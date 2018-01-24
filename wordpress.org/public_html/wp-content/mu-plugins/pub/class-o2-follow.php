@@ -182,7 +182,7 @@ class o2_follow {
 	 * Registers post actions.
 	 */
 	public function subscribe_o2_register_post_action_states() {
-		if ( ! function_exists( 'o2_register_post_action_states' ) ) {
+		if ( function_exists( 'o2_register_post_action_states' ) ) {
 			o2_register_post_action_states( 'follow', [
 				'normal'     => [
 					'shortText' => __( 'Follow', 'o2' ),
@@ -279,11 +279,16 @@ class o2_follow {
 			die;
 		}
 
-		if ( 'post-comment-subscribe' !== $_GET['action'] ) {
-			die;
+		if ( 'post-comment-subscribe' === $_GET['action'] ) {
+			$this->subscribe_to_comments( $post_id );
 		}
 
-		$this->subscribe_to_comments( $post_id );
+		// Echo success if this was an AJAX request, otherwise redirect.
+		if ( isset( $_GET['ajax'] ) ) {
+			echo '1';
+		} else {
+			wp_safe_redirect( get_permalink( $post_id ) );
+		}
 		die;
 	}
 
