@@ -362,7 +362,7 @@ class Template {
 		}
 
 		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true ) ?: array();
-		$icon      = $icon_2x = $svg = $generated = false;
+		$icon      = $icon_1x = $icon_2x = $svg = $generated = false;
 
 		foreach ( $raw_icons as $file => $info ) {
 			switch ( $info['resolution'] ) {
