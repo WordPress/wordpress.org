@@ -387,7 +387,7 @@ class Plugin_I18n {
 
 		foreach ( $originals as $original ) {
 			if ( ! empty( $original->id ) && array_key_exists( $original->id, $translations ) ) {
-				$content = $this->translate_gp_original( $original->singular, $translation[ $original->id ], $content );
+				$content = $this->translate_gp_original( $original->singular, $translations[ $original->id ], $content );
 			}
 		}
 
