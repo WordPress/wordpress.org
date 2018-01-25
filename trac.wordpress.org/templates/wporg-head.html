@@ -23,18 +23,22 @@
 		}
 	</style>
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600&amp;subset=latin,cyrillic-ext,greek-ext,greek,vietnamese,latin-ext,cyrillic' rel='stylesheet' type='text/css' />
-	<link rel="stylesheet" href="https://s.w.org/style/wp4.css?39" />
+	<link rel="stylesheet" href="https://s.w.org/style/wp4.css?70" />
 	<!--[if lte IE 8]>
 	<style type="text/css">
 	@import url("https://s.w.org/style/ie.css?1");
 	</style>
 	<![endif]-->
 	<script type="text/javascript">
-	var toggleMenu = function(){
-	    var m = document.getElementById('wporg-header-menu'),
-	        c = m.className;
-		    m.className = c.match( ' active' ) ? c.replace( ' active', '' ) : c + ' active';
-	}
+		var toggleMenu = function() {
+			var menu    = document.getElementById( 'wporg-header-menu' ),
+				toggle  = document.getElementById( 'mobile-menu-button' ),
+				classes = menu.className,
+				toggled = classes.match( ' active' );
+
+			menu.className = toggled ? classes.replace( ' active', '' ) : classes + ' active';
+			toggle.setAttribute( 'aria-expanded', ! toggled );
+		};
 	</script>
 
 </html>
