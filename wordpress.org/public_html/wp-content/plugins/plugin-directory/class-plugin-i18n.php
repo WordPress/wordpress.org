@@ -375,21 +375,20 @@ class Plugin_I18n {
 			return $content;
 		}
 
+		$raw_translations = $wpdb->get_results( $wpdb->prepare(
+			'SELECT original_id, translation_0 FROM ' . GLOTPRESS_TABLE_PREFIX . 'translations WHERE original_id IN (' . implode( ', ', wp_list_pluck( $originals, 'id' ) ) . ') AND translation_set_id = %d AND status = %s',
+			$translation_set_id, 'current'
+		) );
+
+		$translations = [];
+		foreach ( $raw_translations as $translation ) {
+			$translations[ $translation->original_id ] = $translation->translation_0;
+		}
+
 		foreach ( $originals as $original ) {
-			if ( empty( $original->id ) ) {
-				continue;
+			if ( ! empty( $original->id ) && array_key_exists( $original->id, $translations ) ) {
+				$content = $this->translate_gp_original( $original->singular, $translation[ $original->id ], $content );
 			}
-
-			$translation = $wpdb->get_var( $wpdb->prepare(
-				'SELECT translation_0 FROM ' . GLOTPRESS_TABLE_PREFIX . 'translations WHERE original_id = %d AND translation_set_id = %d AND status = %s',
-				$original->id, $translation_set_id, 'current'
-			) );
-
-			if ( empty( $translation ) ) {
-				continue;
-			}
-
-			$content = $this->translate_gp_original( $original->singular, $translation, $content );
 		}
 
 		$this->cache_set( $slug, $branch, $content, $cache_suffix );
