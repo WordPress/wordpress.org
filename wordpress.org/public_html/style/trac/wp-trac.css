@@ -34,19 +34,34 @@ fieldset {
 }
 
 /* Fixing display of the header */
+#headline {
+	background: #0073aa;
+}
+@media screen and (min-width: 769px) {
+	#wporg-header ul li a.current ~ .uparrow {
+		border-bottom-color: #0073aa;
+	}
+}
 #wporg-header :link, #wporg-header :visited,
 #wporg-header :link:hover, #wporg-header :visited:hover,
 #headline :link, #headline :visited,
 #headline :link:hover, #headline :visited:hover,
+#metanav :link:hover, #metanav :visited:hover,
 #headline h2 {
 	border: 0;
 }
 #headline h2 {
 	background: none;
+	text-shadow: none;
+}
+#headline a {
+	color: #fff;
+	font-family: 'Open Sans', sans serif;
 }
 #wporg-header ul :link, #wporg-header ul :visited,
 #wporg-header ul :link:hover, #wporg-header ul :visited:hover,
-#headline :link:hover, #headline :visited:hover {
+#headline :link:hover, #headline :visited:hover,
+#metanav :link:hover, #metanav :visited:hover {
 	background: 0;
 }
 #headline .menu {
@@ -61,6 +76,15 @@ fieldset {
 #headline .menu li {
 	display: inline;
 	padding-left: 20px;
+}
+#headline .menu a,
+#headline .menu a:visited {
+	color: rgba(255, 255, 255, 0.8);
+}
+#headline .menu a:hover,
+#headline .menu a:active {
+	color: #fff;
+	text-decoration: underline;
 }
 
 /* Centers the footer. Trac is missing the final column (social links). */
@@ -138,10 +162,20 @@ h3.change a {
 	font-size: 12px;
 }
 #metanav.nav li {
+	color: #fff;
 	border-right: 0;
 }
 #metanav.nav li.last {
 	padding-right: 0;
+}
+#metanav.nav a,
+#metanav.nav a:visited {
+	color: rgba(255, 255, 255, 0.8);
+}
+#metanav.nav a:hover,
+#metanav.nav a:active {
+	color: #fff;
+	text-decoration: underline;
 }
 form#search {
 	float: right;
@@ -535,7 +569,7 @@ blockquote.citation {
 	color: #000;
 }
 #mainnav .active :link, #mainnav .active :visited {
-	background: #21759b; /* active nav menu background */
+	background: #0073aa; /* active nav menu background */
 	border-right: none;
 	color: #f9f9f9;
 	text-shadow: none;
