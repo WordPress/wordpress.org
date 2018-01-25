@@ -542,6 +542,11 @@ a:hover, a:active {
   outline: 0;
 }
 
+li a,
+.entry-content a {
+	text-decoration: underline;
+}
+
 .site-main .comment-navigation, .site-main
 .posts-navigation, .site-main
 .post-navigation {
@@ -1010,12 +1015,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Override the `p a` styling for .org */
-.site-title a {
-	border-bottom: none;
-}
-
+p a,
+p a:hover,
+.site-title a,
 .site-title a:hover {
-	border-bottom-color: #00a0d2;
+	border-bottom: none;
 }
 
 /*--------------------------------------------------------------
