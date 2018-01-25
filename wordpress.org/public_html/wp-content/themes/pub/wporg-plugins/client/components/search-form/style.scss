@@ -1,7 +1,6 @@
 .search-form {
 	font-size: 0;
 	margin-bottom: 2rem;
-
 	max-width: 100%;
 	position: relative;
 
@@ -17,7 +16,7 @@
 		max-width: 100%;
 		padding: 0.5rem;
 		vertical-align: initial;
-		width: ms(28);
+		width: ms( 28 );
 	}
 
 	.button-search {
@@ -25,6 +24,7 @@
 		border-left: none;
 		border-radius: 0 2px 2px 0;
 		font-size: ms( 0 );
+		margin: 0;
 		position: relative;
 		right: auto;
 		top: auto;
@@ -38,6 +38,7 @@
 
 		.dashicons {
 			font-size: ms( 0 );
+			vertical-align: tex;
 		}
 	}
 
@@ -75,6 +76,11 @@
 
 	.site-header:not(.home) & {
 		margin: 0;
+		padding: 1rem 1rem 1rem 1.5rem;
+
+		@include breakpoint( $ms-breakpoint ) {
+			padding: 0;
+		}
 
 		.search-field {
 			border: 0;
@@ -84,22 +90,18 @@
 			padding: 5px 10px;
 			position: relative;
 			width: auto;
-		}
 
-		@media screen and (min-width: $ms-breakpoint) {
-			.search-field {
+			@media screen and (min-width: $ms-breakpoint) {
 				font-size: ms( -4 );
 				width: 7rem;
+
+				& + .button-search {
+					display: inline-block;
+					margin-bottom: 0;
+				}
 			}
 
-			.search-field + .button-search {
-				display: inline-block;
-				margin-bottom: 0;
-			}
-		}
-
-		@media screen and (min-width: 60em) {
-			.search-field {
+			@media screen and (min-width: 60em) {
 				width: 10rem;
 			}
 		}
