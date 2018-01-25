@@ -1247,6 +1247,7 @@ h2.toc-heading + h3.toc-heading:target {
 }
 .menu-table-of-contents-container > ul > li.open > div > a:hover {
   color: #fff;
+  background-color: #0073aa;
 }
 .menu-table-of-contents-container ul.default-open {
   display: block !important;
