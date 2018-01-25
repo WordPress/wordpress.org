@@ -12,6 +12,7 @@
 
 #content {
 	max-width: 940px; /* The width of the content area is smaller for proper padding. */
+	padding: 0 10px;
 }
 
 #main {
@@ -636,6 +637,9 @@ input[type=text], input.textwidget, textarea {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	font-size: 13px;
+}
+input[name="description"] {
+    width: 100%;
 }
 fieldset {
 	-webkit-border-radius: 3px;
