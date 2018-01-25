@@ -3,6 +3,8 @@
 Template Name: Submit
 */
 
+global $description, $email, $error, $owner, $recaptcha_pubkey, $site_detected, $site_version, $submitname, $url, $use_recaptcha, $why;
+
 if (function_exists('set_recaptcha_globals') ) {
 	set_recaptcha_globals();
 } else {
