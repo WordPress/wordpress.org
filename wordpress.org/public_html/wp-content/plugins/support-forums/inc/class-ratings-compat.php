@@ -274,7 +274,7 @@ class Ratings_Compat {
 			);
 			printf(
 				/* translators: %s: plugin/theme reviews URL */
-				__( '<a href="%s">Click here</a> to see all reviews.', 'wporg-forums' ),
+				__( '<a href="%s">See all reviews</a>.', 'wporg-forums' ),
 				esc_url( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) )
 			);
 			echo "</p>\n";
