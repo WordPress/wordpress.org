@@ -33,10 +33,12 @@ class DevHub_Formatting {
 
 		add_filter( 'the_excerpt', array( __CLASS__, 'autolink_references' ), 11 );
 		add_filter( 'the_content', array( __CLASS__, 'autolink_references' ), 11 );
-		add_filter( 'devhub-format-description', array( __CLASS__, 'autolink_references' ) );
+
 		add_filter( 'devhub-parameter-type', array( __CLASS__, 'autolink_references' ) );
 
+		add_filter( 'devhub-format-description', array( __CLASS__, 'autolink_references' ) );
 		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_hash_formatting' ), 9 );
+		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_description_parsedown_bug' ) );
 
 		add_filter( 'devhub-function-return-type', array( __CLASS__, 'autolink_references' ) );
 	}
@@ -504,6 +506,38 @@ class DevHub_Formatting {
 		}
 
 		return $new_text;
+	}
+
+	/**
+	 * Fix Parsedown bug that introduces unbalanced 'code' tags.
+	 *
+	 * Under very specific criteria, a bug in the Parsedown package used by the
+	 * parser causes backtick-to-code-tag conversions to get mishandled, skipping
+	 * conversion of a backtick and causing subsequent backticks to be converted
+	 * incorrectly as an open or close 'code' tag (opposite of what it should've
+	 * been). See referenced tickets for more details.
+	 *
+	 * Intended to be a temporary fix until/unless Parsedown is fixed.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/2900
+	 * @see https://github.com/erusev/parsedown/pull/515
+	 */
+	public static function fix_param_description_parsedown_bug( $text ) {
+		$fixes = array(
+			'/`(.+)<code>/'        => '<code>$1</code>',
+			'/<\/code>(.+)`/'      => ' <code>$1</code>',
+			'/<\/code>(.+)<code>/' => ' <code>$1</code>',
+		);
+
+		$matched = true;
+
+		foreach ( $fixes as $regex => $replace ) {
+			if ( $matched && $matched = preg_match( $regex, $text, $match ) ) {
+				$text = preg_replace( $regex, $replace, $text );
+			}
+		}
+
+		return $text;
 	}
 
 } // DevHub_Formatting
