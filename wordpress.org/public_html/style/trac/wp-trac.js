@@ -614,7 +614,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				toggle.hide();
 				$('div.buttons').after( '<div class="wp-notice component"><p><strong>The WordPress.org site now has its own Trac</strong> at ' +
 					'<a href="//meta.trac.wordpress.org/">meta.trac.wordpress.org</a>.</p><p>Would you mind opening this ticket over there instead? ' +
-					'<a href="//meta.trac.wordpress.org/newticket" id="new-meta-ticket">Click here</a> to copy your summary and description over.</p></div>' );
+					'<a href="//meta.trac.wordpress.org/newticket" id="new-meta-ticket">Click here to copy your summary and description over</a>.</p></div>' );
 			});
 
 			$('#propertyform').on( 'click', '#new-meta-ticket', function() {
