@@ -794,7 +794,7 @@ https://make.wordpress.org/themes', 'wporg-themes' ),
 <%2$s>
 
 ** Requirements **
-The theme must pass all the requirements to be included in the Theme Directory. The ticket will be closed if five or more different errors are found.
+The theme must pass all the requirements to be included in the Theme Directory. The ticket will be closed if three or more different errors are found.
 <https://make.wordpress.org/themes/handbook/review/required/>
 
 ** Review Process **
