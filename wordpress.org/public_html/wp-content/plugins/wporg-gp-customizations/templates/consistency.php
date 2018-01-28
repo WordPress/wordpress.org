@@ -7,7 +7,7 @@ gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
 ?>
 
-<p>Analyze translation consistency across projects.</p>
+<p>Analyze translation consistency across projects. The result is limited to 500 translations.</p>
 
 
 <form action="/consistency" method="get" class="consistency-form">
@@ -81,8 +81,9 @@ if ( $performed_search && ! $results ) {
 		echo '<ul class="translations-unique hidden">';
 		foreach ( $translations_unique as $translation ) {
 			printf(
-				'<li>%s <a href="#%s">&darr;</a></li>',
+				'<li>%s <small>(%s)</small> <a href="#%s">&darr;</a></li>',
 				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) ),
+				1 === $translations_unique_counts[ $translation ] ? $translations_unique_counts[ $translation ] . ' time' : $translations_unique_counts[ $translation ] . ' times',
 				esc_attr( sanitize_title( 't-' . $translation ) )
 			);
 		}

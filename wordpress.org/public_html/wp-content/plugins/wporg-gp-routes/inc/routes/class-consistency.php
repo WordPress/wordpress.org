@@ -51,25 +51,30 @@ class Consistency extends GP_Route {
 			$project = $_REQUEST['project'];
 		}
 
+		$locale        = '';
+		$set_slug          = '';
 		$locale_is_rtl = false;
+
 		if ( $set ) {
-			list( $locale, $slug ) = explode( '/', $set );
+			list( $locale, $set_slug ) = explode( '/', $set );
 			$locale_is_rtl = 'rtl' === GP_Locales::by_slug( $locale )->text_direction;
 		}
 
 		$results = [];
 		$performed_search = false;
-		if ( $search && $set ) {
+		if ( $search && $locale && $set_slug ) {
 			$performed_search = true;
 			$results = $this->query( [
 				'search'         => $search,
-				'set'            => $set,
+				'locale'         => $locale,
+				'set_slug'       => $set_slug,
 				'case_sensitive' => $search_case_sensitive,
 				'project'        => $project,
 			] );
 
 			$translations = wp_list_pluck( $results, 'translation', 'translation_id' );
 			$translations_unique = array_unique( $translations );
+			$translations_unique_counts = array_count_values( $translations );
 		}
 
 		$projects = self::PROJECTS;
@@ -111,18 +116,15 @@ class Consistency extends GP_Route {
 	private function query( $args ) {
 		global $wpdb;
 
-		list( $locale, $slug ) = explode( '/', $args['set'] );
-
 		if ( $args['case_sensitive'] ) {
 			$collation = 'BINARY';
 		} else {
 			$collation = '';
 		}
 
-		$search = $wpdb->prepare( "= {$collation} %s", $args['search'] );
-
-		$locale = $wpdb->prepare( '%s', $locale );
-		$slug = $wpdb->prepare( '%s', $slug );
+		$search   = $wpdb->prepare( "= {$collation} %s", $args['search'] );
+		$locale   = $wpdb->prepare( '%s', $args['locale'] );
+		$set_slug = $wpdb->prepare( '%s', $args['set_slug'] );
 
 		$project_where = '';
 		if ( $args['project'] ) {
@@ -154,7 +156,7 @@ class Consistency extends GP_Route {
 				p.active = 1
 				AND t.status = 'current'
 				AND o.status = '+active' AND o.singular {$search}
-				AND ts.locale = {$locale} AND ts.slug = {$slug}
+				AND ts.locale = {$locale} AND ts.slug = {$set_slug}
 				{$project_where}
 			LIMIT 0, 500
 		" );
