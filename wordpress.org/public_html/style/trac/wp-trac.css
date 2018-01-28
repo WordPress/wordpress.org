@@ -36,6 +36,7 @@ fieldset {
 /* Fixing display of the header */
 #headline {
 	background: #0073aa;
+	border-bottom: 0;
 }
 @media screen and (min-width: 769px) {
 	#wporg-header ul li a.current ~ .uparrow {
