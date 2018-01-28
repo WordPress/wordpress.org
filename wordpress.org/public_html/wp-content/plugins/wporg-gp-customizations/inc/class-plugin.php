@@ -42,6 +42,7 @@ class Plugin {
 		add_action( 'wp_default_scripts', array( $this, 'bump_script_versions' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
+		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
@@ -57,6 +58,29 @@ class Plugin {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
+	}
+
+	/**
+	 * Adds a link to view originals in consistency tool.
+	 *
+	 * @param array              $more_links      The links to be output.
+	 * @param GP_Project         $project         Project object.
+	 * @param GP_Locale          $locale          Locale object.
+	 * @param GP_Translation_Set $translation_set Translation Set object.
+	 * @param GP_Translation     $translation     Translation object.
+	 */
+	public function add_consistency_tool_link( $more_links, $project, $locale, $translation_set, $translation ) {
+		$consistency_tool_url = add_query_arg(
+			[
+				'search' => urlencode( $translation->singular ),
+				'set'    => urlencode( $locale->slug . '/' . $translation_set->slug ),
+			],
+			home_url( '/consistency' )
+		);
+
+		$more_links['consistency-tool'] = '<a href="' . esc_url( $consistency_tool_url ) . '">View original in consistency tool</a>';
+
+		return $more_links;
 	}
 
 	/**
