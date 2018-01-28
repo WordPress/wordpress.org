@@ -569,6 +569,9 @@ class Rosetta_Roles {
 	 */
 	public function ajax_rosetta_get_projects() {
 		$projects = $this->get_translate_projects();
+		array_walk( $projects, function( $value ) {
+			unset( $value->path ); // Path is not needed.
+		} );
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		// Sort the tree and remove array keys.
@@ -698,7 +701,7 @@ class Rosetta_Roles {
 		);
 
 		$_projects = $wpdb->get_results( '
-			SELECT id, name, parent_project_id, slug
+			SELECT id, name, parent_project_id, slug, path
 			FROM translate_projects
 			WHERE
 				id NOT IN(' . implode( ',', $ignore_project_ids ) . ') AND

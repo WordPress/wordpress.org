@@ -343,12 +343,19 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 					$name = sprintf(
 						/* translators: 1: Parent project name, 2: Child project name */
 						__( '%1$s &rarr;  %2$s', 'rosetta' ),
-						esc_html( $parent->name ),
-						esc_html( $this->projects[ $project_id ]->name )
+						$parent->name,
+						$this->projects[ $project_id ]->name
 					);
 				} else {
-					$name = esc_html( $this->projects[ $project_id ]->name );
+					$name = $this->projects[ $project_id ]->name;
 				}
+
+				$name = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( 'https://translate.wordpress.org/projects/' . $this->projects[ $project_id ]->path ),
+					esc_html( $name )
+				);
+
 				$projects[] = $name;
 			}
 		}
