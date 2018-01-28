@@ -128,7 +128,8 @@ if ( $performed_search && ! $results ) {
 				}
 
 				printf(
-					'<tr><td>%s</td><td>%s</td></tr>',
+					'<tr class="%s"><td>%s</td><td>%s</td></tr>',
+					isset( $parent_project->name ) ? sanitize_title( 'project-' . $parent_project->name ) : '',
 					sprintf(
 						'<div class="string">%s%s</div>
 						<div class="meta">Project: <a href="/projects/%s">%s</a></div>',
@@ -150,8 +151,7 @@ if ( $performed_search && ! $results ) {
 						$result->original_id,
 						$result->translation_id,
 						$result->translation_added
-					),
-					esc_translation( $result->translation )
+					)
 				);
 			}
 			?>

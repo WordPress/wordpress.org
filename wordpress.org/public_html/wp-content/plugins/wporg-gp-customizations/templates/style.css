@@ -1888,7 +1888,11 @@ ul.ct-legend {
 
 .consistency-table .meta {
 	margin-top: 10px;
-	opacity: .6;
+	color: #818181;
+}
+
+.consistency-table .project-wordpress {
+	box-shadow: -5px 0 0 #fff, -10px 0 0 #0073aa;
 }
 
 .translations-unique {
