@@ -56,12 +56,12 @@ class Init_Locale extends WP_CLI_Command {
 				'meta/wordpress-org',
 				'meta/rosetta',
 				'meta/themes',
-				'meta/plugins',
 				'meta/plugins-v3',
 				'meta/forums',
-				'bbpress/1.1.x',
 				'meta/o2',
 				'meta/p2-breathe',
+				'meta/get-involved',
+				'meta/wordcamp',
 			) );
 		}
 
