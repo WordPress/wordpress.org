@@ -28,7 +28,7 @@ $wordcamp_title = wcpt_get_wordcamp_title();
 
 				<?php if ( wcpt_get_wordcamp_url() ) : ?>
 					<a href="<?php wcpt_wordcamp_url(); ?>" class="wc-single-website">
-						<?php $shot_url = add_query_arg( array( 'w' => 205, 'h' => 148 ), 'http://s.wordpress.com/mshots/v1/' . urlencode( wcpt_get_wordcamp_url() ) ); ?>
+						<?php $shot_url = add_query_arg( array( 'w' => 205, 'h' => 148 ), 'https://s0.wp.com/mshots/v1/' . urlencode( wcpt_get_wordcamp_url() ) ); ?>
 						<img src="<?php echo esc_url( $shot_url ); ?>" />
 						Visit Website &rarr;
 					</a>
@@ -48,8 +48,8 @@ $wordcamp_title = wcpt_get_wordcamp_title();
 
 							<?php
 								$address = urlencode( implode( " ", explode( "\n", wcpt_get_wordcamp_physical_address() ) ) );
-								$map_url = 'http://maps.googleapis.com/maps/api/staticmap?center=' . $address . '&zoom=14&size=130x70&maptype=roadmap&markers=color:blue%7Clabel:A%7C' . $address . '&sensor=false';
-								$map_link = 'http://maps.google.com/maps?q=' . $address;
+								$map_url = 'https://maps.googleapis.com/maps/api/staticmap?center=' . $address . '&zoom=14&size=130x70&maptype=roadmap&markers=color:blue%7Clabel:A%7C' . $address . '&sensor=false';
+								$map_link = 'https://maps.google.com/maps?q=' . $address;
 								$venue_link = wcpt_get_wordcamp_venue_url();
 							?>
 							<a href="<?php echo esc_url( $map_link ); ?>"><img src="<?php echo esc_url( $map_url ); ?>" class="wc-single-map"/></a>
