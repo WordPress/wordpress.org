@@ -52,13 +52,13 @@
 		margin: 0;
 		max-width: 75%;
 		min-width: 200px;
-		padding: 20px 0 0;
 		position: absolute;
 		text-align: left;
+		top: 100%;
 		transition: left 0.3s;
 		z-index: 100000;
 
-		&.active {
+		&.toggled {
 			left: 0;
 		}
 	}
@@ -86,6 +86,13 @@
 			@include breakpoint( sm ) {
 				height: auto;
 			}
+		}
+
+		a:hover,
+		a.current,
+		&.current-menu-item a,
+		&.current_page_parent a {
+			color: #00a0d2;
 		}
 
 		&#download,
@@ -122,36 +129,28 @@
 			}
 
 			&.current,
-			&.current-menu-item {
-				a {
-					color: #eee;
-				}
-			}
-
+			&.current-menu-item,
 			.uparrow {
 				display: none;
 			}
 		}
 
-		a:hover,
-		a.current,
-		&.current-menu-item a,
-		&.current_page_parent a {
-			color: #00a0d2;
-		}
-	}
+		.nav-submenu {
+			clip: rect(1px, 1px, 1px, 1px);
+			height: 1px;
+			left: -2px;
+			margin: 0;
+			overflow: hidden;
+			padding: 0;
+			position: absolute;
+			width: 1px;
+			z-index: 99999;
 
-	.nav-submenu {
-		display: none;
-		margin-bottom: 10px;
-		margin-top: -15px;
-		padding: 0;
-		position: static;
-
-		li a {
-			height: 24px;
-			line-height: 24px;
-			margin-left: 20px;
+			li a {
+				height: 24px;
+				line-height: 24px;
+				margin: 0;
+			}
 		}
 	}
 
@@ -194,7 +193,7 @@
 			}
 
 			.button {
-				background: #191e23 url( //s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831 ) no-repeat 2px 4px;
+				background: #191e23 url( //s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831 ) no-repeat 2px 5px;
 				border: none;
 				border-radius: 0;
 				box-shadow: none;
@@ -230,6 +229,10 @@
 			padding: 36px 27px 0;
 		}
 
+		#headline h2 {
+			text-rendering: optimizeLegibility;
+		}
+
 		#wporg-header-menu {
 			float:left;
 			list-style: none;
@@ -246,14 +249,7 @@
 			position:relative;
 
 			a {
-				color: #eee;
-				display: block;
-				font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
-				font-size: 13px;
-				font-weight: 600;
 				height: 46px;
-				line-height: 34px;
-				margin: 0 4px;
 				padding: 0 6px;
 
 				&.current ~ .uparrow {
@@ -289,39 +285,32 @@
 				width: 0;
 			}
 
-			.nav-submenu li {
-				float: none;
+			.nav-submenu {
+				background: #32373c;
+				border: #32373c solid 1px;
+				border-top: 0;
+				margin-top: -1px;
+				min-width: 0;
 
-				a {
-					height: 34px;
-					line-height: 34px;
-					margin-left: 6px;
+				li {
+					float: none;
+
+					a {
+						height: 34px;
+						line-height: 34px;
+					}
 				}
 			}
 		}
 
-		.nav-submenu {
-			background: #32373c;
-			border: #32373c solid 1px;
-			border-top: 0;
-			display: none !important;/* Prevents #wporg-header ul overwriting this */
-			margin-top: -1px;
-			min-width: 0;
-		}
-
-		ul li:hover .nav-submenu,
-		ul li .nav-submenu:hover {
-			display: block !important;/* Prevents #wporg-header ul overwriting this */
-			left:0;
-			margin-left:0;
-			position: absolute;
-			top: 46px;
-			width: auto;
-			z-index: 101;
-		}
-
-		#headline h2 {
-			text-rendering: optimizeLegibility;
+		ul.nav-menu li:hover > ul,
+		.nav-menu ul li:hover > ul,
+		ul.nav-menu .focus > ul,
+		.nav-menu .focus > ul {
+			clip: inherit;
+			height: inherit;
+			overflow: inherit;
+			width: inherit;
 		}
 
 		ul li.current-menu-item:after,
@@ -333,24 +322,25 @@
 }
 
 #mobile-menu-button {
+	background: none;
+	border: none;
+	box-shadow: none;
 	display: block;
 	float: left;
 	font-family: 'dashicons';
 	font-size: 16px;
 	font-style: normal;
 	font-weight: normal;
-	height: 32px;
 	left: 10px;
 	line-height: 1;
+	padding: 1px;
 	position: absolute;
 	text-align: center;
 	text-decoration: inherit;
+	text-shadow: none;
 	top: 75px;
 	transition: color .1s ease-in;
 	vertical-align: top;
-	width: 39px;
-	-webkit-font-smoothing: antialiased;
-
 	&:before {
 		border: none;
 		box-sizing: border-box;
@@ -359,23 +349,19 @@
 		display: inline-block;
 		float: left;
 		font: normal 50px/1 'Dashicons';
-		height: 32px;
 		margin: 0;
 		outline: none;
 		padding: 3px;
 		text-decoration: none;
 		vertical-align: middle;
-		width: 39px;
 		-webkit-font-smoothing: antialiased;
-	}
-
-	&:hover {
-		background:none;
 	}
 
 	@include breakpoint( $sm ) {
 		display: none;
 	}
+
+	-webkit-font-smoothing: antialiased;
 }
 
 #download-mobile {
