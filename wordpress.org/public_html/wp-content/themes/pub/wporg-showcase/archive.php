@@ -28,7 +28,11 @@ query_posts( $query_string . '&meta_key=ratings_average&orderby=meta_value_num' 
 
 			<?php endwhile; // have_posts ?>
 
-			<?php if ( 1 != $wp_query->max_num_pages || function_exists( 'wp_page_numbers' ) ) { wp_page_numbers(); } ?>
+			<?php
+				the_posts_pagination( [
+					'mid_size' => 2,
+				] );
+			?>
 
 		<?php else : // have_posts ?>
 

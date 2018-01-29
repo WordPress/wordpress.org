@@ -6,7 +6,7 @@
 		<?php
 			breadcrumb();
 			$num_posts = 400;
-			if ( $paged > 1 ) $offset = "&offset=" . ($paged - 1) * $num_posts;
+			$offset    = $paged > 1 ? "&offset=" . ($paged - 1) * $num_posts : '';
 			query_posts("showposts=" . $num_posts . "&post_type=post&post_status=publish" . $offset);
 		?>
 
@@ -17,7 +17,12 @@
 				<div class="storycontent"><a href='<?php the_permalink(); ?>' title='<?php the_title_attribute(); ?>'><?php the_title(); ?></a></div>
 
 			<?php endwhile; // have_posts ?>
-			<?php if ( 1 != $wp_query->max_num_pages || function_exists( 'wp_page_numbers' ) ) { wp_page_numbers(); } ?>
+			<?php
+				the_posts_pagination( [
+					'current'  => $paged ?: 1,
+					'mid_size' => 2,
+				] );
+			?>
 
 		<?php else : // have_posts ?>
 
