@@ -118,12 +118,21 @@ class Themes_API {
 	 * @return string|void
 	 */
 	public function get_result( $format = 'raw' ) {
+		$response = $this->response;
+
+		// Back-compat behaviour:
+		if ( defined( 'THEMES_API_SUPPORTS_ERRORS' ) && ! THEMES_API_SUPPORTS_ERRORS ) {
+			if ( isset( $this->response->error ) && 'Theme not found' == $this->response->error ) {
+				$response = false;
+			}
+		}
+
 		if ( 'json' === $format ) {
-			return wp_json_encode( $this->response );
+			return wp_json_encode( $response );
 		} elseif ( 'php' === $format ) {
-			return serialize( $this->response );
+			return serialize( $response );
 		} else { // 'raw' === $format, or anything else.
-			return $this->response;
+			return $response;
 		}
 	}
 
@@ -326,8 +335,10 @@ class Themes_API {
 				'post_type' => 'repopackage',
 			) );
 
-			if ( ! empty( $themes ) ) {
+			if ( $themes ) {
 				$this->response = $this->fill_theme( $themes[0] );
+			} else {
+				$this->response = (object) array( 'error' => 'Theme not found' ); // Check get_result() if changing this string.
 			}
 		}
 

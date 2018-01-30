@@ -5,6 +5,10 @@ $_SERVER['REQUEST_URI'] = '/themes/';
 
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
+if ( ! defined( 'THEMES_API_SUPPORTS_ERRORS' ) ) {
+	define( 'THEMES_API_SUPPORTS_ERRORS', false );
+}
+
 // Set up action and request information.
 if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 	$request = isset( $_REQUEST['request'] ) ? (object) wp_unslash( $_REQUEST['request'] ) : '';
