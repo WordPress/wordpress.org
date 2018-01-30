@@ -33,16 +33,32 @@ class Readme_Validator {
 			</form>
 
 			<p><?php _e( '... or paste your <code>readme.txt</code> here:', 'wporg-plugins' ); ?></p>
-			<form method="post" action="">
-				<textarea rows="20" cols="100" name="readme_contents" placeholder="=== Plugin Name ===">
+				<textarea rows="20" cols="100" name="readme_visible" placeholder="=== Plugin Name ===">
 					<?php
 					if ( isset( $_POST['readme_contents'] ) ) {
-						echo esc_textarea( wp_unslash( $_POST['readme_contents'] ) );
+						echo esc_textarea( base64_decode( wp_unslash( $_POST['readme_contents'] ) ) );
 					}
 					?>
 				</textarea>
+				<form id="readme-data" method="post" action="">
+					<textarea class="screen-reader-text" rows="20" cols="100" name="readme_contents">
+						<?php
+						if ( isset( $_POST['readme_contents'] ) ) {
+							echo esc_textarea( base64_decode( wp_unslash( $_POST['readme_contents'] ) ) );
+						}
+						?>
+					</textarea>
 				<p><input type="submit" class="button button-secondary" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></p>
 			</form>
+			<script>
+				document.getElementById( 'readme-data' ).addEventListener( 'submit', function() {
+					var readmeInputs = document.getElementsByTagName( 'textarea' );
+
+					readmeInputs[1].value = window.btoa( readmeInputs[0].value );
+
+					return true;
+				} );
+			</script>
 		</div>
 		<?php
 	}
@@ -55,7 +71,7 @@ class Readme_Validator {
 			$errors = Validator::instance()->validate_url( wp_unslash( $_POST['readme_url'] ) );
 
 		} elseif ( ! empty( $_POST['readme_contents'] ) ) {
-			$errors = Validator::instance()->validate_content( wp_unslash( $_REQUEST['readme_contents'] ) );
+			$errors = Validator::instance()->validate_content( base64_decode( wp_unslash( $_REQUEST['readme_contents'] ) ) );
 
 		} else {
 			return;
