@@ -114,6 +114,9 @@ class Display {
 			return $output;
 		}
 		$output .= self::get_display_css();
+		if ( $paged <= 1 ) {
+			$output .= self::get_reporter_avatars();
+		}
 		$output .= ptr_get_template_part(
 			'result-set', array(
 				'revisions' => $rev_query->posts,
@@ -165,9 +168,106 @@ class Display {
 			.pagination-centered ul.pagination li a {
 				cursor: pointer;
 			}
+			.ptr-test-reporter-list {
+				list-style-type: none;
+				margin-left: 0;
+				margin-right: 0;
+			}
+			.ptr-test-reporter-list li {
+				display: inline-block;
+				vertical-align: top;
+				text-align: center;
+				margin-left: 10px;
+				margin-right: 10px;
+				width: 100px;
+			}
+			.ptr-test-reporter-list li h5.avatar-name {
+				font-weight: 600;
+				margin-top: 6px;
+				margin-bottom: 6px;
+			}
 		</style>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get the avatars who have recently reported.
+	 */
+	private static function get_reporter_avatars() {
+		global $wpdb;
+
+		$output           = '';
+		$query_args       = array(
+			'posts_per_page'         => 10,
+			'post_type'              => 'result',
+			'post_parent'            => 0,
+			'orderby'                => 'post_name',
+			'order'                  => 'DESC',
+			'fields'                 => 'ids',
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'no_found_rows'          => true,
+		);
+		$query            = new \WP_Query( $query_args );
+		$active_reporters = array();
+		if ( ! empty( $query->posts ) ) {
+			$active_reporters = $wpdb->get_col( "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type='result' AND post_status='publish' AND post_parent IN (" . implode( ',', $query->posts ) . ')' ); // @codingStandardsIgnoreLine
+			$active_reporters = array_map( 'intval', $active_reporters );
+			$output          .= '<h3>Active Test Reporters</h3>' . PHP_EOL;
+			$users            = get_users(
+				array(
+					'orderby' => 'display_name',
+					'include' => $active_reporters,
+				)
+			);
+			$output          .= self::get_user_list( $users );
+		}
+
+		$all_time_reporters = $wpdb->get_col( "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type='result' AND post_status='publish' AND post_parent != 0" ); // @codingStandardsIgnoreLine
+		if ( ! empty( $all_time_reporters ) ) {
+			$all_time_reporters = array_map( 'intval', $all_time_reporters );
+			$output            .= '<h3>No Reports in >10 Revisions</h3>' . PHP_EOL;
+			$users              = get_users(
+				array(
+					'orderby' => 'display_name',
+					'include' => $all_time_reporters,
+				)
+			);
+			foreach ( $users as $i => $user ) {
+				if ( in_array( $user->ID, $active_reporters, true ) ) {
+					unset( $users[ $i ] );
+				}
+			}
+			$output .= self::get_user_list( $users );
+		}
+		return $output;
+	}
+
+	private static function get_user_list( $users ) {
+		$output = '<ul class="ptr-test-reporter-list">';
+		foreach ( $users as $user ) {
+			$output .= '<li>';
+			if ( ! empty( $user->user_url ) ) {
+				$output .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
+			}
+			$output .= get_avatar( $user->user_email, 82 );
+			if ( ! empty( $user->user_url ) ) {
+				$output .= '</a>';
+			}
+			$output .= '<h5 class="avatar-name">';
+			if ( ! empty( $user->user_url ) ) {
+				$output .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
+			}
+			$output .= $user->display_name;
+			if ( ! empty( $user->user_url ) ) {
+				$output .= '</a>';
+			}
+			$output .= '</h5>';
+			$output .= '</li>';
+		}
+		$output .= '</ul>';
+		return $output;
 	}
 
 	/**
