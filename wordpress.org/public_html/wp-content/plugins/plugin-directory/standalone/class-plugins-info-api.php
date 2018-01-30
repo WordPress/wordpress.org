@@ -84,7 +84,7 @@ class Plugins_Info_API {
 		}
 
 		// Backwards compatibility; the API returns null in case of error..
-		if ( isset( $response['error'] ) ) {
+		if ( isset( $response['error'] ) && ( ! defined( 'PLUGINS_API_SUPPORTS_ERRORS' ) || ! PLUGINS_API_SUPPORTS_ERRORS ) ) {
 			$this->output( null );
 			return;
 		}
