@@ -708,6 +708,15 @@ body.full-overlay-active {
 	background: #eee;
 }
 
+.logged-in .wp-full-overlay,
+.logged-in .wp-full-overlay-sidebar {
+	margin-top: 32px;
+}
+
+.logged-in .wp-full-overlay-sidebar {
+	height: calc( 100% - 32px );
+}
+
 .wp-full-overlay.collapsed .wp-full-overlay-sidebar {
 	overflow: visible;
 }
@@ -812,24 +821,24 @@ body.full-overlay-active {
 	font: normal 22px/1 dashicons;
 	content: "\f335";
 	position: relative;
-	top: 7px;
-	left: 13px;
+	top: 5px;
+	left: 10px;
 }
 
 .theme-install-overlay .previous-theme:before {
 	font: normal 20px/1 dashicons;
 	content: "\f341";
 	position: relative;
-	top: 6px;
-	left: 14px;
+	top: 4px;
+	left: 11px;
 }
 
 .theme-install-overlay .next-theme:before {
 	font: normal 20px/1 dashicons;
 	content: "\f345";
 	position: relative;
-	top: 6px;
-	left: 13px;
+	top: 4px;
+	left: 12px;
 }
 
 .theme-install-overlay .previous-theme.disabled,
@@ -1036,14 +1045,13 @@ body.full-overlay-active {
 }
 
 .theme-details .rating {
-	margin: 7px 0;
+	margin: 16px 0 14px;
 	float: right;
 }
 
 .theme-details .theme-description {
 	float: left;
 	color: #777;
-	line-height: 20px;
 	max-width: 100%;
 }
 
@@ -1478,10 +1486,6 @@ span.favorite.favorited {
 	.customize-loading #customize-container,
 	.theme-install-overlay .wp-full-overlay-main {
 		background-image: url(/wp-admin/images/spinner-2x.gif);
-	}
-
-	.theme-install-overlay .wp-full-overlay-header .theme-install {
-		margin-top: 2px;
 	}
 }
 
