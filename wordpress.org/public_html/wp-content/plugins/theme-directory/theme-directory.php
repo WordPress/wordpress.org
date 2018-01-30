@@ -787,21 +787,23 @@ function wporg_themes_theme_information( $slug ) {
 }
 
 /**
- * Makes a query against api.wordpress.org/themes/info/1.0/ without making a HTTP call
- * Switches to the appropriate blog for the query.
+ * Make a query against the api.wordpress.org/themes/info/ API
+ * This function can be used to access the API without making an external HTTP call.
+ *
+ * NOTE: The API also calls this function.
+ *
+ * @param $method string The Method being called. Valid values: 'query_themes', 'theme_information', 'hot_tags', 'feature_list', and 'get_commercial_shops'
+ * @param $args   array  The arguements for the call.
+ * @param $format string The format to return the data in. Valid values: 'json', 'php', 'raw' (default)
  */
-function wporg_themes_query_api( $method, $args = array() ) {
+function wporg_themes_query_api( $method, $args = array(), $format = 'raw' ) {
 	if ( ! class_exists( 'Themes_API' ) ) {
-		if ( file_exists( __DIR__ . '/class-themes-api.php' ) ) {
-			include_once __DIR__ . '/class-themes-api.php';
-		} else {
-			include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
-		}
+		include_once __DIR__ . '/class-themes-api.php';
 	}
 
 	$api = new Themes_API( $method, $args );
 
-	return $api->response;
+	return $api->get_result( $format );
 }
 
 /**

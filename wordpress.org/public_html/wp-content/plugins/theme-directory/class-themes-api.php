@@ -117,11 +117,13 @@ class Themes_API {
 	 *
 	 * @return string|void
 	 */
-	public function get_result() {
-		if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
+	public function get_result( $format = 'raw' ) {
+		if ( 'json' === $format ) {
 			return wp_json_encode( $this->response );
-		} else {
+		} elseif ( 'php' === $format ) {
 			return serialize( $this->response );
+		} else { // 'raw' === $format, or anything else.
+			return $this->response;
 		}
 	}
 

@@ -54,7 +54,7 @@ switch ( $_REQUEST['action'] ) {
 			) );
 		}
 
-		$theme_slug = $_REQUEST['theme'];
+		$theme_slug = wp_unslash( $_REQUEST['theme'] );
 
 		if ( 'add-favorite' == $_REQUEST['action'] ) {
 			$result = wporg_themes_add_favorite( $theme_slug );
