@@ -11,6 +11,8 @@ die();
 // Assume a standard wp-content/plugins/ plugin directory.
 define( 'WPORGPATH', dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/' );
 
+define( 'PLUGINS_API_SUPPORTS_ERRORS', true );
+
 $_REQUEST = array(
 	'method'  => 'plugin_information',
 	'request' => array(
