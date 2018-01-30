@@ -311,6 +311,36 @@ add_action( 'wp_head', function() {
 } );
 
 /**
+ * Get current major WP version to check against "Tested up to" value.
+ *
+ * @global string $wp_version WordPress version.
+ *
+ * @return float Current major WP version.
+ */
+function get_current_major_wp_version() {
+	$current_version = '';
+
+	// Assume the value stored in a constant (which is set on WP.org), if defined.
+	if ( defined( 'WP_CORE_LATEST_RELEASE' ) && WP_CORE_LATEST_RELEASE ) {
+		$current_version = substr( WP_CORE_LATEST_RELEASE, 0, 3 );
+	}
+
+	// Otherwise, use the version of the running WP instance.
+	if ( empty( $current_version ) ) {
+		global $wp_version;
+
+		$current_version = substr( $wp_version, 0, 3 );
+
+		// However, if the running WP instance appears to not be a release version, assume the latest stable version.
+		if ( false !== strpos( $wp_version, '-' ) ) {
+			$current_version = (float) $current_version - 0.1;
+		}
+	}
+
+	return (float) $current_version;
+}
+
+/**
  * Custom template tags for this theme.
  */
 require get_template_directory() . '/inc/template-tags.php';
