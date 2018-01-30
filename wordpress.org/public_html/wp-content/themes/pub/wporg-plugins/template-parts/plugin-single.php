@@ -16,6 +16,8 @@ global $section, $section_slug, $section_content, $section_read_more, $post;
 
 $content   = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
+
+$plugin_title = $is_closed ? $post->post_name : get_the_title();
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -39,8 +41,11 @@ $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
 			<?php endif; ?>
 		</div>
 
-		<?php $plugin_title = $is_closed ? $post->post_name : get_the_title(); ?>
+		<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
 		<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo wp_kses_post( $plugin_title ); ?></a></h1>
+		<?php else : ?>
+		<h1 class="plugin-title"><?php echo wp_kses_post( $plugin_title ); ?></h1>
+		<?php endif; ?>
 
 		<span class="byline"><?php the_author_byline(); ?></span>
 	</header><!-- .entry-header -->
