@@ -12,7 +12,7 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
-global $section, $section_slug, $section_content, $section_read_more, $post;
+global $section, $section_slug, $section_content, $post;
 
 $content   = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
@@ -98,14 +98,6 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 
 				$section = wp_list_filter( $plugin_sections, array( 'slug' => $section_slug ) );
 				$section = array_pop( $section );
-
-				$section_no_read_mores = array( 'description', 'screenshots', 'installation', 'faq', 'reviews' );
-				// If the FAQ section is the newer `<dl>` form, no need to do read-more for it.
-				if ( false !== stripos( $section_content, '<dl>' ) ) {
-					$section_no_read_mores[] = 'faq';
-				}
-
-				$section_read_more = ! in_array( $section_slug, $section_no_read_mores, true );
 
 				get_template_part( 'template-parts/section' );
 			endforeach;
