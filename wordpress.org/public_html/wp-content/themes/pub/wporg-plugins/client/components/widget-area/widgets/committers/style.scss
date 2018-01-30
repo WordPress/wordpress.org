@@ -5,6 +5,7 @@
 	margin: 0;
 
 	li {
+		@extend .clear;
 		padding-bottom: 0.5rem;
 
 		.remove {
