@@ -118,8 +118,11 @@ class Plugins_Info_API_Request {
 			$fields['description']   = false;
 		}
 
-		// In WordPress x.y we start sending 'contributors' which means respond with a more detailed list of contributors.
-		if ( ! isset( $this->requested_fields['contributors'] ) ) {
+		// In the 1.2+ version of the info API, we default to returning a more detailed list of contributors.
+		// This can be enabled in older versions of the API by passing the 'contributors' field.
+		if ( defined( 'PLUGINS_API_VERSION' ) && PLUGINS_API_VERSION >= 1.2 ) {
+			$fields['contributors'] = true;
+		} elseif ( ! isset( $this->requested_fields['contributors'] ) ) {
 			$fields['bare_contributors'] = true;
 		}
 
