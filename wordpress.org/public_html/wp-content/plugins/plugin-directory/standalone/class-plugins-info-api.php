@@ -61,13 +61,54 @@ class Plugins_Info_API {
 	}
 
 	/**
+	 * API Endpoint that handles the Plugin_Information route when the 'slugs' parameter is present.
+	 *
+	 * @param Plugins_Info_API_Request $request    The Request object for this request.
+	 */
+	function plugin_information_mutliple( $request ) {
+		$slugs = is_array( $request->slugs ) ? $request->slugs : explode( ',', $request->slugs );
+		$slugs = array_unique( array_map( 'trim', $slugs ) );
+
+		if ( count( $slugs ) > 100 ) {
+			$this->output( (object) array( 'error' => 'A maximum of 100 plugins can be queried at once.' ) );
+			return;
+		}
+
+		// Remove the slugs parameter to avoid recursive calls.
+		unset( $request->slugs );
+
+		$response = array();
+		foreach ( $slugs as $slug ) {
+			$request->slug = $slug;
+			$plugin_details = $this->plugin_information( $request, $return_raw = true );
+			if ( ! isset( $plugin_details['error'] ) ) {
+				$plugin_details = $this->remove_unexpected_fields( $plugin_details, $request, 'plugin_information' );
+			}
+
+			$response[ $slug ] = $plugin_details;
+		}
+
+		$this->output( (object) $response );
+	}
+
+	/**
 	 * API Endpoint that handles the Plugin_Information route.
 	 *
 	 * @param Plugins_Info_API_Request $request    The Request object for this request.
 	 * @param bool                     $return_raw Whether this is for another request (query_plugins) or an API request.
 	 */
 	function plugin_information( $request, $return_raw = false ) {
-		if ( false === ( $response = wp_cache_get( $cache_key = $this->plugin_information_cache_key( $request ), self::CACHE_GROUP ) ) ) {
+		if ( $request->slugs ) {
+			$this->plugin_information_mutliple( $request );
+			return;
+		}
+
+		$response = false;
+		if ( ! $request->slug ) {
+			$response = array( 'error' => 'Plugin slug not provided.' );
+		}
+
+		if ( ! $response && false === ( $response = wp_cache_get( $cache_key = $this->plugin_information_cache_key( $request ), self::CACHE_GROUP ) ) ) {
 			$response = $this->internal_rest_api_call( 'plugins/v1/plugin/' . $request->slug, array( 'locale' => $request->locale ) );
 
 			if ( 200 != $response->status ) {

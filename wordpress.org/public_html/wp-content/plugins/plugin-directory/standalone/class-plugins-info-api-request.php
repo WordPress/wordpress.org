@@ -92,6 +92,14 @@ class Plugins_Info_API_Request {
 		return null;
 	}
 
+	public function __set( $field, $value ) {
+		$this->args->{$field} = $value;
+	}
+
+	public function __unset( $field ) {
+		unset( $this->args->{$field} );
+	}
+
 	public function get_expected_fields( $method ) {
 		$fields = self::$fields;
 
