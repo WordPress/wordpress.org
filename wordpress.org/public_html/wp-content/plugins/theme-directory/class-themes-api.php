@@ -120,8 +120,8 @@ class Themes_API {
 	public function get_result( $format = 'raw' ) {
 		$response = $this->response;
 
-		// Back-compat behaviour:
-		if ( defined( 'THEMES_API_SUPPORTS_ERRORS' ) && ! THEMES_API_SUPPORTS_ERRORS ) {
+		// Back-compat behaviour for the 1.0/1.1 API's
+		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION < 1.2 ) {
 			if ( isset( $this->response->error ) && 'Theme not found' == $this->response->error ) {
 				$response = false;
 			}

@@ -124,9 +124,8 @@ class Plugins_Info_API {
 			return $response;
 		}
 
-		// Backwards compatibility; the API returns null in case of error..
-		// This is now feature-flagged by the PLUGINS_API_SUPPORTS_ERRORS constant which is defined as `true` in info/1.2 and later.
-		if ( isset( $response['error'] ) && ( defined( 'PLUGINS_API_SUPPORTS_ERRORS' ) && ! PLUGINS_API_SUPPORTS_ERRORS ) ) {
+		// Backwards compatibility; the API returns null in case of error for the 1.0/1.1 API endpoints.
+		if ( isset( $response['error'] ) && defined( 'PLUGINS_API_VERSION' ) && PLUGINS_API_VERSION < 1.2 ) {
 			$this->output( null );
 			return;
 		}
