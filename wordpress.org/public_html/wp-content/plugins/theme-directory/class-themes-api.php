@@ -338,12 +338,6 @@ class Themes_API {
 			return;
 		}
 
-		// If there is a cached result, return that.
-		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) ) );
-		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-			return;
-		}
-
 		// Set which fields wanted by default:
 		$defaults = array(
 			'sections'     => true,
@@ -355,11 +349,20 @@ class Themes_API {
 			'tags'         => true,
 			'template'     => true,
 		);
+		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION >= 1.2 ) {
+			$defaults['extended_author'] = true;
+		}
 
 		if ( empty( $this->request->fields ) ) {
 			$this->request->fields = array();
 		}
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
+
+		// If there is a cached result, return that.
+		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . $this->request->slug . ':' . md5( serialize( $this->fields ) ) );
+		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
+			return;
+		}
 
 		if ( !empty( $post ) && 'repopackage' == $post->post_type && $this->request->slug === $post->post_name ) {
 			$this->response = $this->fill_theme( $post );
@@ -438,7 +441,6 @@ class Themes_API {
 			'homepage'    => true,
 			'template'    => true,
 		);
-
 
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
 
@@ -595,6 +597,8 @@ class Themes_API {
 
 		if ( $this->fields['extended_author'] ) {
 			$phil->author = (object) array(
+				'profile' => 'https://profiles.wordpress.org/' . $author->user_nicename,
+				'avatar' => 'https://secure.gravatar.com/avatar/' . md5( $author->user_email ) . '?s=96&d=monsterid&r=g',
 				'user_nicename' => $author->user_nicename,
 				'display_name'  => $author->display_name,
 			);
