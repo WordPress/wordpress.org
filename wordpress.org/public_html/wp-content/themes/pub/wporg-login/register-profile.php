@@ -34,14 +34,14 @@ get_header();
 	<p><?php
 		printf(
 			/* translators: %s Email address */
-			__( 'Please check your email %s for a confirmation link to set your password.', 'wporg-login' ),
+			__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ),
 			'<code>' . esc_html( wp_get_current_user()->user_email ) . '</code>'
 		);
 	?></p>
 </div>
 
 <p class="intro">
-<?php _e( 'Complete your WordPress.org Profile information.', 'wporg-login' ); ?>
+<?php _e( 'Complete your WordPress.org Profile information.', 'wporg' ); ?>
 </p>
 
 <form name="registerform" id="registerform" action="" method="post">
@@ -49,13 +49,13 @@ get_header();
 	<?php include __DIR__ . '/partials/register-profilefields.php'; ?>
 
 	<p class="login-submit">
-		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Save Profile Information', 'wporg-login' ); ?>" />
+		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Save Profile Information', 'wporg' ); ?>" />
 	</p>
 
 </form>
 
 <p id="nav">
-	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg-login' ); ?></a>
+	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

@@ -30,7 +30,7 @@ function wporg_login_rest_username_exists( $request ) {
 	if ( ($user = get_user_by( 'login', $login )) || ($user = get_user_by( 'slug', $login )) ) {
 		return [
 			'available' => false,
-			'error' => __( 'That username is already in use.', 'wporg-login' ) . '<br>' . __( 'Is it yours? <a href="/lostpassword">Reset your password</a>.', 'wporg-plugins' ),
+			'error' => __( 'That username is already in use.', 'wporg' ) . '<br>' . __( 'Is it yours? <a href="/lostpassword">Reset your password</a>.', 'wporg' ),
 			'avatar' => get_avatar( $user, 64 ),
 		];
 	}
@@ -55,7 +55,7 @@ function wporg_login_rest_email_in_use( $request ) {
 	if ( $user = get_user_by( 'email', $email ) ) {
 		return [
 			'available' => false,
-			'error' => __( 'That email address already has an account.', 'wporg-login' ) . '<br>' . __( 'Is it yours? <a href="/lostpassword">Reset your password</a>.', 'wporg-plugins' ),
+			'error' => __( 'That email address already has an account.', 'wporg' ) . '<br>' . __( 'Is it yours? <a href="/lostpassword">Reset your password</a>.', 'wporg' ),
 			'avatar' => get_avatar( $user, 64 ),
 		];
 	}

@@ -33,12 +33,12 @@ function wporg_login_create_user( $user_login, $user_email, $user_mailinglist = 
 		if ( is_wp_error( $pre_register_error ) ) {
 			wp_die( $pre_register_error );
 		}
-		wp_die( __( 'Registration Blocked. Please stop.', 'wporg-login' ) );
+		wp_die( __( 'Registration Blocked. Please stop.', 'wporg' ) );
 	}
 
 	$user_id = wpmu_create_user( wp_slash( $user_login ), wp_generate_password(), wp_slash( $user_email ) );
 	if ( ! $user_id ) {
-		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg-login' ) );
+		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
 	}
 
 	// Insert a hashed activation key
@@ -56,18 +56,18 @@ function wporg_login_create_user( $user_login, $user_email, $user_mailinglist = 
 		update_user_meta( $user_id, 'notify_list', 'true' );
 	}
 
-	$body  = sprintf( __( 'Hi %s,', 'wporg-login' ), $user_login ) . "\n\n";
-	$body .= __( 'Welcome to WordPress.org! Your new account has been setup.', 'wporg-login' ) . "\n";
+	$body  = sprintf( __( 'Hi %s,', 'wporg' ), $user_login ) . "\n\n";
+	$body .= __( 'Welcome to WordPress.org! Your new account has been setup.', 'wporg' ) . "\n";
 	$body .= "\n";
-	$body .= sprintf( __( 'Your username is: %s', 'wporg-login' ), $user_login ) . "\n";
-	$body .= __( 'You can create a password at the following URL:', 'wporg-login' ) . "\n";
+	$body .= sprintf( __( 'Your username is: %s', 'wporg' ), $user_login ) . "\n";
+	$body .= __( 'You can create a password at the following URL:', 'wporg' ) . "\n";
 	$body .= home_url( "/register/confirm/{$user_login}/{$activation_key}/" );
 	$body .= "\n\n";
-	$body .= __( '-- The WordPress.org Team', 'wporg-login' );
+	$body .= __( '-- The WordPress.org Team', 'wporg' );
 
 	wp_mail(
 		$user_email,
-		__( '[WordPress.org] Your new account', 'wporg-login' ),
+		__( '[WordPress.org] Your new account', 'wporg' ),
 		$body,
 		array(
 			'From: "WordPress.org" <noreply@wordpress.org>'

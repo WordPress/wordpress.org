@@ -39,14 +39,14 @@ wp_enqueue_script( 'wporg-registration' );
 get_header();
 ?>
 
-<p class="intro"><?php _e( 'Create a WordPress.org account to start contributing to WordPress, get help in the support forums, or rate and review themes and plugins.', 'wporg-login' ); ?></p>
+<p class="intro"><?php _e( 'Create a WordPress.org account to start contributing to WordPress, get help in the support forums, or rate and review themes and plugins.', 'wporg' ); ?></p>
 
 <form name="registerform" id="registerform" action="/register" method="post">
 
 	<p class="login-username">
-		<label for="user_login"><?php _e( 'Username', 'wporg-login' ); ?></label>
+		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
 		<input type="text" name="user_login" id="user_login" class="input <?php if ( $error_user_login ) echo 'error'; ?>" value="<?php echo esc_attr( $user_login ) ?>" size="20" maxlength="60" />
-		<span class="small"><?php _e( 'Required. Only lower case letters (a-z) and numbers (0-9) are allowed.', 'wporg-login' ); ?></span>
+		<span class="small"><?php _e( 'Required. Only lower case letters (a-z) and numbers (0-9) are allowed.', 'wporg' ); ?></span>
 	</p>
 	<?php
 	if ( $error_user_login ) {
@@ -60,9 +60,9 @@ get_header();
 	?>
 
 	<p class="login-email">
-		<label for="user_email"><?php _e( 'Email', 'wporg-login' ); ?></label>
+		<label for="user_email"><?php _e( 'Email', 'wporg' ); ?></label>
 		<input type="email" name="user_email" id="user_email" class="input <?php if ( $error_user_email ) echo 'error'; ?>" value="<?php echo esc_attr( $user_email ) ?>" size="20" maxlength="100" />
-		<span class="small"><?php _e( 'Required. Your password will be emailed here.', 'wporg-login' ); ?></span>
+		<span class="small"><?php _e( 'Required. Your password will be emailed here.', 'wporg' ); ?></span>
 	</p>
 	<?php
 	if ( $error_user_email ) {
@@ -78,24 +78,24 @@ get_header();
 	<p class="login-mailinglist">
 		<label>
 			<input name="user_mailinglist" type="checkbox" id="user_mailinglist" value="true" <?php checked( $user_mailinglist, true ); ?>>
-			<?php _e( 'Subscribe to WordPress Announcements mailing list (a few messages a year)', 'wporg-login' ); ?>
+			<?php _e( 'Subscribe to WordPress Announcements mailing list (a few messages a year)', 'wporg' ); ?>
 		</label>
 	</p>
 	<?php
 		if ( $error_recapcha_status ) {
-			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg-login' ) . '</p></div>';
+			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
 		}
 	?>
 
 	<p class="login-submit">
-		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY  ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary" value="<?php esc_attr_e( 'Create Account', 'wporg-login' ); ?>" />
+		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY  ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
 	</p>
 
 </form>
 
 <p id="nav">
-	<a href="/" title="<?php esc_attr_e( 'Already have an account?', 'wporg-login' ); ?>"><?php _e( 'Already have an account?', 'wporg-login' ); ?></a> &nbsp; • &nbsp;
-	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg-login' ); ?></a>
+	<a href="/" title="<?php esc_attr_e( 'Already have an account?', 'wporg' ); ?>"><?php _e( 'Already have an account?', 'wporg' ); ?></a> &nbsp; • &nbsp;
+	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
 
 </p>
 

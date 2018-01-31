@@ -17,7 +17,7 @@ add_action( 'template_redirect', 'nocache_headers', 10, 0 );
  * Registers support for various WordPress features.
  */
 function wporg_login_setup() {
-	load_theme_textdomain( 'wporg-login' );
+	load_theme_textdomain( 'wporg' );
 }
 add_action( 'after_setup_theme', 'wporg_login_setup' );
 

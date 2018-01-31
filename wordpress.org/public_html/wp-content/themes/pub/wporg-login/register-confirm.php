@@ -65,36 +65,36 @@ get_header();
 ?>
 
 <p class="intro">
-<?php _e( 'Set your password and complete your WordPress.org Profile information.', 'wporg-login' ); ?>
+<?php _e( 'Set your password and complete your WordPress.org Profile information.', 'wporg' ); ?>
 </p>
 
 <form name="registerform" id="registerform" action="" method="post">
 
 		<div class="user-pass1-wrap">
 		<p>
-			<label for="pass1"><?php _e( 'Password', 'wporg-login' ); ?></label>
+			<label for="pass1"><?php _e( 'Password', 'wporg' ); ?></label>
 		</p>
 
 		<div class="wp-pwd">
 			<span class="password-input-wrapper">
 				<input type="password" data-reveal="1" data-pw="<?php echo esc_attr( wp_generate_password( 16 ) ); ?>" name="user_pass" id="pass1" class="input" size="20" value="" autocomplete="off" aria-describedby="pass-strength-result" />
 			</span>
-			<div id="pass-strength-result" class="hide-if-no-js" aria-live="polite"><?php _e( 'Strength indicator', 'wporg-login' ); ?></div>
+			<div id="pass-strength-result" class="hide-if-no-js" aria-live="polite"><?php _e( 'Strength indicator', 'wporg' ); ?></div>
 		</div>
 	</div>
 
-<!--	<p class="description indicator-hint"><?php _e( 'Hint: The password should be at least twelve characters long. To make it stronger, use upper and lower case letters, numbers, and symbols like ! " ? $ % ^ &amp; ).', 'wporg-login' ); ?></p> -->
+<!--	<p class="description indicator-hint"><?php _e( 'Hint: The password should be at least twelve characters long. To make it stronger, use upper and lower case letters, numbers, and symbols like ! " ? $ % ^ &amp; ).', 'wporg' ); ?></p> -->
 
 	<?php include __DIR__ . '/partials/register-profilefields.php'; ?>
 
 	<p class="login-submit">
-		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Create Account', 'wporg-login' ); ?>" />
+		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
 	</p>
 
 </form>
 
 <p id="nav">
-	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg-login' ); ?></a>
+	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer();
