@@ -43,12 +43,28 @@ echo Display::get_display_css(); ?>
 					$host = 'Unknown';
 					$user = get_user_by( 'id', $report->post_author );
 					if ( $user ) {
-						$host = $user->display_name;
+						$host = '';
+						if ( ! empty( $user->user_url ) ) {
+							$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
+						}
+						$host .= get_avatar( $user->ID, 18, '', '', array(
+							'extra_attr' => 'style="vertical-align: middle;margin-right:5px;"',
+						) );
+						if ( ! empty( $user->user_url ) ) {
+							$host .= '</a>';
+						}
+						if ( ! empty( $user->user_url ) ) {
+							$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
+						}
+						$host .= $user->display_name;
+						if ( ! empty( $user->user_url ) ) {
+							$host .= '</a>';
+						}
 					}
 					?>
 				<tr>
 					<td><a href="<?php echo esc_url( get_permalink( $report->ID ) ); ?>" title="<?php echo esc_attr( $status_title ); ?>" class="<?php echo esc_attr( 'ptr-status-badge ptr-status-badge-' . strtolower( $status ) ); ?>"><?php echo esc_html( $status ); ?></a></td>
-					<td><?php echo esc_html( $host ); ?></td>
+					<td><?php echo wp_kses_post( $host ); ?></td>
 					<td><?php echo esc_html( Display::get_display_php_version( $report->ID ) ); ?></td>
 					<td><?php echo esc_html( Display::get_display_mysql_version( $report->ID ) ); ?></td>
 				</tr>

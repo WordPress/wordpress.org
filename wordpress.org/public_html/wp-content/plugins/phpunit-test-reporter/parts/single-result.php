@@ -11,7 +11,23 @@ if ( isset( $results['failures'] ) ) {
 $host = 'Unknown';
 $user = get_user_by( 'id', $report->post_author );
 if ( $user ) {
-	$host = $user->display_name;
+	$host = '';
+	if ( ! empty( $user->user_url ) ) {
+		$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
+	}
+	$host .= get_avatar( $user->ID, 18, '', '', array(
+		'extra_attr' => 'style="vertical-align: middle;margin-right:5px;"',
+	) );
+	if ( ! empty( $user->user_url ) ) {
+		$host .= '</a>';
+	}
+	if ( ! empty( $user->user_url ) ) {
+		$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
+	}
+	$host .= $user->display_name;
+	if ( ! empty( $user->user_url ) ) {
+		$host .= '</a>';
+	}
 } ?>
 
 <?php echo Display::get_display_css(); ?>
@@ -30,7 +46,7 @@ if ( $parent ) :
 <table>
 	<tr>
 		<td><strong>Host</strong></td>
-		<td><?php echo esc_html( $host ); ?></td>
+		<td><?php echo wp_kses_post( $host ); ?></td>
 	</tr>
 	<tr>
 		<td><strong>PHP Version</strong></td>
