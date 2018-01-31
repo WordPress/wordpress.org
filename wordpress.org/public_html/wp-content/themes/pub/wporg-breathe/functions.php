@@ -170,3 +170,19 @@ function disable_mentions_for_handbook( $linked, $mention ) {
 	return $linked;
 }
 add_filter( 'jetpack_mentions_linked_mention', __NAMESPACE__ . '\disable_mentions_for_handbook', 10, 2 );
+
+/**
+ * More contextual link title for post authors.
+ *
+ * @param array    $bootstrap_model O2 user model.
+ * @param \WP_User $user_data       User data.
+ *
+ * @return array
+ */
+function user_model( $bootstrap_model, $user_data ) {
+	/* translators: 1: User display_name; 2: User nice_name */
+	$bootstrap_model['urlTitle'] = sprintf( __( 'Profile of %1$s (%2$s)', 'wporg' ), $user_data->display_name, '@' . $user_data->user_nicename );
+
+	return $bootstrap_model;
+}
+add_filter( 'o2_user_model', __NAMESPACE__ . '\user_model', 10, 2 );
