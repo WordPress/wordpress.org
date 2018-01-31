@@ -293,10 +293,45 @@ class Themes_API {
 	}
 
 	/**
+	 * Retrieve specific information about multiple theme.
+	 */
+	public function theme_information_multiple() {
+		if ( empty( $this->request->slugs ) ) {
+			$this->response = (object) array( 'error' => 'Slugs not provided' );
+			return;
+		}
+
+		$slugs = is_array( $this->request->slugs ) ? $this->request->slugs : explode( ',', $this->request->slugs );
+		$slugs = array_unique( array_map( 'trim', $slugs ) );
+
+		if ( count( $slugs ) > 100 ) {
+			$this->response = (object) array( 'error' => 'A maximum of 100 themes can be queried at once.' );
+			return;
+		}
+
+		$response = array();
+		unset( $this->request->slugs ); // So it doesn't affect caching.
+		foreach ( $slugs as $slug ) {
+			$this->request->slug = $slug;
+			$this->theme_information();
+			$response[ $slug ] = $this->response;
+		}
+
+		$this->response = $response;
+	}
+
+	/**
 	 * Retrieve specific information about a theme.
 	 */
 	public function theme_information() {
 		global $post;
+
+		// Support the 'slugs' parameter to fetch multiple themes at once.
+		if ( ! empty( $this->request->slugs ) ) {
+			$this->theme_information_multiple();
+			return;
+		}
+
 		// Theme slug to identify theme.
 		if ( empty( $this->request->slug ) ) {
 			$this->response = (object) array( 'error' => 'Slug not provided' );
