@@ -93,8 +93,8 @@ function welcome_box() {
 	?>
 	<div class="make-welcome">
 		<div class="entry-meta">
-			<?php edit_post_link( __( 'Edit', 'o2' ), '', '', $welcome->ID ); ?>
-			<button type="button" id="make-welcome-hide" class="toggle dashicons dashicons-no" data-hash="<?php echo $content_hash; ?>" data-cookie="<?php echo $cookie; ?>" title="<?php esc_attr_e( 'Hide this message', 'p2-breathe' ); ?>"></button>
+			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID ); ?>
+			<button type="button" id="make-welcome-hide" class="toggle dashicons dashicons-no" data-hash="<?php echo $content_hash; ?>" data-cookie="<?php echo $cookie; ?>" title="<?php esc_attr_e( 'Hide this message', 'wporg' ); ?>"></button>
 		</div>
 		<div class="entry-content clear">
 			<?php the_content(); ?>
@@ -110,7 +110,7 @@ add_action( 'wporg_breathe_after_header', __NAMESPACE__ . '\welcome_box' );
 function javascript_notice() {
 	?>
 	<noscript class="js-disabled-notice">
-		<?php _e( 'Please enable JavaScript to view this page properly.', 'o2' ); ?>
+		<?php _e( 'Please enable JavaScript to view this page properly.', 'wporg' ); ?>
 	</noscript>
 	<?php
 }
@@ -170,4 +170,3 @@ function disable_mentions_for_handbook( $linked, $mention ) {
 	return $linked;
 }
 add_filter( 'jetpack_mentions_linked_mention', __NAMESPACE__ . '\disable_mentions_for_handbook', 10, 2 );
-

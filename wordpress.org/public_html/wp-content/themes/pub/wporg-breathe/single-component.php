@@ -15,8 +15,8 @@
 			<?php while ( have_posts() ) : the_post(); ?>
 				<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 					<div class="entry-content">
-						<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'p2-breathe' ) ); ?>
-						<?php wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'p2-breathe' ), 'after' => '</div>' ) ); ?>
+						<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'wporg' ) ); ?>
+						<?php wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'wporg' ), 'after' => '</div>' ) ); ?>
 					</div>
 				</article>
 			<?php endwhile; ?>
