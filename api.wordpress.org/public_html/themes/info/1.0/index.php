@@ -1,13 +1,14 @@
 <?php
+
+if ( ! defined( 'THEMES_API_VERSION' ) ) {
+	define( 'THEMES_API_VERSION', basename( dirname( $_SERVER['REQUEST_URI'] ) ) );
+}
+
 // Load WordPress, pretend we're the Theme Directory in order to avoid having to switch sites after loading.
 $_SERVER['HTTP_HOST'] = 'wordpress.org';
 $_SERVER['REQUEST_URI'] = '/themes/';
 
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
-
-if ( ! defined( 'THEMES_API_SUPPORTS_ERRORS' ) ) {
-	define( 'THEMES_API_SUPPORTS_ERRORS', false );
-}
 
 // Set up action and request information.
 if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
