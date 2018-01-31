@@ -231,8 +231,13 @@ class Themes_API {
 			)
 		);
 
-		// Get version from user agent since it's not explicitly sent to feature_list requests.
-		if ( preg_match( '|WordPress/([^;]+)|', $_SERVER['HTTP_USER_AGENT'], $matches ) ) {
+		// The 1.2+ api expects a `wp_version` field to be sent and does not use the UA.
+		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION >= 1.2 ) {
+			if ( isset( $this->request->wp_version ) ) {
+				$wp_version = $this->request->wp_version;
+			}
+		} elseif ( preg_match( '|WordPress/([^;]+)|', $_SERVER['HTTP_USER_AGENT'], $matches ) ) {
+			// Get version from user agent since it's not explicitly sent to feature_list requests in older API branches.
 			$wp_version = $matches[1];
 		}
 
