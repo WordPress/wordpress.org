@@ -1,6 +1,5 @@
 ( function( $ ) {
 	var questions = $( 'dt', '#faq' );
-	var hash      = window.location.hash.replace( /[^a-z0-9-#]/gi, '' );
 
 	questions
 		.each( function( index, question ) {
@@ -10,7 +9,7 @@
 
 			// If there is no ID, create our own.
 			if ( ! id ) {
-				id = '#' + $question.text().toLowerCase().replace( /[^\w\s]/gi, '' ).replace( /\s/gi, '-' );
+				id = '#' + encodeURIComponent( $question.text().toLowerCase() );
 				$question.attr( 'id', id );
 			}
 
@@ -35,12 +34,12 @@
 				return 'true' !== attribute;
 			} ).next( 'dd' ).slideToggle( 200 );
 
-			if ( hash ) {
+			if ( window.location.hash ) {
 				window.scrollTo( 0, $question.offset().top );
 			}
 		} );
 
-	if ( hash ) {
-		questions.find( '[href="' + hash + '"]' ).trigger( 'click' );
+	if ( window.location.hash ) {
+		questions.find( '[href="' + window.location.hash + '"]' ).trigger( 'click' );
 	}
 } )( jQuery );
