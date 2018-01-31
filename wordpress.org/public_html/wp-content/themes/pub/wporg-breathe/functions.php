@@ -186,3 +186,11 @@ function user_model( $bootstrap_model, $user_data ) {
 	return $bootstrap_model;
 }
 add_filter( 'o2_user_model', __NAMESPACE__ . '\user_model', 10, 2 );
+
+/**
+ * Register translations for plugins without their own GlotPress project.
+ */
+// wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
+/* translators: %s: Post title */
+__( 'Pending Review: %s', 'wporg' );
+__( 'Submit for review', 'wporg' );
