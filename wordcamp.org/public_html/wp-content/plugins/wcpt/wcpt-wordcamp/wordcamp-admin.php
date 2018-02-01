@@ -1016,8 +1016,9 @@ class WordCamp_Admin {
 	 */
 	public function print_admin_notices() {
 		global $post;
+		$screen = get_current_screen();
 
-		if ( empty( $post->post_type ) || WCPT_POST_TYPE_ID != $post->post_type ) {
+		if ( empty( $post->post_type ) || WCPT_POST_TYPE_ID != $post->post_type || 'post' !== $screen->base ) {
 			return;
 		}
 
