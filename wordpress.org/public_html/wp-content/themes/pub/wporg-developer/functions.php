@@ -314,6 +314,8 @@ function theme_scripts_styles() {
 	wp_enqueue_script( 'wporg-developer-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20120206', true );
 	wp_enqueue_script( 'wporg-developer-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20130115', true );
 	wp_enqueue_script( 'wporg-developer-search', get_template_directory_uri() . '/js/search.js', array(), '20150430', true );
+	wp_enqueue_script( 'wporg-developer-chapters', get_stylesheet_directory_uri() . '/js/chapters.js', array( 'jquery' ), '20180201' );
+	wp_enqueue_script( 'wporg-developer-menu', get_template_directory_uri() . '/js/menu.js', array( 'jquery' ), '20180201', true );
 }
 
 /**

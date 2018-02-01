@@ -12,28 +12,33 @@ $GLOBALS['pagetitle'] = wp_get_document_title();
 require WPORGPATH . 'header.php';
 ?>
 
-<div id="page" <?php body_class( 'hfeed site devhub-wrap' ); ?>>
+<header id="masthead" class="site-header" role="banner">
+	<?php if ( get_query_var( 'is_handbook' ) ) : ?>
+	<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu', 'wporg' ); ?></strong></a>
+	<?php endif; ?>
+	<div class="site-branding">
+		<?php $tag = is_front_page() ? 'span' : 'h1'; ?>
+		<<?php echo $tag; ?> class="site-title">
+			<a href="<?php echo esc_url( DevHub\get_site_section_url() ); ?>" rel="home"><?php echo DevHub\get_site_section_title(); ?></a>
+		</<?php echo $tag; ?>>
+
+		<nav id="site-navigation" class="main-navigation" role="navigation">
+			<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg' ); ?>"></button>
+			<?php
+			$active_menu = is_post_type_archive( 'command' ) || is_singular( 'command' ) ? 'devhub-cli-menu' : 'devhub-menu';
+			wp_nav_menu( array(
+				'theme_location'  => $active_menu,
+				'container_class' => 'menu-container',
+				'container_id'    => 'primary-menu',
+			) ); ?>
+		</nav>
+	</div>
+</header><!-- #masthead -->
+
+<div id="page" class="hfeed site devhub-wrap">
 	<a href="#main" class="screen-reader-text"><?php _e( 'Skip to content', 'wporg' ); ?></a>
 
 	<?php do_action( 'before' ); ?>
-	<header id="masthead" class="site-header" role="banner">
-		<div class="inner-wrap">
-			<div class="site-branding">
-				<?php $tag = is_front_page() ? 'span' : 'h1'; ?>
-				<<?php echo $tag; ?> class="site-title">
-					<a href="<?php echo esc_url( DevHub\get_site_section_url() ); ?>" rel="home"><?php echo DevHub\get_site_section_title(); ?></a>
-				</<?php echo $tag; ?>>
-			</div>
-			<div class="devhub-menu">
-				<?php
-				$active_menu = is_post_type_archive( 'command' ) || is_singular( 'command' ) ? 'devhub-cli-menu' : 'devhub-menu';
-				wp_nav_menu( array(
-					'theme_location'  => $active_menu,
-					'container_class' => 'menu-container',
-				) ); ?>
-			</div>
-		</div><!-- .inner-wrap -->
-	</header><!-- #masthead -->
 	<?php
 	if ( DevHub\should_show_search_bar() ) : ?>
 		<div id="inner-search">

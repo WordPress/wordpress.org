@@ -7,7 +7,7 @@
 
 get_header(); ?>
 
-	<div id="content-area" <?php body_class(); ?>>
+	<div id="content-area" <?php body_class( 'code-reference' ); ?>>
 
 		<?php breadcrumb_trail(); ?>
 

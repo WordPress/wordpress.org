@@ -348,7 +348,7 @@ input {
 
 .devhub-wrap #content-area,
 .devhub-wrap .inner-wrap {
-  margin: 0 auto;
+  margin: 2rem auto 0;
   max-width: 60em;
 }
 
@@ -686,7 +686,7 @@ input {
 }
 
 .devhub-wrap .hentry {
-  margin: 0 0 1.5em;
+  margin: 0;
 }
 
 .devhub-wrap .byline,
@@ -858,7 +858,11 @@ input {
 }
 
 .devhub-wrap .breadcrumb-trail {
-  margin-bottom: 1.25em;
+  margin-bottom: 2rem;
+}
+
+.devhub-wrap .breadcrumb-trail a {
+  text-decoration: none;
 }
 
 .devhub-wrap h1.entry-title,
@@ -909,7 +913,7 @@ input {
 }
 
 .devhub-wrap .section.blue {
-  background: #0073aa;
+  /*background: #0073aa;*/
   padding: 30px 0;
   padding: 3rem 0;
 }
@@ -940,6 +944,7 @@ input {
   width: 8.4rem;
   display: block;
   margin: 0 auto;
+  opacity: 0.4;
 }
 
 @media (min-width: 43em) and (max-width: 915px) {
@@ -1079,25 +1084,24 @@ input {
   padding-top: 0;
 }
 
-.devhub-wrap.single div#inner-search, .devhub-wrap.archive div#inner-search {
-  background-color: #2e6183;
-  margin-top: -1em;
+.devhub-wrap div#inner-search {
+  background-color: #666;
   margin-bottom: 1em;
   padding-top: 2px;
 }
 
-.devhub-wrap.single div#inner-search .section.search-section, .devhub-wrap.archive div#inner-search .section.search-section {
+.devhub-wrap div#inner-search .section.search-section {
   color: #ffffff;
 }
 
-.devhub-wrap.single div#inner-search div#inner-search-icon-container, .devhub-wrap.archive div#inner-search div#inner-search-icon-container {
+.devhub-wrap div#inner-search div#inner-search-icon-container {
   margin: 0 auto;
   max-width: 60em;
   cursor: pointer;
 }
 
-.devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon {
-  background-color: #2e6183;
+.devhub-wrap div#inner-search div#inner-search-icon-container div#inner-search-icon {
+  background-color: #666;
   color: #ffffff;
   text-align: center;
   margin-right: 26px;
@@ -1112,12 +1116,12 @@ input {
   border-bottom-left-radius: 5px;
 }
 
-.devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search {
+.devhub-wrap div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search {
   height: auto;
   width: auto;
 }
 
-.devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search:before, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search:before {
+.devhub-wrap div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search:before {
   font-size: 36px;
   line-height: 36px;
 }
@@ -1260,91 +1264,6 @@ input {
   padding: 1.6rem 3rem;
 }
 
-.devhub-wrap #sidebar {
-  border: 1px solid #d0d0d0;
-  box-shadow: 0px 0px 5px #d0d0d0;
-  background-color: #f0f0f0;
-}
-
-.devhub-wrap #sidebar h2.widget-title {
-  background-color: #d0d0d0;
-  color: #8a8989;
-  text-align: center;
-  text-transform: uppercase;
-  font-size: 14px;
-  letter-spacing: 2px;
-  margin-bottom: 1.5rem;
-  line-height: 26px;
-  line-height: 2.6rem;
-}
-
-.devhub-wrap #sidebar .menu > li {
-  padding-bottom: 1em;
-}
-
-.devhub-wrap #sidebar ul {
-  list-style-type: none;
-  margin: 0 10px;
-  padding: 5px 0;
-  counter-reset: item;
-}
-
-.devhub-wrap #sidebar ul li:before {
-  content: counter(item);
-  counter-increment: item;
-  background-color: #d0d0d0;
-  width: 25px;
-  display: inline-block;
-  color: #fff;
-  margin-right: 10px;
-  text-align: center;
-  padding: 3px 0;
-  font-size: 13px;
-  border-radius: 50%;
-  vertical-align: top;
-}
-
-.devhub-wrap #sidebar ul li a {
-  font-size: 16px;
-  color: #4b4b4b;
-  font-weight: bold;
-}
-
-.devhub-wrap #sidebar ul li > a {
-  display: inline-block;
-  width: 75%;
-}
-
-.devhub-wrap #sidebar ul li ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0 0 0 35px;
-}
-
-.devhub-wrap #sidebar ul li ul li {
-  padding-left: 20px;
-}
-
-.devhub-wrap #sidebar ul li ul li:before {
-  content: none;
-}
-
-.devhub-wrap #sidebar ul li ul li a {
-  font-weight: normal;
-  font-size: 14px;
-  display: inline;
-  margin-left: -20px;
-}
-
-.devhub-wrap #sidebar ul li ul li ul {
-  margin-left: 20px;
-}
-
-.devhub-wrap #sidebar .current-menu-item > a {
-  font-weight: bold !important;
-  color: #246998;
-}
-
 .devhub-wrap .reference-landing .box ul {
   padding: 0;
   overflow: hidden;
@@ -1410,13 +1329,13 @@ input {
 
 .devhub-wrap .box.transparent {
   background: none;
-  color: #fff;
+  color: #333;
 }
 
 .devhub-wrap .box.transparent h2,
 .devhub-wrap .box.transparent h3,
 .devhub-wrap .box.transparent h4 {
-  color: #fff;
+  color: #32373c;
 }
 
 .devhub-wrap .box.gray {
@@ -1558,35 +1477,6 @@ input {
   margin-top: 30px;
 }
 
-.devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
-  width: 260px;
-  margin-left: 30px;
-}
-
-.devhub-wrap .wp-parser-class .table-of-contents h2, .devhub-wrap .wp-parser-function .table-of-contents h2, .devhub-wrap .wp-parser-hook .table-of-contents h2, .devhub-wrap .wp-parser-method .table-of-contents h2 {
-  padding: 3px 0;
-}
-
-.devhub-wrap .wp-parser-class .table-of-contents > ul, .devhub-wrap .wp-parser-function .table-of-contents > ul, .devhub-wrap .wp-parser-hook .table-of-contents > ul, .devhub-wrap .wp-parser-method .table-of-contents > ul {
-  margin-bottom: 0;
-}
-
-.devhub-wrap .wp-parser-class ul.items, .devhub-wrap .wp-parser-function ul.items, .devhub-wrap .wp-parser-hook ul.items, .devhub-wrap .wp-parser-method ul.items {
-  margin: 1em 20px !important;
-}
-
-.devhub-wrap .wp-parser-class ul.items li, .devhub-wrap .wp-parser-function ul.items li, .devhub-wrap .wp-parser-hook ul.items li, .devhub-wrap .wp-parser-method ul.items li {
-  padding-bottom: 0px !important;
-}
-
-.devhub-wrap .wp-parser-class ul.items > li, .devhub-wrap .wp-parser-function ul.items > li, .devhub-wrap .wp-parser-hook ul.items > li, .devhub-wrap .wp-parser-method ul.items > li {
-  padding-bottom: 8px !important;
-}
-
-.devhub-wrap .wp-parser-class ul.items a:hover, .devhub-wrap .wp-parser-function ul.items a:hover, .devhub-wrap .wp-parser-hook ul.items a:hover, .devhub-wrap .wp-parser-method ul.items a:hover {
-  color: #d54e21 !important;
-}
-
 .devhub-wrap .wp-parser-class .toc-jump, .devhub-wrap .wp-parser-function .toc-jump, .devhub-wrap .wp-parser-hook .toc-jump, .devhub-wrap .wp-parser-method .toc-jump {
   display: inline-block;
   float: right;
@@ -1672,29 +1562,29 @@ input {
   word-wrap: break-word;
 }
 
-.devhub-wrap.single-wp-parser-function .bad-note .comment-content, .devhub-wrap.single-wp-parser-method .bad-note .comment-content, .devhub-wrap.single-wp-parser-hook .bad-note .comment-content, .devhub-wrap.single-wp-parser-class .bad-note .comment-content {
+.devhub-wrap .single-wp-parser-function .bad-note .comment-content, .devhub-wrap .single-wp-parser-method .bad-note .comment-content, .devhub-wrap .single-wp-parser-hook .bad-note .comment-content, .devhub-wrap .single-wp-parser-class .bad-note .comment-content {
   opacity: .6;
 }
 
-.devhub-wrap.single-wp-parser-function .bad-note .comment-content:hover, .devhub-wrap.single-wp-parser-method .bad-note .comment-content:hover, .devhub-wrap.single-wp-parser-hook .bad-note .comment-content:hover, .devhub-wrap.single-wp-parser-class .bad-note .comment-content:hover {
+.devhub-wrap .single-wp-parser-function .bad-note .comment-content:hover, .devhub-wrap .single-wp-parser-method .bad-note .comment-content:hover, .devhub-wrap .single-wp-parser-hook .bad-note .comment-content:hover, .devhub-wrap .single-wp-parser-class .bad-note .comment-content:hover {
   opacity: 1;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-list,
-.devhub-wrap.single-wp-parser-function .comment-list ol, .devhub-wrap.single-wp-parser-method .comment-list,
-.devhub-wrap.single-wp-parser-method .comment-list ol, .devhub-wrap.single-wp-parser-hook .comment-list,
-.devhub-wrap.single-wp-parser-hook .comment-list ol, .devhub-wrap.single-wp-parser-class .comment-list,
-.devhub-wrap.single-wp-parser-class .comment-list ol {
+.devhub-wrap .single-wp-parser-function .comment-list,
+.devhub-wrap .single-wp-parser-function .comment-list ol, .devhub-wrap .single-wp-parser-method .comment-list,
+.devhub-wrap .single-wp-parser-method .comment-list ol, .devhub-wrap .single-wp-parser-hook .comment-list,
+.devhub-wrap .single-wp-parser-hook .comment-list ol, .devhub-wrap .single-wp-parser-class .comment-list,
+.devhub-wrap .single-wp-parser-class .comment-list ol {
   list-style: none;
   margin: 0 0 1.5em 0;
   padding: 0;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-list li,
-.devhub-wrap.single-wp-parser-function #comment-preview, .devhub-wrap.single-wp-parser-method .comment-list li,
-.devhub-wrap.single-wp-parser-method #comment-preview, .devhub-wrap.single-wp-parser-hook .comment-list li,
-.devhub-wrap.single-wp-parser-hook #comment-preview, .devhub-wrap.single-wp-parser-class .comment-list li,
-.devhub-wrap.single-wp-parser-class #comment-preview {
+.devhub-wrap .single-wp-parser-function .comment-list li,
+.devhub-wrap .single-wp-parser-function #comment-preview, .devhub-wrap .single-wp-parser-method .comment-list li,
+.devhub-wrap .single-wp-parser-method #comment-preview, .devhub-wrap .single-wp-parser-hook .comment-list li,
+.devhub-wrap .single-wp-parser-hook #comment-preview, .devhub-wrap .single-wp-parser-class .comment-list li,
+.devhub-wrap .single-wp-parser-class #comment-preview {
   margin-top: 2.5rem;
   background: #fff;
   overflow: auto;
@@ -1702,50 +1592,50 @@ input {
   border-radius: 0 2px 2px 2px;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-list li article,
-.devhub-wrap.single-wp-parser-function #comment-preview article, .devhub-wrap.single-wp-parser-method .comment-list li article,
-.devhub-wrap.single-wp-parser-method #comment-preview article, .devhub-wrap.single-wp-parser-hook .comment-list li article,
-.devhub-wrap.single-wp-parser-hook #comment-preview article, .devhub-wrap.single-wp-parser-class .comment-list li article,
-.devhub-wrap.single-wp-parser-class #comment-preview article {
+.devhub-wrap .single-wp-parser-function .comment-list li article,
+.devhub-wrap .single-wp-parser-function #comment-preview article, .devhub-wrap .single-wp-parser-method .comment-list li article,
+.devhub-wrap .single-wp-parser-method #comment-preview article, .devhub-wrap .single-wp-parser-hook .comment-list li article,
+.devhub-wrap .single-wp-parser-hook #comment-preview article, .devhub-wrap .single-wp-parser-class .comment-list li article,
+.devhub-wrap .single-wp-parser-class #comment-preview article {
   overflow: auto;
 }
 
-.devhub-wrap.single-wp-parser-function #comment-preview,
-.js .devhub-wrap.single-wp-parser-function .comment-form-comment, .devhub-wrap.single-wp-parser-method #comment-preview,
-.js .devhub-wrap.single-wp-parser-method .comment-form-comment, .devhub-wrap.single-wp-parser-hook #comment-preview,
-.js .devhub-wrap.single-wp-parser-hook .comment-form-comment, .devhub-wrap.single-wp-parser-class #comment-preview,
-.js .devhub-wrap.single-wp-parser-class .comment-form-comment {
+.devhub-wrap .single-wp-parser-function #comment-preview,
+.js .devhub-wrap .single-wp-parser-function .comment-form-comment, .devhub-wrap .single-wp-parser-method #comment-preview,
+.js .devhub-wrap .single-wp-parser-method .comment-form-comment, .devhub-wrap .single-wp-parser-hook #comment-preview,
+.js .devhub-wrap .single-wp-parser-hook .comment-form-comment, .devhub-wrap .single-wp-parser-class #comment-preview,
+.js .devhub-wrap .single-wp-parser-class .comment-form-comment {
   margin-top: 0;
   border: 1px solid #ccc;
   border-radius: 0 3px 3px 3px;
   clear: both;
 }
 
-.devhub-wrap.single-wp-parser-function #comment-preview.tab-section-selected, .devhub-wrap.single-wp-parser-method #comment-preview.tab-section-selected, .devhub-wrap.single-wp-parser-hook #comment-preview.tab-section-selected, .devhub-wrap.single-wp-parser-class #comment-preview.tab-section-selected {
+.devhub-wrap .single-wp-parser-function #comment-preview.tab-section-selected, .devhub-wrap .single-wp-parser-method #comment-preview.tab-section-selected, .devhub-wrap .single-wp-parser-hook #comment-preview.tab-section-selected, .devhub-wrap .single-wp-parser-class #comment-preview.tab-section-selected {
   border-radius: 3px;
 }
 
-.devhub-wrap.single-wp-parser-function #comment-preview .comment-content, .devhub-wrap.single-wp-parser-method #comment-preview .comment-content, .devhub-wrap.single-wp-parser-hook #comment-preview .comment-content, .devhub-wrap.single-wp-parser-class #comment-preview .comment-content {
+.devhub-wrap .single-wp-parser-function #comment-preview .comment-content, .devhub-wrap .single-wp-parser-method #comment-preview .comment-content, .devhub-wrap .single-wp-parser-hook #comment-preview .comment-content, .devhub-wrap .single-wp-parser-class #comment-preview .comment-content {
   min-height: 6em;
 }
 
-.devhub-wrap.single-wp-parser-function label[for=comment],
-.devhub-wrap.single-wp-parser-function .comment-form-comment,
-.devhub-wrap.single-wp-parser-function .comment-preview, .devhub-wrap.single-wp-parser-method label[for=comment],
-.devhub-wrap.single-wp-parser-method .comment-form-comment,
-.devhub-wrap.single-wp-parser-method .comment-preview, .devhub-wrap.single-wp-parser-hook label[for=comment],
-.devhub-wrap.single-wp-parser-hook .comment-form-comment,
-.devhub-wrap.single-wp-parser-hook .comment-preview, .devhub-wrap.single-wp-parser-class label[for=comment],
-.devhub-wrap.single-wp-parser-class .comment-form-comment,
-.devhub-wrap.single-wp-parser-class .comment-preview {
+.devhub-wrap .single-wp-parser-function label[for=comment],
+.devhub-wrap .single-wp-parser-function .comment-form-comment,
+.devhub-wrap .single-wp-parser-function .comment-preview, .devhub-wrap .single-wp-parser-method label[for=comment],
+.devhub-wrap .single-wp-parser-method .comment-form-comment,
+.devhub-wrap .single-wp-parser-method .comment-preview, .devhub-wrap .single-wp-parser-hook label[for=comment],
+.devhub-wrap .single-wp-parser-hook .comment-form-comment,
+.devhub-wrap .single-wp-parser-hook .comment-preview, .devhub-wrap .single-wp-parser-class label[for=comment],
+.devhub-wrap .single-wp-parser-class .comment-form-comment,
+.devhub-wrap .single-wp-parser-class .comment-preview {
   margin-bottom: 1em;
 }
 
-.js .devhub-wrap.single-wp-parser-function .comment-form-comment, .js .devhub-wrap.single-wp-parser-method .comment-form-comment, .js .devhub-wrap.single-wp-parser-hook .comment-form-comment, .js .devhub-wrap.single-wp-parser-class .comment-form-comment {
+.js .devhub-wrap .single-wp-parser-function .comment-form-comment, .js .devhub-wrap .single-wp-parser-method .comment-form-comment, .js .devhub-wrap .single-wp-parser-hook .comment-form-comment, .js .devhub-wrap .single-wp-parser-class .comment-form-comment {
   padding: 0 .7em .7em;
 }
 
-.devhub-wrap.single-wp-parser-function .tablist .spinner, .devhub-wrap.single-wp-parser-method .tablist .spinner, .devhub-wrap.single-wp-parser-hook .tablist .spinner, .devhub-wrap.single-wp-parser-class .tablist .spinner {
+.devhub-wrap .single-wp-parser-function .tablist .spinner, .devhub-wrap .single-wp-parser-method .tablist .spinner, .devhub-wrap .single-wp-parser-hook .tablist .spinner, .devhub-wrap .single-wp-parser-class .tablist .spinner {
   background: url("/wp-includes/images/spinner-2x.gif") no-repeat scroll 0 50%;
   -webkit-background-size: 20px 20px;
   background-size: 20px 20px;
@@ -1753,20 +1643,20 @@ input {
   padding-left: 20px;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-list .avatar, .devhub-wrap.single-wp-parser-method .comment-list .avatar, .devhub-wrap.single-wp-parser-hook .comment-list .avatar, .devhub-wrap.single-wp-parser-class .comment-list .avatar {
+.devhub-wrap .single-wp-parser-function .comment-list .avatar, .devhub-wrap .single-wp-parser-method .comment-list .avatar, .devhub-wrap .single-wp-parser-hook .comment-list .avatar, .devhub-wrap .single-wp-parser-class .comment-list .avatar {
   float: left;
   margin: -2px 1em 0 0;
   padding: 0.125em;
   border: 1px solid #eee;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-meta, .devhub-wrap.single-wp-parser-method .comment-meta, .devhub-wrap.single-wp-parser-hook .comment-meta, .devhub-wrap.single-wp-parser-class .comment-meta {
+.devhub-wrap .single-wp-parser-function .comment-meta, .devhub-wrap .single-wp-parser-method .comment-meta, .devhub-wrap .single-wp-parser-hook .comment-meta, .devhub-wrap .single-wp-parser-class .comment-meta {
   padding: .5em 1em;
   background-color: #f7f7f7;
   overflow: auto;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-content, .devhub-wrap.single-wp-parser-method .comment-content, .devhub-wrap.single-wp-parser-hook .comment-content, .devhub-wrap.single-wp-parser-class .comment-content {
+.devhub-wrap .single-wp-parser-function .comment-content, .devhub-wrap .single-wp-parser-method .comment-content, .devhub-wrap .single-wp-parser-hook .comment-content, .devhub-wrap .single-wp-parser-class .comment-content {
   margin-left: 60px;
   margin-left: 3.75rem;
   margin-left: 0;
@@ -1774,22 +1664,22 @@ input {
   padding: 2rem 1.5rem .5rem;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-footer, .devhub-wrap.single-wp-parser-method .comment-footer, .devhub-wrap.single-wp-parser-hook .comment-footer, .devhub-wrap.single-wp-parser-class .comment-footer {
+.devhub-wrap .single-wp-parser-function .comment-footer, .devhub-wrap .single-wp-parser-method .comment-footer, .devhub-wrap .single-wp-parser-hook .comment-footer, .devhub-wrap .single-wp-parser-class .comment-footer {
   margin: 0 1em;
   padding: 0 0 1em 0;
   position: relative;
   overflow: auto;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-footer a, .devhub-wrap.single-wp-parser-method .comment-footer a, .devhub-wrap.single-wp-parser-hook .comment-footer a, .devhub-wrap.single-wp-parser-class .comment-footer a {
+.devhub-wrap .single-wp-parser-function .comment-footer a, .devhub-wrap .single-wp-parser-method .comment-footer a, .devhub-wrap .single-wp-parser-hook .comment-footer a, .devhub-wrap .single-wp-parser-class .comment-footer a {
   float: right;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-footer p, .devhub-wrap.single-wp-parser-method .comment-footer p, .devhub-wrap.single-wp-parser-hook .comment-footer p, .devhub-wrap.single-wp-parser-class .comment-footer p {
+.devhub-wrap .single-wp-parser-function .comment-footer p, .devhub-wrap .single-wp-parser-method .comment-footer p, .devhub-wrap .single-wp-parser-hook .comment-footer p, .devhub-wrap .single-wp-parser-class .comment-footer p {
   margin-bottom: 0;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-content ol, .devhub-wrap.single-wp-parser-method .comment-content ol, .devhub-wrap.single-wp-parser-hook .comment-content ol, .devhub-wrap.single-wp-parser-class .comment-content ol {
+.devhub-wrap .single-wp-parser-function .comment-content ol, .devhub-wrap .single-wp-parser-method .comment-content ol, .devhub-wrap .single-wp-parser-hook .comment-content ol, .devhub-wrap .single-wp-parser-class .comment-content ol {
   list-style: decimal inside;
   margin: 0 0 1.5em 0;
   border-top: none;
@@ -1797,7 +1687,7 @@ input {
   padding: 0;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-content ul, .devhub-wrap.single-wp-parser-method .comment-content ul, .devhub-wrap.single-wp-parser-hook .comment-content ul, .devhub-wrap.single-wp-parser-class .comment-content ul {
+.devhub-wrap .single-wp-parser-function .comment-content ul, .devhub-wrap .single-wp-parser-method .comment-content ul, .devhub-wrap .single-wp-parser-hook .comment-content ul, .devhub-wrap .single-wp-parser-class .comment-content ul {
   list-style: square inside;
   margin: 0 0 1.5em 0;
   border-top: none;
@@ -1805,38 +1695,38 @@ input {
   padding: 0;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-content li, .devhub-wrap.single-wp-parser-method .comment-content li, .devhub-wrap.single-wp-parser-hook .comment-content li, .devhub-wrap.single-wp-parser-class .comment-content li {
+.devhub-wrap .single-wp-parser-function .comment-content li, .devhub-wrap .single-wp-parser-method .comment-content li, .devhub-wrap .single-wp-parser-hook .comment-content li, .devhub-wrap .single-wp-parser-class .comment-content li {
   border: none;
   padding: 0;
 }
 
-.devhub-wrap.single-wp-parser-function #respond, .devhub-wrap.single-wp-parser-method #respond, .devhub-wrap.single-wp-parser-hook #respond, .devhub-wrap.single-wp-parser-class #respond {
+.devhub-wrap .single-wp-parser-function #respond, .devhub-wrap .single-wp-parser-method #respond, .devhub-wrap .single-wp-parser-hook #respond, .devhub-wrap .single-wp-parser-class #respond {
   overflow: hidden;
 }
 
-.devhub-wrap.single-wp-parser-function #respond .log-in-out a, .devhub-wrap.single-wp-parser-method #respond .log-in-out a, .devhub-wrap.single-wp-parser-hook #respond .log-in-out a, .devhub-wrap.single-wp-parser-class #respond .log-in-out a {
+.devhub-wrap .single-wp-parser-function #respond .log-in-out a, .devhub-wrap .single-wp-parser-method #respond .log-in-out a, .devhub-wrap .single-wp-parser-hook #respond .log-in-out a, .devhub-wrap .single-wp-parser-class #respond .log-in-out a {
   font-style: italic;
 }
 
-.devhub-wrap.single-wp-parser-function #reply-title small a, .devhub-wrap.single-wp-parser-method #reply-title small a, .devhub-wrap.single-wp-parser-hook #reply-title small a, .devhub-wrap.single-wp-parser-class #reply-title small a {
+.devhub-wrap .single-wp-parser-function #reply-title small a, .devhub-wrap .single-wp-parser-method #reply-title small a, .devhub-wrap .single-wp-parser-hook #reply-title small a, .devhub-wrap .single-wp-parser-class #reply-title small a {
   font-style: italic;
 }
 
-.devhub-wrap.single-wp-parser-function #respond #submit, .devhub-wrap.single-wp-parser-method #respond #submit, .devhub-wrap.single-wp-parser-hook #respond #submit, .devhub-wrap.single-wp-parser-class #respond #submit {
+.devhub-wrap .single-wp-parser-function #respond #submit, .devhub-wrap .single-wp-parser-method #respond #submit, .devhub-wrap .single-wp-parser-hook #respond #submit, .devhub-wrap .single-wp-parser-class #respond #submit {
   float: left;
   margin: 0 0 1.5em;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-author, .devhub-wrap.single-wp-parser-method .comment-author, .devhub-wrap.single-wp-parser-hook .comment-author, .devhub-wrap.single-wp-parser-class .comment-author {
+.devhub-wrap .single-wp-parser-function .comment-author, .devhub-wrap .single-wp-parser-method .comment-author, .devhub-wrap .single-wp-parser-hook .comment-author, .devhub-wrap .single-wp-parser-class .comment-author {
   float: left;
   line-height: 1.8;
 }
 
-.devhub-wrap.single-wp-parser-function #add-user-note, .devhub-wrap.single-wp-parser-method #add-user-note, .devhub-wrap.single-wp-parser-hook #add-user-note, .devhub-wrap.single-wp-parser-class #add-user-note {
+.devhub-wrap .single-wp-parser-function #add-user-note, .devhub-wrap .single-wp-parser-method #add-user-note, .devhub-wrap .single-wp-parser-hook #add-user-note, .devhub-wrap .single-wp-parser-class #add-user-note {
   font-size: 1.6rem;
 }
 
-.devhub-wrap.single-wp-parser-function .text-button, .devhub-wrap.single-wp-parser-method .text-button, .devhub-wrap.single-wp-parser-hook .text-button, .devhub-wrap.single-wp-parser-class .text-button {
+.devhub-wrap .single-wp-parser-function .text-button, .devhub-wrap .single-wp-parser-method .text-button, .devhub-wrap .single-wp-parser-hook .text-button, .devhub-wrap .single-wp-parser-class .text-button {
   background: #fff none repeat scroll 0 0;
   border-color: #ccc #ccc #bbb;
   border-radius: 3px;
@@ -1845,7 +1735,7 @@ input {
   padding: 0 5px;
 }
 
-.devhub-wrap.single-wp-parser-function .comment-form ul, .devhub-wrap.single-wp-parser-method .comment-form ul, .devhub-wrap.single-wp-parser-hook .comment-form ul, .devhub-wrap.single-wp-parser-class .comment-form ul {
+.devhub-wrap .single-wp-parser-function .comment-form ul, .devhub-wrap .single-wp-parser-method .comment-form ul, .devhub-wrap .single-wp-parser-hook .comment-form ul, .devhub-wrap .single-wp-parser-class .comment-form ul {
   margin-left: 1.5em;
 }
 
@@ -1904,7 +1794,7 @@ input {
 .devhub-wrap .has-sidebar .widget-area {
   float: left;
   overflow: hidden;
-  width: 30%;
+  width: 27%;
   margin-left: -55px;
   margin: 0;
   clear: none;
@@ -1930,61 +1820,6 @@ input {
 .devhub-wrap nav.handbook-navigation .nav-links a[rel="next"] {
   text-align: right;
   float: right;
-}
-
-.devhub-wrap .table-of-contents {
-  float: right;
-  width: 200px;
-  background: #f5f5f5;
-  border-style: none;
-  margin: 0 0 1em 1.85em;
-  z-index: 1;
-  position: relative;
-}
-
-.devhub-wrap .table-of-contents h2 {
-  padding: 4px 0;
-  text-align: center;
-  text-transform: uppercase;
-  font-size: 1em;
-  letter-spacing: 3px;
-  background: #d0d0d0;
-  color: #8a8989;
-}
-
-.devhub-wrap .table-of-contents ul,
-.devhub-wrap .table-of-contents ol {
-  margin: 6px 20px;
-}
-
-.devhub-wrap .table-of-contents ul ul,
-.devhub-wrap .table-of-contents ul ol,
-.devhub-wrap .table-of-contents ol ul,
-.devhub-wrap .table-of-contents ol ol {
-  margin-right: 0;
-  margin-top: 0;
-}
-
-.devhub-wrap ul.items {
-  margin-bottom: 8px !important;
-  margin-top: 16px;
-  list-style-type: none !important;
-  padding-right: 10px;
-}
-
-.devhub-wrap ul.items li {
-  padding-bottom: 6px !important;
-  font-weight: 600;
-}
-
-.devhub-wrap ul.items li ul li,
-.devhub-wrap ul.items li ul li ul li {
-  padding-bottom: 0 !important;
-  font-weight: normal;
-}
-
-.devhub-wrap ul.items li a:hover {
-  color: #d54e21;
 }
 
 .devhub-wrap .user-note-voting {
@@ -2042,6 +1877,528 @@ input {
   border-bottom: 1px solid #ddd;
 }
 
+/** Site Header **/
+.site-header {
+  background: #0073aa;
+  float: none;
+  margin: 0 0 4em;
+  padding: 18px 0;
+  width: auto;
+  margin: 0;
+}
+
+.site-branding {
+  height: 32px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 960px;
+  padding: 0 10px;
+  position: relative;
+}
+
+.site-title {
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
+  display: inline-block;
+  text-align: left;
+  color: black;
+}
+
+.site-title a {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  border-bottom: 0;
+}
+
+@media screen and (max-width: 769px) {
+  .site-title {
+    margin-left: 10px;
+  }
+}
+
+.menu-container {
+  background: #0073aa;
+  clear: both;
+  float: right;
+  width: 100%;
+}
+
+.menu-container ul {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.menu-container ul li {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px;
+}
+
+.menu-container a {
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
+  text-decoration: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+  font-size: 12.8px;
+}
+
+.menu-container a:hover, .menu-container a:active {
+  color: #fff;
+  border-bottom: 1px solid #fff;
+}
+
+@media screen and (max-width: 48em) {
+  .menu-container a:hover, .menu-container a:active {
+    border-bottom: 0;
+  }
+}
+
+@media screen and (min-width: 48em) {
+  .menu-container {
+    float: right;
+    position: relative;
+    width: auto;
+    top: auto;
+    margin-right: 4px;
+  }
+  .menu-container ul {
+    display: inline-block;
+    font-size: 0;
+    margin-top: 5px;
+  }
+  .menu-container ul li {
+    border: 0;
+    display: inline-block;
+    font-size: 1.4rem;
+    margin-right: 2.1rem;
+    padding: 0;
+  }
+  .menu-container ul li:last-of-type {
+    margin: 0;
+  }
+}
+
+.main-navigation {
+  clear: both;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: 50px;
+  z-index: 10;
+}
+
+.main-navigation.toggled ul {
+  display: block;
+}
+
+.menu-toggle.dashicons {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 25px;
+  height: 5.5rem;
+  overflow: hidden;
+  position: absolute;
+  right: 0.5rem;
+  top: -60px;
+  width: 5.5rem;
+  -webkit-appearance: none;
+}
+
+.toggled .menu-toggle.dashicons:before {
+  content: "\f343";
+}
+
+@media screen and (min-width: 48em) {
+  .menu-toggle.dashicons {
+    display: none;
+  }
+  .main-navigation {
+    float: right;
+    position: relative;
+    width: auto;
+    top: auto;
+  }
+  .main-navigation.toggled {
+    padding: 1px 0;
+  }
+  .main-navigation ul {
+    display: inline-block;
+    font-size: 0;
+  }
+  .main-navigation ul li {
+    border: 0;
+    display: inline-block;
+    font-size: 1rem;
+    margin-right: 1rem;
+    padding: 0;
+  }
+  .main-navigation ul li:last-of-type {
+    margin-right: 0;
+  }
+  .main-navigation button.button-search {
+    display: inline-block;
+  }
+}
+
+/** Handbook **/
+aside[id^="handbook"] .widget-title,
+aside[id^="nav_menu"] .widget-title {
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background-color: transparent;
+  padding: 1rem 12px;
+  margin-bottom: 0;
+  color: inherit;
+}
+
+.post-type-archive-handbook .site-main .widget-area,
+.single-handbook .site-main .widget-area {
+  float: left;
+  margin-right: 4%;
+}
+
+.handbook-header {
+  line-height: 2em;
+}
+
+.handbook-header h1 {
+  margin-top: 0;
+}
+
+.single-handbook .content-area h1 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.single-handbook .o2-post {
+  border-top: none;
+}
+
+.single-handbook .handbook-name-container + #primary {
+  padding-top: 5rem;
+}
+
+.post-type-archive-handbook .handbook-name a:not(:hover),
+.single-handbook .handbook-name a:not(:hover) {
+  color: inherit;
+}
+
+.handbook-name-container {
+  position: absolute;
+  right: 0;
+  width: 75%;
+  margin-left: 25%;
+  background-color: #fff;
+}
+
+/** Table of Contents */
+.site-main .table-of-contents {
+  float: right;
+  width: 250px;
+  border: 1px solid #eee;
+  margin: 0 0 15px 15px;
+  z-index: 1;
+  position: relative;
+  color: #555d66;
+  font-size: 0.9em;
+  background-color: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+@media (min-width: 971px) {
+  .site-main .table-of-contents {
+    margin: -15px -30px 15px 15px;
+  }
+}
+
+.site-main .table-of-contents h2 {
+  margin: 0;
+  padding: 0.7rem 1.2rem;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.3em;
+  color: #32373c;
+  text-transform: uppercase;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 0;
+}
+
+.post-type-archive-handbook ul.items,
+.single-handbook ul.items,
+.table-of-contents ul.items {
+  margin: 0;
+  list-style-type: none;
+  padding: 1.2rem;
+}
+
+.post-type-archive-handbook ul.items li,
+.single-handbook ul.items li,
+.table-of-contents ul.items li {
+  padding: 4px;
+}
+
+.post-type-archive-handbook ul.items li a,
+.single-handbook ul.items li a,
+.table-of-contents ul.items li a {
+  text-decoration: none;
+}
+
+.post-type-archive-handbook ul.items li a:hover,
+.single-handbook ul.items li a:hover,
+.table-of-contents ul.items li a:hover {
+  color: #0073aa;
+  text-decoration: underline;
+}
+
+.post-type-archive-handbook ul.items li ul li,
+.post-type-archive-handbook ul.items li ul li ul li,
+.single-handbook ul.items li ul li,
+.single-handbook ul.items li ul li ul li,
+.table-of-contents ul.items li ul li,
+.table-of-contents ul.items li ul li ul li {
+  padding-bottom: 0;
+}
+
+/* Highlight current heading and adjust scroll position for fixed toolbar */
+.toc-heading:target {
+  position: relative;
+  padding-top: 50px;
+  margin-top: -50px;
+}
+
+/* Remove negative margin because there is no jump link before these headlines */
+.entry-content h2.toc-heading:first-of-type:target,
+.entry-content h3.toc-heading:first-of-type:target,
+h2.toc-heading + h3.toc-heading:target {
+  margin-top: 0;
+}
+
+.toc-heading:target:before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50px;
+  border-left: 5px solid #0073aa;
+  height: 50%;
+  height: calc(100% - 50px);
+}
+
+.toc-jump {
+  position: relative;
+  height: 50px;
+}
+
+.toc-jump:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.toc-jump a {
+  z-index: 1;
+}
+
+@media (max-width: 480px) {
+  .table-of-contents {
+    display: none;
+  }
+}
+
+/** Menu */
+#secondary aside.widget_wporg_handbook_pages,
+#secondary aside.widget_nav_menu {
+  font-size: 16px;
+}
+
+.widget_wporg_handbook_pages h1,
+.widget_nav_menu h1 {
+  font-size: 1.6em;
+  font-weight: bold;
+  margin-bottom: 0.6em;
+}
+
+div[class*="-table-of-contents-container"] {
+  font-size: 0.8em;
+}
+
+div[class*="-table-of-contents-container"] ul {
+  margin-left: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+div[class*="-table-of-contents-container"] ul li .expandable {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: stretch;
+  position: relative;
+}
+
+div[class*="-table-of-contents-container"] ul li .dashicons {
+  position: absolute;
+  right: 0;
+  cursor: pointer;
+  padding: 8px;
+  display: inline-block;
+  font-size: 20px;
+  width: auto;
+  height: 100%;
+  color: #0073aa;
+  background-color: #fafafa;
+  border: 0;
+  border-left: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-appearance: none;
+}
+
+div[class*="-table-of-contents-container"] ul li .dashicons:hover,
+div[class*="-table-of-contents-container"] ul li .dashicons:focus {
+  color: #fff;
+  background-color: #0073aa;
+}
+
+div[class*="-table-of-contents-container"] ul li.open > div > .dashicons {
+  transform: rotate(180deg);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  border-left: none;
+}
+
+div[class*="-table-of-contents-container"] ul a {
+  display: block;
+  width: 100%;
+  font-size: 1.05em;
+  padding: 8px 40px 8px 8px;
+  text-decoration: none;
+}
+
+div[class*="-table-of-contents-container"] ul a:hover, div[class*="-table-of-contents-container"] ul a:focus {
+  color: #fff;
+  background-color: #0073aa;
+}
+
+div[class*="-table-of-contents-container"] ul a.active {
+  color: #555;
+  background-color: #fff;
+}
+
+div[class*="-table-of-contents-container"] ul.default-open {
+  display: block !important;
+}
+
+div[class*="-table-of-contents-container"] .open .expandable .dashicons:not(:focus) {
+  background: #fff;
+  color: #0073aa;
+}
+
+div[class*="-table-of-contents-container"] > ul > li:last-child {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+div[class*="-table-of-contents-container"] > ul > li .children > li > a,
+div[class*="-table-of-contents-container"] > ul > li .sub-menu > li > a {
+  padding-left: 13px;
+}
+
+div[class*="-table-of-contents-container"] > ul > li .children > li > ul > li > a,
+div[class*="-table-of-contents-container"] > ul > li .sub-menu > li > ul > li > a {
+  padding-left: 8px;
+}
+
+div[class*="-table-of-contents-container"] > ul > li.open > div > a:not(:focus) {
+  color: #0073aa;
+}
+
+div[class*="-table-of-contents-container"] > ul > li.open > div > a:hover {
+  color: #fff;
+  background-color: #0073aa;
+}
+
+div[class*="-table-of-contents-container"] .current-menu-item ul,
+div[class*="-table-of-contents-container"] .current-menu-ancestor ul {
+  display: block;
+}
+
+div[class*="-table-of-contents-container"] .children,
+div[class*="-table-of-contents-container"] .sub-menu {
+  overflow: hidden;
+  display: none;
+}
+
+#secondary div[class*="-table-of-contents-container"] ul li {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0;
+  position: relative;
+}
+
+#secondary div[class*="-table-of-contents-container"] ul ul {
+  margin-left: 12px;
+  border-left: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* New handbook design */
+.single-handbook #page {
+  background: linear-gradient(to right, #fafafa 35%, #fff 35%);
+  max-width: 100%;
+  padding: 0;
+  overflow: auto;
+}
+
+.single-handbook #content {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  padding-top: 0;
+}
+
+.single-handbook header {
+  margin: 0;
+}
+
+.single-handbook #secondary {
+  clear: left;
+  margin: 0;
+  background: #fafafa;
+  overflow: hidden;
+  width: 25%;
+  padding-top: 2rem;
+}
+
+.single-handbook #primary {
+  padding: 4rem 0 4rem 4rem;
+  background: #fff;
+  box-sizing: border-box;
+  width: 72%;
+}
+
+@media (max-width: 876px) {
+  .single-handbook #primary {
+    padding: 4rem 20px;
+    width: 100%;
+  }
+}
+
+.single-handbook .widget_wporg_handbook_pages
+.widget_nav_menu {
+  background-color: transparent;
+}
+
+.single-handbook nav.o2-post-actions button {
+  top: 10px;
+}
+
+.single-handbook .make-welcome {
+  margin: 0 !important;
+}
+
+/** /Handbook **/
 .rest-api-handbook-reference .table-of-contents {
   float: none;
   overflow: hidden;
@@ -2060,6 +2417,110 @@ input {
 
 .rest-api-handbook-reference .table-of-contents ul.items li ul li:last-child::after {
   content: '';
+}
+
+/* Menu toggle */
+#secondary-toggle {
+  display: none;
+}
+
+body.responsive-show {
+  position: fixed;
+  top: 32px;
+}
+
+body.responsive-show #secondary {
+  left: 0;
+}
+
+body.responsive-show #primary-modal {
+  display: block;
+}
+
+body.responsive-show #o2-expand-editor {
+  display: none;
+}
+
+@media only screen and (max-width: 782px) {
+  #secondary {
+    top: 46px;
+  }
+  body.responsive-show {
+    position: fixed;
+    top: 46px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  body.responsive-show #secondary {
+    left: 0;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  body.responsive-show #secondary {
+    top: 46px;
+  }
+  body.responsive-show #wpadminbar {
+    top: -46px;
+  }
+}
+
+@media (max-width: 876px) {
+  #secondary {
+    position: fixed;
+    z-index: 10;
+    bottom: 0px;
+    overflow-y: auto;
+    transition: all .25s ease;
+    top: 32px;
+    left: -100%;
+    width: 60%;
+    min-width: 300px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  }
+  #secondary-toggle {
+    display: block;
+    float: left;
+    margin-left: 17px;
+    margin-right: 0;
+    width: 48px;
+    height: 48px;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+  }
+  #secondary-toggle:before {
+    content: '\f333';
+    -webkit-font-smoothing: antialiased;
+    font: normal 32px/1 'dashicons';
+    position: relative;
+    top: 0;
+    color: #fff;
+  }
+  #secondary-toggle strong {
+    display: none;
+  }
+  #page {
+    overflow-x: hidden;
+  }
+  body.responsive-show {
+    overflow-y: visible;
+    position: static;
+  }
+  body.responsive-show #page {
+    overflow-x: visible;
+  }
+  body.responsive-show #secondary-toggle:before {
+    color: #0073aa;
+  }
+  .content-area {
+    width: 100%;
+  }
+  #primary,
+  #secondary {
+    -webkit-backface-visibility: hidden;
+  }
 }
 
 @media (max-width: 59.999999em) {
