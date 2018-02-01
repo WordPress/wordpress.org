@@ -74,6 +74,8 @@ function get_whitelist() {
 		'core-editor' => array(
 			'azaozz',
 			'iseulde',
+			'jeffpaul',
+			'karmatosed',
 		),
 		'core-fields' => array(
 			'sc0ttkclark',
