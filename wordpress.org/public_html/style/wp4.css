@@ -217,6 +217,7 @@ a img.aligncenter {
 #wporg-header h1 a {
 	display: block;
 	background: url(//s.w.org/style/images/wporg-logo.svg?3) center left no-repeat;
+	-webkit-background-size: 290px 46px;
 	background-size: 290px 46px;
 	height: 88px;
 	text-indent: -9999px;
@@ -261,6 +262,7 @@ a img.aligncenter {
 	font-size: 12px;
 	outline: none;
 	font-family: "Open Sans", sans-serif;
+	-webkit-border-radius: 0px;
 	border-radius: 0px;
 }
 
@@ -272,6 +274,7 @@ a img.aligncenter {
 	float: left;
 	text-shadow: none !important;
 	border: none;
+	-webkit-box-shadow: none;
 	box-shadow: none;
 	height: 30px;
 	width: 26px;
@@ -279,6 +282,7 @@ a img.aligncenter {
 	background-image: url(//s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831);
 	background-position: 3px 5px;
 	background-repeat: no-repeat;
+	-webkit-border-radius: 0;
 	border-radius: 0;
 	margin: 0;
 	padding: 0;
@@ -295,9 +299,6 @@ a img.aligncenter {
 	text-align: left;
 	top: 100%;
 	-webkit-transition: left 0.3s;
-	-moz-transition: left 0.3s;
-	-ms-transition: left 0.3s;
-	-o-transition: left 0.3s;
 	transition: left 0.3s;
 	z-index: 100000;
 }
@@ -399,6 +400,7 @@ a img.aligncenter {
 #mobile-menu-button {
 	background: none;
 	border: none;
+	-webkit-box-shadow: none;
 	box-shadow: none;
 	position: absolute;
 	top: 75px;
@@ -416,7 +418,6 @@ a img.aligncenter {
 	padding: 1px;
 	text-shadow: none;
 	-webkit-transition: color .1s ease-in 0;
-	-moz-transition: color .1s ease-in 0;
 	transition: color .1s ease-in 0;
 	-webkit-appearance: none;
 	-webkit-font-smoothing: antialiased;
@@ -426,6 +427,7 @@ a img.aligncenter {
 	display: inline-block;
 	float: left;
 	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 	margin: 0;
 	padding: 3px;
@@ -726,10 +728,13 @@ input[type=submit],
 	box-sizing:         border-box;
 	cursor: pointer;
 	display: inline-block;
+	font-size: 12.8px;
 	font-size: 0.8rem;
+	height: 25px;
 	height: 1.5625rem;
 	line-height: 1;
 	margin: 0;
+	padding: 0 12.8px;
 	padding: 0 .8rem;
 	text-decoration: none;
 	white-space: nowrap;
@@ -747,9 +752,12 @@ input[type="submit"]::-moz-focus-inner {
 
 .button.button-xl,
 .button-group.button-xl .button {
+	font-size: 16px;
 	font-size: 1rem;
+	height: 39.062px;
 	height: 2.44141rem;
 	line-height: 1;
+	padding: 0 24px;
 	padding: 0 1.5rem;
 }
 
@@ -757,17 +765,22 @@ input[type="submit"]::-moz-focus-inner {
 .button-group.button-large .button,
 .col-2 p.button,
 .col-13 p.button {
+	height: 31.25px;
 	height: 1.95313rem;
 	line-height: 1;
+	padding: 0 16px;
 	padding: 0 1rem;
 }
 
 .button.button-small,
 .block-content span.button,
 .button-group.button-small .button {
+	font-size: 10.24px;
 	font-size: 0.64rem;
+	height: 20px;
 	height: 1.25rem;
 	line-height: 1;
+	padding: 0 8px;
 	padding: 0 .5rem;
 }
 
@@ -784,21 +797,25 @@ body.trac #plugin-description .description-right p {
 a.button,
 a.button-primary,
 a.button-secondary {
+	line-height: 25px;
 	line-height:  1.5625rem;
 }
 
 a.button.button-large,
 .button-group.button-large a.button {
+	line-height: 31.25px;
 	line-height: 1.95313rem;
 }
 
 a.button.button-xl,
 .button-group.button-xl a.button {
+	line-height: 39.062px;
 	line-height: 2.44141rem;
 }
 
 a.button.button-small,
 .button-group.button-small a.button {
+	line-height: 20px;
 	line-height: 1.25rem;
 }
 
@@ -1214,6 +1231,7 @@ h5 {
 	left: 0;
 	top: 0;
 	background-image: url(//s.w.org/style/images/steps.png);
+	-webkit-background-size: 93px 31px;
 	background-size: 93px 31px;
 	background-repeat: no-repeat;
 }
@@ -1555,6 +1573,7 @@ a.rsslink {
 
 #wporg-footer .cip-image {
 	background: url(//s.w.org/style/images/codeispoetry.png?1) center center no-repeat;
+	-webkit-background-size: 190px 15px;
 	background-size: 190px 15px;
 	width: 190px;
 	height: 15px;
@@ -1563,7 +1582,7 @@ a.rsslink {
 
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
        only screen and (min-resolution: 1.5dppx),
-	   only screen and (min-resolution: 144dpi) {
+       only screen and (min-resolution: 144dpi) {
 	#wporg-footer .cip-image {
 		background-image: url(//s.w.org/style/images/codeispoetry-2x.png?1);
 	}
@@ -1702,12 +1721,8 @@ blockquote {
 	border-top: 1px solid #ccc;
 	padding: 1.5em 0 0 0;
 	margin: 10px 0 0 0;
-	-moz-border-radius-bottomleft: 3px;
-	-khtml-border-bottom-left-radius: 3px;
 	-webkit-border-bottom-left-radius: 3px;
 	border-bottom-left-radius: 3px;
-	-moz-border-radius-bottomright: 3px;
-	-khtml-border-bottom-right-radius: 3px;
 	-webkit-border-bottom-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 }
@@ -1946,8 +1961,6 @@ div.special { margin-top: 22px; }
 	text-align: center;
 	font: 1.3em Georgia, Times, "Times New Roman", serif;
 	padding: 10px 0;
-	-moz-border-radius: 3px;
-	-khtml-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
@@ -2134,7 +2147,11 @@ img#wpstats {
 .wporg-page-mobile #pagebody ul.books {
 	display: -moz-box;
 	display: -ms-flexbox;
+	display: -webkit-box;
+	display: -webkit-flex;
 	display: flex;
+	-webkit-flex-wrap: wrap;
+	-ms-flex-wrap: wrap;
 	flex-wrap: wrap;
 }
 .wporg-page-mobile #pagebody .books li {
@@ -2151,6 +2168,8 @@ img#wpstats {
 }
 .wporg-responsive.wporg-page-mobile #pagebody .books li {
 	padding: 0 14px 15px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	background-color: #fff;
 	border: 1px solid #dedede;
@@ -2178,6 +2197,8 @@ body.wporg-responsive .col-2 {
 
 .wporg-responsive .col-10 .col-5 {
 	width: 50%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	padding-right: 14px;
 }
@@ -2210,7 +2231,11 @@ body.wporg-responsive .col-2 {
 	body.wporg-responsive #pagebody .wrapper {
 		display: -moz-box;
 		display: -ms-flexbox;
+		display: -webkit-box;
+		display: -webkit-flex;
 		display: flex;
+		-webkit-flex-wrap: wrap;
+		-ms-flex-wrap: wrap;
 		flex-wrap: wrap;
 	}
 	body.wporg-responsive .col-2,
@@ -2259,6 +2284,8 @@ body.wporg-responsive .col-2 {
 		float: left;
 		width: 50%;
 		margin: 0;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 		padding: 0 14px;
 	}
@@ -2266,6 +2293,8 @@ body.wporg-responsive .col-2 {
 		float: right;
 		width: 50%;
 		margin: 0;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 		padding: 0 14px;
 	}
@@ -2333,6 +2362,8 @@ body.wporg-responsive .col-2 {
 
 	.wporg-page-about-books #pagebody .books li {
 		padding: 0 18px 18px;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 	}
 	.wporg-page-about-books #pagebody .books .image {
@@ -2379,3 +2410,5 @@ body.wporg-responsive .col-2 {
 .notification-danger {
 	background: #f2dede;
 }
+
+/*# sourceMappingURL=wp4.css.map */
