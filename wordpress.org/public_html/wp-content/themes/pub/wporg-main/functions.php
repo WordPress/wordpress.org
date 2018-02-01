@@ -55,11 +55,11 @@ function widgets() {
 	} );
 
 	register_sidebar( [
-		'id'           => 'sidebar-1',
-		'before'       => '<div class="widget">',
-		'after'        => '</div>',
-		'before_title' => '<h4>',
-		'after_title'  => '</h4>',
+		'id'            => 'sidebar-1',
+		'before_widget' => '<div id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</div>',
+		'before_title'  => '<h4>',
+		'after_title'   => '</h4>',
 	] );
 }
 add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );

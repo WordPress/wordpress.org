@@ -77,6 +77,7 @@ class Locale_Main implements Site {
 			'contact-form',
 			'sharedaddy',
 			'shortcodes',
+			'subscriptions',
 		] );
 		$jetpack_module_manager->setup();
 
@@ -123,6 +124,10 @@ class Locale_Main implements Site {
 		);
 
 		$options->setup();
+
+		// Options for Jetpack's subscription module.
+		add_filter( 'pre_option_stb_enabled', '__return_zero' );
+		add_filter( 'pre_option_stc_enabled', '__return_zero' );
 	}
 
 	/**

@@ -15,8 +15,6 @@ namespace WordPressdotorg\Theme;
 	<?php
 	if ( ! dynamic_sidebar( 'sidebar-1' ) ) :
 		$widget_args = [
-			'before'       => '<div class="widget">',
-			'after'        => '</div>',
 			'before_title' => '<h4>',
 			'after_title'  => '</h4>',
 		];

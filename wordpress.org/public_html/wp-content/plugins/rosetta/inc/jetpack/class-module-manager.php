@@ -36,7 +36,7 @@ class Module_Manager {
 		add_filter( 'jetpack_get_available_modules', [ $this, 'filter_available_modules' ] );
 
 		if ( $this->auto_activate_modules ) {
-			add_filter( 'jetpack_get_default_modules', [ $this, 'filter_default_modules' ], 10, 0 );
+			add_filter( 'pre_option_jetpack_active_modules', [ $this, 'filter_default_modules' ], 10, 0 );
 		}
 	}
 
