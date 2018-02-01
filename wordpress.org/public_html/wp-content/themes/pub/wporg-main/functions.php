@@ -39,6 +39,28 @@ function widgets() {
 
 		return $args;
 	} );
+
+	add_filter( 'widget_categories_args', function( $args ) {
+		$args['number']  = 10;
+		$args['orderby'] = 'count';
+		$args['order']   = 'DESC';
+
+		return $args;
+	} );
+
+	add_filter( 'widget_archives_args', function( $args ) {
+		$args['limit'] = 12;
+
+		return $args;
+	} );
+
+	register_sidebar( [
+		'id'           => 'sidebar-1',
+		'before'       => '<div class="widget">',
+		'after'        => '</div>',
+		'before_title' => '<h4>',
+		'after_title'  => '</h4>',
+	] );
 }
 add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
 

@@ -35,9 +35,8 @@ class WPORG_Widget_Download extends \WP_Widget {
 	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_widget' and 'after_widget'.
-	 * @param array $instance Settings for the current Download widget instance.
 	 */
-	public function widget( $args, $instance ) {
+	public function widget( $args ) {
 		global $rosetta;
 
 		$latest_release = false;
