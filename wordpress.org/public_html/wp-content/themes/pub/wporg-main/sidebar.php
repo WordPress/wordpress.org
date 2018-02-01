@@ -30,11 +30,10 @@ namespace WordPressdotorg\Theme;
 
 		if ( class_exists( 'Jetpack_Subscriptions_Widget' ) ) :
 			the_widget( 'Jetpack_Subscriptions_Widget', array_merge( \Jetpack_Subscriptions_Widget::defaults(), [
-				/* translators: Site name. */
-				'title'          => sprintf( esc_html__( 'Subscribe to %s', 'wporg' ), get_bloginfo( 'name' ) ),
+				'title'          => esc_html__( 'Subscribe to this blog', 'wporg' ),
 				'subscribe_text' => '',
 			] ), $widget_args );
-		endif; // class_exists( 'Jetpack_Subscriptions_Widget' ).
-	endif; // dynamic_sidebar( 'sidebar-1' ).
+		endif;
+	endif;
 	?>
 </aside><!-- #secondary -->
