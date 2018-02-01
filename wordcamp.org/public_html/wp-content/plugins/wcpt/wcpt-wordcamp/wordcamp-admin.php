@@ -1037,7 +1037,17 @@ class WordCamp_Admin {
 					implode( ', ', $this->get_required_fields( 'scheduled' ) )
 				),
 			),
+
+			4 => array(
+				'type'   => 'error',
+				'notice' => __( 'The physical address could not be geocoded, which prevents the camp from showing up in the Events Widget. Please tweak the address so that Google can parse it.', 'wordcamporg' )
+			),
 		);
+
+		// Show this error permenantly, not just after updating.
+		if ( ! empty( $post->{'Physical Address'} ) && empty( get_post_meta( $post->ID, '_venue_coordinates', true ) ) ) {
+			$_REQUEST['wcpt_messages'] = empty( $_REQUEST['wcpt_messages'] ) ? '4' : $_REQUEST['wcpt_messages'] . ',4';
+		}
 
 		if ( ! empty( $_REQUEST['wcpt_messages'] ) ) {
 			$active_notices = explode( ',', $_REQUEST['wcpt_messages'] );
