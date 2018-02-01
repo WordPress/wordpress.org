@@ -6,10 +6,6 @@
 		margin-top: 0;
 	}
 
-	.post-password-form input[type="submit"] {
-		@extend .button;
-	}
-
 	[class*="col-"] {
 		& ~ h1,
 		& ~ h2,
