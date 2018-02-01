@@ -29,14 +29,17 @@ class WPORG_Widget_Download extends \WP_Widget {
 		) );
 	}
 
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 	/**
 	 * Outputs the content for the current Download widget instance.
 	 *
 	 * @access public
 	 *
 	 * @param array $args     Display arguments including 'before_widget' and 'after_widget'.
+	 * @param array $instance Settings for the current Download widget instance.
 	 */
-	public function widget( $args ) {
+	public function widget( $args, $instance ) {
+		// phpcs:enable
 		global $rosetta;
 
 		$latest_release = false;
