@@ -168,7 +168,7 @@ class Plugins_Info_API {
 		}
 
 		// Back-compatible routines.
-		// WordPress 4.x and older need a "bare" contributor map
+		// WordPress 4.9 and older need a "bare" contributor map [ user => profile ]
 		if ( ! empty( $fields['bare_contributors'] ) ) {
 			$contribs                 = $response['contributors'];
 			$response['contributors'] = array();

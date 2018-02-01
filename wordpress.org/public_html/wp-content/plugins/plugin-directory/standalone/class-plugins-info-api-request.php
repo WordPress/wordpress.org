@@ -35,21 +35,34 @@ class Plugins_Info_API_Request {
 	);
 
 	static $plugins_info_fields_defaults = array(
-		'added'         => true,
-		'compatibility' => true,
-		'contributors'  => true,
-		'downloaded'    => true,
-		'downloadlink'  => true,
-		'donate_link'   => true,
-		'homepage'      => true,
-		'last_updated'  => true,
-		'rating'        => true,
-		'ratings'       => true,
-		'requires'      => true,
-		'requires_php'  => true,
-		'sections'      => true,
-		'tags'          => true,
-		'tested'        => true,
+		'added'             => true,
+		'compatibility'     => true,
+		'contributors'      => false,
+		'bare_contributors' => true,
+		'downloaded'        => true,
+		'downloadlink'      => true,
+		'donate_link'       => true,
+		'homepage'          => true,
+		'last_updated'      => true,
+		'rating'            => true,
+		'ratings'           => true,
+		'requires'          => true,
+		'requires_php'      => true,
+		'sections'          => true,
+		'tags'              => true,
+		'tested'            => true,
+	);
+
+	// Alterations made to default fields in the info/1.2 API.
+	static $plugins_info_fields_defaults_12 = array(
+		'downloaded'        => false,
+		'bare_contributors' => false,
+		'compatibility'     => false,
+		'description'       => false,
+		'banners'           => true,
+		'reviews'           => true,
+		'active_installs'   => true,
+		'contributors'      => true,
 	);
 
 	static $query_plugins_fields_defaults = array(
@@ -69,6 +82,18 @@ class Plugins_Info_API_Request {
 		'short_description' => true,
 		'tags'              => true,
 		'tested'            => true,
+	);
+
+	// Alterations made to the default fields in the info/1.2 API.
+	static $query_plugins_fields_defaults_12 = array(
+		'compatibility'   => false,
+		'sections'        => false,
+		'contributors'    => false,
+		'versions'        => false,
+		'screenshots'     => false,
+		'last_updated'    => true,
+		'icons'           => true,
+		'active_installs' => true,
 	);
 
 	public function __construct( $args ) {
@@ -104,9 +129,17 @@ class Plugins_Info_API_Request {
 		$fields = self::$fields;
 
 		if ( 'plugin_information' == $method ) {
-			$fields = array_merge( $fields, self::$plugins_info_fields_defaults );
+			$fields = array_merge(
+				$fields,
+				self::$plugins_info_fields_defaults,
+				( defined( 'PLUGINS_API_VERSION' ) && PLUGINS_API_VERSION >= 1.2 ) ? self::$plugins_info_fields_defaults_12 : array()
+			);
 		} elseif ( 'query_plugins' == $method ) {
-			$fields = array_merge( $fields, self::$query_plugins_fields_defaults );
+			$fields = array_merge(
+				$fields,
+				self::$query_plugins_fields_defaults,
+				( defined( 'PLUGINS_API_VERSION' ) && PLUGINS_API_VERSION >= 1.2 ) ? self::$query_plugins_fields_defaults_12 : array()
+			);
 		} else {
 			return array();
 		}
@@ -116,14 +149,6 @@ class Plugins_Info_API_Request {
 		if ( ! empty( $this->requested_fields['icons'] ) ) {
 			$fields['compatibility'] = false;
 			$fields['description']   = false;
-		}
-
-		// In the 1.2+ version of the info API, we default to returning a more detailed list of contributors.
-		// This can be enabled in older versions of the API by passing the 'contributors' field.
-		if ( defined( 'PLUGINS_API_VERSION' ) && PLUGINS_API_VERSION >= 1.2 ) {
-			$fields['contributors'] = true;
-		} elseif ( ! isset( $this->requested_fields['contributors'] ) ) {
-			$fields['bare_contributors'] = true;
 		}
 
 		$fields = array_merge( $fields, $this->requested_fields );
