@@ -356,6 +356,8 @@ class Themes_API {
 		);
 		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION >= 1.2 ) {
 			$defaults['extended_author'] = true;
+			$defaults['num_ratings'] = true;
+			$detaults['parent'] = true;
 		}
 
 		if ( empty( $this->request->fields ) ) {
@@ -410,8 +412,24 @@ class Themes_API {
 	 */
 	public function query_themes() {
 		global $wp_query;
+
+		// Set which fields wanted by default:
+		$defaults = array(
+			'description' => true,
+			'rating'      => true,
+			'homepage'    => true,
+			'template'    => true,
+		);
+		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION >= 1.2 ) {
+			$defaults['extended_author'] = true;
+			$defaults['num_ratings'] = true;
+			$detaults['parent'] = true;
+		}
+
+		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
+
 		// If there is a cached result, return that.
-		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) ) );
+		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) . serialize( $this->fields ) ) );
 		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
 			return;
 		}
@@ -438,16 +456,6 @@ class Themes_API {
 			'pages'   => max( 1, $this->result->max_num_pages ),
 			'results' => (int) $this->result->found_posts,
 		);
-
-		// Set which fields wanted by default:
-		$defaults = array(
-			'description' => true,
-			'rating'      => true,
-			'homepage'    => true,
-			'template'    => true,
-		);
-
-		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
 
 		// Fill up the themes lists.
 		foreach ( (array) $this->result->posts as $theme ) {
@@ -604,7 +612,6 @@ class Themes_API {
 			$phil->author = (object) array(
 				'profile' => 'https://profiles.wordpress.org/' . $author->user_nicename,
 				'avatar' => 'https://secure.gravatar.com/avatar/' . md5( $author->user_email ) . '?s=96&d=monsterid&r=g',
-				'user_nicename' => $author->user_nicename,
 				'display_name'  => $author->display_name,
 			);
 		} else {
