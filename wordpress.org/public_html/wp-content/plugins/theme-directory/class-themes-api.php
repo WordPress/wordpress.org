@@ -610,8 +610,9 @@ class Themes_API {
 
 		if ( $this->fields['extended_author'] ) {
 			$phil->author = (object) array(
-				'profile' => 'https://profiles.wordpress.org/' . $author->user_nicename,
-				'avatar' => 'https://secure.gravatar.com/avatar/' . md5( $author->user_email ) . '?s=96&d=monsterid&r=g',
+				'user_nicename' => $author->user_nicename,
+				'profile'       => 'https://profiles.wordpress.org/' . $author->user_nicename,
+				'avatar'        => 'https://secure.gravatar.com/avatar/' . md5( $author->user_email ) . '?s=96&d=monsterid&r=g',
 				'display_name'  => $author->display_name,
 			);
 		} else {
