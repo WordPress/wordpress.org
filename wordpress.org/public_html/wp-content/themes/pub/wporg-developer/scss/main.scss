@@ -6,9 +6,6 @@
 	#content {
 		padding: 0;
 	}
-	.site-header {
-		margin-bottom: 0;
-	}
 }
 
 .devhub-wrap {
@@ -47,26 +44,6 @@
 	}
 	.page-header {
 		margin-top: 1em;
-	}
-
-	.devhub-menu .menu,
-	.devhub-cli-menu .menu {
-		list-style: none;
-		float: right;
-		font-size: 14px;
-		font-weight: bold;
-		padding-top: 22px;
-		margin-right: 15px;
-
-		li {
-			display: inline;
-			padding-left: 20px;
-		}
-
-		a {
-			color: #555;
-			font-weight: 400;
-		}
 	}
 
 	a {
@@ -306,8 +283,6 @@
 	.entry-content:after,
 	.comment-content:before,
 	.comment-content:after,
-	.site-header:before,
-	.site-header:after,
 	.site-content:before,
 	.site-content:after,
 	.site-footer:before,
@@ -319,7 +294,6 @@
 	.clear:after,
 	.entry-content:after,
 	.comment-content:after,
-	.site-header:after,
 	.site-content:after,
 	.site-footer:after {
 		clear: both;
@@ -478,30 +452,6 @@
 	/*
 	 * Header area
 	 */
-
-	.site-header {
-		background: none repeat scroll 0 0 #F7F7F7;
-		border-bottom: 1px solid #DFDFDF;
-		height: 62px;
-		margin-bottom: 1em;
-	}
-	.site-branding {
-		width: 100%;
-		a {
-			text-decoration: none;
-			color: #606060;
-		}
-		.site-title {
-			color: #555555;
-			float: left;
-			font-size: 28px;
-			line-height: 1em;
-			padding-left: 9px;
-			padding-top: 18px;
-			text-shadow: 0 1px 0 #FFFFFF;
-			font-weight: 300;
-		}
-	}
 
 	.breadcrumbs {
 		.active {
@@ -2184,9 +2134,6 @@ body.responsive-show {
 			.has-sidebar {
 				width: 100%;
 			}
-		}
-		.site-branding .site-title {
-			padding-left: 0;
 		}
 
 		&.archive, &.search {

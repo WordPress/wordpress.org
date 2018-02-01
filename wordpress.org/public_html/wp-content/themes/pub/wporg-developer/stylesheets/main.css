@@ -276,10 +276,6 @@ input {
   padding: 0;
 }
 
-.home .devhub-wrap .site-header {
-  margin-bottom: 0;
-}
-
 .devhub-wrap {
   padding-bottom: 1.5em;
   /* Text meant only for screen readers */
@@ -354,28 +350,6 @@ input {
 
 .devhub-wrap .page-header {
   margin-top: 1em;
-}
-
-.devhub-wrap .devhub-menu .menu,
-.devhub-wrap .devhub-cli-menu .menu {
-  list-style: none;
-  float: right;
-  font-size: 14px;
-  font-weight: bold;
-  padding-top: 22px;
-  margin-right: 15px;
-}
-
-.devhub-wrap .devhub-menu .menu li,
-.devhub-wrap .devhub-cli-menu .menu li {
-  display: inline;
-  padding-left: 20px;
-}
-
-.devhub-wrap .devhub-menu .menu a,
-.devhub-wrap .devhub-cli-menu .menu a {
-  color: #555;
-  font-weight: 400;
 }
 
 .devhub-wrap a {
@@ -666,8 +640,6 @@ input {
 .devhub-wrap .entry-content:after,
 .devhub-wrap .comment-content:before,
 .devhub-wrap .comment-content:after,
-.devhub-wrap .site-header:before,
-.devhub-wrap .site-header:after,
 .devhub-wrap .site-content:before,
 .devhub-wrap .site-content:after,
 .devhub-wrap .site-footer:before,
@@ -679,7 +651,6 @@ input {
 .devhub-wrap .clear:after,
 .devhub-wrap .entry-content:after,
 .devhub-wrap .comment-content:after,
-.devhub-wrap .site-header:after,
 .devhub-wrap .site-content:after,
 .devhub-wrap .site-footer:after {
   clear: both;
@@ -819,33 +790,6 @@ input {
 
 .devhub-wrap .infinity-end.neverending .site-footer {
   display: block;
-}
-
-.devhub-wrap .site-header {
-  background: none repeat scroll 0 0 #F7F7F7;
-  border-bottom: 1px solid #DFDFDF;
-  height: 62px;
-  margin-bottom: 1em;
-}
-
-.devhub-wrap .site-branding {
-  width: 100%;
-}
-
-.devhub-wrap .site-branding a {
-  text-decoration: none;
-  color: #606060;
-}
-
-.devhub-wrap .site-branding .site-title {
-  color: #555555;
-  float: left;
-  font-size: 28px;
-  line-height: 1em;
-  padding-left: 9px;
-  padding-top: 18px;
-  text-shadow: 0 1px 0 #FFFFFF;
-  font-weight: 300;
 }
 
 .devhub-wrap .breadcrumbs {
@@ -2537,9 +2481,6 @@ body.responsive-show #o2-expand-editor {
   .devhub-wrap #content-area .has-sidebar,
   .devhub-wrap .inner-wrap .has-sidebar {
     width: 100%;
-  }
-  .devhub-wrap .site-branding .site-title {
-    padding-left: 0;
   }
   .devhub-wrap.archive .meta, .devhub-wrap.search .meta {
     font-size: 100%;
