@@ -126,7 +126,7 @@ class GlotPress_Translate_Bridge {
 		$sql_project  = $wpdb->prepare( "p.path = %s", $project_path );
 		$sql_singular = isset( $strings['singular'] ) ? $wpdb->prepare( "o.singular = %s", $strings['singular'] ) : 'o.singular IS NULL';
 		$sql_plural   = isset( $strings['plural'] )   ? $wpdb->prepare( "o.plural = %s",   $strings['plural']   ) : 'o.plural IS NULL';
-		$sql_context  = isset( $strings['context'] )  ? $wpdb->prepare( "o.contxt = %s",   $strings['context']  ) : 'o.context IS NULL';
+		$sql_context  = !empty( $strings['context'] ) ? $wpdb->prepare( "o.context = %s",  $strings['context']  ) : 'o.context IS NULL';
 
 		$sql_locale = $wpdb->prepare( "s.locale = %s AND s.slug = %s", $locale['locale'], $locale['slug'] );
 
@@ -146,6 +146,13 @@ class GlotPress_Translate_Bridge {
 			LIMIT 1",
 			ARRAY_N
 		);
+
+		if ( ! $translation ) {
+			$decoded_strings = array_map( 'html_entity_decode', $strings );
+			if ( $decoded_strings != $strings ) {
+				$translation = $this->find_translation( $decoded_strings, $project_path );
+			}
+		}
 
 		if ( $translation ) {
 			$translation = array_filter( $translation );
