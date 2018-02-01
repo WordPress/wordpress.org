@@ -26,9 +26,21 @@ function wporg_themes_setup() {
 	remove_action( 'template_redirect', 'redirect_canonical' );
 	remove_action( 'template_redirect', 'wp_old_slug_redirect' );
 
+	add_action( 'template_redirect', 'wporg_themes_trailing_slashes' );
+
 	add_theme_support( 'wp4-styles' );
 }
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
+
+/**
+ * Handle the root-level redirect to trailing-slash'd uri which redirect_canonical() usually does.
+ */
+function wporg_themes_trailing_slashes() {
+	if ( '/themes' === $_SERVER['REQUEST_URI'] ) {
+		wp_safe_redirect( '/themes/' );
+		die();
+	}
+}
 
 /**
  * Enqueue scripts and styles.
