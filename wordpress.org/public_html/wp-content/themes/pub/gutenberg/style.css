@@ -542,7 +542,7 @@ a:hover, a:active {
   outline: 0;
 }
 
-li a,
+.site-content li a,
 .entry-content a {
 	text-decoration: underline;
 }
