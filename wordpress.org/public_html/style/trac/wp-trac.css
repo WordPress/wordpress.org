@@ -278,6 +278,9 @@ table.code tbody th {
 table.code tbody th :link, table.code tbody th :visited {
 	color: #888;
 }
+table.code td {
+	word-wrap: break-word;
+}
 div.code {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
@@ -296,6 +299,9 @@ div.code {
 .diff table.trac-diff tbody th {
 	background: #eaf2fa;
 	color: #888;
+}
+table.trac-diff td {
+	word-wrap: break-word;
 }
 .diff table.trac-diff tbody.skipped td, .diff table.trac-diff thead td {
 	border: none; /* reset the borders */
