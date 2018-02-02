@@ -181,10 +181,16 @@ class Display {
 				margin-right: 10px;
 				width: 100px;
 			}
+			.ptr-test-reporter-list.ptr-test-reporter-inactive li {
+				width: 75px;
+			}
 			.ptr-test-reporter-list li h5.avatar-name {
 				font-weight: 600;
 				margin-top: 6px;
 				margin-bottom: 6px;
+			}
+			.ptr-test-reporter-list.ptr-test-reporter-inactive li h5.avatar-name {
+				font-size: 11px;
 			}
 		</style>
 		<?php
@@ -221,13 +227,13 @@ class Display {
 					'include' => $active_reporters,
 				)
 			);
-			$output          .= self::get_user_list( $users );
+			$output          .= self::get_user_list( $users, 'active' );
 		}
 
 		$all_time_reporters = $wpdb->get_col( "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type='result' AND post_status='publish' AND post_parent != 0" ); // @codingStandardsIgnoreLine
 		if ( ! empty( $all_time_reporters ) ) {
 			$all_time_reporters = array_map( 'intval', $all_time_reporters );
-			$output            .= '<h3>No Reports in >10 Revisions</h3>' . PHP_EOL;
+			$output            .= '<h4>Registered, but no reports in >10 Revisions</h4>' . PHP_EOL;
 			$users              = get_users(
 				array(
 					'orderby' => 'display_name',
@@ -239,19 +245,20 @@ class Display {
 					unset( $users[ $i ] );
 				}
 			}
-			$output .= self::get_user_list( $users );
+			$output .= self::get_user_list( $users, 'inactive' );
 		}
 		return $output;
 	}
 
-	private static function get_user_list( $users ) {
-		$output = '<ul class="ptr-test-reporter-list">';
+	private static function get_user_list( $users, $type ) {
+		$output = '<ul class="' . esc_attr( 'ptr-test-reporter-list ptr-test-reporter-' . $type ) . '">';
 		foreach ( $users as $user ) {
 			$output .= '<li>';
 			if ( ! empty( $user->user_url ) ) {
 				$output .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
 			}
-			$output .= get_avatar( $user->user_email, 82 );
+			$avatar_size = 'active' === $type ? 82 : 48;
+			$output     .= get_avatar( $user->user_email, $avatar_size );
 			if ( ! empty( $user->user_url ) ) {
 				$output .= '</a>';
 			}
