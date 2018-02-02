@@ -150,6 +150,8 @@ class RestAPI {
 		update_post_meta( $post_id, 'env', $env );
 		update_post_meta( $post_id, 'results', $results );
 
+		self::maybe_send_email_notifications( $parent_id );
+
 		// Create the response object.
 		$response = new \WP_REST_Response(
 			array(
@@ -165,4 +167,78 @@ class RestAPI {
 
 		return $response;
 	}
+
+	/**
+	 * Maybe send an email notification if 'wpdevbot' has reported
+	 * a success and others have reported failures.
+	 */
+	private static function maybe_send_email_notifications( $parent_id ) {
+
+		// 'wpdevbot' doesn't exist on this system, so nothing to compare.
+		$user = get_user_by( 'login', 'wpdevbot' );
+		if ( ! $user ) {
+			return;
+		}
+		$wporgbot_id = $user->ID;
+
+		$args             = array(
+			'post_parent' => $parent_id,
+			'post_type'   => 'result',
+			'numberposts' => -1,
+		);
+		$results          = get_posts( $args );
+		$wpdevbot_results = wp_filter_object_list( $results, array( 'post_author' => $wporgbot_id ) );
+		// 'wpdevbot' hasn't reported yet
+		if ( empty( $wpdevbot_results ) ) {
+			return;
+		}
+		$wpdevbot_result = array_shift( $wpdevbot_results );
+		// If 'wpdevbot' is failed, we already know the test failure
+		// and don't need to report host testing bots failures.
+		if ( self::is_failed_result( $wpdevbot_result ) ) {
+			return;
+		}
+
+		foreach ( $results as $result ) {
+			// Doesn't make sense to report wpdevbot to itself
+			if ( $wpdevbot_result->ID === $result->ID ) {
+				continue;
+			}
+			// If the test result is failed and we haven't yet sent an
+			// email notification, then let the reporter know.
+			if ( self::is_failed_result( $result )
+				&& ! get_post_meta( $result->ID, 'ptr_reported_failure', true ) ) {
+				$user = get_user_by( 'id', $result->post_author );
+				if ( $user ) {
+					$subject = '[Host Test Results] Test failure for ' . $result->post_name;
+					$body    = 'Hi there,' . PHP_EOL . PHP_EOL
+						. "We've detected a WordPress PHPUnit test failure on your hosting environment. Please review when you have a moment: "
+						. get_permalink( $result->ID ) . PHP_EOL . PHP_EOL
+						. 'Thanks,' . PHP_EOL . PHP_EOL
+						. 'WordPress.org Hosting Community';
+					wp_mail( $user->user_email, $subject, $body );
+					update_post_meta( $result->ID, 'ptr_reported_failure', true );
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * Whether or not a given result is a failed result.
+	 *
+	 * @param WP_Post $post Result post object.
+	 * @return boolean
+	 */
+	private static function is_failed_result( $post ) {
+		$is_failed = false;
+		$results   = get_post_meta( $post->ID, 'results', true );
+		if ( isset( $results['failures'] ) ) {
+			if ( 0 !== (int) $results['failures'] || 0 !== (int) $results['errors'] ) {
+				$is_failed = true;
+			}
+		}
+		return $is_failed;
+	}
+
 }
