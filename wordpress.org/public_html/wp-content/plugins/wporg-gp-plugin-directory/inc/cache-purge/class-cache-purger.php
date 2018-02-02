@@ -84,6 +84,11 @@ class Cache_Purger {
 				}
 
 				$this->delete_plugin_i18n_cache_keys_for_locale( $original->project_id, $translation_set->locale );
+				$prefix = $this->get_plugin_i18n_cache_prefix( (int) $original->project_id );
+				if ( $prefix ) {
+					wp_cache_delete( "{$prefix}:translations:{$set_id}", $this->i18n_cache_group );
+				}
+
 				$purged[] = "{$original->project_id}-{$set_id}";
 			}
 		}
