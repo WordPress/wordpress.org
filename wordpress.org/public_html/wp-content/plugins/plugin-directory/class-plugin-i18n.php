@@ -285,7 +285,7 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Searches GlotPress "originals" for the passed string.
+	 * Returns GlotPress translations for the passed original string IDs.
 	 *
 	 * @param string $slug               Plugin slug
 	 * @param string $branch             dev|stable
