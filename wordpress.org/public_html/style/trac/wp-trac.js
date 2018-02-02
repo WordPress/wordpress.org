@@ -1,4 +1,5 @@
-var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
+/* globals wpTracAutoCompleteUsers, wpTracContributorLabels, wpTracCurrentUser */
+var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList;
 
 (function($){
 
@@ -105,7 +106,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				mentionsInAttrRegEx = new RegExp( '="[^"]*?' + mentionsRegEx.source + '[\\s\\S]*?"' );
 
 			$( 'div.change .comment, #ticket .description' ).each( function() {
-				$comment = $( this ).html();
+				var $comment = $( this ).html();
+
 				if ( mentionsRegEx.test( $comment ) ) {
 					var placeholders = [];
 
@@ -258,7 +260,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 				// Submit comment form on Cmd/Ctrl + Enter.
 				$( '#comment' ).keydown( function( event ) {
-					if ( event.ctrlKey && ( event.keyCode == 10 || event.keyCode == 13 ) ) {
+					if ( event.ctrlKey && ( event.keyCode === 10 || event.keyCode === 13 ) ) {
 						$( 'input[name="submit"]' ).click();
 					}
 				});
@@ -338,7 +340,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						}
 						subst = prefix + sel + suffix;
 						if ( 'undefined' !== typeof document.selection) {
-							var range = document.selection.createRange().text = subst;
+							document.selection.createRange().text = subst;
 							textarea.caretPos -= suffix.length;
 						} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
 							textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
@@ -352,7 +354,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					}
 
 					addButton( 'code-php', 'PHP Code block: {{{#!php example }}}', '#code', function() {
-						encloseSelection( "{{{#!php\n<?php\n", "\n}}}\n" );
+						encloseSelection( "{{{#!php\n<?php\n", "\n}}}\n" ); // jshint ignore:line
 					});
 				}
 				$( 'textarea.wikitext' ).each( extendWikiFormattingToolbar );
@@ -360,7 +362,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 			// Force 'Attachments' and 'Modify Ticket' to be shown.
 			$('#attachments').removeClass('collapsed');
-			$("#modify").parent().removeClass('collapsed');
+			$('#modify').parent().removeClass('collapsed');
 
 			// Push live comment previews above 'Modify Ticket'.
 			$('#ticketchange').insertAfter('#trac-add-comment');
@@ -417,10 +419,28 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					duplicateTicket = parseInt( $('#action_dupe').val() );
 
 				if ( 'duplicate' === action && ( ! duplicateTicket || currentTicket === duplicateTicket ) ) {
-					$('#action_dupe').val('')
+					$('#action_dupe').val('');
 					return false;
 				}
 			});
+
+			// capital_P_dangit()
+			$( '#propertyform' ).on( 'submit', function() {
+				var $summary     = $( '#field-summary' ),
+					$description = $( '#field-description' ),
+					$comment     = $( '#comment' );
+
+				// Simple replacement for ticket summary.
+				$summary.val( $summary.val().replace( 'Wordpress', 'WordPress' ) );
+
+				// Use the more judicious replacement for ticket description and comments.
+				$.each( [ ' Wordpress', '&#8216;Wordpress', '&#8220;Wordpress', '>Wordpress', '(Wordpress' ], function( index, value ) {
+					var replacement = value.replace( 'Wordpress', 'WordPress' );
+
+					$description.val( $description.val().replace( value, replacement ) );
+					$comment.val( $comment.val().replace( value, replacement ) );
+				} );
+			} );
 
 			// Add a 'Show only commits/attachments' view option to tickets.
 			$('label[for="trac-comments-only-toggle"]').text('Show only comment text');
@@ -513,24 +533,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			}
 		},
 
-		// capital_P_dangit()
-		$( '#propertyform' ).on( 'submit', function() {
-			var $summary     = $( '#field-summary' ),
-				$description = $( '#field-description' ),
-				$comment     = $( '#comment' );
-
-			// Simple replacement for ticket summary.
-			$summary.val( $summary.val().replace( 'Wordpress', 'WordPress' ) );
-
-			// Use the more judicious replacement for ticket description and comments.
-			$.each( [ ' Wordpress', '&#8216;Wordpress', '&#8220;Wordpress', '>Wordpress', '(Wordpress' ], function( index, value ) {
-				var replacement = value.replace( 'Wordpress', 'WordPress' );
-
-				$description.val( $description.val().replace( value, replacement ) );
-				$comment.val( $comment.val().replace( value, replacement ) );
-			} );
-		} );
-
 		// If we're not dealing with a trusted bug gardener:
 		nonGardeners: function() {
 			var version,
@@ -545,7 +547,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					$('#field-component').parent().add( $('#field-component').parent().prev() ).wrapAll( '<tr />' ).insertBefore( $( '#field-focuses' ).parents( 'tr' ) );
 				}
 				$('label[for="field-focuses"]').html( 'Contributor<br/>Focuses:' );
-				$('#field-version').after( "<br/><em>If you're filing a bug against trunk, choose <a href='#' class='set-trunk'>'trunk'</a>. Otherwise, choose the earliest affected version you tested.</em>" );
+				$('#field-version').after( '<br/><em>If you\'re filing a bug against trunk, choose <a href="#" class="set-trunk">\'trunk\'</a>. Otherwise, choose the earliest affected version you tested.</em>' );
 				$('.set-trunk').on( 'click', function() {
 					$('#field-version').val('trunk');
 					return false;
@@ -569,10 +571,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			if ( version ) {
 				elements.version.find('option').each( function() {
 					var value = $(this).val();
-					if ( version === value )
+
+					if ( version === value ) {
 						remove = false;
-					else if ( remove && value )
+					} else if ( remove && value ) {
 						$(this).remove();
+					}
 				});
 			}
 		},
@@ -590,7 +594,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			popup.appendTo( '#main' );
 			$( '.open-ticket-report' ).click( function( event ) {
 				if ( popup.children().length === 0 ) {
-					var jqxhr = $.ajax({
+					$.ajax({
 						url: 'https://make.wordpress.org/core/reports/?from-trac',
 						xhrFields: { withCredentials: true }
 					}).done( function( data ) {
@@ -641,7 +645,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				if ( url.length > 1500 ) {
 					url = href + '?' + $.param({
 						summary: $('#field-summary').val(),
-						description: "(Couldn't copy over your description as it was too long. Please paste it here. Your old window was not closed.)"
+						description: '(Couldn\'t copy over your description as it was too long. Please paste it here. Your old window was not closed.)'
 					});
 					window.open( url );
 				} else {
@@ -654,7 +658,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		autocomplete: (function() {
 			var ticketParticipants = [],
 				nonTicketParticipants = [],
-				attachments = [],
 				settings = {};
 
 			return {
@@ -764,7 +767,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					// Exclude current user.
 					if ( 'undefined' !== wpTrac.currentUser ) {
 						users = $.grep( users, function( user ) {
-							return user != wpTrac.currentUser;
+							return user !== wpTrac.currentUser;
 						});
 					}
 
@@ -799,7 +802,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					// Exclude current user.
 					if ( 'undefined' !== wpTrac.currentUser ) {
 						users = $.grep( users, function( user ) {
-							return user != wpTrac.currentUser;
+							return user !== wpTrac.currentUser;
 						});
 					}
 
@@ -922,8 +925,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				// Populates the keywords and dropdown.
 				populate : function() {
 					// For repopulation. Starting over.
-					if ( elements.bin.find('span').length )
+					if ( elements.bin.find('span').length ) {
 						elements.bin.empty();
+					}
 
 					// Replace commas, collapse spaces, trim, then split by space.
 					keywords = $.trim( elements.hiddenEl.val().replace(/,/g, ' ').replace(/ +/g, ' ') ).split(' ');
@@ -935,8 +939,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					if ( 1 !== keywords.length || keywords[0] !== '' ) {
 						$.each( keywords, function( k, v ) {
 							var html = $('<span />').text(v).attr('data-keyword', v).prepend('<a class="dashicons dashicons-dismiss" href="#" />');
-							if ( v in coreKeywordList )
+							if ( v in coreKeywordList ) {
 								html.attr('title', coreKeywordList[v]);
+							}
 							html.appendTo( elements.bin );
 						});
 					}
@@ -948,22 +953,27 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						elements.add = $('#keyword-add');
 					}
 
-					$.each( coreKeywordList, function( k, v ) {
+					$.each( coreKeywordList, function( k ) {
 						// Don't show special (permission-based) ones.
-						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) )
+						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) ) {
 							return;
+						}
 						elements.add.append( '<option value="' + k + ( -1 !== $.inArray( k, keywords ) ? '" disabled="disabled">* ' : '">' ) + k + '</option>' );
 					});
 				},
 
 				// Add a keyword. Takes a sanitized string.
 				addKeyword : function( keyword ) {
-					if ( ! keyword )
+					if ( ! keyword ) {
 						return;
+					}
+
 					var html, title = '';
+
 					// Don't add it again.
-					if ( -1 !== $.inArray( keyword, keywords ) )
+					if ( -1 !== $.inArray( keyword, keywords ) ) {
 						return;
+					}
 					keywords.push( keyword );
 
 					// Update the dropdown. Core keywords also get a title attribute with their description.
@@ -992,8 +1002,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 					// Add it to the bin, and refresh the hidden input.
 					html = $('<span />').text(keyword).attr('data-keyword', keyword).prepend('<a class="dashicons dashicons-dismiss" href="#" />');
-					if ( title )
+					if ( title ) {
 						html.attr('title', title);
+					}
 					html.appendTo( elements.bin );
 					elements.hiddenEl.val( keywords.join(' ') );
 				},
@@ -1003,37 +1014,44 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					var keyword;
 					if ( typeof object === 'string' ) {
 						keyword = object;
-						object = elements.bin.find('span[data-keyword="' + keyword + '"]');
-						if ( ! object.length )
+						object  = elements.bin.find('span[data-keyword="' + keyword + '"]');
+
+						if ( ! object.length ) {
 							return;
+						}
 					} else {
 						keyword = object.text();
 					}
 
 					keywords = $.grep( keywords, function(v) {
-						return v != keyword;
+						return v !== keyword;
 					});
 
 					// Update the core keyword dropdown.
-					if ( keyword in coreKeywordList )
+					if ( keyword in coreKeywordList ) {
 						elements.add.find('option[value=' + keyword + ']').prop('disabled', false).text( keyword );
+					}
 					elements.hiddenEl.val( keywords.join(' ') );
 					object.remove();
 				},
 
 				// Check on submit that we're not just re-ordering keywords.
 				// Otherwise, Trac flips out and adds a useless 'Keywords changed from X to X' marker.
-				submit : function(e) {
-					if ( keywords.length !== originalKeywords.length )
+				submit : function() {
+					if ( keywords.length !== originalKeywords.length ) {
 						return;
+					}
+
 					var testKeywords = $.grep( keywords, function(v) {
 						return -1 === $.inArray( v, originalKeywords );
 					});
+
 					// If the difference has no length, then restore to the original keyword order.
-					if ( ! testKeywords.length )
+					if ( ! testKeywords.length ) {
 						elements.hiddenEl.val( originalKeywords.join(' ') );
+					}
 				}
-			}
+			};
 		}()),
 
 		focuses: (function() {
@@ -1052,7 +1070,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				if ( $( '#field-owner' ).length === 0 ) {
 					$('label[for="field-focuses"]').parent().remove();
 				}
-				if ( field.parent().attr( 'colspan' ) == 3 ) {
+				if ( field.parent().attr( 'colspan' ) === 3 ) {
 					field.parent().attr( 'id', 'focuses' );
 				} else {
 					field.parent().attr({ colspan: 2, id: 'focuses' });
@@ -1114,7 +1132,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				focus.removeClass( 'active' );
 				var remove = focus.data( 'focus' );
 				focuses = $.grep( focuses, function( value ) {
-					return value != remove;
+					return value !== remove;
 				} );
 				updateField();
 			}
@@ -1137,11 +1155,14 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			}
 
 			function submit() {
-				if ( focuses.length !== originalFocuses.length )
+				if ( focuses.length !== originalFocuses.length ) {
 					return;
+				}
+
 				var testFocuses = $.grep( focuses, function(v) {
 					return -1 === $.inArray( v, originalFocuses );
 				});
+
 				// If the difference has no length, then restore to the original order.
 				if ( ! testFocuses.length ) {
 					field.val( originalFocuses.join( ', ' ) );
@@ -1154,7 +1175,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		}()),
 
 		notifications: (function() {
-			var notifications, endpoint, _ticket, _nonce;
+			var notifications, endpoint, star, _ticket, _nonce;
 
 			function init( settings ) {
 				$( hide_cc_field );
@@ -1246,14 +1267,16 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 				$('#ticket.trac-content > h2').prepend( '<div class="ticket-star dashicons dashicons-star-' +
 					( notifications.hasClass('subscribed') ? 'filled' : 'empty' ) + '" title="Watch/unwatch this ticket"></div>' );
+
 				star = $('.ticket-star');
+
 				star.click( function() {
 					$(this).hasClass('dashicons-star-empty') ? subscribe() : unsubscribe();
 				});
 				$('.grid-toggle').on( 'click', 'a', function() {
 					var names = $(this).hasClass('names');
 					notifications.toggleClass('show-usernames', names );
-					document.cookie="wp_trac_ngrid=" + (names ? 1 : 0) + ";max-age=31557600;domain=.wordpress.org;path=/";
+					document.cookie = 'wp_trac_ngrid=' + (names ? 1 : 0) + ';max-age=31557600;domain=.wordpress.org;path=/';
 					return false;
 				});
 			}

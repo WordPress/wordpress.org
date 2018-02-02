@@ -1,13 +1,11 @@
 (function($){
-	var base = window.location.hostname,
-		ajaxurl = 'https://api.wordpress.org/core/trac-search/1.0/';
+	var ajaxurl = 'https://api.wordpress.org/core/trac-search/1.0/';
 
 	$('div#content.ticket input#field-summary').change( function() {
-		var keywords,
-			related,
-			el = $(this);
+		var related,
+			el = $(this),
+			keywords = el.val();
 
-		var keywords = el.val();
 		if ( ! keywords.length ) {
 			return;
 		}
@@ -29,7 +27,6 @@
 					list = $('<ul />').appendTo( related );
 
 					list.css({
-						margin: '4px',
 						'list-style': 'none',
 						margin: '4px 0',
 						padding: 0
@@ -51,6 +48,6 @@
 			},
 			dataType: 'json'
 		});
-	})
+	});
 })(jQuery);
 
