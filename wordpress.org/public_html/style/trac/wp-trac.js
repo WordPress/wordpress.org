@@ -513,6 +513,24 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			}
 		},
 
+		// capital_P_dangit()
+		$( '#propertyform' ).on( 'submit', function() {
+			var $summary     = $( '#field-summary' ),
+				$description = $( '#field-description' ),
+				$comment     = $( '#comment' );
+
+			// Simple replacement for ticket summary.
+			$summary.val( $summary.val().replace( 'Wordpress', 'WordPress' ) );
+
+			// Use the more judicious replacement for ticket description and comments.
+			$.each( [ ' Wordpress', '&#8216;Wordpress', '&#8220;Wordpress', '>Wordpress', '(Wordpress' ], function( index, value ) {
+				var replacement = value.replace( 'Wordpress', 'WordPress' );
+
+				$description.val( $description.val().replace( value, replacement ) );
+				$comment.val( $comment.val().replace( value, replacement ) );
+			} );
+		} );
+
 		// If we're not dealing with a trusted bug gardener:
 		nonGardeners: function() {
 			var version,
