@@ -19,8 +19,7 @@ echo Display::get_display_css(); ?>
 			$rev_id = (int) ltrim( $revision->post_name, 'r' );
 		?>
 			<tr>
-				<th><a href="<?php echo esc_url( sprintf( 'https://core.trac.wordpress.org/changeset/%d', $rev_id ) ); ?>"><?php echo (int) $rev_id; ?></a></th>
-				<th colspan="<?php echo (int) $total_cols - 1; ?>"><?php echo wp_kses_post( apply_filters( 'the_title', $revision->post_title ) ); ?></th>
+				<th colspan="<?php echo (int) $total_cols; ?>"><a href="<?php echo esc_url( sprintf( 'https://core.trac.wordpress.org/changeset/%d', $rev_id ) ); ?>">r<?php echo (int) $rev_id; ?></a>: <?php echo wp_kses_post( apply_filters( 'the_title', $revision->post_title ) ); ?></th>
 			</tr>
 			<?php
 			$query_args   = array(
