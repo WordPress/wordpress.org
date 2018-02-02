@@ -172,16 +172,6 @@ class Plugin_I18n {
 	public function get_gp_originals( $slug, $branch, $key, $str ) {
 		global $wpdb;
 
-		// Try to get a single original with the whole content first (title, etc), if passed, or get them all otherwise.
-		if ( ! empty( $key ) && ! empty( $str ) ) {
-			$originals = $this->search_gp_original( $slug, $branch, $key, $str );
-
-			// Do not cache this as originals, search_gp_original() does its own caching.
-			if ( ! empty( $originals ) ) {
-				return array( $originals );
-			}
-		}
-
 		$cache_suffix = 'originals';
 
 		if ( false !== ( $originals = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
@@ -295,6 +285,39 @@ class Plugin_I18n {
 	}
 
 	/**
+	 * Searches GlotPress "originals" for the passed string.
+	 *
+	 * @param string $slug               Plugin slug
+	 * @param string $branch             dev|stable
+	 * @param array  $originals          List of IDs of the original strings.
+	 * @param int    $translation_set_id Unique ID for translation set.
+	 * @return array Plugin translations
+	 */
+	public function get_gp_translations( $slug, $branch, $originals, $translation_set_id ) {
+		global $wpdb;
+
+		$cache_suffix = "translations:{$translation_set_id}";
+		$translations = $this->cache_get( $slug, $branch, $cache_suffix );
+
+		if ( false === $translations ) {
+			$translations = [];
+
+			$raw_translations = $wpdb->get_results( $wpdb->prepare(
+				'SELECT original_id, translation_0 FROM ' . GLOTPRESS_TABLE_PREFIX . 'translations WHERE original_id IN (' . implode( ', ', wp_list_pluck( $originals, 'id' ) ) . ') AND translation_set_id = %d AND status = %s',
+				$translation_set_id, 'current'
+			) );
+
+			foreach ( $raw_translations as $translation ) {
+				$translations[ $translation->original_id ] = $translation->translation_0;
+			}
+
+			$this->cache_set( $slug, $branch, $translations, $cache_suffix );
+		}
+
+		return $translations;
+	}
+
+	/**
 	 * Somewhat emulated equivalent of __() for content translation drawn directly from the GlotPress DB.
 	 *
 	 * @param string $key     Unique key, used for caching
@@ -375,15 +398,7 @@ class Plugin_I18n {
 			return $content;
 		}
 
-		$raw_translations = $wpdb->get_results( $wpdb->prepare(
-			'SELECT original_id, translation_0 FROM ' . GLOTPRESS_TABLE_PREFIX . 'translations WHERE original_id IN (' . implode( ', ', wp_list_pluck( $originals, 'id' ) ) . ') AND translation_set_id = %d AND status = %s',
-			$translation_set_id, 'current'
-		) );
-
-		$translations = [];
-		foreach ( $raw_translations as $translation ) {
-			$translations[ $translation->original_id ] = $translation->translation_0;
-		}
+		$translations = $this->get_gp_translations( $slug, $branch, $originals, $translation_set_id );
 
 		foreach ( $originals as $original ) {
 			if ( ! empty( $original->id ) && array_key_exists( $original->id, $translations ) ) {
