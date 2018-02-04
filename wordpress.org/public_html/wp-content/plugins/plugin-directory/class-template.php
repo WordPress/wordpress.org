@@ -357,10 +357,6 @@ class Template {
 	public static function get_plugin_icon( $post = null, $output = 'raw' ) {
 		$plugin = get_post( $post );
 
-		if ( in_array( $plugin->post_status, [ 'disabled', 'closed' ], true ) ) {
-			return false;
-		}
-
 		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true ) ?: array();
 		$icon      = $icon_1x = $icon_2x = $svg = $generated = false;
 
