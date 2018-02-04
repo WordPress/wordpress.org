@@ -139,16 +139,52 @@ class Status_Transitions {
 
 			case 'publish':
 				$this->clean_closed_date( $post->ID );
+				$this->set_translation_status( $post, 'active' );
 				break;
 
 			case 'disabled':
 			case 'closed':
 				$this->save_close_reason( $post->ID );
+				$this->set_translation_status( $post, 'inactive' );
 				break;
 		}
 
 		// Record the time a plugin was transitioned into a specific status.
 		update_post_meta( $post->ID, "_{$new_status}", strtotime( $post->post_modified_gmt ) );
+	}
+
+	/**
+	 * Updates project status of the plugin on translate.wordpress.org.
+	 *
+	 * @param \WP_Post $post Post object.
+	 * @param string   $status Project status. Accepts 'active' or 'inactive'.
+	 */
+	public function set_translation_status( $post, $status ) {
+		if ( ! defined( 'TRANSLATE_API_INTERNAL_BEARER_TOKEN' ) ) {
+			return;
+		}
+
+		wp_remote_post( 'https://translate.wordpress.org/wp-json/translate/v1/jobs', array(
+			'body'       => json_encode(
+				array(
+					'timestamp'  => time() + 2 * 60,
+					'recurrence' => 'once',
+					'hook'       => 'wporg_translate_update_plugin_status',
+					'args'       => array(
+						array(
+							'plugin' => $post->post_name,
+							'status' => $status,
+						),
+					),
+				)
+			),
+			'headers'    => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'Bearer ' . TRANSLATE_API_INTERNAL_BEARER_TOKEN,
+			),
+			'blocking'   => false,
+			'user-agent' => 'WordPress.org Plugin Status',
+		) );
 	}
 
 	/**

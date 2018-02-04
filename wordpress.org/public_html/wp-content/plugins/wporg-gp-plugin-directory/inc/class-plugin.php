@@ -2,6 +2,7 @@
 
 namespace WordPressdotorg\GlotPress\Plugin_Directory;
 
+use GP;
 use WP_CLI;
 
 class Plugin {
@@ -45,6 +46,8 @@ class Plugin {
 	 * Initializes the plugin.
 	 */
 	public function plugins_loaded() {
+		add_action( 'wporg_translate_update_plugin_status', array( $this, 'update_project_status' ) );
+
 		$cache_purger = new Cache_Purge\Cache_Purger();
 		$cache_purger->register_events();
 
@@ -90,6 +93,34 @@ class Plugin {
 		$path = '/' . trim( $path, '/' ) . '/';
 		if ( false === strpos( $path, '/' . self::GP_MASTER_PROJECT . '/' ) ) {
 			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Updates the status of a plugin.
+	 *
+	 * Gets triggered by the cron API and the hook `wporg_translate_update_plugin_status`.
+	 *
+	 * @param array $args Arguments from the job. Should include the slug and the status
+	 *                    of the plugin.
+	 * @return bool False on failure, true on success.
+	 */
+	public function update_project_status( $args ) {
+		$project = GP::$project->by_path( self::GP_MASTER_PROJECT . '/' . $args['plugin'] . '/' );
+		if ( ! $project ) {
+			return false;
+		}
+
+		if ( 'active' === $args['status'] && ! $project->active ) {
+			$project->save( [
+				'active' => 1,
+			] );
+		} elseif ( 'inactive' === $args['status'] && $project->active ) {
+			$project->save( [
+				'active' => 0,
+			] );
 		}
 
 		return true;
