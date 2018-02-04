@@ -121,7 +121,8 @@ td.no-right-border {
 	padding: 6px 12px;
 }
 #locale-header ul li.download-button a {
-	font-size: 1.1em;
+	font-size: 1.6em;
+	line-height: 1.5;
 	color: white;
 	text-decoration: none;
 }
