@@ -54,7 +54,7 @@ class Set_Plugin_Project extends WP_CLI_Command {
 
 			if ( ! $plugin_project ) {
 				/*
-				 * That's usally the case for the initial commit.
+				 * That's usually the case for the initial commit.
 				 * Provide a mockup which contains the necessary plugin details.
 				 */
 				$plugin_details = new stdClass();
