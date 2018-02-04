@@ -48,6 +48,7 @@ class Set_Plugin_Project extends WP_CLI_Command {
 
 		// Get plugin details from the API.
 		$plugin_details = $this->get_plugin_details( $plugin_slug );
+
 		if ( ! $plugin_details ) {
 			WP_CLI::warning( "The plugin API couldn't be reached." );
 
@@ -63,8 +64,8 @@ class Set_Plugin_Project extends WP_CLI_Command {
 			} else {
 				// Fill details with old data in case the API is down.
 				$plugin_details = new stdClass();
-				$plugin_details->name = $plugin_project->name;
-				$plugin_details->short_description = $plugin_project->description;
+				$plugin_details->name = $plugin_project->name ?: $plugin_slug;
+				$plugin_details->short_description = str_replace( "<br><br><a href='https://wordpress.org/plugins/{$plugin_slug}'>WordPress.org Plugin Page</a>", '', $plugin_project->description );
 				$plugin_details->stable_tag = 'trunk';
 			}
 		}
@@ -281,6 +282,10 @@ class Set_Plugin_Project extends WP_CLI_Command {
 		$json = @file_get_contents( "https://api.wordpress.org/plugins/info/1.0/{$slug}.json?fields=stable_tag,short_description", false, $http_context );
 
 		$details = $json && '{' == $json[0] ? json_decode( $json ) : null;
+
+		if ( isset( $details->error ) ) {
+			return null;
+		}
 
 		return $details;
 	}
