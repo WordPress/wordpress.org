@@ -44,19 +44,29 @@ class Set_Plugin_Project extends WP_CLI_Command {
 			WP_CLI::error( sprintf( "The master project '%s' couldn't be found.", Plugin::GP_MASTER_PROJECT ), 2 );
 		}
 
+		$plugin_project = GP::$project->by_path( $plugin_project_path );
+
 		// Get plugin details from the API.
 		$plugin_details = $this->get_plugin_details( $plugin_slug );
 		if ( ! $plugin_details ) {
 			WP_CLI::warning( "The plugin API couldn't be reached." );
 
-			/*
-			 * That's usally the case for the initial commit.
-			 * Provide a mockup which contains the necessary plugin details.
-			 */
-			$plugin_details = new stdClass();
-			$plugin_details->name = $plugin_slug;
-			$plugin_details->short_description = '';
-			$plugin_details->stable_tag = 'trunk';
+			if ( ! $plugin_project ) {
+				/*
+				 * That's usally the case for the initial commit.
+				 * Provide a mockup which contains the necessary plugin details.
+				 */
+				$plugin_details = new stdClass();
+				$plugin_details->name = $plugin_slug;
+				$plugin_details->short_description = '';
+				$plugin_details->stable_tag = 'trunk';
+			} else {
+				// Fill details with old data in case the API is down.
+				$plugin_details = new stdClass();
+				$plugin_details->name = $plugin_project->name;
+				$plugin_details->short_description = $plugin_project->description;
+				$plugin_details->stable_tag = 'trunk';
+			}
 		}
 
 		// Get or create the plugin GP project.
@@ -67,8 +77,6 @@ class Set_Plugin_Project extends WP_CLI_Command {
 			'description'       => $plugin_details->short_description . "<br><br><a href='https://wordpress.org/plugins/{$plugin_slug}'>WordPress.org Plugin Page</a>",
 			'active'            => 1,
 		);
-
-		$plugin_project = GP::$project->by_path( $plugin_project_path );
 
 		// Is this a new or an existing project?
 		$new_project_flag = true;
