@@ -1559,6 +1559,15 @@ span.favorite.favorited {
 		margin: 0 auto;
 		width: 100%;
 	}
+
+	.logged-in .wp-full-overlay,
+	.logged-in .wp-full-overlay-sidebar {
+		margin-top: 46px;
+	}
+
+	.logged-in .wp-full-overlay-sidebar {
+		height: calc( 100% - 46px);
+	}
 }
 
 @media only screen and (max-width: 650px) {
@@ -1637,6 +1646,10 @@ span.favorite.favorited {
 	.theme-wrap .theme-about .theme-info > div:not(:last-of-type),
 	.theme-wrap .theme-about .theme-meta > div:not(:last-of-type) {
 		margin-bottom: 30px;
+	}
+
+	.theme-install-overlay .wp-full-overlay-header .theme-install {
+		margin: 2px;
 	}
 
 	.theme-navigation .close:before {
