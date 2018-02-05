@@ -55,11 +55,11 @@ function wporg_themes_scripts() {
 	}
 
 	$rtl = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-themes', get_stylesheet_directory_uri() . "/css/style{$rtl}.css", [ 'open-sans', 'dashicons' ], 16 );
+	wp_enqueue_style( 'wporg-themes', get_stylesheet_directory_uri() . "/css/style{$rtl}.css", [ 'open-sans', 'dashicons' ], 17 );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), 15, true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), 16, true );
 
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
