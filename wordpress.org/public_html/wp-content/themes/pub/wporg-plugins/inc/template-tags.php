@@ -219,9 +219,18 @@ function get_plugin_status_notice( $post = null ) {
 
 		case 'closed':
 			$closed_date = get_post_meta( get_the_ID(), 'plugin_closed_date', true );
-			if ( ! empty( $closed_date ) ) {
-				/* translators: Closing date. */
+
+			if ( $closed_date ) {
+				/* translators: %s: plugin closing date */
 				$message = sprintf( __( 'This plugin was closed on %s and is no longer available for download.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
+
+				$days_passed = (int) ( ( current_time( 'timestamp' ) - mysql2date( 'U', $closed_date ) ) / DAY_IN_SECONDS );
+
+				// Display close reason if more than 60 days have passed.
+				if ( $days_passed > 60 ) {
+					/* translators: %s: plugin close/disable reason */
+					$message .= ' ' . sprintf( __( 'Reason: %s.', 'wporg-plugins' ), Template::get_close_reason( $post ) );
+				}
 			} else {
 				$message = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
 			}
