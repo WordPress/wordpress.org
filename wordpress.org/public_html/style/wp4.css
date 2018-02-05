@@ -1855,6 +1855,11 @@ form#profile-form table td, form#profile-form table th {
 	color: #999;
 }
 
+.google-custom-search {
+	margin: 0 14px;
+	max-width: 932px;
+}
+
 #sitesearch {
 	margin-top: 10px;
 	margin-bottom: 22px;
@@ -2410,5 +2415,4 @@ body.wporg-responsive .col-2 {
 .notification-danger {
 	background: #f2dede;
 }
-
 /*# sourceMappingURL=wp4.css.map */
