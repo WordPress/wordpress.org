@@ -444,12 +444,6 @@ class Themes_API {
 			$this->request->fields = array();
 		}
 
-		// DEBUG
-		if ( function_exists( 'slack_dm' ) && 1 === $this->result->found_posts ) {
-			slack_dm( print_r( $this->fields, 1 ), 'obenland' );
-			slack_dm( print_r( $wp_query, 1 ), 'obenland' );
-		}
-
 		// Basic information about the request.
 		$this->response = (object) array(
 			'info'   => array(),
