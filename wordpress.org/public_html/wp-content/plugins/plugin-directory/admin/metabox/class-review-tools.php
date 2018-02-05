@@ -125,7 +125,7 @@ class Review_Tools {
 		}
 		echo '</ul>';
 
-		if ( in_array( $post->post_status, [ 'draft', 'pending' ], true ) ) {
+		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 			$slug_restricted = [];
 			$slug_reserved   = [];
 
