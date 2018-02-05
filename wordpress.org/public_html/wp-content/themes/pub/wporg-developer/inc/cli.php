@@ -42,6 +42,9 @@ class DevHub_CLI {
 			'excerpt',
 			'revisions',
 			'title',
+
+			// Needed for manual inspection/modification of the post's parent.
+			'page-attributes',
 		);
 		register_post_type( 'command', array(
 			'has_archive' => 'cli/commands',
@@ -73,7 +76,7 @@ class DevHub_CLI {
 	}
 
 	public static function action_pre_get_posts( $query ) {
-		if ( $query->is_main_query() && $query->is_post_type_archive( 'command' ) ) {
+		if ( ! is_admin() && $query->is_main_query() && $query->is_post_type_archive( 'command' ) ) {
 			$query->set( 'post_parent', 0 );
 			$query->set( 'orderby', 'title' );
 			$query->set( 'order', 'ASC' );
@@ -100,7 +103,7 @@ class DevHub_CLI {
 		) );
 		$existing = array();
 		foreach( $q->posts as $post ) {
-			$cmd_path = rtrim( str_replace( home_url( 'cli/commands/' ), '', get_permalink( $post->ID ) ), '/' );
+			$cmd_path = self::get_cmd_path( $post->ID );
 			$existing[ $cmd_path ] = array(
 				'post_id'   => $post->ID,
 				'cmd_path'  => $cmd_path,
@@ -144,7 +147,7 @@ class DevHub_CLI {
 		}
 		$post = self::create_post_from_manifest_doc( $doc, $post_parent );
 		if ( $post ) {
-			$cmd_path = rtrim( str_replace( home_url( 'cli/commands/' ), '', get_permalink( $post->ID ) ), '/' );
+			$cmd_path = self::get_cmd_path( $post->ID );
 			if ( ! empty( $doc['repo_url'] ) ) {
 				update_post_meta( $post->ID, 'repo_url', esc_url_raw( $doc['repo_url'] ) );
 			}
@@ -473,6 +476,34 @@ class DevHub_CLI {
 	private static function get_tags( $tag, $content ) {
 		preg_match_all( "/(<{$tag}>)(.*)(<\/{$tag}>)/", $content, $matches, PREG_SET_ORDER );
 		return $matches;
+	}
+
+	/**
+	 * Gets a normalized version of the command path from the post permalink.
+	 *
+	 * This normalization is needed because CPTs share the slug namespace with
+	 * other CPTs, causing unexpected conflicts that result in changed URLs like
+	 * "command-2".
+	 *
+	 * @see https://github.com/wp-cli/handbook/issues/202
+	 *
+	 * @param int $post_id Post ID to get the normalized path for.
+	 *
+	 * @return string Normalized command path.
+	 */
+	private static function get_cmd_path( $post_id ) {
+		$cmd_path = rtrim( str_replace( home_url( 'cli/commands/' ), '', get_permalink( $post_id ) ), '/' );
+		$parts = explode( '/', $cmd_path );
+		$cleaned_parts = array();
+		foreach ( $parts as $part ) {
+			$matches = null;
+			$result = preg_match( '/^(?<cmd>.*)(?<suffix>-[0-9]+)$/', $part, $matches );
+			if ( 1 === $result ) {
+				$part = $matches['cmd'];
+			}
+			$cleaned_parts[] = $part;
+		}
+		return implode( '/', $cleaned_parts );
 	}
 
 }
