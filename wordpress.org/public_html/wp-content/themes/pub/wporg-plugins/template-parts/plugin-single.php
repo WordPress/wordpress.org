@@ -78,18 +78,16 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			$plugin_sections = Template::get_plugin_sections();
 
 			foreach ( array( 'description', 'screenshots', 'installation', 'faq', 'reviews', 'developers', 'changelog' ) as $section_slug ) :
-				if ( ! isset( $content[ $section_slug ] ) ) {
-					continue;
-				}
-
 				$section_content = '';
 
 				if ( 'description' === $section_slug && $is_closed ) {
-					// Don't show the description for closed plugins.
+					// Don't show the description for closed plugins, show a notice instead.
 					$section_content = get_closed_plugin_notice();
 
 				} elseif ( ! in_array( $section_slug, [ 'screenshots', 'installation', 'faq', 'changelog' ], true ) || ! $is_closed ) {
-					$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
+					if ( isset( $content[ $section_slug ] ) ) {
+						$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
+					}
 				}
 
 				if ( empty( $section_content ) ) {
