@@ -59,6 +59,9 @@ fieldset {
 	color: #fff;
 	font-family: 'Open Sans', sans serif;
 }
+.security #headline a {
+	color: #555;
+}
 #wporg-header ul :link, #wporg-header ul :visited,
 #wporg-header ul :link:hover, #wporg-header ul :visited:hover,
 #headline :link:hover, #headline :visited:hover,
@@ -166,12 +169,19 @@ h3.change a {
 	color: #fff;
 	border-right: 0;
 }
+.security #metanav.nav li {
+	color: #444;
+}
 #metanav.nav li.last {
 	padding-right: 0;
 }
 #metanav.nav a,
 #metanav.nav a:visited {
 	color: rgba(255, 255, 255, 0.8);
+}
+.security #metanav.nav a,
+.security #metanav.nav a:visited {
+	color: #21759b;
 }
 #metanav.nav a:hover,
 #metanav.nav a:active {
