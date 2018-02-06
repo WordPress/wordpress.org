@@ -750,6 +750,12 @@ function wporg_themes_get_themes_for_query() {
 
 	unset( $request['fields'], $request['locale'] );
 
+	// DEBUG
+	if ( function_exists( 'slack_dm' ) && isset( $request['browse'] ) && 'featured' === $request['browse'] && 1 === $api_result->info['results'] ) {
+		slack_dm( print_r( $GLOBALS['wp_query'], 1 ), 'obenland' );
+		slack_dm( print_r( $api_result, 1 ), 'obenland' );
+	}
+
 	return $result = array(
 		'themes'  => $api_result->themes,
 		'request' => $request,

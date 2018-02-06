@@ -445,7 +445,7 @@ class Themes_API {
 		}
 
 		// DEBUG
-		if ( function_exists( 'slack_dm' ) && 'featured' === $wp_query->query_vars['browse'] && 1 === $this->result->found_posts ) {
+		if ( function_exists( 'slack_dm' ) && isset( $wp_query->query_vars['browse'] ) && 'featured' === $wp_query->query_vars['browse'] && 1 === $this->result->found_posts ) {
 			slack_dm( print_r( $this->request, 1 ), 'obenland' );
 			slack_dm( print_r( $wp_query, 1 ), 'obenland' );
 		}
