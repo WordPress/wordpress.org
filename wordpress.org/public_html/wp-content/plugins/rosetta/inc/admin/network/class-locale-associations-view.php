@@ -134,6 +134,7 @@ class Locale_Associations_View implements Admin_Page_View {
 					<th><?php _e( 'Locale', 'rosetta' ); ?></th>
 					<th><?php _e( 'Subdomain', 'rosetta' ); ?></th>
 					<th><?php _e( 'Sites', 'rosetta' ); ?></th>
+					<th><?php _e( 'Latest Release', 'rosetta' ); ?></th>
 					<th>&mdash;</th>
 				</tr>
 			</thead>
@@ -160,9 +161,12 @@ class Locale_Associations_View implements Admin_Page_View {
 									);
 								}
 								echo '</ul>';
+							} else {
+								echo '&mdash;';
 							}
 							?>
 						</td>
+						<td><?php echo esc_html( $association->latest_release ?: '&mdash;' ); ?></td>
 						<td>
 							<form action="" method="post">
 								<?php wp_nonce_field( 'delete-association-' . $association->locale_id ); ?>
