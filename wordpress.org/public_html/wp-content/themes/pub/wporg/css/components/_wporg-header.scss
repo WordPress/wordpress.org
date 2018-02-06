@@ -217,6 +217,7 @@
 
 	@include breakpoint( $sm ) {
 		height: 120px;
+		overflow: hidden;
 		text-align: inherit;
 
 		h1 {
