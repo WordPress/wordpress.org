@@ -296,21 +296,19 @@ div.success p {
 #searchform #searchbox,
 #searchform input#s {
 	box-sizing: content-box;
-	color: #AAAAAA;
-	float: left;
-	margin-right: 6px;
-	background: white;
 	border: 1px solid #ccc;
-	padding: 5px 6px;
-	margin-right: 3px;
 	-webkit-box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1);
 	-moz-box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1);
 	box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1);
 	border-radius: 2px;
-	vertical-align: middle;
 	height: 15px;
-	line-height: 1;
-	width: 130px;
+	padding: 5px 6px;
+	width: 140px;
+	-webkit-appearance: textfield;
+}
+
+#searchbox::placeholder {
+	font-size: 10px;
 }
 
 #searchform #searchbox,
