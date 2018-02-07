@@ -35,6 +35,9 @@ class Performance_Optimizations {
 
 		// REST API.
 		add_filter( 'rest_endpoints', array( $this, 'disable_rest_api_users_endpoint' ) );
+
+		// Disable post meta key lookup, see https://core.trac.wordpress.org/ticket/33885.
+		add_filter( 'postmeta_form_keys', '__return_empty_array' );
 	}
 
 	/**
