@@ -232,10 +232,12 @@ class Make_Core_Trac_Components {
 .compact-components .component-info h3 { margin: 15px 0 10px; }
 .trac-summary th, .trac-summary td { padding: 4px 8px; }
 .trac-summary th { font-weight: bold; text-align: right }
+.trac-summary tbody th { border-bottom: 1px solid #eee; border-right: 1px solid #eee; }
+.trac-summary tbody tr:last-child th { border-bottom: none; }
 .trac-summary th.title { font-weight: normal; text-align: left; font-size: 14px }
 .trac-summary th a { font-weight: bold }
 .trac-summary th.title a { color: #000; }
-.trac-summary .count { text-align: right; min-width: 3em }
+.trac-summary .count { text-align: right; border-right: none; width: auto; }
 .trac-summary .zero { color: #ddd }
 #main ul.maintainers, #main ul.followers { list-style: none; padding: 0; margin: 0 }
 ul.maintainers li, ul.followers li { display: inline-block; line-height: 36px; margin-right: 20px; margin-bottom: 10px }
@@ -243,7 +245,7 @@ ul.maintainers img, ul.followers img { float: left; margin-right: 10px; }
 #main ul.ticket-list { list-style: none; margin: 0; padding: 0 }
 ul.ticket-list li { margin-bottom: 4px }
 ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #eee; padding: 2px 6px; margin-right: 4px }
-.history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: top; line-height: 15px; float: right }
+.history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: middle; line-height: 15px; }
 .history.growing:before { content: "\f142"; color: red }
 .history.shrinking:before { content: "\f140"; color: green }
 td.right { text-align: right; }
@@ -253,8 +255,8 @@ td.maintainers img.avatar { margin-right: 5px; }
 .component-info .create-new-ticket { float: right; margin-top: 25px; }
 </style>
 <script>
-jQuery( document ).ready( function( $ ) {
-	$( '#toggle-compact-components input' ).on( 'change', function() {
+jQuery( function( $ ) {
+	$( '#toggle-compact-components' ).on( 'change', 'input', function() {
 		$( '#main' ).toggleClass( 'compact-components' );
 	});
 });
