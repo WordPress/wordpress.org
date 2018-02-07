@@ -1339,7 +1339,7 @@ h2.toc-heading + h3.toc-heading:target {
 }
 .notice p {
 	font-size: 14px;
-	margin: 0.5em 0;
+	margin: 0.5em 0 !important;
 	padding: 2px;
 }
 .notice.notice-alt {
