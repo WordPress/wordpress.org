@@ -18,6 +18,7 @@ class Make_Core_Trac_Components {
 		add_filter( 'manage_component_posts_columns', array( $this, 'manage_posts_columns' ) );
 		add_action( 'manage_component_posts_custom_column', array( $this, 'manage_posts_custom_column' ), 10, 2 );
 		add_filter( 'wp_nav_menu_objects', array( $this, 'highlight_menu_component_link' ) );
+		add_filter( 'map_meta_cap', [ $this, 'map_meta_cap' ], 10, 4 );
 	}
 
 	function init() {
@@ -209,6 +210,34 @@ class Make_Core_Trac_Components {
 		$menu_items[ $components_item_index ]->classes[] = 'current-menu-item';
 
 		return $menu_items;
+	}
+
+	/**
+	 * Allows component maintainers to edit their components if they are at least a Contributor.
+	 *
+	 * @param array  $required_caps The user's actual capabilities.
+	 * @param string $cap           Capability name.
+	 * @param int    $user_id       The user ID.
+	 * @param array  $context       Context to the cap. Typically the object ID.
+	 * @return array Primitive caps.
+	 */
+	public function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
+		if ( in_array( $cap, [ 'edit_post', 'publish_post', 'edit_others_posts' ], true ) ) {
+			if ( empty( $context[0] ) ) {
+				$context[0] = isset( $_POST['post_ID'] ) ? absint( $_POST['post_ID'] ) : 0;
+			}
+
+			if ( 'component' === get_post_type( $context[0] ) ) {
+				$user_name   = get_user_by( 'id', $user_id )->user_login;
+				$maintainers = array_map( 'trim', explode( ',', get_post_meta( $context[0], '_active_maintainers', true ) ) );
+
+				if ( in_array( $user_name, $maintainers, true ) ) {
+					$required_caps = ['edit_posts'];
+				}
+			}
+		}
+
+		return $required_caps;
 	}
 
 	function wp_enqueue_scripts() {
