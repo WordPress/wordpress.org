@@ -277,7 +277,7 @@ add_filter( 'show_password_fields', '__return_false' );
  * Otherwise, there's nothing to indicate where they can reset it.
  */
 function wcorg_reset_passwords_at_wporg() {
-	wp_redirect( 'https://wordpress.org/support/bb-login.php' );
+	wp_redirect( 'https://login.wordpress.org/lostpassword/' );
 	die();
 }
 add_action( 'login_form_lostpassword', 'wcorg_reset_passwords_at_wporg' );
