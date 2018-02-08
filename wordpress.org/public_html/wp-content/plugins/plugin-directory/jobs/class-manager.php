@@ -18,6 +18,7 @@ class Manager {
 
 		// The actual cron hooks.
 		add_action( 'plugin_directory_meta_sync', array( __NAMESPACE__ . '\Meta_Sync', 'cron_trigger' ) );
+		add_action( 'plugin_directory_plugin_support_resolved', array( __NAMESPACE__ . '\Plugin_Support_Resolved', 'cron_trigger' ) );
 		add_action( 'plugin_directory_svn_sync', array( __NAMESPACE__ . '\SVN_Watcher', 'cron_trigger' ) );
 		add_action( 'plugin_directory_update_api_check', array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger' ) );
 
@@ -28,20 +29,23 @@ class Manager {
 		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
 			add_action( 'pre_option_cron', array( $this, 'register_colon_based_hook_handlers' ), 100 );
 		}
-
 	}
 
 	/**
 	 * Register any cron schedules needed.
 	 */
 	public function register_schedules( $schedules ) {
-		$schedules['every_30s']  = array(
+		$schedules['every_30s']   = array(
 			'interval' => 30,
 			'display'  => 'Every 30 seconds',
 		);
-		$schedules['every_120s'] = array(
+		$schedules['every_120s']  = array(
 			'interval' => 120,
 			'display'  => 'Every 120 seconds',
+		);
+		$schedules['half_hourly'] = array(
+			'interval' => 30 * MINUTE_IN_SECONDS,
+			'display'  => 'Half Hourly',
 		);
 
 		return $schedules;
@@ -224,8 +228,6 @@ class Manager {
 		return false;
 	}
 
-
-
 	/**
 	 * Queue all of our cron tasks.
 	 *
@@ -234,6 +236,9 @@ class Manager {
 	public function register_cron_tasks() {
 		if ( ! wp_next_scheduled( 'plugin_directory_meta_sync' ) ) {
 			wp_schedule_event( time() + 60, 'hourly', 'plugin_directory_meta_sync' );
+		}
+		if ( ! wp_next_scheduled( 'plugin_directory_plugin_support_resolved' ) ) {
+			wp_schedule_event( time() + 60, 'half_hourly', 'plugin_directory_plugin_support_resolved' );
 		}
 		if ( ! wp_next_scheduled( 'plugin_directory_svn_sync' ) ) {
 			wp_schedule_event( time() + 60, 'every_30s', 'plugin_directory_svn_sync' );
