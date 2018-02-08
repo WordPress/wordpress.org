@@ -314,7 +314,7 @@ function track_payment_results( $payment_token, $result, $data ) {
 	 * go un-tested until it was deployed to production. The runtime differences between development and
 	 * production should always be kept as minimal as possible.
 	 */
-	$request_domain = 'production' === WORDCAMP_ENVIRONMENT ? 'stats.wordpress.com' : 'wordcamp.dev';
+	$request_domain = 'production' === WORDCAMP_ENVIRONMENT ? 'stats.wordpress.com' : 'wordcamp.test';
 	$request_url    = sprintf( 'https://%s/g.gif?v=wpcom-no-pv&x_wcorg-tickets=%s', $request_domain, $stat_key );
 	$request_args   = array( 'blocking' => false );
 	$request_result = wp_remote_get( esc_url_raw( $request_url ), $request_args );
