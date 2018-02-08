@@ -172,6 +172,6 @@ class Consistency extends GP_Route {
 	}
 
 	public function _sort_callback( $a, $b ) {
-		return strnatcasecmp( $a->translation, $b->translation );
+		return strnatcmp( $a->translation, $b->translation );
 	}
 }

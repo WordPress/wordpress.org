@@ -84,7 +84,7 @@ if ( $performed_search && ! $results ) {
 				'<li>%s <small>(%s)</small> <a href="#%s">&darr;</a></li>',
 				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) ),
 				1 === $translations_unique_counts[ $translation ] ? $translations_unique_counts[ $translation ] . ' time' : $translations_unique_counts[ $translation ] . ' times',
-				esc_attr( sanitize_title( 't-' . $translation ) )
+				esc_attr( 't-' . md5( $translation ) )
 			);
 		}
 		echo '</ul>';
@@ -122,7 +122,7 @@ if ( $performed_search && ! $results ) {
 					$previous_translation = $result->translation;
 					printf(
 						'<tr id="%s" class="new-translation"><td colspan="2"><strong>%s</strong> <a href="#translations-overview">&uarr;</a></td></tr>',
-						esc_attr( sanitize_title( 't-' . $result->translation ) ),
+						esc_attr( 't-' . md5( $result->translation ) ),
 						esc_translation( $result->translation )
 					);
 				}
