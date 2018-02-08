@@ -88,7 +88,7 @@ class Meta extends \WP_Widget {
 				?>
 				<li>
 					<?php
-					echo esc_html( _n( 'Language:', 'Languages:', 'wporg-plugins', $available_languages_count ) );
+					echo esc_html( _n( 'Language:', 'Languages:', $available_languages_count, 'wporg-plugins' ) );
 
 					echo '<div class="languages">';
 
