@@ -276,3 +276,26 @@ add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
 
 	return $options;
 });
+
+/*
+ * Disable admin pointers
+ */
+function wcorg_disable_admin_pointers() {
+	remove_action( 'admin_enqueue_scripts', array( 'WP_Internal_Pointers', 'enqueue_scripts' ) );
+}
+add_action( 'admin_init', 'wcorg_disable_admin_pointers' );
+
+// Prevent password resets, since they need to be done on w.org
+add_filter( 'allow_password_reset', '__return_false' );
+add_filter( 'show_password_fields', '__return_false' );
+
+/**
+ * Redirect users to WordPress.org to reset their passwords.
+ *
+ * Otherwise, there's nothing to indicate where they can reset it.
+ */
+function wcorg_reset_passwords_at_wporg() {
+	wp_redirect( 'https://wordpress.org/support/bb-login.php' );
+	die();
+}
+add_action( 'login_form_lostpassword', 'wcorg_reset_passwords_at_wporg' );
