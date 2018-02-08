@@ -21,7 +21,7 @@ function log( $error_code, $data = array() ) {
 	$backtrace = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 2 );
 
 	if ( 'cli' === php_sapi_name() ) {
-		$data['command'] = sprintf( '%s %s', $_SERVER['_'], implode( ' ', $_SERVER['argv'] ) );
+		$data['command'] = sprintf( '%s %s', $_SERVER['_'] ?? '', implode( ' ', $_SERVER['argv'] ) );
 	} else {
 		$data['request_url'] = sprintf(
 			'%s://%s%s',
@@ -117,7 +117,7 @@ function redact_keys( & $data ) {
  */
 function get_unique_request_id() {
 	if ( 'cli' === php_sapi_name() ) {
-		$caller = $_SERVER['USER'] . $_SERVER['SSH_CONNECTION'];
+		$caller = $_SERVER['USER'] . ( $_SERVER['SSH_CONNECTION'] ?? '' );
 	} else {
 		$caller = $_SERVER['REMOTE_ADDR'] . $_SERVER['REMOTE_PORT'];
 	}
