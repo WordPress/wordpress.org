@@ -117,7 +117,7 @@ class Role_Manager {
 		$role_object = get_role( $role::get_name() );
 
 		if ( null === $role_object ) {
-			return new WP_Error( 'role_does_not_exists' );
+			return new WP_Error( 'role_does_not_exist' );
 		}
 
 		$old_caps = array_keys( $role_object->capabilities );
