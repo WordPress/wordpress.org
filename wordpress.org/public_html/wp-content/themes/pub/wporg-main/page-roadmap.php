@@ -9,6 +9,10 @@
 
 namespace WordPressdotorg\MainTheme;
 
+if ( false === stristr( home_url(), 'test' ) ) {
+	return get_template_part( 'page' );
+}
+
 get_header();
 the_post();
 
