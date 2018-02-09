@@ -13,7 +13,7 @@ define( 'DB_COLLATE', ''        );
 
 define( 'WP_CONTENT_URL', WP_HOME . '/content'                        );
 define( 'WP_SITEURL',     WP_HOME . '/wordpress'                      );
-define( 'WP_CONTENT_DIR', __DIR__ . 'public_html/content'             );
+define( 'WP_CONTENT_DIR', __DIR__ . '/content'                        );
 //define( 'WPCACHEHOME',    WP_CONTENT_DIR . '/plugins/wp-super-cache/' );
 //define( 'WP_CACHE',       true                                        );
 

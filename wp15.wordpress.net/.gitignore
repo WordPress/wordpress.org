@@ -1,3 +1,11 @@
-# This should mirror svn:ignore. It's just a convenience for those using Git.
+# This should mirror the aggregated `svn:ignore` properties. It's just a convenience for those using Git.
+#
+# Core, plugins, and themes are auto-updated by Core (including major versions), rather than SVN checkouts
+# of trunk (which isn't guaranteed to be stable), or specific tags (which are a hassle to keep updated).
+#
 
 local-config.php
+public_html/content/upgrade
+public_html/content/uploads
+public_html/content/themes/twentyfifteen
+public_html/wordpress
