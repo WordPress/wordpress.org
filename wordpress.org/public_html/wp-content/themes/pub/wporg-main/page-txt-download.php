@@ -20,11 +20,11 @@ get_header();
 			<div class="entry-content">
 				<aside class="col-3 alignright">
 					<?php
-					the_widget( ___NAMESPACE__ . '\WPORG_Widget_Download' );
+					the_widget( __NAMESPACE__ . '\WPORG_Widget_Download' );
 
 					the_widget( 'WP_Widget_Links', array(), array(
 						'before_title' => '<h4>',
-						'after_title'  => '</h4><p>' . ___( 'For help with installing or using WordPress, consult our documentation in your language.', 'wporg' ) . '</p>',
+						'after_title'  => '</h4><p>' . __( 'For help with installing or using WordPress, consult our documentation in your language.', 'wporg' ) . '</p>',
 					) );
 					?>
 				</aside>

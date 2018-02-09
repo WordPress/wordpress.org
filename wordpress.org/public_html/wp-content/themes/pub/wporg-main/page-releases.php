@@ -23,7 +23,7 @@ get_header();
 			if ( ! empty( $releases ) ) :
 				if ( isset( $releases['latest'] ) ) :
 					?>
-					<h3 id="latest"><?php _esc_html_e( 'Latest release', 'wporg' ); ?></h3>
+					<h3 id="latest"><?php esc_html_e( 'Latest release', 'wporg' ); ?></h3>
 					<table class="releases latest">
 						<?php release_row( $releases['latest'] ); ?>
 					</table>
@@ -57,7 +57,7 @@ get_header();
 
 				if ( ! empty( $releases['betas'] ) ) :
 					?>
-					<h3 id="betas"><?php _esc_html_e( 'Beta &amp; RC releases', 'wporg' ); ?></h3>
+					<h3 id="betas"><?php esc_html_e( 'Beta &amp; RC releases', 'wporg' ); ?></h3>
 					<table id="beta" class="releases">
 						<?php
 						foreach ( $releases['betas'] as $release ) :
