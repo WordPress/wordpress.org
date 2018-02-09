@@ -5,6 +5,7 @@
 $grid-columns: 12 !default;
 $grid-gutter: 2% !default;
 $text-margin-bottom: 16px !default;
+$z-over-content: 100 !default;
 
 // display
 @mixin flex {
@@ -138,6 +139,12 @@ $text-margin-bottom: 16px !default;
 			& > .col-#{$i} {
 				$width: 100% / $grid-columns * $i;
 				width: calc(#{$width} - #{$grid-gutter});
+			}
+			$n: $grid-columns / $i + 1;
+			@if $n == floor( $n ) and ($grid-columns / $i) > 1 {
+				& > .col-#{$i}:nth-child(n+#{$n}) {
+					margin-top: #{$grid-gutter};
+				}
 			}
 			& > .offset-#{$i} {
 				$width: 100% / $grid-columns * $i;
