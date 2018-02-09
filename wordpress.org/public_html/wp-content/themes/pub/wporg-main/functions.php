@@ -65,6 +65,23 @@ function widgets() {
 add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
 
 /**
+ * Extend the default WordPress body classes.
+ *
+ * Adds classes to make it easier to target specific pages.
+ *
+ * @param array $classes Body classes.
+ * @return array
+ */
+function body_class( $classes ) {
+	if ( is_page() ) {
+		$classes[] = 'page-' . get_query_var( 'pagename' );
+	}
+
+	return array_unique( $classes );
+}
+add_filter( 'body_class', __NAMESPACE__ . '\body_class' );
+
+/**
  * Custom template tags.
  */
 require_once get_stylesheet_directory() . '/inc/template-tags.php';
