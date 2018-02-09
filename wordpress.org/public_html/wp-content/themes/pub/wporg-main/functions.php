@@ -9,6 +9,10 @@
 
 namespace WordPressdotorg\MainTheme;
 
+function ___( $arg ) { return $arg; }
+function _esc_html__( $arg ) { return $arg; }
+function _esc_html_e( $arg ) { echo $arg; }
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *

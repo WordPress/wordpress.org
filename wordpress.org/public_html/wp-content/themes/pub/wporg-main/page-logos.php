@@ -17,7 +17,7 @@ the_post();
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
-				<h1 class="entry-title"><?php esc_html_e( 'Logos and Graphics', 'wporg-dev' ); ?></h1>
+				<h1 class="entry-title"><?php _esc_html_e( 'Logos and Graphics', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
@@ -209,7 +209,7 @@ the_post();
 			<?php
 			edit_post_link(
 				sprintf(
-				/* translators: %s: Name of current post */
+					/* translators: %s: Name of current post */
 					esc_html__( 'Edit %s', 'wporg' ),
 					the_title( '<span class="screen-reader-text">"', '"</span>', false )
 				),
@@ -221,5 +221,5 @@ the_post();
 
 	</main><!-- #main -->
 
-	<?php
+<?php
 get_footer();

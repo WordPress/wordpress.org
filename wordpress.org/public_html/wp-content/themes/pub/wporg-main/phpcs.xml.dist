@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress.org Main">
+
+	<file>.</file>
+
+	<!-- Exclude development files & folders. -->
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+
+	<!-- Exclude JS/CSS files. -->
+	<exclude-pattern>*.js[x]?</exclude-pattern>
+	<exclude-pattern>*.[s]?css</exclude-pattern>
+
+	<!-- Show sniff codes -->
+	<arg value="s"/>
+
+	<rule ref="WordPress">
+		<exclude name="WordPress.VIP.SlowDBQuery.slow_db_query_meta_key" />
+	</rule>
+	<rule ref="WordPress-Docs" />
+
+	<rule ref="Generic.CodeAnalysis.UnusedFunctionParameter" />
+	<rule ref="Generic.Commenting.Todo" />
+
+	<!-- Allow commented-out code in functions.php -->
+	<rule ref="Squiz.PHP.CommentedOutCode.Found">
+		<exclude-pattern>/functions.php</exclude-pattern>
+	</rule>
+
+</ruleset>
