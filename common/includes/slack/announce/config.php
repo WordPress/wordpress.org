@@ -159,6 +159,9 @@ function get_whitelist() {
 			'jan_dembowski',
 			'macmanx',
 		),
+		'gdpr-compliance' => array(
+			'azaozz',
+		),
 		'glotpress' => array(
 			'ocean90',
 			'gregross',
