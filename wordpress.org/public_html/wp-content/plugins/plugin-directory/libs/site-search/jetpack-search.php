@@ -374,8 +374,8 @@ class Jetpack_Search {
 			$posts_per_page = 200;
 		}
 
-		// ES API does not allow fetching past the 10,000th post
-		$page = min( $page, floor( 9999 / $posts_per_page ) );
+		// ES API does not allow fetching past the 9,000th post
+		$page = min( $page, floor( 9000 / $posts_per_page ) );
 
 		$date_cutoff    = strftime( '%Y-%m-%d', strtotime( '-8 years' ) );
 		$date_today     = strftime( '%Y-%m-%d' );
@@ -443,7 +443,7 @@ class Jetpack_Search {
 		}
 
 		// Total number of results for paging purposes
-		$this->found_posts = min( $this->search_result['results']['total'], 9999 ); // The Jetpack search API errors out if we try to request past 10k
+		$this->found_posts = min( $this->search_result['results']['total'], 9000 ); // The Jetpack search API errors out if we try to request past 9k
 
 		// Don't select anything, posts are inflated by Jetpack_SearchResult_Posts_Iterator
 		// in The Loop, to allow for multi site search
