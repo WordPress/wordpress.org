@@ -4,7 +4,7 @@
 # of trunk (which isn't guaranteed to be stable), or specific tags (which are a hassle to keep updated).
 #
 
-local-config.php
+config-private.php
 public_html/content/upgrade
 public_html/content/uploads
 public_html/content/themes/twentyfifteen
