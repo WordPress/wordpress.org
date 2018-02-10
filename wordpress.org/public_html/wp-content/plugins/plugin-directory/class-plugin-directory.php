@@ -1329,14 +1329,17 @@ class Plugin_Directory {
 		$title = $args['post_title'] ?: $args['post_name'];
 		$slug  = $args['post_name'] ?: sanitize_title( $title );
 
+		$post_date     = current_time( 'mysql' );
+		$post_date_gmt = current_time( 'mysql', 1 );
+
 		$args = wp_parse_args( $args, array(
 			'post_title'        => $title,
 			'post_name'         => $slug,
 			'post_type'         => 'plugin',
-			'post_date'         => '',
-			'post_date_gmt'     => '',
-			'post_modified'     => '',
-			'post_modified_gmt' => '',
+			'post_date'         => $post_date,
+			'post_date_gmt'     => $post_date_gmt,
+			'post_modified'     => $post_date,
+			'post_modified_gmt' => $post_date_gmt,
 		) );
 
 		$result = wp_insert_post( $args, true );
