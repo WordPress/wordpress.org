@@ -384,7 +384,7 @@ class Jetpack_Search {
 		// Start building the WP-style search query args
 		// They'll be translated to ES format args later
 		$es_wp_query_args = array(
-			'query'          => $query->get( 's' ),
+			'query'          => mb_substr( $query->get( 's' ), 0, 200 ), // Limit search query to prevent "Request size too big" errors.
 			'posts_per_page' => $posts_per_page,
 			'paged'          => $page,
 			'orderby'        => $query->get( 'orderby' ),
