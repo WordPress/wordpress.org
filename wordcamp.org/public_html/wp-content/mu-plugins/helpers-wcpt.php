@@ -205,12 +205,13 @@ function wcorg_get_wordcamp_duration( WP_Post $wordcamp ) {
  *
  * The calling plugin is responsible for validating and processing the form, this just outputs a single field.
  *
- * @param string $name          The `name` attribute for the `select` element
+ * @param string $name          Optional. The `name` attribute for the `select` element. Defaults to `wordcamp_id`.
  * @param array  $query_options Optional. Extra arguments to pass to `get_posts()`. Defaults to the values in `get_wordcamps()`.
+ * @param int    $selected      Optional. The list option to select. Defaults to not selecting any.
  *
  * @return string The HTML for the <select> list.
  */
-function get_wordcamp_dropdown( $name = 'wordcamp_id', $query_options = array() ) {
+function get_wordcamp_dropdown( $name = 'wordcamp_id', $query_options = array(), $selected = 0 ) {
 	$wordcamps = get_wordcamps( $query_options );
 
 	wp_enqueue_script( 'select2' );
@@ -225,7 +226,10 @@ function get_wordcamp_dropdown( $name = 'wordcamp_id', $query_options = array() 
 		<option value=""></option>
 
 		<?php foreach ( $wordcamps as $wordcamp ) : ?>
-			<option value="<?php echo esc_attr( $wordcamp->ID ); ?>">
+			<option
+				value="<?php echo esc_attr( $wordcamp->ID ); ?>"
+				<?php selected( $selected, $wordcamp->ID ); ?>
+			>
 				<?php
 
 				echo esc_html( $wordcamp->post_title );
