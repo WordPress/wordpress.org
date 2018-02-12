@@ -87,7 +87,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 			$page = get_page_by_path( $slug, OBJECT, $post->post_type );
 		}
 		if ( $page && ! $instance['show_home'] ) {
-			$args['exclude'] = $page->ID;
+			$args['exclude'] = rtrim( $page->ID . ',' . $args['exclude'], ',' );
 		}
 
 		return $args;
