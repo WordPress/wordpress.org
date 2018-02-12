@@ -8,6 +8,31 @@ defined( 'WPINC' ) or die();
 
 
 /**
+ * Retrieve `wordcamp` posts and their metadata.
+ *
+ * @param array $args Optional. Extra arguments to pass to `get_posts()`.
+ *
+ * @return array
+ */
+function get_wordcamps( $args = array() ) {
+	$args = wp_parse_args( $args, array(
+		'post_type'   => WCPT_POST_TYPE_ID,
+		'post_status' => 'any',
+		'orderby'     => 'ID',
+		'numberposts' => -1,
+		'perm'        => 'readable',
+	) );
+
+	$wordcamps = get_posts( $args );
+
+	foreach ( $wordcamps as &$wordcamp ) {
+		$wordcamp->meta = get_post_custom( $wordcamp->ID );
+	}
+
+	return $wordcamps;
+}
+
+/**
  * Retrieves the `wordcamp` post and postmeta associated with the current site.
  *
  * `Site ID` is the most reliable way to associate a site with it's corresponding `wordcamp` post,
@@ -173,4 +198,53 @@ function wcorg_get_wordcamp_duration( WP_Post $wordcamp ) {
 	$duration_days = ceil( ( $duration_raw + 1 ) / DAY_IN_SECONDS );
 
 	return absint( $duration_days );
+}
+
+/**
+ * Get a <select> dropdown of `wordcamp` posts with a select2 UI.
+ *
+ * The calling plugin is responsible for validating and processing the form, this just outputs a single field.
+ *
+ * @param string $name          The `name` attribute for the `select` element
+ * @param array  $query_options Optional. Extra arguments to pass to `get_posts()`. Defaults to the values in `get_wordcamps()`.
+ *
+ * @return string The HTML for the <select> list.
+ */
+function get_wordcamp_dropdown( $name = 'wordcamp_id', $query_options = array() ) {
+	$wordcamps = get_wordcamps( $query_options );
+
+	wp_enqueue_script( 'select2' );
+	wp_enqueue_style(  'select2' );
+
+	ob_start();
+
+	?>
+
+	<select name="<?php echo esc_attr( $name ); ?>" class="select2">
+		<option value=""><?php _e( 'Select a WordCamp', 'wordcamporg' ); ?></option>
+		<option value=""></option>
+
+		<?php foreach ( $wordcamps as $wordcamp ) : ?>
+			<option value="<?php echo esc_attr( $wordcamp->ID ); ?>">
+				<?php
+
+				echo esc_html( $wordcamp->post_title );
+				if ( ! empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
+					echo ' ' . esc_html( date( 'Y', $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) );
+				}
+
+				?>
+			</option>
+		<?php endforeach; ?>
+	</select>
+
+	<script>
+		jQuery( document ).ready( function() {
+			jQuery( '.select2' ).select2();
+		} );
+	</script>
+
+	<?php
+
+	return ob_get_clean();
 }

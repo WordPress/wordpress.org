@@ -281,3 +281,29 @@ function wcorg_reset_passwords_at_wporg() {
 	die();
 }
 add_action( 'login_form_lostpassword', 'wcorg_reset_passwords_at_wporg' );
+
+/**
+ * Register scripts and styles.
+ */
+function wcorg_register_scripts() {
+	/*
+	 * Select2 can be removed if/when it's bundled with Core, see #31696-core.
+	 * If the handle changes, we'll need to update any of our plugins that are using it.
+	 */
+	wp_register_script(
+		'select2',
+		plugins_url( '/includes/select2/js/select2.min.js', __FILE__ ),
+		array( 'jquery' ),
+		'4.0.5',
+		true
+	);
+
+	wp_register_style(
+		'select2',
+		plugins_url( '/includes/select2/css/select2.min.css', __FILE__ ),
+		array(),
+		'4.0.5'
+	);
+}
+add_action( 'wp_enqueue_scripts',    'wcorg_register_scripts' );
+add_action( 'admin_enqueue_scripts', 'wcorg_register_scripts' );
