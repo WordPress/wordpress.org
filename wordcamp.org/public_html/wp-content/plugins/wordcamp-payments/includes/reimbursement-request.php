@@ -6,6 +6,7 @@
 
 namespace WordCamp\Budgets\Reimbursement_Requests;
 use WCP_Encryption;
+use WordCamp\Utilities;
 
 defined( 'WPINC' ) or die();
 
@@ -864,7 +865,7 @@ function _generate_payment_report_default( $args ) {
 	ob_start();
 	$report = fopen( 'php://output', 'w' );
 
-	fputcsv( $report, wcorg_esc_csv( $column_headings ) );
+	fputcsv( $report, Utilities\Export_CSV::esc_csv( $column_headings ) );
 
 	foreach( $args['data'] as $entry ) {
 		switch_to_blog( $entry->blog_id );
@@ -937,12 +938,12 @@ function _generate_payment_report_default( $args ) {
 		restore_current_blog();
 
 		if ( ! empty( $row ) ) {
-			fputcsv( $report, wcorg_esc_csv( $row ) );
+			fputcsv( $report, Utilities\Export_CSV::esc_csv( $row ) );
 		}
 
 		// Break out expenses into individual line items
 		foreach ( $expenses as $expense ) {
-			fputcsv( $report, wcorg_esc_csv( _generate_payment_report_default_line_items( $expense, $row ) ) );
+			fputcsv( $report, Utilities\Export_CSV::esc_csv( _generate_payment_report_default_line_items( $expense, $row ) ) );
 		}
 	}
 
@@ -1004,7 +1005,7 @@ function _generate_payment_report_jpm_checks( $args ) {
 	ob_start();
 
 	// File Header
-	fputcsv( $report, wcorg_esc_csv( array( 'FILHDR', 'PWS', $options['pws_customer_id'], date( 'm/d/Y' ), date( 'Hi' ) ) ), ',', '|' );
+	fputcsv( $report, Utilities\Export_CSV::esc_csv( array( 'FILHDR', 'PWS', $options['pws_customer_id'], date( 'm/d/Y' ), date( 'Hi' ) ) ), ',', '|' );
 
 	$total = 0;
 	$count = 0;
@@ -1063,7 +1064,7 @@ function _generate_payment_report_jpm_checks( $args ) {
 		$description = html_entity_decode( $description );
 
 		// Payment Header
-		fputcsv( $report, wcorg_esc_csv( array(
+		fputcsv( $report, Utilities\Export_CSV::esc_csv( array(
 			'PMTHDR',
 			'USPS',
 			'QKCHECKS',
@@ -1076,7 +1077,7 @@ function _generate_payment_report_jpm_checks( $args ) {
 		) ), ',', '|' );
 
 		// Payee Name Record
-		fputcsv( $report, wcorg_esc_csv( array(
+		fputcsv( $report, Utilities\Export_CSV::esc_csv( array(
 			'PAYENM',
 			substr( $payable_to, 0, 35 ),
 			'',
@@ -1084,17 +1085,17 @@ function _generate_payment_report_jpm_checks( $args ) {
 		) ), ',', '|' );
 
 		// Payee Address Record
-		fputcsv( $report, wcorg_esc_csv( array(
+		fputcsv( $report, Utilities\Export_CSV::esc_csv( array(
 			'PYEADD',
 			substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_check_street_address', true ) ), 0, 35 ),
 			'',
 		) ), ',', '|' );
 
 		// Additional Payee Address Record
-		fputcsv( $report, wcorg_esc_csv( array( 'ADDPYE', '', '' ) ), ',', '|' );
+		fputcsv( $report, Utilities\Export_CSV::esc_csv( array( 'ADDPYE', '', '' ) ), ',', '|' );
 
 		// Payee Postal Record
-		fputcsv( $report, wcorg_esc_csv( array(
+		fputcsv( $report, Utilities\Export_CSV::esc_csv( array(
 			'PYEPOS',
 			substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_check_city',     true ) ), 0, 35 ),
 			substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_check_state',    true ) ), 0, 35 ),
@@ -1103,7 +1104,7 @@ function _generate_payment_report_jpm_checks( $args ) {
 		) ), ',', '|' );
 
 		// Payment Description
-		fputcsv( $report, wcorg_esc_csv( array(
+		fputcsv( $report, Utilities\Export_CSV::esc_csv( array(
 			'PYTDES',
 			substr( $description, 0, 122 ),
 		) ), ',', '|' );
@@ -1112,7 +1113,7 @@ function _generate_payment_report_jpm_checks( $args ) {
 	}
 
 	// File Trailer
-	fputcsv( $report, wcorg_esc_csv( array( 'FILTRL', $count * 6 + 2 ) ), ',', '|' );
+	fputcsv( $report, Utilities\Export_CSV::esc_csv( array( 'FILTRL', $count * 6 + 2 ) ), ',', '|' );
 
 	// Update counter and unlock
 	$start = absint( get_site_option( '_wcb_jpm_checks_counter', 0 ) );
@@ -1328,7 +1329,7 @@ function _generate_payment_report_jpm_wires( $args ) {
 	$report = fopen( 'php://output', 'w' );
 
 	// JPM Header
-	fputcsv( $report, wcorg_esc_csv( array( 'HEADER', gmdate( 'YmdHis' ), '1' ) ) );
+	fputcsv( $report, Utilities\Export_CSV::esc_csv( array( 'HEADER', gmdate( 'YmdHis' ), '1' ) ) );
 
 	$total = 0;
 	$count = 0;
@@ -1539,12 +1540,12 @@ function _generate_payment_report_jpm_wires( $args ) {
 		// Use for debugging.
 		// print_r( $row );
 
-		fputcsv( $report, wcorg_esc_csv( array_values( $row ) ) );
+		fputcsv( $report, Utilities\Export_CSV::esc_csv( array_values( $row ) ) );
 		restore_current_blog();
 	}
 
 	// JPM Trailer
-	fputcsv( $report, wcorg_esc_csv( array( 'TRAILER', $count, $total ) ) );
+	fputcsv( $report, Utilities\Export_CSV::esc_csv( array( 'TRAILER', $count, $total ) ) );
 
 	fclose( $report );
 	$results = ob_get_clean();

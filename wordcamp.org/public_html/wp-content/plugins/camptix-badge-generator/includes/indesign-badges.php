@@ -4,6 +4,7 @@ namespace CampTix\Badge_Generator\InDesign;
 use \CampTix\Badge_Generator;
 use \CampTix\Badge_Generator\HTML;
 use \WordCamp\Logger;
+use WordCamp\Utilities;
 
 defined( 'WPINC' ) or die();
 
@@ -211,7 +212,7 @@ function generate_csv( $csv_filename, $zip_local_folder, $attendees, $gravatar_f
 		throw new \Exception( __( "Couldn't open CSV file.", 'wordcamporg' ) );
 	}
 
-	fputcsv( $csv_handle, wcorg_esc_csv( get_header_row( $admin_flags, $questions ) ) );
+	fputcsv( $csv_handle, Utilities\Export_CSV::esc_csv( get_header_row( $admin_flags, $questions ) ) );
 
 	foreach ( $attendees as $attendee ) {
 		$row = get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directory, $empty_twitter, $admin_flags, $questions );
@@ -220,7 +221,7 @@ function generate_csv( $csv_filename, $zip_local_folder, $attendees, $gravatar_f
 			continue;
 		}
 
-		fputcsv( $csv_handle, wcorg_esc_csv( $row ) );
+		fputcsv( $csv_handle, Utilities\Export_CSV::esc_csv( $row ) );
 	}
 
 	fclose( $csv_handle );
