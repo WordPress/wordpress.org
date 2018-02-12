@@ -32,6 +32,14 @@ the_post();
 			<div class="entry-content row">
 				<section class="col-8">
 					<h2 id="mission"><?php _esc_html_e( 'Our Mission', 'wporg' ); ?></h2>
+					<p><?php _esc_html_e( 'WordPress is software designed for everyone with emphasis on accessibility, performance, security, and usability. We believe great software should work with little set up, so you can focus on sharing your story, product, or services freely. The basic WordPress software is simple and predictable to easily get started, it also offers a solid array of features for growth and success.', 'wporg' ); ?></p>
+					<p>
+						<?php
+						/* translators: Link to */
+						printf( wp_kses_post( ___( 'We believe in democratizing publishing and the <a href="%s">freedoms that come with open source</a>. Gathered behind this is idea is a large community of people dedicated to this project. The WordPress community is growing and inclusive. Their passion is what drives the success of work press and, in turn, helps you reach your goals.', 'wporg' ) ), esc_url( 'https://opensource.org/osd-annotated' ) );
+						?>
+					</p>
+
 					<div class="shape technology">
 						<a class="dashicons-before dashicons-welcome-widgets-menus" href="">
 							<h3><?php _esc_html_e( 'The Technology', 'wporg' ); ?></h3>
@@ -50,7 +58,7 @@ the_post();
 				<section class="row gutters between">
 					<div class="col-4">
 						<h4><?php _esc_html_e( 'The Technology', 'wporg' ); ?></h4>
-						<p><?php _esc_html_e( 'Learn about WordPress, where we&#8217;ve been, and where we&#8217;re going.', 'wporg' ); ?></p>
+						<p><?php _esc_html_e( 'Learn about WordPress, where it&#8217;s been, and where it&#8217;s going.', 'wporg' ); ?></p>
 						<ul>
 							<li><a href="<?php echo esc_url( home_url( '/about/requirements/' ) ); ?>"><?php _esc_html_e( 'Requirements', 'wporg' ); ?></a></li>
 							<li><a href="<?php echo esc_url( home_url( '/about/features/' ) ); ?>"><?php _esc_html_e( 'Features', 'wporg' ); ?></a></li>
@@ -83,10 +91,41 @@ the_post();
 
 				<section class="col-8">
 					<h2 id="story"><?php _esc_html_e( 'Our Story', 'wporg' ); ?></h2>
+					<p>
+						<?php
+						/* translators: 1: Link to b2/cafelog; 2: WordPress market share: 29%; */
+						printf( wp_kses_post( ___( 'WordPress started in 2003 when Mike Little and Matt Mullenweg created a <a href="%1$s">fork of b2/cafelog</a>. The need for an elegant, well-architected personal publishing system was clear even then. Today, WordPress is built on PHP and MySQL and licensed under the GPLv2. It is also the platform of choice for over %2$s of all sites across the web.', 'wporg' ) ), esc_url( 'https://www.whoishostingthis.com/resources/b2-cafelog/' ), esc_html( WP_MARKET_SHARE . '%' ) );
+						?>
+					</p>
+					<p><?php _esc_html_e( 'WordPress is the success story of open-source projects everywhere. Not only does it evolve in progressive ways&#8212;supported by the finest engineers, designers, scientists, and bloggers the world has ever seen&#8212;but it also provides the opportunity for everyone to create and share, from handcrafted personal anecdotes to world-changing movements. People with little tech background can use it out of the box, and the more text savvy can use it in the most advanced ways.', 'wporg' ); ?></p>
 				</section>
 
 				<section class="col-8">
 					<h2 id="bill-of-rights"><?php _esc_html_e( 'Bill of Rights', 'wporg' ); ?></h2>
+					<p><?php _esc_html_e( 'WordPress is licensed under the General Public License (GPLv2 or later) which provides four core freedoms. Consider this the WordPress Bill of Rights:', 'wporg' ); ?></p>
+				</section>
+
+				<section class="freedoms row gutters between">
+					<div class="col-3">
+						<img class="aligncenter" alt="" src="https://cldup.com/BcSCNPa-D1-3000x3000.png" width="150" />
+						<h4><?php _esc_html_e( 'The 1st Freedom', 'wporg' ); ?></h4>
+						<p><?php _esc_html_e( 'To run the program for any purpose.', 'wporg' ); ?></p>
+					</div>
+					<div class="col-3">
+						<img class="aligncenter" alt="" src="https://cldup.com/OWDlYRsg4S-3000x3000.png" width="150" />
+						<h4><?php _esc_html_e( 'The 2nd Freedom', 'wporg' ); ?></h4>
+						<p><?php _esc_html_e( 'To study how the program works and change it to make it do what you wish.', 'wporg' ); ?></p>
+					</div>
+					<div class="col-3">
+						<img class="aligncenter" alt="" src="https://cldup.com/OSEjaXa5Xb-3000x3000.png" width="150" />
+						<h4><?php _esc_html_e( 'The 3rd Freedom', 'wporg' ); ?></h4>
+						<p><?php _esc_html_e( 'To redistribute.', 'wporg' ); ?></p>
+					</div>
+					<div class="col-3">
+						<img class="aligncenter" alt="" src="https://cldup.com/nvNzFoZE8t-3000x3000.png" width="150" />
+						<h4><?php _esc_html_e( 'The 4th Freedom', 'wporg' ); ?></h4>
+						<p><?php _esc_html_e( 'To distribute copies of your modified versions to others.', 'wporg' ); ?></p>
+					</div>
 				</section>
 
 			</div><!-- .entry-content -->
