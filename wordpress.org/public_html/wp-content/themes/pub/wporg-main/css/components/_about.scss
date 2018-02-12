@@ -1,5 +1,7 @@
 body.page-about,
 body.page-template-about {
+	overflow-x: hidden;
+
 	.entry-header {
 		padding: ms( 4 ) ms( 1 );
 		text-align: center;
@@ -13,16 +15,8 @@ body.page-template-about {
 
 		.entry-description {
 			color: rgba( 255, 255, 255, 0.8);
-			font-size: ms( 4 );
+			font-size: ms( 2 );
 			margin-top: -0.4rem;
-		}
-	}
-
-	.entry-content {
-		overflow: hidden;
-
-		@include breakpoint( 640px ) {
-			overflow: initial;
 		}
 	}
 
@@ -37,7 +31,7 @@ body.page-template-about {
 			height: 260px;
 			margin: 0 auto;
 			opacity: 0.9;
-			padding: 4.2rem 0;
+			padding: 4.7rem 0;
 			position: absolute;
 			text-align: center;
 			transform: skew( -15deg) ;
@@ -46,6 +40,8 @@ body.page-template-about {
 			&:before {
 				font-size: ms( 12 );
 				height: 64px;
+				position: relative;
+				right: 1rem;
 				transform: skew( 15deg );
 				width: 64px;
 			}
@@ -92,7 +88,7 @@ body.page-template-about {
 
 			.shape {
 				height: 336px;
-				padding: 6.555rem 0;
+				padding: 7rem 0;
 				width: 400px;
 			}
 		}
@@ -102,7 +98,7 @@ body.page-template-about {
 
 			.shape {
 				height: 315px;
-				padding: 4.5rem 0;
+				padding: 5rem 0;
 				width: 480px;
 
 				&:before {
@@ -119,7 +115,7 @@ body.page-template-about {
 
 			.shape {
 				height: 282px;
-				padding: 3.55rem 0;
+				padding: 4rem 0;
 				width: 430px;
 
 				&.technology {
@@ -140,7 +136,7 @@ body.page-template-about {
 
 			.shape {
 				height: 380px;
-				padding: 5.66rem 0;
+				padding: 6rem 0;
 				width: 580px;
 
 				&.technology {

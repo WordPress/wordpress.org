@@ -42,12 +42,16 @@ the_post();
 
 					<div class="shapes">
 						<a class="shape technology dashicons-before dashicons-welcome-widgets-menus" href="<?php echo esc_url( home_url( '/about/features/' ) ); ?>">
-							<h3><?php _esc_html_e( 'The Technology', 'wporg' ); ?></h3>
-							<p><?php _esc_html_e( 'Learn about the software', 'wporg' ); ?></p>
+							<p>
+								<strong><?php _esc_html_e( 'The Technology', 'wporg' ); ?></strong><br />
+								<?php _esc_html_e( 'Learn about the software', 'wporg' ); ?>
+							</p>
 						</a>
 						<a class="shape community dashicons-before dashicons-admin-site" href="https://make.wordpress.org/">
-							<h3><?php _esc_html_e( 'The Community', 'wporg' ); ?></h3>
-							<p><?php _esc_html_e( 'Learn about the people', 'wporg' ); ?></p>
+							<p>
+								<strong><?php _esc_html_e( 'The Community', 'wporg' ); ?></strong><br />
+								<?php _esc_html_e( 'Learn about the people', 'wporg' ); ?>
+							</p>
 						</a>
 					</div>
 					<p><?php _esc_html_e( 'We work around the globe, and have contributed countless hours to build a future wherein we can all be proud. WordPress is an open source project that is both free and priceless.', 'wporg' ); ?></p>
