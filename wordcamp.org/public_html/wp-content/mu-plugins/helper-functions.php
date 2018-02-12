@@ -198,28 +198,6 @@ function wcorg_get_countries() {
 }
 
 /**
- * Escape a string to be used in a CSV context
- *
- * This is just a wrapper to somewhat de-couple things, without having to manually sync updates to the canonical
- * function. See CampTix_Plugin::esc_csv() for details.
- *
- * @param array $fields
- *
- * @return array
- */
-function wcorg_esc_csv( $fields ) {
-	require_once( WP_CONTENT_DIR . '/plugins/camptix/camptix.php' );
-
-	if ( is_callable( 'CampTix_Plugin::esc_csv' ) ) {
-		$fields = CampTix_Plugin::esc_csv( $fields );
-	} else {
-		$fields = array();
-	}
-
-	return $fields;
-}
-
-/**
  * Make a remote HTTP request, and retry if it fails
  *
  * Sometimes the HTTP request times out, or there's a temporary server-side error, etc. Some use cases require a
