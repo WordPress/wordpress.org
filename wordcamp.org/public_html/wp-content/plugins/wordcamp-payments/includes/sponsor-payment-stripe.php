@@ -4,7 +4,9 @@
  */
 
 namespace WordCamp\Budgets\Sponsor_Payment_Stripe;
+use WordCamp\Utilities\Stripe_Client;
 use WordCamp_Budgets;
+use Exception;
 
 defined( 'WPINC' ) or die();
 
@@ -188,27 +190,24 @@ function _handle_post_data( &$data ) {
 			$wordcamp_site_id  = get_wordcamp_site_id( $wordcamp_obj );
 			$wordcamp_site_url = set_url_scheme( esc_url_raw( get_blog_option( $wordcamp_site_id, 'home', '' ) ), 'https' );
 
-			require_once( __DIR__ . '/stripe-php/init.php' );
-			\Stripe\Stripe::setApiKey( $data['keys']['secret'] );
+			$body = array(
+				'amount'      => round( $payment_data['amount'], 2 ) * 100,
+				'currency'    => $payment_data['currency'],
+				'source'      => $_POST['stripeToken'],
+				'description' => 'WordCamp Sponsorship: ' . $wordcamp_obj->post_title,
+				'metadata'    => array(
+					'invoice_id'       => $payment_data['invoice_id'],
+					'wordcamp_id'      => $payment_data['wordcamp_id'],
+					'wordcamp_site_id' => $wordcamp_site_id,
+					'wordcamp_url'     => $wordcamp_site_url,
+				),
+			);
 
 			try {
-				$charge = \Stripe\Charge::create( array(
-					'amount'      => round( $payment_data['amount'], 2 ) * 100,
-					'currency'    => $payment_data['currency'],
-					'source'      => $_POST['stripeToken'],
-					'description' => 'WordCamp Sponsorship: ' . $wordcamp_obj->post_title,
-					'metadata'    => array(
-						'invoice_id'       => $payment_data['invoice_id'],
-						'wordcamp_id'      => $payment_data['wordcamp_id'],
-						'wordcamp_site_id' => $wordcamp_site_id,
-						'wordcamp_url'     => $wordcamp_site_url,
-					),
-				) );
-			} catch ( \Stripe\Error\Card $e ) {
-				$data['errors'][] = 'The card has been declined.';
-				return;
-			} catch ( \Exception $e ) {
-				$data['errors'][] = 'An unknown error has occurred, please try again later.';
+				$stripe = new Stripe_Client( $data['keys']['secret'] );
+				$charge = $stripe->charge( $body );
+			} catch ( Exception $exception ) {
+				$data['errors'][] = "An error occurred, please try another card. If that doesn't work, please contact ". EMAIL_CENTRAL_SUPPORT .".";
 				return;
 			}
 
