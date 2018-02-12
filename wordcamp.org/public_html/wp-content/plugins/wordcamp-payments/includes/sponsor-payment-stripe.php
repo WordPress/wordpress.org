@@ -4,13 +4,14 @@
  */
 
 namespace WordCamp\Budgets\Sponsor_Payment_Stripe;
+use WordCamp_Budgets;
 
 defined( 'WPINC' ) or die();
 
-const STEP_SELECT_INVOICE = 1;
+const STEP_SELECT_INVOICE  = 1;
 const STEP_PAYMENT_DETAILS = 2;
 const STEP_PAYMENT_SUCCESS = 3;
-const CSS_VERSION = 1;
+const CSS_VERSION          = 1;
 
 /**
  * Render the payment UI
@@ -19,21 +20,20 @@ const CSS_VERSION = 1;
  * It is invoked from the template-sponsorship-payment.php page template in the central theme.
  */
 function render() {
-
-	// Make sure we have Stripe keys and an HMAC.
 	$keys = _get_keys();
-	if ( empty( $keys['publishable'] ) || empty( $keys['secret'] ) || empty( $keys['hmac_key'] ) )
-		return;
 
-	// Make sure WordCamp_Budgets is available.
+	if ( empty( $keys['publishable'] ) || empty( $keys['secret'] ) || empty( $keys['hmac_key'] ) ) {
+		return;
+	}
+
 	require_once( __DIR__ . '/wordcamp-budgets.php' );
 
 	$data = array(
-		'keys' => $keys,
-		'step' => STEP_SELECT_INVOICE,
-		'wordcamps' => _get_wordcamps(),
-		'currencies' => \WordCamp_Budgets::get_currencies(),
-		'errors' => array(),
+		'keys'       => $keys,
+		'step'       => STEP_SELECT_INVOICE,
+		'wordcamps'  => _get_wordcamps(),
+		'currencies' => WordCamp_Budgets::get_currencies(),
+		'errors'     => array(),
 	);
 
 	if ( ! empty( $_POST['sponsor_payment_submit'] ) ) {
@@ -53,10 +53,10 @@ function _get_keys() {
 	return apply_filters( 'wcorg_sponsor_payment_stripe', array(
 		// Stripe API credentials.
 		'publishable' => '',
-		'secret' => '',
+		'secret'      => '',
 
 		// An HMAC key used to sign some data in between requests.
-		'hmac_key' => '',
+		'hmac_key'    => '',
 	) );
 }
 
@@ -70,16 +70,19 @@ function _get_wordcamps() {
 
 	if ( ! isset( $wordcamps ) ) {
 		$wordcamps = get_posts( array(
-			'post_type' => 'wordcamp',
-			'post_status' => \WordCamp_Loader::get_public_post_statuses(),
-			'posts_per_page' => -1,
-			'orderby'		=> 'title',
-			'order'		  => 'asc',
-			'meta_query'	 => array( array(
-				'key'		=> 'Start Date (YYYY-mm-dd)',
-				'value'	  => strtotime( '-3 months' ),
-				'compare'	=> '>'
-			) )
+			'post_type'      => 'wordcamp',
+			'post_status'    => \WordCamp_Loader::get_public_post_statuses(),
+			'posts_per_page' => - 1,
+			'orderby'        => 'title',
+			'order'          => 'asc',
+
+			'meta_query' => array(
+				array(
+					'key'     => 'Start Date (YYYY-mm-dd)',
+					'value'   => strtotime( '-3 months' ),
+					'compare' => '>'
+				)
+			)
 		) );
 	}
 
@@ -99,9 +102,8 @@ function _handle_post_data( &$data ) {
 	$step = isset( $_POST['step'] ) ? absint( $_POST['step'] ) : STEP_SELECT_INVOICE;
 
 	switch ( $_POST['step'] ) {
+		// An invoice, event, currency and amount have been selected.
 		case STEP_SELECT_INVOICE:
-			// An invoice, event, currency and amount have been selected.
-
 			if ( empty( $_POST['currency'] ) ) {
 				$data['errors'][] = 'Please select a currency.';
 				return;
@@ -131,7 +133,7 @@ function _handle_post_data( &$data ) {
 
 			// Make sure the selected WordCamp is valid.
 			$wordcamp_id = absint( $_POST['wordcamp_id'] );
-			$valid_ids = wp_list_pluck( _get_wordcamps(), 'ID' );
+			$valid_ids   = wp_list_pluck( _get_wordcamps(), 'ID' );
 
 			if ( ! in_array( $wordcamp_id, $valid_ids ) ) {
 				$data['errors'][] = 'Please select a valid event.';
@@ -143,7 +145,7 @@ function _handle_post_data( &$data ) {
 				return;
 			}
 
-			$invoice_id = absint( $_POST['invoice_id'] );
+			$invoice_id       = absint( $_POST['invoice_id'] );
 			$wordcamp_site_id = get_wordcamp_site_id( get_post( $wordcamp_id ) );
 			if ( empty( $wordcamp_site_id ) ) {
 				$data['errors'][] = 'Could not find a site for this WordCamp.';
@@ -151,25 +153,24 @@ function _handle_post_data( &$data ) {
 			}
 
 			// Next step is to collect the card details via Stripe.
-			$data['step'] = STEP_PAYMENT_DETAILS;
+			$data['step']    = STEP_PAYMENT_DETAILS;
 			$data['payment'] = array(
-				'currency' => $currency,
-				'amount' => $amount,
+				'currency'    => $currency,
+				'amount'      => $amount,
 				'wordcamp_id' => $wordcamp_id,
-				'invoice_id' => $invoice_id,
+				'invoice_id'  => $invoice_id,
 			);
 
 			// Passed through to the charge step.
-			$data['payment_data_json'] = json_encode( $data['payment'] );
+			$data['payment_data_json']      = json_encode( $data['payment'] );
 			$data['payment_data_signature'] = hash_hmac( 'sha256', $data['payment_data_json'], $data['keys']['hmac_key'] );
 
 			// Add a WordCamp object for convenience.
 			$data['payment']['wordcamp_obj'] = get_post( $wordcamp_id );
 			break;
 
+		// The card details have been entered and Stripe has submitted our form.
 		case STEP_PAYMENT_DETAILS:
-			// The card details have been entered and Stripe has submitted our form.
-
 			if ( empty( $_POST['stripeToken'] ) ) {
 				$data['errors'][] = 'Stripe token not found.';
 				return;
@@ -177,14 +178,14 @@ function _handle_post_data( &$data ) {
 
 			// Make sure our data hasn't been altered.
 			$payment_data_str = wp_unslash( $_POST['payment_data_json'] );
-			$payment_data = json_decode( $payment_data_str, true );
+			$payment_data     = json_decode( $payment_data_str, true );
 			if ( ! hash_equals( hash_hmac( 'sha256', $payment_data_str, $data['keys']['hmac_key'] ), $_POST['payment_data_signature'] ) ) {
 				$data['errors'][] = 'Could not verify payload signature.';
 				return;
 			}
 
-			$wordcamp_obj = get_post( $payment_data['wordcamp_id'] );
-			$wordcamp_site_id = get_wordcamp_site_id( $wordcamp_obj );
+			$wordcamp_obj      = get_post( $payment_data['wordcamp_id'] );
+			$wordcamp_site_id  = get_wordcamp_site_id( $wordcamp_obj );
 			$wordcamp_site_url = set_url_scheme( esc_url_raw( get_blog_option( $wordcamp_site_id, 'home', '' ) ), 'https' );
 
 			require_once( __DIR__ . '/stripe-php/init.php' );
@@ -192,15 +193,15 @@ function _handle_post_data( &$data ) {
 
 			try {
 				$charge = \Stripe\Charge::create( array(
-					'amount' => round( $payment_data['amount'], 2 ) * 100,
-					'currency' => $payment_data['currency'],
-					'source' => $_POST['stripeToken'],
+					'amount'      => round( $payment_data['amount'], 2 ) * 100,
+					'currency'    => $payment_data['currency'],
+					'source'      => $_POST['stripeToken'],
 					'description' => 'WordCamp Sponsorship: ' . $wordcamp_obj->post_title,
-					'metadata' => array(
-						'invoice_id' => $payment_data['invoice_id'],
-						'wordcamp_id' => $payment_data['wordcamp_id'],
+					'metadata'    => array(
+						'invoice_id'       => $payment_data['invoice_id'],
+						'wordcamp_id'      => $payment_data['wordcamp_id'],
 						'wordcamp_site_id' => $wordcamp_site_id,
-						'wordcamp_url' => $wordcamp_site_url,
+						'wordcamp_url'     => $wordcamp_site_url,
 					),
 				) );
 			} catch ( \Stripe\Error\Card $e ) {
