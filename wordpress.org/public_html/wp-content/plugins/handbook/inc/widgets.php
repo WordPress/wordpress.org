@@ -44,7 +44,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 	public function form( $instance ) {
 		parent::form( $instance );
 
-		$checked = $instance['show_home'] ? 'checked="checked"' : '';
+		$checked = checked( ! empty( $instance['show_home'] ), true, false );
 		?>
 		<p>
 			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('show_home') ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_home' ) ); ?>" type="checkbox" value="1" <?php echo $checked ?> />
@@ -55,7 +55,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 
 	public function update( $new_instance, $old_instance ) {
 		$instance = parent::update( $new_instance, $old_instance );
-		$instance['show_home'] = (bool) $new_instance['show_home'];
+		$instance['show_home'] = isset( $new_instance['show_home'] ) ? (bool) $new_instance['show_home'] : false;
 
 		return $instance;
 	}
