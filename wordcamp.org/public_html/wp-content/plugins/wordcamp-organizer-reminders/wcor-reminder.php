@@ -325,7 +325,6 @@ class WCOR_Reminder {
 	 * @param object $post
 	 */
 	public function markup_manually_send( $post ) {
-		$wordcamps = $this->get_all_wordcamps();
 		?>
 
 		<p><?php _e( 'Check the box below and save the post to manually send this message to the assigned recipient(s), using the data from the selected WordCamp.', 'wordcamporg' ); ?></p>
@@ -333,18 +332,7 @@ class WCOR_Reminder {
 		<p><?php _e( 'It will be sent immediately, regardless of when it is scheduled to be sent automatically, and regardless of whether or not it has already been sent automatically.', 'wordcamporg' ); ?></p>
 
 		<p>
-			<select name="wcor_manually_send_wordcamp">
-				<option value="instructions"><?php _e( 'Select a WordCamp', 'wordcamporg' ); ?></option>
-				<?php /* translators: label for a spacer <option> at the beginning of a <select> */ ?>
-				<option value="spacer"><?php _e( '- - -', 'wordcamporg' ); ?></option>
-
-				<?php foreach ( $wordcamps as $wordcamp ) : ?>
-					<option value="<?php echo esc_attr( $wordcamp->ID ); ?>">
-						[<?php echo esc_html( $wordcamp->meta['sort_column'] ); ?>]
-						<?php echo esc_html( $wordcamp->post_title ); ?>
-					</option>
-				<?php endforeach; ?>
-			</select>
+			<?php echo get_wordcamp_dropdown( 'wcor_manually_send_wordcamp' ); ?>
 		</p>
 
 		<p>
@@ -353,92 +341,6 @@ class WCOR_Reminder {
 		</p>
 
 		<?php
-	}
-
-	/**
-	 * Retrieve all WordCamps and their metadata, sorted by status and year.
-	 *
-	 * @return array
-	 */
-	protected function get_all_wordcamps() {
-		if ( $wordcamps = get_transient( 'wcor_get_all_wordcamps' ) ) {
-			return $wordcamps;
-		}
-
-		$statuses = WordCamp_Loader::get_post_statuses();
-		$statuses = array_merge( array_keys( $statuses ), array( 'draft', 'pending', 'publish' ) );
-
-		$wordcamps = get_posts( array(
-			'post_type'   => WCPT_POST_TYPE_ID,
-			'post_status' => $statuses,
-			'numberposts' => -1,
-		) );
-
-		foreach ( $wordcamps as &$wordcamp ) {
-			$wordcamp->meta                = get_post_custom( $wordcamp->ID );
-			$wordcamp->meta['sort_column'] = empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ? $wordcamp->post_status : date( 'Y', $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] );
-		}
-
-		usort( $wordcamps, array( $this, 'usort_wordcamps_by_year_and_status' ) );
-
-		set_transient( 'wcor_get_all_wordcamps', $wordcamps, HOUR_IN_SECONDS );
-
-		return $wordcamps;
-	}
-
-	/**
-	 * Sort WordCamps by year and post status.
-	 *
-	 * This is a usort() callback.
-	 *
-	 * WordCamps without a start date should be listed first, followed by WordCamps with a start date.
-	 *
-	 * Within the set that does not have a start date, they should be sorted by status; first drafts, then pending,
-	 * then published. Those with the same status should be sorted alphabetically.
-	 *
-	 * Within the set that does have a start date, they should be sorted by year, descending. Those within the same
-	 * year should be sorted alphabetically.
-	 *
-	 * Example:
-	 *
-	 * 1) draft   missing start date, titled "WordCamp Atlanta"
-	 * 2) draft   missing start date, titled "WordCamp Chicago"
-	 * 3) pending missing start date, titled "WordCamp Seattle"
-	 * 4) publish missing start date, titled "WordCamp Portland"
-	 * 5) publish in year 2014,       titled "WordCamp Dayton"
-	 * 6) publish in year 2014,       titled "WordCamp San Francisco"
-	 * 7) publish in year 2013,       titled "WordCamp Boston"
-	 * 8) publish in year 2013,       titled "WordCamp Columbus"
-	 *
-	 * @param WP_Post $a
-	 * @param WP_Post $b
-	 *
-	 * @return int
-	 */
-	protected function usort_wordcamps_by_year_and_status( $a, $b ) {
-		$a_year = empty( $a->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'Y', $a->meta['Start Date (YYYY-mm-dd)'][0] );
-		$b_year = empty( $b->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'Y', $b->meta['Start Date (YYYY-mm-dd)'][0] );
-
-		$status_weights = array(
-			// @todo - this needs to be updated with new wordcamp post statuses
-			'draft'   => 3,
-			'pending' => 2,
-			'publish' => 1,
-		);
-
-		if ( empty( $a_year ) || empty( $b_year ) ) {
-			if ( $a->post_status == $b->post_status ) {
-				return $a->post_title > $b->post_title;
-			} else {
-				return $status_weights[ $a->post_status ] < $status_weights[ $b->post_status ];
-			}
-		} else {
-			if ( date( 'Y', $a->meta['Start Date (YYYY-mm-dd)'][0] ) == date( 'Y', $b->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
-				return $a->post_title > $b->post_title;
-			} else {
-				return $a_year < $b_year;
-			}
-		}
 	}
 
 	/**
