@@ -1,66 +1,170 @@
 body.page-about,
 body.page-template-about {
 	.entry-header {
-		padding: ms(4) ms(1);
+		padding: ms( 4 ) ms( 1 );
 		text-align: center;
 
 		.entry-title {
-			font-size: ms( 8 );
+			font-size: ms( 11 );
 			font-weight: 100;
-			letter-spacing: 0.04rem;
 			line-height: inherit;
 			margin: 1rem auto;
 		}
 
 		.entry-description {
 			color: rgba( 255, 255, 255, 0.8);
-			font-size: ms( 0 );
+			font-size: ms( 4 );
 			margin-top: -0.4rem;
 		}
 	}
 
 	.entry-content {
 		overflow: hidden;
+
+		@include breakpoint( 640px ) {
+			overflow: initial;
+		}
 	}
 
-	.shape {
-		height: 250px;
-		margin: 0 auto;
-		opacity: 0.9;
+	.shapes {
+		height: 480px;
+		margin: 4rem 0;
 		position: relative;
-		text-align: center;
-		transform: skew(-15deg);
-		width: 300px;
 
-		&.community {
-			background-color: #685692;
-			bottom: 50px;
-			margin-right: -5%;
-		}
-
-		&.technology {
-			background-color: #027bb4;
-			margin-left: -5%;
-			top: 50px;
-		}
-
-		.dashicons-before {
+		.shape {
 			color: #fff;
 			display: block;
-			position: relative;
-			top: 30%;
+			height: 260px;
+			margin: 0 auto;
+			opacity: 0.9;
+			padding: 4.2rem 0;
+			position: absolute;
+			text-align: center;
+			transform: skew( -15deg) ;
+			width: 310px;
 
 			&:before {
 				font-size: ms( 12 );
 				height: 64px;
-				transform: skew(15deg);
+				transform: skew( 15deg );
 				width: 64px;
+			}
+
+			&:hover,
+			&:focus,
+			&:active {
+				text-decoration: none;
+			}
+
+			&.technology {
+				background-color: darken( #0073aa, 2% );
+				top: 0;
+				left: 0;
+				z-index: 1;
+
+				&:hover,
+				&:focus,
+				&:active {
+					background-color: darken( #0073aa, 12% );;
+				}
+			}
+
+			&.community {
+				background-color: #67598e;
+				right: 0;
+				bottom: 0;
+
+				&:hover,
+				&:focus,
+				&:active {
+					background-color: darken( #67598e, 10% );
+				}
+			}
+
+			h3, p {
+				margin: 0;
+				transform: skew( 15deg );
 			}
 		}
 
-		h3, p {
-			margin: 0;
-			transform: skew(15deg);
+		@include breakpoint( 480px ) {
+			height: 610px;
+
+			.shape {
+				height: 336px;
+				padding: 6.555rem 0;
+				width: 400px;
+			}
+		}
+
+		@include breakpoint( 640px ) {
+			height: 580px;
+
+			.shape {
+				height: 315px;
+				padding: 4.5rem 0;
+				width: 480px;
+
+				&:before {
+					font-size: ms( 14 );
+					height: 84px;
+					width: 84px;
+				}
+			}
+		}
+
+		@include breakpoint( 768px ) {
+			height: 323px;
+			margin: 4rem 0;
+
+			.shape {
+				height: 282px;
+				padding: 3.55rem 0;
+				width: 430px;
+
+				&.technology {
+					left: auto;
+					right: 45%;
+					top: 40px;
+				}
+
+				&.community {
+					bottom: auto;
+					left: 45%;
+				}
+			}
+		}
+
+		@include breakpoint( 1024px ) {
+			height: 420px;
+
+			.shape {
+				height: 380px;
+				padding: 5.66rem 0;
+				width: 580px;
+
+				&.technology {
+					right: 43%;
+				}
+
+				&.community {
+					left: 43%;
+				}
+
+				&:before {
+					font-size: ms( 16 );
+					height: 108px;
+					width: 108px;
+				}
+			}
+		}
+	}
+
+	.freedoms {
+		text-align: center;
+
+		h4 {
+			font-weight: 300;
 		}
 	}
 }

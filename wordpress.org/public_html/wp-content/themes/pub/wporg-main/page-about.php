@@ -40,14 +40,12 @@ the_post();
 						?>
 					</p>
 
-					<div class="shape technology">
-						<a class="dashicons-before dashicons-welcome-widgets-menus" href="">
+					<div class="shapes">
+						<a class="shape technology dashicons-before dashicons-welcome-widgets-menus" href="<?php echo esc_url( home_url( '/about/features/' ) ); ?>">
 							<h3><?php _esc_html_e( 'The Technology', 'wporg' ); ?></h3>
 							<p><?php _esc_html_e( 'Learn about the software', 'wporg' ); ?></p>
 						</a>
-					</div>
-					<div class="shape community">
-						<a class="dashicons-before dashicons-admin-site" href="">
+						<a class="shape community dashicons-before dashicons-admin-site" href="https://make.wordpress.org/">
 							<h3><?php _esc_html_e( 'The Community', 'wporg' ); ?></h3>
 							<p><?php _esc_html_e( 'Learn about the people', 'wporg' ); ?></p>
 						</a>
