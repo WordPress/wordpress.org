@@ -11,7 +11,10 @@ get_header();
 
 		<?php if ( ! empty( $data['errors'] ) ) : ?>
 			<?php foreach ( $data['errors'] as $error ) : ?>
-				<p><strong><?php esc_html_e( 'Error:', 'wordcamporg' ); ?></strong> <?php echo esc_html( $error ); ?></p>
+				<p class="notice notice-error">
+					<strong><?php esc_html_e( 'Error:', 'wordcamporg' ); ?></strong>
+					<?php echo esc_html( $error ); ?>
+				</p>
 			<?php endforeach; ?>
 		<?php endif; ?>
 
@@ -108,7 +111,10 @@ get_header();
 
 		<?php elseif ( $data['step'] == STEP_PAYMENT_SUCCESS ) : ?>
 
-			<p><strong><?php esc_html_e( 'Success!', 'wordcamporg' ); ?></strong> <?php esc_html_e( 'Your payment has been received, thank you!', 'wordcamporg' ); ?></p>
+			<p class="notice notice-success">
+				<strong><?php esc_html_e( 'Success!', 'wordcamporg' ); ?></strong>
+				<?php esc_html_e( 'Your payment has been received, thank you!', 'wordcamporg' ); ?>
+			</p>
 
 			<ul>
 				<li><a href="<?php echo esc_url( add_query_arg( 'again', 1 ) ); ?>"><?php esc_html_e( 'Make another payment', 'wordcamporg' ); ?></a></li>
