@@ -161,6 +161,7 @@ function get_whitelist() {
 		),
 		'gdpr-compliance' => array(
 			'azaozz',
+			'casiepa',
 		),
 		'glotpress' => array(
 			'ocean90',
