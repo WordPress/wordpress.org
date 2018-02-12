@@ -28,12 +28,7 @@ get_header();
 
 				<label><?php esc_html_e( 'Event', 'wordcamporg' ); ?></label>
 				<div class="control">
-					<select name="wordcamp_id">
-						<option value="" disabled selected><?php esc_html_e( 'Select a WordCamp', 'wordcamporg' ); ?></option>
-						<?php foreach ( $data['wordcamps'] as $wordcamp ) : ?>
-						<option value="<?php echo esc_attr( $wordcamp->ID ); ?>"><?php echo esc_html( $wordcamp->post_title ); ?></option>
-						<?php endforeach; ?>
-					</select>
+					<?php echo get_wordcamp_dropdown( 'wordcamp_id', $data['wordcamp_query_options'] ); ?>
 				</div>
 
 				<label><?php esc_html_e( 'Invoice ID', 'wordcamporg' ); ?></label>

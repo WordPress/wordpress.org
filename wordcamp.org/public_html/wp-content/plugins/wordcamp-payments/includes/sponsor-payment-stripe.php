@@ -5,6 +5,7 @@
 
 namespace WordCamp\Budgets\Sponsor_Payment_Stripe;
 use WordCamp\Utilities\Stripe_Client;
+use WordCamp_Loader;
 use WordCamp_Budgets;
 use Exception;
 
@@ -33,7 +34,7 @@ function render() {
 	$data = array(
 		'keys'       => $keys,
 		'step'       => STEP_SELECT_INVOICE,
-		'wordcamps'  => _get_wordcamps(),
+		'wordcamp_query_options' => get_wordcamp_query_options(),
 		'currencies' => WordCamp_Budgets::get_currencies(),
 		'errors'     => array(),
 	);
@@ -63,32 +64,26 @@ function _get_keys() {
 }
 
 /**
- * Return a list of valid WordCamp posts.
+ * Returns query options to be used with `get_wordcamps()`.
  *
- * @return array An array or WP_Post objects for all public WordCamps.
+ * This provides a consistent and canonical source for the query options, so that all callers are in sync.
+ *
+ * @return array
  */
-function _get_wordcamps() {
-	static $wordcamps;
+function get_wordcamp_query_options() {
+	return array(
+		'post_status' => WordCamp_Loader::get_public_post_statuses(),
+		'orderby'     => 'title',
+		'order'       => 'asc',
 
-	if ( ! isset( $wordcamps ) ) {
-		$wordcamps = get_posts( array(
-			'post_type'      => 'wordcamp',
-			'post_status'    => \WordCamp_Loader::get_public_post_statuses(),
-			'posts_per_page' => - 1,
-			'orderby'        => 'title',
-			'order'          => 'asc',
-
-			'meta_query' => array(
-				array(
-					'key'     => 'Start Date (YYYY-mm-dd)',
-					'value'   => strtotime( '-3 months' ),
-					'compare' => '>'
-				)
+		'meta_query' => array(
+			array(
+				'key'     => 'Start Date (YYYY-mm-dd)',
+				'value'   => strtotime( '-3 months' ),
+				'compare' => '>'
 			)
-		) );
-	}
-
-	return $wordcamps;
+		)
+	);
 }
 
 /**
@@ -135,7 +130,7 @@ function _handle_post_data( &$data ) {
 
 			// Make sure the selected WordCamp is valid.
 			$wordcamp_id = absint( $_POST['wordcamp_id'] );
-			$valid_ids   = wp_list_pluck( _get_wordcamps(), 'ID' );
+			$valid_ids   = wp_list_pluck( get_wordcamps( get_wordcamp_query_options() ), 'ID' );
 
 			if ( ! in_array( $wordcamp_id, $valid_ids ) ) {
 				$data['errors'][] = 'Please select a valid event.';
