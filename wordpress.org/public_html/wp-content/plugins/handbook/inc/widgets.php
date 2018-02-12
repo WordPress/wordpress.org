@@ -48,7 +48,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		?>
 		<p>
 			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('show_home') ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_home' ) ); ?>" type="checkbox" value="1" <?php echo $checked ?> />
-			<label for="<?php echo esc_attr( $this->get_field_id( 'show_home' ) ); ?>"><?php _e( 'List the home page' ); ?></label>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'show_home' ) ); ?>"><?php _e( 'List the home page', 'wporg' ); ?></label>
 		</p>
 		<?php
 	}
