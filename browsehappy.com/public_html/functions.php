@@ -225,6 +225,7 @@ endif;
 function browsehappy_load_textdomain() {
 	load_theme_textdomain( 'browsehappy', get_template_directory() . '/languages' );
 
+	/* translators: Enter either 'ltr' if target language is written left-to-right or 'rtl' if target language is written right-to-left. */
 	$GLOBALS['wp_locale']->text_direction = _x( 'ltr', 'text direction', 'browsehappy' );
 }
 
