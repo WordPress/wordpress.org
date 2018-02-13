@@ -18,7 +18,7 @@
 		    required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -35,7 +35,7 @@
 		    required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -52,7 +52,7 @@
 			required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -69,7 +69,7 @@
 			required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -86,7 +86,7 @@
 			required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -104,7 +104,7 @@
 		    required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -159,7 +159,7 @@
 			<?php endforeach; ?>
 		</select>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li class="wcpt-form-header">
@@ -180,7 +180,7 @@
 		    required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -211,7 +211,7 @@
 		    required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -247,7 +247,7 @@
 		    required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<?php wcorg_required_indicator(); ?>
 	</li>
 </ul>
 
