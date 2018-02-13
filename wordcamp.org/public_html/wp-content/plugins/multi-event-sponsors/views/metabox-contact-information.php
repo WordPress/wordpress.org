@@ -7,6 +7,7 @@
 	
 			<td>
 				<input id="mes_company_name" name="mes_company_name" type="text" value="<?php echo esc_attr( $company_name ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 		
@@ -15,6 +16,7 @@
 	
 			<td>
 				<input id="mes_website" name="mes_website" type="url" value="<?php echo esc_attr( $website ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 		
@@ -23,6 +25,7 @@
 	
 			<td>
 				<input id="mes_first_name" name="mes_first_name" type="text" value="<?php echo esc_attr( $first_name ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 
@@ -31,6 +34,7 @@
 
 			<td>
 				<input id="mes_last_name" name="mes_last_name" type="text" value="<?php echo esc_attr( $last_name ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 
@@ -39,6 +43,7 @@
 
 			<td>
 				<input id="mes_email_address" name="mes_email_address" type="email" value="<?php echo esc_attr( $email_address ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 	
@@ -47,6 +52,7 @@
 	
 			<td>
 				<input id="mes_phone_number" name="mes_phone_number" type="text" value="<?php echo esc_attr( $phone_number ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 	</tbody>
@@ -61,6 +67,7 @@
 
 			<td>
 				<input id="mes_street_address1" name="mes_street_address1" type="text" value="<?php echo esc_attr( $street_address1 ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 	
@@ -77,6 +84,7 @@
 
 			<td>
 				<input id="mes_city" name="mes_city" type="text" value="<?php echo esc_attr( $city ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 	
@@ -85,6 +93,7 @@
 
 			<td>
 				<input id="mes_state" name="mes_state" type="text" value="<?php echo esc_attr( $state ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 	
@@ -93,6 +102,7 @@
 
 			<td>
 				<input id="mes_zip_code" name="mes_zip_code" type="text" value="<?php echo esc_attr( $zip_code ); ?>" required class="regular-text" />
+				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
 	
