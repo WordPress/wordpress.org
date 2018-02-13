@@ -154,3 +154,21 @@ function wcorg_register_meta_only_on_endpoint( $meta_type, $meta_fields, $endpoi
 		register_meta( $meta_type, $field_key, $arguments );
 	}
 }
+
+/**
+ * Display the indicator that marks a form field as required
+ */
+function wcorg_required_indicator() {
+	?>
+
+	<span class="wcorg-required" aria-hidden="true">
+		<?php // translators: The symbol to indicate the form field is required ?>
+		<?php _e( '*', 'wordcamporg' ); ?>
+	</span>
+
+	<span class="screen-reader-text">
+		<?php _e( 'required field', 'wordcamporg' ); ?>
+	</span>
+
+	<?php
+}
