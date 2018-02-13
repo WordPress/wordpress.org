@@ -78,11 +78,11 @@ module.exports = function( grunt ) {
 						}
 
 						if ( 'tools' === component ) {
-							paths.push( '!../wporg/css/tools/_cube.scss' );
+							paths.push( '!../wporg/css/tools/_kube.scss' );
 						}
 
 						if ( 'base' === component ) {
-							paths.push( '!../wporg/css/base/_cube.scss' );
+							paths.push( '!../wporg/css/base/_kube.scss' );
 						}
 
 						files[ 'css/' + component + '/_' + component + '.scss' ] = paths;

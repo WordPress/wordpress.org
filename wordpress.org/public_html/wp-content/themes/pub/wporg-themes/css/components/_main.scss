@@ -698,7 +698,7 @@ body.full-overlay-active {
 	box-sizing: border-box;
 	position: fixed;
 	width: 300px;
-	height: 100%;
+	height: calc( 100% - 32px );
 	top: 0;
 	bottom: 0;
 	left: 0;
@@ -708,13 +708,9 @@ body.full-overlay-active {
 	background: #eee;
 }
 
-.logged-in .wp-full-overlay,
-.logged-in .wp-full-overlay-sidebar {
+.wp-full-overlay,
+.wp-full-overlay-sidebar {
 	margin-top: 32px;
-}
-
-.logged-in .wp-full-overlay-sidebar {
-	height: calc( 100% - 32px );
 }
 
 .wp-full-overlay.collapsed .wp-full-overlay-sidebar {
@@ -1560,12 +1556,12 @@ span.favorite.favorited {
 		width: 100%;
 	}
 
-	.logged-in .wp-full-overlay,
-	.logged-in .wp-full-overlay-sidebar {
+	.wp-full-overlay,
+	.wp-full-overlay-sidebar {
 		margin-top: 46px;
 	}
 
-	.logged-in .wp-full-overlay-sidebar {
+	.wp-full-overlay-sidebar {
 		height: calc( 100% - 46px);
 	}
 }
