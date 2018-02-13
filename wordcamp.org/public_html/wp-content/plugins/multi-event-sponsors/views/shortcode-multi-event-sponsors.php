@@ -20,4 +20,4 @@
 		<?php endforeach; ?>
 	</ul>
 
-<?php endforeach; ?>
+<?php endforeach;

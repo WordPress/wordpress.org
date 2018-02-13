@@ -29,4 +29,4 @@ if ( 'edit' == $wp_list_table->current_action() ) : ?>
 		<input name="camera-wrangler-email" id="tag-camera-wrangler-email" type="text" value="" size="40" />
 	</div>
 
-<?php endif; ?>
+<?php endif;

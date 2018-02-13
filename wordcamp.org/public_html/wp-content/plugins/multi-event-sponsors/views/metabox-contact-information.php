@@ -4,25 +4,25 @@
 	<tbody>
 		<tr>
 			<th><label for="mes_company_name"><?php _e( 'Company Name:', 'wordcamporg' ); ?></label></th>
-	
+
 			<td>
 				<input id="mes_company_name" name="mes_company_name" type="text" value="<?php echo esc_attr( $company_name ); ?>" required class="regular-text" />
 				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
-		
+
 		<tr>
 			<th><label for="mes_website"><?php _e( 'Website:', 'wordcamporg' ); ?></label></th>
-	
+
 			<td>
 				<input id="mes_website" name="mes_website" type="url" value="<?php echo esc_attr( $website ); ?>" required class="regular-text" />
 				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
-		
+
 		<tr>
 			<th><label for="mes_first_name"><?php _e( 'First Name:', 'wordcamporg' ); ?></label></th>
-	
+
 			<td>
 				<input id="mes_first_name" name="mes_first_name" type="text" value="<?php echo esc_attr( $first_name ); ?>" required class="regular-text" />
 				<?php wcorg_required_indicator(); ?>
@@ -46,10 +46,10 @@
 				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
-	
+
 		<tr>
 			<th><label for="mes_phone_number"><?php _e( 'Phone Number:', 'wordcamporg' ); ?></label></th>
-	
+
 			<td>
 				<input id="mes_phone_number" name="mes_phone_number" type="text" value="<?php echo esc_attr( $phone_number ); ?>" required class="regular-text" />
 				<?php wcorg_required_indicator(); ?>
@@ -70,7 +70,7 @@
 				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
-	
+
 		<tr>
 			<th><label for="mes_street_address2"><?php _e( 'Street Address 2:', 'wordcamporg' ); ?></label></th>
 
@@ -78,7 +78,7 @@
 				<input id="mes_street_address2" name="mes_street_address2" type="text" value="<?php echo esc_attr( $street_address2 ); ?>" class="regular-text" />
 			</td>
 		</tr>
-	
+
 		<tr>
 			<th><label for="mes_city"><?php _e( 'City:', 'wordcamporg' ); ?></label></th>
 
@@ -87,7 +87,7 @@
 				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
-	
+
 		<tr>
 			<th><label for="mes_state"><?php _e( 'State:', 'wordcamporg' ); ?></label></th>
 
@@ -96,7 +96,7 @@
 				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
-	
+
 		<tr>
 			<th><label for="mes_zip_code"><?php _e( 'Zip Code:', 'wordcamporg' ); ?></label></th>
 
@@ -105,7 +105,7 @@
 				<?php wcorg_required_indicator(); ?>
 			</td>
 		</tr>
-	
+
 		<tr>
 			<th><label for="mes_country"><?php _e( 'Country:', 'wordcamporg' ); ?></label></th>
 

@@ -21,4 +21,4 @@
 		<input type="checkbox" name="<?php echo esc_attr( $cb_push_name ); ?>" value="1" />
 		Push sponsors to site
 	</label>
-<?php endif; ?>
+<?php endif;

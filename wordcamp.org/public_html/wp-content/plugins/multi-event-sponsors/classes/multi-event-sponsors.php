@@ -6,7 +6,7 @@
 
 class Multi_Event_Sponsors {
 	const VERSION = '0.1';
-	
+
 	/**
 	 * Constructor
 	 */
@@ -88,7 +88,6 @@ class Multi_Event_Sponsors {
 	 * etc
 	 *
 	 * @param array $sponsors
-	 * @param array $regions
 	 *
 	 * @return array
 	 */
