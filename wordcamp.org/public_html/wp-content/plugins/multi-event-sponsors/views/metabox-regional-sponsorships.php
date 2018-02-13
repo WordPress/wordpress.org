@@ -12,7 +12,12 @@
 
 	<tbody>
 		<?php foreach ( $regions as $region ) : ?>
-			<tr>
+			<?php
+				// Some old regions are deprecated, but must remain in the system for back-compat. This prevents them from cluttering the UI when they're not needed.
+				$row_class = false !== stripos( $region->name, 'deprecated' ) && 'null' === $regional_sponsorships[ $region->term_id ] ? 'hidden' : '';
+			?>
+
+			<tr class="<?php echo esc_attr( $row_class ); ?>">
 				<td>
 					<label for="mes_regional_sponsorships-<?php echo esc_attr( $region->term_id ); ?>">
 						<?php echo esc_html( $region->name ); ?>
