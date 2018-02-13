@@ -23,3 +23,8 @@ Alternatively, you can checkout the [meta.svn Subversion repository for the them
 ### Translations
 
 Localized translations of the site can be contributed via the GlotPress installation at <https://translate.wordpress.org/projects/meta/browsehappy>. Instructions are provided at the link.
+
+API
+----------
+
+The Browse Happy API—which detects a browser via user-agent string and determines and returns some basic information about certain browsers, including if it needs an update or is insecure—is developed as a separate project. This API is used by the WordPress.org software for the admin dashboard widget that alerts a user if they are using an outdated or insecure browser. The code for that project can be found at <https://meta.svn.wordpress.org/sites/trunk/api.wordpress.org/public_html/core/browse-happy/>. Bug reports and patches can be submitted at <https://meta.trac.wordpress.org/> with the component "Browse Happy".
