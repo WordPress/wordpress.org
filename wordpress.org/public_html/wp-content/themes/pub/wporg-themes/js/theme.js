@@ -933,7 +933,7 @@ window.wp = window.wp || {};
 
 		collapse: function() {
 
-			this.$el.removeClass( 'collapsed expanded' );
+			this.$el.toggleClass( 'collapsed' ).removeClass( 'expanded' );
 			return false;
 		},
 
