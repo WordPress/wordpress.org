@@ -78,6 +78,7 @@ class Currency_XRT_Client {
 	 */
 	public function get_rates( $date ) {
 		$rates = array();
+		$cache_key = 'wc_currency_rates_' . strtotime( $date );
 
 		try {
 			$date = new \DateTime( $date );
@@ -87,7 +88,7 @@ class Currency_XRT_Client {
 			return $this->error;
 		}
 
-		$cached_rates = $this->get_cached_rates( $date );
+		$cached_rates = get_transient( $cache_key );
 
 		if ( false !== $cached_rates ) {
 			return $cached_rates;
@@ -106,7 +107,7 @@ class Currency_XRT_Client {
 
 		$rates = array_map( 'floatval', $rates );
 
-		$this->cache_rates( $date, $rates );
+		set_transient( $cache_key, $rates, MONTH_IN_SECONDS );
 
 		return $rates;
 	}
@@ -210,36 +211,5 @@ class Currency_XRT_Client {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Check for cached currency exchange rates for a particular date and return them if available.
-	 *
-	 * @todo Add object and/or database caching.
-	 *
-	 * @param \DateTime $date The date to retrieve rates for.
-	 *
-	 * @return array|bool
-	 */
-	protected function get_cached_rates( \DateTime $date ) {
-		if ( isset( $this->cache[ $date->format( 'Y-m-d' ) ] ) ) {
-			return $this->cache[ $date->format( 'Y-m-d' ) ];
-		}
-
-		return false;
-	}
-
-	/**
-	 * Cache the currency exchange rates for a particular date.
-	 *
-	 * @todo Add object and/or database caching.
-	 *
-	 * @param \DateTime $date The date of the rates to be cached.
-	 * @param array $rates    The rates to be cached.
-	 *
-	 * @return void
-	 */
-	protected function cache_rates( \DateTime $date, $rates ) {
-		$this->cache[ $date->format( 'Y-m-d' ) ] = $rates;
 	}
 }
