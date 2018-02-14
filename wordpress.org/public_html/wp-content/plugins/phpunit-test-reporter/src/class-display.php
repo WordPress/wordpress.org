@@ -205,7 +205,7 @@ class Display {
 
 		$output           = '';
 		$query_args       = array(
-			'posts_per_page'         => 10,
+			'posts_per_page'         => 25,
 			'post_type'              => 'result',
 			'post_parent'            => 0,
 			'orderby'                => 'post_name',
@@ -233,7 +233,7 @@ class Display {
 		$all_time_reporters = $wpdb->get_col( "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type='result' AND post_status='publish' AND post_parent != 0" ); // @codingStandardsIgnoreLine
 		if ( ! empty( $all_time_reporters ) ) {
 			$all_time_reporters = array_map( 'intval', $all_time_reporters );
-			$output            .= '<h4>Registered, but no reports in >10 Revisions</h4>' . PHP_EOL;
+			$output            .= '<h4>Registered, but no reports in >25 Revisions</h4>' . PHP_EOL;
 			$users              = get_users(
 				array(
 					'orderby' => 'display_name',
