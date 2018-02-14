@@ -109,22 +109,22 @@ the_post();
 
 				<section class="freedoms row gutters between">
 					<div class="col-3">
-						<img class="aligncenter" alt="" src="https://cldup.com/BcSCNPa-D1-3000x3000.png" width="150" />
+						<div class="graphic"></div>
 						<h4><?php _esc_html_e( 'The 1st Freedom', 'wporg' ); ?></h4>
 						<p><?php _esc_html_e( 'To run the program for any purpose.', 'wporg' ); ?></p>
 					</div>
 					<div class="col-3">
-						<img class="aligncenter" alt="" src="https://cldup.com/OWDlYRsg4S-3000x3000.png" width="150" />
+						<div class="graphic"></div>
 						<h4><?php _esc_html_e( 'The 2nd Freedom', 'wporg' ); ?></h4>
 						<p><?php _esc_html_e( 'To study how the program works and change it to make it do what you wish.', 'wporg' ); ?></p>
 					</div>
 					<div class="col-3">
-						<img class="aligncenter" alt="" src="https://cldup.com/OSEjaXa5Xb-3000x3000.png" width="150" />
+						<div class="graphic"></div>
 						<h4><?php _esc_html_e( 'The 3rd Freedom', 'wporg' ); ?></h4>
 						<p><?php _esc_html_e( 'To redistribute.', 'wporg' ); ?></p>
 					</div>
 					<div class="col-3">
-						<img class="aligncenter" alt="" src="https://cldup.com/nvNzFoZE8t-3000x3000.png" width="150" />
+						<div class="graphic"></div>
 						<h4><?php _esc_html_e( 'The 4th Freedom', 'wporg' ); ?></h4>
 						<p><?php _esc_html_e( 'To distribute copies of your modified versions to others.', 'wporg' ); ?></p>
 					</div>

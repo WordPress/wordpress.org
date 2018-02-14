@@ -157,7 +157,55 @@ body.page-template-about {
 	}
 
 	.freedoms {
+		margin-top: 2rem;
 		text-align: center;
+
+		.graphic {
+			background: url( '/wp-content/themes/pub/wporg-main/images/freedoms.png' ) no-repeat; // TODO: CDN
+			background-size: 100%;
+			padding-top: 100%;
+
+			@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 1.5dppx), only screen and (min-resolution: 144dpi) {
+				background-image: url( '/wp-content/themes/pub/wporg-main/images/freedoms-2x.png' ); // TODO: CDN
+			}
+		}
+
+		@include breakpoint( 0, 479px ) {
+			.graphic {
+				float: left;
+				margin: 0 1rem 1rem 0;
+				padding-top: 25%;
+				width: 25%;
+			}
+
+			h4, p {
+				clear: none;
+				margin-top: 0;
+				text-align: left;
+			}
+		}
+
+		@include breakpoint( 480px, 767px ) {
+			&.row {
+				flex-direction: row;
+				flex-wrap: wrap;
+			}
+			.col-3 {
+				width: calc( 50% - #{$grid-gutter} );
+			}
+		}
+
+		[class*="col-"]:nth-of-type(2) .graphic {
+			background-position: 0 34%;
+		}
+
+		[class*="col-"]:nth-of-type(3) .graphic {
+			background-position: 0 66%;
+		}
+
+		[class*="col-"]:nth-of-type(4) .graphic {
+			background-position: 0 100%;
+		}
 
 		h4 {
 			font-weight: 300;
