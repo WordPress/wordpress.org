@@ -194,6 +194,7 @@ class Locale_Associations implements Admin_Page {
 		wp_cache_add_global_groups( [ 'locale-associations' ] );
 
 		wp_cache_delete( 'subdomains', 'locale-associations' );
+		wp_cache_delete( 'local-list', 'locale-associations' );
 		wp_cache_delete( 'local-sites', 'locale-associations' );
 		wp_cache_delete( 'id-locale', 'locale-associations' );
 	}

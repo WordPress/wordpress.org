@@ -41,23 +41,26 @@ class Detector {
 	 * Detects locale.
 	 */
 	public function __construct() {
-		$this->active_locales = array_merge(
-			$this->active_locales,
-			(array) glob( get_template_directory() . '/languages/*.mo' ),
-			(array) glob( get_stylesheet_directory() . '/languages/*.mo' )
-		);
-		foreach ( $this->active_locales as &$mo_file ) {
-			$mo_file = basename( $mo_file, '.mo' );
+		$this->active_locales = $this->get_active_locales();
+
+		if ( ! empty( $_COOKIE[ 'wporg_locale' ] ) ) {
+			$locale = $this->sanitize_locale( $_COOKIE['wporg_locale'] );
+
+			if ( in_array( $locale, $this->active_locales, true ) ) {
+				$this->locale = $locale;
+				return;
+			}
 		}
-		unset( $mo_file );
 
 		if ( isset( $_GET['locale'] ) ) {
-			$get_locale = preg_replace( '/[^A-Z_-]/i', '', $_GET['locale'] );
+			$get_locale = $this->sanitize_locale( $_GET['locale'] );
 
 			$this->locale = $this->check_variants( $get_locale ) ?: $this->locale;
 		} else {
 			$this->locale = $this->guess_locale() ?: $this->locale;
 		}
+
+		setcookie( 'wporg_locale', $this->locale, time() + YEAR_IN_SECONDS, SITECOOKIEPATH, COOKIE_DOMAIN, is_ssl() );
 	}
 
 	/**
@@ -67,6 +70,23 @@ class Detector {
 	 */
 	public function get_locale() {
 		return $this->locale;
+	}
+
+	/**
+	 * Returns the list of available locales.
+	 *
+	 * @return array
+	 */
+	public function get_active_locales() {
+		wp_cache_add_global_groups( [ 'locale-associations' ] );
+
+		$locales = wp_cache_get( 'locale-list', 'locale-associations' );
+		if ( false === $locales ) {
+			$locales = (array) $GLOBALS['wpdb']->get_col( 'SELECT locale FROM wporg_locales' );
+			wp_cache_set( 'locale-list', $locales, 'locale-associations' );
+		}
+
+		return $locales;
 	}
 
 	/**
@@ -163,5 +183,15 @@ class Detector {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Returns a valid locale string.
+	 *
+	 * @param string $locale Locale string to be sanitized.
+	 * @return string
+	 */
+	protected function sanitize_locale( $locale ) {
+		return preg_replace( '/[^a-zA-Z0-9_]/', '', $locale );
 	}
 }
