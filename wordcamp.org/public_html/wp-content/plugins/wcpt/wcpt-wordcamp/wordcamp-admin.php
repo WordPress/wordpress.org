@@ -105,7 +105,7 @@ class WordCamp_Admin {
 		if ( current_user_can( 'wordcamp_wrangle_wordcamps' ) ) {
 			add_meta_box(
 				'wcpt_notes',
-				__( 'Add a Note', 'wordcamporg' ),
+				__( 'Add Private Note', 'wordcamporg' ),
 				'wcpt_add_note_metabox',
 				WCPT_POST_TYPE_ID,
 				'side',
@@ -236,7 +236,7 @@ class WordCamp_Admin {
 	}
 
 	/**
-	 * Validate and add a new note
+	 * Validate and add a new private note
 	 *
 	 * @param int $post_id
 	 */
@@ -252,6 +252,7 @@ class WordCamp_Admin {
 			return;
 		}
 
+		// Note that this is private, see wcpt_get_log_entries()
 		add_post_meta( $post_id, '_note', array(
 			'timestamp' => time(),
 			'user_id'   => get_current_user_id(),

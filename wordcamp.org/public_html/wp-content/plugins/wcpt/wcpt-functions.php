@@ -103,11 +103,16 @@ function wcpt_log_metabox( $post ) {
  * @return array
  */
 function wcpt_get_log_entries( $wordcamp_id ) {
+	/*
+	 * @todo Rename `_note` meta fields to `_private_note` to make it obvious to devs that the value should be
+	 * treated as private. The `get_post_metadata` filter can be used to support back-compat w/out having to
+	 * rename old entries in database.
+	 */
 	$entries        = array();
-	$notes          = get_post_meta( $wordcamp_id, '_note'          );
+	$private_notes  = get_post_meta( $wordcamp_id, '_note'          );
 	$status_changes = get_post_meta( $wordcamp_id, '_status_change' );
 
-	foreach ( array( 'note' => $notes, 'status_change' => $status_changes ) as $entry_type => $raw_entries ) {
+	foreach ( array( 'note' => $private_notes, 'status_change' => $status_changes ) as $entry_type => $raw_entries ) {
 		foreach ( $raw_entries as $entry ) {
 			$user = get_user_by( 'id', $entry['user_id'] );
 
