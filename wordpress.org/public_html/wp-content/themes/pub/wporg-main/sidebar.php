@@ -4,10 +4,10 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package WordPressdotorg\Theme
+ * @package WordPressdotorg\MainTheme
  */
 
-namespace WordPressdotorg\Theme;
+namespace WordPressdotorg\MainTheme;
 
 ?>
 
