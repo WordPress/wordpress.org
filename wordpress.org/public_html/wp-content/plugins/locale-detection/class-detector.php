@@ -43,24 +43,20 @@ class Detector {
 	public function __construct() {
 		$this->active_locales = $this->get_active_locales();
 
-		if ( ! empty( $_COOKIE[ 'wporg_locale' ] ) ) {
+		if ( ! empty( $_GET['locale'] ) ) {
+			$get_locale = $this->sanitize_locale( $_GET['locale'] );
+
+			$this->locale = $this->check_variants( $get_locale ) ?: $this->locale;
+		} elseif ( ! empty( $_COOKIE['wporg_locale'] ) ) {
 			$locale = $this->sanitize_locale( $_COOKIE['wporg_locale'] );
 
 			if ( in_array( $locale, $this->active_locales, true ) ) {
 				$this->locale = $locale;
-				return;
 			}
-		}
-
-		if ( isset( $_GET['locale'] ) ) {
-			$get_locale = $this->sanitize_locale( $_GET['locale'] );
-
-			$this->locale = $this->check_variants( $get_locale ) ?: $this->locale;
 		} else {
 			$this->locale = $this->guess_locale() ?: $this->locale;
+			setcookie( 'wporg_locale', $this->locale, time() + YEAR_IN_SECONDS, SITECOOKIEPATH, COOKIE_DOMAIN, is_ssl() );
 		}
-
-		setcookie( 'wporg_locale', $this->locale, time() + YEAR_IN_SECONDS, SITECOOKIEPATH, COOKIE_DOMAIN, is_ssl() );
 	}
 
 	/**
