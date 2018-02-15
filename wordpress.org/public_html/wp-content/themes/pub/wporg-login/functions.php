@@ -18,9 +18,6 @@ add_action( 'template_redirect', 'nocache_headers', 10, 0 );
  */
 function wporg_login_setup() {
 	load_theme_textdomain( 'wporg' );
-
-	/* translators: Enter either 'ltr' if target language is written left-to-right or 'rtl' if target language is written right-to-left. */
-	$GLOBALS['wp_locale']->text_direction = _x( 'ltr', 'text direction', 'wporg' );
 }
 add_action( 'after_setup_theme', 'wporg_login_setup' );
 
