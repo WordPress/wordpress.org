@@ -2111,7 +2111,44 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 .report-container select {
 	height: 24px;
 	line-height: 24px;
+	margin-bottom: 0;
 	padding: 1px;
+}
+
+.report-form {
+	display: grid;
+	grid-template-columns: max-content max-content auto;
+	grid-gap: 1em;
+	margin-bottom: 1em;
+}
+
+.report-form .field_report-year,
+.report-form .field_period {
+	grid-row: 1;
+}
+
+.report-form .field_wordcamp-id,
+.report-form .field_status {
+	grid-row: 2;
+	grid-column: 1/4;
+}
+
+.report-form .submit_show-results {
+	grid-row: 3;
+	grid-column: 1/4;
+}
+
+.report-form label {
+	margin-bottom: 3px;
+	float: none;
+	font-weight: 700;
+	display: block;
+}
+
+.report-form label span {
+	color: #aaa;
+	margin-left: 4px;
+	font-weight: 400;
 }
 
 .report-results {
@@ -2119,10 +2156,11 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 	border: 1px #c6c6c6 solid;
 	font-family: monospace;
 	font-size: 13px;
-	padding: 0 1em 0;
+	padding: 0 1em 1em;
 }
 
-#content .report-results h3 {
+#content .report-results h3,
+#content .report-results h4 {
 	margin: 1em 0 0.5em;
 }
 
@@ -2140,6 +2178,21 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 #content .report-results ul.ul-disc {
 	list-style: disc inside;
 	margin-left: 18px;
+}
+
+#content .report-results table {
+	font-size: 0.9em;
+	margin: auto;
+	max-width: 100%;
+	width: auto;
+}
+
+#content .report-results td.number {
+	text-align: right;
+}
+
+#content .report-results td.total {
+	font-weight: bold;
 }
 
 .report-results-control-bar {
