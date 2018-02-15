@@ -195,6 +195,7 @@ function get_default_application_values() {
 		'q_1068212_venues_considering'               => '',
 		'q_4236565_wporg_username'                   => '',
 		'q_4236565_slack_username'                   => '',
+		'where_find_online'                          => '',
 		'q_1079098_anything_else'                    => '',
 
 		// Bonus

@@ -100,11 +100,25 @@ defined( 'WPINC' ) or die();
 
 				<div class="qContent">
 					<div class="qText">
-						What is your username on <a href="https://chat.wordpress.org" target="_blank">WordPress' Slack server</a>?
+						What is your username on <a href="https://chat.wordpress.org" target="_blank">WordPress' Slack workspace</a>?
 					</div>
 
 					<div class="PDF_QT100">
 						<input value="" maxlength="500" name="q_4236565_slack_username" class="large" type="text" title="What is your Slack username?" />
+					</div>
+				</div>
+			</div>
+
+			<div class="PDF_questionDivide"></div>
+
+			<div class="PDF_question">
+				<div class="qContent">
+					<div class="qText">
+						Where can we find you online?
+					</div>
+
+					<div class="PDF_QT100">
+						<input value="" maxlength="500" name="where_find_online" class="large" type="text" title="Where can we find you online?" />
 					</div>
 				</div>
 			</div>
