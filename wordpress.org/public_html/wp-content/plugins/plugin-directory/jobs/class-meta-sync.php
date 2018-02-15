@@ -64,8 +64,7 @@ class Meta_Sync {
 		$last_review_time    = get_option( 'plugin_last_review_sync' );
 		$current_review_time = $wpdb->get_var( 'SELECT MAX(`date`) FROM `ratings`' );
 
-		// sync whenever ratings change, or at least daily, to prevent stale data from persisting forever
-		if ( strtotime( $last_review_time ) >= strtotime( $current_review_time ) || strtotime( $last_review_time ) >= strtotime( '-1 day' ) ) {
+		if ( strtotime( $last_review_time ) >= strtotime( $current_review_time ) ) {
 			return;
 		}
 
