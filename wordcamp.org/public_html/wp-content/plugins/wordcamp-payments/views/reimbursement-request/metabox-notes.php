@@ -29,6 +29,10 @@ defined( 'WPINC' ) or die();
 		<label for="wcbrr_new_note">
 			<?php _e( 'Add a Note', 'wordcamporg' ); ?>
 		</label>
+
+		<?php if ( current_user_can( 'manage_network' ) ) : ?>
+			<p class="description">(visible to organizers)</p>
+		<?php endif; ?>
 	</h3>
 
 	<textarea id="wcbrr_new_note" name="wcbrr_new_note" class="large-text"></textarea>
