@@ -80,7 +80,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$support_user = new WP_User( $user->ID, '', WPORG_SUPPORT_FORUMS_BLOGID );
 
 				if ( ! empty( $support_user->allcaps['bbp_blocked'] ) ) {
-					return new WP_Error( 'blocked_account', __( '<strong>ERROR</strong>: Your account has been disabled.', 'wporg-sso' ) );
+					return new WP_Error( 'blocked_account', __( '<strong>ERROR</strong>: Your account has been disabled.', 'wporg' ) );
 				}
 			}
 
@@ -296,8 +296,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @return array
 		 */
 		public function login_form_defaults( $defaults ) {
-			$defaults['label_remember'] = __( 'Remember me', 'wporg-sso' );
-			$defaults['label_log_in']   = __( 'Log in', 'wporg-sso' );
 			if ( ! empty( $_GET['redirect_to'] ) ) {
 				$defaults['redirect'] = $_GET['redirect_to']; // always ultimately checked for safety at redir time
 			} elseif ( $referer = wp_get_referer() ) {
