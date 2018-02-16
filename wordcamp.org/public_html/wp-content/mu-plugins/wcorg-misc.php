@@ -85,7 +85,6 @@ add_shortcode( 'menu', 'wcorg_shortcode_menu' );
  * @return array
  */
 function wcorg_disable_network_activated_plugins_on_sites( $plugins ) {
-
 	/*
 	 * central.wordcamp.org, plan.wordcamp.org
      *
@@ -98,7 +97,6 @@ function wcorg_disable_network_activated_plugins_on_sites( $plugins ) {
 		unset( $plugins['tagregator/bootstrap.php'] );
 		unset( $plugins['wc-canonical-years/wc-canonical-years.php'] );
 		unset( $plugins['wordcamp-organizer-nags/wordcamp-organizer-nags.php'] );
-		unset( $plugins['camptix/camptix.php'] );
 		unset( $plugins['wc-post-types/wc-post-types.php'] );
 	}
 
@@ -106,6 +104,7 @@ function wcorg_disable_network_activated_plugins_on_sites( $plugins ) {
 	 * plan.wordcamp.org
 	 */
 	if ( 63 === get_current_blog_id() ) {
+		unset( $plugins['camptix/camptix.php'] );
 		unset( $plugins['wordcamp-payments/bootstrap.php'] );
 		unset( $plugins['wordcamp-payments-network/bootstrap.php'] );
 	}
@@ -113,6 +112,20 @@ function wcorg_disable_network_activated_plugins_on_sites( $plugins ) {
 	return $plugins;
 }
 add_filter( 'site_option_active_sitewide_plugins', 'wcorg_disable_network_activated_plugins_on_sites' );
+
+/**
+ * Remove menu items on certain sites.
+ *
+ * This works together with `wcorg_disable_network_activated_plugins_on_sites()`. There are some plugins that we
+ * need running on sites so we can use some of their internals, but don't use the main features, and don't want
+ * them cluttering the UI.
+ */
+function wcorg_remove_admin_menu_pages_on_sites() {
+	if ( get_current_blog_id() === BLOG_ID_CURRENT_SITE ) {
+		remove_menu_page( 'edit.php?post_type=tix_ticket' );
+	}
+}
+add_action( 'admin_menu', 'wcorg_remove_admin_menu_pages_on_sites', 11 );
 
 /*
  * Show Tagregator's log to network admins
