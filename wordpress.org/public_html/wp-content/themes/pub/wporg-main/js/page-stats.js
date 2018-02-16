@@ -119,7 +119,6 @@
 				'#ee8e0d',
 				'#ffe399',
 			],
-			width: 650,
 			height: 450,
 			is3D: false,
 			title: title,

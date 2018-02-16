@@ -69,6 +69,23 @@ function widgets() {
 add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
 
 /**
+ * Enqueue scripts and styles.
+ */
+function scripts() {
+	wp_enqueue_script( 'google-charts', 'https://www.gstatic.com/charts/loader.js', [], null, true );
+	wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts'], 1, true );
+	wp_localize_script( 'wporg-page-stats', 'wporgPageStats', [
+		'trunk'         => number_format( WP_CORE_STABLE_BRANCH + 0.1, 1 ), /* trunk */
+		'beta'          => number_format( WP_CORE_STABLE_BRANCH + 0.2, 1 ), /* trunk w/ beta-tester plugin */
+		'wpVersions'    => ___( 'WordPress Version', 'wporg' ),
+		'phpVersions'   => ___( 'PHP Versions', 'wporg' ),
+		'mysqlVersions' => ___( 'MySQL Version', 'wporg' ),
+		'locales'       => ___( 'Locales', 'wporg' ),
+	] );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
+
+/**
  * Extend the default WordPress body classes.
  *
  * Adds classes to make it easier to target specific pages.
