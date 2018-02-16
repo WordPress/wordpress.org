@@ -88,6 +88,27 @@ function scripts() {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
 /**
+ * Filters an enqueued script's fully-qualified URL.
+ *
+ * @param string $src    The source URL of the enqueued script.
+ * @param string $handle The script's registered handle.
+ * @return string
+ */
+function script_src( $src, $handle ) {
+	$cdn_handles = [
+		'wporg-page-stats',
+	];
+
+	// Use CDN url.
+	if ( in_array( $handle, $cdn_handles, true ) ) {
+		$src = str_replace( get_home_url(), 'https://s.w.org', $src );
+	}
+
+	return $src;
+}
+add_filter( 'script_loader_src', __NAMESPACE__ . '\script_src', 10, 2 );
+
+/**
  * Extend the default WordPress body classes.
  *
  * Adds classes to make it easier to target specific pages.
