@@ -86,6 +86,30 @@ function body_class( $classes ) {
 add_filter( 'body_class', __NAMESPACE__ . '\body_class' );
 
 /**
+ * Adds child-page-specific template name to page template hierarchy.
+ *
+ * @param array $templates A list of template candidates, in descending order of priority.
+ * @return array List of filtered template candidates.
+ */
+function child_page_templates( $templates ) {
+	$page = get_queried_object();
+
+	if ( $page->post_parent ) {
+		$parent = get_post( $page->post_parent );
+
+		// We want it before page-{page_name}.php but after {Page Template}.php.
+		$page_name_index = array_search( "page-{$page->post_name}.php", $templates );
+		$top             = array_slice( $templates, 0, $page_name_index );
+		$bottom          = array_slice( $templates, $page_name_index );
+
+		$templates = array_merge( $top, ["page-{$parent->post_name}-{$page->post_name}.php"], $bottom );
+	}
+
+	return $templates;
+}
+add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\child_page_templates' );
+
+/**
  * Custom template tags.
  */
 require_once get_stylesheet_directory() . '/inc/template-tags.php';
