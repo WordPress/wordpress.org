@@ -1,0 +1,13 @@
+
+/** Tables **/
+.widefat.but-not-too-wide {
+	width: auto;
+}
+
+td.number {
+	text-align: right;
+}
+
+td.total {
+	font-weight: bold;
+}

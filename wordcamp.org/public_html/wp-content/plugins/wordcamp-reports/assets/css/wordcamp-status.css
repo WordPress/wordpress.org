@@ -1,0 +1,12 @@
+
+.status-log-toggle {
+	background: transparent;
+	border: 0;
+	cursor: pointer;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+#status-log-bulk-bar .status-log-bulk-toggle {
+	margin-right: 5px;
+}
