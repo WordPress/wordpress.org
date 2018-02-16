@@ -53,6 +53,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				add_filter( 'email_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
 
 				add_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
+
+				add_filter( 'login_url', [$this, 'add_locale'], 21 );
+				add_filter( 'register_url', [$this, 'add_locale'], 21 );
+				add_filter( 'lostpassword_url', [$this, 'add_locale'], 21 );
 			}
 		}
 
@@ -319,6 +323,16 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 
 			return $lostpassword_url;
+		}
+
+		/**
+		 * Adds a locale parameter to the passed URL.
+		 *
+		 * @param string $url The URL.
+		 * @return string
+		 */
+		public function add_locale( $url ) {
+			return add_query_arg( 'locale', get_locale(), $url );
 		}
 
 		/**
