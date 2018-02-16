@@ -10,7 +10,7 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<title><?php _e( 'WordPress.org Login' ); ?></title>
+<title><?php _e( 'WordPress.org Login', 'wporg' ); ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <?php wp_head(); ?>
