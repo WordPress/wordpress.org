@@ -47,7 +47,7 @@ class Detector {
 	}
 
 	/**
-	 * Sets the locale property based on the following parameters:
+	 * Sets the locale property and cookie based on the following parameters:
 	 *  1. $_GET['locale']
 	 *  2. $_COOKIE['wporg_locale']
 	 *  3. $_SERVER['HTTP_ACCEPT_LANGUAGE']
@@ -65,6 +65,9 @@ class Detector {
 			}
 		} else {
 			$this->locale = $this->guess_locale() ?: $this->locale;
+		}
+
+		if ( empty( $_COOKIE['wporg_locale'] ) || $this->locale !== $_COOKIE['wporg_locale'] ) {
 			setcookie( 'wporg_locale', $this->locale, time() + YEAR_IN_SECONDS, SITECOOKIEPATH, COOKIE_DOMAIN, is_ssl() );
 		}
 	}
