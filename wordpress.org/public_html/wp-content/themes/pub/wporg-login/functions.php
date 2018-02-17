@@ -217,4 +217,5 @@ function wporg_login_language_switcher() {
 	</script>
 	<?php
 }
-add_action( 'login_footer', 'wporg_login_language_switcher' );
+add_action( 'wp_footer', 'wporg_login_language_switcher', 1 );
+add_action( 'login_footer', 'wporg_login_language_switcher', 1 );
