@@ -13,6 +13,16 @@ namespace WordPressdotorg\LocaleDetection;
 class Detector {
 
 	/**
+	 * Name of the cookie for the locale.
+	 */
+	const COOKIE_NAME = 'wporg_locale';
+
+	/**
+	 * Name of the GET parameter for the locale.
+	 */
+	const GET_NAME = 'locale';
+
+	/**
 	 * Whether the locale was guessed or not.
 	 *
 	 * @var bool
@@ -53,12 +63,12 @@ class Detector {
 	 *  3. $_SERVER['HTTP_ACCEPT_LANGUAGE']
 	 */
 	private function set_locale() {
-		if ( ! empty( $_GET['locale'] ) ) {
-			$get_locale = $this->sanitize_locale( $_GET['locale'] );
+		if ( ! empty( $_GET[ self::GET_NAME ] ) ) {
+			$get_locale = $this->sanitize_locale( $_GET[ self::GET_NAME ] );
 
 			$this->locale = $this->check_variants( $get_locale ) ?: $this->locale;
-		} elseif ( ! empty( $_COOKIE['wporg_locale'] ) ) {
-			$locale = $this->sanitize_locale( $_COOKIE['wporg_locale'] );
+		} elseif ( ! empty( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+			$locale = $this->sanitize_locale( $_COOKIE[ self::COOKIE_NAME ] );
 
 			if ( in_array( $locale, $this->active_locales, true ) ) {
 				$this->locale = $locale;
@@ -67,8 +77,8 @@ class Detector {
 			$this->locale = $this->guess_locale() ?: $this->locale;
 		}
 
-		if ( empty( $_COOKIE['wporg_locale'] ) || $this->locale !== $_COOKIE['wporg_locale'] ) {
-			setcookie( 'wporg_locale', $this->locale, time() + YEAR_IN_SECONDS, SITECOOKIEPATH, COOKIE_DOMAIN, is_ssl() );
+		if ( empty( $_COOKIE[ self::COOKIE_NAME ] ) || $this->locale !== $_COOKIE[ self::COOKIE_NAME ] ) {
+			setcookie( self::COOKIE_NAME, $this->locale, time() + YEAR_IN_SECONDS, SITECOOKIEPATH, COOKIE_DOMAIN, is_ssl() );
 		}
 	}
 
