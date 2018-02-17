@@ -679,7 +679,11 @@ jQuery( function( $ ) {
 		}
 		echo '<td class="right"><a href="https://core.trac.wordpress.org/component/' . esc_attr( str_replace( ' ', '+', $component ) ) . '">' . $open_tickets . '</a></td>';
 		if ( $history['change'] ) {
-			echo '<td class="right">' . $arrow . ' ' . sprintf( "%+d", $history['change'] ) . '</td>';
+			$count = sprintf( "%+d", $history['change'] );
+			if ( $history['change'] > 0 ) {
+				$count = $this->trac_query_link( $count, ['component' => $component, 'time' => date( 'm/d/y', strtotime( '-7 days' ) ) ] );
+			}
+			echo '<td class="right">' . $arrow . ' ' . $count . '</td>';
 		} else {
 			echo '<td></td>';
 		}
