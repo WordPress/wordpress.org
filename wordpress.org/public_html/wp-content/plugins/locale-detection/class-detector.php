@@ -43,6 +43,16 @@ class Detector {
 	public function __construct() {
 		$this->active_locales = $this->get_active_locales();
 
+		$this->set_locale();
+	}
+
+	/**
+	 * Sets the locale property based on the following parameters:
+	 *  1. $_GET['locale']
+	 *  2. $_COOKIE['wporg_locale']
+	 *  3. $_SERVER['HTTP_ACCEPT_LANGUAGE']
+	 */
+	private function set_locale() {
 		if ( ! empty( $_GET['locale'] ) ) {
 			$get_locale = $this->sanitize_locale( $_GET['locale'] );
 
