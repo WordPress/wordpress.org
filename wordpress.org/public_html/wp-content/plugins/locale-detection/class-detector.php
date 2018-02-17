@@ -51,7 +51,7 @@ class Detector {
 	 * Detects locale.
 	 */
 	public function __construct() {
-		$this->active_locales = $this->get_active_locales();
+		$this->active_locales = array_merge( $this->active_locales, $this->get_active_locales() );
 
 		$this->set_locale();
 	}
