@@ -1,5 +1,5 @@
 /* globals wpTracAutoCompleteUsers, wpTracContributorLabels, wpTracCurrentUser */
-var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList;
+var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList, $body;
 
 (function($){
 
@@ -56,6 +56,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'wordpress', 'wp',
 	];
 
+	$body = $( document.body );
+
 	wpTrac = {
 
 		gardener: typeof wpBugGardener !== 'undefined',
@@ -74,9 +76,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			wpTrac.autocomplete.init();
 			wpTrac.linkMentions();
 
-			if ( ! $(document.body).hasClass( 'plugins' ) ) {
+			if ( ! $body.hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
-				if ( $(document.body).hasClass( 'core' ) ) {
+				if ( $body.hasClass( 'core' ) ) {
 					wpTrac.reports();
 					wpTrac.focuses.init();
 				}
@@ -179,8 +181,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		},
 
 		hacks: function() {
-			var content = $( '#content' ),
-				$body = $( document.body );
+			var content = $( '#content' );
 
 			// Add deprecated notice for core's test repository.
 			if ( $body.hasClass( 'core' ) && content.hasClass( 'browser' ) ) {
@@ -194,6 +195,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						'html': 'You are currently viewing the <strong>deprecated</strong> test repository. You may want to <a href="/browser/trunk/tests">view the tests in the default repository</a>.',
 					} ) );
 				}
+			}
+
+			if ( $body.hasClass( 'themes' ) ) {
+				$( '#h_reporter' ).text( 'Developer:' );
+				$( '#h_owner' ).text( 'Reviewer:' );
 			}
 
 			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space.
@@ -526,7 +532,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				}
 			}
 
-			if ( $(document.body).hasClass( 'core' ) && content.hasClass( 'search' ) ) {
+			if ( $body.hasClass( 'core' ) && content.hasClass( 'search' ) ) {
 				// Remove 'Wiki' and 'Milestone' from search.
 				$( '#fullsearch #milestone' ).next().remove().end().remove();
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
@@ -540,7 +546,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				remove = true;
 
 			// If we're on /newticket (based on the field-owner check), declutter.
-			if ( $('#field-owner').length && $(document.body).hasClass( 'core' ) ) {
+			if ( $('#field-owner').length && $body.hasClass( 'core' ) ) {
 				$('#field-priority, #field-severity, #field-milestone, #field-cc, #field-keywords').parents('td').hide().prev().hide();
 				if ( $('#field-focuses').length ) {
 					$('#field-focuses').closest('td').attr( 'colspan', 3 );
@@ -599,12 +605,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						xhrFields: { withCredentials: true }
 					}).done( function( data ) {
 						$( data ).find( '.ticket-reports' ).appendTo( popup );
-						$(document.body).addClass( 'ticket-reports-open' );
+						$body.addClass( 'ticket-reports-open' );
 					}).fail( function() {
 						failed = true;
 					});
 				} else {
-					$(document.body).toggleClass( 'ticket-reports-open' );
+					$body.toggleClass( 'ticket-reports-open' );
 					event.preventDefault();
 				}
 				if ( ! failed ) {
@@ -612,7 +618,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				}
 			});
 			$( '#report-popup' ).on( 'click', '.close', function() {
-				$(document.body).removeClass( 'ticket-reports-open' );
+				$body.removeClass( 'ticket-reports-open' );
 				return false;
 			});
 		},
