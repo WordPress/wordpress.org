@@ -356,7 +356,17 @@ class WordCamp_Coming_Soon_Page {
 			return;
 		}
 
-		echo '<style type="text/css">#wpadminbar .wc-coming-soon-info, #wpadminbar .wc-coming-soon-info a { background: #FFE399; color: #23282d }</style>';
+		?>
+
+		<style type="text/css">
+			#wpadminbar .wc-coming-soon-info .ab-item,
+			#wpadminbar .wc-coming-soon-info .ab-item a {
+				background: #FFE399;
+				color: #23282d;
+			}
+		</style>
+
+		<?php
 	}
 
 	/*
