@@ -103,7 +103,12 @@ the_post();
 
 				<section class="col-8">
 					<h2 id="bill-of-rights"><?php _esc_html_e( 'Bill of Rights', 'wporg' ); ?></h2>
-					<p><?php _esc_html_e( 'WordPress is licensed under the General Public License (GPLv2 or later) which provides four core freedoms. Consider this the WordPress Bill of Rights:', 'wporg' ); ?></p>
+					<p>
+						<?php
+						/* translators: Link to license page */
+						printf( wp_kses_post( ___( 'WordPress is licensed under the <a href="%s">General Public License (GPLv2 or later)</a> which provides four core freedoms. Consider this the WordPress Bill of Rights:', 'wporg' ) ), esc_url( home_url( '/about/license/' ) ) );
+						?>
+					</p>
 				</section>
 
 				<section class="freedoms row gutters between">
