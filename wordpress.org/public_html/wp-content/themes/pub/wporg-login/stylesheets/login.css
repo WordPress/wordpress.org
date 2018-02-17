@@ -12,6 +12,13 @@ body.login {
 	-webkit-box-align: center;
 	-ms-flex-align: center;
 	align-items: center;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	-ms-flex-direction: column;
+	flex-direction: column;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
 	height: auto;
 	min-height: 100%;
 }
@@ -481,6 +488,43 @@ form {
 	min-height: 0; /* clearfix IE7 support */
 }
 
+.screen-reader-text {
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	-webkit-clip-path: inset(50%);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	word-wrap: normal !important;
+}
+
+.language-switcher {
+	width: 350px;
+	margin: 0 auto 24px;
+	text-align: center;
+}
+
+.language-switcher label {
+	margin-right: .5em;
+}
+
+.rtl .language-switcher label {
+	margin-right: 0;
+	margin-left: .5em;
+}
+
+.language-switcher span.dashicons {
+	line-height: 30px;
+}
+
+.language-switcher select {
+	height: 30px;
+}
+
 @media (max-width: 375px) {
 	body, html {
 		background: #fff;
@@ -538,6 +582,10 @@ form {
 	#login {
 		width: 100%;
 		padding: 20px 24px;
+	}
+
+	.language-switcher {
+		width: 100%;
 	}
 
 	#login h1 {

@@ -146,3 +146,75 @@ function wporg_login_limit_user_meta( $meta ) {
 	return array_intersect_key( $meta, array_flip( $keep ) );
 }
 add_filter( 'insert_user_meta', 'wporg_login_limit_user_meta', 1 );
+
+/**
+ * Retreives all avaiable locales with their native names.
+ *
+ * @return array Locales with their native names.
+ */
+function wporg_login_get_locales() {
+	wp_cache_add_global_groups( [ 'locale-associations' ] );
+
+	$wp_locales = wp_cache_get( 'locale-list', 'locale-associations' );
+	if ( false === $wp_locales ) {
+		$wp_locales = (array) $GLOBALS['wpdb']->get_col( 'SELECT locale FROM wporg_locales' );
+		wp_cache_set( 'locale-list', $wp_locales, 'locale-associations' );
+	}
+
+	$wp_locales[] = 'en_US';
+
+	require_once GLOTPRESS_LOCALES_PATH;
+
+	$locales = [];
+
+	foreach ( $wp_locales as $locale ) {
+		$gp_locale = GP_Locales::by_field( 'wp_locale', $locale );
+		if ( ! $gp_locale ) {
+			continue;
+		}
+
+		$locales[ $locale ] = $gp_locale->native_name;
+	}
+
+	natsort( $locales );
+
+	return $locales;
+}
+
+/**
+ * Prints markup for a simple language switcher.
+ */
+function wporg_login_language_switcher() {
+	$current_locale = get_locale();
+
+	?>
+	<div class="language-switcher">
+		<form id="language-switcher" action="" method="GET">
+			<label for="language-switcher-locales">
+				<span aria-hidden="true" class="dashicons dashicons-translation"></span>
+				<span class="screen-reader-text"><?php _e( 'Select the language:', 'wporg' ); ?></span>
+			</label>
+			<select id="language-switcher-locales" name="locale">
+				<?php
+				foreach ( wporg_login_get_locales() as $locale => $locale_name ) {
+					printf(
+						'<option value="%s"%s>%s</option>',
+						esc_attr( $locale ),
+						selected( $locale, $current_locale, false ),
+						esc_html( $locale_name )
+					);
+				}
+				?>
+			</select>
+		</form>
+	</div>
+	<script>
+		var switcherForm  = document.getElementById( 'language-switcher' );
+		var localesSelect = document.getElementById( 'language-switcher-locales' );
+		localesSelect.addEventListener( 'change', function() {
+			switcherForm.submit()
+		} );
+	</script>
+	<?php
+}
+add_action( 'login_footer', 'wporg_login_language_switcher' );
