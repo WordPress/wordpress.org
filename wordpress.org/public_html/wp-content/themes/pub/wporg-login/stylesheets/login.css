@@ -224,7 +224,7 @@ p.intro, #login .message {
 }
 
 #login #login_error {
-	border-left: 4px solid #00a0d2;
+	border-left: 4px solid #dc3232;
 	padding: 12px;
 	margin: -24px 0 24px -24px;
 	background-color: #fbfbfb;
@@ -234,8 +234,10 @@ p.intro, #login .message {
 	box-shadow: none !important;
 }
 
-#login #login_error {
-	border-left-color: #dc3232;
+.rtl #login #login_error {
+	border-left: 0;
+	border-right: 4px solid #dc3232;
+	margin: -24px -24px 24px 0;
 }
 
 #login #nav {
@@ -398,11 +400,22 @@ body.route-register-confirm #login .message.error {
 		0 -1px 2px rgba(0, 0, 0, 0.07);
 }
 
+body.rtl.route-register #login .message.error,
+body.rtl.route-register-profile #login .message.error,
+body.rtl.route-register-confirm #login .message.error {
+	border-right-color: #dc3232;
+}
+
 body.route-register .message.error .avatar {
 	border-radius: 50%;
 	margin-right: 1em;
 	max-width: 100%;
 	height: auto;
+}
+
+body.rtl.route-register .message.error .avatar {
+	margin-right: 0;
+	margin-left: 1em;
 }
 
 body.route-register-profile #login .message.info {
@@ -416,13 +429,39 @@ body.route-register-profile p.intro {
 }
 
 form .login-mailinglist label {
+	position: relative;
+	display: block;
+	padding-left: 24px;
 	font-size: 12px;
-	cursor: pointer;
+	line-height: 19px;
+}
+
+.rtl form .login-mailinglist label {
+	padding-left: 0;
+	padding-right: 24px;
+}
+
+@media screen and (max-width: 782px) {
+	form .login-mailinglist label {
+		padding-left: 33px;
+	}
+
+	.rtl form .login-mailinglist label {
+		padding-left: 0;
+		padding-right: 33px;
+	}
 }
 
 form .login-mailinglist label input {
-	float: left;
-	margin: 0.5em 0.5em 0 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 2px 0 0;
+}
+
+.rtl form .login-mailinglist label input {
+	left: auto;
+	right: 0;
 }
 
 /* Clearfix for the forms, allows for non-flex-mode #login div to stretch over the submit button */
@@ -464,6 +503,10 @@ form {
 		width: 100%;
 	}
 
+	.rtl #login #login_error {
+		margin-right: 0;
+	}
+
 	#login {
 		margin-top: 52px;
 		margin-bottom: 48px;
@@ -481,7 +524,7 @@ form {
 		max-width: 40px
 	}
 
-	#rc-imageselect, .g-recaptcha {
+	#rc-imageselect {
 		margin: 0 auto;
 		transform: scale(0.8);
 		-webkit-transform: scale(0.8);

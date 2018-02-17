@@ -76,7 +76,7 @@ get_header();
 	?>
 
 	<p class="login-mailinglist">
-		<label>
+		<label for="user_mailinglist">
 			<input name="user_mailinglist" type="checkbox" id="user_mailinglist" value="true" <?php checked( $user_mailinglist, true ); ?>>
 			<?php _e( 'Subscribe to WordPress Announcements mailing list (a few messages a year)', 'wporg' ); ?>
 		</label>
@@ -88,7 +88,7 @@ get_header();
 	?>
 
 	<p class="login-submit">
-		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY  ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
+		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY  ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
 	</p>
 
 </form>
