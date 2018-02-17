@@ -304,8 +304,9 @@ class WordCamp_Central_Theme {
 		}
 
 		$markers = apply_filters( 'wcc_get_map_markers', $markers );
+		$cache_expiration = 'about' === $map_id ? WEEK_IN_SECONDS : DAY_IN_SECONDS;
 
-		set_transient( $transient_key, $markers, DAY_IN_SECONDS );
+		set_transient( $transient_key, $markers, $cache_expiration );
 
 		return $markers;
 	}
