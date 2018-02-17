@@ -29,6 +29,7 @@ body.route-register-confirm {
 .login-action-login.login .message,
 .login .message.reset-pass {
 	border-left: none;
+	border-right: none;
 	background-color: transparent;
 	color: #555D66;
 	padding: 0;
