@@ -40,7 +40,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * @example add_filter( 'allowed_redirect_hosts', array( &$this, 'add_allowed_redirect_host' ) );
 		*/
 		public function add_allowed_redirect_host( $hosts ) {
-			if ( self::SSO_HOST === $this->host ) {
+			if ( $this->is_sso_host() ) {
 				// If on the SSO host, add the requesting source (eg: make.wordpress.org), if within our bounds
 				$url  = parse_url( $this->_get_safer_redirect_to() );
 				$host = ( empty( $url ) ) ? null : $url['host'];
@@ -88,6 +88,15 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 */
 		public function has_host() {
 			return ( ! empty( $this->host ) );
+		}
+
+		/**
+		 * Whether the current host is the SSO host.
+		 *
+		 * @return bool True if current host is the SSO host, false if not.
+		 */
+		public function is_sso_host() {
+			return self::SSO_HOST === $this->host;
 		}
 
 		/**

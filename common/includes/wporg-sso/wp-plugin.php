@@ -54,9 +54,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				add_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
 
-				add_filter( 'login_url', [$this, 'add_locale'], 21 );
-				add_filter( 'register_url', [$this, 'add_locale'], 21 );
-				add_filter( 'lostpassword_url', [$this, 'add_locale'], 21 );
+				if ( ! $this->is_sso_host() ) {
+					add_filter( 'login_url', [ $this, 'add_locale' ], 21 );
+					add_filter( 'register_url', [ $this, 'add_locale' ], 21 );
+					add_filter( 'lostpassword_url', [ $this, 'add_locale' ], 21 );
+				}
 			}
 		}
 
@@ -161,7 +163,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
 				$this->_safe_redirect( add_query_arg( 'redirect_to', urlencode( $redirect_req ), $this->sso_signup_url ) );
 
-			} elseif ( self::SSO_HOST !== $this->host ) {
+			} elseif ( ! $this->is_sso_host() ) {
 				// If we're not on the SSO host
 				if ( preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// If on a WP login screen...
