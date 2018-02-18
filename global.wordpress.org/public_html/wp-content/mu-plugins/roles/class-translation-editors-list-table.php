@@ -290,7 +290,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 
 			$actions = array();
 			$actions['edit'] = '<a href="' . $edit_link . '">' . __( 'Edit', 'rosetta' ) . '</a>';
-			$actions['remove'] = '<a href="' . wp_nonce_url( $page_url . "&amp;action=remove-translation-editor&amp;translation-editor=$user->ID", 'remove-translation-editor' ) . '">' . __( 'Remove', 'rosetta' ) . '</a>';
+			$actions['delete'] = '<a href="' . wp_nonce_url( $page_url . "&amp;action=remove-translation-editor&amp;translation-editor=$user->ID", 'remove-translation-editor' ) . '">' . __( 'Remove', 'rosetta' ) . '</a>';
 			$edit .= $this->row_actions( $actions );
 		} else {
 			$edit = "<strong>$user->user_login</strong>";
