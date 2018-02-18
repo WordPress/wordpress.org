@@ -88,7 +88,7 @@ get_header();
 	?>
 
 	<p class="login-submit">
-		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY  ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
+		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary button-large" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
 	</p>
 
 </form>
