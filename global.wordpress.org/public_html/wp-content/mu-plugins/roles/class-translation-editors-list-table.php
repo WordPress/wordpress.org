@@ -338,7 +338,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		$projects = array();
 		foreach ( $project_access_list as $project_id ) {
 			if ( $this->projects[ $project_id ] ) {
-				$parent = $this->get_parent_project( $this->project_tree, $project_id );
+				$parent = $this->rosetta_roles->get_parent_project( $this->project_tree, $project_id );
 				if ( $parent->id != $project_id ) {
 					$name = sprintf(
 						/* translators: 1: Parent project name, 2: Child project name */
@@ -361,32 +361,5 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		}
 
 		echo implode( '<br>', $projects );
-	}
-
-	/**
-	 * Returns the parent project for a sub project.
-	 *
-	 * @param array $tree The project tree.
-	 * @param int $child_id The project tree.
-	 * @return object The parent project.
-	 */
-	private function get_parent_project( $tree, $child_id ) {
-		$parent = null;
-		foreach ( $tree as $project ) {
-			if ( $project->id == $child_id ) {
-				$parent = $project;
-				break;
-			}
-
-			if ( isset( $project->sub_projects ) ) {
-				$parent = $this->get_parent_project( $project->sub_projects, $child_id );
-				if ( $parent ) {
-					$parent = $project;
-					break;
-				}
-			}
-		}
-
-		return $parent;
 	}
 }

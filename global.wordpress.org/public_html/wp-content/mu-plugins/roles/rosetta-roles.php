@@ -744,6 +744,33 @@ class Rosetta_Roles {
 		return $tree;
 	}
 
+	/**
+	 * Returns the parent project for a sub project.
+	 *
+	 * @param array $tree The project tree.
+	 * @param int $child_id The project tree.
+	 * @return object The parent project.
+	 */
+	public function get_parent_project( $tree, $child_id ) {
+		$parent = null;
+		foreach ( $tree as $project ) {
+			if ( $project->id == $child_id ) {
+				$parent = $project;
+				break;
+			}
+
+			if ( isset( $project->sub_projects ) ) {
+				$parent = $this->get_parent_project( $project->sub_projects, $child_id );
+				if ( $parent ) {
+					$parent = $project;
+					break;
+				}
+			}
+		}
+
+		return $parent;
+	}
+
 	private function _sort_name_callback( $a, $b ) {
 		return strnatcasecmp( $a->name, $b->name );
 	}
