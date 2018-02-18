@@ -874,7 +874,13 @@ Welcome to the WordPress Polyglots team and happy translating.'
 		}
 
 		$ignore_project_ids = array(
+			13, // BuddyPress
+			58, // bbPress
+			67, // WordCamp Base Theme
+			91, // GlotPress
+			481, // Plugin Directory
 			2804, // Waiting
+			369622, // Disabled
 		);
 
 		$_projects = $wpdb->get_results( '
