@@ -72,14 +72,25 @@ class Rosetta_Roles {
 		if ( ! is_main_site() ) {
 			add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
 			add_filter( 'set-screen-option', array( $this, 'save_custom_screen_options' ), 10, 3 );
+			add_action( 'after_setup_theme', array( $this, 'register_resources_nav_menu' ) );
 
 			add_action( 'translation_editor_added', array( $this, 'update_wporg_profile_badge' ) );
 			add_action( 'translation_editor_removed', array( $this, 'update_wporg_profile_badge' ) );
+
+			add_action( 'translation_editor_added', array( $this, 'send_email_notification' ), 10, 2 );
+			add_action( 'translation_editor_updated', array( $this, 'send_email_notification' ), 10, 2 );
 		}
 
 		add_action( 'wp_ajax_rosetta-get-projects', array( $this, 'ajax_rosetta_get_projects' ) );
 
 		Cross_Locale_PTE::init_admin();
+	}
+
+	/**
+	 * Registers a nav menu for storing resources for translation editors.
+	 */
+	public function register_resources_nav_menu() {
+		register_nav_menu( 'rosetta_translation_editor_resources', __( 'Resources for translation editors', 'rosetta' ) );
 	}
 
 	/**
@@ -502,6 +513,172 @@ class Rosetta_Roles {
 		$action = 'translation_editor_added' === current_filter() ? 'add' : 'remove';
 
 		$this->notify_profiles_wporg_translation_editor_update( $user->ID, $action );
+	}
+
+	/**
+	 * Sends an email to the new translation editor.
+	 *
+	 * @param \WP_User $user           The user object of the translation editor.
+	 * @param array    $projects_added List of project IDs.
+	 */
+	public function send_email_notification( $user, $projects_added ) {
+		// Don't send an email if no new projects have been added.
+		if ( ! $projects_added ) {
+			return;
+		}
+
+		$to      = $user->user_email;
+		$subject = __( 'You have been added to a WordPress project as a translation editor', 'rosetta' );
+
+		if ( [ '0' ] === $projects_added ) {
+			// General Translation Editor.
+
+			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, LOCALEURL. */
+			$message = __(
+				'Howdy ###USERNAME###,
+
+We are happy to inform you that you have been successfully added as a General Translation Editor of WordPress for ###LOCALENAME###.
+
+As a General Translation Editor you have access to submit and approve translations for all projects available at ###LOCALEURL###.
+
+Alongside WordPress itself, it’s good to prioritize translating the projects that ship with it first – The default themes like Twenty Seventeen or Twenty Sixteen, and Akismet.
+
+Please get to know how the team works by reading the Translators Handbook – https://make.wordpress.org/polyglots/handbook/, a good place to start is the General Expectations page.
+
+As a General Translation Editor for the locale, we request that you fill out your WordPress.org profile (https://profiles.wordpress.org/profile/), register on Slack and provide a way for translation contributors to reach you.
+
+We also ask all WordPress General Translation Editors to subscribe for notifications for their locales, you can find the notification subscription settings in your profile settings (https://profiles.wordpress.org/profile/notifications/).
+
+The Polyglots team connects on Slack once per week at 11am UTC every Wednesday. We’d love to have you there if you can make it. Register from http://chat.wordpress.org.
+If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
+
+Welcome to the WordPress Polyglots team and happy translating!'
+			);
+
+			$message = str_replace(
+				[
+					'###USERNAME###',
+					'###LOCALENAME###',
+					'###LOCALEURL###',
+				],
+				[
+					$user->user_login,
+					'#' . $this->gp_locale->wp_locale . ' (' . $this->gp_locale->native_name . ')',
+					'https://translate.wordpress.org/locale/' . $this->gp_locale->slug,
+				],
+				$message
+			);
+		} else {
+			// Project Translation Editor.
+
+			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, PROJECTLIST, RESOURCESLIST. */
+			$message = __(
+				'Howdy ###USERNAME###,
+
+We are happy to inform you that you have been successfully added as a Project Translation Editor for ###LOCALENAME### for the following projects:
+
+###PROJECTLIST###
+
+You have been added to these projects either by your own request, or by the request of the plugin author.
+
+Before translating, please get to know how the team works by reading the Translators Handbook – https://make.wordpress.org/polyglots/handbook/, a good place to start is the General Expectations page.
+
+Your local translation team can be found on https://make.wordpress.org/polyglots/teams/. Make sure you get familiar with the documentation about translating in your language that other contributors from your team have prepared.
+
+###RESOURCESLIST###
+
+The Polyglots team connects on Slack once per week at 11am UTC every Wednesday. We’d love to have you there if you can make it. Register from https://chat.wordpress.org/.
+If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
+
+Welcome to the WordPress Polyglots team and happy translating.'
+			);
+
+			$projects     = $this->get_translate_projects();
+			$project_tree = $this->get_project_tree( $projects, 0, 1 );
+
+			$project_list = [];
+
+			foreach ( $projects_added as $project_id ) {
+				if ( $projects[ $project_id ] ) {
+					$parent = $this->get_parent_project( $project_tree, $project_id );
+					if ( $parent->id != $project_id ) {
+						$name = sprintf(
+							/* translators: 1: Parent project name, 2: Child project name */
+							__( '%1$s &rarr; %2$s', 'rosetta' ),
+							$parent->name,
+							$projects[ $project_id ]->name
+						);
+					} else {
+						$name = $projects[ $project_id ]->name;
+					}
+
+					$name = sprintf(
+						'%s: %s',
+						$name,
+						esc_url( 'https://translate.wordpress.org/projects/' . $projects[ $project_id ]->path )
+					);
+
+					$project_list[] = html_entity_decode( $name, ENT_QUOTES, get_bloginfo( 'charset' ) );
+				}
+			}
+
+			$resources_list = '';
+
+			if ( has_nav_menu( 'rosetta_translation_editor_resources' ) ) {
+				$resources_list = (string) wp_nav_menu( [
+					'fallback_cb'    => '__return_false',
+					'theme_location' => 'rosetta_translation_editor_resources',
+					'container'      => false,
+					'echo'           => false,
+					'depth'          => 1,
+					'items_wrap'     => '%3$s',
+					// Custom walker that returns plain text links.
+					'walker'         => new class() extends Walker_Nav_Menu {
+						public function start_lvl( &$output, $depth = 0, $args = array() ) {
+							$output .= "\n";
+						}
+						public function end_lvl( &$output, $depth = 0, $args = array() ) {
+							$output .= "\n";
+						}
+						public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+							$href  = ! empty( $item->url ) ? $item->url : '';
+							$title = apply_filters( 'the_title', $item->title, $item->ID );
+							$title = apply_filters( 'nav_menu_item_title', $title, $item, $args, $depth );
+
+							$item_output = $title;
+							if ( $href ) {
+								$item_output .= ': ' . esc_url( $href );
+							}
+
+							$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+						}
+						public function end_el( &$output, $item, $depth = 0, $args = array() ) {
+							$output .= "\n";
+						}
+					},
+				] );
+			}
+
+			$message = str_replace(
+				[
+					'###USERNAME###',
+					'###LOCALENAME###',
+					'###PROJECTLIST###',
+					'###RESOURCESLIST###',
+				],
+				[
+					$user->user_login,
+					'#' . $this->gp_locale->wp_locale . ' (' . $this->gp_locale->native_name . ')',
+					implode( "\n", $project_list ),
+					$resources_list,
+				],
+				$message
+			);
+		}
+
+		$headers = "From: \"WordPress Polyglots\" <donotreply@wordpress.org>\n" . 'Content-Type: text/plain; charset="' . get_option( 'blog_charset' ) . "\"\n";
+
+		wp_mail( $to, $subject, $message, $headers );
 	}
 
 	/**
