@@ -16,7 +16,7 @@ gp_tmpl_header();
 				<th class="col-locale-code"><?php _e( 'Locale' ); ?></th>
 				<?php foreach ( $projects as $slug => $project ) : ?>
 					<th><?php
-						$namereplace = array( 'WordPress.org ', 'WordPress for ', 'WordPress ', 'ectory' );
+						$namereplace = array( 'WordPress.org ', 'WordPress for ', 'WordPress ', 'ectory', ' - Development' );
 						echo esc_html( str_replace( $namereplace, '', $project->name ) );
 					?></th>
 				<?php endforeach; ?>

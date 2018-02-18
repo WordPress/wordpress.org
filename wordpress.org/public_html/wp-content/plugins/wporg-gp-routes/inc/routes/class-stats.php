@@ -16,6 +16,7 @@ class Stats extends GP_Route {
 		global $wpdb;
 
 		$projects = array(
+			'meta/wordpress-org' => false,
 			'meta/rosetta' => false,
 			'meta/browsehappy' => false,
 			'meta/themes' => false,
