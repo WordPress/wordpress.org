@@ -292,6 +292,7 @@ class Locale extends GP_Route {
 					case 'rosetta':
 						return '<div class="default-icon"><span class="dashicons dashicons-admin-site"></span></div>';
 					case 'plugins':
+					case 'plugins-v3':
 						return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 					case 'themes':
 						return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
@@ -328,6 +329,8 @@ class Locale extends GP_Route {
 				return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 			case 'glotpress':
 				return '<div class="icon"><img src="'. plugins_url( 'templates/images/glotpress.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
+			case 'apps':
+				return '<div class="default-icon"><span class="dashicons dashicons-smartphone"></span></div>';
 			default:
 				return '<div class="default-icon"><span class="dashicons dashicons-translation"></span></div>';
 		}
