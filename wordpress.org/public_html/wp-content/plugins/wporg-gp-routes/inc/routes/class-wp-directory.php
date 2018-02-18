@@ -10,7 +10,7 @@ use GP_Route;
 class WP_Directory extends GP_Route {
 
 	/**
-	 * Prints stats about contributors of a specific project.
+	 * Retrieves stats about contributors of a specific project.
 	 *
 	 * @param GP_Project $project The project.
 	 * @return array|false False if project not found, otherwise array with contributors.
@@ -29,7 +29,7 @@ class WP_Directory extends GP_Route {
 			SELECT
 				`user_id`, `locale`
 			FROM {$wpdb->wporg_translation_editors}
-			WHERE `project_id` = %d
+			WHERE `project_id` = %d AND `locale` != 'all-locales'
 		", $project->id ), OBJECT );
 
 		foreach ( $translation_editors as $translation_editor ) {
