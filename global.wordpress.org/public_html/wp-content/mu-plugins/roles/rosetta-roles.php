@@ -398,7 +398,7 @@ class Rosetta_Roles {
 			WHERE `user_id` = %d AND `locale` = %s
 		", $user->ID, $this->gp_locale->slug ) );
 
-		do_action( 'translation_editor_removed', $user->ID );
+		do_action( 'translation_editor_removed', $user );
 
 		return true;
 	}
@@ -484,9 +484,9 @@ class Rosetta_Roles {
 		}
 
 		if ( $update ) {
-			do_action( 'translation_editor_updated', $user->ID );
+			do_action( 'translation_editor_updated', $user, $projects_to_add, $projects_to_remove );
 		} else {
-			do_action( 'translation_editor_added', $user->ID );
+			do_action( 'translation_editor_added', $user, $projects_to_add, $projects_to_remove );
 		}
 
 		return true;
@@ -496,12 +496,12 @@ class Rosetta_Roles {
 	 * Handles the update of the translation editor badges on
 	 * profiles.wordpress.org.
 	 *
-	 * @param int $user_id User ID.
+	 * @param \WP_User $user The user object of the translation editor.
 	 */
-	public function update_wporg_profile_badge( $user_id ) {
+	public function update_wporg_profile_badge( $user ) {
 		$action = 'translation_editor_added' === current_filter() ? 'add' : 'remove';
 
-		$this->notify_profiles_wporg_translation_editor_update( $user_id, $action );
+		$this->notify_profiles_wporg_translation_editor_update( $user->ID, $action );
 	}
 
 	/**
