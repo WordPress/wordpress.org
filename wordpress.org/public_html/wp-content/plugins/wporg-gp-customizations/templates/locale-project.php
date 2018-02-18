@@ -261,13 +261,15 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 	<?php if ( $locale_contributors['editors'] ) : ?>
 		<div class="locale-project-contributors-group locale-project-contributors-editors">
 			<h3>Translation Editors</h3>
+			<small>These users can validate and approve your translations.</small>
+			<br><br>
 			<ul>
 				<?php
 				foreach ( $locale_contributors['editors'] as $editor ) {
 					printf(
 						'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
 						$editor->nicename,
-						get_avatar( $editor->email, 50 ),
+						get_avatar( $editor->email, 40 ),
 						$editor->display_name ? $editor->display_name : $editor->nicename
 					);
 				}
