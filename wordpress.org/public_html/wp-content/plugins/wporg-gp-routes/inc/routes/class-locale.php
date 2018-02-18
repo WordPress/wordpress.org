@@ -357,6 +357,49 @@ class Locale extends GP_Route {
 	}
 
 	/**
+	 * Retrieves translation editors of a project.
+	 *
+	 * Also includes cross-locale editors and editors of parent projects.
+	 *
+	 * @param GP_Project $project     A GlotPress project.
+	 * @param string     $locale_slug Slug of the locale.
+	 * @return array List of user IDs.
+	 */
+	private function get_translation_editors( $project, $locale_slug ) {
+		global $wpdb;
+
+		// Get the translation editors of the project.
+		$editors = (array) $wpdb->get_col( $wpdb->prepare( "
+			SELECT
+				`user_id`
+			FROM {$wpdb->wporg_translation_editors}
+			WHERE
+				`project_id` = %d
+				AND `locale` IN (%s, 'all-locales')
+		", $project->id, $locale_slug ) );
+
+		if ( $project->parent_project_id ) {
+			$parent_project_id = $project->parent_project_id;
+			$parent_project = GP::$project->get( $parent_project_id );
+			while ( $parent_project_id ) {
+				$editors = $editors + (array) $wpdb->get_col( $wpdb->prepare( "
+					SELECT
+						`user_id`
+					FROM {$wpdb->wporg_translation_editors}
+					WHERE
+						`project_id` = %d
+						AND `locale` IN (%s, 'all-locales')
+				", $parent_project->id, $locale_slug ) );
+
+				$parent_project = GP::$project->get( $parent_project_id );
+				$parent_project_id = $parent_project->parent_project_id;
+			}
+		}
+
+		return $editors;
+	}
+
+	/**
 	 * Retrieves contributors of a project.
 	 *
 	 * @param GP_Project $project     A GlotPress project.
@@ -373,14 +416,7 @@ class Locale extends GP_Route {
 		);
 
 		// Get the translation editors of the project.
-		$editors = $wpdb->get_col( $wpdb->prepare( "
-			SELECT
-				`user_id`
-			FROM {$wpdb->wporg_translation_editors}
-			WHERE
-				`project_id` = %d
-				AND `locale` = %s
-		", $project->id, $locale_slug ) );
+		$editors = $this->get_translation_editors( $project, $locale_slug );
 
 		// Get the names of the translation editors.
 		foreach ( $editors as $editor_id ) {
@@ -467,7 +503,13 @@ class Locale extends GP_Route {
 		}
 		unset( $contributors, $editors );
 
-		uasort( $locale_contributors['contributors'], array( $this, '_sort_contributors_by_total_count_callback' ) );
+		uasort( $locale_contributors['contributors'], function( $a, $b ) {
+			return $a->total_count < $b->total_count;
+		} );
+
+		uasort( $locale_contributors['editors'], function( $a, $b ) {
+			return strcasecmp( $a->display_name, $b->display_name );
+		} );
 
 		return $locale_contributors;
 	}
@@ -890,20 +932,12 @@ class Locale extends GP_Route {
 		" );
 	}
 
-	private function _sort_contributors_by_total_count_callback( $a, $b ) {
-		return $a->total_count < $b->total_count;
-	}
-
 	private function _sort_reverse_name_callback( $a, $b ) {
 		// The Waiting project should always be first.
 		if ( $a->slug == 'waiting' ) {
 			return -1;
 		}
 		return - strcasecmp( $a->name, $b->name );
-	}
-
-	private function _sort_name_callback( $a, $b ) {
-		return strcasecmp( $a->name, $b->name );
 	}
 
 	private function _encode( $raw ) {
