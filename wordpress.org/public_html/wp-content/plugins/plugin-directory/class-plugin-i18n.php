@@ -224,7 +224,7 @@ class Plugin_I18n {
 		}
 
 		$translation_set_id = $wpdb->get_var( $wpdb->prepare(
-			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s',
+			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s AND slug = "default"',
 			$branch_id, $locale
 		) );
 
@@ -232,7 +232,7 @@ class Plugin_I18n {
 
 			// Don't give up yet. Might be given fr_FR, which actually exists as locale=fr in GP.
 			$translation_set_id = $wpdb->get_var( $wpdb->prepare(
-				'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s',
+				'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s AND slug = "default"',
 				$branch_id, preg_replace( '/^([^-]+)(-.+)?$/', '\1', $locale )
 			) );
 		}
