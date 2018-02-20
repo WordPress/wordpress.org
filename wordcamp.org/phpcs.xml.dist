@@ -1,0 +1,100 @@
+<?xml version="1.0" ?>
+<ruleset name="WordCamp.org Coding Standards">
+	<description>Apply customized version of WordPress Coding Standards to WordCamp.org PHP scripts</description>
+
+	<!--
+		Setup instructions:
+
+		1) Install PHPCS (e.g., `brew install homebrew/php/php-code-sniffer`)
+		2) Install the WP Coding Standards (https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards)
+		3) Edit CodeSniffer.conf and update `installed_paths` to point to where you installed the WP Coding Standards,
+		   and any other tweaks you want to make.
+		   See https://github.com/iandunn/dotfiles/blob/master/phpcs/CodeSniffer.conf for an example.
+		4) Make sure this file is at the project root. You can symlink it there if your `meta.(git|svn).wordpress.org`
+		   checkout is elsewhere.
+		5) `cd` to a folder inside the project and run `phpcs`. You can use the `-a` flag to run it interactively.
+		6) Run it before you generate a patch or create a commit. Setting up a git pre-commit or pre-push hook can
+		   make that automatic.
+
+		Note: It's possible to create a `phpcs.xml` file if you want to override anything here, but please make sure
+		any code you contribute conforms to this file. If you think any of the rules here should change, start a
+		discussion in #meta-wordcamp.
+
+		See these links for useful information:
+			- https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml
+	        - https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties
+	-->
+
+	<!-- TODO
+		Exclude 3rd party plugins/themes so this can be run from the project root without a ton of extraneous stuff
+		<exclude-pattern>/build/*</exclude-pattern>
+
+		Look through `General` and `Squiz` sniffs for anything you might want to add.
+
+		Maybe add WordCamp\Remote_CSS\output_cached_css to customEscapingFunctions or whichever param is most appropriate
+		Maybe do something similar for set_cache_headers and nonce verification
+
+		Setup WordPress.WP.I18n text_domain property and test that it works, see https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties#internationalization-setting-your-text-domain
+	-->
+
+	<arg name="extensions" value="php" />
+
+	<!-- Show sniff codes in all reports -->
+	<arg value="ps" />
+	<arg name="colors" />
+
+	<!-- Scan all (php) files in the current folder and subfolders -->
+	<file>.</file>
+
+	<rule ref="WordPress-Core">
+		<!-- I don't see anything wrong with this :) -->
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen" />
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd" />
+
+		<!-- I've never heard a compelling argument for this, and it clutters the directory listing with irrelevant noise. -->
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+
+		<!-- It's often obvious what the placeholder is, so whether or not to include a comment is a judgement call. -->
+		<exclude name="WordPress.WP.I18n.MissingTranslatorsComment" />
+
+		<!-- I know it's a language construct, but it just looks better using the function call syntax. -->
+		<exclude name="PEAR.Files.IncludingFile.BracketsNotRequired" />
+
+		<!-- This requires passing a whitelist of prefixes in order to work, which is not practical for a large and varied codebase. It's also fixes a problem that we're unlikely to cause. -->
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound" />
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound" />
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound" />
+
+		<!-- Aligning things make the code more readable. `Generic.WhiteSpace.DisallowSpaceIndent` will catch accidental uses of all spaces. -->
+		<exclude name="WordPress.WhiteSpace.PrecisionAlignment.Found" />
+		<exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
+		<exclude name="WordPress.WhiteSpace.OperatorSpacing.SpacingBefore" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" />
+		<exclude name="Squiz.Strings.ConcatenationSpacing.PaddingFound" />
+	</rule>
+
+	<rule ref="WordPress-Docs">
+		<!-- If files/variables are given descriptive names like they should be, then an explicit description is usually unnecessary, so leave this as a judgement call. -->
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
+		<exclude name="Squiz.Commenting.FileComment.Missing" />
+		<exclude name="Squiz.Commenting.ClassComment.Missing" />
+		<exclude name="Generic.Commenting.DocComment.MissingShort" />
+
+		<!-- We really only use basic exceptions, so this is kind of overkill and tedious. -->
+		<exclude name="Squiz.Commenting.FunctionComment.EmptyThrows" />
+	</rule>
+
+	<rule ref="WordPress-VIP">
+		<exclude name="WordPress.VIP.SuperGlobalInputUsage.AccessDetected" />
+
+		<!-- We want these for the best practices, but anything specific to VIP's hosting environment is irrelevant. -->
+		<exclude name="WordPress.VIP.RestrictedFunctions.wp_remote_get_wp_remote_get" />
+		<exclude name="WordPress.VIP.RestrictedFunctions.file_get_contents_file_get_contents" />
+		<exclude name="WordPress.VIP.RestrictedFunctions.get_posts_get_posts" />
+	</rule>
+
+	<rule ref="WordPress-Extra">
+		<!-- I think it's better to have all the `use` statements come right after the namespace line. -->
+		<exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
+	</rule>
+</ruleset>
