@@ -932,8 +932,14 @@ window.wp = window.wp || {};
 		},
 
 		collapse: function() {
+			this.$el.toggleClass( 'collapsed' );
 
-			this.$el.toggleClass( 'collapsed' ).removeClass( 'expanded' );
+			if ( themes.data.settings.isMobile ) {
+				this.$el.removeClass( 'expanded' );
+			} else {
+				this.$el.toggleClass( 'expanded' );
+			}
+
 			return false;
 		},
 
