@@ -1586,6 +1586,17 @@ span.favorite.favorited {
 	}
 }
 
+@media only screen and (max-width: 600px) {
+	.wp-full-overlay,
+	.wp-full-overlay-sidebar {
+		margin-top: 0;
+	}
+
+	.wp-full-overlay-sidebar {
+		height: 100%;
+	}
+}
+
 @media only screen and (max-width: 480px) {
 	.theme-browser .theme {
 		width: 100%;
