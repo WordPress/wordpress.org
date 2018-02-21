@@ -14,8 +14,8 @@ class Delete_Plugin_Project extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <slug>
-	 * : Slug of a plugin
+	 * <project>
+	 * : ID or slug of a plugin project.
 	 *
 	 * [--force]
 	 * : If set, the command will delete the plugin, without prompting
@@ -24,9 +24,14 @@ class Delete_Plugin_Project extends WP_CLI_Command {
 	public function __invoke( $args, $assoc_args ) {
 		global $wpdb;
 
-		$project_path = sprintf( '%s/%s', Plugin::GP_MASTER_PROJECT , $args[0] );
+		if ( is_numeric( $args[0]  ) ) {
+			$project = GP::$project->get( $args[0]  );
+		} else {
+			$project_path = sprintf( '%s/%s', Plugin::GP_MASTER_PROJECT , $args[0] );
 
-		$project = GP::$project->by_path( $project_path );
+			$project = GP::$project->by_path( $project_path );
+		}
+
 		if ( ! $project ) {
 			WP_CLI::error( sprintf( "There is no plugin project for '%s'.", $args[0] ) );
 		}
@@ -34,7 +39,7 @@ class Delete_Plugin_Project extends WP_CLI_Command {
 		$sub_projects = $project->sub_projects();
 
 		if ( ! isset( $assoc_args['force'] ) ) {
-			WP_CLI::confirm( sprintf( "Do you want to delete %s with %d sub-projects?", $project->name, ( $sub_projects ? count( $sub_projects ) : 0 ) ) );
+			WP_CLI::confirm( sprintf( "Do you want to delete '%s' (ID: %d) with %d sub-projects?", $project->name, $project->id, ( $sub_projects ? count( $sub_projects ) : 0 ) ) );
 		}
 
 		// Handle sub-projects.
