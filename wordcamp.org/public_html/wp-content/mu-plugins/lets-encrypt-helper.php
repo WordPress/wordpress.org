@@ -74,6 +74,7 @@ class WordCamp_Lets_Encrypt_Helper {
 		$domains[] = '2006.wordcamp.org';
 		$domains[] = '2007.wordcamp.org';
 		$domains[] = 'bg.wordcamp.org';
+		$domains[] = 'india.wordcamp.org';
 		$domains[] = 'fr.2011.montreal.wordcamp.org';
 		$domains[] = 'fr.2012.montreal.wordcamp.org';
 		$domains[] = 'fr.2013.montreal.wordcamp.org';
