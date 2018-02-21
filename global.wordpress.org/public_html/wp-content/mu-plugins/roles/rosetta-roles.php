@@ -552,7 +552,8 @@ We also ask all WordPress General Translation Editors to subscribe for notificat
 The Polyglots team connects on Slack once per week at 11am UTC every Wednesday. We’d love to have you there if you can make it. Register from http://chat.wordpress.org.
 If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
 
-Welcome to the WordPress Polyglots team and happy translating!'
+Welcome to the WordPress Polyglots team and happy translating!',
+				'rosetta'
 			);
 
 			$message = str_replace(
@@ -590,7 +591,8 @@ Your local translation team can be found on https://make.wordpress.org/polyglots
 The Polyglots team connects on Slack once per week at 11am UTC every Wednesday. We’d love to have you there if you can make it. Register from https://chat.wordpress.org/.
 If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
 
-Welcome to the WordPress Polyglots team and happy translating.'
+Welcome to the WordPress Polyglots team and happy translating.',
+				'rosetta'
 			);
 
 			$projects     = $this->get_translate_projects();
