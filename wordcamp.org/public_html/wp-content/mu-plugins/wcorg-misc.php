@@ -267,12 +267,25 @@ add_filter( 'wordcamp_qbo_client_options', function( $options ) {
 
 // Sponsorship payments (Stripe) credentials.
 add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
+	$environment = ( defined('WORDCAMP_ENVIRONMENT') ) ? WORDCAMP_ENVIRONMENT : 'development';
+
+	switch ( $environment ) {
+		case 'production' :
+			$options['publishable'] = WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE_LIVE;
+			$options['secret']      = WORDCAMP_PAYMENT_STRIPE_SECRET_LIVE;
+			break;
+
+		case 'development':
+		default :
+			$options['publishable'] = WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE;
+			$options['secret']      = WORDCAMP_PAYMENT_STRIPE_SECRET;
+			break;
+	}
+
 	$options['hmac_key'] = WORDCAMP_PAYMENT_STRIPE_HMAC;
-	$options['publishable'] = WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE_LIVE;
-	$options['secret'] = WORDCAMP_PAYMENT_STRIPE_SECRET_LIVE;
 
 	return $options;
-});
+} );
 
 /*
  * Disable admin pointers
