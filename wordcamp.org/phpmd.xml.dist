@@ -1,0 +1,108 @@
+<?xml version="1.0" ?>
+<ruleset name="WordCamp.org Code Quality Standards"
+		 xmlns="http://pmd.sf.net/ruleset/1.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+		 xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+	<description>Analyze WordCamp.org PHP scripts for code quality issues.</description>
+
+	<!--
+		The "rules" here should be considered rough guidelines rather than hard rules. PHPMD is naturally not as
+		accurate or clear as PHPCS, so developers need to use their judgement more. It's normal and expected to get
+		warnings about things that are ok in reality. So, if this warns you about something, then take that into
+		consideration, but use your judgement, and feel free to ignore it if you feel like it's unwarranted.
+		The Code Size rules are some of the most important ones to pay attention to, because they're good indicators
+		that a function needs to be modularized. Even they are hard to tune for a good signal/noise ratio, though.
+
+		Setup instructions:
+
+		1) Install PHPMD (e.g., `brew install homebrew/php/phpmd`)
+		2) Make sure this file is at the project root. You can symlink it there if your `meta.(git|svn).wordpress.org`
+		   checkout is elsewhere.
+		3) Run `phpmd {folder/file to scan} text path/to/phpmd.xml.dist`. If you'd like, you can set up a convenience wrapper
+		   so that you just have to type `phpmd {folder/file to scan}. Example: https://github.com/iandunn/dotfiles/commit/5b20c05
+		4) Run it before you generate a patch or create a commit. Setting up a git pre-commit or pre-push hook can
+		   make that automatic.
+
+		Note: It's possible to create a `phpmd.xml` file if you want to override anything here, but please don't abuse
+		that, since code that you contribute affects other developers. If you think any of the rules here should
+		change, start a discussion in #meta-wordcamp.
+
+		See https://phpmd.org/rules/index.html for details on the rules and configuration parameters.
+
+		Note: To customize a rule's properties, you have to exclude it from its ruleset, and then include it with a
+		custom property list. See `rulesets/naming.xml/ShortVariable` below for an example.
+	-->
+
+
+	<rule ref="rulesets/cleancode.xml">
+		<!-- We're currently excluding all the individual rules here, but we want this ruleset in principal, so let's
+			 leave it included and evaluate any new rules that are added to it. -->
+
+		<!-- This is not a reliable indicator of violating SRP in a meaningful way, and our typical usage of it is fine. -->
+		<exclude name="BooleanArgumentFlag" />
+
+		<!-- Returning early is more readable, but can make a function harder to maintain. A single point of
+		     return is sometimes best. See https://tommcfarlin.com/wordpress-refactoring-plugin-functions/#comment-40498
+		     and the following comments. Often it's best to return early and late, but not in the middle of a
+		     function. -->
+		<exclude name="ElseExpression" />
+
+		<!-- This is too strict for us right now. -->
+		<exclude name="StaticAccess" />
+	</rule>
+
+	<rule ref="rulesets/codesize.xml">
+		<!-- Include later with custom values -->
+		<exclude name="ExcessiveMethodLength" />
+		<exclude name="CyclomaticComplexity"  />
+	</rule>
+
+	<rule ref="rulesets/codesize.xml/ExcessiveMethodLength">
+		<properties>
+			<property name="minimum" value="70" />
+		</properties>
+	</rule>
+
+	<rule ref="rulesets/codesize.xml/CyclomaticComplexity">
+		<properties>
+			<!-- This value is particularly difficult to tune for a good signal/noise ratio, but let's try it this
+			     low for awhile and only bump it if we really need to, because keeping CC low makes a big difference
+			     when it comes to maintainability, reliability, and testability. -->
+			<property name="reportLevel" value="8" />
+		</properties>
+	</rule>
+
+	<!-- `rulesets/controversial.xml` is a non-starter, because camelCase is inconsistent with the WP Coding Standards,
+	     and requiring a framework to access superglobals overkill. -->
+
+	<rule ref="rulesets/design.xml">
+		<!-- There are proper cases for this, like exit()'ing after a redirect -->
+		<exclude name="ExitExpression" />
+	</rule>
+
+	<rule ref="rulesets/naming.xml">
+		<!-- Include later with custom values -->
+		<exclude name="ShortVariable" />
+
+		<!-- Variable names should be descriptive and self-documenting -->
+		<exclude name="LongVariable" />
+	</rule>
+
+    <rule ref="rulesets/naming.xml/ShortVariable">
+        <properties>
+            <!-- $a and $b are conventionally used in usort() callbacks. $to is perfectly descriptive with `wp_mail()`. -->
+            <property name="exceptions" value="a,b,to" />
+        </properties>
+    </rule>
+
+	<rule ref="rulesets/unusedcode.xml">
+		<!-- It's nice to know what variables are passed from WP hooks, even if we're not using them right now.
+		     Also, PHP doesn't support named parameters, so sometimes it's unavoidable  -->
+		<exclude name="UnusedFormalParameter" />
+
+		<!-- Too many false positives when a controller function creates a variable, and then includes a view file
+			 which uses the variable -->
+		<exclude name="UnusedLocalVariable" />
+	</rule>
+</ruleset>

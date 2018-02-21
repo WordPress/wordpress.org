@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <ruleset name="WordCamp.org Coding Standards">
-	<description>Apply customized version of WordPress Coding Standards to WordCamp.org PHP scripts</description>
+	<description>Apply customized version of WordPress Coding Standards to WordCamp.org PHP scripts.</description>
 
 	<!--
 		Setup instructions:
@@ -30,6 +30,9 @@
 		<exclude-pattern>/build/*</exclude-pattern>
 
 		Look through `General` and `Squiz` sniffs for anything you might want to add.
+			Is there one that detects `\Foo` instead of `use Foo`?
+			maximum nesting level?
+			function length?
 
 		Maybe add WordCamp\Remote_CSS\output_cached_css to customEscapingFunctions or whichever param is most appropriate
 		Maybe do something similar for set_cache_headers and nonce verification
