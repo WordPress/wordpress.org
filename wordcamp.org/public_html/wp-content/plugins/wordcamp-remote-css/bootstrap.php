@@ -2,7 +2,7 @@
 
 namespace WordCamp\RemoteCSS;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 /*
 Plugin Name: WordCamp Remote CSS

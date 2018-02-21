@@ -2,10 +2,10 @@
 
 namespace WordCamp\RemoteCSS;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 if ( is_configured() ) {
-	add_action( 'wp_ajax_'        . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler'        ); // This is useless in production, but useful for manual testing
+	add_action( 'wp_ajax_'        . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler'        ); // This is useless in production, but useful for manual testing.
 	add_action( 'wp_ajax_nopriv_' . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler'        );
 	add_action( SYNCHRONIZE_ACTION,              __NAMESPACE__ . '\synchronize_remote_css' );
 }
@@ -51,7 +51,7 @@ function webhook_handler() {
 			do_action( SYNCHRONIZE_ACTION, get_option( OPTION_REMOTE_CSS_URL ) );
 			wp_send_json_success( __( 'The remote CSS file was successfully synchronized.', 'wordcamporg' ) );
 		} catch ( \Exception $exception ) {
-			wp_send_json_error( strip_tags( $exception->getMessage() ) );   // strip_tags() instead of wp_strip_tags() because we want to preserve the inner content
+			wp_send_json_error( strip_tags( $exception->getMessage() ) );   // strip_tags() instead of wp_strip_tags() because we want to preserve the inner content.
 		}
 	}
 }

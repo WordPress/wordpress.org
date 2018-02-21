@@ -5,14 +5,14 @@ use WP_Post;
 use WP_Customize_Manager;
 use Exception;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 const POST_TYPE             = 'wc_remote_css';
 const SAFE_CSS_POST_SLUG    = 'wcrcss_safe_cached_version';
 const OPTION_LAST_UPDATE    = 'wcrcss_last_update';
 const AJAX_ACTION           = 'wcrcss_webhook';
 const SYNCHRONIZE_ACTION    = 'wcrcss_synchronize';
-const WEBHOOK_RATE_LIMIT    = 30; // seconds
+const WEBHOOK_RATE_LIMIT    = 30; // seconds.
 const OPTION_REMOTE_CSS_URL = 'wcrcss_remote_css_url';
 const CSS_HANDLE            = 'wordcamp_remote_css';
 const GITHUB_API_HOSTNAME   = 'api.github.com';
@@ -152,8 +152,8 @@ function migrate_jetpack_post( $jetpack_post ) {
 
 	if ( is_wp_error( $result ) ) {
 		throw new Exception( sprintf(
-			// translators: %s is an email address
-			__( "Could not migrate Jetpack post. Please notify us at %s.", 'wordcamporg' ),
+			// translators: %s is an email address.
+			__( 'Could not migrate Jetpack post. Please notify us at %s.', 'wordcamporg' ),
 			EMAIL_CENTRAL_SUPPORT
 		) );
 	}
@@ -175,7 +175,7 @@ function create_new_post( $content = '' ) {
 		'post_type'    => POST_TYPE,
 		'post_name'    => SAFE_CSS_POST_SLUG,
 		'post_status'  => 'private',
-		'post_content' => $content
+		'post_content' => $content,
 	), true );
 
 	if ( ! is_wp_error( $post ) ) {
@@ -184,8 +184,8 @@ function create_new_post( $content = '' ) {
 
 	if ( ! is_a( $post, 'WP_Post' ) ) {
 		throw new Exception( sprintf(
-			// translators: %s is an email address
-			__( "Could not create CSS post. Please notify us at %s.", 'wordcamporg' ),
+			// translators: %s is an email address.
+			__( 'Could not create CSS post. Please notify us at %s.', 'wordcamporg' ),
 			EMAIL_CENTRAL_SUPPORT
 		) );
 	}
@@ -210,7 +210,7 @@ function create_new_post( $content = '' ) {
  * @return string
  */
 function get_output_mode() {
-	$mode = 'add-on';
+	$mode             = 'add-on';
 	$jetpack_settings = (array) get_theme_mod( 'jetpack_custom_css' );
 
 	if ( isset( $jetpack_settings['replace'] ) && $jetpack_settings['replace'] ) {

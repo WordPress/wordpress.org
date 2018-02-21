@@ -1,7 +1,7 @@
 <?php
 
 namespace WordCamp\RemoteCSS;
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 /**
  * @var string $plugin_url

@@ -5,7 +5,7 @@ use WordCamp\Logger;
 use Jetpack_Custom_CSS_Enhancements;
 use Exception;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 /**
  * Synchronizes the local safe/cached copy of the CSS with the canonical, remote source.
@@ -28,7 +28,7 @@ function synchronize_remote_css( $remote_css_url ) {
  *
  * @param string $remote_css_url
  *
- * @throws \Exception if the response body could not be retrieved for any reason
+ * @throws Exception If the response body could not be retrieved for any reason.
  *
  * @return string
  */
@@ -36,14 +36,14 @@ function fetch_unsafe_remote_css( $remote_css_url ) {
 	$response = wp_remote_get(
 		$remote_css_url,
 		array(
-			'user-agent'         => 'WordCamp.org Remote CSS',  // GitHub's API explicitly requests this, and it could be beneficial for other platforms too
+			'user-agent'         => 'WordCamp.org Remote CSS',  // GitHub's API explicitly requests this, and it could be beneficial for other platforms too.
 			'reject_unsafe_urls' => true,
 		)
 	);
 
 	if ( is_wp_error( $response ) ) {
 		Logger\log( 'request_error', compact( 'remote_css_url', 'response' ) );
-		throw new \Exception( $response->get_error_message() );
+		throw new Exception( $response->get_error_message() );
 	}
 
 	$response_code = (int) wp_remote_retrieve_response_code( $response );
@@ -51,7 +51,7 @@ function fetch_unsafe_remote_css( $remote_css_url ) {
 	if ( ! in_array( $response_code, array( 200, 301, 302, 303, 307, 308 ), true ) ) {
 		Logger\log( 'invalid_response_code', compact( 'remote_css_url', 'response' ) );
 
-		throw new \Exception( sprintf(
+		throw new Exception( sprintf(
 			__( 'The remote server responded with status code <code>%d</code>, which is not valid.', 'wordcamporg' ),
 			$response_code
 		) );
@@ -83,8 +83,8 @@ function sanitize_unsafe_css( $unsafe_css ) {
 
 	if ( ! $parser_rules_setup || ! $subvalue_sanitization_setup ) {
 		throw new Exception( sprintf(
-			// translators: %s is an email address
-			__( "Could not update CSS because sanitization was not available. Please notify us at %s.", 'wordcamporg' ),
+			// translators: %s is an email address.
+			__( 'Could not update CSS because sanitization was not available. Please notify us at %s.', 'wordcamporg' ),
 			EMAIL_CENTRAL_SUPPORT
 		) );
 	}
@@ -97,8 +97,8 @@ function sanitize_unsafe_css( $unsafe_css ) {
 	 */
 	if ( did_action( 'csstidy_optimize_postparse' ) < 1 ) {
 		throw new Exception( sprintf(
-			// translators: %s is an email address
-			__( "Could not update CSS because sanitization did not run. Please notify us at %s.", 'wordcamporg' ),
+			// translators: %s is an email address.
+			__( 'Could not update CSS because sanitization did not run. Please notify us at %s.', 'wordcamporg' ),
 			EMAIL_CENTRAL_SUPPORT
 		) );
 	}
@@ -112,7 +112,7 @@ function sanitize_unsafe_css( $unsafe_css ) {
  * @param string $safe_css
  */
 function save_safe_css( $safe_css ) {
-	$post = get_safe_css_post();
+	$post               = get_safe_css_post();
 	$post->post_content = $safe_css;
 
 	/*

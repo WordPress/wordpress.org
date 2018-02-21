@@ -1,13 +1,15 @@
 <?php
 
+namespace WordCamp\RemoteCSS;
+use Exception;
+
+defined( 'WPINC' ) || die();
+
 /*
  * @todo Move all of this into the Customizer. Replace the discovery notice with an input field for the URL.
  *       Not sure how to fit all the contextual help. though.
  * 		 For errors, use https://developer.wordpress.org/themes/customize-api/tools-for-improved-user-experience/#notifications
  */
-
-namespace WordCamp\RemoteCSS;
-defined( 'WPINC' ) or die();
 
 add_action( 'admin_menu', __NAMESPACE__ . '\add_admin_pages' );
 
@@ -38,15 +40,15 @@ function render_options_page() {
 		try {
 			$notice       = process_options_page();
 			$notice_class = 'notice-success';
-		} catch( \Exception $exception ) {
+		} catch ( Exception $exception ) {
 			$notice       = $exception->getMessage();
 			$notice_class = 'notice-error';
 		}
 	}
 
-	$output_mode               = get_output_mode();
-	$remote_css_url            = get_option( OPTION_REMOTE_CSS_URL , '' );
-	$fonts_tool_url            = admin_url( 'themes.php?page=wc-fonts-options' );
+	$output_mode    = get_output_mode();
+	$remote_css_url = get_option( OPTION_REMOTE_CSS_URL, '' );
+	$fonts_tool_url = admin_url( 'themes.php?page=wc-fonts-options' );
 
 	require_once( dirname( __DIR__ ) . '/views/page-remote-css.php' );
 }
@@ -66,9 +68,9 @@ function set_output_mode( $mode ) {
 }
 
 /**
- * Process submissions of the form on the options page
+ * Process submissions of the form on the options page.
  *
- * @throws \Exception if the user isn't authorized
+ * @throws Exception If the user isn't authorized.
  *
  * @return string
  */
@@ -76,7 +78,7 @@ function process_options_page() {
 	check_admin_referer( 'wcrcss-options-submit', 'wcrcss-options-nonce' );
 
 	if ( ! current_user_can( 'switch_themes' ) ) {
-		throw new \Exception( __( 'Access denied.', 'wordcamporg' ) );
+		throw new Exception( __( 'Access denied.', 'wordcamporg' ) );
 	}
 
 	$remote_css_url = trim( $_POST['wcrcss-remote-css-url'] );
@@ -104,28 +106,28 @@ function process_options_page() {
  *
  * @param string $remote_css_url
  *
- * @throws \Exception if the URL cannot be validated
+ * @throws Exception If the URL cannot be validated.
  *
  * @return string
  */
 function validate_remote_css_url( $remote_css_url ) {
-	// Syntactically-valid URLs only
+	// Syntactically-valid URLs only.
 	$remote_css_url = filter_var( $remote_css_url, FILTER_VALIDATE_URL );
 
 	if ( false === $remote_css_url ) {
-		throw new \Exception( __( 'The URL was invalid.', 'wordcamporg' ) );
+		throw new Exception( __( 'The URL was invalid.', 'wordcamporg' ) );
 	}
 
 	$remote_css_url = esc_url_raw( $remote_css_url, array( 'http', 'https' ) );
 
 	if ( empty( $remote_css_url ) ) {
-		throw new \Exception( __( 'The URL was invalid.', 'wordcamporg' ) );
+		throw new Exception( __( 'The URL was invalid.', 'wordcamporg' ) );
 	}
 
-	$parsed_url = parse_url( $remote_css_url );
+	$parsed_url = wp_parse_url( $remote_css_url );
 
 	/*
-	 * Only allow whitelisted hostnames, to prevent SSRF attacks
+	 * Only allow whitelisted hostnames, to prevent SSRF attacks.
 	 *
 	 * WARNING: These must be trusted in the sense that they're not malicious, but also in the sense that they
 	 * have strong internal security. We can't allow sites hosted by local WordPress communities, for instance,
@@ -137,8 +139,8 @@ function validate_remote_css_url( $remote_css_url ) {
 	$trusted_hostnames = apply_filters( 'wcrcss_trusted_remote_hostnames', array() );
 
 	if ( ! in_array( $parsed_url['host'], $trusted_hostnames, true ) ) {
-		throw new \Exception( sprintf(
-			// translators: %s: WordPress Meta Trac URL
+		throw new Exception( sprintf(
+			// translators: %s: WordPress Meta Trac URL.
 			__(
 				'Due to security constraints, only certain third-party platforms can be used. We currently only support GitHub, but more platforms can be added if there\'s interest from organizers. To request an additional platform, please <a href="%s">create a ticket</a> on Meta Trac.',
 				'wordcamporg'
@@ -155,8 +157,8 @@ function validate_remote_css_url( $remote_css_url ) {
 	 * sanitized, which would further couple the plugin to Jetpack.
 	 */
 	if ( '.css' !== substr( $parsed_url['path'], strlen( $parsed_url['path'] ) - 4, 4 ) ) {
-		throw new \Exception( sprintf(
-			// translators: %s: '.css'
+		throw new Exception( sprintf(
+			// translators: %s: '.css'.
 			__(
 				'The URL must be a vanilla CSS file ending in %s. If you\'d like to use SASS/LESS, please compile it into vanilla CSS on your server, and then enter the URL for that file.',
 				'wordcamporg'
@@ -198,7 +200,7 @@ function add_contextual_help_tabs() {
 		'overview'                  => __( 'Overview',                  'wordcamporg' ),
 		'basic-setup'               => __( 'Basic Setup',               'wordcamporg' ),
 		'automated-synchronization' => __( 'Automated Synchronization', 'wordcamporg' ),
-		'tips'                      => __( 'Tips',                      'wordcamporg' )
+		'tips'                      => __( 'Tips',                      'wordcamporg' ),
 	);
 
 	foreach ( $tabs as $id => $label ) {

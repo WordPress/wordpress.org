@@ -1,7 +1,7 @@
 <?php
 
 namespace WordCamp\RemoteCSS;
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 class Test_Synchronize_Remote_CSS extends \WP_UnitTestCase {
 	/**

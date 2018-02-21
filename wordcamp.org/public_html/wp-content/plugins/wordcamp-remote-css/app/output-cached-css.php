@@ -4,10 +4,10 @@ namespace WordCamp\RemoteCSS;
 use Jetpack;
 use Exception;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 if ( is_configured() ) {
-	add_action( 'wp_enqueue_scripts',           __NAMESPACE__ . '\enqueue_cached_css', 11 );  // after the theme's stylesheet, but before Core's Custom CSS stylesheet
+	add_action( 'wp_enqueue_scripts',           __NAMESPACE__ . '\enqueue_cached_css', 11 );  // after the theme's stylesheet, but before Core's Custom CSS stylesheet.
 	add_filter( 'stylesheet_uri',               __NAMESPACE__ . '\skip_theme_stylesheet'  );
 	add_action( 'wp_ajax_'        . CSS_HANDLE, __NAMESPACE__ . '\output_cached_css'      );
 	add_action( 'wp_ajax_nopriv_' . CSS_HANDLE, __NAMESPACE__ . '\output_cached_css'      );
@@ -61,7 +61,7 @@ function skip_theme_stylesheet( $stylesheet_url ) {
  * @return int
  */
 function get_latest_revision_id() {
-	$safe_css = get_safe_css_post();
+	$safe_css        = get_safe_css_post();
 	$latest_revision = wp_get_post_revisions( $safe_css->ID, array( 'posts_per_page' => 1 ) );
 
 	if ( empty( $latest_revision ) ) {
@@ -100,7 +100,7 @@ function set_cache_headers( $cache_headers ) {
 	$cache_headers = array(
 		'Cache-Control' => 'maxage=' . $expiration_period,
 		'ETag'          => '"' . md5( $last_modified ) . '"',
-		'Last-Modified' => $last_modified, // Currently Core always strips this out, but we want to send it, and maybe Core will allow that in the future
+		'Last-Modified' => $last_modified, // Currently Core always strips this out, but we want to send it, and maybe Core will allow that in the future.
 		'Expires'       => gmdate( 'D, d M Y H:i:s', time() + $expiration_period ) . ' GMT',
 	);
 
@@ -111,7 +111,7 @@ function set_cache_headers( $cache_headers ) {
  * Handles the AJAX endpoint to output the local copy of the CSS
  */
 function output_cached_css() {
-	// Explicitly tell the browser that this is CSS, to avoid MIME sniffing vulnerabilities
+	// Explicitly tell the browser that this is CSS, to avoid MIME sniffing vulnerabilities.
 	header( 'Content-Type: text/css; charset=' . get_option( 'blog_charset' ) );
 
 	try {
