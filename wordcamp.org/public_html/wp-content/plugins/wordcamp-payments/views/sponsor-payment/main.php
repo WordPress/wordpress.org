@@ -1,6 +1,8 @@
 <?php
 namespace WordCamp\Budgets\Sponsor_Payment_Stripe;
 
+/** @var array $data */
+
 get_header();
 ?>
 
@@ -19,24 +21,43 @@ get_header();
 		<?php endif; ?>
 
 		<?php if ( $data['step'] == STEP_SELECT_INVOICE ) : ?>
+			<p class="payment-instructions">
+				<?php esc_html_e( 'Use this form to pay your WordCamp sponsorship fee to WordPress Community Support, PBC. If you did not receive an invoice ID yet, please get in touch with the event\'s Sponsorships Coordinator for more information.', 'wordcamporg' ); ?>
+			</p>
 
-			<p><?php esc_html_e( 'Use this form to pay your WordCamp sponsorship fee to WordPress Community Support, PBC. If you did not receive an invoice ID yet, please get in touch with the event\'s Sponsorships Coordinator for more information.', 'wordcamporg' ); ?></p>
-
-			<form method="POST">
+			<form method="POST" class="payment-form" data-step="<?php echo STEP_SELECT_INVOICE; ?>">
 				<input type="hidden" name="step" value="<?php echo STEP_SELECT_INVOICE; ?>" />
 				<input type="hidden" name="sponsor_payment_submit" value="1" />
 
-				<label><?php esc_html_e( 'Event', 'wordcamporg' ); ?></label>
 				<div class="control">
-					<?php echo get_wordcamp_dropdown( 'wordcamp_id', $data['wordcamp_query_options'] ); ?>
+					<input type="radio" id="payment_type_invoice" name="payment_type" value="invoice" checked> <label for="payment_type_invoice"><?php esc_html_e( 'Invoice payment', 'wordcamporg' ); ?></label>
+					<input type="radio" id="payment_type_other" name="payment_type" value="other"> <label for="payment_type_other"><?php esc_html_e( 'Other payment', 'wordcamporg' ); ?></label>
 				</div>
 
-				<label><?php esc_html_e( 'Invoice ID', 'wordcamporg' ); ?></label>
-				<div class="control">
-					<input type="text" name="invoice_id" />
-				</div>
+				<div class="clear"></div>
 
-				<label><?php esc_html_e( 'Currency', 'wordcamporg' ); ?></label>
+				<fieldset class="invoice-fields">
+					<label class="control-header"><?php esc_html_e( 'Event', 'wordcamporg' ); ?></label>
+					<div class="control">
+						<?php echo get_wordcamp_dropdown( 'wordcamp_id', $data['wordcamp_query_options'] ); ?>
+					</div>
+
+					<label class="control-header"><?php esc_html_e( 'Invoice ID', 'wordcamporg' ); ?></label>
+					<div class="control">
+						<input type="text" name="invoice_id" />
+					</div>
+				</fieldset>
+
+				<fieldset class="other-fields">
+					<label class="control-header"><?php esc_html_e( 'Description (100 character limit)', 'wordcamporg' ); ?></label>
+					<div class="control">
+						<input type="text" name="description" maxlength="100" value="" />
+					</div>
+				</fieldset>
+
+				<div class="clear"></div>
+
+				<label class="control-header"><?php esc_html_e( 'Currency', 'wordcamporg' ); ?></label>
 				<div class="control">
 					<select name="currency">
 						<option value="" disabled selected><?php esc_html_e( 'Select a Currency', 'wordcamporg' ); ?></option>
@@ -50,7 +71,7 @@ get_header();
 					</select>
 				</div>
 
-				<label><?php esc_html_e( 'Amount', 'wordcamporg' ); ?></label>
+				<label class="control-header"><?php esc_html_e( 'Amount', 'wordcamporg' ); ?></label>
 				<div class="control">
 					<input type="text" name="amount" /><br />
                     <em><?php esc_html_e( 'An additional 2.9% to cover processing fees on credit card payments is highly appreciated but not required.', 'wordcamporg' ); ?></em>
@@ -66,14 +87,21 @@ get_header();
 			<p><?php esc_html_e( 'Please review the details below and hit "Make a Payment" when you\'re ready.', 'wordcamporg' ); ?></p>
 
 			<table>
-				<tr>
-					<td><?php esc_html_e( 'Invoice', 'wordcamporg' ); ?></td>
-					<td><?php echo esc_html( $data['payment']['invoice_id'] ); ?></td>
-				</tr>
-				<tr>
-					<td><?php esc_html_e( 'Event', 'wordcamporg' ); ?></td>
-					<td><?php echo esc_html( $data['payment']['wordcamp_obj']->post_title ); ?></td>
-				</tr>
+				<?php if ( 'invoice' === $data['payment']['payment_type'] ) : ?>
+					<tr>
+						<td><?php esc_html_e( 'Event', 'wordcamporg' ); ?></td>
+						<td><?php echo esc_html( get_wordcamp_name( get_wordcamp_site_id( $data['payment']['wordcamp_obj'] ) ) ); ?></td>
+					</tr>
+					<tr>
+						<td><?php esc_html_e( 'Invoice', 'wordcamporg' ); ?></td>
+						<td><?php echo esc_html( $data['payment']['invoice_id'] ); ?></td>
+					</tr>
+				<?php elseif ( 'other' === $data['payment']['payment_type'] ) : ?>
+					<tr>
+						<td><?php esc_html_e( 'Description', 'wordcamporg' ); ?></td>
+						<td><?php echo esc_html( $data['payment']['description'] ); ?></td>
+					</tr>
+				<?php endif; ?>
 				<tr>
 					<td><?php esc_html_e( 'Currency', 'wordcamporg' ); ?></td>
 					<td><?php echo esc_html( $data['payment']['currency'] ); ?></td>
@@ -84,7 +112,7 @@ get_header();
 				</tr>
 			</table>
 
-			<form method="POST">
+			<form method="POST" class="payment-form" data-step="<?php echo STEP_PAYMENT_DETAILS; ?>">
 				<input type="hidden" name="step" value="<?php echo STEP_PAYMENT_DETAILS; ?>" />
 				<input type="hidden" name="sponsor_payment_submit" value="1" />
 				<input type="hidden" name="payment_data_json" value="<?php echo esc_attr( $data['payment_data_json'] ); ?>" />

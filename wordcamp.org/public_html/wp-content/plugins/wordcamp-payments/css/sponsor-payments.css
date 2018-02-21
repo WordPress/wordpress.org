@@ -1,14 +1,15 @@
-.wcorg-sponsor-payment label,
-.wcorg-sponsor-payment .control {
+.wcorg-sponsor-payment .control,
+.wcorg-sponsor-payment .control-header {
 	float: left;
 	clear: both;
+	width: 100%;
 }
 
-.wcorg-sponsor-payment label {
+.wcorg-sponsor-payment .control-header,
+#content.wcorg-sponsor-payment input[type="submit"] {
 	margin-top: 10px;
 }
 
-.wcorg-sponsor-payment .clear {
-	display: block;
-	margin-bottom: 20px;
+#content.wcorg-sponsor-payment .other-fields input[name="description"] {
+	width: 100%;
 }
