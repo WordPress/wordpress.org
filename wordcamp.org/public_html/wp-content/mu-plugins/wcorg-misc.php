@@ -277,12 +277,12 @@ add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
 
 		case 'development':
 		default :
-			$options['publishable'] = WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE;
-			$options['secret']      = WORDCAMP_PAYMENT_STRIPE_SECRET;
+			$options['publishable'] = ( defined( 'WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE' ) ) ? WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE : '';
+			$options['secret']      = ( defined( 'WORDCAMP_PAYMENT_STRIPE_SECRET' ) ) ? WORDCAMP_PAYMENT_STRIPE_SECRET : '';
 			break;
 	}
 
-	$options['hmac_key'] = WORDCAMP_PAYMENT_STRIPE_HMAC;
+	$options['hmac_key'] = ( defined( 'WORDCAMP_PAYMENT_STRIPE_HMAC' ) ) ? WORDCAMP_PAYMENT_STRIPE_HMAC : '';
 
 	return $options;
 } );
