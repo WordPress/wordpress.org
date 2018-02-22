@@ -15,12 +15,12 @@ class Cache_Purger {
 	 */
 	public function register_events() {
 		add_action( 'init', array( $this, 'add_global_cache_group' ) );
-		add_action( 'gp_originals_imported', array( $this, 'originals_imported' ) );
-		add_action( 'gp_translation_created', array( $this, 'queue_translation_for_cache_purge' ) );
-		add_action( 'gp_translation_saved', array( $this, 'queue_translation_for_cache_purge' ) );
+		add_action( 'gp_originals_imported', array( $this, 'originals_imported' ), 1 );
+		add_action( 'gp_translation_created', array( $this, 'queue_translation_for_cache_purge' ), 1 );
+		add_action( 'gp_translation_saved', array( $this, 'queue_translation_for_cache_purge' ), 1 );
 
 		// Cache purging is delayed until shutdown to prevent multiple purges for the same project.
-		add_action( 'shutdown', array( $this, 'delete_plugin_i18n_cache_on_translation_edits' ) );
+		add_action( 'shutdown', array( $this, 'delete_plugin_i18n_cache_on_translation_edits' ), 99 );
 	}
 
 	/**
