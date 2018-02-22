@@ -11,8 +11,14 @@ wcorg_include_mu_plugin_folders();
  * This is because the folder contains some .php files that we don't want to automatically include with glob().
  */
 function wcorg_include_individual_mu_plugins() {
+	$shortcodes = dirname( __DIR__ ) . '/mu-plugins-private/wordcamp-shortcodes/wc-shortcodes.php';
+
 	require_once( __DIR__ . '/wp-cli-commands/bootstrap.php' );
 	require_once( __DIR__ . '/camptix-tweaks/camptix-tweaks.php' );
+
+	if ( is_file( $shortcodes ) ) {
+		require_once( $shortcodes );
+	}
 }
 
 /**
