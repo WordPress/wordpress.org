@@ -13,6 +13,19 @@
 add_filter( 'got_url_rewrite', '__return_true' );
 
 /*
+ * Register an extra directory for private themes.
+ *
+ * These are all old and no longer used on new sites, but must remain active for old sites. They haven't been
+ * open-sourced yet because they need to be audited and cleaned up first, which is a low priority.
+ *
+ * Having these in a separate folder lets us make wp-content/themes a single `svn:external` with the current
+ * public themes. 
+ */
+if ( is_dir( WP_CONTENT_DIR . '/themes-private' ) ) {
+	register_theme_directory( WP_CONTENT_DIR . '/themes-private' );
+}
+
+/*
  * Include pages in the list of posts types that can have comments closed automatically
  */
 function wcorg_close_comments_for_post_types( $post_types ) {
