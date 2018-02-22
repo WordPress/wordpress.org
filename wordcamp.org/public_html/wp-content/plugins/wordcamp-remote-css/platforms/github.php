@@ -82,16 +82,7 @@ function convert_to_api_urls( $remote_css_url ) {
 function authenticate_requests( $preempt, $request_args, $request_url ) {
 	$parsed_url = wp_parse_url( $request_url );
 
-	/*
-	 * SECURITY: Make sure we're only authorizing the requests we're intending to, to avoid the possibility of
-	 * the keys being used for another purpose. That's not likely, but it's better to err on the side of caution.
-	 */
-	$is_relevant_request = GITHUB_API_HOSTNAME === $parsed_url['host']                 &&
-	                       'GET'               === $request_args['method']             &&
-	                       '/repos'            === substr( $parsed_url['path'], 0, 6 ) &&
-	                       '.css'              === substr( $parsed_url['path'], strlen( $parsed_url['path'] ) - 4 );
-
-	if ( ! $is_relevant_request ) {
+	if ( ! should_authenticate_url( $parsed_url, $request_args ) ) {
 		return $preempt;
 	}
 
@@ -116,6 +107,35 @@ function authenticate_requests( $preempt, $request_args, $request_url ) {
 	}
 
 	return $preempt;
+}
+
+/**
+ * Determine if the given URL should have authentication credentials added to it.
+ *
+ * SECURITY: Make sure we're only authorizing the requests we're intending to, to avoid the possibility of
+ * the keys being used for another purpose. That's not likely, but it's better to err on the side of caution.
+ *
+ * @param array $request_url_parts
+ * @param array $request_args
+ *
+ * @return bool
+ */
+function should_authenticate_url( $request_url_parts, $request_args ) {
+	$authenticate = true;
+
+	if ( GITHUB_API_HOSTNAME !== $request_url_parts['host'] || 'GET' !== $request_args['method'] ) {
+		$authenticate = false;
+	}
+
+	if ( '/repos' !== substr( $request_url_parts['path'], 0, 6 ) ) {
+		$authenticate = false;
+	}
+
+	if ( '.css' !== substr( $request_url_parts['path'], strlen( $request_url_parts['path'] ) - 4 ) ) {
+		$authenticate = false;
+	}
+
+	return $authenticate;
 }
 
 /**
