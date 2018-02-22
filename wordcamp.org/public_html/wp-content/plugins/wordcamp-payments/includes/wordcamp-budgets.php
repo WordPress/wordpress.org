@@ -11,10 +11,11 @@ class WordCamp_Budgets {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init', array( __CLASS__, 'register_post_statuses' ) );
-		add_action( 'admin_menu',             array( $this, 'register_budgets_menu' )     );
-		add_action( 'admin_enqueue_scripts',  array( $this, 'enqueue_common_assets' ), 11 );
+		add_action( 'init', 				  array( __CLASS__, 'register_post_statuses' ) 				 );
+		add_action( 'admin_menu',             array( $this, 'register_budgets_menu' )     				 );
+		add_action( 'admin_enqueue_scripts',  array( $this, 'enqueue_common_assets' ), 			   11 	 );
 		add_filter( 'user_has_cap',           array( __CLASS__, 'user_can_view_payment_details' ), 10, 4 );
+		add_filter( 'default_title', 	   	  array( $this, 'set_default_payments_title'), 		   10, 2 );
 	}
 
 	/**
@@ -118,6 +119,34 @@ class WordCamp_Budgets {
 			plugins_url( 'images/dollar-sign-icon.svg', dirname( __FILE__ ) ),
 			30
 		);
+	}
+
+	/**
+	 * Set default post title for reimbursements, vendor payments and sponsor invoices.
+	 *
+	 * @param  string  $post_title Default post title.
+	 * @param  WP_Post $post 	   Current post object.
+	 *
+	 * @return string $post_title Post title.
+	 */
+	public function set_default_payments_title ( $post_title, $post ) {
+		if ( $post instanceof WP_Post && ! empty( $post->post_type ) ) {
+			$new_title = '';
+
+			// Generate default title for payment CPTs.
+			switch ( $post->post_type ) {
+				case 'wcb_reimbursement':   $new_title = __( 'Reimbursement Request', 'wordcamporg' ); break;
+				case 'wcp_payment_request': $new_title = __( 'Vendor Payment', 'wordcamporg' ); 	   break;
+				case 'wcb_sponsor_invoice': $new_title = __( 'Sponsor Invoice', 'wordcamporg' ); 	   break;
+			}
+
+			// Prepend title with post ID to make it unique.
+			if ( $new_title ) {
+			   $post_title = sprintf( __( '[%s] Untitled %s', 'wordcamporg' ), $post->ID, $new_title );
+			}
+		}
+
+		return $post_title;
 	}
 
 	/**
