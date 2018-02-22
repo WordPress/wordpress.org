@@ -1505,7 +1505,7 @@ function _generate_payment_report_jpm_wires( $args ) {
 
 			'112-priority' => '',
 			'113-blank' => '',
-			'114-charges' => '',
+			'114-charges' => 'OUR', // Charges should always be paid by the remitter, instead of shared.
 			'115-blank' => '',
 			'116-details' => '',
 			'117-note' => substr( sprintf( 'wcb-%d-%d', $entry->blog_id, $entry->request_id ), 0, 70 ),
@@ -1531,10 +1531,6 @@ function _generate_payment_report_jpm_wires( $args ) {
 
 			$row['47-supl-id-type'] = 'ACCT';
 			$row['48-supl-id-value'] = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_account', true ) );
-		}
-
-		if ( get_post_meta( $post->ID, '_wcbrr_currency', true ) == 'CAD' ) {
-			$row['114-charges'] = 'OUR';
 		}
 
 		// Use for debugging.
