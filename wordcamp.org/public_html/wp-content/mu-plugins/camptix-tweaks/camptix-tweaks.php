@@ -2,6 +2,7 @@
 
 namespace WordCamp\CampTix_Tweaks;
 use CampTix_Plugin;
+use WP_Post;
 
 defined( 'WPINC' ) or die();
 
@@ -20,9 +21,12 @@ add_action( 'camptix_payment_result',                        __NAMESPACE__ . '\t
 // Attendees
 add_filter( 'camptix_name_order',                            __NAMESPACE__ . '\set_name_order'         );
 add_action( 'camptix_form_edit_attendee_custom_error_flags', __NAMESPACE__ . '\disable_attendee_edits' );
+add_action( 'transition_post_status',                        __NAMESPACE__ . '\log_publish_to_cancel', 10, 3 );
 
 // Miscellaneous
+add_filter( 'camptix_beta_features_enabled', '__return_true' );
 add_action( 'camptix_nt_file_log',     '__return_false' );
+add_action( 'init',                    __NAMESPACE__ . '\camptix_debug', 9          ); // CampTix does this at 10.
 add_filter( 'camptix_default_addons',  __NAMESPACE__ . '\load_addons'               );
 add_filter( 'camptix_capabilities',    __NAMESPACE__ . '\modify_capabilities'       );
 add_filter( 'camptix_default_options', __NAMESPACE__ . '\modify_default_options'    );
@@ -469,6 +473,39 @@ function disable_attendee_edits( $attendee ) {
 			$camptix->redirect_with_error_flags();
 		}
 	}
+}
+
+/**
+ * Log when published attendees are cancelled.
+ *
+ * @param string  $to
+ * @param string  $from
+ * @param WP_Post $post
+ */
+function log_publish_to_cancel( $to, $from, $post ) {
+	/** @var $camptix CampTix_Plugin */
+	global $camptix;
+
+	if ( 'tix_attendee' !== $post->post_type || $to === $from ) {
+		return;
+	}
+
+	if ( 'publish' === $from && 'cancel' === $to ) {
+		$camptix->log( 'Publish to cancel transition, possible bug.', $post->ID );
+	}
+}
+
+/**
+ * Enable debugging info for super admins.
+ *
+ * It's not done for others because it can expose sensitive information.
+ */
+function camptix_debug() {
+	if ( ! current_user_can( 'manage_network' ) ) {
+		return;
+	}
+
+	add_filter( 'camptix_debug', '__return_true' );
 }
 
 /**

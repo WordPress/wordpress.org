@@ -32,7 +32,6 @@ function _get_network_plugin_state_list( $state ) {
 			'camptix-attendance/camptix-attendance.php',
 			'camptix-badge-generator/bootstrap.php',
 			'camptix/camptix.php',
-			'camptix-extras/camptix-extras.php',
 			'camptix-network-tools/camptix-network-tools.php',
 			'custom-content-width/custom-content-width.php',
 			'email-post-changes/email-post-changes.php',
