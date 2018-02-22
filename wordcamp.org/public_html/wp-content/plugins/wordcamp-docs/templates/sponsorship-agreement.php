@@ -143,7 +143,7 @@ h2 {
 
 		<h2>WordCamp Sponsorship Agreement</h2>
 
-		<p>This Sponsorship Agreement is made by and between WordPress Community Support, a Public Benefit Corporation (the "WPCS"), and <?php echo esc_html( $data['sponsor_name'] ); ?> (the "Sponsor"). This Agreement is effective as of <?php echo esc_html( $data['agreement_date'] ); ?>.</p>
+		<p>This Sponsorship Agreement is made by and between WordPress Community Support, a Public Benefit Corporation (the "WPCS"), with registered address: 660 4th Street #119, San Francisco CA 94107 (Tax ID: 81-0896291), and <?php echo esc_html( $data['sponsor_name'] ); ?> (the "Sponsor"). This Agreement is effective as of <?php echo esc_html( $data['agreement_date'] ); ?>.</p>
 
 		<p>1. Sponsored events. With assistance from its local organizers, WPCS hosts WordCamp conferences throughout the world. This Agreement pertains to a WordCamp event hosted in the following location and time period:</p>
 
