@@ -119,7 +119,7 @@ class MES_Region {
 	 *
 	 * @param int $region_id
 	 *
-	 * @return bool
+	 * @return string|bool The address on success, or `false` on failure.
 	 */
 	public static function get_camera_wranger_from_region( $region_id ) {
 		$camera_wranglers = get_option( 'mes_region_camera_wranglers', array() );
