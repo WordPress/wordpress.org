@@ -101,8 +101,7 @@ function authenticate_requests( $preempt, $request_args, $request_url ) {
 		$request_query_params = array();
 	}
 
-	$has_authentication_params = array_key_exists( 'client_id',     $request_query_params ) &&
-	                             array_key_exists( 'client_secret', $request_query_params );
+	$has_authentication_params = isset( $request_query_params['client_id'], $request_query_params['client_secret'] );
 
 	if ( ! $has_authentication_params ) {
 		$request_url = add_query_arg(
