@@ -71,6 +71,8 @@ function convert_to_api_urls( $remote_css_url ) {
  *
  * This allows us to make 5k requests per hour, instead of just 60.
  *
+ * @action pre_http_request
+ *
  * @param false|array|WP_Error $preempt      See `pre_http_request`.
  * @param array                $request_args
  * @param string               $request_url
@@ -89,27 +91,29 @@ function authenticate_requests( $preempt, $request_args, $request_url ) {
 	                       '/repos'            === substr( $parsed_url['path'], 0, 6 ) &&
 	                       '.css'              === substr( $parsed_url['path'], strlen( $parsed_url['path'] ) - 4 );
 
-	if ( $is_relevant_request ) {
-		if ( isset( $parsed_url['query'] ) ) {
-			parse_str( $parsed_url['query'], $request_query_params );
-		} else {
-			$request_query_params = array();
-		}
+	if ( ! $is_relevant_request ) {
+		return $preempt;
+	}
 
-		$has_authentication_params = array_key_exists( 'client_id',     $request_query_params ) &&
-									 array_key_exists( 'client_secret', $request_query_params );
+	if ( isset( $parsed_url['query'] ) ) {
+		parse_str( $parsed_url['query'], $request_query_params );
+	} else {
+		$request_query_params = array();
+	}
 
-		if ( ! $has_authentication_params ) {
-			$request_url = add_query_arg(
-				array(
-					'client_id'     => REMOTE_CSS_GITHUB_ID,
-					'client_secret' => REMOTE_CSS_GITHUB_SECRET,
-				),
-				$request_url
-			);
+	$has_authentication_params = array_key_exists( 'client_id',     $request_query_params ) &&
+	                             array_key_exists( 'client_secret', $request_query_params );
 
-			$preempt = wp_remote_get( $request_url, $request_args );
-		}
+	if ( ! $has_authentication_params ) {
+		$request_url = add_query_arg(
+			array(
+				'client_id'     => REMOTE_CSS_GITHUB_ID,
+				'client_secret' => REMOTE_CSS_GITHUB_SECRET,
+			),
+			$request_url
+		);
+
+		$preempt = wp_remote_get( $request_url, $request_args );
 	}
 
 	return $preempt;
