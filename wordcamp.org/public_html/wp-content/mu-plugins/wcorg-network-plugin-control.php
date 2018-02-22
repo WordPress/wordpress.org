@@ -52,7 +52,6 @@ function _get_network_plugin_state_list( $state ) {
 			'wc-fonts/wc-fonts.php',
 			'wc-post-types/wc-post-types.php',
 			'wordcamp-qbo-client/wordcamp-qbo-client.php',
-			'wordcamp-shortcodes/wc-shortcodes.php',
 			'wordpress-importer/wordpress-importer.php',
 			'wporg-profiles-wp-activity-notifier/wporg-profiles-wp-activity-notifier.php',
 			'json-rest-api/plugin.php',
