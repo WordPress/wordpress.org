@@ -91,7 +91,7 @@ function scripts() {
 				'noData'    => __( 'No data yet', 'wporg-plugins' ),
 				'today'     => __( 'Today', 'wporg-plugins' ),
 				'yesterday' => __( 'Yesterday', 'wporg-plugins' ),
-				'last_week' => __( 'Last Week', 'wporg-plugins' ),
+				'last_week' => __( 'Last 7 Days', 'wporg-plugins' ),
 				'all_time'  => __( 'All Time', 'wporg-plugins' ),
 			),
 		) );
