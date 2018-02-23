@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+	<!--
+	### todo
+		some meetups, like seattle and NYC are missing, maybe b/c the coordinates overlap too closely and google is filtering them out?
+			maybe just coincidence and some meetup groups that don't have wordcamps are missing too?
+
+	### process to build KML file:
+		export wordcamps to csv from wordcamp.org script
+ 			probably don't need these though, since wordcamps have to have a meetup first
+ 			maybe some odd edge cases, though?
+		export meetsup to csv from stats script
+		import into My Maps
+			maybe don't need this step. can import csv into Earth?
+			if need to do this again, just write script like described below
+		export to kml. it'll be missing coordinates
+		import into google earth, it'll add coordinates
+		export to kml
+		find/replace <linearring> with <!-- <linearring> and same for closing tag
+		upload to wordcamp.org or other public server w/ valid SSL (not local dev environment)
+		update the URL below for the KmlLayer
+
+	### potential process improvements if use this again in future
+	 	could have a script that generates the exact KML we want, instead of bothering with My Maps and Earth
+	 	don't need to combine them, can have multiple kmllayers, so just setup one file for each layer. it's fine to have one script for wordcamps and another for meetups
+	 	actually, you have to have a meetup to have a camp, so for this purpose, we really only need meetups, the camps will just be dupes
+
+	### misc
+		potentially interesting to use this to see which areas don't have a meetup within driving distance, and focus some efforts there, to make sure everyone in the world has access to a meetup
+	-->
+
+	<head>
+		<title>Map of Meetup and WordCamp cities with custom styles</title>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta charset="utf-8">
+
+		<style>
+			#map {
+				height: 100%;
+			}
+
+			html, body {
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+
+		<script>
+			function initMap() {
+				var map, styles, kmlLayer,
+					url 		= 'https://central.wordcamp.org/wp-content/miscellaneous/active-groups-map/groups.kml', // google services need access to this, so it has to be a public URL with a valid SSL
+					cachebuster = Date.now();	// google caches the KML on their side, so this is needed when tweaking the KML file
+
+				// built from https://mapstyle.withgoogle.com/
+				styles = [
+					{
+						"elementType" : "geometry",
+						"stylers"     : [
+							{
+								"visibility" : "off"
+							}
+						]
+					},
+					{
+						"elementType" : "geometry.fill",
+						"stylers"     : [
+							{
+								"color" : "#ebe8e3"
+							},
+							{
+								"visibility" : "on"
+							}
+						]
+					},
+					{
+						"elementType" : "geometry.stroke",
+						"stylers"     : [
+							{
+								"visibility" : "off"
+							}
+						]
+					},
+					{
+						"elementType" : "labels",
+						"stylers"     : [
+							{
+								"visibility" : "off"
+							}
+						]
+					},
+					{
+						"elementType" : "labels.icon",
+						"stylers"     : [
+							{
+								"visibility" : "off"
+							}
+						]
+					},
+					{
+						"elementType" : "labels.text.fill",
+						"stylers"     : [
+							{
+								"lightness" : 20
+							},
+							{
+								"gamma" : 0.01
+							}
+						]
+					},
+					{
+						"elementType" : "labels.text.stroke",
+						"stylers"     : [
+							{
+								"saturation" : -31
+							},
+							{
+								"lightness" : -33
+							},
+							{
+								"gamma" : 0.8
+							},
+							{
+								"weight" : 2
+							}
+						]
+					},
+					{
+						"featureType" : "landscape",
+						"elementType" : "geometry",
+						"stylers"     : [
+							{
+								"saturation" : 30
+							},
+							{
+								"lightness" : 30
+							}
+						]
+					},
+					{
+						"featureType" : "poi",
+						"elementType" : "geometry",
+						"stylers"     : [
+							{
+								"saturation" : 20
+							}
+						]
+					},
+					{
+						"featureType" : "poi.park",
+						"elementType" : "geometry",
+						"stylers"     : [
+							{
+								"saturation" : -20
+							},
+							{
+								"lightness" : 20
+							}
+						]
+					},
+					{
+						"featureType" : "road",
+						"elementType" : "geometry",
+						"stylers"     : [
+							{
+								"saturation" : -30
+							},
+							{
+								"lightness" : 10
+							}
+						]
+					},
+					{
+						"featureType" : "road",
+						"elementType" : "geometry.stroke",
+						"stylers"     : [
+							{
+								"saturation" : 25
+							},
+							{
+								"lightness" : 25
+							}
+						]
+					},
+					{
+						"featureType" : "water",
+						"stylers"     : [
+							{
+								"lightness" : -20
+							}
+						]
+					},
+					{
+						"featureType" : "water",
+						"elementType" : "geometry.fill",
+						"stylers"     : [
+							{
+								"color" : "#235873"
+							}
+						]
+					}
+				];
+
+				map = new google.maps.Map(
+					document.getElementById( 'map' ),
+					{
+						center : { lat : 30, lng : 16 },
+						zoom   : 2,
+						styles : styles
+					}
+				);
+
+
+				kmlLayer = new google.maps.KmlLayer(
+					url + '?cachebuster=' + cachebuster,
+					{
+						map              : map,
+						preserveViewport : true
+					}
+				);
+			}
+		</script>
+	</head>
+
+	<body>
+		<div id="map"></div>
+
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOn6aXZPmHnAaPFjeZ0XdbHztpbRlWv5c&callback=initMap" async defer></script>
+	</body>
+</html>
