@@ -1,0 +1,22 @@
+<phpunit
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	>
+	<groups>
+		<include>
+			<group>serve-happy</group>
+		</include>
+		<exclude>
+			<group>serve-happy-live-http</group>
+		</exclude>
+	</groups>
+	<testsuites>
+		<testsuite>
+			<directory suffix=".php">tests/</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
+
