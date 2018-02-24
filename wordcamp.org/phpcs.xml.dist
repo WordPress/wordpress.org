@@ -22,6 +22,7 @@
 
 		See these links for useful information:
 			- https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml
+			- https://github.com/squizlabs/PHP_CodeSniffer/wiki/Customisable-Sniff-Properties
 	        - https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties
 	-->
 
@@ -29,10 +30,21 @@
 		Exclude 3rd party plugins/themes so this can be run from the project root without a ton of extraneous stuff
 		<exclude-pattern>/build/*</exclude-pattern>
 
+		disable WordPress.VIP.PostsPerPage.posts_per_page_posts_per_page for bin folder only
+
 		Look through `General` and `Squiz` sniffs for anything you might want to add.
 			Is there one that detects `\Foo` instead of `use Foo`?
 			maximum nesting level?
 			function length?
+			unnecessary order-of-operations params, e.g., $foo = ( $bar || $qax ) ? 'bax' : 'quix';
+			echoing html instead of breaking php or using an external view. e.g., echo '<div>foo</div>'; should be `?> <div>foo</div> <?php` (but on multiple lines of course)
+			var assignment immediately followed by if/while/for statement, without a blank space inbetween. maybe not in all cases, though?
+			closing divs with a comment after them. it adds clutter. when viewing source, this is an artifact from the days before browser dev tools. view in IDEs, this isn't necessary if the code is properly formatted.
+			return statement at end of function w/out blank line above it
+			no space between last @param and the @return in docblock. i know diff than core, but whitespace makes it easier to scan/read. should also have space above first @param. sometimes want no space between different types of tags, though.
+			opening/closing <?php ?> tags without a blank line after/before them, except when doing single-line like <?php foo(); ?>
+			align ? and : in multiple ternary operator statements
+			don't un-align params in function calls - e.g., multiple add_meta_box( $a, $b, $c, $d, $e, $f, $g ) calls should have the params aligned.
 
 		Maybe add WordCamp\Remote_CSS\output_cached_css to customEscapingFunctions or whichever param is most appropriate
 		Maybe do something similar for set_cache_headers and nonce verification
@@ -40,10 +52,11 @@
 		Setup WordPress.WP.I18n text_domain property and test that it works, see https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties#internationalization-setting-your-text-domain
 	-->
 
+
 	<arg name="extensions" value="php" />
 
 	<!-- Show sniff codes in all reports -->
-	<arg value="ps" />
+	<arg value="ps"    />
 	<arg name="colors" />
 
 	<!-- Scan all (php) files in the current folder and subfolders -->
@@ -72,8 +85,15 @@
 		<exclude name="WordPress.WhiteSpace.PrecisionAlignment.Found" />
 		<exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
 		<exclude name="WordPress.WhiteSpace.OperatorSpacing.SpacingBefore" />
+		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.SpaceBeforeArrayCloser" />
 		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" />
 		<exclude name="Squiz.Strings.ConcatenationSpacing.PaddingFound" />
+
+		<!-- Warn about mis-aligned array items, but don't automatically "fix" them, because arrays in function calls get extra lines added.
+		     See https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/issues/1305 -->
+		<exclude phpcbf-only="true" name="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned" />
+		<exclude phpcbf-only="true" name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
+		<exclude phpcbf-only="true" name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
 	</rule>
 
 	<rule ref="WordPress-Docs">
@@ -81,10 +101,20 @@
 		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
 		<exclude name="Squiz.Commenting.FileComment.Missing" />
 		<exclude name="Squiz.Commenting.ClassComment.Missing" />
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
+
+		<!-- I don't see how these are useful. -->
+		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
 
 		<!-- We really only use basic exceptions, so this is kind of overkill and tedious. -->
 		<exclude name="Squiz.Commenting.FunctionComment.EmptyThrows" />
+
+		<!-- Whitespace makes things more readable. -->
+		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen" />
+
+		<!-- It's not wrong for WordPress plugin file headers. -->
+		<exclude name="Squiz.Commenting.FileComment.WrongStyle" />
 	</rule>
 
 	<rule ref="WordPress-VIP">
@@ -94,6 +124,9 @@
 		<exclude name="WordPress.VIP.RestrictedFunctions.wp_remote_get_wp_remote_get" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.file_get_contents_file_get_contents" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.get_posts_get_posts" />
+
+		<!-- This is too strict. -->
+		<exclude name="WordPress.VIP.SlowDBQuery.slow_db_query_meta_query" />
 	</rule>
 
 	<rule ref="WordPress-Extra">
