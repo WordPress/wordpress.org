@@ -13,6 +13,15 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+add_filter( 'jetpack_open_graph_tags', function( $tags ) {
+	$tags['og:title']            = _esc_html__( 'The GNU Public License', 'wporg' );
+	$tags['og:description']      = _esc_html__( 'WordPress is an open source software project, and a fierce believer in the values of the open web. WordPress uses the GNU Public License, which provides a platform for technical expansion and encourages adaptation and innovation. Learn more about this license, and discover what can and cannot be done under it.', 'wporg' );
+	$tags['twitter:text:title']  = $tags['og:title'];
+	$tags['twitter:description'] = $tags['og:description'];
+
+	return $tags;
+} );
+
 get_header();
 the_post();
 ?>

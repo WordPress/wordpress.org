@@ -13,6 +13,15 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+add_filter( 'jetpack_open_graph_tags', function( $tags ) {
+	$tags['og:title']            = _esc_html__( 'WordPress Domains', 'wporg' );
+	$tags['og:description']      = _esc_html__( 'WordPress domains and site names can be very flexible; however, top-level domains can&#8217;t use the word WordPress. Find out what is allowed and what constitutes a trademark violation, as well as policies on subdomain use. Review the list of official WordPress sites to know how to recognize and advise violators.', 'wporg' );
+	$tags['twitter:text:title']  = $tags['og:title'];
+	$tags['twitter:description'] = $tags['og:description'];
+
+	return $tags;
+} );
+
 get_header();
 the_post();
 ?>

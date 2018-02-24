@@ -13,6 +13,16 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+add_filter( 'jetpack_open_graph_tags', function( $tags ) {
+	$tags['og:title']            = _esc_html__( 'WordPress is Secure', 'wporg' );
+	/* translators: WordPress market share: 29%; */
+	$tags['og:description']      = sprintf( _esc_html__( 'Why is WordPress recommended as a secure website-building solution? With a passionate open source community and an extensible, easy-to-use platform, WordPress provides flexible and secure options for all levels of users, from beginners to pros. Learn how WordPress guarantees the security of %s of the web.', 'wporg' ), WP_MARKET_SHARE . '%' );
+	$tags['twitter:text:title']  = $tags['og:title'];
+	$tags['twitter:description'] = $tags['og:description'];
+
+	return $tags;
+} );
+
 get_header();
 
 the_post();

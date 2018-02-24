@@ -13,6 +13,15 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+add_filter( 'jetpack_open_graph_tags', function( $tags ) {
+	$tags['og:title']            = _esc_html__( 'Key WordPress Statistics', 'wporg' );
+	$tags['og:description']      = _esc_html__( 'WordPress is committed to transparency, and you can get a better sense of its constant worldwide growth through the statistics we share. Review key WordPress stats including usage breakdown by WordPress versions, PHP and MySQL versions being run, and locales of use, and see how WordPress expands its global reach.', 'wporg' );
+	$tags['twitter:text:title']  = $tags['og:title'];
+	$tags['twitter:description'] = $tags['og:description'];
+
+	return $tags;
+} );
+
 get_header();
 the_post();
 ?>

@@ -13,6 +13,16 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+add_filter( 'jetpack_open_graph_tags', function( $tags ) {
+	$tags['og:title']            = _esc_html__( 'The History of WordPress', 'wporg' );
+	/* translators: WordPress market share: 29%; */
+	$tags['og:description']      = sprintf( _esc_html__( 'WordPress currently powers more than %s of the web. How did it grow to become the world&#8217;s leading web publishing platform? Learn about the history of WordPress: an open source software project built by an active community of contributors who are passionate about collaboration, empowerment, and the open web.', 'wporg' ), WP_MARKET_SHARE . '%' );
+	$tags['twitter:text:title']  = $tags['og:title'];
+	$tags['twitter:description'] = $tags['og:description'];
+
+	return $tags;
+} );
+
 get_header();
 the_post();
 ?>

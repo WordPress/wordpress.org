@@ -13,6 +13,16 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+add_filter( 'jetpack_open_graph_tags', function( $tags ) {
+	$tags['og:title']            = _esc_html__( 'WordPress Features', 'wporg' );
+	/* translators: WordPress market share: 29%; */
+	$tags['og:description']      = sprintf( _esc_html__( 'Discover why WordPress powers more than %s of the web. WordPress is a simple, flexible, user-friendly platform, with key features that include media management, SEO, and endless options for customization. More than 50,000 plugins extend the core functionality of WordPress even more. Build your site today.', 'wporg' ), WP_MARKET_SHARE . '%' );
+	$tags['twitter:text:title']  = $tags['og:title'];
+	$tags['twitter:description'] = $tags['og:description'];
+
+	return $tags;
+} );
+
 get_header();
 the_post();
 ?>

@@ -13,6 +13,15 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+add_filter( 'jetpack_open_graph_tags', function( $tags ) {
+	$tags['og:title']            = _esc_html__( 'WordPress Development Roadmap', 'wporg' );
+	$tags['og:description']      = _esc_html__( 'The WordPress Roadmap lists major releases by date, includes details about the features of each release, and acknowledges the contributing community members. Learn about the status of upcoming releases, development cycles, issues, and milestones. Follow the progress of WordPress development week after week!', 'wporg' );
+	$tags['twitter:text:title']  = $tags['og:title'];
+	$tags['twitter:description'] = $tags['og:description'];
+
+	return $tags;
+} );
+
 get_header();
 the_post();
 
