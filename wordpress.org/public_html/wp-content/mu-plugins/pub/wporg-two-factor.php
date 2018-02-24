@@ -1,0 +1,20 @@
+<?php
+/**
+ * Plugin Name: WP.org Two Factor
+ * Description: Runs the Two Factor authentication plugins on WordPress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  https://wordpress.org/
+ * License:     GPLv2 or later
+ *
+ * @package WordPressdotorg\TwoFactor
+ */
+
+namespace WordPressdotorg\TwoFactor;
+
+if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
+	return;
+}
+
+include_once WP_PLUGIN_DIR . '/two-factor/two-factor.php';
+include_once WP_PLUGIN_DIR . '/wporg-two-factor/wporg-two-factor.php';
