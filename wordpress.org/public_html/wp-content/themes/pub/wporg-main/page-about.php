@@ -86,6 +86,7 @@ the_post();
 							<li><a href="<?php echo esc_url( home_url( '/about/philosophy/' ) ); ?>"><?php _esc_html_e( 'Philosophy', 'wporg' ); ?></a></li>
 							<li><a href="<?php echo esc_url( home_url( '/about/etiquette/' ) ); ?>"><?php _esc_html_e( 'Etiquette', 'wporg' ); ?></a></li>
 							<li><a href="<?php echo esc_url( home_url( '/about/swag/' ) ); ?>"><?php _esc_html_e( 'Swag', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/logos/' ) ); ?>"><?php _esc_html_e( 'Logos and Graphics', 'wporg' ); ?></a></li>
 						</ul>
 					</div>
 				</section>
