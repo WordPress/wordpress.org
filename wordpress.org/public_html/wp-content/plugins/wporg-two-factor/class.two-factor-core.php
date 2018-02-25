@@ -125,8 +125,8 @@ class Two_Factor_Core {
 			$user = wp_get_current_user();
 		}
 
-		$providers         = self::get_providers();
-		$enabled_providers = get_user_meta( $user->ID, self::ENABLED_PROVIDERS_USER_META_KEY, true );
+		$providers         = static::get_providers();
+		$enabled_providers = get_user_meta( $user->ID, static::ENABLED_PROVIDERS_USER_META_KEY, true );
 		if ( empty( $enabled_providers ) ) {
 			$enabled_providers = array();
 		}
@@ -146,8 +146,8 @@ class Two_Factor_Core {
 			$user = wp_get_current_user();
 		}
 
-		$providers            = self::get_providers();
-		$enabled_providers    = self::get_enabled_providers_for_user( $user );
+		$providers            = static::get_providers();
+		$enabled_providers    = static::get_enabled_providers_for_user( $user );
 		$configured_providers = array();
 
 		foreach ( $providers as $classname => $provider ) {
@@ -172,8 +172,8 @@ class Two_Factor_Core {
 			$user_id = get_current_user_id();
 		}
 
-		$providers           = self::get_providers();
-		$available_providers = self::get_available_providers_for_user( get_userdata( $user_id ) );
+		$providers           = static::get_providers();
+		$available_providers = static::get_available_providers_for_user( get_userdata( $user_id ) );
 
 		// If there's only one available provider, force that to be the primary.
 		if ( empty( $available_providers ) ) {
@@ -181,7 +181,7 @@ class Two_Factor_Core {
 		} elseif ( 1 === count( $available_providers ) ) {
 			$provider = key( $available_providers );
 		} else {
-			$provider = get_user_meta( $user_id, self::PROVIDER_USER_META_KEY, true );
+			$provider = get_user_meta( $user_id, static::PROVIDER_USER_META_KEY, true );
 
 			// If the provider specified isn't enabled, just grab the first one that is.
 			if ( ! isset( $available_providers[ $provider ] ) ) {
@@ -212,7 +212,7 @@ class Two_Factor_Core {
 	 * @param int $user_id Optional. User ID. Default is 'null'.
 	 */
 	public static function is_user_using_two_factor( $user_id = null ) {
-		$provider = self::get_primary_provider_for_user( $user_id );
+		$provider = static::get_primary_provider_for_user( $user_id );
 		return ! empty( $provider );
 	}
 
@@ -225,13 +225,13 @@ class Two_Factor_Core {
 	 * @param WP_User $user WP_User object of the logged-in user.
 	 */
 	public static function wp_login( $user_login, $user ) {
-		if ( ! self::is_user_using_two_factor( $user->ID ) ) {
+		if ( ! static::is_user_using_two_factor( $user->ID ) ) {
 			return;
 		}
 
 		wp_clear_auth_cookie();
 
-		self::show_two_factor_login( $user );
+		static::show_two_factor_login( $user );
 		exit;
 	}
 
@@ -247,14 +247,14 @@ class Two_Factor_Core {
 			$user = wp_get_current_user();
 		}
 
-		$login_nonce = self::create_login_nonce( $user->ID );
+		$login_nonce = static::create_login_nonce( $user->ID );
 		if ( ! $login_nonce ) {
 			wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
 		}
 
 		$redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : $_SERVER['REQUEST_URI'];
 
-		self::login_html( $user, $login_nonce['key'], $redirect_to );
+		static::login_html( $user, $login_nonce['key'], $redirect_to );
 	}
 
 	/**
@@ -273,19 +273,19 @@ class Two_Factor_Core {
 		}
 
 		$nonce = $_GET['wp-auth-nonce'];
-		if ( true !== self::verify_login_nonce( $user->ID, $nonce ) ) {
+		if ( true !== static::verify_login_nonce( $user->ID, $nonce ) ) {
 			wp_safe_redirect( get_bloginfo( 'url' ) );
 			exit;
 		}
 
-		$providers = self::get_available_providers_for_user( $user );
+		$providers = static::get_available_providers_for_user( $user );
 		if ( isset( $providers[ $_GET['provider'] ] ) ) {
 			$provider = $providers[ $_GET['provider'] ];
 		} else {
 			wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
 		}
 
-		self::login_html( $user, $_GET['wp-auth-nonce'], $_GET['redirect_to'], '', $provider );
+		static::login_html( $user, $_GET['wp-auth-nonce'], $_GET['redirect_to'], '', $provider );
 
 		exit;
 	}
@@ -303,14 +303,14 @@ class Two_Factor_Core {
 	 */
 	public static function login_html( $user, $login_nonce, $redirect_to, $error_msg = '', $provider = null ) {
 		if ( empty( $provider ) ) {
-			$provider = self::get_primary_provider_for_user( $user->ID );
+			$provider = static::get_primary_provider_for_user( $user->ID );
 		} elseif ( is_string( $provider ) && method_exists( $provider, 'get_instance' ) ) {
 			$provider = call_user_func( array( $provider, 'get_instance' ) );
 		}
 
 		$provider_class = get_class( $provider );
 
-		$available_providers = self::get_available_providers_for_user( $user );
+		$available_providers = static::get_available_providers_for_user( $user );
 		$backup_providers = array_diff_key( $available_providers, array( $provider_class => null ) );
 		$interim_login = isset( $_REQUEST['interim-login'] ); // WPCS: override ok.
 		$wp_login_url = wp_login_url();
@@ -428,7 +428,7 @@ class Two_Factor_Core {
 		}
 		$login_nonce['expiration'] = time() + HOUR_IN_SECONDS;
 
-		if ( ! update_user_meta( $user_id, self::USER_META_NONCE_KEY, $login_nonce ) ) {
+		if ( ! update_user_meta( $user_id, static::USER_META_NONCE_KEY, $login_nonce ) ) {
 			return false;
 		}
 
@@ -443,7 +443,7 @@ class Two_Factor_Core {
 	 * @param int $user_id User ID.
 	 */
 	public static function delete_login_nonce( $user_id ) {
-		return delete_user_meta( $user_id, self::USER_META_NONCE_KEY );
+		return delete_user_meta( $user_id, static::USER_META_NONCE_KEY );
 	}
 
 	/**
@@ -455,13 +455,13 @@ class Two_Factor_Core {
 	 * @param string $nonce Login nonce.
 	 */
 	public static function verify_login_nonce( $user_id, $nonce ) {
-		$login_nonce = get_user_meta( $user_id, self::USER_META_NONCE_KEY, true );
+		$login_nonce = get_user_meta( $user_id, static::USER_META_NONCE_KEY, true );
 		if ( ! $login_nonce ) {
 			return false;
 		}
 
 		if ( $nonce !== $login_nonce['key'] || time() > $login_nonce['expiration'] ) {
-			self::delete_login_nonce( $user_id );
+			static::delete_login_nonce( $user_id );
 			return false;
 		}
 
@@ -484,30 +484,30 @@ class Two_Factor_Core {
 		}
 
 		$nonce = $_POST['wp-auth-nonce'];
-		if ( true !== self::verify_login_nonce( $user->ID, $nonce ) ) {
+		if ( true !== static::verify_login_nonce( $user->ID, $nonce ) ) {
 			wp_safe_redirect( get_bloginfo( 'url' ) );
 			exit;
 		}
 
 		if ( isset( $_POST['provider'] ) ) {
-			$providers = self::get_available_providers_for_user( $user );
+			$providers = static::get_available_providers_for_user( $user );
 			if ( isset( $providers[ $_POST['provider'] ] ) ) {
 				$provider = $providers[ $_POST['provider'] ];
 			} else {
 				wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
 			}
 		} else {
-			$provider = self::get_primary_provider_for_user( $user->ID );
+			$provider = static::get_primary_provider_for_user( $user->ID );
 		}
 
 		// Allow the provider to re-send codes, etc.
 		if ( true === $provider->pre_process_authentication( $user ) ) {
-			$login_nonce = self::create_login_nonce( $user->ID );
+			$login_nonce = static::create_login_nonce( $user->ID );
 			if ( ! $login_nonce ) {
 				wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
 			}
 
-			self::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], '', $provider );
+			static::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], '', $provider );
 			exit;
 		}
 
@@ -515,16 +515,16 @@ class Two_Factor_Core {
 		if ( true !== $provider->validate_authentication( $user ) ) {
 			do_action( 'wp_login_failed', $user->user_login );
 
-			$login_nonce = self::create_login_nonce( $user->ID );
+			$login_nonce = static::create_login_nonce( $user->ID );
 			if ( ! $login_nonce ) {
 				wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
 			}
 
-			self::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], esc_html__( 'ERROR: Invalid verification code.', 'two-factor' ), $provider );
+			static::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], esc_html__( 'ERROR: Invalid verification code.', 'two-factor' ), $provider );
 			exit;
 		}
 
-		self::delete_login_nonce( $user->ID );
+		static::delete_login_nonce( $user->ID );
 
 		$rememberme = false;
 		if ( isset( $_REQUEST['rememberme'] ) && $_REQUEST['rememberme'] ) {
@@ -587,10 +587,10 @@ class Two_Factor_Core {
 			return $output;
 		}
 
-		if ( ! self::is_user_using_two_factor( $user_id ) ) {
+		if ( ! static::is_user_using_two_factor( $user_id ) ) {
 			return sprintf( '<span class="dashicons-before dashicons-no-alt">%s</span>', esc_html__( 'Disabled' ) );
 		} else {
-			$provider = self::get_primary_provider_for_user( $user_id );
+			$provider = static::get_primary_provider_for_user( $user_id );
 			return esc_html( $provider->get_label() );
 		}
 
@@ -608,8 +608,8 @@ class Two_Factor_Core {
 	public static function user_two_factor_options( $user ) {
 		wp_enqueue_style( 'user-edit-2fa', plugins_url( 'user-edit.css', __FILE__ ) );
 
-		$enabled_providers = array_keys( self::get_available_providers_for_user( $user->ID ) );
-		$primary_provider = self::get_primary_provider_for_user( $user->ID );
+		$enabled_providers = array_keys( static::get_available_providers_for_user( $user->ID ) );
+		$primary_provider = static::get_primary_provider_for_user( $user->ID );
 
 		if ( ! empty( $primary_provider ) && is_object( $primary_provider ) ) {
 			$primary_provider_key = get_class( $primary_provider );
@@ -620,7 +620,7 @@ class Two_Factor_Core {
 		wp_nonce_field( 'user_two_factor_options', '_nonce_user_two_factor_options', false );
 
 		?>
-		<input type="hidden" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>" />
+		<input type="hidden" name="<?php echo esc_attr( static::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php /* Dummy input so $_POST value is passed when no providers are enabled. */ ?>" />
 		<table class="form-table">
 			<tr>
 				<th>
@@ -636,10 +636,10 @@ class Two_Factor_Core {
 							</tr>
 						</thead>
 						<tbody>
-						<?php foreach ( self::get_providers() as $class => $object ) : ?>
+						<?php foreach ( static::get_providers() as $class => $object ) : ?>
 							<tr>
-								<th scope="row"><input type="checkbox" name="<?php echo esc_attr( self::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( in_array( $class, $enabled_providers ) ); ?> /></th>
-								<th scope="row"><input type="radio" name="<?php echo esc_attr( self::PROVIDER_USER_META_KEY ); ?>" value="<?php echo esc_attr( $class ); ?>" <?php checked( $class, $primary_provider_key ); ?> /></th>
+								<th scope="row"><input type="checkbox" name="<?php echo esc_attr( static::ENABLED_PROVIDERS_USER_META_KEY ); ?>[]" value="<?php echo esc_attr( $class ); ?>" <?php checked( in_array( $class, $enabled_providers ) ); ?> /></th>
+								<th scope="row"><input type="radio" name="<?php echo esc_attr( static::PROVIDER_USER_META_KEY ); ?>" value="<?php echo esc_attr( $class ); ?>" <?php checked( $class, $primary_provider_key ); ?> /></th>
 								<td>
 									<?php $object->print_label(); ?>
 									<?php do_action( 'two-factor-user-options-' . $class, $user ); ?>
@@ -675,23 +675,23 @@ class Two_Factor_Core {
 		if ( isset( $_POST['_nonce_user_two_factor_options'] ) ) {
 			check_admin_referer( 'user_two_factor_options', '_nonce_user_two_factor_options' );
 
-			if ( ! isset( $_POST[ self::ENABLED_PROVIDERS_USER_META_KEY ] ) ||
-					! is_array( $_POST[ self::ENABLED_PROVIDERS_USER_META_KEY ] ) ) {
+			if ( ! isset( $_POST[ static::ENABLED_PROVIDERS_USER_META_KEY ] ) ||
+					! is_array( $_POST[ static::ENABLED_PROVIDERS_USER_META_KEY ] ) ) {
 				return;
 			}
 
-			$providers = self::get_providers();
+			$providers = static::get_providers();
 
-			$enabled_providers = $_POST[ self::ENABLED_PROVIDERS_USER_META_KEY ];
+			$enabled_providers = $_POST[ static::ENABLED_PROVIDERS_USER_META_KEY ];
 
 			// Enable only the available providers.
 			$enabled_providers = array_intersect( $enabled_providers, array_keys( $providers ) );
-			update_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY, $enabled_providers );
+			update_user_meta( $user_id, static::ENABLED_PROVIDERS_USER_META_KEY, $enabled_providers );
 
 			// Primary provider must be enabled.
-			$new_provider = isset( $_POST[ self::PROVIDER_USER_META_KEY ] ) ? $_POST[ self::PROVIDER_USER_META_KEY ] : '';
+			$new_provider = isset( $_POST[ static::PROVIDER_USER_META_KEY ] ) ? $_POST[ static::PROVIDER_USER_META_KEY ] : '';
 			if ( ! empty( $new_provider ) && in_array( $new_provider, $enabled_providers, true ) ) {
-				update_user_meta( $user_id, self::PROVIDER_USER_META_KEY, $new_provider );
+				update_user_meta( $user_id, static::PROVIDER_USER_META_KEY, $new_provider );
 			}
 		}
 	}
