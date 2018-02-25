@@ -2,6 +2,7 @@
 
 namespace WordPressdotorg\GlotPress\Customizations;
 
+use GP_Translation;
 use WP_CLI;
 
 class Plugin {
@@ -43,6 +44,7 @@ class Plugin {
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
+		add_filter( 'gp_translation_prepare_for_save', array( $this, 'apply_capital_P_dangit' ), 10, 2 );
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
@@ -58,6 +60,23 @@ class Plugin {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
+	}
+
+	/**
+	 * Applies capital_P_dangit() on translations.
+	 *
+	 * @param array          $args        Translation arguments.
+	 * @param GP_Translation $translation Translation instance.
+	 * @return array Translation arguments.
+	 */
+	public function apply_capital_P_dangit( $args, GP_Translation $translation ) {
+		foreach ( range( 0, $translation->get_static( 'number_of_plural_translations' ) - 1 ) as $i ) {
+			if ( isset( $args[ "translation_$i" ] ) ) {
+				$args[ "translation_$i" ] = capital_P_dangit( $args[ "translation_$i" ] );
+			}
+		}
+
+		return $args;
 	}
 
 	/**
