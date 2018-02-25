@@ -690,25 +690,18 @@ ul.filter-header-links {
 
 a.contribute-button {
 	color: #555;
-	line-height: 26px;
-	padding: 0 10px 5px;
-	-webkit-appearance: none;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-	min-height: 26px;
-	vertical-align: baseline;
-	white-space: nowrap;
 }
 
 a.contribute-button:hover {
 	color: #333;
 }
 
-@media (max-width: 782px) {
+@media screen and (min-width: 783px) {
 	a.contribute-button {
-		max-width: 92%;
-		padding: 0 5px;
-		white-space: normal;
+		font-size: 14px;
+		padding: 0 14px;
+		height: 28px;
+		line-height: 28px;
 	}
 }
 
@@ -916,19 +909,27 @@ a.contribute-button:hover {
 }
 
 .projects .project-status > div {
-	width: 33.333%;
+	width: 25%;
 	float: left;
 	margin: 20px 0;
-	padding: 0 20px;
 	text-align: center;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
-.projects .project-status-waiting {
-	border-right: 1px solid #eee;
+.projects .project-status > div:not(:first-child) {
 	border-left: 1px solid #eee;
+}
+
+@media (max-width: 500px) {
+	.projects .project-status > div {
+		width: 50%;
+	}
+
+	.projects .project-status > div:nth-child(3) {
+		border-left: 0;
+	}
 }
 
 .projects .project-status-title {
@@ -1947,4 +1948,13 @@ button:focus {
 
 #legend + .actionlist {
 	margin: 0;
+}
+
+.paging a,
+.paging span,
+.paging .current,
+.paging .dots {
+	width: auto;
+	min-width: 2em;
+	padding: .1em;
 }

@@ -118,12 +118,13 @@ gp_tmpl_header();
 <div id="projects" class="projects">
 	<?php
 	foreach ( $sub_projects as $sub_project ) {
-		$percent_complete = $waiting = $sub_projects_count = $fuzzy = 0;
+		$percent_complete = $waiting = $sub_projects_count = $fuzzy = $remaining = 0;
 		if ( isset( $project_status[ $sub_project->id ] ) ) {
 			$status = $project_status[ $sub_project->id ];
 			$percent_complete = $status->percent_complete;
 			$waiting = $status->waiting_count;
 			$fuzzy = $status->fuzzy_count;
+			$remaining = $status->all_count - $status->current_count;
 			$sub_projects_count = $status->sub_projects_count;
 		}
 
@@ -177,16 +178,20 @@ gp_tmpl_header();
 
 			<div class="project-status">
 				<div class="project-status-sub-projects">
-					<span class="project-status-title">Sub-Projects</span>
-					<span class="project-status-value"><?php echo $sub_projects_count; ?></span>
+					<span class="project-status-title">Projects</span>
+					<span class="project-status-value"><?php echo number_format_i18n( $sub_projects_count ); ?></span>
 				</div>
 				<div class="project-status-waiting">
 					<span class="project-status-title">Waiting/Fuzzy</span>
-					<span class="project-status-value"><?php echo $waiting + $fuzzy; ?></span>
+					<span class="project-status-value"><?php echo number_format_i18n( $waiting + $fuzzy ); ?></span>
+				</div>
+				<div class="project-status-remaining">
+					<span class="project-status-title">Remaining</span>
+					<span class="project-status-value"><?php echo number_format_i18n( $remaining ); ?></span>
 				</div>
 				<div class="project-status-progress">
 					<span class="project-status-title">Progress</span>
-					<span class="project-status-value"><?php echo $percent_complete; ?>%</span>
+					<span class="project-status-value"><?php echo number_format_i18n( $percent_complete ); ?>%</span>
 				</div>
 			</div>
 
