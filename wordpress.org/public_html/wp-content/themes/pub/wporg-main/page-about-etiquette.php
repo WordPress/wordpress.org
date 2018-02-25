@@ -13,6 +13,11 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+// Prevent Jetpack from looking for a non-existent featured image.
+add_filter( 'jetpack_images_pre_get_images', function() {
+	return new \WP_Error();
+} );
+
 add_filter( 'jetpack_open_graph_tags', function( $tags ) {
 	$tags['og:title']            = _esc_html__( 'Etiquette at WordPress', 'wporg' );
 	$tags['og:description']      = _esc_html__( 'We welcome the contributions of everyone who&#8217;s interested in joining the WordPress open source project, and every thriving, diverse community needs etiquette guidelines. Review our simple guidelines that focus on diversity, safety, and inclusion and foster a welcoming community for our contributors around the world.', 'wporg' );

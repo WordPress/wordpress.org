@@ -13,6 +13,11 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+// Prevent Jetpack from looking for a non-existent featured image.
+add_filter( 'jetpack_images_pre_get_images', function() {
+	return new \WP_Error();
+} );
+
 add_filter( 'jetpack_open_graph_tags', function( $tags ) {
 	$tags['og:title']            = _esc_html__( 'WordPress&rsquo; Philosophy', 'wporg' );
 	$tags['og:description']      = _esc_html__( 'At the core of the WordPress philosophy is our commitment to the open web and to building software that works for everyone, from a new user to an advanced developer. Our philosophy pushes WordPress to remain flexible, adaptable, and easy-to-use. Learn about WordPress&#8217;s philosophy and how it shapes our community.', 'wporg' );

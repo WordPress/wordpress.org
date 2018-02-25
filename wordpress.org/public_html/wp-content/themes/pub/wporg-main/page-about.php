@@ -13,6 +13,11 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+// Prevent Jetpack from looking for a non-existent featured image.
+add_filter( 'jetpack_images_pre_get_images', function() {
+	return new \WP_Error();
+} );
+
 add_filter( 'jetpack_open_graph_tags', function( $tags ) {
 	$tags['og:title']            = _esc_html__( 'Democratize Publishing', 'wporg' );
 	$tags['og:description']      = _esc_html__( 'WordPress is software designed for everyone with emphasis on accessibility, performance, security, and usability.', 'wporg' );

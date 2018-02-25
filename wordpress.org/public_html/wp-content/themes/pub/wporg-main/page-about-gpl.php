@@ -13,6 +13,11 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+// Prevent Jetpack from looking for a non-existent featured image.
+add_filter( 'jetpack_images_pre_get_images', function() {
+	return new \WP_Error();
+} );
+
 get_header();
 the_post();
 ?>

@@ -13,6 +13,11 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+// Prevent Jetpack from looking for a non-existent featured image.
+add_filter( 'jetpack_images_pre_get_images', function() {
+	return new \WP_Error();
+} );
+
 add_filter( 'jetpack_open_graph_tags', function( $tags ) {
 	$tags['og:title']            = _esc_html__( 'WordPress Swag', 'wporg' );
 	$tags['og:description']      = _esc_html__( 'Show your WordPress pride and run with the coolest swag! You&#8217;ll be surprised how widely recognized our logo is around the world, bringing people together through recognition and community. Choose your WordPress swag today (Wapuu t-shirt, anyone?) and your purchase will also support free swag at WordCamps and meetups.', 'wporg' );
