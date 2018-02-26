@@ -186,13 +186,33 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 
 	public function two_factor_providers( $providers) {
 		$wporg_providers = array(
-			'WPORG_Two_Factor_Email'        => __DIR__ . '/providers/class-wporg-two-factor-email.php',
-			'WPORG_Two_Factor_Totp'         => __DIR__ . '/providers/class-wporg-two-factor-totp.php',
-			'WPORG_Two_Factor_Backup_Codes' => __DIR__ . '/providers/class-wporg-two-factor-backup-codes.php',
-			'WPORG_Two_Factor_Slack'        => __DIR__ . '/providers/class-wporg-two-factor-slack.php'
+			'WPORG_Two_Factor_Primary'   => __DIR__ . '/providers/class-wporg-two-factor-primary.php',
+			'WPORG_Two_Factor_Secondary' => __DIR__ . '/providers/class-wporg-two-factor-secondary.php',
 		);
 
 		return $wporg_providers;
+	}
+
+	/**
+	 * Simple handler to enable Two factor for a given user.
+	 * NOTE: It's assumed that the Two Factor details have been setup correctly previously.
+	 */
+	public static function enable_two_factor( $user_id ) {
+		// True if at least one provider method was set.
+		return (
+			update_user_meta( $user_id, self::PROVIDER_USER_META_KEY,          'WPORG_Two_Factor_Primary' ) ||
+			update_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY, [ 'WPORG_Two_Factor_Primary', 'WPORG_Two_Factor_Secondary' ] )
+		);
+	}
+
+	/**
+	 * Simple handler to disable Two factor for a given user.
+	 */
+	public static function disable_two_factor( $user_id ) {
+		delete_user_meta( $user_id, self::PROVIDER_USER_META_KEY );
+		delete_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY );
+		delete_user_meta( $user_id, Two_Factor_Totp::SECRET_META_KEY );
+		return true;
 	}
 
 	/**
@@ -204,7 +224,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		wp_enqueue_script( 'two-factor-edit', plugins_url( 'js/profile-edit.js' , __FILE__ ), [ 'jquery' ], 1, true );
 
 		$key       = get_user_meta( $user->ID, Two_Factor_Totp::SECRET_META_KEY, true );
-		$is_active = !! $key;
+		$is_active = self::is_user_using_two_factor( $user->ID );
 		?>
 
 		<h2 class="entry-title"><?php esc_html_e( 'Two Factor Authentication', 'wporg' ); ?></h2>
@@ -376,6 +396,10 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 				wp_send_json_error( __( 'Unable to save Two Factor Authentication code. Please try again.', 'wporg' ) );
 			}
 
+			if ( ! self::enable_two_factor( $user_id ) ) {
+				wp_send_json_error( __( 'Unable to save Two Factor Authentication code. Please try again.', 'wporg' ) );
+			}
+
 			wp_send_json_success();
 		}
 
@@ -391,13 +415,9 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		$user_id = absint( $_POST['user_id'] );
 		if ( ! current_user_can( 'edit_user', $user_id ) ) {
 			wp_send_json_error( __( 'You do not have permission to edit this user.' ) );
-		};
-
-		if ( ! delete_user_meta( $user_id, Two_Factor_Totp::SECRET_META_KEY ) ) {
-			wp_send_json_error( __( 'Unable to remove Two Factor Authentication code. Please try again.', 'wporg' ) );
 		}
 
-		if ( ! update_user_meta( $user_id, Two_Factor_Core::ENABLED_PROVIDERS_USER_META_KEY, [] ) ) {
+		if ( ! self::disable_two_factor( $user_id ) ) {
 			wp_send_json_error( __( 'Unable to remove Two Factor Authentication code. Please try again.', 'wporg' ) );
 		}
 
