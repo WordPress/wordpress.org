@@ -50,7 +50,7 @@ class WPORG_Two_Factor_Slack extends WPORG_Two_Factor_Email {
 		$user_details = $this->get_slack_details( $user->ID );
 
 		// Require the Slack account to exist, and for the user to have 2FA enabled on Slack.
-		return $user_detauls && empty( $user_details->deleted ) && ! empty( $user_details->has_2fa );
+		return $user_details && empty( $user_details->deleted ) && ! empty( $user_details->has_2fa );
 	}
 
 	public function generate_and_email_token( $user ) {
