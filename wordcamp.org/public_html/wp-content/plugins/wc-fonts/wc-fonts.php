@@ -1,37 +1,40 @@
 <?php
+
 /*
  * Plugin Name: WordCamp.org Fonts
  */
 
 class WordCamp_Fonts_Plugin {
-
 	protected $options;
 
-	// Runs when file is loaded
-	function __construct() {
-		add_action( 'init', array( $this, 'init' ) );
+	/**
+	 * Runs when file is loaded.
+	 */
+	public function __construct() {
+		add_action( 'init',       array( $this, 'init'       ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 
-		add_action( 'wp_head', array( $this, 'wp_head_typekit' ), 102 ); // after safecss_style
-		add_action( 'wp_head', array( $this, 'wp_head_google_web_fonts' ) );
-		add_action( 'wp_head', array( $this, 'wp_head_font_awesome' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_core_fonts' ) );
+		add_action( 'wp_head',            array( $this, 'wp_head_typekit'          ), 102 ); // After safecss_style.
+		add_action( 'wp_head',            array( $this, 'wp_head_google_web_fonts' ) );
+		add_action( 'wp_head',            array( $this, 'wp_head_font_awesome'     ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_core_fonts'       ) );
 	}
 
 	/**
 	 * Runs during init, loads the options array.
 	 */
-	function init() {
+	public function init() {
 		$this->options = (array) get_option( 'wc-fonts-options', array() );
 	}
 
 	/**
 	 * Provides the <head> output for Typekit settings.
 	 */
-	function wp_head_typekit() {
-		if ( ! isset( $this->options['typekit-id'] ) || empty( $this->options['typekit-id'] ) )
+	public function wp_head_typekit() {
+		if ( ! isset( $this->options['typekit-id'] ) || empty( $this->options['typekit-id'] ) ) {
 			return;
+		}
 
 		printf( '<script type="text/javascript" src="https://use.typekit.com/%s.js"></script>' . "\n", $this->options['typekit-id'] );
 		printf( '<script type="text/javascript">try{Typekit.load();}catch(e){}</script>' );
@@ -40,9 +43,10 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Provides the <head> output for Google Web Fonts
 	 */
-	function wp_head_google_web_fonts() {
-		if ( ! isset( $this->options['google-web-fonts'] ) || empty( $this->options['google-web-fonts'] ) )
+	public function wp_head_google_web_fonts() {
+		if ( ! isset( $this->options['google-web-fonts'] ) || empty( $this->options['google-web-fonts'] ) ) {
 			return;
+		}
 
 		printf( '<style>%s</style>', $this->options['google-web-fonts'] );
 	}
@@ -50,7 +54,7 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Provides the <head> output for Font Awesome
 	 */
-	function wp_head_font_awesome() {
+	public function wp_head_font_awesome() {
 		if ( empty( $this->options['font-awesome-url'] ) ) {
 			return;
 		}
@@ -70,7 +74,7 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Runs during admin init, does Settings API
 	 */
-	function admin_init() {
+	public function admin_init() {
 		register_setting( 'wc-fonts-options', 'wc-fonts-options', array( $this, 'validate_options' ) );
 		add_settings_section( 'general', '', '__return_null', 'wc-fonts-options' );
 
@@ -90,7 +94,7 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Runs during admin_menu, adds a Fonts section to Appearance
 	 */
-	function admin_menu() {
+	public function admin_menu() {
 		$fonts = add_theme_page(
 			esc_html__( 'Fonts', 'wordcamporg' ),
 			esc_html__( 'Fonts', 'wordcamporg' ),
@@ -103,12 +107,16 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Uses the Settings API to render the Appearance > Fonts page
 	 */
-	function render_admin_page() {
+	public function render_admin_page() {
 		?>
+
 		<div class="wrap">
-			<?php screen_icon(); ?>
-			<h1><?php esc_html_e( 'Fonts', 'wordcamporg' ); ?></h1>
+			<h1>
+				<?php esc_html_e( 'Fonts', 'wordcamporg' ); ?>
+			</h1>
+
 			<?php settings_errors(); ?>
+
 			<form method="post" action="options.php" enctype="multipart/form-data">
 				<?php
 					settings_fields( 'wc-fonts-options' );
@@ -117,19 +125,20 @@ class WordCamp_Fonts_Plugin {
 				?>
 			</form>
 		</div>
+
 		<?php
 	}
 
 	/**
 	 * Settings API field for the Typekit ID
 	 */
-	function field_typekit_id() {
+	public function field_typekit_id() {
 		$value = isset( $this->options['typekit-id'] ) ? $this->options['typekit-id'] : '';
 		?>
 
 		<input type="text" name="wc-fonts-options[typekit-id]" value="<?php echo esc_attr( $value ); ?>" class="regular-text code" />
 		<p class="description">
-			<?php esc_html_e( "Enter your Typekit Kit ID only. Do not add any URLs or JavaScript.", 'wordcamporg' ); ?>
+			<?php esc_html_e( 'Enter your Typekit Kit ID only. Do not add any URLs or JavaScript.', 'wordcamporg' ); ?>
 		</p>
 
 		<?php
@@ -138,7 +147,7 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Settings API field for the Google Web Fonts URLs
 	 */
-	function field_google_web_fonts() {
+	public function field_google_web_fonts() {
 		$value = isset( $this->options['google-web-fonts'] ) ? $this->options['google-web-fonts'] : '';
 		?>
 
@@ -156,7 +165,7 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Settings API field for the Google Web Fonts URLs
 	 */
-	function field_font_awesome_url() {
+	public function field_font_awesome_url() {
 		$value = isset( $this->options['font-awesome-url'] ) ? $this->options['font-awesome-url'] : '';
 		?>
 
@@ -171,7 +180,7 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Settings API field for the Dashicons checkbox
 	 */
-	function field_dashicons() {
+	public function field_dashicons() {
 		$value = isset( $this->options['dashicons'] ) ? $this->options['dashicons'] : '';
 		?>
 
@@ -186,45 +195,52 @@ class WordCamp_Fonts_Plugin {
 	/**
 	 * Triggered by the Settings API upon settings save.
 	 */
-	function validate_options( $input ) {
+	public function validate_options( $input ) {
 		$output = $this->options;
 
-		// Typekit
-		if ( isset( $input['typekit-id'] ) )
+		// Typekit.
+		if ( isset( $input['typekit-id'] ) ) {
 			$output['typekit-id'] = preg_replace( '/[^0-9a-zA-Z]+/', '', $input['typekit-id'] );
+		}
 
-		// Google Web Fonts
+		// Google Web Fonts.
 		if ( isset( $input['google-web-fonts'] ) ) {
 			$fonts = array();
 			$lines = explode( "\n", $input['google-web-fonts'] );
 			foreach ( $lines as $line ) {
 				$matches = array();
-				$url = preg_match( '#fonts\.googleapis\.com/css\?family=[^\)\'"]+#', $line, $matches );
-				if ( $matches ) $url = esc_url_raw( 'http://' . $matches[0] );
+				$url     = preg_match( '#fonts\.googleapis\.com/css\?family=[^\)\'"]+#', $line, $matches );
 
-				if ( ! $url )
+				if ( $matches ) {
+					$url = esc_url_raw( 'http://' . $matches[0] );
+				}
+
+				if ( ! $url ) {
 					continue;
+				}
 
-				$url = parse_url( $url );
+				$url = wp_parse_url( $url );
 
-				if ( $url['host'] != 'fonts.googleapis.com' )
+				if ( 'fonts.googleapis.com' != $url['host'] ) {
 					continue;
+				}
 
-				if ( ! preg_match( '/^family=(.+)/i', $url['query'] ) )
+				if ( ! preg_match( '/^family=(.+)/i', $url['query'] ) ) {
 					continue;
+				}
 
-				$url = 'https://' . $url['host'] . $url['path'] . '?' . $url['query'];
-				$import = "@import url('" . esc_url_raw( $url ) . "');";
+				$url     = 'https://' . $url['host'] . $url['path'] . '?' . $url['query'];
+				$import  = "@import url('" . esc_url_raw( $url ) . "');";
 				$fonts[] = $import;
 			}
 			$output['google-web-fonts'] = implode( "\n", $fonts );
 		}
 
-		// Font Awesome
+		// Font Awesome.
 		$output['font-awesome-url'] = '';
 
 		if ( isset( $input['font-awesome-url'] ) ) {
-			$url = parse_url( $input['font-awesome-url'] );
+			$url = wp_parse_url( $input['font-awesome-url'] );
 
 			if ( isset( $url['host'] ) && isset( $url['path'] ) ) {
 				$valid_hostname  = 'maxcdn.bootstrapcdn.com' === $url['host'];
@@ -236,12 +252,11 @@ class WordCamp_Fonts_Plugin {
 			}
 		}
 
-		// Dashicons
-		$output['dashicons'] = $input['dashicons'] ? true : false;
+		// Dashicons.
+		$output['dashicons'] = isset( $input['dashicons'] ) && $input['dashicons'] ? true : false;
 
 		return $output;
 	}
 }
 
-// Go!
-new WordCamp_Fonts_Plugin;
+new WordCamp_Fonts_Plugin();
