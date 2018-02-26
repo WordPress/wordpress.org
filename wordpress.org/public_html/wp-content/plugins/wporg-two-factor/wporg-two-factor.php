@@ -52,6 +52,8 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 
 		wp_clear_auth_cookie();
 
+		wp_enqueue_style( 'two-factor-login', plugins_url( '/css/login.css', __FILE__ ) );
+
 		self::show_two_factor_login( $user );
 		exit;
 	}
