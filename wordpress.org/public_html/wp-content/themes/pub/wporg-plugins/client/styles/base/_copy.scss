@@ -48,6 +48,7 @@ pre {
 code, kbd, tt, var {
 	font-family: $font__code;
 	font-size: 0.9375rem;
+	hyphens: none;
 }
 
 abbr, acronym {
