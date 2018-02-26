@@ -272,14 +272,12 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 					<input type="hidden" name="two-factor-totp-key" value="<?php echo esc_attr( $key ) ?>" />
 					<input type="tel" name="two-factor-totp-authcode" class="input" value="" size="20" pattern="[0-9]*" placeholder="<?php esc_attr_e( 'e.g. 123456', 'wporg' ); ?>" />
 				</p>
-				<div>
-					<small>
-						<?php
-						/* translators: 1: URL to Authy; 2: URL to Google Authenticator */
-						printf( wp_kses_post( __( 'Not sure what this screen means? You may need to download <a href="%1$s">Authy</a> or <a href="%2$s">Google Authenticator</a> for your phone.', 'wporg' ) ), esc_url( 'https://authy.com/download/' ), esc_url( 'https://support.google.com/accounts/answer/1066447?hl=' . get_locale() ) );
-						?>
-					</small>
-				</div>
+				<small class="description">
+					<?php
+					/* translators: 1: URL to Authy; 2: URL to Google Authenticator */
+					printf( wp_kses_post( __( 'Not sure what this screen means? You may need to download <a href="%1$s">Authy</a> or <a href="%2$s">Google Authenticator</a> for your phone.', 'wporg' ) ), esc_url( 'https://authy.com/download/' ), esc_url( 'https://support.google.com/accounts/answer/1066447?hl=' . get_locale() ) );
+					?>
+				</small>
 				<button type="cancel" class="button button-secondary alignleft"><?php esc_html_e( 'Cancel', 'wporg' ); ?></button>
 				<button type="submit" class="button button-primary alignright"><?php esc_html_e( 'Enable', 'wporg' ); ?></button>
 			</div>
@@ -297,14 +295,12 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 					<input type="hidden" name="two-factor-totp-key" value="<?php echo esc_attr( $key ) ?>" />
 					<input type="tel" name="two-factor-totp-authcode" class="input" value="" size="20" pattern="[0-9]*" placeholder="<?php esc_attr_e( 'e.g. 123456', 'wporg' ); ?>" />
 				</p>
-				<div>
-					<small>
-						<?php
-						/* translators: 1: URL to Authy; 2: URL to Google Authenticator */
-						printf( wp_kses_post( __( 'Not sure what this screen means? You may need to download <a href="%1$s">Authy</a> or <a href="%2$s">Google Authenticator</a> for your phone.', 'wporg' ) ), esc_url( 'https://authy.com/download/' ), esc_url( 'https://support.google.com/accounts/answer/1066447?hl=' . get_locale() ) );
-						?>
-					</small>
-				</div>
+				<small class="description">
+					<?php
+					/* translators: 1: URL to Authy; 2: URL to Google Authenticator */
+					printf( wp_kses_post( __( 'Not sure what this screen means? You may need to download <a href="%1$s">Authy</a> or <a href="%2$s">Google Authenticator</a> for your phone.', 'wporg' ) ), esc_url( 'https://authy.com/download/' ), esc_url( 'https://support.google.com/accounts/answer/1066447?hl=' . get_locale() ) );
+					?>
+				</small>
 				<button type="cancel" class="button button-secondary alignleft"><?php esc_html_e( 'Cancel', 'wporg' ); ?></button>
 				<button type="submit" class="button button-primary alignright"><?php esc_html_e( 'Enable', 'wporg' ); ?></button>
 			</div>
@@ -329,6 +325,10 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			#bbpress-forums #two-factor-key-code > div {
 				margin-left: 20%;
 				width: 60% !important;
+			}
+			#bbpress-forums .two-factor .description {
+				display: block;
+				margin-bottom: 20px;
 			}
 			.dashicons-clipboard:before {
 				transform: rotate( -45deg );
