@@ -17,4 +17,8 @@ class WPORG_Two_Factor_Backup_Codes extends Two_Factor_Backup_Codes {
 		return $instance;
 	}
 
+	public function validate_authentication( $user, $code = '' ) {
+		return $this->validate_code( $user, $code );
+	}
+
 }

@@ -17,6 +17,14 @@ class WPORG_Two_Factor_Email extends Two_Factor_Email {
 		return $instance;
 	}
 
+	public function validate_authentication( $user, $code = '' ) {
+		if ( ! isset( $user->ID ) || ! $code ) {
+			return false;
+		}
+
+		return $this->validate_token( $user->ID, $code );
+	}
+
 	/**
 	 * Generate and email the user token.
 	 *

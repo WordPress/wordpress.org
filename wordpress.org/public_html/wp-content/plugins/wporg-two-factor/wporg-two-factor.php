@@ -198,7 +198,6 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 * NOTE: It's assumed that the Two Factor details have been setup correctly previously.
 	 */
 	public static function enable_two_factor( $user_id ) {
-		// True if at least one provider method was set.
 		return (
 			update_user_meta( $user_id, self::PROVIDER_USER_META_KEY,          'WPORG_Two_Factor_Primary' ) &&
 			update_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY, [ 'WPORG_Two_Factor_Primary', 'WPORG_Two_Factor_Secondary' ] )
@@ -222,7 +221,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 */
 	public static function user_two_factor_options( $user ) {
 		wp_enqueue_script( 'two-factor-edit', plugins_url( 'js/profile-edit.js' , __FILE__ ), [ 'jquery' ], 1, true );
-		wp_localize_script( 'two-factor-edit', 'two_factor_edit', array( 
+		wp_localize_script( 'two-factor-edit', 'two_factor_edit', array(
 			'ajaxurl' => admin_url( 'admin-ajax.php' ),
 		) );
 
