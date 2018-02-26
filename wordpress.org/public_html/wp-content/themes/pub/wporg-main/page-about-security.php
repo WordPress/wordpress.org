@@ -42,7 +42,7 @@ the_post();
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<p class="intro">Learn more about WordPress core software security in this free white paper. You can also download it in <a href="https://github.com/WordPress/Security-White-Paper/blob/master/WordPressSecurityWhitePaper.pdf?raw=true">PDF format</a>.</p>
+					<p>Learn more about WordPress core software security in this free white paper. You can also download it in <a href="https://github.com/WordPress/Security-White-Paper/blob/master/WordPressSecurityWhitePaper.pdf?raw=true">PDF format</a>.</p>
 
 					<img src="//s.w.org/about/images/logos/wordpress-logo-stacked-rgb.png" class="aligncenter" />
 
