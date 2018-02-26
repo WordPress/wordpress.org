@@ -1,4 +1,5 @@
 <?php
+
 /*
 Plugin Name: WordCamp Forms to Drafts
 Description: Convert form submissions into drafts for our custom post types.
@@ -7,14 +8,14 @@ Author:      WordCamp Central
 Author URI:  http://wordcamp.org
 */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	die( 'Access denied.' );
-}
-
 /*
  * @todo
  * - Refactor the update_post_meta() loop in each method into a DRY function.
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	die( 'Access denied.' );
+}
 
 class WordCamp_Forms_To_Drafts {
 	/**
@@ -87,7 +88,7 @@ class WordCamp_Forms_To_Drafts {
 			wcorg_login_message( '', get_permalink() )
 		);
 
-		// Prevent wpautop() from converting tabs into empty paragraphs in #wcorg-login-message
+		// Prevent wpautop() from converting tabs into empty paragraphs in #wcorg-login-message.
 		$please_login_message = trim( str_replace( "\t", '', $please_login_message ) );
 
 		$form_wrapper = '<div class="wcfd-disabled-form">' . $please_login_message . '<div class="wcfd-overlay"></div> [contact-form';
@@ -140,7 +141,7 @@ class WordCamp_Forms_To_Drafts {
 		}
 
 		$current_user = wp_get_current_user();
-		$form_id = get_post_meta( $post->ID, 'wcfd-key', true );
+		$form_id      = get_post_meta( $post->ID, 'wcfd-key', true );
 
 		switch ( $form_id ) {
 			case 'call-for-speakers':
@@ -169,7 +170,7 @@ class WordCamp_Forms_To_Drafts {
 	 *
 	 * @todo submit Jetpack PR to modularize that logic so we can just call it directly instead of duplicating it
 	 *
-	 * @param int $page_id
+	 * @param int    $page_id
 	 * @param string $label
 	 *
 	 * @return string
@@ -247,7 +248,7 @@ class WordCamp_Forms_To_Drafts {
 	 *
 	 * Yes, this is an ugly hack.
 	 *
-	 * @param $post_type
+	 * @param string $post_type
 	 */
 	protected function simulate_post_type( $post_type ) {
 		global $wp_post_types;
@@ -285,7 +286,7 @@ class WordCamp_Forms_To_Drafts {
 
 		$this->simulate_post_type( 'wordcamp' );
 
-		// Create the post
+		// Create the post.
 		$draft_id = wp_insert_post( array(
 			'post_type'    => 'wcb_sponsor',
 			'post_title'   => $all_values['Company Name'],
@@ -294,7 +295,7 @@ class WordCamp_Forms_To_Drafts {
 			'post_author'  => $this->get_user_id_from_username( 'wordcamp' ),
 		) );
 
-		// Create the post meta
+		// Create the post meta.
 		if ( $draft_id ) {
 			foreach ( $sponsor_to_form_key_map as $sponsor_key => $form_key ) {
 				if ( ! empty( $all_values[ $form_key ] ) ) {
@@ -355,7 +356,7 @@ class WordCamp_Forms_To_Drafts {
 		$speaker_query = new WP_Query( array(
 			'post_type'      => 'wcb_speaker',
 			'posts_per_page' => 1,
-			'post_status'    => array( 'publish', 'pending', 'draft', 'future', 'private' ),    // Trashed speakers are ignored because they'll likely be deleted
+			'post_status'    => array( 'publish', 'pending', 'draft', 'future', 'private' ),    // Trashed speakers are ignored because they'll likely be deleted.
 
 			'meta_query' => array(
 				array(
@@ -389,7 +390,7 @@ class WordCamp_Forms_To_Drafts {
 		);
 
 		if ( $speaker_id ) {
-			update_post_meta( $speaker_id, '_wcb_speaker_email', $speaker[ 'Email Address' ] );
+			update_post_meta( $speaker_id, '_wcb_speaker_email', $speaker['Email Address'] );
 			update_post_meta( $speaker_id, '_wcpt_user_id',      $this->get_user_id_from_username( $speaker['WordPress.org Username'] ) );
 		}
 
