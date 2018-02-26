@@ -222,6 +222,9 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 */
 	public static function user_two_factor_options( $user ) {
 		wp_enqueue_script( 'two-factor-edit', plugins_url( 'js/profile-edit.js' , __FILE__ ), [ 'jquery' ], 1, true );
+		wp_localize_script( 'two-factor-edit', 'two_factor_edit', array( 
+			'ajaxurl' => admin_url( 'admin-ajax.php' ),
+		) );
 
 		$key       = get_user_meta( $user->ID, Two_Factor_Totp::SECRET_META_KEY, true );
 		$is_active = self::is_user_using_two_factor( $user->ID );

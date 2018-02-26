@@ -4,7 +4,7 @@ jQuery( function( $ ) {
 		event.preventDefault();
 
 		$.post(
-			ajaxurl,
+			two_factor_edit.ajaxurl,
 			{
 				action      : 'two-factor-disable',
 				_ajax_nonce : $( '#_nonce_user_two_factor_totp_options' ).val(),
@@ -60,7 +60,7 @@ jQuery( function( $ ) {
 			$( '.two-factor .bbp-template-notice' ).remove();
 
 			$.post(
-				ajaxurl,
+				two_factor_edit.ajaxurl,
 				{
 					action      : 'two-factor-totp-verify-code',
 					_ajax_nonce : $('#_nonce_user_two_factor_totp_options').val(),
@@ -83,7 +83,7 @@ jQuery( function( $ ) {
 
 	$( '#generate-backup-codes' ).on( 'click', function() {
 		$.post(
-			ajaxurl,
+			two_factor_edit.ajaxurl,
 			{
 				action: 'two_factor_backup_codes_generate',
 				user_id: $( '#user_id' ).val(),
