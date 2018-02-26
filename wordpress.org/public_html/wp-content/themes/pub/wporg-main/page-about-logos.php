@@ -31,10 +31,15 @@ the_post();
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<h3 class="graphics">Official WordPress Logo</h3>
-					<p>When you need the official WordPress logo for a web site or publication, please use one of the following. Please only use logos in accordance with the <a href="http://wordpressfoundation.org/trademark-policy/">WordPress trademark&nbsp;policy</a>.</p>
+					<h3 class="graphics"><?php _esc_html_e( 'Official WordPress Logo', 'wporg' ); ?></h3>
+					<p>
+						<?php
+						/* translators: Link to Trademark Policy of WordPress Foundation */
+						printf( wp_kses_post( ___( 'When you need the official WordPress logo for a web site or publication, please use one of the following. Please only use logos in accordance with the <a href="%s">WordPress trademark&nbsp;policy</a>.', 'wporg' ) ), esc_url( 'http://wordpressfoundation.org/trademark-policy/' ) );
+						?>
+					</p>
 
-					<h3 class="graphics">Downloads</h3>
+					<h3 class="graphics"><?php _esc_html_e( 'Downloads', 'wporg' ); ?></h3>
 
 					<section class="all-logos col-12 row gutters">
 						<div class="logo col-4" id="logo-all">
@@ -100,13 +105,11 @@ the_post();
 							</ul>
 						</div>
 
-
-
 						<div class="logo col-4"></div>
 					</section>
 
-					<h3 class="graphics">Fight the Fake Logo (Fauxgo)</h3>
-					<p>Friends don&#8217;t let friends use the wrong WordPress logo. If you see one of these in the wild, please suggest a change.</p>
+					<h3 class="graphics"><?php _esc_html_e( 'Fight the Fake Logo (Fauxgo)', 'wporg' ); ?></h3>
+					<p><?php _esc_html_e( 'Friends don&#8217;t let friends use the wrong WordPress logo. If you see one of these in the wild, please suggest a change.', 'wporg' ); ?></p>
 					<img class="aligncenter" src="//s.w.org/about/images/logo-comparison.png" width="500" />
 				</section>
 			</div><!-- .entry-content -->
