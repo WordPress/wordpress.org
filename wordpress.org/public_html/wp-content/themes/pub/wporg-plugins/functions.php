@@ -59,8 +59,8 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	$suffix = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-plugins-style', get_template_directory_uri() . "/css/style{$suffix}.css", [ 'open-sans', 'dashicons' ], '20180226' );
+	wp_enqueue_style( 'wporg-plugins', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180227' );
+	wp_style_add_data( 'wporg-plugins', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'wporg-plugins-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
@@ -133,7 +133,7 @@ function loader_src( $src, $handle ) {
 	$cdn_urls = [
 		'dashicons',
 		'wp-embed',
-		'wporg-plugins-style',
+		'wporg-plugins',
 		'wporg-plugins-navigation',
 		'wporg-plugins-skip-link-focus-fix',
 		'wporg-plugins-popover',
