@@ -217,7 +217,6 @@
 
 	@include breakpoint( $sm ) {
 		height: 120px;
-		overflow: hidden;
 		text-align: inherit;
 
 		h1 {
@@ -236,6 +235,7 @@
 
 		#wporg-header-menu {
 			float:left;
+			height: 46px;
 			list-style: none;
 			margin: -15px 0 0;
 			max-width: inherit;
