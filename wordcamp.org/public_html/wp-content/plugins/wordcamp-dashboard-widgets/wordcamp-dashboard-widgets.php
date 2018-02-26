@@ -44,14 +44,14 @@ class WordCamp_Dashboard_Widgets {
 	 * @return bool
 	 */
 	protected function show_wordcamp_reminders() {
-		$this->need_central_about_info  = $this->check_central_about_info();
-		$this->needed_pages             = $this->check_needed_pages();
+		$this->need_central_about_info = $this->check_central_about_info();
+		$this->needed_pages            = $this->check_needed_pages();
 
 		return $this->need_central_about_info || $this->needed_pages;
 	}
 
 	/**
-	 * Check if the organizers have given us their "About" text and banner image for their central.wordcamp.org page
+	 * Check if the organizers have given us their "About" text and banner image for their central.wordcamp.org page.
 	 *
 	 * @return bool
 	 */
@@ -62,11 +62,11 @@ class WordCamp_Dashboard_Widgets {
 			return 'yes' == $need_info;
 		}
 
-		$need_info  = 'yes';
-		$wordcamp   = get_wordcamp_post();
+		$need_info = 'yes';
+		$wordcamp  = get_wordcamp_post();
 
 		if ( isset( $wordcamp->ID ) ) {
-			switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
+			switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org.
 
 			if ( has_post_thumbnail( $wordcamp->ID ) && $wordcamp->post_content ) {
 				$need_info = 'no';
@@ -88,15 +88,17 @@ class WordCamp_Dashboard_Widgets {
 	 * @return array
 	 */
 	protected function check_needed_pages() {
-		$transient_key  = 'wcorg_needed_pages';
-		$needed_pages   = get_transient( $transient_key );
+		$transient_key = 'wcorg_needed_pages';
+		$needed_pages  = get_transient( $transient_key );
 
 		if ( false !== $needed_pages ) {
 			return $needed_pages;
 		}
 
 		$needed_pages       = array();
-		$found_registration = $found_attendees = $found_schedule = false;
+		$found_registration = false;
+		$found_attendees    = false;
+		$found_schedule     = false;
 		$published_pages    = get_posts( array(
 			'post_type'      => 'page',
 			'post_status'    => 'publish',
@@ -226,13 +228,13 @@ class WordCamp_Dashboard_Widgets {
 		</p>
 
 		<ul class="ul-disc">
-            <?php if ( current_user_can( 'switch_themes' ) ) : ?>
-                <li>
-                    <a href="https://make.wordpress.org/community/2017/04/18/introducing-a-new-mentor-tool-the-planning-checklist/">
-		                <?php esc_html_e( 'Track your progress towards holding a successful WordCamp event.', 'wordcamporg' ); ?>
-                    </a>
-                </li>
-            <?php endif; ?>
+			<?php if ( current_user_can( 'switch_themes' ) ) : ?>
+				<li>
+					<a href="https://make.wordpress.org/community/2017/04/18/introducing-a-new-mentor-tool-the-planning-checklist/">
+						<?php esc_html_e( 'Track your progress towards holding a successful WordCamp event.', 'wordcamporg' ); ?>
+					</a>
+				</li>
+			<?php endif; ?>
 
 			<li>
 				<a href="https://make.wordpress.org/community/2017/03/23/showing-upcoming-local-events-in-wp-admin/">
