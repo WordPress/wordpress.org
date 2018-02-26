@@ -4,11 +4,10 @@
 Plugin Name: Email Post Changes - Subscribe to Specific Post
 Description: Extends the Email Post Changes plugin to allow visitors to subscribe to a specific post/page
 Version:     0.1
-Author:      Ian Dunn
+Author:      WordPress Meta Team
 */
 
 class EPCSpecificPost {
-	
 	/**
 	 * Constructor
 	 */
@@ -28,7 +27,7 @@ class EPCSpecificPost {
 
 	/**
 	 * Override EPC's default options
-	 * 
+	 *
 	 * @param  array $options
 	 * @return array
 	 */
@@ -36,33 +35,34 @@ class EPCSpecificPost {
 		/*
 		 * EPC assumes you always want to e-mail the admin, and will always include the admin_email in the 'Additional Email Addresses' field,
 		 * even if you submit an empty value, so emptying the default value works around that.
-		 */ 
+		 */
 		$options['emails']     = array();
 		$options['post_types'] = array( 'page' );
-		
+
 		return $options;
 	}
 
 	/**
 	 * Inserts extra email addresses into the list of recipients
 	 * When EPC is crafting a new notification, this method adds all of the addresses we've collected to it
-	 * 
-	 * @param  array $emails The list of addresses that EPC has collected
+	 *
+	 * @param  array $emails The list of addresses that EPC has collected.
 	 * @param  int   $old_post_id
 	 * @param  int   $new_post_id
 	 * @return array
 	 */
 	public function insert_subscribed_emails( $emails, $old_post_id, $new_post_id ) {
 		$subscribed_emails = get_option( 'epcsp_subscribed_addresses', array() );
-		
+
 		if ( isset( $subscribed_emails[ $old_post_id ] ) && is_array( $subscribed_emails[ $old_post_id ] ) ) {
 			$emails = array_merge( $emails, $subscribed_emails[ $old_post_id ] );
 			$emails = array_unique( $emails );
 		}
-		
+
 		return $emails;
 	}
 }
 
 require_once( __DIR__ . '/widget-subscribe.php' );
+
 $GLOBALS['EPCSpecificPost'] = new EPCSpecificPost();
