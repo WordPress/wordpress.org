@@ -222,7 +222,7 @@ function remove_all_previewer_styles() {
 		return;
 	}
 
-	foreach( $wp_styles->queue as $stylesheet ) {
+	foreach ( $wp_styles->queue as $stylesheet ) {
 		wp_dequeue_style( $stylesheet );
 	}
 

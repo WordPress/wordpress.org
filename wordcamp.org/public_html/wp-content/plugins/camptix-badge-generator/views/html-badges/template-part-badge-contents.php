@@ -1,11 +1,13 @@
 <?php
 
 namespace CampTix\Badge_Generator\HTML;
+use WP_Post;
+
 defined( 'WPINC' ) or die();
 
 /**
- * @var \WP_Post $attendee
- * @var array    $allowed_html
+ * @var WP_Post $attendee
+ * @var array   $allowed_html
  */
 
 ?>
@@ -24,7 +26,7 @@ defined( 'WPINC' ) or die();
 
 <figure>
 	<img
-	    class="attendee-avatar"
+		class="attendee-avatar"
 		src="<?php echo esc_url( $attendee->avatar_url ); ?>"
 		alt="<?php echo esc_attr( strip_tags( $attendee->formatted_name ) ); ?>"
 	/>

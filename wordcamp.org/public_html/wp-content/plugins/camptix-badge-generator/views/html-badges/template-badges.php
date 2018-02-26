@@ -1,12 +1,14 @@
 <?php
 
 namespace CampTix\Badge_Generator\HTML;
+use WP_Post;
+
 defined( 'WPINC' ) or die();
 
 /**
- * @global string   $template
- * @var    array    $attendees
- * @var    \WP_Post $attendee
+ * @global string  $template
+ * @var    array   $attendees
+ * @var    WP_Post $attendee
  */
 
 /*
@@ -29,36 +31,38 @@ if ( isset( $template ) && __FILE__ == $template ) {
 
 <body>
 	<?php
-		if ( empty( $attendees ) ) :
 
-			_e( 'No attendees were found. Please try again once tickets have been purchased.', 'wordcamporg' );
+	if ( empty( $attendees ) ) :
 
-		else :
+		_e( 'No attendees were found. Please try again once tickets have been purchased.', 'wordcamporg' );
 
-			foreach ( $attendees as $attendee ) :
-				?>
+	else :
 
-				<article class="attendee <?php echo esc_attr( $attendee->css_classes ); ?>">
-					<section class="badge badge-back">
-						<?php require( __DIR__ . '/template-part-badge-contents.php' ); ?>
-					</section>
+		foreach ( $attendees as $attendee ) : ?>
+			<article class="attendee <?php echo esc_attr( $attendee->css_classes ); ?>">
+				<section class="badge badge-back">
+					<?php require( __DIR__ . '/template-part-badge-contents.php' ); ?>
+				</section>
 
-					<section class="badge badge-front">
-						<div class="holepunch">&#9421;</div>
+				<section class="badge badge-front">
+					<div class="holepunch">&#9421;</div>
 
-						<?php require( __DIR__ . '/template-part-badge-contents.php' ); ?>
-					</section>
+					<?php require( __DIR__ . '/template-part-badge-contents.php' ); ?>
+				</section>
 
-					<!-- These are arbitrary elements that you can use for any purpose -->
-					<div class="attendee-design-element-1"></div>
-					<div class="attendee-design-element-2"></div>
-					<div class="attendee-design-element-3"></div>
-					<div class="attendee-design-element-4"></div>
-					<div class="attendee-design-element-5"></div>
-				</article>
-			<?php endforeach; ?>
-		<?php endif; ?>
+				<!-- These are arbitrary elements that you can use for any purpose -->
+				<div class="attendee-design-element-1"></div>
+				<div class="attendee-design-element-2"></div>
+				<div class="attendee-design-element-3"></div>
+				<div class="attendee-design-element-4"></div>
+				<div class="attendee-design-element-5"></div>
+			</article>
+		<?php endforeach;
 
-	<?php wp_footer(); ?>
+	endif;
+
+	wp_footer();
+
+	?>
 </body>
 </html>

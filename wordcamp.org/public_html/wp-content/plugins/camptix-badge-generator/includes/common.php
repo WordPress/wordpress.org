@@ -65,12 +65,12 @@ function print_admin_styles() {
 /**
  * Get the attendees
  *
- * @param string|array $ticket_ids        Reduce fetched attendees by the ticket they purchased. The string 'all'
- *                                        will result in all attendees being fetched, regardless of their
- *                                        ticket. An array of ticket IDs will result in only the attendees for
- *                                        those tickets being fetched.
- * @param string $registered_after        Reduce fetched attendees by their registration date. Any value parseable
- *                                        by strtotime().
+ * @param string|array $ticket_ids       Reduce fetched attendees by the ticket they purchased. The string 'all'
+ *                                       will result in all attendees being fetched, regardless of their
+ *                                       ticket. An array of ticket IDs will result in only the attendees for
+ *                                       those tickets being fetched.
+ * @param string       $registered_after Reduce fetched attendees by their registration date. Any value parseable
+ *                                       by strtotime().
  *
  * @todo Maybe optimize this by looking at post_date rather than tix_timestamp
  *
@@ -142,7 +142,7 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 				array(
 					'size'    => 1024,
 					'default' => 'blank',
-					'rating'  => 'g'
+					'rating'  => 'g',
 				)
 			);
 			$value = str_replace( 'secure.gravatar.com', 'en.gravatar.com', $value );   // work around Varnish bug on secure.gravatar.com that causes `503` response codes
@@ -187,7 +187,7 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 function get_css_classes( $attendee ) {
 	$classes = array(
 		'attendee-' . $attendee->post_name,
-		'ticket-'   . $attendee->ticket
+		'ticket-'   . $attendee->ticket,
 	);
 
 	if ( $attendee->coupon ) {

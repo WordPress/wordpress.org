@@ -32,7 +32,7 @@ function build_assets( $options ) {
 	$options = shortcode_atts(
 		array(
 			'ticket_ids'       => 'all',
-			'registered_after' => ''
+			'registered_after' => '',
 		),
 		$options
 	);
@@ -255,7 +255,7 @@ function get_admin_flags() {
  * @return array
  */
 function get_header_row( $admin_flags, $questions ) {
-	$header_row   = array( 'First Name', 'Last Name', 'Email Address', 'Ticket', 'Coupon', 'Twitter', );
+	$header_row   = array( 'First Name', 'Last Name', 'Email Address', 'Ticket', 'Coupon', 'Twitter' );
 	$header_row   = array_merge( $header_row, array_values( $admin_flags ) );
 	$header_row   = array_merge( $header_row, wp_list_pluck( $questions, 'post_title' ) );
 	$header_row[] = '@Gravatar'; // Prefixed with an @ to let InDesign know that it contains an image. Last because InDesign complains if it's not.
@@ -432,7 +432,7 @@ function create_zip_file( $zip_filename, $zip_local_folder, $csv_filename, $grav
 		0,
 		array(
 			'add_path'        => $zip_local_folder . '/gravatars/',
-			'remove_all_path' => true
+			'remove_all_path' => true,
 		)
 	);
 
