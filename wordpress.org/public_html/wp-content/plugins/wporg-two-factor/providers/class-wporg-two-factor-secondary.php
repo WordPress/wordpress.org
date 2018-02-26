@@ -43,7 +43,7 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 
 		<p>
 			<label for="authcode"><?php esc_html_e( 'Verification Code:', 'wporg' ); ?></label>
-			<input type="tel" name="two-factor-backup-code" id="authcode" class="input" value="" size="20" pattern="[0-9]*" />
+			<input type="tel" name="two-factor-backup-code" id="authcode" class="input" value="" size="20" pattern="[0-9]{6,20}" title="<?php esc_attr_e( 'Codes are at least 6 decimal digits' ); ?>" />
 			<?php submit_button( __( 'Authenticate', 'wporg' ) ); ?>
 		</p>
 
@@ -79,7 +79,7 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 		$providers = apply_filters( 'wporg_two_factor_secondary_providers', $providers );
 
 		// Add some CSS for this clss.
-		add_action( 'login_head', [ $this, 'add_styles' ] );
+		wp_enqueue_style( 'two-factor-login', plugins_url( '/css/login.css', dirname( __FILE__ ) ) );
 
 		foreach ( $providers as $class => $path ) {
 			include_once( $path );
@@ -94,20 +94,6 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 		}
 
 		return parent::__construct();
-	}
-
-	// Add some specific styles for this class.
-	public function add_styles() {
-		if ( isset( $_GET['provider'] ) && $_GET['provider'] === __CLASS__ ) {
-			echo '<style>
-				body.login-action-backup_2fa .backup-methods-wrap {
-					display: none;
-				}
-				body.login-action-backup_2fa input[name="two-factor-backup-resend"] {
-
-				}
-			</style>';
-		}
 	}
 
 	public function pre_process_authentication( $user ) {
