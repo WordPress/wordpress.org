@@ -1640,9 +1640,13 @@ ul.ct-legend {
 	}
 }
 
+.locale-project-contributors-group hr {
+	margin: 30px 0;
+}
+
 .locale-project-contributors-group ul {
 	padding: 0;
-	margin: 0;
+	margin: 10px 0;
 	list-style: none;
 }
 
@@ -1653,6 +1657,20 @@ ul.ct-legend {
 .locale-project-contributors-group .avatar {
 	vertical-align: middle;
 	margin-right: 10px;
+}
+
+.locale-project-contributors-group ul.compressed li {
+	display: inline-block;
+	margin-right: 8px;
+	font-size: small;
+}
+
+.locale-project-contributors-group ul.compressed li:not(:last-child):after {
+	content: ', ';
+}
+
+.locale-project-contributors-group ul.compressed .avatar {
+	margin-right: 3px;
 }
 
 .locale-project-contributors-table {

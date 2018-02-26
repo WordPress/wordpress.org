@@ -371,8 +371,13 @@ class Locale extends GP_Route {
 	private function get_translation_editors( $project, $locale_slug ) {
 		global $wpdb;
 
+		$editors = [
+			'project'   => [],
+			'inherited' => [],
+		];
+
 		// Get the translation editors of the project.
-		$editors = (array) $wpdb->get_col( $wpdb->prepare( "
+		$editors['project'] = (array) $wpdb->get_col( $wpdb->prepare( "
 			SELECT
 				`user_id`
 			FROM {$wpdb->wporg_translation_editors}
@@ -381,23 +386,34 @@ class Locale extends GP_Route {
 				AND `locale` IN (%s, 'all-locales')
 		", $project->id, $locale_slug ) );
 
+		// Get the translation editors of parent projects.
 		if ( $project->parent_project_id ) {
 			$parent_project_id = $project->parent_project_id;
 			$parent_project = GP::$project->get( $parent_project_id );
 			while ( $parent_project_id ) {
-				$editors = $editors + (array) $wpdb->get_col( $wpdb->prepare( "
+				$editors['inherited'] = array_merge( $editors['inherited'], (array) $wpdb->get_col( $wpdb->prepare( "
 					SELECT
 						`user_id`
 					FROM {$wpdb->wporg_translation_editors}
 					WHERE
 						`project_id` = %d
 						AND `locale` IN (%s, 'all-locales')
-				", $parent_project->id, $locale_slug ) );
+				", $parent_project->id, $locale_slug ) ) );
 
 				$parent_project = GP::$project->get( $parent_project_id );
 				$parent_project_id = $parent_project->parent_project_id;
 			}
 		}
+
+		// Get the translation editors for all projects.
+		$editors['inherited'] = array_merge( $editors['inherited'], (array) $wpdb->get_col( $wpdb->prepare( "
+			SELECT
+				`user_id`
+			FROM {$wpdb->wporg_translation_editors}
+			WHERE
+				`project_id` = '0'
+				AND `locale` = %s
+		", $locale_slug ) ) );
 
 		return $editors;
 	}
@@ -413,27 +429,41 @@ class Locale extends GP_Route {
 	private function get_locale_contributors( $project, $locale_slug, $set_slug ) {
 		global $wpdb;
 
-		$locale_contributors = array(
-			'editors'      => array(),
-			'contributors' => array(),
-		);
+		$locale_contributors = [
+			'editors'      => [
+				'project'   => [],
+				'inherited' => [],
+			],
+			'contributors' => [],
+		];
 
 		// Get the translation editors of the project.
 		$editors = $this->get_translation_editors( $project, $locale_slug );
 
+		$editor_ids = [];
+
 		// Get the names of the translation editors.
-		foreach ( $editors as $editor_id ) {
-			$user = get_user_by( 'id', $editor_id );
-			if ( ! $user ) {
-				continue;
+		foreach ( [ 'project', 'inherited'] as $editor_source ) {
+			foreach ( $editors[ $editor_source ] as $editor_id ) {
+				$user = get_user_by( 'id', $editor_id );
+				if ( ! $user ) {
+					continue;
+				}
+
+				$locale_contributors['editors'][ $editor_source ][ $editor_id ] = (object) array(
+					'nicename'     => $user->user_nicename,
+					'display_name' => $this->_encode( $user->display_name ),
+					'email'        => $user->user_email,
+				);
+
+				$editor_ids[] = $editor_id;
 			}
 
-			$locale_contributors['editors'][ $editor_id ] = (object) array(
-				'nicename'     => $user->user_nicename,
-				'display_name' => $this->_encode( $user->display_name ),
-				'email'        => $user->user_email,
-			);
+			uasort( $locale_contributors['editors'][ $editor_source ], function( $a, $b ) {
+				return strcasecmp( $a->display_name, $b->display_name );
+			} );
 		}
+
 		unset( $editors );
 
 		// Get the contributors of the project.
@@ -469,8 +499,6 @@ class Locale extends GP_Route {
 			);
 		}
 
-		$editors = array_keys( $locale_contributors['editors'] );
-
 		// Get the names of the contributors.
 		foreach ( $contributors as $contributor ) {
 			if ( isset( $locale_contributors['contributors'][ $contributor->user_id ] ) ) {
@@ -501,17 +529,13 @@ class Locale extends GP_Route {
 				'current_count' => $contributor->current_count,
 				'waiting_count' => $contributor->waiting_count,
 				'fuzzy_count'   => $contributor->fuzzy_count,
-				'is_editor'     => in_array( $user->ID, $editors ),
+				'is_editor'     => in_array( $user->ID, $editor_ids ),
 			);
 		}
-		unset( $contributors, $editors );
+		unset( $contributors, $editor_ids );
 
 		uasort( $locale_contributors['contributors'], function( $a, $b ) {
 			return $a->total_count < $b->total_count;
-		} );
-
-		uasort( $locale_contributors['editors'], function( $a, $b ) {
-			return strcasecmp( $a->display_name, $b->display_name );
 		} );
 
 		return $locale_contributors;

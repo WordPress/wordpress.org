@@ -258,14 +258,15 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 		<?php endif; ?>
 	</div>
 
-	<?php if ( $locale_contributors['editors'] ) : ?>
-		<div class="locale-project-contributors-group locale-project-contributors-editors">
-			<h3>Translation Editors</h3>
-			<small>These users can validate and approve your translations.</small>
-			<br><br>
+	<div class="locale-project-contributors-group locale-project-contributors-editors">
+		<h3>Translation Editors</h3>
+		<?php
+		if ( $locale_contributors['editors']['project'] ) :
+			?>
+			<p>These users can validate and approve your translations for this specific project.</p>
 			<ul>
 				<?php
-				foreach ( $locale_contributors['editors'] as $editor ) {
+				foreach ( $locale_contributors['editors']['project'] as $editor ) {
 					printf(
 						'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
 						$editor->nicename,
@@ -275,8 +276,33 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 				}
 				?>
 			</ul>
-		</div>
-	<?php endif; ?>
+			<?php
+		else :
+			?>
+			<p>There are no editors for this specific project, yet. <a href="https://make.wordpress.org/polyglots/handbook/rosetta/theme-plugin-directories/">Become an editor.</a></p>
+			<?php
+		endif;
+
+		if ( $locale_contributors['editors']['inherited'] ) :
+			?>
+			<hr>
+			<p>The following users can edit translations for either a parent project or all projects.</p>
+			<ul class="compressed">
+				<?php
+				foreach ( $locale_contributors['editors']['inherited'] as $editor ) {
+					printf(
+						'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
+						$editor->nicename,
+						get_avatar( $editor->email, 15 ),
+						$editor->display_name ? $editor->display_name : $editor->nicename
+					);
+				}
+				?>
+			</ul>
+			<?php
+		endif;
+		?>
+	</div>
 </div>
 
 <script>
