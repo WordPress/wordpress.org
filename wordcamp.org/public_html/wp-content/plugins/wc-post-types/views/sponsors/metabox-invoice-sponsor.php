@@ -33,5 +33,4 @@
 		<?php _e( 'Add New Invoice', 'wordcamporg' ); ?>
 	</a>
 
-<?php endif; ?>
-
+<?php endif;

@@ -15,7 +15,7 @@
 			name="_wcpt_sponsor_company_name"
 			value="<?php echo esc_attr( $company_name ); ?>"
 			maxlength="50"
-		    required
+			required
 		/>
 
 		<?php wcorg_required_indicator(); ?>
@@ -32,7 +32,7 @@
 			id="_wcpt_sponsor_website"
 			name="_wcpt_sponsor_website"
 			value="<?php echo esc_url( $website ); ?>"
-		    required
+			required
 		/>
 
 		<?php wcorg_required_indicator(); ?>
@@ -101,7 +101,7 @@
 			name="_wcpt_sponsor_phone_number"
 			value="<?php echo esc_attr( $phone_number ); ?>"
 			maxlength="21"
-		    required
+			required
 		/>
 
 		<?php wcorg_required_indicator(); ?>
@@ -143,7 +143,7 @@
 <ul class="wcpt-form">
 	<li>
 		<label for="_wcpt_sponsor_country">
-			<?php _e( 'Country:', 'wordcamporg' ) ?>
+			<?php _e( 'Country:', 'wordcamporg' ); ?>
 		</label>
 
 		<?php // todo add selected attribute to select and change first option value to empty string ?>
@@ -177,7 +177,7 @@
 			id="_wcpt_sponsor_street_address1"
 			name="_wcpt_sponsor_street_address1"
 			value="<?php echo esc_attr( $street_address1 ); ?>"
-		    required
+			required
 		/>
 
 		<?php wcorg_required_indicator(); ?>
@@ -208,7 +208,7 @@
 			id="_wcpt_sponsor_city"
 			name="_wcpt_sponsor_city"
 			value="<?php echo esc_attr( $city ); ?>"
-		    required
+			required
 		/>
 
 		<?php wcorg_required_indicator(); ?>
@@ -244,7 +244,7 @@
 			name="_wcpt_sponsor_zip_code"
 			value="<?php echo esc_attr( $zip_code ); ?>"
 			maxlength="30"
-		    required
+			required
 		/>
 
 		<?php wcorg_required_indicator(); ?>

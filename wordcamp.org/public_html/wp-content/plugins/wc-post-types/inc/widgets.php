@@ -3,17 +3,15 @@
  * WordCamp.org Post Types Widgets
  */
 
-if ( ! class_exists( 'WCB_Widget_Sponsors' ) ) :
 /**
  * Sponsors widget class.
  *
  * @see WordCamp_Post_Types_Plugin::register_widgets()
  */
 class WCB_Widget_Sponsors extends WP_Widget {
-
 	function __construct() {
 		$widget_ops = array(
-			'classname' => 'wcb_widget_sponsors',
+			'classname'   => 'wcb_widget_sponsors',
 			'description' => __( 'Your WordCamp&#8217;s Sponsors', 'wordcamporg' ),
 		);
 		WP_Widget::__construct( 'wcb_sponsors', __( 'Sponsors', 'wordcamporg' ), $widget_ops );
@@ -27,8 +25,10 @@ class WCB_Widget_Sponsors extends WP_Widget {
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		echo $before_widget;
-		if ( $title )
+
+		if ( $title ) {
 			echo $before_title . $title . $after_title;
+		}
 
 		// Fetch sponsor levels
 		$terms = $wcpt_plugin->get_sponsor_levels();
@@ -52,22 +52,26 @@ class WCB_Widget_Sponsors extends WP_Widget {
 
 		<?php foreach ( $terms as $term ) : ?>
 			<?php
-				$sponsors = new WP_Query( array(
-					'post_type' => 'wcb_sponsor',
-					'posts_per_page' => -1,
-					'order' => 'ASC',
-					'taxonomy' => $term->taxonomy,
-					'term' => $term->slug,
-				) );
 
-				if ( ! $sponsors->have_posts() )
-					continue;
+			$sponsors = new WP_Query( array(
+				'post_type'      => 'wcb_sponsor',
+				'posts_per_page' => -1,
+				'order'          => 'ASC',
+				'taxonomy'       => $term->taxonomy,
+				'term'           => $term->slug,
+			) );
+
+			if ( ! $sponsors->have_posts() ) {
+				continue;
+			}
+
 			?>
 
 			<div class="sponsor-level <?php echo $term->slug; ?>">
 				<h4 class="sponsor-level-title"><?php echo esc_html( $term->name ); ?></h4>
 
-				<?php while ( $sponsors->have_posts() ) : $sponsors->the_post(); ?>
+				<?php while ( $sponsors->have_posts() ) :
+					$sponsors->the_post(); ?>
 
 					<a class="sponsor-logo" href="<?php the_permalink(); ?>">
 						<?php ( has_post_thumbnail() ) ? the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x' ) : the_title(); ?>
@@ -85,20 +89,19 @@ class WCB_Widget_Sponsors extends WP_Widget {
 
 	function form( $instance ) {
 		$instance = wp_parse_args( (array) $instance, array( 'title' => '' ) );
-		$title = $instance['title'];
+		$title    = $instance['title'];
 		?>
 		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'wordcamporg' ); ?> <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></label></p>
 		<?php
 	}
 
 	function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;
-		$new_instance = wp_parse_args( (array) $new_instance, array( 'title' => '' ) );
+		$instance          = $old_instance;
+		$new_instance      = wp_parse_args( (array) $new_instance, array( 'title' => '' ) );
 		$instance['title'] = strip_tags( $new_instance['title'] );
 		return $instance;
 	}
 }
-endif; // class_exists
 
 /**
  * Speakers widget class.
@@ -110,12 +113,11 @@ endif; // class_exists
  * @see WordCamp_Post_Types_Plugin->shortcode_speakers()
  */
 class WCPT_Widget_Speakers extends WP_Widget {
-
 	protected $cache_time = 3600; // seconds
 
 	function __construct() {
 		$widget_ops = array(
-			'classname' => 'wcpt_widget_speakers',
+			'classname'   => 'wcpt_widget_speakers',
 			'description' => __( 'Your WordCamp&#8217;s Speakers', 'wordcamporg' ),
 		);
 		WP_Widget::__construct( 'wcpt_speakers', __( 'Speakers', 'wordcamporg' ), $widget_ops );
@@ -125,26 +127,30 @@ class WCPT_Widget_Speakers extends WP_Widget {
 		/** @var $wcpt_plugin WordCamp_Post_Types_Plugin */
 		global $wcpt_plugin;
 
-		$transient_key = 'wcpt-' . md5( $args['widget_id'] );
+		$transient_key     = 'wcpt-' . md5( $args['widget_id'] );
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		echo $args['before_widget'];
-		if ( $instance['title'] )
+		if ( $instance['title'] ) {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
+		}
 
 		if ( false === ( $widget_content = get_transient( $transient_key ) ) ) {
 			// Shortcode attributes
 			$attr = array();
 
-			if ( $instance['count'] )
+			if ( $instance['count'] ) {
 				$attr['posts_per_page'] = $instance['count'];
+			}
 
-			if ( $instance['random'] )
+			if ( $instance['random'] ) {
 				$attr['orderby'] = 'rand';
+			}
 
 			$attr_str = array();
-			foreach ( $attr as $key => $value )
+			foreach ( $attr as $key => $value ) {
 				$attr_str[ $key ] = sprintf( '%s="%s"', $key, esc_attr( $value ) );
+			}
 			$attr_str = implode( ' ', $attr_str );
 
 			// Run and store cached version.
@@ -155,8 +161,9 @@ class WCPT_Widget_Speakers extends WP_Widget {
 		echo $widget_content;
 
 		$speakers_permalink = $wcpt_plugin->get_wcpt_permalink( 'speakers' );
-		if ( ! empty( $speakers_permalink ) )
+		if ( ! empty( $speakers_permalink ) ) {
 			printf( '<a class="wcpt-speakers-link" href="%s">%s</a>', esc_url( $speakers_permalink ), esc_html( __( 'View all speakers &rarr;', 'wordcamporg' ) ) );
+		}
 
 		echo $args['after_widget'];
 
@@ -164,16 +171,21 @@ class WCPT_Widget_Speakers extends WP_Widget {
 	}
 
 	function form( $instance ) {
-		$instance = wp_parse_args( (array) $instance, array(
-			'title' => '',
-			'count' => 3,
-			'random' => false,
-		) );
+		$instance = wp_parse_args(
+			(array) $instance,
+			array(
+				'title'  => '',
+				'count'  => 3,
+				'random' => false,
+			)
+		);
 
-		$title = $instance['title'];
-		$count = absint( $instance['count'] );
+		$title  = $instance['title'];
+		$count  = absint( $instance['count'] );
 		$random = (bool) $instance['random'];
+
 		?>
+
 		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'wordcamporg' ); ?> <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></label></p>
 		<p><label for="<?php echo $this->get_field_id( 'count' ); ?>"><?php _e( 'Number of speakers to show:', 'wordcamporg' ); ?> <input type="text" size="3" id="<?php echo $this->get_field_id( 'count' ); ?>" name="<?php echo $this->get_field_name( 'count' ); ?>" value="<?php echo esc_attr( $count ); ?>" /></label></p>
 		<p>
@@ -185,15 +197,18 @@ class WCPT_Widget_Speakers extends WP_Widget {
 	}
 
 	function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;
-		$new_instance = wp_parse_args( (array) $new_instance, array(
-			'title' => '',
-			'count' => 3,
-			'random' => false,
-		) );
+		$instance     = $old_instance;
+		$new_instance = wp_parse_args(
+			(array) $new_instance,
+			array(
+				'title'  => '',
+				'count'  => 3,
+				'random' => false,
+			)
+		);
 
-		$instance['title'] = strip_tags( $new_instance['title'] );
-		$instance['count'] = absint( $new_instance['count'] );
+		$instance['title']  = strip_tags( $new_instance['title'] );
+		$instance['count']  = absint( $new_instance['count'] );
 		$instance['random'] = (bool) $new_instance['random'];
 
 		// Clear transient cache
@@ -212,12 +227,11 @@ class WCPT_Widget_Speakers extends WP_Widget {
  * @see WordCamp_Post_Types_Plugin->shortcode_sessions()
  */
 class WCPT_Widget_Sessions extends WP_Widget {
-
 	protected $cache_time = 3600; // seconds
 
 	function __construct() {
 		$widget_ops = array(
-			'classname' => 'wcpt_widget_sessions',
+			'classname'   => 'wcpt_widget_sessions',
 			'description' => __( 'Show off your WordCamp sessions', 'wordcamporg' ),
 		);
 		WP_Widget::__construct( 'wcpt_sessions', __( 'Sessions', 'wordcamporg' ), $widget_ops );
@@ -227,30 +241,34 @@ class WCPT_Widget_Sessions extends WP_Widget {
 		/** @var $wcpt_plugin WordCamp_Post_Types_Plugin */
 		global $wcpt_plugin;
 
-		$transient_key = 'wcpt-' . md5( $args['widget_id'] );
+		$transient_key     = 'wcpt-' . md5( $args['widget_id'] );
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		echo $args['before_widget'];
-		if ( $instance['title'] )
+		if ( $instance['title'] ) {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
+		}
 
 		if ( false === ( $widget_content = get_transient( $transient_key ) ) ) {
 			// Shortcode attributes
 			$attr = array(
 				'show_avatars' => 'true',
-				'show_meta' => 'true',
+				'show_meta'    => 'true',
 				'speaker_link' => 'anchor',
 			);
 
-			if ( $instance['count'] )
+			if ( $instance['count'] ) {
 				$attr['posts_per_page'] = $instance['count'];
+			}
 
-			if ( $instance['random'] )
+			if ( $instance['random'] ) {
 				$attr['orderby'] = 'rand';
+			}
 
 			$attr_str = array();
-			foreach ( $attr as $key => $value )
+			foreach ( $attr as $key => $value ) {
 				$attr_str[ $key ] = sprintf( '%s="%s"', $key, esc_attr( $value ) );
+			}
 			$attr_str = implode( ' ', $attr_str );
 
 			// Run and store cached version.
@@ -261,8 +279,9 @@ class WCPT_Widget_Sessions extends WP_Widget {
 		echo $widget_content;
 
 		$sessions_permalink = $wcpt_plugin->get_wcpt_permalink( 'sessions' );
-		if ( ! empty( $sessions_permalink ) )
+		if ( ! empty( $sessions_permalink ) ) {
 			printf( '<a class="wcpt-sessions-link" href="%s">%s</a>', esc_url( $sessions_permalink ), esc_html( __( 'View all sessions &rarr;', 'wordcamporg' ) ) );
+		}
 
 		echo $args['after_widget'];
 
@@ -270,16 +289,21 @@ class WCPT_Widget_Sessions extends WP_Widget {
 	}
 
 	function form( $instance ) {
-		$instance = wp_parse_args( (array) $instance, array(
-			'title' => '',
-			'count' => 3,
-			'random' => false,
-		) );
+		$instance = wp_parse_args(
+			(array) $instance,
+			array(
+				'title'  => '',
+				'count'  => 3,
+				'random' => false,
+			)
+		);
 
-		$title = $instance['title'];
-		$count = absint( $instance['count'] );
+		$title  = $instance['title'];
+		$count  = absint( $instance['count'] );
 		$random = (bool) $instance['random'];
+
 		?>
+
 		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'wordcamporg' ); ?> <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></label></p>
 		<p><label for="<?php echo $this->get_field_id( 'count' ); ?>"><?php _e( 'Number of speakers to show:', 'wordcamporg' ); ?> <input type="text" size="3" id="<?php echo $this->get_field_id( 'count' ); ?>" name="<?php echo $this->get_field_name( 'count' ); ?>" value="<?php echo esc_attr( $count ); ?>" /></label></p>
 		<p>
@@ -291,15 +315,18 @@ class WCPT_Widget_Sessions extends WP_Widget {
 	}
 
 	function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;
-		$new_instance = wp_parse_args( (array) $new_instance, array(
-			'title' => '',
-			'count' => 3,
-			'random' => false,
-		) );
+		$instance     = $old_instance;
+		$new_instance = wp_parse_args(
+			(array) $new_instance,
+			array(
+				'title'  => '',
+				'count'  => 3,
+				'random' => false,
+			)
+		);
 
-		$instance['title'] = strip_tags( $new_instance['title'] );
-		$instance['count'] = absint( $new_instance['count'] );
+		$instance['title']  = strip_tags( $new_instance['title'] );
+		$instance['count']  = absint( $new_instance['count'] );
 		$instance['random'] = (bool) $new_instance['random'];
 
 		// Clear transient cache
@@ -322,7 +349,7 @@ class WCPT_Widget_Organizers extends WP_Widget {
 
 	function __construct() {
 		$widget_ops = array(
-			'classname' => 'wcpt_widget_organizers',
+			'classname'   => 'wcpt_widget_organizers',
 			'description' => __( 'Display your organizing team in the sidebar', 'wordcamporg' ),
 		);
 		WP_Widget::__construct( 'wcpt_organizers', __( 'Organizers', 'wordcamporg' ), $widget_ops );
@@ -332,26 +359,30 @@ class WCPT_Widget_Organizers extends WP_Widget {
 		/** @var $wcpt_plugin WordCamp_Post_Types_Plugin */
 		global $wcpt_plugin;
 
-		$transient_key = 'wcpt-' . md5( $args['widget_id'] );
+		$transient_key     = 'wcpt-' . md5( $args['widget_id'] );
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		echo $args['before_widget'];
-		if ( $instance['title'] )
+		if ( $instance['title'] ) {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
+		}
 
 		if ( false === ( $widget_content = get_transient( $transient_key ) ) ) {
 			// Shortcode attributes
 			$attr = array();
 
-			if ( $instance['count'] )
+			if ( $instance['count'] ) {
 				$attr['posts_per_page'] = $instance['count'];
+			}
 
-			if ( $instance['random'] )
+			if ( $instance['random'] ) {
 				$attr['orderby'] = 'rand';
+			}
 
 			$attr_str = array();
-			foreach ( $attr as $key => $value )
+			foreach ( $attr as $key => $value ) {
 				$attr_str[ $key ] = sprintf( '%s="%s"', $key, esc_attr( $value ) );
+			}
 			$attr_str = implode( ' ', $attr_str );
 
 			// Run and store cached version.
@@ -362,8 +393,9 @@ class WCPT_Widget_Organizers extends WP_Widget {
 		echo $widget_content;
 
 		$organizers_permalink = $wcpt_plugin->get_wcpt_permalink( 'organizers' );
-		if ( ! empty( $organizers_permalink ) )
+		if ( ! empty( $organizers_permalink ) ) {
 			printf( '<a class="wcpt-organizers-link" href="%s">%s</a>', esc_url( $organizers_permalink ), esc_html( __( 'Organizing team &rarr;', 'wordcamporg' ) ) );
+		}
 
 		echo $args['after_widget'];
 
@@ -371,16 +403,21 @@ class WCPT_Widget_Organizers extends WP_Widget {
 	}
 
 	function form( $instance ) {
-		$instance = wp_parse_args( (array) $instance, array(
-			'title' => '',
-			'count' => 3,
-			'random' => false,
-		) );
+		$instance = wp_parse_args(
+			(array) $instance,
+			array(
+				'title'  => '',
+				'count'  => 3,
+				'random' => false,
+			)
+		);
 
-		$title = $instance['title'];
-		$count = absint( $instance['count'] );
+		$title  = $instance['title'];
+		$count  = absint( $instance['count'] );
 		$random = (bool) $instance['random'];
+
 		?>
+
 		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'wordcamporg' ); ?> <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></label></p>
 		<p><label for="<?php echo $this->get_field_id( 'count' ); ?>"><?php _e( 'Number of organizers to show:', 'wordcamporg' ); ?> <input type="text" size="3" id="<?php echo $this->get_field_id( 'count' ); ?>" name="<?php echo $this->get_field_name( 'count' ); ?>" value="<?php echo esc_attr( $count ); ?>" /></label></p>
 		<p>
@@ -392,20 +429,24 @@ class WCPT_Widget_Organizers extends WP_Widget {
 	}
 
 	function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;
-		$new_instance = wp_parse_args( (array) $new_instance, array(
-			'title' => '',
-			'count' => 3,
-			'random' => false,
-		) );
+		$instance     = $old_instance;
+		$new_instance = wp_parse_args(
+			(array) $new_instance,
+			array(
+				'title'  => '',
+				'count'  => 3,
+				'random' => false,
+			)
+		);
 
-		$instance['title'] = strip_tags( $new_instance['title'] );
-		$instance['count'] = absint( $new_instance['count'] );
+		$instance['title']  = strip_tags( $new_instance['title'] );
+		$instance['count']  = absint( $new_instance['count'] );
 		$instance['random'] = (bool) $new_instance['random'];
 
 		// Clear transient cache
 		$transient_key = 'wcpt-' . md5( $this->id );
 		delete_transient( $transient_key );
+
 		return $instance;
 	}
 }

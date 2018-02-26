@@ -71,7 +71,7 @@ function register_additional_rest_fields() {
 	 */
 	if ( get_option( 'show_avatars' ) ) {
 		$avatar_properties = array();
-		$avatar_sizes = rest_get_avatar_sizes();
+		$avatar_sizes      = rest_get_avatar_sizes();
 
 		foreach ( $avatar_sizes as $size ) {
 			$avatar_properties[ $size ] = array(
@@ -126,7 +126,7 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_additional_rest_fields' 
  *
  * @return void
  */
-function register_fav_sessions_email(){
+function register_fav_sessions_email() {
 	register_rest_route(
 		'wc-post-types/v1',     // REST namespace + API version
 		'/email-fav-sessions/', // URL slug
@@ -135,7 +135,7 @@ function register_fav_sessions_email(){
 			'callback' => 'send_favourite_sessions_email',
 			'args'     => array(
 				'email-address' => array(
-					'required' => true,
+					'required'          => true,
 					'validate_callback' => function( $value, $request, $param ) {
 						return is_email( $value );
 					},
@@ -145,7 +145,7 @@ function register_fav_sessions_email(){
 				),
 
 				'session-list' => array(
-					'required' => true,
+					'required'          => true,
 					'validate_callback' => function( $value, $request, $param ) {
 						$session_ids = explode( ',', $value );
 						$session_count = count( $session_ids );
@@ -161,7 +161,7 @@ function register_fav_sessions_email(){
 						return implode( ',', array_filter( $session_ids, 'is_numeric' ) );
 					},
 				),
-			)
+			),
 		)
 	);
 }

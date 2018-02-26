@@ -17,7 +17,7 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 		);
 
 		$this->stylesheet = wp_get_theme()->get_stylesheet();
-		$this->template = wp_get_theme()->get_template();
+		$this->template   = wp_get_theme()->get_template();
 
 		// Initialize only if theme requires.
 		if ( in_array( $this->stylesheet, $compat_themes ) || in_array( $this->template, $compat_themes ) ) {
@@ -70,21 +70,23 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 		global $post;
 
 		$speakers = new WP_Query( array(
-			'post_type' => 'wcb_speaker',
-			'orderby' => 'title',
-			'order' => 'ASC',
+			'post_type'      => 'wcb_speaker',
+			'orderby'        => 'title',
+			'order'          => 'ASC',
 			'posts_per_page' => -1,
 		) );
 
-		if ( ! $speakers->have_posts() )
+		if ( ! $speakers->have_posts() ) {
 			return '';
+		}
 
 		ob_start();
 		?>
 
 		<div class="cpt-loop speaker-gravatar-list clearfix">
 			<p>
-			<?php while ( $speakers->have_posts() ) : $speakers->the_post(); ?>
+			<?php while ( $speakers->have_posts() ) :
+				$speakers->the_post(); ?>
 			<?php
 				$href  = '#' . esc_attr( $post->post_name );
 				$title = esc_attr( get_the_title() );
@@ -94,22 +96,25 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 			?>
 			<?php endwhile; ?>
 			</p>
-		</div><!-- .cpt-loop -->
+		</div>
 
 		<?php $speakers->rewind_posts(); ?>
 		<?php $half_id = $this->wcb_optimal_column_split( $speakers, 200, 200 ); ?>
 
 		<div class="cpt-loop speakers">
-
 			<div class="grid_6 alpha">
 
-				<?php while ( $speakers->have_posts() ) : $speakers->the_post(); ?>
+				<?php while ( $speakers->have_posts() ) :
+					$speakers->the_post(); ?>
 
 					<?php
-						if ( get_the_ID() == $half_id )
-							echo '</div><div class="grid_6 omega">';
 
-						$odd = ( ( $speakers->current_post + 1 ) % 2 ) ? 'odd' : 'even';
+					if ( get_the_ID() == $half_id ) {
+						echo '</div><div class="grid_6 omega">';
+					}
+
+					$odd = ( ( $speakers->current_post + 1 ) % 2 ) ? 'odd' : 'even';
+
 					?>
 
 					<div id="<?php echo esc_attr( $post->post_name ); ?>" <?php post_class( 'speaker clearfix ' . $odd ); ?> >
@@ -121,11 +126,11 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 						?>
 						</div>
 					</div>
-
 				<?php endwhile; ?>
 
 			</div>
-		</div><!-- .cpt-loop -->
+		</div>
+
 		<?php
 
 		wp_reset_postdata();
@@ -142,40 +147,49 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 		global $post;
 
 		$sessions = new WP_Query( array(
-			'post_type' => 'wcb_session',
-			'orberby' => 'title',
-			'order' => 'DESC',
+			'post_type'      => 'wcb_session',
+			'orberby'        => 'title',
+			'order'          => 'DESC',
 			'posts_per_page' => -1,
 		) );
 
-		if ( ! $sessions->have_posts() )
-			return;
+		if ( ! $sessions->have_posts() ) {
+			return '';
+		}
 
 		ob_start();
 		?>
 
 		<div class="cpt-loop sessions">
-
 			<?php $half_id = $this->wcb_optimal_column_split( $sessions, 200 ); ?>
 
 			<div class="grid_6 alpha">
-
-			<?php while ( $sessions->have_posts() ) : $sessions->the_post(); ?>
-
-				<?php
-					// Close the first column, open the second.
-					if ( get_the_ID() == $half_id )
-						echo '</div><div class="grid_6 omega">';
-
-					$odd = ( ( $sessions->current_post +1 ) % 2 ) ? 'odd' : 'even';
-				?>
-				<div id="post-<?php the_ID(); ?>" <?php post_class( 'session ' . $odd ); ?> >
-					<h3 class="entry-title session-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+				<?php while ( $sessions->have_posts() ) :
+					$sessions->the_post(); ?>
 
 					<?php
-						$meta = array();
+
+					// Close the first column, open the second.
+					if ( get_the_ID() == $half_id ) {
+						echo '</div><div class="grid_6 omega">';
+					}
+
+					$odd = ( ( $sessions->current_post + 1 ) % 2 ) ? 'odd' : 'even';
+
+					?>
+
+					<div id="post-<?php the_ID(); ?>" <?php post_class( 'session ' . $odd ); ?> >
+						<h3 class="entry-title session-title">
+							<a href="<?php the_permalink(); ?>">
+								<?php the_title(); ?>
+							</a>
+						</h3>
+
+						<?php
+
+						$meta     = array();
 						$speakers = get_post_meta( get_the_ID(), '_wcb_session_speakers', true );
-						$track = get_the_terms( get_the_ID(), 'wcb_track' );
+						$track    = get_the_terms( get_the_ID(), 'wcb_track' );
 
 						if ( empty( $track ) ) {
 							$track = '';
@@ -184,32 +198,37 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 							$track = $track[0]->name;
 						}
 
-						if ( ! empty( $speakers ) )
+						if ( ! empty( $speakers ) ) {
 							$meta['speakers'] = sprintf( __( 'Presented by %s', 'wordcamporg' ), esc_html( rtrim( $speakers, ',' ) ) );
+						}
 
-						if ( ! empty( $track ) )
+						if ( ! empty( $track ) ) {
 							$meta['track'] = sprintf( __( '%s Track', 'wordcamporg' ), esc_html( $track ) );
+						}
 
 						$track_url = get_term_link( $track, 'wcb_track' );
-						if ( ! is_wp_error( $track_url ) )
+
+						if ( ! is_wp_error( $track_url ) ) {
 							$meta['track'] = sprintf( '<a href="%s">%s</a>', esc_url( $track_url ), $meta['track'] );
+						}
 
 						// Output the meta
 						if ( ! empty( $meta ) ) {
 							$meta = implode( ' <span class="meta-sep meta-sep-bull">&bull;</span> ', $meta );
 							printf( '<div class="entry-meta session-speakers session-meta">%s</div>', $meta );
 						}
-					?>
-					<div class="entry-content session-description">
-						<?php the_post_thumbnail(); ?>
-						<?php the_content(); ?>
+
+						?>
+
+						<div class="entry-content session-description">
+							<?php the_post_thumbnail(); ?>
+							<?php the_content(); ?>
+						</div>
 					</div>
-				</div>
 
-			<?php endwhile; ?>
-
-			</div><!-- .grid_6 -->
-		</div><!-- .cpt-loop -->
+				<?php endwhile; ?>
+			</div>
+		</div>
 
 		<?php
 
@@ -230,38 +249,51 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 
 		ob_start();
 		?>
+
 		<div class="sponsors">
-		<?php foreach ( $terms as $term ) : ?>
-			<?php
+			<?php foreach ( $terms as $term ) : ?>
+				<?php
+
 				$sponsors = new WP_Query( array(
-					'post_type' => 'wcb_sponsor',
-					'order' => 'ASC',
-					'posts_per_page' => -1,
-					'taxonomy' => $term->taxonomy,
-					'term' => $term->slug,
+					'post_type'      => 'wcb_sponsor',
+					'order'          => 'ASC',
+					'posts_per_page' => - 1,
+					'taxonomy'       => $term->taxonomy,
+					'term'           => $term->slug,
 				) );
 
-				if ( ! $sponsors->have_posts() )
+				if ( ! $sponsors->have_posts() ) {
 					continue;
-			?>
+				}
 
-			<div class="sponsor-level <?php echo $term->slug; ?>">
-				<h2 class="sponsor-level-title"><?php echo esc_html( $term->name ); ?></h2>
+				?>
 
-				<?php while ( $sponsors->have_posts() ) : $sponsors->the_post(); ?>
-				<div id="post-<?php the_ID(); ?>" <?php post_class( 'sponsor' ); ?> >
-					<h3 class="entry-title sponsor-title"><a href="<?php the_permalink(); ?>">
-						<?php ( has_post_thumbnail() ) ? the_post_thumbnail() : the_title(); ?>
-					</a></h3>
-					<div class="entry-content sponsor-description">
-						<?php the_content(); ?>
+				<div class="sponsor-level <?php echo $term->slug; ?>">
+					<h2 class="sponsor-level-title">
+						<?php echo esc_html( $term->name ); ?>
+					</h2>
+
+					<?php while ( $sponsors->have_posts() ) :
+						$sponsors->the_post(); ?>
+
+					<div id="post-<?php the_ID(); ?>" <?php post_class( 'sponsor' ); ?> >
+						<h3 class="entry-title sponsor-title">
+							<a href="<?php the_permalink(); ?>">
+								<?php ( has_post_thumbnail() ) ? the_post_thumbnail() : the_title(); ?>
+							</a>
+						</h3>
+
+						<div class="entry-content sponsor-description">
+							<?php the_content(); ?>
+						</div>
 					</div>
-				</div><!-- #post -->
-				<?php endwhile; ?>
 
-			</div><!-- .sponsor-level -->
-		<?php endforeach; ?>
-		</div><!-- .sponsors -->
+					<?php endwhile; ?>
+
+				</div>
+			<?php endforeach; ?>
+		</div>
+
 		<?php
 
 		wp_reset_postdata();
@@ -275,12 +307,14 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 	 * Splits the query into two columns based upon content length. Ported from base theme functions.
 	 *
 	 * @todo Move to compat
+	 *
 	 * @param WP_Query $query
-	 * @param integer $post_cost A character cost attributed to rendering a post. Helps for approximations.
-	 * @param integer $min_chars The minimum number of characters per post. Helps for approximations.
+	 * @param integer  $post_cost A character cost attributed to rendering a post. Helps for approximations.
+	 * @param integer  $min_chars The minimum number of characters per post. Helps for approximations.
+	 *
 	 * @return Object The starting post ID of the second column.
 	 */
-	public function wcb_optimal_column_split( $query, $post_cost=0, $min_chars=0 ) {
+	public function wcb_optimal_column_split( $query, $post_cost = 0, $min_chars = 0 ) {
 		$query->rewind_posts();
 
 		$total  = 0;
@@ -289,7 +323,7 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 		while ( $query->have_posts() ) {
 			$post     = $query->next_post();
 			$length   = strlen( $post->post_content );
-			$total   += ( $length < $min_chars) ? $min_chars : $length;
+			$total   += ( $length < $min_chars ) ? $min_chars : $length;
 			$total   += $post_cost;
 			$totals[] = array( $total, $post->ID );
 		}
@@ -312,11 +346,12 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 	 * A filter for base theme's wcb_entry_meta.
 	 */
 	function wcb_session_entry_meta( $meta ) {
-		if ( get_post_type() != 'wcb_session' )
+		if ( get_post_type() != 'wcb_session' ) {
 			return $meta;
+		}
 
 		$speakers = get_post_meta( get_the_ID(), '_wcb_session_speakers', true );
-		$track = get_the_terms( get_the_ID(), 'wcb_track' );
+		$track    = get_the_terms( get_the_ID(), 'wcb_track' );
 
 		if ( empty( $track ) ) {
 			$track = '';
@@ -325,20 +360,24 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 			$track = $track[0]->name;
 		}
 
-		if ( ! empty( $speakers ) )
+		if ( ! empty( $speakers ) ) {
 			$meta['speakers'] = sprintf( __( 'Presented by %s', 'wordcamporg' ), esc_html( $speakers ) );
+		}
 
-		if ( ! empty( $track ) )
+		if ( ! empty( $track ) ) {
 			$meta['track'] = sprintf( __( '%s Track', 'wordcamporg' ), esc_html( $track ) );
+		}
 
 		$track_url = get_term_link( $track, 'wcb_track' );
-		if ( ! is_wp_error( $track_url ) )
+		if ( ! is_wp_error( $track_url ) ) {
 			$meta['track'] = sprintf( '<a href="%s">%s</a>', esc_url( $track_url ), $meta['track'] );
+		}
 
 		$order = array();
 
-		if ( ! empty( $meta['speakers'] ) )
+		if ( ! empty( $meta['speakers'] ) ) {
 			$order[] = 'speakers';
+		}
 
 		if ( ! empty( $meta['track'] ) ) {
 			$order[] = 'sep';
@@ -352,4 +391,4 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 		return $meta;
 	}
 }
-new WordCamp_Post_Types_Plugin_Back_Compat;
+new WordCamp_Post_Types_Plugin_Back_Compat();
