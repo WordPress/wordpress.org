@@ -200,7 +200,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	public static function enable_two_factor( $user_id ) {
 		// True if at least one provider method was set.
 		return (
-			update_user_meta( $user_id, self::PROVIDER_USER_META_KEY,          'WPORG_Two_Factor_Primary' ) ||
+			update_user_meta( $user_id, self::PROVIDER_USER_META_KEY,          'WPORG_Two_Factor_Primary' ) &&
 			update_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY, [ 'WPORG_Two_Factor_Primary', 'WPORG_Two_Factor_Secondary' ] )
 		);
 	}
