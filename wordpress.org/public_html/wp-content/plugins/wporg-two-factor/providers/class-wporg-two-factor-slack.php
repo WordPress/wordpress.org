@@ -4,22 +4,12 @@ require_once __DIR__ . '/class-wporg-two-factor-email.php';
 
 class WPORG_Two_Factor_Slack extends WPORG_Two_Factor_Email {
 
-	/**
-	 * The user meta token key.
-	 *
-	 * @type string
-	 */
 	const TOKEN_META_KEY = '_two_factor_slack_token';
 
-	/**
-	 * Ensures only one instance of this class exists in memory at any one time.
-	 *
-	 * @since 0.1-dev
-	 */
-	static function get_instance() {
+	public static function get_instance() {
 		static $instance;
-		$class = __CLASS__;
-		if ( ! is_a( $instance, $class ) ) {
+		if ( ! $instance ) {
+			$class = __CLASS__;
 			$instance = new $class;
 		}
 		return $instance;
