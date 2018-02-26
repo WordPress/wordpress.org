@@ -222,6 +222,10 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 * @param \WP_User $user User object.
 	 */
 	public static function user_two_factor_options( $user ) {
+		if ( ! function_exists( 'is_caped' ) || ! is_caped() ) {
+			return;
+		}
+
 		wp_enqueue_script( 'two-factor-edit', plugins_url( 'js/profile-edit.js' , __FILE__ ), [ 'jquery' ], 1, true );
 		wp_localize_script( 'two-factor-edit', 'two_factor_edit', array(
 			'ajaxurl' => admin_url( 'admin-ajax.php' ),
