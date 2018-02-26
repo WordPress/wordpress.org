@@ -10,7 +10,8 @@
  * @package WordPressdotorg\TwoFactor
  */
 
-class WPORG_Two_Factor {
+class WPORG_Two_Factor extends Two_Factor_Core {
+
 	public function __construct() {
 		add_filter( 'two_factor_providers', [ $this, 'two_factor_providers' ] );
 
@@ -22,16 +23,168 @@ class WPORG_Two_Factor {
 			add_action( 'show_user_profile', [ $this, 'user_two_factor_options' ] );
 		}
 
-		add_action( 'wp_ajax_two-factor-totp-verify-code',[ $this, 'ajax_verify_code' ] );
-		add_action( 'wp_ajax_two-factor-disable',[ $this, 'ajax_disable' ] );
+		add_action( 'wp_ajax_two-factor-totp-verify-code', [ $this, 'ajax_verify_code' ] );
+		add_action( 'wp_ajax_two-factor-disable',          [ $this, 'ajax_disable' ] );
+
+		// Auth cookie unsetting.
+		remove_action( 'wp_login',                [ 'Two_Factor_Core', 'wp_login' ], 10, 2 );
+		remove_action( 'login_form_validate_2fa', [ 'Two_Factor_Core', 'login_form_validate_2fa' ] );
+		remove_action( 'login_form_backup_2fa',   [ 'Two_Factor_Core', 'backup_2fa' ] );
+
+		add_action( 'wp_login',                [ $this, 'wp_login' ], 10, 2 );
+		add_action( 'login_form_validate_2fa', [ $this, 'login_form_validate_2fa' ] );
+		add_action( 'login_form_backup_2fa',   [ $this, 'backup_2fa' ] );
+
 	}
 
-	public function two_factor_providers( $providers ) {
-		// Limit 2FA to certain users during Development.
-		if ( ! is_user_logged_in() || ! in_array( get_current_user_id(), [ 148148, 196012, 8772187 ] ) ) {
-			return array();
+	/**
+	 * Handle the browser-based login.
+	 *
+	 * @since 0.1-dev
+	 *
+	 * @param string  $user_login Username.
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public static function wp_login( $user_login, $user ) {
+		if ( ! self::is_user_using_two_factor( $user->ID ) ) {
+			return;
 		}
 
+		wp_clear_auth_cookie();
+
+		self::show_two_factor_login( $user );
+		exit;
+	}
+
+	/**
+	 * Login form validation.
+	 *
+	 * @since 0.1-dev
+	 */
+	public static function login_form_validate_2fa() {
+		if ( ! isset( $_POST['wp-auth-id'], $_POST['wp-auth-nonce'] ) ) {
+			return;
+		}
+
+		$user = get_userdata( $_POST['wp-auth-id'] );
+		if ( ! $user ) {
+			return;
+		}
+
+		$nonce = $_POST['wp-auth-nonce'];
+		if ( true !== self::verify_login_nonce( $user->ID, $nonce ) ) {
+			wp_safe_redirect( get_bloginfo( 'url' ) );
+			exit;
+		}
+
+		if ( isset( $_POST['provider'] ) ) {
+			$providers = self::get_available_providers_for_user( $user );
+			if ( isset( $providers[ $_POST['provider'] ] ) ) {
+				$provider = $providers[ $_POST['provider'] ];
+			} else {
+				wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
+			}
+		} else {
+			$provider = self::get_primary_provider_for_user( $user->ID );
+		}
+
+		// Allow the provider to re-send codes, etc.
+		if ( true === $provider->pre_process_authentication( $user ) ) {
+			$login_nonce = self::create_login_nonce( $user->ID );
+			if ( ! $login_nonce ) {
+				wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
+			}
+
+			self::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], '', $provider );
+			exit;
+		}
+
+		// Ask the provider to verify the second factor.
+		if ( true !== $provider->validate_authentication( $user ) ) {
+			do_action( 'wp_login_failed', $user->user_login );
+
+			$login_nonce = self::create_login_nonce( $user->ID );
+			if ( ! $login_nonce ) {
+				wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
+			}
+
+			self::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], esc_html__( 'ERROR: Invalid verification code.', 'two-factor' ), $provider );
+			exit;
+		}
+
+		self::delete_login_nonce( $user->ID );
+
+		$rememberme = false;
+		if ( isset( $_REQUEST['rememberme'] ) && $_REQUEST['rememberme'] ) {
+			$rememberme = true;
+		}
+
+		wp_set_auth_cookie( $user->ID, $rememberme );
+
+		// Must be global because that's how login_header() uses it.
+		global $interim_login;
+		$interim_login = isset( $_REQUEST['interim-login'] ); // WPCS: override ok.
+
+		if ( $interim_login ) {
+			$customize_login = isset( $_REQUEST['customize-login'] );
+			if ( $customize_login ) {
+				wp_enqueue_script( 'customize-base' );
+			}
+			$message = '<p class="message">' . __( 'You have logged in successfully.' ) . '</p>';
+			$interim_login = 'success'; // WPCS: override ok.
+			login_header( '', $message ); ?>
+			</div>
+			<?php
+			/** This action is documented in wp-login.php */
+			do_action( 'login_footer' ); ?>
+			<?php if ( $customize_login ) : ?>
+				<script type="text/javascript">setTimeout( function(){ new wp.customize.Messenger({ url: '<?php echo wp_customize_url(); /* WPCS: XSS OK. */ ?>', channel: 'login' }).send('login') }, 1000 );</script>
+			<?php endif; ?>
+			</body></html>
+			<?php
+			exit;
+		}
+		$redirect_to = apply_filters( 'login_redirect', $_REQUEST['redirect_to'], $_REQUEST['redirect_to'], $user );
+		wp_safe_redirect( $redirect_to );
+
+		exit;
+	}
+
+
+	/**
+	 * Add short description. @todo
+	 *
+	 * @since 0.1-dev
+	 */
+	public static function backup_2fa() {
+		if ( ! isset( $_GET['wp-auth-id'], $_GET['wp-auth-nonce'], $_GET['provider'] ) ) {
+			return;
+		}
+
+		$user = get_userdata( $_GET['wp-auth-id'] );
+		if ( ! $user ) {
+			return;
+		}
+
+		$nonce = $_GET['wp-auth-nonce'];
+		if ( true !== self::verify_login_nonce( $user->ID, $nonce ) ) {
+			wp_safe_redirect( get_bloginfo( 'url' ) );
+			exit;
+		}
+
+		$providers = self::get_available_providers_for_user( $user );
+		if ( isset( $providers[ $_GET['provider'] ] ) ) {
+			$provider = $providers[ $_GET['provider'] ];
+		} else {
+			wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
+		}
+
+		self::login_html( $user, $_GET['wp-auth-nonce'], $_GET['redirect_to'], '', $provider );
+
+		exit;
+	}
+
+	public function two_factor_providers( $providers) {
 		$wporg_providers = array(
 			'WPORG_Two_Factor_Email'        => __DIR__ . '/providers/class-wporg-two-factor-email.php',
 			'WPORG_Two_Factor_Totp'         => __DIR__ . '/providers/class-wporg-two-factor-totp.php',
@@ -47,7 +200,7 @@ class WPORG_Two_Factor {
 	 *
 	 * @param \WP_User $user User object.
 	 */
-	public function user_two_factor_options( $user ) {
+	public static function user_two_factor_options( $user ) {
 		wp_enqueue_script( 'two-factor-edit', plugins_url( 'js/profile-edit.js' , __FILE__ ), [ 'jquery' ], 1, true );
 
 		$key       = get_user_meta( $user->ID, Two_Factor_Totp::SECRET_META_KEY, true );
