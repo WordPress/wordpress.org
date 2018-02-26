@@ -17,7 +17,7 @@ jQuery( function( $ ) {
 						$( '<div class="bbp-template-notice info" />' ).text( response.data )
 					);
 				} else {
-					$( '#two-factor-active' ).find( 'div:first-of-type' ).prepend(
+					$( '#two-factor-active' ).find( '> div:first-of-type' ).prepend(
 						$( '<div class="bbp-template-notice error" />' ).text( response.data )
 					);
 				}
@@ -91,9 +91,10 @@ jQuery( function( $ ) {
 			},
 			function( response ) {
 				if ( response.success ) {
-					var $codesList = $( '.two-factor-backup-codes-unused-codes' );
+					var $codesList = $( '#two-factor-backup-codes-list' ),
+						txt_data = 'data:application/text;charset=utf-8,' + '\n';
 
-					$( '#generate-backup-codes' ).remove();
+					$( '#two-factor-backup-codes-button' ).hide();
 					$( '.two-factor-backup-codes-wrapper' ).show();
 					$codesList.html( '' );
 
@@ -102,25 +103,55 @@ jQuery( function( $ ) {
 						$codesList.append( '<li>' + response.data.codes[ i ] + '</li>' );
 					}
 
-					// Update counter.
-					$( '.two-factor-backup-codes-count' ).html( response.data.i18n.count );
-
 					// Build the download link
-					var txt_data = 'data:application/text;charset=utf-8,' + '\n';
 					txt_data += response.data.i18n.title.replace( /%s/g, document.domain ) + '\n\n';
 
 					for ( i = 0; i < response.data.codes.length; i++ ) {
 						txt_data += i + 1 + '. ' + response.data.codes[ i ] + '\n';
 					}
 
-					$( '#two-factor-backup-codes-download-link' ).attr( 'href', encodeURI( txt_data ) );
+					$( '#two-factor-backup-codes-download' ).attr( 'href', encodeURI( txt_data ) );
 				}
 			}
 		);
 	} );
 
-	$( '#print-agreement' ).on( 'change', function() {
-		$( '.two-factor-backup-codes-wrapper button[type="submit"]' ).prop( 'disabled', ! $( this ).prop( 'checked' ) );
+	var $printAgreement   = $( '#print-agreement' ),
+		$backupDoneButton = $( '.two-factor-backup-codes-wrapper button[type="submit"]' );
+
+	$printAgreement.on( 'change', function() {
+		$backupDoneButton.prop( 'disabled', ! $printAgreement.prop( 'checked' ) );
 	} );
 
+	$backupDoneButton.on( 'click', function( event ) {
+		event.preventDefault();
+
+		$( '.two-factor-backup-codes-wrapper' ).hide();
+		$( '#two-factor-backup-codes-button' ).show();
+		$printAgreement.prop( 'checked', false );
+		$backupDoneButton.prop( 'disabled', true );
+	} );
+
+	$( '#two-factor-backup-codes-copy' ).on( 'click', function() {
+		var $temp = $( '<textarea>' ),
+			list = '';
+
+		$( 'body' ).append( $temp );
+		$( '#two-factor-backup-codes-list' ).children().each( function( index, node ) {
+			list += node.innerText + "\n";
+		} );
+
+		$temp.val( list ).select();
+		document.execCommand( 'copy' );
+		$temp.remove();
+	} );
+
+	$( '#two-factor-backup-codes-print' ).on( 'click', function() {
+		var printer = window.open('', '_blank' );
+		printer.document.writeln( '<ol>' + $( '#two-factor-backup-codes-list' ).html() + '</ol>' );
+		printer.document.close();
+		printer.focus();
+		printer.print();
+		printer.close();
+	} );
 } );
