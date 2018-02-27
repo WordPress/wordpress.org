@@ -19,9 +19,5 @@ if ( ! defined( 'WPORG_ENABLE_2FA' ) || ! WPORG_ENABLE_2FA ) {
 	return;
 }
 
-if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
-	return;
-}
-
 include_once WP_PLUGIN_DIR . '/two-factor/two-factor.php';
 include_once WP_PLUGIN_DIR . '/wporg-two-factor/wporg-two-factor.php';
