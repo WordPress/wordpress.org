@@ -352,7 +352,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 * Simple handler to enable Two factor for a given user.
 	 * NOTE: It's assumed that the Two Factor details have been setup correctly previously.
 	 */
-	public static function enable_two_factor( $user_id ) {
+	public function enable_two_factor( $user_id ) {
 		$result = (
 			update_user_meta( $user_id, self::PROVIDER_USER_META_KEY,          'WPORG_Two_Factor_Primary' ) &&
 			update_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY, [ 'WPORG_Two_Factor_Primary', 'WPORG_Two_Factor_Secondary' ] )
@@ -369,7 +369,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	/**
 	 * Simple handler to disable Two factor for a given user.
 	 */
-	public static function disable_two_factor( $user_id ) {
+	public function disable_two_factor( $user_id ) {
 		delete_user_meta( $user_id, self::PROVIDER_USER_META_KEY );
 		delete_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY );
 		delete_user_meta( $user_id, Two_Factor_Totp::SECRET_META_KEY );
@@ -564,7 +564,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 				wp_send_json_error( __( 'Unable to save Two Factor Authentication code. Please try again.', 'wporg' ) );
 			}
 
-			if ( ! self::enable_two_factor( $user_id ) ) {
+			if ( ! $this->enable_two_factor( $user_id ) ) {
 				wp_send_json_error( __( 'Unable to save Two Factor Authentication code. Please try again.', 'wporg' ) );
 			}
 
@@ -585,7 +585,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			wp_send_json_error( __( 'You do not have permission to edit this user.' ) );
 		}
 
-		if ( ! self::disable_two_factor( $user_id ) ) {
+		if ( ! $this->disable_two_factor( $user_id ) ) {
 			wp_send_json_error( __( 'Unable to remove Two Factor Authentication code. Please try again.', 'wporg' ) );
 		}
 
