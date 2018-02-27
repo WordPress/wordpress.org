@@ -77,7 +77,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		$login_host = class_exists( 'WPOrg_SSO' ) ? WPOrg_SSO::SSO_HOST : 'login.wordpress.org';
 		if ( $login_host === $_SERVER['HTTP_HOST']  ) {
 			if ( '/wp-login.php' == substr( $_SERVER['REQUEST_URI'], 0, 13 ) ) {
-				if ( $_POST || 'backup_2fa' == $_REQUEST['action'] || 'validate_2fa' == $_REQUEST['action'] ) {
+				if ( $_POST || ( isset( $_REQUEST['action'] ) && ( 'backup_2fa' == $_REQUEST['action'] || 'validate_2fa' == $_REQUEST['action'] ) ) ) {
 					return $user_id;
 				}
 			}
