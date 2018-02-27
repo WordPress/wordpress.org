@@ -288,7 +288,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			</form>
 		</div><!-- Opened in login_header() -->
 
-		<?php if ( empty( $_GET['action'] ) ) : ?>
+		<?php if ( 'WPORG_Two_Factor_Primary' === $provider_class ) : ?>
 		<div class="backup-methods-wrap">
 			<a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
 				'action'        => 'backup_2fa',
