@@ -42,12 +42,7 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 		} else {
 			echo '<p class="intro">' . __( 'Enter a backup code.', 'wporg' ) . '</p>';
 		}
-
-		if ( $email_enabled || $slack_enabled ) : ?>
-			<p class="two-factor-email-resend intro">
-				<button type="submit" class="button-link" name="two-factor-backup-resend"><span class="dashicons-before dashicons-controls-repeat"><?php esc_html_e( 'Resend Code', 'wporg' ); ?></span></button>
-			</p>
-		<?php endif; ?>
+		?>
 
 		<p>
 			<label for="authcode"><?php esc_html_e( 'Verification Code:', 'wporg' ); ?></label>
@@ -65,7 +60,12 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 				} catch(e){}
 			}, 200);
 		</script>
-		<?php
+
+		<?php if ( $email_enabled || $slack_enabled ) : ?>
+		<p class="two-factor-email-resend">
+			<button type="submit" class="button-link" name="two-factor-backup-resend"><span class="dashicons-before dashicons-controls-repeat"><?php esc_html_e( 'Resend Code', 'wporg' ); ?></span></button>
+		</p>
+		<?php endif;
 	}
 
 	function is_available_for_user( $user ) { return true; }

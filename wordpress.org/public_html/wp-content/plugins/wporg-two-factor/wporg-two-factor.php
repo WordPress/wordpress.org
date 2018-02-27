@@ -311,6 +311,12 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			.login-action-validate_2fa #login {
 				margin-bottom: 24px;
 			}
+			.wp-core-ui.login .button-primary {
+				float: none;
+			}
+			#login .two-factor-email-resend {
+				margin-top: 16px;
+			}
 			.backup-methods-wrap {
 				margin: 24px 0;
 				text-align: center;
