@@ -17,7 +17,7 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 	}
 
 	public function get_label() {
-		return _x( 'Backup Method', 'Provider Label', 'wporg' );
+		return 'WordPress.org Secondary 2FA Provider'; // Not translated as it's not displayed, this is purely for debugging & the parent plugin.
 	}
 
 	public function authentication_page( $user ) {

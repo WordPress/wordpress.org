@@ -21,7 +21,7 @@ class WPORG_Two_Factor_Primary extends Two_Factor_Totp {
 	 * Returns the name of the provider.
 	 */
 	public function get_label() {
-		return _x( 'Time Based One-Time Password (Google Authenticator, Authy, etc)', 'Provider Label', 'wporg' );
+		return 'WordPress.org Primary 2FA Provider'; // Not translated as it's not displayed, this is purely for debugging & the parent plugin.
 	}
 
 	public function validate_authentication( $user, $code = '' ) {
