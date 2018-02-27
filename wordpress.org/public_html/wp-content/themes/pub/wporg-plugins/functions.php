@@ -59,7 +59,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-plugins', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180227' );
+	wp_enqueue_style( 'wporg-plugins', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180228' );
 	wp_style_add_data( 'wporg-plugins', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'wporg-plugins-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
