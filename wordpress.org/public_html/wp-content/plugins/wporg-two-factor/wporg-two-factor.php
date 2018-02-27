@@ -205,7 +205,6 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		exit;
 	}
 
-
 	/**
 	 * Add short description. @todo
 	 *
@@ -228,6 +227,134 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		self::login_html( $user, '', $_GET['redirect_to'], '', $provider );
 
 		exit;
+	}
+
+	/**
+	 * Display the login form.
+	 *
+	 * @since 0.1-dev
+	 *
+	 * @param WP_User $user WP_User object of the logged-in user.
+	 */
+	public static function show_two_factor_login( $user ) {
+		if ( ! $user ) {
+			$user = wp_get_current_user();
+		}
+
+		$login_nonce = self::create_login_nonce( $user->ID );
+		if ( ! $login_nonce ) {
+			wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
+		}
+
+		$redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : $_SERVER['REQUEST_URI'];
+
+		self::login_html( $user, $login_nonce['key'], $redirect_to );
+	}
+
+	/**
+	 * Generates the html form for the second step of the authentication process.
+	 *
+	 * @since 0.1-dev
+	 *
+	 * @param WP_User       $user WP_User object of the logged-in user.
+	 * @param string        $login_nonce A string nonce stored in usermeta.
+	 * @param string        $redirect_to The URL to which the user would like to be redirected.
+	 * @param string        $error_msg Optional. Login error message.
+	 * @param string|object $provider An override to the provider.
+	 */
+	public static function login_html( $user, $login_nonce, $redirect_to, $error_msg = '', $provider = null ) {
+		if ( empty( $provider ) ) {
+			$provider = self::get_primary_provider_for_user( $user->ID );
+		} elseif ( is_string( $provider ) && method_exists( $provider, 'get_instance' ) ) {
+			$provider = call_user_func( array( $provider, 'get_instance' ) );
+		}
+
+		$provider_class = get_class( $provider );
+
+		$available_providers = self::get_available_providers_for_user( $user );
+		$backup_providers = array_diff_key( $available_providers, array( $provider_class => null ) );
+		$interim_login = isset( $_REQUEST['interim-login'] ); // WPCS: override ok.
+		$wp_login_url = wp_login_url();
+
+		$rememberme = $_REQUEST['rememberme'] ?? 0;
+
+		$backup_classname = key( $backup_providers );
+		$backup_provider  = $backup_providers[ $backup_classname ];
+
+		if ( ! function_exists( 'login_header' ) ) {
+			// We really should migrate login_header() out of `wp-login.php` so it can be called from an includes file.
+			include_once( TWO_FACTOR_DIR . 'includes/function.login-header.php' );
+		}
+
+		$wp_error = new \WP_Error();
+		if ( isset( $_REQUEST['two-factor-backup-resend'] ) ) {
+			$wp_error->add( 'codes-resent', esc_html__( 'Codes were re-sent.', 'wporg' ), 'message' );
+		}
+		if ( ! empty( $error_msg ) ) {
+			$wp_error->add( 'authentication-error', esc_html( $error_msg ) );
+		}
+
+		login_header( __( 'Authenticate', 'wporg' ), '', $wp_error );
+		?>
+
+			<form name="validate_2fa_form" id="loginform" action="<?php echo esc_url( set_url_scheme( add_query_arg( 'action', 'validate_2fa', $wp_login_url ), 'login_post' ) ); ?>" method="post" autocomplete="off">
+				<input type="hidden" name="provider"      id="provider"      value="<?php echo esc_attr( $provider_class ); ?>" />
+				<input type="hidden" name="wp-auth-id"    id="wp-auth-id"    value="<?php echo esc_attr( $user->ID ); ?>" />
+				<input type="hidden" name="wp-auth-nonce" id="wp-auth-nonce" value="<?php echo esc_attr( $login_nonce ); ?>" />
+				<?php if ( $interim_login ) : ?>
+					<input type="hidden" name="interim-login" value="1" />
+				<?php else : ?>
+					<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_to ); ?>" />
+				<?php endif; ?>
+				<input type="hidden" name="rememberme"    id="rememberme"    value="<?php echo esc_attr( $rememberme ); ?>" />
+
+				<?php $provider->authentication_page( $user ); ?>
+			</form>
+		</div><!-- Opened in login_header() -->
+
+		<?php if ( empty( $_GET['action'] ) ) : ?>
+		<div class="backup-methods-wrap">
+			<a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
+				'action'        => 'backup_2fa',
+				'provider'      => $backup_classname,
+				'wp-auth-id'    => $user->ID,
+				'wp-auth-nonce' => $login_nonce,
+				'redirect_to'   => $redirect_to,
+				'rememberme'    => $rememberme,
+			) ), $wp_login_url ) ); ?>"><?php esc_html_e( 'Try another way to sign in &rarr;', 'wporg' ); ?></a>
+		</div>
+		<?php endif; ?>
+
+		<style>
+			body:not(.login-action-backup_2fa):not(.login-action-validate_2fa) #login {
+				margin-bottom: 0;
+			}
+			.login-action-backup_2fa #login,
+			.login-action-validate_2fa #login {
+				margin-bottom: 24px;
+			}
+			.backup-methods-wrap {
+				margin: 24px 0;
+				text-align: center;
+			}
+			.backup-methods-wrap a {
+				color: #999;
+				text-decoration: none;
+			}
+			/* Prevent Jetpack from hiding our controls, see https://github.com/Automattic/jetpack/issues/3747 */
+			.jetpack-sso-form-display #loginform > p,
+			.jetpack-sso-form-display #loginform > div {
+				display: block;
+			}
+		</style>
+
+		<?php
+		/** This action is documented in wp-login.php */
+		do_action( 'login_footer' ); ?>
+		<div class="clear"></div>
+		</body>
+		</html>
+		<?php
 	}
 
 	public function two_factor_providers() {

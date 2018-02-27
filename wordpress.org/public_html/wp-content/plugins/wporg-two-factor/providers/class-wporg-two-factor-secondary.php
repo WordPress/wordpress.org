@@ -33,25 +33,24 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 		$slack_enabled = isset( $this->providers['WPORG_Two_Factor_Slack'] ) && $this->providers['WPORG_Two_Factor_Slack']->is_available_for_user( $user );
 
 		if ( $email_enabled && $slack_enabled ) {
-			echo '<p>' . __( 'Enter the verification code sent to your Email, Slack, or a printed backup code.', 'wporg' ) . '</p>';
+			echo '<p class="intro">' . __( 'Enter the verification code sent to your Email, Slack, or a backup code.', 'wporg' ) . '</p>';
 		} elseif ( $email_enabled ) {
-			echo '<p>' . __( 'Enter the verification code sent to your Email, or a printed backup code.', 'wporg' ) . '</p>';
+			echo '<p class="intro">' . __( 'Enter the verification code sent to your Email, or a backup code.', 'wporg' ) . '</p>';
 		} else {
-			echo '<p>' . __( 'Enter a printed backup code.', 'wporg' ) . '</p>';
+			echo '<p class="intro">' . __( 'Enter a backup code.', 'wporg' ) . '</p>';
 		}
-		?>
+
+		if ( $email_enabled || $slack_enabled ) : ?>
+			<p class="two-factor-email-resend intro">
+				<button type="submit" class="button-link" name="two-factor-backup-resend"><span class="dashicons-before dashicons-controls-repeat"><?php esc_html_e( 'Resend Code', 'wporg' ); ?></span></button>
+			</p>
+		<?php endif; ?>
 
 		<p>
 			<label for="authcode"><?php esc_html_e( 'Verification Code:', 'wporg' ); ?></label>
-			<input type="tel" name="two-factor-backup-code" id="authcode" class="input" value="" size="20" pattern="[0-9]{6,20}" title="<?php esc_attr_e( 'Codes are at least 6 decimal digits' ); ?>" />
-			<?php submit_button( __( 'Authenticate', 'wporg' ) ); ?>
+			<input type="tel" name="two-factor-backup-code" id="authcode" class="input" value="" size="20" pattern="[0-9]{6,20}" title="<?php esc_attr_e( 'Codes are at least 6 decimal digits', 'wporg' ); ?>" />
+			<?php submit_button( __( 'Authenticate', 'wporg' ), 'primary', 'submit', false ); ?>
 		</p>
-
-		<?php if ( $email_enabled || $slack_enabled ) { ?>
-			<p class="two-factor-email-resend">
-				<input type="submit" class="button" name="two-factor-backup-resend" value="<?php esc_attr_e( 'Resend Code', 'wporg' ); ?>" />
-			</p>
-		<?php } ?>
 
 		<script type="text/javascript">
 			setTimeout( function(){
@@ -77,9 +76,6 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 			'WPORG_Two_Factor_Slack'        => __DIR__ . '/class-wporg-two-factor-slack.php'
 		];
 		$providers = apply_filters( 'wporg_two_factor_secondary_providers', $providers );
-
-		// Add some CSS for this clss.
-		wp_enqueue_style( 'two-factor-login', plugins_url( '/css/login.css', dirname( __FILE__ ) ) );
 
 		foreach ( $providers as $class => $path ) {
 			include_once( $path );

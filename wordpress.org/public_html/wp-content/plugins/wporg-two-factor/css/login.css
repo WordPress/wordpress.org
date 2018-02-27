@@ -1,8 +1,0 @@
-#authcode:invalid {
-	border: 1px solid #EE0000;
-}
-body.login-action-backup_2fa .backup-methods-wrap {
-	display: none;
-}
-body.login-action-backup_2fa input[name="two-factor-backup-resend"] {
-}
