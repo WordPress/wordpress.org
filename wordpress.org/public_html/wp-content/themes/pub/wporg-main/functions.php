@@ -84,6 +84,14 @@ function scripts() {
 			'locales'       => ___( 'Locales', 'wporg' ),
 		] );
 	}
+
+	if ( is_page() ) {
+		$page = get_queried_object();
+
+		if ( $page->post_parent && 'about' === get_post( $page->post_parent )->post_name ) {
+			wp_enqueue_script( 'wporg-navigation', get_theme_file_uri( '/js/navigation.js' ), [], '20151215', true );
+		}
+	}
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
@@ -97,6 +105,7 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 function script_src( $src, $handle ) {
 	$cdn_handles = [
 		'wporg-page-stats',
+		'wporg-navigation',
 	];
 
 	// Use CDN url.
@@ -118,7 +127,15 @@ add_filter( 'script_loader_src', __NAMESPACE__ . '\script_src', 10, 2 );
  */
 function body_class( $classes ) {
 	if ( is_page() ) {
-		$classes[] = 'page-' . get_query_var( 'pagename' );
+		$page = get_queried_object();
+
+		$classes[] = 'page-' . $page->post_name;
+
+		if ( $page->post_parent ) {
+			$parent = get_post( $page->post_parent );
+
+			$classes[] = 'page-parent-' . $parent->post_name;
+		}
 	}
 
 	return array_unique( $classes );

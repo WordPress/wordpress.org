@@ -13,6 +13,13 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+$GLOBALS['menu_items'] = [
+	'domains' => __( 'Domains', 'wporg' ),
+	'license' => __( 'GNU Public License', 'wporg' ),
+	'privacy' => __( 'Privacy Policy', 'wporg' ),
+	'stats'   => __( 'Statistics', 'wporg' ),
+];
+
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
@@ -27,15 +34,15 @@ add_filter( 'jetpack_open_graph_tags', function( $tags ) {
 	return $tags;
 } );
 
-get_header();
+get_header( 'child-page' );
 the_post();
 ?>
 
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
-				<h1 class="entry-title"><?php _esc_html_e( 'Statistics', 'wporg' ); ?></h1>
+			<header class="entry-header row">
+				<h1 class="entry-title col-8"><?php _esc_html_e( 'Statistics', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">

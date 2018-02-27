@@ -13,6 +13,14 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+$GLOBALS['menu_items'] = [
+	'requirements' => __( 'Requirements', 'wporg' ),
+	'features'     => __( 'Features', 'wporg' ),
+	'security'     => __( 'Security', 'wporg' ),
+	'roadmap'      => __( 'Roadmap', 'wporg' ),
+	'history'      => __( 'History', 'wporg' ),
+];
+
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
@@ -27,7 +35,7 @@ add_filter( 'jetpack_open_graph_tags', function( $tags ) {
 	return $tags;
 } );
 
-get_header();
+get_header( 'child-page' );
 the_post();
 
 $date_format = get_option( 'date_format' );
@@ -37,7 +45,7 @@ $date_format = get_option( 'date_format' );
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
-				<h1 class="entry-title"><?php _esc_html_e( 'Roadmap', 'wporg' ); ?></h1>
+				<h1 class="entry-title col-8"><?php _esc_html_e( 'Roadmap', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">

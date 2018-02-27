@@ -13,12 +13,19 @@ if ( false === stristr( home_url(), 'test' ) ) {
 	return get_template_part( 'page' );
 }
 
+$GLOBALS['menu_items'] = [
+	'philosophy' => __( 'Philosophy', 'wporg' ),
+	'etiquette'  => __( 'Etiquette', 'wporg' ),
+	'swag'       => __( 'Swag', 'wporg' ),
+	'logos'      => __( 'Graphics &amp; Logos', 'wporg' ),
+];
+
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-get_header();
+get_header( 'child-page' );
 the_post();
 ?>
 
@@ -26,7 +33,7 @@ the_post();
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
-				<h1 class="entry-title"><?php _esc_html_e( 'Graphics &amp; Logos', 'wporg' ); ?></h1>
+				<h1 class="entry-title col-8"><?php _esc_html_e( 'Graphics &amp; Logos', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">

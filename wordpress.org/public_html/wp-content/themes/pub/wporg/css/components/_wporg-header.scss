@@ -57,10 +57,10 @@
 		top: 100%;
 		transition: left 0.3s;
 		z-index: 100000;
+	}
 
-		&.toggled {
-			left: 0;
-		}
+	&.toggled #wporg-header-menu {
+		left: 0;
 	}
 
 	ul li {

@@ -80,8 +80,12 @@
 }
 
 /* Small menu. */
-.main-navigation.toggled ul {
-	display: block;
+.main-navigation.toggled {
+	z-index: 1;
+
+	ul {
+		display: block;
+	}
 }
 
 .menu-toggle {
