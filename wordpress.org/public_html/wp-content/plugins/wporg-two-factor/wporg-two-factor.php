@@ -376,7 +376,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 * @param \WP_User $user User object.
 	 */
 	public static function user_two_factor_options( $user ) {
-		if ( ! function_exists( 'is_caped' ) || ! is_caped() ) {
+		if ( ! function_exists( 'wporg_user_has_restricted_password' ) || ! wporg_user_has_restricted_password( $user->ID ) ) {
 			return;
 		}
 
