@@ -447,7 +447,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			<div>
 				<p><?php esc_html_e( 'Scan this QR code with your authentication app.', 'wporg' ); ?></p>
 				<p><button type="button" class="button-link"><?php esc_html_e( 'Can&#8217;t scan the code?', 'wporg' ); ?></button></p>
-				<img src="<?php echo esc_url( Two_Factor_Totp::get_google_qr_code( 'wordpress.org:' . $user->user_login, $key, 'wordpress.org' ) ); ?>" id="two-factor-totp-qrcode" />
+				<img src="<?php echo esc_url( Two_Factor_Totp::get_google_qr_code( 'WordPress.org: ' . $user->user_login, $key, 'WordPress.org' ) ); ?>" id="two-factor-totp-qrcode" />
 				<p><?php esc_html_e( 'Then enter the authentication code provided by the app:', 'wporg' ); ?></p>
 				<p>
 					<label class="screen-reader-text" for="two-factor-totp-authcode"><?php esc_html_e( 'Authentication Code:', 'wporg' ); ?></label>
