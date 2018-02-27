@@ -12,8 +12,14 @@
 
 class WPORG_Two_Factor extends Two_Factor_Core {
 
+	const WPORG_2FA_COOKIE = 'wporg_2fa';
+
 	public function __construct() {
 		add_filter( 'two_factor_providers', [ $this, 'two_factor_providers' ] );
+
+		add_filter( 'determine_current_user', [ $this, 'disable_authentication_without_2fa' ], 20 ); // Cookies at priority 10, Must be > 11
+		add_action( 'clear_auth_cookie',      [ $this, 'clear_2fa_cookies' ] );
+		add_filter( 'salt',                   [ $this, 'add_2fa_salt' ], 10, 2 );
 
 		remove_action( 'edit_user_profile', [ 'Two_Factor_Core', 'user_two_factor_options' ] );
 		remove_action( 'show_user_profile', [ 'Two_Factor_Core', 'user_two_factor_options' ] );
@@ -37,6 +43,79 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 
 	}
 
+	function add_2fa_salt( $salt, $scheme ) {
+		if ( '2fa' == $scheme ) {
+			$salt = defined( 'WPORG_2FA_KEY' ) ? WPORG_2FA_KEY : AUTH_KEY;
+		}
+
+		return $salt;
+	}
+
+	function disable_authentication_without_2fa( $user_id ) {
+		if ( ! $user_id ) {
+			return $user_id;
+		}
+		// User is logged in:
+
+		// If the user isn't a 2FA user, allow.
+		if ( ! self::is_user_using_two_factor( $user_id ) ) {
+			return $user_id;
+		}
+
+		// If the user has a valid 2FA cookie, allow
+		if ( isset( $_COOKIE[ self::WPORG_2FA_COOKIE ] ) && wp_validate_auth_cookie( $_COOKIE[ self::WPORG_2FA_COOKIE ], '2fa' ) ) {
+			return $user_id;
+		}
+
+		// If the user did not authenticate via Cookie, allow
+		if ( ! wp_validate_auth_cookie( false ) && ! wp_validate_logged_in_cookie( false ) ) {
+			// The user wasn't authenticated by cookie, so allow the auth.
+			return $user_id;
+		}
+
+		// If they're on the 2FA login page, allow
+		$login_host = class_exists( 'WPOrg_SSO' ) ? WPOrg_SSO::SSO_HOST : 'login.wordpress.org';
+		if ( $login_host === $_SERVER['HTTP_HOST']  ) {
+			if ( '/wp-login.php' == substr( $_SERVER['REQUEST_URI'], 0, 13 ) ) {
+				if ( $_POST || 'backup_2fa' == $_REQUEST['action'] || 'validate_2fa' == $_REQUEST['action'] ) {
+					return $user_id;
+				}
+			}
+		}
+
+		/*
+		 * Fail. We've checked that:
+		 * - the user has 2FA enabled
+		 * - doesn't have a valid 2FA cookie
+		 * - the user is logged in via cookie
+		 * - isn't currently logging in on the SSO host
+		 *
+		 * The users cookies are not valid until that 2FA cookie is set.
+		 */
+		return 0;
+	}
+
+	function clear_2fa_cookies() {
+		setcookie( self::WPORG_2FA_COOKIE, ' ', time() - YEAR_IN_SECONDS, ADMIN_COOKIE_PATH,   COOKIE_DOMAIN );
+		setcookie( self::WPORG_2FA_COOKIE, ' ', time() - YEAR_IN_SECONDS, PLUGINS_COOKIE_PATH, COOKIE_DOMAIN );
+	}
+
+	function set_2fa_cookies( $user ) {
+		// Set the Expiration based on the main Authentication cookie
+		$auth_cookie_parts = wp_parse_auth_cookie( '', 'secure_auth' );
+		if ( ! $auth_cookie_parts  ) {
+			wp_logout();
+			return;
+		}
+
+		$expiration = $auth_cookie_parts['expiration'];
+
+		$cookie_value = wp_generate_auth_cookie( $user->ID, $expiration, '2fa', '' /* WordPress.org doesn't use Session Tokens yet */ );
+
+		setcookie( self::WPORG_2FA_COOKIE, $cookie_value, $expiration, ADMIN_COOKIE_PATH,   COOKIE_DOMAIN, true, true );
+		setcookie( self::WPORG_2FA_COOKIE, $cookie_value, $expiration, PLUGINS_COOKIE_PATH, COOKIE_DOMAIN, true, true );
+	}
+
 	/**
 	 * Handle the browser-based login.
 	 *
@@ -50,11 +129,11 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			return;
 		}
 
-		wp_clear_auth_cookie();
-
 		wp_enqueue_style( 'two-factor-login', plugins_url( '/css/login.css', __FILE__ ) );
 
-		self::show_two_factor_login( $user );
+		$redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : $_SERVER['REQUEST_URI'];
+		self::login_html( $user, '', $redirect_to );
+
 		exit;
 	}
 
@@ -64,27 +143,18 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 * @since 0.1-dev
 	 */
 	public static function login_form_validate_2fa() {
-		if ( ! isset( $_POST['wp-auth-id'], $_POST['wp-auth-nonce'] ) ) {
+		if ( ! is_user_logged_in() ) {
 			return;
 		}
 
-		$user = get_userdata( $_POST['wp-auth-id'] );
-		if ( ! $user ) {
-			return;
-		}
-
-		$nonce = $_POST['wp-auth-nonce'];
-		if ( true !== self::verify_login_nonce( $user->ID, $nonce ) ) {
-			wp_safe_redirect( get_bloginfo( 'url' ) );
-			exit;
-		}
+		$user = wp_get_current_user();
 
 		if ( isset( $_POST['provider'] ) ) {
 			$providers = self::get_available_providers_for_user( $user );
 			if ( isset( $providers[ $_POST['provider'] ] ) ) {
 				$provider = $providers[ $_POST['provider'] ];
 			} else {
-				wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
+				wp_die( 'A valid 2FA provider could not be found.', 403 );
 			}
 		} else {
 			$provider = self::get_primary_provider_for_user( $user->ID );
@@ -92,12 +162,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 
 		// Allow the provider to re-send codes, etc.
 		if ( true === $provider->pre_process_authentication( $user ) ) {
-			$login_nonce = self::create_login_nonce( $user->ID );
-			if ( ! $login_nonce ) {
-				wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
-			}
-
-			self::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], '', $provider );
+			self::login_html( $user, '', $_REQUEST['redirect_to'], '', $provider );
 			exit;
 		}
 
@@ -105,23 +170,11 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		if ( true !== $provider->validate_authentication( $user ) ) {
 			do_action( 'wp_login_failed', $user->user_login );
 
-			$login_nonce = self::create_login_nonce( $user->ID );
-			if ( ! $login_nonce ) {
-				wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
-			}
-
-			self::login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], esc_html__( 'ERROR: Invalid verification code.', 'two-factor' ), $provider );
+			self::login_html( $user, '', $_REQUEST['redirect_to'], esc_html__( 'ERROR: Invalid verification code.', 'wporg' ), $provider );
 			exit;
 		}
 
-		self::delete_login_nonce( $user->ID );
-
-		$rememberme = false;
-		if ( isset( $_REQUEST['rememberme'] ) && $_REQUEST['rememberme'] ) {
-			$rememberme = true;
-		}
-
-		wp_set_auth_cookie( $user->ID, $rememberme );
+		$this->set_2fa_cookies( $user );
 
 		// Must be global because that's how login_header() uses it.
 		global $interim_login;
@@ -159,40 +212,29 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 * @since 0.1-dev
 	 */
 	public static function backup_2fa() {
-		if ( ! isset( $_GET['wp-auth-id'], $_GET['wp-auth-nonce'], $_GET['provider'] ) ) {
+		if ( ! is_user_logged_in() ) {
 			return;
 		}
 
-		$user = get_userdata( $_GET['wp-auth-id'] );
-		if ( ! $user ) {
-			return;
-		}
-
-		$nonce = $_GET['wp-auth-nonce'];
-		if ( true !== self::verify_login_nonce( $user->ID, $nonce ) ) {
-			wp_safe_redirect( get_bloginfo( 'url' ) );
-			exit;
-		}
+		$user = wp_get_current_user();
 
 		$providers = self::get_available_providers_for_user( $user );
 		if ( isset( $providers[ $_GET['provider'] ] ) ) {
 			$provider = $providers[ $_GET['provider'] ];
 		} else {
-			wp_die( esc_html__( 'Cheatin&#8217; uh?' ), 403 );
+			wp_die( 'No 2FA provider could be found.', 403 );
 		}
 
-		self::login_html( $user, $_GET['wp-auth-nonce'], $_GET['redirect_to'], '', $provider );
+		self::login_html( $user, '', $_GET['redirect_to'], '', $provider );
 
 		exit;
 	}
 
-	public function two_factor_providers( $providers) {
-		$wporg_providers = array(
+	public function two_factor_providers() {
+		return array(
 			'WPORG_Two_Factor_Primary'   => __DIR__ . '/providers/class-wporg-two-factor-primary.php',
 			'WPORG_Two_Factor_Secondary' => __DIR__ . '/providers/class-wporg-two-factor-secondary.php',
 		);
-
-		return $wporg_providers;
 	}
 
 	/**
@@ -200,10 +242,17 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 * NOTE: It's assumed that the Two Factor details have been setup correctly previously.
 	 */
 	public static function enable_two_factor( $user_id ) {
-		return (
+		$result = (
 			update_user_meta( $user_id, self::PROVIDER_USER_META_KEY,          'WPORG_Two_Factor_Primary' ) &&
 			update_user_meta( $user_id, self::ENABLED_PROVIDERS_USER_META_KEY, [ 'WPORG_Two_Factor_Primary', 'WPORG_Two_Factor_Secondary' ] )
 		);
+
+		if ( $result && $user_id == get_current_user_id() ) {
+			$user = wp_get_current_user();
+			$this->set_2fa_cookies( $user );
+		}
+
+		return $result;
 	}
 
 	/**
