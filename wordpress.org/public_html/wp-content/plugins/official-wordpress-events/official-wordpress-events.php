@@ -379,7 +379,7 @@ class Official_WordPress_Events {
 					}
 				}
 
-				$request_url = isset( $body->meta->next ) ? $body->meta->next : null;
+				$request_url = isset( $body->meta->next ) ? urldecode( $body->meta->next ) : null;
 			}
 		}
 
