@@ -1,6 +1,6 @@
 /* global ajaxurl:true */
 jQuery( function( $ ) {
-	$( '#two-factor-active' ).on( 'click', '[type="cancel"]', function( event ) {
+	$( '#two-factor-active' ).on( 'click', '.two-factor-disable', function( event ) {
 		event.preventDefault();
 
 		$.post(
@@ -44,7 +44,7 @@ jQuery( function( $ ) {
 	} );
 
 	$( 'fieldset.two-factor' )
-		.not( '#two-factor-active' ).on( 'click', '[type="cancel"]', function( event ) {
+		.not( '#two-factor-active' ).on( 'click', '.two-factor-cancel', function( event ) {
 		event.preventDefault();
 
 		$( '.two-factor .bbp-template-notice' ).remove();
@@ -54,7 +54,7 @@ jQuery( function( $ ) {
 			.find( '[type="tel"]').val( '' );
 		$( '#two-factor-start' ).show();
 	} )
-		.on( 'click', '[type="submit"]', function( event ) {
+		.on( 'click', '.two-factor-submit', function( event ) {
 			event.preventDefault();
 
 			$( '.two-factor .bbp-template-notice' ).remove();
@@ -117,7 +117,7 @@ jQuery( function( $ ) {
 	} );
 
 	var $printAgreement   = $( '#print-agreement' ),
-		$backupDoneButton = $( '.two-factor-backup-codes-wrapper button[type="submit"]' );
+		$backupDoneButton = $( '.two-factor-backup-codes-wrapper .two-factor-submit' );
 
 	$printAgreement.on( 'change', function() {
 		$backupDoneButton.prop( 'disabled', ! $printAgreement.prop( 'checked' ) );
