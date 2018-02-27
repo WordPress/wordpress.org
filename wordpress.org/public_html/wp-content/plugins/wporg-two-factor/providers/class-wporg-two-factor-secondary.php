@@ -25,7 +25,10 @@ class WPORG_Two_Factor_Secondary extends Two_Factor_Provider { // When it's a pr
 			return;
 		}
 
-		$this->send_codes_to_user( $user );
+		// If this is the first load, resend the codes.
+		if ( ! isset( $_REQUEST['two-factor-backup-code'] ) ) {
+			$this->send_codes_to_user( $user, true );
+		}
 
 		require_once( ABSPATH . '/wp-admin/includes/template.php' );
 
