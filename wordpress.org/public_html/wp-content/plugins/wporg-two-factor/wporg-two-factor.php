@@ -277,8 +277,6 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 
 			<form name="validate_2fa_form" id="loginform" action="<?php echo esc_url( set_url_scheme( add_query_arg( 'action', 'validate_2fa', $wp_login_url ), 'login_post' ) ); ?>" method="post" autocomplete="off">
 				<input type="hidden" name="provider"      id="provider"      value="<?php echo esc_attr( $provider_class ); ?>" />
-				<input type="hidden" name="wp-auth-id"    id="wp-auth-id"    value="<?php echo esc_attr( $user->ID ); ?>" />
-				<input type="hidden" name="wp-auth-nonce" id="wp-auth-nonce" value="<?php echo esc_attr( $login_nonce ); ?>" />
 				<?php if ( $interim_login ) : ?>
 					<input type="hidden" name="interim-login" value="1" />
 				<?php else : ?>
@@ -295,8 +293,6 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			<a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
 				'action'        => 'backup_2fa',
 				'provider'      => $backup_classname,
-				'wp-auth-id'    => $user->ID,
-				'wp-auth-nonce' => $login_nonce,
 				'redirect_to'   => $redirect_to,
 				'rememberme'    => $rememberme,
 			) ), $wp_login_url ) ); ?>"><?php esc_html_e( 'Try another way to sign in &rarr;', 'wporg' ); ?></a>
