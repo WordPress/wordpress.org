@@ -129,8 +129,6 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			return;
 		}
 
-		wp_enqueue_style( 'two-factor-login', plugins_url( '/css/login.css', __FILE__ ) );
-
 		$redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : $_SERVER['REQUEST_URI'];
 		self::login_html( $user, '', $redirect_to );
 
