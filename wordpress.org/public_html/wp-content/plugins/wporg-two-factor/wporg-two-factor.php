@@ -445,7 +445,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		<fieldset id="two-factor-qr-code" class="bbp-form two-factor" style="display: none;">
 			<legend><?php esc_html_e( 'Two Factor Authentication', 'wporg' ); ?></legend>
 			<div>
-				<p><?php esc_html_e( 'Scan this QR code with your mobile app.', 'wporg' ); ?></p>
+				<p><?php esc_html_e( 'Scan this QR code with your authentication app.', 'wporg' ); ?></p>
 				<p><button type="button" class="button-link"><?php esc_html_e( 'Can&#8217;t scan the code?', 'wporg' ); ?></button></p>
 				<img src="<?php echo esc_url( Two_Factor_Totp::get_google_qr_code( 'wordpress.org:' . $user->user_login, $key, 'wordpress.org' ) ); ?>" id="two-factor-totp-qrcode" />
 				<p><?php esc_html_e( 'Then enter the authentication code provided by the app:', 'wporg' ); ?></p>
@@ -468,7 +468,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		<fieldset id="two-factor-key-code" class="bbp-form two-factor" style="display: none;">
 			<legend><?php esc_html_e( 'Two Factor Authentication', 'wporg' ); ?></legend>
 			<div>
-				<p><?php esc_html_e( 'Enter this time code into your mobile app.', 'wporg' ); ?></p>
+				<p><?php esc_html_e( 'Enter this time code into your authentication app.', 'wporg' ); ?></p>
 				<p><button type="button" class="button-link"><?php esc_html_e( 'Prefer to scan the code?', 'wporg' ); ?></button></p>
 				<p class="key"><strong><?php echo esc_html( $key ); ?></strong></p>
 				<p><?php esc_html_e( 'Then enter the authentication code provided by the app:', 'wporg' ); ?></p>
