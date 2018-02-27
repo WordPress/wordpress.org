@@ -230,28 +230,6 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	}
 
 	/**
-	 * Display the login form.
-	 *
-	 * @since 0.1-dev
-	 *
-	 * @param WP_User $user WP_User object of the logged-in user.
-	 */
-	public static function show_two_factor_login( $user ) {
-		if ( ! $user ) {
-			$user = wp_get_current_user();
-		}
-
-		$login_nonce = self::create_login_nonce( $user->ID );
-		if ( ! $login_nonce ) {
-			wp_die( esc_html__( 'Failed to create a login nonce.', 'two-factor' ) );
-		}
-
-		$redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : $_SERVER['REQUEST_URI'];
-
-		self::login_html( $user, $login_nonce['key'], $redirect_to );
-	}
-
-	/**
 	 * Generates the html form for the second step of the authentication process.
 	 *
 	 * @since 0.1-dev
