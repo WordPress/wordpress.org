@@ -58,7 +58,7 @@ class Meetup_Client {
 		while ( $request_url ) {
 			$request_url = $this->sign_request_url( $request_url );
 
-			$response = wcorg_redundant_remote_get( $request_url );
+			$response = $this->tenacious_remote_get( $request_url );
 
 			if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 				$body = json_decode( wp_remote_retrieve_body( $response ), true );
@@ -114,7 +114,7 @@ class Meetup_Client {
 
 		$request_url = $this->sign_request_url( $request_url );
 
-		$response = wcorg_redundant_remote_get( $request_url );
+		$response = $this->tenacious_remote_get( $request_url );
 
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			$count_header = wp_remote_retrieve_header( $response, 'X-Total-Count' );
@@ -138,6 +138,63 @@ class Meetup_Client {
 		}
 
 		return $count;
+	}
+
+	/**
+	 * Wrapper for `wp_remote_get` to retry requests that fail temporarily for various reasons.
+	 *
+	 * Based on `wcorg_redundant_remote_get`.
+	 *
+	 * @param string $url
+	 * @param array  $args
+	 *
+	 * @return array|\WP_Error
+	 */
+	protected function tenacious_remote_get( $url, $args = array() ) {
+		$attempt_count = 0;
+		$max_attempts  = 3;
+
+		// Response codes that should break the loop. See https://www.meetup.com/meetup_api/docs/#errors
+		// TODO are there others?
+		$breaking_codes = array(
+			200, // Ok.
+			400, // Bad request.
+			401, // Unauthorized (invalid key).
+			429, // Too many requests (rate-limited).
+		);
+
+		while ( $attempt_count < $max_attempts ) {
+			$response      = wp_remote_get( $url, $args );
+			$response_code = wp_remote_retrieve_response_code( $response );
+
+			if ( in_array( $response_code, $breaking_codes, true ) || is_wp_error( $response ) ) {
+				break;
+			}
+
+			$attempt_count ++;
+
+			/**
+			 * Action: Fires when tenacious_remote_get fails a request attempt.
+			 *
+			 * Note that the request parameter includes the request URL that contains a query string for the API key.
+			 * This should be redacted before outputting anywhere public.
+			 *
+			 * @param array $response
+			 * @param array $request
+			 * @param int   $attempt_count
+			 * @param int   $max_attempts
+			 */
+			do_action( 'meetup_client_tenacious_remote_get_attempt', $response, compact( 'url', 'args' ), $attempt_count, $max_attempts );
+
+			if ( $attempt_count < $max_attempts ) {
+				$retry_after = wp_remote_retrieve_header( $response, 'retry-after' ) ?: 5;
+				$wait        = min( $retry_after * $attempt_count, 30 );
+
+				sleep( $wait );
+			}
+		}
+
+		return $response;
 	}
 
 	/**
@@ -212,12 +269,27 @@ class Meetup_Client {
 	/**
 	 * Extract error information from an API response and add it to our error handler.
 	 *
-	 * @param array $response
+	 * @param array|\WP_Error $response
 	 *
 	 * @return void
 	 */
 	protected function handle_error_response( $response ) {
-		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( is_wp_error( $response ) ) {
+			$codes = $response->get_error_codes();
+
+			foreach ( $codes as $code ) {
+				$messages = $response->get_error_messages( $code );
+
+				foreach ( $messages as $message ) {
+					$this->error->add( $code, $message );
+				}
+			}
+
+			return;
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		$data          = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( isset( $data['errors'] ) ) {
 			foreach ( $data['errors'] as $error ) {
@@ -225,11 +297,13 @@ class Meetup_Client {
 			}
 		} elseif ( isset( $data['code'] ) && isset( $data['details'] ) ) {
 			$this->error->add( $data['code'], $data['details'] );
-		} else {
+		} elseif ( $response_code ) {
 			$this->error->add(
 				'http_response_code',
-				wp_remote_retrieve_response_code( $response ) . ': ' . print_r( $data, true )
+				sprintf( 'HTTP Status: %d', absint( $response_code ) )
 			);
+		} else {
+			$this->error->add( 'unknown_error', 'There was an unknown error.' );
 		}
 	}
 
@@ -290,7 +364,7 @@ class Meetup_Client {
 	 * Retrieve data about events associated with one particular group.
 	 *
 	 * @param string $group_slug The slug/urlname of a group.
-	 * @param array $args        Optional. Additional request parameters.
+	 * @param array  $args       Optional. Additional request parameters.
 	 *                           See https://www.meetup.com/meetup_api/docs/:urlname/events/
 	 *
 	 * @return array|\WP_Error
