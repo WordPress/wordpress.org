@@ -143,7 +143,7 @@ function loader_src( $src, $handle ) {
 		'wporg-plugins-faq',
 	];
 
-	if ( false === strpos( home_url(), 'https://wordpress.org/' ) ) {
+	if ( false === strpos( home_url(), 'wordpress.org' ) ) {
 		return $src;
 	}
 
