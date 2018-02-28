@@ -24,16 +24,6 @@ class Tests_API_Responses extends PHPUnit_Framework_TestCase {
 				],
 				[ 'php_version' => '5.3.2' ]
 			],
-			[
-				[
-					'php_version' => '7.0',
-					'ip_address' => '1.2.3.0'
-				],
-				[
-					'php_version' => '7.0',
-					'ip_address' => '1.2.3.0'
-				]
-			],
 		];
 	}
 
@@ -54,7 +44,10 @@ class Tests_API_Responses extends PHPUnit_Framework_TestCase {
 		$output = json_decode( $this->helper_api_request( $input ), true );
 
 		// Assert that it's a successful response, and not an error.
-		$this->assertArrayHasKey( 'status', $output );
+		$this->assertArrayHasKey( 'recommended_version', $output );
+		$this->assertArrayHasKey( 'is_supported', $output );
+		$this->assertArrayHasKey( 'is_secure', $output );
+		$this->assertArrayHasKey( 'is_acceptable', $output );
 	}
 
 	function dataprovider_determine_request_invalid() {
@@ -91,17 +84,6 @@ class Tests_API_Responses extends PHPUnit_Framework_TestCase {
 					'status'  => 400
 				]
 			],
-			[
-				[
-					'php_version' => '7.0',
-					'ip_address' => '1.2.3.4'
-				],
-				[
-					'code'    => 'invalid_param',
-					'message' => 'Invalid parameter: ip_address',
-					'status'  => 400
-				]
-			],
 		];
 	}
 
@@ -125,37 +107,39 @@ class Tests_API_Responses extends PHPUnit_Framework_TestCase {
 	}
 
 	function dataprovider_parse_request_valid() {
-		return [
-			// Testing Valid IP Address format
-			[
-				[
-					'php_version' => RECOMMENDED_PHP,
-					'ip_address'  => '1.2.3.0',
-				],
-				[ 'status' => 'ok' ]
-			],
-			// Testing PHP version logic:
+		// Test recommended PHP version is always returned.
+		$data = [
 			[
 				[ 'php_version' => RECOMMENDED_PHP ],
-				[ 'status' => 'ok' ]
+				[ 'recommended_version' => RECOMMENDED_PHP ]
 			],
 			[
-				[ 'php_version' => RECOMMENDED_PHP + 0.1 ],
-				[ 'status' => 'ok' ]
-			],
-			[
-				[ 'php_version' => PHP_RECEIVING_SECURITY_UPDATES ],
-				[ 'status' => 'ok' ]
-			],
-			[
-				[ 'php_version' => PHP_RECEIVING_SECURITY_UPDATES - 0.1 ],
-				[ 'status' => 'no_security_updates' ]
-			],
-			[
-				[ 'php_version' => TRIGGER_PHP_VERSION - 0.1 ],
-				[ 'status' => 'out_of_date' ]
+				[ 'php_version' => '5.2' ],
+				[ 'recommended_version' => RECOMMENDED_PHP ]
 			],
 		];
+
+		// Test individual PHP versions.
+		$flags = [
+			'is_supported'  => 'SUPPORTED_PHP',
+			'is_secure'     => 'SECURE_PHP',
+			'is_acceptable' => 'ACCEPTABLE_PHP'
+		];
+		foreach ( $flags as $flag => $constant_name ) {
+			$data[] = [
+				[ 'php_version' => constant( $constant_name ) ],
+				[ $flag => true ]
+			];
+			$data[] = [
+				[ 'php_version' => constant( $constant_name ) + 0.1 ],
+				[ $flag => true ]
+			];
+			$data[] = [
+				[ 'php_version' => constant( $constant_name ) - 0.1 ],
+				[ $flag => false ]
+			];
+		}
+		return $data;
 	}
 
 	/**
