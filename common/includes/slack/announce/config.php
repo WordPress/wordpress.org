@@ -176,6 +176,7 @@ function get_whitelist() {
 		),
 		'meta' => array(
 			'obenland',
+			'sergey',
 			'tellyworth',
 		),
 		'meta-devhub' => array(
