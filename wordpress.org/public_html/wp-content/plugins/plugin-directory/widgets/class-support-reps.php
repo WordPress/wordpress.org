@@ -43,6 +43,8 @@ class Support_Reps extends \WP_Widget {
 				'pluginSlug'          => $post->post_name,
 				'removeSupportRepAYS' => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
 			) );
+		} elseif ( ! $support_reps ) {
+			return;
 		}
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Support Reps', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
