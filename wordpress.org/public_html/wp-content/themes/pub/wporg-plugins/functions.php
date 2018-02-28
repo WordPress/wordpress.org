@@ -143,6 +143,10 @@ function loader_src( $src, $handle ) {
 		'wporg-plugins-faq',
 	];
 
+	if ( false === strpos( home_url(), 'https://wordpress.org/' ) ) {
+		return $src;
+	}
+
 	// Use CDN url.
 	if ( in_array( $handle, $cdn_urls, true ) ) {
 		$src = str_replace( get_home_url(), 'https://s.w.org', $src );
