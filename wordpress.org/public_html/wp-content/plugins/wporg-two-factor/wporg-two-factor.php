@@ -20,6 +20,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		add_filter( 'determine_current_user', [ $this, 'disable_authentication_without_2fa' ], 20 ); // Cookies at priority 10, Must be > 11
 		add_action( 'clear_auth_cookie',      [ $this, 'clear_2fa_cookies' ] );
 		add_filter( 'salt',                   [ $this, 'add_2fa_salt' ], 10, 2 );
+		add_action( 'set_auth_cookie',        [ $this, 'set_auth_cookie_maybe_set_2fa_cookie' ], 10, 6 );
 
 		remove_action( 'edit_user_profile', [ 'Two_Factor_Core', 'user_two_factor_options' ] );
 		remove_action( 'show_user_profile', [ 'Two_Factor_Core', 'user_two_factor_options' ] );
@@ -95,20 +96,40 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		return 0;
 	}
 
+	function set_auth_cookie_maybe_set_2fa_cookie( $auth_cookie, $expire, $expiration, $user_id, $scheme, $token = '' ) {
+		// Check if they're the current user and 2FA
+		if ( ! is_user_logged_in() || get_current_user_id() !== $user_id ) {
+			return;
+		}
+
+		if ( ! self::is_user_using_two_factor( $user_id ) ) {
+			return;
+		}
+
+		if ( empty( $_COOKIE[ self::WPORG_2FA_COOKIE ] ) ) {
+			return;
+		}
+
+		// At this point we know they have a 2FA account, were already logged in, and had a 2FA cookie
+		$this->set_2fa_cookies( get_userdata( $user_id ), $expire );
+	}
+
+
 	function clear_2fa_cookies() {
 		setcookie( self::WPORG_2FA_COOKIE, ' ', time() - YEAR_IN_SECONDS, ADMIN_COOKIE_PATH,   COOKIE_DOMAIN );
 		setcookie( self::WPORG_2FA_COOKIE, ' ', time() - YEAR_IN_SECONDS, PLUGINS_COOKIE_PATH, COOKIE_DOMAIN );
 	}
 
-	function set_2fa_cookies( $user ) {
-		// Set the Expiration based on the main Authentication cookie
-		$auth_cookie_parts = wp_parse_auth_cookie( '', 'secure_auth' );
-		if ( ! $auth_cookie_parts  ) {
-			wp_logout();
-			return;
+	function set_2fa_cookies( $user, $expiration = false ) {
+		if ( ! $expiration ) {
+			// Set the Expiration based on the main Authentication cookie
+			$auth_cookie_parts = wp_parse_auth_cookie( '', 'secure_auth' );
+			if ( ! $auth_cookie_parts  ) {
+				wp_logout();
+				return;
+			}
+			$expiration = $auth_cookie_parts['expiration'];
 		}
-
-		$expiration = $auth_cookie_parts['expiration'];
 
 		$cookie_value = wp_generate_auth_cookie( $user->ID, $expiration, '2fa', '' /* WordPress.org doesn't use Session Tokens yet */ );
 
@@ -255,7 +276,6 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		$rememberme = $_REQUEST['rememberme'] ?? 0;
 
 		$backup_classname = key( $backup_providers );
-		$backup_provider  = $backup_providers[ $backup_classname ];
 
 		if ( ! function_exists( 'login_header' ) ) {
 			// We really should migrate login_header() out of `wp-login.php` so it can be called from an includes file.
@@ -286,7 +306,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			</form>
 		</div><!-- Opened in login_header() -->
 
-		<?php if ( 'WPORG_Two_Factor_Primary' === $provider_class ) : ?>
+		<?php if ( 'WPORG_Two_Factor_Primary' === $provider_class && $backup_classname ) : ?>
 		<div class="backup-methods-wrap">
 			<a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
 				'action'        => 'backup_2fa',
