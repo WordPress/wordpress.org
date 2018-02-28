@@ -77,18 +77,17 @@ class Upload {
 				<div class="plugin-queue-message notice notice-info notice-alt">
 					<p>
 					<?php
-					if ( 1 === ( $plugins->new + $plugins->pending ) ) {
-						esc_html_e( 'Currently there is 1 plugin in the review queue.', 'wporg-plugins' );
+					if ( 1 === (int) $plugins->new ) {
+						esc_html_e( 'Currently there is 1 plugin awaiting review.', 'wporg-plugins' );
 					} else {
 						printf(
-							/* translators: 1: Total amount of pending plugins; 2: Amount of new plugins. */
+							/* translators: %s: Amount of plugins awaiting review. */
 							esc_html( _n(
-								'Currently there are %1$s plugins in the review queue, %2$s of which is awaiting its initial review.',
-								'Currently there are %1$s plugins in the review queue, %2$s of which are awaiting their initial review.',
+								'Currently there is %s plugin awaiting review.',
+								'Currently there are %s plugins awaiting review.',
 								$plugins->new,
 								'wporg-plugins'
 							) ),
-							'<strong>' . ( $plugins->new + $plugins->pending ) . '</strong>',
 							'<strong>' . $plugins->new . '</strong>'
 						);
 					}
