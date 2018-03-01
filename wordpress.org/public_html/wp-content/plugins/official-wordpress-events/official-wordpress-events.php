@@ -21,7 +21,6 @@ class Official_WordPress_Events {
 	 * Can/should probably remove calls to geocode API in favor of using meetup v2/group or some other endpoint that returns detailed location breakdown
 	 * Look at meetup-stats.php and see if any differences are relevant, or if there's anything else that'd be helpful in general
 	 * Check non-latin characters, accents etc to make sure stored properly in db
-	 * Add admin_notice to wordcamp post type to warn when coordinates missing. Also back-fill current ones that are missing.
 	 * Store wordcamp dates in UTC, and also store timezone? Would need to start collecting timezone for wordcamps and then back-fill old records
 	 *
 	 *
@@ -70,6 +69,7 @@ class Official_WordPress_Events {
 				'id'          => null,
 				'type'        => $event->type,
 				'source_id'   => $event->source_id,
+				'status'      => $event->status,
 				'title'       => $event->title,
 				'url'         => $event->url,
 				'description' => $event->description,
@@ -146,7 +146,9 @@ class Official_WordPress_Events {
 		$raw_events = $wpdb->get_results( sprintf( "
 			SELECT *
 			FROM `%s`
-			WHERE date_utc >= SUBDATE( CURRENT_DATE(), 1 )
+			WHERE
+				date_utc >= SUBDATE( CURRENT_DATE(), 1 ) AND
+				status    = 'scheduled'
 			ORDER BY date_utc ASC
 			LIMIT 300",
 			self::EVENTS_TABLE
@@ -212,7 +214,7 @@ class Official_WordPress_Events {
 	 */
 	protected function get_wordcamp_events() {
 		$request_params = array(
-			'status'   => 'wcpt-scheduled',
+			'status'   => array( 'wcpt-scheduled', 'wcpt-cancelled' ),
 			'per_page' => 100,
 			// Note: With the number of WordCamps per year growing fast, we may need to batch requests in the near future, like we do for meetups
 		);
@@ -241,6 +243,7 @@ class Official_WordPress_Events {
 			foreach ( $wordcamps as $wordcamp ) {
 				$event = array(
 					'source_id'   => $wordcamp->id,
+					'status'      => 'wcpt-scheduled' === $wordcamp->status ? 'scheduled' : 'cancelled',
 					'type'        => 'wordcamp',
 					'title'       => $wordcamp->title->rendered,
 					'description' => $wordcamp->content->rendered,
@@ -318,7 +321,7 @@ class Official_WordPress_Events {
 
 		foreach ( $groups as $group_batch ) {
 			$request_url = sprintf(
-				'%s2/events?group_id=%s&time=0,3m&page=%d&key=%s',
+				'%s2/events?group_id=%s&time=0,3m&page=%d&key=%s&status=upcoming,cancelled',
 				self::MEETUP_API_BASE_URL,
 				implode( ',', $group_batch ),
 				200,
@@ -364,6 +367,7 @@ class Official_WordPress_Events {
 						$events[] = new Official_WordPress_Event( array(
 							'type'            => 'meetup',
 							'source_id'       => $meetup->id,
+							'status'          => 'upcoming' === $meetup->status ? 'scheduled' : 'cancelled',
 							'title'           => $meetup->name,
 							'url'             => $meetup->event_url,
 							'meetup_name'     => $meetup->group->name,
