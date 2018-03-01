@@ -1025,29 +1025,3 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 }
 
 main();
-
-/*
-CREATE TABLE `wporg_events` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(32) NOT NULL DEFAULT '',
-  `source_id` varchar(32) NOT NULL DEFAULT '',
-  `title` varchar(255) NOT NULL DEFAULT '',
-  `url` text NOT NULL,
-  `description` longtext,
-  `attendees` int(11) unsigned DEFAULT NULL,
-  `meetup` varchar(255) DEFAULT NULL,
-  `meetup_url` text,
-  `date_utc` datetime NOT NULL,
-  `date_utc_offset` varchar(32) DEFAULT NULL,
-  `end_date` datetime NOT NULL,
-  `location` text,
-  `country` varchar(64) DEFAULT NULL,
-  `latitude` double NOT NULL,
-  `longitude` double NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `event_source_id` (`type`,`source_id`),
-  KEY `date` (`date_utc`),
-  KEY `country` (`country`),
-  KEY `lat_lon` (`latitude`,`longitude`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
-*/
