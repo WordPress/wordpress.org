@@ -453,8 +453,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'كراچى',
-				'latitude'    => '24.906',
-				'longitude'   => '67.082',
+				'latitude'    => '24.861',
+				'longitude'   => '67.010',
 				'country'     => 'PK',
 			),
 		),
@@ -487,7 +487,6 @@ function get_location_test_cases() {
 			),
 		),
 
-		// The database only has 大阪市 ("Osaka-shi"), not 大阪 ("Osaka"), so an exact match will for 大阪 will fail
 		'city-endonym-ideographic-municipal-unit-asia' => array(
 			'input' => array(
 				'location_name' => '大阪',
@@ -495,7 +494,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tokyo',
 			),
 			'expected' => array(
-				'description' => '大阪市',
+				'description' => '大阪',
 				'latitude'    => '34.694',
 				'longitude'   => '135.502',
 				'country'     => 'JP',
