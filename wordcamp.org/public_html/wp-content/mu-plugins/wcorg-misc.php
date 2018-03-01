@@ -348,3 +348,65 @@ function wcorg_register_scripts() {
 }
 add_action( 'wp_enqueue_scripts',    'wcorg_register_scripts' );
 add_action( 'admin_enqueue_scripts', 'wcorg_register_scripts' );
+
+/**
+ * Conditionally omit incident report submission feedback posts from post query results.
+ *
+ * @param WP_Query $wp_query
+ */
+function wcorg_central_omit_incident_reports( $wp_query ) {
+	if ( ! $wp_query instanceof WP_Query ) {
+		return $wp_query;
+	}
+
+	$post_types = $wp_query->get( 'post_type' );
+
+	if ( BLOG_ID_CURRENT_SITE == get_current_blog_id()
+	     && in_array( 'feedback', (array) $post_types, true )
+	     && ! current_user_can( 'manage_network' ) // TODO add a subrole for this.
+	) {
+		$meta_query = $wp_query->get( 'meta_query', array() );
+
+		$meta_query[] = array(
+			'relation' => 'OR',
+			array(
+				'key'     => '_feedback_email',
+				'value'   => 'report@wordcamp.org',
+				'compare' => 'NOT LIKE',
+			),
+			// This catches non-feedback posts, but may cause a performance issue.
+			// See https://developer.wordpress.org/reference/classes/wp_query/#comment-2315
+			array(
+				'key'   => '_feedback_email',
+				'value' => 'NOT EXISTS',
+			),
+		);
+
+		$wp_query->set( 'meta_query', $meta_query );
+	}
+
+	return $wp_query;
+}
+
+add_filter( 'pre_get_posts', 'wcorg_central_omit_incident_reports' );
+
+/**
+ * Modify the capabilities necessary for exporting content from WordCamp Central.
+ *
+ * This effectively makes it so that only super admins and trusted deputies can export.
+ *
+ * The intention is to prevent the export of incident report submission feedback posts, which don't seem to be filtered
+ * out by `wcorg_central_omit_incident_reports` when exporting all content.
+ *
+ * @param array  $primitive_caps The original list of primitive caps mapped to the given meta cap.
+ * @param string $meta_cap       The meta cap in question.
+ */
+function wcorg_central_modify_export_caps( $primitive_caps, $meta_cap ) {
+	if ( BLOG_ID_CURRENT_SITE == get_current_blog_id() && 'export' === $meta_cap ) {
+		return array_merge( (array) $primitive_caps, array( 'manage_network' ) ); // TODO add a subrole for this.
+	}
+
+	return $primitive_caps;
+}
+
+add_filter( 'map_meta_cap', 'wcorg_central_modify_export_caps', 10, 2 );
