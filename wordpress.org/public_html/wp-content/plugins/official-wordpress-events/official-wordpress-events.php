@@ -343,7 +343,7 @@ class Official_WordPress_Events {
 							$location = $this->format_meetup_venue_location( $meetup->venue );
 						} else {
 							$geocoded_location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
-							$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location->address_components );
+							$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location );
 							$location          = sprintf(
 								'%s%s%s',
 								$location_parts['city'],
@@ -443,6 +443,16 @@ class Official_WordPress_Events {
 	 */
 	protected function reverse_geocode( $latitude, $longitude ) {
 		$address  = false;
+		$cache_key       = 'geocode_' . md5( $latitude, $longitude );
+		$cached_response = wp_cache_get( $cache_key, 'events' );
+
+		if ( false !== $cached_response ) {
+			return $cached_response;
+		}
+
+		// Rough attempt at avoiding rate limit.
+		usleep( 75000 );
+
 		$response = $this->remote_get( sprintf(
 			'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s&sensor=false',
 			$latitude,
@@ -454,8 +464,9 @@ class Official_WordPress_Events {
 
 			$body = json_decode( wp_remote_retrieve_body( $response ) );
 
-			if ( isset( $body->results[0] ) ) {
-				$address = $body->results[0];
+			if ( isset( $body->results[0]->address_components ) ) {
+				$address = $body->results[0]->address_components;
+				wp_cache_set( $cache_key, $address, 'events', 0 );
 			}
 		}
 		else {
