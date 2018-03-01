@@ -715,8 +715,12 @@ function get_events( $args = array() ) {
 		$sql_values[] = $args['country'];
 	}
 
+	// Just show events that are currently scheduled (as opposed to cancelled).
+	$wheres[]     = '`status` = %s';
+	$sql_values[] = 'scheduled';
+
 	// Just show upcoming events
-	$wheres[] = '`date_utc` >= %s';
+	$wheres[] = '`date_utc` >= %s'; // Not actually UTC. WordCamp posts don't store a timezone value.
 
 	// Dates are in local-time not UTC, so the API output will contain events that have already happened in some parts of the world.
 	// TODO update this when the UTC dates are stored.
