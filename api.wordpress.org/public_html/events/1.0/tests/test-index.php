@@ -189,7 +189,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Africa/Nairobi',
 			),
 			'expected' => array(
-				'description' => 'nairobi',
+				'description' => 'naíróbí',
 				'latitude'    => '-1.283',
 				'longitude'   => '36.817',
 				'country'     => 'KE',
@@ -203,7 +203,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tokyo',
 			),
 			'expected' => array(
-				'description' => 'tokyo',
+				'description' => 'tōkyō',
 				'latitude'    => '35.690',
 				'longitude'   => '139.692',
 				'country'     => 'JP',
@@ -217,7 +217,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Europe/Berlin',
 			),
 			'expected' => array(
-				'description' => 'berlin',
+				'description' => 'berlín',
 				'latitude'    => '52.524',
 				'longitude'   => '13.411',
 				'country'     => 'DE',
@@ -347,7 +347,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Denver',
 			),
 			'expected' => array(
-				'description' => "dona ana",
+				'description' => "doña ana",
 				'latitude'    => '32.390',
 				'longitude'   => '-106.814',
 				'country'     => 'US',
@@ -396,7 +396,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Africa/Douala',
 			),
 			'expected' => array(
-				'description' => 'yaoundé',
+				'description' => 'yaounde',
 				'latitude'    => '3.867',
 				'longitude'   => '11.517',
 				'country'     => 'CM',
@@ -566,7 +566,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Mexico_City',
 			),
 			'expected' => array(
-				'description' => 'ciudad de méxico',
+				'description' => 'ciudad de mexico',
 				'latitude'    => '19.428',
 				'longitude'   => '-99.128',
 				'country'     => 'MX',
@@ -594,7 +594,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Bogota',
 			),
 			'expected' => array(
-				'description' => 'bogotá',
+				'description' => 'bogota',
 				'latitude'    => '4.610',
 				'longitude'   => '-74.082',
 				'country'     => 'CO',
@@ -627,7 +627,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Sao_Paulo',
 			),
 			'expected' => array(
-				'description' => 'são paulo',
+				'description' => 'sao',
 				'latitude'    => '-23.548',
 				'longitude'   => '-46.636',
 				'country'     => 'BR',

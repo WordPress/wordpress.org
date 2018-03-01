@@ -281,7 +281,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 	// And we sort by population desc, assuming that the biggest matching location is the most likely one.
 
 	// Exact match
-	$row = $wpdb->get_row( $wpdb->prepare( "
+	$query = "
 		SELECT name, latitude, longitude, country
 		FROM geoname_summary
 		WHERE name = %s
@@ -289,15 +289,18 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 			FIELD( %s, country  ) DESC,
 			FIELD( %s, timezone ) DESC,
 			population DESC
-		LIMIT 1",
-		$location_name,
-		$country,
-		$timezone
-	) );
+		LIMIT 1";
+
+	$prepared_query = $wpdb->prepare( $query, $location_name, $country, $timezone );
+	$db_handle      = $wpdb->db_connect( $prepared_query );
+
+	$wpdb->set_charset( $db_handle, 'utf8' ); // The content in this table requires a UTF8 connection.
+	$row = $wpdb->get_row( $prepared_query );
+	$wpdb->set_charset( $db_handle, 'latin1' ); // Revert to the default charset to avoid affecting other queries.
 
 	// Wildcard match
 	if ( ! $row && $wildcard && 'ASCII' !== mb_detect_encoding( $location_name ) ) {
-		$row = $wpdb->get_row( $wpdb->prepare( "
+		$query = "
 			SELECT name, latitude, longitude, country
 			FROM geoname_summary
 			WHERE name LIKE %s
@@ -305,11 +308,14 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 				FIELD( %s, country  ) DESC,
 				FIELD( %s, timezone ) DESC,
 				population DESC
-			LIMIT 1",
-			$wpdb->esc_like( $location_name ) . '%',
-			$country,
-			$timezone
-		) );
+			LIMIT 1";
+
+		$prepared_query = $wpdb->prepare( $query, $wpdb->esc_like( $location_name ) . '%', $country, $timezone );
+		$db_handle      = $wpdb->db_connect( $prepared_query );
+
+		$wpdb->set_charset( $db_handle, 'utf8' ); // The content in this table requires a UTF8 connection.
+		$row = $wpdb->get_row( $prepared_query );
+		$wpdb->set_charset( $db_handle, 'latin1' ); // Revert to the default charset to avoid affecting other queries.
 	}
 
 	// Suffix the "State", good in some countries (western countries) horrible in others
@@ -318,6 +324,12 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 	// if ( $row->state && $row->state != $row->name && $row->name NOT CONTAINED WITHIN $row->state? ) {
 	//	 $row->name .= ', ' . $row->state;
 	// }
+
+	// Strip off null bytes
+	// @todo Modify geoname script to to this instead?
+	if ( ! empty( $row->name ) ) {
+		$row->name = trim( $row->name );
+	}
 
 	return $row;
 }
