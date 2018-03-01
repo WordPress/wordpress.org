@@ -350,6 +350,7 @@ class Official_WordPress_Events {
 								empty( $location_parts['state'] )        ? '' : ', ' . $location_parts['state'],
 								empty( $location_parts['country_name'] ) ? '' : ', ' . $location_parts['country_name']
 							);
+							$location         = trim( $location, ", \t\n\r\0\x0B" );
 						}
 
 						if ( ! empty( $meetup->venue->country ) ) {
