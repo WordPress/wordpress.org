@@ -143,16 +143,15 @@ class Official_WordPress_Events {
 		$cached_events = array();
 
 		// Include yesterday's events because server timezone may be ahead of user's timezone
-		$raw_events = $wpdb->get_results( sprintf( "
+		$raw_events = $wpdb->get_results( "
 			SELECT *
-			FROM `%s`
+			FROM `". self::EVENTS_TABLE ."`
 			WHERE
 				date_utc >= SUBDATE( CURRENT_DATE(), 1 ) AND
 				status    = 'scheduled'
 			ORDER BY date_utc ASC
-			LIMIT 300",
-			self::EVENTS_TABLE
-		) );
+			LIMIT 300"
+		);
 
 		foreach ( $raw_events as $event ) {
 			$cached_events[] = new Official_WordPress_Event( array(
