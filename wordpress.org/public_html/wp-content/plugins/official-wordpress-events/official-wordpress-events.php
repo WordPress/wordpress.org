@@ -37,10 +37,15 @@ class Official_WordPress_Events {
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts',           array( $this, 'enqueue_scripts'    ) );
 		add_action( 'owpe_prime_events_cache',      array( $this, 'prime_events_cache' ) );
+		add_action( 'owpe_mark_deleted_meetups',    array( $this, 'mark_deleted_meetups' ) );
 		add_shortcode( 'official_wordpress_events', array( $this, 'render_events'      ) );
 
 		if ( ! wp_next_scheduled( 'owpe_prime_events_cache' ) ) {
 			wp_schedule_event( time(), 'hourly', 'owpe_prime_events_cache' );
+		}
+
+		if ( ! wp_next_scheduled( 'owpe_mark_deleted_meetups' ) ) {
+			wp_schedule_event( time(), 'hourly', 'owpe_mark_deleted_meetups' );
 		}
 	}
 
@@ -443,7 +448,7 @@ class Official_WordPress_Events {
 	 * @param string $latitude
 	 * @param string $longitude
 	 *
-	 * @return false | object
+	 * @return false | array
 	 */
 	protected function reverse_geocode( $latitude, $longitude ) {
 		$address  = false;
@@ -531,6 +536,76 @@ class Official_WordPress_Events {
 		}
 
 		return implode( ', ', $location );
+	}
+
+	/**
+	 * Mark Meetup events as deleted in our database when they're deleted from Meetup.com.
+	 *
+	 * Meetup.com allows organizers to either cancel or delete events. If the event is cancelled, then the status
+	 * in our database will be updated the next time `prime_events_cache` runs. If the event is deleted, though,
+	 * it is removed from their API results, so `prime_events_cache` won't see it, and the status will remain
+	 * `scheduled`.
+	 *
+	 * This checks all the upcoming Meetup.com events to see if any of them are missing. If they are, it assumes
+	 * that they were deleted, and updates their status.
+	 */
+	public function mark_deleted_meetups() {
+		global $wpdb;
+
+		$chunked_db_events = array();
+
+		// Don't include anything before tomorrow, because time zone differences could result in past events being flagged.
+		$raw_events = $wpdb->get_results( "
+			SELECT id, source_id, meetup_url
+			FROM `". self::EVENTS_TABLE ."`
+			WHERE
+				type      = 'meetup'    AND
+				status    = 'scheduled' AND
+				date_utc >= DATE_ADD( NOW(), INTERVAL 24 HOUR )
+			LIMIT 5000
+		" );
+
+		foreach ( $raw_events as $event ) {
+			$chunked_db_events[ $event->meetup_url ][] = $event;
+		}
+
+		foreach ( $chunked_db_events as $group_url => $db_events ) {
+			$url_name = trim( wp_parse_url( $group_url, PHP_URL_PATH ), '/' );
+
+			$request_url = sprintf(
+				'%s%s/events?page=500&status=upcoming,cancelled&key=%s',
+				self::MEETUP_API_BASE_URL,
+				$url_name,
+				MEETUP_API_KEY
+			);
+
+			$response   = $this->remote_get( $request_url );
+			$body       = json_decode( wp_remote_retrieve_body( $response ) );
+			$api_events = wp_list_pluck( $body, 'id' );
+
+			// Make sure we have a valid API response, to avoid marking events as deleted just because the request failed.
+			if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+				continue;
+			}
+
+			if ( empty( $body[0]->status ) || empty( $api_events[0] ) ) {
+				continue;
+			}
+
+			foreach ( $db_events as $db_event ) {
+				// If the event is still appearing in the Meetup.com API results, it hasn't been deleted.
+				if ( in_array( $db_event->source_id, $api_events, true ) ) {
+					continue;
+				}
+
+				// The event is missing from a valid response, so assume that it's been deleted.
+				$wpdb->update( self::EVENTS_TABLE, array( 'status' => 'deleted' ), array( 'id' => $db_event->id ) );
+
+				if ( 'cli' === php_sapi_name() ) {
+					echo "\nMarked {$db_event->source_id} as deleted.";
+				}
+			}
+		}
 	}
 
 	/**
