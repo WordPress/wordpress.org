@@ -582,7 +582,8 @@ class Official_WordPress_Events {
 				$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
 				trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
 
-				if ( $to = apply_filters( 'owe_error_email_addresses', array() ) ) {
+				$to = apply_filters( 'owe_error_email_addresses', array() );
+				if ( $to && ( ! defined( 'WPORG_SANDBOXED_REQUEST' ) || ! WPORG_SANDBOXED_REQUEST ) ) {
 					wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
 				}
 			}
