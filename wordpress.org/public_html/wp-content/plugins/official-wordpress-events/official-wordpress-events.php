@@ -551,6 +551,8 @@ class Official_WordPress_Events {
 			$args['timeout'] = 30;
 			$response        = wp_remote_get( $url, $args );
 
+			$this->maybe_pause( wp_remote_retrieve_headers( $response ) );
+
 			if ( is_wp_error( $response ) ) {
 				$error_messages = implode( ', ', $response->get_error_messages() );
 
@@ -584,8 +586,6 @@ class Official_WordPress_Events {
 					wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
 				}
 			}
-
-			$this->maybe_pause( wp_remote_retrieve_headers( $response ) );
 		}
 
 		return $response;
@@ -611,6 +611,10 @@ class Official_WordPress_Events {
 
 		if ( $period < 2 ) {
 			$period = 2;
+		}
+
+		if ( 'cli' == php_sapi_name() ) {
+			echo "\nPausing for $period seconds to avoid rate-limiting.";
 		}
 
 		$this->log( 'sleeping to avoid api rate limit' );
