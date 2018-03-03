@@ -1946,6 +1946,7 @@ input {
   color: #fff;
   font-size: 25px;
   height: 5.5rem;
+  outline-style: none;
   overflow: hidden;
   position: absolute;
   right: 0.5rem;
