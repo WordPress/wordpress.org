@@ -45,25 +45,6 @@ class WordCamp_Lets_Encrypt_Helper {
 			return new WP_Error( 'error', 'Invalid or empty key.', array( 'status' => 403 ) );
 		}
 
-		/*
-		 * Only request high-priority certificates right now.
-		 *
-		 * We're hitting LE API limits, and many certificates are failling to renew. The entire script is
-		 * short-circuited when Acme throws an exception, so let's just get some high priority certs issued
-		 * while we work on fixing the larger issue.
-		 *
-		 * Focusing on a small number of certs in the short term should also give us some breathing room on
-		 * the limits.
-		 *
-		 * @todo OMGWTFBBQ
-		 */
-		return array(
-			'2018.guadalajara.wordcamp.org',
-			'2018.fayetteville.wordcamp.org',
-			'2018.ottawa.wordcamp.org'
-		);
-
-
 		$domains = array();
 		$blogs   = $wpdb->get_results( "
 			SELECT `domain`, `path`
