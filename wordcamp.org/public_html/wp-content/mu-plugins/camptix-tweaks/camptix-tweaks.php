@@ -2,6 +2,7 @@
 
 namespace WordCamp\CampTix_Tweaks;
 use CampTix_Plugin;
+use const WordCamp\Mentors\PLUGIN_DIR;
 use WP_Post;
 
 defined( 'WPINC' ) or die();
@@ -19,19 +20,21 @@ add_action( 'transition_post_status',                        __NAMESPACE__ . '\t
 add_action( 'camptix_payment_result',                        __NAMESPACE__ . '\track_payment_results',        10, 3 );
 
 // Attendees
-add_filter( 'camptix_name_order',                            __NAMESPACE__ . '\set_name_order'         );
-add_action( 'camptix_form_edit_attendee_custom_error_flags', __NAMESPACE__ . '\disable_attendee_edits' );
-add_action( 'transition_post_status',                        __NAMESPACE__ . '\log_publish_to_cancel', 10, 3 );
+add_filter( 'camptix_name_order',                            __NAMESPACE__ . '\set_name_order'                      );
+add_action( 'camptix_form_edit_attendee_custom_error_flags', __NAMESPACE__ . '\disable_attendee_edits'              );
+add_action( 'transition_post_status',                        __NAMESPACE__ . '\log_publish_to_cancel',        10, 3 );
 
 // Miscellaneous
-add_filter( 'camptix_beta_features_enabled', '__return_true' );
-add_action( 'camptix_nt_file_log',     '__return_false' );
-add_action( 'init',                    __NAMESPACE__ . '\camptix_debug', 9          ); // CampTix does this at 10.
-add_filter( 'camptix_default_addons',  __NAMESPACE__ . '\load_addons'               );
-add_filter( 'camptix_capabilities',    __NAMESPACE__ . '\modify_capabilities'       );
-add_filter( 'camptix_default_options', __NAMESPACE__ . '\modify_default_options'    );
-add_filter( 'camptix_html_message',    __NAMESPACE__ . '\render_html_emails', 10, 2 );
-add_action( 'camptix_tshirt_report_intro', __NAMESPACE__ . '\tshirt_report_intro_message', 10, 3 );
+add_filter( 'camptix_beta_features_enabled',                 '__return_true' );
+add_action( 'camptix_nt_file_log',                           '__return_false' );
+add_action( 'init',                                          __NAMESPACE__ . '\camptix_debug',                    9 ); // CampTix does this at 10.
+add_filter( 'camptix_default_addons',                        __NAMESPACE__ . '\load_addons'                         );
+add_filter( 'camptix_capabilities',                          __NAMESPACE__ . '\modify_capabilities'                 );
+add_filter( 'camptix_default_options',                       __NAMESPACE__ . '\modify_default_options'              );
+add_filter( 'camptix_options',                               __NAMESPACE__ . '\modify_email_templates'              );
+add_filter( 'camptix_email_tickets_template',                __NAMESPACE__ . '\switch_email_template'               );
+add_filter( 'camptix_html_message',                          __NAMESPACE__ . '\render_html_emails',           10, 2 );
+add_action( 'camptix_tshirt_report_intro',                   __NAMESPACE__ . '\tshirt_report_intro_message',  10, 3 );
 
 
 /**
@@ -557,6 +560,151 @@ function modify_default_options( $options ) {
 	$options['payment_options_paypal'] = array( 'api_predef' => 'wordcamp-sandbox' );
 
 	return $options;
+}
+
+/**
+ * Append a footer string to some email templates.
+ *
+ * This copies some email template strings from the options array into new array items where the key has
+ * '_with_footer' appended. This ensures the footer is included in the desired templates without it getting
+ * repeatedly appended to the option values every time the templates are customized.
+ *
+ * @param array $options
+ *
+ * @return array
+ */
+function modify_email_templates( $options ) {
+	$sponsors_string = get_global_sponsors_string();
+	$donation_string = get_donation_string();
+
+	$email_footer_string = "\n\n===\n\n$sponsors_string\n\n$donation_string";
+
+	$templates_that_need_footers = array(
+		'email_template_single_purchase',
+		'email_template_multiple_purchase',
+		'email_template_multiple_purchase_receipt',
+	);
+
+	foreach ( $templates_that_need_footers as $template ) {
+		// We can't add the string to the original option or it will keep getting added over and over again
+		// whenever the email templates are customized and saved.
+		$options[ $template . '_with_footer' ] = $options[ $template ] . $email_footer_string;
+	}
+
+	return $options;
+}
+
+/**
+ * Specify an alternate for email templates that should have our custom footer.
+ *
+ * @param string $template_slug
+ *
+ * @return string
+ */
+function switch_email_template( $template_slug ) {
+	$templates_that_need_footers = array(
+		'email_template_single_purchase',
+		'email_template_multiple_purchase',
+		'email_template_multiple_purchase_receipt',
+	);
+
+	if ( in_array( $template_slug, $templates_that_need_footers, true ) ) {
+		$template_slug .= '_with_footer';
+	}
+
+	return $template_slug;
+}
+
+/**
+ * Get a string for HTML email footers listing global sponsors.
+ *
+ * @return string
+ */
+function get_global_sponsors_string() {
+	$sponsor_message_html = '';
+	$sponsors             = get_global_sponsors();
+	$sponsor_count        = count( $sponsors );
+
+	if ( $sponsor_count > 0 ) {
+		$sponsors = wp_list_pluck( $sponsors, 'name' );
+
+		shuffle( $sponsors );
+
+		switch ( $sponsor_count ) {
+			case 1 :
+				$sponsors_string = array_shift( $sponsors );
+				break;
+			case 2 :
+				$sponsors_string = sprintf(
+					/* translators: The %s placeholders are the names of sponsors. */
+					__( '%s and %s', 'wordcamporg' ),
+					array_shift( $sponsors ),
+					array_shift( $sponsors )
+				);
+				break;
+			default :
+				$last_sponsor = array_pop( $sponsors );
+
+				$sponsors_string = sprintf(
+					'%1$s%2$s %3$s',
+					/* translators: Used between sponsor names in a list, there is a space after the comma. */
+					implode( _x( ', ', 'list item separator', 'wordcamporg' ), $sponsors ),
+					/* translators: List item separator, used before the last sponsor name in the list. */
+					__( ', and', 'wordcamporg' ),
+					$last_sponsor
+				);
+				break;
+		}
+
+		$sponsor_message_html = sprintf(
+			/* translators: The first %s placeholder is a list of sponsor names. The second %s placeholder is a URL. */
+			__( 'WordPress Global Community Sponsors help fund WordCamps and meetups around the world. Thank you to %s for <a href="%s">their support</a>!', 'wordcamporg' ),
+			$sponsors_string,
+			'https://central.wordcamp.org/global-community-sponsors/'
+		);
+	}
+
+	return $sponsor_message_html;
+}
+
+/**
+ * Get a string for HTML email footers requesting donations to WPF.
+ *
+ * @return string
+ */
+function get_donation_string() {
+	return sprintf(
+		__( 'Do you love WordPress events? To support open source education and charity hackathons, please <a href="%s">donate to the WordPress Foundation</a>.', 'wordcamporg' ),
+		'https://wordpressfoundation.org/donate/'
+	);
+}
+
+/**
+ * Get an array of Global Sponsor names and URLs.
+ *
+ * @return array
+ */
+function get_global_sponsors() {
+	$sponsors = array();
+
+	switch_to_blog( BLOG_ID_CURRENT_SITE );
+
+	$sponsor_posts = get_posts( array(
+		'post_type'   => 'mes',
+		'post_status' => 'publish',
+		'numberposts' => -1,
+	) );
+
+	foreach ( $sponsor_posts as $sponsor_post ) {
+		$sponsors[] = array(
+			'name' => $sponsor_post->post_title,
+			'url'  => $sponsor_post->mes_website,
+		);
+	}
+
+	restore_current_blog();
+
+	return $sponsors;
 }
 
 /**

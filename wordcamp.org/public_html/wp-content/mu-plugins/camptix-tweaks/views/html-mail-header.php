@@ -81,6 +81,13 @@
 			line-height: inherit !important;
 		}
 
+		hr {
+			margin: 2em auto;
+			border: 0;
+			height: 1px;
+			background-color: #d3e7f8;
+		}
+
 		#bodyCell {
 			padding: 10px;
 		}
