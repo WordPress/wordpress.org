@@ -108,7 +108,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			// Setup a default redirect to URL, with a safe version to only change if validation succeeds below.
 			$redirect_to = ! empty( $_GET['action'] ) && in_array( $_GET['action'], array( 'logout', 'loggedout' ) ) ? '/loggedout/' : 'https://wordpress.org/';
 
-			if ( ! empty( $_REQUEST['redirect_to'] ) ) {
+			if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ) {
 				// User is requesting a further redirect afterward, let's make sure it's a legit target.
 				$redirect_to_requested = str_replace( ' ', '%20', $_REQUEST['redirect_to'] ); // Encode spaces.
 				$redirect_to_requested = function_exists( 'wp_sanitize_redirect' ) ? wp_sanitize_redirect( $redirect_to_requested ) : $redirect_to_requested;
