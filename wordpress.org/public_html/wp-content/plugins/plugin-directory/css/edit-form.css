@@ -36,6 +36,7 @@
 input#post_name,
 input#post_author_username {
 	width: 350px;
+	max-width: 100%;
 }
 
 .button-link:not(.handlediv) {
