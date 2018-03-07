@@ -2,7 +2,6 @@
 
 namespace WordCamp\CampTix_Tweaks;
 use CampTix_Plugin;
-use const WordCamp\Mentors\PLUGIN_DIR;
 use WP_Post;
 
 defined( 'WPINC' ) or die();
