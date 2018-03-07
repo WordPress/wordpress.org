@@ -15,8 +15,9 @@ class WordCamp_QBO_Client {
 	private static $options;
 
 	public static function load_options() {
-		if ( isset( self::$options ) )
+		if ( isset( self::$options ) ) {
 			return self::$options;
+		}
 
 		self::$options = wp_parse_args( get_option( 'wordcamp-qbo-client', array() ), array(
 			'default-class' => '',
@@ -33,11 +34,13 @@ class WordCamp_QBO_Client {
 			'api_base' => '',
 		) );
 
-		foreach ( $init_options as $key => $value )
+		foreach ( $init_options as $key => $value ) {
 			self::$$key = $value;
+		}
 
-		if ( empty( self::$hmac_key ) )
+		if ( empty( self::$hmac_key ) ) {
 			return;
+		}
 
 		add_action( 'admin_init', array( __CLASS__, 'admin_init' ), 20 );
 	}
@@ -45,11 +48,13 @@ class WordCamp_QBO_Client {
 	public static function admin_init() {
 		$cap = is_multisite() ? 'manage_network' : 'manage_options';
 
-		if ( ! current_user_can( $cap ) )
+		if ( ! current_user_can( $cap ) ) {
 			return;
+		}
 
-		if ( ! class_exists( 'WCP_Payment_Request' ) )
+		if ( ! class_exists( 'WCP_Payment_Request' ) ) {
 			return;
+		}
 
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
@@ -58,16 +63,19 @@ class WordCamp_QBO_Client {
 
 	public static function admin_notices() {
 		$screen = get_current_screen();
-		if ( $screen->id != 'wcp_payment_request' )
+		if ( $screen->id != 'wcp_payment_request' ) {
 			return;
+		}
 
 		$post = get_post();
-		if ( $post->post_status == 'auto-draft' )
+		if ( $post->post_status == 'auto-draft' ) {
 			return;
+		}
 
 		$data = get_post_meta( $post->ID, '_wordcamp-qbo-client-data', true );
-		if ( empty( $data['last_error'] ) )
+		if ( empty( $data['last_error'] ) ) {
 			return;
+		}
 
 		printf( '<div class="notice error is-dismissible"><p>QBO Sync Error: %s</p></div>', esc_html( $data['last_error'] ) );
 	}
@@ -96,13 +104,14 @@ class WordCamp_QBO_Client {
 	public static function metabox_quickbooks() {
 		self::load_options();
 
-		$post = get_post();
+		$post    = get_post();
 		$classes = self::get_classes();
-		$data = get_post_meta( $post->ID, '_wordcamp-qbo-client-data', true );
+		$data    = get_post_meta( $post->ID, '_wordcamp-qbo-client-data', true );
 
 		$selected_class = self::$options['default-class'];
-		if ( ! empty( $data['class'] ) && array_key_exists( $data['class'], $classes ) )
+		if ( ! empty( $data['class'] ) && array_key_exists( $data['class'], $classes ) ) {
 			$selected_class = $data['class'];
+		}
 
 		?>
 
@@ -112,7 +121,7 @@ class WordCamp_QBO_Client {
 
 		<?php if ( empty( $data['transaction_id'] ) ) : ?>
 			<p>This request has not been synced with QuickBooks yet.</p>
-		<?php else: ?>
+		<?php else : ?>
 			<pre><?php echo esc_html( print_r( $data, true ) ); ?></pre>
 		<?php endif; ?>
 
@@ -151,82 +160,97 @@ class WordCamp_QBO_Client {
 	}
 
 	public static function save_post( $post_id, $post ) {
-		if ( $post->post_type !== WCP_Payment_Request::POST_TYPE )
+		if ( $post->post_type !== WCP_Payment_Request::POST_TYPE ) {
 			return;
+		}
 
-		if ( empty( $_POST['wordcamp-qbo-client-nonce'] ) || empty( $_POST['wordcamp-qbo-client-post'] ) )
+		if ( empty( $_POST['wordcamp-qbo-client-nonce'] ) || empty( $_POST['wordcamp-qbo-client-post'] ) ) {
 			return;
+		}
 
-		if ( intval( $_POST['wordcamp-qbo-client-post'] ) !== $post->ID )
+		if ( intval( $_POST['wordcamp-qbo-client-post'] ) !== $post->ID ) {
 			return;
+		}
 
-		if ( ! wp_verify_nonce( $_POST['wordcamp-qbo-client-nonce'], 'wordcamp-qbo-client-push-' . $post->ID ) )
+		if ( ! wp_verify_nonce( $_POST['wordcamp-qbo-client-nonce'], 'wordcamp-qbo-client-push-' . $post->ID ) ) {
 			wp_die( 'Could not verify QBO nonce. Please go back, refresh the page and try again.' );
+		}
 
 		// No need to push.
-		if ( empty( $_POST['wordcamp-qbo-client-push'] ) )
+		if ( empty( $_POST['wordcamp-qbo-client-push'] ) ) {
 			return;
+		}
 
-		if ( $post->post_status != 'paid' )
+		if ( $post->post_status != 'paid' ) {
 			wp_die( 'A request has to be marked as paid before it could be synced to QuickBooks.' );
+		}
 
-		if ( empty( $_POST['wordcamp-qbo-client-class'] ) )
+		if ( empty( $_POST['wordcamp-qbo-client-class'] ) ) {
 			wp_die( 'You need to set a QuickBooks class before you can sync this payment request.' );
+		}
 
 		$class = $_POST['wordcamp-qbo-client-class'];
-		if ( ! array_key_exists( $class, self::get_classes() ) )
+		if ( ! array_key_exists( $class, self::get_classes() ) ) {
 			wp_die( 'The class you have picked does not exist.' );
+		}
 
-		$data = get_post_meta( $post->ID, '_wordcamp-qbo-client-data', true );
+		$data   = get_post_meta( $post->ID, '_wordcamp-qbo-client-data', true );
 		$txn_id = false;
 
-		if ( ! is_array( $data ) )
+		if ( ! is_array( $data ) ) {
 			$data = array();
+		}
 
 		// This request has not been synced before.
-		if ( ! empty( $data['transaction_id'] ) )
+		if ( ! empty( $data['transaction_id'] ) ) {
 			$txn_id = $data['transaction_id'];
+		}
 
 		$amount = get_post_meta( $post->ID, '_camppayments_payment_amount', true );
 		$amount = preg_replace( '#[^\d.-]+#', '', $amount );
 		$amount = floatval( $amount );
 
 		$currency = get_post_meta( $post->ID, '_camppayments_currency', true );
-		if ( strtoupper( $currency ) != 'USD' )
+
+		if ( strtoupper( $currency ) != 'USD' ) {
 			wp_die( 'Non-USD payments sync to QuickBooks is not available yet.' );
+		}
 
 		$description_chunks = array( $post->post_title );
-		$description = get_post_meta( $post->ID, '_camppayments_description', true );
-		if ( ! empty( $description ) )
+		$description        = get_post_meta( $post->ID, '_camppayments_description', true );
+
+		if ( ! empty( $description ) ) {
 			$description_chunks[] = $description;
+		}
 
 		$description_chunks[] = esc_url_raw( get_edit_post_link( $post->ID, 'raw' ) );
-		$description = implode( "\n", $description_chunks );
+		$description          = implode( "\n", $description_chunks );
+
 		unset( $description_chunks );
 
 		$category = get_post_meta( $post->ID, '_camppayments_payment_category', true );
-		$date = absint( get_post_meta( $post->ID, '_camppayments_date_vendor_paid', true ) );
+		$date     = absint( get_post_meta( $post->ID, '_camppayments_date_vendor_paid', true ) );
 
 		$body = array(
-			'id' => $txn_id,
-			'date' => $date,
-			'amount' => $amount,
-			'category' => $category,
+			'id'          => $txn_id,
+			'date'        => $date,
+			'amount'      => $amount,
+			'category'    => $category,
 			'description' => $description,
-			'class' => $class,
+			'class'       => $class,
 		);
 
-		$body = json_encode( $body );
-		$request_url = esc_url_raw( self::$api_base . '/expense/' );
+		$body         = json_encode( $body );
+		$request_url  = esc_url_raw( self::$api_base . '/expense/' );
 		$request_args = array(
 			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
-			'body' => $body,
+			'body'    => $body,
 			'headers' => array(
-				'Content-Type' => 'application/json',
+				'Content-Type'  => 'application/json',
 				'Authorization' => self::_get_auth_header( 'post', $request_url, $body ),
 			),
 		);
-		$response = wp_remote_post( $request_url, $request_args );
+		$response     = wp_remote_post( $request_url, $request_args );
 
 		Logger\log( 'remote_request', compact( 'request_url', 'request_args', 'response' ) );
 
@@ -241,8 +265,8 @@ class WordCamp_QBO_Client {
 			} else {
 				unset( $data['last_error'] );
 				$data['transaction_id'] = $body['transaction_id'];
-				$data['timestamp'] = time();
-				$data['class'] = $class;
+				$data['timestamp']      = time();
+				$data['class']          = $class;
 
 				// Remember this class for future reference.
 				if ( self::$options['default-class'] != $class ) {
@@ -306,7 +330,7 @@ class WordCamp_QBO_Client {
 			'amount'            => floatval(            $invoice_meta['_wcbsi_amount'         ][0] ),
 			'description'       => sanitize_text_field( $invoice_meta['_wcbsi_description'    ][0] ),
 
-			'statement_memo' => sprintf(
+			'statement_memo'    => sprintf(
 				'WordCamp.org Invoice: %s',
 				esc_url_raw( admin_url( sprintf( 'post.php?post=%s&action=edit', $invoice_id ) ) )
 			),
@@ -339,12 +363,12 @@ class WordCamp_QBO_Client {
 		$oauth_header = self::_get_auth_header( 'post', $request_url, $body );
 
 		$args = array(
+			'body'    => $body,
 			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth_header,
 				'Content-Type'  => 'application/json',
 			),
-			'body' => $body,
 		);
 
 		return array(
@@ -497,13 +521,17 @@ class WordCamp_QBO_Client {
 	 * @param string $method The request method: GET, POST, etc.
 	 * @param string $request_url The clean request URI, without any query arguments.
 	 * @param string $body The payload body.
-	 * @param array $args The query arguments.
+	 * @param array  $args The query arguments.
 	 *
 	 * @return string A sha256 HMAC signature.
 	 */
 	private static function _get_auth_header( $method, $request_url, $body = '', $args = array() ) {
-		$signature = hash_hmac( 'sha256', json_encode( array( strtolower( $method ),
-			strtolower( $request_url ), $body, $args ) ), self::$hmac_key );
+		$signature = hash_hmac( 'sha256', json_encode( array(
+			strtolower( $method ),
+			strtolower( $request_url ),
+			$body,
+			$args,
+		) ), self::$hmac_key );
 
 		return 'wordcamp-qbo-hmac ' . $signature;
 	}

@@ -22,8 +22,9 @@ class WordCamp_QBO {
 	private static $categories_map;
 
 	public static function load_options() {
-		if ( isset( self::$options ) )
+		if ( isset( self::$options ) ) {
 			return self::$options;
+		}
 
 		self::$options = wp_parse_args( get_option( 'wordcamp-qbo', array() ), array(
 			'auth' => array(),
@@ -49,20 +50,22 @@ class WordCamp_QBO {
 		self::$sandbox_mode = WORDCAMP_ENVIRONMENT !== 'production';
 
 		$init_options = wp_parse_args( apply_filters( 'wordcamp_qbo_options', array() ), array(
-			'app_token' => '',
-			'consumer_key' => '',
+			'app_token'       => '',
+			'consumer_key'    => '',
 			'consumer_secret' => '',
-			'hmac_key' => '',
+			'hmac_key'        => '',
 
-			'categories_map' => array(),
+			'categories_map'  => array(),
 		) );
 
-		foreach ( $init_options as $key => $value )
+		foreach ( $init_options as $key => $value ) {
 			self::$$key = $value;
+		}
 
 		// There's no point in doing anything if we don't have the secrets.
-		if ( empty( self::$consumer_key ) )
+		if ( empty( self::$consumer_key ) ) {
 			return;
+		}
 
 		self::$api_base_url = sprintf(
 			'https://%squickbooks.api.intuit.com',
@@ -86,22 +89,22 @@ class WordCamp_QBO {
 	 */
 	public static function rest_api_init() {
 		register_rest_route( 'wordcamp-qbo/v1', '/expense', array(
-			'methods' => 'GET, POST',
+			'methods'  => 'GET, POST',
 			'callback' => array( __CLASS__, 'rest_callback_expense' ),
 		) );
 
 		register_rest_route( 'wordcamp-qbo/v1', '/invoice', array(
-			'methods' => 'GET, POST',
+			'methods'  => 'GET, POST',
 			'callback' => array( __CLASS__, 'rest_callback_invoice' ),
 		) );
 
 		register_rest_route( 'wordcamp-qbo/v1', '/invoice_pdf', array(
-			'methods' => 'GET',
+			'methods'  => 'GET',
 			'callback' => array( __CLASS__, 'rest_callback_invoice_pdf' ),
 		) );
 
 		register_rest_route( 'wordcamp-qbo/v1', '/paid_invoices', array(
-			'methods' => 'GET',
+			'methods'  => 'GET',
 			'callback' => array( __CLASS__, 'rest_callback_paid_invoices' ),
 		) );
 	}
@@ -112,56 +115,63 @@ class WordCamp_QBO {
 	 * @param WP_REST_Request $request
 	 */
 	public static function rest_callback_expense( $request ) {
-		if ( ! self::_is_valid_request( $request ) )
+		if ( ! self::_is_valid_request( $request ) ) {
 			return new WP_Error( 'unauthorized', 'Unauthorized', array( 'status' => 401 ) );
+		}
 
 		self::load_options();
 		$oauth = self::_get_oauth();
 		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
 
 		$amount = floatval( $request->get_param( 'amount' ) );
-		if ( ! $amount )
+		if ( ! $amount ) {
 			return new WP_Error( 'error', 'An amount was not given.' );
+		}
 
 		$description = $request->get_param( 'description' );
-		if ( empty( $description ) )
+		if ( empty( $description ) ) {
 			return new WP_Error( 'error', 'The expense description can not be empty.' );
+		}
 
 		$category = $request->get_param( 'category' );
-		if ( empty( $category ) || ! array_key_exists( $category, self::$categories_map ) )
+		if ( empty( $category ) || ! array_key_exists( $category, self::$categories_map ) ) {
 			return new WP_Error( 'error', 'The category you have picked is invalid.' );
+		}
 
 		$date = $request->get_param( 'date' );
-		if ( empty( $date ) )
+		if ( empty( $date ) ) {
 			return new WP_Error( 'error', 'The expense date can not be empty.' );
+		}
 
 		$date = absint( $date );
 
 		$class = $request->get_param( 'class' );
-		if ( empty( $class ) )
+		if ( empty( $class ) ) {
 			return new WP_Error( 'error', 'You need to set a class.' );
+		}
 
 		$classes = self::_get_classes();
-		if ( ! array_key_exists( $class, $classes ) )
+		if ( ! array_key_exists( $class, $classes ) ) {
 			return new WP_Error( 'error', 'Unknown class.' );
+		}
 
 		$class = array(
 			'value' => $class,
-			'name' => $classes[ $class ],
+			'name'  => $classes[ $class ],
 		);
 
 		$payload = array(
-			'AccountRef' => self::$account,
-			'TxnDate' => gmdate( 'Y-m-d', $date ),
+			'AccountRef'  => self::$account,
+			'TxnDate'     => gmdate( 'Y-m-d', $date ),
 			'PaymentType' => 'Cash',
-			'Line' => array(
+			'Line'        => array(
 				array(
-					'Id' => 1,
-					'Description' => $description,
-					'Amount' => $amount,
-					'DetailType' => 'AccountBasedExpenseLineDetail',
+					'Id'                            => 1,
+					'Description'                   => $description,
+					'Amount'                        => $amount,
+					'DetailType'                    => 'AccountBasedExpenseLineDetail',
 					'AccountBasedExpenseLineDetail' => array(
-						'ClassRef' => $class,
+						'ClassRef'   => $class,
 						'AccountRef' => self::$categories_map[ $category ],
 					),
 				),
@@ -175,48 +185,52 @@ class WordCamp_QBO {
 				self::$api_base_url, self::$options['auth']['realmId'], $payload['Id'] ) );
 
 			$oauth_header = $oauth->get_oauth_header( 'GET', $request_url );
-			$response = wp_remote_get( $request_url, array(
+			$response     = wp_remote_get( $request_url, array(
 				'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 				'headers' => array(
 					'Authorization' => $oauth_header,
-					'Accept' => 'application/json',
+					'Accept'        => 'application/json',
 				),
 			) );
 			Logger\log( 'remote_request_sync_token', compact( 'response' ) );
 
-			if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != 200 )
+			if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != 200 ) {
 				return new WP_Error( 'error', 'Could not find purchase to update.' );
+			}
 
 			$body = json_decode( wp_remote_retrieve_body( $response ), true );
-			if ( ! isset( $body['Purchase']['SyncToken'] ) )
+			if ( ! isset( $body['Purchase']['SyncToken'] ) ) {
 				return new WP_Error( 'error', 'Could not decode purchase for update.' );
+			}
 
 			$payload['SyncToken'] = $body['Purchase']['SyncToken'];
 			unset( $response );
 		}
 
-		$payload = json_encode( $payload );
+		$payload     = json_encode( $payload );
 		$request_url = esc_url_raw( sprintf( '%s/v3/company/%d/purchase',
 			self::$api_base_url, self::$options['auth']['realmId'] ) );
 
 		$oauth_header = $oauth->get_oauth_header( 'POST', $request_url, $payload );
-		$response = wp_remote_post( $request_url, array(
+		$response     = wp_remote_post( $request_url, array(
 			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth_header,
-				'Accept' => 'application/json',
-				'Content-Type' => 'application/json',
+				'Accept'        => 'application/json',
+				'Content-Type'  => 'application/json',
 			),
-			'body' => $payload,
+			'body'    => $payload,
 		) );
 		Logger\log( 'remote_request_create_expense', compact( 'payload', 'response' ) );
 
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != 200 )
+		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != 200 ) {
 			return new WP_Error( 'error', 'Could not create purchase.' );
+		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-		if ( empty( $body ) )
+		if ( empty( $body ) ) {
 			return new WP_Error( 'error', 'Could not decode create purchase result.' );
+		}
 
 		return array(
 			'transaction_id' => intval( $body['Purchase']['Id'] ),
@@ -247,7 +261,7 @@ class WordCamp_QBO {
 		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
 
 		$args = array(
-			'query' => 'SELECT * FROM Class MAXRESULTS 1000',
+			'query'        => 'SELECT * FROM Class MAXRESULTS 1000',
 			'minorversion' => 4,
 		);
 
@@ -255,14 +269,14 @@ class WordCamp_QBO {
 			self::$api_base_url, self::$options['auth']['realmId'] ) );
 
 		$oauth_header = $oauth->get_oauth_header( 'GET', $request_url, $args );
-		$response = wp_remote_get(
+		$response     = wp_remote_get(
 			esc_url_raw( add_query_arg( $args, $request_url ) ),
 			array(
 				'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 				'headers' => array(
 					'Authorization' => $oauth_header,
-					'Accept' => 'application/json',
-				)
+					'Accept'        => 'application/json',
+				),
 			)
 		);
 		Logger\log( 'remote_request', compact( 'args', 'response' ) );
@@ -474,7 +488,7 @@ class WordCamp_QBO {
 		 * sacrificed to make room for the complete instructions.
 		 */
 		$description_limit = abs( 995 - strlen( $payment_instructions ) );
-		$customer_memo = sprintf(
+		$customer_memo     = sprintf(
 			"%s\n\n%s",
 			substr( $description, 0, $description_limit ),
 			$payment_instructions
@@ -501,26 +515,26 @@ class WordCamp_QBO {
 
 			'Line' => array(
 				array(
-					'Amount'      => $amount,
-					'Description' => $line_description,
-					'DetailType'  => 'SalesItemLineDetail',
+					'Amount'              => $amount,
+					'Description'         => $line_description,
+					'DetailType'          => 'SalesItemLineDetail',
 
 					'SalesItemLineDetail' => array(
-						'ItemRef' => array(
+						'ItemRef'   => array(
 							'value' => '20', // Sponsorship
 						),
 
-						'ClassRef' => array(
+						'ClassRef'  => array(
 							'value' => $class_id,
 						),
 
 						'UnitPrice' => $amount,
 						'Qty'       => 1,
-					)
-				)
+					),
+				),
 			),
 
-			'CustomerRef' => array(
+			'CustomerRef'  => array(
 				'value' => $customer_id,
 			),
 
@@ -532,7 +546,7 @@ class WordCamp_QBO {
 				'value' => 1, // Due on receipt
 			),
 
-			'BillEmail' => array(
+			'BillEmail'    => array(
 				'Address' => $customer_email,
 			),
 		);
@@ -565,12 +579,12 @@ class WordCamp_QBO {
 				'Accept'        => 'application/json',
 				'Content-Type'  => 'application/json',
 			),
-			'body' => $payload,
+			'body'    => $payload,
 		);
 
 		return array(
 			'url'  => $request_url,
-			'args' => $args
+			'args' => $args,
 		);
 	}
 
@@ -629,7 +643,7 @@ class WordCamp_QBO {
 				'Accept'        => 'application/json',
 				'Content-Type'  => 'application/octet-stream',
 			),
-			'body' => '',
+			'body'    => '',
 		);
 
 		return array(
@@ -716,7 +730,7 @@ class WordCamp_QBO {
 				'Accept'        => 'application/pdf',
 				'Content-Type'  => 'application/pdf',
 			),
-			'body' => '',
+			'body'    => '',
 		);
 
 		return array(
@@ -945,22 +959,22 @@ class WordCamp_QBO {
 			),
 
 			'CurrencyRef' => array(
-				'value' => $currency_code
+				'value' => $currency_code,
 			),
 
-			'PreferredDeliveryMethod' =>'Email',
+			'PreferredDeliveryMethod' => 'Email',
 
-			'GivenName'        => $sponsor['first-name'],
-			'FamilyName'       => $sponsor['last-name'],
-			'CompanyName'      => $sponsor['company-name'],
-			'DisplayName'      => sprintf( '%s - %s', $sponsor['company-name'], $currency_code ),
-			'PrintOnCheckName' => $sponsor['company-name'],
+			'GivenName'               => $sponsor['first-name'],
+			'FamilyName'              => $sponsor['last-name'],
+			'CompanyName'             => $sponsor['company-name'],
+			'DisplayName'             => sprintf( '%s - %s', $sponsor['company-name'], $currency_code ),
+			'PrintOnCheckName'        => $sponsor['company-name'],
 
-			'PrimaryPhone' => array(
+			'PrimaryPhone'            => array(
 				'FreeFormNumber' => $sponsor['phone-number'],
 			),
 
-			'PrimaryEmailAddr' => array(
+			'PrimaryEmailAddr'        => array(
 				'Address' => $sponsor['email-address'],
 			),
 		);
@@ -984,7 +998,7 @@ class WordCamp_QBO {
 				'Accept'        => 'application/json',
 				'Content-Type'  => 'application/json',
 			),
-			'body' => $payload,
+			'body'    => $payload,
 		);
 
 		return array(
@@ -1101,16 +1115,22 @@ class WordCamp_QBO {
 	 * @return bool True if valid, false if invalid.
 	 */
 	private static function _is_valid_request( $request ) {
-		if ( ! $request->get_header( 'authorization' ) )
+		if ( ! $request->get_header( 'authorization' ) ) {
 			return false;
+		}
 
-		if ( ! preg_match( '#^wordcamp-qbo-hmac (.+)$#', $request->get_header( 'authorization' ), $matches ) )
+		if ( ! preg_match( '#^wordcamp-qbo-hmac (.+)$#', $request->get_header( 'authorization' ), $matches ) ) {
 			return false;
+		}
 
-		$given_hmac = $matches[1];
+		$given_hmac  = $matches[1];
 		$request_url = esc_url_raw( home_url( parse_url( home_url( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) ) );
-		$payload = json_encode( array( strtolower( $request->get_method() ), strtolower( $request_url ),
-			$request->get_body(), $request->get_query_params() ) );
+		$payload     = json_encode( array(
+			strtolower( $request->get_method() ),
+			strtolower( $request_url ),
+			$request->get_body(),
+			$request->get_query_params(),
+		) );
 
 		return hash_equals( hash_hmac( 'sha256', $payload, self::$hmac_key ), $given_hmac );
 	}
@@ -1127,11 +1147,13 @@ class WordCamp_QBO {
 	 * Catch an OAuth authentication flow if it is one.
 	 */
 	public static function maybe_oauth_request() {
-		if ( empty( $_GET['wordcamp-qbo-oauth-request'] ) )
+		if ( empty( $_GET['wordcamp-qbo-oauth-request'] ) ) {
 			return;
+		}
 
-		if ( empty( $_GET['wordcamp-qbo-oauth-nonce'] ) || ! wp_verify_nonce( $_GET['wordcamp-qbo-oauth-nonce'], 'oauth-request' ) )
+		if ( empty( $_GET['wordcamp-qbo-oauth-nonce'] ) || ! wp_verify_nonce( $_GET['wordcamp-qbo-oauth-nonce'], 'oauth-request' ) ) {
 			wp_die( 'Could not verify nonce.' );
+		}
 
 		self::load_options();
 		$oauth = self::_get_oauth();
@@ -1139,15 +1161,16 @@ class WordCamp_QBO {
 		if ( empty( $_GET['oauth_token'] ) ) {
 
 			// We don't have an access token yet.
-			$request_url = 'https://oauth.intuit.com/oauth/v1/get_request_token';
+			$request_url  = 'https://oauth.intuit.com/oauth/v1/get_request_token';
 			$callback_url = esc_url_raw( add_query_arg( array(
 				'wordcamp-qbo-oauth-request' => 1,
-				'wordcamp-qbo-oauth-nonce' => wp_create_nonce( 'oauth-request' ),
+				'wordcamp-qbo-oauth-nonce'   => wp_create_nonce( 'oauth-request' ),
 			), admin_url() ) );
 
 			$request_token = $oauth->get_request_token( $request_url, $callback_url );
-			if ( is_wp_error( $request_token ) )
+			if ( is_wp_error( $request_token ) ) {
 				wp_die( $request_token->get_error_message() );
+			}
 
 			update_user_meta( get_current_user_id(), 'wordcamp-qbo-oauth', $request_token );
 
@@ -1160,40 +1183,48 @@ class WordCamp_QBO {
 			// We have a token.
 			$request_token = get_user_meta( get_current_user_id(), 'wordcamp-qbo-oauth', true );
 
-			if ( $request_token['oauth_token'] != $_GET['oauth_token'] )
+			if ( $request_token['oauth_token'] != $_GET['oauth_token'] ) {
 				wp_die( 'Could not verify OAuth token.' );
+			}
 
-			if ( empty( $_GET['oauth_verifier'] ) )
+			if ( empty( $_GET['oauth_verifier'] ) ) {
 				wp_die( 'Could not obtain OAuth verifier.' );
+			}
 
 			$oauth->set_token( $request_token['oauth_token'], $request_token['oauth_token_secret'] );
 			$request_url = 'https://oauth.intuit.com/oauth/v1/get_access_token';
 
 			$access_token = $oauth->get_access_token( $request_url, $_GET['oauth_verifier'] );
 
-			if ( is_wp_error( $access_token ) )
+			if ( is_wp_error( $access_token ) ) {
 				wp_die( 'Could not obtain an access token.' );
+			}
 
 			// We have an access token.
 			$data = array(
-				'oauth_token' => $access_token['oauth_token'],
+				'oauth_token'        => $access_token['oauth_token'],
 				'oauth_token_secret' => $access_token['oauth_token_secret'],
-				'realmId' => $_GET['realmId'],
+				'realmId'            => $_GET['realmId'],
 			);
 
 			self::$options['auth'] = $data;
 
 			$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
-			$request_url = sprintf( '%s/v3/company/%d/companyinfo/%d',
-				self::$api_base_url, self::$options['auth']['realmId'], self::$options['auth']['realmId'] );
+
+			$request_url = sprintf(
+				'%s/v3/company/%d/companyinfo/%d',
+				self::$api_base_url,
+				self::$options['auth']['realmId'],
+				self::$options['auth']['realmId']
+			);
 
 			$oauth_header = $oauth->get_oauth_header( 'GET', $request_url );
-			$response = wp_remote_get( $request_url, array(
+			$response     = wp_remote_get( $request_url, array(
 				'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 				'headers' => array(
 					'Authorization' => $oauth_header,
-					'Accept' => 'application/json',
-				)
+					'Accept'        => 'application/json',
+				),
 			) );
 			Logger\log( 'remote_request', compact( 'response' ) );
 
@@ -1207,7 +1238,7 @@ class WordCamp_QBO {
 			}
 			$company_name = $body['CompanyInfo']['CompanyName'];
 
-			self::$options['auth']['name'] = $company_name;
+			self::$options['auth']['name']      = $company_name;
 			self::$options['auth']['timestamp'] = time();
 			self::update_options();
 
