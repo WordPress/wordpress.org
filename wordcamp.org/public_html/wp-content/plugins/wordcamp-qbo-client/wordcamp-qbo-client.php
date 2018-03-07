@@ -90,37 +90,7 @@ class WordCamp_QBO_Client {
 	 * @return array Class IDs as keys, names as values.
 	 */
 	public static function get_classes() {
-		$cache_key = md5( 'wordcamp-qbo-client:classes' );
-		$cache = get_transient( $cache_key );
-
-		if ( $cache !== false )
-			return $cache;
-
-		$request_url = esc_url_raw( self::$api_base . '/classes/' );
-		$request_args = array(
-			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
-			'headers' => array(
-				'Content-Type' => 'application/json',
-				'Authorization' => self::_get_auth_header( 'get', $request_url ),
-			),
-		);
-		$response = wp_remote_get( $request_url, $request_args );
-
-		Logger\log( 'remote_request', compact( 'request_url', 'request_args', 'response' ) );
-
-		$classes = array();
-
-		if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) == 200 ) {
-			$body = json_decode( wp_remote_retrieve_body( $response ), true );
-			if ( ! empty( $body ) && is_array( $body ) )
-				$classes = $body;
-		}
-
-		if ( $classes ) {
-			set_transient( $cache_key, $classes, 12 * HOUR_IN_SECONDS );
-		}
-
-		return $classes;
+		return get_site_option( 'wordcamp_qbo_classes' );
 	}
 
 	public static function metabox_quickbooks() {

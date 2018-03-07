@@ -35,6 +35,11 @@ class WordCamp_QBO {
 	 */
 	public static function load() {
 		add_action( 'plugins_loaded', array( __CLASS__, 'plugins_loaded' ) );
+		add_action( 'wcqbo_prime_classes_cache', array( __CLASS__, 'prime_classes_cache' ) );
+
+		if ( ! wp_next_scheduled( 'wcqbo_prime_classes_cache' ) ) {
+			wp_schedule_event( time(), 'hourly', 'wcqbo_prime_classes_cache' );
+		}
 	}
 
 	/**
@@ -83,11 +88,6 @@ class WordCamp_QBO {
 		register_rest_route( 'wordcamp-qbo/v1', '/expense', array(
 			'methods' => 'GET, POST',
 			'callback' => array( __CLASS__, 'rest_callback_expense' ),
-		) );
-
-		register_rest_route( 'wordcamp-qbo/v1', '/classes', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'rest_callback_classes' ),
 		) );
 
 		register_rest_route( 'wordcamp-qbo/v1', '/invoice', array(
@@ -224,30 +224,23 @@ class WordCamp_QBO {
 	}
 
 	/**
-	 * REST: /classes
+	 * Update the cached QBO classes ("communities").
 	 *
-	 * @param WP_REST_Request $request
+	 * These are stored in an option rather than a transient, because:
+	 *
+	 * 1) The user shouldn't have to wait for an external HTTP request to complete before the page loads.
+	 * 2) The connection is QBO is not reliable enough. For example, it expires every 180 days, and needs to be
+	 *    manually reconnected. When the transient expires during that timeframe, it cannot be renewed until the
+	 *    connection is re-established, and any functionality relying on this would be broken.
 	 */
-	public static function rest_callback_classes( $request ) {
-		if ( ! self::_is_valid_request( $request ) )
-			return new WP_Error( 'unauthorized', 'Unauthorized', array( 'status' => 401 ) );
-
-		return self::_get_classes();
-	}
-
-	/**
-	 * Get an array of available QBO classes.
-	 *
-	 * @uses get_transient, set_transient
-	 *
-	 * @return array An array of class IDs as keys, names as values.
-	 */
-	private static function _get_classes() {
-		$cache_key = md5( 'wordcamp-qbo:classes' );
-		$cache = get_transient( $cache_key );
-
-		if ( $cache !== false )
-			return $cache;
+	public static function prime_classes_cache() {
+		/*
+		 * This isn't strictly needed right now, but it's future-proofing for when we eventually remove
+		 * `wordcamp-qbo-client` and network-activate `wordcamp-qbo`.
+		 */
+		if ( ! is_main_site() ) {
+			return;
+		}
 
 		self::load_options();
 		$oauth = self::_get_oauth();
@@ -275,12 +268,12 @@ class WordCamp_QBO {
 		Logger\log( 'remote_request', compact( 'args', 'response' ) );
 
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
-			return new WP_Error( 'error', 'Could not fetch classes.' );
+			return;
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $body ) ) {
-			return new WP_Error( 'error', 'Could not fetch classes body.' );
+			return;
 		}
 
 		$classes = array();
@@ -288,10 +281,13 @@ class WordCamp_QBO {
 			$classes[ $class['Id'] ] = $class['Name'];
 		}
 
+		if ( empty ( $class ) ) {
+			return;
+		}
+
 		asort( $classes );
 
-		set_transient( $cache_key, $classes, 12 * HOUR_IN_SECONDS );
-		return $classes;
+		update_site_option( 'wordcamp_qbo_classes', $classes );
 	}
 
 	/**
