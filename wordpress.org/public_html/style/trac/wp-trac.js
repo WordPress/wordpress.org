@@ -60,8 +60,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 	wpTrac = {
 
-		gardener: typeof wpBugGardener !== 'undefined',
-		currentUser: wpTracCurrentUser,
+		gardener: 'undefined' !== typeof wpBugGardener,
+		currentUser: 'undefined' !== typeof wpTracCurrentUser ? wpTracCurrentUser : '',
 
 		init: function() {
 			wpTrac.hacks();
@@ -771,7 +771,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					}
 
 					// Exclude current user.
-					if ( 'undefined' !== wpTrac.currentUser ) {
+					if ( wpTrac.currentUser ) {
 						users = $.grep( users, function( user ) {
 							return user !== wpTrac.currentUser;
 						});
