@@ -17,6 +17,7 @@ add_filter( 'camptix_require_login_please_login_message',    __NAMESPACE__ . '\o
 add_action( 'camptix_form_start_errors',                     __NAMESPACE__ . '\add_form_start_error_messages'       );
 add_action( 'transition_post_status',                        __NAMESPACE__ . '\ticket_sales_opened',          10, 3 );
 add_action( 'camptix_payment_result',                        __NAMESPACE__ . '\track_payment_results',        10, 3 );
+add_filter( 'camptix_shortcode_contents',                    __NAMESPACE__ . '\modify_shortcode_contents',    10, 2 );
 
 // Attendees
 add_filter( 'camptix_name_order',                            __NAMESPACE__ . '\set_name_order'                      );
@@ -617,15 +618,21 @@ function switch_email_template( $template_slug ) {
 /**
  * Get a string for HTML email footers listing global sponsors.
  *
+ * @param array $sponsor_args Args for filtering which sponsors to include.
+ *
  * @return string
  */
-function get_global_sponsors_string() {
+function get_global_sponsors_string( $sponsor_args = array() ) {
 	$sponsor_message_html = '';
-	$sponsors             = get_global_sponsors();
+	$sponsors             = get_global_sponsors( $sponsor_args );
 	$sponsor_count        = count( $sponsors );
 
 	if ( $sponsor_count > 0 ) {
 		$sponsors = wp_list_pluck( $sponsors, 'name' );
+
+		$sponsors = array_map( function( $string ) {
+			return "<strong>$string</strong>";
+		}, $sponsors );
 
 		shuffle( $sponsors );
 
@@ -655,12 +662,42 @@ function get_global_sponsors_string() {
 				break;
 		}
 
-		$sponsor_message_html = sprintf(
-			/* translators: The first %s placeholder is a list of sponsor names. The second %s placeholder is a URL. */
-			__( 'WordPress Global Community Sponsors help fund WordCamps and meetups around the world. Thank you to %s for <a href="%s">their support</a>!', 'wordcamporg' ),
+		$intro = __( 'WordPress Global Community Sponsors help fund WordCamps and meetups around the world.', 'wordcamporg' );
+
+		$thank_you = sprintf(
+			/* translators: %1$s: list of sponsor names; %2$s: URL; */
+			_n(
+				'Thank you to %1$s for <a href="%2$s">its support</a>!',
+				'Thank you to %1$s for <a href="%2$s">their support</a>!',
+				$sponsor_count,
+				'wordcamporg'
+			),
 			$sponsors_string,
 			'https://central.wordcamp.org/global-community-sponsors/'
 		);
+
+		if ( isset( $sponsor_args['region_id'], $sponsor_args['level_id'] ) ) {
+			$sponsor_level = get_sponsorship_level_name_from_id( $sponsor_args['level_id'] );
+			$sponsor_region = get_sponsorship_region_description_from_id( $sponsor_args['region_id'] );
+
+			if ( $sponsor_level && $sponsor_region ) {
+				$thank_you = sprintf(
+					/* translators: %1$s: sponsorship type; %2$s: list of sponsor names; %3$s: URL; %4$s: sponsorship region; */
+					_n(
+						'Thank you to our %1$s sponsor %2$s for <a href="%3$s">its support</a> in %4$s!',
+						'Thank you to our %1$s sponsors %2$s for <a href="%3$s">their support</a> in %4$s!',
+						$sponsor_count,
+						'wordcamporg'
+					),
+					$sponsor_level,
+					$sponsors_string,
+					'https://central.wordcamp.org/global-community-sponsors/',
+					$sponsor_region
+				);
+			}
+		}
+
+		$sponsor_message_html = sprintf( '%s %s', $intro, $thank_you );
 	}
 
 	return $sponsor_message_html;
@@ -673,6 +710,7 @@ function get_global_sponsors_string() {
  */
 function get_donation_string() {
 	return sprintf(
+		/* translators: %s is a placeholder for a URL. */
 		__( 'Do you love WordPress events? To support open source education and charity hackathons, please <a href="%s">donate to the WordPress Foundation</a>.', 'wordcamporg' ),
 		'https://wordpressfoundation.org/donate/'
 	);
@@ -681,9 +719,16 @@ function get_donation_string() {
 /**
  * Get an array of Global Sponsor names and URLs.
  *
+ * @param array $args Args for filtering which sponsors to include.
+ *
  * @return array
  */
-function get_global_sponsors() {
+function get_global_sponsors( $args = array() ) {
+	$args = wp_parse_args( $args, array(
+		'region_id' => '',
+		'level_id'  => '',
+	) );
+
 	$sponsors = array();
 
 	switch_to_blog( BLOG_ID_CURRENT_SITE );
@@ -695,6 +740,24 @@ function get_global_sponsors() {
 	) );
 
 	foreach ( $sponsor_posts as $sponsor_post ) {
+		$sponsorships = $sponsor_post->mes_regional_sponsorships;
+
+		if ( $args['region_id'] ) {
+			if ( ! isset( $sponsorships[ $args['region_id'] ] ) || empty( $sponsorships[ $args['region_id'] ] ) ) {
+				continue;
+			}
+
+			$sponsorships = array_intersect_key( $sponsorships, array( $args['region_id'] => '' ) );
+		}
+
+		if ( $args['level_id'] ) {
+			$levels = array_map( 'absint', $sponsorships );
+
+			if ( ! in_array( $args['level_id'], $levels, true ) ) {
+				continue;
+			}
+		}
+
 		$sponsors[] = array(
 			'name' => $sponsor_post->post_title,
 			'url'  => $sponsor_post->mes_website,
@@ -704,6 +767,69 @@ function get_global_sponsors() {
 	restore_current_blog();
 
 	return $sponsors;
+}
+
+/**
+ * Get a sponsorship region description.
+ *
+ * The two sponsorship regions currently in use are hard-coded so they can be translated. If a different region is
+ * specified, this function will attempt to retrieve a description string from the database (which won't be translated).
+ *
+ * @param int $region_id
+ *
+ * @return string
+ */
+function get_sponsorship_region_description_from_id( $region_id ) {
+	$region_id          = absint( $region_id );
+	$region_description = '';
+
+	if ( $region_id ) {
+		// Make the two standard options translatable.
+		switch( $region_id ) {
+			case 558366 : // Eastern
+				$region_description = __( 'Europe, Africa, and Asia Pacific', 'wordcamporg' );
+				break;
+			case 558365 : // Western
+				$region_description = __( 'North, Central, and South America', 'wordcamporg' );
+				break;
+		}
+
+		if ( ! $region_description ) {
+			switch_to_blog( BLOG_ID_CURRENT_SITE );
+
+			$region = get_term( $region_id, 'mes-regions' );
+
+			if ( $region instanceof \WP_Term ) {
+				$region_description = $region->description;
+			}
+
+			restore_current_blog();
+		}
+	}
+
+	return $region_description;
+}
+
+/**
+ * Get the name of a sponsorship level.
+ *
+ * @param int $level_id
+ *
+ * @return string
+ */
+function get_sponsorship_level_name_from_id( $level_id ) {
+	$level_id   = absint( $level_id );
+	$level_name = '';
+
+	if ( $level_id ) {
+		switch_to_blog( BLOG_ID_CURRENT_SITE );
+
+		$level_name = get_the_title( $level_id );
+
+		restore_current_blog();
+	}
+
+	return $level_name;
 }
 
 /**
@@ -756,4 +882,39 @@ function tshirt_report_intro_message( $message, $site_id, $sizes ) {
 
 	restore_current_blog();
 	return $message;
+}
+
+/**
+ * Modify the output of the `[camptix]` shortcode when certain conditions are met.
+ *
+ * @param string $shortcode_contents
+ * @param string $tix_action
+ *
+ * @return string
+ */
+function modify_shortcode_contents( $shortcode_contents, $tix_action ) {
+	switch ( $tix_action ) {
+		case 'access_tickets' : // Screen after purchase is complete.
+			$content_end = '</div><!-- #tix -->';
+
+			$current_wordcamp = get_wordcamp_post();
+			$region_id = isset( $current_wordcamp->meta['Multi-Event Sponsor Region'][0] ) ? $current_wordcamp->meta['Multi-Event Sponsor Region'][0] : '';
+
+			$sponsors_string = get_global_sponsors_string( array(
+				'region_id' => $region_id,
+				'level_id'  => 3040794, // Gold
+			) );
+			$donation_string = get_donation_string();
+
+			if ( false !== strpos( $shortcode_contents, $content_end ) ) {
+				$shortcode_contents = str_replace(
+					$content_end,
+					wpautop( "$sponsors_string\n\n$donation_string" ) . $content_end,
+					$shortcode_contents
+				);
+			}
+			break;
+	}
+
+	return $shortcode_contents;
 }
