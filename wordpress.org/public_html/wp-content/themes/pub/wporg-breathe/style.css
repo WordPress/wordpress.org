@@ -786,7 +786,7 @@ nav.o2-post-footer-actions ul li > span > a {
 }
 
 .make-welcome .entry-meta {
-	margin: 15px;
+	margin: 1em;
 	position: absolute;
 	right: 0;
 	top: 0;
@@ -811,6 +811,10 @@ nav.o2-post-footer-actions ul li > span > a {
 
 .make-welcome .entry-meta [type="button"]:focus {
 	outline: thin dotted;
+}
+
+.make-welcome .hidden {
+	display: none;
 }
 
 @media screen and (min-width: 960px) {
