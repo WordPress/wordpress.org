@@ -13,7 +13,7 @@
 namespace WordPressdotorg\TwoFactor;
 
 // Set this to false to disable the two factor plugin entirely
-define( 'WPORG_ENABLE_2FA', true );
+define( 'WPORG_ENABLE_2FA', false );
 
 if ( ! defined( 'WPORG_ENABLE_2FA' ) || ! WPORG_ENABLE_2FA ) {
 	return;
