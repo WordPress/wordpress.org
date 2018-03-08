@@ -40,7 +40,11 @@ class Readme_Validator {
 				document.getElementById( 'readme-data' ).addEventListener( 'submit', function() {
 					var readmeInputs = document.getElementsByTagName( 'textarea' );
 
-					readmeInputs[1].value = window.btoa( readmeInputs[0].value );
+					readmeInputs[1].value = window.btoa( encodeURIComponent( readmeInputs[0].value ).replace( /%([0-9A-F]{2})/g,
+						function toSolidBytes( match, p1 ) {
+							return String.fromCharCode( '0x' + p1 );
+						})
+					);
 
 					return true;
 				} );
