@@ -46,11 +46,11 @@ the_post();
 			<div class="entry-content row">
 				<section class="col-8">
 					<h2 id="mission"><?php _esc_html_e( 'Our Mission', 'wporg' ); ?></h2>
-					<p><?php _esc_html_e( 'WordPress is software designed for everyone with emphasis on accessibility, performance, security, and usability. We believe great software should work with little set up, so you can focus on sharing your story, product, or services freely. The basic WordPress software is simple and predictable to easily get started, it also offers a solid array of features for growth and success.', 'wporg' ); ?></p>
+					<p><?php _esc_html_e( 'WordPress is software designed for everyone, emphasizing accessibility, performance, security, and ease of use. We believe great software should work with minimum set up, so you can focus on sharing your story, product, or services freely. The basic WordPress software is simple and predictable so you can easily get started. It also offers powerful features for growth and success.', 'wporg' ); ?></p>
 					<p>
 						<?php
 						/* translators: Link to */
-						printf( wp_kses_post( ___( 'We believe in democratizing publishing and the <a href="%s">freedoms that come with open source</a>. Gathered behind this is idea is a large community of people dedicated to this project. The WordPress community is growing and inclusive. Their passion is what drives the success of work press and, in turn, helps you reach your goals.', 'wporg' ) ), esc_url( 'https://opensource.org/osd-annotated' ) );
+						printf( wp_kses_post( ___( 'We believe in democratizing publishing and the <a href="%s">freedoms that come with open source</a>. Supporting this idea is a large community of people collaborating on and contributing to this project. The WordPress community is welcoming and inclusive. Our contributors&#8217; passion drives the success of WordPress which, in turn, helps you reach your goals.', 'wporg' ) ), esc_url( 'https://opensource.org/osd-annotated' ) );
 						?>
 					</p>
 
@@ -68,7 +68,7 @@ the_post();
 							</p>
 						</a>
 					</div>
-					<p><?php _esc_html_e( 'We work around the globe, and have contributed countless hours to build a future wherein we can all be proud. WordPress is an open source project that is both free and priceless.', 'wporg' ); ?></p>
+					<p><?php _esc_html_e( 'WordPress contributors work around the globe, and have dedicated countless hours to build a tool that democratizes publishing. WordPress is open source software that is both free and priceless.', 'wporg' ); ?></p>
 				</section>
 
 				<section class="row gutters between">
@@ -110,10 +110,10 @@ the_post();
 					<p>
 						<?php
 						/* translators: 1: Link to b2/cafelog; 2: WordPress market share: 29%; */
-						printf( wp_kses_post( ___( 'WordPress started in 2003 when Mike Little and Matt Mullenweg created a <a href="%1$s">fork of b2/cafelog</a>. The need for an elegant, well-architected personal publishing system was clear even then. Today, WordPress is built on PHP and MySQL and licensed under the GPLv2. It is also the platform of choice for over %2$s of all sites across the web.', 'wporg' ) ), esc_url( 'https://www.whoishostingthis.com/resources/b2-cafelog/' ), esc_html( WP_MARKET_SHARE . '%' ) );
+						printf( wp_kses_post( ___( 'WordPress started in 2003 when Mike Little and Matt Mullenweg created a  <a href="%1$s">fork of b2/cafelog</a>. The need for an elegant, well-architected personal publishing system was clear even then. Today, WordPress is built on PHP and MySQL, and licensed under the GPLv2. It is also the platform of choice for over %2$s of all sites across the web.', 'wporg' ) ), esc_url( 'https://www.whoishostingthis.com/resources/b2-cafelog/' ), esc_html( WP_MARKET_SHARE . '%' ) );
 						?>
 					</p>
-					<p><?php _esc_html_e( 'WordPress is the success story of open-source projects everywhere. Not only does it evolve in progressive ways&#8212;supported by the finest engineers, designers, scientists, and bloggers the world has ever seen&#8212;but it also provides the opportunity for everyone to create and share, from handcrafted personal anecdotes to world-changing movements. People with little tech background can use it out of the box, and the more text savvy can use it in the most advanced ways.', 'wporg' ); ?></p>
+					<p><?php _esc_html_e( 'The WordPress open source project has evolved in progressive ways over time &#8212; supported by skilled, enthusiastic developers, designers, scientists, bloggers, and more. WordPress provides the opportunity for anyone to create and share, from handcrafted personal anecdotes to world-changing movements. People with a limited tech experience can use it "out of the box", and more tech-savvy folks can customize it in remarkable ways.', 'wporg' ); ?></p>
 				</section>
 
 				<section class="col-8">
