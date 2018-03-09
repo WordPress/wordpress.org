@@ -9,6 +9,8 @@ Author URI:  https://make.wordpress.org/meta
 */
 
 namespace WP15\Updates;
+use DateTime;
+
 defined( 'WPINC' ) or die();
 
 add_filter( 'tggr_end_date', __NAMESPACE__ . '\set_tagregator_cutoff_date' );
@@ -19,11 +21,11 @@ add_filter( 'tggr_end_date', __NAMESPACE__ . '\set_tagregator_cutoff_date' );
  * The #wp15 hashtag will collect spam, etc, after the event is over, and we want to
  * avoid publishing those.
  *
- * @param false|int $date
+ * @param DateTime|null $date
  *
- * @return false|int
+ * @return DateTime
  */
 function set_tagregator_cutoff_date( $date ) {
 	// A few weeks after the event ends, so that wrap-up posts, etc are included.
-	return strtotime( 'June 15, 2018' );
+	return new DateTime( 'June 15, 2018' );
 }
