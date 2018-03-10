@@ -4158,6 +4158,17 @@ div.bbp-breadcrumb p {
 	content: "\f487";
 }
 
+.sidebar .plugin-meta-icon {
+	border-top: 0;
+}
+
+.sidebar .plugin-icon {
+	margin: 0;
+	height: 128px;
+	width: 128px;
+	background-size: contain;
+}
+
 /*--------------------------------------------------------------
 # User Profile
 --------------------------------------------------------------*/

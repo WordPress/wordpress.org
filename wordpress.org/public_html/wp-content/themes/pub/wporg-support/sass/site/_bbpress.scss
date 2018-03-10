@@ -13,7 +13,7 @@ section {
 
 .three-up { //3-columns section
 	@extend .clear;
-	
+
 	@media (min-width: $ms-breakpoint) {
 		> div {
 			float:left;
@@ -95,7 +95,7 @@ section {
 
 			@media screen and ( min-width: $ms-breakpoint ) {
 				float: left;
-				padding: 0; 
+				padding: 0;
 				width: 65%;
 			}
 		}
@@ -161,8 +161,8 @@ section {
 		}
 
 		.bbp-body {
-			.bbp-topic-freshness, 
-			.bbp-topic-voice-count, 
+			.bbp-topic-freshness,
+			.bbp-topic-voice-count,
 			.bbp-topic-reply-count {
 				font-size: ms(-3);
 			}
@@ -170,7 +170,7 @@ section {
 
 		.bbp-header,
 		.bbp-body {
-			li.bbp-forum-freshness, 
+			li.bbp-forum-freshness,
 			li.bbp-topic-freshness {
 				width: 58%;
 
@@ -190,9 +190,9 @@ section {
 			}
 		}
 
-		ul.bbp-lead-topic, 
-		ul.bbp-replies, 
-		ul.bbp-search-results, 
+		ul.bbp-lead-topic,
+		ul.bbp-replies,
+		ul.bbp-search-results,
 		ul.bbp-topics.full-posts,
 		li.bbp-body div.hentry {
 			overflow: visible;
@@ -215,7 +215,7 @@ section {
 			display: none;
 		}
 
-		div.bbp-topic-author img.avatar, 
+		div.bbp-topic-author img.avatar,
 		div.bbp-reply-author img.avatar {
 			border-radius: 50%;
 			float: left;
@@ -245,7 +245,7 @@ section {
 			}
 		}
 
-		div.bbp-reply-author a.bbp-author-name, 
+		div.bbp-reply-author a.bbp-author-name,
 		div.bbp-topic-author a.bbp-author-name {
 			clear: none;
 			font-size: ms(0);
@@ -253,7 +253,7 @@ section {
 			margin: 0;
 		}
 
-		div.bbp-reply-author, 
+		div.bbp-reply-author,
 		div.bbp-topic-author {
 			float: none;
 			text-align: left;
@@ -290,12 +290,12 @@ section {
 			font-weight: 400;
 		}
 
-		div.topic, 
+		div.topic,
 		div.reply {
 			padding: 1.5rem 1.5rem 1.5rem 0;
 		}
 
-		div.bbp-reply-content, 
+		div.bbp-reply-content,
 		div.bbp-topic-content {
 			padding: 0;
 			margin: 0 0 0 10%;
@@ -310,19 +310,19 @@ section {
 			margin-left: 1.5rem;
 		}
 
-		div.bbp-reply-content a, 
+		div.bbp-reply-content a,
 		div.bbp-topic-content a {
 			text-decoration: underline;
 			font-weight: inherit;
 		}
 
-		div.bbp-reply-content a.mention, 
+		div.bbp-reply-content a.mention,
 		div.bbp-topic-content a.mention {
 			text-decoration: none;
 			font-weight: bold;
 		}
 
-		div.bbp-reply-content .bbp-reply-revision-log-item a, 
+		div.bbp-reply-content .bbp-reply-revision-log-item a,
 		div.bbp-topic-content .bbp-topic-revision-log-item a {
 			text-decoration: none;
 		}
@@ -345,7 +345,7 @@ section {
 			}
 		}
 
-		ul.status-closed, 
+		ul.status-closed,
 		ul.status-closed a {
 			color: inherit;
 		}
@@ -357,7 +357,7 @@ section {
 			img.avatar {
 				display: none; // Hides the avatar from single forum view.
 			}
-		
+
 			a ~ a {
 				margin-left: -3px; // Hides non-breaking space after the avatar.
 			}
@@ -448,10 +448,10 @@ section {
 		}
 	}
 
-	#bbpress-forums ul.bbp-forums, 
-	#bbpress-forums ul.bbp-lead-topic, 
-	#bbpress-forums ul.bbp-replies, 
-	#bbpress-forums ul.bbp-search-results, 
+	#bbpress-forums ul.bbp-forums,
+	#bbpress-forums ul.bbp-lead-topic,
+	#bbpress-forums ul.bbp-replies,
+	#bbpress-forums ul.bbp-search-results,
 	#bbpress-forums ul.bbp-topics,
 	#bbpress-forums #bbp-user-wrapper {
 		font-size: ms(-2);
@@ -471,7 +471,7 @@ section {
 		width: 90px;
 	}
 
-	li.bbp-forum-freshness, 
+	li.bbp-forum-freshness,
 	li.bbp-topic-freshness {
 		text-align: left;
 	}
@@ -488,7 +488,7 @@ section {
 	}
 
 	.forum-titles {
-		.bbp-topic-voice-count, 
+		.bbp-topic-voice-count,
 		.bbp-topic-reply-count {
 			overflow: hidden;
 
@@ -514,7 +514,7 @@ section {
 		}
 	}
 
-	li.bbp-header li.bbp-forum-info, 
+	li.bbp-header li.bbp-forum-info,
 	li.bbp-header li.bbp-topic-title {
 		text-align: left !important;
 	}
@@ -532,7 +532,7 @@ section {
 		font-size: ms(-2);
 	}
 
-	.bbp-topic-form fieldset.bbp-form button, 
+	.bbp-topic-form fieldset.bbp-form button,
 	.bbp-reply-form fieldset.bbp-form button { // specifc overwrites
 		float: none;
 		margin-top: 0;
@@ -795,7 +795,7 @@ select {
 		content: "\f132";
 	}
 
-	.forum-info li.forum-subscribe:before, 
+	.forum-info li.forum-subscribe:before,
 	.topic-info li.topic-subscribe:before {
 		content: "\f465";
 	}
@@ -835,8 +835,8 @@ select {
 				padding-right: 0;
 			}
 
-			div.even:not(.topic), 
-			ul.even, 
+			div.even:not(.topic),
+			ul.even,
 			div.odd,
 			ul.odd {
 				background: #fff;
@@ -865,7 +865,7 @@ select {
 					}
 				}
 
-				&.sticky, 
+				&.sticky,
 				&.super-sticky,
 				&.status-closed {
 
@@ -923,7 +923,6 @@ div.bbp-breadcrumb {
 }
 
 .sidebar {
-
 	.topic-info li.topic-forum:before {
 		content: "\f230";
 	}
@@ -940,6 +939,16 @@ div.bbp-breadcrumb {
 		content: "\f487";
 	}
 
+	.plugin-meta-icon {
+		border-top: 0;
+	}
+
+	.plugin-icon {
+		margin: 0;
+		height: 128px;
+		width: 128px;
+		background-size: contain;
+	}
 }
 
 
@@ -1016,9 +1025,3 @@ div.bbp-breadcrumb {
 		}
 	}
 }
-
-
-
-
-
-
