@@ -30,6 +30,8 @@ class Set_Plugin_Project extends WP_CLI_Command {
 	 *
 	 */
 	public function __invoke( $args, $assoc_args ) {
+		global $wpdb;
+
 		if ( ! preg_match( '/^[^\/]+$/', $args[0] ) ) {
 			WP_CLI::error( sprintf( "The plugin slug '%s' contains invalid characters.", $args[0] ), 1 );
 		}
@@ -97,6 +99,12 @@ class Set_Plugin_Project extends WP_CLI_Command {
 
 			// Update the project details.
 			$plugin_project->update( $project_args );
+		}
+
+		// Store ID of the post in the plugin directory. Used for retrieving plugin icons.
+		$post_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $project->slug ) );
+		if ( $post_id ) {
+			gp_update_meta( $plugin_project->id, 'directory-post-id', $post_id, 'wp-plugins' );
 		}
 
 		// The current stable SVN tag.
