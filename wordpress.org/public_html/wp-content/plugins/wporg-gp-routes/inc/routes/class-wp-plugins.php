@@ -171,8 +171,14 @@ class WP_Plugins extends WP_Directory {
 		$default = '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 
 		$icon = '';
-		if ( function_exists( 'wporg_get_plugin_icon' ) ) {
-			$icon = wporg_get_plugin_icon( $project->slug, $size );
+
+		if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) ) {
+			$directory_post_id = gp_get_meta( 'wp-plugins', $project->id, 'directory-post-id' );
+			if ( $directory_post_id ) {
+				switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+				$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
+				restore_current_blog();
+			}
 		}
 
 		if ( $icon ) {

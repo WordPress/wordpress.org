@@ -882,6 +882,12 @@ a.contribute-button:hover {
 	background: #dedede;
 }
 
+.projects .project-icon .plugin-icon {
+	width: 128px;
+	height: 128px;
+	background-size: contain;
+}
+
 .projects .project-icon .default-icon span,
 .projects .project-icon .wordpress-icon span {
 	height: 128px;
@@ -996,7 +1002,9 @@ a.contribute-button:hover {
 }
 
 .project-box .project-icon .plugin-icon {
-	margin: 0 !important;
+	width: 64px;
+	height: 64px;
+	background-size: contain;
 }
 
 .project-box .project-icon .default-icon,

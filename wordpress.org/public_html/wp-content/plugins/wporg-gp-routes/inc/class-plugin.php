@@ -36,8 +36,8 @@ class Plugin {
 	 * Initializes the plugin.
 	 */
 	public function plugins_loaded() {
-		if ( file_exists( WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php' ) ) {
-			include_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
+		if ( file_exists( WPORGPATH . 'wp-content/plugins/plugin-directory/class-template.php' ) ) {
+			include_once WPORGPATH . 'wp-content/plugins/plugin-directory/class-template.php';
 		}
 
 		add_action( 'template_redirect', [ $this, 'register_routes' ], 5 );

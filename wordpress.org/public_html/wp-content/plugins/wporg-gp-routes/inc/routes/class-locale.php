@@ -2,7 +2,6 @@
 
 namespace WordPressdotorg\GlotPress\Routes\Routes;
 
-// wporg_get_plugin_icon()
 use GP;
 use GP_Locales;
 use GP_Route;
@@ -310,25 +309,23 @@ class Locale extends GP_Route {
 				} else {
 					return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
 				}
-			case 'bbpress':
-			case 'buddypress':
-				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
-					$screenshot = wporg_get_plugin_icon( $project->slug, $size );
-					if ( $screenshot ) {
-						return $screenshot;
-					}
-				}
-				return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 			case 'wp-plugins':
-				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
-					$screenshot = wporg_get_plugin_icon( $sub_project->slug, $size );
-					if ( $screenshot ) {
-						return $screenshot;
+				$icon = '';
+
+				if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) ) {
+					$directory_post_id = gp_get_meta( 'wp-plugins', $sub_project->id, 'directory-post-id' );
+					if ( $directory_post_id ) {
+						switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+						$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
+						restore_current_blog();
 					}
 				}
+
+				if ( $icon ) {
+					return $icon;
+				}
+
 				return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
-			case 'glotpress':
-				return '<div class="icon"><img src="'. plugins_url( 'templates/images/glotpress.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
 			case 'apps':
 				return '<div class="default-icon"><span class="dashicons dashicons-smartphone"></span></div>';
 			default:
