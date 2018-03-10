@@ -46,6 +46,11 @@ class Plugin {
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'apply_capital_P_dangit' ), 10, 2 );
 
+		// Cron.
+		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
+		add_action( 'init', [ $this, 'register_cron_events' ] );
+		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
+
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
 		add_action( 'admin_bar_menu', array( $this, 'replace_login_url_in_admin_bar' ), 20 );
@@ -60,6 +65,78 @@ class Plugin {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
+	}
+
+	/**
+	 * Filters the non-default cron schedules.
+	 *
+	 * @param array $schedules An array of non-default cron schedules.
+	 * @return array  An array of non-default cron schedules.
+	 */
+	public function register_cron_schedules( $schedules ) {
+		$schedules['15_minutes'] = array(
+			'interval' => 15 * MINUTE_IN_SECONDS,
+			'display'  => 'Every 15 minutes',
+		);
+
+		return $schedules;
+	}
+
+	/**
+	 * Registers cron events.
+	 */
+	public function register_cron_events() {
+		if ( ! wp_next_scheduled( 'wporg_translate_update_contributor_profile_badges' ) ) {
+			wp_schedule_event( time(), '15_minutes', 'wporg_translate_update_contributor_profile_badges' );
+		}
+	}
+
+	/**
+	 * Calls the profile.w.org activity handler to assign contributors to the
+	 * Translation Contributor group.
+	 */
+	public function update_contributor_profile_badges() {
+		global $wpdb;
+
+		if ( ! isset( $wpdb->user_translations_count ) ) {
+			return;
+		}
+
+		$now       = time();
+		$last_sync = get_option( 'wporg_translate_last_badges_sync' );
+		if ( ! $last_sync ) {
+			return;
+		}
+
+		$user_ids = $wpdb->get_col( $wpdb->prepare( "
+			SELECT user_id
+			FROM {$wpdb->user_translations_count}
+			WHERE accepted > 0 AND date_modified > %s
+			GROUP BY user_id
+		", gmdate( 'Y-m-d H:i:s', $last_sync ) ) );
+
+		if ( ! $user_ids ) {
+			update_option( 'wporg_translate_last_badges_sync', $now );
+			return;
+		}
+
+		$request_body = [
+			'action'      => 'wporg_handle_association',
+			'source'      => 'polyglots',
+			'command'     => 'add',
+			'association' => 'translation-contributor',
+		];
+
+		foreach( $user_ids as $user_id ) {
+			$request_body['user_id'] = $user_id;
+
+			wp_remote_post( 'https://profiles.wordpress.org/wp-admin/admin-ajax.php', [
+				'body'       => $request_body,
+				'user-agent' => 'WordPress.org Translate',
+			] );
+		}
+
+		update_option( 'wporg_translate_last_badges_sync', $now );
 	}
 
 	/**
