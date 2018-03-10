@@ -1,0 +1,131 @@
+#!/bin/sh
+
+# See README.md for setup instructions.
+
+# TODO
+#
+# - Restrict changed files to only PHP for `php -l` and PHPMD, then PHP and CSS for PHPCS.
+# - This all assumes that the state is clean. If a changed file is dirty, `php -l`, etc will be run against the
+#   dirty file on disk, not the contents of that file at `HEAD`. We could maybe stash unstaged changes, run this
+#   then pop the stash, but that feels bad. Line numbers wouldn't necessary match up between `php -l` output and
+#   the file after popping the stash, and there may be merge conflicts when popping in some cases?
+# - Only run PHPCS/PHPMD over changed lines, not entire files?
+# - Maybe make these functions more DRY, since they're all pretty similar.
+#
+
+
+# Get the files that have changes between the local and remote HEADs.
+function get_changed_files {
+	changed_files=$( /usr/bin/git diff git-svn HEAD --name-only )
+}
+
+# Lint PHP files for syntax errors.
+function php_lint {
+	local errors=false
+
+	for file in $changed_files; do
+		output=$( /usr/local/bin/php -l -d display_errors=1 $file )
+
+		if [ $? != 0 ]; then
+			errors=true
+
+			for line in "${output[@]}"; do
+				echo "${color_error} $line ${color_reset}"
+			done
+		fi
+	done
+
+	if [[ $errors == true ]]; then
+		exit 1
+	fi
+}
+
+# Run PHP Code Sniffer to check for coding standards violations.
+function phpcs {
+	local errors=false
+
+	for file in $changed_files; do
+		output=$( /usr/local/bin/phpcs $file )
+
+		if [ $? != 0 ]; then
+			errors=true
+
+			for line in "${output[@]}"; do
+				echo "$line"
+			done
+		fi
+	done
+
+	if [[ $errors == true ]]; then
+		prompt_to_continue
+	fi
+}
+
+# Run PHP Mess Detector to check for poor-quality code.
+function phpmd {
+	local errors=false
+	local config=$( search_tree "phpmd.xml.dist" )
+
+	for file in $changed_files; do
+		output=$( /usr/local/bin/phpmd $file text $config )
+
+		if [ $? != 0 ]; then
+			errors=true
+
+			for line in "${output[@]}"; do
+				echo "${color_warn} $line ${color_reset}"
+			done
+		fi
+	done
+
+	if [[ $errors == true ]]; then
+		prompt_to_continue
+	fi
+}
+
+# Search up the directory tree for the given file.
+#
+# $1 - The filename to find.
+function search_tree {
+	local folder=$PWD
+	local file=${1}
+	local path=false
+
+	while [[ '/' != $folder ]]; do
+		if [[ -f $folder/$file ]]; then
+			path=$folder/$file
+			break
+		fi
+
+		folder=$( dirname $folder )
+	done
+
+	echo "$path"
+}
+
+# Prompt the user to abort or continue running the script.
+function prompt_to_continue {
+	printf "\nDo you want to procede despite the errors above? [y/N] "
+	read PROCEED
+
+	if [[ 'y' != $PROCEED ]]; then
+		printf "\nAborting.\n"
+		exit 1
+	fi
+}
+
+function main {
+	color_reset="\033[m"
+	color_error="\033[1;31m" # red
+	color_warn="\033[1;33m"  # yellow
+
+	get_changed_files
+
+	php_lint
+	phpcs
+	phpmd
+
+	echo "\nProceeding with push.\n"
+}
+
+main
