@@ -40,7 +40,7 @@ class Plugin_Directory {
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
-		add_action( 'template_redirect', array( $this, 'custom_redirects' ) );
+		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
@@ -514,6 +514,10 @@ class Plugin_Directory {
 
 		// Remove the /admin$ redirect to wp-admin
 		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
+
+		// disable feeds
+		remove_action( 'wp_head', 'feed_links', 2 );
+		remove_action( 'wp_head', 'feed_links_extra', 3 );
 
 		add_filter( 'get_term', array( __NAMESPACE__ . '\I18n', 'translate_term' ) );
 		add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );
@@ -1175,6 +1179,22 @@ class Plugin_Directory {
 		// new-style Search links.
 		if ( get_query_var( 's' ) && isset( $_GET['s'] ) ) {
 			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ) );
+			die();
+		}
+
+		// disable feeds
+		if ( is_feed() ) {
+			if( isset( $_GET['feed'] ) ) {
+				wp_redirect( esc_url_raw( remove_query_arg( 'feed' ) ), 301 );
+				die();
+			}
+			set_query_var( 'feed', '' );
+			redirect_canonical();
+			die();
+		}
+
+		if ( is_comment_feed() ) {
+			wp_redirect( 'https://wordpress.org/plugins/', 301 );
 			die();
 		}
 
