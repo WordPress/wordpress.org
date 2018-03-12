@@ -2,6 +2,7 @@
 
 # See README.md for setup instructions.
 
+#
 # TODO
 #
 # - Restrict changed files to only PHP for `php -l` and PHPMD, then PHP and CSS for PHPCS.
@@ -13,6 +14,20 @@
 # - Maybe make these functions more DRY, since they're all pretty similar.
 #
 
+# Main controller.
+function main {
+	color_reset="\033[m"
+	color_error="\033[1;31m" # red
+	color_warn="\033[1;33m"  # yellow
+
+	get_changed_files
+
+	php_lint
+	phpcs
+	phpmd
+
+	echo "\nProceeding with push.\n"
+}
 
 # Get the files that have changes between the local and remote HEADs.
 function get_changed_files {
@@ -41,6 +56,8 @@ function php_lint {
 }
 
 # Run PHP Code Sniffer to check for coding standards violations.
+#
+# PHPCS automatically searches for phpcs.xml.dist, so we don't need to specify its location like we do with PHPMD.
 function phpcs {
 	local errors=false
 
@@ -105,27 +122,13 @@ function search_tree {
 
 # Prompt the user to abort or continue running the script.
 function prompt_to_continue {
-	printf "\nDo you want to procede despite the errors above? [y/N] "
+	printf "\nDo you want to proceed despite the errors above? [y/N] "
 	read PROCEED
 
 	if [[ 'y' != $PROCEED ]]; then
 		printf "\nAborting.\n"
 		exit 1
 	fi
-}
-
-function main {
-	color_reset="\033[m"
-	color_error="\033[1;31m" # red
-	color_warn="\033[1;33m"  # yellow
-
-	get_changed_files
-
-	php_lint
-	phpcs
-	phpmd
-
-	echo "\nProceeding with push.\n"
 }
 
 main

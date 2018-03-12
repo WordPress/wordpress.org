@@ -13,13 +13,13 @@ Aside: Why not use native Subversion hooks? Because they run on the server, whic
 
 ## git svn dcommit
 
-git-svn doesn't support hooks natively, so we'll use an alias instead.
+git-svn doesn't support hooks natively, but we can use an alias instead.
 
 1. Add the following to your `.gitconfig`:
 
 	```
 	[alias]
-		svnpush  = !sh .git/hooks/pre-svn-dcommit && git svn dcommit --interactive
+		svnpush = !sh .git/hooks/pre-svn-dcommit && git svn dcommit --interactive
 	```
 
 1. When you're ready to push, call `git svnpush` instead of `git svn dcommit`.
