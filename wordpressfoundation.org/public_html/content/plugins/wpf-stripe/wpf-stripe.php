@@ -8,13 +8,18 @@ Author URI:  http://ottopress.com
 License:     GPLv2 or later
 */
 
+namespace WordPress_Foundation\Stripe;
+use Exception;
+
 defined( 'WPINC' ) || die();
 
-$wpf_success_url = 'https://wordpressfoundation.org/successful-donation/';
-$wpf_fail_url    = 'https://wordpressfoundation.org/unsuccessful-donation/';
 
-add_shortcode( 'wpfstripe', 'wpf_stripe_buttons' );
-function wpf_stripe_buttons() {
+/**
+ * Display Stripe donate buttons.
+ *
+ * @return string
+ */
+function render_donate_shortcode() {
 	$image = plugins_url( 'blue-xl.png', __FILE__ );
 
 	ob_start();
@@ -92,15 +97,16 @@ function wpf_stripe_buttons() {
 
 	return ob_get_clean();
 }
+add_shortcode( 'wpfstripe', __NAMESPACE__ . '\render_donate_shortcode' );
 
-add_action('init', 'wpf_stripe_check_subscribe');
-function wpf_stripe_check_subscribe() {
+add_action( 'init', __NAMESPACE__ . '\check_subscribe' );
+function check_subscribe() {
 	if ( !empty( $_POST ) && isset( $_POST['stripeToken'] ) ) {
-		wpf_stripe_process_payments();
+		process_payments();
 	}
 }
 
-function wpf_stripe_process_payments() {
+function process_payments() {
 	global $wpf_success_url, $wpf_fail_url;
 
 	// no token, nothing to do
@@ -130,8 +136,10 @@ function wpf_stripe_process_payments() {
 	}
 }
 
-add_action('wp_head','wpf_custom_styles');
-function wpf_custom_styles() {
+/**
+ * Output CSS for the `[wpfstripe]` shortcode.
+ */
+function custom_styles() {
 	global $post;
 
 	if ( ! is_a( $post, 'WP_Post' ) || 'donate' !== $post->post_name ) {
@@ -150,4 +158,4 @@ function wpf_custom_styles() {
 
 	<?php
 }
-
+add_action( 'wp_head', __NAMESPACE__ . '\custom_styles' );
