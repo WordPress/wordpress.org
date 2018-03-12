@@ -132,6 +132,22 @@ function wpf_stripe_process_payments() {
 
 add_action('wp_head','wpf_custom_styles');
 function wpf_custom_styles() {
-?><style>.stripe-button-el { text-transform: none; float: left; margin: 8px; }</style><?php
+	global $post;
+
+	if ( ! is_a( $post, 'WP_Post' ) || 'donate' !== $post->post_name ) {
+		return;
+	}
+
+	?>
+
+	<style>
+		.stripe-button-el {
+			text-transform: none;
+			float: left;
+			margin: 8px;
+		}
+	</style>
+
+	<?php
 }
 
