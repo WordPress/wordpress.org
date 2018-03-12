@@ -2,6 +2,6 @@
 
 namespace Stripe\Error;
 
-class ApiConnection extends Base
+class Idempotency extends Base
 {
 }

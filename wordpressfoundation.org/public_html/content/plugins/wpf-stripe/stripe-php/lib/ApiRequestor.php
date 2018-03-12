@@ -33,7 +33,7 @@ class ApiRequestor
         } elseif ($d === false) {
             return 'false';
         } elseif (is_array($d)) {
-            $res = array();
+            $res = [];
             foreach ($d as $k => $v) {
                 $res[$k] = self::_encodeObjects($v);
             }
@@ -54,17 +54,13 @@ class ApiRequestor
      */
     public function request($method, $url, $params = null, $headers = null)
     {
-        if (!$params) {
-            $params = array();
-        }
-        if (!$headers) {
-            $headers = array();
-        }
+        $params = $params ?: [];
+        $headers = $headers ?: [];
         list($rbody, $rcode, $rheaders, $myApiKey) =
         $this->_requestRaw($method, $url, $params, $headers);
         $json = $this->_interpretResponse($rbody, $rcode, $rheaders);
         $resp = new ApiResponse($rbody, $rcode, $rheaders, $json);
-        return array($resp, $myApiKey);
+        return [$resp, $myApiKey];
     }
 
     /**
@@ -74,6 +70,7 @@ class ApiRequestor
      * @param array $resp
      *
      * @throws Error\InvalidRequest if the error is caused by the user.
+     * @throws Error\Idempotency if the error is caused by an idempotency key.
      * @throws Error\Authentication if the error is caused by a lack of
      *    permissions.
      * @throws Error\Permission if the error is caused by insufficient
@@ -110,6 +107,7 @@ class ApiRequestor
         $msg = isset($errorData['message']) ? $errorData['message'] : null;
         $param = isset($errorData['param']) ? $errorData['param'] : null;
         $code = isset($errorData['code']) ? $errorData['code'] : null;
+        $type = isset($errorData['type']) ? $errorData['type'] : null;
 
         switch ($rcode) {
             case 400:
@@ -117,6 +115,9 @@ class ApiRequestor
                 // for API versions earlier than 2015-09-08
                 if ($code == 'rate_limit') {
                     return new Error\RateLimit($msg, $param, $rcode, $rbody, $resp, $rheaders);
+                }
+                if ($type == 'idempotency_error') {
+                    return new Error\Idempotency($msg, $rcode, $rbody, $resp, $rheaders);
                 }
 
                 // intentional fall-through
@@ -181,13 +182,13 @@ class ApiRequestor
         $uname = php_uname();
 
         $appInfo = Stripe::getAppInfo();
-        $ua = array(
+        $ua = [
             'bindings_version' => Stripe::VERSION,
             'lang' => 'php',
             'lang_version' => $langVersion,
             'publisher' => 'stripe',
             'uname' => $uname,
-        );
+        ];
         if ($clientInfo) {
             $ua = array_merge($clientInfo, $ua);
         }
@@ -196,11 +197,11 @@ class ApiRequestor
             $ua['application'] = $appInfo;
         }
 
-        $defaultHeaders = array(
+        $defaultHeaders = [
             'X-Stripe-Client-User-Agent' => json_encode($ua),
             'User-Agent' => $uaString,
             'Authorization' => 'Bearer ' . $apiKey,
-        );
+        ];
         return $defaultHeaders;
     }
 
@@ -256,7 +257,7 @@ class ApiRequestor
         }
 
         $combinedHeaders = array_merge($defaultHeaders, $headers);
-        $rawHeaders = array();
+        $rawHeaders = [];
 
         foreach ($combinedHeaders as $header => $value) {
             $rawHeaders[] = $header . ': ' . $value;
@@ -269,7 +270,7 @@ class ApiRequestor
             $params,
             $hasFile
         );
-        return array($rbody, $rcode, $rheaders, $myApiKey);
+        return [$rbody, $rcode, $rheaders, $myApiKey];
     }
 
     private function _processResourceParam($resource, $hasCurlFile)
