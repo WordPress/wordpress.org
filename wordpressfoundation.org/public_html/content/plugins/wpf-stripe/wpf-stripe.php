@@ -1,74 +1,96 @@
 <?php
+
 /*
 Plugin Name: WPF Stripe
-Plugin URI: https://wordpressfoundation.org/wpf-stripe
 Description: Add support for Stripe subscriptions
-Version: 1.0
-Author: Otto
-Author URI: http://ottopress.com
-License: GPLv2 or later
-Text Domain: wpf-stripe
+Author:      Otto
+Author URI:  http://ottopress.com
+License:     GPLv2 or later
 */
+
+defined( 'WPINC' ) || die();
 
 $wpf_success_url = 'https://wordpressfoundation.org/successful-donation/';
 $wpf_fail_url    = 'https://wordpressfoundation.org/unsuccessful-donation/';
 
-// Real live data, only use on live site
-$wpf_stripe_publishable_key = 'pk_live_qKgFC6r4tVgMx7yIQl5QatpM';
-
 add_shortcode( 'wpfstripe', 'wpf_stripe_buttons' );
 function wpf_stripe_buttons() {
-	global $wpf_stripe_publishable_key;
 	$image = plugins_url( 'blue-xl.png', __FILE__ );
 
-	$output = <<< EOT
-<form action="" method="POST">
-  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="{$wpf_stripe_publishable_key}"
-    data-image="{$image}"
-    data-name="WordPress Foundation"
-    data-description="Yearly Subscription"
-    data-amount="1000"
-    data-label="Give $10 per year">
-  </script>
-  <input type='hidden' name='wpf_plan' value='lowest'>
-</form>
-<form action="" method="POST">
-  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="{$wpf_stripe_publishable_key}"
-    data-image="{$image}"
-    data-name="WordPress Foundation"
-    data-description="Yearly Subscription"
-    data-amount="5000"
-    data-label="Give $50 per year">
-  </script>
-  <input type='hidden' name='wpf_plan' value='low'>
-</form>
-<form action="" method="POST">
-  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="{$wpf_stripe_publishable_key}"
-    data-image="{$image}"
-    data-name="WordPress Foundation"
-    data-description="Yearly Subscription"
-    data-amount="20000"
-    data-label="Give $200 per year">
-  </script>
-  <input type='hidden' name='wpf_plan' value='medium'>
-</form>
-<form action="" method="POST">
-  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="{$wpf_stripe_publishable_key}"
-    data-image="{$image}"
-    data-name="WordPress Foundation"
-    data-description="Yearly Subscription"
-    data-amount="100000"
-    data-label="Give $1000 per year">
-  </script>
-  <input type='hidden' name='wpf_plan' value='high'>
-</form>
-EOT;
+	ob_start();
+	?>
 
-	return $output;
+	<p>You can choose to donate annually:</p>
+
+	<div class="subscription-plans">
+		<form action="" method="POST">
+			<script
+				src="https://checkout.stripe.com/checkout.js"
+				class="stripe-button"
+				data-key="<?php echo esc_html( STRIPE_PUBLIC_KEY ); ?>"
+				data-image="<?php echo esc_url( $image ); ?>"
+				data-name="WordPress Foundation"
+				data-description="Yearly Subscription"
+				data-amount="1000"
+				data-label="Give $10 per year"
+				data-zip-code="true"
+				data-billing-address="true">
+			</script>
+			<input type='hidden' name='wpf_plan' value='lowest'>
+		</form>
+
+		<form action="" method="POST">
+			<script
+				src="https://checkout.stripe.com/checkout.js"
+				class="stripe-button"
+				data-key="<?php echo esc_html( STRIPE_PUBLIC_KEY ); ?>"
+				data-image="<?php echo esc_url( $image ); ?>"
+				data-name="WordPress Foundation"
+				data-description="Yearly Subscription"
+				data-amount="5000"
+				data-zip-code="true"
+				data-billing-address="true"
+				data-label="Give $50 per year">
+			</script>
+			<input type='hidden' name='wpf_plan' value='low'>
+		</form>
+
+		<form action="" method="POST">
+			<script
+				src="https://checkout.stripe.com/checkout.js"
+				class="stripe-button"
+				data-key="<?php echo esc_html( STRIPE_PUBLIC_KEY ); ?>"
+				data-image="<?php echo esc_url( $image ); ?>"
+				data-name="WordPress Foundation"
+				data-description="Yearly Subscription"
+				data-amount="20000"
+				data-label="Give $200 per year"
+				data-zip-code="true"
+				data-billing-address="true">
+			</script>
+			<input type='hidden' name='wpf_plan' value='medium'>
+		</form>
+
+		<form action="" method="POST">
+			<script
+				src="https://checkout.stripe.com/checkout.js"
+				class="stripe-button"
+				data-key="<?php echo esc_html( STRIPE_PUBLIC_KEY ); ?>"
+				data-image="<?php echo esc_url( $image ); ?>"
+				data-name="WordPress Foundation"
+				data-description="Yearly Subscription"
+				data-amount="100000"
+				data-label="Give $1000 per year"
+				data-zip-code="true"
+				data-billing-address="true">
+			</script>
+			<input type='hidden' name='wpf_plan' value='high'>
+		</form>
+	</div>
+
+	<?php
+
+	return ob_get_clean();
 }
 
 add_action('init', 'wpf_stripe_check_subscribe');
