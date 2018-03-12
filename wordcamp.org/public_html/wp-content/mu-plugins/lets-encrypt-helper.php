@@ -71,7 +71,18 @@ class WordCamp_Lets_Encrypt_Helper {
 
 		// Back-compat domains.
 		if ( is_callable( 'wcorg_get_domain_redirects' ) ) {
-			$domains = array_merge( $domains, array_keys( wcorg_get_domain_redirects() ) );
+			$back_compat_domains = wcorg_get_domain_redirects();
+
+			/*
+			 * Temporary remove domains whose DNS hasn't been migrated to ORD, because it causes the LE
+			 * renewal script to abort early.
+			 *
+			 * @todo remove this once DNS is updated.
+			 */
+			unset( $back_compat_domains['wordcampsf.org'] );
+			unset( $back_compat_domains['wordcampsf.com'] );
+
+			$domains = array_merge( $domains, array_keys( $back_compat_domains ) );
 		}
 
 		$domains = array_unique( $domains );
