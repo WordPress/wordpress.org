@@ -59,17 +59,6 @@ the_post();
 				</section>
 			</div><!-- .entry-content -->
 
-			<?php
-			edit_post_link(
-				sprintf(
-					/* translators: %s: Name of current post */
-					esc_html__( 'Edit %s', 'wporg' ),
-					the_title( '<span class="screen-reader-text">"', '"</span>', false )
-				),
-				'<footer class="entry-footer"><span class="edit-link">',
-				'</span></footer><!-- .entry-footer -->'
-			);
-			?>
 		</article><!-- #post-## -->
 
 	</main><!-- #main -->
