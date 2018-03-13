@@ -13,6 +13,9 @@ class Users {
 		add_action( 'personal_options_update',         array( $this, 'save_custom_fields' ), 10, 2 );
 		add_action( 'edit_user_profile_update',        array( $this, 'save_custom_fields' ), 10, 2 );
 
+		// Adjust display of user fields
+		add_filter( 'bbp_get_displayed_user_field',    array( $this, 'modify_user_fields' ), 10, 3 );
+
 		// Custom user contact methods.
 		add_filter( 'user_contactmethods',             array( $this, 'custom_contact_methods' ) );
 
@@ -104,6 +107,17 @@ class Users {
 		$auto_topic_subscription = isset( $_POST['auto_topic_subscription'] );
 		update_user_option( $user_id, 'auto_topic_subscription', $auto_topic_subscription );
 	}
+
+	public function modify_user_fields( $value, $field, $filter ) {
+		if ( $field === 'description'  && $filter === 'display' ) {
+			if ( ! is_user_logged_in() ) {
+				$value = '';
+			} else {
+				$value = bbp_rel_nofollow( $value );
+			}
+		}
+		return $value;
+	}	
 
 	/**
 	 * Add "My Account" submenu items to admin bar for quick access.
