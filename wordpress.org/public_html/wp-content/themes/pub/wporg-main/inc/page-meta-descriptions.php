@@ -101,4 +101,4 @@ function custom_open_graph_tags( $tags = array() ) {
 
 	return $tags;
 }
-add_filter( 'jetpack_open_graph_tags', 'custom_open_graph_tags' );
+add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\custom_open_graph_tags' );
