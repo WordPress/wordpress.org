@@ -26,14 +26,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-add_filter( 'jetpack_open_graph_tags', function( $tags ) {
-	$tags['og:title']            = _esc_html__( 'Hosting Requirements for WordPress', 'wporg' );
-	$tags['og:description']      = _esc_html__( 'Running WordPress doesn&#8217;t require a lot, but your host will still need to meet a few minimum requirements. Learn about the website hosting requirements to run WordPress, including our recommendation to support PHP 7.2+ and HTTPS. Not sure how to ask your host for these details? Use the sample email we include.', 'wporg' );
-	$tags['twitter:text:title']  = $tags['og:title'];
-	$tags['twitter:description'] = $tags['og:description'];
-
-	return $tags;
-} );
+// See inc/page-meta-descriptions.php for the meta description for this page.
 
 get_header( 'child-page' );
 the_post();

@@ -18,14 +18,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-add_filter( 'jetpack_open_graph_tags', function( $tags ) {
-	$tags['og:title']            = _esc_html__( 'Democratize Publishing', 'wporg' );
-	$tags['og:description']      = _esc_html__( 'WordPress is software designed for everyone with emphasis on accessibility, performance, security, and usability.', 'wporg' );
-	$tags['twitter:text:title']  = $tags['og:title'];
-	$tags['twitter:description'] = $tags['og:description'];
-
-	return $tags;
-} );
+// See inc/page-meta-descriptions.php for the meta description for this page.
 
 get_header();
 the_post();

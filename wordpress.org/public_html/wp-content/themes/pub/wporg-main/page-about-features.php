@@ -26,15 +26,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-add_filter( 'jetpack_open_graph_tags', function( $tags ) {
-	$tags['og:title']            = _esc_html__( 'WordPress Features', 'wporg' );
-	/* translators: WordPress market share: 29%; */
-	$tags['og:description']      = sprintf( _esc_html__( 'Discover why WordPress powers more than %s of the web. WordPress is a simple, flexible, user-friendly platform, with key features that include media management, SEO, and endless options for customization. More than 50,000 plugins extend the core functionality of WordPress even more. Build your site today.', 'wporg' ), WP_MARKET_SHARE . '%' );
-	$tags['twitter:text:title']  = $tags['og:title'];
-	$tags['twitter:description'] = $tags['og:description'];
-
-	return $tags;
-} );
+// See inc/page-meta-descriptions.php for the meta description for this page.
 
 get_header( 'child-page' );
 the_post();

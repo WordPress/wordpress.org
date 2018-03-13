@@ -25,6 +25,8 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
+// See inc/page-meta-descriptions.php for the meta description for this page.
+
 get_header( 'child-page' );
 the_post();
 ?>

@@ -26,15 +26,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-add_filter( 'jetpack_open_graph_tags', function( $tags ) {
-	$tags['og:title']            = _esc_html__( 'WordPress is Secure', 'wporg' );
-	/* translators: WordPress market share: 29%; */
-	$tags['og:description']      = sprintf( _esc_html__( 'Why is WordPress recommended as a secure website-building solution? With a passionate open source community and an extensible, easy-to-use platform, WordPress provides flexible and secure options for all levels of users, from beginners to pros. Learn how WordPress guarantees the security of %s of the web.', 'wporg' ), WP_MARKET_SHARE . '%' );
-	$tags['twitter:text:title']  = $tags['og:title'];
-	$tags['twitter:description'] = $tags['og:description'];
-
-	return $tags;
-} );
+// See inc/page-meta-descriptions.php for the meta description for this page.
 
 get_header( 'child-page' );
 the_post();

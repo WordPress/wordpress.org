@@ -25,14 +25,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-add_filter( 'jetpack_open_graph_tags', function( $tags ) {
-	$tags['og:title']            = _esc_html__( 'Etiquette at WordPress', 'wporg' );
-	$tags['og:description']      = _esc_html__( 'We welcome the contributions of everyone who&#8217;s interested in joining the WordPress open source project, and every thriving, diverse community needs etiquette guidelines. Review our simple guidelines that focus on diversity, safety, and inclusion and foster a welcoming community for our contributors around the world.', 'wporg' );
-	$tags['twitter:text:title']  = $tags['og:title'];
-	$tags['twitter:description'] = $tags['og:description'];
-
-	return $tags;
-} );
+// See inc/page-meta-descriptions.php for the meta description for this page.
 
 get_header( 'child-page' );
 the_post();

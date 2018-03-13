@@ -166,7 +166,30 @@ function child_page_templates( $templates ) {
 }
 add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\child_page_templates' );
 
+function use_opengraph_data_for_embed_template() {
+	global $post;
+	if ( 'page' != $post->post_type || ! $post->page_template || 'default' == $post->page_template ) {
+		return;
+	}
+
+	$meta = custom_open_graph_tags();
+	if ( $meta ) {
+		add_filter( 'the_title', function( $title ) use( $meta ) {
+			return $meta['og:title'] ?? $title;
+		} );
+		add_filter( 'the_content', function( $content ) use( $meta ) {
+			return $meta['og:description'] ?? $content;
+		} );
+	}
+}
+add_action( 'embed_head', __NAMESPACE__ . '\use_opengraph_data_for_embed_template' );
+
 /**
  * Custom template tags.
  */
 require_once get_stylesheet_directory() . '/inc/template-tags.php';
+
+/**
+ * Custom meta descriptions for page templates.
+ */
+require_once get_stylesheet_directory() . '/inc/page-meta-descriptions.php';
