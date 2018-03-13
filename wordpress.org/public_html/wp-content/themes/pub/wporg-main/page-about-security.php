@@ -14,11 +14,11 @@ if ( false === stristr( home_url(), 'test' ) ) {
 }
 
 $GLOBALS['menu_items'] = [
-	'requirements' => __( 'Requirements', 'wporg' ),
-	'features'     => __( 'Features', 'wporg' ),
-	'security'     => __( 'Security', 'wporg' ),
-	'roadmap'      => __( 'Roadmap', 'wporg' ),
-	'history'      => __( 'History', 'wporg' ),
+	'about/requirements' => __( 'Requirements', 'wporg' ),
+	'about/features'     => __( 'Features', 'wporg' ),
+	'about/security'     => __( 'Security', 'wporg' ),
+	'about/roadmap'      => __( 'Roadmap', 'wporg' ),
+	'about/history'      => __( 'History', 'wporg' ),
 ];
 
 // Prevent Jetpack from looking for a non-existent featured image.
