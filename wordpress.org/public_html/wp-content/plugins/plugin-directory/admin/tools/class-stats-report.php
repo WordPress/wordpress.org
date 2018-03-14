@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Tools;
+use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * All functionality related to Stats_Report Tool.
@@ -87,25 +88,35 @@ class Stats_Report {
 		// --------------
 		// Plugin Status Changes
 		// --------------
-		$states = array( 'plugin_approve', 'plugin_delist', 'plugin_new', 'plugin_reject' );
-		foreach ( $states as $state ) {
-			// The stats table used by bbPress1 (and could still be used, but isn't yet).
-			// Won't provide meaningful results for time intervals that include days after the switch to WP.
-			$stats[ $state ] = $wpdb->get_var( $wpdb->prepare(
-				"SELECT SUM(views) FROM stats_extras WHERE name = 'plugin' AND date < %s AND date > DATE_SUB( %s, INTERVAL %d DAY ) AND value = %s",
-				$args['date'],
-				$args['date'],
-				absint( $args['num_days'] ) + 1,
-				$state
-			) );
-		}
+		$stats[ 'plugin_approve' ] = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = '_approved' AND meta_value >= %d AND meta_value < %d",
+			strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ),
+			strtotime( $args['date'] ) + DAY_IN_SECONDS
+		) );
 
-		// Temporary until the above is updated to work with the new directory:
-		foreach ( array( 'plugin_approve', 'plugin_delist', 'plugin_reject' ) as $unused_stat ) {
-			if ( ! $stats[ $unused_stat ] ) {
-				$stats[ $unused_stat ] = __( 'N/A', 'wporg-plugins' );
-			}
-		}
+		$stats[ 'plugin_delist' ] = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = 'plugin_closed_date' AND meta_value >= %s AND meta_value < %s",
+			date( 'Y-m-d', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) ),
+			date( 'Y-m-d', strtotime( $args['date'] ) )
+		) );
+
+		$stats[ 'plugin_delist_reasons' ] = array_column( $wpdb->get_results( $wpdb->prepare(
+			"SELECT reason.meta_value as reason, COUNT(*) as count FROM $wpdb->postmeta closed_date JOIN $wpdb->postmeta reason ON closed_date.post_id = reason.post_id AND reason.meta_key = '_close_reason' WHERE closed_date.meta_key = 'plugin_closed_date' AND closed_date.meta_value >= %s AND closed_date.meta_value < %s GROUP BY reason.meta_value",
+			date( 'Y-m-d', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) ),
+			date( 'Y-m-d', strtotime( $args['date'] ) )
+		) ), 'count', 'reason' );
+
+		$stats[ 'plugin_new' ] = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'plugin' AND post_date >= %s AND post_date < %s",
+			date( 'Y-m-d', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) ),
+			date( 'Y-m-d', strtotime( $args['date'] ) )
+		) );
+
+		$stats[ 'plugin_reject' ] = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = '_rejected' AND meta_value >= %d AND meta_value < %d",
+			strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ),
+			strtotime( $args['date'] ) + DAY_IN_SECONDS
+		) );
 
 		// --------------
 		// Plugin Queue
@@ -293,6 +304,15 @@ class Stats_Report {
 					__( 'Plugins closed : %s', 'wporg-plugins' ),
 					$stats['plugin_delist']
 				);
+				$reasons = array();
+				if ( $stats['plugin_delist_reasons'] ) {
+					echo '<ul>';
+					foreach ( $stats['plugin_delist_reasons'] as $reason => $number ) {
+						$reason = Template::get_close_reasons()[ $reason ];
+						echo "<li>&nbsp;&nbsp;{$reason}: {$number}</li>";
+					}
+					echo '</ul>';
+				}
 			?>
 			</li>
 			<li>
