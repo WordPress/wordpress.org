@@ -107,9 +107,9 @@ class Stats_Report {
 		) ), 'count', 'reason' );
 
 		$stats[ 'plugin_new' ] = (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'plugin' AND post_date >= %s AND post_date < %s",
-			date( 'Y-m-d', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) ),
-			date( 'Y-m-d', strtotime( $args['date'] ) )
+			"SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = '_submitted_date' AND meta_value >= %d AND meta_value < %d",
+			strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ),
+			strtotime( $args['date'] ) + DAY_IN_SECONDS
 		) );
 
 		$stats[ 'plugin_reject' ] = (int) $wpdb->get_var( $wpdb->prepare(
