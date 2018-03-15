@@ -63,7 +63,7 @@ class WordCamp_Lets_Encrypt_Helper {
 
 			$domains[] = $blog['domain'];
 
-			// While transitioning from city.wordcamp.org/year-extra
+			// While transitioning from city.wordcamp.org/year-extra.
 			if ( preg_match( '#^([^\.]+)\.wordcamp.org/([0-9]{4}(?:-[^\.])?)/?$#i', $blog['domain'] . $blog['path'], $matches ) ) {
 				$domains[] = sprintf( '%s.%s.wordcamp.org', $matches[2], $matches[1] );
 			}
@@ -79,7 +79,6 @@ class WordCamp_Lets_Encrypt_Helper {
 			 *
 			 * @todo remove this once DNS is updated.
 			 */
-			unset( $back_compat_domains['wordcampsf.org'] );
 			unset( $back_compat_domains['wordcampsf.com'] );
 
 			$domains = array_merge( $domains, array_keys( $back_compat_domains ) );
