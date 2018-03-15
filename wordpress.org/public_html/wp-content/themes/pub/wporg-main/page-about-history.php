@@ -36,7 +36,7 @@ the_post();
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
-				<h1 class="entry-title col-8"><?php _esc_html_e( 'History', 'wporg' ); ?></h1>
+				<h1 class="entry-title col-8"><?php esc_html_e( 'History', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">

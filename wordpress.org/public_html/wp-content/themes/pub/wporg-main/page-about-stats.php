@@ -35,12 +35,12 @@ the_post();
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header row">
-				<h1 class="entry-title col-8"><?php _esc_html_e( 'Statistics', 'wporg' ); ?></h1>
+				<h1 class="entry-title col-8"><?php esc_html_e( 'Statistics', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<p><?php _esc_html_e( 'Here are some charts showing what sorts of systems people are running WordPress on. (You&#8217;ll need JavaScript enabled to see them.)', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Here are some charts showing what sorts of systems people are running WordPress on. (You&#8217;ll need JavaScript enabled to see them.)', 'wporg' ); ?></p>
 					<div id="wp_versions" class="wporg-stats-chart loading"></div>
 					<div id="php_versions" class="wporg-stats-chart loading"></div>
 					<div id="mysql_versions" class="wporg-stats-chart loading"></div>

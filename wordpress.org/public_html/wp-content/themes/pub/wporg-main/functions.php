@@ -9,10 +9,6 @@
 
 namespace WordPressdotorg\MainTheme;
 
-function ___( $arg ) { return $arg; }
-function _esc_html__( $arg ) { return $arg; }
-function _esc_html_e( $arg ) { echo $arg; }
-
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *
@@ -78,10 +74,10 @@ function scripts() {
 		wp_localize_script( 'wporg-page-stats', 'wporgPageStats', [
 			'trunk'         => number_format( WP_CORE_STABLE_BRANCH + 0.1, 1 ), /* trunk */
 			'beta'          => number_format( WP_CORE_STABLE_BRANCH + 0.2, 1 ), /* trunk w/ beta-tester plugin */
-			'wpVersions'    => ___( 'WordPress Version', 'wporg' ),
-			'phpVersions'   => ___( 'PHP Versions', 'wporg' ),
-			'mysqlVersions' => ___( 'MySQL Version', 'wporg' ),
-			'locales'       => ___( 'Locales', 'wporg' ),
+			'wpVersions'    => __( 'WordPress Version', 'wporg' ),
+			'phpVersions'   => __( 'PHP Versions', 'wporg' ),
+			'mysqlVersions' => __( 'MySQL Version', 'wporg' ),
+			'locales'       => __( 'Locales', 'wporg' ),
 		] );
 	}
 

@@ -28,6 +28,8 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 // See inc/page-meta-descriptions.php for the meta description for this page.
 
+// Translatoin Note: Currently this is translated through https://github.com/WordPress/Security-White-Paper
+
 get_header( 'child-page' );
 the_post();
 ?>
@@ -36,7 +38,7 @@ the_post();
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
-				<h1 class="entry-title col-8"><?php _esc_html_e( 'Security', 'wporg' ); ?></h1>
+				<h1 class="entry-title col-8"><?php esc_html_e( 'Security', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">

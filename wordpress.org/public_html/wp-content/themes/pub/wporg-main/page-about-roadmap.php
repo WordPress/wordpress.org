@@ -38,7 +38,7 @@ $date_format = get_option( 'date_format' );
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
-				<h1 class="entry-title col-8"><?php _esc_html_e( 'Roadmap', 'wporg' ); ?></h1>
+				<h1 class="entry-title col-8"><?php esc_html_e( 'Roadmap', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
@@ -46,40 +46,40 @@ $date_format = get_option( 'date_format' );
 					<p>
 						<?php
 						/* translators: 1: Link to Ideas forum; 2: Link to Core Trac */
-						printf( wp_kses_post( ___( 'After the 2.1 release, we decided to adopt a regular release schedule every 3-4 months with the features primarily driven by <a href="%1$s">ideas voted on by our users</a>. Here are the current planned releases, and links to their respective milestones in our <a href="%2$s">issue tracker</a>.', 'wporg' ) ), esc_url( 'https://wordpress.org/ideas/' ), esc_url( 'https://core.trac.wordpress.org/' ) );
+						printf( wp_kses_post( __( 'After the 2.1 release, we decided to adopt a regular release schedule every 3-4 months with the features primarily driven by <a href="%1$s">ideas voted on by our users</a>. Here are the current planned releases, and links to their respective milestones in our <a href="%2$s">issue tracker</a>.', 'wporg' ) ), esc_url( 'https://wordpress.org/ideas/' ), esc_url( 'https://core.trac.wordpress.org/' ) );
 						?>
 					</p>
-					<p><?php _esc_html_e( 'Any projected dates are for discussion and planning purposes, and will be firmed up as we get closer to release.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Any projected dates are for discussion and planning purposes, and will be firmed up as we get closer to release.', 'wporg' ); ?></p>
 					<table>
-						<thead><tr><th><?php _esc_html_e( 'Version', 'wporg' ); ?></th><th><?php _esc_html_e( 'Planned', 'wporg' ); ?></th></tr></thead>
+						<thead><tr><th><?php esc_html_e( 'Version', 'wporg' ); ?></th><th><?php esc_html_e( 'Planned', 'wporg' ); ?></th></tr></thead>
 						<tbody>
 						<tr><th><a href="https://make.wordpress.org/core/5-0/">5.0</a></th><td>2018</td></tr>
 						</tbody>
 					</table>
 
-					<p><?php _esc_html_e( 'The month prior to a release new features are frozen and the focus is entirely on ensuring the quality of the release by eliminating bugs and profiling the code for any performance issues.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'The month prior to a release new features are frozen and the focus is entirely on ensuring the quality of the release by eliminating bugs and profiling the code for any performance issues.', 'wporg' ); ?></p>
 
-					<h3><?php _esc_html_e( 'Jazzers and Release Dates', 'wporg' ); ?></h3>
+					<h3><?php esc_html_e( 'Jazzers and Release Dates', 'wporg' ); ?></h3>
 
 					<p>
 						<?php
 						/* translators: 1: Link to playlist */
-						printf( wp_kses_post( ___( 'WordPress core developers share a love of jazz music, and all our major releases are named in honor of jazz musicians we personally admire. Here&#8217;s a list of releases and the musicians they were named for. <a href="%s">You can listen to a Last.fm station of all the musicians we named a release for</a>.', 'wporg' ) ), esc_url( 'http://www.last.fm/tag/wordpress-release-jazz' ) );
+						printf( wp_kses_post( __( 'WordPress core developers share a love of jazz music, and all our major releases are named in honor of jazz musicians we personally admire. Here&#8217;s a list of releases and the musicians they were named for. <a href="%s">You can listen to a Last.fm station of all the musicians we named a release for</a>.', 'wporg' ) ), esc_url( 'http://www.last.fm/tag/wordpress-release-jazz' ) );
 						?>
 					</p>
 
 					<table>
 						<thead>
 							<tr>
-								<th><?php _esc_html_e( 'Version', 'wporg' ); ?></th>
-								<th><?php _esc_html_e( 'Musician', 'wporg' ); ?></th>
-								<th><?php _esc_html_e( 'Date', 'wporg' ); ?></th>
+								<th><?php esc_html_e( 'Version', 'wporg' ); ?></th>
+								<th><?php esc_html_e( 'Musician', 'wporg' ); ?></th>
+								<th><?php esc_html_e( 'Date', 'wporg' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
 						<tr>
 							<th><a href="https://wordpress.org/news/2003/05/wordpress-now-available/">.70</a></th>
-							<td><?php _esc_html_e( 'No musician chosen.', 'wporg' ); ?></td>
+							<td><?php esc_html_e( 'No musician chosen.', 'wporg' ); ?></td>
 							<td><?php echo esc_html( date_i18n( $date_format, strtotime( 'May 27, 2003' ) ) ); ?></td>
 						</tr>
 						<tr>

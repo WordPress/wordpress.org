@@ -35,7 +35,7 @@ the_post();
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header row">
-				<h1 class="entry-title col-8"><?php _esc_html_e( 'GNU Public License', 'wporg' ); ?></h1>
+				<h1 class="entry-title col-8"><?php esc_html_e( 'GNU Public License', 'wporg' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
@@ -43,21 +43,21 @@ the_post();
 					<p>
 						<?php
 						/* translators: 1: Link to Free Software Foundation; 2: Link to GPL text */
-						printf( wp_kses_post( ___( 'The license under which the WordPress software is released is the GPLv2 (or later) from the <a href="%1$s">Free Software Foundation</a>. A copy of the license is included with every copy of WordPress, but you can also <a href="%2$s">read the text of the license here</a>.', 'wporg' ) ), esc_url( 'https://www.fsf.org/' ), esc_url( 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html' ) );
+						printf( wp_kses_post( __( 'The license under which the WordPress software is released is the GPLv2 (or later) from the <a href="%1$s">Free Software Foundation</a>. A copy of the license is included with every copy of WordPress, but you can also <a href="%2$s">read the text of the license here</a>.', 'wporg' ) ), esc_url( 'https://www.fsf.org/' ), esc_url( 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html' ) );
 						?>
 					</p>
 
 					<p>
 						<?php
 						/* translators: 1: Link to Drupal; 2: Link to Drupal's licensing faq */
-						printf( wp_kses_post( ___( 'Part of this license outlines requirements for derivative works, such as plugins or themes. Derivatives of WordPress code inherit the GPL license. <a href="%1$s">Drupal</a>, which has the same GPL license as WordPress, has an excellent page on <a href="%2$s">licensing as it applies to themes and modules</a> (their word for plugins).', 'wporg' ) ), esc_url( 'https://drupal.org/' ), esc_url( 'https://drupal.org/licensing/faq/' ) );
+						printf( wp_kses_post( __( 'Part of this license outlines requirements for derivative works, such as plugins or themes. Derivatives of WordPress code inherit the GPL license. <a href="%1$s">Drupal</a>, which has the same GPL license as WordPress, has an excellent page on <a href="%2$s">licensing as it applies to themes and modules</a> (their word for plugins).', 'wporg' ) ), esc_url( 'https://drupal.org/' ), esc_url( 'https://drupal.org/licensing/faq/' ) );
 						?>
 					</p>
 
 					<p>
 						<?php
 						/* translators: 1: Link to Serendipity; 2: Link to Habari */
-						printf( wp_kses_post( ___( 'There is some legal grey area regarding what is considered a derivative work, but we feel strongly that plugins and themes are derivative work and thus inherit the GPL license. If you disagree, you might want to consider a non-GPL platform such as <a href="%1$s">Serendipity</a> (BSD license) or <a href="%2$s">Habari</a> (Apache license) instead.', 'wporg' ) ), esc_url( 'https://www.s9y.org/' ), esc_url( 'http://habariproject.org/en/' ) );
+						printf( wp_kses_post( __( 'There is some legal grey area regarding what is considered a derivative work, but we feel strongly that plugins and themes are derivative work and thus inherit the GPL license. If you disagree, you might want to consider a non-GPL platform such as <a href="%1$s">Serendipity</a> (BSD license) or <a href="%2$s">Habari</a> (Apache license) instead.', 'wporg' ) ), esc_url( 'https://www.s9y.org/' ), esc_url( 'http://habariproject.org/en/' ) );
 						?>
 					</p>
 				</section>
