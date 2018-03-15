@@ -25,6 +25,11 @@ function custom_open_graph_tags( $tags = array() ) {
 			$desc  = esc_html__( 'WordPress domains and site names can be very flexible; however, top-level domains can&#8217;t use the word WordPress. Find out what is allowed and what constitutes a trademark violation, as well as policies on subdomain use. Review the list of official WordPress sites to know how to recognize and advise violators.', 'wporg' );
 			break;
 
+		case 'page-about-accessibility.php':
+			$title = esc_html__( 'WordPress Accessibility', 'wporg' );
+			$desc  = /* TODO */ 'The WordPress community and the open source WordPress project is committed to being as inclusive and accessible as possible. We want users, regardless of device or ability, to be able to publish content and maintain a website or application built with WordPress.';
+			break;
+
 		case 'page-about-etiquette.php':
 			$title = esc_html__( 'Etiquette at WordPress', 'wporg' );
 			$desc  = esc_html__( 'We welcome the contributions of everyone who&#8217;s interested in joining the WordPress open source project, and every thriving, diverse community needs etiquette guidelines. Review our simple guidelines that focus on diversity, safety, and inclusion and foster a welcoming community for our contributors around the world.', 'wporg' );

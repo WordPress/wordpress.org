@@ -28,7 +28,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 // See inc/page-meta-descriptions.php for the meta description for this page.
 
-// Translatoin Note: Currently this is translated through https://github.com/WordPress/Security-White-Paper
+// Translation Note: Currently this is translated through https://github.com/WordPress/Security-White-Paper
 
 get_header( 'child-page' );
 the_post();

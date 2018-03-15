@@ -81,6 +81,7 @@ the_post();
 						<ul>
 							<li><a href="<?php echo esc_url( home_url( '/about/domains/' ) ); ?>"><?php esc_html_e( 'Domains', 'wporg' ); ?></a></li>
 							<li><a href="<?php echo esc_url( home_url( '/about/license/' ) ); ?>"><?php esc_html_e( 'GNU Public License', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/accessibility/' ) ); ?>"><?php esc_html_e( 'Accessibility', 'wporg' ); ?></a></li>
 							<li><a href="<?php echo esc_url( home_url( '/about/privacy/' ) ); ?>"><?php esc_html_e( 'Privacy Policy', 'wporg' ); ?></a></li>
 							<li><a href="<?php echo esc_url( home_url( '/about/stats/' ) ); ?>"><?php esc_html_e( 'Statistics', 'wporg' ); ?></a></li>
 						</ul>

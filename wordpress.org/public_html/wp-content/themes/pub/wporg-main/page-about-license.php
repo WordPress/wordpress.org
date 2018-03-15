@@ -14,10 +14,11 @@ if ( false === stristr( home_url(), 'test' ) ) {
 }
 
 $GLOBALS['menu_items'] = [
-	'about/domains' => __( 'Domains', 'wporg' ),
-	'about/license' => __( 'GNU Public License', 'wporg' ),
-	'about/privacy' => __( 'Privacy Policy', 'wporg' ),
-	'about/stats'   => __( 'Statistics', 'wporg' ),
+	'about/domains'       => __( 'Domains', 'wporg' ),
+	'about/license'       => __( 'GNU Public License', 'wporg' ),
+	'about/accessibility' => __( 'Accessibility', 'wporg' ),
+	'about/privacy'       => __( 'Privacy Policy', 'wporg' ),
+	'about/stats'         => __( 'Statistics', 'wporg' ),
 ];
 
 // Prevent Jetpack from looking for a non-existent featured image.
