@@ -28,7 +28,9 @@ class Locale_Manager implements Role {
 	 * @return array Array of capabilities.
 	 */
 	public static function get_capabilities() {
-		return [];
+		return [
+			'level_1' => true, // Make user visible in authors dropdown, see https://core.trac.wordpress.org/ticket/16841.
+		];
 	}
 
 	/**
