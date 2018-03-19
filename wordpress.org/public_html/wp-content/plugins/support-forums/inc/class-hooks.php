@@ -68,6 +68,9 @@ class Hooks {
 
 		// Edit quicktags for reply box
 		add_filter( 'bbp_get_quicktags_settings', array( $this, 'quicktags_settings' ) );
+
+		// Limit pagination of the 'all-topics' view
+		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'has_topics_all_topics' ) );
 	}
 
 	/**
@@ -142,7 +145,7 @@ class Hooks {
 					! user_can( $user_id, 'moderate', $post->ID )
 				) {
 					$caps = array( 'do_not_allow' );
-				}	
+				}
 
 				break;
 		}
@@ -568,7 +571,7 @@ class Hooks {
 		// Bail if the new status is not pending or spam.
 		if ( ! in_array( $data['post_status'], array( 'pending', 'spam' ) ) ) {
 			return $data;
-		}	
+		}
 
 		$topic_id = bbp_get_reply_topic_id( $data['ID'] );
 
@@ -604,18 +607,47 @@ class Hooks {
 		return $formatted_number;
 	}
 
-    /**
+	/**
 	 * Remove tags from quicktags that don't work for the forums, such as img.
 	 *
-	 * @param array $settings			quicktags settings array
+	 * @param array $settings quicktags settings array
 	 * @return array
 	 */
-	function quicktags_settings ( $settings ) {
+	public function quicktags_settings( $settings ) {
 
 		$tags = explode( ',', $settings['buttons'] );
 		$tags = array_diff( $tags, array('img') );
 		$settings['buttons'] = implode( ',', $tags );
-		
+
 		return $settings;
+	}
+
+	/**
+	 * Optimize the all-topics view by not fetching the found rows, and limiting it to 99 pages displayed.
+	 * In the event the site has more than 99 pages, it's cached for a week, else a day.
+	 *
+	 * @link https://meta.trac.wordpress.org/ticket/3414
+	 */
+	public function has_topics_all_topics( $r ) {
+		if ( bbp_is_single_view() && 'all-topics' === bbp_get_view_id() ) {
+			if ( get_transient( __CLASS__ . '_total_all-topics' ) ) {
+				// We already know how many pages this site has.
+				$r['no_found_rows'] = true;
+			}
+			add_filter( 'bbp_topic_pagination', array( $this, 'forum_pagination_all_topics' ) );
+		}
+
+		return $r;
+	}
+
+	public function forum_pagination_all_topics( $r ) {
+		$pages = get_transient( __CLASS__ . '_total_all-topics' );
+		if ( ! $pages ) {
+			set_transient( __CLASS__ . '_total_all-topics', $r['total'], $r['total'] > 99 ? WEEK_IN_SECONDS : DAY_IN_SECONDS );
+		}
+
+		$r['total'] = min( 99, $pages );
+
+		return $r;
 	}
 }
