@@ -49,9 +49,9 @@ get_header( 'wporg' );
 				<p class="subheading">
 					<?php
 					printf(
-						/* translators: WordPress market share: 29%; */
-						__( '%s of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ),
-						WP_MARKET_SHARE . '%'
+						/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
+						__( '%s%% of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ),
+						number_format_i18n( WP_MARKET_SHARE )
 					);
 					?>
 				</p>

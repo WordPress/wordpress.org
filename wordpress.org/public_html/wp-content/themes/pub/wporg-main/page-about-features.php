@@ -43,8 +43,8 @@ the_post();
 				<section class="col-8">
 					<p>
 						<?php
-						/* translators: WordPress market share: 29%; */
-						printf( esc_html__( 'WordPress powers more than %s of the web &mdash; a figure that rises every day. Everything from simple websites, to blogs, to complex portals and enterprise websites, and even applications, are built with WordPress.', 'wporg' ), esc_html( WP_MARKET_SHARE . '%' ) );
+						/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
+						printf( esc_html__( 'WordPress powers more than %s%% of the web &mdash; a figure that rises every day. Everything from simple websites, to blogs, to complex portals and enterprise websites, and even applications, are built with WordPress.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ) );
 						?>
 					</p>
 
