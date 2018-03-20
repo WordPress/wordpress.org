@@ -8,13 +8,18 @@ Author:      WordPress Meta Team
 Author URI:  https://make.wordpress.org/meta
 */
 
-namespace WP15\Updates;
+namespace WP15\Miscellaneous;
 use DateTime;
 
 defined( 'WPINC' ) or die();
 
 add_filter( 'map_meta_cap',  __NAMESPACE__ . '\allow_css_editing', 10, 2   );
 add_filter( 'tggr_end_date', __NAMESPACE__ . '\set_tagregator_cutoff_date' );
+add_filter( 'wp15_update_pomo_files', __NAMESPACE__ . '\update_pomo_files' );
+
+if ( ! wp_next_scheduled( 'wp15_update_pomo_files' ) ) {
+	wp_schedule_event( time(), 'hourly', 'wp15_update_pomo_files' );
+}
 
 
 /**
@@ -52,4 +57,40 @@ function allow_css_editing( $required_capabilities, $requested_capability ) {
 function set_tagregator_cutoff_date( $date ) {
 	// A few weeks after the event ends, so that wrap-up posts, etc are included.
 	return new DateTime( 'June 15, 2018' );
+}
+
+/**
+ * Update the PO/MO files for the wp15 text domain.
+ */
+function update_pomo_files() {
+	$gp_api            = 'https://translate.wordpress.org';
+	$gp_project        = 'meta/wp15';
+	$localizations_dir = WP_CONTENT_DIR . '/languages/wp15';
+	$set_response      = wp_remote_get( "$gp_api/api/projects/$gp_project" );
+	$body              = json_decode( wp_remote_retrieve_body( $set_response ) );
+	$translation_sets  = isset( $body->translation_sets ) ? $body->translation_sets : false;
+
+	if ( ! $translation_sets ) {
+		trigger_error( 'Translation sets missing from response body.' );
+		return;
+	}
+
+	foreach ( $translation_sets as $set ) {
+		if ( empty( $set->locale ) || empty( $set->wp_locale ) ) {
+			continue;
+		}
+
+		$po_response = wp_remote_get( "$gp_api/projects/$gp_project/{$set->locale}/default/export-translations?filters[status]=current&format=po" );
+		$mo_response = wp_remote_get( "$gp_api/projects/$gp_project/{$set->locale}/default/export-translations?filters[status]=current&format=mo" );
+		$po_content  = wp_remote_retrieve_body( $po_response );
+		$mo_content  = wp_remote_retrieve_body( $mo_response );
+
+		if ( ! $po_content || ! $mo_content || false === strpos( $po_content, "Language: {$set->wp_locale}" ) ) {
+			trigger_error( "Invalid PO/MO content for {$set->wp_locale}." );
+			continue;
+		}
+
+		file_put_contents( "$localizations_dir/wp15-{$set->wp_locale}.po", $po_content );
+		file_put_contents( "$localizations_dir/wp15-{$set->wp_locale}.mo", $mo_content );
+	}
 }

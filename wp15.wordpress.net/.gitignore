@@ -6,6 +6,7 @@
 
 config-private.php
 public_html/content/cache
+public_html/content/languages
 public_html/content/upgrade
 public_html/content/uploads
 public_html/content/plugins/tagregator
