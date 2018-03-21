@@ -68,6 +68,9 @@ add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
  * Enqueue scripts and styles.
  */
 function scripts() {
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180321' );
+	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
+
 	if ( is_page( 'stats' ) ) {
 		wp_enqueue_script( 'google-charts', 'https://www.gstatic.com/charts/loader.js', [], null, true );
 		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts'], 1, true );

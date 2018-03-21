@@ -63,9 +63,9 @@ the_post();
 					<p><?php esc_html_e( 'WordPress contributors work around the globe, and have dedicated countless hours to build a tool that democratizes publishing. WordPress is open source software that is both free and priceless.', 'wporg' ); ?></p>
 				</section>
 
-				<section class="row gutters between">
+				<section class="areas row gutters between">
 					<div class="col-4">
-						<h4><?php esc_html_e( 'The Technology', 'wporg' ); ?></h4>
+						<h3><?php esc_html_e( 'The Technology', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'Learn about WordPress, where it&#8217;s been, and where it&#8217;s going.', 'wporg' ); ?></p>
 						<ul>
 							<li><a href="<?php echo esc_url( home_url( '/about/requirements/' ) ); ?>"><?php esc_html_e( 'Requirements', 'wporg' ); ?></a></li>
@@ -76,7 +76,7 @@ the_post();
 						</ul>
 					</div>
 					<div class="col-4">
-						<h4><?php esc_html_e( 'The Details', 'wporg' ); ?></h4>
+						<h3><?php esc_html_e( 'The Details', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'There&#8217;s so much in the details. Stay abreast with the particulars.', 'wporg' ); ?></p>
 						<ul>
 							<li><a href="<?php echo esc_url( home_url( '/about/domains/' ) ); ?>"><?php esc_html_e( 'Domains', 'wporg' ); ?></a></li>
@@ -87,7 +87,7 @@ the_post();
 						</ul>
 					</div>
 					<div class="col-4">
-						<h4><?php esc_html_e( 'The People', 'wporg' ); ?></h4>
+						<h3><?php esc_html_e( 'The People', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'Learn about the community and how we get along.', 'wporg' ); ?></p>
 						<ul>
 							<li><a href="<?php echo esc_url( home_url( '/about/philosophy/' ) ); ?>"><?php esc_html_e( 'Philosophy', 'wporg' ); ?></a></li>
@@ -122,22 +122,22 @@ the_post();
 				<section class="freedoms row gutters between">
 					<div class="col-3">
 						<div class="graphic"></div>
-						<h4><?php esc_html_e( 'The 1st Freedom', 'wporg' ); ?></h4>
+						<h3><?php esc_html_e( 'The 1st Freedom', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'To run the program for any purpose.', 'wporg' ); ?></p>
 					</div>
 					<div class="col-3">
 						<div class="graphic"></div>
-						<h4><?php esc_html_e( 'The 2nd Freedom', 'wporg' ); ?></h4>
+						<h3><?php esc_html_e( 'The 2nd Freedom', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'To study how the program works and change it to make it do what you wish.', 'wporg' ); ?></p>
 					</div>
 					<div class="col-3">
 						<div class="graphic"></div>
-						<h4><?php esc_html_e( 'The 3rd Freedom', 'wporg' ); ?></h4>
+						<h3><?php esc_html_e( 'The 3rd Freedom', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'To redistribute.', 'wporg' ); ?></p>
 					</div>
 					<div class="col-3">
 						<div class="graphic"></div>
-						<h4><?php esc_html_e( 'The 4th Freedom', 'wporg' ); ?></h4>
+						<h3><?php esc_html_e( 'The 4th Freedom', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'To distribute copies of your modified versions to others.', 'wporg' ); ?></p>
 					</div>
 				</section>
