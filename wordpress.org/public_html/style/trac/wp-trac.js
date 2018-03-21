@@ -471,7 +471,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			});
 
 			// List commits between #ticket and #attachments.
-			if ( $( '#content.ticket' ).length ) {
+			if ( $( '#content.ticket' ).length && ! $( '#ticket.ticketdraft' ).length ) {
 				var $commitChanges = $( 'div.change' ).has( '.comment > p > a.changeset' ).has( '.comment div.message p a.ticket' ),
 					$commits = $( '<ul/>' ), commitCount = 0;
 
