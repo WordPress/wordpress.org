@@ -68,7 +68,7 @@ add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180321' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180321a' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	if ( is_page( 'stats' ) ) {
