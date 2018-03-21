@@ -1404,10 +1404,26 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			return {
 				init: init
 			};
-		}())
+		}()),
+
+		patchTracFor122Changes: function() {
+			console.log( "wp-trac: Applying compat patches for Trac 1.2.2" );
+			// From Trac 1.2.2 threaded_comments.js:
+			window.applyCommentsOrder = window.applyCommentsOrder || function() {}
+
+			// From Trac 1.2.2 trac.js:
+			$.loadScript                = $.loadScript                || function() {}
+			$.fn.exclusiveOnClick       = $.fn.exclusiveOnClick       || function() {}
+			$.fn.addSelectAllCheckboxes = $.fn.addSelectAllCheckboxes || function() {}
+			$.fn.disableOnSubmit        = $.fn.disableOnSubmit        || function() {}
+			$.fn.disableSubmit          = $.fn.disableSubmit          || function() {}
+		}
 
 	};
 
 	$(document).ready( wpTrac.init );
+
+	// Perform this as soon as this file loads.
+	wpTrac.patchTracFor122Changes();
 
 })(jQuery);
