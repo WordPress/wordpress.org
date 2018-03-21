@@ -177,7 +177,7 @@ body.page-template-about {
 				width: 25%;
 			}
 
-			h4, p {
+			h3, p {
 				clear: none;
 				margin-top: 0;
 				text-align: left;
@@ -206,8 +206,15 @@ body.page-template-about {
 			background-position: 0 100%;
 		}
 
-		h4 {
+		h3 {
 			font-weight: 300;
+			font-size: ms( 2 );
+		}
+	}
+
+	.areas {
+		h3 {
+			@extend h4;
 		}
 	}
 }
