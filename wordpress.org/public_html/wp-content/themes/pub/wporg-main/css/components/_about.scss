@@ -7,15 +7,14 @@ body.page-template-about {
 		text-align: center;
 
 		.entry-title {
-			font-size: ms( 11 );
-			font-weight: 100;
-			line-height: inherit;
-			margin: 1rem auto;
+			font-size: ms( 12 );
+			margin: 2rem auto 1rem;
 		}
 
 		.entry-description {
-			color: rgba( 255, 255, 255, 0.8);
+			color: rgba( 255, 255, 255, 0.8 );
 			font-size: ms( 2 );
+			font-weight: 300;
 			margin-top: -0.4rem;
 		}
 	}
