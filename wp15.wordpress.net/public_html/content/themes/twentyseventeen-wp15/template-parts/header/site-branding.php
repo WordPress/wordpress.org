@@ -26,10 +26,10 @@
 				$date_format    = _x( 'F dS, Y', 'Site description date format' );
 				$formatted_date = date_i18n( $date_format, strtotime( '2018-05-27' ) );
 
-				// translators: 1: the formatted date; e.g., "May 27th, 2018".
-				esc_html__(
-					printf( 'WordPress turns 15 years old on %1$s.', $formatted_date ),
-					'wp15'
+				printf(
+					// translators: 1: the formatted date; e.g., "May 27th, 2018".
+					__( 'WordPress turns 15 years old on %1$s.', 'wp15' ),
+					$formatted_date
 				);
 
 				?>
