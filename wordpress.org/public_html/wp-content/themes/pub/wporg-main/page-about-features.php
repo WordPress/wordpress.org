@@ -129,7 +129,7 @@ the_post();
 						<li><strong><?php esc_html_e( 'Theme System', 'wporg' ); ?></strong>
 							<?php
 							/* translators: 1: Link to Codex page about APIs; 2: Link to Theme Directory */
-							printf( wp_kses_post( __( 'Create WordPress themes for clients, customers, and for WordPress users. The <a href="%1$s">WordPress API</a> provides the extensibility to create themes as simple or as complex as you wish. If you want to give your theme away for free you can give it to users in the <a href="%2$s">Theme Repository</a>', 'wporg' ) ), esc_url( 'https://codex.wordpress.org/WordPress_APIs' ), esc_url( home_url( '/themes/' ) ) );
+							printf( wp_kses_post( __( 'Create WordPress themes for clients, other WordPress users, or yourself. The <a href="%1$s">WordPress API</a> provides the extensibility to create themes as simple or as complex as you wish. If you want to give your theme away for free you can give it to users in the <a href="%2$s">Theme Repository</a>', 'wporg' ) ), esc_url( 'https://codex.wordpress.org/WordPress_APIs' ), esc_url( home_url( '/themes/' ) ) );
 							?>
 						</li>
 						<li><strong><?php esc_html_e( 'Application Framework', 'wporg' ); ?></strong>
