@@ -2073,6 +2073,20 @@ aside[id^="nav_menu"] .widget-title {
   margin-top: 0;
 }
 
+.single-handbook {
+  font-size: 13px;
+  font-size: 1.3rem;
+}
+
+.single-handbook p, .single-handbook ol, .single-handbook ul {
+  line-height: 1.6;
+}
+
+.single-handbook .site-main p, .single-handbook .site-main ol, .single-handbook .site-main ul {
+  font-size: 1.05em;
+  color: #555;
+}
+
 .single-handbook .content-area h1 {
   margin-top: 0;
   padding-top: 0;
@@ -2108,7 +2122,6 @@ aside[id^="nav_menu"] .widget-title {
   z-index: 1;
   position: relative;
   color: #555d66;
-  font-size: 0.9em;
   background-color: #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   border-radius: 3px;
