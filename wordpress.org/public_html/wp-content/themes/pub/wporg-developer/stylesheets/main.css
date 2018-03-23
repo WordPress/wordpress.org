@@ -2177,6 +2177,7 @@ aside[id^="nav_menu"] .widget-title {
 .single-handbook ul.items li ul li ul li,
 .table-of-contents ul.items li ul li,
 .table-of-contents ul.items li ul li ul li {
+  list-style-type: circle;
   padding-bottom: 0;
 }
 
