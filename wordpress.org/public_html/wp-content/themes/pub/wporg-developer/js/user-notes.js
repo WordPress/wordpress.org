@@ -13,14 +13,15 @@
 
 	function showCommentForm() {
 		$( '#respond' ).show();
-		$( '#add-user-note').hide();
+		$( '#add-user-note' ).hide();
 
-		var target = $( '#commentform' );
+		var wpAdminBar = $( '#page.admin-bar' ).length ? 32 : 0;
+		var target     = $( '#commentform #add-note-or-feedback' );
 		if ( target.length ) {
 			var pos = target.offset();
 
 			$( 'html,body' ).animate( {
-				scrollTop: pos.top
+				scrollTop: pos.top - wpAdminBar
 			}, 1000 );
 
 			$('.wp-editor-area').focus();
@@ -39,9 +40,9 @@
 	}
 
 	// Add php and js buttons to QuickTags.
-	QTags.addButton( 'php', 'php', '[php]', '[/php]' );
-	QTags.addButton( 'js', 'js', '[js]', '[/js]' );
-	QTags.addButton( 'inline-code', 'inline code', '<code>', '</code>' );
+	QTags.addButton( 'php', 'php', '[php]', '[/php]', '', '', '', 'comment' );
+	QTags.addButton( 'js', 'js', '[js]', '[/js]', '', '', '', 'comment' );
+	QTags.addButton( 'inline-code', 'inline code', '<code>', '</code>', '', '', '', 'comment' );
 
 	// Override tab within user notes textarea to actually insert a tab character.
 	// Copied from code within core's wp-admin/js/common.js.

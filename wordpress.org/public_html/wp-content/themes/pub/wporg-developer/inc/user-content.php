@@ -40,6 +40,9 @@ class DevHub_User_Submitted_Content {
 		// Remove reply to link
 		add_filter( 'comment_reply_link',              '__return_empty_string' );
 
+		// Remove cancel reply link
+		add_filter( 'cancel_comment_reply_link',       '__return_empty_string' );
+
 		// Disable smilie conversion
 		remove_filter( 'comment_text',                 'convert_smilies',    20 );
 
@@ -57,6 +60,12 @@ class DevHub_User_Submitted_Content {
 
 		// Tweak code contained in shortcode
 		add_filter( 'syntaxhighlighter_precode',       array( __CLASS__, 'syntaxhighlighter_precode' ) );
+
+		// Allowed HTML for a new child comment
+		add_filter( 'preprocess_comment',              array( __CLASS__, 'comment_new_allowed_html' ) );
+
+		// Allowed HTML for an edited child comment (There is no decent hook to filter child comments only)
+		add_action( 'edit_comment',                    array( __CLASS__, 'comment_edit_allowed_html' ) );
 
 	}
 
@@ -79,6 +88,74 @@ class DevHub_User_Submitted_Content {
 	}
 
 	/**
+	 * Updates edited child comments with allowed HTML.
+	 *
+	 * Allowed html is <strong>, <em>, <code> and <a>.
+	 *
+	 * @param int $comment_ID Comment ID.
+	 */
+	public static function comment_edit_allowed_html( $comment_ID ) {
+
+		// Get the edited comment.
+		$comment = get_comment( $comment_ID, ARRAY_A );
+		if ( ! $comment ) {
+			return;
+		}
+
+		if ( ( 0 === (int) $comment['comment_parent'] ) || empty( $comment['comment_content'] ) ) {
+			return;
+		}
+
+		$content = $comment['comment_content'];
+		$data    = self::comment_new_allowed_html( $comment );
+
+		if ( $data['comment_content'] !== $content ) {
+			$commentarr = array(
+				'comment_ID' => $data['comment_ID'],
+				'comment_content' => $data['comment_content']
+			);
+
+			// Update comment content.
+			wp_update_comment( $commentarr );
+		}
+	}
+
+	/**
+	 * Filter new child comments content with allowed HTML.
+	 *
+	 * Allowed html is <strong>, <em>, <code> and <a>.
+	 *
+	 * @param array $commentdata Array with comment data.
+	 * @return array Array with filtered comment data.
+	 */
+	public static function comment_new_allowed_html( $commentdata ) {
+		$comment_parent  = isset( $commentdata['comment_parent'] ) ? absint( $commentdata['comment_parent'] ) : 0;
+		$comment_content = isset( $commentdata['comment_content'] ) ? trim( $commentdata['comment_content'] ) : '';
+
+		if ( ( $comment_parent === 0 ) || ! $comment_content ) {
+			return $commentdata;
+		}
+
+		$allowed_html = array(
+			'a'      => array(
+				'href'   => true,
+				'rel'    => true,
+				'target' => true,
+			),
+			'em'     => array(),
+			'strong' => array(),
+			'code'   => array(),
+		);
+
+		$allowed_protocols = array( 'http', 'https' );
+
+		$comment_content = wp_kses( $comment_content, $allowed_html, $allowed_protocols );
+		$commentdata['comment_content'] = preg_replace( '/\r?\n|\r/', '', $comment_content );
+
+		return $commentdata;
+	}
+
+	/**
 	 * Enqueues scripts and styles.
 	 */
 	public static function scripts_and_styles() {
@@ -87,10 +164,12 @@ class DevHub_User_Submitted_Content {
 			wp_enqueue_style( 'syntaxhighlighter-core' );
 			wp_enqueue_style( 'syntaxhighlighter-theme-default' );
 
-			wp_enqueue_script( 'wporg-developer-user-notes', get_template_directory_uri() . '/js/user-notes.js', array( 'quicktags' ), '20170404', true );
-			if ( get_option( 'thread_comments' ) ) {
-				wp_enqueue_script( 'comment-reply' );
-			}
+			wp_enqueue_script( 'wporg-developer-user-notes', get_template_directory_uri() . '/js/user-notes.js', array( 'jquery', 'quicktags' ), '20170404', true );
+			wp_enqueue_script( 'wporg-developer-user-notes-feedback', get_template_directory_uri() . '/js/user-notes-feedback.js', array( 'jquery', 'quicktags' ), '20170404eee', true );
+			wp_localize_script( 'wporg-developer-user-notes-feedback', 'wporg_note_feedback', array(
+				'show' => __( 'Show Feedback', 'wporg' ),
+				'hide' => __( 'Hide Feedback', 'wporg' ),
+			) );
 		}
 	}
 
@@ -151,6 +230,65 @@ class DevHub_User_Submitted_Content {
 			'tinymce'       => false,
 		) );
 		echo '</div>';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Capture an {@see wp_editor()} instance as the 'User Contributed Notes' feedback form.
+	 *
+	 * Uses output buffering to capture the editor instance.
+	 *
+	 * @return string HTML output for the wp_editor-ized feedback form.
+	 */
+	public static function wp_editor_feedback( $comment, $display = 'show', $content = '' ) {
+
+		if ( ! ( isset( $comment->comment_ID ) && absint( $comment->comment_ID ) ) ) {
+			return '';
+		}
+
+		$comment_id = absint( $comment->comment_ID );
+
+		static $instance = 0;
+		$instance++;
+
+		$display     = ( 'hide' === $display ) ? ' style="display: none;"' : '';
+		$title       = __( 'Add feedback to this note', 'wporg' );
+		$form_type   = '';
+		$button_text = __( 'Add Feedback', 'wporg' );
+
+		if ( $content ) {
+			$title       = __( 'Edit feedback', 'wporg' );
+			$form_type   = '-edit';
+			$button_text = __( 'Edit Feedback', 'wporg' );
+		}
+
+		$allowed_tags = '';
+		foreach ( array( '<strong>', '<em>', '<code>', '<a>' ) as $tag ) {
+			$allowed_tags .= '<code>' . htmlentities( $tag ) . '</code>, ';
+		}
+
+		ob_start();
+		echo "<div id='feedback-editor-{$comment_id}' class='feedback-editor'{$display}>\n";
+		echo "<p class='feedback-editor-title'>{$title}</p>\n";
+		echo '<form id="feedback-form-' . $instance . $form_type . '" class="feedback-form" method="post" action="' . site_url( '/wp-comments-post.php' ) . '" name="feedback-form-' . $instance ."\">\n";
+
+		wp_editor( '', 'feedback-' . $instance, array(
+			'media_buttons' => false,
+			'textarea_name' => 'comment',
+			'textarea_rows' => 3,
+			'quicktags'     => array(
+				'buttons' => 'strong,em'
+			),
+			'teeny'         => true,
+			'tinymce'       => false,
+		) );
+
+		echo '<p><strong>' . __( 'Note', 'wporg' ) . '</strong>: ' . __( 'No newlines allowed', 'wporg' ) . '. ';
+		printf( __( 'Allowed tags: %s', 'wporg' ), trim( $allowed_tags, ', ' ) ) . "</p>\n";
+		echo "<p><input id='submit-{$instance}' class='submit' type='submit' value='Add Feedback' name='submit-{$instance}'>\n";
+		echo "<input type='hidden' name='comment_post_ID' value='" . get_the_ID() . "' id='comment_post_ID-{$instance}' />\n";
+		echo "<input type='hidden' name='comment_parent' id='comment_parent-{$instance}' value='{$comment_id}' />\n";
+		echo "</p>\n</form>\n</div><!-- #feedback-editor-{$comment_id} -->\n";
 		return ob_get_clean();
 	}
 

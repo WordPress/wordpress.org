@@ -32,19 +32,21 @@ if ( post_password_required() ) {
 		<?php endif; // check for comment navigation ?>
 
 		<ol class="comment-list">
-			<?php
-				/* Loop through and list the comments. Tell wp_list_comments()
-				 * to use wporg_developer_comment() to format the comments.
+			<?php 
+				$feedback_editor = false;
+
+				/* Loop through and list the comments. Use wporg_developer_list_notes() to format the comments.
 				 * If you want to override this in a child theme, then you can
-				 * define wporg_developer_comment() and that will be used instead.
-				 * See wporg_developer_comment() in inc/template-tags.php for more.
+				 * define wporg_developer_list_notes() and that will be used instead.
+				 * See wporg_developer_list_notes() in inc/template-tags.php for more.
 				 */
 				if ( is_singular( 'post' ) ) {
 					wp_list_comments();
 				} else {
 					$ordered_comments = wporg_developer_get_ordered_notes();
 					if ( $ordered_comments ) {
-						wp_list_comments( array( 'callback' => 'wporg_developer_user_note' ), $ordered_comments );
+						$feedback_editor = array_filter(  wp_list_pluck( $ordered_comments, 'show_editor') );
+						wporg_developer_list_notes( $ordered_comments, array( 'avatar_size' => 32 ) ); 
 					}
 				}
 			?>
@@ -62,11 +64,11 @@ if ( post_password_required() ) {
 
 	<?php if ( \DevHub\is_parsed_post_type() && DevHub\can_user_post_note( true, get_the_ID() ) ) : ?>
 
-		<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note or feedback to contribute?', 'wporg' ); ?></a></p>
+		<?php $add_note_style = empty( $feedback_editor ) ? 'display:none;' : ''; ?>
+		<p id="add-user-note" style="<?php echo $add_note_style; ?>"><a href="<?php echo user_trailingslashit( get_permalink() ) . '#respond'; ?>"><?php _e( 'Have a note or feedback to contribute?', 'wporg' ); ?></a></p>
 
-		<?php comment_form( array(
-			'class_form'          => 'comment-form tab-container',
-			'comment_field'       => DevHub_User_Submitted_Content::wp_editor_comments(),
+		<?php 
+		$args = array(
 			'logged_in_as'        => '<p class="logged-in-as">'
 				. sprintf(
 					/* translators: 1: user profile link, 2: accessibility text, 3: user name, 4: logout URL */
@@ -90,9 +92,8 @@ if ( post_password_required() ) {
 					'<span class="text-button">' . __( 'inline code', 'wporg' ) . '</span>'
 				)
 				. '</li></ul></p>',
-			'comment_notes_after' => DevHub_Note_Preview::comment_preview()
-				. '<p>'
-				. __( 'Submission Notes:', 'wporg' ) 
+			'comment_notes_after' => '<p>'
+				. __( 'Submission Notes:', 'wporg' )
 				. '<ul><li>'
 				. __( 'This form is not for support requests, discussions, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' )
 				. '</li><li>'
@@ -105,13 +106,29 @@ if ( post_password_required() ) {
 				)
 				. '</li></ul></p>',
 			'label_submit'        => __( 'Add Note or Feedback', 'wporg' ),
+			'cancel_reply_link'   => '',
 			'must_log_in'         => '<p>' . sprintf(
 				__( 'You must <a href="%s">log in</a> before being able to contribute a note or feedback.', 'wporg' ),
-				'https://wordpress.org/support/bb-login.php?redirect_to=' . urlencode( get_comments_link() )
+				'https://login.wordpress.org/?redirect_to=' . urlencode( get_comments_link() )
 			) . '</p>',
-			'title_reply'         =>  '', //'Add Example'
-		) ); ?>
+			'title_reply'         => '', //'Add Example'
+			'title_reply_to'      => '',
+		);
 
+		if ( class_exists( 'DevHub_Note_Preview' ) ) {
+			$args['comment_notes_after'] = DevHub_Note_Preview::comment_preview() . $args['comment_notes_after'];
+			$args['class_form']          = 'comment-form tab-container';
+		}
+
+		if ( class_exists( 'DevHub_User_Submitted_Content' ) ) {
+			$args['comment_field'] = DevHub_User_Submitted_Content::wp_editor_comments();
+		}
+
+		// Insert comment form if feedback form is not already used.
+		if ( empty( $feedback_editor ) ) {
+			comment_form( $args );
+		}
+		?>
 	<?php endif; ?>
 
 	<?php if ( ! \DevHub\is_parsed_post_type() && comments_open() ) : ?>

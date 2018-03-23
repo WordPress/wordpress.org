@@ -1137,6 +1137,18 @@
 			opacity: 1;
 		}
 
+		.comment-awaiting-moderation {
+			background-color: #fff8e5;
+			padding: .2em .5em;
+			border-radius: 3px;
+			border: 1px solid #ffb900;
+		}
+
+		.depth-2 .comment-awaiting-moderation {
+			display: inline-block;
+			margin: 2px 0;
+		}
+
 		.comment-list,
 		.comment-list ol {
 			list-style: none;
@@ -1146,15 +1158,68 @@
 
 		.comment-list li,
 		#comment-preview {
-			margin-top: 2.5rem;
+			margin-top: 3rem;
 			background: #fff;
 			overflow: auto;
-			border: 1px solid #dfdfdf;
-			border-radius: 0 2px 2px 2px;
 
 			article {
 				overflow: auto;
 			}
+		}
+
+		.comment-list li.depth-1,
+		#comment-preview {
+			border: 1px solid #dfdfdf;
+			border-radius: 2px;
+		}
+
+		// Feedback
+		.comment-list li.depth-2 {
+			border-top: 1px solid #dfdfdf;
+			padding: 0;
+			margin: 0;
+
+			.comment-content {
+				padding: .9em 0;
+			}
+			.comment-content p {
+				margin-bottom: 0;
+				font-size: .9em;
+			}
+		}
+
+		.comment ul.children {
+			margin: 0 0 1.5em 0;
+			border-bottom: 1px solid #dfdfdf;
+		}
+
+		.feedback {
+			width: 90%;
+			float: right;
+			margin-right: 1.5rem;
+		}
+
+		.feedback-links {
+			margin: 0 1.5rem 1em 1.5rem;
+			font-size: 0.9em;
+			clear: both;
+		}
+
+		.feedback-editor-title,
+		.feedback-title {
+			font-size: 1.8rem;
+			font-weight: 300;
+			line-height: 2.2rem;
+			margin-bottom: 1em;
+		}
+
+		.feedback-toggle {
+			margin: 0 0 0 1.5rem;
+			display: inline-block;
+		}
+
+		#wp-feedback-wrap {
+			padding-bottom: 1em;
 		}
 
 		#comment-preview,
@@ -1162,7 +1227,7 @@
 			margin-top: 0;
 			border: 1px solid #ccc;
 			border-radius: 0 3px 3px 3px;
-			clear:both;
+			clear: both;
 		}
 
 		#comment-preview.tab-section-selected {
@@ -1223,21 +1288,6 @@
 			margin-left: 0;
 			clear: both;
 			padding: 2rem 1.5rem .5rem;
-		}
-
-		.comment-footer {
-			margin: 0 1em;
-			padding: 0 0 1em 0;
-			position: relative;
-			overflow: auto;
-
-			a {
-				float: right;
-			}
-
-			p {
-				margin-bottom: 0;
-			}
 		}
 
 		.comment-content ol {

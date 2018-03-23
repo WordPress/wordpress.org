@@ -1514,6 +1514,18 @@ input {
   opacity: 1;
 }
 
+.devhub-wrap .single-wp-parser-function .comment-awaiting-moderation, .devhub-wrap .single-wp-parser-method .comment-awaiting-moderation, .devhub-wrap .single-wp-parser-hook .comment-awaiting-moderation, .devhub-wrap .single-wp-parser-class .comment-awaiting-moderation {
+  background-color: #fff8e5;
+  padding: .2em .5em;
+  border-radius: 3px;
+  border: 1px solid #ffb900;
+}
+
+.devhub-wrap .single-wp-parser-function .depth-2 .comment-awaiting-moderation, .devhub-wrap .single-wp-parser-method .depth-2 .comment-awaiting-moderation, .devhub-wrap .single-wp-parser-hook .depth-2 .comment-awaiting-moderation, .devhub-wrap .single-wp-parser-class .depth-2 .comment-awaiting-moderation {
+  display: inline-block;
+  margin: 2px 0;
+}
+
 .devhub-wrap .single-wp-parser-function .comment-list,
 .devhub-wrap .single-wp-parser-function .comment-list ol, .devhub-wrap .single-wp-parser-method .comment-list,
 .devhub-wrap .single-wp-parser-method .comment-list ol, .devhub-wrap .single-wp-parser-hook .comment-list,
@@ -1529,11 +1541,9 @@ input {
 .devhub-wrap .single-wp-parser-method #comment-preview, .devhub-wrap .single-wp-parser-hook .comment-list li,
 .devhub-wrap .single-wp-parser-hook #comment-preview, .devhub-wrap .single-wp-parser-class .comment-list li,
 .devhub-wrap .single-wp-parser-class #comment-preview {
-  margin-top: 2.5rem;
+  margin-top: 3rem;
   background: #fff;
   overflow: auto;
-  border: 1px solid #dfdfdf;
-  border-radius: 0 2px 2px 2px;
 }
 
 .devhub-wrap .single-wp-parser-function .comment-list li article,
@@ -1542,6 +1552,67 @@ input {
 .devhub-wrap .single-wp-parser-hook #comment-preview article, .devhub-wrap .single-wp-parser-class .comment-list li article,
 .devhub-wrap .single-wp-parser-class #comment-preview article {
   overflow: auto;
+}
+
+.devhub-wrap .single-wp-parser-function .comment-list li.depth-1,
+.devhub-wrap .single-wp-parser-function #comment-preview, .devhub-wrap .single-wp-parser-method .comment-list li.depth-1,
+.devhub-wrap .single-wp-parser-method #comment-preview, .devhub-wrap .single-wp-parser-hook .comment-list li.depth-1,
+.devhub-wrap .single-wp-parser-hook #comment-preview, .devhub-wrap .single-wp-parser-class .comment-list li.depth-1,
+.devhub-wrap .single-wp-parser-class #comment-preview {
+  border: 1px solid #dfdfdf;
+  border-radius: 2px;
+}
+
+.devhub-wrap .single-wp-parser-function .comment-list li.depth-2, .devhub-wrap .single-wp-parser-method .comment-list li.depth-2, .devhub-wrap .single-wp-parser-hook .comment-list li.depth-2, .devhub-wrap .single-wp-parser-class .comment-list li.depth-2 {
+  border-top: 1px solid #dfdfdf;
+  padding: 0;
+  margin: 0;
+}
+
+.devhub-wrap .single-wp-parser-function .comment-list li.depth-2 .comment-content, .devhub-wrap .single-wp-parser-method .comment-list li.depth-2 .comment-content, .devhub-wrap .single-wp-parser-hook .comment-list li.depth-2 .comment-content, .devhub-wrap .single-wp-parser-class .comment-list li.depth-2 .comment-content {
+  padding: .9em 0;
+}
+
+.devhub-wrap .single-wp-parser-function .comment-list li.depth-2 .comment-content p, .devhub-wrap .single-wp-parser-method .comment-list li.depth-2 .comment-content p, .devhub-wrap .single-wp-parser-hook .comment-list li.depth-2 .comment-content p, .devhub-wrap .single-wp-parser-class .comment-list li.depth-2 .comment-content p {
+  margin-bottom: 0;
+  font-size: .9em;
+}
+
+.devhub-wrap .single-wp-parser-function .comment ul.children, .devhub-wrap .single-wp-parser-method .comment ul.children, .devhub-wrap .single-wp-parser-hook .comment ul.children, .devhub-wrap .single-wp-parser-class .comment ul.children {
+  margin: 0 0 1.5em 0;
+  border-bottom: 1px solid #dfdfdf;
+}
+
+.devhub-wrap .single-wp-parser-function .feedback, .devhub-wrap .single-wp-parser-method .feedback, .devhub-wrap .single-wp-parser-hook .feedback, .devhub-wrap .single-wp-parser-class .feedback {
+  width: 90%;
+  float: right;
+  margin-right: 1.5rem;
+}
+
+.devhub-wrap .single-wp-parser-function .feedback-links, .devhub-wrap .single-wp-parser-method .feedback-links, .devhub-wrap .single-wp-parser-hook .feedback-links, .devhub-wrap .single-wp-parser-class .feedback-links {
+  margin: 0 1.5rem 1em 1.5rem;
+  font-size: 0.9em;
+  clear: both;
+}
+
+.devhub-wrap .single-wp-parser-function .feedback-editor-title,
+.devhub-wrap .single-wp-parser-function .feedback-title, .devhub-wrap .single-wp-parser-method .feedback-editor-title,
+.devhub-wrap .single-wp-parser-method .feedback-title, .devhub-wrap .single-wp-parser-hook .feedback-editor-title,
+.devhub-wrap .single-wp-parser-hook .feedback-title, .devhub-wrap .single-wp-parser-class .feedback-editor-title,
+.devhub-wrap .single-wp-parser-class .feedback-title {
+  font-size: 1.8rem;
+  font-weight: 300;
+  line-height: 2.2rem;
+  margin-bottom: 1em;
+}
+
+.devhub-wrap .single-wp-parser-function .feedback-toggle, .devhub-wrap .single-wp-parser-method .feedback-toggle, .devhub-wrap .single-wp-parser-hook .feedback-toggle, .devhub-wrap .single-wp-parser-class .feedback-toggle {
+  margin: 0 0 0 1.5rem;
+  display: inline-block;
+}
+
+.devhub-wrap .single-wp-parser-function #wp-feedback-wrap, .devhub-wrap .single-wp-parser-method #wp-feedback-wrap, .devhub-wrap .single-wp-parser-hook #wp-feedback-wrap, .devhub-wrap .single-wp-parser-class #wp-feedback-wrap {
+  padding-bottom: 1em;
 }
 
 .devhub-wrap .single-wp-parser-function #comment-preview,
@@ -1606,21 +1677,6 @@ input {
   margin-left: 0;
   clear: both;
   padding: 2rem 1.5rem .5rem;
-}
-
-.devhub-wrap .single-wp-parser-function .comment-footer, .devhub-wrap .single-wp-parser-method .comment-footer, .devhub-wrap .single-wp-parser-hook .comment-footer, .devhub-wrap .single-wp-parser-class .comment-footer {
-  margin: 0 1em;
-  padding: 0 0 1em 0;
-  position: relative;
-  overflow: auto;
-}
-
-.devhub-wrap .single-wp-parser-function .comment-footer a, .devhub-wrap .single-wp-parser-method .comment-footer a, .devhub-wrap .single-wp-parser-hook .comment-footer a, .devhub-wrap .single-wp-parser-class .comment-footer a {
-  float: right;
-}
-
-.devhub-wrap .single-wp-parser-function .comment-footer p, .devhub-wrap .single-wp-parser-method .comment-footer p, .devhub-wrap .single-wp-parser-hook .comment-footer p, .devhub-wrap .single-wp-parser-class .comment-footer p {
-  margin-bottom: 0;
 }
 
 .devhub-wrap .single-wp-parser-function .comment-content ol, .devhub-wrap .single-wp-parser-method .comment-content ol, .devhub-wrap .single-wp-parser-hook .comment-content ol, .devhub-wrap .single-wp-parser-class .comment-content ol {

@@ -76,9 +76,10 @@ namespace {
 		/**
 		 * Get contibuted notes ordered by vote
 		 *
-		 * By default only top level comments are returned.
-		 * If child notes are included use wp_list_comments() or a custom walker for display.
-		 * unapproved notes for the current user are included.
+		 * Only the parent notes are ordered by vote count.
+		 * Child notes are added to to the parent note 'child_notes' property.
+		 * Unapproved notes for the current user are included.
+		 * Use `wporg_developer_list_notes()` to display the notes.
 		 *
 		 * @param integer $post_id Optional. Post id to get comments for
 		 * @param array $args Arguments used for get_comments().
@@ -92,29 +93,60 @@ namespace {
 				$post_id = get_the_ID();
 			}
 
-			$order    = array();
 			$defaults = array(
 				'post__in'           => array( $post_id ),
 				'type'               => 'comment',
 				'status'             => 'approve',
 				'include_unapproved' => array_filter( array( get_current_user_id() ) ),
-				'parent'             => false,
 			);
 
 			if ( is_super_admin() ) {
 				$defaults['status'] = 'all';
 			}
 
-			$args = wp_parse_args( $args, $defaults );
-
+			$args     = wp_parse_args( $args, $defaults );
 			$comments = get_comments( $args );
 
 			if ( ! $comments ) {
 				return;
 			}
 
+			// Check if the current page is a reply to a note.
+			$reply_id = 0;
+			if ( isset( $_GET['replytocom'] ) && $_GET['replytocom'] ) {
+				$reply_id = absint( $_GET['replytocom'] );
+			}
+
+			$order = $children = array();
+			$voting = class_exists( 'DevHub_User_Contributed_Notes_Voting' );
+
+			// Remove child notes and add the vote count order for parent notes.
 			foreach ( $comments as $key => $comment ) {
-				$order[ $key ] = (int) DevHub_User_Contributed_Notes_Voting::count_votes( $comment->comment_ID, 'difference' );
+				if ( 0 === (int) $comment->comment_parent ) {
+					$vote_count    = $voting ? (int) DevHub_User_Contributed_Notes_Voting::count_votes( $comment->comment_ID, 'difference' ) : 0;
+					$order[ $key ] = $vote_count;
+				} else {
+					unset( $comments[ $key ] );
+					$children[ $comment->comment_parent ][] = $comment;
+				}
+			}
+
+			$show_editor = false;
+
+			// Add children notes to their parents.
+			foreach ( $comments as $key => $comment ) {
+				$comments[ $key ]->child_notes = array();
+				$comments[ $key ]->show_editor = false;
+
+				if ( array_key_exists( $comment->comment_ID, $children ) ) {
+					$comments[ $key ]->child_notes = array_reverse( $children[ $comment->comment_ID ] );
+				}
+
+				if ( ! $show_editor && ( $reply_id && ( $reply_id === (int) $comment->comment_ID ) ) ) {
+					// Show the editor when replying to this parent comment
+					$comments[ $key ]->show_editor = true;
+					$show_editor = true;
+				}
 			}
 
 			// sort the posts by votes
@@ -124,98 +156,198 @@ namespace {
 		}
 	endif;
 
+	if ( ! function_exists( 'wporg_developer_list_notes' ) ) :
+		/**
+		 * List user contributed notes.
+		 *
+		 * @param array   $comments Array with comment objects.
+		 * @param array   $args Comment display arguments.
+		 */
+		function wporg_developer_list_notes( $comments, $args ) {
+			$is_user_logged_in  = is_user_logged_in();
+			$can_user_post_note = DevHub\can_user_post_note( true, get_the_ID() );
+			$user_content       = class_exists( 'DevHub_User_Submitted_Content' );
+			$display_editor     = $is_user_logged_in && $can_user_post_note && $user_content;
+
+			foreach ( $comments as $comment ) {
+
+				$comment_id = $comment->comment_ID;
+
+				// Display parent comment.
+				wporg_developer_user_note( $comment, $args, 1 );
+
+				// Show or hide feedback notes.
+				$class = $comment->show_editor ? '' : ' hide-if-js';
+				echo "<section id='feedback-{$comment_id}' class='feedback{$class}'>\n";
+
+				// Display child comments.
+				if ( ! empty( $comment->child_notes ) ) {
+
+					echo "<h4 class='feedback-title'>Feedback</h4>\n";
+					echo "<ul class='children'>\n";
+					foreach ( $comment->child_notes as $child_note ) {
+						wporg_developer_user_note( $child_note, $args, 2, $comment->show_editor );
+					}
+					echo "</ul>\n";
+				}
+
+				// Add a feedback form for logged in users.
+				if ( $display_editor ) {
+					// Show or hide the editor depending if we're replying to a note.
+					$display = $comment->show_editor ? 'show' : 'hide';
+					echo DevHub_User_Submitted_Content::wp_editor_feedback( $comment, $display );
+				}
+				echo "</section><!-- .feedback -->\n";
+
+				// Feedback links to log in, add feedback or show feedback.
+				echo "<footer class='feedback-links' >\n";
+				if ( $can_user_post_note ) {
+					echo "EEE";
+					$feedback_link = trailingslashit( get_permalink() ) . "?replytocom={$comment_id}#feedback-editor-{$comment_id}";
+					$display       = '';
+					$aria          = '';
+					if ( ! $is_user_logged_in ) {
+						$class         = 'login';
+						$feedback_text = __( 'Log in to add feedback', 'wporg' );
+						$feedback_link = 'https://login.wordpress.org/?redirect_to=' . urlencode( $feedback_link );
+					} else {
+						$class         ='add';
+						$feedback_text = __( 'Add feedback to this note', 'wporg' );
+						$aria          = '';//" aria-expanded='false' aria_controls='feedback-editor-{$comment_id}' aria-label='" . esc_attr( $feedback_text ) . "'";
+
+						// Hide 'add feedback' link if editor is displayed.
+						$display = $display_editor && $comment->show_editor ? ' style="display:none"' : '';
+					}
+					echo '<a class="feedback-' . $class . '" href="' . esc_url( $feedback_link ) . '"' . $display . $aria .' rel="nofollow">' . $feedback_text . '</a>';
+				}
+
+				// close parent list item
+				echo "</footer>\n</article><!-- .comment-body -->\n</li>\n";
+			}
+		}
+	endif;
+
+
 	if ( ! function_exists( 'wporg_developer_user_note' ) ) :
 		/**
 		 * Template for user contributed notes.
+		 *
+		 * @param object $comment Comment object.
+		 * @param array  $args    Arguments.
+		 * @param int    $depth   Nested comment depth.
 		 */
 		function wporg_developer_user_note( $comment, $args, $depth ) {
-			$GLOBALS['comment'] = $comment;
-			$count = (int) DevHub_User_Contributed_Notes_Voting::count_votes( $comment->comment_ID, 'difference' );
-			$curr_user_note = DevHub_User_Contributed_Notes_Voting::is_current_user_note( $comment->comment_ID );
+			$GLOBALS['comment']       = $comment;
+			$GLOBALS['comment_depth'] = $depth;
 
+			$approved       = ( 0 < (int) $comment->comment_approved ) ? true : false;
+			$is_parent      = ( 0 === (int) $comment->comment_parent ) ? true : false;
+			$is_voting      = class_exists( 'DevHub_User_Contributed_Notes_Voting' );
+			$count          = $is_voting ? (int)  DevHub_User_Contributed_Notes_Voting::count_votes( $comment->comment_ID, 'difference' ) : 0;
+			$curr_user_note = $is_voting ? (bool) DevHub_User_Contributed_Notes_Voting::is_current_user_note( $comment->comment_ID ) : false;
+
+			// Classes
 			$comment_class = array();
+
 			if ( -1 > $count ) {
 				$comment_class[] = 'bad-note';
 			}
+
 			if ( $curr_user_note ) {
 				$comment_class[] = 'user-submitted-note';
 			}
-			?>
 
-			<li id="comment-<?php comment_ID(); ?>" <?php comment_class( implode( ' ', $comment_class ) ); ?>>
+			if ( ! $approved ) {
+				$comment_class[] = 'user-note-moderated';
+			}
+
+			// This would all be moot if core passed the $comment context for 'get_comment_author_link' filter.
+			if ( $comment->user_id ) {
+				$commenter = get_user_by( 'id', $comment->user_id );
+				$url = 'https://profiles.wordpress.org/' . sanitize_key( $commenter->user_nicename ) . '/';
+				$author = get_the_author_meta( 'display_name', $comment->user_id );
+			} else {
+				$url = $comment->comment_author_url;
+				$author = $comment->comment_author;
+			}
+
+			$comment_author_link = $author;
+			if ( $url ) {
+				$comment_author_link = "<a href='$url' rel='external nofollow' class='url'>$author</a>";
+			}
+
+			$date = sprintf( _x( '%1$s ago', '%1$s = human-readable time difference', 'wporg' ),
+				human_time_diff( get_comment_time( 'U' ),
+				current_time( 'timestamp' ) )
+			);
+			?>
+			<li id="comment-<?php comment_ID(); ?>" data-comment-id="<?php echo $comment->comment_ID;  ?>" <?php comment_class( implode( ' ', $comment_class ) ); ?>>
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
+
+			<?php if ( $is_parent ) : ?>
 				<a href="#comment-content-<?php echo $comment->comment_ID; ?>" class="screen-reader-text"><?php _e( 'Skip to note content', 'wporg' ); ?></a>
 				<header class="comment-meta">
-					<?php DevHub_User_Contributed_Notes_Voting::show_voting(); ?>
+
+				<?php
+				if ( $is_voting ) {
+					DevHub_User_Contributed_Notes_Voting::show_voting();
+				}
+				?>
 					<div class="comment-author vcard">
 						<span class="comment-author-attribution">
-						<?php if ( 0 != $args['avatar_size'] ) {
-								echo get_avatar( $comment, $args['avatar_size'] );
-						} ?>
-
 						<?php
-							// This would all be moot if core passed the $comment context for 'get_comment_author_link' filter
-							if ( $comment->user_id ) {
-								$commenter = get_user_by( 'id', $comment->user_id );
-								$url = 'https://profiles.wordpress.org/' . esc_attr( $commenter->user_nicename ) . '/';
-								$author = get_the_author_meta( 'display_name', $comment->user_id );
-							} else {
-								$url = $comment->comment_author_url;
-								$author = $comment->comment_author;
-							}
+						if ( 0 != $args['avatar_size'] ) {
+							echo get_avatar( $comment, $args['avatar_size'] );
+						}
 
-							$comment_author_link = '';
-							if ( $url ) {
-								$comment_author_link = "<a href='$url' rel='external nofollow' class='url'>";
-							}
-							$comment_author_link .= $author;
-							if ( $url ) {
-								$comment_author_link .= '</a>';
-							}
-
-							printf( __( 'Contributed by %s', 'wporg' ), sprintf( '<cite class="fn">%s</cite>', $comment_author_link ) );
+						printf( __( 'Contributed by %s', 'wporg' ), sprintf( '<cite class="fn">%s</cite>', $comment_author_link ) );
 						?>
 
 						</span>
 						&mdash;
 						<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
 							<time datetime="<?php comment_time( 'c' ); ?>">
-							<?php
-								printf( _x( '%1$s ago', '%1$s = human-readable time difference', 'wporg' ),
-									human_time_diff( get_comment_time( 'U' ),
-									current_time( 'timestamp' ) )
-								);
-							?>
+							<?php echo $date; ?>
 							</time>
 						</a>
 						<?php edit_comment_link( __( 'Edit', 'wporg' ), '<span class="edit-link">&mdash; ', '</span>' ); ?>
+						<?php if ( ! $approved ) : ?>
+							&mdash; <span class="comment-awaiting-moderation"><?php _e( 'awaiting moderation', 'wporg' ); ?></span>
+						<?php endif; ?>
 					</div>
 				</header>
 				<!-- .comment-metadata -->
+			<?php endif; ?>
 
 				<div class="comment-content" id="comment-content-<?php echo $comment->comment_ID; ?>">
-					<?php comment_text(); ?>
-				</div>
-				<!-- .comment-content -->
-
-				<?php if ( '0' == $comment->comment_approved ) : ?>
-					<footer class="comment-footer">
-						<p class="comment-awaiting-moderation"><?php _e( 'Your note is awaiting moderation.', 'wporg' ); ?></p>
-					</footer>
-					<!-- .comment-footer -->
-				<?php endif; ?>
-
 				<?php
-					comment_reply_link( array_merge( $args, array(
-						'add_below' => 'div-comment',
-						'depth'     => $depth,
-						'max_depth' => $args['max_depth'],
-						'before'    => '<div class="reply">',
-						'after'     => '</div>',
-					) ) );
+				if ( $is_parent ) {
+					comment_text();
+				} else {
+					$text = get_comment_text()  . ' &mdash; ';
+					$text .= sprintf( __( 'By %s', 'wporg' ), sprintf( '<cite class="fn">%s</cite>', $comment_author_link ) ) . ' &mdash; ';
+					$text .= ' <a href="'. esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
+					$text .= '<time datetime="' . get_comment_time( 'c' ) . '">' . $date . '</time></a>';
+
+					if ( current_user_can( 'edit_comment', $comment->comment_ID ) ) {
+						$text .= ' &mdash; <a class="comment-edit-link" href="' . get_edit_comment_link( $comment->comment_ID ) .'">';
+						$text .= __( 'Edit', 'wporg' ) . '</a>';
+					}
+
+					if ( ! $approved ) {
+						$text .= ' &mdash; <span class="comment-awaiting-moderation">' . __( 'awaiting moderation', 'wporg' ) . '</span>';
+					}
+
+					echo apply_filters( 'comment_text', $text );
+				}
 				?>
-			</article><!-- .comment-body -->
-			<?php
+				</div><!-- .comment-content -->
+
+			<?php if ( ! $is_parent ) : ?>
+			</article>
+			</li>
+			<?php endif; ?>
+		<?php
 		}
 	endif; // ends check for wporg_developer_user_note()
 
