@@ -172,7 +172,7 @@ class Meetup_Client {
 			$response      = wp_remote_get( $url, $args );
 			$response_code = wp_remote_retrieve_response_code( $response );
 
-			$this->maybe_throttle( $response );
+			$this->maybe_throttle( wp_remote_retrieve_headers( $response ) );
 
 			if ( in_array( $response_code, $breaking_codes, true ) || is_wp_error( $response ) ) {
 				break;
@@ -254,14 +254,17 @@ class Meetup_Client {
 	/**
 	 * Check the rate limit status in an API response and delay further execution if necessary.
 	 *
-	 * @param array $response
-	 *
-	 * @return void
+	 * @param array $headers
 	 */
-	protected function maybe_throttle( $response ) {
-		$remaining = absint( wp_remote_retrieve_header( $response, 'x-ratelimit-remaining' ) );
-		$period    = absint( wp_remote_retrieve_header( $response, 'x-ratelimit-reset' ) );
+	protected function maybe_throttle( $headers ) {
+		if ( ! isset( $headers['x-ratelimit-remaining'], $headers['x-ratelimit-reset'] ) ) {
+			return;
+		}
 
+		$remaining = absint( $headers['x-ratelimit-remaining'] );
+		$period    = absint( $headers['x-ratelimit-reset'    ] );
+
+		// Pause more frequently than we need to, and for longer, just to be safe
 		if ( $remaining > 2 ) {
 			return;
 		}
