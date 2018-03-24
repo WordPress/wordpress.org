@@ -202,7 +202,17 @@ class Meetup_Client {
 				$retry_after = wp_remote_retrieve_header( $response, 'retry-after' ) ?: 5;
 				$wait        = min( $retry_after * $attempt_count, 30 );
 
+				if ( 'cli' === php_sapi_name() ) {
+					echo "\nRequest failed $attempt_count times. Pausing for $wait seconds before retrying.";
+				}
+
 				sleep( $wait );
+			}
+		}
+
+		if ( $attempt_count === $max_attempts && 'cli' === php_sapi_name() ) {
+			if ( 200 !== $response_code || is_wp_error( $response ) ) {
+				echo "\nRequest failed $attempt_count times. Giving up.";
 			}
 		}
 
@@ -276,6 +286,10 @@ class Meetup_Client {
 
 		if ( $period < 2 ) {
 			$period = 2;
+		}
+
+		if ( 'cli' == php_sapi_name() ) {
+			echo "\nPausing for $period seconds to avoid rate-limiting.";
 		}
 
 		sleep( $period );
