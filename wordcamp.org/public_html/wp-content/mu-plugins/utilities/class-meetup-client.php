@@ -1,6 +1,8 @@
 <?php
 
 namespace WordCamp\Utilities;
+use WP_Error;
+
 defined( 'WPINC' ) || die();
 
 /**
@@ -23,7 +25,7 @@ class Meetup_Client {
 	protected $debug_mode;
 
 	/**
-	 * @var \WP_Error|null Container for errors.
+	 * @var WP_Error|null Container for errors.
 	 */
 	public $error = null;
 
@@ -31,7 +33,7 @@ class Meetup_Client {
 	 * Meetup_Client constructor.
 	 */
 	public function __construct() {
-		$this->error = new \WP_Error();
+		$this->error = new WP_Error();
 
 		if ( defined( 'MEETUP_API_KEY' ) ) {
 			$this->api_key = MEETUP_API_KEY;
@@ -53,7 +55,7 @@ class Meetup_Client {
 	 *
 	 * @param string $request_url The API endpoint URL to send the request to.
 	 *
-	 * @return array|\WP_Error The results of the request.
+	 * @return array|WP_Error The results of the request.
 	 */
 	protected function send_paginated_request( $request_url ) {
 		$data = array();
@@ -109,7 +111,7 @@ class Meetup_Client {
 	 *
 	 * @param string $request_url The API endpoint URL to send the request to.
 	 *
-	 * @return int|\WP_Error
+	 * @return int|WP_Error
 	 */
 	protected function send_total_count_request( $request_url ) {
 		$count = 0;
@@ -153,7 +155,7 @@ class Meetup_Client {
 	 * @param string $url
 	 * @param array  $args
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	protected function tenacious_remote_get( $url, $args = array() ) {
 		$attempt_count = 0;
@@ -183,7 +185,7 @@ class Meetup_Client {
 				break;
 			}
 
-			$attempt_count ++;
+			$attempt_count++;
 
 			/**
 			 * Action: Fires when tenacious_remote_get fails a request attempt.
@@ -241,7 +243,7 @@ class Meetup_Client {
 	 * @return string
 	 */
 	protected function get_next_url( $response ) {
-		$url   = '';
+		$url = '';
 
 		// First try v3.
 		$links = wp_remote_retrieve_header( $response, 'link' );
@@ -279,7 +281,7 @@ class Meetup_Client {
 		$remaining = absint( $headers['x-ratelimit-remaining'] );
 		$period    = absint( $headers['x-ratelimit-reset'    ] );
 
-		// Pause more frequently than we need to, and for longer, just to be safe
+		// Pause more frequently than we need to, and for longer, just to be safe.
 		if ( $remaining > 2 ) {
 			return;
 		}
@@ -288,7 +290,7 @@ class Meetup_Client {
 			$period = 2;
 		}
 
-		if ( 'cli' == php_sapi_name() ) {
+		if ( 'cli' === php_sapi_name() ) {
 			echo "\nPausing for $period seconds to avoid rate-limiting.";
 		}
 
@@ -298,7 +300,7 @@ class Meetup_Client {
 	/**
 	 * Extract error information from an API response and add it to our error handler.
 	 *
-	 * @param array|\WP_Error $response
+	 * @param array|WP_Error $response
 	 *
 	 * @return void
 	 */
@@ -340,9 +342,9 @@ class Meetup_Client {
 	 * Retrieve data about groups in the Chapter program.
 	 *
 	 * @param array $args Optional. Additional request parameters.
-	 *                    See https://www.meetup.com/meetup_api/docs/pro/:urlname/groups/
+	 *                    See https://www.meetup.com/meetup_api/docs/pro/:urlname/groups/.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function get_groups( array $args = array() ) {
 		$request_url = $this->api_base . 'pro/wordpress/groups';
@@ -361,9 +363,9 @@ class Meetup_Client {
 	 *
 	 * @param array $group_ids The IDs of the groups to get events for.
 	 * @param array $args      Optional. Additional request parameters.
-	 *                         See https://www.meetup.com/meetup_api/docs/2/events/
+	 *                         See https://www.meetup.com/meetup_api/docs/2/events/.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function get_events( array $group_ids, array $args = array() ) {
 		$url_base     = $this->api_base . '2/events';
@@ -394,9 +396,9 @@ class Meetup_Client {
 	 *
 	 * @param string $group_slug The slug/urlname of a group.
 	 * @param array  $args       Optional. Additional request parameters.
-	 *                           See https://www.meetup.com/meetup_api/docs/:urlname/events/
+	 *                           See https://www.meetup.com/meetup_api/docs/:urlname/events/.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function get_group_events( $group_slug, array $args = array() ) {
 		$request_url = $this->api_base . "$group_slug/events";
@@ -413,9 +415,9 @@ class Meetup_Client {
 	 *
 	 * @param string $route The Meetup.com API route to send a request to.
 	 * @param array  $args  Optional. Additional request parameters.
-	 *                      See https://www.meetup.com/meetup_api/docs/
+	 *                      See https://www.meetup.com/meetup_api/docs/.
 	 *
-	 * @return int|\WP_Error
+	 * @return int|WP_Error
 	 */
 	public function get_result_count( $route, array $args = array() ) {
 		$request_url = $this->api_base . $route;
