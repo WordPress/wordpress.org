@@ -150,6 +150,8 @@ class Meetup_Client {
 	/**
 	 * Wrapper for `wp_remote_get` to retry requests that fail temporarily for various reasons.
 	 *
+	 * One common example of a reason a request would fail, but later succeed, is when the first request times out.
+	 *
 	 * Based on `wcorg_redundant_remote_get`.
 	 *
 	 * @param string $url
@@ -181,7 +183,7 @@ class Meetup_Client {
 
 			$this->maybe_throttle( wp_remote_retrieve_headers( $response ) );
 
-			if ( in_array( $response_code, $breaking_codes, true ) || is_wp_error( $response ) ) {
+			if ( in_array( $response_code, $breaking_codes, true ) ) {
 				break;
 			}
 
