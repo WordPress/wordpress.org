@@ -18,6 +18,11 @@ class Meetup_Client {
 	protected $api_key = '';
 
 	/**
+	 * @var bool If true, the client will fetch fewer results, for faster debugging.
+	 */
+	protected $debug_mode;
+
+	/**
 	 * @var \WP_Error|null Container for errors.
 	 */
 	public $error = null;
@@ -36,6 +41,8 @@ class Meetup_Client {
 				'The Meetup.com API Key is undefined.'
 			);
 		}
+
+		$this->debug_mode = apply_filters( 'wcmc_debug_mode', false );
 	}
 
 	/**
@@ -82,6 +89,10 @@ class Meetup_Client {
 				$request_url = $this->get_next_url( $response );
 			} else {
 				$this->handle_error_response( $response );
+				break;
+			}
+
+			if ( $this->debug_mode ) {
 				break;
 			}
 		}
