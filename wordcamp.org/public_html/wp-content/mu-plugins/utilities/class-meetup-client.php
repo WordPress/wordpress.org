@@ -168,6 +168,11 @@ class Meetup_Client {
 			429, // Too many requests (rate-limited).
 		);
 
+		// The default of 5 seconds often results in frequent timeouts.
+		if ( empty( $args['timeout'] ) ) {
+			$args['timeout'] = 15;
+		}
+
 		while ( $attempt_count < $max_attempts ) {
 			$response      = wp_remote_get( $url, $args );
 			$response_code = wp_remote_retrieve_response_code( $response );
