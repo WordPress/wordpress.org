@@ -9,7 +9,7 @@
 
 namespace WordPressdotorg\MainTheme;
 
-if ( false === stristr( home_url(), 'test' ) ) {
+if ( false === stristr( home_url(), 'test' ) && ! isset( $_GET['test'] ) ) {
 	return get_template_part( 'page' );
 }
 
