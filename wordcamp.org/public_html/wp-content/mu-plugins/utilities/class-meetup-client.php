@@ -84,10 +84,6 @@ class Meetup_Client {
 				$this->handle_error_response( $response );
 				break;
 			}
-
-			if ( $request_url ) {
-				$this->maybe_throttle( $response );
-			}
 		}
 
 		if ( ! empty( $this->error->get_error_messages() ) ) {
@@ -131,8 +127,6 @@ class Meetup_Client {
 			$this->handle_error_response( $response );
 		}
 
-		$this->maybe_throttle( $response );
-
 		if ( ! empty( $this->error->get_error_messages() ) ) {
 			return $this->error;
 		}
@@ -166,6 +160,8 @@ class Meetup_Client {
 		while ( $attempt_count < $max_attempts ) {
 			$response      = wp_remote_get( $url, $args );
 			$response_code = wp_remote_retrieve_response_code( $response );
+
+			$this->maybe_throttle( $response );
 
 			if ( in_array( $response_code, $breaking_codes, true ) || is_wp_error( $response ) ) {
 				break;
