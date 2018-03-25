@@ -88,7 +88,7 @@ the_post();
 						<li><strong><?php esc_html_e( 'Search Engine Optimized', 'wporg' ); ?></strong>
 							<?php
 							/* translators: Link to Plugin Directory search for SEO */
-							printf( wp_kses_post( __( 'WordPress is optimized for search engines right out of the box. For more fine-grained SEO control, there are plenty of <a href="%s">SEO plugins</a> to take care of that for you.', 'wporg' ) ), esc_url( 'https://wordpress.org/plugins/search/SEO/' ) );
+							printf( wp_kses_post( __( 'WordPress is optimized for search engines right out of the box. For more fine-grained SEO control, there are plenty of <a href="%s">SEO plugins</a> to take care of that for you.', 'wporg' ) ), esc_url( home_url( '/plugins/search/SEO/' ) ) );
 							?>
 						</li>
 						<li><strong><?php esc_html_e( 'Multilingual', 'wporg' ); ?></strong>
