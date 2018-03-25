@@ -108,12 +108,17 @@ function get_wp15_events( $potential_events ) {
 	}
 
 	if ( 'cli' == php_sapi_name() ) {
-		$names = wp_list_pluck( $other_events, 'name' );
+		$wp15_names  = wp_list_pluck( $wp15_events,  'name' );
+		$other_names = wp_list_pluck( $other_events, 'name' );
+
+		sort( $wp15_names  );
+		sort( $other_names );
 
 		echo "\nIgnored these events. Double check for false-negatives.\n\n";
+		print_r( $other_names );
 
-		sort(    $names );
-		print_r( $names );
+		echo "\nWP events. Double check for false-positives.\n\n";
+		print_r( $wp15_names );
 	}
 
 	return $wp15_events;
