@@ -100,7 +100,7 @@ function get_wp15_events( $potential_events ) {
 		$event['description'] = isset( $event['description'] ) ? $event['description'] : '';
 		$trimmed_event        = array_intersect_key( $event, $relevant_keys );
 
-		if ( is_wp15_event( $event['name'], $event['description'] ) ) {
+		if ( is_wp15_event( $event['id'], $event['name'], $event['description'] ) ) {
 			$wp15_events[] = $trimmed_event;
 		} else {
 			$other_events[] = $trimmed_event;
@@ -127,14 +127,20 @@ function get_wp15_events( $potential_events ) {
 /**
  * Determine if a meetup event is a WP15 celebration.
  *
+ * @param string $id
  * @param string $title
  * @param string $description
  *
  * @return bool
  */
-function is_wp15_event( $title, $description ) {
+function is_wp15_event( $id, $title, $description ) {
 	$match    = false;
 	$keywords = array( 'wp15', 'anniversary', 'birthday', '15 year', 'party', 'picnic', 'picknick' );
+	$false_positives = array( '246705594' );
+
+	if ( in_array( $id, $false_positives ) ) {
+		return false;
+	}
 
 	foreach ( $keywords as $keyword ) {
 		if ( false !== stripos( $description, $keyword ) || false !== stripos( $title, $keyword ) ) {
