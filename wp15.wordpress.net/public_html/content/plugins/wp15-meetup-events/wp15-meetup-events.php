@@ -9,12 +9,14 @@ License:     GPLv2 or later
 */
 
 namespace WP15\Meetups;
+use DateTime, DateTimeZone, Exception;
 use WP_Error;
 use WordCamp\Utilities as WordCampOrg;
 
 defined( 'WPINC' ) || die();
 
 add_action(    'wp15_prime_events_cache', __NAMESPACE__ . '\prime_events_cache' );
+add_shortcode( 'wp15_meetup_events',      __NAMESPACE__ . '\render_events_shortcode' );
 
 if ( ! wp_next_scheduled( 'wp15_prime_events_cache' ) ) {
 	wp_schedule_event( time(), 'hourly', 'wp15_prime_events_cache' );
@@ -73,6 +75,7 @@ function get_potential_events( $start_date, $end_date ) {
 
 	$event_args = array(
 		'status' => array( 'upcoming', 'past' ),
+		'fields' => 'timezone',
 		'time'   => sprintf(
 			'%d,%d',
 			$start_date * 1000,
@@ -93,11 +96,12 @@ function get_potential_events( $start_date, $end_date ) {
  * @return array
  */
 function get_wp15_events( $potential_events ) {
-	$relevant_keys = array_flip( array( 'id', 'event_url', 'name', 'time', 'group' ) );
+	$relevant_keys = array_flip( array( 'id', 'event_url', 'name', 'time', 'timezone', 'group' ) );
 
 	foreach ( $potential_events as $event ) {
 		$event['group']       = $event['group']['name'];
 		$event['description'] = isset( $event['description'] ) ? $event['description'] : '';
+		$event['time']        = $event['time'] / 1000;  // Convert to seconds.
 		$trimmed_event        = array_intersect_key( $event, $relevant_keys );
 
 		if ( is_wp15_event( $event['id'], $event['name'], $event['description'] ) ) {
@@ -150,4 +154,53 @@ function is_wp15_event( $id, $title, $description ) {
 	}
 
 	return $match;
+}
+
+/**
+ * Render the WP15 events shortcode.
+ */
+function render_events_shortcode() {
+	$events = get_option( 'wp15_events' );
+
+	usort( $events, __NAMESPACE__ . '\sort_events' );
+
+	require_once( __DIR__ . '/views/events-list.php' );
+}
+
+/**
+ * Sort events by their timestamp.
+ *
+ * @param array $a
+ * @param array $b
+ *
+ * @return int
+ */
+function sort_events( $a, $b ) {
+	if ( $a['time'] === $b['time'] ) {
+		return 0;
+	}
+
+	return $a['time'] > $b['time'];
+}
+
+/**
+ * Format a UTC timestamp with respect to the local timezone.
+ *
+ * @param int    $utc_time
+ * @param string $timezone
+ *
+ * @return string
+ */
+function get_local_formatted_date( $utc_time, $timezone ) {
+	$date_format = _x( 'F dS, Y g:ia', 'WP15 event date format' );
+
+	try {
+		$local_timestamp = new DateTime( '@' . $utc_time );
+		$local_timestamp->setTimezone( new DateTimeZone( $timezone ) );
+		$local_timestamp = $local_timestamp->format( $date_format );
+	} catch ( Exception $exception ) {
+		$local_timestamp = '';
+	}
+
+	return $local_timestamp;
 }
