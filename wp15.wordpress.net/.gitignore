@@ -11,5 +11,6 @@ public_html/content/upgrade
 public_html/content/uploads
 public_html/content/plugins/tagregator
 public_html/content/plugins/wp-super-cache
+public_html/content/plugins/wp15-meetup-events/libraries/meetup-client.php
 public_html/content/themes/twentyseventeen
 public_html/wordpress

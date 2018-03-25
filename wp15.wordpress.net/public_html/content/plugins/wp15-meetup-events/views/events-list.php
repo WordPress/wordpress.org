@@ -1,6 +1,6 @@
 <?php
 
-namespace WP15\Meetups;
+namespace WP15\Meetup_Events;
 
 /** @var array $events */
 

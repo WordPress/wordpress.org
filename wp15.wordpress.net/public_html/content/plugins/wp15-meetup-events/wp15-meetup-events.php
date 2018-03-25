@@ -8,7 +8,8 @@ Author URI:  https://make.wordpress.org/meta
 License:     GPLv2 or later
 */
 
-namespace WP15\Meetups;
+namespace WP15\Meetup_Events;
+
 use DateTime, DateTimeZone, Exception;
 use WP_Error;
 use WordCamp\Utilities as WordCampOrg;
@@ -138,8 +139,8 @@ function get_wp15_events( $potential_events ) {
  * @return bool
  */
 function is_wp15_event( $id, $title, $description ) {
-	$match    = false;
-	$keywords = array( 'wp15', 'anniversary', 'birthday', '15 year', 'party', 'picnic', 'picknick' );
+	$match           = false;
+	$keywords        = array( 'wp15', 'anniversary', 'birthday', '15 year', 'party', 'picnic', 'picknick' );
 	$false_positives = array( '246705594' );
 
 	if ( in_array( $id, $false_positives ) ) {
