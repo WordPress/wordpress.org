@@ -144,7 +144,7 @@ function get_wp15_events( $potential_events ) {
 function is_wp15_event( $id, $title, $description ) {
 	$match           = false;
 	$keywords        = array( 'wp15', 'anniversary', 'aniversário', 'birthday', '15 year', '15 ano', 'party', 'picnic', 'picknick' );
-	$false_positives = array( '246705594' );
+	$false_positives = array( '246705594', '249125877' );
 
 	if ( in_array( $id, $false_positives ) ) {
 		return false;
