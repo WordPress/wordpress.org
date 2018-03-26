@@ -112,7 +112,7 @@ function get_wp15_events( $potential_events ) {
 		}
 	}
 
-	if ( 'cli' == php_sapi_name() ) {
+	if ( 'cli' === php_sapi_name() ) {
 		$wp15_names  = wp_list_pluck( $wp15_events,  'name' );
 		$other_names = wp_list_pluck( $other_events, 'name' );
 
@@ -140,7 +140,7 @@ function get_wp15_events( $potential_events ) {
  */
 function is_wp15_event( $id, $title, $description ) {
 	$match           = false;
-	$keywords        = array( 'wp15', 'anniversary', 'birthday', '15 year', 'party', 'picnic', 'picknick' );
+	$keywords        = array( 'wp15', 'anniversary', 'aniversário', 'birthday', '15 year', '15 ano', 'party', 'picnic', 'picknick' );
 	$false_positives = array( '246705594' );
 
 	if ( in_array( $id, $false_positives ) ) {
