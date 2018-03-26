@@ -163,11 +163,17 @@ class Meetup_Client {
 		$attempt_count = 0;
 		$max_attempts  = 3;
 
-		// Response codes that should break the loop. See https://www.meetup.com/meetup_api/docs/#errors
-		// TODO are there others?
+		/*
+		 * Response codes that should break the loop.
+		 *
+		 * See https://www.meetup.com/meetup_api/docs/#errors.
+		 *
+		 * `400` (bad request) is not in the list, even though it seems like it _should_ indicate an unrecoverable
+		 * error. In practice we've observed that it's common for a seemingly valid request to be rejected with
+		 * a `400` response, but then get a `200` response if that exact same request is retried.
+		 */
 		$breaking_codes = array(
 			200, // Ok.
-			400, // Bad request.
 			401, // Unauthorized (invalid key).
 			429, // Too many requests (rate-limited).
 		);
