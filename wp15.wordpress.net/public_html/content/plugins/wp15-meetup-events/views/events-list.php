@@ -6,7 +6,7 @@ namespace WP15\Meetup_Events;
 
 ?>
 
-<ul class="wp-event-list">
+<ul class="wp15-events-list">
 	<?php foreach ( $events as $event ) : ?>
 		<li>
 			<h3 class="wp15-event-group">
@@ -20,7 +20,7 @@ namespace WP15\Meetup_Events;
 			</p>
 
 			<p class="wp15-event-date-time">
-				<?php echo esc_html( get_local_formatted_date( $event['time'], $event['timezone'] ) ); ?>
+				<?php echo esc_html( $event['time'] ); ?>
 			</p>
 		</li>
 	<?php endforeach; ?>

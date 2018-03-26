@@ -1,0 +1,20 @@
+#wp15-events-map {
+	position: relative;
+	height: 400px;
+	background-color: #AADAFF;
+}
+
+.wp15-spinner {
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 20px;
+	height: 20px;
+	margin: -10px 0 0 0;	/* take half the height of the spinner off the top, so that it's perfectly centered */
+	background-image: url( 'images/spinner-2x.gif' );
+	background-repeat: no-repeat;
+	background-size: 20px 20px;
+	opacity: 0.7;
+	filter: alpha( opacity=70 );
+}

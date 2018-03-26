@@ -17,6 +17,7 @@ use WordCamp\Utilities as WordCampOrg;
 defined( 'WPINC' ) || die();
 
 add_action(    'wp15_prime_events_cache', __NAMESPACE__ . '\prime_events_cache' );
+add_action(    'wp_enqueue_scripts',      __NAMESPACE__ . '\enqueue_scripts'         );
 add_shortcode( 'wp15_meetup_events',      __NAMESPACE__ . '\render_events_shortcode' );
 
 if ( ! wp_next_scheduled( 'wp15_prime_events_cache' ) ) {
@@ -97,9 +98,11 @@ function get_potential_events( $start_date, $end_date ) {
  * @return array
  */
 function get_wp15_events( $potential_events ) {
-	$relevant_keys = array_flip( array( 'id', 'event_url', 'name', 'time', 'timezone', 'group' ) );
+	$relevant_keys = array_flip( array( 'id', 'event_url', 'name', 'time', 'timezone', 'group', 'latitude', 'longitude' ) );
 
 	foreach ( $potential_events as $event ) {
+		$event['latitude']    = ! empty( $event['venue']['lat'] ) ? $event['venue']['lat'] : $event['group']['group_lat'];
+		$event['longitude']   = ! empty( $event['venue']['lon'] ) ? $event['venue']['lon'] : $event['group']['group_lon'];
 		$event['group']       = $event['group']['name'];
 		$event['description'] = isset( $event['description'] ) ? $event['description'] : '';
 		$event['time']        = $event['time'] / 1000;  // Convert to seconds.
@@ -158,13 +161,67 @@ function is_wp15_event( $id, $title, $description ) {
 }
 
 /**
+ * Enqueue the plugin's scripts and styles.
+ */
+function enqueue_scripts() {
+	global $post;
+
+	if ( ! is_a( $post, 'WP_Post' ) || 'about' !== $post->post_name ) {
+		return;
+	}
+
+	wp_register_script(
+		'google-maps',
+		'https://maps.googleapis.com/maps/api/js?key=' . GOOGLE_MAPS_PUBLIC_KEY,
+		array(),
+		false,
+		true
+	);
+
+	wp_enqueue_script(
+		'wp15-meetup-events',
+		plugins_url( 'wp15-meetup-events.js', __FILE__ ),
+		array( 'jquery', 'underscore', 'google-maps' ),
+		filemtime( __DIR__ . '/wp15-meetup-events.js' ),
+		true
+	);
+
+	wp_enqueue_style(
+		'wp15-meetup-events',
+		plugins_url( 'wp15-meetup-events.css', __FILE__ ),
+		array(),
+		filemtime( __DIR__ . '/wp15-meetup-events.css' )
+	);
+}
+
+/**
  * Render the WP15 events shortcode.
  */
 function render_events_shortcode() {
 	$events = get_option( 'wp15_events' );
 
+	// This needs to be done on the fly, in order to use the date format for the visitor's locale.
+	foreach ( $events as & $event ) {
+		$event['time'] = get_local_formatted_date( $event['time'], $event['timezone'] );
+	}
+
 	usort( $events, __NAMESPACE__ . '\sort_events' );
 
+	$map_options = array(
+		'mapContainer'            => 'wp15-events-map',
+		'mapMarkers'              => $events,
+		'markerIconBaseURL'       => plugins_url( '/images/', __FILE__ ),
+		'markerIcon'              => 'map-marker.svg',
+		'markerIconAnchorXOffset' => 32,
+		'markerIconHeight'        => 64,
+		'markerIconWidth'         => 64,
+		'clusterIcon'             => 'clustered-markers.png',
+		'clusterIconWidth'        => 53,
+		'clusterIconHeight'       => 52,
+
+	);
+
+	require_once( __DIR__ . '/views/events-map.php'  );
 	require_once( __DIR__ . '/views/events-list.php' );
 }
 

@@ -25,12 +25,16 @@ if ( 'production' === WP15_ENVIRONMENT ) {
 	define( 'WP_DEBUG_LOG',     true  );
 	define( 'SCRIPT_DEBUG',     false );
 	define( 'FORCE_SSL_ADMIN',  true  );
+
+	define( 'GOOGLE_MAPS_PUBLIC_KEY', 'AIzaSyDjIfyktiJI23M5_IxssOEcrmnOFLHAbEs' ); // Restricted to wp15.wordpress.net.
 } else {
 	define( 'SAVEQUERIES',  true );
 	define( 'WP_DEBUG',     true );
 	define( 'WP_DEBUG_LOG', true );
 	define( 'WP_DEBUG_DISPLAY', true );
 	define( 'SCRIPT_DEBUG', true );
+
+	define( 'GOOGLE_MAPS_PUBLIC_KEY', 'AIzaSyBM47qaIt4qOD36XDA9v5lsLKTERCZa2gA' ); // No referrer restrictions.
 }
 
 if ( ! defined( 'ABSPATH' ) ) {
