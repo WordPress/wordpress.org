@@ -193,7 +193,7 @@ function sort_events( $a, $b ) {
  * @return string
  */
 function get_local_formatted_date( $utc_time, $timezone ) {
-	$date_format = _x( 'F dS, Y g:ia', 'WP15 event date format' );
+	$date_format = _x( 'F jS, Y g:ia', 'WP15 event date format' );
 
 	try {
 		$local_timestamp = new DateTime( '@' . $utc_time );

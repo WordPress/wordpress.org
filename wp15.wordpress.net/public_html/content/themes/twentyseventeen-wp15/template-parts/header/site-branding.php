@@ -23,7 +23,7 @@
 			<p class="site-description">
 				<?php
 				// translators: Date format, see https://php.net/date.
-				$date_format    = _x( 'F dS, Y', 'Site description date format' );
+				$date_format    = _x( 'F jS, Y', 'Site description date format' );
 				$formatted_date = date_i18n( $date_format, strtotime( '2018-05-27' ) );
 
 				printf(
