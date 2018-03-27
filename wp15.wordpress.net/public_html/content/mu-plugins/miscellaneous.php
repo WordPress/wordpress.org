@@ -16,6 +16,8 @@ defined( 'WPINC' ) or die();
 add_filter( 'map_meta_cap',  __NAMESPACE__ . '\allow_css_editing', 10, 2   );
 add_filter( 'tggr_end_date', __NAMESPACE__ . '\set_tagregator_cutoff_date' );
 add_filter( 'wp15_update_pomo_files', __NAMESPACE__ . '\update_pomo_files' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\register_assets', 1 );
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_assets', 1 );
 
 if ( ! wp_next_scheduled( 'wp15_update_pomo_files' ) ) {
 	wp_schedule_event( time(), 'hourly', 'wp15_update_pomo_files' );
@@ -93,4 +95,26 @@ function update_pomo_files() {
 		file_put_contents( "$localizations_dir/wp15-{$set->wp_locale}.po", $po_content );
 		file_put_contents( "$localizations_dir/wp15-{$set->wp_locale}.mo", $mo_content );
 	}
+}
+
+/**
+ * Register style and script assets for later enqueueing.
+ */
+function register_assets() {
+	// Select2 styles.
+	wp_register_style(
+		'select2',
+		WP_CONTENT_URL . '/mu-plugins/assets/select2/css/select2.min.css',
+		array(),
+		'4.0.5'
+	);
+
+	// Select2 script.
+	wp_register_script(
+		'select2',
+		WP_CONTENT_URL . '/mu-plugins/assets/select2/js/select2.js',
+		array(),
+		'4.0.5',
+		true
+	);
 }
