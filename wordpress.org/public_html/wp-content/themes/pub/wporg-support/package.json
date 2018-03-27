@@ -12,6 +12,6 @@
     "grunt": "^1.0.1",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-rtlcss": "^2.0.1",
-    "grunt-sass": "^1.2.1"
+    "grunt-sass": "^2.1.0"
   }
 }
