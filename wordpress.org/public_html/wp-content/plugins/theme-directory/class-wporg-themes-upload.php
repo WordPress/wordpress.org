@@ -663,6 +663,7 @@ TICKET;
 					'reporter'  => $this->author->user_login,
 					'cc'        => $this->author->user_email,
 					'priority'  => $this->trac_ticket->priority,
+					'owner'     => '',
 				) );
 
 				// temporary debugging - email Otto when this specific branch occurs TODO remove this after testing
@@ -677,6 +678,7 @@ TICKET;
 				'reporter'  => $this->author->user_login,
 				'cc'        => $this->author->user_email,
 				'priority'  => $this->trac_ticket->priority,
+				'owner'     => '',
 			) );
 
 			// Theme review team auto-approves theme-updates, so mark the theme as live immediately, without sending additional email
