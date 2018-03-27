@@ -16,6 +16,21 @@ use GP_Locales;
 require_once trailingslashit( dirname( __FILE__ ) ) . 'locale-detection/locale-detection.php';
 
 /**
+ * Load the wp15 textdomain.
+ */
+function textdomain() {
+	$path   = WP_LANG_DIR . '/wp15';
+	$mofile = 'wp15-' . get_locale() . '.mo';
+
+	load_textdomain(
+		'wp15',
+		$path . '/' . $mofile
+	);
+}
+
+add_action( 'plugins_loaded', __NAMESPACE__ . '\textdomain' );
+
+/**
  * Register style and script assets for later enqueueing.
  */
 function register_assets() {
