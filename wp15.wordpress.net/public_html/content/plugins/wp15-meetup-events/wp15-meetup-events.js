@@ -173,7 +173,7 @@ var WP15MeetupEvents = ( function( $ ) {
 
 		clusterOptions = {
 			maxZoom:  11,
-			gridSize: 30,
+			gridSize: 20,
 			styles: [
 				{
 					url:       options.markerIconBaseURL + options.clusterIcon,
