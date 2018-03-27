@@ -15,6 +15,9 @@ function enqueue_scripts() {
 		'twentyseventeen-parent-style',
 		get_template_directory_uri() . '/style.css'
 	);
+
+	// Styles for locale switcher.
+	wp_enqueue_style( 'select2' );
 }
 
 /**
@@ -30,7 +33,6 @@ function set_custom_logo() {
 	<a href="<?php echo esc_url( home_url() ); ?>" class="custom-logo-link" rel="home" itemprop="url">
 		<img src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/wp15-logo.svg" class="custom-logo" alt="WordPress 15th anniversary logo" itemprop="logo" />
 	</a>
-
 
 	<?php
 
