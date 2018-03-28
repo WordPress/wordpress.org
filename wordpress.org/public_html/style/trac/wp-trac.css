@@ -59,6 +59,7 @@ fieldset {
 	color: #fff;
 	font-family: 'Open Sans', sans serif;
 }
+.build #headline a,
 .security #headline a {
 	color: #555;
 }
@@ -169,6 +170,7 @@ h3.change a {
 	color: #fff;
 	border-right: 0;
 }
+.build #metanav.nav li,
 .security #metanav.nav li {
 	color: #444;
 }
@@ -179,6 +181,8 @@ h3.change a {
 #metanav.nav a:visited {
 	color: rgba(255, 255, 255, 0.8);
 }
+.build #metanav.nav a,
+.build #metanav.nav a:visited,
 .security #metanav.nav a,
 .security #metanav.nav a:visited {
 	color: #21759b;
