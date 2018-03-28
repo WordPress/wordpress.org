@@ -1,17 +1,20 @@
 {
-  "name": "wporg-support",
-  "version": "1.0.0",
-  "description": "Theme for WordPress Support Forums",
-  "main": "index.php",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "wordpressdotorg",
-  "license": "GPL-2.0+",
-  "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-contrib-watch": "^1.0.0",
-    "grunt-rtlcss": "^2.0.1",
-    "grunt-sass": "^2.1.0"
-  }
+	"name": "wporg-support",
+	"version": "1.0.0",
+	"description": "Theme for WordPress Support Forums",
+	"main": "index.php",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "wordpressdotorg",
+	"license": "GPL-2.0-or-later",
+	"devDependencies": {
+		"grunt": "~1.0.2",
+		"grunt-contrib-watch": "~1.0.0",
+		"grunt-rtlcss": "~2.0.1",
+		"grunt-sass": "~2.1.0"
+	},
+	"engines": {
+		"node": ">=8.9.3"
+	}
 }
