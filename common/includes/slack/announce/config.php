@@ -13,6 +13,7 @@ namespace Dotorg\Slack\Announce;
  */
 function get_whitelist() {
 	$wordcamp_central = array(
+		'adityakane',
 		'andreamiddleton',
 		'camikaos',
 		'chanthaboune',
