@@ -190,13 +190,9 @@ class Accommodations_Field extends CampTix_Addon {
 		$handbook_link    = 'https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/inclusive-and-welcoming-events/#requests-for-special-accommodations';
 		$support_email    = 'support@wordcamp.org';
 		$recipients       = array(
-			/* todo
 			$current_wordcamp->meta['Email Address'][0], // Lead organizer
 			$current_wordcamp->meta['E-mail Address'][0], // City address
 			$support_email,
-			*/
-			'corey.mckrill+test1@a8c.com',
-			'corey.mckrill+test2@a8c.com',
 		);
 
 		foreach ( $recipients as $recipient ) {
