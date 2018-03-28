@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Domains
+ * Template Name: About -> Domains
  *
  * Page template for displaying the Domains page.
  *

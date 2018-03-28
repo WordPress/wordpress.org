@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Swag
+ * Template Name: About -> Swag
  *
  * Page template for displaying the Swag page.
  *

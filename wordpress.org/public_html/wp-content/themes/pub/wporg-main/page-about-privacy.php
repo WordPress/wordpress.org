@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Privacy
+ * Template Name: About -> Privacy
  *
  * Page template for displaying the Privacy page.
  *

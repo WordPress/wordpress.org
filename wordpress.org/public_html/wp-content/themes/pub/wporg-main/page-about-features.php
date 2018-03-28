@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Features
+ * Template Name: About -> Features
  *
  * Page template for displaying the Features page.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Roadmap
+ * Template Name: About -> Roadmap
  *
  * Page template for displaying the Roadmap page.
  *

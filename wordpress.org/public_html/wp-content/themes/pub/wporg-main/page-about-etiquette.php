@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Etiquette
+ * Template Name: About -> Etiquette
  *
  * Page template for displaying the Etiquette page.
  *

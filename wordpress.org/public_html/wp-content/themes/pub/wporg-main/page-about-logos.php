@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Logos
+ * Template Name: About -> Logos
  *
  * Page template for displaying the Logos and Graphics page.
  *

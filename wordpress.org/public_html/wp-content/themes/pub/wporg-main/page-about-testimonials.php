@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Testimonials
+ * Template Name: About -> Testimonials
  *
  * Page template for displaying the Logos and Graphics page.
  *

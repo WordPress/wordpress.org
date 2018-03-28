@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Philosophy
+ * Template Name: About -> Philosophy
  *
  * Page template for displaying the Philosophy page.
  *

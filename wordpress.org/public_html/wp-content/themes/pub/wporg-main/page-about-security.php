@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Security
+ * Template Name: About -> Security
  *
  * Page template for displaying the Security page.
  *

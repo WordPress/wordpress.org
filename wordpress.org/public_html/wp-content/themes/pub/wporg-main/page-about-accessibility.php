@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Accessibility
+ * Template Name: About -> Accessibility
  *
  * Page template for displaying the Accessibility page.
  *

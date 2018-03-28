@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Requirements
+ * Template Name: About -> Requirements
  *
  * Page template for displaying the Requirements page.
  *

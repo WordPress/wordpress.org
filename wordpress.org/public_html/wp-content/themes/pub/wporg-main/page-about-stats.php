@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Stats
+ * Template Name: About -> Stats
  *
  * Page template for displaying the Stats page.
  *

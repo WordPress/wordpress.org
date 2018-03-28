@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: History
+ * Template Name: About -> History
  *
  * Page template for displaying the History page.
  *

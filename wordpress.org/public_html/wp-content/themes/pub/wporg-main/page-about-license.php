@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: License
+ * Template Name: About -> License
  *
  * Page template for displaying the License page.
  *
