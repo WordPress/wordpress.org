@@ -121,7 +121,7 @@ class Meeting_Post_Type {
 			if ( 'weekly' === $post->recurring || '1' === $post->recurring ) {
 				try {
 					// from the start date, advance the week until it's past now
-					$start = new DateTime( $post->start_date . ' ' . $post->time . ' GMT' );
+					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
 					$now   = new DateTime();
 
@@ -140,7 +140,7 @@ class Meeting_Post_Type {
 			} else if ( 'biweekly' === $post->recurring ) {
 				try {
 					// advance the start date 2 weeks at a time until it's past now
-					$start = new DateTime( $post->start_date . ' ' . $post->time . ' GMT' );
+					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
 					$now   = new DateTime();
 
@@ -156,18 +156,18 @@ class Meeting_Post_Type {
 			} else if ( 'occurrence' === $post->recurring ) {
 				try {
 					// advance the occurrence day in the current month until it's past now
-					$start = new DateTime( $post->start_date . ' ' . $post->time . ' GMT' );
+					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
 					$now   = new DateTime();
 
-					$day_index = date( 'w', strtotime( $post->start_date . ' ' . $post->time . ' GMT' ) );
+					$day_index = date( 'w', strtotime( sprintf( '%s %s GMT', $post->start_date, $post->time ) ) );
 					$day_name  = $GLOBALS['wp_locale']->get_weekday( $day_index );
 					$numerals  = array( 'first', 'second', 'third', 'fourth' );
 					$months    = array( 'this month', 'next month' );
 
 					foreach ( $post->occurrence as $index ) {
 						foreach ( $months as $month ) {
-							$next = new DateTime( $numerals[ $index - 1 ] . ' ' . $day_name . ' of ' . $month );
+							$next = new DateTime( sprintf( '%s %s of %s %s GMT', $numerals[ $index - 1 ], $day_name, $month, $post->time ) );
 							if ( $next > $now ) {
 								break 2;
 							}
@@ -182,7 +182,7 @@ class Meeting_Post_Type {
 			} else if ( 'monthly' === $post->recurring ) {
 				try {
 					// advance the start date 1 month at a time until it's past now
-					$start = new DateTime( $post->start_date . ' ' . $post->time . ' GMT' );
+					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
 					$now   = new DateTime();
 
