@@ -27,7 +27,7 @@ function custom_open_graph_tags( $tags = array() ) {
 
 		case 'page-about-accessibility.php':
 			$title = esc_html__( 'WordPress Accessibility', 'wporg' );
-			$desc  = /* TODO */ 'The WordPress community and the open source WordPress project is committed to being as inclusive and accessible as possible. We want users, regardless of device or ability, to be able to publish content and maintain a website or application built with WordPress.';
+			$desc  = esc_html__( 'The WordPress community and the open source WordPress project is committed to being as inclusive and accessible as possible. We want users, regardless of device or ability, to be able to publish content and maintain a website or application built with WordPress.', 'wporg' );
 			break;
 
 		case 'page-about-etiquette.php':
