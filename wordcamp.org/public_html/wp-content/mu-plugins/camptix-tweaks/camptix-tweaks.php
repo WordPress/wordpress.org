@@ -29,6 +29,7 @@ add_filter( 'camptix_beta_features_enabled',                 '__return_true' );
 add_action( 'camptix_nt_file_log',                           '__return_false' );
 add_action( 'init',                                          __NAMESPACE__ . '\camptix_debug',                    9 ); // CampTix does this at 10.
 add_filter( 'camptix_default_addons',                        __NAMESPACE__ . '\load_addons'                         );
+add_action( 'camptix_load_addons',                           __NAMESPACE__ . '\load_custom_addons',              11 );
 add_filter( 'camptix_capabilities',                          __NAMESPACE__ . '\modify_capabilities'                 );
 add_filter( 'camptix_default_options',                       __NAMESPACE__ . '\modify_default_options'              );
 add_filter( 'camptix_options',                               __NAMESPACE__ . '\modify_email_templates'              );
@@ -540,6 +541,18 @@ function load_addons( $addons ) {
 	$addons['track-attendance'] = $camptix->get_default_addon_path( 'track-attendance.php' );
 
 	return $addons;
+}
+
+/**
+ * WordCamp-specific addons.
+ */
+function load_custom_addons() {
+	// Allergy field
+	require_once( __DIR__ . '/addons/allergy.php' );
+	// Accommodations field
+	require_once( __DIR__ . '/addons/accommodations.php' );
+	// Code of Conduct field
+	require_once( __DIR__ . '/addons/code-of-conduct.php' );
 }
 
 /**
