@@ -11,8 +11,9 @@ function get_site_domain( $rep_slash = true, $echo = true, $rem_trail_slash = fa
 	if ( $rem_trail_slash && ( strrpos( $domain, '/' ) == ( strlen( $domain ) - 1 ) ) )
 		$domain = substr( $domain, 0, strlen( $domain ) - 1 );
 
-	if ( false !== strpos( $domain, 'http://' ) )
-		$domain = substr( $domain, 7 );
+	#if ( false !== strpos( $domain, 'http://' ) )
+	#	$domain = substr( $domain, 7 );
+	$domain = preg_replace( '#^https?://#i', '', $domain );
 	if ( $rep_slash )
 		$domain = str_replace('/', '%2F', $domain );
 
