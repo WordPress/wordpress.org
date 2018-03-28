@@ -534,7 +534,6 @@ div.bbp-template-notice,
 div.indicator-hint {
 	background: #fff8e5;
 	border: 1px solid #ffb900;
-	-webkit-border-radius: 0;
 	border-radius: 0;
 }
 
@@ -601,7 +600,6 @@ div.bbp-template-notice.updated {
 #bbpress-forums fieldset.bbp-form textarea:focus,
 #bbpress-forums fieldset.bbp-form select:focus,
 #bbpress-forums fieldset.bbp-form input:focus {
-	-webkit-box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, .8);
 	box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, .8);
 }
 

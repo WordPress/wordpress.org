@@ -9,12 +9,19 @@
 	"author": "wordpressdotorg",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
+		"@wordpress/browserslist-config": "~2.1.2",
+		"autoprefixer": "~8.2.0",
 		"grunt": "~1.0.2",
 		"grunt-contrib-watch": "~1.0.0",
+		"grunt-postcss": "~0.9.0",
 		"grunt-rtlcss": "~2.0.1",
-		"grunt-sass": "~2.1.0"
+		"grunt-sass": "~2.1.0",
+		"postcss-scss": "~1.0.4"
 	},
 	"engines": {
 		"node": ">=8.9.3"
-	}
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	]
 }

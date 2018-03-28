@@ -1,4 +1,6 @@
 module.exports = function(grunt) {
+	var autoprefixer = require( 'autoprefixer' );
+	var scsssyntax = require( 'postcss-scss' );
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON( 'package.json' ),
@@ -15,6 +17,23 @@ module.exports = function(grunt) {
 				},
 			},
 		},
+		postcss: {
+			options: {
+				map: false,
+				processors: [
+					autoprefixer({
+						browsers: [ 'extends @wordpress/browserslist-config' ],
+						cascade: false,
+					}),
+				],
+				syntax: scsssyntax,
+				failOnError: true,
+			},
+			dist: {
+				expand: true,
+				src: [ 'sass/**/*.scss' ],
+			},
+		},
 		rtlcss: {
 			dist: {
 				files: {
@@ -29,10 +48,11 @@ module.exports = function(grunt) {
 			},
 		},
 	});
+	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 
-	grunt.registerTask( 'build', [ 'sass', 'rtlcss' ]);
+	grunt.registerTask( 'build', [ 'postcss', 'sass', 'rtlcss' ]);
 	grunt.registerTask( 'default', [ 'build' ]);
 };
