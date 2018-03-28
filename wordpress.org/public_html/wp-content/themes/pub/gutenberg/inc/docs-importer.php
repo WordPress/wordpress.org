@@ -270,9 +270,8 @@ class Import_Gutendocs {
 		// Strip YAML doc from the header
 		$markdown = preg_replace( '#^---(.+)---#Us', '', $markdown );
 
-		$title = null;
+		// Remove any level 1 headings at the start of the markdown
 		if ( preg_match( '/^#\s(.+)/', $markdown, $matches ) ) {
-			$title = $matches[1];
 			$markdown = preg_replace( '/^#\s(.+)/', '', $markdown );
 		}
 
@@ -292,9 +291,7 @@ class Import_Gutendocs {
 			'ID'           => $post_id,
 			'post_content' => wp_filter_post_kses( wp_slash( $html ) ),
 		);
-		if ( ! is_null( $title ) ) {
-			$post_data['post_title'] = sanitize_text_field( wp_slash( $title ) );
-		}
+
 		wp_update_post( $post_data );
 		return true;
 	}
