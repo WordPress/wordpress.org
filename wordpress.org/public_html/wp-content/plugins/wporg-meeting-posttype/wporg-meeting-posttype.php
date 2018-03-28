@@ -165,8 +165,8 @@ class Meeting_Post_Type {
 					$numerals  = array( 'first', 'second', 'third', 'fourth' );
 					$months    = array( 'this month', 'next month' );
 
-					foreach ( $post->occurrence as $index ) {
-						foreach ( $months as $month ) {
+					foreach ( $months as $month ) {
+						foreach ( $post->occurrence as $index ) {
 							$next = new DateTime( sprintf( '%s %s of %s %s GMT', $numerals[ $index - 1 ], $day_name, $month, $post->time ) );
 							if ( $next > $now ) {
 								break 2;
