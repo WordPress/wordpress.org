@@ -8,7 +8,7 @@
 
 			while ( have_posts() ) {
 				the_post();
-				get_template_part( 'template-parts/page/content', 'page' );
+				get_template_part( 'template-parts/page/content', 'about' );
 				echo do_shortcode( '[wp15_meetup_events]' );
 			}
 
