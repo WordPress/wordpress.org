@@ -9,10 +9,6 @@
 
 namespace WordPressdotorg\MainTheme;
 
-if ( false === stristr( home_url(), 'test' ) && ! isset( $_GET['test'] ) ) {
-	return get_template_part( 'page' );
-}
-
 $GLOBALS['menu_items'] = [
 	'about/requirements' => __( 'Requirements', 'wporg' ),
 	'about/features'     => __( 'Features', 'wporg' ),
