@@ -125,7 +125,7 @@ function get_wp15_events( $potential_events ) {
 		echo "\nIgnored these events. Double check for false-negatives.\n\n";
 		print_r( $other_names );
 
-		echo "\nWP events. Double check for false-positives.\n\n";
+		echo "\nWP15 events. Double check for false-positives.\n\n";
 		print_r( $wp15_names );
 	}
 

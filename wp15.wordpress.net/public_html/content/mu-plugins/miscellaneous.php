@@ -65,6 +65,14 @@ function set_tagregator_cutoff_date( $date ) {
  * Update the PO/MO files for the wp15 text domain.
  */
 function update_pomo_files() {
+	/*
+	 * The content will probably not need to be updated after the event is over. Updating it anyway would use up API
+	 * resources needlessly, and introduce the risk of overwriting the valid data with invalid data if something breaks.
+	 */
+	if ( time() >= strtotime( 'June 15, 2018' ) ) {
+		return;
+	}
+
 	$gp_api            = 'https://translate.wordpress.org';
 	$gp_project        = 'meta/wp15';
 	$localizations_dir = WP_CONTENT_DIR . '/languages/wp15';
