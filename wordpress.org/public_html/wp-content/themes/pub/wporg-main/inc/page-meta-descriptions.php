@@ -182,7 +182,7 @@ function custom_page_title( $title, $post = null ) {
 			break;
 
 		case 'page-about-security.php':
-			$title = esc_html_x( 'About', 'Page title', 'wporg' );
+			$title = esc_html_x( 'Security', 'Page title', 'wporg' );
 			break;
 
 		case 'page-about-stats.php':
