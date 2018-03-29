@@ -208,6 +208,8 @@ class Accommodations_Field extends CampTix_Addon {
 
 		$current_wordcamp = get_wordcamp_post();
 		$wordcamp_name    = get_wordcamp_name( get_wordcamp_site_id( $current_wordcamp ) );
+		$post_type_object = get_post_type_object( $attendee->post_type );
+		$attendee_link    = add_query_arg( 'action', 'edit', admin_url( sprintf( $post_type_object->_edit_link, $attendee->ID ) ) );
 		$handbook_link    = 'https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/inclusive-and-welcoming-events/#requests-for-special-accommodations';
 		$support_email    = 'support@wordcamp.org';
 		$recipients       = array(
@@ -238,7 +240,7 @@ class Accommodations_Field extends CampTix_Addon {
 			$message = sprintf(
 				"%s\n\n%s\n\n%s\n\n%s",
 				$message_line_1,
-				get_edit_post_link( $attendee, 'plaintext' ), // Link to attendee post's Edit screen.
+				esc_url_raw( $attendee_link ), // Link to attendee post's Edit screen.
 				$message_line_2,
 				$handbook_link // Link to page in WordCamp Organizer Handbook.
 			);

@@ -208,6 +208,8 @@ class Allergy_Field extends CampTix_Addon {
 
 		$current_wordcamp = get_wordcamp_post();
 		$wordcamp_name    = get_wordcamp_name( get_wordcamp_site_id( $current_wordcamp ) );
+		$post_type_object = get_post_type_object( $attendee->post_type );
+		$attendee_link    = add_query_arg( 'action', 'edit', admin_url( sprintf( $post_type_object->_edit_link, $attendee->ID ) ) );
 		$handbook_link    = 'https://make.wordpress.org/community/handbook/wordcamp-organizer/planning-details/selling-tickets/life-threatening-allergies/';
 		$support_email    = 'support@wordcamp.org';
 		$recipients       = array(
@@ -228,7 +230,7 @@ class Allergy_Field extends CampTix_Addon {
 				$wordcamp_name
 			);
 
-			$message_line_1 =  wp_strip_all_tags( __( 'The following attendee has indicated that they have a life-threatening allergy. Please note that this information is confidential.', 'wordcamporg' ) );
+			$message_line_1 = wp_strip_all_tags( __( 'The following attendee has indicated that they have a life-threatening allergy. Please note that this information is confidential.', 'wordcamporg' ) );
 
 			$message_line_2 = wp_strip_all_tags( __( 'Please follow the procedure outlined in the WordCamp Organizer Handbook to ensure the health and safety of this event\'s attendees.', 'wordcamporg' ) );
 			if ( $support_email === $recipient ) {
@@ -238,7 +240,7 @@ class Allergy_Field extends CampTix_Addon {
 			$message = sprintf(
 				"%s\n\n%s\n\n%s\n\n%s",
 				$message_line_1,
-				get_edit_post_link( $attendee, 'plaintext' ), // Link to attendee post's Edit screen.
+				esc_url_raw( $attendee_link ), // Link to attendee post's Edit screen.
 				$message_line_2,
 				$handbook_link // Link to page in WordCamp Organizer Handbook.
 			);
