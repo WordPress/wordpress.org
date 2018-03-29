@@ -16,7 +16,7 @@ namespace WordPressdotorg\MainTheme;
  * @return array Filtered Open Graph tags.
  */
 function custom_open_graph_tags( $tags = [] ) {
-	$post = get_post( $post );
+	$post = get_post();
 	if ( ! $post || 'page' !== $post->post_type ) {
 		return $tags;
 	}
