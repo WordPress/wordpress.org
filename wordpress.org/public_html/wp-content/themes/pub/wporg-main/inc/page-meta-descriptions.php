@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom template tags
+ * Custom meta descriptions.
  *
  * @package WordPressdotorg\MainTheme
  */
@@ -10,10 +10,17 @@ namespace WordPressdotorg\MainTheme;
 /**
  * Add custom open-grapgh tags for page templates where the content is hard-coded.
  *
- * This is also defined here to allow it to be used on pages where the page template is not included for that page, sych as the embed template.
+ * This is also defined here to allow it to be used on pages where the page template is not included for that page, such as the embed template.
+ *
+ * @param array       $tags Optional. Open Graph tags.
+ * @param WP_Post|int $post Optional. Post object or ID.
+ * @return array Filtered Open Graph tags.
  */
-function custom_open_graph_tags( $tags = array() ) {
-	$post = get_post();
+function custom_open_graph_tags( $tags = [], $post = null ) {
+	$post = get_post( $post );
+	if ( ! $post || 'page' !== $post->post_type ) {
+		return $tags;
+	}
 
 	switch ( $post->page_template ) {
 		default:
@@ -107,3 +114,21 @@ function custom_open_graph_tags( $tags = array() ) {
 	return $tags;
 }
 add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\custom_open_graph_tags' );
+
+/**
+ * Maps page titles to Open Graph data which are translatable strings.
+ *
+ * @param string      $title The post title.
+ * @param WP_Post|int $post  Optional. Post object or ID.
+ * @return string Filtered post tile.
+ */
+function custom_page_title( $title, $post = null ) {
+	if ( ! $post ) {
+		return $title;
+	}
+
+	$tags = custom_open_graph_tags( [], $post );
+	return $tags['og:title'] ?? $title;
+}
+add_filter( 'the_title', __NAMESPACE__ . '\custom_page_title', 10, 2 );
+add_filter( 'single_post_title', __NAMESPACE__ . '\custom_page_title', 10, 2 );
