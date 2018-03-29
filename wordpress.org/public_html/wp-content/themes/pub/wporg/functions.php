@@ -58,10 +58,20 @@ function setup() {
 	) ) );
 
 	add_theme_support( 'wp4-styles' );
-
-	$GLOBALS['pagetitle'] = __( 'WordPress.org', 'wporg' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
+
+/**
+ * Sets the document title.
+ *
+ * The global $pagetitle is used by the global w.org header.
+ *
+ * @global string $pagetitle
+ */
+function set_document_title() {
+	$GLOBALS['pagetitle'] = wp_get_document_title();
+}
+add_action( 'template_redirect', __NAMESPACE__ . '\set_document_title' );
 
 /**
  * Set the content width in pixels, based on the theme's design and stylesheet.
