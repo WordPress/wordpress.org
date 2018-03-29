@@ -95,7 +95,7 @@ function update_pomo_files() {
 		$po_content  = wp_remote_retrieve_body( $po_response );
 		$mo_content  = wp_remote_retrieve_body( $mo_response );
 
-		if ( ! $po_content || ! $mo_content || false === strpos( $po_content, "Language: {$set->wp_locale}" ) ) {
+		if ( ! $po_content || ! $mo_content || false === strpos( $po_content, 'Project-Id-Version: Meta - wp15.wordpress.net' ) ) {
 			trigger_error( "Invalid PO/MO content for {$set->wp_locale}." );
 			continue;
 		}
