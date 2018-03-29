@@ -12,11 +12,10 @@ namespace WordPressdotorg\MainTheme;
  *
  * This is also defined here to allow it to be used on pages where the page template is not included for that page, such as the embed template.
  *
- * @param array       $tags Optional. Open Graph tags.
- * @param WP_Post|int $post Optional. Post object or ID.
+ * @param array $tags Optional. Open Graph tags.
  * @return array Filtered Open Graph tags.
  */
-function custom_open_graph_tags( $tags = [], $post = null ) {
+function custom_open_graph_tags( $tags = [] ) {
 	$post = get_post( $post );
 	if ( ! $post || 'page' !== $post->post_type ) {
 		return $tags;
@@ -121,7 +120,7 @@ function custom_open_graph_tags( $tags = [], $post = null ) {
 add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\custom_open_graph_tags' );
 
 /**
- * Maps page titles to Open Graph data which are translatable strings.
+ * Maps page titles to translatable strings.
  *
  * @param string      $title The post title.
  * @param WP_Post|int $post  Optional. Post object or ID.
@@ -132,8 +131,78 @@ function custom_page_title( $title, $post = null ) {
 		return $title;
 	}
 
-	$tags = custom_open_graph_tags( [], $post );
-	return $tags['og:title'] ?? $title;
+	$post = get_post( $post );
+	if ( ! $post || 'page' !== $post->post_type ) {
+		return $title;
+	}
+
+	switch ( $post->page_template ) {
+		case 'page-about-domains.php':
+			$title = esc_html_x( 'Domains', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-accessibility.php':
+			$title = esc_html_x( 'Accessibility', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-etiquette.php':
+			$title = esc_html_x( 'Etiquette', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-features.php':
+			$title = esc_html_x( 'Features', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-history.php':
+			$title = esc_html_x( 'History', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-license.php':
+			$title = esc_html_x( 'GNU Public License', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-logos.php':
+			$title = esc_html_x( 'Graphics &amp; Logos', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-philosophy.php':
+			$title = esc_html_x( 'Philosophy', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-privacy.php':
+			$title = esc_html_x( 'Privacy Policy', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-requirements.php':
+			$title = esc_html_x( 'Requirements', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-roadmap.php':
+			$title = esc_html_x( 'Roadmap', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-security.php':
+			$title = esc_html_x( 'About', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-stats.php':
+			$title = esc_html_x( 'Statistics', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-swag.php':
+			$title = esc_html_x( 'Swag', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-testimonials.php':
+			$title = esc_html_x( 'Testimonials', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about.php':
+			$title = esc_html_x( 'About', 'Page title', 'wporg' );
+			break;
+	}
+
+	return $title;
 }
 add_filter( 'the_title', __NAMESPACE__ . '\custom_page_title', 10, 2 );
 add_filter( 'single_post_title', __NAMESPACE__ . '\custom_page_title', 10, 2 );

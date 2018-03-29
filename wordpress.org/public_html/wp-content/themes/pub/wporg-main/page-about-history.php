@@ -10,11 +10,11 @@
 namespace WordPressdotorg\MainTheme;
 
 $GLOBALS['menu_items'] = [
-	'about/requirements' => __( 'Requirements', 'wporg' ),
-	'about/features'     => __( 'Features', 'wporg' ),
-	'about/security'     => __( 'Security', 'wporg' ),
-	'about/roadmap'      => __( 'Roadmap', 'wporg' ),
-	'about/history'      => __( 'History', 'wporg' ),
+	'about/requirements' => _x( 'Requirements', 'Page title', 'wporg' ),
+	'about/features'     => _x( 'Features', 'Page title', 'wporg' ),
+	'about/security'     => _x( 'Security', 'Page title', 'wporg' ),
+	'about/roadmap'      => _x( 'Roadmap', 'Page title', 'wporg' ),
+	'about/history'      => _x( 'History', 'Page title', 'wporg' ),
 ];
 
 // Prevent Jetpack from looking for a non-existent featured image.
@@ -32,7 +32,7 @@ the_post();
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
-				<h1 class="entry-title col-8"><?php esc_html_e( 'History', 'wporg' ); ?></h1>
+				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">

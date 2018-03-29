@@ -64,33 +64,33 @@ the_post();
 						<h3><?php esc_html_e( 'The Technology', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'Learn about WordPress, where it&#8217;s been, and where it&#8217;s going.', 'wporg' ); ?></p>
 						<ul>
-							<li><a href="<?php echo esc_url( home_url( '/about/requirements/' ) ); ?>"><?php esc_html_e( 'Requirements', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/features/' ) ); ?>"><?php esc_html_e( 'Features', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/security/' ) ); ?>"><?php esc_html_e( 'Security', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/roadmap/' ) ); ?>"><?php esc_html_e( 'Roadmap', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/history/' ) ); ?>"><?php esc_html_e( 'History', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/requirements/' ) ); ?>"><?php echo esc_html_x( 'Requirements', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/features/' ) ); ?>"><?php echo esc_html_x( 'Features', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/security/' ) ); ?>"><?php echo esc_html_x( 'Security', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/roadmap/' ) ); ?>"><?php echo esc_html_x( 'Roadmap', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/history/' ) ); ?>"><?php echo esc_html_x( 'History', 'Page title', 'wporg' ); ?></a></li>
 						</ul>
 					</div>
 					<div class="col-4">
 						<h3><?php esc_html_e( 'The Details', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'There&#8217;s so much in the details. Stay abreast with the particulars.', 'wporg' ); ?></p>
 						<ul>
-							<li><a href="<?php echo esc_url( home_url( '/about/domains/' ) ); ?>"><?php esc_html_e( 'Domains', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/license/' ) ); ?>"><?php esc_html_e( 'GNU Public License', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/accessibility/' ) ); ?>"><?php esc_html_e( 'Accessibility', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/privacy/' ) ); ?>"><?php esc_html_e( 'Privacy Policy', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/stats/' ) ); ?>"><?php esc_html_e( 'Statistics', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/domains/' ) ); ?>"><?php echo esc_html_x( 'Domains', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/license/' ) ); ?>"><?php echo esc_html_x( 'GNU Public License', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/accessibility/' ) ); ?>"><?php echo esc_html_x( 'Accessibility', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/privacy/' ) ); ?>"><?php echo esc_html_x( 'Privacy Policy', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/stats/' ) ); ?>"><?php echo esc_html_x( 'Statistics', 'Page title', 'wporg' ); ?></a></li>
 						</ul>
 					</div>
 					<div class="col-4">
 						<h3><?php esc_html_e( 'The People', 'wporg' ); ?></h3>
 						<p><?php esc_html_e( 'Learn about the community and how we get along.', 'wporg' ); ?></p>
 						<ul>
-							<li><a href="<?php echo esc_url( home_url( '/about/philosophy/' ) ); ?>"><?php esc_html_e( 'Philosophy', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/etiquette/' ) ); ?>"><?php esc_html_e( 'Etiquette', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/swag/' ) ); ?>"><?php esc_html_e( 'Swag', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/logos/' ) ); ?>"><?php esc_html_e( 'Logos and Graphics', 'wporg' ); ?></a></li>
-							<li><a href="<?php echo esc_url( home_url( '/about/testimonials/' ) ); ?>"><?php esc_html_e( 'Testimonials', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/philosophy/' ) ); ?>"><?php echo esc_html_x( 'Philosophy', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/etiquette/' ) ); ?>"><?php echo esc_html_x( 'Etiquette', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/swag/' ) ); ?>"><?php echo esc_html_x( 'Swag', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/logos/' ) ); ?>"><?php echo esc_html_x( 'Logos and Graphics', 'Page title', 'wporg' ); ?></a></li>
+							<li><a href="<?php echo esc_url( home_url( '/about/testimonials/' ) ); ?>"><?php echo esc_html_x( 'Testimonials', 'Page title', 'wporg' ); ?></a></li>
 						</ul>
 					</div>
 				</section>
