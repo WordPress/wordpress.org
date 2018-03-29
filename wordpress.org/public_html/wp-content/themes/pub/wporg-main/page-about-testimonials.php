@@ -24,30 +24,18 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 // See inc/page-meta-descriptions.php for the meta description for this page.
 
-/*
- * List of Twitter tweets to display in a random order.
- */
-$embed_tweets = array(
-	'https://twitter.com/masonjames/status/690264022680231936',
-	'https://twitter.com/rosso/status/690299171295748096',
-	'https://twitter.com/thatmitchcanter/status/690300103312150529',
-	'https://twitter.com/cesjam7/status/690302854213558273',
-	'https://twitter.com/TomiToikka/status/690304183598211072',
-	'https://twitter.com/takisbig/status/694654894398164992',
-	'https://twitter.com/eatwholegrain/status/694510399971037184',
-	'https://twitter.com/idylanrobertson/status/691375719532748800',
-	'https://twitter.com/bobWP/status/708298319693479937',
-);
+// Pull list of testimonial URLs from the news page holding them
+switch_to_blog( 8 );
+$testpage = get_page_by_path( 'testimonials' );
+restore_current_blog();
 
-/*
- * List of WordPress embeds to mix into the content.
- *
- * Please Note: These must be the /embed link and must be https://
- */
-$embed_wps = array(
-	'https://www.rhyswynne.co.uk/why-ilovewp/embed/',
-	'https://ayudawp.com/ilovewp/embed/',
-);
+// we only need the URLs in the post_content
+preg_match_all( '|https://\S+|', $testpage->post_content, $testimonials );
+$testimonials = $testimonials[0];
+
+// separate out the twiiter from the WPs
+$embed_tweets = array_values( array_filter( $testimonials, function ($t) { return strpos( $t, 'https://twitter.com' ) === 0; } ) );
+$embed_wps    = array_values( array_filter( $testimonials, function ($t) { return strpos( $t, 'https://twitter.com' ) !== 0; } ) );
 
 // Randomize the tweet order
 shuffle( $embed_tweets );
