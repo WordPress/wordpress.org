@@ -100,6 +100,11 @@ function custom_open_graph_tags( $tags = [], $post = null ) {
 			$desc  = esc_html__( 'Show your WordPress pride and run with the coolest swag! You&#8217;ll be surprised how widely recognized our logo is around the world, bringing people together through recognition and community. Choose your WordPress swag today (Wapuu t-shirt, anyone?) and your purchase will also support free swag at WordCamps and meetups.', 'wporg' );
 			break;
 
+		case 'page-about-testimonials.php':
+			$title = esc_html__( 'WordPress Testimonials', 'wporg' );
+			$desc  = esc_html__( 'People like to talk about WordPress! Make a tweet or a post using the #ilovewp hashtag, and your comments might be featured on WordPress.org!', 'wporg' );
+			break;
+
 		case 'page-about.php':
 			$title = esc_html__( 'Democratize Publishing', 'wporg' );
 			$desc  = esc_html__( 'WordPress is software designed for everyone with emphasis on accessibility, performance, security, and usability.', 'wporg' );
