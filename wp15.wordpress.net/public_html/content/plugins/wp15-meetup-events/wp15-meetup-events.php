@@ -221,8 +221,10 @@ function render_events_shortcode() {
 
 	);
 
+	ob_start();
 	require_once( __DIR__ . '/views/events-map.php'  );
 	require_once( __DIR__ . '/views/events-list.php' );
+	return ob_get_clean();
 }
 
 /**
