@@ -4,6 +4,8 @@ namespace WordCamp\CampTix_Tweaks;
 defined( 'WPINC' ) or die();
 
 use CampTix_Plugin, CampTix_Addon;
+use WP_Post;
+use PHPMailer;
 
 /**
  * Class Allergy_Field.
@@ -24,6 +26,7 @@ class Allergy_Field extends CampTix_Addon {
 		add_filter( 'camptix_checkout_attendee_info', array( $this, 'validate_registration_field' ) );
 		add_filter( 'camptix_form_register_complete_attendee_object', array( $this, 'populate_attendee_object' ), 10, 2 );
 		add_action( 'camptix_checkout_update_post_meta', array( $this, 'save_registration_field' ), 10, 2 );
+		add_action( 'camptix_ticket_emailed', array( $this, 'after_email_receipt' ) );
 
 		// Edit info field
 		add_filter( 'camptix_form_edit_attendee_ticket_info', array( $this, 'populate_ticket_info_array' ), 10, 2 );
@@ -83,10 +86,10 @@ class Allergy_Field extends CampTix_Addon {
 	/**
 	 * Add the value of the new field to the attendee object during checkout processing.
 	 *
-	 * @param \WP_Post $attendee
+	 * @param WP_Post $attendee
 	 * @param array    $data
 	 *
-	 * @return \WP_Post
+	 * @return WP_Post
 	 */
 	public function populate_attendee_object( $attendee, $data ) {
 		$attendee->{ self::SLUG } = $data[ self::SLUG ];
@@ -98,21 +101,33 @@ class Allergy_Field extends CampTix_Addon {
 	 * Save the value of the new field to the attendee post upon completion of checkout.
 	 *
 	 * @param int      $post_id
-	 * @param \WP_Post $attendee
+	 * @param WP_Post $attendee
 	 *
 	 * @return bool|int
 	 */
 	public function save_registration_field( $post_id, $attendee ) {
-		$this->maybe_send_notification_email( $attendee->{ self::SLUG }, get_post( $post_id ) );
-
 		return update_post_meta( $post_id, 'tix_' . self::SLUG, $attendee->{ self::SLUG } );
+	}
+
+	/**
+	 * Initialize email notifications after the ticket receipt email has been sent.
+	 *
+	 * @param WP_Post $attendee_id
+	 */
+	public function after_email_receipt( $attendee_id ) {
+		$attendee = get_post( $attendee_id );
+		$value    = get_post_meta( $attendee_id, 'tix_' . self::SLUG, true );
+
+		if ( $attendee instanceof WP_Post && 'tix_attendee' === $attendee->post_type ) {
+			$this->maybe_send_notification_email( $value, $attendee );
+		}
 	}
 
 	/**
 	 * Retrieve the stored value of the new field for use on the Edit Info form.
 	 *
 	 * @param array    $ticket_info
-	 * @param \WP_Post $attendee
+	 * @param WP_Post $attendee
 	 *
 	 * @return array
 	 */
@@ -126,7 +141,7 @@ class Allergy_Field extends CampTix_Addon {
 	 * Update the stored value of the new field if it was changed in the Edit Info form.
 	 *
 	 * @param array    $data
-	 * @param \WP_Post $attendee
+	 * @param WP_Post $attendee
 	 *
 	 * @return bool|int
 	 */
@@ -170,7 +185,7 @@ class Allergy_Field extends CampTix_Addon {
 	 * Send a notification if it hasn't been sent already.
 	 *
 	 * @param string   $value
-	 * @param \WP_Post $attendee
+	 * @param WP_Post $attendee
 	 */
 	protected function maybe_send_notification_email( $value, $attendee ) {
 		// Only send notifications for 'yes' answers.
@@ -183,6 +198,12 @@ class Allergy_Field extends CampTix_Addon {
 		// Only send the notification once.
 		if ( $already_sent ) {
 			return;
+		}
+
+		global $phpmailer;
+		if ( $phpmailer instanceof PHPMailer ) {
+			// Clear out any lingering content from a previously sent message.
+			$phpmailer = new PHPMailer( true );
 		}
 
 		$current_wordcamp = get_wordcamp_post();
