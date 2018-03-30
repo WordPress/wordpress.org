@@ -4,9 +4,29 @@ namespace WP15\Theme;
 
 defined( 'WPINC' ) || die();
 
+add_filter( 'template_include',   __NAMESPACE__ . '\get_front_page_template' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
 add_filter( 'get_custom_logo',    __NAMESPACE__ . '\set_custom_logo' );
 add_filter( 'body_class',         __NAMESPACE__ . '\add_body_classes' );
+
+
+/**
+ * Bypass TwentySeventeen's front-page template.
+ *
+ * When a static front page is configured, its corresponding template should be used to render the page, not
+ * TwentySeventeen's generic front-page template.
+ *
+ * @param string $template
+ *
+ * @return string
+ */
+function get_front_page_template( $template ) {
+	if ( false !== strpos( $template, 'twentyseventeen/front-page.php' ) ) {
+		$template = get_page_template();
+	}
+
+	return $template;
+}
 
 /**
  * Enqueue scripts and styles
