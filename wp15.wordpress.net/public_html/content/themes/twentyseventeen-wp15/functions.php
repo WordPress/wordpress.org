@@ -50,3 +50,83 @@ function set_custom_logo() {
 
 	return ob_get_clean();
 };
+
+/**
+ * Data for the Swag page download items.
+ *
+ * @return array
+ */
+function get_swag_download_items() {
+	return array(
+		/*
+		array(
+			'title'             => __( '', 'wp15' ),
+			'preview_image_url' => '',
+			'files'             => array(
+				array(
+					'name' => __( '', 'wp15' ),
+					'url'  => '',
+				),
+			),
+		),
+		*/
+		array(
+			'title'             => __( 'WP15 Logo', 'wp15' ),
+			'preview_image_url' => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_logo_preview.png',
+			'files'             => array(
+				array(
+					'name' => __( 'AI source file (vector)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_logo_source.ai',
+				),
+				array(
+					'name' => __( 'PDF (vector)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_logo.pdf',
+				),
+				array(
+					'name' => __( 'PNG (blue/white/transparent)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_logo_blue-white-transparent.png',
+				),
+				array(
+					'name' => __( 'PNG (blue/transparent)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_logo_blue-transparent.png',
+				),
+				array(
+					'name' => __( 'PNG (white/transparent)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_logo_white-transparent.png',
+				),
+			),
+		),
+		array(
+			'title'             => 'wp_is( 15 );',
+			'preview_image_url' => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_is15_preview.png',
+			'files'             => array(
+				array(
+					'name' => __( 'AI source file (vector)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_is15_source.ai',
+				),
+				array(
+					'name' => __( 'PDF (vector)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_is15.pdf',
+				),
+				array(
+					'name' => __( 'PNG (gray/transparent)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_is15_gray-transparent.png',
+				),
+			),
+		),
+		array(
+			'title'             => __( 'Sticker sheet', 'wp15' ),
+			'preview_image_url' => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_stickers_preview.png',
+			'files'             => array(
+				array(
+					'name' => __( 'AI source file (vector', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_stickers_source.ai',
+				),
+				array(
+					'name' => __( 'PDF (vector)', 'wp15' ),
+					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_stickers.pdf',
+				),
+			),
+		),
+	);
+}

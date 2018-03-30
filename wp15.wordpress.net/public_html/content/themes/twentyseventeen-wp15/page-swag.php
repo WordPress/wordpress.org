@@ -1,9 +1,3 @@
-<?php
-/**
- * Template: Swag
- */
-?>
-
 <?php get_header(); ?>
 
 	<div class="wrap">
