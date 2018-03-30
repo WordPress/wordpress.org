@@ -56,7 +56,7 @@ function register_assets() {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\register_assets' );
 
 /**
- * Retreives all avaiable locales with their native names.
+ * Retrieves all available locales with their native names.
  *
  * See https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-login/functions.php#L150
  *

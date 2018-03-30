@@ -49,7 +49,24 @@ h3 {
 	box-shadow: inset 0 -1px 0 rgba( 0, 115, 170, 1 );
 }
 
+.home .entry-title {
+	display: none;
+}
+
+
+/*
+ * Header
+ */
+.site-header {
+	display: grid;
+	grid-template-rows: auto auto;
+	grid-template-columns: auto 280px;
+}
+
 .custom-header {
+	grid-column: 1 / span 2;
+	grid-row: 1;
+	margin-bottom: 0 !important;
 	background-color: #00A0D2;
 	background-image: url( 'images/confetti-tile.svg' );
 	background-repeat: repeat;
@@ -85,8 +102,26 @@ body:not( .home ) .custom-logo-link {
 	margin-bottom: 0;
 }
 
-.home .entry-title {
-	display: none;
+.navigation-top {
+	grid-column: 1;
+	grid-row: 2;
+	position: relative;
+}
+
+.wp15-locale-switcher-container {
+	grid-column: 2;
+	grid-row: 2;
+	padding: 20px 30px 0 0;
+	background-color: white;
+	border-bottom: 1px solid #eee;
+}
+
+#wp15-locale-switcher-form label {
+	display: inline;
+}
+
+.wp15-locale-switcher-container .dashicons-translation {
+	margin: 5px 10px;
 }
 
 
@@ -311,16 +346,6 @@ body:not( .home ) .custom-logo-link {
 a.tggr-author-profile,
 a:hover.tggr-author-profile {
 	box-shadow: none;
-}
-
-
-/*
- * Language Picker
- */
-.wp15-locale-switcher-container {
-	float: right;
-	margin-top: 9px;
-	margin-right: 2em;
 }
 
 
