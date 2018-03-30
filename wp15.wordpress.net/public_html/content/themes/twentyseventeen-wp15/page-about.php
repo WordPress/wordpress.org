@@ -6,7 +6,14 @@
 			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 				<header class="entry-header">
-					<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+					<h1 class="entry-title">
+						<?php
+
+						// translators: The name of the page that describes the WP15 celebrations.
+						esc_html_e( 'About', 'wp15' );
+
+						?>
+					</h1>
 				</header>
 
 				<div class="entry-content">
@@ -14,11 +21,11 @@
 						<?php _e( 'People all over the world are celebrating the WordPress 15th Anniversary on May 27, 2018. Join us!', 'wp15' ); ?>
 					</h1>
 
-					<img src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="Confetti with the WordPress logo and WP15 color scheme" />
+					<img src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="<?php esc_attr_e( 'Confetti with the WordPress logo and WP15 color scheme', 'wp15' ); ?>" />
 
 					<?php echo do_shortcode( '[wp15_meetup_events]' ); ?>
 
-					<img src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="Confetti with the WordPress logo and WP15 color scheme" />
+					<img src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="<?php esc_attr_e( 'Confetti with the WordPress logo and WP15 color scheme', 'wp15' ); ?>" />
 
 					<p>
 						<?php printf(

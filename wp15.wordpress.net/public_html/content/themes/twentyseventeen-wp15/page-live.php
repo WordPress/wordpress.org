@@ -6,7 +6,14 @@
 			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 				<header class="entry-header">
-					<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+					<h1 class="entry-title">
+						<?php
+
+						// translators: The name of the page that displays the #wp15 social media posts in real time.
+						echo esc_html_x( 'Live', 'verb', 'wp15' );
+
+						?>
+					</h1>
 				</header>
 
 				<div class="entry-content">
