@@ -59,8 +59,8 @@ h3 {
  */
 .site-header {
 	display: grid;
-	grid-template-rows: auto auto;
-	grid-template-columns: auto 280px;
+	grid-template-rows: auto 70px;
+	grid-template-columns: auto 300px;
 }
 
 .custom-header {
@@ -79,6 +79,10 @@ h3 {
 .site-branding {
 	text-align: center;
 	min-height: 300px;
+}
+
+.site-branding a:hover, .site-branding a:focus {
+	opacity: 1;
 }
 
 .custom-logo-link {
@@ -106,6 +110,10 @@ body:not( .home ) .custom-logo-link {
 	grid-column: 1;
 	grid-row: 2;
 	position: relative;
+}
+
+.menu-toggle {
+	padding-top: 23px;
 }
 
 .wp15-locale-switcher-container {
