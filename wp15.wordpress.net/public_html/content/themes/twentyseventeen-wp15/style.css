@@ -248,6 +248,7 @@ body:not( .home ) .custom-logo-link {
  * Tagregator
  */
 #tggr-media-item-container {
+	position: relative;
 	width: 90vw;
 	left: 50%;
 	right: 50%;
@@ -301,7 +302,7 @@ a:hover.tggr-author-profile {
 
 
 /*
- * Language Picker Fake Styles
+ * Language Picker
  */
 .wp15-locale-switcher-container {
 	float: right;
