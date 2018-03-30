@@ -5,9 +5,9 @@ namespace WP15\Theme;
 defined( 'WPINC' ) || die();
 
 add_filter( 'template_include',   __NAMESPACE__ . '\get_front_page_template' );
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
-add_filter( 'get_custom_logo',    __NAMESPACE__ . '\set_custom_logo' );
-add_filter( 'body_class',         __NAMESPACE__ . '\add_body_classes' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts'         );
+add_filter( 'get_custom_logo',    __NAMESPACE__ . '\set_custom_logo'         );
+add_filter( 'body_class',         __NAMESPACE__ . '\add_body_classes'        );
 
 
 /**
