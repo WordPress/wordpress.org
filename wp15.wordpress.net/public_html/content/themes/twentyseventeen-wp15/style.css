@@ -49,30 +49,34 @@ h3 {
 	box-shadow: inset 0 -1px 0 rgba( 0, 115, 170, 1 );
 }
 
+.custom-header {
+	background-color: #00A0D2;
+	background-image: url( 'images/confetti-tile.svg' );
+	background-repeat: repeat;
+}
+
 .custom-header-media:before {
 	background: transparent;
 }
 
 .site-branding {
+	text-align: center;
 	min-height: 300px;
 }
 
 .custom-logo-link {
-	display: block;
+	display: inline-block;
 	margin: auto auto 2em;
 	padding: 0;
+	background-color: #00A0D2;
 }
 
 .custom-logo-link img {
-	display: none;
+	max-width: 300px;
+	max-height: none;
 }
 
-body:not( .title-tagline-hidden ) .site-branding-text {
-	display: block;
-	margin: auto;
-	text-align: center;
-}
-
+body:not( .title-tagline-hidden ) .site-branding-text,
 body:not( .home ) .site-branding-text {
 	display: none;
 }
