@@ -11,9 +11,21 @@ add_filter( 'get_custom_logo',    __NAMESPACE__ . '\set_custom_logo' );
  * Enqueue scripts and styles
  */
 function enqueue_scripts() {
-	wp_enqueue_style(
+	wp_register_style(
+		'source-sans-pro',
+		'https://fonts.googleapis.com/css?family=Crete+Round|Source+Sans+Pro:400,400i,600,700&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext,vietnamese'
+	);
+
+	wp_register_style(
 		'twentyseventeen-parent-style',
 		get_template_directory_uri() . '/style.css'
+	);
+
+	wp_enqueue_style(
+		'twentyseventeen-style',
+		get_stylesheet_directory_uri() . '/style.css',
+		array( 'twentyseventeen-parent-style', 'source-sans-pro' ),
+		filemtime( __DIR__ . '/style.css' )
 	);
 
 	// Styles for locale switcher.

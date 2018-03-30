@@ -8,3 +8,342 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: wp15
 Template:    twentyseventeen
 */
+
+body {
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 18px;
+}
+
+a {
+	color: #0073AA;
+}
+
+.site-title,
+.entry-title {
+	font-family: 'Source Sans Pro', sans-serif;
+}
+
+.page .panel-content .entry-title,
+.page-title,
+body.page:not( .twentyseventeen-front-page ) .entry-title {
+	font-size: 1em;
+}
+
+h2, .home.blog .entry-title {
+	color: #C94300;
+}
+
+h1,
+h2,
+h3 {
+	font-family: 'Crete Round', serif;
+}
+
+.entry-content a,
+.entry-summary a,
+.widget a,
+.site-footer .widget-area a,
+.posts-navigation a,
+.widget_authors a strong {
+	-webkit-box-shadow: inset 0 -1px 0 rgba( 0, 115, 170, 1 );
+	box-shadow: inset 0 -1px 0 rgba( 0, 115, 170, 1 );
+}
+
+.custom-header-media:before {
+	background: transparent;
+}
+
+.site-branding {
+	min-height: 300px;
+}
+
+.custom-logo-link {
+	display: block;
+	margin: auto auto 2em;
+	padding: 0;
+}
+
+.custom-logo-link img {
+	display: none;
+}
+
+body:not( .title-tagline-hidden ) .site-branding-text {
+	display: block;
+	margin: auto;
+	text-align: center;
+}
+
+body:not( .home ) .site-branding-text {
+	display: none;
+}
+
+body:not( .home ) .custom-logo-link {
+	margin-bottom: 0;
+}
+
+.home .entry-title {
+	display: none;
+}
+
+
+/*
+ * Events
+ */
+#wp15-events-map {
+	position: relative;
+	height: 500px;
+	width: 64vw;
+	left: 50%;
+	right: 50%;
+	margin-left: -32vw;
+	margin-right: -32vw;
+	margin-top: 2em;
+	margin-bottom: 4em;
+	background-color: #AADAFF;
+}
+
+.wp15-events-list {
+	list-style-type: none;
+}
+
+.wp15-events-list li {
+	margin-bottom: 3em;
+}
+
+.wp15-event-group,
+.wp15-event-title,
+.wp15-event-date-time {
+	margin-bottom: .5em;
+	text-align: center;
+}
+
+.wp15-event-date-time {
+	font-size: 16px;
+	color: #767676;
+}
+
+
+/*
+ * Download Swag Assets
+ */
+.downloads-wrapper, .downloads-wrapper *,
+.downloads-wrapper :before, .downloads-wrapper :after {
+	box-sizing: border-box;
+}
+
+.downloads-wrapper {
+	display: block;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	overflow: hidden;
+	font-size: 16px;
+	line-height: 1.618;
+	background: #fff;
+	color: rgba( 35, 40, 45, 0.5 );
+	margin: 0 .392%;
+	font-size: 0;
+	/*inline-block hack*/
+}
+
+.downloads-wrapper ul,
+.downloads-wrapper li,
+.postcontent ul.downloads-wrapper,
+#main ul#postlist .postcontent ul.downloads-wrapper li {
+	list-style: none;
+	margin: 0 !important;
+	padding: 0;
+}
+
+.downloads-wrapper .downloads-item,
+#main ul#postlist .postcontent ul.downloads-wrapper li.downloads-item {
+	display: inline-block;
+	vertical-align: top;
+	width: 32.288%;
+	min-width: 8.625em;
+	margin: 0 .35% 1.5em !important;
+	font-size: 16px;
+}
+
+.downloads-wrapper .downloads-item:hover .downloads-item-preview {
+	background: #00a0d2;
+	-webkit-transition: background .2s ease-in-out;
+	-moz-transition: background .2s ease-in-out;
+	transition: background .2s ease-in-out;
+}
+
+.downloads-wrapper .downloads-item:hover .downloads-item-preview img {
+	opacity: .9;
+	-webkit-transition: opacity .2s ease-in-out;
+	-moz-transition: opacity .2s ease-in-out;
+	transition: opacity .2s ease-in-out;
+}
+
+.downloads-wrapper .downloads-item-preview {
+	line-height: 0;
+	border-radius: .3em;
+	-webkit-transition: background .3s ease-in-out;
+	-moz-transition: background .3s ease-in-out;
+	transition: background .3s ease-in-out;
+}
+
+.downloads-wrapper .downloads-item-preview img {
+	max-width: 100%;
+	height: auto;
+	border: 2px solid rgba( 180, 185, 190, 0.3 );
+	border-radius: .3em;
+	-webkit-transition: opacity .5s ease-in-out;
+	-moz-transition: opacity .5s ease-in-out;
+	transition: opacity .5s ease-in-out;
+}
+
+.downloads-wrapper .downloads-item-header {
+	margin: 0;
+	padding: 0 .5em;
+	font-size: 16px;
+	line-height: 1.618;
+}
+
+.downloads-wrapper .downloads-item-header strong {
+	display: block;
+	font-size: 16px;
+	line-height: 1;
+	color: rgba( 35, 40, 45, 0.5 );
+	margin: 1em 0 .5em;
+}
+
+.downloads-wrapper .downloads-item-header span {
+	display: block;
+	font-size: 14px;
+	line-height: 1;
+	color: rgba( 35, 40, 45, 0.5 );
+	margin: 0 0 1em;
+}
+
+.downloads-wrapper .downloads-item-files {
+	color: rgba( 35, 40, 45, 0.5 );
+	font-size: 12px;
+	margin-bottom: .236em;
+	padding: 0 .6em;
+}
+
+.downloads-wrapper .downloads-item-files li {
+	padding: 0 0 .5em;
+}
+
+.downloads-wrapper .downloads-item-files span {
+	opacity: .5;
+}
+
+
+/*
+ * Swag
+ */
+.swag-wrapper p {
+	display: inline;
+}
+
+
+/*
+ * Tagregator
+ */
+#tggr-media-item-container {
+	width: 90vw;
+	left: 50%;
+	right: 50%;
+	margin-left: -45vw;
+	margin-right: -45vw;
+}
+
+@media screen and ( min-width: 48em ) {
+	#tggr-media-item-container {
+		width: 80vw;
+		left: 50%;
+		right: 50%;
+		margin-left: -40vw;
+		margin-right: -40vw;
+	}
+}
+
+.tggr-media-item {
+	background-color: #F8F8F8;
+	box-sizing: border-box;
+	border: 2px solid rgba( 180, 185, 190, 0.3 );
+	border-radius: .3em;
+}
+
+.tggr-media-item .tggr-actions {
+	text-align: left;
+}
+
+.tggr-actions a,
+.tggr-media-item a,
+.entry-content .tggr-media-item a {
+	text-decoration: none;
+	box-shadow: none;
+}
+
+#tggr-media-item-container .tggr-actions a span {
+	font-size: 13px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.tggr-media-item a:hover,
+.tggr-media-item .tggr-actions a:hover span {
+	text-decoration: none;
+}
+
+a.tggr-author-profile,
+a:hover.tggr-author-profile {
+	box-shadow: none;
+}
+
+
+/*
+ * Language Picker Fake Styles
+ */
+.wp15-locale-switcher-container {
+	float: right;
+	margin-top: 9px;
+	margin-right: 2em;
+}
+
+
+/*
+ * Embeds
+ */
+iframe.wp-embedded-content {
+	float: left;
+	margin-right: 5px;
+	width: 48%;
+	box-sizing: border-box;
+	border: 2px solid rgba( 180, 185, 190, 0.3 );
+	border-radius: .3em;
+}
+
+
+/*
+ * Footer
+ */
+.site-info {
+	float: none;
+	width: 100%;
+	text-align: center;
+}
+
+
+/*
+ * Responsive
+ */
+@media screen and ( min-width: 48em ) {
+	.site-content {
+		padding: 3em 0 0;
+	}
+
+	.page.page-one-column .entry-header,
+	.twentyseventeen-front-page.page-one-column .entry-header,
+	.archive.page-one-column:not( .has-sidebar) .page-header {
+		margin-bottom: 1em;
+	}
+}
