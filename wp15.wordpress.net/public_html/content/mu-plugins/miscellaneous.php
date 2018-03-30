@@ -18,6 +18,7 @@ add_filter( 'tggr_end_date', __NAMESPACE__ . '\set_tagregator_cutoff_date' );
 add_filter( 'wp15_update_pomo_files', __NAMESPACE__ . '\update_pomo_files' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\register_assets', 1 );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_assets', 1 );
+add_filter( 'mime_types', __NAMESPACE__ . '\mime_types' );
 
 if ( ! wp_next_scheduled( 'wp15_update_pomo_files' ) ) {
 	wp_schedule_event( time(), 'hourly', 'wp15_update_pomo_files' );
@@ -125,4 +126,15 @@ function register_assets() {
 		'4.0.5',
 		true
 	);
+}
+
+/**
+ * Add supported mime types.
+ *
+ * @param $mime_types
+ */
+function mime_types( $mime_types ) {
+	$mime_types[ 'ai' ] = 'application/postscript';
+
+	return $mime_types;
 }
