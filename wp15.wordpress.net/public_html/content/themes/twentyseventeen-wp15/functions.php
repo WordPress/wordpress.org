@@ -119,7 +119,7 @@ function get_swag_download_items() {
 			'preview_image_url' => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_stickers_preview.png',
 			'files'             => array(
 				array(
-					'name' => __( 'AI source file (vector', 'wp15' ),
+					'name' => __( 'AI source file (vector)', 'wp15' ),
 					'url'  => 'https://wp15.wordpress.net/content/uploads/2018/03/swag_wp15_stickers_source.ai',
 				),
 				array(
