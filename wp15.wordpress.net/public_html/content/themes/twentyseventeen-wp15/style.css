@@ -91,6 +91,15 @@ body:not( .home ) .custom-logo-link {
 
 
 /*
+ * About
+ */
+.page-slug-about h1,
+.page-slug-about p {
+	text-align: center;
+}
+
+
+/*
  * Events
  */
 #wp15-events-map {

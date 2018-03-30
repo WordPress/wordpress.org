@@ -6,6 +6,7 @@ defined( 'WPINC' ) || die();
 
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
 add_filter( 'get_custom_logo',    __NAMESPACE__ . '\set_custom_logo' );
+add_filter( 'body_class',         __NAMESPACE__ . '\add_body_classes' );
 
 /**
  * Enqueue scripts and styles
@@ -30,6 +31,27 @@ function enqueue_scripts() {
 
 	// Styles for locale switcher.
 	wp_enqueue_style( 'select2' );
+}
+
+/**
+ * Add the post's slug to the body tag
+ *
+ * For CSS developers, this is better than relying on the post ID, because that often changes between their local
+ * development environment and production, and manually importing/exporting is inconvenient.
+ *
+ * @param array $body_classes
+ *
+ * @return array
+ */
+function add_body_classes( $body_classes ) {
+	global $wp_query;
+	$post = $wp_query->get_queried_object();
+
+	if ( is_a( $post, 'WP_Post' ) ) {
+		$body_classes[] = $post->post_type . '-slug-' . sanitize_html_class( $post->post_name, $post->ID );
+	}
+
+	return $body_classes;
 }
 
 /**
