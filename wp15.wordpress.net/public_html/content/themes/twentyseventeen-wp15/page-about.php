@@ -27,7 +27,7 @@
 
 					<img src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="<?php esc_attr_e( 'Confetti with the WordPress logo and WP15 color scheme', 'wp15' ); ?>" />
 
-					<p>
+					<p class="wp10-nostalgia">
 						<?php printf(
 							wp_kses_data( __( 'Check out <a href="%s">this post about the WordPress 10th anniversary</a>.', 'wp15' ) ),
 							'https://wordpress.org/news/2013/05/ten-good-years/'

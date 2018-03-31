@@ -137,7 +137,7 @@ body:not( .home ) .custom-logo-link {
  * About
  */
 .page-slug-about h1,
-.page-slug-about p {
+.wp10-nostalgia {
 	text-align: center;
 }
 
@@ -148,29 +148,42 @@ body:not( .home ) .custom-logo-link {
 #wp15-events-map {
 	position: relative;
 	height: 500px;
-	width: 64vw;
+	width: 80vw;
 	left: 50%;
 	right: 50%;
-	margin-left: -32vw;
-	margin-right: -32vw;
+	margin-left: -40vw;
+	margin-right: -40vw;
 	margin-top: 2em;
 	margin-bottom: 4em;
 	background-color: #AADAFF;
 }
 
+@media screen and ( max-width: 48em ) {
+	#wp15-events-map {
+		width: 100%;
+		margin: 2em auto 3em;
+		left: auto;
+		right: auto;
+	}
+}
+
 .wp15-events-list {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 300px, 1fr ) );
+	grid-gap: 2em;
+	width: 80vw;
+	margin-left: calc( -1 * ( (80vw - 100%) / 2 ) );
 	list-style-type: none;
 }
 
 .wp15-events-list li {
-	margin-bottom: 3em;
+	margin-bottom: 1em;
 }
 
 .wp15-event-group,
 .wp15-event-title,
 .wp15-event-date-time {
 	margin-bottom: .5em;
-	text-align: center;
 }
 
 .wp15-event-date-time {
