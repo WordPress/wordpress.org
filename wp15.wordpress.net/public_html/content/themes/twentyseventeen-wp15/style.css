@@ -72,12 +72,19 @@ h3 {
 	background-repeat: repeat;
 }
 
+.home .custom-header {
+	height: calc( 100vh - 105px );
+}
+
 .custom-header-media:before {
 	background: transparent;
 }
 
 .site-branding {
-	text-align: center;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	height: 100%;
 	min-height: 300px;
 }
 
@@ -147,9 +154,6 @@ body:not( .home ) .custom-logo-link {
 	margin: 0 auto;
 }
 
-/*
- * Events
- */
 #wp15-events-map {
 	position: relative;
 	height: 500px;
