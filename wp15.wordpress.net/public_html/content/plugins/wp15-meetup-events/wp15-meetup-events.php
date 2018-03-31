@@ -204,6 +204,7 @@ function render_events_shortcode() {
 	foreach ( $events as & $event ) {
 		$event['time'] = get_local_formatted_date( $event['time'], $event['timezone'] );
 	}
+	unset( $event ); // Destroy the reference to restore expected behavior; see https://stackoverflow.com/a/4969286/450127.
 
 	usort( $events, __NAMESPACE__ . '\sort_events' );
 
