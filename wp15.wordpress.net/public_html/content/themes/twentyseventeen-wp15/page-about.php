@@ -21,11 +21,11 @@
 						<?php esc_html_e( 'People all over the world are celebrating the WordPress 15th Anniversary on May 27, 2018. Join us!', 'wp15' ); ?>
 					</h1>
 
-					<img src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="<?php esc_attr_e( 'Confetti with the WordPress logo and WP15 color scheme', 'wp15' ); ?>" />
+					<img class="wp15-confetti-divider" src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="<?php esc_attr_e( 'Confetti with the WordPress logo and WP15 color scheme', 'wp15' ); ?>" />
 
 					<?php echo do_shortcode( '[wp15_meetup_events]' ); ?>
 
-					<img src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="<?php esc_attr_e( 'Confetti with the WordPress logo and WP15 color scheme', 'wp15' ); ?>" />
+					<img class="wp15-confetti-divider" src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="<?php esc_attr_e( 'Confetti with the WordPress logo and WP15 color scheme', 'wp15' ); ?>" />
 
 					<p class="wp10-nostalgia">
 						<?php printf(
