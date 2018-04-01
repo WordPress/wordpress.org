@@ -75,7 +75,7 @@ the_post();
 					<p><?php
 						printf(
 							/* translators: 1: WordPress Market share - 30. Note the following % sign is escaped as %%. 2: Footnote 3: Market Penetration - 60.  Note the following % sign is escaped as %%. */
-							__( 'WordPress is a free and open source content management system (CMS). It is the most widely-used CMS software in the world and it powers more than %1$s%% of the top 10 million websites%2$s, giving it an estimated 58% market share of all sites
+							__( 'WordPress is a free and open source content management system (CMS). It is the most widely-used CMS software in the world and it powers more than %1$s%% of the top 10 million websites%2$s, giving it an estimated %3$s%% market share of all sites
 using a CMS.', 'wporg' ),
 							WP_MARKET_SHARE,
 							'<sup id="ref1"><a href="#footnote1">1</a></a></sup>',
