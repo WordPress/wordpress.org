@@ -6,6 +6,13 @@ namespace WP15\Meetup_Events;
 
 ?>
 
+<form id="wp15-events-filter">
+	<label>
+		<span><?php esc_html_e( 'Search events:', 'wp15' ); ?></span>
+		<input id="wp15-events-query" type="text" value="" />
+	</label>
+</form>
+
 <ul class="wp15-events-list">
 	<?php foreach ( $events as $event ) : ?>
 		<li>

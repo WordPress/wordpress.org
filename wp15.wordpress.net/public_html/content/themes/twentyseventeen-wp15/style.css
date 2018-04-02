@@ -188,6 +188,17 @@ body:not( .home ) .custom-logo-link {
 	}
 }
 
+#wp15-events-filter {
+	margin-bottom: 1.5em;
+	text-align: center;
+}
+
+#wp15-events-filter input[type="text"] {
+	display: inline;
+	width: auto;
+	margin-left: .5em;
+}
+
 .wp15-events-list {
 	display: grid;
 	grid-template-columns: repeat( auto-fill, minmax( 300px, 1fr ) );

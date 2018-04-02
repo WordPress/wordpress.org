@@ -53,6 +53,8 @@ var WP15MeetupEvents = ( function( $ ) {
 		initOptions = null;
 
 		try {
+			$( '#wp15-events-query' ).keyup( filterEventList );
+
 			if ( options.hasOwnProperty( 'mapContainer' ) && options.hasOwnProperty( 'mapMarkers' ) ) {
 				loadMap( options.mapContainer, options.mapMarkers );
 			}
@@ -187,6 +189,29 @@ var WP15MeetupEvents = ( function( $ ) {
 		};
 
 		return new MarkerClusterer( map, markersArray, clusterOptions );
+	}
+
+	/**
+	 * Filter the list of events based on a user's search query.
+	 */
+	function filterEventList() {
+		var query  = this.value,
+		    events = $( '.wp15-events-list' ).children( 'li' );
+
+		if ( '' === query ) {
+			events.show();
+			return;
+		}
+
+		events.each( function( index, event ) {
+			var groupName = $( event ).children( '.wp15-event-group' ).text().trim();
+
+			if ( -1 === groupName.search( new RegExp( query, 'i' ) ) ) {
+				$( event ).hide();
+			} else {
+				$( event ).show();
+			}
+		} );
 	}
 
 	/**
