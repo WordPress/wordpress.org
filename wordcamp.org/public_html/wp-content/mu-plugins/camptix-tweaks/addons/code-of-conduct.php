@@ -25,10 +25,6 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 		add_action( 'camptix_form_attendee_info_errors', array( $this, 'add_registration_field_validation_error' ) );
 		add_filter( 'camptix_form_register_complete_attendee_object', array( $this, 'populate_attendee_object' ), 10, 2 );
 		add_action( 'camptix_checkout_update_post_meta', array( $this, 'save_registration_field' ), 10, 2 );
-
-		// Edit info field
-		add_filter( 'camptix_form_edit_attendee_ticket_info', array( $this, 'populate_ticket_info_array' ), 10, 2 );
-		add_action( 'camptix_form_edit_attendee_after_questions', array( $this, 'render_ticket_info_field' ), 15 );
 	}
 
 	/**
@@ -132,53 +128,6 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 	 */
 	public function save_registration_field( $post_id, $attendee ) {
 		return update_post_meta( $post_id, 'tix_' . self::SLUG, $attendee->{ self::SLUG } );
-	}
-
-	/**
-	 * Retrieve the stored value of the new field for use on the Edit Info form.
-	 *
-	 * @param array    $ticket_info
-	 * @param \WP_Post $attendee
-	 *
-	 * @return array
-	 */
-	public function populate_ticket_info_array( $ticket_info, $attendee ) {
-		$ticket_info[ self::SLUG ] = wp_validate_boolean( get_post_meta( $attendee->ID, 'tix_' . self::SLUG, true ) );
-
-		return $ticket_info;
-	}
-
-	/**
-	 * Render the new field for the Edit Info form.
-	 */
-	public function render_ticket_info_field() {
-		$attendee_id = intval( $_REQUEST['tix_attendee_id'] );
-		$coc         = wp_validate_boolean( get_post_meta( $attendee_id, 'tix_' . self::SLUG, true ) );
-
-		?>
-
-		<tr class="tix-row-<?php echo esc_attr( self::SLUG ); ?>">
-			<td class="tix-required tix-left">
-				<?php
-					if ( $coc_url = $this->maybe_get_coc_url() ) :
-						printf(
-							/* translators: %s placeholder is a URL */
-							wp_kses_post( __( 'Do you agree to follow the event <a href="%s">Code of Conduct</a>?', 'wordcamporg' ) ),
-							esc_url( $coc_url )
-						);
-					else :
-						esc_html_e( 'Do you agree to follow the event Code of Conduct?', 'wordcamporg' );
-					endif;
-				?>
-				<span class="tix-required-star">*</span>
-			</td>
-
-			<td class="tix-right">
-				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="checkbox" <?php checked( $coc ); ?> disabled /> <?php esc_html_e( 'Yes', 'wordcamporg' ); ?></label>
-			</td>
-		</tr>
-
-		<?php
 	}
 
 	/**
