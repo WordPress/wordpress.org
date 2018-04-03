@@ -58,20 +58,28 @@ h3 {
 /*
  * Header
  */
-.site-header {
-	display: grid;
-	grid-template-rows: auto 70px;
-	grid-template-columns: auto 300px;
+@supports( display: grid ) {
+	.site-header {
+		display: grid;
+		grid-template-rows: auto 70px;
+		grid-template-columns: auto 300px;
+	}
 }
 
 .custom-header {
-	grid-column: 1 / span 2;
-	grid-row: 1;
+	height: 400px;
 	margin-bottom: 0 !important;
 	background-color: #00A0D2;
 	background-image: url( 'images/confetti-tile.svg' );
 	background-size: 400px 400px;
 	background-repeat: repeat;
+}
+
+@supports( display: grid ) {
+	.custom-header {
+		grid-column: 1 / span 2;
+		grid-row: 1;
+	}
 }
 
 .home .custom-header {
@@ -84,11 +92,17 @@ h3 {
 }
 
 .site-branding {
-	display: flex;
-	justify-content: center;
-	flex-direction: column;
+	text-align: center;
 	height: 100%;
 	min-height: 300px;
+}
+
+@supports( display: flex ) {
+	.site-branding {
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+	}
 }
 
 .site-branding a:hover, .site-branding a:focus {
@@ -105,7 +119,7 @@ h3 {
 
 .custom-logo-link img {
 	max-width: 300px;
-	max-height: none;
+	max-height: 218px;
 }
 
 body:not( .title-tagline-hidden ) .site-branding-text,
