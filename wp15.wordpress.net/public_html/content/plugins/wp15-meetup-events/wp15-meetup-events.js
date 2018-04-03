@@ -199,7 +199,7 @@ var WP15MeetupEvents = ( function( $ ) {
 		    events = $( '.wp15-events-list' ).children( 'li' );
 
 		if ( '' === query ) {
-			events.show();
+			events.attr( 'aria-hidden', false );
 			return;
 		}
 
@@ -208,9 +208,9 @@ var WP15MeetupEvents = ( function( $ ) {
 			    location  = $( event ).data( 'location' );
 
 			if ( -1 === groupName.search( new RegExp( query, 'i' ) ) && -1 === location.search( new RegExp( query, 'i' ) ) ) {
-				$( event ).hide();
+				$( event ).attr( 'aria-hidden', true );
 			} else {
-				$( event ).show();
+				$( event ).attr( 'aria-hidden', false );
 			}
 		} );
 	}
