@@ -70,13 +70,13 @@ h3 {
 	margin-bottom: 0 !important;
 	background-color: #00A0D2;
 	background-image: url( 'images/confetti-tile.svg' );
-	background-size: 25%;
+	background-size: 400px 400px;
 	background-repeat: repeat;
 }
 
 .home .custom-header {
 	height: calc( 100vh - 105px );
-	background-size: 30%;
+	background-size: 550px 550px;
 }
 
 .custom-header-media:before {
