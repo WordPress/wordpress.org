@@ -3,13 +3,7 @@
 namespace WP15\Meetup_Events;
 defined( 'WPINC' ) || die();
 
-/** @var array $map_options */
-
 ?>
-
-<script>
-	var wp15MeetupEventsOptions = <?php echo wp_json_encode( $map_options ); ?>;
-</script>
 
 <div id="wp15-events-map">
 	<div class="wp15-spinner spinner spinner-visible"></div>

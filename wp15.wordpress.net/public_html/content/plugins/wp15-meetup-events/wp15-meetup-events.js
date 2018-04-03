@@ -7,8 +7,10 @@
  */
 var WP15MeetupEvents = ( function( $ ) {
 	// `templateOptions` is copied from Core in order to avoid an extra HTTP request just to get `wp.template`.
-	var options,
-		templateOptions = {
+	var events,
+	    options,
+	    strings,
+	    templateOptions = {
 			evaluate:    /<#([\s\S]+?)#>/g,
 			interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
 			escape:      /\{\{([^\}]+?)\}\}(?!\})/g
@@ -17,15 +19,16 @@ var WP15MeetupEvents = ( function( $ ) {
 	/**
 	 * Initialization that runs when the document has fully loaded.
 	 */
-	function init( initOptions ) {
-		options     = initOptions;
-		initOptions = null;
+	function init( data ) {
+		events  = data.events;
+		options = data.map_options;
+		strings = data.strings;
 
 		try {
 			$( '#wp15-events-query' ).keyup( filterEventList );
 
-			if ( options.hasOwnProperty( 'mapContainer' ) && options.hasOwnProperty( 'mapMarkers' ) ) {
-				loadMap( options.mapContainer, options.mapMarkers );
+			if ( options.hasOwnProperty( 'mapContainer' ) ) {
+				loadMap( options.mapContainer, events );
 			}
 		} catch ( exception ) {
 			log( exception );
@@ -206,4 +209,4 @@ var WP15MeetupEvents = ( function( $ ) {
 	};
 } )( jQuery );
 
-jQuery( document ).ready( WP15MeetupEvents.init( wp15MeetupEventsOptions ) );
+jQuery( document ).ready( WP15MeetupEvents.init( wp15MeetupEventsData ) );

@@ -176,6 +176,13 @@ function enqueue_scripts() {
 		return;
 	}
 
+	wp_enqueue_style(
+		'wp15-meetup-events',
+		plugins_url( 'wp15-meetup-events.css', __FILE__ ),
+		array(),
+		filemtime( __DIR__ . '/wp15-meetup-events.css' )
+	);
+
 	wp_register_script(
 		'google-maps',
 		'https://maps.googleapis.com/maps/api/js?key=' . GOOGLE_MAPS_PUBLIC_KEY,
@@ -200,18 +207,42 @@ function enqueue_scripts() {
 		true
 	);
 
-	wp_enqueue_style(
+	wp_localize_script(
 		'wp15-meetup-events',
-		plugins_url( 'wp15-meetup-events.css', __FILE__ ),
-		array(),
-		filemtime( __DIR__ . '/wp15-meetup-events.css' )
+		'wp15MeetupEventsData',
+		array(
+			'map_options' => get_map_options(),
+			'events'      => get_formatted_events(),
+		)
+	);
+}
+
+
+/**
+ * Get the configuration for the Google Map of events.
+ *
+ * @return array
+ */
+function get_map_options() {
+	return array(
+		'mapContainer'            => 'wp15-events-map',
+		'markerIconBaseURL'       => plugins_url( '/images/', __FILE__ ),
+		'markerIcon'              => 'map-marker.svg',
+		'markerIconAnchorXOffset' => 32,
+		'markerIconHeight'        => 64,
+		'markerIconWidth'         => 64,
+		'clusterIcon'             => 'clustered-markers.png',
+		'clusterIconWidth'        => 53,
+		'clusterIconHeight'       => 52,
 	);
 }
 
 /**
- * Render the WP15 events shortcode.
+ * Format the WP15 events for presentation.
+ *
+ * @return array
  */
-function render_events_shortcode() {
+function get_formatted_events() {
 	$events = get_option( 'wp15_events' );
 
 	// This needs to be done on the fly, in order to use the date format for the visitor's locale.
@@ -222,23 +253,7 @@ function render_events_shortcode() {
 
 	usort( $events, __NAMESPACE__ . '\sort_events' );
 
-	$map_options = array(
-		'mapContainer'            => 'wp15-events-map',
-		'mapMarkers'              => $events,
-		'markerIconBaseURL'       => plugins_url( '/images/', __FILE__ ),
-		'markerIcon'              => 'map-marker.svg',
-		'markerIconAnchorXOffset' => 32,
-		'markerIconHeight'        => 64,
-		'markerIconWidth'         => 64,
-		'clusterIcon'             => 'clustered-markers.png',
-		'clusterIconWidth'        => 53,
-		'clusterIconHeight'       => 52,
-	);
-
-	ob_start();
-	require_once( __DIR__ . '/views/events-map.php'  );
-	require_once( __DIR__ . '/views/events-list.php' );
-	return ob_get_clean();
+	return $events;
 }
 
 /**
@@ -255,6 +270,18 @@ function sort_events( $a, $b ) {
 	}
 
 	return $a['time'] > $b['time'];
+}
+
+/**
+ * Render the WP15 events shortcode.
+ */
+function render_events_shortcode() {
+	$events = get_formatted_events();
+
+	ob_start();
+	require_once( __DIR__ . '/views/events-map.php'  );
+	require_once( __DIR__ . '/views/events-list.php' );
+	return ob_get_clean();
 }
 
 /**
