@@ -45,7 +45,7 @@ function enqueue_scripts() {
 	wp_enqueue_style(
 		'twentyseventeen-style',
 		get_stylesheet_directory_uri() . '/style.css',
-		array( 'twentyseventeen-parent-style', 'source-sans-pro' ),
+		array( 'twentyseventeen-parent-style', 'source-sans-pro', 'dashicons' ),
 		filemtime( __DIR__ . '/style.css' )
 	);
 
