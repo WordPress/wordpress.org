@@ -185,9 +185,17 @@ function enqueue_scripts() {
 	);
 
 	wp_enqueue_script(
+		'marker-clusterer',
+		plugins_url( 'libraries/marker-clusterer.min.js', __FILE__ ),
+		array(),
+		filemtime( __DIR__ . '/libraries/marker-clusterer.min.js' ),
+		true
+	);
+
+	wp_enqueue_script(
 		'wp15-meetup-events',
 		plugins_url( 'wp15-meetup-events.js', __FILE__ ),
-		array( 'jquery', 'underscore', 'google-maps' ),
+		array( 'jquery', 'underscore', 'google-maps', 'marker-clusterer' ),
 		filemtime( __DIR__ . '/wp15-meetup-events.js' ),
 		true
 	);
