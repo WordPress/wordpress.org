@@ -169,9 +169,11 @@ var WP15MeetupEvents = ( function( $ ) {
 	function filterEventList() {
 		var query  = this.value,
 		    events = $( '.wp15-events-list' ).children( 'li' );
+		    speak  = _.debounce( wp.a11y.speak, 1000 );
 
 		if ( '' === query ) {
 			events.attr( 'aria-hidden', false );
+			speak( strings.search_cleared );
 			return;
 		}
 
@@ -185,6 +187,8 @@ var WP15MeetupEvents = ( function( $ ) {
 				$( event ).attr( 'aria-hidden', false );
 			}
 		} );
+
+		speak( strings.search_match.replace( '%s', query ) );
 	}
 
 	/**

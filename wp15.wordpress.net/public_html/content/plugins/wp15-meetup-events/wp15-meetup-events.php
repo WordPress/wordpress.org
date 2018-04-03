@@ -202,7 +202,7 @@ function enqueue_scripts() {
 	wp_enqueue_script(
 		'wp15-meetup-events',
 		plugins_url( 'wp15-meetup-events.js', __FILE__ ),
-		array( 'jquery', 'underscore', 'google-maps', 'marker-clusterer' ),
+		array( 'jquery', 'underscore', 'wp-a11y', 'google-maps', 'marker-clusterer' ),
 		filemtime( __DIR__ . '/wp15-meetup-events.js' ),
 		true
 	);
@@ -211,12 +211,24 @@ function enqueue_scripts() {
 		'wp15-meetup-events',
 		'wp15MeetupEventsData',
 		array(
+			'strings'     => get_js_strings(),
 			'map_options' => get_map_options(),
 			'events'      => get_formatted_events(),
 		)
 	);
 }
 
+/**
+ * Internationalize strings that will be displayed via JavaScript.
+ *
+ * @return array
+ */
+function get_js_strings() {
+	return array(
+		'search_cleared' => __( 'Search cleared, showing all events.', 'wp15' ),
+		'search_match'   => __( 'Showing events that match %s.',       'wp15' ),
+	);
+}
 
 /**
  * Get the configuration for the Google Map of events.
