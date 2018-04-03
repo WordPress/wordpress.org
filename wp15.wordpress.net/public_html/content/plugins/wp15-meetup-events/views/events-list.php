@@ -15,7 +15,7 @@ namespace WP15\Meetup_Events;
 
 <ul class="wp15-events-list">
 	<?php foreach ( $events as $event ) : ?>
-		<li>
+		<li data-location="<?php echo esc_attr( $event['location'] ); ?>">
 			<h3 class="wp15-event-group">
 				<?php echo esc_html( $event['group'] ); ?>
 			</h3>

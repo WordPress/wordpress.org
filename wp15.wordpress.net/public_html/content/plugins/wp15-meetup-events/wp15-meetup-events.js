@@ -204,9 +204,10 @@ var WP15MeetupEvents = ( function( $ ) {
 		}
 
 		events.each( function( index, event ) {
-			var groupName = $( event ).children( '.wp15-event-group' ).text().trim();
+			var groupName = $( event ).children( '.wp15-event-group' ).text().trim(),
+			    location  = $( event ).data( 'location' );
 
-			if ( -1 === groupName.search( new RegExp( query, 'i' ) ) ) {
+			if ( -1 === groupName.search( new RegExp( query, 'i' ) ) && -1 === location.search( new RegExp( query, 'i' ) ) ) {
 				$( event ).hide();
 			} else {
 				$( event ).show();

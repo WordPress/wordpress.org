@@ -98,14 +98,20 @@ function get_potential_events( $start_date, $end_date ) {
  * @return array
  */
 function get_wp15_events( $potential_events ) {
-	$relevant_keys = array_flip( array( 'id', 'event_url', 'name', 'time', 'timezone', 'group', 'latitude', 'longitude' ) );
+	$relevant_keys = array_flip( array( 'id', 'event_url', 'name', 'time', 'timezone', 'group', 'location', 'latitude', 'longitude' ) );
 
 	foreach ( $potential_events as $event ) {
+		$location = array(
+			isset( $event['venue']['city'] )                   ? $event['venue']['city']                   : '',
+			isset( $event['venue']['localized_country_name'] ) ? $event['venue']['localized_country_name'] : ''
+		);
+
 		$event['latitude']    = ! empty( $event['venue']['lat'] ) ? $event['venue']['lat'] : $event['group']['group_lat'];
 		$event['longitude']   = ! empty( $event['venue']['lon'] ) ? $event['venue']['lon'] : $event['group']['group_lon'];
 		$event['group']       = $event['group']['name'];
 		$event['description'] = isset( $event['description'] ) ? $event['description'] : '';
 		$event['time']        = $event['time'] / 1000;  // Convert to seconds.
+		$event['location']    = trim( implode( ' ', $location ) );
 		$trimmed_event        = array_intersect_key( $event, $relevant_keys );
 
 		if ( is_wp15_event( $event['id'], $event['name'], $event['description'] ) ) {
@@ -219,7 +225,6 @@ function render_events_shortcode() {
 		'clusterIcon'             => 'clustered-markers.png',
 		'clusterIconWidth'        => 53,
 		'clusterIconHeight'       => 52,
-
 	);
 
 	ob_start();
