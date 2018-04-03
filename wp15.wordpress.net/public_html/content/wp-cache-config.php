@@ -34,8 +34,8 @@ if ( ! defined( 'WPCACHEHOME' ) ) {
 }
 
 $cache_compression   = 0;
-$cache_enabled       = false;
-$super_cache_enabled = false;
+$cache_enabled       = true;
+$super_cache_enabled = true;
 $cache_max_time      = 1300;
 $cache_path          = WP_CONTENT_DIR . '/cache/';
 $file_prefix         = 'wp-cache-';
