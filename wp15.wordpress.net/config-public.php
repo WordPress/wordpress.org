@@ -18,6 +18,14 @@ define( 'WP_CACHE',       true                                        );
 define( 'DISALLOW_FILE_EDIT',       true );
 define( 'DISALLOW_UNFILTERED_HTML', true );
 
+/*
+ * WordPress is installed in a subfolder, so the default cookie path would be `/wordpress`. That would prevent
+ * cookies from being read by front-end requests, though, like the locale picker.
+ */
+define( 'COOKIEPATH',        '/' );
+define( 'SITECOOKIEPATH',    '/' );
+define( 'ADMIN_COOKIE_PATH', '/' );
+
 if ( 'production' === WP15_ENVIRONMENT ) {
 	ini_set( 'display_errors', 0 );
 
