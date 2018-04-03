@@ -31,6 +31,25 @@ function textdomain() {
 add_action( 'plugins_loaded', __NAMESPACE__ . '\textdomain' );
 
 /**
+ * Modify the key for WP Super Cache to take locale into account.
+ *
+ * @param string $cache_key
+ *
+ * @return string
+ */
+function cache_key( $cache_key ) {
+	$locale = get_locale();
+
+	if ( $locale ) {
+		$cache_key .= '-' . $locale;
+	}
+
+	return $cache_key;
+}
+
+add_filter( 'supercache_filename_str', __NAMESPACE__ . '\cache_key' );
+
+/**
  * Register style and script assets for later enqueueing.
  */
 function register_assets() {
