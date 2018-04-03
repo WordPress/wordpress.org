@@ -6,7 +6,7 @@
  * This is mostly copied from the `wordcamp-central-2012` theme.
  */
 var WP15MeetupEvents = ( function( $ ) {
-	// templateOptions is copied from Core in order to avoid an extra HTTP request just to get wp.template
+	// `templateOptions` is copied from Core in order to avoid an extra HTTP request just to get `wp.template`.
 	var options,
 		templateOptions = {
 			evaluate:    /<#([\s\S]+?)#>/g,

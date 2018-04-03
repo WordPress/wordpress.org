@@ -1,6 +1,7 @@
 <?php
 
 namespace WP15\Meetup_Events;
+defined( 'WPINC' ) || die();
 
 /** @var array $map_options */
 
