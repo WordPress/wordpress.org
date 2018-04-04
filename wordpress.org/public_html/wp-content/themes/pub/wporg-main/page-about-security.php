@@ -193,13 +193,32 @@ using a CMS.', 'wporg' ),
 
 					<p><?php _e( 'The following sections discuss the APIs, resources, and policies that WordPress uses to strengthen the core software and 3rd party plugins and themes against these potential risks.', 'wporg' ); ?></p>
 					<h4><?php _e( 'A1 - Injection', 'wporg' ); ?></h4>
-					<p><?php _e( 'There is a set of functions and APIs available in WordPress to assist developers in making sure unauthorized code cannot be injected, and help them validate and sanitize data. Best practices and documentation are available<sup id="ref9"><a href="#footnote9">9</a></sup> on how to use these APIs to protect, validate, or sanitize input and output data in HTML, URLs, HTTP headers, and when interacting with the database and filesystem. Administrators can also further restrict the types of file which can be uploaded via filters.', 'wporg' ); ?></p>
+					<p><?php
+						printf(
+							/* translators: %s: Footnote */
+							__( 'There is a set of functions and APIs available in WordPress to assist developers in making sure unauthorized code cannot be injected, and help them validate and sanitize data. Best practices and documentation are available% on how to use these APIs to protect, validate, or sanitize input and output data in HTML, URLs, HTTP headers, and when interacting with the database and filesystem. Administrators can also further restrict the types of file which can be uploaded via filters.', 'wporg' ),
+							'<sup id="ref9"><a href="#footnote9">9</a></sup>'
+						);
+					?></p>
 					<h4><?php _e( 'A2 - Broken Authentication and Session Management', 'wporg' ); ?></h4>
 					<p><?php _e( 'WordPress core software manages user accounts and authentication and details such as the user ID, name, and password are managed on the server-side, as well as the authentication cookies. Passwords are protected in the database using standard salting and stretching techniques. Existing sessions are destroyed upon logout for versions of WordPress after 4.0.', 'wporg' ); ?></p>
 					<h4><?php _e( 'A3 - Cross Site Scripting (XSS)', 'wporg' ); ?></h4>
-					<p><?php _e( 'WordPress provides a range of functions which can help ensure that user-supplied data is safe<sup id="ref10"><a href="#footnote10">10</a></sup>. Trusted users, that is administrators and editors on a single WordPress installation, and network administrators only in WordPress Multisite, can post unfiltered HTML or JavaScript as they need to, such as inside a post or page. Untrusted users and user-submitted content is filtered by default to remove dangerous entities, using the KSES library through the <code>wp_kses</code> function.', 'wporg' ); ?></p>
+					<p><?php
+						printf(
+							/* translators: 1: Footnote, 2: wp_kses() */
+							__( 'WordPress provides a range of functions which can help ensure that user-supplied data is safe%1$s. Trusted users, that is administrators and editors on a single WordPress installation, and network administrators only in WordPress Multisite, can post unfiltered HTML or JavaScript as they need to, such as inside a post or page. Untrusted users and user-submitted content is filtered by default to remove dangerous entities, using the KSES library through the %2$s function.', 'wporg' ),
+							'<sup id="ref10"><a href="#footnote10">10</a></sup>',
+							'<code>wp_kses</code>'
+						);
+					?></p>
 
-					<p><?php _e( "As an example, the WordPress core team noticed before the release of WordPress 2.3 that the function <code>the_search_query()</code> was being misused by most theme authors, who were not escaping the function's output for use in HTML. In a very rare case of slightly breaking backward compatibility, the function's output was changed in WordPress 2.3 to be pre-escaped.", 'wporg' ); ?></p>
+					<p><?php
+						printf(
+							/* translators: %s: the_search_query() */
+							__( 'As an example, the WordPress core team noticed before the release of WordPress 2.3 that the function %s was being misused by most theme authors, who were not escaping the function&#8217;s output for use in HTML. In a very rare case of slightly breaking backward compatibility, the function&#8217;s output was changed in WordPress 2.3 to be pre-escaped.', 'wporg' ),
+							'<code>the_search_query()</code>'
+						);
+					?></p>
 					<h4><?php _e( 'A4 - Insecure Direct Object Reference', 'wporg' ); ?></h4>
 					<p><?php _e( "WordPress often provides direct object reference, such as unique numeric identifiers of user accounts or content available in the URL or form fields. While these identifiers disclose direct system information, WordPress' rich permissions and access control system prevent unauthorized requests.", 'wporg' ); ?></p>
 					<h4><?php _e( 'A5 - Security Misconfiguration', 'wporg' ); ?></h4>
