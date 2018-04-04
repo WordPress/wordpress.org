@@ -88,6 +88,13 @@ class Parser {
 	public $faq = array();
 
 	/**
+	 * Flag to specify that a Contributor was ignored.
+	 *
+	 * @var bool
+	 */
+	public $contributor_ignored = false;
+
+	/**
 	 * These are the readme sections that we expect.
 	 *
 	 * @var array
@@ -543,6 +550,7 @@ class Parser {
 			// In the event that something invalid is used, we'll ignore it (Example: 'Joe Bloggs (Australian Translation)')
 			if ( ! $user ) {
 				unset( $users[ $i ] );
+				$this->contributor_ignored = true;
 				continue;
 			}
 

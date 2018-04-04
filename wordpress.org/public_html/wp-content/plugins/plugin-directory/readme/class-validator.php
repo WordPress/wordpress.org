@@ -88,6 +88,10 @@ class Validator {
 			/* Translators: Plugin header tag; */
 			$warnings[] = sprintf( __( 'No %s listed.', 'wporg-plugins' ), '<code>Contributors</code>' );
 		}
+		if ( $readme->contributor_ignored ) {
+			/* Translators: 1: Plugin header tag; */
+			$warnings[] = sprintf( __( 'One or more %1$s listed were ignored. %1$s should only contain WordPress.org usernames.', 'wporg-plugins' ), '<code>Contributors</code>' );
+		}
 
 		// Notes.
 		if ( empty( $readme->sections['faq'] ) ) {
