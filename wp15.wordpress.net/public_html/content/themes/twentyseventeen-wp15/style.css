@@ -58,6 +58,10 @@ h3 {
 /*
  * Header
  */
+.site-header {
+	overflow: visible;
+}
+
 @supports( display: grid ) {
 	.site-header {
 		display: grid;
@@ -135,10 +139,15 @@ body:not( .home ) .custom-logo-link {
 	grid-column: 1;
 	grid-row: 2;
 	position: relative;
+	z-index: 20;
 }
 
 .menu-toggle {
 	padding-top: 23px;
+}
+
+.main-navigation.toggled-on .menu-top-menu-container {
+	width: 100vw;
 }
 
 .wp15-locale-switcher-container {
