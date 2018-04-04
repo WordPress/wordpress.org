@@ -31,7 +31,7 @@ class Validator {
 		$url = esc_url_raw( $url );
 
 		if ( strtolower( substr( $url, -10 ) ) != 'readme.txt' ) {
-			/* Translators: File name; */
+			/* translators: %s: readme.txt */
 			$error = sprintf( __( 'URL must end in %s!', 'wporg-plugins' ), '<code>readme.txt</code>' );
 			return array(
 				'errors' => array( $error ),
@@ -63,51 +63,51 @@ class Validator {
 
 		// Fatal errors.
 		if ( empty( $readme->name ) ) {
-			/* Translators: Plugin header tag; */
+			/* translators: %s: 'Plugin Name' section title */
 			$errors[] = sprintf( __( 'No plugin name detected. Plugin names look like: %s', 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' );
 		}
 
 		// Warnings.
 		if ( empty( $readme->requires ) ) {
-			/* Translators: Plugin header tag; */
-			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Requires at least</code>' );
+			/* translators: %s: plugin header tag */
+			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Requires at least</code>' );
 		}
 		if ( empty( $readme->tested ) ) {
-			/* Translators: Plugin header tag; */
-			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Tested up to</code>' );
+			/* translators: %s: plugin header tag */
+			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Tested up to</code>' );
 		}
 		if ( empty( $readme->requires_php ) ) {
-			/* Translators: Plugin header tag; */
-			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Requires PHP</code>' );
+			/* translators: %s: plugin header tag */
+			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Requires PHP</code>' );
 		}
 		if ( empty( $readme->stable_tag ) ) {
-			/* Translators: 1: Plugin header tag; 2: SVN directory; 3: Plugin header tag; */
-			$warnings[] = sprintf( __( '%1$s is missing.  Hint: If you treat %2$s as stable, put %3$s.', 'wporg-plugins' ), '<code>Stable tag</code>', '<code>/trunk/</code>', '<code>Stable tag: trunk</code>' );
+			/* translators: 1: 'Stable tag', 2: /trunk/ SVN directory, 3: 'Stable tag: trunk' */
+			$warnings[] = sprintf( __( '%1$s field is missing.  Hint: If you treat %2$s as stable, put %3$s.', 'wporg-plugins' ), '<code>Stable tag</code>', '<code>/trunk/</code>', '<code>Stable tag: trunk</code>' );
 		}
 		if ( ! count( $readme->contributors ) ) {
-			/* Translators: Plugin header tag; */
-			$warnings[] = sprintf( __( 'No %s listed.', 'wporg-plugins' ), '<code>Contributors</code>' );
+			/* translators: %s: plugin header tag */
+			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Contributors</code>' );
 		}
 		if ( $readme->contributor_ignored ) {
-			/* Translators: 1: Plugin header tag; */
-			$warnings[] = sprintf( __( 'One or more %1$s listed were ignored. %1$s should only contain WordPress.org usernames.', 'wporg-plugins' ), '<code>Contributors</code>' );
+			/* translators: %s: plugin header tag */
+			$warnings[] = sprintf( __( 'One or more contributors listed were ignored. %s field should only contain WordPress.org usernames.', 'wporg-plugins' ), '<code>Contributors</code>' );
 		}
 
 		// Notes.
 		if ( empty( $readme->sections['faq'] ) ) {
-			/* Translators: Plugin header tag; */
+			/* translators: %s: section title */
 			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Frequently Asked Questions ==</code>' );
 		}
 		if ( empty( $readme->sections['changelog'] ) ) {
-			/* Translators: Plugin header tag; */
+			/* translators: %s: section title */
 			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Changelog ==</code>' );
 		}
 		if ( empty( $readme->upgrade_notice ) ) {
-			/* Translators: Plugin header tag; */
+			/* translators: %s: section title */
 			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Upgrade Notice ==</code>' );
 		}
 		if ( empty( $readme->screenshots ) ) {
-			/* Translators: Plugin header tag; */
+			/* translators: %s: section title */
 			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Screenshots ==</code>' );
 		}
 		if ( empty( $readme->donate_link ) ) {
