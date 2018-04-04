@@ -9,7 +9,7 @@ use WordCamp_Loader;
 use WordCamp_Budgets;
 use Exception;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 const STEP_SELECT_INVOICE  = 1;
 const STEP_PAYMENT_DETAILS = 2;
@@ -97,9 +97,9 @@ function get_wordcamp_query_options() {
 			array(
 				'key'     => 'Start Date (YYYY-mm-dd)',
 				'value'   => strtotime( '-2 years' ),
-				'compare' => '>'
-			)
-		)
+				'compare' => '>',
+			),
+		),
 	);
 }
 
@@ -117,8 +117,8 @@ function _handle_post_data( &$data ) {
 
 	switch ( $step ) {
 		// An invoice, event, currency and amount have been selected.
-		default :
-		case STEP_SELECT_INVOICE :
+		default:
+		case STEP_SELECT_INVOICE:
 			$payment_type = filter_input( INPUT_POST, 'payment_type' );
 			$wordcamp_id  = filter_input( INPUT_POST, 'wordcamp_id', FILTER_VALIDATE_INT );
 			$invoice_id   = filter_input( INPUT_POST, 'invoice_id', FILTER_VALIDATE_INT );
@@ -127,8 +127,8 @@ function _handle_post_data( &$data ) {
 			$amount       = filter_input( INPUT_POST, 'amount', FILTER_VALIDATE_FLOAT );
 
 			switch ( $payment_type ) {
-				default :
-				case 'invoice' :
+				default:
+				case 'invoice':
 					if ( ! $wordcamp_id ) {
 						$data['errors'][] = 'Please select an event.';
 						return;
@@ -155,7 +155,7 @@ function _handle_post_data( &$data ) {
 					}
 					break;
 
-				case 'other' :
+				case 'other':
 					$description = substr( sanitize_text_field( $description ), 0, 100 );
 
 					if ( ! $description ) {
@@ -199,7 +199,7 @@ function _handle_post_data( &$data ) {
 			);
 
 			// Passed through to the charge step.
-			$data['payment_data_json']      = json_encode( $data['payment'] );
+			$data['payment_data_json']      = wp_json_encode( $data['payment'] );
 			$data['payment_data_signature'] = hash_hmac( 'sha256', $data['payment_data_json'], $data['keys']['hmac_key'] );
 
 			// Add a WordCamp object for convenience.
@@ -207,7 +207,7 @@ function _handle_post_data( &$data ) {
 			break;
 
 		// The card details have been entered and Stripe has submitted our form.
-		case STEP_PAYMENT_DETAILS :
+		case STEP_PAYMENT_DETAILS:
 			$stripe_token           = filter_input( INPUT_POST, 'stripeToken' );
 			$payment_data_json      = filter_input( INPUT_POST, 'payment_data_json' );
 			$payment_data_signature = filter_input( INPUT_POST, 'payment_data_signature' );
@@ -223,7 +223,6 @@ function _handle_post_data( &$data ) {
 			}
 
 			// Make sure our data hasn't been altered.
-
 			if ( ! hash_equals( hash_hmac( 'sha256', $payment_data_json, $data['keys']['hmac_key'] ), $payment_data_signature ) ) {
 				$data['errors'][] = 'Could not verify payload signature.';
 				return;
@@ -232,7 +231,7 @@ function _handle_post_data( &$data ) {
 			$payment_data = json_decode( wp_unslash( $payment_data_json ), true );
 
 			switch ( $payment_data['payment_type'] ) {
-				case 'invoice' :
+				case 'invoice':
 					$wordcamp_obj     = get_post( $payment_data['wordcamp_id'] );
 					$wordcamp_site_id = get_wordcamp_site_id( $wordcamp_obj );
 
@@ -245,7 +244,7 @@ function _handle_post_data( &$data ) {
 					);
 					break;
 
-				case 'other' :
+				case 'other':
 					$description = 'Other Payment';
 					$metadata    = array(
 						'description' => $payment_data['description'],
