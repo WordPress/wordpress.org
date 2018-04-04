@@ -223,14 +223,13 @@ function _handle_post_data( &$data ) {
 			}
 
 			// Make sure our data hasn't been altered.
-			$payment_data_str = wp_unslash( $payment_data_json );
 
-			if ( ! hash_equals( hash_hmac( 'sha256', $payment_data_str, $data['keys']['hmac_key'] ), $payment_data_signature ) ) {
+			if ( ! hash_equals( hash_hmac( 'sha256', $payment_data_json, $data['keys']['hmac_key'] ), $payment_data_signature ) ) {
 				$data['errors'][] = 'Could not verify payload signature.';
 				return;
 			}
 
-			$payment_data = json_decode( $payment_data_str, true );
+			$payment_data = json_decode( wp_unslash( $payment_data_json ), true );
 
 			switch ( $payment_data['payment_type'] ) {
 				case 'invoice' :
