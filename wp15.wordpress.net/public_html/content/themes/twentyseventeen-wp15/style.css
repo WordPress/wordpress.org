@@ -65,8 +65,15 @@ h3 {
 @supports( display: grid ) {
 	.site-header {
 		display: grid;
-		grid-template-rows: auto 70px;
-		grid-template-columns: auto 300px;
+		grid-template-rows: auto 1fr;
+		grid-template-columns: auto 3fr;
+	}
+
+	@media screen and ( min-width: 370px ) {
+		.site-header {
+			grid-template-rows: auto 70px;
+			grid-template-columns: auto 300px;
+		}
 	}
 }
 
@@ -122,8 +129,27 @@ h3 {
 }
 
 .custom-logo-link img {
-	max-width: 300px;
-	max-height: 218px;
+	max-width: 90%;
+	max-height: 90%;
+}
+
+/*
+ * IE <= 11 can't scale SVGs properly, so set fixed dimensions.
+ *
+ * @see https://gist.github.com/larrybotha/7881691
+ */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+	.custom-logo-link img {
+		max-width: 150px;
+		max-height: 100px;
+	}
+}
+
+@media screen and ( min-width: 475px ) {
+	.custom-logo-link img {
+		max-width: 300px;
+		max-height: 218px;
+	}
 }
 
 body:not( .title-tagline-hidden ) .site-branding-text,
@@ -147,7 +173,9 @@ body:not( .home ) .custom-logo-link {
 }
 
 .main-navigation.toggled-on .menu-top-menu-container {
+	position: absolute;
 	width: 100vw;
+	border-bottom: 1px solid #eee;
 }
 
 .wp15-locale-switcher-container {
