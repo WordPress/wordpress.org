@@ -245,7 +245,7 @@ class Ratings_Compat {
 				echo '<span class="reviews-need-login">';
 				printf(
 					/* translators: %s: login URL */
-					__( 'You must <a href="%s">log in or register</a> to submit a review.', 'wporg-forums' ),
+					__( 'You must be <a href="%s">logged in</a> to submit a review.', 'wporg-forums' ),
 					add_query_arg(
 						'redirect_to',
 						urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
@@ -332,17 +332,17 @@ class Ratings_Compat {
 		remove_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10 );
 
 		if ( ! is_user_logged_in() ) {
-			echo '<p>';
+			echo '<div class="bbp-template-notice"><p>';
 			printf(
 				/* translators: %s: login URL */
-				__( 'You must <a href="%s">log in or register</a> to submit a review.', 'wporg-forums' ),
+				__( 'You must be <a href="%s">logged in</a> to submit a review.', 'wporg-forums' ),
 				add_query_arg(
 					'redirect_to',
 					urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
 					'https://login.wordpress.org/'
 				)
 			);
-			echo '</p>';
+			echo '</p></div>';
 			return;
 		}
 
