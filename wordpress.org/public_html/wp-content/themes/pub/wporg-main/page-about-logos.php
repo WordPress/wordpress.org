@@ -105,9 +105,9 @@ the_post();
 								<span><?php esc_html_e( 'W Mark', 'wporg' ); ?></span>
 							</div>
 							<ul class="resources-list">
-								<li><a href="//s.w.org/about/images/logos/WordPress-logotype-wmark.pdf"><?php echo wp_kses_post( __( 'PDF <span>(Vector)</span>', 'wporg' ) ); ?></a></li>
-								<li><a href="//s.w.org/about/images/logos/WordPress-logotype-wmark.png"><?php echo wp_kses_post( __( 'PNG <span>(BaseGray/transparent)</span>', 'wporg' ) ); ?></a></li>
-								<li><a href="//s.w.org/about/images/logos/WordPress-logotype-wmark-white.png"><?php echo wp_kses_post( __( 'PNG <span>(White/transparent)</span>', 'wporg' ) ); ?></a></li>
+								<li><a href="//s.w.org/style/images/about/WordPress-logotype-wmark.pdf"><?php echo wp_kses_post( __( 'PDF <span>(Vector)</span>', 'wporg' ) ); ?></a></li>
+								<li><a href="//s.w.org/style/images/about/WordPress-logotype-wmark.png"><?php echo wp_kses_post( __( 'PNG <span>(BaseGray/transparent)</span>', 'wporg' ) ); ?></a></li>
+								<li><a href="//s.w.org/style/images/about/WordPress-logotype-wmark-white.png"><?php echo wp_kses_post( __( 'PNG <span>(White/transparent)</span>', 'wporg' ) ); ?></a></li>
 							</ul>
 						</div>
 
