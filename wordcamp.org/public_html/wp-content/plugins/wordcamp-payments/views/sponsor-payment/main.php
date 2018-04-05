@@ -15,7 +15,7 @@ get_header();
 			<?php foreach ( $data['errors'] as $error ) : ?>
 				<p class="notice notice-error">
 					<strong><?php esc_html_e( 'Error:', 'wordcamporg' ); ?></strong>
-					<?php echo esc_html( $error ); ?>
+					<?php echo wp_kses_data( $error ); ?>
 				</p>
 			<?php endforeach; ?>
 		<?php endif; ?>
@@ -120,7 +120,7 @@ get_header();
 
 				<script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
 					data-key="<?php echo esc_attr( $data['keys']['publishable'] ); ?>"
-					data-amount="<?php echo esc_attr( round( $data['payment']['amount'], 2 ) * 100 ); ?>"
+					data-amount="<?php echo esc_attr( round( $data['payment']['amount'], 2 ) * 100 ); ?>" <?php // @todo: Handle currencies with multipliers other than 100. ?>
 					data-currency="<?php echo esc_attr( $data['payment']['currency'] ); ?>"
 					data-name="WordPress Community Support, PBC"
 					data-description="<?php esc_attr_e( 'Event Sponsorship Payment', 'wordcamporg' ); ?>"

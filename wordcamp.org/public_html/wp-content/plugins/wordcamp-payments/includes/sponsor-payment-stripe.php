@@ -253,7 +253,7 @@ function _handle_post_data( &$data ) {
 			}
 
 			$body = array(
-				'amount'      => round( $payment_data['amount'], 2 ) * 100, // TODO handle zero-decimal currencies.
+				'amount'      => round( $payment_data['amount'], 0 ) * 100, // TODO handle zero-decimal currencies and currencies with multipliers other than 100.
 				'currency'    => $payment_data['currency'],
 				'source'      => $stripe_token,
 				'description' => $description,
@@ -264,10 +264,7 @@ function _handle_post_data( &$data ) {
 				$stripe = new Stripe_Client( $data['keys']['secret'] );
 				$charge = $stripe->charge( $body );
 			} catch ( Exception $exception ) {
-				$data['errors'][] = sprintf(
-					"An error occurred, please try another card. If that doesn't work, please contact %s.",
-					EMAIL_CENTRAL_SUPPORT
-				);
+				$data['errors'][] = $exception->getMessage();
 				return;
 			}
 
