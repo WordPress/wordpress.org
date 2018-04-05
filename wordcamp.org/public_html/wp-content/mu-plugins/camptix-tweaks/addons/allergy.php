@@ -54,9 +54,9 @@ class Allergy_Field extends CampTix_Addon {
 			</td>
 
 			<td class="tix-right">
-				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php esc_html_e( 'Yes (we will contact you)', 'wordcamporg' ); ?></label>
+				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php esc_html( _ex( 'Yes (we will contact you)', 'ticket registration option', 'wordcamporg' ) ); ?></label>
 				<br />
-				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php esc_html_e( 'No', 'wordcamporg' ); ?></label>
+				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php esc_html( _ex( 'No', 'ticket registration option', 'wordcamporg' ) ); ?></label>
 			</td>
 		</tr>
 
@@ -172,9 +172,9 @@ class Allergy_Field extends CampTix_Addon {
 			</td>
 
 			<td class="tix-right">
-				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php esc_html_e( 'Yes (we will contact you)', 'wordcamporg' ); ?></label>
+				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php esc_html( _ex( 'Yes (we will contact you)', 'ticket registration option', 'wordcamporg' ) ); ?></label>
 				<br />
-				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php esc_html_e( 'No', 'wordcamporg' ); ?></label>
+				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php esc_html( _ex( 'No', 'ticket registration option', 'wordcamporg' ) ); ?></label>
 			</td>
 		</tr>
 
