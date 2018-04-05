@@ -299,21 +299,21 @@ function render_events_shortcode() {
 /**
  * Format a UTC timestamp with respect to the local timezone.
  *
- * @param int    $utc_time
+ * @param int    $utc_timestamp
  * @param string $timezone
  *
  * @return string
  */
-function get_local_formatted_date( $utc_time, $timezone ) {
+function get_local_formatted_date( $utc_timestamp, $timezone ) {
 	$date_format = _x( 'F jS, Y g:ia', 'WP15 event date format', 'wp15' );
 
 	try {
-		$local_timestamp = new DateTime( '@' . $utc_time );
-		$local_timestamp->setTimezone( new DateTimeZone( $timezone ) );
-		$local_timestamp = $local_timestamp->format( $date_format );
+		$utc_datetime = new DateTime( '@' . $utc_timestamp );
+		$utc_datetime->setTimezone( new DateTimeZone( $timezone ) );
+		$formatted_date = $utc_datetime->format( $date_format );
 	} catch ( Exception $exception ) {
-		$local_timestamp = '';
+		$formatted_date = '';
 	}
 
-	return $local_timestamp;
+	return $formatted_date;
 }
