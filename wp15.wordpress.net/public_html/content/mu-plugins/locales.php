@@ -9,7 +9,7 @@ Author URI:  https://make.wordpress.org/meta
 */
 
 namespace WP15\Locales;
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 use GP_Locales;
 
@@ -119,14 +119,17 @@ function locale_switcher() {
 	$current_locale = get_locale();
 
 	?>
+
 	<div class="wp15-locale-switcher-container">
 		<form id="wp15-locale-switcher-form" action="" method="GET">
 			<label for="wp15-locale-switcher">
 				<span aria-hidden="true" class="dashicons dashicons-translation"></span>
-				<span class="screen-reader-text"><?php _e( 'Select the language:', 'wp15' ); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Select the language:', 'wp15' ); ?></span>
 			</label>
+
 			<select id="wp15-locale-switcher" name="locale">
 				<?php
+
 				foreach ( get_locales() as $locale => $locale_name ) {
 					printf(
 						'<option value="%s"%s>%s</option>',
@@ -135,11 +138,12 @@ function locale_switcher() {
 						esc_html( $locale_name )
 					);
 				}
+
 				?>
 			</select>
 		</form>
-		<?php //todo Add blurb about submitting missing translations? ?>
 	</div>
+
 	<?php
 
 	wp_enqueue_script( 'locale-switcher' );

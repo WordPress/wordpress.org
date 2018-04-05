@@ -11,14 +11,14 @@ Author URI:  https://make.wordpress.org/meta
 namespace WP15\Miscellaneous;
 use DateTime;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
-add_filter( 'map_meta_cap',  __NAMESPACE__ . '\allow_css_editing', 10, 2   );
-add_filter( 'tggr_end_date', __NAMESPACE__ . '\set_tagregator_cutoff_date' );
-add_filter( 'wp15_update_pomo_files', __NAMESPACE__ . '\update_pomo_files' );
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\register_assets', 1 );
-add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_assets', 1 );
-add_filter( 'mime_types', __NAMESPACE__ . '\mime_types' );
+add_filter( 'map_meta_cap',           __NAMESPACE__ . '\allow_css_editing',         10, 2 );
+add_filter( 'tggr_end_date',          __NAMESPACE__ . '\set_tagregator_cutoff_date'       );
+add_filter( 'wp15_update_pomo_files', __NAMESPACE__ . '\update_pomo_files'                );
+add_action( 'wp_enqueue_scripts',     __NAMESPACE__ . '\register_assets',            1    );
+add_action( 'admin_enqueue_scripts',  __NAMESPACE__ . '\register_assets',            1    );
+add_filter( 'mime_types',             __NAMESPACE__ . '\mime_types'                       );
 
 add_filter( 'tggr_show_log', '__return_true' );
 
@@ -133,10 +133,10 @@ function register_assets() {
 /**
  * Add supported mime types.
  *
- * @param $mime_types
+ * @param array $mime_types
  */
 function mime_types( $mime_types ) {
-	$mime_types[ 'ai' ] = 'application/postscript';
+	$mime_types['ai'] = 'application/postscript';
 
 	return $mime_types;
 }
