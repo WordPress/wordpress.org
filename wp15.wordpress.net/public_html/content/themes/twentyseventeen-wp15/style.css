@@ -348,6 +348,10 @@ body:not( .home ) .custom-logo-link {
 	color: #767676;
 }
 
+.wp15-organize-event {
+	text-align: center;
+}
+
 
 /*
  * Download Swag Assets

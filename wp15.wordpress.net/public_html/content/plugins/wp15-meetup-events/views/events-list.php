@@ -33,3 +33,11 @@ defined( 'WPINC' ) || die();
 		</li>
 	<?php endforeach; ?>
 </ul>
+
+<p class="wp15-organize-event">
+	<?php printf(
+		wp_kses_data( __( 'Don’t see your city? Get in touch with <a href="%s">your local group</a>, or <a href="%s">organize a group in your town</a>.', 'wp15' ) ),
+		'https://www.meetup.com/pro/wordpress/',
+		'https://make.wordpress.org/community/handbook/meetup-organizer/welcome/'
+	); ?>
+</p>
