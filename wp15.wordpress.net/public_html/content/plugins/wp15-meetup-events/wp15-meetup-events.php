@@ -305,7 +305,7 @@ function render_events_shortcode() {
  * @return string
  */
 function get_local_formatted_date( $utc_time, $timezone ) {
-	$date_format = _x( 'F jS, Y g:ia', 'WP15 event date format' );
+	$date_format = _x( 'F jS, Y g:ia', 'WP15 event date format', 'wp15' );
 
 	try {
 		$local_timestamp = new DateTime( '@' . $utc_time );
