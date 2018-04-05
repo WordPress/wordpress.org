@@ -161,29 +161,97 @@ body:not( .home ) .custom-logo-link {
 	margin-bottom: 0;
 }
 
+.navigation-top-container {
+	background-color: white;
+	border-top: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+}
+
+@supports ( display: grid ) {
+	.navigation-top-container {
+		grid-column: 1 / span 2;
+		grid-row: 2;
+		display: grid;
+		grid-template-columns: auto 3fr;
+	}
+
+	@media screen and ( min-width: 48em ) {
+		.navigation-top-container {
+			display: grid;
+			grid-template-columns: auto 300px;
+		}
+	}
+
+	.site-navigation-fixed.navigation-top-container {
+		position: fixed;
+		top: 0;
+		bottom: auto;
+		left: 0;
+		right: 0;
+		width: 100%;
+		z-index: 7;
+	}
+
+	.admin-bar .site-navigation-fixed.navigation-top-container {
+		top: 32px;
+	}
+}
+
 .navigation-top {
-	grid-column: 1;
+	grid-column: 1 / span 2;
 	grid-row: 2;
 	position: relative;
 	z-index: 20;
+	background: transparent;
+	border-top: 0;
+	border-bottom: 0;
 }
 
-.menu-toggle {
-	padding-top: 23px;
+@media screen and ( min-width: 48em ) {
+	.navigation-top {
+		grid-column: 1;
+		grid-row: 1;
+	}
+}
+
+.site-navigation-fixed.navigation-top {
+	position: relative;
+	left: auto;
+	right: auto;
+}
+
+.admin-bar .site-navigation-fixed.navigation-top {
+	top: auto;
 }
 
 .main-navigation.toggled-on .menu-top-menu-container {
 	position: absolute;
 	width: 100vw;
-	border-bottom: 1px solid #eee;
 }
 
-.wp15-locale-switcher-container {
-	grid-column: 2;
-	grid-row: 2;
-	padding: 20px 30px 0 0;
-	background-color: white;
-	border-bottom: 1px solid #eee;
+@supports ( display: grid ) {
+	.wp15-locale-switcher-container {
+		grid-column: 1 / span 2;
+		grid-row: 1;
+		display: grid;
+	}
+
+	#wp15-locale-switcher-form {
+		padding: 20px 0 0;
+		display: flex;
+		margin: 0 auto;
+	}
+
+	@media screen and ( min-width: 48em ) {
+		.wp15-locale-switcher-container {
+			grid-column: 2;
+			grid-row: 1;
+		}
+
+		#wp15-locale-switcher-form {
+			padding: 20px 30px 0 0;
+		}
+	}
 }
 
 #wp15-locale-switcher-form label {
@@ -191,7 +259,13 @@ body:not( .home ) .custom-logo-link {
 }
 
 .wp15-locale-switcher-container .dashicons-translation {
-	margin: 5px 10px;
+	margin: 5px 5px;
+}
+
+@media screen and ( min-width: 48em ) {
+	.wp15-locale-switcher-container .dashicons-translation {
+		margin: 5px 10px;
+	}
 }
 
 

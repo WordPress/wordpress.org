@@ -51,6 +51,14 @@ function enqueue_scripts() {
 
 	// Styles for locale switcher.
 	wp_enqueue_style( 'select2' );
+
+	wp_enqueue_script(
+		'twentyseventeen-wp15-front-end',
+		get_theme_file_uri( '/assets/js/front-end.js' ),
+		array( 'jquery', 'twentyseventeen-global' ),
+		1,
+		true
+	);
 }
 
 /**

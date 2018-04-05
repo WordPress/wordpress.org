@@ -22,14 +22,16 @@ use WP15\Locales;
 			<?php get_template_part( 'template-parts/header/header', 'image' ); ?>
 
 			<?php if ( has_nav_menu( 'top' ) ) : ?>
+			<div class="navigation-top-container">
 				<div class="navigation-top">
 					<div class="wrap">
 						<?php get_template_part( 'template-parts/navigation/navigation', 'top' ); ?>
 					</div>
 				</div>
-			<?php endif; ?>
 
-			<?php Locales\locale_switcher(); ?>
+				<?php Locales\locale_switcher(); ?>
+			</div>
+			<?php endif; ?>
 		</header>
 
 		<?php if ( ( is_single() || ( is_page() && ! twentyseventeen_is_frontpage() ) ) && has_post_thumbnail( get_queried_object_id() ) ) : ?>
