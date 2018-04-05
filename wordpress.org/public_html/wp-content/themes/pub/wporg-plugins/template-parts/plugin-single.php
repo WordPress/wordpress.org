@@ -51,6 +51,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 	</header><!-- .entry-header -->
 
 	<?php if ( ! get_query_var( 'plugin_advanced' ) ) : ?>
+		<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.location.hash = '#developers'; }</script>
 		<span id="description"></span>
 		<span id="reviews"></span>
 		<span id="installation"></span>
