@@ -54,7 +54,6 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 		<span id="description"></span>
 		<span id="reviews"></span>
 		<span id="installation"></span>
-		<span id="changelog"></span>
 		<span id="developers"></span>
 		<ul class="tabs clear">
 			<li id="tablink-description"><a href="#description"><?php esc_html_e( 'Details', 'wporg-plugins' ); ?></a></li>

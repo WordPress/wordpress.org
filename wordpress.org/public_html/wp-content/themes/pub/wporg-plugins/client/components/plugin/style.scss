@@ -124,16 +124,14 @@
 	span#description,
 	span#reviews,
 	span#developers,
-	span#changelog,
 	span#installation {
 		position:fixed;
 	}
 
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#changelog:not(:target) ~ .tabs li#tablink-description ,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .tabs li#tablink-description ,
 	span#reviews:target ~ .tabs li#tablink-reviews,
 	span#installation:target ~ .tabs li#tablink-installation,
-	span#developers:target ~ .tabs li#tablink-developers,
-	span#changelog:target ~ .tabs li#tablink-developers  {
+	span#developers:target ~ .tabs li#tablink-developers  {
 		border-top: 2px solid #eee;
 		border-left: 2px solid #eee;
 		border-right: 2px solid #eee;
@@ -142,21 +140,17 @@
 		background: #fff;
 	}
 
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#changelog:not(:target) ~ .entry-content #tab-description,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#changelog:not(:target) ~ .entry-content #screenshots,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#changelog:not(:target) ~ .entry-content #faq,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#changelog:not(:target) ~ .entry-content #tab-developers,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#changelog:not(:target) ~ .entry-content #tab-developers ~ button,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-description,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #screenshots,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #faq,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers ~ button,
 	span#reviews:target ~ .entry-content #tab-reviews,
 	span#installation:target ~ .entry-content #tab-installation,
 	span#developers:target ~ .entry-content #tab-changelog,
 	span#developers:target ~ .entry-content #tab-developers,
 	span#developers:target ~ .entry-content #tab-developers ~ button,
-	span#developers:target ~ .entry-content #tab-developers .plugin-development,
-	span#changelog:target ~ .entry-content #tab-changelog,
-	span#changelog:target ~ .entry-content #tab-developers,
-	span#changelog:target ~ .entry-content #tab-developers ~ button,
-	span#changelog:target ~ .entry-content #tab-developers .plugin-development {
+	span#developers:target ~ .entry-content #tab-developers .plugin-development {
 		display:block;
 	}
 
