@@ -47,6 +47,19 @@ class Comment_Handler {
 				}
 			} elseif ( 0 === strpos( $line, 'Content-Transfer-Encoding: base64' ) ) {
 				$base64 = true;
+			} elseif ( 0 === strpos( $line, 'Content-Type: multipart/' ) ) {
+				$multipart = true;
+				$content_type = $line;
+
+				$content_type_lines = $lines;
+				while ( $content_type_lines && ! preg_match( '/(^[\x21-\x7E][^:]+):/', current( $content_type_lines ) ) ) {
+					$content_type .= array_shift( $content_type_lines );
+				}
+				unset( $content_type_lines );
+
+				if ( preg_match('/boundary="?([a-zA-Z0-9\'()+_,-.\/:=?]+)"?/', $content_type, $matches ) ) {
+					$boundary = $matches[1];
+				}
 			} elseif ( 0 === strpos( $line, 'Subject:' ) ) {
 				$subject = str_replace( 'Subject: ', '', $line );
 
@@ -65,6 +78,37 @@ class Comment_Handler {
 		// Remove empty line between headers and body if not base64.
 		if ( ! $base64 ) {
 			array_shift( $lines );
+		}
+
+		// Get the email body if multipart.
+		if ( $multipart && $boundary ) {
+			// Split content by boundary.
+			$body = implode( "\n", $lines );
+			$body_parts = explode( '--' . $boundary, $body );
+			array_shift( $body_parts ); // Remove empty line.
+			array_pop( $body_parts ); // Remove --.
+
+			// Assume that there's only one part and the first part is what we need.
+			$lines = explode( "\n", trim( $body_parts[0] ) );
+
+			$base64 = false;
+
+			// Trim off headers.
+			while ( $lines && '' !== current( $lines ) ) {
+				$line = array_shift( $lines );#
+				if ( 0 === strpos( $line, 'Content-Transfer-Encoding: base64' ) ) {
+					$base64 = true;
+				}
+			}
+
+			if ( $base64 ) {
+				$lines = explode( "\n", base64_decode( implode( "\n", $lines ) ) );
+			}
+
+			// Remove empty line between headers and body if not base64.
+			if ( ! $base64 ) {
+				array_shift( $lines );
+			}
 		}
 
 		$title = '';
