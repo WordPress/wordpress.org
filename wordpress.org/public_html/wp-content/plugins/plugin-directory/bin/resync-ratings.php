@@ -7,7 +7,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 if ( 'cli' != php_sapi_name() ) {
 	die();
 }
-$opts = getopt( '', array( 'post:', 'url:', 'abspath:', 'age:' ) );
+$opts = getopt( '', array( 'plugin:', 'url:', 'abspath:' ) );
 
 if ( empty( $opts['url'] ) ) {
 	$opts['url'] = 'https://wordpress.org/plugins/';
@@ -31,7 +31,14 @@ if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Plugin_Directory' ) ) {
 	die();
 }
 
-$slugs = $wpdb->get_col( "SELECT post_name FROM {$wpdb->posts} WHERE post_type = 'plugin' and post_status = 'publish'" );
+if ( !empty( $opts['plugin'] ) ) {
+	$sql = $wpdb->prepare( "SELECT post_name FROM {$wpdb->posts} WHERE post_type = 'plugin' and post_status = 'publish' AND post_name = %s", $opts['plugin'] );
+} else {
+	// All plugins.
+	$sql = "SELECT post_name FROM {$wpdb->posts} WHERE post_type = 'plugin' and post_status = 'publish'";
+}
+
+$slugs = $wpdb->get_col( $sql );
 
 foreach ( $slugs as $i => $slug ) {
 
