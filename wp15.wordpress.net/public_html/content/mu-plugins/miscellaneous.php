@@ -20,6 +20,8 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\register_assets', 1 );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_assets', 1 );
 add_filter( 'mime_types', __NAMESPACE__ . '\mime_types' );
 
+add_filter( 'tggr_show_log', '__return_true' );
+
 if ( ! wp_next_scheduled( 'wp15_update_pomo_files' ) ) {
 	wp_schedule_event( time(), 'hourly', 'wp15_update_pomo_files' );
 }
