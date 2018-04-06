@@ -34,6 +34,8 @@ use WP15\Locales;
 			<?php endif; ?>
 		</header>
 
+		<?php Locales\locale_notice(); ?>
+
 		<?php if ( ( is_single() || ( is_page() && ! twentyseventeen_is_frontpage() ) ) && has_post_thumbnail( get_queried_object_id() ) ) : ?>
 			<div class="single-featured-image-header">
 				<?php echo get_the_post_thumbnail( get_queried_object_id(), 'twentyseventeen-featured-image' ); ?>
@@ -42,5 +44,3 @@ use WP15\Locales;
 
 		<div class="site-content-contain">
 			<div id="content" class="site-content">
-
-				<?php Locales\locale_notice(); ?>
