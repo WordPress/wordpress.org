@@ -310,7 +310,9 @@ function get_local_formatted_date( $utc_timestamp, $timezone ) {
 	try {
 		$utc_datetime = new DateTime( '@' . $utc_timestamp );
 		$utc_datetime->setTimezone( new DateTimeZone( $timezone ) );
-		$formatted_date = $utc_datetime->format( $date_format );
+
+		$local_timestamp = strtotime( $utc_datetime->format( $date_format ) );
+		$formatted_date  = date_i18n( $date_format, $local_timestamp );
 	} catch ( Exception $exception ) {
 		$formatted_date = '';
 	}
