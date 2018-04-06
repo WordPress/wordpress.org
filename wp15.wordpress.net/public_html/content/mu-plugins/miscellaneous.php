@@ -88,6 +88,9 @@ function update_pomo_files() {
 		return;
 	}
 
+	$locale_status = wp_list_pluck( $translation_sets, 'percent_translated', 'wp_locale' );
+	update_option( 'wp15_locale_status', $locale_status );
+
 	foreach ( $translation_sets as $set ) {
 		if ( empty( $set->locale ) || empty( $set->wp_locale ) ) {
 			continue;
