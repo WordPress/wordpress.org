@@ -389,18 +389,7 @@ class Template {
 
 		if ( ! $icon || 'publish' !== $plugin->post_status ) {
 			$generated = true;
-
-			$icon = new Plugin_Geopattern();
-			$icon->setString( $plugin->post_name );
-
-			// Use the average color of the first known banner as the icon background color
-			if ( $color = get_post_meta( $plugin->ID, 'assets_banners_color', true ) ) {
-				if ( strlen( $color ) === 6 && strspn( $color, 'abcdef0123456789' ) === 6 ) {
-					$icon->setColor( '#' . $color );
-				}
-			}
-
-			$icon = $icon->toDataURI();
+			$icon = self::get_geopattern_icon_url( $plugin );
 		}
 
 		switch ( $output ) {
@@ -421,6 +410,28 @@ class Template {
 			default:
 				return compact( 'svg', 'icon', 'icon_2x', 'generated' );
 		}
+	}
+
+	/**
+	 * Retrieve the Geopattern SVG URL for a given plugin.
+	 */
+	public static function get_geopattern_icon_url( $post = null, $color = null ) {
+		$plugin = get_post( $post );
+
+		if ( is_null( $color ) ) {
+			$color = get_post_meta( $plugin->ID, 'assets_banners_color', true );
+		}
+
+		if ( strlen( $color ) === 6 && strspn( $color, 'abcdef0123456789' ) === 6 ) {
+			$color = "_{$color}";
+		} else {
+			$color = '';
+		}
+
+		// This is a cached resource. The slug + color combine to form the cache buster.
+		$url = "https://s.w.org/plugins/geopattern-icon/{$plugin->post_name}{$color}.svg";
+
+		return $url;
 	}
 
 	/**
