@@ -549,7 +549,7 @@ As a General Translation Editor for the locale, we request that you fill out you
 
 We also ask all WordPress General Translation Editors to subscribe for notifications for their locales, you can find the notification subscription settings in your profile settings (https://profiles.wordpress.org/profile/notifications/).
 
-The Polyglots team connects on Slack once per week at 11am UTC every Wednesday. We’d love to have you there if you can make it. Register from http://chat.wordpress.org.
+The Polyglots team connects on Slack once per week at 11am UTC every Wednesday. We’d love to have you there if you can make it. Register from https://chat.wordpress.org.
 If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
 
 Welcome to the WordPress Polyglots team and happy translating!',
@@ -580,7 +580,7 @@ We are happy to inform you that you have been successfully added as a Project Tr
 
 ###PROJECTLIST###
 
-You have been added to these projects either by your own request, or by the request of the plugin author.
+You have been added to these projects either by your own request or by the request of the project author.
 
 Before translating, please get to know how the team works by reading the Translators Handbook – https://make.wordpress.org/polyglots/handbook/, a good place to start is the General Expectations page.
 
