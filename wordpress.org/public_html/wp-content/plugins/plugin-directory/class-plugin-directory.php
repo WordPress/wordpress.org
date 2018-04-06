@@ -501,11 +501,11 @@ class Plugin_Directory {
 		// Add duplicate search rule which will be hit before the following old-plugin tab rules
 		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
 
+		// Add a rule for generated plugin icons. geopattern-icon/demo.svg | geopattern-icon/demo.abc123.svg
+		add_rewrite_rule( '^geopattern-icon/([^/]+)(\.([a-f0-9]{6}))?\.svg$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
+
 		// Handle plugin admin requests
 		add_rewrite_rule( '^([^/]+)/advanced/?$', 'index.php?name=$matches[1]&plugin_advanced=1', 'top' );
-
-		// Add a rule for generated plugin icons
-		add_rewrite_rule( '^([^/]+)/geopattern-icon(/([^/]*))?/?$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
 
 		// Handle the old plugin tabs URLs.
 		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
