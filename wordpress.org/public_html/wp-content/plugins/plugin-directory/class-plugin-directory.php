@@ -41,6 +41,7 @@ class Plugin_Directory {
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
+		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
@@ -503,6 +504,9 @@ class Plugin_Directory {
 		// Handle plugin admin requests
 		add_rewrite_rule( '^([^/]+)/advanced/?$', 'index.php?name=$matches[1]&plugin_advanced=1', 'top' );
 
+		// Add a rule for generated plugin icons
+		add_rewrite_rule( '^([^/]+)/geopattern-icon(/([^/]*))?/?$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
+
 		// Handle the old plugin tabs URLs.
 		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
 
@@ -918,7 +922,7 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Returns the requested page's content, translated.
+	 * Returns the requested page's title, translated.
 	 *
 	 * @param string $title
 	 * @param int    $post_id
@@ -927,6 +931,7 @@ class Plugin_Directory {
 	public function translate_post_title( $title, $post_id = null ) {
 		$post = get_post( $post_id );
 
+		// The $post_id passed may be a Support Forum post ID, which thankfully is much higher than plugins ID's for now.
 		if ( $post instanceof \WP_Post ) {
 			$title = Plugin_I18n::instance()->translate( 'title', $title, [ 'post_id' => $post ] );
 		}
@@ -1053,6 +1058,7 @@ class Plugin_Directory {
 		$vars[] = 'redirect_plugin';
 		$vars[] = 'redirect_plugin_tab';
 		$vars[] = 'plugin_advanced';
+		$vars[] = 'geopattern_icon';
 
 		return $vars;
 	}
@@ -1198,6 +1204,31 @@ class Plugin_Directory {
 			die();
 		}
 
+	}
+
+	/**
+	 * Output a SVG Geopattern for a given plugin.
+	 */
+	function geopattern_icon_route() {
+		global $wp;
+
+		if ( ! isset( $wp->query_vars['name'], $wp->query_vars['geopattern_icon'] ) ) {
+			return;
+		}
+
+		$slug  = get_query_var( 'name' );
+		$color = get_query_var( 'geopattern_icon' );
+
+		$icon = new Plugin_Geopattern();
+		$icon->setString( $slug );
+		if ( strlen( $color ) === 6 && strspn( $color, 'abcdef0123456789' ) === 6 ) {
+			$icon->setColor( '#' . $color );
+		}
+
+		status_header( 200 );
+		header( 'Content-Type: image/svg+xml' );
+		echo $icon->toSVG();
+		die();
 	}
 
 	/**
