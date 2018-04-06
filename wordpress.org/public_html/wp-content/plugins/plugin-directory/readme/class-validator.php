@@ -76,7 +76,10 @@ class Validator {
 			/* translators: %s: plugin header tag */
 			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Tested up to</code>' );
 		}
-		if ( empty( $readme->requires_php ) ) {
+		if ( isset( $readme->warnings['requires_php_ignored'] ) ) {
+			/* translators: 1: plugin header tag; 2: Example version 5.2.4. 3: Example version 7.0. */
+			$warnings[] = sprintf( __( 'The Requires PHP field was ignored. %1$s field should only contain a PHP version such as %2$s or %3$s.', 'wporg-plugins' ), '<code>Requires PHP</code>', '<code>5.2.4</code>', '<code>7.0</code>' );
+		} elseif ( empty( $readme->requires_php ) ) {
 			/* translators: %s: plugin header tag */
 			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Requires PHP</code>' );
 		}
@@ -88,7 +91,7 @@ class Validator {
 			/* translators: %s: plugin header tag */
 			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Contributors</code>' );
 		}
-		if ( $readme->contributor_ignored ) {
+		if ( isset( $readme->warnings['contributor_ignored'] ) ) {
 			/* translators: %s: plugin header tag */
 			$warnings[] = sprintf( __( 'One or more contributors listed were ignored. %s field should only contain WordPress.org usernames.', 'wporg-plugins' ), '<code>Contributors</code>' );
 		}
