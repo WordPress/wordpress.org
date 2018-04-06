@@ -139,6 +139,14 @@ h3 {
  * @see https://gist.github.com/larrybotha/7881691
  */
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+	.custom-header {
+		min-height: 260px;
+	}
+
+	.site-branding {
+		padding: 1em 0;
+	}
+
 	.custom-logo-link img {
 		max-width: 150px;
 		max-height: 100px;
@@ -146,9 +154,11 @@ h3 {
 }
 
 @media screen and ( min-width: 475px ) {
-	.custom-logo-link img {
-		max-width: 300px;
-		max-height: 218px;
+	@supports not (-ms-high-constrast: active) {
+		.custom-logo-link img {
+			max-width: 300px;
+			max-height: 218px;
+		}
 	}
 }
 
@@ -224,9 +234,30 @@ body:not( .home ) .custom-logo-link {
 	top: auto;
 }
 
+.menu-top-menu-container {
+	text-align: center;
+}
+
 .main-navigation.toggled-on .menu-top-menu-container {
 	position: absolute;
 	width: 100vw;
+}
+
+@media screen and (min-width: 48em) {
+	#top-menu {
+		display: inline-block;
+	}
+}
+
+@supports ( display: grid ) {
+	.main-navigation.toggled-on #top-menu {
+		display: block;
+	}
+}
+
+.wp15-locale-switcher-container {
+	text-align: center;
+	padding-bottom: 1em;
 }
 
 @supports ( display: grid ) {
@@ -234,6 +265,8 @@ body:not( .home ) .custom-logo-link {
 		grid-column: 1 / span 2;
 		grid-row: 1;
 		display: grid;
+		text-align: left;
+		padding-bottom: 0;
 	}
 
 	#wp15-locale-switcher-form {
@@ -304,6 +337,15 @@ body:not( .home ) .custom-logo-link {
 	background-color: #AADAFF;
 }
 
+/*
+ * IE <= 11 doesn't show SVG markers on the map, so treat it like a progressive enhancement.
+ */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+	#wp15-events-map {
+		display: none;
+	}
+}
+
 @media screen and ( max-width: 48em ) {
 	#wp15-events-map {
 		width: 100%;
@@ -326,7 +368,7 @@ body:not( .home ) .custom-logo-link {
 
 .wp15-events-list {
 	display: grid;
-	grid-template-columns: repeat( auto-fill, minmax( 300px, 1fr ) );
+	grid-template-columns: repeat( auto-fill, minmax( 250px, 1fr ) );
 	grid-gap: 2em;
 	width: 80vw;
 	margin-left: calc( -1 * ( (80vw - 100%) / 2 ) );
