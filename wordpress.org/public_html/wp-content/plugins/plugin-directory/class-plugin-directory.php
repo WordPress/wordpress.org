@@ -1227,6 +1227,9 @@ class Plugin_Directory {
 
 		status_header( 200 );
 		header( 'Content-Type: image/svg+xml' );
+		header( 'Cache-Control: public, max-age=' . YEAR_IN_SECONDS );
+		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + YEAR_IN_SECONDS ) );
+
 		echo $icon->toSVG();
 		die();
 	}
