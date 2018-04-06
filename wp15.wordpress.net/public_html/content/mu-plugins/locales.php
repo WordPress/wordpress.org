@@ -57,7 +57,7 @@ function register_assets() {
 	wp_register_script(
 		'locale-switcher',
 		WP_CONTENT_URL . '/mu-plugins/assets/locale-switcher.js',
-		array( 'jquery', 'select2' ),
+		array( 'jquery', 'select2', 'utils' ),
 		1,
 		true
 	);
@@ -68,6 +68,12 @@ function register_assets() {
 		array(
 			'locale' => get_locale(),
 			'dir'    => is_rtl() ? 'rtl' : 'ltr',
+			'cookie' => array(
+				'expires' => YEAR_IN_SECONDS,
+				'cpath'   => SITECOOKIEPATH,
+				'domain'  => '',
+				'secure'  => true,
+			)
 		)
 	);
 }
@@ -147,4 +153,33 @@ function locale_switcher() {
 	<?php
 
 	wp_enqueue_script( 'locale-switcher' );
+}
+
+/**
+ * Prints markup for a notice when a locale isn't fully translated.
+ */
+function locale_notice() {
+	$current_locale = get_locale();
+	$status         = get_option( 'wp15_locale_status', array() );
+	$threshold      = 90;
+	$is_dismissed   = ! empty( $_COOKIE['wp15-locale-notice-dismissed'] );
+
+	if ( isset( $status[ $current_locale ] ) && absint( $status[ $current_locale ] ) <= $threshold && ! $is_dismissed ) : ?>
+		<div class="wp15-locale-notice">
+			<p>
+				<?php
+				printf(
+					wp_kses_post( __( 'The translation for this locale is incomplete. Help us get to 100%% by <a href="%s">contributing a translation</a>.', 'wp15' ) ),
+					esc_url( sprintf(
+						'https://translate.wordpress.org/projects/meta/wp15/%s/default',
+						strtolower( str_replace( '_', '-', $current_locale ) )
+					) )
+				);
+				?>
+			</p>
+			<button type="button" class="wp15-locale-notice-dismiss">
+				<span class="screen-reader-text"><?php _e( 'Dismiss this notice.' ); ?></span>
+			</button>
+		</div>
+	<?php endif;
 }

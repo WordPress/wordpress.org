@@ -62,6 +62,11 @@ h3 {
 	overflow: visible;
 }
 
+.site-header:before,
+.site-header:after {
+	content: none;
+}
+
 @supports( display: grid ) {
 	.site-header {
 		display: grid;
@@ -301,6 +306,65 @@ body:not( .home ) .custom-logo-link {
 	}
 }
 
+.wp15-locale-notice {
+	background: #fafafa;
+	margin-bottom: 5px;
+	padding: 1px 38px 1px 12px;
+	position: relative;
+	text-align: center;
+}
+
+.wp15-locale-notice p {
+	margin: 0.5em 0;
+	padding: 2px;
+}
+
+.wp15-locale-notice-dismiss:before {
+	background: none;
+	color: #333;
+	content: "\f153";
+	display: block;
+	font: normal 16px/20px dashicons;
+	speak: none;
+	margin: 0.5em 0;
+	height: 20px;
+	text-align: center;
+	width: 20px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.wp15-locale-notice-dismiss {
+	position: absolute;
+	top: 0;
+	right: 1px;
+	border: none;
+	margin: 0;
+	padding: 7px;
+	background: none;
+	color: #333;
+	cursor: pointer;
+}
+
+.wp15-locale-notice-dismiss:hover,
+.wp15-locale-notice-dismiss:active,
+.wp15-locale-notice-dismiss:focus {
+	background: inherit;
+}
+
+.wp15-locale-notice-dismiss:hover:before,
+.wp15-locale-notice-dismiss:active:before,
+.wp15-locale-notice-dismiss:focus:before {
+	color: #0073AA;
+}
+
+.wp15-locale-notice-dismiss:focus {
+	outline: none;
+}
+
+.ie8 .wp15-locale-notice-dismiss:focus {
+	outline: 1px solid #5b9dd9;
+}
 
 /*
  * About

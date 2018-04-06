@@ -42,3 +42,5 @@ use WP15\Locales;
 
 		<div class="site-content-contain">
 			<div id="content" class="site-content">
+
+				<?php Locales\locale_notice(); ?>
