@@ -169,7 +169,7 @@ function locale_notice() {
 			<p>
 				<?php
 				printf(
-					wp_kses_post( __( 'The translation for this locale is incomplete. Help us get to 100%% by <a href="%s">contributing a translation</a>.', 'wp15' ) ),
+					wp_kses_post( __( 'The translation for this locale is incomplete. Help us get to 100 percent by <a href="%s">contributing a translation</a>.', 'wp15' ) ),
 					esc_url( sprintf(
 						'https://translate.wordpress.org/projects/meta/wp15/%s/default',
 						strtolower( str_replace( '_', '-', $current_locale ) )
