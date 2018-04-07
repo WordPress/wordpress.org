@@ -275,7 +275,7 @@ body:not( .home ) .custom-logo-link {
 	}
 
 	#wp15-locale-switcher-form {
-		padding: 20px 0 0;
+		padding: 13px 0 0;
 		display: flex;
 		margin: 0 auto;
 	}
@@ -294,6 +294,10 @@ body:not( .home ) .custom-logo-link {
 
 #wp15-locale-switcher-form label {
 	display: inline;
+}
+
+#wp15-locale-switcher-form select {
+	visibility: hidden; /* Prevent iOS native picker UI */
 }
 
 .wp15-locale-switcher-container .dashicons-translation {
