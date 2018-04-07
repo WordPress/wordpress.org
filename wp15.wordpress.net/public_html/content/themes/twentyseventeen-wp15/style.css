@@ -70,13 +70,11 @@ h3 {
 @supports( display: grid ) {
 	.site-header {
 		display: grid;
-		grid-template-rows: auto 1fr;
 		grid-template-columns: auto 3fr;
 	}
 
 	@media screen and ( min-width: 370px ) {
 		.site-header {
-			grid-template-rows: auto 70px;
 			grid-template-columns: auto 300px;
 		}
 	}
