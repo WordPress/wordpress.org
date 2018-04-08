@@ -36,9 +36,18 @@ class Comment_Handler {
 		while ( $lines && '' !== current( $lines ) ) {
 			$line = array_shift( $lines );
 			if ( 0 === strpos( $line, 'X-Trac-Ticket-URL:' ) ) {
-				// X-Trac-Ticket-URL: https://core.trac.wordpress.org/ticket/12345#comment:1
+				$comment_id = 0;
 				list( , $comment_url ) = explode( ': ', $line );
-				list( $ticket_url, $comment_id ) = explode( '#comment:', $comment_url );
+
+				// Get ticket URL, attachment notifcations have no specific URL.
+				if ( false !== strpos( $line, '#comment:' ) ) {
+					// X-Trac-Ticket-URL: https://core.trac.wordpress.org/ticket/12345#comment:1
+					list( $ticket_url, $comment_id ) = explode( '#comment:', $comment_url );
+				} else {
+					// X-Trac-Ticket-URL: https://core.trac.wordpress.org/ticket/12345
+					$ticket_url = $comment_url;
+				}
+
 				list( $trac_url, $ticket_id ) = explode( '/ticket/', $ticket_url );
 
 				$trac = Trac::get( $trac_url );
@@ -166,7 +175,13 @@ class Comment_Handler {
 
 		if ( $has_changes ) {
 			while ( $lines && '' !== current( $lines ) ) {
-				$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', array_shift( $lines ) );
+				$line = array_shift( $lines );
+
+				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
+					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
+				} else { // * status:  assigned => closed
+					$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', $line );
+				}
 			}
 		}
 
