@@ -44,7 +44,7 @@ the_post();
 					<p><?php
 						/* translators: 1: Link to the Core Handbook Accessibility Standards; 2: Link to Core Trac Accessibility focus. */
 						printf(
-							__( 'All new and updates code released in WordPress must conform with these guidelines as per the <a href="%1$s">WordPress Accessibility Coding Standards</a>. Some current features and functionality in development may not yet fully comply, and known issues are listed in the <a href="%2$s">WordPress Trac "accessibility" focus</a>.', 'wporg' ),
+							__( 'All new and updated code released in WordPress must conform with these guidelines as per the <a href="%1$s">WordPress Accessibility Coding Standards</a>. Some current features and functionality in development may not yet fully comply, and known issues are listed in the <a href="%2$s">WordPress Trac "accessibility" focus</a>.', 'wporg' ),
 							'https://make.wordpress.org/core/handbook/best-practices/coding-standards/accessibility-coding-standards/',
 							'https://core.trac.wordpress.org/focus/accessibility'
 						);
