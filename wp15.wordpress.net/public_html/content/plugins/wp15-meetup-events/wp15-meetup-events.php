@@ -109,7 +109,7 @@ function get_wp15_events( $potential_events ) {
 		$event['latitude']    = ! empty( $event['venue']['lat'] ) ? $event['venue']['lat'] : $event['group']['group_lat'];
 		$event['longitude']   = ! empty( $event['venue']['lon'] ) ? $event['venue']['lon'] : $event['group']['group_lon'];
 		$event['group']       = $event['group']['name'];
-		$event['description'] = isset( $event['description'] ) ? $event['description'] : '';
+		$event['description'] = isset( $event['description'] ) ? trim( $event['description'] ) : '';
 		$event['time']        = $event['time'] / 1000;  // Convert to seconds.
 		$event['location']    = trim( implode( ' ', $location ) );
 		$trimmed_event        = array_intersect_key( $event, $relevant_keys );
@@ -305,13 +305,15 @@ function render_events_shortcode() {
  * @return string
  */
 function get_local_formatted_date( $utc_timestamp, $timezone ) {
+	// translators: Do not include `T`, `P`, or `O`, because that will show the site's timezone/difference, not the event's. The event dates will already be converted to their local timezone.
 	$date_format = _x( 'F jS, Y g:ia', 'WP15 event date format', 'wp15' );
 
 	try {
 		$utc_datetime = new DateTime( '@' . $utc_timestamp );
 		$utc_datetime->setTimezone( new DateTimeZone( $timezone ) );
 
-		$local_timestamp = strtotime( $utc_datetime->format( $date_format ) );
+		// Convert to a timestamp in the local timezone, in order to pass through `date_i18n()` for month name translation.
+		$local_timestamp = strtotime( $utc_datetime->format( 'Y-m-d H:i' ) );
 		$formatted_date  = date_i18n( $date_format, $local_timestamp );
 	} catch ( Exception $exception ) {
 		$formatted_date = '';
