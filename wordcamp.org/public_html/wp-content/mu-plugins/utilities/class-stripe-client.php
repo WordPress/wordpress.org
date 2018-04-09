@@ -66,6 +66,7 @@ class Stripe_Client {
 		 */
 		if ( isset( $request_args['body']['amount'] ) && $request_args['body']['amount'] > self::AMOUNT_MAX ) {
 			throw new Exception( sprintf(
+				// translators: Do _not_ translate "USD" to your locale; it is meant to stay as "USD" exactly.
 				__( "We're sorry, but we can't accept amounts larger than %s. Please send the equivalent in USD, or break it up into several smaller payments. Feel free to email <a href='mailto:%s'>%s</a> with any questions.", 'wordcamporg' ),
 				number_format( self::AMOUNT_MAX / self::get_fractional_unit_multiplier( $request_args['body']['currency'] ), 2 ),
 				EMAIL_CENTRAL_SUPPORT,
