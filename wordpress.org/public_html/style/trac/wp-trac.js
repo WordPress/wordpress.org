@@ -175,8 +175,16 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			// Restore the 'Delete' comment buttons, if any. The Trac plugin places them in a location we don't want.
 			// See https://meta.trac.wordpress.org/changeset/204.
 			$('div.change').children('.trac-ticket-buttons').each( function() {
-				var el = $(this);
-				el.children().appendTo( el.prev().children('.trac-ticket-buttons') ).end().end().remove();
+				var el = $(this),
+					trac_buttons = el.prev().children('.trac-ticket-buttons');
+
+				// Trac 1.2.2 already has a delete button here. TODO See r204 to check if buttons need removing from templates.
+				if ( trac_buttons.find('form input[name="action"][value="delete-comment"]').length ) {
+					console.log( "wp-trac: .trac-ticket-buttons delete-comment changes not needed on this trac." );
+					return;
+				}
+
+				el.children().appendTo( trac_buttons ).end().end().remove();
 			});
 		},
 
