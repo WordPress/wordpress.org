@@ -68,7 +68,7 @@ add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180322' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180410' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	if ( is_page( 'stats' ) ) {
@@ -106,6 +106,10 @@ function script_src( $src, $handle ) {
 		'wporg-page-stats',
 		'wporg-navigation',
 	];
+
+	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
+		return $src;
+	}
 
 	// Use CDN url.
 	if ( in_array( $handle, $cdn_handles, true ) ) {

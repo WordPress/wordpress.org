@@ -127,6 +127,10 @@ function style_src( $src, $handle ) {
 		'dashicons',
 	];
 
+	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
+		return $src;
+	}
+
 	// Use CDN url.
 	if ( in_array( $handle, $cdn_handles, true ) ) {
 		$src = str_replace( get_home_url(), 'https://s.w.org', $src );

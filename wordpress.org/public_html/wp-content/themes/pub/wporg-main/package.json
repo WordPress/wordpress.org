@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "svn",
-    "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg/"
+    "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-main/"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.6",
@@ -19,7 +19,7 @@
     "grunt-contrib-watch": "^1.0.0",
     "grunt-postcss": "^0.8.0",
     "grunt-rtlcss": "^2.0.1",
-    "grunt-sass": "^1.2.0",
+    "grunt-sass": "~2.0.0",
     "grunt-sass-globbing": "^1.5.1",
     "pixrem": "^3.0.2",
     "es6-promise": "~4.0.5"
