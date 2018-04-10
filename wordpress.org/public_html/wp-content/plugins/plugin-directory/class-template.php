@@ -389,7 +389,7 @@ class Template {
 
 		if ( ! $icon || 'publish' !== $plugin->post_status ) {
 			$generated = true;
-			$icon = $svg = self::get_geopattern_icon_url( $plugin );
+			$icon = self::get_geopattern_icon_url( $plugin );
 		}
 
 		switch ( $output ) {

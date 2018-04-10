@@ -126,9 +126,6 @@ class API_Update_Updater {
 		if ( !empty( $raw_banners['banner'] ) ) {
 			$banners['1x'] = $raw_banners['banner'];
 		}
-		if ( $banners ) {
-			$banners['default']  = $banners['2x'] ?? $banners['1x'];
-		}
 
 		// RTL Banners (get_plugin_banner 'raw_with_rtl' returns these)
 		if ( !empty( $raw_banners['banner_2x_rtl'] ) ) {
@@ -136,9 +133,6 @@ class API_Update_Updater {
 		}
 		if ( !empty( $raw_banners['banner_rtl'] ) ) {
 			$banners_rtl['1x'] = $raw_banners['banner_rtl'];
-		}
-		if ( $banners_rtl ) {
-			$banners_rtl['default']  = $banners_rtl['2x'] ?? $banners_rtl['1x'];
 		}
 
 		// Icons.
@@ -150,14 +144,13 @@ class API_Update_Updater {
 		}
 		if ( !empty( $raw_icons['svg'] ) ) {
 			$icons['svg'] = $raw_icons['svg'];
-
-			// We don't need to set the 1x field when it's the SVG.
-			if ( isset( $icons['1x'] ) && $icons['1x'] == $icons['svg'] ) {
-				unset( $icons['1x'] );
-			}
 		}
-		if ( $icons ) {
-			$icons['default'] = $icons['svg'] ?? ( $icons['2x'] ?? $icons['1x'] );
+		if ( !empty( $raw_icons['generated'] ) ) {
+			// Geopattern SVG will be in 'icon':
+			$icons['default'] = $raw_icons['icon'];
+
+			// Don't set the `1x` field when it's a geopattern icon
+			unset( $icons['1x'] );
 		}
 
 		return (object) compact( 'icons', 'banners', 'banners_rtl' );
