@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * Handles interfacing with the api.WordPress.org/plugin/update-check/ API.
@@ -61,7 +62,7 @@ class API_Update_Updater {
 			return true;
 		}
 
-		$data           = array(
+		$data = array(
 			'plugin_id'       => $post->ID,
 			'plugin_slug'     => $post->post_name,
 			'available'       => 'publish' === $post->post_status || 'disabled' === $post->post_status,
@@ -74,6 +75,7 @@ class API_Update_Updater {
 			'requires'        => get_post_meta( $post->ID, 'requires', true ),
 			'requires_php'    => get_post_meta( $post->ID, 'requires_php', true ),
 			'upgrade_notice'  => '',
+			'assets'          => serialize( self::get_plugin_assets( $post ) ),
 			'last_updated'    => $post->post_modified,
 		);
 		$upgrade_notice = get_post_meta( $post->ID, 'upgrade_notice', true );
@@ -111,6 +113,56 @@ class API_Update_Updater {
 		return true;
 	}
 
+	static function get_plugin_assets( $post ) {
+		$icons = $banners = $banners_rtl = array();
+
+		$raw_icons   = Template::get_plugin_icon( $post, 'raw' );
+		$raw_banners = Template::get_plugin_banner( $post, 'raw_with_rtl' );
+
+		// Banners
+		if ( !empty( $raw_banners['banner_2x'] ) ) {
+			$banners['2x'] = $raw_banners['banner_2x'];
+		}
+		if ( !empty( $raw_banners['banner'] ) ) {
+			$banners['1x'] = $raw_banners['banner'];
+		}
+		if ( $banners ) {
+			$banners['default']  = $banners['2x'] ?? $banners['1x'];
+		}
+
+		// RTL Banners (get_plugin_banner 'raw_with_rtl' returns these)
+		if ( !empty( $raw_banners['banner_2x_rtl'] ) ) {
+			$banners_rtl['2x'] = $raw_banners['banner_2x_rtl'];
+		}
+		if ( !empty( $raw_banners['banner_rtl'] ) ) {
+			$banners_rtl['1x'] = $raw_banners['banner_rtl'];
+		}
+		if ( $banners_rtl ) {
+			$banners_rtl['default']  = $banners_rtl['2x'] ?? $banners_rtl['1x'];
+		}
+
+		// Icons.
+		if ( !empty( $raw_icons['icon_2x'] ) ) {
+			$icons['2x'] = $raw_icons['icon_2x'];
+		}
+		if ( !empty( $raw_icons['icon'] ) ) {
+			$icons['1x'] = $raw_icons['icon'];
+		}
+		if ( !empty( $raw_icons['svg'] ) ) {
+			$icons['svg'] = $raw_icons['svg'];
+
+			// We don't need to set the 1x field when it's the SVG.
+			if ( isset( $icons['1x'] ) && $icons['1x'] == $icons['svg'] ) {
+				unset( $icons['1x'] );
+			}
+		}
+		if ( $icons ) {
+			$icons['default'] = $icons['svg'] ?? ( $icons['2x'] ?? $icons['1x'] );
+		}
+
+		return (object) compact( 'icons', 'banners', 'banners_rtl' );
+	}
+
 }
 
 /*
@@ -127,6 +179,7 @@ CREATE TABLE `{$prefix}_update_source` (
   `requires` varchar(128) NOT NULL DEFAULT '',
   `requires_php` varchar(128) NOT NULL DEFAULT '',
   `upgrade_notice` text,
+  `assets` text NOT NULL DEFAULT '',
   `last_updated` datetime NOT NULL,
   PRIMARY KEY (`plugin_id`),
   UNIQUE KEY `plugin_slug` (`plugin_slug`),

@@ -389,7 +389,7 @@ class Template {
 
 		if ( ! $icon || 'publish' !== $plugin->post_status ) {
 			$generated = true;
-			$icon = self::get_geopattern_icon_url( $plugin );
+			$icon = $svg = self::get_geopattern_icon_url( $plugin );
 		}
 
 		switch ( $output ) {
@@ -440,7 +440,7 @@ class Template {
 	 * @static
 	 *
 	 * @param int|\WP_Post|null $post   Optional. Post ID or post object. Defaults to global $post.
-	 * @param string            $output Optional. Output type. 'html' or 'raw'. Default: 'raw'.
+	 * @param string            $output Optional. Output type. 'html', 'raw', or 'raw_with_rtl'. Default: 'raw'.
 	 * @return mixed
 	 */
 	public static function get_plugin_banner( $post = null, $output = 'raw' ) {
@@ -472,15 +472,17 @@ class Template {
 			}
 		}
 
-		if ( is_rtl() ) {
+		if ( is_rtl() || 'raw_with_rtl' == $output ) {
 			foreach ( $rtl_banners as $info ) {
 				switch ( $info['resolution'] ) {
 					case '1544x500':
-						$banner_2x = self::get_asset_url( $plugin, $info );
+						$field = 'raw_with_rtl' == $output ? 'banner_2x_rtl' : 'banner_2x';
+						$$field = self::get_asset_url( $plugin, $info );
 						break;
 
 					case '772x250':
-						$banner = self::get_asset_url( $plugin, $info );
+						$field = 'raw_with_rtl' == $output ? 'banner_rtl' : 'banner';
+						$$field = self::get_asset_url( $plugin, $info );
 						break;
 				}
 			}
@@ -505,8 +507,9 @@ class Template {
 				break;
 
 			case 'raw':
+			case 'raw_with_rtl':
 			default:
-				return compact( 'banner', 'banner_2x' );
+				return compact( 'banner', 'banner_2x', 'banner_rtl', 'banner_2x_rtl' );
 		}
 	}
 
