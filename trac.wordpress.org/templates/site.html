@@ -36,6 +36,13 @@
 	ticket_preview.html (as site.html isn't) -->
 <xi:include href="site-ticket.html" />
 
+<!--! Append a version string to CSS files hosted on the w.org CDN -->
+<py:if test="project_slug == 'meta'">
+	<py:match path="link[@rel='stylesheet' and starts-with(@href,'https://s.w.org/') and substring-after(@href,'.css') = '']">
+		<link rel="stylesheet" href="${select('@href')}?v=${scripts_version}" />
+	</py:match>
+</py:if>
+
 <!--! Styles and such. Load before first JS file (jquery.js) -->
 <py:match path="head/script[contains(@src,'jquery.js')]">
 	<!--! WP.org Global Header -->
@@ -56,6 +63,13 @@
 		</script>
 	</py:if>
 </py:match>
+
+<!--! Append a version string to JS files hosted on the w.org CDN -->
+<py:if test="project_slug == 'meta'">
+	<py:match path="script[starts-with(@src,'https://s.w.org/') and substring-after(@src,'.js') = '']">
+		<script src="${select('@src')}?v=${scripts_version}">${select('*|comment()|text()')}</script>
+	</py:match>
+</py:if>
 
 <!--! Remove Trac logo and footer -->
 <div py:match="div[@id='header']" py:strip=""></div>
