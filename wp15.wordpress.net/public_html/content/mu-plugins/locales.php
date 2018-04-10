@@ -43,8 +43,7 @@ function update_pomo_files() {
 		return;
 	}
 
-	$locale_status = wp_list_pluck( $translation_sets, 'percent_translated', 'wp_locale' );
-	update_option( 'wp15_locale_status', $locale_status );
+	update_option( 'wp15_locale_data', $translation_sets );
 
 	foreach ( $translation_sets as $set ) {
 		if ( empty( $set->locale ) || empty( $set->wp_locale ) ) {
@@ -212,21 +211,32 @@ function locale_switcher() {
  * Prints markup for a notice when a locale isn't fully translated.
  */
 function locale_notice() {
+	$locale_data = get_option( 'wp15_locale_data', array() );
+
+	if ( empty( $locale_data ) ) {
+		return;
+	}
+
 	$current_locale = get_locale();
-	$status         = get_option( 'wp15_locale_status', array() );
+	$statuses       = wp_list_pluck( $locale_data, 'percent_translated', 'wp_locale' );
+	$mapped_locales = wp_list_pluck( $locale_data, 'locale', 'wp_locale' );
 	$threshold      = 90;
 	$is_dismissed   = ! empty( $_COOKIE['wp15-locale-notice-dismissed'] );
 
-	if ( isset( $status[ $current_locale ] ) && absint( $status[ $current_locale ] ) <= $threshold && ! $is_dismissed ) : ?>
+	if ( isset( $statuses[ $current_locale ] ) && absint( $statuses[ $current_locale ] ) <= $threshold && ! $is_dismissed ) :
+		$contribute_url = 'https://translate.wordpress.org/projects/meta/wp15/';
+
+		if ( isset( $mapped_locales[ $current_locale ] ) ) {
+			$contribute_url .= $mapped_locales[ $current_locale ] . '/default';
+		}
+	?>
 		<div class="wp15-locale-notice">
 			<p>
 				<?php
 				printf(
+					/* translators: %s placeholder is a URL. */
 					wp_kses_post( __( 'The translation for this locale is incomplete. Help us get to 100 percent by <a href="%s">contributing a translation</a>.', 'wp15' ) ),
-					esc_url( sprintf(
-						'https://translate.wordpress.org/projects/meta/wp15/%s/default',
-						strtolower( str_replace( '_', '-', $current_locale ) )
-					) )
+					esc_url( $contribute_url )
 				);
 				?>
 			</p>
