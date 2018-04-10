@@ -15,6 +15,59 @@ use GP_Locales;
 
 require_once trailingslashit( dirname( __FILE__ ) ) . 'locale-detection/locale-detection.php';
 
+if ( ! wp_next_scheduled( 'wp15_update_pomo_files' ) ) {
+	wp_schedule_event( time(), 'hourly', 'wp15_update_pomo_files' );
+}
+
+/**
+ * Update the PO/MO files for the wp15 text domain.
+ */
+function update_pomo_files() {
+	/*
+	 * The content will probably not need to be updated after the event is over. Updating it anyway would use up API
+	 * resources needlessly, and introduce the risk of overwriting the valid data with invalid data if something breaks.
+	 */
+	if ( time() >= strtotime( 'June 15, 2018' ) ) {
+		return;
+	}
+
+	$gp_api            = 'https://translate.wordpress.org';
+	$gp_project        = 'meta/wp15';
+	$localizations_dir = WP_CONTENT_DIR . '/languages/wp15';
+	$set_response      = wp_remote_get( "$gp_api/api/projects/$gp_project" );
+	$body              = json_decode( wp_remote_retrieve_body( $set_response ) );
+	$translation_sets  = isset( $body->translation_sets ) ? $body->translation_sets : false;
+
+	if ( ! $translation_sets ) {
+		trigger_error( 'Translation sets missing from response body.' );
+		return;
+	}
+
+	$locale_status = wp_list_pluck( $translation_sets, 'percent_translated', 'wp_locale' );
+	update_option( 'wp15_locale_status', $locale_status );
+
+	foreach ( $translation_sets as $set ) {
+		if ( empty( $set->locale ) || empty( $set->wp_locale ) ) {
+			continue;
+		}
+
+		$po_response = wp_remote_get( "$gp_api/projects/$gp_project/{$set->locale}/default/export-translations?filters[status]=current&format=po" );
+		$mo_response = wp_remote_get( "$gp_api/projects/$gp_project/{$set->locale}/default/export-translations?filters[status]=current&format=mo" );
+		$po_content  = wp_remote_retrieve_body( $po_response );
+		$mo_content  = wp_remote_retrieve_body( $mo_response );
+
+		if ( ! $po_content || ! $mo_content || false === strpos( $po_content, 'Project-Id-Version: Meta - wp15.wordpress.net' ) ) {
+			trigger_error( "Invalid PO/MO content for {$set->wp_locale}." );
+			continue;
+		}
+
+		file_put_contents( "$localizations_dir/wp15-{$set->wp_locale}.po", $po_content );
+		file_put_contents( "$localizations_dir/wp15-{$set->wp_locale}.mo", $mo_content );
+	}
+}
+
+add_filter( 'wp15_update_pomo_files', __NAMESPACE__ . '\update_pomo_files' );
+
 /**
  * Load the wp15 textdomain.
  */
