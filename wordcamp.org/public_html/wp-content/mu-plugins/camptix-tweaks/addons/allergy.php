@@ -17,10 +17,21 @@ use PHPMailer;
 class Allergy_Field extends CampTix_Addon {
 	const SLUG = 'allergy';
 
+	public $question = '';
+
+	public $options = array();
+
 	/**
 	 * Hook into WordPress and Camptix.
 	 */
 	public function camptix_init() {
+		$this->question = __( 'Do you have a life-threatening allergy that would affect your experience at WordCamp?', 'wordcamporg' );
+
+		$this->options = array(
+			'yes' => _x( 'Yes (we will contact you)', 'ticket registration option', 'wordcamporg' ),
+			'no'  => _x( 'No', 'ticket registration option', 'wordcamporg' ),
+		);
+
 		// Registration field
 		add_action( 'camptix_attendee_form_after_questions', array( $this, 'render_registration_field' ), 11, 2 );
 		add_filter( 'camptix_checkout_attendee_info', array( $this, 'validate_registration_field' ) );
@@ -32,6 +43,9 @@ class Allergy_Field extends CampTix_Addon {
 		add_filter( 'camptix_form_edit_attendee_ticket_info', array( $this, 'populate_ticket_info_array' ), 10, 2 );
 		add_action( 'camptix_form_edit_attendee_update_post_meta', array( $this, 'validate_save_ticket_info_field' ), 10, 2 );
 		add_action( 'camptix_form_edit_attendee_after_questions', array( $this, 'render_ticket_info_field' ), 11 );
+
+		// Metabox
+		add_filter( 'camptix_metabox_attendee_info_additional_rows', array( $this, 'add_metabox_row' ), 11, 2 );
 	}
 
 	/**
@@ -49,14 +63,14 @@ class Allergy_Field extends CampTix_Addon {
 
 		<tr class="tix-row-<?php echo esc_attr( self::SLUG ); ?>">
 			<td class="tix-required tix-left">
-				<?php esc_html_e( 'Do you have a life-threatening allergy that would affect your experience at WordCamp?', 'wordcamporg' ); ?>
+				<?php echo esc_html( $this->question ); ?>
 				<span class="tix-required-star">*</span>
 			</td>
 
 			<td class="tix-right">
-				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php esc_html( _ex( 'Yes (we will contact you)', 'ticket registration option', 'wordcamporg' ) ); ?></label>
+				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html( $this->options['yes'] ); ?></label>
 				<br />
-				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php esc_html( _ex( 'No', 'ticket registration option', 'wordcamporg' ) ); ?></label>
+				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html( $this->options['no'] ); ?></label>
 			</td>
 		</tr>
 
@@ -167,18 +181,61 @@ class Allergy_Field extends CampTix_Addon {
 
 		<tr class="tix-row-<?php echo esc_attr( self::SLUG ); ?>">
 			<td class="tix-required tix-left">
-				<?php esc_html_e( 'Do you have a life-threatening allergy that would affect your experience at WordCamp?', 'wordcamporg' ); ?>
+				<?php echo esc_html( $this->question ); ?>
 				<span class="tix-required-star">*</span>
 			</td>
 
 			<td class="tix-right">
-				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php esc_html( _ex( 'Yes (we will contact you)', 'ticket registration option', 'wordcamporg' ) ); ?></label>
+				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html( $this->options['yes'] ); ?></label>
 				<br />
-				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php esc_html( _ex( 'No', 'ticket registration option', 'wordcamporg' ) ); ?></label>
+				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html( $this->options['no'] ); ?></label>
 			</td>
 		</tr>
 
 		<?php
+	}
+
+	/**
+	 * Add a row to the Attendee Info metabox table for the new field and value.
+	 *
+	 * @param array   $rows
+	 * @param WP_Post $post
+	 *
+	 * @return mixed
+	 */
+	public function add_metabox_row( $rows, $post ) {
+		$value = get_post_meta( $post->ID, 'tix_' . self::SLUG, true ) ?: '';
+		if ( $value && isset( $this->options[ $value ] ) ) {
+			$value = $this->options[ $value ];
+		}
+		$new_row = array( $this->question, esc_html( $value ) );
+
+		add_filter( 'locale', array( $this, 'set_locale_to_en_US' ) );
+
+		$ticket_row = array_filter( $rows, function( $row ) {
+			if ( 'Ticket' === $row[0] ) {
+				return true;
+			}
+
+			return false;
+		} );
+
+		remove_filter( 'locale', array( $this, 'set_locale_to_en_US' ) );
+
+		if ( ! empty( $ticket_row ) ) {
+			$ticket_row_key = key( $ticket_row );
+			$row_indexes    = array_keys( $rows );
+			$position       = array_search( $ticket_row_key, $row_indexes );
+
+			$slice = array_slice( $rows, $position );
+
+			array_unshift( $slice, $new_row );
+			array_splice( $rows, $position, count( $rows ), $slice );
+		} else {
+			$rows[] = $new_row;
+		}
+
+		return $rows;
 	}
 
 	/**

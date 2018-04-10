@@ -4,6 +4,7 @@ namespace WordCamp\CampTix_Tweaks;
 defined( 'WPINC' ) or die();
 
 use CampTix_Plugin, CampTix_Addon;
+use WP_Post;
 
 /**
  * Class Code_Of_Conduct_Field.
@@ -25,6 +26,9 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 		add_action( 'camptix_form_attendee_info_errors', array( $this, 'add_registration_field_validation_error' ) );
 		add_filter( 'camptix_form_register_complete_attendee_object', array( $this, 'populate_attendee_object' ), 10, 2 );
 		add_action( 'camptix_checkout_update_post_meta', array( $this, 'save_registration_field' ), 10, 2 );
+
+		// Metabox
+		add_filter( 'camptix_metabox_attendee_info_additional_rows', array( $this, 'add_metabox_row' ), 15, 2 );
 	}
 
 	/**
@@ -128,6 +132,46 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 	 */
 	public function save_registration_field( $post_id, $attendee ) {
 		return update_post_meta( $post_id, 'tix_' . self::SLUG, $attendee->{ self::SLUG } );
+	}
+
+	/**
+	 * Add a row to the Attendee Info metabox table for the new field and value.
+	 *
+	 * @param array   $rows
+	 * @param WP_Post $post
+	 *
+	 * @return mixed
+	 */
+	public function add_metabox_row( $rows, $post ) {
+		$value = get_post_meta( $post->ID, 'tix_' . self::SLUG, true ) ? __( 'Yes', 'wordcamporg' ) : '';
+		$new_row = array( __( 'Do you agree to follow the event Code of Conduct?', 'camptix' ), esc_html( $value ) );
+
+		add_filter( 'locale', array( $this, 'set_locale_to_en_US' ) );
+
+		$ticket_row = array_filter( $rows, function( $row ) {
+			if ( 'Ticket' === $row[0] ) {
+				return true;
+			}
+
+			return false;
+		} );
+
+		remove_filter( 'locale', array( $this, 'set_locale_to_en_US' ) );
+
+		if ( ! empty( $ticket_row ) ) {
+			$ticket_row_key = key( $ticket_row );
+			$row_indexes    = array_keys( $rows );
+			$position       = array_search( $ticket_row_key, $row_indexes );
+
+			$slice = array_slice( $rows, $position );
+
+			array_unshift( $slice, $new_row );
+			array_splice( $rows, $position, count( $rows ), $slice );
+		} else {
+			$rows[] = $new_row;
+		}
+
+		return $rows;
 	}
 
 	/**

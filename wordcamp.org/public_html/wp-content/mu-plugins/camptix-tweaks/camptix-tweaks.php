@@ -30,6 +30,7 @@ add_action( 'camptix_nt_file_log',                           '__return_false' );
 add_action( 'init',                                          __NAMESPACE__ . '\camptix_debug',                    9 ); // CampTix does this at 10.
 add_filter( 'camptix_default_addons',                        __NAMESPACE__ . '\load_addons'                         );
 add_action( 'camptix_load_addons',                           __NAMESPACE__ . '\load_custom_addons',              11 );
+add_filter( 'camptix_metabox_questions_default_fields_list', __NAMESPACE__ . '\modify_default_fields_list'          );
 add_filter( 'camptix_capabilities',                          __NAMESPACE__ . '\modify_capabilities'                 );
 add_filter( 'camptix_default_options',                       __NAMESPACE__ . '\modify_default_options'              );
 add_filter( 'camptix_options',                               __NAMESPACE__ . '\modify_email_templates'              );
@@ -553,6 +554,17 @@ function load_custom_addons() {
 	require_once( __DIR__ . '/addons/accommodations.php' );
 	// Code of Conduct field
 	require_once( __DIR__ . '/addons/code-of-conduct.php' );
+}
+
+/**
+ * Modify the list of default questions on the ticket registration form.
+ *
+ * @param string $default_fields
+ *
+ * @return string
+ */
+function modify_default_fields_list( $default_fields ) {
+	return __( 'Top three fields: First name, last name, e-mail address.<br />Bottom three fields: Life-threatening allergy, accessibility needs, Code of Conduct agreement.', 'wordcamporg' );
 }
 
 /**
