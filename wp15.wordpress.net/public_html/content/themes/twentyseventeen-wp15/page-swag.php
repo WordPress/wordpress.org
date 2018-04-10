@@ -10,7 +10,7 @@ use WP15\Theme;
 				<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 					<header class="entry-header">
-						<h1>
+						<h1 class="entry-title">
 							<?php
 							/* translators: "Swag" is a term for promotional items. This is the title of the page. */
 							esc_html_e( 'Swag', 'wp15' );
