@@ -282,7 +282,13 @@ using a CMS.', 'wporg' ),
 					<p><?php _e( 'HTTP requests issued by WordPress are filtered to prevent access to loopback and private IP addresses. Additionally, access is only allowed to certain standard HTTP ports.', 'wporg' ); ?></p>
 					<h2><?php _e( 'WordPress Plugin and Theme Security', 'wporg' ); ?></h2>
 					<h3><?php _e( 'The Default Theme', 'wporg' ); ?></h3>
-					<p><?php _e( 'WordPress requires a theme to be enabled to render content visible on the frontend. The default theme which ships with core WordPress (currently "Twenty Fifteen") has been vigorously reviewed and tested for security reasons by both the team of theme developers plus the core development team.', 'wporg' ); ?></p>
+					<p><?php
+						printf(
+							/* translators: %s: The latest Core Theme release - Currently Twenty Seventeen */
+							__( 'WordPress requires a theme to be enabled to render content visible on the frontend. The default theme which ships with core WordPress (currently "%s") has been vigorously reviewed and tested for security reasons by both the team of theme developers plus the core development team.', 'wporg' ),
+							wp_get_theme( 'core/' . WP_CORE_DEFAULT_THEME )->display( 'Name' )
+						);
+					?></p>
 
 					<p><?php _e( 'The default theme can serve as a starting point for custom theme development, and site developers can create a child theme which includes some customization but falls back on the default theme for most functionality and security. The default theme can be easily removed by an administrator if not needed.', 'wporg' ); ?></p>
 
