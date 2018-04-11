@@ -178,13 +178,16 @@ h3.change a {
 	padding-right: 0;
 }
 #metanav.nav a,
-#metanav.nav a:visited {
+#metanav.nav a:visited,
+#metanav form.trac-logout button {
 	color: rgba(255, 255, 255, 0.8);
 }
 .build #metanav.nav a,
 .build #metanav.nav a:visited,
+.build #metanav form.trac-logout button,
 .security #metanav.nav a,
-.security #metanav.nav a:visited {
+.security #metanav.nav a:visited,
+.security #metanav form.trac-logout button {
 	color: #21759b;
 }
 #metanav.nav a:hover,
@@ -389,20 +392,23 @@ table.progress td.closed {
 #ticket table.properties a:hover {
 	background: #ddd;
 }
-#ticket table.properties th.missing {
+#ticket table.properties > tbody > tr > th.missing {
 	color: #aaa;
 }
-#ticket table.properties, #ticket table.properties .description {
+#ticket table.properties,
+#ticket table.properties .description {
 	border-top: 1px solid #ddd;
 }
-#ticket table.properties :link, #ticket table.properties :visited {
+#ticket table.properties :link,
+#ticket table.properties :visited {
 	color: #000;
 }
-#ticket table.properties td, #ticket table.properties th {
+#ticket table.properties > tbody > tr > td,
+#ticket table.properties > tbody > tr > th {
 	line-height: 1.4;
 	font-size: 13px;
 }
-#ticket table.properties th {
+#ticket table.properties > tbody > tr > th {
 	color: #666;
 }
 #ticket .description h3 {
@@ -788,6 +794,9 @@ div.trac-content {
 	-webkit-box-shadow: none;
 	box-shadow: none;
 }
+.trac-author-user {
+	font-weight: inherit;
+}
 .foldable :link, .foldable :visited {
 	-webkit-box-shadow: none;
 	box-shadow: none;
@@ -911,9 +920,17 @@ div.trac-ticket-buttons input[type=submit] {
 	font-size: 12px;
 	color: #888;
 }
+
+#changelog .changes,
 div.change ul.changes {
 	margin-top: 20px;
 	margin-bottom: 20px;
+	padding: inherit;
+	border: none;
+	float: none;
+	box-shadow: none;
+	background: inherit;
+	color: inherit;
 }
 h3.change .profile-link {
 	border-bottom: none;
