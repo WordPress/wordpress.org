@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '95'
+	scripts_version = '96'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = 'https://make.wordpress.org/' + project_slug + '/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
@@ -37,11 +37,9 @@
 <xi:include href="site-ticket.html" />
 
 <!--! Append a version string to CSS files hosted on the w.org CDN -->
-<py:if test="project_slug == 'meta'">
-	<py:match path="link[@rel='stylesheet' and starts-with(@href,'https://s.w.org/') and substring-after(@href,'.css') = '']">
-		<link rel="stylesheet" href="${select('@href')}?v=${scripts_version}" />
-	</py:match>
-</py:if>
+<py:match path="link[@rel='stylesheet' and starts-with(@href,'https://s.w.org/') and substring-after(@href,'.css') = '']">
+	<link rel="stylesheet" href="${select('@href')}?v=${scripts_version}" />
+</py:match>
 
 <!--! Styles and such. Load before first JS file (jquery.js) -->
 <py:match path="head/script[contains(@src,'jquery.js')]">
@@ -65,11 +63,9 @@
 </py:match>
 
 <!--! Append a version string to JS files hosted on the w.org CDN -->
-<py:if test="project_slug == 'meta'">
-	<py:match path="script[starts-with(@src,'https://s.w.org/') and substring-after(@src,'.js') = '']">
-		<script src="${select('@src')}?v=${scripts_version}">${select('*|comment()|text()')}</script>
-	</py:match>
-</py:if>
+<py:match path="script[starts-with(@src,'https://s.w.org/') and substring-after(@src,'.js') = '']">
+	<script src="${select('@src')}?v=${scripts_version}">${select('*|comment()|text()')}</script>
+</py:match>
 
 <!--! Remove Trac logo and footer -->
 <div py:match="div[@id='header']" py:strip=""></div>
