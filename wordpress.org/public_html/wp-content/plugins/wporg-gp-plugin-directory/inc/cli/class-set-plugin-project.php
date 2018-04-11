@@ -102,7 +102,7 @@ class Set_Plugin_Project extends WP_CLI_Command {
 		}
 
 		// Store ID of the post in the plugin directory. Used for retrieving plugin icons.
-		$post_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $project->slug ) );
+		$post_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $plugin_project->slug ) );
 		if ( $post_id ) {
 			gp_update_meta( $plugin_project->id, 'directory-post-id', $post_id, 'wp-plugins' );
 		}
