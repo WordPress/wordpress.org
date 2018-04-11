@@ -348,6 +348,11 @@ body:not( .home ) .custom-logo-link {
 	cursor: pointer;
 }
 
+.rtl .wp15-locale-notice-dismiss {
+	left: 1px;
+	right: inherit;
+}
+
 .wp15-locale-notice-dismiss:hover,
 .wp15-locale-notice-dismiss:active,
 .wp15-locale-notice-dismiss:focus {
@@ -432,6 +437,11 @@ body:not( .home ) .custom-logo-link {
 	margin-left: .5em;
 }
 
+.rtl #wp15-events-filter input[type="text"] {
+	margin-left: 0;
+	margin-right: .5em;
+}
+
 .wp15-events-list {
 	display: grid;
 	grid-template-columns: repeat( auto-fill, minmax( 250px, 1fr ) );
@@ -439,6 +449,11 @@ body:not( .home ) .custom-logo-link {
 	width: 80vw;
 	margin-left: calc( -1 * ( (80vw - 100%) / 2 ) );
 	list-style-type: none;
+}
+
+.rtl .wp15-events-list {
+	margin-left: 0;
+	margin-right: calc( -1 * ( (80vw - 100%) / 2 ) );
 }
 
 .wp15-events-list li {
