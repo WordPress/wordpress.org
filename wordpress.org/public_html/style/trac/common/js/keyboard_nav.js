@@ -12,7 +12,7 @@
     var selection = SELECTED_FILE_ELEM;
     function pickFirst() {
       selection = $('#f0');
-      if ( !selection.length ) 
+      if ( !selection.length )
         selection = $("#dirlist tr:first");
     }
     function pickCurrent() {
@@ -43,13 +43,14 @@
       case 79: // 'o'pen
       case 82: // 'r'eload
       case 86: // 'v'iew
-        if (selection == null) 
+        if (selection == null)
           pickCurrent();
 
         var expander = selection.find('.expander');
         if (expander.length > 0) {
           if (event.keyCode == 82) { // 'r'eload
-            selection.removeClass("expanded").removeClass("collapsed")
+            expander.removeClass("expanded");
+            selection.removeClass("collapsed")
               .siblings("tr."+selection.get(0).id).not(selection).remove();
           }
           expander.click();
@@ -89,7 +90,7 @@
       focus: function() { ENABLE_KEY_NAV = false; },
       blur: function() { ENABLE_KEY_NAV = true; }
     });
-    $("#dirlist tr").live('mouseenter', function() {
+    $(document).on("mouseenter", "#dirlist tr", function() {
       LAST_HOVERED_FILE_ELEM = $(this);
     });
   });

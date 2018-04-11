@@ -6,7 +6,7 @@
       fragId = parseInt(fragId.substr(3));
     if (snap == undefined)
       snap = false;
-    
+
     var count = 1;
     return this.each(function() {
       // Use first child <a> as a trigger, or generate a trigger from the text
@@ -18,7 +18,7 @@
         $(this).text("");
         $(this).append(trigger);
       }
-      
+
       trigger.click(function() {
         var div = $(this.parentNode.parentNode).toggleClass("collapsed");
         return snap && !div.hasClass("collapsed");
@@ -63,12 +63,8 @@
             .click(function() {
               $(this).remove();
               th.show();
-              if ($.browser.msie)
-                for ( var i = 0; i < n; i++ )
-                  row_headers.eq(i*k+j).show();
-              else // much faster, but not supported by IExplorer
-                for ( var i = 0; i < n; i++ )
-                  row_headers.eq(i*k+j).css('display', 'table-cell');
+              for (var i = 0; i < n; i++)
+                row_headers.eq(i*k+j).css('display', 'table-cell');
             })
           );
         };

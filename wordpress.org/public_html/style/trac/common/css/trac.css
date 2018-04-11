@@ -64,6 +64,22 @@ span:target {
  border-radius: .2em;
 }
 
+/* option anchors in TracIni macro */
+.tracini table.wiki tbody tr:target { background: #ffb }
+.tracini .tracini-option { border: none; position: relative }
+.tracini .tracini-option:link:hover, .tracini .tracini-option:visited:hover {
+ background-color: transparent;
+}
+.tracini tr[id]:hover .tracini-option:before {
+ content: "\00b6";
+ position: absolute;
+ display: block;
+ left: -1em;
+ width: 1em;
+ color: #d7d7d7;
+ z-index: 1;
+}
+
 @media screen {
  a.ext-link .icon {
   background: url(../extlink.gif) left center no-repeat;
@@ -81,34 +97,39 @@ span:target {
 }
 
 /* Forms */
-input, textarea, select { margin: 2px }
-input, select { vertical-align: middle }
-input[type=button], input[type=submit], input[type=reset], button {
- *overflow: visible; /* Workaround too much margin on button in IE7 */
+input, textarea, select, .trac-button { margin: 2px }
+/* Avoid respect to system font settings for controls on Firefox, #11607 */
+input, select, button {
+ font-family: Arial,Verdana,'Bitstream Vera Sans',Helvetica,sans-serif;
+ font-size: 100%;
 }
-input[type=button], input[type=submit], input[type=reset] {
+/* Avoid to inherit white-space of its parent element for IE 11, #11376 */
+textarea { white-space: pre-wrap }
+input, select, .trac-button { vertical-align: middle }
+input[type=button], input[type=submit], input[type=reset], .trac-button {
  background: #eee;
  color: #222;
  border: 1px outset #eee;
  border-radius: .3em;
  box-shadow: .1em .1em .4em 0 #888;
  padding: .1em .5em .2em;
- text-shadow: .1em .1em #ddd;
+ text-shadow: .04em .04em #ddd;
  cursor: pointer;
 }
-input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
+input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover,
+.trac-button:hover {
  background: #f6f6f6;
  box-shadow: .1em .1em .6em 0 #999;
- text-shadow: .1em .1em #fcfcfc;
+ text-shadow: .04em .04em #fcfcfc;
 }
-input[type=button]:active, input[type=submit]:active,
-input[type=reset]:active {
+input[type=button]:active, input[type=submit]:active, input[type=reset]:active,
+.trac-button:active, .inlinebuttons a:active {
  position: relative;
  top: .1em;
  left: .1em;
 }
 input[type=button][disabled], input[type=submit][disabled],
-input[type=reset][disabled] {
+input[type=reset][disabled], .trac-button[disabled] {
  background: #f6f6f6;
  border-style: solid;
  color: #999;
@@ -130,9 +151,15 @@ fieldset {
  box-shadow: .1em .1em 1em 0 #E7E7E7 inset;
  padding: 1em;
 }
-p.hint, span.hint { color: #666; font-size: 85%; font-style: italic; margin: .5em 0;
-  padding-left: 1em;
+p.hint, span.hint, span.trac-datetimehint {
+ color: #666;
+ font-size: 85%;
+ font-style: italic;
+ margin: .5em 0;
+ padding-left: 1em;
 }
+span.hint { vertical-align: middle; }
+p.help { color: #666; font-size: 90%; margin: 1em .5em .5em; }
 legend {
  color: #999;
  margin-left: .6em;
@@ -140,12 +167,17 @@ legend {
  font-size: 90%;
  font-weight: bold;
 }
-label.disabled { color: #d7d7d7 }
+label.disabled, .disabled span.hint, .disabled p.help, .disabled legend,
+.disabled input, .disabled select, .readonly span.hint, .readonly p.help {
+ color: #d7d7d7
+}
 .buttons { margin: .5em .5em .5em 0 }
 .buttons form, .buttons form div { display: inline }
 .buttons input { margin: 1em .5em .1em 0 }
 
-.inlinebuttons input { 
+.inlinebuttons input,
+.inlinebuttons .trac-button,
+.inlinebuttons a {
  border: 1px solid #ddd;
  border-radius: 1em;
  height: 1.6em;
@@ -158,37 +190,58 @@ label.disabled { color: #d7d7d7 }
  cursor: pointer;
 }
 .uisymbols .inlinebuttons input[type=button],
-.uisymbols .inlinebuttons input[type=submit] {
+.uisymbols .inlinebuttons input[type=submit],
+.uisymbols .inlinebuttons .trac-button,
+.uisymbols .inlinebuttons a {
  font-size: 100%;
 }
 .inlinebuttons input[type=button]:hover,
-.inlinebuttons input[type=submit]:hover {
+.inlinebuttons input[type=submit]:hover,
+.inlinebuttons .trac-button:hover,
+.inlinebuttons a:hover {
  background: #f6f6f6;
  color: #333;
- text-shadow: .1em .1em #fcfcfc;
+ text-shadow: .04em .04em #fcfcfc;
  box-shadow: .1em .1em .6em 0 #999;
 }
 input[type=button].trac-delete,
-input[type=submit].trac-delete {
+input[type=submit].trac-delete,
+.trac-button.trac-delete {
  color: #d31313;
 }
 input[type=button].trac-delete:hover,
-input[type=submit].trac-delete:hover {
+input[type=submit].trac-delete:hover,
+.trac-button.trac-delete:hover {
  color: #e31313;
 }
+textarea.trac-fullwidth, input.trac-fullwidth, button.trac-fullwidth {
+ -moz-box-sizing: border-box;
+ box-sizing: border-box;
+ margin-left: 0;
+ margin-right: 0;
+ width: 100%;
+}
+textarea.trac-fullwidth { padding: 2px; }
+/* Resource edit forms (detailed view) */
+form.mod { margin: 1em 0 }
+form.mod .field { margin: .5em 0; }
+form.mod .field.description { margin-top: 1em; }
+form.mod .field label { padding-left: .2em }
+form.mod #changeinfo .field { margin: 0.25em 0 0.75em 0 }
+form.mod #changeinfo .options { padding: 0 0 0.5em 1em }
 
 /* Header */
 #header hr { display: none }
 #header h1 { margin: 1.5em 0 -1.5em; padding: 0 }
 #header img { border: none; margin: 0 0 -3em }
-#header a {
+#header :link, #header :visited, #header :link:hover, #header :visited:hover {
  background: transparent;
  color: #555;
  margin-bottom: 2px;
  border: none;
  padding: 0;
 }
-#header h1 a:hover { color: #000 }
+#header h1 :link:hover, #header h1 :visited:hover { color: #000 }
 
 /* Quick search */
 #search {
@@ -203,7 +256,7 @@ input[type=submit].trac-delete:hover {
 
 /* Navigation */
 .nav h2, .nav hr { display: none }
-.nav ul { 
+.nav ul {
  font-size: 10px;
  list-style: none;
  margin: 0;
@@ -215,9 +268,6 @@ input[type=submit].trac-delete:hover {
  display: inline-block;
  padding: 0 .75em;
  white-space: nowrap;
- /* IE7 hack to make inline-block effective on block element */
- zoom: 1;
- *display: inline;
 }
 .nav li.last { border-right: none }
 
@@ -225,6 +275,26 @@ input[type=submit].trac-delete:hover {
 #metanav {
  padding-top: .3em;
 }
+#metanav form.trac-logout {
+ display: inline;
+ margin: 0;
+ padding: 0;
+}
+#metanav form.trac-logout button {
+ margin: 0;
+ padding: 0;
+ border: 0;
+ outline: 0;
+ background: transparent;
+ font-family: inherit;
+ font-size: 100%;
+ color: #b00;
+ border-bottom: 1px dotted #bbb;
+ cursor: pointer;
+}
+#metanav form.trac-logout button::-moz-focus-inner { border: 0; padding: 0 }
+#metanav form.trac-logout button:hover { background-color: #eee; color: #555 }
+#metanav form.trac-logout button:active { position: static }
 
 /* Main navigation bar */
 #mainnav {
@@ -277,7 +347,7 @@ input[type=submit].trac-delete:hover {
 }
 
 /* Context-dependent navigation links */
-#ctxtnav { 
+#ctxtnav {
  min-height: 1em;
  padding: .4em 0;
 }
@@ -305,13 +375,13 @@ input[type=submit].trac-delete:hover {
 }
 
 /* Alternate links */
-#altlinks { 
+#altlinks {
  clear: both;
  margin-top: .4em;
  text-align: center;
 }
 #altlinks h3 { font-size: 12px; letter-spacing: normal; margin: 0 }
-#altlinks ul { list-style: none; margin: 0; }
+#altlinks ul { list-style: none; margin: 0; padding: 0 }
 #altlinks li {
  border-right: 1px solid #d7d7d7;
  display: inline;
@@ -338,11 +408,11 @@ input[type=submit].trac-delete:hover {
 
 /* Footer */
 #footer {
-  clear: both;
-  color: #bbb;
-  font-size: 10px;
-  height: 31px;
-  padding: .25em 0;
+ clear: both;
+ color: #bbb;
+ font-size: 10px;
+ height: 31px;
+ padding: .25em 0;
 }
 #footer :link, #footer :visited { color: #bbb; }
 #footer hr { display: none }
@@ -350,15 +420,15 @@ input[type=submit].trac-delete:hover {
 #footer #tracpowered:hover { background: transparent }
 #footer p { margin: 0 }
 #footer p.left {
-  float: left;
-  margin-left: 1em;
-  padding: 0 1em;
-  border-left: 1px solid #d7d7d7;
-  border-right: 1px solid #d7d7d7;
+ float: left;
+ margin-left: 1em;
+ padding: 0 1em;
+ border-left: 1px solid #d7d7d7;
+ border-right: 1px solid #d7d7d7;
 }
 #footer p.right {
-  float: right;
-  text-align: right;
+ float: right;
+ text-align: right;
 }
 
 /* Container for all the elements in the page, usually single child of the body element */
@@ -375,6 +445,15 @@ div.trac-content {
  box-shadow: .2em .3em 1.5em #eee;
 }
 
+/* Author info */
+.trac-author-anonymous, .trac-author-none {
+ font-style: italic;
+}
+.trac-author-user {
+ font-weight: bold;
+ color: #666;
+}
+
 /* Help links */
 .uinohelp #help { display: none }
 #help {
@@ -387,6 +466,9 @@ div.trac-content {
 #help :link, #help :visited { cursor: help }
 #help hr { display: none }
 
+/* Datepicker hints */
+.trac-nodatetimehint .trac-datetimehint { display: none }
+
 /* Section folding */
 .foldable :link, .foldable :visited {
  background: url(../expanded.png) 4px 50% no-repeat;
@@ -394,7 +476,7 @@ div.trac-content {
  border-radius: .3em;
  box-shadow: .1em .1em .3em 0 #bbb;
  color: #222;
- text-shadow: .1em .1em #fcfcfc;
+ text-shadow: .04em .04em #fcfcfc;
  padding: .3em .5em .3em 20px;
 }
 .foldable :link:hover, .foldable :visited:hover { background-color: transparent }
@@ -405,9 +487,27 @@ div.trac-content {
 fieldset > legend.foldable :link, fieldset > legend.foldable :visited {
  color: #666;
  font-size: 110%;
- text-shadow: .1em .1em #ddd;
+ text-shadow: .04em .04em #ddd;
 }
 .collapsed legend.foldable { background: white }
+
+.expander {
+ background: url(../expander_normal.png) 0 50% no-repeat;
+ cursor: pointer;
+ padding-left: 8px;
+ margin-left: 4px;
+}
+.expander:hover {
+ background: url(../expander_normal_hover.png) 0 50% no-repeat;
+}
+.expander.expanded {
+ background: url(../expander_open.png) 0 50% no-repeat;
+ padding-left: 12px;
+ margin-left: 0;
+}
+.expander.expanded:hover {
+ background: url(../expander_open_hover.png) 0 50% no-repeat;
+}
 
 /* Section with count */
 h2 .trac-count, h3 .trac-count {
@@ -430,7 +530,6 @@ h2 .trac-count, h3 .trac-count {
  position: relative;
  margin: 0 1em 1em;
 }
-* html #prefs { width: 26em } /* Set width only for IE */
 #prefs input, #prefs select { font-size: 9px; vertical-align: middle }
 #prefs fieldset {
  background: transparent;
@@ -473,6 +572,14 @@ a.trac-diff:after { content: "∆" }
 div.compact > p:first-child { margin-top: 0 }
 div.compact > p:last-child { margin-bottom: 0 }
 
+/* Delete */
+#delete-confirm li { list-style-type: square; }
+
+/* Styles related to RTL support */
+.rtl { direction: rtl; }
+.rtl div.wiki-toc { float: left; }
+.rtl .wiki-toc ul ul, .wiki-toc ol ol { padding-right: 1.2em }
+
 a.missing:link, a.missing:visited, a.missing, span.missing,
 a.forbidden, span.forbidden { color: #998 }
 a.missing:hover { color: #000 }
@@ -501,7 +608,11 @@ pre.wiki, pre.literal-block {
  overflow: auto;
 }
 
-tt {
+div.wiki-code {
+ margin: 1em 1.75em;
+}
+
+code, tt {
  color: #600;
  border: 1px solid #edc;
  border-radius: .25em;
@@ -509,12 +620,12 @@ tt {
  background: #fafafa;
 }
 
-blockquote.citation { 
- margin: -0.6em 0;
- border-style: solid; 
- border-width: 0 0 0 2px; 
+blockquote.citation {
+ margin: -0.6em 0 0 0;
+ border-style: solid;
+ border-width: 0 0 0 2px;
  padding-left: .5em;
- border-color: #b44; 
+ border-color: #b44;
 }
 .citation blockquote.citation { border-color: #4b4; }
 .citation .citation blockquote.citation { border-color: #44b; }
@@ -532,10 +643,11 @@ table.wiki th {
  padding: .1em .25em;
  background-color: #f7f7f7;
 }
+table.wiki tbody tr.even { background-color: #fcfcfc }
+table.wiki tbody tr.odd { background-color: #f7f7f7 }
 
 .wikitoolbar {
  margin-top: 0.3em;
- margin-left: 2px;
  border: solid #d7d7d7;
  border-width: 1px 1px 1px 0;
  height: 18px;
@@ -566,7 +678,7 @@ table.wiki th {
 .wikitoolbar a#img { background-position: 0 -128px }
 
 /* Textarea resizer */
-div.trac-resizable { display: table; width: 1px }
+div.trac-resizable { display: table; width: 100% }
 div.trac-resizable > div { display: table-cell }
 div.trac-resizable textarea { display: block; margin-bottom: 0 }
 div.trac-grip {
@@ -577,15 +689,6 @@ div.trac-grip {
  border-top-width: 0;
  cursor: s-resize;
 }
-
-/* Styles for the form for adding attachments. */
-#attachment .field { margin-top: 1.3em }
-#attachment label { padding-left: .2em }
-#attachment fieldset { margin-top: 2em }
-#attachment fieldset .field { float: left; margin: 0 1em .5em 0 }
-#attachment .options { float: left; padding: 0 0 1em 1em }
-#attachment br { clear: left }
-.attachment #preview { margin-top: 1em }
 
 /* Styles for the list of attachments. */
 #attachments > div.attachments {
@@ -603,6 +706,9 @@ div.trac-grip {
  float: right;
  margin: .4em 0;
 }
+#attachments span.trac-author { font-style: italic; }
+
+.attachment #preview { margin-top: 1em }
 
 /* Styles for tabular listings such as those used for displaying directory
    contents and report results. */
@@ -616,6 +722,7 @@ table.listing {
  width: 100%;
 }
 table.listing th { text-align: left; padding: 0 1em .1em 0; font-size: 12px }
+table.listing th.sel, table.listing td.sel { text-align: center; width: 1% }
 table.listing thead tr { background: #f7f7f0 }
 table.listing thead th {
  border: 1px solid #d7d7d7;
@@ -648,7 +755,7 @@ table.listing tbody td a:hover, table.listing tbody th a:hover {
 table.listing tbody tr { border-top: 1px solid #ddd }
 table.listing tbody tr.even { background-color: #fcfcfc }
 table.listing tbody tr.odd { background-color: #f7f7f7 }
-table.listing tbody tr:hover { background: #eed !important }
+table.listing tbody tr:hover td { background: #eed !important }
 table.listing tbody tr.focus { background: #ddf !important }
 
 table.listing pre { white-space: pre-wrap }
@@ -662,18 +769,23 @@ table.listing pre { white-space: pre-wrap }
 }
 #fieldhist td.version { text-align: center }
 #fieldhist td.comment { width: 100% }
+#fieldhist .inlinebuttons {
+ display: none;
+ float: right;
+}
+.uisymbols #fieldhist .inlinebuttons a { font-size: 85% }
 
 /* Auto-completion interface */
 .suggestions { background: #fff; border: 1px solid #886; color: #222; }
 .suggestions ul {
-  font-family: sans-serif;
-  max-height: 20em;
-  min-height: 3em;
-  list-style: none;
-  margin: 0;
-  overflow: auto;
-  padding: 0;
-  width: 440px;
+ font-family: sans-serif;
+ max-height: 20em;
+ min-height: 3em;
+ list-style: none;
+ margin: 0;
+ overflow: auto;
+ padding: 0;
+ width: 440px;
 }
 * html .suggestions ul { height: 10em; }
 .suggestions li { background: #fff; cursor: pointer; padding: 2px 5px }
@@ -688,9 +800,9 @@ table.listing pre { white-space: pre-wrap }
  margin: 1em 0;
 }
 #content.error div.message pre, div.system-message pre {
-  margin-left: 1em;
-  overflow: hidden;
-  white-space: normal;
+ margin-left: 1em;
+ overflow: hidden;
+ white-space: pre-wrap;
 }
 
 div.system-message p { margin: 0 }
@@ -746,7 +858,7 @@ div.system-message .trac-close-msg:hover {
  /* taken from .inlinebuttons */
  background: #f6f6f6;
  color: #333;
- text-shadow: .1em .1em #fcfcfc;
+ text-shadow: .04em .04em #fcfcfc;
  box-shadow: .1em .1em .6em 0 #999;
 }
 .uisymbols div.system-message .trac-close-msg > span {
@@ -759,11 +871,6 @@ div.system-message .trac-close-msg:hover {
 /* error.html page */
 #content.error form.newticket { display: inline; }
 #content.error form.newticket textarea { display: none; }
-
-#content.error #systeminfo, #content.error #plugins { margin: 1em; width: auto; }
-#content.error #systeminfo th, #content.error #systeminfo td,
-#content.error #plugins th, #content.error #plugins td { font-size: 90%; }
-#content.error #systeminfo th, #content.error #plugins th { background: #f7f7f7; font-weight: bold; }
 
 #content.error #traceback { margin-left: 1em; }
 #content.error #traceback :link, #content.error #traceback :visited {
@@ -792,15 +899,13 @@ div.system-message .trac-close-msg:hover {
 #content.error #traceback td code { white-space: pre; }
 #content.error #traceback pre { font-size: 95%; }
 
-#content.error #plugins td.file { color: #666; }
-
 #content .paging { margin: 0 0 2em; padding: .5em 0 0;
   font-size: 85%; line-height: 2em; text-align: center;
 }
-#content .paging .current { 
+#content .paging .current {
   padding: .1em .3em;
   border: 1px solid #333;
-  background: #999; color: #fff; 
+  background: #999; color: #fff;
 }
 
 #content .paging :link, #content .paging :visited {
@@ -811,7 +916,7 @@ div.system-message .trac-close-msg:hover {
 #content .paging :link:hover, #content .paging :visited:hover {
   background: #999; color: #fff;  border-color: #333;
 }
-#content .paging .previous a, 
+#content .paging .previous a,
 #content .paging .next a {
   font-size: 150%; font-weight: bold; border: none;
 }
@@ -821,6 +926,28 @@ div.system-message .trac-close-msg:hover {
 }
 
 #content h2 .numresults { color: #666; font-size: 90%; }
+
+/* Styles for the About page */
+#content.about a.logo { border: none; float: right; margin-left: 2em; }
+#content.about a.logo img { display: block; }
+#content.about #python-logo img { width: 140px; height: 56px; }
+#content.about p.copyright { color: #999; font-size: 90%; }
+
+/* Styles for environment info (error and about pages) */
+#environmentinfo h2 { margin-top: 2em; }
+#environmentinfo table { margin: 1em; width: auto; }
+#environmentinfo table th, #environmentinfo table td { border: 1px solid #ddd; font-size: 90%; }
+#environmentinfo table th { background: #f7f7f7; font-weight: bold; white-space: nowrap; }
+#environmentinfo table td.file { color: #666; }
+#environmentinfo table tr.disabled th,
+#environmentinfo table tr.disabled td { color: #999; }
+#environmentinfo #config th, #content.about #config td { padding: 3px; }
+#environmentinfo #config tr.modified { background: #ffd; }
+#environmentinfo #config tr.modified td.value { font-style: italic; }
+#environmentinfo #config td.doc { padding: 3px 1em; }
+
+/* Styles for jquery-ui */
+.trac-placeholder { background: #eed }
 
 /* Styles for search word highlighting */
 @media screen {
@@ -836,7 +963,7 @@ div.system-message .trac-close-msg:hover {
  .nav, form, .buttons form, form .buttons, form .inlinebuttons,
  .noprint, .trac-nav, .trac-topnav,
  #attachments > div.attachments > p {
-   display: none;
+  display: none;
  }
  form.printableform { display: block }
  div.code pre { white-space: pre-wrap }

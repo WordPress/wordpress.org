@@ -22,6 +22,7 @@ jQuery(function($){
     dateFormat: jquery_ui.date_format,
     firstDay: jquery_ui.first_week_day,
     isRTL: false,
+    showButtonPanel: true,
     showMonthAfterYear: formatMonth.indexOf('$month') >
                         formatMonth.indexOf('$year')
   });
@@ -39,11 +40,13 @@ jQuery(function($){
     closeText: _("Done"),
     timeFormat: jquery_ui.time_format,
     separator: jquery_ui.timepicker_separator,
-    timezone: 'Z',
+    timezone: jquery_ui.default_timezone,
     showTimezone: jquery_ui.show_timezone,
     timezoneList: jquery_ui.timezone_list,
     timezoneIso8601: jquery_ui.timezone_iso8601,
     ampm: jquery_ui.ampm,
+    amNames: jquery_ui.period_names.am,
+    pmNames: jquery_ui.period_names.pm,
     showSecond: true
   });
 });

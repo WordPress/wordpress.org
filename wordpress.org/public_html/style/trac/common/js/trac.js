@@ -148,11 +148,11 @@
     this.click(function() {
       var form = $(this).closest("form");
       if (form.hasClass("trac-submit-is-disabled")) {
-        form.on("submit.prevent-submit", function() {
+        form.bind("submit.prevent-submit", function() {
           return false;
         });
         $(window).on("unload", function() {
-          form.off("submit.prevent-submit");
+          form.unbind("submit.prevent-submit");
         });
       } else {
         form.addClass("trac-submit-is-disabled");
@@ -165,7 +165,7 @@
 
   $.loadStyleSheet = function(href, type) {
     type = type || "text/css";
-    $(function() {
+    $(document).ready(function() {
       var link;
       $("link[rel=stylesheet]").each(function() {
         if (this.getAttribute("href") === href) {
@@ -202,7 +202,7 @@
       var listeners = readyListeners[href];
       listeners.push(listener);
     }
-    $(listener);
+    $(document).ready(listener);
   };
 
   $.loadScript = function(href, type, charset) {
@@ -236,7 +236,7 @@
   $.setWarningUnsavedChanges = function(enabled, message) {
     if (enabled) {
       if (!warn_unsaved_changes) {
-        $(window).on("beforeunload", function() {
+        $(window).bind("beforeunload", function() {
           return warn_unsaved_changes;
         });
       }
@@ -244,7 +244,7 @@
         "changes will be lost if you leave this page before saving your " +
         "changes.");
     } else {
-      $(window).off("beforeunload");
+      $(window).unbind("beforeunload");
       warn_unsaved_changes = null;
     }
   };

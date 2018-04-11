@@ -1,5 +1,5 @@
 (function($){
-  
+
   /* Adapted from http://www.kryogenix.org/code/browser/searchhi/ */
   $.fn.highlightText = function(text, className, caseSensitive) {
     function highlight(node) {
@@ -21,12 +21,14 @@
       }
     }
     return this.each(function() { highlight(this) });
-  }
-  
+  };
+
   $(document).ready(function() {
+    $("p.filters").exclusiveOnClick(":checkbox, :checkbox + label");
+
     var elems = $(".searchable");
     if (!elems.length) return;
-  
+
     function getSearchTerms(url) {
       if (url.indexOf("?") == -1) return [];
       var params = url.substr(url.indexOf("?") + 1).split("&");
@@ -39,7 +41,7 @@
           var terms = [];
           $.each(query.split(/(".*?"|'.*?'|\s+)/), function() {
             if (terms.length < 10) {
-              term = this.replace(/^\s+$/, "")
+              var term = this.replace(/^\s+$/, "")
                          .replace(/^['"]/, "")
                          .replace(/['"]$/, "");
               if (term.length >= 3)
@@ -51,7 +53,7 @@
       }
       return [];
     }
-  
+
     var terms = getSearchTerms(document.URL);
     if (!terms.length) terms = getSearchTerms(document.referrer);
     if (terms.length) {
