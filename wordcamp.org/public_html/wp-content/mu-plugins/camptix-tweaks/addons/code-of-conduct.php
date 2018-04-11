@@ -144,7 +144,7 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 	 */
 	public function add_metabox_row( $rows, $post ) {
 		$value = get_post_meta( $post->ID, 'tix_' . self::SLUG, true ) ? __( 'Yes', 'wordcamporg' ) : '';
-		$new_row = array( __( 'Do you agree to follow the event Code of Conduct?', 'camptix' ), esc_html( $value ) );
+		$new_row = array( __( 'Do you agree to follow the event Code of Conduct?', 'wordcamporg' ), esc_html( $value ) );
 
 		add_filter( 'locale', array( $this, 'set_locale_to_en_US' ) );
 
