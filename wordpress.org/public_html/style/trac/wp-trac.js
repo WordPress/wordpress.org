@@ -926,14 +926,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					html += '<div id="keyword-bin"></div>';
 					container.prepend( html );
 					elements.bin = $('#keyword-bin');
-
-					// Walk in the footsteps of Firefox autocomplete's trail of destruction,
-					// tidying the radio buttons in its wake. See #WP17051.
-					if ( $.browser.mozilla ) {
-						$('#action input:radio').each( function() {
-							this.checked = this.defaultChecked;
-						});
-					}
 				},
 
 				// Populates the keywords and dropdown.
