@@ -181,6 +181,8 @@ h3.change a {
 #metanav.nav a:visited,
 #metanav form.trac-logout button {
 	color: rgba(255, 255, 255, 0.8);
+	background: inherit;
+	border: inherit;
 }
 .build #metanav.nav a,
 .build #metanav.nav a:visited,
@@ -191,9 +193,12 @@ h3.change a {
 	color: #21759b;
 }
 #metanav.nav a:hover,
-#metanav.nav a:active {
+#metanav.nav a:active,
+#metanav form.trac-logout button:hover,
+#metanav form.trac-logout button:active {
 	color: #fff;
 	text-decoration: underline;
+	background-color: inherit;
 }
 form#search {
 	float: right;
