@@ -1411,6 +1411,26 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			// From Trac 1.2.2 threaded_comments.js:
 			window.applyCommentsOrder = window.applyCommentsOrder || function() {}
 
+			// Add Params to s.w.org scripts and stylesheets when loaded dynamically.
+			var cache_buster = jQuery('script[src^="https://s.w.org"][src*="v="]').attr('src');
+			if ( cache_buster ) {
+				cache_buster = cache_buster.match(/v=([0-9]+)$/)[1];
+			}
+			var maybe_add_cache_buster = function( href ) {
+				if ( cache_buster && href.match( /https:\/\/s.w.org/i ) && href.match( /[.](css|js)$/ ) ) {
+					href += '?v=' + cache_buster;
+				}
+				return href;
+			}
+			var oldLoadScript = $.loadScript;
+			$.loadScript = function(href, type, charset) {
+				return oldLoadScript( maybe_add_cache_buster( href ), type, charset );
+			}
+			var oldLoadStylesheet = $.loadStyleSheet;
+			$.loadStyleSheet = function( href ) {
+				return oldLoadStylesheet( maybe_add_cache_buster( href ) );
+			}
+
 			// From Trac 1.2.2 trac.js:
 			$.loadScript                = $.loadScript                || function() {}
 			$.fn.exclusiveOnClick       = $.fn.exclusiveOnClick       || function() {}
