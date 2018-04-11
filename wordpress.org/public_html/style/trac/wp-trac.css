@@ -922,6 +922,7 @@ div.trac-ticket-buttons input[type=submit] {
 }
 
 #changelog .changes,
+#ticketchange .changes,
 div.change ul.changes {
 	margin-top: 20px;
 	margin-bottom: 20px;
