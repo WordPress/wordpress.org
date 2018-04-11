@@ -31,6 +31,7 @@ class Comment_Handler {
 		$lines = array_map( 'rtrim', $this->lines );
 		$base64 = false;
 		$subject = '';
+		$multipart = false;
 
 		// Trim off headers.
 		while ( $lines && '' !== current( $lines ) ) {
