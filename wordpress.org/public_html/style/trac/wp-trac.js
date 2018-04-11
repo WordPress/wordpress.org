@@ -378,6 +378,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			$('#attachments').removeClass('collapsed');
 			$('#modify').parent().removeClass('collapsed');
 
+			// Move the Add-Comment before Ticket Modify dialogue.
+			$('#trac-add-comment').insertBefore( $('#modify').parent() );
+
 			// Push live comment previews above 'Modify Ticket'.
 			$('#ticketchange').insertAfter('#trac-add-comment');
 
