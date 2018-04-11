@@ -513,12 +513,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 							class: 'foldable'
 						})
 						.html( '<a href="#no0" id="no0">Commits <span class="trac-count">(' + commitCount + ')</span></a>' )
-						.after(
-							$( '<div/>', {
-								class: 'commits'
-							})
-							.append( $commits )
-						)
+					).append(
+						$( '<div/>', {
+							class: 'commits'
+						})
+						.append( $commits )
 					)
 				);
 			}
