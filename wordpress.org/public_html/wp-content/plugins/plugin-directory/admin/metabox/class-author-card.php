@@ -150,15 +150,15 @@ class Author_Card {
 				foreach ( $user_notes as $note ) {
 					$note_meta = sprintf(
 						/* translators: 1: user note author's display name, 2: date */
-						__( 'By %1$s on %2$s</a>', 'wporg-plugins' ),
+						__( 'By %1$s on %2$s', 'wporg-plugins' ),
 						$note->moderator,
 						$note->date
 					);
 
 					$note_html  = apply_filters( 'comment_text', $note->text, null, array() );
-					$note_html .= sprintf( '<p class="textright">%s</p>' . "\n", $note_meta );
+					$note_html .= sprintf( '<p class="textright">%s</p>', $note_meta );
 
-					echo '<li>' . $note_html . '</li>';
+					echo '<li>' . $note_html . '</li>' . "\n";
 				}
 				echo '</ul>';
 			}
@@ -304,7 +304,7 @@ class Author_Card {
 						echo ' ' . $extra;
 					}
 
-					echo '</span></li>';
+					echo '</span></li>' . "\n";
 				}
 				echo '</ul>';
 			}
