@@ -972,11 +972,17 @@ class WordCamp_Admin {
 		$protected_fields = array();
 
 		if ( ! current_user_can( 'wordcamp_manage_mentors' ) ) {
-			$protected_fields += array(
+			$protected_fields = array_merge( $protected_fields, array(
 				'Mentor WordPress.org User Name',
 				'Mentor Name',
 				'Mentor E-mail Address',
-			);
+			) );
+		}
+
+		if ( ! current_user_can( 'wordcamp_wrangle_wordcamps' ) ) {
+			$protected_fields = array_merge( $protected_fields, array(
+				'Multi-Event Sponsor Region',
+			) );
 		}
 
 		return in_array( $field_name, $protected_fields );

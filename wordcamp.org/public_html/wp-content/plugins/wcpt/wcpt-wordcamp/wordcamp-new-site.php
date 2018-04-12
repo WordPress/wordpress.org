@@ -203,6 +203,10 @@ class WordCamp_New_Site {
 			return;
 		}
 
+		if ( WordCamp_Admin::is_protected_field( 'Multi-Event Sponsor Region' ) ) {
+			return;
+		}
+
 		$wordcamp              = get_post( $wordcamp_id );
 		$meta                  = get_post_custom( $wordcamp_id );
 		$blog_id               = get_wordcamp_site_id( $wordcamp );

@@ -145,6 +145,7 @@ class MES_Region {
 		$selected_region = get_post_meta( $post->ID, $key, true );
 		$site_id         = get_post_meta( $post->ID, '_site_id', true );
 		$cb_push_name    = wcpt_key_to_str( 'push-mes-sponsors', 'wcpt_' );
+		$protected       = WordCamp_Admin::is_protected_field( $key );
 
 		require( dirname( __DIR__ ) . '/views/template-region-dropdown.php' );
 	}
@@ -158,6 +159,10 @@ class MES_Region {
 	 */
 	public function wcpt_region_dropdown_save( $key, $value, $post_id ) {
 		if ( 'Multi-Event Sponsor Region' != $key ) {
+			return;
+		}
+
+		if ( WordCamp_Admin::is_protected_field( $key ) ) {
 			return;
 		}
 
