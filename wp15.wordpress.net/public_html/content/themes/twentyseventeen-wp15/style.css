@@ -437,6 +437,10 @@ body:not( .home ) .custom-logo-link {
 	margin-left: .5em;
 }
 
+#wp15-events-filter input[type="text"]::placeholder {
+    opacity: 0.5;
+}
+
 .rtl #wp15-events-filter input[type="text"] {
 	margin-left: 0;
 	margin-right: .5em;

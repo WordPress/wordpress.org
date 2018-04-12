@@ -10,7 +10,8 @@ defined( 'WPINC' ) || die();
 <form id="wp15-events-filter">
 	<label>
 		<span><?php esc_html_e( 'Search events:', 'wp15' ); ?></span>
-		<input id="wp15-events-query" type="text" value="" />
+		<?php // translators: Change this to a city in your locale that has a WP15 event planned. If none do, then choose a recognizable city in your locale. ?>
+		<input id="wp15-events-query" type="text" value="" placeholder="<?php echo esc_attr_x( 'Seattle', 'Event query placeholder', 'wp15' ); ?>" />
 	</label>
 </form>
 
