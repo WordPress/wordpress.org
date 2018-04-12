@@ -404,7 +404,7 @@ body:not( .home ) .custom-logo-link {
 	margin-left: -40vw;
 	margin-right: -40vw;
 	margin-top: 2em;
-	margin-bottom: 4em;
+	margin-bottom: 2em;
 	background-color: #AADAFF;
 }
 
@@ -420,14 +420,14 @@ body:not( .home ) .custom-logo-link {
 @media screen and ( max-width: 48em ) {
 	#wp15-events-map {
 		width: 100%;
-		margin: 2em auto 3em;
+		margin: 2em auto 1em;
 		left: auto;
 		right: auto;
 	}
 }
 
 #wp15-events-filter {
-	margin-bottom: 1.5em;
+	margin-bottom: 3em;
 	text-align: center;
 }
 
