@@ -108,39 +108,64 @@ class Author_Card {
 			</p>
 		<?php endif; ?>
 
-		<?php
-		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
-			$user     = new \WP_User( $author, '', WPORG_SUPPORT_FORUMS_BLOGID );
-			$statuses = array();
+		<div class="profile-user-notes">
+			<?php
+			if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+				$user     = new \WP_User( $author, '', WPORG_SUPPORT_FORUMS_BLOGID );
+				$statuses = array();
 
-			if ( ! empty( $user->allcaps['bbp_blocked'] ) ) {
-				$statuses[] = array(
-					'text' => __( 'banned', 'wporg-plugins' ),
-					'desc' => __( 'User is banned from logging into WordPress.org', 'wporg-plugins' ),
-				);
-			}
-
-			if ( (bool) get_user_meta( $user->ID, 'is_bozo', true ) ) {
-				$statuses[] = array(
-					'text' => __( 'flagged', 'wporg-plugins' ),
-					'desc' => __( 'User is flagged in the support forums', 'wporg-plugins' ),
-				);
-			}
-
-			if ( $statuses ) {
-				$labels = array();
-				foreach ( $statuses as $status ) {
-					$labels[] = sprintf(
-						'<strong><span title="%s">%s</span></strong>',
-						esc_attr( $status['desc'] ),
-						$status['text']
+				if ( ! empty( $user->allcaps['bbp_blocked'] ) ) {
+					$statuses[] = array(
+						'text' => __( 'banned', 'wporg-plugins' ),
+						'desc' => __( 'User is banned from logging into WordPress.org', 'wporg-plugins' ),
 					);
 				}
-				/* translators: %s: comma-separated list of negative user status labels */
-				echo '<p>' . sprintf( __( 'This user is: %s', 'wporg-plugins' ), implode( ', ', $labels ) ) . '</p>';
-			}
-		}
 
+				if ( (bool) get_user_meta( $user->ID, 'is_bozo', true ) ) {
+					$statuses[] = array(
+						'text' => __( 'flagged', 'wporg-plugins' ),
+						'desc' => __( 'User is flagged in the support forums', 'wporg-plugins' ),
+					);
+				}
+
+				if ( $statuses ) {
+					$labels = array();
+					foreach ( $statuses as $status ) {
+						$labels[] = sprintf(
+							'<strong><span title="%s">%s</span></strong>',
+							esc_attr( $status['desc'] ),
+							$status['text']
+						);
+					}
+					/* translators: %s: comma-separated list of negative user status labels */
+					echo '<p>' . sprintf( __( 'This user is: %s', 'wporg-plugins' ), implode( ', ', $labels ) ) . '</p>';
+				}
+			}
+
+			$user_notes = get_user_meta( $user->ID, '_wporg_bbp_user_notes', true );
+
+			if ( $user_notes ) {
+				_e( 'User notes:', 'wporg-plugins' );
+				echo '<ul>';
+				foreach ( $user_notes as $note ) {
+					$note_meta = sprintf(
+						/* translators: 1: user note author's display name, 2: date */
+						__( 'By %1$s on %2$s</a>', 'wporg-plugins' ),
+						$note->moderator,
+						$note->date
+					);
+
+					$note_html  = apply_filters( 'comment_text', $note->text, null, array() );
+					$note_html .= sprintf( '<p class="textright">%s</p>' . "\n", $note_meta );
+
+					echo '<li>' . $note_html . '</li>';
+				}
+				echo '</ul>';
+			}
+			?>
+		</div>
+
+		<?php
 		$post_ids = get_posts( array(
 			'fields'         => 'ids',
 			'post_type'      => 'plugin',
