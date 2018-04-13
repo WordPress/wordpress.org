@@ -275,6 +275,9 @@ class Import_Gutendocs {
 			$markdown = preg_replace( '/^#\s(.+)/', '', $markdown );
 		}
 
+		// Remove the .md extension from relative links
+		$markdown = preg_replace( '/(\[.*?\]\(\.\/.*?)(\.md)?\)/i', '$1)', $markdown );
+
 		// Transform to HTML
 		jetpack_require_lib( 'markdown' );
 		$parser = new \WPCom_GHF_Markdown_Parser;
