@@ -130,7 +130,7 @@ function internationalize_titles( $title ) {
 
 		case 'Live':
 			// translators: The name of the page that displays the #wp15 social media posts in real time.
-			$title = esc_html_x( 'Live', 'verb', 'wp15' );
+			$title = esc_html_x( 'Live', 'adjective', 'wp15' );
 			break;
 
 		case 'Swag':
