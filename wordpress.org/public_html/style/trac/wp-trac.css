@@ -416,7 +416,7 @@ table.progress td.closed {
 #ticket table.properties > tbody > tr > th {
 	color: #666;
 }
-#ticket .description h3 {
+#ticket div.description h3 {
 	border-bottom: 1px solid #ddd;
 	color: #666;
 }
@@ -672,8 +672,9 @@ table.listing thead th {
 	background: #eaf2fa;
 	border-bottom-color: #ccc;
 }
-table.listing tbody tr:hover {
-	background: #eee !important; /* important to override the other important */
+table.listing tbody tr:hover td,
+table.code tbody tr:hover td {
+	background: #eee;
 }
 .suggestions {
 	border: 1px solid #888;
