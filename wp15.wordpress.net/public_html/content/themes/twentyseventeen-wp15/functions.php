@@ -8,6 +8,8 @@ add_filter( 'template_include',   __NAMESPACE__ . '\get_front_page_template' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts'         );
 add_filter( 'get_custom_logo',    __NAMESPACE__ . '\set_custom_logo'         );
 add_filter( 'body_class',         __NAMESPACE__ . '\add_body_classes'        );
+add_filter( 'the_title',             __NAMESPACE__ . '\internationalize_titles'          );
+add_filter( 'document_title_parts',  __NAMESPACE__ . '\internationalize_document_titles' );
 add_filter( 'wp_get_nav_menu_items', __NAMESPACE__ . '\internationalize_menu_items' );
 
 
@@ -105,28 +107,72 @@ function set_custom_logo() {
 /**
  * Internationalize the menu item titles.
  *
+ * @param string $title
+ *
+ * @return string
+ */
+function internationalize_titles( $title ) {
+	switch ( $title ) {
+		case 'WP15':
+			// translators: The title of the wp15.wordpress.net website.
+			$title = esc_html__( 'WP15', 'wp15' );
+			break;
+
+		case 'WordPress turns 15 on May 27, 2018':
+			// translators: The tagline for the wp15.wordpress.net website.
+			$title = esc_html__( 'WordPress turns 15 on May 27, 2018', 'wp15' );
+			break;
+
+		case 'About':
+			// translators: The name of the page that describes the WP15 celebrations.
+			$title = esc_html__( 'About', 'wp15' );
+			break;
+
+		case 'Live':
+			// translators: The name of the page that displays the #wp15 social media posts in real time.
+			$title = esc_html_x( 'Live', 'verb', 'wp15' );
+			break;
+
+		case 'Swag':
+			// translators: "Swag" is a term for promotional items. This is the title of the page.
+			$title = esc_html__( 'Swag', 'wp15' );
+			break;
+	}
+
+	return $title;
+}
+
+/**
+ * Internationalize the document's `<title>` element.
+ *
+ * @param array $title_parts
+ *
+ * @return array
+ */
+function internationalize_document_titles( $title_parts ) {
+	$title_parts['title'] = internationalize_titles( $title_parts['title'] );
+
+	if ( isset( $title_parts['site'] ) ) {
+		$title_parts['site'] = internationalize_titles( $title_parts['site'] );
+	}
+
+	if ( isset( $title_parts['tagline'] ) ) {
+		$title_parts['tagline'] = internationalize_titles( $title_parts['tagline'] );
+	}
+
+	return $title_parts;
+}
+
+/**
+ * Internationalize the menu item titles.
+ *
  * @param array $items
  *
  * @return array
  */
 function internationalize_menu_items( $items ) {
 	foreach ( $items as $item ) {
-		switch ( $item->title ) {
-			case 'About':
-				// translators: The name of the page that describes the WP15 celebrations.
-				$item->title = esc_html__( 'About', 'wp15' );
-				break;
-
-			case 'Live':
-				// translators: The name of the page that displays the #wp15 social media posts in real time.
-				$item->title = esc_html_x( 'Live', 'verb', 'wp15' );
-				break;
-
-			case 'Swag':
-				// translators: "Swag" is a term for promotional items. This is the title of the page.
-				$item->title = esc_html__( 'Swag', 'wp15' );
-				break;
-		}
+		$item->post_title = internationalize_titles( $item->post_title );
 	}
 
 	return $items;

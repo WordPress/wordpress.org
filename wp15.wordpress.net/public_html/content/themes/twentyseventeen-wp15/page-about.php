@@ -7,12 +7,7 @@
 
 				<header class="entry-header">
 					<h1 class="entry-title">
-						<?php
-
-						// translators: The name of the page that describes the WP15 celebrations.
-						esc_html_e( 'About', 'wp15' );
-
-						?>
+						<?php the_title(); ?>
 					</h1>
 				</header>
 
