@@ -434,7 +434,7 @@ table.progress td.closed {
 #properties {
 	white-space: normal;
 }
-#properties table td {
+#properties table.trac-properties > tbody > tr > td {
 	width: 50%;
 }
 #properties input {
@@ -443,10 +443,10 @@ table.progress td.closed {
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
-#properties table th.col2 {
+#properties table.trac-properties > tbody > tr > th.col2 {
 	border: none;
 }
-#properties table td {
+#properties table.trac-properties > tbody > tr > td {
 	vertical-align: top; /* align everything */
 	padding: .3em; /* breathing room */
 }
@@ -1036,7 +1036,7 @@ body.plugins #main .newticket-not-here .support {
 #propertyform[action*="/newticket"] #focuses span {
 	display: none;
 }
-#propertyform[action*="/newticket"] #properties table td#focuses {
+#propertyform[action*="/newticket"] #properties table.trac-properties > tbody > tr > td#focuses {
 	padding-left: 0;
 }
 #propertyform > p,
@@ -1438,7 +1438,7 @@ body.buddypress #main {
 }
 
 /* =Workflow Keywords */
-#properties table td {
+#properties table.trac-properties > tbody > tr > td {
 	vertical-align: top;
 }
 #keyword-bin {
@@ -1496,7 +1496,7 @@ body.core #reportfilters {
 #ticket table.properties th#h_focuses.missing {
 	display: none;
 }
-#properties table td#focuses {
+#properties table.trac-properties > tbody > tr > td#focuses {
 	padding: .6em 0 .3em 60px;
 	height: 66px;
 }
@@ -2088,19 +2088,22 @@ a.mention.me {
 		min-width: 115px !important;
 		text-align: left;
 	}
-	#properties table th,
-	#properties table td {
+	#properties table.trac-properties {
+		display: block !important;
+	}
+	#properties table.trac-properties > tbody > tr > th,
+	#properties table.trac-properties > tbody > tr > td {
 		/* one col, labels on top */
 		display: block;
 		padding: 0 !important;
 		width: 100% !important;
 	}
-	#properties table th {
+	#properties table.trac-properties > tbody > tr > th {
 		padding: 0;
 		margin: 10px 0 5px;
 		text-align: left;
 	}
-	#properties table th.col2 {
+	#properties table.trac-properties > tbody > tr > th.col2 {
 		border-left: none; /* no columns, no divider */
 	}
 	#field-description {
