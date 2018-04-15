@@ -152,7 +152,7 @@ class Comment_Handler {
 		}
 
 		// Remove Trac email footer.
-		while ( $lines && end( $lines ) !== '--' ) {
+		while ( $lines && trim( end( $lines ) ) !== '--' ) {
 			array_pop( $lines );
 		}
 		// Remove -- which starts footer.
