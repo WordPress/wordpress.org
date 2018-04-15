@@ -911,6 +911,7 @@ h3 .trac-ticket-buttons:before {
 }
 h3 .trac-ticket-buttons {
 	padding-top: 8px;
+	visibility: visible !important;
 }
 h3.chat-bot .trac-ticket-buttons {
 	padding-top: 0;
