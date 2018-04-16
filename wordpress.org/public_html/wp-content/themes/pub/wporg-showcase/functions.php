@@ -32,7 +32,7 @@ function site_screenshot_src( $width = '', $echo = true ) {
 	}
 
 	if ( '' != $width ) {
-		$screenshot .= '?w=' . $width;
+		$screenshot = add_query_arg( 'w', $width, $screenshot);
 	}
 
 	$screenshot = apply_filters( 'wporg_showcase_screenshot_src', $screenshot, $post, $width );
@@ -55,8 +55,8 @@ function site_screenshot_tag( $width = '', $classes='screenshot' ) {
 	$srcset = $screenshot;
 
 	if ( '' != $width ) {
-		$screenshot .= '?w=' . $width;
-		$srcset .= '?w=' . $width*2;
+		$screenshot = add_query_arg( 'w', $width, $screenshot);
+		$srcset = add_query_arg( 'w', $width*2 , $screenshot);
 	}
 
 	// mshot images have a 4/3 ratio
