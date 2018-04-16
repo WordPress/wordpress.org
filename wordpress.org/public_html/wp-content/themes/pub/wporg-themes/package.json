@@ -16,6 +16,7 @@
     "cssnano": "^3.7.4",
     "grunt": "^1.0.1",
     "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "~2.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-postcss": "^0.8.0",
     "grunt-rtlcss": "^2.0.1",
@@ -25,4 +26,3 @@
     "es6-promise": "~4.0.5"
   }
 }
-

@@ -11,7 +11,6 @@ require( 'es6-promise' ).polyfill();
 module.exports = function( grunt ) {
 	var isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 
-
 	// Project configuration.
 	grunt.initConfig({
 		postcss: {
@@ -154,6 +153,21 @@ module.exports = function( grunt ) {
 				src: ['**/style.css']
 			}
 		},
+		uglify: {
+			options: {
+				ASCIIOnly: true,
+				screwIE8: false
+			},
+			js: {
+				expand: true,
+				cwd: 'js/',
+				dest: 'js/',
+				ext: '.min.js',
+				src: [
+					'theme.js',
+				]
+			}
+		},
 		watch: {
 			jshint: {
 				files: ['<%= jshint.files %>'],
@@ -176,9 +190,10 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-sass-globbing' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
+	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 
 	grunt.registerTask( 'css', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic'] );
-	grunt.registerTask( 'default', ['jshint', 'css'] );
-	grunt.registerTask( 'build', ['css'] );
+	grunt.registerTask( 'default', ['jshint', 'css', 'uglify:js'] );
+	grunt.registerTask( 'build', ['css', 'uglify:js'] );
 };
 
