@@ -32,12 +32,46 @@ function get_front_page_template( $template ) {
 }
 
 /**
+ * Register custom fonts.
+ */
+function get_fonts_url() {
+	$fonts_url = '';
+	$fonts     = array();
+	$subsets   = 'cyrillic,cyrillic-ext,greek,greek-ext,latin,latin-ext,vietnamese';
+
+	/*
+	 * Translators: If there are characters in your language that are not supported
+	 * by Source Sans Pro, translate this to 'off'. Do not translate into your own language.
+	 */
+	if ( 'off' !== _x( 'on', 'Source Sans Pro font: on or off', 'wp15' ) ) {
+		$fonts[] = 'Source Sans Pro:400,400i,600,700';
+	}
+
+	/*
+	 * Translators: If there are characters in your language that are not supported
+	 * by Crete Round, translate this to 'off'. Do not translate into your own language.
+	 */
+	if ( 'off' !== _x( 'on', 'Crete Round font: on or off', 'wp15' ) ) {
+		$fonts[] = 'Crete Round';
+	}
+
+	if ( $fonts ) {
+		$fonts_url = add_query_arg( array(
+			'family' => rawurlencode( implode( '|', $fonts ) ),
+			'subset' => rawurlencode( $subsets ),
+		), 'https://fonts.googleapis.com/css' );
+	}
+
+	return $fonts_url;
+}
+
+/**
  * Enqueue scripts and styles
  */
 function enqueue_scripts() {
 	wp_register_style(
-		'source-sans-pro',
-		'https://fonts.googleapis.com/css?family=Crete+Round|Source+Sans+Pro:400,400i,600,700&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext,vietnamese'
+		'twentyseventeen-wp15-fonts',
+		get_fonts_url()
 	);
 
 	wp_register_style(
@@ -48,7 +82,7 @@ function enqueue_scripts() {
 	wp_enqueue_style(
 		'twentyseventeen-style',
 		get_stylesheet_directory_uri() . '/style.css',
-		array( 'twentyseventeen-parent-style', 'source-sans-pro', 'dashicons' ),
+		array( 'twentyseventeen-parent-style', 'twentyseventeen-wp15-fonts', 'dashicons' ),
 		filemtime( __DIR__ . '/style.css' )
 	);
 
