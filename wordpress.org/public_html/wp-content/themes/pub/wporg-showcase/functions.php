@@ -37,6 +37,9 @@ function site_screenshot_src( $width = '', $echo = true ) {
 
 	$screenshot = apply_filters( 'wporg_showcase_screenshot_src', $screenshot, $post, $width );
 
+	// force screenshot URLs to be https
+	$screenshot = str_replace( 'http://', 'https://', $screenshot );
+
 	if ( $echo ) {
 		echo $screenshot;
 	} else {
@@ -48,10 +51,7 @@ function site_screenshot_src( $width = '', $echo = true ) {
 function site_screenshot_tag( $width = '', $classes='screenshot' ) {
 	global $post;
 
-	$screenshot = get_post_meta($post->ID, 'screenshot', true);
-	if ( empty( $screenshot ) ) {
-		$screenshot = 'https://wordpress.com/mshots/v1/http%3A%2F%2F' . get_site_domain( true, false );
-	}
+	$screenshot = site_screenshot_src( $width, false );
 	$srcset = $screenshot;
 
 	if ( '' != $width ) {
