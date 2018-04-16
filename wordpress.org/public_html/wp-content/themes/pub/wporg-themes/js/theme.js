@@ -1609,8 +1609,9 @@ window.wp = window.wp || {};
 				Backbone.Router.prototype.navigate.apply( this, arguments );
 			}
 
-			if ( 'object' === typeof _gaq ) {
-				_gaq.push([ '_trackPageview', themes.data.settings.path + arguments[0] ]);
+			if ( 'function' === typeof ga ) {
+				ga('set', 'page', themes.data.settings.path + arguments[0]);
+				ga('send', 'pageview');
 			}
 		}
 	});
