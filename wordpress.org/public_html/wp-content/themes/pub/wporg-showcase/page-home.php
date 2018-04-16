@@ -6,7 +6,7 @@ Template Name: Home
 get_header();
 ?>
 <div id="pagebody" class="home">
-	<?php query_posts( array( 'cat' => 4, 'posts_per_page' => 9 ) ); ?>
+	<?php query_posts( array( 'cat' => 4, 'posts_per_page' => 9, 'post_status' => 'publish' ) ); ?>
 	<?php if ( have_posts() ) : ?>
 
 		<div class="wpsc-hero group">
