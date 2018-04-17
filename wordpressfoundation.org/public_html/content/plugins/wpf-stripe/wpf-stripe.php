@@ -210,14 +210,14 @@ function process_payments() {
 			wp_die( 'Unsupported form action' );
 		}
 
-		$redirect_url = home_url( 'successful-donation/'  );
+		$redirect_url = home_url( 'successful-donation/' );
 	} catch ( Exception $exception ) {
 		log( $exception->getMessage(), $params );
-		$redirect_url = home_url( 'unsuccessful-donation/');
-	} finally {
-		wp_safe_redirect( $redirect_url );
-		exit;
+		$redirect_url = home_url( 'unsuccessful-donation/' );
 	}
+
+	wp_safe_redirect( $redirect_url );
+	exit;
 }
 add_action( 'init', __NAMESPACE__ . '\process_payments' );
 
@@ -228,6 +228,7 @@ add_action( 'init', __NAMESPACE__ . '\process_payments' );
  * @param array  $data
  */
 function log( $error_message, $data ) {
+	// Trigger instead of logging directly, so that it's conveniently displayed in dev environments.
 	trigger_error( sprintf(
 		'%s error: %s. Data: %s',
 		__FUNCTION__,
