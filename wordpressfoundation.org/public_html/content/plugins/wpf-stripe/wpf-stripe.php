@@ -122,48 +122,6 @@ function render_donate_shortcode() {
 }
 add_shortcode( 'wpfstripe', __NAMESPACE__ . '\render_donate_shortcode' );
 
-function process_payments() {
-	if ( ! isset( $_POST['stripeEmail'], $_POST['stripeToken'] ) ) {
-		return;
-	}
-
-	require_once( __DIR__ . '/stripe-php/init.php' );
-	Stripe::setApiKey( STRIPE_SECRET_KEY );
-
-	try {
-		if ( isset( $_POST['wpf_plan'] ) ) {
-			$params = array(
-				'source' => $_POST['stripeToken'],
-				'email'  => $_POST['stripeEmail'],
-				'plan'   => $_POST['wpf_plan'],	// Subscribe the new Customer to the plan at the same time.
-			);
-
-			Customer::create( $params );
-		} elseif ( isset( $_POST['amount'] ) ) {
-			$params = array(
-				'source'        => $_POST['stripeToken'],
-				'receipt_email' => $_POST['stripeEmail'],
-				'amount'        => $_POST['amount'] * 100,	// Convert dollars to pennies.
-				'currency'      => 'USD',
-				'description'   => 'WordPress Foundation donation',
-			);
-
-			Charge::create( $params );
-		} else {
-			wp_die( 'Unsupported form action' );
-		}
-
-		$redirect_url = home_url( 'successful-donation/'  );
-	} catch ( Exception $exception ) {
-		log( $exception->getMessage(), $params );
-		$redirect_url = home_url( 'unsuccessful-donation/');
-	} finally {
-		wp_safe_redirect( $redirect_url );
-		exit;
-	}
-}
-add_action( 'init', __NAMESPACE__ . '\process_payments' );
-
 /**
  * Output CSS for the `[wpfstripe]` shortcode.
  */
@@ -215,6 +173,53 @@ function custom_styles() {
 	<?php
 }
 add_action( 'wp_head', __NAMESPACE__ . '\custom_styles' );
+
+/**
+ * Process donation transactions through Stripe's API.
+ *
+ * Emails for successful transactions are sent by `handle_webhooks()`.
+ */
+function process_payments() {
+	if ( ! isset( $_POST['stripeEmail'], $_POST['stripeToken'] ) ) {
+		return;
+	}
+
+	require_once( __DIR__ . '/stripe-php/init.php' );
+	Stripe::setApiKey( STRIPE_SECRET_KEY );
+
+	try {
+		if ( isset( $_POST['wpf_plan'] ) ) {
+			$params = array(
+				'source' => $_POST['stripeToken'],
+				'email'  => $_POST['stripeEmail'],
+				'plan'   => $_POST['wpf_plan'],	// Subscribe the new Customer to the plan at the same time.
+			);
+
+			Customer::create( $params );
+		} elseif ( isset( $_POST['amount'] ) ) {
+			$params = array(
+				'source'        => $_POST['stripeToken'],
+				'receipt_email' => $_POST['stripeEmail'],
+				'amount'        => $_POST['amount'] * 100,	// Convert dollars to pennies.
+				'currency'      => 'USD',
+				'description'   => 'WordPress Foundation donation',
+			);
+
+			Charge::create( $params );
+		} else {
+			wp_die( 'Unsupported form action' );
+		}
+
+		$redirect_url = home_url( 'successful-donation/'  );
+	} catch ( Exception $exception ) {
+		log( $exception->getMessage(), $params );
+		$redirect_url = home_url( 'unsuccessful-donation/');
+	} finally {
+		wp_safe_redirect( $redirect_url );
+		exit;
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\process_payments' );
 
 /**
  * Log an error message.
