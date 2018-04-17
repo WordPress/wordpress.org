@@ -14,6 +14,7 @@ use Stripe\Stripe, Stripe\Customer, Stripe\Charge;
 
 defined( 'WPINC' ) || die();
 
+require_once( __DIR__ . '/email.php' );
 
 /**
  * Display Stripe donate buttons.
