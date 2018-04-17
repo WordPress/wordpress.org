@@ -140,6 +140,34 @@ function gutenbergtheme_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'gutenbergtheme_scripts' );
 
+function gutenbergtheme_adjacent_post_order( $order_by, $post, $order ) {
+	if ( 'handbook' !== $post->post_type ) {
+		return $order_by;
+	}
+
+	return "ORDER BY p.menu_order $order LIMIT 1";
+}
+add_filter( 'get_previous_post_sort', 'gutenbergtheme_adjacent_post_order', 10, 3 );
+add_filter( 'get_next_post_sort', 'gutenbergtheme_adjacent_post_order', 10, 3 );
+
+function gutenbergtheme_previous_post_where( $where, $in_same_term, $excluded_term, $taxonomy, $post ) {
+	if ( 'handbook' !== $post->post_type ) {
+		return $order_by;
+	}
+
+	return "WHERE p.post_type='handbook' AND p.post_status='publish' AND p.menu_order < {$post->menu_order}";
+}
+add_filter( 'get_previous_post_where', 'gutenbergtheme_previous_post_where', 10, 5 );
+
+function gutenbergtheme_next_post_where( $where, $in_same_term, $excluded_term, $taxonomy, $post ) {
+	if ( 'handbook' !== $post->post_type ) {
+		return $order_by;
+	}
+
+	return "WHERE p.post_type='handbook' AND p.post_status='publish' AND p.menu_order > {$post->menu_order}";
+}
+add_filter( 'get_next_post_where', 'gutenbergtheme_next_post_where', 10, 5 );
+
 /**
  * Implement the Custom Header feature.
  */
