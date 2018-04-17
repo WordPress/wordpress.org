@@ -237,6 +237,7 @@ function register_routes() {
 	register_rest_route( 'wpf-stripe/v1', 'webhooks', $route_args );
 }
 // todo: not ready for production yet -- add_action( 'rest_api_init', __NAMESPACE__ . '\register_routes' );
+// todo before enabling this, replace the placeholder content in the Donation Email posts w/ proper content from Andrea
 
 /**
  * Handle webhooks sent from Stripe.
@@ -308,6 +309,7 @@ function handle_webhooks( $request ) {
 		case 'customer.subscription.deleted':
 			print_r( compact( 'event', 'transaction_data' ) );
 			// send_mail( 'subscription-deleted', $transaction_data );
+			// todo need to add a template for this on production
 			break;
 
 		// An annual subscription payment is coming up soon.

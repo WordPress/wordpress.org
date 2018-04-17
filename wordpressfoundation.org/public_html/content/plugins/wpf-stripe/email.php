@@ -30,6 +30,7 @@ function send_email( $template_name, $transaction_data ) {
 	$to      = $transaction_data['email'];
 	$subject = merge_template_data( $template->post_title, $transaction_data );
 	$message = merge_template_data( $template->post_content, $transaction_data );
+	$headers = array( 'Reply-To: stripe-wpf@wordcamp.org' );
 
 	if ( ! is_email( $to ) || empty( $subject ) || empty( $message ) ) {
 		Stripe\log( 'Invalid email parameters.', compact( 'to', 'subject', 'message' ) );
@@ -38,7 +39,7 @@ function send_email( $template_name, $transaction_data ) {
 
 	//todo create multipart HTML/plaintext
 
-	$success = wp_mail( $to, $subject, $message );
+	$success = wp_mail( $to, $subject, $message, $headers );
 
 	if ( ! $success ) {
 		Stripe\log( 'Email failed to send.', compact( 'to', 'subject', 'message' ) );
