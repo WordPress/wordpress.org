@@ -10,11 +10,13 @@ Author URI:  https://make.wordpress.org/meta
 
 namespace WP15\Miscellaneous;
 use DateTime;
+use TGGRSourceFlickr, TGGRSourceGoogle, TGGRSourceInstagram, TGGRSourceTwitter;
 
 defined( 'WPINC' ) || die();
 
 add_filter( 'map_meta_cap',           __NAMESPACE__ . '\allow_css_editing',         10, 2 );
 add_filter( 'tggr_end_date',          __NAMESPACE__ . '\set_tagregator_cutoff_date'       );
+add_filter( 'wp_insert_post_data',    __NAMESPACE__ . '\moderate_tagregator_posts'        );
 add_action( 'wp_enqueue_scripts',     __NAMESPACE__ . '\register_assets',            1    );
 add_action( 'admin_enqueue_scripts',  __NAMESPACE__ . '\register_assets',            1    );
 add_filter( 'mime_types',             __NAMESPACE__ . '\mime_types'                       );
@@ -57,6 +59,40 @@ function allow_css_editing( $required_capabilities, $requested_capability ) {
 function set_tagregator_cutoff_date( $date ) {
 	// A few weeks after the event ends, so that wrap-up posts, etc are included.
 	return new DateTime( 'June 15, 2018' );
+}
+
+/**
+ * Set new Tagregator posts to `pending`, so they can be manually approved before being displayed.
+ *
+ * The `#WP15` hashtag is shared with other, non-WordPress meanings, and sometimes has content that would be
+ * inappropriate for an official WP site. So, we need to manually approve the posts before they're published.
+ *
+ * @param array $post_data
+ *
+ * @return array
+ */
+function moderate_tagregator_posts( $post_data ) {
+	$tagregator_post_types = array();
+	$moderator_actions     = array( 'edit', 'editpost', 'inline-save' );
+	$modules               = array( 'TGGRSourceFlickr', 'TGGRSourceGoogle', 'TGGRSourceInstagram', 'TGGRSourceTwitter' );
+
+	foreach ( $modules as $module ) {
+		if ( defined( "$module::POST_TYPE_SLUG" ) ) {
+			array_push( $tagregator_post_types, $module::POST_TYPE_SLUG );
+		}
+	}
+
+	if ( 'publish' !== $post_data['post_status'] || ! in_array( $post_data['post_type'], $tagregator_post_types, true ) ) {
+		return $post_data;
+	}
+
+	if ( isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], $moderator_actions, true ) ) {
+		return $post_data;
+	}
+
+	$post_data['post_status'] = 'pending';
+
+	return $post_data;
 }
 
 /**
