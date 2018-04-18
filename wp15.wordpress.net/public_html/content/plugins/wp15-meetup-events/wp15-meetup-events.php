@@ -29,9 +29,9 @@ if ( ! wp_next_scheduled( 'wp15_prime_events_cache' ) ) {
  * Fetch the latest WP15 events and cache them locally.
  */
 function prime_events_cache() {
-	// We can assume that all celebrations will be within a week of the anniversary.
-	$start_date = strtotime( 'May 21, 2018' );
-	$end_date   = strtotime( 'June 2, 2018' );
+	// We can assume that all celebrations will be within a few weeks of the anniversary.
+	$start_date = strtotime( 'May  13, 2018' );
+	$end_date   = strtotime( 'June 10, 2018' );
 
 	/*
 	 * This data will no longer be need to be updated after the event is over. Updating it anyway would use up API
@@ -149,8 +149,8 @@ function get_wp15_events( $potential_events ) {
  */
 function is_wp15_event( $id, $title, $description ) {
 	$match           = false;
-	$keywords        = array( 'wp15', 'anniversary', 'aniversário', 'birthday', '15 year', '15 ano', '15 año' );
-	$false_positives = array();
+	$keywords        = array( 'wp15', 'anniversary', 'aniversário', 'birthday', 'Tanti auguri', '15 year', '15 ano', '15 año', '15 candeline', 'wordt 15' );
+	$false_positives = array( 'jlzcqlyxhbvb' );
 
 	if ( in_array( $id, $false_positives ) ) {
 		return false;
