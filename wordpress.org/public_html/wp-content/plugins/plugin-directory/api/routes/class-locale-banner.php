@@ -177,7 +177,7 @@ class Locale_Banner extends Base {
 				}
 
 				// Non-English locale in header, no translations.
-			} elseif ( $locales_from_header ) {
+			} elseif ( $is_plugin_request && $locales_from_header ) {
 				$locale = reset( $locales_from_header );
 
 				$suggest_string = sprintf(
