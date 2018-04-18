@@ -327,8 +327,17 @@ section {
 			text-decoration: none;
 		}
 
+		li.bbp-body div.type-topic span.bbp-admin-links,
+		li.bbp-body div.type-reply span.bbp-admin-links {
+			display: none;
+		}
+
 		li.bbp-body div.type-topic:hover span.bbp-admin-links,
-		li.bbp-body div.type-reply:hover span.bbp-admin-links {
+		li.bbp-body div.type-reply:hover span.bbp-admin-links,
+		li.bbp-body div.type-topic:focus-within span.bbp-admin-links,
+		li.bbp-body div.type-reply:focus-within span.bbp-admin-links {
+			display: block;
+			position: absolute;
 			bottom: 0;
 			right: 0;
 			background: #fbfbfb;
