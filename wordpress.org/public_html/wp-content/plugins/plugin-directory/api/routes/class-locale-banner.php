@@ -68,12 +68,17 @@ class Locale_Banner extends Base {
 
 		$current_locale = get_locale();
 
+		require_once GLOTPRESS_LOCALES_PATH;
+
+		// Validate the list of locales can be found by `wp_locale`.
+		$translated_locales = array_filter( $translated_locales, function( $locale ) {
+			return \GP_Locales::by_field( 'wp_locale', $locale );
+		} );
+
 		// Build a list of WordPress locales which we'll suggest to the user.
 		$suggest_locales              = array_values( array_intersect( $locales_from_header, $translated_locales ) );
 		$current_locale_is_suggested  = in_array( $current_locale, $suggest_locales );
 		$current_locale_is_translated = in_array( $current_locale, $translated_locales );
-
-		require_once GLOTPRESS_LOCALES_PATH;
 
 		// Get the native language names of the locales.
 		$suggest_named_locales = [];
