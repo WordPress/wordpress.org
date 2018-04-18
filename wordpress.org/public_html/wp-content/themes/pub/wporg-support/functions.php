@@ -404,15 +404,21 @@ function wporg_support_add_moderation_notice() {
 
 	elseif ( in_array( $post->post_status, array( 'pending', 'spam' ) ) ) :
 
+		/* translators: Number of hours the user should wait for a pending post to get approved before contacting moderators. */
+		$moderation_timeframe = (int) __( '96', 'wporg-forums' );
+		if ( ! $moderation_timeframe ) {
+			$moderation_timeframe = 96;
+		}
+
 		if ( $is_user_blocked ) {
 			// Blocked users get a generic message with no call to action or moderation timeframe.
 			$notices[] = __( 'This post has been held for moderation by our automated system.', 'wporg-forums' );
-		} elseif ( $hours_passed > 96 ) {
+		} elseif ( $hours_passed > $moderation_timeframe ) {
 			$notice_class = 'warning';
 			$notices[]    = sprintf(
-				/* translators: %s: https://make.wordpress.org/chat/ */
+				/* translators: %s: WordPress Slack URL */
 				__( 'This post was held for moderation by our automated system but has taken longer than expected to get approved. Please come to the #forums channel on <a href="%s">WordPress Slack</a> and let us know. Provide a link to the post.', 'wporg-forums' ),
-				'https://make.wordpress.org/chat/'
+				esc_url( __( 'https://make.wordpress.org/chat/', 'wporg-forums' ) )
 			);
 		} else {
 			$notices[] = __( 'This post has been held for moderation by our automated system. It will be reviewed within 72 hours.', 'wporg-forums' );
