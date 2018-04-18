@@ -13,7 +13,7 @@ namespace WordCamp\Site_Cloner;
 defined( 'WPINC' ) or die();
 
 const PRIME_SITES_CRON_ACTION      = 'wcsc_prime_sites';
-const WORDCAMP_SITES_TRANSIENT_KEY = 'wcsc_sites';
+const WORDCAMP_SITES_OPTION_KEY = 'wcsc_sites';
 
 /**
  * Initialization
@@ -167,7 +167,7 @@ function register_api_endpoints() {
  */
 function sites_endpoint() {
 	$sites        = array();
-	$cached_sites = get_site_transient( WORDCAMP_SITES_TRANSIENT_KEY );
+	$cached_sites = get_site_option( WORDCAMP_SITES_OPTION_KEY, array() );
 
 	if ( $cached_sites ) {
 		unset( $cached_sites[ get_current_blog_id() ] );
@@ -192,10 +192,7 @@ function prime_wordcamp_sites() {
 		return;
 	}
 
-	// Keep the cache longer than needed, just to be sure that it doesn't expire before the cron job runs again
-	// todo This shouldn't be a transient, it should just be a regular option.
-	//      Transients aren't guaranteed to exist until they expire, so it could expire before the next cron runs
-	set_site_transient( WORDCAMP_SITES_TRANSIENT_KEY, get_wordcamp_sites(), DAY_IN_SECONDS * 2 );
+	update_site_option( WORDCAMP_SITES_OPTION_KEY, get_wordcamp_sites() );
 }
 
 /**
