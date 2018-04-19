@@ -3641,6 +3641,7 @@ section {
 
 .bbpress #bbpress-forums li.bbp-body div.type-topic:focus-within span.bbp-admin-links,
 .bbpress #bbpress-forums li.bbp-body div.type-reply:focus-within span.bbp-admin-links {
+	/* Separated from the block above due to browsers that don't support :focus-within */
 	display: block;
 }
 
