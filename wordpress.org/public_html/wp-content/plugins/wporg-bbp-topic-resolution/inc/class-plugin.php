@@ -253,7 +253,7 @@ class Plugin {
 
 			</select>
 			<input type="submit" name="submit" value="<?php esc_attr_e( 'Update', 'wporg-forums' ); ?>" />
-			</form></span>
+			</form>
 			<?php
 		}
 	}
