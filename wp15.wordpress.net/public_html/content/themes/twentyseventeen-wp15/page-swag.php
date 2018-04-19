@@ -46,7 +46,6 @@ use WP15\Theme;
 
 						<img class="wp15-confetti-divider" src="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/images/confetti-divider.svg" alt="" />
 
-						<!--
 						<h2>
 							<?php esc_html_e( 'Purchase', 'wp15' ); ?>
 						</h2>
@@ -55,11 +54,12 @@ use WP15\Theme;
 							<?php
 							printf(
 								wp_kses_post( __( 'Check out the <a href="%s">WordPress Swag Store</a> if you\'d like to purchase WordPress 15th anniversary swag.', 'wp15' ) ),
-								'https://mercantile.wordpress.org/' // TODO use WP15-specific url
+								'https://mercantile.wordpress.org/product-category/wordpress-15/'
 							);
 							?>
 						</p>
-						-->
+
+						<?php echo wp_oembed_get( 'https://mercantile.wordpress.org/product/wordpress-15th-anniversary-tshirt/' ); ?>
 
 					</div>
 
