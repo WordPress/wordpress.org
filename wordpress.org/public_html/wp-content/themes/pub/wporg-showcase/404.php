@@ -13,7 +13,7 @@ $wp_query = new WP_Query( array( 'no_found_rows' => true, 'post_type' => 'post',
 
 					<div class="col-5">
 						<div class="storycontent">
-								<p>Sorry, we could not not find that site in the Showcase. We do have many others available though. Here's one chosen at random!<p>
+								<p>Sorry, we could not not find that site in the Showcase. We do have many others available though. Here&#8217;s one chosen at random!</p>
 								<?php //breadcrumb(); ?>
 								<h3><?php the_title(); ?></h3>
 								<a href=' http://<?php get_site_domain( false ); ?>'>
