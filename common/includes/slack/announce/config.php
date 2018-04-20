@@ -119,6 +119,7 @@ function get_whitelist() {
 		),
 		'core-restapi' => array(
 			'danielbachhuber',
+			'flixos90',
 			'joehoyle',
 			'kadamwhite',
 			'krogsgard',
