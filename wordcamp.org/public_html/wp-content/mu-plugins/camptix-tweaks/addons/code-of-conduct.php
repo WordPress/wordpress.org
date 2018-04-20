@@ -63,7 +63,7 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 			</td>
 
 			<td class="tix-right">
-				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="checkbox" <?php checked( $current_data[ self::SLUG ] ); ?> /> <?php esc_html_e( 'Yes', 'wordcamporg' ); ?></label>
+				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="checkbox" <?php checked( $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html_x( 'Yes', 'ticket registration option', 'wordcamporg' ); ?></label>
 			</td>
 		</tr>
 
@@ -143,7 +143,7 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 	 * @return mixed
 	 */
 	public function add_metabox_row( $rows, $post ) {
-		$value = get_post_meta( $post->ID, 'tix_' . self::SLUG, true ) ? __( 'Yes', 'wordcamporg' ) : '';
+		$value = get_post_meta( $post->ID, 'tix_' . self::SLUG, true ) ? _x( 'Yes', 'ticket registration option', 'wordcamporg' ) : '';
 		$new_row = array( __( 'Do you agree to follow the event Code of Conduct?', 'wordcamporg' ), esc_html( $value ) );
 
 		add_filter( 'locale', array( $this, 'set_locale_to_en_US' ) );
