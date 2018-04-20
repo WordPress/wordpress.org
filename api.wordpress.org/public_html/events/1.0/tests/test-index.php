@@ -757,9 +757,9 @@ function get_location_test_cases() {
 		'ip-europe' => array(
 			'input' => array( 'ip' => '80.95.186.144' ),
 			'expected' => array(
-				'description' => 'queens island',
-				'latitude'    => '54.617',
-				'longitude'   => '-5.900',
+				'description' => 'belfast',
+				'latitude'    => '54.583',
+				'longitude'   => '-5.933',
 				'country'     => 'GB',
 				'internal'    => true,
 			),
