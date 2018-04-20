@@ -20,6 +20,7 @@ function run_tests() {
 	$tests_failed = 0;
 	$tests_failed += test_get_location();
 	$tests_failed += test_get_events();
+	$tests_failed += test_get_events_country_restriction();
 	$tests_failed += test_add_regional_wordcamps();
 	$tests_failed += test_build_response();
 	$tests_failed += test_is_client_core();
@@ -124,6 +125,7 @@ function get_location_test_cases() {
 		'country-code-australia' => array(
 			'input' => array(
 				'country' => 'AU',
+				'restrict_by_country' => true,
 			),
 			'expected' => array(
 				'country' => 'AU',
@@ -905,7 +907,7 @@ function test_get_events() {
 }
 
 /**
- * Get the cases for testing `get_location()`
+ * Get the cases for testing `get_events()`.
  *
  * @return array
  */
@@ -930,11 +932,86 @@ function get_events_test_cases() {
 			'input' => array(
 				'number'  => '1',
 				'country' => 'AU',
+				'restrict_by_country' => true,
 			),
 			'expected' => array(
 				'count'   => 1,
 				'country' => 'AU',
 			),
+		),
+	);
+
+	return $cases;
+}
+
+/**
+ * Test `get_events()` `restricted_by_country` parameter.
+ *
+ * @return bool The number of failures
+ */
+function test_get_events_country_restriction() {
+	$failed = 0;
+	$cases  = get_events_country_restriction_test_cases();
+
+	printf( "\n\nRunning %d events restrict by country tests\n", count( $cases ) );
+
+	foreach ( $cases as $case_id => $case ) {
+		$actual_result    = get_events( $case['input'] );
+		$actual_countries = array_column( array_column( $actual_result, 'location' ), 'country' );
+		$actual_countries = array_unique( array_map( 'strtoupper', $actual_countries ) );
+
+		sort( $actual_countries );
+
+		$passed = $actual_countries === $case['expected_countries'];
+
+		output_results( $case_id, $passed, $case['expected_countries'], $actual_countries );
+
+		if ( ! $passed ) {
+			$failed++;
+		}
+	}
+
+	return $failed;
+}
+
+/**
+ * Get the cases for testing the `get_events()` `restricted_by_country` parameter.
+ *
+ * @return array
+ */
+function get_events_country_restriction_test_cases() {
+	$cases = array(
+		'restricted-by-country' => array(
+			'input' => array(
+				'number'              => '500',
+				'country'             => 'CA',
+				'restrict_by_country' => true,
+			),
+			'expected_countries' => array( 'CA' ),
+		),
+
+		/*
+		 * This assumes there will always be at least an upcoming event on both sides of the border, so the
+		 * coordinates need to be half-way between two very active groups in different countries, where the
+		 * mid-point is less than `$event_distances['meetup']`.
+		 *
+		 * If Toronto, CA and Buffalo, US no longer work in the future, then another possible location would be
+		 * `53.997654, -6.403377` -- between Belfast, GB and Dublin, IE -- or `47.986952, -122.961350` --
+		 * between Seattle, US and Victoria, CA.
+		 *
+		 * See https://wordpress.slack.com/archives/C08M59V3P/p1524168308000202.
+		 */
+		'not-restricted-by-country' => array(
+			'input' => array(
+				'number'              => '500',
+				'restrict_by_country' => false,
+
+				'nearby' => array(
+					'latitude'  => '43.254372',
+					'longitude' => '-79.063746',
+				),
+			),
+			'expected_countries' => array( 'CA', 'US' ),
 		),
 	);
 
@@ -1009,6 +1086,9 @@ function build_response_test_cases() {
 			'input' => array(
 				'location' => array(
 					'country' => 'CA',
+				),
+				'location_args' => array(
+					'restrict_by_country' => true,
 				),
 			),
 			'expected' => array(

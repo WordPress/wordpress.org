@@ -75,7 +75,7 @@ function bootstrap() {
  * @return array
  */
 function parse_request() {
-	$location_args = array();
+	$location_args = array( 'restrict_by_country' => false );
 
 	// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
 	if ( isset( $_GET['latitude'] ) ) {
@@ -85,6 +85,7 @@ function parse_request() {
 
 	if ( isset( $_GET['country'] ) ) {
 		$location_args['country'] = $_GET['country'];
+		$location_args['restrict_by_country'] = true;
 	}
 
 	// If a precise location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
@@ -144,6 +145,7 @@ function build_response( $location, $location_args ) {
 	if ( $location ) {
 		$event_args = array(
 			'is_client_core' => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
 		if ( isset( $_REQUEST['number'] ) ) {
@@ -722,7 +724,7 @@ function get_events( $args = array() ) {
 	}
 
 	// Allow queries for limiting to specific countries.
-	if ( ! empty( $args['country'] ) && preg_match( '![a-z]{2}!i', $args['country'] ) ) {
+	if ( $args['restrict_by_country'] && ! empty( $args['country'] ) && preg_match( '![a-z]{2}!i', $args['country'] ) ) {
 		$wheres[]     = '`country` = %s';
 		$sql_values[] = $args['country'];
 	}
@@ -882,7 +884,7 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
 	}
 
 	// Allow queries for limiting to specific countries.
-	if ( ! empty( $request_args['country'] ) && preg_match( '![a-z]{2}!i', $request_args['country'] ) ) {
+	if ( $request_args['restrict_by_country'] && ! empty( $request_args['country'] ) && preg_match( '![a-z]{2}!i', $request_args['country'] ) ) {
 		$where[]  = '`country` = %s';
 		$values[] = $request_args['country'];
 	}
