@@ -279,7 +279,7 @@ class Import_Gutendocs {
 		$markdown = preg_replace( '/(\[.*?\]\((\.\.\/)+.*?)(\.md)?\)/i', '$1)', $markdown );
 
 		// Remove the (../)*docs/ path from relative links, and replace it with an absolute URL
-		$markdown = preg_replace( '/(\[.*?\])\(((\.\.\/)*docs\/)?(.*?)\/?\)/i', '$1(https://wordpress.org/gutenberg/handbook/$4/)', $markdown );
+		$markdown = preg_replace( '/(\[.*?\])\((\.\.\/)+docs\/(.*?)\/?\)/i', '$1(https://wordpress.org/gutenberg/handbook/$3/)', $markdown );
 
 		// Transform to HTML
 		jetpack_require_lib( 'markdown' );
