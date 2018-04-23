@@ -195,6 +195,7 @@ a:hover img,
 
 div.content {
 	float: right;
+	width: 100%;
 }
 div.leftcol {
 	float: left;
@@ -204,6 +205,7 @@ div.rightcol {
 }
 div.sidebar {
 	float: left;
+	width: 100%;
 }
 div.group {
 	padding: 20px 20px 1px 20px;
@@ -1559,6 +1561,13 @@ body.trac .attachment {
 	display: inline;
 }
 
+/* =Toolbar
+-------------------------------------------------------------- */
+
+#wp-toolbar {
+	width: 960px;
+}
+
 /* =Responsive Overrides
 -------------------------------------------------------------- */
 
@@ -1590,6 +1599,9 @@ body.trac .attachment {
 	div.group div.sidebar {
 		width: 200px;
 	}
+	#wp-toolbar {
+		width: 960px;
+	}
 }
 
 /* Do not fix #header for non-desktops */
@@ -1599,8 +1611,21 @@ body.trac .attachment {
 		z-index: 0;
 		position: absolute;
 	}
+	#header-inner h1 a {
+		width: 65px !important;
+	}
 	#wpadminbar {
+		height: 56px !important;
 		position: absolute;
+	}
+	#wp-toolbar {
+		width: 100%;
+	}
+	body:not(.trac):not(.home-page) #main {
+		margin-top: 140px;
+	}
+	.bbp-topic-meta {
+		display: none;
 	}
 }
 
