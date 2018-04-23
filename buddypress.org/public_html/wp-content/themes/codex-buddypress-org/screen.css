@@ -2,22 +2,19 @@
 
 /* Layout
 --------------------------------------------------------------------*/
-#main .content {
-	width: 680px;
-}
 
 body.home-page.home #main {
-        margin-top: 120px;
+  margin-top: 120px;
 }
 
 #subnav {
-	background: transparent;
-	border-bottom: none;
-	margin-top: 135px;
+  background: transparent;
+  border-bottom: none;
+  margin-top: 135px;
 }
 
 #footer {
-	border-top: none;
+  border-top: none !important;
 }
 
 /* Typography
@@ -26,6 +23,7 @@ body.home-page.home #main {
 .content h1 {
   font-size: 24px;
   margin-bottom: .5em;
+  margin-top: .5em;
 }
 
 /* Sections
@@ -59,17 +57,6 @@ body.home-page.home #main {
 }
 .table-of-contents-widget li:first-child {
   border-top: 0;
-}
-.table-of-contents-widget:before {
-  position: absolute;
-  content: '';
-  top: 0;
-  right: -11px;
-  width: 0;
-  height: 0;
-  border-top: 22px solid transparent;
-  border-bottom: 22px solid transparent;
-  border-left: 10px solid #d54e21;
 }
 .user-widget {
   margin: 20px 0;

@@ -151,7 +151,6 @@ body:not(.trac):not(.home-page) #main {
 }
 
 #footer {
-	width: 100%;
 	padding: 24px 0;
 	font-size: 12px;
 	margin: 0 auto 24px auto;
@@ -1631,8 +1630,20 @@ body.trac .attachment {
 	#wp-toolbar {
 		width: 100%;
 	}
+	#main {
+		margin: 100px 10px 40px 10px;
+	}
 	body:not(.trac):not(.home-page) #main {
 		margin-top: 140px;
+	}
+	#footer {
+		padding: 10px;
+		margin: 10px;
+	}
+	#footer div.links,
+	#footer div.details {
+		float: none;
+		margin: 10px 0;
 	}
 	#bb-menu-icon {
 		display: block;
@@ -1680,16 +1691,5 @@ body.trac .attachment {
 	#nav:hover #bb-menu-icon:before,
 	#nav:focus #bb-menu-icon:before {
 		color: #fff;
-	}
-}
-
-/* Bump #header-inner height on mobile to support stacked elements */
-@media screen and ( max-width: 460px ) {
-	#header-inner {
-		margin: 0 auto;
-		padding: 0;
-	}
-	#main {
-		margin: 100px 10px 40px 10px;
 	}
 }
