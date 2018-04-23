@@ -339,7 +339,6 @@ div.single-post table tr.alt td {
 
 #bb-menu-icon:before {
 	font: normal 16px/1 'dashicons';
-	margin-right: 5px;
 	color: #000;
 	content: '\f349'
 }
@@ -1639,9 +1638,10 @@ body.trac .attachment {
 		display: block;
 		position: absolute;
 		right: 0;
-		padding: 33px 15px 33px 33px;
+		padding: 33px 20px 33px 33px;
 		text-decoration: none;
 	}
+	#bb-menu-icon:hover
 	#nav {
 		margin: 0;
 		float: right;
@@ -1651,7 +1651,8 @@ body.trac .attachment {
 		position: absolute;
 		width: 100%;
 		right: 0;
-		top: 70px;
+		top: 81px;
+		border-bottom: 1px solid #aaa;
 	}
 	#bb-nav li {
 		width: 100%;
@@ -1663,8 +1664,9 @@ body.trac .attachment {
 		display: block;
 		margin: 0;
 		padding: 20px;
-		text-shadow: none !important;
 		color: #000;
+		text-shadow: none !important;
+		border-radius: 0 !important;
 	}
 	#bb-nav,
 	#bbpress-forums .bbp-pagination-count,
