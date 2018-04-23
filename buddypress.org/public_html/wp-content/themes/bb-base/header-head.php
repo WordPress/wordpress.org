@@ -1,7 +1,6 @@
 <head profile="http://gmpg.org/xfn/11">
-
 	<title><?php wp_title( '&middot;', true, 'right' ); bloginfo( 'name' ); ?></title>
-
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta http-equiv="Content-Type" content="<?php bloginfo( 'html_type' ); ?>; charset=<?php bloginfo( 'charset' ); ?>" />
 	<meta http-equiv="Content-Style-Type" content="text/css" />
 	<meta name="distribution" content="global" />
