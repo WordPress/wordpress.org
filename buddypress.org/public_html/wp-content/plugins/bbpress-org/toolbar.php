@@ -507,7 +507,6 @@ function bbporg_toolbar_css_overrides() {
 			#wpadminbar .ab-top-menu > li.menupop.hover > .ab-item { color: #555; background: #e2e2e2; }
 			#wpadminbar > #wp-toolbar li:hover span.ab-label, #wpadminbar > #wp-toolbar li.hover span.ab-label, #wpadminbar > #wp-toolbar a:focus span.ab-label { color: #555; }
 			#wpadminbar li:hover .ab-icon:before, #wpadminbar li:hover .ab-item:before, #wpadminbar li:hover .ab-item:after, #wpadminbar li:hover #adminbarsearch:before { color: #999; }
-			#wp-toolbar { width: 960px; margin: 0 auto; }
 
 			/* Admin Bar: submenu */
 			#wpadminbar .menupop .ab-sub-wrapper { background: #eee; }
@@ -544,9 +543,7 @@ function bbporg_toolbar_css_overrides() {
 			@media screen and ( max-width: 460px ) {
 				#wpadminbar {
 					top: 140px;
-				}
-				#wp-toolbar {
-					width: 100%;
+					height: 56px;
 				}
 				#wpadminbar #wp-toolbar a.ab-item,
 				#wpadminbar .quicklinks li#wp-admin-bar-bp-notifications > a { padding: 0; }
