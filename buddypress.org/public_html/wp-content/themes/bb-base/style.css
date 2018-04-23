@@ -1565,7 +1565,7 @@ body.trac .attachment {
 -------------------------------------------------------------- */
 
 #wp-toolbar {
-	width: 960px;
+	margin: 0 auto;
 }
 
 /* =Responsive Overrides
