@@ -200,3 +200,14 @@ body.home-page.home #main {
   font-size: 14px;
   font-weight: 200;
 }
+
+@media screen and ( max-width: 782px ) {
+	.footer-meta-wrap .footer-meta {
+		width: auto;
+		padding: 0;
+	}
+	.footer-meta-wrap .footer-meta .col-half {
+		width: 100%;
+		padding: 10px;
+	}
+}

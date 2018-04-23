@@ -54,7 +54,7 @@ if ( bb_base_is_codex() ) {
 function bb_base_register_stylesheets() {
 
 	// Version of CSS
-	$version = '201804220015';
+	$version = '201804220020';
 
 	// Base theme styling
 	wp_enqueue_style( 'bb-base',   get_template_directory_uri()   . '/style.css', false,                         $version, 'screen' );
