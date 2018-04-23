@@ -333,6 +333,17 @@ div.single-post table tr.alt td {
 /* =Navigation
 -------------------------------------------------------------- */
 
+#bb-menu-icon {
+	display: none;
+}
+
+#bb-menu-icon:before {
+	font: normal 16px/1 'dashicons';
+	margin-right: 5px;
+	color: #000;
+	content: '\f349'
+}
+
 #nav {
 	float: right;
 	margin: 30px 0 0 0;
@@ -1608,7 +1619,7 @@ body.trac .attachment {
 @media screen and ( max-width: 782px ) {
 	#header {
 		top: 0;
-		z-index: 0;
+		z-index: 999999;
 		position: absolute;
 	}
 	#header-inner h1 a {
@@ -1624,15 +1635,52 @@ body.trac .attachment {
 	body:not(.trac):not(.home-page) #main {
 		margin-top: 140px;
 	}
+	#bb-menu-icon {
+		display: block;
+		position: absolute;
+		right: 0;
+		padding: 30px;
+		text-decoration: none;
+	}
+	#nav {
+		margin: 0;
+		float: right;
+		overflow: visible;
+	}
+	#bb-nav {
+		position: absolute;
+		width: 100%;
+		right: 0;
+		top: 70px;
+	}
+	#bb-nav li {
+		width: 100%;
+		text-align: center;
+		margin: 0;
+		padding: 0;
+	}
+	#bb-nav li a {
+		display: block;
+		margin: 0;
+		padding: 20px;
+		text-shadow: none !important;
+		color: #000;
+	}
+	#bb-nav,
+	#bbpress-forums .bbp-pagination-count,
 	.bbp-topic-meta {
 		display: none;
+	}
+	#nav:hover #bb-nav,
+	#nav:focus #bb-nav {
+		background-color: #eee;
+		display: block !important;
 	}
 }
 
 /* Bump #header-inner height on mobile to support stacked elements */
 @media screen and ( max-width: 460px ) {
 	#header-inner {
-		height: 140px;
 		margin: 0 auto;
 		padding: 0;
 	}
