@@ -1639,7 +1639,7 @@ body.trac .attachment {
 		display: block;
 		position: absolute;
 		right: 0;
-		padding: 30px;
+		padding: 33px 15px 33px 33px;
 		text-decoration: none;
 	}
 	#nav {
