@@ -448,7 +448,7 @@ function bporg_toolbar_css_overrides() {
 		<?php if ( is_main_site() && is_front_page() ) : ?>
 			#wpadminbar { display: none !important; }
 		<?php else : ?>
-			#wpadminbar { color: #555; background: #eee; border-bottom: 1px solid #ddd; height: 42px; }
+			#wpadminbar { color: #555; background: #eee; top: 81px; border-bottom: 1px solid #ddd; height: 42px; }
 			#wpadminbar #wp-toolbar a.ab-item, #wpadminbar .quicklinks li#wp-admin-bar-bp-notifications > a { padding: 5px; }
 			#wpadminbar #wp-toolbar ul.ab-submenu a.ab-item { padding: 0 2em 0 1em; }
 			#wpadminbar #wp-toolbar .ab-top-secondary .menupop .menupop > a.ab-item  { padding: 0 1em 0 2em; }
@@ -498,7 +498,6 @@ function bporg_toolbar_css_overrides() {
 			/* Some responsive'ish tweaks */
 			@media screen and ( max-width: 460px ) {
 				#wpadminbar {
-					top: 81px;
 					height: 56px;
 				}
 				#wpadminbar #wp-toolbar a.ab-item,
