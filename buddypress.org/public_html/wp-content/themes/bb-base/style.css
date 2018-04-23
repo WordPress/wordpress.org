@@ -1641,7 +1641,6 @@ body.trac .attachment {
 		padding: 33px 20px 33px 33px;
 		text-decoration: none;
 	}
-	#bb-menu-icon:hover
 	#nav {
 		margin: 0;
 		float: right;
@@ -1677,6 +1676,10 @@ body.trac .attachment {
 	#nav:focus #bb-nav {
 		background-color: #eee;
 		display: block !important;
+	}
+	#nav:hover #bb-menu-icon:before,
+	#nav:focus #bb-menu-icon:before {
+		color: #fff;
 	}
 }
 
