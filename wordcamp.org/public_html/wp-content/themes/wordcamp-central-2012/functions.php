@@ -365,7 +365,7 @@ class WordCamp_Central_Theme {
 			<li class="menu-item menu-item-type-custom menu-item-object-custom"><a href="<?php echo esc_url( get_feed_link() ); ?>">RSS (posts)</a></li>
 			<li class="menu-item menu-item-type-custom menu-item-object-custom"><a href="<?php echo esc_url( get_post_type_archive_feed_link( 'wordcamp' ) ); ?>">RSS (WordCamps)</a></li>
 			<li class="menu-item menu-item-type-custom menu-item-object-custom">
-				<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link( '<span class="privacy-policy-link-wrapper">', '</span>' ); ?>
+				<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link(); ?>
 			</li>
 
 			<?php

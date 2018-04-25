@@ -23,6 +23,10 @@ class WCB_Footer extends WCB_Element {
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php echo esc_attr( get_bloginfo( 'name', 'display' ) ); ?>" rel="home">
 							<?php bloginfo( 'name' ); ?>
 						</a>
+
+						<span role="separator" aria-hidden="true"></span>
+
+						<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link(); ?>
 					</div>
 
 					<div id="site-generator">
@@ -35,8 +39,6 @@ class WCB_Footer extends WCB_Element {
 							?>
 						</a>
 					</div>
-
-					<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link( '<span class="privacy-policy-link-wrapper">', '</span>' ); ?>
 				</div>
 			</div>
 		</div>

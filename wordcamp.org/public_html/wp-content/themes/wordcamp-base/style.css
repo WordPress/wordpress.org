@@ -190,6 +190,9 @@ div.menu,
 	font-weight: bold;
 	width: 700px;
 }
+#site-info a {
+    margin-right: 1.25em;
+}
 #site-generator {
 	float: right;
 	width: 220px;

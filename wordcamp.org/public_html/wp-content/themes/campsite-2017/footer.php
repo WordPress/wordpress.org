@@ -24,11 +24,15 @@ namespace WordCamp\CampSite_2017;
 					<?php echo esc_html( sprintf( __( 'Proudly powered by %s', 'wordcamporg' ), 'WordPress' ) ); ?>
 				</a>
 
+				<span role="separator" aria-hidden="true"></span>
+
 				<a class="site-info-network" href="https://central.wordcamp.org/">
 					<?php esc_html_e( 'Go to WordCamp Central', 'wordcamporg' ); ?>
 				</a>
 
-				<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link( '<span class="privacy-policy-link-wrapper">', '</span>' ); ?>
+				<span role="separator" aria-hidden="true"></span>
+
+				<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link(); ?>
 			</div>
 		</footer>
 
