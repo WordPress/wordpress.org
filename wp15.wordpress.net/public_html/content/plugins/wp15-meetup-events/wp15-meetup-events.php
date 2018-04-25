@@ -30,7 +30,7 @@ if ( ! wp_next_scheduled( 'wp15_prime_events_cache' ) ) {
  */
 function prime_events_cache() {
 	// We can assume that all celebrations will be within a few weeks of the anniversary.
-	$start_date = strtotime( 'May  13, 2018' );
+	$start_date = strtotime( 'May   1, 2018' );
 	$end_date   = strtotime( 'June 10, 2018' );
 
 	/*
