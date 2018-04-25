@@ -73,6 +73,8 @@
 				<?php esc_html_e( 'See all upcoming events at WordCamp Central', 'wordcamporg' ); ?>
 			</a>
 		</p>
+
+		<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link( '<span class="privacy-policy-link-wrapper">', '</span>' ); ?>
 	</div>
 
 	<?php wp_footer(); ?>
