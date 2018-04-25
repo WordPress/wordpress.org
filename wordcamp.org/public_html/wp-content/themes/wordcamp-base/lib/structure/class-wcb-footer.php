@@ -35,6 +35,8 @@ class WCB_Footer extends WCB_Element {
 							?>
 						</a>
 					</div>
+
+					<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link( '<span class="privacy-policy-link-wrapper">', '</span>' ); ?>
 				</div>
 			</div>
 		</div>

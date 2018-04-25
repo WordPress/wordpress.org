@@ -44,6 +44,7 @@
 				<?php esc_html_e( 'Go to WordCamp Central', 'wordcamporg' ); ?>
 			</a>
 
+			<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link( '<span class="privacy-policy-link-wrapper">', '</span>' ); ?>
 		</div>
 	</footer>
 </div> <!-- #page -->
