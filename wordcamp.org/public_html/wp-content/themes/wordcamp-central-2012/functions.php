@@ -5,7 +5,6 @@
  * (Almost) everything in this file works around the base class called WordCamp_Central_Theme,
  * which is a static class, and should never have an instance (hence the trigger_error trick
  * in the class constructor.)
- *
  */
 
 /**
@@ -51,7 +50,7 @@ class WordCamp_Central_Theme {
 	 */
 	static function after_setup_theme() {
 		add_theme_support( 'post-formats', array( 'link', 'image' ) );
-		$GLOBALS['custom_background'] = 'WordCamp_Central_Theme_Kill_Features';
+		$GLOBALS['custom_background']   = 'WordCamp_Central_Theme_Kill_Features';
 		$GLOBALS['custom_image_header'] = 'WordCamp_Central_Theme_Kill_Features';
 
 		// Add some new image sizes, also site shot is 205x148, minimap is 130x70
@@ -72,22 +71,22 @@ class WordCamp_Central_Theme {
 		unregister_sidebar( 'secondary-widget-area' );
 
 		register_sidebar( array(
-			'name' => __( 'Pages Widget Area', 'twentyten' ),
-			'id' => 'pages-widget-area',
-			'description' => __( 'Widgets displayed on pages.', 'twentyten' ),
+			'name'          => __( 'Pages Widget Area', 'twentyten' ),
+			'id'            => 'pages-widget-area',
+			'description'   => __( 'Widgets displayed on pages.', 'twentyten' ),
 			'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
-			'after_widget' => '</li>',
-			'before_title' => '<h3 class="widget-title">',
-			'after_title' => '</h3>',
+			'after_widget'  => '</li>',
+			'before_title'  => '<h3 class="widget-title">',
+			'after_title'   => '</h3>',
 		) );
 		register_sidebar( array(
-			'name' => __( 'Blog Widget Area', 'twentyten' ),
-			'id' => 'blog-widget-area',
-			'description' => __( 'Widgets displayed on the blog.', 'twentyten' ),
+			'name'          => __( 'Blog Widget Area', 'twentyten' ),
+			'id'            => 'blog-widget-area',
+			'description'   => __( 'Widgets displayed on the blog.', 'twentyten' ),
 			'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
-			'after_widget' => '</li>',
-			'before_title' => '<h3 class="widget-title">',
-			'after_title' => '</h3>',
+			'after_widget'  => '</li>',
+			'before_title'  => '<h3 class="widget-title">',
+			'after_title'   => '</h3>',
 		) );
 	}
 
@@ -96,8 +95,9 @@ class WordCamp_Central_Theme {
 	 * Removes pages and WordCamps from search results.
 	 */
 	static function pre_get_posts( $query ) {
-		if ( $query->is_search && $query->is_main_query() && ! is_admin() )
+		if ( $query->is_search && $query->is_main_query() && ! is_admin() ) {
 			$query->set( 'post_type', 'post' );
+		}
 	}
 
 	/**
@@ -108,19 +108,21 @@ class WordCamp_Central_Theme {
 	 */
 	static function process_forms() {
 		$available_actions = array( 'subscribe' );
-		if ( ! isset( $_REQUEST['wccentral-form-action'] ) || ! in_array( $_REQUEST['wccentral-form-action'], $available_actions ) )
+		if ( ! isset( $_REQUEST['wccentral-form-action'] ) || ! in_array( $_REQUEST['wccentral-form-action'], $available_actions ) ) {
 			return;
+		}
 
 		$action = $_REQUEST['wccentral-form-action'];
 		switch ( $action ) {
 
 			// Subscribe to mailing list
 			case 'subscribe':
-				if ( ! call_user_func( array( __CLASS__, 'can_subscribe' ) ) )
+				if ( ! call_user_func( array( __CLASS__, 'can_subscribe' ) ) ) {
 					return;
+				}
 
 				// Jetpack will do the is_email check for us
-				$email = $_REQUEST['wccentral-subscribe-email'];
+				$email     = $_REQUEST['wccentral-subscribe-email'];
 				$subscribe = Jetpack_Subscriptions::subscribe( $email, 0, false );
 
 				// The following part is taken from the Jetpack subscribe widget (subscriptions.php)
@@ -137,11 +139,12 @@ class WordCamp_Central_Theme {
 				}
 
 				if ( $error ) {
-					switch( $error ) {
+					switch ( $error ) {
 						case 'invalid_email':
 							$redirect = add_query_arg( 'subscribe', 'invalid_email' );
 							break;
-						case 'active': case 'pending':
+						case 'active':
+						case 'pending':
 							$redirect = add_query_arg( 'subscribe', 'already' );
 							break;
 						default:
@@ -169,7 +172,8 @@ class WordCamp_Central_Theme {
 
 		wp_localize_script( 'wordcamp-central', 'wordcampCentralOptions', self::get_javascript_options() );
 
-		/* We add some JavaScript to pages with the comment form
+		/*
+		 * We add some JavaScript to pages with the comment form
 		 * to support sites with threaded comments (when in use).
 		 */
 		if ( is_singular() && get_option( 'thread_comments' ) ) {
@@ -207,7 +211,9 @@ class WordCamp_Central_Theme {
 			$options['markerIconHeight']        = 94;
 			$options['markerIconWidth']         = 122;
 
-			if ( $map_markers = self::get_map_markers( $map_id ) ) {
+			$map_markers = self::get_map_markers( $map_id );
+
+			if ( $map_markers ) {
 				$options['mapMarkers'] = $map_markers;
 			}
 		}
@@ -229,7 +235,7 @@ class WordCamp_Central_Theme {
 			preg_match_all( '/' . get_shortcode_regex() . '/s', $post_content, $shortcodes, PREG_SET_ORDER );
 
 			foreach ( $shortcodes as $shortcode ) {
-				if ( 'wcc_map' == $shortcode[2] ) {
+				if ( 'wcc_map' === $shortcode[2] ) {
 					$attributes = shortcode_parse_atts( $shortcode[3] );
 					$map_id     = sanitize_text_field( $attributes['id'] );
 					break;
@@ -249,14 +255,15 @@ class WordCamp_Central_Theme {
 	 */
 	protected static function get_map_markers( $map_id ) {
 		$transient_key = "wcc_map_markers_$map_id";
+		$markers       = get_transient( $transient_key );
 
-		if ( $markers = get_transient( $transient_key ) ) {
+		if ( $markers ) {
 			return $markers;
 		} else {
 			$markers = array();
 		}
 
-		// Get the raw marker posts for the given map
+		// Get the raw marker posts for the given map.
 		$parameters = array(
 			'post_type'      => 'wordcamp',
 			'posts_per_page' => -1,
@@ -266,7 +273,7 @@ class WordCamp_Central_Theme {
 			),
 		);
 
-		switch( $map_id ) {
+		switch ( $map_id ) {
 			case 'schedule':
 				$parameters['meta_query'][] = array(
 					'key'     => 'Start Date (YYYY-mm-dd)',
@@ -278,32 +285,34 @@ class WordCamp_Central_Theme {
 
 		$raw_markers = get_posts( $parameters );
 
-		// Convert the raw markers into prepared objects that are ready to be used on the JavaScript side
+		// Convert the raw markers into prepared objects that are ready to be used on the JavaScript side.
 		foreach ( $raw_markers as $marker ) {
-			if ( 'schedule' == $map_id ) {
+			if ( 'schedule' === $map_id ) {
 				$marker_type = 'upcoming';
 			} else {
 				$marker_type = get_post_meta( $marker->ID, 'Start Date (YYYY-mm-dd)', true ) > strtotime( '-2 days' ) ? 'upcoming' : 'past';
 			}
 
-			if ( ! $coordinates = get_post_meta( $marker->ID, '_venue_coordinates', true ) ) {
+			$coordinates = get_post_meta( $marker->ID, '_venue_coordinates', true );
+
+			if ( ! $coordinates ) {
 				continue;
 			}
 
 			$markers[ $marker->ID ] = array(
-				'id'          => $marker->ID,
-				'name'        => wcpt_get_wordcamp_title( $marker->ID ),
-				'dates'       => wcpt_get_wordcamp_start_date( $marker->ID ),
-				'location'    => get_post_meta( $marker->ID, 'Location', true ),
-				'venueName'   => get_post_meta( $marker->ID, 'Venue Name', true ),
-				'url'         => self::get_best_wordcamp_url( $marker->ID ),
-				'latitude'    => $coordinates['latitude'],
-				'longitude'   => $coordinates['longitude'],
-				'iconURL'     => "icon-marker-{$marker_type}-2x.png",
+				'id'        => $marker->ID,
+				'name'      => wcpt_get_wordcamp_title( $marker->ID ),
+				'dates'     => wcpt_get_wordcamp_start_date( $marker->ID ),
+				'location'  => get_post_meta( $marker->ID, 'Location', true ),
+				'venueName' => get_post_meta( $marker->ID, 'Venue Name', true ),
+				'url'       => self::get_best_wordcamp_url( $marker->ID ),
+				'latitude'  => $coordinates['latitude'],
+				'longitude' => $coordinates['longitude'],
+				'iconURL'   => "icon-marker-{$marker_type}-2x.png",
 			);
 		}
 
-		$markers = apply_filters( 'wcc_get_map_markers', $markers );
+		$markers          = apply_filters( 'wcc_get_map_markers', $markers );
 		$cache_expiration = 'about' === $map_id ? WEEK_IN_SECONDS : DAY_IN_SECONDS;
 
 		set_transient( $transient_key, $markers, $cache_expiration );
@@ -314,29 +323,41 @@ class WordCamp_Central_Theme {
 	/**
 	 * Filters excerpt_more.
 	 */
-	static function excerpt_more( $more ) {
+	public static function excerpt_more( $more ) {
 		return '&nbsp;&hellip;';
 	}
 
 	/**
 	 * Filters nav_menu_css_class.
+	 *
 	 * Make sure Schedule is current-menu-item when viewing WordCamps.
 	 */
-	static function nav_menu_css_class( $classes, $item, $args ) {
+	public static function nav_menu_css_class( $classes, $item, $args ) {
 		if ( 'wordcamp' == get_post_type() ) {
 			if ( home_url( '/schedule/' ) == trailingslashit( $item->url ) ) {
 				$classes[] = 'current-menu-item';
 			} else {
 				$remove = array( 'current-menu-item', 'current_page_parent', 'current_page_ancestor' );
-				foreach ( $remove as $class )
+
+				foreach ( $remove as $class ) {
 					$classes = array_splice( $classes, array_search( $class, $classes ), 1 );
+				}
 			}
 		}
+
 		return $classes;
 	}
 
+	/**
+	 * Add links to the footer menu.
+	 *
+	 * @param string $items HTML markup of all <li> elements.
+	 * @param array  $args  The arguments that were passed to `wp_nav_menu()`.
+	 *
+	 * @return string
+	 */
 	public static function add_links_to_footer_menu( $items, $args ) {
-		if ( 'menu-footer' == $args->container_class ) {
+		if ( 'menu-footer' === $args->container_class ) {
 			ob_start();
 
 			?>
@@ -348,6 +369,7 @@ class WordCamp_Central_Theme {
 			</li>
 
 			<?php
+
 			$items .= ob_get_clean();
 		}
 
@@ -355,61 +377,69 @@ class WordCamp_Central_Theme {
 	}
 
 	/**
-	 * Get Session List
+	 * Get Session List.
 	 *
 	 * Uses the WordCamp post type to loop through the latest
 	 * WordCamps, if WordCamp URLs are valid network blogs, switches
 	 * to blog and queries for Session.
 	 *
 	 * @uses switch_to_blog, get_blog_details, wp_object_cache
-	 * @return assoc array with session and WC info
+	 * @return assoc array with session and WC info.
 	 */
 	public static function get_sessions( $count = 4 ) {
-		if ( ! function_exists( 'wcpt_has_wordcamps' ) )
+		if ( ! function_exists( 'wcpt_has_wordcamps' ) ) {
 			return false;
+		}
 
-		// Check cache
-		if ( (bool) $sessions = wp_cache_get( 'wccentral_sessions_' . $count ) )
+		// Check cache.
+		$sessions = (bool) wp_cache_get( 'wccentral_sessions_' . $count );
+		if ( $sessions ) {
 			return $sessions;
+		}
 
-		// Take latest WordCamps
+		// Take latest WordCamps.
 		$args = array(
 			'posts_per_page' => $count + 10,
 			'meta_key'       => 'Start Date (YYYY-mm-dd)',
 			'orderby'        => 'meta_value',
 			'order'          => 'ASC',
-			'meta_query'     => array( array(
-				'key'        => 'Start Date (YYYY-mm-dd)',
-				'value'      => strtotime( '-2 days' ),
-				'compare'    => '>'
-			) )
+
+			'meta_query' => array(
+				array(
+					'key'     => 'Start Date (YYYY-mm-dd)',
+					'value'   => strtotime( '-2 days' ),
+					'compare' => '>',
+				),
+			),
 		);
 
-		if ( ! wcpt_has_wordcamps( $args ) )
+		if ( ! wcpt_has_wordcamps( $args ) ) {
 			return false;
+		}
 
-		// We'll hold the sessions here
+		// We'll hold the sessions here.
 		$sessions = array();
 
-		// Loop through the latest WCs
+		// Loop through the latest WCs.
 		while ( wcpt_wordcamps() ) {
 			wcpt_the_wordcamp();
 
-			// Store WC data (will be unavailable after switch_to_blog)
-			$domain = parse_url( wcpt_get_wordcamp_url(), PHP_URL_HOST );
+			// Store WC data (will be unavailable after switch_to_blog).
+			$domain       = wp_parse_url( wcpt_get_wordcamp_url(), PHP_URL_HOST );
 			$blog_details = get_blog_details( array( 'domain' => $domain ), false );
 
-			$wordcamp_date = wcpt_get_wordcamp_start_date( 0, 'F ' );
+			$wordcamp_date  = wcpt_get_wordcamp_start_date( 0, 'F ' );
 			$wordcamp_date .= wcpt_get_wordcamp_start_date( 0, 'j' );
-			if ( wcpt_get_wordcamp_end_date( 0, 'j' ) )
+			if ( wcpt_get_wordcamp_end_date( 0, 'j' ) ) {
 				$wordcamp_date .= '-' . wcpt_get_wordcamp_end_date( 0, 'j' );
+			}
 
-			// Valid for all sessions in this WC
+			// Valid for all sessions in this WC.
 			$session = array(
-				'wordcamp_title' => wcpt_get_wordcamp_title(),
+				'wordcamp_title'     => wcpt_get_wordcamp_title(),
 				'wordcamp_permalink' => wcpt_get_wordcamp_permalink(),
-				'wordcamp_date' => $wordcamp_date,
-				'wordcamp_thumb' => get_the_post_thumbnail( get_the_ID(), 'wccentral-thumbnail-small' ),
+				'wordcamp_date'      => $wordcamp_date,
+				'wordcamp_thumb'     => get_the_post_thumbnail( get_the_ID(), 'wccentral-thumbnail-small' ),
 			);
 
 			if ( isset( $blog_details->blog_id ) && $blog_details->blog_id ) {
@@ -417,49 +447,54 @@ class WordCamp_Central_Theme {
 
 				switch_to_blog( $my_blog_id );
 
-					// Look through 5 sessions, store in $sessions array
-					$sessions_query = new WP_Query( array( 'post_type' => 'wcb_session', 'posts_per_page' => 5, 'post_status' => 'publish' ) );
-					while ( $sessions_query->have_posts() ) {
-						$sessions_query->the_post();
+					// Look through 5 sessions, store in $sessions array.
+					$sessions_query = new WP_Query( array(
+						'post_type'      => 'wcb_session',
+						'posts_per_page' => 5,
+						'post_status'    => 'publish',
+					) );
+				while ( $sessions_query->have_posts() ) {
+					$sessions_query->the_post();
 
-						// Add the extra fields to $session and push to $sessions
-						$sessions[] = array_merge( $session, array(
-							'name' => apply_filters( 'the_title', get_the_title() ),
-							'speakers' => get_post_meta( get_the_ID(), '_wcb_session_speakers', true ),
-							'permalink' => get_permalink( get_the_ID() ),
-						) );
-					}
+					// Add the extra fields to $session and push to $sessions.
+					$sessions[] = array_merge( $session, array(
+						'name'      => apply_filters( 'the_title', get_the_title() ),
+						'speakers'  => get_post_meta( get_the_ID(), '_wcb_session_speakers', true ),
+						'permalink' => get_permalink( get_the_ID() ),
+					) );
+				}
 
 				restore_current_blog();
 			}
 		}
 
-		// Randomize and pick $count
+		// Randomize and pick $count.
 		shuffle( $sessions );
 		$sessions = array_slice( $sessions, 0, $count );
 
-		// Cache in transients
+		// Cache in transients.
 		wp_cache_set( 'wccentral_sessions_' . $count, $sessions );
 		return $sessions;
 	}
 
 	/**
-	 * Retrieve Subscription Status from $_REQUEST
+	 * Retrieve Subscription Status from $_REQUEST.
 	 */
 	public static function get_subscription_status() {
 		return isset( $_REQUEST['subscribe'] ) ? strtolower( $_REQUEST['subscribe'] ) : false;
 	}
 
 	/**
-	 * Subscription Check
-	 * Returns true if subscriptions are available
+	 * Subscription Check.
+	 *
+	 * Returns true if subscriptions are available.
 	 */
 	public static function can_subscribe() {
 		return class_exists( 'Jetpack_Subscriptions' ) && is_callable( array( 'Jetpack_Subscriptions', 'subscribe' ) );
 	}
 
 	/**
-	 * Fetch the latest tweets from the @WordCamp account
+	 * Fetch the latest tweets from the @WordCamp account.
 	 *
 	 * This is an AJAX callback returning JSON-formatted data.
 	 *
@@ -521,7 +556,11 @@ class WordCamp_Central_Theme {
 	 * @return array
 	 */
 	protected static function sanitize_format_tweets( $tweets ) {
-		$whitelisted_fields = array( 'id_str' => '', 'text' => '', 'created_at' => '' );
+		$whitelisted_fields = array(
+			'id_str'     => '',
+			'text'       => '',
+			'created_at' => '',
+		);
 
 		foreach ( $tweets as & $tweet ) {
 			$tweet           = (object) shortcode_atts( $whitelisted_fields, $tweet );
@@ -552,71 +591,99 @@ class WordCamp_Central_Theme {
 	}
 
 	/**
-	 * Twenty Ten Comment
-	 * Overrides the twentyten_comment function in the parent theme.
+	 * Override `twentyten_comment()` in the parent theme.
+	 *
+	 * @param WP_Comment $comment
+	 * @param array      $args
+	 * @param int        $depth
 	 */
 	public static function twentyten_comment( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
+
 		switch ( $comment->comment_type ) :
-			case '' :
-		?>
-		<li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
-			<div id="comment-<?php comment_ID(); ?>" class="comment-container">
-			<div class="comment-author vcard">
-				<?php echo get_avatar( $comment, 60 ); ?>
-				<?php printf( __( '%s <span class="says">says:</span>', 'twentyten' ), sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() ) ); ?>
-			</div><!-- .comment-author .vcard -->
-			<?php if ( $comment->comment_approved == '0' ) : ?>
-				<em class="comment-awaiting-moderation"><?php _e( 'Your comment is awaiting moderation.', 'twentyten' ); ?></em>
-				<br />
-			<?php endif; ?>
+			case '': ?>
+				<li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
+					<div id="comment-<?php comment_ID(); ?>" class="comment-container">
+						<div class="comment-author vcard">
+							<?php echo get_avatar( $comment, 60 ); ?>
+							<?php printf(
+								__( '%s <span class="says">says:</span>', 'twentyten' ),
+								sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() )
+							); ?>
+						</div>
 
-			<div class="comment-meta commentmetadata"><a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
+						<?php if ( '0' == $comment->comment_approved ) : ?>
+							<em class="comment-awaiting-moderation">
+								<?php esc_html_e( 'Your comment is awaiting moderation.', 'twentyten' ); ?>
+							</em>
+							<br />
+						<?php endif; ?>
+
+						<div class="comment-meta commentmetadata"><a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
+							<?php
+								/* translators: 1: date, 2: time */
+								printf( __( '%1$s at %2$s', 'twentyten' ), get_comment_date(),  get_comment_time() ); ?></a><?php edit_comment_link( __( '(Edit)', 'twentyten' ), ' ' );
+							?>
+						</div>
+
+						<div class="comment-body">
+							<?php comment_text(); ?>
+						</div>
+
+						<div class="reply">
+							<?php comment_reply_link( array_merge( $args,
+								array(
+									'depth'      => $depth,
+									'max_depth'  => $args['max_depth'],
+									'reply_text' => '&#10149; Reply',
+								)
+							) ); ?>
+						</div>
+				</div> <!-- #comment-##  -->
+
 				<?php
-					/* translators: 1: date, 2: time */
-					printf( __( '%1$s at %2$s', 'twentyten' ), get_comment_date(),  get_comment_time() ); ?></a><?php edit_comment_link( __( '(Edit)', 'twentyten' ), ' ' );
-				?>
-			</div><!-- .comment-meta .commentmetadata -->
-
-			<div class="comment-body"><?php comment_text(); ?></div>
-
-			<div class="reply">
-				<?php comment_reply_link( array_merge( $args,
-					array(
-						'depth' => $depth,
-						'max_depth' => $args['max_depth'],
-						'reply_text' => '&#10149; Reply'
-					)
-				) ); ?>
-			</div><!-- .reply -->
-		</div><!-- #comment-##  -->
-
-		<?php
 				break;
-			case 'pingback'  :
-			case 'trackback' :
-		?>
-		<li class="post pingback">
-			<p><?php _e( 'Pingback:', 'twentyten' ); ?> <?php comment_author_link(); ?><?php edit_comment_link( __( '(Edit)', 'twentyten' ), ' ' ); ?></p>
-		<?php
+
+			case 'pingback':
+			case 'trackback': ?>
+				<li class="post pingback">
+					<p>
+						<?php esc_html_e( 'Pingback:', 'twentyten' ); ?>
+						<?php comment_author_link(); ?>
+						<?php edit_comment_link( __( '(Edit)', 'twentyten' ), ' ' ); ?>
+					</p>
+				<?php
 				break;
 		endswitch;
 	}
 
+	/**
+	 * Run the query to get upcoming WordCamps.
+	 *
+	 * @param int $count
+	 *
+	 * @return WP_Query
+	 */
 	public static function get_upcoming_wordcamps_query( $count = 10 ) {
-		$query = new WP_Query( array(
-			'post_type'		 => WCPT_POST_TYPE_ID,
-			'post_status'    => WordCamp_Loader::get_public_post_statuses(),
-			'posts_per_page' => $count,
-			'meta_key'       => 'Start Date (YYYY-mm-dd)',
-			'orderby'        => 'meta_value',
-			'order'          => 'ASC',
-			'meta_query'     => array( array(
-				'key'        => 'Start Date (YYYY-mm-dd)',
-				'value'      => strtotime( '-2 days' ),
-				'compare'    => '>'
-			) )
-		) );
+		$query = new WP_Query(
+			array(
+				'post_type'      => WCPT_POST_TYPE_ID,
+				'post_status'    => WordCamp_Loader::get_public_post_statuses(),
+				'posts_per_page' => $count,
+				'meta_key'       => 'Start Date (YYYY-mm-dd)',
+				'orderby'        => 'meta_value',
+				'order'          => 'ASC',
+
+				'meta_query' => array(
+					array(
+						'key'     => 'Start Date (YYYY-mm-dd)',
+						'value'   => strtotime( '-2 days' ),
+						'compare' => '>',
+					),
+				),
+			)
+		);
+
 		return $query;
 	}
 
@@ -627,10 +694,10 @@ class WordCamp_Central_Theme {
 	 * @param bool $show_year   Optional. True to include the year in the date output.
 	 */
 	public static function the_wordcamp_date( $wordcamp_id = 0, $show_year = false ) {
-		$start_day = wcpt_get_wordcamp_start_date( $wordcamp_id, 'j' );
+		$start_day   = wcpt_get_wordcamp_start_date( $wordcamp_id, 'j' );
 		$start_month = wcpt_get_wordcamp_start_date( $wordcamp_id, 'F' );
-		$end_day = wcpt_get_wordcamp_end_date( $wordcamp_id, 'j' );
-		$end_month = wcpt_get_wordcamp_end_date( $wordcamp_id, 'F' );
+		$end_day     = wcpt_get_wordcamp_end_date( $wordcamp_id, 'j' );
+		$end_month   = wcpt_get_wordcamp_end_date( $wordcamp_id, 'F' );
 
 		if ( $show_year ) {
 			$start_year = wcpt_get_wordcamp_start_date( $wordcamp_id, 'Y' );
@@ -721,11 +788,11 @@ class WordCamp_Central_Theme {
 	 * @return string
 	 */
 	public static function shortcode_about_stats( $attributes ) {
-		// Allow stat values to be overridden with shortcode attributes
-	    $map_stats = shortcode_atts( self::get_map_stats(), $attributes, 'wcc_about_stats' );
+		// Allow stat values to be overridden with shortcode attributes.
+		$map_stats = shortcode_atts( self::get_map_stats(), $attributes, 'wcc_about_stats' );
 
-	    // Sanitize stat values
-        $map_stats = array_map( 'absint', $map_stats );
+		// Sanitize stat values.
+		$map_stats = array_map( 'absint', $map_stats );
 
 		ob_start();
 		require( __DIR__ . '/shortcode-about-stats.php' );
@@ -742,8 +809,9 @@ class WordCamp_Central_Theme {
 	 */
 	protected static function get_map_stats() {
 		$transient_key = 'wcc_about_map_stats';
+		$map_stats     = get_transient( $transient_key );
 
-		if ( ! $map_stats = get_transient( $transient_key ) ) {
+		if ( ! $map_stats ) {
 			$cities    = array();
 			$wordcamps = new WP_Query( array(
 				'post_type'      => 'wordcamp',
@@ -751,20 +819,21 @@ class WordCamp_Central_Theme {
 				'posts_per_page' => -1,
 			) );
 
-			// Count the number of cities
-			// @todo use _venue_city field since it'll be more accurate, but need to populate older camps first
+			// Count the number of cities.
+			// @todo use _venue_city field since it'll be more accurate, but need to populate older camps first.
 			foreach ( $wordcamps->posts as $wordcamp ) {
-				$url = get_post_meta( $wordcamp->ID, 'URL', true );
+				$url      = get_post_meta( $wordcamp->ID, 'URL', true );
+				$hostname = wp_parse_url( $url, PHP_URL_HOST );
 
-				if ( $hostname = parse_url( $url, PHP_URL_HOST ) ) {
-					$city = explode( '.', $hostname );
+				if ( $hostname ) {
+					$city               = explode( '.', $hostname );
 					$cities[ $city[0] ] = true;
 				}
 			}
 
-			// @todo generate countries automatically from _venue_country_code field, but need to populate older camps first
+			// @todo generate countries automatically from _venue_country_code field, but need to populate older camps first.
 
-			// Compile the results
+			// Compile the results.
 			$map_stats = array(
 				'wordcamps'  => $wordcamps->found_posts,
 				'cities'     => count( $cities ),
@@ -800,47 +869,50 @@ class WordCamp_Central_Theme {
 	 */
 	private static function _get_tshirt_sizes( $wordcamp_id ) {
 		$wordcamp = get_post( $wordcamp_id );
-		$sizes = array();
+		$sizes    = array();
 
 		$wordcamp_site_id = absint( get_wordcamp_site_id( $wordcamp ) );
-		if ( ! $wordcamp_site_id )
+		if ( ! $wordcamp_site_id ) {
 			return $sizes;
+		}
 
 		wp_suspend_cache_addition( true );
 		switch_to_blog( $wordcamp_site_id );
 
 		$questions = get_posts( array(
-			'post_type' => 'tix_question',
-			'post_status' => 'publish',
+			'post_type'      => 'tix_question',
+			'post_status'    => 'publish',
 			'posts_per_page' => 100,
-			'fields' => 'ids',
+			'fields'         => 'ids',
 		) );
 
 		// Aggregate only t-shirt questions.
 		$tshirt_questions = array();
 		foreach ( $questions as $question_id ) {
-			if ( get_post_meta( $question_id, 'tix_type', true ) != 'tshirt' )
+			if ( get_post_meta( $question_id, 'tix_type', true ) !== 'tshirt' ) {
 				continue;
+			}
 
 			$tshirt_questions[] = $question_id;
 		}
 
 		$paged = 1;
 		while ( $attendees = get_posts( array(
-			'post_type' => 'tix_attendee',
-			'post_status' => array( 'publish', 'pending' ),
+			'post_type'      => 'tix_attendee',
+			'post_status'    => array( 'publish', 'pending' ),
 			'posts_per_page' => 200,
-			'paged' => $paged++,
-			'orderby' => 'ID',
-			'order' => 'ASC',
-			'fields' => 'ids',
+			'paged'          => $paged++,
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'fields'         => 'ids',
 		) ) ) {
 			foreach ( $attendees as $attendee_id ) {
 				$answers = get_post_meta( $attendee_id, 'tix_questions', true );
 				foreach ( $answers as $question_id => $answer ) {
-					if ( in_array( $question_id, $tshirt_questions ) ) {
-						if ( ! isset( $sizes[ $answer ] ) )
+					if ( in_array( $question_id, $tshirt_questions, true ) ) {
+						if ( ! isset( $sizes[ $answer ] ) ) {
 							$sizes[ $answer ] = 0;
+						}
 
 						$sizes[ $answer ]++;
 					}
@@ -858,10 +930,29 @@ class WordCamp_Central_Theme {
 // Load the theme class, this is where it all starts.
 WordCamp_Central_Theme::on_load();
 
-// Override the parent's comment function with ours.
+/**
+ * Override the parent's comment function with ours.
+ *
+ * @param WP_Comment $comment
+ * @param array      $args
+ * @param int        $depth
+ */
 function twentyten_comment( $comment, $args, $depth ) {
-	return WordCamp_Central_Theme::twentyten_comment( $comment, $args, $depth );
+	WordCamp_Central_Theme::twentyten_comment( $comment, $args, $depth );
 }
 
-// This class is used to kill header images and custom background added by 2010.
-class WordCamp_Central_Theme_Kill_Features { function init() { return false; } }
+/**
+ * Class WordCamp_Central_Theme_Kill_Features
+ *
+ * This class is used to kill header images and custom background added by 2010.
+ */
+class WordCamp_Central_Theme_Kill_Features {
+	/**
+	 * Disable theme features.
+	 *
+	 * @return bool
+	 */
+	public function init() {
+		return false;
+	}
+}
