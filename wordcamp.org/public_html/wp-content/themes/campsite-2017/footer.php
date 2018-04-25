@@ -24,7 +24,7 @@ namespace WordCamp\CampSite_2017;
 					<?php echo esc_html( sprintf( __( 'Proudly powered by %s', 'wordcamporg' ), 'WordPress' ) ); ?>
 				</a>
 
-				<a class="site-info-network" href="http://central.wordcamp.org/" title="<?php esc_attr_e( 'Return to WordCamp Central', 'wordcamporg' ); ?>">
+				<a class="site-info-network" href="http://central.wordcamp.org/">
 					<?php esc_html_e( 'Go to WordCamp Central', 'wordcamporg' ); ?>
 				</a>
 			</div>
