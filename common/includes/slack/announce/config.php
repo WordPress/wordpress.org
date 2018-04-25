@@ -173,6 +173,7 @@ function get_whitelist() {
 		),
 		'hosting-community' => array(
 			'mike',
+			'jadonn',
 		),
 		'marketing' => array(
 			'sararosso',
