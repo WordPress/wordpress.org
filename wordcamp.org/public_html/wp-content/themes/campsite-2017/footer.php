@@ -26,9 +26,9 @@ namespace WordCamp\CampSite_2017;
 
 				<span role="separator" aria-hidden="true"></span>
 
-				<a class="site-info-network" href="https://central.wordcamp.org/">
-					<?php esc_html_e( 'Go to WordCamp Central', 'wordcamporg' ); ?>
-				</a>
+				<a class="site-info-network" href="https://central.wordcamp.org/"><?php
+					esc_html_e( 'Go to WordCamp Central', 'wordcamporg' );
+				?></a>
 
 				<span role="separator" aria-hidden="true"></span>
 
