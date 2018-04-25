@@ -20,7 +20,7 @@ namespace WordCamp\CampSite_2017;
 
 			<div class="site-info">
 				<?php /* translators: %s: WordPress */ ?>
-				<a class="site-info-generator" href="http://wordpress.org/" title="<?php esc_attr_e( 'A Semantic Personal Publishing Platform', 'wordcamporg' ); ?>" rel="generator">
+				<a class="site-info-generator" href="https://wordpress.org/" title="<?php esc_attr_e( 'A Semantic Personal Publishing Platform', 'wordcamporg' ); ?>" rel="generator">
 					<?php echo esc_html( sprintf( __( 'Proudly powered by %s', 'wordcamporg' ), 'WordPress' ) ); ?>
 				</a>
 
