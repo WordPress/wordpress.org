@@ -1,4 +1,5 @@
 <?php
+
 /*
 Plugin Name: WordCamp Coming Soon Page
 Description: Creates a Coming Soon landing page for new WordCamp sites

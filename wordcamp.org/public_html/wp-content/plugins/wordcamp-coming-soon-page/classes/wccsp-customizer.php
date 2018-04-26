@@ -7,7 +7,7 @@ class WCCSP_Customizer {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init',                  array( $this, 'init'                           ), 11 ); // after WCCSP_Settings::init()
+		add_action( 'init',                  array( $this, 'init'                           ), 11 ); // After WCCSP_Settings::init().
 		add_action( 'customize_register',    array( $this, 'register_customizer_components' )     );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_customizer_scripts'     )     );
 	}
@@ -28,13 +28,12 @@ class WCCSP_Customizer {
 		$wp_customize->add_section(
 			'wccsp_live_preview',
 			array(
-				'capability' => $GLOBALS['WCCSP_Settings']::REQUIRED_CAPABILITY,
-				'title'      => __( 'Coming Soon Page', 'wordcamporg' ),
-
+				'capability'  => $GLOBALS['WCCSP_Settings']::REQUIRED_CAPABILITY,
+				'title'       => __( 'Coming Soon Page', 'wordcamporg' ),
 				'description' => __(
 					'When enabled, the Coming Soon page will be displayed to logged-out users, giving you a chance to setup all of your content before your site is visible to the world.',
 					'wordcamporg'
-                ) . $GLOBALS['WCCSP_Settings']->render_admin_notices(),
+				) . $GLOBALS['WCCSP_Settings']->render_admin_notices(),
 			)
 		);
 
@@ -51,11 +50,11 @@ class WCCSP_Customizer {
 		$wp_customize->add_control(
 			'wccsp_settings[enabled]',
 			array(
-				'section'     => 'wccsp_live_preview',
-				'type'        => 'radio',
-				'choices'     => array( 'on' => 'On', 'off' => 'Off' ),
-				'priority'    => 1,
-				'capability'  => $GLOBALS['WCCSP_Settings']::REQUIRED_CAPABILITY,
+				'section'    => 'wccsp_live_preview',
+				'type'       => 'radio',
+				'choices'    => array( 'on' => 'On', 'off' => 'Off' ),
+				'priority'   => 1,
+				'capability' => $GLOBALS['WCCSP_Settings']::REQUIRED_CAPABILITY,
 			)
 		);
 

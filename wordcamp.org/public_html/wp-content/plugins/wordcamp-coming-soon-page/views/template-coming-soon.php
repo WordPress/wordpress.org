@@ -46,7 +46,7 @@
 					<?php else : ?>
 						<?php printf(
 							/* translators: %s is the name of the blog. */
-							__(
+							esc_html__(
 								'%s is in the early planning stages. In the meantime, you can subscribe to updates above, or contact the organizers below to get involved.',
 								'wordcamporg'
 							),
@@ -58,9 +58,9 @@
 
 			<?php if ( in_array( 'contact-form', $active_modules ) && $contact_form_shortcode ) : ?>
 				<div class="wccsp-contact">
-					<h2><?php esc_html_e( 'Contact the Organizers' , 'wordcamporg' ); ?></h2>
+					<h2><?php esc_html_e( 'Contact the Organizers', 'wordcamporg' ); ?></h2>
 
-					<?php echo $contact_form_shortcode; // intentionally not escaping because it's the output of do_shortcode() ?>
+					<?php echo $contact_form_shortcode; // Intentionally not escaping because it's the output of do_shortcode(). ?>
 				</div>
 			<?php endif; ?>
 		</div><!-- .wccsp-container -->

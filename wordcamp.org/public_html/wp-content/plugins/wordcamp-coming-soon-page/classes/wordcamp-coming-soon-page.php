@@ -8,16 +8,16 @@ class WordCamp_Coming_Soon_Page {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init',                       array( $this, 'init' ), 11 );                               // after WCCSP_Settings::init()
-		add_action( 'wp_enqueue_scripts',         array( $this, 'manage_plugin_theme_stylesheets' ), 99 );    // (hopefully) after all plugins/themes have enqueued their styles
-		add_action( 'wp_head',                    array( $this, 'render_dynamic_styles' ) );
-		add_filter( 'template_include',           array( $this, 'override_theme_template' ) );
-		add_action( 'template_redirect',          array( $this, 'disable_jetpacks_open_graph' ) );
-		add_filter( 'rest_authentication_errors', array( $this, 'disable_rest_endpoints' ) );
-		add_action( 'admin_bar_menu',             array( $this, 'admin_bar_menu_item' ), 1000 );
-		add_action( 'admin_head',                 array( $this, 'admin_bar_styling' ) );
-		add_action( 'wp_head',                    array( $this, 'admin_bar_styling' ) );
-		add_action( 'admin_notices',              array( $this, 'block_new_post_admin_notice' ) );
+		add_action( 'init',                       array( $this, 'init'                            ), 11    );  // After WCCSP_Settings::init().
+		add_action( 'wp_enqueue_scripts',         array( $this, 'manage_plugin_theme_stylesheets' ), 99    );  // (Hopefully) after all plugins/themes have enqueued their styles.
+		add_action( 'wp_head',                    array( $this, 'render_dynamic_styles'           )        );
+		add_filter( 'template_include',           array( $this, 'override_theme_template'         )        );
+		add_action( 'template_redirect',          array( $this, 'disable_jetpacks_open_graph'     )        );
+		add_filter( 'rest_authentication_errors', array( $this, 'disable_rest_endpoints'          )        );
+		add_action( 'admin_bar_menu',             array( $this, 'admin_bar_menu_item'             ), 1000  );
+		add_action( 'admin_head',                 array( $this, 'admin_bar_styling'               )        );
+		add_action( 'wp_head',                    array( $this, 'admin_bar_styling'               )        );
+		add_action( 'admin_notices',              array( $this, 'block_new_post_admin_notice'     )        );
 		add_filter( 'get_post_metadata',          array( $this, 'jetpack_dont_email_post_to_subs' ), 10, 4 );
 
 		add_image_size( 'wccsp_image_medium_rectangle', 500, 300 );
@@ -28,7 +28,7 @@ class WordCamp_Coming_Soon_Page {
 	 */
 	public function init() {
 		$settings                      = $GLOBALS['WCCSP_Settings']->get_settings();
-		$show_page                     = 'on' == $settings['enabled'] && ! current_user_can( 'edit_posts' );
+		$show_page                     = 'on' === $settings['enabled'] && ! current_user_can( 'edit_posts' );
 		$this->override_theme_template = $show_page || $this->is_coming_soon_preview();
 	}
 
@@ -76,7 +76,7 @@ class WordCamp_Coming_Soon_Page {
 	 * Dequeue all enqueued stylesheets and Custom CSS
 	 */
 	protected function dequeue_all_stylesheets() {
-		foreach( $GLOBALS['wp_styles']->queue as $stylesheet ) {
+		foreach ( $GLOBALS['wp_styles']->queue as $stylesheet ) {
 			wp_dequeue_style( $stylesheet );
 		}
 
@@ -140,7 +140,7 @@ class WordCamp_Coming_Soon_Page {
 	 *
 	 * @return array
 	 */
-	function get_template_variables() {
+	public function get_template_variables() {
 		$variables = array(
 			'image_url'              => $this->get_image_url(),
 			'background_url'         => $this->get_bg_image_url(),
@@ -166,13 +166,13 @@ class WordCamp_Coming_Soon_Page {
 			jetpack_require_lib( 'class.color' );
 		}
 
-		// If they never changed from the old default background color, then use the new default
+		// If they never changed from the old default background color, then use the new default.
 		$background = $settings['body_background_color'];
 		if ( '#666666' === $background ) {
 			$background = '#0073aa';
 		}
 
-		// Just in case we can't find Jetpack_Color
+		// Just in case we can't find Jetpack_Color.
 		if ( class_exists( 'Jetpack_Color' ) ) {
 			$color     = new Jetpack_Color( $background, 'hex' );
 			$color_hsl = $color->toHsl();
@@ -180,13 +180,13 @@ class WordCamp_Coming_Soon_Page {
 			$lighter_color = new Jetpack_Color( array(
 				$color_hsl['h'],
 				$color_hsl['s'],
-				( $color_hsl['l'] >= 85 ) ? 100 : $color_hsl['l'] + 15
+				( $color_hsl['l'] >= 85 ) ? 100 : $color_hsl['l'] + 15,
 			), 'hsl' );
 
 			$darker_color = new Jetpack_Color( array(
 				$color_hsl['h'],
 				$color_hsl['s'],
-				( $color_hsl['l'] < 10 ) ? 0 : $color_hsl['l'] - 10
+				( $color_hsl['l'] < 10 ) ? 0 : $color_hsl['l'] - 10,
 			), 'hsl' );
 
 			$background_lighter = '#' . $lighter_color->toHex();
@@ -200,7 +200,7 @@ class WordCamp_Coming_Soon_Page {
 		$colors['lighter'] = $background_lighter;
 		$colors['darker']  = $background_darker;
 
-		// Not currently customizable
+		// Not currently customizable.
 		$colors['text']       = '#32373c';
 		$colors['light-text'] = '#b4b9be';
 		$colors['border']     = '#00669b';
@@ -209,7 +209,7 @@ class WordCamp_Coming_Soon_Page {
 	}
 
 	/**
-	 * Retrieve the URL of the logo image displayed in the template
+	 * Retrieve the URL of the logo image displayed in the template.
 	 *
 	 * @return string|false
 	 */
@@ -223,7 +223,7 @@ class WordCamp_Coming_Soon_Page {
 	}
 
 	/**
-	 * Retrieve the URL of the background image displayed in the template
+	 * Retrieve the URL of the background image displayed in the template.
 	 *
 	 * @return string|false
 	 */
@@ -241,18 +241,18 @@ class WordCamp_Coming_Soon_Page {
 	 * @return string|false
 	 */
 	public function get_dates() {
-		$dates = false;
+		$dates         = false;
 		$wordcamp_post = get_wordcamp_post();
 
 		if ( isset( $wordcamp_post->ID ) ) {
 			if ( ! empty( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
-				// translators: date format, see https://php.net/date
-				$dates = date_i18n( __( 'F jS Y' , 'wordcamporg' ), $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] );
+				// translators: date format, see https://php.net/date.
+				$dates = date_i18n( __( 'F jS Y', 'wordcamporg' ), $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] );
 
 				if ( ! empty( $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] ) ) {
 					if ( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] !== $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] ) {
-						// translators: date format, see https://php.net/date
-						$dates .= ' - ' . date_i18n( __( 'F jS Y' , 'wordcamporg' ), $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] );
+						// translators: date format, see https://php.net/date.
+						$dates .= ' - ' . date_i18n( __( 'F jS Y', 'wordcamporg' ), $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] );
 					}
 				}
 			}
@@ -309,7 +309,7 @@ class WordCamp_Coming_Soon_Page {
 	 * @return string
 	 */
 	public function get_introduction() {
-		$settings     = $GLOBALS['WCCSP_Settings']->get_settings();
+		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
 
 		return $settings['introduction'];
 	}
@@ -317,15 +317,16 @@ class WordCamp_Coming_Soon_Page {
 	/**
 	 * Display notice in admin bar when Coming Soon mode is on.
 	 *
-	 * @param WP_Admin_Bar $wp_admin_bar WP_Admin_Bar instance, passed by reference
+	 * @param WP_Admin_Bar $wp_admin_bar WP_Admin_Bar instance, passed by reference.
 	 */
-	function admin_bar_menu_item( $wp_admin_bar ) {
+	public function admin_bar_menu_item( $wp_admin_bar ) {
 		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
-		if ( $settings['enabled'] !== 'on' ) {
+
+		if ( 'on' !== $settings['enabled'] ) {
 			return;
 		}
 
-		$menu_slug   = add_query_arg(
+		$menu_slug = add_query_arg(
 			array(
 				'autofocus[section]' => 'wccsp_live_preview',
 				'url'                => rawurlencode( add_query_arg( 'wccsp-preview', '', site_url() ) ),
@@ -352,7 +353,8 @@ class WordCamp_Coming_Soon_Page {
 	 */
 	public function admin_bar_styling() {
 		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
-		if ( $settings['enabled'] !== 'on' ) {
+
+		if ( 'on' !== $settings['enabled'] ) {
 			return;
 		}
 
@@ -369,18 +371,19 @@ class WordCamp_Coming_Soon_Page {
 		<?php
 	}
 
-	/*
+	/**
 	 * Show a notice if Coming Soon is enabled.
 	 *
 	 * Explain to users why publishing is disabled when Coming Soon is enabled.
 	 */
 	public function block_new_post_admin_notice() {
 		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
-		if ( $settings['enabled'] !== 'on' ) {
+
+		if ( 'on' !== $settings['enabled'] ) {
 			return;
 		}
 
-		$menu_slug   = add_query_arg(
+		$menu_slug = add_query_arg(
 			array(
 				'autofocus[section]' => 'wccsp_live_preview',
 				'url'                => rawurlencode( add_query_arg( 'wccsp-preview', '', site_url() ) ),
@@ -388,10 +391,10 @@ class WordCamp_Coming_Soon_Page {
 			'/customize.php'
 		);
 		$setting_url = admin_url( $menu_slug );
+		$screen      = get_current_screen();
 
-		$screen = get_current_screen();
-		if ( trim( $screen->id ) == 'post' ) {
-			$class = 'notice notice-warning';
+		if ( 'post' === trim( $screen->id ) ) {
+			$class   = 'notice notice-warning';
 			$message = sprintf(
 				__( '<a href="%s">Coming Soon mode</a> is enabled. Site subscribers will not receive email notifications about published posts.', 'wordcamporg' ),
 				esc_url( $setting_url )
@@ -401,7 +404,7 @@ class WordCamp_Coming_Soon_Page {
 				$message = wp_strip_all_tags( $message );
 			}
 
-			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+			printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), wp_kses_data( $message ) );
 		}
 	}
 
@@ -413,12 +416,14 @@ class WordCamp_Coming_Soon_Page {
 	 * @param int               $object_id Object ID.
 	 * @param string            $meta_key  Meta key.
 	 * @param bool              $single    Whether to return only the first value of the specified $meta_key.
+	 *
+	 * @return null|array|string
 	 */
-	function jetpack_dont_email_post_to_subs( $value, $object_id, $meta_key, $single ) {
+	public function jetpack_dont_email_post_to_subs( $value, $object_id, $meta_key, $single ) {
 		if ( '_jetpack_dont_email_post_to_subs' === $meta_key ) {
 			$settings = $GLOBALS['WCCSP_Settings']->get_settings();
 
-			if ( $settings['enabled'] === 'on' ) {
+			if ( 'on' === $settings['enabled'] ) {
 				return true;
 			}
 		}
@@ -426,4 +431,4 @@ class WordCamp_Coming_Soon_Page {
 		return $value;
 	}
 
-} // end WordCamp_Coming_Soon_Page
+} // end WordCamp_Coming_Soon_Page.

@@ -15,7 +15,7 @@
 		<?php if ( $background_url ) : ?>
 			background: url('<?php echo esc_url( $background_url ); ?>') no-repeat center;
 			background-size: cover;
-		<?php else: ?>
+		<?php else : ?>
 			background: <?php echo esc_attr( $colors['main'] ); ?>;
 			background: linear-gradient(
 				45deg,

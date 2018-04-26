@@ -11,7 +11,7 @@ class WCCSP_Settings {
 	const REQUIRED_CAPABILITY = 'administrator';
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'admin_menu',                   array( $this, 'register_settings_pages' ) );
@@ -27,18 +27,18 @@ class WCCSP_Settings {
 	}
 
 	/**
-	 * Retrieves all of the settings from the database
+	 * Retrieves all of the settings from the database.
 	 *
 	 * @return array
 	 */
 	public function get_settings() {
 		$defaults = array(
-			'enabled'                    => 'off',        // so that sites created before the plugin was deployed won't display the home page when the plugin is activated
+			'enabled'                    => 'off',        // So that sites created before the plugin was deployed won't display the home page when the plugin is activated.
 			'body_background_color'      => '#0073AA',
 			'image_id'                   => 0,
 			'background_id'              => 0,
-			'container_background_color' => '#FFFFFF', // deprecated
-			'text_color'                 => '#000000', // deprecated
+			'container_background_color' => '#FFFFFF', // Deprecated.
+			'text_color'                 => '#000000', // Deprecated.
 			'introduction'               => '',
 		);
 
@@ -51,7 +51,7 @@ class WCCSP_Settings {
 	}
 
 	/**
-	 * Add a link to the Settings menu
+	 * Add a link to the Settings menu.
 	 *
 	 * Even though this lives in the Customizer, having a link in the regular admin menus helps with
 	 * discoverability.
@@ -75,7 +75,8 @@ class WCCSP_Settings {
 	}
 
 	/**
-	 * Clear the static page cache
+	 * Clear the static page cache.
+	 *
 	 * Changing the settings will change the how the page looks, so the cache needs to be refreshed.
 	 */
 	public function clear_static_page_cache() {
