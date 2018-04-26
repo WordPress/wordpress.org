@@ -149,8 +149,12 @@ function get_wp15_events( $potential_events ) {
  */
 function is_wp15_event( $id, $title, $description ) {
 	$match           = false;
-	$keywords        = array( 'wp15', 'anniversary', 'aniversário', 'birthday', 'Tanti auguri', '15 year', '15 ano', '15 año', '15 candeline', 'wordt 15' );
 	$false_positives = array( 'jlzcqlyxhbvb' );
+	$keywords        = array(
+		'wp15', '15 year', '15 ano', '15 año', '15 candeline', 'wordt 15',
+		'anniversary', 'aniversário', 'aniversario', 'birthday', 'cumpleaños',
+		'Tanti auguri'
+	);
 
 	if ( in_array( $id, $false_positives ) ) {
 		return false;
