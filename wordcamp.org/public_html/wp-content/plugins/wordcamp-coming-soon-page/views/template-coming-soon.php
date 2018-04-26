@@ -74,7 +74,8 @@
 			</a>
 		</p>
 
-		<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link( '<span class="privacy-policy-link-wrapper">', '</span>' ); ?>
+		<span role="separator" aria-hidden="true"></span>
+		<?php function_exists( 'the_privacy_policy_link' ) && the_privacy_policy_link(); ?>
 	</div>
 
 	<?php wp_footer(); ?>

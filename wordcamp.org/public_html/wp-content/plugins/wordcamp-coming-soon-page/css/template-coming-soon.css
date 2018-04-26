@@ -232,6 +232,12 @@ label {
 		text-decoration: underline;
 	}
 
+	.wccsp-footer span[role=separator] {
+		padding: 0 0.4em 0 0.6em;
+		color: white;
+		display: none;
+	}
+
 /* Hide Jetpack's Infinite Scroll element */
 #infinite-footer {
 	display: none !important;
