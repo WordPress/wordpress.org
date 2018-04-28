@@ -231,7 +231,7 @@ class Translation_Sync {
 		$existing_translations = GP::$translation->find( [
 			'translation_set_id' => $new_translation_set->id,
 			'original_id'        => $new_original->id,
-			'status'             => [ 'current', 'waiting' ],
+			'status'             => [ 'current', 'waiting', 'fuzzy' ],
 		] );
 
 		foreach ( $existing_translations as $_existing_translation ) {
@@ -242,6 +242,8 @@ class Translation_Sync {
 
 			if ( $existing_translation === $new_translation ) {
 				$_existing_translation->set_as_current();
+				gp_clean_translation_set_cache( $new_translation_set->id );
+
 				return true;
 			}
 		}
@@ -257,6 +259,7 @@ class Translation_Sync {
 		}
 
 		$translation->set_as_current();
+		gp_clean_translation_set_cache( $new_translation_set->id );
 
 		return true;
 	}
