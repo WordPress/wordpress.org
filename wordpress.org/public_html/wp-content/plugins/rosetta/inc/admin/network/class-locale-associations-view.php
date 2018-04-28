@@ -37,11 +37,14 @@ class Locale_Associations_View implements Admin_Page_View {
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( $this->get_title() ); ?></h1>
-
+			<p><?php _e( 'Manage the locale association for localized sites. Without an association the site&#8217;s front end is not available.', 'rosetta' ); ?></p>
+			<p><a href="#add-new-associations"><?php _e( 'Add New Association', 'rosetta' ); ?></a> | <a  href="#existing-associations"><?php _e( 'Existing Associations', 'rosetta' ); ?></a> | <a href="#sites-without-locale-association"><?php _e( 'Sites Without Locale Association', 'rosetta' ); ?></a></p>
+			<hr/>
 			<?php
 			$this->render_message();
 			$this->render_form();
 			$this->render_table();
+			$this->render_sites_without_locale();
 			?>
 		</div>
 		<?php
@@ -102,20 +105,20 @@ class Locale_Associations_View implements Admin_Page_View {
 	 */
 	private function render_form() {
 		?>
-		<h2><?php _e( 'Add New Association', 'rosetta' ); ?></h2>
+		<h2 id="add-new-associations"><?php _e( 'Add New Association', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
 		<form action="" method="post">
 			<?php wp_nonce_field( 'add-association' ); ?>
 			<input type="hidden" name="action" value="add-association" />
 
 			<p>
 				<label for="locale"><?php _e( 'Locale:', 'rosetta' ); ?></label>
-				<input type="text" id="locale" name="locale" />
+				<input type="text" id="locale" name="locale" class="code" />
 
 				<label for="subdomain"><?php _e( 'Subdomain:', 'rosetta' ); ?></label>
-				<input type="text" id="subdomain" name="subdomain" />
+				<input type="text" id="subdomain" name="subdomain" class="code" />
 			</p>
 
-			<p>
+			<p class="submit">
 				<input type="submit" class="button button-primary" value="<?php esc_attr_e( 'Add New Association', 'rosetta' ); ?>" />
 			</p>
 		</form>
@@ -127,7 +130,7 @@ class Locale_Associations_View implements Admin_Page_View {
 	 */
 	private function render_table() {
 		?>
-		<h2><?php _e( 'Existing Associations', 'rosetta' ); ?></h2>
+		<h2 id="existing-associations"><?php _e( 'Existing Associations', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
 		<table class="widefat striped">
 			<thead>
 				<tr>
@@ -180,5 +183,40 @@ class Locale_Associations_View implements Admin_Page_View {
 			</tbody>
 		</table>
 		<?php
+	}
+
+	/**
+	 * Renders a list of sites without a locale association.
+	 */
+	public function render_sites_without_locale() {
+		?>
+		<h2 id="sites-without-locale-association"><?php _e( 'Sites Without Locale Association', 'rosetta' ); ?> <a href="#wpbody-content"><small>&uarr;</small></a></h2>
+		<?php
+		$domains_with_locale = wp_list_pluck( $this->page->get_associations(), 'subdomain' );
+		array_walk( $domains_with_locale, function( &$domain ) {
+			$domain = "$domain.wordpress.org";
+		} );
+
+		$sites = get_sites( [
+			'network_id'     => get_current_network_id(),
+			'path'           => '/',
+			'number'         => '', // All.
+			'domain__not_in' => $domains_with_locale
+		] );
+
+		if ( $sites ) {
+			echo '<ul>';
+			foreach ( $sites as $site ) {
+				printf(
+					'<li><a href="%s">%s (%s)</a></li>',
+					esc_url( $site->home ),
+					esc_html( $site->blogname ),
+					esc_html( $site->domain . $site->path )
+				);
+			}
+			echo '</ul>';
+		} else {
+			echo '&mdash;';
+		}
 	}
 }
