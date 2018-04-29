@@ -164,8 +164,10 @@ function get_whitelist() {
 			'macmanx',
 		),
 		'gdpr-compliance' => array(
+			'allendav',
 			'azaozz',
 			'casiepa',
+			'desrosj',
 		),
 		'glotpress' => array(
 			'ocean90',
