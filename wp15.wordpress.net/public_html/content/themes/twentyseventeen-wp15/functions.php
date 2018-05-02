@@ -4,13 +4,14 @@ namespace WP15\Theme;
 
 defined( 'WPINC' ) || die();
 
-add_filter( 'template_include',   __NAMESPACE__ . '\get_front_page_template' );
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts'         );
-add_filter( 'get_custom_logo',    __NAMESPACE__ . '\set_custom_logo'         );
-add_filter( 'body_class',         __NAMESPACE__ . '\add_body_classes'        );
+add_filter( 'template_include',      __NAMESPACE__ . '\get_front_page_template'          );
+add_action( 'wp_enqueue_scripts',    __NAMESPACE__ . '\enqueue_scripts'                  );
+add_filter( 'get_custom_logo',       __NAMESPACE__ . '\set_custom_logo'                  );
+add_filter( 'body_class',            __NAMESPACE__ . '\add_body_classes'                 );
 add_filter( 'the_title',             __NAMESPACE__ . '\internationalize_titles'          );
 add_filter( 'document_title_parts',  __NAMESPACE__ . '\internationalize_document_titles' );
-add_filter( 'wp_get_nav_menu_items', __NAMESPACE__ . '\internationalize_menu_items' );
+add_filter( 'wp_get_nav_menu_items', __NAMESPACE__ . '\internationalize_menu_items'      );
+add_action( 'wp_head',               __NAMESPACE__ . '\render_social_meta_tags'          );
 
 
 /**
@@ -290,4 +291,24 @@ function get_swag_download_items() {
 			),
 		),
 	);
+}
+
+/**
+ * Output social media-related meta tags for the document header.
+ */
+function render_social_meta_tags() {
+	?>
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="<?php echo wp_get_document_title(); ?>" />
+	<meta property="og:description" content="<?php echo internationalize_titles( 'WordPress turns 15 on May 27, 2018' ); ?>" />
+	<meta property="og:url" content="https://wp15.wordpress.net/" />
+	<meta property="og:site_name" content="<?php echo internationalize_titles( 'WP15' ); ?>" />
+	<meta property="og:image" content="https://wp15.wordpress.net/content/uploads/2018/03/wp15-logo-square.png" />
+	<meta property="og:locale" content="<?php echo get_locale(); ?>" />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:url" content="https://wp15.wordpress.net/" />
+	<meta name="twitter:title" content="<?php echo wp_get_document_title(); ?>" />
+	<meta name="twitter:description" content="<?php echo internationalize_titles( 'WordPress turns 15 on May 27, 2018' ); ?>" />
+	<meta name="twitter:image" content="https://wp15.wordpress.net/content/uploads/2018/03/wp15-logo-square.png" />
+	<?php
 }
