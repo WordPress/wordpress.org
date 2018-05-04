@@ -100,6 +100,7 @@ function get_whitelist() {
 			'rmccue',
 		),
 		'core-media' => array(
+			'antpb',
 			'desrosj',
 			'joemcgill',
 			'mike',
