@@ -424,7 +424,6 @@ dt a.edit {
 
 .editor .original {
 	margin-bottom: 1em;
-	word-wrap: break-word;
 }
 
 .editor .textareas textarea {
@@ -847,7 +846,7 @@ a.contribute-button:hover {
 .projects .project-name,
 .projects .project-description {
 	margin-left: 148px;
-	word-break: break-word;
+	overflow-wrap: break-word;
 }
 
 .projects .project-name h4 {
@@ -1309,7 +1308,7 @@ ul.projects-dropdown li > a > span {
 }
 
 .stats-table table th {
-	word-break: break-word;
+	overflow-wrap: break-word;
 }
 
 .stats-table table th.col-locale-code {
@@ -1983,4 +1982,38 @@ button:focus {
 	width: auto;
 	min-width: 2em;
 	padding: .1em;
+}
+
+/* Word wraps and fixed table layout for translations */
+.editor .original,
+span.context,
+table.translations td.original,
+table.translations td.translation {
+	word-wrap: normal;
+	word-break: normal;
+	overflow-wrap: break-word;
+}
+
+table.translations {
+	table-layout: fixed;
+}
+
+table.translations th.checkbox {
+	width: 1em;
+	text-align: center;
+}
+
+table.translations th:nth-child(2) { /* table.translations th.priority */
+	width: 2em;
+	text-align: center;
+}
+
+table.translations th.original,
+table.translations th.translation {
+	width: 50%;
+}
+
+table.translations th:nth-child(5) { /* table.translations th.actions */
+	width: 5em;
+	text-align: center;
 }
