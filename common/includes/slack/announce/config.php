@@ -135,9 +135,12 @@ function get_whitelist() {
 			'melchoyce',
 		),
 		'design' => array(
+			'boemedia',
 			'hugobaeta',
+			'joshuawold',
 			'karmatosed',
 			'melchoyce',
+			'mizejewski',
 		),
 		'design-dashicons' => array(
 			'empireoflight',
