@@ -1,5 +1,7 @@
 <?php
 /**
+ * Template Name: Releases
+ *
  * Template for displaying a release archive page.
  *
  * @package WordPressdotorg\MainTheme
