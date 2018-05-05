@@ -296,7 +296,11 @@ span.morethan90 {
 
 span.context {
 	font-size: 90%;
+	padding: .1em 0;
+	margin-left: .2em;
 	background-color: #a0a5aa;
+	box-decoration-break: clone;
+	box-shadow: .3em 0 0 #a0a5aa, -.3em 0 0 #a0a5aa;
 }
 
 table.translations thead tr {
@@ -1989,8 +1993,8 @@ button:focus {
 span.context,
 table.translations td.original,
 table.translations td.translation {
-	word-wrap: normal;
 	word-break: normal;
+	word-wrap: break-word;
 	overflow-wrap: break-word;
 }
 
@@ -2003,7 +2007,7 @@ table.translations th.checkbox {
 	text-align: center;
 }
 
-table.translations th:nth-child(2) { /* table.translations th.priority */
+table.translations th.priority {
 	width: 2em;
 	text-align: center;
 }
@@ -2013,7 +2017,7 @@ table.translations th.translation {
 	width: 50%;
 }
 
-table.translations th:nth-child(5) { /* table.translations th.actions */
+table.translations th.actions {
 	width: 5em;
 	text-align: center;
 }
