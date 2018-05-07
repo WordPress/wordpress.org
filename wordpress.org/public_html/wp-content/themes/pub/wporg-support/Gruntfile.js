@@ -17,6 +17,20 @@ module.exports = function(grunt) {
 				},
 			},
 		},
+		stylelint: {
+			scss: {
+				options: {
+					syntax: 'scss'
+				},
+				expand: true,
+				src: [
+					'sass/**/*.scss',
+					'!sass/_normalize.scss',
+					'!sass/mixins/_breakpoint.scss',
+					'!sass/mixins/_modular-scale.scss',
+				],
+			}
+		},
 		postcss: {
 			options: {
 				map: false,
@@ -48,10 +62,11 @@ module.exports = function(grunt) {
 			},
 		},
 	});
-	grunt.loadNpmTasks( 'grunt-postcss' );
-	grunt.loadNpmTasks( 'grunt-sass' );
-	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+	grunt.loadNpmTasks( 'grunt-postcss' );
+	grunt.loadNpmTasks( 'grunt-rtlcss' );
+	grunt.loadNpmTasks( 'grunt-sass' );
+	grunt.loadNpmTasks( 'grunt-stylelint' );
 
 	grunt.registerTask( 'build', [ 'postcss', 'sass', 'rtlcss' ]);
 	grunt.registerTask( 'default', [ 'build' ]);
