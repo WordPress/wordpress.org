@@ -93,6 +93,7 @@ function get_whitelist() {
 		'core-i18n' => array(
 			'ocean90',
 			'sergey',
+			'swissspidy',
 		),
 		'core-js' => array(
 			'adamsilverstein',
