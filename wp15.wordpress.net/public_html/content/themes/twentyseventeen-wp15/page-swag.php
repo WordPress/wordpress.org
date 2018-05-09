@@ -59,6 +59,7 @@ use WP15\Theme;
 							?>
 						</p>
 
+						<?php echo wp_oembed_get( 'https://mercantile.wordpress.org/product/wordpress-15th-anniversary-mug/' ); ?>
 						<?php echo wp_oembed_get( 'https://mercantile.wordpress.org/product/wordpress-15th-anniversary-tshirt/' ); ?>
 
 					</div>
