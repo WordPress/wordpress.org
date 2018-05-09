@@ -38,7 +38,9 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 	 * @param int   $i
 	 */
 	public function render_registration_field( $form_data, $i ) {
-		$current_data = wp_parse_args( $form_data['tix_attendee_info'][ $i ], array(
+		$current_data = ( isset( $form_data['tix_attendee_info'][ $i ] ) ) ?: array();
+
+		$current_data = wp_parse_args( $current_data, array(
 			self::SLUG => false,
 		) );
 
