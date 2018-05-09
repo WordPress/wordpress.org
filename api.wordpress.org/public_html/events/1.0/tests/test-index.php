@@ -22,6 +22,7 @@ function run_tests() {
 	$tests_failed += test_get_events();
 	$tests_failed += test_get_events_country_restriction();
 	$tests_failed += test_add_regional_wordcamps();
+	$tests_failed += test_maybe_add_wp15_promo();
 	$tests_failed += test_build_response();
 	$tests_failed += test_is_client_core();
 
@@ -1200,6 +1201,160 @@ function test_add_regional_wordcamps() {
 	) {
 		$failed++;
 		output_results( 'core-user-agent', false, 'local events were not affected', $events_core_user_agent );
+	}
+
+	return $failed;
+}
+
+/**
+ * Test `maybe_add_wp15_promo()`
+ *
+ * @return int
+ */
+function test_maybe_add_wp15_promo() {
+	$failed = 0;
+
+	$local_events_yes_wp15 = array(
+		array(
+			'type'       => 'meetup',
+			'title'      => 'WordPress 15th Anniversary Celebration',
+			'url'        => 'https://www.meetup.com/pdx-wp/events/250109566/',
+			'meetup'     => 'Portland WordPress Meetup',
+			'meetup_url' => 'https://www.meetup.com/pdx-wp/',
+			'date'       => '2018-05-27 12:00:00',
+			'location'   => array(
+				'location'  => 'Portland, OR, USA',
+				'country'   => 'us',
+				'latitude'  => 45.540115,
+				'longitude' => - 122.630699,
+			),
+		),
+		array(
+			'type'       => 'wordcamp',
+			'title'      => 'WordCamp Portland, Oregon, USA',
+			'url'        => 'https://2018.portland.wordcamp.org',
+			'meetup'     => null,
+			'meetup_url' => null,
+			'date'       => '2018-11-03 00:00:00',
+			'location'   => array(
+				'location'  => 'Portland, OR, USA',
+				'country'   => 'us',
+				'latitude'  => 45.540115,
+				'longitude' => - 122.630699,
+			),
+		),
+	);
+
+	$local_events_no_wp15 = array(
+		array(
+			'type'       => 'meetup',
+			'title'      => 'Kickoff: Meet and greet, roundtable discussion',
+			'url'        => 'https://www.meetup.com/Corvallis-WordPress-Meetup/events/250327006/',
+			'meetup'     => 'Corvallis WordPress Meetup',
+			'meetup_url' => 'https://www.meetup.com/Corvallis-WordPress-Meetup/',
+			'date'       => '2018-05-22 18:30:00',
+			'location'   => array(
+				'location'  => 'Corvallis, OR, USA',
+				'country'   => 'us',
+				'latitude'  => 44.563564,
+				'longitude' => - 123.26095,
+			),
+		),
+		array(
+			'type'       => 'wordcamp',
+			'title'      => 'WordCamp Portland, Oregon, USA',
+			'url'        => 'https://2018.portland.wordcamp.org',
+			'meetup'     => null,
+			'meetup_url' => null,
+			'date'       => '2018-11-03 00:00:00',
+			'location'   => array(
+				'location'  => 'Portland, OR, USA',
+				'country'   => 'us',
+				'latitude'  => 45.540115,
+				'longitude' => - 122.630699,
+			),
+		),
+	);
+
+	$local_events_added_wp15 = array(
+		array(
+			'type'       => 'meetup',
+			'title'      => 'WP15',
+			'url'        => 'https://wordpress.org/news/2018/04/celebrate-the-wordpress-15th-anniversary-on-may-27/',
+			'meetup'     => null,
+			'meetup_url' => null,
+			'date'       => '2018-05-27 12:00:00',
+			'location'   => array(
+				'location' => 'Everywhere',
+			),
+		),
+		array(
+			'type'       => 'meetup',
+			'title'      => 'Kickoff: Meet and greet, roundtable discussion',
+			'url'        => 'https://www.meetup.com/Corvallis-WordPress-Meetup/events/250327006/',
+			'meetup'     => 'Corvallis WordPress Meetup',
+			'meetup_url' => 'https://www.meetup.com/Corvallis-WordPress-Meetup/',
+			'date'       => '2018-05-22 18:30:00',
+			'location'   => array(
+				'location'  => 'Corvallis, OR, USA',
+				'country'   => 'us',
+				'latitude'  => 44.563564,
+				'longitude' => - 123.26095,
+			),
+		),
+		array(
+			'type'       => 'wordcamp',
+			'title'      => 'WordCamp Portland, Oregon, USA',
+			'url'        => 'https://2018.portland.wordcamp.org',
+			'meetup'     => null,
+			'meetup_url' => null,
+			'date'       => '2018-11-03 00:00:00',
+			'location'   => array(
+				'location'  => 'Portland, OR, USA',
+				'country'   => 'us',
+				'latitude'  => 45.540115,
+				'longitude' => - 122.630699,
+			),
+		),
+	);
+
+	$user_agent = 'WordPress/4.9; https://example.org';
+
+	$time_before_date_range = 1523295832;
+	$time_during_date_range = 1525887832;
+
+	printf( "\n\nRunning %d maybe_add_wp15_promo() tests\n", 4 );
+
+	// Test that the promo is added if there is not already a WP15 event.
+	$events_promo_added = maybe_add_wp15_promo( $local_events_no_wp15, $user_agent, $time_during_date_range );
+
+	if ( $events_promo_added !== $local_events_added_wp15 ) {
+		$failed++;
+		output_results( 'needs-promo', false, $local_events_added_wp15, $events_promo_added );
+	}
+
+	// Test that no promo is added if there is already a WP15 event.
+	$events_already_has_one = maybe_add_wp15_promo( $local_events_yes_wp15, $user_agent, $time_during_date_range );
+
+	if ( $events_already_has_one !== $local_events_yes_wp15 ) {
+		$failed++;
+		output_results( 'already-has-event', false, $local_events_yes_wp15, $events_already_has_one );
+	}
+
+	// Test that no changes are made if the user agent isn't Core.
+	$events_no_user_agent = maybe_add_wp15_promo( $local_events_no_wp15, '', $time_during_date_range );
+
+	if ( $events_no_user_agent !== $local_events_no_wp15 ) {
+		$failed++;
+		output_results( 'no-user-agent', false, $local_events_no_wp15, $events_no_user_agent );
+	}
+
+	// Test that no promo is added if the time is outside the date range.
+	$events_outside_date_range = maybe_add_wp15_promo( $local_events_no_wp15, $user_agent, $time_before_date_range );
+
+	if ( $events_outside_date_range !== $local_events_no_wp15 ) {
+		$failed++;
+		output_results( 'outside-date-range', false, $local_events_no_wp15, $events_outside_date_range );
 	}
 
 	return $failed;

@@ -164,6 +164,7 @@ function build_response( $location, $location_args ) {
 		}
 
 		$events = get_events( $event_args );
+		$events = maybe_add_wp15_promo( $events, $_SERVER['HTTP_USER_AGENT'], time() );
 		$events = add_regional_wordcamps( $events, $_SERVER['HTTP_USER_AGENT'] );
 
 		// Internal location data cannot be exposed in the response, see get_location().
@@ -978,6 +979,79 @@ function add_regional_wordcamps( $local_events, $user_agent ) {
 	}
 
 	return array_merge( $regional_wordcamps, $local_events );
+}
+
+/**
+ * Add a special WP15 meetup event to the Events Widget in Core if the user location doesn't already have a
+ * WP15 event in the list.
+ *
+ * @param array  $local_events The list of events for a particular location.
+ * @param string $user_agent   The User Agent string of the client requesting the events.
+ * @param int    $time         Unix timestamp.
+ *
+ * @return array
+ */
+function maybe_add_wp15_promo( $local_events, $user_agent, $time ) {
+	if ( ! is_client_core( $user_agent ) ) {
+		return $local_events;
+	}
+
+	if ( $time < strtotime( 'April 27th, 2018' ) || $time > strtotime( 'May 28th, 2018' ) ) {
+		return $local_events;
+	}
+
+	$wp15_events = array_filter( $local_events, function( $event ) {
+		return is_wp15_event( $event['title'] );
+	} );
+
+	if ( empty( $wp15_events ) ) {
+		$promo = array(
+			'type'       => 'meetup',
+			'title'      => 'WP15',
+			'url'        => 'https://wordpress.org/news/2018/04/celebrate-the-wordpress-15th-anniversary-on-may-27/',
+			'meetup'     => null,
+			'meetup_url' => null,
+			'date'       => '2018-05-27 12:00:00',
+			'location'   => array(
+				'location' => 'Everywhere',
+			),
+		);
+
+		array_unshift( $local_events, $promo );
+	}
+
+	return $local_events;
+}
+
+/**
+ * Determine if a meetup event is a WP15 celebration, based on the event title.
+ *
+ * Note that unlike the version of this function in the `wp15-meetup-events` plugin, the event data we're parsing here
+ * doesn't include a meetup event ID or a description, so we must rely on the title. In testing, this resulted in about
+ * 10% fewer events identified.
+ *
+ * @see https://meta.trac.wordpress.org/browser/sites/trunk/wp15.wordpress.net/public_html/content/plugins/wp15-meetup-events/wp15-meetup-events.php#L141
+ *
+ * @param string $title
+ *
+ * @return bool
+ */
+function is_wp15_event( $title ) {
+	$match    = false;
+	$keywords = array(
+		'wp15', '15 year', '15 ano', '15 año', '15 candeline', 'wordt 15',
+		'anniversary', 'aniversário', 'aniversario', 'birthday', 'cumpleaños',
+		'Tanti auguri'
+	);
+
+	foreach ( $keywords as $keyword ) {
+		if ( false !== stripos( $title, $keyword ) ) {
+			$match = true;
+			break;
+		}
+	}
+
+	return $match;
 }
 
 /**
