@@ -103,7 +103,7 @@ class Allergy_Field extends CampTix_Addon {
 	 * Add the value of the new field to the attendee object during checkout processing.
 	 *
 	 * @param WP_Post $attendee
-	 * @param array    $data
+	 * @param array   $data
 	 *
 	 * @return WP_Post
 	 */
@@ -116,7 +116,7 @@ class Allergy_Field extends CampTix_Addon {
 	/**
 	 * Save the value of the new field to the attendee post upon completion of checkout.
 	 *
-	 * @param int      $post_id
+	 * @param int     $post_id
 	 * @param WP_Post $attendee
 	 *
 	 * @return bool|int
@@ -128,7 +128,7 @@ class Allergy_Field extends CampTix_Addon {
 	/**
 	 * Initialize email notifications after the ticket receipt email has been sent.
 	 *
-	 * @param WP_Post $attendee_id
+	 * @param int $attendee_id
 	 */
 	public function after_email_receipt( $attendee_id ) {
 		$attendee = get_post( $attendee_id );
@@ -142,7 +142,7 @@ class Allergy_Field extends CampTix_Addon {
 	/**
 	 * Retrieve the stored value of the new field for use on the Edit Info form.
 	 *
-	 * @param array    $ticket_info
+	 * @param array   $ticket_info
 	 * @param WP_Post $attendee
 	 *
 	 * @return array
@@ -156,7 +156,7 @@ class Allergy_Field extends CampTix_Addon {
 	/**
 	 * Update the stored value of the new field if it was changed in the Edit Info form.
 	 *
-	 * @param array    $data
+	 * @param array   $data
 	 * @param WP_Post $attendee
 	 *
 	 * @return bool|int
@@ -243,7 +243,7 @@ class Allergy_Field extends CampTix_Addon {
 	/**
 	 * Send a notification if it hasn't been sent already.
 	 *
-	 * @param string   $value
+	 * @param string  $value
 	 * @param WP_Post $attendee
 	 */
 	protected function maybe_send_notification_email( $value, $attendee ) {

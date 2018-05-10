@@ -97,7 +97,7 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 	}
 
 	/**
-	 *
+	 * Add a validation message when the checkbox isn't checked.
 	 *
 	 * @param array $error_flags
 	 */
@@ -113,10 +113,10 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 	/**
 	 * Add the value of the new field to the attendee object during checkout processing.
 	 *
-	 * @param \WP_Post $attendee
-	 * @param array    $data
+	 * @param WP_Post $attendee
+	 * @param array   $data
 	 *
-	 * @return \WP_Post
+	 * @return WP_Post
 	 */
 	public function populate_attendee_object( $attendee, $data ) {
 		$attendee->{ self::SLUG } = $data[ self::SLUG ];
@@ -127,8 +127,8 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 	/**
 	 * Save the value of the new field to the attendee post upon completion of checkout.
 	 *
-	 * @param int      $post_id
-	 * @param \WP_Post $attendee
+	 * @param int     $post_id
+	 * @param WP_Post $attendee
 	 *
 	 * @return bool|int
 	 */
