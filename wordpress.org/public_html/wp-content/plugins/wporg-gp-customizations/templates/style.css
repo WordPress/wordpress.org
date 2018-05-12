@@ -1935,7 +1935,7 @@ ul.ct-legend {
 	opacity: .5;
 }
 
-button {
+.gp-content button {
 	background: #f7f7f7;
 	border: 1px solid #ccc;
 	box-shadow: 0 1px 0 #ccc;
@@ -1955,14 +1955,14 @@ button {
 	-webkit-appearance: none;
 }
 
-button:hover,
-button:focus {
+.gp-content button:hover,
+.gp-content button:focus {
 	background: #fafafa;
 	border-color: #999;
 	color: #23282d;
 }
 
-button:focus {
+.gp-content button:focus {
 	border-color: #5b9dd9;
 	box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
 	outline: 0;
