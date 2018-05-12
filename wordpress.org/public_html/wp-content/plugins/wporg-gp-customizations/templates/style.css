@@ -628,20 +628,37 @@ ul.filter-header-links {
 	-webkit-appearance: textfield;
 }
 
-.locales {
-	-webkit-column-count: 2;
-	-moz-column-count: 2;
-	column-count: 2;
-	-webkit-column-gap: 30px;
-	-moz-column-gap: 30px;
-	column-gap: 30px;
+@supports (display: flex) and (not (display: grid)) {
+	.locales {
+		display: flex;
+		flex-wrap: wrap;
+		margin: 0 -15px;
+	}
+
+	.locales .locale {
+		flex-grow: 1;
+		margin: 0 15px 30px;
+		width: calc( 33% - 30px );
+	}
 }
 
-@media (min-width: 700px) {
+@supports (display: grid) {
 	.locales {
-		-webkit-column-count: 3;
-		-moz-column-count: 3;
-		column-count: 3;
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-gap: 30px;
+	}
+
+	@media (min-width: 500px) {
+		.locales {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (min-width: 700px) {
+		.locales {
+			grid-template-columns: repeat(3, 1fr);
+		}
 	}
 }
 
@@ -657,9 +674,7 @@ ul.filter-header-links {
 .project-status:before,
 .project-status:after,
 .locale-project-contributors:before,
-.locale-project-contributors:after,
-.locales:before,
-.locales:after {
+.locale-project-contributors:after {
 	content: "";
 	display: table;
 }
@@ -669,15 +684,11 @@ ul.filter-header-links {
 .projects:after,
 .project-box-header:after,
 .project-status:after,
-.locale-project-contributors:after,
-.locales:after {
+.locale-project-contributors:after {
 	clear: both;
 }
 
 .locale {
-	margin-bottom: 30px;
-	width: 100%;
-	display: inline-block;
 	border: 1px solid #ccc;
 	-webkit-box-shadow: 0 1px 1px -1px rgba(0,0,0,0.1);
 	box-shadow: 0 1px 1px -1px rgba(0,0,0,0.1);
@@ -1219,14 +1230,6 @@ ul.projects-dropdown li > a > span {
 
 	.locale-intro {
 		float: none;
-	}
-
-	.locales .locale .name {
-		display: block;
-	}
-
-	.locales .locale .contributors {
-		display: none;
 	}
 
 	.locale-box {
@@ -1836,7 +1839,7 @@ ul.ct-legend {
 	width: 120px;
 }
 
-.consistency-form-submit {
+.gp-content .consistency-form-submit {
 	background: #0085ba;
 	border-color: #0073aa #006799 #006799;
 	box-shadow: 0 1px 0 #006799;
@@ -1851,15 +1854,15 @@ ul.ct-legend {
 	font-size: 15px;
 }
 
-.consistency-form-submit:hover,
-.consistency-form-submit:focus {
+.gp-content .consistency-form-submit:hover,
+.gp-content .consistency-form-submit:focus {
 	background: #008ec2;
 	border-color: #006799;
 	box-shadow: 0 1px 0 #006799;
 	color: #fff;
 }
 
-.consistency-form-submit:focus {
+.gp-content .consistency-form-submit:focus {
 	box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
 }
 
@@ -1935,7 +1938,8 @@ ul.ct-legend {
 	opacity: .5;
 }
 
-.gp-content button {
+.gp-content button,
+.gp-content input.button {
 	background: #f7f7f7;
 	border: 1px solid #ccc;
 	box-shadow: 0 1px 0 #ccc;
@@ -1956,16 +1960,23 @@ ul.ct-legend {
 }
 
 .gp-content button:hover,
-.gp-content button:focus {
+.gp-content button:focus,
+.gp-content input.button:hover,
+.gp-content input.button:focus {
 	background: #fafafa;
 	border-color: #999;
 	color: #23282d;
 }
 
-.gp-content button:focus {
+.gp-content button:focus,
+.gp-content input.button:focus {
 	border-color: #5b9dd9;
 	box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
 	outline: 0;
+}
+
+.gp-content .bulk-actions input.button {
+	vertical-align: middle;
 }
 
 #legend {
