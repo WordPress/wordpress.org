@@ -37,10 +37,27 @@ class Meta extends \WP_Widget {
 
 		<ul>
 			<?php if ( $built_for = get_the_term_list( $post->ID, 'plugin_built_for', '', ', ' ) ) : ?>
-				<li><?php printf( __( 'Designed to work with: %s', 'wporg-plugins' ), $built_for ); ?></li>
+				<li>
+					<?php
+					printf(
+						/* translators: %s: term list */
+						__( 'Designed to work with: %s', 'wporg-plugins' ),
+						esc_html( $built_for )
+					);
+					?>
+				</li>
 			<?php endif; ?>
 
-			<li><?php printf( __( 'Version: %s', 'wporg-plugins' ), '<strong>' . get_post_meta( $post->ID, 'version', true ) . '</strong>' ); ?></li>
+			<li>
+				<?php
+				printf(
+					/* translators: %s: version number */
+					__( 'Version: %s', 'wporg-plugins' ),
+					'<strong>' . esc_html( get_post_meta( $post->ID, 'version', true ) ) . '</strong>'
+				);
+				?>
+			</li>
+
 			<li>
 				<?php
 				$modified_time = get_post_modified_time();
@@ -51,33 +68,56 @@ class Meta extends \WP_Widget {
 				}
 
 				printf(
+					/* translators: %s: time since the last update */
 					__( 'Last updated: %s', 'wporg-plugins' ),
-					/* Translators: Plugin modified time. */
-					'<strong>' . sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $modified_time ) . '</span>' ) . '</strong>'
+					/* translators: %s: time since the last update */
+					'<strong>' . wp_kses( sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $modified_time ) . '</span>', array( 'span' => true ) ) ) . '</strong>'
 				);
 				?>
 			</li>
-			<li><?php printf( __( 'Active installations: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
+			<li>
+				<?php
+				printf(
+					/* translators: %s: active installations count */
+					__( 'Active installations: %s', 'wporg-plugins' ),
+					'<strong>' . esc_html( Template::active_installs( false ) ) . '</strong>'
+				);
+				?>
+			</li>
 
 			<?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
 				<li>
-				<?php
-				_e( 'Requires WordPress Version:', 'wporg-plugins' );
-				echo '<strong>' . esc_html( $requires ) . '</strong>';
-				?>
+					<?php
+					printf(
+						/* translators: %s: version number */
+						__( 'Requires WordPress Version: %s', 'wporg-plugins' ),
+						'<strong>' . esc_html( $requires ) . '</strong>'
+					);
+					?>
 				</li>
 			<?php endif; ?>
 
 			<?php if ( $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true ) ) : ?>
-				<li><?php printf( __( 'Tested up to: %s', 'wporg-plugins' ), '<strong>' . $tested_up_to . '</strong>' ); ?></li>
+				<li>
+					<?php
+					printf(
+						/* translators: %s: version number */
+						__( 'Tested up to: %s', 'wporg-plugins' ),
+						'<strong>' . esc_html( $tested_up_to ) . '</strong>'
+					);
+					?>
+				</li>
 			<?php endif; ?>
 
 			<?php if ( $requires_php = (string) get_post_meta( $post->ID, 'requires_php', true ) ) : ?>
 				<li>
-				<?php
-				_e( 'Requires PHP Version:', 'wporg-plugins' );
-				echo '<strong>' . esc_html( $requires_php ) . '</strong>';
-				?>
+					<?php
+					printf(
+						/* translators: %s: version number */
+						__( 'Requires PHP Version: %s', 'wporg-plugins' ),
+						'<strong>' . esc_html( $requires_php ) . '</strong>'
+					);
+					?>
 				</li>
 			<?php endif; ?>
 
