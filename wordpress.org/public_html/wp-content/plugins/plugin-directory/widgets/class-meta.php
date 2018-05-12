@@ -71,7 +71,7 @@ class Meta extends \WP_Widget {
 					/* translators: %s: time since the last update */
 					__( 'Last updated: %s', 'wporg-plugins' ),
 					/* translators: %s: time since the last update */
-					'<strong>' . wp_kses( sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $modified_time ) . '</span>', array( 'span' => true ) ) ) . '</strong>'
+					'<strong>' . wp_kses( sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $modified_time ) . '</span>' ), array( 'span' => true ) ) . '</strong>'
 				);
 				?>
 			</li>
