@@ -360,6 +360,16 @@ class User_Notes {
 	}
 
 	/**
+	 * Checks whether the user has any notes.
+	 *
+	 * @param int $user_id User ID. Defaults to the current post author.
+	 * @return bool True if the user has notes, false otherwise.
+	 */
+	public function has_user_notes( $user_id = 0 ) {
+		return (bool) $this->get_user_notes( $user_id )->count;
+	}
+
+	/**
 	 * Displays the form for adding a new note or editing an existing note.
 	 *
 	 * @param int $user_id User ID. Defaults to the current post author.
@@ -456,6 +466,11 @@ class User_Notes {
 		$show_user_notes = isset( $_GET['show_user_notes'] ) && (int) $_GET['show_user_notes'] == $post_id;
 
 		$class = 'wporg-bbp-user-notes';
+
+		if ( $this->has_user_notes( $user_id ) ) {
+			$class .= ' has-user-notes';
+		}
+
 		if ( ! $show_user_notes ) {
 			$class .= ' hidden-notes';
 		}
