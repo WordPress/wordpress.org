@@ -292,4 +292,38 @@ class Export_CSV {
 
 		die();
 	}
+
+	/**
+	 * Save the CSV file to a local directory.
+	 *
+	 * @param string $location The path of the directory to save the file in.
+	 *
+	 * @return bool|string
+	 */
+	public function save_file( $location ) {
+		if ( ! $this->filename ) {
+			$this->error->add(
+				'csv_error',
+				'Could not generate a CSV file without a file name.'
+			);
+		}
+
+		if ( ! wp_is_writable( $location ) ) {
+			$this->error->add(
+				'filesystem_error',
+				'The specified location is not writable.'
+			);
+
+			return false;
+		}
+
+		$full_path = trailingslashit( $location ) . $this->filename;
+		$content   = $this->generate_file_content();
+
+		$file = fopen( $full_path, 'w' );
+		fwrite( $file, $content );
+		fclose( $file );
+
+		return $full_path;
+	}
 }
