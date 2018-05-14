@@ -2001,6 +2001,7 @@ ul.ct-legend {
 
 /* Word wraps and fixed table layout for translations */
 .editor .original,
+.editor .translation,
 span.context,
 table.translations td.original,
 table.translations td.translation {
