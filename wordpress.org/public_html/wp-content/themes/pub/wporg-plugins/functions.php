@@ -273,7 +273,8 @@ function social_meta_data() {
 	$icon   = Template::get_plugin_icon();
 	$banner = Template::get_plugin_banner();
 
-	$banner['banner_2x'] = $banner['banner_2x'] ? $banner['banner'] : false;
+	$banner['banner']    = $banner['banner'] ?? false;
+	$banner['banner_2x'] = $banner['banner_2x'] ?? false;
 
 	printf( '<meta property="og:title" content="%s" />' . "\n", the_title_attribute( array( 'echo' => false ) ) );
 	printf( '<meta property="og:description" content="%s" />' . "\n", esc_attr( strip_tags( get_the_excerpt() ) ) );
@@ -286,7 +287,7 @@ function social_meta_data() {
 	if ( $banner['banner_2x'] ) {
 		printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $banner['banner_2x'] ) );
 	}
-	if ( isset( $banner['banner'] ) ) {
+	if ( $banner['banner'] ) {
 		printf( '<meta property="og:image" content="%s" />' . "\n", esc_url( $banner['banner'] ) );
 	}
 	if ( ! $icon['generated'] && ( $icon['icon_2x'] || $icon['icon'] ) ) {
