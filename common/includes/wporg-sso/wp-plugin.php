@@ -166,6 +166,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			} elseif ( ! $this->is_sso_host() ) {
 				// If we're not on the SSO host
 				if ( preg_match( '!/wp-login\.php$!', $this->script ) ) {
+					// Don't redirect the 'confirmaction' wp-login handlers to login.wordpress.org.
+					if ( isset( $_GET['action']  ) && empty( $_POST ) && 'confirmaction' == $_GET['action'] ) {
+						return;
+					}
+
 					// If on a WP login screen...
 					$redirect_to_sso_login = $this->sso_login_url;
 
