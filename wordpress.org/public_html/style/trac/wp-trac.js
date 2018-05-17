@@ -40,6 +40,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'multisite' : 'Relating to multisite, but assigned a more specific component.',
 		'rest-api' : 'Relating to the REST API, but assigned a more specific component.',
 		'performance' : 'Performance or caching (but not the Cache API component).',
+		'privacy' : 'Privacy focus.',
 		'coding-standards' : 'Coding Standards focus.'
 	};
 
