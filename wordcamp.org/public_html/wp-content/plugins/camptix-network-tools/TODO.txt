@@ -1,0 +1,33 @@
+High priority
+	internationalize strings
+	refactor paypal stuff out of transacount id look so that it can be modular like camptix itself
+	currency too
+	assign all classes to global variables so they can be accessed by other plugins
+	automatically grab credentials from individual site options, instead of having to assign via filter callback?
+
+Medium priority
+	add ability to send any 'critical' errors to array of admins
+	add error notice if camptix isn't activated?
+	log list table::prepare_items()
+		probably need to refactor how $advanced_query_value[x] works if add other cases with different number of substitutions.
+		since prepare() can take an array of args, maybe do an array_merge() of common arguments and an variable-length array of advanced query arguments
+		or just prepare() it here, and cat it with $where below after $where runs through prepare()
+		also, maybe avoid doing the regular query if doing an advanced query
+	add note to network log search results to scroll down to see the highlighted entry. otherwise they might not realize it's there b/c it's below the fold.
+	setup cron jobs to schedule upon plugin activation and unschedule upon deactivation, rather than always firing in the constructor?
+	revisit limit of 1000 in sql queries for blog_ids. large networks like wordcamp.org could start running up against that. at least put a filter around the value
+
+Low priority
+	fire gather_events_data job whenever new site is added to network, or when camptix activated?
+	add link to dashboard from camptix proper to help let people know about it?
+	camptix_log_email_notifications()
+		Maybe send batch of notifications via a cron job, instead of immediatetly sending an e-mail for each match
+		If current approach proves to be too expensive during traffic spikes (like when ticket sales open for a big event), we could setup a cron job to run every 10 minutes and scan new entries since it last ran.
+	setup $table_name as class var instead of multiple times in diff functions so the logic is DRY
+		set as public var so other classes can use it
+	gather_events_data()
+		store time in utc, but display in current site's timezone
+		put filter around 1000 limit. there are a few others places that need this too
+		being stored in redundantly individual tables rather than in global table
+	network log search for something like "id:refund" should probably return 0 results
+	remove reference to active_plugins filter since it's deprecated
