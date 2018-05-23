@@ -6,6 +6,7 @@
 
 require( 'inc/back-compat.php' );
 require_once( 'inc/favorite-schedule-shortcode.php' );
+require_once( 'inc/privacy.php' );
 
 class WordCamp_Post_Types_Plugin {
 	protected $wcpt_permalinks;
