@@ -28,10 +28,18 @@ get_template_part( 'header', 'wporg' );
 					<div id="primary-menu" class="menu">
 						<ul>
 							<?php
+							$active_item = false;
+							// The last found menu item that patches is the one that's shown as active.
+							foreach ( $menu_items as $path => $text ) {
+								if ( false !== strpos( $_SERVER['REQUEST_URI'], $path ) ) {
+									$active_item = $path;
+								}
+							}
+
 							foreach ( $menu_items as $path => $text ) :
-								$class = false !== strpos( $_SERVER['REQUEST_URI'], $path ) ? 'active' : ''; // phpcs:ignore
+								$class = ( $path === $active_item ) ? 'active' : ''; // phpcs:ignore
 								?>
-								<li class="page_item"><a class="<?php echo esc_attr( $class ); ?>" href="<?php echo esc_url( home_url( $path ) ); ?>"><?php echo esc_html( $text ); ?></a></li>
+								<li class="page_item"><a class="<?php echo esc_attr( $class ); ?>" href="<?php echo esc_url( trailingslashit( home_url( $path ) ) ); ?>"><?php echo esc_html( $text ); ?></a></li>
 							<?php endforeach; ?>
 						</ul>
 					</div>

@@ -196,3 +196,13 @@ require_once get_stylesheet_directory() . '/inc/template-tags.php';
  * Custom meta descriptions for page templates.
  */
 require_once get_stylesheet_directory() . '/inc/page-meta-descriptions.php';
+
+/**
+ * Include reCAPTCHA functions for privacy requests.
+ */
+include __DIR__ . '/inc/recaptcha.php';
+
+/**
+ * Include the Privacy request functions.
+ */
+include __DIR__ . '/inc/privacy-functions.php';
