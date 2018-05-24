@@ -54,7 +54,7 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 				if ( $coc_url = $this->maybe_get_coc_url() ) :
 					printf(
 						/* translators: %s placeholder is a URL */
-						wp_kses_post( __( 'Do you agree to follow the event <a href="%s">Code of Conduct</a>?', 'wordcamporg' ) ),
+						wp_kses_post( __( 'Do you agree to follow the event <a href="%s" target="_blank">Code of Conduct</a>?', 'wordcamporg' ) ),
 						esc_url( $coc_url )
 					);
 				else :

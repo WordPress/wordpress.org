@@ -23,6 +23,9 @@ add_filter( 'camptix_shortcode_contents',                    __NAMESPACE__ . '\m
 add_filter( 'camptix_name_order',                            __NAMESPACE__ . '\set_name_order'                      );
 add_action( 'camptix_form_edit_attendee_custom_error_flags', __NAMESPACE__ . '\disable_attendee_edits'              );
 add_action( 'transition_post_status',                        __NAMESPACE__ . '\log_publish_to_cancel',        10, 3 );
+add_filter( 'camptix_privacy_erase_attendee',                __NAMESPACE__ . '\retain_attendee_data',         10, 2 );
+add_action( 'admin_notices',                                 __NAMESPACE__ . '\admin_notice_attendee_privacy'       );
+add_filter( 'wp_privacy_personal_data_erasers',              __NAMESPACE__ . '\modify_erasers',                  99 );
 
 // Miscellaneous
 add_filter( 'camptix_beta_features_enabled',                 '__return_true' );
@@ -554,6 +557,8 @@ function load_custom_addons() {
 	require_once( __DIR__ . '/addons/accommodations.php' );
 	// Code of Conduct field
 	require_once( __DIR__ . '/addons/code-of-conduct.php' );
+	// Privacy field
+	require_once( __DIR__ . '/addons/privacy.php' );
 }
 
 /**
@@ -564,7 +569,7 @@ function load_custom_addons() {
  * @return string
  */
 function modify_default_fields_list( $default_fields ) {
-	return __( 'Top three fields: First name, last name, e-mail address.<br />Bottom three fields: Life-threatening allergy, accessibility needs, Code of Conduct agreement.', 'wordcamporg' );
+	return __( 'Top three fields: First name, last name, e-mail address.<br />Bottom four fields: Attendee list opt-out, life-threatening allergy, accessibility needs, Code of Conduct agreement.', 'wordcamporg' );
 }
 
 /**
@@ -942,4 +947,59 @@ function modify_shortcode_contents( $shortcode_contents, $tix_action ) {
 	}
 
 	return $shortcode_contents;
+}
+
+/**
+ * Modify the list of personal data eraser callbacks.
+ *
+ * @param array $erasers
+ *
+ * @return array mixed
+ */
+function modify_erasers( $erasers ) {
+	// Temporarily disable the default eraser callbacks for CampTix.
+	unset( $erasers['camptix-attendee'] );
+
+	return $erasers;
+}
+
+/**
+ * Short-circuit the CampTix attendee data erasure callback if the attendee data is still within the retention period.
+ *
+ * @param bool|string $erase
+ * @param WP_Post     $post
+ *
+ * @return bool|string
+ */
+function retain_attendee_data( $erase, $post ) {
+	$created          = strtotime( get_the_date( 'c', $post ) );
+	$now              = time();
+	$retention_period = YEAR_IN_SECONDS * 3;
+
+	if ( ( $now - $created ) < $retention_period ) {
+		return __( 'Attendee data could not be anonymized because it is still within the data retention period.', 'wordcamporg' );
+	}
+
+	return $erase;
+}
+
+/**
+ * Add a notice about data confidentiality to the Edit Attendee screen.
+ */
+function admin_notice_attendee_privacy() {
+	$screen = get_current_screen();
+
+	if ( 'tix_attendee' === $screen->id ) {
+		$notice_classes = 'notice notice-info';
+		$message        = wp_kses_post( sprintf(
+			__( 'The personal information displayed here is <strong>confidential</strong>, and should not be shown publicly, except under the circumstances described in the <a href="%s">privacy policy</a>.', 'wordcamporg' ),
+			esc_url( get_privacy_policy_url() )
+		) );
+
+		printf(
+			'<div class="%1$s">%2$s</div>',
+			esc_attr( $notice_classes ),
+			wpautop( $message )
+		);
+	}
 }

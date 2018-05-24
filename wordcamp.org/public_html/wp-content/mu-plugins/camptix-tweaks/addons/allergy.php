@@ -46,6 +46,12 @@ class Allergy_Field extends CampTix_Addon {
 
 		// Metabox
 		add_filter( 'camptix_metabox_attendee_info_additional_rows', array( $this, 'add_metabox_row' ), 11, 2 );
+
+		// Privacy
+		add_filter( 'camptix_privacy_attendee_props_to_export', array( $this, 'attendee_props_to_export' ) );
+		add_filter( 'camptix_privacy_export_attendee_prop', array( $this, 'export_attendee_prop' ), 10, 4 );
+		add_filter( 'camptix_privacy_attendee_props_to_erase', array( $this, 'attendee_props_to_erase' ) );
+		add_action( 'camptix_privacy_erase_attendee_prop', array( $this, 'erase_attendee_prop' ), 10, 3 );
 	}
 
 	/**
@@ -331,6 +337,75 @@ class Allergy_Field extends CampTix_Addon {
 	 */
 	public function set_locale_to_en_US() {
 		return 'en_US';
+	}
+
+	/**
+	 * Include the new field in the personal data exporter.
+	 *
+	 * @param array $props
+	 *
+	 * @return array
+	 */
+	public function attendee_props_to_export( $props ) {
+		$props[ 'tix_' . self::SLUG ] = $this->question;
+
+		return $props;
+	}
+
+	/**
+	 * Add the new field's value and label to the aggregated personal data for export.
+	 *
+	 * @param array   $export
+	 * @param string  $key
+	 * @param string  $label
+	 * @param WP_Post $post
+	 *
+	 * @return array
+	 */
+	public function export_attendee_prop( $export, $key, $label, $post ) {
+		if ( 'tix_' . self::SLUG === $key ) {
+			$value = get_post_meta( $post->ID, 'tix_' . self::SLUG, true );
+
+			if ( isset( $this->options[ $value ] ) ) {
+				$value = $this->options[ $value ];
+			}
+
+			if ( ! empty( $value ) ) {
+				$export[] = array(
+					'name'  => $label,
+					'value' => $value,
+				);
+			}
+		}
+
+		return $export;
+	}
+
+	/**
+	 * Include the new field in the personal data eraser.
+	 *
+	 * @param array $props
+	 *
+	 * @return array
+	 */
+	public function attendee_props_to_erase( $props ) {
+		$props[ 'tix_' . self::SLUG ] = 'camptix_yesno';
+
+		return $props;
+	}
+
+	/**
+	 * Anonymize the value of the new field during personal data erasure.
+	 *
+	 * @param string  $key
+	 * @param string  $type
+	 * @param WP_Post $post
+	 */
+	public function erase_attendee_prop( $key, $type, $post ) {
+		if ( 'tix_' . self::SLUG === $key ) {
+			$anonymized_value = wp_privacy_anonymize_data( $type );
+			update_post_meta( $post->ID, $key, $anonymized_value );
+		}
 	}
 }
 
