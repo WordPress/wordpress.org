@@ -108,6 +108,16 @@ function custom_open_graph_tags( $tags = [] ) {
 			$title = esc_html__( 'Democratize Publishing', 'wporg' );
 			$desc  = esc_html__( 'WordPress is software designed for everyone with emphasis on accessibility, performance, security, and usability.', 'wporg' );
 			break;
+
+		case 'page-about-privacy-data-erasure-request.php':
+			$title = esc_html_x( 'Data Erasure Request', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'WordPress.org respects your privacy and intends to remain transparent about any personal data we store about individuals. Under the General Data Protection Regulation (GDPR), EU citizens and residents may request deletion of personal data stored on our servers.', 'wporg' );
+			break;
+
+		case 'page-about-privacy-data-export-request.php':
+			$title = esc_html_x( 'Data Export Request', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'WordPress.org respects your privacy and intends to remain transparent about any personal data we store about individuals. Under the General Data Protection Regulation (GDPR), EU citizens and residents are entitled to receive a copy of any personal data we might hold about you.', 'wporg' );
+			break;
 	}
 
 	$tags['og:title']            = $title;
@@ -199,6 +209,14 @@ function custom_page_title( $title, $post = null ) {
 
 		case 'page-about.php':
 			$title = esc_html_x( 'About', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-privacy-data-erasure-request.php':
+			$title = esc_html_x( 'Data Erasure Request', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-privacy-data-export-request.php':
+			$title = esc_html_x( 'Data Export Request', 'Page title', 'wporg' );
 			break;
 	}
 

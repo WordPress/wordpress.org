@@ -42,7 +42,7 @@ if ( ! $email && is_user_logged_in() ) {
 	$email = wp_get_current_user()->user_email;
 }
 
-// TODO See inc/page-meta-descriptions.php for the meta description for this page.
+// See inc/page-meta-descriptions.php for the meta description for this page.
 
 add_action( 'wp_head', function() {
 	// TODO: Move to Theme once styled.
@@ -57,8 +57,14 @@ add_action( 'wp_head', function() {
 			border-left: 4px solid green;
 			padding: 6px;
 		}
+
+		form.request-form label {
+			display: block;
+			color: #555;
+			font-size: 0.8em;
+		}
 		form.request-form input[type="email"] {
-			width: 75%;
+			width: 100%;
 		}
 	</style>';
 } );
@@ -84,7 +90,10 @@ the_post();
 					<p><?php esc_html_e( 'This export will contain relevant personal or private data stored on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and sites.', 'wporg'); ?></p>
 
 					<?php if ( $error_message ) : ?>
-						<p class="error"><strong>An error occured with your request:</strong> <?php echo $error_message; ?></p>
+						<p class="error">
+							<strong><?php esc_html_e( 'An error occured with your request:', 'wporg' ); ?></strong><br>
+							<?php echo $error_message; ?>
+						</p>
 					<?php elseif ( $success ) : ?>
 					<p class="success"><strong><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></strong></p>
 					<?php endif; ?>
@@ -96,23 +105,24 @@ the_post();
 
 					<form id="export-request-form" class="request-form" method="POST" action="#">
 						<label for="email">
-							Email Address
+							<?php esc_html_e( 'Email Address', 'wporg' ); ?>
 						</label>
 						<input
 							type="email"
 							name="email" id="email"
-							placeholder="you@example.com"
+							placeholder="<?php
+								/* translators: Example placeholder email address */
+								esc_attr_e( 'you@example.com', 'wporg' )
+							?>"
 							required
 							value="<?php echo esc_attr( $email ); ?>"
 						>
-						<br>
 						<p><?php esc_html_e( 'By submitting this form, you declare that you are the individual owner of the specified email address and its associated accounts; and that all submitted information including any supplemental details necessary to verify your identity are true.', 'wporg' ); ?></p>
-						<br />
-						<?php reCAPTCHA\display_submit_button( esc_attr__( 'Accept Declaration and Request Export', 'wporg' ) ); ?>
+						<?php reCAPTCHA\display_submit_button( __( 'Accept Declaration and Request Export', 'wporg' ) ); ?>
 						<?php if ( is_user_logged_in() ) wp_nonce_field( $nonce_action ); ?>
 					</form>
 
-					<p><strong>Please note:</strong> <?php esc_html_e( 'Before we can begin processing your request, we\'ll require that you verify ownership of the email address. If the email address is associated with an account, we\'ll also require you to log in to that account first.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( "Please Note: Before we can begin processing your request, we'll require that you verify ownership of the email address. If the email address is associated with an account, we'll also require you to log in to that account first.", 'wporg' ); ?></p>
 
 				</section>
 			</div><!-- .entry-content -->

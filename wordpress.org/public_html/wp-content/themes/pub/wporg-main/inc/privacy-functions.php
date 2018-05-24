@@ -22,18 +22,16 @@ function privacy_process_request( $type ) {
 
 	// Currently only enabled for special accounts.
 	if ( ! is_user_logged_in() || ! wporg_user_has_restricted_password() ) {
-		$api_request = new \WP_Error(
-			'not_available',
-			'This form is currently disabled.'
-		);
+		$error_message = 'This form is currently unavailable.';
 	} else
+
 	if ( ! reCAPTCHA\check_status() ) {
-		$error_message = 'Your form session has expired. Please try again.';
+		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
 	} elseif (
 		is_user_logged_in() &&
 		! wp_verify_nonce( $_POST['_wpnonce'], $nonce_action )
 	) {
-		$error_message = 'Your form session has expired. Please try again.';
+		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
 
 	} elseif (
 		// Check if a user account exists for this email before processing.
@@ -42,13 +40,14 @@ function privacy_process_request( $type ) {
 	) {
 		if ( is_user_logged_in() ) {
 			$error_message = sprintf(
-				'The provided email address belongs to a different WordPress.org account. Please <a href="%1$s">log out</a> and <a href="%2$s">login to the account first</a>.',
-				wp_logout_url( get_permalink() ),
-				wp_login_url( get_permalink() )
+				/* translators: %s: link to the Login form */
+				__( 'The provided email address belongs to a different WordPress.org account. Please <a href="%s">login to the account first</a>.', 'wporg' ),
+				wp_logout_url( wp_login_url( get_permalink() ) )
 			);
 		} else {
 			$error_message = sprintf(
-				'The provided email address belongs to a WordPress.org account. Please <a href="%s">login to the account first</a>.',
+				/* translators: %s: link to the Login form */
+				__( 'The provided email address belongs to a WordPress.org account. Please <a href="%s">login to the account first</a>.', 'wporg' ),
 				wp_login_url( get_permalink() )
 			);
 		}
@@ -75,10 +74,10 @@ function privacy_process_request( $type ) {
 
 			if ( 'duplicate_request' == $api_request->get_error_code() ) {
 				// TODO This should never have to be displayed to an end user. See API for details.
-				$error_message = 'A request for this email address already exists. Please check your spam folder for your confirmation email.';
+				$error_message = esc_html__( 'A request for this email address already exists. Please check your spam folder for your confirmation email.', 'wporg' );
 
 			} elseif ( 'invalid_identifier' == $api_request->get_error_code() ) {
-				$error_message = 'The provided email was invalid. Please check the address and try again.';
+				$error_message = esc_html__( 'The provided email was invalid. Please check the address and try again.', 'wporg' );
 
 			}
 		} elseif ( !empty( $api_request['created'] ) ) {
