@@ -83,7 +83,8 @@ the_post();
 
 					<p><?php esc_html_e( 'This will request permanent deletion of your WordPress.org account, and relevant personal or private data stored on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and sites.', 'wporg'); ?></p>
 
-					<p><?php esc_html_e( 'Not all data can be erased, please review the <a href="/about/privacy/">Privacy Policy</a> for details.', 'wporg' ); ?></p>
+					<?php /* translators: link to privacy policy. */ ?>
+					<p><?php printf( esc_html__( 'Not all data can be erased, please review the %s for details.', 'wporg' ), '<a href="/about/privacy/">Privacy Policy</a>' ); ?></p>
 
 					<?php if ( $error_message ) : ?>
 						<p class="error"><strong>An error occured with your request:</strong> <?php echo $error_message; ?></p>
