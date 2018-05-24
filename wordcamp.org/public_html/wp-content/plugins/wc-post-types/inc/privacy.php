@@ -9,7 +9,7 @@ namespace WordCamp\Post_Types\Privacy;
 
 defined( 'WPINC' ) || die();
 
-use WP_Query, WP_User;
+use WP_Query, WP_User, WP_Error;
 
 add_filter( 'wp_privacy_personal_data_exporters', __NAMESPACE__ . '\register_personal_data_exporters' );
 //add_filter( 'wp_privacy_personal_data_erasers', __NAMESPACE__ . '\register_personal_data_erasers' );
@@ -114,6 +114,13 @@ function _personal_data_exporter( $post_type, array $props_to_export, $email_add
 
 	$post_query = get_wc_posts( $post_type, $email_address, $page );
 
+	if ( is_wp_error( $post_query ) ) {
+		return [
+			'data' => [],
+			'done' => true,
+		];
+	}
+
 	foreach ( (array) $post_query->posts as $post ) {
 		$post_data_to_export = [];
 
@@ -208,7 +215,7 @@ function organizer_personal_data_eraser( $email_address, $page ) {
  * @param string $email_address
  * @param int    $page
  *
- * @return WP_Query
+ * @return WP_Query|WP_Error
  */
 function get_wc_posts( $post_type, $email_address, $page ) {
 	$number = 20;
@@ -236,8 +243,9 @@ function get_wc_posts( $post_type, $email_address, $page ) {
 			if ( $user instanceof WP_User ) {
 				$meta_query[] = [
 					[
-						'key' => '_wcpt_user_id',
+						'key'   => '_wcpt_user_id',
 						'value' => $user->ID,
+						'type'  => 'NUMERIC',
 					],
 				];
 
@@ -262,14 +270,21 @@ function get_wc_posts( $post_type, $email_address, $page ) {
 			if ( $user instanceof WP_User ) {
 				$meta_query = [
 					[
-						'key' => '_wcpt_user_id',
+						'key'   => '_wcpt_user_id',
 						'value' => $user->ID,
+						'type'  => 'NUMERIC',
 					],
 				];
 
 				$query_args['meta_query'] = $meta_query;
+			} else {
+				$query_args = [];
 			}
 			break;
+	}
+
+	if ( empty( $query_args ) ) {
+		return new WP_Error();
 	}
 
 	return new WP_Query( $query_args );
