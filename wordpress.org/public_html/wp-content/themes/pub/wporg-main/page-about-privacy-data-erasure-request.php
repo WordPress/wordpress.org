@@ -77,11 +77,13 @@ the_post();
 				<section class="col-8">
 					<p><em>This page is under active development and is not currently enabled. All text is not final and will change.</em></p>
 
-					<p>WordPress.org respects your privacy and allows you to erase all data stored about you.<br>The following form will allow you to request an erasure of any data linked to your email address.</p>
+					<p><?php esc_html_e( 'WordPress.org respects your privacy and intends to remain transparent about any personal data we store about individuals. Under the General Data Protection Regulation (GDPR), EU citizens and residents may request deletion of personal data stored on our servers.', 'wporg' ); ?></p>
 
-					<p>This will request an erasure of all data storred on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and subdomains thereof.</p>
+					<p><?php esc_html_e( 'The following form will allow you to request deletion of your account and relevant personal and private data. You will be required to authenticate ownership of that address, and may be asked to provide additional identification or information necessary to verify the request.', 'wporg' ); ?></p>
 
-					<p>Not all data can be erased, please review the <a href="/about/privacy/">Privacy Policy</a> for details.</p>
+					<p><?php esc_html_e( 'This will request permanent deletion of your WordPress.org account, and relevant personal or private data stored on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and sites.', 'wporg'); ?></p>
+
+					<p><?php esc_html_e( 'Not all data can be erased, please review the <a href="/about/privacy/">Privacy Policy</a> for details.', 'wporg' ); ?></p>
 
 					<?php if ( $error_message ) : ?>
 						<p class="error"><strong>An error occured with your request:</strong> <?php echo $error_message; ?></p>
@@ -111,11 +113,13 @@ the_post();
 							value="<?php echo esc_attr( $email ); ?>"
 						>
 						<br>
-						<?php reCAPTCHA\display_submit_button( 'Request Erasure' ); ?>
+						<p><?php esc_html_e( 'By submitting this form, you declare that you are the individual owner of the specified email address and its associated accounts; and that all submitted information including any supplemental details necessary to verify your identity are true. You also declare that it is your intention for accounts associated with that email address to be permanently deleted.', 'wporg' ); ?></p>
+						<br/>
+						<?php reCAPTCHA\display_submit_button( esc_attr__( 'Accept Declaration and Request Permanent Account Deletion', 'wporg' ) ); ?>
 						<?php if ( is_user_logged_in() ) wp_nonce_field( $nonce_action ); ?>
 					</form>
 
-					<p><strong>Please note:</strong> Before we can begin processing your request, we'll require that you verify ownership of the email address. If the email address is associated with an account, we'll also require you to login to that account first.</p>
+						<p><strong>Please note:</strong> <?php esc_html_e( 'Before we can begin processing your request, we\'ll require that you verify ownership of the email address. If the email address is associated with an account, we\'ll also require you to login to that account first.', 'wporg' ); ?></p>
 
 				</section>
 			</div><!-- .entry-content -->
