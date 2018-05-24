@@ -35,7 +35,7 @@ echo Display::get_display_css(); ?>
 					$status       = 'Errored';
 					$status_title = 'No results found for test.';
 					$results      = get_post_meta( $report->ID, 'results', true );
-					if ( isset( $results['failures'] ) ) {
+					if ( isset( $results['failures'] ) && ! empty( $results['tests'] ) ) {
 						$status       = 0 === (int) $results['failures'] && 0 === (int) $results['errors'] ? 'Passed' : 'Failed';
 						$status_title = (int) $results['tests'] . ' tests, ' . (int) $results['failures'] . ' failed, ' . (int) $results['errors'] . ' errors';
 					}
