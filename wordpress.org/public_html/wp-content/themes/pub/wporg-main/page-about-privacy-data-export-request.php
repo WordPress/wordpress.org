@@ -77,14 +77,16 @@ the_post();
 				<section class="col-8">
 					<p><em>This page is under active development and is not currently enabled. All text is not final and will change.</em></p>
 
-					<p>WordPress.org respects your privacy and allows you to export all data stored about you.<br>The following form will allow you to request an export of any data linked to your email address.</p>
+					<p><?php esc_html_e( 'WordPress.org respects your privacy and intends to remain transparent about any personal data we store about individuals. Under the General Data Protection Regulation (GDPR), EU citizens and residents are entitled to receive a copy of any personal data we might hold about you.', 'wporg' ); ?></p>
 
-					<p>This export will contain all data storred on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and subdomains thereof.</p>
+					<p><?php esc_html_e( 'The following form will allow you to request an export of any data linked to your email address. You will be required to authenticate ownership of that address, and may be asked to provide additional identification or information necessary to verify the request and search our records.', 'wporg' ); ?></p>
+
+					<p><?php esc_html_e( 'This export will contain relevant personal or private data stored on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and sites.', 'wporg'); ?></p>
 
 					<?php if ( $error_message ) : ?>
 						<p class="error"><strong>An error occured with your request:</strong> <?php echo $error_message; ?></p>
 					<?php elseif ( $success ) : ?>
-						<p class="success"><strong>Please check your email for a confirmation link.</strong></p>
+					<p class="success"><strong><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></strong></p>
 					<?php endif; ?>
 
 					<p class="error"><strong>This is currently disabled unless you have a 'special' WordPress.org account.</strong></p>
@@ -104,11 +106,13 @@ the_post();
 							value="<?php echo esc_attr( $email ); ?>"
 						>
 						<br>
-						<?php reCAPTCHA\display_submit_button( 'Request Export' ); ?>
+						<p><?php esc_html_e( 'By submitting this form, you declare that you are the individual owner of the specified email address and its associated accounts; and that all submitted information including any supplemental details necessary to verify your identity are true.', 'wporg' ); ?></p>
+						<br />
+						<?php reCAPTCHA\display_submit_button( esc_attr__( 'Accept Declaration and Request Export', 'wporg' ) ); ?>
 						<?php if ( is_user_logged_in() ) wp_nonce_field( $nonce_action ); ?>
 					</form>
 
-					<p><strong>Please note:</strong> Before we can begin processing your request, we'll require that you verify ownership of the email address. If the email address is associated with an account, we'll also require you to login to that account first.</p>
+					<p><strong>Please note:</strong> <?php esc_html_e( 'Before we can begin processing your request, we\'ll require that you verify ownership of the email address. If the email address is associated with an account, we\'ll also require you to log in to that account first.', 'wporg' ); ?></p>
 
 				</section>
 			</div><!-- .entry-content -->
