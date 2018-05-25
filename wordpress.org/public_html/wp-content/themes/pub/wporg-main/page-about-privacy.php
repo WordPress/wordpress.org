@@ -71,20 +71,23 @@ the_post();
 					<p><?php esc_html_e( 'We rely on one or more of the following processing conditions:', 'wporg' ); ?></p>
 					<ul>
 						<li><?php esc_html_e( 'our legitimate interests in the effective delivery of information and services to you;', 'wporg' ); ?></li>
-						<li><?php esc_html_e( 'rely on explicit consent', 'wporg' ); ?></li>
-						<li><?php esc_html_e( 'to perform our obligations under the terms and conditions.', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'explicit consent that you have given;', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'legal obligations.', 'wporg' ); ?></li>
 					</ul>
 
 					<h3><?php esc_html_e( 'Access to data', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'You have the right to request a copy of the information we hold about you. If you would like a copy of some or all your personal information, please follow the instructions at the end of this policy.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'All WordCamp attendee-provided data can be viewed and changed by the attendee via the Access Token URL that is emailed to confirm a successful ticket purchase.', 'wporg' ); ?></p>
-					<p><?php echo wp_kses_post( __( 'WordPress.org user accounts can be edited by visiting https://profiles.wordpress.org/username/ (use your own WordPress.org username in that URL) while logged in to your account, and clicking the &#8220;Edit&#8221; link. ', 'wporg' ) ); ?></p>
+					<p><?php echo wp_kses_post( __( 'WordPress.org user accounts can be edited by following these steps:<br/>
+1) Visit <a href="https://login.wordpress.org/">https://login.wordpress.org</a>, and then enter your username and password.<br/>
+2) You will be redirected to https://profiles.wordpress.org/your_username.<br/>
+3) Click the &#8220;Edit&#8221; link next to your username.', 'wporg' ) ); ?></p>
 
 					<h3><?php esc_html_e( 'Retention of personal information', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'We will retain your personal information on our systems only for as long as we need to, for the success of the WordPress open source project and the programs that support WordPress.org. We keep contact information (such as mailing list information) until a user unsubscribes or requests that we delete that information from our live systems. If you choose to unsubscribe from a mailing list, we may keep certain limited information about you so that we may honor your request.', 'wporg' ); ?></p>
-					<p><?php esc_html_e( 'WordPress.org will not delete personal data from logs or records necessary to the operation, development, or archival records of the WordPress open source project.', 'wporg' ); ?></p>
-					<p><?php esc_html_e( 'WordPress.org shall maintain WordCamp attendee data for 3 years to better track and foster community growth and to preserve our ability to respond to code of conduct complaints.', 'wporg' ); ?></p>
-					<p><?php esc_html_e( 'On WordCamp.org sites, banking/financial data collected as part of a reimbursement request is deleted from WordCamp.org 7 days after the request is marked paid. The reason for the 7-day retention period is to prevent organizers having to re-enter their banking details if a wire fails or if a payment was marked “Paid” in error. Invoices and receipts related to WordCamp expenses are retained for 7 years after the close of the calendar year’s audit, by instruction of our financial consultants (auditors & bookkeepers).', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'WordPress.org will not delete personal data from logs or records necessary to the operation, development, or archives of the WordPress open source project.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'WordPress.org shall maintain WordCamp attendee data for 3 years to better track and foster community growth, and then automatically delete non-essential data collected via registration. Attendee names and email addresses will be retained indefinitely, to preserve our ability to respond to code of conduct reports.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'On WordCamp.org sites, banking/financial data collected as part of a reimbursement request is deleted from WordCamp.org 7 days after the request is marked paid. The reason for the 7-day retention period is to prevent organizers having to re-enter their banking details if a wire fails or if a payment was marked &#8220;Paid&#8221; in error. Invoices and receipts related to WordCamp expenses are retained for 7 years after the close of the calendar year\'s audit, by instruction of our financial consultants (auditors & bookkeepers).', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'When deletion is requested or otherwise required, we will anonymise the data of data subjects and/or remove their information from publicly accessible sites if the deletion of data would break essential systems or damage the logs or records necessary to the operation, development, or archival records of the WordPress open source project.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'Rights in relation to your information', 'wporg' ); ?></h3>
@@ -92,27 +95,27 @@ the_post();
 					<ul>
 						<li><?php esc_html_e( 'request a copy of personal information we hold about you;', 'wporg' ); ?></li>
 						<li><?php esc_html_e( 'ask that we update the personal information we hold about you, or independently correct such personal information that you think is incorrect or incomplete;', 'wporg' ); ?></li>
-						<li><?php esc_html_e( 'ask that we delete personal information that we hold about you from live systems and not archives, or restrict the way in which we use such personal information;', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'ask that we delete personal information that we hold about you from live systems, or restrict the way in which we use such personal information (for information on deletion from archives, see the &#8220;Retention of personal information&#8221; section);', 'wporg' ); ?></li>
 						<li><?php esc_html_e( 'object to our processing of your personal information; and/or', 'wporg' ); ?></li>
 						<li><?php esc_html_e( 'withdraw your consent to our processing of your personal information (to the extent such processing is based on consent and consent is the only permissible basis for processing).', 'wporg' ); ?></li>
 					</ul>
 					<p><?php esc_html_e( 'If you would like to exercise these rights or understand if these rights apply to you, please follow the instructions at the end of this Privacy statement.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'Third Party Links', 'wporg' ); ?></h3>
-					<p><?php esc_html_e( 'Our website may contain links to other websites provided by third parties not under our control.  When following a link and providing information on that link please be aware that we are not responsible for the data provided to that third party.  This privacy policy only applies to this website, so when you visit other websites, even when you click on a link posted on WordPress.org, you should read their own privacy policies.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Our website may contain links to other websites provided by third parties not under our control.  When following a link and providing information to a 3rd-party website, please be aware that we are not responsible for the data provided to that third party.  This privacy policy only applies to the websites listed at the beginning of this document, so when you visit other websites, even when you click on a link posted on WordPress.org, you should read their own privacy policies.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'Aggregated Statistics', 'wporg' ); ?></h3>
-					<p><?php echo wp_kses_post( __( 'WordPress.org may collect statistics about the behavior of visitors to its websites. For instance, WordPress.org may reveal how many downloads a particular version got, or say which plugins are most popular based on checks from <code>api.wordpress.org</code>, a web service used by WordPress installations to check for new versions of WordPress and plugins. However, WordPress.org does not disclose personally-identifying information other than as described below.', 'wporg' ) ); ?></p>
+					<p><?php echo wp_kses_post( __( 'WordPress.org may collect statistics about the behavior of visitors to its websites. For instance, WordPress.org may reveal how many times a particular version of WordPress was downloaded or report on which plugins are the most popular, based on data gathered by <code>api.wordpress.org</code>, a web service used by WordPress installations to check for new versions of WordPress and plugins. However, WordPress.org does not disclose personally-identifying information other than as described in this policy.', 'wporg' ) ); ?></p>
 
 					<h3><?php esc_html_e( 'Cookies', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'Additionally, information about how you use our website is collected automatically using &#8220;cookies&#8221;.  Cookies are text files placed on your computer to collect standard internet log information and visitor behaviour information. This information is used to track visitor use of the website and to compile statistical reports on website activity.', 'wporg' ); ?></p>
 					<p><?php echo wp_kses_post( __( 'Please see <a href="https://wordpress.org/about/privacy/cookies/">our cookie policy</a> for more information about what cookies are collected on WordPress.org.', 'wporg' ) ); ?></p>
 
 					<h3><?php esc_html_e( 'Privacy Policy Changes', 'wporg' ); ?></h3>
-					<p><?php esc_html_e( 'Although most changes are likely to be minor, WordPress.org may change its Privacy Policy from time to time, and in WordPress.org&#8217;s sole discretion. WordPress.org encourages visitors to frequently check this page for any changes to its Privacy Policy. Your continued use of this site after any change in this Privacy Policy will constitute your acceptance of such change.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Although most changes are likely to be minor, WordPress.org may change its Privacy Policy from time to time, and at WordPress.org&#8217;s sole discretion. WordPress.org encourages visitors to frequently check this page for any changes to its Privacy Policy. Your continued use of this site after any change in this Privacy Policy will constitute your acceptance of such change.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'Contact', 'wporg' ); ?></h3>
-					<p><?php esc_html_e( 'Please contact us if you have any questions about our privacy policy or information we hold about you by emailing dpo@wordcamp.org', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Please contact us if you have any questions about our privacy policy or information we hold about you by emailing dpo@wordcamp.org.', 'wporg' ); ?></p>
 
 					<p><a rel="license" href="https://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" src="https://creativecommons.org/images/public/somerights20.png"></a></p>
 				</section>
