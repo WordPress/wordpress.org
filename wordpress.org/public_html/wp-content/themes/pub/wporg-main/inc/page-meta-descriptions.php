@@ -118,6 +118,11 @@ function custom_open_graph_tags( $tags = [] ) {
 			$title = esc_html_x( 'Data Export Request', 'Page title', 'wporg' );
 			$desc  = esc_html__( 'WordPress.org respects your privacy and intends to remain transparent about any personal data we store about individuals. Under the General Data Protection Regulation (GDPR), EU citizens and residents are entitled to receive a copy of any personal data we might hold about you.', 'wporg' );
 			break;
+
+		case 'page-about-privacy-cookies.php':
+			$title = esc_html_x( 'Cookie Policy', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'This policy specifically explains how WordPress.org, our partners, and users of our services deploy cookies, as well as the options you have to control them.', 'wporg' );
+			break;
 	}
 
 	$tags['og:title']            = $title;
