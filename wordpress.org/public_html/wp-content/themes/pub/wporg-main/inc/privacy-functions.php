@@ -41,13 +41,13 @@ function privacy_process_request( $type ) {
 		if ( is_user_logged_in() ) {
 			$error_message = sprintf(
 				/* translators: %s: link to the Login form */
-				__( 'The provided email address belongs to a different WordPress.org account. Please <a href="%s">login to the account first</a>.', 'wporg' ),
+				__( 'The provided email address belongs to a different WordPress.org account. Please <a href="%s">log in to the account first</a>.', 'wporg' ),
 				wp_logout_url( wp_login_url( get_permalink() ) )
 			);
 		} else {
 			$error_message = sprintf(
 				/* translators: %s: link to the Login form */
-				__( 'The provided email address belongs to a WordPress.org account. Please <a href="%s">login to the account first</a>.', 'wporg' ),
+				__( 'The provided email address belongs to a WordPress.org account. Please <a href="%s">log in to the account first</a>.', 'wporg' ),
 				wp_login_url( get_permalink() )
 			);
 		}
