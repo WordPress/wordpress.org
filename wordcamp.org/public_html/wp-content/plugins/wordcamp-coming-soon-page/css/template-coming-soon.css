@@ -242,3 +242,9 @@ label {
 #infinite-footer {
 	display: none !important;
 }
+
+/* Jetpack EU Cookie Law Widget */
+#eu-cookie-law input[type="submit"] {
+	width: auto;
+	text-shadow: none;
+}
