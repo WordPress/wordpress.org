@@ -97,25 +97,25 @@ the_post();
 							<tr>
 								<th>__utmb</th>
 								<td><?php esc_html_e( '30 minutes', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-       usage">Google Analytics</a> - <?php esc_html_e( 'Used to determine new sessions/visits. The cookie is created when the javascript library executes and no existing __utmb cookies exists. The cookie is updated every time data is sent to Google Analytics.', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Used to determine new sessions/visits. The cookie is created when the javascript library executes and no existing __utmb cookies exists. The cookie is updated every time data is sent to Google Analytics.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
 								<th>__utmc</th>
 								<td><?php esc_html_e( 'Session', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-       usage">Google Analytics</a> - <?php esc_html_e( 'Set for interoperability with urchin.js. Historically, this cookie operated in conjunction with the __utmb cookie to determine whether the user was in a new session/visit.', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Set for interoperability with urchin.js. Historically, this cookie operated in conjunction with the __utmb cookie to determine whether the user was in a new session/visit.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
 								<th>__utmt</th>
 								<td><?php esc_html_e( '10 minutes', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-       usage">Google Analytics</a> - <?php esc_html_e( 'Used to throttle request rate.', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Used to throttle request rate.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
 								<th>__utmz</th>
 								<td><?php esc_html_e( '6 months', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-       usage">Google Analytics</a> - <?php esc_html_e( '‘Stores the traffic source or campaign that explains how the user reached your site. The cookie is created when the javascript library executes and is updated every time data is sent to Google Analytics.', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Stores the traffic source or campaign that explains how the user reached your site. The cookie is created when the javascript library executes and is updated every time data is sent to Google Analytics.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
