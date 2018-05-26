@@ -15,6 +15,7 @@ abstract class Directory_Compat {
 	abstract protected function forum_id();
 	abstract protected function query_var();
 	abstract protected function taxonomy();
+	abstract protected function name();
 	abstract protected function parse_query();
 	abstract protected function do_view_sidebar();
 	abstract protected function do_topic_sidebar();
@@ -479,7 +480,7 @@ abstract class Directory_Compat {
 
 	public function register_taxonomy() {
 		if ( post_type_exists( 'topic' ) ) {
-			register_taxonomy( $this->taxonomy(), 'topic', array( 'public' => false ) );
+			register_taxonomy( $this->taxonomy(), 'topic', array( 'public' => false, 'show_ui' => true, 'labels' => array ('name' => $this->name() ) ) );
 		}
 	}
 

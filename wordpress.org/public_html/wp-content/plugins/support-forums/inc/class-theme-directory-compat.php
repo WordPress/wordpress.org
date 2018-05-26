@@ -57,6 +57,10 @@ class Theme_Directory_Compat extends Directory_Compat {
 		return 'topic-' . self::COMPAT;
 	}
 
+	function name() {
+		return ucfirst( self::COMPAT );
+	}
+
 	public function __construct() {
 		$this->init();
 	}
