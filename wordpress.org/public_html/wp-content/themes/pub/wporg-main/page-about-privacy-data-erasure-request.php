@@ -57,6 +57,12 @@ add_action( 'wp_head', function() {
 			border-left: 4px solid green;
 			padding: 6px;
 		}
+		div.alert {
+			border: 1px solid red;
+			border-left: 4px solid red;
+			padding: 6px;
+			margin-bottom: 2rem;
+		}	
 		form.request-form label {
 			display: block;
 			color: #555;
@@ -64,6 +70,12 @@ add_action( 'wp_head', function() {
 		}
 		form.request-form input[type="email"] {
 			width: 100%;
+		}
+		form.request-form input:invalid {
+			border: 1px solid red;
+		}
+		h5 {
+			margin-top: 1rem;
 		}
 	</style>';
 } );
@@ -80,40 +92,33 @@ the_post();
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<p><em>This page is under active development and is not currently enabled. All text is not final and will change.</em></p>
-
 					<p><?php esc_html_e( 'WordPress.org respects your privacy and intends to remain transparent about any personal data we store about individuals. Under the General Data Protection Regulation (GDPR), EU citizens and residents may request deletion of personal data stored on our servers.', 'wporg' ); ?></p>
 
 					<p><?php esc_html_e( 'The following form will allow you to request deletion of your account and relevant personal and private data. You will be required to authenticate ownership of that address, and may be asked to provide additional identification or information necessary to verify the request.', 'wporg' ); ?></p>
 
-					<p><?php esc_html_e( 'This will request permanent deletion of your WordPress.org account, and relevant personal or private data stored on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and sites.', 'wporg'); ?></p>
+					<div class="alert">
+						<h5><?php esc_html_e( 'Important!', 'wporg' ); ?></h5>
 
-					<p><?php
-						printf(
-							/* translators: link to privacy policy. */
-							esc_html__( 'Not all data can be erased, please review the %s for details.', 'wporg' ),
-							'<a href="/about/privacy/">' . esc_html_x( 'Privacy Policy', 'Page title', 'wporg' ) . '</a>'
-						);
-					?></p>
+						<p><?php printf( wp_kses_post( __( 'This will request permanent deletion of your <strong>WordPress.org</strong> account, and relevant personal or private data stored on <strong>%s</strong>, and other related domains and sites.', 'wporg') ), 'WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org' ); ?></p>
+
+						<p><?php esc_html_e( 'Please note that we cannot remove or provide access to data stored on WordPress sites hosted or administered by third parties.', 'wporg' ); ?></p>
+
+						<p><?php
+							printf(
+								/* translators: link to privacy policy. */
+								wp_kses_post( __('Not all data can be erased, please review the <a href="%s">Privacy Policy</a> for details.', 'wporg' ) ),
+								'https://wordpress.org/about/privacy/'
+							);
+						?></p>
+					</div>
 
 					<?php if ( $error_message ) : ?>
-
 						<p class="error">
 							<strong><?php esc_html_e( 'An error occured with your request:', 'wporg' ); ?></strong><br>
 							<?php echo $error_message; ?>
 						</p>
 					<?php elseif ( $success ) : ?>
 						<p class="success"><strong><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></strong></p>
-					<?php endif; ?>
-
-					<p class="error">
-						<strong>This is currently disabled unless you have a 'special' WordPress.org account.</strong>
-						<br>
-						<span style="color: red">DO NOT REQUEST ERASURE UNLESS YOU WANT YOUR ACCOUNT DELETED.</span>
-						</strong>
-					</p>
-					<?php if ( is_user_logged_in() && wporg_user_has_restricted_password() ) : ?>
-						<p class="success">PS: You have a special account.</p>
 					<?php endif; ?>
 
 					<form id="erase-request-form" class="request-form" method="POST" action="#">
