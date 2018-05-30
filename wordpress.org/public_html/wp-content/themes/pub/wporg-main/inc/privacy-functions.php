@@ -21,7 +21,7 @@ function privacy_process_request( $type ) {
 	}
 
 	// Currently only enabled for special accounts.
-	if ( ! is_user_logged_in() || ! wporg_user_has_restricted_password() ) {
+	if ( 'export' === $type && ( ! is_user_logged_in() || ! wporg_user_has_restricted_password() ) ) {
 		$error_message = 'This form is currently unavailable.';
 	} else
 
