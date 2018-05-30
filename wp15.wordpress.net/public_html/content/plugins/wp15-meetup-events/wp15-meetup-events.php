@@ -76,7 +76,7 @@ function get_potential_events( $start_date, $end_date ) {
 	$group_ids     = wp_list_pluck( $groups, 'id' );
 
 	$event_args = array(
-		'status' => array( 'upcoming', 'past' ),
+		'status' => 'upcoming,past',
 		'fields' => 'timezone',
 		'time'   => sprintf(
 			'%d,%d',
