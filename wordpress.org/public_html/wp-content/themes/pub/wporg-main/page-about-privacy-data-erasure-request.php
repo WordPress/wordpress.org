@@ -11,7 +11,7 @@ namespace WordPressdotorg\MainTheme;
 
 $GLOBALS['menu_items'] = [
 	'about/privacy'                      => _x( 'Privacy Policy',       'Page title', 'wporg' ),
-	'about/privacy/data-export-request'  => _x( 'Data Export Request',  'Page title', 'wporg' ),
+	#'about/privacy/data-export-request'  => _x( 'Data Export Request',  'Page title', 'wporg' ),
 	'about/privacy/data-erasure-request' => _x( 'Data Erasure Request', 'Page title', 'wporg' ),
 ];
 
