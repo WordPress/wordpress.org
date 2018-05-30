@@ -121,6 +121,7 @@ the_post();
 						<p class="success"><strong><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></strong></p>
 					<?php endif; ?>
 
+					<?php if ( !$success ) : ?>
 					<form id="erase-request-form" class="request-form" method="POST" action="#">
 						<label for="email">
 							<?php esc_html_e( 'Email Address', 'wporg' ); ?>
@@ -141,6 +142,8 @@ the_post();
 					</form>
 
 						<p><?php esc_html_e( "Please Note: Before we can begin processing your request, we'll require that you verify ownership of the email address. If the email address is associated with an account, we'll also require you to log in to that account first.", 'wporg' ); ?></p>
+
+					<?php endif; ?>
 
 				</section>
 			</div><!-- .entry-content -->
