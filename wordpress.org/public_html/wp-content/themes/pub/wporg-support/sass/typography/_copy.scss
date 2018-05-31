@@ -22,7 +22,7 @@ p {
 	&.note {
 		font-size: ms( -4 );
 		letter-spacing: 0.01rem;
-		max-width: ms(26);
+		max-width: ms( 26 );
 	}
 }
 
@@ -42,7 +42,7 @@ pre {
 	background: $color__background-pre;
 	box-sizing: content-box;
 	font-family: $font__pre;
-	font-size: ms(-2);
+	font-size: ms( -2 );
 	line-height: $font__line-height-pre;
 	margin-bottom: 1.6em;
 	max-width: 100%;
@@ -52,7 +52,7 @@ pre {
 
 code, kbd, tt, var {
 	font-family: $font__code;
-	font-size: ms(-2);
+	font-size: ms( -2 );
 }
 
 abbr, acronym {

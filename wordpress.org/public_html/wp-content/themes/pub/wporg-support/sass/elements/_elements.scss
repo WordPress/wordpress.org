@@ -5,8 +5,10 @@ html {
 }
 
 *,
-*:before,
-*:after { /* Inherit box-sizing to make it easier to change the property for components that leverage other behavior; see http://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+*::before,
+*::after {
+
+	/* Inherit box-sizing to make it easier to change the property for components that leverage other behavior; see http://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
 	box-sizing: inherit;
 }
 
@@ -17,8 +19,8 @@ body {
 blockquote, q {
 	quotes: "" "";
 
-	&:before,
-	&:after {
+	&::before,
+	&::after {
 		content: "";
 		margin: 0;
 	}
@@ -64,4 +66,3 @@ img {
 @import "notices";
 @import "banners";
 @import "badges";
-

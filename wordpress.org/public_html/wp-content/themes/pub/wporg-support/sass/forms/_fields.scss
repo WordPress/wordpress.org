@@ -97,7 +97,7 @@ input[type="radio"] {
 	min-width: 16px;
 	padding: 0 !important;
 	text-align: center;
-	transition: .05s border-color ease-in-out;
+	transition: 0.05s border-color ease-in-out;
 	vertical-align: middle;
 	width: 25px;
 }
@@ -112,11 +112,11 @@ input[type="radio"] {
 	margin-right: 4px;
 }
 
-input[type="checkbox"]:checked:before,
-input[type="radio"]:checked:before {
+input[type="checkbox"]:checked::before,
+input[type="radio"]:checked::before {
 	display: inline-block;
 	float: left;
-	font: normal 21px/1 dashicons;
+	font: 400 21px/1 dashicons;
 	vertical-align: middle;
 	width: 16px;
 	-moz-osx-font-smoothing: grayscale;
@@ -124,14 +124,14 @@ input[type="radio"]:checked:before {
 	speak: none;
 }
 
-input[type="checkbox"]:checked:before {
+input[type="checkbox"]:checked::before {
 	color: #1e8cbe;
 	content: "\f147";
-	font: normal 30px/1 dashicons;
+	font: 400 30px/1 dashicons;
 	margin: -3px -5px;
 }
 
-input[type="radio"]:checked:before {
+input[type="radio"]:checked::before {
 	background-color: #1e8cbe;
 	border-radius: 50px;
 	content: "\2022";
@@ -145,6 +145,7 @@ input[type="radio"]:checked:before {
 }
 
 @-moz-document url-prefix() {
+
 	input[type="checkbox"],
 	input[type="radio"],
 	.form-table input.tog {
@@ -228,10 +229,10 @@ input[type="checkbox"]:disabled,
 input[type="checkbox"].disabled,
 input[type="radio"]:disabled,
 input[type="radio"].disabled,
-input[type="checkbox"]:disabled:checked:before,
-input[type="checkbox"].disabled:checked:before,
-input[type="radio"]:disabled:checked:before,
-input[type="radio"].disabled:checked:before {
+input[type="checkbox"]:disabled:checked::before,
+input[type="checkbox"].disabled:checked::before,
+input[type="radio"]:disabled:checked::before,
+input[type="radio"].disabled:checked::before {
 	opacity: 0.7;
 }
 
@@ -245,6 +246,7 @@ fieldset label {
 -------------------------------------------------------------- */
 
 @media screen and ( min-width: 48em ) {
+
 	/* Input Elements */
 	input[type="text"],
 	input[type="email"],
@@ -262,8 +264,8 @@ fieldset label {
 		padding: 0;
 	}
 
-	input[type="checkbox"]:checked:before {
-		font: normal 21px/1 dashicons;
+	input[type="checkbox"]:checked::before {
+		font: 400 21px/1 dashicons;
 		margin: -3px 0 0 -4px;
 	}
 
@@ -273,7 +275,7 @@ fieldset label {
 		width: 16px;
 	}
 
-	input[type="radio"]:checked:before {
+	input[type="radio"]:checked::before {
 		width: 6px;
 		height: 6px;
 		margin: 4px;

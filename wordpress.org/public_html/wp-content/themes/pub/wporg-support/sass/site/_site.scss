@@ -6,7 +6,7 @@ body, #pagebody {
 }
 
 /*--------------------------------------------------------------
-# .site-header 
+# .site-header
 --------------------------------------------------------------*/
 .site-header {
 	background: $color__wp-blue;
@@ -112,6 +112,7 @@ body, #pagebody {
 			}
 
 			li {
+
 				&:hover > ul,
 				&.focus > ul {
 					left: 100%;
@@ -158,6 +159,7 @@ body, #pagebody {
 		}
 
 		@media screen and (min-width: $ms-breakpoint) {
+
 			&.active {
 				border-bottom: 1px solid;
 			}
@@ -170,9 +172,10 @@ body, #pagebody {
 }
 
 @media screen and (min-width: $ms-breakpoint) {
+
 	#wporg-header ul li a.current ~ .uparrow,
-	#wporg-header ul li.current-menu-item:after,
-	#wporg-header ul li.current_page_parent:after {
+	#wporg-header ul li.current-menu-item::after,
+	#wporg-header ul li.current_page_parent::after {
 		border-bottom: 9px solid $color__wp-blue;
 	}
 
@@ -200,15 +203,17 @@ body, #pagebody {
 	width: 3.5rem;
 	-webkit-appearance: none;
 
-	.toggled &:before {
+	.toggled &::before {
 		content: "\f343";
 	}
 }
 
 @media screen and ( min-width: $ms-breakpoint ) {
+
 	.menu-toggle.dashicons {
 		display: none;
 	}
+
 	.main-navigation {
 		float: right;
 		position: relative;
@@ -268,9 +273,11 @@ body, #pagebody {
 	}
 
 	.page-header {
+
 		h1 {
 			margin: 0;
 		}
+
 		p {
 			margin: 0.5rem 0;
 		}
@@ -293,13 +300,14 @@ body, #pagebody {
 # .sidebar
 --------------------------------------------------------------*/
 .sidebar {
+
 	div {
 		margin-bottom: 2rem;
 
 		ul {
-			margin-bottom:0;
+			margin-bottom: 0;
 		}
-		
+
 		ul > li {
 			font-size: ms(-2);
 			border-top: 1px solid #eee;
@@ -356,6 +364,7 @@ body, #pagebody {
 
 	.site-header.home &,
 	.site-main & {
+
 		.button-search {
 			background: transparent;
 			border: none;
@@ -396,6 +405,7 @@ body, #pagebody {
 		}
 
 		@media screen and (min-width: $ms-breakpoint) {
+
 			.search-field {
 				border-radius: 2px 0 0 2px;
 				font-size: ms( -4 );
@@ -409,6 +419,7 @@ body, #pagebody {
 		}
 
 		@media screen and (min-width: 60em) {
+
 			.search-field {
 				width: 10rem;
 			}
@@ -424,6 +435,7 @@ body, #pagebody {
 }
 
 .search {
+
 	.site-main {
 		margin-top: 2rem;
 		padding-top: 0;
@@ -439,6 +451,7 @@ body, #pagebody {
 # .page
 --------------------------------------------------------------*/
 .page {
+
 	.entry-header {
 		margin-top: 2rem;
 
@@ -455,6 +468,7 @@ body, #pagebody {
 	}
 
 	.entry-content {
+
 		h2 {
 			font-size: ms( 4 );
 			font-weight: 400;
@@ -505,7 +519,7 @@ body, #pagebody {
 	}
 
 	.submenu li.current {
-		font-weight: bold;
+		font-weight: 700;
 	}
 
 	.submenu li:last-child {
@@ -524,6 +538,7 @@ body, #pagebody {
 }
 
 .page-template-page-full-width {
+
 	.entry-header .entry-title,
 	.entry-content section .container {
 		max-width: 100%;
@@ -538,6 +553,3 @@ body, #pagebody {
 .error-404 .page-title, .error-404 .page-content {
 	text-align: center;
 }
-
-
-

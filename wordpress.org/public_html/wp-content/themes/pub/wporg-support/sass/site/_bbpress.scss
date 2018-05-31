@@ -12,21 +12,25 @@ section {
 }
 
 .three-up { //3-columns section
+
 	@extend .clear;
 
 	@media (min-width: $ms-breakpoint) {
+
 		> div {
-			float:left;
-			width:30%;
-			margin-right:5%;
-			font-size:ms(-2);
+			float: left;
+			width: 30%;
+			margin-right: 5%;
+			font-size: ms(-2);
+
 			&:nth-child(3n) {
-				margin-right:0;
+				margin-right: 0;
 			}
 		}
 	}
 
 	&.bbp-forums {
+
 		> div {
 			background: transparent;
 			position: relative;
@@ -44,10 +48,11 @@ section {
 			}
 
 			p {
-				color: #666666;
+				color: #666;
 			}
 
 			a {
+
 				&:hover {
 					color: $color__link;
 					text-decoration: none;
@@ -64,7 +69,7 @@ section {
 				margin: 2rem 5% 0 0;
 
 				&:nth-child(3n) {
-					margin-right:0;
+					margin-right: 0;
 				}
 			}
 		}
@@ -74,12 +79,14 @@ section {
 
 .bbpress,
 .page-template-page-forums-sidebar {
+
 	main#main {
+
 		.entry-content,
 		.entry-meta {
 			padding: 0;
 
-			@media(min-width:568px) {
+			@media (min-width: 568px) {
 				padding: 0 ms(4);
 			}
 		}
@@ -101,6 +108,7 @@ section {
 		}
 
 		@media screen and ( min-width: $ms-breakpoint ) {
+
 			.entry-content,
 			.entry-meta {
 				padding-left: 0;
@@ -116,6 +124,7 @@ section {
 }
 
 .bbpress {
+
 	main#main {
 		margin-top: 2rem;
 		padding: 0 10px 10px;
@@ -126,7 +135,7 @@ section {
 	#bbpress-forums {
 
 		div.bbp-template-notice {
-			padding: .5rem;
+			padding: 0.5rem;
 			border: none;
 			border-radius: 3px;
 
@@ -161,6 +170,7 @@ section {
 		}
 
 		.bbp-body {
+
 			.bbp-topic-freshness,
 			.bbp-topic-voice-count,
 			.bbp-topic-reply-count {
@@ -170,11 +180,12 @@ section {
 
 		.bbp-header,
 		.bbp-body {
+
 			li.bbp-forum-freshness,
 			li.bbp-topic-freshness {
 				width: 58%;
 
-				@media(min-width: 321px) {
+				@media (min-width: 321px) {
 					width: 25%;
 				}
 			}
@@ -238,6 +249,7 @@ section {
 		}
 
 		@media only screen and (max-width: 480px) {
+
 			div.bbp-reply-author img.avatar,
 			div.bbp-topic-author img.avatar {
 				position: relative;
@@ -279,7 +291,7 @@ section {
 		.wporg-bbp-user-notes-toggle,
 		.wporg-bbp-user-flag {
 			font-size: ms(-2);
-			font-weight: normal;
+			font-weight: 400;
 			margin: 0;
 			margin-right: 10px;
 			display: inline-block;
@@ -319,7 +331,7 @@ section {
 		div.bbp-reply-content a.mention,
 		div.bbp-topic-content a.mention {
 			text-decoration: none;
-			font-weight: bold;
+			font-weight: 700;
 		}
 
 		div.bbp-reply-content .bbp-reply-revision-log-item a,
@@ -354,7 +366,9 @@ section {
 
 		li.bbp-body div.type-topic:focus-within span.bbp-admin-links,
 		li.bbp-body div.type-reply:focus-within span.bbp-admin-links {
-			/* Separated from the block above due to browsers that don't support :focus-within */
+
+			/* Separated from the block above due to browsers that
+			 * don't support :focus-within */
 			display: block;
 		}
 
@@ -367,6 +381,7 @@ section {
 		.bbp-topic-meta .bbp-topic-freshness-author,
 		.bbp-topic-revision-log-item,
 		.bbp-reply-revision-log-item {
+
 			img.avatar {
 				display: none; // Hides the avatar from single forum view.
 			}
@@ -381,12 +396,14 @@ section {
 		}
 
 		p.bbp-topic-meta a {
+
 			/* Override bb-base/style.css */
 			color: $color__link;
 
 			&:hover,
 			&:focus,
 			&:active {
+
 				/* Override bb-base/style.css */
 				text-decoration: underline;
 			}
@@ -397,11 +414,12 @@ section {
 			padding-top: 0.5rem;
 		}
 
-		p.wporg-bbp-topic-site-url:before {
+		p.wporg-bbp-topic-site-url::before {
+
 			content: "\f103";
 			color: #000;
 			font-family: dashicons;
-			font: normal 16px/1 'dashicons';
+			font: 400 16px/1 dashicons;
 			margin-right: 5px;
 			float: left;
 			padding-top: 3px;
@@ -423,8 +441,7 @@ section {
 
 			.page-numbers {
 				background: #fff;
-				border: 1px solid #B4B9BE;
-				margin-left: 0;
+				border: 1px solid #b4b9be;
 				color: #757575;
 				padding: 2px 8px;
 				margin-left: -1px;
@@ -450,6 +467,7 @@ section {
 				&:first-child {
 					border-radius: 3px 0 0 3px;
 				}
+
 				&:last-child {
 					border-radius: 0 3px 3px 0;
 				}
@@ -501,28 +519,35 @@ section {
 	}
 
 	.forum-titles {
+
 		.bbp-topic-voice-count,
 		.bbp-topic-reply-count {
 			overflow: hidden;
 
-			&:before {
-				font: normal 16px/1 'dashicons';
-			    margin-right: 100px;
+			&::before {
 
-			    @media(min-width: 321px) {
-			    	font: normal 21px/1 'dashicons';
-			    	margin-left: 20px;
-			    }
+				font: 400 16px/1 dashicons;
+				margin-right: 100px;
+
+				@media (min-width: 321px) {
+
+					font: 400 21px/1 dashicons;
+					margin-left: 20px;
+				}
 			}
 		}
+
 		.bbp-topic-voice-count {
-			&:before {
-			    content: "\f307";
+
+			&::before {
+				content: "\f307";
 			}
 		}
+
 		.bbp-topic-reply-count {
-			&:before {
-			    content: "\f125";
+
+			&::before {
+				content: "\f125";
 			}
 		}
 	}
@@ -534,12 +559,12 @@ section {
 }
 
 
-
 /*--------------------------------------------------------------
 # Buttons
 --------------------------------------------------------------*/
 
 #bbpress-forums {
+
 	fieldset.bbp-form button {
 		padding: 0 0.8rem;
 		font-size: ms(-2);
@@ -560,6 +585,7 @@ section {
 	}
 
 	fieldset.bbp-form .button.submit {
+
 		@extend .button-primary;
 	}
 
@@ -567,6 +593,7 @@ section {
 	.reviews-submit-link > .btn,
 	.subscription-toggle,
 	.favorite-toggle {
+
 		@extend .button;
 	}
 
@@ -582,21 +609,22 @@ section {
 	&:hover {
 		text-decoration: underline !important;
 	}
-	&:after {
+
+	&::after {
 		content: "\f345";
-	    font-family: dashicons;
-	    position: absolute;
-	    top: 1px;
-	    right: 0;
+		font-family: dashicons;
+		position: absolute;
+		top: 1px;
+		right: 0;
 	}
 }
 
 .rtl .viewmore {
-	&:after {
+
+	&::after {
 		content: "\f341";
 	}
 }
-
 
 
 /*--------------------------------------------------------------
@@ -604,12 +632,13 @@ section {
 --------------------------------------------------------------*/
 
 #bbpress-forums {
+
 	fieldset.bbp-form {
 		margin: 0;
 		border: 0;
 
 		legend {
-			font-weight: normal;
+			font-weight: 400;
 			font-size: ms(2);
 		}
 
@@ -634,6 +663,7 @@ section {
 	}
 
 	@media (max-width: 767px) {
+
 		input[type="text"] {
 			width: 100%;
 		}
@@ -661,9 +691,11 @@ section {
 }
 
 .topic-resolved {
+
 	label {
 		vertical-align: none;
 	}
+
 	select {
 		width: 120px;
 		line-height: 1;
@@ -673,7 +705,6 @@ section {
 select {
 	-webkit-appearance: menulist; // Get those arrows back into the select box.
 }
-
 
 
 /*--------------------------------------------------------------
@@ -719,11 +750,13 @@ select {
 	}
 
 	.helpful-links {
+
 		> div:last-child {
 			font-size: ms(-2);
 		}
 
 		@media (min-width: $ms-breakpoint) {
+
 			> div {
 				width: 65%;
 				float: left;
@@ -743,7 +776,7 @@ select {
 
 		p {
 			font-size: ms(0);
-			color: #666666;
+			color: #666;
 
 			a:hover > .dashicons {
 				text-decoration: none;
@@ -769,15 +802,14 @@ select {
 }
 
 
-
-
 /*--------------------------------------------------------------
 # Single Forum
 --------------------------------------------------------------*/
 .sidebar {
-	.forum-info li:before,
-	.topic-info li:before,
-	div ul li a:before {
+
+	.forum-info li::before,
+	.topic-info li::before,
+	div ul li a::before {
 		float: left;
 		margin-right: 5px;
 	}
@@ -794,22 +826,22 @@ select {
 		display: inline-block;
 	}
 
-	.forum-info li.topic-count:before {
+	.forum-info li.topic-count::before {
 		content: "\f105";
 	}
 
-	.forum-info li.reply-count:before,
-	.topic-info li.reply-count:before {
+	.forum-info li.reply-count::before,
+	.topic-info li.reply-count::before {
 		content: "\f125";
 	}
 
-	.forum-info li.create-topic a:before,
-	.topic-info li.create-reply a:before {
+	.forum-info li.create-topic a::before,
+	.topic-info li.create-reply a::before {
 		content: "\f132";
 	}
 
-	.forum-info li.forum-subscribe:before,
-	.topic-info li.topic-subscribe:before {
+	.forum-info li.forum-subscribe::before,
+	.topic-info li.topic-subscribe::before {
 		content: "\f465";
 	}
 
@@ -820,14 +852,13 @@ select {
 }
 
 
-
-
-
 /*--------------------------------------------------------------
 # Single Topic
 --------------------------------------------------------------*/
 .single-topic {
+
 	.entry-content {
+
 		#bbpress-forums {
 			overflow: visible;
 
@@ -897,7 +928,7 @@ select {
 					display: block;
 					float: left;
 					color: #fff;
-					background: gold;
+					background: #ffd700;
 					padding-top: 3px;
 					width: 30px;
 					height: 25px;
@@ -936,19 +967,20 @@ div.bbp-breadcrumb {
 }
 
 .sidebar {
-	.topic-info li.topic-forum:before {
+
+	.topic-info li.topic-forum::before {
 		content: "\f230";
 	}
 
-	.topic-info li.wp-version:before {
+	.topic-info li.wp-version::before {
 		content: "\f120";
 	}
 
-	.topic-info li.topic-resolved:before {
+	.topic-info li.topic-resolved::before {
 		content: "\f546";
 	}
 
-	.topic-info li.topic-favorite:before {
+	.topic-info li.topic-favorite::before {
 		content: "\f487";
 	}
 
@@ -965,20 +997,18 @@ div.bbp-breadcrumb {
 }
 
 
-
-
 /*--------------------------------------------------------------
 # User Profile
 --------------------------------------------------------------*/
 .bbp-single-user {
+
 	.page-header {
+
 		h1 {
 			margin-bottom: 1rem;
 		}
 	}
 }
-
-
 
 
 /*--------------------------------------------------------------
@@ -988,6 +1018,7 @@ div.bbp-breadcrumb {
 .bbp-view { // This is my hook for both the plugin/theme support review page and the actual plugin/theme support forum
 	// Review page
 	.review-ratings {
+
 		@extend .clear;
 		margin-bottom: ms(0);
 		padding-bottom: 10px;
@@ -1003,11 +1034,12 @@ div.bbp-breadcrumb {
 			border-top: 1px solid #eee;
 
 			.reviews-total-count {
-				font-weight: bold;
+				font-weight: 700;
 				padding-bottom: 5px;
 				padding-top: 5px;
 			}
 		}
+
 		.col-5 {
 			margin: 0 5% 10px 0;
 			width: 60%;
@@ -1015,6 +1047,7 @@ div.bbp-breadcrumb {
 			float: none;
 
 			> div:first-child {
+
 				@extend h4;
 				margin-top: 0;
 			}

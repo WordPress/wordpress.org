@@ -1,6 +1,6 @@
 @import "../variables-site/variables-site";
 
-// /* ----------------------------------------------------------------------------
+// /* --------------------------------------------------------------------------
 //
 // NOTE: If you edit this file, you should make sure that the CSS rules for
 // buttons in the following files are updated.
@@ -11,16 +11,18 @@
 // WordPress-style Buttons
 // =======================
 // Create a button by adding the `.button` class to an element. For backwards
-// compatibility, we support several other classes (such as `.button-secondary`),
+// compatibility, we support several other classes,such as `.button-secondary`),
 // but these will *not* work with the stackable classes described below.
 //
 // Button Styles
 // -------------
-// To display a primary button style, add the `.button-primary` class to a button.
+// To display a primary button style,
+// add the `.button-primary` class to a button.
 //
 // Button Sizes
 // ------------
-// Adjust a button's size by adding the `.button-large` or `.button-small` class.
+// Adjust a button's size by adding the `.button-large`
+// or `.button-small` class.
 //
 // Button States
 // -------------
@@ -36,7 +38,7 @@
 // 4.0 - Button Groups
 // 5.0 - Responsive Button Styles
 //
-//---------------------------------------------------------------------------- */
+//--------------------------------------------------------------------------- */
 
 /* ----------------------------------------------------------------------------
   1.0 - Button Layouts
@@ -130,8 +132,8 @@ input[type="reset"]:focus {
 .button:visited,
 .button-secondary {
 	background: #f7f7f7;
-	border-color: #cccccc;
-	box-shadow: 0 1px 0 #cccccc;
+	border-color: #ccc;
+	box-shadow: 0 1px 0 #ccc;
 	color: #555;
 	vertical-align: top;
 }
@@ -190,7 +192,8 @@ p .button {
 	transform: none !important;
 }
 
-/* Buttons that look like links, for a cross of good semantics with the visual */
+/* Buttons that look like links,
+for a cross of good semantics with the visual */
 .button-link {
 	background: none;
 	border: 0;
@@ -282,7 +285,6 @@ p .button {
 	cursor: default;
 	text-shadow: 0 -1px 0 rgba( 0, 0, 0, 0.1 ) !important;
 }
-
 
 
 /* ----------------------------------------------------------------------------

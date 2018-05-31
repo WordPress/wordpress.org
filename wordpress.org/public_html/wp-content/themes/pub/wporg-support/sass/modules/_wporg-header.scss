@@ -66,8 +66,8 @@
 	}
 
 	ul li {
-		list-style-type:none;
-		position:relative;
+		list-style-type: none;
+		position: relative;
 
 		a {
 			color: #eee;
@@ -82,7 +82,7 @@
 			text-decoration: none;
 
 			&.subcurrent {
-				font-weight: bold;
+				font-weight: 700;
 			}
 
 			@include breakpoint( sm ) {
@@ -153,6 +153,7 @@
 	}
 
 	#head-search {
+
 		@include breakpoint( $sm ) {
 			float: right;
 			margin-right: 14px;
@@ -185,7 +186,7 @@
 					color: #eee;
 				}
 
-				@media screen and (max-width:480px) {
+				@media screen and (max-width: 480px) {
 					width: 216px;
 				}
 			}
@@ -228,7 +229,7 @@
 		}
 
 		#wporg-header-menu {
-			float:left;
+			float: left;
 			list-style: none;
 			margin: -15px 0 0;
 			max-width: inherit;
@@ -240,7 +241,7 @@
 
 		ul li {
 			float: left;
-			position:relative;
+			position: relative;
 
 			a {
 				color: #eee;
@@ -263,12 +264,12 @@
 				}
 			}
 
-			&.current-menu-item:after,
-			&.current_page_parent:after {
+			&.current-menu-item::after,
+			&.current_page_parent::after {
 				border-bottom: 9px solid #f7f7f7;
 				border-left: 9px solid transparent;
 				border-right: 9px solid transparent;
-				content: '';
+				content: "";
 				height: 0;
 				left: 50%;
 				margin: -8px 0 0 -9px;
@@ -309,8 +310,8 @@
 		ul li:hover .nav-submenu,
 		ul li .nav-submenu:hover {
 			display: block !important;/* Prevents #wporg-header ul overwriting this */
-			left:0;
-			margin-left:0;
+			left: 0;
+			margin-left: 0;
 			position: absolute;
 			top: 46px;
 			width: auto;
@@ -321,8 +322,8 @@
 			text-rendering: optimizeLegibility;
 		}
 
-		ul li.current-menu-item:after,
-		ul li.current_page_parent:after,
+		ul li.current-menu-item::after,
+		ul li.current_page_parent::after,
 		ul li a.current ~ .uparrow {
 			border-bottom-color: $color__wp-blue;
 		}
@@ -335,10 +336,10 @@
 	box-shadow: none;
 	display: block;
 	float: left;
-	font-family: 'dashicons';
+	font-family: dashicons;
 	font-size: 16px;
 	font-style: normal;
-	font-weight: normal;
+	font-weight: 400;
 	left: 10px;
 	line-height: 1;
 	padding: 1px;
@@ -347,18 +348,18 @@
 	text-decoration: inherit;
 	text-shadow: none;
 	top: 75px;
-	transition: color .1s ease-in;
+	transition: color 0.1s ease-in;
 	vertical-align: top;
 	-webkit-font-smoothing: antialiased;
 
-	&:before {
+	&::before {
 		border: none;
 		box-sizing: border-box;
 		color: #888;
-		content: '\f228';
+		content: "\f228";
 		display: inline-block;
 		float: left;
-		font: normal 50px/1 'Dashicons';
+		font: 400 50px/1 Dashicons;
 		margin: 0;
 		outline: none;
 		padding: 3px;
@@ -374,7 +375,7 @@
 
 #download-mobile {
 	background: #f7f7f7;
-	border-bottom: 1px solid #dddddd;
+	border-bottom: 1px solid #ddd;
 
 	.wrapper {
 		padding: 20px 0;

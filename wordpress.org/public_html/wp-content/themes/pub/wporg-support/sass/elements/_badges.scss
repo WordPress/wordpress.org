@@ -3,26 +3,27 @@
 /* User badges */
 
 .by-moderator {
-	box-shadow: -4px 0 0 white, -6px 0 0 $color__moderator;
+	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__moderator;
 }
+
 .by-plugin-author,
 .by-plugin-contributor,
 .by-plugin-support-rep {
-	box-shadow: -4px 0 0 white, -6px 0 0 $color__plugin-author;
+	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__plugin-author;
 }
 
 .by-theme-author,
 .by-theme-contributor,
 .by-theme-support-rep {
-	box-shadow: -4px 0 0 white, -6px 0 0 $color__theme-author;
+	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__theme-author;
 }
 
 .author-badge {
 	position: absolute;
 	top: 14px;
-	left: -4px;	
+	left: -4px;
 	padding: 2px 6px;
-	color: white;
+	color: #fff;
 	font-size: 0.6rem;
 	letter-spacing: 1px;
 	border-radius: 0 2px 2px 0;
@@ -43,6 +44,7 @@
 .bbp-view .bbp-topics,
 .bbp-search .bbp-search-results,
 .bbp-user-replies-created {
+
 	div.author-has-badge {
 		box-shadow: none;
 		border-left-style: solid;
@@ -71,8 +73,8 @@
 }
 
 @media screen and ( max-width: 480px ) {
+
 	.author-badge {
 		top: -28px;
 	}
 }
-
