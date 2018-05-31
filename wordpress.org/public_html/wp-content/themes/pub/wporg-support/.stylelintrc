@@ -1,0 +1,15 @@
+{
+  "extends": "stylelint-config-wordpress/scss",
+  "rules": {
+	  "block-no-empty": null,
+	  "declaration-block-no-shorthand-property-overrides": null,
+	  "declaration-property-unit-whitelist": null,
+	  "font-family-no-missing-generic-family-keyword": null,
+	  "function-parentheses-space-inside": null,
+	  "no-descending-specificity": null,
+	  "no-duplicate-selectors": null,
+	  "selector-list-comma-newline-after": null,
+	  "value-keyword-case": null,
+	  "scss/selector-no-redundant-nesting-selector": null,
+  }
+}
