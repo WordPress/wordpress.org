@@ -17,6 +17,8 @@ use PHPMailer;
 class Allergy_Field extends CampTix_Addon {
 	const SLUG = 'allergy';
 
+	public $label = '';
+
 	public $question = '';
 
 	public $options = array();
@@ -25,6 +27,8 @@ class Allergy_Field extends CampTix_Addon {
 	 * Hook into WordPress and Camptix.
 	 */
 	public function camptix_init() {
+		$this->label = __( 'Life-threatening allergy', 'wordcamporg' );
+
 		$this->question = __( 'Do you have a life-threatening allergy that would affect your experience at WordCamp?', 'wordcamporg' );
 
 		$this->options = array(
@@ -46,6 +50,12 @@ class Allergy_Field extends CampTix_Addon {
 
 		// Metabox
 		add_filter( 'camptix_metabox_attendee_info_additional_rows', array( $this, 'add_metabox_row' ), 11, 2 );
+
+		// Reporting
+		add_filter( 'camptix_summary_fields', array( $this, 'add_summary_field' ) );
+		add_action( 'camptix_summarize_by_' . self::SLUG, array( $this, 'summarize' ), 10, 2 );
+		add_filter( 'camptix_attendee_report_extra_columns', array( $this, 'add_export_column' ) );
+		add_filter( 'camptix_attendee_report_column_value_' . self::SLUG, array( $this, 'add_export_column_value' ), 10, 2 );
 
 		// Privacy
 		add_filter( 'camptix_privacy_attendee_props_to_export', array( $this, 'attendee_props_to_export' ) );
@@ -337,6 +347,69 @@ class Allergy_Field extends CampTix_Addon {
 	 */
 	public function set_locale_to_en_US() {
 		return 'en_US';
+	}
+
+	/**
+	 * Add an option to the `Summarize by` dropdown.
+	 *
+	 * @param array $fields
+	 *
+	 * @return array
+	 */
+	public function add_summary_field( $fields ) {
+		$fields[ self::SLUG ] = $this->label;
+
+		return $fields;
+	}
+
+	/**
+	 * Callback to summarize the answers for this field.
+	 *
+	 * @param array   $summary
+	 * @param WP_Post $attendee
+	 */
+	public function summarize( &$summary, $attendee ) {
+		/** @var $camptix CampTix_Plugin */
+		global $camptix;
+
+		$answer = get_post_meta( $attendee->ID, 'tix_' . self::SLUG, true );
+
+		if ( isset( $this->options[ $answer ] ) ) {
+			$camptix->increment_summary( $summary, $this->options[ $answer ] );
+		} else {
+			$camptix->increment_summary( $summary, __( 'No answer', 'wordcamporg' ) );
+		}
+	}
+
+	/**
+	 * Add a column to the CSV export.
+	 *
+	 * @param array $columns
+	 *
+	 * @return array
+	 */
+	public function add_export_column( $columns ) {
+		$columns[ self::SLUG ] = $this->label;
+
+		return $columns;
+	}
+
+	/**
+	 * Add the human-readable value of the field to the CSV export.
+	 *
+	 * @param string  $value
+	 * @param WP_Post $attendee
+	 *
+	 * @return string
+	 */
+	public function add_export_column_value( $value, $attendee ) {
+		$value = get_post_meta( $attendee->ID, 'tix_' . self::SLUG, true );
+
+		if ( isset( $this->options[ $value ] ) ) {
+			return $this->options[ $value ];
+		}
+
+		return '';
 	}
 
 	/**
