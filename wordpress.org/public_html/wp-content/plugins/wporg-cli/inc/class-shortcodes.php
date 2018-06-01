@@ -21,12 +21,12 @@ class Shortcodes{
 		if ( isset( $atts['auth_token'] ) ) {
 			self::$auth_token = $atts['auth_token'];
 		}
-		$label = isset( $atts['label'] ) ? $atts['label'] : '';
-		$out = '<h2>' . sprintf( 'Issues labeled "%s"', esc_html( $label ) ) . '</h2>';
+		$filter_label = isset( $atts['label'] ) ? $atts['label'] : '';
+		$out = '<h2>' . sprintf( 'Issues labeled "%s"', esc_html( $filter_label ) ) . '</h2>';
 		$url = 'https://api.github.com/orgs/wp-cli/issues';
 		$url = add_query_arg( array_map( 'rawurlencode', array(
 			'per_page' => 100,
-			'labels'   => $label,
+			'labels'   => $filter_label,
 			'filter'   => 'all',
 		) ), $url );
 		$issues = self::github_request( $url );
@@ -43,6 +43,9 @@ class Shortcodes{
 			$out .= '<p><strong><a href="' . esc_url( $issue->html_url ) . '">' . esc_html( $issue->title ) . '</a></strong> (' . esc_html( $issue->repository->full_name ) . ')<br />' . PHP_EOL;
 			if ( ! empty( $issue->labels ) ) {
 				foreach( $issue->labels as $label ) {
+					if ( $label->name === $filter_label ) {
+						continue;
+					}
 					$text_color = '#FFF';
 					$background_color = $label->color;
 					$c_r = hexdec( substr( $background_color, 0, 2 ) );
