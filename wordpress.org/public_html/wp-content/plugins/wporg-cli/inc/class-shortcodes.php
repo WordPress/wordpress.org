@@ -39,27 +39,46 @@ class Shortcodes{
 			return $out;
 		}
 
-		foreach( $issues as $issue ) {
-			$out .= '<p><strong><a href="' . esc_url( $issue->html_url ) . '">' . esc_html( $issue->title ) . '</a></strong> (' . esc_html( $issue->repository->full_name ) . ')<br />' . PHP_EOL;
-			if ( ! empty( $issue->labels ) ) {
-				foreach( $issue->labels as $label ) {
-					if ( $label->name === $filter_label ) {
-						continue;
-					}
-					$text_color = '#FFF';
-					$background_color = $label->color;
-					$c_r = hexdec( substr( $background_color, 0, 2 ) );
-					$c_g = hexdec( substr( $background_color, 2, 2 ) );
-					$c_b = hexdec( substr( $background_color, 4, 2 ) );
-					// Light background means dark color
-					if ( ( ( ( $c_r * 299 ) + ( $c_g * 587 ) + ( $c_b * 114 ) ) / 1000 ) > 135 ) {
-						$text_color = '#000';
-					}
-					$out .= '<span class="label" style="' . esc_attr( 'display:inline-block;padding-left:3px;padding-right:3px;color:' . $text_color . ';background-color:#' . $background_color ) . '">' . esc_html( $label->name ) . '</span> ';
-				}
-				$out .= '<br />';
+		$repository_issues = array(
+			// Root repository should always be first.
+			'wp-cli/wp-cli' => array(),
+		);
+		foreach ( $issues as $issue ) {
+			$repo_name = $issue->repository->full_name;
+			if ( ! isset( $repository_issues[ $repo_name ] ) ) {
+				$repository_issues[ $repo_name ] = array();
 			}
-			$out .= '</p>';
+			$repository_issues[ $repo_name ][] = $issue;
+		}
+
+		foreach ( $repository_issues as $repo_name => $issues ) {
+			if ( empty( $issues ) ) {
+				continue;
+			}
+			$out .= '<h4>' . esc_html( $repo_name ) . '</h4><ul>';
+			foreach ( $issues as $issue ) {
+				$out .= '<li><a href="' . esc_url( $issue->html_url ) . '">' . esc_html( $issue->title ) . '</a><br />' . PHP_EOL;
+				if ( ! empty( $issue->labels ) ) {
+					foreach( $issue->labels as $label ) {
+						if ( $label->name === $filter_label ) {
+							continue;
+						}
+						$text_color = '#FFF';
+						$background_color = $label->color;
+						$c_r = hexdec( substr( $background_color, 0, 2 ) );
+						$c_g = hexdec( substr( $background_color, 2, 2 ) );
+						$c_b = hexdec( substr( $background_color, 4, 2 ) );
+						// Light background means dark color
+						if ( ( ( ( $c_r * 299 ) + ( $c_g * 587 ) + ( $c_b * 114 ) ) / 1000 ) > 135 ) {
+							$text_color = '#000';
+						}
+						$out .= '<span class="label" style="' . esc_attr( 'display:inline-block;padding-left:3px;padding-right:3px;color:' . $text_color . ';background-color:#' . $background_color ) . '">' . esc_html( $label->name ) . '</span> ';
+					}
+					$out .= '<br />';
+				}
+				$out .= '</li>';
+			}
+			$out .= '</ul>';
 		}
 		return $out;
 	}
