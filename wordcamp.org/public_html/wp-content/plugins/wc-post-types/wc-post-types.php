@@ -705,7 +705,7 @@ class WordCamp_Post_Types_Plugin {
 
 		$html .= '</tbody>';
 		$html .= '</table>';
-		$html .= $this->fav_session_email_form();
+		$html .= $this->fav_session_share_form();
 		return $html;
 	}
 
@@ -744,11 +744,11 @@ class WordCamp_Post_Types_Plugin {
 	 *
 	 * @return string HTML code that represents the form to send emails and a link to show and hide it.
 	 */
-	function fav_session_email_form() {
-		static $email_form_count = 0;
+	function fav_session_share_form() {
+		static $share_form_count = 0;
 
-		// Skip email form if it is disabled or it was already added to document.
-		if ( email_fav_sessions_disabled() || $email_form_count !== 0 ) {
+		// Skip share form if it was already added to document.
+		if ( 0 !== $share_form_count ) {
 			return '';
 		}
 
@@ -756,16 +756,41 @@ class WordCamp_Post_Types_Plugin {
 		?>
 
 		<div class="email-form fav-session-email-form-hide">
-			<div id="fav-session-email-form">
-				<?php esc_html_e( 'Send me my favorite sessions:', 'wordcamporg' ); ?>
+			<!-- Tab links -->
+			<div class="fav-session-share-tab">
+				<?php if ( ! email_fav_sessions_disabled() ) : ?>
+					<div class="fav-session-tablinks" id="fav-session-btn-email">
+						<?php esc_html_e( 'Email', 'wordcamporg' ); ?>
+					</div>
+				<?php endif; ?>
 
-				<form id="fav-sessions-form">
-					<input type="text" name="email_address" id="fav-sessions-email-address" placeholder="my@email.com" />
-					<input type="submit" value="<?php esc_attr_e( 'Send', 'wordcamporg' ); ?>" />
-				</form>
+				<div class="fav-session-tablinks" id="fav-session-btn-print">
+					<?php esc_html_e( 'Print', 'wordcamporg' ); ?>
+				</div>
 			</div>
-			<div class="fav-session-email-wait-spinner"></div>
-			<div class="fav-session-email-result"></div>
+
+			<!-- Tab content -->
+			<?php if ( ! email_fav_sessions_disabled() ) : ?>
+				<div id="fav-session-tab-email" class="fav-session-share-tabcontent">
+					<div id="fav-session-email-form">
+						<?php esc_html_e( 'Send me my favorite sessions:', 'wordcamporg' ); ?>
+
+						<form id="fav-sessions-form">
+							<input type="text" name="email_address" id="fav-sessions-email-address" placeholder="me@protonmail.com" />
+							<input type="submit" value="<?php esc_attr_e( 'Send', 'wordcamporg' ); ?>" />
+						</form>
+					</div>
+
+					<div class="fav-session-email-wait-spinner"></div>
+					<div class="fav-session-email-result"></div>
+				</div>
+			<?php endif; ?>
+
+			<div id="fav-session-tab-print" class="fav-session-share-tabcontent">
+				<button id="fav-session-print">
+					<?php esc_html_e( 'Print favorite sessions', 'wordcamporg' ); ?>
+				</button>
+			</div>
 		</div>
 
 		<a class="show-email-form" href="javascript:">
@@ -774,11 +799,11 @@ class WordCamp_Post_Types_Plugin {
 		</a>
 
 		<?php
-		$email_form = ob_get_clean();
+		$share_form = ob_get_clean();
 
-		$email_form_count++;
+		$share_form_count++;
 
-		return $email_form;
+		return $share_form;
 	}
 
 	/**

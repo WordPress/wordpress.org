@@ -38,11 +38,14 @@ jQuery( document ).ready( function ( $ ) {
 	function switchEmailFavButton() {
 		var favSessions = FavSessions.get();
 
-		// Display email form only if there are any selected sessions.
+		// Display share form only if there are any selected sessions.
 		if ( Object.keys( favSessions ).length > 0 ) {
 			$( '.show-email-form' ).show();
+			$( '.email-form' ).show();
 		} else {
 			$( '.show-email-form' ).hide();
+			$( '.email-form' ).addClass( 'fav-session-div-hide' ).removeClass( 'fav-session-div-show' );
+			$( '.email-form' ).hide();
 		}
 	}
 
@@ -162,6 +165,44 @@ jQuery( document ).ready( function ( $ ) {
 			timeout: 5000,
 		} );
 	} );
+
+	// In case email tab is hidden, use the next tab as default.
+	var defaultTab = 'email';
+	if ( 0 === $( '#fav-session-tab-email' ).length ) {
+		defaultTab = 'print';
+	}
+
+	$( '#fav-session-tab-' + defaultTab ).show();
+	$( '#fav-session-tab-' + defaultTab ).addClass( 'active' );
+	$( '#fav-session-btn-' + defaultTab ).addClass( 'active' );
+
+	$( '.fav-session-tablinks' ).click( function( event ) {
+		var i, tabContent, tabLinks;
+
+		tabContent = document.getElementsByClassName( 'fav-session-share-tabcontent' );
+
+		for ( i = 0; i < tabContent.length; i++ ) {
+			$( tabContent[ i ] ).hide();
+		}
+
+		tabLinks = document.getElementsByClassName( 'fav-session-tablinks' );
+
+		$( tabLinks ).removeClass( 'active' );
+
+		var element         = $( this );
+		var idStartPosition = 'fav-session-btn-'.length;
+		var tabName         = 'fav-session-tab-' + element.attr( 'id' ).substring( idStartPosition );
+
+		$( document.getElementById( tabName ) ).show();
+		$( event.currentTarget ).addClass( 'active' )
+	});
+
+
+	$( '#fav-session-print' ).click( function( event ) {
+		$( '.wcpt-schedule td div' ).css( 'opacity', 0.3 );
+		window.print();
+		$( '.wcpt-schedule td div' ).css( 'opacity', 1 );
+	});
 
 	initFavouriteSessions();
 } );

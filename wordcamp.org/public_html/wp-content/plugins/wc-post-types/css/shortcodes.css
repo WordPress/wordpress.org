@@ -136,6 +136,49 @@ td.wcb-favourite-session a.fav-session-button {
 	border-radius: 6px;
 }
 
+/* Style the tabs */
+.fav-session-share-tab {
+	overflow: hidden;
+	border: 1px solid #ccc;
+	background-color: #f1f1f1;
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+}
+
+/* Style the buttons inside the tabs */
+.fav-session-share-tab div {
+	background-color: inherit;
+	text-align: center;
+	display: table-cell;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	padding: 12px 16px;
+	transition: 0.3s;
+	font-size: 14px;
+}
+
+/* Change background color of buttons on hover */
+.fav-session-share-tab div:hover {
+	background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.fav-session-share-tab div.active {
+	background-color: #ccc;
+}
+
+/* Style the tab content */
+.fav-session-share-tabcontent {
+	display: none;
+	padding: 12px 14px;
+	border: 1px solid #ccc;
+	border-top: none;
+	min-height: 145px;
+	background-color: #ccc;
+}
+
 #fav-session-email-form {
 	margin: 10px;
 }
@@ -251,6 +294,18 @@ td.wcb-favourite-session a.fav-session-button {
 		right: 20px;
 	}
 
+}
+
+@media print {
+	.wcb-session-favourite-icon,
+	.show-email-form,
+	.email-form {
+		display: none !important;
+	}
+
+	.wcpt-schedule td.wcb-favourite-session div {
+		opacity: 1 !important;
+	}
 }
 
 /*
