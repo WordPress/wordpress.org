@@ -1,18 +1,41 @@
 jQuery( document ).ready( function ( $ ) {
+	var favSessionsUrlSlug = 'fav-sessions=';
+
+	function getUrlParams() {
+		var url       = decodeURIComponent( window.location.search ),
+		    urlParams = {};
+
+		url.replace( /[?&]+([^=&]+)=([^&]*)/gi, function( str, key, value ) {
+			urlParams[ key ] = value;
+		} );
+
+		return urlParams;
+	}
+
 	var FavSessions = {
 		favSessKey: 'favourite_sessions',
+		useLocalStorage: 'local_storage',
+		useUrlSessions:  'URL',
 
-		get: function () {
-			var favSessions = JSON.parse( localStorage.getItem( this.favSessKey ) );
+		get: function() {
+			if ( this.primarySource == this.useLocalStorage ) {
+				var favSessions = JSON.parse( localStorage.getItem( this.favSessKey ) );
 
-			if ( ! favSessions ) {
-				favSessions = {};
+				if ( ! favSessions ) {
+					favSessions = {};
+				}
+			} else {
+				favSessions = this.favSessionsFromUrl();
 			}
 
 			return favSessions;
 		},
 
 		toggleSession: function ( sessionId ) {
+			if ( this.primarySource !== this.useLocalStorage ) {
+				return;
+			}
+
 			var favSessions = this.get();
 
 			if ( favSessions.hasOwnProperty( sessionId ) ) {
@@ -23,7 +46,37 @@ jQuery( document ).ready( function ( $ ) {
 
 			localStorage.setItem( this.favSessKey, JSON.stringify( favSessions ) );
 		},
+
+		getSessionsForLink: function() {
+			var favSessions = this.get();
+
+			return Object.keys( favSessions ).join();
+		},
+
+		favSessionsFromUrl: function() {
+			var urlParams       = getUrlParams(),
+			    urlSlugPosition = favSessionsUrlSlug.slice( 0, favSessionsUrlSlug.length - 1 ),
+			    favSessionIds   = urlParams[ urlSlugPosition ].split( ',' ),
+			    favSessions     = {};
+
+			for ( var i = 0; i < favSessionIds.length; i++ ) {
+				favSessions[ favSessionIds[ i ] ] = true;
+			}
+
+			return favSessions;
+		},
+
+		updateBasedOnLink: function() {
+			favSessions = this.favSessionsFromUrl();
+
+			localStorage.setItem( this.favSessKey, JSON.stringify( favSessions ) );
+
+			return this.get();
+		},
 	};
+
+	// Use local storage for session source for fetching & target for saving by default.
+	FavSessions.primarySource = FavSessions.useLocalStorage;
 
 	function switchCellAppearance( sessionId ) {
 		// (Un)highlight schedule table cell in case a session is (un)marked as favourite.
@@ -49,16 +102,77 @@ jQuery( document ).ready( function ( $ ) {
 		}
 	}
 
+	function updateShareLink() {
+		var favSessionIds   = FavSessions.getSessionsForLink(),
+		    urlParams       = getUrlParams(),
+		    baseURL         = window.location.href,
+		    paramsPosition  = baseURL.indexOf( '?' ),
+		    urlSlugPosition = favSessionsUrlSlug.slice( 0, favSessionsUrlSlug.length - 1 );
+
+		if ( -1 !== paramsPosition ) {
+			baseURL = baseURL.slice( 0, paramsPosition );
+		}
+
+		urlParams[ urlSlugPosition ] = favSessionIds;
+
+		// Don't include empty URL parameter.
+		if ( '' === favSessionIds ) {
+			delete urlParams[ urlSlugPosition ];
+		}
+
+		var favSessionsLink = baseURL + '?' + $.param( urlParams );
+
+		$( '#fav-sessions-link' ).text( favSessionsLink );
+		$( '#fav-sessions-link' ).prop( 'href', favSessionsLink );
+	}
+
 	function switchSessionFavourite( sessionId ) {
 		FavSessions.toggleSession( sessionId );
 		switchCellAppearance( sessionId );
 		switchEmailFavButton();
+		updateShareLink();
 	}
 
 	function initFavouriteSessions() {
 		var favSessions = FavSessions.get();
 
 		if ( favSessions === {} ) {
+			return;
+		}
+
+		/*
+		 * The user has already saved some sessions in local storage, but is now
+		 * loading a shared link. We need to determine whether they intend to overwrite
+		 * their saved sessions with those in the link, or if they just want to view
+		 * the link's sessions and then discard them, so that their saved sessions remain
+		 * in tact.
+		 */
+		var currentUrl = window.location.href;
+
+		if ( currentUrl.indexOf( favSessionsUrlSlug ) > -1 ) {
+			var overwrite = confirm( favSessionsPhpObject.i18n.overwriteFavSessions );
+
+			if ( true === overwrite ) {
+				FavSessions.primarySource = FavSessions.useLocalStorage;
+				favSessions               = FavSessions.updateBasedOnLink( currentUrl );
+
+				$( '.fav-session-button' ).attr( 'title', '' );
+				$( '.fav-session-button' ).fadeTo( 0, 1 );
+			} else {
+				FavSessions.primarySource = FavSessions.useUrlSessions;
+				favSessions               = FavSessions.get();
+
+				/*
+				 * Deactivate interaction with favourite session buttons,
+				 * since the use chose to not overwrite their saved sessions.
+				 */
+				$( '.fav-session-button' ).attr( 'title', favSessionsPhpObject.i18n.buttonDisabledNote );
+				$( '.fav-session-button' ).fadeTo( 0, 0.5 );
+				$( '.fav-session-button' ).css( 'color', '#e7e7e7' );
+			}
+		}
+
+		if ( {} === favSessions ) {
 			return;
 		}
 
@@ -74,6 +188,7 @@ jQuery( document ).ready( function ( $ ) {
 		}
 
 		switchEmailFavButton();
+		updateShareLink();
 	}
 
 	function hideSpinnerShowResult( message ) {
@@ -118,9 +233,14 @@ jQuery( document ).ready( function ( $ ) {
 	$( '.fav-session-button' ).click( function ( event ) {
 		event.preventDefault();
 
-		var elem = $( this );
-		var sessionId = elem.parent().parent().data( 'session-id' );
-		switchSessionFavourite( sessionId );
+		if ( FavSessions.primarySource == FavSessions.useLocalStorage ) {
+			var elem      = $( this ),
+			    sessionId = elem.parent().parent().data( 'session-id' );
+
+			switchSessionFavourite( sessionId );
+		} else {
+			alert( favSessionsPhpObject.i18n.buttonDisabledAlert );
+		}
 
 		return false;
 	} );

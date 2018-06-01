@@ -731,6 +731,9 @@ class WordCamp_Post_Types_Plugin {
 				'i18n' => array(
 					'reqTimeOut' => esc_html__( 'Sorry, the email request timed out.', 'wordcamporg' ),
 					'otherError' => esc_html__( 'Sorry, the email request failed.',    'wordcamporg' ),
+					'overwriteFavSessions' => esc_html__( 'You already have some sessions saved. Would you like to overwrite those with the shared sessions that you are viewing?', 'wordcamporg' ),
+					'buttonDisabledAlert'  => esc_html__( 'Interaction with favorite sessions disabled in share sessions view. Please click on schedule menu link to pick sessions.', 'wordcamporg' ),
+					'buttonDisabledNote'   => esc_html__( 'Button disabled.', 'wordcamporg' ),
 				),
 			)
 		);
@@ -764,6 +767,10 @@ class WordCamp_Post_Types_Plugin {
 					</div>
 				<?php endif; ?>
 
+				<div class="fav-session-tablinks" id="fav-session-btn-link">
+					<?php esc_html_e( 'Link', 'wordcamporg' ); ?>
+				</div>
+
 				<div class="fav-session-tablinks" id="fav-session-btn-print">
 					<?php esc_html_e( 'Print', 'wordcamporg' ); ?>
 				</div>
@@ -785,6 +792,11 @@ class WordCamp_Post_Types_Plugin {
 					<div class="fav-session-email-result"></div>
 				</div>
 			<?php endif; ?>
+
+			<div id="fav-session-tab-link" class="fav-session-share-tabcontent">
+				<?php esc_html_e( 'Shareable link:', 'wordcamporg' ); ?><br />
+				<a id="fav-sessions-link" href=""></a>
+			</div>
 
 			<div id="fav-session-tab-print" class="fav-session-share-tabcontent">
 				<button id="fav-session-print">
