@@ -88,6 +88,10 @@ window.wordCampPostType.WcptWordCamp = ( function( $ ) {
 			var $option = $( this ).find( 'option:selected' );
 			self.updateMentor( $option );
 		});
+
+		if ( $.fn.hasOwnProperty( 'select2' ) ) {
+			$select.select2();
+		}
 	};
 
     /**
@@ -109,9 +113,19 @@ window.wordCampPostType.WcptWordCamp = ( function( $ ) {
 		}
 	};
 
-    /**
+	/**
+	 * Initialize select2 for currency.
+	 */
+	$( document ).ready( function initializeSelect2() {
+		if ( ! $.fn.hasOwnProperty( 'select2' ) ) {
+			return;
+		}
+		$( '#wcpt_information select' ).select2();
+	});
+
+	/**
 	 * Kick things off
-     */
+	 */
 	$( document ).ready( function( $ ) {
 		self.initialize();
 	} );

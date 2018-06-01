@@ -567,6 +567,7 @@ class WordCamp_Admin {
 				$data
 			);
 		}
+		wp_enqueue_script( 'select2' );
 	}
 
 	function admin_styles() {
@@ -574,6 +575,7 @@ class WordCamp_Admin {
 			wp_enqueue_style( 'jquery-ui' );
 			wp_enqueue_style( 'wp-datepicker-skins' );
 		}
+		wp_enqueue_style( 'select2' );
 	}
 
 	/**
@@ -1242,7 +1244,7 @@ function wcpt_metabox( $meta_keys ) {
 									</option>
 								</select>
 							<?php else : ?>
-								<select name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>">
+								<select name="<?php echo esc_attr( $object_name ); ?>" id="<?php echo esc_attr( $object_name ); ?>" class="select-currency">
 									<?php foreach ( $currencies as $symbol => $name ) : ?>
 										<option value="<?php echo esc_attr( $symbol ); ?>"<?php selected( $symbol, get_post_meta( $post_id, $key, true ) ); ?>>
 											<?php echo ( $symbol ) ? esc_html( $name . ' (' . $symbol . ')' ) : ''; ?>
