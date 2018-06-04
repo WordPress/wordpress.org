@@ -51,8 +51,8 @@ class Core extends Trac {
 		'docs'               => '#core-docs',
 		'javascript'         => '#core-js',
 		'coding-standards'   => '#core-coding-standards',
-		'Privacy'            => '#gdpr-compliance',
-		'privacy'            => '#gdpr-compliance',
+		'Privacy'            => '#core-privacy',
+		'privacy'            => '#core-privacy',
 	);
 }
 

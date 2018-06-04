@@ -120,6 +120,12 @@ function get_whitelist() {
 			'flixos90',
 			'schlessera',
 		),
+		'core-privacy' => array(
+			'allendav',
+			'azaozz',
+			'casiepa',
+			'desrosj',
+		),
 		'core-restapi' => array(
 			'danielbachhuber',
 			'flixos90',
@@ -168,12 +174,6 @@ function get_whitelist() {
 			'ipstenu',
 			'jan_dembowski',
 			'macmanx',
-		),
-		'gdpr-compliance' => array(
-			'allendav',
-			'azaozz',
-			'casiepa',
-			'desrosj',
 		),
 		'glotpress' => array(
 			'ocean90',
