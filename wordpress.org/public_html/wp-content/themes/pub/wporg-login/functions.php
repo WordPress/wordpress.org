@@ -190,6 +190,9 @@ function wporg_login_language_switcher() {
 	?>
 	<div class="language-switcher">
 		<form id="language-switcher" action="" method="GET">
+			<?php if ( !empty( $_GET['redirect_to'] ) ): ?>
+				<input type="hidden" name="redirect_to" value="<?php esc_attr_e( $_GET['redirect_to'] ); ?>" />
+			<?php endif; ?>
 			<label for="language-switcher-locales">
 				<span aria-hidden="true" class="dashicons dashicons-translation"></span>
 				<span class="screen-reader-text"><?php _e( 'Select the language:', 'wporg' ); ?></span>
