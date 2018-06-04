@@ -80,6 +80,7 @@ function get_whitelist() {
 			'jeffpaul',
 			'karmatosed',
 			'matias',
+			'mcsf',
 		),
 		'core-fields' => array(
 			'sc0ttkclark',
