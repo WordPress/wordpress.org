@@ -10,6 +10,8 @@ jQuery( document ).ready( function( $ ) {
 		init: function () {
 			try {
 				app.registerEventHandlers();
+				wcb.setupSelect2( '#wcp_general_info select' );
+				wcb.setupSelect2( '#vendor_country_iso3166' );
 				wcb.attachedFilesView = new wcb.AttachedFilesView( { el: $( '#row-files' ) } );
 				wcb.setupDatePicker( '#wcp_general_info' );
 				wcb.setupDatePicker( '#submitpost.wcb'   );

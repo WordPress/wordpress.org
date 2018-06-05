@@ -61,7 +61,6 @@ get_header();
 				<div class="control">
 					<select name="currency">
 						<option value="" disabled selected><?php esc_html_e( 'Select a Currency', 'wordcamporg' ); ?></option>
-						<option value=""></option>
 
 						<?php foreach ( $data['currencies'] as $currency_key => $currency_name ) : ?>
 							<option value="<?php echo esc_attr( $currency_key ); ?>">

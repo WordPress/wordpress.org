@@ -10,6 +10,7 @@ jQuery( document ).ready( function( $ ) {
 		init: function() {
 			try {
 				app.registerEventHandlers();
+				wcb.setupSelect2( '#wcbsi_sponsor_invoice select' );
 				$( '#_wcbsi_sponsor_id' ).trigger( 'change' );  // Populate the initial sponsor information
 				$( '#wcbsi-sponsor-information' ).removeClass( 'loading-content' );
 				wcb.setupDatePicker( '#wcbsi_sponsor_invoice' );

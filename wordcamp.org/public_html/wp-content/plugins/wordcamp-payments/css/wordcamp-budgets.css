@@ -54,6 +54,19 @@ body.post-type-wcb_sponsor_invoice #save-action {
 	margin-bottom: 1em;
 }
 
+.wcb-form li > .select2-container {
+	margin-left: 1em;
+	margin-bottom: 1em;
+}
+
+.wcb-budget-container .select2-selection {
+	border: none;
+}
+
+.select2-currency-dropdown .select2-results {
+	border-bottom: 1px solid #aaa;
+}
+
 .wcb-form-required {
 	color: #dc3232;
 }

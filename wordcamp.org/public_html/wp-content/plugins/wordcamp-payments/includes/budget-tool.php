@@ -86,14 +86,18 @@ class WordCamp_Budget_Tool {
         return;
     }
 
-    public static function enqueue_scripts() {
-        $screen = get_current_screen();
-        if ( $screen->id == 'toplevel_page_wordcamp-budget' ) {
-            wp_enqueue_script( 'wcb-budget-tool',
-                plugins_url( 'javascript/budget-tool.js', __DIR__ ),
-                array( 'backbone', 'jquery', 'jquery-ui-sortable', 'heartbeat', 'underscore' ), 3 , true );
-        }
-    }
+	public static function enqueue_scripts() {
+		$screen = get_current_screen();
+
+		wp_enqueue_script( 'select2' );
+		wp_enqueue_style( 'select2' );
+
+		if ( $screen->id == 'toplevel_page_wordcamp-budget' ) {
+			wp_enqueue_script( 'wcb-budget-tool',
+				plugins_url( 'javascript/budget-tool.js', __DIR__ ),
+				array( 'backbone', 'jquery', 'jquery-ui-sortable', 'heartbeat', 'underscore', 'select2' ), 3 , true );
+		}
+	}
 
     private static function _get_budget() {
         $budget = get_option( 'wcb_budget', array(

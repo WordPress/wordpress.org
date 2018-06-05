@@ -42,7 +42,6 @@ defined( 'WPINC' ) or die();
 				<option value="">
 					<?php _e( '-- Select a Currency --', 'wordcamporg' ); ?>
 				</option>
-				<option value=""></option>
 
 				<?php foreach ( $available_currencies as $currency_key => $currency_name ) : ?>
 					<option value="<?php echo esc_attr( $currency_key ); ?>" <?php selected( $currency_key, $selected_currency ); ?> >

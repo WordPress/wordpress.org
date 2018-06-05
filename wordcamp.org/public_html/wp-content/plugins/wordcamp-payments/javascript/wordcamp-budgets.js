@@ -250,6 +250,18 @@ jQuery( document ).ready( function( $ ) {
 			} else {
 				console.log( 'WordCamp Budgets: ', error );
 			}
+		},
+
+		/**
+		 * Setup select2 on select items.
+		 * @param {string} selector
+		 */
+		setupSelect2 : function( selector ) {
+			if ( ! $.fn.hasOwnProperty( 'select2' ) ) {
+				return;
+			}
+
+			$( selector ).select2();
 		}
 	};
 

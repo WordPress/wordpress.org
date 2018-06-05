@@ -664,11 +664,6 @@ class WordCamp_Budgets {
 	 */
 	public static function get_currencies() {
 		$currencies = array (
-			'EUR' => 'European Zone Euro',
-			'USD' => 'United States Dollar',
-
-			'' => '',
-
 			'AFN' => 'Afghan Afghani',
 			'ALL' => 'Albanian Lek',
 			'DZD' => 'Algerian Dinar',
@@ -721,6 +716,7 @@ class WordCamp_Budgets {
 			'SVC' => 'El Salvador Colon',
 			'ERN' => 'Eritrean Nakfa',
 			'ETB' => 'Ethiopian Birr',
+			'EUR' => 'European Zone Euro',
 			'FKP' => 'Falkland Islands Pound',
 			'FJD' => 'Fiji Dollar',
 			'GMD' => 'Gambian Dalasi',
@@ -821,6 +817,7 @@ class WordCamp_Budgets {
 			'COU' => 'Unidad de Valor Real',
 			'AED' => 'United Arab Emirates Dirham',
 			'GBP' => 'United Kingdom Pound Sterling',
+			'USD' => 'United States Dollar',
 			'UZS' => 'Uzbekistan Sum',
 			'VUV' => 'Vanuatu Vatu',
 			'VEF' => 'Venezuelan Bolívar',
