@@ -761,7 +761,7 @@ namespace DevHub {
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
 		}
-		$params = '';
+		$params = [];
 		$args = get_post_meta( $post_id, '_wp-parser_args', true );
 		$tags = get_post_meta( $post_id, '_wp-parser_tags', true );
 
