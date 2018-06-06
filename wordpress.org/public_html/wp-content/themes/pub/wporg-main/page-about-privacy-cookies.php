@@ -48,7 +48,7 @@ the_post();
 					<p><?php esc_html_e( 'Our Privacy Policy explains our principles when it comes to the collection, processing, and storage of your information. This policy specifically explains how we, our partners, and users of our services deploy cookies, as well as the options you have to control them.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'What are cookies?', 'wporg' ); ?></h3>
-					<p><?php esc_html_e( 'Cookies are small pieces of data, stored in text files, that are stored on your computer or other device when websites are loaded in a browser. They are widely used to &#8216;remember&#8217; you and your preferences, either for a single visit (through a &#8216;session cookie&#8217;) or for multiple repeat visits (using a &#8216;persistent cookie&#8217;). They ensure a consistent and efficient experience for visitors, and perform essential functions such as allowing users to register and remain logged in. Cookies may be set by the site that you are visiting (known as &#8216;first party cookies), or by third parties, such as those who serve content or provide advertising or analytics services on the website (&#8216;third party cookies&#8217;).', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Cookies are small pieces of data, stored in text files, that are stored on your computer or other device when websites are loaded in a browser. They are widely used to &#8216;remember&#8217; you and your preferences, either for a single visit (through a &#8216;session cookie&#8217;) or for multiple repeat visits (using a &#8216;persistent cookie&#8217;). They ensure a consistent and efficient experience for visitors, and perform essential functions such as allowing users to register and remain logged in. Cookies may be set by the site that you are visiting (known as &#8216;first party cookies&#8217;), or by third parties, such as those who serve content or provide advertising or analytics services on the website (&#8216;third party cookies&#8217;).', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'Cookies set by WordPress.org', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'We use cookies for a number of different purposes. Some cookies are necessary for technical reasons; some enable a personalized experience for both visitors and registered users; and some allow the display of advertising from selected third party networks. Some of these cookies may be set when a page is loaded, or when a visitor takes a particular action (clicking the &#8216;like&#8217; or &#8216;follow&#8217; button on a post, for example).', 'wporg' ); ?></p>
@@ -59,7 +59,7 @@ the_post();
 					<p><strong><?php esc_html_e( 'Tracking', 'wporg' ); ?></strong>: <?php esc_html_e( 'These are set by trusted third party networks (e.g. Google Analytics) to track details such as the number of unique visitors, and pageviews to help improve the user experience.', 'wporg' ); ?></p>
 					<p><strong><?php esc_html_e( 'Third Party/Embedded Content', 'wporg' ); ?></strong>: <?php esc_html_e( 'WordPress.org makes use of different third party applications and services to enhance the experience of website visitors. These include social media platforms such as Facebook and Twitter (through the use of sharing buttons), or embedded content from Youtube and Vimeo. As a result, cookies may be set by these third parties, and used by them to track your online activity. We have no direct control over the information that is collected by these cookies.', 'wporg' ); ?></p>
 
-					<h3><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></h3>
+					<h3><?php esc_html_e( 'wordpress.org', 'wporg' ); ?></h3>
 					<table>
 						<thead>
 							<tr>
@@ -73,7 +73,7 @@ the_post();
 							<tr>
 								<th>devicePixelRatio</th>
 								<td><?php esc_html_e( 'Browser default (1 year)', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to make the site responsive to the visitor\'s screen size.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to make the site responsive to the visitor&#8217;s screen size.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -121,7 +121,7 @@ the_post();
 							<tr>
 								<th>wp-settings-{user_id}</th>
 								<td><?php esc_html_e( '1 year', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to persist a user\'s wp-admin configuration.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to persist a user&#8217;s wp-admin configuration.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -133,7 +133,7 @@ the_post();
 						</tbody>
 					</table>
 
-					<h3><?php esc_html_e( 'Make.wordpress.org', 'wporg' ); ?></h3>
+					<h3><?php esc_html_e( 'make.wordpress.org', 'wporg' ); ?></h3>
 					<table>
 						<thead>
 							<tr>
@@ -147,7 +147,7 @@ the_post();
 							<tr>
 								<th>welcome-{blog_id}</th>
 								<td><?php esc_html_e( 'Permanent', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to record if you\'ve chosen to hidden the &#8220;Welcome&#8221; message at the top of the corresponding blog.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to record if you&#8217;ve chosen to hidden the &#8220;Welcome&#8221; message at the top of the corresponding blog.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -179,7 +179,7 @@ the_post();
 						</tbody>
 					</table>
 
-					<h3><?php esc_html_e( 'Codex.wordpress.org', 'wporg' ); ?></h3>
+					<h3><?php esc_html_e( 'codex.wordpress.org', 'wporg' ); ?></h3>
 					<table>
 						<thead>
 							<tr>
@@ -193,7 +193,7 @@ the_post();
 							<tr>
 								<th>codexToken</th>
 								<td><?php esc_html_e( '6 months', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged in WordPress.org user. Only set if you select "Keep me logged inâ"when logging in.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged in WordPress.org user. Only set if you select &#8220;Keep me logged in&#8221; when logging in.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -225,7 +225,7 @@ the_post();
 							<tr>
 								<th>camptix_client_stats</th>
 								<td><?php esc_html_e( '1 year', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to track unique visitors to tickets page on a wordcamp site', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to track unique visitors to tickets page on a WordCamp site', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -237,19 +237,19 @@ the_post();
 							<tr>
 								<th>comment_author_{hash}</th>
 								<td><?php esc_html_e( '347 days', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to tracked comment author name, if "Save my name, email, and website in this browser for the next time I comment." is checked', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to tracked comment author name, if &#8220;Save my name, email, and website in this browser for the next time I comment.&#8221; is checked', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
 								<th>comment_author_email_{hash}</th>
 								<td><?php esc_html_e( '347 days', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to tracked comment author email, if "Save my name, email, and website in this browser for the next time I comment." is checked', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to tracked comment author email, if &#8220;Save my name, email, and website in this browser for the next time I comment.&#8221; is checked', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
 								<th>comment_author_url_{hash}</th>
 								<td><?php esc_html_e( '347 days', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to track comment author url, if "Save my name, email, and website in this browser for the next time I comment." checkbox is checked', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to track comment author url, if &#8220;Save my name, email, and website in this browser for the next time I comment.&#8221; checkbox is checked', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -261,7 +261,7 @@ the_post();
 							<tr>
 								<th>wp-settings-{user}</th>
 								<td><?php esc_html_e( '1 year', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to preserve user\'s wp admin settings', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to preserve user&#8217;s wp-admin settings', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -273,7 +273,7 @@ the_post();
 							<tr>
 								<th>tix_view_token</th>
 								<td><?php esc_html_e( '2 days', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used for session managing private camptix content', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used for session managing private CampTix content', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -297,7 +297,7 @@ the_post();
 							<tr>
 								<th>stnojs</th>
 								<td><?php esc_html_e( '2 days', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Remember if user do not want JS', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Remember if user do not want JavaScript executed', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -316,12 +316,12 @@ the_post();
 					</table>
 
 					<h3><?php esc_html_e( 'Controlling Cookies', 'wporg' ); ?></h3>
-					<p><?php esc_html_e( 'Visitors may wish to restrict the use of cookies, or completely prevent them from being set. Most browsers provide for ways to control cookie behaviour such as the length of time they are stored &#8212; either through built-in functionality or by utilizing third party plugins.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Visitors may wish to restrict the use of cookies, or completely prevent them from being set. Most browsers provide for ways to control cookie behavior such as the length of time they are stored &#8212; either through built-in functionality or by utilizing third party plugins.', 'wporg' ); ?></p>
 					<p><?php echo wp_kses_post( __( 'To find out more on how to manage and delete cookies, visit <a href="http://aboutcookies.org/">aboutcookies.org</a>. For more details on advertising cookies, and how to manage them, visit <a href="http://www.youronlinechoices.eu/">youronlinechoices.eu</a> (EU based), or <a href="http://www.aboutads.info/choices/">aboutads.info</a> (US based).', 'wporg' ) ); ?></p>
-					<p><?php esc_html_e( 'Some specific opt out programs are available here:', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Some specific opt-out programs are available here:', 'wporg' ); ?></p>
 					<p>Quantcast - <a href="https://www.quantcast.com/opt-out/">https://www.quantcast.com/opt-out/</a><br/>
 					Google Analytics - <a href="https://tools.google.com/dlpage/gaoptout">https://tools.google.com/dlpage/gaoptout</a></p>
-					<p><?php esc_html_e( 'It\'s important to note that restricting or disabling the use of cookies can limit the functionality of sites, or prevent them from working correctly at all.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'It&#8217;s important to note that restricting or disabling the use of cookies can limit the functionality of sites, or prevent them from working correctly at all.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></h3>
 					<p><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></p>

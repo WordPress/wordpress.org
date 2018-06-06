@@ -114,7 +114,7 @@ the_post();
 
 					<?php if ( $error_message ) : ?>
 						<p class="error">
-							<strong><?php esc_html_e( 'An error occured with your request:', 'wporg' ); ?></strong><br>
+							<strong><?php esc_html_e( 'An error occurred with your request:', 'wporg' ); ?></strong><br>
 							<?php echo $error_message; ?>
 						</p>
 					<?php elseif ( $success ) : ?>
@@ -141,7 +141,7 @@ the_post();
 						<?php if ( is_user_logged_in() ) wp_nonce_field( $nonce_action ); ?>
 					</form>
 
-						<p><?php esc_html_e( "Please Note: Before we can begin processing your request, we'll require that you verify ownership of the email address. If the email address is associated with an account, we'll also require you to log in to that account first.", 'wporg' ); ?></p>
+						<p><?php esc_html_e( 'Please Note: Before we can begin processing your request, we&#8217;ll require that you verify ownership of the email address. If the email address is associated with an account, we&#8217;ll also require you to log in to that account first.', 'wporg' ); ?></p>
 
 					<?php endif; ?>
 
