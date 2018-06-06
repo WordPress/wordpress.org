@@ -4,7 +4,7 @@
  */
 
 ( function( $, wp ) {
-	$( '#user-note-voting' ).on( 'click', '.user-note-voting-up, .user-note-voting-down', function( event ) {
+	$( '#comments' ).on( 'click', 'a.user-note-voting-up, a.user-note-voting-down', function( event ) {
 		event.preventDefault();
 
 		var $item = $( this ),
