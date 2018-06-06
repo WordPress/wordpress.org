@@ -103,7 +103,7 @@ the_post();
 						printf( wp_kses_post( __( 'WordPress started in 2003 when Mike Little and Matt Mullenweg created a <a href="%1$s">fork of b2/cafelog</a>. The need for an elegant, well-architected personal publishing system was clear even then. Today, WordPress is built on PHP and MySQL, and licensed under the GPLv2. It is also the platform of choice for over %2$s%% of all sites across the web.', 'wporg' ) ), esc_url( 'https://www.whoishostingthis.com/resources/b2-cafelog/' ), number_format_i18n( WP_MARKET_SHARE ) );
 						?>
 					</p>
-					<p><?php esc_html_e( 'The WordPress open source project has evolved in progressive ways over time &#8212; supported by skilled, enthusiastic developers, designers, scientists, bloggers, and more. WordPress provides the opportunity for anyone to create and share, from handcrafted personal anecdotes to world-changing movements. People with a limited tech experience can use it "out of the box", and more tech-savvy folks can customize it in remarkable ways.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'The WordPress open source project has evolved in progressive ways over time &#8212; supported by skilled, enthusiastic developers, designers, scientists, bloggers, and more. WordPress provides the opportunity for anyone to create and share, from handcrafted personal anecdotes to world-changing movements. People with a limited tech experience can use it &#8220;out of the box&#8221;, and more tech-savvy folks can customize it in remarkable ways.', 'wporg' ); ?></p>
 				</section>
 
 				<section class="col-8">
