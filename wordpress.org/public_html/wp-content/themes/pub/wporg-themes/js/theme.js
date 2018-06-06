@@ -516,6 +516,7 @@ window.wp = window.wp || {};
 
 			data.show_favorites = !! themes.data.settings.favorites.user;
 			data.is_favorited   = ( themes.data.settings.favorites.themes.indexOf( data.slug ) != -1 );
+			data.current_user   = themes.data.settings.favorites.user;
 
 			this.$el.html( this.html( data ) );
 			// Set up navigation events

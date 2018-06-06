@@ -38,7 +38,7 @@
 
 				<div class="theme-meta-info">
 					<p class="version">
-						<?php printf( __( 'Version: %s', 'wporg-themes' ), '<strong>' . $theme->version . '</strong>' ); ?>	
+						<?php printf( __( 'Version: %s', 'wporg-themes' ), '<strong>' . $theme->version . '</strong>' ); ?>
 					</p>
 					<p class="updated">
 						<?php printf( __( 'Last updated: %s', 'wporg-themes' ),
@@ -139,6 +139,22 @@
 					<p><?php _e( 'Got something to say? Need help?', 'wporg-themes' ); ?></p>
 					<a href="//wordpress.org/support/theme/<?php echo $theme->slug; ?>" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-support -->
+
+				<div class="theme-report">
+        				<h4><?php _e( 'Report', 'wporg-themes' ); ?></h4>
+        				<p><?php _e( 'Does this theme have major issues?', 'wporg-themes' ); ?></p>
+        				<?php
+        				$report_url = add_query_arg(
+                				urlencode_deep( array_filter( array(
+                        				'rep-theme'   => "https://wordpress.org/themes/{$theme->slug}/",
+                        				'rep-subject' => "Reported Theme: {$theme->name}", // Not translated, email subject.
+                        				'rep-name'    => wp_get_current_user()->user_login,
+                				) ) ),
+                				'https://make.wordpress.org/themes/report-theme/'
+        				);
+        				?>
+        				<a rel="nofollow" href="<?php echo esc_url( $report_url ); ?>" class="button button-secondary"><?php _e( 'Report this theme', 'wporg-themes' ); ?></a>
+				</div><!-- .theme-report -->
 
 				<div class="theme-translations">
 					<h4><?php _e( 'Translations', 'wporg-themes' ); ?></h4>

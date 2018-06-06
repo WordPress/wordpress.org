@@ -113,6 +113,12 @@
 					<a href="//wordpress.org/support/theme/{{ data.slug }}" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-support -->
 
+				<div class="theme-report">
+        				<h4><?php _e( 'Report', 'wporg-themes' ); ?></h4>
+        				<p><?php _e( 'Does this theme have major issues?', 'wporg-themes' ); ?></p>
+        				<a rel="nofollow" href="https://make.wordpress.org/themes/report-theme/?rep-name={{ data.current_user }}&rep-theme={{ data.homepage }}&rep-subject=Reported+Theme:+{{ data.name }}" class="button button-secondary"><?php _e( 'Report this theme', 'wporg-themes' ); ?></a>
+				</div><!-- .theme-report -->
+
 				<div class="theme-translations">
 					<h4><?php _e( 'Translations', 'wporg-themes' ); ?></h4>
 					<p>
