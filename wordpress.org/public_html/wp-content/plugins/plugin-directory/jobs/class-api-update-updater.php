@@ -18,10 +18,12 @@ class API_Update_Updater {
 	public static function cron_trigger() {
 		global $wpdb;
 
+		// Note: `left( pm.meta_value, 128 )` is due to the short `version` field length and some plugins with absurdly long version strings.
 		$out_of_date_plugins = $wpdb->get_col(
 			"SELECT p.post_name
 			FROM {$wpdb->posts} p
 				LEFT JOIN {$wpdb->prefix}update_source u ON p.ID = u.plugin_id
+				LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'version'
 			WHERE
 				p.post_type = 'plugin'
 				AND (
@@ -31,6 +33,7 @@ class API_Update_Updater {
 				AND (
 					u.plugin_id IS NULL OR
 					u.last_updated != p.post_modified OR
+					( u.version != pm.meta_value AND u.version != left( pm.meta_value, 128 ) ) OR
 					( u.available = 1 AND (p.post_status != 'publish' AND p.post_status != 'disabled' ) ) OR
 					( u.available = 0 AND (p.post_status = 'publish' OR p.post_status = 'disabled' ) )
 				)"
