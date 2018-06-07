@@ -2076,10 +2076,10 @@ a.mention.me {
 		float: right; /* move it to the right to help prevent collisions */
 		margin: 0 .5em 0 0;
 	}
-	#ticket table.properties th {
+	#ticket table.properties > tbody > th {
 		padding: 0.5em .2em .5em 0; /* reduce side padding */
 	}
-	#ticket table.properties td {
+	#ticket table.properties > tbody > td {
 		padding: 0.5em 0 .5em .2em; /* reduce side padding */
 	}
 	#field-description-help, #content.ticket label[for="comment"] {
@@ -2157,8 +2157,8 @@ a.mention.me {
 	#trac-ticket-title {
 		margin-top: 10px;
 	}
-	#ticket table.properties th,
-	#ticket table.properties td {
+	#ticket table.properties > tbody > th,
+	#ticket table.properties > tbody > td {
 		display: block;
 		float: left;
 		width: 60%;
@@ -2166,7 +2166,7 @@ a.mention.me {
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 	}
-	#ticket table.properties th {
+	#ticket table.properties > tbody > th {
 		width: 40%;
 		clear: left;
 	}
