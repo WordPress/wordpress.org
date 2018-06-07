@@ -735,11 +735,17 @@ input[type=submit],
 	cursor: pointer;
 	display: inline-block;
 	font-size: 12.8px;
+	font-size: 12.8px;
+	font-size: 12.8px;
 	font-size: 0.8rem;
+	height: 25px;
+	height: 25px;
 	height: 25px;
 	height: 1.5625rem;
 	line-height: 1;
 	margin: 0;
+	padding: 0 12.8px;
+	padding: 0 12.8px;
 	padding: 0 12.8px;
 	padding: 0 .8rem;
 	text-decoration: none;
@@ -759,10 +765,16 @@ input[type="submit"]::-moz-focus-inner {
 .button.button-xl,
 .button-group.button-xl .button {
 	font-size: 16px;
+	font-size: 16px;
+	font-size: 16px;
 	font-size: 1rem;
+	height: 39.062px;
+	height: 39.062px;
 	height: 39.062px;
 	height: 2.44141rem;
 	line-height: 1;
+	padding: 0 24px;
+	padding: 0 24px;
 	padding: 0 24px;
 	padding: 0 1.5rem;
 }
@@ -772,8 +784,12 @@ input[type="submit"]::-moz-focus-inner {
 .col-2 p.button,
 .col-13 p.button {
 	height: 31.25px;
+	height: 31.25px;
+	height: 31.25px;
 	height: 1.95313rem;
 	line-height: 1;
+	padding: 0 16px;
+	padding: 0 16px;
 	padding: 0 16px;
 	padding: 0 1rem;
 }
@@ -782,10 +798,16 @@ input[type="submit"]::-moz-focus-inner {
 .block-content span.button,
 .button-group.button-small .button {
 	font-size: 10.24px;
+	font-size: 10.24px;
+	font-size: 10.24px;
 	font-size: 0.64rem;
+	height: 20px;
+	height: 20px;
 	height: 20px;
 	height: 1.25rem;
 	line-height: 1;
+	padding: 0 8px;
+	padding: 0 8px;
 	padding: 0 8px;
 	padding: 0 .5rem;
 }
@@ -804,11 +826,15 @@ a.button,
 a.button-primary,
 a.button-secondary {
 	line-height: 25px;
+	line-height: 25px;
+	line-height: 25px;
 	line-height:  1.5625rem;
 }
 
 a.button.button-large,
 .button-group.button-large a.button {
+	line-height: 31.25px;
+	line-height: 31.25px;
 	line-height: 31.25px;
 	line-height: 1.95313rem;
 }
@@ -816,11 +842,15 @@ a.button.button-large,
 a.button.button-xl,
 .button-group.button-xl a.button {
 	line-height: 39.062px;
+	line-height: 39.062px;
+	line-height: 39.062px;
 	line-height: 2.44141rem;
 }
 
 a.button.button-small,
 .button-group.button-small a.button {
+	line-height: 20px;
+	line-height: 20px;
 	line-height: 20px;
 	line-height: 1.25rem;
 }
@@ -1345,6 +1375,7 @@ body.make-tv #headline h2 a:before { content: '\f235'; }
 body.make-marketing #headline h2 a:before { content: '\f130'; }
 body.make-cli #headline h2 a:before { content: '\f345'; }
 body.make-hosting #headline h2 a:before { content: '\f176'; }
+body.make-tide #headline h2 a:before { content: '\f10d'; }
 
 .make-core .site-title a:before { content: '\f475'; }
 .make-design .site-title a:before { content: '\f309'; }
@@ -1364,6 +1395,7 @@ body.make-hosting #headline h2 a:before { content: '\f176'; }
 .make-marketing .site-title a:before { content: '\f130'; }
 .make-cli .site-title a:before { content: '\f345'; }
 .make-hosting .site-title a:before { content: '\f176'; }
+.make-tide .site-title a:before { content: '\f10d'; }
 
 #headline .login {
 	font-size: 12px;
@@ -1842,6 +1874,13 @@ form#profile-form table input[type='text'], form#profile-form textarea {
 
 .error a {
 	color: #c00;
+}
+
+#wordpress-org .widget p.error {
+	border-left: 4px solid #dc3232;
+	margin-left: 0;
+	margin-right: 0;
+	padding: 0.7em 1em;
 }
 
 .form-invalid {
