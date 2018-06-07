@@ -230,8 +230,14 @@ class Template {
 	public static function get_star_rating( $post = null ) {
 		$post = get_post( $post );
 
-		$rating      = get_post_meta( $post->ID, 'rating', true ) ?: 0;
-		$ratings     = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+		if ( class_exists( '\WPORG_Ratings' ) ) {
+			$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
+			$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
+		} else {
+			$rating  = get_post_meta( $post->ID, 'rating', true ) ?: 0;
+			$ratings = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+		}
+
 		$num_ratings = array_sum( $ratings );
 
 		return '<div class="plugin-rating">' .

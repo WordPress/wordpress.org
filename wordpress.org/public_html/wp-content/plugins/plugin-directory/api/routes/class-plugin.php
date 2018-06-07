@@ -115,8 +115,17 @@ class Plugin extends Base {
 		$result['tested']        = get_post_meta( $post_id, 'tested', true ) ?: false;
 		$result['requires_php']  = get_post_meta( $post_id, 'requires_php', true ) ?: false;
 		$result['compatibility'] = array();
-		$result['rating']        = ( get_post_meta( $post_id, 'rating', true ) ?: 0 ) * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
-		$result['ratings']       = array_map( 'intval', (array) get_post_meta( $post_id, 'ratings', true ) );
+
+		if ( class_exists( '\WPORG_Ratings' ) ) {
+			$result['rating']  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
+			$result['ratings'] = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
+		} else {
+			$result['rating']  = get_post_meta( $post->ID, 'rating', true ) ?: 0;
+			$result['ratings'] = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+		}
+
+		$result['rating']  = $result['rating'] * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
+		$result['ratings'] = array_map( 'intval', $result['ratings'] );
 		krsort( $result['ratings'] );
 
 		$result['num_ratings']              = array_sum( $result['ratings'] );

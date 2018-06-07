@@ -28,10 +28,16 @@ class Ratings extends \WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Ratings', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
+		$post  = get_post();
 
-		$post        = get_post();
-		$rating      = get_post_meta( $post->ID, 'rating', true ) ?: 0;
-		$ratings     = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+		if ( class_exists( '\WPORG_Ratings' ) ) {
+			$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
+			$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
+		} else {
+			$rating  = get_post_meta( $post->ID, 'rating', true ) ?: 0;
+			$ratings = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+		}
+
 		$num_ratings = array_sum( $ratings );
 
 		echo $args['before_widget'];
