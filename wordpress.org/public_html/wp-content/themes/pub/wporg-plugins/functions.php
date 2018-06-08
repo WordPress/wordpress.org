@@ -217,9 +217,9 @@ add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
 function document_title( $title ) {
 	if ( is_front_page() ) {
 		$title['title']   = __( 'WordPress Plugins', 'wporg-plugins' );
-		$title['tagline'] = __( 'Plugins extend and expand the functionality of WordPress.', 'wporg-plugins' );
+		$title['tagline'] = __( 'WordPress.org', 'wporg-plugins' );
 	} else {
-		$title['site'] = __( 'WordPress Plugins', 'wporg-plugins' );
+		$title['site'] = __( 'WordPress.org', 'wporg-plugins' );
 	}
 
 	return $title;
@@ -232,7 +232,7 @@ add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title' );
  * @return string Document title separator.
  */
 function document_title_separator() {
-	return ( is_feed() ) ? '&#8212;' : '&mdash;';
+	return ( is_feed() ) ? '&#8212;' : '&#124;';
 }
 add_filter( 'document_title_separator', __NAMESPACE__ . '\document_title_separator' );
 
@@ -266,6 +266,19 @@ add_filter( 'get_the_excerpt', __NAMESPACE__ . '\excerpt_length' );
  * Adds meta tags for richer social media integrations.
  */
 function social_meta_data() {
+	if ( is_front_page() ) {
+		foreach ( [
+			'og:title'       => __( 'WordPress Plugins', 'wporg-plugins' ),
+			'og:description' => __( 'Choose from thousands of free plugins to build, customize, and enhance your WordPress website.', 'wporg-plugins' ),
+			'og:site_name'   => 'WordPress.org',
+			'og:type'        => 'website',
+			'og:url'         => home_url(),
+		] as $property => $content ) {
+			printf( '<meta property="%1$s" content="%2$s" />' . "\n", esc_attr( $property ), esc_attr( $content ) );
+		}
+		return;
+	}
+
 	if ( ! is_singular( 'plugin' ) ) {
 		return;
 	}
