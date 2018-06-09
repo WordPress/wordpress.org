@@ -1,11 +1,17 @@
 <?php
-
 /**
  * Template Name: bbPress - Support (Index)
  *
  * @package bbPress
  * @subpackage Theme
  */
+
+/**
+ * Adds a custom description meta tag.
+ */
+add_action( 'wp_head', function() {
+	printf( '<meta name="description" content="%s" />' . "\n", esc_attr__( 'Our community support articles are the best place to get the most out of WordPress. Learn how to set up your website, troubleshoot problems, customize your site, and more.', 'wporg-forums' ) );
+} );
 
 get_header(); ?>
 

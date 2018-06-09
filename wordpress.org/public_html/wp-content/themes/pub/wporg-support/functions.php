@@ -136,7 +136,7 @@ add_filter( 'body_class', 'wporg_support_body_class' );
  * @package WPBBP
  */
 function wporg_get_global_header() {
-	$GLOBALS['pagetitle'] = wp_title( '&laquo;', false, 'right' ) . ' ' . get_bloginfo( 'name' );
+	$GLOBALS['pagetitle'] = wp_get_document_title();
 	require WPORGPATH . 'header.php';
 }
 
@@ -148,6 +148,42 @@ function wporg_get_global_header() {
 function wporg_get_global_footer() {
 	require WPORGPATH . 'footer.php';
 }
+
+
+/**
+ * Append an optimized site name.
+ *
+ * @param array $title {
+ *     The document title parts.
+ *
+ *     @type string $title   Title of the viewed page.
+ *     @type string $page    Optional. Page number if paginated.
+ *     @type string $tagline Optional. Site description when on home page.
+ *     @type string $site    Optional. Site title when not on home page.
+ * }
+ * @return array Filtered title parts.
+ */
+function wporg_support_document_title( $title ) {
+	if ( is_front_page() ) {
+		$title['title']   = _x( 'Support', 'Site title', 'wporg-forums' );
+		$title['tagline'] = __( 'WordPress.org', 'wporg-forums' );
+	} else {
+		$title['site'] = __( 'WordPress.org', 'wporg-forums' );
+	}
+
+	return $title;
+}
+add_filter( 'document_title_parts', 'wporg_support_document_title' );
+
+/**
+ * Set the separator for the document title.
+ *
+ * @return string Document title separator.
+ */
+function wporg_support_document_title_separator() {
+	return '&#124;';
+}
+add_filter( 'document_title_separator', 'wporg_support_document_title_separator' );
 
 /**
  * Link user profiles to their global profiles.
