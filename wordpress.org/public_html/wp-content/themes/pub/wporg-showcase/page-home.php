@@ -3,6 +3,13 @@
 Template Name: Home
 */
 
+/**
+ * Adds a custom description meta tag.
+ */
+add_action( 'wp_head', function() {
+	printf( '<meta name="description" content="%s" />' . "\n", esc_attr__( 'Discover inspiration in some of the most beautiful, best designed WordPress websites.', 'wporg-showcase' ) );
+} );
+
 get_header();
 ?>
 <div id="pagebody" class="home">

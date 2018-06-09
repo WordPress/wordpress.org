@@ -256,15 +256,24 @@ function wporg_showcase_document_title( $parts ) {
 
 	if ( is_front_page() ) {
 		// Omit page name from the home page.
-		$parts['title'] = '';
-	} elseif ( is_category() ) {
-		// Prepend 'Flavor: ' to category document titles.
-		/* translators: %s: category name */
-		$parts['title'] = sprintf( __( 'Flavor: %s', 'wporg-showcase' ), $parts['title'] );
-	} elseif ( is_tag() ) {
-		// Prepend 'Tag: ' to tag document titles.
-		/* translators: %s: tag name */
-		$parts['title'] = sprintf( __( 'Tag: %s', 'wporg-showcase' ), $parts['title'] );
+		$parts['title']   = $parts['tagline'];
+		$parts['tagline'] = __( 'WordPress.org', 'wporg-showcase' );
+	} else {
+		if ( is_category() ) {
+			// Prepend 'Flavor: ' to category document titles.
+			/* translators: %s: category name */
+			$parts['title'] = sprintf( esc_attr__( 'Flavor: %s', 'wporg-showcase' ), esc_attr( $parts['title'] ) );
+		} elseif ( is_tag() ) {
+			// Prepend 'Tag: ' to tag document titles.
+			/* translators: %s: tag name */
+			$parts['title'] = sprintf( esc_attr__( 'Tag: %s', 'wporg-showcase' ), esc_attr( $parts['title'] ) );
+		} elseif ( is_single() ) {
+			// Apend ' Showcase' to single document titles.
+			/* translators: %s: Name of showcased site */
+			$parts['title'] = sprintf( esc_attr__( '%s Showcase', 'wporg-showcase' ), esc_attr( $parts['title'] ) );
+		}
+
+		$parts['site'] = __( 'WordPress.org', 'wporg-showcase' );
 	}
 
 	return $parts;
@@ -272,4 +281,6 @@ function wporg_showcase_document_title( $parts ) {
 add_filter( 'document_title_parts', 'wporg_showcase_document_title' );
 
 // Change the document title separator.
-add_filter( 'document_title_separator', create_function( '$separator', 'return "&#8250;";' ) );
+add_filter( 'document_title_separator', function() {
+	return "&#124;";
+} );
