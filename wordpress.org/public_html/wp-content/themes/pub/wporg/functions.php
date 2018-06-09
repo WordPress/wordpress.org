@@ -74,6 +74,16 @@ function set_document_title() {
 add_action( 'template_redirect', __NAMESPACE__ . '\set_document_title' );
 
 /**
+ * Set the separator for the document title.
+ *
+ * @return string Document title separator.
+ */
+function document_title_separator() {
+	return '&#124;';
+}
+add_filter( 'document_title_separator', __NAMESPACE__ . '\document_title_separator' );
+
+/**
  * Set the content width in pixels, based on the theme's design and stylesheet.
  *
  * Priority 0 to make it available to lower priority callbacks.
