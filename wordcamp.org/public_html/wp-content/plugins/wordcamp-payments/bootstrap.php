@@ -23,3 +23,7 @@ if ( is_admin() ) {
 	$GLOBALS['wordcamp_budgets']    = new WordCamp_Budgets();
 	$GLOBALS['wcp_payment_request'] = new WCP_Payment_Request();
 }
+
+if ( is_admin() || wp_doing_cron() || wp_doing_ajax() ) {
+	require_once( __DIR__ . '/includes/privacy.php' );
+}
