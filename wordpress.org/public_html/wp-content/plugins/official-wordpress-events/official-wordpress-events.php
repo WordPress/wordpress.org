@@ -627,6 +627,10 @@ class Official_WordPress_Events {
 
 			$this->maybe_pause( wp_remote_retrieve_headers( $response ) );
 
+			$response_code    = wp_remote_retrieve_response_code( $response );
+			$response_message = wp_remote_retrieve_response_message( $response );
+			$response_body    = wp_remote_retrieve_body( $response );
+
 			if ( is_wp_error( $response ) ) {
 				$error_messages = implode( ', ', $response->get_error_messages() );
 
@@ -638,27 +642,40 @@ class Official_WordPress_Events {
 						print_r( $args, true )
 					);
 				}
-			} elseif ( 200 != $response['response']['code'] ) {
+			} elseif ( 200 != $response_code ) {
 				// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
-
 				$error = sprintf(
-					'Received HTTP code: %s and body: %s. Request was to: %s; Arguments were: %s',
-					$response['response']['code'],
-					substr( sanitize_text_field( $response['body'] ), 0, 500 ),
+					"HTTP Code: %d\nMessage: %s\nBody: %s\nRequest URL: %s\nArgs: %s",
+					$response_code,
+					sanitize_text_field( $response_message ),
+					substr( sanitize_text_field( $response_body ), 0, 500 ),
 					$url,
 					print_r( $args, true )
 				);
 
-				$response = new WP_Error( 'woe_invalid_http_response', 'Invalid HTTP response code', $response );
+				$response = new WP_Error( 'owe_invalid_http_response', 'Invalid HTTP response code', $response );
 			}
 
 			if ( $error ) {
 				$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
-				trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
+				trigger_error( sprintf(
+					'%s error for %s: %s',
+					__METHOD__,
+					parse_url( site_url(), PHP_URL_HOST ),
+					sanitize_text_field( $error )
+				), E_USER_WARNING );
 
 				$to = apply_filters( 'owe_error_email_addresses', array() );
 				if ( $to && ( ! defined( 'WPORG_SANDBOXED_REQUEST' ) || ! WPORG_SANDBOXED_REQUEST ) ) {
-					wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
+					wp_mail(
+						$to,
+						sprintf(
+							'%s error for %s',
+							__METHOD__,
+							parse_url( site_url(), PHP_URL_HOST )
+						),
+						sanitize_text_field( $error )
+					);
 				}
 			}
 		}
