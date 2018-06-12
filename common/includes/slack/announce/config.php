@@ -22,6 +22,7 @@ function get_whitelist() {
 		'hlashbrooke',
 		'iandunn',
 		'rocio',
+		'vedanshu',
 	);
 
 	return array(
