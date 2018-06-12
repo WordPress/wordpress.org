@@ -86,8 +86,8 @@ class Support_Compat {
 	 * Check the request for the `wporg_user_login`, and then add filters to
 	 * handle either the feed request or the custom view if a user is found.
 	 *
-	 * @param array $query_vars The query vars
-	 * @return array The query vars
+	 * @param array $query_vars The query vars.
+	 * @return array The query vars.
 	 */
 	public function request( $query_vars ) {
 		if ( isset( $query_vars['wporg_user_login'] ) && ! empty( $query_vars['wporg_user_login'] ) && ! $this->user ) {
@@ -110,7 +110,7 @@ class Support_Compat {
 	}
 
 	public function topic_pubdate_correction_for_feed( $value, $object_id, $meta_key, $single ) {
-		// We only care about _bbp_last_active_time in this particular context
+		// We only care about _bbp_last_active_time in this particular context.
 		if( $meta_key == '_bbp_last_active_time' ) {
 			$value = get_post_time( 'Y-m-d H:i:s', true, $object_id );
 		}
