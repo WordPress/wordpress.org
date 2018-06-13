@@ -39,6 +39,11 @@ if ( ! empty( $_GET['version'] ) ) {
 	$version = WP_CORE_LATEST_RELEASE;
 }
 
+if ( version_compare( $version, '3.2', '<' ) ) {
+	header( 'HTTP/1.0 400 Bad Request', true, 400 );
+	die( 'Bad request.' );
+}
+
 $locale = false;
 // Convert a locale from a WP locale to a GP locale.
 if ( ( isset( $_GET['locale'] ) && 'en_US' != $_GET['locale'] ) || ( 'cli' == php_sapi_name() && isset( $argv[2] ) ) ) {
