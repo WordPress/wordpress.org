@@ -5,7 +5,7 @@
  * @package wporg-themes
  */
 
-$GLOBALS['pagetitle'] = __( 'Theme Directory &mdash; Free WordPress Themes', 'wporg-themes' );
+$GLOBALS['pagetitle'] = wp_get_document_title();
 
 require WPORGPATH . 'header.php';
 ?>

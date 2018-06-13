@@ -66,7 +66,7 @@ function wporg_themes_scripts() {
 			'query'    => wporg_themes_get_themes_for_query(),
 			'settings' => array(
 				/* translators: %s: theme name */
-				'title'        => __( '%s &mdash; Free WordPress Themes', 'wporg-themes' ),
+				'title'        => __( '%s &#124; WordPress.org', 'wporg-themes' ),
 				'isMobile'     => wp_is_mobile(),
 				'postsPerPage' => 24,
 				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
@@ -142,6 +142,59 @@ function wporg_themes_body_class( $classes ) {
 	return $classes;
 }
 add_filter( 'body_class', 'wporg_themes_body_class' );
+
+/**
+ * Append an optimized site name.
+ *
+ * @param array $title {
+ *     The document title parts.
+ *
+ *     @type string $title   Title of the viewed page.
+ *     @type string $page    Optional. Page number if paginated.
+ *     @type string $tagline Optional. Site description when on home page.
+ *     @type string $site    Optional. Site title when not on home page.
+ * }
+ * @return array Filtered title parts.
+ */
+function wporg_themes_document_title( $title ) {
+	if ( is_front_page() ) {
+		$title['title']   = __( 'WordPress Themes', 'wporg-themes' );
+		$title['tagline'] = __( 'WordPress.org', 'wporg-themes' );
+	} else if ( is_category() || is_tag() ) {
+		/* translators: Category or tag name */
+		$title['title'] = sprintf( __( 'WordPress Themes: %s Free', 'wporg-themes' ), single_term_title( '', false ) );
+	}
+
+	if ( ! is_front_page() ) {
+		$title['site'] = __( 'WordPress.org', 'wporg-themes' );
+	}
+
+	return $title;
+}
+add_filter( 'document_title_parts', 'wporg_themes_document_title' );
+
+/**
+ * Set the separator for the document title.
+ *
+ * @return string Document title separator.
+ */
+add_filter( 'document_title_separator', function() {
+	return '&#124;';
+} );
+
+/**
+ * Adds meta description for front page.
+ *
+ * @param array $tags Array that consists of meta name and meta content pairs.
+ */
+function wporg_themes_meta_tags( $tags ) {
+	if ( is_front_page() ) {
+		$tags['description'] = __( 'Find the perfect theme for your WordPress website. Choose from thousands of stunning designs with a wide variety of features and customization options.', 'wporg-themes' );
+	}
+
+	return $tags;
+}
+add_filter( 'jetpack_seo_meta_tags', 'wporg_themes_meta_tags' );
 
 /**
  * Overrides feeds to use a custom RSS2 feed which contains the current requests themes.
@@ -298,3 +351,11 @@ function wporg_themes_embed_template( $template ) {
 }
 add_filter( 'embed_template', 'wporg_themes_embed_template' );
 
+include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo.php';
+include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-posts.php';
+include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-titles.php';
+include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-utils.php';
+
+if ( class_exists( 'Jetpack_SEO' ) ) {
+	new Jetpack_SEO;
+}
