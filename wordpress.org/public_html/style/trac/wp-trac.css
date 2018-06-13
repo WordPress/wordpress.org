@@ -2061,6 +2061,12 @@ a.mention.me {
 	#metanav li {
 		float: left;
 	}
+	#metanav.nav a,
+	#metanav.nav a:hover,
+	#metanav.nav a:active,
+	#metanav.nav a:visited {
+		color: initial;
+	}
 	#mainnav :link, #mainnav :visited { /* bigger tap target */
 		padding: .5em 20px;
 		-webkit-text-size-adjust: 120%;
