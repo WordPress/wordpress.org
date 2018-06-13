@@ -106,7 +106,7 @@ function custom_open_graph_tags( $tags = [] ) {
 
 		case 'page-about.php':
 			$title = esc_html__( 'Democratize Publishing', 'wporg' );
-			$desc  = esc_html__( 'WordPress is software designed for everyone with emphasis on accessibility, performance, security, and usability.', 'wporg' );
+			$desc  = esc_html__( 'Learn about the team behind WordPress, and where the most popular online publishing platform is heading in the future.', 'wporg' );
 			break;
 
 		case 'page-about-privacy-data-erasure-request.php':
@@ -213,7 +213,7 @@ function custom_page_title( $title, $post = null ) {
 			break;
 
 		case 'page-about.php':
-			$title = esc_html_x( 'About', 'Page title', 'wporg' );
+			$title = esc_html_x( 'About Us: Our Mission', 'Page title', 'wporg' );
 			break;
 
 		case 'page-about-privacy-data-erasure-request.php':
