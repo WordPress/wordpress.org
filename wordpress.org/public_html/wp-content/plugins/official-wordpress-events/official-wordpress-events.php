@@ -321,18 +321,30 @@ class Official_WordPress_Events {
 			return $events;
 		}
 
-		$groups = array_chunk( $groups, 200, true );
+		// Meetup API sometimes throws an error with chunk size larger than 50.
+		$groups = array_chunk( $groups, 50, true );
 
 		foreach ( $groups as $group_batch ) {
-			$request_url = sprintf(
-				'%s2/events?group_id=%s&time=0,3m&page=%d&key=%s&status=upcoming,cancelled',
-				self::MEETUP_API_BASE_URL,
-				implode( ',', $group_batch ),
-				200,
-				MEETUP_API_KEY
+			$request_url = add_query_arg(
+				array(
+					'group_id' => implode( ',', $group_batch ),
+					'time'     => '0,3m',
+					'page'     => 200,
+					'status'   => 'upcoming,cancelled',
+				),
+				self::MEETUP_API_BASE_URL . '2/events'
 			);
 
 			while ( ! empty( $request_url ) ) {
+				// The "next" URLs returned by the API need to be re-signed.
+				$request_url = add_query_arg(
+					array(
+						'sign' => true,
+						'key'  => MEETUP_API_KEY,
+					),
+					$request_url
+				);
+
 				$this->log( 'fetching more events from: ' . var_export( $request_url, true ) );
 
 				$response = $this->remote_get( $request_url );
