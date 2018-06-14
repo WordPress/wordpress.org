@@ -1,0 +1,35 @@
+# Copyright (C) 2017 Table Of Contents For HelpHub
+# This file is distributed under the same license as the Table Of Contents Lite package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Table Of Contents Lite 1.0\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support\n"
+"POT-Creation-Date: 2014-04-07 11:28:06+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2017-01-12 10:00+08:00\n"
+"Last-Translator: Carl Alberto<carl@alber2.com>\n"
+
+#. translators: %s: date and time of the revision
+
+#: includes/class-table-of-contents-lite.php:207
+#: includes/class-table-of-contents-lite.php:216
+msgid "Cheatin&#8217; huh?"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Table Of Contents Lite"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://carl@alber2.com"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Carl Alberto"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://carl@alber2.com"
+msgstr ""
