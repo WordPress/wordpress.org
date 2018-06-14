@@ -17,8 +17,8 @@
 			<div>
 				<h3><?php _e( 'Forum Feeds', 'bbporg'); ?></h3>
 				<ul>
-					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/" title="Forum Posts">Recent Posts</a></li>
-					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/?type=topic" title="Forum Topics">Recent Topics</a></li>
+					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/" title="<?php esc_attr_e( 'Forum Posts', 'bborg' ); ?>"><?php esc_html_e( 'Recent Posts', 'bborg' ); ?></a></li>
+					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/?type=topic" title="<?php esc_attr_e( 'Forum Topics', 'bborg' ); ?>"><?php esc_html_e( 'Recent Topics', 'bborg' ); ?></a></li>
 				</ul>
 			</div>
 
@@ -33,7 +33,7 @@
 
 			<div>
 				<?php bbp_topic_tag_list( 0, array(
-					'before' => '<h3>Topic Tags</h3><ul class="topic-tags"><li>',
+					'before' => '<h3>' . esc_html__( 'Topic Tags', 'bborg' ) . '</h3><ul class="topic-tags"><li>',
 					'after'  => '</li></ul>',
 					'sep'    => '</li><li>',
 				) ); ?>
@@ -46,7 +46,7 @@
 				<div>
 					<?php bbp_topic_admin_links( array (
 						'id'     => bbp_get_topic_id(),
-						'before' => '<h3>Topic Admin</h3><ul class="topic-admin-links"><li>',
+						'before' => '<h3>' . esc_html__( 'Topic Admin', 'bborg' ) . '</h3><ul class="topic-admin-links"><li>',
 						'after'  => '</li></ul>',
 						'sep'    => '</li><li>',
 						'links'  => array()
@@ -79,8 +79,8 @@
 			<div>
 				<h3><?php _e( 'Feeds', 'bbporg'); ?></h3>
 				<ul>
-					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/" title="All Recent Posts">All Recent Posts</a></li>
-					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/" title="All Recent Topics">All Recent Topics</a></li>
+					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/" title="<?php esc_attr_e( 'All Recent Posts', 'bborg' ); ?>"><?php esc_html_e( 'All Recent Posts', 'bborg' ); ?></a></li>
+					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/" title="<?php esc_attr_e( 'All Recent Topics', 'bborg' ); ?>"><?php esc_html_e( 'All Recent Topics', 'bborg' ); ?></a></li>
 				</ul>
 			</div>
 
@@ -95,15 +95,15 @@
 
 		<div class="feature">
 			<h3><?php _e('WordPress', 'bbporg'); ?></h3>
-			<p><a href="https://wordpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/wordpress.gif"/></a>The world&#8217;s most powerful web publishing software.</p>
+			<p><a href="https://wordpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/wordpress.gif"/></a><?php esc_html_e( 'The world&#8217;s most powerful web publishing software.', 'bborg' ); ?></p>
 		</div>
 		<div class="feature">
 			<h3><?php _e('bbPress', 'bbporg'); ?></h3>
-			<p><a href="https://bbpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/bbpress.gif"/></a>Simple and elegant forum software from the creators of WordPress.</p>
+			<p><a href="https://bbpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/bbpress.gif"/></a><?php esc_html_e( 'Simple and elegant forum software from the creators of WordPress.', 'bborg' ); ?></p>
 		</div>
 		<div style="margin-right: 0pt;" class="feature">
 			<h3><?php _e('BuddyPress', 'bbporg'); ?></h3>
-			<p><a href="https://buddypress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/buddypress.gif"/></a>Create a fully featured niche social-network with a few easy clicks.</p>
+			<p><a href="https://buddypress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/buddypress.gif"/></a><?php esc_html_e( 'Create a fully featured niche social-network with a few easy clicks.', 'bborg' ); ?></p>
 		</div>
 
 	<?php elseif ( ( ! is_page( 'login' ) && ! is_page( 'register' ) && ! is_page( 'lost-password' ) ) || is_home() || is_singular( 'post' ) || is_archive() ) : ?>

@@ -29,7 +29,7 @@ function codex_get_breadcrumb() {
 			}
 		}
 
-		$crumb[] = '<a href="/">Codex Home</a>';
+		$crumb[] = '<a href="/">' . __( 'Codex Home', 'bborg' ) . '</a>';
 
 		krsort( $crumb );
 		$crumb = implode( ' ', $crumb );
