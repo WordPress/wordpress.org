@@ -257,6 +257,7 @@ class Author_Card {
 						if ( 'approved' === $plugin->post_status ) {
 							$note       = true;
 							$tooltips[] = __( 'Plugin is approved, but has no data.', 'wporg-plugins' );
+							$classes[]  = 'profile-plugin-open-unused';
 						} elseif ( strtotime( '-2 years' ) > strtotime( $last_updated ) ) {
 							$tooltips[] = __( 'Plugin is open but has not been updated in more than two years.', 'wporg-plugins' );
 							$classes[]  = 'profile-plugin-open-old';
@@ -290,12 +291,12 @@ class Author_Card {
 						sprintf(
 							'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
 							urlencode( esc_attr( $plugin_slug ) ),
-							esc_attr__( 'Click to search Pluginrepo P2 for mentions of this plugin', 'wporg-plugins' )
+							esc_attr__( 'Click to search Plugin Team P2 for mentions of this plugin', 'wporg-plugins' )
 						),
 						sprintf(
 							'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
 							urlencode( esc_attr( $plugin_slug ) ),
-							esc_attr__( 'Click to search Pluginrepo SupportPress for mentions of this plugin', 'wporg-plugins' )
+							esc_attr__( 'Click to search Plugin SupportPress for mentions of this plugin', 'wporg-plugins' )
 						),
 					);
 					vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', $plugin_links );

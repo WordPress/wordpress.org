@@ -226,6 +226,10 @@ input#post_author_username {
 	color: #666;
 }
 
+.profile-plugins a.profile-plugin-open-unused {
+	color: #826eb4;
+}
+
 a.profile-plugin-open {
 	color: green;
 }
