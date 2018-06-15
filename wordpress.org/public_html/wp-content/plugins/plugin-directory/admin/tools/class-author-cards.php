@@ -36,7 +36,7 @@ class Author_Cards {
 	public function enqueue_assets( $hook_suffix ) {
 		switch ( $hook_suffix ) {
 			case 'tools_page_authorcards':
-				wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 4 );
+				wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 5 );
 				break;
 		}
 	}
