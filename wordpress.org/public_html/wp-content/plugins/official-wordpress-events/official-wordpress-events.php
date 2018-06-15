@@ -400,7 +400,7 @@ class Official_WordPress_Events {
 					}
 				}
 
-				$request_url = isset( $body->meta->next ) ? urldecode( $body->meta->next ) : null;
+				$request_url = isset( $body->meta->next ) ? esc_url_raw( $body->meta->next ) : null;
 			}
 		}
 
