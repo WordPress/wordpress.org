@@ -558,10 +558,11 @@ article.state-unresolved {
 /*
  * Sticky post
  */
-.sticky .o2-post {
+.post.sticky .o2-post {
 	border: 0;
 	border-top: 2px solid #ddd;
 	background: #e5f5fa;
+	padding-top: 3em;
 	position: relative;
 }
 
@@ -586,7 +587,8 @@ article.status-private .comment.alt {
 	background: #fef0f0;
 }
 
-.status-private .o2-post {
+.post.status-private .o2-post {
+	padding-top: 3em;
 	position: relative;
 }
 
