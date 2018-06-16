@@ -33,8 +33,9 @@ class WPorg_GP_Custom_Translation_Warnings {
 	 * @param string $translation The translated string.
 	 */
 	public function warning_mismatching_urls( $original, $translation ) {
-		// Any http/https/schemeless URLs which are not encased in quotation marks nor contain whitespace
-		$urls_regex = '@(?<![\'"])((https?://|(?<![:\w])//)[^\s]+)(?![\'"])@i';
+		// Any http/https/schemeless URLs which are not encased in quotation marks
+		// nor contain whitespace and end with a valid URL ending char.
+		$urls_regex = '@(?<![\'"])((https?://|(?<![:\w])//)[^\s]+[a-z0-9\-_&=#/])(?![\'"])@i';
 
 		preg_match_all( $urls_regex, $original, $original_urls );
 		$original_urls = array_unique( $original_urls[0] );
