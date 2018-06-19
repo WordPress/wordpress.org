@@ -13,7 +13,7 @@ get_header(); ?>
 			<span class="trail-browse"><span class="trail-begin"><?php _e( 'Search Results', 'wporg' ); ?></span></span><span class="sep">:</span>
 			<span><a href="<?php echo home_url( '/' ); ?>"><?php _e( 'Home', 'wporg' ); ?></a></span>
 			<span class="sep">/</span>
-			<?php if ( get_query_var( 'is_handbook' ) ) : ?>
+			<?php if ( $GLOBALS['wp_query']->is_handbook ) : ?>
 			<span><a href="<?php echo esc_url( get_query_var( 'current_handbook_home_url' ) ); ?>"><?php echo get_query_var( 'current_handbook_name' ); ?></a></span>
 			<?php elseif ( $reference_page = get_page_by_path( 'reference' ) ) : ?>
 			<span><a href="<?php echo esc_url( get_permalink( $reference_page ) ); ?>"><?php echo get_the_title( $reference_page ); ?></a></span>
@@ -31,7 +31,7 @@ get_header(); ?>
 			<?php /* Start the Loop */ ?>
 			<?php while ( have_posts() ) : the_post(); ?>
 
-				<?php get_template_part( 'content', get_query_var( 'is_handbook' ) ? 'handbook-archive' : 'reference-archive' ); ?>
+				<?php get_template_part( 'content', $GLOBALS['wp_query']->is_handbook ? 'handbook-archive' : 'reference-archive' ); ?>
 
 			<?php endwhile; ?>
 

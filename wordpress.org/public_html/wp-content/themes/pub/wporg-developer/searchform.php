@@ -34,7 +34,7 @@
 <?php } ?>
 
 	<?php
-		$is_handbook = get_query_var( 'is_handbook' );
+		$is_handbook = $GLOBALS['wp_query']->is_handbook;
 		$search_url  = get_query_var( 'current_handbook_home_url' );
 		$search_url  = $search_url ? $search_url : home_url( '/' );
 		$filters     = ! ( $is_handbook || is_404() );
@@ -59,15 +59,15 @@
 					'wp-parser-class'    => __( 'Classes',   'wporg' ),
 					'wp-parser-method'   => __( 'Methods',   'wporg' ),
 				);
-				
-				$qv_post_type = array_filter( (array) get_query_var( 'post_type' ) );	
-				$no_filters   = get_query_var( 'empty_post_type_search' );
+
+				$qv_post_type = array_filter( (array) get_query_var( 'post_type' ) );
+				$no_filters   = $GLOBALS['wp_query']->is_empty_post_type_search;
 
 				if ( ! is_search() || in_array( 'any', $qv_post_type ) || $no_filters ) {
 					// No filters used.
 					$qv_post_type = array();
 				}
-						
+
 				foreach ( $search_post_types as $post_type => $label ) {
 					$checked = checked( in_array( $post_type, $qv_post_type ), true, false );
 				?>

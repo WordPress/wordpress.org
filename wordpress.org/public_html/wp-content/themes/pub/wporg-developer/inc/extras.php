@@ -96,7 +96,7 @@ add_filter( 'document_title_parts', 'wporg_developer_document_title' );
  * @return string
  */
 function wporg_filter_archive_excerpt( $excerpt ) {
-	if ( ! is_single() && ! get_query_var( 'is_handbook' ) && 'command' !== get_query_var( 'post_type' ) ) {
+	if ( ! is_single() && ! $GLOBALS['wp_query']->is_handbook && 'command' !== get_query_var( 'post_type' ) ) {
 
 		$post_id = get_the_ID();
 		$type    = get_post_type_object( get_post_type( $post_id ) )->labels->singular_name;
@@ -200,4 +200,3 @@ function wporg_loop_pagination( $page_links ) {
 	return $page_links;
 }
 add_filter( 'loop_pagination', 'wporg_loop_pagination' );
-

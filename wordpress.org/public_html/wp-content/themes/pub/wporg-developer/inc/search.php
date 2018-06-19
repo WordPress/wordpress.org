@@ -24,22 +24,6 @@ class DevHub_Search {
 		add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ), 20 );
 		add_filter( 'posts_orderby', array( __CLASS__, 'search_posts_orderby' ), 10, 2 );
 		add_filter( 'the_posts',     array( __CLASS__, 'rerun_empty_exact_search' ), 10, 2 );
-		add_filter( 'query_vars',    array( __CLASS__, 'default_qv_empty_post_type_search' ) );
-	}
-
-	/**
-	 * Add query var to indicate if no post type filters were explicitly used for
-	 * a search.
-	 *
-	 * Defaults the query var 'empty_post_type_search' to false. It is potentially
-	 * set to true elsewhere.
-	 *
-	 * @param array $public_query_vars The array of whitelisted query variables.
-	 * @return array
-	 */
-	public static function default_qv_empty_post_type_search( $public_query_vars ) {
-		$public_query_vars['empty_post_type_search'] = false;
-		return $public_query_vars;
 	}
 
 	/**
@@ -59,7 +43,7 @@ class DevHub_Search {
 
 		// Separates searches for handbook pages from non-handbook pages depending on
 		// whether the search was performed within context of a handbook page or not.
-		if ( get_query_var( 'is_handbook' ) ) {
+		if ( $query->is_handbook ) {
 			// Search only in current handbook post type.
 			// Just to make sure. post type should already be set.
 			$query->set( 'post_type', wporg_get_current_handbook() );
@@ -82,7 +66,7 @@ class DevHub_Search {
 
 		if ( ! $qv_post_types ) {
 			// Record the fact no post types were explicitly supplied.
-			$query->set( 'empty_post_type_search', true );
+			$query->is_empty_post_type_search = true;
 
 			// Not a handbook page, or exact search, or filters used.
 			// Fallback to parsed post types.
