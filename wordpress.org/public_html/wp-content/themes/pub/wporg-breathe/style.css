@@ -1158,8 +1158,8 @@ h2.toc-heading + h3.toc-heading:target {
 
 /** Menu */
 
-#secondary aside.widget_wporg_handbook_pages,
-#secondary aside.widget_nav_menu {
+.single-handbook #secondary aside.widget_wporg_handbook_pages,
+.single-handbook #secondary aside.widget_nav_menu {
 	font-size: 16px;
 }
 
