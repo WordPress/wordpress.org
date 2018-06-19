@@ -367,8 +367,8 @@ body,
 	line-height: 1.2;
 }
 
-aside[id^="handbook"] .widget-title,
-aside[id^="nav_menu"] .widget-title {
+.single-handbook aside[id^="handbook"] .widget-title,
+.single-handbook aside[id^="nav_menu"] .widget-title {
 	font-size: 16px;
 	text-transform: uppercase;
 	letter-spacing: 1px;
