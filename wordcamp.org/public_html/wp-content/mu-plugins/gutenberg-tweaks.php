@@ -20,14 +20,18 @@ defined( 'WPINC' ) || die();
  * @todo: Most of this can be removed once Gutenberg is refined enough to become the default editor
  *        for organizers.
  */
+function load() {
+	if ( is_plugin_active( 'gutenberg/gutenberg.php' ) ) {
+		add_filter( 'gutenberg_can_edit_post_type', __NAMESPACE__ . '\disable_gutenberg_on_cpts',           10, 2 );
+		add_filter( 'get_edit_post_link',           __NAMESPACE__ . '\add_classic_param_to_edit_links'            );
+		add_filter( 'page_row_actions',             __NAMESPACE__ . '\add_gutenberg_edit_link',             10, 2 );
+		add_filter( 'post_row_actions',             __NAMESPACE__ . '\add_gutenberg_edit_link',             10, 2 );
+		add_action( 'admin_print_scripts-edit.php', __NAMESPACE__ . '\add_classic_param_to_add_new_button', 11    );
+		add_action( 'admin_print_scripts',          __NAMESPACE__ . '\add_classic_param_to_admin_menus',     1    );
+	}
+}
 
-add_filter( 'gutenberg_can_edit_post_type', __NAMESPACE__ . '\disable_gutenberg_on_cpts',           10, 2 );
-add_filter( 'get_edit_post_link',           __NAMESPACE__ . '\add_classic_param_to_edit_links'            );
-add_filter( 'page_row_actions',             __NAMESPACE__ . '\add_gutenberg_edit_link',             10, 2 );
-add_filter( 'post_row_actions',             __NAMESPACE__ . '\add_gutenberg_edit_link',             10, 2 );
-add_action( 'admin_print_scripts-edit.php', __NAMESPACE__ . '\add_classic_param_to_add_new_button', 11    );
-add_action( 'admin_print_scripts',          __NAMESPACE__ . '\add_classic_param_to_admin_menus',     1    );
-
+add_action( 'plugins_loaded', __NAMESPACE__ . '\load' );
 
 /**
  * Limit which post types are editable by Gutenberg
