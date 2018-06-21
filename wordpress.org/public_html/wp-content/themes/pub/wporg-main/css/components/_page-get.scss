@@ -27,6 +27,7 @@ body.page-get {
 	}
 
 	section.download {
+		padding-top: 0;
 		text-align: center;
 		
 		.dashicons-download:before {
@@ -69,18 +70,12 @@ body.page-get {
 
 		.web-stores { //mobile section
 			@extend .clear;
-			margin: 2rem auto 0;
 			width: 100%;
-
 
 			a {
 				display: inline-block;
 				margin: 10px;
 				width: 150px;
-			}
-
-			@include breakpoint( $ms-breakpoint ) {
-				margin: 4rem auto 0;
 			}
 		}
 		.ios .button-android {
@@ -97,19 +92,20 @@ body.page-get {
 
 	section + section {
 		border-top: 2px solid #eee;
-
 	}
 
 	.call-to-action {
 		display: block;
-		font-size: ms(-1);
-		margin: 2rem 0 2rem;
+		font-size: ms( -1 );
+		margin: 2rem 0;
 
 		@include breakpoint( $ms-breakpoint ) {
 			font-size: ms( -2 );
-			margin: 3rem 0 2rem;
 		}
 
+		&:last-child {
+			margin-bottom: 0;
+		}
 	}
 
 	.dashicons {
