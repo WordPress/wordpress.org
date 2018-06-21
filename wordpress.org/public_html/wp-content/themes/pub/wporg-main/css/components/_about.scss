@@ -8,6 +8,7 @@ body.page-template-about {
 
 		.entry-title {
 			font-size: ms( 12 );
+			line-height: 1;
 			margin: 2rem auto 1rem;
 		}
 
@@ -15,7 +16,7 @@ body.page-template-about {
 			color: rgba( 255, 255, 255, 0.8 );
 			font-size: ms( 2 );
 			font-weight: 300;
-			margin-top: -0.4rem;
+			margin: -.4rem auto 2rem;
 		}
 	}
 
