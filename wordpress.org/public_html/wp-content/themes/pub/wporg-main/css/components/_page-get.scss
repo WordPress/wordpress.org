@@ -8,6 +8,10 @@ body.page-get {
 			font-size: ms( 12 );
 			line-height: 1;
 			margin: 2rem auto 1rem;
+
+			@include breakpoint( 0, 420px ) {
+				font-size: ms( 11 );
+			}
 		}
 
 		.entry-description {
@@ -19,7 +23,11 @@ body.page-get {
 	}
 
 	section {
-		padding: ms( 10 ) ms( 4 );
+		padding: ms( 10 ) 0;
+
+		@include breakpoint( 479px ) {
+			padding: ms( 10 ) ms( 4 );
+		}
 
 		h2:first-of-type {
 			width: 100%;
@@ -29,15 +37,30 @@ body.page-get {
 	section.download {
 		padding-top: 0;
 		text-align: center;
+
+		@include breakpoint( 479px ) {
+			aside {
+				text-align: initial;
+			}
+		}
+
+		@include breakpoint( 0, 479px ) {
+			aside[class*='col-'],
+			aside p:last-child {
+				margin-bottom: 0;
+			}
+
+			.call-to-action:not(:last-child) {
+				margin-bottom: 2rem;
+			}
+		}
 		
 		.dashicons-download:before {
 			margin-right: 5px;
 			vertical-align: middle;
-		}
 
-		@include breakpoint( $ms-breakpoint ) {
-			aside {
-				text-align: initial;
+			@include breakpoint( 0, 479px ) {
+				display: none;
 			}
 		}
 
@@ -49,14 +72,21 @@ body.page-get {
 	section.hosting {
 		text-align: center;
 
-
-		@include breakpoint( $ms-breakpoint ) {
+		@include breakpoint( 479px ) {
 			.host {
 				text-align: initial;
 			}
+
+			.col-6:nth-child(n+3) {
+				margin-top: 0;
+			}
 		}
-		.col-6:nth-child(n+3) {
-			margin-top: 0;
+
+		@include breakpoint( 0, 479px ) {
+			[class*='col-'] {
+				margin-bottom: 0;
+				margin-top: 2rem;
+			}
 		}
 
 		.logo__bluehost,
@@ -67,16 +97,18 @@ body.page-get {
 
 	section.apps-mobile {
 		text-align: center;
+		width: 100%;
 
-		.web-stores { //mobile section
-			@extend .clear;
-			width: 100%;
+		@include breakpoint( 0, 768px ) {
+			border-top: none;
+			border-bottom: 2px solid #eee;
+			padding-top: 0;
+		}
 
-			a {
-				display: inline-block;
-				margin: 10px;
-				width: 150px;
-			}
+		.web-stores [class*='button-'] {
+			display: inline-block;
+			margin: 0.5rem;
+			width: 150px;
 		}
 		.ios .button-android {
 			display: none;
@@ -98,8 +130,9 @@ body.page-get {
 		display: block;
 		font-size: ms( -1 );
 		margin: 2rem 0;
+		text-decoration: underline;
 
-		@include breakpoint( $ms-breakpoint ) {
+		@include breakpoint( 479px ) {
 			font-size: ms( -2 );
 		}
 

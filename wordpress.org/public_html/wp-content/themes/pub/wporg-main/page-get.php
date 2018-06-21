@@ -36,7 +36,7 @@ the_post();
 				</p>
 			</header><!-- .entry-header -->
 
-			<div class="entry-content">
+			<div class="entry-content row">
 
 				<section class="download row gutters between">
 					<h2><?php esc_html_e( 'Priceless, and also free', 'wporg' ); ?></h2>
@@ -123,7 +123,7 @@ the_post();
 					<a href="<?php echo esc_url( home_url( '/hosting/' ) ); ?>" class="call-to-action col-12"><?php esc_html_e( 'See all of our recommended hosts', 'wporg' ); ?></a>
 				</section>
 
-				<section class="apps-mobile">
+				<section class="apps-mobile first-sm">
 					<span class="dashicons dashicons-smartphone"></span>
 					<h2><?php esc_html_e( 'Inspiration strikes anywhere, anytime', 'wporg' ); ?></h2>
 					<p class="subheading"><?php esc_html_e( 'Create or update content on the go with our mobile apps.', 'wporg' ); ?></p>
