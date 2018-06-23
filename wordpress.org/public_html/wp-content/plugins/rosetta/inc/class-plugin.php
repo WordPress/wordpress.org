@@ -97,31 +97,40 @@ class Plugin {
 					 * for all timezone strings supported by PHP.
 					 */
 					$offset_or_tz = _x( '0', 'default GMT offset or timezone string', 'rosetta' );
-					if ( $offset_or_tz && ! is_numeric( $offset_or_tz ) && in_array( $offset_or_tz, timezone_identifiers_list() ) ) {
+					if ( $offset_or_tz && ! is_numeric( $offset_or_tz ) && in_array( $offset_or_tz, timezone_identifiers_list(), true ) ) {
 						return $offset_or_tz;
 					} else {
 						return '';
 					}
 				} )
-				->set_priority( 9 ) // Before `wp_timezone_override_offset()`
 		);
 
 		$options->add_option(
 			( new Filter\Option() )
 				->set_name( 'gmt_offset' )
 				->set_callback( function() {
+					// Do the smart timezone handling like `wp_timezone_override_offset()`.
+					$timezone_string = get_option( 'timezone_string' );
+					if ( $timezone_string ) {
+						$timezone_object = timezone_open( $timezone_string );
+						$datetime_object = date_create();
+						if ( false !== $timezone_object && false !== $datetime_object ) {
+							return round( timezone_offset_get( $timezone_object, $datetime_object ) / HOUR_IN_SECONDS, 2 );
+						}
+					}
+
 					/* translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
 					 * or a valid timezone string (America/New_York). See https://secure.php.net/manual/timezones.php
 					 * for all timezone strings supported by PHP.
 					 */
 					$offset_or_tz = _x( '0', 'default GMT offset or timezone string', 'rosetta' );
 					if ( $offset_or_tz && is_numeric( $offset_or_tz ) ) {
-						return $offset_or_tz;
+						return (int) $offset_or_tz;
 					} else {
 						return 0;
 					}
 				} )
-				->set_priority( 9 ) // Before `wp_timezone_override_offset()`
+				->set_priority( 11 ) // After `wp_timezone_override_offset()`.
 		);
 
 		$options->add_option(
