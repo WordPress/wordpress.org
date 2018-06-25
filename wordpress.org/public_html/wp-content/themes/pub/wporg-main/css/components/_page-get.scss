@@ -110,6 +110,12 @@ body.page-get {
 			margin: 0.5rem;
 			width: 150px;
 		}
+
+		// Why Google decided to add its own margin, I'll never understand.
+		.web-stores .button-android {
+			width: 174px;
+		}
+
 		.ios .button-android {
 			display: none;
 		}
