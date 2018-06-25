@@ -1,0 +1,23 @@
+.parallelogram {
+	color: #fff;
+	display: block;
+	margin: 0 auto;
+	opacity: 0.9;
+	padding: 4.7rem 0;
+	position: absolute;
+	text-align: center;
+	transform: skew( -15deg) ;
+
+	&:before {
+		font-size: ms( 12 );
+		height: 64px;
+		position: relative;
+		right: 1rem;
+		transform: skew( 15deg );
+		width: 64px;
+	}
+
+	> * {
+		transform: skew( 15deg );
+	}
+}

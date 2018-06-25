@@ -25,26 +25,9 @@ body.page-template-about {
 		margin: 4rem 0;
 		position: relative;
 
-		.shape {
-			color: #fff;
-			display: block;
+		.parallelogram {
 			height: 260px;
-			margin: 0 auto;
-			opacity: 0.9;
-			padding: 4.7rem 0;
-			position: absolute;
-			text-align: center;
-			transform: skew( -15deg) ;
 			width: 310px;
-
-			&:before {
-				font-size: ms( 12 );
-				height: 64px;
-				position: relative;
-				right: 1rem;
-				transform: skew( 15deg );
-				width: 64px;
-			}
 
 			&:hover,
 			&:focus,
@@ -86,7 +69,7 @@ body.page-template-about {
 		@include breakpoint( 480px ) {
 			height: 610px;
 
-			.shape {
+			.parallelogram {
 				height: 336px;
 				padding: 7rem 0;
 				width: 400px;
@@ -96,7 +79,7 @@ body.page-template-about {
 		@include breakpoint( 640px ) {
 			height: 580px;
 
-			.shape {
+			.parallelogram {
 				height: 315px;
 				padding: 5rem 0;
 				width: 480px;
@@ -113,7 +96,7 @@ body.page-template-about {
 			height: 323px;
 			margin: 4rem 0;
 
-			.shape {
+			.parallelogram {
 				height: 282px;
 				padding: 4rem 0;
 				width: 430px;
@@ -134,7 +117,7 @@ body.page-template-about {
 		@include breakpoint( 1024px ) {
 			height: 420px;
 
-			.shape {
+			.parallelogram {
 				height: 380px;
 				padding: 6rem 0;
 				width: 580px;

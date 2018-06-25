@@ -43,13 +43,13 @@ the_post();
 					</p>
 
 					<div class="shapes">
-						<a class="shape technology dashicons-before dashicons-welcome-widgets-menus" href="<?php echo esc_url( home_url( '/about/features/' ) ); ?>">
+						<a class="parallelogram technology dashicons-before dashicons-welcome-widgets-menus" href="<?php echo esc_url( home_url( '/about/features/' ) ); ?>">
 							<p>
 								<strong><?php esc_html_e( 'The Technology', 'wporg' ); ?></strong><br />
 								<?php esc_html_e( 'Learn about the software', 'wporg' ); ?>
 							</p>
 						</a>
-						<a class="shape community dashicons-before dashicons-admin-site" href="https://make.wordpress.org/">
+						<a class="parallelogram community dashicons-before dashicons-admin-site" href="https://make.wordpress.org/">
 							<p>
 								<strong><?php esc_html_e( 'The Community', 'wporg' ); ?></strong><br />
 								<?php esc_html_e( 'Learn about the people', 'wporg' ); ?>

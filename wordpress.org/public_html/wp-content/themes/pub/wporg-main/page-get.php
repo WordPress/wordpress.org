@@ -106,6 +106,8 @@ the_post();
 				</section>
 
 				<section class="hosting row gutters between">
+					<div class="parallelogram"></div>
+					<div class="parallelogram"></div>
 					<span class="dashicons dashicons-cloud"></span>
 					<h2><?php esc_html_e( 'WordPress Hosting', 'wporg' ); ?></h2>
 					<p class="subheading col-8"><?php esc_html_e( 'Choosing a hosting provider can be difficult, so we have selected a few of the best to get you started.', 'wporg' ); ?></p>
