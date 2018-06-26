@@ -120,7 +120,8 @@ class Set_Theme_Project extends WP_CLI_Command {
 			'description' => 'Description',
 		);
 
-		$file_data = file_get_contents( $style_css, false, null, -1, 8192 );
+		//  Pull only the first 8kiB of the file in.
+		$file_data = file_get_contents( $style_css, false, null, 0, 8192 );
 
 		// Make sure we catch CR-only line endings.
 		$file_data = str_replace( "\r", "\n", $file_data );
