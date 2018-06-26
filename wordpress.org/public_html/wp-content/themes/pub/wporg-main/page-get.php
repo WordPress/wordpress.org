@@ -54,7 +54,8 @@ the_post();
 							</span>
 						</a>
 					</div>
-					<aside class="col-8">
+
+					<aside class="col-6">
 						<h4><?php esc_html_e( 'Installation', 'wporg' ); ?></h4>
 						<p>
 							<?php
@@ -65,6 +66,9 @@ the_post();
 							);
 							?>
 						</p>
+					</aside>
+
+					<aside class="col-6">
 						<h4><?php esc_html_e( 'Release notifications', 'wporg' ); ?></h4>
 						<p>
 							<?php
@@ -77,7 +81,7 @@ the_post();
 						</p>
 					</aside>
 
-					<aside class="col-4">
+					<aside class="col-12">
 						<h4><?php esc_html_e( 'Requirements', 'wporg' ); ?></h4>
 						<p class="aside">
 							<?php
@@ -89,9 +93,7 @@ the_post();
 								esc_url( 'https://mariadb.org/' )
 							);
 							?>
-						</p>
-
-						<p class="aside">
+							<br>
 							<?php
 							printf(
 								/* translators: 1: URL to Apache website; 2: URL to Nginx website */
@@ -106,7 +108,6 @@ the_post();
 				</section>
 
 				<section class="hosting row gutters between">
-					<div class="parallelogram"></div>
 					<div class="parallelogram"></div>
 					<span class="dashicons dashicons-cloud"></span>
 					<h2><?php esc_html_e( 'WordPress Hosting', 'wporg' ); ?></h2>

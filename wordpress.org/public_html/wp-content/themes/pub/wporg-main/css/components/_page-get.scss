@@ -1,5 +1,7 @@
 body.page-template-page-get,
 body.page-get {
+	overflow-x: hidden;
+
 	.entry-header {
 		padding: ms( 4 ) ms( 1 );
 		text-align: center;
@@ -70,9 +72,8 @@ body.page-get {
 	}
 
 	section.hosting {
-		text-align: center;
-		margin-bottom: 5%;
 		position: relative;
+		text-align: center;
 
 		.parallelogram {
 			background: #f5f5f5;
@@ -83,19 +84,8 @@ body.page-get {
 			width: 120%;
 			z-index: -1;
 
-			& + .parallelogram {
-				background: #fbfbfb;
-				top: 5%;
-				transform: skew( 15deg );
-				z-index: -2;
-			}
-
 			@include breakpoint( 0, 768px ) {
 				transform: none;
-
-				& + .parallelogram {
-					background: transparent;
-				}
 			}
 		}
 
@@ -107,16 +97,11 @@ body.page-get {
 			.host {
 				text-align: initial;
 			}
-
-			.col-6:nth-child(n+3) {
-				margin-top: 0;
-			}
 		}
 
-		@include breakpoint( 0, 479px ) {
+		@include breakpoint( 0, 768px ) {
 			[class*='col-'] {
-				margin-bottom: 0;
-				margin-top: 2rem;
+				margin-bottom: 2rem;
 			}
 		}
 
