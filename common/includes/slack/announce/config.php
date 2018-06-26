@@ -47,6 +47,7 @@ function get_whitelist() {
 		'community-events' => $wordcamp_central,
 		'community-team' => $wordcamp_central,
 		'core' => array_merge( get_committers(), array(
+			'antpb',
 			'audrasjb',
 			'danieltj',
 			'desrosj',
