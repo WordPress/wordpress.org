@@ -306,7 +306,7 @@ class o2_follow {
 			return;
 		}
 
-		$subscribed_ids   = get_user_meta( $current_user->ID, self::USER_META_KEY, true );
+		$subscribed_ids   = (array) get_user_meta( $current_user->ID, self::USER_META_KEY, true );
 		$subscribed_ids[] = $post_id;
 		$subscribed_ids   = array_unique( $subscribed_ids );
 
