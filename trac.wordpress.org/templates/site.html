@@ -32,6 +32,15 @@
 		pass
 ?>
 
+<!--! Analytics for Core Trac -->
+<py:if test="project_slug == 'core'">
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-5Z8B3BX');</script>
+</py:if>
+
 <!--! These are changes for tickets that are also loaded from
 	ticket_preview.html (as site.html isn't) -->
 <xi:include href="site-ticket.html" />
@@ -249,6 +258,12 @@
 </py:if>
 
 <body py:match="body" id="wordpress-org" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
+
+	<!--! Analytics for Core Trac -->
+	<py:if test="project_slug == 'core'">
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5Z8B3BX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	</py:if>
+
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-header.html" />
 
@@ -282,19 +297,6 @@
 
 	<!--! Check for security buzzwords on new tickets -->
 	<script py:if="req.environ['PATH_INFO'] == '/newticket'" src="https://s.w.org/style/trac/trac-security.js?${scripts_version}"></script>
-
-	<!--! Analytics for Core Trac -->
-	<py:if test="project_slug == 'core'">
-		<script type="text/javascript">
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-		ga('create', 'UA-52447-27', 'auto');
-		ga('send', 'pageview');
-		</script>
-	</py:if>
 
 	<!--! Trac auth check -->
 	<py:if test="req.session['authenticated']">
