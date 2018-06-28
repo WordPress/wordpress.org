@@ -53,7 +53,7 @@ the_post();
 
 					<h3 id="simplicity"><?php esc_html_e( 'Striving for Simplicity', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'We&#8217;re never done with simplicity. We want to make WordPress easier to use with every single release. We&#8217;ve got a good track record of this, if you don&#8217;t believe us then just take a look back at some older versions of WordPress!', 'wporg' ); ?></p>
-					<p><?php esc_html_e( 'In past releases we&#8217;ve taken major steps to improve ease of use and ultimately make things simpler to understand. One great example of this is core software updates. Updating used to be a painful manual task that was too tricky for a lot of our users. We decided to focus on this and simplified it down to a single click. Now anyone with a WordPress install can perform one click upgrades on both the core of WordPress and plugins and themes.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'In past releases we&#8217;ve taken major steps to improve ease of use and ultimately make things simpler to understand. One great example of this is core software updates. Updating used to be a painful manual task that was too tricky for a lot of our users. We decided to focus on this and simplified it down to a single click. Now anyone with a WordPress installation can perform one click upgrades on both the core of WordPress and plugins and themes.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'We love to challenge ourselves and simplify tasks in ways that are positive for the overall WordPress user experience. Every version of WordPress should be easier and more enjoyable to use than the last.', 'wporg' ); ?></p>
 
 					<h3 id="deadlines"><?php esc_html_e( 'Deadlines Are Not Arbitrary', 'wporg' ); ?></h3>
