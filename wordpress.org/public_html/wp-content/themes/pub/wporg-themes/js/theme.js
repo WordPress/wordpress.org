@@ -1609,11 +1609,6 @@ window.wp = window.wp || {};
 			if ( Backbone.history._hasPushState ) {
 				Backbone.Router.prototype.navigate.apply( this, arguments );
 			}
-
-			if ( 'function' === typeof ga ) {
-				ga('set', 'page', themes.data.settings.path + arguments[0]);
-				ga('send', 'pageview');
-			}
 		}
 	});
 
