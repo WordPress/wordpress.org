@@ -422,7 +422,7 @@ class Builder {
 			unlink( $this->zip_file );
 		}
 		$this->exec( sprintf(
-			'cd %s && find %s -print0 | sort -z | xargs -0 zip -Xu %s 2>&1',
+			'cd %s && find %s -print0 | sort -z | xargs -0 zip -Xuy %s 2>&1',
 			escapeshellarg( $this->tmp_build_dir ),
 			escapeshellarg( $this->slug ),
 			escapeshellarg( $this->zip_file )
