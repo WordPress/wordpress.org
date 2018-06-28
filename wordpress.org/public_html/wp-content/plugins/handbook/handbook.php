@@ -229,6 +229,7 @@ class WPorg_Handbook {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'capability_type'   => 'handbook_page',
 			'map_meta_cap'      => true,
 			'has_archive'       => true,
