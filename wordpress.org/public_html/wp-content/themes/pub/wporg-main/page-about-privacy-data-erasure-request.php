@@ -10,9 +10,9 @@
 namespace WordPressdotorg\MainTheme;
 
 $GLOBALS['menu_items'] = [
-	'about/privacy'                      => _x( 'Privacy Policy',       'Page title', 'wporg' ),
-	#'about/privacy/data-export-request'  => _x( 'Data Export Request',  'Page title', 'wporg' ),
-	'about/privacy/data-erasure-request' => _x( 'Data Erasure Request', 'Page title', 'wporg' ),
+	'about/privacy'                      => esc_html_x( 'Privacy Policy', 'Page title', 'wporg' ),
+	// 'about/privacy/data-export-request'  => esc_html_x( 'Data Export Request', 'Page title', 'wporg' ),
+	'about/privacy/data-erasure-request' => esc_html_x( 'Data Erasure Request', 'Page title', 'wporg' ),
 ];
 
 // Prevent Jetpack from looking for a non-existent featured image.
@@ -42,27 +42,11 @@ if ( ! $email && is_user_logged_in() ) {
 	$email = wp_get_current_user()->user_email;
 }
 
-// See inc/page-meta-descriptions.php for the meta description for this page.
+/* See inc/page-meta-descriptions.php for the meta description for this page. */
 
 add_action( 'wp_head', function() {
 	// TODO: Move to Theme once styled.
 	echo '<style>
-		p.error {
-			border: 1px solid red;
-			border-left: 4px solid red;
-			padding: 6px;
-		}
-		p.success {
-			border: 1px solid green;
-			border-left: 4px solid green;
-			padding: 6px;
-		}
-		div.alert {
-			border: 1px solid red;
-			border-left: 4px solid red;
-			padding: 6px;
-			margin-bottom: 2rem;
-		}	
 		form.request-form label {
 			display: block;
 			color: #555;
@@ -96,58 +80,63 @@ the_post();
 
 					<p><?php esc_html_e( 'The following form will allow you to request deletion of your account and relevant personal and private data. You will be required to authenticate ownership of that address, and may be asked to provide additional identification or information necessary to verify the request.', 'wporg' ); ?></p>
 
-					<div class="alert">
+					<div class="notice notice-info notice-alt">
 						<h5><?php esc_html_e( 'Important!', 'wporg' ); ?></h5>
 
-						<p><?php printf( wp_kses_post( __( 'This will request permanent deletion of your <strong>WordPress.org</strong> account, and relevant personal or private data stored on <strong>%s</strong>, and other related domains and sites.', 'wporg') ), 'WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org' ); ?></p>
-
+						<p>
+							<?php
+							printf(
+								/* translators: List of sites that use WordPress.org account. */
+								wp_kses_post( __( 'This will request permanent deletion of your <strong>WordPress.org</strong> account, and relevant personal or private data stored on <strong>%s</strong>, and other related domains and sites.', 'wporg' ) ),
+								'WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org'
+							);
+							?>
+						</p>
 						<p><?php esc_html_e( 'Please note that we cannot remove or provide access to data stored on WordPress sites hosted or administered by third parties.', 'wporg' ); ?></p>
-
-						<p><?php
+						<p>
+							<?php
 							printf(
 								/* translators: link to privacy policy. */
-								wp_kses_post( __('Not all data can be erased, please review the <a href="%s">Privacy Policy</a> for details.', 'wporg' ) ),
-								'https://wordpress.org/about/privacy/'
+								wp_kses_post( __( 'Not all data can be erased, please review the <a href="%s">Privacy Policy</a> for details.', 'wporg' ) ),
+								esc_url( home_url( '/about/privacy/' ) )
 							);
-						?></p>
+							?>
+						</p>
 					</div>
 
 					<?php if ( $error_message ) : ?>
-						<p class="error">
-							<strong><?php esc_html_e( 'An error occurred with your request:', 'wporg' ); ?></strong><br>
-							<?php echo $error_message; ?>
-						</p>
+						<div class="notice notice-error notice-alt">
+							<p><?php echo esc_html( $error_message ); ?></p>
+						</div>
 					<?php elseif ( $success ) : ?>
-						<p class="success"><strong><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></strong></p>
+						<div class="notice notice-success notice-alt">
+							<p><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></p>
+						</div>
 					<?php endif; ?>
 
-					<?php if ( !$success ) : ?>
-					<form id="erase-request-form" class="request-form" method="POST" action="#">
-						<label for="email">
-							<?php esc_html_e( 'Email Address', 'wporg' ); ?>
-						</label>
-						<input
-							type="email"
-							name="email" id="email"
-							placeholder="<?php
+					<?php if ( ! $success ) : ?>
+						<form id="erase-request-form" class="request-form" method="POST" action="#">
+							<label for="email"><?php esc_html_e( 'Email Address', 'wporg' ); ?></label>
+							<?php
+							printf( '<input type="email" name="email" id="email" placeholder="%1$s" required value="%2$s" />',
 								/* translators: Example placeholder email address */
-								esc_attr_e( 'you@example.com', 'wporg' )
-							?>"
-							required
-							value="<?php echo esc_attr( $email ); ?>"
-						>
-						<p><?php esc_html_e( 'By submitting this form, you declare that you are the individual owner of the specified email address and its associated accounts; and that all submitted information including any supplemental details necessary to verify your identity are true. You also declare that it is your intention for accounts associated with that email address to be permanently deleted.', 'wporg' ); ?></p>
-						<?php reCAPTCHA\display_submit_button( __( 'Accept Declaration and Request Permanent Account Deletion', 'wporg' ) ); ?>
-						<?php if ( is_user_logged_in() ) wp_nonce_field( $nonce_action ); ?>
-					</form>
-
+								esc_attr__( 'you@example.com', 'wporg' ),
+								esc_attr( $email )
+							);
+							?>
+							<p><?php esc_html_e( 'By submitting this form, you declare that you are the individual owner of the specified email address and its associated accounts; and that all submitted information including any supplemental details necessary to verify your identity are true. You also declare that it is your intention for accounts associated with that email address to be permanently deleted.', 'wporg' ); ?></p>
+							<?php
+							reCAPTCHA\display_submit_button( __( 'Accept Declaration and Request Permanent Account Deletion', 'wporg' ) );
+							if ( is_user_logged_in() ) :
+								wp_nonce_field( $nonce_action );
+							endif;
+							?>
+						</form>
 						<p><?php esc_html_e( 'Please Note: Before we can begin processing your request, we&#8217;ll require that you verify ownership of the email address. If the email address is associated with an account, we&#8217;ll also require you to log in to that account first.', 'wporg' ); ?></p>
-
 					<?php endif; ?>
 
 				</section>
 			</div><!-- .entry-content -->
-
 		</article><!-- #post-## -->
 
 	</main><!-- #main -->

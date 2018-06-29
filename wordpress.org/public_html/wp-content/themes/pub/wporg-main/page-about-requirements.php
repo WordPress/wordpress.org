@@ -22,7 +22,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-// See inc/page-meta-descriptions.php for the meta description for this page.
+/* See inc/page-meta-descriptions.php for the meta description for this page. */
 
 get_header( 'child-page' );
 the_post();
@@ -67,14 +67,16 @@ the_post();
 						?>
 					</p>
 
-					<p><?php
+					<p>
+						<?php
 						printf(
 							/* translators: 1: PHP Version including; 2: MySQL Version */
 							wp_kses_post( __( 'Note: If you are in a legacy environment where you only have older PHP or MySQL versions, WordPress also works with PHP %1$s+ and MySQL %2$s+, but these versions have reached official End Of Life and as such <strong>may expose your site to security vulnerabilities</strong>.', 'wporg' ) ),
 							'5.2.4',
 							'5.0'
 						);
-					?></p>
+						?>
+					</p>
 
 					<h3><?php esc_html_e( 'Ask for it', 'wporg' ); ?></h3>
 
@@ -84,14 +86,18 @@ the_post();
 						<p><?php esc_html_e( 'I&#8217;m interested in running the open-source WordPress &lt;https://wordpress.org/&gt; web software and I was wondering if my account supported the following:', 'wporg' ); ?></p>
 
 						<ul>
-							<li><?php
+							<li>
+								<?php
 								/* translators: PHP Version */
 								printf( esc_html__( 'PHP %s or greater', 'wporg' ), '7.2' );
-							?></li>
-							<li><?php
+								?>
+							</li>
+							<li>
+								<?php
 								/* translators: 1: MySQL version; 2: MariaDB Version */
 								printf( esc_html__( 'MySQL %1$s or greater OR MariaDB %2$s or greater', 'wporg' ), '5.6', '10.0' );
-							?></li>
+								?>
+							</li>
 							<li><?php esc_html_e( 'Nginx or Apache with mod_rewrite module', 'wporg' ); ?></li>
 							<li><?php esc_html_e( 'HTTPS support', 'wporg' ); ?></li>
 						</ul>

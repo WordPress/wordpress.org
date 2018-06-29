@@ -24,7 +24,6 @@ function custom_open_graph_tags( $tags = [] ) {
 	switch ( $post->page_template ) {
 		default:
 			return $tags;
-			break;
 
 		case 'page-about-domains.php':
 			$title = esc_html__( 'WordPress Domains', 'wporg' );
@@ -44,13 +43,13 @@ function custom_open_graph_tags( $tags = [] ) {
 		case 'page-about-features.php':
 			$title = esc_html__( 'WordPress Features', 'wporg' );
 			/* translators: 1: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; 2: Number of WordPress.org hosted plugins; */
-			$desc  = sprintf( esc_html__( 'Discover why WordPress powers more than %1$s%% of the web. WordPress is a simple, flexible, user-friendly platform, with key features that include media management, SEO, and endless options for customization. More than %2$s plugins extend the core functionality of WordPress even more. Build your site today.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ), number_format_i18n( 50000 ) );
+			$desc = sprintf( esc_html__( 'Discover why WordPress powers more than %1$s%% of the web. WordPress is a simple, flexible, user-friendly platform, with key features that include media management, SEO, and endless options for customization. More than %2$s plugins extend the core functionality of WordPress even more. Build your site today.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ), number_format_i18n( 50000 ) );
 			break;
 
 		case 'page-about-history.php':
 			$title = esc_html__( 'The History of WordPress', 'wporg' );
 			/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
-			$desc  = sprintf( esc_html__( 'WordPress currently powers more than %s%% of the web. How did it grow to become the world&#8217;s leading web publishing platform? Learn about the history of WordPress: an open source software project built by an active community of contributors who are passionate about collaboration, empowerment, and the open web.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ) );
+			$desc = sprintf( esc_html__( 'WordPress currently powers more than %s%% of the web. How did it grow to become the world&#8217;s leading web publishing platform? Learn about the history of WordPress: an open source software project built by an active community of contributors who are passionate about collaboration, empowerment, and the open web.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ) );
 			break;
 
 		case 'page-about-license.php':
@@ -60,7 +59,8 @@ function custom_open_graph_tags( $tags = [] ) {
 
 		case 'page-about-logos.php':
 			$title = esc_html__( 'Graphics &amp; Logos', 'wporg' );
-			$desc  = sprintf( __( 'When you need the official WordPress logo for a web site or publication, please use one of the following. Please only use logos in accordance with the <a href="%s">WordPress trademark&nbsp;policy</a>.', 'wporg' ), esc_url( 'http://wordpressfoundation.org/trademark-policy/' ) );
+			/* translators: Link to foundation trademark policy ; */
+			$desc = sprintf( __( 'When you need the official WordPress logo for a web site or publication, please use one of the following. Please only use logos in accordance with the <a href="%s">WordPress trademark&nbsp;policy</a>.', 'wporg' ), esc_url( 'http://wordpressfoundation.org/trademark-policy/' ) );
 			break;
 
 		case 'page-about-philosophy.php':
@@ -86,7 +86,7 @@ function custom_open_graph_tags( $tags = [] ) {
 		case 'page-about-security.php':
 			$title = esc_html__( 'WordPress is Secure', 'wporg' );
 			/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
-			$desc  = sprintf( esc_html__( 'Why is WordPress recommended as a secure website-building solution? With a passionate open source community and an extensible, easy-to-use platform, WordPress provides flexible and secure options for all levels of users, from beginners to pros. Learn how WordPress guarantees the security of %s%% of the web.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ) );
+			$desc = sprintf( esc_html__( 'Why is WordPress recommended as a secure website-building solution? With a passionate open source community and an extensible, easy-to-use platform, WordPress provides flexible and secure options for all levels of users, from beginners to pros. Learn how WordPress guarantees the security of %s%% of the web.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ) );
 			break;
 
 		case 'page-about-stats.php':

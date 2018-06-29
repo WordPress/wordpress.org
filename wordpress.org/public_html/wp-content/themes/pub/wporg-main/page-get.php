@@ -45,11 +45,11 @@ the_post();
 						<a class="button button-primary button-xl" href="<?php echo esc_url( home_url( 'latest.zip' ) ); ?>">
 							<span class="dashicons-before dashicons-download">
 								<?php
-								echo apply_filters( 'no_orphans', sprintf(
+								echo esc_html( apply_filters( 'no_orphans', sprintf(
 									/* translators: WordPress version. */
-									esc_html__( 'Download WordPress %s', 'wporg' ),
-									esc_html( WP_CORE_LATEST_RELEASE )
-								) );
+									__( 'Download WordPress %s', 'wporg' ),
+									WP_CORE_LATEST_RELEASE
+								) ) );
 								?>
 							</span>
 						</a>

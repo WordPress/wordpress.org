@@ -73,7 +73,7 @@ function scripts() {
 
 	if ( is_page( 'stats' ) ) {
 		wp_enqueue_script( 'google-charts', 'https://www.gstatic.com/charts/loader.js', [], null, true );
-		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts'], 1, true );
+		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts' ], 1, true );
 		wp_localize_script( 'wporg-page-stats', 'wporgPageStats', [
 			'trunk'         => number_format( WP_CORE_STABLE_BRANCH + 0.1, 1 ), /* trunk */
 			'beta'          => number_format( WP_CORE_STABLE_BRANCH + 0.2, 1 ), /* trunk w/ beta-tester plugin */
@@ -158,11 +158,11 @@ function child_page_templates( $templates ) {
 		$parent = get_post( $page->post_parent );
 
 		// We want it before page-{page_name}.php but after {Page Template}.php.
-		$page_name_index = array_search( "page-{$page->post_name}.php", $templates );
+		$page_name_index = array_search( "page-{$page->post_name}.php", $templates, true );
 		$top             = array_slice( $templates, 0, $page_name_index );
 		$bottom          = array_slice( $templates, $page_name_index );
 
-		$templates = array_merge( $top, ["page-{$parent->post_name}-{$page->post_name}.php"], $bottom );
+		$templates = array_merge( $top, [ "page-{$parent->post_name}-{$page->post_name}.php" ], $bottom );
 	}
 
 	return $templates;
@@ -186,18 +186,22 @@ function rosetta_page_templates( $post_templates ) {
 }
 add_filter( 'theme_page_templates', __NAMESPACE__ . '\rosetta_page_templates' );
 
+/**
+ * Passes SEO-optimized title and description to embeds.
+ */
 function use_opengraph_data_for_embed_template() {
 	global $post;
-	if ( 'page' != $post->post_type || ! $post->page_template || 'default' == $post->page_template ) {
+
+	if ( 'page' !== $post->post_type || ! $post->page_template || 'default' === $post->page_template ) {
 		return;
 	}
 
 	$meta = custom_open_graph_tags();
 	if ( $meta ) {
-		add_filter( 'the_title', function( $title ) use( $meta ) {
+		add_filter( 'the_title', function( $title ) use ( $meta ) {
 			return $meta['og:title'] ?? $title;
 		} );
-		add_filter( 'the_content', function( $content ) use( $meta ) {
+		add_filter( 'the_content', function( $content ) use ( $meta ) {
 			return $meta['og:description'] ?? $content;
 		} );
 	}
@@ -207,19 +211,19 @@ add_action( 'embed_head', __NAMESPACE__ . '\use_opengraph_data_for_embed_templat
 /**
  * Custom template tags.
  */
-require_once get_stylesheet_directory() . '/inc/template-tags.php';
+require_once __DIR__ . '/inc/template-tags.php';
 
 /**
  * Custom meta descriptions for page templates.
  */
-require_once get_stylesheet_directory() . '/inc/page-meta-descriptions.php';
+require_once __DIR__ . '/inc/page-meta-descriptions.php';
 
 /**
  * Include reCAPTCHA functions for privacy requests.
  */
-include __DIR__ . '/inc/recaptcha.php';
+require_once __DIR__ . '/inc/recaptcha.php';
 
 /**
  * Include the Privacy request functions.
  */
-include __DIR__ . '/inc/privacy-functions.php';
+require_once __DIR__ . '/inc/privacy-functions.php';

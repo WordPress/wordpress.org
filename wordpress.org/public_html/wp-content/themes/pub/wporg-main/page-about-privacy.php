@@ -22,7 +22,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-// See inc/page-meta-descriptions.php for the meta description for this page.
+/* See inc/page-meta-descriptions.php for the meta description for this page. */
 
 get_header( 'child-page' );
 the_post();
@@ -72,10 +72,20 @@ the_post();
 					<h3><?php esc_html_e( 'Access to data', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'You have the right to request a copy of the information we hold about you. If you would like a copy of some or all your personal information, please follow the instructions at the end of this policy.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'All WordCamp attendee-provided data can be viewed and changed by the attendee via the Access Token URL that is emailed to confirm a successful ticket purchase.', 'wporg' ); ?></p>
-					<p><?php echo wp_kses_post( __( 'WordPress.org user accounts can be edited by following these steps:<br/>
-1) Visit <a href="https://login.wordpress.org/">https://login.wordpress.org</a>, and then enter your username and password.<br/>
-2) You will be redirected to https://profiles.wordpress.org/your_username.<br/>
-3) Click the &#8220;Edit&#8221; link next to your username.', 'wporg' ) ); ?></p>
+					<p><?php esc_html_e( 'WordPress.org user accounts can be edited by following these steps:', 'wporg' ); ?></p>
+					<ol>
+						<li>
+							<?php
+							printf(
+								/* translators: Login URL */
+								wp_kses_post( __( 'Visit <a href="%s">https://login.wordpress.org</a>, and enter your username and password.', 'wporg' ) ),
+								esc_url( 'https://login.wordpress.org/' )
+							);
+							?>
+						</li>
+						<li><?php esc_html_e( 'You will be redirected to https://profiles.wordpress.org/your_username.', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'Click the &#8220;Edit&#8221; link next to your username.', 'wporg' ); ?></li>
+					</ol>
 
 					<h3><?php esc_html_e( 'Retention of personal information', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'We will retain your personal information on our systems only for as long as we need to, for the success of the WordPress open source project and the programs that support WordPress.org. We keep contact information (such as mailing list information) until a user unsubscribes or requests that we delete that information from our live systems. If you choose to unsubscribe from a mailing list, we may keep certain limited information about you so that we may honor your request.', 'wporg' ); ?></p>

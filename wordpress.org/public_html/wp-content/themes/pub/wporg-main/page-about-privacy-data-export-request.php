@@ -10,9 +10,9 @@
 namespace WordPressdotorg\MainTheme;
 
 $GLOBALS['menu_items'] = [
-	'about/privacy'                      => _x( 'Privacy Policy',       'Page title', 'wporg' ),
-	'about/privacy/data-export-request'  => _x( 'Data Export Request',  'Page title', 'wporg' ),
-	'about/privacy/data-erasure-request' => _x( 'Data Erasure Request', 'Page title', 'wporg' ),
+	'about/privacy'                      => esc_html_x( 'Privacy Policy', 'Page title', 'wporg' ),
+	'about/privacy/data-export-request'  => esc_html_x( 'Data Export Request', 'Page title', 'wporg' ),
+	'about/privacy/data-erasure-request' => esc_html_x( 'Data Erasure Request', 'Page title', 'wporg' ),
 ];
 
 // Prevent Jetpack from looking for a non-existent featured image.
@@ -42,22 +42,11 @@ if ( ! $email && is_user_logged_in() ) {
 	$email = wp_get_current_user()->user_email;
 }
 
-// See inc/page-meta-descriptions.php for the meta description for this page.
+/* See inc/page-meta-descriptions.php for the meta description for this page. */
 
 add_action( 'wp_head', function() {
 	// TODO: Move to Theme once styled.
 	echo '<style>
-		p.error {
-			border: 1px solid red;
-			border-left: 4px solid red;
-			padding: 6px;
-		}
-		p.success {
-			border: 1px solid green;
-			border-left: 4px solid green;
-			padding: 6px;
-		}
-
 		form.request-form label {
 			display: block;
 			color: #555;
@@ -87,46 +76,45 @@ the_post();
 
 					<p><?php esc_html_e( 'The following form will allow you to request an export of any data linked to your email address. You will be required to authenticate ownership of that address, and may be asked to provide additional identification or information necessary to verify the request and search our records.', 'wporg' ); ?></p>
 
-					<p><?php esc_html_e( 'This export will contain relevant personal or private data stored on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and sites.', 'wporg'); ?></p>
+					<p><?php esc_html_e( 'This export will contain relevant personal or private data stored on WordPress.org, WordPress.net, WordCamp.org, BuddyPress.org, bbPress.org, and other related domains and sites.', 'wporg' ); ?></p>
 
 					<?php if ( $error_message ) : ?>
-						<p class="error">
-							<strong><?php esc_html_e( 'An error occured with your request:', 'wporg' ); ?></strong><br>
-							<?php echo $error_message; ?>
-						</p>
+						<div class="notice notice-error notice-alt">
+							<p><?php echo esc_html( $error_message ); ?></p>
+						</div>
 					<?php elseif ( $success ) : ?>
-					<p class="success"><strong><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></strong></p>
+					<div class="notice notice-success notice-alt">
+						<p><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></p>
+					</div>
 					<?php endif; ?>
 
-					<p class="error"><strong>This is currently disabled unless you have a 'special' WordPress.org account.</strong></p>
-					<?php if ( is_user_logged_in() && wporg_user_has_restricted_password() ) : ?>
-						<p class="success">PS: You have a special account.</p>
+					<div class="notice notice-error notice-alt">
+						<p>This is currently disabled unless you have a 'special' WordPress.org account.</p>
+					</div>
+					<?php if ( is_user_logged_in() && function_exists( 'wporg_user_has_restricted_password' ) && wporg_user_has_restricted_password() ) : ?>
+						<div class="notice notice-info notice-alt"><p>PS: You have a special account.</p></div>
 					<?php endif; ?>
 
 					<form id="export-request-form" class="request-form" method="POST" action="#">
-						<label for="email">
-							<?php esc_html_e( 'Email Address', 'wporg' ); ?>
-						</label>
-						<input
-							type="email"
-							name="email" id="email"
-							placeholder="<?php
-								/* translators: Example placeholder email address */
-								esc_attr_e( 'you@example.com', 'wporg' )
-							?>"
-							required
-							value="<?php echo esc_attr( $email ); ?>"
-						>
+						<label for="email"><?php esc_html_e( 'Email Address', 'wporg' ); ?></label>
+						<?php
+						printf( '<input type="email" name="email" id="email" placeholder="%1$s" required value="%2$s" />',
+							/* translators: Example placeholder email address */
+							esc_attr__( 'you@example.com', 'wporg' ),
+							esc_attr( $email )
+						);
+						?>
 						<p><?php esc_html_e( 'By submitting this form, you declare that you are the individual owner of the specified email address and its associated accounts; and that all submitted information including any supplemental details necessary to verify your identity are true.', 'wporg' ); ?></p>
-						<?php reCAPTCHA\display_submit_button( __( 'Accept Declaration and Request Export', 'wporg' ) ); ?>
-						<?php if ( is_user_logged_in() ) wp_nonce_field( $nonce_action ); ?>
+						<?php
+						reCAPTCHA\display_submit_button( __( 'Accept Declaration and Request Export', 'wporg' ) );
+						if ( is_user_logged_in() ) :
+							wp_nonce_field( $nonce_action );
+						endif;
+						?>
 					</form>
-
-					<p><?php esc_html_e( "Please Note: Before we can begin processing your request, we'll require that you verify ownership of the email address. If the email address is associated with an account, we'll also require you to log in to that account first.", 'wporg' ); ?></p>
-
+					<p><?php esc_html_e( 'Please Note: Before we can begin processing your request, we&#8217;ll require that you verify ownership of the email address. If the email address is associated with an account, we&#8217;ll also require you to log in to that account first.', 'wporg' ); ?></p>
 				</section>
 			</div><!-- .entry-content -->
-
 		</article><!-- #post-## -->
 
 	</main><!-- #main -->

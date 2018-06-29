@@ -22,7 +22,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-// See inc/page-meta-descriptions.php for the meta description for this page.
+/* See inc/page-meta-descriptions.php for the meta description for this page. */
 
 get_header( 'child-page' );
 the_post();
@@ -54,11 +54,8 @@ the_post();
 						printf( wp_kses_post( __( 'So show the love and spread the word &mdash; get your <a href="%s">WordPress swag</a> today.', 'wporg' ) ), esc_url( 'https://mercantile.wordpress.org' ) );
 						?>
 					</p>
-
 				</section>
-
 			</div><!-- .entry-content -->
-
 		</article><!-- #post-## -->
 
 	</main><!-- #main -->

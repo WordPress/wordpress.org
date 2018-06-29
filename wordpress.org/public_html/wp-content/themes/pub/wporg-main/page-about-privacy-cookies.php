@@ -10,7 +10,7 @@
 namespace WordPressdotorg\MainTheme;
 
 $GLOBALS['menu_items'] = [
-	'about/privacy'                      => _x( 'Privacy Policy',       'Page title', 'wporg' ),
+	'about/privacy' => _x( 'Privacy Policy', 'Page title', 'wporg' ),
 ];
 
 // Prevent Jetpack from looking for a non-existent featured image.
@@ -26,7 +26,7 @@ add_filter( 'body_class', function( $classes ) {
 } );
 
 
-// See inc/page-meta-descriptions.php for the meta description for this page.
+/* See inc/page-meta-descriptions.php for the meta description for this page. */
 
 get_header( 'child-page' );
 the_post();
@@ -40,10 +40,6 @@ the_post();
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<h3><?php esc_html_e( '', 'wporg' ); ?></h3>
-					<p><?php esc_html_e( '', 'wporg' ); ?></p>
-					<p><?php echo wp_kses_post( __( '', 'wporg' ) ); ?></p>
-
 					<h3><?php esc_html_e( 'Cookies', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'Our Privacy Policy explains our principles when it comes to the collection, processing, and storage of your information. This policy specifically explains how we, our partners, and users of our services deploy cookies, as well as the options you have to control them.', 'wporg' ); ?></p>
 
@@ -173,7 +169,7 @@ the_post();
 							<tr>
 								<th>trac_form_token</th>
 								<td><?php esc_html_e( 'Session', 'wporg' ); ?></td>
-								<td><?php esc_html_e( '', 'wporg' ); ?></td>
+								<td></td>
 								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged in WordPress.org user.', 'wporg' ); ?></td>
 							</tr>
 						</tbody>

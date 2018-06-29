@@ -31,6 +31,7 @@ get_template_part( 'header', 'wporg' );
 							$active_item = false;
 							// The last found menu item that patches is the one that's shown as active.
 							foreach ( $menu_items as $path => $text ) {
+								// phpcs:ignore WordPress.VIP
 								if ( false !== strpos( $_SERVER['REQUEST_URI'], $path ) ) {
 									$active_item = $path;
 								}

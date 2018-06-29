@@ -1,42 +1,51 @@
 <?php
 /**
  * Functions for the Privacy Tools - Exports and Erasures.
+ *
+ * @package WordPressdotorg\MainTheme
  */
+
+// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput
+
 namespace WordPressdotorg\MainTheme;
+
 use WordPressdotorg\GDPR\Main as GDPR_Main;
 
+/**
+ * Processes privacy requests.
+ *
+ * @param string $type Type of request.
+ *
+ * @return array
+ */
 function privacy_process_request( $type ) {
-	$email = $error_message = $success = false;
-	$nonce_action = 'request_' . $type;
+	$email         = false;
+	$error_message = false;
+	$success       = false;
+	$nonce_action  = 'request_' . $type;
 
-	if ( empty( $_POST['email'] ) || ! $type || ! in_array( $type, [ 'erase', 'export' ] ) ) {
+	if ( empty( $_POST['email'] ) || ! $type || ! in_array( $type, [ 'erase', 'export' ], true ) ) {
 		return compact( 'email', 'error_message', 'success', 'nonce_action' );
 	}
 
-	$email = trim( wp_unslash( $_POST['email'] ) );
-
-	$requesting_user = false;
-	if ( is_user_logged_in() ) {
-		$requesting_user = wp_get_current_user()->user_login;
-	}
+	// phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+	$email           = trim( wp_unslash( $_POST['email'] ) );
+	$requesting_user = is_user_logged_in() ? wp_get_current_user()->user_login : false;
+	$email_user      = get_user_by( 'email', $email );
 
 	// Currently only enabled for special accounts.
-	if ( 'export' === $type && ( ! is_user_logged_in() || ! wporg_user_has_restricted_password() ) ) {
+	if ( 'export' === $type && ( ! is_user_logged_in() || ! function_exists( 'wporg_user_has_restricted_password' ) || ! wporg_user_has_restricted_password() ) ) {
 		$error_message = 'This form is currently unavailable.';
-	} else
-
-	if ( ! reCAPTCHA\check_status() ) {
+	} elseif ( ! reCAPTCHA\check_status() ) {
 		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
 	} elseif (
 		is_user_logged_in() &&
-		! wp_verify_nonce( $_POST['_wpnonce'], $nonce_action )
+		! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), $nonce_action )
 	) {
 		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
-
 	} elseif (
 		// Check if a user account exists for this email before processing.
-		false != ( $email_user = get_user_by( 'email', $email ) ) &&
-		$email_user->user_login !== $requesting_user
+		false !== $email_user && $email_user->user_login !== $requesting_user
 	) {
 		if ( is_user_logged_in() ) {
 			$error_message = sprintf(
@@ -51,11 +60,10 @@ function privacy_process_request( $type ) {
 				wp_login_url( get_permalink() )
 			);
 		}
-
 	} else {
-		if ( 'export' == $type ) {
+		if ( 'export' === $type ) {
 			$api_method = 'create-data-export-request';
-		} elseif ( 'erase' == $type ) {
+		} elseif ( 'erase' === $type ) {
 			$api_method = 'create-account-erasure-request';
 		}
 
@@ -72,15 +80,15 @@ function privacy_process_request( $type ) {
 		if ( is_wp_error( $api_request ) ) {
 			$error_message = $api_request->get_error_message();
 
-			if ( 'duplicate_request' == $api_request->get_error_code() ) {
+			if ( 'duplicate_request' === $api_request->get_error_code() ) {
 				// TODO This should never have to be displayed to an end user. See API for details.
 				$error_message = esc_html__( 'A request for this email address already exists. Please check your spam folder for your confirmation email.', 'wporg' );
 
-			} elseif ( 'invalid_identifier' == $api_request->get_error_code() ) {
+			} elseif ( 'invalid_identifier' === $api_request->get_error_code() ) {
 				$error_message = esc_html__( 'The provided email was invalid. Please check the address and try again.', 'wporg' );
 
 			}
-		} elseif ( !empty( $api_request['created'] ) ) {
+		} elseif ( ! empty( $api_request['created'] ) ) {
 			$success = true;
 		}
 	}

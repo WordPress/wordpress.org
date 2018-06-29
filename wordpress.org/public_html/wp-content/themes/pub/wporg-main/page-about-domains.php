@@ -22,7 +22,7 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
-// See inc/page-meta-descriptions.php for the meta description for this page.
+/* See inc/page-meta-descriptions.php for the meta description for this page.*/
 
 get_header( 'child-page' );
 the_post();
@@ -53,7 +53,6 @@ the_post();
 					<p><?php esc_html_e( 'If they&#8217;re not WordPress.com, WordPress.net, WordPress.org, WordPress.tv, or WordPressFoundation.org, they&#8217;re not allowed, and you should contact the owner with a pointer to this page. We see this most frequently with spammy sites distributing plugins and themes with malware in them, which you probably don&#8217;t want to be associated with.', 'wporg' ); ?></p>
 				</section>
 			</div><!-- .entry-content -->
-
 		</article><!-- #post-## -->
 
 	</main><!-- #main -->
