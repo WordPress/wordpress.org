@@ -32,24 +32,26 @@ function release_row( $release ) {
 /**
  * Retrieve the localised downloads link.
  *
- * Uses the 'txt-download' page if exists, falling back to the 'releases' page for older sites, and finally, the english downloads page.
+ * Uses the 'txt-download' page if exists, falling back to the 'releases' page for older sites,
+ * and finally, the english downloads page.
  */
 function get_downloads_url() {
 	static $downloads_url = null;
 
 	if ( is_null( $downloads_url ) ) {
-		$releases_page = get_page_by_path( 'txt-download' );
+		$downloads_url  = 'https://wordpress.org/downloads/';
+		$downloads_page = get_page_by_path( 'txt-download' );
 
-		if ( ! $releases_page ) {
-			$releases_page = get_page_by_path( 'releases' );
+		if ( ! $downloads_page ) {
+			$downloads_page = get_page_by_path( 'download' );
 		}
 
-		if ( $releases_page ) {
-			$downloads_url = get_permalink( $releases_page );
+		if ( ! $downloads_page ) {
+			$downloads_page = get_page_by_path( 'releases' );
 		}
 
-		if ( ! $downloads_url ) {
-			$downloads_url = 'https://wordpress.org/downloads/';
+		if ( $downloads_page ) {
+			$downloads_url = get_permalink( $downloads_page );
 		}
 	}
 
