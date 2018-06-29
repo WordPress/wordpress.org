@@ -32,7 +32,7 @@ class Trac implements User {
 	protected $commit_template = 'https://%s.trac.wordpress.org/changeset/%s';
 	protected $commit_info_template = 'https://%s.trac.wordpress.org/log/?rev=%s&format=changelog&limit=1&verbose=on';
 
-	const min_digits = 2;
+	const min_digits = 3;
 	const max_digits = 7;
 
 	static protected $shorthands = array(
