@@ -80,7 +80,7 @@ the_post();
 
 					<?php if ( $error_message ) : ?>
 						<div class="notice notice-error notice-alt">
-							<p><?php echo esc_html( $error_message ); ?></p>
+							<p><?php echo wp_kses_post( $error_message ); ?></p>
 						</div>
 					<?php elseif ( $success ) : ?>
 					<div class="notice notice-success notice-alt">
