@@ -169,6 +169,23 @@ function child_page_templates( $templates ) {
 }
 add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\child_page_templates' );
 
+/**
+ * Filter page templates that require `$rosetta` to be available.
+ *
+ * @global Rosetta_Sites $rosetta
+ *
+ * @param array $post_templates Array of page templates. Keys are filenames,
+ *                              values are translated names.
+ */
+function rosetta_page_templates( $post_templates ) {
+	if ( empty( $GLOBALS['rosetta'] ) ) {
+		unset( $post_templates['page-releases.php'] );
+	}
+
+	return $post_templates;
+}
+add_filter( 'theme_page_templates', __NAMESPACE__ . '\rosetta_page_templates' );
+
 function use_opengraph_data_for_embed_template() {
 	global $post;
 	if ( 'page' != $post->post_type || ! $post->page_template || 'default' == $post->page_template ) {
