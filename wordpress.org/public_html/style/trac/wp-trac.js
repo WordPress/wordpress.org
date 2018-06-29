@@ -688,7 +688,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						}
 					}).atwho({
 						at:         '[att',
-						insertTpl:  '${atwho-at}achment:${name}]',
+						insertTpl:  '${atwho-at}achment:"${name}"]',
 						displayTpl: '<li>${display}</li>',
 						data:       this.getAttachments(),
 						callbacks: {
