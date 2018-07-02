@@ -63,8 +63,8 @@ class Validator {
 
 		// Fatal errors.
 		if ( empty( $readme->name ) ) {
-			/* translators: %s: 'Plugin Name' section title */
-			$errors[] = sprintf( __( 'No plugin name detected. Plugin names look like: %s', 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' );
+			/* translators: 1: 'Plugin Name' section title, 2: 'Plugin Name' */
+			$errors[] = sprintf( __( 'No plugin name detected. Plugin names look like: %1$s. Please change %2$s to reflect the actual name of your plugin.', 'wporg-plugins' ), '<code>=== Plugin Name ===</code>', '<code>Plugin Name</code>' );
 		}
 
 		// Warnings.
