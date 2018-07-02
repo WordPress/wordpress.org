@@ -21,7 +21,7 @@ get_template_part( 'header', 'wporg' );
 	<div id="content" class="site-content row gutters">
 		<header id="masthead" class="site-header col-12" role="banner">
 			<div class="site-branding">
-				<p class="site-title"><a href="<?php echo esc_url( home_url( '/about/' ) ); ?>" rel="bookmark"><?php echo esc_html_x( 'About', 'Page title', 'wporg' ); ?></a></p>
+				<p class="site-title"><a href="<?php echo esc_url( get_permalink( get_post()->post_parent ) ); ?>" rel="bookmark"><?php echo get_the_title( get_post()->post_parent ); ?></a></p>
 
 				<nav id="site-navigation" class="main-navigation" role="navigation">
 					<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg' ); ?>"></button>

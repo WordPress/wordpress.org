@@ -192,6 +192,25 @@ function use_opengraph_data_for_embed_template() {
 add_action( 'embed_head', __NAMESPACE__ . '\use_opengraph_data_for_embed_template' );
 
 /**
+ * Customizes the parent page title when rendering as a site title on child pages.
+ *
+ * Example: 'About' on all child pages of the About page.
+ *
+ * @param string $title   Post Title.
+ * @param int    $post_id Post ID.
+ * @return string
+ */
+function parent_page_title( $title, $post_id ) {
+	$title_post = get_post( $post_id );
+	if ( 'about' === $title_post->post_name && get_post()->post_name !== $title_post->post_name ) {
+		$title = esc_html_x( 'About', 'Page title', 'wporg' );
+	}
+
+	return $title;
+}
+add_filter( 'the_title', __NAMESPACE__ . '\parent_page_title', 11, 2 );
+
+/**
  * Custom template tags.
  */
 require_once __DIR__ . '/inc/template-tags.php';
