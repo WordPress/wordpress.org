@@ -15,16 +15,25 @@ namespace WordPressdotorg\MainTheme;
  * @param array $release Release to be processed.
  */
 function release_row( $release ) {
+	$is_rosetta = defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK;
 	?>
 	<tr>
 		<td><?php echo esc_html( $release['version'] ); ?></td>
 		<td><?php echo esc_html( date_i18n( get_option( 'date_format' ), $release['builton'] ) ); ?></td>
 		<td><a href="<?php echo esc_url( $release['zip_url'] ); ?>">zip</a>
-			<small>(<a href="<?php echo esc_url( $release['zip_url'] . '.md5' ); ?>">md5</a>)</small>
+			<small>(<a href="<?php echo esc_url( $release['zip_url'] . '.md5' ); ?>">md5</a><?php if ( ! $is_rosetta ) : ?> | <a href="<?php echo esc_url( $release['zip_url'] . '.sha1' ); ?>">sha1</a><?php endif; ?>)</small>
 		</td>
 		<td><a href="<?php echo esc_url( $release['targz_url'] ); ?>">tar.gz</a>
-			<small>(<a href="<?php echo esc_url( $release['targz_url'] . '.md5' ); ?>">md5</a>)</small>
+			<small>(<a href="<?php echo esc_url( $release['targz_url'] . '.md5' ); ?>">md5</a><?php if ( ! $is_rosetta ) : ?> | <a href="<?php echo esc_url( $release['targz_url'] . '.sha1' ); ?>">sha1</a><?php endif; ?>)</small>
 		</td>
+		<?php if ( ! $is_rosetta ) : ?>
+			<td>
+				<?php if ( ! empty( $release['iis_url'] ) ) : ?>
+					<a href="<?php echo esc_url( $release['iis_url'] ); ?>">IIS zip</a>
+					<small>(<a href="<?php echo esc_url( $release['iis_url'] . '.md5' ); ?>">md5</a> | <a href="<?php echo esc_url( $release['iis_url'] . '.sha1' ); ?>">sha1</a>)</small>
+				<?php endif; ?>
+			</td>
+		<?php endif; ?>
 	</tr>
 	<?php
 }

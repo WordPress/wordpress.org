@@ -27,6 +27,12 @@ body.page {
 		}
 	}
 
+	@include breakpoint( $ms-breakpoint ) {
+		.site-header + .site-main .entry-title {
+			padding: initial;
+		}
+	}
+
 	.entry-content,
 	.entry-footer {
 		margin: 0 auto;
