@@ -52,6 +52,9 @@ function get_whitelist() {
 			'danieltj',
 			'desrosj',
 			'jeffpaul',
+			'jon_bossenger',
+			'joshuawold',
+			'pbiron',
 			'welcher',
 		) ),
 		'core-bootstrap' => array(
