@@ -45,7 +45,7 @@ class HelpHub_Contributors_Public {
 	 */
 	public function __construct( $helphub_contributors, $version ) {
 		$this->helphub_contributors = $helphub_contributors;
-		$this->version = $version;
+		$this->version              = $version;
 		add_action( 'wp_enqueue_scripts', array( $this, 'public_enqueue_scripts' ) );
 		add_filter( 'the_content', array( $this, 'show_contributors' ) );
 	}
@@ -148,6 +148,7 @@ class HelpHub_Contributors_Public {
 					else :
 
 						// Display message if no user is found with provided username.
+						/* translators: %s: Username, do not translate. */
 						$contributors_items .= '<div class="contributor contributor-not-found"><p>' . sprintf( __( '%s is not a valid username.', 'wporg-forums' ), '<strong>' . $contributor . '</strong>' ) . '</p></div>';
 
 					endif; // is_object( $contributor_object )

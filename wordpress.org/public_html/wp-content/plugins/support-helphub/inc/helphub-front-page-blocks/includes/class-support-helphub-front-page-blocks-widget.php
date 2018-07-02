@@ -52,10 +52,11 @@ class Support_HelpHub_Front_Page_Blocks_Widget extends WP_Widget {
 	public function update( $new_instance, $old_instance ) {
 		$save_instance = array();
 
-		$save_instance['icon']  = ( ! empty( $new_instance['icon'] ) ? strip_tags( $new_instance['icon'] ) : '' );
-		$save_instance['title'] = ( ! empty( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '' );
+		$save_instance['icon']        = ( ! empty( $new_instance['icon'] ) ? strip_tags( $new_instance['icon'] ) : '' );
+		$save_instance['title']       = ( ! empty( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '' );
 		$save_instance['description'] = ( ! empty( $new_instance['description'] ) ? strip_tags( $new_instance['description'] ) : '' );
-		$save_instance['menu'] = ( ! empty( $new_instance['menu'] ) ? strip_tags( $new_instance['menu'] ) : '' );
+		$save_instance['categoryid']  = ( ! empty( $new_instance['categoryid'] ) ? strip_tags( $new_instance['categoryid'] ) : '' );
+		$save_instance['menu']        = ( ! empty( $new_instance['menu'] ) ? strip_tags( $new_instance['menu'] ) : '' );
 
 		return $save_instance;
 	}

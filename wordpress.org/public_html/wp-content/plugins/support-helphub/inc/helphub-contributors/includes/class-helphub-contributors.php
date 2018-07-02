@@ -52,7 +52,7 @@ class HelpHub_Contributors {
 	 */
 	public function __construct() {
 		$this->helphub_contributors = 'helphub-contributors';
-		$this->version = '1.0.0';
+		$this->version              = '1.0.0';
 		add_action( 'init', array( $this, 'set_locale' ) );
 		$this->required_dependencies();
 		$this->admin_hooks();
@@ -67,7 +67,8 @@ class HelpHub_Contributors {
 	 * @access public
 	 */
 	public function set_locale() {
-		load_plugin_textdomain( $this->get_helphub_contributors(), false, dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
+		load_plugin_textdomain(
+			$this->get_helphub_contributors(), false, dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
 	}
 

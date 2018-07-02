@@ -111,8 +111,8 @@ final class HelpHub_Codex_Languages {
 	 */
 	public function codex_languages_func( $atts ) {
 		wp_enqueue_style( 'helphub-codex-languages-style', $this->plugin_url . 'assets/css/codex-languages.css', array(), '1.0.0' );
-		$str = '<p class="language-links"><a href="https://codex.wordpress.org/Multilingual_Codex" title="Multilingual Codex" class="mw-redirect">Languages</a>: <strong class="selflink">English</strong>';
-		$lang_table = array(
+		$str              = '<p class="language-links"><a href="https://codex.wordpress.org/Multilingual_Codex" title="Multilingual Codex" class="mw-redirect">Languages</a>: <strong class="selflink">English</strong>';
+		$lang_table       = array(
 			array( 'Arabic', 'العربية', 'ar_codex', 'https://codex.wordpress.org/ar:%1s' ),
 			array( 'Azerbaijani', 'Azərbaycanca', 'azr_codex', 'https://codex.wordpress.org/azr:%1s' ),
 			array( 'Azeri', 'آذری', 'azb_codex', 'https://codex.wordpress.org/azb:%1s' ),
@@ -170,7 +170,7 @@ final class HelpHub_Codex_Languages {
 			$shortcode_params[ $lang[2] ] = null;
 		}
 		$args = shortcode_atts( $shortcode_params, $atts );
-		$i = 0;
+		$i    = 0;
 		foreach ( $args as $key => $value ) {
 			if ( null != $value ) {
 				$str .= sprintf( ' &bull; <a class="external text" href="' . $lang_table[ $i ][3] . '">' . $lang_table[ $i ][1] . '</a>', $value );

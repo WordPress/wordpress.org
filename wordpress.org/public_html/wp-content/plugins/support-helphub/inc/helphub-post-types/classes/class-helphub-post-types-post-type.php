@@ -98,10 +98,12 @@ class HelpHub_Post_Types_Post_Type {
 			add_filter( 'post_updated_messages', array( $this, 'updated_messages' ) );
 
 			if ( 'edit.php' === $pagenow && isset( $_GET['post_type'] ) && $this->post_type === $_GET['post_type'] ) { // WPCS: input var ok; CSRF ok.
-				add_filter( 'manage_edit-' . $this->post_type . '_columns', array(
-					$this,
-					'register_custom_column_headings',
-				), 10, 1 );
+				add_filter(
+					'manage_edit-' . $this->post_type . '_columns', array(
+						$this,
+						'register_custom_column_headings',
+					), 10, 1
+				);
 				add_action( 'manage_posts_custom_column', array( $this, 'register_custom_columns' ), 10, 2 );
 			}
 		}
@@ -300,15 +302,19 @@ class HelpHub_Post_Types_Post_Type {
 	 */
 	public function meta_box_setup() {
 		if ( 'post' === $this->post_type ) {
-			add_meta_box( $this->post_type . '-display', __( 'Display Settings', 'wporg-forums' ), array(
-				$this,
-				'meta_box_content',
-			), $this->post_type, 'normal', 'high' );
+			add_meta_box(
+				$this->post_type . '-display', __( 'Display Settings', 'wporg-forums' ), array(
+					$this,
+					'meta_box_content',
+				), $this->post_type, 'normal', 'high'
+			);
 		} elseif ( 'helphub_version' === $this->post_type ) {
-			add_meta_box( $this->post_type . '-version-meta', __( 'Display Settings', 'wporg-forums' ), array(
-				$this,
-				'meta_box_version_content',
-			), $this->post_type, 'normal', 'high' );
+			add_meta_box(
+				$this->post_type . '-version-meta', __( 'Display Settings', 'wporg-forums' ), array(
+					$this,
+					'meta_box_version_content',
+				), $this->post_type, 'normal', 'high'
+			);
 		}
 	} // End meta_box_setup()
 
@@ -369,13 +375,13 @@ class HelpHub_Post_Types_Post_Type {
 				switch ( $v['type'] ) {
 					case 'hidden':
 						$field = '<input name="' . esc_attr( $k ) . '" type="hidden" id="' . esc_attr( $k ) . '" value="' . esc_attr( $data ) . '" />';
-						$html  .= '<tr valign="top">' . $field . "\n";
-						$html  .= '</tr>' . "\n";
+						$html .= '<tr valign="top">' . $field . "\n";
+						$html .= '</tr>' . "\n";
 						break;
 					case 'text':
 					case 'url':
 						$field = '<input name="' . esc_attr( $k ) . '" type="text" id="' . esc_attr( $k ) . '" class="regular-text" value="' . esc_attr( $data ) . '" />';
-						$html  .= '<tr valign="top"><th><label for="' . esc_attr( $k ) . '">' . $v['name'] . '</label></th><td>' . $field . "\n";
+						$html .= '<tr valign="top"><th><label for="' . esc_attr( $k ) . '">' . $v['name'] . '</label></th><td>' . $field . "\n";
 						if ( isset( $v['description'] ) ) {
 							$html .= '<p class="description">' . $v['description'] . '</p>' . "\n";
 						}
@@ -383,7 +389,7 @@ class HelpHub_Post_Types_Post_Type {
 						break;
 					case 'textarea':
 						$field = '<textarea name="' . esc_attr( $k ) . '" id="' . esc_attr( $k ) . '" class="large-text">' . esc_attr( $data ) . '</textarea>';
-						$html  .= '<tr valign="top"><th><label for="' . esc_attr( $k ) . '">' . $v['name'] . '</label></th><td>' . $field . "\n";
+						$html .= '<tr valign="top"><th><label for="' . esc_attr( $k ) . '">' . $v['name'] . '</label></th><td>' . $field . "\n";
 						if ( isset( $v['description'] ) ) {
 							$html .= '<p class="description">' . $v['description'] . '</p>' . "\n";
 						}
@@ -391,10 +397,12 @@ class HelpHub_Post_Types_Post_Type {
 						break;
 					case 'editor':
 						ob_start();
-						wp_editor( $data, $k, array(
-							'media_buttons' => false,
-							'textarea_rows' => 10,
-						) );
+						wp_editor(
+							$data, $k, array(
+								'media_buttons' => false,
+								'textarea_rows' => 10,
+							)
+						);
 						$field = ob_get_contents();
 						ob_end_clean();
 						$html .= '<tr valign="top"><th><label for="' . esc_attr( $k ) . '">' . $v['name'] . '</label></th><td>' . $field . "\n";
@@ -415,7 +423,7 @@ class HelpHub_Post_Types_Post_Type {
 							$data_atts .= sprintf( 'data-library="%s" ', esc_attr( $v['media-frame']['library'] ) );
 						}
 
-						$field = '<input name="' . esc_attr( $k ) . '" type="file" id="' . esc_attr( $k ) . '" class="regular-text helphub-upload-field" />';
+						$field  = '<input name="' . esc_attr( $k ) . '" type="file" id="' . esc_attr( $k ) . '" class="regular-text helphub-upload-field" />';
 						$field .= '<button id="' . esc_attr( $k ) . '" class="helphub-upload button" ' . $data_atts . '>' . $v['label'] . '</button>';
 						$html  .= '<tr valign="top"><th><label for="' . esc_attr( $k ) . '">' . $v['name'] . '</label></th><td>' . $field . "\n";
 						if ( isset( $v['description'] ) ) {
@@ -476,7 +484,7 @@ class HelpHub_Post_Types_Post_Type {
 							$data = time();
 						}
 						$field = '<input name="' . esc_attr( $k ) . '" type="date" id="' . esc_attr( $k ) . '" class="helphub-meta-date" value="' . esc_attr( date_i18n( 'F d, Y', $data ) ) . '" />';
-						$html  .= '<tr valign="top"><th><label for="' . esc_attr( $k ) . '">' . $v['name'] . '</label></th><td>' . $field . "\n";
+						$html .= '<tr valign="top"><th><label for="' . esc_attr( $k ) . '">' . $v['name'] . '</label></th><td>' . $field . "\n";
 						if ( isset( $v['description'] ) ) {
 							$html .= '<p class="description">' . $v['description'] . '</p>' . "\n";
 						}

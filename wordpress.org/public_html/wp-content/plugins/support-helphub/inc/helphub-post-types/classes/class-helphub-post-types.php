@@ -126,15 +126,21 @@ final class HelpHub_Post_Types {
 		require_once( dirname( __FILE__ ) . '/class-helphub-post-types-post-type.php' );
 		require_once( dirname( __FILE__ ) . '/class-helphub-post-types-taxonomy.php' );
 
-		$this->post_types['post']               = new HelpHub_Post_Types_Post_Type( 'post', __( 'Post', 'wporg-forums' ), __( 'Posts', 'wporg-forums' ), array(
-			'menu_icon' => 'dashicons-post',
-		) );
-		$this->post_types['helphub_article']    = new HelpHub_Post_Types_Post_Type( 'helphub_article', __( 'Article', 'wporg-forums' ), __( 'Articles', 'wporg-forums' ), array(
-			'menu_icon' => 'dashicons-media-document',
-		) );
-		$this->post_types['helphub_version']    = new HelpHub_Post_Types_Post_Type( 'helphub_version', __( 'WordPress Version', 'wporg-forums' ), __( 'WordPress Versions', 'wporg-forums' ), array(
-			'menu_icon' => 'dashicons-wordpress',
-		) );
+		$this->post_types['post']            = new HelpHub_Post_Types_Post_Type(
+			'post', __( 'Post', 'wporg-forums' ), __( 'Posts', 'wporg-forums' ), array(
+				'menu_icon' => 'dashicons-post',
+			)
+		);
+		$this->post_types['helphub_article'] = new HelpHub_Post_Types_Post_Type(
+			'helphub_article', __( 'Article', 'wporg-forums' ), __( 'Articles', 'wporg-forums' ), array(
+				'menu_icon' => 'dashicons-media-document',
+			)
+		);
+		$this->post_types['helphub_version'] = new HelpHub_Post_Types_Post_Type(
+			'helphub_version', __( 'WordPress Version', 'wporg-forums' ), __( 'WordPress Versions', 'wporg-forums' ), array(
+				'menu_icon' => 'dashicons-wordpress',
+			)
+		);
 
 		/* Post Types - End */
 
@@ -173,19 +179,19 @@ final class HelpHub_Post_Types {
 	/**
 	 * Load the localisation file.
 	 *
-	 * @access  public
-	 * @since   1.0.0
+	 * @access public
+	 * @since 1.0.0
 	 */
 	public function load_plugin_textdomain() {
 		load_plugin_textdomain( 'wporg-forums', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	} // End load_plugin_textdomain()
 
 	/**
-	* Make sure category archive actually loads
-	*
-	* @access  public
-	* @since   1.1.0
-	*/
+	 * Make sure category archive actually loads
+	 *
+	 * @access public
+	 * @since 1.1.0
+	 */
 	public function fix_archive_category( WP_Query $query ) {
 		if ( ! is_admin() && is_category() && $query->is_main_query() ) {
 			$query->set( 'post_type', 'helphub_article' );
@@ -196,8 +202,8 @@ final class HelpHub_Post_Types {
 	 * Enqueue post type admin Styles.
 	 *
 	 * @access public
-	 * @since   1.0.0
-	 * @return   void
+	 * @since 1.0.0
+	 * @return void
 	 */
 	public function enqueue_admin_styles() {
 		global $pagenow;
@@ -212,14 +218,16 @@ final class HelpHub_Post_Types {
 				wp_enqueue_style( 'jquery-ui-datepicker' );
 			endif;
 		endif;
-		wp_localize_script( 'helphub-post-types-admin', 'HelphubAdmin',
+		wp_localize_script(
+			'helphub-post-types-admin', 'HelphubAdmin',
 			array(
 				'default_title'  => __( 'Upload', 'wporg-forums' ),
 				'default_button' => __( 'Select this', 'wporg-forums' ),
 			)
 		);
 
-		wp_localize_script( 'helphub-post-types-gallery', 'HelphubGallery',
+		wp_localize_script(
+			'helphub-post-types-gallery', 'HelphubGallery',
 			array(
 				'gallery_title'  => __( 'Add Images to Product Gallery', 'wporg-forums' ),
 				'gallery_button' => __( 'Add to gallery', 'wporg-forums' ),

@@ -222,6 +222,10 @@ class Table_Of_Contents_Lite {
 	 */
 	public function add_toc( $content ) {
 
+		if ( ! is_singular() ) {
+			return $content;
+		}
+
 		$toc = '';
 
 		$items = $this->get_tags_in_content( 'h([1-4])', $content ); // returns the h1-h4 tags inside the_content.
@@ -235,10 +239,10 @@ class Table_Of_Contents_Lite {
 
 		if ( $items ) {
 			$contents_header = sprintf( 'h%s', $items[0][2] );
-			$toc .= '<div class="table-of-contents">';
-			$toc .= '<h2 class="toc-title">' . __( 'Topics', 'wporg-forums' ) . '</h2>';
-			$toc .= '<ul class="items">';
-			$last_item = false;
+			$toc            .= '<div class="table-of-contents">';
+			$toc            .= '<h2 class="toc-title">' . __( 'Topics', 'wporg-forums' ) . '</h2>';
+			$toc            .= '<ul class="items">';
+			$last_item       = false;
 			foreach ( $items as $item ) {
 				if ( $last_item ) {
 					if ( $last_item < $item[2] ) {
@@ -250,7 +254,7 @@ class Table_Of_Contents_Lite {
 					}
 				}
 				$last_item = $item[2];
-				$toc       .= sprintf( '<li><a href="#%1s">%2s</a>', sanitize_title_with_dashes( $item[3] ), $item[3] );
+				$toc      .= sprintf( '<li><a href="#%1s">%2s</a>', sanitize_title_with_dashes( $item[3] ), $item[3] );
 			}
 			$toc .= '</ul></div>';
 		}

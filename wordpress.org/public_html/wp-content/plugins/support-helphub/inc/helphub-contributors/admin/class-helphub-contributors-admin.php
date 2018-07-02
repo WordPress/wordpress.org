@@ -46,7 +46,7 @@ class Helphub_Contributors_Admin {
 	public function __construct( $helphub_contributors, $version ) {
 
 		$this->helphub_contributors = $helphub_contributors;
-		$this->version = $version;
+		$this->version              = $version;
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'add_contributors' ) );

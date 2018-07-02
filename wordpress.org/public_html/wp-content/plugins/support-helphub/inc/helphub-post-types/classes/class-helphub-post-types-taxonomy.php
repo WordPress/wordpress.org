@@ -80,9 +80,9 @@ class HelpHub_Post_Types_Taxonomy {
 	 */
 	public function __construct( $post_type = array(), $token = 'thing-category', $singular = '', $plural = '', $args = array() ) {
 		$this->post_type = $post_type;
-		$this->token = esc_attr( $token );
-		$this->singular = esc_html( $singular );
-		$this->plural = esc_html( $plural );
+		$this->token     = esc_attr( $token );
+		$this->singular  = esc_html( $singular );
+		$this->plural    = esc_html( $plural );
 
 		if ( '' === $this->singular ) {
 			$this->singular = __( 'Category', 'wporg-forums' );
@@ -105,15 +105,15 @@ class HelpHub_Post_Types_Taxonomy {
 	 */
 	private function _get_default_args() {
 		return array(
-			'labels'                => $this->_get_default_labels(),
-			'public'                => true,
-			'hierarchical'          => true,
-			'show_ui'               => true,
-			'show_admin_column'     => true,
-			'query_var'             => true,
-			'show_in_nav_menus'     => false,
-			'show_tagcloud'         => false,
-			'rewrite'               => array(
+			'labels'            => $this->_get_default_labels(),
+			'public'            => true,
+			'hierarchical'      => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'query_var'         => true,
+			'show_in_nav_menus' => false,
+			'show_tagcloud'     => false,
+			'rewrite'           => array(
 				'slug' => str_replace( 'helphub_', '', esc_attr( $this->token ) ),
 			),
 		);
@@ -130,22 +130,23 @@ class HelpHub_Post_Types_Taxonomy {
 		return array(
 			'name'                => sprintf( _x( '%s', 'taxonomy general name', 'wporg-forums' ), $this->plural ), /* @codingStandardsIgnoreLine */
 			'singular_name'       => sprintf( _x( '%s', 'taxonomy singular name', 'wporg-forums' ), $this->singular ), /* @codingStandardsIgnoreLine */
-			'search_items'        => sprintf( __( 'Search %s', 'wporg-forums' ), $this->plural ),
+			/* translators: %s: Plural of the search label. */
+			'search_items'      => sprintf( __( 'Search %s', 'wporg-forums' ), $this->plural ),
 			/* translators: %s: Plural name of the post type. */
-			'all_items'           => sprintf( __( 'All %s', 'wporg-forums' ), $this->plural ),
+			'all_items'         => sprintf( __( 'All %s', 'wporg-forums' ), $this->plural ),
 			/* translators: %s: Post type name. */
-			'parent_item'         => sprintf( __( 'Parent %s', 'wporg-forums' ), $this->singular ),
+			'parent_item'       => sprintf( __( 'Parent %s', 'wporg-forums' ), $this->singular ),
 			/* translators: %s: Post type name. */
-			'parent_item_colon'   => sprintf( __( 'Parent %s:', 'wporg-forums' ), $this->singular ),
+			'parent_item_colon' => sprintf( __( 'Parent %s:', 'wporg-forums' ), $this->singular ),
 			/* translators: %s: Post type name. */
-			'edit_item'           => sprintf( __( 'Edit %s', 'wporg-forums' ), $this->singular ),
+			'edit_item'         => sprintf( __( 'Edit %s', 'wporg-forums' ), $this->singular ),
 			/* translators: %s: Post type name. */
-			'update_item'         => sprintf( __( 'Update %s', 'wporg-forums' ), $this->singular ),
+			'update_item'       => sprintf( __( 'Update %s', 'wporg-forums' ), $this->singular ),
 			/* translators: %s: Post type name. */
-			'add_new_item'        => sprintf( __( 'Add New %s', 'wporg-forums' ), $this->singular ),
+			'add_new_item'      => sprintf( __( 'Add New %s', 'wporg-forums' ), $this->singular ),
 			/* translators: %s: Post type name. */
-			'new_item_name'       => sprintf( __( 'New %s Name', 'wporg-forums' ), $this->singular ),
-			'menu_name'           => $this->plural,
+			'new_item_name'     => sprintf( __( 'New %s Name', 'wporg-forums' ), $this->singular ),
+			'menu_name'         => $this->plural,
 		);
 	} // End _get_default_labels()
 
