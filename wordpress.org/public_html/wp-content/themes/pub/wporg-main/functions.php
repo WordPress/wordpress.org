@@ -198,7 +198,7 @@ add_action( 'embed_head', __NAMESPACE__ . '\use_opengraph_data_for_embed_templat
  */
 function parent_page_title( $title, $post_id ) {
 	$title_post = get_post( $post_id );
-	if ( 'about' === $title_post->post_name && get_post()->post_name !== $title_post->post_name ) {
+	if ( is_page() && 'about' === $title_post->post_name && get_post()->post_name !== $title_post->post_name ) {
 		$title = esc_html_x( 'About', 'Page title', 'wporg' );
 	}
 
