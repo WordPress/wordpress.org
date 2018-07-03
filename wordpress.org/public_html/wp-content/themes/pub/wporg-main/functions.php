@@ -84,12 +84,8 @@ function scripts() {
 		] );
 	}
 
-	if ( is_page() ) {
-		$page = get_queried_object();
-
-		if ( $page->post_parent && 'about' === get_post( $page->post_parent )->post_name ) {
-			wp_enqueue_script( 'wporg-navigation', get_theme_file_uri( '/js/navigation.js' ), [], '20151215', true );
-		}
+	if ( is_page() && get_queried_object()->post_parent ) {
+		wp_enqueue_script( 'wporg-navigation', get_theme_file_uri( '/js/navigation.js' ), [], '20151215', true );
 	}
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
