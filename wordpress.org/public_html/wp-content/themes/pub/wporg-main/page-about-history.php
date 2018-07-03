@@ -32,21 +32,41 @@ the_post();
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
-				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
+				<?php the_title( '<h1 class="entry-title col-8">', '</h1>' ); ?>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<p>We&#8217;ve been working on a new book about the history of WordPress drawing on dozens of interviews with the original folks involved and extensive research. It&#8217;s not ready yet, but for the tenth anniversary of WordPress we&#8217;d like to make a chapter available, <em>On forking WordPress, forks in general, early WordPress, and the community</em>, which you can download below in the following formats:</p>
+					<p><?php echo wp_kses_post( __( 'We&#8217;ve been working on a new book about the history of WordPress drawing on dozens of interviews with the original folks involved and extensive research. It&#8217;s not ready yet, but for the tenth anniversary of WordPress we&#8217;d like to make a chapter available, <em>On forking WordPress, forks in general, early WordPress, and the community</em>, which you can download below in the following formats:', 'wporg' ) ); ?></p>
 
 					<ul>
-						<li><a href="chapter3.epub">Chapter 3 - EPUB</a></li>
-						<li><a href="chapter3.mobi">Chapter 3 - MOBI</a></li>
-						<li><a href="chapter3.pdf">Chapter 3 - PDF</a></li>
+						<li>
+							<a href="chapter3.epub">
+								<?php
+								/* translators: file format */
+								printf( __( 'Chapter 3 &endash; %s', 'wporg' ), 'EPUB' );
+								?>
+							</a>
+						</li>
+						<li>
+							<a href="chapter3.mobi">
+								<?php
+								/* translators: file format */
+								printf( __( 'Chapter 3 &endash; %s', 'wporg' ), 'MOBI' );
+								?>
+							</a>
+						</li>
+						<li>
+							<a href="chapter3.pdf">
+								<?php
+								/* translators: file format */
+								printf( __( 'Chapter 3 &endash; %s', 'wporg' ), 'PDF' );
+								?>
+							</a>
+						</li>
 					</ul>
 				</section>
 			</div><!-- .entry-content -->
-
 		</article><!-- #post-## -->
 
 	</main><!-- #main -->
