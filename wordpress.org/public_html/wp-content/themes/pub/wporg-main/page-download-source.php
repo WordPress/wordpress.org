@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: About -> Source Code
+ * Template Name: Download -> Source Code
  *
  * Page template for displaying the Source Code page.
  *
