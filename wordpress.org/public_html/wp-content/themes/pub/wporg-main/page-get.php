@@ -87,7 +87,7 @@ the_post();
 							<?php
 							printf(
 								/* translators: 1: URL to PHP website; 2: URL to MySQL website; 3: URL to MariaDB website */
-								wp_kses_post( __( 'We recommend servers running version 5.6 or greater of <a href="%1$s">PHP</a>/<a href="%2$s">MySQL</a> and version 10.0 or greater of <a href="%3$s">MariaDB</a>.', 'wporg' ) ),
+								wp_kses_post( __( 'We recommend servers running version 7.2 or greater of <a href="%1$s">PHP</a> and <a href="%2$s">MySQL</a> version 5.6 <em>OR</em> <a href="%3$s">MariaDB</a> version 10.0 or greater.', 'wporg' ) ),
 								esc_url( 'http://www.php.net/' ),
 								esc_url( 'https://www.mysql.com/' ),
 								esc_url( 'https://mariadb.org/' )
