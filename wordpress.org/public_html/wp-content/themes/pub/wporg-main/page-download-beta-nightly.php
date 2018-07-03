@@ -1,8 +1,8 @@
 <?php
 /**
- * Template Name: About -> Stats
+ * Template Name: Download -> Beta/Nightly
  *
- * Page template for displaying the Stats page.
+ * Page template for displaying the Beta/Nightly page.
  *
  * @package WordPressdotorg\MainTheme
  */

@@ -1,8 +1,8 @@
 <?php
 /**
- * Template Name: About -> Stats
+ * Template Name: About -> Source Code
  *
- * Page template for displaying the Stats page.
+ * Page template for displaying the Source Code page.
  *
  * @package WordPressdotorg\MainTheme
  */
