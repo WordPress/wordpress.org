@@ -244,6 +244,7 @@ class Table_Of_Contents_Lite {
 			$toc            .= '<ul class="items">';
 			$last_item       = false;
 			foreach ( $items as $item ) {
+				$last_item = $item[2];
 				if ( $last_item ) {
 					if ( $last_item < $item[2] ) {
 						$toc .= '<ul>';
@@ -253,8 +254,7 @@ class Table_Of_Contents_Lite {
 						$toc .= '</li>';
 					}
 				}
-				$last_item = $item[2];
-				$toc      .= sprintf( '<li><a href="#%1s">%2s</a>', sanitize_title_with_dashes( $item[3] ), $item[3] );
+				$toc .= sprintf( '<li><a href="#%1s">%2s</a>', sanitize_title_with_dashes( $item[3] ), $item[3] );
 			}
 			$toc .= '</ul></div>';
 		}
