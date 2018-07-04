@@ -505,8 +505,23 @@ button.fuzzy strong {
 	vertical-align: middle;
 }
 
+.strings dt {
+	margin-bottom: 2px;
+}
+
+.strings dd {
+	margin-bottom: 10px;
+}
+
 .strings textarea {
+	box-sizing: border-box;
+	max-width: 100%;
 	resize: vertical;
+	vertical-align: middle;
+}
+
+.strings .or-cancel {
+	margin-left: 5px;
 }
 
 #gp-footer {
