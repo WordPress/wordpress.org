@@ -232,7 +232,7 @@ class Payment_Activity extends Date_Range {
 			);
 		} else {
 			$extra_where = sprintf(
-				' AND blog_id NOT IN ( %s )',
+				' AND FIND_IN_SET( blog_id, %s ) = 0',
 				implode( ',', Reports\get_excluded_site_ids() )
 			);
 		}
