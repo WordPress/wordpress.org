@@ -310,3 +310,15 @@ function register_file_exports() {
 }
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\register_file_exports' );
+
+/**
+ * A list of IDs for sites that should not be included in report results.
+ *
+ * @return array
+ */
+function get_excluded_site_ids() {
+	return array(
+		206, // 2016.testing
+		928, // 2017.testing
+	);
+}

@@ -225,7 +225,17 @@ class Payment_Activity extends Date_Range {
 		$payments_table       = \Payment_Requests_Dashboard::get_table_name();
 		$reimbursements_table = Reimbursement_Requests\get_index_table_name();
 
-		$extra_where = ( $this->wordcamp_site_id ) ? ' AND blog_id = ' . (int) $this->wordcamp_site_id : '';
+		if ( $this->wordcamp_site_id ) {
+			$extra_where = sprintf(
+				' AND blog_id = %d',
+				intval( $this->wordcamp_site_id )
+			);
+		} else {
+			$extra_where = sprintf(
+				' AND blog_id NOT IN ( %s )',
+				implode( ',', Reports\get_excluded_site_ids() )
+			);
+		}
 
 		$index_query = $wpdb->prepare( "
 			(
