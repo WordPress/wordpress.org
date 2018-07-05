@@ -128,5 +128,5 @@ the_post();
 
 	</main><!-- #main -->
 
-	<?php
+<?php
 get_footer();

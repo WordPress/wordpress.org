@@ -65,7 +65,7 @@ the_post();
 					<p>
 						<?php
 						printf(
-						/* translators: URL to documentation */
+							/* translators: URL to documentation */
 							wp_kses_post( __( 'If you would like to be part of this process, the best place to start is the <a href="%s">Beta Testing Handbook</a>.', 'wporg' ) ),
 							esc_url( 'https://make.wordpress.org/core/handbook/testing/beta/' )
 						);
@@ -77,5 +77,5 @@ the_post();
 
 	</main><!-- #main -->
 
-	<?php
+<?php
 get_footer();

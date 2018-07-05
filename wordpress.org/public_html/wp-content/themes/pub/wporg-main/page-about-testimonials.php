@@ -131,7 +131,7 @@ the_post();
 						<a href="https://twitter.com/intent/tweet?button_hashtag=ilovewp" class="twitter-hashtag-button" data-size="large" data-related="WordPress" data-dnt="true">
 						<?php
 							/* translators: The #ilovewp Hashtag */
-							printf( __( 'Tweet %s', 'wporg' ), '#ilovewp' );
+							printf( esc_html__( 'Tweet %s', 'wporg' ), '#ilovewp' );
 						?>
 						</a>
 					</p>

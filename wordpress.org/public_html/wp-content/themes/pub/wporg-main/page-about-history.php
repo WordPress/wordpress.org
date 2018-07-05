@@ -44,7 +44,7 @@ the_post();
 							<a href="chapter3.epub">
 								<?php
 								/* translators: file format */
-								printf( __( 'Chapter 3 &#8211; %s', 'wporg' ), 'EPUB' );
+								printf( esc_html__( 'Chapter 3 &#8211; %s', 'wporg' ), 'EPUB' );
 								?>
 							</a>
 						</li>
@@ -52,7 +52,7 @@ the_post();
 							<a href="chapter3.mobi">
 								<?php
 								/* translators: file format */
-								printf( __( 'Chapter 3 &#8211; %s', 'wporg' ), 'MOBI' );
+								printf( esc_html__( 'Chapter 3 &#8211; %s', 'wporg' ), 'MOBI' );
 								?>
 							</a>
 						</li>
@@ -60,7 +60,7 @@ the_post();
 							<a href="chapter3.pdf">
 								<?php
 								/* translators: file format */
-								printf( __( 'Chapter 3 &#8211; %s', 'wporg' ), 'PDF' );
+								printf( esc_html__( 'Chapter 3 &#8211; %s', 'wporg' ), 'PDF' );
 								?>
 							</a>
 						</li>

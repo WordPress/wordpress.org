@@ -21,10 +21,18 @@ function release_row( $release ) {
 		<td><?php echo esc_html( $release['version'] ); ?></td>
 		<td><?php echo esc_html( date_i18n( get_option( 'date_format' ), $release['builton'] ) ); ?></td>
 		<td><a href="<?php echo esc_url( $release['zip_url'] ); ?>">zip</a>
-			<small>(<a href="<?php echo esc_url( $release['zip_url'] . '.md5' ); ?>">md5</a><?php if ( ! $is_rosetta ) : ?> | <a href="<?php echo esc_url( $release['zip_url'] . '.sha1' ); ?>">sha1</a><?php endif; ?>)</small>
+			<small>(<a href="<?php echo esc_url( $release['zip_url'] . '.md5' ); ?>">md5</a>
+				<?php if ( ! $is_rosetta ) : ?>
+					| <a href="<?php echo esc_url( $release['zip_url'] . '.sha1' ); ?>">sha1</a>
+				<?php endif; ?>)
+			</small>
 		</td>
 		<td><a href="<?php echo esc_url( $release['targz_url'] ); ?>">tar.gz</a>
-			<small>(<a href="<?php echo esc_url( $release['targz_url'] . '.md5' ); ?>">md5</a><?php if ( ! $is_rosetta ) : ?> | <a href="<?php echo esc_url( $release['targz_url'] . '.sha1' ); ?>">sha1</a><?php endif; ?>)</small>
+			<small>(<a href="<?php echo esc_url( $release['targz_url'] . '.md5' ); ?>">md5</a>
+				<?php if ( ! $is_rosetta ) : ?>
+					| <a href="<?php echo esc_url( $release['targz_url'] . '.sha1' ); ?>">sha1</a>
+				<?php endif; ?>)
+			</small>
 		</td>
 		<?php if ( ! $is_rosetta ) : ?>
 			<td>

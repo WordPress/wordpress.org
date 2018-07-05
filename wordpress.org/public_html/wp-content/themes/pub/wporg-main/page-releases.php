@@ -10,12 +10,12 @@
 namespace WordPressdotorg\MainTheme;
 
 if ( get_post()->post_parent ) {
-$GLOBALS['menu_items'] = [
-	'download/releases'     => _x( 'Releases', 'Page title', 'wporg' ),
-	'download/beta-nightly' => _x( 'Beta/Nightly', 'Page title', 'wporg' ),
-	'download/counter'      => _x( 'Counter', 'Page title', 'wporg' ),
-	'download/source'       => _x( 'Source Code', 'Page title', 'wporg' ),
-];
+	$GLOBALS['menu_items'] = [
+		'download/releases'     => _x( 'Releases', 'Page title', 'wporg' ),
+		'download/beta-nightly' => _x( 'Beta/Nightly', 'Page title', 'wporg' ),
+		'download/counter'      => _x( 'Counter', 'Page title', 'wporg' ),
+		'download/source'       => _x( 'Source Code', 'Page title', 'wporg' ),
+	];
 }
 
 // Prevent Jetpack from looking for a non-existent featured image.
