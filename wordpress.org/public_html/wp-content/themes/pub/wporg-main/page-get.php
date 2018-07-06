@@ -16,14 +16,14 @@ $hosts = [
 		'name'        => 'Bluehost',
 		'url'         => 'https://www.bluehost.com/wordpress-hosting',
 	],
-
-	/*
 	'dreamhost'     => [
-		'description' => __( '', 'wporg' ),
-		'logo'        => '',
+		'description' => __( 'Privacy-focused and dedicated to the Open Web, DreamHost provides some of the most powerful and secure managed WordPress environments in the world.', 'wporg' ),
+		'logo'        => 'images/logo-dreamhost.png',
 		'name'        => 'Dreamhost',
 		'url'         => 'https://www.dreamhost.com/wordpress-hosting/',
 	],
+
+	/*
 	'siteground'    => [
 		'description' => __( '', 'wporg' ),
 		'logo'        => '',
@@ -38,6 +38,7 @@ $hosts = [
 		'url'         => 'https://wordpress.com/',
 	],
 ];
+shuffle( $hosts );
 
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
