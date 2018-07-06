@@ -84,6 +84,11 @@ the_post();
 								?>
 							</span>
 						</a>
+						<p>
+							<a href="<?php echo esc_url( home_url( 'latest.tar.gz' ) ); ?>">
+								<?php esc_html_e( 'Download .tar.gz', 'wporg' ); ?>
+							</a>
+						</p>
 					</div>
 
 					<aside class="col-6">
