@@ -9,6 +9,36 @@
 
 namespace WordPressdotorg\MainTheme;
 
+$hosts = [
+	'bluehost'      => [
+		'description' => __( 'Our optimized hosting is fast, secure, and simple. We are turning our passion for WordPress into the most amazing managed platform for your WordPress websites ever.', 'wporg' ),
+		'logo'        => 'images/logo-bluehost.png',
+		'name'        => 'Bluehost',
+		'url'         => 'https://www.bluehost.com/wordpress-hosting',
+	],
+
+	/*
+	'dreamhost'     => [
+		'description' => __( '', 'wporg' ),
+		'logo'        => '',
+		'name'        => 'Dreamhost',
+		'url'         => 'https://www.dreamhost.com/wordpress-hosting/',
+	],
+	'siteground'    => [
+		'description' => __( '', 'wporg' ),
+		'logo'        => '',
+		'name'        => 'Siteground',
+		'url'         => 'https://www.siteground.com/wordpress-hosting.htm',
+	],
+	*/
+	'wordpress.com' => [
+		'description' => __( 'WordPress.com is the easiest way to create a free website or blog. It’s a powerful hosting platform that grows with you. We offer expert support for your WordPress site.', 'wporg' ),
+		'logo'        => 'images/logo-wpcom.png',
+		'name'        => 'WordPress.com',
+		'url'         => 'https://wordpress.com/',
+	],
+];
+
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
@@ -113,16 +143,19 @@ the_post();
 					<h2><?php esc_html_e( 'WordPress Hosting', 'wporg' ); ?></h2>
 					<p class="subheading col-8"><?php esc_html_e( 'Choosing a hosting provider can be difficult, so we have selected a few of the best to get you started.', 'wporg' ); ?></p>
 
+					<?php foreach ( array_rand( $hosts, 2 ) as $host ) : ?>
 					<div class="host col-6">
-						<img src="<?php echo esc_url( get_theme_file_uri( 'images/logo-bluehost.png' ) ); ?>" class="logo__bluehost" />
-						<p><?php esc_html_e( 'Our optimized hosting is fast, secure, and simple. We are turning our passion for WordPress into the most amazing managed platform for your WordPress websites ever.', 'wporg' ); ?></p>
-						<a href="https://www.bluehost.com/wordpress-hosting"><?php esc_html_e( 'Visit Bluehost', 'wporg' ); ?></a>
+						<img src="<?php echo esc_url( get_theme_file_uri( $hosts[ $host ]['logo'] ) ); ?>" class="logo" />
+						<p><?php echo esc_html( $hosts[ $host ]['description'] ); ?></p>
+						<a href="<?php echo esc_url( $hosts[ $host ]['url'] ); ?>">
+							<?php
+							/* translators: Name of hosting company */
+							printf( esc_html__( 'Visit %s', 'wporg' ), esc_html( $hosts[ $host ]['name'] ) );
+							?>
+						</a>
 					</div>
-					<div class="host col-6">
-						<img src="<?php echo esc_url( get_theme_file_uri( 'images/logo-wpcom.png' ) ); ?>" class="logo__wpcom" />
-						<p><?php esc_html_e( 'WordPress.com is the easiest way to create a free website or blog. It’s a powerful hosting platform that grows with you. We offer expert support for your WordPress site.', 'wporg' ); ?></p>
-						<a href="https://wordpress.com/"><?php esc_html_e( 'Visit WordPress.com', 'wporg' ); ?></a>
-					</div>
+					<?php endforeach; ?>
+
 					<a href="<?php echo esc_url( home_url( '/hosting/' ) ); ?>" class="call-to-action col-12"><?php esc_html_e( 'See all of our recommended hosts', 'wporg' ); ?></a>
 				</section>
 
