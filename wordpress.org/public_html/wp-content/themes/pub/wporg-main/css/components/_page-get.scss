@@ -40,6 +40,14 @@ body.page-get {
 		padding-top: 0;
 		text-align: center;
 
+		.call-to-action {
+			margin-top: 0;
+
+			p {
+				margin-top: 0.5rem;
+			}
+		}
+
 		@include breakpoint( 479px ) {
 			aside {
 				text-align: initial;
