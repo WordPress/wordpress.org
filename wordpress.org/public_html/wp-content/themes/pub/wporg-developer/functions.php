@@ -259,6 +259,13 @@ function register_nav_menus() {
 	) );
 }
 
+/**
+ * Filters the permalink for a wp-parser-method post.
+ *
+ * @param string   $link The post's permalink.
+ * @param \WP_Post $post The post in question.
+ * @return string
+ */
 function method_permalink( $link, $post ) {
 	global $wp_rewrite;
 
@@ -266,9 +273,11 @@ function method_permalink( $link, $post ) {
 		return $link;
 	}
 
-	list( $class, $method ) = explode( '-', $post->post_name );
-	$link = home_url( user_trailingslashit( "reference/classes/$class/$method" ) );
-	return $link;
+	$parts  = explode( '-', $post->post_name );
+	$method = array_pop( $parts );
+	$class  = implode( '-', $parts );
+
+	return home_url( user_trailingslashit( "reference/classes/$class/$method" ) );
 }
 
 function taxonomy_permalink( $link, $term, $taxonomy ) {
