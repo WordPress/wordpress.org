@@ -133,7 +133,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: plugins@wordpress.org */
-				__( 'You have already submitted a plugin called %1$s. Please be patient and wait for a review. If you have made a mistake, please email <a href="mailto:%2$s">%2$s</a> and let us know.', 'wporg-plugins' ),
+				__( 'You have already submitted a plugin called %1$s. Please be patient and wait for a review. If you have made a mistake, email <a href="mailto:%2$s">%2$s</a> and let us know.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'plugins@wordpress.org'
 			) );
@@ -143,10 +143,10 @@ class Upload_Handler {
 			$error = __( 'Error: The plugin has no description.', 'wporg-plugins' );
 
 			return new \WP_Error( 'no_description', $error . ' ' . sprintf(
-				/* translators: 1: plugin header line, 2: Codex URL */
+				/* translators: 1: plugin header line, 2: Documentation URL */
 				__( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Description:</code>',
-				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
+				__( 'https://developer.wordpress.org/plugins/the-basics/header-requirements/', 'wporg-plugins' )
 			) );
 		}
 
@@ -154,10 +154,10 @@ class Upload_Handler {
 			$error = __( 'Error: The plugin has no version.', 'wporg-plugins' );
 
 			return new \WP_Error( 'no_version', $error . ' ' . sprintf(
-				/* translators: 1: plugin header line, 2: Codex URL */
+				/* translators: 1: plugin header line, 2: Documentation URL */
 				__( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Version:</code>',
-				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
+				__( 'https://developer.wordpress.org/plugins/the-basics/header-requirements/', 'wporg-plugins' )
 			) );
 		}
 
@@ -289,7 +289,14 @@ class Upload_Handler {
 			'plugins@wordpress.org'
 		) . '</p><p>';
 
-		$message .= __( 'If there is an error in your submission, such as you require a specific plugin slug or need a different user account to own the plugin, please email us as we can correct many issues before approval.', 'wporg-plugins' );
+		$message .= __( 'If there is any error in your submission, please email us as we can correct many issues before approval.', 'wporg-plugins' ) . '</p><p>';
+
+		$message .= sprintf(
+			/* translators: 1: URL to guidelines; 2: URL to FAQs; */
+			wp_kses_post( __( 'While you&#8217;re waiting on your review, please take the time to read <a href="%1$s">the developer guidelines</a> and <a href="%2$s">the developer FAQ</a> as they will address most questions.', 'wporg-plugins' ) ),
+			'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/',
+			'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/'
+		);
 
 		// Success!
 		return $message;
@@ -408,11 +415,14 @@ class Upload_Handler {
 
 Your plugin has been given the initial slug of %2$s, however this is subject to change based on the results of your review.
 
-If there is a problem with this submission, such as an incorrect display name or slug, please reply to this email and let us know. In most cases, we can correct errors as long as the plugin has not yet been approved. Please do not submit your plugin multiple times in an attempt to correct the issue, just email us.
+If there is any problem with this submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved. For situations like an incorrect plugin slug, we are unable to change that post approval, so if you do not let us know of your requirements now, we will be unable to honor them later.
 
-Remember to read the developer guidelines: https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/ 
+We recommend you review the following links to understand the
 
-Please make sure to follow our official blog: https://make.wordpress.org/plugins/
+Guidelines: https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
+Frequently Asked Questions: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
+
+Also, make sure to follow our official blog: https://make.wordpress.org/plugins/
 
 --
 The WordPress Plugin Directory Team
