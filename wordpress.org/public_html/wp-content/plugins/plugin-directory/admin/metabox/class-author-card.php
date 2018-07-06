@@ -38,6 +38,19 @@ class Author_Card {
 			return;
 		}
 
+		$author_support_rep = get_posts( [
+			'post_type'      => 'plugin',
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'tax_query'      => [
+				[
+					'taxonomy' => 'plugin_support_reps',
+					'field'    => 'slug',
+					'terms'    => $author->user_nicename,
+				],
+			],
+		] );
+
 		$author_commit    = Tools::get_users_write_access_plugins( $author );
 		$author_plugins_q = array(
 			'author'         => $author->ID,
@@ -57,19 +70,19 @@ class Author_Card {
 			<div class="profile-details">
 				<strong><a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>"><?php echo $author->user_login; ?></a></strong>
 				<?php
-					$author_links = array(
-						sprintf(
-							'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
-							urlencode( esc_attr( $author->user_nicename ) ),
-							esc_attr__( 'Click to search Pluginrepo P2 for mentions of this author', 'wporg-plugins' )
-						),
-						sprintf(
-							'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
-							urlencode( esc_attr( $author->user_nicename ) ),
-							esc_attr__( 'Click to search Pluginrepo SupportPress for mentions of this author', 'wporg-plugins' )
-						),
-					);
-					vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_links );
+				$author_links = array(
+					sprintf(
+						'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
+						urlencode( esc_attr( $author->user_nicename ) ),
+						esc_attr__( 'Click to search Pluginrepo P2 for mentions of this author', 'wporg-plugins' )
+					),
+					sprintf(
+						'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
+						urlencode( esc_attr( $author->user_nicename ) ),
+						esc_attr__( 'Click to search Pluginrepo SupportPress for mentions of this author', 'wporg-plugins' )
+					),
+				);
+				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_links );
 				?>
 
 				<span class="profile-links">
@@ -80,23 +93,23 @@ class Author_Card {
 					&lt;<?php echo $author->user_email; ?>&gt;
 					<span class="profile-sp-link">
 					<?php
-						printf(
-							'[ <a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a> ]',
-							esc_attr( $author->user_email ),
-							esc_attr__( 'Click to search Pluginrepo SupportPress for emails sent to/from this email address', 'wporg-plugins' )
-						);
+					printf(
+						'[ <a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a> ]',
+						esc_attr( $author->user_email ),
+						esc_attr__( 'Click to search Pluginrepo SupportPress for emails sent to/from this email address', 'wporg-plugins' )
+					);
 					?>
 					</span>
 				</div>
 				<div class="profile-join">
-				<?php
+					<?php
 					/* translators: 1: time ago, 2: registration date */
 					printf(
 						__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
 						human_time_diff( strtotime( $author->user_registered ) ),
 						date( 'Y-M-d', strtotime( $author->user_registered ) )
 					);
-				?>
+					?>
 				</div>
 			</div>
 		</div>
@@ -202,114 +215,17 @@ class Author_Card {
 				echo '<strong>' . sprintf( _n( '%d plugin:', '%d plugins:', count( $all_plugins ), 'wporg-plugins' ), count( $all_plugins ) ) . '</strong>';
 
 				echo '<ul>';
-				foreach ( $all_plugins as $plugin ) {
-					echo '<li>';
-					$note         = false;
-					$extra        = '';
-					$classes      = $tooltips = array();
-					$last_updated = get_post_meta( $plugin->ID, 'last_updated', true );
-
-					if ( in_array( $plugin->post_name, wp_list_pluck( $author_plugins, 'post_name' ) ) ) {
-						$tooltips[] = __( 'This user submitted this plugin.', 'wporg-plugins ' );
-						$classes[]  = 'plugin-owner';
-						if ( ! in_array( $plugin->post_name, $author_commit ) ) {
-							$note       = true;
-							$tooltips[] = __( 'The user is not a current committer.', 'wporg-plugins' );
-						}
-					}
-
-					$plugin_slug = $plugin->post_name;
-					if ( in_array( $plugin->post_status, array( 'new', 'pending' ) ) ) {
-						/* translators: %s: time ago */
-						$extra     .= sprintf(
-							__( '(requested %s ago)', 'wporg-plugins' ),
-							human_time_diff( strtotime( $last_updated ) )
-						);
-						$tooltips[] = __( 'Requested, remains unapproved.', 'wporg-plugins' );
-						$classes[]  = 'profile-plugin-requested';
-
-					} elseif ( 'rejected' === $plugin->post_status ) {
-						$tooltips[]  = __( 'Plugin was rejected.', 'wporg-plugins' );
-						$classes[]   = 'profile-plugin-rejected';
-						$plugin_slug = substr( $plugin_slug, 9, - 9 );
-
-					} elseif ( 'closed' === $plugin->post_status ) {
-						/* translators: %s: close/disable reason */
-						$extra     .= sprintf(
-							__( '(closed: %s)', 'wporg-plugins' ),
-							Template::get_close_reason( $plugin )
-						);
-						$tooltips[] = __( 'Plugin is closed.', 'wporg-plugins' );
-						$classes[]  = 'profile-plugin-closed';
-
-					} elseif ( 'disabled' === $plugin->post_status ) {
-						/* translators: %s: close/disable reason */
-						$extra     .= sprintf(
-							__( '(disabled: %s)', 'wporg-plugins' ),
-							Template::get_close_reason( $plugin )
-						);
-						$tooltips[] = __( 'Plugin is disabled (updates are active).', 'wporg-plugins' );
-						$classes[]  = 'profile-plugin-closed';
-						$note       = true;
-
-					} else {
-						// Plugin is some fashion of open.
-						if ( 'approved' === $plugin->post_status ) {
-							$note       = true;
-							$tooltips[] = __( 'Plugin is approved, but has no data.', 'wporg-plugins' );
-							$classes[]  = 'profile-plugin-open-unused';
-						} elseif ( strtotime( '-2 years' ) > strtotime( $last_updated ) ) {
-							$tooltips[] = __( 'Plugin is open but has not been updated in more than two years.', 'wporg-plugins' );
-							$classes[]  = 'profile-plugin-open-old';
-						} else {
-							$tooltips[] = __( 'Plugin is open.', 'wporg-plugins' );
-						}
-						$classes[] = 'profile-plugin-open';
-					}
-
-					echo '<span>';
-
-					printf(
-						'<a class="%1$s" title="%2$s" href="%3$s">%4$s</a>',
-						esc_attr( implode( ' ', $classes ) ),
-						esc_attr( implode( ' ', $tooltips ) ),
-						esc_attr( get_permalink( $plugin ) ),
-						$plugin->post_name
-					);
-
-					if ( $note ) {
-						echo '*';
-					}
-
-					$plugin_links = array(
-						sprintf(
-							'<a href="%s" title="%s">%s</a>',
-							esc_url( get_edit_post_link( $plugin->ID, '' ) ),
-							esc_attr__( 'Edit this plugin', 'wporg-plugins' ),
-							__( 'Edit', 'wporg-plugins' )
-						),
-						sprintf(
-							'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
-							urlencode( esc_attr( $plugin_slug ) ),
-							esc_attr__( 'Click to search Plugin Team P2 for mentions of this plugin', 'wporg-plugins' )
-						),
-						sprintf(
-							'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
-							urlencode( esc_attr( $plugin_slug ) ),
-							esc_attr__( 'Click to search Plugin SupportPress for mentions of this plugin', 'wporg-plugins' )
-						),
-					);
-					vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', $plugin_links );
-
-					if ( $extra ) {
-						echo ' ' . $extra;
-					}
-
-					echo '</span></li>' . "\n";
-				}
+				self::display_plugin_links( $all_plugins, $author_plugins, $author_commit );
 				echo '</ul>';
 			}
-			?>
+
+			if ( ! empty( $author_support_rep ) ) :
+				?>
+				<p><strong><?php esc_html_e( 'Support Rep for:', 'wporg-plugins' ); ?></strong></p>
+				<ul>
+					<?php self::display_plugin_links( $author_support_rep, $author_plugins, $author_commit ); ?>
+				</ul>
+			<?php endif; ?>
 		</div>
 
 		<?php
@@ -340,5 +256,119 @@ class Author_Card {
 			), admin_url( 'edit.php' ) ) ),
 			$ip
 		);
+	}
+
+	/**
+	 * Displays a list of the passed plugins with their meta information.
+	 *
+	 * @param array $all_plugins    All plugins associated with this author.
+	 * @param array $author_plugins Other plugins by this author.
+	 * @param array $author_commit  Plugins the author has commit access to.
+	 */
+	protected static function display_plugin_links( $all_plugins, $author_plugins, $author_commit ) {
+		foreach ( $all_plugins as $plugin ) {
+			echo '<li>';
+			$note         = false;
+			$extra        = '';
+			$classes      = $tooltips = array();
+			$last_updated = get_post_meta( $plugin->ID, 'last_updated', true );
+
+			if ( in_array( $plugin->post_name, wp_list_pluck( $author_plugins, 'post_name' ) ) ) {
+				$tooltips[] = __( 'This user submitted this plugin.', 'wporg-plugins ' );
+				$classes[]  = 'plugin-owner';
+				if ( ! in_array( $plugin->post_name, $author_commit ) ) {
+					$note       = true;
+					$tooltips[] = __( 'The user is not a current committer.', 'wporg-plugins' );
+				}
+			}
+
+			$plugin_slug = $plugin->post_name;
+			if ( in_array( $plugin->post_status, array( 'new', 'pending' ) ) ) {
+				/* translators: %s: time ago */
+				$extra     .= sprintf(
+					__( '(requested %s ago)', 'wporg-plugins' ),
+					human_time_diff( strtotime( $last_updated ) )
+				);
+				$tooltips[] = __( 'Requested, remains unapproved.', 'wporg-plugins' );
+				$classes[]  = 'profile-plugin-requested';
+
+			} elseif ( 'rejected' === $plugin->post_status ) {
+				$tooltips[]  = __( 'Plugin was rejected.', 'wporg-plugins' );
+				$classes[]   = 'profile-plugin-rejected';
+				$plugin_slug = substr( $plugin_slug, 9, - 9 );
+
+			} elseif ( 'closed' === $plugin->post_status ) {
+				/* translators: %s: close/disable reason */
+				$extra     .= sprintf(
+					__( '(closed: %s)', 'wporg-plugins' ),
+					Template::get_close_reason( $plugin )
+				);
+				$tooltips[] = __( 'Plugin is closed.', 'wporg-plugins' );
+				$classes[]  = 'profile-plugin-closed';
+
+			} elseif ( 'disabled' === $plugin->post_status ) {
+				/* translators: %s: close/disable reason */
+				$extra     .= sprintf(
+					__( '(disabled: %s)', 'wporg-plugins' ),
+					Template::get_close_reason( $plugin )
+				);
+				$tooltips[] = __( 'Plugin is disabled (updates are active).', 'wporg-plugins' );
+				$classes[]  = 'profile-plugin-closed';
+				$note       = true;
+
+			} else {
+				// Plugin is some fashion of open.
+				if ( 'approved' === $plugin->post_status ) {
+					$note       = true;
+					$tooltips[] = __( 'Plugin is approved, but has no data.', 'wporg-plugins' );
+					$classes[]  = 'profile-plugin-open-unused';
+				} elseif ( strtotime( '-2 years' ) > strtotime( $last_updated ) ) {
+					$tooltips[] = __( 'Plugin is open but has not been updated in more than two years.', 'wporg-plugins' );
+					$classes[]  = 'profile-plugin-open-old';
+				} else {
+					$tooltips[] = __( 'Plugin is open.', 'wporg-plugins' );
+				}
+				$classes[] = 'profile-plugin-open';
+			}
+
+			echo '<span>';
+
+			printf(
+				'<a class="%1$s" title="%2$s" href="%3$s">%4$s</a>',
+				esc_attr( implode( ' ', $classes ) ),
+				esc_attr( implode( ' ', $tooltips ) ),
+				esc_attr( get_permalink( $plugin ) ),
+				$plugin->post_name
+			);
+
+			if ( $note ) {
+				echo '*';
+			}
+
+			vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', [
+				sprintf(
+					'<a href="%s" title="%s">%s</a>',
+					esc_url( get_edit_post_link( $plugin->ID, '' ) ),
+					esc_attr__( 'Edit this plugin', 'wporg-plugins' ),
+					__( 'Edit', 'wporg-plugins' )
+				),
+				sprintf(
+					'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
+					urlencode( esc_attr( $plugin_slug ) ),
+					esc_attr__( 'Click to search Plugin Team P2 for mentions of this plugin', 'wporg-plugins' )
+				),
+				sprintf(
+					'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
+					urlencode( esc_attr( $plugin_slug ) ),
+					esc_attr__( 'Click to search Plugin SupportPress for mentions of this plugin', 'wporg-plugins' )
+				),
+			] );
+
+			if ( $extra ) {
+				echo ' ' . $extra;
+			}
+
+			echo '</span></li>' . "\n";
+		}
 	}
 }
