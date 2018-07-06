@@ -231,10 +231,8 @@ class Payment_Activity extends Date_Range {
 				intval( $this->wordcamp_site_id )
 			);
 		} else {
-			$extra_where = sprintf(
-				' AND FIND_IN_SET( blog_id, %s ) = 0',
-				implode( ',', Reports\get_excluded_site_ids() )
-			);
+			$excluded_ids = implode( ',', array_map( 'absint', Reports\get_excluded_site_ids() ) );
+			$extra_where = " AND blog_id NOT IN ( $excluded_ids )";
 		}
 
 		$index_query = $wpdb->prepare( "
