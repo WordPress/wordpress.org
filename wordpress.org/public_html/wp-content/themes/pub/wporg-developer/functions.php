@@ -117,7 +117,7 @@ function init() {
 	add_action( 'wp_head', __NAMESPACE__ . '\\header_js' );
 	add_action( 'add_meta_boxes', __NAMESPACE__ . '\\rename_comments_meta_box', 10, 2 );
 
-	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 9, 2 );
+	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 11, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
 
 	add_theme_support( 'automatic-feed-links' );
