@@ -11,7 +11,7 @@ namespace WordPressdotorg\MainTheme;
 
 $hosts = [
 	'bluehost'      => [
-		'description' => __( 'Our optimized hosting is fast, secure, and simple. We are turning our passion for WordPress into the most amazing managed platform for your WordPress websites ever.', 'wporg' ),
+		'description' => __( 'Bluehost has turned passion for WordPress into the fastest, simplest managed platform for your websites. Recommended by WordPress since 2005, each WordPress package offers a free domain, free SSL, and 24/7 support.', 'wporg' ),
 		'logo'        => 'images/logo-bluehost.svg',
 		'name'        => 'Bluehost',
 		'url'         => 'https://www.bluehost.com/wordpress-hosting',
@@ -22,15 +22,12 @@ $hosts = [
 		'name'        => 'Dreamhost',
 		'url'         => 'https://www.dreamhost.com/wordpress-hosting/',
 	],
-
-	/*
 	'siteground'    => [
-		'description' => __( '', 'wporg' ),
+		'description' => __( 'SiteGround offers top-tier website performance and support regardless of your technical skill. Join millions of happy clients using their WordPress services to get the help you need at prices you love.', 'wporg' ),
 		'logo'        => 'images/logo-siteground.png',
 		'name'        => 'Siteground',
 		'url'         => 'https://www.siteground.com/wordpress-hosting.htm',
 	],
-	*/
 	'wordpress.com' => [
 		'description' => __( 'WordPress.com is the easiest way to create a free website or blog. It’s a powerful hosting platform that grows with you. We offer expert support for your WordPress site.', 'wporg' ),
 		'logo'        => 'images/logo-wpcom.png',
