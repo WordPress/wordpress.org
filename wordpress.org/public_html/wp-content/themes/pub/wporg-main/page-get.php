@@ -40,6 +40,13 @@ $hosts = [
 ];
 shuffle( $hosts );
 
+$menu_items = [
+	'download/releases'     => _x( 'All Releases', 'Page title', 'wporg' ),
+	'download/beta-nightly' => _x( 'Beta/Nightly Versions', 'Page title', 'wporg' ),
+	'download/counter'      => _x( 'Download Counter', 'Page title', 'wporg' ),
+	'download/source'       => _x( 'Source Code', 'Page title', 'wporg' ),
+];
+
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
@@ -117,7 +124,7 @@ the_post();
 						</p>
 					</aside>
 
-					<aside class="col-12">
+					<aside class="col-6">
 						<h4><?php esc_html_e( 'Requirements', 'wporg' ); ?></h4>
 						<p class="aside">
 							<?php
@@ -140,7 +147,15 @@ the_post();
 							?>
 						</p>
 					</aside>
-					<a href="<?php echo esc_url( home_url( '/download/' ) ); ?>" class="call-to-action col-12"><?php esc_html_e( 'Discover other ways to get WordPress', 'wporg' ); ?></a>
+
+					<aside class="col-6">
+						<h4><?php esc_html_e( 'More resources', 'wporg' ); ?></h4>
+						<ul>
+							<?php foreach ( $menu_items as $slug => $text ) : ?>
+								<li><a href="<?php echo esc_url( home_url( $slug ) ); ?>"><?php echo esc_html( $text ); ?></a></li>
+							<?php endforeach; ?>
+						</ul>
+					</aside>
 				</section>
 
 				<section class="hosting row gutters between">

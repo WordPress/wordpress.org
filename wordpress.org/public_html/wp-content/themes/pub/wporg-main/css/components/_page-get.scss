@@ -27,10 +27,6 @@ body.page-get {
 	section {
 		padding: ms( 10 ) 0;
 
-		@include breakpoint( 479px ) {
-			padding: ms( 10 ) ms( 4 );
-		}
-
 		h2:first-of-type {
 			width: 100%;
 		}
@@ -62,6 +58,10 @@ body.page-get {
 
 			.call-to-action:not(:last-child) {
 				margin-bottom: 2rem;
+			}
+
+			li {
+				list-style-type: none;
 			}
 		}
 		
