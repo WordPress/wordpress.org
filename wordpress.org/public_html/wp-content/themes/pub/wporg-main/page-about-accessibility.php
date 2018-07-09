@@ -37,9 +37,7 @@ the_post();
 
 			<div class="entry-content row">
 				<section class="col-8">
-
 					<p><?php esc_html_e( 'The WordPress community and the open source WordPress project is committed to being as inclusive and accessible as possible. We want users, regardless of device or ability, to be able to publish content and maintain a website or application built with WordPress.', 'wporg' ); ?></p>
-
 					<p><?php esc_html_e( 'WordPress aims to make the WordPress Admin and bundled themes fully WCAG 2.0 AA compliant where possible.', 'wporg' ); ?></p>
 					<p>
 					<?php
@@ -98,6 +96,32 @@ the_post();
 					?>
 					</p>
 
+					<h3>
+						<?php
+						/* translators: ATAG: Authoring Tool Accessibility Guidelines; https://www.w3.org/TR/ATAG20/ */
+						esc_html_e( 'ATAG Statement', 'wporg' );
+						?>
+					</h3>
+					<p>
+						<?php
+						printf(
+							/* translators: Link to ATAG */
+							wp_kses_post( __( 'The <a href="%s">Authoring Tool Accessibility Guidelines version 2.0</a>, or ATAG, are a set of guidelines that govern how to create a tool for creating web pages that are both accessible and encourages the creation of accessible content.', 'wporg' ) ),
+							'https://www.w3.org/TR/ATAG20/'
+						);
+						?>
+					</p>
+					<p>
+						<?php
+						printf(
+							/* translators: Link to ATAG */
+							wp_kses_post( __( 'The <a href="%s">WordPress accessibility coding standards</a> require new or updated code to meet the standards of the Web Content Accessibility Guidelines (WCAG) version 2.0 at level AA. ATAG conformance is an additional goal beyond WCAG compliance.', 'wporg' ) ),
+							'https://make.wordpress.org/core/handbook/best-practices/coding-standards/accessibility-coding-standards/'
+						);
+						?>
+					</p>
+					<p><?php echo wp_kses_post( __( 'An application that fully conforms with ATAG 2.0 must not only be usable by people with disabilities, but it should <strong>enable</strong> and <strong>encourage</strong> all users to create accessible content and assist them in repairing accessibility mistakes, without requiring any additional tools or add-ons.', 'wporg' ) ); ?></p>
+					<p><?php esc_html_e( 'WordPress is not currently conforming with ATAG 2.0, but pledges to pursue features that are accessible and which help users create accessible content in pursuit of the long-term goal of ATAG compliance.', 'wporg' ); ?></p>
 				</section>
 			</div><!-- .entry-content -->
 		</article><!-- #post-## -->
