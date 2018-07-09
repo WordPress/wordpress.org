@@ -12,7 +12,7 @@ namespace WordPressdotorg\MainTheme;
 $hosts = [
 	'bluehost'      => [
 		'description' => __( 'Our optimized hosting is fast, secure, and simple. We are turning our passion for WordPress into the most amazing managed platform for your WordPress websites ever.', 'wporg' ),
-		'logo'        => 'images/logo-bluehost.png',
+		'logo'        => 'images/logo-bluehost.svg',
 		'name'        => 'Bluehost',
 		'url'         => 'https://www.bluehost.com/wordpress-hosting',
 	],
@@ -26,7 +26,7 @@ $hosts = [
 	/*
 	'siteground'    => [
 		'description' => __( '', 'wporg' ),
-		'logo'        => '',
+		'logo'        => 'images/logo-siteground.png',
 		'name'        => 'Siteground',
 		'url'         => 'https://www.siteground.com/wordpress-hosting.htm',
 	],
