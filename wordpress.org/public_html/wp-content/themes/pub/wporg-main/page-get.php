@@ -162,7 +162,7 @@ the_post();
 					</div>
 					<?php endforeach; ?>
 
-					<a href="<?php echo esc_url( home_url( '/hosting/' ) ); ?>" class="call-to-action col-12"><?php esc_html_e( 'See all of our recommended hosts', 'wporg' ); ?></a>
+					<a href="https://wordpress.org/hosting/" class="call-to-action col-12"><?php esc_html_e( 'See all of our recommended hosts', 'wporg' ); ?></a>
 				</section>
 
 				<section class="apps-mobile first-sm">

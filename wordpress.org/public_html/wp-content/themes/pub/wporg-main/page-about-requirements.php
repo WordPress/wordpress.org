@@ -63,7 +63,7 @@ the_post();
 					<p>
 						<?php
 						/* translators: 1: URL to Apache; 2: URL to Nginx; 3: URL to hosting page */
-						printf( wp_kses_post( __( 'That&#8217;s really it. We recommend <a href="%1$s">Apache</a> or <a href="%2$s">Nginx</a> as the most robust and featureful server for running WordPress, but any server that supports PHP and MySQL will do. That said, we can&#8217;t test every possible environment and <a href="%3$s">each of the hosts on our hosting page</a> supports the above and more with no problems.', 'wporg' ) ), esc_url( 'https://httpd.apache.org/' ), esc_url( 'https://nginx.org/' ), esc_url( home_url( '/hosting/' ) ) );
+						printf( wp_kses_post( __( 'That&#8217;s really it. We recommend <a href="%1$s">Apache</a> or <a href="%2$s">Nginx</a> as the most robust and featureful server for running WordPress, but any server that supports PHP and MySQL will do. That said, we can&#8217;t test every possible environment and <a href="%3$s">each of the hosts on our hosting page</a> supports the above and more with no problems.', 'wporg' ) ), esc_url( 'https://httpd.apache.org/' ), esc_url( 'https://nginx.org/' ), esc_url( 'https://wordpress.org/hosting/' ) );
 						?>
 					</p>
 
