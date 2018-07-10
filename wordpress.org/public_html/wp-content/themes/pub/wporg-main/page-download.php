@@ -132,7 +132,7 @@ the_post();
 
 					<aside class="col-6">
 						<h4><?php esc_html_e( 'Requirements', 'wporg' ); ?></h4>
-						<p class="aside">
+						<p>
 							<?php
 							printf(
 								/* translators: 1: URL to PHP website; 2: URL to MySQL website; 3: URL to MariaDB website */
