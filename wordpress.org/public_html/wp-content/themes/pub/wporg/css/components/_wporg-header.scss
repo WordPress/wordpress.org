@@ -322,6 +322,11 @@
 	}
 }
 
+.page-download #wporg-header #download,
+.page-parent-download #wporg-header #download {
+	display: none;
+}
+
 #mobile-menu-button {
 	background: none;
 	border: none;
