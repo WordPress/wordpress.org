@@ -361,7 +361,8 @@ a img.aligncenter {
 	overflow: hidden;
 }
 
-.wporg-page-download #wporg-header #download {
+.page-download #wporg-header #download,
+.page-parent-download #wporg-header #download {
 	display: none;
 }
 
