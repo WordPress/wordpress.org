@@ -103,10 +103,9 @@ if ( WP_CORE_STABLE_BRANCH === $branch ) {
 		#wrap {
 			color: black;
 			height: 1.35em;
-			font-size: 2.25em;
+			font-size: 2em;
 			font-weight: normal;
 			margin: 0.25em 0;
-			position: relative;
 		}
 
 		.something-semantic {
@@ -126,7 +125,6 @@ if ( WP_CORE_STABLE_BRANCH === $branch ) {
 			-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 			box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 			background: #fff;
-			display: inline-block;
 			margin: 0 4%;
 			padding: 6% 10%;
 		}
@@ -140,6 +138,10 @@ if ( WP_CORE_STABLE_BRANCH === $branch ) {
 		@media screen and (min-width: 500px) and (min-height: 400px) {
 			body {
 				font-size: 150%;
+			}
+
+			#wrap {
+				font-size: 2.25em;
 			}
 		}
 
