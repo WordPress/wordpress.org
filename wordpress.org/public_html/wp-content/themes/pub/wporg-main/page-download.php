@@ -38,10 +38,10 @@ $hosts = [
 shuffle( $hosts );
 
 $menu_items = [
-	'download/releases'     => _x( 'All Releases', 'Page title', 'wporg' ),
-	'download/beta-nightly' => _x( 'Beta/Nightly Versions', 'Page title', 'wporg' ),
-	'download/counter'      => _x( 'Download Counter', 'Page title', 'wporg' ),
-	'download/source'       => _x( 'Source Code', 'Page title', 'wporg' ),
+	'download/releases/'     => _x( 'All Releases', 'Page title', 'wporg' ),
+	'download/beta-nightly/' => _x( 'Beta/Nightly Versions', 'Page title', 'wporg' ),
+	'download/counter/'      => _x( 'Download Counter', 'Page title', 'wporg' ),
+	'download/source/'       => _x( 'Source Code', 'Page title', 'wporg' ),
 ];
 
 // Prevent Jetpack from looking for a non-existent featured image.
