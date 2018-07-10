@@ -602,7 +602,9 @@ function modify_capabilities( $capabilities ) {
  * Modify CampTix's default options
  */
 function modify_default_options( $options ) {
-	$options['payment_methods']        = array( 'paypal'     => true               );
+	$options['payment_methods']        = array( 'stripe'     => true               );
+	$options['payment_options_stripe'] = array( 'api_predef' => 'wpcs-sandbox'     );
+	$options['payment_methods']        = array( 'paypal'     => false              );
 	$options['payment_options_paypal'] = array( 'api_predef' => 'wordcamp-sandbox' );
 
 	return $options;
