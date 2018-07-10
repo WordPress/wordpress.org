@@ -143,10 +143,13 @@ function stripe_credentials( $credentials ) {
 	// Sandbox account
 	$credentials = array(
 		'wpcs-sandbox' => array(
-			'label'          => 'WordCamp Sandbox',
-			'sandbox'        => true,
-			'api_public_key' => defined( 'WORDCAMP_CAMPTIX_STRIPE_TEST_PUBLIC' ) ? WORDCAMP_CAMPTIX_STRIPE_TEST_PUBLIC : '',
-			'api_secret_key' => defined( 'WORDCAMP_CAMPTIX_STRIPE_TEST_SECRET' ) ? WORDCAMP_CAMPTIX_STRIPE_TEST_SECRET : '',
+			'label'               => 'WordCamp Sandbox',
+			'sandbox'             => true,
+			'api_test_public_key' => defined( 'WORDCAMP_CAMPTIX_STRIPE_TEST_PUBLIC' ) ? WORDCAMP_CAMPTIX_STRIPE_TEST_PUBLIC : '',
+			'api_test_secret_key' => defined( 'WORDCAMP_CAMPTIX_STRIPE_TEST_SECRET' ) ? WORDCAMP_CAMPTIX_STRIPE_TEST_SECRET : '',
+			// Backcompat
+			'api_public_key'      => defined( 'WORDCAMP_CAMPTIX_STRIPE_TEST_PUBLIC' ) ? WORDCAMP_CAMPTIX_STRIPE_TEST_PUBLIC : '',
+			'api_secret_key'      => defined( 'WORDCAMP_CAMPTIX_STRIPE_TEST_SECRET' ) ? WORDCAMP_CAMPTIX_STRIPE_TEST_SECRET : '',
 		),
 	);
 
