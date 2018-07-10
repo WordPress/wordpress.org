@@ -1,8 +1,8 @@
 <?php
 /**
- * Template Name: Get
+ * Template Name: Download
  *
- * Page template for the Get WordPress page.
+ * Page template for the Download page.
  *
  * @package WordPressdotorg\MainTheme
  */
