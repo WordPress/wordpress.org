@@ -19,7 +19,7 @@ $hosts = [
 	'dreamhost'     => [
 		'description' => __( 'Privacy-focused and dedicated to the Open Web, DreamHost provides some of the most powerful and secure managed WordPress environments in the world.', 'wporg' ),
 		'logo'        => 'images/logo-dreamhost.png',
-		'name'        => 'Dreamhost',
+		'name'        => 'DreamHost',
 		'url'         => 'https://www.dreamhost.com/wordpress-hosting/',
 	],
 	'siteground'    => [
