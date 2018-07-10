@@ -40,6 +40,7 @@ add_filter( 'camptix_options',                               __NAMESPACE__ . '\m
 add_filter( 'camptix_email_tickets_template',                __NAMESPACE__ . '\switch_email_template'               );
 add_filter( 'camptix_html_message',                          __NAMESPACE__ . '\render_html_emails',           10, 2 );
 add_action( 'camptix_tshirt_report_intro',                   __NAMESPACE__ . '\tshirt_report_intro_message',  10, 3 );
+add_filter( 'camptix_stripe_checkout_image_url',             __NAMESPACE__ . '\stripe_default_checkout_image_url'   );
 
 
 /**
@@ -1017,4 +1018,21 @@ function admin_notice_attendee_privacy() {
 			wpautop( $message )
 		);
 	}
+}
+
+/**
+ * Provide a default fallback image for the Stripe checkout overlay.
+ *
+ * If the site has a Site Icon set, this will be used. Otherwise, a WordPress logo will be used.
+ *
+ * @param string $url
+ *
+ * @return string
+ */
+function stripe_default_checkout_image_url( $url ) {
+	if ( empty( $url ) ) {
+		$url = 'https://s.w.org/about/images/desktops/wp-blue-1024x768.png';
+	}
+
+	return $url;
 }
