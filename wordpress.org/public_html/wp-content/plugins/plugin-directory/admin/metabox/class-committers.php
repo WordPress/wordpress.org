@@ -58,6 +58,14 @@ class Committers {
 			$response->send();
 		}
 
+		if ( ! empty( $committer->allcaps['bbp_blocked'] ) ) {
+			$response->add( array(
+				'what' => 'committer',
+				'data' => new \WP_Error( 'error', sprintf( __( 'The user %s is banned/blocked.', 'wporg-plugins' ), '<code>' . $login . '</code>' ) ),
+			) );
+			$response->send();
+		}
+
 		$result = Tools::grant_plugin_committer( $post->post_name, $committer );
 
 		if ( ! $result ) {

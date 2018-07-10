@@ -107,6 +107,10 @@ class Plugin_Committers extends Base {
 			return new WP_Error( 'plugin_user_not_found', __( 'The provided user could not be found.', 'wporg-plugins' ) );
 		}
 
+		if ( ! empty( $user->allcaps['bbp_blocked'] ) ) {
+			return new WP_Error( 'plugin_user_banned', __( 'User is blocked/banned and cannot be granted commmit.', 'wporg-plugins' ) );
+		}
+
 		$plugin_slug = $request['plugin_slug'];
 
 		if ( ! Tools::grant_plugin_committer( $plugin_slug, $user ) ) {
