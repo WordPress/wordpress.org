@@ -85,6 +85,12 @@ function show_sandbox_mode_warning() {
 			}
 		}
 
+		if ( ! empty( $camptix_options['payment_options_stripe']['api_predef'] ) ) {
+			if ( 'wpcs-sandbox' == $camptix_options['payment_options_stripe']['api_predef'] ) {
+				$sandbox = true;
+			}
+		}
+
 		// And the event is not archived
 		if ( $sandbox && ! $camptix_options['archived'] ) {
 			require_once( __DIR__ . '/views/notice-sandbox-mode.php' );
@@ -356,9 +362,15 @@ function is_sandboxed() {
 	if ( isset( $options['payment_options_paypal']['sandbox'] ) && $options['payment_options_paypal']['sandbox'] ) {
 		$is_sandboxed = true;
 	}
+	if ( isset( $options['payment_options_stripe']['sandbox'] ) && $options['payment_options_stripe']['sandbox'] ) {
+		$is_sandboxed = true;
+	}
 
 	// If the WordCamp sandbox is picked from the predefs
 	if ( ! empty( $options['payment_options_paypal']['api_predef'] ) && 'wordcamp-sandbox' == $options['payment_options_paypal']['api_predef'] ) {
+		$is_sandboxed = true;
+	}
+	if ( ! empty( $options['payment_options_stripe']['api_predef'] ) && 'wpcs-sandbox' == $options['payment_options_stripe']['api_predef'] ) {
 		$is_sandboxed = true;
 	}
 
