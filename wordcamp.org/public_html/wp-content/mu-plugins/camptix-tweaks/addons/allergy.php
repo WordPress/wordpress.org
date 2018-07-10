@@ -86,9 +86,15 @@ class Allergy_Field extends CampTix_Addon {
 			</td>
 
 			<td class="tix-right">
-				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html( $this->options['yes'] ); ?></label>
+				<label>
+					<input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> required />
+					<?php echo esc_html( $this->options['yes'] ); ?>
+				</label>
 				<br />
-				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html( $this->options['no'] ); ?></label>
+				<label>
+					<input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> required />
+					<?php echo esc_html( $this->options['no'] ); ?>
+				</label>
 			</td>
 		</tr>
 
@@ -204,9 +210,15 @@ class Allergy_Field extends CampTix_Addon {
 			</td>
 
 			<td class="tix-right">
-				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html( $this->options['yes'] ); ?></label>
+				<label>
+					<input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="yes" <?php checked( 'yes', $current_data[ self::SLUG ] ); ?> required />
+					<?php echo esc_html( $this->options['yes'] ); ?>
+				</label>
 				<br />
-				<label><input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html( $this->options['no'] ); ?></label>
+				<label>
+					<input name="tix_ticket_info[<?php echo esc_attr( self::SLUG ); ?>]" type="radio" value="no" <?php checked( 'no', $current_data[ self::SLUG ] ); ?> required />
+					<?php echo esc_html( $this->options['no'] ); ?>
+				</label>
 			</td>
 		</tr>
 

@@ -65,7 +65,10 @@ class Code_Of_Conduct_Field extends CampTix_Addon {
 			</td>
 
 			<td class="tix-right">
-				<label><input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="checkbox" <?php checked( $current_data[ self::SLUG ] ); ?> /> <?php echo esc_html_x( 'Yes', 'ticket registration option', 'wordcamporg' ); ?></label>
+				<label>
+					<input name="tix_attendee_info[<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( self::SLUG ); ?>]" type="checkbox" <?php checked( $current_data[ self::SLUG ] ); ?> required />
+					<?php echo esc_html_x( 'Yes', 'ticket registration option', 'wordcamporg' ); ?>
+				</label>
 			</td>
 		</tr>
 
