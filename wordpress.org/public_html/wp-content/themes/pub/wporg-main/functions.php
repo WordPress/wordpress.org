@@ -28,9 +28,6 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
  * Registers theme-specific widgets.
  */
 function widgets() {
-	include_once get_stylesheet_directory() . '/widgets/class-wporg-widget-download.php';
-
-	register_widget( __NAMESPACE__ . '\WPORG_Widget_Download' );
 	register_widget( 'WP_Widget_Links' );
 
 	add_filter( 'widget_links_args', function( $args ) {
