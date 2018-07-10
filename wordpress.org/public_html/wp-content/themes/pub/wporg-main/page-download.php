@@ -44,6 +44,15 @@ $menu_items = [
 	'download/source/'       => _x( 'Source Code', 'Page title', 'wporg' ),
 ];
 
+$zip_url   = 'https://wordpress.org/latest.zip';
+$targz_url = 'https://wordpress.org/latest.tar.gz';
+
+if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK ) {
+	$rosetta_release = $GLOBALS['rosetta']->rosetta->get_latest_release();
+	$zip_url         = $rosetta_release['zip_url'];
+	$targz_url       = $rosetta_release['targz_url'];
+}
+
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
@@ -77,7 +86,7 @@ the_post();
 					<h2><?php esc_html_e( 'Priceless, and also free', 'wporg' ); ?></h2>
 					<p class="subheading"><?php esc_html_e( 'Download WordPress and use it on your site.', 'wporg' ); ?></p>
 					<div class="call-to-action col-12">
-						<a class="button button-primary button-xl" href="<?php echo esc_url( home_url( 'latest.zip' ) ); ?>">
+						<a class="button button-primary button-xl" href="<?php echo esc_url( $zip_url ); ?>">
 							<span class="dashicons-before dashicons-download">
 								<?php
 								echo esc_html( apply_filters( 'no_orphans', sprintf(
@@ -89,7 +98,7 @@ the_post();
 							</span>
 						</a>
 						<p>
-							<a href="<?php echo esc_url( home_url( 'latest.tar.gz' ) ); ?>">
+							<a href="<?php echo esc_url( $targz_url ); ?>">
 								<?php esc_html_e( 'Download .tar.gz', 'wporg' ); ?>
 							</a>
 						</p>
