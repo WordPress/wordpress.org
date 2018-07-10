@@ -48,8 +48,7 @@ add_filter( 'camptix_stripe_checkout_image_url',             __NAMESPACE__ . '\s
  *
  * If they open ticket sales while in sandbox mode, then attendees will be confused, etc.
  *
- * @todo This should probably be moved to CampTix itself, except for the check for the 'wordcamp-sandbox' account,
- * which can stay here.
+ * @todo This should probably be moved to CampTix itself.
  */
 function show_sandbox_mode_warning() {
 	/** @var $post    \WP_Post        */
@@ -68,35 +67,63 @@ function show_sandbox_mode_warning() {
 	$camptix_shortcode_page = isset( $post->post_content ) && has_shortcode( $post->post_content, 'camptix' );
 
 	if ( $camptix_post_type || $camptix_shortcode_page ) {
-		$sandbox = false;
-
-		// If any payment addons are in sandbox mode
-		foreach ( $camptix_options as $option_key => $option_value ) {
-			if ( 'payment_options_' === substr( $option_key, 0, 16 ) ) {
-				if ( isset( $option_value['sandbox'] ) && true === $option_value['sandbox'] ) {
-					$sandbox = true;
-				}
-			}
-		}
-
-		// If the WordCamp sandbox is picked from the predefs
-		if ( ! empty( $camptix_options['payment_options_paypal']['api_predef'] ) ) {
-			if ( 'wordcamp-sandbox' == $camptix_options['payment_options_paypal']['api_predef'] ) {
-				$sandbox = true;
-			}
-		}
-
-		if ( ! empty( $camptix_options['payment_options_stripe']['api_predef'] ) ) {
-			if ( 'wpcs-sandbox' == $camptix_options['payment_options_stripe']['api_predef'] ) {
-				$sandbox = true;
-			}
-		}
+		$sandboxed = is_sandboxed();
 
 		// And the event is not archived
-		if ( $sandbox && ! $camptix_options['archived'] ) {
+		if ( $sandboxed && ! $camptix_options['archived'] ) {
 			require_once( __DIR__ . '/views/notice-sandbox-mode.php' );
 		}
 	}
+}
+
+/**
+ * Returns true if CampTix is running in sandbox mode.
+ *
+ * @todo This should probably be moved to CampTix itself, except for the check for the 'wordcamp-sandbox' account.
+ *
+ * @return bool
+ */
+function is_sandboxed() {
+	/** @var $camptix CampTix_Plugin */
+	global $camptix;
+	static $is_sandboxed = null;
+
+	if ( ! is_null( $is_sandboxed ) ) {
+		return $is_sandboxed;
+	}
+
+	$options      = $camptix->get_options();
+	$is_sandboxed = false;
+
+	$enabled_payment_methods = array_keys( $camptix->get_enabled_payment_methods() );
+
+	foreach ( $enabled_payment_methods as $method_id ) {
+		switch ( $method_id ) {
+			case 'stripe':
+				$sandbox_predef = 'wpcs-sandbox';
+				break;
+			case 'paypal':
+				$sandbox_predef = 'wordcamp-sandbox';
+				break;
+			default:
+				$sandbox_predef = false;
+				break;
+		}
+
+		if ( $sandbox_predef && isset( $options[ 'payment_options_' . $method_id ]['api_predef'] ) && $sandbox_predef === $options[ 'payment_options_' . $method_id ]['api_predef'] ) {
+			$is_sandboxed = true;
+			break;
+		}
+
+		$not_predef = ! isset( $options[ 'payment_options_' . $method_id ]['api_predef'] ) || ! $options[ 'payment_options_' . $method_id ]['api_predef'];
+
+		if ( $not_predef && isset( $options[ 'payment_options_' . $method_id ]['sandbox'] ) && true === $options[ 'payment_options_' . $method_id ]['sandbox'] ) {
+			$is_sandboxed = true;
+			break;
+		}
+	}
+
+	return $is_sandboxed;
 }
 
 /**
@@ -340,42 +367,6 @@ function track_payment_results( $payment_token, $result, $data ) {
 	$request_url    = sprintf( 'https://%s/g.gif?v=wpcom-no-pv&x_wcorg-tickets=%s', $request_domain, $stat_key );
 	$request_args   = array( 'blocking' => false );
 	$request_result = wp_remote_get( esc_url_raw( $request_url ), $request_args );
-}
-
-/**
- * Returns true if CampTix is running in sandbox mode.
- *
- * @return bool
- */
-function is_sandboxed() {
-	/** @var $camptix CampTix_Plugin */
-	global $camptix;
-	static $is_sandboxed = null;
-
-	if ( ! is_null( $is_sandboxed ) ) {
-		return $is_sandboxed;
-	}
-
-	$options      = $camptix->get_options();
-	$is_sandboxed = false;
-
-	// If the PayPal sandbox checkbox is set to true in manual settings
-	if ( isset( $options['payment_options_paypal']['sandbox'] ) && $options['payment_options_paypal']['sandbox'] ) {
-		$is_sandboxed = true;
-	}
-	if ( isset( $options['payment_options_stripe']['sandbox'] ) && $options['payment_options_stripe']['sandbox'] ) {
-		$is_sandboxed = true;
-	}
-
-	// If the WordCamp sandbox is picked from the predefs
-	if ( ! empty( $options['payment_options_paypal']['api_predef'] ) && 'wordcamp-sandbox' == $options['payment_options_paypal']['api_predef'] ) {
-		$is_sandboxed = true;
-	}
-	if ( ! empty( $options['payment_options_stripe']['api_predef'] ) && 'wpcs-sandbox' == $options['payment_options_stripe']['api_predef'] ) {
-		$is_sandboxed = true;
-	}
-
-	return $is_sandboxed;
 }
 
 /**
