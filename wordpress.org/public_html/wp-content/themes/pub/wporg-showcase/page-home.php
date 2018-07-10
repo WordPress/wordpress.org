@@ -103,7 +103,6 @@ get_header();
 					<h5><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h5>
 					<?php
 						the_tags( '<ul class="wpsc-tags"><li>', '</li><li>', '</li></ul>' );
-						if ( function_exists( 'the_ratings' ) ) the_ratings();
 					?>
 				</li>
 

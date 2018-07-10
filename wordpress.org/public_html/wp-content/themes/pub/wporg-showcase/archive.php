@@ -1,9 +1,6 @@
 <?php
 get_header();
 
-// order the displayed posts by the ratings average
-global $query_string;
-query_posts( $query_string . '&meta_key=ratings_average&orderby=meta_value_num' );
 ?>
 <div id="pagebody">
 	<div class="wrapper">

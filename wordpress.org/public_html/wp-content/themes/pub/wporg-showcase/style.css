@@ -90,10 +90,6 @@ textarea.text {
 	color: #666;
 }
 
-div.post-ratings {
-	height: 50px;
-}
-
 h4 {
 	border-bottom:1px solid #DEDEDE;
 	color:#333333;
@@ -178,44 +174,6 @@ h5 a {
 	margin: 0;
 	padding: 0;
 	font-size: 10px;
-}
-
-table.most-votes, table.top-rated {
-	padding: 0;
-	margin-bottom: 22px;
-}
-
-table.most-votes, table.top-rated td {
-	valign: top;
-	line-height: 16px;
-}
-
-.most-rated {
-	background: #F5F5F5;
-	-moz-border-radius: 3px;
-	-khtml-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-	border: 1px solid #ccc;
-	padding: 0;
-	margin: 1px 2px 0 0;
-	display: block;
-	text-align: center;
-	font-weight: bold;
-	width: 50px;
-	line-height: 14px;
-	color: #797979;
-	font-size: 11px;
-}
-
-.top-rated img.post-ratings-image {
-	height: 10px;
-	width: 10px;
-	margin-top: 3px;
-}
-
-.top-rated-stars {
-	width: 54px;
 }
 
 ul#flavors {
@@ -323,10 +281,6 @@ blockquote cite {
 
 .nextprev {
 	margin-bottom: 20px;
-}
-
-.post-ratings-text {
-	padding-left: 8px;
 }
 
 .clear {
@@ -811,28 +765,6 @@ a.wpsc-hero-learnmore {
 .wpsc-recent h5 a {
 	font-style: normal;
 	font-weight: bold;
-}
-
-.wpsc-recent>li .post-ratings {
-	position: absolute;
-	bottom: 0;
-	height:auto;
-	border-top: 1px #EFEFEF solid;
-	padding: 5px 0 0 0;
-	text-align: right;
-	width: 80%;
-	margin-left: 5%;
-}
-
-/* Ratings */
-
-#pagebody .post-ratings img,
-#pagebody .post-ratings-loading img,
-#pagebody .post-ratings-image img {
-	padding: 5px 2px 0 0; /* was margin */
-	float: left;
-	width:12px;
-	height:12px;
 }
 
 .wpsc-view-all {

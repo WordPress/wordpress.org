@@ -234,10 +234,6 @@ function custom_excerpt_length( $length ) {
 }
 add_filter( 'excerpt_length', 'custom_excerpt_length', 999 );
 
-// Switch ratings image to stars_showcase
-function wpsc_postratings_image( $option ) { return 'stars_showcase'; }
-	add_filter( 'pre_option_postratings_image', 'wpsc_postratings_image' );
-
 // Use ... in excerpts
 add_filter( 'excerpt_more', create_function( '$more', 'return "...";' ) );
 
