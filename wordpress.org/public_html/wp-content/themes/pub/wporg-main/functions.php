@@ -65,6 +65,8 @@ add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
  * Enqueue scripts and styles.
  */
 function scripts() {
+	$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
 	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180711' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
@@ -94,7 +96,7 @@ function scripts() {
 	}
 
 	if ( is_page() && get_queried_object()->post_parent ) {
-		wp_enqueue_script( 'wporg-navigation', get_theme_file_uri( '/js/navigation.js' ), [], '20151215', true );
+		wp_enqueue_script( 'wporg-navigation', get_theme_file_uri( "/js/navigation$suffix.js" ), [], '20151215', true );
 	}
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );

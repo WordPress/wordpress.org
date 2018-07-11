@@ -209,7 +209,7 @@ if ( WP_CORE_STABLE_BRANCH === $branch ) {
 		</div>
 	</div>
 
-	<script type="text/javascript" src="//code.jquery.com/jquery-latest.js"></script>
+	<script type="text/javascript" src="//code.jquery.com/jquery-latest.min.js"></script>
 	<script type="text/javascript">
 		jQuery( function( $ ) {
 			var numnums = $( '#numnumnum, #numnumnum2' ),
