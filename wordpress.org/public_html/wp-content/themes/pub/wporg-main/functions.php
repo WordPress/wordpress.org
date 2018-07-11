@@ -110,6 +110,7 @@ function script_src( $src, $handle ) {
 	$cdn_handles = [
 		'wporg-page-stats',
 		'wporg-navigation',
+		'wporg-plugins-skip-link-focus-fix',
 		'jquery-core',
 		'jquery-migrate',
 	];
