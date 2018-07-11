@@ -29,7 +29,7 @@ function enqueue_script( $form_id ) {
  */
 function display_submit_button( $submit_text = 'Submit', $classes = 'button' ) {
 	echo '<input' .
-		' data-sitekey=' . esc_attr( RECAPTCHA_INVIS_PUBKEY ) . '"' .
+		' data-sitekey="' . esc_attr( RECAPTCHA_INVIS_PUBKEY ) . '"' .
 		' data-callback="reCAPTCHAPostSubmit"' .
 		' type="submit"' .
 		' name="form-submit" id="form-submit"' .
