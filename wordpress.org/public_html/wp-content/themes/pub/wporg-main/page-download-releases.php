@@ -9,23 +9,16 @@
 
 namespace WordPressdotorg\MainTheme;
 
-if ( get_post()->post_parent ) {
-	$GLOBALS['menu_items'] = [
-		'download/releases'     => _x( 'Releases', 'Page title', 'wporg' ),
-		'download/beta-nightly' => _x( 'Beta/Nightly', 'Page title', 'wporg' ),
-		'download/counter'      => _x( 'Counter', 'Page title', 'wporg' ),
-		'download/source'       => _x( 'Source Code', 'Page title', 'wporg' ),
-	];
-}
+$GLOBALS['menu_items'] = [
+	'download/releases'     => _x( 'Releases', 'Page title', 'wporg' ),
+	'download/beta-nightly' => _x( 'Beta/Nightly', 'Page title', 'wporg' ),
+	'download/counter'      => _x( 'Counter', 'Page title', 'wporg' ),
+	'download/source'       => _x( 'Source Code', 'Page title', 'wporg' ),
+];
 
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
-} );
-
-add_filter( 'body_class', function( $classes ) {
-	$classes[] = 'page-child';
-	return $classes;
 } );
 
 /* See inc/page-meta-descriptions.php for the meta description for this page. */
