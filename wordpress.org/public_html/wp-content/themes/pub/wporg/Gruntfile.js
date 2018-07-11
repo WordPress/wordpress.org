@@ -39,6 +39,19 @@ module.exports = function( grunt ) {
 			files: [ 'Gruntfile.js', 'js/**/*.js' ],
 			options: grunt.file.readJSON( '.jshintrc' )
 		},
+		uglify: {
+			options: {
+				ASCIIOnly: true,
+				screwIE8: false
+			},
+			js: {
+				expand: true,
+				cwd: 'js/',
+				dest: 'js/',
+				ext: '.min.js',
+				src: '**/*.js',
+			}
+		},
 		sass: {
 			options: {
 				sourceMap: true,
@@ -156,8 +169,9 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-sass-globbing' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
+	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 
 	grunt.registerTask( 'css', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic'] );
 	grunt.registerTask( 'default', ['jshint', 'css'] );
-	grunt.registerTask( 'build', ['css'] );
+	grunt.registerTask( 'build', ['css', 'uglify:js'] );
 };
