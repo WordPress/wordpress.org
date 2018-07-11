@@ -223,6 +223,26 @@ function custom_page_title( $title, $post = null ) {
 		case 'page-about-privacy-data-export-request.php':
 			$title = esc_html_x( 'Data Export Request', 'Page title', 'wporg' );
 			break;
+
+		case 'page-download.php':
+			$title = esc_html_x( 'Download', 'Page title', 'wporg' );
+			break;
+
+		case 'page-download-beta-nightly.php':
+			$title = esc_html_x( 'Beta/Nightly', 'Page title', 'wporg' );
+			break;
+
+		case 'page-download-counter.php':
+			$title = esc_html_x( 'Counter', 'Page title', 'wporg' );
+			break;
+
+		case 'page-download-releases.php':
+			$title = esc_html_x( 'Releases', 'Page title', 'wporg' );
+			break;
+
+		case 'page-download-source.php':
+			$title = esc_html_x( 'Source Code', 'Page title', 'wporg' );
+			break;
 	}
 
 	return $title;
