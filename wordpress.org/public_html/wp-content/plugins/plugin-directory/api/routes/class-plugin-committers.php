@@ -108,7 +108,7 @@ class Plugin_Committers extends Base {
 		}
 
 		if ( ! empty( $user->allcaps['bbp_blocked'] ) ) {
-			return new WP_Error( 'plugin_user_banned', __( 'User is blocked/banned and cannot be granted commmit.', 'wporg-plugins' ) );
+			return new WP_Error( 'plugin_user_banned', __( 'User is blocked/banned and cannot be granted commit.', 'wporg-plugins' ) );
 		}
 
 		$plugin_slug = $request['plugin_slug'];
