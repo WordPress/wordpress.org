@@ -68,6 +68,18 @@ function scripts() {
 	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180711' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
+	if ( is_page( 'download' ) && ( ! defined( 'IS_ROSETTA_NETWORK' ) || ! IS_ROSETTA_NETWORK ) ) {
+		// Move jQuery to footer on w.org's Download page...
+		wp_scripts()->add_data( 'jquery', 'group', 1 );
+		wp_scripts()->add_data( 'jquery-core', 'group', 1 );
+		wp_scripts()->add_data( 'jquery-migrate', 'group', 1 );
+	} else {
+		// remove it everywhere else.
+		wp_deregister_script( 'jquery' );
+		wp_register_script( 'jquery', false );
+	}
+	wp_enqueue_script( 'jquery' );
+
 	if ( is_page( 'stats' ) ) {
 		wp_enqueue_script( 'google-charts', 'https://www.gstatic.com/charts/loader.js', [], null, true );
 		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts' ], 1, true );
@@ -98,6 +110,8 @@ function script_src( $src, $handle ) {
 	$cdn_handles = [
 		'wporg-page-stats',
 		'wporg-navigation',
+		'jquery-core',
+		'jquery-migrate',
 	];
 
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
