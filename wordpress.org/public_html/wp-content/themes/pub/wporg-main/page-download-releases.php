@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Releases
+ * Template Name: Download -> Releases
  *
  * Template for displaying a release archive page.
  *
