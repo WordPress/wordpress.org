@@ -67,7 +67,7 @@ function scripts() {
 
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array(), '20171002', true );
-		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array(), '20180131', true );
+		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), '20180131', true );
 	}
 
 	if ( ! is_404() ) {
@@ -119,8 +119,6 @@ function scripts() {
 	// No Jetpack scripts needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
 	wp_dequeue_script( 'devicepx' );
-
-	wp_enqueue_script( 'jquery' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
