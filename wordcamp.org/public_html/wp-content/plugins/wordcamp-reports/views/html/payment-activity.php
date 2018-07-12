@@ -8,10 +8,11 @@ defined( 'WPINC' ) || die();
 
 /** @var \DateTime $start_date */
 /** @var \DateTime $end_date */
-/** @var string $wordcamp_name */
-/** @var array $requests */
-/** @var array $payments */
-/** @var array $failures */
+/** @var \DateTime $xrt_date */
+/** @var string    $wordcamp_name */
+/** @var array     $requests */
+/** @var array     $payments */
+/** @var array     $failures */
 
 $asterisk2 = false;
 ?>
@@ -29,14 +30,18 @@ $asterisk2 = false;
 		<?php endif; ?>
 	</h3>
 
-	<ul>
-		<?php if ( $requests['vendor_payment_count'] ) : ?>
-			<li>Vendor payments: <?php echo number_format_i18n( $requests['vendor_payment_count'] ) ?></li>
-		<?php endif; ?>
-		<?php if ( $requests['reimbursement_count'] ) : ?>
-			<li>Reimbursements: <?php echo number_format_i18n( $requests['reimbursement_count'] ) ?></li>
-		<?php endif; ?>
-	</ul>
+	<table class="striped widefat but-not-too-wide">
+		<tbody>
+		<tr>
+			<td>Vendor payments:</td>
+			<td class="number"><?php echo number_format_i18n( $requests['vendor_payment_count'] ) ?></td>
+		</tr>
+		<tr>
+			<td>Reimbursements:</td>
+			<td class="number"><?php echo number_format_i18n( $requests['reimbursement_count'] ) ?></td>
+		</tr>
+		</tbody>
+	</table>
 
 	<table class="striped widefat but-not-too-wide">
 		<thead>
@@ -81,20 +86,24 @@ $asterisk2 = false;
 		<?php endif; ?>
 	</h3>
 
-	<ul>
-		<?php if ( $payments['vendor_payment_count'] ) : ?>
-			<li>Vendor payments: <?php echo number_format_i18n( $payments['vendor_payment_count'] ) ?></li>
-		<?php endif; ?>
-		<?php if ( $payments['reimbursement_count'] ) : ?>
-			<li>Reimbursements: <?php echo number_format_i18n( $payments['reimbursement_count'] ) ?></li>
-		<?php endif; ?>
-	</ul>
+	<table class="striped widefat but-not-too-wide">
+		<tbody>
+		<tr>
+			<td>Vendor payments:</td>
+			<td class="number"><?php echo number_format_i18n( $payments['vendor_payment_count'] ) ?></td>
+		</tr>
+		<tr>
+			<td>Reimbursements:</td>
+			<td class="number"><?php echo number_format_i18n( $payments['reimbursement_count'] ) ?></td>
+		</tr>
+		</tbody>
+	</table>
 
 	<table class="striped widefat but-not-too-wide">
 		<thead>
 		<tr>
 			<td>Currency</td>
-			<td>Total Amount Requested</td>
+			<td>Total Amount Paid</td>
 			<td>Estimated Value in USD *</td>
 		</tr>
 		</thead>
@@ -133,14 +142,18 @@ $asterisk2 = false;
 		<?php endif; ?>
 	</h3>
 
-	<ul>
-		<?php if ( $failures['vendor_payment_count'] ) : ?>
-			<li>Vendor payments: <?php echo number_format_i18n( $failures['vendor_payment_count'] ) ?></li>
-		<?php endif; ?>
-		<?php if ( $failures['reimbursement_count'] ) : ?>
-			<li>Reimbursements: <?php echo number_format_i18n( $failures['reimbursement_count'] ) ?></li>
-		<?php endif; ?>
-	</ul>
+	<table class="striped widefat but-not-too-wide">
+		<tbody>
+		<tr>
+			<td>Vendor payments:</td>
+			<td class="number"><?php echo number_format_i18n( $failures['vendor_payment_count'] ) ?></td>
+		</tr>
+		<tr>
+			<td>Reimbursements:</td>
+			<td class="number"><?php echo number_format_i18n( $failures['reimbursement_count'] ) ?></td>
+		</tr>
+		</tbody>
+	</table>
 
 	<table class="striped widefat but-not-too-wide">
 		<thead>
@@ -173,10 +186,12 @@ $asterisk2 = false;
 <?php endif; ?>
 
 <?php if ( $requests['vendor_payment_count'] || $requests['reimbursement_count'] || $payments['vendor_payment_count'] || $payments['reimbursement_count'] || $failures['vendor_payment_count'] || $failures['reimbursement_count'] ) : ?>
-	<p class="description">* Estimate based on exchange rates for <?php echo esc_html( $end_date->format( 'M jS, Y' ) ); ?></p>
-	<?php if ( $asterisk2 ) : ?>
-		<p class="description">** Currency exchange rate not available.</p>
-	<?php endif; ?>
+	<p class="description">
+		* Estimate based on exchange rates for <?php echo esc_html( $xrt_date->format( 'M jS, Y' ) ); ?>.
+		<?php if ( $asterisk2 ) : ?>
+			<br />** Currency exchange rate not available.
+		<?php endif; ?>
+	</p>
 <?php else : ?>
 	<p>
 		No data

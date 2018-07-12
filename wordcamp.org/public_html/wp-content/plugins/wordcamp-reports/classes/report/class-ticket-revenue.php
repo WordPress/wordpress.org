@@ -48,7 +48,7 @@ class Ticket_Revenue extends Date_Range {
 			<li>Query the CampTix events log for attendee status changes to \"publish\" or \"refund\" during the specified date range.</li>
 			<li>Query each WordCamp site with matched events and retrieve ticket data related to each event.</li>
 			<li>Append the ticket data to the event data.</li>
-			<li>Group the events based on whether the transaction was handled by WPCS. Assume all transactions in a currency supported by PayPal were handled by WPCS.</li>
+			<li>Group the events by payment method.</li>
 		</ol>
 	";
 
@@ -318,8 +318,10 @@ class Ticket_Revenue extends Date_Range {
 		}
 
 		foreach ( $ticket_ids as $ticket_id ) {
+			$method = get_post_meta( $ticket_id, 'tix_payment_method', true ) ?: 'none';
+
 			$ticket_details[ $blog_id . '_' . $ticket_id ] = array(
-				'method'           => get_post_meta( $ticket_id, 'tix_payment_method', true ),
+				'method'           => $method,
 				'currency'         => $currency,
 				'full_price'       => floatval( get_post_meta( $ticket_id, 'tix_ticket_price', true ) ),
 				'discounted_price' => floatval( get_post_meta( $ticket_id, 'tix_ticket_discounted_price', true ) ),
@@ -353,67 +355,77 @@ class Ticket_Revenue extends Date_Range {
 		);
 
 		$data_groups = array(
-			'wpcs'     => array_merge( $initial_data, array(
-				'label'       => 'WPCS ticket revenue',
-				'description' => 'Transactions using a payment method for which WPCS has an established account.',
+			'total'     => array_merge( $initial_data, array(
+				'label'       => 'Total ticket revenue',
+				'description' => 'Not including transaction fees.',
 			) ),
-			'non_wpcs' => array_merge( $initial_data, array(
-				'label'       => 'Non-WPCS ticket revenue',
-				'description' => 'Transactions using a payment method for which WPCS does not have an established account.',
+			'stripe'    => array_merge( $initial_data, array(
+				'label'       => 'Ticket transactions through Stripe',
+				'description' => '',
 			) ),
-			'none'     => array_merge( $initial_data, array(
+			'paypal'    => array_merge( $initial_data, array(
+				'label'       => 'Ticket transactions through PayPal',
+				'description' => '',
+			) ),
+			'instamojo' => array_merge( $initial_data, array(
+				'label'       => 'Ticket transactions through Instamojo',
+				'description' => '',
+			) ),
+			'razorpay'  => array_merge( $initial_data, array(
+				'label'       => 'Ticket transactions through Razorpay',
+				'description' => '',
+			) ),
+			'none'      => array_merge( $initial_data, array(
 				'label'       => 'Ticket transactions with no payment',
 				'description' => 'Transactions for which no payment method was recorded.',
 			) ),
-			'total'    => array_merge( $initial_data, array(
-				'label'       => 'Total ticket revenue',
-				'description' => '',
-			) ),
 		);
 
-		// Assume that all transactions through a gateway for which WPCS has an account, used the WPCS account.
-		$wpcs_payment_methods = array( 'paypal', 'stripe' );
 		$currencies           = array();
 
 		foreach ( $events as $event ) {
 			$currency = $event['currency'];
+			$method   = $event['method'];
+			$type     = $event['type'];
 
-			if ( ! $event['method'] ) {
-				$group = 'none';
-			} elseif ( in_array( $event['method'], $wpcs_payment_methods, true ) ) {
-				$group = 'wpcs';
-			} else {
-				$group = 'non_wpcs';
+			if ( ! isset( $data_groups[ $method ] ) ) {
+				$data_groups[ $method ] = array_merge( $initial_data, array(
+					'label'       => sprintf(
+						'Ticket transactions through %s',
+						esc_html( $method )
+					),
+					'description' => '',
+				) );
 			}
 
 			if ( ! in_array( $currency, $currencies, true ) ) {
-				$data_groups[ $group ]['gross_revenue_by_currency'][ $currency ]   = 0;
-				$data_groups[ $group ]['discounts_by_currency'][ $currency ]       = 0;
-				$data_groups[ $group ]['amount_refunded_by_currency'][ $currency ] = 0;
-				$data_groups[ $group ]['net_revenue_by_currency'][ $currency ]     = 0;
-				$data_groups['total']['gross_revenue_by_currency'][ $currency ]    = 0;
-				$data_groups['total']['discounts_by_currency'][ $currency ]        = 0;
-				$data_groups['total']['amount_refunded_by_currency'][ $currency ]  = 0;
-				$data_groups['total']['net_revenue_by_currency'][ $currency ]      = 0;
-				$currencies[]                                                      = $currency;
+				$data_groups[ $method ]['gross_revenue_by_currency'][ $currency ]   = 0;
+				$data_groups[ $method ]['discounts_by_currency'][ $currency ]       = 0;
+				$data_groups[ $method ]['amount_refunded_by_currency'][ $currency ] = 0;
+				$data_groups[ $method ]['net_revenue_by_currency'][ $currency ]     = 0;
+				$data_groups['total']['gross_revenue_by_currency'][ $currency ]     = 0;
+				$data_groups['total']['discounts_by_currency'][ $currency ]         = 0;
+				$data_groups['total']['amount_refunded_by_currency'][ $currency ]   = 0;
+				$data_groups['total']['net_revenue_by_currency'][ $currency ]       = 0;
+				$currencies[]                                                       = $currency;
 			}
 
-			switch ( $event['type'] ) {
+			switch ( $type ) {
 				case 'Purchase' :
-					$data_groups[ $group ]['tickets_sold'] ++;
-					$data_groups[ $group ]['gross_revenue_by_currency'][ $currency ] += $event['full_price'];
-					$data_groups[ $group ]['discounts_by_currency'][ $currency ]     += $event['full_price'] - $event['discounted_price'];
-					$data_groups[ $group ]['net_revenue_by_currency'][ $currency ]   += $event['discounted_price'];
-					$data_groups['total']['tickets_sold']  ++;
-					$data_groups['total']['gross_revenue_by_currency'][ $currency ]  += $event['full_price'];
-					$data_groups['total']['discounts_by_currency'][ $currency ]      += $event['full_price'] - $event['discounted_price'];
-					$data_groups['total']['net_revenue_by_currency'][ $currency ]    += $event['discounted_price'];
+					$data_groups[ $method ]['tickets_sold'] ++;
+					$data_groups[ $method ]['gross_revenue_by_currency'][ $currency ] += $event['full_price'];
+					$data_groups[ $method ]['discounts_by_currency'][ $currency ]     += $event['full_price'] - $event['discounted_price'];
+					$data_groups[ $method ]['net_revenue_by_currency'][ $currency ]   += $event['discounted_price'];
+					$data_groups['total']['tickets_sold'] ++;
+					$data_groups['total']['gross_revenue_by_currency'][ $currency ] += $event['full_price'];
+					$data_groups['total']['discounts_by_currency'][ $currency ]     += $event['full_price'] - $event['discounted_price'];
+					$data_groups['total']['net_revenue_by_currency'][ $currency ]   += $event['discounted_price'];
 					break;
 
 				case 'Refund' :
-					$data_groups[ $group ]['tickets_refunded'] ++;
-					$data_groups[ $group ]['amount_refunded_by_currency'][ $currency ] += $event['discounted_price'];
-					$data_groups[ $group ]['net_revenue_by_currency'][ $currency ]     -= $event['discounted_price'];
+					$data_groups[ $method ]['tickets_refunded'] ++;
+					$data_groups[ $method ]['amount_refunded_by_currency'][ $currency ] += $event['discounted_price'];
+					$data_groups[ $method ]['net_revenue_by_currency'][ $currency ]     -= $event['discounted_price'];
 					$data_groups['total']['tickets_refunded']  ++;
 					$data_groups['total']['amount_refunded_by_currency'][ $currency ]  += $event['discounted_price'];
 					$data_groups['total']['net_revenue_by_currency'][ $currency ]      -= $event['discounted_price'];
@@ -460,14 +472,13 @@ class Ticket_Revenue extends Date_Range {
 	 * @return void
 	 */
 	public function render_html() {
-		$data       = $this->compile_report_data( $this->get_data() );
-		$start_date = $this->start_date;
-		$end_date   = $this->end_date;
+		$now = new \DateTime();
 
+		$start_date    = $this->start_date;
+		$end_date      = $this->end_date;
+		$xrt_date      = ( $end_date > $now ) ? $now : $end_date;
 		$wordcamp_name = ( $this->wordcamp_site_id ) ? get_wordcamp_name( $this->wordcamp_site_id ) : '';
-		$wpcs          = $data['wpcs'];
-		$non_wpcs      = $data['non_wpcs'];
-		$none          = $data['none'];
+		$data          = $this->compile_report_data( $this->get_data() );
 		$total         = $data['total'];
 
 		if ( ! empty( $this->error->get_error_messages() ) ) {

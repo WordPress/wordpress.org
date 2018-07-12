@@ -1,13 +1,17 @@
 
 /** Tables **/
-.widefat.but-not-too-wide {
+.report-results table {
+	margin: 1em 0;
+}
+
+.report-results .widefat.but-not-too-wide {
 	width: auto;
 }
 
-td.number {
+.report-results td.number {
 	text-align: right;
 }
 
-td.total {
+.report-results td.total {
 	font-weight: bold;
 }

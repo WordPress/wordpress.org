@@ -57,6 +57,8 @@ use WordCamp\Reports\Report;
 	</form>
 
 	<?php if ( $report instanceof Report\Sponsorship_Grants ) : ?>
-		<?php $report->render_html(); ?>
+		<div class="report-results">
+			<?php $report->render_html(); ?>
+		</div>
 	<?php endif; ?>
 </div>

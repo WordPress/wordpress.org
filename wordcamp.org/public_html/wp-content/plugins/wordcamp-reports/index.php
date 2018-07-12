@@ -24,7 +24,7 @@ define( __NAMESPACE__ . '\PLUGIN_URL', \plugins_url( '/', __FILE__ ) );
 /**
  * Get the path for the includes directory.
  *
- * @return string Path with trailing slash
+ * @return string Path with trailing slash.
  */
 function get_classes_dir_path() {
 	return trailingslashit( PLUGIN_DIR ) . 'classes/';
@@ -33,10 +33,19 @@ function get_classes_dir_path() {
 /**
  * Get the path for the views directory.
  *
- * @return string Path with trailing slash
+ * @return string Path with trailing slash.
  */
 function get_views_dir_path() {
 	return trailingslashit( PLUGIN_DIR ) . 'views/';
+}
+
+/**
+ * Get the path for the assets directory.
+ *
+ * @return string Path with trailing slash.
+ */
+function get_assets_dir_path() {
+	return trailingslashit( PLUGIN_DIR ) . 'assets/';
 }
 
 /**
@@ -202,7 +211,7 @@ function enqueue_admin_assets( $hook_suffix ) {
 		'admin-common',
 		get_assets_url() . 'css/admin-common.css',
 		array(),
-		CSS_VERSION
+		filemtime( get_assets_dir_path() . 'css/admin-common.css' )
 	);
 
 	$report       = filter_input( INPUT_GET, 'report', FILTER_SANITIZE_STRING );

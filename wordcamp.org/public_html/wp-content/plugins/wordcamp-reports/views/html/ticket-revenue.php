@@ -8,16 +8,16 @@ defined( 'WPINC' ) || die();
 
 /** @var \DateTime $start_date */
 /** @var \DateTime $end_date */
-/** @var string $wordcamp_name */
-/** @var array $data */
+/** @var \DateTime $xrt_date */
+/** @var string    $wordcamp_name */
+/** @var array     $data */
+/** @var array     $total */
 
 $asterisk2 = false;
-$groups    = 0;
 ?>
 
 <?php foreach ( $data as $key => $group ) : ?>
 	<?php if ( empty( $group['gross_revenue_by_currency'] ) ) continue; ?>
-	<?php if ( 'total' === $key && $groups < 2 ) continue; ?>
 
 	<h3>
 		<?php echo esc_html( $group['label'] ); ?>
@@ -35,10 +35,18 @@ $groups    = 0;
 		<p class="description"><?php echo wp_kses_post( $group['description'] ); ?></p>
 	<?php endif; ?>
 
-	<ul>
-		<li>Tickets sold: <?php echo number_format_i18n( $group['tickets_sold'] ); ?></li>
-		<li>Tickets refunded: <?php echo number_format_i18n( $group['tickets_refunded'] ); ?></li>
-	</ul>
+	<table class="striped widefat but-not-too-wide">
+		<tbody>
+		<tr>
+			<td>Tickets sold:</td>
+			<td class="number"><?php echo number_format_i18n( $group['tickets_sold'] ); ?></td>
+		</tr>
+		<tr>
+			<td>Tickets refunded:</td>
+			<td class="number"><?php echo number_format_i18n( $group['tickets_refunded'] ); ?></td>
+		</tr>
+		</tbody>
+	</table>
 
 	<table class="striped widefat but-not-too-wide">
 		<thead>
@@ -82,12 +90,11 @@ $groups    = 0;
 		</tr>
 		</tbody>
 	</table>
-	<?php $groups ++; ?>
 <?php endforeach; ?>
 
 <?php if ( ! empty( $total['net_revenue_by_currency'] ) ) : ?>
 	<p class="description">
-		* Estimate based on exchange rates for <?php echo esc_html( $end_date->format( 'M jS, Y' ) ); ?>
+		* Estimate based on exchange rates for <?php echo esc_html( $xrt_date->format( 'M jS, Y' ) ); ?>.
 		<?php if ( $asterisk2 ) : ?>
 			<br />** Currency exchange rate not available.
 		<?php endif; ?>

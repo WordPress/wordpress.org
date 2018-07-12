@@ -517,10 +517,12 @@ class Payment_Activity extends Date_Range {
 	 * @return void
 	 */
 	public function render_html() {
-		$data       = $this->compile_report_data( $this->get_data() );
+		$now  = new \DateTime();
+		$data = $this->compile_report_data( $this->get_data() );
+
 		$start_date = $this->start_date;
 		$end_date   = $this->end_date;
-
+		$xrt_date      = ( $end_date > $now ) ? $now : $end_date;
 		$wordcamp_name = ( $this->wordcamp_site_id ) ? get_wordcamp_name( $this->wordcamp_site_id ) : '';
 		$requests      = $data['requests'];
 		$payments      = $data['payments'];

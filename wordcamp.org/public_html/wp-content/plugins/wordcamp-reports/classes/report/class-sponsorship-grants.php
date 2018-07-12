@@ -315,12 +315,14 @@ class Sponsorship_Grants extends Date_Range {
 	 * @return void
 	 */
 	public function render_html() {
-		$data          = $this->get_data();
-		$compiled_data = $this->compile_report_data( $data );
+		$now = new \DateTime();
+
 		$start_date    = $this->start_date;
 		$end_date      = $this->end_date;
-
+		$xrt_date      = ( $end_date > $now ) ? $now : $end_date;
 		$wordcamp_name = ( $this->wordcamp_site_id ) ? get_wordcamp_name( $this->wordcamp_site_id ) : '';
+		$data          = $this->get_data();
+		$compiled_data = $this->compile_report_data( $data );
 
 		if ( ! empty( $this->error->get_error_messages() ) ) {
 			$this->render_error_html();

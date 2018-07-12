@@ -57,6 +57,8 @@ use WordCamp\Reports\Report;
 	</form>
 
 	<?php if ( $report instanceof Report\Payment_Activity ) : ?>
-		<?php $report->render_html(); ?>
+		<div class="report-results">
+			<?php $report->render_html(); ?>
+		</div>
 	<?php endif; ?>
 </div>

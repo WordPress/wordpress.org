@@ -8,9 +8,10 @@ defined( 'WPINC' ) || die();
 
 /** @var \DateTime $start_date */
 /** @var \DateTime $end_date */
-/** @var string $wordcamp_name */
-/** @var array $invoices */
-/** @var array $payments */
+/** @var \DateTime $xrt_date */
+/** @var string    $wordcamp_name */
+/** @var array     $invoices */
+/** @var array     $payments */
 
 $asterisk2 = false;
 ?>
@@ -28,9 +29,14 @@ $asterisk2 = false;
 		<?php endif; ?>
 	</h3>
 
-	<ul>
-		<li>Invoices sent: <?php echo number_format_i18n( $invoices['total_count'] ); ?></li>
-	</ul>
+	<table class="striped widefat but-not-too-wide">
+		<tbody>
+		<tr>
+			<td>Invoices sent:</td>
+			<td class="number"><?php echo number_format_i18n( $invoices['total_count'] ); ?></td>
+		</tr>
+		</tbody>
+	</table>
 
 	<table class="striped widefat but-not-too-wide">
 		<thead>
@@ -75,9 +81,14 @@ $asterisk2 = false;
 		<?php endif; ?>
 	</h3>
 
-	<ul>
-		<li>Payments received: <?php echo number_format_i18n( $payments['total_count'] ); ?></li>
-	</ul>
+	<table class="striped widefat but-not-too-wide">
+		<tbody>
+		<tr>
+			<td>Payments received:</td>
+			<td class="number"><?php echo number_format_i18n( $payments['total_count'] ); ?></td>
+		</tr>
+		</tbody>
+	</table>
 
 	<table class="striped widefat but-not-too-wide">
 		<thead>
@@ -110,10 +121,12 @@ $asterisk2 = false;
 <?php endif; ?>
 
 <?php if ( $invoices['total_count'] > 0 || $payments['total_count'] > 0 ) : ?>
-	<p class="description">* Estimate based on exchange rates for <?php echo esc_html( $end_date->format( 'M jS, Y' ) ); ?></p>
-	<?php if ( $asterisk2 ) : ?>
-		<p class="description">** Currency exchange rate not available.</p>
-	<?php endif; ?>
+	<p class="description">
+		* Estimate based on exchange rates for <?php echo esc_html( $xrt_date->format( 'M jS, Y' ) ); ?>.
+		<?php if ( $asterisk2 ) : ?>
+			<br />** Currency exchange rate not available.
+		<?php endif; ?>
+	</p>
 <?php else : ?>
 	<p>
 		No data

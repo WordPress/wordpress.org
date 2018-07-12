@@ -8,9 +8,10 @@ defined( 'WPINC' ) || die();
 
 /** @var \DateTime $start_date */
 /** @var \DateTime $end_date */
-/** @var string $wordcamp_name */
-/** @var array $data */
-/** @var array $compiled_data */
+/** @var \DateTime $xrt_date */
+/** @var string    $wordcamp_name */
+/** @var array     $data */
+/** @var array     $compiled_data */
 
 $asterisk2 = false;
 ?>
@@ -28,7 +29,14 @@ $asterisk2 = false;
 		<?php endif; ?>
 	</h3>
 
-	<h4>Grants awarded: <?php echo number_format_i18n( $compiled_data['grant_count'] ) ?></h4>
+	<table class="striped widefat but-not-too-wide">
+		<tbody>
+		<tr>
+			<td>Grants awarded:</td>
+			<td class="number"><?php echo number_format_i18n( $compiled_data['grant_count'] ) ?></td>
+		</tr>
+		</tbody>
+	</table>
 
 	<table class="striped widefat but-not-too-wide">
 		<thead>
@@ -59,10 +67,12 @@ $asterisk2 = false;
 		</tbody>
 	</table>
 
-	<p class="description">* Estimate based on exchange rates for <?php echo esc_html( $end_date->format( 'M jS, Y' ) ); ?></p>
-	<?php if ( $asterisk2 ) : ?>
-		<p class="description">** Currency exchange rate not available.</p>
-	<?php endif; ?>
+	<p class="description">
+		* Estimate based on exchange rates for <?php echo esc_html( $xrt_date->format( 'M jS, Y' ) ); ?>.
+		<?php if ( $asterisk2 ) : ?>
+			<br />** Currency exchange rate not available.
+		<?php endif; ?>
+	</p>
 
 	<h4>Grant details:</h4>
 
