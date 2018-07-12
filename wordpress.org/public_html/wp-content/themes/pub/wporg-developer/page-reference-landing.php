@@ -43,7 +43,7 @@ get_header(); ?>
 								<?php
 
 								$list = new WP_Query( array(
-									'posts_per_page' => 13,
+									'posts_per_page' => 14,
 									'post_type'      => DevHub\get_parsed_post_types(),
 									'orderby'        => 'title',
 									'order'          => 'ASC',
