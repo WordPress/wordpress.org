@@ -119,6 +119,8 @@ function scripts() {
 	// No Jetpack scripts needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
 	wp_dequeue_script( 'devicepx' );
+
+	wp_enqueue_script( 'jquery' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
