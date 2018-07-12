@@ -70,13 +70,13 @@ function scripts() {
 	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180711' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
-	if ( is_page( 'download' ) || is_page( 'stats' ) ) {
-		// Move jQuery to footer on w.org's Download page...
+	if ( is_page( 'download' ) || is_page( 'stats' ) || is_single() ) {
+		// Moves jQuery to the footer when needed...
 		wp_scripts()->add_data( 'jquery', 'group', 1 );
 		wp_scripts()->add_data( 'jquery-core', 'group', 1 );
 		wp_scripts()->add_data( 'jquery-migrate', 'group', 1 );
 	} else {
-		// remove it everywhere else.
+		// and removes it when not.
 		wp_deregister_script( 'jquery' );
 		wp_register_script( 'jquery', false );
 	}
