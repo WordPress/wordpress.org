@@ -98,6 +98,8 @@
 					<meta itemprop="ratingCount" content="<?php echo $theme->num_ratings; ?>"/>
 					<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
 
+					<a class="reviews-link" href="//wordpress.org/support/theme/<?php echo $theme->slug; ?>/reviews/"><?php esc_html_e( 'See all', 'wporg-themes' ); ?></a>
+
 					<?php if ( $theme->rating ) { ?>
 					<div class="rating rating-<?php echo round( $theme->rating / 10 ) * 10; ?>">
 						<span class="one"></span>

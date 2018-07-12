@@ -80,8 +80,8 @@ module.exports = function( grunt ) {
 							paths.push( '!../wporg/css/tools/_kube.scss' );
 						}
 
-						if ( 'base' === component ) {
-							paths.push( '!../wporg/css/base/_kube.scss' );
+						if ( 'generic' === component ) {
+							paths.push( '!../wporg/css/generic/_kube.scss' );
 						}
 
 						files[ 'css/' + component + '/_' + component + '.scss' ] = paths;

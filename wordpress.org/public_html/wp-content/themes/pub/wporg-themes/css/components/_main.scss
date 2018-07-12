@@ -629,6 +629,28 @@ body.author .theme-browser .theme .theme-author  {
 	color: #999;
 }
 
+.theme-ratings {
+	position: relative;
+}
+
+.theme-ratings .reviews-link {
+	font-size: 12px;
+	font-size: 0.6666rem;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+[dir="ltr"] .theme-ratings .reviews-link:after,
+[dir="rtl"] .theme-ratings .reviews-link:before {
+	content: "\f345";
+	font-family: dashicons;
+	float: right;
+	padding-left: 3px;
+	position: relative;
+	top: 1px;
+}
+
 .theme-ratings .description {
 	color: #aa9;
 	display: inline-block;
