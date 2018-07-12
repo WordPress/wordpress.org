@@ -24,29 +24,6 @@ get_header(); ?>
 			<div class="entry-content">
 				<section>
 					<div class="container">
-						<p>
-							<?php
-							printf(
-								/* translators: URL to plugin guidelines. */
-								wp_kses_post( __( 'Once submitted, your plugin will be manually reviewed for any common errors as well as ensuring it complies with <a href="%s">all the guidelines</a>.', 'wporg-plugins' ) ),
-								esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/' )
-							);
-							?>
-						</p>
-
-						<?php echo do_shortcode( '[wporg-plugin-upload]' ); ?>
-
-						<p><?php esc_html_e( 'Even if you&#8217;ve submitted a dozen plugins, take the time to refresh your memory with the following information:', 'wporg-plugins' ); ?>
-						<ul>
-							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/"><?php esc_html_e( 'How to use SVN', 'wporg-plugins' ); ?></a></li>
-							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/"><?php esc_html_e( 'Plugin Assets (and how to use them)', 'wporg-plugins' ); ?></a></li>
-							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/"><?php esc_html_e( 'Developer FAQ', 'wporg-plugins' ); ?></a></li>
-						</ul>
-					</div>
-				</section>
-
-				<section>
-					<div class="container">
 						<h2 id="faq"><?php esc_html_e( 'FAQ', 'wporg-plugins' ); ?></h2>
 
 						<h3><?php esc_html_e( 'How long will the review process take?', 'wporg-plugins' ); ?></h3>
@@ -78,6 +55,29 @@ get_header(); ?>
 							?>
 						</p>
 						<p><?php echo wp_kses_post( __( 'Regarding the names and trademarks of other companies and plugins, don&#8217;t use them at the start of your plugin name. If you&#8217;re not Facebook, you shouldn&#8217;t submit a plugin that uses <code>facebook</code> as the first term in your slug. &#8220;Facebook Like Sharer&#8221; (which would be <code>facebook-like-sharer</code>) is not acceptable, but &#8220;Like Sharer for Facebook&#8221; (which would be <code>like-sharer-for-facebook</code>) would be alright.', 'wporg-plugins' ) ); ?></p>
+					</div>
+				</section>
+
+				<section>
+					<div class="container">
+						<p>
+							<?php
+							printf(
+								/* translators: URL to plugin guidelines. */
+								wp_kses_post( __( 'Once submitted, your plugin will be manually reviewed for any common errors as well as ensuring it complies with <a href="%s">all the guidelines</a>.', 'wporg-plugins' ) ),
+								esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/' )
+							);
+							?>
+						</p>
+
+						<?php echo do_shortcode( '[wporg-plugin-upload]' ); ?>
+
+						<p><?php esc_html_e( 'Even if you&#8217;ve submitted a dozen plugins, take the time to refresh your memory with the following information:', 'wporg-plugins' ); ?>
+						<ul>
+							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/"><?php esc_html_e( 'How to use SVN', 'wporg-plugins' ); ?></a></li>
+							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/"><?php esc_html_e( 'Plugin Assets (and how to use them)', 'wporg-plugins' ); ?></a></li>
+							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/"><?php esc_html_e( 'Developer FAQ', 'wporg-plugins' ); ?></a></li>
+						</ul>
 					</div>
 				</section>
 			</div><!-- .entry-content -->
