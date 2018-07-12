@@ -62,16 +62,21 @@ function scripts() {
 	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180514a' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
+	// Make jQuery a footer script.
+	wp_scripts()->add_data( 'jquery', 'group', 1 );
+	wp_scripts()->add_data( 'jquery-core', 'group', 1 );
+	wp_scripts()->add_data( 'jquery-migrate', 'group', 1 );
+
 	wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
 
 	if ( is_singular( 'plugin' ) ) {
-		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array(), '20171002', true );
+		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
 		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), '20180131', true );
 	}
 
 	if ( ! is_404() ) {
-		wp_enqueue_script( 'wporg-plugins-locale-banner', get_stylesheet_directory_uri() . '/js/locale-banner.js', array(), '20171116', true );
+		wp_enqueue_script( 'wporg-plugins-locale-banner', get_stylesheet_directory_uri() . '/js/locale-banner.js', array( 'jquery' ), '20171116', true );
 		wp_localize_script( 'wporg-plugins-locale-banner', 'wporgLocaleBanner', array(
 			'apiURL'        => rest_url( '/plugins/v1/locale-banner' ),
 			'currentPlugin' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
@@ -119,6 +124,8 @@ function scripts() {
 	// No Jetpack scripts needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
 	wp_dequeue_script( 'devicepx' );
+	wp_register_script( 'grofiles-cards', false );
+	wp_enqueue_script( 'grofiles-cards' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
@@ -133,6 +140,8 @@ function loader_src( $src, $handle ) {
 	$cdn_urls = [
 		'dashicons',
 		'wp-embed',
+		'jquery-core',
+		'jquery-migrate',
 		'wporg-style',
 		'wporg-navigation',
 		'wporg-skip-link-focus-fix',
@@ -143,7 +152,7 @@ function loader_src( $src, $handle ) {
 		'wporg-plugins-faq',
 	];
 
-	if ( false === strpos( home_url(), 'wordpress.org' ) ) {
+	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		return $src;
 	}
 
