@@ -2182,7 +2182,7 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 
 #content .report-results table {
 	font-size: 0.9em;
-	margin: auto;
+	margin: 1em 0;
 	max-width: 100%;
 	width: auto;
 }
