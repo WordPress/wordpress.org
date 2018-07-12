@@ -57,83 +57,83 @@ function get_whitelist() {
 			'pbiron',
 			'welcher',
 		) ),
-		'core-bootstrap' => array(
+		'core-bootstrap' => array_merge( get_committers(), array(
 			'schlessera',
-		),
-		'core-comments' => array(
+		) ),
+		'core-comments' => array_merge( get_committers(), array(
 			'rachelbaker',
-		),
+		) ),
 		'core-committers' => get_committers(),
-		'core-customize' => array(
+		'core-customize' => array_merge( get_committers(), array(
 			'celloexpressions',
 			'jeffpaul',
 			'ocean90',
 			'valendesigns',
 			'voldemortensen',
 			'westonruter',
-		),
-		'core-docs' => array(
+		) ),
+		'core-docs' => array_merge( get_committers(), array(
 			'drew',
 			'kenshino',
 			'omarreiss',
 			'johnbillion',
 			'atimmer',
-		),
-		'core-editor' => array(
+		) ),
+		'core-editor' => array_merge( get_committers(), array(
 			'azaozz',
 			'iseulde',
 			'jeffpaul',
 			'karmatosed',
 			'matias',
 			'mcsf',
-		),
-		'core-fields' => array(
+		) ),
+		'core-fields' => array_merge( get_committers(), array(
 			'sc0ttkclark',
-		),
-		'core-flow' => array(
+		) ),
+		'core-flow' => array_merge( get_committers(), array(
 			'boren',
-		),
-		'core-http' => array(
+		) ),
+		'core-http' => array_merge( get_committers(), array(
 			'eric',
 			'tollmanz',
-		),
-		'core-i18n' => array(
+		) ),
+		'core-i18n' => array_merge( get_committers(), array(
 			'ocean90',
 			'sergey',
 			'swissspidy',
-		),
-		'core-js' => array(
+		) ),
+		'core-js' => array_merge( get_committers(), array(
 			'adamsilverstein',
 			'aduth',
 			'rmccue',
-		),
-		'core-media' => array(
+		) ),
+		'core-media' => array_merge( get_committers(), array(
 			'antpb',
 			'desrosj',
 			'joemcgill',
 			'karmatosed',
 			'mike',
 			'ocean90',
-		),
-		'core-multisite' => array(
+		) ),
+		'core-multisite' => array_merge( get_committers(), array(
 			'flixos90',
 			'jeremyfelt',
-		),
-		'core-passwords' => array(
+		) ),
+		'core-passwords' => array_merge( get_committers(), array(
 			'georgestephanis',
 			'valendesigns',
-		),
-		'core-php' => array(
+		) ),
+		'core-php' => array_merge( get_committers(), array(
 			'flixos90',
 			'schlessera',
-		),
-		'core-privacy' => array(
+		) ),
+		'core-privacy' => array_merge( get_committers(), array(
 			'allendav',
 			'azaozz',
 			'casiepa',
 			'desrosj',
-		),
-		'core-restapi' => array(
+		) ),
+		'core-restapi' => array_merge( get_committers(), array(
 			'danielbachhuber',
 			'flixos90',
 			'joehoyle',
@@ -141,14 +141,14 @@ function get_whitelist() {
 			'krogsgard',
 			'rachelbaker',
 			'rmccue',
-		),
-		'core-themes' => array(
+		) ),
+		'core-themes' => array_merge( get_committers(), array(
 			'davidakennedy',
 			'iamtakashi',
 			'karmatosed',
 			'laurelfulford',
 			'melchoyce',
-		),
+		) ),
 		'design' => array(
 			'boemedia',
 			'hugobaeta',
