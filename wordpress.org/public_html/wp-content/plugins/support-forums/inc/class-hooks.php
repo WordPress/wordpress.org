@@ -17,6 +17,9 @@ class Hooks {
 		add_filter( 'wp_insert_post_data',            array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',        array( $this, 'replace_quicktags_blockquote_button' ) );
 
+		// Link to create new topics atop topic list.
+		add_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
+
 		// Gravatar suppression on lists of topics and revision logs.
 		add_filter( 'bbp_after_get_topic_author_link_parse_args', array( $this, 'get_author_link' ) );
 		add_filter( 'bbp_after_get_reply_author_link_parse_args', array( $this, 'get_author_link' ) );
@@ -232,6 +235,13 @@ class Hooks {
 			}
 		</script>
 		<?php
+	}
+
+	/**
+	 * Displays a link to the new topic form.
+	 */
+	public function new_topic_link() {
+		printf( '<a class="create-topic" href="#new-topic-0">%s</a>', __( 'Create Topic', 'wporg-forums' ) );
 	}
 
 	/**

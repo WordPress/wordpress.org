@@ -434,6 +434,22 @@ section {
 			color: #f00;
 		}
 
+		.create-topic {
+			font-size: 0.8rem;
+			float: left;
+
+			&:before {
+				color: #000;
+				content: "\f132";
+				float: left;
+				font: 400 16px/1 dashicons;
+				margin-right: 3px;
+				padding-top: 3px;
+			}
+		}
+
+
+
 		.bbp-pagination {
 			font-size: ms(-2);
 			float: none;

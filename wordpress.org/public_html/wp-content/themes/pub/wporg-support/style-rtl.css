@@ -3703,6 +3703,20 @@ section {
 	color: #f00;
 }
 
+.bbpress #bbpress-forums .create-topic {
+	font-size: 0.8rem;
+	float: right;
+}
+
+.bbpress #bbpress-forums .create-topic:before {
+	color: #000;
+	content: "\f132";
+	float: right;
+	font: 400 16px/1 dashicons;
+	margin-left: 3px;
+	padding-top: 3px;
+}
+
 .bbpress #bbpress-forums .bbp-pagination {
 	font-size: 0.8rem;
 	float: none;
