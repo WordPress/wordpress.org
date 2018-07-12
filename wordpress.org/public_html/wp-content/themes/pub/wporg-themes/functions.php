@@ -114,6 +114,9 @@ function wporg_themes_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
 
+// Disable mentions script in Theme Directory.
+add_filter( 'jetpack_mentions_should_load_ui', '__return_false', 11 );
+
 /**
  * Extend the default WordPress body classes.
  *

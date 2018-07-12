@@ -129,6 +129,9 @@ function scripts() {
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
+// Disable mentions script in Plugin Directory.
+add_filter( 'jetpack_mentions_should_load_ui', '__return_false', 11 );
+
 /**
  * Filters an enqueued script & style's fully-qualified URL.
  *
