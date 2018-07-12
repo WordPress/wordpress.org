@@ -111,6 +111,7 @@ function get_whitelist() {
 			'antpb',
 			'desrosj',
 			'joemcgill',
+			'karmatosed',
 			'mike',
 			'ocean90',
 		),
