@@ -1274,6 +1274,15 @@ namespace DevHub {
 	}
 
 	/**
+	 * Returns the array of post types that have source code.
+	 *
+	 * @return array
+	 */
+	function get_post_types_with_source_code() {
+		return array( 'wp-parser-class', 'wp-parser-method', 'wp-parser-function' );
+	}
+
+	/**
 	 * Does the post type have source code?
 	 *
 	 * @param  null|string $post_type Optional. The post type name. If null, assumes current post type. Default null.
@@ -1281,10 +1290,9 @@ namespace DevHub {
 	 * @return bool
 	 */
 	function post_type_has_source_code( $post_type = null ) {
-		$post_type                   = $post_type ? $post_type : get_post_type();
-		$post_types_with_source_code = array( 'wp-parser-class', 'wp-parser-method', 'wp-parser-function' );
+		$post_type = $post_type ? $post_type : get_post_type();
 
-		return in_array( $post_type, $post_types_with_source_code );
+		return in_array( $post_type, get_post_types_with_source_code() );
 	}
 
 	/**
