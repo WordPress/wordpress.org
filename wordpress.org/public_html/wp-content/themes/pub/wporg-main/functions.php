@@ -70,7 +70,7 @@ function scripts() {
 	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20180711' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
-	if ( is_page( 'download' ) && ( ! defined( 'IS_ROSETTA_NETWORK' ) || ! IS_ROSETTA_NETWORK ) ) {
+	if ( is_page( 'download' ) || is_page( 'stats' ) ) {
 		// Move jQuery to footer on w.org's Download page...
 		wp_scripts()->add_data( 'jquery', 'group', 1 );
 		wp_scripts()->add_data( 'jquery-core', 'group', 1 );
