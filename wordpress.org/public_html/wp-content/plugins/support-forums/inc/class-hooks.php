@@ -241,7 +241,9 @@ class Hooks {
 	 * Displays a link to the new topic form.
 	 */
 	public function new_topic_link() {
-		printf( '<a class="create-topic" href="#new-topic-0">%s</a>', __( 'Create Topic', 'wporg-forums' ) );
+		if ( bbp_is_single_forum() ) {
+			printf( '<a class="create-topic" href="#new-topic-0">%s</a>', __( 'Create Topic', 'wporg-forums' ) );
+		}
 	}
 
 	/**
