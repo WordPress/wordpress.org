@@ -330,6 +330,16 @@ class WPorg_Handbook {
 	}
 
 	function pre_get_posts( $query ) {
+		// Bail early if query is not for this handbook's post type.
+		if ( get_query_var( 'post_type' ) !== $this->post_type ) {
+			// Request is obviously not for a handbook root page. (Though if the request is
+			// for some other handbook's root page will be determined by that handbook.)
+			if ( empty( get_query_var( 'handbook' ) ) ) {
+				$query->is_handbook_root = false;
+			}
+			return;
+		}
+
 		$query->is_handbook_root = false;
 
 		if ( $query->is_main_query() && ! $query->is_admin && ! $query->is_search && $query->is_post_type_archive( $this->post_type ) ) {
