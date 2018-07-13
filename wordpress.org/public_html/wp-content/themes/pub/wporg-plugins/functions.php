@@ -63,9 +63,9 @@ function scripts() {
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Make jQuery a footer script.
-	wp_scripts()->add_data( 'jquery', 'group', 1 );
-	wp_scripts()->add_data( 'jquery-core', 'group', 1 );
-	wp_scripts()->add_data( 'jquery-migrate', 'group', 1 );
+	//wp_scripts()->add_data( 'jquery', 'group', 1 );
+	//wp_scripts()->add_data( 'jquery-core', 'group', 1 );
+	//wp_scripts()->add_data( 'jquery-migrate', 'group', 1 );
 
 	wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
