@@ -21,7 +21,10 @@ defined( 'WPINC' ) || die();
  *        for organizers.
  */
 function load() {
-	if ( is_plugin_active( 'gutenberg/gutenberg.php' ) ) {
+	/**
+	 * gutenberg_init() is only available when the Gutenberg plugin is active.
+	 */
+	if ( function_exists( '\\gutenberg_init' ) ) {
 		add_filter( 'gutenberg_can_edit_post_type', __NAMESPACE__ . '\disable_gutenberg_on_cpts',           10, 2 );
 		add_filter( 'get_edit_post_link',           __NAMESPACE__ . '\add_classic_param_to_edit_links'            );
 		add_filter( 'page_row_actions',             __NAMESPACE__ . '\add_gutenberg_edit_link',             10, 2 );
