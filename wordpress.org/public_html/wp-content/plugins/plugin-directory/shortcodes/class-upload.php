@@ -173,26 +173,24 @@ class Upload {
 						</small>
 					</p>
 				</form>
-				<script>
+		<?php
+			wp_enqueue_script( 'jquery' );
+			wp_add_inline_script( 'jquery-migrate', '
 					( function ( $ ) {
-						var $label    = $( 'label.button' ),
+						var $label = $( "label.button" ),
 							labelText = $label.text();
-
-						$( '#zip_file' )
-							.on( 'change', function( event ) {
-								var fileName = event.target.value.split( '\\' ).pop();
-
+						$( "#zip_file" )
+							.on( "change", function( event ) {
+								var fileName = event.target.value.split( "\\\\" ).pop();
 								fileName ? $label.text( fileName ) : $label.text( labelText );
 							} )
-							.on( 'focus', function() { $label.addClass( 'focus' ); } )
-							.on( 'blur', function() { $label.removeClass( 'focus' ); } );
-					} ( window.jQuery ) );
-				</script>
+							.on( "focus", function() { $label.addClass( "focus" ); } )
+							.on( "blur", function() { $label.removeClass( "focus" ); } );
+					} ( window.jQuery ) );' );
+		
+		endif; // ! $submitted_counts->total
 
-			<?php endif; // ! $submitted_counts->total ?>
-
-		<?php else : ?>
-
+		else : ?>
 			<p>
 			<?php
 			printf(
