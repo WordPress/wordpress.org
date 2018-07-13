@@ -90,7 +90,7 @@ the_post();
 					<?php
 						printf(
 							/* translators: %s: Link to the Accessibility handbook's Reporting Issues */
-							wp_kses_post( __( 'To report an Accessibility issue you’ve encountered in WordPress or on WordPress.org, please see the Accessibility Handbook on <a href="%s">Reporting Accessibility Issues</a>.', 'wporg' ) ),
+							wp_kses_post( __( 'To report an Accessibility issue you’ve encountered in WordPress or on WordPress.org, please see the Accessibility Handbook page on <a href="%s">Reporting Accessibility Issues</a>.', 'wporg' ) ),
 							'https://make.wordpress.org/accessibility/handbook/reporting-issues/'
 						);
 					?>
