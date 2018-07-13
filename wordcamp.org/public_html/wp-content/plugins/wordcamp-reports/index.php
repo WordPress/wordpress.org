@@ -111,6 +111,7 @@ function get_report_classes() {
 		__NAMESPACE__ . '\Report\Sponsorship_Grants',
 		__NAMESPACE__ . '\Report\WordCamp_Status',
 		__NAMESPACE__ . '\Report\Meetup_Groups',
+		__NAMESPACE__ . '\Report\WordCamp_Payment_Methods',
 	);
 }
 
