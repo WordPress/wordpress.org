@@ -111,7 +111,17 @@ the_post();
 							</ul>
 						</div>
 
-						<div class="logo col-4"></div>
+						<div class="logo col-4" id="logo-simplified">
+							<img src="//s.w.org/style/images/about/simplified.png" alt="<?php esc_attr_e( 'WordPress Logotype - Simplified', 'wporg' ); ?>" />
+							<div class="logo-header">
+								<strong><?php esc_html_e( 'WordPress Logotype', 'wporg' ); ?></strong>
+								<span><?php esc_html_e( 'Simplified', 'wporg' ); ?></span>
+							</div>
+							<ul class="resources-list">
+								<li><a href="//s.w.org/style/images/about/WordPress-logotype-simplified.pdf?1"><?php echo wp_kses_post( __( 'PDF <span>(Vector)</span>', 'wporg' ) ); ?></a></li>
+								<li><a href="//s.w.org/style/images/about/WordPress-logotype-simplified.png"><?php echo wp_kses_post( __( 'PNG <span>(BaseGray/transparent)</span>', 'wporg' ) ); ?></a></li>
+							</ul>
+						</div>
 					</section>
 
 					<h3 class="graphics"><?php esc_html_e( 'Fight the Fake Logo (Fauxgo)', 'wporg' ); ?></h3>
