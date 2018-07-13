@@ -85,7 +85,7 @@ function scripts() {
 
 	if ( get_query_var( 'plugin_advanced' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), false, true );
-		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20171207', true );
+		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20180713', true );
 
 		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
 			'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
