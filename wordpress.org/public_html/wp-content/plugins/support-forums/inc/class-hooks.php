@@ -242,7 +242,7 @@ class Hooks {
 	 */
 	public function new_topic_link() {
 		if ( bbp_is_single_forum() ) {
-			printf( '<a class="create-topic" href="#new-topic-0">%s</a>', __( 'Create Topic', 'wporg-forums' ) );
+			printf( '<a class="button create-topic" href="#new-topic-0">%s</a>', __( 'Create Topic', 'wporg-forums' ) );
 		}
 	}
 

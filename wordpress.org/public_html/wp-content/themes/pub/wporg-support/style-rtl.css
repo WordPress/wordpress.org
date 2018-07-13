@@ -3711,10 +3711,9 @@ section {
 .bbpress #bbpress-forums .create-topic:before {
 	color: #000;
 	content: "\f132";
-	float: right;
 	font: 400 16px/1 dashicons;
-	margin-left: 3px;
-	padding-top: 3px;
+	margin: 0 -4px 0 4px;
+	vertical-align: middle;
 }
 
 .bbpress #bbpress-forums .bbp-pagination {

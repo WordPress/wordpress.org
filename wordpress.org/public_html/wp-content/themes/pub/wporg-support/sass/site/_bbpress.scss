@@ -441,10 +441,9 @@ section {
 			&:before {
 				color: #000;
 				content: "\f132";
-				float: left;
 				font: 400 16px/1 dashicons;
-				margin-right: 3px;
-				padding-top: 3px;
+				margin: 0 4px 0 -4px;
+				vertical-align: middle;
 			}
 		}
 
