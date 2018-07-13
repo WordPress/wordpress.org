@@ -45,7 +45,6 @@ google.charts.load( 'current', {
 					},
 					bar: { groupWidth: ( data.getNumberOfRows() > 100 ? '100%' : null ) },
 					height: 350,
-					width: 532,
 					curveType: 'function',
 					trendlines: {
 						0: {
@@ -104,7 +103,6 @@ google.charts.load( 'current', {
 					},
 					bar: { groupWidth: ( data.getNumberOfRows() > 100 ? '100%' : null ) },
 					height: 350,
-					width: 532,
 					curveType: 'function',
 					trendlines: {
 						0: {
