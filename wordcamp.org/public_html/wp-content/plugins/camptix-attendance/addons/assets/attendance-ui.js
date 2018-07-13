@@ -273,8 +273,6 @@ jQuery(document).ready(function($){
 			if ( options && options.controller ) {
 				this.controller = options.controller;
 			}
-
-			this.search = _.debounce( this.search, 500 );
 		},
 
 		/**
@@ -411,7 +409,7 @@ jQuery(document).ready(function($){
 			this.$list.on( 'scroll', this.scroll );
 			this.$loading = this.$list.find( '.loading' );
 
-			this.on( 'search', this.search, this );
+			this.on( 'search', _.debounce( this.search, 350 ), this );
 			this.on( 'flush', this.flush, this );
 			this.on( 'more:toggle', this.moreToggle, this );
 			this.on( 'filter', this.filter, this );
