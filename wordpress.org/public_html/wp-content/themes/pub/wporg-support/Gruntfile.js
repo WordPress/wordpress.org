@@ -10,9 +10,10 @@ module.exports = function(grunt) {
 					'style.css': 'sass/style.scss',
 				},
 				options: {
-					outputStyle: 'expanded',
+					implementation: require( 'node-sass' ),
 					indentType: 'tab',
 					indentWidth: 1,
+					outputStyle: 'expanded',
 					sourceMap: true,
 				},
 			},
