@@ -48,6 +48,7 @@ class Themes_API {
 		'parent'             => false,
 		'rating'             => false,
 		'ratings'            => false,
+		'reviews_url'        => false,
 		'screenshot_count'   => false,
 		'screenshot_url'     => true,
 		'screenshots'        => false,
@@ -357,7 +358,8 @@ class Themes_API {
 		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION >= 1.2 ) {
 			$defaults['extended_author'] = true;
 			$defaults['num_ratings'] = true;
-			$detaults['parent'] = true;
+			$defaults['reviews_url'] = true;
+			$defaults['parent'] = true;
 		}
 
 		if ( empty( $this->request->fields ) ) {
@@ -671,6 +673,10 @@ class Themes_API {
 			// Return a % rating; Rating range: 0~5.
 			$phil->rating = \WPORG_Ratings::get_avg_rating( 'theme', $theme->post_name ) * 20;
 			$phil->num_ratings = \WPORG_Ratings::get_rating_count( 'theme', $theme->post_name );
+		}
+
+		if ( $this->fields['reviews_url'] ) {
+			$phil->reviews_url = 'https://wordpress.org/support/theme/' . $theme->post_name . '/reviews/';
 		}
 
 		if ( $this->fields['downloaded'] ) {
