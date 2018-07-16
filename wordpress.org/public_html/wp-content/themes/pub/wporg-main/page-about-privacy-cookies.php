@@ -53,7 +53,7 @@ the_post();
 					<p><strong><?php esc_html_e( 'Functionality', 'wporg' ); ?></strong>: <?php esc_html_e( 'These cookies are used to store preferences set by users such as account name, language, and location.', 'wporg' ); ?></p>
 					<p><strong><?php esc_html_e( 'Performance', 'wporg' ); ?></strong>: <?php esc_html_e( 'Performance cookies collect information on how users interact with websites hosted on WordPress.org, including what pages are visited most, as well as other analytical data. These details are only used to improve how the website functions.', 'wporg' ); ?></p>
 					<p><strong><?php esc_html_e( 'Tracking', 'wporg' ); ?></strong>: <?php esc_html_e( 'These are set by trusted third party networks (e.g. Google Analytics) to track details such as the number of unique visitors, and pageviews to help improve the user experience.', 'wporg' ); ?></p>
-					<p><strong><?php esc_html_e( 'Third Party/Embedded Content', 'wporg' ); ?></strong>: <?php esc_html_e( 'WordPress.org makes use of different third party applications and services to enhance the experience of website visitors. These include social media platforms such as Facebook and Twitter (through the use of sharing buttons), or embedded content from Youtube and Vimeo. As a result, cookies may be set by these third parties, and used by them to track your online activity. We have no direct control over the information that is collected by these cookies.', 'wporg' ); ?></p>
+					<p><strong><?php esc_html_e( 'Third Party/Embedded Content', 'wporg' ); ?></strong>: <?php esc_html_e( 'WordPress.org makes use of different third party applications and services to enhance the experience of website visitors. These include social media platforms such as Facebook and Twitter (through the use of sharing buttons), or embedded content from YouTube and Vimeo. As a result, cookies may be set by these third parties, and used by them to track your online activity. We have no direct control over the information that is collected by these cookies.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'wordpress.org', 'wporg' ); ?></h3>
 					<table>
@@ -313,7 +313,16 @@ the_post();
 
 					<h3><?php esc_html_e( 'Controlling Cookies', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'Visitors may wish to restrict the use of cookies, or completely prevent them from being set. Most browsers provide for ways to control cookie behavior such as the length of time they are stored &#8212; either through built-in functionality or by utilizing third party plugins.', 'wporg' ); ?></p>
-					<p><?php echo wp_kses_post( __( 'To find out more on how to manage and delete cookies, visit <a href="http://aboutcookies.org/">aboutcookies.org</a>. For more details on advertising cookies, and how to manage them, visit <a href="http://www.youronlinechoices.eu/">youronlinechoices.eu</a> (EU based), or <a href="http://www.aboutads.info/choices/">aboutads.info</a> (US based).', 'wporg' ) ); ?></p>
+					<p>
+						<?php
+						printf(
+							wp_kses_post( __( 'To find out more on how to manage and delete cookies, visit <a href="%1$s">aboutcookies.org</a>. For more details on advertising cookies, and how to manage them, visit <a href="%2$s">youronlinechoices.eu</a> (EU based), or <a href="%3$s">aboutads.info</a> (US based).', 'wporg' ) ),
+							'https://www.aboutcookies.org/',
+							'https://youronlinechoices.eu/',
+							'http://www.aboutads.info/choices/'
+						);
+						?>
+					</p>
 					<p><?php esc_html_e( 'Some specific opt-out programs are available here:', 'wporg' ); ?></p>
 					<p>Quantcast - <a href="https://www.quantcast.com/opt-out/">https://www.quantcast.com/opt-out/</a><br/>
 					Google Analytics - <a href="https://tools.google.com/dlpage/gaoptout">https://tools.google.com/dlpage/gaoptout</a></p>
