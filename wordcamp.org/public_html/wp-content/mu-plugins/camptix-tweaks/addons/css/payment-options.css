@@ -1,0 +1,77 @@
+#tix-preferred-payment-option {
+    display: none;
+}
+
+.tix-submit {
+    display: block;
+    float: right;
+}
+
+.tix-payment-method .tix-payment-tab {
+    display: block;
+    float: left;
+    border: none;
+    color: #0a0a0a;
+    background: none;
+    font-size: 16px;
+    line-height: 24px;
+    border-bottom: 2px solid #0a0a0a;
+    border-radius: 0;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.tix-payment-method .tix-payment-tab.tix-tab-selected {
+    border-bottom: 5px solid;
+    padding-bottom: 7px;
+}
+
+.tix-payment-tab {
+    letter-spacing: 0px;
+    font-weight: bold;
+    text-transform: none;
+}
+
+.tix-payment-method-container {
+    display: block;
+    float: right;
+    padding-top: 20px;
+    clear: both;
+    width: 100%;
+}
+
+#tix .tix-submit .tix-checkout-button {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 0px none;
+    border-radius: 2px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    clear: both;
+    display: block;
+    float: right;
+    margin-top: 20px;
+}
+
+.tix-alternate-payment-option {
+    float: left;
+    clear: both;
+    padding-left: 15px;
+    padding-top: 15px;
+}
+
+#tix .tix-submit .tix-alternate-payment-option label {
+    color: #191e23;
+    font-size: 16px;
+    padding-left: 15px;
+}
+
+#tix input[name=tix_payment_method]:required {
+    box-shadow: none;
+}
+
+#tix .tix-wide-tab {
+    width: 150%;
+    text-align: left;
+    float: right;
+}

@@ -457,8 +457,7 @@ function set_name_order( $order ) {
 	} else {
 		$current_city = wcorg_get_url_part( site_url(), 'city' );
 
-		if ( array_key_exists( $current_city, $alternate_orders ) ) {
-			// todo PHP Warning:  array_key_exists(): The first argument should be either a string or an integer
+		if ( $current_city !== false && array_key_exists( $current_city, $alternate_orders ) ) {
 			$order = $alternate_orders[ $current_city ];
 		}
 	}
@@ -566,6 +565,14 @@ function load_custom_addons() {
 	require_once( __DIR__ . '/addons/code-of-conduct.php' );
 	// Privacy field
 	require_once( __DIR__ . '/addons/privacy.php' );
+
+	// Payment options
+	if ( in_array( filter_input( INPUT_GET, 'tix_action' ), array( 'attendee_info', 'checkout' ), true )
+	     && ! wcorg_skip_feature( 'camptix_payment_options' )
+	) {
+		require_once( __DIR__ . '/addons/class-payment-options.php' );
+	}
+
 }
 
 /**
