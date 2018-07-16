@@ -38,7 +38,7 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 		$flag_name   = $args[0];
 		$max_site_id = empty( $args[1] ) ? false : absint( $args[1] );
 		$dry_run     = isset( $assoc_args[ 'dry-run' ] );
-		$sites       = wp_get_sites( array( 'limit' => false ) );
+		$sites       = get_sites( array( 'number' => 0 ) );
 		$notify      = new \cli\progress\Bar( 'Applying flag', count( $sites ) );
 		$results     = array();
 
@@ -88,6 +88,106 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 		if ( $dry_run ) {
 			WP_CLI::warning( 'This was only a dry-run.' );
 		}
+	}
+
+	/**
+	 * Get or modify the state of a skip-feature flag on a single site.
+	 *
+	 * See wcorg_skip_feature() for context.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <command>
+	 * : The skip-feature command to execute on a site.
+	 * ---
+	 * options:
+	 *   - get
+	 *   - set
+	 *   - unset
+	 * ---
+	 *
+	 * <flag_name>
+	 * : The name of the flag to get or modify.
+	 *
+	 * <blog_id>
+	 * : The numeric ID of the site on which the skip-feature command will be executed.
+	 *
+	 * ## EXAMPLES
+	 *
+	 * wp wc-misc skip-feature-flag get wcb_viewport_initial_scale 437
+	 * wp wc-misc skip-feature-flag set wcb_viewport_initial_scale 437
+	 * wp wc-misc skip-feature-flag unset wcb_viewport_initial_scale 437
+	 *
+	 * @subcommand skip-feature-flag
+	 *
+	 * @param array $args
+	 *
+	 * @throws \WP_CLI\ExitException
+	 */
+	public function skip_feature_flag( $args ) {
+		$command   = ( $args[0] ) ?: '';
+		$flag_name = ( $args[1] ) ?: '';
+		$blog_id   = ( $args[2] ) ? absint( $args[2] ) : 0;
+
+		WP_CLI::line();
+
+		$commands = array( 'get', 'set', 'unset' );
+
+		if ( ! in_array( $command, $commands, true ) ) {
+			WP_CLI::error( 'Invalid command. Use `get`, `set`, or `unset` for the first argument.' );
+		}
+
+		if ( ! $flag_name ) {
+			WP_CLI::error( 'Invalid flag name.' );
+		}
+
+		if ( ! $blog_id ) {
+			WP_CLI::error( 'Invalid blog ID.' );
+		}
+
+		switch_to_blog( $blog_id );
+
+		$flags = get_option( 'wordcamp_skip_features', array() );
+
+		switch ( $command ) {
+			case 'get':
+				if ( array_key_exists( $flag_name, $flags ) && true === $flags[ $flag_name ] ) {
+					$message = sprintf(
+						'The %s flag is SET on blog %d.',
+						$flag_name,
+						$blog_id
+					);
+				} else {
+					$message = sprintf(
+						'The %s flag is NOT SET on blog %d.',
+						$flag_name,
+						$blog_id
+					);
+				}
+				break;
+			case 'set':
+				$flags[ $flag_name ] = true;
+				update_option( 'wordcamp_skip_features', $flags );
+				$message = sprintf(
+					'The %s flag was successfully SET for blog %d.',
+					$flag_name,
+					$blog_id
+				);
+				break;
+			case 'unset':
+				unset( $flags[ $flag_name ] );
+				update_option( 'wordcamp_skip_features', $flags );
+				$message = sprintf(
+					'The %s flag was successfully UNSET for blog %d.',
+					$flag_name,
+					$blog_id
+				);
+				break;
+		}
+
+		restore_current_blog();
+
+		WP_CLI::line( $message );
 	}
 
 	/**
