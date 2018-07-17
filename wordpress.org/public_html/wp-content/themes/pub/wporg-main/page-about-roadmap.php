@@ -47,9 +47,20 @@ $date_format = get_option( 'date_format' );
 					</p>
 					<p><?php esc_html_e( 'Any projected dates are for discussion and planning purposes, and will be firmed up as we get closer to release.', 'wporg' ); ?></p>
 					<table>
-						<thead><tr><th><?php esc_html_e( 'Version', 'wporg' ); ?></th><th><?php esc_html_e( 'Planned', 'wporg' ); ?></th></tr></thead>
+						<thead>
+						<tr>
+							<th><?php esc_html_e( 'Version', 'wporg' ); ?></th>
+							<th><?php esc_html_e( 'Planned', 'wporg' ); ?></th>
+						</tr>
+						</thead>
 						<tbody>
-						<tr><th><a href="https://make.wordpress.org/core/5-0/">5.0</a></th><td>2018</td></tr>
+						<tr>
+							<th>
+								<a href="https://make.wordpress.org/core/5-0/">5.0</a>
+								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
+							</th>
+							<td>2018</td>
+						</tr>
 						</tbody>
 					</table>
 
