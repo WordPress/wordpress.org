@@ -19,21 +19,26 @@ $camptix_options = $camptix->get_options();
 		_camptixAttendanceTickets = [ <?php echo esc_js( implode( ', ', array_map( 'absint', wp_list_pluck( $camptix_tickets, 'ID' ) ) ) ); ?> ];
 	</script>
 
-	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 	<meta name="referrer" content="never" />
 </head>
 <body>
 	<script id="tmpl-attendee" type="text/template">
 		<div class="spinner-container"><span class="spinner"></span></div>
 		<a href="#" class="status toggle <# if ( data.status ) { #> yes <# } #>"><div class="dashicons dashicons-admin-users"></div></a>
+
 		<span class="name">
-			{{ data.name }}
+			<# if ( 'lastName' == data.sort ) { #>
+				{{ data.lastName }}, {{ data.firstName }}
+			<# } else { #>
+				{{ data.firstName }} {{ data.lastName }}
+			<# } #>
 		</span>
 	</script>
 
 	<script id="tmpl-attendee-toggle" type="text/template">
 		<img src="{{ data.avatar }}" />
-		<p>Did <strong>{{ data.name }}</strong> attend <?php echo esc_html( $camptix_options['event_name'] ); ?>?</p>
+		<p>Did <strong>{{ data.firstName }} {{ data.lastName }}</strong> attend <?php echo esc_html( $camptix_options['event_name'] ); ?>?</p>
 
 		<div class="yes-no-container">
 			<a href="#" class="yes">Yes</a>
@@ -51,7 +56,7 @@ $camptix_options = $camptix->get_options();
 				<a href="#" class="dashicons dashicons-menu"></a>
 				<div class="submenu">
 					<a href="#" class="search">Search</a>
-					<a href="#" class="filter">Filter</a>
+					<a href="#" class="filter">Sort & Filter</a>
 					<a href="#" class="refresh">Refresh</a>
 				</div>
 			</div>
@@ -78,7 +83,14 @@ $camptix_options = $camptix->get_options();
 	<script id="tmpl-attendee-filter" type="text/template">
 		<a href="#" class="close dashicons dashicons-no"></a>
 		<div class="wrapper">
-			<h1>Filters</h1>
+			<h1>Sort & Filter</h1>
+
+			<h1 class="section-title">Sort Attendees By</h1>
+			<ul class="filter-sort section-controls">
+				<li data-sort="firstName" <# if ( data.sort == 'firstName' ) { #> class="selected" <# } #> >First Name</li>
+				<li data-sort="lastName" <# if ( data.sort == 'lastName' ) { #> class="selected" <# } #> >Last Name</li>
+				<li data-sort="orderDate" <# if ( data.sort == 'orderDate' ) { #> class="selected" <# } #> >Order Date</li>
+			</ul>
 
 			<h1 class="section-title">Attendance</h1>
 			<ul class="filter-attendance section-controls">

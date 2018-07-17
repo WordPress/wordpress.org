@@ -14,9 +14,12 @@ jQuery(document).ready(function($){
 	camptix.models.Attendee = Backbone.Model.extend({
 		defaults: function() {
 			return {
+				id: null,
 				status: false,
+				sort: 'firstName',
 				avatar: '',
-				name: '',
+				firstName: '',
+				lastName: ''
 			}
 		},
 
@@ -162,7 +165,8 @@ jQuery(document).ready(function($){
 		 * Render the attendee list item.
 		 */
 		render: function() {
-			this.$el.html( this.template( this.model.toJSON() ) );
+			var attendeeData = _.extend( this.model.toJSON(), { sort: this.controller.filterSettings.sort } );
+			this.$el.html( this.template( attendeeData ) );
 			return this;
 		},
 
@@ -315,6 +319,7 @@ jQuery(document).ready(function($){
 
 		events: {
 			'fastClick .close': 'close',
+			'fastClick .filter-sort li': 'toggleSort',
 			'fastClick .filter-attendance li': 'toggleAttendance',
 			'fastClick .filter-tickets li': 'toggleTickets'
 		},
@@ -366,6 +371,17 @@ jQuery(document).ready(function($){
 			this.render();
 			this.controller.trigger( 'filter', this.filterSettings );
 		},
+
+		/**
+		 * Toggle sort order for tickets list
+		 */
+		toggleSort: function( event ) {
+			var sortOrder = $( event.target ).data( 'sort' );
+			this.filterSettings.sort = sortOrder;
+			this.render();
+
+			this.controller.trigger( 'filter', this.filterSettings );
+		}
 	});
 
 	/**
@@ -380,6 +396,7 @@ jQuery(document).ready(function($){
 		events: {
 			'fastClick .dashicons-menu': 'menu',
 			'fastClick .submenu .search': 'searchView',
+			'fastClick .submenu .sort': 'sortView',
 			'fastClick .submenu .refresh': 'refresh',
 			'fastClick .submenu .filter': 'filterView'
 		},
@@ -396,7 +413,8 @@ jQuery(document).ready(function($){
 			this.filterSettings = {
 				'attendance': 'none',
 				'tickets': _camptixAttendanceTickets,
-				'search': ''
+				'search': '',
+				'sort': 'firstName'
 			};
 
 			this.render();
@@ -432,7 +450,7 @@ jQuery(document).ready(function($){
 				options = {};
 
 			// Dispose of the current collection and cache it for later use.
-			if ( 'undefined' != typeof this.collection ) {
+			if ( 'undefined' !== typeof this.collection ) {
 				this.collection.off( null, null, this );
 				this.cache.push( this.collection );
 			}

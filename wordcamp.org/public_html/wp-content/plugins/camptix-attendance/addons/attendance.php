@@ -70,7 +70,7 @@ class CampTix_Attendance extends CampTix_Addon {
 	}
 
 	/**
-	 * Synchronize an attendee model.
+	 * Synchronize a single attendee model.
 	 *
 	 * Sets are removes the attended flag for a given camptix_id.
 	 */
@@ -113,14 +113,36 @@ class CampTix_Attendance extends CampTix_Addon {
 		$ticket_ids = wp_list_pluck( $this->get_tickets(), 'ID' );
 
 		$query_args = array(
-			'post_type' => 'tix_attendee',
-			'post_status' => 'publish',
-			'orderby' => 'title',
-			'order' => 'ASC',
-			'paged' => $paged,
+			'post_type'      => 'tix_attendee',
+			'post_status'    => 'publish',
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+			'paged'          => $paged,
 			'posts_per_page' => 50,
-			'meta_query' => '',
+			'meta_query'     => '',
 		);
+
+		/**
+		 * Sort Attendee Posts
+		 */
+		if ( ! empty( $_REQUEST['camptix_filters']['sort'] ) ) {
+			switch ( $_REQUEST['camptix_filters']['sort'] ) {
+				case 'lastName':
+					$query_args['orderby']  = 'meta_value';
+					$query_args['meta_key'] = 'tix_last_name';
+					break;
+				case 'orderDate':
+					$query_args['orderby'] = 'date';
+					$query_args['order']   = 'DESC';
+					break;
+				case 'firstName':
+				default:
+					// each $attendee->post_title is already First Lastname
+					break;
+			}
+
+			unset( $_REQUEST['camptix_filters']['sort'] );
+		}
 
 		$filters = array();
 		if ( ! empty( $_REQUEST['camptix_filters'] ) )
@@ -173,7 +195,7 @@ class CampTix_Attendance extends CampTix_Addon {
 		$attendee = get_post( $attendee );
 
 		$first_name = get_post_meta( $attendee->ID, 'tix_first_name', true );
-		$last_name = get_post_meta( $attendee->ID, 'tix_last_name', true );
+		$last_name  = get_post_meta( $attendee->ID, 'tix_last_name', true );
 		$avatar_url = sprintf( 'https://secure.gravatar.com/avatar/%s?s=160', md5( get_post_meta( $attendee->ID, 'tix_email', true ) ) );
 		$avatar_url = add_query_arg( 'd', 'https://secure.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=160', $avatar_url );
 
@@ -181,7 +203,8 @@ class CampTix_Attendance extends CampTix_Addon {
 
 		return array(
 			'id' => $attendee->ID,
-			'name' => sprintf( '%s %s', $first_name, $last_name ),
+			'firstName' => $first_name,
+			'lastName' => $last_name,
 			'avatar' => esc_url_raw( $avatar_url ),
 			'status' => $status,
 		);
@@ -249,6 +272,7 @@ class CampTix_Attendance extends CampTix_Addon {
 	 */
 	public function setup_sections( $sections ) {
 		$sections['attendance-ui'] = esc_html__( 'Attendance UI', 'wordcamporg' );
+
 		return $sections;
 	}
 
@@ -313,7 +337,7 @@ class CampTix_Attendance extends CampTix_Addon {
 	}
 
 	/**
-	 * Get CampTix Tickets
+	 * Get CampTix Tickets (not to be confused with Attendees)
 	 *
 	 * Returns an array of published tickets registered with CampTix.
 	 */
