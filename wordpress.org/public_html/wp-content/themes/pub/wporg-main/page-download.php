@@ -44,13 +44,17 @@ $menu_items = [
 	'download/source/'       => _x( 'Source Code', 'Page title', 'wporg' ),
 ];
 
-$zip_url   = 'https://wordpress.org/latest.zip';
-$targz_url = 'https://wordpress.org/latest.tar.gz';
+$latest_release_version   = WP_CORE_LATEST_RELEASE;
+$latest_release_zip_url   = 'https://wordpress.org/latest.zip';
+$latest_release_targz_url = 'https://wordpress.org/latest.tar.gz';
 
 if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK ) {
-	$rosetta_release = $GLOBALS['rosetta']->rosetta->get_latest_release();
-	$zip_url         = $rosetta_release['zip_url'];
-	$targz_url       = $rosetta_release['targz_url'];
+	$rosetta_release = $GLOBALS['rosetta']->rosetta->get_latest_public_release();
+	if ( $rosetta_release ) {
+		$latest_release_version   = $rosetta_release['version'];
+		$latest_release_zip_url   = $rosetta_release['zip_url'];
+		$latest_release_targz_url = $rosetta_release['targz_url'];
+	}
 }
 
 // Prevent Jetpack from looking for a non-existent featured image.
@@ -86,19 +90,19 @@ the_post();
 					<h2><?php esc_html_e( 'Priceless, and also free', 'wporg' ); ?></h2>
 					<p class="subheading"><?php esc_html_e( 'Download WordPress and use it on your site.', 'wporg' ); ?></p>
 					<div class="call-to-action col-12">
-						<a class="button button-primary button-xl" href="<?php echo esc_url( $zip_url ); ?>">
+						<a class="button button-primary button-xl" href="<?php echo esc_url( $latest_release_zip_url ); ?>">
 							<span class="dashicons-before dashicons-download">
 								<?php
 								echo esc_html( apply_filters( 'no_orphans', sprintf(
 									/* translators: WordPress version. */
 									__( 'Download WordPress %s', 'wporg' ),
-									WP_CORE_LATEST_RELEASE
+									$latest_release_version
 								) ) );
 								?>
 							</span>
 						</a>
 						<p>
-							<a href="<?php echo esc_url( $targz_url ); ?>">
+							<a href="<?php echo esc_url( $latest_release_targz_url ); ?>">
 								<?php esc_html_e( 'Download .tar.gz', 'wporg' ); ?>
 							</a>
 						</p>
