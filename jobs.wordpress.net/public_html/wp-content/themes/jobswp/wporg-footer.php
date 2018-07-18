@@ -4,7 +4,7 @@
 			<li><a href="https://wordpress.org/about/" title="An introduction to the WordPress project">About</a></li>
 			<li><a href="https://wordpress.org/news/" title="News and Updates">Blog</a></li>
 			<li><a href="https://wordpress.org/hosting/" title="Recommended web hosting providers">Hosting</a></li>
-			<li><a href="https://jobs.wordpress.net/" title="Find or post WordPress jobs">Jobs</a></li>
+			<li><a href="https://wordpressfoundation.org/donate/" title="Donate to the WordPress Foundation">Donate</a></li>
 		</ul>
 
 		<ul>
@@ -32,7 +32,7 @@
 			<li><a href="https://wordpress.com/?ref=wporg-footer" title="Hassle-free WordPress hosting">WordPress.com</a></li>
 			<li><a href="https://ma.tt/" title="Co-founder of WordPress, an example of what WordPress can do">Matt</a></li>
 			<li><a href="https://wordpress.org/about/privacy/" title="WordPress.org Privacy Policy">Privacy</a></li>
-			<li><a href="https://wordpress.org/about/license/" title="WordPress is open source software">License / GPLv2</a></li>
+			<li><a href="https://publiccode.eu/" target="_blank">Public Code</a></li>
 		</ul>
 
 		<ul>
@@ -41,6 +41,10 @@
 			</li>
 			<li>
 				<iframe src="//www.facebook.com/plugins/like.php?app_id=121415197926116&amp;href=http%3A%2F%2Fwww.facebook.com%2Fwordpress&amp;send=false&amp;layout=button_count&amp;width=135&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font=lucida+grande&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:135px; height:21px;" allowTransparency="true"></iframe>
+			</li>
+			<li>
+				<script src="https://apis.google.com/js/platform.js" async defer></script>
+				<div class="g-plusone" data-size="medium" data-href="https://plus.google.com/+WordPress"></div>
 			</li>
 		</ul>
 	</div>
