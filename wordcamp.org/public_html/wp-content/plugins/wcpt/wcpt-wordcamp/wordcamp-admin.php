@@ -93,6 +93,15 @@ class WordCamp_Admin {
 		);
 
 		add_meta_box(
+			'wcpt_contributor_info',
+			__( 'Contributor Day Information', 'wcpt' ),
+			'wcpt_contributor_metabox',
+			WCPT_POST_TYPE_ID,
+			'advanced',
+			'high'
+		);
+
+		add_meta_box(
 			'wcpt_original_application',
 			'Original Application',
 			array( $this, 'original_application_metabox' ),
@@ -441,6 +450,19 @@ class WordCamp_Admin {
 				);
 				break;
 
+			case 'contributor':
+				// These fields names need to be unique, hence the 'Contributor' prefix on each one
+				$retval = array (
+					'Contributor Day'                   => 'checkbox',
+					'Contributor Day Date (YYYY-mm-dd)' => 'date',
+					'Contributor Venue Name'            => 'text',
+					'Contributor Venue Address'         => 'textarea',
+					'Contributor Venue Capacity'        => 'text',
+					'Contributor Venue Website URL'     => 'text',
+					'Contributor Venue Contact Info'    => 'textarea',
+				);
+				break;
+
 			case 'wordcamp':
 				$retval = array (
 					'Start Date (YYYY-mm-dd)'           => 'date',
@@ -521,6 +543,14 @@ class WordCamp_Admin {
 					'Website URL'                     => 'text',
 					'Contact Information'             => 'textarea',
 					'Exhibition Space Available'      => 'checkbox',
+
+					'Contributor Day'                   => 'checkbox',
+					'Contributor Day Date (YYYY-mm-dd)' => 'date',
+					'Contributor Venue Name'            => 'text',
+					'Contributor Venue Address'         => 'textarea',
+					'Contributor Venue Capacity'        => 'text',
+					'Contributor Venue Website URL'     => 'text',
+					'Contributor Venue Contact Info'    => 'textarea',
 				);
 				break;
 
@@ -1154,6 +1184,11 @@ function wcpt_organizer_metabox() {
 
 function wcpt_venue_metabox() {
 	$meta_keys = $GLOBALS['wordcamp_admin']->meta_keys( 'venue' );
+	wcpt_metabox( $meta_keys );
+}
+
+function wcpt_contributor_metabox() {
+	$meta_keys = $GLOBALS['wordcamp_admin']->meta_keys( 'contributor' );
 	wcpt_metabox( $meta_keys );
 }
 

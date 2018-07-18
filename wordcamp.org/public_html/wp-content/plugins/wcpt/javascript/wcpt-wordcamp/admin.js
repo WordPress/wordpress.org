@@ -10,11 +10,16 @@ window.wordCampPostType.WcptWordCamp = ( function( $ ) {
 	 */
 	self.initialize = function() {
 		var createSiteCheckbox = $( '#wcpt_create-site-in-network' ),
-			$mentorUserName = $( '#wcpt_mentor_wordpress_org_user_name' );
+			$mentorUserName = $( '#wcpt_mentor_wordpress_org_user_name' ),
+			hasContributor = $( '#wcpt_contributor_day' );
 
 		// Sponsor region
 		createSiteCheckbox.change( self.toggleSponsorRegionRequired );
 		createSiteCheckbox.trigger( 'change' );
+
+		// Contributor day info
+		hasContributor.change( self.toggleContributorInfo );
+		hasContributor.trigger( 'change' );
 
 		// Date fields
 		$( '.date-field' ).datepicker( {
@@ -92,6 +97,25 @@ window.wordCampPostType.WcptWordCamp = ( function( $ ) {
 		if ( $.fn.hasOwnProperty( 'select2' ) ) {
 			$select.select2();
 		}
+	};
+
+	/**
+	 * Toggle the display of the Contributor Day Info fields
+	 *
+	 * @param {object} event
+	 */
+	self.toggleContributorInfo = function( event ) {
+
+		// Selects all the div enclosing input elements for contributing info,
+		// except for the one which has the checkbox with ID wcpt_contributor_day
+		var contributorInputElements = $( "#wcpt_contributor_info .inside .inside:not( :has( #wcpt_contributor_day ) )" );
+
+		if ( $( '#wcpt_contributor_day' ).is( ':checked' ) ) {
+			contributorInputElements.slideDown();
+		} else {
+			contributorInputElements.slideUp();
+		}
+
 	};
 
     /**
