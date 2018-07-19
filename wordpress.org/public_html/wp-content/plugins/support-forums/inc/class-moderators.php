@@ -979,10 +979,10 @@ class Moderators {
 	 *
 	 * @param string $link Link HTML.
 	 * @param array  $r    Parsed arguments.
-	 * @param array  $args Raw arguments.
+	 * @param array  $args Optional. Raw arguments.
 	 * @return string Filtered link.
 	 */
-	public function convert_toggles_to_actions( $link, $r, $args ) {
+	public function convert_toggles_to_actions( $link, $r, $args = array() ) {
 		if ( false !== strpos( $link, 'bbp_toggle_topic_close' ) ) {
 			$action = ( bbp_is_topic_closed( $r['id'] ) ) ? 'wporg_bbp_open_topic' : 'wporg_bbp_close_topic';
 			$link   = str_replace( 'bbp_toggle_topic_close', $action, $link );
