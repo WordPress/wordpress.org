@@ -21,6 +21,7 @@ class Manager {
 		add_action( 'plugin_directory_plugin_support_resolved', array( __NAMESPACE__ . '\Plugin_Support_Resolved', 'cron_trigger' ) );
 		add_action( 'plugin_directory_svn_sync', array( __NAMESPACE__ . '\SVN_Watcher', 'cron_trigger' ) );
 		add_action( 'plugin_directory_update_api_check', array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger' ) );
+		add_action( 'plugin_directory_translation_sync', array( __NAMESPACE__ . '\Translation_Sync', 'cron_trigger' ) );
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
@@ -248,6 +249,9 @@ class Manager {
 		}
 		if ( ! wp_next_scheduled( 'plugin_directory_check_cronjobs' ) ) {
 			wp_schedule_event( time() + 60, 'every_120s', 'plugin_directory_check_cronjobs' );
+		}
+		if ( ! wp_next_scheduled ( 'plugin_directory_translation_sync' ) ) {
+			wp_schedule_event( time() + 60, 'daily', 'plugin_directory_translation_sync' );
 		}
 	}
 
