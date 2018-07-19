@@ -148,7 +148,7 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), absint( $sub_project_status->fuzzy_count ) ); ?>
 					</td>
 					<td class="stats untranslated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), max( 0, absint( $sub_project_status->all_count ) -  absint( $sub_project_status->current_count ) ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), absint( $sub_project_status->all_count ) -  absint( $sub_project_status->current_count ) ); ?>
 					</td>
 					<td class="stats waiting">
 						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), absint( $sub_project_status->waiting_count ) ); ?>
@@ -186,7 +186,7 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), absint( $status->fuzzy_count ) ); ?>
 					</td>
 					<td class="stats untranslated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), max( 0, absint( $status->all_count ) -  absint( $status->current_count ) ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), absint( $status->all_count ) -  absint( $status->current_count ) ); ?>
 					</td>
 					<td class="stats waiting">
 						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), absint( $status->waiting_count ) ); ?>
