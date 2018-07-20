@@ -8,17 +8,35 @@ class WordCamp_Budget_Tool {
     }
 
     public static function admin_menu() {
-		add_submenu_page( 'wordcamp-budget', esc_html__( 'WordCamp Budget', 'wordcamporg' ), esc_html__( 'Budget', 'wordcamporg' ), 'manage_options', 'wordcamp-budget' );
+		add_submenu_page(
+			'wordcamp-budget',
+			esc_html__( 'WordCamp Budget', 'wordcamporg' ),
+			esc_html__( 'Budget', 'wordcamporg' ),
+			WordCamp_Budgets::VIEWER_CAP,
+			'wordcamp-budget'
+		);
+
+	    register_setting(
+	    	'wcb_budget_noop',
+		    'wcb_budget_noop',
+		    array( __CLASS__, 'validate' )
+	    );
+
         add_action( 'wcb_render_budget_page', array( __CLASS__, 'render' ) );
-        register_setting( 'wcb_budget_noop', 'wcb_budget_noop', array( __CLASS__, 'validate' ) );
     }
 
     public static function validate( $noop ) {
-        if ( empty( $_POST['_wcb_budget_data'] ) )
-            return;
+        if ( empty( $_POST['_wcb_budget_data'] ) ) {
+	        return;
+        }
 
-        if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'wcb_budget_noop-options' ) )
-            return;
+        if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'wcb_budget_noop-options' ) ) {
+	        return;
+        }
+
+        if ( ! current_user_can( WordCamp_Budgets::ADMIN_CAP ) ) {
+        	return;
+        }
 
         $budget = self::_get_budget();
         $data = json_decode( wp_unslash( $_POST['_wcb_budget_data'] ), true );

@@ -107,7 +107,7 @@ wcb.editable = <?php echo json_encode( $editable ); ?>;
         <?php settings_fields( 'wcb_budget_noop' ); ?>
         <input type="hidden" name="_wcb_budget_data" value="<?php echo esc_attr( json_encode( $budget ) ); ?>" />
 
-        <?php if ( $budget['status'] == 'draft' ) : ?>
+        <?php if ( $budget['status'] == 'draft' && current_user_can( WordCamp_Budgets::ADMIN_CAP ) ) : ?>
         <p class="submit">
             <?php submit_button( esc_html__( 'Save Draft', 'wordcamporg' ), 'secondary', 'wcb-budget-save-draft', false ); ?>
             <?php submit_button( esc_html__( 'Save &amp; Request Review', 'wordcamporg' ), 'secondary', 'wcb-budget-request-review', false ); ?>
@@ -119,7 +119,7 @@ wcb.editable = <?php echo json_encode( $editable ); ?>;
             <?php submit_button( esc_html__( 'Approve', 'wordcamporg' ), 'primary', 'wcb-budget-approve', false ); ?>
             <?php submit_button( esc_html__( 'Reject', 'wordcamporg' ), 'primary', 'wcb-budget-reject', false ); ?>
         </p>
-        <?php elseif ( $budget['status'] == 'approved' && $view == 'working' ) : ?>
+        <?php elseif ( $budget['status'] == 'approved' && $view == 'working' && current_user_can( WordCamp_Budgets::ADMIN_CAP ) ) : ?>
         <p class="submit">
             <?php submit_button( esc_html__( 'Update Working Budget', 'wordcamporg' ), 'primary', 'wcb-budget-update-working', false ); ?>
             <a href="<?php echo admin_url( 'admin.php?page=wordcamp-budget&wcb-view=working' ); ?>" class="button"><?php esc_html_e( 'Cancel Changes', 'wordcamporg' ); ?></a>

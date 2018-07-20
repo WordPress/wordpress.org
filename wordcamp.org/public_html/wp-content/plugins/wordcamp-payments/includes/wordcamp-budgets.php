@@ -7,6 +7,9 @@ class WordCamp_Budgets {
 	const VERSION = '0.1.4';
 	const PAYMENT_INFO_RETENTION_PERIOD = 7; // days
 
+	const VIEWER_CAP = 'publish_posts';
+	const ADMIN_CAP  = 'manage_options';
+
 	/**
 	 * Constructor
 	 */
@@ -113,7 +116,7 @@ class WordCamp_Budgets {
 		add_menu_page(
 			esc_html__( 'WordCamp Budget', 'wordcamporg' ),
 			esc_html__( 'Budget',          'wordcamporg' ),
-			'manage_options',
+			self::VIEWER_CAP,
 			'wordcamp-budget',
 			function() { do_action( 'wcb_render_budget_page' ); },
 			plugins_url( 'images/dollar-sign-icon.svg', dirname( __FILE__ ) ),
