@@ -32,17 +32,25 @@ function load() {
 		add_action( 'admin_print_scripts-edit.php', __NAMESPACE__ . '\add_classic_param_to_add_new_button', 11    );
 		add_action( 'admin_print_scripts',          __NAMESPACE__ . '\add_classic_param_to_admin_menus',     1    );
 
-		// @todo Hotfix for Gutenberg 3.1-3.2 breaking wpApiSettings. This will hopefully be unnecessary with 3.3.
-		// See https://github.com/WordPress/gutenberg/issues/7488
-		// See https://github.com/WordPress/gutenberg/pull/7566
-		if ( ! wp_script_is( 'wp-api-fetch', 'registered' ) ) {
-			add_action( 'wp_enqueue_scripts', 'gutenberg_extend_wp_api_backbone_client' );
-			add_action( 'admin_enqueue_scripts', 'gutenberg_extend_wp_api_backbone_client' );
-		}
+		// @todo Remove after Gutenberg 3.3 is released.
+		add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wpapi_hotfix', 99 );
+		add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\wpapi_hotfix', 99 );
 	}
 }
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\load' );
+
+/**
+ * @todo Hotfix for Gutenberg 3.1-3.2 breaking wpApiSettings. This will hopefully be unnecessary with 3.3.
+ *
+ * See https://github.com/WordPress/gutenberg/issues/7488
+ * See https://github.com/WordPress/gutenberg/pull/7566
+ */
+function wpapi_hotfix() {
+	if ( ! wp_script_is( 'wp-api-fetch', 'registered' ) ) {
+		gutenberg_extend_wp_api_backbone_client();
+	}
+}
 
 /**
  * Limit which post types are editable by Gutenberg
