@@ -97,8 +97,7 @@ class WordCamp_Admin {
 			__( 'Contributor Day Information', 'wcpt' ),
 			'wcpt_contributor_metabox',
 			WCPT_POST_TYPE_ID,
-			'advanced',
-			'high'
+			'advanced'
 		);
 
 		add_meta_box(
