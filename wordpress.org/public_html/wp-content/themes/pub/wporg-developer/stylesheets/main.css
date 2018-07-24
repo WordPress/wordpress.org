@@ -1445,16 +1445,39 @@ input {
   border-bottom-style: none;
 }
 
-.devhub-wrap .related ul {
-  line-height: 1.7;
-  /* Slightly increase the line height for more readability */
-  list-style-type: none;
-  margin: 0;
-  overflow-x: auto;
+.devhub-wrap .related {
+  /* Hide the title and toc links (same as .screen-reader-text)
+		   this allows for linking from the toc. */
 }
 
 .devhub-wrap .related .show-more, .devhub-wrap .related .hide-more {
   display: none;
+}
+
+.devhub-wrap .related h3, .devhub-wrap .related .uses .toc-jump, .devhub-wrap .related .used-by .toc-jump {
+  height: 0;
+  margin-bottom: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  position: absolute !important;
+}
+
+.devhub-wrap .related .used-by, .devhub-wrap .related .uses {
+  overflow-x: auto;
+  clear: right;
+}
+
+.devhub-wrap .related td p {
+  margin-bottom: 0;
+}
+
+.devhub-wrap .related th, .devhub-wrap .related td {
+  width: 50%;
+}
+
+@media (max-width: 43em) {
+  .devhub-wrap .related .related-desc, .devhub-wrap .related span {
+    display: none;
+  }
 }
 
 .devhub-wrap .source-content {
@@ -1488,11 +1511,11 @@ input {
   display: none;
 }
 
-.devhub-wrap table .changelog-version {
+.devhub-wrap .changelog table .changelog-version {
   width: 10%;
 }
 
-.devhub-wrap table .changelog-desc {
+.devhub-wrap .changelog table .changelog-desc {
   width: 90%;
 }
 
@@ -2446,7 +2469,6 @@ body.responsive-show {
 
 body.responsive-show #secondary {
   left: 0;
-  overflow: auto;
 }
 
 body.responsive-show #primary-modal {

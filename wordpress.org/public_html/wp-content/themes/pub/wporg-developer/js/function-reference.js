@@ -32,7 +32,7 @@ var wporg_developer = ( function( $ ) {
 	}
 
 	function sourceCodeDisplay( element ) {
-		 
+
 		if ( element !== undefined ) {
 			// Find table inside a specific source code element if passed.
 			var sourceCode = $( '.source-content', element ).find( 'table' );
@@ -82,8 +82,8 @@ var wporg_developer = ( function( $ ) {
 	function toggleUsageListInit() {
 
 		// We only expect one used_by and uses per document
-		$usedByList = $( '.used-by' ).find( 'li' );
-		$usesList   = $( '.uses' ).find( 'li' );
+		$usedByList = $( 'tbody tr', '#used-by-table' );
+		$usesList   = $( 'tbody tr', '#uses-table' );
 
 		if ( $usedByList.length > 5 ) {
 			$usedByList = $usedByList.slice( 5 ).hide();

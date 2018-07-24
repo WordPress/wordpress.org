@@ -341,7 +341,7 @@
 		border-color: transparent;
 		border-image: none;
 		border-style: solid solid none;
-		border-width: 1px 1px 0;   
+		border-width: 1px 1px 0;
 		display: inline-block;
 		padding: .5em 1em;
 		margin-bottom:-1px;
@@ -351,7 +351,7 @@
 		background-color: #fff;
 		border-color: #ccc;
 		border-radius: 3px 3px 0 0;
-		color: #333;  
+		color: #333;
 	}
 	.tab-section {
 		margin-top: 0;
@@ -1060,18 +1060,38 @@
 	/* = Related
 	----------------------------------------------- */
 	.related {
-		ul {
-			line-height: 1.7; /* Slightly increase the line height for more readability */
-			list-style-type: none;
-			margin: 0;
-			overflow-x: auto;
-		}
-
 		.show-more, .hide-more {
 			display: none;
 		}
-	}
 
+		/* Hide the title and toc links (same as .screen-reader-text)
+		   this allows for linking from the toc. */
+		h3, .uses .toc-jump, .used-by .toc-jump {
+			height: 0;
+			margin-bottom: 0;
+			clip: rect(1px, 1px, 1px, 1px);
+			position: absolute !important;
+		}
+
+		.used-by, .uses {
+			overflow-x: auto;
+			clear: right;
+		}
+
+		td p  {
+			margin-bottom: 0;
+		}
+
+		th, td {
+			width: 50%;
+		}
+
+		@media (max-width: 43em) {
+			.related-desc, span {
+				display: none;
+			}
+		}
+	}
 
 	.source-content {
 		overflow: auto;
@@ -1105,14 +1125,13 @@
 	}
 
 	/* Changelog */
-	table {
+	.changelog table {
 		.changelog-version {
 			width: 10%;
 		}
 		.changelog-desc {
 			width: 90%;
 		}
-
 	}
 
 	.loop-pagination {
@@ -1586,7 +1605,7 @@
 		&:active {
 			color: #fff;
 			border-bottom: 1px solid #fff;
-			
+
 			@media screen and (max-width: 48em) {
 				border-bottom: 0;
 			}
@@ -2392,7 +2411,7 @@ body.responsive-show {
 			}
 		}
 	}
-	
+
 	.entry-content {
 		margin-top: 2rem;
 	}
@@ -2479,17 +2498,17 @@ body.responsive-show {
 			border-color: #ccc #bbb #aaa #bbb;
 			background: #eee;
 		}
-		
+
 		&:focus, &:active {
 			border-color: #bbb;
 			background: #eee;
 			-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 			box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 		}
-		
+
 		> span {
 			color: #757575;
-			
+
 			&.red {
 				color: #dc3232;
 			}
@@ -2502,10 +2521,10 @@ body.responsive-show {
 
 	.btn-group {
 		display: inline;
-		
+
 		> a {
 			position: relative;
-			
+
 			@media(min-width: 571px) {
 				&:first-child {
 					right: -6px;
