@@ -17,6 +17,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'ux-feedback' : 'Feedback is needed from the user experience perspective, generally from a UX lead.',
 		'has-unit-tests' : 'Proposed solution has unit test coverage.',
 		'needs-unit-tests' : 'Ticket has a particular need for unit tests.',
+		'needs-dev-note' : 'Ticket needs a post on the development blog.',
 		'needs-docs' : 'Inline documentation is needed.',
 		'needs-codex' : 'The Codex needs to be updated or expanded.',
 		'has-screenshots' : 'Visual changes are documented with screenshots.',
