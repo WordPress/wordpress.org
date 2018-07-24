@@ -72,7 +72,7 @@ class Plugin {
 	 */
 	public function download_button_menu_item( $menu_items ) {
 		foreach ( $menu_items as $menu_item ) {
-			if ( false !== stripos( $menu_item->url, 'download/' ) || 'page-templates/download.php' === get_page_template_slug( $menu_item->object_id ) ) {
+			if ( false !== stripos( $menu_item->url, 'download/' ) || 'page-download.php' === get_page_template_slug( $menu_item->object_id ) ) {
 				$menu_item->classes = array_merge( $menu_item->classes, ['button', 'button-primary', 'download'] );
 				$menu_item->title   = _x( 'Download WordPress', 'Menu title', 'rosetta' );
 				break;
