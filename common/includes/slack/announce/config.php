@@ -81,11 +81,13 @@ function get_whitelist() {
 		) ),
 		'core-editor' => array_merge( get_committers(), array(
 			'azaozz',
+			'gziolo',
 			'iseulde',
 			'jeffpaul',
 			'karmatosed',
 			'matias',
 			'mcsf',
+			'youknowriad',
 		) ),
 		'core-fields' => array_merge( get_committers(), array(
 			'sc0ttkclark',
