@@ -160,7 +160,7 @@ class DevHub_User_Submitted_Content {
 	 */
 	public static function scripts_and_styles() {
 		if ( is_singular() ) {
-			wp_enqueue_script( 'wporg-developer-function-reference', get_template_directory_uri() . '/js/function-reference.js', array( 'jquery', 'syntaxhighlighter-core', 'syntaxhighlighter-brush-php' ), '20160824', true );
+			wp_enqueue_script( 'wporg-developer-function-reference', get_template_directory_uri() . '/js/function-reference.js', array( 'jquery', 'syntaxhighlighter-core', 'syntaxhighlighter-brush-php' ), '20180724', true );
 			wp_enqueue_style( 'syntaxhighlighter-core' );
 			wp_enqueue_style( 'syntaxhighlighter-theme-default' );
 
