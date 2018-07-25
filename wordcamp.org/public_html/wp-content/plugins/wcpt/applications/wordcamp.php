@@ -45,13 +45,15 @@ function enqueue_assets() {
 function render_application_shortcode() {
 	ob_start();
 
-	if ( isset( $_POST['submit-application'] ) ) {
+	if ( is_rate_limited() ) {
+		$message        = 'You have submitted too many applications recently. Please wait and try again in a few hours.';
+		$notice_classes = 'notice-error';
+
+		require( dirname( __DIR__ ) . '/views/applications/common/submission-results.php' );
+	} elseif ( isset( $_POST['submit-application'] ) ) {
 		$application_data = validate_data( $_POST );
 
-		if ( is_rate_limited() ) {
-			$message        = 'You have submitted too many applications recently. Please wait and try again in a few hours.';
-			$notice_classes = 'notice-error';
-		} else if ( is_wp_error( $application_data ) ) {
+		if ( is_wp_error( $application_data ) ) {
 			$message = $application_data->get_error_message();
 			$notice_classes = 'notice-error';
 		} else {
@@ -84,7 +86,7 @@ function is_rate_limited() {
 
 	$previous_entries = get_posts( array(
 		'post_type'      => WCPT_POST_TYPE_ID,
-		'post_status'    => 'any',
+		'post_status'    => get_post_stati(), // This will include trashed posts, unlike 'any'.
 		'posts_per_page' => $limit,
 		'orderby'        => 'date',
 		'order'          => 'DESC',
