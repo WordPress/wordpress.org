@@ -19,6 +19,7 @@ class WordCamp_Coming_Soon_Page {
 		add_action( 'wp_head',                    array( $this, 'admin_bar_styling'               )        );
 		add_action( 'admin_notices',              array( $this, 'block_new_post_admin_notice'     )        );
 		add_filter( 'get_post_metadata',          array( $this, 'jetpack_dont_email_post_to_subs' ), 10, 4 );
+		add_filter( 'publicize_should_publicize_published_post', array( $this, 'jetpack_prevent_publicize' ) );
 
 		add_image_size( 'wccsp_image_medium_rectangle', 500, 300 );
 	}
@@ -396,7 +397,7 @@ class WordCamp_Coming_Soon_Page {
 		if ( 'post' === trim( $screen->id ) ) {
 			$class   = 'notice notice-warning';
 			$message = sprintf(
-				__( '<a href="%s">Coming Soon mode</a> is enabled. Site subscribers will not receive email notifications about published posts.', 'wordcamporg' ),
+				__( '<a href="%s">Coming Soon mode</a> is enabled. Site subscribers will not receive email notifications about published posts. Published posts will not be automatically cross-posted to social media accounts.', 'wordcamporg' ),
 				esc_url( $setting_url )
 			);
 
@@ -429,6 +430,25 @@ class WordCamp_Coming_Soon_Page {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Disable publicizing posts when Coming Soon mode is on. Note that even if we return false here, when publishing a
+	 * post, we will see a message that post has been cross posted in social media accounts. That message is incorrect,
+	 * but can only be fixed in JetPack, not here.
+	 *
+	 * @param bool $should_publicize Whether this post can be publicized or not
+	 *
+	 * @return bool
+	 */
+	public function jetpack_prevent_publicize( $should_publicize ) {
+		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
+
+		if ( 'on' === $settings['enabled'] ) {
+			return false;
+		}
+
+		return $should_publicize;
 	}
 
 } // end WordCamp_Coming_Soon_Page.
