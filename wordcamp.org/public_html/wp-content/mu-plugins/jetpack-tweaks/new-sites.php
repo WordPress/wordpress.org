@@ -1,6 +1,7 @@
 <?php
 
 namespace WordCamp\Jetpack_Tweaks;
+
 defined( 'WPINC' ) or die();
 
 add_filter( 'jetpack_get_default_modules',                     __NAMESPACE__ . '\default_jetpack_modules'       );
@@ -22,7 +23,7 @@ function default_jetpack_modules( $modules ) {
  * Never automatically connect new sites to WordPress.com.
  *
  * Sites don't have SSL certificates when they're first created, so any attempt to connect to WordPress.com would
- * fail. Instead, connecting is attempted after the SSL has been installed. See wcorg_connect_new_site().
+ * fail. Instead, connecting is attempted after the SSL has been installed. See wcorg_connect_new_site_email().
  *
  * @param array $new_value
  * @param array $old_value
@@ -36,44 +37,78 @@ function auto_connect_new_sites( $new_value, $old_value ) {
 }
 
 /**
- * Schedule an attempt to connect Jetpack to WordPress.com
+ * Schedule an email asking to connect Jetpack to WordPress.com
  *
  * @param int $blog_id The blog id.
  */
 function schedule_connect_new_site( $blog_id ) {
 	wp_schedule_single_event(
 		time() + 12 * HOUR_IN_SECONDS + 600, // After the the SSL certificate has been installed
-		'wcorg_connect_new_site',
+		'wcorg_connect_new_site_email',
 		array( $blog_id, get_current_user_id() )
 	);
 }
 
 /**
- * Connect Jetpack to WordPress.com
+ * Send a mail asking for connecting Jetpack to WordPress.com
  *
  * Runs during wp-cron.php.
  *
  * @param int $blog_id The blog_id to connect.
  * @param int $user_id The user ID who created the new site.
  */
-function wcorg_connect_new_site( $blog_id, $user_id ) {
-	if ( ! class_exists( 'Jetpack_Network' ) ) {
+function wcorg_connect_new_site_email( $blog_id, $user_id ) {
+
+	$original_blog_id = get_current_blog_id();
+
+	switch_to_blog( $blog_id );
+
+	// Bail if Jetpack is already active
+	if ( \Jetpack::is_active() ) {
+		restore_current_blog();
 		return;
 	}
+	restore_current_blog();
 
-	error_log( sprintf( 'Connecting new site %d for user %d.', $blog_id, $user_id ) );
+	$domain = get_site_url( $blog_id );
 
-	$network         = \Jetpack_Network::init();
-	$current_user_id = get_current_user_id();
+	$subject = 'Connect ' . $domain . ' with Jetpack';
 
-	wp_set_current_user( $user_id );
-	$result = $network->do_subsiteregister( $blog_id );
-	$active = \Jetpack::is_active();
-	wp_set_current_user( $current_user_id );
+	$email_content = get_wcorg_jetpack_email( $blog_id );
+	wp_mail(
+		'support@wordcamp.org',
+		$subject,
+		$email_content
+	);
+}
 
-	if ( is_wp_error( $result ) ) {
-		error_log( sprintf( 'Could not connect site %d for user %d: %s', $blog_id, $user_id, $result->get_error_message() ) );
-	}
+/**
+ * Generate email content which contains the one click Jetpack - WordCamp connection link.
+ *
+ * @param $blog_id
+ *
+ * @return string
+ */
+function get_wcorg_jetpack_email( $blog_id ) {
 
-	error_log( sprintf( 'Connecting new site %d complete, is_active: %s.', $blog_id, var_export( $active, true ) ) );
+	$domain = get_site_url( $blog_id );
+	$jetpack_net_admin = \Jetpack_Network::init();
+	$jetpack_link = $jetpack_net_admin->get_url( array(
+		'name' => 'subsiteregister',
+		'site_id' => $blog_id,
+	) );
+	$email_content = <<<TEXT
+Hi there,
+
+WordCamp site $domain can now be connected to Jetpack. Please click on the link below to activate the Jetpack connection on this site.
+
+$jetpack_link
+
+Please note that this link can only be used by people having access to Jetpack admin on wordcamp.org. If you do not have access, please assign this ticket to any Global Community Support team member. 
+
+Thanks.
+
+TEXT;
+
+	return $email_content;
 }
