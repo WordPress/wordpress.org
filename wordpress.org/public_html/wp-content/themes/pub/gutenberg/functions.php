@@ -17,6 +17,15 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
+	function frontenberg_edit_pages( $allcaps ) {
+		$allcaps['edit_pages']           = true;
+		$allcaps['edit_others_pages']    = true;
+		$allcaps['edit_published_pages'] = true;
+
+		return $allcaps;
+	}
+	add_filter( 'user_has_cap', 'frontenberg_edit_pages' );
+
 	show_admin_bar( true );
 
 	add_action( 'wp_enqueue_scripts', function() {
