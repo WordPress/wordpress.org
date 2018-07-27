@@ -204,7 +204,9 @@ function wporg_support_get_slack_username( $user_id = 0 ) {
 
 	$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
 	if ( $data && ( $data = json_decode( $data, true ) ) ) {
-		$slack_username = $data['name'];
+		if ( isset( $data['profile']['display_name'] ) ) {
+			$slack_username = $data['profile']['display_name'];
+		}
 	}
 
 	return $slack_username;
