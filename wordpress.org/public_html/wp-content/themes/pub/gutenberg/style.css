@@ -938,8 +938,13 @@ object {
 --------------------------------------------------------------*/
 
 @media (min-width: 782px) {
-	.folded .gutenberg__editor .edit-post-header {
+	.folded .gutenberg__editor .edit-post-header,
+	.folded .gutenberg__editor .components-notice-list {
 	    left: 0;
+	}
+
+	.gutenberg__editor .edit-post-layout.is-sidebar-opened .edit-post-layout__content {
+		margin-top: 32px;
 	}
 }
 
