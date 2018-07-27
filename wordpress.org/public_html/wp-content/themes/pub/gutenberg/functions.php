@@ -31,6 +31,20 @@ add_action( 'template_redirect', function() {
 		wp_enqueue_style( 'nav-menus' );
 		wp_enqueue_style( 'l10n' );
 		wp_enqueue_style( 'buttons' );
+		wp_add_inline_script( 'wp-api-fetch',
+			sprintf(
+				'wp.apiFetch.use( function( options, next ) {
+					if ( options.path = "/wp/v2/posts/%d/autosaves" ) {
+						return Promise.resolve( [ { "id": %d } ] ); //not sure what this actually should be, etc.
+					}
+
+					return next( options );
+				} );',
+				113,
+				113
+			),
+			'after'
+		);
 	} );
 	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
 
