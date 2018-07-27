@@ -35,13 +35,11 @@ add_action( 'template_redirect', function() {
 			sprintf(
 				'wp.apiFetch.use( function( options, next ) {
 					if ( options.method !== "GET" ) {
-						return Promise.resolve( [ { "id": %d } ] ); //not sure what this actually should be, etc.
+						return Promise.resolve( options.data ); //not sure what this actually should be, etc.
 					}
 
 					return next( options );
-				} );',
-				113,
-				113
+				} );'
 			),
 			'after'
 		);
