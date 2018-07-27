@@ -1,7 +1,3 @@
-<?php
-$data = get_plugin_data( WP_PLUGIN_DIR . '/gutenberg/gutenberg.php' );
-$gutenberg_version = $data['Version'];
-?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 	<head>
