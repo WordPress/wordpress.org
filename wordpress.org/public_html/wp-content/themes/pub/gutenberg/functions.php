@@ -34,7 +34,7 @@ add_action( 'template_redirect', function() {
 		wp_add_inline_script( 'wp-api-fetch',
 			sprintf(
 				'wp.apiFetch.use( function( options, next ) {
-					if ( options.path = "/wp/v2/posts/%d/autosaves" ) {
+					if ( options.method !== "GET" ) {
 						return Promise.resolve( [ { "id": %d } ] ); //not sure what this actually should be, etc.
 					}
 
