@@ -5,6 +5,7 @@
 
 namespace WordCamp\Budgets\Sponsor_Payment_Stripe;
 use WordCamp\Utilities\Stripe_Client;
+use WordCamp\Utilities\Form_Spam_Prevention;
 use WordCamp_Loader;
 use WordCamp_Budgets;
 use Exception;
@@ -61,6 +62,9 @@ function render() {
 		)
 	);
 
+	$fsp = new Form_Spam_Prevention();
+	add_action( 'wp_print_styles', [ $fsp, 'render_form_field_styles' ] );
+
 	require_once( dirname( __DIR__ ) . '/views/sponsor-payment/main.php' );
 }
 
@@ -114,6 +118,7 @@ function get_wordcamp_query_options() {
  */
 function _handle_post_data( &$data ) {
 	$step = filter_input( INPUT_POST, 'step' );
+	$fsp  = new Form_Spam_Prevention();
 
 	switch ( $step ) {
 		// An invoice, event, currency and amount have been selected.
@@ -125,6 +130,11 @@ function _handle_post_data( &$data ) {
 			$description  = filter_input( INPUT_POST, 'description' );
 			$currency     = filter_input( INPUT_POST, 'currency' );
 			$amount       = filter_input( INPUT_POST, 'amount', FILTER_VALIDATE_FLOAT );
+
+			if ( ! $fsp->validate_form_submission() ) {
+				$data['errors'][] = 'Your form submission could not be processed. Please try again.';
+				return;
+			}
 
 			switch ( $payment_type ) {
 				default:
@@ -139,6 +149,7 @@ function _handle_post_data( &$data ) {
 
 					if ( ! in_array( $wordcamp_id, $valid_ids ) ) {
 						$data['errors'][] = 'Please select a valid event.';
+						$fsp->add_score_to_ip_address( [ 1 ] );
 						return;
 					}
 
@@ -172,6 +183,7 @@ function _handle_post_data( &$data ) {
 
 			if ( ! array_key_exists( $currency, $data['currencies'] ) || false !== strpos( $currency, 'null' ) ) {
 				$data['errors'][] = 'Invalid currency.';
+				$fsp->add_score_to_ip_address( [ 1 ] );
 				return;
 			}
 
@@ -270,6 +282,7 @@ function _handle_post_data( &$data ) {
 
 			// All good!
 			$data['step'] = STEP_PAYMENT_SUCCESS;
+			$fsp->add_score_to_ip_address( [ -1 ] );
 			break;
 	}
 }

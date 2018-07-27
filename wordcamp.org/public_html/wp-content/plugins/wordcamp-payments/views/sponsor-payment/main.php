@@ -1,7 +1,10 @@
 <?php
 namespace WordCamp\Budgets\Sponsor_Payment_Stripe;
 
+use WordCamp\Utilities\Form_Spam_Prevention;
+
 /** @var array $data */
+/** @var Form_Spam_Prevention $fsp */
 
 get_header();
 ?>
@@ -20,7 +23,11 @@ get_header();
 			<?php endforeach; ?>
 		<?php endif; ?>
 
-		<?php if ( $data['step'] == STEP_SELECT_INVOICE ) : ?>
+		<?php if ( $fsp->is_ip_address_throttled() ) : ?>
+			<p class="payment-instructions">
+				This form is currently unavailable. Please try again later.
+			</p>
+		<?php elseif ( $data['step'] == STEP_SELECT_INVOICE ) : ?>
 			<p class="payment-instructions">
 				<?php esc_html_e( 'Use this form to pay your WordCamp sponsorship fee to WordPress Community Support, PBC. If you did not receive an invoice ID yet, please get in touch with the event\'s Sponsorships Coordinator for more information.', 'wordcamporg' ); ?>
 			</p>
@@ -56,6 +63,8 @@ get_header();
 				</fieldset>
 
 				<div class="clear"></div>
+
+				<?php $fsp->render_form_fields(); ?>
 
 				<label class="control-header"><?php esc_html_e( 'Currency', 'wordcamporg' ); ?></label>
 				<div class="control">
