@@ -17,7 +17,6 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
-	add_theme_support( 'align-wide' );
 	show_admin_bar( true );
 
 	add_action( 'wp_enqueue_scripts', function() {
@@ -159,15 +158,33 @@ if ( ! function_exists( 'gutenbergtheme_setup' ) ) :
 			'caption',
 		) );
 
-		add_theme_support( 'gutenberg', array(
-			'wide-images' => true,
-   		'colors' => array(
-				'#0073aa',
-				'#229fd8',
-				'#eee',
-				'#444',
-			),
-		) );
+		add_theme_support( 'align-wide' );
+
+		add_theme_support( 'editor-color-palette', [
+			[
+				'name'  => esc_html__( 'Dark Blue', 'gutenbergtheme' ),
+				'slug' => 'dark-blue',
+				'color' => '#0073aa',
+			],
+			[
+
+				'name'  => esc_html__( 'Light Blue', 'gutenbergtheme' ),
+				'slug' => 'light-blue',
+				'color' => '#229fd8',
+			],
+			[
+
+				'name'  => esc_html__( 'Dark Gray', 'gutenbergtheme' ),
+				'slug' => 'dark-gray',
+				'color' => '#444',
+			],
+			[
+
+				'name'  => esc_html__( 'Light Gray', 'gutenbergtheme' ),
+				'slug' => 'light-gray',
+				'color' => '#eee',
+			],
+		] );
 	}
 endif;
 add_action( 'after_setup_theme', 'gutenbergtheme_setup' );
