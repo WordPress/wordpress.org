@@ -11,6 +11,102 @@ if ( ! defined( 'WPORGPATH' ) ) {
 	define( 'WPORGPATH', get_theme_file_path( '/inc/' ) );
 }
 
+
+add_action( 'template_redirect', function() {
+	if ( ! is_page( 'test' ) ) {
+		return;
+	}
+
+	add_theme_support( 'align-wide' );
+	show_admin_bar( true );
+
+	add_action( 'wp_enqueue_scripts', function() {
+		wp_enqueue_script( 'postbox', admin_url( 'js/postbox.min.js' ),array( 'jquery-ui-sortable' ), false, 1 );
+		wp_enqueue_style( 'dashicons' );
+		wp_enqueue_style( 'common' );
+		wp_enqueue_style( 'forms' );
+		wp_enqueue_style( 'dashboard' );
+		wp_enqueue_style( 'media' );
+		wp_enqueue_style( 'admin-menu' );
+		wp_enqueue_style( 'admin-bar' );
+		wp_enqueue_style( 'nav-menus' );
+		wp_enqueue_style( 'l10n' );
+		wp_enqueue_style( 'buttons' );
+	} );
+	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
+
+	if ( ! is_user_logged_in() ) {
+		add_filter( 'wp_insert_post_empty_content', '__return_true', PHP_INT_MAX -1, 2 );
+		add_filter( 'pre_insert_term', function( $t ) {return ''; });
+	}
+
+
+	// Disable use XML-RPC
+	add_filter( 'xmlrpc_enabled', '__return_false' );
+
+	// Disable X-Pingback to header
+	function disable_x_pingback( $headers ) {
+		unset( $headers['X-Pingback'] );
+
+		return $headers;
+	}
+	add_filter( 'wp_headers', 'disable_x_pingback' );
+
+	/**
+	 * Ajax handler for querying attachments.
+	 *
+	 * @since 3.5.0
+	 */
+	function frontenberg_wp_ajax_nopriv_query_attachments() {
+		$query = isset( $_REQUEST['query'] ) ? (array) $_REQUEST['query'] : array();
+		$keys = array(
+			's', 'order', 'orderby', 'posts_per_page', 'paged', 'post_mime_type',
+			'post_parent', 'post__in', 'post__not_in', 'year', 'monthnum'
+		);
+		foreach ( get_taxonomies_for_attachments( 'objects' ) as $t ) {
+			if ( $t->query_var && isset( $query[ $t->query_var ] ) ) {
+				$keys[] = $t->query_var;
+			}
+		}
+
+		$query = array_intersect_key( $query, array_flip( $keys ) );
+		$query['post_type'] = 'attachment';
+		if ( MEDIA_TRASH
+			&& ! empty( $_REQUEST['query']['post_status'] )
+			&& 'trash' === $_REQUEST['query']['post_status'] ) {
+			$query['post_status'] = 'trash';
+		} else {
+			$query['post_status'] = 'inherit';
+		}
+
+		// Filter query clauses to include filenames.
+		if ( isset( $query['s'] ) ) {
+			add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
+		}
+
+		/**
+		 * Filters the arguments passed to WP_Query during an Ajax
+		 * call for querying attachments.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @see WP_Query::parse_query()
+		 *
+		 * @param array $query An array of query variables.
+		 */
+		$query = apply_filters( 'ajax_query_attachments_args', $query );
+		$query = new WP_Query( $query );
+
+		$posts = array_map( 'wp_prepare_attachment_for_js', $query->posts );
+		$posts = array_filter( $posts );
+
+		wp_send_json_success( $posts );
+	}
+	add_action( 'wp_ajax_nopriv_query-attachments', 'frontenberg_wp_ajax_nopriv_query_attachments' );
+});
+
+
+
 if ( ! function_exists( 'gutenbergtheme_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
