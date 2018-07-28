@@ -10,7 +10,7 @@
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
 		"@wordpress/browserslist-config": "~2.2.0",
-		"autoprefixer": "~8.6.5",
+		"autoprefixer": "~9.0.1",
 		"grunt": "~1.0.3",
 		"grunt-contrib-watch": "~1.1.0",
 		"grunt-postcss": "~0.9.0",
@@ -18,8 +18,8 @@
 		"grunt-sass": "~3.0.1",
 		"grunt-stylelint": "~0.10.0",
 		"node-sass": "~4.9.2",
-		"postcss-scss": "~1.0.6",
-		"stylelint": "~9.3.0",
+		"postcss-scss": "~2.0.0",
+		"stylelint": "~9.4.0",
 		"stylelint-config-wordpress": "~13.0.0"
 	},
 	"engines": {
