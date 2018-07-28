@@ -48,6 +48,12 @@ if ( bbp_is_single_view() || bbp_is_search_results() ) : ?>
 
 				<?php bbp_user_nicename( bbp_get_topic_author_id(), array( 'before' => '<p class="bbp-user-nicename">(@', 'after' => ')</p><br />' ) ); ?>
 
+				<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) && 'bbp_blocked' === bbp_get_user_role( bbp_get_topic_author_id() ) ) : ?>
+					<p class="wporg-bbp-user-is-blocked">[<?php esc_attr_e( 'This user is blocked', 'wporg-forums' ); ?>]</p>
+				<?php endif; ?>
+
+				<br>
+
 				<?php if ( $title = get_user_option( 'title', bbp_get_topic_author_id() ) ) : ?>
 
 					<p class="bbp-author-title"><?php echo esc_html( $title ); ?></p>

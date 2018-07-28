@@ -434,11 +434,16 @@ section {
 			color: #f00;
 		}
 
+		p.wporg-bbp-user-is-blocked {
+			display: inline-block;
+			color: #f00;
+		}
+
 		.create-topic {
 			font-size: 0.8rem;
 			float: left;
 
-			&:before {
+			&::before {
 				color: #000;
 				content: "\f132";
 				font: 400 16px/1 dashicons;
@@ -446,8 +451,6 @@ section {
 				vertical-align: middle;
 			}
 		}
-
-
 
 		.bbp-pagination {
 			font-size: ms(-2);

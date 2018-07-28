@@ -3703,12 +3703,17 @@ section {
 	color: #f00;
 }
 
+.bbpress #bbpress-forums p.wporg-bbp-user-is-blocked {
+	display: inline-block;
+	color: #f00;
+}
+
 .bbpress #bbpress-forums .create-topic {
 	font-size: 0.8rem;
 	float: right;
 }
 
-.bbpress #bbpress-forums .create-topic:before {
+.bbpress #bbpress-forums .create-topic::before {
 	color: #000;
 	content: "\f132";
 	font: 400 16px/1 dashicons;
