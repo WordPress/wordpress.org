@@ -31,6 +31,15 @@ function get_classes_dir_path() {
 }
 
 /**
+ * Get the path for the includes directory.
+ *
+ * @return string Path with trailing slash.
+ */
+function get_includes_dir_path() {
+	return trailingslashit( PLUGIN_DIR ) . 'includes/';
+}
+
+/**
  * Get the path for the views directory.
  *
  * @return string Path with trailing slash.
@@ -56,6 +65,21 @@ function get_assets_dir_path() {
 function get_assets_url() {
 	return trailingslashit( PLUGIN_URL ) . 'assets/';
 }
+
+/**
+ * Autoload all the files in the includes directory.
+ *
+ * @return void
+ */
+function load_includes() {
+	foreach ( glob( get_includes_dir_path() . '*.php' ) as $filename ) {
+		if ( is_readable( $filename ) ) {
+			include_once ( $filename );
+		}
+	}
+}
+
+add_action( 'plugins_loaded', __NAMESPACE__ . '\load_includes' );
 
 /**
  * Autoloader for plugin classes.
@@ -109,6 +133,7 @@ function get_report_classes() {
 		__NAMESPACE__ . '\Report\Sponsor_Invoices',
 		__NAMESPACE__ . '\Report\Payment_Activity',
 		__NAMESPACE__ . '\Report\Sponsorship_Grants',
+		__NAMESPACE__ . '\Report\WordCamp_Details',
 		__NAMESPACE__ . '\Report\WordCamp_Status',
 		__NAMESPACE__ . '\Report\Meetup_Groups',
 		__NAMESPACE__ . '\Report\WordCamp_Payment_Methods',

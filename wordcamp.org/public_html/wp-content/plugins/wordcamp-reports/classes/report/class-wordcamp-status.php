@@ -6,8 +6,10 @@
 namespace WordCamp\Reports\Report;
 defined( 'WPINC' ) || die();
 
-use WordCamp_Loader;
+use Exception;
 use WordCamp\Reports;
+use function WordCamp\Reports\Validation\validate_wordcamp_status;
+use WordCamp_Loader;
 
 /**
  * Class WordCamp_Status
@@ -100,45 +102,21 @@ class WordCamp_Status extends Date_Range {
 	public function __construct( $start_date, $end_date, $status = '', array $options = array() ) {
 		// Report-specific options.
 		$options = wp_parse_args( $options, array(
-			'status_subset' => array(),
+			'status_subset' => [],
 		) );
 
 		parent::__construct( $start_date, $end_date, $options );
 
-		if ( 'any' === $status ) {
-			$status = '';
-		}
-
-		if ( $status && $this->validate_status_input( $status ) ) {
-			$this->status = $status;
-		}
-	}
-
-	/**
-	 * Validate the given status ID string.
-	 *
-	 * @param string $status The status ID to filter for in the report.
-	 *
-	 * @return bool True if the status ID is valid. Otherwise false.
-	 */
-	protected function validate_status_input( $status ) {
-		if ( is_array( $this->options['status_subset'] ) && ! empty( $this->options['status_subset'] ) ) {
-			if ( ! in_array( $status, $this->options['status_subset'], true ) ) {
-				$this->error->add( 'invalid_status', 'Please enter a valid status ID.' );
-
-				return false;
+		if ( $status && 'any' !== $status ) {
+			try {
+				$this->status = validate_wordcamp_status( $status, $options );
+			} catch ( Exception $e ) {
+				$this->error->add(
+					self::$slug . '-status-error',
+					$e->getMessage()
+				);
 			}
-
-			return true;
 		}
-
-		if ( ! in_array( $status, array_keys( WordCamp_Loader::get_post_statuses() ), true ) ) {
-			$this->error->add( 'invalid_status', 'Please enter a valid status ID.' );
-
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
