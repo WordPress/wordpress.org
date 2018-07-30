@@ -20,6 +20,7 @@
 }
 
 .wp-block-cover-text.alignwide,
+[data-align="wide"] .wp-block-image,
 .wp-block-image.alignwide,
 .wp-block-gallery.alignwide,
 .wp-block-text-columns.alignwide{
@@ -28,6 +29,7 @@
 }
 
 .wp-block-cover-text.alignfull,
+[data-align="full"] .wp-block-image,
 .wp-block-image.alignfull,
 .wp-block-gallery.alignfull,
 .wp-block-text-columns.alignfull{
