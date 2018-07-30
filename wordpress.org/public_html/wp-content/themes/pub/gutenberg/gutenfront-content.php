@@ -1,4 +1,7 @@
 <?php
+
+$localised_domain = parse_url( home_url('/'), PHP_URL_HOST );
+
 $title = __( 'Say Hello to the New Editor', 'gutenbergtheme' );
 
 $content = '<!-- wp:subhead -->
@@ -22,7 +25,7 @@ $content .= '<!-- wp:spacer -->
 <!-- /wp:spacer -->' . "\n\n";
 
 $content .= '<!-- wp:button {"align":"center","backgroundColor":"dark-blue"} -->
-<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="/plugins/gutenberg/">' . __( "Download Gutenberg Today", 'gutenbergtheme' ) . '</a></div>
+<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="' . "https://{$localised_domain}/plugins/gutenberg/" . '">' . __( "Download Gutenberg Today", 'gutenbergtheme' ) . '</a></div>
 <!-- /wp:button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
@@ -30,7 +33,7 @@ $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":
 	sprintf(
 		/* translators: %s: The URL to the Clasic Editor plugin. */
 		__( "Gutenberg is available as a plugin today, and will be included in version 5.0 of WordPress. The <a href='%s'>classic editor</a> will be available as a plugin if needed.", 'gutenbergtheme' ),
-		'/plugins/classic-editor/'
+		"https://{$localised_domain}/plugins/classic-editor/"
 	) . '</em></p>
 <!-- /wp:paragraph -->' . "\n\n";
 
@@ -141,7 +144,7 @@ $content .= '<!-- wp:spacer -->
 <!-- /wp:spacer -->' . "\n\n";
 
 $content .= '<!-- wp:button {"align":"center","backgroundColor":"dark-blue"} -->
-<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="/plugins/gutenberg/">' . __( 'Download Gutenberg Today', 'gutenbergtheme' ) . '</a></div>
+<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="' . "https://{$localised_domain}/plugins/gutenberg/" . '">' . __( 'Download Gutenberg Today', 'gutenbergtheme' ) . '</a></div>
 <!-- /wp:button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
@@ -149,7 +152,7 @@ $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":
 	sprintf(
 		/* translators: %s: The URL to the Clasic Editor plugin. */
 		__( "Gutenberg is available as a plugin today, and will be included in version 5.0 of WordPress. The <a href='%s'>classic editor</a> will be available as a plugin if needed.", 'gutenbergtheme' ),
-		'/plugins/classic-editor/'
+		"https://{$localised_domain}/plugins/classic-editor/"
 	) . '</em></p>
 <!-- /wp:paragraph -->' . "\n\n";
 
