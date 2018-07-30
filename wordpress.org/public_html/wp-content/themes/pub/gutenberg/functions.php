@@ -17,15 +17,6 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
-	function frontenberg_edit_pages( $allcaps ) {
-		$allcaps['edit_pages']           = true;
-		$allcaps['edit_others_pages']    = true;
-		$allcaps['edit_published_pages'] = true;
-
-		return $allcaps;
-	}
-	add_filter( 'user_has_cap', 'frontenberg_edit_pages' );
-
 	show_admin_bar( true );
 
 	add_action( 'wp_enqueue_scripts', function() {
@@ -59,11 +50,6 @@ add_action( 'template_redirect', function() {
 		);
 	} );
 	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
-
-	if ( ! is_user_logged_in() ) {
-		add_filter( 'wp_insert_post_empty_content', '__return_true', PHP_INT_MAX -1, 2 );
-		add_filter( 'pre_insert_term', function( $t ) {return ''; });
-	}
 
 	// Disable use XML-RPC
 	add_filter( 'xmlrpc_enabled', '__return_false' );
@@ -135,6 +121,47 @@ function frontenberg_wp_ajax_nopriv_query_attachments() {
 	wp_send_json_success( $posts );
 }
 add_action( 'wp_ajax_nopriv_query-attachments', 'frontenberg_wp_ajax_nopriv_query_attachments' );
+
+// Override the WP API to give Gutenberg the REST API responses it wants.
+function frontenberg_override_rest_api( $null, $wp_rest_server, $request ) {
+	if ( is_admin() || preg_match( '!/wp-json/!', $_SERVER['REQUEST_URI'] ) ) {
+		return $null; // Don't modify an actual API responses..
+	}
+
+	if ( '/wp/v2/types' == $request->get_route() ) {
+		// Minimal data required by Gutenberg for pages.
+		return new WP_REST_Response( array(
+			'page' => array(
+				'rest_base' => 'pages',
+			)
+		), 200 );
+	}
+
+	if ( preg_match( '!^/wp/v2/pages/(\d+)$!', $request->get_route(), $m ) ) {
+		$content = include __DIR__ . '/gutenfront-content.php';
+
+		return new WP_REST_Response( array(
+			'id' => $m[1],
+			'date' => gmdate( 'c' ), 'date_gmt' => gmdate( 'c' ),
+			'modified' => gmdate( 'c' ), 'modified_gmt' => gmdate( 'c' ),
+			'link' => 'https://wordpress.org/gutenberg/', 'guid' => array(),
+			'parent' => 0, 'menu_order' => 0, 'author' => 0, 'featured_media' => 0,
+			'comment_status' => 'closed', 'ping_status' => 'closed', 'template' => '', 'meta' => [], '_links' => [],
+			'type' => 'page', 'slug' => '', 'status' => 'draft',
+			'excerpt' => array( 'raw' => '' ),
+			'title' => array(
+				'raw' => $content['title'],
+			),
+			'content' => array(
+				'raw' => $content['content'],
+			),
+		), 200 );
+	}
+
+	return $null;
+}
+add_filter( 'rest_pre_dispatch', 'frontenberg_override_rest_api', 10, 3 );
+
 
 if ( ! function_exists( 'gutenbergtheme_setup' ) ) :
 	/**
