@@ -968,6 +968,11 @@ object {
 	visibility: hidden;
 }
 
+.media-frame-uploader,
+.media-router {
+	display: none;
+}
+
 /*--------------------------------------------------------------
 # WP.org Header
 --------------------------------------------------------------*/
