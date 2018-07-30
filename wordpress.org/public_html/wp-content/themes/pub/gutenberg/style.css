@@ -943,7 +943,7 @@ object {
 	    left: 0;
 	}
 
-	.gutenberg__editor .edit-post-layout.is-sidebar-opened .edit-post-layout__content {
+	.gutenberg__editor .edit-post-layout .edit-post-layout__content {
 		margin-top: 32px;
 	}
 
