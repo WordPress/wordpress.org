@@ -290,7 +290,7 @@ function gutenbergtheme_fonts_url() {
  * Enqueue scripts and styles.
  */
 function gutenbergtheme_scripts() {
-	wp_enqueue_style( 'gutenbergtheme-style', get_stylesheet_uri(), [], 1 );
+	wp_enqueue_style( 'gutenbergtheme-style', get_stylesheet_uri(), [], 2 );
 
 	wp_enqueue_style( 'gutenbergthemeblocks-style', get_template_directory_uri() . '/blocks.css');
 
