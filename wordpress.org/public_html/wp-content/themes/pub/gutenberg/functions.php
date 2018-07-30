@@ -112,6 +112,10 @@ function frontenberg_wp_ajax_nopriv_query_attachments() {
 		add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
 	}
 
+	if ( empty( $query['post__in'] ) ) {
+		$query['post__in'] = range( 350, 390 );
+	}
+
 	/**
 	 * Filters the arguments passed to WP_Query during an Ajax
 	 * call for querying attachments.
