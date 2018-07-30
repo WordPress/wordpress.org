@@ -960,11 +960,9 @@ object {
 	display: none !important;
 }
 
-.gutenberg__editor .editor-post-preview {
-	visibility: hidden;
-}
-
-.gutenberg__editor .editor-post-saved-state {
+.gutenberg__editor .editor-post-preview,
+.gutenberg__editor .editor-post-saved-state,
+.gutenberg__editor .editor-post-permalink__change {
 	visibility: hidden;
 }
 
