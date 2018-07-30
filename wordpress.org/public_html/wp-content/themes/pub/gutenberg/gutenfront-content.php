@@ -5,10 +5,6 @@ $content = '<!-- wp:subhead -->
 <p class="wp-block-subhead">' . __( 'It’s a whole new way to use WordPress. We call it Gutenberg.', 'gutenbergtheme' ) . '</p>
 <!-- /wp:subhead -->' . "\n\n";
 
-$content .= '<!-- wp:image {"id":351,"align":"full"} -->
-<figure class="wp-block-image alignfull"><img src="https://wordpress.org/gutenberg/wp-content/uploads/2018/07/Screenshot-4.png" alt="" class="wp-image-351"/></figure>
-<!-- /wp:image -->' . "\n\n";
-
 $content .= '<!-- wp:image {"id":97629,"align":"full"} -->
 <figure class="wp-block-image alignfull"><img src="https://wordpress.org/gutenberg/files/2018/07/Screenshot-4-1.png" alt="" class="wp-image-97629"/></figure>
 <!-- /wp:image -->' . "\n\n";
@@ -54,10 +50,6 @@ $content .= '<!-- wp:image {"id":358} -->
 <figure class="wp-block-image"><img src="https://wordpress.org/gutenberg/files/2018/07/Insert-Block-2-1.gif" alt="" class="wp-image-358"/></figure>
 <!-- /wp:image -->' . "\n\n";
 
-$content .= '<!-- wp:image {"id":358} -->
-<figure class="wp-block-image"><img src="https://wordpress.org/gutenberg/wp-content/uploads/2018/07/Insert-Block-2-1.gif" alt="" class="wp-image-358"/></figure>
-<!-- /wp:image -->' . "\n\n";
-
 $content .= '<!-- wp:paragraph {"align":"left"} -->
 <p style="text-align:left">' . __( "Blocks allow for rich customization without deep knowledge of code, and make good on the promise of WordPress: broad functionality with a clear, consistent user experience. Here's just a selection of the default blocks included with Gutenberg:", 'gutenbergtheme' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
@@ -77,10 +69,6 @@ $content .= '<!-- wp:heading {"align":"center"} -->
 $content .= '<!-- wp:paragraph {"align":"left"} -->
 <p style="text-align:left">' . __( 'A single block is nice — solid, clear, discrete. But when you start building with blocks? That’s when the real excitement starts: endless combinations, endless layouts, endless possibility, all driven by your vision.', 'gutenbergtheme' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
-
-$content .= '<!-- wp:image {"id":359} -->
-<figure class="wp-block-image"><img src="https://wordpress.org/gutenberg/wp-content/uploads/2018/07/Builder-2-1.gif" alt="" class="wp-image-359"/></figure>
-<!-- /wp:image -->' . "\n\n";
 
 $content .= '<!-- wp:image {"id":359} -->
 <figure class="wp-block-image"><img src="https://wordpress.org/gutenberg/files/2018/07/Builder-2-1.gif" alt="" class="wp-image-359"/></figure>
