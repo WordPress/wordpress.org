@@ -87,9 +87,9 @@ $content .= '<!-- wp:heading {"align":"center"} -->
 
 $content .= '<!-- wp:columns {"className":"gutenberg-landing\u002d\u002ddevelopers-columns"} -->
 <div class="wp-block-columns has-2-columns gutenberg-landing--developers-columns"><!-- wp:column -->
-<div class="wp-block-column"><!-- wp:heading {"level":3,"align":"left"} -->
-<h3 style="text-align:left">' . __( 'Built with modern technology.', 'gutenbergtheme' ) . '</h3>
-<!-- /wp:heading -->' . "\n\n";
+<div class="wp-block-column"><!-- wp:paragraph {"align":"left"} -->
+<p><strong>' . __( 'Built with modern technology.', 'gutenbergtheme' ) . '</strong></p>
+<!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
 <p style="text-align:left">' . __( 'Gutenberg was developed on GitHub and uses the WordPress REST API, Javascript, and React.', 'gutenbergtheme' ) . '</p>
@@ -101,9 +101,9 @@ $content .= '<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
 <!-- /wp:column -->' . "\n\n";
 
 $content .= '<!-- wp:column -->
-<div class="wp-block-column"><!-- wp:heading {"level":3,"align":"left"} -->
-<h3 style="text-align:left">' . __( 'Designed for compatibility.', 'gutenbergtheme' ) . '</h3>
-<!-- /wp:heading -->' . "\n\n";
+<div class="wp-block-column"><!-- wp:paragraph {"align":"left"} -->
+<p><strong>' . __( 'Designed for compatibility.', 'gutenbergtheme' ) . '</strong></p>
+<!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
 <p style="text-align:left">' . __( 'We recommend migrating features to blocks when possible, but support for existing WordPress functionality will remain, and there will be transition paths for shortcodes, meta-boxes, and Custom Post Types.', 'gutenbergtheme' ) . '</p>
