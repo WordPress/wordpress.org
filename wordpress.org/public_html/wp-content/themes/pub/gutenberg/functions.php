@@ -147,7 +147,8 @@ function frontenberg_override_rest_api( $null, $wp_rest_server, $request ) {
 			'link' => 'https://wordpress.org/gutenberg/', 'guid' => array(),
 			'parent' => 0, 'menu_order' => 0, 'author' => 0, 'featured_media' => 0,
 			'comment_status' => 'closed', 'ping_status' => 'closed', 'template' => '', 'meta' => [], '_links' => [],
-			'type' => 'page', 'slug' => '', 'status' => 'draft',
+			'type' => 'page', 'status' => 'draft',
+			'slug' => '', 'generated_slug' => '', 'permalink_template' => home_url('/'),
 			'excerpt' => array( 'raw' => '' ),
 			'title' => array(
 				'raw' => $content['title'],
