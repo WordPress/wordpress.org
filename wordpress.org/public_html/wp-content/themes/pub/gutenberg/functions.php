@@ -61,6 +61,17 @@ add_action( 'template_redirect', function() {
 		return $headers;
 	}
 	add_filter( 'wp_headers', 'disable_x_pingback' );
+
+	// Embeds need further work.
+	add_filter( 'block_categories', function( $cats ) {
+		foreach ( $cats as $i => $cat ) {
+			if ( $cat['slug'] === 'embed' )
+				unset( $cats[$i] );
+		}
+		return $cats;
+	} );
+
+
 });
 
 /**
