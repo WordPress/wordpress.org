@@ -952,8 +952,10 @@ object {
 	}
 }
 
-.gutenberg__editor .is-button.is-large,
+.gutenberg__editor .edit-post-header .is-button.is-large,
+.gutenberg__editor .edit-post-header .editor-post-save-draft,
 .gutenberg__editor .editor-post-publish-panel__toggle,
+.gutenberg__editor .editor-media-placeholder__upload-button,
 .gutenberg__editor .button-link-delete {
 	display: none !important;
 }
