@@ -48,11 +48,6 @@ add_action( 'template_redirect', function() {
 			'wp.data.dispatch( "core/edit-post" ).closeGeneralSidebar();' .
 			'wp.data.dispatch( "core/nux" ).disableTips();'
 		);
-		wp_add_inline_style(
-			'buttons',
-			'.is-button.is-large, .editor-post-publish-panel__toggle { display: none !important; }
-			.editor-post-preview { visibility: hidden; }'
-		);
 	} );
 	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
 

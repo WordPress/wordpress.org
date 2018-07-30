@@ -952,6 +952,20 @@ object {
 	}
 }
 
+.gutenberg__editor .is-button.is-large,
+.gutenberg__editor .editor-post-publish-panel__toggle,
+.gutenberg__editor .button-link-delete {
+	display: none !important;
+}
+
+.gutenberg__editor .editor-post-preview {
+	visibility: hidden;
+}
+
+.gutenberg__editor .editor-post-saved-state {
+	visibility: hidden;
+}
+
 /*--------------------------------------------------------------
 # WP.org Header
 --------------------------------------------------------------*/
