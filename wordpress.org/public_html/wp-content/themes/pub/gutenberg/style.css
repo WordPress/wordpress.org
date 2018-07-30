@@ -946,6 +946,10 @@ object {
 	.gutenberg__editor .edit-post-layout.is-sidebar-opened .edit-post-layout__content {
 		margin-top: 32px;
 	}
+
+	.gutenberg__editor .edit-post-last-revision__panel {
+		display: none;
+	}
 }
 
 /*--------------------------------------------------------------

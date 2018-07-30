@@ -52,6 +52,11 @@ add_action( 'template_redirect', function() {
 			),
 			'after'
 		);
+		wp_add_inline_script(
+			'wp-edit-post',
+			'wp.data.dispatch( "core/edit-post" ).closeGeneralSidebar();' .
+			'wp.data.dispatch( "core/nux" ).disableTips();'
+		);
 	} );
 	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
 
