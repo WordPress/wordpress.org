@@ -26,7 +26,7 @@ $content .= '<!-- wp:spacer -->
 <!-- /wp:spacer -->' . "\n\n";
 
 $content .= '<!-- wp:button {"align":"center","backgroundColor":"dark-blue"} -->
-<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="https://wordpress.org/plugins/gutenberg/">' . __( "Download Gutenberg Today", 'gutenbergtheme' ) . '</a></div>
+<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="/plugins/gutenberg/">' . __( "Download Gutenberg Today", 'gutenbergtheme' ) . '</a></div>
 <!-- /wp:button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
@@ -141,11 +141,11 @@ $content .= '<!-- wp:quote {"align":"left","className":" is-style-large"} -->
 <!-- /wp:quote -->' . "\n\n";
 
 $content .= '<!-- wp:quote {"align":"left","className":" is-style-large"} -->
-<blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . __( '"Suddenly, the chore of setting up a new website becomes effortless."', 'gutenbergtheme' ) . '</p><cite>— <a href="https://loopconf.com/talk/customizing-the-future/"' . __( '>Mel Choyce', 'gutenbergtheme' ) . '</a></cite></blockquote>
+<blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . __( '"Suddenly, the chore of setting up a new website becomes effortless."', 'gutenbergtheme' ) . '</p><cite>— <a href="https://loopconf.com/talk/customizing-the-future/">' . __( 'Mel Choyce', 'gutenbergtheme' ) . '</a></cite></blockquote>
 <!-- /wp:quote -->' . "\n\n";
 
 $content .= '<!-- wp:quote {"align":"left","className":" is-style-large"} -->
-<blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . __( '"The web up until this point has been confined to some sort of rectangular screen. But that is not how it’s going to be. Gutenberg has the potential of moving us into the next time."', 'gutenbergtheme' ) . '</p><cite>— <a href="https://wordpress.tv/2017/12/10/morten-rand-hendriksen-gutenberg-and-the-wordpress-of-tomorrow/">' . __( 'Morten Rand-Hendriksen', 'gutenbergtheme' ) . '</a> </cite></blockquote>
+<blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . __( '"The web up until this point has been confined to some sort of rectangular screen. But that is not how it’s going to be. Gutenberg has the potential of moving us into the next time."', 'gutenbergtheme' ) . '</p><cite>— <a href="https://wordpress.tv/2017/12/10/morten-rand-hendriksen-gutenberg-and-the-wordpress-of-tomorrow/">' . __( 'Morten Rand-Hendriksen', 'gutenbergtheme' ) . '</a></cite></blockquote>
 <!-- /wp:quote -->' . "\n\n";
 
 $content .= '<!-- wp:spacer -->
@@ -153,7 +153,7 @@ $content .= '<!-- wp:spacer -->
 <!-- /wp:spacer -->' . "\n\n";
 
 $content .= '<!-- wp:button {"align":"center","backgroundColor":"dark-blue"} -->
-<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="https://wordpress.org/plugins/gutenberg/">' . __( 'Download Gutenberg Today', 'gutenbergtheme' ) . '</a></div>
+<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="/plugins/gutenberg/">' . __( 'Download Gutenberg Today', 'gutenbergtheme' ) . '</a></div>
 <!-- /wp:button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
