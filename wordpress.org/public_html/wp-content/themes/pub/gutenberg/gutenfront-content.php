@@ -23,7 +23,7 @@ $content = <<<EOPOST
 <!-- /wp:gallery -->
 
 <!-- wp:spacer -->
-<div style="height:100px" class="wp-block-spacer"></div>
+<div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:button {"align":"center","backgroundColor":"dark-blue"} -->
@@ -35,7 +35,7 @@ $content = <<<EOPOST
 <!-- /wp:paragraph -->
 
 <!-- wp:spacer -->
-<div style="height:100px" class="wp-block-spacer"></div>
+<div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"align":"center"} -->
@@ -63,7 +63,7 @@ $content = <<<EOPOST
 <!-- /wp:gallery -->
 
 <!-- wp:spacer -->
-<div style="height:100px" class="wp-block-spacer"></div>
+<div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"align":"center"} -->
@@ -83,7 +83,7 @@ $content = <<<EOPOST
 <!-- /wp:image -->
 
 <!-- wp:spacer -->
-<div style="height:100px" class="wp-block-spacer"></div>
+<div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"align":"center"} -->
@@ -121,7 +121,7 @@ $content = <<<EOPOST
 <!-- /wp:columns -->
 
 <!-- wp:spacer -->
-<div style="height:100px" class="wp-block-spacer"></div>
+<div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"align":"center"} -->
@@ -145,7 +145,7 @@ $content = <<<EOPOST
 <!-- /wp:quote -->
 
 <!-- wp:spacer -->
-<div style="height:100px" class="wp-block-spacer"></div>
+<div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:button {"align":"center","backgroundColor":"dark-blue"} -->
@@ -157,7 +157,7 @@ $content = <<<EOPOST
 <!-- /wp:paragraph -->
 
 <!-- wp:spacer -->
-<div style="height:100px" class="wp-block-spacer"></div>
+<div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"align":"center"} -->
