@@ -39,7 +39,7 @@ add_action( 'template_redirect', function() {
 						lodash.startsWith( options.path, "/gutenberg/v1/block-renderer" )
 					);
 
-					if ( options.method !== "GET" && ! isWhitelistedEndpoint ) {
+					if ( options.method && options.method !== "GET" && ! isWhitelistedEndpoint ) {
 						return Promise.resolve( options.data ); // This works in enough cases to be the default return value.
 					}
 
