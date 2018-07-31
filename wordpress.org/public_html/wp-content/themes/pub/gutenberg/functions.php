@@ -42,6 +42,7 @@ add_action( 'template_redirect', function() {
 					if ( options.method && options.method !== "GET" && ! isWhitelistedEndpoint ) {
 						return Promise.resolve( options.data ); // This works in enough cases to be the default return value.
 					}
+					options.path = options.path.replace( "per_page=-1", "per_page=10" );
 
 					return next( options );
 				} );'
