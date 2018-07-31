@@ -64,11 +64,11 @@ add_action( 'template_redirect', function() {
 						window.fakeUploadedMedia[ id ] = {
 							"id": id,
 							"date": "", "date_gmt": "", "modified": "", "modified_gmt": "",
-							"guid": { "rendered": "" }, "title": { "rendered": file.name },
-							"description": { "rendered": ""}, "caption": { "rendered": "" }, "alt_text": "",
+							"guid": {}, "title": { "rendered": file.name, "raw": file.name },
+							"description": {}, "caption": {}, "alt_text": "",
 							"slug": file.name, "status": "inherit", "type": "attachment", "link": "",
 							"author": 0, "comment_status": "open", "ping_status": "closed",
-							"media_details": {}, "media_type": "image", "mime_type": file.type,
+							"media_details": {}, "media_type": file.type.split("/")[0], "mime_type": file.type,
 							"source_url": "", // This gets filled below with a data uri
 							"_links": {}
 						};
