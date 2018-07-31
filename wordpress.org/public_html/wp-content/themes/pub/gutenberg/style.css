@@ -966,8 +966,11 @@ object {
 	visibility: hidden;
 }
 
-.gutenberg__editor .editor-block-list__layout {
-	overflow-x: hidden;
+@media (max-width: 640px) {
+	.gutenberg__editor .editor-block-list__layout {
+		overflow-x: hidden;
+		padding-top: 13px;
+	}
 }
 
 .media-frame-uploader,
