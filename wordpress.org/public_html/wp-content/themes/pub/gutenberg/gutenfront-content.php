@@ -151,7 +151,7 @@ $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":
 <p style="text-align:center" class="has-small-font-size gutenberg-landing--button-disclaimer"><em>' .
 	sprintf(
 		/* translators: %s: The URL to the Clasic Editor plugin. */
-		wp_kses_post( __( 'Gutenberg is available as a plugin today, and will be included in version 5.0 of WordPress. The <a href="%s"">classic editor</a> will be available as a plugin if needed.', 'wporg' ) ),
+		wp_kses_post( __( 'Gutenberg is available as a plugin today, and will be included in version 5.0 of WordPress. The <a href="%s">classic editor</a> will be available as a plugin if needed.', 'wporg' ) ),
 		esc_url( "https://{$localised_domain}/plugins/classic-editor/" )
 	) . '</em></p>
 <!-- /wp:paragraph -->' . "\n\n";
