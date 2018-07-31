@@ -975,6 +975,10 @@ object {
 	display: none;
 }
 
+.editor-block-list__block[data-type="wporg/download-button"] {
+	text-align: center;
+}
+
 /*--------------------------------------------------------------
 # WP.org Header
 --------------------------------------------------------------*/
