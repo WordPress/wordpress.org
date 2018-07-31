@@ -35,7 +35,7 @@ add_action( 'template_redirect', function() {
 			sprintf(
 				'wp.apiFetch.use( function( options, next ) {
 					if ( options.method !== "GET" ) {
-						return Promise.resolve( options.data ); //not sure what this actually should be, etc.
+						return Promise.resolve( options.data );
 					}
 
 					return next( options );
@@ -165,6 +165,7 @@ function frontenberg_override_rest_api( $null, $wp_rest_server, $request ) {
 				'raw' => $content['title'],
 			),
 			'content' => array(
+				'block_format' => 1,
 				'raw' => $content['content'],
 			),
 		), 200 );
