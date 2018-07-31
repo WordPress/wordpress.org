@@ -177,7 +177,7 @@ function frontenberg_wp_ajax_nopriv_query_attachments() {
 	}
 
 	if ( empty( $query['post__in'] ) ) {
-		$query['post__in'] = range( 350, 390 );
+		$query['post__in'] = array_combine( range( 350, 390 ), range( 97654, 97659 ) );
 	}
 
 	/**
