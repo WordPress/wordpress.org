@@ -29,7 +29,7 @@ $content .= '<!-- wp:wporg/download-button -->
 <!-- /wp:wporg/download-button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
-<p style="text-align:center" class="is-small-text gutenberg-landing--button-disclaimer"><em>' .
+<p style="text-align:center" class="has-small-font-size gutenberg-landing--button-disclaimer"><em>' .
 	sprintf(
 		/* translators: %s: The URL to the Clasic Editor plugin. */
 		wp_kses_post( __( 'Gutenberg is available as a plugin today, and will be included in version 5.0 of WordPress. The <a href="%s">classic editor</a> will be available as a plugin if needed.', 'wporg' ) ),
@@ -96,7 +96,7 @@ $content .= '<!-- wp:paragraph {"align":"left"} -->
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-<p style="text-align:left" class="is-small-text"><a href="https://wordpress.org/gutenberg/handbook/language/">' . esc_html__( 'Learn more', 'wporg' ) . '</a></p>
+<p style="text-align:left" class="has-small-font-size"><a href="https://wordpress.org/gutenberg/handbook/language/">' . esc_html__( 'Learn more', 'wporg' ) . '</a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->' . "\n\n";
 
@@ -110,7 +110,7 @@ $content .= '<!-- wp:paragraph {"align":"left"} -->
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-<p style="text-align:left" class="is-small-text"><a href="https://wordpress.org/gutenberg/handbook/reference/faq/">' . esc_html__( 'Learn more', 'wporg' ) . '</a></p>
+<p style="text-align:left" class="has-small-font-size"><a href="https://wordpress.org/gutenberg/handbook/reference/faq/">' . esc_html__( 'Learn more', 'wporg' ) . '</a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->' . "\n\n";
@@ -148,7 +148,7 @@ $content .= '<!-- wp:wporg/download-button -->
 <!-- /wp:wporg/download-button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
-<p style="text-align:center" class="is-small-text gutenberg-landing--button-disclaimer"><em>' .
+<p style="text-align:center" class="has-small-font-size gutenberg-landing--button-disclaimer"><em>' .
 	sprintf(
 		/* translators: %s: The URL to the Clasic Editor plugin. */
 		wp_kses_post( __( 'Gutenberg is available as a plugin today, and will be included in version 5.0 of WordPress. The <a href="%s"">classic editor</a> will be available as a plugin if needed.', 'wporg' ) ),
