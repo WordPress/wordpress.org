@@ -34,9 +34,12 @@ add_action( 'template_redirect', function() {
 		wp_add_inline_script( 'wp-api-fetch',
 			sprintf(
 				'wp.apiFetch.use( function( options, next ) {
-					var is_whitelisted_endpoint = options.path.startsWith( "/oembed/1.0/proxy" ) || options.path.startsWith( "/gutenberg/v1/block-renderer" );
+					var isWhitelistedEndpoint = (
+						lodash.startsWith( options.path, "/oembed/1.0/proxy" ) ||
+						lodash.startsWith( options.path, "/gutenberg/v1/block-renderer" )
+					);
 
-					if ( options.method !== "GET" && ! is_whitelisted_endpoint ) {
+					if ( options.method !== "GET" && ! isWhitelistedEndpoint ) {
 						return Promise.resolve( options.data ); //not sure what this actually should be, etc.
 					}
 
