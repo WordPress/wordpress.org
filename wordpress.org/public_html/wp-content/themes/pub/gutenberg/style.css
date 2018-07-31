@@ -1051,7 +1051,12 @@ object {
 --------------------------------------------------------------*/
 
 /* Make sure all headers inherit from Gutenberg styles, not .org styles */
-h1, h2, h3, h4, h5, h6 {
+#wordpress-org h1,
+#wordpress-org h2,
+#wordpress-org h3,
+#wordpress-org h4,
+#wordpress-org h5,
+#wordpress-org h6 {
 	font-family: "Noto Serif", serif;
 }
 
