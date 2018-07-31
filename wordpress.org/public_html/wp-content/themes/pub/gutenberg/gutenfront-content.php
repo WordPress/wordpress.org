@@ -143,9 +143,9 @@ $content .= '<!-- wp:spacer -->
 <div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->' . "\n\n";
 
-$content .= '<!-- wp:button {"align":"center","backgroundColor":"dark-blue"} -->
-<div class="wp-block-button aligncenter"><a class="wp-block-button__link has-background has-dark-blue-background-color" href="' . "https://{$localised_domain}/plugins/gutenberg/" . '">' . __( 'Download Gutenberg Today', 'gutenbergtheme' ) . '</a></div>
-<!-- /wp:button -->' . "\n\n";
+$content .= '<!-- wp:wporg/download-button -->
+<div class="wp-block-wporg-download-button wp-block-button aligncenter"><a class="wp-block-button__link has-background has-strong-blue-background-color" href="' . "https://{$localised_domain}/plugins/gutenberg/" . '" style="background-color:rgb(0,115,170)">' . __( "Download Gutenberg Today", 'gutenbergtheme' ) . '</a></div>
+<!-- /wp:wporg/download-button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
 <p style="text-align:center" class="is-small-text gutenberg-landing--button-disclaimer"><em>' .
