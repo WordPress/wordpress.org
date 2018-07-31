@@ -27,6 +27,10 @@ registerBlockType( 'wporg/download-button', {
 		}
 	},
 
+	supports: {
+		inserter: false
+	},
+
 	edit: function( props ) {
 
 		return el(
