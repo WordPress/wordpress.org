@@ -24,7 +24,7 @@ $hosts = [
 	],
 	'siteground'    => [
 		'description' => __( 'SiteGround offers top-tier website performance and support regardless of your technical skill. Join millions of happy clients using their WordPress services to get the help you need at prices you love.', 'wporg' ),
-		'logo'        => 'images/logo-siteground.png',
+		'logo'        => 'images/logo-siteground.svg',
 		'name'        => 'Siteground',
 		'url'         => 'https://www.siteground.com/wordpress-hosting.htm',
 	],
