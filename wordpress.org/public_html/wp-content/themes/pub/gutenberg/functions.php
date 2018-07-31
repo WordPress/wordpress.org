@@ -34,8 +34,10 @@ add_action( 'template_redirect', function() {
 		wp_add_inline_script( 'wp-api-fetch',
 			sprintf(
 				'wp.apiFetch.use( function( options, next ) {
-					if ( options.method !== "GET" ) {
-						return Promise.resolve( options.data );
+					var is_whitelisted_endpoint = options.path.startsWith( "/oembed/1.0/proxy" ) || options.path.startsWith( "/gutenberg/v1/block-renderer" );
+
+					if ( options.method !== "GET" && ! is_whitelisted_endpoint ) {
+						return Promise.resolve( options.data ); //not sure what this actually should be, etc.
 					}
 
 					return next( options );
@@ -61,18 +63,23 @@ add_action( 'template_redirect', function() {
 		return $headers;
 	}
 	add_filter( 'wp_headers', 'disable_x_pingback' );
-
-	// Embeds need further work.
-	add_filter( 'block_categories', function( $cats ) {
-		foreach ( $cats as $i => $cat ) {
-			if ( $cat['slug'] === 'embed' )
-				unset( $cats[$i] );
-		}
-		return $cats;
-	} );
-
-
 });
+
+/**
+ * Let unauthenticated users embed media in Frontenberg.
+ */
+function frontenberg_enable_oembed( $all_caps ) {
+	if (
+		0 === strpos( $_SERVER['REQUEST_URI'], '/gutenberg/wp-json/oembed/1.0/proxy' )  ||
+		0 === strpos( $_SERVER['REQUEST_URI'], '/gutenberg/wp-json/gutenberg/v1/block-renderer/core/archives' ) ||
+		0 === strpos( $_SERVER['REQUEST_URI'], '/gutenberg/wp-json/gutenberg/v1/block-renderer/core/latest-comments' )
+	) {
+		$all_caps['edit_posts'] = true;
+	}
+
+	return $all_caps;
+}
+add_filter( 'user_has_cap', 'frontenberg_enable_oembed' );
 
 /**
  * Ajax handler for querying attachments for logged-out users.
