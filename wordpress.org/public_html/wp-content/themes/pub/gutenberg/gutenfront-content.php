@@ -88,7 +88,7 @@ $content .= '<!-- wp:heading {"align":"center"} -->
 $content .= '<!-- wp:columns {"className":"gutenberg-landing\u002d\u002ddevelopers-columns"} -->
 <div class="wp-block-columns has-2-columns gutenberg-landing--developers-columns"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:paragraph {"align":"left"} -->
-<p><strong>' . __( 'Built with modern technology.', 'gutenbergtheme' ) . '</strong></p>
+<p style="text-align:left"><strong>' . __( 'Built with modern technology.', 'gutenbergtheme' ) . '</strong></p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
@@ -102,7 +102,7 @@ $content .= '<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
 
 $content .= '<!-- wp:column -->
 <div class="wp-block-column"><!-- wp:paragraph {"align":"left"} -->
-<p><strong>' . __( 'Designed for compatibility.', 'gutenbergtheme' ) . '</strong></p>
+<p style="text-align:left"><strong>' . __( 'Designed for compatibility.', 'gutenbergtheme' ) . '</strong></p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
