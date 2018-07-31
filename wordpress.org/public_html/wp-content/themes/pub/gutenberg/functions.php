@@ -56,6 +56,10 @@ add_action( 'template_redirect', function() {
 	} );
 	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
 
+	add_action( 'enqueue_block_editor_assets', function() {
+		wp_enqueue_script( 'button-readonly', get_template_directory_uri() . '/js/button-readonly.js', array(), null );
+	} );
+
 	// Disable use XML-RPC
 	add_filter( 'xmlrpc_enabled', '__return_false' );
 
