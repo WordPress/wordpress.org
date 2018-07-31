@@ -56,6 +56,13 @@ add_action( 'template_redirect', function() {
 	// Disable use XML-RPC
 	add_filter( 'xmlrpc_enabled', '__return_false' );
 
+	add_action( 'wp_footer', function() {
+		wp_add_inline_script(
+			'wp-edit-post',
+			'wp.domReady( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
+		);
+	} );
+
 	// Disable X-Pingback to header
 	function disable_x_pingback( $headers ) {
 		unset( $headers['X-Pingback'] );
