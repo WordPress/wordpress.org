@@ -40,7 +40,52 @@ add_action( 'template_redirect', function() {
 					);
 
 					if ( options.method !== "GET" && ! isWhitelistedEndpoint ) {
-						return Promise.resolve( options.data ); //not sure what this actually should be, etc.
+						return Promise.resolve( options.data ); // This works in enough cases to be the default return value.
+					}
+
+					return next( options );
+				} );'
+			),
+			'after'
+		);
+		wp_add_inline_script( 'wp-api-fetch',
+			sprintf(
+				'wp.apiFetch.use( function( options, next ) {
+					if ( options.method == "POST" && options.path == "/wp/v2/media" ) {
+						var file = options.body.get("file");
+
+						window.fakeUploadedMedia = window.fakeUploadedMedia || [];
+						if ( ! window.fakeUploadedMedia.length ) {
+							window.fakeUploadedMedia[9999000] = {};
+						}
+						var id = window.fakeUploadedMedia.length;
+
+						window.fakeUploadedMedia[ id ] = {
+							"id": id,
+							"date": "", "date_gmt": "", "modified": "", "modified_gmt": "",
+							"guid": { "rendered": "" }, "title": { "rendered": file.name },
+							"description": { "rendered": ""}, "caption": { "rendered": "" }, "alt_text": "",
+							"slug": file.name, "status": "inherit", "type": "attachment", "link": "",
+							"author": 0, "comment_status": "open", "ping_status": "closed",
+							"media_details": {}, "media_type": "image", "mime_type": file.type,
+							"source_url": "", // This gets filled below with a data uri
+							"_links": {}
+						};
+
+						 return new Promise( function( resolve ) {
+							var a = new FileReader();
+    							a.onload = function(e) {
+    								window.fakeUploadedMedia[ id ].source_url = e.target.result;
+    								resolve( window.fakeUploadedMedia[ id ] );
+    							}
+    							a.readAsDataURL( file );
+    						} );
+					}
+
+					// Drag droped media of ID 9999xxx is stored within the Browser
+					var path_id_match = options.path.match( "^/wp/v2/media/(9999\\\\d+)" );
+					if ( path_id_match ) {
+						return Promise.resolve( window.fakeUploadedMedia[ path_id_match[1] ] );
 					}
 
 					return next( options );
