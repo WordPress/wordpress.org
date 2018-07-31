@@ -966,6 +966,10 @@ object {
 	visibility: hidden;
 }
 
+.gutenberg__editor .editor-block-list__layout {
+	overflow-x: hidden;
+}
+
 .media-frame-uploader,
 .media-router {
 	display: none;
