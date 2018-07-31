@@ -41,8 +41,8 @@ $content .= '<!-- wp:spacer -->
 <div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->' . "\n\n";
 
-$content .= '<!-- wp:heading {"align":"center"} -->
-<h2 style="text-align:center">' . __( 'Meet your new best friend, Blocks', 'gutenbergtheme' ) . '</h2>
+$content .= '<!-- wp:heading {"align":"left"} -->
+<h2 style="text-align:left">' . __( 'Meet your new best friend, Blocks', 'gutenbergtheme' ) . '</h2>
 <!-- /wp:heading -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
@@ -65,8 +65,8 @@ $content .= '<!-- wp:spacer -->
 <div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->' . "\n\n";
 
-$content .= '<!-- wp:heading {"align":"center"} -->
-<h2 style="text-align:center">' . __( 'Be your own builder', 'gutenbergtheme' ) . '</h2>
+$content .= '<!-- wp:heading {"align":"left"} -->
+<h2 style="text-align:left">' . __( 'Be your own builder', 'gutenbergtheme' ) . '</h2>
 <!-- /wp:heading -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
@@ -81,8 +81,8 @@ $content .= '<!-- wp:spacer -->
 <div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->' . "\n\n";
 
-$content .= '<!-- wp:heading {"align":"center"} -->
-<h2 style="text-align:center">' . __( 'Gutenberg ❤️ Developers', 'gutenbergtheme' ) . '</h2>
+$content .= '<!-- wp:heading {"align":"left"} -->
+<h2 style="text-align:left">' . __( 'Gutenberg ❤️ Developers', 'gutenbergtheme' ) . '</h2>
 <!-- /wp:heading -->' . "\n\n";
 
 $content .= '<!-- wp:columns {"className":"gutenberg-landing\u002d\u002ddevelopers-columns"} -->
@@ -119,8 +119,8 @@ $content .= '<!-- wp:spacer -->
 <div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->' . "\n\n";
 
-$content .= '<!-- wp:heading {"align":"center"} -->
-<h2 style="text-align:center">' . __( 'The editor is just the beginning', 'gutenbergtheme' ) . '</h2>
+$content .= '<!-- wp:heading {"align":"left"} -->
+<h2 style="text-align:left">' . __( 'The editor is just the beginning', 'gutenbergtheme' ) . '</h2>
 <!-- /wp:heading -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
@@ -160,8 +160,8 @@ $content .= '<!-- wp:spacer -->
 <div style="height:100px" class="wp-block-spacer" aria-hidden="true"></div>
 <!-- /wp:spacer -->' . "\n\n";
 
-$content .= '<!-- wp:heading {"align":"center"} -->
-<h2 style="text-align:center">' . __( 'Dig in deeper', 'gutenbergtheme' ) . '</h2>
+$content .= '<!-- wp:heading {"align":"left"} -->
+<h2 style="text-align:left">' . __( 'Dig in deeper', 'gutenbergtheme' ) . '</h2>
 <!-- /wp:heading -->' . "\n\n";
 
 $content .= '<!-- wp:list -->
