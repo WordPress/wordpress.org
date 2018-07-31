@@ -4,8 +4,8 @@ namespace WordCamp\Reports\Time;
 defined( 'WPINC' ) || die();
 
 use Exception;
-use DateTimeImmutable;
 use WordCamp\Reports\Utility\Date_Range;
+use function WordCamp\Reports\Validation\validate_date_range;
 
 /**
  * Generate a simple array of years.
@@ -105,10 +105,9 @@ function convert_time_period_to_date_range( $year, $period = '' ) {
 	}
 
 	try {
-		$range = new Date_Range(
-			new DateTimeImmutable( $start_date ),
-			new DateTimeImmutable( $end_date )
-		);
+		$range = validate_date_range( $start_date, $end_date, [
+			'allow_future_start' => true,
+		] );
 	} catch ( Exception $e ) {
 		throw new Exception( sprintf(
 			'Invalid range: %s',
@@ -117,28 +116,4 @@ function convert_time_period_to_date_range( $year, $period = '' ) {
 	}
 
 	return $range;
-}
-
-/**
- * Change the expiration time interval based on the current date/time relative to a date range.
- *
- * @param int        $expiration A time interval in seconds.
- * @param Date_Range $range
- *
- * @return int A (possibly) modified time interval in seconds.
- * @throws Exception
- */
-function modify_cache_expiration_for_date_range( $expiration, Date_Range $range ) {
-	$now = new DateTimeImmutable( 'now' );
-	$now->setTime( 0, 0, 0 ); // Beginning of the current day.
-
-	if ( $range->is_within( $now ) ) {
-		// Expire the cache sooner if the data includes the current day.
-		$expiration = HOUR_IN_SECONDS;
-	} elseif ( $range->end->diff( $now )->y > 0 ) {
-		// Keep the cache longer if the end of the date range is over a year ago.
-		$expiration = MONTH_IN_SECONDS;
-	}
-
-	return $expiration;
 }

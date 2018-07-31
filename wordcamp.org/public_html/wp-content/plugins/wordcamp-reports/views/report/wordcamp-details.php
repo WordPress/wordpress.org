@@ -14,6 +14,7 @@ use WordCamp\Reports\Report;
 /** @var bool   $include_dateless */
 /** @var string $status */
 /** @var array  $statuses */
+/** @var array  $available_fields */
 ?>
 
 <div class="wrap">
@@ -64,6 +65,25 @@ use WordCamp\Reports\Report;
 			</tr>
 			</tbody>
 		</table>
+
+		<fieldset class="fields-container">
+			<legend class="fields-label">Available Fields</legend>
+
+			<?php foreach ( $available_fields as $field_name => $extra_props ) : ?>
+				<div class="field-checkbox">
+					<input
+						type="checkbox"
+						id="fields-<?php echo esc_attr( $field_name ); ?>"
+						name="fields[]"
+						value="<?php echo esc_attr( $field_name ); ?>"
+						<?php if ( $extra_props && is_string( $extra_props ) ) echo esc_html( $extra_props ); ?>
+					/>
+					<label for="fields-<?php echo esc_attr( $field_name ); ?>">
+						<?php echo esc_attr( $field_name ); ?>
+					</label>
+				</div>
+			<?php endforeach; ?>
+		</fieldset>
 
 		<?php submit_button( 'Export CSV', 'primary', 'action', false ); ?>
 	</form>
