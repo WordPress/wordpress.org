@@ -173,11 +173,11 @@ class Meetup_Events extends Base {
 
 		$data = [];
 
-		$relevant_keys = array_flip( array( 'id', 'event_url', 'name', 'description', 'time', 'group', 'city', 'l10n_country', 'latitude', 'longitude' ) );
+		$relevant_keys = array_fill_keys( [ 'id', 'event_url', 'name', 'description', 'time', 'group', 'city', 'l10n_country', 'latitude', 'longitude' ], '' );
 
 		foreach ( $events as $event ) {
 			$group_id = $event['group']['id'];
-			$event    = wp_parse_args( $event, array_fill_keys( $relevant_keys, '' ) );
+			$event    = wp_parse_args( $event, $relevant_keys );
 
 			$event['description']  = isset( $event['description'] ) ? trim( $event['description'] ) : '';
 			$event['time']         = absint( $event['time'] ) / 1000; // Convert to seconds.
@@ -457,7 +457,7 @@ class Meetup_Events extends Base {
 			$filename[] = $report->range->start->format( 'Y-m-d' );
 			$filename[] = $report->range->end->format( 'Y-m-d' );
 
-			$headers = [ 'Event ID', 'Event URL', 'Event Name', 'Description', 'Date', 'Group Name', 'City', 'Country', 'Country (localized)', 'Latitude', 'Longitude' ];
+			$headers = [ 'Event ID', 'Event URL', 'Event Name', 'Description', 'Date', 'Group Name', 'City', 'Country (localized)', 'Latitude', 'Longitude' ];
 
 			$data = $report->get_data();
 
