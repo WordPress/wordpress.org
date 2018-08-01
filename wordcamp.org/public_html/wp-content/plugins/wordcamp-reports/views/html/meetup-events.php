@@ -17,6 +17,13 @@ defined( 'WPINC' ) || die();
 	<h4>By country</h4>
 
 	<table class="striped widefat but-not-too-wide">
+		<tr>
+			<td>Countries with at least one event during the date range</td>
+			<td class="number"><?php echo number_format_i18n( $data['countries_with_events'] ); ?></td>
+		</tr>
+	</table>
+
+	<table class="striped widefat but-not-too-wide">
 		<thead>
 		<tr>
 			<td>Country</td>

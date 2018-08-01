@@ -261,6 +261,8 @@ class Meetup_Events extends Base {
 			}
 		}
 
+		$compiled_data['countries_with_events'] = count( $compiled_data['total_events_by_country'] );
+
 		try {
 			$events_by_group = $this->sort_events_by_field( 'group', $data );
 		} catch ( Exception $e ) {
