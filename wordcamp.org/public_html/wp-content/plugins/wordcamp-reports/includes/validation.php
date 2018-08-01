@@ -42,13 +42,19 @@ function validate_date_range( $start_date, $end_date, array $config = [] ) {
 		throw new Exception( 'Please enter valid start and end dates.' );
 	}
 
-	try {
-		$start_date = new DateTimeImmutable( $start_date ); // Immutable so methods don't modify the original object.
-	} catch ( Exception $e ) {
-		throw new Exception( sprintf(
-			'Invalid start date: %s',
-			$e->getMessage()
-		) );
+	if ( $start_date instanceof DateTime ) {
+		$start_date = DateTimeImmutable::createFromMutable( $start_date );
+	}
+
+	if ( ! $start_date instanceof DateTimeImmutable ) {
+		try {
+			$start_date = new DateTimeImmutable( $start_date ); // Immutable so methods don't modify the original object.
+		} catch ( Exception $e ) {
+			throw new Exception( sprintf(
+				'Invalid start date: %s',
+				$e->getMessage()
+			) );
+		}
 	}
 
 	// No future start dates.
@@ -64,13 +70,19 @@ function validate_date_range( $start_date, $end_date, array $config = [] ) {
 		) );
 	}
 
-	try {
-		$end_date = new DateTimeImmutable( $end_date ); // Immutable so methods don't modify the original object.
-	} catch ( Exception $e ) {
-		throw new Exception( sprintf(
-			'Invalid end date: %s',
-			$e->getMessage()
-		) );
+	if ( $end_date instanceof DateTime ) {
+		$end_date = DateTimeImmutable::createFromMutable( $end_date );
+	}
+
+	if ( ! $end_date instanceof DateTimeImmutable ) {
+		try {
+			$end_date = new DateTimeImmutable( $end_date ); // Immutable so methods don't modify the original object.
+		} catch ( Exception $e ) {
+			throw new Exception( sprintf(
+				'Invalid end date: %s',
+				$e->getMessage()
+			) );
+		}
 	}
 
 	// No negative date intervals.
