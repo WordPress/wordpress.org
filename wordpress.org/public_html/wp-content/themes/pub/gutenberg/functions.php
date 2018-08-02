@@ -416,7 +416,7 @@ add_filter( 'get_next_post_sort', 'gutenbergtheme_adjacent_post_order', 10, 3 );
 
 function gutenbergtheme_previous_post_where( $where, $in_same_term, $excluded_term, $taxonomy, $post ) {
 	if ( 'handbook' !== $post->post_type ) {
-		return $order_by;
+		return $where;
 	}
 
 	return "WHERE p.post_type='handbook' AND p.post_status='publish' AND p.menu_order < {$post->menu_order}";
@@ -425,7 +425,7 @@ add_filter( 'get_previous_post_where', 'gutenbergtheme_previous_post_where', 10,
 
 function gutenbergtheme_next_post_where( $where, $in_same_term, $excluded_term, $taxonomy, $post ) {
 	if ( 'handbook' !== $post->post_type ) {
-		return $order_by;
+		return $where;
 	}
 
 	return "WHERE p.post_type='handbook' AND p.post_status='publish' AND p.menu_order > {$post->menu_order}";
