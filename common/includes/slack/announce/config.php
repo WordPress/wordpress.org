@@ -134,6 +134,7 @@ function get_whitelist() {
 			'azaozz',
 			'casiepa',
 			'desrosj',
+			'Heather Burns',
 		) ),
 		'core-restapi' => array_merge( get_committers(), array(
 			'danielbachhuber',
