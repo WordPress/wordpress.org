@@ -31,6 +31,8 @@ add_action( 'template_redirect', function() {
 		wp_enqueue_style( 'nav-menus' );
 		wp_enqueue_style( 'l10n' );
 		wp_enqueue_style( 'buttons' );
+
+		// Use a middleware provider to intercept and modify API calls. Short-circuit POST requests, bound queries, allow media, etc.
 		wp_add_inline_script( 'wp-api-fetch',
 			sprintf(
 				'wp.apiFetch.use( function( options, next ) {
@@ -39,16 +41,75 @@ add_action( 'template_redirect', function() {
 						lodash.startsWith( options.path, "/gutenberg/v1/block-renderer" )
 					);
 
+					// Prevent non-whitelisted non-GET requests (ie. POST) to prevent errors
 					if ( options.method && options.method !== "GET" && ! isWhitelistedEndpoint ) {
-						return Promise.resolve( options.data ); // This works in enough cases to be the default return value.
+						// This works in enough cases to be the default return value.
+						return Promise.resolve( options.data );
 					}
+
+					// Add limits to all GET queries which attempt unbound queries
 					options.path = options.path.replace( "per_page=-1", "per_page=10" );
+
+					// Load images with the view context, seems to work
+					if ( lodash.startsWith( options.path, "/wp/v2/media/" ) ) {
+						options.path = options.path.replace( "context=edit", "context=view" );
+					}
 
 					return next( options );
 				} );'
 			),
 			'after'
 		);
+
+		// Use a middleware preloader to handle the "types" API endpoints with minimal data needed
+		wp_add_inline_script( 'wp-api-fetch',
+			'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( {
+				"/wp/v2/types?context=edit": { "body": {
+					"page": {
+						"rest_base": "pages",
+						"supports": {}
+					},
+					"wp_block": {
+						"rest_base": "blocks",
+						"supports": {}
+					}
+				} },
+				"/wp/v2/types/page?context=edit": { "body": {
+					"rest_base": "pages",
+					"supports": {}
+				} },
+				"/wp/v2/types/wp_block?context=edit": { "body": {
+					"rest_base": "blocks",
+					"supports": {}
+				} }
+			} ) );',
+			'after'
+		);
+
+		// Use a middleware preloader to load the custom post content:
+		$frontendburg_content = include __DIR__ . '/gutenfront-content.php';
+		wp_add_inline_script( 'wp-api-fetch',
+			sprintf(
+				'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( %s ) );',
+				wp_json_encode( array(
+					"/wp/v2/pages/" . get_post()->ID . "?context=edit" => [ 'body' => [
+						'id' => get_post()->ID,
+						'title' => [ 'raw' => $frontendburg_content['title'] ],
+						'content' => [ 'block_format' => 1, 'raw' => $frontendburg_content['content'] ],
+						'excerpt' => [ 'raw' => '' ],
+						'date' => '', 'date_gmt' => '', 'modified' => '', 'modified_gmt' => '',
+						'link' => home_url('/'), 'guid' => [],
+						'parent' => 0, 'menu_order' => 0, 'author' => 0, 'featured_media' => 0,
+						'comment_status' => 'closed', 'ping_status' => 'closed', 'template' => '', 'meta' => [], '_links' => [],
+						'type' => 'page', 'status' => 'draft',
+						'slug' => '', 'generated_slug' => '', 'permalink_template' => home_url('/'),
+					] ]
+				) )
+			),
+			'after'
+		);
+
+		// Add a middleware provider which intercepts all uploads and stores them within the browser
 		wp_add_inline_script( 'wp-api-fetch',
 			sprintf(
 				'wp.apiFetch.use( function( options, next ) {
@@ -199,49 +260,6 @@ function frontenberg_wp_ajax_nopriv_query_attachments() {
 	wp_send_json_success( $posts );
 }
 add_action( 'wp_ajax_nopriv_query-attachments', 'frontenberg_wp_ajax_nopriv_query_attachments' );
-
-// Override the WP API to give Gutenberg the REST API responses it wants.
-function frontenberg_override_rest_api( $null, $wp_rest_server, $request ) {
-	if ( is_admin() || preg_match( '!/wp-json/!', $_SERVER['REQUEST_URI'] ) ) {
-		return $null; // Don't modify an actual API responses..
-	}
-
-	if ( '/wp/v2/types' == $request->get_route() ) {
-		// Minimal data required by Gutenberg for pages.
-		return new WP_REST_Response( array(
-			'page' => array(
-				'rest_base' => 'pages',
-			)
-		), 200 );
-	}
-
-	if ( preg_match( '!^/wp/v2/pages/(\d+)$!', $request->get_route(), $m ) ) {
-		$content = include __DIR__ . '/gutenfront-content.php';
-
-		return new WP_REST_Response( array(
-			'id' => $m[1],
-			'date' => gmdate( 'c' ), 'date_gmt' => gmdate( 'c' ),
-			'modified' => gmdate( 'c' ), 'modified_gmt' => gmdate( 'c' ),
-			'link' => 'https://wordpress.org/gutenberg/', 'guid' => array(),
-			'parent' => 0, 'menu_order' => 0, 'author' => 0, 'featured_media' => 0,
-			'comment_status' => 'closed', 'ping_status' => 'closed', 'template' => '', 'meta' => [], '_links' => [],
-			'type' => 'page', 'status' => 'draft',
-			'slug' => '', 'generated_slug' => '', 'permalink_template' => home_url('/'),
-			'excerpt' => array( 'raw' => '' ),
-			'title' => array(
-				'raw' => $content['title'],
-			),
-			'content' => array(
-				'block_format' => 1,
-				'raw' => $content['content'],
-			),
-		), 200 );
-	}
-
-	return $null;
-}
-add_filter( 'rest_pre_dispatch', 'frontenberg_override_rest_api', 10, 3 );
-
 
 if ( ! function_exists( 'gutenbergtheme_setup' ) ) :
 	/**
