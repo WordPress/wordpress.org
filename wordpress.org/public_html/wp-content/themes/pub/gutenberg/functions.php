@@ -154,9 +154,10 @@ add_action( 'template_redirect', function() {
 		wp_add_inline_script(
 			'wp-edit-post',
 			'wp.data.dispatch( "core/edit-post" ).closeGeneralSidebar();' .
-			'wp.data.dispatch( "core/nux" ).disableTips();'
+			'wp.data.dispatch( "core/nux" ).disableTips();' .
+			'wp.domReady( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
 		);
-	} );
+	}, 11 );
 	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
 
 	add_action( 'enqueue_block_editor_assets', function() {
@@ -165,13 +166,6 @@ add_action( 'template_redirect', function() {
 
 	// Disable use XML-RPC
 	add_filter( 'xmlrpc_enabled', '__return_false' );
-
-	add_action( 'wp_footer', function() {
-		wp_add_inline_script(
-			'wp-edit-post',
-			'wp.domReady( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
-		);
-	} );
 
 	// Disable X-Pingback to header
 	function disable_x_pingback( $headers ) {
