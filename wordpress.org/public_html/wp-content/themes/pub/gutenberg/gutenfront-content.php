@@ -5,7 +5,7 @@ $localised_domain = parse_url( home_url( '/' ), PHP_URL_HOST );
 $title = __( 'Say Hello to the New Editor', 'wporg' );
 
 $content = '<!-- wp:subhead -->
-<p class="wp-block-subhead">' . esc_html__( 'It&#8217;s a whole new way to use WordPress. We call it Gutenberg.', 'wporg' ) . '</p>
+<p class="wp-block-subhead">' . esc_html__( 'It&#8217;s a whole new way to use WordPress. Try it right here!', 'wporg' ) . '</p>
 <!-- /wp:subhead -->' . "\n\n";
 
 $content .= '<!-- wp:image {"id":97629,"align":"full"} -->
@@ -13,11 +13,11 @@ $content .= '<!-- wp:image {"id":97629,"align":"full"} -->
 <!-- /wp:image -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
-<p style="text-align:left">' . esc_html__( 'Gutenberg is the new editor for WordPress. It&#8217;s been completely rethought and rebuilt to make it easier for you to easily create rich, beautiful posts and pages&#8212;whether you write code for a living, or you&#8217;re building a website for the first time.', 'wporg' ) . '</p>
+<p style="text-align:left">' . esc_html__( 'We call the new editor Gutenberg. The entire editing experience has been rebuilt for media rich pages and posts. Experience the flexibility that blocks will bring, whether you are building your first site, or write code for a living.', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:gallery {"align":"wide","columns":4,"className":"gutenberg-landing\u002d\u002dfeatures-grid"} -->
-<ul class="wp-block-gallery alignwide columns-4 is-cropped gutenberg-landing--features-grid"><li class="blocks-gallery-item"><figure><img src="https://wordpress.org/gutenberg/files/2018/07/Plugin-1-1.gif" alt=""/><figcaption>' . esc_html_x( 'Accomplish more with fewer plugins.', 'Image Caption', 'wporg' ) . '</figcaption></figure></li><li class="blocks-gallery-item"><figure><img src="https://wordpress.org/gutenberg/files/2018/07/Layout-3.gif" alt=""/><figcaption>' . esc_html_x( 'Easily create modern, multimedia-heavy layouts.', 'Image Caption', 'wporg' ) . '</figcaption></figure></li><li class="blocks-gallery-item"><figure><img src="https://wordpress.org/gutenberg/files/2018/07/Devices-1-1.gif" alt=""/><figcaption>' . esc_html_x( 'Work across all screen sizes and devices.', 'Image Caption', 'wporg' ) . '</figcaption></figure></li><li class="blocks-gallery-item"><figure><img src="https://wordpress.org/gutenberg/files/2018/07/Visual-1.gif" alt=""/><figcaption>' . esc_html_x( 'Trust that your editor looks like your actual website.', 'Image Caption', 'wporg' ) . '</figcaption></figure></li></ul>
+<ul class="wp-block-gallery alignwide columns-4 is-cropped gutenberg-landing--features-grid"><li class="blocks-gallery-item"><figure><img src="https://wordpress.org/gutenberg/files/2018/07/Plugin-1-1.gif" alt=""/><figcaption>' . esc_html_x( 'Do more with fewer plugins.', 'Image Caption', 'wporg' ) . '</figcaption></figure></li><li class="blocks-gallery-item"><figure><img src="https://wordpress.org/gutenberg/files/2018/07/Layout-3.gif" alt=""/><figcaption>' . esc_html_x( 'Create modern, multimedia-heavy layouts.', 'Image Caption', 'wporg' ) . '</figcaption></figure></li><li class="blocks-gallery-item"><figure><img src="https://wordpress.org/gutenberg/files/2018/07/Devices-1-1.gif" alt=""/><figcaption>' . esc_html_x( 'Work across all screen sizes and devices.', 'Image Caption', 'wporg' ) . '</figcaption></figure></li><li class="blocks-gallery-item"><figure><img src="https://wordpress.org/gutenberg/files/2018/07/Visual-1.gif" alt=""/><figcaption>' . esc_html_x( 'Trust that your editor looks like your website.', 'Image Caption', 'wporg' ) . '</figcaption></figure></li></ul>
 <!-- /wp:gallery -->' . "\n\n";
 
 $content .= '<!-- wp:spacer -->
@@ -32,7 +32,7 @@ $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":
 <p style="text-align:center" class="has-small-font-size gutenberg-landing--button-disclaimer"><em>' .
 	sprintf(
 		/* translators: %s: The URL to the Clasic Editor plugin. */
-		wp_kses_post( __( 'Gutenberg is available as a plugin today, and will be included in version 5.0 of WordPress. The <a href="%s">classic editor</a> will be available as a plugin if needed.', 'wporg' ) ),
+		wp_kses_post( __( 'Gutenberg is available as a plugin now, and soon by default in version 5.0 of WordPress. The <a href="%s">classic editor</a> will be available as a plugin if needed.', 'wporg' ) ),
 		esc_url( "https://{$localised_domain}/plugins/classic-editor/" )
 	) . '</em></p>
 <!-- /wp:paragraph -->' . "\n\n";
@@ -42,11 +42,11 @@ $content .= '<!-- wp:spacer -->
 <!-- /wp:spacer -->' . "\n\n";
 
 $content .= '<!-- wp:heading {"align":"left"} -->
-<h2 style="text-align:left">' . esc_html__( 'Meet your new best friend, Blocks', 'wporg' ) . '</h2>
+<h2 style="text-align:left">' . esc_html__( 'Meet your new best friends, Blocks', 'wporg' ) . '</h2>
 <!-- /wp:heading -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
-<p style="text-align:left">' . esc_html__( 'Blocks allow you to insert, rearrange, and style rich content natively, instead of relying on a daunting list of separate features: shortcodes, embeds, widgets, post formats, custom post types, theme options, meta-boxes, and other formatting elements.', 'wporg' ) . '</p>
+<p style="text-align:left">' . esc_html__( 'Blocks are a great new tool for building engaging content. With blocks, you can insert, rearrange, and style multimedia content with very little technical knowledge. Instead of using custom code, you can add a block and focus on your content.', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:image {"id":358} -->
@@ -54,7 +54,7 @@ $content .= '<!-- wp:image {"id":358} -->
 <!-- /wp:image -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
-<p style="text-align:left">' . esc_html__( 'Blocks allow for rich customization without deep knowledge of code, and make good on the promise of WordPress: broad functionality with a clear, consistent user experience. Here&#8217;s just a selection of the default blocks included with Gutenberg:', 'wporg' ) . '</p>
+<p style="text-align:left">' . esc_html__( 'Without being an expert developer, you can build your own custom posts and pages. Here&#8217;s a seletion of the default blocks included with Gutenberg:', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:gallery {"align":"full","columns":8} -->
@@ -70,7 +70,7 @@ $content .= '<!-- wp:heading {"align":"left"} -->
 <!-- /wp:heading -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
-<p style="text-align:left">' . esc_html__( 'A single block is nice&#8212;solid, clear, discrete. But when you start building with blocks? That&#8217;s when the real excitement starts: endless combinations, endless layouts, endless possibility, all driven by your vision.', 'wporg' ) . '</p>
+<p style="text-align:left">' . esc_html__( 'A single block is nice&#8212;reliable, clear, distinct. Discover the flexibility to use media and content, side by side, driven by your vision.', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:image {"id":359} -->
@@ -92,7 +92,7 @@ $content .= '<!-- wp:columns {"className":"gutenberg-landing\u002d\u002ddevelope
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
-<p style="text-align:left">' . esc_html__( 'Gutenberg was developed on GitHub and uses the WordPress REST API, Javascript, and React.', 'wporg' ) . '</p>
+<p style="text-align:left">' . esc_html__( 'Gutenberg was developed on GitHub using the WordPress REST API, JavaScript, and React.', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
@@ -106,7 +106,7 @@ $content .= '<!-- wp:column -->
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
-<p style="text-align:left">' . esc_html__( 'We recommend migrating features to blocks when possible, but support for existing WordPress functionality will remain, and there will be transition paths for shortcodes, meta-boxes, and Custom Post Types.', 'wporg' ) . '</p>
+<p style="text-align:left">' . esc_html__( 'We recommend migrating features to blocks, but support for existing WordPress functionality remains. There will be transition paths for shortcodes, meta-boxes, and Custom Post Types.', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
@@ -128,15 +128,15 @@ $content .= '<!-- wp:paragraph {"align":"left"} -->
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:quote {"align":"left","className":" is-style-large"} -->
-<blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . wp_kses_post( __( '"Once Gutenberg is capable of handling all the pieces that visually compose a site&#8212;with themes providing styles for all the blocks&#8212;we end up with an editor that looks <em>exactly like the front-end</em>."', 'wporg' ) ) . '</p><cite>&#8212; <a href="https://matiasventura.com/post/gutenberg-or-the-ship-of-theseus/">' . esc_html__( 'Matias Ventura', 'wporg' ) . '</a></cite></blockquote>
-<!-- /wp:quote -->' . "\n\n";
-
-$content .= '<!-- wp:quote {"align":"left","className":" is-style-large"} -->
-<blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . esc_html__( '"Suddenly, the chore of setting up a new website becomes effortless."', 'wporg' ) . '</p><cite>&#8212; <a href="https://loopconf.com/talk/customizing-the-future/">' . esc_html__( 'Mel Choyce', 'wporg' ) . '</a></cite></blockquote>
+<blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . wp_kses_post( __( '"This will make running your own blog a viable alternative again."', 'wporg' ) ) . '</p><cite>&#8212; <a href="https://twitter.com/azumbrunnen_/status/1019347243084800005">' . esc_html__( 'Adrian Zumbrunnen', 'wporg' ) . '</a></cite></blockquote>
 <!-- /wp:quote -->' . "\n\n";
 
 $content .= '<!-- wp:quote {"align":"left","className":" is-style-large"} -->
 <blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . esc_html__( '"The web up until this point has been confined to some sort of rectangular screen. But that is not how it&#8217;s going to be. Gutenberg has the potential of moving us into the next time."', 'wporg' ) . '</p><cite>&#8212; <a href="https://wordpress.tv/2017/12/10/morten-rand-hendriksen-gutenberg-and-the-wordpress-of-tomorrow/">' . esc_html__( 'Morten Rand-Hendriksen', 'wporg' ) . '</a></cite></blockquote>
+<!-- /wp:quote -->' . "\n\n";
+
+$content .= '<!-- wp:quote {"align":"left","className":" is-style-large"} -->
+<blockquote style="text-align:left" class="wp-block-quote  is-style-large"><p>' . esc_html__( '"The Gutenberg editor has some great assets that could genuinely help people to write better texts."', 'wporg' ) . '</p><cite>&#8212; <a href="https://yoast.com/writing-with-gutenberg/">' . esc_html__( 'Marieke van de Rakt', 'wporg' ) . '</a></cite></blockquote>
 <!-- /wp:quote -->' . "\n\n";
 
 $content .= '<!-- wp:spacer -->
