@@ -17,11 +17,31 @@
 				toggles: []
 			};
 
+			this.setupFieldsToggle();
 			this.setupSingleToggles();
 			this.setupBulkToggles();
 
+			$( '#status' ).select2();
+
 			$( document ).ready( function() {
 				self.cache.$hideAll.trigger( 'click' );
+			} );
+		},
+
+		setupFieldsToggle: function() {
+			var self = this;
+
+			self.cache.$fieldsToggle = $( '#fields-toggle' );
+			self.cache.$fieldsContainer = $( '#fields-section' );
+
+			self.cache.$fieldsToggle.on( 'click', function( event ) {
+				event.preventDefault();
+
+				if ( self.cache.$fieldsContainer.hasClass( 'hidden' ) ) {
+					self.cache.$fieldsContainer.removeClass( 'hidden' );
+				} else {
+					self.cache.$fieldsContainer.addClass( 'hidden' );
+				}
 			} );
 		},
 

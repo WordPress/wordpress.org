@@ -7,9 +7,14 @@ namespace WordCamp\Reports\Report;
 defined( 'WPINC' ) || die();
 
 use Exception;
-use WordCamp\Reports;
-use function WordCamp\Reports\Validation\validate_wordcamp_status;
+use DateTime;
+use WP_Error, WP_Post;
+use function WordCamp\Reports\{get_assets_url, get_assets_dir_path, get_views_dir_path};
+use WordCamp\Reports\Utility\Date_Range;
+use function WordCamp\Reports\Validation\{validate_date_range, validate_wordcamp_status};
+use function WordCamp\Reports\Time\{year_array, quarter_array, month_array, convert_time_period_to_date_range};
 use WordCamp_Loader;
+use WordCamp\Utilities\Export_CSV;
 
 /**
  * Class WordCamp_Status
@@ -18,7 +23,7 @@ use WordCamp_Loader;
  *
  * @package WordCamp\Reports\Report
  */
-class WordCamp_Status extends Date_Range {
+class WordCamp_Status extends Base {
 	/**
 	 * Report name.
 	 *
@@ -68,6 +73,13 @@ class WordCamp_Status extends Date_Range {
 	public static $shortcode_tag = 'wordcamp_status_report';
 
 	/**
+	 * The date range that defines the scope of the report data.
+	 *
+	 * @var null|Date_Range
+	 */
+	public $range = null;
+
+	/**
 	 * The status to filter for in the report.
 	 *
 	 * @var string
@@ -105,7 +117,16 @@ class WordCamp_Status extends Date_Range {
 			'status_subset' => [],
 		) );
 
-		parent::__construct( $start_date, $end_date, $options );
+		parent::__construct( $options );
+
+		try {
+			$this->range = validate_date_range( $start_date, $end_date, $options );
+		} catch ( Exception $e ) {
+			$this->error->add(
+				self::$slug . '-date-error',
+				$e->getMessage()
+			);
+		}
 
 		if ( $status && 'any' !== $status ) {
 			try {
@@ -138,13 +159,25 @@ class WordCamp_Status extends Date_Range {
 	 * @return string
 	 */
 	protected function get_cache_key() {
-		$cache_key = parent::get_cache_key();
+		$cache_key_segments = [
+			parent::get_cache_key(),
+			$this->range->generate_cache_key_segment(),
+		];
 
 		if ( $this->status ) {
-			$cache_key .= '_' . $this->status;
+			$cache_key_segments[] = $this->status;
 		}
 
-		return $cache_key;
+		return implode( '_', $cache_key_segments );
+	}
+
+	/**
+	 * Generate a cache expiration interval.
+	 *
+	 * @return int A time interval in seconds.
+	 */
+	protected function get_cache_expiration() {
+		return $this->range->generate_cache_duration( parent::get_cache_expiration() );
 	}
 
 	/**
@@ -176,7 +209,7 @@ class WordCamp_Status extends Date_Range {
 
 			// Trim log entries occurring after the date range.
 			$logs = array_filter( $logs, function( $entry ) {
-				if ( $entry['timestamp'] > $this->end_date->getTimestamp() ) {
+				if ( $entry['timestamp'] > $this->range->end->getTimestamp() ) {
 					return false;
 				}
 
@@ -194,7 +227,7 @@ class WordCamp_Status extends Date_Range {
 
 			// Trim log entries occurring before the date range.
 			$logs = array_filter( $logs, function( $entry ) {
-				if ( $entry['timestamp'] < $this->start_date->getTimestamp() ) {
+				if ( $entry['timestamp'] < $this->range->start->getTimestamp() ) {
 					return false;
 				}
 
@@ -299,7 +332,7 @@ class WordCamp_Status extends Date_Range {
 					// Don't include WordCamps that happened more than 3 months before the start date.
 					'key'     => 'Start Date (YYYY-mm-dd)',
 					'compare' => '>=',
-					'value'   => strtotime( '-3 months', $this->start_date->getTimestamp() ),
+					'value'   => strtotime( '-3 months', $this->range->start->getTimestamp() ),
 					'type'    => 'NUMERIC',
 				),
 			),
@@ -311,11 +344,11 @@ class WordCamp_Status extends Date_Range {
 	/**
 	 * Retrieve the log of status changes for a particular WordCamp.
 	 *
-	 * @param \WP_Post $wordcamp A WordCamp post.
+	 * @param WP_Post $wordcamp A WordCamp post.
 	 *
 	 * @return array
 	 */
-	protected function get_wordcamp_status_logs( \WP_Post $wordcamp ) {
+	protected function get_wordcamp_status_logs( WP_Post $wordcamp ) {
 		$log_entries = get_post_meta( $wordcamp->ID, '_status_change' );
 
 		if ( ! empty( $log_entries ) ) {
@@ -397,8 +430,8 @@ class WordCamp_Status extends Date_Range {
 	 */
 	public function render_html() {
 		$data       = $this->compile_report_data( $this->get_data() );
-		$start_date = $this->start_date;
-		$end_date   = $this->end_date;
+		$start_date = $this->range->start;
+		$end_date   = $this->range->end;
 		$status     = $this->status;
 
 		$active_camps   = $data['active_camps'];
@@ -406,15 +439,9 @@ class WordCamp_Status extends Date_Range {
 		$statuses       = WordCamp_Loader::get_post_statuses();
 
 		if ( ! empty( $this->error->get_error_messages() ) ) {
-			?>
-			<div class="notice notice-error">
-				<?php foreach ( $this->error->get_error_messages() as $message ) : ?>
-					<?php echo wpautop( wp_kses_post( $message ) ); ?>
-				<?php endforeach; ?>
-			</div>
-		<?php
+			$this->render_error_html();
 		} else {
-			include Reports\get_views_dir_path() . 'html/wordcamp-status.php';
+			include get_views_dir_path() . 'html/wordcamp-status.php';
 		}
 	}
 
@@ -426,17 +453,17 @@ class WordCamp_Status extends Date_Range {
 	protected static function register_assets() {
 		wp_register_script(
 			self::$slug,
-			Reports\get_assets_url() . 'js/' . self::$slug . '.js',
-			array( 'jquery' ),
-			Reports\JS_VERSION,
+			get_assets_url() . 'js/' . self::$slug . '.js',
+			array( 'jquery', 'select2' ),
+			filemtime( get_assets_dir_path() . 'js/' . self::$slug . '.js' ),
 			true
 		);
 
 		wp_register_style(
 			self::$slug,
-			Reports\get_assets_url() . 'css/' . self::$slug . '.css',
-			array(),
-			Reports\CSS_VERSION,
+			get_assets_url() . 'css/' . self::$slug . '.css',
+			array( 'select2' ),
+			filemtime( get_assets_dir_path() . 'css/' . self::$slug . '.css' ),
 			'screen'
 		);
 	}
@@ -448,7 +475,9 @@ class WordCamp_Status extends Date_Range {
 	 */
 	public static function enqueue_admin_assets() {
 		self::register_assets();
+		WordCamp_Details::register_assets();
 
+		wp_enqueue_style( WordCamp_Details::$slug );
 		wp_enqueue_script( self::$slug );
 		wp_enqueue_style( self::$slug );
 	}
@@ -467,11 +496,26 @@ class WordCamp_Status extends Date_Range {
 		$nonce      = filter_input( INPUT_POST, self::$slug . '-nonce' );
 		$statuses   = WordCamp_Loader::get_post_statuses();
 
+		$field_defaults = [
+			'ID'                      => 'checked',
+			'Name'                    => 'checked disabled',
+			'Start Date (YYYY-mm-dd)' => 'checked',
+			'End Date (YYYY-mm-dd)'   => 'checked',
+			'Location'                => 'checked',
+			'URL'                     => 'checked',
+			'Created'                 => 'checked',
+			'Status'                  => 'checked',
+		];
+
 		$report = null;
 
-		if ( 'run-report' === $action && wp_verify_nonce( $nonce, 'run-report' ) ) {
+		if ( 'Show results' === $action
+		     && wp_verify_nonce( $nonce, 'run-report' )
+		     && current_user_can( 'manage_network' )
+		) {
 			$options = array(
-				'earliest_start' => new \DateTime( '2015-01-01' ), // No status log data before 2015.
+				'public'         => false,
+				'earliest_start' => new DateTime( '2015-01-01' ), // No status log data before 2015.
 			);
 
 			if ( $refresh ) {
@@ -479,14 +523,99 @@ class WordCamp_Status extends Date_Range {
 			}
 
 			$report = new self( $start_date, $end_date, $status, $options );
-
-			// The report adjusts the end date in some circumstances.
-			if ( empty( $report->error->get_error_messages() ) ) {
-				$end_date = $report->end_date->format( 'Y-m-d' );
-			}
 		}
 
-		include Reports\get_views_dir_path() . 'report/wordcamp-status.php';
+		include get_views_dir_path() . 'report/wordcamp-status.php';
+	}
+
+	/**
+	 * Export the report data to a file.
+	 *
+	 * @return void
+	 */
+	public static function export_to_file() {
+		$start_date = filter_input( INPUT_POST, 'start-date' );
+		$end_date   = filter_input( INPUT_POST, 'end-date' );
+		$status     = filter_input( INPUT_POST, 'status' );
+		$fields     = filter_input( INPUT_POST, 'fields', FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY ] );
+		$refresh    = filter_input( INPUT_POST, 'refresh', FILTER_VALIDATE_BOOLEAN );
+		$action     = filter_input( INPUT_POST, 'action' );
+		$nonce      = filter_input( INPUT_POST, self::$slug . '-nonce' );
+
+		if ( 'Export CSV' !== $action ) {
+			return;
+		}
+
+		if ( wp_verify_nonce( $nonce, 'run-report' ) && current_user_can( 'manage_network' ) ) {
+			$error = null;
+
+			$options = array(
+				'public'         => false,
+				'earliest_start' => new DateTime( '2015-01-01' ), // No status log data before 2015.
+			);
+
+			if ( $refresh ) {
+				$options['flush_cache'] = true;
+			}
+
+			$status_report = new self( $start_date, $end_date, $status, $options );
+			$wordcamp_ids  = array_keys( $status_report->get_data() );
+
+			if ( ! empty( $status_report->error->get_error_messages() ) ) {
+				$error = $status_report->error;
+			} elseif ( empty( $wordcamp_ids ) ) {
+				$error = new WP_Error(
+					self::$slug . '-export-error',
+					'No status data available for the given criteria.'
+				);
+			}
+
+			$include_counts = false;
+			if ( ! empty( array_intersect( $fields, [ 'Tickets', 'Speakers', 'Sponsors', 'Organizers' ] ) ) ) {
+				$include_counts = true;
+			}
+
+			// The "Name" field should always be included, but does not get submitted because the input is disabled,
+			// so add it in here.
+			$fields[] = 'Name';
+
+			$options = array(
+				'fields' => $fields,
+				'public' => false,
+			);
+
+			$details_report = new WordCamp_Details( null, $wordcamp_ids, $include_counts, $options );
+
+			$filename = [ $status_report::$name ];
+			$filename[] = $status_report->range->start->format( 'Y-m-d' );
+			$filename[] = $status_report->range->end->format( 'Y-m-d' );
+			if ( $status_report->status ) {
+				$filename[] = $status_report->status;
+			}
+			if ( $details_report->include_counts ) {
+				$filename[] = 'include-counts';
+			}
+
+			$data = $details_report->prepare_data_for_display( $details_report->get_data() );
+
+			$headers = ( ! empty( $data ) ) ? array_keys( $data[0] ) : [];
+
+			$exporter = new Export_CSV( array(
+				'filename' => $filename,
+				'headers'  => $headers,
+				'data'     => $data,
+			) );
+
+			if ( ! empty( $details_report->error->get_error_messages() ) ) {
+				$exporter->error = $details_report->merge_errors( $details_report->error, $exporter->error );
+			}
+
+			if ( $error instanceof WP_Error ) {
+				$exporter->error = $details_report->merge_errors( $error, $exporter->error );
+			}
+
+			$exporter->emit_file();
+		} // End if().
 	}
 
 	/**
@@ -502,6 +631,7 @@ class WordCamp_Status extends Date_Range {
 		if ( 'page' === get_post_type() ) {
 			self::register_assets();
 
+			wp_enqueue_style( 'select2' );
 			wp_enqueue_script( self::$slug );
 
 			ob_start();
@@ -524,8 +654,9 @@ class WordCamp_Status extends Date_Range {
 		$status = filter_input( INPUT_GET, 'status' );
 		$action = filter_input( INPUT_GET, 'action' );
 
-		$years    = self::year_array( absint( date( 'Y' ) ), 2015 );
-		$months   = self::month_array();
+		$years    = year_array( absint( date( 'Y' ) ), 2015 );
+		$quarters = quarter_array();
+		$months   = month_array();
 		$statuses = WordCamp_Loader::get_post_statuses();
 
 		if ( ! $year ) {
@@ -539,15 +670,22 @@ class WordCamp_Status extends Date_Range {
 		$report = null;
 
 		if ( 'Show results' === $action ) {
-			$range = self::convert_time_period_to_date_range( $year, $period );
+			try {
+				$range = convert_time_period_to_date_range( $year, $period );
+			} catch ( Exception $e ) {
+				$error = new WP_Error(
+					self::$slug . '-time-period-error',
+					$e->getMessage()
+				);
+			}
 
 			$options = array(
-				'earliest_start' => new \DateTime( '2015-01-01' ), // No status log data before 2015.
+				'earliest_start' => new DateTime( '2015-01-01' ), // No status log data before 2015.
 			);
 
-			$report = new self( $range['start_date'], $range['end_date'], $status, $options );
+			$report = new self( $range->start, $range->end, $status, $options );
 		}
 
-		include Reports\get_views_dir_path() . 'public/wordcamp-status.php';
+		include get_views_dir_path() . 'public/wordcamp-status.php';
 	}
 }

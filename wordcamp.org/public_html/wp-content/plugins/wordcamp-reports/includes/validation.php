@@ -4,6 +4,7 @@ namespace WordCamp\Reports\Validation;
 defined( 'WPINC' ) || die();
 
 use Exception;
+use stdClass;
 use DateTime, DateTimeImmutable, DateInterval;
 use WP_Post;
 use WordCamp\Reports\Utility\Date_Range;
@@ -120,7 +121,7 @@ function validate_date_range( $start_date, $end_date, array $config = [] ) {
  *     @type bool $require_site True if the WordCamp post must have an associated site in the network.
  * }
  *
- * @return array An associative array containing valid post ID and site ID integers for the WordCamp.
+ * @return object An object containing properties for valid post ID and site ID integers for the WordCamp.
  * @throws Exception
  */
 function validate_wordcamp_id( $post_id, array $config = [] ) {
@@ -139,26 +140,26 @@ function validate_wordcamp_id( $post_id, array $config = [] ) {
 	$wordcamp_post = get_post( $post_id );
 
 	if ( ! $wordcamp_post instanceof WP_Post || WCPT_POST_TYPE_ID !== get_post_type( $wordcamp_post ) ) {
-		throw new Exception( 'Please enter a valid WordCamp ID.' );
+		throw new Exception( sprintf(
+			'Invalid WordCamp ID: %s',
+			esc_html( $post_id )
+		) );
 	}
 
-	$valid = [
-		'post_id' => $post_id,
-		'site_id' => 0,
-	];
+	$valid = new stdClass();
 
-	if ( $config['require_site'] ) {
-		$site_id = get_wordcamp_site_id( $wordcamp_post );
-
-		if ( ! $site_id ) {
-			throw new Exception( 'The specified WordCamp does not have a site yet.' );
-		}
-
-		$valid['site_id'] = $site_id;
-	}
+	$valid->post_id = $post_id;
+	$valid->site_id = get_wordcamp_site_id( $wordcamp_post );
 
 	if ( $switched ) {
 		restore_current_blog();
+	}
+
+	if ( $config['require_site'] && ! $valid->site_id ) {
+		throw new Exception( sprintf(
+			'The WordCamp with ID %d does not have a site.',
+			absint( $post_id )
+		) );
 	}
 
 	return $valid;

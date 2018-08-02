@@ -12,6 +12,7 @@ use WordCamp\Reports\Report;
 /** @var string $period */
 /** @var string $status */
 /** @var array  $years */
+/** @var array  $quarters */
 /** @var array  $months */
 /** @var array  $statuses */
 /** @var Report\WordCamp_Status|null $report */
@@ -36,10 +37,9 @@ use WordCamp\Reports\Report;
 			<label for="period">Time Period</label>
 			<select id="period" name="period">
 				<option value="all"<?php selected( 'all' === $period ); ?>>Entire year</option>
-				<option value="q1"<?php selected( 'q1' === $period ); ?>>1st quarter</option>
-				<option value="q2"<?php selected( 'q2' === $period ); ?>>2nd quarter</option>
-				<option value="q3"<?php selected( 'q3' === $period ); ?>>3rd quarter</option>
-				<option value="q4"<?php selected( 'q4' === $period ); ?>>4th quarter</option>
+				<?php foreach ( $quarters as $quarter_value => $quarter_label ) : ?>
+					<option value="<?php echo esc_attr( $quarter_value ); ?>"<?php selected( $quarter_value, $period ); ?>><?php echo esc_html( $quarter_label ); ?></option>
+				<?php endforeach; ?>
 				<?php foreach ( $months as $month_value => $month_label ) : ?>
 					<option value="<?php echo esc_attr( $month_value ); ?>"<?php selected( $month_value, $period ); ?>><?php echo esc_html( $month_label ); ?></option>
 				<?php endforeach; ?>

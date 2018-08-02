@@ -6,15 +6,17 @@
 namespace WordCamp\Reports\Views\HTML\WordCamp_Status;
 defined( 'WPINC' ) || die();
 
-/** @var \DateTime $start_date */
-/** @var \DateTime $end_date */
+use DateTime;
+
+/** @var DateTime $start_date */
+/** @var DateTime $end_date */
 /** @var string $status */
 /** @var array $active_camps */
 /** @var array $inactive_camps */
 /** @var array $statuses */
 ?>
 
-<?php if ( ! empty( $active_camps ) ) : ?>
+<?php if ( count( $active_camps ) ) : ?>
 	<h3 id="active-heading">
 		<?php if ( $status ) : ?>
 			WordCamps set to &ldquo;<?php echo esc_html( $statuses[ $status ] ); ?>&rdquo;
@@ -27,6 +29,13 @@ defined( 'WPINC' ) || die();
 			between <?php echo esc_html( $start_date->format( 'M jS, Y' ) ); ?> and <?php echo esc_html( $end_date->format( 'M jS, Y' ) ); ?>
 		<?php endif; ?>
 	</h3>
+
+	<table class="striped widefat but-not-too-wide">
+		<tr>
+			<td>Active WordCamps</td>
+			<td class="number"><?php echo number_format_i18n( count( $active_camps ) ); ?></td>
+		</tr>
+	</table>
 
 	<?php foreach ( $active_camps as $active_camp ) : ?>
 		<p><strong class="active-camp"><?php echo esc_html( $active_camp['name'] ); ?></strong> &ndash; <?php echo esc_html( $statuses[ $active_camp['latest_status'] ] ); ?></p>
@@ -42,7 +51,7 @@ defined( 'WPINC' ) || die();
 	<?php endforeach; ?>
 <?php endif; ?>
 
-<?php if ( ! empty( $inactive_camps ) ) : ?>
+<?php if ( count( $inactive_camps ) ) : ?>
 	<h3 id="inactive-heading">
 		WordCamps
 		<?php if ( $status ) : ?>
@@ -56,6 +65,13 @@ defined( 'WPINC' ) || die();
 		<?php endif; ?>
 	</h3>
 
+	<table class="striped widefat but-not-too-wide">
+		<tr>
+			<td>Inactive WordCamps</td>
+			<td class="number"><?php echo number_format_i18n( count( $inactive_camps ) ); ?></td>
+		</tr>
+	</table>
+
 	<ul>
 	<?php foreach ( $inactive_camps as $inactive_camp ) : ?>
 		<li>
@@ -68,7 +84,7 @@ defined( 'WPINC' ) || die();
 <?php endif; ?>
 
 <?php if ( empty( $active_camps ) && empty( $inactive_camps ) ) : ?>
-	<h3 id="no-data-heading">
+	<p>
 		No data
 		<?php if ( $status ) : ?>
 			involving &ldquo;<?php echo esc_html( $statuses[ $status ] ); ?>&rdquo;
@@ -78,5 +94,5 @@ defined( 'WPINC' ) || die();
 		<?php else : ?>
 			between <?php echo esc_html( $start_date->format( 'M jS, Y' ) ); ?> and <?php echo esc_html( $end_date->format( 'M jS, Y' ) ); ?>
 		<?php endif; ?>
-	</h3>
+	</p>
 <?php endif; ?>

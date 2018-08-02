@@ -13,6 +13,7 @@ use WordCamp\Reports\Report;
 /** @var string $end_date */
 /** @var string $status */
 /** @var array  $statuses */
+/** @var array  $field_defaults */
 /** @var Report\WordCamp_Status|null $report */
 ?>
 
@@ -37,21 +38,24 @@ use WordCamp\Reports\Report;
 			<tbody>
 				<tr>
 					<th scope="row"><label for="start-date">Start Date</label></th>
-					<td><input type="date" id="start-date" name="start-date" value="<?php echo esc_attr( $start_date ) ?>" /></td>
+					<td><input type="date" id="start-date" name="start-date" value="<?php echo esc_attr( $start_date ) ?>" required /></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="end-date">End Date</label></th>
-					<td><input type="date" id="end-date" name="end-date" value="<?php echo esc_attr( $end_date ) ?>" /></td>
+					<td><input type="date" id="end-date" name="end-date" value="<?php echo esc_attr( $end_date ) ?>" required /></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="status">Status (optional)</label></th>
 					<td>
-						<select id="status" name="status">
+						<select id="status" name="status" class="select2-container">
 							<option value="any"<?php selected( ( ! $status || 'any' === $status ) ); ?>>Any</option>
 							<?php foreach ( $statuses as $value => $label ) : ?>
 								<option value="<?php echo esc_attr( $value ); ?>"<?php selected( $value, $status ); ?>><?php echo esc_attr( $label ); ?></option>
 							<?php endforeach; ?>
 						</select>
+						<p class="description">
+							This will select all WordCamps that had this status at any time during the date range.
+						</p>
 					</td>
 				</tr>
 				<tr>
@@ -61,7 +65,14 @@ use WordCamp\Reports\Report;
 			</tbody>
 		</table>
 
-		<?php submit_button( 'Show results', 'primary', '' ); ?>
+		<?php submit_button( 'Show results', 'primary', 'action', false ); ?>
+
+		<button id="fields-toggle" class="secondary button-secondary">Export resulting WordCamps as a CSV</button>
+
+		<section id="fields-section" class="hidden">
+			<?php Report\WordCamp_Details::render_available_fields( 'private', $field_defaults ); ?>
+			<?php submit_button( 'Export CSV', 'primary', 'action', false ); ?>
+		</section>
 	</form>
 
 	<?php if ( $report instanceof Report\WordCamp_Status ) : ?>
