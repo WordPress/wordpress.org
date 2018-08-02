@@ -56,6 +56,7 @@ function get_whitelist() {
 			'joshuawold',
 			'pbiron',
 			'welcher',
+			'Whitney',
 		) ),
 		'core-bootstrap' => array_merge( get_committers(), array(
 			'schlessera',
@@ -172,6 +173,7 @@ function get_whitelist() {
 		),
 		'feature-notifications' => array(
 			'johnbillion',
+			'schlessera',
 		),
 		'feature-shinyupdates' => array(
 			'obenland',
