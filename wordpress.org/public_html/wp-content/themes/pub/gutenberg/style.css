@@ -937,6 +937,10 @@ object {
 # Frontenberg
 --------------------------------------------------------------*/
 
+.gutenberg .gutenberg__editor .components-navigate-regions {
+	height: auto;
+}
+
 @media (min-width: 782px) {
 	.folded .gutenberg__editor .edit-post-header,
 	.folded .gutenberg__editor .components-notice-list {
