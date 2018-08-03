@@ -155,7 +155,7 @@ add_action( 'template_redirect', function() {
 			'wp-edit-post',
 			'wp.data.dispatch( "core/edit-post" ).closeGeneralSidebar();' .
 			'wp.data.dispatch( "core/nux" ).disableTips();' .
-			'wp.domReady( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
+			'_wpLoadGutenbergEditor.then( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
 		);
 	}, 11 );
 	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
