@@ -54,7 +54,7 @@ $content .= '<!-- wp:image {"id":358} -->
 <!-- /wp:image -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left"} -->
-<p style="text-align:left">' . esc_html__( 'Without being an expert developer, you can build your own custom posts and pages. Here&#8217;s a seletion of the default blocks included with Gutenberg:', 'wporg' ) . '</p>
+<p style="text-align:left">' . esc_html__( 'Without being an expert developer, you can build your own custom posts and pages. Here&#8217;s a selection of the default blocks included with Gutenberg:', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:gallery {"align":"full","columns":8} -->
