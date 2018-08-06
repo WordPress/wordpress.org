@@ -949,6 +949,7 @@ object {
 
 	.gutenberg__editor .edit-post-layout .edit-post-layout__content {
 		margin-top: 32px;
+		overflow-y: inherit;
 	}
 
 	.gutenberg__editor .edit-post-last-revision__panel {
