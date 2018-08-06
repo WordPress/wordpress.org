@@ -271,6 +271,25 @@ function frontenberg_wp_ajax_nopriv_query_attachments() {
 }
 add_action( 'wp_ajax_nopriv_query-attachments', 'frontenberg_wp_ajax_nopriv_query_attachments' );
 
+/**
+ * Removes tagline, which is used more as a description on this site.
+ *
+ * @param array $title {
+ *     The document title parts.
+ *
+ *     @type string $title   Title of the viewed page.
+ *     @type string $page    Optional. Page number if paginated.
+ *     @type string $tagline Optional. Site description when on home page.
+ *     @type string $site    Optional. Site title when not on home page.
+ * }
+ */
+function gutenberg_title_parts( $title ) {
+	unset( $title['tagline'] );
+
+	return $title;
+}
+add_filter( 'document_title_parts', 'gutenberg_title_parts' );
+
 if ( ! function_exists( 'gutenbergtheme_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
