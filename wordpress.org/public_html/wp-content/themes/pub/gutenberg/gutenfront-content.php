@@ -73,8 +73,8 @@ $content .= '<!-- wp:paragraph {"align":"left"} -->
 <p style="text-align:left">' . esc_html__( 'A single block is nice&#8212;reliable, clear, distinct. Discover the flexibility to use media and content, side by side, driven by your vision.', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
 
-$content .= '<!-- wp:image {"id":359} -->
-<figure class="wp-block-image"><img src="https://wordpress.org/gutenberg/files/2018/07/Builder-2-1.gif" alt="" class="wp-image-359"/></figure>
+$content .= '<!-- wp:image {"id":98363} -->
+<figure class="wp-block-image"><img src="https://wordpress.org/gutenberg/files/2018/08/Builder.gif" alt="" class="wp-image-98363"/></figure>
 <!-- /wp:image -->' . "\n\n";
 
 $content .= '<!-- wp:spacer -->
