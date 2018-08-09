@@ -194,6 +194,17 @@ add_action( 'template_redirect', function() {
 		return $headers;
 	}
 	add_filter( 'wp_headers', 'disable_x_pingback' );
+
+	function frontenberg_site_title() {
+		return esc_html__( 'The new Gutenberg editing experience', 'wporg' );
+	}
+	add_filter( 'the_title', 'frontenberg_site_title' );
+	add_filter( 'option_blogname', 'frontenberg_site_title' );
+
+	function frontenberg_site_description() {
+		return esc_html__( 'A new editing experience for WordPress is in the works, code name Gutenberg. Read more about it and test it!', 'wporg' );
+	}
+	add_filter( 'option_blogdescription', 'frontenberg_site_description' );
 });
 
 /**
