@@ -206,6 +206,19 @@ function wporg_themes_pre_insert_term( $term ) {
 add_filter( 'pre_insert_term', 'wporg_themes_pre_insert_term' );
 
 /**
+ * The array of post types to be included in the sitemap.
+ *
+ * @param array $post_types List of included post types.
+ * @return array
+ */
+function wporg_themes_sitemap_post_types( $post_types ) {
+	$post_types[] = 'repopackage';
+
+	return $post_types;
+}
+add_filter( 'jetpack_sitemap_post_types', 'wporg_themes_sitemap_post_types' );
+
+/**
  * Returns the specified meta value for a version of a theme.
  *
  * @param int          $post_id Post ID.

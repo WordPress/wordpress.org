@@ -39,6 +39,7 @@ class Plugin_Directory {
 		add_filter( 'found_posts', array( $this, 'filter_found_posts' ), 10, 2 );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
+		add_filter( 'jetpack_sitemap_post_types', array( $this, 'jetpack_sitemap_post_types' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
@@ -1232,6 +1233,18 @@ class Plugin_Directory {
 
 		echo $icon->toSVG();
 		die();
+	}
+
+	/**
+	 * The array of post types to be included in the sitemap.
+	 *
+	 * @param array $post_types List of included post types.
+	 * @return array
+	 */
+	public function jetpack_sitemap_post_types( $post_types ) {
+		$post_types[] = 'plugin';
+
+		return $post_types;
 	}
 
 	/**
