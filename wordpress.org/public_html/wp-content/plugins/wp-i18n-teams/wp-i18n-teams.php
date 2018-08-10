@@ -572,12 +572,16 @@ class WP_I18n_Teams {
 	protected static function get_slack_username( $user_id ) {
 		global $wpdb;
 
+		$slack_username = '';
+
 		$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
 		if ( $data && ( $data = json_decode( $data, true ) ) ) {
-			return $data['name'];
+			if ( isset( $data['profile']['display_name'] ) ) {
+				$slack_username = $data['profile']['display_name'];
+			}
 		}
 
-		return '';
+		return $slack_username;
 	}
 
 	public function _sort_display_name_callback( $a, $b ) {
