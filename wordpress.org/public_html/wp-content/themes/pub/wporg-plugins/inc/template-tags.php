@@ -213,7 +213,7 @@ function get_plugin_status_notice( $post = null ) {
 		case 'disabled':
 			$message = current_user_can( 'plugin_approve' )
 				? __( 'This plugin is disabled (closed, but actively serving updates).', 'wporg-plugins' )
-				: __( 'This plugin has been closed for new installs.', 'wporg-plugins' );
+				: __( 'This plugin has been closed for new installations.', 'wporg-plugins' );
 
 			$message = sprintf( $error_notice, $message );
 			break;
