@@ -173,9 +173,9 @@ class Upload {
 						</small>
 					</p>
 				</form>
-		<?php
-			wp_enqueue_script( 'jquery' );
-			wp_add_inline_script( 'jquery-migrate', '
+
+				<?php
+				$upload_script = '
 					( function ( $ ) {
 						var $label = $( "label.button" ),
 							labelText = $label.text();
@@ -186,11 +186,20 @@ class Upload {
 							} )
 							.on( "focus", function() { $label.addClass( "focus" ); } )
 							.on( "blur", function() { $label.removeClass( "focus" ); } );
-					} ( window.jQuery ) );' );
-		
-		endif; // ! $submitted_counts->total
+					} ( window.jQuery ) );';
 
-		else : ?>
+				if ( ! wp_script_is( 'jquery', 'done' ) ) {
+					wp_enqueue_script( 'jquery' );
+					wp_add_inline_script( 'jquery-migrate', $upload_script );
+				} else {
+					printf( '<script>%s</script>', $upload_script );
+				}
+				?>
+		
+			<?php endif; // ! $submitted_counts->total ?>
+
+		<?php else : ?>
+
 			<p>
 			<?php
 			printf(
