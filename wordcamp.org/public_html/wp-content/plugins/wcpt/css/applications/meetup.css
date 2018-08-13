@@ -1,0 +1,26 @@
+#meetup-application label {
+	display: block;
+	margin-bottom: 1em;
+	font-weight: bold;
+	font-size: 1.1em;
+}
+
+#meetup-application .required-indicator,
+#meetup-application .label-description {
+	font-size: .8em;
+	font-style: italic;
+	opacity: 0.7;
+}
+
+#meetup-application .label-description {
+	display: block;
+}
+
+#meetup-application input,
+#meetup-application select,
+#meetup-application textarea {
+	display: block;
+	width: 100%;
+	margin-top: .15em;
+}
+

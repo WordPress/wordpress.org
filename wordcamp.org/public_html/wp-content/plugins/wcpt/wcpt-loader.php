@@ -45,9 +45,11 @@ class WCPT_Loader {
 		// Load the files
 		require_once ( WCPT_DIR . 'wcpt-functions.php' );
 		require_once ( WCPT_DIR . 'wcpt-wordcamp/wordcamp-loader.php' );
-		require_once ( WCPT_DIR . 'applications/common.php' );
-		require_once ( WCPT_DIR . 'applications/tracker.php' );
-		require_once ( WCPT_DIR . 'applications/wordcamp.php' );
+		require_once ( WCPT_DIR . 'wcpt-meetup/meetup-loader.php' );
+		require_once ( WCPT_DIR . 'wcpt-event/tracker.php' );
+		require_once ( WCPT_DIR . 'wcpt-wordcamp/wordcamp.php' );
+		require_once ( WCPT_DIR . 'wcpt-meetup/meetup.php' );
+		require_once ( WCPT_DIR . 'wcpt-meetup/class-meetup-admin.php' );
 
 		// Require admin files.
 		if ( is_admin() || ( defined( 'DOING_CRON' ) && DOING_CRON ) ) {
@@ -67,6 +69,7 @@ class WCPT_Loader {
 		// Create admin
 		$GLOBALS['wcpt_admin'] = new WCPT_Admin;
 		$GLOBALS['wordcamp_admin'] = new WordCamp_Admin;
+		$GLOBALS['meetup_admin'] = new Meetup_Admin();
 	}
 
 	/**
@@ -87,3 +90,4 @@ endif; // class_exists check
 // Load everything up
 $wcpt_loader     = new WCPT_Loader;
 $wordcamp_loader = new WordCamp_Loader;
+$meetup_loader = new Meetup_Loader();

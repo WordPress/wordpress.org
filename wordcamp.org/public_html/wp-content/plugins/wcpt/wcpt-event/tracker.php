@@ -1,13 +1,14 @@
 <?php
 
 namespace WordPress_Community\Applications\Tracker;
+
 use \WordCamp_Loader;
 defined( 'WPINC' ) or die();
 
 const SHORTCODE_SLUG = 'application-tracker';
 
-add_shortcode( SHORTCODE_SLUG,    __NAMESPACE__ . '\render_status_shortcode' );
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts'         );
+add_shortcode( SHORTCODE_SLUG, __NAMESPACE__ . '\render_status_shortcode' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
 
 /**
  * Render the [application-tracker] shortcode.
@@ -31,13 +32,15 @@ function get_active_wordcamps() {
 	unset( $shown_statuses[ WCPT_FINAL_STATUS ] );
 	$shown_statuses = array_keys( $shown_statuses );
 
-	$raw_posts = get_posts( array(
-		'post_type'      => WCPT_POST_TYPE_ID,
-		'post_status'    => $shown_statuses,
-		'posts_per_page' => 300,
-		'order'          => 'ASC',
-		'orderby'        => 'post_title',
-	) );
+	$raw_posts = get_posts(
+		array(
+			'post_type'      => WCPT_POST_TYPE_ID,
+			'post_status'    => $shown_statuses,
+			'posts_per_page' => 300,
+			'order'          => 'ASC',
+			'orderby'        => 'post_title',
+		)
+	);
 
 	foreach ( $raw_posts as $key => $post ) {
 		$last_update_timestamp = get_last_update_timestamp( $post->ID );

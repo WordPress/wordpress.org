@@ -6,6 +6,8 @@ define( 'WCPT_SLUG',           'wordcamps'          );
 define( 'WCPT_DEFAULT_STATUS', 'wcpt-needs-vetting' );
 define( 'WCPT_FINAL_STATUS',   'wcpt-closed'        );
 
+require_once WCPT_DIR . 'wcpt-event/class-event-loader.php';
+
 if ( ! class_exists( 'WordCamp_Loader' ) ) :
 /**
  * WordCamp_Loader
@@ -15,17 +17,13 @@ if ( ! class_exists( 'WordCamp_Loader' ) ) :
  * @since WordCamp Post Type (0.1)
  *
  */
-class WordCamp_Loader {
+class WordCamp_Loader extends Event_Loader {
 
 	/**
 	 * The main WordCamp Post Type loader
 	 */
 	function __construct() {
-		add_action( 'plugins_loaded',                  array( $this, 'includes'                          ) );
-		add_action( 'init',                            array( $this, 'register_post_types'               ) );
-		add_action( 'init',                            array( $this, 'register_post_capabilities'        ) );
-		add_action( 'init',                            array( $this, 'register_post_statuses'            ) );
-		add_filter( 'pre_get_posts',                   array( $this, 'query_public_statuses_on_archives' ) );
+		parent::__construct();
 		add_action( 'wp_insert_post_data',             array( $this, 'set_scheduled_date'                ) );
 		add_filter( 'wordcamp_rewrite_rules',          array( $this, 'wordcamp_rewrite_rules'            ) );
 		add_filter( 'query_vars',                      array( $this, 'query_vars'                        ) );
@@ -131,52 +129,7 @@ class WordCamp_Loader {
 		}
 	}
 
-	public function register_post_statuses() {
-		foreach ( self::get_post_statuses() as $key => $label ) {
-			register_post_status( $key, array(
-				'label' => $label,
-				'public' => true,
-				'label_count' => _nx_noop(
-					sprintf( '%s <span class="count">(%s)</span>', $label, '%s' ),
-					sprintf( '%s <span class="count">(%s)</span>', $label, '%s' ),
-					'wordcamporg'
-				),
-			) );
-		}
-	}
 
-	/**
-	 * Only query the public post statuses on WordCamp archives and feeds
-	 *
-	 * By default, any public post statuses are queried when the `post_status` parameter is not explicitly passed
-	 * to WP_Query. This causes central.wordcamp.org/wordcamps/ and central.wordcamp.org/wordcamps/feed/ to display
-	 * camps that are `needs-vetting`, etc, which is not desired.
-	 *
-	 * Another way to fix this would have been to register some of the posts statuses as `private`, but they're not
-	 * consistently used in a public or private way, so that would have had more side effects.
-	 *
-	 * @param WP_Query $query
-	 */
-	public function query_public_statuses_on_archives( $query ) {
-		if ( ! $query->is_post_type_archive( WCPT_POST_TYPE_ID ) ) {
-			return;
-		}
-
-		if ( is_admin() ) {
-			return;
-		}
-
-		// Sort by the date it was added to the schedule. See WordCamp_Loader::set_scheduled_date() for details.
-		if ( '' === $query->get( 'orderby' ) ) {
-			$query->set( 'orderby', 'menu_order date' );
-		}
-
-		if ( ! empty( $query->query_vars['post_status'] ) ) {
-			return;
-		}
-
-		$query->query_vars['post_status'] = self::get_public_post_statuses();
-	}
 
 	/**
 	 * Save the date that the camp was moved on to the official schedule
