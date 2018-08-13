@@ -19,6 +19,7 @@ abstract class Event_Admin {
 	 * Event_Admin constructor.
 	 */
 	public function __construct() {
+
 		add_action( 'add_meta_boxes', array( $this, 'metabox' ) );
 
 		add_action( 'add_meta_boxes', array( $this, 'add_status_metabox' ) );
@@ -150,6 +151,10 @@ abstract class Event_Admin {
 			return;
 		}
 
+		if ( ! current_user_can( 'wordcamp_wrangle_wordcamps' ) ) {
+			return;
+		}
+
 		add_meta_box(
 			'wcpt_log',
 			'Log',
@@ -166,6 +171,10 @@ abstract class Event_Admin {
 	 */
 	public function add_note_metabox() {
 		if ( ! current_user_can( $this->get_edit_capability() ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'wordcamp_wrangle_wordcamps' ) ) {
 			return;
 		}
 

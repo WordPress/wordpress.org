@@ -185,25 +185,6 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				Meetup_Application::POST_TYPE,
 				'advanced'
 			);
-
-			if ( current_user_can( 'wcpt_wrangle_meetups' ) ) {
-				add_meta_box(
-					'wcpt_meetup_notes',
-					__( 'Add Private Note', 'wcpt' ),
-					array( $this, 'wcpt_notes_metabox' ),
-					Meetup_Application::POST_TYPE,
-					'advanced'
-				);
-
-				add_meta_box(
-					'wcpt_meetup_logs',
-					__( 'Logs', 'wcpt' ),
-					array( $this, 'wcpt_logs_metabox' ),
-					Meetup_Application::POST_TYPE,
-					'advanced'
-				);
-
-			}
 		}
 
 		/**
