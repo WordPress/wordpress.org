@@ -1002,6 +1002,22 @@ div.bbp-breadcrumb {
 		content: "\f487";
 	}
 
+	.topic-info li.topic-report::before {
+		content: "\f227";
+	}
+
+	.topic-info li.topic-previous-reports {
+
+		.previous-reports {
+
+			padding-left: 0;
+
+			li {
+				list-style: inside;
+			}
+		}
+	}
+
 	.plugin-meta-icon {
 		border-top: 0;
 	}

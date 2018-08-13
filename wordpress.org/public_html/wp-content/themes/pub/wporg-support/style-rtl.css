@@ -4207,6 +4207,18 @@ div.bbp-breadcrumb p {
 	content: "\f487";
 }
 
+.sidebar .topic-info li.topic-report::before {
+	content: "\f227";
+}
+
+.sidebar .topic-info li.topic-previous-reports .previous-reports {
+	padding-right: 0;
+}
+
+.sidebar .topic-info li.topic-previous-reports .previous-reports li {
+	list-style: inside;
+}
+
 .sidebar .plugin-meta-icon {
 	border-top: 0;
 }

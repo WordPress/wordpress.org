@@ -19,6 +19,7 @@ include( dirname( __FILE__ ) . '/inc/class-users.php' );
 include( dirname( __FILE__ ) . '/inc/class-user-notes.php' );
 include( dirname( __FILE__ ) . '/inc/class-moderators.php' );
 include( dirname( __FILE__ ) . '/inc/class-hooks.php' );
+include( dirname( __FILE__ ) . '/inc/class-report-topic.php' );
 
 // Compat-only includes.
 include( dirname( __FILE__ ) . '/inc/class-dropin.php' );

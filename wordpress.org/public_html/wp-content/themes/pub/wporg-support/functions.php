@@ -5,7 +5,6 @@
  * @package WPBBP
  */
 
-
 /**
  * Use the ‘Lead Topic’ uses the single topic part
  * allowing styling the lead topic separately from the main reply loop.
@@ -726,6 +725,7 @@ function bb_base_single_topic_description() {
 	<?php endif; ?>
 
 	<?php
+	do_action( 'wporg_support_after_topic_info' );
 }
 
 function bb_base_single_forum_description() {

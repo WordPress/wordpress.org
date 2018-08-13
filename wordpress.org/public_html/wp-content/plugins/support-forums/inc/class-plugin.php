@@ -37,10 +37,11 @@ class Plugin {
 	 * Instantiate a new Plugin object.
 	 */
 	private function __construct() {
-		$this->users       = new Users;
-		$this->user_notes  = new User_Notes;
-		$this->moderators  = new Moderators;
-		$this->hooks       = new Hooks;
+		$this->users        = new Users;
+		$this->user_notes   = new User_Notes;
+		$this->moderators   = new Moderators;
+		$this->hooks        = new Hooks;
+		$this->report_topic = new Report_Topic;
 
 		// These modifications are specific to https://wordpress.org/support/
 		$blog_id = get_current_blog_id();
