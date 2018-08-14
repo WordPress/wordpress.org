@@ -108,7 +108,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 
 			switch ( $column ) {
 				case 'organizer':
-					echo esc_html( get_post_meta( $post_id, 'Organizer Name', true ) . '<' . get_post_meta( $post_id, 'Email Address', true ) . '>' );
+					echo esc_html( get_post_meta( $post_id, 'Organizer Name', true ) . '<' . get_post_meta( $post_id, 'Email', true ) . '>' );
 					break;
 				case 'meetup.com_url':
 					$this->print_clickable_link( get_post_meta( $post_id, 'Meetup URL', true ) );

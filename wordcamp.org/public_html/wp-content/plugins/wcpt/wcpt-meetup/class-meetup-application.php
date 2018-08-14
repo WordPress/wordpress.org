@@ -228,7 +228,7 @@ class Meetup_Application extends Event_Application {
 		add_post_meta( $post_id, 'Best describe organizer', $data['q_describe_yourself'] );
 		add_post_meta( $post_id, 'WordPress.org username', $data['q_wporg_username'] );
 		add_post_meta( $post_id, 'WordPress slack username', $data['q_wp_slack_username'] );
-		add_post_meta( $post_id, 'Date Applied', gmdate( 'Y-m-d\TH:i:s\Z' ) );
+		add_post_meta( $post_id, 'Date Applied', time() );
 
 		add_post_meta(
 			$post_id, '_status_change', array(
