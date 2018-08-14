@@ -277,14 +277,14 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			);
 
 			$organizer_keys = array(
-				'Organizer Name'                           => 'text',
-				'Email'                                    => 'text',
-				'Primary organizer WordPress.org username' => 'text',
+				'Organizer Name'                               => 'text',
+				'Email'                                        => 'text',
+				'Primary organizer WordPress.org username'     => 'text',
 				'Co-Organizers usernames (seperated by comma)' => 'text',
-				'Date closed'                              => 'date',
-				'Skype/Slack'                              => 'text',
-				'Region'                                   => 'text',
-				'Address'                                  => 'textarea',
+				'Date closed'                                  => 'date',
+				'Skype/Slack'                                  => 'text',
+				'Region'                                       => 'text',
+				'Address'                                      => 'textarea',
 			);
 
 			$swag_keys = array(

@@ -218,16 +218,16 @@ class Meetup_Application extends Event_Application {
 			)
 		);
 
-		add_post_meta( $post_id, 'Email Address', $data['q_email'] );
+		add_post_meta( $post_id, 'Email', $data['q_email'] );
 		add_post_meta( $post_id, 'City', $data['q_city'] );
 		add_post_meta( $post_id, 'State', $data['q_state'] );
 		add_post_meta( $post_id, 'Country', $data['q_country'] );
 		add_post_meta( $post_id, 'Zip', $data['q_zip'] );
 		add_post_meta( $post_id, 'Already a meetup', $data['q_already_a_meetup'] );
-		add_post_meta( $post_id, 'Existing meetup URL', $data['q_existing_meetup_url'] );
+		add_post_meta( $post_id, 'Meetup URL', $data['q_existing_meetup_url'] );
 		add_post_meta( $post_id, 'Best describe organizer', $data['q_describe_yourself'] );
-		add_post_meta( $post_id, 'WordPress.org username', $data['q_wporg_username'] );
-		add_post_meta( $post_id, 'WordPress slack username', $data['q_wp_slack_username'] );
+		add_post_meta( $post_id, 'Primary organizer WordPress.org username', $data['q_wporg_username'] );
+		add_post_meta( $post_id, 'Skype/Slack', $data['q_wp_slack_username'] );
 		add_post_meta( $post_id, 'Date Applied', time() );
 
 		add_post_meta(
