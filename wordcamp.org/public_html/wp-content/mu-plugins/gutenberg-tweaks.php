@@ -26,7 +26,7 @@ function load() {
 	 */
 	if ( function_exists( '\\gutenberg_init' ) ) {
 		add_filter( 'gutenberg_can_edit_post_type', __NAMESPACE__ . '\disable_gutenberg_on_cpts',           10, 2 );
-		add_filter( 'get_edit_post_link',           __NAMESPACE__ . '\add_classic_param_to_edit_links'            );
+		add_filter( 'get_edit_post_link',           __NAMESPACE__ . '\add_classic_param_to_edit_links',     10, 2 );
 		add_filter( 'page_row_actions',             __NAMESPACE__ . '\add_gutenberg_edit_link',             10, 2 );
 		add_filter( 'post_row_actions',             __NAMESPACE__ . '\add_gutenberg_edit_link',             10, 2 );
 		add_action( 'admin_print_scripts-edit.php', __NAMESPACE__ . '\add_classic_param_to_add_new_button', 11    );
@@ -49,7 +49,13 @@ function disable_gutenberg_on_cpts( $bool, $post_type ) {
 }
 
 // Add the `classic-editor` trigger to all edit post URLs
-function add_classic_param_to_edit_links( $url ) {
+function add_classic_param_to_edit_links( $url, $post_id ) {
+	$post = get_post( $post_id );
+
+	if ( function_exists( 'gutenberg_post_has_blocks' ) && gutenberg_post_has_blocks( $post ) ) {
+		return $url;
+	}
+
 	return add_query_arg( 'classic-editor', '', $url );
 }
 
