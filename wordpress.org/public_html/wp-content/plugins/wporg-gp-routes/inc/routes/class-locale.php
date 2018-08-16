@@ -849,6 +849,12 @@ class Locale extends GP_Route {
 				$filter_where = 'AND stats.untranslated > 0';
 				$filter_order_by = "( stats.current / stats.all ) $sort_order, tp.name ASC";
 				break;
+
+			case 'completed':
+				$filter_where = 'AND stats.all > 0 AND stats.current = stats.all';
+				$filter_order_by = "tp.name $sort_order";
+				break;
+
 		}
 
 		/*
