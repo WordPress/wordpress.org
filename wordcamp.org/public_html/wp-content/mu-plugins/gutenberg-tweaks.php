@@ -49,7 +49,11 @@ function disable_gutenberg_on_cpts( $bool, $post_type ) {
 }
 
 // Add the `classic-editor` trigger to all edit post URLs
-function add_classic_param_to_edit_links( $url, $post_id ) {
+function add_classic_param_to_edit_links( $url, $post_id = 0 ) {
+	if ( ! $post_id ) {
+		return $url;
+	}
+
 	$post = get_post( $post_id );
 
 	if ( function_exists( 'gutenberg_post_has_blocks' ) && gutenberg_post_has_blocks( $post ) ) {
