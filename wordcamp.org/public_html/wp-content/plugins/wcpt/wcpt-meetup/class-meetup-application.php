@@ -54,17 +54,17 @@ class Meetup_Application extends Event_Application {
 	public static function get_post_statuses() {
 		return array(
 			'wcpt-mtp-nds-vet'   => _x( 'Needs Vetting', 'Meetup status', 'wordcamporg' ),
-			'wcpt-mtp-more-info' => _x( 'More Info Requested', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-nds-ori'   => _x( 'Needs Orientation/Interview', 'Meetup status', 'wordcamporg' ),
+			'wcpt-mtp-schdlng'   => _x( 'Scheduling', 'Meetup status', 'wordcamporg' ),
+			'wcpt-mtp-schdld'    => _x( 'Scheduled', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-nds-sit'   => _x( 'Needs Site', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-nds-trn'   => _x( 'Needs Transfer', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-nds-nw-ow' => _x( 'Needs to assign new owner', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-chng-req'  => _x( 'Changes requested', 'Meetup status', 'wordcamporg' ),
-			'wcpt-mtp-nds-swag'  => _x( 'Needs Swag', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-rejected'  => _x( 'Declined', 'Meetup status', 'wordcamporg' ),
-			'wcpt-mtp-active'    => _x( 'Active', 'Meetup status', 'wordcamporg' ),
+			'wcpt-mtp-active'    => _x( 'Active in the chapter', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-dormant'   => _x( 'Dormant', 'Meetup status', 'wordcamporg' ),
-			'wcpt-mtp-removed'   => _x( 'Removed', 'Meetup status', 'wordcamporg' ),
+			'wcpt-mtp-removed'   => _x( 'Removed from the chapter', 'Meetup status', 'wordcamporg' ),
 		);
 	}
 
@@ -128,13 +128,11 @@ class Meetup_Application extends Event_Application {
 		$unsafe_data = shortcode_atts( $this->get_default_application_values(), $unsafe_data );
 
 		$required_fields = array(
-			'q_first_name',
-			'q_last_name',
+			'q_name',
 			'q_email',
 			'q_city',
-			'q_state',
 			'q_country',
-			'q_zip',
+			'q_mtp_loc',
 			'q_already_a_meetup',
 			'q_describe_yourself',
 			'q_wporg_username',
@@ -150,6 +148,7 @@ class Meetup_Application extends Event_Application {
 
 		foreach ( $required_fields as $field ) {
 			if ( empty( $safe_data[ $field ] ) ) {
+				error_log('field is: '. $field);
 				return new \WP_Error( 'required_fields', "Please click on your browser's Back button, and fill in all of the required fields." );
 			}
 		}
@@ -165,18 +164,21 @@ class Meetup_Application extends Event_Application {
 	public function get_default_application_values() {
 		// WordCamp uses an ID with questions. Not sure how are they used. Ask @corey
 		$values = array(
-			'q_first_name'          => '',
-			'q_last_name'           => '',
+			'q_name'                => '',
 			'q_email'               => '',
+			'q_address_line_1'      => '',
+			'q_address_line_2'      => '',
 			'q_city'                => '',
 			'q_state'               => '',
 			'q_country'             => '',
 			'q_zip'                 => '',
+			'q_mtp_loc'             => '',
 			'q_already_a_meetup'    => '',
 			'q_existing_meetup_url' => '',
 			'q_describe_yourself'   => '',
 			'q_wporg_username'      => '',
 			'q_wp_slack_username'   => '',
+			'q_additional_comments' => '',
 		);
 
 		return $values;
@@ -191,14 +193,14 @@ class Meetup_Application extends Event_Application {
 	 */
 	public function create_post( $data ) {
 		// Create the post.
-		$user     = wcorg_get_user_by_canonical_names( $data['q_wporg_username'] );
+		$wordcamp_user_id = get_user_by( 'email', 'support@wordcamp.org' )->ID;
 		$statuses = self::get_post_statuses();
 
 		$post = array(
 			'post_type'   => self::get_event_type(),
-			'post_title'  => $data['q_city'] . ', ' . $data['q_country'],
+			'post_title'  => esc_html( $data['q_mtp_loc'] ),
 			'post_status' => self::get_default_status(),
-			'post_author' => is_a( $user, 'WP_User' ) ? $user->ID : 0,
+			'post_author' => $wordcamp_user_id,
 		);
 
 		$post_id = wp_insert_post( $post, true );
@@ -210,30 +212,29 @@ class Meetup_Application extends Event_Application {
 		// Populate the meta fields.
 		add_post_meta( $post_id, '_application_data', $data );
 
-		add_post_meta(
-			$post_id, 'Organizer Name', sprintf(
-				'%s %s',
-				$data['q_first_name'],
-				$data['q_last_name']
-			)
-		);
+		$organizer_address = <<<ADDRESS
+		{$data['q_address_line_1']}
+		{$data['q_address_line_2']}
+		{$data['q_city']}, {$data['q_state']}, {$data['q_country']}
+		{$data['q_zip']}
+ADDRESS;
 
+		add_post_meta( $post_id, 'Organizer Name', $data['q_name'] );
 		add_post_meta( $post_id, 'Email', $data['q_email'] );
-		add_post_meta( $post_id, 'City', $data['q_city'] );
-		add_post_meta( $post_id, 'State', $data['q_state'] );
-		add_post_meta( $post_id, 'Country', $data['q_country'] );
-		add_post_meta( $post_id, 'Zip', $data['q_zip'] );
+		add_post_meta( $post_id, 'City', $data['q_mtp_loc'] );
+		add_post_meta( $post_id, 'Address', $organizer_address );
 		add_post_meta( $post_id, 'Already a meetup', $data['q_already_a_meetup'] );
 		add_post_meta( $post_id, 'Meetup URL', $data['q_existing_meetup_url'] );
 		add_post_meta( $post_id, 'Best describe organizer', $data['q_describe_yourself'] );
 		add_post_meta( $post_id, 'Primary organizer WordPress.org username', $data['q_wporg_username'] );
-		add_post_meta( $post_id, 'Skype/Slack', $data['q_wp_slack_username'] );
+		add_post_meta( $post_id, 'Slack', $data['q_wp_slack_username'] );
 		add_post_meta( $post_id, 'Date Applied', time() );
-
+		add_post_meta( $post_id, 'Extra Comments', $data['q_additional_comments'] );
+		add_post_meta( $post_id, 'Meetup Location', $data['q_mtp_loc'] );
 		add_post_meta(
 			$post_id, '_status_change', array(
 				'timestamp' => time(),
-				'user_id'   => is_a( $user, 'WP_User' ) ? $user->ID : 0,
+				'user_id'   => $wordcamp_user_id,
 				'message'   => sprintf( '%s &rarr; %s', 'Application', $statuses[ self::get_default_status() ] ),
 			)
 		);

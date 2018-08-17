@@ -39,7 +39,14 @@ abstract class Event_Application {
 			array(),
 			1
 		);
+		wp_register_style(
+			'wordcamp-application',
+			plugins_url( 'css/applications/wordcamp.css', __DIR__ ),
+			array( 'wp-community-applications' ),
+			1
+		);
 
+		wp_enqueue_style( 'wordcamp-application' );
 		wp_enqueue_style( 'wp-community-applications' );
 	}
 

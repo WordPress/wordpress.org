@@ -65,7 +65,7 @@ function wcpt_key_to_str( $key, $prefix = '' ) {
 function wcpt_log_metabox( $post ) {
 	$entries = wcpt_get_log_entries( $post->ID );
 
-	require_once( __DIR__ . '/views/common/metabox-log.php' );
+	require( __DIR__ . '/views/common/metabox-log.php' );
 }
 
 /**
@@ -86,20 +86,35 @@ function wcpt_get_log_entries( $event_id ) {
 	$status_changes = get_post_meta( $event_id, '_status_change' );
 
 	foreach ( array( 'note' => $private_notes, 'status_change' => $status_changes ) as $entry_type => $raw_entries ) {
-		foreach ( $raw_entries as $entry ) {
-			$user = get_user_by( 'id', $entry['user_id'] );
+		$entries = array_merge( process_raw_entries( $raw_entries, $entry_type ), $entries );
+	}
 
-			if ( $user ) {
-				$entry['user_display_name'] = $user->display_name;
-			} else {
-				// Assume that the action was performed during a cron job
-				$entry['user_display_name'] = 'WordCamp Bot';
-			}
+	return $entries;
+}
 
-			$entry['type'] = $entry_type;
+/**
+ * Add displayable data to raw entries
+ *
+ * @param array $raw_entries
+ * @param string $entry_type Type of entry
+ *
+ * @return array
+ */
+function process_raw_entries ( $raw_entries, $entry_type ) {
+	$entries = array();
+	foreach ( $raw_entries as $entry ) {
+		$user = get_user_by( 'id', $entry['user_id'] );
 
-			$entries[] = $entry;
+		if ( $user ) {
+			$entry['user_display_name'] = $user->display_name;
+		} else {
+			// Assume that the action was performed during a cron job
+			$entry['user_display_name'] = 'WordCamp Bot';
 		}
+
+		$entry['type'] = $entry_type;
+
+		$entries[] = $entry;
 	}
 
 	usort( $entries, 'wcpt_sort_log_entries' );

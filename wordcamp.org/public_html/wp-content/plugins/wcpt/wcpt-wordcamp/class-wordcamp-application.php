@@ -40,16 +40,8 @@ class WordCamp_Application extends Event_Application {
 			true
 		);
 
-		wp_register_style(
-			'wordcamp-application',
-			plugins_url( 'css/applications/wordcamp.css', __DIR__ ),
-			array( 'wp-community-applications' ),
-			1
-		);
-
 		if ( isset( $post->post_content ) && has_shortcode( $post->post_content, self::SHORTCODE_SLUG ) ) {
 			wp_enqueue_script( 'wordcamp-application' );
-			wp_enqueue_style( 'wordcamp-application' );
 		}
 	}
 
