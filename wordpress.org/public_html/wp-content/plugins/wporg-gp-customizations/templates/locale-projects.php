@@ -99,7 +99,11 @@ gp_tmpl_header();
 				$sorts['strings-waiting-and-fuzzy-asc'] = 'Waiting + Fuzzy (Least first)';
 				$sorts['percent-completed'] = 'Percent Completed (Most first)';
 				$sorts['percent-completed-asc'] = 'Percent Completed (Least first)';
-				$sorts['completed-asc'] = '100% Translations';
+
+				// Completed project filter, except on the 'waiting' project.
+				if ( $project->slug != 'waiting' ) {
+					$sorts['completed-asc'] = '100% Translations';
+				}
 
 				foreach ( $sorts as $value => $text ) {
 					printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), ( $value == $filter ? 'selected="selected"' : '' ), esc_attr( $text ) );
