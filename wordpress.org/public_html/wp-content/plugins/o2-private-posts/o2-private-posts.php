@@ -27,6 +27,7 @@ function init() {
 	add_filter( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts', 11 );
 	add_filter( 'o2_create_post', __NAMESPACE__ . '\set_post_status', 10, 2 );
 	add_action( 'o2_writeapi_post_created', __NAMESPACE__ . '\handle_meta_data', 10, 2 );
+	add_action( 'transition_post_status', __NAMESPACE__ . '\handle_admin_meta_data', 12, 3 );
 }
 add_filter( 'init', __NAMESPACE__ . '\init' );
 
@@ -99,12 +100,30 @@ function handle_meta_data( $post_id, $message ) {
 	}
 
 	if ( class_exists( 'o2_Tags' ) ) {
-		$post      = get_post( $post_id );
-		$post_tags = o2_Tags::find_tags( $post->post_content, true );
-		$post_tags = array_unique( $post_tags );
+		$post = get_post( $post_id );
+
+		if ( ! empty( $GLOBALS['o2'] ) ) {
+			$post_tags = $GLOBALS['o2']->tags->gather_all_tags( $post );
+		} else {
+			$post_tags = o2_Tags::find_tags( $post->post_content, true );
+			$post_tags = array_unique( $post_tags );
+		}
 
 		if ( ! empty( $post_tags ) ) {
 			wp_set_post_tags( $post_id, $post_tags, true );
 		}
+	}
+}
+
+/**
+ * Sets O2_ToDo state and post tags when a private post is published from wp-admin.
+ *
+ * @param string   $new  Status being switched to.
+ * @param string   $old  Status being switched from.
+ * @param \WP_Post $post The full Post object.
+ */
+function handle_admin_meta_data( $new, $old, $post ) {
+	if ( 'private' === $new ) {
+		handle_meta_data( $post->ID, (object) [ '_post_privately' => true ] );
 	}
 }
