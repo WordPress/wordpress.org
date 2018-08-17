@@ -148,7 +148,6 @@ class Meetup_Application extends Event_Application {
 
 		foreach ( $required_fields as $field ) {
 			if ( empty( $safe_data[ $field ] ) ) {
-				error_log('field is: '. $field);
 				return new \WP_Error( 'required_fields', "Please click on your browser's Back button, and fill in all of the required fields." );
 			}
 		}
