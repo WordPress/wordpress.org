@@ -192,6 +192,7 @@ function get_whitelist() {
 			'gregross',
 		),
 		'hosting-community' => array(
+			'ataylorme',
 			'mike',
 			'jadonn',
 		),
