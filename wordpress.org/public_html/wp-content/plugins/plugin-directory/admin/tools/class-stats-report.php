@@ -226,7 +226,7 @@ class Stats_Report {
 			/* translators: %s: today's date */
 			printf(
 				__( 'The day up to which stats are to be gathered. In YYYY-MM-DD format. Defaults to today (%s).', 'wporg-plugins' ),
-				$date
+				esc_html( $date )
 			);
 		?>
 		</p>
@@ -269,9 +269,9 @@ class Stats_Report {
 			/* translators: 1: number of days, 2: selected date, 3: number of most recent days */
 			printf(
 				__( 'Displaying stats for the %1$d days preceding %2$s (and other stats for the %3$d most recent days).', 'wporg-plugins' ),
-				$stats['num_days'],
-				$stats['date'],
-				$stats['recentdays']
+				esc_html( $stats['num_days'] ),
+				esc_html( $stats['date'] ),
+				esc_html( $stats['recentdays'] )
 			);
 		?>
 		</p>
@@ -284,7 +284,7 @@ class Stats_Report {
 				/* translators: %d: number of requested plugins */
 				printf(
 					__( 'Plugins requested : %d', 'wporg-plugins' ),
-					$stats['plugin_new']
+					esc_html( $stats['plugin_new'] )
 				);
 			?>
 			</li>
@@ -293,7 +293,7 @@ class Stats_Report {
 				/* translators: %s: number of rejected plugins */
 				printf(
 					__( 'Plugins rejected : %s', 'wporg-plugins' ),
-					$stats['plugin_reject']
+					esc_html( $stats['plugin_reject'] )
 				);
 			?>
 			</li>
@@ -302,7 +302,7 @@ class Stats_Report {
 				/* translators: %s: number of closed plugins */
 				printf(
 					__( 'Plugins closed : %s', 'wporg-plugins' ),
-					$stats['plugin_delist']
+					esc_html( $stats['plugin_delist'] )
 				);
 				$reasons = array();
 				if ( $stats['plugin_delist_reasons'] ) {
@@ -320,7 +320,7 @@ class Stats_Report {
 				/* translators: %s: number of approved plugins */
 				printf(
 					__( 'Plugins approved : %s', 'wporg-plugins' ),
-					$stats['plugin_approve']
+					esc_html( $stats['plugin_approve'] )
 				);
 			?>
 			</li>
@@ -334,7 +334,7 @@ class Stats_Report {
 				/* translators: %d: number of plugins in the queue */
 				printf(
 					__( 'Plugins in the queue (new and pending)* : %d', 'wporg-plugins' ),
-					$stats['in_queue']
+					esc_html( $stats['in_queue'] )
 				);
 			?>
 			</li>
@@ -343,8 +343,8 @@ class Stats_Report {
 				/* translators: 1: number of most recent days, 2: number of older plugins in the queue */
 				printf(
 					__( '&rarr; (older than %1$d days ago)** : %2$d', 'wporg-plugins' ),
-					$stats['recentdays'],
-					$stats['in_queue_old']
+					esc_html( $stats['recentdays'] ),
+					esc_html( $stats['in_queue_old'] )
 				);
 			?>
 			</li>
@@ -353,9 +353,9 @@ class Stats_Report {
 				/* translators: 1: start date, 2: end date, 3: number of plugins in the queue within defined time window */
 				printf(
 					__( '&rarr; (%1$s - %2$s) : %3$d', 'wporg-plugins' ),
-					$start_date,
-					$stats['date'],
-					$stats['in_queue_from_time_window']
+					esc_html( $start_date ),
+					esc_html( $stats['date'] ),
+					esc_html( $stats['in_queue_from_time_window'] )
 				);
 			?>
 			</li>
@@ -364,7 +364,7 @@ class Stats_Report {
 				/* translators: %d: number of new plugins */
 				printf(
 					__( '&rarr; (new; not processed or replied to yet)* : %d', 'wporg-plugins' ),
-					$stats['in_queue_new']
+					esc_html( $stats['in_queue_new'] )
 				);
 			?>
 			</li>
@@ -373,7 +373,7 @@ class Stats_Report {
 				/* translators: %d: number of pending plugins */
 				printf(
 					__( '&rarr; (pending; replied to)* : %d', 'wporg-plugins' ),
-					$stats['in_queue_pending']
+					esc_html( $stats['in_queue_pending'] )
 				);
 			?>
 			</li>
@@ -387,7 +387,7 @@ class Stats_Report {
 				/* translators: %d: number of open tickets */
 				printf(
 					__( 'Total open tickets* : %d', 'wporg-plugins' ),
-					$stats['supportpress_queue_total_open']
+					esc_html( $stats['supportpress_queue_total_open'] )
 				);
 			?>
 			</li>
@@ -396,8 +396,8 @@ class Stats_Report {
 				/* translators: 1: number of most recent days, 2: number of plugins with no activity */
 				printf(
 					__( ' &rarr; (with no activity in last %1$d days)** : %2$d', 'wporg-plugins' ),
-					$stats['recentdays'],
-					$stats['supportpress_queue_total_open_old']
+					esc_html( $stats['recentdays'] ),
+					esc_html( $stats['supportpress_queue_total_open_old'] )
 				);
 			?>
 			</li>
@@ -406,7 +406,7 @@ class Stats_Report {
 				/* translators: %d: number of most recent days */
 				printf(
 					__( 'Within defined %d day time window:', 'wporg-plugins' ),
-					$stats['num_days']
+					esc_html( $stats['num_days'] )
 				);
 				?>
 				<ul style="margin-left:20px;margin-top:0.5em;">
@@ -415,7 +415,7 @@ class Stats_Report {
 						/* translators: %d: total number of plugins within defined time window */
 						printf(
 							__( 'Total : %d', 'wporg-plugins' ),
-							$stats['supportpress_queue_interval_all']
+							esc_html( $stats['supportpress_queue_interval_all'] )
 						);
 					?>
 					</li>
@@ -424,7 +424,7 @@ class Stats_Report {
 						/* translators: %d: number of closed plugins within defined time window */
 						printf(
 							__( 'Closed : %d', 'wporg-plugins' ),
-							$stats['supportpress_queue_interval_closed']
+							esc_html( $stats['supportpress_queue_interval_closed'] )
 						);
 					?>
 					</li>
@@ -433,7 +433,7 @@ class Stats_Report {
 						/* translators: %d: number of open plugins within defined time window */
 						printf(
 							__( 'Open : %d', 'wporg-plugins' ),
-							$stats['supportpress_queue_interval_open']
+							esc_html( $stats['supportpress_queue_interval_open'] )
 						);
 					?>
 					</li>
