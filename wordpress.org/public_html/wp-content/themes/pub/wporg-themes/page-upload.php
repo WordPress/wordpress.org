@@ -5,6 +5,8 @@
  * @package wporg-themes
  */
 
+send_frame_options_header();
+
 get_header();
 
 if ( have_posts() ) :
