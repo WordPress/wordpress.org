@@ -89,6 +89,8 @@ function wcpt_get_log_entries( $event_id ) {
 		$entries = array_merge( process_raw_entries( $raw_entries, $entry_type ), $entries );
 	}
 
+	usort( $entries, 'wcpt_sort_log_entries' );
+
 	return $entries;
 }
 
