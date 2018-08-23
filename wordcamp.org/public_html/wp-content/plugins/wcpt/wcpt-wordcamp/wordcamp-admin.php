@@ -55,7 +55,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 			// Cron jobs
 			add_action( 'plugins_loaded', array( $this, 'schedule_cron_jobs' ), 11 );
 			add_action( 'wcpt_close_wordcamps_after_event', array( $this, 'close_wordcamps_after_event' ) );
-			add_action( 'wcpt_metabox_save_done', array( $this, 'update_venue_address' ) );
+			add_action( 'wcpt_metabox_save_done', array( $this, 'update_venue_address' ), 10, 2 );
 			add_action( 'wcpt_metabox_save_done', array( $this, 'update_mentor' ) );
 		}
 
@@ -151,16 +151,17 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 		 *
 		 * These are used for the maps on Central, stats, etc.
 		 *
-		 * @param int $post_id Post id
+		 * @param int   $post_id              Post id
+		 * @param array $original_meta_values Original meta values before save
 		 */
-		public function update_venue_address( $post_id ) {
+		public function update_venue_address( $post_id, $original_meta_values ) {
 			if ( $this->get_event_type() !== get_post_type() ) {
 				return;
 			}
 
 			// If the venue address was changed, update its coordinates
 			$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
-			if ( $new_address === get_post_meta( $post_id, 'Physical Address', true ) ) {
+			if ( $new_address === $original_meta_values['Physical Address'] ) {
 				return;
 			}
 

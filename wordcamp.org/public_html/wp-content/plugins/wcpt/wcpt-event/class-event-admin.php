@@ -357,6 +357,7 @@ abstract class Event_Admin {
 		}
 
 		$meta_keys = $this->meta_keys();
+		$orig_meta_values = get_post_meta( $post_id );
 
 		foreach ( $meta_keys as $key => $value ) {
 			$post_value     = wcpt_key_to_str( $key, 'wcpt_' );
@@ -406,7 +407,7 @@ abstract class Event_Admin {
 			}
 		}
 
-		do_action( 'wcpt_metabox_save_done', $post_id );
+		do_action( 'wcpt_metabox_save_done', $post_id, $orig_meta_values );
 
 		$this->validate_and_add_note( $post_id );
 
