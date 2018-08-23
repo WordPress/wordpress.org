@@ -1,0 +1,17 @@
+body.page-template-page-guides,
+body.page-guides {
+	.entry-header {
+		padding: ms( 4 ) ms( 1 );
+		text-align: center;
+
+		.entry-title {
+			font-size: ms( 12 );
+			line-height: 1;
+			margin: 2rem auto 1rem;
+
+			@include breakpoint( 0, 420px ) {
+				font-size: ms( 11 );
+			}
+		}
+	}
+}

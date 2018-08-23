@@ -9,6 +9,16 @@
 
 namespace WordPressdotorg\MainTheme;
 
+function _esc_html_e( $text, $domain ) {
+	echo esc_html( $text );
+}
+function ___( $text, $domain ) {
+	return $text;
+}
+function esc_html___( $text, $domain ) {
+	return esc_html( $text );
+}
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *
