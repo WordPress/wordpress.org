@@ -150,7 +150,7 @@ the_post();
 							<?php
 							printf(
 								/* translators: 1: URL to Apache website; 2: URL to Nginx website */
-								wp_kses_post( __( 'We also recommend either <a href="%1$s">Apache</a> or <a href="%1$s">Nginx</a> as the most robust options for running WordPress, but neither is required.', 'wporg' ) ),
+								wp_kses_post( __( 'We also recommend either <a href="%1$s">Apache</a> or <a href="%2$s">Nginx</a> as the most robust options for running WordPress, but neither is required.', 'wporg' ) ),
 								esc_url( 'https://httpd.apache.org/' ),
 								esc_url( 'https://nginx.org/' )
 							);
