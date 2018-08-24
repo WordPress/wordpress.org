@@ -121,6 +121,7 @@ function get_whitelist() {
 		'core-multisite' => array_merge( get_committers(), array(
 			'flixos90',
 			'jeremyfelt',
+			'spacedmonkey',
 		) ),
 		'core-passwords' => array_merge( get_committers(), array(
 			'georgestephanis',
