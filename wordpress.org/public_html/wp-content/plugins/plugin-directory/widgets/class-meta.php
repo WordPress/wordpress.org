@@ -87,13 +87,16 @@ class Meta extends \WP_Widget {
 
 			<?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
 				<li>
-					<?php
-					printf(
-						/* translators: %s: version number */
-						__( 'Requires WordPress Version: %s', 'wporg-plugins' ),
-						'<strong>' . esc_html( $requires ) . '</strong>'
-					);
-					?>
+					<?php esc_html_e( 'WordPress Version:', 'wporg-plugins' ); ?>
+					<strong>
+						<?php
+						printf(
+							/* translators: Minimum version number required. */
+							esc_html__( '%s or higher', 'wporg-plugins' ),
+							esc_html( $requires )
+						);
+						?>
+					</strong>
 				</li>
 			<?php endif; ?>
 
@@ -111,13 +114,16 @@ class Meta extends \WP_Widget {
 
 			<?php if ( $requires_php = (string) get_post_meta( $post->ID, 'requires_php', true ) ) : ?>
 				<li>
-					<?php
-					printf(
-						/* translators: %s: version number */
-						__( 'Requires PHP Version: %s', 'wporg-plugins' ),
-						'<strong>' . esc_html( $requires_php ) . '</strong>'
-					);
-					?>
+					<?php esc_html_e( 'PHP Version:', 'wporg-plugins' ); ?>
+					<strong>
+						<?php
+						printf(
+							/* translators: Minimum version number required. */
+							esc_html__( '%s or higher', 'wporg-plugins' ),
+							esc_html( $requires_php )
+						);
+						?>
+					</strong>
 				</li>
 			<?php endif; ?>
 
