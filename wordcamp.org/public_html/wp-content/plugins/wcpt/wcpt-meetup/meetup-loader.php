@@ -7,6 +7,7 @@
 
 use WordPress_Community\Applications\Meetup_Application;
 define( 'WCPT_MEETUP_SLUG', 'wp_meetup' );
+define( 'WCPT_MEETUP_TAG_SLUG', 'meetup_tags' );
 
 
 if ( ! class_exists( 'Meetup_Loader' ) ) :
@@ -16,6 +17,88 @@ if ( ! class_exists( 'Meetup_Loader' ) ) :
 	 */
 	class Meetup_Loader extends Event_Loader {
 
+		/**
+		 * Meetup_Loader constructor.
+		 */
+		public function __construct() {
+			parent::__construct();
+			add_action( 'init', array( $this, 'register_meetup_taxonomy' ) );
+			add_action( 'set_object_terms', array( $this, 'log_meetup_tags' ), 10, 6 );
+		}
+
+		/**
+		 * Log when a tag is added or removed in a meetup event
+		 *
+		 * @param int    $event_id   Meetup post ID.
+		 * @param array  $terms      An array of tags.
+		 * @param array  $tt_ids     An array of term taxonomy IDs.
+		 * @param string $taxonomy   Taxonomy slug.
+		 * @param bool   $append     Whether to append new terms to the old terms.
+		 * @param array  $old_tt_ids Old array of term taxonomy IDs.
+		 */
+		public function log_meetup_tags( $event_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+
+			// bail if taxonomy is not meetup tags.
+			if ( WCPT_MEETUP_TAG_SLUG !== $taxonomy ) {
+				return;
+			}
+
+			$tt_added_ids = array_diff( $tt_ids, $old_tt_ids );
+			$tt_removed_ids = array_diff( $old_tt_ids, $tt_ids );
+
+			if ( count( $tt_added_ids ) > 0 ) {
+				$added_terms_query = new WP_Term_Query( array(
+						'taxonomy'   => WCPT_MEETUP_TAG_SLUG,
+						'object_ids' => $event_id,
+						'term_taxonomy_id' => $tt_added_ids,
+						'fields' => 'names'
+					)
+				);
+
+				$added_terms = $added_terms_query->get_terms();
+
+				add_post_meta( $event_id, '_tags_log', array(
+					'timestamp' => time(),
+					'user_id'   => get_current_user_id(),
+					'message'   => 'Tags added: ' . join( ', ', $added_terms ),
+				) );
+			}
+
+			if ( count( $tt_removed_ids ) > 0 ) {
+				$removed_terms = ( new WP_Term_Query( array(
+						'taxonomy'         => WCPT_MEETUP_TAG_SLUG,
+						'term_taxonomy_id' => $tt_removed_ids,
+						'fields'           => 'names',
+						'hide_empty'       => false,
+					)
+				) )->get_terms();
+
+				add_post_meta( $event_id, '_tags_log', array(
+					'timestamp' => time(),
+					'user_id'   => get_current_user_id(),
+					'message'   => 'Tags removed: ' . join( ', ', $removed_terms ),
+				) );
+			}
+
+		}
+
+		/**
+		 * Register custom tags for meetup events.
+		 */
+		public function register_meetup_taxonomy() {
+			register_taxonomy(
+				'meetup_tags',
+				Meetup_Application::POST_TYPE,
+				array(
+					'hierarchical' => false,
+					'labels'       => array(
+						'name'          => __( 'Meetup Tags' ),
+						'singular_name' => __( 'Meetup Tag' ),
+					),
+					'show_admin_column' => true,
+				)
+			);
+		}
 
 		/**
 		 * Include files specific for meetup event
@@ -53,8 +136,6 @@ if ( ! class_exists( 'Meetup_Loader' ) ) :
 
 			$wcpt_supports = array(
 				'title',
-				'editor',
-				'thumbnail',
 				'revisions',
 				'author',
 			);

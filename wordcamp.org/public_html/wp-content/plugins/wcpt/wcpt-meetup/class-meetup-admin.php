@@ -21,8 +21,6 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		 */
 		public function __construct() {
 			parent::__construct();
-
-			add_action( 'wcpt_metabox_save_done', array( $this, 'save_tag_checkboxes' ) );
 		}
 
 		/**
@@ -81,13 +79,13 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		 */
 		public function column_headers( $columns ) {
 			$columns = array(
-				'cb'             => '<input type="checkbox" />',
-				'title'          => __( 'Title', 'wcpt' ),
-				'tags'           => __( 'Tags', 'wcpt' ),
-				'organizer'      => __( 'Organizer', 'wcpt' ),
-				'date'           => __( 'Date', 'wcpt' ),
-				'meetup.com_url' => __( 'Meetup URL', 'wcpt' ),
-				'helpscout_url'  => __( 'HelpScout Link', 'wcpt' ),
+				'cb'                   => '<input type="checkbox" />',
+				'title'                => __( 'Title', 'wcpt' ),
+				'taxonomy-meetup_tags' => __( 'Meetup Tags', 'wcpt' ),
+				'organizer'            => __( 'Organizer', 'wcpt' ),
+				'date'                 => __( 'Date', 'wcpt' ),
+				'meetup.com_url'       => __( 'Meetup URL', 'wcpt' ),
+				'helpscout_url'        => __( 'HelpScout Link', 'wcpt' ),
 			);
 
 			return $columns;
@@ -190,15 +188,6 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				'advanced'
 			);
 
-			add_meta_box(
-				'wcpt_show_tag_logs',
-				'Tag logs',
-				array( $this, 'wcpt_tag_log_metabox' ),
-				$this->get_event_type(),
-				'advanced',
-				'low'
-			);
-
 		}
 
 		/**
@@ -261,16 +250,6 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		}
 
 		/**
-		 * Renders tags logs
-		 */
-		public function wcpt_tag_log_metabox() {
-			global $post_id;
-			$entries = get_post_meta( $post_id, '_tags_log' );
-			$entries = process_raw_entries( $entries, 'Tag changed' );
-			require( WCPT_DIR . '/views/common/metabox-log.php' );
-		}
-
-		/**
 		 * Meta keys group for Meetup Event.
 		 *
 		 * @param string $meta_group
@@ -296,9 +275,6 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				'Oriented by'                => 'text',
 				'Joined chapter date'        => 'date',
 				'Joined chapter by'          => 'text',
-				'More Information requested' => 'checkbox',
-				'Changes Requested'          => 'checkbox',
-				'Needs Meeting'              => 'checkbox'
 			);
 
 			$organizer_keys = array(
@@ -315,8 +291,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			);
 
 			$swag_keys = array(
-				'Needs swag' => 'checkbox',
-				'Swag notes' => 'text',
+				'Swag notes' => 'textarea',
 			);
 
 			switch ( $meta_group ) {
@@ -344,71 +319,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			return $data;
 		}
 
-		/**
-		 * Toggle tags that are rendered as checkboxes
-		 *
-		 * @param int $post_id
-		 */
-		public function save_tag_checkboxes( $post_id ) {
 
-			$post_tags = wp_get_post_tags( $post_id, array( 'fields' => 'names' ) );
-
-			$post_tags = $this->add_or_remove_tag( $post_id, $post_tags, 'wcpt_needs_swag', 'Needs Swag', $_POST['wcpt_swag_notes'] );
-
-			$post_tags = $this->add_or_remove_tag( $post_id, $post_tags, 'wcpt_more_information_requested', 'More Information requested' );
-
-			$post_tags = $this->add_or_remove_tag( $post_id, $post_tags, 'wcpt_changes_requested', 'Changes Requested' );
-
-			$post_tags = $this->add_or_remove_tag( $post_id, $post_tags, 'wcpt_needs_meeting', 'Needs Meeting' );
-
-			if ( $post_tags != wp_get_post_tags( $post_id ) ) {
-				wp_set_post_tags( $post_id, $post_tags );
-			}
-		}
-
-		/**
-		 * Add or remove tag. Also logs and make a note when required
-		 *
-		 * @param $post_id
-		 * @param $tag_array
-		 * @param $input_name
-		 * @param $label
-		 * @param string $note_message
-		 *
-		 * @return array
-		 */
-		public function add_or_remove_tag( $post_id, $tag_array, $input_name, $label, $note_message = '' ) {
-
-			if ( $note_message !== '' ) {
-				$note_message = ' Note: ' . $note_message;
-			}
-
-			if ( isset( $_POST[ $input_name] ) && $_POST[ $input_name ] && ( ! in_array( $label, $tag_array ) ) ) {
-
-				$tag_array[] = $label;
-
-				add_post_meta(
-					$post_id, '_tags_log', array(
-						'timestamp' => time(),
-						'user_id'   => get_current_user_id(),
-						'message'   => 'Tag ' . $label . ' added.' . $note_message,
-					)
-				);
-
-			} elseif ( ! isset( $_POST[ $input_name] ) && in_array( $label, $tag_array ) ) {
-				$tag_array = array_diff( $tag_array, array( $label ) );
-
-				add_post_meta(
-					$post_id, '_tags_log', array(
-						'timestamp' => time(),
-						'user_id'   => get_current_user_id(),
-						'message'   => 'Tag ' . $label . ' removed.' . $note_message,
-					)
-				);
-			}
-
-			return $tag_array;
-		}
 	}
 
 endif;

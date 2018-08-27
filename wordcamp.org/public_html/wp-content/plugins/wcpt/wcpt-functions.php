@@ -84,8 +84,9 @@ function wcpt_get_log_entries( $event_id ) {
 	$entries        = array();
 	$private_notes  = get_post_meta( $event_id, '_note'          );
 	$status_changes = get_post_meta( $event_id, '_status_change' );
+	$tag_changes    = get_post_meta( $event_id, '_tags_log' );
 
-	foreach ( array( 'note' => $private_notes, 'status_change' => $status_changes ) as $entry_type => $raw_entries ) {
+	foreach ( array( 'note' => $private_notes, 'status_change' => $status_changes, 'tag_change' => $tag_changes ) as $entry_type => $raw_entries ) {
 		$entries = array_merge( process_raw_entries( $raw_entries, $entry_type ), $entries );
 	}
 
@@ -118,8 +119,6 @@ function process_raw_entries ( $raw_entries, $entry_type ) {
 
 		$entries[] = $entry;
 	}
-
-	usort( $entries, 'wcpt_sort_log_entries' );
 
 	return $entries;
 }
