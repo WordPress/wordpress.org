@@ -176,6 +176,7 @@ class Meetup_Client {
 			200, // Ok.
 			401, // Unauthorized (invalid key).
 			429, // Too many requests (rate-limited).
+			404, // Unable to find group
 		);
 
 		// The default of 5 seconds often results in frequent timeouts.
@@ -397,6 +398,24 @@ class Meetup_Client {
 		}
 
 		return $events;
+	}
+
+	/**
+	 * Retrieve data about the group. Calls https://www.meetup.com/meetup_api/docs/:urlname/#get
+	 *
+	 * @param string $group_slug The slug/urlname of a group.
+	 * @param array $args Optional. Additional request parameters.
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_group_details ( $group_slug, $args = array() ) {
+		$request_url = $this->api_base . "$group_slug";
+
+		if ( ! empty( $args ) ) {
+			$request_url = add_query_arg( $args, $request_url );
+		}
+
+		return $this->send_paginated_request( $request_url );
 	}
 
 	/**
