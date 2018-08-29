@@ -379,6 +379,7 @@ abstract class Event_Admin {
 
 			switch ( $value ) {
 				case 'text':
+				case 'deputy_list':
 				case 'textarea':
 					update_post_meta( $post_id, $key, $values[ $key ] );
 					break;
@@ -634,6 +635,18 @@ abstract class Event_Admin {
 								<?php
 								break;
 
+							case 'deputy_list':
+								wp_dropdown_users( array(
+									'role__in'         => array(
+										'administrator',
+										'editor',
+									),
+									'name'             => esc_attr( $object_name ),
+									'id'               => esc_attr( $object_name ),
+									'selected'         => get_post_meta( $post_id, $key, true ),
+									'show_option_none' => 'None',
+								) );
+								break;
 							default:
 								do_action( 'wcpt_metabox_value', $key, $value, $object_name );
 								break;

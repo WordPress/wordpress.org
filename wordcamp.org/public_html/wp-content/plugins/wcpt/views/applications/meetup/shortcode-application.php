@@ -17,7 +17,7 @@ function render_meetup_application_form( $countries ) {
 			<div class="PDF_questionDivide"></div>
 			<div class="PDF_question">
 				<label>
-					Please enter your name.
+					Please enter your full Name.
 					<span class="required-indicator">(required)</span>
 					<input type="text" name="q_name" required/>
 				</label>

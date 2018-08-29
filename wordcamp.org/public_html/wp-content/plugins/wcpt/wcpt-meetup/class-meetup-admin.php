@@ -455,13 +455,13 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				'Date Applied'               => 'date',
 				'Already a meetup'           => 'text',
 				'Date of Last Contact'       => 'date',
-				'Who contacted'              => 'text',
+				'Who contacted'              => 'deputy_list',
 				'Vetted Date'                => 'date',
-				'Vetted by'                  => 'text',
+				'Vetted by'                  => 'deputy_list',
 				'Orientation Date'           => 'date',
-				'Oriented by'                => 'text',
+				'Oriented by'                => 'deputy_list',
 				'Joined chapter date'        => 'date',
-				'Joined chapter by'          => 'text',
+				'Joined chapter by'          => 'deputy_list',
 			);
 
 			$organizer_keys = array(
