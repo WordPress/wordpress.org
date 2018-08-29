@@ -21,6 +21,8 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		 */
 		public function __construct() {
 			parent::__construct();
+
+			add_action( 'wcpt_metabox_save_done', array( $this, 'maybe_update_meetup_data' ) );
 		}
 
 		/**
@@ -92,14 +94,29 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		}
 
 		/**
-		 * TODO: Implement
-		 *
+		 * Return read only meta fields.
+		 */
+		public static function get_protected_fields() {
+			return array(
+
+				// These fields are update by meetup API and will be overwritten even if manually changed.
+				'Meetup Location (From meetup.com)',
+				'Meetup members count',
+				'Meetup group created on',
+				'Number of past meetups',
+				'Last meetup on',
+				'Last meetup RSVP count',
+			);
+		}
+
+		/**
+		 * Checks if a field is read only.
 		 * @param string $key Name of the field.
 		 *
 		 * @return bool Whether `$key` is a protected field.
 		 */
 		public static function is_protected_field( $key ) {
-			return false;
+			return in_array( $key, self::get_protected_fields() );
 		}
 
 		/**
@@ -188,6 +205,15 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				'advanced'
 			);
 
+			add_meta_box(
+				'wcpt_meetup_metadata',
+				__( 'Meetup.com API sync', 'wcpt' ),
+				array( $this, 'wcpt_meetup_sync' ),
+				Meetup_Application::POST_TYPE,
+				'side',
+				'high'
+			);
+
 		}
 
 		/**
@@ -246,7 +272,133 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		public function meetup_metabox( $meta_keys ) {
 			global $post_id;
 
-			self::display_meta_boxes( array(), $meta_keys, array(), $post_id, array() );
+			self::display_meta_boxes( array(), $meta_keys, array(), $post_id, self::get_protected_fields() );
+		}
+
+		public function wcpt_meetup_sync() {
+			global $post_id;
+			$meta_key = 'Last meetup.com API sync';
+			$last_synced_on = get_post_meta( $post_id, $meta_key, true );
+			$element_name = 'sync_with_meetup_api';
+
+			if ( empty( $last_synced_on ) ) {
+				$last_synced_on = 'Never';
+			} else {
+				$last_synced_on = date( "Y-m-d",  substr( $last_synced_on, 0, 10 ) );
+			}
+			?>
+			<div class="wcb submitbox">
+				<div class="misc-pub-section">
+					<label>Last sync: <?php echo $last_synced_on ?></label>
+				</div>
+				<div class="misc-pub-section">
+					<label>
+						<input type="checkbox" name="<?php echo $element_name ?>" >
+						Sync Now
+					</label>
+				</div>
+			</div>
+			<?php
+		}
+		/**
+		 * Updates meetup fields using meetup.com API only if Sync now checkbox is checked.
+		 *
+		 * @param int   $post_id
+		 * @param array $original_meta_values
+		 */
+		public function maybe_update_meetup_data( $post_id ){
+			if ( $this->get_event_type() !== get_post_type() ) {
+				return;
+			}
+
+			$should_sync = $_POST[ 'sync_with_meetup_api' ];
+			if ( ! $should_sync ) {
+				return;
+			}
+
+			$result = self::update_meetup_data( $post_id );
+
+			if ( is_wp_error( $result ) ) {
+				$this->active_admin_notices[] = $result->get_error_code();
+				return;
+			}
+
+			update_post_meta( $post_id, 'Last meetup.com API sync', time() );
+
+		}
+
+		/**
+		 * Update meetup fields using meetup.com API
+		 *
+		 * @param $post_id
+		 *
+		 * @return array|WP_Error
+		 */
+		public static function update_meetup_data( $post_id ) {
+
+			$meetup_url = get_post_meta( $post_id, 'Meetup URL', true );
+
+			$parsed_url = wp_parse_url( $meetup_url, -1 );
+
+			if( ! $parsed_url ) {
+				return new WP_Error( 'invalid-url', __('Provided Meetup URL is not a valid URL.', 'wordcamporg' ) );
+			}
+			$url_path_segments = explode( '/', rtrim( $parsed_url['path'], '/' ) );
+			$slug = array_pop( $url_path_segments );
+			$mtp_client = new \WordCamp\Utilities\Meetup_Client();
+
+			$group_details = $mtp_client->get_group_details(
+				$slug,
+				array(
+					'fields' => 'past_event_count,last_event',
+				)
+			);
+
+			if ( is_wp_error( $group_details ) ) {
+				return $group_details;
+			}
+
+			if ( isset( $group_details['errors'] ) ) {
+				return new WP_Error( 'invalid-response', __( 'Received invalid response from meetup api.', 'wordcamporg' ) );
+			}
+
+			update_post_meta( $post_id, 'Meetup Location (From meetup.com)', $group_details['localized_location'] );
+			update_post_meta( $post_id, 'Meetup members count', $group_details['members'] );
+			update_post_meta( $post_id, 'Meetup group created on', $group_details['created'] / 1000 );
+			update_post_meta( $post_id, 'Number of past meetups', $group_details['past_event_count'] );
+
+			if ( isset( $group_details['last_event'] ) && is_array( $group_details['last_event'] ) ) {
+				update_post_meta( $post_id, 'Last meetup on', $group_details['last_event']['time'] / 1000 );
+				update_post_meta( $post_id, 'Last meetup RSVP count', $group_details['last_event']['yes_rsvp_count'] );
+			}
+		}
+
+		/**
+		 * List of admin notices.
+		 *
+		 * @return array
+		 */
+		public function get_admin_notices() {
+
+			return array(
+				'invalid-url'        => array(
+					'type'   => 'notice',
+					'notice' => __( 'Invalid meetup.com URL. Meetup fields are not updated.', 'wordcamporg' ),
+				),
+				'invalid-response'   => array(
+					'type'   => 'notice',
+					'notice' => __( 'Received invalid response from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' )
+				),
+				'group_error'        => array(
+					'type'   => 'notice',
+					'notice' => __( 'Received invalid response from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' )
+				),
+				'http_response_code' => array(
+					'type'   => 'notice',
+					'notice' => __( 'Received invalid response code from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' )
+				),
+			);
+
 		}
 
 		/**
@@ -259,9 +411,15 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		public static function meta_keys( $meta_group = '' ) {
 
 			$info_keys = array(
-				'Meetup URL'      => 'text',
-				'HelpScout link'  => 'text',
-				'Meetup Location' => 'text',
+				'Meetup URL'                        => 'text',
+				'Meetup Location (From meetup.com)' => 'text',
+				'Meetup members count'              => 'text',
+				'Meetup group created on'           => 'date',
+				'Number of past meetups'            => 'text',
+				'Last meetup on'                    => 'date',
+				'Last meetup RSVP count'            => 'text',
+				'HelpScout link'                    => 'text',
+				'Meetup Location'                   => 'text',
 			);
 
 			$application_keys = array(
@@ -290,6 +448,10 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				'Extra Comments' => 'textarea',
 			);
 
+			$metadata_keys = array(
+				'Last meetup.com API sync' => 'date',
+			);
+
 			$swag_keys = array(
 				'Swag notes' => 'textarea',
 			);
@@ -307,13 +469,17 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				case 'swag':
 					$data = $swag_keys;
 					break;
+				case 'metadata':
+					$data = $metadata_keys;
+					break;
 				case 'all':
 				default:
 					$data = array_merge(
 						$info_keys,
 						$application_keys,
 						$organizer_keys,
-						$swag_keys
+						$swag_keys,
+						$metadata_keys
 					);
 			}
 			return $data;

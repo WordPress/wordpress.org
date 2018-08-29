@@ -15,10 +15,14 @@
  */
 abstract class Event_Admin {
 
+	public $active_admin_notices;
+
 	/**
 	 * Event_Admin constructor.
 	 */
 	public function __construct() {
+
+		$this->active_admin_notices = array();
 
 		add_action( 'add_meta_boxes', array( $this, 'metabox' ) );
 
@@ -50,6 +54,11 @@ abstract class Event_Admin {
 		add_action( 'admin_print_styles', array( $this, 'common_admin_styles' ) );
 
 		add_action( 'transition_post_status', array( $this, 'log_status_changes' ), 10, 3 );
+
+		add_filter( 'redirect_post_location', array( $this, 'add_admin_notices_to_redirect_url' ), 10, 2 );
+
+		// Admin notices
+		add_action( 'admin_notices', array( $this, 'print_admin_notices' ) );
 	}
 
 	/**
@@ -410,6 +419,75 @@ abstract class Event_Admin {
 		do_action( 'wcpt_metabox_save_done', $post_id, $orig_meta_values );
 
 		$this->validate_and_add_note( $post_id );
+
+	}
+
+	/**
+	 * Add our custom admin notice keys to the redirect URL.
+	 *
+	 * Any member can add a key to $this->active_admin_notices to signify that the corresponding message should
+	 * be shown when the redirect finished. When it does, print_admin_notices() will examine the URL and create
+	 * a notice with the message that corresponds to the key.
+	 *
+	 * @param string $location
+	 * @param int    $post_id
+	 *
+	 * @return string
+	 */
+	public function add_admin_notices_to_redirect_url( $location, $post_id ) {
+		if ( $this->active_admin_notices ) {
+			$location = add_query_arg( 'wcpt_messages', implode( ',', $this->active_admin_notices ), $location );
+		}
+
+		// Don't show conflicting messages like 'Post submitted.'
+		if ( in_array( 1, $this->active_admin_notices ) && false !== strpos( $location, 'message=8' ) ) {
+			$location = remove_query_arg( 'message', $location );
+		}
+
+		return $location;
+	}
+
+	/**
+	 * Return admin notices for messages that were passed in the URL.
+	 */
+	abstract public function get_admin_notices();
+
+	/**
+	 * Create admin notices for messages that were passed in the URL.
+	 *
+	 * Any member can add a key to $this->active_admin_notices to signify that the corresponding message should
+	 * be shown when the redirect finished. add_admin_notices_to_redirect_url() adds those keys to the redirect
+	 * url, and this function examines the URL and create a notice with the message that corresponds to the key.
+	 *
+	 * $notices[key]['type'] should equal 'error' or 'updated'.
+	 */
+	public function print_admin_notices() {
+
+		global $post;
+		$screen = get_current_screen();
+
+
+		if ( empty( $post->post_type ) || $this->get_event_type() != $post->post_type || 'post' !== $screen->base ) {
+			return;
+		}
+
+		$notices = $this->get_admin_notices();
+
+		if ( ! empty( $_REQUEST['wcpt_messages'] ) ) {
+			$active_notices = explode( ',', $_REQUEST['wcpt_messages'] );
+
+			foreach ( $active_notices as $notice_key ) {
+				if ( isset( $notices[ $notice_key ] ) ) {
+					?>
+
+					<div class="<?php echo esc_attr( $notices[ $notice_key ]['type'] ); ?>">
+						<p><?php echo wp_kses( $notices[ $notice_key ]['notice'], wp_kses_allowed_html( 'post' ) ); ?></p>
+					</div>
+
+					<?php
+				}
+			}
+		}
 
 	}
 

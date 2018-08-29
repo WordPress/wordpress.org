@@ -16,7 +16,6 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 	 * @since WordCamp Post Type (0.1)
 	 */
 	class WordCamp_Admin extends Event_Admin {
-		protected $active_admin_notices;
 
 		/**
 		 * Initialize WCPT Admin
@@ -24,8 +23,6 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 		function __construct() {
 
 			parent::__construct();
-
-			$this->active_admin_notices = array();
 
 			// Add some general styling to the admin area
 			add_action( 'wcpt_admin_head', array( $this, 'admin_head' ) );
@@ -46,11 +43,6 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 					'require_complete_meta_to_publish_wordcamp',
 				), 11, 2
 			); // after enforce_post_status
-
-			// Admin notices
-			add_action( 'admin_notices', array( $this, 'print_admin_notices' ) );
-
-			add_filter( 'redirect_post_location', array( $this, 'add_admin_notices_to_redirect_url' ), 10, 2 );
 
 			// Cron jobs
 			add_action( 'plugins_loaded', array( $this, 'schedule_cron_jobs' ), 11 );
@@ -862,47 +854,25 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 		}
 
 		/**
-		 * Add our custom admin notice keys to the redirect URL.
-		 *
-		 * Any member can add a key to $this->active_admin_notices to signify that the corresponding message should
-		 * be shown when the redirect finished. When it does, print_admin_notices() will examine the URL and create
-		 * a notice with the message that corresponds to the key.
-		 *
-		 * @param $location
-		 * @param $post_id
-		 * @return string
+		 * Return admin notices for messages that were passed in the URL.
 		 */
-		public function add_admin_notices_to_redirect_url( $location, $post_id ) {
-			if ( $this->active_admin_notices ) {
-				$location = add_query_arg( 'wcpt_messages', implode( ',', $this->active_admin_notices ), $location );
-			}
+		public function get_admin_notices() {
 
-			// Don't show conflicting messages like 'Post submitted.'
-			if ( in_array( 1, $this->active_admin_notices ) && false !== strpos( $location, 'message=8' ) ) {
-				$location = remove_query_arg( 'message', $location );
-			}
-
-			return $location;
-		}
-
-		/**
-		 * Create admin notices for messages that were passed in the URL.
-		 *
-		 * Any member can add a key to $this->active_admin_notices to signify that the corresponding message should
-		 * be shown when the redirect finished. add_admin_notices_to_redirect_url() adds those keys to the redirect
-		 * url, and this function examines the URL and create a notice with the message that corresponds to the key.
-		 *
-		 * $notices[key]['type'] should equal 'error' or 'updated'.
-		 */
-		public function print_admin_notices() {
 			global $post;
+
 			$screen = get_current_screen();
 
-			if ( empty( $post->post_type ) || WCPT_POST_TYPE_ID != $post->post_type || 'post' !== $screen->base ) {
-				return;
+
+			if ( empty( $post->post_type ) || $this->get_event_type() != $post->post_type || 'post' !== $screen->base ) {
+				return array();
 			}
 
-			$notices = array(
+			// Show this error permanently, not just after updating.
+			if ( ! empty( $post->{'Physical Address'} ) && empty( get_post_meta( $post->ID, '_venue_coordinates', true ) ) ) {
+				$_REQUEST['wcpt_messages'] = empty( $_REQUEST['wcpt_messages'] ) ? '4' : $_REQUEST['wcpt_messages'] . ',4';
+			}
+
+			return array(
 				1 => array(
 					'type'   => 'error',
 					'notice' => sprintf(
@@ -925,26 +895,6 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 				),
 			);
 
-			// Show this error permenantly, not just after updating.
-			if ( ! empty( $post->{'Physical Address'} ) && empty( get_post_meta( $post->ID, '_venue_coordinates', true ) ) ) {
-				$_REQUEST['wcpt_messages'] = empty( $_REQUEST['wcpt_messages'] ) ? '4' : $_REQUEST['wcpt_messages'] . ',4';
-			}
-
-			if ( ! empty( $_REQUEST['wcpt_messages'] ) ) {
-				$active_notices = explode( ',', $_REQUEST['wcpt_messages'] );
-
-				foreach ( $active_notices as $notice_key ) {
-					if ( isset( $notices[ $notice_key ] ) ) {
-						?>
-
-					<div class="<?php echo esc_attr( $notices[ $notice_key ]['type'] ); ?>">
-						<p><?php echo wp_kses( $notices[ $notice_key ]['notice'], wp_kses_allowed_html( 'post' ) ); ?></p>
-					</div>
-
-						<?php
-					}
-				}
-			}
 		}
 
 		/**
