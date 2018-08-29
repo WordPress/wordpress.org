@@ -8,6 +8,7 @@
 use WordPress_Community\Applications\Meetup_Application;
 define( 'WCPT_MEETUP_SLUG', 'wp_meetup' );
 define( 'WCPT_MEETUP_TAG_SLUG', 'meetup_tags' );
+define( 'WCPT_WORDPRESS_MEETUP_ID', 72560962 );
 
 
 if ( ! class_exists( 'Meetup_Loader' ) ) :

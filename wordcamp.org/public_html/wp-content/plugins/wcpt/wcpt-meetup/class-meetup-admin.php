@@ -100,6 +100,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			return array(
 
 				// These fields are update by meetup API and will be overwritten even if manually changed.
+				'Meetup Co-organizer names',
 				'Meetup Location (From meetup.com)',
 				'Meetup members count',
 				'Meetup group created on',
@@ -362,6 +363,33 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				return new WP_Error( 'invalid-response', __( 'Received invalid response from meetup api.', 'wordcamporg' ) );
 			}
 
+			$group_leads = $mtp_client->get_group_members(
+				$slug,
+				array(
+					'role' => 'leads',
+				)
+			);
+
+			if ( is_wp_error( $group_leads ) ) {
+				return $group_leads;
+			}
+
+			if ( isset( $group_leads['errors'] ) ) {
+				return new WP_Error( 'invalid-response-leads', __( 'Received invalid response from meetup api.', 'wordcamporg' ) );
+			}
+
+			$event_hosts = [];
+			if ( isset( $group_leads ) && is_array( $group_leads ) ) {
+				foreach ( $group_leads as $event_host ) {
+					if ( WCPT_WORDPRESS_MEETUP_ID === $event_host['id'] ) {
+						// Skip WordPress admin user
+						continue;
+					}
+					$event_hosts[] = $event_host['name'] . ' <' . $event_host['id'] . '> ';
+				}
+			}
+
+			update_post_meta( $post_id, 'Meetup Co-organizer names', join(', ', $event_hosts ) );
 			update_post_meta( $post_id, 'Meetup Location (From meetup.com)', $group_details['localized_location'] );
 			update_post_meta( $post_id, 'Meetup members count', $group_details['members'] );
 			update_post_meta( $post_id, 'Meetup group created on', $group_details['created'] / 1000 );
@@ -412,6 +440,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 
 			$info_keys = array(
 				'Meetup URL'                        => 'text',
+				'Meetup Co-organizer names'         => 'text',
 				'Meetup Location (From meetup.com)' => 'text',
 				'Meetup members count'              => 'text',
 				'Meetup group created on'           => 'date',
