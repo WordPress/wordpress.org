@@ -419,6 +419,24 @@ class Meetup_Client {
 	}
 
 	/**
+	 * Retrieve group members. Calls https://www.meetup.com/meetup_api/docs/:urlname/members/#list
+	 *
+	 * @param string $group_slug The slug/urlname of a group.
+	 * @param array $args Optional. Additional request parameters.
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_group_members ( $group_slug, $args = array() ) {
+		$request_url = $this->api_base . "$group_slug/members";
+
+		if ( ! empty( $args ) ) {
+			$request_url = add_query_arg( $args, $request_url );
+		}
+
+		return $this->send_paginated_request( $request_url );
+	}
+
+	/**
 	 * Retrieve data about events associated with one particular group.
 	 *
 	 * @param string $group_slug The slug/urlname of a group.
