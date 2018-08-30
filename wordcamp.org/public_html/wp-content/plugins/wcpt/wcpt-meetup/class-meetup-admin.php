@@ -99,7 +99,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		public static function get_protected_fields() {
 			return array(
 
-				// These fields are update by meetup API and will be overwritten even if manually changed.
+				// These fields are updated by Meetup API and will be overwritten even if manually changed.
 				'Meetup Co-organizer names',
 				'Meetup Location (From meetup.com)',
 				'Meetup members count',
@@ -360,7 +360,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			}
 
 			if ( isset( $group_details['errors'] ) ) {
-				return new WP_Error( 'invalid-response', __( 'Received invalid response from meetup api.', 'wordcamporg' ) );
+				return new WP_Error( 'invalid-response', __( 'Received invalid response from Meetup API.', 'wordcamporg' ) );
 			}
 
 			$group_leads = $mtp_client->get_group_members(
@@ -375,7 +375,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			}
 
 			if ( isset( $group_leads['errors'] ) ) {
-				return new WP_Error( 'invalid-response-leads', __( 'Received invalid response from meetup api.', 'wordcamporg' ) );
+				return new WP_Error( 'invalid-response-leads', __( 'Received invalid response from Meetup API.', 'wordcamporg' ) );
 			}
 
 			$event_hosts = [];
