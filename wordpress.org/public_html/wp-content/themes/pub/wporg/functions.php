@@ -192,6 +192,44 @@ add_action( 'customize_preview_init', __NAMESPACE__ . '\customize_preview_js' );
 function hreflang_link_attributes() {
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
+	// Google doesn't have support for a whole lot of languages and throws errors about it,
+	// so we exclude them, as we're otherwise outputting data that isn't used at all.
+	$unsupported_languages = array(
+		'arq',
+		'art',
+		'art-xemoji',
+		'ary',
+		'ast',
+		'az-ir',
+		'azb',
+		'bcc',
+		'ff-sn',
+		'frp',
+		'fuc',
+		'fur',
+		'haz',
+		'ido',
+		'io',
+		'kab',
+		'li',
+		'li-nl',
+		'lmo',
+		'me',
+		'me-me',
+		'rhg',
+		'rup',
+		'sah',
+		'sc-it',
+		'scn',
+		'skr',
+		'srd',
+		'szl',
+		'tah',
+		'twd',
+		'ty-tj',
+		'tzm',
+	);
+
 	$sites = wp_cache_get( 'local-sites', 'locale-associations' );
 
 	if ( false === $sites ) {
@@ -212,7 +250,7 @@ function hreflang_link_attributes() {
 				continue;
 			}
 
-			if ( isset( $gp_locale->slug ) ) {
+			if ( isset( $gp_locale->slug ) && ! in_array( $gp_locale->slug, $unsupported_languages ) ) {
 				$sites[ $site->locale ]->hreflang = $gp_locale->slug;
 			} else {
 				unset( $sites[ $site->locale ] );
