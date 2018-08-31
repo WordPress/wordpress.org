@@ -452,16 +452,16 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			);
 
 			$application_keys = array(
-				'Date Applied'               => 'date',
-				'Already a meetup'           => 'text',
-				'Date of Last Contact'       => 'date',
-				'Who contacted'              => 'deputy_list',
-				'Vetted Date'                => 'date',
-				'Vetted by'                  => 'deputy_list',
-				'Orientation Date'           => 'date',
-				'Oriented by'                => 'deputy_list',
-				'Joined chapter date'        => 'date',
-				'Joined chapter by'          => 'deputy_list',
+				'Date Applied'                               => 'date',
+				'Already a meetup'                           => 'text',
+				'Date of Last Contact'                       => 'date',
+				'Who contacted (Wordpress.org username)'     => 'text',
+				'Vetted Date'                                => 'date',
+				'Vetted by (Wordpress.org username)'         => 'text',
+				'Orientation Date'                           => 'date',
+				'Oriented by (Wordpress.org username)'       => 'text',
+				'Joined chapter date'                        => 'date',
+				'Joined chapter by (Wordpress.org username)' => 'text',
 			);
 
 			$organizer_keys = array(
@@ -474,7 +474,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				'Slack'                                        => 'text',
 				'Region'                                       => 'text',
 				'Address'                                      => 'textarea',
-				'Extra Comments' => 'textarea',
+				'Extra Comments'                               => 'textarea',
 			);
 
 			$metadata_keys = array(
