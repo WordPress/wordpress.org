@@ -23,6 +23,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			parent::__construct();
 
 			add_action( 'wcpt_metabox_save_done', array( $this, 'maybe_update_meetup_data' ) );
+			add_action( 'wcpt_metabox_value', array( $this, 'render_co_organizers_list' ) );
 		}
 
 		/**
@@ -385,17 +386,21 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 						// Skip WordPress admin user
 						continue;
 					}
-					$event_hosts[] = $event_host['name'] . ' <' . $event_host['id'] . '> ';
+					$event_hosts[] = array(
+							'name' => $event_host['name'],
+							'id'   => $event_host['id'],
+					);
 				}
 			}
 
-			update_post_meta( $post_id, 'Meetup Co-organizer names', join(', ', $event_hosts ) );
+			update_post_meta( $post_id, 'Meetup Co-organizer names', $event_hosts );
 			update_post_meta( $post_id, 'Meetup Location (From meetup.com)', $group_details['localized_location'] );
 			update_post_meta( $post_id, 'Meetup members count', $group_details['members'] );
 			update_post_meta( $post_id, 'Meetup group created on', $group_details['created'] / 1000 );
-			update_post_meta( $post_id, 'Number of past meetups', $group_details['past_event_count'] );
+
 
 			if ( isset( $group_details['last_event'] ) && is_array( $group_details['last_event'] ) ) {
+				update_post_meta( $post_id, 'Number of past meetups', $group_details['past_event_count'] );
 				update_post_meta( $post_id, 'Last meetup on', $group_details['last_event']['time'] / 1000 );
 				update_post_meta( $post_id, 'Last meetup RSVP count', $group_details['last_event']['yes_rsvp_count'] );
 			}
@@ -430,6 +435,41 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		}
 
 		/**
+		 * Render list of co-organizer of meetup linking to their profile on meetup.com
+		 *
+		 * @param string $key Name of meetup field. Should be 'Meetup Co-organizer names'
+		 */
+		public function render_co_organizers_list( $key ) {
+			global $post_id;
+			if ( 'Meetup Co-organizer names' !== $key ) {
+				return;
+			}
+			$organizers = get_post_meta( $post_id, $key, true );
+			if ( isset ( $organizers ) && is_array( $organizers ) ) {
+				$group_slug = get_post_meta( $post_id, 'Meetup URL', true );
+				if ( empty ( $group_slug ) ) {
+					echo 'Invalid Meetup Group URL';
+					return;
+				}
+				echo '<ul>';
+				foreach ( $organizers as $organizer ) {
+					$organizer_id = $organizer['id'];
+					$meetup_profile_url = "$group_slug/members/$organizer_id";
+					?>
+					<li>
+						<a target="_blank" rel="noopener" href="<?php echo esc_html( $meetup_profile_url ); ?>">
+							<?php echo esc_html( $organizer['name'] ); ?>
+						</a>
+					</li>
+					<?php
+				}
+				echo '</ul>';
+			} else {
+				echo __( 'No meetup organizers set.', 'wordcamp.org' );
+			}
+		}
+
+		/**
 		 * Meta keys group for Meetup Event.
 		 *
 		 * @param string $meta_group
@@ -440,7 +480,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 
 			$info_keys = array(
 				'Meetup URL'                        => 'text',
-				'Meetup Co-organizer names'         => 'text',
+				'Meetup Co-organizer names'         => 'meetup_coorganizers',
 				'Meetup Location (From meetup.com)' => 'text',
 				'Meetup members count'              => 'text',
 				'Meetup group created on'           => 'date',

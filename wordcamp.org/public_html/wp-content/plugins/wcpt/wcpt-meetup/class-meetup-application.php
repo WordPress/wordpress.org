@@ -212,10 +212,10 @@ class Meetup_Application extends Event_Application {
 		add_post_meta( $post_id, '_application_data', $data );
 
 		$organizer_address = <<<ADDRESS
-		{$data['q_address_line_1']}
-		{$data['q_address_line_2']}
-		{$data['q_city']}, {$data['q_state']}, {$data['q_country']}
-		{$data['q_zip']}
+{$data['q_address_line_1']}
+{$data['q_address_line_2']}
+{$data['q_city']}, {$data['q_state']}, {$data['q_country']}
+{$data['q_zip']}
 ADDRESS;
 
 		add_post_meta( $post_id, 'Organizer Name', $data['q_name'] );
