@@ -310,6 +310,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			if ( ! empty( $_GET['redirect_to'] ) ) {
 				$defaults['redirect'] = $_GET['redirect_to']; // always ultimately checked for safety at redir time
 			} elseif ( $referer = wp_get_referer() ) {
+				$_GET['redirect_to'] = $referer;
 				$defaults['redirect'] = $referer;
 			}
 			return $defaults;
