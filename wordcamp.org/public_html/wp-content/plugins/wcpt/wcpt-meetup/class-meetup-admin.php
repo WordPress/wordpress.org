@@ -70,7 +70,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		 * @return string
 		 */
 		public static function get_edit_capability() {
-			return 'can_wrangle_meetup';
+			return 'wordcamp_wrangle_wordcamps';
 		}
 
 		/**
@@ -277,6 +277,9 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			self::display_meta_boxes( array(), $meta_keys, array(), $post_id, self::get_protected_fields() );
 		}
 
+		/**
+		 * Displays a MetaBox which allows option to sync Meetup.com API data with Meetup tracker.
+		 */
 		public function wcpt_meetup_sync() {
 			global $post_id;
 			$meta_key = 'Last meetup.com API sync';
@@ -302,6 +305,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			</div>
 			<?php
 		}
+
 		/**
 		 * Updates meetup fields using meetup.com API only if Sync now checkbox is checked.
 		 *
