@@ -7,6 +7,8 @@
 
 namespace WordCamp\SubRoles;
 
+use WordPress_Community\Applications\Meetup_Application;
+
 defined( 'WPINC' ) || die();
 
 /**
@@ -150,6 +152,15 @@ function map_subrole_caps( $primitive_caps, $meta_cap, $user_id, $args ) {
 			}
 
 			if ( defined( 'WCPT_POST_TYPE_ID' ) && WCPT_POST_TYPE_ID === $post_type ) {
+				if ( $current_user && $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
+					$required_caps[] = 'wordcamp_wrangle_wordcamps';
+				}
+			}
+
+			// Class `Meetup_Application` is only loaded when in admin view.
+			if ( is_admin() && Meetup_Application::POST_TYPE === $post_type ) {
+				// Use same permission for meetups as well as wordcamps.
+				// TODO: In future consider changing this to wrangle_events
 				if ( $current_user && $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
 					$required_caps[] = 'wordcamp_wrangle_wordcamps';
 				}
