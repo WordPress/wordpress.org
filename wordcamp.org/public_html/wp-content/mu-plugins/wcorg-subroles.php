@@ -135,6 +135,10 @@ function map_subrole_caps( $primitive_caps, $meta_cap, $user_id, $args ) {
 		case 'edit_published_wordcamps' :
 		case 'edit_wordcamp' :
 		case 'edit_others_wordcamps' :
+		case 'edit_wp_meetups' :
+		case 'edit_published_wp_meetups' :
+		case 'edit_wp_meetup' :
+		case 'edit_others_wp_meetups' :
 			if ( $current_user && $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
 				$required_caps[] = 'wordcamp_wrangle_wordcamps';
 			}
