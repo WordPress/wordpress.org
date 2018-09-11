@@ -183,7 +183,7 @@ namespace {
 				// Display child comments.
 				if ( ! empty( $comment->child_notes ) ) {
 
-					echo "<h4 class='feedback-title'>Feedback</h4>\n";
+					echo "<h4 class='feedback-title'>" . __( 'Feedback', 'wporg' ) . "</h4>\n";
 					echo "<ul class='children'>\n";
 					foreach ( $comment->child_notes as $child_note ) {
 						wporg_developer_user_note( $child_note, $args, 2, $comment->show_editor );
