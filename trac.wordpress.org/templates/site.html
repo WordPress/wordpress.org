@@ -115,6 +115,9 @@
 				<li>Does the problem occur even when you deactivate all plugins and use the default theme?</li>
 				<li>In case it's relevant to the ticket, what is the expected output or result? What did you see instead?</li>
 				<li>Please provide any additional information that you think we'd find useful. (OS and browser for UI defects, server environment for crashes, etc.)</li>
+				<py:if test="project_slug == 'core'">
+					<li>Please create Gutenberg issues on the projects GitHub <a href="https://github.com/WordPress/gutenberg/issues">issue tracker</a>.</li>
+				</py:if>
 			</ul>
 			<p>You can <a href="/search">search for existing tickets here</a>. For more help, please see the <a href="https://make.wordpress.org/core/handbook/reporting-bugs/">contributor handbook</a>.</p>
 
