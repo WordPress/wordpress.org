@@ -629,7 +629,7 @@ jQuery( function( $ ) {
 		if ( in_array( 'focus', $topics ) ) {
 			$focuses = array( 'accessibility', 'administration', 'coding-standards', 'docs', 'javascript', 'multisite', 'performance', 'privacy', 'rest-api', 'rtl', 'template', 'ui' );
 			foreach ( $focuses as $focus ) {
-				echo '<option value="focus/' . $focus . '">' . $focus . ( $both ? ' (focus)' : '' ) . '</option>';
+				echo '<option value="focus/' . esc_attr( rawurlencode( $focus ) ) . '">' . $focus . ( $both ? ' (focus)' : '' ) . '</option>';
 			}
 		}
 		if ( $both ) {
@@ -638,7 +638,7 @@ jQuery( function( $ ) {
 		if ( in_array( 'component', $topics ) ) {
 			$components = $this->api->get_components();
 			foreach ( $components as $component ) {
-				echo '<option value="component/' . esc_attr( str_replace( ' ', '+', $component ) ) . '">' . esc_html( $component ) . "</option>";
+				echo '<option value="component/' . esc_attr( rawurlencode( $component ) ) . '">' . esc_html( $component ) . "</option>";
 			}
 		}
 		echo '</select>';
@@ -677,7 +677,7 @@ jQuery( function( $ ) {
 		if ( ! empty( $this->breakdown_component_type[ $component ] ) ) {
 			$open_tickets = array_sum( $this->breakdown_component_type[ $component ] );
 		}
-		echo '<td class="right"><a href="https://core.trac.wordpress.org/component/' . esc_attr( str_replace( ' ', '+', $component ) ) . '">' . $open_tickets . '</a></td>';
+		echo '<td class="right"><a href="https://core.trac.wordpress.org/component/' . esc_attr( rawurlencode( $component ) ) . '">' . $open_tickets . '</a></td>';
 		if ( $history['change'] ) {
 			$count = sprintf( "%+d", $history['change'] );
 			if ( $history['change'] > 0 ) {
