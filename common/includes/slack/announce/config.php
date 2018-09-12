@@ -258,12 +258,7 @@ function get_whitelist() {
 			'melindahelt',
 			'juliekuehl',
 		),
-		'wceu-volunteers' => array(
-			'lanche86',
-			'lucasartoni',
-			'paolo',
-			'savione',
-		),
+		// NOTE: Private Groups need not be listed here. All members of Private Groups have access to /announce & /here
 		'wcus' => array(
 			'alx',
 			'camikaos',
@@ -275,22 +270,6 @@ function get_whitelist() {
 			'alx',
 			'camikaos',
 			'drew',
-		),
-		'wcus-speakers' => array(
-			'alx',
-			'camikaos',
-			'liljimmi',
-			'williamsba',
-		),
-		'wcus-summit' => array(
-			'liljimmi',
-		),
-		'wcus-volunteers' => array(
-			'alx',
-			'camikaos',
-			'ingridmiller',
-			'liamdempsey',
-			'bishop',
 		),
 		'wptv' => array(
 			'jerrysarcastic',
