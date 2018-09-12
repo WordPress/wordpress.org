@@ -1,3 +1,8 @@
 span.swag-needed-icon {
     color: goldenrod;
 }
+
+#post-body textarea {
+    width: 50%;
+    height: 150px;
+}

@@ -25,7 +25,7 @@ function render_meetup_application_form( $countries ) {
 			<div class="PDF_questionDivide"></div>
 			<div class="PDF_question">
 				<label>
-					Please enter you email address.
+					Please enter your email address.
 					<span class="required-indicator">(required)</span>
 					<input type="email" name="q_email" required/>
 				</label>
