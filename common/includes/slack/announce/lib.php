@@ -58,8 +58,25 @@ function show_authorization( $user, $channel ) {
 }
 
 function run( $data ) {
-	$user = $data['user_name'];
+	global $wpdb;
+
 	$channel = $data['channel_name'];
+	$user = false;
+
+	// Find the user_login for the Slack user_id
+	if ( isset( $data['user_id'] ) ) {
+		$wp_user_id = $wpdb->get_var( $wpdb->prepare(
+			"SELECT user_id FROM slack_users WHERE slack_id = %s",
+			$data['user_id']
+		) );
+		if ( $user = get_user_by( 'id', $wp_user_id ) ) {
+			$user = $user->user_login;
+		}
+	}
+	// Default back to the historical 'user_name' Slack field.
+	if ( ! $user ) {
+		$user = $data['user_name'];
+	}
 
 	if ( empty( $data['text'] ) ) {
 		show_authorization( $user, $channel );
@@ -113,7 +130,7 @@ function run( $data ) {
 	if ( function_exists( $get_avatar ) ) {
 		$send->set_icon( call_user_func( $get_avatar, $data['user_name'], $data['user_id'], $data['team_id'] ) );
 	}
-	
+
 	// By sending the channel ID, we can post to private groups.
 	$send->send( $data['channel_id'] );
 }
