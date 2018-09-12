@@ -65,13 +65,13 @@ function run( $data ) {
 
 	// Find the user_login for the Slack user_id
 	if ( isset( $data['user_id'] ) ) {
-		$wp_user_id = $wpdb->get_var( $wpdb->prepare(
-			"SELECT user_id FROM slack_users WHERE slack_id = %s",
+		$user = $wpdb->get_var( $wpdb->prepare(
+			"SELECT user_login
+			FROM slack_users
+				JOIN {$wpdb->users} ON slack_users.user_id = {$wpdb->users}.id
+			WHERE slack_id = %s",
 			$data['user_id']
 		) );
-		if ( $user = get_user_by( 'id', $wp_user_id ) ) {
-			$user = $user->user_login;
-		}
 	}
 	// Default back to the historical 'user_name' Slack field.
 	if ( ! $user ) {
