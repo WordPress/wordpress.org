@@ -55,8 +55,7 @@ array_walk( $embed_tweets, function ( &$tweet ) {
 	$tweet = preg_replace( '|https?://twitter.com/.*/status/([0-9]+)|', '$1', $tweet );
 } );
 
-wp_enqueue_script( 'masonry', 'https://s.w.org/wp-includes/js/masonry.min.js', array(), null, true );
-wp_enqueue_script( 'twitter-widgets', 'https://platform.twitter.com/widgets.js', array( 'masonry' /* The appended JS requires it */ ), null, true );
+wp_enqueue_script( 'twitter-widgets', 'https://platform.twitter.com/widgets.js', array( 'jquery', 'masonry' /* The appended JS requires it */ ), null, true );
 
 $custom_js = <<<EOJS
 twttr.ready( function( twttr ) {
