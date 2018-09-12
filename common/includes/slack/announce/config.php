@@ -8,6 +8,9 @@ namespace Dotorg\Slack\Announce;
 /**
  * Returns a whitelist of users by channel.
  *
+ * As slack has deprecated the usage of user_names, please use WordPress.org user_logins here. Case Sensitive.
+ * See https://api.slack.com/changelog/2017-09-the-one-about-usernames
+ *
  * The array keys are the channel name (omit #) and the
  * values are an array of users.
  */
@@ -21,8 +24,8 @@ function get_whitelist() {
 		'courtneypk',
 		'hlashbrooke',
 		'iandunn',
-		'rocio',
-		'vedanshu',
+		'_DorsVenabili', // @rocio on Slack
+		'vedjain', // @vendanshu on Slack
 	);
 
 	return array(
@@ -32,13 +35,13 @@ function get_whitelist() {
 			'rianrietveld',
 		),
 		'bbpress' => array(
-			'jjj',
+			'johnjamesjacoby', // @jjj on Slack
 			'netweb',
 		),
 		'buddypress' => array(
-			'boone',
-			'djpaul',
-			'jjj',
+			'boonebgorges', // @boone on Slack
+			'DJPaul',
+			'johnjamesjacoby', // @jjj on Slack
 		),
 		'cli' => array(
 			'danielbachhuber',
@@ -51,12 +54,12 @@ function get_whitelist() {
 			'audrasjb',
 			'danieltj',
 			'desrosj',
-			'jeffpaul',
-			'jon_bossenger',
-			'joshuawold',
+			'JeffPaul',
+			'psykro', // @jon_bossenger on Slack
+			'JoshuaWold',
 			'pbiron',
 			'welcher',
-			'Whitney',
+			'whitneyyadrich', // @Whitney on Slack
 		) ),
 		'core-bootstrap' => array_merge( get_committers(), array(
 			'schlessera',
@@ -67,15 +70,15 @@ function get_whitelist() {
 		'core-committers' => get_committers(),
 		'core-customize' => array_merge( get_committers(), array(
 			'celloexpressions',
-			'jeffpaul',
+			'JeffPaul',
 			'ocean90',
 			'valendesigns',
 			'voldemortensen',
 			'westonruter',
 		) ),
 		'core-docs' => array_merge( get_committers(), array(
-			'drew',
-			'kenshino',
+			'DrewAPicture', // @drew on Slack
+			'Kenshino',
 			'omarreiss',
 			'johnbillion',
 			'atimmer',
@@ -84,9 +87,9 @@ function get_whitelist() {
 			'azaozz',
 			'gziolo',
 			'iseulde',
-			'jeffpaul',
+			'JeffPaul',
 			'karmatosed',
-			'matias',
+			'matveb', // @matias on Slack
 			'mcsf',
 			'youknowriad',
 		) ),
@@ -94,15 +97,15 @@ function get_whitelist() {
 			'sc0ttkclark',
 		) ),
 		'core-test' => array_merge( get_committers(), array(
-			'boren',
+			'ryan', // @boren on Slack
 		) ),
 		'core-https' => array_merge( get_committers(), array(
-			'eric',
+			'ericlewis', // @eric on Slack
 			'tollmanz',
 		) ),
 		'core-i18n' => array_merge( get_committers(), array(
 			'ocean90',
-			'sergey',
+			'SergeyBiryukov', // @sergey on Slack
 			'swissspidy',
 		) ),
 		'core-js' => array_merge( get_committers(), array(
@@ -115,7 +118,7 @@ function get_whitelist() {
 			'desrosj',
 			'joemcgill',
 			'karmatosed',
-			'mike',
+			'mikeschroder', // @mike on Slack
 			'ocean90',
 		) ),
 		'core-multisite' => array_merge( get_committers(), array(
@@ -136,7 +139,7 @@ function get_whitelist() {
 			'azaozz',
 			'casiepa',
 			'desrosj',
-			'Heather Burns',
+			'idea15', // @Heather Burns on Slack
 		) ),
 		'core-restapi' => array_merge( get_committers(), array(
 			'danielbachhuber',
@@ -157,20 +160,20 @@ function get_whitelist() {
 		'design' => array(
 			'boemedia',
 			'hugobaeta',
-			'joshuawold',
+			'JoshuaWold',
 			'karmatosed',
 			'melchoyce',
 			'mizejewski',
 		),
 		'design-dashicons' => array(
-			'empireoflight',
+			'EmpireOfLight',
 		),
 		'docs' => array(
-			'drew',
+			'DrewAPicture', // @drew on Slack
 			'hlashbrooke',
-			'kenshino',
+			'Kenshino',
 			'lizkaraffa',
-			'zzap',
+			'milana_cap', // @zzap on Slack
 		),
 		'feature-notifications' => array(
 			'johnbillion',
@@ -183,32 +186,32 @@ function get_whitelist() {
 			'swissspidy',
 		),
 		'forums' => array(
-			'clorith',
-			'ipstenu',
-			'jan_dembowski',
+			'Clorith',
+			'Ipstenu',
+			'jdembowski', // @jan_dembowski on Slack
 			'macmanx',
 		),
 		'glotpress' => array(
 			'ocean90',
-			'gregross',
+			'GregRoss',
 		),
 		'hosting-community' => array(
-			'ataylorme',
-			'mike',
+			'andrew.taylor', // @ataylorme on Slack
+			'mikeschroder', // @mike on Slack
 			'jadonn',
 		),
 		'marketing' => array(
-			'sararosso',
-			'gidgey',
+			'rosso99', // @sararosso on Slack
+			'bridgetwillard', // @gidgey on Slack
 		),
 		'meta' => array(
 			'obenland',
-			'sergey',
+			'SergeyBiryukov', // @sergey on Slack
 			'tellyworth',
 		),
 		'meta-devhub' => array(
 			'coffee2code',
-			'drew',
+			'DrewAPicture', // @drew on Slack
 		),
 		'meta-i18n' => array(
 			'ocean90',
@@ -216,22 +219,22 @@ function get_whitelist() {
 		'meta-wordcamp' => $wordcamp_central,
 		'polyglots' => array(
 			'casiepa',
-			'coachbirgit',
+			'CoachBirgit',
 			'deconf',
-			'nao',
+			'Nao',
 			'ocean90',
 			'petya',
-			'sergey',
+			'SergeyBiryukov', // @sergey on Slack
 			'tobifjellner',
 		),
 		'polyglots-events' => array(
 			'casiepa',
-			'coachbirgit',
+			'CoachBirgit',
 			'deconf',
-			'nao',
+			'Nao',
 			'ocean90',
 			'petya',
-			'sergey',
+			'SergeyBiryukov', // @sergey on Slack
 			'tobifjellner',
 		),
 		'themereview' => array(
@@ -244,7 +247,7 @@ function get_whitelist() {
 			'karmatosed',
 		),
 		'tide' => array(
-			'jeffpaul',
+			'JeffPaul',
 			'lukecarbis',
 			'valendesigns',
 		),
@@ -253,39 +256,61 @@ function get_whitelist() {
 			'donkiely',
 			'liljimmi',
 			'bethsoderberg',
-			'courtneyengle',
+			'courane01', // @courtneyengle on Slack
 			'chanthaboune',
 			'melindahelt',
 			'juliekuehl',
 		),
 		// NOTE: Private Groups need not be listed here. All members of Private Groups have access to /announce & /here
 		'wcus' => array(
-			'alx',
+			'cronkled', // @alx on Slack
 			'camikaos',
-			'randy_hicks',
-			'bishop',
-			'dustinmeza',
+			'vc27', // @randy_hicks on Slack
+			'andrealeebishop', // @bishop on Slack
+			'DustinMeza',
 		),
 		'wcus-contributor-day' => array(
-			'alx',
+			'cronkled', // @alx on Slack
 			'camikaos',
-			'drew',
+			'DrewAPicture', // @drew on Slack
 		),
 		'wptv' => array(
-			'jerrysarcastic',
-			'roseapplemedia',
+			'JerrySarcastic',
+			'RoseAppleMedia',
 		),
 	);
 }
 
 function get_committers() {
 	return array(
-		'dd32', 'nacin', 'mark', 'helen', 'azaozz', 'westi',
-		'nb', 'sergey', 'ocean90', 'wonderboymusic', 'drew', 'johnbillion',
-		'jorbin', 'boone', 'jeremyfelt', 'pento', 'obenland', 'iseulde',
+		'dd32', 'nacin', 'helen', 'azaozz', 'westi',
+		'ocean90', 'wonderboymusic', 'johnbillion',
+		'jorbin', 'jeremyfelt', 'pento', 'obenland', 'iseulde',
 		'westonruter', 'afercia', 'karmatosed', 'rmccue', 'michaelarestad',
-		'swissspidy', 'rachelbaker', 'joehoyle', 'melchoyce', 'eric', 'mike',
+		'swissspidy', 'rachelbaker', 'joehoyle', 'melchoyce',
 		'peterwilsoncc', 'joemcgill', 'davidakennedy', 'adamsilverstein',
-		'jnylen', 'flixos90', 'iandunn', 'kadamwhite', 'matias',
+		'flixos90', 'iandunn', 'kadamwhite',
+
+		'markjaquith',    // @mark on Slack
+		'nbachiyski',     // @nb on Slack
+		'SergeyBiryukov', // @sergey on Slack
+		'DrewAPicture',   // @drew on Slack
+		'boonebgorges',   // @boone on Slack
+		'ericlewis',      // @eric on Slack
+		'mikeschroder',   // @mike on Slack
+		'jnylen0',        // @jnylen on Slack
+		'matveb',         // @matias on Slack
+	);
+}
+
+// This is not all deputies; it's only the ones who want to receive `/deputies` pings
+function get_pingable_worcamp_deputies() {
+	return array(
+		'00Sleepy', '_DorsVenabili', 'adityakane', 'andreamiddleton', 'bph', 'brandondove', 'camikaos',
+		'chanthaboune', 'courtneypk', 'drebbits', 'francina', 'gounder', 'heysherie', 'hlashbrooke',
+		'karenalma', 'kcristiano', 'kdrewien', 'Kenshino', 'mayukojpn', 'mikelking', 'miss_jwo',
+		'remediosgraphic', 'Savione', 'vc27', 'yaycheryl',
+
+		'coreymckrill', 'iandunn', // todo remove after testing
 	);
 }

@@ -84,25 +84,25 @@ function run( $data ) {
 	}
 
 	if ( $data['command'] === '/committers' ) {
+		// This command seems to not be used actively, in preference for the slack @committers group pings.
 		$committers = get_committers();
 		if ( ! in_array( $user, $committers, true ) ) {
 			return;
 		}
 
+		// TODO: Note that pinging users by `@username` is deprecated, and we now have WordPress.org usernames in the above list.
+		// This should be upadted to ping users by the `<@U.....>` format.
+
 		$text = sprintf( "*@committers:* %s\n_(cc: %s)_", $data['text'], '@' . implode( ', @', $committers ) );
 	} elseif ( $data['command'] === '/deputies' ) {
-		// This is not all deputies; it's only the ones who want to receive `/deputies` pings
-		$pingable_deputies = array(
-			'00sleepy', '_dorsvenabili', 'adityakane', 'andreamiddleton', 'bph', 'brandondove', 'camikaos',
-			'chanthaboune', 'courtneypk', 'drebbits', 'francina', 'gounder', 'heysherie', 'hlashbrooke',
-			'karenalma', 'kcristiano', 'kdrewien', 'kenshino', 'mayukojpn', 'mikelking', 'miss_jwo',
-			'remediosgraphic', 'savione', 'vc27', 'yaycheryl',
-		);
-		$pingable_deputies = array( 'coreymckrill', 'iandunn' ); // todo remove after testing
+		$pingable_deputies = get_pingable_worcamp_deputies();
 
 		if ( ! in_array( $user, $pingable_deputies, true ) ) {
 			return;
 		}
+
+		// TODO: Note that pinging users by `@username` is deprecated, and we have WordPress.org usernames in the above list.
+		// This should be upadted to ping users by the `<@U.....>` format.
 
 		$text = sprintf( "*/deputies:* %s\n_(CC: %s)_", $data['text'], '@' . implode( ', @', $pingable_deputies ) );
 	} else {
