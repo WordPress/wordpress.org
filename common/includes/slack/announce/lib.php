@@ -95,7 +95,7 @@ function run( $data ) {
 
 		$text = sprintf( "*@committers:* %s\n_(cc: %s)_", $data['text'], '@' . implode( ', @', $committers ) );
 	} elseif ( $data['command'] === '/deputies' ) {
-		$pingable_deputies = get_pingable_worcamp_deputies();
+		$pingable_deputies = get_pingable_wordcamp_deputies();
 
 		if ( ! in_array( $user, $pingable_deputies, true ) ) {
 			return;

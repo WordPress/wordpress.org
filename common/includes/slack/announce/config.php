@@ -8,7 +8,7 @@ namespace Dotorg\Slack\Announce;
 /**
  * Returns a whitelist of users by channel.
  *
- * As slack has deprecated the usage of user_names, please use WordPress.org user_logins here. Case Sensitive.
+ * As Slack has deprecated the usage of user_names, please use WordPress.org user_logins here. Case Sensitive.
  * See https://api.slack.com/changelog/2017-09-the-one-about-usernames
  *
  * The array keys are the channel name (omit #) and the
@@ -304,7 +304,7 @@ function get_committers() {
 }
 
 // This is not all deputies; it's only the ones who want to receive `/deputies` pings
-function get_pingable_worcamp_deputies() {
+function get_pingable_wordcamp_deputies() {
 	return array(
 		'00Sleepy', '_DorsVenabili', 'adityakane', 'andreamiddleton', 'bph', 'brandondove', 'camikaos',
 		'chanthaboune', 'courtneypk', 'drebbits', 'francina', 'gounder', 'heysherie', 'hlashbrooke',
