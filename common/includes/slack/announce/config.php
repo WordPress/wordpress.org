@@ -93,10 +93,10 @@ function get_whitelist() {
 		'core-fields' => array_merge( get_committers(), array(
 			'sc0ttkclark',
 		) ),
-		'core-flow' => array_merge( get_committers(), array(
+		'core-test' => array_merge( get_committers(), array(
 			'boren',
 		) ),
-		'core-http' => array_merge( get_committers(), array(
+		'core-https' => array_merge( get_committers(), array(
 			'eric',
 			'tollmanz',
 		) ),
