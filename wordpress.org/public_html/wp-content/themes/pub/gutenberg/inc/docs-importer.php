@@ -270,6 +270,8 @@ class Import_Gutendocs {
 		// Strip YAML doc from the header
 		$markdown = preg_replace( '#^---(.+)---#Us', '', $markdown );
 
+		$markdown = trim( $markdown );
+
 		// Remove any level 1 headings at the start of the markdown
 		if ( preg_match( '/^#\s(.+)/', $markdown, $matches ) ) {
 			$markdown = preg_replace( '/^#\s(.+)/', '', $markdown );
@@ -292,6 +294,8 @@ class Import_Gutendocs {
 		$html = str_replace( 'class="js"', 'class="language-javascript"', $html );
 		$html = str_replace( 'class="css"', 'class="language-css"', $html );
 
+		add_filter( 'wp_kses_allowed_html', array( 'Import_Gutendocs', 'allow_extra_tags' ), 10, 1 );
+
 		// Save the post
 		$post_data = array(
 			'ID'           => $post_id,
@@ -299,6 +303,9 @@ class Import_Gutendocs {
 		);
 
 		wp_update_post( $post_data );
+
+		remove_filter( 'wp_kses_allowed_html', array( 'Import_Gutendocs', 'allow_extra_tags' ), 10, 1 );
+
 		return true;
 	}
 
@@ -328,6 +335,17 @@ class Import_Gutendocs {
 		$html .= "$code_blocks</div>";
 
 		return $html;
+	}
+
+	/**
+	 * Add extra tags to the KSES allowed tags list.
+	 */
+	public static function allow_extra_tags( $tags ) {
+		if ( ! isset( $tags['style'] ) ) {
+			$tags['style'] = array();
+		}
+
+		return $tags;
 	}
 
 	/**
