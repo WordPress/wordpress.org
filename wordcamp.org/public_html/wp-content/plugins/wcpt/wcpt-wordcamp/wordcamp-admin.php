@@ -157,11 +157,17 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 				return;
 			}
 
-			$request_url = add_query_arg(
-				'address',
-				urlencode( $new_address ),
-				'https://maps.googleapis.com/maps/api/geocode/json'
-			);
+			$request_url = add_query_arg( array(
+				'address' => rawurlencode( $new_address ),
+			), 'https://maps.googleapis.com/maps/api/geocode/json' );
+
+			$key = apply_filters( 'wordcamp_google_maps_api_key', '' );
+
+			if ( $key ) {
+				$request_url = add_query_arg( array(
+					'key' => $key,
+				), $request_url );
+			}
 
 			$response = wcorg_redundant_remote_get( $request_url );
 
