@@ -185,7 +185,17 @@ class WordCamp_Central_Theme {
 		}
 
 		if ( is_page( 'about' ) || is_page( 'schedule' ) ) {
-			wp_enqueue_script( 'google-maps', 'https://maps.googleapis.com/maps/api/js', array(), false, true );
+			$url = 'https://maps.googleapis.com/maps/api/js';
+
+			$key = apply_filters( 'wordcamp_google_maps_api_key', '' );
+
+			if ( $key ) {
+				$url = add_query_arg( array(
+					'key' => $key,
+				), $url );
+			}
+
+			wp_enqueue_script( 'google-maps', $url, array(), false, true );
 		}
 	}
 

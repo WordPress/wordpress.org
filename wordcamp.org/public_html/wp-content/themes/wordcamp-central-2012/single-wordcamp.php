@@ -47,8 +47,17 @@ $wordcamp_title = wcpt_get_wordcamp_title();
 						<?php if ( wcpt_get_wordcamp_physical_address() ) : ?>
 
 							<?php
-								$address = urlencode( implode( " ", explode( "\n", wcpt_get_wordcamp_physical_address() ) ) );
+								$address = rawurlencode( implode( " ", explode( "\n", wcpt_get_wordcamp_physical_address() ) ) );
 								$map_url = 'https://maps.googleapis.com/maps/api/staticmap?center=' . $address . '&zoom=14&size=130x70&maptype=roadmap&markers=color:blue%7Clabel:A%7C' . $address . '&sensor=false';
+
+								$api_key = apply_filters( 'wordcamp_google_maps_api_key', '' );
+
+								if ( $api_key ) {
+									$map_url = add_query_arg( array(
+										'key' => $api_key,
+									), $map_url );
+								}
+
 								$map_link = 'https://maps.google.com/maps?q=' . $address;
 								$venue_link = wcpt_get_wordcamp_venue_url();
 							?>
