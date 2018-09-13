@@ -300,6 +300,28 @@ add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
 	return $options;
 } );
 
+// Google Maps API
+add_filter( 'wordcamp_google_maps_api_key', function( $key ) {
+	$environment = ( defined('WORDCAMP_ENVIRONMENT') ) ? WORDCAMP_ENVIRONMENT : 'development';
+
+	switch ( $environment ) {
+		case 'production' :
+			if ( defined( 'WORDCAMP_PROD_GOOGLE_MAPS_API_KEY' ) ) {
+				$key = WORDCAMP_PROD_GOOGLE_MAPS_API_KEY;
+			}
+			break;
+
+		case 'development':
+		default :
+			if ( defined( 'WORDCAMP_DEV_GOOGLE_MAPS_API_KEY' ) ) {
+				$key = WORDCAMP_DEV_GOOGLE_MAPS_API_KEY;
+			}
+			break;
+	}
+
+	return $key;
+} );
+
 /*
  * Disable admin pointers
  */
