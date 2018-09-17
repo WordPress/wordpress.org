@@ -56,7 +56,7 @@ function add_classic_param_to_edit_links( $url, $post_id = 0 ) {
 
 	$post = get_post( $post_id );
 
-	if ( function_exists( 'gutenberg_post_has_blocks' ) && gutenberg_post_has_blocks( $post ) ) {
+	if ( function_exists( 'has_blocks' ) && has_blocks( $post ) ) {
 		return $url;
 	}
 
