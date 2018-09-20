@@ -19,6 +19,7 @@ abstract class Event_Loader {
 		add_action( 'init', array( $this, 'register_post_capabilities' ) );
 		add_action( 'init', array( $this, 'register_post_statuses' ) );
 		add_filter( 'pre_get_posts', array( $this, 'query_public_statuses_on_archives' ) );
+		add_filter( 'cron_schedules', array( $this, 'add_weekly_cron_interval' ) );
 	}
 
 	/**
@@ -106,6 +107,27 @@ abstract class Event_Loader {
 		}
 
 		$query->query_vars['post_status'] = $this->get_public_post_statuses();
+	}
+
+	/**
+	 * Add weekly schedule option to wp_schedule_event
+	 *
+	 * @param array $new_schedules
+	 * @param array $schedules
+	 *
+	 * @return array
+	 */
+	public function add_weekly_cron_interval( $schedules ) {
+		if ( isset( $schedules['weekly'] ) ) {
+			return $schedules;
+		}
+
+		$schedules['weekly'] = array(
+			'interval' => WEEK_IN_SECONDS,
+			'display'  => __( 'Once weekly', 'wordcamporg' )
+		);
+
+		return $schedules;
 	}
 
 }
