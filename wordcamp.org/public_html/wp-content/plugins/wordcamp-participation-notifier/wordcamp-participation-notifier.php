@@ -19,6 +19,7 @@ class WordCamp_Participation_Notifier {
 		add_action( 'camptix_rl_buyer_completed_registration', array( $this, 'primary_attendee_registered' ), 10, 2 );
 		add_action( 'camptix_rl_registration_confirmed',       array( $this, 'additional_attendee_confirmed_registration' ), 10, 2 );
 		add_action( 'added_post_meta',                         array( $this, 'attendee_checked_in' ), 10, 4 );
+		add_action( 'update_meetup_organizers',                array( $this, 'update_meetup_organizers' ), 10, 2 );
 	}
 
 	/**
@@ -47,6 +48,43 @@ class WordCamp_Participation_Notifier {
 		} elseif ( 'publish' == $new_status || 'publish' == $old_status ) {
 			$this->speaker_post_published_or_unpublished( $new_status, $old_status, $post );
 		}
+	}
+
+	/**
+	 * Add badges to meetup organizers.
+	 *
+	 * @param array   $organizers
+	 * @param WP_Post $post
+	 *
+	 * @return mixed
+	 */
+	public function update_meetup_organizers( $organizers, $post ) {
+		if ( empty( $organizers ) ) {
+			return;
+		}
+
+		return $this->remote_post( self::PROFILES_HANDLER_URL, $this->get_meetup_org_payload( $organizers, $post ) );
+	}
+
+	/**
+	 * Helper function to create post data for AJAX request
+	 *
+	 * @param array   $organizers
+	 * @param WP_Post $post
+	 *
+	 * @return array
+	 */
+	protected function get_meetup_org_payload( $organizers, $post ) {
+		$association = array(
+			'action'      => 'wporg_handle_association',
+			'source'      => 'meetups',
+			'command'     => 'add',
+			'users'       => $organizers,
+			'meetup_id'   => $post->ID,
+			'association' => 'meetup-organizer'
+		);
+
+		return apply_filters( 'wp_meetup_organizer_association_payload', $association, $post );
 	}
 
 	/**
