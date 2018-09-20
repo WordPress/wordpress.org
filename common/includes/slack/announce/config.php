@@ -18,6 +18,7 @@ function get_whitelist() {
 	$wordcamp_central = array(
 		'adityakane',
 		'andreamiddleton',
+		'angelasjin',
 		'camikaos',
 		'chanthaboune',
 		'coreymckrill',
