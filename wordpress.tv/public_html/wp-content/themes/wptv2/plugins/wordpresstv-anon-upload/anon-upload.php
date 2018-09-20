@@ -213,7 +213,7 @@ class WPTV_Anon_Upload {
 		$anon_post = get_default_post_to_edit( 'post' ); // without saving auto-draft
 		$anon_post = get_object_vars( $anon_post );
 
-		$anon_post['post_title']   = 'Uploaded video';
+		$anon_post['post_title']   = $this->sanitize_text( $_posted['wptv_video_title'] );
 		$anon_post['post_excerpt'] = '';
 		$anon_post['post_author']  = $this->drafts_author;
 		$anon_post['post_status']  = 'pending';

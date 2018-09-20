@@ -263,7 +263,7 @@ class WordPressTV_Theme {
 	 * @param WP_Query $query
 	 * @return string
 	 */
-	function search_posts_search( $search, &$query ) {
+	function search_posts_search( $search, $query ) {
 		global $wpdb;
 		if ( ! $query->is_main_query() || ! $query->is_search || is_admin() ) {
 			return $search;
