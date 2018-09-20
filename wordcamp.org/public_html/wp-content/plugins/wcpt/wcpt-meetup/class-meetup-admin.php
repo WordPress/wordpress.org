@@ -22,8 +22,12 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		public function __construct() {
 			parent::__construct();
 
+			add_action( 'plugins_loaded', array( $this, 'schedule_cron_jobs' ) );
+			add_action( 'wcpt_meetup_api_sync', array( $this, 'meetup_api_sync' ) );
 			add_action( 'wcpt_metabox_save_done', array( $this, 'maybe_update_meetup_data' ) );
 			add_action( 'wcpt_metabox_value', array( $this, 'render_co_organizers_list' ) );
+			add_action( 'wcpt_metabox_save_done', array( $this, 'meetup_organizers_changed' ), 10, 2 );
+			add_action( 'transition_post_status', array( $this, 'maybe_update_organizers' ), 10, 3 );
 		}
 
 		/**
@@ -328,9 +332,6 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				$this->active_admin_notices[] = $result->get_error_code();
 				return;
 			}
-
-			update_post_meta( $post_id, 'Last meetup.com API sync', time() );
-
 		}
 
 		/**
@@ -408,6 +409,106 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				update_post_meta( $post_id, 'Last meetup on', $group_details['last_event']['time'] / 1000 );
 				update_post_meta( $post_id, 'Last meetup RSVP count', $group_details['last_event']['yes_rsvp_count'] );
 			}
+			update_post_meta( $post_id, 'Last meetup.com API sync', time() );
+		}
+
+		/**
+		 * Trigger action `update_meetup_organizers` when new organizers are added.
+		 * Note: While we add badges to new organizers, we do not remove them from organizers who has stepped down.
+		 * This is because, we want to give credit if someone has organized a meetup in the past even if they are not active presently.
+		 *
+		 * @param int   $post_id
+		 * @param array $original_data
+		 */
+		public function meetup_organizers_changed( $post_id, $original_data ){
+			global $post;
+
+			if ( $this->get_event_type() !== get_post_type() ) {
+				return;
+			}
+
+			if ( 'wcpt-mtp-active' !== $post->post_status ) {
+				return;
+			}
+
+			$organizers_list = $this->get_organizer_list(
+				get_post_meta( $post_id, 'Primary organizer WordPress.org username', true ),
+				get_post_meta( $post_id, 'Co-Organizers usernames (seperated by comma)', true )
+			);
+
+			$original_organizers_list = $this->get_organizer_list(
+				$original_data['Primary organizer WordPress.org username'][0],
+				$original_data['Co-Organizers usernames (seperated by comma)'][0]
+			);
+
+			$new_organizers = array_diff( $organizers_list, $original_organizers_list );
+
+			$this->update_meetup_organizers( $new_organizers, $post );
+
+		}
+
+		/**
+		 * If status is set to `Active in the Chapter` then add badges for all organizers in the list.
+		 *
+		 * @param string  $new_status
+		 * @param string  $old_status
+		 * @param WP_Post $post
+		 */
+		public function maybe_update_organizers( $new_status, $old_status, $post ) {
+
+			if ( $this->get_event_type() !== get_post_type() ) {
+				return;
+			}
+
+			if ( 'wcpt-mtp-active' !== $post->post_status ) {
+				return;
+			}
+
+			if ( $new_status === $old_status ) {
+				// When both the status are same (and set to active), then we do not need to do anything. This is handled by meetup_organizers_changed function.
+				return;
+			}
+
+			$organizers_list = $this->get_organizer_list(
+				get_post_meta( $post->ID, 'Primary organizer WordPress.org username', true ),
+				get_post_meta( $post->ID, 'Co-Organizers usernames (seperated by comma)', true )
+			);
+
+			$this->update_meetup_organizers( $organizers_list, $post );
+
+		}
+
+		/**
+		 * Helper function for getting list of organizers.
+		 *
+		 * @param string $main_organizer
+		 * @param string $co_organizers
+		 *
+		 * @return array
+		 */
+		private function get_organizer_list( $main_organizer, $co_organizers ) {
+			$organizer_list = array();
+			if ( ! empty( $main_organizer ) ) {
+				$organizer_list[] = $main_organizer;
+			}
+
+			if ( ! empty( $co_organizers ) ) {
+				$co_organizers_list = array_map( 'trim', explode( ',', $co_organizers ) );
+				$organizer_list = array_merge( $organizer_list, $co_organizers_list );
+			}
+			return $organizer_list;
+		}
+
+		/**
+		 * Helper method which triggers action `update_meetup_organizers`
+		 *
+		 * @param $organizers
+		 * @param $post
+		 */
+		protected function update_meetup_organizers( $organizers, $post ) {
+			if ( ! empty( $organizers ) ) {
+				do_action( 'update_meetup_organizers', $organizers, $post );
+			}
 		}
 
 		/**
@@ -483,16 +584,17 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		public static function meta_keys( $meta_group = '' ) {
 
 			$info_keys = array(
-				'Meetup URL'                        => 'text',
-				'Meetup Co-organizer names'         => 'meetup_coorganizers',
-				'Meetup Location (From meetup.com)' => 'text',
-				'Meetup members count'              => 'text',
-				'Meetup group created on'           => 'date',
-				'Number of past meetups'            => 'text',
-				'Last meetup on'                    => 'date',
-				'Last meetup RSVP count'            => 'text',
-				'HelpScout link'                    => 'text',
-				'Meetup Location'                   => 'text',
+				'Meetup URL'                                   => 'text',
+				'Meetup Co-organizer names'                    => 'meetup_coorganizers',
+				'Primary organizer WordPress.org username'     => 'text',
+				'Co-Organizers usernames (seperated by comma)' => 'text',
+				'Meetup Location (From meetup.com)'            => 'text',
+				'Meetup group created on'                      => 'date',
+				'Number of past meetups'                       => 'text',
+				'Last meetup on'                               => 'date',
+				'Last meetup RSVP count'                       => 'text',
+				'HelpScout link'                               => 'text',
+				'Meetup Location'                              => 'text',
 			);
 
 			$application_keys = array(
@@ -509,16 +611,14 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			);
 
 			$organizer_keys = array(
-				'Organizer Name'                               => 'text',
-				'Email'                                        => 'text',
-				'Primary organizer WordPress.org username'     => 'text',
-				'Co-Organizers usernames (seperated by comma)' => 'text',
-				'Organizer description'                        => 'text',
-				'Date closed'                                  => 'date',
-				'Slack'                                        => 'text',
-				'Region'                                       => 'text',
-				'Address'                                      => 'textarea',
-				'Extra Comments'                               => 'textarea',
+				'Organizer Name'        => 'text',
+				'Email'                 => 'text',
+				'Organizer description' => 'text',
+				'Date closed'           => 'date',
+				'Slack'                 => 'text',
+				'Region'                => 'text',
+				'Address'               => 'textarea',
+				'Extra Comments'        => 'textarea',
 			);
 
 			$metadata_keys = array(
@@ -558,7 +658,106 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 			return $data;
 		}
 
+		/**
+		 * Schedule cron job for updating data from meetup API
+		 */
+		public function schedule_cron_jobs() {
+			if ( wp_next_scheduled( 'wcpt_meetup_api_sync' ) ) {
+				return;
+			}
 
+			wp_schedule_event( current_time( 'timestamp' ), 'weekly', 'wcpt_meetup_api_sync' );
+		}
+
+
+		/**
+		 * Cron worker for syncing with Meetup.com API data
+		 */
+		public static function meetup_api_sync() {
+			$query = new WP_Query( array(
+				'post_type'   => self::get_event_type(),
+				'post_status' => 'wcpt-mtp-active',
+				'fields'      => 'ids',
+				'posts_per_page' => -1,
+			) );
+
+			$new_meetup_org_data = array();
+			foreach ( $query->posts as $post_id ) {
+
+				$meetup_organizers = get_post_meta( $post_id, 'Meetup Co-organizer names', true );
+				self::update_meetup_data( $post_id );
+				$new_meetup_organizers = get_post_meta( $post_id, 'Meetup Co-organizer names', true );
+
+				if ( empty( $new_meetup_organizers ) ) {
+					continue;
+				}
+
+				if ( empty( $meetup_organizers ) ) {
+					$new_ids = wp_list_pluck( $new_meetup_organizers, 'id' );
+				} else {
+					$new_ids = array_diff(
+						wp_list_pluck( $new_meetup_organizers, 'id' ),
+						wp_list_pluck( $meetup_organizers, 'id' )
+					);
+				}
+
+				if ( empty ( $new_ids ) ) {
+					continue;
+				}
+
+				$new_meetup_org_data[ $post_id ] = array();
+
+				foreach ( $new_meetup_organizers as $org ) {
+					if ( in_array( $org['id'], $new_ids ) ) {
+						$new_meetup_org_data[ $post_id ][] = $org;
+					}
+				}
+			}
+			self::new_meetup_organizers_notify( $new_meetup_org_data );
+		}
+
+		/**
+		 * Send email containing new meetup organizers to WordCamp Support team.
+		 *
+		 * @param array $new_meetup_org_data
+		 */
+		public static function new_meetup_organizers_notify( $new_meetup_org_data ) {
+			if ( empty( $new_meetup_org_data ) ) {
+				return;
+			}
+
+			$template = <<<HTML
+Hi,
+<br><br>
+New organizers have been added for following meetups. Please update their wporg usernames in their meetup tracker page.
+<br><br>
+HTML;
+			$count = 0;
+			foreach ( $new_meetup_org_data as $post_id => $new_meetup_org ) {
+				$count += 1;
+				$title = get_the_title( $post_id );
+				$meetup_tracker_url = get_site_url() . "/wp-admin/post.php?post=$post_id&action=edit";
+				$template = $template . "$count. <a href='$meetup_tracker_url' rel='noreferrer' target='_blank' >$title</a> : ";
+				$meetup_group_url = get_post_meta( $post_id, 'Meetup URL', true );
+				$meetup_members = array();
+				foreach ( $new_meetup_org as $organizer ) {
+					$organizer_id = esc_html( $organizer['id'] );
+					$organizer_name = esc_html( $organizer['name'] );
+					$meetup_members[] = "<a href='$meetup_group_url/members/$organizer_id' target='_blank' rel='noreferrer' >$organizer_name</a>";
+				}
+				$template = $template . join( ', ', $meetup_members ) . "<br>";
+			}
+			// TODO: Change to email before merging
+			wp_mail(
+				array( 'support@wordcamp.com' ),
+				'New Meetup organizer added',
+				$template,
+				array(
+					'From:         noreply@wordcamp.org',
+					'Content-Type: text/html; charset=UTF-8',
+				)
+			);
+		}
 	}
 
 endif;
