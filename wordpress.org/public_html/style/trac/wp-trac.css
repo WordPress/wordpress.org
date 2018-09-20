@@ -600,12 +600,14 @@ blockquote.citation {
 	border-right: none;
 	color: #000;
 }
+.trac.core #mainnav .first.last :link, .core #mainnav .first.last :visited,
 #mainnav .active :link, #mainnav .active :visited {
 	background: #0073aa; /* active nav menu background */
 	border-right: none;
 	color: #f9f9f9;
 	text-shadow: none;
 }
+.trac.core #mainnav .first.last :link:hover, .core #mainnav .first.last :visited:hover,
 #mainnav .active :link:hover, #mainnav .active :visited:hover {
 	border-right: none;
 }
