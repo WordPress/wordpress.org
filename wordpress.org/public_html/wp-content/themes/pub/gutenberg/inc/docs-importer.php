@@ -292,6 +292,7 @@ class Import_Gutendocs {
 		$html = preg_replace_callback( '/{%\s+codetabs\s+%}(.*?){%\s+end\s+%}/ms', array( 'Import_Gutendocs', 'parse_code_blocks' ), $html );
 		$html = str_replace( 'class="php"', 'class="language-php"', $html );
 		$html = str_replace( 'class="js"', 'class="language-javascript"', $html );
+		$html = str_replace( 'class="jsx"', 'class="language-jsx"', $html );
 		$html = str_replace( 'class="css"', 'class="language-css"', $html );
 
 		add_filter( 'wp_kses_allowed_html', array( 'Import_Gutendocs', 'allow_extra_tags' ), 10, 1 );
