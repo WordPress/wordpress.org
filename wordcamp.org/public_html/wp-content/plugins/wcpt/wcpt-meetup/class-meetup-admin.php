@@ -749,7 +749,7 @@ HTML;
 			}
 			// TODO: Change to email before merging
 			wp_mail(
-				array( 'support@wordcamp.com' ),
+				array( 'support@wordcamp.org' ),
 				'New Meetup organizer added',
 				$template,
 				array(
