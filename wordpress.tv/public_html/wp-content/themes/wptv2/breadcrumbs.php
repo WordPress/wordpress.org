@@ -8,7 +8,7 @@
 global $wptv;
 ?>
 <div class="breadcrumb">
-	<a href="<?php echo esc_attr( home_url() );?>">Home</a>
+	<a href="<?php echo esc_url( home_url() ); ?>"><?php _e( 'Home', 'wptv' ); ?></a>
 	<?php
 		$wptv->the_category( '<span class="arrow">&raquo;</span>' );
 		$wptv->the_event( '<span class="arrow">&raquo;</span>' );
