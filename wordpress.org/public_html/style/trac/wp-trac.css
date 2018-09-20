@@ -2090,6 +2090,9 @@ a.mention.me {
 	#ticket table.properties > tbody > td {
 		padding: 0.5em 0 .5em .2em; /* reduce side padding */
 	}
+	#ticket table.properties > tbody > tr > th {
+		width: 30%; /* More room so columns don't overlap */
+	}
 	#field-description-help, #content.ticket label[for="comment"] {
 		float: none; /* don't let it collide with the editor buttons */
 	}
@@ -2247,5 +2250,8 @@ a.mention.me {
 	}
 	#content.timeline dd {
 		margin-left: 0;
+	}
+	#ticket table.properties > tbody > tr > th {
+		width: 40%; /* More room so columns don't overlap */
 	}
 }
