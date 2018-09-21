@@ -91,7 +91,7 @@ if ( ! class_exists( 'Meetup_Loader' ) ) :
 				'meetup_tags',
 				Meetup_Application::POST_TYPE,
 				array(
-					'hierarchical' => false,
+					'hierarchical' => true,
 					'labels'       => array(
 						'name'          => __( 'Meetup Tags' ),
 						'singular_name' => __( 'Meetup Tag' ),
