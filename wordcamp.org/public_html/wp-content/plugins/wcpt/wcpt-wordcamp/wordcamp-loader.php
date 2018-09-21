@@ -29,6 +29,7 @@ class WordCamp_Loader extends Event_Loader {
 		add_filter( 'query_vars',                      array( $this, 'query_vars'                        ) );
 		add_filter( 'rest_wordcamp_collection_params', array( $this, 'set_rest_post_status_default'      ) );
 		add_action( 'rest_api_init',                   array( $this, 'register_rest_public_fields'       ) );
+		add_action( 'init',                            array( $this, 'register_post_capabilities' ) );
 	}
 
 	/**

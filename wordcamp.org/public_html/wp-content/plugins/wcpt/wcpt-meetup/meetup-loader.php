@@ -164,22 +164,6 @@ if ( ! class_exists( 'Meetup_Loader' ) ) :
 		}
 
 		/**
-		 * Allow some site roles to see WordCamp posts.
-		 */
-		public function register_post_capabilities() {
-			$roles = array(
-				'contributor',
-				'author',
-				'editor',
-				'administrator',
-			);
-
-			foreach ( $roles as $role ) {
-				get_role( $role )->add_cap( 'edit_' . Meetup_Application::POST_TYPE . 's' );
-			}
-		}
-
-		/**
 		 * Get available post statuses
 		 *
 		 * @return array

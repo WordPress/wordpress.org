@@ -16,7 +16,6 @@ abstract class Event_Loader {
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'register_post_types' ) );
-		add_action( 'init', array( $this, 'register_post_capabilities' ) );
 		add_action( 'init', array( $this, 'register_post_statuses' ) );
 		add_filter( 'pre_get_posts', array( $this, 'query_public_statuses_on_archives' ) );
 		add_filter( 'cron_schedules', array( $this, 'add_weekly_cron_interval' ) );
@@ -35,13 +34,6 @@ abstract class Event_Loader {
 	 * @return void
 	 */
 	abstract protected function register_post_types();
-
-	/**
-	 * Add capabilities to roles for post type.
-	 *
-	 * @return void
-	 */
-	abstract protected function register_post_capabilities();
 
 	/**
 	 * Return list of available post statuses with their labels.
