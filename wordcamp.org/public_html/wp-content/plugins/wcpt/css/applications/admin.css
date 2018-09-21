@@ -6,3 +6,7 @@ span.swag-needed-icon {
     width: 50%;
     height: 150px;
 }
+
+#post-body input[type=text] {
+    width: 50%;
+}
