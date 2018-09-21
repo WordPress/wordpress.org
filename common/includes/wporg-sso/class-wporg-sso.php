@@ -61,22 +61,20 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		/**
 		 * Returns the SSO login URL, with redirect_to as requested, if deemed valid.
 		 *
-		 * @param string $redirect_to
-		 * @param string $filter_redirect_to When used with the WP login_url filter, the redirect_to is passed as a 2nd arg instead.
+		 * @param string $login_url
+		 * @param string $redirect_to When used with the WP login_url filter, the redirect_to is passed as a 2nd arg instead.
 		 * @return string
 		 *
-		 * @example Use directly, or through add_action( 'login_url', array( &$wporg_sso, 'login_url' ), 10, 2 );
+		 * @example Use through add_action( 'login_url', array( $wporg_sso, 'login_url' ), 10, 2 );
 		 */
-		public function login_url( $redirect_to = '', $filter_redirect_to = '' ) {
+		public function login_url( $login_url = '', $redirect_to = '' ) {
 			$login_url = $this->sso_login_url;
-			// If 2nd arg is passed, then redirect_to is it.
-			if ( ! empty( $filter_redirect_to ) ) {
-				$redirect_to = $filter_redirect_to;
-			}
+
 			if ( ! empty( $redirect_to ) && $this->_is_valid_targeted_domain( $redirect_to ) ) {
 				$redirect_to = preg_replace( '/\/wp-(login|signup)\.php\??.*$/', '/', $redirect_to );
 				$login_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $login_url );
 			}
+
 			return $login_url;
 
 		}
