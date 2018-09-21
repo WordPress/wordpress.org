@@ -717,7 +717,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		}
 
 		/**
-		 * Send email containing new meetup organizers to WordCamp Support team.
+		 * Send email containing new meetup organizers to WordCamp Support team. Also adds a tag - `Needs to update Organizer list`
 		 *
 		 * @param array $new_meetup_org_data
 		 */
@@ -746,8 +746,10 @@ HTML;
 					$meetup_members[] = "<a href='$meetup_group_url/members/$organizer_id' target='_blank' rel='noreferrer' >$organizer_name</a>";
 				}
 				$template = $template . join( ', ', $meetup_members ) . "<br>";
+
+				// Add a tag for meetup
+				wp_set_object_terms( $post_id, 'Needs to update Organizer list', 'meetup_tags', true );
 			}
-			// TODO: Change to email before merging
 			wp_mail(
 				array( 'support@wordcamp.org' ),
 				'New Meetup organizer added',
