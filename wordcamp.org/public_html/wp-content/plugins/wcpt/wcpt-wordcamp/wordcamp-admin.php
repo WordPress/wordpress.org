@@ -153,7 +153,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 
 			// If the venue address was changed, update its coordinates
 			$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
-			if ( $new_address === $original_meta_values['Physical Address'] ) {
+			if ( $new_address === $original_meta_values['Physical Address'][0] ) {
 				return;
 			}
 
