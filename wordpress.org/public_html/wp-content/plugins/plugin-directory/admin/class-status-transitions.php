@@ -356,6 +356,11 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 	public function clean_closed_date( $post_id ) {
 		delete_post_meta( $post_id, 'plugin_closed_date' );
 		delete_post_meta( $post_id, '_close_reason' );
+
+		$post = get_post( $post_id );
+		if ( $post && 'approved' != $post->post_status ) {
+			$this->audit_log( 'Plugin reopened.', $post_id );
+		}
 	}
 
 	/**
