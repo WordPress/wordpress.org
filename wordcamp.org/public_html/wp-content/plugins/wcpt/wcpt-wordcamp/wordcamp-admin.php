@@ -1,5 +1,6 @@
 <?php
 
+use WordCamp\Logger;
 use WordCamp\Mentors_Dashboard;
 use WordPress_Community\Applications\WordCamp_Application;
 
@@ -170,9 +171,11 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 			}
 
 			$response = wcorg_redundant_remote_get( $request_url );
+			$body     = json_decode( wp_remote_retrieve_body( $response ) );
 
 			// Don't delete the existing (and probably good) values if the request failed
-			if ( is_wp_error( $response ) ) {
+			if ( is_wp_error( $response ) || empty( $body->results[0]['address_components'] ) ) {
+				Logger\log( 'geocoding_failure', compact( 'request_url', 'response' ) );
 				return;
 			}
 
