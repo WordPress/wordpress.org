@@ -7,8 +7,9 @@ use WP_Widget_Factory;
 
 defined( 'WPINC' ) || die();
 
-add_action( 'jetpack_active_modules', __NAMESPACE__ . '\load_jetpack_widgets_module' );
-add_action( 'wp_footer',              __NAMESPACE__ . '\render_cookie_banner'        );
+add_action( 'jetpack_active_modules',           __NAMESPACE__ . '\load_jetpack_widgets_module'    );
+add_action( 'wp_footer',                        __NAMESPACE__ . '\render_cookie_banner'           );
+add_filter( 'wp_privacy_personal_data_erasers', __NAMESPACE__ . '\modify_erasers',             99 );
 
 
 /**
@@ -61,4 +62,18 @@ function render_cookie_banner() {
 	the_widget( 'Jetpack_EU_Cookie_Law_Widget', $widget_params );
 
 	$cookie_law_widget->enqueue_frontend_scripts();
+}
+
+/**
+ * Modify the list of personal data eraser callbacks.
+ *
+ * @param array $erasers
+ *
+ * @return array mixed
+ */
+function modify_erasers( $erasers ) {
+	// Temporarily disable the default eraser callbacks.
+	unset( $erasers['jetpack-feedback'] );
+
+	return $erasers;
 }
