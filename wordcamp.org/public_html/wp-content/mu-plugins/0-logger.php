@@ -19,11 +19,12 @@ defined( 'WPINC' ) or die();
  */
 function log( $error_code, $data = array() ) {
 	$backtrace = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 2 );
+	$meta_information = array();
 
 	if ( 'cli' === php_sapi_name() ) {
-		$data['command'] = sprintf( '%s %s', $_SERVER['_'] ?? '', implode( ' ', $_SERVER['argv'] ) );
+		$meta_information['command'] = sprintf( '%s %s', $_SERVER['_'] ?? '', implode( ' ', $_SERVER['argv'] ) );
 	} else {
-		$data['request_url'] = sprintf(
+		$meta_information['request_url'] = sprintf(
 			'%s://%s%s',
 			$_SERVER['HTTPS'] ? 'https' : 'http',
 			$_SERVER['SERVER_NAME'],
@@ -32,11 +33,12 @@ function log( $error_code, $data = array() ) {
 
 		// Fall back to IP address if it's too early to detect the user
 		if ( did_action( 'after_setup_theme' ) > 0 ) {
-			$data['current_user'] = get_current_user_id();
+			$meta_information['current_user'] = get_current_user_id();
 		} else {
-			$data['remote_ip'] = $_SERVER['REMOTE_ADDR'];
+			$meta_information['remote_ip'] = $_SERVER['REMOTE_ADDR'];
 		}
 	}
+	$data['logger_meta'] = $meta_information;
 
 	redact_keys( $data );
 	$data = str_replace( "\n", '[newline]', wp_json_encode( $data ) );
