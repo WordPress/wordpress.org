@@ -490,7 +490,7 @@ class WordPressTV_Theme {
 					$hd_param = sprintf( 'hd="%d"', (bool) get_option( 'video_player_high_quality', false ) );
 				}
 
-				$video      = sprintf( '[%s %s w="%s" %s]', $shortcode[2], trim( $shortcode[3] ), is_single() ? '940' : '605', $hd_param );
+				$video      = sprintf( '[%s %s w="%s" %s]', $shortcode[2], trim( $shortcode[3] ), is_single() ? '940' : '575', $hd_param );
 				$video      = apply_filters( 'the_content', $video );
 			}
 		}
