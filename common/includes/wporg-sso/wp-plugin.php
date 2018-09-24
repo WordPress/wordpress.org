@@ -231,14 +231,12 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 								}
 								return;
 							}
+						} else if ( is_user_logged_in() && 'logout' == self::$matched_route ) {
+							// No redirect, ask the user if they really want to log out.
+							return;
 						} else if ( is_user_logged_in() ) {
-							if ( preg_match( '!^' . $this->valid_sso_paths['logout'] . '/?$!', $_SERVER['REQUEST_URI'] ) ) {
-								// No redirect, ask the user if they really want to log out.
-								return;
-							} else {
-								// Otherwise, redirect to the login screen.
-								$this->_redirect_to_profile();
-							}
+							// Otherwise, redirect to the their profile.
+							$this->_redirect_to_profile();
 						}
 					} elseif ( ( is_admin() && is_super_admin() ) || 0 === strpos( $_SERVER['REQUEST_URI'], '/wp-json' ) || 0 === strpos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' ) ) {
 						// Do nothing, allow access to wp-admin, wp-json and xmlrpc.php on login.wordpress.org

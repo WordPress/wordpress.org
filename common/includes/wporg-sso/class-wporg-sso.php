@@ -43,7 +43,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			if ( $this->is_sso_host() ) {
 				// If on the SSO host, add the requesting source (eg: make.wordpress.org), if within our bounds
 				$url  = parse_url( $this->_get_safer_redirect_to() );
-				$host = ( empty( $url ) ) ? null : $url['host'];
+				$host = ( ! $url || ! isset( $url['host'] ) ) ? null : $url['host'];
 			} else {
 				// If not on the SSO host, add login.wordpress.org, to be safe
 				$host = self::SSO_HOST;
