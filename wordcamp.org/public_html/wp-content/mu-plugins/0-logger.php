@@ -96,6 +96,16 @@ function redact_keys( & $data ) {
 			$value = (array) $value;
 		}
 
+		if ( false !== filter_var( $value, FILTER_VALIDATE_URL ) ) {
+			$url_parts = parse_url( $value );
+
+			if ( ! empty( $url_parts['query'] ) ) {
+				parse_str( $url_parts['query'], $query );
+				$url_parts['query'] = redact_keys( $query );
+				$value              = $url_parts;
+			}
+		}
+
 		if ( in_array( strtolower( $key ), $redacted_keys, true ) ) {
 			 $data[ $key ] = '[redacted]';
 		}
