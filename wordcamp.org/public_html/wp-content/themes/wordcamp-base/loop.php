@@ -17,6 +17,12 @@
  * @subpackage Twenty_Ten
  * @since Twenty Ten 1.0
  */
+
+$gallery_term = get_term_by( 'name', _x( 'gallery', 'gallery category slug', 'wordcamporg' ), 'category' );
+if ( ! $gallery_term ) {
+	$gallery_term = get_term_by( 'slug', _x( 'gallery', 'gallery category slug', 'wordcamporg' ), 'category' );
+}
+
 ?>
 
 <?php /* Display navigation to next/previous pages when applicable */ ?>
@@ -57,7 +63,7 @@
 
 <?php /* How to display posts in the Gallery category. */ ?>
 
-	<?php if ( in_category( _x('gallery', 'gallery category slug', 'wordcamporg') ) ) : ?>
+	<?php if ( $gallery_term && in_category( $gallery_term->term_id ) ) : ?>
 		<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<h2 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php printf( esc_attr__( 'Permalink to %s', 'wordcamporg' ), the_title_attribute( 'echo=0' ) ); ?>" rel="bookmark"><?php the_title(); ?></a></h2>
 
@@ -89,7 +95,8 @@
 			</div><!-- .entry-content -->
 
 			<div class="entry-utility">
-				<a href="<?php echo get_term_link( _x('gallery', 'gallery category slug', 'wordcamporg'), 'category' ); ?>" title="<?php esc_attr_e( 'View posts in the Gallery category', 'wordcamporg' ); ?>"><?php _e( 'More Galleries', 'wordcamporg' ); ?></a>
+				<a href="<?php echo get_term_link( $gallery_term->term_id, 'category' ); ?>"
+				   title="<?php esc_attr_e( 'View posts in the Gallery category', 'wordcamporg' ); ?>"><?php _e( 'More Galleries', 'wordcamporg' ); ?></a>
 				<span class="meta-sep">|</span>
 				<span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'wordcamporg' ), __( '1 Comment', 'wordcamporg' ), __( '% Comments', 'wordcamporg' ) ); ?></span>
 				<?php edit_post_link( __( 'Edit', 'wordcamporg' ), '<span class="meta-sep">|</span> <span class="edit-link">', '</span>' ); ?>
