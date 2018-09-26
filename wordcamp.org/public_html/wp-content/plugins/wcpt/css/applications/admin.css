@@ -7,6 +7,11 @@ span.swag-needed-icon {
     height: 150px;
 }
 
+#post-body #wcpt_notes textarea {
+    resize: both;
+    width: 100%;
+}
+
 #post-body input[type=text] {
     width: 50%;
 }
