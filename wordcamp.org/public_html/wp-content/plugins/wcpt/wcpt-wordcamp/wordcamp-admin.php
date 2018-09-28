@@ -174,7 +174,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 			$body     = json_decode( wp_remote_retrieve_body( $response ) );
 
 			// Don't delete the existing (and probably good) values if the request failed
-			if ( is_wp_error( $response ) || empty( $body->results[0]['address_components'] ) ) {
+			if ( is_wp_error( $response ) || empty( $body->results[0]->address_components ) ) {
 				Logger\log( 'geocoding_failure', compact( 'request_url', 'response' ) );
 				return;
 			}
