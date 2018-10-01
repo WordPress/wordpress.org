@@ -83,7 +83,7 @@ function browsehappy_echo_version( $browser ) {
 	echo browsehappy_fetch_version( $browser );
 }
 
-function browsehappy_fetch_version( $browser, $normalize = true ) {
+function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) {
 
 	$fragment = browsehappy_get_browser_data( $browser )->wikidata;
 	if ( ! $fragment ) {
@@ -99,15 +99,18 @@ function browsehappy_fetch_version( $browser, $normalize = true ) {
 		return $stored_version;
 	}
 
+	$rank_type = $rank ? 'PreferredRank' : 'NormalRank';
+	$limit     = $rank ? 'LIMIT 1' : '';
+
 	// See https://github.com/WordPress/browsehappy/issues/37
 	$query = "
 		SELECT ?version WHERE {
 			wd:{$fragment} p:P348 [
 				ps:P348 ?version;
-				wikibase:rank wikibase:PreferredRank
+				wikibase:rank wikibase:{$rank_type}
 			].
 		}
-		LIMIT 1
+		{$limit}
 	";
 
 	$request = wp_remote_get( add_query_arg(
@@ -127,12 +130,27 @@ function browsehappy_fetch_version( $browser, $normalize = true ) {
 	if (
 		empty( $data ) ||
 		empty( $data->results ) ||
-		! is_array( $data->results->bindings ) ||
+		! is_array( $data->results->bindings )
+	) {
+		return false;
+	}
+
+	if (
 		empty( $data->results->bindings[0] ) ||
 		empty( $data->results->bindings[0]->version ) ||
 		empty( $data->results->bindings[0]->version->value )
 	) {
-		return false;
+		if ( $rank ) {
+			return browsehappy_fetch_version( $browser, $normalize, false );
+		} else {
+			return false;
+		}
+	}
+
+	if ( ! $rank ) {
+		usort( $data->results->bindings, function( $a, $b ) {
+			return strcmp( $b->version->value, $a->version->value );
+		} );
 	}
 
 	$version = $data->results->bindings[0]->version->value;
