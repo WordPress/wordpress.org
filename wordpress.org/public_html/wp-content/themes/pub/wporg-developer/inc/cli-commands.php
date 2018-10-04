@@ -140,6 +140,49 @@ class DevHub_Command extends WP_CLI_Command {
 		}
 	}
 
+	/**
+	 * Returns information pertaining to the last parsing.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <key>
+	 * : The information from the last parsing to obtain. One of: 'date', 'import-dir', 'version'.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp devhub last-parsed version
+	 *
+	 * @when after_wp_load
+	 * @subcommand last-parsed
+	 */
+	public function last_parsed( $args, $assoc_args ) {
+		list( $key ) = $args;
+
+		$valid_values = array(
+			'date'       => 'wp_parser_last_import',
+			'import-dir' => 'wp_parser_root_import_dir',
+			'version'    => 'wp_parser_imported_wp_version',
+		);
+
+		if ( empty( $valid_values[ $key ] ) ) {
+			WP_CLI::error( 'Invalid value provided. Must be one of: ' . implode( ', ', array_keys( $valid_values ) ) );
+		}
+
+		$option = $valid_values[ $key ];
+
+		$value = get_option( $option );
+
+		if ( 'date' === $key ) {
+			$value = date_i18n( 'Y-m-d H:i', $value );
+		}
+
+		if ( ! $value ) {
+			WP_CLI::error( 'No value from previous parsing of WordPress source was detected.' );
+		} else {
+			WP_CLI::log( $value );
+		}
+	}
+
 }
 
 WP_CLI::add_command( 'devhub', 'DevHub_Command' );
