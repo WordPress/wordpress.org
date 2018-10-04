@@ -98,6 +98,12 @@ require __DIR__ . '/inc/autocomplete.php';
 require __DIR__ . '/inc/search.php';
 
 /**
+ * Parser customizations.
+ */
+require __DIR__ . '/inc/parser.php';
+
+
+/**
  * Set the content width based on the theme's design and stylesheet.
  */
 if ( ! isset( $content_width ) ) {
@@ -126,8 +132,6 @@ function init() {
 	// Modify default breadcrumbs.
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items_for_hooks', 10, 2 );
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items_for_handbook_root', 10, 2 );
-
-	add_filter( 'wp_parser_skip_duplicate_hooks', '__return_true' );
 
 	add_filter( 'document_title_separator', __NAMESPACE__ . '\\theme_title_separator', 10, 2 );
 
