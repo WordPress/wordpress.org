@@ -102,6 +102,13 @@ require __DIR__ . '/inc/search.php';
  */
 require __DIR__ . '/inc/parser.php';
 
+/**
+ * CLI commands.
+ */
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	require __DIR__ . '/inc/cli-commands.php';
+}
+
 
 /**
  * Set the content width based on the theme's design and stylesheet.
