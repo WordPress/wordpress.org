@@ -10,6 +10,30 @@
  */
 class DevHub_Parser {
 
+	// Files and directories to skip from parsing.
+	const SKIP_FROM_PARSING = [
+		'wp-admin/css/',
+		'wp-admin/includes/class-ftp',
+		'wp-admin/includes/class-pclzip.php',
+		'wp-admin/js/',
+		'wp-content/',
+		'wp-includes/ID3/',
+		'wp-includes/IXR/',
+		'wp-includes/SimplePie/',
+		'wp-includes/Text/',
+		'wp-includes/certificates/',
+		'wp-includes/class-IXR.php',
+		'wp-includes/class-json.php',
+		'wp-includes/class-phpass.php',
+		'wp-includes/class-phpmailer.php',
+		'wp-includes/class-pop3.php ',
+		'wp-includes/class-simplepie.php',
+		'wp-includes/class-smtp.php',
+		'wp-includes/class-snoopy.php',
+		'wp-includes/js/',
+	];
+
+
 	/**
 	 * Initializer.
 	 */
@@ -23,6 +47,33 @@ class DevHub_Parser {
 	public static function do_init() {
 		// Skip duplicate hooks.
 		add_filter( 'wp_parser_skip_duplicate_hooks', '__return_true' );
+
+		// Skip parsing of certain files.
+		add_filter( 'wp_parser_pre_import_file',      [ __CLASS__, 'should_file_be_imported' ], 10, 2 );
+	}
+
+	/**
+	 * Indicates if the given file should be imported for parsing or not.
+	 *
+	 * @param  bool  $import Should the file be imported?
+	 * @param  array $file   File data.
+	 * @return bool  True if file should be imported, else false.
+	 */
+	public static function should_file_be_imported( $import, $file ) {
+		// Bail early if file is already being skipped.
+		if ( ! $import ) {
+			return $import;
+		}
+
+		// Skip file if it matches anything in the list.
+		foreach ( self::SKIP_FROM_PARSING as $skip ) {
+			if ( 0 === strpos( $file['path'], $skip ) ) {
+				$import = false;
+				break;
+			}
+		}
+
+		return $import;
 	}
 
 	/**
