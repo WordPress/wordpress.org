@@ -914,7 +914,8 @@ div.sidebar #bbpress-forums {
 }
 
 #bbpress-forums .bbp-author-role {
-	margin: -20px 12px 10px;
+	margin: 5px;
+	padding: 2px;
 	border: 1px solid #ddd;
 	background-color: #eee;
 }
