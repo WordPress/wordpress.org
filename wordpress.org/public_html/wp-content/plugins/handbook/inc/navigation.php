@@ -162,8 +162,8 @@ class WPorg_Handbook_Navigation {
 			}
 		}
 
-		// Cache key format is pages:{post type}:{sort column}(:{excluded})?.
-		$cache_key = 'pages:' . get_post_type( $post ) . ':' . $sort_column;
+		// Cache key format is pages:{post ID}:{sort column}:{source_post}(:{excluded})?.
+		$cache_key = 'pages:' . $post->ID . ':' . $sort_column . ':' . ( $source_post ? '1' : '0' );
 		if ( $exclude ) {
 			$cache_key .= ':' . str_replace( ' ', '', $exclude );
 		}
