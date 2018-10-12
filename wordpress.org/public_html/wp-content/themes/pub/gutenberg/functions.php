@@ -158,25 +158,6 @@ add_action( 'template_redirect', function() {
 			'_wpLoadGutenbergEditor.then( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
 		);
 
-		// Fix domReady for frontendberg
-		wp_add_inline_script(
-			'wp-dom-ready',
-			'wp.domReady = function( callback ) {
-				// The included domReady fails to call callbacks which are registered while readyState is "interactive".
-				// DOMContentLoaded fires at the start of interactive, but domReady only calls registered methods at "complete".
-				// This caused Frontendberg to white screen as the Gutenberg initialize call happens in that timespan when SessionStorage is empty
-				if (
-					document.readyState === "complete" || // DOMContentLoaded + Images/Styles/etc loaded, so we call directly.
-					document.readyState === "interactive" // DOMContentLoaded fires at this point, so we call directly.
-				) {
-					return callback();
-				}
-
-				// DOMContentLoaded has not fired yet, delay callback until then.
-				document.addEventListener("DOMContentLoaded", callback);
-			};'
-		);
-
 	}, 11 );
 
 	add_action( 'wp_enqueue_scripts', function( $hook ) {
@@ -203,7 +184,7 @@ add_action( 'template_redirect', function() {
 
 		// This filter is only added on a front-page view of the homepage for this site, no other checks are needed here.
 
-		return time() . ':5911429'; // WordPressdotorg user OD
+		return time() . ':5911429'; // WordPressdotorg user ID
 	}, 10, 3 );
 
 	// Disable use XML-RPC
