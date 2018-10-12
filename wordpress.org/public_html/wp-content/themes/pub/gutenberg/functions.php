@@ -178,7 +178,17 @@ add_action( 'template_redirect', function() {
 		);
 
 	}, 11 );
-	add_action( 'wp_enqueue_scripts', 'gutenberg_editor_scripts_and_styles' );
+	add_action( 'wp_enqueue_scripts', function( $hook ) {
+		// This file contains functions that gutenberg is calling.
+		// Unfortunately they don't work great logged out and cause PHP Warnings instead.
+		// include_once ABSPATH . 'wp-admin/includes/post.php';
+
+		// Stub these functions for now.
+		function wp_check_post_lock() { return 0; }
+		function wp_set_post_lock() { return []; }
+
+		gutenberg_editor_scripts_and_styles( $hook );
+	} );
 
 	add_action( 'enqueue_block_editor_assets', function() {
 		wp_enqueue_script( 'button-readonly', get_template_directory_uri() . '/js/button-readonly.js', array(), null );
