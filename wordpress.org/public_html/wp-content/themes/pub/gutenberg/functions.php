@@ -178,14 +178,11 @@ add_action( 'template_redirect', function() {
 		);
 
 	}, 11 );
-	add_action( 'wp_enqueue_scripts', function( $hook ) {
-		// This file contains functions that gutenberg is calling.
-		// Unfortunately they don't work great logged out and cause PHP Warnings instead.
-		// include_once ABSPATH . 'wp-admin/includes/post.php';
 
-		// Stub these functions for now.
-		function wp_check_post_lock() { return 0; }
-		function wp_set_post_lock() { return []; }
+	add_action( 'wp_enqueue_scripts', function( $hook ) {
+		// Gutenberg requires the post-locking functions defined within:
+		// See `show_post_locked_dialog` and `get_post_metadata` filters below.
+		include_once ABSPATH . 'wp-admin/includes/post.php';
 
 		gutenberg_editor_scripts_and_styles( $hook );
 	} );
@@ -193,6 +190,21 @@ add_action( 'template_redirect', function() {
 	add_action( 'enqueue_block_editor_assets', function() {
 		wp_enqueue_script( 'button-readonly', get_template_directory_uri() . '/js/button-readonly.js', array(), null );
 	} );
+
+	// Disable post locking dialogue.
+	add_filter( 'show_post_locked_dialog', '__return_false' );
+
+	// Homepage is always locked by @wordpressdotorg
+	// This prevents other logged-in users taking a lock of the post on the front-end.
+	add_filter( 'get_post_metadata', function( $value, $post_id, $meta_key ) {
+		if ( $meta_key !== '_edit_lock' ) {
+			return $value;
+		}
+
+		// This filter is only added on a front-page view of the homepage for this site, no other checks are needed here.
+
+		return time() . ':5911429'; // WordPressdotorg user OD
+	}, 10, 3 );
 
 	// Disable use XML-RPC
 	add_filter( 'xmlrpc_enabled', '__return_false' );
