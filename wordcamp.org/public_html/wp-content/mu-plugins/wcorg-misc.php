@@ -301,13 +301,15 @@ add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
 } );
 
 // Google Maps API
-add_filter( 'wordcamp_google_maps_api_key', function( $key ) {
+add_filter( 'wordcamp_google_maps_api_key', function( $key, $scope = 'client' ) {
 	$environment = ( defined('WORDCAMP_ENVIRONMENT') ) ? WORDCAMP_ENVIRONMENT : 'development';
 
 	switch ( $environment ) {
 		case 'production' :
-			if ( defined( 'WORDCAMP_PROD_GOOGLE_MAPS_API_KEY' ) ) {
+			if ( $scope === 'client' && defined( 'WORDCAMP_PROD_GOOGLE_MAPS_API_KEY' ) ) {
 				$key = WORDCAMP_PROD_GOOGLE_MAPS_API_KEY;
+			} elseif ( $scope === 'server' && defined( 'WORDCAMP_PROD_GOOGLE_MAPS_SERVER_API_KEY') ) {
+				$key = WORDCAMP_PROD_GOOGLE_MAPS_SERVER_API_KEY;
 			}
 			break;
 
@@ -320,7 +322,7 @@ add_filter( 'wordcamp_google_maps_api_key', function( $key ) {
 	}
 
 	return $key;
-} );
+}, 10, 2 );
 
 /*
  * Disable admin pointers
