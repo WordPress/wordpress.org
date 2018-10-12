@@ -162,7 +162,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 				'address' => rawurlencode( $new_address ),
 			), 'https://maps.googleapis.com/maps/api/geocode/json' );
 
-			$key = apply_filters( 'wordcamp_google_maps_api_key', '' );
+			$key = apply_filters( 'wordcamp_google_maps_api_key', '', 'server' );
 
 			if ( $key ) {
 				$request_url = add_query_arg( array(
