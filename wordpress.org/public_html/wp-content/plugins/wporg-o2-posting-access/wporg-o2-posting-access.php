@@ -24,6 +24,12 @@ class Plugin {
 		add_action( 'admin_bar_menu', [ $this, 'remove_non_accessible_menu_items' ], 100 );
 
 		if ( apply_filters( 'wporg_o2_enable_pending_for_unknown_users', true ) ) {
+			if ( ! is_network_admin() && ! is_user_admin() ) {
+				add_action( 'admin_bar_menu', [ $this, 'add_pending_posts_count_to_admin_bar' ], 55 );
+				add_action( 'wp_enqueue_scripts', [ $this, 'add_pending_posts_icon_to_admin_bar' ] );
+				add_action( 'admin_enqueue_scripts', [ $this, 'add_pending_posts_icon_to_admin_bar' ] );
+			}
+
 			add_filter( 'gettext_with_context', [ $this, 'replace_post_button_label' ], 10, 4 );
 			add_filter( 'o2_create_post', [ $this, 'save_new_post_as_pending' ] );
 			add_filter( 'the_title', [ $this, 'prepend_pending_notice' ], 10, 2 );
@@ -88,6 +94,49 @@ class Plugin {
 	}
 
 	/**
+	 * Adds pending posts count before pending comments count.
+	 *
+	 * @param \WP_Admin_Bar $wp_admin_bar The admin bar instance.
+	 */
+	public function add_pending_posts_count_to_admin_bar( $wp_admin_bar ) {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
+
+		$awaiting_review = wp_count_posts();
+		$awaiting_review = $awaiting_review->pending;
+		$awaiting_text   = sprintf( _n( '%s post awaiting review', '%s posts awaiting review', $awaiting_review, 'o2' ), number_format_i18n( $awaiting_review ) );
+
+		$icon   = '<span class="ab-icon"></span>';
+		$title  = '<span class="ab-label count-' . $awaiting_review . '" aria-hidden="true">' . number_format_i18n( $awaiting_review ) . '</span>';
+		$title .= '<span class="screen-reader-text">' . $awaiting_text . '</span>';
+
+		$wp_admin_bar->add_menu(
+			array(
+				'id'    => 'pending-posts',
+				'title' => $icon . $title,
+				'href'  => admin_url( 'edit.php' ),
+			)
+		);
+	}
+
+	/**
+	 * Adds icon for the pending posts count.
+	 */
+	public function add_pending_posts_icon_to_admin_bar() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
+
+		wp_add_inline_style( 'admin-bar', '
+			#wpadminbar #wp-admin-bar-pending-posts .ab-icon:before {
+				content: "\f109";
+				top: 3px;
+			}
+		' );
+	}
+
+	/**
 	 * Sets post status of a new post to 'pending'.
 	 *
 	 * @param object $post Post data.
@@ -128,8 +177,8 @@ class Plugin {
 	}
 
 	/**
-	 * Whether a user can publish a post with post status 'publish'
-	 * .
+	 * Whether a user can publish a post with post status 'publish'.
+	 *
 	 * @param int $user_id Optional. The user ID.
 	 * @return bool True when user can, false if not.
 	 */
