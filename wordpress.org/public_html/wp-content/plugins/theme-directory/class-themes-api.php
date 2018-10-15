@@ -482,7 +482,7 @@ class Themes_API {
 			$this->query['paged'] = (int) $this->request->page;
 		}
 		if ( isset( $this->request->per_page ) ) {
-			$this->query['posts_per_page'] = $this->request->per_page;
+			$this->query['posts_per_page'] = min( $this->request->per_page, 999 );
 		}
 
 		// Views
