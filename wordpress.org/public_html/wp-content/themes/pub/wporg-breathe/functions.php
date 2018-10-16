@@ -215,3 +215,4 @@ add_filter( 'o2_user_model', __NAMESPACE__ . '\user_model', 10, 2 );
 /* translators: %s: Post title */
 __( 'Pending Review: %s', 'wporg' );
 __( 'Submit for review', 'wporg' );
+_n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
