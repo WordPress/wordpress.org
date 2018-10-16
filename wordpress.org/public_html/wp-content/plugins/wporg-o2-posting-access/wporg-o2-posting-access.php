@@ -131,7 +131,11 @@ class Plugin {
 		wp_add_inline_style( 'admin-bar', '
 			#wpadminbar #wp-admin-bar-pending-posts .ab-icon:before {
 				content: "\f109";
-				top: 3px;
+				top: 2px;
+			}
+
+			#wpadminbar #wp-admin-bar-pending-posts .count-0 {
+				opacity: .5;
 			}
 		' );
 	}
