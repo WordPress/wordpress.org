@@ -659,6 +659,19 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 		}
 
 		/**
+		 * List of meta keys that can be exposed publicly.
+		 *
+		 * @return array
+		 */
+		public static function get_public_meta_keys() {
+			return array(
+				'Meetup URL',
+				'Meetup Location (From meetup.com)',
+				'Last meetup on',
+			);
+		}
+
+		/**
 		 * Schedule cron job for updating data from meetup API
 		 */
 		public function schedule_cron_jobs() {

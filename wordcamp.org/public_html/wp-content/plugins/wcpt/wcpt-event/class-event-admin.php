@@ -262,15 +262,19 @@ abstract class Event_Admin {
 		$old_status = get_post_status_object( $old_status );
 		$new_status = get_post_status_object( $new_status );
 
-		add_post_meta(
+		$log_id = add_post_meta(
 			$post->ID, '_status_change', array(
 				'timestamp' => time(),
 				'user_id'   => get_current_user_id(),
 				'message'   => sprintf( '%s &rarr; %s', $old_status->label, $new_status->label ),
 			)
 		);
+		// Encoding $post_type and status_change meta ID in key so that we can fetch it if needed while simultaneously be able to have a where clause on value
+		// Because of the way MySQL works, it will still be able to use index on meta_key when searching, as long as we are querying just the prefix
+		if ( $log_id ) {
+			add_post_meta( $post->ID, "_status_change_log_$post->post_type $log_id", time() );
+		}
 	}
-
 
 	/**
 	 * Load common admin side scripts

@@ -74,7 +74,7 @@ class Meetup_Application extends Event_Application {
 	 * @return array
 	 */
 	public static function get_public_post_statuses() {
-		return array( 'wcpt-mtp-nds-swag', 'wcpt-mtp-active', 'wcpt-mtp-dormant' );
+		return array( 'wcpt-mtp-nds-vet', 'wcpt-mtp-active', 'wcpt-mtp-dormant' );
 	}
 
 	/**
