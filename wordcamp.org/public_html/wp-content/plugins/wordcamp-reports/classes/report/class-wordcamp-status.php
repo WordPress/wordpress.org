@@ -9,10 +9,10 @@ defined( 'WPINC' ) || die();
 use Exception;
 use DateTime;
 use WP_Error, WP_Post;
-use function WordCamp\Reports\{get_assets_url, get_assets_dir_path, get_views_dir_path};
+use function WordCamp\Reports\{get_views_dir_path};
 use WordCamp\Reports\Utility\Date_Range;
 use function WordCamp\Reports\Validation\{validate_date_range, validate_wordcamp_status};
-use function WordCamp\Reports\Time\{year_array, quarter_array, month_array, convert_time_period_to_date_range};
+use function WordCamp\Reports\Time\{year_array, quarter_array, month_array};
 use WordCamp_Loader;
 use WordCamp\Utilities\Export_CSV;
 
@@ -23,7 +23,7 @@ use WordCamp\Utilities\Export_CSV;
  *
  * @package WordCamp\Reports\Report
  */
-class WordCamp_Status extends Base {
+class WordCamp_Status extends Base_Status {
 	/**
 	 * Report name.
 	 *
@@ -222,7 +222,7 @@ class WordCamp_Status extends Base {
 			}
 
 			$latest_log    = end( $logs );
-			$latest_status = $this->get_log_status_result( $latest_log );
+			$latest_status = $this->get_log_status_result( $latest_log, WordCamp_Loader::get_post_statuses() );
 			reset( $logs );
 
 			// Trim log entries occurring before the date range.
@@ -348,65 +348,8 @@ class WordCamp_Status extends Base {
 	 *
 	 * @return array
 	 */
-	protected function get_wordcamp_status_logs( WP_Post $wordcamp ) {
-		$log_entries = get_post_meta( $wordcamp->ID, '_status_change' );
-
-		if ( ! empty( $log_entries ) ) {
-			// Sort log entries in chronological order.
-			usort( $log_entries, function( $a, $b ) {
-				if ( $a['timestamp'] === $b['timestamp'] ) {
-					return 0;
-				}
-
-				return ( $a['timestamp'] > $b['timestamp'] ) ? 1 : -1;
-			} );
-
-			return $log_entries;
-		}
-
-		return array();
-	}
-
-	/**
-	 * Determine the ending status of a particular status change event.
-	 *
-	 * E.g. for this event:
-	 *
-	 *     Needs Vetting → More Info Requested
-	 *
-	 * The ending status would be "More Info Requested".
-	 *
-	 * @param array $log_entry A status change log entry.
-	 *
-	 * @return string
-	 */
-	protected function get_log_status_result( $log_entry ) {
-		if ( isset( $log_entry['message'] ) ) {
-			$pieces = explode( ' &rarr; ', $log_entry['message'] );
-
-			if ( isset( $pieces[1] ) ) {
-				return $this->get_status_id_from_name( $pieces[1] );
-			}
-		}
-
-		return '';
-	}
-
-	/**
-	 * Given the ID of a WordCamp status, determine the ID string.
-	 *
-	 * @param string $status_name A WordCamp status name.
-	 *
-	 * @return string
-	 */
-	protected function get_status_id_from_name( $status_name ) {
-		$statuses = array_flip( WordCamp_Loader::get_post_statuses() );
-
-		if ( isset( $statuses[ $status_name ] ) ) {
-			return $statuses[ $status_name ];
-		}
-
-		return '';
+	protected function get_wordcamp_status_logs( \WP_Post $wordcamp ) {
+		return $this->sort_logs( get_post_meta( $wordcamp->ID, '_status_change' ) );
 	}
 
 	/**
@@ -446,40 +389,51 @@ class WordCamp_Status extends Base {
 	}
 
 	/**
-	 * Register all assets used by this report.
+	 * Determine whether to render the public report form.
 	 *
-	 * @return void
+	 * This shortcode is limited to use on pages.
+	 *
+	 * @return string HTML content to display shortcode.
 	 */
-	protected static function register_assets() {
-		wp_register_script(
-			self::$slug,
-			get_assets_url() . 'js/' . self::$slug . '.js',
-			array( 'jquery', 'select2' ),
-			filemtime( get_assets_dir_path() . 'js/' . self::$slug . '.js' ),
-			true
-		);
+	public static function handle_shortcode() {
+		$html = '';
 
-		wp_register_style(
-			self::$slug,
-			get_assets_url() . 'css/' . self::$slug . '.css',
-			array( 'select2' ),
-			filemtime( get_assets_dir_path() . 'css/' . self::$slug . '.css' ),
-			'screen'
-		);
+		if ( 'page' === get_post_type() ) {
+			self::register_assets();
+
+			wp_enqueue_style( 'select2' );
+			wp_enqueue_script( self::$slug );
+
+			ob_start();
+			self::render_public_page();
+			$html = ob_get_clean();
+		}
+
+		return $html;
 	}
 
 	/**
-	 * Enqueue JS and CSS assets for this report's admin interface.
+	 * Render the page for this report on the front end.
 	 *
 	 * @return void
 	 */
-	public static function enqueue_admin_assets() {
-		self::register_assets();
-		WordCamp_Details::register_assets();
+	public static function render_public_page() {
+		$params = self::parse_public_report_input();
+		$years    = year_array( absint( date( 'Y' ) ), 2015 );
+		$quarters = quarter_array();
+		$months   = month_array();
+		$statuses = WordCamp_Loader::get_post_statuses();
 
-		wp_enqueue_style( WordCamp_Details::$slug );
-		wp_enqueue_script( self::$slug );
-		wp_enqueue_style( self::$slug );
+		$error = $params['error'];
+		$report = null;
+		$period = $params['period'];
+		$year = $params['year'];
+		$status = $params['status'];
+		if ( ! empty( $params ) && isset( $params['range'] ) ) {
+			$report = new self( $params['range']->start, $params['range']->end, $params['status'], $params['options'] );
+		}
+
+		include get_views_dir_path() . 'public/wordcamp-status.php';
 	}
 
 	/**
@@ -618,74 +572,8 @@ class WordCamp_Status extends Base {
 		} // End if().
 	}
 
-	/**
-	 * Determine whether to render the public report form.
-	 *
-	 * This shortcode is limited to use on pages.
-	 *
-	 * @return string HTML content to display shortcode.
-	 */
-	public static function handle_shortcode() {
-		$html = '';
-
-		if ( 'page' === get_post_type() ) {
-			self::register_assets();
-
-			wp_enqueue_style( 'select2' );
-			wp_enqueue_script( self::$slug );
-
-			ob_start();
-			self::render_public_page();
-			$html = ob_get_clean();
-		}
-
-		return $html;
+	static public function get_report_object( $date_range, $status, $options ) {
+		return new self( $date_range->start, $date_range->end, $status, $options );
 	}
 
-	/**
-	 * Render the page for this report on the front end.
-	 *
-	 * @return void
-	 */
-	public static function render_public_page() {
-		// Apparently 'year' is a reserved URL parameter on the front end, so we prepend 'report-'.
-		$year   = filter_input( INPUT_GET, 'report-year', FILTER_VALIDATE_INT );
-		$period = filter_input( INPUT_GET, 'period' );
-		$status = filter_input( INPUT_GET, 'status' );
-		$action = filter_input( INPUT_GET, 'action' );
-
-		$years    = year_array( absint( date( 'Y' ) ), 2015 );
-		$quarters = quarter_array();
-		$months   = month_array();
-		$statuses = WordCamp_Loader::get_post_statuses();
-
-		if ( ! $year ) {
-			$year = absint( date( 'Y' ) );
-		}
-
-		if ( ! $period ) {
-			$period = absint( date( 'm' ) );
-		}
-
-		$report = null;
-
-		if ( 'Show results' === $action ) {
-			try {
-				$range = convert_time_period_to_date_range( $year, $period );
-			} catch ( Exception $e ) {
-				$error = new WP_Error(
-					self::$slug . '-time-period-error',
-					$e->getMessage()
-				);
-			}
-
-			$options = array(
-				'earliest_start' => new DateTime( '2015-01-01' ), // No status log data before 2015.
-			);
-
-			$report = new self( $range->start, $range->end, $status, $options );
-		}
-
-		include get_views_dir_path() . 'public/wordcamp-status.php';
-	}
 }

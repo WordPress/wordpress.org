@@ -134,21 +134,6 @@ abstract class Base {
 	public abstract function compile_report_data( array $data );
 
 	/**
-	 * Determine the data fields safelist based on the context of the report.
-	 *
-	 * @return array The list of fields that are safe to include.
-	 */
-	protected function get_data_fields_safelist() {
-		$safelist = $this->public_data_fields;
-
-		if ( false === $this->options['public'] ) {
-			$safelist = array_merge( $safelist, $this->private_data_fields );
-		}
-
-		return $safelist;
-	}
-
-	/**
 	 * Filter the report data prior to caching and compiling.
 	 *
 	 * @param array $data The data to filter.
@@ -313,5 +298,20 @@ abstract class Base {
 		$response_data['data'] = $data;
 
 		return new \WP_REST_Response( $response_data );
+	}
+
+	/**
+	 * Determine the data fields safelist based on the context of the report.
+	 *
+	 * @return array The list of fields that are safe to include.
+	 */
+	public function get_data_fields_safelist() {
+		$safelist = $this->public_data_fields;
+
+		if ( false === $this->options['public'] ) {
+			$safelist = array_merge( $safelist, $this->private_data_fields );
+		}
+
+		return $safelist;
 	}
 }
