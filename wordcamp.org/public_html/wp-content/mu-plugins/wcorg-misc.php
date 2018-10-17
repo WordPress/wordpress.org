@@ -435,10 +435,14 @@ function wcorg_central_modify_export_caps( $primitive_caps, $meta_cap ) {
 
 add_filter( 'map_meta_cap', 'wcorg_central_modify_export_caps', 10, 2 );
 
-	/**
-	 * Error handler to send errors to slack.
-	 */
+/**
+ * Error handler to send errors to slack.
+ */
 function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
+
+	if ( $err_no !== E_ERROR && $err_no !== E_USER_ERROR && $err_no !== E_CORE_ERROR && $err_no !== E_COMPILE_ERROR ) {
+		return;
+	}
 
 	$domain = get_site_url();
 
