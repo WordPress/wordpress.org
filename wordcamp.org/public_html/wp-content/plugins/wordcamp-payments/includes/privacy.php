@@ -11,7 +11,7 @@ defined( 'WPINC' ) || die();
 
 add_filter( 'the_posts',                          __NAMESPACE__ . '\hide_others_payment_files', 10, 2 );
 add_filter( 'wp_privacy_personal_data_exporters', __NAMESPACE__ . '\register_personal_data_exporters' );
-add_filter( 'wp_privacy_personal_data_erasers', __NAMESPACE__ . '\register_personal_data_erasers' );
+add_filter( 'wp_privacy_personal_data_erasers',   __NAMESPACE__ . '\register_personal_data_erasers'   );
 
 
 /**
@@ -89,7 +89,7 @@ function get_payment_file_parent_ids( $attachments ) {
 		'numberposts' => 1000,
 		'post_type'   => array(
 			Reimbursement_Requests\POST_TYPE,
-			WCP_Payment_Request::POST_TYPE
+			WCP_Payment_Request::POST_TYPE,
 		),
 	) );
 
@@ -107,7 +107,6 @@ function register_personal_data_erasers( $erasers ) {
 	/**
 	 * This is an empty stub, we are not adding an eraser for now, because it contains data which can be used for
 	 * accounting or reference purpose.
-	 *
 	 */
 	return $erasers;
 }
@@ -137,24 +136,24 @@ function register_personal_data_exporters( $exporters ) {
  * Finds and exports personal data associated with an email address in a vendor payment request
  *
  * @param string $email_address
- * @param int $page
+ * @param int    $page
  *
  * @return array
  */
 function vendor_payment_exporter( $email_address, $page ) {
-
 	$results = array(
 		'data' => array(),
 		'done' => true,
 	);
 
-	$vendor_payment_requests = get_post_wp_query( \WCP_Payment_Request::POST_TYPE, $page, $email_address );
+	$vendor_payment_requests = get_post_wp_query( WCP_Payment_Request::POST_TYPE, $page, $email_address );
 
 	if ( empty( $vendor_payment_requests ) ) {
 		return $results;
 	}
 
 	$data_to_export = array();
+
 	foreach ( $vendor_payment_requests->posts as $post ) {
 		$vendor_payment_exp_data = array();
 		$meta                    = get_post_meta( $post->ID );
@@ -169,14 +168,14 @@ function vendor_payment_exporter( $email_address, $page ) {
 		];
 
 		$vendor_payment_exp_data = array_merge(
-			$vendor_payment_exp_data, get_meta_details( $meta, \WCP_Payment_Request::POST_TYPE )
+			$vendor_payment_exp_data, get_meta_details( $meta, WCP_Payment_Request::POST_TYPE )
 		);
 
 		if ( ! empty( $vendor_payment_exp_data ) ) {
 			$data_to_export[] = array(
-				'group_id'    => \WCP_Payment_Request::POST_TYPE,
+				'group_id'    => WCP_Payment_Request::POST_TYPE,
 				'group_label' => __( 'WordCamp Vendor Payments', 'wordcamporg' ),
-				'item_id'     => \WCP_Payment_Request::POST_TYPE . "-{$post->ID}",
+				'item_id'     => WCP_Payment_Request::POST_TYPE . "-{$post->ID}",
 				'data'        => $vendor_payment_exp_data,
 			);
 		}
@@ -192,12 +191,11 @@ function vendor_payment_exporter( $email_address, $page ) {
  * Finds and exports personal data associated with an email address in a Reimbursement Request.
  *
  * @param string $email_address
- * @param int $page
+ * @param int    $page
  *
  * @return array
  */
 function reimbursements_exporter( $email_address, $page ) {
-
 	$results = array(
 		'data' => array(),
 		'done' => true,
@@ -210,6 +208,7 @@ function reimbursements_exporter( $email_address, $page ) {
 	}
 
 	$data_to_export = array();
+
 	foreach ( $reimbursements->posts as $post ) {
 		$reimbursement_data_to_export = array();
 		$meta                         = get_post_meta( $post->ID );
@@ -223,11 +222,10 @@ function reimbursements_exporter( $email_address, $page ) {
 			'value' => $post->post_date,
 		];
 
-		// meta fields
+		// Meta fields.
 		$reimbursement_data_to_export = array_merge(
 			$reimbursement_data_to_export, get_meta_details( $meta, Reimbursement_Requests\POST_TYPE )
 		);
-
 
 		if ( ! empty( $reimbursement_data_to_export ) ) {
 			$data_to_export[] = array(
@@ -251,14 +249,13 @@ function reimbursements_exporter( $email_address, $page ) {
  * We use `_camppayments_vendor_email_address` as the key for `payment_request`, instead of author email,
  * because the vendor contact details could be of an individual (instead of a business), and thus is a potential PII
  *
- * @param $query_type string
- * @param $page integer
- * @param $email_address string Email address of the entity making the request
+ * @param string  $query_type
+ * @param integer $page
+ * @param string  $email_address Email address of the entity making the request.
  *
  * @return null|WP_Query
  */
 function get_post_wp_query( $query_type, $page, $email_address ) {
-
 	$query_args = array(
 		'post_type'      => $query_type,
 		'post_status'    => 'any',
@@ -268,7 +265,7 @@ function get_post_wp_query( $query_type, $page, $email_address ) {
 	);
 
 	switch ( $query_type ) {
-		case Reimbursement_Requests\POST_TYPE :
+		case Reimbursement_Requests\POST_TYPE:
 			$user = get_user_by( 'email', $email_address );
 
 			if ( empty( $user ) ) {
@@ -277,7 +274,8 @@ function get_post_wp_query( $query_type, $page, $email_address ) {
 
 			$query_args = array_merge( $query_args, array( 'post_author' => $user->ID ) );
 			break;
-		case \WCP_Payment_Request::POST_TYPE :
+
+		case WCP_Payment_Request::POST_TYPE:
 			$query_args['meta_query'] = [
 				'relation' => 'AND',
 			];
@@ -287,7 +285,8 @@ function get_post_wp_query( $query_type, $page, $email_address ) {
 				'value' => $email_address,
 			];
 			break;
-		default :
+
+		default:
 			return null;
 	}
 
@@ -295,15 +294,18 @@ function get_post_wp_query( $query_type, $page, $email_address ) {
 }
 
 /**
- * @param $meta array meta object of post, as retrieved by `get_post_meta( $post->ID )`
- * @param $post_type string post_type . could be one of wcb_reimbursement or wcp_payment_request
+ *
+ * @param array  $meta      Meta object of post, as retrieved by `get_post_meta( $post->ID )`.
+ * @param string $post_type Post type. Could be one of `wcb_reimbursement` or `wcp_payment_request`.
  *
  * @return array Details of the reimbursement request
  */
 function get_meta_details( $meta, $post_type ) {
 	$meta_details = array();
+
 	foreach ( get_meta_fields_mapping( $post_type ) as $meta_field => $meta_field_name ) {
 		$data = isset( $meta[ $meta_field ] ) ? $meta[ $meta_field ] : null;
+
 		if ( ! empty( $data ) && is_array( $data ) && ! empty( $data[0] ) ) {
 			$meta_details[] = [
 				'name'  => $meta_field_name,
@@ -318,7 +320,7 @@ function get_meta_details( $meta, $post_type ) {
 /**
  * Returns array of meta fields and their titles that we want to allow export for.
  *
- * @param $post_type string
+ * @param string $post_type
  *
  * @return array
  */
@@ -326,7 +328,7 @@ function get_meta_fields_mapping( $post_type ) {
 	$mapping_fields = array();
 
 	if ( Reimbursement_Requests\POST_TYPE === $post_type ) {
-		$prefix = '_wcbrr_';
+		$prefix         = '_wcbrr_';
 		$mapping_fields = array_merge(
 			$mapping_fields,
 			array(
@@ -334,14 +336,14 @@ function get_meta_fields_mapping( $post_type ) {
 				$prefix . 'currency'                    => __( 'Currency', 'wordcamporg' ),
 				$prefix . 'payment_method'              => __( 'Payment Method', 'wordcamporg' ),
 
-				// Payment Method - Direct Deposit
+				// Payment Method - Direct Deposit.
 				$prefix . 'ach_bank_name'               => __( 'Bank Name', 'wordcamporg' ),
 				$prefix . 'ach_account_type'            => __( 'Account Type', 'wordcamporg' ),
 				$prefix . 'ach_routing_number'          => __( 'Routing Number', 'wordcamporg' ),
 				$prefix . 'ach_account_number'          => __( 'Account Number', 'wordcamporg' ),
 				$prefix . 'ach_account_holder_name'     => __( 'Account Holder Name', 'wordcamporg' ),
 
-				// Payment Method - Check
+				// Payment Method - Check.
 				$prefix . 'payable_to'                  => __( 'Payable To', 'wordcamporg' ),
 				$prefix . 'check_street_address'        => __( 'Street Address', 'wordcamporg' ),
 				$prefix . 'check_city'                  => __( 'City', 'wordcamporg' ),
@@ -349,7 +351,7 @@ function get_meta_fields_mapping( $post_type ) {
 				$prefix . 'check_zip_code'              => __( 'ZIP / Postal Code', 'wordcamporg' ),
 				$prefix . 'check_country'               => __( 'Country', 'wordcamporg' ),
 
-				// Payment Method - Wire
+				// Payment Method - Wire.
 				$prefix . 'bank_name'                   => __( 'Beneficiary’s Bank Name', 'wordcamporg' ),
 				$prefix . 'bank_street_address'         => __( 'Beneficiary’s Bank Street Address', 'wordcamporg' ),
 				$prefix . 'bank_city'                   => __( 'Beneficiary’s Bank City', 'wordcamporg' ),
@@ -359,7 +361,7 @@ function get_meta_fields_mapping( $post_type ) {
 				$prefix . 'bank_bic'                    => __( 'Beneficiary’s Bank SWIFT BIC', 'wordcamporg' ),
 				$prefix . 'beneficiary_account_number'  => __( 'Beneficiary’s Account Number or IBAN', 'wordcamporg' ),
 
-				// Intermediary bank details
+				// Intermediary bank details.
 				$prefix . 'interm_bank_name'            => __( 'Intermediary Bank Name', 'wordcamporg' ),
 				$prefix . 'interm_bank_street_address'  => __( 'Intermediary Bank Street Address', 'wordcamporg' ),
 				$prefix . 'interm_bank_city'            => __( 'Intermediary Bank City', 'wordcamporg' ),
@@ -375,15 +377,14 @@ function get_meta_fields_mapping( $post_type ) {
 				$prefix . 'beneficiary_state'           => __( 'Beneficiary’s State / Province', 'wordcamporg' ),
 				$prefix . 'beneficiary_zip_code'        => __( 'Beneficiary’s ZIP / Postal Code', 'wordcamporg' ),
 				$prefix . 'beneficiary_country_iso3166' => __( 'Beneficiary’s Country', 'wordcamporg' ),
-
 			)
 		);
-	} elseif ( \WCP_Payment_Request::POST_TYPE === $post_type ) {
-		$prefix = '_camppayments_';
+	} elseif ( WCP_Payment_Request::POST_TYPE === $post_type ) {
+		$prefix         = '_camppayments_';
 		$mapping_fields = array_merge(
 			$mapping_fields,
 			array(
-				// Vendor payment fields
+				// Vendor payment fields.
 				$prefix . 'description'            => __( 'Description', 'wordcamporg' ),
 				$prefix . 'general_notes'          => __( 'Notes', 'wordcamporg' ),
 				$prefix . 'vendor_name'            => __( 'Name', 'wordcamporg' ),
@@ -400,4 +401,3 @@ function get_meta_fields_mapping( $post_type ) {
 
 	return $mapping_fields;
 }
-
