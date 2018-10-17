@@ -955,6 +955,9 @@ class WordCamp_Budgets {
 			'posts_per_page' => 100,
 			'orderby'        => 'title',
 			'order'          => 'ASC',
+
+			// Make sure that `WordCamp\Budgets\Privacy\hide_others_payment_files()` runs.
+			'suppress_filters' => false,
 		) );
 
 		foreach ( $files as &$file ) {

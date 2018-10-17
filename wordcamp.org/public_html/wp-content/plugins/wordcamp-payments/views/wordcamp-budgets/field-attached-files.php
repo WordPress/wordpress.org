@@ -16,6 +16,12 @@
 	<?php _e( 'Attached files:', 'wordcamporg' ); ?>
 </h4>
 
+<?php if ( ! current_user_can( 'manage_options' ) ) : ?>
+	<p>
+		<em><?php _e( 'Note: Files uploaded by other users are hidden to protect privacy.', 'wordcamporg' ); ?></em>
+	</p>
+<?php endif; ?>
+
 <ul class="wcb_files_list loading-content">
 	<li>
 		<span class="spinner is-active"></span>
