@@ -434,3 +434,55 @@ function wcorg_central_modify_export_caps( $primitive_caps, $meta_cap ) {
 }
 
 add_filter( 'map_meta_cap', 'wcorg_central_modify_export_caps', 10, 2 );
+
+	/**
+	 * Error handler to send errors to slack.
+	 */
+function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
+
+	$domain = get_site_url();
+
+	$page_slug = trim( $_SERVER["REQUEST_URI"] , '/' );
+
+	$text = "Error $err_no : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug";
+
+	$message = array(
+		"attachments" => array(
+			array(
+				"fallback" => $text,
+				"color" => "#ff0000",
+				"pretext" => "Error on \"$file:$line\" ",
+				"author_name" => $domain,
+				"text" => $text,
+			),
+		),
+	);
+
+	$data = json_encode( $message );
+
+	$req = curl_init( SLACK_ERROR_REPORT_URL );
+	curl_setopt( $req, CURLOPT_HTTPHEADER, array( "Content-type: application/json" ) );
+	curl_setopt( $req, CURLOPT_POST, true );
+	curl_setopt( $req, CURLOPT_POSTFIELDS, $data );
+
+	curl_exec( $req );
+
+	return false;
+}
+
+	/**
+	 * Shutdown handler which forwards errors to slack.
+	 */
+function send_fatal_to_slack() {
+	if( ! $error = error_get_last() ) {
+		return;
+	}
+
+	return send_error_to_slack( $error['type'], $error['message'], $error['file'], $error['line'] );
+}
+
+if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
+	register_shutdown_function( 'send_fatal_to_slack' );
+	set_error_handler( 'send_error_to_slack', E_ERROR );
+}
+
