@@ -272,6 +272,10 @@ input {
   padding-bottom: 0;
 }
 
+.home .devhub-wrap h1, .home .devhub-wrap h2, .home .devhub-wrap h3, .home .devhub-wrap h4, .home .devhub-wrap h5, .home .devhub-wrap h6 {
+  font-family: "Open Sans", sans-serif;
+}
+
 .home .devhub-wrap #content {
   padding: 0;
 }
@@ -848,38 +852,77 @@ input {
 }
 
 .devhub-wrap .home-landing .section {
-  padding: 30px 0%;
-  padding: 3rem 0%;
+  padding: 50px 0 10px;
+  padding: 5rem 0 1rem;
+  margin-top: 60px;
+  margin-top: 6rem;
+}
+
+.devhub-wrap .home-landing .section .no-bullets li {
+  line-height: 20px;
+  line-height: 2rem;
+  margin-bottom: 12.5px;
+  margin-bottom: 1.25rem;
+}
+
+.devhub-wrap .home-landing .section .no-bullets li a {
+  color: #4ca6cf;
+  font-size: 125%;
+}
+
+@media (max-width: 974px) {
+  .devhub-wrap .home-landing .section {
+    width: 640px;
+    margin: 0 auto;
+  }
 }
 
 .devhub-wrap .color.section {
   color: #fff;
 }
 
-.devhub-wrap .section.blue {
+.devhub-wrap .section {
   /*background: #0073aa;*/
   padding: 30px 0;
   padding: 3rem 0;
+  overflow: auto;
 }
 
-.devhub-wrap .section.blue .box {
+.devhub-wrap .section .box {
   text-align: center;
+  padding: 0 30px 90px;
+  padding: 0 3rem 9rem;
+  width: 320px;
 }
 
-.devhub-wrap .section.blue .box .widget-description {
-  padding: 1em 0;
+.devhub-wrap .section .box .widget-description {
+  padding: 1em 0 0;
+  margin-bottom: 5px;
+  margin-bottom: 1rem;
 }
 
-.devhub-wrap .section.blue .widget-title {
-  font-size: 50px;
-  font-size: 5rem;
-  line-height: 78px;
-  line-height: 7.8rem;
+.devhub-wrap .section.search-guide {
+  border-top: 2px solid #efefef;
+  padding-top: 60px;
+  padding-top: 6rem;
+  margin-top: 0;
 }
 
-.devhub-wrap .section.blue .widget-title .dashicons {
-  font-size: 84px;
-  font-size: 8.4rem;
+.devhub-wrap .section.search-guide .box {
+  text-align: left;
+}
+
+.devhub-wrap .section .widget-title {
+  font-size: 25px;
+  font-size: 2.5rem;
+  line-height: 60px;
+  line-height: 6rem;
+}
+
+.devhub-wrap .section .widget-title .dashicons {
+  color: #222;
+  font-size: 108px;
+  font-size: 10.8rem;
   line-height: 84px;
   line-height: 8.4rem;
   height: 84px;
@@ -892,7 +935,7 @@ input {
 }
 
 @media (min-width: 43em) and (max-width: 915px) {
-  .devhub-wrap .section.blue .three-columns .widget-title {
+  .devhub-wrap .section .three-columns .widget-title {
     font-size: 35px;
     font-size: 3.5rem;
   }
@@ -1304,8 +1347,11 @@ input {
 }
 
 .devhub-wrap .widget-description {
-  font-style: italic;
-  font-weight: 300;
+  font-weight: 400;
+}
+
+.devhub-wrap .go {
+  color: #4ca6cf;
 }
 
 .devhub-wrap .handbook h1 {
@@ -1941,6 +1987,45 @@ input {
   .site-title {
     margin-left: 10px;
   }
+}
+
+.site-header.home {
+  padding: 28px 20px;
+  padding: 2.8rem 2.0rem;
+  text-align: center;
+}
+
+.site-header.home .site-branding {
+  height: initial;
+}
+
+.site-header.home .site-title {
+  max-width: none;
+  font-weight: 300;
+  margin: 36px 0 11.25px;
+  margin: 3.6rem 0 1.125rem;
+  text-align: center;
+  display: inherit;
+  clear: both;
+}
+
+.site-header.home .site-title a {
+  font-size: 68.6646px;
+  font-size: 6.86646rem;
+}
+
+@media (max-width: 500px) {
+  .site-header.home .site-title a {
+    font-size: 50px;
+    font-size: 5rem;
+  }
+}
+
+.site-header.home .site-description {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 2.25rem;
+  font-weight: 300;
+  text-align: center;
 }
 
 .menu-container {

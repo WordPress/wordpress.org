@@ -12,15 +12,18 @@ $GLOBALS['pagetitle'] = wp_get_document_title();
 require WPORGPATH . 'header.php';
 ?>
 
-<header id="masthead" class="site-header" role="banner">
+<header id="masthead" class="site-header<?php if ( is_front_page() ) { echo ' home'; } ?>" role="banner">
 	<?php if ( get_query_var( 'is_handbook' ) ) : ?>
 	<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu', 'wporg' ); ?></strong></a>
 	<?php endif; ?>
 	<div class="site-branding">
-		<?php $tag = is_front_page() ? 'span' : 'h1'; ?>
-		<<?php echo $tag; ?> class="site-title">
+		<h1 class="site-title">
 			<a href="<?php echo esc_url( DevHub\get_site_section_url() ); ?>" rel="home"><?php echo DevHub\get_site_section_title(); ?></a>
-		</<?php echo $tag; ?>>
+		</h1>
+
+		<?php if ( is_front_page() ) : ?>
+		<p class="site-description"><?php _e( 'The freedom to build.', 'wporg' ); ?></p>
+		<?php endif; ?>
 
 		<nav id="site-navigation" class="main-navigation" role="navigation">
 			<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg' ); ?>"></button>

@@ -2,6 +2,9 @@
 @import "global";
 
 .home .devhub-wrap {
+	h1, h2, h3, h4, h5, h6 {
+		font-family: "Open Sans", sans-serif;
+	}
 	padding-bottom: 0;
 	#content {
 		padding: 0;
@@ -506,34 +509,74 @@
 		overflow: visible;
 	}
 	.home-landing .section {
-		padding: 30px 0%;
-		padding: 3rem 0%;
+		padding: 50px 0 10px;
+		padding: 5rem 0 1rem;
+		margin-top: 60px;
+		margin-top: 6rem;
+
+		.no-bullets {
+			li {
+				line-height: 20px;
+				line-height: 2rem;
+				margin-bottom: 12.5px;
+				margin-bottom: 1.25rem;
+
+				a {
+					color: #4ca6cf;
+					font-size: 125%;
+				}
+			}
+		}
+
+		@media ( max-width: 974px ) {
+			width: 640px;
+			margin: 0 auto;
+		}
+		
 	}
 	.color.section {
 		color: #fff;
 	}
-	.section.blue {
+	.section {
 		/*background: #0073aa;*/
 		padding: 30px 0;
 		padding: 3rem 0;
+		overflow: auto;
 
 		.box {
 			text-align: center;
 
+			padding: 0 30px 90px;
+			padding: 0 3rem 9rem;
+			width: 320px;
+
 			.widget-description {
-				padding: 1em 0;
+				padding: 1em 0 0;
+				margin-bottom: 5px;
+				margin-bottom: 1rem;
+			}
+		}
+		&.search-guide {
+			border-top: 2px solid #efefef;
+			padding-top: 60px;
+			padding-top: 6rem;
+			margin-top: 0;
+
+			.box {
+				text-align: left;
 			}
 		}
 
 		.widget-title {
 
-			font-size: 50px;
-			font-size: 5rem;
-			line-height: 78px;
-			line-height: 7.8rem;
+			font-size: 25px;
+			font-size: 2.5rem;
+			line-height: 60px;
+			line-height: 6rem;
 			.dashicons {
-				font-size: 84px;
-				font-size: 8.4rem;
+				color: #222;
+				font-size: 108px;
+				font-size: 10.8rem;
 				line-height: 84px;
 				line-height: 8.4rem;
 				height: 84px;
@@ -930,9 +973,12 @@
 	}
 
 	.widget-description {
-		font-style: italic;
-		font-weight: 300;
+		font-weight: 400;
 	}
+	.go {
+		color: #4ca6cf;
+	}
+
 	.handbook {
 		h1 {
 			margin: 24px 0;
@@ -1576,6 +1622,43 @@
 		margin-left: 10px;
 	}
 }
+.site-header.home {
+	padding: 28px 20px;
+	padding: 2.8rem 2.0rem;
+	text-align: center;
+
+	.site-branding {
+		height: initial;
+	}
+
+	.site-title {
+		max-width: none;
+		font-weight: 300;
+		margin: 36px 0 11.25px;
+		margin: 3.6rem 0 1.125rem;
+		text-align: center;
+		display: inherit;
+		clear: both;
+
+		a {
+			font-size: 68.6646px;
+			font-size: 6.86646rem;
+		
+			@media (max-width: 500px) {
+				font-size: 50px;
+				font-size: 5rem;
+			}
+		}
+	}
+
+	.site-description {
+		color: hsla(0,0%,100%,.8);
+		font-size: 2.25rem;
+		font-weight: 300;
+		text-align: center;
+	}
+}
+
 .menu-container {
 	background: #0073aa;
 	clear: both;
