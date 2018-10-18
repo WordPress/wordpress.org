@@ -10,6 +10,7 @@ defined( 'WPINC' ) || die();
 
 
 add_filter( 'the_posts',                          __NAMESPACE__ . '\hide_others_payment_files', 10, 2 );
+add_filter( 'wp_unique_filename',                 __NAMESPACE__ . '\obscure_payment_file_names', 10, 2 );
 add_filter( 'wp_privacy_personal_data_exporters', __NAMESPACE__ . '\register_personal_data_exporters' );
 add_filter( 'wp_privacy_personal_data_erasers',   __NAMESPACE__ . '\register_personal_data_erasers'   );
 
@@ -94,6 +95,38 @@ function get_payment_file_parent_ids( $attachments ) {
 	) );
 
 	return wp_list_pluck( $payment_posts_with_attachments, 'ID' );
+}
+
+/**
+ * Add a CSPRN to payment file names to protect privacy.
+ *
+ * Without this, a 3rd party could scrape the site looking for predictable filenames. With this added, that is no
+ * longer practical. See https://core.trac.wordpress.org/ticket/43546#comment:34 for details on how a similar
+ * technique was used in Core. A length of `16` was chosen because that makes the filename less cumbersome, but
+ * still makes brute force practically impossible (2.267522912 * 10^26 years).
+ *
+ * @param string $filename
+ * @param string $extension
+ *
+ * @return string
+ */
+function obscure_payment_file_names( $filename, $extension ) {
+	$attached_post       = get_post( absint( $_REQUEST['post_id'] ?? 0 ) );
+	$relevant_post_types = array(
+		Reimbursement_Requests\POST_TYPE,
+		WCP_Payment_Request::POST_TYPE,
+	);
+
+	if ( $attached_post instanceof WP_Post && in_array( $attached_post->post_type, $relevant_post_types, true ) ) {
+		$filename = sprintf(
+			'%s-%s%s',
+			str_replace( $extension, '', $filename ),
+			wp_generate_password( 16, false, false ),
+			$extension
+		);
+	}
+
+	return $filename;
 }
 
 /**
