@@ -34,7 +34,7 @@ add_filter( 'wp_privacy_personal_data_erasers',   __NAMESPACE__ . '\register_per
 function hide_others_payment_files( $attachments, $wp_query ) {
 	$user = wp_get_current_user();
 
-	if ( 'attachment' !== $wp_query->get( 'post_type' ) || in_array( 'administrator', $user->roles, true ) ) {
+	if ( 'attachment' !== $wp_query->get( 'post_type' ) || current_user_can( 'manage_options' ) ) {
 		return $attachments;
 	}
 
