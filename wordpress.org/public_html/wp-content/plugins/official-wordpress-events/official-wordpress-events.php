@@ -475,15 +475,15 @@ class Official_WordPress_Events {
 		usleep( 75000 );
 
 		$response = $this->remote_get( sprintf(
-			'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s&sensor=false',
+			'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s&sensor=false&key=%s',
 			$latitude,
-			$longitude
+			$longitude,
+			OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY
 		) );
+		$body = json_decode( wp_remote_retrieve_body( $response ) );
 
-		if ( ! is_wp_error( $response ) ) {
+		if ( ! is_wp_error( $response ) && isset( $body->results ) && empty( $body->error_message ) ) {
 			$this->log( 'geocode successful' );
-
-			$body = json_decode( wp_remote_retrieve_body( $response ) );
 
 			if ( isset( $body->results[0]->address_components ) ) {
 				$address = $body->results[0]->address_components;
@@ -491,7 +491,7 @@ class Official_WordPress_Events {
 			}
 		}
 		else {
-			$this->log( 'geocode failed' );
+			$this->log( 'geocode failed: ' . wp_json_encode( $response ) );
 		}
 
 		return $address;
