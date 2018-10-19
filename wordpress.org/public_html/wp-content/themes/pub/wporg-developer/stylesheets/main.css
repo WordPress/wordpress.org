@@ -786,6 +786,10 @@ input {
   display: none;
 }
 
+.devhub-wrap .widget-area .search-section.hide-if-js {
+  display: block;
+}
+
 .devhub-wrap .infinite-scroll .paging-navigation,
 .devhub-wrap .infinite-scroll.neverending .site-footer {
   /* Theme Footer (when set to scrolling) */
