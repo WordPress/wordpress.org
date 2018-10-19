@@ -7,6 +7,8 @@ Version:     0.1
 Author:      WordPress.org Meta Team
 */
 
+use WordCamp\Utilities\Meetup_Client;
+
 class Official_WordPress_Events {
 	const EVENTS_TABLE          = 'wporg_events';
 	const WORDCAMP_API_BASE_URL = 'https://central.wordcamp.org/wp-json/';
@@ -317,63 +319,50 @@ class Official_WordPress_Events {
 	protected function get_meetup_events() {
 		$events = array();
 
-		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY || ! $groups = $this->get_meetup_group_ids() ) {
+		require_once( __DIR__ . '/class-meetup-client.php' );
+
+		$client = new Meetup_Client();
+		if ( ! empty( $client->error->errors ) ) {
+			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $client->error ), true );
 			return $events;
 		}
 
-		// Meetup API sometimes throws an error with chunk size larger than 50.
-		$groups = array_chunk( $groups, 50, true );
+		$groups = $client->get_groups();
+		if ( ! empty( $client->error->errors ) ) {
+			$this->log( 'Failed to fetch groups: ' . wp_json_encode( $client->error ), true );
+			return $events;
+		}
 
-		foreach ( $groups as $group_batch ) {
-			$request_url = add_query_arg(
-				array(
-					'group_id' => implode( ',', $group_batch ),
-					'time'     => '0,3m',
-					'page'     => 200,
-					'status'   => 'upcoming,cancelled',
-				),
-				self::MEETUP_API_BASE_URL . '2/events'
-			);
-
-			while ( ! empty( $request_url ) ) {
-				// The "next" URLs returned by the API need to be re-signed.
-				$request_url = add_query_arg(
-					array(
-						'sign' => true,
-						'key'  => MEETUP_API_KEY,
-					),
-					$request_url
-				);
-
-				$this->log( 'fetching more events from: ' . var_export( $request_url, true ) );
-
-				$response = $this->remote_get( $request_url );
-				$body     = json_decode( wp_remote_retrieve_body( $response ) );
-
-				$this->log( 'pruned response - ' . print_r( $this->prune_response_for_log( $response ), true ) );
-
-				if ( ! empty ( $body->results ) ) {
-					$meetups = $body->results;
+		$meetups = $client->get_events( wp_list_pluck( $groups, 'id' ) );
+		if ( ! empty( $client->error->errors ) ) {
+			$this->log( 'Failed to fetch meetups: ' . wp_json_encode( $client->error ), true );
+			return $events;
+		}
 
 					foreach ( $meetups as $meetup ) {
-						$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
+						if ( empty( $meetup['id'] ) || empty( $meetup['name'] ) ) {
+							$this->log( 'Malformed meetup: ' . wp_json_encode( $meetup ) );
+							continue;
+						}
 
-						if ( isset( $meetup->venue ) ) {
-							$location = $this->format_meetup_venue_location( $meetup->venue );
+						$start_timestamp = ( $meetup['time'] / 1000 ) + ( $meetup['utc_offset'] / 1000 );    // convert to seconds
+
+						if ( isset( $meetup['venue'] ) ) {
+							$location = $this->format_meetup_venue_location( $meetup['venue'] );
 						} else {
-							$geocoded_location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
+							$geocoded_location = $this->reverse_geocode( $meetup['group']['group_lat'], $meetup['group']['group_lon'] );
 							$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location );
 							$location          = sprintf(
 								'%s%s%s',
-								$location_parts['city'],
+								$location_parts['city'] ?? '',
 								empty( $location_parts['state'] )        ? '' : ', ' . $location_parts['state'],
 								empty( $location_parts['country_name'] ) ? '' : ', ' . $location_parts['country_name']
 							);
 							$location         = trim( $location, ", \t\n\r\0\x0B" );
 						}
 
-						if ( ! empty( $meetup->venue->country ) ) {
-							$country_code = $meetup->venue->country;
+						if ( ! empty( $meetup['venue']['country'] ) ) {
+							$country_code = $meetup['venue']['country'];
 						} elseif ( ! empty( $location_parts['country_code'] ) ) {
 							$country_code = $location_parts['country_code'];
 						} else {
@@ -382,76 +371,26 @@ class Official_WordPress_Events {
 
 						$events[] = new Official_WordPress_Event( array(
 							'type'            => 'meetup',
-							'source_id'       => $meetup->id,
-							'status'          => 'upcoming' === $meetup->status ? 'scheduled' : 'cancelled',
-							'title'           => $meetup->name,
-							'url'             => $meetup->event_url,
-							'meetup_name'     => $meetup->group->name,
-							'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup->group->urlname ),
-							'description'     => $meetup->description,
-							'num_attendees'   => $meetup->yes_rsvp_count,
+							'source_id'       => $meetup['id'],
+							'status'          => 'upcoming' === $meetup['status'] ? 'scheduled' : 'cancelled',
+							'title'           => $meetup['name'],
+							'url'             => $meetup['event_url'],
+							'meetup_name'     => $meetup['group']['name'],
+							'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup['group']['urlname'] ),
+							'description'     => $meetup['description'] ?? '',
+							'num_attendees'   => $meetup['yes_rsvp_count'],
 							'start_timestamp' => $start_timestamp,
-							'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ), // convert to seconds
+							'end_timestamp'   => ( empty ( $meetup['duration'] ) ? $start_timestamp : $start_timestamp + ( $meetup['duration'] / 1000 ) ), // convert to seconds
 							'location'        => $location,
 							'country_code'    => $country_code,
-							'latitude'        => empty( $meetup->venue->lat ) ? $meetup->group->group_lat : $meetup->venue->lat,
-							'longitude'       => empty( $meetup->venue->lon ) ? $meetup->group->group_lon : $meetup->venue->lon,
+							'latitude'        => empty( $meetup['venue']['lat'] ) ? $meetup['group']['group_lat'] : $meetup['venue']['lat'],
+							'longitude'       => empty( $meetup['venue']['lon'] ) ? $meetup['group']['group_lon'] : $meetup['venue']['lon'],
 						) );
 					}
-				}
-
-				$request_url = isset( $body->meta->next ) ? esc_url_raw( $body->meta->next ) : null;
-			}
-		}
 
 		$this->log( sprintf( 'returning %d events', count( $events ) ) );
 
 		return $events;
-	}
-
-	/*
-	 * Gets the IDs of all of the meetup groups associated
-	 * 
-	 * @return array
-	 */
-	protected function get_meetup_group_ids() {
-		$group_ids = array();
-
-		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY ) {
-			return $group_ids;
-		}
-
-		$request_url = sprintf(
-			'%s2/profiles?&member_id=%d&key=%s',
-			self::MEETUP_API_BASE_URL,
-			self::MEETUP_MEMBER_ID,
-			MEETUP_API_KEY
-		);
-
-		while ( ! empty( $request_url ) ) {
-			$this->log( 'fetching more groups from: ' . var_export( $request_url, true ) );
-
-			$response = $this->remote_get( $request_url );
-			$body     = json_decode( wp_remote_retrieve_body( $response ) );
-
-			$this->log( 'pruned response - ' . print_r( $this->prune_response_for_log( $response ), true ) );
-
-			if ( ! empty ( $body->results ) ) {
-				foreach ( $body->results as $profile ) {
-					if ( ! isset( $profile->group->id, $profile->role ) || 'Organizer' !== $profile->role ) {
-						continue;
-					}
-
-					$group_ids[] = $profile->group->id;
-				}
-			}
-
-			$request_url = isset( $body->meta->next ) ? $body->meta->next : null;
-		}
-
-		$this->log( sprintf( 'returning %d groups', count( $group_ids ) ) );
-
-		return $group_ids;
 	}
 
 	/**
@@ -538,11 +477,11 @@ class Official_WordPress_Events {
 		$location = array();
 
 		foreach ( array( 'city', 'state', 'localized_country_name' ) as $part ) {
-			if ( ! empty( $venue->$part ) ) {
+			if ( ! empty( $venue[ $part ] ) ) {
 				if ( in_array( $part, array( 'state' ) ) ) {
-					$location[] = strtoupper( $venue->$part );
+					$location[] = strtoupper( $venue[ $part ] );
 				} else {
-					$location[] = $venue->$part;
+					$location[] = $venue[ $part ];
 				}
 			}
 		}
@@ -733,9 +672,23 @@ class Official_WordPress_Events {
 	 * @todo Remove this when the stuck cron job bug is fixed
 	 *
 	 * @param string $message
+	 * @param bool   $write_to_disk If true, writes the message to the standard error log in addition to the
+	 *                              `owpe_log` option.
 	 */
-	protected function log( $message ) {
+	protected function log( $message, $write_to_disk = false ) {
 		$limit = 500;
+		$api_keys = array( MEETUP_API_KEY, OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
+
+		if ( $write_to_disk ) {
+			error_log( sprintf(
+				/*
+				 * Use the folder name as a prefix so that Slack searches/highlights will match this and log
+				 * entries generated by PHP itself.
+				 */
+				'official-wordpress-events: %s',
+				str_replace( $api_keys, '[redacted]', $message )
+			) );
+		}
 
 		if ( ! isset( $this->log ) ) {
 			$this->log = array();
