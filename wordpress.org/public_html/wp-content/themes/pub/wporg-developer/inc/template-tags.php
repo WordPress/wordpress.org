@@ -624,6 +624,8 @@ namespace DevHub {
 				return __( 'Theme Handbook', 'wporg' );
 			case 'cli':
 				return __( 'WP-CLI Commands', 'wporg' );
+			case 'rest-api':
+				return __( 'REST API Handbook', 'wporg' );
 			default:
 				return __( 'Developer Resources', 'wporg' );
 		}
