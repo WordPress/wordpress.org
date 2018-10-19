@@ -92,7 +92,7 @@
     <rule ref="rulesets/naming.xml/ShortVariable">
         <properties>
             <!-- $a and $b are conventionally used in usort() callbacks. $to is perfectly descriptive with `wp_mail()`. -->
-            <property name="exceptions" value="a,b,to" />
+            <property name="exceptions" value="a,b,to,wp" />
         </properties>
     </rule>
 
