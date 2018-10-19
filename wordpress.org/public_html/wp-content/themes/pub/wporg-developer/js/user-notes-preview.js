@@ -20,6 +20,9 @@
 		text = '';
 		processing = false;
 
+		// Show tabs with Javascript.
+		$( '#commentform .tablist').show();
+
 		if ( textarea.length && preview.length && tabs.length ) {
 
 			// Append spinner to preview tab

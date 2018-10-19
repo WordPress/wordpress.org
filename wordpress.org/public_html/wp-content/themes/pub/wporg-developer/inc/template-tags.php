@@ -113,7 +113,11 @@ namespace {
 
 			// Check if the current page is a reply to a note.
 			$reply_id = 0;
-			if ( isset( $_GET['replytocom'] ) && $_GET['replytocom'] ) {
+			if ( isset( $_GET['replytocom'] ) && $_GET['replytocom'] ) {		
+				/* Javascript uses preventDefault() when clicking links with '?replytocom={comment_ID}'
+				 * We assume Javascript is disabled when visiting a page with this query var.
+				 * There are no consequences if Javascript is enabled.
+				 */
 				$reply_id = absint( $_GET['replytocom'] );
 			}
 
@@ -142,8 +146,11 @@ namespace {
 					$comments[ $key ]->child_notes = array_reverse( $children[ $comment->comment_ID ] );
 				}
 
-				if ( ! $show_editor && ( $reply_id && ( $reply_id === (int) $comment->comment_ID ) ) ) {
-					// Show the editor when replying to this parent comment
+				if ( ! $show_editor && ( $reply_id && ( $reply_id === (int) $comment->comment_ID ) ) ) { 
+					/* The query var 'replytocom' is used and the value is the same as the current comment ID.
+					 * We show the editor for the current comment because we assume Javascript is disabled.
+					 * If Javascript is not disabled the editor is hidden (as normal) by the class 'hide-if-js'.
+					 */
 					$comments[ $key ]->show_editor = true;
 					$show_editor = true;
 				}
@@ -164,10 +171,15 @@ namespace {
 		 * @param array   $args Comment display arguments.
 		 */
 		function wporg_developer_list_notes( $comments, $args ) {
+			$is_user_content    = class_exists( 'DevHub_User_Submitted_Content' );
 			$is_user_logged_in  = is_user_logged_in();
 			$can_user_post_note = DevHub\can_user_post_note( true, get_the_ID() );
-			$user_content       = class_exists( 'DevHub_User_Submitted_Content' );
-			$display_editor     = $is_user_logged_in && $can_user_post_note && $user_content;
+			$is_user_verified   = $is_user_logged_in && $can_user_post_note;
+		
+			$args['updated_note'] = 0;
+			if ( isset( $_GET['updated-note'] ) && $_GET['updated-note'] ) {
+				$args['updated_note'] = absint( $_GET['updated-note'] );
+			}
 
 			foreach ( $comments as $comment ) {
 
@@ -176,9 +188,10 @@ namespace {
 				// Display parent comment.
 				wporg_developer_user_note( $comment, $args, 1 );
 
-				// Show or hide feedback notes.
-				$class = $comment->show_editor ? '' : ' hide-if-js';
-				echo "<section id='feedback-{$comment_id}' class='feedback{$class}'>\n";
+				/* Use hide-if-js class to hide the feedback section if Javascript is enabled.
+				 * Users can display the section with Javascript.
+				 */
+				echo "<section id='feedback-{$comment_id}' class='feedback hide-if-js'>\n";
 
 				// Display child comments.
 				if ( ! empty( $comment->child_notes ) ) {
@@ -192,8 +205,10 @@ namespace {
 				}
 
 				// Add a feedback form for logged in users.
-				if ( $display_editor ) {
-					// Show or hide the editor depending if we're replying to a note.
+				if ( $is_user_content && $is_user_verified ) {
+					/* Show the feedback editor if we're replying to a note and Javascript is disabled.
+					 * If Javascript is enabled the editor is hidden (as normal) by the 'hide-if-js' class.
+					 */
 					$display = $comment->show_editor ? 'show' : 'hide';
 					echo DevHub_User_Submitted_Content::wp_editor_feedback( $comment, $display );
 				}
@@ -202,10 +217,8 @@ namespace {
 				// Feedback links to log in, add feedback or show feedback.
 				echo "<footer class='feedback-links' >\n";
 				if ( $can_user_post_note ) {
-					echo "EEE";
 					$feedback_link = trailingslashit( get_permalink() ) . "?replytocom={$comment_id}#feedback-editor-{$comment_id}";
 					$display       = '';
-					$aria          = '';
 					if ( ! $is_user_logged_in ) {
 						$class         = 'login';
 						$feedback_text = __( 'Log in to add feedback', 'wporg' );
@@ -213,12 +226,14 @@ namespace {
 					} else {
 						$class         ='add';
 						$feedback_text = __( 'Add feedback to this note', 'wporg' );
-						$aria          = '';//" aria-expanded='false' aria_controls='feedback-editor-{$comment_id}' aria-label='" . esc_attr( $feedback_text ) . "'";
 
-						// Hide 'add feedback' link if editor is displayed.
-						$display = $display_editor && $comment->show_editor ? ' style="display:none"' : '';
+						/* Hide the feedback link if the current user is logged in and the
+						 * feedback editor is displayed (because Javascript is disabled).
+						 * If Javascript is enabled the editor is hidden and the feedback link is displayed (as normal).
+						 */
+						$display = $is_user_verified && $comment->show_editor ? ' style="display:none"' : '';
 					}
-					echo '<a class="feedback-' . $class . '" href="' . esc_url( $feedback_link ) . '"' . $display . $aria .' rel="nofollow">' . $feedback_text . '</a>';
+					echo '<a role="button" class="feedback-' . $class . '" href="' . esc_url( $feedback_link ) . '"' . $display . ' rel="nofollow">' . $feedback_text . '</a>';
 				}
 
 				// close parent list item
@@ -240,13 +255,20 @@ namespace {
 			$GLOBALS['comment']       = $comment;
 			$GLOBALS['comment_depth'] = $depth;
 
+			static $note_number = 0;
+
 			$approved       = ( 0 < (int) $comment->comment_approved ) ? true : false;
 			$is_parent      = ( 0 === (int) $comment->comment_parent ) ? true : false;
 			$is_voting      = class_exists( 'DevHub_User_Contributed_Notes_Voting' );
 			$count          = $is_voting ? (int)  DevHub_User_Contributed_Notes_Voting::count_votes( $comment->comment_ID, 'difference' ) : 0;
 			$curr_user_note = $is_voting ? (bool) DevHub_User_Contributed_Notes_Voting::is_current_user_note( $comment->comment_ID ) : false;
+			$edited_note_id = isset( $args['updated_note'] ) ? $args['updated_note'] : 0;
+			$is_edited_note = ( $edited_note_id === (int) $comment->comment_ID );
+			$note_author    = \DevHub\get_note_author_link( $comment );
+			$can_edit_note  = \DevHub\can_user_edit_note( $comment->comment_ID );
+			$has_edit_cap   = current_user_can( 'edit_comment', $comment->comment_ID );
 
-			// Classes
+			// CSS Classes
 			$comment_class = array();
 
 			if ( -1 > $count ) {
@@ -261,21 +283,6 @@ namespace {
 				$comment_class[] = 'user-note-moderated';
 			}
 
-			// This would all be moot if core passed the $comment context for 'get_comment_author_link' filter.
-			if ( $comment->user_id ) {
-				$commenter = get_user_by( 'id', $comment->user_id );
-				$url = 'https://profiles.wordpress.org/' . sanitize_key( $commenter->user_nicename ) . '/';
-				$author = get_the_author_meta( 'display_name', $comment->user_id );
-			} else {
-				$url = $comment->comment_author_url;
-				$author = $comment->comment_author;
-			}
-
-			$comment_author_link = $author;
-			if ( $url ) {
-				$comment_author_link = "<a href='$url' rel='external nofollow' class='url'>$author</a>";
-			}
-
 			$date = sprintf( _x( '%1$s ago', '%1$s = human-readable time difference', 'wporg' ),
 				human_time_diff( get_comment_time( 'U' ),
 				current_time( 'timestamp' ) )
@@ -285,7 +292,7 @@ namespace {
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
 
 			<?php if ( $is_parent ) : ?>
-				<a href="#comment-content-<?php echo $comment->comment_ID; ?>" class="screen-reader-text"><?php _e( 'Skip to note content', 'wporg' ); ?></a>
+				<a href="#comment-content-<?php echo $comment->comment_ID; ?>" class="screen-reader-text"><?php printf( __( 'Skip to note %d content', 'wporg' ), ++ $note_number ); ?></a>
 				<header class="comment-meta">
 
 				<?php
@@ -300,17 +307,29 @@ namespace {
 							echo get_avatar( $comment, $args['avatar_size'] );
 						}
 
-						printf( __( 'Contributed by %s', 'wporg' ), sprintf( '<cite class="fn">%s</cite>', $comment_author_link ) );
+						printf( __( 'Contributed by %s', 'wporg' ), sprintf( '<cite class="fn">%s</cite>', $note_author ) );
 						?>
 
 						</span>
 						&mdash;
-						<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
+						<a class="comment-date" href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
 							<time datetime="<?php comment_time( 'c' ); ?>">
 							<?php echo $date; ?>
 							</time>
 						</a>
+
 						<?php edit_comment_link( __( 'Edit', 'wporg' ), '<span class="edit-link">&mdash; ', '</span>' ); ?>
+						<?php if ( ! $has_edit_cap && $can_edit_note ) : ?>
+							&mdash; <span class="comment-author-edit-link">
+								<!-- Front end edit comment link -->
+								<a class="comment-edit-link" href="<?php echo site_url( "/reference/comment/edit/{$comment->comment_ID}" ); ?>"><?php _e( 'Edit', 'wporg' ); ?></a>
+							</span>
+						<?php endif; ?>
+						<?php if ( $can_edit_note && $is_edited_note ) : ?>
+							&mdash; <span class="comment-edited">
+							<?php _e( 'edited', 'wporg' ); ?>
+							</span>
+						<?php endif; ?>
 						<?php if ( ! $approved ) : ?>
 							&mdash; <span class="comment-awaiting-moderation"><?php _e( 'awaiting moderation', 'wporg' ); ?></span>
 						<?php endif; ?>
@@ -325,13 +344,22 @@ namespace {
 					comment_text();
 				} else {
 					$text = get_comment_text()  . ' &mdash; ';
-					$text .= sprintf( __( 'By %s', 'wporg' ), sprintf( '<cite class="fn">%s</cite>', $comment_author_link ) ) . ' &mdash; ';
-					$text .= ' <a href="'. esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
+					$text .= sprintf( __( 'By %s', 'wporg' ), sprintf( '<cite class="fn">%s</cite>', $note_author ) ) . ' &mdash; ';
+					$text .= ' <a class="comment-date" href="'. esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
 					$text .= '<time datetime="' . get_comment_time( 'c' ) . '">' . $date . '</time></a>';
 
-					if ( current_user_can( 'edit_comment', $comment->comment_ID ) ) {
+					if ( $has_edit_cap ) {
+						// WP admin edit comment link.
 						$text .= ' &mdash; <a class="comment-edit-link" href="' . get_edit_comment_link( $comment->comment_ID ) .'">';
 						$text .= __( 'Edit', 'wporg' ) . '</a>';
+					} elseif ( $can_edit_note ) {
+						// Front end edit comment link.
+						$text .= ' &mdash; <a class="comment-edit-link" href="' . site_url( "/reference/comment/edit/{$comment->comment_ID}" ) . '">';
+						$text .= __( 'Edit', 'wporg' ) . '</a>';
+					}
+
+					if ( $can_edit_note && $is_edited_note ) {
+						$text .= ' &mdash; <span class="comment-edited">' . __( 'edited', 'wporg' ) . '</span>';
 					}
 
 					if ( ! $approved ) {
@@ -1404,6 +1432,76 @@ namespace DevHub {
 		}
 
 		return $open;
+	}
+
+	/**
+	 * Indicates if the current user can edit a user contibuted note.
+	 *
+	 * A user can only edit their own notes if it's in moderation and
+	 * if it's a note for a parsed post type.
+	 *      
+	 * Users with the 'edit_comment' capability can edit
+	 * all notes from a parsed post type (regardless if it's in moderation).
+	 *
+	 * @param integer $note_id Note ID.
+	 * @return bool True if the current user can edit notes.
+	 */
+	function can_user_edit_note( $note_id = 0 ) {
+		$user = get_current_user_id();
+		$note = get_comment( $note_id );
+		if ( ! $user || ! $note ) {
+			return false;
+		}
+
+		$post_id        = isset( $note->comment_post_ID ) ? (int) $note->comment_post_ID : 0;
+		$is_note_author = isset( $note->user_id ) && ( (int) $note->user_id === $user );
+		$is_approved    = isset( $note->comment_approved ) && ( 0 < (int) $note->comment_approved );
+		$can_edit_notes = isset( $note->comment_ID ) && current_user_can( 'edit_comment', $note->comment_ID );
+		$is_parsed_type = is_parsed_post_type( get_post_type( $post_id ) );
+
+		if ( $is_parsed_type && ( $can_edit_notes || ( $is_note_author && ! $is_approved ) ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the note author link to the profiles.wordpress.org author's URL.
+	 *
+	 * @param WP_Comment|int $comment Comment object or comment ID.
+	 * @return string The HTML link to the profiles.wordpress.org author's URL.
+	 */
+	function get_note_author_link( $comment ) {
+		return get_note_author( $comment, true );
+	}
+
+	/**
+	 * Get the note author nicename.
+	 *
+	 * @param WP_Comment|int $comment Comment object or comment ID.
+	 * @param bool           $link. Whether to return a link to the author's profiles. Default false.
+	 * @return string The comment author name or HTML link.
+	 */
+	function get_note_author( $comment, $link = false ) {
+		$comment   = get_comment( $comment );
+		$user_id   = isset( $comment->user_id ) ? $comment->user_id : 0;
+		$commenter = get_user_by( 'id', $comment->user_id );
+		$author    = '';
+
+		if ( $user_id && isset( $commenter->user_nicename ) ) {
+			$url    = 'https://profiles.wordpress.org/' . sanitize_key( $commenter->user_nicename ) . '/';
+			$author = get_the_author_meta( 'display_name', $comment->user_id );
+		} else {
+			$url    = isset( $comment->comment_author_url ) ? $comment->comment_author_url : '';
+			$author = isset( $comment->comment_author ) ?  $comment->comment_author : '';
+		}
+
+		if ( $link && ( $url && $author ) ) {
+			$author = sprintf( '<a href="%s" rel="external nofollow" class="url">%s</a>', esc_url( $url ), $author );
+		}
+
+		return $author;
 	}
 
 	/**

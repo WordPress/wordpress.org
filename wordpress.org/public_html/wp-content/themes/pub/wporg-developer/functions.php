@@ -56,6 +56,11 @@ require __DIR__ . '/inc/user-content-preview.php';
 require __DIR__ . '/inc/user-content-voting.php';
 
 /**
+ * Editing for user-submitted content.
+ */
+require __DIR__ . '/inc/user-content-edit.php';
+
+/**
  * CLI commands custom post type and importer.
  */
 require __DIR__ . '/inc/cli.php';

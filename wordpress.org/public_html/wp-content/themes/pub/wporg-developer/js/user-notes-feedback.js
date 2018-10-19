@@ -4,22 +4,20 @@
 		return;
 	}
 
+	var wpAdminBar     = 0;
 	var options        = wporg_note_feedback;
-	var wpAdminBar     = $('#page.admin-bar').length ? 32 : 0;
-	var feedbackToggle = $( '<a class="feedback-toggle" href="#">' + options.show + '</a>' );
-	var hash           = window.location.hash;
+	var feedbackToggle = $( '<a role="button" class="feedback-toggle" href="#">' + options.show + '</a>' );
+	var commentID      = window.location.hash;
 
 	// Check if the fragment identifier is a comment ID (e.g. #comment-63)
-	if ( !hash.match( /#comment\-[0-9]+$/ ) ) {
-		hash = '';
+	if ( !commentID.match( /#comment\-[0-9]+$/ ) ) {
+		commentID = '';
 	}
 	
 	$( '.feedback-editor' ).each( function() {
-
-		// Hide hidden editor with 'hide-if-js' class.
-		if( 'none' === $(this).css('display') ) {
-			$( this ).show().addClass( 'hide-if-js' );
-		}
+		// Hide feedback editors with hide-if-js class
+		$( this ).not('.edit-feedback-editor').addClass( 'hide-if-js' );
+		$( this ).removeAttr("style");
 
 		// Add quicktag 'inline code' button to editor. 
 		var id = $( this ).find( 'textarea' ).attr( 'id' );
@@ -37,9 +35,10 @@
 			var feedback = $( this ).find( '.feedback' );
 			var toggle = feedbackToggle.clone();
 
+			var feedback_id = getCommentID( $(this) );
 			toggle.attr( {
 				'aria-expanded': 'false',
-				'aria-controls': 'feedback-' + getCommentID( $(this) )
+				'aria-controls': 'feedback-' + feedback_id
 			} );
 
 			// Set text to 'Hide Feedback' if feedback is displayed
@@ -47,15 +46,22 @@
 				toggle.text( options.hide );
 			}
 
-			feedbackLinks.find( '.feedback-add' ).show();
+			// Display hidden add feedback link and add aria
+			feedbackLinks.find( '.feedback-add' ).removeAttr("style").attr( {
+				'aria-expanded': 'false',
+				'aria-controls': 'feedback-editor-' + feedback_id
+			} );
+
 			feedbackLinks.append( toggle );
 		}
 
 		if ( feedbackLinks.length ) {
-			// Move feedback links before feedback.
+			// Move the feedback links before the feedback section.
 			var clonedElements = feedbackLinks.clone().children();
 			var feedbackLinksTop = $( '<div class="feedback-links"></div>' ).append( clonedElements );
 			$( this ).find( '.feedback' ).first().before( feedbackLinksTop );
+
+			// Hide the bottom feedback links.
 			feedbackLinks.addClass( 'bottom hide-if-js' );
 		}
 	} );
@@ -67,7 +73,6 @@
 
 	// Removes added elements 
 	function resetComment( el ) {
-
 		var children = el.find( 'ul.children' );
 		if ( !children.length ) {
 			el.find( '.feedback-toggle' ).remove();
@@ -78,32 +83,35 @@
 
 	// Show hidden child comments if the fragment identifier is a comment ID (e.g. #comment-63).  
 	$( document ).ready( function() {
-
+		// Set wpAdminBar
+		wpAdminBar = $('#wpadminbar').length ? 32 : 0;
 		var childComments = $( '.comment' ).find( 'ul.children' );
 
-		if ( !( hash.length && childComments.length ) ) {
+		if ( ! ( commentID.length && childComments.length ) ) {
 			return;
 		}
 
-		var hashComment = childComments.find( hash ).first();
-		if ( hashComment.length ) {
-			// Child comment exists.
-
-			var parent = hashComment.closest( '.comment.depth-1' );
-			if ( parent.find( '.feedback' ).hasClass( 'hide-if-js' ) ) {
-				// Show child comments.
-				parent.find( '.feedback-toggle' ).first().trigger( 'click' );
-			}
-
-			// Scroll to the child comment.
-			var pos = hashComment.offset();
-			$( 'html,body' ).animate( {
-				scrollTop: pos.top - wpAdminBar
-			}, 1 );
+		var comment = childComments.find( commentID + '.depth-2' ).first();
+		if ( ! comment.length ) {
+			return;
 		}
+		// Child comment exists.
+
+		var parent = comment.closest( '.comment.depth-1' );
+		if ( parent.find( '.feedback' ).hasClass( 'hide-if-js' ) ) {
+			// Show child comments.
+			parent.find( '.feedback-toggle' ).first().trigger( 'click' );
+		}
+
+		// Scroll to child comment and adjust for admin bar
+		var pos = comment.offset();
+		$( 'html,body' ).animate( {
+			scrollTop: pos.top - wpAdminBar
+		}, 1 );
+
 	} );
 
-	// Show/Hide feedback toggle link.
+	// Click event for Show/Hide feedback toggle link.
 	$( document ).on( 'click', '.feedback-toggle', function( e ) {
 		e.preventDefault();
 
@@ -130,7 +138,7 @@
 				scrollTop: pos.top - wpAdminBar
 			}, 1000 );
 
-			// Add feedback links at the bottom if there are over 3 feedback notes.
+			// Show feedback links at the bottom if there are over 3 feedback notes.
 			var children = parent.find( 'ul.children > li' );
 			if ( 3 < children.length ) {
 				var feedbackLinks = parent.find( '.feedback-links.bottom' );

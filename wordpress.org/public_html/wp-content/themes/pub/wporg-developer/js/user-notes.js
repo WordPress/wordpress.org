@@ -6,17 +6,59 @@
 ( function( $ ) {
 
 	var commentForm = $( '.comment-form textarea' );
+	var add_user_note = $( '#add-user-note' );	
+	var commentID = window.location.hash;
+	var wpAdminBar = 0;
 
-	if ( !commentForm.length ) {
-		return;
+	// Check if the fragment identifier is a comment ID (e.g. #comment-63)
+	if ( ! commentID.match( /#comment\-[0-9]+$/ ) ) {
+		commentID = '';
 	}
 
-	function showCommentForm() {
-		$( '#respond' ).show();
-		$( '#add-user-note' ).hide();
+	// Actions for when the page is ready
+	$( document ).ready( function() {
+		// Set wpAdminBar
+		wpAdminBar = $( '#wpadminbar' ).length ? 32 : 0;
 
-		var wpAdminBar = $( '#page.admin-bar' ).length ? 32 : 0;
-		var target     = $( '#commentform #add-note-or-feedback' );
+		// Display form and scroll to it
+		if ( '#respond' === window.location.hash ) {
+			showCommentForm();
+		}
+
+		if( ! wpAdminBar || ! commentID ) {
+			return;
+		}
+
+		var comment = $('#comments').find( commentID + '.depth-1' ).first();
+		if( ! comment.length  ) {
+			return;
+		}
+
+		// Scroll to top level comment and adjust for admin bar.
+		var pos = comment.offset();
+		$( 'html,body' ).animate( {
+			scrollTop: pos.top - wpAdminBar
+		}, 1 );
+	} );
+
+	// Scroll to comment if comment date link is clicked
+	$( '#comments' ).on( 'click', '.comment-date', function( e ) {
+		// Scroll to comment and adjust for admin bar
+		// Add 16px for child comments
+		var pos = $( this ).offset();
+		$( 'html,body' ).animate( {
+			scrollTop: pos.top - wpAdminBar - 16
+		}, 1 );
+	} );
+
+	function showCommentForm() {
+		if( add_user_note.length ) {
+			add_user_note.hide();
+		}
+
+		$( '#respond' ).show();
+
+		var target = $( '#commentform #add-note-or-feedback' );
 		if ( target.length ) {
 			var pos = target.offset();
 
@@ -28,16 +70,21 @@
 		}
 	}
 
-	$( '#respond, #add-user-note' ).toggle();
+	if ( ! commentForm.length ) {
+		return;
+	}
+
+	if( add_user_note.length ) {
+		add_user_note.show();
+
+		// Hide by default if #add-user-note exists
+		$( '#respond' ).hide();
+	}
+
 	$( '#add-user-note, .table-of-contents a[href="#add-note-or-feedback"]' ).click( function( e ) {
 		e.preventDefault();
-
 		showCommentForm();
 	} );
-
-	if ( '#respond' === document.location.hash ) {
-		showCommentForm();
-	}
 
 	// Add php and js buttons to QuickTags.
 	QTags.addButton( 'php', 'php', '[php]', '[/php]', '', '', '', 'comment' );

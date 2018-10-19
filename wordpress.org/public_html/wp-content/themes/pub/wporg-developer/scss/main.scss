@@ -1205,14 +1205,17 @@
 			opacity: 1;
 		}
 
-		.comment-awaiting-moderation {
+		.comment-awaiting-moderation,
+		.comment-edited {
 			background-color: #fff8e5;
 			padding: .2em .5em;
+			margin-right: .5em;
 			border-radius: 3px;
 			border: 1px solid #ffb900;
 		}
 
-		.depth-2 .comment-awaiting-moderation {
+		.depth-2 .comment-awaiting-moderation,
+		.depth-2 .comment-edited {
 			display: inline-block;
 			margin: 2px 0;
 		}
@@ -1238,7 +1241,8 @@
 		.comment-list li.depth-1,
 		#comment-preview {
 			border: 1px solid #dfdfdf;
-			border-radius: 2px;
+			border-radius: 2px;	
+			width: 100%;
 		}
 
 		// Feedback
@@ -1430,8 +1434,13 @@
 			padding: 0 5px;
 		}
 
-		.comment-form ul {
+		.comment-form ul, .feedback-form ul {
 			margin-left: 1.5em;
+		}
+
+		.feedback-form ul li {
+			margin: 0;
+			overflow: visible;
 		}
 	}
 
