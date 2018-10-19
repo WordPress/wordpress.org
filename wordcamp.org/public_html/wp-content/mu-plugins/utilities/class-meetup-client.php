@@ -83,7 +83,8 @@ class Meetup_Client {
 				} else {
 					$this->error->add(
 						'unexpected_response_data',
-						'The API response did not provide the expected data format.'
+						'The API response did not provide the expected data format.',
+						$response
 					);
 					break;
 				}
@@ -168,12 +169,13 @@ class Meetup_Client {
 		 *
 		 * See https://www.meetup.com/meetup_api/docs/#errors.
 		 *
+		 * `200` (ok) is not in the list, because it needs to be handled conditionally. See below.
+		 *
 		 * `400` (bad request) is not in the list, even though it seems like it _should_ indicate an unrecoverable
 		 * error. In practice we've observed that it's common for a seemingly valid request to be rejected with
 		 * a `400` response, but then get a `200` response if that exact same request is retried.
 		 */
 		$breaking_codes = array(
-			200, // Ok.
 			401, // Unauthorized (invalid key).
 			429, // Too many requests (rate-limited).
 			404, // Unable to find group
@@ -189,6 +191,14 @@ class Meetup_Client {
 			$response_code = wp_remote_retrieve_response_code( $response );
 
 			$this->maybe_throttle( wp_remote_retrieve_headers( $response ) );
+
+			/*
+			 * Sometimes their API inexplicably returns a success code with an empty body, but will return a valid
+			 * response if the exact request is retried.
+			 */
+			if ( 200 === $response_code && ! empty( wp_remote_retrieve_body( $response ) ) ) {
+				break;
+			}
 
 			if ( in_array( $response_code, $breaking_codes, true ) ) {
 				break;
