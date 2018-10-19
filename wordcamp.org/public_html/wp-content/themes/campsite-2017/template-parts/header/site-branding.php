@@ -15,6 +15,8 @@ $description = get_bloginfo( 'description', 'display' );
 ?>
 
 <div class="site-branding">
+	<?php the_custom_logo(); ?>
+
 	<?php if ( is_front_page() && is_home() ) : ?>
 
 		<h1 class="site-title">

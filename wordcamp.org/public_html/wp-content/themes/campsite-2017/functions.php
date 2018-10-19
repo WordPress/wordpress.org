@@ -39,6 +39,13 @@ function setup_theme() {
 		) )
 	);
 
+	add_theme_support( 'custom-logo', array(
+		'height'      => 250,
+		'width'       => 250,
+		'flex-width'  => true,
+		'flex-height' => true,
+	) );
+
 	register_nav_menus( array(
 		'primary'   => esc_html__( 'Primary',   'wordcamporg' ),
 		'secondary' => esc_html__( 'Secondary', 'wordcamporg' ),
