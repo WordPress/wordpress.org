@@ -31,6 +31,7 @@
 		<exclude-pattern>/build/*</exclude-pattern>
 
 		disable WordPress.VIP.PostsPerPage.posts_per_page_posts_per_page for bin folder only
+			should that be `WordPress.VIP.PostsPerPage.posts_per_page` ?
 
 		Look through `General` and `Squiz` sniffs for anything you might want to add.
 			Is there one that detects `\Foo` instead of `use Foo`?
@@ -52,6 +53,7 @@
 			replace explicit references to central.wordcamp.org / ID `5` with `is_main_site()` or `get_main_site_id()`
 			anonymous functions used with add_(action|filter), and maybe other places can detect w/out false positives. don't be lazy. should only be used with cases like array_filter.
 			whitespace-only changes to lines that don't have logic changes, in a commit that does have logic changes. this indicates that a commit is mixing coding standards changes w/ logic changes, which adds diff noise to the logic change. they should be separate commits.
+			unnecessary parenthesis in ternary conditions: $result = ( $condition ) ? 'foo' : 'bar'
 
 		Maybe add WordCamp\Remote_CSS\output_cached_css to customEscapingFunctions or whichever param is most appropriate
 		Maybe do something similar for set_cache_headers and nonce verification
@@ -143,6 +145,9 @@
 		<!-- Whitespace makes things more readable. -->
 		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen" />
 
+		<!-- There are some valid cases of this, like in identifying a closing tag from another file; e.g., in `themes/campsite-2017/footer.php`. -->
+		<exclude name="Squiz.Commenting.InlineComment.SpacingAfter" />
+
 		<!-- It's not wrong for WordPress plugin file headers. -->
 		<exclude name="Squiz.Commenting.FileComment.WrongStyle" />
 
@@ -152,8 +157,6 @@
 	</rule>
 
 	<rule ref="WordPress-VIP">
-		<exclude name="WordPress.VIP.SuperGlobalInputUsage.AccessDetected" />
-
 		<!-- We want these for the best practices, but anything specific to VIP's hosting environment is irrelevant. -->
 		<exclude name="WordPress.VIP.RestrictedFunctions.wp_remote_get_wp_remote_get" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.file_get_contents_file_get_contents" />
@@ -161,12 +164,18 @@
 		<exclude name="WordPress.VIP.RestrictedFunctions.switch_to_blog_switch_to_blog" />
 		<exclude name="WordPress.VIP.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__" />
 		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
+		<exclude name="WordPress.VIP.FileSystemWritesDisallow" />
+		<exclude name="WordPress.VIP.SuperGlobalInputUsage.AccessDetected" />
+		<exclude name="WordPress.VIP.PostsPerPage.posts_per_page_posts_per_page" />
 
 		<!-- This is too strict. -->
 		<exclude name="WordPress.VIP.SlowDBQuery.slow_db_query_meta_query" />
 
 		<!-- There are some situations where this is appropriate, so leave it so the developer's discretion. -->
 		<exclude name="WordPress.VIP.DirectDatabaseQuery.DirectQuery" />
+
+		<!-- High numbers are often used as a sanity limit -->
+		<exclude name="WordPress.VIP.PostsPerPage.posts_per_page_numberposts" />
 	</rule>
 
 	<rule ref="WordPress-Extra">
