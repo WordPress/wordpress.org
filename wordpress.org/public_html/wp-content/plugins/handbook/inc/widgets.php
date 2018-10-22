@@ -90,6 +90,10 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 			$args['exclude'] = rtrim( $page->ID . ',' . $args['exclude'], ',' );
 		}
 
+		// Use custom walker that excludes display of orphaned pages. (An ancestor
+		// of such a page is likely not published and thus this is not accessible.)
+		$args['walker'] = new WPorg_Handbook_Walker;
+
 		return $args;
 	}
 
