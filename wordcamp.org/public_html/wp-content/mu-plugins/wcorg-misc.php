@@ -451,26 +451,18 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 	$text = "Error $err_no : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug";
 
 	$message = array(
-		"attachments" => array(
-			array(
-				"fallback" => $text,
-				"color" => "#ff0000",
-				"pretext" => "Error on \"$file:$line\" ",
-				"author_name" => $domain,
-				"text" => $text,
-			),
-		),
+		"fallback" => $text,
+		"color" => "#ff0000",
+		"pretext" => "Error on \"$file:$line\" ",
+		"author_name" => $domain,
+		"text" => $text,
 	);
+	require_once '/home/api/public_html/includes/slack-config.php';
+	$send = new \Dotorg\Slack\Send( SLACK_ERROR_REPORT_URL );
+	$send->add_attachment( $message );
 
-	$data = json_encode( $message );
-
-	$req = curl_init( SLACK_ERROR_REPORT_URL );
-	curl_setopt( $req, CURLOPT_HTTPHEADER, array( "Content-type: application/json" ) );
-	curl_setopt( $req, CURLOPT_POST, true );
-	curl_setopt( $req, CURLOPT_POSTFIELDS, $data );
-
-	curl_exec( $req );
-
+	// For now
+	$send->send( 'vedanshu' );
 	return false;
 }
 
