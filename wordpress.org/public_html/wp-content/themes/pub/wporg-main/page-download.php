@@ -66,6 +66,13 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 get_header();
 the_post();
+
+// https://meta.trac.wordpress.org/ticket/3865
+if ( !wp_is_mobile() && empty( $rosetta_release ) ) {
+	include_once( WP_PLUGIN_DIR . '/polldaddy/polldaddy.php' );
+	echo '<div class="popup-poll">' . do_shortcode( "[polldaddy poll=9992274 type='slider']" ) . '</div>';
+}
+
 ?>
 	<main id="main" class="site-main col-12" role="main">
 
