@@ -6,6 +6,7 @@
 
 	var wpAdminBar     = 0;
 	var options        = wporg_note_feedback;
+	var comments       = $( '.comment' );
 	var feedbackToggle = $( '<a role="button" class="feedback-toggle" href="#">' + options.show + '</a>' );
 	var commentID      = window.location.hash;
 
@@ -27,7 +28,7 @@
 	} );
 
 	// Loop through feedback notes
-	$( '.comment' ).each( function() {
+	comments.each( function() {
 		var feedbackLinks = $( this ).find( '.feedback-links' );
 		var childComments = $( this ).find( 'ul.children' );
 		
@@ -85,26 +86,26 @@
 	$( document ).ready( function() {
 		// Set wpAdminBar
 		wpAdminBar = $('#wpadminbar').length ? 32 : 0;
-		var childComments = $( '.comment' ).find( 'ul.children' );
+		var childComments = comments.find( 'ul.children' );
 
 		if ( ! ( commentID.length && childComments.length ) ) {
 			return;
 		}
 
-		var comment = childComments.find( commentID + '.depth-2' ).first();
-		if ( ! comment.length ) {
+		var childComment = childComments.find( commentID + '.depth-2' ).first();
+		if ( ! childComment.length ) {
 			return;
 		}
 		// Child comment exists.
 
-		var parent = comment.closest( '.comment.depth-1' );
+		var parent = childComment.closest( '.comment.depth-1' );
 		if ( parent.find( '.feedback' ).hasClass( 'hide-if-js' ) ) {
 			// Show child comments.
 			parent.find( '.feedback-toggle' ).first().trigger( 'click' );
 		}
 
 		// Scroll to child comment and adjust for admin bar
-		var pos = comment.offset();
+		var pos = childComment.offset();
 		$( 'html,body' ).animate( {
 			scrollTop: pos.top - wpAdminBar
 		}, 1 );
@@ -112,7 +113,7 @@
 	} );
 
 	// Click event for Show/Hide feedback toggle link.
-	$( document ).on( 'click', '.feedback-toggle', function( e ) {
+	comments.on( 'click', '.feedback-toggle', function( e ) {
 		e.preventDefault();
 
 		var parent = $( this ).closest( '.comment.depth-1' );
@@ -160,7 +161,7 @@
 	} );
 
 	// Show editor when the add feedback link is clicked.
-	$( document ).on( 'click', '.feedback-add', function( e ) {
+	comments.on( 'click', '.feedback-add', function( e ) {
 		e.preventDefault();
 
 		var parent = $( this ).closest( '.comment.depth-1' );
