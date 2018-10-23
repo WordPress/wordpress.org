@@ -392,7 +392,7 @@ class DevHub_User_Submitted_Content {
 
 		echo "<form id='feedback-form-{$instance}{$form_type}' class='feedback-form' method='post' action='{$action}' name='feedback-form-{$instance}'>\n";
 		echo self::get_editor_rules( 'feedback', $note_link );
-		wp_editor( $content, 'feedback-' . $instance, array(
+		wp_editor( $content, 'feedback-comment-' . $instance, array(
 				'media_buttons' => false,
 				'textarea_name' => 'comment',
 				'textarea_rows' => 3,
