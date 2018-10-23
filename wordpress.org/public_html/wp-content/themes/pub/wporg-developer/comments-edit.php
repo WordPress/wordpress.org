@@ -35,7 +35,7 @@ $ref_url     = get_site_section_url();
 $ref_link    = sprintf( '<a href="%s">%s</a>', esc_url( $ref_url ), __( 'Reference', 'wporg' ) );
 $post_link   = sprintf( '<a href="%s">%s</a>', esc_url( $post_url ), $post_title );
 /* translators: %d: comment ID */
-$note_link   = sprintf( '<a href="%s">%s</a>', esc_url( $post_url . '#comment-' . $comment_id ), sprintf( __( 'note %d', $comment_id ), 'wporg' ) );
+$note_link   = sprintf( '<a href="%s">%s</a>', esc_url( $post_url . '#comment-' . $comment_id ), sprintf( __( 'note %d', 'wporg' ), $comment_id ) );
 $type_link   = sprintf( '<a href="%s">%s</a>', esc_url( $type_url ), $type_label );
 
 $parent_link   = '';
