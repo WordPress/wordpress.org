@@ -435,20 +435,70 @@ function wcorg_central_modify_export_caps( $primitive_caps, $meta_cap ) {
 
 add_filter( 'map_meta_cap', 'wcorg_central_modify_export_caps', 10, 2 );
 
+
 /**
- * Error handler to send errors to slack.
+ * Check and create filesystem dirs to manage rate limiting in error handling.
+ * For legacy bugs we are doing rate limiting via filesystem. We would be investigating to see if we can instead use memcache to rate limit sometime in the future.
+ *
+ * @return bool Return true if file permissions etc are present
+ */
+function init_error_handling() {
+	$error_dir = '/tmp/error_limiting';
+	if ( ! file_exists( $error_dir ) ) {
+		mkdir( $error_dir );
+	}
+	return is_dir( $error_dir ) && is_writeable( $error_dir );
+}
+
+/**
+ * Error handler to send errors to slack. Always return false.
  */
 function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 
+	if ( ! init_error_handling() ) {
+		return false;
+	}
+
 	if ( $err_no !== E_ERROR && $err_no !== E_USER_ERROR && $err_no !== E_CORE_ERROR && $err_no !== E_COMPILE_ERROR ) {
-		return;
+		return false;
+	}
+
+	// Max file length for ubuntu system is 255
+	$err_key = substr( base64_encode("$file-$line-$err_no" ), -254 );
+
+	$error_file = "/tmp/error_limiting/$err_key";
+
+	$text = "";
+
+	$data = array(
+		'last_reported_at' => time(),
+		'error_count' => 0, //since last reported
+	);
+
+	if ( ! file_exists( $error_file ) ) {
+		$text = "Error occured. ";
+		file_put_contents( $error_file, json_encode( $data ) );
+	} else {
+		$data = json_decode( file_get_contents( $error_file ), true );
+		$data['error_count'] += 1;
+		$time_elasped = time() - $data['last_reported_at'];
+		if ( $time_elasped > 120 ) {
+			$text = "Still happening. Happened ${data['error_count']} time(s) since last reported. ";
+			$data['last_reported_at'] = time();
+			$data['error_count'] = 0;
+			file_put_contents( $error_file, json_encode( $data ) );
+		} else {
+			file_put_contents( $error_file, json_encode( $data ) );
+			return false;
+		}
+
 	}
 
 	$domain = get_site_url();
 
 	$page_slug = trim( $_SERVER["REQUEST_URI"] , '/' );
 
-	$text = "Error $err_no : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug";
+	$text = $text . "Message : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug";
 
 	$message = array(
 		"fallback" => $text,
