@@ -101,16 +101,18 @@ class Init_Locale extends WP_CLI_Command {
 			if ( $set ) {
 				WP_CLI::line(
 					sprintf(
-						'%s added to %s.',
-						$gp_locale->wp_locale,
+						'%s/%s added to %s.',
+						$gp_locale->slug,
+						$slug,
 						$project_path
 					)
 				);
 			} else {
 				WP_CLI::warning(
 					sprintf(
-						'%s couldn\'t be added to %s.',
-						$gp_locale->wp_locale,
+						'%s/%s couldn\'t be added to %s.',
+						$gp_locale->slug,
+						$slug,
 						$project_path
 					)
 				);
