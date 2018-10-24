@@ -53,6 +53,7 @@ function get_whitelist() {
 		'core' => array_merge( get_committers(), array(
 			'antpb',
 			'audrasjb',
+			'chanthaboune',
 			'danieltj',
 			'desrosj',
 			'JeffPaul',
