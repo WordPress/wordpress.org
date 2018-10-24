@@ -238,7 +238,7 @@ class Locale extends GP_Route {
 			],
 			'ca' => [
 				'default',
-				'valencian',
+				'valencia',
 			],
 			'de' => [
 				'default',
