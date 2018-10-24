@@ -84,6 +84,7 @@ function get_whitelist() {
 			'omarreiss',
 			'johnbillion',
 			'atimmer',
+			'chrisvanpatten',
 		) ),
 		'core-editor' => array_merge( get_committers(), array(
 			'azaozz',
@@ -176,6 +177,7 @@ function get_whitelist() {
 			'Kenshino',
 			'lizkaraffa',
 			'milana_cap', // @zzap on Slack
+			'chrisvanpatten',
 		),
 		'feature-notifications' => array(
 			'johnbillion',
