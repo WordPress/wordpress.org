@@ -1098,11 +1098,11 @@ blockquote {
 	background: transparent;
 	border: none;
 	padding: 0;
-	border-right: 2px solid #eee;
-	color: #82878c;
+	border-right: 2px solid #767676;
+	color: #767676;
 	font-style: italic;
 	margin: 1rem 0;
-	padding-right: 1rem;
+	padding-right: 0.8rem;
 }
 
 blockquote cite {

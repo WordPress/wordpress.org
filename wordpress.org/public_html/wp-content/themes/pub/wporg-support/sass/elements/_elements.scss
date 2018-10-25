@@ -32,11 +32,11 @@ blockquote {
 	border: none;
 	padding: 0;
 
-	border-left: 2px solid $color__border;
-	color: #82878c;
+	border-left: 2px solid $color__blockquote;
+	color: $color__blockquote;
 	font-style: italic;
 	margin: 1rem 0;
-	padding-left: 1rem;
+	padding-left: 0.8rem;
 
 	cite {
 		font-size: ms( -2 );
