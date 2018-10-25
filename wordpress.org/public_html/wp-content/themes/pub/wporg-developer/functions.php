@@ -114,6 +114,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require __DIR__ . '/inc/cli-commands.php';
 }
 
+/**
+ * Admin area customizations.
+ */
+if ( is_admin() ) {
+	require __DIR__ . '/inc/admin.php';
+}
 
 /**
  * Set the content width based on the theme's design and stylesheet.
