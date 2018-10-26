@@ -34,6 +34,8 @@ function get_whitelist() {
 			'afercia',
 			'joedolson',
 			'rianrietveld',
+			'audrasjb',
+			'arush',
 		),
 		'bbpress' => array(
 			'johnjamesjacoby', // @jjj on Slack
