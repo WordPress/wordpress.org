@@ -48,8 +48,12 @@ function get_whitelist() {
 			'danielbachhuber',
 			'schlessera',
 		),
-		'community-events' => $wordcamp_central,
-		'community-team' => $wordcamp_central,
+		'community-events' => array_merge( $wordcamp_central, array(
+			'francina',
+		) ),
+		'community-team' => array_merge( $wordcamp_central, array(
+			'francina',
+		) ),
 		'core' => array_merge( get_committers(), array(
 			'antpb',
 			'audrasjb',
