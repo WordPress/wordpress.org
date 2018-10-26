@@ -908,9 +908,15 @@
 
 	.new-in-guide.two-columns .box {
 		width: 43%;
+		@media ( max-width: 688px ) {
+			width: 100%;
+		}
 	}
 	.new-in-guide.two-columns .box:first-child {
 		width: 53%;
+		@media ( max-width: 688px ) {
+			width: 100%;
+		}
 	}
 
 	#sidebar,

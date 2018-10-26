@@ -1280,8 +1280,20 @@ input {
   width: 43%;
 }
 
+@media (max-width: 688px) {
+  .devhub-wrap .new-in-guide.two-columns .box {
+    width: 100%;
+  }
+}
+
 .devhub-wrap .new-in-guide.two-columns .box:first-child {
   width: 53%;
+}
+
+@media (max-width: 688px) {
+  .devhub-wrap .new-in-guide.two-columns .box:first-child {
+    width: 100%;
+  }
 }
 
 .devhub-wrap #sidebar,
