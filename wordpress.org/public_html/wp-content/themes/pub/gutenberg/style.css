@@ -811,6 +811,18 @@ a:hover, a:active {
   margin-right: 1em;
 }
 
+.search-results .site-content {
+  max-width: 932px;
+  margin: 0 auto 1.5em;
+}
+.search-results .entry-header,
+.search-results .entry-footer {
+  max-width: none;
+}
+.search-results h2.entry-title {
+  text-decoration: underline;
+}
+
 /*--------------------------------------------------------------
 ## Comments
 --------------------------------------------------------------*/
