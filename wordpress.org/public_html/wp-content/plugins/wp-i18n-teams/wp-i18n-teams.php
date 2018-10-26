@@ -90,7 +90,7 @@ class WP_I18n_Teams {
 				printf(
 					'<div class="callout callout-warning"><p>%s</p><p><a href="%s">%s</a></p></div>',
 					sprintf(
-						__( 'Locale %s doesn&#8217;t exists.', 'wporg' ),
+						__( 'Locale %s doesn&#8217;t exist.', 'wporg' ),
 						'<code>' . esc_html( $_GET['locale'] ) . '</code>'
 					),
 					esc_url( get_permalink() ),
