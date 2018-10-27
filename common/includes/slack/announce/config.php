@@ -152,6 +152,7 @@ function get_whitelist() {
 		) ),
 		'core-restapi' => array_merge( get_committers(), array(
 			'danielbachhuber',
+			'desrosj',
 			'flixos90',
 			'joehoyle',
 			'kadamwhite',
