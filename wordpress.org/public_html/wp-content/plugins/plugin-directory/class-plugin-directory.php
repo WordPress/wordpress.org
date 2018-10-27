@@ -1179,13 +1179,13 @@ class Plugin_Directory {
 
 		// If it's an old search query, handle that too.
 		if ( 'search.php' == get_query_var( 'name' ) && isset( $_GET['q'] ) ) {
-			wp_safe_redirect( site_url( '/search/' . urlencode( wp_unslash( $_GET['q'] ) ) . '/' ) );
+			wp_safe_redirect( site_url( '/search/' . urlencode( wp_unslash( $_GET['q'] ) ) . '/' ), 301 );
 			die();
 		}
 
 		// new-style Search links.
 		if ( get_query_var( 's' ) && isset( $_GET['s'] ) ) {
-			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ) );
+			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ), 301 );
 			die();
 		}
 
