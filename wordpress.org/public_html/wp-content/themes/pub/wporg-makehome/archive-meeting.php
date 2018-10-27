@@ -15,7 +15,23 @@
 	<?php while( have_posts() ): the_post(); ?>
 		<tr id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<td><?php echo $post->team; ?></td>
-			<td><a href="<?php echo $post->link; ?>"><?php the_title(); ?></a></td>
+			<td><?php
+				$title = get_the_title();
+				printf(
+					'<a href="%s">%s</a>',
+					esc_url( $post->link ),
+					$title
+				);
+				if ( current_user_can( 'edit_post', get_the_ID() ) ) {
+					printf(
+						' <a class="edit" href="%s" aria-label="%s">%s</a>',
+						get_edit_post_link(),
+						/* translators: %s: post title */
+						esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;', 'make-wporg' ), $title ) ),
+						__( '(Edit)', 'make-wporg' )
+					);
+				}
+			?></td>
 			<td><?php 
 			// convert the date time to a pretty format
 			$time = strtotime( $post->next_date.' '. $post->time.' GMT' ); // note, strtotime doesn't grok UTC very well, GMT works fine though

@@ -334,3 +334,16 @@ table.schedule td,
 table.schedule th {
   padding: 5px 3px;
 }
+
+table.schedule .edit {
+	visibility: hidden;
+}
+
+table.schedule td:hover .edit{
+	visibility: visible;
+}
+
+table.schedule td:focus-within .edit {
+	/* Separated from the block above due to browsers that don't support :focus-within */
+	visibility: visible;
+}
