@@ -21,12 +21,15 @@ class Meeting_Post_Type {
 
 	public static function init() {
 		$mpt = Meeting_Post_Type::getInstance();
-		add_action( 'init', array( $mpt, 'register_meeting_post_type' ) );
-		add_filter( 'pre_get_posts', array( $mpt, 'meeting_archive_page_query' ) );
-		add_filter( 'the_posts', array( $mpt, 'meeting_set_next_meeting' ), 10, 2 );
-		add_filter( 'manage_meeting_posts_columns', array( $mpt, 'meeting_add_custom_columns' ) );
-		add_action( 'manage_meeting_posts_custom_column' , array( $mpt, 'meeting_custom_columns' ), 10, 2 );
-		add_action( 'admin_head', array( $mpt, 'meeting_column_width' ) );
+		add_action( 'init',                               array( $mpt, 'register_meeting_post_type' ) );
+		add_action( 'save_post_meeting',                  array( $mpt, 'save_meta_boxes' ), 10, 2 );
+		add_filter( 'pre_get_posts',                      array( $mpt, 'meeting_archive_page_query' ) );
+		add_filter( 'the_posts',                          array( $mpt, 'meeting_set_next_meeting' ), 10, 2 );
+		add_filter( 'manage_meeting_posts_columns',       array( $mpt, 'meeting_add_custom_columns' ) );
+		add_action( 'manage_meeting_posts_custom_column', array( $mpt, 'meeting_custom_columns' ), 10, 2 );
+		add_action( 'admin_head',                         array( $mpt, 'meeting_column_width' ) );
+		add_action( 'admin_bar_menu',                     array( $mpt, 'add_edit_meetings_item_to_admin_bar' ), 80 );
+		add_action( 'wp_enqueue_scripts',                 array( $mpt, 'add_edit_meetings_icon_to_admin_bar' ) );
 	}
 
 	public function meeting_column_width() { ?>
@@ -213,7 +216,6 @@ class Meeting_Post_Type {
 		return $posts;
 	}
 
-
 	public function register_meeting_post_type() {
 	    $labels = array(
 	        'name'                => _x( 'Meetings', 'Post Type General Name', 'wporg' ),
@@ -228,6 +230,7 @@ class Meeting_Post_Type {
 	        'edit_item'           => __( 'Edit Meeting', 'wporg' ),
 	        'update_item'         => __( 'Update Meeting', 'wporg' ),
 	        'view_item'           => __( 'View Meeting', 'wporg' ),
+	        'view_items'          => __( 'View Meetings', 'wporg' ),
 	        'search_items'        => __( 'Search Meeting', 'wporg' ),
 	        'not_found'           => __( 'Not found', 'wporg' ),
 	        'not_found_in_trash'  => __( 'Not found in Trash', 'wporg' ),
@@ -257,7 +260,6 @@ class Meeting_Post_Type {
 			),
 	    );
 	    register_post_type( 'meeting', $args );
-	    add_action( 'save_post_meeting', array( $this, 'save_meta_boxes' ),  10, 2 );
 	}
 
 	public function add_meta_boxes() {
@@ -420,6 +422,46 @@ class Meeting_Post_Type {
 			update_post_meta( $post->ID, $key, $value );
 		}
 	}
+
+	/**
+	 * Adds "Edit Meetings" item after "Add New" menu.
+	 *
+	 * @param \WP_Admin_Bar $wp_admin_bar The admin bar instance.
+	 */
+	public function add_edit_meetings_item_to_admin_bar( $wp_admin_bar ) {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
+
+		if ( is_admin() || ! is_post_type_archive( 'meeting' ) ) {
+			return;
+		}
+
+		$wp_admin_bar->add_menu(
+			array(
+				'id'    => 'edit-meetings',
+				'title' => '<span class="ab-icon"></span>' . __( 'Edit Meetings', 'wporg' ),
+				'href'  => admin_url( 'edit.php?post_type=meeting' ),
+			)
+		);
+	}
+
+	/**
+	 * Adds icon for the "Edit Meetings" item.
+	 */
+	public function add_edit_meetings_icon_to_admin_bar() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
+
+		wp_add_inline_style( 'admin-bar', '
+			#wpadminbar #wp-admin-bar-edit-meetings .ab-icon:before {
+				content: "\f145";
+				top: 2px;
+			}
+		' );
+	}
+
 }
 
 // fire it up
