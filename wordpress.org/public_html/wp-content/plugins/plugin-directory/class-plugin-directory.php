@@ -1183,9 +1183,15 @@ class Plugin_Directory {
 			die();
 		}
 
-		// new-style Search links.
+		// New-style search links.
 		if ( get_query_var( 's' ) && isset( $_GET['s'] ) ) {
 			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ), 301 );
+			die();
+		}
+
+		// Empty search query.
+		if ( 'search' === get_query_var( 'name' ) || isset( $_GET['s'] ) && ! get_query_var( 's' ) ) {
+			wp_safe_redirect( site_url( '/' ), 301 );
 			die();
 		}
 
