@@ -291,6 +291,11 @@ function social_meta_data() {
 		return;
 	}
 
+	// Prevent duplicate search engine results.
+	if ( get_query_var( 'plugin_advanced' ) || is_search() ) {
+		echo '<meta name="robots" content="noindex, follow" />' . "\n";
+	}
+
 	if ( ! is_singular( 'plugin' ) ) {
 		return;
 	}
@@ -317,11 +322,6 @@ function social_meta_data() {
 	}
 	if ( ! $icon['generated'] && ( $icon['icon_2x'] || $icon['icon'] ) ) {
 		printf( '<meta name="thumbnail" content="%s" />' . "\n", esc_url( $icon['icon_2x'] ?: $icon['icon'] ) );
-	}
-
-	// Prevent duplicate search engine results.
-	if ( get_query_var( 'plugin_advanced' ) ) {
-		echo '<meta name="robots" content="noindex, follow" />' . "\n";
 	}
 }
 add_action( 'wp_head', __NAMESPACE__ . '\social_meta_data' );
