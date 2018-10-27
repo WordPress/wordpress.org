@@ -197,7 +197,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				__( 'Edit', 'wporg-plugins' )
 			);
 
-			if ( current_user_can( 'plugin_review', $post->ID ) ) {
+			if ( in_array( $post->post_status, array( 'new', 'pending' ) ) && current_user_can( 'plugin_approve', $post->ID ) ) {
 				$actions['inline hide-if-no-js'] = sprintf(
 					'<button type="button" class="button-link editinline" aria-label="%s" aria-expanded="false">%s</button>',
 					/* translators: %s: post title */
