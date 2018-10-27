@@ -245,10 +245,8 @@ class Customizations {
 
 		$message  = '';
 		$type     = 'updated';
-		$post     = get_post();
-		$is_admin = current_user_can( 'plugin_approve' );
 
-		switch ( $post->post_status ) {
+		switch ( get_post_status() ) {
 			case 'new':
 				$message = __( 'This plugin is newly requested and has not yet been reviewed.', 'wporg-plugins' );
 				$type    = 'notice-info';
