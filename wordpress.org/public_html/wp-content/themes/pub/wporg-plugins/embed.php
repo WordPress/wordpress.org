@@ -180,7 +180,7 @@ if ( ! headers_sent() ) {
 
 			<div class="wp-embed-meta">
 				<?php if ( 'publish' === get_post_status() ) : ?>
-					<a class="plugin-download button download-button button-large" href="<?php echo esc_url( the_permalink() ); ?>"><?php esc_html_e( 'Get this plugin', 'wporg-plugins' ); ?></a>
+					<a class="plugin-download button download-button button-large" href="<?php echo esc_url( get_permalink() ); ?>"><?php esc_html_e( 'Get this plugin', 'wporg-plugins' ); ?></a>
 				<?php endif; ?>
 			</div>
 		</div>
