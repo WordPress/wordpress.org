@@ -454,6 +454,25 @@ class DevHub_User_Contributed_Notes_Voting {
 	}
 
 	/**
+	 * Resets the votes for a note..
+	 *
+	 * The current user needs to have the edit_comment capability for the votes to be deleted.
+	 *
+	 * @access public
+	 *
+	 * @param int $comment_id The comment ID to reset votes for
+	 */
+	public static function reset_votes( $comment_id ) {
+		$comment_id = absint( $comment_id );
+		if ( ! $comment_id || ! current_user_can( 'edit_comment', $comment_id ) ) {
+			return;
+		}
+
+		delete_comment_meta( $comment_id, self::$meta_upvotes );
+		delete_comment_meta( $comment_id, self::$meta_downvotes );
+	}
+
+	/**
 	 * Handles abstraction between an up or down vote.
 	 *
 	 * @access protected
