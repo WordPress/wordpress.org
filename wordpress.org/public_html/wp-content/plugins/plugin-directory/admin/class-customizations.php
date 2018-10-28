@@ -125,6 +125,11 @@ class Customizations {
 					) );
 					break;
 
+				case 'edit.php':
+					if ( ! current_user_can( 'plugin_approve' ) )  {
+						wp_dequeue_script( 'inline-edit-post' );
+					}
+					break;
 			}
 		}
 	}

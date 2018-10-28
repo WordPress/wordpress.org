@@ -204,8 +204,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 					esc_attr( sprintf( __( 'Quick edit &#8220;%s&#8221; inline', 'wporg-plugins' ), $title ) ),
 					__( 'Quick&nbsp;Edit', 'wporg-plugins' )
 				);
-			} else {
-				wp_dequeue_script( 'inline-edit-post' );
 			}
 		}
 
