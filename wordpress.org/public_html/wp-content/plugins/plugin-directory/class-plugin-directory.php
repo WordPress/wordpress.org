@@ -1341,7 +1341,7 @@ class Plugin_Directory {
 			$posts = get_posts( array(
 				'post_type'   => 'plugin',
 				'name'        => $plugin_slug,
-				'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
+				'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved', 'rejected' ),
 			) );
 
 			if ( ! $posts ) {
