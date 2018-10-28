@@ -115,6 +115,17 @@ class Upload_Handler {
 
 		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
 
+		// Is there a previously rejected plugin with the same slug?
+		if ( $plugin_post && 'rejected' === $plugin_post->post_status ) {
+			// Change slug to 'rejected-plugin-name-rejected' to free up 'plugin-name'.
+			wp_update_post( array(
+				'ID'        => $plugin_post->ID,
+				'post_name' => sprintf( 'rejected-%s-rejected', $plugin_post->post_name ),
+			) );
+
+			$plugin_post = null;
+		}
+
 		// Is there already a plugin with the same slug by a different author?
 		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
 			$error = __( 'Error: The plugin already exists.', 'wporg-plugins' );
