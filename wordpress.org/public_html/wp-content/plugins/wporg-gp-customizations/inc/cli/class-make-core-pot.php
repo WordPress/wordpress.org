@@ -95,7 +95,6 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'wp-includes/js/plupload/*',
 			'wp-includes/js/swfupload/*',
 			'wp-includes/js/thickbox/*',
-			'wp-includes/js/tinymce/*',
 			'wp-includes/js/tw-sack.js',
 			'*.js.map', // TODO: Currently not parsable, https://wordpress.slack.com/archives/C02RP4T41/p1541003227208000.
 		];
