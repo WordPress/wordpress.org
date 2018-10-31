@@ -52,15 +52,16 @@ class Make_Core_Pot extends WP_CLI_Command {
 			WP_CLI::error( 'Unsupported WordPress version. Use makepot.php.' );
 		}
 
+		$extract_js = version_compare( $wp_version, '5.0-beta', '>=' );
+
 		$dry_run = Utils\get_flag_value( $assoc_args, 'dry-run', false );
 
 		$headers = wp_json_encode( [
 			'Report-Msgid-Bugs-To' => 'https://core.trac.wordpress.org/',
-			'PO-Revision-Date'     => 'YEAR-MO-DA HO:MI+ZONE',
 		], JSON_UNESCAPED_SLASHES );
 
 		$file_comment = sprintf(
-			"Copyright (C) %s by the contributors\nThis file is distributed under the same license as the WordPress package.",
+			'Copyright (C) %s by the contributors\nThis file is distributed under the same license as the WordPress package.',
 			date( 'Y' )
 		);
 
@@ -76,21 +77,45 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command/*, [ 'launch' => false ]*/ );
+		! $dry_run && WP_CLI::runcommand( $command );
 
 		// Front end.
+		$front_end_exclude = [
+			'wp-admin/*',
+			'wp-content/themes/*',
+			'wp-includes/class-pop3.php',
+			'wp-content/plugins/akismet/*',
+			// External JavaScript libaries.
+			'wp-includes/js/tinymce/*',
+			'wp-includes/js/codemirror/*',
+			'wp-includes/js/crop/*',
+			'wp-includes/js/imgareaselect/*',
+			'wp-includes/js/jcrop/*',
+			'wp-includes/js/jquery/*',
+			'wp-includes/js/mediaelement/*',
+			'wp-includes/js/plupload/*',
+			'wp-includes/js/swfupload/*',
+			'wp-includes/js/thickbox/*',
+			'wp-includes/js/tinymce/*',
+			'wp-includes/js/tw-sack.js',
+			'*.js.map', // TODO: Currently not parsable, https://wordpress.slack.com/archives/C02RP4T41/p1541003227208000.
+		];
+
 		$command  = 'i18n make-pot ' . escapeshellarg( $this->source );
 		$command .= ' ' . escapeshellarg( $this->destination . '/wordpress.pot' );
-		$command .= ' --exclude="wp-admin/*,wp-content/themes/*,wp-includes/class-pop3.php,wp-content/plugins/akismet/"';
+		$command .= ' --exclude=' . escapeshellarg( implode( ',', $front_end_exclude ) );
 		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-js';
 		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
+		if ( ! $extract_js ) {
+			$command .= ' --skip-js';
+		}
+
 		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command/*, [ 'launch' => false ]*/ );
+		! $dry_run && WP_CLI::runcommand( $command );
 
 		// Hello Dolly, included in admin.
 		$hello_dolly_pot = wp_tempnam( 'hello-dolly.pot' );
@@ -107,7 +132,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command/*, [ 'launch' => false ]*/ );
+		! $dry_run && WP_CLI::runcommand( $command );
 
 		// Admin.
 		$admin_network_files = [
@@ -132,12 +157,12 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-js';
+		$command .= ' --skip-js'; // TODO: No use of wp.i18n, yet.
 		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command/*, [ 'launch' => false ]*/ );
+		! $dry_run && WP_CLI::runcommand( $command );
 
 		unlink( $hello_dolly_pot );
 
@@ -149,12 +174,12 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-js';
+		$command .= ' --skip-js'; // TODO: No use of wp.i18n, yet.
 		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command/*, [ 'launch' => false ]*/ );
+		! $dry_run && WP_CLI::runcommand( $command );
 	}
 
 	/**
