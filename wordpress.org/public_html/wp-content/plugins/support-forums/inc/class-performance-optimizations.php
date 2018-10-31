@@ -38,6 +38,22 @@ class Performance_Optimizations {
 
 		// Disable post meta key lookup, see https://core.trac.wordpress.org/ticket/33885.
 		add_filter( 'postmeta_form_keys', '__return_empty_array' );
+
+		// Disable canonical redirects for short post_names
+		add_filter( 'template_redirect', array( $this, 'maybe_disable_404_canonical' ), 9 );
+
+	}
+
+	/**
+	 * Disables Canonical redirects on 404 pages when a short (<5char) name is provided.
+	 *
+	 * This is used to avoid really bad queries in redirect_guess_404_permalink() on urls such as:
+	 * https://wordpress.org/support/topic/test/*1*
+	 */
+	public function maybe_disable_404_canonical() {
+		if ( is_404() && get_query_var( 'name' ) && strlen( get_query_var( 'name' ) ) < 5 ) {
+			remove_filter( 'template_redirect', 'redirect_canonical' );
+		}
 	}
 
 	/**
