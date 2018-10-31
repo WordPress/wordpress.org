@@ -86,7 +86,6 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'wp-includes/class-pop3.php',
 			'wp-content/plugins/akismet/*',
 			// External JavaScript libaries.
-			'wp-includes/js/tinymce/*',
 			'wp-includes/js/codemirror/*',
 			'wp-includes/js/crop/*',
 			'wp-includes/js/imgareaselect/*',
@@ -100,6 +99,11 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'wp-includes/js/tw-sack.js',
 			'*.js.map', // TODO: Currently not parsable, https://wordpress.slack.com/archives/C02RP4T41/p1541003227208000.
 		];
+
+		// Support https://build.trac.wordpress.org/browser/branches/4.2/wp-includes/js/tinymce/wp-mce-help.php for pre-4.3.
+		if ( version_compare( $wp_version, '4.3-beta', '>=' ) ) {
+			$front_end_exclude[] = 'wp-includes/js/tinymce/*';
+		}
 
 		$command  = 'i18n make-pot ' . escapeshellarg( $this->source );
 		$command .= ' ' . escapeshellarg( $this->destination . '/wordpress.pot' );
