@@ -72,6 +72,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
 		$command .= ' --skip-js';
+		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
@@ -85,6 +86,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
 		$command .= ' --skip-js';
+		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
@@ -101,6 +103,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
 		$command .= ' --skip-js';
+		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
@@ -130,6 +133,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
 		$command .= ' --skip-js';
+		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
@@ -146,6 +150,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
 		$command .= ' --skip-js';
+		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
 		WP_CLI::line( $command );
