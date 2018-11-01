@@ -1,15 +1,5 @@
-<?php
-/**
- * Archive Topic Content Part
- *
- * @package bbPress
- * @subpackage Theme
- */
 
-// Exit if accessed directly
-defined( 'ABSPATH' ) || exit;
-
-bbp_breadcrumb(); ?>
+<?php bbp_breadcrumb(); ?>
 
 <?php if ( bbp_is_forum_archive() || bbp_is_topic_archive() || bbp_is_search() ) : ?>
 
@@ -36,15 +26,15 @@ bbp_breadcrumb(); ?>
 
 	<?php if ( bbp_has_topics() ) : ?>
 
-		<?php bbp_get_template_part( 'pagination', 'topics' ); ?>
+		<?php bbp_get_template_part( 'pagination', 'topics'    ); ?>
 
-		<?php bbp_get_template_part( 'loop', 'topics' ); ?>
+		<?php bbp_get_template_part( 'loop',       'topics'    ); ?>
 
-		<?php bbp_get_template_part( 'pagination', 'topics' ); ?>
+		<?php bbp_get_template_part( 'pagination', 'topics'    ); ?>
 
 	<?php else : ?>
 
-		<?php bbp_get_template_part( 'feedback', 'no-topics' ); ?>
+		<?php bbp_get_template_part( 'feedback',   'no-topics' ); ?>
 
 	<?php endif; ?>
 

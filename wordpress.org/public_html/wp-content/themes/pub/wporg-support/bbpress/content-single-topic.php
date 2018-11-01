@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Single Topic Content Part
  *
@@ -34,13 +35,13 @@
 
 			<?php bbp_get_template_part( 'pagination', 'replies' ); ?>
 
-			<?php bbp_get_template_part( 'loop', 'replies' ); ?>
+			<?php bbp_get_template_part( 'loop',       'replies' ); ?>
 
 			<?php bbp_get_template_part( 'pagination', 'replies' ); ?>
 
-		<?php elseif ( bb_base_reply_search_query() ) : ?>
+		<?php elseif( bb_base_reply_search_query() ) : ?>
 
-			<?php bbp_get_template_part( 'feedback', 'no-replies' ); ?>
+			<?php bbp_get_template_part( 'feedback',   'no-replies' ); ?>
 
 		<?php endif; ?>
 

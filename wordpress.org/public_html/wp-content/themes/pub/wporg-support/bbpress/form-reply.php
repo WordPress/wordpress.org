@@ -1,4 +1,5 @@
 <?php
+
 /**
  * New/Edit Reply
  *
@@ -41,15 +42,13 @@ if ( bbp_is_reply_edit() ) : ?>
 
 					<div class="bbp-template-notice">
 						<ul>
-							<li>
-								<?php
+							<li><?php
 								printf(
 									/* translators: %s: forum title */
 									esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies, however your posting capabilities still allow you to post.', 'wporg-forums' ),
 									bbp_get_forum_title( bbp_get_topic_forum_id() )
 								);
-								?>
-							</li>
+							?></li>
 						</ul>
 					</div>
 
@@ -80,7 +79,7 @@ if ( bbp_is_reply_edit() ) : ?>
 					<?php if ( ! ( bbp_use_wp_editor() || current_user_can( 'unfiltered_html' ) ) ) : ?>
 
 						<p class="form-allowed-tags">
-							<label><?php esc_html_e( 'You may use these <abbr title="HyperText Markup Language">HTML</abbr> tags and attributes:', 'wporg-forums' ); ?></label><br />
+							<label><?php esc_html_e( 'You may use these <abbr title="HyperText Markup Language">HTML</abbr> tags and attributes:','wporg-forums' ); ?></label><br />
 							<code><?php bbp_allowed_tags(); ?></code>
 						</p>
 
@@ -227,7 +226,7 @@ if ( bbp_is_reply_edit() ) : ?>
 					<?php if ( is_user_logged_in() ) : ?>
 						<li><?php esc_html_e( 'You cannot reply to this review.', 'wporg-forums' ); ?></li>
 					<?php else : ?>
-						<li><?php printf( esc_html__( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() ); ?></li>
+						<li><?php printf( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() ); ?></li>
 					<?php endif; ?>
 
 				<?php else : ?>
@@ -235,7 +234,7 @@ if ( bbp_is_reply_edit() ) : ?>
 					<?php if ( is_user_logged_in() ) : ?>
 						<li><?php esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' ); ?></li>
 					<?php else : ?>
-						<li><?php printf( esc_html__( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() ); ?></li>
+						<li><?php printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() ); ?></li>
 					<?php endif; ?>
 
 				<?php endif; ?>
@@ -249,5 +248,4 @@ if ( bbp_is_reply_edit() ) : ?>
 
 </div>
 
-<?php
-endif;
+<?php endif;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User Topics Replied To
  *
@@ -16,24 +17,20 @@ do_action( 'bbp_template_before_user_topics_replied_to' ); ?>
 
 			<?php bbp_get_template_part( 'pagination', 'replies' ); ?>
 
-			<?php bbp_get_template_part( 'loop', 'reply-topics' ); ?>
+			<?php bbp_get_template_part( 'loop',       'reply-topics' ); ?>
 
 			<?php bbp_get_template_part( 'pagination', 'replies' ); ?>
 
 		<?php else : ?>
 
-			<p>
-				<?php
-				bbp_is_user_home()
-				? esc_html_e( 'You have not replied to any topics.', 'wporg-forums' )
+			<p><?php bbp_is_user_home()
+				? esc_html_e( 'You have not replied to any topics.',      'wporg-forums' )
 				: esc_html_e( 'This user has not replied to any topics.', 'wporg-forums' );
-				?>
-			</p>
+			?></p>
 
 		<?php endif; ?>
 
 	</div>
 </div><!-- #bbp-user-topics-replied-to -->
 
-<?php
-do_action( 'bbp_template_after_user_topics_replied_to' );
+<?php do_action( 'bbp_template_after_user_topics_replied_to' );

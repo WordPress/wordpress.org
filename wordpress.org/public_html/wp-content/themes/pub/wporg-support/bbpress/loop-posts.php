@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Posts Loop
  *
@@ -11,20 +12,14 @@
 <ul class="bbp-topics full-posts">
 	<li class="bbp-body">
 
-		<?php
-		while ( bbp_topics() ) :
-			bbp_the_topic();
-			?>
+		<?php while ( bbp_topics() ) : bbp_the_topic(); ?>
 
-			<?php if ( 'topic' === get_post_type() ) : ?>
+			<?php if ( 'topic' == get_post_type() ) : ?>
 
 				<?php bbp_get_template_part( 'content', 'single-topic-lead' ); ?>
 
-				<?php // This actually works. ?>
-				<?php
-			else :
-				bbpress()->reply_query = bbpress()->topic_query;
-				?>
+			<?php // This actually works. ?>
+			<?php else : bbpress()->reply_query = bbpress()->topic_query; ?>
 
 				<?php bbp_get_template_part( 'loop', 'single-reply' ); ?>
 

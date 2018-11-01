@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Single Topic Part
  *
@@ -43,25 +44,9 @@ if ( bbp_is_single_view() || bbp_is_search_results() ) : ?>
 
 				<?php do_action( 'bbp_theme_before_topic_author_details' ); ?>
 
-				<?php
-				bbp_topic_author_link(
-					array(
-						'sep'       => '',
-						'show_role' => false,
-						'size'      => 100,
-					)
-				);
-				?>
+				<?php bbp_topic_author_link( array( 'sep' => '', 'show_role' => false, 'size' => 100 ) ); ?>
 
-				<?php
-				bbp_user_nicename(
-					bbp_get_topic_author_id(),
-					array(
-						'before' => '<p class="bbp-user-nicename">(@',
-						'after'  => ')</p><br />',
-					)
-				);
-				?>
+				<?php bbp_user_nicename( bbp_get_topic_author_id(), array( 'before' => '<p class="bbp-user-nicename">(@', 'after' => ')</p><br />' ) ); ?>
 
 				<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) && 'bbp_blocked' === bbp_get_user_role( bbp_get_topic_author_id() ) ) : ?>
 					<p class="wporg-bbp-user-is-blocked">[<?php esc_attr_e( 'This user is blocked', 'wporg-forums' ); ?>]</p>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Replies Loop - Single Reply
  *
@@ -28,25 +29,9 @@ if ( bbp_is_single_view() || bbp_is_search_results() || bbp_is_single_user_repli
 
 		<?php do_action( 'bbp_theme_before_reply_author_details' ); ?>
 
-		<?php
-		bbp_reply_author_link(
-			array(
-				'sep'       => '',
-				'show_role' => false,
-				'size'      => 100,
-			)
-		);
-		?>
+		<?php bbp_reply_author_link( array( 'sep' => '', 'show_role' => false, 'size' => 100 ) ); ?>
 
-		<?php
-		bbp_user_nicename(
-			bbp_get_reply_author_id(),
-			array(
-				'before' => '<p class="bbp-user-nicename">(@',
-				'after'  => ')</p>',
-			)
-		);
-		?>
+		<?php bbp_user_nicename( bbp_get_reply_author_id(), array( 'before' => '<p class="bbp-user-nicename">(@', 'after' => ')</p>' ) ); ?>
 
 		<?php if ( current_user_can( 'moderate', bbp_get_reply_topic_id() ) && 'bbp_blocked' === bbp_get_user_role( bbp_get_reply_author_id() ) ) : ?>
 			<p class="wporg-bbp-user-is-blocked">[<?php esc_html_e( 'This user is blocked', 'wporg-support' ); ?>]</p>
