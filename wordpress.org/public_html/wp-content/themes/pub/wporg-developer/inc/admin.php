@@ -66,7 +66,7 @@ class DevHub_Admin {
 		 * @param bool True if admin.css should be enqueued, false otherwise.
 		 */
 		if ( (bool) apply_filters( 'devhub-admin_enqueue_scripts', in_array( get_current_screen()->id, $screen_ids ) ) ) {
-			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', [], '20160630' );
+			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', [], '20181101' );
 		}
 	}
 
