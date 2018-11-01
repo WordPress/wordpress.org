@@ -60,6 +60,7 @@ class WPORG_Explanations {
 		add_filter( 'post_row_actions',        array( $this, 'expl_row_action'        ), 10, 2 );
 
 		// Script and styles.
+		add_filter( 'devhub-admin_enqueue_scripts', array( $this, 'admin_enqueue_base_scripts' ) );
 		add_action( 'admin_enqueue_scripts',   array( $this, 'admin_enqueue_scripts'  )        );
 
 		// AJAX.
@@ -440,24 +441,30 @@ class WPORG_Explanations {
 	}
 
 	/**
+	 * Enables enqueuing of admin.css for explanation pages.
+	 *
+	 * @access public
+	 *
+	 * @param bool $do_enqueue Should admin.css be enqueued?
+	 * @return bool True if admin.css should be enqueued, false otherwise.
+	 */
+	public function admin_enqueue_base_scripts( $do_enqueue ) {
+		return $do_enqueue || in_array( get_current_screen()->id, $this->screen_ids  );
+	}
+
+	/**
 	 * Enqueue JS and CSS for all parsed post types and explanation pages.
 	 *
 	 * @access public
 	 */
 	public function admin_enqueue_scripts() {
 
-		$parsed_post_types = array();
-
-		foreach ( \DevHub\get_parsed_post_types() as $post_type ) {
-			$parsed_post_types[] = $post_type;
-			$parsed_post_types[] = "edit-{$post_type}";
-		}
+		$parsed_post_types_screen_ids = DevHub_Admin::get_parsed_post_types_screen_ids();
 
 		if ( in_array( get_current_screen()->id, array_merge(
-				$parsed_post_types,
+				$parsed_post_types_screen_ids,
 				$this->screen_ids
 		) ) ) {
-			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20160630' );
 			wp_enqueue_script( 'wporg-explanations', get_template_directory_uri() . '/js/explanations.js', array( 'jquery', 'wp-util' ), '20160630', true );
 
 			wp_localize_script( 'wporg-explanations', 'wporg', array(

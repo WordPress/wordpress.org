@@ -21,6 +21,8 @@ class DevHub_Admin {
 	 * Handles adding/removing hooks.
 	 */
 	public static function do_init() {
+		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_scripts' ] );
+	
 		add_action( 'comment_author', [ __CLASS__, 'append_user_nicename' ], 10, 2 );
 
 		if ( class_exists( 'DevHub_User_Contributed_Notes_Voting' ) ) {
@@ -29,6 +31,42 @@ class DevHub_Admin {
 
 			// Reset votes after editing a comment in the wp-admin.
 			add_filter( 'comment_edit_redirect',  [ __CLASS__, 'comment_edit_redirect'], 10, 2 );
+		}
+	}
+
+	/**
+	 * Returns array of screen IDs for parsed post types.
+	 *
+	 * @access public
+	 *
+	 * @return array
+	 */
+	public static function get_parsed_post_types_screen_ids() {
+		$screen_ids = [];
+		foreach ( DevHub\get_parsed_post_types() as $parsed_post_type ) {
+			$screen_ids[] = $parsed_post_type;
+			$screen_ids[] = "edit-{$parsed_post_type}";
+		}
+
+		return $screen_ids;
+	}
+
+	/**
+	 * Enqueue JS and CSS on the edit screens for all parsed post types.
+	 *
+	 * @access public
+	 */
+	public static function admin_enqueue_scripts() {
+		// By default, only enqueue on parsed post type screens.
+		$screen_ids = self::get_parsed_post_types_screen_ids();
+
+		/**
+		 * Filters whether or not admin.css should be enqueued.
+		 *
+		 * @param bool True if admin.css should be enqueued, false otherwise.
+		 */
+		if ( (bool) apply_filters( 'devhub-admin_enqueue_scripts', in_array( get_current_screen()->id, $screen_ids ) ) ) {
+			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', [], '20160630' );
 		}
 	}
 
