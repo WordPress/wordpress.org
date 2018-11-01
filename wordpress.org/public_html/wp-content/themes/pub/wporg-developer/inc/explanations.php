@@ -28,12 +28,22 @@ class WPORG_Explanations {
 	public $exp_post_type = 'wporg_explanations';
 
 	/**
+	 * Explanation-specific screen IDs.
+	 *
+	 * @access public
+	 * @var array
+	 */
+	public $screen_ids = [];
+
+	/**
 	 * Constructor.
 	 *
 	 * @access public
 	 */
 	public function __construct() {
 		$this->post_types = DevHub\get_parsed_post_types();
+
+		$this->screen_ids = [ $this->exp_post_type, "edit-{$this->exp_post_type}" ];
 
 		// Setup.
 		add_action( 'init',                    array( $this, 'register_post_type'     ), 0     );
@@ -445,7 +455,7 @@ class WPORG_Explanations {
 
 		if ( in_array( get_current_screen()->id, array_merge(
 				$parsed_post_types,
-				array( 'wporg_explanations', 'edit-wporg_explanations' )
+				$this->screen_ids
 		) ) ) {
 			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20160630' );
 			wp_enqueue_script( 'wporg-explanations', get_template_directory_uri() . '/js/explanations.js', array( 'jquery', 'wp-util' ), '20160630', true );
