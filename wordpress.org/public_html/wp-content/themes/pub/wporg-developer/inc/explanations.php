@@ -48,11 +48,17 @@ class WPORG_Explanations {
 		// Setup.
 		add_action( 'init',                    array( $this, 'register_post_type'     ), 0     );
 		add_action( 'init',                    array( $this, 'remove_editor_support'  ), 100   );
+
+		// Admin.
 		add_action( 'edit_form_after_title',   array( $this, 'post_to_expl_controls'  )        );
 		add_action( 'edit_form_top',           array( $this, 'expl_to_post_controls'  )        );
 		add_action( 'admin_bar_menu',          array( $this, 'toolbar_edit_link'      ), 100   );
 		add_action( 'admin_menu',              array( $this, 'admin_menu'             )        );
 		add_action( 'load-post-new.php',       array( $this, 'prevent_direct_creation')        );
+		// Add admin post listing column for explanations indicator.
+		add_filter( 'manage_posts_columns',       array( $this, 'add_post_column'     )        );
+		// Output checkmark in explanations column if post has an explanation.
+		add_action( 'manage_posts_custom_column', array( $this, 'handle_column_data'  ), 10, 2 );
 
 		// Permissions.
 		add_action( 'after_switch_theme',      array( $this, 'add_roles'              )        );
@@ -537,6 +543,54 @@ class WPORG_Explanations {
 			} else {
 				wp_send_json_error(
 					new WP_Error( 'unpublish_error', __( 'Explanation could not be un-published.', 'wporg' ) )
+				);
+			}
+		}
+	}
+
+	/**
+	 * Adds a column in the admin listing of posts for parsed post types to
+	 * indicate if they have an explanation.
+	 *
+	 * Inserted as first column after title column.
+	 *
+	 * @access public
+	 *
+	 * @param array $columns Associative array of post column ids and labels.
+	 * @return array
+	 */
+	public function add_post_column( $columns ) {
+		if ( ! empty( $_GET['post_type'] ) && DevHub\is_parsed_post_type( $_GET['post_type'] ) ) {
+			$index = array_search( 'title', array_keys( $columns ) );
+			$pos   = false === $index ? count( $columns ) : $index + 1;
+
+			$col_data = [ 'has_explanation' => sprintf(
+				'<span class="dashicons dashicons-info" title="%s"></span><span class="screen-reader-text">%s</span>',
+				esc_attr__( 'Has explanation?', 'wporg' ),
+				esc_html__( 'Explanation?', 'wporg' )
+			) ];
+			$columns  = array_merge( array_slice( $columns, 0, $pos ), $col_data, array_slice( $columns, $pos ) );
+		}
+
+		return $columns;
+	}
+
+	/**
+	 * Outputs an indicator for the explanations column if post has an explanation.
+	 *
+	 * @access public
+	 *
+	 * @param string $column_name The name of the column.
+	 * @param int    $post_id     The ID of the post.
+	 */
+	public function handle_column_data( $column_name, $post_id ) {
+		if ( 'has_explanation' === $column_name ) {
+			if ( $explanation = DevHub\get_explanation( $post_id ) ) {
+				printf(
+					'<a href="%s">%s%s</a>',
+					get_edit_post_link( $explanation ),
+					'<span class="dashicons dashicons-info" aria-hidden="true"></span>',
+					'<span class="screen-reader-text">' . __( 'Post has an explanation.', 'wporg' ) . '</span>'
 				);
 			}
 		}

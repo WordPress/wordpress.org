@@ -22,6 +22,45 @@
 }
 
 /* Explanations */
+.fixed .column-has_explanation {
+  width: 2em;
+}
+
+.fixed .column-has_explanation .dashicons {
+  width: 30px;
+}
+
+.fixed tbody .column-has_explanation a {
+  color: #72777c;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.fixed tbody .column-has_explanation a:focus, .fixed tbody .column-has_explanation a:hover {
+  color: #0073aa;
+}
+
+.fixed tbody .column-has_explanation a .dashicons {
+  font-size: 26px;
+}
+
+@media screen and (max-width: 782px) {
+  .fixed tbody .column-has_explanation a .screen-reader-text {
+    position: static;
+    -webkit-clip-path: none;
+    clip-path: none;
+    width: auto;
+    height: auto;
+    margin: 0;
+  }
+}
+
+@media screen and (max-width: 782px) {
+  .fixed tbody .column-has_explanation a [aria-hidden="true"] {
+    display: none;
+  }
+}
+
 .post-type-wporg_explanations .page-title-action {
   display: none;
 }

@@ -25,6 +25,47 @@
 
 /* Explanations */
 
+.fixed {
+	.column-has_explanation {
+		width: 2em;
+
+		.dashicons {
+			width: 30px;
+		}
+	}
+
+	tbody .column-has_explanation a {
+		color: #72777c;
+		display: inline-block;
+		margin-top: 4px;
+
+		&:focus, &:hover {
+			color: #0073aa;
+		}
+
+		.dashicons {
+			font-size: 26px;
+		}
+
+		.screen-reader-text {
+			@media screen and (max-width: 782px) {
+				position: static;
+				-webkit-clip-path: none;
+				clip-path: none;
+				width: auto;
+				height: auto;
+				margin: 0;
+			}
+		}
+
+		& [aria-hidden="true"] {
+			@media screen and (max-width: 782px) {
+				display: none;
+			}
+		}
+	}
+}
+
 .post-type-wporg_explanations .page-title-action {
 	display: none;
 }
@@ -80,3 +121,4 @@
 .wporg_parsed_content {
 	width: 100%;
 }
+
