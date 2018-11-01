@@ -1,3 +1,16 @@
+<?php
+/**
+ * Replies Loop - Single Reply Topic
+ *
+ * @package bbPress
+ * @subpackage Theme
+ */
+
+// Exit if accessed directly
+defined( 'ABSPATH' ) || exit;
+
+?>
+
 <?php $topic_id = bbp_get_reply_topic_id(); ?>
 
 <ul id="bbp-topic-<?php bbp_topic_id( $topic_id ); ?>" <?php bbp_topic_class( $topic_id ); ?>>
@@ -18,13 +31,25 @@
 
 			<?php do_action( 'bbp_theme_before_topic_started_by' ); ?>
 
-			<span class="bbp-topic-started-by"><?php printf( __( 'Started by: %1$s', 'wporg-forums' ), bbp_get_topic_author_link( array( 'post_id' => $topic_id, 'size' => '14' ) ) ); ?></span>
+			<span class="bbp-topic-started-by">
+				<?php
+				printf(
+					esc_html__( 'Started by: %1$s', 'wporg-forums' ),
+					bbp_get_topic_author_link(
+						array(
+							'post_id' => $topic_id,
+							'size'    => '14',
+						)
+					)
+				);
+				?>
+			</span>
 
 			<?php do_action( 'bbp_theme_after_topic_started_by' ); ?>
 
 			<?php do_action( 'bbp_theme_before_topic_started_in' ); ?>
 
-			<span class="bbp-topic-started-in"><?php printf( __( 'in: <a href="%1$s">%2$s</a>', 'wporg-forums' ), bbp_get_forum_permalink( bbp_get_topic_forum_id( $topic_id ) ), bbp_get_forum_title( bbp_get_topic_forum_id( $topic_id ) ) ); ?></span>
+			<span class="bbp-topic-started-in"><?php printf( esc_html__( 'in: <a href="%1$s">%2$s</a>', 'wporg-forums' ), bbp_get_forum_permalink( bbp_get_topic_forum_id( $topic_id ) ), bbp_get_forum_title( bbp_get_topic_forum_id( $topic_id ) ) ); ?></span>
 
 			<?php do_action( 'bbp_theme_after_topic_started_in' ); ?>
 
@@ -52,7 +77,16 @@
 
 			<?php do_action( 'bbp_theme_before_topic_freshness_author' ); ?>
 
-			<span class="bbp-topic-freshness-author"><?php bbp_author_link( array( 'post_id' => bbp_get_topic_last_active_id( $topic_id ), 'size' => 14 ) ); ?></span>
+			<span class="bbp-topic-freshness-author">
+				<?php
+				bbp_author_link(
+					array(
+						'post_id' => bbp_get_topic_last_active_id( $topic_id ),
+						'size'    => 14,
+					)
+				);
+				?>
+			</span>
 
 			<?php do_action( 'bbp_theme_after_topic_freshness_author' ); ?>
 

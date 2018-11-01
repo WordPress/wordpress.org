@@ -1,5 +1,4 @@
-<?php 
-
+<?php
 /**
  * Single Reply Content Part
  *
@@ -7,9 +6,7 @@
  * @subpackage Theme
  */
 
-?>
-	
-<?php bbp_breadcrumb(); ?>
+bbp_breadcrumb(); ?>
 
 <div id="bbpress-forums">
 

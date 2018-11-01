@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Single View Content Part
  *
@@ -21,21 +20,21 @@
 
 		<?php bbp_get_template_part( 'pagination', 'topics' ); ?>
 
-		<?php if ( in_array( bbp_get_view_id(), array( 'spam', 'pending', 'archived' ) ) ) : ?>
+		<?php if ( in_array( bbp_get_view_id(), array( 'spam', 'pending', 'archived' ), true ) ) : ?>
 
-		<?php bbp_get_template_part( 'loop',       'posts'     ); ?>
+			<?php bbp_get_template_part( 'loop', 'posts' ); ?>
 
 		<?php else : ?>
 
-		<?php bbp_get_template_part( 'loop',       'topics'    ); ?>
+			<?php bbp_get_template_part( 'loop', 'topics' ); ?>
 
 		<?php endif; ?>
 
-		<?php bbp_get_template_part( 'pagination', 'topics'    ); ?>
+		<?php bbp_get_template_part( 'pagination', 'topics' ); ?>
 
 	<?php else : ?>
 
-		<?php bbp_get_template_part( 'feedback',   'no-topics' ); ?>
+		<?php bbp_get_template_part( 'feedback', 'no-topics' ); ?>
 
 	<?php endif; ?>
 
