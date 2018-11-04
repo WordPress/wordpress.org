@@ -70,21 +70,29 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		$this->post_types = (array) apply_filters( 'handbook_post_types', $this->post_types );
 		$this->post_types = array_map( array( $this, 'append_suffix' ), $this->post_types );
 
-		if ( in_array( $post->post_type, $this->post_types ) ) {
-			$args['post_type'] = $post->post_type;
+		$post_type = '';
+
+		if ( $post && in_array( $post->post_type, $this->post_types ) ) {
+			$post_type = $post->post_type;
+		} elseif ( is_post_type_archive( $this->post_types ) ) {
+			$post_type = reset( $this->post_types );
 		}
 
-		$post_type_obj = get_post_type_object( $post->post_type );
+		if ( $post_type ) {
+			$args['post_type'] = $post_type;
+		}
+
+		$post_type_obj = get_post_type_object( $post_type );
 
 		if ( current_user_can( $post_type_obj->cap->read_private_posts ) ) {
 			$args['post_status'] = array( 'publish', 'private' );
 		}
 
 		// Exclude root handbook page from the table of contents.
-		$page = get_page_by_path( $this->append_suffix( $post->post_type ), OBJECT, $post->post_type );
+		$page = get_page_by_path( $this->append_suffix( $post_type ), OBJECT, $post_type );
 		if ( ! $page ) {
-			$slug = substr( $post->post_type, 0, -9 );
-			$page = get_page_by_path( $slug, OBJECT, $post->post_type );
+			$slug = substr( $post_type, 0, -9 );
+			$page = get_page_by_path( $slug, OBJECT, $post_type );
 		}
 		if ( $page && ! $instance['show_home'] ) {
 			$args['exclude'] = rtrim( $page->ID . ',' . $args['exclude'], ',' );
