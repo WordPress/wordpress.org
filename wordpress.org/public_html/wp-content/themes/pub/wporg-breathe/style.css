@@ -367,6 +367,8 @@ body,
 	line-height: 1.2;
 }
 
+.post-type-archive-handbook aside[id^="handbook"] .widget-title,
+.post-type-archive-handbook aside[id^="nav_menu"] .widget-title,
 .single-handbook aside[id^="handbook"] .widget-title,
 .single-handbook aside[id^="nav_menu"] .widget-title {
 	font-size: 16px;
@@ -1069,8 +1071,8 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 
 .post-type-archive-handbook div.table-of-contents h2,
-.single-handbook div.table-of-contents h2,
 .post-type-archive-handbook div.table-of-contents h3,
+.single-handbook div.table-of-contents h2,
 .single-handbook div.table-of-contents h3 {
 	margin: 0;
 	padding: 7px 12px;
@@ -1158,6 +1160,8 @@ h2.toc-heading + h3.toc-heading:target {
 
 /** Menu */
 
+.post-type-archive-handbook #secondary aside.widget_wporg_handbook_pages,
+.post-type-archive-handbook #secondary aside.widget_nav_menu,
 .single-handbook #secondary aside.widget_wporg_handbook_pages,
 .single-handbook #secondary aside.widget_nav_menu {
 	font-size: 16px;
@@ -1268,28 +1272,33 @@ h2.toc-heading + h3.toc-heading:target {
 }
 
 /* New handbook design */
+.post-type-archive-handbook #page,
 .single-handbook #page {
 	background: linear-gradient(to right, #fafafa 40%, #fff 40%);
 	max-width: 100%;
 	padding: 0;
 }
 
+.post-type-archive-handbook #main,
 .single-handbook #main {
 	max-width: 960px;
 	margin: 0 auto;
 	display: flex;
 }
 
+.post-type-archive-handbook header,
 .single-handbook header {
 	margin: 0;
 }
 
+.post-type-archive-handbook #secondary,
 .single-handbook #secondary {
 	clear: left;
 	margin: 0;
 	background: #fafafa;
 }
 
+.post-type-archive-handbook #primary,
 .single-handbook #primary {
 	padding: 4rem 0 4rem 4rem;
 	background: #fff;
@@ -1297,22 +1306,28 @@ h2.toc-heading + h3.toc-heading:target {
 }
 
 @media(max-width: 876px) {
+	.post-type-archive-handbook, #primary,
 	.single-handbook #primary {
 		padding: 4rem 20px;
 	}
 }
 
+.post-type-archive-handbook #secondary-content,
 .single-handbook #secondary-content {
 	padding-top: 4rem;
 }
 
+.post-type-archive-handbook .widget_wporg_handbook_pages,
 .single-handbook .widget_wporg_handbook_pages {
 	background-color: transparent;
 }
 
+.post-type-archive-handbook nav.o2-post-actions button,
 .single-handbook nav.o2-post-actions button {
 	top: 10px;
 }
+
+.post-type-archive-handbook .make-welcome,
 .single-handbook .make-welcome {
 	margin: 0 !important;
 }
