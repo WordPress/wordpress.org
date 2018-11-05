@@ -303,51 +303,51 @@ article.page .translators-info table td:first-of-type {
 
 	article.page .translators-info table tbody td[data-column-title]:before {
 		content: attr(data-column-title);
-		position: initial;
-		display: flex;
+		position: absolute;
 		left: 10px;
-		width: 50%;
+		width: 33%;
 		font-weight: bold;
 	}
 
 	article.page .translators-info table tbody td:nth-of-type(1) {
 		display: inline-block;
-		padding-left: 40%;
+		padding-left: 33% !important;
 		padding-right: 5px;
-		width: 30%;
+		width: 66%;
 		border-bottom: none !important;
 	}
 
 	article.page .translators-info table tbody td:nth-of-type(2) {
 		display: inline-block;
 		padding-left: 0;
-		width: 23%;
+		width: 33%;
 		border-bottom: none !important;
 	}
 
 	article.page .translators-info table tbody td:nth-of-type(3) {
 		border-top: 1px solid #f1f1f1 !important;
+		padding-left: 33% !important;
 	}
 
 	article.page .translators-info table tbody td:nth-of-type(4) {
 		display: inline-block;
-		padding-left: 40%;
+		padding-left: 33% !important;
 		padding-right: 5px;
-		width: 30%;
+		width: 66%;
 		border-bottom: none !important;
 	}
 
 	article.page .translators-info table tbody td:nth-of-type(5) {
 		display: inline-block;
 		padding-left: 0;
-		width: 23%;
+		width: 33%;
 		border-bottom: none !important;
 	}
 
 	article.page .translators-info table tbody td:nth-of-type(6) {
 		display: inline-block;
-		padding-left: 40%;
-		width: 30%;
+		padding-left: 33% !important;
+		width: 66%;
 		border-top: 1px solid #f1f1f1 !important;
 		border-bottom: none !important;
 	}
@@ -355,7 +355,7 @@ article.page .translators-info table td:first-of-type {
 	article.page .translators-info table tbody td:nth-of-type(7) {
 		display: inline-block;
 		padding-left: 0;
-		width: 23%;
+		width: 33%;
 		border-top: 1px solid #f1f1f1 !important;
 		border-bottom: none !important;
 	}
@@ -364,5 +364,6 @@ article.page .translators-info table td:first-of-type {
 		border-top: 1px solid #f1f1f1 !important;
 		border-bottom: none !important;
 		padding-right: 0;
+		padding-left: 33% !important;
 	}
 }
