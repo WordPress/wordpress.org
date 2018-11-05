@@ -179,12 +179,14 @@ function get_whitelist() {
 			'EmpireOfLight',
 		),
 		'docs' => array(
+			'atachibana',
+			'chrisvanpatten',
+			'Clorith',
 			'DrewAPicture', // @drew on Slack
 			'hlashbrooke',
 			'Kenshino',
 			'lizkaraffa',
 			'milana_cap', // @zzap on Slack
-			'chrisvanpatten',
 		),
 		'feature-notifications' => array(
 			'johnbillion',
