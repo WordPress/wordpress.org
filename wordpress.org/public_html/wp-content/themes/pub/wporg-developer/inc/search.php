@@ -23,7 +23,7 @@ class DevHub_Search {
 	public static function do_init() {
 		add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ), 20 );
 		add_filter( 'posts_orderby', array( __CLASS__, 'search_posts_orderby' ), 10, 2 );
-		add_filter( 'the_posts',     array( __CLASS__, 'rerun_empty_exact_search' ), 10, 2 );
+		add_filter( 'the_posts',     array( __CLASS__, 'rerun_empty_search' ), 10, 2 );
 	}
 
 	/**
@@ -168,8 +168,12 @@ class DevHub_Search {
 	}
 
 	/**
-	 * Rerun an exact search with the same criteria except exactness if no posts
-	 * were found.
+	 * Potentially rerun a search if no posts were found.
+	 *
+	 * Situations:
+	 * - For an exact search, try again with the same criteria but without exactness
+	 * - For a search containing characters that can be converted to HTML entities,
+	 * , try again after converting those characters
 	 *
 	 * @access public
 	 *
@@ -177,10 +181,21 @@ class DevHub_Search {
 	 * @param  WP_Query $query WP_Query object
 	 * @return array
 	 */
-	public static function rerun_empty_exact_search( $posts, $query ) {
-		if ( is_search() && true === $query->get( 'exact' ) && ! $query->found_posts ) {
-			$query->set( 'exact', false );
-			$posts = $query->get_posts();
+	public static function rerun_empty_search( $posts, $query ) {
+		if ( is_search() && ! $query->found_posts ) {
+			$s = $query->get( 's' );
+
+			// Return exact search without exactness.
+			if ( true === $query->get( 'exact' ) ) {
+				$query->set( 'exact', false );
+				$posts = $query->get_posts();
+			}
+			
+			// Retry HTML entity convertible search term after such a conversion.
+			elseif ( $s != ( $she = htmlentities( $s ) ) ) {
+				$query->set( 's', $she );
+				$posts = $query->get_posts();
+			}
 		}
 
 		return $posts;
