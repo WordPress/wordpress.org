@@ -2198,6 +2198,10 @@ aside[id^="nav_menu"] .widget-title {
   color: inherit;
 }
 
+.widget-area .widget .searchform .button-search {
+  height: 100%;
+}
+
 .post-type-archive-handbook .site-main .widget-area,
 .single-handbook .site-main .widget-area {
   float: left;
