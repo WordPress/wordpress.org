@@ -303,7 +303,8 @@ article.page .translators-info table td:first-of-type {
 
 	article.page .translators-info table tbody td[data-column-title]:before {
 		content: attr(data-column-title);
-		position: absolute;
+		position: initial;
+		display: flex;
 		left: 10px;
 		width: 50%;
 		font-weight: bold;
