@@ -2326,7 +2326,7 @@ aside[id^="nav_menu"] .widget-title {
 
 /* Highlight current heading and adjust scroll position for fixed toolbar */
 .toc-heading:target {
-  position: relative;
+  position: initial;
   padding-top: 50px;
   margin-top: -50px;
 }
