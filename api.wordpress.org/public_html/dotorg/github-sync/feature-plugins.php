@@ -17,7 +17,7 @@ class GH2WORG {
 	private $whitelisted_repos = [
 		// Github.com/{$user/repo-name} => plugins.svn.wordpress.org/{$slug}/trunk/
 		'dd32/feature-plugin-testing'           => 'test-plugin-3',
-		'georgestephanis/two-factor'            => 'two-factor',
+//		'georgestephanis/two-factor'            => 'two-factor', // See https://github.com/georgestephanis/two-factor/issues/251
 		'georgestephanis/application-passwords' => 'application-passwords',
 		'obenland/shiny-updates'                => 'shiny-updates',
 		'pento/react'                           => 'react',
@@ -25,6 +25,8 @@ class GH2WORG {
 	];
 
 	function __construct() {
+		die( "Temporarily disabled. See https://github.com/georgestephanis/two-factor/issues/251" );
+
 		$repo_name = $this->get_notified_repo();
 
 		$svn_directory = $this->whitelisted_repos[ $repo_name ];
