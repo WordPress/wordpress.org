@@ -277,6 +277,7 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate language-pack', __NAMESPACE__ . '\CLI\Language_Pack' );
 		WP_CLI::add_command( 'wporg-translate mass-create-sets', __NAMESPACE__ . '\CLI\Mass_Create_Sets' );
 		WP_CLI::add_command( 'wporg-translate make-core-pot', __NAMESPACE__ . '\CLI\Make_Core_Pot' );
+		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 	}
 
 	/**
