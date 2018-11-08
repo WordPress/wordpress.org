@@ -1066,6 +1066,10 @@ big {
 	font-size: 125%;
 }
 
+.text-center {
+	text-align: center;
+}
+
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/
@@ -2732,7 +2736,7 @@ p a:hover {
 	content: "\f228";
 	display: inline-block;
 	float: left;
-	font: 400 50px/1 Dashicons;
+	font: 400 50px/1 dashicons;
 	margin: 0;
 	outline: none;
 	padding: 3px;
@@ -3180,12 +3184,15 @@ body, #pagebody {
 }
 
 /*--------------------------------------------------------------
+# .single
 # .page
 --------------------------------------------------------------*/
+.single .entry-header,
 .page .entry-header {
 	margin-top: 2rem;
 }
 
+.single .entry-header .entry-title,
 .page .entry-header .entry-title {
 	font-size: 1.5625rem;
 	font-weight: 400;
@@ -3194,16 +3201,21 @@ body, #pagebody {
 }
 
 @media screen and (min-width: 48em) {
+	.single .entry-header .entry-title,
 	.page .entry-header .entry-title {
 		padding: 0 2rem;
+		margin: 0;
+		width: 65%;
 	}
 }
 
+.single .entry-content h2,
 .page .entry-content h2 {
 	font-size: 1.5625rem;
 	font-weight: 400;
 }
 
+.single .entry-content h3,
 .page .entry-content h3 {
 	font-size: 1rem;
 	font-weight: 600;
@@ -3211,37 +3223,47 @@ body, #pagebody {
 	text-transform: uppercase;
 }
 
+.single .entry-content a,
 .page .entry-content a {
 	text-decoration: underline;
 }
 
+.single .entry-content section,
 .page .entry-content section {
 	padding: 2rem 0;
 }
 
+.single .entry-content section .container,
 .page .entry-content section .container {
 	margin: 0 auto;
 	max-width: 35.527136788rem;
 }
 
 @media screen and (min-width: 48em) {
+	.single .entry-content section .container,
 	.page .entry-content section .container {
 		padding: 0 2rem;
+		margin: 0;
+		width: 65%;
 	}
 }
 
+.single .entry-content section:first-of-type,
 .page .entry-content section:first-of-type {
 	padding-top: 0;
 }
 
+.single .entry-content section + section,
 .page .entry-content section + section {
 	border-top: 2px solid #eee;
 }
 
+.single .submenu,
 .page .submenu {
 	margin-left: 0;
 }
 
+.single .submenu li,
 .page .submenu li {
 	border-bottom: 1px solid #dedede;
 	font-size: 12px;
@@ -3249,24 +3271,30 @@ body, #pagebody {
 	padding: 5px 0;
 }
 
+.single .submenu li.current,
 .page .submenu li.current {
 	font-weight: 700;
 }
 
+.single .submenu li:last-child,
 .page .submenu li:last-child {
 	border-bottom: 0;
 }
 
+.single .submenu li ul,
 .page .submenu li ul {
 	margin-left: 16px;
 }
 
+.single .submenu li ul li,
 .page .submenu li ul li {
 	border: none;
 	line-height: 1.4em;
 	padding-bottom: 2px;
 }
 
+.single .entry-header .entry-title,
+.single .entry-content section .container,
 .page-template-page-full-width .entry-header .entry-title,
 .page-template-page-full-width .entry-content section .container {
 	max-width: 100%;
@@ -3278,6 +3306,34 @@ body, #pagebody {
 --------------------------------------------------------------*/
 .error-404 .page-title, .error-404 .page-content {
 	text-align: center;
+}
+
+/*--------------------------------------------------------------
+# Archives
+--------------------------------------------------------------*/
+body.archive #main h1 {
+	font-size: 2.2rem;
+	text-align: center;
+}
+
+body.archive #main a {
+	color: inherit;
+}
+
+body.archive #main a:hover, body.archive #main a:focus, body.archive #main a:active {
+	text-decoration: none;
+	color: #0073aa;
+}
+
+body.archive #main article h2 {
+	font-size: 1.3rem;
+}
+
+body.archive #main .archive-pagination {
+	display: block;
+	margin-top: 20px;
+	text-align: center;
+	width: 100%;
 }
 
 /*--------------------------------------------------------------
@@ -3295,12 +3351,15 @@ section {
 }
 
 @media (min-width: 48em) {
+	.three-up .archive-block,
 	.three-up > div {
-		float: left;
+		display: inline-block;
+		vertical-align: top;
 		width: 30%;
-		margin-right: 5%;
+		margin-right: 4.5%;
 		font-size: 0.8rem;
 	}
+	.three-up .archive-block:nth-child(3n),
 	.three-up > div:nth-child(3n) {
 		margin-right: 0;
 	}
@@ -3340,7 +3399,7 @@ section {
 	.three-up.bbp-forums > div {
 		height: 200px;
 		border-bottom: none;
-		margin: 2rem 5% 0 0;
+		margin: 2rem 4.5% 0 0;
 	}
 	.three-up.bbp-forums > div:nth-child(3n) {
 		margin-right: 0;
@@ -3960,16 +4019,26 @@ select {
 /*--------------------------------------------------------------
 # Homepage
 --------------------------------------------------------------*/
+.forum-archive.wporg-support .info-box,
 .home.wporg-support .info-box {
 	text-align: center;
 	max-width: 20rem;
 	margin: 0 auto 4rem;
 }
 
+.forum-archive.wporg-support .info-box h3,
 .home.wporg-support .info-box h3 {
 	margin-top: 1rem;
 }
 
+.forum-archive.wporg-support .info-box .icon-wrapper,
+.home.wporg-support .info-box .icon-wrapper {
+	display: inline-block;
+	width: 100%;
+	height: 108px;
+}
+
+.forum-archive.wporg-support .info-box .dashicons,
 .home.wporg-support .info-box .dashicons {
 	font-size: 5.9604644775rem;
 	opacity: 0.4;
@@ -3978,56 +4047,72 @@ select {
 }
 
 @media (min-width: 48em) {
+	.forum-archive.wporg-support .info-box,
 	.home.wporg-support .info-box {
 		max-width: 100%;
 		margin: 0;
 	}
 }
 
+.forum-archive.wporg-support #bbpress-forums .bbp-forums,
+.home.wporg-support #bbpress-forums .bbp-forums {
+	border: none;
+}
+
+.forum-archive.wporg-support #bbpress-forums div.odd,
 .home.wporg-support #bbpress-forums div.odd {
 	background: transparent;
 }
 
+.forum-archive.wporg-support .col-8,
 .home.wporg-support .col-8 {
 	margin-left: 0;
 }
 
+.forum-archive.wporg-support ul#views,
 .home.wporg-support ul#views {
 	text-align: center;
 	font-size: 0.8rem;
 	margin: 0;
 }
 
+.forum-archive.wporg-support .helpful-links > div:last-child,
 .home.wporg-support .helpful-links > div:last-child {
 	font-size: 0.8rem;
 }
 
 @media (min-width: 48em) {
+	.forum-archive.wporg-support .helpful-links > div,
 	.home.wporg-support .helpful-links > div {
 		width: 65%;
 		float: left;
 		margin-right: 5%;
 	}
+	.forum-archive.wporg-support .helpful-links > div:last-child,
 	.home.wporg-support .helpful-links > div:last-child {
 		width: 30%;
 		margin-right: 0;
 	}
 }
 
+.forum-archive.wporg-support .themes-plugins,
 .home.wporg-support .themes-plugins {
 	margin: 0 0 4rem;
 	border-bottom: 1px solid #eee;
 }
 
+.forum-archive.wporg-support .themes-plugins p,
 .home.wporg-support .themes-plugins p {
 	font-size: 1rem;
 	color: #666;
 }
 
+.forum-archive.wporg-support .themes-plugins p a:hover > .dashicons,
 .home.wporg-support .themes-plugins p a:hover > .dashicons {
 	text-decoration: none;
 }
 
+.forum-archive.wporg-support .themes-plugins h3,
 .home.wporg-support .themes-plugins h3 {
 	font-size: 1.4rem;
 	margin-bottom: 0;
@@ -4035,11 +4120,13 @@ select {
 }
 
 @media (min-width: 48em) {
+	.forum-archive.wporg-support .themes-plugins,
 	.home.wporg-support .themes-plugins {
 		width: 65%;
 		margin: 3rem 0 4rem;
 		border-bottom: none;
 	}
+	.forum-archive.wporg-support .themes-plugins p,
 	.home.wporg-support .themes-plugins p {
 		font-size: 0.8rem;
 	}
@@ -4288,6 +4375,76 @@ div.bbp-breadcrumb p {
 		flex-direction: column-reverse;
 	}
 	.bbp-view .review-ratings .col-3, .bbp-view .review-ratings .col-5 {
+		width: 100%;
+	}
+}
+
+/*--------------------------------------------------------------
+# HelpHub Specific
+--------------------------------------------------------------*/
+.three-up.helphub-front-page p,
+.three-up.helphub-front-page ul {
+	text-align: left;
+}
+
+.three-up.helphub-front-page > div {
+	margin-bottom: 5rem;
+}
+
+.three-up.helphub-front-page .icon-wrapper a {
+	color: inherit;
+	text-decoration: none;
+}
+
+#helphub-forum-link {
+	margin-top: 5rem;
+}
+
+#helphub-forum-link span {
+	display: inline-block;
+	width: 100%;
+	max-width: 335px;
+}
+
+#helphub-forum-link a {
+	margin-top: 0.5rem;
+	display: inline-block;
+}
+
+body.helphub-with-sidebar .left-sidebar {
+	font-size: 0.9rem;
+}
+
+body.helphub-with-sidebar .left-sidebar h2 {
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: #32373c;
+}
+
+body.helphub-with-sidebar .left-sidebar ul {
+	list-style: none;
+	margin: 0;
+}
+
+body.helphub-with-sidebar .left-sidebar ul li {
+	margin-bottom: 0.8rem;
+}
+
+body.helphub-with-sidebar .left-sidebar ul li ul {
+	margin-left: 1rem;
+}
+
+@media screen and (min-width: 768px) {
+	body.helphub-with-sidebar .left-sidebar {
+		float: left;
+		padding-right: 4rem;
+		width: 33%;
+	}
+	body.helphub-with-sidebar .left-sidebar + #main-content {
+		float: right;
+		width: 67%;
+	}
+	body.helphub-with-sidebar .left-sidebar + #main-content .entry-content .container {
 		width: 100%;
 	}
 }

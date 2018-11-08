@@ -516,7 +516,7 @@ body.reply-edit #bbpress-forums fieldset legend {
 #bbpress-forums fieldset.bbp-form select,
 #bbpress-forums fieldset.bbp-form input {
 	border: 1px solid #ccc;
-	outline-color: rgb(131, 189, 102);
+	outline-color: rgb( 131, 189, 102 );
 }
 
 /* Notices */
@@ -567,13 +567,7 @@ div.bbp-template-notice.updated {
 // 	box-sizing: border-box;
 // 	background: #f3f3f3;
 // 	background-image:
-// 	  -webkit-gradient(
-// 	    linear,
-// 	    left top,
-// 	    left bottom,
-// 	    from(#fefefe),
-// 	    to(#f4f4f4)
-// 	   );
+//  -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#f4f4f4));
 // 	background-image: -webkit-linear-gradient(top, #fefefe, #f4f4f4);
 // 	background-image: linear-gradient(to bottom, #fefefe, #f4f4f4);
 // }
@@ -583,13 +577,7 @@ div.bbp-template-notice.updated {
 // 	border-color: #999;
 // 	background: #f3f3f3;
 // 	background-image:
-// 	  -webkit-gradient(
-// 	    linear,
-// 	    left top,
-// 	    left bottom,
-// 	    from(#fff),
-// 	    to(#f3f3f3)
-// 	  );
+//  -webkit-gradient(linear, left top, left bottom, from(#fff), to(#f3f3f3));
 // 	background-image: -webkit-linear-gradient(top, #fff, #f3f3f3);
 // 	background-image: linear-gradient(to bottom, #fff, #f3f3f3);
 // }

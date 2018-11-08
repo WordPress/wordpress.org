@@ -17,11 +17,13 @@ section {
 
 	@media (min-width: $ms-breakpoint) {
 
+		.archive-block,
 		> div {
-			float: left;
+			display: inline-block;
+			vertical-align: top;
 			width: 30%;
-			margin-right: 5%;
-			font-size: ms(-2);
+			margin-right: 4.5%;
+			font-size: ms( -2 );
 
 			&:nth-child(3n) {
 				margin-right: 0;
@@ -54,6 +56,7 @@ section {
 			a {
 
 				&:hover {
+
 					color: $color__link;
 					text-decoration: none;
 
@@ -66,7 +69,7 @@ section {
 			@media (min-width: $ms-breakpoint) {
 				height: 200px;
 				border-bottom: none;
-				margin: 2rem 5% 0 0;
+				margin: 2rem 4.5% 0 0;
 
 				&:nth-child(3n) {
 					margin-right: 0;
@@ -415,7 +418,6 @@ section {
 		}
 
 		p.wporg-bbp-topic-site-url::before {
-
 			content: "\f103";
 			color: #000;
 			font-family: dashicons;
@@ -543,12 +545,10 @@ section {
 			overflow: hidden;
 
 			&::before {
-
 				font: 400 16px/1 dashicons;
 				margin-right: 100px;
 
 				@media (min-width: 321px) {
-
 					font: 400 21px/1 dashicons;
 					margin-left: 20px;
 				}
@@ -729,6 +729,7 @@ select {
 # Homepage
 --------------------------------------------------------------*/
 
+.forum-archive.wporg-support,
 .home.wporg-support {
 
 	.info-box {
@@ -738,6 +739,12 @@ select {
 
 		h3 {
 			margin-top: 1rem;
+		}
+
+		.icon-wrapper {
+			display: inline-block;
+			width: 100%;
+			height: 108px;
 		}
 
 		.dashicons {
@@ -753,8 +760,15 @@ select {
 		}
 	}
 
-	#bbpress-forums div.odd {
-		background: transparent;
+	#bbpress-forums {
+
+		.bbp-forums {
+			border: none;
+		}
+
+		div.odd {
+			background: transparent;
+		}
 	}
 
 	.col-8 {
@@ -1009,7 +1023,6 @@ div.bbp-breadcrumb {
 	.topic-info li.topic-previous-reports {
 
 		.previous-reports {
-
 			padding-left: 0;
 
 			li {
