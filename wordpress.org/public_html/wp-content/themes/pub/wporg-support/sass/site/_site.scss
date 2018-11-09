@@ -448,10 +448,10 @@ body, #pagebody {
 
 
 /*--------------------------------------------------------------
-# .single
+# .helphub-page
 # .page
 --------------------------------------------------------------*/
-.single,
+.helphub-page,
 .page {
 
 	.entry-header {
@@ -465,8 +465,6 @@ body, #pagebody {
 
 			@media screen and ( min-width: $ms-breakpoint ) {
 				padding: 0 2rem;
-				margin: 0;
-				width: 65%;
 			}
 		}
 	}
@@ -498,8 +496,6 @@ body, #pagebody {
 
 				@media screen and ( min-width: $ms-breakpoint ) {
 					padding: 0 2rem;
-					margin: 0;
-					width: 65%;
 				}
 			}
 

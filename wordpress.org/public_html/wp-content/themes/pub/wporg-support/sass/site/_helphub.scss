@@ -81,3 +81,26 @@ body.helphub-with-sidebar {
 		}
 	}
 }
+
+.helphub-page {
+	.entry-header {
+		.entry-title {
+			@media screen and ( min-width: $ms-breakpoint ) {
+				margin: 0;
+				width: 65%;
+			}
+		}
+	}
+
+	.entry-content {
+		section {
+			.container {
+				 @media screen and ( min-width: $ms-breakpoint ) {
+					 margin: 0;
+					 width: 65%;
+				 }
+			 }
+		 }
+	 }
+}
+

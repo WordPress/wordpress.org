@@ -3184,15 +3184,15 @@ body, #pagebody {
 }
 
 /*--------------------------------------------------------------
-# .single
+# .helphub-page
 # .page
 --------------------------------------------------------------*/
-.single .entry-header,
+.helphub-page .entry-header,
 .page .entry-header {
 	margin-top: 2rem;
 }
 
-.single .entry-header .entry-title,
+.helphub-page .entry-header .entry-title,
 .page .entry-header .entry-title {
 	font-size: 1.5625rem;
 	font-weight: 400;
@@ -3201,21 +3201,19 @@ body, #pagebody {
 }
 
 @media screen and (min-width: 48em) {
-	.single .entry-header .entry-title,
+	.helphub-page .entry-header .entry-title,
 	.page .entry-header .entry-title {
 		padding: 0 2rem;
-		margin: 0;
-		width: 65%;
 	}
 }
 
-.single .entry-content h2,
+.helphub-page .entry-content h2,
 .page .entry-content h2 {
 	font-size: 1.5625rem;
 	font-weight: 400;
 }
 
-.single .entry-content h3,
+.helphub-page .entry-content h3,
 .page .entry-content h3 {
 	font-size: 1rem;
 	font-weight: 600;
@@ -3223,47 +3221,45 @@ body, #pagebody {
 	text-transform: uppercase;
 }
 
-.single .entry-content a,
+.helphub-page .entry-content a,
 .page .entry-content a {
 	text-decoration: underline;
 }
 
-.single .entry-content section,
+.helphub-page .entry-content section,
 .page .entry-content section {
 	padding: 2rem 0;
 }
 
-.single .entry-content section .container,
+.helphub-page .entry-content section .container,
 .page .entry-content section .container {
 	margin: 0 auto;
 	max-width: 35.527136788rem;
 }
 
 @media screen and (min-width: 48em) {
-	.single .entry-content section .container,
+	.helphub-page .entry-content section .container,
 	.page .entry-content section .container {
 		padding: 0 2rem;
-		margin: 0;
-		width: 65%;
 	}
 }
 
-.single .entry-content section:first-of-type,
+.helphub-page .entry-content section:first-of-type,
 .page .entry-content section:first-of-type {
 	padding-top: 0;
 }
 
-.single .entry-content section + section,
+.helphub-page .entry-content section + section,
 .page .entry-content section + section {
 	border-top: 2px solid #eee;
 }
 
-.single .submenu,
+.helphub-page .submenu,
 .page .submenu {
 	margin-left: 0;
 }
 
-.single .submenu li,
+.helphub-page .submenu li,
 .page .submenu li {
 	border-bottom: 1px solid #dedede;
 	font-size: 12px;
@@ -3271,22 +3267,22 @@ body, #pagebody {
 	padding: 5px 0;
 }
 
-.single .submenu li.current,
+.helphub-page .submenu li.current,
 .page .submenu li.current {
 	font-weight: 700;
 }
 
-.single .submenu li:last-child,
+.helphub-page .submenu li:last-child,
 .page .submenu li:last-child {
 	border-bottom: 0;
 }
 
-.single .submenu li ul,
+.helphub-page .submenu li ul,
 .page .submenu li ul {
 	margin-left: 16px;
 }
 
-.single .submenu li ul li,
+.helphub-page .submenu li ul li,
 .page .submenu li ul li {
 	border: none;
 	line-height: 1.4em;
@@ -4446,6 +4442,20 @@ body.helphub-with-sidebar .left-sidebar ul li ul {
 	}
 	body.helphub-with-sidebar .left-sidebar + #main-content .entry-content .container {
 		width: 100%;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	.helphub-page .entry-header .entry-title {
+		margin: 0;
+		width: 65%;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	.helphub-page .entry-content section .container {
+		margin: 0;
+		width: 65%;
 	}
 }
 
