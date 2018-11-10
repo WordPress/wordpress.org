@@ -5,6 +5,8 @@ namespace WordPressdotorg\Make\Breathe;
  * Sets up theme defaults.
  */
 function after_setup_theme() {
+	add_theme_support( 'responsive-embeds' );
+
 	remove_theme_support( 'custom-header' );
 	remove_theme_support( 'custom-background' );
 
