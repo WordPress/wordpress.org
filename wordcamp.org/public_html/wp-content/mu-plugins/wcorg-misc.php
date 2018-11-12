@@ -460,7 +460,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 	}
 
 	if ( $err_no !== E_ERROR && $err_no !== E_USER_ERROR && $err_no !== E_CORE_ERROR && $err_no !== E_COMPILE_ERROR ) {
-		return false;
+//		return false;
 	}
 
 	// Max file length for ubuntu system is 255
