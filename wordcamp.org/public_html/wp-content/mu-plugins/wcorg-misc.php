@@ -460,7 +460,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 	}
 
 	if ( $err_no !== E_ERROR && $err_no !== E_USER_ERROR && $err_no !== E_CORE_ERROR && $err_no !== E_COMPILE_ERROR ) {
-//		return false;
+		return false;
 	}
 
 	// Max file length for ubuntu system is 255
@@ -527,7 +527,7 @@ function send_fatal_to_slack() {
 	return send_error_to_slack( $error['type'], $error['message'], $error['file'], $error['line'] );
 }
 
-if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
+if ( false && ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) ) {
 	register_shutdown_function( 'send_fatal_to_slack' );
 	set_error_handler( 'send_error_to_slack', E_ERROR );
 }
