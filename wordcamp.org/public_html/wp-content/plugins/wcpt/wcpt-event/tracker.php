@@ -23,6 +23,7 @@ function render_status_shortcode() {
  * @return array
  */
 function get_active_wordcamps() {
+	global $wpdb;
 	$wordcamps          = array();
 	$statuses           = WordCamp_Loader::get_post_statuses();
 	$milestones         = WordCamp_Loader::map_statuses_to_milestones();
@@ -31,23 +32,36 @@ function get_active_wordcamps() {
 	$shown_statuses = $statuses;
 	unset( $shown_statuses[ WCPT_FINAL_STATUS ] );
 	$shown_statuses = array_keys( $shown_statuses );
+	$wordcamp_post_type = WCPT_POST_TYPE_ID;
+
+	$wordcamp_post_objs = $wpdb->get_results(
+		$wpdb->prepare(
+			"
+			SELECT DISTINCT post_id
+			FROM {$wpdb->prefix}postmeta
+			WHERE
+				meta_key like '_status_change_log_$wordcamp_post_type%'
+			AND
+				meta_value >= %d
+			",
+			$inactive_timestamp
+		)
+	);
+	$wordcamp_post_ids = wp_list_pluck( $wordcamp_post_objs, 'post_id' );
 
 	$raw_posts = get_posts(
 		array(
 			'post_type'      => WCPT_POST_TYPE_ID,
 			'post_status'    => $shown_statuses,
-			'posts_per_page' => 300,
+			'posts_per_page' => -1,
 			'order'          => 'ASC',
 			'orderby'        => 'post_title',
+			'post__in'       => $wordcamp_post_ids,
 		)
 	);
 
 	foreach ( $raw_posts as $key => $post ) {
 		$last_update_timestamp = get_last_update_timestamp( $post->ID );
-
-		if ( $last_update_timestamp <= $inactive_timestamp ) {
-			continue;
-		}
 
 		$wordcamps[] = array(
 			'city'       => $post->post_title,
