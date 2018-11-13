@@ -44,7 +44,7 @@ class Export extends WP_CLI_Command {
 		// Change wp_locale until GlotPress returns the correct wp_locale for variants.
 		$wp_locale = $gp_locale->wp_locale;
 		if ( 'default' !== $args['locale-slug'] ) {
-			$wp_locale = $wp_locale . '_' . $set->slug;
+			$wp_locale = $wp_locale . '_' . $args['locale-slug'];
 		}
 
 		$projects = [
