@@ -1468,6 +1468,7 @@ h2.toc-heading + h3.toc-heading:target {
 	color: #0073aa;
 }
 .menu-table-of-contents-container .open .expandable .dashicons:hover {
+	background-color: #0073aa;
 	color: #fff;
 }
 .menu-table-of-contents-container ul a {
@@ -1500,6 +1501,7 @@ h2.toc-heading + h3.toc-heading:target {
   color: #0073aa;
 }
 .menu-table-of-contents-container > ul > li.open > div > a:hover {
+  background-color: #0073aa;
   color: #fff;
 }
 .menu-table-of-contents-container ul.default-open {
