@@ -39,6 +39,7 @@ class DevHub_Formatting {
 		add_filter( 'devhub-format-description', array( __CLASS__, 'autolink_references' ) );
 		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_hash_formatting' ), 9 );
 		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_description_parsedown_bug' ) );
+		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_description_html_as_code' ) );
 
 		add_filter( 'devhub-function-return-type', array( __CLASS__, 'autolink_references' ) );
 	}
@@ -563,6 +564,26 @@ class DevHub_Formatting {
 			if ( $matched && $matched = preg_match( $regex, $text, $match ) ) {
 				$text = preg_replace( $regex, $replace, $text );
 			}
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Wraps single-quoted HTML within 'code' tags.
+	 *
+	 * The HTML should have been denoted with backticks in the original source, in
+	 * which case it would have been parsed properly, but committers aren't
+	 * always sticklers for documentation formatting.
+	 *
+	 * @access public
+	 *
+	 * @param string $text Text.
+	 * @return string
+	 */
+	public static function fix_param_description_html_as_code( $text ) {
+		if ( false !== strpos( $text, "'&lt;" ) ) {
+			$text = preg_replace( '/\'(&lt;[^\']+&gt;)\'/', '<code>$1</code>', $text );
 		}
 
 		return $text;
