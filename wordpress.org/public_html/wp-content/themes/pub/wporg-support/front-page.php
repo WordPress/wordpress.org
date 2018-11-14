@@ -29,7 +29,7 @@ get_header(); ?>
 
 					<br>
 
-					<a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>">Check out our support forums</a>
+					<a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>"><?php esc_html_e( 'Check out our support forums', 'wporg-forums' ); ?></a>
 				</p>
 			</div>
 		<?php endif; ?>
