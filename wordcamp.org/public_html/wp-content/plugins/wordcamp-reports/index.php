@@ -15,9 +15,6 @@ defined( 'WPINC' ) || die();
 
 use WordCamp\Reports\Report;
 
-const JS_VERSION  = 1;
-const CSS_VERSION = 1;
-
 define( __NAMESPACE__ . '\PLUGIN_DIR', \plugin_dir_path( __FILE__ ) );
 define( __NAMESPACE__ . '\PLUGIN_URL', \plugins_url( '/', __FILE__ ) );
 
