@@ -162,15 +162,16 @@ class WordCamp_Details extends Base_Details {
 	 * @return array
 	 */
 	public static function get_field_order() {
-		/* @var WordCamp_Admin $wordcamp_admin */
-		global $wordcamp_admin;
+		if ( ! is_callable( array( 'WordCamp_Admin', 'meta_keys' ) ) ) {
+			require_once( WP_PLUGIN_DIR . '/wcpt/wcpt-wordcamp/wordcamp-admin.php' );
+		}
 
 		return array_merge(
 			[
 				'ID',
 				'Name',
 			],
-			array_keys( $wordcamp_admin->meta_keys( 'wordcamp' ) ),
+			array_keys( WordCamp_Admin::meta_keys( 'wordcamp' ) ),
 			[
 				'Created',
 				'Status',
@@ -179,9 +180,9 @@ class WordCamp_Details extends Base_Details {
 				'Sponsors',
 				'Organizers',
 			],
-			array_keys( $wordcamp_admin->meta_keys( 'contributor' ) ),
-			array_keys( $wordcamp_admin->meta_keys( 'organizer' ) ),
-			array_keys( $wordcamp_admin->meta_keys( 'venue' ) ),
+			array_keys( WordCamp_Admin::meta_keys( 'contributor' ) ),
+			array_keys( WordCamp_Admin::meta_keys( 'organizer' ) ),
+			array_keys( WordCamp_Admin::meta_keys( 'venue' ) ),
 			[
 				'_venue_coordinates',
 				'_venue_city',
@@ -288,9 +289,11 @@ class WordCamp_Details extends Base_Details {
 	 * @return array
 	 */
 	public function get_meta_keys() {
-		/* @var WordCamp_Admin $wordcamp_admin */
-		global $wordcamp_admin;
-		$meta_keys = array_merge( array_keys( $wordcamp_admin->meta_keys( 'all' ) ), [
+		if ( ! is_callable( array( 'WordCamp_Admin', 'meta_keys' ) ) ) {
+			require_once( WP_PLUGIN_DIR . '/wcpt/wcpt-wordcamp/wordcamp-admin.php' );
+		}
+
+		$meta_keys = array_merge( array_keys( WordCamp_Admin::meta_keys( 'all' ) ), [
 			'_venue_coordinates',
 			'_venue_city',
 			'_venue_state',
