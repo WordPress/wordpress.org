@@ -183,14 +183,7 @@ class WordCamp_Details extends Base_Details {
 			array_keys( WordCamp_Admin::meta_keys( 'contributor' ) ),
 			array_keys( WordCamp_Admin::meta_keys( 'organizer' ) ),
 			array_keys( WordCamp_Admin::meta_keys( 'venue' ) ),
-			[
-				'_venue_coordinates',
-				'_venue_city',
-				'_venue_state',
-				'_venue_country_code',
-				'_venue_country_name',
-				'_venue_zip',
-			]
+			WordCamp_Admin::get_venue_address_meta_keys()
 		);
 	}
 
@@ -293,14 +286,10 @@ class WordCamp_Details extends Base_Details {
 			require_once( WP_PLUGIN_DIR . '/wcpt/wcpt-wordcamp/wordcamp-admin.php' );
 		}
 
-		$meta_keys = array_merge( array_keys( WordCamp_Admin::meta_keys( 'all' ) ), [
-			'_venue_coordinates',
-			'_venue_city',
-			'_venue_state',
-			'_venue_country_code',
-			'_venue_country_name',
-			'_venue_zip',
-		] );
+		$meta_keys = array_merge(
+			array_keys( WordCamp_Admin::meta_keys( 'all' ) ),
+			WordCamp_Admin::get_venue_address_meta_keys()
+		);
 
 		return $meta_keys;
 	}

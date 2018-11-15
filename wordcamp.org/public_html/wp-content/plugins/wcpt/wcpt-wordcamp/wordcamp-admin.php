@@ -262,9 +262,9 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 		}
 
 		/**
-		 * meta_keys ()
+		 * Returns the names and types of post meta fields that have corresponding UI fields.
 		 *
-		 * Returns post meta key
+		 * For keys that don't have UI, see `get_venue_address_meta_keys()` and any similar functions.
 		 *
 		 * @param string $meta_group
 		 *
@@ -446,6 +446,24 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 			}
 
 			return apply_filters( 'wcpt_admin_meta_keys', $retval, $meta_group );
+		}
+
+		/**
+		 * Returns the slugs of the post meta fields for the venue's address.
+		 *
+		 * These aren't included in `meta_keys()` because they have no corresponding UI.
+		 *
+		 * @return array
+		 */
+		static function get_venue_address_meta_keys() {
+			return array(
+				'_venue_coordinates',
+				'_venue_city',
+				'_venue_state',
+				'_venue_country_code',
+				'_venue_country_name',
+				'_venue_zip',
+			);
 		}
 
 		/**

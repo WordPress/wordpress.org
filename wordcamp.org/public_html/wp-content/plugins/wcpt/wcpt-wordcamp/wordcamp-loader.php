@@ -332,14 +332,16 @@ class WordCamp_Loader extends Event_Loader {
 	}
 
 	/**
-	 * Meta field keys to publicly expose in the v2 REST API
+	 * Meta field keys that are safe to publicly expose in the v2 REST API.
 	 *
-	 * @see wcorg_json_expose_whitelisted_meta_data() in mu-plugins/wcorg-json-api.php
+	 * @see wcorg_json_expose_whitelisted_meta_data() in mu-plugins/wcorg-json-api.php.
 	 *
 	 * @return array
 	 */
 	public static function get_public_meta_keys() {
-		return array(
+		require_once( __DIR__ . '/wordcamp-admin.php' );
+
+		$safe_fields = array(
 			// Sourced from wcorg_json_expose_whitelisted_meta_data()
 			'Start Date (YYYY-mm-dd)',
 			'End Date (YYYY-mm-dd)',
@@ -356,13 +358,11 @@ class WordCamp_Loader extends Event_Loader {
 			'Available Rooms',
 			'Website URL',
 			'Exhibition Space Available',
-			// Additional venue data
-			'_venue_coordinates',
-			'_venue_city',
-			'_venue_state',
-			'_venue_country_code',
-			'_venue_country_name',
-			'_venue_zip',
+		);
+
+		return array_merge(
+			$safe_fields,
+			WordCamp_Admin::get_venue_address_meta_keys()
 		);
 	}
 
