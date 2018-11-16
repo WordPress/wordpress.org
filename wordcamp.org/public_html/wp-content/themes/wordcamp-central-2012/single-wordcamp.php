@@ -106,7 +106,10 @@ $wordcamp_title = wcpt_get_wordcamp_title();
 
 				<div class="wc-single-past">
 
-					<h3><?php echo $wordcamp_title; ?></h3>
+					<h3>
+						<?php echo esc_html( $wordcamp_title ); ?>
+					</h3>
+
 					<ul>
 
 					<?php while ( wcpt_wordcamps() ) : wcpt_the_wordcamp(); ?>

@@ -617,8 +617,8 @@ class WordCamp_Central_Theme {
 						<div class="comment-author vcard">
 							<?php echo get_avatar( $comment, 60 ); ?>
 							<?php printf(
-								__( '%s <span class="says">says:</span>', 'twentyten' ),
-								sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() )
+								wp_kses_post( __( '%s <span class="says">says:</span>', 'twentyten' ) ),
+								sprintf( '<cite class="fn">%s</cite>', wp_kses_post( get_comment_author_link() ) )
 							); ?>
 						</div>
 
@@ -629,11 +629,19 @@ class WordCamp_Central_Theme {
 							<br />
 						<?php endif; ?>
 
-						<div class="comment-meta commentmetadata"><a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
-							<?php
-								/* translators: 1: date, 2: time */
-								printf( __( '%1$s at %2$s', 'twentyten' ), get_comment_date(),  get_comment_time() ); ?></a><?php edit_comment_link( __( '(Edit)', 'twentyten' ), ' ' );
-							?>
+						<div class="comment-meta commentmetadata">
+							<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
+								<?php
+									/* translators: 1: date, 2: time */
+									printf(
+										esc_html__( '%1$s at %2$s', 'twentyten' ),
+										get_comment_date(),
+										get_comment_time()
+									);
+								?>
+							</a>
+
+							<?php edit_comment_link( __( '(Edit)', 'twentyten' ), ' ' ); ?>
 						</div>
 
 						<div class="comment-body">
@@ -714,26 +722,26 @@ class WordCamp_Central_Theme {
 			$end_year   = wcpt_get_wordcamp_end_date( $wordcamp_id, 'Y' );
 		}
 
-		echo "$start_month $start_day";
+		echo esc_html( "$start_month $start_day" );
 
 		if ( $end_day ) {
 			if ( $show_year && $start_year !== $end_year ) {
-				echo ", $start_year";
+				echo esc_html( ", $start_year" );
 			}
 
 			echo '&ndash;';
 
 			if ( $start_month !== $end_month ) {
-				echo "$end_month ";
+				echo esc_html( "$end_month " );
 			}
 
-			echo $end_day;
+			echo esc_html( $end_day );
 
 			if ( $show_year ) {
-				echo ", $end_year";
+				echo esc_html( ", $end_year" );
 			}
 		} elseif ( $show_year ) {
-			echo ", $start_year";
+			echo esc_html( ", $start_year" );
 		}
 	}
 

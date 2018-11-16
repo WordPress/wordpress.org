@@ -1,9 +1,8 @@
- <?php
+<?php
 /**
  * Template Name: Past WordCamps
  *
  * A custom page template for the Past WordCamps list.
- *
  */
 
 get_header(); ?>
@@ -11,7 +10,8 @@ get_header(); ?>
 		<div id="container" class="wc-schedule">
 			<div id="content" role="main">
 
-				<?php if ( have_posts() ) : the_post(); ?>
+				<?php if ( have_posts() ) :
+					the_post(); ?>
 
 				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 					<h1 class="entry-title"><?php the_title(); ?></h1>
@@ -50,7 +50,8 @@ get_header(); ?>
 						<h3 class="wc-schedule-year"><?php echo esc_html( $year ); ?></h3>
 
 						<ul class="wc-schedule-list">
-							<?php foreach ( $posts as $post ) : setup_postdata( $post ); ?>
+							<?php foreach ( $posts as $post ) :
+								setup_postdata( $post ); ?>
 
 								<li>
 									<a href="<?php echo esc_url( WordCamp_Central_Theme::get_best_wordcamp_url( $post->ID ) ); ?>">
@@ -73,7 +74,10 @@ get_header(); ?>
 						</ul>
 					<?php wp_reset_postdata(); endforeach; ?>
 
-				<a href="<?php echo home_url( '/schedule/' ); ?>" class="wc-schedule-more"><span class="arrow">&larr;</span> Upcoming WordCamps</a>
+				<a href="<?php echo esc_url( home_url( '/schedule/' ) ); ?>" class="wc-schedule-more">
+					<span class="arrow">&larr;</span>
+					Upcoming WordCamps
+				</a>
 
 				<?php endif; // wcpt_has_wordcamps ?>
 

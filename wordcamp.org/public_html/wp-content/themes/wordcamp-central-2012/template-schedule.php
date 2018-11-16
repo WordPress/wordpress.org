@@ -3,7 +3,6 @@
  * Template Name: WordCamp Schedule
  *
  * A custom page template for the Upcoming WordCamp schedule.
- *
  */
 
 get_header(); ?>
@@ -11,7 +10,8 @@ get_header(); ?>
 		<div id="container" class="wc-schedule">
 			<div id="content" role="main">
 
-				<?php if ( have_posts() ) : the_post(); ?>
+				<?php if ( have_posts() ) :
+					the_post(); ?>
 
 				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 					<h1 class="entry-title"><?php the_title(); ?></h1>
@@ -25,7 +25,7 @@ get_header(); ?>
 					<?php // Get the upcoming approved (published) WordCamps
 					if ( function_exists( 'wcpt_has_wordcamps' ) &&
 						wcpt_has_wordcamps( array(
-							'post_status' => WordCamp_Loader::get_public_post_statuses(),
+							'post_status'    => WordCamp_Loader::get_public_post_statuses(),
 							'posts_per_page' => -1,
 							'meta_key'       => 'Start Date (YYYY-mm-dd)',
 							'orderby'        => 'meta_value',
@@ -45,7 +45,8 @@ get_header(); ?>
 						<h3 class="wc-schedule-year"><?php echo esc_html( $year ); ?></h3>
 
 						<ul class="wc-schedule-list">
-							<?php foreach ( $posts as $post ) :	setup_postdata( $post ); ?>
+							<?php foreach ( $posts as $post ) :
+								setup_postdata( $post ); ?>
 
 								<li>
 									<a href="<?php echo esc_url( WordCamp_Central_Theme::get_best_wordcamp_url( $post->ID ) ); ?>">
@@ -68,7 +69,9 @@ get_header(); ?>
 						</ul>
 					<?php wp_reset_postdata(); endforeach; ?>
 
-				<a href="<?php echo home_url( '/schedule/past-wordcamps/' ); ?>" class="wc-schedule-more">Past WordCamps &rarr;</a>
+				<a href="<?php echo esc_url( home_url( '/schedule/past-wordcamps/' ) ); ?>" class="wc-schedule-more">
+					Past WordCamps &rarr;
+				</a>
 
 				<?php endif; // wcpt_has_wordcamps ?>
 

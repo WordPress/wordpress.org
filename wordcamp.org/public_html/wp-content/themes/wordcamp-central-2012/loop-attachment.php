@@ -15,13 +15,31 @@
  */
 ?>
 
-<?php if ( have_posts() ) while ( have_posts() ) : the_post(); ?>
-
+<?php
+if ( have_posts() )
+	while ( have_posts() ) :
+		the_post();
+		$title = sprintf(
+			esc_html__( 'Return to %s', 'twentyten' ),
+			strip_tags( get_the_title( $post->post_parent ) )
+		);
+?>
 				<?php if ( ! empty( $post->post_parent ) ) : ?>
-					<p class="page-title"><a href="<?php echo get_permalink( $post->post_parent ); ?>" title="<?php echo esc_attr( sprintf( __( 'Return to %s', 'twentyten' ), strip_tags( get_the_title( $post->post_parent ) ) ) ); ?>" rel="gallery"><?php
-						/* translators: %s - title of parent post */
-						printf( __( '&larr; %s', 'twentyten' ), get_the_title( $post->post_parent ) );
-					?></a></p>
+					<p class="page-title">
+						<a
+							href="<?php echo esc_attr( get_permalink( $post->post_parent ) ); ?>"
+							title="<?php echo esc_attr( $title ); ?>"
+							rel="gallery"
+						>
+							<?php
+								/* translators: %s - title of parent post */
+								printf(
+									wp_kses_post( __( '&larr; %s', 'twentyten' ) ),
+									get_the_title( $post->post_parent )
+								);
+							?>
+						</a>
+					</p>
 				<?php endif; ?>
 
 				<div class="entry-meta">
@@ -32,18 +50,22 @@
 						<li><?php comments_popup_link('No replies yet', '1 reply', '% replies', 'comments-link', 'Comments are off for this post' ); ?></li>
 						<li>
 						<?php
+
 						if ( wp_attachment_is_image() ) {
 							$metadata = wp_get_attachment_metadata();
-							printf( __( 'Full size is %s pixels', 'twentyten' ),
-								sprintf( '<a href="%1$s" title="%2$s">%3$s &times; %4$s</a>',
-									wp_get_attachment_url(),
+							printf(
+								wp_kses_post( __( 'Full size is %s pixels', 'twentyten' ) ),
+								sprintf(
+									'<a href="%1$s" title="%2$s">%3$s &times; %4$s</a>',
+									esc_url( wp_get_attachment_url() ),
 									esc_attr( __( 'Link to full-size image', 'twentyten' ) ),
-									$metadata['width'],
-									$metadata['height']
+									absint( $metadata['width'] ),
+									absint( $metadata['height'] )
 								)
 							);
 						}
-					?>
+
+						?>
 						</li>
 						<li class="wc-single-search"><strong>Search</strong> <?php get_search_form(); ?></li>
 
@@ -76,18 +98,24 @@
 									$next_attachment_url = wp_get_attachment_url();
 								}
 							?>
-							<p class="attachment"><a href="<?php echo $next_attachment_url; ?>" title="<?php the_title_attribute(); ?>" rel="attachment"><?php
-								$attachment_width  = apply_filters( 'twentyten_attachment_size', 900 );
-								$attachment_height = apply_filters( 'twentyten_attachment_height', 900 );
-								echo wp_get_attachment_image( $post->ID, array( $attachment_width, $attachment_height ) ); // filterable image width with, essentially, no limit for image height.
-							?></a></p>
+							<p class="attachment">
+								<a href="<?php echo esc_url( $next_attachment_url ); ?>" title="<?php esc_attr( the_title_attribute( array( 'echo' => false ) ) ); ?>" rel="attachment">
+									<?php
+									$attachment_width  = apply_filters( 'twentyten_attachment_size', 900 );
+									$attachment_height = apply_filters( 'twentyten_attachment_height', 900 );
+									echo wp_kses_post( wp_get_attachment_image( $post->ID, array( $attachment_width, $attachment_height ) ) ); // filterable image width with, essentially, no limit for image height.
+									?>
+								</a>
+							</p>
 
 							<div id="nav-below" class="navigation">
 								<div class="nav-previous"><?php previous_image_link( false ); ?></div>
 								<div class="nav-next"><?php next_image_link( false ); ?></div>
 							</div><!-- #nav-below -->
 	<?php else : ?>
-							<a href="<?php echo wp_get_attachment_url(); ?>" title="<?php the_title_attribute(); ?>" rel="attachment"><?php echo basename( get_permalink() ); ?></a>
+							<a href="<?php echo esc_url( wp_get_attachment_url() ); ?>" title="<?php esc_attr( the_title_attribute( array( 'echo' => false ) ) ); ?>" rel="attachment">
+								<?php echo esc_html( basename( get_permalink() ) ); ?>
+							</a>
 <?php endif; ?>
 						</div><!-- .entry-attachment -->
 						<div class="entry-caption"><?php if ( !empty( $post->post_excerpt ) ) the_excerpt(); ?></div>

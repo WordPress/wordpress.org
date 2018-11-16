@@ -9,14 +9,18 @@
 		<div id="content" role="main" class="group">
 
 			<h1 class="page-title"><?php
-				printf( __( 'Tag Archives: %s', 'twentyten' ), '<span>' . single_tag_title( '', false ) . '</span>' );
+				printf(
+					wp_kses_post( __( 'Tag Archives: %s', 'twentyten' ) ),
+					'<span>' . single_tag_title( '', false ) . '</span>'
+				);
 			?></h1>
 
 			<?php get_search_form(); ?>
 
 			<?php get_template_part( 'navigation-above' ); ?>
 
-			<?php while ( have_posts() ) : the_post(); ?>
+			<?php while ( have_posts() ) :
+				the_post(); ?>
 
 					<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 

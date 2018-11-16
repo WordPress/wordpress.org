@@ -7,14 +7,15 @@
 		<div id="primary" class="wc-planned" role="complementary">
 			<h3>Planned WordCamps</h3>
 
-			<?php echo wptexturize( wpautop( "These WordCamps are in the early stages of planning, but don't have a date yet. When their dates are confirmed, they'll be added to the schedule of approved WordCamps." ) );
-			?>
+			<p>
+				These WordCamps are in the early stages of planning, but don't have a date yet. When their dates are confirmed, they'll be added to the schedule of approved WordCamps.
+			</p>
 
 			<?php
 				// Get the upcoming approved (published) WordCamps *with dates*
 				$args = array(
 					'posts_per_page' => -1,
-					'post_status' => WordCamp_Loader::get_pre_planning_post_statuses(),
+					'post_status'    => WordCamp_Loader::get_pre_planning_post_statuses(),
 					'meta_key'       => 'Start Date (YYYY-mm-dd)',
 					'orderby'        => 'meta_value',
 					'order'          => 'ASC',
@@ -31,7 +32,8 @@
 			<ul class="xoxo">
 
 				<?php wcpt_has_wordcamps( $args ); ?>
-				<?php while ( wcpt_wordcamps() ) : wcpt_the_wordcamp(); ?>
+				<?php while ( wcpt_wordcamps() ) :
+					wcpt_the_wordcamp(); ?>
 
 					<li>
 						<strong>
@@ -53,11 +55,12 @@
 					// Change the query args, this time get the ones without dates
 					// and run the query again
 					$args['meta_query'][0]['compare'] = '<';
-					$args['orderby'] = 'date';
+					$args['orderby']                  = 'date';
 					wcpt_has_wordcamps( $args );
 				?>
 
-				<?php while ( wcpt_wordcamps() ) : wcpt_the_wordcamp(); ?>
+				<?php while ( wcpt_wordcamps() ) :
+					wcpt_the_wordcamp(); ?>
 
 					<li>
 						<strong>
@@ -75,9 +78,7 @@
 				<?php endwhile; // wcpt_wordcamps ?>
 
 				<li>
-					<?php echo wptexturize(
-						wpautop( 'Don&#8217;t see your city on the list, but yearning for a local WordCamp? Check out what it takes to <a href="/become-an-organizer/">become an organizer</a>!')
-					); ?>
+					Don&#8217;t see your city on the list, but yearning for a local WordCamp? Check out what it takes to <a href="/become-an-organizer/">become an organizer</a>!
 				</li>
 
 			</ul>

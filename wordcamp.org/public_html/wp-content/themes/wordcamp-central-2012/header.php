@@ -32,17 +32,19 @@
 	// Add the blog description for the home/front page.
 	$site_description = get_bloginfo( 'description', 'display' );
 	if ( $site_description && ( is_home() || is_front_page() ) )
-		echo " | $site_description";
+		echo esc_html( " | $site_description" );
 
 	// Add a page number if necessary:
-	if ( $paged >= 2 || $page >= 2 )
-		echo ' | ' . sprintf( __( 'Page %s', 'twentyten' ), max( $paged, $page ) );
+	if ( $paged >= 2 || $page >= 2 ) {
+		echo ' | ' . sprintf( esc_html__( 'Page %s', 'twentyten' ), (int) max( $paged, $page ) );
+	}
 
 	?></title>
 <link rel="profile" href="http://gmpg.org/xfn/11" />
 <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>" />
 <?php
-	/* Always have wp_head() just before the closing </head>
+	/*
+	 * Always have wp_head() just before the closing </head>
 	 * tag of your theme, or you will break many plugins, which
 	 * generally use this hook to add elements to <head> such
 	 * as styles, scripts, and meta tags.
@@ -82,18 +84,24 @@
 <div id="header" class="group">
 	<div id="masthead" class="group">
 		<?php /*  Allow screen readers / text browsers to skip the navigation menu and get right to the good stuff */ ?>
-		<a href="#<?php echo is_front_page()? 'wc-hero-panel': 'content'; ?>" class="skip-link screen-reader-text"><?php _e( 'Skip to content', 'twentyten' ); ?></a>
+		<a href="#<?php echo is_front_page() ? 'wc-hero-panel' : 'content'; ?>" class="skip-link screen-reader-text">
+			<?php esc_html_e( 'Skip to content', 'twentyten' ); ?>
+		</a>
 
-		<?php $heading_tag = ( is_home() || is_front_page() ) ? 'h1' : 'div'; ?>
-		<<?php echo $heading_tag; ?> id="site-title">
+		<?php $use_heading_tag = is_home() || is_front_page(); ?>
+		<?php echo $use_heading_tag ? '<h1 id="site-title">' : '<div id="site-title">'; ?>
 			<span>
-				<a href="<?php echo home_url( '/' ); ?>" title="<?php echo esc_attr( get_bloginfo( 'name', 'display' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a>
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php echo esc_attr( get_bloginfo( 'name', 'display' ) ); ?>" rel="home">
+					<?php bloginfo( 'name' ); ?>
+				</a>
 			</span>
-		</<?php echo $heading_tag; ?>>
+		<?php echo $use_heading_tag ? '</h1>' : '</div>'; ?>
 
 		<div id="access" role="navigation">
 			<?php /* Our navigation menu.  If one isn't filled out, wp_nav_menu falls back to wp_page_menu.  The menu assiged to the primary position is the one used.  If none is assigned, the menu with the lowest ID is used.  */ ?>
-			<button class="wc-primary-button menu-toggle"><?php _e( 'Primary Menu', 'adirondack' ); ?></button>
+			<button class="wc-primary-button menu-toggle">
+				<?php esc_html_e( 'Primary Menu', 'twentyten' ); ?>
+			</button>
 			<?php wp_nav_menu( array( 'container_class' => 'menu-header', 'theme_location' => 'primary' ) ); ?>
 		</div><!-- #access -->
 	</div><!-- #masthead -->
@@ -110,8 +118,8 @@
 				Everyone from casual users to core developers participate, share ideas, and get to know each other.
 			</p>
 			<p class="wc-hero-actions">
-				<a href="<?php echo home_url( '/about/' ); ?>" class="wc-hero-learnmore">Learn More</a> or
-				<a href="<?php echo home_url( '/schedule/' ); ?>" class="wc-primary-button">Find a WordCamp</a>
+				<a href="<?php echo esc_url( home_url( '/about/' ) ); ?>" class="wc-hero-learnmore">Learn More</a> or
+				<a href="<?php echo esc_url( home_url( '/schedule/' ) ); ?>" class="wc-primary-button">Find a WordCamp</a>
 			</p>
 		</div><!-- .wc-hero-intro -->
 
@@ -119,12 +127,12 @@
 			<?php
 				// Get image attachments from page Home.
 				$attachments = get_posts( array(
-					'post_type' => 'attachment',
+					'post_type'      => 'attachment',
 					'posts_per_page' => 10,
-					'post_parent' => get_the_ID(),
+					'post_parent'    => get_the_ID(),
 					'post_mime_type' => 'image',
-					'orderby' => 'date',
-					'order' => 'DESC',
+					'orderby'        => 'date',
+					'order'          => 'DESC',
 				) );
 			?>
 
@@ -161,10 +169,11 @@
 					<p class="wc-hero-mailinglist-subscription-status">Something went wrong; please try again later.</p>
 				<?php elseif ( WordCamp_Central_Theme::get_subscription_status() == false ) : ?>
 					<h3>Join the <strong>Mailing List</strong></h3>
-					<form action="<?php echo home_url( '/' ); ?>" method="POST">
-					<input type="hidden" name="wccentral-form-action" value="subscribe" />
-					<input type="text" class="wc-hero-mailinglist-email" placeholder="Enter your email address" name="wccentral-subscribe-email" />
-					<input type="submit" class="wc-hero-mailinglist-submit" value="Go" />
+
+					<form action="<?php echo esc_url( home_url( '/' ) ); ?>" method="POST">
+						<input type="hidden" name="wccentral-form-action" value="subscribe" />
+						<input type="text" class="wc-hero-mailinglist-email" placeholder="Enter your email address" name="wccentral-subscribe-email" />
+						<input type="submit" class="wc-hero-mailinglist-submit" value="Go" />
 					</form>
 				<?php endif; // get_subscription_status ?>
 
