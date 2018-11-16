@@ -1418,7 +1418,12 @@ h2.toc-heading + h3.toc-heading:target {
 .menu-table-of-contents-container {
   font-size: 0.8em;
 }
-.menu-table-of-contents-container ul {
+
+.menu-table-of-contents-container *:focus {
+  outline: 0;
+}
+
+.site-content .menu-table-of-contents-container ul {
   margin-left: 0;
   padding-left: 0;
   list-style: none;
@@ -1464,12 +1469,15 @@ h2.toc-heading + h3.toc-heading:target {
   border-right: 1px solid rgba(0,0,0,0.05);
   border-left: none;
 }
-.menu-table-of-contents-container .open .expandable .dashicons:not(:focus) {
+.menu-table-of-contents-container .current_page_ancestor:not(.open) .expandable .dashicons:not(:focus),
+.menu-table-of-contents-container .current_page_item .expandable .dashicons:not(:focus) {
+	background-color: #fff;
 	color: #0073aa;
 }
-.menu-table-of-contents-container .open .expandable .dashicons:hover {
-	background-color: #0073aa;
-	color: #fff;
+.menu-table-of-contents-container .current_page_ancestor .expandable .dashicons:hover,
+.menu-table-of-contents-container .current_page_item .expandable .dashicons:hover {
+	background-color: #0073aa !important;
+	color: #fff !important;
 }
 .menu-table-of-contents-container ul a {
   display: block;
@@ -1486,6 +1494,9 @@ h2.toc-heading + h3.toc-heading:target {
 .menu-table-of-contents-container .current-menu-item > a {
   color: #555;
   background-color: #fff;
+}
+.menu-table-of-contents-container ul a:visited:not(:hover) {
+  color: #0073aa;
 }
 .menu-table-of-contents-container > ul > li:last-child {
   border-bottom: 1px solid rgba(0,0,0,0.05);
