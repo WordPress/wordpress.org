@@ -1999,6 +1999,9 @@ h2.toc-heading + h3.toc-heading:target {
 div[class*="-table-of-contents-container"] {
 	font-size: 0.8em;
 
+	*:focus {
+		outline: 0;
+	}
 	ul {
 		margin-left: 0;
 		padding-left: 0;
@@ -2065,10 +2068,6 @@ div[class*="-table-of-contents-container"] {
 			display: block !important;
 		}
 	}
-	.open .expandable .dashicons:not(:focus) {
-		background: #fff;
-		color: #0073aa;
-	}
 	& > ul > li {
 		&:last-child {
 			border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -2095,6 +2094,16 @@ div[class*="-table-of-contents-container"] {
 	.current-menu-item ul,
 	.current-menu-ancestor ul {
 		display: block;
+	}
+	.current-menu-ancestor:not(.open) .expandable .dashicons:not(:focus),
+	.current-menu-item .expandable .dashicons:not(:focus) {
+		background: #fff;
+		color: #0073aa;
+	}
+	.current-menu-ancestor .expandable .dashicons:hover,
+	.current-menu-item .expandable .dashicons:hover {
+		background-color:: #0073aa !important;
+		color: #fff !important;
 	}
 	.children,
 	.sub-menu {
