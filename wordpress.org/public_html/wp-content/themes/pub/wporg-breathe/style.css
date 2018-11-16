@@ -1222,7 +1222,8 @@ h2.toc-heading + h3.toc-heading:target {
   border-right: 1px solid rgba(0,0,0,0.05);
   border-left: none;
 }
-.menu-table-of-contents-container .open .expandable .dashicons:not(:focus) {
+.menu-table-of-contents-container .current_page_ancestor:not(.open) .expandable .dashicons:not(:focus),
+.menu-table-of-contents-container .current_page_item .expandable .dashicons:not(:focus) {
 	background: #fff;
 	color: #0073aa;
 }
@@ -1236,6 +1237,11 @@ h2.toc-heading + h3.toc-heading:target {
 .menu-table-of-contents-container ul a:focus {
   color: #fff;
   background-color: #0073aa;
+}
+.menu-table-of-contents-container .current_page_ancestor .expandable .dashicons:hover,
+.menu-table-of-contents-container .current_page_item .expandable .dashicons:hover {
+  background-color: #0073aa !important;
+  color: #fff !important;
 }
 .menu-table-of-contents-container ul a.active,
 .menu-table-of-contents-container .current-menu-item > a {
