@@ -12,13 +12,17 @@ get_header(); ?>
 <?php if ( $is_handbook ) { get_sidebar( 'handbook' ); } ?>
 
 	<section id="primary" class="content-area">
-		<div id="content" class="site-content" role="main">
+		<div id="<?php echo $is_handbook ? 'handbook-content' : 'content'; ?>" class="site-content" role="main">
 
 		<?php if ( have_posts() ) : ?>
 
 			<header class="page-header">
 				<h1 class="page-title">
-					<?php printf( __( 'Search Results for: %s', 'wporg-breathe' ), '<span>' . get_search_query() . '</span>' ); ?>
+					<?php if ( wporg_is_handbook() ) {
+						printf( __( 'Handbook Search Results for: %s', 'wporg-breathe' ), '<span>' . get_search_query() . '</span>' );
+					} else {
+						printf( __( 'Search Results for: %s', 'wporg-breathe' ), '<span>' . get_search_query() . '</span>' );
+					} ?>
 
 					<span class="controls">
 						<?php do_action( 'breathe_view_controls' ); ?>
