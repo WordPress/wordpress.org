@@ -32,6 +32,17 @@ class WordCamp_Canonical_Years_Plugin {
 		if ( ! preg_match( '/^([0-9]{4})+\.((.+)\.wordcamp\.(lo|dev|test|org))$/i', $_SERVER['HTTP_HOST'], $matches ) )
 			return;
 
+		$wordcamp = get_wordcamp_post();
+		$end_date = $wordcamp->meta['End Date (YYYY-mm-dd)'][0] ?? false;
+
+		/*
+		 * In rare cases, the site for next year's camp will be created before this year's camp is over. When that
+		 * happens, we should wait to add the canonical link until after the current year's camp is over.
+		 */
+		if ( $end_date && time() < ( (int) $end_date + DAY_IN_SECONDS ) ) {
+			return;
+		}
+
 		$current_domain = $matches[0];
 		$city_domain = $matches[2];
 
