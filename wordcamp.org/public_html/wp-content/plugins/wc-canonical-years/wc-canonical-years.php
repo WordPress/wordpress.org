@@ -29,7 +29,7 @@ class WordCamp_Canonical_Years_Plugin {
 		$matches = array();
 
 		// match xxxx.city.wordcamp.org
-		if ( ! preg_match( '/^([0-9]{4})+\.((.+)\.wordcamp\.(lo|dev|org))$/i', $_SERVER['HTTP_HOST'], $matches ) )
+		if ( ! preg_match( '/^([0-9]{4})+\.((.+)\.wordcamp\.(lo|dev|test|org))$/i', $_SERVER['HTTP_HOST'], $matches ) )
 			return;
 
 		$current_domain = $matches[0];
