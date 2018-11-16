@@ -507,12 +507,12 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		"author_name" => $domain,
 		"text" => $text,
 	);
-	require_once '/home/api/public_html/includes/slack-config.php';
+
 	$send = new \Dotorg\Slack\Send( SLACK_ERROR_REPORT_URL );
 	$send->add_attachment( $message );
 
-	// For now
-	$send->send( 'vedanshu' );
+	// @todo change to WORDCAMP_LOGS_SLACK_CHANNEL when ready
+	$send->send( '@vedanshu' );
 	return false;
 }
 
