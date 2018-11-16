@@ -72,7 +72,7 @@ class WordCamp_Canonical_Years_Plugin {
 		if ( $latest_domain !== $current_domain && $latest_domain ) {
 			printf(
 				'<link rel="canonical" href="%s" />' . "\n",
-				esc_url( trailingslashit( $latest_domain ) )
+				set_url_scheme( esc_url( trailingslashit( $latest_domain ) ) )
 			);
 		}
 	}
