@@ -48,20 +48,9 @@ $wordcamp_title = wcpt_get_wordcamp_title();
 
 							<?php
 								$address = rawurlencode( implode( " ", explode( "\n", wcpt_get_wordcamp_physical_address() ) ) );
-								$map_url = 'https://maps.googleapis.com/maps/api/staticmap?center=' . $address . '&zoom=14&size=130x70&maptype=roadmap&markers=color:blue%7Clabel:A%7C' . $address . '&sensor=false';
-
-								$api_key = apply_filters( 'wordcamp_google_maps_api_key', '' );
-
-								if ( $api_key ) {
-									$map_url = add_query_arg( array(
-										'key' => $api_key,
-									), $map_url );
-								}
-
 								$map_link = 'https://maps.google.com/maps?q=' . $address;
 								$venue_link = wcpt_get_wordcamp_venue_url();
 							?>
-							<a href="<?php echo esc_url( $map_link ); ?>"><img src="<?php echo esc_url( $map_url ); ?>" class="wc-single-map"/></a>
 
 							<?php if ( $venue_link ) : ?>
 								<a href="<?php echo esc_url( $venue_link ); ?>"><?php wcpt_wordcamp_venue_name(); ?></a><br />
@@ -69,7 +58,9 @@ $wordcamp_title = wcpt_get_wordcamp_title();
 								<strong><?php wcpt_wordcamp_venue_name(); ?></strong><br />
 							<?php endif; ?>
 
-							<?php echo nl2br( wcpt_get_wordcamp_physical_address() ); ?><br />
+							<a href="<?php echo esc_url( $map_link ); ?>">
+								<?php echo nl2br( esc_html( wcpt_get_wordcamp_physical_address() ) ); ?><br />
+							</a>
 						<?php else: ?>
 							<strong><?php wcpt_wordcamp_venue_name(); ?></strong><br />
 							<?php wcpt_wordcamp_location(); ?>
