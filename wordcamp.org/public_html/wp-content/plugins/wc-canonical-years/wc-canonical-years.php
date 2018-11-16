@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Plugin Name: WordCamp.org Canonical Years
  * Author: Andrew Nacin
@@ -6,14 +7,21 @@
  */
 
 class WordCamp_Canonical_Years_Plugin {
-	function __construct() {
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 	}
 
-	function init() {
+	/**
+	 * Initialize plugin
+	 */
+	public function init() {
 		// Only on the home page.
-		if ( isset( $_SERVER['REQUEST_URI'] ) && $_SERVER['REQUEST_URI'] == '/' )
+		if ( isset( $_SERVER['REQUEST_URI'] ) && '/' === $_SERVER['REQUEST_URI'] ) {
 			add_action( 'wp_head', array( $this, 'wp_head' ), 9 );
+		}
 
 		// WordPress will print rel=conanical for singular posts by default, we don't want that.
 		remove_action( 'wp_head', 'rel_canonical' );
@@ -23,14 +31,15 @@ class WordCamp_Canonical_Years_Plugin {
 	 * Runs during wp_head, prints the canonical link for the most recent
 	 * WordCamp in the same city as the current site.
 	 */
-	function wp_head() {
+	public function wp_head() {
 		global $wpdb;
 
 		$matches = array();
 
-		// match xxxx.city.wordcamp.org
-		if ( ! preg_match( '/^([0-9]{4})+\.((.+)\.wordcamp\.(lo|dev|test|org))$/i', $_SERVER['HTTP_HOST'], $matches ) )
+		// Match `xxxx.city.wordcamp.org` pattern.
+		if ( ! preg_match( '/^([0-9]{4})+\.((.+)\.wordcamp\.(lo|dev|test|org))$/i', $_SERVER['HTTP_HOST'], $matches ) ) {
 			return;
+		}
 
 		$wordcamp = get_wordcamp_post();
 		$end_date = $wordcamp->meta['End Date (YYYY-mm-dd)'][0] ?? false;
@@ -38,13 +47,16 @@ class WordCamp_Canonical_Years_Plugin {
 		/*
 		 * In rare cases, the site for next year's camp will be created before this year's camp is over. When that
 		 * happens, we should wait to add the canonical link until after the current year's camp is over.
+		 *
+		 * This won't prevent the link from being added to past years, but that edge case isn't significant enough
+		 * to warrant the extra complexity.
 		 */
 		if ( $end_date && time() < ( (int) $end_date + DAY_IN_SECONDS ) ) {
 			return;
 		}
 
 		$current_domain = $matches[0];
-		$city_domain = $matches[2];
+		$city_domain    = $matches[2];
 
 		$latest_domain = $wpdb->get_var( $wpdb->prepare( "
 			SELECT domain
@@ -57,10 +69,14 @@ class WordCamp_Canonical_Years_Plugin {
 			"%.{$city_domain}"
 		) );
 
-		if ( $latest_domain != $current_domain && $latest_domain )
-			printf( '<link rel="canonical" href="%s" />' . "\n", trailingslashit( esc_url( $latest_domain ) ) );
+		if ( $latest_domain !== $current_domain && $latest_domain ) {
+			printf(
+				'<link rel="canonical" href="%s" />' . "\n",
+				esc_url( trailingslashit( $latest_domain ) )
+			);
+		}
 	}
 }
 
 // Initialize the plugin.
-new WordCamp_Canonical_Years_Plugin;
+$GLOBALS['wc_canonical_years'] = new WordCamp_Canonical_Years_Plugin();
