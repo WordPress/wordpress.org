@@ -18,7 +18,7 @@ get_header(); ?>
 
 			<header class="page-header">
 				<h1 class="page-title">
-					<?php if ( wporg_is_handbook() ) {
+					<?php if ( $is_handbook ) {
 						printf( __( 'Handbook Search Results for: %s', 'wporg-breathe' ), '<span>' . get_search_query() . '</span>' );
 					} else {
 						printf( __( 'Search Results for: %s', 'wporg-breathe' ), '<span>' . get_search_query() . '</span>' );
