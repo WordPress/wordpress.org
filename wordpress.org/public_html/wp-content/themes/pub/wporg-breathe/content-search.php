@@ -35,7 +35,7 @@ $is_handbook = function_exists( 'wporg_is_handbook' ) && wporg_is_handbook();
 			</span>
 			<?php if ( is_object_in_taxonomy( get_post_type(), 'post_tag' ) ) : ?>
 				<span class="entry-tags">
-					<?php breathe_tags_with_count( '', __( '<br />Tags:' , 'wporg-breathe' ) .' ', ', ', ' &nbsp;' ); ?>&nbsp;
+					<?php breathe_tags_with_count( '', '<br />' . __( 'Tags:' , 'wporg-breathe' ) .' ', ', ', ' &nbsp;' ); ?>&nbsp;
 				</span>
 			<?php endif; ?>
 
