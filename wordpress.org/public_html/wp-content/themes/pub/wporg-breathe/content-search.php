@@ -2,12 +2,15 @@
 /**
  * @package wporg-breathe
  */
+
+$is_handbook = function_exists( 'wporg_is_handbook' ) && wporg_is_handbook();
+
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<header class="entry-header">
 		<div class="entry-meta">
-			<?php if ( ! is_page() && ! wporg_is_handbook() ) :
+			<?php if ( ! is_page() && ! $is_handbook ) :
 				$author_posts_url = get_author_posts_url( get_the_author_meta( 'ID' ) );
 					$posts_by_title   = sprintf(
 					__( 'Posts by %1$s ( @%2$s )', 'wporg-breathe' ),
@@ -19,10 +22,10 @@
 			</a>
 			<?php endif; ?>
 
-			<?php if ( ! is_page() && ! wporg_is_handbook() ) : ?>
+			<?php if ( ! is_page() && ! $is_handbook ) : ?>
 				<a href="<?php echo esc_url( $author_posts_url ); ?>" title="<?php echo esc_attr( $posts_by_title ); ?>" class="entry-author"><?php the_author(); ?></a>
 			<?php endif; ?>
-			<?php if ( ! wporg_is_handbook() ) : ?>
+			<?php if ( ! $is_handbook ) : ?>
 			<span class="entry-date">
 				<?php breathe_date_time_with_microformat(); ?>
 			</span>
