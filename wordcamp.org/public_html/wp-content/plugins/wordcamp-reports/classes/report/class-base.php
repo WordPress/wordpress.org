@@ -4,9 +4,9 @@
  */
 
 namespace WordCamp\Reports\Report;
-use WP_Post;
-
 defined( 'WPINC' ) || die();
+
+use WP_Error, WP_Post, WP_REST_Response;
 
 /**
  * Class Base
@@ -114,7 +114,7 @@ abstract class Base {
 			'public'      => true,
 		) );
 
-		$this->error = new \WP_Error();
+		$this->error = new WP_Error();
 	}
 
 	/**
@@ -148,6 +148,21 @@ abstract class Base {
 		} );
 
 		return $data;
+	}
+
+	/**
+	 * Determine the data fields safelist based on the context of the report.
+	 *
+	 * @return array The list of fields that are safe to include.
+	 */
+	public function get_data_fields_safelist() {
+		$safelist = $this->public_data_fields;
+
+		if ( false === $this->options['public'] ) {
+			$safelist = array_merge( $safelist, $this->private_data_fields );
+		}
+
+		return $safelist;
 	}
 
 	/**
@@ -217,12 +232,12 @@ abstract class Base {
 	/**
 	 * Merge two error objects into one, new error object.
 	 *
-	 * @param \WP_Error $error1 An error object.
-	 * @param \WP_Error $error2 An error object.
+	 * @param WP_Error $error1 An error object.
+	 * @param WP_Error $error2 An error object.
 	 *
-	 * @return \WP_Error The combined errors of the two parameters.
+	 * @return WP_Error The combined errors of the two parameters.
 	 */
-	protected function merge_errors( \WP_Error $error1, \WP_Error $error2 ) {
+	protected function merge_errors( WP_Error $error1, WP_Error $error2 ) {
 		$codes = $error2->get_error_codes();
 
 		foreach ( $codes as $code ) {
@@ -234,33 +249,6 @@ abstract class Base {
 		}
 
 		return $error1;
-	}
-
-	/**
-	 * Validate a given WordCamp post ID.
-	 *
-	 * @param int $wordcamp_id The ID of a WordCamp post.
-	 *
-	 * @return bool True if the WordCamp ID is valid. Otherwise false.
-	 */
-	protected function validate_wordcamp_id( $wordcamp_id ) {
-		$wordcamp = get_post( $wordcamp_id );
-
-		if ( ! $wordcamp instanceof WP_Post || WCPT_POST_TYPE_ID !== get_post_type( $wordcamp ) ) {
-			$this->error->add( 'invalid_wordcamp_id', 'Please enter a valid WordCamp ID.' );
-
-			return false;
-		}
-
-		$wordcamp_site_id = get_wordcamp_site_id( $wordcamp );
-
-		if ( ! $wordcamp_site_id ) {
-			$this->error->add( 'wordcamp_without_site', 'The specified WordCamp does not have a site yet.' );
-
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -287,7 +275,7 @@ abstract class Base {
 	 * @param mixed $data                       The data that will go in the `data` parameter of the response.
 	 * @param array $additional_response_params Additional top-level parameters to add to the response.
 	 *
-	 * @return \WP_REST_Response
+	 * @return WP_REST_Response
 	 */
 	protected static function prepare_rest_response( $data, array $additional_response_params = array() ) {
 		$response_data = array_merge( array(
@@ -297,21 +285,6 @@ abstract class Base {
 
 		$response_data['data'] = $data;
 
-		return new \WP_REST_Response( $response_data );
-	}
-
-	/**
-	 * Determine the data fields safelist based on the context of the report.
-	 *
-	 * @return array The list of fields that are safe to include.
-	 */
-	public function get_data_fields_safelist() {
-		$safelist = $this->public_data_fields;
-
-		if ( false === $this->options['public'] ) {
-			$safelist = array_merge( $safelist, $this->private_data_fields );
-		}
-
-		return $safelist;
+		return new WP_REST_Response( $response_data );
 	}
 }

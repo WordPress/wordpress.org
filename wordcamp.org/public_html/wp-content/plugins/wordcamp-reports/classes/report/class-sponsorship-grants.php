@@ -8,9 +8,11 @@
 namespace WordCamp\Reports\Report;
 defined( 'WPINC' ) || die();
 
+use Exception;
 use WordCamp\Reports;
 use WordCamp\Reports\Report;
 use WordCamp\Utilities;
+use function WordCamp\Reports\Validation\{validate_wordcamp_id};
 
 /**
  * Class Sponsorship_Grants
@@ -115,9 +117,18 @@ class Sponsorship_Grants extends Date_Range {
 
 		$this->xrt = new Utilities\Currency_XRT_Client();
 
-		if ( $wordcamp_id && $this->validate_wordcamp_id( $wordcamp_id ) ) {
-			$this->wordcamp_id      = $wordcamp_id;
-			$this->wordcamp_site_id = get_wordcamp_site_id( get_post( $wordcamp_id ) );
+		if ( $wordcamp_id ) {
+			try {
+				$valid = validate_wordcamp_id( $wordcamp_id );
+
+				$this->wordcamp_id      = $valid->post_id;
+				$this->wordcamp_site_id = $valid->site_id;
+			} catch( Exception $e ) {
+				$this->error->add(
+					self::$slug . '-wordcamp-id-error',
+					$e->getMessage()
+				);
+			}
 		}
 	}
 
