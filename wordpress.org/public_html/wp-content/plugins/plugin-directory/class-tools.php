@@ -231,6 +231,47 @@ class Tools {
 	}
 
 	/**
+	 * Retrieve a list of plugins for which a user is a support rep.
+	 *
+	 * @static
+	 * @global \wpdb $wpdb WordPress database abstraction object.
+	 *
+	 * @param string|WP_User $user The user.
+	 * @return array         Array of WP_Post objects.
+	 */
+	public static function get_support_rep_plugins( $user ) {
+		global $wpdb;
+
+		if ( ! $user instanceof \WP_User ) {
+			$user = new \WP_User( $user );
+		}
+
+		$plugins = [];
+
+		if ( $user->exists() && ( false === ( $plugins = wp_cache_get( $user->user_nicename, 'support-rep-plugins' ) ) ) ) {
+			$query = new \WP_Query( [
+				'post_type'      => 'plugin',
+				'post_status'    => 'publish',
+				'posts_per_page' => 250,
+				'no_found_rows'  => true,
+				'tax_query' => [
+					[
+						'taxonomy' => 'plugin_support_reps',
+						'field'    => 'slug',
+						'terms'    => $user->user_nicename,
+					],
+				],
+			] );
+
+			$plugins = $query->have_posts() ? $query->posts : [];
+
+			wp_cache_set( $user->user_nicename, $plugins, 'support-rep-plugins', 12 * HOUR_IN_SECONDS );
+		}
+
+		return $plugins;
+	}
+
+	/**
 	 * Retrieve a list of support reps for a specific plugin.
 	 *
 	 * @static
@@ -280,6 +321,7 @@ class Tools {
 		$result = wp_add_object_terms( $post->ID, $user->user_nicename, 'plugin_support_reps' );
 
 		wp_cache_delete( $plugin_slug, 'plugin-support-reps' );
+		wp_cache_delete( $user->user_nicename, 'support-rep-plugins' );
 
 		return $result;
 	}
@@ -311,6 +353,7 @@ class Tools {
 		$result = wp_remove_object_terms( $post->ID, $user->user_nicename, 'plugin_support_reps' );
 
 		wp_cache_delete( $plugin_slug, 'plugin-support-reps' );
+		wp_cache_delete( $user->user_nicename, 'support-rep-plugins' );
 
 		return $result;
 	}
