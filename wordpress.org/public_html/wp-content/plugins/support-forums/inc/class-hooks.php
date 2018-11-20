@@ -242,7 +242,19 @@ class Hooks {
 	 */
 	public function new_topic_link() {
 		if ( bbp_is_single_forum() ) {
-			printf( '<a class="button create-topic" href="#new-topic-0">%s</a>', __( 'Create Topic', 'wporg-forums' ) );
+			if ( bbp_current_user_can_access_create_topic_form() ) {
+				printf(
+					'<a class="button create-topic" href="#new-topic-0">%s</a>',
+					__( 'Create Topic', 'wporg-forums' )
+				);
+			} elseif ( ! bbp_is_forum_closed() && ! is_user_logged_in() ) {
+				printf(
+					'<a class="button create-topic login" href="%s">%s</a>',
+					wp_login_url(),
+					__( 'Login to Create a Topic', 'wporg-forums' )
+				);
+			}
+
 			remove_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
 		}
 	}
