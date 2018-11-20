@@ -139,6 +139,14 @@ class Plugin_Committers extends Base {
 
 		$plugin_slug = $request['plugin_slug'];
 
+		// Prevent a committer removing themselves, if they're the only committer.
+		if ( $user->user_login == wp_get_current_user()->user_login ) {
+			$committers = Tools::get_plugin_committers( $plugin_slug );
+			if ( count( $committers ) == 1 && in_array( $user->user_login, $committers ) ) {
+				return new WP_Error( 'failed', __( 'Sorry, you must have at least one committer.', 'wporg-plugins' ) );
+			}
+		}
+
 		$result = Tools::revoke_plugin_committer( $plugin_slug, $user );
 		if ( ! $result ) {
 			return new WP_Error( 'failed', __( 'The operation failed. Please try again.', 'wporg-plugins' ) );
