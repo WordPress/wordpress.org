@@ -68,15 +68,37 @@ class Validator {
 		}
 
 		// Warnings.
-		if ( empty( $readme->requires ) ) {
+		if ( isset( $readme->warnings['requires_header_ignored'] ) ) {
+			$latest_wordpress_version = defined( 'WP_CORE_STABLE_BRANCH' ) ? WP_CORE_STABLE_BRANCH : '5.0';
+
+			/* translators: 1: plugin header tag; 2: Example version 5.0. 3: Example version 4.9. */
+			$warnings[] = sprintf(
+				__( 'The Requires at least field was ignored. %1$s field should only contain a valid WordPress version such as %2$s or %3$s.', 'wporg-plugins' ),
+				'<code>Requires at least</code>',
+				'<code>' . number_format( $latest_wordpress_version, 1 ) . '</code>',
+				'<code>' . number_format( $latest_wordpress_version - 0.1, 1 ) . '</code>'
+			);
+		} elseif ( empty( $readme->requires ) ) {
 			/* translators: %s: plugin header tag */
 			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Requires at least</code>' );
 		}
-		if ( empty( $readme->tested ) ) {
+
+		if ( isset( $readme->warnings['tested_header_ignored'] ) ) {
+			$latest_wordpress_version = defined( 'WP_CORE_STABLE_BRANCH' ) ? WP_CORE_STABLE_BRANCH : '5.0';
+
+			/* translators: 1: plugin header tag; 2: Example version 5.0. 3: Example version 5.1. */
+			$warnings[] = sprintf(
+				__( 'The Tested up to field was ignored. %1$s field should only contain a valid WordPress version such as %2$s or %3$s.', 'wporg-plugins' ),
+				'<code>Tested up to</code>',
+				'<code>' . number_format( $latest_wordpress_version, 1 ) . '</code>',
+				'<code>' . number_format( $latest_wordpress_version + 0.1, 1 ) . '</code>'
+			);
+		} elseif ( empty( $readme->tested ) ) {
 			/* translators: %s: plugin header tag */
 			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Tested up to</code>' );
 		}
-		if ( isset( $readme->warnings['requires_php_ignored'] ) ) {
+
+		if ( isset( $readme->warnings['requires_php_header_ignored'] ) ) {
 			/* translators: 1: plugin header tag; 2: Example version 5.2.4. 3: Example version 7.0. */
 			$warnings[] = sprintf( __( 'The Requires PHP field was ignored. %1$s field should only contain a PHP version such as %2$s or %3$s.', 'wporg-plugins' ), '<code>Requires PHP</code>', '<code>5.2.4</code>', '<code>7.0</code>' );
 		} elseif ( empty( $readme->requires_php ) ) {
@@ -87,13 +109,13 @@ class Validator {
 			/* translators: 1: 'Stable tag', 2: /trunk/ SVN directory, 3: 'Stable tag: trunk' */
 			$warnings[] = sprintf( __( '%1$s field is missing.  Hint: If you treat %2$s as stable, put %3$s.', 'wporg-plugins' ), '<code>Stable tag</code>', '<code>/trunk/</code>', '<code>Stable tag: trunk</code>' );
 		}
-		if ( ! count( $readme->contributors ) ) {
-			/* translators: %s: plugin header tag */
-			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Contributors</code>' );
-		}
+
 		if ( isset( $readme->warnings['contributor_ignored'] ) ) {
 			/* translators: %s: plugin header tag */
 			$warnings[] = sprintf( __( 'One or more contributors listed were ignored. %s field should only contain WordPress.org usernames.', 'wporg-plugins' ), '<code>Contributors</code>' );
+		} elseif ( ! count( $readme->contributors ) ) {
+			/* translators: %s: plugin header tag */
+			$warnings[] = sprintf( __( '%s field is missing.', 'wporg-plugins' ), '<code>Contributors</code>' );
 		}
 
 		// Notes.
