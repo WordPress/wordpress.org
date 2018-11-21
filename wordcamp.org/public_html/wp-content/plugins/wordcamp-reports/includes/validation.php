@@ -33,7 +33,7 @@ function validate_date_range( $start_date, $end_date, array $config = [] ) {
 		'allow_future_start' => false,
 		'allow_future_end'   => true,
 		'earliest_start'     => null,
-		'max_interval'       => new DateInterval( 'P1Y' ),
+		'max_interval'       => null,
 		'include_end_date'   => true,
 	];
 
