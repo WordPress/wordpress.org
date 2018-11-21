@@ -7,13 +7,20 @@ namespace WordCamp\Reports\Report;
 defined( 'WPINC' ) || die();
 
 use Exception;
+use DateInterval;
 use WP_Query;
 use function WordCamp\Reports\{get_views_dir_path};
 use WordCamp\Reports\Utility\Date_Range;
 use function WordCamp\Reports\Validation\{validate_date_range, validate_wordcamp_status, validate_wordcamp_id};
 use WordCamp_Loader;
 
-
+/**
+ * Class WordCamp_Counts
+ *
+ * Based on the bin script php/multiple-use/wc-post-types/count-speakers-sponsors-sessions.php?rev=2795
+ *
+ * @package WordCamp\Reports\Report
+ */
 class WordCamp_Counts extends Base {
 	/**
 	 * Report name.
@@ -52,7 +59,7 @@ class WordCamp_Counts extends Base {
 					<li>The WordPress.org user ID of each published Organizer post</li>
 					<li>The post ID of each published Session post</li>
 					<li>The email address of each published Speaker post</li>
-					<li>The website domain of each published Sponsor post</li>
+					<li>The website domain of each published Sponsor post, stripped of its TLD</li>
 				</ul>
 			</li>
 			<li>Generate a unique ID for any post that does not have the desired meta value.</li>
@@ -134,6 +141,8 @@ class WordCamp_Counts extends Base {
 				break;
 			}
 		}
+
+		sort( $this->statuses );
 	}
 
 	/**
@@ -382,7 +391,17 @@ class WordCamp_Counts extends Base {
 		] );
 
 		$site_data['sponsors'] = array_map( function( $url ) {
-			return preg_replace( '/^www\./', '', wp_parse_url( $url, PHP_URL_HOST ) );
+			$hostname = wp_parse_url( $url, PHP_URL_HOST );
+
+			if ( ! $hostname ) {
+				return '';
+			}
+
+			$trimmed = substr( $hostname, 0, strripos( $hostname, '.' ) ); // Remove the TLD.
+			$trimmed = preg_replace( '/\.com?$/', '', $trimmed ); // Remove possible secondary .com or .co.
+			$trimmed = preg_replace( '/^www\./', '', $trimmed ); // Remove possible www.
+
+			return $trimmed;
 		}, wp_list_pluck( $sponsors->posts, '_wcpt_sponsor_website' ) );
 
 		restore_current_blog();
@@ -447,6 +466,7 @@ class WordCamp_Counts extends Base {
 		) {
 			$options = array(
 				'public' => false,
+				'max_interval' => new DateInterval( 'P1Y1M' ),
 			);
 
 			if ( $refresh ) {
