@@ -8,7 +8,7 @@ defined( 'WPINC' ) || die();
 
 use Exception;
 use DateTime;
-use WP_Post, WP_Query;
+use WP_Post, WP_Query, WP_Error;
 use function WordCamp\Reports\{get_views_dir_path};
 use WordCamp\Reports\Utility\Date_Range;
 use function WordCamp\Reports\Validation\{validate_date_range, validate_wordcamp_id};
