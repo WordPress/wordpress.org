@@ -9,6 +9,8 @@ defined( 'WPINC' ) || die();
  * This is a general purpose client, whereas the one in `plugins/wordcamp-qbo-client` is specific to the WordCamp
  * Payments plugin. Eventually, we should probably merge the two into a single general purpose client, rather
  * than having multiple.
+ *
+ * TODO Refactor this to use the API_Client base class.
  */
 class QBO_Client {
 	/**

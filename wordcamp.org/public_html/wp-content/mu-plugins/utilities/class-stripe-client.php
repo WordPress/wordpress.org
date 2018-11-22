@@ -12,6 +12,8 @@ defined( 'WPINC' ) || die();
  * This is favorable over the official `stripe-php` library, because we don't have to worry about keeping it
  * updated, it only has the functionality we're actually using, we won't end up with unit tests, etc inside
  * a publicly accessible folder, etc.
+ *
+ * TODO Refactor this to use the API_Client base class.
  */
 class Stripe_Client {
 	const API_URL = 'https://api.stripe.com';

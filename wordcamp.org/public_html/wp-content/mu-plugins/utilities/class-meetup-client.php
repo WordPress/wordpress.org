@@ -7,6 +7,8 @@ defined( 'WPINC' ) || die();
 
 /**
  * Class Meetup_Client
+ *
+ * TODO Refactor this to use the API_Client base class.
  */
 class Meetup_Client {
 	/**
