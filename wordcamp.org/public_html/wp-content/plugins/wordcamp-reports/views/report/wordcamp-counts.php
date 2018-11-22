@@ -12,6 +12,7 @@ use WordCamp\Reports\Report;
 /** @var string $start_date */
 /** @var string $end_date */
 /** @var array  $statuses */
+/** @var bool   $include_gender */
 /** @var array  $all_statuses */
 /** @var Report\WordCamp_Counts|null $report */
 ?>
@@ -52,6 +53,10 @@ use WordCamp\Reports\Report;
 						<?php endforeach; ?>
 					</select>
 				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="refresh">Include gender breakdowns</label></th>
+				<td><input type="checkbox" id="include-gender" name="include-gender" <?php checked( $include_gender ); ?> /></td>
 			</tr>
 			<tr>
 				<th scope="row"><label for="refresh">Refresh results</label></th>

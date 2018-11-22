@@ -8,10 +8,16 @@
 	width: auto;
 }
 
-.report-results td.number {
+.report-results td.number,
+.report-results span.number {
 	text-align: right;
 }
 
-.report-results td.total {
+.report-results td.total,
+.report-results span.total {
 	font-weight: bold;
+}
+
+.report-results .small {
+	font-size: 0.8em;
 }
