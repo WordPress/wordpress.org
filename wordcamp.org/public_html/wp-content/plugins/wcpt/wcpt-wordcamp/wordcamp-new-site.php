@@ -115,6 +115,12 @@ class WordCamp_New_Site {
 	 * @param int $wordcamp_id
 	 */
 	public function maybe_create_new_site( $wordcamp_id ) {
+		$wordcamp = get_post( $wordcamp_id );
+
+		if ( ! $wordcamp instanceof WP_Post || WCPT_POST_TYPE_ID !== $wordcamp->post_type ) {
+			return;
+		}
+
 		/*
 		 * If this were to be called again before it had finished -- e.g., when `WCORMailer::replace_placeholders()`
 		 * calls `WordCamp_Admin::metabox_save()` -- then it would `wpmu_create_blog()` would return a `blog_taken`
@@ -154,7 +160,6 @@ class WordCamp_New_Site {
 		}
 
 		$path              = isset( $url_components['path'] ) ? $url_components['path'] : '';
-		$wordcamp          = get_post( $wordcamp_id );
 		$wordcamp_meta     = get_post_custom( $wordcamp_id );
 		$lead_organizer    = $this->get_user_or_current_user( $wordcamp_meta['WordPress.org Username'][0] );
 		$site_meta         = array( 'public' => 1 );
