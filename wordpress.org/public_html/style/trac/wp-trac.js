@@ -195,6 +195,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			if ( $body.hasClass( 'themes' ) ) {
 				$( '#h_reporter' ).text( 'Developer:' );
 				$( '#h_owner' ).text( 'Reviewer:' );
+
+				// Prevent uploading of ZIP files to Trac.
+				// See https://meta.trac.wordpress.org/ticket/3904
+				$( '#attachment input[type="file"]' ).change( function() {
+					var ext = this.value.split('.').pop();
+					$( '#wp-block-zip-upload' ).remove(); // Hide the notice if it's already in the DOM
+					if ( 'zip' == ext ) {
+						this.value = '';
+
+						$(this).parents('div.field').after( '<div class="wp-notice" id="wp-block-zip-upload"><p><strong>Please do not upload ZIPs to Trac.</strong><br>All Theme ZIPs (including updates) should be submitted via <a href="https://wordpress.org/themes/upload/">https://wordpress.org/themes/upload/</a>.</p></div>' );
+					}
+				} );
 			}
 
 			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space.
