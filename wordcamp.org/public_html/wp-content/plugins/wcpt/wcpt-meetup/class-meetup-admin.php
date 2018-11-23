@@ -321,7 +321,7 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 				return;
 			}
 
-			$should_sync = $_POST[ 'sync_with_meetup_api' ];
+			$should_sync = $_POST[ 'sync_with_meetup_api' ] ?? false;
 			if ( ! $should_sync ) {
 				return;
 			}
