@@ -270,7 +270,7 @@ ADDRESS;
 	 */
 	public function get_event_location() {
 		if ( isset( $this->post ) && isset( $this->post->ID ) ) {
-			return get_post_meta( $this->post->ID, 'q_city' );
+			return get_post_meta( $this->post->ID, 'q_city', true );
 		}
 	}
 
