@@ -73,7 +73,8 @@ function render_meetup_application_form( $countries ) {
 			<div class="PDF_question">
 				<label>
 					Enter the city, state/province, and country where you would like to organize a Meetup
-					<input type="text" name="q_mtp_loc" required/>
+					<span class="required-indicator">(required)</span>
+					<input type="text" name="q_mtp_loc" required />
 				</label>
 			</div>
 			<div class="PDF_questionDivide"></div>
