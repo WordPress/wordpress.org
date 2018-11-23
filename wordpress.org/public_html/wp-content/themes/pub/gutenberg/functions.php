@@ -169,7 +169,7 @@ add_action( 'template_redirect', function() {
 	} );
 
 	add_action( 'enqueue_block_editor_assets', function() {
-		wp_enqueue_script( 'button-readonly', get_template_directory_uri() . '/js/button-readonly.js', array(), null );
+		wp_enqueue_script( 'button-readonly', get_template_directory_uri() . '/js/button-readonly.js', array( 'wp-blocks', 'wp-element' ), null );
 	} );
 
 	// Disable post locking dialogue.
