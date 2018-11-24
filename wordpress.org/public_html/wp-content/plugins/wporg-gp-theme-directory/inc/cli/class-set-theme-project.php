@@ -2,6 +2,7 @@
 
 namespace WordPressdotorg\GlotPress\Theme_Directory\CLI;
 
+use Exception;
 use GP;
 use MakePOT;
 use WordPressdotorg\GlotPress\Theme_Directory\Plugin;
@@ -24,13 +25,6 @@ class Set_Theme_Project extends WP_CLI_Command {
 	 */
 	private $temp_dir;
 
-	/**
-	 * MakePot instance.
-	 *
-	 * @var MakePot
-	 */
-	private $makepot;
-
 	public function __construct() {
 		if ( ! file_exists( '/tmp/wporg-themes-i18n/' ) ) {
 			mkdir( '/tmp/wporg-themes-i18n/' );
@@ -41,13 +35,6 @@ class Set_Theme_Project extends WP_CLI_Command {
 		if ( ! mkdir( $this->temp_dir ) ) {
 			WP_CLI::error( "Couldn't create temporary directory." );
 		}
-
-		$this->checkout_tools();
-		if ( ! file_exists( $this->temp_dir . '/i18n-tools/makepot.php' ) ) {
-			WP_CLI::error( "Couldn't find MakePot." );
-		}
-		require_once $this->temp_dir . '/i18n-tools/makepot.php';
-		$this->makepot = new MakePot();
 	}
 
 	/**
@@ -81,7 +68,14 @@ class Set_Theme_Project extends WP_CLI_Command {
 		$theme_data = $this->get_theme_data( $theme_slug, $theme_dir );
 
 		$project = $this->find_create_update_glotpress_project( $theme_slug, $theme_data );
-		$pot = $this->generate_pot( $theme_slug, $theme_dir );
+
+		try {
+			$pot = $this->generate_pot( $theme_slug, $theme_dir );
+		} catch ( Exception $exception ) {
+			$this->cleanup_theme( $theme_slug );
+			WP_CLI::error( "{$theme_slug} {$theme_version} not imported: " . $exception->getMessage() );
+		}
+
 		$this->import_pot_to_glotpress( $pot, $project );
 
 		$this->cleanup_theme( $theme_slug );
@@ -156,8 +150,26 @@ class Set_Theme_Project extends WP_CLI_Command {
 	 * @return string The path to the .pot file.
 	 */
 	private function generate_pot( $theme_slug, $theme_dir ) {
+		if ( ! defined( 'WPORGTRANSLATE_WPCLI' ) ) {
+			throw new Exception( 'Missing configuration for WPORGTRANSLATE_WPCLI.' );
+		}
+
 		$pot_file = "{$this->temp_dir}/{$theme_slug}.pot";
-		$this->makepot->wp_theme( $theme_dir, $pot_file );
+
+		$cmd = sprintf(
+			'%s i18n make-pot %s %s --slug=%s --ignore-domain --skip-audit',
+			WPORGTRANSLATE_WPCLI,
+			escapeshellarg( $theme_dir ),
+			escapeshellarg( $pot_file ),
+			escapeshellarg( $theme_slug )
+		);
+
+		exec( $cmd, $output, $return_code );
+
+		if ( 0 !== $return_code || ! file_exists( $pot_file ) ) {
+			throw new Exception( "POT file couldn't be created." );
+		}
+
 		return $pot_file;
 	}
 
@@ -177,7 +189,7 @@ class Set_Theme_Project extends WP_CLI_Command {
 			'slug'                => $theme_slug,
 			'description'         => $theme_data['description'] . "<br><br><a href='https://wordpress.org/themes/{$theme_slug}'>WordPress.org Theme Page</a>",
 			'parent_project_id'   => $parent_project->id,
-			'source_url_template' => "https://themes.trac.wordpress.org/browser/$theme_slug/{$theme_data['version']}/%file%#L%line%",
+			'source_url_template' => "https://themes.trac.wordpress.org/browser/$theme_slug/{$theme_data['version']}/%file%?marks=%line%#L%line%",
 			'active'              => 1,
 		);
 
@@ -289,30 +301,21 @@ class Set_Theme_Project extends WP_CLI_Command {
 	public function filter_import_original_priority( $data ) {
 		$priorities = array(
 			// These are important strings that we need translated
-			'Plugin Name of the plugin/theme' => 1,
-			'Theme Name of the plugin/theme'  => 1,
-			'Description of the plugin/theme' => 1,
+			'Theme Name of the theme'  => 1,
+			'Description of the theme' => 1,
 			// Regular strings are more important than these:
-			'Plugin URI of the plugin/theme'  => -1,
-			'Theme URI of the plugin/theme'   => -1,
-			'Author of the plugin/theme'      => -1,
-			'Author URI of the plugin/theme'  => -1,
+			'Theme URI of the theme'   => -1,
+			'Author of the theme'      => -1,
+			'Author URI of the theme'  => -1,
 		);
+
 		if ( isset( $priorities[ $data['comment'] ] ) ) {
 			$data['priority'] = $priorities[ $data['comment'] ];
+		} else {
+			$data['priority'] = 0;
 		}
-		return $data;
-	}
 
-	/**
-	 * Creates an i18n-tools checkout so we have MakePot available.
-	 */
-	private function checkout_tools() {
-		$tools_dir = "{$this->temp_dir}/i18n-tools/";
-		if ( ! file_exists( $tools_dir ) ) {
-			$esc_tools_dir = escapeshellarg( $tools_dir );
-			`svn export --non-interactive https://i18n.svn.wordpress.org/tools/trunk {$esc_tools_dir}`;
-		}
+		return $data;
 	}
 
 	/**
