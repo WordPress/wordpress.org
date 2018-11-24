@@ -4,7 +4,6 @@
 
 	<!-- Exclude external libraries -->
 	<exclude-pattern>/libs/geopattern-1.1.0/*</exclude-pattern>
-	<exclude-pattern>/libs/i18n-tools/*</exclude-pattern>
 	<exclude-pattern>/libs/michelf-php-markdown-1.6.0/*</exclude-pattern>
 
 	<!-- Exclude JS/CSS files. -->
