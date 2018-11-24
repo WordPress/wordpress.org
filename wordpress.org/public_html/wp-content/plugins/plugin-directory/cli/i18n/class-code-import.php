@@ -22,6 +22,10 @@ class Code_Import extends I18n_Import {
 	 * @throws Exception
 	 */
 	public function import_from_tag( $tag ) {
+		if ( ! defined( 'WPORGTRANSLATE_WPCLI' ) ) {
+			throw new Exception( 'Missing configuration for WPORGTRANSLATE_WPCLI.' );
+		}
+
 		$svn_url = $this->get_plugin_svn_url( $tag );
 
 		$files = SVN::ls( $svn_url );
@@ -42,14 +46,19 @@ class Code_Import extends I18n_Import {
 			throw new Exception( 'Plugin is not compatible with language packs: ' . $valid->get_error_message() );
 		}
 
-		if ( ! class_exists( '\PotExtMeta' ) ) {
-			require_once plugin_dir_path( \WordPressdotorg\Plugin_Directory\PLUGIN_FILE ) . 'libs/i18n-tools/makepot.php';
-		}
-
 		$pot_file = "{$tmp_directory}/{$this->plugin}-code.pot";
-		$makepot  = new \MakePOT();
 
-		if ( ! $makepot->wp_plugin( $export_directory, $pot_file, $this->plugin ) || ! file_exists( $pot_file ) ) {
+		$cmd = sprintf(
+			'%s i18n make-pot %s %s --slug=%s --ignore-domain --skip-audit',
+			WPORGTRANSLATE_WPCLI,
+			escapeshellarg( $export_directory ),
+			escapeshellarg( $pot_file ),
+			escapeshellarg( $this->plugin )
+		);
+
+		exec( $cmd, $output, $return_code );
+
+		if ( 0 !== $return_code || ! file_exists( $pot_file ) ) {
 			throw new Exception( "POT file couldn't be created." );
 		}
 
