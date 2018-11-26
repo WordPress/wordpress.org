@@ -88,10 +88,9 @@ function scripts() {
 
 	if ( is_page( 'stats' ) ) {
 		wp_enqueue_script( 'google-charts', 'https://www.gstatic.com/charts/loader.js', [], null, true );
-		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts' ], 1, true );
+		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts' ], 2, true );
 		wp_localize_script( 'wporg-page-stats', 'wporgPageStats', [
 			'trunk'         => number_format( WP_CORE_STABLE_BRANCH + 0.1, 1 ), /* trunk */
-			'beta'          => number_format( WP_CORE_STABLE_BRANCH + 0.2, 1 ), /* trunk w/ beta-tester plugin */
 			'wpVersions'    => __( 'WordPress Version', 'wporg' ),
 			'phpVersions'   => __( 'PHP Versions', 'wporg' ),
 			'mysqlVersions' => __( 'MySQL Version', 'wporg' ),
