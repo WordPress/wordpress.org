@@ -16,6 +16,25 @@ namespace WordPressdotorg\MainTheme;
  * @return array Filtered Open Graph tags.
  */
 function custom_open_graph_tags( $tags = [] ) {
+
+	// Override the Front-page tags on Rosetta sites.
+	if ( is_front_page() && isset( $GLOBALS['rosetta'] ) ) {
+
+		$locale_native_name = $GLOBALS['rosetta']->rosetta->glotpress_locale->native_name;
+		return array(
+			'og:type'         => 'website',
+			'og:title'        => __( 'Blog Tool, Publishing Platform, and CMS - WordPress', 'wporg' ),
+			'og:description'  => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
+			'og:url'          => home_url( '/' ),
+			/* translators: %s - The Locale native name. */
+			'og:site_name'    => sprintf( __( 'WordPress - %s', 'wporg' ), $locale_native_name ),
+			'og:image'        => 'https://s.w.org/images/home/screen-themes.png?3',
+			'og:locale'       => get_locale(),
+			'twitter:card'    => 'summary_large_image',
+			'twitter:creator' => '@WordPress',
+		);
+	}
+
 	$post = get_post();
 	if ( ! $post || 'page' !== $post->post_type ) {
 		return $tags;
