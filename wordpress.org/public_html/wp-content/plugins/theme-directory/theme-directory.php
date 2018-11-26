@@ -1089,6 +1089,10 @@ add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
  * @link https://sites.google.com/site/webmasterhelpforum/en/faq-internationalisation FAQ: Internationalisation
  */
 function wporg_themes_add_hreflang_link_attributes() {
+	if ( is_404() ) {
+		return;
+	}
+
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
 	if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
@@ -1135,6 +1139,13 @@ function wporg_themes_add_hreflang_link_attributes() {
 			'subdomain' => ''
 		);
 
+		// Add x-default to the list of sites.
+		$sites['x-default'] = (object) array(
+			'locale'    => 'x-default',
+			'hreflang'  => 'x-default',
+			'subdomain' => '',
+		);
+
 		uasort( $sites, function( $a, $b ) {
 			return strcasecmp( $a->hreflang, $b->hreflang );
 		} );
@@ -1142,11 +1153,18 @@ function wporg_themes_add_hreflang_link_attributes() {
 		wp_cache_set( 'local-sites', $sites, 'locale-associations' );
 	}
 
+	if ( is_singular() ) {
+		$path = parse_url( get_permalink(), PHP_URL_PATH );
+	} else {
+		// WordPress doesn't have a good way to get the canonical version of non-singular urls.
+		$path = $_SERVER['REQUEST_URI']; // phpcs:ignore
+	}
+
 	foreach ( $sites as $site ) {
 		$url = sprintf(
 			'https://%swordpress.org%s',
 			$site->subdomain ? "{$site->subdomain}." : '',
-			$_SERVER[ 'REQUEST_URI' ]
+			$path
 		);
 
 		printf(

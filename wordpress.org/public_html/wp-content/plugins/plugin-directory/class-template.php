@@ -782,6 +782,13 @@ class Template {
 				'subdomain' => '',
 			);
 
+			// Add x-default to the list of sites.
+			$sites['x-default'] = (object) array(
+				'locale'    => 'x-default',
+				'hreflang'  => 'x-default',
+				'subdomain' => '',
+			);
+
 			uasort( $sites, function( $a, $b ) {
 				return strcasecmp( $a->hreflang, $b->hreflang );
 			} );
@@ -789,11 +796,21 @@ class Template {
 			wp_cache_set( 'local-sites-' . get_post()->post_name, $sites, 'locale-associations', DAY_IN_SECONDS );
 		}
 
+		if ( is_singular() ) {
+			$path = parse_url( get_permalink(), PHP_URL_PATH );
+			if ( get_query_var( 'plugin_advanced' ) ) {
+				$path .= 'advanced/';
+			}
+		} else {
+			// WordPress doesn't have a good way to get the canonical version of non-singular urls.
+			$path = $_SERVER['REQUEST_URI']; // phpcs:ignore
+		}
+
 		foreach ( $sites as $site ) {
 			$url = sprintf(
 				'https://%swordpress.org%s',
 				$site->subdomain ? "{$site->subdomain}." : '',
-				$_SERVER['REQUEST_URI']
+				$path
 			);
 
 			printf(
