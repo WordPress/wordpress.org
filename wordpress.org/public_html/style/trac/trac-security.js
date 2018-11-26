@@ -18,7 +18,7 @@ window.wp = window.wp || {};
 			'sanitize', 'unsanitize', 'sanitizes', 'unsanitizes', 'sanitized', 'unsanitized', 'sanitization',
 			'valid', 'invalid', 'validate', 'validates', 'validation','hack', 'vulnerable', 'attack',
 			'compromise', 'escalation', 'injection', 'forgery', 'password', 'passwords', 'cross-site' ,
-			'secure'
+			'secure', 'private'
 		],
 
 		intersect : function(a, b) {
