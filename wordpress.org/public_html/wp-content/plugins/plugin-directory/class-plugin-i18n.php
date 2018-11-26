@@ -400,11 +400,23 @@ class Plugin_I18n {
 
 		$translations = $this->get_gp_translations( $slug, $branch, $originals, $translation_set_id );
 
+		// Sort the originals so as to process long strings first.
+		uasort( $originals, function( $a, $b ) {
+			$a_len = strlen( $a->singular );
+			$b_len = strlen( $b->singular );
+
+			return $a_len == $b_len ? 0 : ($a_len > $b_len ? -1 : 1);
+		} );
+
+		// Mark each original for translation
 		foreach ( $originals as $original ) {
 			if ( ! empty( $original->id ) && array_key_exists( $original->id, $translations ) ) {
-				$content = $this->translate_gp_original( $original->singular, $translations[ $original->id ], $content );
+				$content = $this->mark_gp_original( $original->id, $original->singular, $content );
 			}
 		}
+
+		// Translate the marked originals.
+		$content = $this->translate_marked_gp_originals( $content, $translations, $originals );
 
 		$this->cache_set( $slug, $branch, $content, $cache_suffix );
 
@@ -412,31 +424,51 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Takes content, searches for $original, and replaces it by $translation.
+	 * Takes content, searches for $original, and replaces it with a marker for later translation.
 	 *
-	 * @param string $original    English string.
-	 * @param string $translation Translation.
+	 * @param string $original_id Original English Translation ID.
+	 * @param string $original    Original English String.
 	 * @param string $content     Content to be searched.
 	 * @return mixed
 	 */
-	public function translate_gp_original( $original, $translation, $content ) {
+	public function mark_gp_original( $original_id, $original, $content ) {
+		$marker = "___TRANSLATION_{$original_id}___";
+
 		if ( $original === $content ) {
-			$content = $translation;
+			$content = $marker;
 		} else {
 			$original = preg_quote( $original, '/' );
 
 			if ( false === strpos( $content, '<' ) ) {
-				// Don't use $translation, it may contain backreference-like characters.
-				$content = preg_replace( "/\b{$original}\b/", '___TRANSLATION___', $content );
+				$content = preg_replace( "/\b{$original}\b/", $marker, $content );
 			} else {
-				// Don't use $translation, it may contain backreference-like characters.
-				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", '${1}___TRANSLATION___${3}', $content );
+				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
 			}
-
-			$content = str_replace( '___TRANSLATION___', $translation, $content );
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Translates marked translations $content from ::mark_gp_original().
+	 *
+	 * @param string $content      The Content to be searched.
+	 * @param array  $translations The Translations.
+	 * @param array  $originals    The Originals.
+	 * @return string
+	 */
+	public function translate_marked_gp_originals( $content, $translations, $originals ) {
+		return preg_replace_callback(
+			'/___TRANSLATION_(\d+)___/',
+			function( $m ) use( $translations, $originals ) {
+				$marker = $m[0];
+				$id     = $m[1];
+
+				// The translation by ID, Original by ID, or the marker if it was never actually marking a original translation.
+				return $translations[ $id ] ?? ( $originals[ $id ] ?? $marker );
+			},
+			$content
+		);
 	}
 
 	/**
