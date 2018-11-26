@@ -4,9 +4,13 @@
 	google.charts.setOnLoadCallback( drawCharts );
 
 	window.drawWpVersionsGraph = function( data ) {
+
 		// Remove trunk from display.
-		delete data[ wporgPageStats.trunk ];
-		delete data[ wporgPageStats.beta ];
+		for ( var version in data ) {
+			if ( parseFloat( version ) >= parseFloat( wporgPageStats.trunk ) ) {
+				delete data[ version ];
+			}
+		}
 
 		drawGraph( data, 'wp_versions', wporgPageStats.wpVersions, 'Version', 'versions' );
 	};
