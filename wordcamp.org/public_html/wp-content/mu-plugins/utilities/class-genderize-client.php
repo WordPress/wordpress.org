@@ -12,7 +12,9 @@ use GP_Locales;
  * @package WordCamp\Utilities
  */
 class Genderize_Client extends API_Client {
-
+	/**
+	 * @var string The option key where the cache is saved in the database.
+	 */
 	const CACHE_KEY = 'genderize_cached_data';
 
 	/**
@@ -69,8 +71,7 @@ class Genderize_Client extends API_Client {
 		}
 
 		if ( true === $this->options->reset_cache ) {
-			$this->cache = [];
-			$this->save_cached_data();
+			delete_option( self::CACHE_KEY );
 		}
 	}
 
@@ -83,6 +84,9 @@ class Genderize_Client extends API_Client {
 	 * @return array
 	 */
 	public function get_gender_data( array $names, $locale ) {
+		$names     = array_unique( array_map( 'strtolower', $names ) );
+		$lang_code = $this->get_lang_code_from_locale( $locale );
+
 		// Bail if there are errors.
 		if ( ! empty( $this->error->get_error_messages() ) ) {
 			return [];
@@ -90,9 +94,6 @@ class Genderize_Client extends API_Client {
 
 		$data         = [];
 		$needs_update = [];
-
-		$names     = array_unique( array_map( 'strtolower', $names ) );
-		$lang_code = $this->get_lang_code_from_locale( $locale );
 
 		foreach ( $names as $name ) {
 			$item = $this->get_cache_item( $name, $lang_code );
@@ -172,7 +173,7 @@ class Genderize_Client extends API_Client {
 			return false;
 		}
 
-		return $cache[ $lang_code ][ $name ];
+		return $item;
 	}
 
 	/**
