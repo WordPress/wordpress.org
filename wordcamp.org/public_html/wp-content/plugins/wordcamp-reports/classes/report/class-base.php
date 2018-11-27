@@ -151,6 +151,47 @@ abstract class Base {
 	}
 
 	/**
+	 * Filter the data rows based on a search query.
+	 *
+	 * @param array $data
+	 *
+	 * @return array
+	 */
+	protected function filter_data_rows( array $data ) {
+		if ( empty( $this->options['search_query'] ) ) {
+			return $data;
+		}
+
+		$terms = explode( ',', $this->options['search_query'] );
+		$terms = array_map( 'trim', $terms );
+
+		foreach ( $data as $index => $row ) {
+			$match = false;
+
+			foreach ( $terms as $term ) {
+				foreach ( $this->options['search_fields'] as $field ) {
+					// Private search fields will be missing in the context of a public report.
+					if ( ! isset( $row[ $field ] ) ) {
+						continue;
+					}
+
+					if ( false !== stripos( $row[ $field ], $term ) ) {
+						$match = true;
+						break 2;
+					}
+				}
+			}
+
+			if ( ! $match ) {
+				unset( $data[ $index ] );
+			}
+		}
+
+		// Re-index the array to remove gaps.
+		return array_values( $data );
+	}
+
+	/**
 	 * Determine the data fields safelist based on the context of the report.
 	 *
 	 * @return array The list of fields that are safe to include.

@@ -11,6 +11,7 @@ use WordCamp\Reports\Report;
 
 /** @var string $start_date */
 /** @var string $end_date */
+/** @var string $search_query */
 /** @var Report\Meetup_Events|null $report */
 ?>
 
@@ -39,6 +40,13 @@ use WordCamp\Reports\Report;
 			<tr>
 				<th scope="row"><label for="end-date">End Date</label></th>
 				<td><input type="date" id="end-date" name="end-date" value="<?php echo esc_attr( $end_date ) ?>" /></td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="meetup-search-query">Search</label></th>
+				<td>
+					<input type="text" id="meetup-search-query" name="search-query" value="<?php echo esc_attr( $search_query ) ?>" />
+					<p class="description">Enter comma-separate list of terms. Results will be filtered to only include events that match at least one term. You should manually verify that the results are accurate.</p>
+				</td>
 			</tr>
 			<tr>
 				<th scope="row"><label for="refresh">Refresh results</label></th>

@@ -125,6 +125,7 @@ class Meetup_Events extends Base {
 		$cache_key_segments = [
 			parent::get_cache_key(),
 			$this->range->generate_cache_key_segment(),
+			$this->options['search_query'],
 		];
 
 		return implode( '_', $cache_key_segments );
@@ -196,6 +197,7 @@ class Meetup_Events extends Base {
 		}
 
 		$data = $this->filter_data_fields( $data );
+		$data = $this->filter_data_rows( $data );
 		$this->maybe_cache_data( $data );
 
 		return $data;
@@ -405,6 +407,7 @@ class Meetup_Events extends Base {
 	public static function render_admin_page() {
 		$start_date = filter_input( INPUT_POST, 'start-date' );
 		$end_date   = filter_input( INPUT_POST, 'end-date' );
+		$search_query = sanitize_text_field( filter_input( INPUT_POST, 'search-query' ) );
 		$refresh    = filter_input( INPUT_POST, 'refresh', FILTER_VALIDATE_BOOLEAN );
 		$action     = filter_input( INPUT_POST, 'action' );
 		$nonce      = filter_input( INPUT_POST, self::$slug . '-nonce' );
@@ -417,6 +420,8 @@ class Meetup_Events extends Base {
 		) {
 			$options = array(
 				'earliest_start' => new DateTime( '2015-01-01' ), // Chapter program started in 2015.
+				'search_query'   => $search_query,
+				'search_fields'  => self::get_search_fields(),
 			);
 
 			if ( $refresh ) {
@@ -430,6 +435,15 @@ class Meetup_Events extends Base {
 	}
 
 	/**
+	 * Get a list of fields that will be checked during search queries.
+	 *
+	 * @return array
+	 */
+	protected static function get_search_fields() {
+		return array( 'name', 'description' );
+	}
+
+	/**
 	 * Export the report data to a file.
 	 *
 	 * @return void
@@ -437,6 +451,7 @@ class Meetup_Events extends Base {
 	public static function export_to_file() {
 		$start_date = filter_input( INPUT_POST, 'start-date' );
 		$end_date   = filter_input( INPUT_POST, 'end-date' );
+		$search_query = sanitize_text_field( filter_input( INPUT_POST, 'search-query' ) );
 		$refresh    = filter_input( INPUT_POST, 'refresh', FILTER_VALIDATE_BOOLEAN );
 		$action     = filter_input( INPUT_POST, 'action' );
 		$nonce      = filter_input( INPUT_POST, self::$slug . '-nonce' );
@@ -453,6 +468,8 @@ class Meetup_Events extends Base {
 
 		$options = array(
 			'earliest_start' => new DateTime( '2015-01-01' ), // Chapter program started in 2015.
+			'search_query'   => $search_query,
+			'search_fields'  => self::get_search_fields(),
 		);
 
 		if ( $refresh ) {
