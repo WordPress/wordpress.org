@@ -157,8 +157,13 @@ class Meetup_Events extends Base {
 		}
 
 		$meetup = new Meetup_Client();
-
 		$groups = $meetup->get_groups();
+
+		if ( is_wp_error( $groups ) ) {
+			$this->error->add( $groups->get_error_code(), $groups->get_error_message() );
+			return array();
+		}
+
 		$group_ids = wp_list_pluck( $groups, 'id' );
 		$groups    = array_combine( $group_ids, $groups );
 
