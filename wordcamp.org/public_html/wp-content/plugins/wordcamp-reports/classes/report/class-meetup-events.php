@@ -327,6 +327,10 @@ class Meetup_Events extends Base {
 	 * @throws Exception
 	 */
 	protected function sort_events_by_field( $field, array $data ) {
+		if ( empty( $data ) ) {
+			return $data;
+		}
+
 		if ( ! array_key_exists( $field, $data[0] ) ) {
 			throw new Exception( sprintf(
 				'Cannot sort events by %s.',
