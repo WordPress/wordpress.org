@@ -48,9 +48,9 @@ class Meetup_Events extends Base {
 	 *
 	 * @var string
 	 */
-	public static $methodology = "
+	public static $methodology = '
 		Retrieve data about events in the Chapter program from the Meetup.com API.
-	";
+	';
 
 	/**
 	 * Report group.
@@ -62,7 +62,7 @@ class Meetup_Events extends Base {
 	/**
 	 * Shortcode tag for outputting the public report form.
 	 *
-	 * todo
+	 * @todo
 	 *
 	 * @var string
 	 */
@@ -160,7 +160,7 @@ class Meetup_Events extends Base {
 
 		$groups = $meetup->get_groups();
 		$group_ids = wp_list_pluck( $groups, 'id' );
-		$groups = array_combine( $group_ids, $groups );
+		$groups    = array_combine( $group_ids, $groups );
 
 		$events = $meetup->get_events( $group_ids, array(
 			'status' => 'upcoming,past',
@@ -302,7 +302,7 @@ class Meetup_Events extends Base {
 
 		$compiled_data['groups_with_events'] = count( $compiled_data['total_events_by_group'] );
 
-		$meetup = new Meetup_Client();
+		$meetup       = new Meetup_Client();
 		$total_groups = absint( $meetup->get_result_count( 'pro/wordpress/groups' ) );
 
 		$compiled_data['groups_with_no_events'] = $total_groups - $compiled_data['groups_with_events'];
@@ -311,7 +311,7 @@ class Meetup_Events extends Base {
 	}
 
 	/**
-	 *
+	 * Sort the events by the given field.
 	 *
 	 * @param string $field
 	 * @param array  $data
@@ -341,7 +341,7 @@ class Meetup_Events extends Base {
 	}
 
 	/**
-	 *
+	 * Count how many events were in each month in the date range.
 	 *
 	 * @param array $events
 	 *
@@ -407,8 +407,8 @@ class Meetup_Events extends Base {
 		$report = null;
 
 		if ( 'Show results' === $action
-		     && wp_verify_nonce( $nonce, 'run-report' )
-		     && current_user_can( 'manage_network' )
+			&& wp_verify_nonce( $nonce, 'run-report' )
+			&& current_user_can( 'manage_network' )
 		) {
 			$options = array(
 				'earliest_start' => new DateTime( '2015-01-01' ), // Chapter program started in 2015.
@@ -442,43 +442,45 @@ class Meetup_Events extends Base {
 			return;
 		}
 
-		if ( wp_verify_nonce( $nonce, 'run-report' ) && current_user_can( 'manage_network' ) ) {
-			$options = array(
-				'earliest_start' => new DateTime( '2015-01-01' ), // Chapter program started in 2015.
-			);
+		if ( ! wp_verify_nonce( $nonce, 'run-report' ) || ! current_user_can( 'manage_network' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to export this data.', 'wordcamporg' ) );
+		}
 
-			if ( $refresh ) {
-				$options['flush_cache'] = true;
-			}
+		$options = array(
+			'earliest_start' => new DateTime( '2015-01-01' ), // Chapter program started in 2015.
+		);
 
-			$report = new self( $start_date, $end_date, $options );
+		if ( $refresh ) {
+			$options['flush_cache'] = true;
+		}
 
-			$filename   = array( $report::$name );
-			$filename[] = $report->range->start->format( 'Y-m-d' );
-			$filename[] = $report->range->end->format( 'Y-m-d' );
+		$report = new self( $start_date, $end_date, $options );
 
-			$headers = [ 'Event ID', 'Event URL', 'Event Name', 'Description', 'Date', 'Group Name', 'City', 'Country (localized)', 'Latitude', 'Longitude' ];
+		$filename   = array( $report::$name );
+		$filename[] = $report->range->start->format( 'Y-m-d' );
+		$filename[] = $report->range->end->format( 'Y-m-d' );
 
-			$data = $report->get_data();
+		$headers = [ 'Event ID', 'Event URL', 'Event Name', 'Description', 'Date', 'Group Name', 'City', 'Country (localized)', 'Latitude', 'Longitude' ];
 
-			array_walk( $data, function( &$event ) {
-				$date = new DateTime();
-				$date->setTimestamp( $event['time'] );
-				$event['time'] = $date->format( 'Y-m-d' );
-			} );
+		$data = $report->get_data();
 
-			$exporter = new Export_CSV( array(
-				'filename' => $filename,
-				'headers'  => $headers,
-				'data'     => $data,
-			) );
+		array_walk( $data, function( &$event ) {
+			$date = new DateTime();
+			$date->setTimestamp( $event['time'] );
+			$event['time'] = $date->format( 'Y-m-d' );
+		} );
 
-			if ( ! empty( $report->error->get_error_messages() ) ) {
-				$exporter->error = $report->merge_errors( $report->error, $exporter->error );
-			}
+		$exporter = new Export_CSV( array(
+			'filename' => $filename,
+			'headers'  => $headers,
+			'data'     => $data,
+		) );
 
-			$exporter->emit_file();
-		} // End if().
+		if ( ! empty( $report->error->get_error_messages() ) ) {
+			$exporter->error = $report->merge_errors( $report->error, $exporter->error );
+		}
+
+		$exporter->emit_file();
 	}
 
 	/**
