@@ -24,6 +24,13 @@ use WordCamp\Utilities\Genderize_Client;
  */
 class WordCamp_Counts extends Base {
 	/**
+	 * The lowest acceptable probability when determining gender.
+	 *
+	 * @var float
+	 */
+	const GENDER_PROBABILITY_THRESHOLD = 0.9;
+
+	/**
 	 * Report name.
 	 *
 	 * @var string
@@ -105,21 +112,32 @@ class WordCamp_Counts extends Base {
 	protected $genderize = null;
 
 	/**
+	 * An array of data from the WordCamp Details report.
+	 *
+	 * @var array|null
+	 */
+	protected $wordcamps = null;
+
+	/**
 	 * Data fields that can be visible in a public context.
 	 *
 	 * @var array An associative array of key/default value pairs.
 	 */
 	protected $public_data_fields = [
-		'ID'                      => 0,
-		'Name'                    => '',
-		'URL'                     => '',
-		'Start Date (YYYY-mm-dd)' => '',
-		'Status'                  => '',
-		'attendees'               => 0,
-		'organizers'              => 0,
-		'sessions'                => 0,
-		'speakers'                => 0,
-		'sponsors'                => 0,
+		'wordcamp_id' => 0,
+		'site_id'     => 0,
+		'post_id'     => 0,
+		'type'        => '',
+		'gender'      => '',
+	];
+
+	/**
+	 * Data fields that should only be visible in a private context.
+	 *
+	 * @var array An associative array of key/default value pairs.
+	 */
+	protected $private_data_fields = [
+		'identifier'  => '',
 	];
 
 	/**
@@ -200,9 +218,6 @@ class WordCamp_Counts extends Base {
 	/**
 	 * Query and parse the data for the report.
 	 *
-	 * TODO Refactor the raw data structure to make it exportable as a CSV, move some of the counting stuff
-	 * to compile_report_data().
-	 *
 	 * @return array
 	 */
 	public function get_data() {
@@ -217,46 +232,11 @@ class WordCamp_Counts extends Base {
 			return $data;
 		}
 
-		// @todo Maybe find a way to run this without having to hack the memory limit.
+		// @todo Maybe find a way to run this without having to hack the ini.
 		ini_set( 'memory_limit', '900M' );
+		ini_set( 'max_execution_time', 300 );
 
-		$details_options = [
-			'public' => false,
-		];
-		$details_report = new WordCamp_Details( $this->range, [], false, $details_options );
-
-		if ( ! empty( $details_report->error->get_error_messages() ) ) {
-			$this->error = $this->merge_errors( $this->error, $details_report->error );
-
-			return [];
-		}
-
-		$wordcamps = array_filter( $details_report->get_data(), function( $wordcamp ) {
-			// Skip camps with no website URL.
-			if ( ! $wordcamp['URL'] ) {
-				return false;
-			}
-
-			if ( ! empty( $this->statuses ) && ! in_array( $wordcamp['Status'], $this->statuses ) ) {
-				return false;
-			}
-
-			return true;
-		} );
-
-		$wordcamps = array_reduce( $wordcamps, function( $carry, $item ) {
-			$keep = [
-				'ID'                      => '',
-				'Name'                    => '',
-				'URL'                     => '',
-				'Start Date (YYYY-mm-dd)' => '',
-				'Status'                  => '',
-			];
-
-			$carry[ $item['ID'] ] = array_intersect_key( $item, $keep );
-
-			return $carry;
-		}, [] );
+		$wordcamps = $this->get_wordcamps();
 
 		$wordcamp_ids = array_keys( $wordcamps );
 
@@ -266,79 +246,17 @@ class WordCamp_Counts extends Base {
 			try {
 				$valid = validate_wordcamp_id( $wordcamp_id );
 
-				$data[ $wordcamp_id ] = array_merge(
-					$wordcamps[ $wordcamp_id ],
-					$this->get_data_for_site( $valid->site_id )
-				);
+				$data = array_merge( $data, $this->get_data_for_site( $valid->site_id, $valid->post_id ) );
 			} catch ( Exception $e ) {
 				$this->error->add(
 					self::$slug . '-wordcamp-id-error',
 					$e->getMessage()
 				);
+			}
 
+			if ( ! empty( $this->error->get_error_messages() ) ) {
 				break;
 			}
-		}
-
-		$totals = [
-			'attendees'  => 0,
-			'organizers' => 0,
-			'sessions'   => 0,
-			'speakers'   => 0,
-			'sponsors'   => 0,
-		];
-
-		$uniques = [
-			'attendees'  => [],
-			'organizers' => [],
-			'speakers'   => [],
-			'sponsors'   => [],
-		];
-
-		$gender_template = [
-			'female'  => 0,
-			'male'    => 0,
-			'unknown' => 0,
-		];
-
-		$genders = [
-			'attendees'  => $gender_template,
-			'organizers' => $gender_template,
-			'speakers'   => $gender_template,
-		];
-
-		foreach ( $data as $id => &$event ) {
-			foreach ( $totals as $key => $bucket ) {
-				if ( isset( $uniques[ $key ] ) ) {
-					$uniques[ $key ] = array_unique( array_merge( $uniques[ $key ], $event[ $key ]['total'] ) );
-				}
-
-				if ( $this->include_gender && isset( $genders[ $key ] ) ) {
-					$event[ $key ]['gender'] = array_reduce( $event[ $key ]['gender'], function( $carry, $item ) {
-						$carry[ $item ] ++;
-
-						return $carry;
-					}, $gender_template );
-
-					foreach ( $genders[ $key ] as $gender => &$total ) {
-						$total += $event[ $key ]['gender'][ $gender ];
-					}
-				}
-
-				$event[ $key ]['total'] = count( $event[ $key ]['total'] );
-
-				$totals[ $key ] += $event[ $key ]['total'];
-			}
-		}
-
-		$data['totals'] = $totals;
-
-		$data['uniques'] = array_map( function( $group ) {
-			return count( $group );
-		}, $uniques );
-
-		if ( $this->include_gender ) {
-			$data['genders'] = $genders;
 		}
 
 		$data = $this->filter_data_fields( $data );
@@ -350,14 +268,90 @@ class WordCamp_Counts extends Base {
 	/**
 	 * Compile the report data into results.
 	 *
-	 * TODO Move some of the logic from get_data into here.
-	 *
 	 * @param array $data The data to compile.
 	 *
 	 * @return array
 	 */
 	public function compile_report_data( array $data ) {
-		return $data;
+		$wordcamps = $this->prepare_data_for_display( $this->get_wordcamps() );
+
+		$compiled_data = [
+			'wordcamps' => [],
+			'totals'    => [
+				'attendee'  => 0,
+				'organizer' => 0,
+				'session'   => 0,
+				'speaker'   => 0,
+				'sponsor'   => 0,
+			],
+			'uniques'   => [
+				'attendee'  => [],
+				'organizer' => [],
+				'speaker'   => [],
+				'sponsor'   => [],
+			],
+		];
+
+		$wordcamp_template = [
+			'totals' => [
+				'attendee'  => 0,
+				'organizer' => 0,
+				'session'   => 0,
+				'speaker'   => 0,
+				'sponsor'   => 0,
+			],
+		];
+
+		if ( $this->include_gender ) {
+			$gender_template = [
+				'female'  => 0,
+				'male'    => 0,
+				'unknown' => 0,
+			];
+
+			$wordcamp_template['genders'] = $compiled_data['genders'] = [
+				'attendee'  => $gender_template,
+				'organizer' => $gender_template,
+				'speaker'   => $gender_template,
+			];
+		}
+
+		foreach ( $data as $item ) {
+			$wordcamp_id = $item['wordcamp_id'];
+
+			if ( ! isset( $compiled_data['wordcamps'][ $wordcamp_id ] ) ) {
+				$compiled_data['wordcamps'][ $wordcamp_id ] = array_merge(
+					[
+						'info' => $wordcamps[ $wordcamp_id ],
+					],
+					$wordcamp_template
+				);
+			}
+
+			$type       = $item['type'];
+			$identifier = $item['identifier'];
+
+			$compiled_data['wordcamps'][ $wordcamp_id ]['totals'][ $type ] ++;
+			$compiled_data['totals'][ $type ] ++;
+			if ( isset( $compiled_data['uniques'][ $type ] ) ) {
+				$compiled_data['uniques'][ $type ][] = $identifier;
+			}
+
+			if ( $this->include_gender && isset( $wordcamp_template['genders'][ $type ] ) ) {
+				$gender = $item['gender'];
+
+				$compiled_data['wordcamps'][ $wordcamp_id ]['genders'][ $type ][ $gender ] ++;
+				$compiled_data['genders'][ $type ][ $gender ] ++;
+			}
+		}
+
+		$compiled_data['uniques'] = array_map( function( $group ) {
+			$group = array_unique( $group );
+
+			return count( $group );
+		}, $compiled_data['uniques'] );
+
+		return $compiled_data;
 	}
 
 	/**
@@ -387,25 +381,68 @@ class WordCamp_Counts extends Base {
 	}
 
 	/**
+	 * Get data from a WordCamp Details report and filter it.
+	 *
+	 * @return array|null
+	 */
+	protected function get_wordcamps() {
+		if ( is_array( $this->wordcamps ) ) {
+			return $this->wordcamps;
+		}
+
+		$details_options = [
+			'public' => false,
+		];
+		$details_report = new WordCamp_Details( $this->range, [], false, $details_options );
+
+		if ( ! empty( $details_report->error->get_error_messages() ) ) {
+			$this->error = $this->merge_errors( $this->error, $details_report->error );
+
+			return [];
+		}
+
+		$wordcamps = array_filter( $details_report->get_data(), function( $wordcamp ) {
+			// Skip camps with no website URL.
+			if ( ! $wordcamp['URL'] ) {
+				return false;
+			}
+
+			if ( ! empty( $this->statuses ) && ! in_array( $wordcamp['Status'], $this->statuses ) ) {
+				return false;
+			}
+
+			return true;
+		} );
+
+		$this->wordcamps = array_reduce( $wordcamps, function( $carry, $item ) {
+			$keep = [
+				'ID'                      => '',
+				'Name'                    => '',
+				'URL'                     => '',
+				'Start Date (YYYY-mm-dd)' => '',
+				'Status'                  => '',
+			];
+
+			$carry[ $item['ID'] ] = array_intersect_key( $item, $keep );
+
+			return $carry;
+		}, [] );
+
+		return $this->wordcamps;
+	}
+
+	/**
 	 * Retrieve all of the data for one site.
 	 *
 	 * @param int $site_id
+	 * @param int $wordcamp_id
 	 *
 	 * @return array
 	 */
-	protected function get_data_for_site( $site_id ) {
-		$site_data = [
-			'attendees'  => [],
-			'organizers' => [],
-			'sessions'   => [],
-			'speakers'   => [],
-			'sponsors'   => [],
-		];
+	protected function get_data_for_site( $site_id, $wordcamp_id ) {
+		$site_data = [];
 
 		switch_to_blog( $site_id );
-
-		// The get_locale() function doesn't work inside switch_to_blog because it returns early.
-		$wp_locale = get_site_option( 'WPLANG', 'en_US' );
 
 		$attendees = new WP_Query( [
 			'posts_per_page' => -1,
@@ -413,14 +450,22 @@ class WordCamp_Counts extends Base {
 			'post_status'    => 'publish',
 		] );
 
-		$site_data['attendees']['total'] = wp_list_pluck( $attendees->posts, 'tix_email', 'ID' );
+		foreach ( $attendees->posts as $attendee ) {
+			$data = [
+				'wordcamp_id' => $wordcamp_id,
+				'site_id'     => $site_id,
+				'post_id'     => $attendee->ID,
+				'type'        => 'attendee',
+				'identifier'  => $attendee->tix_email,
+			];
 
-		if ( $this->include_gender ) {
-			$names = array_map( function( $name ) {
-				return explode( ' ', $name )[0];
-			}, wp_list_pluck( $attendees->posts, 'tix_first_name', 'ID' ) );
+			if ( $this->include_gender ) {
+				$data['first_name'] = explode( ' ', $attendee->tix_first_name )[0];
+			}
 
-			$site_data['attendees']['gender'] = $this->get_genders( $names, $wp_locale );
+			$site_data[] = $data;
+
+			clean_post_cache( $attendee );
 		}
 
 		$organizers = new WP_Query( [
@@ -429,29 +474,53 @@ class WordCamp_Counts extends Base {
 			'post_status'    => 'publish',
 		] );
 
-		$site_data['organizers']['total']  = wp_list_pluck( $organizers->posts, '_wcpt_user_id', 'ID' );
+		foreach ( $organizers->posts as $organizer ) {
+			$data = [
+				'wordcamp_id' => $wordcamp_id,
+				'site_id'     => $site_id,
+				'post_id'     => $organizer->ID,
+				'type'        => 'organizer',
+				'identifier'  => $organizer->_wcpt_user_id,
+			];
 
-		if ( $this->include_gender ) {
-			$names = array_map( function( $name ) {
-				return explode( ' ', $name )[0];
-			}, wp_list_pluck( $organizers->posts, 'post_title', 'ID' ) );
+			if ( $this->include_gender ) {
+				$data['first_name'] = explode( ' ', $organizer->post_title )[0];
+			}
 
-			$site_data['organizers']['gender'] = $this->get_genders( $names, $wp_locale );
+			$site_data[] = $data;
+
+			clean_post_cache( $organizer );
 		}
 
 		$sessions = new WP_Query( [
-			'posts_per_page' => - 1,
+			'posts_per_page' => -1,
 			'post_type'      => 'wcb_session',
 			'post_status'    => 'publish',
 			'meta_query'     => [
 				[
 					'key'   => '_wcpt_session_type',
-					'value' => 'session',
+					'value' => 'session', // Other session types are usually things like "Lunch".
 				]
 			],
 		] );
 
-		$site_data['sessions']['total'] = wp_list_pluck( $sessions->posts, 'ID' );
+		foreach ( $sessions->posts as $session ) {
+			$data = [
+				'wordcamp_id' => $wordcamp_id,
+				'site_id'     => $site_id,
+				'post_id'     => $session->ID,
+				'type'        => 'session',
+				'identifier'  => '',
+			];
+
+			if ( $this->include_gender ) {
+				$data['first_name'] = '';
+			}
+
+			$site_data[] = $data;
+
+			clean_post_cache( $session );
+		}
 
 		$speakers = new WP_Query( [
 			'posts_per_page' => -1,
@@ -459,14 +528,22 @@ class WordCamp_Counts extends Base {
 			'post_status'    => 'publish',
 		] );
 
-		$site_data['speakers']['total']  = wp_list_pluck( $speakers->posts, '_wcb_speaker_email', 'ID' );
+		foreach ( $speakers->posts as $speaker ) {
+			$data = [
+				'wordcamp_id' => $wordcamp_id,
+				'site_id'     => $site_id,
+				'post_id'     => $speaker->ID,
+				'type'        => 'speaker',
+				'identifier'  => $speaker->_wcb_speaker_email,
+			];
 
-		if ( $this->include_gender ) {
-			$names = array_map( function( $name ) {
-				return explode( ' ', $name )[0];
-			}, wp_list_pluck( $speakers->posts, 'post_title', 'ID' ) );
+			if ( $this->include_gender ) {
+				$data['first_name'] = explode( ' ', $speaker->post_title )[0];
+			}
 
-			$site_data['speakers']['gender'] = $this->get_genders( $names, $wp_locale );
+			$site_data[] = $data;
+
+			clean_post_cache( $speaker );
 		}
 
 		$sponsors = new WP_Query( [
@@ -475,32 +552,62 @@ class WordCamp_Counts extends Base {
 			'post_status'    => 'publish',
 		] );
 
-		$site_data['sponsors']['total'] = array_map( function( $url ) {
-			$hostname = wp_parse_url( $url, PHP_URL_HOST );
+		foreach ( $sponsors->posts as $sponsor ) {
+			$data = [
+				'wordcamp_id' => $wordcamp_id,
+				'site_id'     => $site_id,
+				'post_id'     => $sponsor->ID,
+				'type'        => 'sponsor',
+				'identifier'  => $this->get_sponsor_identifier( $sponsor->_wcpt_sponsor_website ),
+			];
 
-			if ( ! $hostname ) {
-				return '';
+			if ( $this->include_gender ) {
+				$data['first_name'] = '';
 			}
 
-			$trimmed = substr( $hostname, 0, strripos( $hostname, '.' ) ); // Remove the TLD.
-			$trimmed = preg_replace( '/\.com?$/', '', $trimmed ); // Remove possible secondary .com or .co.
-			$trimmed = preg_replace( '/^www\./', '', $trimmed ); // Remove possible www.
+			$site_data[] = $data;
 
-			return $trimmed;
-		}, wp_list_pluck( $sponsors->posts, '_wcpt_sponsor_website' ) );
+			clean_post_cache( $sponsor );
+		}
 
 		restore_current_blog();
 
-		foreach ( $site_data as $type => &$data ) {
-			if ( 'sessions' === $type ) {
-				continue;
+		// Convert blanks to unique values.
+		array_walk( $site_data, function( &$value ) {
+			if ( 'session' === $value['type'] ) {
+				return;
 			}
 
-			// Convert blanks to unique values.
-			array_walk( $data['total'], function( &$value, $key ) use ( $site_id ) {
-				if ( ! $value ) {
-					$value = "{$site_id}_{$key}";
+			if ( empty( $value['identifier'] ) ) {
+				$value['identifier'] = "{$value['site_id']}_{$value['post_id']}";
+			}
+		} );
+
+		if ( $this->include_gender ) {
+			$names = array_filter( wp_list_pluck( $site_data, 'first_name' ) );
+
+			// The get_locale() function doesn't work inside switch_to_blog because it returns early.
+			$wp_locale = get_site_option( 'WPLANG', 'en_US' );
+
+			$gender_data = $this->genderize->get_gender_data( $names, $wp_locale );
+
+			if ( ! empty( $this->genderize->error->get_error_messages() ) ) {
+				$this->merge_errors( $this->error, $this->genderize->error );
+
+				return [];
+			}
+
+			array_walk( $site_data, function( &$value ) use ( $gender_data ) {
+				$name = strtolower( $value['first_name'] );
+				$data = $gender_data[ $name ];
+
+				if ( ! $data['gender'] || $data['probability'] < self::GENDER_PROBABILITY_THRESHOLD ) {
+					$value['gender'] = 'unknown';
+				} else {
+					$value['gender'] = $data['gender'];
 				}
+
+				unset( $value['first_name'] );
 			} );
 		}
 
@@ -508,39 +615,24 @@ class WordCamp_Counts extends Base {
 	}
 
 	/**
-	 * Try to detect the genders for a list of first names.
+	 * Reduce a sponsor URL to a simple domain name with no TLD.
 	 *
-	 * @param array  $names
-	 * @param string $locale
+	 * @param string $sponsor_url
 	 *
-	 * @return array
+	 * @return string
 	 */
-	protected function get_genders( $names, $locale ) {
-		$probability_threshold = (float) 0.9;
+	protected function get_sponsor_identifier( $sponsor_url ) {
+		$hostname = wp_parse_url( $sponsor_url, PHP_URL_HOST );
 
-		$names   = array_map( 'strtolower', $names );
-		$genders = [];
-
-		$gender_data = $this->genderize->get_gender_data( $names, $locale );
-
-		if ( ! empty( $this->genderize->error->get_error_messages() ) ) {
-			$this->merge_errors( $this->error, $this->genderize->error );
-
-			return [];
+		if ( ! $hostname ) {
+			return '';
 		}
 
-		foreach ( $names as $name ) {
-			$data = $gender_data[ $name ];
+		$trimmed = substr( $hostname, 0, strripos( $hostname, '.' ) ); // Remove the TLD.
+		$trimmed = preg_replace( '/\.com?$/', '', $trimmed ); // Remove possible secondary .com or .co.
+		$trimmed = preg_replace( '/^www\./', '', $trimmed ); // Remove possible www.
 
-			if ( ! $data['gender'] || $data['probability'] < $probability_threshold ) {
-				$genders[] = 'unknown';
-				continue;
-			}
-
-			$genders[] = $data['gender'];
-		}
-
-		return $genders;
+		return $trimmed;
 	}
 
 	/**
@@ -549,17 +641,10 @@ class WordCamp_Counts extends Base {
 	 * @return void
 	 */
 	public function render_html() {
-		$data = $this->prepare_data_for_display( $this->get_data() );
+		$data       = $this->compile_report_data( $this->get_data() );
 		$start_date = $this->range->start;
 		$end_date   = $this->range->end;
 		$statuses   = $this->statuses;
-
-		if ( $this->include_gender ) {
-			$genders = array_pop( $data );
-		}
-
-		$uniques = array_pop( $data );
-		$totals  = array_pop( $data );
 
 		if ( ! empty( $this->error->get_error_messages() ) ) {
 			$this->render_error_html();
@@ -591,7 +676,7 @@ class WordCamp_Counts extends Base {
 		     && current_user_can( 'manage_network' )
 		) {
 			$options = array(
-				'public' => false,
+				'public'       => false,
 				'max_interval' => new DateInterval( 'P1Y1M' ),
 			);
 

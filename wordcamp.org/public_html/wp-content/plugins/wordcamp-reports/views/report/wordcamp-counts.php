@@ -55,7 +55,7 @@ use WordCamp\Reports\Report;
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><label for="refresh">Include gender breakdowns</label></th>
+				<th scope="row"><label for="refresh">Include estimated gender breakdowns</label></th>
 				<td><input type="checkbox" id="include-gender" name="include-gender" <?php checked( $include_gender ); ?> /></td>
 			</tr>
 			<tr>

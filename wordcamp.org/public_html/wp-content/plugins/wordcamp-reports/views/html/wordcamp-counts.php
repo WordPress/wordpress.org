@@ -8,20 +8,17 @@ defined( 'WPINC' ) || die();
 
 use DateTime;
 
+/** @var array $data */
 /** @var DateTime $start_date */
 /** @var DateTime $end_date */
 /** @var string $statuses */
-/** @var array $data */
-/** @var array $totals */
-/** @var array $uniques */
-/** @var array $genders */
 
 $gender_legend = '<span class="description small"><span class="total">Total</span> / F / M / ?</span>';
 ?>
 
-<?php if ( count( $data ) ) : ?>
+<?php if ( count( $data['wordcamps'] ) ) : ?>
 	<h3 id="active-heading">
-		Numbers for WordCamps occurring
+		Counts for WordCamps occurring
 		<?php if ( $start_date->format( 'Y-m-d' ) === $end_date->format( 'Y-m-d' ) ) : ?>
 			on <?php echo esc_html( $start_date->format( 'M jS, Y' ) ); ?>
 		<?php else : ?>
@@ -32,7 +29,7 @@ $gender_legend = '<span class="description small"><span class="total">Total</spa
 	<table class="striped widefat but-not-too-wide">
 		<tr>
 			<td>WordCamps</td>
-			<td class="number total"><?php echo number_format_i18n( count( $data ) ); ?></td>
+			<td class="number total"><?php echo number_format_i18n( count( $data['wordcamps'] ) ); ?></td>
 		</tr>
 	</table>
 
@@ -46,33 +43,33 @@ $gender_legend = '<span class="description small"><span class="total">Total</spa
 		</tr>
 		<tr>
 			<td>Attendees</td>
-			<td class="number"><?php echo number_format_i18n( $totals['attendees'] ); ?></td>
-			<td class="number"><?php echo number_format_i18n( $uniques['attendees'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['totals']['attendee'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['uniques']['attendee'] ); ?></td>
 		</tr>
 		<tr>
 			<td>Organizers</td>
-			<td class="number"><?php echo number_format_i18n( $totals['organizers'] ); ?></td>
-			<td class="number"><?php echo number_format_i18n( $uniques['organizers'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['totals']['organizer'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['uniques']['organizer'] ); ?></td>
 		</tr>
 		<tr>
 			<td>Sessions</td>
-			<td class="number"><?php echo number_format_i18n( $totals['sessions'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['totals']['session'] ); ?></td>
 			<td class="number">n/a</td>
 		</tr>
 		<tr>
 			<td>Speakers</td>
-			<td class="number"><?php echo number_format_i18n( $totals['speakers'] ); ?></td>
-			<td class="number"><?php echo number_format_i18n( $uniques['speakers'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['totals']['speaker'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['uniques']['speaker'] ); ?></td>
 		</tr>
 		<tr>
 			<td>Sponsors</td>
-			<td class="number"><?php echo number_format_i18n( $totals['sponsors'] ); ?></td>
-			<td class="number"><?php echo number_format_i18n( $uniques['sponsors'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['totals']['sponsor'] ); ?></td>
+			<td class="number"><?php echo number_format_i18n( $data['uniques']['sponsor'] ); ?></td>
 		</tr>
 	</table>
 
-	<?php if ( ! empty( $genders ) ) : ?>
-		<h4>Gender Breakdown</h4>
+	<?php if ( ! empty( $data['genders'] ) ) : ?>
+		<h4>Estimated Gender Breakdown</h4>
 
 		<table class="striped widefat but-not-too-wide">
 			<tr>
@@ -84,24 +81,24 @@ $gender_legend = '<span class="description small"><span class="total">Total</spa
 			</tr>
 			<tr>
 				<td>Attendees</td>
-				<td class="number"><?php echo number_format_i18n( $totals['attendees'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['attendees']['female'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['attendees']['male'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['attendees']['unknown'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['totals']['attendee'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['attendee']['female'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['attendee']['male'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['attendee']['unknown'] ); ?></td>
 			</tr>
 			<tr>
 				<td>Organizers</td>
-				<td class="number"><?php echo number_format_i18n( $totals['organizers'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['organizers']['female'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['organizers']['male'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['organizers']['unknown'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['totals']['organizer'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['organizer']['female'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['organizer']['male'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['organizer']['unknown'] ); ?></td>
 			</tr>
 			<tr>
 				<td>Speakers</td>
-				<td class="number"><?php echo number_format_i18n( $totals['speakers'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['speakers']['female'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['speakers']['male'] ); ?></td>
-				<td class="number"><?php echo number_format_i18n( $genders['speakers']['unknown'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['totals']['speaker'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['speaker']['female'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['speaker']['male'] ); ?></td>
+				<td class="number"><?php echo number_format_i18n( $data['genders']['speaker']['unknown'] ); ?></td>
 			</tr>
 		</table>
 	<?php endif; ?>
@@ -113,46 +110,46 @@ $gender_legend = '<span class="description small"><span class="total">Total</spa
 			<td>WordCamp</td>
 			<td>Date</td>
 			<td>Status</td>
-			<td>Attendees<?php if ( ! empty( $genders ) ) : ?><br /><?php echo $gender_legend ?><?php endif; ?></td>
-			<td>Organizers<?php if ( ! empty( $genders ) ) : ?><br /><?php echo $gender_legend ?><?php endif; ?></td>
+			<td>Attendees<?php if ( ! empty( $data['genders'] ) ) : ?><br /><?php echo $gender_legend ?><?php endif; ?></td>
+			<td>Organizers<?php if ( ! empty( $data['genders'] ) ) : ?><br /><?php echo $gender_legend ?><?php endif; ?></td>
 			<td>Sessions</td>
-			<td>Speakers<?php if ( ! empty( $genders ) ) : ?><br /><?php echo $gender_legend ?><?php endif; ?></td>
+			<td>Speakers<?php if ( ! empty( $data['genders'] ) ) : ?><br /><?php echo $gender_legend ?><?php endif; ?></td>
 			<td>Sponsors</td>
 		</tr>
-		<?php foreach ( $data as $event ) : ?>
+		<?php foreach ( $data['wordcamps'] as $event ) : ?>
 			<tr>
-				<td><a href="<?php echo esc_attr( $event['URL'] ); ?>"><?php echo esc_html( $event['Name'] ); ?></a></td>
-				<td><?php echo esc_html( $event['Start Date (YYYY-mm-dd)'] ); ?></td>
-				<td><?php echo esc_html( $event['Status'] ); ?></td>
+				<td><a href="<?php echo esc_attr( $event['info']['URL'] ); ?>"><?php echo esc_html( $event['info']['Name'] ); ?></a></td>
+				<td><?php echo esc_html( $event['info']['Start Date (YYYY-mm-dd)'] ); ?></td>
+				<td><?php echo esc_html( $event['info']['Status'] ); ?></td>
 				<td class="number">
-					<span class="total"><?php echo number_format_i18n( $event['attendees']['total'] ); ?></span>
-					<?php if ( ! empty( $genders ) ) : ?>
-						/ <?php echo number_format_i18n( $event['attendees']['gender']['female'] ); ?>
-						/ <?php echo number_format_i18n( $event['attendees']['gender']['male'] ); ?>
-						/ <?php echo number_format_i18n( $event['attendees']['gender']['unknown'] ); ?>
+					<span class="total"><?php echo number_format_i18n( $event['totals']['attendee'] ); ?></span>
+					<?php if ( ! empty( $data['genders'] ) ) : ?>
+						/ <?php echo number_format_i18n( $event['genders']['attendee']['female'] ); ?>
+						/ <?php echo number_format_i18n( $event['genders']['attendee']['male'] ); ?>
+						/ <?php echo number_format_i18n( $event['genders']['attendee']['unknown'] ); ?>
 					<?php endif; ?>
 				</td>
 				<td class="number">
-					<span class="total"><?php echo number_format_i18n( $event['organizers']['total'] ); ?></span>
-					<?php if ( ! empty( $genders ) ) : ?>
-						/ <?php echo number_format_i18n( $event['organizers']['gender']['female'] ); ?>
-						/ <?php echo number_format_i18n( $event['organizers']['gender']['male'] ); ?>
-						/ <?php echo number_format_i18n( $event['organizers']['gender']['unknown'] ); ?>
-					<?php endif; ?>
-				</td>
-				<td class="number total">
-					<?php echo number_format_i18n( $event['sessions']['total'] ); ?>
-				</td>
-				<td class="number">
-					<span class="total"><?php echo number_format_i18n( $event['speakers']['total'] ); ?></span>
-					<?php if ( ! empty( $genders ) ) : ?>
-						/ <?php echo number_format_i18n( $event['speakers']['gender']['female'] ); ?>
-						/ <?php echo number_format_i18n( $event['speakers']['gender']['male'] ); ?>
-						/ <?php echo number_format_i18n( $event['speakers']['gender']['unknown'] ); ?>
+					<span class="total"><?php echo number_format_i18n( $event['totals']['organizer'] ); ?></span>
+					<?php if ( ! empty( $data['genders'] ) ) : ?>
+						/ <?php echo number_format_i18n( $event['genders']['organizer']['female'] ); ?>
+						/ <?php echo number_format_i18n( $event['genders']['organizer']['male'] ); ?>
+						/ <?php echo number_format_i18n( $event['genders']['organizer']['unknown'] ); ?>
 					<?php endif; ?>
 				</td>
 				<td class="number total">
-					<?php echo number_format_i18n( $event['sponsors']['total'] ); ?>
+					<?php echo number_format_i18n( $event['totals']['session'] ); ?>
+				</td>
+				<td class="number">
+					<span class="total"><?php echo number_format_i18n( $event['totals']['speaker'] ); ?></span>
+					<?php if ( ! empty( $data['genders'] ) ) : ?>
+						/ <?php echo number_format_i18n( $event['genders']['speaker']['female'] ); ?>
+						/ <?php echo number_format_i18n( $event['genders']['speaker']['male'] ); ?>
+						/ <?php echo number_format_i18n( $event['genders']['speaker']['unknown'] ); ?>
+					<?php endif; ?>
+				</td>
+				<td class="number total">
+					<?php echo number_format_i18n( $event['totals']['sponsor'] ); ?>
 				</td>
 			</tr>
 		<?php endforeach; ?>
