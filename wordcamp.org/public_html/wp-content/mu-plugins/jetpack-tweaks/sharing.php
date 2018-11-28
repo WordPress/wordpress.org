@@ -14,6 +14,10 @@ add_filter( 'jetpack_twitter_cards_site_tag',   __NAMESPACE__ . '\twitter_siteta
  * Provides a default image for sharing WordCamp home/pages to Facebook/Twitter/Google other than the Jetpack "blank" image.
  */
 function default_og_image() {
+	if ( has_header_image() ) {
+		return get_header_image();
+	}
+
 	return 'https://s.w.org/images/backgrounds/wordpress-bg-medblue.png';
 }
 
