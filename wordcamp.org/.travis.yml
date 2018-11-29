@@ -1,0 +1,43 @@
+# Travis CI configuration file.
+# @link https://travis-ci.org/
+
+# Declare project language and PHP versions to test against.
+# @link http://about.travis-ci.org/docs/user/languages/php/
+language: php
+php:
+  - 7.2
+
+before_script:
+  # Setup code sniffer to run WordPress Code Standard tests
+  - composer create-project wp-coding-standards/wpcs --no-dev
+
+  # Install WordPress Coding Standards.
+  - mkdir wordpress-coding-standards && curl -L https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/archive/master.tar.gz | tar xz --strip-components=1 -C wordpress-coding-standards
+
+  # Set installed paths for phpcs
+  # @link https://github.com/squizlabs/PHP_CodeSniffer/wiki/Configuration-Options#setting-the-installed-standard-paths
+  - wpcs/vendor/bin/phpcs --config-set installed_paths wordpress-coding-standards
+
+  # Create a empty file, which will be passed to phpcs along with all the changed files. This will make sure that incase no php file changes are there, phpcs will not assume that it has to scan whole directory.
+  - touch $TRAVIS_BUILD_DIR/tmp.php
+
+script:
+
+  # Run Code Standard Test. This automatically picks up configuration from  phpcs.xml.dist.
+
+  # Exporting list of changed files in CHANGED_FILES variable
+  # diff: Get the changed files
+  #   --name-only: Get only name of changed files
+  #   --diff-filter=AM: Get only (A)dded or (M)odified files. We do not care about deleted files for coding standard test.
+  #   $TRAVIS_BRANCH: Base branch we want to merge. Usually this will be master
+  #   $TRAVIS_BRANCH...HEAD: List of commits not present in $TRAVIS_BRANCH, but present in HEAD
+  # tr '\n' ' ': Convert from list of filenames seperated by `\n` to list of filenames seperated by ' '
+  - export CHANGED_FILES=$(git diff --name-only --diff-filter=AM $TRAVIS_BRANCH...HEAD | tr '\n' ' ')
+
+  # `wpcs` is where we have installed the code sniffer
+  # -v flag: Print verbose output
+  # -n flag: Do not print warnings
+  # -p flag: Show progress of the run
+  # --extensions=php: Only sniff php files
+  # tmp.php: So that phpcs do not assume that it has to scan all files in case no php files are changed.
+  - wpcs/vendor/bin/phpcs -v -n -p --extensions=php $TRAVIS_BUILD_DIR/tmp.php $(echo $CHANGED_FILES)
