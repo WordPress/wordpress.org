@@ -19,6 +19,8 @@ get_header(); ?>
 </div>
 <?php } ?>
 
+<?php do_action( 'handbook_breadcrumbs' ); ?>
+
 <div id="primary" class="content-area">
 
 	<div class="site-content" role="main">

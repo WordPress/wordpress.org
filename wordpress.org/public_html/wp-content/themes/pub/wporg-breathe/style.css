@@ -1044,6 +1044,44 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	top: 12px;
 }
 
+.handbook-breadcrumbs {
+	position: absolute;
+	top: 4rem;
+	left: 280px;
+	font-size: 1.25rem;
+}
+
+.single-handbook .handbook-breadcrumbs ~ #primary {
+	padding-top: 8rem;
+}
+
+.single-handbook .handbook-name-container ~ .handbook-breadcrumbs {
+	top: 5rem;
+}
+
+.single-handbook .handbook-name-container ~ .handbook-breadcrumbs ~ #primary {
+	padding-top: 10rem;
+}
+
+@media (max-width: 875px) {
+	.handbook-breadcrumbs {
+		top: 3rem;
+		left: 22px;
+	}
+
+	.single-handbook .handbook-breadcrumbs ~ #primary {
+		padding-top: 7rem;
+	}
+	
+	.single-handbook .handbook-name-container ~ .handbook-breadcrumbs {
+		top: 5rem;
+	}
+
+	.single-handbook .handbook-name-container ~ .handbook-breadcrumbs ~ #primary {
+		padding-top: 10rem;
+	}
+}
+
 /** Table of Contents */
 .post-type-archive-handbook div.table-of-contents,
 .single-handbook div.table-of-contents {
