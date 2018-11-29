@@ -1,9 +1,10 @@
 <?php
 
 namespace CampTix\Badge_Generator;
-use \CampTix\Badge_Generator\HTML;
+use CampTix_Plugin;
+use CampTix\Badge_Generator\HTML;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 if ( is_admin() ) {
 	add_filter( 'camptix_menu_tools_tabs',   __NAMESPACE__ . '\add_badges_tab'     );
@@ -65,11 +66,11 @@ function print_admin_styles() {
 /**
  * Get the attendees
  *
- * @param string|array $ticket_ids       Reduce fetched attendees by the ticket they purchased. The string 'all'
+ * @param string|array $ticket_ids       Filter fetched attendees by the ticket they purchased. The string 'all'
  *                                       will result in all attendees being fetched, regardless of their
  *                                       ticket. An array of ticket IDs will result in only the attendees for
  *                                       those tickets being fetched.
- * @param string       $registered_after Reduce fetched attendees by their registration date. Any value parseable
+ * @param string       $registered_after Filter fetched attendees by their registration date. Any value parseable
  *                                       by strtotime().
  * @param string       $admin_flag       Filter fetched attendees to only those who have the given admin flag
  *                                       assigned.
@@ -132,7 +133,7 @@ function get_attendees( $ticket_ids = 'all', $registered_after = '', $admin_flag
  *      Any non-null value will be returned as if it were pulled from the database
  */
 function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
-	/** @global \CampTix_Plugin $camptix */
+	/** @global CampTix_Plugin $camptix */
 	global $camptix;
 
 	$attendee = get_post( $post_id );
@@ -141,7 +142,7 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 		return $value;
 	}
 
-	if ( 'tix_attendee' != $attendee->post_type ) {
+	if ( 'tix_attendee' !== $attendee->post_type ) {
 		return $value;
 	}
 
@@ -155,7 +156,7 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 					'rating'  => 'g',
 				)
 			);
-			$value = str_replace( 'secure.gravatar.com', 'en.gravatar.com', $value );   // work around Varnish bug on secure.gravatar.com that causes `503` response codes
+			$value = str_replace( 'secure.gravatar.com', 'en.gravatar.com', $value );   // work around Varnish bug on secure.gravatar.com that causes `503` response codes.
 			break;
 
 		case 'coupon':

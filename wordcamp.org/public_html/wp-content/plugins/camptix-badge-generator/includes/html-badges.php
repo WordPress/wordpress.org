@@ -5,21 +5,23 @@
  */
 
 namespace CampTix\Badge_Generator\HTML;
-use \CampTix\Badge_Generator;
+use CampTix\Badge_Generator;
+use CampTix_Plugin;
+use WP_Customize_Manager;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 add_action( 'customize_register',    __NAMESPACE__ . '\register_customizer_components'   );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_customizer_scripts'       );
 add_action( 'admin_print_styles',    __NAMESPACE__ . '\print_customizer_styles'          );
 add_action( 'wp_enqueue_scripts',    __NAMESPACE__ . '\remove_all_previewer_styles', 998 );
-add_action( 'wp_enqueue_scripts',    __NAMESPACE__ . '\enqueue_previewer_scripts',   999 );  // after remove_all_previewer_styles()
+add_action( 'wp_enqueue_scripts',    __NAMESPACE__ . '\enqueue_previewer_scripts',   999 );  // after remove_all_previewer_styles().
 add_filter( 'template_include',      __NAMESPACE__ . '\use_badges_template'              );
 
 /**
  * Register our Customizer settings, panels, sections, and controls
  *
- * @param \WP_Customize_Manager $wp_customize
+ * @param WP_Customize_Manager $wp_customize
  */
 function register_customizer_components( $wp_customize ) {
 	ob_start();
@@ -122,7 +124,7 @@ function enqueue_customizer_scripts() {
 		return;
 	}
 
-	// Enqueue our scripts
+	// Enqueue our scripts.
 	wp_enqueue_script(
 		'camptix-html-badges-customizer',
 		plugins_url( 'javascript/html-badges-customizer.js', __DIR__ ),
@@ -167,7 +169,7 @@ function print_customizer_styles() {
  * @return bool
  */
 function is_badges_preview() {
-	/** @global \WP_Customize_Manager $wp_customize */
+	/** @global WP_Customize_Manager $wp_customize */
 	global $wp_customize;
 
 	return isset( $_GET['camptix-badges'] ) && $wp_customize->is_preview();
@@ -198,7 +200,7 @@ function use_badges_template( $template ) {
  * @todo Need some way of detecting failed HTTP requests for Gravatars and retrying them, like InDesign badges does
  */
 function render_badges_template() {
-	/** @global \CampTix_Plugin $camptix */
+	/** @global CampTix_Plugin $camptix */
 	global $camptix;
 
 	$allowed_html = array(

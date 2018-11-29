@@ -1,12 +1,14 @@
 <?php
 
 namespace CampTix\Badge_Generator\InDesign;
-use \CampTix\Badge_Generator;
-use \CampTix\Badge_Generator\HTML;
-use \WordCamp\Logger;
+use Exception;
+use CampTix_Plugin;
+use CampTix\Badge_Generator;
+use CampTix\Badge_Generator\HTML;
+use WordCamp\Logger;
 use WordCamp\Utilities;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 add_action( 'camptix_menu_tools_indesign_badges', __NAMESPACE__ . '\render_indesign_page' );
 
@@ -27,6 +29,8 @@ function render_indesign_page() {
  * Build the badge assets for InDesign
  *
  * @param array $options
+ *
+ * @throws Exception
  */
 function build_assets( $options ) {
 	$options = shortcode_atts(
@@ -52,7 +56,7 @@ function build_assets( $options ) {
 		generate_csv( $csv_filename, $zip_local_folder, $attendees, $gravatar_folder );
 		create_zip_file( $zip_filename, $zip_local_folder, $csv_filename, $gravatar_folder );
 	} finally {
-		// todo Delete contents of $assets_folder, then rmdir( $assets_folder );
+		// todo Delete contents of $assets_folder, then rmdir( $assets_folder );.
 	}
 }
 
@@ -64,7 +68,7 @@ function build_assets( $options ) {
  * @param array  $attendees
  * @param string $gravatar_folder
  *
- * @throws \Exception
+ * @throws Exception
  */
 function download_gravatars( $attendees, $gravatar_folder ) {
 	set_time_limit( 0 );
@@ -86,7 +90,7 @@ function download_gravatars( $attendees, $gravatar_folder ) {
 
 		if ( ! $gravatar_file ) {
 			Logger\log( 'gravatar_open_failed', compact( 'attendee', 'gravatar_folder', 'filename' ) );
-			throw new \Exception( __( "Couldn't save all Gravatars.", 'wordcamporg' ) );
+			throw new Exception( __( "Couldn't save all Gravatars.", 'wordcamporg' ) );
 		}
 
 		fwrite( $gravatar_file, $gravatar_image );
@@ -111,7 +115,7 @@ function download_gravatars( $attendees, $gravatar_folder ) {
  *
  * @todo Update this to use wcorg_redundant_remote_get() instead, for DRYness
  *
- * @throws \Exception when the HTTP request fails
+ * @throws Exception when the HTTP request fails
  */
 function download_single_gravatar( $request_url ) {
 	$attempt_count = 1;
@@ -123,7 +127,7 @@ function download_single_gravatar( $request_url ) {
 		$retry_after = wp_remote_retrieve_header( $response, 'retry-after' ) ?: 5;
 		$retry_after = min( $retry_after * $attempt_count, 30 );
 
-		// A 404 is expected when the attendee doesn't have a Gravatar setup, so don't retry them
+		// A 404 is expected when the attendee doesn't have a Gravatar setup, so don't retry them.
 		if ( 404 == $status_code ) {
 			return false;
 		}
@@ -133,7 +137,7 @@ function download_single_gravatar( $request_url ) {
 		}
 
 		if ( is_array( $response ) && isset( $response['body'] ) ) {
-			$response['body'] = '[redacted]'; // Avoid cluttering the logs with a ton of binary data
+			$response['body'] = '[redacted]'; // Avoid cluttering the logs with a ton of binary data.
 		}
 
 		if ( $attempt_count < 3 ) {
@@ -141,7 +145,7 @@ function download_single_gravatar( $request_url ) {
 			sleep( $retry_after );
 		} else {
 			Logger\log( 'request_failed_permenantly', compact( 'request_url', 'response' ) );
-			throw new \Exception( __( "Couldn't download all Gravatars.", 'wordcamporg' ) );
+			throw new Exception( __( "Couldn't download all Gravatars.", 'wordcamporg' ) );
 		}
 
 		$attempt_count++;
@@ -169,7 +173,7 @@ function get_gravatar_filename( $attendee ) {
 /**
  * Get the filename for the Zip file
  *
- * @param $assets_folder
+ * @param string $assets_folder
  *
  * @return string
  */
@@ -196,10 +200,10 @@ function get_zip_filename( $assets_folder ) {
  * @param array  $attendees
  * @param string $gravatar_folder
  *
- * @throws \Exception
+ * @throws Exception
  */
 function generate_csv( $csv_filename, $zip_local_folder, $attendees, $gravatar_folder ) {
-	/** @var \CampTix_Plugin $camptix */
+	/** @var CampTix_Plugin $camptix */
 	global $camptix;
 
 	$csv_handle            = fopen( $csv_filename, 'w' );
@@ -210,7 +214,7 @@ function generate_csv( $csv_filename, $zip_local_folder, $attendees, $gravatar_f
 
 	if ( ! $csv_handle ) {
 		Logger\log( 'open_csv_failed' );
-		throw new \Exception( __( "Couldn't open CSV file.", 'wordcamporg' ) );
+		throw new Exception( __( "Couldn't open CSV file.", 'wordcamporg' ) );
 	}
 
 	fputcsv( $csv_handle, Utilities\Export_CSV::esc_csv( get_header_row( $admin_flags, $questions ) ) );
@@ -234,7 +238,7 @@ function generate_csv( $csv_filename, $zip_local_folder, $attendees, $gravatar_f
  * @return array
  */
 function get_admin_flags() {
-	/** @var \CampTix_Plugin $camptix */
+	/** @var CampTix_Plugin $camptix */
 	global $camptix;
 
 	$flags           = array();
@@ -279,7 +283,7 @@ function get_header_row( $admin_flags, $questions ) {
 function get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directory, $empty_twitter, $admin_flags, $questions ) {
 	$row = array();
 
-	if ( 'unknown.attendee@example.org' == $attendee->tix_email ) {
+	if ( 'unknown.attendee@example.org' === $attendee->tix_email ) {
 		return $row;
 	}
 
@@ -326,7 +330,7 @@ function get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directo
  * @return string
  */
 function get_twitter_username( $attendee ) {
-	/** @global \CampTix_Plugin $camptix */
+	/** @global CampTix_Plugin $camptix */
 	global $camptix;
 
 	$username = '';
@@ -352,17 +356,17 @@ function get_twitter_username( $attendee ) {
  *
  * @param string $username
  * @param string $first_name
- * @param string $empty_mode 'replace' to replace empty usernames with first names
+ * @param string $empty_mode 'replace' to replace empty usernames with first names.
  *
  * @return string
  */
 function format_twitter_username( $username, $first_name, $empty_mode = '' ) {
-	if ( empty ( $username ) ) {
+	if ( empty( $username ) ) {
 		if ( 'replace' === $empty_mode ) {
 			$username = $first_name;
 		}
 	} else {
-		// Strip out everything but the username, and prefix a @
+		// Strip out everything but the username, and prefix a `@` character.
 		$username = '@' . preg_replace(
 			'/
 				(https?:\/\/)?
@@ -407,12 +411,12 @@ function get_answer( $question, $answers ) {
  * @param string $csv_filename
  * @param string $gravatar_folder
  *
- * @throws \Exception
+ * @throws Exception
  */
 function create_zip_file( $zip_filename, $zip_local_folder, $csv_filename, $gravatar_folder ) {
 	if ( ! class_exists( 'ZipArchive') ) {
 		Logger\log( 'zip_ext_not_installed' );
-		throw new \Exception( __( 'The Zip extension for PHP is not installed.', 'wordcamporg' ) );
+		throw new Exception( __( 'The Zip extension for PHP is not installed.', 'wordcamporg' ) );
 	}
 
 	$zip_file    = new \ZipArchive();
@@ -420,7 +424,7 @@ function create_zip_file( $zip_filename, $zip_local_folder, $csv_filename, $grav
 
 	if ( true !== $open_status ) {
 		Logger\log( 'zip_open_failed', compact( 'zip_filename', 'open_status' ) );
-		throw new \Exception( __( 'The Zip file could not be created.', 'wordcamporg' ) );
+		throw new Exception( __( 'The Zip file could not be created.', 'wordcamporg' ) );
 	}
 
 	$zip_file->addFile(
@@ -452,12 +456,12 @@ function create_zip_file( $zip_filename, $zip_local_folder, $csv_filename, $grav
  *
  * @param string $filename
  *
- * @throws \Exception
+ * @throws Exception
  */
 function serve_zip_file( $filename ) {
 	if ( ! current_user_can( Badge_Generator\REQUIRED_CAPABILITY ) ) {
 		Logger\log( 'access_denied' );
-		throw new \Exception( __( "You don't have authorization to perform this action.", 'wordcamporg' ) );
+		throw new Exception( __( "You don't have authorization to perform this action.", 'wordcamporg' ) );
 	}
 
 	set_time_limit( 0 );

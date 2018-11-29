@@ -10,7 +10,7 @@
  */
 
 namespace CampTix\Badge_Generator;
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 const REQUIRED_CAPABILITY = 'manage_options';
 

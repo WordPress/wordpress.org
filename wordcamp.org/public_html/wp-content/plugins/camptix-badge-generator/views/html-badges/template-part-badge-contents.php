@@ -3,7 +3,7 @@
 namespace CampTix\Badge_Generator\HTML;
 use WP_Post;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 /**
  * @var WP_Post $attendee

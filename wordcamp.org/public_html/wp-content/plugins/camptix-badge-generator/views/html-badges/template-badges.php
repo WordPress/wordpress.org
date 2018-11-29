@@ -3,7 +3,7 @@
 namespace CampTix\Badge_Generator\HTML;
 use WP_Post;
 
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 /**
  * @global string  $template
@@ -15,7 +15,7 @@ defined( 'WPINC' ) or die();
  * template-loader.php includes this file in the global scope, which is ugly. So, include this again from a
  * function, so that we get a nice, clean, local scope.
  */
-if ( isset( $template ) && __FILE__ == $template ) {
+if ( isset( $template ) && __FILE__ === $template ) {
 	render_badges_template();
 	return;
 }
@@ -24,7 +24,7 @@ if ( isset( $template ) && __FILE__ == $template ) {
 <html <?php language_attributes(); ?>>
 
 <head>
-	<title><?php _e( 'CampTix HTML Badges', 'wordcamporg' ); ?></title>
+	<title><?php esc_html_e( 'CampTix HTML Badges', 'wordcamporg' ); ?></title>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<?php wp_head(); ?>
 </head>
@@ -34,7 +34,7 @@ if ( isset( $template ) && __FILE__ == $template ) {
 
 	if ( empty( $attendees ) ) :
 
-		_e( 'No attendees were found. Please try again once tickets have been purchased.', 'wordcamporg' );
+		esc_html_e( 'No attendees were found. Please try again once tickets have been purchased.', 'wordcamporg' );
 
 	else :
 
