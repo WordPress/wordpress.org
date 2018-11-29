@@ -161,7 +161,7 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 		case 'coupon':
 			if ( $attendee->tix_coupon_id ) {
 				$coupon = get_post( $attendee->tix_coupon_id );
-				$value  = $coupon->post_name;
+				$value  = $coupon->post_name ?? '';
 			}
 			break;
 
@@ -180,7 +180,7 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 
 		case 'ticket':
 			$ticket = get_post( $attendee->tix_ticket_id );
-			$value  = $ticket->post_name;
+			$value  = $ticket->post_name ?? '';
 			break;
 	}
 
