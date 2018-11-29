@@ -33,6 +33,7 @@ function build_assets( $options ) {
 		array(
 			'ticket_ids'       => 'all',
 			'registered_after' => '',
+			'admin_flag'       => '',
 		),
 		$options
 	);
@@ -44,7 +45,7 @@ function build_assets( $options ) {
 		$csv_filename     = $assets_folder . '/attendees.csv';
 		$zip_filename     = get_zip_filename( $assets_folder );
 		$zip_local_folder = pathinfo( $zip_filename, PATHINFO_FILENAME );
-		$attendees        = Badge_Generator\get_attendees( $options['ticket_ids'], $options['registered_after'] );
+		$attendees        = Badge_Generator\get_attendees( $options['ticket_ids'], $options['registered_after'], $options['admin_flag'] );
 
 		wp_mkdir_p( $gravatar_folder );
 		download_gravatars( $attendees, $gravatar_folder );

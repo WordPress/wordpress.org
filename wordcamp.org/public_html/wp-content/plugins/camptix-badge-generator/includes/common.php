@@ -71,12 +71,14 @@ function print_admin_styles() {
  *                                       those tickets being fetched.
  * @param string       $registered_after Reduce fetched attendees by their registration date. Any value parseable
  *                                       by strtotime().
+ * @param string       $admin_flag       Filter fetched attendees to only those who have the given admin flag
+ *                                       assigned.
  *
  * @todo Maybe optimize this by looking at post_date rather than tix_timestamp
  *
  * @return array
  */
-function get_attendees( $ticket_ids = 'all', $registered_after = '' ) {
+function get_attendees( $ticket_ids = 'all', $registered_after = '', $admin_flag = '' ) {
 	$params = array(
 		'post_type'      => 'tix_attendee',
 		'posts_per_page' => 12000,
@@ -102,6 +104,14 @@ function get_attendees( $ticket_ids = 'all', $registered_after = '' ) {
 	}
 
 	$attendees = get_posts( $params );
+
+	if ( '' !== $admin_flag ) {
+		$attendees = array_filter( $attendees, function( $attendee ) use ( $admin_flag ) {
+			$flags = get_post_meta( $attendee->ID, 'camptix-admin-flag' );
+
+			return in_array( $admin_flag, $flags, true );
+		} );
+	}
 
 	return $attendees;
 }
