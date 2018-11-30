@@ -4,8 +4,8 @@ $localised_domain = parse_url( home_url( '/' ), PHP_URL_HOST );
 
 $title = __( 'Say Hello to the New Editor', 'wporg' );
 
-$content = '<!-- wp:paragraph -->
-<p><em>' . esc_html__( 'It&#8217;s a whole new way to use WordPress. Try it right here!', 'wporg' ) . '</em></p>
+$content = '<!-- wp:paragraph {"customTextColor":"#6c7781","customFontSize":17} -->
+<p style="color:#6c7781;font-size:17px" class="has-text-color"><em>' . esc_html__( 'It&#8217;s a whole new way to use WordPress. Try it right here!', 'wporg' ) . '</em></p>
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:image {"id":97629,"align":"full"} -->
