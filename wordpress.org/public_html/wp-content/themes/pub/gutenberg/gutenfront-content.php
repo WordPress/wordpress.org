@@ -4,9 +4,9 @@ $localised_domain = parse_url( home_url( '/' ), PHP_URL_HOST );
 
 $title = __( 'Say Hello to the New Editor', 'wporg' );
 
-$content = '<!-- wp:subhead -->
-<p class="wp-block-subhead">' . esc_html__( 'It&#8217;s a whole new way to use WordPress. Try it right here!', 'wporg' ) . '</p>
-<!-- /wp:subhead -->' . "\n\n";
+$content = '<!-- wp:paragraph -->
+<p><em>' . esc_html__( 'It&#8217;s a whole new way to use WordPress. Try it right here!', 'wporg' ) . '</em></p>
+<!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:image {"id":97629,"align":"full"} -->
 <figure class="wp-block-image alignfull"><img src="https://wordpress.org/gutenberg/files/2018/07/Screenshot-4-1.png" alt="" class="wp-image-97629"/></figure>
