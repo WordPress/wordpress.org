@@ -480,6 +480,47 @@ function gutenbergtheme_next_post_where( $where, $in_same_term, $excluded_term, 
 add_filter( 'get_next_post_where', 'gutenbergtheme_next_post_where', 10, 5 );
 
 /**
+ * Add redirects for any handbook pages that have been renamed.
+ */
+function gutenbergtheme_handbook_redirects() {
+	if ( ! is_404() || ! get_query_var( 'handbook' ) ) {
+		return;
+	}
+
+	// Any handbook pages where the filename changes should be listed here.
+	// If only the parent path changes, it's not needed and WordPress will handle it automatically.
+	$redirects = [
+		'reference/deprecated'           => 'designers-developers/developers/backwards-compatibility/deprecations/',
+		'extensibility/annotations'      => 'designers-developers/developers/block-api/block-annotations/',
+		'block-api/attributes'           => 'designers-developers/developers/block-api/block-attributes/',
+		'block-api/deprecated-blocks'    => 'designers-developers/developers/block-api/block-deprecation/',
+		'block-api'                      => 'designers-developers/developers/block-api/block-registration/',
+		'templates'                      => 'designers-developers/developers/block-api/block-templates/',
+		'extensibility/autocomplete'     => 'designers-developers/developers/filters/autocomplete-filters/',
+		'extensibility/extending-blocks' => 'designers-developers/developers/filters/block-filters/',
+		'extensibility/parser'           => 'designers-developers/developers/filters/parser-filters/',
+		'blocks'                         => 'designers-developers/developers/tutorials/block-tutorial/intro/',
+		'language'                       => 'designers-developers/key-concepts/',
+
+		// Redirects for index pages where needed
+		// These next two look like an infinite redirect, but one will exist so the `is_404()` check prevents it above. This is for an inpending changes
+		'designers-developers/developers/tutorials/block-tutorial'       => 'designers-developers/developers/tutorials/block-tutorial/intro/',
+		'designers-developers/developers/tutorials/block-tutorial/intro' => 'designers-developers/developers/tutorials/block-tutorial/',
+	];
+
+	if ( isset( $redirects[ get_query_var( 'handbook' ) ] ) ) {
+		wp_redirect(
+			home_url(
+				'/handbook/' .
+				$redirects[ get_query_var( 'handbook' ) ]
+			)
+		);
+		exit;
+	}
+}
+add_action( 'template_redirect', 'gutenbergtheme_handbook_redirects' );
+
+/**
  * Implement the Custom Header feature.
  */
 require get_template_directory() . '/inc/custom-header.php';
