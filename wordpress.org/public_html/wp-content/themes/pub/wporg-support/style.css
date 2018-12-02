@@ -3307,25 +3307,25 @@ body, #pagebody {
 /*--------------------------------------------------------------
 # Archives
 --------------------------------------------------------------*/
-body.archive #main h1 {
+body.category #main h1 {
 	font-size: 2.2rem;
 	text-align: center;
 }
 
-body.archive #main a {
+body.category #main a {
 	color: inherit;
 }
 
-body.archive #main a:hover, body.archive #main a:focus, body.archive #main a:active {
+body.category #main a:hover, body.category #main a:focus, body.category #main a:active {
 	text-decoration: none;
 	color: #0073aa;
 }
 
-body.archive #main article h2 {
+body.category #main article h2 {
 	font-size: 1.3rem;
 }
 
-body.archive #main .archive-pagination {
+body.category #main .archive-pagination {
 	display: block;
 	margin-top: 20px;
 	text-align: center;
