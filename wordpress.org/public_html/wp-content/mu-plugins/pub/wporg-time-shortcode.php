@@ -161,8 +161,9 @@ function time_shortcode_in_comments( $comment ) {
 	$saved_tags = $shortcode_tags;
 
 	// Only process the time shortcode.
-	unset( $shortcode_tags );
-	$shortcode_tags['time'] = __NAMESPACE__ . '\time_shortcode';
+	$shortcode_tags = array(
+		'time' =>__NAMESPACE__ . '\time_shortcode'
+	);
 
 	// Do the time shortcode on the comment.
 	$comment = do_shortcode( $comment );
