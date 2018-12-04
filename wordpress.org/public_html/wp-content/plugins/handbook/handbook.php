@@ -15,8 +15,6 @@ require_once dirname( __FILE__ ) . '/inc/email-post-changes.php';
 require_once dirname( __FILE__ ) . '/inc/walker.php';
 require_once dirname( __FILE__ ) . '/inc/watchlist.php';
 
-WPorg_Handbook_Glossary::init();
-
 /**
  * Initialize our handbooks
  *
@@ -36,6 +34,8 @@ class WPorg_Handbook_Init {
 		foreach ( $post_types as $type ) {
 			new WPorg_Handbook( $type );
 		}
+
+		WPorg_Handbook_Glossary::init();
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
