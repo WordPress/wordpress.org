@@ -465,11 +465,11 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		E_CORE_ERROR,
 		E_COMPILE_ERROR,
 		E_PARSE,
-		E_WARNING,
-		E_DEPRECATED,
 
 		// TODO: Enable notices once we get rid of all noisy E_WARNING.
 		// E_NOTICE,
+		// E_DEPRECATED,
+		// E_WARNING,
 	);
 
 	if ( ! in_array( $err_no, $error_whitelist ) ) {
