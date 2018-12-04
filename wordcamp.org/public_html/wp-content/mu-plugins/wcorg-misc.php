@@ -19,7 +19,7 @@ add_filter( 'got_url_rewrite', '__return_true' );
  * open-sourced yet because they need to be audited and cleaned up first, which is a low priority.
  *
  * Having these in a separate folder lets us make wp-content/themes a single `svn:external` with the current
- * public themes. 
+ * public themes.
  */
 if ( is_dir( WP_CONTENT_DIR . '/themes-private' ) ) {
 	register_theme_directory( WP_CONTENT_DIR . '/themes-private' );
@@ -470,27 +470,26 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 
 		// TODO: Enable notices once we get rid of all noisy E_WARNING.
 		// E_NOTICE,
-
 	);
 
 	if ( ! in_array( $err_no, $error_whitelist ) ) {
 		return false;
 	}
 
-	// Max file length for ubuntu system is 255
+	// Max file length for ubuntu system is 255.
 	$err_key = substr( base64_encode("$file-$line-$err_no" ), -254 );
 
 	$error_file = "/tmp/error_limiting/$err_key";
 
-	$text = "";
+	$text = '';
 
 	$data = array(
 		'last_reported_at' => time(),
-		'error_count' => 0, //since last reported
+		'error_count' => 0, // since last reported.
 	);
 
 	if ( ! file_exists( $error_file ) ) {
-		$text = "Error occured. ";
+		$text = 'Error occured. ';
 		file_put_contents( $error_file, json_encode( $data ) );
 	} else {
 		$data = json_decode( file_get_contents( $error_file ), true );
@@ -505,23 +504,21 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 			file_put_contents( $error_file, json_encode( $data ) );
 			return false;
 		}
-
 	}
 
 	$domain = get_site_url();
 
-	$page_slug = trim( $_SERVER["REQUEST_URI"] , '/' );
+	$page_slug = esc_html( trim( $_SERVER['REQUEST_URI'], '/' ) );
 
 	$text = $text . "Message : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug \n Error type: $err_no";
 
 	$message = array(
-		"fallback" => $text,
-		"color" => "#ff0000",
-		"pretext" => "Error on \"$file:$line\" ",
-		"author_name" => $domain,
-		"text" => $text,
+		'fallback' => $text,
+		'color' => '#ff0000',
+		'pretext' => "Error on \"$file:$line\" ",
+		'author_name' => $domain,
+		'text' => $text,
 	);
-
 
 	$send = new \Dotorg\Slack\Send( SLACK_ERROR_REPORT_URL );
 	$send->add_attachment( $message );
@@ -535,7 +532,8 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
  * Shutdown handler which forwards errors to slack.
  */
 function send_fatal_to_slack() {
-	if( ! $error = error_get_last() ) {
+	$error = error_get_last();
+	if ( ! $error ) {
 		return;
 	}
 
