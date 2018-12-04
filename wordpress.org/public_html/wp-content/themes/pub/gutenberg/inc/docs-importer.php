@@ -277,8 +277,8 @@ class Import_Gutendocs {
 			$markdown = preg_replace( '/^#\s(.+)/', '', $markdown );
 		}
 
-		// Remove the .md extension from relative links
-		$markdown = preg_replace( '/(\[.*?\]\((\.\.\/)+.*?)(\.md)?(#.*)?\)/i', '$1$4)', $markdown );
+		// Remove the .md extension from relative links and treat 'readme.md' as an index
+		$markdown = preg_replace( '/(\[.*?\]\((\.\.\/)+.*?)((\/readme)?\.md)?(#.*)?\)/i', '$1$5)', $markdown );
 
 		// Remove the (../)*docs/ path from relative links, and replace it with an absolute URL
 		$markdown = preg_replace( '/(\[.*?\])\((\.\.\/)+docs\/(.*?)\/?(#.*)?\)/i', '$1(https://wordpress.org/gutenberg/handbook/$3/$4)', $markdown );
