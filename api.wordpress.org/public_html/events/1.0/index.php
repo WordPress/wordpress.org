@@ -930,14 +930,14 @@ function add_regional_wordcamps( $local_events, $user_agent ) {
 		return $local_events;
 	}
 
-	if ( $time <= strtotime( 'December 2nd, 2017' ) ) {
+	if ( $time > strtotime( 'November 7th, 2018' ) && $time < strtotime( 'December 10th, 2018' ) ) {
 		$regional_wordcamps[] = array(
 			'type'       => 'wordcamp',
 			'title'      => 'WordCamp US',
-			'url'        => 'https://2017.us.wordcamp.org/',
+			'url'        => 'https://2018.us.wordcamp.org/',
 			'meetup'     => '',
 			'meetup_url' => '',
-			'date'       => '2017-12-01 00:00:00',
+			'date'       => '2018-12-07 00:00:00',
 
 			'location' => array(
 				'location'  => 'Nashville, TN, USA',
@@ -948,20 +948,20 @@ function add_regional_wordcamps( $local_events, $user_agent ) {
 		);
 	}
 
-	if ( $time >= strtotime( 'May 14th, 2018' ) && $time <= strtotime( 'June 15th, 2018' ) ) {
+	if ( $time > strtotime( 'May 20th, 2019' ) && $time < strtotime( 'June 23rd, 2019' ) ) {
 		$regional_wordcamps[] = array(
 			'type'       => 'wordcamp',
 			'title'      => 'WordCamp Europe',
-			'url'        => 'https://2018.europe.wordcamp.org/',
+			'url'        => 'https://2019.europe.wordcamp.org/',
 			'meetup'     => '',
 			'meetup_url' => '',
-			'date'       => '2018-06-14 00:00:00',
+			'date'       => '2019-06-20 00:00:00',
 
 			'location' => array(
-				'location'  => 'Belgrade, Serbia',
-				'country'   => 'RS',
-				'latitude'  => 44.808497,
-				'longitude' => 20.432285,
+				'location'  => 'Berlin, Germany',
+				'country'   => 'DE',
+				'latitude'  => 52.50697,
+				'longitude' => 13.2843064,
 			)
 		);
 	}
