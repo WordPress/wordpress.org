@@ -6,6 +6,12 @@ class WPorg_Handbook_Glossary {
 	const capability_type = 'handbook_page';
 
 	static function init() {
+		// Disable glossary functionality for multi-handbook sites until
+		// such support is added.
+		if ( count( WPorg_Handbook_Init::get_post_types() ) > 1 ) {
+			return;
+		}
+
 		add_action( 'init', array( __CLASS__, 'init_hook' ) );
 		add_action( 'load-edit.php', array( __CLASS__, 'load_edit_php' ) );
 		add_filter( 'edit_glossary_per_page', array( __CLASS__, 'edit_posts_per_page' ) );
