@@ -523,8 +523,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 	$send = new \Dotorg\Slack\Send( SLACK_ERROR_REPORT_URL );
 	$send->add_attachment( $message );
 
-	// @todo change to WORDCAMP_LOGS_SLACK_CHANNEL when ready
-	$send->send( '@vedjain' );
+	$send->send( WORDCAMP_LOGS_SLACK_CHANNEL );
 	return false;
 }
 
