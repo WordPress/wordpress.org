@@ -459,7 +459,21 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		return false;
 	}
 
-	if ( $err_no !== E_ERROR && $err_no !== E_USER_ERROR && $err_no !== E_CORE_ERROR && $err_no !== E_COMPILE_ERROR ) {
+	$error_whitelist = array(
+		E_ERROR,
+		E_USER_ERROR,
+		E_CORE_ERROR,
+		E_COMPILE_ERROR,
+		E_PARSE,
+		E_WARNING,
+		E_DEPRECATED,
+
+		// TODO: Enable notices once we get rid of all noisy E_WARNING.
+		// E_NOTICE,
+
+	);
+
+	if ( ! in_array( $err_no, $error_whitelist ) ) {
 		return false;
 	}
 
@@ -482,7 +496,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		$data = json_decode( file_get_contents( $error_file ), true );
 		$data['error_count'] += 1;
 		$time_elasped = time() - $data['last_reported_at'];
-		if ( $time_elasped > 120 ) {
+		if ( $time_elasped > 600 ) {
 			$text = "Still happening. Happened ${data['error_count']} time(s) since last reported. ";
 			$data['last_reported_at'] = time();
 			$data['error_count'] = 0;
@@ -498,7 +512,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 
 	$page_slug = trim( $_SERVER["REQUEST_URI"] , '/' );
 
-	$text = $text . "Message : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug";
+	$text = $text . "Message : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug \n Error type: $err_no";
 
 	$message = array(
 		"fallback" => $text,
@@ -508,17 +522,18 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		"text" => $text,
 	);
 
+
 	$send = new \Dotorg\Slack\Send( SLACK_ERROR_REPORT_URL );
 	$send->add_attachment( $message );
 
 	// @todo change to WORDCAMP_LOGS_SLACK_CHANNEL when ready
-	$send->send( '@vedanshu' );
+	$send->send( '@vedjain' );
 	return false;
 }
 
-	/**
-	 * Shutdown handler which forwards errors to slack.
-	 */
+/**
+ * Shutdown handler which forwards errors to slack.
+ */
 function send_fatal_to_slack() {
 	if( ! $error = error_get_last() ) {
 		return;
@@ -527,7 +542,7 @@ function send_fatal_to_slack() {
 	return send_error_to_slack( $error['type'], $error['message'], $error['file'], $error['line'] );
 }
 
-if ( false && ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) ) {
+if ( ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) ) {
 	register_shutdown_function( 'send_fatal_to_slack' );
 	set_error_handler( 'send_error_to_slack', E_ERROR );
 }
