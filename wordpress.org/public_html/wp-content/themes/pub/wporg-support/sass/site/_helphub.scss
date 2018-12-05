@@ -67,7 +67,7 @@ body.helphub-with-sidebar {
 
 		@include breakpoint( $sm ) {
 			float: left;
-			padding-right: 4rem;
+			padding-right: 3rem;
 			width: $size__site-sidebar;
 
 			& + #main-content {

@@ -4433,12 +4433,12 @@ body.helphub-with-sidebar .left-sidebar ul li ul {
 @media screen and (min-width: 768px) {
 	body.helphub-with-sidebar .left-sidebar {
 		float: left;
-		padding-right: 4rem;
-		width: 33%;
+		padding-right: 3rem;
+		width: 23%;
 	}
 	body.helphub-with-sidebar .left-sidebar + #main-content {
 		float: right;
-		width: 67%;
+		width: 77%;
 	}
 	body.helphub-with-sidebar .left-sidebar + #main-content .entry-content .container {
 		width: 100%;
