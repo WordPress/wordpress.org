@@ -4450,6 +4450,10 @@ body.helphub-with-sidebar .left-sidebar ul li ul {
 	}
 }
 
+.helphub-page .entry-content section .container .wp-block-image {
+	overflow: hidden;
+}
+
 @media screen and (min-width: 48em) {
 	.helphub-page .entry-content section .container {
 		margin: 0;
