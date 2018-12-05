@@ -284,6 +284,7 @@ class WP_50_Credits extends WP_Credits {
 			'joostdevalk',
 			'jorbin',
 			'jorgefilipecosta',
+			'joshuawold',
 			'joyously',
 			'jrf',
 			'jryancard',
