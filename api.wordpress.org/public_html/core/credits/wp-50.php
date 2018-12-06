@@ -467,6 +467,7 @@ class WP_50_Credits extends WP_Credits {
 			'sirjonathan',
 			'sirreal',
 			'sisanu',
+			'skithund',
 			'skorasaurus',
 			'smyoon315',
 			'soean',
