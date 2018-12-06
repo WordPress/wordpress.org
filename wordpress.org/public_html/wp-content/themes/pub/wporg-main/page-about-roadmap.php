@@ -250,7 +250,7 @@ $date_format = get_option( 'date_format' );
 							<td><?php echo esc_html( date_i18n( $date_format, strtotime( 'November 15, 2017' ) ) ); ?></td>
 						</tr>
 						<tr>
-							<th><a href="https://wordpress.org/news/2018/11/bebo/">5.0</a></th>
+							<th><a href="https://wordpress.org/news/2018/12/bebo/">5.0</a></th>
 							<td>Bebo Valdés</td>
 							<td><?php echo esc_html( date_i18n( $date_format, strtotime( 'December 6, 2018' ) ) ); ?></td>
 						</tr>
