@@ -531,11 +531,14 @@ class WP_50_Credits extends WP_Credits {
 
 	function external_libraries() {
 		return array(
+			array( 'Babel Polyfill', 'https://babeljs.io/docs/en/babel-polyfill' ),
 			array( 'Backbone.js', 'http://backbonejs.org/' ),
 			array( 'Class POP3', 'https://squirrelmail.org/' ),
+			array( 'Closest', 'https://github.com/jonathantneal/closest' ),
 			array( 'CodeMirror', 'https://codemirror.net/' ),
 			array( 'Color Animations', 'https://plugins.jquery.com/color/' ),
 			array( 'getID3()', 'http://getid3.sourceforge.net/' ),
+			array( 'FormData', 'https://github.com/jimmywarting/FormData' ),
 			array( 'Horde Text Diff', 'https://pear.horde.org/' ),
 			array( 'hoverIntent', 'http://cherne.net/brian/resources/jquery.hoverIntent.html' ),
 			array( 'imgAreaSelect', 'http://odyniec.net/projects/imgareaselect/' ),
@@ -548,14 +551,18 @@ class WP_50_Credits extends WP_Credits {
 			array( 'jQuery.suggest', 'https://github.com/pvulgaris/jquery.suggest' ),
 			array( 'jQuery UI Touch Punch', 'http://touchpunch.furf.com/' ),
 			array( 'json2', 'https://github.com/douglascrockford/JSON-js' ),
+			array( 'Lodash', 'https://lodash.com/' ),
 			array( 'Masonry', 'http://masonry.desandro.com/' ),
 			array( 'MediaElement.js', 'http://mediaelementjs.com/' ),
+			array( 'Moment', 'http://momentjs.com/' ),
 			array( 'PclZip', 'http://www.phpconcept.net/pclzip/' ),
 			array( 'PemFTP', 'https://www.phpclasses.org/package/1743-PHP-FTP-client-in-pure-PHP.html' ),
 			array( 'phpass', 'http://www.openwall.com/phpass/' ),
 			array( 'PHPMailer', 'https://github.com/PHPMailer/PHPMailer' ),
 			array( 'Plupload', 'http://www.plupload.com/' ),
 			array( 'random_compat', 'https://github.com/paragonie/random_compat' ),
+			array( 'React', 'https://reactjs.org/' ),
+			array( 'ReactDom', 'https://reactjs.org/' ),
 			array( 'Requests', 'http://requests.ryanmccue.info/' ),
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'The Incutio XML-RPC Library', 'http://scripts.incutio.com/xmlrpc/' ),
@@ -563,6 +570,7 @@ class WP_50_Credits extends WP_Credits {
 			array( 'TinyMCE', 'https://www.tinymce.com/' ),
 			array( 'Twemoji', 'https://github.com/twitter/twemoji' ),
 			array( 'Underscore.js', 'http://underscorejs.org/' ),
+			array( 'whatwg-fetch', 'https://github.com/github/fetch' ),
 			array( 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ),
 		);
 	}
