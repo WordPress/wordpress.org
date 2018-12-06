@@ -56,10 +56,10 @@ $date_format = get_option( 'date_format' );
 						<tbody>
 						<tr>
 							<th>
-								<a href="https://make.wordpress.org/core/5-0/">5.0</a>
+								<a href="https://make.wordpress.org/core/5-1/">5.1</a>
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td>2018</td>
+							<td>2019</td>
 						</tr>
 						</tbody>
 					</table>
@@ -248,6 +248,11 @@ $date_format = get_option( 'date_format' );
 							<th><a href="https://wordpress.org/news/2017/11/tipton/">4.9</a></th>
 							<td>Billy Tipton</td>
 							<td><?php echo esc_html( date_i18n( $date_format, strtotime( 'November 15, 2017' ) ) ); ?></td>
+						</tr>
+						<tr>
+							<th><a href="https://wordpress.org/news/2018/11/bebo/">5.0</a></th>
+							<td>Bebo Valdés</td>
+							<td><?php echo esc_html( date_i18n( $date_format, strtotime( 'December 6, 2018' ) ) ); ?></td>
 						</tr>
 						</tbody>
 					</table>
