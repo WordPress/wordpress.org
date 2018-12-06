@@ -562,7 +562,7 @@ class WP_50_Credits extends WP_Credits {
 			array( 'Plupload', 'http://www.plupload.com/' ),
 			array( 'random_compat', 'https://github.com/paragonie/random_compat' ),
 			array( 'React', 'https://reactjs.org/' ),
-			array( 'ReactDom', 'https://reactjs.org/' ),
+			array( 'Redux', 'https://redux.js.org/' ),
 			array( 'Requests', 'http://requests.ryanmccue.info/' ),
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'The Incutio XML-RPC Library', 'http://scripts.incutio.com/xmlrpc/' ),
