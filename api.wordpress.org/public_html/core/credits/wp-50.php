@@ -11,7 +11,7 @@ class WP_50_Credits extends WP_Credits {
 				'data'	  => array(
 					'matt'			   => array( 'Matt Mullenweg',			 'Release Lead' ),
 					'allancole'		   => array( 'Allan Cole',				 'Release Lead' ),
-					'antpb'			   => array( 'Anthony Burcell',			 'Release Lead' ),
+					'antpb'			   => array( 'Anthony Burchell',		 'Release Lead' ),
 					'pento'			   => array( 'Gary Pendergast',			 'Release Lead' ),
 					'chanthaboune'	   => array( 'Josepha Haden Chomphosy',  'Release Lead' ),
 					'laurelfulford'    => array( 'Laurel Fulford',			 'Release Lead' ),
