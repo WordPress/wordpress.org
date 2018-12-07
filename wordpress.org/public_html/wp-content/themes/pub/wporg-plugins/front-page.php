@@ -10,10 +10,11 @@
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
 $sections = array(
+    'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
 	'featured'  => __( 'Featured Plugins', 'wporg-plugins' ),
-	'popular'   => __( 'Popular Plugins', 'wporg-plugins' ),
 	'beta'      => __( 'Beta Plugins', 'wporg-plugins' ),
 	'favorites' => __( 'My Favorites', 'wporg-plugins' ),
+	'popular'   => __( 'Popular Plugins', 'wporg-plugins' ),
 );
 
 $widget_args = array(
@@ -43,6 +44,8 @@ get_header();
 				$section_args['meta_key'] = '_active_installs';
 				$section_args['orderby']  = 'meta_value_num';
 				unset( $section_args['browse'] );
+			} else if ( 'blocks' === $browse ) {
+				$section_args['orderby'] = 'rand';
 			}
 
 			$section_query = new \WP_Query( $section_args );
