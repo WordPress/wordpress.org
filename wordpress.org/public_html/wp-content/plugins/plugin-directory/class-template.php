@@ -352,7 +352,7 @@ class Template {
 	}
 
 	/**
-	 * Retrieve the Plugin banner details for a plugin.
+	 * Retrieve the Plugin icon details for a plugin.
 	 *
 	 * @static
 	 *
