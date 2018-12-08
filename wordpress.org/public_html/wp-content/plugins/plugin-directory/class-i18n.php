@@ -76,11 +76,13 @@ class I18n {
 		_x( 'My Favorites', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Featured', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Popular', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Blocks', 'Plugin Section Name', 'wporg-plugins' );
 
 		// Section descriptions.
 		_x( 'Plugins that have been offered for adoption by others.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'Beta plugins are in development for possible inclusion in a future version of WordPress.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'Plugins contained within this category get displayed on the Featured tab.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'The below plugins have been marked as favorites.', 'Plugin Section Description', 'wporg-plugins' );
+		_x( 'Plugins that offer blocks for the block-based editor.', 'Plugin Section Description', 'wporg-plugins' );
 	}
 }
