@@ -154,6 +154,66 @@ function custom_open_graph_tags( $tags = [] ) {
 add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\custom_open_graph_tags' );
 
 /**
+ * Renders site's attributes for Rosetta sites.
+ *
+ * @see https://developers.google.com/search/docs/guides/enhance-site
+ */
+function sites_attributes_schema() {
+	if ( ! is_front_page() ) {
+		return;
+	}
+
+	$og_tags = \WordPressdotorg\MainTheme\custom_open_graph_tags();
+	$locale  = $GLOBALS['rosetta']->rosetta->glotpress_locale;
+	?>
+<script type="application/ld+json">
+{
+    "@context":"https://schema.org",
+    "@graph":[
+        {
+            "@type":"Organization",
+            "@id":"https://wordpress.org/#organization",
+            "url":"https://wordpress.org/",
+            "name":"WordPress",
+            "logo":{
+                "@type":"ImageObject",
+                "@id":"https://wordpress.org/#logo",
+                "url":"https://s.w.org/style/images/about/WordPress-logotype-wmark.png"
+            },
+            "sameAs":[
+                "https://www.facebook.com/WordPress/",
+                "https://twitter.com/WordPress",
+                "https://en.wikipedia.org/wiki/WordPress"
+            ]
+        },
+        {
+            "@type":"WebSite",
+            "@id":"<?php echo esc_js( home_url( '/#website' ) ); ?>",
+            "url":"<?php echo esc_js( home_url( '/' ) ); ?>",
+            "name":"<?php echo esc_js( sprintf( __( 'WordPress - %s', 'wporg' ), $locale->native_name ) ); ?>",
+            "publisher":{
+                "@id":"https://wordpress.org/#organization"
+            }
+        },
+        {
+            "@type":"WebPage",
+            "@id":"<?php echo esc_js( home_url( '/' ) ); ?>",
+            "url":"<?php echo esc_js( home_url( '/' ) ); ?>",
+            "inLanguage":"<?php echo esc_js( $locale->slug ); ?>",
+            "name":"<?php echo esc_js( $og_tags['og:title'] ); ?>",
+            "description":"<?php echo esc_js( $og_tags['og:description'] ); ?>",
+            "isPartOf":{
+                "@id":"<?php echo esc_js( home_url( '/#website' ) ); ?>"
+            }
+        }
+    ]
+}
+</script>
+<?php
+}
+add_action( 'wp_head', __NAMESPACE__ . '\sites_attributes_schema' );
+
+/**
  * Maps page titles to translatable strings.
  *
  * @param string      $title The post title.
