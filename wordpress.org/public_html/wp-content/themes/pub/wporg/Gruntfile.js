@@ -67,7 +67,7 @@ module.exports = function( grunt ) {
 		},
 		sass_globbing: {
 			itcss: {
-				files: function() {
+				files: (function() {
 					var files = {};
 
 					['settings', 'tools', 'generic', 'base', 'objects', 'components', 'trumps'].forEach( function( component ) {
@@ -82,7 +82,7 @@ module.exports = function( grunt ) {
 					} );
 
 					return files;
-				}()
+				})()
 			},
 			options: { signature: false }
 		},
