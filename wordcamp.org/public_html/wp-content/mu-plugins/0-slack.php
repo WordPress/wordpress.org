@@ -6,4 +6,6 @@
 
 defined( 'WPINC' ) or die();
 
-require_once( __DIR__ . '/includes/slack/send.php' );
+if( is_readable( __DIR__ . '/includes/slack/send.php' ) ) {
+	require_once( __DIR__ . '/includes/slack/send.php' );
+}
