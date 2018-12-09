@@ -19,9 +19,9 @@ get_header(); ?>
 			<header class="page-header">
 				<h1 class="page-title">
 					<?php if ( $is_handbook ) {
-						printf( __( 'Handbook Search Results for: %s', 'wporg-breathe' ), '<span>' . get_search_query() . '</span>' );
+						printf( __( 'Handbook Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
 					} else {
-						printf( __( 'Search Results for: %s', 'wporg-breathe' ), '<span>' . get_search_query() . '</span>' );
+						printf( __( 'Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
 					} ?>
 
 					<span class="controls">

@@ -13,7 +13,7 @@ $is_handbook = function_exists( 'wporg_is_handbook' ) && wporg_is_handbook();
 			<?php if ( ! is_page() && ! $is_handbook ) :
 				$author_posts_url = get_author_posts_url( get_the_author_meta( 'ID' ) );
 					$posts_by_title   = sprintf(
-					__( 'Posts by %1$s ( @%2$s )', 'wporg-breathe' ),
+					__( 'Posts by %1$s ( @%2$s )', 'wporg' ),
 					get_the_author_meta( 'display_name' ),
 					get_the_author_meta( 'user_nicename' )
 				); ?>
@@ -35,7 +35,7 @@ $is_handbook = function_exists( 'wporg_is_handbook' ) && wporg_is_handbook();
 			</span>
 			<?php if ( is_object_in_taxonomy( get_post_type(), 'post_tag' ) ) : ?>
 				<span class="entry-tags">
-					<?php breathe_tags_with_count( '', '<br />' . __( 'Tags:' , 'wporg-breathe' ) .' ', ', ', ' &nbsp;' ); ?>&nbsp;
+					<?php breathe_tags_with_count( '', '<br />' . __( 'Tags:' , 'wporg' ) .' ', ', ', ' &nbsp;' ); ?>&nbsp;
 				</span>
 			<?php endif; ?>
 
@@ -51,8 +51,8 @@ $is_handbook = function_exists( 'wporg_is_handbook' ) && wporg_is_handbook();
 	</div><!-- .entry-summary -->
 	<?php else : ?>
 	<div class="entry-content">
-		<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'wporg-breathe' ) ); ?>
-		<?php wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'wporg-breathe' ), 'after' => '</div>' ) ); ?>
+		<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'wporg' ) ); ?>
+		<?php wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'wporg' ), 'after' => '</div>' ) ); ?>
 	</div><!-- .entry-content -->
 	<?php endif; ?>
 
