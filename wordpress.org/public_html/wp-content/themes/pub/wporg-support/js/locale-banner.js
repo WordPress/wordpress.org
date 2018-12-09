@@ -15,6 +15,7 @@
 
 			var $banner = $( '<div />', {
 				'class': 'locale-banner',
+				'dir': 'auto',
 				'html': response.suggest_string
 			} );
 
