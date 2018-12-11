@@ -34,32 +34,32 @@ registerBlockType( 'wporg/download-button', {
 	edit: function( props ) {
 
 		return el(
-			'div', 
+			'div',
 			{ className: 'wp-block-button align' + props.attributes.align, },
 			el(
 				'a',
 				{ className: 'wp-block-button__link has-background has-strong-blue-background-color', href: props.attributes.url,
-					style: { backgroundColor: 'rgb(0,115,170)' },
-					title: props.attributes.title 
+					style: { backgroundColor: 'rgb(0,115,170)', color: '#fff' },
+					title: props.attributes.title
 				},
 				props.attributes.text
-			) 
+			)
 		);
 	},
 
 	save: function( props ) {
 
 		return el(
-			'div', 
+			'div',
 			{ className: 'wp-block-button align' + props.attributes.align },
 			el(
 				'a',
 				{ className: 'wp-block-button__link has-background has-strong-blue-background-color', href: props.attributes.url,
-					style: { backgroundColor: 'rgb(0,115,170)' },
-					title: props.attributes.title  
+					style: { backgroundColor: 'rgb(0,115,170)', color: '#fff' },
+					title: props.attributes.title
 				},
 				props.attributes.text
-			) 
+			)
 		);
 	},
 } );
