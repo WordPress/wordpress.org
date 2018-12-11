@@ -967,6 +967,11 @@ object {
 	.gutenberg__editor .edit-post-last-revision__panel {
 		display: none;
 	}
+
+	/* Disable 'Reusable blocks' edit link */
+	.gutenberg__editor .edit-post-more-menu__content a[href="edit.php?post_type=wp_block"] {
+		display: none;
+	}
 }
 
 .gutenberg__editor .edit-post-header .is-button.is-large,
