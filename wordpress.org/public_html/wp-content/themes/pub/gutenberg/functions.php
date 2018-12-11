@@ -175,6 +175,10 @@ add_action( 'template_redirect', function() {
 	// Disable post locking dialogue.
 	add_filter( 'show_post_locked_dialog', '__return_false' );
 
+	// Everyone can richedit! This avoids a case where a page can be cached where a user can't richedit.
+	$GLOBALS['wp_rich_edit'] = true;
+	add_filter( 'user_can_richedit', '__return_true', 1000 );
+
 	// Homepage is always locked by @wordpressdotorg
 	// This prevents other logged-in users taking a lock of the post on the front-end.
 	add_filter( 'get_post_metadata', function( $value, $post_id, $meta_key ) {
