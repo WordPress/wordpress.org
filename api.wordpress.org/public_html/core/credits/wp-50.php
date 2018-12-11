@@ -359,6 +359,7 @@ class WP_50_Credits extends WP_Credits {
 			'mike-haydon-swo',
 			'mikehaydon',
 			'mikeschroder',
+			'mikeselander',
 			'mikeyarce',
 			'milana_cap',
 			'milesdelliott',
