@@ -9,6 +9,7 @@ export default React.createClass( {
 	propTypes : {
 		initialSortField : PropTypes.string.isRequired,
 		columns          : PropTypes.object,
+		customRender     : PropTypes.object,
 	},
 
 	getDefaultProps : function() {
@@ -62,6 +63,7 @@ export default React.createClass( {
 			'searchQuery' : this.state.searchQuery,
 			'sortOrder'   : this.state.sortOrder,
 			'sortField'   : this.state.sortField,
+			'sortFunction': this.props.sortFunction
 		} );
 
 		return (
@@ -77,6 +79,7 @@ export default React.createClass( {
 					sortField       = { this.state.sortField }
 					sortOrder       = { this.state.sortOrder }
 					handleSortEvent = { this.handleSortEvent }
+					customRender    = { this.props.customRender }
 				/>
 			</div>
 		);

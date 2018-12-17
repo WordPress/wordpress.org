@@ -64,9 +64,9 @@ module.exports = {
 	 *
 	 * @returns {number}
 	 */
-	_sortRows : function(a, b ) {
-		a = a[ filters.sortField ].toLowerCase();
-		b = b[ filters.sortField ].toLowerCase();
+	_sortRows : function( a, b ) {
+		a = a[ filters.sortField ].toString().toLowerCase();
+		b = b[ filters.sortField ].toString().toLowerCase();
 
 		if ( a > b ) {
 			return 'asc' == filters.sortOrder ? 1 : -1;

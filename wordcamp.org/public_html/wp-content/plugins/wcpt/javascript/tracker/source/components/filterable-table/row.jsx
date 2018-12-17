@@ -2,14 +2,16 @@ import React, { PropTypes } from 'react';
 
 export default React.createClass( {
 	propTypes : {
-		columns : PropTypes.object,
-		row     : PropTypes.object,
+		columns      : PropTypes.object,
+		row          : PropTypes.object,
+		customRender : PropTypes.object,
 	},
 
 	getDefaultProps : function() {
 		return {
-			columns : {},
-			row     : {},
+			columns      : {},
+			row          : {},
+			customRender : {},
 		};
 	},
 
@@ -20,21 +22,24 @@ export default React.createClass( {
 		 * Loop through the display columns instead of the row, because the row might have meta data that
 		 * shouldn't be displayed, like URLs.
 		 */
-		for ( let i in this.props.columns ) {
+		for ( let columnName in this.props.columns ) {
 			let cellContent = '';
 
-			if ( ! this.props.columns.hasOwnProperty( i ) ) {
+			if ( ! this.props.columns.hasOwnProperty( columnName ) ) {
 				continue;
 			}
 
-			if ( this.props.row[ i + 'Url' ] ) {
-				cellContent = <a href={ this.props.row[ i + 'Url' ] }>{ this.props.row[ i ] }</a>;
+			if ( this.props.row[ columnName + 'Url' ] ) {
+				cellContent = <a href={ this.props.row[ columnName + 'Url' ] }>{ this.props.row[ columnName ] }</a>;
+			} else if ( this.props.customRender[ columnName ] ) {
+				cellContent = this.props.customRender[ columnName ]( this.props.row[ columnName ] );
 			} else {
-				cellContent = this.props.row[ i ];
+				cellContent = this.props.row[ columnName ];
 			}
 
+
 			cells.push(
-				<td className={ i } key={ i }>
+				<td className={ columnName } key={ columnName }>
 					{ cellContent }
 				</td>
 			);

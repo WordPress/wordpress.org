@@ -9,6 +9,7 @@ export default React.createClass( {
 		sortField       : PropTypes.string.isRequired,
 		sortOrder       : PropTypes.oneOf( [ 'asc', 'desc' ] ),
 		handleSortEvent : PropTypes.func.isRequired,
+		customRender    : PropTypes.object,
 	},
 
 	getDefaultProps : function() {
@@ -21,7 +22,14 @@ export default React.createClass( {
 
 	render : function() {
 		const rows = this.props.rows.map( function( row, index ) {
-			return <TableRow columns={ this.props.columns } row={ row } key={ index } />;
+			return ( 
+				<TableRow 
+					columns      = { this.props.columns }
+					row          = { row }
+					key          = { index }
+					customRender = { this.props.customRender }
+				/>
+			);
 		}.bind( this ) );
 
 		return (

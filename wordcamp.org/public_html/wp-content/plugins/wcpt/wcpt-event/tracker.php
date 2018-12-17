@@ -14,7 +14,7 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
  * Render the [application-tracker] shortcode.
  */
 function render_status_shortcode() {
-	return '<div id="wpc-application-tracker">Loading Application Tracker...</div>';
+	return '<div id="wpc-application-tracker">Loading WordCamp Application Tracker...</div>';
 }
 
 /**
@@ -69,7 +69,7 @@ function get_active_wordcamps() {
 			'applicant'  => get_post_meta( $post->ID, 'Organizer Name', true ),
 			'milestone'  => $milestones[ $post->post_status ],
 			'status'     => $statuses[ $post->post_status ],
-			'lastUpdate' => human_time_diff( time(), $last_update_timestamp ) . ' ago',
+			'lastUpdate' => $last_update_timestamp,
 		);
 	}
 
