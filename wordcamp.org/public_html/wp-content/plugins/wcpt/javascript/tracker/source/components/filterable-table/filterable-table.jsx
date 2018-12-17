@@ -63,7 +63,6 @@ export default React.createClass( {
 			'searchQuery' : this.state.searchQuery,
 			'sortOrder'   : this.state.sortOrder,
 			'sortField'   : this.state.sortField,
-			'sortFunction': this.props.sortFunction
 		} );
 
 		return (
