@@ -8,12 +8,16 @@ defined( 'WPINC' ) or die();
 const SHORTCODE_SLUG = 'application-tracker';
 
 add_shortcode( SHORTCODE_SLUG, __NAMESPACE__ . '\render_status_shortcode' );
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
 
 /**
  * Render the [application-tracker] shortcode.
  */
-function render_status_shortcode() {
+function render_status_shortcode( $atts = [] ) {
+	$application_type = 'wordcamp';
+	if ( isset ( $atts['type'] ) ) {
+		$application_type = $atts['type'];
+	}
+	enqueue_scripts( $application_type );
 	return '<div id="wpc-application-tracker">Loading WordCamp Application Tracker...</div>';
 }
 
@@ -37,31 +41,35 @@ function get_active_wordcamps() {
 	$wordcamp_post_objs = $wpdb->get_results(
 		$wpdb->prepare(
 			"
-			SELECT DISTINCT post_id
+			SELECT DISTINCT post_id, MAX( meta_value ) as last_updated
 			FROM {$wpdb->prefix}postmeta
 			WHERE
 				meta_key like '_status_change_log_$wordcamp_post_type%'
 			AND
 				meta_value >= %d
+			GROUP BY post_id
 			",
 			$inactive_timestamp
 		)
 	);
-	$wordcamp_post_ids = wp_list_pluck( $wordcamp_post_objs, 'post_id' );
+	$wordcamp_post_obj = array();
+	foreach ( $wordcamp_post_objs as $wordcamp_post ) {
+		$wordcamp_post_obj[ $wordcamp_post->post_id ] = $wordcamp_post->last_updated;
+	}
 
 	$raw_posts = get_posts(
 		array(
 			'post_type'      => WCPT_POST_TYPE_ID,
 			'post_status'    => $shown_statuses,
-			'posts_per_page' => -1,
+			'posts_per_page' => 1000,
 			'order'          => 'ASC',
 			'orderby'        => 'post_title',
-			'post__in'       => $wordcamp_post_ids,
+			'post__in'       => array_keys ( $wordcamp_post_obj ),
 		)
 	);
 
 	foreach ( $raw_posts as $key => $post ) {
-		$last_update_timestamp = get_last_update_timestamp( $post->ID );
+		$last_update_timestamp = $wordcamp_post_obj[ $post->ID ];
 
 		$wordcamps[] = array(
 			'city'       => $post->post_title,
@@ -77,28 +85,27 @@ function get_active_wordcamps() {
 }
 
 /**
- * Get the timestamp of the last time the post status changed
+ * Get the columns headers for WordCamp
  *
- * @param int $post_id
- *
- * @return int
+ * @return array
  */
-function get_last_update_timestamp( $post_id ) {
-	$last_update_timestamp = 0;
-	$status_changes        = get_post_meta( $post_id, '_status_change' );
-
-	if ( $status_changes ) {
-		usort( $status_changes, 'wcpt_sort_log_entries' );
-		$last_update_timestamp = $status_changes[0]['timestamp'];
-	}
-
-	return $last_update_timestamp;
+function get_wordcamp_display_columns() {
+	return array(
+		'city'       => 'City',
+		'applicant'  => 'Applicant',
+		'milestone'  => 'Milestone',
+		'status'     => 'Status',
+		'lastUpdate' => 'Updated',
+	);
 }
 
 /**
- * Enqueue scripts and styles
+ * Enqueue scripts and styles.
+ * Based on the event type passed, we will localize different data for Meetup and WordCamp events.
+ * 
+ * @param string application_type Application type for the tracker table. Could be either `wordcamp` or `meetup`. 
  */
-function enqueue_scripts() {
+function enqueue_scripts( $application_type ) {
 	global $post;
 
 	wp_register_script(
@@ -116,36 +123,30 @@ function enqueue_scripts() {
 		1
 	);
 
-	if ( ! is_a( $post, 'WP_POST' ) || ! has_shortcode( $post->post_content, SHORTCODE_SLUG ) ) {
-		return;
-	}
-
 	wp_enqueue_script( 'wpc-application-tracker' );
 
-	wp_localize_script(
-		'wpc-application-tracker',
-		'wpcApplicationTracker',
-		array(
-			'applications'     => get_active_wordcamps(),
-			'displayColumns'   => get_display_columns(),
-			'initialSortField' => 'city',
-		)
-	);
-
 	wp_enqueue_style( 'wpc-application-tracker' );
+
+	if ( 'wordcamp' === $application_type ) {
+		wp_localize_script(
+			'wpc-application-tracker',
+			'wpcApplicationTracker',
+			array(
+				'applications'     => get_active_wordcamps(),
+				'displayColumns'   => get_wordcamp_display_columns(),
+				'initialSortField' => 'city',
+			)
+		);
+	} elseif ( 'meetup' === $application_type ) {
+		wp_localize_script(
+			'wpc-application-tracker',
+			'wpcApplicationTracker',
+			array(
+				'applications',
+				'displayColumns',
+				'initialSortField',
+			)
+		);
+	} 
 }
 
-/**
- * Get the columns headers
- *
- * @return array
- */
-function get_display_columns() {
-	return array(
-		'city'       => 'City',
-		'applicant'  => 'Applicant',
-		'milestone'  => 'Milestone',
-		'status'     => 'Status',
-		'lastUpdate' => 'Updated',
-	);
-}
