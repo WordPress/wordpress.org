@@ -22,29 +22,39 @@ function render_status_shortcode( $atts = [] ) {
 }
 
 /**
- * Get camps that are active enough to be shown on the tracker
+ * Get applications that are active enough to be shown on the tracker
  *
+ * @param string $application_type Type of application. Could be `wordcamp` or `meetup`.
  * @return array
  */
-function get_active_wordcamps() {
+function get_active_events( $application_type ) {
 	global $wpdb;
-	$wordcamps          = array();
-	$statuses           = WordCamp_Loader::get_post_statuses();
-	$milestones         = WordCamp_Loader::map_statuses_to_milestones();
+	$events             = array();
+	$shown_statuses     = array();
+	$statuses           = array();
+	$milestones         = array();
 	$inactive_timestamp = strtotime( '60 days ago' );
+	$post_type          = '';
 
-	$shown_statuses = $statuses;
-	unset( $shown_statuses[ WCPT_FINAL_STATUS ] );
-	$shown_statuses = array_keys( $shown_statuses );
-	$wordcamp_post_type = WCPT_POST_TYPE_ID;
+	if ( 'wordcamp' === $application_type ) {
+		$statuses = WordCamp_Loader::get_post_statuses();
+		$milestones = WordCamp_Loader::map_statuses_to_milestones();
+		unset( $shown_statuses[ WCPT_FINAL_STATUS ] );
+		$post_type = WCPT_POST_TYPE_ID;
+	} elseif ( 'meetup' === $application_type ) {
+		$statuses = \Meetup_Loader::get_post_statuses();
+		$post_type = WCPT_MEETUP_SLUG;
+	}
 
-	$wordcamp_post_objs = $wpdb->get_results(
+	$shown_statuses = array_keys( $statuses );
+
+	$event_post_objs = $wpdb->get_results(
 		$wpdb->prepare(
 			"
 			SELECT DISTINCT post_id, MAX( meta_value ) as last_updated
 			FROM {$wpdb->prefix}postmeta
 			WHERE
-				meta_key like '_status_change_log_$wordcamp_post_type%'
+				meta_key like '_status_change_log_$post_type%'
 			AND
 				meta_value >= %d
 			GROUP BY post_id
@@ -52,36 +62,47 @@ function get_active_wordcamps() {
 			$inactive_timestamp
 		)
 	);
-	$wordcamp_post_obj = array();
-	foreach ( $wordcamp_post_objs as $wordcamp_post ) {
-		$wordcamp_post_obj[ $wordcamp_post->post_id ] = $wordcamp_post->last_updated;
+
+	$event_posts = array();
+	foreach ( $event_post_objs as $event_post ) {
+		$event_posts[ $event_post->post_id ] = $event_post->last_updated;
 	}
 
 	$raw_posts = get_posts(
 		array(
-			'post_type'      => WCPT_POST_TYPE_ID,
+			'post_type'      => $post_type,
 			'post_status'    => $shown_statuses,
 			'posts_per_page' => 1000,
 			'order'          => 'ASC',
 			'orderby'        => 'post_title',
-			'post__in'       => array_keys ( $wordcamp_post_obj ),
+			'post__in'       => array_keys ( $event_posts ),
 		)
 	);
 
 	foreach ( $raw_posts as $key => $post ) {
-		$last_update_timestamp = $wordcamp_post_obj[ $post->ID ];
+		$last_update_timestamp = $event_posts[ $post->ID ];
 
-		$wordcamps[] = array(
-			'city'       => $post->post_title,
-			'cityUrl'    => filter_var( get_post_meta( $post->ID, 'URL', true ), FILTER_VALIDATE_URL ),
-			'applicant'  => get_post_meta( $post->ID, 'Organizer Name', true ),
-			'milestone'  => $milestones[ $post->post_status ],
-			'status'     => $statuses[ $post->post_status ],
-			'lastUpdate' => time() - $last_update_timestamp,
-		);
+		if ( 'wordcamp' === $application_type ) {
+			$events[] = array(
+				'city'       => $post->post_title,
+				'cityUrl'    => filter_var( get_post_meta( $post->ID, 'URL', true ), FILTER_VALIDATE_URL ),
+				'applicant'  => esc_html( get_post_meta( $post->ID, 'Organizer Name', true ) ),
+				'milestone'  => $milestones[ $post->post_status ],
+				'status'     => $statuses[ $post->post_status ],
+				'lastUpdate' => time() - $last_update_timestamp,
+			);
+		} elseif ( 'meetup' === $application_type ) {
+			$events[] = array(
+				'city'       => $post->post_title,
+				'cityUrl'    => filter_var( get_post_meta( $post->ID, 'Meetup URL', true ), FILTER_VALIDATE_URL ),
+				'applicant'  => esc_html( get_post_meta( $post->ID, 'Organizer Name', true ) ),
+				'status'     => $statuses[ $post->post_status ],
+				'lastUpdate' => time() - $last_update_timestamp,
+			);
+		}
 	}
 
-	return $wordcamps;
+	return $events;
 }
 
 /**
@@ -89,14 +110,24 @@ function get_active_wordcamps() {
  *
  * @return array
  */
-function get_wordcamp_display_columns() {
-	return array(
-		'city'       => 'City',
-		'applicant'  => 'Applicant',
-		'milestone'  => 'Milestone',
-		'status'     => 'Status',
-		'lastUpdate' => 'Updated',
-	);
+function get_display_columns( $application_type ) {
+	switch ( $application_type ) {
+		case 'wordcamp':
+			return array(
+				'city'       => 'City',
+				'applicant'  => 'Applicant',
+				'milestone'  => 'Milestone',
+				'status'     => 'Status',
+				'lastUpdate' => 'Updated',
+			);
+		case 'meetup':
+			return array(
+				'city' => 'City',
+				'applicant' => 'Applicant',
+				'status' => 'Status',
+				'lastUpdate' => 'Updated',
+			);
+	}
 }
 
 /**
@@ -127,26 +158,14 @@ function enqueue_scripts( $application_type ) {
 
 	wp_enqueue_style( 'wpc-application-tracker' );
 
-	if ( 'wordcamp' === $application_type ) {
-		wp_localize_script(
-			'wpc-application-tracker',
-			'wpcApplicationTracker',
-			array(
-				'applications'     => get_active_wordcamps(),
-				'displayColumns'   => get_wordcamp_display_columns(),
-				'initialSortField' => 'city',
-			)
-		);
-	} elseif ( 'meetup' === $application_type ) {
-		wp_localize_script(
-			'wpc-application-tracker',
-			'wpcApplicationTracker',
-			array(
-				'applications',
-				'displayColumns',
-				'initialSortField',
-			)
-		);
-	} 
+	wp_localize_script(
+		'wpc-application-tracker',
+		'wpcApplicationTracker',
+		array(
+			'applications'     => get_active_events( $application_type ),
+			'displayColumns'   => get_display_columns( $application_type ),
+			'initialSortField' => 'city',
+		)
+	);
 }
 
