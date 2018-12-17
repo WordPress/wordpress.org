@@ -54,11 +54,12 @@ function get_active_events( $application_type ) {
 			SELECT DISTINCT post_id, MAX( meta_value ) as last_updated
 			FROM {$wpdb->prefix}postmeta
 			WHERE
-				meta_key like '_status_change_log_$post_type%'
+				meta_key like %s
 			AND
 				meta_value >= %d
 			GROUP BY post_id
 			",
+			'_status_change_log_' . $post_type . '%',
 			$inactive_timestamp
 		)
 	);
@@ -136,11 +137,9 @@ function get_display_columns( $application_type ) {
  * Enqueue scripts and styles.
  * Based on the event type passed, we will localize different data for Meetup and WordCamp events.
  * 
- * @param string application_type Application type for the tracker table. Could be either `wordcamp` or `meetup`. 
+ * @param string $application_type Application type for the tracker table. Could be either `wordcamp` or `meetup`.
  */
 function enqueue_scripts( $application_type ) {
-	global $post;
-
 	wp_register_script(
 		'wpc-application-tracker',
 		plugins_url( 'javascript/tracker/build/applications.min.js', dirname( __FILE__ ) ), // this file was renamed from 'tracker', which was getting flagged by ad blockers
