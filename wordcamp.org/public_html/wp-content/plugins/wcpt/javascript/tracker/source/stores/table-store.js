@@ -18,9 +18,9 @@ module.exports = {
 
 		filters = Object.assign( filters, options );
 
-		const filteredRows = this.searchRows( wpcApplicationTracker.applications, filters.searchQuery );
+		const filteredRows = this._searchRows( wpcApplicationTracker.applications, filters.searchQuery );
 
-		filteredRows.sort( this.sortRows );
+		filteredRows.sort( this._sortRows );
 
 		return filteredRows;
 	},
@@ -33,7 +33,7 @@ module.exports = {
 	 *
 	 * @returns {array}
 	 */
-	searchRows : function( rows, searchQuery ) {
+	_searchRows : function(rows, searchQuery ) {
 		const hits = [];
 
 		if ( '' === searchQuery ) {
@@ -64,7 +64,7 @@ module.exports = {
 	 *
 	 * @returns {number}
 	 */
-	sortRows : function( a, b ) {
+	_sortRows : function(a, b ) {
 		a = a[ filters.sortField ].toLowerCase();
 		b = b[ filters.sortField ].toLowerCase();
 
