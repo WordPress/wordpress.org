@@ -32,7 +32,7 @@ export default React.createClass( {
 			if ( this.props.row[ columnName + 'Url' ] ) {
 				cellContent = <a href={ this.props.row[ columnName + 'Url' ] }>{ this.props.row[ columnName ] }</a>;
 			} else if ( this.props.customRender[ columnName ] ) {
-				cellContent = this.props.customRender[ columnName ]( this.props.row[ columnName ] );
+				cellContent = this.props.customRender[ columnName ]( this.props.row, this.props.row[ columnName ] );
 			} else {
 				cellContent = this.props.row[ columnName ];
 			}

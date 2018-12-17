@@ -84,20 +84,22 @@ function get_active_events( $application_type ) {
 
 		if ( 'wordcamp' === $application_type ) {
 			$events[] = array(
-				'city'       => $post->post_title,
-				'cityUrl'    => filter_var( get_post_meta( $post->ID, 'URL', true ), FILTER_VALIDATE_URL ),
-				'applicant'  => esc_html( get_post_meta( $post->ID, 'Organizer Name', true ) ),
-				'milestone'  => $milestones[ $post->post_status ],
-				'status'     => $statuses[ $post->post_status ],
-				'lastUpdate' => time() - $last_update_timestamp,
+				'city'          => $post->post_title,
+				'cityUrl'       => filter_var( get_post_meta( $post->ID, 'URL', true ), FILTER_VALIDATE_URL ),
+				'applicant'     => esc_html( get_post_meta( $post->ID, 'Organizer Name', true ) ),
+				'milestone'     => $milestones[ $post->post_status ],
+				'status'        => $statuses[ $post->post_status ],
+				'lastUpdate'    => $last_update_timestamp,
+				'humanizedTime' => human_time_diff( $last_update_timestamp ),
 			);
 		} elseif ( 'meetup' === $application_type ) {
 			$events[] = array(
-				'city'       => $post->post_title,
-				'cityUrl'    => filter_var( get_post_meta( $post->ID, 'Meetup URL', true ), FILTER_VALIDATE_URL ),
-				'applicant'  => esc_html( get_post_meta( $post->ID, 'Organizer Name', true ) ),
-				'status'     => $statuses[ $post->post_status ],
-				'lastUpdate' => time() - $last_update_timestamp,
+				'city'          => $post->post_title,
+				'cityUrl'       => filter_var( get_post_meta( $post->ID, 'Meetup URL', true ), FILTER_VALIDATE_URL ),
+				'applicant'     => esc_html( get_post_meta( $post->ID, 'Organizer Name', true ) ),
+				'status'        => $statuses[ $post->post_status ],
+				'lastUpdate'    => $last_update_timestamp,
+				'humanizedTime' => human_time_diff( $last_update_timestamp ),
 			);
 		}
 	}
