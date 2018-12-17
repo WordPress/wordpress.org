@@ -12,13 +12,11 @@ require( './style.scss' );
  * Converts unix seconds into human readable time.
  * Looks like exact javascript convert of WordPress's human_time_diff, except this always compares from current time, instead of getting two arguments.
  *
- * @param {int} date Unix timestamp date to compare from
+ * @param {int} seconds Seconds ago to convert to human readable time
  *
  * @returns {string} Human readable time ago
  */
-const timeSince = ( date ) => {
-
-	const seconds = Math.floor( (new Date() / 1000 ) - date );
+const timeSince = ( seconds ) => {
 
 	let interval = Math.floor(seconds / 31536000);
 

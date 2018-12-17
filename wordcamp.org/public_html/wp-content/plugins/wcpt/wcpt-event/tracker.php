@@ -69,7 +69,7 @@ function get_active_wordcamps() {
 			'applicant'  => get_post_meta( $post->ID, 'Organizer Name', true ),
 			'milestone'  => $milestones[ $post->post_status ],
 			'status'     => $statuses[ $post->post_status ],
-			'lastUpdate' => $last_update_timestamp,
+			'lastUpdate' => time() - $last_update_timestamp,
 		);
 	}
 
