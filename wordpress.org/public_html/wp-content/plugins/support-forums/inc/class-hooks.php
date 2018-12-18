@@ -180,6 +180,11 @@ class Hooks {
 			}
 		}
 
+		// Avoid redirecting the old slug of "Update PHP" page to a forum topic.
+		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
+			$redirect_url = false;
+		}
+
 		return $redirect_url;
 	}
 
