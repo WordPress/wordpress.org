@@ -14,6 +14,7 @@ class Hooks {
 		add_filter( 'pre_option__bbp_edit_lock',      array( $this, 'increase_edit_lock_time' ) );
 		add_filter( 'bbp_map_meta_caps',              array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
 		add_filter( 'redirect_canonical',             array( $this, 'disable_redirect_guess_404_permalink' ) );
+		add_action( 'template_redirect',              array( $this, 'redirect_update_php_page' ) );
 		add_filter( 'wp_insert_post_data',            array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',        array( $this, 'replace_quicktags_blockquote_button' ) );
 
@@ -180,6 +181,18 @@ class Hooks {
 		}
 
 		return $redirect_url;
+	}
+
+	/**
+	 * Redirect "Update PHP" page from the old slug to the new one.
+	 *
+	 * The old slug is 'upgrade-php', the new one is 'update-php'.
+	 */
+	public function redirect_update_php_page() {
+		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
+			wp_redirect( home_url( '/update-php/' ), 301 );
+			exit;
+		}
 	}
 
 	/**
