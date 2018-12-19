@@ -63,6 +63,7 @@ function get_whitelist() {
 			'danieltj',
 			'desrosj',
 			'JeffPaul',
+			'karmatosed',
 			'psykro', // @jon_bossenger on Slack
 			'JoshuaWold',
 			'pbiron',
