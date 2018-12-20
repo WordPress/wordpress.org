@@ -56,7 +56,7 @@
 							$active_installs = number_format_i18n( $active_installs ) . '+';
 						}
 					?>
-					<p class="active_installs"><?php printf( __( 'Active Installs: %s', 'wporg-themes' ), '<strong>' . $active_installs . '</strong>' ); ?></p>
+					<p class="active_installs"><?php printf( __( 'Active Installations: %s', 'wporg-themes' ), '<strong>' . $active_installs . '</strong>' ); ?></p>
 					<?php if ( $theme->theme_url ) { ?>
 					<a href="<?php echo esc_url( $theme->theme_url ); ?>"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a>
 					<?php } ?>
