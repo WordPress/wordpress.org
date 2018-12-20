@@ -2144,7 +2144,7 @@ class WordCamp_Post_Types_Plugin {
 			array(
 				'labels'          => $labels,
 				'rewrite'         => array( 'slug' => 'speaker', 'with_front' => true, ),
-				'supports'        => array( 'title', 'editor', 'author', 'revisions', 'comments', 'custom-fields' ),
+				'supports'        => array( 'title', 'editor', 'excerpt', 'author', 'revisions', 'comments', 'custom-fields' ),
 				'menu_position'   => 20,
 				'public'          => true,
 				'show_ui'         => true,
