@@ -25,15 +25,16 @@ $content .= '<!-- wp:spacer -->
 <!-- /wp:spacer -->' . "\n\n";
 
 $content .= '<!-- wp:wporg/download-button -->
-<div class="wp-block-wporg-download-button wp-block-button aligncenter"><a class="wp-block-button__link has-background has-strong-blue-background-color" href="' . "https://{$localised_domain}/plugins/gutenberg/" . '" style="background-color:rgb(0,115,170);color:#fff">' . esc_html__( 'Download Gutenberg Today', 'wporg' ) . '</a></div>
+<div class="wp-block-wporg-download-button wp-block-button aligncenter"><a class="wp-block-button__link has-background has-strong-blue-background-color" href="' . "https://{$localised_domain}/download/" . '" style="background-color:rgb(0,115,170);color:#fff">' . esc_html__( 'Try it Today in WordPress', 'wporg' ) . '</a></div>
 <!-- /wp:wporg/download-button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
 <p style="text-align:center" class="has-small-font-size gutenberg-landing--button-disclaimer"><em>' .
 	sprintf(
-		/* translators: %s: The URL to the Clasic Editor plugin. */
-		wp_kses_post( __( 'Gutenberg is available as a plugin now, and soon by default in version 5.0 of WordPress. The <a href="%s">classic editor</a> will be available as a plugin if needed.', 'wporg' ) ),
-		esc_url( "https://{$localised_domain}/plugins/classic-editor/" )
+		/* translators: 1: The URL to the Clasic Editor plugin. 2: The URL to the Gutenberg plugin.  */
+		wp_kses_post( __( 'Gutenberg is available as part of WordPress 5.0 and later. The <a href="%1$s">classic editor</a> plugin allows users to switch back to the previous editor if needed. Future development will continue in the <a href="%2$s">Gutenberg</a> plugin.', 'wporg' ) ),
+		esc_url( "https://{$localised_domain}/plugins/classic-editor/" ),
+		esc_url( "https://{$localised_domain}/plugins/gutenberg/" )
 	) . '</em></p>
 <!-- /wp:paragraph -->' . "\n\n";
 
@@ -144,15 +145,16 @@ $content .= '<!-- wp:spacer -->
 <!-- /wp:spacer -->' . "\n\n";
 
 $content .= '<!-- wp:wporg/download-button -->
-<div class="wp-block-wporg-download-button wp-block-button aligncenter"><a class="wp-block-button__link has-background has-strong-blue-background-color" href="' . "https://{$localised_domain}/plugins/gutenberg/" . '" style="background-color:rgb(0,115,170);color:#fff">' . esc_html__( 'Download Gutenberg Today', 'wporg' ) . '</a></div>
+<div class="wp-block-wporg-download-button wp-block-button aligncenter"><a class="wp-block-button__link has-background has-strong-blue-background-color" href="' . "https://{$localised_domain}/download/" . '" style="background-color:rgb(0,115,170);color:#fff">' . esc_html__( 'Try it Today in WordPress', 'wporg' ) . '</a></div>
 <!-- /wp:wporg/download-button -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
 <p style="text-align:center" class="has-small-font-size gutenberg-landing--button-disclaimer"><em>' .
 	sprintf(
-		/* translators: %s: The URL to the Clasic Editor plugin. */
-		wp_kses_post( __( 'Gutenberg is available as a plugin today, and will be included in version 5.0 of WordPress. The <a href="%s">classic editor</a> will be available as a plugin if needed.', 'wporg' ) ),
-		esc_url( "https://{$localised_domain}/plugins/classic-editor/" )
+		/* translators: 1: The URL to the Clasic Editor plugin. 2: The URL to the Gutenberg plugin.  */
+		wp_kses_post( __( 'Gutenberg is available as part of WordPress 5.0 and later. The <a href="%1$s">classic editor</a> plugin allows users to switch back to the previous editor if needed. Future development will continue in the <a href="%2$s">Gutenberg</a> plugin.', 'wporg' ) ),
+		esc_url( "https://{$localised_domain}/plugins/classic-editor/" ),
+		esc_url( "https://{$localised_domain}/plugins/gutenberg/" )
 	) . '</em></p>
 <!-- /wp:paragraph -->' . "\n\n";
 
