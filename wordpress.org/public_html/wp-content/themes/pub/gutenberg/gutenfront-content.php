@@ -31,8 +31,8 @@ $content .= '<!-- wp:wporg/download-button -->
 $content .= '<!-- wp:paragraph {"align":"center","fontSize":"small","className":"gutenberg-landing\u002d\u002dbutton-disclaimer"} -->
 <p style="text-align:center" class="has-small-font-size gutenberg-landing--button-disclaimer"><em>' .
 	sprintf(
-		/* translators: 1: The URL to the Clasic Editor plugin. 2: The URL to the Gutenberg plugin.  */
-		wp_kses_post( __( 'Gutenberg is available as part of WordPress 5.0 and later. The <a href="%1$s">classic editor</a> plugin allows users to switch back to the previous editor if needed. Future development will continue in the <a href="%2$s">Gutenberg</a> plugin.', 'wporg' ) ),
+		/* translators: 1: The URL to the Classic Editor plugin. 2: The URL to the Gutenberg plugin.  */
+		wp_kses_post( __( 'Gutenberg is available as part of WordPress 5.0 and later. The <a href="%1$s">Classic Editor</a> plugin allows users to switch back to the previous editor if needed. Future development will continue in the <a href="%2$s">Gutenberg</a> plugin.', 'wporg' ) ),
 		esc_url( "https://{$localised_domain}/plugins/classic-editor/" ),
 		esc_url( "https://{$localised_domain}/plugins/gutenberg/" )
 	) . '</em></p>
