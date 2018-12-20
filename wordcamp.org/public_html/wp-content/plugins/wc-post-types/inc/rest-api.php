@@ -113,6 +113,47 @@ function register_additional_rest_fields() {
 			)
 		);
 	} // End if().
+
+	/**
+	 * Session date and time
+	 */
+	register_rest_field(
+		'wcb_session',
+		'session_date_time',
+		[
+			'get_callback' => function ( $object ) {
+				$object = (object) $object;
+				$raw    = absint( get_post_meta( $object->id, '_wcpt_session_time', true ) );
+				$return = [
+					'date' => '',
+					'time' => '',
+				];
+
+				if ( $raw ) {
+					$return['date'] = date_i18n( get_option( 'date_format' ), $raw );
+					$return['time'] = date_i18n( get_option( 'time_format' ), $raw );
+				}
+
+				return $return;
+			},
+			'schema'       => [
+				'description' => __( 'Date and time of the session', 'wordcamporg' ),
+				'type'        => 'object',
+				'context'     => array( 'embed', 'view' ),
+				'readonly'    => true,
+				'properties'  => [
+					'date' => [
+						'type'    => 'string',
+						'context' => array( 'embed', 'view' ),
+					],
+					'time' => [
+						'type'    => 'string',
+						'context' => array( 'embed', 'view' ),
+					],
+				],
+			],
+		]
+	);
 }
 
 
@@ -195,7 +236,14 @@ function link_speaker_to_sessions( $response, $post ) {
 	foreach ( $sessions as $session_id ) {
 		$response->add_link(
 			'sessions',
-			get_rest_url( null, "/wp/v2/sessions/$session_id" ),
+			add_query_arg(
+				[
+					// Ensure that taxonomy data gets included in the embed.
+					'_embed'  => true,
+					'context' => 'view',
+				],
+				get_rest_url( null, "/wp/v2/sessions/$session_id" )
+			),
 			array( 'embeddable' => true )
 		);
 	}
