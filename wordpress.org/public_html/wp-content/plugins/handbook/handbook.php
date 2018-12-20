@@ -308,6 +308,11 @@ class WPorg_Handbook {
 	function template_include( $template ) {
 		global $wp_query;
 
+		// Don't override Embeds
+		if ( is_embed() ) {
+			return $template;
+		}
+
 		$handbook_templates = array();
 
 		// For singular handbook pages not of the 'handbook' post type.

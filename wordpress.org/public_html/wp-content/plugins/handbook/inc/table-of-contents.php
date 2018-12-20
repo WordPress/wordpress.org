@@ -41,8 +41,9 @@ class WPorg_Handbook_TOC {
 	function load_filters() {
 		$this->post_types = array_map( array( $this, 'append_suffix' ), $this->post_types );
 
-		if ( is_singular( $this->post_types ) )
+		if ( is_singular( $this->post_types ) && ! is_embed() ) {
 			add_filter( 'the_content', array( $this, 'add_toc' ) );
+		}
 	}
 
 	function append_suffix( $t ) {
