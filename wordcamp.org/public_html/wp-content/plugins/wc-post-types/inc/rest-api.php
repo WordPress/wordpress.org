@@ -104,7 +104,7 @@ function register_additional_rest_fields() {
 					return $avatar_urls;
 				},
 				'schema'       => array(
-					'description' => __( 'Avatar URLs for the speaker.' ),
+					'description' => __( 'Avatar URLs for the speaker.', 'wordcamporg' ),
 					'type'        => 'object',
 					'context'     => array( 'embed', 'view', 'edit' ),
 					'readonly'    => true,
