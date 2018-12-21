@@ -77,13 +77,13 @@ if ( empty( $_POST ) || $error ) {
 	<input type="hidden" name="comment_post_ID" value="<?php echo $post->ID; ?>" />
 
 	<p><label for="submitname"><?php _e( 'Your Name', 'wporg-showcase' ); ?></label><br />
-	<input type="text" name="submitname" id="submitname" class="text" value="<?php echo esc_attr( $submitname ); ?>" size="28" tabindex="2" /></p>
+	<input type="text" name="submitname" id="submitname" class="text" value="<?php echo esc_attr( $submitname ); ?>" size="28" tabindex="2" required></p>
 
 	<p><label for="email"><?php _e( 'Your E-mail', 'wporg-showcase'); ?></label><br />
-	<input type="text" name="email" id="email" value="<?php echo esc_attr( $email ); ?>" size="28" tabindex="3" class="text" /></p>
+	<input type="email" name="email" id="email" value="<?php echo esc_attr( $email ); ?>" size="28" tabindex="3" class="text" required></p>
 
 	<p><label for="url"><?php _e( 'Site URL', 'wporg-showcase' ); ?></label><br />
-	<input type="text" name="url" id="url" value="<?php echo esc_url( $url ); ?>" size="28" tabindex="4" class="text" /></p>
+	<input type="url" name="url" id="url" value="<?php echo esc_url( $url ); ?>" size="28" tabindex="4" class="text" required></p>
 
 	<p><label for="owner"><?php _e( "Do you own this site? (It's okay if you don't - we just want to know for contact purposes.)", 'wporg-showcase' ); ?></label><br />
 	<select name="owner" id="owner" tabindex="5">
@@ -92,10 +92,10 @@ if ( empty( $_POST ) || $error ) {
 	</select>
 
 	<p><label for="description"><?php _e( 'Please describe the site and, if applicable, the person or organization it represents.', 'wporg-showcase' ); ?></label><br />
-	<textarea name="description" id="description" cols="60" rows="4" tabindex="6" class="text"><?php echo esc_textarea( $description ); ?></textarea></p>
+	<textarea name="description" id="description" cols="60" rows="4" tabindex="6" class="text" required><?php echo esc_textarea( $description ); ?></textarea></p>
 
 	<p><label for="why"><?php _e( 'What justifies this site being added to the WordPress Showcase? What makes it unique or interesting?', 'wporg-showcase' ); ?></label><br />
-	<textarea name="why" id="why" cols="60" rows="4" tabindex="7" class="text"><?php echo esc_textarea( $why ); ?></textarea></p>
+	<textarea name="why" id="why" cols="60" rows="4" tabindex="7" class="text" required><?php echo esc_textarea( $why ); ?></textarea></p>
 
 	<p class="required"><?php _e( '* All fields are required.', 'wporg-showcase' ); ?></p>
 
