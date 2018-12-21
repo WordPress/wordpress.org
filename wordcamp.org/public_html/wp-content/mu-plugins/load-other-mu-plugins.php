@@ -16,6 +16,13 @@ function wcorg_include_individual_mu_plugins() {
 	require_once( __DIR__ . '/wp-cli-commands/bootstrap.php' );
 	require_once( __DIR__ . '/camptix-tweaks/camptix-tweaks.php' );
 
+	if (
+		( defined( 'WORDCAMP_ENVIRONMENT' ) && 'production' !== WORDCAMP_ENVIRONMENT )
+		|| in_array( get_current_blog_id(), [ 928 ], true ) // Test sites
+	) {
+		require_once( __DIR__ . '/blocks/blocks.php' );
+	}
+
 	if ( is_file( $shortcodes ) ) {
 		require_once( $shortcodes );
 	}
