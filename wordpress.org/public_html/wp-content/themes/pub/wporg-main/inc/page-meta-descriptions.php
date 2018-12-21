@@ -20,11 +20,18 @@ function custom_open_graph_tags( $tags = [] ) {
 	// Override the Front-page tags on Rosetta sites.
 	if ( is_front_page() && isset( $GLOBALS['rosetta'] ) ) {
 
+		// Use `name=""` for description.
+		// See Jetpacks Twitter Card for where it happens for the twitter:* fields.
+		add_filter( 'jetpack_open_graph_output', function( $html ) {
+			return str_replace( '<meta property="description"', '<meta name="description"', $html );
+		} );
+
 		$locale_native_name = $GLOBALS['rosetta']->rosetta->glotpress_locale->native_name;
 		return array(
 			'og:type'         => 'website',
 			'og:title'        => __( 'Blog Tool, Publishing Platform, and CMS - WordPress', 'wporg' ),
 			'og:description'  => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
+			'description'     => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
 			'og:url'          => home_url( '/' ),
 			/* translators: %s - The Locale native name. */
 			'og:site_name'    => sprintf( __( 'WordPress - %s', 'wporg' ), $locale_native_name ),
