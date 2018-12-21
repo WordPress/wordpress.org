@@ -1,0 +1,56 @@
+.wordcamp-speakers-block {
+	&,
+	.editor-styles-wrapper & {
+		list-style: none;
+	}
+
+	&.layout-grid {
+		display: grid;
+		grid-template-columns: repeat( 2, 1fr );
+		grid-column-gap: 1em;
+		grid-row-gap: 1em;
+
+		&.grid-columns-3 {
+			grid-template-columns: repeat( 3, 1fr );
+		}
+		&.grid-columns-4 {
+			grid-template-columns: repeat( 4, 1fr );
+		}
+	}
+
+	.wordcamp-speaker:after {
+		content: "";
+		display: table;
+		clear: both;
+	}
+}
+
+.wordcamp-speaker-session-list {
+	&,
+	.editor-styles-wrapper & {
+		list-style: none;
+	}
+}
+
+.wordcamp-speaker-avatar {
+	&.align-left,
+	&.align-center,
+	&.align-right {
+		display: block;
+	}
+
+	&.align-left {
+		float: left;
+		margin-right: 1em;
+	}
+
+	&.align-center {
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	&.align-right {
+		float: right;
+		margin-left: 1em;
+	}
+}

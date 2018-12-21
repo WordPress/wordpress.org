@@ -1,0 +1,36 @@
+.wordcamp-block-speakers-mode-option {
+	flex-basis: 100%;
+	padding: 0.5em;
+}
+.wordcamp-speakers-select-option {
+	display: flex;
+	align-items: center;
+}
+.wordcamp-speakers-select-option-icon-container {
+	background-color: #f3f3f4;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+}
+.wordcamp-speakers-select-option-label {
+	margin: 0 0.5em;
+}
+
+.wordcamp-speakers-select-option-label-term-count {
+	font-size: 0.6em;
+	display: inline-block;
+	border-radius: 50%;
+	background-color: #f3f3f4;
+	width: 2.2em;
+	height: 2.2em;
+	margin: 0 0.5em;
+	text-align: center;
+	line-height: 2.2em;
+	vertical-align: text-top;
+}
+
+.wordcamp-components-versatile-select {
+	width: 100%;
+}

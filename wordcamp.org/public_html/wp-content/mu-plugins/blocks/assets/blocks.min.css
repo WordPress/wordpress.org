@@ -1,0 +1,97 @@
+.wordcamp-speakers-block,
+.editor-styles-wrapper .wordcamp-speakers-block {
+  list-style: none; }
+
+.wordcamp-speakers-block.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-column-gap: 1em;
+  grid-row-gap: 1em; }
+  .wordcamp-speakers-block.layout-grid.grid-columns-3 {
+    grid-template-columns: repeat(3, 1fr); }
+  .wordcamp-speakers-block.layout-grid.grid-columns-4 {
+    grid-template-columns: repeat(4, 1fr); }
+
+.wordcamp-speakers-block .wordcamp-speaker:after {
+  content: "";
+  display: table;
+  clear: both; }
+
+.wordcamp-speaker-session-list,
+.editor-styles-wrapper .wordcamp-speaker-session-list {
+  list-style: none; }
+
+.wordcamp-speaker-avatar.align-left, .wordcamp-speaker-avatar.align-center, .wordcamp-speaker-avatar.align-right {
+  display: block; }
+
+.wordcamp-speaker-avatar.align-left {
+  float: left;
+  margin-right: 1em; }
+
+.wordcamp-speaker-avatar.align-center {
+  margin-left: auto;
+  margin-right: auto; }
+
+.wordcamp-speaker-avatar.align-right {
+  float: right;
+  margin-left: 1em; }
+
+.wordcamp-components-versatile-select-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left; }
+
+.wordcamp-components-versatile-select-select {
+  flex-grow: 2;
+  margin-right: 1em; }
+  .rtl .wordcamp-components-versatile-select-select {
+    margin-left: 1em;
+    margin-right: 0; }
+  .wordcamp-components-versatile-select-select input[type="text"]:focus {
+    box-shadow: none; }
+
+.wordcamp-components-avatar-size-buttons {
+  display: flex;
+  justify-content: space-between; }
+
+.edit-post-settings-sidebar__panel-block .components-panel__body .wordcamp-components-avatar-size-range {
+  margin-top: 1em; }
+
+.wordcamp-components-image-alignment .components-icon-button {
+  display: inline-flex; }
+
+.wordcamp-block-speakers-mode-option {
+  flex-basis: 100%;
+  padding: 0.5em; }
+
+.wordcamp-speakers-select-option {
+  display: flex;
+  align-items: center; }
+
+.wordcamp-speakers-select-option-icon-container {
+  background-color: #f3f3f4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px; }
+
+.wordcamp-speakers-select-option-label {
+  margin: 0 0.5em; }
+
+.wordcamp-speakers-select-option-label-term-count {
+  font-size: 0.6em;
+  display: inline-block;
+  border-radius: 50%;
+  background-color: #f3f3f4;
+  width: 2.2em;
+  height: 2.2em;
+  margin: 0 0.5em;
+  text-align: center;
+  line-height: 2.2em;
+  vertical-align: text-top; }
+
+.wordcamp-components-versatile-select {
+  width: 100%; }
+
