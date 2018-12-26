@@ -542,3 +542,49 @@ if ( ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) ) {
 	set_error_handler( 'send_error_to_slack', E_ERROR );
 }
 
+/**
+ * Allow individual site administrators to activate and deactivate optional plugins.
+ *
+ * @param array  $required_capabilities The primitive capabilities that are required to perform the requested meta
+ *                                      capability.
+ * @param string $requested_capability  The requested meta capability.
+ * @param int    $user_id               The user ID.
+ * @param array  $args                  Optional data for the given capability. In this case, the plugin slug to
+ *                                      activate/deactivate.
+ *
+ * @return array The primitive capabilities that are required to perform the requested meta capability.
+ */
+function wcorg_let_admins_activate_some_plugins( $required_capabilities, $requested_capability, $user_id, $args ) {
+	$target_plugin    = $args[0] ?? null;
+	$optional_plugins = array(
+		'campt-indian-payment-gateway/campt-indian-payment-gateway.php',
+		'camptix-kdcpay-gateway/camptix-kdcpay.php',
+		'camptix-mailchimp/camptix-mailchimp.php',
+		'camptix-mercadopago/camptix-mercadopago.php',
+		'camptix-pagseguro/camptix-pagseguro.php',
+		'camptix-payfast-gateway/camptix-payfast.php',
+		'camptix-trustcard/camptix-trustcard.php',
+		'camptix-trustpay/camptix-trustpay.php',
+		'edit-flow/edit_flow.php',
+		'liveblog/liveblog.php',
+	);
+
+	switch ( $requested_capability ) {
+		// Let regular admins visit the Plugins screen.
+		case 'activate_plugins':
+		case 'deactivate_plugins':
+			$required_capabilities = array( 'manage_options' );
+			break;
+
+		// Let regular admins toggle specific plugins on/off.
+		case 'activate_plugin':
+		case 'deactivate_plugin':
+			if ( in_array( $target_plugin, $optional_plugins, true ) ) {
+				$required_capabilities = array( 'manage_options' );
+			}
+			break;
+	}
+
+	return $required_capabilities;
+}
+add_filter( 'map_meta_cap', 'wcorg_let_admins_activate_some_plugins', 10, 4 );
