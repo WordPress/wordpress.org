@@ -25,7 +25,7 @@ if ( is_dir( WP_CONTENT_DIR . '/themes-private' ) ) {
 	register_theme_directory( WP_CONTENT_DIR . '/themes-private' );
 }
 
-/*
+/**
  * Include pages in the list of posts types that can have comments closed automatically
  */
 function wcorg_close_comments_for_post_types( $post_types ) {
@@ -47,7 +47,7 @@ add_filter( 'close_comments_for_post_types', 'wcorg_close_comments_for_post_type
  */
 function wcorg_enforce_public_blog_option( $value ) {
 	$private_sites = array(
-		206,     // testing.wordcamp.org
+		206,     // testing.wordcamp.org.
 	);
 
 	if ( in_array( get_current_blog_id(), $private_sites, true ) ) {
@@ -60,8 +60,8 @@ function wcorg_enforce_public_blog_option( $value ) {
 }
 add_filter( 'pre_update_option_blog_public', 'wcorg_enforce_public_blog_option' );
 
-/*
- * We want to let organizers use shortcodes inside Text widgets
+/**
+ * We want to let organizers use shortcodes inside Text widgets.
  */
 add_filter( 'widget_text', 'do_shortcode' );
 // todo can remove this after ugprade to 4.9
@@ -100,11 +100,11 @@ add_shortcode( 'menu', 'wcorg_shortcode_menu' );
 function wcorg_disable_network_activated_plugins_on_sites( $plugins ) {
 	/*
 	 * central.wordcamp.org, plan.wordcamp.org
-     *
+	 *
 	 * These are plugins for individual WordCamp sites, so they aren't relevant for Central and Plan.
 	 * They clutter the admin menu and slow down page loads.
 	 */
-	if ( in_array( get_current_blog_id(), array( BLOG_ID_CURRENT_SITE, 63 ) ) ) {
+	if ( in_array( get_current_blog_id(), array( BLOG_ID_CURRENT_SITE, 63 ), true ) ) {
 		unset( $plugins['camptix-extras/camptix-extras.php'] );
 		unset( $plugins['camptix-network-tools/camptix-network-tools.php'] );
 		unset( $plugins['tagregator/bootstrap.php'] );
@@ -140,7 +140,7 @@ function wcorg_remove_admin_menu_pages_on_sites() {
 }
 add_action( 'admin_menu', 'wcorg_remove_admin_menu_pages_on_sites', 11 );
 
-/*
+/**
  * Show Tagregator's log to network admins
  */
 function wcorg_show_tagregator_log() {
@@ -172,19 +172,22 @@ add_filter( 'get_space_allowed', 'wcorg_modify_default_space_allotment' );
  * Redirects from /year/month/day/slug/ to /slug/ for new URL formats.
  */
 function wcorg_subdomactories_redirect() {
-	if ( ! is_404() )
+	if ( ! is_404() ) {
 		return;
+	}
 
-	if ( get_option( 'permalink_structure' ) != '/%postname%/' )
+	if ( get_option( 'permalink_structure' ) !== '/%postname%/' ) {
 		return;
+	}
 
 	// russia.wordcamp.org/2014/2014/11/25/post-name/
 	// russia.wordcamp.org/2014/11/25/post-name/
 	// russia.wordcamp.org/2014/2014/25/post-name/
 	// russia.wordcamp.org/2015-ru/...
 
-	if ( ! preg_match( '#^/[0-9]{4}(?:-[^/]+)?/(?:[0-9]{4}/[0-9]{2}|[0-9]{2}|[0-9]{4})/[0-9]{2}/(.+)$#', $_SERVER['REQUEST_URI'], $matches ) )
+	if ( ! preg_match( '#^/[0-9]{4}(?:-[^/]+)?/(?:[0-9]{4}/[0-9]{2}|[0-9]{2}|[0-9]{4})/[0-9]{2}/(.+)$#', $_SERVER['REQUEST_URI'], $matches ) ) {
 		return;
+	}
 
 	wp_safe_redirect( esc_url_raw( set_url_scheme( home_url( $matches[1] ) ) ) );
 	die();
@@ -213,7 +216,7 @@ function wcorg_content_slugs_to_body_tag( $body_classes ) {
 }
 add_filter( 'body_class', 'wcorg_content_slugs_to_body_tag' );
 
-/*
+/**
  * Flush the rewrite rules on the current site.
  *
  * See WordCamp_CLI_Rewrite_Rules::flush() for an explanation.
@@ -228,7 +231,7 @@ function wcorg_flush_rewrite_rules() {
 		wp_send_json_error( 'You are not authorized to flush the rewrite rules.' );
 	}
 }
-add_action( 'wp_ajax_wcorg_flush_rewrite_rules_everywhere',        'wcorg_flush_rewrite_rules' ); // This isn't used by the wp-cli command, but is useful for manual testing
+add_action( 'wp_ajax_wcorg_flush_rewrite_rules_everywhere',        'wcorg_flush_rewrite_rules' ); // This isn't used by the wp-cli command, but is useful for manual testing.
 add_action( 'wp_ajax_nopriv_wcorg_flush_rewrite_rules_everywhere', 'wcorg_flush_rewrite_rules' );
 
 /*
@@ -241,41 +244,43 @@ add_action( 'plugins_loaded', function() {
 	load_textdomain( 'wordcamporg', sprintf( '%s/languages/wordcamporg/wordcamporg-%s.mo', WP_CONTENT_DIR, get_user_locale() ) );
 } );
 
-// WordCamp.org QBO Integration
+// WordCamp.org QBO Integration.
 add_filter( 'wordcamp_qbo_options', function( $options ) {
-	if ( ! defined( 'WORDCAMP_QBO_CONSUMER_KEY' ) )
+	if ( ! defined( 'WORDCAMP_QBO_CONSUMER_KEY' ) ) {
 		return $options;
+	}
 
-    // Secrets.
-    $options['app_token'] = WORDCAMP_QBO_APP_TOKEN;
-    $options['consumer_key'] = WORDCAMP_QBO_CONSUMER_KEY;
-    $options['consumer_secret'] = WORDCAMP_QBO_CONSUMER_SECRET;
-    $options['hmac_key'] = WORDCAMP_QBO_HMAC_KEY;
+	// Secrets.
+	$options['app_token']       = WORDCAMP_QBO_APP_TOKEN;
+	$options['consumer_key']    = WORDCAMP_QBO_CONSUMER_KEY;
+	$options['consumer_secret'] = WORDCAMP_QBO_CONSUMER_SECRET;
+	$options['hmac_key']        = WORDCAMP_QBO_HMAC_KEY;
 
-    // WordCamp Payments to QBO categories mapping.
-    $options['categories_map'] = array(
-        'after-party'     => array( 'value' => 72, 'name' => 'After Party' ),
-        'audio-visual'    => array( 'value' => 79, 'name' => 'Audio-Visual' ),
-        'food-beverages'  => array( 'value' => 64, 'name' => 'Food & Beverage-WordCamps' ),
-        'office-supplies' => array( 'value' => 70, 'name' => 'Office Expense' ),
-        'signage-badges'  => array( 'value' => 73, 'name' => 'Printing/Signage/Badges' ),
-        'speaker-event'   => array( 'value' => 76, 'name' => 'Speaker Events' ),
-        'swag'            => array( 'value' => 74, 'name' => 'Swag' ),
-        'venue'           => array( 'value' => 78, 'name' => 'Venue Rental' ),
-        'other'           => array( 'value' => 71, 'name' => 'Other Miscellaneous Expense' ),
-    );
+	// WordCamp Payments to QBO categories mapping.
+	$options['categories_map'] = array(
+		'after-party'     => array( 'value' => 72, 'name' => 'After Party'                 ),
+		'audio-visual'    => array( 'value' => 79, 'name' => 'Audio-Visual'                ),
+		'food-beverages'  => array( 'value' => 64, 'name' => 'Food & Beverage-WordCamps'   ),
+		'office-supplies' => array( 'value' => 70, 'name' => 'Office Expense'              ),
+		'signage-badges'  => array( 'value' => 73, 'name' => 'Printing/Signage/Badges'     ),
+		'speaker-event'   => array( 'value' => 76, 'name' => 'Speaker Events'              ),
+		'swag'            => array( 'value' => 74, 'name' => 'Swag'                        ),
+		'venue'           => array( 'value' => 78, 'name' => 'Venue Rental'                ),
+		'other'           => array( 'value' => 71, 'name' => 'Other Miscellaneous Expense' ),
+	);
 
-    return $options;
-});
+	return $options;
+} );
 
 add_filter( 'wordcamp_qbo_client_options', function( $options ) {
-	if ( ! defined( 'WORDCAMP_QBO_HMAC_KEY' ) )
+	if ( ! defined( 'WORDCAMP_QBO_HMAC_KEY' ) ) {
 		return $options;
+	}
 
-    $options['hmac_key'] = WORDCAMP_QBO_HMAC_KEY;
-    $options['api_base'] = 'https://central.wordcamp.org/wp-json/wordcamp-qbo/v1';
+	$options['hmac_key'] = WORDCAMP_QBO_HMAC_KEY;
+	$options['api_base'] = 'https://central.wordcamp.org/wp-json/wordcamp-qbo/v1';
 
-    return $options;
+	return $options;
 });
 
 // Sponsorship payments (Stripe) credentials.
@@ -283,13 +288,13 @@ add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
 	$environment = ( defined('WORDCAMP_ENVIRONMENT') ) ? WORDCAMP_ENVIRONMENT : 'development';
 
 	switch ( $environment ) {
-		case 'production' :
+		case 'production':
 			$options['publishable'] = WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE_LIVE;
 			$options['secret']      = WORDCAMP_PAYMENT_STRIPE_SECRET_LIVE;
 			break;
 
 		case 'development':
-		default :
+		default:
 			$options['publishable'] = ( defined( 'WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE' ) ) ? WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE : '';
 			$options['secret']      = ( defined( 'WORDCAMP_PAYMENT_STRIPE_SECRET' ) ) ? WORDCAMP_PAYMENT_STRIPE_SECRET : '';
 			break;
@@ -300,21 +305,21 @@ add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
 	return $options;
 } );
 
-// Google Maps API
+// Google Maps API.
 add_filter( 'wordcamp_google_maps_api_key', function( $key, $scope = 'client' ) {
 	$environment = ( defined('WORDCAMP_ENVIRONMENT') ) ? WORDCAMP_ENVIRONMENT : 'development';
 
 	switch ( $environment ) {
-		case 'production' :
-			if ( $scope === 'client' && defined( 'WORDCAMP_PROD_GOOGLE_MAPS_API_KEY' ) ) {
+		case 'production':
+			if ( 'client' === $scope && defined( 'WORDCAMP_PROD_GOOGLE_MAPS_API_KEY' ) ) {
 				$key = WORDCAMP_PROD_GOOGLE_MAPS_API_KEY;
-			} elseif ( $scope === 'server' && defined( 'WORDCAMP_PROD_GOOGLE_MAPS_SERVER_API_KEY') ) {
+			} elseif ( 'server' === $scope && defined( 'WORDCAMP_PROD_GOOGLE_MAPS_SERVER_API_KEY') ) {
 				$key = WORDCAMP_PROD_GOOGLE_MAPS_SERVER_API_KEY;
 			}
 			break;
 
 		case 'development':
-		default :
+		default:
 			if ( defined( 'WORDCAMP_DEV_GOOGLE_MAPS_API_KEY' ) ) {
 				$key = WORDCAMP_DEV_GOOGLE_MAPS_API_KEY;
 			}
@@ -324,7 +329,7 @@ add_filter( 'wordcamp_google_maps_api_key', function( $key, $scope = 'client' ) 
 	return $key;
 }, 10, 2 );
 
-/*
+/**
  * Disable admin pointers
  */
 function wcorg_disable_admin_pointers() {
@@ -332,7 +337,7 @@ function wcorg_disable_admin_pointers() {
 }
 add_action( 'admin_init', 'wcorg_disable_admin_pointers' );
 
-// Prevent password resets, since they need to be done on w.org
+// Prevent password resets, since they need to be done on w.org.
 add_filter( 'allow_password_reset', '__return_false' );
 add_filter( 'show_password_fields', '__return_false' );
 
@@ -377,6 +382,8 @@ add_action( 'admin_enqueue_scripts', 'wcorg_register_scripts' );
  * Conditionally omit incident report submission feedback posts from post query results.
  *
  * @param WP_Query $wp_query
+ *
+ * @return WP_Query
  */
 function wcorg_central_omit_incident_reports( $wp_query ) {
 	if ( ! $wp_query instanceof WP_Query ) {
@@ -385,9 +392,9 @@ function wcorg_central_omit_incident_reports( $wp_query ) {
 
 	$post_types = $wp_query->get( 'post_type' );
 
-	if ( BLOG_ID_CURRENT_SITE == get_current_blog_id()
-	     && in_array( 'feedback', (array) $post_types, true )
-	     && ! current_user_can( 'manage_network' ) // TODO add a subrole for this.
+	if ( BLOG_ID_CURRENT_SITE === get_current_blog_id()
+		&& in_array( 'feedback', (array) $post_types, true )
+		&& ! current_user_can( 'manage_network' ) // TODO add a subrole for this.
 	) {
 		$meta_query = $wp_query->get( 'meta_query', array() );
 
@@ -399,7 +406,7 @@ function wcorg_central_omit_incident_reports( $wp_query ) {
 				'compare' => 'NOT LIKE',
 			),
 			// This catches non-feedback posts, but may cause a performance issue.
-			// See https://developer.wordpress.org/reference/classes/wp_query/#comment-2315
+			// See https://developer.wordpress.org/reference/classes/wp_query/#comment-2315.
 			array(
 				'key'   => '_feedback_email',
 				'value' => 'NOT EXISTS',
@@ -411,7 +418,6 @@ function wcorg_central_omit_incident_reports( $wp_query ) {
 
 	return $wp_query;
 }
-
 add_filter( 'pre_get_posts', 'wcorg_central_omit_incident_reports' );
 
 /**
@@ -424,17 +430,17 @@ add_filter( 'pre_get_posts', 'wcorg_central_omit_incident_reports' );
  *
  * @param array  $primitive_caps The original list of primitive caps mapped to the given meta cap.
  * @param string $meta_cap       The meta cap in question.
+ *
+ * @return array
  */
 function wcorg_central_modify_export_caps( $primitive_caps, $meta_cap ) {
-	if ( BLOG_ID_CURRENT_SITE == get_current_blog_id() && 'export' === $meta_cap ) {
+	if ( BLOG_ID_CURRENT_SITE === get_current_blog_id() && 'export' === $meta_cap ) {
 		return array_merge( (array) $primitive_caps, array( 'manage_network' ) ); // TODO add a subrole for this.
 	}
 
 	return $primitive_caps;
 }
-
 add_filter( 'map_meta_cap', 'wcorg_central_modify_export_caps', 10, 2 );
-
 
 /**
  * Check and create filesystem dirs to manage rate limiting in error handling.
@@ -483,39 +489,39 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 
 	$data = array(
 		'last_reported_at' => time(),
-		'error_count' => 0, // since last reported.
+		'error_count'      => 0, // since last reported.
 	);
 
 	if ( ! file_exists( $error_file ) ) {
 		$text = 'Error occured. ';
-		file_put_contents( $error_file, json_encode( $data ) );
+		file_put_contents( $error_file, wp_json_encode( $data ) );
 	} else {
-		$data = json_decode( file_get_contents( $error_file ), true );
+		$data                 = json_decode( file_get_contents( $error_file ), true );
 		$data['error_count'] += 1;
-		$time_elasped = time() - $data['last_reported_at'];
+		$time_elasped         = time() - $data['last_reported_at'];
+
 		if ( $time_elasped > 600 ) {
-			$text = "Still happening. Happened ${data['error_count']} time(s) since last reported. ";
+			$text                     = "Still happening. Happened ${data['error_count']} time(s) since last reported. ";
 			$data['last_reported_at'] = time();
-			$data['error_count'] = 0;
-			file_put_contents( $error_file, json_encode( $data ) );
+			$data['error_count']      = 0;
+
+			file_put_contents( $error_file, wp_json_encode( $data ) );
 		} else {
-			file_put_contents( $error_file, json_encode( $data ) );
+			file_put_contents( $error_file, wp_json_encode( $data ) );
 			return false;
 		}
 	}
 
-	$domain = get_site_url();
-
+	$domain    = get_site_url();
 	$page_slug = esc_html( trim( $_SERVER['REQUEST_URI'], '/' ) );
-
-	$text = $text . "Message : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug \n Error type: $err_no";
+	$text      = $text . "Message : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug \n Error type: $err_no";
 
 	$message = array(
-		'fallback' => $text,
-		'color' => '#ff0000',
-		'pretext' => "Error on \"$file:$line\" ",
+		'fallback'    => $text,
+		'color'       => '#ff0000',
+		'pretext'     => "Error on \"$file:$line\" ",
 		'author_name' => $domain,
-		'text' => $text,
+		'text'        => $text,
 	);
 
 	$send = new \Dotorg\Slack\Send( SLACK_ERROR_REPORT_URL );
