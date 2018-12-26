@@ -2264,6 +2264,8 @@ class WordCamp_Post_Types_Plugin {
 				'capability_type' => 'post',
 				'hierarchical'    => false,
 				'query_var'       => true,
+				'show_in_rest'    => true,
+				'rest_base'       => 'organizers',
 				'menu_icon'       => 'dashicons-groups',
 			)
 		);
