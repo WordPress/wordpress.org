@@ -14,6 +14,10 @@ const externals = {
 const webpackConfig = {
 	mode: NODE_ENV === 'production' ? 'production' : 'development',
 
+	optimization: {
+		minimize: true,
+	},
+
 	entry: {
 		blocks: path.resolve( __dirname, 'assets/src/blocks.js' ),
 	},
