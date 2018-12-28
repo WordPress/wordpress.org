@@ -442,6 +442,8 @@ function wcorg_central_modify_export_caps( $primitive_caps, $meta_cap ) {
 }
 add_filter( 'map_meta_cap', 'wcorg_central_modify_export_caps', 10, 2 );
 
+define( 'ERROR_RATE_LIMITING_DIR', '/tmp/error_limiting' );
+
 /**
  * Check and create filesystem dirs to manage rate limiting in error handling.
  * For legacy bugs we are doing rate limiting via filesystem. We would be investigating to see if we can instead use memcache to rate limit sometime in the future.
@@ -449,11 +451,10 @@ add_filter( 'map_meta_cap', 'wcorg_central_modify_export_caps', 10, 2 );
  * @return bool Return true if file permissions etc are present
  */
 function init_error_handling() {
-	$error_dir = '/tmp/error_limiting';
-	if ( ! file_exists( $error_dir ) ) {
-		mkdir( $error_dir );
+	if ( ! file_exists( ERROR_RATE_LIMITING_DIR ) ) {
+		mkdir( ERROR_RATE_LIMITING_DIR );
 	}
-	return is_dir( $error_dir ) && is_writeable( $error_dir );
+	return is_dir( ERROR_RATE_LIMITING_DIR ) && is_writeable( ERROR_RATE_LIMITING_DIR );
 }
 
 /**
@@ -483,7 +484,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 	// Max file length for ubuntu system is 255.
 	$err_key = substr( base64_encode("$file-$line-$err_no" ), -254 );
 
-	$error_file = "/tmp/error_limiting/$err_key";
+	$error_file = ERROR_RATE_LIMITING_DIR . "/$err_key";
 
 	$text = '';
 
@@ -543,10 +544,31 @@ function send_fatal_to_slack() {
 	return send_error_to_slack( $error['type'], $error['message'], $error['file'], $error['line'] );
 }
 
-if ( ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) ) {
+if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
 	register_shutdown_function( 'send_fatal_to_slack' );
 	set_error_handler( 'send_error_to_slack', E_ERROR );
 }
+
+/**
+ * Function `send_error_to_slack` above also creates a bunch of files in /tmp/error_limiting folder in order to rate limit the notification.
+ * This function will be used as a cron to clear these error_limiting files periodically.
+ */
+function handle_clear_error_rate_limiting_files() {
+	if ( ! init_error_handling() ) {
+		return;
+	}
+	foreach ( new DirectoryIterator( ERROR_RATE_LIMITING_DIR ) as $file_info ) {
+		if ( ! $file_info->isDot() ) {
+			unlink( $file_info->getPathname() );
+		}
+	}
+
+}
+add_action( 'clear_error_rate_limiting_files', 'handle_clear_error_rate_limiting_files' );
+if ( ! wp_next_scheduled( 'clear_error_rate_limiting_files' ) ) {
+	wp_schedule_event( time(), 'daily', 'clear_error_rate_limiting_files' );
+}
+
 
 /**
  * Allow individual site administrators to activate and deactivate optional plugins.
