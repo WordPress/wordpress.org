@@ -544,7 +544,7 @@ function send_fatal_to_slack() {
 	return send_error_to_slack( $error['type'], $error['message'], $error['file'], $error['line'] );
 }
 
-if ( false && ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
+if ( false && ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) ) {
 	register_shutdown_function( 'send_fatal_to_slack' );
 	set_error_handler( 'send_error_to_slack', E_ERROR );
 }
