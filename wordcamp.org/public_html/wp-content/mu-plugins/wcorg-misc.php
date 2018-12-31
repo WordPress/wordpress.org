@@ -557,6 +557,7 @@ function handle_clear_error_rate_limiting_files() {
 	if ( ! init_error_handling() ) {
 		return;
 	}
+
 	foreach ( new DirectoryIterator( ERROR_RATE_LIMITING_DIR ) as $file_info ) {
 		if ( ! $file_info->isDot() ) {
 			unlink( $file_info->getPathname() );
@@ -564,7 +565,9 @@ function handle_clear_error_rate_limiting_files() {
 	}
 
 }
+
 add_action( 'clear_error_rate_limiting_files', 'handle_clear_error_rate_limiting_files' );
+
 if ( ! wp_next_scheduled( 'clear_error_rate_limiting_files' ) ) {
 	wp_schedule_event( time(), 'daily', 'clear_error_rate_limiting_files' );
 }
