@@ -102,7 +102,7 @@ class SpeakersBlockContent extends Component {
 							</div>
 						}
 
-						{ true === show_session && post._embedded.sessions.length &&
+						{ true === show_session && post._embedded.sessions &&
 							<Fragment>
 								<h4 className={ 'wordcamp-speaker-session-heading' }>
 									{ _n( 'Session', 'Sessions', post._embedded.sessions.length, 'wordcamporg' ) }
