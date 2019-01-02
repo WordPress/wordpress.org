@@ -293,6 +293,16 @@ abstract class Event_Admin {
 			true
 		);
 
+		$gutenberg_enabled = false;
+		$current_screen = get_current_screen();
+		if ( method_exists( $current_screen, 'is_block_editor' ) && $current_screen->is_block_editor() ) {
+			$gutenberg_enabled = true;
+		}
+
+		wp_localize_script( 'wcpt-admin', 'wcpt_admin', array(
+			'gutenberg_enabled' => $gutenberg_enabled,
+		) );
+
 		wp_enqueue_script( 'wcpt-admin' );
 		wp_enqueue_script( 'select2' );
 

@@ -148,6 +148,35 @@ window.wordCampPostType.WcptWordCamp = ( function( $ ) {
 	});
 
 	/**
+	 * Bind Update button with Save Draft button in pages with block editor
+	 */
+	$( document ).ready(
+		function () {
+			if ( ! window.wcpt_admin || window.wcpt_admin[ 'gutenberg_enabled' ] !== "1" ) {
+				return;
+			}
+
+			function checkAndEnableUpdateButton() {
+				if ( $( ".editor-post-save-draft" ).length > 0 ) {
+					$( "#wcpt-update" ).removeAttr( 'disabled' );
+				} else {
+					setTimeout( checkAndEnableUpdateButton, 500 );
+				}
+			}
+
+			$( "#wcpt-update" ).click( function() {
+				$( ".editor-post-save-draft" ).click();
+			} );
+
+			$( "body" ).on( "click", ".editor-post-save-draft", function() {
+				$( "#wcpt-update" ).attr( 'disabled', 'disabled' );
+				setTimeout( checkAndEnableUpdateButton );
+			} );
+
+		}
+	);
+
+	/**
 	 * Kick things off
 	 */
 	$( document ).ready( function( $ ) {
