@@ -35,7 +35,11 @@ class DevHub_Command extends WP_CLI_Command {
 		} else {
 			$user_id = (int) $user_id;
 		}
-		WP_CLI::log( "Importing as user ID $user_id" );
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			WP_CLI::error( 'Invalid user_id provided.' );
+		}
+		WP_CLI::log( "Importing as user ID $user_id ({$user->user_nicename})." );
 
 		$plugins = [
 			'phpdoc-parser'  => 'phpdoc-parser/plugin.php',
