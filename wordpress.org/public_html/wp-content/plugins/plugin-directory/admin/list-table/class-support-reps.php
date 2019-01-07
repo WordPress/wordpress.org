@@ -51,7 +51,7 @@ class Support_Reps extends \WP_List_Table {
 		}
 
 		$this->items = array_map( function ( $user ) {
-			return new \WP_User( $user );
+			return get_user_by( 'slug', $user );
 		}, Tools::get_plugin_support_reps( $plugin_slug ) );
 	}
 

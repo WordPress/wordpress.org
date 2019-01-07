@@ -51,7 +51,7 @@ class Committers extends \WP_List_Table {
 		}
 
 		$this->items = array_map( function ( $user ) {
-			return new \WP_User( $user );
+			return get_user_by( 'login', $user );
 		}, Tools::get_plugin_committers( $plugin_slug ) );
 	}
 
