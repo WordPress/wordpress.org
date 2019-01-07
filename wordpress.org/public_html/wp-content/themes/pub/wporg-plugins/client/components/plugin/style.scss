@@ -112,6 +112,10 @@
 			text-decoration: underline;
 		}
 
+		ul > li > p, ol > li > p {
+			margin: 0;
+		}
+
 		#admin {
 			display:block !important;
 		}
