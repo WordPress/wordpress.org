@@ -36,6 +36,7 @@ Nicolas Gallagher and Jonathan Neal http://necolas.github.io/normalize.css/
 # Content
 	## Posts and pages
 	## Comments
+	## 404
 # Infinite scroll
 # Media
 	## Captions
@@ -833,6 +834,21 @@ a:hover, a:active {
 .bypostauthor {
   display: block;
 }
+
+/*--------------------------------------------------------------
+## 404
+--------------------------------------------------------------*/
+.error404 #content {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  min-height: 400px;
+}
+
+.error404 p {
+  margin: 1.5em auto;
+}
+
 
 /*--------------------------------------------------------------
 # Infinite scroll
