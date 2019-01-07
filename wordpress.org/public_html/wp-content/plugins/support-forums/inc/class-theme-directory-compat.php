@@ -71,11 +71,13 @@ class Theme_Directory_Compat extends Directory_Compat {
 	public function parse_query() {
 		$slug = get_query_var( 'wporg_theme' );
 		if ( ! $slug ) {
+			status_header( 404 );
 			return;
 		}
 
 		$theme = $this->get_object( $slug );
 		if ( ! $theme ) {
+			status_header( 404 );
 			return;
 		} else {
 			$this->slug         = $slug;
