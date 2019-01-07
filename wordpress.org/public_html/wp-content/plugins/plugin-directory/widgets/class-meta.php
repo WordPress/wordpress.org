@@ -185,7 +185,7 @@ class Meta extends \WP_Widget {
 			endif;
 			?>
 
-			<?php if ( $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>
+			<?php if ( empty( $args['hide_tags'] ) && $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>
 				<li class="clear">
 					<?php
 					$terms = get_the_terms( $post, 'plugin_tags' );
