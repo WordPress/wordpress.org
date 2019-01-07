@@ -527,11 +527,7 @@ a {
   color: #0073aa;
 }
 
-a:visited {
-  color: #333;
-}
-
-a:hover, a:focus, a:active {
+a:visited, a:hover, a:focus, a:active {
   color: #00a0d2;
 }
 
@@ -1518,6 +1514,9 @@ h2.toc-heading + h3.toc-heading:target {
 }
 .menu-table-of-contents-container ul a:visited:not(:hover) {
   color: #0073aa;
+}
+.menu-table-of-contents-container ul a:focus:not(.active) {
+  color: #fff
 }
 .menu-table-of-contents-container > ul > li:last-child {
   border-bottom: 1px solid rgba(0,0,0,0.05);
