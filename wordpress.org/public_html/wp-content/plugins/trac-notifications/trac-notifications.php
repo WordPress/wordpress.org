@@ -419,17 +419,16 @@ class wporg_trac_notifications {
 		#focuses, #components, #milestones, p.save-changes {
 			clear: both;
 		}
-		#milestones, p.save-changes {
-			padding-top: 1em;
+		#focuses ul {
+			margin: 0;
 		}
 		#focuses li {
 			display: inline-block !important;
 			list-style: none;
-			min-width: 15%;
-			margin-right: 30px;
+			width: 24%;
+			margin: 0;
 		}
 		#components > ul {
-			margin: 0 0 0 1% !important;
 			margin: 0;
 			padding: 0;
 		}
@@ -440,10 +439,19 @@ class wporg_trac_notifications {
 		#components > ul > li {
 			list-style: none;
 		}
+		#milestones ul {
+			margin: 0;
+		}
 		#milestones > ul > li {
 			float: left;
-			width: 25%;
+			width: 24%;
 			list-style: none;
+		}
+		#milestones, p.save-changes {
+			padding-top: 1em;
+		}
+		#milestones #show-completed {
+			width: 100%;
 		}
 		.completed-milestone {
 			display: none !important;
@@ -451,6 +459,15 @@ class wporg_trac_notifications {
 		.completed-milestone.checked,
 		#milestones.show-completed-milestones .completed-milestone {
 			display: list-item !important;
+		}
+		@media screen and (max-width: 450px) {
+			.make-core #components > ul,
+			#focuses li {
+				width: 100%;
+			}
+			#milestones > ul > li {
+				width: 49%;
+			}
 		}
 		</style>
 		<script>
