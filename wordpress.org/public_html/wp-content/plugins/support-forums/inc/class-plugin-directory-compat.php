@@ -71,7 +71,6 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	public function parse_query() {
 		$slug = get_query_var( 'wporg_plugin' );
 		if ( ! $slug ) {
-			status_header( 404 );
 			return;
 		}
 

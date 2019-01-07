@@ -71,7 +71,6 @@ class Theme_Directory_Compat extends Directory_Compat {
 	public function parse_query() {
 		$slug = get_query_var( 'wporg_theme' );
 		if ( ! $slug ) {
-			status_header( 404 );
 			return;
 		}
 
