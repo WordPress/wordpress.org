@@ -37,6 +37,7 @@ if ( $jsonp ) {
  *
  * @param string $ua   The user-agent string.
  * @param array  $data Parsed user-agent data.
+ * @global wpdb  $wpdb WordPress database abstraction object.
  */
 function bh_record_data( $ua, $data ) {
 	global $wpdb;
