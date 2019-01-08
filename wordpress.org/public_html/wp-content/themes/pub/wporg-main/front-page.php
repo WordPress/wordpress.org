@@ -103,7 +103,7 @@ get_header( 'wporg' );
 					$plugin_count = defined( 'WP_PLUGIN_COUNT' ) ? WP_PLUGIN_COUNT : 54000;
 					printf(
 						/* translators: 1: Rounded number of plugins. 2: Link to Plugin Directory. */
-						_n( 'Extend WordPress with over %1s plugin to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2s">much more</a>.', 'Extend WordPress with over %1s plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2s">much more</a>.', $plugin_count, esc_url( home_url( '/plugins/' ) ), 'wporg' ),
+						_n( 'Extend WordPress with over %1$s plugin to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.', 'Extend WordPress with over %1$s plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%2$s">much more</a>.', $plugin_count, esc_url( home_url( '/plugins/' ) ), 'wporg' ),
 						esc_html( number_format_i18n( $plugin_count ) ),
 						esc_url( home_url( '/plugins/' ) )
 					);
