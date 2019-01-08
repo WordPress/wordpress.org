@@ -11,6 +11,8 @@ get_header();
 
 get_sidebar( 'handbook' );
 
+do_action( 'handbook_breadcrumbs' );
+
 ?>
 
 	<div id="primary" class="content-area">
