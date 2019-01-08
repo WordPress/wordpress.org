@@ -62,6 +62,9 @@ class Plugin {
 			add_filter( 'bbp_edit_topic_pre_insert', array( $this, 'pre_insert' ) );
 			add_filter( 'bbp_new_reply_pre_insert',  array( $this, 'pre_insert' ) );
 			add_filter( 'bbp_edit_reply_pre_insert', array( $this, 'pre_insert' ) );
+
+			// Prevent editing their topics/replies.
+			add_filter( 'bbp_map_meta_caps', array( $this, 'bbp_map_meta_caps' ), 100, 3 );
 		}
 
 		// Alter queries for the current user.
@@ -309,5 +312,18 @@ class Plugin {
 			'wporg_bbp_flag_user',
 			'wporg_bbp_unflag_user',
 		);
+	}
+
+	public function bbp_map_meta_caps( $caps, $cap, $user_id ) {
+		$limited_caps = array(
+			'edit_topic',
+			'edit_reply',
+		);
+
+		if ( in_array( $cap, $limited_caps, true ) ) {
+			$caps = array( 'do_not_allow' );
+		}
+
+		return $caps;
 	}
 }
