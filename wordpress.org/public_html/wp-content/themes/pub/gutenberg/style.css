@@ -750,6 +750,18 @@ a:hover, a:active {
   max-width: 100%;
 }
 
+.widget_search .search-submit {
+  display: none;
+}
+
+.widget_search input[type="search"] {
+  width: 90%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  font-size: 14px;
+  border: 1px solid #eee;
+}
+
 /*--------------------------------------------------------------
 # Content
 --------------------------------------------------------------*/
