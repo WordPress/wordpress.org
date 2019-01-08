@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: bbPress: Topic Archive
- * Description: Add noindex,nofollow to old topics.
+ * Description: Add noindex,follow to old topics and closed topics without responses.
  * Version:     1.0
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/
@@ -41,9 +41,15 @@ class WPORG_bbPress_Topic_Archive {
 		&&
 			bbp_is_topic( $post->ID )
 		&&
-			( time() - get_post_time( 'U', true, $post ) > YEAR_IN_SECONDS )
+			(
+				// Thread last modified is over a year old
+				( time() - get_post_time( 'U', true, $post ) > YEAR_IN_SECONDS )
+			||
+				// Closed thread with no replies
+				( bbp_is_topic_closed( $post->ID ) && ! bbp_get_topic_reply_count( $post->ID, true ) )
+			)
 		) {
-			echo '<meta name="robots" content="noindex,nofollow" />' . "\n";
+			echo '<meta name="robots" content="noindex,follow" />' . "\n";
 		}
 	}
 } }
