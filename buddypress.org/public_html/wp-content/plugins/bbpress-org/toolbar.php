@@ -21,7 +21,7 @@ add_action( 'add_admin_bar_menus', 'bborg_toolbar_tweaks', 11 );
  * Remove the BuddyPress and bbPress about menus
  *
  * @author johnjamesjacoby
- * @global object $wp_admin_bar
+ * @param WP_Admin_Bar $wp_admin_bar WP_Admin_Bar instance, passed by reference.
  */
 function bbporg_remove_about_pages( $wp_admin_bar ) {
 	$wp_admin_bar->remove_menu( 'bp-about'  );
