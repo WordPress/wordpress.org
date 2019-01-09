@@ -146,7 +146,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		},
 
 		linkGutenbergIssues: function( selector ) {
-			var gutenRegEx = /\bGB[-]?(\d+)(<\/a>)?\b/gi,
+			var gutenRegEx = /\bGB[-]?(\d+)([^<]*<\/a>)?/gi,
 				gutenInAttrRegEx = new RegExp( '="[^"]*?' + gutenRegEx.source + '[\\s\\S]*?"' );
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function() {
