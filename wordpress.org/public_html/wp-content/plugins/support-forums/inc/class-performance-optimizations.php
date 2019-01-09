@@ -33,6 +33,9 @@ class Performance_Optimizations {
 		// Redirect search results.
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_search_results_to_google_search' ) );
 
+		// Redirect (.+)/page/[01]/ and (.+)?paged=[01] to $1
+		add_action( 'bbp_template_redirect', array( $this, 'redirect_page_zero_one' ) );
+
 		// REST API.
 		add_filter( 'rest_endpoints', array( $this, 'disable_rest_api_users_endpoint' ) );
 
@@ -121,6 +124,35 @@ class Performance_Optimizations {
 
 		wp_safe_redirect( $search_url );
 		exit;
+	}
+
+	/**
+	 * Redirects /page/[01]/, and /?paged=[01] requests to the archive root.
+	 */
+	public function redirect_page_zero_one() {
+		global $wp_query;
+
+		if (
+			isset( $wp_query->query['paged'] ) &&
+			in_array( $wp_query->query['paged'], [ 0, 1 ] ) &&
+			'POST' !== $_SERVER['REQUEST_METHOD']
+		) {
+			// Generate the current URL.
+			$current_url = $_SERVER['REQUEST_URI'];
+			// Remove the path components.
+			$current_url = preg_replace( '!^' . preg_quote( parse_url( home_url('/'), PHP_URL_PATH ), '!' ) . '!i', '', $current_url );
+			$current_url = home_url( $current_url );
+
+			// Remove any paged items
+			$pageless_url = $current_url;
+			$pageless_url = remove_query_arg( 'paged', $pageless_url );
+			$pageless_url = preg_replace( '!/page/[01]/?!i', '/', $pageless_url );
+
+			if ( $pageless_url !== $current_url ) {
+				wp_safe_redirect( $pageless_url );
+				exit;
+			}
+		}
 	}
 
 	public function pre_get_posts( $query ) {
