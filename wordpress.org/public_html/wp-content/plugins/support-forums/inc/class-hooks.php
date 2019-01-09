@@ -76,7 +76,7 @@ class Hooks {
 		// Limit pagination of the 'all-topics' view
 		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'has_topics_all_topics' ) );
 
-		// Remove redundant parts of the <title>
+		// Remove the redundant prefixes in the bbPress <title>.
 		add_filter( 'bbp_raw_title_array', array( $this, 'bbp_raw_title_array' ) );
 	}
 
@@ -697,6 +697,12 @@ class Hooks {
 		return $r;
 	}
 
+	/**
+	 * Remove the redundant prefixes in the bbPress <title>.
+	 *
+	 * @param array $title The title format
+	 * @return array
+	 */
 	public function bbp_raw_title_array( $title ) {
 		if ( bbp_is_single_forum() || bbp_is_single_topic() || bbp_is_single_view() ) {
 			$title['format'] = '%s';
