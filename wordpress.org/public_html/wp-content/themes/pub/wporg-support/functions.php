@@ -187,7 +187,7 @@ add_filter( 'excerpt_length', 'wporg_support_excerpt_length' );
  * @package WPBBP
  */
 function wporg_get_global_header() {
-	$GLOBALS['pagetitle'] = wp_title( '&#124;', false, 'right' ) . ' ' . __( 'WordPress.org', 'wporg-forums' );
+	$GLOBALS['pagetitle'] = wp_title( '&#124;', false, 'right' ) . __( 'WordPress.org', 'wporg-forums' );
 	require WPORGPATH . 'header.php';
 }
 
