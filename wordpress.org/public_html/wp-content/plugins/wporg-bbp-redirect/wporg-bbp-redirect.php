@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: bbPress: Redirect
- * Description: Redirect bbPress 1 id-based slugs to new title-based slugs.
+ * Description: Redirect bbPress 1 id-based slugs and >200char slugs to new title-based slugs.
  * Version:     1.0
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/
@@ -54,23 +54,31 @@ class WPORG_bbPress_Old_Id_Redirect {
 			}
 
 			if ( in_array( $post_type, array( 'forum', 'topic' ) ) ) {
-				$maybe_id = get_query_var( 'name' );
+				$maybe_id = get_query_var( $post_type ); // 'name' will be truncated to 200char, topic and forum are not.
+
+				$meta_key = '_wp_old_slug';
 				if ( is_numeric( $maybe_id ) ) {
+					$meta_key = sprintf( '_bbp_old_%s_id', $post_type );
+
 					if ( absint( $maybe_id ) != $maybe_id ) {
 						return;
 					}
+
+					$maybe_id = absint( $maybe_id );
 				}
-				$post_id = $wpdb->get_var( $wpdb->prepare( "
-					SELECT post_id
+
+				$post_id = $wpdb->get_var( $wpdb->prepare(
+					"SELECT post_id
 					FROM $wpdb->postmeta, $wpdb->posts
 					WHERE ID = post_id
 						AND post_type = %s
 						AND meta_key = %s
-						AND meta_value = %d
+						AND meta_value = %s
 					LIMIT 1",
 					$post_type,
-					sprintf( '_bbp_old_%s_id', $post_type ),
-					$maybe_id ) );
+					$meta_key,
+					$maybe_id
+				) );
 				if ( $post_id ) {
 					$link = get_permalink( $post_id );
 					if ( $link ) {
