@@ -77,6 +77,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 			wpTrac.autocomplete.init();
 			wpTrac.linkMentions();
+			wpTrac.linkGutenbergIssues();
 
 			if ( ! $body.hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
@@ -104,12 +105,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			});
 		},
 
-		linkMentions: function() {
+		linkMentions: function( selector ) {
 			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
 			var mentionsRegEx = /(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9/_\-.]{1,20})(?:\b(?!@|＠)|$)/g,
 				mentionsInAttrRegEx = new RegExp( '="[^"]*?' + mentionsRegEx.source + '[\\s\\S]*?"' );
 
-			$( 'div.change .comment, #ticket .description' ).each( function() {
+			$( selector || 'div.change .comment, #ticket .description' ).each( function() {
 				var $comment = $( this ).html();
 
 				if ( mentionsRegEx.test( $comment ) ) {
@@ -133,6 +134,45 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					} );
 
 					// Restore mentions in HTML attributes.
+					if ( placeholders.length ) {
+						$comment = $comment.replace( '__PLACEHOLDER__', function() {
+							return placeholders.shift();
+						} );
+					}
+
+					$( this ).html( $comment );
+				}
+			});
+		},
+
+		linkGutenbergIssues: function( selector ) {
+			var gutenRegEx = /\bGB[-]?(\d+)(<\/a>)?\b/gi,
+				gutenInAttrRegEx = new RegExp( '="[^"]*?' + gutenRegEx.source + '[\\s\\S]*?"' );
+
+			$( selector || 'div.change .comment, #ticket .description' ).each( function() {
+				var $comment = $( this ).html();
+
+				if ( gutenRegEx.test( $comment ) ) {
+					var placeholders = [];
+
+					if ( gutenInAttrRegEx.test( $comment ) ) {
+						// Preserve matches in HTML attributes.
+						$comment = $comment.replace( gutenInAttrRegEx, function( match ) {
+							placeholders.push( match );
+							return '__PLACEHOLDER__';
+						} );
+					}
+
+					$comment = $comment.replace( gutenRegEx, function( match, issueNumber, closing_a_present ) {
+						if ( closing_a_present ) {
+							// Already linked
+							return match;
+						}
+
+						return '<a class="gutenberg-issue github ext-link" href="https://github.com/WordPress/Gutenberg/issues/' + issueNumber + '"><span class="icon">&#8203;</span>' + match + '</a>';
+					} );
+
+					// Restore matches in HTML attributes.
 					if ( placeholders.length ) {
 						$comment = $comment.replace( '__PLACEHOLDER__', function() {
 							return placeholders.shift();
@@ -173,6 +213,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						.wrap( '<a href="' + href.replace('/raw-attachment/', '/attachment/') + '" />' );
 				};
 			});
+
+			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );
+			wpTrac.linkMentions( '.ticketdraft .comment' );
 		},
 
 		hacks: function() {
