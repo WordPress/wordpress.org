@@ -85,8 +85,8 @@ add_filter( 'bp_group_members_count_user_join_filter', 'bporg_group_members_coun
  */
 function bporg_redirect() {
 
-	// Explode the request (could use parse_url() here too)
-	$uri_chunks = explode( '/', $_SERVER['REQUEST_URI'] );
+	// Explode the request. parse_url() is used here to exclude any query args which caused some redirects to be missed.
+	$uri_chunks = explode( '/', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
 
 	// Redirect /forums/ to /support/
 	if ( $uri_chunks[1] === 'forums' && empty( $uri_chunks[2] ) ) {
