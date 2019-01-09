@@ -1438,6 +1438,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			$.fn.addSelectAllCheckboxes = $.fn.addSelectAllCheckboxes || function() {}
 			$.fn.disableOnSubmit        = $.fn.disableOnSubmit        || function() {}
 			$.fn.disableSubmit          = $.fn.disableSubmit          || function() {}
+		},
+
+		disableTracAutoFocus: function() {
+			// Disable the Trac autofocus which scrolls past the intro to creating tickets.
+			$(".trac-autofocus").removeClass( 'trac-autofocus' );
 		}
 
 	};
@@ -1445,6 +1450,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 	$(document).ready( wpTrac.init );
 
 	// Perform this as soon as this file loads.
+	wpTrac.disableTracAutoFocus();
 	wpTrac.patchTracFor122Changes();
 
 })(jQuery);
