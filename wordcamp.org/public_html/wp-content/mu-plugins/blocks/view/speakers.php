@@ -18,7 +18,7 @@ $container_classes = [
 <?php if ( ! empty( $speakers ) ) : ?>
 	<ul class="<?php echo implode( ' ', $container_classes ); ?>">
 		<?php foreach ( $speakers as $post ) : setup_postdata( $post ); ?>
-			<li class="wordcamp-speaker wordcamp-speaker-<?php echo sanitize_html_class( $post->post_name ); ?>">
+			<li class="wordcamp-speaker wordcamp-speaker-<?php echo sanitize_html_class( $post->post_name ); ?> wordcamp-clearfix">
 				<h3 class="wordcamp-speaker-name-heading">
 					<?php echo get_the_title( $post ); ?>
 				</h3>

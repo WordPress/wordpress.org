@@ -7,7 +7,6 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 const { BaseControl, Button, ButtonGroup, RangeControl } = wp.components;
-const { withInstanceId } = wp.compose;
 const { __, _x } = wp.i18n;
 
 /**
@@ -47,16 +46,12 @@ function AvatarSizeControl( {
 	label,
 	help,
 	value,
-	instanceId,
 	onChange,
 	initialPosition,
 	...props
 } ) {
-	const id = `wordcamp-inspector-avatar-size-control-${ instanceId }`;
-
 	return (
 		<BaseControl
-			id={ id }
 			className={ classnames( 'wordcamp-components-avatar-size', className ) }
 			label={ label }
 			help={ help }
@@ -104,4 +99,4 @@ function AvatarSizeControl( {
 	);
 }
 
-export default withInstanceId( AvatarSizeControl );
+export default AvatarSizeControl;

@@ -61,7 +61,11 @@ class SpeakersBlockContent extends Component {
 				{ speakerPosts.map( ( post, i ) =>
 					<li
 						key={ i }
-						className={ classnames( 'wordcamp-speaker', 'wordcamp-speaker-' + post.slug ) }
+						className={ classnames(
+							'wordcamp-speaker',
+							'wordcamp-speaker-' + decodeEntities( post.slug ),
+							'wordcamp-clearfix'
+						) }
 					>
 						<h3 className={ 'wordcamp-speaker-name-heading' }>
 							{ decodeEntities( post.title.rendered.trim() ) || __( '(Untitled)', 'wordcamporg' ) }
