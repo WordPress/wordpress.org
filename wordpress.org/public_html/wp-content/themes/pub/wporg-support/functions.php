@@ -781,36 +781,10 @@ function bb_base_single_topic_description() {
 
 function bb_base_single_forum_description() {
 
-	// Validate forum_id
-	$forum_id = bbp_get_forum_id();
-
 	// Unhook the 'view all' query var adder
 	remove_filter( 'bbp_get_forum_permalink', 'bbp_add_view_all' );
 
-	// Get some forum data
-	$topic_count = bbp_get_forum_topic_count( $forum_id, true, true );
-	$reply_count = bbp_get_forum_reply_count( $forum_id, true, true );
-	$last_active = bbp_get_forum_last_active_id( $forum_id );
-
-	// Has replies
-	if ( !empty( $reply_count ) ) {
-		$reply_text = sprintf( _n( '%s reply', '%s replies', $reply_count, 'wporg-forums' ), bbp_number_format( $reply_count ) );
-	} else {
-		$reply_text = '';
-	}
-
-	// Forum has active data
-	if ( !empty( $last_active ) ) {
-		$topic_text      = bbp_get_forum_topics_link( $forum_id );
-		$time_since      = bbp_get_forum_freshness_link( $forum_id );
-
-	// Forum has no last active data
-	} else {
-		$topic_text      = sprintf( _n( '%s topic', '%s topics', $topic_count, 'wporg-forums' ), bbp_number_format( $topic_count ) );
-	}
-	?>
-
-	<?php if ( bbp_get_forum_parent_id() ) : ?>
+	if ( bbp_get_forum_parent_id() ) : ?>
 		<li class="topic-parent"><?php
 			/* translators: %s: forum title */
 			printf( __( 'In: %s', 'wporg-forums' ),
@@ -819,26 +793,6 @@ function bb_base_single_forum_description() {
 					bbp_get_forum_title( bbp_get_forum_parent_id() )
 				)
 			);
-		?></li>
-	<?php endif; ?>
-	<?php //if ( !empty( $topic_count ) ) : ?>
-		<!-- <li class="topic-count"><?php echo $topic_text; ?></li> -->
-	<?php //endif; ?>
-	<?php //if ( !empty( $reply_count ) ) : ?>
-		<!-- <li class="reply-count"><?php echo $reply_text; ?></li> -->
-	<?php //endif; ?>
-	<?php //if ( !empty( $last_active  ) ) : ?>
-		<!-- <li class="forum-freshness-author"> --><?php
-			/* translators: %s: post author link */
-			//printf( __( 'Last post by: %s', 'wporg-forums' ),
-			//	bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) )
-			//);
-		?><!-- </li> -->
-	<?php //endif; ?>
-	<?php if ( !empty( $time_since  ) ) : ?>
-		<li class="forum-freshness-time"><?php
-			/* translators: %s: date/time link to the latest post */
-			printf( __( 'Last activity: %s', 'wporg-forums' ), $time_since );
 		?></li>
 	<?php endif;
 }
