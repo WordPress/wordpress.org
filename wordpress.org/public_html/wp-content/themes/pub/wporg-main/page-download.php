@@ -8,6 +8,7 @@
  */
 
 namespace WordPressdotorg\MainTheme;
+use WordPressdotorg\API\Serve_Happy\RECOMMENDED_PHP;
 
 $hosts = [
 	'bluehost'      => [
@@ -146,11 +147,14 @@ if ( !wp_is_mobile() && empty( $rosetta_release ) ) {
 						<p>
 							<?php
 							printf(
-								/* translators: 1: URL to PHP website; 2: URL to MySQL website; 3: URL to MariaDB website */
-								wp_kses_post( __( 'We recommend servers running version 7.2 or greater of <a href="%1$s">PHP</a> and <a href="%2$s">MySQL</a> version 5.6 <em>OR</em> <a href="%3$s">MariaDB</a> version 10.0 or greater.', 'wporg' ) ),
-								esc_url( 'http://www.php.net/' ),
+								/* translators: 1: PHP version; 2: URL to PHP website; 3: URL to MySQL website; 4: MySQL version; 5: URL to MariaDB website; 6: MariaDB version */
+								wp_kses_post( __( 'We recommend servers running version %1$s or greater of <a href="%2$s">PHP</a> and <a href="%3$s">MySQL</a> version %4$s <em>OR</em> <a href="%5$s">MariaDB</a> version %6$s or greater.', 'wporg' ) ),
+								RECOMMENDED_PHP,
+								esc_url( 'https://www.php.net/' ),
 								esc_url( 'https://www.mysql.com/' ),
-								esc_url( 'https://mariadb.org/' )
+								'5.6',
+								esc_url( 'https://mariadb.org/' ),
+								'10.0'
 							);
 							?>
 							<br>
