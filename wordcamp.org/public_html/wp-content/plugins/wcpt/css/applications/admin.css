@@ -15,3 +15,7 @@ span.swag-needed-icon {
 #post-body input[type=text] {
     width: 50%;
 }
+
+.postbox-container .select2-container {
+    min-width: 25%;
+}
