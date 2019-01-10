@@ -6,7 +6,7 @@ define( 'API_VERSION', '1.0' );
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/init.php';
 
 require __DIR__ . '/include.php';
-require __DIR__ . '/config.php';
+require WPORGPATH . 'wp-content/mu-plugins/pub/servehappy-config.php';
 
 // Output the API response.
 output_response(

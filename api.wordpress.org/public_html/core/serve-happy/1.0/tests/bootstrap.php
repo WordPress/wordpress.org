@@ -21,5 +21,11 @@ if ( file_exists( $api_init_file ) ) {
 	include $api_init_file;
 }
 
-require dirname( __DIR__ ) . '/config.php';
 require dirname( __DIR__ ) . '/include.php';
+if ( defined( 'WPORGPATH' ) ) {
+	// Running on WordPress.org, include the main mu-plugins config
+	require WPORGPATH . 'wp-content/mu-plugins/pub/servehappy-config.php';
+} else {
+	// Assume meta-environment.
+	require dirname( dirname( dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) ) ) . '/wordpress.org/public_html/wp-content/mu-plugins/pub/servehappy-config.php';
+}

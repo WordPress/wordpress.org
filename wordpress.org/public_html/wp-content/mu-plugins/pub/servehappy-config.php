@@ -1,8 +1,19 @@
 <?php
 namespace WordPressdotorg\API\Serve_Happy;
+/**
+ * Plugin Name: Servehappy Versions
+ * Description: Defines PHP version constants used by the Servehappy API and throughout wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  https://wordpress.org/
+ * License:     GPLv2 or later
+ */
 
 // The latest branch of PHP which WordPress.org recommends.
 define( 'RECOMMENDED_PHP', '7.3' );
+
+// The oldest branch of PHP which WordPress core still works with.
+define( 'MINIMUM_PHP', '5.2.4' );
 
 // The lowest branch of PHP which is actively supported.
 define( 'SUPPORTED_PHP', '7.2' );

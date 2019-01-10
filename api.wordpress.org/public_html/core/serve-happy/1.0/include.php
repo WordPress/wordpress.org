@@ -26,6 +26,7 @@ function parse_request( $request ) {
 
 	return array(
 		'recommended_version' => RECOMMENDED_PHP,
+		'minimum_version'     => MINIMUM_PHP,
 		'is_supported'        => version_compare( $php_version, SUPPORTED_PHP, '>=' ),
 		'is_secure'           => version_compare( $php_version, SECURE_PHP, '>=' ),
 		'is_acceptable'       => version_compare( $php_version, ACCEPTABLE_PHP, '>=' ),
