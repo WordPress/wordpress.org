@@ -156,28 +156,6 @@
 		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
 	</rule>
 
-	<rule ref="WordPress-VIP">
-		<!-- We want these for the best practices, but anything specific to VIP's hosting environment is irrelevant. -->
-		<exclude name="WordPress.VIP.RestrictedFunctions.wp_remote_get_wp_remote_get" />
-		<exclude name="WordPress.VIP.RestrictedFunctions.file_get_contents_file_get_contents" />
-		<exclude name="WordPress.VIP.RestrictedFunctions.get_posts_get_posts" />
-		<exclude name="WordPress.VIP.RestrictedFunctions.switch_to_blog_switch_to_blog" />
-		<exclude name="WordPress.VIP.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__" />
-		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
-		<exclude name="WordPress.VIP.FileSystemWritesDisallow" />
-		<exclude name="WordPress.VIP.SuperGlobalInputUsage.AccessDetected" />
-		<exclude name="WordPress.VIP.PostsPerPage.posts_per_page_posts_per_page" />
-
-		<!-- This is too strict. -->
-		<exclude name="WordPress.VIP.SlowDBQuery.slow_db_query_meta_query" />
-
-		<!-- There are some situations where this is appropriate, so leave it so the developer's discretion. -->
-		<exclude name="WordPress.VIP.DirectDatabaseQuery.DirectQuery" />
-
-		<!-- High numbers are often used as a sanity limit -->
-		<exclude name="WordPress.VIP.PostsPerPage.posts_per_page_numberposts" />
-	</rule>
-
 	<rule ref="WordPress-Extra">
 		<!-- I think it's better to have all the `use` statements come right after the namespace line. -->
 		<exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
