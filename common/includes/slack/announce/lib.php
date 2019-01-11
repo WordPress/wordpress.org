@@ -83,18 +83,7 @@ function run( $data ) {
 		return;
 	}
 
-	if ( $data['command'] === '/committers' ) {
-		// This command seems to not be used actively, in preference for the slack @committers group pings.
-		$committers = get_committers();
-		if ( ! in_array( $user, $committers, true ) ) {
-			return;
-		}
-
-		// TODO: Note that pinging users by `@username` is deprecated, and we now have WordPress.org usernames in the above list.
-		// This should be upadted to ping users by the `<@U.....>` format.
-
-		$text = sprintf( "*@committers:* %s\n_(cc: %s)_", $data['text'], '@' . implode( ', @', $committers ) );
-	} elseif ( $data['command'] === '/deputies' ) {
+	if ( $data['command'] === '/deputies' ) {
 		$pingable_deputies = get_pingable_wordcamp_deputies();
 
 		if ( ! in_array( $user, $pingable_deputies, true ) ) {
