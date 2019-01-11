@@ -297,13 +297,17 @@ function get_whitelist() {
 
 function get_committers() {
 	return array(
-		'dd32', 'nacin', 'helen', 'azaozz', 'westi',
+		'matt', 'dd32', 'nacin', 'helen', 'azaozz', 'westi',
 		'ocean90', 'wonderboymusic', 'johnbillion',
-		'jorbin', 'jeremyfelt', 'pento', 'obenland', 'iseulde',
+		'jorbin', 'jeremyfelt', 'pento', 'obenland',
 		'westonruter', 'afercia', 'karmatosed', 'rmccue', 'michaelarestad',
 		'swissspidy', 'rachelbaker', 'joehoyle', 'melchoyce',
 		'peterwilsoncc', 'joemcgill', 'davidakennedy', 'adamsilverstein',
-		'flixos90', 'iandunn', 'kadamwhite',
+		'flixos90', 'iandunn', 'kadamwhite', 'jrf', 'atimmer', 'laurelfulford',
+		'allendav', 'omarreiss', 'allancole', 'antpb', 'mcsf',
+		'herregroen', 'youknowriad', 'gziolo', 'aduth', 'jorgefilipecosta',
+		'bpayton', 'noisysocks', 'desrosj', 'tellyworth', 'aaroncampbell',
+		'mattmiklic', 'kovshenin', 'joen', 'lancewillett', 'iandstewart',
 
 		'markjaquith',    // @mark on Slack
 		'nbachiyski',     // @nb on Slack
@@ -314,6 +318,9 @@ function get_committers() {
 		'mikeschroder',   // @mike on Slack
 		'jnylen0',        // @jnylen on Slack
 		'matveb',         // @matias on Slack
+		'iseulde',        // @ella on Slack
+		'johnjamesjacoby',// @JJJ on Slack
+		'lonelyvegan',    // @tofumatt on Slack
 	);
 }
 
