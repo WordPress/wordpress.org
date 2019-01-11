@@ -44,7 +44,7 @@ class Reviews {
 							<?php echo Template::dashicons_stars( $review->post_rating ); ?>
 							<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
 						</header>
-						<div class="review-content"><?php the_content(); ?></div>
+						<div class="review-content"><?php echo wp_strip_all_tags(get_the_content()); ?></div>
 					</div>
 				</article>
 			<?php endforeach; ?>
