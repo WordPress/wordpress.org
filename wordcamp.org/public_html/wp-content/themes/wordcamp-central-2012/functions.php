@@ -122,8 +122,9 @@ class WordCamp_Central_Theme {
 				}
 
 				// Jetpack will do the is_email check for us
-				$email     = $_REQUEST['wccentral-subscribe-email'];
-				$subscribe = Jetpack_Subscriptions::subscribe( $email, 0, false );
+				$jetpack_subscriptions = Jetpack_Subscriptions::init();
+				$email                 = $_REQUEST['wccentral-subscribe-email'];
+				$subscribe             = $jetpack_subscriptions->subscribe( $email, 0, false );
 
 				// The following part is taken from the Jetpack subscribe widget (subscriptions.php)
 				if ( is_wp_error( $subscribe ) ) {
