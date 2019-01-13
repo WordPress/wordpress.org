@@ -138,7 +138,7 @@ class HelpHub_Post_Types_Post_Type {
 			/* translators: %s: Post type name. */
 			'view_item'          => sprintf( __( 'View %s', 'wporg-forums' ), $this->singular ),
 			/* translators: %s: Plural post type name. */
-			'search_items'       => sprintf( __( 'Search %a', 'wporg-forums' ), $this->plural ),
+			'search_items'       => sprintf( __( 'Search %s', 'wporg-forums' ), $this->plural ),
 			/* translators: %s: Plural post type name. */
 			'not_found'          => sprintf( __( 'No %s Found', 'wporg-forums' ), $this->plural ),
 			/* translators: %s: Plural post type name. */
