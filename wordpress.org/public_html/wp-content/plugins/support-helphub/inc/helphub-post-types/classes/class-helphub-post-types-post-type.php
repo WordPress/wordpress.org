@@ -282,10 +282,10 @@ class HelpHub_Post_Types_Post_Type {
 			/* translators: %s: Post type name. */
 			7  => sprintf( __( '%s saved.', 'wporg-forums' ), $this->singular ),
 			/* translators: %1$s: Post type name. %2$s: Lowercase post type name. %3$s: Post link tag. %4$s: Close post link tag. */
-			8  => sprintf( __( '%1$s submitted. %2$sPreview %3$s%4$s', 'wporg-forums' ), $this->singular, strtolower( $this->singular ), '<a target="_blank" href="' . esc_url( add_query_arg( 'preview', 'true', $permalink ) ) . '">', '</a>' ),
-			/* translators: %1$s: Post type name. %2$s: Lowercase post type name. */
-			9  => sprintf( __( '%1$s scheduled for: %1$s. %2$sPreview %2$s%3$s', 'wporg-forums' ), $this->singular, strtolower( $this->singular ), '<strong>' . date_i18n( __( 'M j, Y @ G:i', 'wporg-forums' ), strtotime( $post->post_date ) ) . '</strong>', '<a target="_blank" href="' . esc_url( $permalink ) . '">', '</a>' ),
-			/* translators: %1$s: Post type name. %2$s: Lowercase post type name. %3$s: Close post link tag. %4$s: Close post link tag. */
+			8  => sprintf( __( '%1$s submitted. %2$sPreview %3$s%4$s', 'wporg-forums' ), $this->singular, '<a target="_blank" href="' . esc_url( add_query_arg( 'preview', 'true', $permalink ) ) . '">', strtolower( $this->singular ), '</a>' ),
+			/* translators: %1$s: Post type name. %2$s: Lowercase post type name. %3$s: Date. %4$s: Post link tag. %5$s: Close post link tag. */
+			9  => sprintf( __( '%1$s scheduled for: %3$s. %4$sPreview %2$s%5$s', 'wporg-forums' ), $this->singular, strtolower( $this->singular ), '<strong>' . date_i18n( __( 'M j, Y @ G:i', 'wporg-forums' ), strtotime( $post->post_date ) ) . '</strong>', '<a target="_blank" href="' . esc_url( $permalink ) . '">', '</a>' ),
+			/* translators: %1$s: Post type name. %2$s: Lowercase post type name. %3$s: Post link tag. %4$s: Close post link tag. */
 			10 => sprintf( __( '%1$s draft updated. %3$sPreview %2$s%4$s', 'wporg-forums' ), $this->singular, strtolower( $this->singular ), '<a target="_blank" href="' . esc_url( add_query_arg( 'preview', 'true', $permalink ) ) . '">', '</a>' ),
 		);
 
