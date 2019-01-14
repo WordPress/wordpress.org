@@ -1,4 +1,4 @@
-<?php defined( 'WPINC' ) or die(); ?>
+<?php defined( 'WPINC' ) || die(); ?>
 
 <table class="widefat striped">
 	<thead>
@@ -14,11 +14,11 @@
 		<?php if ( $entries ) : ?>
 
 			<?php foreach ( $entries as $entry ) : ?>
-				<tr>
-					<th><?php echo esc_html( date( 'Y-m-d h:ia', $entry['timestamp'] ) );          ?></th>
-					<th><?php echo esc_html( ucwords( str_replace( '_', ' ', $entry['type'] ) ) ); ?></th>
-					<th><?php echo esc_html( $entry['user_display_name'] );                        ?></th>
-					<th><?php echo wp_kses(  $entry['message'], wp_kses_allowed_html( 'data') );   ?></th>
+				<tr class="<?php echo esc_attr( str_replace( '_', '-', $entry['type'] ) ); ?>">
+					<th><p><?php echo esc_html( date( 'Y-m-d h:ia', $entry['timestamp'] ) ); ?></p></th>
+					<th><p><?php echo esc_html( ucwords( str_replace( '_', ' ', $entry['type'] ) ) ); ?></p></th>
+					<th><p><?php echo esc_html( $entry['user_display_name'] ); ?></p></th>
+					<th><?php echo wp_kses( wpautop( $entry['message'] ), wp_kses_allowed_html( 'data' ) ); ?></th>
 				</tr>
 			<?php endforeach; ?>
 

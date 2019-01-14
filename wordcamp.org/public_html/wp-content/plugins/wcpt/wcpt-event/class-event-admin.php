@@ -518,7 +518,7 @@ abstract class Event_Admin {
 
 		check_admin_referer( 'wcpt_notes', 'wcpt_notes_nonce' );
 
-		$new_note_message = sanitize_text_field( wp_unslash( $_POST['wcpt_new_note'] ) );
+		$new_note_message = sanitize_textarea_field( wp_unslash( $_POST['wcpt_new_note'] ) );
 
 		if ( empty( $new_note_message ) ) {
 			return;

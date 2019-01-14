@@ -19,3 +19,26 @@ span.swag-needed-icon {
 .postbox-container .select2-container {
     min-width: 25%;
 }
+
+#wcpt_log .widefat th p:first-of-type {
+		margin-top: 0;
+}
+
+#wcpt_log .widefat th p:last-of-type {
+		margin-bottom: 0;
+}
+
+#wcpt_log .widefat td p,
+#wcpt_log .widefat th p {
+		color: #777;
+}
+
+#wcpt_log .widefat tr.note td,
+#wcpt_log .widefat tr.note th {
+		vertical-align:top;
+}
+
+#wcpt_log .widefat tr.note td p,
+#wcpt_log .widefat tr.note th p {
+		color: #222;
+}
