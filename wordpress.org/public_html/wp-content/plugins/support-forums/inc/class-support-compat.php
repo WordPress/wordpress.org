@@ -354,21 +354,25 @@ class Support_Compat {
 	public function load_compat_subscriptions() {
 		if ( class_exists( 'WordPressdotorg\Forums\Term_Subscription\Plugin' ) ) {
 			Plugin::get_instance()->plugin_subscriptions = new Term_Subscription\Plugin( array(
-				'taxonomy' => 'topic-plugin',
-				'labels'   => array(
+				'taxonomy'  => 'topic-plugin',
+				'directory' => Plugin::get_instance()->plugins,
+				'labels'    => array(
 					'subscribed_header'      => __( 'Subscribed Plugins', 'wporg-forums' ),
 					'subscribed_user_notice' => __( 'You are not currently subscribed to any plugins.', 'wporg-forums' ),
 					'subscribed_anon_notice' => __( 'This user is not currently subscribed to any plugins.', 'wporg-forums' ),
-					'receipt'                => __( 'You are receiving this email because you are subscribed to a plugin.', 'wporg-forums' ),
+					/* translators: %s: Plugin Name. */
+					'receipt'                => __( 'You are receiving this email because you are subscribed to the %s plugin.', 'wporg-forums' ),
 				),
 			) );
 			Plugin::get_instance()->theme_subscriptions = new Term_Subscription\Plugin( array(
-				'taxonomy' => 'topic-theme',
-				'labels'   => array(
+				'taxonomy'  => 'topic-theme',
+				'directory' => Plugin::get_instance()->themes,
+				'labels'    => array(
 					'subscribed_header'      => __( 'Subscribed Themes', 'wporg-forums' ),
 					'subscribed_user_notice' => __( 'You are not currently subscribed to any themes.', 'wporg-forums' ),
 					'subscribed_anon_notice' => __( 'This user is not currently subscribed to any themes.', 'wporg-forums' ),
-					'receipt'                => __( 'You are receiving this email because you are subscribed to a theme.', 'wporg-forums' ),
+					/* translators: %s: Theme Name. */
+					'receipt'                => __( 'You are receiving this email because you are subscribed to the %s theme.', 'wporg-forums' ),
 				),
 			) );
 		}
@@ -393,7 +397,7 @@ class Support_Compat {
 			"SELECT post_name
 			 FROM {$prefix}posts AS p
 			 LEFT JOIN {$prefix}term_relationships AS tr ON p.ID = tr.object_id
-			 LEFT JOIN {$prefix}term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+			 LEFT JOIN {$prefix}term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
 			 LEFT JOIN {$prefix}terms AS t ON tt.term_id = t.term_id
 			 WHERE tt.taxonomy = 'plugin_committers' AND p.post_status = 'publish' AND p.post_type = 'plugin' AND t.slug = %s
 			 ORDER BY p.post_title ASC",
@@ -411,7 +415,7 @@ class Support_Compat {
 			"SELECT post_name
 			 FROM {$prefix}posts AS p
 			 LEFT JOIN {$prefix}term_relationships AS tr ON p.ID = tr.object_id
-			 LEFT JOIN {$prefix}term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+			 LEFT JOIN {$prefix}term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
 			 LEFT JOIN {$prefix}terms AS t ON tt.term_id = t.term_id
 			 WHERE tt.taxonomy = 'plugin_contributors' AND p.post_status = 'publish' AND p.post_type = 'plugin' AND t.slug = %s
 			 ORDER BY p.post_title ASC",

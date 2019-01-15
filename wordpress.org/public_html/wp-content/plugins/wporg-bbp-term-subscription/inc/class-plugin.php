@@ -11,15 +11,17 @@ class Plugin {
 
 	private $subscribers = array();
 
-	public $taxonomy = false;
-	public $labels   = array();
+	public $taxonomy  = false;
+	public $labels    = array();
+	public $directory = false;
 
 	const META_KEY = '_bbp_term_subscription';
 
 	public function __construct( $args = array() ) {
 		$r = wp_parse_args( $args, array(
-			'taxonomy' => 'topic-tag',
-			'labels'   => array(
+			'taxonomy'  => 'topic-tag',
+			'directory' => false,
+			'labels'    => array(
 				'subscribed_header'      => __( 'Subscribed Topic Tags', 'wporg-forums' ),
 				'subscribed_user_notice' => __( 'You are not currently subscribed to any topic tags.', 'wporg-forums' ),
 				'subscribed_anon_notice' => __( 'This user is not currently subscribed to any topic tags.', 'wporg-forums' ),
@@ -27,8 +29,9 @@ class Plugin {
 			),
 		) );
 
-		$this->taxonomy = $r['taxonomy'];
-		$this->labels   = $r['labels'];
+		$this->taxonomy  = $r['taxonomy'];
+		$this->labels    = $r['labels'];
+		$this->directory = $r['directory'];
 
 		add_action( 'bbp_init', array( $this, 'bbp_init' ) );
 	}
@@ -156,7 +159,7 @@ class Plugin {
 	 * @param mixed $anonymous_data Array of anonymous user data
 	 * @param int $topic_author The topic author id
 	 */
-	public function notify_term_subscribers_of_new_topic( $topic_id, $forum_id,  $anonymous_data = false, $topic_author = 0 ) {
+	public function notify_term_subscribers_of_new_topic( $topic_id, $forum_id, $anonymous_data = false, $topic_author = 0 ) {
 		$terms = get_the_terms( $topic_id, $this->taxonomy );
 		if ( ! $terms ) {
 			return;
@@ -184,6 +187,7 @@ class Plugin {
 
 		// Replace forum-specific messaging with term subscription messaging.
 		add_filter( 'bbp_forum_subscription_mail_message', array( $this, 'replace_forum_subscription_mail_message' ), 10, 4 );
+		add_filter( 'bbp_forum_subscription_mail_title',   array( $this, 'replace_forum_subscription_mail_title' ), 10, 2 );
 
 		// Replace forum subscriber list with term subscribers, avoiding duplicates.
 		add_filter( 'bbp_forum_subscription_user_ids', array( $this, 'add_term_subscribers_to_forum' ) );
@@ -192,8 +196,10 @@ class Plugin {
 		bbp_notify_forum_subscribers( $topic_id, $forum_id );
 
 		// Remove filters.
-		remove_filter( 'bbp_forum_subscription_user_ids', array( $this, 'add_term_subscribers_to_forum' ) );
+		remove_filter( 'bbp_forum_subscription_user_ids',     array( $this, 'add_term_subscribers_to_forum' ) );
 		remove_filter( 'bbp_forum_subscription_mail_message', array( $this, 'replace_forum_subscription_mail_message' ), 10 );
+		remove_filter( 'bbp_forum_subscription_mail_title',   array( $this, 'replace_forum_subscription_mail_title' ) );
+
 	}
 
 	/**
@@ -235,10 +241,29 @@ Login and visit the topic to reply to the topic or unsubscribe from these emails
 			$topic_author_name,
 			$topic_content,
 			$topic_url,
-			$this->labels['receipt']
+			// String may not have placeholders, ie. in the case of tags.
+			sprintf( $this->labels['receipt'], $this->directory ? $this->directory->title() : '' )
 		);
 
 		return $message;
+	}
+
+	/**
+	 * Replace the forum subscription subject/title with term-specific messaging.
+	 *
+	 * @param string $title The current title
+	 * @param int $topic_id The topic id
+	 */
+	public function replace_forum_subscription_mail_title( $title, $topic_id ) {
+		if ( $this->directory && $this->directory->title() ) {
+			$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+			$topic_title = strip_tags( bbp_get_topic_title( $topic_id ) );
+
+			// [WordPress.org] [Plugin Name] This is my threads
+			$title = sprintf( '[%s] [%s] %s', $blog_name, $this->directory->title(), $topic_title );
+		}
+
+		return $title;
 	}
 
 	/**
@@ -280,6 +305,7 @@ Login and visit the topic to reply to the topic or unsubscribe from these emails
 
 		// Replace topic-specific messaging with term subscription messaging.
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'replace_topic_subscription_mail_message' ), 10, 3 );
+		add_filter( 'bbp_subscription_mail_title',   array( $this, 'replace_topic_subscription_mail_title' ), 10, 3 );
 
 		// Replace forum subscriber list with term subscribers, avoiding duplicates.
 		add_filter( 'bbp_topic_subscription_user_ids', array( $this, 'add_term_subscribers_to_topic' ) );
@@ -289,7 +315,8 @@ Login and visit the topic to reply to the topic or unsubscribe from these emails
 
 		// Remove filters.
 		remove_filter( 'bbp_topic_subscription_user_ids', array( $this, 'add_term_subscribers_to_topic' ) );
-		remove_filter( 'bbp_subscription_mail_message', array( $this, 'replace_topic_subscription_mail_message' ), 10 );
+		remove_filter( 'bbp_subscription_mail_message',   array( $this, 'replace_topic_subscription_mail_message' ) );
+		remove_filter( 'bbp_subscription_mail_title',     array( $this, 'replace_topic_subscription_mail_title' ) );
 	}
 
 	/**
@@ -330,10 +357,30 @@ Login and visit the topic to reply to the topic or unsubscribe from these emails
 			$reply_author_name,
 			$reply_content,
 			$reply_url,
-			$this->labels['receipt']
+			// String may not have placeholders, ie. in the case of tags.
+			sprintf( $this->labels['receipt'], $this->directory ? $this->directory->title() : '' )
 		);
 
 		return $message;
+	}
+
+	/**
+	 * Replace the topic subscription subject/title with term-specific messaging.
+	 *
+	 * @param string $title    The current title
+	 * @param int    $reply_id The reply id
+	 * @param int    $topic_id The topic id
+	 */
+	public function replace_topic_subscription_mail_title( $title, $reply_id, $topic_id ) {
+		if ( $this->directory && $this->directory->title() ) {
+			$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+			$topic_title = strip_tags( bbp_get_topic_title( $topic_id ) );
+
+			// [WordPress.org] [Plugin Name] This is my threads
+			$title = sprintf( '[%s] [%s] %s', $blog_name, $this->directory->title(), $topic_title );
+		}
+
+		return $title;
 	}
 
 	/**
