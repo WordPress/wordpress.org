@@ -14,7 +14,7 @@ class WordCamp_Application extends Event_Application {
 	const SHORTCODE_SLUG = 'wordcamp-organizer-application';
 
 	static function get_event_label() {
-		__( 'WordCamp', 'wordcamporg' );
+		return __( 'WordCamp', 'wordcamporg' );
 	}
 
 	/**
@@ -157,6 +157,24 @@ class WordCamp_Application extends Event_Application {
 	}
 
 	/**
+	 * Gets default status of new WordCamp application
+	 *
+	 * @return string
+	 */
+	public static function get_default_status() {
+		return WCPT_DEFAULT_STATUS;
+	}
+
+	/**
+	 * Public report URL for WordCamp applications.
+	 *
+	 * @return string
+	 */
+	public static function get_application_report_url() {
+		return "https://central.wordcamp.org/reports/application-status/";
+	}
+
+	/**
 	 * Create a WordCamp post from an application
 	 *
 	 * @param array $data
@@ -185,6 +203,7 @@ class WordCamp_Application extends Event_Application {
 		// Populate the meta fields
 		add_post_meta( $post_id, '_application_data', $data );
 		add_post_meta( $post_id, '_application_submitter_ip_address', $_SERVER['REMOTE_ADDR'] );
+
 
 		add_post_meta(
 			$post_id, 'Organizer Name', sprintf(
@@ -230,7 +249,7 @@ class WordCamp_Application extends Event_Application {
 	 */
 	function get_organizer_email() {
 		if ( isset( $this->post ) && isset( $this->post->ID ) ) {
-			return get_post_meta( $this->post->ID, 'q_1079059_email' );
+			return get_post_meta( $this->post->ID, 'Email Address', true );
 		}
 	}
 
@@ -241,7 +260,7 @@ class WordCamp_Application extends Event_Application {
 	 */
 	function get_event_location() {
 		if ( isset( $this->post ) && isset( $this->post->ID ) ) {
-			return get_post_meta( $this->post->ID, 'q_1079103_wordcamp_location' );
+			return get_post_meta( $this->post->ID, 'Location', true );
 		}
 	}
 

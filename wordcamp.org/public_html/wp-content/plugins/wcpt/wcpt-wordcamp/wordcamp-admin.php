@@ -5,6 +5,7 @@ use WordCamp\Mentors_Dashboard;
 use WordPress_Community\Applications\WordCamp_Application;
 
 require_once WCPT_DIR . 'wcpt-event/class-event-admin.php';
+require_once WCPT_DIR . 'wcpt-event/notification.php';
 
 if ( ! class_exists( 'WordCamp_Admin' ) ) :
 	/**
@@ -704,6 +705,57 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 		 */
 		public function mark_date_added_to_planning_schedule( $wordcamp ) {
 			update_post_meta( $wordcamp->ID, '_timestamp_added_to_planning_schedule', time() );
+		}
+
+		/**
+		 * Send notification to slack when a WordCamp is scheduled or declined. Runs whenever status of an applications changes
+		 *
+		 * @param string  $new_status
+		 * @param string  $old_status
+		 * @param WP_Post $wordcamp
+		 *
+		 * @return null|bool
+		 */
+		public function notify_application_status_in_slack( $new_status, $old_status, WP_Post $wordcamp ) {
+
+			$notification_enabled = apply_filters( 'wordcamp_application_notification_enabled', true );
+
+			if ( ! $notification_enabled ) {
+				return null;
+			}
+
+			if ( 'wcpt-scheduled' === $new_status ) {
+				return $this->notify_new_wordcamp_in_slack( $wordcamp );
+			} elseif ( 'wcpt-rejected' === $new_status ) {
+				$location = get_post_meta( $wordcamp->ID, 'Location', true );
+				return $this->schedule_decline_notification( $wordcamp, 'WordCamp', $location );
+			}
+		}
+
+		/**
+		 * Send notification when a new WordCamp comes in scheduled status.
+		 *
+		 * @param WP_Post $wordcamp
+		 *
+		 * @return null|bool
+		 */
+		public static function notify_new_wordcamp_in_slack( $wordcamp ) {
+			// Not translating any string because they will be sent to slack.
+			$city             = get_post_meta( $wordcamp->ID, 'Location', true );
+			$start_date       = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
+			$wordcamp_url     = get_post_meta( $wordcamp->ID, 'URL', true );
+			$title            = 'New WordCamp scheduled!!!';
+
+			$message = sprintf(
+				"<%s|WordCamp $city> has been scheduled for a start date of %s. :tada: :community: :wordpress:\n\n%s",
+				$wordcamp_url,
+				date( 'F j, Y', $start_date ),
+				$wordcamp_url
+			);
+
+			$attachment = create_event_status_attachment( $message, $wordcamp->ID, $title );
+
+			return wcpt_slack_notify( COMMUNITY_EVENTS_SLACK, $attachment );
 		}
 
 		/**

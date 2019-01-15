@@ -55,10 +55,15 @@ abstract class Event_Admin {
 
 		add_action( 'transition_post_status', array( $this, 'log_status_changes' ), 10, 3 );
 
+		add_action( 'transition_post_status', array( $this, 'notify_application_status_in_slack' ), 10, 3 );
+
 		add_filter( 'redirect_post_location', array( $this, 'add_admin_notices_to_redirect_url' ), 10, 2 );
 
 		// Admin notices
 		add_action( 'admin_notices', array( $this, 'print_admin_notices' ) );
+
+		add_action( 'send_decline_notification_action',  'Event_Admin::send_decline_notification', 10, 3 );
+
 	}
 
 	/**
@@ -274,6 +279,46 @@ abstract class Event_Admin {
 		if ( $log_id ) {
 			add_post_meta( $post->ID, "_status_change_log_$post->post_type $log_id", time() );
 		}
+	}
+
+	/**
+	 * Hooked to `transition_post_status`, will send notifications to community slack channels based whenever an application status changes to something that we are interested in. Most likely would be when an application is declined or accepted.
+	 *
+	 * @param string  $new_status New status
+	 * @param string  $old_status Old Status
+	 * @param WP_Post $event
+	 */
+	abstract public function notify_application_status_in_slack( $new_status, $old_status, WP_Post $event );
+
+	/**
+	 * Schedule notificaiton for declined application. Currently supports WordCamp and Meetup
+	 *
+	 * @param WP_Post $event Event object
+	 * @param string  $label Could be WordCamp or Meetup
+	 * @param string  $location
+	 *
+	 * @return bool|string
+	 */
+	public static function schedule_decline_notification( $event, $label, $location ) {
+		wp_schedule_single_event( time() + DAY_IN_SECONDS, 'send_decline_notification_action', array( $event->ID, $label, $location ) );
+	}
+
+	/**
+	 * Send declined notification to community team slack channel.
+	 *
+	 * @param int    $event_id
+	 * @param string $label
+	 * @param string $location
+	 */
+	public static function send_decline_notification( $event_id, $label, $location ) {
+		$message = sprintf(
+			"A %s application for %s has been declined, and the applicant has been informed via email.",
+			$label,
+			$location
+		);
+
+		$attachment = create_event_status_attachment( $message, $event_id, '' );
+		wcpt_slack_notify( COMMUNITY_TEAM_SLACK, $attachment );
 	}
 
 	/**

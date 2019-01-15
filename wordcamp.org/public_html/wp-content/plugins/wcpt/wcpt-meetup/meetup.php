@@ -2,7 +2,7 @@
 
 namespace WordPress_Community\Applications\Meetup;
 
-require_once 'class-meetup-application.php';
+require_once WCPT_DIR . 'wcpt-meetup/class-meetup-application.php';
 use WordPress_Community\Applications\Meetup_Application;
 
 defined( 'WPINC' ) or die();

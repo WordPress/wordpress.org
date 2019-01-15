@@ -270,8 +270,15 @@ ADDRESS;
 	 */
 	public function get_event_location() {
 		if ( isset( $this->post->ID ) ) {
-			return get_post_meta( $this->post->ID, 'q_city', true );
+			return get_post_meta( $this->post->ID, 'Meetup Location', true );
 		}
+	}
+
+	/**
+	 * Public report URL for Meetup Applications
+	 */
+	public static function get_application_report_url() {
+		return "https://central.wordcamp.org/reports/meetup-applications/";
 	}
 
 }

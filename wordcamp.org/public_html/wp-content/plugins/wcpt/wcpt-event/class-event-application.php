@@ -6,6 +6,7 @@
  */
 
 namespace WordPress_Community\Applications;
+require_once WCPT_DIR . 'wcpt-event/notification.php';
 
 /**
  * Class Event_Application
@@ -84,6 +85,7 @@ abstract class Event_Application {
 	 */
 	public function submit_application() {
 		$application_data = $this->validate_data( $_POST );
+
 		if ( $this->is_rate_limited() ) {
 			$message        = __( 'You have submitted too many applications recently. Please wait and try again in a few hours.', 'wordcamporg' );
 			$notice_classes = 'notice-error';
@@ -92,7 +94,13 @@ abstract class Event_Application {
 			$notice_classes = 'notice-error';
 		} else {
 			$this->create_post( $application_data );
-			$this->notify_applicant_application_received( $this->get_organizer_email(), $this->get_event_location() );
+			$this->notify_applicant_application_received(
+					$this->get_organizer_email(),
+					$this->get_event_location()
+			);
+
+			$this->notify_new_application_in_slack();
+
 			$message        = __( "Thank you for your application! We've received it, and we'll contact you once we've had a chance to review it.", 'wordcamporg' );
 			$notice_classes = 'notice-success';
 		}
@@ -174,6 +182,20 @@ abstract class Event_Application {
 	abstract public function get_event_location();
 
 	/**
+	 * Get default status for a new application.
+	 *
+	 * @return string|null
+	 */
+	abstract public static function get_default_status();
+
+	/**
+	 * Get publicly accessible report url for a event. Should return null if such report is published.
+	 *
+	 * @return string|null
+	 */
+	abstract public static function get_application_report_url();
+
+	/**
 	 * Display a notice to applicant while submitting the form.
 	 *
 	 * @param string $message Message to be displayed.
@@ -191,9 +213,9 @@ abstract class Event_Application {
 	 * Notify the applicant that we've received their application
 	 *
 	 * @param string $email_address
-	 * @param string $meetup_city
+	 * @param string $event_city
 	 */
-	public function notify_applicant_application_received( $email_address, $meetup_city ) {
+	public function notify_applicant_application_received( $email_address, $event_city ) {
 		//translators: Name of the event. Egs WordCamp.
 		$subject = sprintf( __( "We've received your %s application", 'wpct' ), $this->get_event_label() );
 		$headers = array( 'Reply-To: support@wordcamp.org' );
@@ -203,9 +225,38 @@ abstract class Event_Application {
 				"Thank you for applying to organize a %s in %s! We'll send you a follow-up e-mail once we've had a chance to review your application.",
 				'wpct'
 			),
-			$this->get_event_label(), sanitize_text_field( $meetup_city )
+			$this->get_event_label(), sanitize_text_field( $event_city )
 		);
 
 		wp_mail( $email_address, $subject, $message, $headers );
+	}
+
+	/**
+	 * Notify in community slack channel that we've received an application
+	 */
+	public function notify_new_application_in_slack() {
+
+		// Not translating because this will be sent to community events slack channel.
+		$message = sprintf( "A %s application for %s has been received.", $this->get_event_label(), $this->get_event_location() );
+
+		$public_report_url = $this->get_application_report_url();
+		if ( isset( $public_report_url ) ) {
+			// `<%s|here> is syntax for slack message to hyperlink text `here` with url provided in `%s`
+			$message = sprintf( "%s Public status can be followed on <%s|%s application report page>.", $message, $public_report_url, $this->get_event_label() );
+		}
+
+		$default_status = $this->get_default_status();
+		$queue_size = wp_count_posts( $post_type=$this->get_event_type() )->$default_status;
+		if ( isset( $queue_size ) ) {
+			$singular = "is $queue_size application";
+			$plural   = "are $queue_size applications";
+			$message = sprintf(
+					"%s\n _There %s in vetting queue._",
+					$message,
+					1 === $queue_size ? $singular : $plural );
+		}
+
+		$attachment = create_event_attachment( $message,  sprintf( "New %s application ", $this->get_event_label() ) );
+		return wcpt_slack_notify( COMMUNITY_TEAM_SLACK, $attachment );
 	}
 }

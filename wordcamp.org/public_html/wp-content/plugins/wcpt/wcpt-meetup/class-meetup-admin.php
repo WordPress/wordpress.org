@@ -8,8 +8,10 @@
 use \WordPress_Community\Applications\Meetup_Application;
 
 require_once WCPT_DIR . 'wcpt-event/class-event-admin.php';
+require_once WCPT_DIR . 'wcpt-event/notification.php';
 
-if ( ! class_exists( 'MeetupAdmin' ) ) :
+
+if ( ! class_exists( 'Meetup_Admin' ) ) :
 
 	/**
 	 * Implements Meetup Admin class
@@ -476,6 +478,58 @@ if ( ! class_exists( 'MeetupAdmin' ) ) :
 
 			$this->update_meetup_organizers( $organizers_list, $post );
 
+		}
+
+		/**
+		 * Send notification to slack when a Meetup becomes active in the chapter or is declined.
+		 *
+		 * @param string  $new_status
+		 * @param string  $old_status
+		 * @param WP_Post $meetup
+		 *
+		 * @return null|bool Will be null if notification was not enabled, or false if notifcation was attempted but failed. true if notification was successful
+		 */
+		public function notify_application_status_in_slack( $new_status, $old_status, WP_Post $meetup ) {
+
+			$notification_enabled = apply_filters( 'meetup_application_notification_enabled', true );
+
+			if ( ! $notification_enabled ) {
+				return null;
+			}
+
+			if ( 'wcpt-mtp-active' === $new_status ) {
+				return $this->notify_new_meetup_group_in_slack( $meetup );
+			} elseif ( 'wcpt-mtp-rejected' === $new_status ) {
+				$location = get_post_meta( $meetup->ID, 'Meetup Location', true );
+				return $this->schedule_decline_notification( $meetup, $this->get_event_label(), $location );
+			}
+		}
+
+		/**
+		 * Send notification when a new Meetup groups is added to the chapter.
+		 *
+		 * @param WP_Post $meetup Meetup post object
+		 *
+		 * @return bool|string
+		 */
+		public static function notify_new_meetup_group_in_slack( $meetup ) {
+
+			// Not translating strings here because these will be sent to Slack.
+			$city            = get_post_meta( $meetup->ID, 'Meetup Location', true );
+			$organizer_slack = get_post_meta( $meetup->ID, 'Slack', true );
+			$meetup_link     = get_post_meta( $meetup->ID, 'Meetup URL', true );
+			$title           = "New meetup group added";
+
+			$message = sprintf(
+				"Let's welcome the new WordPress meetup group%s%s, to the chapter! :tada: :community: :wordpress:\n%s",
+				isset( $city ) ? " in $city," : "",
+				isset( $organizer_slack ) ? " organized by @$organizer_slack" : "",
+				$meetup_link
+			);
+
+			$attachment = create_event_status_attachment( $message, $meetup->ID, $title );
+
+			return wcpt_slack_notify( COMMUNITY_EVENTS_SLACK, $attachment );
 		}
 
 		/**
