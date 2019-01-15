@@ -497,9 +497,9 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 				return null;
 			}
 
-			if ( 'wcpt-mtp-active' === $new_status ) {
+			if ( 'wcpt-mtp-active' === $new_status && 'wcpt-mtp-active' !== $old_status ) {
 				return $this->notify_new_meetup_group_in_slack( $meetup );
-			} elseif ( 'wcpt-mtp-rejected' === $new_status ) {
+			} elseif ( 'wcpt-mtp-rejected' === $new_status && 'wcpt-mtp-rejected' !== $old_status ) {
 				$location = get_post_meta( $meetup->ID, 'Meetup Location', true );
 				return $this->schedule_decline_notification( $meetup, $this->get_event_label(), $location );
 			}

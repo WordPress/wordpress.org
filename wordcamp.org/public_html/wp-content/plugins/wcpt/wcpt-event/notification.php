@@ -109,6 +109,10 @@ function get_props_for_event ( $event_id ) {
  * @return array List of user nicenames
  */
 function get_user_nicenames_from_ids( $user_ids ) {
+	if ( empty( $user_ids ) ) {
+		return array();
+	}
+
 	$user_query = new WP_User_Query( array( 'include' => $user_ids, 'fields'  => array( 'user_nicename' ), ) );
 
 	$users = $user_query->get_results();
