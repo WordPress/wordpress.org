@@ -45,6 +45,9 @@ class Performance_Optimizations {
 		// Disable canonical redirects for short post_names
 		add_filter( 'template_redirect', array( $this, 'maybe_disable_404_canonical' ), 9 );
 
+		// Disable the 'popular' view.
+		add_filter( 'bbp_register_views', array( $this, 'disable_popular_view' ) );
+
 	}
 
 	/**
@@ -424,5 +427,12 @@ class Performance_Optimizations {
 			wp_cache_set( $cache_key, $bound_id, $cache_group, DAY_IN_SECONDS );
 		}
 		return $bound_id;
+	}
+
+	/**
+	 * Deregister the 'popular' view as it doesn't make sense on the Global Forums from a performance perspective.
+	 */
+	public function disable_popular_view() {
+		bbp_deregister_view( 'popular' );
 	}
 }
