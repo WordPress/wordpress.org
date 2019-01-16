@@ -13,7 +13,12 @@ class WordCamp_Application extends Event_Application {
 
 	const SHORTCODE_SLUG = 'wordcamp-organizer-application';
 
-	static function get_event_label() {
+	/**
+	 * Return publicly displayed name of the event
+	 *
+	 * @return string
+	 */
+	public static function get_event_label() {
 		return __( 'WordCamp', 'wordcamporg' );
 	}
 
@@ -22,14 +27,14 @@ class WordCamp_Application extends Event_Application {
 	 *
 	 * @return string
 	 */
-	static function get_event_type() {
+	public static function get_event_type() {
 		return WCPT_POST_TYPE_ID;
 	}
 
 	/**
 	 * Enqueue scripts and stylesheets
 	 */
-	function enqueue_assets() {
+	public function enqueue_assets() {
 		global $post;
 
 		wp_register_script(
@@ -52,7 +57,7 @@ class WordCamp_Application extends Event_Application {
 	 *
 	 * @return null|void
 	 */
-	function render_application_form( $countries ) {
+	public function render_application_form( $countries ) {
 		render_wordcamp_application_form( $countries );
 	}
 
@@ -63,7 +68,7 @@ class WordCamp_Application extends Event_Application {
 	 *
 	 * @return array|\WP_Error
 	 */
-	function validate_data( $unsafe_data ) {
+	public function validate_data( $unsafe_data ) {
 		$safe_data   = array();
 		$unsafe_data = shortcode_atts( $this->get_default_application_values(), $unsafe_data );
 
@@ -97,9 +102,9 @@ class WordCamp_Application extends Event_Application {
 	 *
 	 * @return array
 	 */
-	function get_default_application_values() {
+	public function get_default_application_values() {
 		$values = array(
-			// Part 1
+			// Part 1.
 			'q_1079074_first_name'                       => '',
 			'q_1079074_last_name'                        => '',
 			'q_1079059_email'                            => '',
@@ -117,7 +122,7 @@ class WordCamp_Application extends Event_Application {
 			'q_1068223_hope_to_accomplish'               => array(),
 			'q_1068223_hope_to_accomplish_other'         => '',
 
-			// Part 2
+			// Part 2.
 			'q_1045950_active_meetup'                    => '',
 			'q_1045953_role_in_meetup'                   => '',
 			'q_1045972_meetup_url'                       => '',
@@ -127,7 +132,7 @@ class WordCamp_Application extends Event_Application {
 			'q_1079086_other_tech_events'                => '',
 			'q_1079082_other_tech_events_success'        => '',
 
-			// Part 3
+			// Part 3.
 			'q_1079103_wordcamp_location'                => '',
 			'q_1046006_wordcamp_date'                    => '',
 			'q_1046007_how_many_attendees'               => '',
@@ -148,7 +153,7 @@ class WordCamp_Application extends Event_Application {
 			'where_find_online'                          => '',
 			'q_1079098_anything_else'                    => '',
 
-			// Bonus
+			// Bonus.
 			'q_1079112_best_describes_you'               => '',
 			'q_1079112_best_describes_you_other'         => '',
 		);
@@ -171,7 +176,7 @@ class WordCamp_Application extends Event_Application {
 	 * @return string
 	 */
 	public static function get_application_report_url() {
-		return "https://central.wordcamp.org/reports/application-status/";
+		return 'https://central.wordcamp.org/reports/application-status/';
 	}
 
 	/**
@@ -181,8 +186,8 @@ class WordCamp_Application extends Event_Application {
 	 *
 	 * @return bool|\WP_Error
 	 */
-	function create_post( $data ) {
-		// Create the post
+	public function create_post( $data ) {
+		// Create the post.
 		$user      = wcorg_get_user_by_canonical_names( $data['q_4236565_wporg_username'] );
 		$statues   = \WordCamp_Loader::get_post_statuses();
 		$countries = wcorg_get_countries();
@@ -191,7 +196,7 @@ class WordCamp_Application extends Event_Application {
 			'post_type'   => $this->get_event_type(),
 			'post_title'  => 'WordCamp ' . $data['q_1079103_wordcamp_location'],
 			'post_status' => WCPT_DEFAULT_STATUS,
-			'post_author' => is_a( $user, 'WP_User' ) ? $user->ID : 7694169, // Set `wordcamp` as author if supplied username is not valid
+			'post_author' => is_a( $user, 'WP_User' ) ? $user->ID : 7694169, // Set `wordcamp` as author if supplied username is not valid.
 		);
 
 		$post_id = wp_insert_post( $post, true );
@@ -200,13 +205,14 @@ class WordCamp_Application extends Event_Application {
 			return $post_id;
 		}
 
-		// Populate the meta fields
+		// Populate the meta fields.
 		add_post_meta( $post_id, '_application_data', $data );
 		add_post_meta( $post_id, '_application_submitter_ip_address', $_SERVER['REMOTE_ADDR'] );
 
-
 		add_post_meta(
-			$post_id, 'Organizer Name', sprintf(
+			$post_id,
+			'Organizer Name',
+			sprintf(
 				'%s %s',
 				$data['q_1079074_first_name'],
 				$data['q_1079074_last_name']
@@ -219,7 +225,9 @@ class WordCamp_Application extends Event_Application {
 		add_post_meta( $post_id, 'WordPress.org Username', $data['q_4236565_wporg_username'] );
 
 		add_post_meta(
-			$post_id, 'Mailing Address', sprintf(
+			$post_id,
+			'Mailing Address',
+			sprintf(
 				"%s\n%s%s%s %s\n%s",
 				$data['q_1079060_add1'],
 				$data['q_1079060_add2'] ? $data['q_1079060_add2'] . "\n" : '',
@@ -231,7 +239,9 @@ class WordCamp_Application extends Event_Application {
 		);
 
 		add_post_meta(
-			$post_id, '_status_change', array(
+			$post_id,
+			'_status_change',
+			array(
 				'timestamp' => time(),
 				'user_id'   => is_a( $user, 'WP_User' ) ? $user->ID : 0,
 				'message'   => sprintf( '%s &rarr; %s', 'Application', $statues[ WCPT_DEFAULT_STATUS ] ),
@@ -247,7 +257,7 @@ class WordCamp_Application extends Event_Application {
 	 *
 	 * @return null|string
 	 */
-	function get_organizer_email() {
+	public function get_organizer_email() {
 		if ( isset( $this->post ) && isset( $this->post->ID ) ) {
 			return get_post_meta( $this->post->ID, 'Email Address', true );
 		}
@@ -258,7 +268,7 @@ class WordCamp_Application extends Event_Application {
 	 *
 	 * @return null|string
 	 */
-	function get_event_location() {
+	public function get_event_location() {
 		if ( isset( $this->post ) && isset( $this->post->ID ) ) {
 			return get_post_meta( $this->post->ID, 'Location', true );
 		}

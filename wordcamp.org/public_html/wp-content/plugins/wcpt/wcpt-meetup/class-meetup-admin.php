@@ -119,6 +119,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 
 		/**
 		 * Checks if a field is read only.
+		 *
 		 * @param string $key Name of the field.
 		 *
 		 * @return bool Whether `$key` is a protected field.
@@ -167,8 +168,8 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		/**
 		 * TODO: Remove quickedit action.
 		 *
-		 * @param $actions
-		 * @param $post
+		 * @param array   $actions
+		 * @param WP_Post $post
 		 *
 		 * @return mixed
 		 */
@@ -295,16 +296,16 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 			if ( empty( $last_synced_on ) ) {
 				$last_synced_on = 'Never';
 			} else {
-				$last_synced_on = date( "Y-m-d",  substr( $last_synced_on, 0, 10 ) );
+				$last_synced_on = date( 'Y-m-d',  substr( $last_synced_on, 0, 10 ) );
 			}
 			?>
 			<div class="wcb submitbox">
 				<div class="misc-pub-section">
-					<label>Last sync: <?php echo $last_synced_on ?></label>
+					<label>Last sync: <?php echo esc_html( $last_synced_on ); ?></label>
 				</div>
 				<div class="misc-pub-section">
 					<label>
-						<input type="checkbox" name="<?php echo $element_name ?>" >
+						<input type="checkbox" name="<?php echo esc_html( $element_name ); ?>" >
 						Sync Now
 					</label>
 				</div>
@@ -315,15 +316,15 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		/**
 		 * Updates meetup fields using meetup.com API only if Sync now checkbox is checked.
 		 *
-		 * @param int   $post_id
-		 * @param array $original_meta_values
+		 * @param int $post_id
 		 */
-		public function maybe_update_meetup_data( $post_id ){
+		public function maybe_update_meetup_data( $post_id ) {
 			if ( $this->get_event_type() !== get_post_type() ) {
 				return;
 			}
 
-			$should_sync = $_POST[ 'sync_with_meetup_api' ] ?? false;
+			//phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in `metabox_save` in class-event-admin.php.
+			$should_sync = $_POST['sync_with_meetup_api'] ?? false;
 			if ( ! $should_sync ) {
 				return;
 			}
@@ -339,7 +340,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		/**
 		 * Update meetup fields using meetup.com API
 		 *
-		 * @param $post_id
+		 * @param int $post_id
 		 *
 		 * @return array|WP_Error
 		 */
@@ -349,7 +350,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 
 			$parsed_url = wp_parse_url( $meetup_url, -1 );
 
-			if( ! $parsed_url ) {
+			if ( ! $parsed_url ) {
 				return new WP_Error( 'invalid-url', __('Provided Meetup URL is not a valid URL.', 'wordcamporg' ) );
 			}
 			$url_path_segments = explode( '/', rtrim( $parsed_url['path'], '/' ) );
@@ -390,12 +391,12 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 			if ( isset( $group_leads ) && is_array( $group_leads ) ) {
 				foreach ( $group_leads as $event_host ) {
 					if ( WCPT_WORDPRESS_MEETUP_ID === $event_host['id'] ) {
-						// Skip WordPress admin user
+						// Skip WordPress admin user.
 						continue;
 					}
 					$event_hosts[] = array(
-							'name' => $event_host['name'],
-							'id'   => $event_host['id'],
+						'name' => $event_host['name'],
+						'id'   => $event_host['id'],
 					);
 				}
 			}
@@ -404,7 +405,6 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 			update_post_meta( $post_id, 'Meetup Location (From meetup.com)', $group_details['localized_location'] );
 			update_post_meta( $post_id, 'Meetup members count', $group_details['members'] );
 			update_post_meta( $post_id, 'Meetup group created on', $group_details['created'] / 1000 );
-
 
 			if ( isset( $group_details['last_event'] ) && is_array( $group_details['last_event'] ) ) {
 				update_post_meta( $post_id, 'Number of past meetups', $group_details['past_event_count'] );
@@ -422,7 +422,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		 * @param int   $post_id
 		 * @param array $original_data
 		 */
-		public function meetup_organizers_changed( $post_id, $original_data ){
+		public function meetup_organizers_changed( $post_id, $original_data ) {
 			global $post;
 
 			if ( $this->get_event_type() !== get_post_type() ) {
@@ -508,7 +508,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		/**
 		 * Send notification when a new Meetup groups is added to the chapter.
 		 *
-		 * @param WP_Post $meetup Meetup post object
+		 * @param WP_Post $meetup Meetup post object.
 		 *
 		 * @return bool|string
 		 */
@@ -518,7 +518,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 			$city            = get_post_meta( $meetup->ID, 'Meetup Location', true );
 			$organizer_slack = get_post_meta( $meetup->ID, 'Slack', true );
 			$meetup_link     = get_post_meta( $meetup->ID, 'Meetup URL', true );
-			$title           = "New meetup group added";
+			$title           = 'New meetup group added';
 
 			$message = sprintf(
 				"Let's welcome the new WordPress meetup group%s%s, to the chapter! :tada: :community: :wordpress:\n%s",
@@ -556,8 +556,8 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		/**
 		 * Helper method which triggers action `update_meetup_organizers`
 		 *
-		 * @param $organizers
-		 * @param $post
+		 * @param array   $organizers
+		 * @param WP_Post $post
 		 */
 		protected function update_meetup_organizers( $organizers, $post ) {
 			if ( ! empty( $organizers ) ) {
@@ -579,15 +579,15 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 				),
 				'invalid-response'   => array(
 					'type'   => 'notice',
-					'notice' => __( 'Received invalid response from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' )
+					'notice' => __( 'Received invalid response from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' ),
 				),
 				'group_error'        => array(
 					'type'   => 'notice',
-					'notice' => __( 'Received invalid response from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' )
+					'notice' => __( 'Received invalid response from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' ),
 				),
 				'http_response_code' => array(
 					'type'   => 'notice',
-					'notice' => __( 'Received invalid response code from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' )
+					'notice' => __( 'Received invalid response code from Meetup API. Please make sure Meetup URL is correct, or try again after some time.', 'wordcamporg' ),
 				),
 			);
 
@@ -596,7 +596,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		/**
 		 * Render list of co-organizer of meetup linking to their profile on meetup.com
 		 *
-		 * @param string $key Name of meetup field. Should be 'Meetup Co-organizer names'
+		 * @param string $key Name of meetup field. Should be 'Meetup Co-organizer names'.
 		 */
 		public function render_co_organizers_list( $key ) {
 			global $post_id;
@@ -604,9 +604,9 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 				return;
 			}
 			$organizers = get_post_meta( $post_id, $key, true );
-			if ( isset ( $organizers ) && is_array( $organizers ) ) {
+			if ( isset( $organizers ) && is_array( $organizers ) ) {
 				$group_slug = get_post_meta( $post_id, 'Meetup URL', true );
-				if ( empty ( $group_slug ) ) {
+				if ( empty( $group_slug ) ) {
 					echo 'Invalid Meetup Group URL';
 					return;
 				}
@@ -624,7 +624,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 				}
 				echo '</ul>';
 			} else {
-				echo __( 'No meetup organizers set.', 'wordcamp.org' );
+				esc_html_e( 'No meetup organizers set.', 'wordcamp.org' );
 			}
 		}
 
@@ -741,12 +741,14 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		 * Cron worker for syncing with Meetup.com API data
 		 */
 		public static function meetup_api_sync() {
-			$query = new WP_Query( array(
-				'post_type'   => self::get_event_type(),
-				'post_status' => 'wcpt-mtp-active',
-				'fields'      => 'ids',
-				'posts_per_page' => -1,
-			) );
+			$query = new WP_Query(
+				array(
+					'post_type'      => self::get_event_type(),
+					'post_status'    => 'wcpt-mtp-active',
+					'fields'         => 'ids',
+					'posts_per_page' => - 1,
+				)
+			);
 
 			$new_meetup_org_data = array();
 			foreach ( $query->posts as $post_id ) {
@@ -768,7 +770,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 					);
 				}
 
-				if ( empty ( $new_ids ) ) {
+				if ( empty( $new_ids ) ) {
 					continue;
 				}
 
@@ -801,7 +803,7 @@ New organizers have been added for following meetups. Please update their wporg 
 HTML;
 			$count = 0;
 			foreach ( $new_meetup_org_data as $post_id => $new_meetup_org ) {
-				$count += 1;
+				$count ++;
 				$title = get_the_title( $post_id );
 				$meetup_tracker_url = get_site_url() . "/wp-admin/post.php?post=$post_id&action=edit";
 				$template = $template . "$count. <a href='$meetup_tracker_url' rel='noreferrer' target='_blank' >$title</a> : ";
@@ -812,9 +814,9 @@ HTML;
 					$organizer_name = esc_html( $organizer['name'] );
 					$meetup_members[] = "<a href='$meetup_group_url/members/$organizer_id' target='_blank' rel='noreferrer' >$organizer_name</a>";
 				}
-				$template = $template . join( ', ', $meetup_members ) . "<br>";
+				$template = $template . join( ', ', $meetup_members ) . '<br>';
 
-				// Add a tag for meetup
+				// Add a tag for meetup.
 				wp_set_object_terms( $post_id, 'Needs to update Organizer list', 'meetup_tags', true );
 			}
 			wp_mail(

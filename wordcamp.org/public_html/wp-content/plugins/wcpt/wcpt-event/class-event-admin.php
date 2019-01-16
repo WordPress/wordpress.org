@@ -41,7 +41,8 @@ abstract class Event_Admin {
 		add_filter( 'post_row_actions', array( $this, 'post_row_actions' ), 10, 2 );
 
 		add_filter(
-			'manage_' . $this->get_event_type() . '_posts_columns', array(
+			'manage_' . $this->get_event_type() . '_posts_columns',
+			array(
 				$this,
 				'column_headers',
 			)
@@ -59,7 +60,7 @@ abstract class Event_Admin {
 
 		add_filter( 'redirect_post_location', array( $this, 'add_admin_notices_to_redirect_url' ), 10, 2 );
 
-		// Admin notices
+		// Admin notices.
 		add_action( 'admin_notices', array( $this, 'print_admin_notices' ) );
 
 		add_action( 'send_decline_notification_action',  'Event_Admin::send_decline_notification', 10, 3 );
@@ -268,14 +269,16 @@ abstract class Event_Admin {
 		$new_status = get_post_status_object( $new_status );
 
 		$log_id = add_post_meta(
-			$post->ID, '_status_change', array(
+			$post->ID,
+			'_status_change',
+			array(
 				'timestamp' => time(),
 				'user_id'   => get_current_user_id(),
 				'message'   => sprintf( '%s &rarr; %s', $old_status->label, $new_status->label ),
 			)
 		);
-		// Encoding $post_type and status_change meta ID in key so that we can fetch it if needed while simultaneously be able to have a where clause on value
-		// Because of the way MySQL works, it will still be able to use index on meta_key when searching, as long as we are querying just the prefix
+		// Encoding $post_type and status_change meta ID in key so that we can fetch it if needed while simultaneously be able to have a where clause on value.
+		// Because of the way MySQL works, it will still be able to use index on meta_key when searching, as long as we are querying just the prefix.
 		if ( $log_id ) {
 			add_post_meta( $post->ID, "_status_change_log_$post->post_type $log_id", time() );
 		}
@@ -284,8 +287,8 @@ abstract class Event_Admin {
 	/**
 	 * Hooked to `transition_post_status`, will send notifications to community slack channels based whenever an application status changes to something that we are interested in. Most likely would be when an application is declined or accepted.
 	 *
-	 * @param string  $new_status New status
-	 * @param string  $old_status Old Status
+	 * @param string  $new_status New status.
+	 * @param string  $old_status Old Status.
 	 * @param WP_Post $event
 	 */
 	abstract public function notify_application_status_in_slack( $new_status, $old_status, WP_Post $event );
@@ -293,11 +296,9 @@ abstract class Event_Admin {
 	/**
 	 * Schedule notificaiton for declined application. Currently supports WordCamp and Meetup
 	 *
-	 * @param WP_Post $event Event object
-	 * @param string  $label Could be WordCamp or Meetup
+	 * @param WP_Post $event Event object.
+	 * @param string  $label Could be WordCamp or Meetup.
 	 * @param string  $location
-	 *
-	 * @return bool|string
 	 */
 	public static function schedule_decline_notification( $event, $label, $location ) {
 		wp_schedule_single_event( time() + DAY_IN_SECONDS, 'send_decline_notification_action', array( $event->ID, $label, $location ) );
@@ -312,7 +313,7 @@ abstract class Event_Admin {
 	 */
 	public static function send_decline_notification( $event_id, $label, $location ) {
 		$message = sprintf(
-			"A %s application for %s has been declined, and the applicant has been informed via email.",
+			'A %s application for %s has been declined, and the applicant has been informed via email.',
 			$label,
 			$location
 		);
@@ -344,9 +345,11 @@ abstract class Event_Admin {
 			$gutenberg_enabled = true;
 		}
 
-		wp_localize_script( 'wcpt-admin', 'wcpt_admin', array(
-			'gutenberg_enabled' => $gutenberg_enabled,
-		) );
+		wp_localize_script(
+			'wcpt-admin',
+			'wcpt_admin',
+			array( 'gutenberg_enabled' => $gutenberg_enabled )
+		);
 
 		wp_enqueue_script( 'wcpt-admin' );
 		wp_enqueue_script( 'select2' );
@@ -401,13 +404,17 @@ abstract class Event_Admin {
 	/**
 	 * Save metadata from form
 	 *
-	 * @param int     $post_id Post ID.
-	 * @param WP_Post $post    Post Object.
+	 * @hook save_post
 	 */
 	public function metabox_save( $post_id, $post ) {
 		// Don't add/remove meta on revisions and auto-saves.
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 			return;
+		}
+
+		// Make sure the requset came from the edit post screen.
+		if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) ) {
+			die( 'Unable to verify nonce' );
 		}
 
 		// Don't add/remove meta on trash, untrash, restore, etc.
@@ -419,11 +426,6 @@ abstract class Event_Admin {
 			return;
 		}
 
-		// Make sure the requset came from the edit post screen.
-		if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) ) {
-			return;
-		}
-
 		$meta_keys = $this->meta_keys();
 		$orig_meta_values = get_post_meta( $post_id );
 
@@ -431,7 +433,7 @@ abstract class Event_Admin {
 			$post_value     = wcpt_key_to_str( $key, 'wcpt_' );
 			$values[ $key ] = isset( $_POST[ $post_value ] ) ? esc_attr( $_POST[ $post_value ] ) : '';
 
-			// Don't update protected fields
+			// Don't update protected fields.
 			if ( $this->is_protected_field( $key ) ) {
 				continue;
 			}
@@ -476,6 +478,7 @@ abstract class Event_Admin {
 			}
 		}
 
+		// TODO: This should also pass $_POST params since nonce is verified here.
 		do_action( 'wcpt_metabox_save_done', $post_id, $orig_meta_values );
 
 		$this->validate_and_add_note( $post_id );
@@ -499,7 +502,7 @@ abstract class Event_Admin {
 			$location = add_query_arg( 'wcpt_messages', implode( ',', $this->active_admin_notices ), $location );
 		}
 
-		// Don't show conflicting messages like 'Post submitted.'
+		// Don't show conflicting messages like 'Post submitted'.
 		if ( in_array( 1, $this->active_admin_notices ) && false !== strpos( $location, 'message=8' ) ) {
 			$location = remove_query_arg( 'message', $location );
 		}
@@ -525,7 +528,6 @@ abstract class Event_Admin {
 
 		global $post;
 		$screen = get_current_screen();
-
 
 		if ( empty( $post->post_type ) || $this->get_event_type() != $post->post_type || 'post' !== $screen->base ) {
 			return;
@@ -569,9 +571,11 @@ abstract class Event_Admin {
 			return;
 		}
 
-		// Note that this is private, see wcpt_get_log_entries()
+		// Note that this is private, see `wcpt_get_log_entries()`.
 		add_post_meta(
-			$post_id, '_note', array(
+			$post_id,
+			'_note',
+			array(
 				'timestamp' => time(),
 				'user_id'   => get_current_user_id(),
 				'message'   => $new_note_message,
@@ -605,64 +609,65 @@ abstract class Event_Admin {
 				<?php if ( 'checkbox' == $value ) : ?>
 
 					<p>
-						<strong><?php echo $key; ?></strong>:
-						<input type="checkbox" name="<?php echo $object_name; ?>"
-							   id="<?php echo $object_name; ?>" <?php checked( get_post_meta( $post_id, $key, true ) ); ?><?php echo $readonly; ?> />
+						<strong><?php echo esc_html( $key ); ?></strong>:
+						<input type="checkbox" name="<?php echo esc_attr( $object_name ); ?>"
+							   id="<?php echo esc_attr( $object_name ); ?>" <?php checked( get_post_meta( $post_id, $key, true ) ); ?><?php echo esc_attr( $readonly ); ?> />
 					</p>
 
 				<?php else : ?>
 
 					<p>
-						<strong><?php echo $key; ?></strong>
+						<strong><?php echo esc_html( $key ); ?></strong>
 						<?php if ( in_array( $key, $required_fields, true ) ) : ?>
-							<span class="description"><?php _e( '(required)', 'wordcamporg' ); ?></span>
+							<span class="description"><?php esc_html_e( '(required)', 'wordcamporg' ); ?></span>
 						<?php endif; ?>
 					</p>
 
 					<p>
 						<label class="screen-reader-text"
-							   for="<?php echo $object_name; ?>"><?php echo $key; ?></label>
+							   for="<?php echo esc_attr( $object_name ); ?>"><?php echo esc_html( $key ); ?></label>
 
 						<?php
 						switch ( $value ) :
 							case 'text':
 								?>
 
-								<input type="text" size="36" name="<?php echo $object_name; ?>"
-									   id="<?php echo $object_name; ?>"
-									   value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>"<?php echo $readonly; ?> />
+								<input type="text" size="36" name="<?php echo esc_attr( $object_name ); ?>"
+									   id="<?php echo esc_attr( $object_name ); ?>"
+									   value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>"<?php echo esc_attr( $readonly ); ?> />
 
 								<?php
 								break;
 							case 'number':
 								?>
 
-								<input type="number" size="16" name="<?php echo $object_name; ?>"
-									   id="<?php echo $object_name; ?>"
+								<input type="number" size="16" name="<?php echo esc_attr( $object_name ); ?>"
+									   id="<?php echo esc_attr( $object_name ); ?>"
 									   value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>"
-									   step="any" min="0"<?php echo $readonly; ?> />
+									   step="any" min="0"<?php echo esc_attr( $readonly ); ?> />
 
 								<?php
 								break;
 							case 'date':
-								// Quick filter on dates
-								if ( $date = get_post_meta( $post_id, $key, true ) ) {
+								// Quick filter on dates.
+								$date = get_post_meta( $post_id, $key, true );
+								if ( $date ) {
 									$date = date( 'Y-m-d', $date );
 								}
 
 								?>
 
-								<input type="text" size="36" class="date-field" name="<?php echo $object_name; ?>"
-									   id="<?php echo $object_name; ?>"
-									   value="<?php echo $date; ?>"<?php echo $readonly; ?> />
+								<input type="text" size="36" class="date-field" name="<?php echo esc_attr( $object_name ); ?>"
+									   id="<?php echo esc_attr( $object_name ); ?>"
+									   value="<?php echo esc_attr( $date ); ?>"<?php echo esc_attr( $readonly ); ?> />
 
 								<?php
 								break;
 							case 'textarea':
 								?>
 
-								<textarea rows="4" cols="23" name="<?php echo $object_name; ?>"
-										  id="<?php echo $object_name; ?>"<?php echo $readonly; ?>><?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?></textarea>
+								<textarea rows="4" cols="23" name="<?php echo esc_attr( $object_name ); ?>"
+										  id="<?php echo esc_attr( $object_name ); ?>"<?php echo esc_attr( $readonly ); ?>><?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?></textarea>
 
 								<?php
 								break;
@@ -674,8 +679,8 @@ abstract class Event_Admin {
 								if ( $readonly ) :
 									$value = get_post_meta( $post_id, $key, true );
 									?>
-								<select name="<?php echo $object_name; ?>"
-										id="<?php echo $object_name; ?>"<?php echo $readonly; ?>>
+								<select name="<?php echo esc_attr( $object_name ); ?>"
+										id="<?php echo esc_attr( $object_name ); ?>"<?php echo esc_attr( $readonly ); ?>>
 									<option value="<?php echo esc_attr( $value ); ?>" selected>
 										<?php echo ( $value ) ? esc_html( $currencies[ $value ] . ' (' . $value . ')' ) : ''; ?>
 									</option>
@@ -695,16 +700,18 @@ abstract class Event_Admin {
 								break;
 
 							case 'deputy_list':
-								wp_dropdown_users( array(
-									'role__in'         => array(
-										'administrator',
-										'editor',
-									),
-									'name'             => esc_attr( $object_name ),
-									'id'               => esc_attr( $object_name ),
-									'selected'         => get_post_meta( $post_id, $key, true ),
-									'show_option_none' => 'None',
-								) );
+								wp_dropdown_users(
+									array(
+										'role__in'         => array(
+											'administrator',
+											'editor',
+										),
+										'name'             => esc_attr( $object_name ),
+										'id'               => esc_attr( $object_name ),
+										'selected'         => get_post_meta( $post_id, $key, true ),
+										'show_option_none' => 'None',
+									)
+								);
 								break;
 							default:
 								do_action( 'wcpt_metabox_value', $key, $value, $object_name );

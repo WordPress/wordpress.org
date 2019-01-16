@@ -52,7 +52,7 @@ abstract class Event_Application {
 	}
 
 	/**
-	 * Render the output the of the [meetup-organizer-application] shortcode.
+	 * Render the output the of the application forms shortcode.
 	 *
 	 * @todo Use force_login_to_view_form() and populate_form_based_on_user().
 	 *
@@ -61,8 +61,9 @@ abstract class Event_Application {
 	public function render_application_shortcode() {
 		ob_start();
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- We do not verify nonce for frontend forms because WP Super Cache may cache an expired nonce token.
 		if ( isset( $_POST['submit-application'] ) ) {
-			$this->submit_application();
+			$this->submit_application( $_POST );
 		} else {
 			$countries = wcorg_get_countries();
 			$this->render_application_form( $countries );
@@ -82,9 +83,11 @@ abstract class Event_Application {
 
 	/**
 	 * Submit application details. Calls `create_post` to actually create the event.
+	 *
+	 * @param array $post_data Form params.
 	 */
-	public function submit_application() {
-		$application_data = $this->validate_data( $_POST );
+	public function submit_application( $post_data ) {
+		$application_data = $this->validate_data( $post_data );
 
 		if ( $this->is_rate_limited() ) {
 			$message        = __( 'You have submitted too many applications recently. Please wait and try again in a few hours.', 'wordcamporg' );
@@ -95,8 +98,8 @@ abstract class Event_Application {
 		} else {
 			$this->create_post( $application_data );
 			$this->notify_applicant_application_received(
-					$this->get_organizer_email(),
-					$this->get_event_location()
+				$this->get_organizer_email(),
+				$this->get_event_location()
 			);
 
 			$this->notify_new_application_in_slack();
@@ -222,10 +225,11 @@ abstract class Event_Application {
 		//translators: Name and city of the event. Egs WordCamp in New York.
 		$message = sprintf(
 			__(
-				"Thank you for applying to organize a %s in %s! We'll send you a follow-up e-mail once we've had a chance to review your application.",
+				"Thank you for applying to organize a %1\$s in %2\$s! We'll send you a follow-up e-mail once we've had a chance to review your application.",
 				'wpct'
 			),
-			$this->get_event_label(), sanitize_text_field( $event_city )
+			$this->get_event_label(),
+			sanitize_text_field( $event_city )
 		);
 
 		wp_mail( $email_address, $subject, $message, $headers );
@@ -237,26 +241,27 @@ abstract class Event_Application {
 	public function notify_new_application_in_slack() {
 
 		// Not translating because this will be sent to community events slack channel.
-		$message = sprintf( "A %s application for %s has been received.", $this->get_event_label(), $this->get_event_location() );
+		$message = sprintf( 'A %s application for %s has been received.', $this->get_event_label(), $this->get_event_location() );
 
 		$public_report_url = $this->get_application_report_url();
 		if ( isset( $public_report_url ) ) {
 			// `<%s|here> is syntax for slack message to hyperlink text `here` with url provided in `%s`
-			$message = sprintf( "%s Public status can be followed on <%s|%s application report page>.", $message, $public_report_url, $this->get_event_label() );
+			$message = sprintf( '%s Public status can be followed on <%s|%s application report page>.', $message, $public_report_url, $this->get_event_label() );
 		}
 
 		$default_status = $this->get_default_status();
-		$queue_size = wp_count_posts( $post_type=$this->get_event_type() )->$default_status;
+		$queue_size = wp_count_posts( $this->get_event_type() )->$default_status;
 		if ( isset( $queue_size ) ) {
 			$singular = "is $queue_size application";
 			$plural   = "are $queue_size applications";
 			$message = sprintf(
-					"%s\n _There %s in vetting queue._",
-					$message,
-					1 === $queue_size ? $singular : $plural );
+				"%s\n _There %s in vetting queue._",
+				$message,
+				1 === $queue_size ? $singular : $plural
+			);
 		}
 
-		$attachment = create_event_attachment( $message,  sprintf( "New %s application ", $this->get_event_label() ) );
+		$attachment = create_event_attachment( $message,  sprintf( 'New %s application ', $this->get_event_label() ) );
 		return wcpt_slack_notify( COMMUNITY_TEAM_SLACK, $attachment );
 	}
 }

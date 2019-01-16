@@ -154,6 +154,9 @@
 		<!-- Class comments are generally not useful, so they're left out, but then PHPCS confuses the plugin headers for a class comment -->
 		<exclude name="Squiz.Commenting.ClassComment.WrongStyle" />
 		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
+
+		<!-- WordPress have translators comment which requires no space after `//` -->
+		<exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" />
 	</rule>
 
 	<rule ref="WordPress-Extra">

@@ -80,7 +80,7 @@ class Meetup_Application extends Event_Application {
 	/**
 	 * Enqueue scripts and stylesheets.
 	 */
-	function enqueue_assets() {
+	public function enqueue_assets() {
 		global $post;
 
 		wp_register_script(
@@ -161,7 +161,7 @@ class Meetup_Application extends Event_Application {
 	 * @return array
 	 */
 	public function get_default_application_values() {
-		// WordCamp uses an ID with questions. Not sure how are they used. Ask @corey
+		// WordCamp uses an ID with questions. Not sure how are they used. Ask @corey.
 		$values = array(
 			'q_name'                => '',
 			'q_email'               => '',
@@ -231,7 +231,9 @@ ADDRESS;
 		add_post_meta( $post_id, 'Extra Comments', $data['q_additional_comments'] );
 		add_post_meta( $post_id, 'Meetup Location', $data['q_mtp_loc'] );
 		add_post_meta(
-			$post_id, '_status_change', array(
+			$post_id,
+			'_status_change',
+			array(
 				'timestamp' => time(),
 				'user_id'   => $wordcamp_user_id,
 				'message'   => sprintf( '%s &rarr; %s', 'Application', $statuses[ self::get_default_status() ] ),
@@ -278,7 +280,7 @@ ADDRESS;
 	 * Public report URL for Meetup Applications
 	 */
 	public static function get_application_report_url() {
-		return "https://central.wordcamp.org/reports/meetup-applications/";
+		return 'https://central.wordcamp.org/reports/meetup-applications/';
 	}
 
 }

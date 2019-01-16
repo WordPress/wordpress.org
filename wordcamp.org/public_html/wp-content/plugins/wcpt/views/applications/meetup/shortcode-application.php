@@ -1,7 +1,7 @@
 <?php
 
 namespace WordPress_Community\Applications\Meetup;
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 /**
  * Renders the application form for meetup. Renders shortcode meetup-organizer-application

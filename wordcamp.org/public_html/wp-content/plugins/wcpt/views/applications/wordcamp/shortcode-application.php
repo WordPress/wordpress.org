@@ -1,7 +1,7 @@
 <?php
 
 namespace WordPress_Community\Applications\WordCamp;
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 
 /**
