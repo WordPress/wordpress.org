@@ -77,7 +77,7 @@ Arguments:
       <py:when test="'author' in change" py:with="wporg_user = wporg_sanitize_user_nicename(change.author)">
         <span class="avatar" py:if="change">
           <span class="username-line"><a href="https://profiles.wordpress.org/${wporg_user}" class="profile-link">
-            <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" /> @<span class="username" data-username="${change.author}">${authorinfo(change.author)}</span></a></span>
+            <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" /> @<span class="username" data-username="${change.author}" data-nicename="${wporg_user}">${authorinfo(change.author)}</span></a></span>
           <py:if test="'date' in change">
             <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
           </py:if>

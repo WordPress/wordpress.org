@@ -47,7 +47,7 @@
 
 <!--! Gravatars for the ticket reporter -->
 <td py:match="td[@headers='h_reporter']" py:attrs="select('@*')" py:with="wporg_user = wporg_sanitize_user_nicename(ticket.reporter)">
-  <a href="${profile_link + wporg_user}">
+  <a href="${profile_link + wporg_user}" data-nicename="${wporg_user}">
     <img class="avatar" src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" />
   </a>
     ${select('*|comment()|text()')}
