@@ -447,6 +447,14 @@ pre code {
 	padding: 0;
 }
 
+.wp-block-code {
+	display: block;
+	line-height: 1.75em;
+	padding: 1em;
+	overflow: auto;
+	white-space: pre-wrap;
+}
+
 article.post .o2-post,
 article#post-new .o2-post,
 article.page .o2-post,
