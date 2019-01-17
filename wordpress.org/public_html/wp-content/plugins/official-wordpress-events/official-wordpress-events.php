@@ -133,7 +133,7 @@ class Official_WordPress_Events {
 		if ( $events ) {
 			ob_start();
 			require_once( __DIR__ . '/template-events.php' );
-			$output = ob_get_flush();
+			$output = ob_get_clean();
 		}
 
 		return $output;
