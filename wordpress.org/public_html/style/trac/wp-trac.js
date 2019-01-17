@@ -807,17 +807,38 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					// Most recent should show up first.
 					$( $( '.change .username' ).get().reverse() ).each( function() {
 						var username = $(this).data( 'username' );
+
+						// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
+						if (
+							$(this).data( 'nicename' ) &&
+							username.toLowerCase() != $(this).data( 'nicename' ).toLowerCase() &&
+							wpTrac.currentUser !== username
+						) {
+							username = $(this).data( 'nicename' );
+						}
+
 						if (
 							typeof username !== 'undefined' &&
 							-1 === $.inArray( username, users ) &&
 							-1 === $.inArray( username, exclude )
 						) {
-							users.push( $(this).data( 'username' ) );
+							users.push( username );
 						}
 					});
 
 					// Add ticket reporter.
 					var ticketReporter = $.trim( $( '#ticket td[headers="h_reporter"]' ).text() );
+					var ticketReporterNicename = $( '#ticket td[headers="h_reporter"] a' ).data( 'nicename' );
+					// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
+					if (
+						ticketReporter &&
+						ticketReporterNicename &&
+						ticketReporter !== wpTrac.currentUser &&
+						ticketReporter.toLowerCase() !== ticketReporterNicename.toLowerCase()
+					) {
+						ticketReporter = ticketReporterNicename;
+					}
+
 					if ( ticketReporter && -1 === $.inArray( ticketReporter, users ) ) {
 						users.push( ticketReporter );
 					}
