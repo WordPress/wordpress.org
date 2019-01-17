@@ -588,7 +588,6 @@ function wcorg_let_admins_activate_some_plugins( $required_capabilities, $reques
 	$target_plugin    = $args[0] ?? null;
 	$optional_plugins = array(
 		'campt-indian-payment-gateway/campt-indian-payment-gateway.php',
-		'camptix-kdcpay-gateway/camptix-kdcpay.php',
 		'camptix-mailchimp/camptix-mailchimp.php',
 		'camptix-mercadopago/camptix-mercadopago.php',
 		'camptix-pagseguro/camptix-pagseguro.php',
