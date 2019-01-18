@@ -466,7 +466,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		return false;
 	}
 
-	$error_whitelist = array(
+	$error_safelist = [
 		E_ERROR,
 		E_USER_ERROR,
 		E_CORE_ERROR,
@@ -475,9 +475,19 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		E_NOTICE,
 		E_DEPRECATED,
 		E_WARNING,
-	);
+	];
 
-	if ( ! in_array( $err_no, $error_whitelist ) ) {
+	if ( ! in_array( $err_no, $error_safelist ) ) {
+		return false;
+	}
+
+	// Always use the ABSPATH constant in the keys here to avoid path disclosure.
+	$error_ignorelist = [
+		// See https://core.trac.wordpress.org/ticket/29204
+		ABSPATH . 'wp-includes/SimplePie/Registry.php:215' => 'Non-static method WP_Feed_Cache::create() should not be called statically',
+	];
+
+	if ( isset( $error_ignorelist[ "$file:$line" ] ) && false !== strpos( $err_msg, $error_ignorelist[ "$file:$line" ] ) ) {
 		return false;
 	}
 
@@ -515,7 +525,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 
 	$domain    = get_site_url();
 	$page_slug = esc_html( trim( $_SERVER['REQUEST_URI'], '/' ) );
-	$text      = $text . "Message : \"$err_msg\" occured on \"$file:$line\" \n Domain: $domain \n Page: $page_slug \n Error type: $err_no";
+	$text      = $text . "Message : \"$err_msg\" occurred on \"$file:$line\" \n Domain: $domain \n Page: $page_slug \n Error type: $err_no";
 
 	$message = array(
 		'fallback'    => $text,
