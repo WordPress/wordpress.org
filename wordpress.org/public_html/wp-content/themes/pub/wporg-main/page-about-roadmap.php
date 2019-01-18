@@ -49,7 +49,15 @@ $date_format = get_option( 'date_format' );
 						?>
 					</p>
 
-					<p><?php esc_html_e( 'For 2019 the project also has the following 9 priorities, as outlined in this post by project lead Matt Mullenweg:', 'wporg' ); ?>
+					<p>
+						<?php
+						printf(
+							/* translators: %s: Link to make/core blog post */
+							wp_kses_post( __( 'For 2019 the project also has the following 9 priorities, as outlined in <a href="%s">this post</a> by project lead Matt Mullenweg:', 'wporg' ) ),
+							esc_url( 'https://make.wordpress.org/core/2018/12/08/9-priorities-for-2019/' )
+						);
+						?>
+					</p>
 
 					<ul>
 						<li><?php esc_html_e( 'Creating a block for navigation menus.', 'wporg' ); ?></li>
