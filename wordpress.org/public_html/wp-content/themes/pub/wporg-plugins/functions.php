@@ -44,6 +44,17 @@ function setup() {
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 
 /**
+ * Handle the root-level redirect to trailing-slash'd uri which redirect_canonical() usually does.
+ */
+function enforce_trailing_slash() {
+	if ( '/plugins' === $_SERVER['REQUEST_URI'] ) {
+		wp_safe_redirect( '/plugins/' );
+		die();
+	}
+}
+add_action( 'template_redirect', __NAMESPACE__ . '\enforce_trailing_slash' );
+
+/**
  * Set the content width in pixels, based on the theme's design and stylesheet.
  *
  * Priority 0 to make it available to lower priority callbacks.
