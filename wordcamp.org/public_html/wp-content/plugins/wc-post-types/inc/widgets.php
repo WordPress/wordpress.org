@@ -22,7 +22,8 @@ class WCB_Widget_Sponsors extends WP_Widget {
 		global $wcpt_plugin;
 
 		extract( $args );
-		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
+		$title = ( isset( $instance['title'] ) ) ?: '';
+		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
 		echo $before_widget;
 
@@ -128,6 +129,7 @@ class WCPT_Widget_Speakers extends WP_Widget {
 		global $wcpt_plugin;
 
 		$transient_key     = 'wcpt-' . md5( $args['widget_id'] );
+		$instance['title'] = ( isset( $instance['title'] ) ) ?: '';
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		echo $args['before_widget'];
@@ -242,6 +244,7 @@ class WCPT_Widget_Sessions extends WP_Widget {
 		global $wcpt_plugin;
 
 		$transient_key     = 'wcpt-' . md5( $args['widget_id'] );
+		$instance['title'] = ( isset( $instance['title'] ) ) ?: '';
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		echo $args['before_widget'];
@@ -360,6 +363,7 @@ class WCPT_Widget_Organizers extends WP_Widget {
 		global $wcpt_plugin;
 
 		$transient_key     = 'wcpt-' . md5( $args['widget_id'] );
+		$instance['title'] = ( isset( $instance['title'] ) ) ?: '';
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		echo $args['before_widget'];
