@@ -2571,6 +2571,7 @@ class WordCamp_Budgets {
 	 */
 	public static function get_payment_categories() {
 		return array(
+			// Changes here may need to be synchronized with `_get_default_budget()`.
 			'after-party'     => esc_html__( 'After Party',                    'wordcamporg' ),
 			'audio-visual'    => esc_html__( 'Audio Visual',                   'wordcamporg' ),
 			'camera-shipping' => esc_html__( 'Camera Shipping',                'wordcamporg' ),

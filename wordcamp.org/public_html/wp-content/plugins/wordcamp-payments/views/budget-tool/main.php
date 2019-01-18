@@ -3,6 +3,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
 wcb.input = <?php echo json_encode( $budget[ $view ] ); ?>;
 wcb.urls = <?php echo json_encode( $inspire_urls ); ?>;
 wcb.currencies = <?php echo json_encode( $currencies ); ?>;
+wcb.categories = <?php echo wp_json_encode( WordCamp_Budgets::get_payment_categories() ); ?>;
 wcb.status = <?php echo json_encode( $budget['status'] ); ?>;
 wcb.view = <?php echo json_encode( $view ); ?>;
 wcb.editable = <?php echo json_encode( $editable ); ?>;

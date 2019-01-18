@@ -363,18 +363,10 @@ window.wcb = window.wcb || {models:{}, input:[]};
         }
     });
 
-    wcb.categories = {
-        'venue': 'Venue',
-        'audio-visual': 'Audio Visual',
-        'after-party': 'After Party',
-        'camera-shipping': 'Camera Shipping',
-        'food-beverage': 'Food & Beverage',
-        'office-supplies': 'Office Supplies',
-        'signage-badges': 'Signage & Badges',
-        'speaker-event': 'Speaker Event',
-        'swag': 'Swag',
-        'other': 'Other'
-    };
+	// Decode HTML entities in category names
+	_.each( wcb.categories, function( name, slug, list ) {
+		list[ slug ] = name.replace( '&amp;', '&' );
+	} );
 
     wcb.metaLabels = {
         'attendees': 'Attendees',
