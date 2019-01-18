@@ -89,12 +89,12 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 		public function column_headers( $columns ) {
 			$columns = array(
 				'cb'                   => '<input type="checkbox" />',
-				'title'                => __( 'Title', 'wcpt' ),
-				'taxonomy-meetup_tags' => __( 'Meetup Tags', 'wcpt' ),
-				'organizer'            => __( 'Organizer', 'wcpt' ),
-				'date'                 => __( 'Date', 'wcpt' ),
-				'meetup.com_url'       => __( 'Meetup URL', 'wcpt' ),
-				'helpscout_url'        => __( 'HelpScout Link', 'wcpt' ),
+				'title'                => __( 'Title',          'wordcamporg' ),
+				'taxonomy-meetup_tags' => __( 'Meetup Tags',    'wordcamporg' ),
+				'organizer'            => __( 'Organizer',      'wordcamporg' ),
+				'date'                 => __( 'Date',           'wordcamporg' ),
+				'meetup.com_url'       => __( 'Meetup URL',     'wordcamporg' ),
+				'helpscout_url'        => __( 'HelpScout Link', 'wordcamporg' ),
 			);
 
 			return $columns;
@@ -184,7 +184,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 
 			add_meta_box(
 				'wcpt_meetup_meetup_information',
-				__( 'Meetup Information', 'wcpt' ),
+				__( 'Meetup Information', 'wordcamporg' ),
 				array( $this, 'wcpt_meetup_information_metabox' ),
 				Meetup_Application::POST_TYPE,
 				'advanced'
@@ -192,7 +192,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 
 			add_meta_box(
 				'wcpt_meetup_application',
-				__( 'Application Information', 'wcpt' ),
+				__( 'Application Information', 'wordcamporg' ),
 				array( $this, 'wcpt_application_metabox' ),
 				Meetup_Application::POST_TYPE,
 				'advanced'
@@ -200,7 +200,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 
 			add_meta_box(
 				'wcpt_meetup_organizer_info',
-				__( 'Organizer Information', 'wcpt' ),
+				__( 'Organizer Information', 'wordcamporg' ),
 				array( $this, 'wcpt_organizer_info_metabox' ),
 				Meetup_Application::POST_TYPE,
 				'advanced'
@@ -208,7 +208,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 
 			add_meta_box(
 				'wcpt_meetup_swag',
-				__( 'Swag Information', 'wcpt' ),
+				__( 'Swag Information', 'wordcamporg' ),
 				array( $this, 'wcpt_swag_metabox' ),
 				Meetup_Application::POST_TYPE,
 				'advanced'
@@ -216,7 +216,7 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 
 			add_meta_box(
 				'wcpt_meetup_metadata',
-				__( 'Meetup.com API sync', 'wcpt' ),
+				__( 'Meetup.com API sync', 'wordcamporg' ),
 				array( $this, 'wcpt_meetup_sync' ),
 				Meetup_Application::POST_TYPE,
 				'side',

@@ -219,14 +219,14 @@ abstract class Event_Application {
 	 * @param string $event_city
 	 */
 	public function notify_applicant_application_received( $email_address, $event_city ) {
-		//translators: Name of the event. Egs WordCamp.
-		$subject = sprintf( __( "We've received your %s application", 'wpct' ), $this->get_event_label() );
+		//translators: Name of the event. E.g. WordCamp or meetup.
+		$subject = sprintf( __( "We've received your %s application", 'wordcamporg' ), $this->get_event_label() );
 		$headers = array( 'Reply-To: support@wordcamp.org' );
-		//translators: Name and city of the event. Egs WordCamp in New York.
+		//translators: Name and city of the event. E.g. WordCamp New York.
 		$message = sprintf(
 			__(
 				"Thank you for applying to organize a %1\$s in %2\$s! We'll send you a follow-up e-mail once we've had a chance to review your application.",
-				'wpct'
+				'wordcamporg'
 			),
 			$this->get_event_label(),
 			sanitize_text_field( $event_city )

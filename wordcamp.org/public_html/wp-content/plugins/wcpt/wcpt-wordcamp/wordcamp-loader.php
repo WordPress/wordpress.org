@@ -63,19 +63,19 @@ class WordCamp_Loader extends Event_Loader {
 	function register_post_types() {
 		// WordCamp post type labels
 		$wcpt_labels = array (
-			'name'                  => __( 'WordCamps',                   'wcpt' ),
-			'singular_name'         => __( 'WordCamp',                    'wcpt' ),
-			'add_new'               => __( 'Add New',                     'wcpt' ),
-			'add_new_item'          => __( 'Create New WordCamp',         'wcpt' ),
-			'edit'                  => __( 'Edit',                        'wcpt' ),
-			'edit_item'             => __( 'Edit WordCamp',               'wcpt' ),
-			'new_item'              => __( 'New WordCamp',                'wcpt' ),
-			'view'                  => __( 'View WordCamp',               'wcpt' ),
-			'view_item'             => __( 'View WordCamp',               'wcpt' ),
-			'search_items'          => __( 'Search WordCamps',            'wcpt' ),
-			'not_found'             => __( 'No WordCamps found',          'wcpt' ),
-			'not_found_in_trash'    => __( 'No WordCamps found in Trash', 'wcpt' ),
-			'parent_item_colon'     => __( 'Parent WordCamp:',            'wcpt' )
+			'name'                  => __( 'WordCamps',                   'wordcamporg' ),
+			'singular_name'         => __( 'WordCamp',                    'wordcamporg' ),
+			'add_new'               => __( 'Add New',                     'wordcamporg' ),
+			'add_new_item'          => __( 'Create New WordCamp',         'wordcamporg' ),
+			'edit'                  => __( 'Edit',                        'wordcamporg' ),
+			'edit_item'             => __( 'Edit WordCamp',               'wordcamporg' ),
+			'new_item'              => __( 'New WordCamp',                'wordcamporg' ),
+			'view'                  => __( 'View WordCamp',               'wordcamporg' ),
+			'view_item'             => __( 'View WordCamp',               'wordcamporg' ),
+			'search_items'          => __( 'Search WordCamps',            'wordcamporg' ),
+			'not_found'             => __( 'No WordCamps found',          'wordcamporg' ),
+			'not_found_in_trash'    => __( 'No WordCamps found in Trash', 'wordcamporg' ),
+			'parent_item_colon'     => __( 'Parent WordCamp:',            'wordcamporg' )
 		);
 
 		// WordCamp post type rewrite

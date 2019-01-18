@@ -108,11 +108,11 @@ class WCPT_Admin {
 			return false;
 
 		?>
-			<h3><?php _e( 'WordCamps', 'wcpt' ); ?></h3>
+			<h3><?php _e( 'WordCamps', 'wordcamporg' ); ?></h3>
 
 			<table class="form-table">
 				<tr valign="top">
-					<th scope="row"><?php _e( 'WordCamps', 'wcpt' ); ?></th>
+					<th scope="row"><?php _e( 'WordCamps', 'wordcamporg' ); ?></th>
 					<td>
 
 					</td>

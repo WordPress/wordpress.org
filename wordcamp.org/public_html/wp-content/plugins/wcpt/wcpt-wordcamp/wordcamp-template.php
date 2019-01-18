@@ -503,9 +503,9 @@ function wcpt_wordcamp_pagination_count() {
 
 		// Set return string
 		if ( $total > 1 )
-			$retstr = sprintf( __( 'Viewing %1$s to %2$s (of %3$s)', 'wcpt' ), $from_num, $to_num, $total );
+			$retstr = sprintf( __( 'Viewing %1$s to %2$s (of %3$s)', 'wordcamporg' ), $from_num, $to_num, $total );
 		else
-			$retstr = sprintf( __( 'Viewing %1$s WordCamp', 'wcpt' ), $total );
+			$retstr = sprintf( __( 'Viewing %1$s WordCamp', 'wordcamporg' ), $total );
 
 		// Filter and return
 		return apply_filters( 'wcpt_get_wordcamp_pagination_count', $retstr );

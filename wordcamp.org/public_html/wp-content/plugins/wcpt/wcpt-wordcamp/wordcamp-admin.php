@@ -64,7 +64,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 		public function metabox() {
 			add_meta_box(
 				'wcpt_information',
-				__( 'WordCamp Information', 'wcpt' ),
+				__( 'WordCamp Information', 'wordcamporg' ),
 				'wcpt_wordcamp_metabox',
 				WCPT_POST_TYPE_ID,
 				'advanced',
@@ -73,7 +73,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 
 			add_meta_box(
 				'wcpt_organizer_info',
-				__( 'Organizing Team', 'wcpt' ),
+				__( 'Organizing Team', 'wordcamporg' ),
 				'wcpt_organizer_metabox',
 				WCPT_POST_TYPE_ID,
 				'advanced',
@@ -82,7 +82,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 
 			add_meta_box(
 				'wcpt_venue_info',
-				__( 'Venue Information', 'wcpt' ),
+				__( 'Venue Information', 'wordcamporg' ),
 				'wcpt_venue_metabox',
 				WCPT_POST_TYPE_ID,
 				'advanced',
@@ -91,7 +91,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 
 			add_meta_box(
 				'wcpt_contributor_info',
-				__( 'Contributor Day Information', 'wcpt' ),
+				__( 'Contributor Day Information', 'wordcamporg' ),
 				'wcpt_contributor_metabox',
 				WCPT_POST_TYPE_ID,
 				'advanced'
@@ -546,11 +546,11 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 			}
 			?>
 
-		<h3><?php esc_html_e( 'WordCamps', 'wcpt' ); ?></h3>
+		<h3><?php esc_html_e( 'WordCamps', 'wordcamporg' ); ?></h3>
 
 		<table class="form-table">
 			<tr valign="top">
-				<th scope="row"><?php esc_html_e( 'WordCamps', 'wcpt' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'WordCamps', 'wordcamporg' ); ?></th>
 
 				<td>
 				</td>
@@ -570,12 +570,12 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 		public function column_headers( $columns ) {
 			$columns = array(
 				'cb'             => '<input type="checkbox" />',
-				'title'          => __( 'Title', 'wcpt' ),
-				// 'wcpt_location'    => __( 'Location', 'wcpt' ),
-				'wcpt_date'      => __( 'Date', 'wcpt' ),
-				'wcpt_organizer' => __( 'Organizer', 'wcpt' ),
-				'wcpt_venue'     => __( 'Venue', 'wcpt' ),
-				'date'           => __( 'Status', 'wcpt' ),
+				'title'          => __( 'Title',     'wordcamporg' ),
+				// 'wcpt_location'    => __( 'Location', 'wordcamporg' ),
+				'wcpt_date'      => __( 'Date',      'wordcamporg' ),
+				'wcpt_organizer' => __( 'Organizer', 'wordcamporg' ),
+				'wcpt_venue'     => __( 'Venue',     'wordcamporg' ),
+				'date'           => __( 'Status',    'wordcamporg' ),
 			);
 			return $columns;
 		}
@@ -593,7 +593,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 
 			switch ( $column ) {
 				case 'wcpt_location':
-					echo esc_html( wcpt_get_wordcamp_location() ? wcpt_get_wordcamp_location() : __( 'No Location', 'wcpt' ) );
+					echo esc_html( wcpt_get_wordcamp_location() ? wcpt_get_wordcamp_location() : __( 'No Location', 'wordcamporg' ) );
 					break;
 
 				case 'wcpt_date':
@@ -604,27 +604,26 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 						// Has an end date.
 						$end = wcpt_get_wordcamp_end_date();
 						if ( $end ) {
-							$string_date = sprintf( __( 'Start: %1$s<br />End: %2$s', 'wcpt' ), $start, $end );
-
+							$string_date = sprintf( __( 'Start: %1$s<br />End: %2$s', 'wordcamporg' ), $start, $end );
 							// No end date.
 						} else {
-							$string_date = sprintf( __( 'Start: %1$s', 'wcpt' ), $start );
+							$string_date = sprintf( __( 'Start: %1$s', 'wordcamporg' ), $start );
 						}
 
 						// No date.
 					} else {
-						$string_date = __( 'No Date', 'wcpt' );
+						$string_date = __( 'No Date', 'wordcamporg' );
 					}
 
 					echo wp_kses( $string_date, array( 'br' => array() ) );
 					break;
 
 				case 'wcpt_organizer':
-					echo esc_html( wcpt_get_wordcamp_organizer_name() ? wcpt_get_wordcamp_organizer_name() : __( 'No Organizer', 'wcpt' ) );
+					echo esc_html( wcpt_get_wordcamp_organizer_name() ? wcpt_get_wordcamp_organizer_name() : __( 'No Organizer', 'wordcamporg' ) );
 					break;
 
 				case 'wcpt_venue':
-					echo esc_html( wcpt_get_wordcamp_venue_name() ? wcpt_get_wordcamp_venue_name() : __( 'No Venue', 'wcpt' ) );
+					echo esc_html( wcpt_get_wordcamp_venue_name() ? wcpt_get_wordcamp_venue_name() : __( 'No Venue', 'wordcamporg' ) );
 					break;
 			}
 		}

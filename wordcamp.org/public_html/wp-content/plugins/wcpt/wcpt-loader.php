@@ -27,7 +27,6 @@ if ( ! class_exists( 'WCPT_Loader' ) ) :
 	 * @since WordCamp Post Type (0.1)
 	 */
 	class WCPT_Loader {
-
 		/**
 		 * The main WordCamp Post Type loader
 		 */
@@ -86,7 +85,6 @@ if ( ! class_exists( 'WCPT_Loader' ) ) :
 			load_textdomain( 'wcpt', $mofile );
 		}
 	}
-
 endif; // class_exists check.
 
 // Load everything up.
