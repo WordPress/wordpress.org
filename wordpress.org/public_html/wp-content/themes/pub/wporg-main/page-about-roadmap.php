@@ -131,7 +131,7 @@ $date_format = get_option( 'date_format' );
 						<?php
 						printf(
 							/* translators: %s: Link to History page */
-							wp_kses_post( __( 'You can see an overview of previous release on our <a href="%s">history page</a>.', 'wporg' ) ),
+							wp_kses_post( __( 'You can see an overview of previous releases on our <a href="%s">history page</a>.', 'wporg' ) ),
 							esc_url( home_url( '/about/history/' ) )
 						);
 						?>
