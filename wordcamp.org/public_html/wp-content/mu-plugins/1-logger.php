@@ -26,7 +26,7 @@ function log( $error_code, $data = array() ) {
 	} else {
 		$meta_information['request_url'] = sprintf(
 			'%s://%s%s',
-			$_SERVER['HTTPS'] ? 'https' : 'http',
+			( empty( $_SERVER['HTTPS'] ) ) ? 'http' : 'https',
 			$_SERVER['SERVER_NAME'],
 			$_SERVER['REQUEST_URI']
 		);
