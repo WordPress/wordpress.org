@@ -152,7 +152,7 @@ class Performance_Optimizations {
 			$pageless_url = preg_replace( '!/page/[01]/?!i', '/', $pageless_url );
 
 			if ( $pageless_url !== $current_url ) {
-				wp_safe_redirect( $pageless_url );
+				wp_safe_redirect( $pageless_url, 301 );
 				exit;
 			}
 		}
