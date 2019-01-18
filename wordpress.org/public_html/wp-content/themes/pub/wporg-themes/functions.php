@@ -37,7 +37,13 @@ add_action( 'after_setup_theme', 'wporg_themes_setup' );
  */
 function wporg_themes_trailing_slashes() {
 	if ( '/themes' === $_SERVER['REQUEST_URI'] ) {
-		wp_safe_redirect( '/themes/' );
+		wp_safe_redirect( '/themes/', 301 );
+		die();
+	}
+
+	if ( false !== stripos( $_SERVER['REQUEST_URI'], '/index.php' ) ) {
+		$url = str_ireplace( '/index.php', '/', $_SERVER['REQUEST_URI'] );
+		wp_safe_redirect( $url, 301 );
 		die();
 	}
 }
