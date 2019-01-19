@@ -17,6 +17,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'ux-feedback' : 'Feedback is needed from the user experience perspective, generally from a UX lead.',
 		'has-unit-tests' : 'Proposed solution has unit test coverage.',
 		'needs-unit-tests' : 'Ticket has a particular need for unit tests.',
+		'has-dev-note' : 'Ticket with a published post on the development blog.',
 		'needs-dev-note' : 'Ticket needs a post on the development blog.',
 		'needs-docs' : 'Inline documentation is needed.',
 		'needs-codex' : 'The Codex needs to be updated or expanded.',
@@ -1063,6 +1064,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						wpTrac.workflow.removeKeyword( 'needs-unit-tests' );
 					} else if ( 'needs-unit-tests' === keyword ) {
 						wpTrac.workflow.removeKeyword( 'has-unit-tests' );
+					}
+
+					if ( 'has-dev-note' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'needs-dev-note' );
+					} else if ( 'needs-dev-note' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'has-dev-note' );
 					}
 
 					if ( 'has-screenshots' === keyword ) {
