@@ -64,7 +64,7 @@ twttr.ready( function( twttr ) {
 		embed_holder_masonry;
 
 	embed_holder_masonry = embed_holder_jq.masonry({
-		itemSelector: 'iframe, twitterwidget',
+		itemSelector: 'iframe, twitter-widget',
 		columnWidth: 372,
 		gutter: 10,
 		initLayout: false
