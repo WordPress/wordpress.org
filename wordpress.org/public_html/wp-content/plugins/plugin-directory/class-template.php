@@ -133,18 +133,26 @@ class Template {
 	 * @static
 	 */
 	public static function output_meta() {
-		$metas = [];
+		$metas   = [];
+		$noindex = false;
 
-		if ( is_singular( 'plugin' ) ) {
+		// Prevent duplicate search engine results.
+		if ( get_query_var( 'plugin_advanced' ) || is_search() ) {
+			$noindex = true;
+		} elseif ( is_singular( 'plugin' ) ) {
 			$metas[] = sprintf(
 				'<meta name="description" value="%s" />',
 				esc_attr( get_the_excerpt() )
 			);
 
-			// Add noindex on disabled plugin page.
+			// Add noindex for closed plugins.
 			if ( 'publish' !== get_post_status() ) {
-				$metas[] = '<meta name="robots" content="noindex" />';
+				$noindex = true;
 			}
+		}
+
+		if ( $noindex ) {
+			$metas[] = '<meta name="robots" content="noindex,follow" />' . "\n";
 		}
 
 		echo implode( "\n", $metas );

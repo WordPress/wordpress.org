@@ -302,11 +302,6 @@ function social_meta_data() {
 		return;
 	}
 
-	// Prevent duplicate search engine results.
-	if ( get_query_var( 'plugin_advanced' ) || is_search() ) {
-		echo '<meta name="robots" content="noindex, follow" />' . "\n";
-	}
-
 	if ( ! is_singular( 'plugin' ) ) {
 		return;
 	}
