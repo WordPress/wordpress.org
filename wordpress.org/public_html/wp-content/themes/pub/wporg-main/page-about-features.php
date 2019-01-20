@@ -112,7 +112,8 @@ the_post();
 							<?php esc_html_e( 'You can be WordPress too! Help to build WordPress, answer questions on the support forums, write documentation, translate WordPress into your language, speak at a WordCamp, write about WordPress on your blog. Whatever your skill, we&#8217;d love to have you!', 'wporg' ); ?>
 						</li>
 					</ul>
-					<h3><?php echo esc_html_x( 'Developer Features', 'Features page: Section Header', 'wporg' ); ?></h3>
+
+					<h3 id="developer"><?php echo esc_html_x( 'Developer Features', 'Features page: Section Header', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'For developers, we&#8217;ve got lots of goodies packed under the hood that you can use to extend WordPress in whatever direction takes your fancy.', 'wporg' ); ?></p>
 
 					<ul>
