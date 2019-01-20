@@ -178,9 +178,7 @@ function get_plugin_status_notice( $post = null ) {
 
 	switch ( $post_status ) {
 		case 'publish':
-			$tested_up_to             = (string) get_post_meta( get_post( $post )->ID, 'tested', true );
-			$version_to_check_against = (string) ( get_current_major_wp_version() - 0.2 );
-			if ( version_compare( $version_to_check_against, $tested_up_to, '>' ) ) {
+			if ( Template::is_plugin_outdated( $post ) ) {
 				$message = sprintf(
 					$warning_notice,
 					__( 'This plugin <strong>hasn&#146;t been tested with the latest 3 major releases of WordPress</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' )

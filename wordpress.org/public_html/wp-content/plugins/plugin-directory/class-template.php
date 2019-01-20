@@ -159,6 +159,52 @@ class Template {
 	}
 
 	/**
+	 * Gets current major WP version to check against "Tested up to" value.
+	 *
+	 * @static
+	 * @global string $wp_version WordPress version.
+	 *
+	 * @return float Current major WP version.
+	 */
+	public static function get_current_major_wp_version() {
+		$current_version = '';
+
+		// Assume the value stored in a constant (which is set on WP.org), if defined.
+		if ( defined( 'WP_CORE_LATEST_RELEASE' ) && WP_CORE_LATEST_RELEASE ) {
+			$current_version = substr( WP_CORE_LATEST_RELEASE, 0, 3 );
+		}
+
+		// Otherwise, use the version of the running WP instance.
+		if ( empty( $current_version ) ) {
+			global $wp_version;
+
+			$current_version = substr( $wp_version, 0, 3 );
+
+			// However, if the running WP instance appears to not be a release version, assume the latest stable version.
+			if ( false !== strpos( $wp_version, '-' ) ) {
+				$current_version = (float) $current_version - 0.1;
+			}
+		}
+
+		return (float) $current_version;
+	}
+
+	/**
+	 * Checks if the plugin was tested with the latest 3 major releases of WordPress.
+	 *
+	 * @static
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return bool True if the plugin is marked as tested, false otherwise.
+	 */
+	public static function is_plugin_outdated( $post = null ) {
+		$tested_up_to             = (string) get_post_meta( get_post( $post )->ID, 'tested', true );
+		$version_to_check_against = (string) ( self::get_current_major_wp_version() - 0.2 );
+
+		return version_compare( $version_to_check_against, $tested_up_to, '>' );
+	}
+
+	/**
 	 * Returns a string representing the number of active installations for an item.
 	 *
 	 * @static
