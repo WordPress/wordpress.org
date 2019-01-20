@@ -145,8 +145,8 @@ class Template {
 				esc_attr( get_the_excerpt() )
 			);
 
-			// Add noindex for closed plugins.
-			if ( 'publish' !== get_post_status() ) {
+			// Add noindex for closed or outdated plugins.
+			if ( 'publish' !== get_post_status() || self::is_plugin_outdated() ) {
 				$noindex = true;
 			}
 		}
