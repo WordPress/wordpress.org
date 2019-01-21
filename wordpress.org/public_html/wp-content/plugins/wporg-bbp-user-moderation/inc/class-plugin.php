@@ -64,7 +64,7 @@ class Plugin {
 			add_filter( 'bbp_edit_reply_pre_insert', array( $this, 'pre_insert' ) );
 
 			// Prevent editing their topics/replies.
-			add_filter( 'bbp_map_meta_caps', array( $this, 'bbp_map_meta_caps' ), 100, 3 );
+			add_filter( 'bbp_map_meta_caps', array( $this, 'bbp_map_meta_caps' ), 100, 4 );
 		}
 
 		// Alter queries for the current user.
@@ -314,14 +314,28 @@ class Plugin {
 		);
 	}
 
-	public function bbp_map_meta_caps( $caps, $cap, $user_id ) {
+	public function bbp_map_meta_caps( $caps, $cap, $user_id, $args ) {
 		$limited_caps = array(
 			'edit_topic',
 			'edit_reply',
 		);
 
 		if ( in_array( $cap, $limited_caps, true ) ) {
-			$caps = array( 'do_not_allow' );
+			$do_not_allow = array( 'do_not_allow' );
+
+			if ( ! isset( $args[0] ) ) {
+				// No post was specified.. Do not allow editing of an unknown.
+				$caps = $do_not_allow;
+			} else {
+				// If we can't find the post OR the post is NOT pending.. do not allow
+				$_post = get_post( $args[0] );
+				if ( ! $_post || $_post->post_status !== bbp_get_pending_status_id() ) {
+					$caps = $do_not_allow;
+				}
+				// else {
+				// 	// We found the post, and it's status is pending.. fall-through and allow.
+				// }
+			}
 		}
 
 		return $caps;
