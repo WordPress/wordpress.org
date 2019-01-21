@@ -159,6 +159,40 @@ class Template {
 	}
 
 	/**
+	 * Prints <link rel="prev|next"> tags for archives.
+	 *
+	 * @static
+	 */
+	public static function archive_link_rel_prev_next() {
+		global $paged, $wp_query;
+		if ( ! is_archive() && ! is_search() ) {
+			return;
+		}
+
+		$max_page = $wp_query->max_num_pages;
+		if ( ! $paged ) {
+			$paged = 1;
+		}
+
+		$nextpage = intval( $paged ) + 1;
+		$prevpage = intval( $paged ) - 1;
+
+		if ( $prevpage >= 1 ) {
+			printf(
+				'<link rel="prev" href="%s">' . "\n",
+				esc_url( get_pagenum_link( $prevpage ) )
+			);
+		}
+
+		if ( $nextpage <= $max_page ) {
+			printf(
+				'<link rel="next" href="%s">' . "\n",
+				esc_url( get_pagenum_link( $nextpage ) )
+			);
+		}
+	}
+
+	/**
 	 * Gets current major WP version to check against "Tested up to" value.
 	 *
 	 * @static

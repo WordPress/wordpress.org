@@ -49,6 +49,7 @@ class Plugin_Directory {
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'output_meta' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
+		add_action( 'wp_head', array( Template::class, 'archive_link_rel_prev_next' ), 3 );
 
 		// Cron tasks.
 		new Jobs\Manager();
