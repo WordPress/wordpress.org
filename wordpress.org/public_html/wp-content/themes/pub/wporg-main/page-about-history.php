@@ -71,7 +71,7 @@ the_post();
 					<p>
 						<?php
 						/* translators: 1: Link to playlist */
-						printf( wp_kses_post( __( 'WordPress core developers share a love of jazz music, and all our major releases are named in honor of jazz musicians we personally admire. Here&#8217;s a list of releases and the musicians they were named for. <a href="%s">You can listen to a Last.fm station of all the musicians we named a release for</a>.', 'wporg' ) ), esc_url( 'http://www.last.fm/tag/wordpress-release-jazz' ) );
+						printf( wp_kses_post( __( 'WordPress core developers share a love of jazz music, and all our major releases are named in honor of jazz musicians we personally admire. Here&#8217;s a list of releases and the musicians they were named for. <a href="%s">You can listen to a Last.fm station of all the musicians we named a release for</a>.', 'wporg' ) ), esc_url( 'https://www.last.fm/tag/wordpress-release-jazz' ) );
 						?>
 					</p>
 
