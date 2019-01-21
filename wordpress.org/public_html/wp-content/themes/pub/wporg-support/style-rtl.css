@@ -2212,6 +2212,10 @@ a:visited {
 	color: #0073aa;
 }
 
+a.wp-block-button__link:visited {
+	color: #4ca6cf;
+}
+
 a:hover, a:focus, a:active {
 	/* Override wp4.css */
 	color: #0073aa;
