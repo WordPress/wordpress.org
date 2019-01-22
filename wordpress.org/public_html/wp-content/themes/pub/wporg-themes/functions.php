@@ -252,9 +252,11 @@ function wporg_themes_get_feature_list( $include = 'active' ) {
 				'four-columns'  => __( 'Four Columns', 'wporg-themes' ),
 				'left-sidebar'  => __( 'Left Sidebar', 'wporg-themes' ),
 				'right-sidebar' => __( 'Right Sidebar', 'wporg-themes' ),
+				'wide-blocks'   => __( 'Wide Blocks', 'wporg-themes' ),
 			),
 			__( 'Features', 'wporg-themes' ) => array(
 				'accessibility-ready'   => __( 'Accessibility Ready', 'wporg-themes' ),
+				'block-styles'          => __( 'Block Editor Styles', 'wporg-themes' ),
 				'buddypress'            => __( 'BuddyPress', 'wporg-themes' ),
 				'custom-background'     => __( 'Custom Background', 'wporg-themes' ),
 				'custom-colors'         => __( 'Custom Colors', 'wporg-themes' ),
