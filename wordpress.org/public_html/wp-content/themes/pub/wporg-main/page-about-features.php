@@ -241,15 +241,6 @@ the_post();
 							);
 							?>
 						</li>
-						<li><strong><?php echo esc_html_x( 'The Latest Libraries', 'Features page: Section Header', 'wporg' ); ?></strong><br>
-							<?php
-							printf(
-								/* translators: %s: Link to Developer Handbook page about default scripts */
-								wp_kses_post( __( 'WordPress comes with the <a href="%s">latest script libraries</a> for you to make use of. These include jQuery, Plupload, Underscore.js and Backbone.js. We&#8217;re always on the lookout for new tools that developers can use to make a better experience for our users.', 'wporg' ) ),
-								esc_url( 'https://developer.wordpress.org/reference/functions/wp_enqueue_script/#default-scripts-included-and-registered-by-wordpress' )
-							);
-							?>
-						</li>
 					</ul>
 				</section>
 			</div><!-- .entry-content -->
