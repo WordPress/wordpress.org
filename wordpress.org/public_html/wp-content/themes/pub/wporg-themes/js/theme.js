@@ -1582,12 +1582,12 @@ window.wp = window.wp || {};
 
 	themes.Router = Backbone.Router.extend({
 		routes: {
-			'browse/:sort(/)'  : 'sort',
-			'tags/:tag(/)'     : 'tag',
-			'search/:query(/)' : 'search',
-			'author/:author(/)': 'author',
-			':slug(/)'         : 'preview',
-			''                 : 'sort'
+			'browse/:sort(/page/:page)(/)'   : 'sort',
+			'tags/:tag(/page/:page)(/)'      : 'tag',
+			'search/:query(/page/:page)(/)'  : 'search',
+			'author/:author(/page/:page)(/)' : 'author',
+			':slug(/)'                       : 'preview',
+			''                               : 'sort'
 		},
 
 		baseUrl: function( url ) {
@@ -1659,7 +1659,11 @@ window.wp = window.wp || {};
 			// Handles sorting / browsing routes
 			// Also handles the root URL triggering a sort request
 			// for `featured`, the default view
-			themes.router.on( 'route:sort', function( sort ) {
+			themes.router.on( 'route:sort', function( sort, page ) {
+				if ( page ) {
+					themes.router.navigate( 'browse/' + sort + '/', { replace: true } );
+				}
+
 				self.view.collection.queries.push( themes.data.query );
 
 				if ( ! sort ) {
@@ -1670,14 +1674,22 @@ window.wp = window.wp || {};
 			});
 
 			// The `search` route event. The router populates the input field.
-			themes.router.on( 'route:search', function() {
+			themes.router.on( 'route:search', function( query, page ) {
+				if ( page ) {
+					themes.router.navigate( 'search/' + query + '/', { replace: true } );
+				}
+
 				self.view.collection.queries.push( themes.data.query );
 
 				$( '.wp-filter-search' ).focus().trigger( 'keyup' );
 				self.view.trigger( 'theme:close' );
 			});
 
-			themes.router.on( 'route:tag', function( tag ) {
+			themes.router.on( 'route:tag', function( tag, page ) {
+				if ( page ) {
+					themes.router.navigate( 'tags/' + tag + '/', { replace: true } );
+				}
+
 				self.view.collection.queries.push( themes.data.query );
 
 				_.each( tag.split( '+' ), function( tag ) {
@@ -1689,7 +1701,11 @@ window.wp = window.wp || {};
 				self.view.trigger( 'theme:close' );
 			});
 
-			themes.router.on( 'route:author', function( author ) {
+			themes.router.on( 'route:author', function( author, page ) {
+				if ( page ) {
+					themes.router.navigate( 'author/' + author + '/', { replace: true } );
+				}
+
 				self.view.collection.queries.push( themes.data.query );
 
 				request.author = author;
