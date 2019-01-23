@@ -15,7 +15,7 @@ if ( ! defined( 'WPORGPATH' ) ) {
  * Prevent errors resulting from change to Gutenberg plugin in 4.9 that adds call to
  * `get_current_screen()`.
  */
-if ( ! function_exists( 'get_current_screen' ) && ! is_admin() && ! wp_doing_cron() ) {
+if ( ! function_exists( 'get_current_screen' ) && ! is_admin() && ! wp_doing_cron() && ! wp_doing_ajax() && ! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) ) {
 	function get_current_screen() {
 		return null;
 	}
