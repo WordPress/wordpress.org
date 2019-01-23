@@ -11,6 +11,15 @@ if ( ! defined( 'WPORGPATH' ) ) {
 	define( 'WPORGPATH', get_theme_file_path( '/inc/' ) );
 }
 
+/**
+ * Prevent errors resulting from change to Gutenberg plugin in 4.9 that adds call to
+ * `get_current_screen()`.
+ */
+if ( ! function_exists( 'get_current_screen' ) && ! is_admin() && ! wp_doing_cron() ) {
+	function get_current_screen() {
+		return null;
+	}
+}
 
 add_action( 'template_redirect', function() {
 	if ( ! is_page( 'test' ) ) {
