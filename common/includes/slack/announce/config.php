@@ -215,6 +215,7 @@ function get_whitelist() {
 			'jadonn',
 		),
 		'marketing' => array(
+			'joostdevalk',
 			'rosso99', // @sararosso on Slack
 			'bridgetwillard', // @gidgey on Slack
 		),
