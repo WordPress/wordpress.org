@@ -412,17 +412,17 @@ abstract class Event_Admin {
 			return;
 		}
 
-		// Make sure the requset came from the edit post screen.
+		if ( $this->get_event_type() !== $post->post_status ) {
+			return;
+		}
+
+		// Make sure the request came from the edit post screen.
 		if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) ) {
 			die( 'Unable to verify nonce' );
 		}
 
 		// Don't add/remove meta on trash, untrash, restore, etc.
 		if ( empty( $_POST['action'] ) || 'editpost' !== $_POST['action'] ) {
-			return;
-		}
-
-		if ( $this->get_event_type() !== get_post_type() ) {
 			return;
 		}
 
