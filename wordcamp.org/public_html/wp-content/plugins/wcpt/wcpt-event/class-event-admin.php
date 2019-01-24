@@ -412,7 +412,7 @@ abstract class Event_Admin {
 			return;
 		}
 
-		if ( $this->get_event_type() !== $post->post_status ) {
+		if ( $this->get_event_type() !== $post->post_type ) {
 			return;
 		}
 
