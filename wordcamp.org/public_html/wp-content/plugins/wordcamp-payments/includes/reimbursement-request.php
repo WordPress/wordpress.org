@@ -5,10 +5,12 @@
  */
 
 namespace WordCamp\Budgets\Reimbursement_Requests;
+defined( 'WPINC' ) or die();
+
+use WP_Post;
 use WCP_Encryption;
 use WordCamp\Utilities;
-
-defined( 'WPINC' ) or die();
+use WordCamp_Budgets;
 
 const POST_TYPE = 'wcb_reimbursement';
 
@@ -250,7 +252,7 @@ function enqueue_assets() {
  * requests and to submit notes, but they should only be able to change the form fields if the post hasn't been
  * submitted yet, or if we've asked for more information.
  *
- * @param \WP_Post $post
+ * @param WP_Post $post
  *
  * @return bool
  */
@@ -262,7 +264,7 @@ function user_can_edit_request( $post ) {
 /**
  * Render the Status metabox
  *
- * @param \WP_Post $post
+ * @param WP_Post $post
  */
 function render_status_metabox( $post ) {
 	wp_nonce_field( 'status', 'status_nonce' );
@@ -285,12 +287,19 @@ function render_status_metabox( $post ) {
 	$current_user_can_edit_request = false;
 	$submit_text = esc_html_x( 'Update', 'payment request', 'wordcamporg' );
 	$submit_note = '';
+	$submit_note_class = 'warning';
 
 	if ( current_user_can( 'manage_network' ) ) {
 		$current_user_can_edit_request = true;
 	} elseif ( in_array( $post->post_status, $editable_statuses ) ) {
-		$submit_text = esc_html__( 'Submit for Review', 'wordcamporg' );
-		$submit_note = esc_html__( 'Once submitted for review, this request can not be edited.', 'wordcamporg' );
+		if ( WordCamp_Budgets::can_submit_request( $post ) ) {
+			$submit_text = __( 'Submit for Review', 'wordcamporg' );
+			$submit_note = __( 'Once submitted for review, this request cannot be edited.', 'wordcamporg' );
+		} else {
+			$submit_note = __( 'Please add an invoice or other supporting documentation in the Files section and save the draft.', 'wordcamporg' );
+			$submit_note_class = 'error';
+		}
+
 		$current_user_can_edit_request = true;
 	}
 
@@ -299,7 +308,6 @@ function render_status_metabox( $post ) {
 
 	$request_id         = get_current_blog_id() . '-' . $post->ID;
 	$requested_by       = \WordCamp_Budgets::get_requester_name( $post->post_author );
-	$update_text        = current_user_can( 'manage_network' ) ? esc_html__( 'Update Request', 'wordcamporg' ) : esc_html__( 'Send Request', 'wordcamporg' );
 
 	require_once( dirname( __DIR__ ) . '/views/reimbursement-request/metabox-status.php' );
 }
@@ -307,7 +315,7 @@ function render_status_metabox( $post ) {
 /**
  * Render the Notes metabox
  *
- * @param \WP_Post $post
+ * @param WP_Post $post
  */
 function render_notes_metabox( $post ) {
 	wp_nonce_field( 'notes', 'notes_nonce' );
@@ -320,7 +328,7 @@ function render_notes_metabox( $post ) {
 /**
  * Render General Information Metabox
  *
- * @param \WP_Post $post
+ * @param WP_Post $post
  *
  */
 function render_general_information_metabox( $post ) {
@@ -364,7 +372,7 @@ function get_reimbursement_reasons() {
 /**
  * Render Expenses Metabox
  *
- * @param \WP_Post $post
+ * @param WP_Post $post
  *
  */
 function render_expenses_metabox( $post ) {
@@ -439,7 +447,7 @@ function set_request_status( $post_data, $post_data_raw ) {
  * Save the post's data
  *
  * @param int      $post_id
- * @param \WP_Post $post
+ * @param WP_Post $post
  */
 function save_request( $post_id, $post ) {
 	if ( ! \WordCamp_Budgets::post_edit_is_actionable( $post, POST_TYPE ) ) {
@@ -464,7 +472,7 @@ function save_request( $post_id, $post ) {
 	 * To avoid that, we create a stub WP_Post with the original post status, and give that to
 	 * user_can_edit_request() instead.
 	 */
-	$original_post = new \WP_Post( (object) array( 'post_status' => $_POST['original_post_status'] ) );
+	$original_post = new WP_Post( (object) array( 'post_status' => $_POST['original_post_status'] ) );
 
 	if ( user_can_edit_request( $original_post ) ) {
 		$text_fields = array( 'name_of_payer', 'currency', 'reason', 'reason_other' );
@@ -670,7 +678,7 @@ function validate_and_save_expenses( $post_id, $expenses ) {
 /**
  * Validate and save expense data
  *
- * @param \WP_Post $post
+ * @param WP_Post $post
  * @param array    $expenses
  */
 function validate_and_save_notes( $post, $new_note_message ) {
@@ -715,7 +723,7 @@ function validate_and_save_notes( $post, $new_note_message ) {
 /**
  * Notify WordCamp Central or the request author when new notes are added
  *
- * @param \WP_Post $request
+ * @param WP_Post $request
  * @param array    $note
  */
 function notify_parties_of_new_note( $request, $note ) {
@@ -761,7 +769,7 @@ function notify_parties_of_new_note( $request, $note ) {
  *
  * @param string   $new_status
  * @param string   $old_status
- * @param \WP_Post $request
+ * @param WP_Post $request
  */
 function notify_organizer_request_updated( $new_status, $old_status, $request ) {
 	if ( $request->post_type !== POST_TYPE ) {

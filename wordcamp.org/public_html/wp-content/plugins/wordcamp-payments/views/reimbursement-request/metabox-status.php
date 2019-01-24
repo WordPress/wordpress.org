@@ -3,6 +3,17 @@
 namespace WordCamp\Budgets\Reimbursement_Requests;
 defined( 'WPINC' ) or die();
 
+/**
+ * @var \WP_Post $post
+ * @var bool     $current_user_can_edit_request
+ * @var string   $request_id
+ * @var string   $requested_by
+ * @var string   $incomplete_notes
+ * @var bool     $incomplete_readonly
+ * @var string   $submit_text
+ * @var string   $submit_note
+ * @var string   $submit_note_class
+ */
 ?>
 
 <div id="submitpost" class="wcb submitbox">
@@ -84,33 +95,6 @@ defined( 'WPINC' ) or die();
 		<div class="clear"></div>
 	</div> <!-- #minor-publishing -->
 
-
-	<div id="major-publishing-actions">
-		<?php if ( $current_user_can_edit_request ) : ?>
-			<?php if ( !empty( $submit_note ) ) : ?>
-				<div><?php echo $submit_note; ?></div>
-			<?php endif; ?>
-
-			<div id="delete-action">
-				<?php if ( current_user_can( 'delete_post', $post->ID ) ) : ?>
-					<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>">
-						<?php _e( 'Delete', 'wordcamporg' ); ?>
-					</a>
-				<?php endif; ?>
-			</div>
-
-			<div id="publishing-action">
-				<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr( $submit_text ) ?>" />
-				<?php submit_button( $submit_text, 'primary button-large', 'wcb-update', false, array( 'accesskey' => 'p' ) ); ?>
-			</div>
-
-			<div class="clear"></div>
-
-		<?php else : ?>
-
-			<?php _e( 'This request can not be edited.', 'wordcamporg' ); ?>
-
-		<?php endif; ?>
-	</div> <!-- #major-publishing-actions -->
+	<?php require dirname( __DIR__ ) . '/wordcamp-budgets/major-publishing-actions.php'; ?>
 
 </div> <!-- .submitbox -->
