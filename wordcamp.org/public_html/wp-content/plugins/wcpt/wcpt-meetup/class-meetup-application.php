@@ -54,6 +54,7 @@ class Meetup_Application extends Event_Application {
 	public static function get_post_statuses() {
 		return array(
 			'wcpt-mtp-nds-vet'   => _x( 'Needs Vetting', 'Meetup status', 'wordcamporg' ),
+			'wcpt-mpt-awt-fdb'   => _x( 'Awaiting Feedback', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-nds-ori'   => _x( 'Needs Orientation/Interview', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-schdlng'   => _x( 'Scheduling', 'Meetup status', 'wordcamporg' ),
 			'wcpt-mtp-schdld'    => _x( 'Scheduled', 'Meetup status', 'wordcamporg' ),
