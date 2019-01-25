@@ -481,10 +481,15 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		return false;
 	}
 
-	// Always use the ABSPATH constant in the keys here to avoid path disclosure.
+	// Always use constants in the keys here to avoid path disclosure.
 	$error_ignorelist = [
 		// See https://core.trac.wordpress.org/ticket/29204
 		ABSPATH . 'wp-includes/SimplePie/Registry.php:215' => 'Non-static method WP_Feed_Cache::create() should not be called statically',
+
+		// It seems like WPSC shouldn't assume that these files/folders always exist, and should check first instead.
+		WP_CONTENT_DIR . '/plugins/wp-super-cache/wp-cache-phase2.php:2359' => 'failed to open dir: No such file or directory',
+		WP_CONTENT_DIR . '/plugins/wp-super-cache/wp-cache-phase2.php:2901' => 'failed to open dir: No such file or directory',
+		WP_CONTENT_DIR . '/plugins/wp-super-cache/wp-cache-phase2.php:3033' => 'No such file or directory',
 	];
 
 	if ( isset( $error_ignorelist[ "$file:$line" ] ) && false !== strpos( $err_msg, $error_ignorelist[ "$file:$line" ] ) ) {
