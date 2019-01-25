@@ -1,7 +1,17 @@
 <?php
 
 namespace WordCamp\Budgets\Sponsor_Invoices;
+use WP_Post;
+
 defined( 'WPINC' ) or die();
+
+/**
+ * @var WP_Post $post
+ * @var string  $delete_text
+ * @var array   $allowed_edit_statuses
+ * @var bool    $current_user_can_edit_request
+ * @var bool    $current_user_can_submit_request
+ */
 
 ?>
 
@@ -40,7 +50,7 @@ defined( 'WPINC' ) or die();
 
 
 	<div id="major-publishing-actions">
-		<?php if ( $current_user_can_edit_request ) : ?>
+		<?php if ( $current_user_can_edit_request && $current_user_can_submit_request ) : ?>
 
 			<div id="delete-action">
 				<?php if ( current_user_can( 'delete_post', $post->ID ) ) : ?>
@@ -62,6 +72,12 @@ defined( 'WPINC' ) or die();
 			</div>
 
 			<div class="clear"></div>
+
+		<?php elseif ( ! $current_user_can_submit_request ) : ?>
+
+			<p>
+				<?php _e( "Invoices can't be submitted until your venue contract has been signed.", 'wordcamporg' ); ?>
+			</p>
 
 		<?php else : ?>
 

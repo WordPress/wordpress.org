@@ -5,6 +5,8 @@
  */
 
 namespace WordCamp\Budgets\Sponsor_Invoices;
+use WP_Post;
+use WordCamp_Loader;
 
 defined( 'WPINC' ) or die();
 
@@ -243,12 +245,16 @@ function required_fields_complete( $submitted_values, $required_fields ) {
 /**
  * Render the Status metabox
  *
- * @param \WP_Post $post
+ * @param WP_Post $post The invoice post
  */
 function render_status_metabox( $post ) {
+	require_once( WP_PLUGIN_DIR . '/wcpt/wcpt-event/class-event-loader.php' );
+	require_once( WP_PLUGIN_DIR . '/wcpt/wcpt-wordcamp/wordcamp-loader.php' );
+
 	wp_nonce_field( 'status', 'status_nonce' );
 
 	$delete_text = EMPTY_TRASH_DAYS ? esc_html__( 'Move to Trash' ) : esc_html__( 'Delete Permanently' );
+	$wordcamp    = get_wordcamp_post();
 
 	/*
 	 * We can't use current_user_can( 'edit_post', N ) in this case, because the restriction only applies when
@@ -268,7 +274,9 @@ function render_status_metabox( $post ) {
 		$allowed_edit_statuses[] = 'wcbsi_submitted';
 	}
 
+	$allowed_submit_statuses         = WordCamp_Loader::get_after_contract_statuses();
 	$current_user_can_edit_request = in_array( $post->post_status, $allowed_edit_statuses, true );
+	$current_user_can_submit_request = $wordcamp && in_array( $wordcamp->post_status, $allowed_submit_statuses, true );
 
 	require_once( dirname( __DIR__ ) . '/views/sponsor-invoice/metabox-status.php' );
 }
