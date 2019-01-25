@@ -68,7 +68,6 @@ function _get_network_plugin_state_list( $state ) {
 			'camptix-trustpay/camptix-trustpay.php',
 			'liveblog/liveblog.php',
 			'multi-event-sponsors/bootstrap.php',
-			'polldaddy/polldaddy.php',
 			'supportflow/supportflow.php',
 			'wordcamp-api/bootstrap.php',
 			'wordcamp-organizer-reminders/bootstrap.php',
