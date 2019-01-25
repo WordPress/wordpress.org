@@ -1,7 +1,7 @@
 <?php
 
 defined( 'WPINC' ) or die();
-use WordCamp\Logger;
+use function WordCamp\Logger\log;
 
 /*
  * Miscellaneous helper functions.
@@ -94,10 +94,10 @@ function wcorg_redundant_remote_get( $request_url, $request_args = array() ) {
 		}
 
 		if ( $attempt_count < 3 ) {
-			Logger\log( 'request_failed_temporarily', compact( 'request_url', 'request_args', 'response', 'attempt_count', 'retry_after' ) );
+			log( 'request_failed_temporarily', compact( 'request_url', 'request_args', 'response', 'attempt_count', 'retry_after' ) );
 			sleep( $retry_after );
 		} else {
-			Logger\log( 'request_failed_permenantly', compact( 'request_url', 'request_args', 'response' ) );
+			log( 'request_failed_permenantly', compact( 'request_url', 'request_args', 'response' ) );
 			break;
 		}
 
