@@ -43,6 +43,7 @@ if ( ! class_exists( 'WCPT_Loader' ) ) :
 		public function includes() {
 			// Load the files.
 			require_once( WCPT_DIR . 'wcpt-functions.php' );
+			require_once( WCPT_DIR . 'wcpt-event/class-event-loader.php' );
 			require_once( WCPT_DIR . 'wcpt-wordcamp/wordcamp-loader.php' );
 			require_once( WCPT_DIR . 'wcpt-meetup/meetup-loader.php' );
 			require_once( WCPT_DIR . 'wcpt-event/tracker.php' );
