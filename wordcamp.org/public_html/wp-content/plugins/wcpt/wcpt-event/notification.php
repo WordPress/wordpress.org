@@ -3,6 +3,11 @@
  * Provides helper methods for sending slack notifications in response to status changes in application.
  */
 
+// Local environments don't have the credentials to send to Slack.
+if ( 'development' === WORDCAMP_ENVIRONMENT && ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) ) {
+	return;
+}
+
 if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 	// If this is sandbox and then send notification of owner of sandbox (as long as sandbox username and slack username matches).
 	if ( defined( 'SANDBOX_SLACK_USERNAME' ) ) {
