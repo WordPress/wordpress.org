@@ -78,13 +78,13 @@ class o2_follow {
 	 */
 	public function get_options( $options ) {
 		$localizations      = array(
-			'follow'               => __( 'Follow', 'o2' ),
-			'followComments'       => __( 'Follow comments', 'o2' ),
-			'unfollow'             => __( 'Unfollow', 'o2' ),
-			'unfollowComments'     => __( 'Unfollow comments', 'o2' ),
-			'followError'          => __( 'There was a problem updating your following preferences.', 'o2' ),
-			'followingAll'         => __( 'Following all', 'o2' ),
-			'followingAllComments' => __( 'You are already following all comments on this site.', 'o2' ),
+			'follow'               => __( 'Follow', 'wporg' ),
+			'followComments'       => __( 'Follow comments', 'wporg' ),
+			'unfollow'             => __( 'Unfollow', 'wporg' ),
+			'unfollowComments'     => __( 'Unfollow comments', 'wporg' ),
+			'followError'          => __( 'There was a problem updating your following preferences.', 'wporg' ),
+			'followingAll'         => __( 'Following all', 'wporg' ),
+			'followingAllComments' => __( 'You are already following all comments on this site.', 'wporg' ),
 		);
 		$localizations      = array_merge( $options['strings'], $localizations );
 		$options['strings'] = $localizations;
@@ -119,7 +119,7 @@ class o2_follow {
 
 		$comment_form_extras .= '<p class="comment-subscription-form">';
 		$comment_form_extras .= '<input type="checkbox" name="subscribe" id="subscribe" value="subscribe" style="width: auto;"' . checked( $checked, true, false ) . '/> ';
-		$comment_form_extras .= '<label class="subscribe-label" id="subscribe-label" for="subscribe" style="display: inline;">' . esc_html__( 'Notify me of new comments via email.', 'o2' ) . '</label>';
+		$comment_form_extras .= '<label class="subscribe-label" id="subscribe-label" for="subscribe" style="display: inline;">' . esc_html__( 'Notify me of new comments via email.', 'wporg' ) . '</label>';
 		$comment_form_extras .= '</p>';
 
 		return $comment_form_extras;
@@ -169,7 +169,7 @@ class o2_follow {
 	 * @return string
 	 **/
 	public function subscription_o2_post_form( $post_form_extras = '' ) {
-		$label = esc_html__( 'Notify me of new comments via email.', 'o2' );
+		$label = esc_html__( 'Notify me of new comments via email.', 'wporg' );
 
 		$post_form_extras .= '<p style="margin-top: 1.5em;" class="comment-subscription-form"><input type="checkbox" name="post_subscribe" id="post_subscribe" value="post_subscribe" style="margin-left: .5em;"/>';
 		$post_form_extras .= '<label style="font-size: 1.2em; margin-bottom: .5em;" id="post_subscribe_label" for="post_subscribe"><small>' . $label . '</small></label>';
@@ -185,15 +185,15 @@ class o2_follow {
 		if ( function_exists( 'o2_register_post_action_states' ) ) {
 			o2_register_post_action_states( 'follow', [
 				'normal'     => [
-					'shortText' => __( 'Follow', 'o2' ),
-					'title'     => __( 'Follow comments', 'o2' ),
+					'shortText' => __( 'Follow', 'wporg' ),
+					'title'     => __( 'Follow comments', 'wporg' ),
 					'classes'   => [],
 					'genericon' => 'genericon-subscribe',
 					'nextState' => 'subscribed',
 				],
 				'subscribed' => [
-					'shortText' => __( 'Following', 'o2' ),
-					'title'     => __( 'Unfollow comments', 'o2' ),
+					'shortText' => __( 'Following', 'wporg' ),
+					'title'     => __( 'Unfollow comments', 'wporg' ),
 					'classes'   => [ 'post-comments-subscribed' ],
 					'genericon' => 'genericon-unsubscribe',
 					'nextState' => 'normal',
