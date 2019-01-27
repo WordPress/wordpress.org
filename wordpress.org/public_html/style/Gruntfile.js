@@ -34,7 +34,7 @@ module.exports = function( grunt ) {
 			}
 		},
 		jshint: {
-			files: [ 'Gruntfile.js', 'trac/*.js', 't!rac/*.min.js' ],
+			files: [ 'Gruntfile.js', 'js/*.js', 'trac/*.js', 't!rac/*.min.js' ],
 			options: grunt.file.readJSON( '.jshintrc' )
 		},
 		sass: {
@@ -107,6 +107,21 @@ module.exports = function( grunt ) {
 				src: ['wp4.css']
 			}
 		},
+		uglify: {
+			options: {
+				ASCIIOnly: true,
+				screwIE8: false
+			},
+			js: {
+				expand: true,
+				cwd: 'js/',
+				dest: 'js/',
+				ext: '.min.js',
+				src: [
+					'navigation.js',
+				]
+			}
+		},
 		watch: {
 			jshint: {
 				files: ['<%= jshint.files %>'],
@@ -128,8 +143,10 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
+	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 
+	grunt.registerTask( 'js', ['uglify:js'] );
 	grunt.registerTask( 'css', ['sass', 'postcss', 'rtlcss:dynamic'] );
-	grunt.registerTask( 'default', ['jshint', 'css'] );
-	grunt.registerTask( 'build', ['css'] );
+	grunt.registerTask( 'default', ['jshint', 'css', 'js'] );
+	grunt.registerTask( 'build', ['css', 'js'] );
 };
