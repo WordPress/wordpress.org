@@ -2063,6 +2063,8 @@ a.mention.me {
 	#metanav li {
 		float: left;
 	}
+	#metanav.nav li,
+	#metanav.nav form.trac-logout button,
 	#metanav.nav a,
 	#metanav.nav a:hover,
 	#metanav.nav a:active,
