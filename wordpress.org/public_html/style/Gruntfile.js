@@ -14,7 +14,6 @@ module.exports = function( grunt ) {
 			options: {
 				map: { inline: false },
 				processors: [
-					require( 'pixrem' )(),
 					require( 'autoprefixer' )( {
 						browsers: [
 							'Android >= 2.1',
@@ -26,7 +25,7 @@ module.exports = function( grunt ) {
 							'Safari >= 6.0'
 						],
 						cascade: false
-					} ),
+					} )
 				]
 			},
 			dist: {
@@ -36,17 +35,6 @@ module.exports = function( grunt ) {
 		jshint: {
 			files: [ 'Gruntfile.js', 'js/*.js', 'trac/*.js', 't!rac/*.min.js' ],
 			options: grunt.file.readJSON( '.jshintrc' )
-		},
-		sass: {
-			options: {
-				sourceMap: true,
-				outputStyle: 'expanded'
-			},
-			dist: {
-				files: {
-					'style.css': 'style.scss'
-				}
-			}
 		},
 		rtlcss: {
 			options: {
@@ -138,7 +126,6 @@ module.exports = function( grunt ) {
 	//	grunt.config.merge( { postcss: { options : { processors: [ require( 'cssnano' )() ] } } } );
 	}
 
-	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
@@ -146,7 +133,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 
 	grunt.registerTask( 'js', ['uglify:js'] );
-	grunt.registerTask( 'css', ['sass', 'postcss', 'rtlcss:dynamic'] );
+	grunt.registerTask( 'css', ['postcss', 'rtlcss:dynamic'] );
 	grunt.registerTask( 'default', ['jshint', 'css', 'js'] );
 	grunt.registerTask( 'build', ['css', 'js'] );
 };
