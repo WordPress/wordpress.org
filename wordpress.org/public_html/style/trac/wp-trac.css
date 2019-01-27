@@ -1997,6 +1997,7 @@ a.mention.me {
 @media (max-width: 770px) {
 	#headline {
 		height: auto;
+		min-height: 62px;
 	}
 	#headline .menu {
 		clear: both;
