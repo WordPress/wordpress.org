@@ -502,6 +502,12 @@ class Language_Pack extends WP_CLI_Command {
 				$wp_locale = $wp_locale . '_' . $set->slug;
 			}
 
+			// Check if any current translations exist.
+			if ( 0 === $set->current_count() ) {
+				WP_CLI::log( "Skip {$wp_locale}, no translations." );
+				continue;
+			}
+
 			// Check if percent translated is above threshold.
 			$percent_translated = $set->percent_translated();
 			if ( $percent_translated < self::PACKAGE_THRESHOLD ) {
