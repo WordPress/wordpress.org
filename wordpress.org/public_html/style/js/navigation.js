@@ -10,12 +10,12 @@
 		return;
 	}
 
-	button = container.getElementsByTagName( 'button' )[1];
+	button = document.getElementById( 'mobile-menu-button' );
 	if ( 'undefined' === typeof button ) {
 		return;
 	}
 
-	menu = container.getElementsByTagName( 'ul' )[0];
+	menu = document.getElementById( 'wporg-header-menu' );
 
 	// Hide menu toggle button if menu is empty and return early.
 	if ( 'undefined' === typeof menu ) {
