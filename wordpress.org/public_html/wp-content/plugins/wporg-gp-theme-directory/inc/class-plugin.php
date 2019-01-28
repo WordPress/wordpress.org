@@ -64,8 +64,8 @@ class Plugin {
 	 * @return bool False on failure, true on success.
 	 */
 	public function import_or_update_theme_on_status_change( $args ) {
-		$time = date( 'r' );
-		$message = "_Time: {$time}_\nImport of theme {$args['theme']} {$args['version']} in process...\n";
+		$timestamp = time();
+		$message   = '';
 
 		// Import in a separate process.
 		$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate set-theme-project ' . escapeshellarg( $args['theme'] ) . ' ' . escapeshellarg( $args['version'] ) . ' 2>&1';;
@@ -86,6 +86,7 @@ class Plugin {
 			'fallback'   => "Theme {$args['theme']} was imported.",
 			'color'      => '#82878c',
 			'mrkdwn_in'  => [ 'text' ],
+			'ts'         => $timestamp,
 		];
 		$this->slack( $attachment );
 

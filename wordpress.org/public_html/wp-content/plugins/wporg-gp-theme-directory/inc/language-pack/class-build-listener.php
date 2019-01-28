@@ -42,8 +42,8 @@ class Build_Listener {
 			return false;
 		}
 
-		$time = date( 'r' );
-		$message = "_Time: {$time}_\nLanguage packs for {$args['theme']} in process...\n";
+		$timestamp = time();
+		$message   = '';
 
 		// Build in a separate process.
 		$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate language-pack generate theme ' . escapeshellarg( $args['theme'] ) . ' 2>&1';
@@ -63,6 +63,7 @@ class Build_Listener {
 			'fallback'   => "Language packs for {$args['theme']} were processed.",
 			'color'      => '#c32283',
 			'mrkdwn_in'  => [ 'text' ],
+			'ts'         => $timestamp,
 		];
 		$this->slack( $attachment );
 

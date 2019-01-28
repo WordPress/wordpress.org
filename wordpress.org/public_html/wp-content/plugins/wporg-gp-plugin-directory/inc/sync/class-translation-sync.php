@@ -87,9 +87,10 @@ class Translation_Sync {
 		$sub_project = basename( $args['gp_project'] );
 		$sub_project_counterpart = $this->project_mapping[ $sub_project ];
 
-		$time = date( 'r' );
-		$message = "_Time: {$time}_\nTranslation sync from {$sub_project} to {$sub_project_counterpart} in process...\n";
-		$updates = 0;
+		$timestamp = time();
+		$message   = '';
+		$updates   = 0;
+
 		foreach ( $translation_sets as $translation_set ) {
 			if ( 0 == $translation_set->current_count() ) {
 				continue;
@@ -121,6 +122,7 @@ class Translation_Sync {
 			'fallback'   => "Translations for {$args['plugin']} were synced.",
 			'color'      => '#00a0d2',
 			'mrkdwn_in'  => [ 'text' ],
+			'ts'         => $timestamp,
 		];
 		$this->slack( $attachment );
 
