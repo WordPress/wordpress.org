@@ -91,7 +91,7 @@ the_post();
 							<li>
 								<?php
 								/* translators: PHP Version */
-								printf( esc_html__( 'PHP %s or greater', 'wporg' ), '7.2' );
+								printf( esc_html__( 'PHP %s or greater', 'wporg' ), RECOMMENDED_PHP );
 								?>
 							</li>
 							<li>
