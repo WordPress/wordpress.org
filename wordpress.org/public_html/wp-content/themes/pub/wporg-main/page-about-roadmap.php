@@ -54,7 +54,7 @@ $date_format = get_option( 'date_format' );
 						printf(
 							/* translators: %s: Link to make/core blog post */
 							wp_kses_post( __( 'For 2019 the project also has the following 9 priorities, as outlined in <a href="%s">this post</a> by project lead Matt Mullenweg:', 'wporg' ) ),
-							esc_url( 'https://make.wordpress.org/core/2018/12/08/9-priorities-for-2019/' )
+							'https://make.wordpress.org/core/2018/12/08/9-priorities-for-2019/'
 						);
 						?>
 					</p>
@@ -81,7 +81,7 @@ $date_format = get_option( 'date_format' );
 							printf(
 								/* translators: %s: Link to open tickets in Core Trac */
 								wp_kses_post( __( 'Form a Triage team to tackle our <a href="%s">6,500 open issues on Trac</a>.', 'wporg' ) ),
-								esc_url( 'https://core.trac.wordpress.org/query?status=!closed' )
+								'https://core.trac.wordpress.org/query?status=!closed'
 							);
 							?>
 						</li>
@@ -92,7 +92,7 @@ $date_format = get_option( 'date_format' );
 						printf(
 							/* translators: %s: https://make.wordpress.org/ */
 							wp_kses_post( __( 'Want to get involved? Head on over to <a href="%s">Make WordPress</a>! We can always use more people to help translate, design, document, develop and market WordPress.', 'wporg' ) ),
-							esc_url( 'https://make.wordpress.org/' )
+							'https://make.wordpress.org/'
 						);
 						?>
 					</p>
@@ -104,7 +104,7 @@ $date_format = get_option( 'date_format' );
 						printf(
 							/* translators: %s: Link to Core Trac */
 							wp_kses_post( __( 'Here are the current planned releases, and links to their respective milestones in our <a href="%s">issue tracker</a>. Any projected dates are for discussion and planning purposes, and will be firmed up as we get closer to release.', 'wporg' ) ),
-							esc_url( 'https://core.trac.wordpress.org/' )
+							'https://core.trac.wordpress.org/'
 						);
 						?>
 					</p>

@@ -148,7 +148,7 @@ the_post();
 							printf(
 								/* translators: Link to Polyglots teams */
 								wp_kses_post( __( 'WordPress is available in more than 70 languages. If you or the person you&#8217;re building the website for would prefer to use WordPress in a language other than English, <a href="%s">that&#8217;s easy to do</a>.', 'wporg' ) ),
-								esc_url( 'https://make.wordpress.org/polyglots/teams/' )
+								'https://make.wordpress.org/polyglots/teams/'
 							);
 							?>
 						</li>
@@ -182,7 +182,7 @@ the_post();
 								/* translators: 1: Link to support forums; 2: Link to WordCamp Central */
 								wp_kses_post( __( 'As the most popular open source CMS on the web, WordPress has a vibrant and supportive community. Ask a question on the <a href="%1$s">support forums</a> and get help from a volunteer, attend a <a href="%2$s">WordCamp</a> or Meetup to learn more about WordPress, read blogs posts and tutorials about WordPress. Community is at the heart of WordPress, making it what it is today.', 'wporg' ) ),
 								esc_url( __( 'https://wordpress.org/support/forums/', 'wporg' ) ),
-								esc_url( 'https://central.wordcamp.org/' )
+								'https://central.wordcamp.org/'
 							);
 							?>
 						</li>
@@ -191,7 +191,7 @@ the_post();
 							printf(
 								/* translators: %s: https://make.wordpress.org/ */
 								wp_kses_post( __( 'You can be WordPress too! Help to build WordPress, answer questions on the support forums, write documentation, translate WordPress into your language, speak at a WordCamp, write about WordPress on your blog. Whatever your skill, <a href="%s">we&#8217;d love to have you</a>!', 'wporg' ) ),
-								esc_url( 'https://make.wordpress.org/' )
+								'https://make.wordpress.org/'
 							);
 							?>
 						</li>
@@ -206,7 +206,7 @@ the_post();
 							printf(
 								/* translators: 1: Link to Developer Hub; 2: Link to Plugin Directory */
 								wp_kses_post( __( 'The <a href="%1$s">WordPress APIs</a> make it possible for you to create plugins to extend WordPress. WordPress&#8217;s extensibility lies in the thousands of hooks at your disposal. Once you&#8217;ve created your plugin, we&#8217;ve even got a <a href="%2$s">plugin repository</a> for you to host it on.', 'wporg' ) ),
-								esc_url( 'https://developer.wordpress.org/' ),
+								'https://developer.wordpress.org/',
 								esc_url( home_url( '/plugins/' ) )
 							);
 							?>
@@ -216,7 +216,7 @@ the_post();
 							printf(
 								/* translators: 1: Link to Theme Developer Handbook; 2: Link to Theme Directory */
 								wp_kses_post( __( 'Create WordPress themes for clients, other WordPress users, or yourself. WordPress provides the extensibility to <a href="%1$s">create themes</a> as simple or as complex as you wish. If you want to give your theme away for free you can give it to users in the <a href="%2$s">theme repository</a>.', 'wporg' ) ),
-								esc_url( 'https://developer.wordpress.org/themes/' ),
+								'https://developer.wordpress.org/themes/',
 								esc_url( home_url( '/themes/' ) )
 							);
 							?>
@@ -226,7 +226,7 @@ the_post();
 							printf(
 								/* translators: %s: Link to REST API Handbook */
 								wp_kses_post( __( 'If you want to build an application, WordPress can help with that too. WordPress provides a lot of the features under the hood that your app will need: translations, user management, HTTP requests, databases, URL routing and much, much more. You can also use our <a href="%s">REST API</a> to interact with it.', 'wporg' ) ),
-								esc_url( 'https://developer.wordpress.org/rest-api/' )
+								'https://developer.wordpress.org/rest-api/'
 							);
 							?>
 						</li>
@@ -235,9 +235,9 @@ the_post();
 							printf(
 								/* translators: 1: Link to Plugin Handbook page about custom post types; 2: Link to Plugin Handbook page about custom taxonomies; 3: Link to Plugin Handbook page about metadata */
 								wp_kses_post( __( 'WordPress comes with default content types, but for more flexibility you can add a few lines of code to create your own <a href="%1$s">custom post types</a>, <a href="%2$s">taxonomies</a>, and <a href="%3$s">metadata</a>. Take WordPress in whatever direction you wish.', 'wporg' ) ),
-								esc_url( 'https://developer.wordpress.org/plugins/post-types/' ),
-								esc_url( 'https://developer.wordpress.org/plugins/taxonomies/' ),
-								esc_url( 'https://developer.wordpress.org/plugins/metadata/' )
+								'https://developer.wordpress.org/plugins/post-types/',
+								'https://developer.wordpress.org/plugins/taxonomies/',
+								'https://developer.wordpress.org/plugins/metadata/'
 							);
 							?>
 						</li>

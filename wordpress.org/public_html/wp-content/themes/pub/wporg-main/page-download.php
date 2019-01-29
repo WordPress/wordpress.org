@@ -116,7 +116,7 @@ the_post();
 							printf(
 								/* translators: URL to installation guide */
 								wp_kses_post( __( 'With our famous 5-minute installation, setting up WordPress for the first time is simple. We’ve created a <a href="%1$s">handy guide</a> to see you through the installation process.', 'wporg' ) ),
-								esc_url( 'https://codex.wordpress.org/Installing_WordPress#Famous_5-Minute_Installation' )
+								'https://codex.wordpress.org/Installing_WordPress#Famous_5-Minute_Installation'
 							);
 							?>
 						</p>
@@ -129,7 +129,7 @@ the_post();
 							printf(
 								/* translators: URL to WordPress mailing list */
 								wp_kses_post( __( 'Want to get notified about WordPress releases? Join the <a href="%1$s">WordPress Announcements mailing list</a> and we will send a friendly message whenever there is a new stable release.', 'wporg' ) ),
-								esc_url( 'https://wordpress.org/list/' )
+								'https://wordpress.org/list/'
 							);
 							?>
 						</p>
@@ -143,10 +143,10 @@ the_post();
 								/* translators: 1: PHP version; 2: URL to PHP website; 3: URL to MySQL website; 4: MySQL version; 5: URL to MariaDB website; 6: MariaDB version */
 								wp_kses_post( __( 'We recommend servers running version %1$s or greater of <a href="%2$s">PHP</a> and <a href="%3$s">MySQL</a> version %4$s <em>OR</em> <a href="%5$s">MariaDB</a> version %6$s or greater.', 'wporg' ) ),
 								RECOMMENDED_PHP,
-								esc_url( 'https://www.php.net/' ),
-								esc_url( 'https://www.mysql.com/' ),
+								'https://secure.php.net/',
+								'https://www.mysql.com/',
 								'5.6',
-								esc_url( 'https://mariadb.org/' ),
+								'https://mariadb.org/',
 								'10.0'
 							);
 							?>
@@ -155,8 +155,8 @@ the_post();
 							printf(
 								/* translators: 1: URL to Apache website; 2: URL to Nginx website */
 								wp_kses_post( __( 'We also recommend either <a href="%1$s">Apache</a> or <a href="%2$s">Nginx</a> as the most robust options for running WordPress, but neither is required.', 'wporg' ) ),
-								esc_url( 'https://httpd.apache.org/' ),
-								esc_url( 'https://nginx.org/' )
+								'https://httpd.apache.org/',
+								'https://nginx.org/'
 							);
 							?>
 						</p>

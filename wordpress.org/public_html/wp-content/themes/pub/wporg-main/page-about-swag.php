@@ -43,7 +43,7 @@ the_post();
 						</a>
 						<?php
 						/* translators: Link to swag store */
-						printf( wp_kses_post( __( 'Whether you&#8217;re a seasoned WordPress fanatic or just getting warmed up, wear your WordPress love with pride. The official <a href="%s">WordPress Swag Store</a> sells shirts and hoodies in a variety of designs and colors, printed on stock from socially responsible companies.', 'wporg' ) ), esc_url( 'https://mercantile.wordpress.org' ) );
+						printf( wp_kses_post( __( 'Whether you&#8217;re a seasoned WordPress fanatic or just getting warmed up, wear your WordPress love with pride. The official <a href="%s">WordPress Swag Store</a> sells shirts and hoodies in a variety of designs and colors, printed on stock from socially responsible companies.', 'wporg' ) ), 'https://mercantile.wordpress.org' );
 						?>
 					</p>
 					<p><?php esc_html_e( 'The swag store also rotates other products through the lineup on a regular basis.', 'wporg' ); ?></p>
@@ -51,7 +51,7 @@ the_post();
 					<p>
 						<?php
 						/* translators: Link to swag store */
-						printf( wp_kses_post( __( 'So show the love and spread the word &mdash; get your <a href="%s">WordPress swag</a> today.', 'wporg' ) ), esc_url( 'https://mercantile.wordpress.org' ) );
+						printf( wp_kses_post( __( 'So show the love and spread the word &mdash; get your <a href="%s">WordPress swag</a> today.', 'wporg' ) ), 'https://mercantile.wordpress.org' );
 						?>
 					</p>
 				</section>

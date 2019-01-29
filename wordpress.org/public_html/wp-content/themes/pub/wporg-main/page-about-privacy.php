@@ -79,7 +79,7 @@ the_post();
 							printf(
 								/* translators: Login URL */
 								wp_kses_post( __( 'Visit <a href="%s">https://login.wordpress.org</a>, and enter your username and password.', 'wporg' ) ),
-								esc_url( 'https://login.wordpress.org/' )
+								'https://login.wordpress.org/'
 							);
 							?>
 						</li>

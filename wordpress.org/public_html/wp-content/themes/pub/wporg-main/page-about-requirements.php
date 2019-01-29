@@ -45,19 +45,19 @@ the_post();
 						<li>
 							<?php
 							/* translators: 1: URL to PHP; 2: PHP Version */
-							printf( wp_kses_post( __( '<a href="%1$s">PHP</a> version %2$s or greater.', 'wporg' ) ), esc_url( 'http://www.php.net/' ), RECOMMENDED_PHP );
+							printf( wp_kses_post( __( '<a href="%1$s">PHP</a> version %2$s or greater.', 'wporg' ) ), 'https://secure.php.net/', RECOMMENDED_PHP );
 							?>
 						</li>
 						<li>
 							<?php
 							/* translators: 1: URL to MySQL; 2: MySQL Version; 3: URL to MariaDB; 4: MariaDB Version */
-							printf( wp_kses_post( __( '<a href="%1$s">MySQL</a> version %2$s or greater <em>OR</em> <a href="%3$s">MariaDB</a> version %4$s or greater.', 'wporg' ) ), esc_url( 'https://www.mysql.com/' ), '5.6', esc_url( 'https://mariadb.org/' ), '10.0' );
+							printf( wp_kses_post( __( '<a href="%1$s">MySQL</a> version %2$s or greater <em>OR</em> <a href="%3$s">MariaDB</a> version %4$s or greater.', 'wporg' ) ), 'https://www.mysql.com/', '5.6', 'https://mariadb.org/', '10.0' );
 							?>
 						</li>
 						<li>
 							<?php
 							/* translators: URL to news post */
-							printf( wp_kses_post( __( '<a href="%s">HTTPS</a> support', 'wporg' ) ), esc_url( 'https://wordpress.org/news/2016/12/moving-toward-ssl/' ) );
+							printf( wp_kses_post( __( '<a href="%s">HTTPS</a> support', 'wporg' ) ), 'https://wordpress.org/news/2016/12/moving-toward-ssl/' );
 							?>
 						</li>
 					</ul>
@@ -65,7 +65,7 @@ the_post();
 					<p>
 						<?php
 						/* translators: 1: URL to Apache; 2: URL to Nginx; 3: URL to hosting page */
-						printf( wp_kses_post( __( 'That&#8217;s really it. We recommend <a href="%1$s">Apache</a> or <a href="%2$s">Nginx</a> as the most robust and featureful server for running WordPress, but any server that supports PHP and MySQL will do. That said, we can&#8217;t test every possible environment and <a href="%3$s">each of the hosts on our hosting page</a> supports the above and more with no problems.', 'wporg' ) ), esc_url( 'https://httpd.apache.org/' ), esc_url( 'https://nginx.org/' ), esc_url( 'https://wordpress.org/hosting/' ) );
+						printf( wp_kses_post( __( 'That&#8217;s really it. We recommend <a href="%1$s">Apache</a> or <a href="%2$s">Nginx</a> as the most robust and featureful server for running WordPress, but any server that supports PHP and MySQL will do. That said, we can&#8217;t test every possible environment and <a href="%3$s">each of the hosts on our hosting page</a> supports the above and more with no problems.', 'wporg' ) ), 'https://httpd.apache.org/', 'https://nginx.org/', 'https://wordpress.org/hosting/' );
 						?>
 					</p>
 

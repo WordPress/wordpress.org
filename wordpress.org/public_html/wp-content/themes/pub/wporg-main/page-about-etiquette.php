@@ -40,7 +40,7 @@ the_post();
 					<p>
 						<?php
 						/* translators: Link to blog post */
-						printf( wp_kses_post( __( 'In the WordPress open source project, we realize that our biggest asset is the community that we foster. The project, as a whole, follows these basic philosophical principles from <a href="%s">The Cathedral and The Bazaar</a>.', 'wporg' ) ), esc_url( 'http://www.catb.org/esr/writings/cathedral-bazaar/cathedral-bazaar/index.html' ) );
+						printf( wp_kses_post( __( 'In the WordPress open source project, we realize that our biggest asset is the community that we foster. The project, as a whole, follows these basic philosophical principles from <a href="%s">The Cathedral and The Bazaar</a>.', 'wporg' ) ), 'http://www.catb.org/esr/writings/cathedral-bazaar/cathedral-bazaar/index.html' );
 						?>
 					</p>
 
@@ -51,7 +51,7 @@ the_post();
 						<li>
 							<?php
 							/* translators: Link to make.wordpress.org */
-							printf( wp_kses_post( __( 'Any member of the community can donate their time and contribute to the project in any form including design, code, documentation, community building, etc. For more information, go to <a href="%s">make.wordpress.org</a>.', 'wporg' ) ), esc_url( 'https://make.wordpress.org/' ) );
+							printf( wp_kses_post( __( 'Any member of the community can donate their time and contribute to the project in any form including design, code, documentation, community building, etc. For more information, go to <a href="%s">make.wordpress.org</a>.', 'wporg' ) ), 'https://make.wordpress.org/' );
 							?>
 						</li>
 						<li><?php esc_html_e( 'The WordPress open source community cares about diversity. We strive to maintain a welcoming environment where everyone can feel included, by keeping communication free of discrimination, incitement to violence, promotion of hate, and unwelcoming behavior.', 'wporg' ); ?></li>
@@ -62,7 +62,7 @@ the_post();
 					<p>
 						<?php
 						/* translators: 1: Link to community team slack channel; 2: Link to tag archive on make/community */
-						printf( wp_kses_post( __( 'Meetings are conducted in the <a href="%1$s">#community-team Slack channel</a>, and minutes published on the <a href="%2$s">Make Community blog</a>.', 'wporg' ) ), esc_url( 'https://wordpress.slack.com/messages/community-team' ), esc_url( 'https://make.wordpress.org/community/tag/ccoc/' ) );
+						printf( wp_kses_post( __( 'Meetings are conducted in the <a href="%1$s">#community-team Slack channel</a>, and minutes published on the <a href="%2$s">Make Community blog</a>.', 'wporg' ) ), 'https://wordpress.slack.com/messages/community-team', 'https://make.wordpress.org/community/tag/ccoc/' );
 						?>
 					</p>
 				</section>

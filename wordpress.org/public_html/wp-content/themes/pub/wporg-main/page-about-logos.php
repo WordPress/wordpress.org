@@ -41,7 +41,7 @@ the_post();
 					<p>
 						<?php
 						/* translators: Link to Trademark Policy of WordPress Foundation */
-						printf( wp_kses_post( __( 'When you need the official WordPress logo for a web site or publication, please use one of the following. Please only use logos in accordance with the <a href="%s">WordPress trademark&nbsp;policy</a>.', 'wporg' ) ), esc_url( 'http://wordpressfoundation.org/trademark-policy/' ) );
+						printf( wp_kses_post( __( 'When you need the official WordPress logo for a web site or publication, please use one of the following. Please only use logos in accordance with the <a href="%s">WordPress trademark&nbsp;policy</a>.', 'wporg' ) ), 'http://wordpressfoundation.org/trademark-policy/' );
 						?>
 					</p>
 

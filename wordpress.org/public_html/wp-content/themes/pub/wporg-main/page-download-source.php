@@ -41,10 +41,10 @@ the_post();
 						printf(
 							/* translators: URLs to documentation */
 							wp_kses_post( __( 'If you&#8217;d like to browse the WordPress source and inline documentation, we have a <a href="%1$s">convenient developer reference</a> and a <a href="%2$s">code browser</a>. We also have guides for <a href="%3$s">contributing with Subversion</a> and <a href="%4$s">contributing with Git</a>.', 'wporg' ) ),
-							esc_url( 'https://developer.wordpress.org/reference/' ),
-							esc_url( 'https://core.trac.wordpress.org/browser/' ),
-							esc_url( 'https://make.wordpress.org/core/handbook/contribute/svn/' ),
-							esc_url( 'https://make.wordpress.org/core/handbook/contribute/git/' )
+							'https://developer.wordpress.org/reference/',
+							'https://core.trac.wordpress.org/browser/',
+							'https://make.wordpress.org/core/handbook/contribute/svn/',
+							'https://make.wordpress.org/core/handbook/contribute/git/'
 						);
 						?>
 					</p>
@@ -55,7 +55,7 @@ the_post();
 							/* translators: URLs to documentation */
 							wp_kses_post( __( 'The built WordPress source, <a href="%1$s">licensed</a> under the GNU General Public License version 2 (or later), can be <a href="%2$s">browsed online</a> or checked out locally with Subversion or Git:', 'wporg' ) ),
 							esc_url( home_url( '/about/license/' ) ),
-							esc_url( 'https://build.trac.wordpress.org/browser' )
+							'https://build.trac.wordpress.org/browser'
 						);
 						?>
 					</p>
@@ -86,8 +86,8 @@ the_post();
 						printf(
 							/* translators: URLs to documentation */
 							wp_kses_post( __( 'WordPress minifies core JavaScript files using UglifyJS and CSS using clean-css, all via the <a href="%1$s">Grunt</a> JavaScript-based task runner. The development source that includes un-minified versions of these files, along with the build scripts, can be <a href="%2$s">browsed online</a> or checked out locally with Subversion or Git:', 'wporg' ) ),
-							esc_url( 'http://gruntjs.com/' ),
-							esc_url( 'https://core.trac.wordpress.org/browser' )
+							'https://gruntjs.com/',
+							'https://core.trac.wordpress.org/browser'
 						);
 						?>
 					</p>
@@ -118,7 +118,7 @@ the_post();
 						printf(
 							/* translators: URLs to documentation */
 							wp_kses_post( __( 'The source code for any program binaries or minified external scripts that are included with WordPress can be freely obtained from our <a href="%s">sources repository</a>.', 'wporg' ) ),
-							esc_url( 'https://code.trac.wordpress.org/browser/wordpress-sources' )
+							'https://code.trac.wordpress.org/browser/wordpress-sources'
 						);
 						?>
 					</p>

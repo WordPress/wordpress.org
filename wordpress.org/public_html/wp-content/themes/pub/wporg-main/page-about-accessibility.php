@@ -55,7 +55,7 @@ the_post();
 						printf(
 							/* translators: 1: Link to the Theme Directory Accessible Themes; 2: Link to Accessibility Handbook requirements. */
 							wp_kses_post( __( 'While the WordPress project cannot guarantee that all Themes are compliant, the <a href="%1$s">accessibility-ready themes</a> have been checked by the Theme Review Team to ensure that these themes pass their <a href="%2$s">basic accessibility requirements</a>.', 'wporg' ) ),
-							esc_url( site_url( '/themes/tags/accessibility-ready/' ) ),
+							esc_url( home_url( '/themes/tags/accessibility-ready/' ) ),
 							'https://make.wordpress.org/themes/handbook/review/accessibility/required/'
 						);
 					?>
