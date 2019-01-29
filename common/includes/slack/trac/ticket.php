@@ -39,6 +39,11 @@ class Ticket extends Resource {
 		}
 
 		$attachment['fields'] = self::get_ticket_fields( $this->data );
+		$attachment['ts']     = strtotime( $this->data->created );
+
+		$attachment['footer']      = sprintf( '<%s|%s>', $this->trac->get_url(), $this->trac->get_name() );
+		$attachment['footer_icon'] = sprintf( '%s/chrome/common/trac.ico', $this->trac->get_url() );
+
 		return $attachment;
 	}
 
@@ -52,7 +57,11 @@ class Ticket extends Resource {
 			return;
 		}
 
-		$url = $this->get_url() . '?format=csv';
+		$url = sprintf(
+			'%s/query?id=%s&col=id&col=summary&col=owner&col=type&col=cc&col=status&col=priority&col=milestone&col=component&col=version&col=severity&col=resolution&col=time&col=focuses&col=reporter&col=keywords&col=description&format=csv',
+			$this->trac->get_url(),
+			$this->id
+		);
 		$contents = @file_get_contents( $url );
 		if ( $contents === false ) {
 			$this->data = false;
@@ -63,7 +72,7 @@ class Ticket extends Resource {
 		// of a single CSV row (there can be \n in content).
 		$contents = explode( "\n", $contents, 2 );
 		$ticket_info = array_combine(
-			str_getcsv( $contents[0], ',', '"', '"' ),
+			str_getcsv( strtolower( $contents[0] ), ',', '"', '"' ),
 			str_getcsv( $contents[1], ',', '"', '"' )
 		);
 
