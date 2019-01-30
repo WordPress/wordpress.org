@@ -2673,10 +2673,12 @@ class WordCamp_Budgets {
 	 * @param WP_Post $post
 	 */
 	public static function can_submit_request( $post ) {
-		// A request must have documentation attached before it can be submitted.
-		$files = self::get_attached_files( $post );
-		if ( empty( $files ) ) {
-			return false;
+		if ( ! current_user_can( 'manage_network' ) ) {
+			// A request must have documentation attached before it can be submitted.
+			$files = self::get_attached_files( $post );
+			if ( empty( $files ) ) {
+				return false;
+			}
 		}
 
 		return true;
