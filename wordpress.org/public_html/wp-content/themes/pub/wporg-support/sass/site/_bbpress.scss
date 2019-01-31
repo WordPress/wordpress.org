@@ -665,7 +665,13 @@ section {
 			font-size: ms(-2);
 		}
 
+		em#site_url_description {
+			display: inline-block;
+			margin-bottom: 12px;
+		}
+
 		input[type="checkbox"],
+		input#site_url,
 		input#bbp_topic_tags {
 			margin-bottom: 0;
 		}
