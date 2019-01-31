@@ -103,9 +103,18 @@ class Report_Topic {
 			return;
 		}
 
+		$topic_id = bbp_get_topic_id();
+
+		// Disallow closed support topics to be modlook reported after 6 months.
+		$last_active_post_date = get_post_field( 'post_date', bbp_get_topic_last_active_id( $topic_id ) );
+
+		if ( ( time() - strtotime( $last_active_post_date ) ) / MONTH_IN_SECONDS >= 6 ) {
+			return;
+		}
+
 		$current_user     = get_current_user_id();
 		$previous_reports = $this->get_previous_reports();
-		$is_reported      = has_term( 'modlook', 'topic-tag', bbp_get_topic_id() );
+		$is_reported      = has_term( 'modlook', 'topic-tag', $topic_id );
 
 		$report_text = '';
 
