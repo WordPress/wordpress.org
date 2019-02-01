@@ -251,7 +251,9 @@ class Template {
 		$post  = get_post( $post );
 		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0;
 
-		if ( $count <= 10 ) {
+		if ( 'closed' === $post->post_status ) {
+			$text = __( 'N/A', 'wporg-plugins' );
+		} elseif ( $count <= 10 ) {
 			$text = __( 'Fewer than 10', 'wporg-plugins' );
 		} elseif ( $count >= 1000000 ) {
 			$million_count = intdiv( $count, 1000000 );
