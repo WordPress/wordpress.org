@@ -121,7 +121,7 @@ the_post();
 					<h3><?php esc_html_e( 'Contact', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'Please contact us if you have any questions about our privacy policy or information we hold about you by emailing dpo@wordcamp.org.', 'wporg' ); ?></p>
 
-					<p><a rel="license" href="https://creativecommons.org/licenses/by-sa/2.5/"><img alt="Creative Commons License" src="https://creativecommons.org/images/public/somerights20.png"></a></p>
+					<p><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" src="https://s.w.org/images/home/ccbysa40.png"></a></p>
 				</section>
 			</div><!-- .entry-content -->
 

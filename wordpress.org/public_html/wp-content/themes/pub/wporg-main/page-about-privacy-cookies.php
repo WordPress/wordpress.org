@@ -329,7 +329,7 @@ the_post();
 					<p><?php esc_html_e( 'It&#8217;s important to note that restricting or disabling the use of cookies can limit the functionality of sites, or prevent them from working correctly at all.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></h3>
-					<p><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></p>
+					<p><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" src="https://s.w.org/images/home/ccbysa40.png"></a></p>
 				</section>
 			</div><!-- .entry-content -->
 
