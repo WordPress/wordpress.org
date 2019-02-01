@@ -3873,6 +3873,8 @@ section {
 .bbpress .forum-titles .bbp-topic-reply-count::before {
 	font: 400 16px/1 dashicons;
 	margin-right: 100px;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
 }
 
 @media (min-width: 321px) {
