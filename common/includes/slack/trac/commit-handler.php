@@ -46,7 +46,7 @@ class Commit_Handler {
 		$color    = $this->trac->get_color();
 
 		$text     = "*$username <$url|$revision> by $author*\n$log";
-		$fallback = "$revision by $author: $log";
+		$fallback = "$username $revision by $author";
 
 		$this->send->set_username( $username );
 		$this->send->set_icon( $icon );
@@ -54,7 +54,7 @@ class Commit_Handler {
 			'color'     => $color,
 			'text'      => $text,
 			'fallback'  => $fallback,
-			'mrkdwn_in' => array( 'text', 'fallback' ),
+			'mrkdwn_in' => array( 'text' ),
 		) );
 	}
 

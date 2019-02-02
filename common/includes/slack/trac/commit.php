@@ -27,16 +27,21 @@ class Commit extends Resource {
 		}
 
 		$username = $this->trac->get_commit_username();
-		$url      = $this->get_url();
 		$revision = 'r' . $this->id;
 		$author   = $this->author;
 		$message  = self::format_commit_for_slack( $this->trac, $this->message );
 
 		$attachment = [];
 
-		$attachment['text']      = "*$username <$url|$revision> by $author*\n$message";
-		$attachment['fallback']  = "$revision by $author: $message";
-		$attachment['mrkdwn_in'] = [ 'text', 'fallback' ];
+		$attachment['title']      = "$username $revision";
+		$attachment['title_link'] = $this->get_url();
+
+		$attachment['author_name'] = $author;
+		$attachment['author_icon'] = sprintf( 'https://wordpress.org/grav-redirect.php?user=%s&s=32', $author );
+
+		$attachment['text']      = $message;
+		$attachment['fallback']  = "$username $revision by $author";
+		$attachment['mrkdwn_in'] = [ 'text' ];
 
 		$attachment['ts']          = $this->created;
 		$attachment['footer']      = sprintf( '<%s|%s>', $this->trac->get_url(), $this->trac->get_name() );
