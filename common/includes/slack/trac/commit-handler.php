@@ -35,26 +35,33 @@ class Commit_Handler {
 	}
 
 	protected function generate_payload() {
-		$author = $this->svnlook( 'author' );
-		$log = Commit::format_commit_for_slack( $this->trac, $this->svnlook( 'log' ) );
-
-		$url = $this->trac->get_commit_template( $this->rev );
+		$author   = $this->svnlook( 'author' );
+		$log      = Commit::format_commit_for_slack( $this->trac, $this->svnlook( 'log' ) );
+		$date     = $this->svnlook( 'date' );
+		$url      = $this->trac->get_commit_template( $this->rev );
 		$revision = 'r' . $this->rev;
-
 		$username = $this->trac->get_commit_username();
 		$icon     = $this->trac->get_icon();
 		$color    = $this->trac->get_color();
 
+		$title    = "$username $revision";
 		$text     = "*$username <$url|$revision> by $author*\n$log";
 		$fallback = "$username $revision by $author";
 
 		$this->send->set_username( $username );
 		$this->send->set_icon( $icon );
 		$this->send->add_attachment( array(
-			'color'     => $color,
-			'text'      => $text,
-			'fallback'  => $fallback,
-			'mrkdwn_in' => array( 'text' ),
+			'title'       => $title,
+			'title_link'  => $url,
+			'author_name' => $author,
+			'author_icon' => sprintf( 'https://wordpress.org/grav-redirect.php?user=%s&s=32', $author ),
+			'color'       => $color,
+			'text'        => $text,
+			'fallback'    => $fallback,
+			'mrkdwn_in'   => array( 'text' ),
+			'ts'          => $date,
+			'footer'      => sprintf( '<%s|%s>', $this->trac->get_url(), $this->trac->get_name() ),
+			'footer_icon' => sprintf( '%s/chrome/common/trac.ico', $this->trac->get_url() ),
 		) );
 	}
 
@@ -69,6 +76,11 @@ class Commit_Handler {
 
 		if ( $subcommand === 'changed' ) {
 			$command .= ' | awk \'{print $2}\'';
+		}
+
+		if ( $subcommand === 'date' ) {
+			// Convert output to timestamp.
+			$command = 'date --date "$( ' . $command . ' )" +%s';
 		}
 
 		exec( $command, $output, $return_var );
