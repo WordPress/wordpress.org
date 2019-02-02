@@ -38,6 +38,11 @@ class Ticket extends Resource {
 			return false;
 		}
 
+		unset( $attachment['text'] ); // Moved to title and title_link.
+
+		$attachment['title']      = sprintf( '#%s: %s', $this->id, htmlspecialchars( $this->summary, ENT_NOQUOTES ) );
+		$attachment['title_link'] = $this->get_url();
+
 		$attachment['fields'] = self::get_ticket_fields( $this->data );
 		$attachment['ts']     = strtotime( $this->data->created );
 

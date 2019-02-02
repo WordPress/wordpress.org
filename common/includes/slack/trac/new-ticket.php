@@ -22,10 +22,11 @@ class New_Ticket extends Ticket {
 			return $attachment;
 		}
 
-		$attachment['pretext'] = preg_replace( '/: /', ": \n", $attachment['text'], 1 );
-		$attachment['mrkdwn_in'][] = 'pretext';
-		$attachment['text'] = Trac::format_for_slack( $this->description );
+		$attachment['pretext'] = sprintf( 'New %s opened by %s', self::get_type( $this->type ), $this->reporter );
+
+		$attachment['text']  = Trac::format_for_slack( $this->description );
 		$attachment['color'] = $this->trac->get_color();
+
 		return $attachment;
 	}
 
@@ -55,5 +56,5 @@ class New_Ticket extends Ticket {
 		}
 
 		return $attachments;
-	}	
+	}
 }
