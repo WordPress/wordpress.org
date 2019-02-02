@@ -149,6 +149,26 @@ function custom_open_graph_tags( $tags = [] ) {
 			$title = esc_html_x( 'Cookie Policy', 'Page title', 'wporg' );
 			$desc  = esc_html__( 'This policy specifically explains how WordPress.org, our partners, and users of our services deploy cookies, as well as the options you have to control them.', 'wporg' );
 			break;
+
+		case 'page-download.php':
+			$title = esc_html_x( 'Download', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'Download WordPress today, and get started on creating your website with one of the most powerful, popular, and customizable platforms in the world.', 'wporg' );
+			break;
+
+		case 'page-download-beta-nightly.php':
+			$title = esc_html_x( 'Beta/Nightly', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'Get the latest, unstable or work-in-progress versions of WordPress for testing and development.', 'wporg' );
+			break;
+
+		case 'page-download-releases.php':
+			$title = esc_html_x( 'Releases', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'Browse and download previous versions of WordPress for testing and development.', 'wporg' );
+			break;
+
+		case 'page-download-source.php':
+			$title = esc_html_x( 'Source Code', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'See how WordPress works under the hood, and contribute your own code to the world&#8217;s most popular content management system.', 'wporg' );
+			break;
 	}
 
 	$tags['og:title']            = $title;
@@ -308,6 +328,10 @@ function custom_page_title( $title, $post = null ) {
 
 		case 'page-about-privacy-data-export-request.php':
 			$title = esc_html_x( 'Data Export Request', 'Page title', 'wporg' );
+			break;
+
+		case 'page-about-privacy-cookies.php':
+			$title = esc_html_x( 'Cookie Policy', 'Page title', 'wporg' );
 			break;
 
 		case 'page-download.php':
