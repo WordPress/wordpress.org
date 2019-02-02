@@ -36,16 +36,14 @@ class Commit_Handler {
 
 	protected function generate_payload() {
 		$author   = $this->svnlook( 'author' );
-		$log      = Commit::format_commit_for_slack( $this->trac, $this->svnlook( 'log' ) );
+		$message  = Commit::format_commit_for_slack( $this->trac, $this->svnlook( 'log' ) );
 		$date     = $this->svnlook( 'date' );
 		$url      = $this->trac->get_commit_template( $this->rev );
 		$revision = 'r' . $this->rev;
 		$username = $this->trac->get_commit_username();
 		$icon     = $this->trac->get_icon();
 		$color    = $this->trac->get_color();
-
 		$title    = "$username $revision";
-		$text     = "*$username <$url|$revision> by $author*\n$log";
 		$fallback = "$username $revision by $author";
 
 		$this->send->set_username( $username );
@@ -56,7 +54,7 @@ class Commit_Handler {
 			'author_name' => $author,
 			'author_icon' => sprintf( 'https://wordpress.org/grav-redirect.php?user=%s&s=32', $author ),
 			'color'       => $color,
-			'text'        => $text,
+			'text'        => $message,
 			'fallback'    => $fallback,
 			'mrkdwn_in'   => array( 'text' ),
 			'ts'          => $date,
