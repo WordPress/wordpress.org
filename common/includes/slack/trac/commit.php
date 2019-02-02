@@ -38,7 +38,7 @@ class Commit extends Resource {
 		$attachment['fallback']  = "$revision by $author: $message";
 		$attachment['mrkdwn_in'] = [ 'text', 'fallback' ];
 
-		$attachment['ts']          = strtotime( $this->created );
+		$attachment['ts']          = $this->created;
 		$attachment['footer']      = sprintf( '<%s|%s>', $this->trac->get_url(), $this->trac->get_name() );
 		$attachment['footer_icon'] = sprintf( '%s/chrome/common/trac.ico', $this->trac->get_url() );
 
