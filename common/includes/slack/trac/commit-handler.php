@@ -45,17 +45,16 @@ class Commit_Handler {
 		$icon     = $this->trac->get_icon();
 		$color    = $this->trac->get_color();
 
-		$pretext = "*$username <$url|$revision>* by $author:";
+		$text     = "*$username <$url|$revision> by $author*\n$log";
 		$fallback = "$revision by $author: $log";
 
 		$this->send->set_username( $username );
 		$this->send->set_icon( $icon );
 		$this->send->add_attachment( array(
 			'color'     => $color,
-			'pretext'   => $pretext,
-			'text'      => $log,
+			'text'      => $text,
 			'fallback'  => $fallback,
-			'mrkdwn_in' => array( 'text', 'pretext', 'fallback' ),
+			'mrkdwn_in' => array( 'text', 'fallback' ),
 		) );
 	}
 
