@@ -42,8 +42,8 @@ class WPORG_bbPress_Topic_Archive {
 			bbp_is_topic( $post->ID )
 		&&
 			(
-				// Thread last modified is over a year old
-				( time() - get_post_time( 'U', true, $post ) > YEAR_IN_SECONDS )
+				// Thread last modified is over 3 years old
+				( time() - get_post_time( 'U', true, bbp_get_topic_last_active_id( $post->ID ) ) > 3 * YEAR_IN_SECONDS )
 			||
 				// Closed thread with no replies
 				( bbp_is_topic_closed( $post->ID ) && ! bbp_get_topic_reply_count( $post->ID, true ) )
