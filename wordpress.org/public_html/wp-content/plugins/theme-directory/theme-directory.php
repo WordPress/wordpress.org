@@ -1093,6 +1093,11 @@ function wporg_themes_add_hreflang_link_attributes() {
 		return;
 	}
 
+	$path = wporg_themes_get_current_url( $path_only = true );
+	if ( ! $path ) {
+		return;
+	}
+
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
 	if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
@@ -1153,13 +1158,6 @@ function wporg_themes_add_hreflang_link_attributes() {
 		wp_cache_set( 'local-sites', $sites, 'locale-associations' );
 	}
 
-	if ( is_singular() ) {
-		$path = parse_url( get_permalink(), PHP_URL_PATH );
-	} else {
-		// WordPress doesn't have a good way to get the canonical version of non-singular urls.
-		$path = $_SERVER['REQUEST_URI']; // phpcs:ignore
-	}
-
 	foreach ( $sites as $site ) {
 		$url = sprintf(
 			'https://%swordpress.org%s',
@@ -1176,3 +1174,60 @@ function wporg_themes_add_hreflang_link_attributes() {
 	echo "\n";
 }
 add_action( 'wp_head', 'wporg_themes_add_hreflang_link_attributes' );
+
+/**
+ * Outputs a <link rel="canonical"> on archive pages.
+ */
+function wporg_themes_archive_rel_canonical_link() {
+	if ( $url = wporg_themes_get_current_url() ) {
+		printf(
+			'<link rel="canonical" href="%s">' . "\n",
+			esc_url( $url )
+		);
+	}
+}
+add_action( 'wp_head', 'wporg_themes_archive_rel_canonical_link' );
+remove_action( 'wp_head', 'rel_canonical' );
+
+/**
+ * Get the current front-end requested URL.
+ */
+function wporg_themes_get_current_url( $path_only = false ) {
+	$queried_object = get_queried_object();
+	$link = false;
+
+	if ( get_query_var( 'browse' ) ) {
+		// The browse/% urls on the Theme directory are front-page-query alterations.
+		$link = home_url( 'browse/' . get_query_var( 'browse' ) . '/' );
+	} elseif ( is_tax() || is_tag() || is_category() ) {
+		$link = get_term_link( $queried_object );
+	} elseif ( is_author() ) {
+		$link = get_author_link( $queried_object );
+	} elseif ( is_singular() ) {
+		$link = get_permalink( $queried_object );
+	} elseif ( is_search() ) {
+		$link = home_url( 'search/' . urlencode( get_query_var( 's' ) ) . '/' );
+	} elseif ( is_front_page() ) {
+		$link = home_url( '/' );
+	}
+
+
+	if ( $link && is_paged() ) {
+		if ( false !== stripos( $link, '?' ) ) {
+			$link = add_query_arg( 'paged', (int) get_query_var( 'paged' ), $link );
+		} else {
+			$link = rtrim( $link, '/' ) . '/page/' . (int) get_query_var( 'paged' ) . '/';
+		}
+	}
+
+	if ( $path_only && $link ) {
+		$path = parse_url( $link, PHP_URL_PATH );
+		if ( $query = parse_url( $link, PHP_URL_QUERY ) ) {
+			$path .= '?' . $query;
+		}
+
+		return $path;
+	}
+
+	return $link;
+}
