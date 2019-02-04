@@ -1202,7 +1202,7 @@ function wporg_themes_get_current_url( $path_only = false ) {
 	} elseif ( is_tax() || is_tag() || is_category() ) {
 		$link = get_term_link( $queried_object );
 	} elseif ( is_author() ) {
-		$link = get_author_link( $queried_object );
+		// $link = get_author_link( $queried_object );
 	} elseif ( is_singular() ) {
 		$link = get_permalink( $queried_object );
 	} elseif ( is_search() ) {
