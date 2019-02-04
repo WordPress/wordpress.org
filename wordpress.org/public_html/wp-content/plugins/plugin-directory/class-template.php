@@ -823,20 +823,37 @@ class Template {
 	public static function hreflang_link_attributes() {
 		global $wpdb;
 
-		if ( ! get_post() ) {
+		$post = false;
+		if ( is_singular( 'plugin' ) ) {
+			$post = get_post();
+		}
+
+		$path = self::get_current_url( $path_only = true );
+		if ( ! $path ) {
 			return;
 		}
 
 		wp_cache_add_global_groups( array( 'locale-associations' ) );
 
-		if ( false === ( $sites = wp_cache_get( 'local-sites-' . get_post()->post_name, 'locale-associations' ) ) ) {
+		// WARNING: for any changes below, check other uses of the `locale-assosciations` group as there's shared cache keys in use.
+		$cache_key = $post ? 'local-sites-' . $post->post_name : 'local-sites';
+		if ( false === ( $sites = wp_cache_get( $cache_key, 'locale-associations' ) ) ) {
 
 			// get subdomain/locale associations
 			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM wporg_locales', OBJECT_K );
 
-			$sites = Plugin_I18n::instance()->get_locales();
-
 			require_once GLOTPRESS_LOCALES_PATH;
+
+			if ( $post ) {
+				$sites = Plugin_I18n::instance()->get_locales();
+			} else {
+				$sites = array();
+				foreach ( array_keys( $subdomains ) as $locale ) {
+					$sites[] = (object) array(
+						'wp_locale'    => $locale
+					);
+				}
+			}
 
 			foreach ( $sites as $key => $site ) {
 				$gp_locale = \GP_Locales::by_field( 'wp_locale', $site->wp_locale );
@@ -883,17 +900,7 @@ class Template {
 				return strcasecmp( $a->hreflang, $b->hreflang );
 			} );
 
-			wp_cache_set( 'local-sites-' . get_post()->post_name, $sites, 'locale-associations', DAY_IN_SECONDS );
-		}
-
-		if ( is_singular() ) {
-			$path = parse_url( get_permalink(), PHP_URL_PATH );
-			if ( get_query_var( 'plugin_advanced' ) ) {
-				$path .= 'advanced/';
-			}
-		} else {
-			// WordPress doesn't have a good way to get the canonical version of non-singular urls.
-			$path = $_SERVER['REQUEST_URI']; // phpcs:ignore
+			wp_cache_set( $cache_key, $sites, 'locale-associations', DAY_IN_SECONDS );
 		}
 
 		foreach ( $sites as $site ) {
@@ -914,7 +921,7 @@ class Template {
 	/**
 	 * Outputs a <link rel="canonical"> on archive pages.
 	 */
-	public function archive_rel_canonical_link() {
+	public static function archive_rel_canonical_link() {
 		if ( $url = self::get_current_url() ) {
 			printf(
 				'<link rel="canonical" href="%s">' . "\n",
@@ -926,7 +933,7 @@ class Template {
 	/**
 	 * Get the current front-end requested URL.
 	 */
-	public function get_current_url() {
+	public static function get_current_url( $path_only = false ) {
 		$queried_object = get_queried_object();
 		$link = false;
 
@@ -950,6 +957,15 @@ class Template {
 			} else {
 				$link = rtrim( $link, '/' ) . '/page/' . (int) get_query_var( 'paged' ) . '/';
 			}
+		}
+
+		if ( $path_only && $link ) {
+			$path = parse_url( $link, PHP_URL_PATH );
+			if ( $query = parse_url( $link, PHP_URL_QUERY ) ) {
+				$path .= '?' . $query;
+			}
+
+			return $path;
 		}
 
 		return $link;
