@@ -1199,10 +1199,11 @@ function wporg_themes_get_current_url( $path_only = false ) {
 	if ( get_query_var( 'browse' ) ) {
 		// The browse/% urls on the Theme directory are front-page-query alterations.
 		$link = home_url( 'browse/' . get_query_var( 'browse' ) . '/' );
+	} elseif ( is_author() ) {
+		// On WordPress.org get_author_posts_url() returns profile.wordpress.org links. Build it manually.
+		$link = home_url( 'author/' . $queried_object->user_nicename . '/' );
 	} elseif ( is_tax() || is_tag() || is_category() ) {
 		$link = get_term_link( $queried_object );
-	} elseif ( is_author() ) {
-		// $link = get_author_link( $queried_object );
 	} elseif ( is_singular() ) {
 		$link = get_permalink( $queried_object );
 	} elseif ( is_search() ) {
