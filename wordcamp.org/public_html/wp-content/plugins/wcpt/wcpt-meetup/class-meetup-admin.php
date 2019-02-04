@@ -782,7 +782,8 @@ if ( ! class_exists( 'Meetup_Admin' ) ) :
 					}
 				}
 			}
-			self::new_meetup_organizers_notify( $new_meetup_org_data );
+			// Disabling the new organizer notification because its a lot of work, and not always possible to find someone's wporg username from their meetup profile
+			// self::new_meetup_organizers_notify( $new_meetup_org_data );
 		}
 
 		/**
