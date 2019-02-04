@@ -670,9 +670,22 @@ class Plugin_Directory {
 		if ( 'plugin_business_model' == $term->taxonomy ) {
 			return false;
 		}
+
 		if ( 'plugin_built_for' == $term->taxonomy ) {
 			// Term slug = Post Slug = /%postname%/
 			return trailingslashit( home_url( $term->slug ) );
+		}
+
+		// browse/%
+		if ( 'plugin_section' == $term->taxonomy && 'favorites' == $term->slug ) {
+			return trailingslashit( home_url( 'browse/favorites/' . get_query_var( 'favorites_user' ) ) );
+		} elseif ( 'plugin_section' == $term->taxonomy ) {
+			return trailingslashit( home_url( 'browse/' . $term->slug ) );
+		}
+
+		// author/%
+		if ( 'plugin_contributors' == $term->taxonomy ) {
+			return trailingslashit( home_url( 'author/' . $term->slug ) );
 		}
 
 		return $term_link;
@@ -1078,6 +1091,18 @@ class Plugin_Directory {
 		}
 
 		switch ( $term->taxonomy ) {
+			case 'plugin_section':
+				if ( 'favorites' == $term->slug ) {
+					$user = get_query_var( 'favorites_user' ) ?? $_GET['favorites_user'];
+					$user = get_user_by( 'slug', $user );
+					if ( $user && $user != wp_get_current_user() ) {
+						$name = sprintf(
+							__( 'Favorites: %s', 'wporg-plugins' ),
+							esc_html( $user->display_name )
+						);
+					}
+				}
+				break;
 			case 'plugin_contributors':
 			case 'plugin_committers':
 				$user = get_user_by( 'slug', $term->name );
