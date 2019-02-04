@@ -937,10 +937,8 @@ class Template {
 		$queried_object = get_queried_object();
 		$link = false;
 
-		if ( is_tax() ) {
+		if ( is_tax() || is_tag() || is_category() ) {
 			$link = get_term_link( $queried_object );
-		} elseif ( is_author() ) {
-			$link = get_author_link( $queried_object );
 		} elseif ( is_singular() ) {
 			$link = get_permalink( $queried_object );
 
