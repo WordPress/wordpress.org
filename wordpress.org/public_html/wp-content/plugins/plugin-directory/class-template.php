@@ -949,6 +949,8 @@ class Template {
 			}
 		} elseif ( is_search() ) {
 			$link = home_url( 'search/' . urlencode( get_query_var( 's' ) ) . '/' );
+		} elseif ( is_front_page() ) {
+			$link = home_url( '/' );
 		}
 
 		if ( $link && is_paged() ) {
