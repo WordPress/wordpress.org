@@ -427,6 +427,13 @@ function save_invoice( $post_id, $post ) {
 			update_post_meta( $post_id, $meta_key, $value );
 		}
 	}
+
+	if ( 'wcbsi_approved' === $post->post_status ) {
+		$invoice_sent_at = get_post_meta( $post_id, 'Sent at', true );
+		if ( empty( $invoice_sent_at ) ) {
+			update_post_meta( $post_id, 'Sent at', time() );
+		}
+	}
 }
 
 /**

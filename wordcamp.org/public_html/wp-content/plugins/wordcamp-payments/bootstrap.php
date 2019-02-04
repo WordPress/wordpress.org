@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( is_admin() ) {
 	require_once( __DIR__ . '/includes/wordcamp-budgets.php' );
 	require_once( __DIR__ . '/includes/payment-request.php' );
-	require_once( __DIR__ . '/includes/sponsor-invoice.php' );
 	require_once( __DIR__ . '/includes/reimbursement-request.php' );
 	require_once( __DIR__ . '/includes/encryption.php' );
 	require_once( __DIR__ . '/includes/budget-tool.php' );
@@ -26,4 +25,5 @@ if ( is_admin() ) {
 
 if ( is_admin() || wp_doing_cron() || wp_doing_ajax() ) {
 	require_once( __DIR__ . '/includes/privacy.php' );
+	require_once( __DIR__ . '/includes/sponsor-invoice.php' );
 }

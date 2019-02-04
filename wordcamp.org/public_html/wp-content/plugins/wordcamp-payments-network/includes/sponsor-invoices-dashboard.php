@@ -14,17 +14,19 @@ if ( defined( 'DOING_AJAX' ) ) {
 } elseif ( defined( 'DOING_CRON' ) ) {
 	add_action( 'wcbdsi_check_for_paid_invoices', __NAMESPACE__ . '\check_for_paid_invoices'       );
 	add_action( 'save_post',                      __NAMESPACE__ . '\update_index_row',       10, 2 );
+	add_action( 'plugins_loaded',                 __NAMESPACE__ . '\schedule_sent_invoice_reminder' );
 
 } elseif ( is_network_admin() ) {
 	add_action( 'plugins_loaded',        __NAMESPACE__ . '\schedule_cron_events'  );
 	add_action( 'network_admin_menu',    __NAMESPACE__ . '\register_submenu_page' );
 	add_action( 'init',                  __NAMESPACE__ . '\upgrade_database'      );
-
 } elseif ( is_admin() ) {
 	add_action( 'save_post',    __NAMESPACE__ . '\update_index_row', 11, 2 );   // See note in callback about priority
 	add_action( 'trashed_post', __NAMESPACE__ . '\delete_index_row'        );
 	add_action( 'delete_post',  __NAMESPACE__ . '\delete_index_row'        );
 }
+
+add_action( 'send_invoice_pending_reminder', __NAMESPACE__ . '\send_invoice_pending_reminder' );
 
 /**
  * Schedule cron job when plugin is activated
@@ -458,6 +460,180 @@ function delete_index_row( $invoice_id ) {
 		array(
 			'blog_id'    => get_current_blog_id(),
 			'invoice_id' => $invoice_id,
+		)
+	);
+}
+
+/**
+ * Schedule cron to send reminder mails to organizers for unpaid invoices.
+ */
+function schedule_sent_invoice_reminder() {
+	if ( wp_next_scheduled( 'send_invoice_pending_reminder' ) ) {
+		return;
+	}
+
+	wp_schedule_event( time(), 'daily', 'send_invoice_pending_reminder' );
+}
+
+/**
+ * Send reminder to organizer about the unpaid invoice.
+ */
+function send_invoice_pending_reminder() {
+	global $wpdb;
+
+	$table_name    = get_index_table_name();
+	$sent_invoices = $wpdb->get_results(
+		$wpdb->prepare(
+			"
+				SELECT blog_id, invoice_id
+				FROM $table_name
+				WHERE status = 'wcbsi_approved'
+				LIMIT 1000
+			",
+			array()
+		)
+	);
+
+	foreach ( $sent_invoices as $invoice_data ) {
+		$blog_id    = $invoice_data->blog_id;
+		$invoice_id = $invoice_data->invoice_id;
+
+		switch_to_blog( $blog_id );
+
+		$invoice_sent_at = get_post_meta( $invoice_id, 'Sent at', true );
+
+		if ( empty( $invoice_sent_at ) ) {
+			// Backfill for older invoices.
+			update_post_meta( $invoice_id, 'Sent at', time() );
+			update_post_meta( $invoice_id, 'Backfilled Sent at', true );
+			restore_current_blog();
+			continue;
+		}
+
+		$last_reminder       = get_post_meta( $invoice_id, 'last_reminder_details', true );
+		$invoice_defaulted   = get_post_meta( $invoice_id, 'invoice_defaulted', true );
+		$reminder_step       = 1;
+		$last_step_time      = $invoice_sent_at;
+		$wordcamp_post       = get_wordcamp_post();
+		$wordcamp_start_date = ( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'] ?? array() )[0];
+		$wordcamp_lead_email = ( $wordcamp_post->meta['Email Address'] ?? array() )[0];
+
+		if ( empty( $wordcamp_post ) ) {
+			// Maybe this is a central.wordcamp.org test sponsor invoice.
+			restore_current_blog();
+			continue;
+		}
+
+		if ( ! empty ( $invoice_defaulted ) ) {
+			restore_current_blog();
+			continue;
+		}
+
+		if ( ! empty( $last_reminder ) ) {
+			$reminder_step  = $last_reminder['step'] + 1;
+			$last_step_time = $last_reminder['sent_at'];
+		}
+
+		// We will send reminders after 30, 45, and 60 days.
+		$reminder_schedule = array(
+			1 => 30,
+			2 => 15,
+			3 => 15,
+		);
+
+		if ( $reminder_step > count( $reminder_schedule ) || ( $wordcamp_start_date && time() > ( (int) $wordcamp_start_date + 2 * MONTH_IN_SECONDS ) ) ) {
+			send_invoice_defaulted_notification( $invoice_id );
+			update_post_meta( $invoice_id, 'invoice_defaulted', true );
+			restore_current_blog();
+			continue;
+		}
+
+		$next_reminder_in = $last_step_time + $reminder_schedule[ $reminder_step ] * DAY_IN_SECONDS;
+
+		if ( time() < (int) $next_reminder_in ) {
+			restore_current_blog();
+			continue;
+		}
+
+		$current_reminder_details = array(
+			'sent_at' => time(),
+			'step'    => $reminder_step,
+		);
+
+		send_invoice_pending_reminder_mail( $invoice_id, $wordcamp_lead_email );
+
+		update_post_meta( $invoice_id, 'last_reminder_details', $current_reminder_details );
+
+		restore_current_blog();
+	}
+}
+
+/**
+ * Send mail to organizer about a pending sponsor invoice.
+ *
+ * @param int    $invoice_id
+ * @param string $organizer_mail
+ */
+function send_invoice_pending_reminder_mail( $invoice_id, $organizer_mail ) {
+	$invoice   = get_post( $invoice_id );
+	$edit_link = get_site_url() . "/wp-admin/post.php?post=$invoice_id&action=edit";
+
+	$reminder_body = str_replace(
+		"\t",
+		'',
+		sprintf(
+			__(
+				"Howdy organizers,
+				<br>
+				It looks like the invoice <a href='%s'>%s</a> is still unpaid. If you still expect the sponsor to pay this invoice, please contact them to find out when we should expect payment. If this invoice needs to be cancelled, please email support@wordcamp.org.
+				<br>
+				Thanks for all your hard work on WordCamp.",
+				'wordcamporg'
+			),
+			$edit_link,
+			$invoice->post_title
+		)
+	);
+
+	$author = get_user_by( 'ID', $invoice->post_author );
+	wp_mail(
+		array( $author->user_email ),
+		sprintf( __( "Pending invoice: %s" ,'wordcamporg' ), $invoice->post_title ),
+		$reminder_body,
+		array(
+			'From: WordCamp Central <support@wordcamp.org>',
+			'Content-Type: text/html; charset=UTF-8',
+			'Sender: wordpress@' . strtolower( $_SERVER['SERVER_NAME'] ),
+			sprintf( "CC: %s", $organizer_mail ), // CC to lead organizer in case post author is not active anymore.
+		)
+	);
+}
+
+/**
+ * Send email to support@wordcamp.org about Sponsor invoice that has been pending for too long.
+ *
+ * @param int $invoice_id
+ */
+function send_invoice_defaulted_notification( $invoice_id ) {
+	$edit_link = get_site_url() . "/wp-admin/post.php?post=$invoice_id&action=edit";
+
+	$notification_body = str_replace(
+		"\t",
+		'',
+		"A Sponsor Invoice has been in pending state for too long now. Please check to see if we want to cancel this. No further reminders will be sent to the organizers.
+		<br>
+		Invoice link: $edit_link
+		<br>"
+	);
+
+	wp_mail(
+		array( "support@wordcamp.org" ),
+		"Sponsor Invoice pending for too long",
+		$notification_body,
+		array(
+			'From: WordCamp Central <support@wordcamp.org>',
+			'Content-Type: text/html; charset=UTF-8',
+			'Sender: wordpress@' . strtolower( $_SERVER['SERVER_NAME'] ),
 		)
 	);
 }
