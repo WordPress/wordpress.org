@@ -1202,8 +1202,8 @@ input {
 }
 
 .devhub-wrap .reference-landing .section, .devhub-wrap .search-section {
-  max-width: 700px;
-  max-width: 70rem;
+  max-width: 970px;
+  max-width: 97rem;
   margin: 0 auto;
   padding: 1.5em 1em;
 }
@@ -2750,7 +2750,7 @@ body.responsive-show #o2-expand-editor {
   .devhub-wrap .reference-landing .section {
     float: none;
     width: 100%;
-    padding: 1.5em 10%;
+    padding: 1.5em 2%;
     clear: both;
     text-align: center;
     display: block;
