@@ -9,6 +9,12 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+// If we don't have any posts to display for the archive, then send a 404 status. See #meta4151
+if ( ! have_posts() ) {
+	status_header( 404 );
+	nocache_headers();
+}
+
 get_header(); ?>
 
 	<div id="primary" class="content-area">
