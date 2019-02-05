@@ -229,6 +229,25 @@ function parent_page_title( $title, $post_id ) {
 add_filter( 'the_title', __NAMESPACE__ . '\parent_page_title', 11, 2 );
 
 /**
+ * Some custom redirects for old pages no longer included in this theme.
+ */
+function old_page_redirects() {
+	if ( ! is_404() ) {
+		return;
+	}
+
+	// Old WordPress.org/about/* pages:
+	if (
+		'wordpress.org' == $_SERVER['HTTP_HOST'] &&
+		preg_match( '!^/about/(books|fanart|screenshots)!i', $_SERVER['REQUEST_URI'] )
+	) {
+		wp_safe_redirect( '/about/', 301 );
+		die();
+	}
+}
+add_filter( 'template_redirect', __NAMESPACE__ . '\old_page_redirects' );
+
+/**
  * Custom template tags.
  */
 require_once __DIR__ . '/inc/template-tags.php';
