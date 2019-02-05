@@ -25,6 +25,12 @@
 	else :
 		canonical = false;
 
+	# <meta name="robots">
+	if req.environ['PATH_INFO'].startswith('/attachment/') :
+		robots = 'noindex, follow'
+	else :
+		robots = false
+
 	profile_to_edit = 'https://wordpress.org/support/users/'
 
 	# Fix https://meta.trac.wordpress.org/ticket/21
@@ -70,6 +76,10 @@
 
 	<py:if test="canonical">
 		<link rel="canonical" href="$canonical"/>
+	</py:if>
+
+	<py:if test="robots">
+		<meta name="robots" content="$robots"/>
 	</py:if>
 </py:match>
 
