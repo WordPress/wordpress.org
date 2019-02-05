@@ -191,6 +191,15 @@ function wporg_get_global_header() {
 	require WPORGPATH . 'header.php';
 }
 
+function wporg_support_bbp_raw_title( $title ) {
+	if ( $page = get_query_var( 'paged' ) ) {
+		$title .= " - page {$page}";
+	}
+
+	return $title;
+}
+add_filter( 'bbp_raw_title', 'wporg_support_bbp_raw_title' );
+
 /**
  * The Footer for our theme.
  *
