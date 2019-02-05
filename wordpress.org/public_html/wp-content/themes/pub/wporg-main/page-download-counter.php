@@ -11,12 +11,16 @@
 
 $branch = WP_CORE_STABLE_BRANCH;
 
+$canonical_url = get_permalink();
+
 if (
 	isset( $_GET['branch'] )
 	&& preg_match( '/^[0-9]\.[0-9]$/', wp_unslash( $_GET['branch'] ), $matches ) // phpcs:ignore WordPress.VIP
 	&& version_compare( WP_CORE_STABLE_BRANCH, $matches[0], '>' )
 ) {
 	$branch = $matches[0];
+
+	$canonical_url = add_query_arg( 'branch', $branch, $canonical_url );
 }
 
 // phpcs:ignore WordPress.VIP.DirectDatabaseQuery
@@ -43,10 +47,25 @@ if ( ! empty( $_GET['json'] ) ) {
 if ( WP_CORE_STABLE_BRANCH === $branch ) {
 	/* translators: 1: version number; 2: download count; */
 	$text = __( 'WordPress %1$s has been&nbsp;downloaded %2$s times', 'wporg' );
+
+	/* translators: 1: date; 2: version number; 3: download count; */
+	$meta_desc_text = __( 'As of %1$s, WordPress %2$s has been downloaded over %3$s times - watch that number increase in real time!', 'wporg' );
 } else {
 	/* translators: 1: version number; 2: download count; */
 	$text = __( 'WordPress %1$s was&nbsp;downloaded %2$s times', 'wporg' );
+
+	/* translators: 1: date; 2: version number; 3: download count; */
+	$meta_desc_text = __( 'As of %1$s, WordPress %2$s was downloaded over %3$s times.', 'wporg' );
 }
+
+// Page meta description
+$meta_desc_text = sprintf(
+	$meta_desc_text,
+	date_i18n( 'F jS Y' ),
+	$branch,
+	number_format_i18n( $num )
+);
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -55,6 +74,13 @@ if ( WP_CORE_STABLE_BRANCH === $branch ) {
 	<title><?php echo esc_html( wp_get_document_title() ); ?></title>
 	<link href="//fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet" type="text/css">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<link rel="canonical" href="<?php echo esc_url( $canonical_url ); ?>">
+	<meta name="description" conntent="<?php echo esc_attr( $meta_desc_text ); ?>">
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-P24PF4B');</script>
 	<style type="text/css">
 		html,
 		body {
@@ -190,6 +216,7 @@ if ( WP_CORE_STABLE_BRANCH === $branch ) {
 </head>
 
 <body>
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24PF4B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<div class="something-semantic">
 		<div class="something-else-semantic">
 			<div class="counter-inner">
