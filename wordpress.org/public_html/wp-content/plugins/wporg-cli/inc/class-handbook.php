@@ -12,6 +12,7 @@ class Handbook {
 		if ( ! is_singular( 'handbook' )
 			|| ! is_main_query()
 			|| ! in_the_loop()
+			|| is_embed()
 			|| $id !== get_queried_object_id() ) {
 			return $title;
 		}

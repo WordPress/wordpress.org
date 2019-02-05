@@ -72,6 +72,7 @@ class Editor {
 		if ( ! is_singular( $this->importer->get_post_type() )
 			|| ! is_main_query()
 			|| ! in_the_loop()
+			|| is_embed()
 			|| $id !== get_queried_object_id() ) {
 			return $title;
 		}
