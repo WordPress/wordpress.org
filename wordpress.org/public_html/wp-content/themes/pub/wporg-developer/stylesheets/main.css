@@ -875,6 +875,15 @@ input {
   font-size: 125%;
 }
 
+.devhub-wrap .home-landing .section .widget-title {
+  line-height: 60px;
+  line-height: 6rem;
+}
+
+.devhub-wrap .home-landing .section.search-guide {
+  border-top: 2px solid #efefef;
+}
+
 @media (max-width: 974px) {
   .devhub-wrap .home-landing .section {
     width: 640px;
@@ -906,7 +915,6 @@ input {
 }
 
 .devhub-wrap .section.search-guide {
-  border-top: 2px solid #efefef;
   padding-top: 60px;
   padding-top: 6rem;
   margin-top: 0;
@@ -919,8 +927,8 @@ input {
 .devhub-wrap .section .widget-title {
   font-size: 25px;
   font-size: 2.5rem;
-  line-height: 60px;
-  line-height: 6rem;
+  line-height: 20px;
+  line-height: 2rem;
 }
 
 .devhub-wrap .section .widget-title .dashicons {
@@ -1189,11 +1197,29 @@ input {
 }
 
 .devhub-wrap .searchform .search-post-type label input {
+  margin-bottom: 6px;
   padding-left: 0.5em;
+  vertical-align: middle;
 }
 
 .devhub-wrap .searchform .search-post-type label:last-child {
   border-right-width: 0;
+}
+
+@media (max-width: 688px) {
+  .devhub-wrap .searchform .search-post-type span {
+    display: block;
+  }
+  .devhub-wrap .searchform .search-post-type label {
+    margin-left: 0;
+    margin-right: 1em;
+    width: 130px;
+  }
+  .devhub-wrap .searchform .search-post-type label:last-child {
+    margin-right: 0;
+    padding-right: 0;
+    width: initial;
+  }
 }
 
 .devhub-wrap .search-results-summary {
@@ -1305,10 +1331,12 @@ input {
 }
 
 .devhub-wrap .horizontal-list {
-  display: inline;
+  display: block;
+  width: 100%;
   list-style-type: none;
   margin: 0;
   padding: 0;
+  text-align: center;
 }
 
 .devhub-wrap .horizontal-list li {
@@ -2707,6 +2735,9 @@ body.responsive-show #o2-expand-editor {
   .devhub-wrap .inner-wrap .has-sidebar {
     width: 100%;
   }
+  .devhub-wrap #content-area {
+    padding-left: 2%;
+  }
   .devhub-wrap.archive .meta, .devhub-wrap.search .meta {
     font-size: 100%;
     margin-bottom: 1.5em;
@@ -2722,6 +2753,12 @@ body.responsive-show #o2-expand-editor {
   }
   .devhub-wrap.archive .sourcefile, .devhub-wrap.search .sourcefile {
     float: left;
+  }
+}
+
+@media (min-width: 43em) and (max-width: 43em) {
+  .devhub-wrap #content-area {
+    padding-left: 2%;
   }
 }
 

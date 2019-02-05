@@ -532,6 +532,15 @@
 			}
 		}
 
+		.widget-title {
+			line-height: 60px;
+			line-height: 6rem;
+		}
+
+		&.search-guide {
+			border-top: 2px solid #efefef;
+		}
+
 		@media ( max-width: 974px ) {
 			width: 640px;
 			margin: 0 auto;
@@ -560,7 +569,6 @@
 			}
 		}
 		&.search-guide {
-			border-top: 2px solid #efefef;
 			padding-top: 60px;
 			padding-top: 6rem;
 			margin-top: 0;
@@ -574,8 +582,8 @@
 
 			font-size: 25px;
 			font-size: 2.5rem;
-			line-height: 60px;
-			line-height: 6rem;
+			line-height: 20px;
+			line-height: 2rem;
 			.dashicons {
 				color: #222;
 				font-size: 108px;
@@ -821,11 +829,31 @@
 				padding-left: 0;
 				padding-right: 1.3em;
 				input {
+					margin-bottom: 6px;
 					padding-left: 0.5em;
+					vertical-align: middle;
 				}
 			}
 			label:last-child {
 				border-right-width: 0;
+			}
+
+			@media ( max-width: 688px ) {
+				span {
+					display: block;
+				}
+
+				label {
+					margin-left: 0;
+					margin-right: 1em;
+					width: 130px;
+
+					&:last-child {
+						margin-right: 0;
+						padding-right: 0;
+						width: initial;
+					}
+				}
 			}
 		}
 	}
@@ -927,10 +955,12 @@
 		padding: 0;
 	}
 	.horizontal-list {
-		display: inline;
+		display: block;
+		width: 100%;
 		list-style-type: none;
 		margin: 0;
 		padding: 0;
+		text-align: center;
 	}
 	.horizontal-list li {
 		display: inline;
@@ -2333,6 +2363,9 @@ body.responsive-show {
 				width: 100%;
 			}
 		}
+		#content-area {
+			padding-left: 2%;
+		}
 
 		&.archive, &.search {
 			.meta {
@@ -2357,6 +2390,11 @@ body.responsive-show {
 
 			.sourcefile {
 				float: left;
+			}
+		}
+		#content-area {
+			@media (max-width: 43em) {
+				padding-left: 2%;
 			}
 		}
 	}
