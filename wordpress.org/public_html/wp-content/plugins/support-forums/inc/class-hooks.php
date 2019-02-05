@@ -8,15 +8,16 @@ class Hooks {
 
 	public function __construct() {
 		// Basic behavior filters and actions.
-		add_filter( 'bbp_get_forum_pagination_count', '__return_empty_string' );
-		add_filter( 'bbp_get_form_topic_subscribed',  array( $this, 'check_topic_subscription_checkbox' ) );
-		add_action( 'pre_get_posts',                  array( $this, 'hide_non_public_forums' ) );
-		add_filter( 'pre_option__bbp_edit_lock',      array( $this, 'increase_edit_lock_time' ) );
-		add_filter( 'bbp_map_meta_caps',              array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
-		add_filter( 'redirect_canonical',             array( $this, 'disable_redirect_guess_404_permalink' ) );
-		add_action( 'template_redirect',              array( $this, 'redirect_update_php_page' ) );
-		add_filter( 'wp_insert_post_data',            array( $this, 'set_post_date_gmt_for_pending_posts' ) );
-		add_action( 'wp_print_footer_scripts',        array( $this, 'replace_quicktags_blockquote_button' ) );
+		add_filter( 'bbp_get_forum_pagination_count',  '__return_empty_string' );
+		add_filter( 'bbp_get_form_topic_subscribed',   array( $this, 'check_topic_subscription_checkbox' ) );
+		add_action( 'pre_get_posts',                   array( $this, 'hide_non_public_forums' ) );
+		add_filter( 'pre_option__bbp_edit_lock',       array( $this, 'increase_edit_lock_time' ) );
+		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
+		add_filter( 'bbp_map_meta_caps',               array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
+		add_filter( 'redirect_canonical',              array( $this, 'disable_redirect_guess_404_permalink' ) );
+		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
+		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
+		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 
 		// Link to create new topics atop topic list.
 		add_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
@@ -122,6 +123,15 @@ class Hooks {
 	 */
 	public function increase_edit_lock_time() {
 		return 60;
+	}
+
+	/**
+	 * Increase bbPress' default topics per page setting from 15 to 30.
+	 *
+	 * @return int Filtered topics per page setting.
+	 */
+	public function increase_topics_per_page() {
+		return 30;
 	}
 
 	/**
