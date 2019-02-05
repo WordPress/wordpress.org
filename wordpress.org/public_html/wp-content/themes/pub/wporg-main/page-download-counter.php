@@ -75,7 +75,7 @@ $meta_desc_text = sprintf(
 	<link href="//fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet" type="text/css">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<link rel="canonical" href="<?php echo esc_url( $canonical_url ); ?>">
-	<meta name="description" conntent="<?php echo esc_attr( $meta_desc_text ); ?>">
+	<meta name="description" content="<?php echo esc_attr( $meta_desc_text ); ?>">
 	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
