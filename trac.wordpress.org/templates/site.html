@@ -19,6 +19,12 @@
 	else :
 		support_link = 'https://wordpress.org/support/'
 
+	# <link rel="canonical">
+	if req.environ['PATH_INFO'].startswith('/ticket/') :
+		canonical = 'https://' + req.environ['HTTP_HOST'] + '/ticket/' + req.environ['PATH_INFO'].split('/')[2]
+	else :
+		canonical = false;
+
 	profile_to_edit = 'https://wordpress.org/support/users/'
 
 	# Fix https://meta.trac.wordpress.org/ticket/21
@@ -60,6 +66,10 @@
 			$("#field-summary").one( 'focus', function( event ) { return false; });
 		});
 		</script>
+	</py:if>
+
+	<py:if test="canonical">
+		<link rel="canonical" href="$canonical"/>
 	</py:if>
 </py:match>
 
