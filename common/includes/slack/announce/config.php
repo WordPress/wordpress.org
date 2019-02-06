@@ -213,6 +213,7 @@ function get_whitelist() {
 			'andrew.taylor', // @ataylorme on Slack
 			'mikeschroder', // @mike on Slack
 			'jadonn',
+			'brettface',
 		),
 		'marketing' => array(
 			'joostdevalk',
