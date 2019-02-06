@@ -148,8 +148,11 @@ function get_whitelist() {
 			'allendav',
 			'azaozz',
 			'casiepa',
+			'dejliglama',
 			'desrosj',
+			'garrett-eclipse',
 			'idea15', // @Heather Burns on Slack
+			'lakenh',
 		) ),
 		'core-restapi' => array_merge( get_committers(), array(
 			'danielbachhuber',
