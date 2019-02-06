@@ -59,6 +59,14 @@
 		Maybe do something similar for set_cache_headers and nonce verification
 
 		Setup WordPress.WP.I18n text_domain property and test that it works, see https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties#internationalization-setting-your-text-domain
+
+		Don't add @package phpDoc? Clutters code without adding any real value. You know what "package" the file is part of because of the folder it's in; e.g., wp-content/plugins/wordcamp-payments
+
+		Don't mush HTML elements together on the same line, unless it's really short. `<h1>The title</h1>` is ok, but `<h1><?php echo esc_html( get_the_title() ); ?></h1>` should have the h1 tags on separate lines.
+
+		wp_enqueue_*() cachebusters should use filemtime() rather than a hardcoded int.
+
+		Combine similar `use` statements on the same line. Like, all the core PHP objects, then all the WP objects on the 2nd line, then our custom objects on the 3rd line, etc.
 	-->
 
 
@@ -101,6 +109,8 @@
 
 		<!-- There are cases where having multiple items on a single line is appropriate. e.g., a list of 100 currency codes. -->
 		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
 
 		<!-- todo get_speaker_from_user_id() meta_query should not have to line up with post_status
 		<rule ref="WordPress.Arrays.MultipleStatementAlignment">
