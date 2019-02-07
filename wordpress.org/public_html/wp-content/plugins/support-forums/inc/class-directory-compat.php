@@ -58,6 +58,9 @@ abstract class Directory_Compat {
 
 			// Remove new topic form at the bottom of reviews forum.
 			add_filter( 'bbp_get_template_part', array( $this, 'noop_reviews_forum_form_topic' ), 10, 3 );
+
+			// Tell WordPress not to 404 (before bbPress overrides it) so that Canonical can do it's job.
+			add_filter( 'pre_handle_404', array( $this, 'abort_wp_handle_404' ) );
 		}
 	}
 
@@ -393,9 +396,9 @@ abstract class Directory_Compat {
 			( ! empty( $this->authors ) && in_array( $user->user_nicename, $this->authors ) )
 		||
 			( ! empty( $this->contributors ) && in_array( $user->user_nicename, $this->contributors ) )
-		|| 
+		||
 			( ! empty( $this->support_reps ) && in_array( $user->user_nicename, $this->support_reps ) )
-		|| 
+		||
 			// Back-compat for support reps added before https://meta.trac.wordpress.org/changeset/5867,
 			// can be removed once they are re-added via the Plugin Directory UI.
 			( is_a( $user, 'WP_User' ) && $user->supportrep == $this->slug() )
@@ -704,6 +707,19 @@ abstract class Directory_Compat {
 	}
 
 	/**
+	 * Filter WP::handle_404() to not run on compat views, so as to allow Canonical to properly handle the request.
+	 */
+	public function abort_wp_handle_404( $handled ) {
+		if ( $this->slug() ) {
+			// We've matched a term, so WordPress shouldn't 404 this request.
+			$handled = true;
+		}
+
+		return $handled;
+	}
+
+
+	/**
 	 * Add a subscribe/unsubscribe link to the compat views.
 	 */
 	public function do_subscription_link() {
@@ -898,7 +914,7 @@ abstract class Directory_Compat {
 					"SELECT slug
 					 FROM {$prefix}terms AS t
 					 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
-					 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+					 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
 					 WHERE tt.taxonomy = 'plugin_committers' AND tr.object_id = %d",
 					 $plugin->ID
 				) );
@@ -933,7 +949,7 @@ abstract class Directory_Compat {
 				"SELECT slug
 				 FROM {$prefix}terms AS t
 				 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
-				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
 				 WHERE tt.taxonomy = 'plugin_contributors' AND tr.object_id = %d",
 				 $plugin->ID
 			) );
@@ -967,7 +983,7 @@ abstract class Directory_Compat {
 				"SELECT slug
 				 FROM {$prefix}terms AS t
 				 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
-				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
 				 WHERE tt.taxonomy = 'plugin_support_reps' AND tr.object_id = %d",
 				 $plugin->ID
 			) );
