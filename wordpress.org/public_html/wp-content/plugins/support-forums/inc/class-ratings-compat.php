@@ -45,6 +45,9 @@ class Ratings_Compat {
 			add_filter( 'posts_clauses', array( $this, 'add_filter_to_posts_clauses' ) );
 			add_action( 'pre_get_posts', array( $this, 'no_found_rows' ) );
 			add_filter( 'bbp_topic_pagination', array( $this, 'add_filter_topic_pagination' ) );
+
+			// <meta robots="noindex,follow"> for filtered views.
+			add_filter( 'wp_head', 'wp_no_robots' );
 		}
 
 		// Total reviews count. Can be altered using $this->filter if needed.
