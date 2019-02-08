@@ -110,6 +110,10 @@
 /**
  * This should be inherited from p2-breathe
  */
+.table-of-contents .items li a {
+	word-break: break-word;
+}
+
 .table-of-contents .items li a,
 .table-of-contents .items li a:visited {
 	text-decoration: none;
