@@ -150,7 +150,7 @@ class Table_Of_Contents_Lite {
 	 * Load style
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_style( 'table-of-contents', TABLE_OF_CONTENTS_URL . 'assets/css/style.css', array(), '1.0' );
+		wp_enqueue_style( 'table-of-contents', TABLE_OF_CONTENTS_URL . 'assets/css/style.css', array(), '1.0.1' );
 	}
 
 	/**
