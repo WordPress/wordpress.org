@@ -19,8 +19,8 @@ class Hooks {
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 
-		// Output rel="canonical" meta tag.
-		add_action( 'wp_head', array( $this, 'rel_canonical' ) );
+		// Output rel="canonical" meta tag. Runs before WP's rel_canonical to unhook that if needed.
+		add_action( 'wp_head', array( $this, 'rel_canonical' ), 9 );
 
 		// Link to create new topics atop topic list.
 		add_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
@@ -272,22 +272,27 @@ class Hooks {
 	}
 
 	/**
-	 * Outputs rel="canonical" for topic tags and views.
+	 * Outputs <link rel="canonical"> tags for various pages.
 	 */
 	public function rel_canonical() {
-		if ( ! bbp_is_topic_tag() && ! bbp_is_single_view() ) {
-			return;
-		}
-
+		$canonical_url = false;
 		if ( bbp_is_topic_tag() ) {
 			$canonical_url = bbp_get_topic_tag_link();
-		} else {
+		} elseif ( bbp_is_single_view() ) {
 			$canonical_url = bbp_get_view_url();
+		} elseif ( bbp_is_forum_archive() ) {
+			$canonical_url = get_post_type_archive_link( 'forum' );
+		} elseif ( bbp_is_single_topic() ) {
+			remove_action( 'wp_head', 'rel_canonical' ); // Doesn't handle pagination.
+			$canonical_url = bbp_get_topic_permalink();
+		} elseif ( bbp_is_single_forum() ) {
+			remove_action( 'wp_head', 'rel_canonical' ); // Doesn't handle pagination.
+			$canonical_url = bbp_get_forum_permalink();
 		}
 
 		// Make sure canonical has pagination if needed.
 		$page = get_query_var( 'paged', 0 );
-		if ( $page >= 2 ) {
+		if ( $canonical_url && $page >= 2 ) {
 			$canonical_url .= 'page/' . absint( $page ) . '/';
 		}
 
