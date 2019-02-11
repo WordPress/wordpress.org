@@ -402,11 +402,16 @@ abstract class Event_Admin {
 	}
 
 	/**
-	 * Save metadata from form
+	 * Save metadata from form.
+	 *
+	 * @param int     $post_id      The ID of the post being saved.
+	 * @param WP_Post $post         The post being saved.
+	 * @param bool    $verify_nonce Whether or not to verify the nonce. Set to false when calling manually, leave
+	 *                              true when calling via `save_post` hook.
 	 *
 	 * @hook save_post
 	 */
-	public function metabox_save( $post_id, $post ) {
+	public function metabox_save( $post_id, $post, $verify_nonce = true ) {
 		// Don't add/remove meta on revisions and auto-saves.
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 			return;
@@ -417,8 +422,10 @@ abstract class Event_Admin {
 		}
 
 		// Make sure the request came from the edit post screen.
-		if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) ) {
-			die( 'Unable to verify nonce' );
+		if ( $verify_nonce ) {
+			if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) ) {
+				wp_die( 'Unable to verify nonce.' );
+			}
 		}
 
 		// Don't add/remove meta on trash, untrash, restore, etc.
