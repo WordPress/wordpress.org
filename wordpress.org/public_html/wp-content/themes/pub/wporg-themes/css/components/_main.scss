@@ -168,7 +168,7 @@ ul, ol {
 /**
  * Theme Screenshot
  *
- * Has a fixed aspect ratio of 1.5 to 1 regardless of screenshot size
+ * Has a fixed aspect ratio of 1.33 to 1 regardless of screenshot size
  * It is also responsive.
  */
 .theme-browser .theme .theme-screenshot {
@@ -181,7 +181,6 @@ ul, ol {
 .theme-browser .theme .theme-screenshot:after {
 	content: '';
 	display: block;
-	padding-top: 66.66666%; /* using a 3/2 aspect ratio */
 }
 
 .theme-browser .theme:hover .theme-screenshot,
@@ -192,7 +191,7 @@ ul, ol {
 .theme-browser .theme .theme-screenshot img {
 	height: auto;
 	left: 0;
-	position: absolute;
+	position: inherit;
 	top: 0;
 	-webkit-transform: translateZ( 0 );
 	transition: opacity 0.2s ease-in-out;
