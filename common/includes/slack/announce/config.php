@@ -55,6 +55,7 @@ function get_whitelist() {
 		) ),
 		'community-team' => array_merge( $wordcamp_central, array(
 			'francina',
+			'myselfkhayer',
 		) ),
 		'core' => array_merge( get_committers(), array(
 			'antpb',
