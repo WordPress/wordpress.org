@@ -148,7 +148,7 @@ class GlotPress_Translate_Bridge {
 		);
 
 		if ( ! $translation ) {
-			$decoded_strings = array_map( 'html_entity_decode', $strings );
+			$decoded_strings = array_map( 'wp_specialchars_decode', $strings );
 			if ( $decoded_strings != $strings ) {
 				$translation = $this->find_translation( $decoded_strings, $project_path );
 			}
