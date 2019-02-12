@@ -259,6 +259,8 @@ class WordPressTV_Theme {
 	 * Relies on various other filters used once.
 	 * @todo optimize the get_tax_query part.
 	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
 	 * @param string   $search
 	 * @param WP_Query $query
 	 * @return string
@@ -313,6 +315,8 @@ class WordPressTV_Theme {
 	 * This adds the JOIN clause resulting from the taxonomy
 	 * search. Make sure this filter runs only once per WP_Query request.
 	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
 	 * @param string   $join
 	 * @param WP_Query $query
 	 * @return string
@@ -336,6 +340,8 @@ class WordPressTV_Theme {
 	 * Searching with taxonomies may include duplicates when
 	 * search query matches content and one or more taxonomies.
 	 * This filter glues all duplicates. Use only once per WP_Query.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param string   $group_by
 	 * @param WP_Query $query
@@ -467,6 +473,9 @@ class WordPressTV_Theme {
 	/**
 	 * Renders the video or a video thumbnail
 	 *
+	 * @global WP_Post $post
+	 * @global $originalcontent
+	 *
 	 * @param bool $thumb
 	 * @param bool $no_html
 	 */
@@ -539,6 +548,8 @@ class WordPressTV_Theme {
 	/**
 	 * Outputs the video image
 	 *
+	 * @global WP_Post $post
+	 *
 	 * @param int  $h
 	 * @param int  $w
 	 * @param bool $arrow
@@ -593,6 +604,8 @@ class WordPressTV_Theme {
 
 	/**
 	 * Removes shortcodes from $originalcontent global
+	 *
+	 * @global $originalcontent
 	 *
 	 * @param string $content
 	 * @return mixed
@@ -782,6 +795,10 @@ add_action( 'wp_enqueue_scripts', 'wptv_enqueue_scripts' );
 /**
  * Create a nicely formatted and more specific title element text for output
  * in head of document, based on current view.
+ *
+ * @global $paged
+ * @global $page
+ *
  *
  * @param string $title Default title text for current view.
  * @param string $sep   Optional separator.
