@@ -1,14 +1,14 @@
 <?php
 /**
  * Jetpack Compatibility File
- * See: http://jetpack.me/
+ * See: https://jetpack.me/
  *
  * @package wporg-developer
  */
 
 /**
  * Add theme support for Infinite Scroll.
- * See: http://jetpack.me/support/infinite-scroll/
+ * See: https://jetpack.me/support/infinite-scroll/
  */
 function wporg_developer_jetpack_setup() {
 	add_theme_support( 'infinite-scroll', array(

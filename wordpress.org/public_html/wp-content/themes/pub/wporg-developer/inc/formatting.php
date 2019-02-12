@@ -83,12 +83,12 @@ class DevHub_Formatting {
 	 *
 	 * Handles these six different types of links:
 	 *
-	 * - {@link http://en.wikipedia.org/wiki/ISO_8601}
+	 * - {@link https://en.wikipedia.org/wiki/ISO_8601}
 	 * - {@see WP_Rewrite::$index}
 	 * - {@see WP_Query::query()}
 	 * - {@see esc_attr()}
 	 * - {@see 'pre_get_search_form'}
-	 * - {@link http://codex.wordpress.org/The_Loop Use new WordPress Loop}
+	 * - {@link https://codex.wordpress.org/The_Loop Use new WordPress Loop}
 	 *
 	 * Note: Though @see and @link are semantically different in meaning, that isn't always
 	 * the case with use so this function handles them identically.
@@ -132,12 +132,12 @@ class DevHub_Formatting {
 
 					$parts = explode( ' ', $link, 2 );
 
-					// Link without linked text: {@link http://en.wikipedia.org/wiki/ISO_8601}
+					// Link without linked text: {@link https://en.wikipedia.org/wiki/ISO_8601}
 					if ( 1 === count( $parts ) ) {
 						$url = $text = $link;
 					}
 
-					// Link with linked text: {@link http://codex.wordpress.org/The_Loop Use new WordPress Loop}
+					// Link with linked text: {@link https://codex.wordpress.org/The_Loop Use new WordPress Loop}
 					else {
 						$url = $parts[0];
 						$text = $parts[1];

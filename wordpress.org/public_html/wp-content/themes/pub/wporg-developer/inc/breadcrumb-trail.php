@@ -18,8 +18,8 @@
  * @version   0.6.1.modified
  * @author    Justin Tadlock <justin@justintadlock.com>
  * @copyright Copyright (c) 2008 - 2013, Justin Tadlock
- * @link      http://themehybrid.com/plugins/breadcrumb-trail
- * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @link      https://themehybrid.com/plugins/breadcrumb-trail
+ * @license   https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
 /**

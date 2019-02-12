@@ -17,8 +17,8 @@
  * @version   0.3.0
  * @author    Justin Tadlock <justin@justintadlock.com>
  * @copyright Copyright (c) 2010 - 2013, Justin Tadlock
- * @link      http://themehybrid.com/docs/tutorials/loop-pagination
- * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @link      https://themehybrid.com/docs/loop-pagination
+ * @license   https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
 /**
