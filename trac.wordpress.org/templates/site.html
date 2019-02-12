@@ -28,6 +28,10 @@
 	# <meta name="robots">
 	if req.environ['PATH_INFO'].startswith('/attachment/') :
 		robots = 'noindex, follow'
+	elif req.environ['PATH_INFO'].startswith('/browser/') and 'rev' in req.args : # eg: /browser/trunk/?rev=37670
+		robots = 'noindex, follow'
+	elif req.environ['PATH_INFO'].startswith('/changeset/') and len( filter( None, req.environ['PATH_INFO'].split('/') ) ) > 2 : # eg: /changeset/123/trunk
+		robots = 'noindex, follow'
 	else :
 		robots = false
 
