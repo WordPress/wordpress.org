@@ -18,11 +18,12 @@ $menu_items = array(
 );
 
 $GLOBALS['pagetitle'] = wp_get_document_title();
+$GLOBALS['wporg_global_header_options'] = array(
+	'in_wrapper' => '<a class="skip-link screen-reader-text" href="#main">' . esc_html( 'Skip to content', 'wporg-plugins' ) . '</a>',
+);
 require WPORGPATH . 'header.php';
 ?>
 <div id="page" class="site">
-	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-plugins' ); ?></a>
-
 	<div id="content" class="site-content">
 		<header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
