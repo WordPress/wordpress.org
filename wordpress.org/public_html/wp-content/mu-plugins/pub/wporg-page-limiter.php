@@ -37,10 +37,12 @@ class WPORG_Page_Limiter {
 		add_filter( 'bbp_topic_pagination', [ $this, 'bbp_topic_pagination' ], 100 );
 	}
 
-	// Pre-query, ensure we flag this request as a 404 - Won't stop the actual WP_Query though, just sets the 404 headers.
+	// Pre-query, Override the query to be a 404.
 	public function request( $args ) {
 		if ( isset( $args['paged'] ) && $args['paged'] > self::MAX_PAGES ) {
-			$args['error'] = 404;
+			$args = array(
+				'error' => 404,
+			);
 		}
 		return $args;
 	}
@@ -55,13 +57,6 @@ class WPORG_Page_Limiter {
 
 		if ( $paged && $paged > self::MAX_PAGES ) {
 			$query->set_404();
-		/*
-			// TODO: WP_Query will still query the DB even if it's been told it's a 404 either via set_404() or via WP::parse_request().
-			add_filter( 'posts_request', function( $request ) {
-				// remove_filter( 'posts_request', __METHOD__ );
-				return ''; // empty SQL
-			}, 100 );
-		*/
 		}
 
 	}
