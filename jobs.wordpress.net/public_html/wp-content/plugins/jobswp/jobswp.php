@@ -2,7 +2,7 @@
 /*
 Plugin Name: JobsWP
 Version: 1.2
-Plugin URI: http://jobs.wordpress.net
+Plugin URI: https://jobs.wordpress.net/
 Author: Scott Reilly
 Description: Functionality for jobs.wordpress.net
 */
@@ -657,7 +657,7 @@ EMAIL;
 			$headers = '';
 			$headers['From'] = 'jobs.wordpress.net <jobs@wordpress.net>';
 
-			$body = sprintf( $body, $title, 'http://jobs.wordpress.net/', $token, self::get_days_until_pruning(), 'http://jobs.wordpress.net/remove-a-job/' );
+			$body = sprintf( $body, $title, 'https://jobs.wordpress.net/', $token, self::get_days_until_pruning(), 'https://jobs.wordpress.net/remove-a-job/' );
 
 			if ( $to ) {
 				wp_mail( $to, $subject, $body, $headers );

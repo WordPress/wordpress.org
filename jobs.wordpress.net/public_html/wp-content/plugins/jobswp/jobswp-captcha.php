@@ -2,7 +2,7 @@
 /**
  * Plugin Name: JobsWP reCaptcha
  * Version:     1.1
- * Plugin URI:  http://jobs.wordpress.net
+ * Plugin URI:  https://jobs.wordpress.net/
  * Author:      Scott Reilly
  * Description: Adds reCaptcha field to job posting form for jobs.wordpress.net.
  *
