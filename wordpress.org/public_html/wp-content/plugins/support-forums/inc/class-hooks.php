@@ -15,6 +15,7 @@ class Hooks {
 		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
 		add_filter( 'bbp_map_meta_caps',               array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
 		add_filter( 'redirect_canonical',              array( $this, 'disable_redirect_guess_404_permalink' ) );
+		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
@@ -206,6 +207,27 @@ class Hooks {
 		}
 
 		return $redirect_url;
+	}
+
+	/**
+	 * Disable wp_old_slug_redirect() for hidden topics.
+	 *
+	 * Prevents Spam, Pending, or Archived topics that the current user cannot view
+	 * from performing a redirect loop.
+	 *
+	 * @param int $post_id The redirect post ID.
+	 * @return int Filtered redirect post ID.
+	 */
+	public function disable_wp_old_slug_redirect( $post_id ) {
+		if ( is_404() && 'topic' === get_query_var( 'post_type' ) && get_query_var( 'name' ) ) {
+			$hidden_topic = get_post( $post_id );
+
+			if ( $hidden_topic && ! current_user_can( 'read_topic', $hidden_topic->ID ) ) {
+				$post_id = 0;
+			}
+		}
+
+		return $post_id;
 	}
 
 	/**
