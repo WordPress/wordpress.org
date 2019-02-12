@@ -82,6 +82,10 @@ class Hooks {
 
 		// Remove the redundant prefixes in the bbPress <title>.
 		add_filter( 'bbp_raw_title_array', array( $this, 'bbp_raw_title_array' ) );
+
+		// Don't 404 user profile pages. Fixed in bbPress 2.6: https://bbpress.trac.wordpress.org/ticket/3047
+		add_filter( 'bbp_template_redirect', array( $this, 'disable_404_for_user_profile' ) );
+
 	}
 
 	/**
@@ -288,6 +292,9 @@ class Hooks {
 		} elseif ( bbp_is_single_forum() ) {
 			remove_action( 'wp_head', 'rel_canonical' ); // Doesn't handle pagination.
 			$canonical_url = bbp_get_forum_permalink();
+		} elseif ( bbpress()->displayed_user && bbpress()->displayed_user->exists() ) {
+			// This covers all user pages rather than using 6 different bbp_is_*() calls.
+			$canonical_url = 'https://profiles.wordpress.org/' . bbpress()->displayed_user->user_nicename . '/';
 		}
 
 		// Make sure canonical has pagination if needed.
@@ -753,5 +760,14 @@ class Hooks {
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Don't 404 for user profile pages. Fixed in bbPress 2.6: https://bbpress.trac.wordpress.org/ticket/3047
+	 */
+	function disable_404_for_user_profile() {
+		if ( bbpress()->displayed_user && bbpress()->displayed_user->exists() ) {
+			status_header( 200 );
+		}
 	}
 }
