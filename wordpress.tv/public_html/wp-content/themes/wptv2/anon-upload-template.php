@@ -237,8 +237,8 @@ if ( !empty($_REQUEST['error']) ) {
 				<h3>Guidelines</h3>
 				<p>WordCamp videos: the audio is clear and easy to understand, the camera was on a tripod, the video shows the speaker and slides, divide the video by presentation if possible.</p>
 				<p>Screencasts: keep it concise, keep it clear, keep on track (no chock-full of personal promotion please), keep it current.</p>
-				<p>Vodcasts and other video-based content: if you have put together a video podcast or other WordPress focused, relevant video - let us <a href="http://wordpress.tv/contact/">know about it</a>.
-				<p>If this is the first time you're submitting a video, please check all <a href="http://blog.wordpress.tv/submission-guidelines/">Submission Guidelines</a>.</p>
+				<p>Vodcasts and other video-based content: if you have put together a video podcast or other WordPress focused, relevant video - let us <a href="https://wordpress.tv/contact/">know about it</a>.
+				<p>If this is the first time you're submitting a video, please check all <a href="https://blog.wordpress.tv/submission-guidelines/">Submission Guidelines</a>.</p>
 				<h3>Accepted formats</h3>
 				<p>Maximum upload file size: 1GB. You can upload the following video formats:</p>
 				<ul class="accepted-formats">

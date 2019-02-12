@@ -77,7 +77,7 @@ if ( have_posts() ) :
 				<p><?php printf ( __( 'Or, <a href="%s">visit the homepage</a> to start a fresh journey.', 'wptv' ), '/' ); ?></p>
 				<p>
 					<img src="<?php echo get_stylesheet_directory_uri(); ?>/i/michael-pick-stashes-a-guinness.gif" alt="" /><br />
-					Photo animation credit: <a href="http://markjaquith.com/">Mark Jaquith</a>.
+					Photo animation credit: <a href="https://markjaquith.com/">Mark Jaquith</a>.
 				</p>
 			</div>
 		</div>

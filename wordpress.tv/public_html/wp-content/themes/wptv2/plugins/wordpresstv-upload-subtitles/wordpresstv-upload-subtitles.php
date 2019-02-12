@@ -393,7 +393,7 @@ class WordPressTV_Subtitles_Upload {
 					new tab).</p>
 
 				<p>Submitted by: <a
-						href="http://profiles.wordpress.org/<?php echo esc_attr( $attachment_meta['submitted_by'] ); ?>/"><?php echo esc_html( $attachment_meta['submitted_by'] ); ?></a>,
+						href="https://profiles.wordpress.org/<?php echo esc_attr( $attachment_meta['submitted_by'] ); ?>/"><?php echo esc_html( $attachment_meta['submitted_by'] ); ?></a>,
 					email: <a
 						href="mailto:<?php echo esc_attr( $attachment_meta['submitted_email'] ); ?>"><?php echo esc_html( $attachment_meta['submitted_email'] ); ?></a>
 				</p>

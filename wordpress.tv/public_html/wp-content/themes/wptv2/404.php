@@ -19,7 +19,7 @@ global $wp_query, $post, $wptv;
 		<div class="primary-content">
 			<div class="baron-von-pick">
 				<img src="<?php echo get_stylesheet_directory_uri(); ?>/i/michael-pick-stashes-a-guinness.gif" alt="" /><br />
-				<?php printf( __( 'Photo animation credit: %s.', 'wptv' ), '<a href="http://markjaquith.com/">Mark Jaquith</a>' ); ?>
+				<?php printf( __( 'Photo animation credit: %s.', 'wptv' ), '<a href="https://markjaquith.com/">Mark Jaquith</a>' ); ?>
 			</div>
 			<div class="message-404">
 				<h2><?php esc_html_e( 'Uh oh, someone made a mistake!', 'wptv' ); ?></h2>

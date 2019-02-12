@@ -166,7 +166,7 @@ if ( post_password_required() ) :
 
 	<div class="container">
 		<div class="video-upload">
-			<p><?php printf( __( 'Hey there! If you&#8217;re interested in subtitling or captioning videos for WordPress.tv, please fill out the <a href="%s">contact form</a>, and we&#8217;ll be in touch.', 'wptv' ), 'http://wordpress.tv/contact/' ); ?></p>
+			<p><?php printf( __( 'Hey there! If you&#8217;re interested in subtitling or captioning videos for WordPress.tv, please fill out the <a href="%s">contact form</a>, and we&#8217;ll be in touch.', 'wptv' ), 'https://wordpress.tv/contact/' ); ?></p>
 			<div class="pass-form">
 				<?php echo get_the_password_form(); ?>
 			</div>
@@ -257,9 +257,9 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 					<th><label for="wptv_wporg_username"><?php _e( 'WordPress.org Username' ); ?><span class="required"> * </span></label></th>
 					<td>
 						<input type="text" id="wptv_wporg_username" name="wptv_wporg_username" /><br />
-						To contribute subtitles, you must be a registered user at the <a href="http://wordpress.org">WordPress.org</a> website. Note that this is the username you use to log in at WordPress.org, not the username you use to log in on your own WordPress-powered site.<br />
-						If you think you are registered but aren't sure, you can try logging in at <a href="http://wordpress.org/support/bb-login.php">WordPress.org/support</a>.<br />
-						If you don't have a WordPress.org username yet, you can <a href="http://wordpress.org/support/register.php">sign up for a free account</a>.
+						To contribute subtitles, you must be a registered user at the <a href="https://wordpress.org">WordPress.org</a> website. Note that this is the username you use to log in at WordPress.org, not the username you use to log in on your own WordPress-powered site.<br />
+						If you think you are registered but aren't sure, you can try logging in at <a href="https://wordpress.org/support/bb-login.php">WordPress.org/support</a>.<br />
+						If you don't have a WordPress.org username yet, you can <a href="https://wordpress.org/support/register.php">sign up for a free account</a>.
 					</td>
 				</tr>
 

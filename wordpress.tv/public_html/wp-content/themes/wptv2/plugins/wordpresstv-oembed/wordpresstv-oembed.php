@@ -3,7 +3,7 @@
 **************************************************************************
 
 Plugin Name:  WordPress.tv oEmbed Provider
-Plugin URI:   http://wordpress.tv/oembed/
+Plugin URI:   https://wordpress.tv/oembed/
 Description:  Creates an oEmbed provider for WordPress.tv.
 Author:       Viper007Bond
 

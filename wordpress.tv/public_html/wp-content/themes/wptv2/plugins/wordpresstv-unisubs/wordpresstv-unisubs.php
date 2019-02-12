@@ -59,7 +59,7 @@ class WordCampTV_Unisubs {
 	function template_redirect() {
 
 		// If a ?guid has been specified, but not a /unisubs/ endpoint, redirect
-		// to the post permalink. Allows requests like http://wordpress.tv/?guid=nWoZmCPz
+		// to the post permalink. Allows requests like https://wordpress.tv/?guid=nWoZmCPz
 		if ( get_query_var( 'guid' ) && ! get_query_var( 'unisubs' ) ) {
 			$post = $this->get_post_by_guid( get_query_var( 'guid' ) );
 			if ( $post ) {

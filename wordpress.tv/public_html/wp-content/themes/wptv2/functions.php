@@ -236,7 +236,7 @@ class WordPressTV_Theme {
 		 * @todo Optimize this before re-enabling
 		 *
 		 * This method was disabled because it caused 504 errors on large result sets
-		 * (e.g., http://wordpress.tv/?s=keynote). Sorting by a meta value is not performant.
+		 * (e.g., https://wordpress.tv/?s=keynote). Sorting by a meta value is not performant.
 		 *
 		 * Maybe look at ways to do the sorting in PHP, or just use Elasticsearch instead.
 		 */
@@ -511,7 +511,7 @@ class WordPressTV_Theme {
 			if ( $thumb ) {
 				preg_match( '/id=([0-9]+).*/', $code, $matches );
 				$id    = $matches[1];
-				$ssxml = file_get_contents( 'http://www.slideshare.net/api/2/get_slideshow/?slideshow_id=' . $id . '&api_key=sM0rzJvp&ts=' . time() . '&hash=' . sha1( 'vHs2uii6' . time() ) );
+				$ssxml = file_get_contents( 'https://www.slideshare.net/api/2/get_slideshow/?slideshow_id=' . $id . '&api_key=sM0rzJvp&ts=' . time() . '&hash=' . sha1( 'vHs2uii6' . time() ) );
 				preg_match( '/<ThumbnailURL>(.+)<\/ThumbnailURL>/', $ssxml, $matches );
 				$image = $matches[1];
 			} else {
@@ -579,7 +579,7 @@ class WordPressTV_Theme {
 
 			preg_match( '/id=([0-9]+).*/', $code, $matches );
 			$id    = $matches[1];
-			$url   = 'http://www.slideshare.net/api/2/get_slideshow/?slideshow_id=' . $id . '&api_key=sM0rzJvp&ts=' . time() . '&hash=' . sha1( 'vHs2uii6' . time() );
+			$url   = 'https://www.slideshare.net/api/2/get_slideshow/?slideshow_id=' . $id . '&api_key=sM0rzJvp&ts=' . time() . '&hash=' . sha1( 'vHs2uii6' . time() );
 			$ssxml = wp_remote_retrieve_body( wp_remote_get( esc_url_raw( $url ) ) );
 			preg_match( '/<ThumbnailURL>(.+)<\/ThumbnailURL>/', $ssxml, $matches );
 			$ret = $matches[1];
@@ -891,7 +891,7 @@ if ( ! function_exists( 'bump_stats_extras' ) ) {
  * Eliminates widows in strings by replace the breaking space that appears before the last word
  * with a non-breaking space.
  *
- * @link http://www.shauninman.com/post/heap/2006/08/22/widont_wordpress_plugin Typesetting widows
+ * @link https://www.shauninman.com/post/heap/2006/08/22/widont_wordpress_plugin Typesetting widows
  *
  * @param string $str Optional. String to operate on.
  * @return string
