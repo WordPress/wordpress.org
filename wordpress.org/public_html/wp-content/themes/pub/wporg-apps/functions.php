@@ -36,7 +36,7 @@ function wpmobileapps_setup() {
 	/*
 	 * Enable support for Post Thumbnails on posts and pages.
 	 *
-	 * @link http://codex.wordpress.org/Function_Reference/add_theme_support#Post_Thumbnails
+	 * @link https://developer.wordpress.org/reference/functions/add_theme_support/#post-thumbnails
 	 */
 	add_theme_support( 'post-thumbnails' );
 

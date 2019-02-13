@@ -71,7 +71,7 @@ add_filter( 'document_title_parts', 'wpmobileapps_document_title' );
  * Sets the authordata global when viewing an author archive.
  *
  * This provides backwards compatibility with
- * http://core.trac.wordpress.org/changeset/25574
+ * https://core.trac.wordpress.org/changeset/25574
  *
  * It removes the need to call the_post() and rewind_posts() in an author
  * template to print information about the author.

@@ -1,8 +1,8 @@
 /*
 Theme Name: wpmobileapps
-Theme URI: http://underscores.me/
+Theme URI: https://apps.wordpress.org/
 Author: Dave Whitley
-Author URI: http://underscores.me/
+Author URI: https://underscores.me/
 Description: WordPress Mobile Apps Site
 Version: 1.0
 License: GNU General Public License
@@ -14,11 +14,11 @@ Tags:
 This theme, like WordPress, is licensed under the GPL.
 Use it to make something cool, have fun, and share what you've learned with others.
 
- wpmobileapps is based on Underscores http://underscores.me/, (C) 2012-2014 Automattic, Inc.
+ wpmobileapps is based on Underscores https://underscores.me/, (C) 2012-2014 Automattic, Inc.
 
 Resetting and rebuilding styles have been helped along thanks to the fine work of
-Eric Meyer http://meyerweb.com/eric/tools/css/reset/index.html
-along with Nicolas Gallagher and Jonathan Neal http://necolas.github.com/normalize.css/
+Eric Meyer https://meyerweb.com/eric/tools/css/reset/index.html
+along with Nicolas Gallagher and Jonathan Neal https://necolas.github.com/normalize.css/
 and Blueprint http://www.blueprintcss.org/
 */
 /* =Reset
@@ -57,7 +57,7 @@ html {
 *,
 *:before,
 *:after {
-  /* apply a natural box layout model to all elements; see http://www.paulirish.com/2012/box-sizing-border-box-ftw/ */
+  /* apply a natural box layout model to all elements; see https://www.paulirish.com/2012/box-sizing-border-box-ftw/ */
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
@@ -2358,8 +2358,8 @@ object {
   }
 }
 /*
-Animate.css - http://daneden.me/animate
-Licensed under the MIT license - http://opensource.org/licenses/MIT
+Animate.css - https://daneden.github.io/animate.css/
+Licensed under the MIT license - https://opensource.org/licenses/MIT
 
 Copyright (c) 2013 Daniel Eden
 */
