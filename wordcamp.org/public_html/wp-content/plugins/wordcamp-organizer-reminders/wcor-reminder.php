@@ -435,6 +435,8 @@ class WCOR_Reminder {
 			return;
 		}
 
+		wp_die( 'Manually sending reminders is currently disabled while I track down a nasty bug. -Ian' );
+
 		$wordcamp = get_post( $form_values['wcor_manually_send_wordcamp'] );
 		$WCOR_Mailer->send_manual_email( $email, $wordcamp );
 	}
