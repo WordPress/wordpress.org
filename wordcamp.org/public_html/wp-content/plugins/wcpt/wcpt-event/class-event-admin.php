@@ -421,6 +421,11 @@ abstract class Event_Admin {
 			return;
 		}
 
+		// Don't add/remove meta on trash, untrash, restore, etc.
+		if ( empty( $_POST['action'] ) || 'editpost' !== $_POST['action'] ) {
+			return;
+		}
+
 		// Make sure the request came from the edit post screen.
 		if ( $verify_nonce ) {
 			if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) ) {
@@ -428,10 +433,6 @@ abstract class Event_Admin {
 			}
 		}
 
-		// Don't add/remove meta on trash, untrash, restore, etc.
-		if ( empty( $_POST['action'] ) || 'editpost' !== $_POST['action'] ) {
-			return;
-		}
 
 		$meta_keys = $this->meta_keys();
 		$orig_meta_values = get_post_meta( $post_id );
