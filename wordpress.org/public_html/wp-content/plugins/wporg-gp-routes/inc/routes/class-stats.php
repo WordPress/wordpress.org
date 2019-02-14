@@ -4,6 +4,7 @@ namespace WordPressdotorg\GlotPress\Routes\Routes;
 
 use GP;
 use GP_Route;
+use GP_Locales;
 
 /**
  * Stats Route Class.
@@ -137,4 +138,90 @@ class Stats extends GP_Route {
 		$this->tmpl( 'stats-overview', get_defined_vars() );
 	}
 
+	public function get_stats_plugin_theme_overview( $locale, $locale_slug, $view = false ) {
+		global $wpdb;
+		if ( ! $locale || ! $locale_slug || ! $view ) {
+			wp_redirect( '/stats', 301 );
+			die();
+		}
+
+		$gp_locale = GP_Locales::by_slug( $locale );
+
+		$items = array();
+		if ( 'plugins' == $view ) {
+			// Fetch top 100 plugins..
+			$items = get_transient( __METHOD__ . '_plugin_items' );
+			if ( ! $items ) {
+				$api = wp_safe_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[per_page]=250' );
+				foreach ( json_decode( wp_remote_retrieve_body( $api ) )->plugins as $plugin ) {
+					$items[ $plugin->slug ] = (object) [
+						'installs' => $plugin->active_installs,
+					];
+				}
+				set_transient( __METHOD__ . '_plugin_items', $items, DAY_IN_SECONDS );
+			}
+		} elseif ( 'themes' == $view && defined( 'WPORG_THEME_DIRECTORY_BLOGID' ) ) {
+			$items = get_transient( __METHOD__ . '_theme_items' );
+			if ( ! $items ) {
+				// The Themes API API isn't playing nice.. Easiest way..
+				switch_to_blog( WPORG_THEME_DIRECTORY_BLOGID );
+				$items = $wpdb->get_results(
+					"SELECT p.post_name as slug, pm.meta_value as installs
+					FROM {$wpdb->posts} p
+					LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_active_installs'
+					WHERE p.post_type = 'repopackage' AND p.post_status = 'publish'
+					ORDER BY pm.meta_value+0 DESC, p.post_date
+					LIMIT 250",
+					OBJECT_K
+				);
+				restore_current_blog();
+				foreach ( $items as $slug => $details ) {
+					unset( $items[$slug]->slug );
+				}
+				set_transient( __METHOD__ . '_theme_items', $items, DAY_IN_SECONDS );
+			}
+		} else {
+			wp_safe_redirect( '/stats' );
+			die();
+		}
+
+		$project_ids = [];
+		foreach ( $items as $slug => $details ) {
+			$items[$slug]->project = GP::$project->by_path( 'wp-' . $view . '/' . $slug );
+			if ( ! $items[$slug]->project || ! $items[$slug]->project->active ) {
+				// Not all top-all-time plugins/themes have translation projects.
+				unset( $items[ $slug ] );
+				continue;
+			}
+
+			if (
+				'plugins' == $view &&
+				(
+					! GP::$project->by_path( $items[$slug]->project->path . '/dev' )
+					&&
+					! GP::$project->by_path( $items[$slug]->project->path . '/stable' )
+				)
+			) {
+				// Not all top plugins are translation-aware, lets just skip those..
+				unset( $items[ $slug ] );
+				continue;
+			}
+
+			$project_ids[ $items[$slug]->project->id ] = $slug;
+		}
+
+		$sql_project_ids = implode( ', ', array_map( 'intval', array_keys( $project_ids ) ) );
+		$stats = $wpdb->get_results( $wpdb->prepare(
+			"SELECT `project_id`, `all`, `current`, `waiting`, `untranslated`
+				FROM {$wpdb->project_translation_status}
+				WHERE project_id IN ($sql_project_ids)
+				AND locale = %s AND locale_slug = %s",
+			$locale, $locale_slug
+		) );
+		foreach ( $stats as $row ) {
+			$items[ $project_ids[ $row->project_id ] ]->stats = $row;
+		}
+
+		$this->tmpl( 'stats-plugin-themes-overview', compact( 'locale', 'locale_slug', 'view', 'gp_locale', 'items' ) );
+	}
 }

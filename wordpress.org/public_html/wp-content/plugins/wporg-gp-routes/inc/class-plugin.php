@@ -87,6 +87,7 @@ class Plugin {
 	 *  - (/locale)/$locale/$dir/glossary/-delete
 	 *  - (/locale)/$locale/$dir/glossary/-export
 	 *  - (/locale)/$locale/$dir/glossary/-import
+	 *  - /locale/$locale/$dir/stats(?:/(plugins|themes))?s
 	 *  - /stats/?
 	 *  - /projects/wp-plugins/$project
 	 *  - /projects/wp-plugins/$project/contributors
@@ -142,6 +143,7 @@ class Plugin {
 			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-export", array( 'GP_Route_Glossary_Entry', 'export_glossary_entries_get' ) );
 			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_get' ) );
 			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_post' ), 'post' );
+			GP::$router->prepend( "/locale/$locale/$dir/stats(?:/(plugins|themes))?", array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_plugin_theme_overview' ) );
 			GP::$router->prepend( '/stats', array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_overview' ) );
 			GP::$router->prepend( '/consistency', array( __NAMESPACE__ . '\Routes\Consistency', 'get_search_form' ) );
 
