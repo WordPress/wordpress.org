@@ -60,6 +60,12 @@
 
 <!--! Styles and such. Load before first JS file (jquery.js) -->
 <py:match path="head/script[contains(@src,'jquery.js')]">
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s);j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-5Z8B3BX');</script>
+
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-head.html" />
 	<meta name="viewport" content="width=device-width" />
@@ -277,17 +283,7 @@
 </py:if>
 
 <body py:match="body" id="wordpress-org" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
-
-	<!--! Analytics for Core Trac -->
-	<py:if test="project_slug == 'core'">
-		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-			new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-			j=d.createElement(s);j.async=true;j.src=
-			'https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);
-		})(window,document,'script','dataLayer','GTM-5Z8B3BX');</script>
-		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5Z8B3BX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-	</py:if>
-
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5Z8B3BX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-header.html" />
 
