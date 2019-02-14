@@ -28,7 +28,7 @@ gp_tmpl_header();
 				$gp_locale = GP_Locales::by_slug( $locale_slug );
 				$set_slug = 'default';
 				// Variants (de/formal for example) don't have GP_Locales in this context
-				if ( ! $gp_locale && ( list( $base_locale_slug, $set_slug ) = explode( '/', $locale_slug ) ) ) {
+				if ( ! $gp_locale && strpos( $locale_slug, '/' ) && ( list( $base_locale_slug, $set_slug ) = explode( '/', $locale_slug ) ) ) {
 					$_gp_locale = GP_Locales::by_slug( $base_locale_slug );
 					if ( $_gp_locale ) {
 						$gp_locale = clone $_gp_locale;
