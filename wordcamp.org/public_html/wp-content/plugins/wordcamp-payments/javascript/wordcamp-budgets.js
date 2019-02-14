@@ -32,7 +32,7 @@ jQuery( document ).ready( function( $ ) {
 		maybeMakeFieldsOptional : function() {
 			var status = $( '#wcb_status' ).val();
 
-			if ( 'draft' === status || 'wcb-incomplete' === status ) {
+			if ( [ 'draft', 'wcb-incomplete', 'wcb-paid', 'wcb-cancelled' ].indexOf( status ) !== -1 ) {
 				app.makeFieldsOptional();
 
 				if ( 'wcb-incomplete' === status ) {

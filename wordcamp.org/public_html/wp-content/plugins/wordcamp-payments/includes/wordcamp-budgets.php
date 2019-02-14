@@ -170,7 +170,7 @@ class WordCamp_Budgets {
 			'wordcamp-budgets',
 			plugins_url( 'javascript/wordcamp-budgets.js', __DIR__ ),
 			array( 'jquery', 'jquery-ui-datepicker', 'media-upload', 'media-views' ),
-			3,
+			filemtime( WORDCAMP_PAYMENTS_PATH . '/javascript/wordcamp-budgets.js' ),
 			true
 		);
 

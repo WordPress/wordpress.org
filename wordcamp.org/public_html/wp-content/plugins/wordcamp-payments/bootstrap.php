@@ -8,6 +8,8 @@ Author URI:  https://wordcamp.org
 Version:     0.1
 */
 
+define( 'WORDCAMP_PAYMENTS_PATH', plugin_dir_path( __FILE__ ) );
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Access denied.' );
 }
