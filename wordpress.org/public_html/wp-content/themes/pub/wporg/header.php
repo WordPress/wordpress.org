@@ -11,9 +11,11 @@
 
 namespace WordPressdotorg\Theme;
 
-$GLOBALS['wporg_global_header_options'] = array(
-	'in_wrapper' => '<a class="skip-link screen-reader-text" href="#content">' . esc_html( 'Skip to content', 'wporg' ) . '</a>',
-);
+global $wporg_global_header_options;
+if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
+	$wporg_global_header_options['in_wrapper'] = '';
+$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#content">' . esc_html( 'Skip to content', 'wporg' ) . '</a>';
+
 get_template_part( 'header', 'wporg' );
 ?>
 <div id="page" class="site">
