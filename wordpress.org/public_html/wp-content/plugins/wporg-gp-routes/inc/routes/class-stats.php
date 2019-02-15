@@ -194,20 +194,23 @@ class Stats extends GP_Route {
 				continue;
 			}
 
-			if (
-				'plugins' == $view &&
-				(
-					! GP::$project->by_path( $items[$slug]->project->path . '/dev' )
-					&&
-					! GP::$project->by_path( $items[$slug]->project->path . '/stable' )
-				)
-			) {
-				// Not all top plugins are translation-aware, lets just skip those..
-				unset( $items[ $slug ] );
-				continue;
-			}
+			if ( 'plugins' == $view ) {
+				// For plugins, we're ignoring the Readme projects as they're not immediately useful.
+				// The display will use the "Code Stable" if present, else "Code Development"
+				$code_project =
+					GP::$project->by_path( 'wp-' . $view . '/' . $slug . '/stable' ) ?:
+					GP::$project->by_path( 'wp-' . $view . '/' . $slug . '/dev' );
 
-			$project_ids[ $items[$slug]->project->id ] = $slug;
+				// No code project? This happens when the plugin isn't translatable. The readme projects still exist though.
+				if ( ! $code_project ) {
+					unset( $items[ $slug ] );
+					continue;
+				}
+
+				$project_ids[ $code_project->id ] = $slug;
+			} else {
+				$project_ids[ $items[$slug]->project->id ] = $slug;
+			}
 		}
 
 		$sql_project_ids = implode( ', ', array_map( 'intval', array_keys( $project_ids ) ) );
@@ -218,8 +221,20 @@ class Stats extends GP_Route {
 				AND locale = %s AND locale_slug = %s",
 			$locale, $locale_slug
 		) );
+
+		// Link Projects & Stats
 		foreach ( $stats as $row ) {
 			$items[ $project_ids[ $row->project_id ] ]->stats = $row;
+		}
+
+		// Final sanity check that we have data to display.
+		foreach ( $items as $slug => $details ) {
+			if (
+				! isset( $details->stats ) || // Didn't find any cached data for a project
+				! $details->stats->all // Project has no strings, not useful for this interface
+			) {
+				unset( $items[ $slug ] );
+			}
 		}
 
 		$this->tmpl( 'stats-plugin-themes-overview', compact( 'locale', 'locale_slug', 'view', 'gp_locale', 'items' ) );

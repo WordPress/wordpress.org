@@ -4,7 +4,7 @@ gp_enqueue_script( 'tablesorter' );
 
 $breadcrumb   = array();
 $breadcrumb[] = gp_link_get( '/stats', __( 'Locale Stats' ) );
-$breadcrumb[] = gp_link_get( '/locales/' . $locale . '/' . $locale_slug, $gp_locale->native_name );
+$breadcrumb[] = gp_link_get( '/locale/' . $locale . '/' . $locale_slug, $gp_locale->english_name );
 $breadcrumb[] = trim( ucwords( $view ), 's' ) . ' translation status overview';
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
