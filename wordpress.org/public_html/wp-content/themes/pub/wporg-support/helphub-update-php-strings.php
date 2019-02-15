@@ -15,7 +15,7 @@ use WordPressdotorg\API\Serve_Happy\MINIMUM_PHP;
  * @param int    $id    Post ID.
  * @return string Filtered post title.
  */
-function hh_filter_update_php_title( $title, $id ) {
+function wporg_support_filter_update_php_title( $title, $id ) {
 	if ( is_admin() ) {
 		return $title;
 	}
@@ -26,7 +26,7 @@ function hh_filter_update_php_title( $title, $id ) {
 
 	return __( 'Get a faster, more secure website: update your PHP today', 'wporg-forums' );
 }
-add_filter( 'the_title', 'hh_filter_update_php_title', 5, 2 );
+add_filter( 'the_title', 'wporg_support_filter_update_php_title', 5, 2 );
 
 /**
  * Injects the content for the Update PHP page if the Update PHP page template is selected.
@@ -34,16 +34,16 @@ add_filter( 'the_title', 'hh_filter_update_php_title', 5, 2 );
  * @param string $content Post content.
  * @return string Filtered post content.
  */
-function hh_filter_update_php_content( $content ) {
+function wporg_support_filter_update_php_content( $content ) {
 	if ( is_admin() ) {
 		return $content;
 	}
 
-	if ( ! is_page_template( 'page-update-php.php' ) ) {
+	if ( ! in_the_loop() || get_the_ID() !== get_queried_object_id() ) {
 		return $content;
 	}
 
-	if ( ! in_the_loop() || get_the_ID() !== get_queried_object_id() ) {
+	if ( ! is_page_template( 'page-update-php.php' ) ) {
 		return $content;
 	}
 
@@ -144,4 +144,4 @@ function hh_filter_update_php_content( $content ) {
 
 	return $content;
 }
-add_filter( 'the_content', 'hh_filter_update_php_content', 5 );
+add_filter( 'the_content', 'wporg_support_filter_update_php_content', 5 );

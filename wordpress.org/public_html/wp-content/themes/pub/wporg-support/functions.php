@@ -810,3 +810,7 @@ function bb_is_intl_forum() {
 	return get_locale() != 'en_US';
 }
 
+/**
+ * Include the Strings for the supporg/update-php page.
+ */
+include_once __DIR__ . '/helphub-update-php-strings.php';
