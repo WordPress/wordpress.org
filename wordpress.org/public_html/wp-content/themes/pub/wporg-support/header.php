@@ -21,7 +21,7 @@ $menu_items = array(
 global $wporg_global_header_options;
 if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
 	$wporg_global_header_options['in_wrapper'] = '';
-$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#content">' . esc_html( 'Skip to content', 'wporg-forums' ) . '</a>';
+$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#content">' . esc_html__( 'Skip to content', 'wporg-forums' ) . '</a>';
 wporg_get_global_header();
 ?>
 

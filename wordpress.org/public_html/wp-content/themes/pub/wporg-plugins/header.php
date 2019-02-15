@@ -21,7 +21,7 @@ $GLOBALS['pagetitle'] = wp_get_document_title();
 global $wporg_global_header_options;
 if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
 	$wporg_global_header_options['in_wrapper'] = '';
-$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#main">' . esc_html( 'Skip to content', 'wporg-plugins' ) . '</a>';
+$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#main">' . esc_html__( 'Skip to content', 'wporg-plugins' ) . '</a>';
 require WPORGPATH . 'header.php';
 ?>
 <div id="page" class="site">

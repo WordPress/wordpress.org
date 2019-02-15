@@ -3,7 +3,7 @@ $GLOBALS['pagetitle'] = wp_get_document_title();
 global $wporg_global_header_options;
 if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
 	$wporg_global_header_options['in_wrapper'] = '';
-$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#pagebody">' . esc_html( 'Skip to content', 'wporg-showcase' ) . '</a>';
+$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#pagebody">' . esc_html__( 'Skip to content', 'wporg-showcase' ) . '</a>';
 
 $prefix = is_ssl() ? 'https://' : 'http://s.';
 wp_enqueue_style( 'blog-wp4', $prefix.'wordpress.org/style/blog-wp4.css', array(), 4 );
