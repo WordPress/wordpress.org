@@ -14,7 +14,7 @@
 	<meta name="author" content="WordPress" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?7" />
+	<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?8" />
 	<script src="<?php echo get_template_directory_uri(); ?>/js/modernizr-1.6.min.js"></script>
 	<script src="https://use.typekit.com/lsw6yis.js"></script>
 	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
@@ -87,7 +87,7 @@ $facebook_pieces = array(
 				</nav>
 			</section><!-- #share -->
 			<div id="byline">
-				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( __( 'Brought to you by %s', 'browsehappy' ), 'WordPress' ); ?></a>
+				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( __( 'Brought to you by %s', 'browsehappy' ), '<strong>WordPress</strong>' ); ?></a>
 			</div><!-- #byline -->
 		</div>
 	</footer>

@@ -593,27 +593,16 @@ html[dir="rtl"] #share nav li {
 }
 
 #byline a {
-	width: 300px;
-	height: 20px;
+	color: #fff;
 	margin: 0 auto;
 	display: block;
-	background-image: url(imgs/browsehappy-sprite.png);
-	background-repeat: no-repeat;
-	background-position: 0 -135px;
-	text-indent: -9999px;
-	-moz-opacity: 0.6;
-	-khtml-opacity: 0.6;
-	opacity: 0.6;
-	-webkit-transition: all .5s;
-	-moz-transition: all .5s;
-	-o-transition: all .5s;
-	transition: all .5s;
+	font-size: large;
+	font-variant: all-small-caps;
+	text-align: center;
 }
 
-#byline a:hover {
-	-moz-opacity: 1;
-	-khtml-opacity: 1;
-	opacity: 1;
+#byline a strong {
+	font-variant: initial;
 }
 
 @media (max-width: 1168px) { #main .wrap { max-width: 960px; } }
