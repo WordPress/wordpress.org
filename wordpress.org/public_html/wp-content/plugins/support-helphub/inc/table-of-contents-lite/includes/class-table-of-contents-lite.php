@@ -222,7 +222,7 @@ class Table_Of_Contents_Lite {
 	 */
 	public function add_toc( $content ) {
 
-		if ( ! is_singular() ) {
+		if ( ! is_singular() || is_embed() ) {
 			return $content;
 		}
 
