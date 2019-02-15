@@ -467,7 +467,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 
 	// Checks to see if the error-throwing expression is prepended with the @ control operator.
 	// See https://secure.php.net/manual/en/function.set-error-handler.php
-	if ( 0 === error_reporting() ) {
+	if ( 0 === (int) error_reporting() ) {
 		return false;
 	}
 
