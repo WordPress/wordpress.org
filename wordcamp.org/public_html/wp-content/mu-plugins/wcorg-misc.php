@@ -461,8 +461,13 @@ function init_error_handling() {
  * Error handler to send errors to slack. Always return false.
  */
 function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
-
 	if ( ! init_error_handling() ) {
+		return false;
+	}
+
+	// Checks to see if the error-throwing expression is prepended with the @ control operator.
+	// See https://secure.php.net/manual/en/function.set-error-handler.php
+	if ( 0 === error_reporting() ) {
 		return false;
 	}
 
@@ -485,11 +490,6 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 	$error_ignorelist = [
 		// See https://core.trac.wordpress.org/ticket/29204
 		ABSPATH . 'wp-includes/SimplePie/Registry.php:215' => 'Non-static method WP_Feed_Cache::create() should not be called statically',
-
-		// It seems like WPSC shouldn't assume that these files/folders always exist, and should check first instead.
-		WP_CONTENT_DIR . '/plugins/wp-super-cache/wp-cache-phase2.php:2359' => 'failed to open dir: No such file or directory',
-		WP_CONTENT_DIR . '/plugins/wp-super-cache/wp-cache-phase2.php:2901' => 'failed to open dir: No such file or directory',
-		WP_CONTENT_DIR . '/plugins/wp-super-cache/wp-cache-phase2.php:3033' => 'No such file or directory',
 	];
 
 	if ( isset( $error_ignorelist[ "$file:$line" ] ) && false !== strpos( $err_msg, $error_ignorelist[ "$file:$line" ] ) ) {
