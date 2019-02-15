@@ -1,5 +1,9 @@
 <?php
 $GLOBALS['pagetitle'] = wp_get_document_title();
+global $wporg_global_header_options;
+if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
+	$wporg_global_header_options['in_wrapper'] = '';
+$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#content">' . esc_html__( 'Skip to content', 'wporg' ) . '</a>';
 require WPORGPATH . 'header.php';
 ?>
 <header id="masthead" class="site-header" role="banner">
@@ -13,8 +17,6 @@ require WPORGPATH . 'header.php';
 	</div>
 
 	<nav id="site-navigation" class="navigation-main clear" role="navigation">
-		<div class="screen-reader-text skip-link"><a href="#content" title="<?php _e( 'Skip to content', 'wporg' ); ?>"><?php _e( 'Skip to content', 'wporg' ); ?></a></div>
-
 		<?php wp_nav_menu( array( 'theme_location' => 'primary', 'fallback_cb' => false, 'depth' => 1 ) ); ?>
 	</nav><!-- .navigation-main -->
 </header><!-- .site-header -->
