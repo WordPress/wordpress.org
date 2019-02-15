@@ -14,11 +14,30 @@ import ImageAlignmentControl from '../shared/image-alignment';
 
 const data = window.WordCampBlocks.speakers || {};
 
+const DEFAULT_SCHEMA = {
+	grid_columns: {
+		default : 2,
+		minimum : 2,
+		maximum : 4,
+	},
+	avatar_size: {
+		default : 150,
+		minimum : 25,
+		maximum : 600,
+	},
+};
+
+const DEFAULT_OPTIONS = {
+	align   : {},
+	content : {},
+	sort    : {},
+};
+
 class SpeakerInspectorControls extends Component {
 	render() {
 		const { attributes, setAttributes } = this.props;
-		const { layout, grid_columns, show_avatars, avatar_size, avatar_align, content, speaker_link, show_session, sort } = attributes;
-		const { schema, options } = data;
+		const { layout, grid_columns, show_avatars, avatar_size, avatar_align, content, excerpt_more, show_session, sort } = attributes;
+		const { schema = DEFAULT_SCHEMA, options = DEFAULT_OPTIONS } = data;
 
 		return (
 			<InspectorControls>
@@ -28,9 +47,9 @@ class SpeakerInspectorControls extends Component {
 							<RangeControl
 								label={ __( 'Grid Columns', 'wordcamporg' ) }
 								value={ Number( grid_columns ) }
-								min={ Number( schema[ 'grid_columns' ].minimum ) }
-								max={ Number( schema[ 'grid_columns' ].maximum ) }
-								initialPosition={ Number( schema[ 'grid_columns' ].default ) }
+								min={ Number( schema.grid_columns.minimum ) }
+								max={ Number( schema.grid_columns.maximum ) }
+								initialPosition={ Number( schema.grid_columns.default ) }
 								onChange={ ( value ) => setAttributes( { grid_columns: value } ) }
 							/>
 						</PanelRow>
@@ -51,10 +70,12 @@ class SpeakerInspectorControls extends Component {
 								<AvatarSizeControl
 									label={ __( 'Size', 'wordcamporg' ) }
 									value={ Number( avatar_size ) }
-									min={ Number( schema[ 'avatar_size' ].minimum ) }
-									max={ Number( schema[ 'avatar_size' ].maximum ) }
-									initialPosition={ Number( schema[ 'avatar_size' ].default ) }
+									initialPosition={ Number( schema.avatar_size.default ) }
 									onChange={ ( value ) => setAttributes( { avatar_size: value } ) }
+									rangeProps={ {
+										min : Number( schema.avatar_size.minimum ),
+										max : Number( schema.avatar_size.maximum ),
+									} }
 								/>
 							</PanelRow>
 							<PanelRow>
@@ -62,6 +83,7 @@ class SpeakerInspectorControls extends Component {
 									label={ __( 'Alignment', 'wordcamporg' ) }
 									value={ avatar_align }
 									onChange={ ( value ) => setAttributes( { avatar_align: value } ) }
+									alignOptions={ options.align }
 								/>
 							</PanelRow>
 						</Fragment>
@@ -77,14 +99,16 @@ class SpeakerInspectorControls extends Component {
 							onChange={ ( value ) => setAttributes( { content: value } ) }
 						/>
 					</PanelRow>
-					<PanelRow>
-						<ToggleControl
-							label={ __( 'Speaker Link', 'wordcamporg' ) }
-							help={ __( "Link to a speaker's biography page", 'wordcamporg' ) }
-							checked={ speaker_link }
-							onChange={ ( value ) => setAttributes( { speaker_link: value } ) }
-						/>
-					</PanelRow>
+					{ 'excerpt' === content &&
+						<PanelRow>
+							<ToggleControl
+								label={ __( 'Read More Link', 'wordcamporg' ) }
+								help={ __( 'Show a link at the end of the excerpt (some themes already include this)', 'wordcamporg' ) }
+								checked={ excerpt_more }
+								onChange={ ( value ) => setAttributes( { excerpt_more: value } ) }
+							/>
+						</PanelRow>
+					}
 					<PanelRow>
 						<ToggleControl
 							label={ __( 'Session Information', 'wordcamporg' ) }

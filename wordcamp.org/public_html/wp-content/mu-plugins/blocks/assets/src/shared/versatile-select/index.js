@@ -8,6 +8,7 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 const { BaseControl, Button } = wp.components;
+const { withInstanceId } = wp.compose;
 const { Component } = wp.element;
 const { __ } = wp.i18n;
 
@@ -23,14 +24,12 @@ class VersatileSelect extends Component {
 		this.state = {
 			selectedOptions: null,
 		};
-
-		this.render = this.render.bind( this );
 	}
 
 	render() {
-		const { className, label, help, instanceId, onChange, submitLabel } = this.props;
-		const id = `wordcamp-block-versatile-select-control-${ instanceId }`;
+		const { instanceId, className, label, help, onChange, selectProps, submitLabel } = this.props;
 		const value = this.state.selectedOptions || this.props.value;
+		const id = `wordcamp-block-versatile-select-control-${ instanceId }`;
 
 		return (
 			<BaseControl
@@ -39,24 +38,22 @@ class VersatileSelect extends Component {
 				label={ label }
 				help={ help }
 			>
-				<div className={ 'wordcamp-components-versatile-select-inner' }>
+				<div className="wordcamp-components-versatile-select-inner">
 					<Select
-						isMulti={ true }
-						{ ...this.props }
+						id={ id }
+						className="wordcamp-components-versatile-select-select"
 						value={ value }
-						className={ 'wordcamp-components-versatile-select-select' }
+						aria-label={ label }
 						onChange={ ( selectedOptions ) => {
-							this.setState( { selectedOptions: selectedOptions } );
+							this.setState( { selectedOptions } );
 						} }
+						{ ...selectProps }
 					/>
 					<Button
-						className={ 'wordcamp-components-versatile-select-button' }
+						className="wordcamp-components-versatile-select-button"
 						isLarge
 						isDefault
-						onClick={ () => {
-							const { selectedOptions } = this.state;
-							onChange( selectedOptions );
-						} }
+						onClick={ () => onChange( this.state.selectedOptions ) }
 					>
 						{ submitLabel || __( 'Select', 'wordcamporg' ) }
 					</Button>
@@ -66,4 +63,4 @@ class VersatileSelect extends Component {
 	}
 }
 
-export default VersatileSelect;
+export default withInstanceId( VersatileSelect );

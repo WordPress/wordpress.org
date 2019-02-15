@@ -1,14 +1,13 @@
 const path = require( 'path' );
 const webpack = require( 'webpack' );
-const { exec } = require( 'child_process' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const externals = {
-	react: 'React',
-	'react-dom': 'ReactDOM',
-	lodash: 'lodash',
+	react       : 'React',
+	'react-dom' : 'ReactDOM',
+	lodash      : 'lodash',
 };
 
 const webpackConfig = {
@@ -22,21 +21,21 @@ const webpackConfig = {
 		blocks: path.resolve( __dirname, 'assets/src/blocks.js' ),
 	},
 	output: {
-		filename: '[name].min.js',
-		path: path.resolve( __dirname, 'assets' ),
+		filename : '[name].min.js',
+		path     : path.resolve( __dirname, 'assets' ),
 	},
 	module: {
 		rules: [
 			{
-				test: /\.jsx?$/,
-				exclude: [
+				test    : /\.jsx?$/,
+				exclude : [
 					/node_modules/,
 				],
 				use: 'babel-loader',
 			},
 			{
-				test: /\.(sc|sa|c)ss$/,
-				exclude: [
+				test    : /\.(sc|sa|c)ss$/,
+				exclude : [
 					/node_modules/,
 				],
 				use: [
@@ -52,7 +51,7 @@ const webpackConfig = {
 			filename: '[name].min.css',
 		} ),
 		new webpack.DefinePlugin( {
-			'process.env.NODE_ENV': JSON.stringify( NODE_ENV )
+			'process.env.NODE_ENV': JSON.stringify( NODE_ENV ),
 		} ),
 	],
 	externals,

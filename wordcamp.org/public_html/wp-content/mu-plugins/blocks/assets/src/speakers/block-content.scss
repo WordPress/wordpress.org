@@ -5,9 +5,19 @@
 }
 
 .wordcamp-speakers-block {
-	&,
-	.editor-styles-wrapper & {
+	/* The double-ampersand defeats an overzealous ul rule in Core's editor-blocks.css. */
+	/* https://css-tricks.com/the-sass-ampersand/#article-header-id-11 */
+	&#{&},
+	.block-editor &#{&} {
 		list-style: none;
+		margin: 0 0 1em 0;
+	}
+
+	&.layout-list > li {
+		margin-bottom: 1em;
+		&:last-child {
+			margin-bottom: 0;
+		}
 	}
 
 	@media ( min-width: 400px ) {
@@ -42,19 +52,15 @@
 }
 
 .wordcamp-speaker-session-list {
-	&,
-	.editor-styles-wrapper & {
+	/* See note above about the double-ampersand. */
+	ul#{&},
+	.block-editor ul#{&} {
 		list-style: none;
+		margin: 0
 	}
 }
 
-.wordcamp-speaker-avatar {
-	&.align-left,
-	&.align-center,
-	&.align-right {
-		display: block;
-	}
-
+.wordcamp-speaker-avatar-container {
 	&.align-left {
 		float: left;
 		margin-right: 1em;
@@ -63,6 +69,7 @@
 	&.align-center {
 		margin-left: auto;
 		margin-right: auto;
+		text-align: center;
 	}
 
 	&.align-right {

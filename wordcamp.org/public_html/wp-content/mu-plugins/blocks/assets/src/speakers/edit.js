@@ -6,8 +6,10 @@ import { isUndefined, pickBy, split } from 'lodash';
 /**
  * WordPress dependencies
  */
+const apiFetch = wp.apiFetch;
 const { withSelect } = wp.data;
 const { Component, Fragment } = wp.element;
+const { addQueryArgs } = wp.url;
 
 /**
  * Internal dependencies
@@ -19,13 +21,57 @@ import './edit.scss';
 
 const MAX_POSTS = 100;
 
+const ALL_POSTS_QUERY = {
+	orderby  : 'title',
+	order    : 'asc',
+	per_page : MAX_POSTS,
+	_embed   : true,
+};
+
+const ALL_TERMS_QUERY = {
+	orderby  : 'name',
+	order    : 'asc',
+	per_page : MAX_POSTS,
+};
+
 class SpeakersEdit extends Component {
+	constructor( props ) {
+		super( props );
+
+		this.state = {
+			allSpeakerPosts : null,
+			allSpeakerTerms : null,
+		};
+	}
+
+	componentWillMount() {
+		this.isStillMounted = true;
+
+		const allSpeakerPosts = apiFetch( {
+			path: addQueryArgs( `/wp/v2/speakers`, ALL_POSTS_QUERY ),
+		} );
+		const allSpeakerTerms = apiFetch( {
+			path: addQueryArgs( `/wp/v2/speaker_group`, ALL_TERMS_QUERY ),
+		} );
+
+		if ( this.isStillMounted ) {
+			this.setState( {
+				allSpeakerPosts : allSpeakerPosts, // Promise
+				allSpeakerTerms : allSpeakerTerms, // Promise
+			} );
+		}
+	}
+
+	componentWillUnmount() {
+		this.isStillMounted = false;
+	}
+
 	render() {
 		const { mode } = this.props.attributes;
 
 		return (
 			<Fragment>
-				<SpeakersBlockControls { ...this.props } />
+				<SpeakersBlockControls { ...this.props } { ...this.state } />
 				{ mode &&
 					<Fragment>
 						<SpeakersInspectorControls { ...this.props } />
@@ -55,7 +101,7 @@ const speakersSelect = ( select, props ) => {
 	}
 
 	if ( 'specific_terms' === mode && Array.isArray( term_ids ) ) {
-		args[ 'speaker_group' ] = term_ids;
+		args.speaker_group = term_ids;
 	}
 
 	const speakersQuery = pickBy( args, ( value ) => ! isUndefined( value ) );

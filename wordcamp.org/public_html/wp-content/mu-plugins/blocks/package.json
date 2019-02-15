@@ -10,7 +10,8 @@
 	},
 	"dependencies": {
 		"classnames": "2.2.6",
-		"react-select": "2.1.1"
+		"dompurify": "1.0.9",
+		"react-select": "2.3.0"
 	},
 	"devDependencies": {
 		"@babel/core": "7.1.2",
@@ -20,16 +21,14 @@
 		"@wordpress/browserslist-config": "2.2.2",
 		"@wordpress/compose": "2.1.0",
 		"@wordpress/element": "2.1.4",
+		"@wordpress/eslint-plugin": "1.0.1",
 		"@wordpress/i18n": "3.0.1",
+		"@wordpress/npm-package-json-lint-config": "1.1.6",
+		"@wordpress/scripts": "2.5.0",
 		"acorn": "6.0.4",
-		"babel-eslint": "10.0.1",
 		"babel-loader": "8.0.4",
 		"cross-env": "5.2.0",
 		"css-loader": "1.0.1",
-		"eslint": "5.7.0",
-		"eslint-config-wordpress": "2.0.0",
-		"eslint-plugin-jsx-a11y": "6.1.2",
-		"eslint-plugin-react": "7.11.1",
 		"lodash": "4.17.11",
 		"mini-css-extract-plugin": "0.4.4",
 		"node-sass": "4.9.4",
@@ -41,12 +40,11 @@
 		"extends @wordpress/browserslist-config"
 	],
 	"eslintIgnore": [
-		"*.min.js",
-		"package*.json"
+		"*.min.js"
 	],
 	"scripts": {
 		"start": "cross-env BABEL_ENV=development NODE_ENV=development webpack --watch",
 		"build": "cross-env BABEL_ENV=development NODE_ENV=development webpack",
-		"lint": "eslint $(git diff master --name-only) $(git diff --cached --name-only) --ignore-pattern '!.eslintrc.js' --quiet"
+		"lint:js": "wp-scripts lint-js ."
 	}
 }

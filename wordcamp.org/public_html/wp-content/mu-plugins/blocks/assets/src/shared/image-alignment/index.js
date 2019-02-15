@@ -8,17 +8,14 @@ import classnames from 'classnames';
  */
 const { BaseControl, Toolbar } = wp.components;
 
-const data = window.WordCampBlocks.speakers || {};
-
 function ImageAlignmentControl( {
 	className,
 	label,
 	help,
 	value,
 	onChange,
+	alignOptions,
 } ) {
-	const { options } = data;
-
 	return (
 		<BaseControl
 			className={ classnames( 'wordcamp-components-image-alignment', className ) }
@@ -26,16 +23,18 @@ function ImageAlignmentControl( {
 			help={ help }
 		>
 			<Toolbar
-				controls={ options.align.map( ( alignment ) => {
+				controls={ alignOptions.map( ( alignment ) => {
 					const isActive = value === alignment.value;
 					const iconSlug = `align-${ alignment.value }`;
 
 					return {
-						title : alignment.label,
-						icon : iconSlug,
+						title    : alignment.label,
+						icon     : iconSlug,
 						isActive : isActive,
-						onClick : () => { onChange( alignment.value ); }
-					}
+						onClick  : () => {
+							onChange( alignment.value );
+						},
+					};
 				} ) }
 			/>
 		</BaseControl>

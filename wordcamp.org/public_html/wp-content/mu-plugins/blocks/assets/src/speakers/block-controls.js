@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { find } from 'lodash';
-
-/**
  * WordPress dependencies
  */
 const { Button, Placeholder, Spinner } = wp.components;
@@ -22,7 +17,7 @@ class SpeakersBlockControls extends Component {
 	render() {
 		const { attributes, setAttributes, speakerPosts } = this.props;
 		const { mode } = attributes;
-		const { options } = data;
+		const { mode: modeOptions = {} } = data.options;
 
 		const hasPosts = Array.isArray( speakerPosts ) && speakerPosts.length;
 
@@ -40,18 +35,21 @@ class SpeakersBlockControls extends Component {
 			);
 		}
 
+		let output;
+
 		switch ( mode ) {
 			case 'all' :
-				return (
+				output = (
 					<SpeakersBlockContent { ...this.props } />
 				);
+				break;
 
 			case 'specific_posts' :
-				const postsLabel = find( options.mode, ( modeOption ) => {
+				const postsLabel = modeOptions.find( ( modeOption ) => {
 					return 'specific_posts' === modeOption.value;
 				} ).label;
 
-				return (
+				output = (
 					<Fragment>
 						<SpeakersBlockContent { ...this.props } />
 						<Placeholder
@@ -62,13 +60,14 @@ class SpeakersBlockControls extends Component {
 						</Placeholder>
 					</Fragment>
 				);
+				break;
 
 			case 'specific_terms' :
-				const termsLabel = find( options.mode, ( modeOption ) => {
+				const termsLabel = modeOptions.find( ( modeOption ) => {
 					return 'specific_terms' === modeOption.value;
 				} ).label;
 
-				return (
+				output = (
 					<Fragment>
 						<SpeakersBlockContent { ...this.props } />
 						<Placeholder
@@ -79,35 +78,40 @@ class SpeakersBlockControls extends Component {
 						</Placeholder>
 					</Fragment>
 				);
+				break;
+
+			default :
+				output = (
+					<Placeholder
+						icon="megaphone"
+						label={ __( 'Speakers', 'wordcamporg' ) }
+					>
+						<div className="wordcamp-block-speakers-mode-option">
+							<Button
+								isDefault
+								isLarge
+								onClick={ () => {
+									setAttributes( { mode: 'all' } );
+								} }
+							>
+								{ modeOptions.find( ( modeOption ) => {
+									return 'all' === modeOption.value;
+								} ).label }
+							</Button>
+						</div>
+
+						<div className="wordcamp-block-speakers-mode-option">
+							<SpeakersSelect
+								label={ __( 'Choose specific speakers or groups', 'wordcamporg' ) }
+								{ ...this.props }
+							/>
+						</div>
+					</Placeholder>
+				);
+				break;
 		}
 
-		return (
-			<Placeholder
-				icon={ 'megaphone' }
-				label={ __( 'Speakers', 'wordcamporg' ) }
-			>
-				<div className={ 'wordcamp-block-speakers-mode-option' }>
-					<Button
-						isDefault
-						isLarge
-						onClick={ () => {
-							setAttributes( { mode: 'all' } );
-						} }
-					>
-						{ find( options.mode, ( modeOption ) => {
-							return 'all' === modeOption.value;
-						} ).label }
-					</Button>
-				</div>
-
-				<div className={ 'wordcamp-block-speakers-mode-option' }>
-					<SpeakersSelect
-						label={ __( 'Choose specific speakers or groups', 'wordcamporg' ) }
-						{ ...this.props }
-					/>
-				</div>
-			</Placeholder>
-		);
+		return output;
 	}
 }
 
