@@ -23,6 +23,9 @@ class Hooks {
 		// Output rel="canonical" meta tag. Runs before WP's rel_canonical to unhook that if needed.
 		add_action( 'wp_head', array( $this, 'rel_canonical' ), 9 );
 
+		// Output rel="next", rel="prev" meta tags.
+		add_action( 'wp_head', array( $this, 'rel_next_prev' ), 9 );
+
 		// Link to create new topics atop topic list.
 		add_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
 
@@ -298,10 +301,13 @@ class Hooks {
 	}
 
 	/**
-	 * Outputs <link rel="canonical"> tags for various pages.
+	 * Returns the canonical URL for various bbPress pages.
+	 *
+	 * @return string The canonical URL.
 	 */
-	public function rel_canonical() {
-		$canonical_url = false;
+	public function get_canonical_url() {
+		$canonical_url = '';
+
 		if ( bbp_is_topic_tag() ) {
 			$canonical_url = bbp_get_topic_tag_link();
 		} elseif ( bbp_is_single_view() ) {
@@ -309,14 +315,25 @@ class Hooks {
 		} elseif ( bbp_is_forum_archive() ) {
 			$canonical_url = get_post_type_archive_link( 'forum' );
 		} elseif ( bbp_is_single_topic() ) {
-			remove_action( 'wp_head', 'rel_canonical' ); // Doesn't handle pagination.
 			$canonical_url = bbp_get_topic_permalink();
 		} elseif ( bbp_is_single_forum() ) {
-			remove_action( 'wp_head', 'rel_canonical' ); // Doesn't handle pagination.
 			$canonical_url = bbp_get_forum_permalink();
 		} elseif ( bbpress()->displayed_user && bbpress()->displayed_user->exists() ) {
 			// This covers all user pages rather than using 6 different bbp_is_*() calls.
 			$canonical_url = 'https://profiles.wordpress.org/' . bbpress()->displayed_user->user_nicename . '/';
+		}
+
+		return $canonical_url;
+	}
+
+	/**
+	 * Outputs <link rel="canonical"> tags for various bbPress pages.
+	 */
+	public function rel_canonical() {
+		$canonical_url = $this->get_canonical_url();
+
+		if ( bbp_is_single_topic() || bbp_is_single_forum() ) {
+			remove_action( 'wp_head', 'rel_canonical' ); // Doesn't handle pagination.
 		}
 
 		// Make sure canonical has pagination if needed.
@@ -327,6 +344,47 @@ class Hooks {
 
 		if ( $canonical_url ) {
 			echo '<link rel="canonical" href="' . esc_url( $canonical_url ) . '" />' . "\n";
+		}
+	}
+
+	/**
+	 * Outputs rel="next", rel="prev" for paginated archives.
+	 */
+	public function rel_next_prev() {
+		global $wp_query;
+
+		$canonical_url = $this->get_canonical_url();
+		$max_pages     = $wp_query->max_num_pages;
+
+		if ( bbp_is_single_view() ) {
+			bbp_view_query();  // Populate bbpress()->topic_query.
+			$max_pages = bbpress()->topic_query->max_num_pages;
+		} elseif ( bbp_is_single_topic() ) {
+			bbp_has_replies(); // Populate bbpress()->reply_query.
+			$max_pages = bbpress()->reply_query->max_num_pages;
+		} elseif ( bbp_is_single_forum() ) {
+			$topic_count = get_post_meta( get_queried_object_id(), '_bbp_topic_count', true );
+			if ( $topic_count ) {
+				$max_pages = $topic_count / bbp_get_topics_per_page();
+			}
+		}
+
+		if ( ! $canonical_url || ! $max_pages ) {
+			return;
+		}
+
+		$page      = max( 1, get_query_var( 'paged', 0 ) );
+		$next_page = min( $page + 1, $max_pages );
+		$prev_page = max( $page - 1, 1 );
+
+		if ( $page < $max_pages ) {
+			$next_page_url = $canonical_url . 'page/' . absint( $next_page ) . '/';
+			echo '<link rel="next" href="' . esc_url( $next_page_url ) . '" />' . "\n";
+		}
+
+		if ( $page > 1 ) {
+			$prev_page_url = $canonical_url . ( $prev_page > 1 ? 'page/' . absint( $prev_page ) . '/' : '' );
+			echo '<link rel="prev" href="' . esc_url( $prev_page_url ) . '" />' . "\n";
 		}
 	}
 
