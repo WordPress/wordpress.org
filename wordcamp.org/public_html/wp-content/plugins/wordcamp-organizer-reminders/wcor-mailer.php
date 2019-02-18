@@ -501,7 +501,10 @@ class WCOR_Mailer {
 		) );
 
 		foreach ( $wordcamps as $wordcamp ) {
-			$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
+			$sent_email_ids = get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
+			if ( ! is_array( $sent_email_ids ) ) {
+				$sent_email_ids = array();
+			}
 
 			foreach ( $reminder_emails as $email ) {
 				$recipient = $this->get_recipients( $wordcamp->ID, $email->ID );
