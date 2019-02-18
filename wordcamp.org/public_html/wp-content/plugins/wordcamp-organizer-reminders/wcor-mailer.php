@@ -161,7 +161,10 @@ class WCOR_Mailer {
 		global $wordcamp_admin;
 
 		// Make sure postmeta is synced with $_POST when this is called in the middle of updating a post
-		if ( did_action( 'transition_post_status' ) || did_action( 'save_post' ) ) {
+		$saving_post     = ( did_action( 'transition_post_status' ) || did_action( 'save_post' ) ) && isset( $_POST['post_type'] );
+		$saving_wordcamp = $saving_post && defined( 'WCPT_POST_TYPE_ID' ) && $_POST['post_type'] === WCPT_POST_TYPE_ID;
+
+		if ( $saving_wordcamp ) {
 			$wordcamp_admin->metabox_save( $wordcamp->ID, $wordcamp, false );
 		}
 
@@ -535,6 +538,7 @@ class WCOR_Mailer {
 	protected function timed_email_is_ready_to_send( $wordcamp, $email, $sent_email_ids ) {
 		$ready = false;
 
+		// Don't retroactively send new emails to old camps, since they're already closed.
 		if ( strtotime( $wordcamp->post_date ) < strtotime( $email->post_date ) ) {
 			return $ready;
 		}
