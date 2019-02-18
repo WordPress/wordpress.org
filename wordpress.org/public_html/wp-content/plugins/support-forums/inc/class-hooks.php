@@ -303,10 +303,11 @@ class Hooks {
 	/**
 	 * Returns the canonical URL for various bbPress pages.
 	 *
-	 * @return string The canonical URL.
+	 * @return array The canonical URL.
 	 */
 	public function get_canonical_url() {
-		$canonical_url = '';
+		$canonical_url  = false;
+		$supports_paged = true;
 
 		if ( bbp_is_topic_tag() ) {
 			$canonical_url = bbp_get_topic_tag_link();
@@ -320,17 +321,18 @@ class Hooks {
 			$canonical_url = bbp_get_forum_permalink();
 		} elseif ( bbpress()->displayed_user && bbpress()->displayed_user->exists() ) {
 			// This covers all user pages rather than using 6 different bbp_is_*() calls.
-			$canonical_url = 'https://profiles.wordpress.org/' . bbpress()->displayed_user->user_nicename . '/';
+			$canonical_url  = 'https://profiles.wordpress.org/' . bbpress()->displayed_user->user_nicename . '/';
+			$supports_paged = false;
 		}
 
-		return $canonical_url;
+		return [ $canonical_url, $supports_paged ];
 	}
 
 	/**
 	 * Outputs <link rel="canonical"> tags for various bbPress pages.
 	 */
 	public function rel_canonical() {
-		$canonical_url = $this->get_canonical_url();
+		list( $canonical_url, $canonical_supports_paged ) = $this->get_canonical_url();
 
 		if ( bbp_is_single_topic() || bbp_is_single_forum() ) {
 			remove_action( 'wp_head', 'rel_canonical' ); // Doesn't handle pagination.
@@ -338,7 +340,7 @@ class Hooks {
 
 		// Make sure canonical has pagination if needed.
 		$page = get_query_var( 'paged', 0 );
-		if ( $canonical_url && $page >= 2 ) {
+		if ( $canonical_url && $canonical_supports_paged && $page >= 2 ) {
 			$canonical_url .= 'page/' . absint( $page ) . '/';
 		}
 
@@ -353,8 +355,9 @@ class Hooks {
 	public function rel_next_prev() {
 		global $wp_query;
 
-		$canonical_url = $this->get_canonical_url();
-		$max_pages     = $wp_query->max_num_pages;
+		list( $canonical_url ) = $this->get_canonical_url();
+
+		$max_pages = $wp_query->max_num_pages;
 
 		if ( bbp_is_single_view() ) {
 			bbp_view_query();  // Populate bbpress()->topic_query.
