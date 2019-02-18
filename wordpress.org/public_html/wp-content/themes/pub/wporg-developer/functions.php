@@ -131,7 +131,6 @@ if ( ! isset( $content_width ) ) {
 
 add_action( 'init', __NAMESPACE__ . '\\init' );
 add_action( 'widgets_init', __NAMESPACE__ . '\\widgets_init' );
-add_action( 'wp_default_styles', __NAMESPACE__ . '\\remove_dashicons_styles', 11 );
 
 function init() {
 
@@ -155,20 +154,6 @@ function init() {
 	add_filter( 'document_title_separator', __NAMESPACE__ . '\\theme_title_separator', 10, 2 );
 
 	add_filter( 'syntaxhighlighter_htmlresult', __NAMESPACE__ . '\\syntaxhighlighter_htmlresult' );
-}
-
-/**
- * Makes 'dashicons' a noop script on the frontend to prevent getting enqueued.
- *
- * The global W.org header already includes the dashicons stylesheet.
- *
- * @param WP_Scripts $scripts WP_Scripts object.
- */
-function remove_dashicons_styles( &$scripts ) {
-	if ( ! is_admin() ) {
-		$scripts->remove( 'dashicons' );
-		$scripts->add( 'dashicons', '' );
-	}
 }
 
 /**
