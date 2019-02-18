@@ -109,16 +109,16 @@ do_action( 'bbp_template_before_user_details' ); ?>
 						<a href="<?php bbp_user_profile_edit_url(); ?>" title="<?php
 							/* translators: %s: user's display name */
 							printf( esc_attr__( "Edit %s's Profile", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
-						?>"><?php esc_html_e( 'Edit', 'wporg-forums' ); ?></a>
+						?>"><?php esc_html_e( 'Edit Forum Profile', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
 
 				<li>
 					<span class="wporg-profile-edit-link">
-					<a href="https://profiles.wordpress.org/<?php echo bbp_get_displayed_user_field( 'user_nicename' ); ?>" title="<?php
-                            /* translators: %s: user's display name */
-                            printf( esc_attr__( "Edit %s's wordpress.org Profile", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
-                        ?>"><?php esc_html_e( 'Edit Profile', 'wporg-forums' ); ?></a>
+					<a href="https://profiles.wordpress.org/<?php echo bbp_get_displayed_user_field( 'user_nicename' ); ?>/profile/edit/" title="<?php
+							/* translators: %s: user's display name */
+							printf( esc_attr__( "Edit %s's WordPress.org Profile", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+						?>"><?php esc_html_e( 'Edit WP.org Profile', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
 
