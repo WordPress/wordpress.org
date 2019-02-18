@@ -1,5 +1,7 @@
 <?php
 
+use function WordCamp\Logger\log;
+
 /**
  * Sends e-mails at time-based intervals and on triggers
  * @package WordCampOrganizerReminders
@@ -111,6 +113,7 @@ class WCOR_Mailer {
 	 */
 	protected function mail( $to, $subject, $body, $headers = array(), $email, $wordcamp ) {
 		if ( ! $this->validate_email_addresses( $to ) ) {
+			log( 'Message not sent because of invalid recipients.', compact( 'email', 'wordcamp' ) );
 			return false;
 		}
 
@@ -129,11 +132,16 @@ class WCOR_Mailer {
 		if ( is_array( $to ) && $this->send_individual_emails( $email->ID ) ) {
 			foreach ( $to as $individual_recipient ) {
 				if ( ! wp_mail( $individual_recipient, $subject, $body, $headers ) ) {
+					log( 'Message failed to send', compact( 'individual_recipient', 'email', 'wordcamp' ) );
 					$status = false;
 				}
 			}
 		} else {
 			$status = wp_mail( $to, $subject, $body, $headers );
+
+			if ( ! $status ) {
+				log( 'Message failed to send', compact( 'email', 'wordcamp' ) );
+			}
 		}
 
 		return $status;
