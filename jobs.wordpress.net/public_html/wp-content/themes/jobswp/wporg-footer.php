@@ -42,10 +42,6 @@
 			<li>
 				<iframe src="//www.facebook.com/plugins/like.php?app_id=121415197926116&amp;href=http%3A%2F%2Fwww.facebook.com%2Fwordpress&amp;send=false&amp;layout=button_count&amp;width=135&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font=lucida+grande&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:135px; height:21px;" allowTransparency="true"></iframe>
 			</li>
-			<li>
-				<script src="https://apis.google.com/js/platform.js" async defer></script>
-				<div class="g-plusone" data-size="medium" data-href="https://plus.google.com/+WordPress"></div>
-			</li>
 		</ul>
 	</div>
 
