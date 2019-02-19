@@ -361,6 +361,7 @@ class Hooks {
 
 		if ( bbp_is_single_view() ) {
 			bbp_view_query();  // Populate bbpress()->topic_query.
+			bbpress()->topic_query->is_tax = false;
 			$max_pages = bbpress()->topic_query->max_num_pages;
 		} elseif ( bbp_is_single_topic() ) {
 			bbp_has_replies(); // Populate bbpress()->reply_query.
