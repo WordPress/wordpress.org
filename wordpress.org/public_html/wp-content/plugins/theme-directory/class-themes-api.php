@@ -275,6 +275,7 @@ class Themes_API {
 
 			unset( $tags[ __( 'Features' ) ]['blavatar'] );
 			$tags[ __( 'Features' ) ]['footer-widgets'] = __( 'Footer Widgets' );
+			$tags[ __( 'Features' ) ]['custom-logo']    = __( 'Custom Logo' );
 			asort( $tags[ __( 'Features' ) ] ); // To move footer-widgets to the right place.
 
 			$tags[ __( 'Subject' ) ] = array(
@@ -288,6 +289,13 @@ class Themes_API {
 				'photography'    => __( 'Photography' ),
 				'portfolio'      => __( 'Portfolio' ),
 			);
+		}
+
+		// Pending https://core.trac.wordpress.org/ticket/46272
+		if ( ! isset( $wp_version ) || version_compare( $wp_version, '5.2-alpha', '>=' ) ) {
+			$tags[ __( 'Layout' ) ]['wide-blocks']    = __( 'Wide Blocks' );
+			$tags[ __( 'Features' ) ]['block-styles'] = __( 'Block Editor Styles' );
+			asort( $tags[ __( 'Features' ) ] ); // To move block-styles to the right place.
 		}
 
 		// Only return tag slugs, to stay compatible with bbpress-version of Themes API.
@@ -428,7 +436,11 @@ class Themes_API {
 			$detaults['parent'] = true;
 		}
 
-		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
+		if ( isset( $this->request->fields ) ) {
+			$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
+		} else {
+			$this->fields = array_merge( $this->fields, $defaults );
+		}
 
 		// If there is a cached result, return that.
 		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) . serialize( $this->fields ) ) );
