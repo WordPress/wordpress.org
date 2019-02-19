@@ -117,7 +117,7 @@ class Author_Card {
 		<?php if ( ! empty( $author->user_url ) ) : ?>
 			<p class="profile-url">
 				<?php _e( 'Author URL:', 'wporg-plugins' ); ?>
-				<a href="http://href.li?<?php echo esc_url( $author->user_url ); ?>"><?php echo esc_html( $author->user_url ); ?></a>
+				<a href="<?php echo esc_url( $author->user_url ); ?>"><?php echo esc_html( $author->user_url ); ?></a>
 			</p>
 		<?php endif; ?>
 
