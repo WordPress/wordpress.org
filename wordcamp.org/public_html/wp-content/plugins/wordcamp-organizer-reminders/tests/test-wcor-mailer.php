@@ -215,4 +215,25 @@ class Test_WCOR_Mailer extends WP_UnitTestCase {
 			),
 		);
 	}
+
+	/**
+	 * Test that manual reminders are sent.
+	 *
+	 * @covers WCOR_Mailer::send_manual_email
+	 */
+	public function test_manual_message_sent() {
+		/** @var WCOR_Mailer $WCOR_Mailer */
+		global $WCOR_Mailer;
+
+		$message  = get_post( self::$triggered_reminder_post_id );
+		$wordcamp = get_post( self::$wordcamp_dayton_post_id );
+		$result   = $WCOR_Mailer->send_manual_email( $message, $wordcamp );
+
+		$this->assert_mail_succeeded(
+			'dayton@wordcamp.org',
+			'WordCamp Dayton has been added to the final schedule',
+			"Huzzah! A new WordCamp is coming soon to Dayton, Ohio, USA! The lead organizer is janedoe, and the venue is at:\n\n3640 Colonel Glenn Hwy, Dayton, OH, US\n",
+			$result
+		);
+	}
 }
