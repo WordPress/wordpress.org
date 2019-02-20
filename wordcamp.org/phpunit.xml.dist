@@ -1,5 +1,5 @@
 <phpunit
-	bootstrap="tests/bootstrap.php"
+	bootstrap="phpunit-bootstrap.php"
 	backupGlobals="false"
 	colors="true"
 	convertErrorsToExceptions="true"
@@ -9,7 +9,9 @@
 
 	<testsuites>
 		<testsuite>
-			<directory prefix="test-" suffix=".php">./tests/</directory>
+			<directory prefix="test-" suffix=".php">
+				./public_html/wp-content/plugins/wordcamp-remote-css/tests/
+			</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>
