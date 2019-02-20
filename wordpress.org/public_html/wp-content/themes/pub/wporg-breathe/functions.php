@@ -37,6 +37,16 @@ function customize_register( $wp_customize ) {
 }
 
 /**
+ * Outputs a 'noindex,follow' meta tag for search results.
+ */
+function no_robots_search_results() {
+	if ( is_search() ) {
+		wp_no_robots();
+	}
+}
+add_action( 'wp_head', __NAMESPACE__ . '\no_robots_search_results', 9 );
+
+/**
  * Renders the site title for the selective refresh partial.
  */
 function customize_partial_blogname() {
