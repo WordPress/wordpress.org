@@ -6,7 +6,8 @@
  */
 
 class WCOR_Reminder {
-	const POST_TYPE_SLUG = 'organizer-reminder';
+	const AUTOMATED_POST_TYPE_SLUG = 'organizer-reminder';
+	const REQUIRED_CAPABILITY      = 'manage_options';
 
 	/**
 	 * Constructor
@@ -14,36 +15,38 @@ class WCOR_Reminder {
 	public function __construct() {
 		add_action( 'init',                              array( $this, 'register_post_type' ) );
 		add_action( 'admin_init',                        array( $this, 'add_meta_boxes' ) );
-		add_action( 'save_post_' . self::POST_TYPE_SLUG, array( $this, 'save_post' ), 10, 2 );
+		add_action( 'admin_menu',                        array( $this, 'register_menu_pages' ) );
+		add_action( 'save_post_' . self::AUTOMATED_POST_TYPE_SLUG, array( $this, 'save_post' ), 10, 2 );
 	}
 
 	/**
 	 * Registers the Reminder post type
 	 */
 	public function register_post_type() {
-		$labels = array(
-			'name'               => 'Organizer Reminders',
-			'singular_name'      => 'Organizer Reminder',
-			'add_new'            => 'Add New',
-			'add_new_item'       => 'Add New Reminder',
+		$automated_labels = array(
+			'name'               => 'Automated Reminders',
+			'singular_name'      => 'Automated Reminder',
+			'add_new'            => 'Add New Automated',
+			'add_new_item'       => 'Add New Automated Reminder',
 			'edit'               => 'Edit',
-			'edit_item'          => 'Edit Reminder',
-			'new_item'           => 'New Reminder',
-			'view'               => 'View Reminders',
-			'view_item'          => 'View Reminder',
-			'search_items'       => 'Search Reminders',
-			'not_found'          => 'No reminders',
-			'not_found_in_trash' => 'No reminders',
-			'parent'             => 'Parent Reminder',
+			'edit_item'          => 'Edit Automated Reminder',
+			'new_item'           => 'New Automated Reminder',
+			'view'               => 'View Automated Reminders',
+			'view_item'          => 'View Automated Reminder',
+			'search_items'       => 'Search Automated Reminders',
+			'not_found'          => 'No automated reminders',
+			'not_found_in_trash' => 'No automated reminders',
+			'parent'             => 'Parent Automated Reminder',
 		);
 
-		$params = array(
-			'labels'              => $labels,
-			'singular_label'      => 'Reminder',
+		$automated_params = array(
+			'labels'              => $automated_labels,
+			'singular_label'      => 'Automated Reminder',
 			'public'              => true,
 			'exclude_from_search' => true,
 			'publicly_queryable'  => false,
 			'show_ui'             => true,
+			'show_in_menu'        => 'organizer-reminders',
 			'show_in_nav_menus'   => false,
 			'hierarchical'        => false,
 			'capability_type'     => 'post',
@@ -53,7 +56,7 @@ class WCOR_Reminder {
 			'supports'            => array( 'title', 'editor', 'author', 'revisions' ),
 		);
 
-		register_post_type( self::POST_TYPE_SLUG, $params );
+		register_post_type( self::AUTOMATED_POST_TYPE_SLUG, $automated_params );
 	}
 
 	/**
@@ -64,7 +67,7 @@ class WCOR_Reminder {
 			'wcor_reminder_details',
 			'Reminder Details',
 			array( $this, 'markup_reminder_details' ),
-			self::POST_TYPE_SLUG,
+			self::AUTOMATED_POST_TYPE_SLUG,
 			'normal',
 			'high'
 		);
@@ -73,7 +76,7 @@ class WCOR_Reminder {
 			'wcor_manually_send',
 			__( 'Manually Send', 'wordcamporg' ),
 			array( $this, 'markup_manually_send' ),
-			self::POST_TYPE_SLUG,
+			self::AUTOMATED_POST_TYPE_SLUG,
 			'side'
 		);
 	}
@@ -344,10 +347,25 @@ class WCOR_Reminder {
 	}
 
 	/**
+	 * Register new admin pages
+	 */
+	public function register_menu_pages() {
+		add_menu_page(
+			'Organizer Reminders',
+			'Organizer Reminders',
+			self::REQUIRED_CAPABILITY,
+			'organizer-reminders',
+			'',
+			'dashicons-email-alt',
+			30
+		);
+	}
+
+	/**
 	 * Checks to make sure the conditions for saving post meta are met
 	 *
 	 * @param int $post_id
-	 * @param object $post
+	 * @param WP_Post $post
 	 */
 	public function save_post( $post_id, $post ) {
 		$ignored_actions = array( 'trash', 'untrash', 'restore' );

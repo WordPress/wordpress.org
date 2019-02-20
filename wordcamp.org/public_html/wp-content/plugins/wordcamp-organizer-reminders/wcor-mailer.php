@@ -498,7 +498,7 @@ class WCOR_Mailer {
 
 		$reminder_emails = get_posts( array(
 			'posts_per_page' => -1,
-			'post_type'      => WCOR_Reminder::POST_TYPE_SLUG,
+			'post_type'      => WCOR_Reminder::AUTOMATED_POST_TYPE_SLUG,
 			'meta_query'     => array(
 				array(
 					'key'     => 'wcor_send_when',
@@ -609,7 +609,7 @@ class WCOR_Mailer {
 	protected function get_triggered_posts( $trigger ) {
 		$posts = get_posts( array(
 			'posts_per_page' => -1,
-			'post_type'      => WCOR_Reminder::POST_TYPE_SLUG,
+			'post_type'      => WCOR_Reminder::AUTOMATED_POST_TYPE_SLUG,
 			'meta_query'     => array(
 				array(
 					'key'    => 'wcor_send_when',
