@@ -14,9 +14,29 @@ function make_setup_theme() {
 
 add_action( 'pre_get_posts', 'make_query_mods' );
 function make_query_mods( $query ) {
-	if ( ! is_admin() && $query->is_main_query() && $query->is_home() )
+	if ( ! is_admin() && $query->is_main_query() && $query->is_home() ) {
 		$query->set( 'posts_per_page', 1 );
+	}
+
+	// There's nothing worth searching for on this site.
+	if ( ! is_admin() && $query->is_main_query() && $query->is_search() ) {
+		$query->set_404();
+	}
 }
+
+add_filter( 'the_posts', function( $posts, $query ) {
+	// Ensure all non-post routes 404, as this site isn't like most others.
+	if (
+		( ! is_admin() && $query->is_main_query() && ! $posts ) ||
+		( ! is_admin() && $query->is_main_query() && $query->is_post_type_archive( 'meeting' ) && $query->get('paged') > 1 ) // Pagination on the query is explicitly disabled, so this doens't 404
+	) {
+		$query->set_404();
+		status_header( 404 );
+		nocache_headers();
+	}
+
+	return $posts;
+}, 10, 2 );
 
 add_filter('post_class','make_home_site_classes', 10, 3);
 function make_home_site_classes($classes, $class, $id) {
