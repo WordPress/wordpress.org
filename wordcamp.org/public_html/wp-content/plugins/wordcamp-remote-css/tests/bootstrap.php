@@ -16,7 +16,7 @@ if ( ! $core_tests_directory ) {
 }
 
 require_once( $core_tests_directory . '/includes/functions.php' );
-require_once( dirname( dirname( $core_tests_directory ) ) . '/src/wp-admin/includes/plugin.php' );
+require_once( dirname( dirname( $core_tests_directory ) ) . '/build/wp-admin/includes/plugin.php' );
 
 /**
  * Load the plugins that we'll need to be active for the tests
@@ -30,13 +30,16 @@ function manually_load_plugin() {
 	 */
 	define( 'WP_ADMIN',          true );
 	define( 'JETPACK_DEV_DEBUG', true );
-	define( 'JETPACK__PLUGIN_DIR', dirname( dirname( __DIR__ ) ) . '/jetpack' );
+	define( 'JETPACK__PLUGIN_DIR', dirname( dirname( __DIR__ ) ) . '/jetpack/' );
+	define( 'JETPACK__PLUGIN_FILE', JETPACK__PLUGIN_DIR . '/jetpack.php' );
 
-	$jetpack_plugin_data = get_plugin_data( JETPACK__PLUGIN_DIR . '/jetpack.php', false );
+	$jetpack_plugin_data = get_plugin_data( JETPACK__PLUGIN_FILE, false );
 
 	define( 'JETPACK__VERSION', $jetpack_plugin_data['Version'] );
 
 	require_once( dirname( __DIR__ )  . '/bootstrap.php' );
+	require_once( JETPACK__PLUGIN_DIR . '/class.jetpack.php' );
+	require_once( JETPACK__PLUGIN_DIR . '/class.jetpack-constants.php' );
 	require_once( JETPACK__PLUGIN_DIR . '/modules/custom-css/custom-css-4.7.php' );
 
 	// Some of the sanitization lives here because it runs for both Custom CSS and Remote CSS.

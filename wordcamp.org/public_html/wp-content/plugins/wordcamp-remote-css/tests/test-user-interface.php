@@ -3,6 +3,11 @@
 namespace WordCamp\RemoteCSS;
 defined( 'WPINC' ) || die();
 
+/**
+ * Class Test_User_Interface
+ *
+ * @group wordcamp-remote-css
+ */
 class Test_User_Interface extends \WP_UnitTestCase {
 	/**
 	 * Test that valid URLs are allowed

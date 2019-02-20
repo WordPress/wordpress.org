@@ -3,6 +3,11 @@
 namespace WordCamp\RemoteCSS;
 defined( 'WPINC' ) || die();
 
+/**
+ * Class Test_Synchronize_Remote_CSS
+ *
+ * @group wordcamp-remote-css
+ */
 class Test_Synchronize_Remote_CSS extends \WP_UnitTestCase {
 	/**
 	 * Test that the sanitized css matches a known good version
