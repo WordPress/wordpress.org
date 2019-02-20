@@ -67,7 +67,7 @@ class Test_User_Interface extends \WP_UnitTestCase {
 	 * @covers WordCamp\RemoteCSS\validate_remote_css_url()
 	 */
 	public function test_non_whitelisted_urls_blocked() {
-		$this->setExpectedException( '\Exception', 'URL you provided is not hosted by one of our currently-supported platforms' );
+		$this->setExpectedException( '\Exception', 'only certain third-party platforms can be used' );
 		validate_remote_css_url( 'https://example.org/style.css' );
 	}
 
