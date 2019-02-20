@@ -49,7 +49,6 @@ class Privacy_Field extends CampTix_Addon {
 		add_filter( 'camptix_checkout_attendee_info', array( $this, 'validate_registration_field' ) );
 		add_filter( 'camptix_form_register_complete_attendee_object', array( $this, 'populate_attendee_object' ), 10, 2 );
 		add_action( 'camptix_checkout_update_post_meta', array( $this, 'save_registration_field' ), 10, 2 );
-		add_action( 'camptix_ticket_emailed', array( $this, 'after_email_receipt' ) );
 
 		// Edit info field
 		add_filter( 'camptix_form_edit_attendee_ticket_info', array( $this, 'populate_ticket_info_array' ), 10, 2 );
