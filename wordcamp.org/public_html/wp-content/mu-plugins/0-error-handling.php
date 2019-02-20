@@ -94,13 +94,14 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line ) {
 		$time_elapsed         = time() - $data['last_reported_at'];
 
 		if ( $time_elapsed > 600 ) {
-			$data['last_reported_at']  = time();
-			$data['error_count']       = 0;
-			file_put_contents( $error_file, wp_json_encode( $data ) );
-
 			$footer .= "Occurred *${data['error_count']} time(s)* since last reported";
+
+			$data['last_reported_at'] = time();
+			$data['error_count']      = 0;
+			file_put_contents( $error_file, wp_json_encode( $data ) );
 		} else {
 			file_put_contents( $error_file, wp_json_encode( $data ) );
+			
 			return false;
 		}
 	}
