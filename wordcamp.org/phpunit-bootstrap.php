@@ -14,6 +14,7 @@ if ( ! $core_tests_directory ) {
 require_once( $core_tests_directory . '/includes/functions.php' );
 require_once( dirname( dirname( $core_tests_directory ) ) . '/build/wp-admin/includes/plugin.php' );
 
+
 /*
  * Load individual plugin bootstrappers
  *
@@ -27,5 +28,12 @@ require_once( dirname( dirname( $core_tests_directory ) ) . '/build/wp-admin/inc
  */
 require_once( WP_PLUGIN_DIR . '/wordcamp-organizer-reminders/tests/bootstrap.php' );
 require_once( WP_PLUGIN_DIR . '/wordcamp-remote-css/tests/bootstrap.php' );
+
+/*
+ * This has to be the last plugin bootstrapper, because it includes the Core test bootstrapper, which would
+ * short-circuits any other plugin bootstrappers than run after it. We can remove that when we remove CampTix
+ * from the w.org directory and make it a wordcamp.org-only plugin.
+ */
+require_once( WP_PLUGIN_DIR . '/camptix/tests/bootstrap.php' );
 
 require_once( $core_tests_directory . '/includes/bootstrap.php' );

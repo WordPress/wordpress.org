@@ -10,6 +10,12 @@
 	<testsuites>
 		<testsuite>
 			<directory prefix="test-" suffix=".php">
+				./public_html/wp-content/plugins/camptix/tests/
+			</directory>
+		</testsuite>
+
+		<testsuite>
+			<directory prefix="test-" suffix=".php">
 				./public_html/wp-content/plugins/wordcamp-organizer-reminders/tests/
 			</directory>
 		</testsuite>
