@@ -92,7 +92,7 @@ class Commit extends Resource {
 		}, $message );
 
 		// Converts {U+201C} to an UTF-8 character.
-		$message = preg_replace_callback( '/\{U\+([0-9A-F]{4})\}/', function( $matches ) {
+		$message = preg_replace_callback( '/\{U\+([0-9A-F]{4,6})\}/', function( $matches ) {
 			return html_entity_decode( "&#x{$matches[1]};", ENT_NOQUOTES, 'UTF-8' );
 		}, $message );
 
