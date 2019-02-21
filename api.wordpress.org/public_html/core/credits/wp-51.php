@@ -45,6 +45,7 @@ class WP_51_Credits extends WP_Credits {
 					'subrataemfluence' => 'Subrata Sarkar',
 					'ireneyoast'       => 'Irene Strikkers',
 					'audrasjb'         => 'Jb Audras',
+					'Rarst'            => 'Andrey Savchenko',
 				],
 			],
 		];
