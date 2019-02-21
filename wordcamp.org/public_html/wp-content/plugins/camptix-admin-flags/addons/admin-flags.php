@@ -44,6 +44,8 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 			// Bulk editing from Attendees screen
 			add_filter( 'manage_tix_attendee_posts_columns', array( $this, 'add_custom_columns' ) );
 			add_action( 'manage_tix_attendee_posts_custom_column', array( $this, 'render_custom_columns' ), 10, 2 );
+			add_filter( 'views_edit-tix_attendee', array( $this, 'add_custom_filters' ) );
+			add_filter( 'pre_get_posts', array( $this, 'add_custom_filters_post_filter' ) );
 			add_action( 'admin_footer-edit.php', array( $this, 'render_client_side_templates' ) );
 			add_action( 'wp_ajax_tix_admin_flag_toggle', array( $this, 'toggle_flag' ) );
 			add_action( 'admin_footer-edit.php', array( $this, 'print_javascript' ) );
@@ -298,6 +300,91 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 
 				break;
 		}
+	}
+
+	/**
+	 * Add custom views to the attendee listing post listing.
+	 *
+	 * @param array $views
+	 *
+	 * @return array
+	 */
+	public function add_custom_filters( $views ) {
+		global $wpdb;
+
+		if ( empty( $GLOBALS['typenow'] ) || 'tix_attendee' !== $GLOBALS['typenow'] || empty( $this->flags ) ) {
+			return $views;
+		}
+
+		$meta_counts = $wpdb->get_results( "
+			SELECT meta_value, COUNT( post_id ) AS count
+			FROM {$wpdb->postmeta}
+			WHERE meta_key = 'camptix-admin-flag'
+			GROUP BY meta_value",
+			ARRAY_A
+		);
+		$meta_counts = wp_list_pluck( $meta_counts, 'count', 'meta_value' );
+
+		if ( ! $meta_counts ) {
+			return $views;
+		}
+
+		$currently_viewed_flag = empty( $_GET['camptix_flag'] ) ? false : wp_unslash( $_GET['camptix_flag'] );
+		$base_url              = add_query_arg( 'post_type', 'tix_attendee', 'edit.php' );
+
+		foreach ( $this->flags as $flag => $label ) {
+			$count = 0;
+			$class_html = '';
+			$url        = add_query_arg( 'camptix_flag', $flag, $base_url );
+
+			if ( $currently_viewed_flag && $currently_viewed_flag == $flag ) {
+				$class_html = ' class="current"';
+			}
+
+			if ( isset( $meta_counts[ $flag ] ) ) {
+				$count = $meta_counts[ $flag ];
+			}
+
+			$views[ $flag ] = sprintf(
+				'<a href="%s" %s>
+					%s <span class="count">(%s)</span>
+				</a>',
+				esc_url( $url ),
+				$class_html,
+				$label,
+				number_format_i18n( $count )
+			);
+		}
+
+		return $views;
+	}
+
+	/**
+	 * Filter the wp-admin post listing query to filter to admin flags.
+	 *
+	 * @param WP_Query $query
+	 */
+	public function add_custom_filters_post_filter( $query ) {
+		$flag = empty( $_GET['camptix_flag'] ) ? false : wp_unslash( $_GET['camptix_flag'] );
+
+		if ( ! is_admin() || empty( $GLOBALS['typenow'] ) || 'tix_attendee' !== $GLOBALS['typenow'] ) {
+			return;
+		}
+
+		if ( ! isset( $this->flags[ $flag ] ) ) {
+			return;
+		}
+
+		if ( ! isset( $query->query_vars['meta_query'] ) ) {
+			$query->query_vars['meta_query'] = array();
+		}
+
+		$query->query_vars['meta_query'][] = array(
+			'key'     => 'camptix-admin-flag',
+			'value'   => $flag,
+			'compare' => '=',
+			'type'    => 'CHAR',
+		);
 	}
 
 	/**
