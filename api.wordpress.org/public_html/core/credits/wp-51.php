@@ -178,7 +178,7 @@ class WP_51_Credits extends WP_Credits {
 			'diedeexterkate',
 			'dilipbheda',
 			'dimadin',
-			'dingo_bastard',
+			'dingo_d',
 			'dipeshkakadiya',
 			'dlh',
 			'dmsnell',

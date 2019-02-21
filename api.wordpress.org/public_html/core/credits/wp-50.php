@@ -185,7 +185,7 @@ class WP_50_Credits extends WP_Credits {
 			'diegoliv',
 			'diegoreymendez',
 			'dimadin',
-			'dingo_bastard',
+			'dingo_d',
 			'dixitadusara',
 			'dlh',
 			'dlocc',

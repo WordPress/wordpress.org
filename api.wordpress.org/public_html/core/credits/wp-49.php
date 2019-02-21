@@ -224,7 +224,7 @@ class WP_49_Credits extends WP_Credits {
 			'desrosj',
 			'diedeexterkate',
 			'dimadin',
-			'dingo_bastard',
+			'dingo_d',
 			'dipeshkakadiya',
 			'div33',
 			'dixitadusara',

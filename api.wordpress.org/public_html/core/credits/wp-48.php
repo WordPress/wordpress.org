@@ -157,7 +157,7 @@ class WP_48_Credits extends WP_Credits {
 			'dhaval-parekh',
 			'diddledan',
 			'dimadin',
-			'dingo_bastard',
+			'dingo_d',
 			'dlh',
 			'dllh',
 			'dotancohen',
