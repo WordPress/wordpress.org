@@ -92,11 +92,6 @@ fieldset {
 	text-decoration: underline;
 }
 
-/* Centers the footer. Trac is missing the final column (social links). */
-#wporg-footer .wrapper {
-	max-width: 773px;
-}
-
 /* More specific overrides of wp4.css */
 .change h3 a,
 h3.change a {
