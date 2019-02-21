@@ -1,5 +1,7 @@
 <?php
 
+define( 'WP_PLUGIN_DIR', __DIR__ . '/public_html/wp-content/plugins' );
+
 $core_tests_directory = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $core_tests_directory ) {
@@ -23,7 +25,7 @@ require_once( dirname( dirname( $core_tests_directory ) ) . '/build/wp-admin/inc
  * bootstrap for a particular suite before the suite loads (see https://stackoverflow.com/a/30170762/450127). It's
  * not clear if that would properly isolate them from each other, and allow multiple independent contexts, though.
  */
-require_once( __DIR__ . '/public_html/wp-content/plugins/wordcamp-organizer-reminders/tests/bootstrap.php' );
-require_once( __DIR__ . '/public_html/wp-content/plugins/wordcamp-remote-css/tests/bootstrap.php' );
+require_once( WP_PLUGIN_DIR . '/wordcamp-organizer-reminders/tests/bootstrap.php' );
+require_once( WP_PLUGIN_DIR . '/wordcamp-remote-css/tests/bootstrap.php' );
 
 require_once( $core_tests_directory . '/includes/bootstrap.php' );
