@@ -9,7 +9,11 @@
  * Use case: flag everyone attending a closed party/event.
  */
 class CampTix_Admin_Flags_Addon extends CampTix_Addon {
+	protected $flags = array();
 
+	/**
+	 * Constructor.
+	 */
 	public function __construct() {
 		add_action( 'camptix_init', array( $this, 'camptix_init' ) );
 	}
@@ -27,21 +31,21 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 			add_filter( 'camptix_validate_options', array( $this, 'validate_options' ), 10, 2 );
 		}
 
-		$this->flags = array();
 		$camptix_options = $camptix->get_options();
 
 		// No further actions if we don't have any configured flags.
-		if ( empty( $camptix_options['camptix-admin-flags-data-parsed'] ) )
+		if ( empty( $camptix_options['camptix-admin-flags-data-parsed'] ) ) {
 			return;
+		}
 
 		$this->flags = (array) $camptix_options['camptix-admin-flags-data-parsed'];
 
 		if ( current_user_can( $camptix->caps['manage_attendees'] ) ) {
-			// Individual editing from Edit Attendee screen
+			// Individual editing from Edit Attendee screen.
 			add_action( 'save_post', array( $this, 'save_post' ), 11, 1 );
 			add_action( 'camptix_attendee_submitdiv_misc', array( $this, 'publish_metabox_actions' ) );
 
-			// Bulk editing from Attendees screen
+			// Bulk editing from Attendees screen.
 			add_filter( 'manage_tix_attendee_posts_columns', array( $this, 'add_custom_columns' ) );
 			add_action( 'manage_tix_attendee_posts_custom_column', array( $this, 'render_custom_columns' ), 10, 2 );
 			add_filter( 'views_edit-tix_attendee', array( $this, 'add_custom_filters' ) );
@@ -66,13 +70,16 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 */
 	public function shortcode_attendees_atts( $out, $pairs, $atts ) {
 		$admin_flags = array();
-		if ( ! empty( $atts['has_admin_flag'] ) )
+		if ( ! empty( $atts['has_admin_flag'] ) ) {
 			$admin_flags = array_map( 'trim', explode( ',', $atts['has_admin_flag'] ) );
+		}
 
 		$admin_flags_clean = array();
-		foreach ( $this->flags as $key => $label )
-			if ( in_array( $key, $admin_flags ) )
+		foreach ( $this->flags as $key => $label ) {
+			if ( in_array( $key, $admin_flags, true ) ) {
 				$admin_flags_clean[] = $key;
+			}
+		}
 
 		$out['has_admin_flag'] = $admin_flags;
 		return $out;
@@ -82,21 +89,23 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * Modify the attendees list shortcode query based on has_admin_flag.
 	 */
 	public function shortcode_attendees_query( $query_args, $shortcode_args ) {
-		if ( empty( $shortcode_args['has_admin_flag'] ) )
+		if ( empty( $shortcode_args['has_admin_flag'] ) ) {
 			return $query_args;
+		}
 
 		// Sanitized in self::shortcode_attendees_atts.
 		$flags = $shortcode_args['has_admin_flag'];
 
-		if ( empty( $query_args['meta_query'] ) )
+		if ( empty( $query_args['meta_query'] ) ) {
 			$query_args['meta_query'] = array();
+		}
 
 		foreach ( $flags as $flag ) {
 			$query_args['meta_query'][] = array(
-				'key' => 'camptix-admin-flag',
-				'value' => $flag,
+				'key'     => 'camptix-admin-flag',
+				'value'   => $flag,
 				'compare' => '=',
-				'type' => 'CHAR',
+				'type'    => 'CHAR',
 			);
 		}
 
@@ -108,7 +117,7 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 */
 	public function export_columns( $columns ) {
 		foreach ( $this->flags as $key => $label ) {
-			$column_key = sprintf( 'camptix-admin-flags-%s', $key );
+			$column_key             = sprintf( 'camptix-admin-flags-%s', $key );
 			$columns[ $column_key ] = $label;
 		}
 
@@ -122,16 +131,18 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * attendee. Prints "No" if the flag is configured but not set.
 	 */
 	public function export_columns_values( $value, $index, $attendee ) {
-		if ( 0 !== strpos( $index, 'camptix-admin-flags-' ) )
+		if ( 0 !== strpos( $index, 'camptix-admin-flags-' ) ) {
 			return $value;
+		}
 
 		// See self::export_columns() for key format.
 		$key = str_replace( 'camptix-admin-flags-', '', $index );
-		if ( ! array_key_exists( $key, $this->flags ) )
+		if ( ! array_key_exists( $key, $this->flags ) ) {
 			return $value;
+		}
 
 		$attendee_flags = (array) get_post_meta( $attendee->ID, 'camptix-admin-flag' );
-		return in_array( $key, $attendee_flags ) ? 'Yes' : 'No';
+		return in_array( $key, $attendee_flags, true ) ? 'Yes' : 'No';
 	}
 
 	/**
@@ -148,8 +159,9 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	public function setup_controls( $section ) {
 		global $camptix;
 
-		if ( 'admin-flags' != $section )
+		if ( 'admin-flags' !== $section ) {
 			return;
+		}
 
 		add_settings_section( 'general', __( 'Admin Flags', 'camptix' ), array( $this, 'setup_controls_section' ), 'camptix_options' );
 		$camptix->add_settings_field_helper( 'camptix-admin-flags-data', __( 'Admin Flags Data', 'camptix' ), 'field_textarea' );
@@ -170,38 +182,42 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * Runs whenever the CampTix option is updated.
 	 */
 	public function validate_options( $output, $input ) {
-		if ( ! isset( $input['camptix-admin-flags-data'] ) )
+		if ( ! isset( $input['camptix-admin-flags-data'] ) ) {
 			return $output;
+		}
 
 		$has_error = false;
-		$flags = array();
-		$data = explode( "\n", $input['camptix-admin-flags-data'] );
+		$flags     = array();
+		$data      = explode( "\n", $input['camptix-admin-flags-data'] );
 
 		foreach ( $data as $line ) {
 
-			if ( empty( $line ) )
+			if ( empty( $line ) ) {
 				continue;
+			}
 
-			// flag-key: Flag Label
+			// flag-key: Flag Label.
 			if ( ! preg_match( '#^([^:]+?):(.+)$#', $line, $matches ) ) {
 				$has_error = true;
 				continue;
 			}
 
-			$key = sanitize_html_class( sanitize_title_with_dashes( trim( $matches[1] ) ) );
-			$label = trim( $matches[2] );
+			$key           = sanitize_html_class( sanitize_title_with_dashes( trim( $matches[1] ) ) );
+			$label         = trim( $matches[2] );
 			$flags[ $key ] = $label;
 		}
 
 		$lines = array();
-		foreach ( $flags as $key => $label )
+		foreach ( $flags as $key => $label ) {
 			$lines[] = sprintf( '%s: %s', $key, $label );
+		}
 
-		$output['camptix-admin-flags-data'] = implode( "\n", $lines );
+		$output['camptix-admin-flags-data']        = implode( "\n", $lines );
 		$output['camptix-admin-flags-data-parsed'] = $flags;
 
-		if ( $has_error )
+		if ( $has_error ) {
 			add_settings_error( 'tix', 'error', __( 'Flags data has been saved, but one or more flags was invalid, so it has been stripped.', 'camptix' ), 'error' );
+		}
 
 		return $output;
 	}
@@ -210,24 +226,28 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * Runs during the generic save_post.
 	 */
 	public function save_post( $post_id ) {
-		if ( wp_is_post_revision( $post_id ) || 'tix_attendee' != get_post_type( $post_id ) )
+		if ( wp_is_post_revision( $post_id ) || 'tix_attendee' !== get_post_type( $post_id ) ) {
 			return;
+		}
 
-		if ( empty( $_POST['camptix-admin-flags-nonce'] ) || ! wp_verify_nonce( $_POST['camptix-admin-flags-nonce'], 'camptix-admin-flags-update' ) )
+		if ( empty( $_POST['camptix-admin-flags-nonce'] ) || ! wp_verify_nonce( $_POST['camptix-admin-flags-nonce'], 'camptix-admin-flags-update' ) ) {
 			return;
+		}
 
 		delete_post_meta( $post_id, 'camptix-admin-flag' );
 
-		foreach ( $this->flags as $key => $label )
-			if ( ! empty( $_POST['camptix-admin-flags'][ $key ] ) )
+		foreach ( $this->flags as $key => $label ) {
+			if ( ! empty( $_POST['camptix-admin-flags'][ $key ] ) ) {
 				add_post_meta( $post_id, 'camptix-admin-flag', $key );
+			}
+		}
 	}
 
 	/**
 	 * Adds to the CampTix additional metabox actions.
 	 */
 	public function publish_metabox_actions() {
-		$post = get_post();
+		$post           = get_post();
 		$attendee_flags = (array) get_post_meta( $post->ID, 'camptix-admin-flag' );
 		?>
 
@@ -236,7 +256,7 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 			<?php foreach ( $this->flags as $key => $label ) : ?>
 
 				<div class="tix-pub-section-item">
-					<input id="camptix-admin-flags-<?php echo sanitize_html_class( $key ); ?>" name="camptix-admin-flags[<?php echo esc_attr( $key ); ?>]" type="checkbox" <?php checked( in_array( $key, $attendee_flags ) ); ?> value="1" />
+					<input id="camptix-admin-flags-<?php echo sanitize_html_class( $key ); ?>" name="camptix-admin-flags[<?php echo esc_attr( $key ); ?>]" type="checkbox" <?php checked( in_array( $key, $attendee_flags, true ) ); ?> value="1" />
 					<label for="camptix-admin-flags-<?php echo sanitize_html_class( $key ); ?>"><?php echo esc_html( $label ); ?></label>
 				</div>
 
@@ -262,7 +282,7 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * Render custom columns on the Attendees screen.
 	 *
 	 * @param string $column
-	 * @param int $attendee_id
+	 * @param int    $attendee_id
 	 */
 	public function render_custom_columns( $column, $attendee_id ) {
 		$attendee_flags = (array) get_post_meta( $attendee_id, 'camptix-admin-flag' );
@@ -270,34 +290,37 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 		switch ( $column ) {
 			case 'admin-flags':
 				echo '<ul>';
-					foreach ( $this->flags as $key => $label ) {
-						$enabled = in_array( $key, $attendee_flags );
 
-						?>
+				foreach ( $this->flags as $key => $label ) {
+					$enabled = in_array( $key, $attendee_flags, true );
 
-						<li>
-							<span class="tix-admin-flag-label"><?php echo esc_html( $label ); ?></span>:
+					?>
 
-							<a
-								href="#"
-								data-attendee-id="<?php echo esc_attr( $attendee_id ); ?>"
-								data-key="<?php echo esc_attr( $key ); ?>"
-								data-nonce="<?php echo esc_attr( wp_create_nonce( sprintf( 'tix_toggle_flag_%s_%s', $attendee_id, $key ) ) ); ?>"
-								data-command="<?php echo esc_attr( $enabled ? 'disable' : 'enable' ); ?>"
-								class="tix-toggle-flag">
+					<li>
+						<span class="tix-admin-flag-label">
+							<?php echo esc_html( $label ); ?>
+						</span>:
 
-								<?php if ( $enabled ) : ?>
-									<?php _e( 'Disable', 'camptix' ); ?>
-								<?php else : ?>
-									<?php _e( 'Enable', 'camptix' ); ?>
-								<?php endif; ?>
-							</a>
-						</li>
+						<a
+							href="#"
+							data-attendee-id="<?php echo esc_attr( $attendee_id ); ?>"
+							data-key="<?php echo esc_attr( $key ); ?>"
+							data-nonce="<?php echo esc_attr( wp_create_nonce( sprintf( 'tix_toggle_flag_%s_%s', $attendee_id, $key ) ) ); ?>"
+							data-command="<?php echo esc_attr( $enabled ? 'disable' : 'enable' ); ?>"
+							class="tix-toggle-flag">
 
-						<?php
-					}
+							<?php if ( $enabled ) : ?>
+								<?php esc_html_e( 'Disable', 'camptix' ); ?>
+							<?php else : ?>
+								<?php esc_html_e( 'Enable', 'camptix' ); ?>
+							<?php endif; ?>
+						</a>
+					</li>
+
+					<?php
+				}
+
 				echo '</ul>';
-
 				break;
 		}
 	}
@@ -333,11 +356,11 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 		$base_url              = add_query_arg( 'post_type', 'tix_attendee', 'edit.php' );
 
 		foreach ( $this->flags as $flag => $label ) {
-			$count = 0;
+			$count      = 0;
 			$class_html = '';
 			$url        = add_query_arg( 'camptix_flag', $flag, $base_url );
 
-			if ( $currently_viewed_flag && $currently_viewed_flag == $flag ) {
+			if ( $currently_viewed_flag && $currently_viewed_flag === $flag ) {
 				$class_html = ' class="current"';
 			}
 
@@ -391,7 +414,7 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * Render the templates used by JavaScript
 	 */
 	public function render_client_side_templates() {
-		if ( 'tix_attendee' != $GLOBALS['typenow'] ) {
+		if ( 'tix_attendee' !== $GLOBALS['typenow'] ) {
 			return;
 		}
 
@@ -412,7 +435,7 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 				data-command="{{data.command}}"
 				class="tix-toggle-flag">
 
-				{{data.command}}    <?php // todo use i18n var ?>
+				{{data.command}}    <?php // todo use i18n var. ?>
 			</a>
 		</script>
 
@@ -423,7 +446,7 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * AJAX handler to toggle a flag from the Attendees screen.
 	 */
 	public function toggle_flag() {
-		/** @var $camptix CampTix_Plugin */
+		/** @var CampTix_Plugin $camptix */
 		global $camptix;
 
 		if ( empty( $_REQUEST['action'] ) || empty( $_REQUEST['attendee_id'] ) || empty( $_REQUEST['key'] ) || empty( $_REQUEST['command'] ) || empty( $_REQUEST['nonce'] ) ) {
@@ -440,13 +463,13 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 
 		$attendee = get_post( $attendee_id );
 
-		if ( ! is_a( $attendee, 'WP_Post' ) || 'tix_attendee' != $attendee->post_type ) {
+		if ( ! is_a( $attendee, 'WP_Post' ) || 'tix_attendee' !== $attendee->post_type ) {
 			wp_send_json_error( array( 'error' => 'Invalid attendee.' ) );
 		}
 
-		if ( 'enable' == $command ) {
+		if ( 'enable' === $command ) {
 			add_post_meta( $attendee_id, 'camptix-admin-flag', $key );
-		} elseif ( 'disable' == $command ) {
+		} elseif ( 'disable' === $command ) {
 			delete_post_meta( $attendee_id, 'camptix-admin-flag', $key );
 		}
 
@@ -457,7 +480,7 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * Print our JavaScript
 	 */
 	public function print_javascript() {
-		if ( 'tix_attendee' != $GLOBALS['typenow'] ) {
+		if ( 'tix_attendee' !== $GLOBALS['typenow'] ) {
 			return;
 		}
 
@@ -525,7 +548,7 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 	 * Print our CSS
 	 */
 	public function print_css() {
-		if ( 'tix_attendee' != $GLOBALS['typenow'] ) {
+		if ( 'tix_attendee' !== $GLOBALS['typenow'] ) {
 			return;
 		}
 
