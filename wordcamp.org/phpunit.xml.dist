@@ -8,19 +8,19 @@
 	>
 
 	<testsuites>
-		<testsuite>
+		<testsuite name="CampTix">
 			<directory prefix="test-" suffix=".php">
 				./public_html/wp-content/plugins/camptix/tests/
 			</directory>
 		</testsuite>
 
-		<testsuite>
+		<testsuite name="WordCamp Organizer Reminders">
 			<directory prefix="test-" suffix=".php">
 				./public_html/wp-content/plugins/wordcamp-organizer-reminders/tests/
 			</directory>
 		</testsuite>
 
-		<testsuite>
+		<testsuite name="WordCamp Remote CSS">
 			<directory prefix="test-" suffix=".php">
 				./public_html/wp-content/plugins/wordcamp-remote-css/tests/
 			</directory>
