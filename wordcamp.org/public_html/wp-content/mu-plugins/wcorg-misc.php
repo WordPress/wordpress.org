@@ -151,6 +151,29 @@ function wcorg_show_tagregator_log() {
 add_action( 'init', 'wcorg_show_tagregator_log' );
 
 /**
+ * Tell Tagregator to stop importing items for a camp 2 weeks after it has occurred.
+ *
+ * @param DateTime|null $end_date The date that Tagregator should stop importing items for a camp. Default null.
+ *
+ * @return DateTime|null
+ */
+function wcorg_set_per_camp_tagregator_end_date( $end_date ) {
+	$details = get_wordcamp_post();
+
+	if ( isset( $details->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
+		$offset = '2 weeks';
+
+		// Despite its key/label, the start date value is actually stored as a Unix timestamp.
+		$camp_start_timestamp = $details->meta['Start Date (YYYY-mm-dd)'][0];
+		$end_date             = date_create( date( 'Y-m-d', $camp_start_timestamp ) . '  ' . $offset );
+	}
+
+	return $end_date;
+}
+
+add_filter( 'tggr_end_date', 'wcorg_set_per_camp_tagregator_end_date' );
+
+/**
  * Modify the space allocation on a per-size basis.
  *
  * @param int $size
