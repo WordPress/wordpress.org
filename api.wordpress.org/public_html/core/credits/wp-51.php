@@ -357,7 +357,7 @@ class WP_51_Credits extends WP_Credits {
 			'lorenzone92',
 			'lucagrandicelli',
 			'lucasrolff',
-			'luciano',
+			'luciano-croce',
 			'luminus',
 			'maartenleenders',
 			'macbookandrew',
