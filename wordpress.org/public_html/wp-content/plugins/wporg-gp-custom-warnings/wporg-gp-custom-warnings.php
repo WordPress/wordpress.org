@@ -29,7 +29,7 @@ class WPorg_GP_Custom_Translation_Warnings {
 	 *
 	 * This allows for the scheme to change, and for WordPress.org URL's to change to a subdomain.
 	 *
-	 * @param string $original    The orignal string.
+	 * @param string $original    The original string.
 	 * @param string $translation The translated string.
 	 */
 	public function warning_mismatching_urls( $original, $translation ) {
@@ -90,6 +90,42 @@ class WPorg_GP_Custom_Translation_Warnings {
 		}
 		if ( $added_urls ) {
 			$error .= "The translation contains the following unexpected URLs: " . implode( ', ', $added_urls );
+		}
+
+		return trim( $error );
+	}
+
+
+	/**
+	 * Adds a warning for changing placeholders.
+	 *
+	 * This only supports placeholders in the format of '###[A-Z_]+###'.
+	 *
+	 * @param string $original    The original string.
+	 * @param string $translation The translated string.
+	 */
+	public function warning_mismatching_placeholders( $original, $translation ) {
+		$placeholder_regex = '@(###[A-Z_]+###)@';
+
+		preg_match_all( $placeholder_regex, $original, $original_placeholders );
+		$original_placeholders = array_unique( $original_placeholders[0] );
+
+		preg_match_all( $placeholder_regex, $translation, $translation_placeholders );
+		$translation_placeholders = array_unique( $translation_placeholders[0] );
+
+		$missing_placeholders = array_diff( $original_placeholders, $translation_placeholders );
+		$added_placeholders = array_diff( $translation_placeholders, $original_placeholders );
+		if ( ! $missing_placeholders && ! $added_placeholders ) {
+			return true;
+		}
+
+		// Error.
+		$error = '';
+		if ( $missing_placeholders ) {
+			$error .= "The translation appears to be missing the following placeholders: " . implode( ', ', $missing_placeholders ) . "\n";
+		}
+		if ( $added_placeholders ) {
+			$error .= "The translation contains the following unexpected placeholders: " . implode( ', ', $added_placeholders );
 		}
 
 		return trim( $error );
