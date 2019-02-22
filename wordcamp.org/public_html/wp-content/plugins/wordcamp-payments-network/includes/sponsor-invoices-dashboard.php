@@ -511,10 +511,10 @@ function send_invoice_pending_reminder() {
 		$reminder_step       = 1;
 		$last_step_time      = $invoice_sent_at;
 		$wordcamp_post       = get_wordcamp_post();
-		$wordcamp_start_date = ( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'] ?? array() )[0];
-		$wordcamp_lead_email = ( $wordcamp_post->meta['Email Address'] ?? array() )[0];
+		$wordcamp_start_date = $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] ?? false;
+		$wordcamp_lead_email = $wordcamp_post->meta['Email Address'][0]           ?? false;
 
-		if ( empty( $wordcamp_post ) ) {
+		if ( empty( $wordcamp_post ) || ! $wordcamp_lead_email ) {
 			// Maybe this is a central.wordcamp.org test sponsor invoice.
 			restore_current_blog();
 			continue;
