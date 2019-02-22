@@ -10,6 +10,10 @@ body.page-template-about {
 			font-size: ms( 12 );
 			line-height: 1;
 			margin: 2rem auto 1rem;
+
+			@include breakpoint( 0, 480px ) {
+				font-size: ms( 10 );
+			}
 		}
 
 		.entry-description {
