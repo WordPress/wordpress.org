@@ -482,16 +482,12 @@ function send_invoice_pending_reminder() {
 	global $wpdb;
 
 	$table_name    = get_index_table_name();
-	$sent_invoices = $wpdb->get_results(
-		$wpdb->prepare(
-			"
-				SELECT blog_id, invoice_id
-				FROM $table_name
-				WHERE status = 'wcbsi_approved'
-				LIMIT 1000
-			",
-			array()
-		)
+	$sent_invoices = $wpdb->get_results( "
+		SELECT blog_id, invoice_id
+		FROM $table_name
+		WHERE status = 'wcbsi_approved'
+		LIMIT 1000"
+		// Don't forget to add a prepare() call here if you ever add user input.
 	);
 
 	foreach ( $sent_invoices as $invoice_data ) {
