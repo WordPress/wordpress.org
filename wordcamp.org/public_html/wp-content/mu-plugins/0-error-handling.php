@@ -54,13 +54,24 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 		return false;
 	}
 
-	// Always use constants in the keys here to avoid path disclosure.
+	/*
+	 * Ignore warnings/notices that aren't actionable.
+	 *
+	 * Always use constants in the keys here to avoid path disclosure.
+	 */
 	$error_ignorelist = [
 		// See https://core.trac.wordpress.org/ticket/29204
 		ABSPATH . 'wp-includes/SimplePie/Registry.php:215' => 'Non-static method WP_Feed_Cache::create() should not be called statically',
 
 		// This is normal.
 		WP_PLUGIN_DIR . '/hyperdb/db.php:1230' => 'mysqli_query(): MySQL server has gone away',
+
+		// These are trivial mistakes in 3rd party code. They indicate poor quality, but don't warrant action.
+		ABSPATH . '/wp-includes/class-wp-post.php:342' => 'Undefined property: WP_Post::$filter',
+		ABSPATH . '/wp-includes/comment-template.php:1221' => "Trying to get property 'comment_status' of non-object",
+		WP_PLUGIN_DIR . '/jetpack/_inc/lib/class.media-summary.php:119' => 'Undefined index: id',
+		WP_PLUGIN_DIR . '/jetpack/sync/class.jetpack-sync-module-posts.php:151' => "Trying to get property 'post_type' of non-object",
+		WP_PLUGIN_DIR . '/jetpack/sync/class.jetpack-sync-module-posts.php:137' => 'Undefined offset:',
 	];
 
 	if ( isset( $error_ignorelist[ "$file:$line" ] ) && false !== strpos( $err_msg, $error_ignorelist[ "$file:$line" ] ) ) {
