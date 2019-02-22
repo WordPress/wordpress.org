@@ -58,6 +58,9 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 	$error_ignorelist = [
 		// See https://core.trac.wordpress.org/ticket/29204
 		ABSPATH . 'wp-includes/SimplePie/Registry.php:215' => 'Non-static method WP_Feed_Cache::create() should not be called statically',
+
+		// This is normal.
+		WP_PLUGIN_DIR . '/hyperdb/db.php:1230' => 'mysqli_query(): MySQL server has gone away',
 	];
 
 	if ( isset( $error_ignorelist[ "$file:$line" ] ) && false !== strpos( $err_msg, $error_ignorelist[ "$file:$line" ] ) ) {
