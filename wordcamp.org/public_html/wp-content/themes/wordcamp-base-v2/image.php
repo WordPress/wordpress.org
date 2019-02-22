@@ -25,8 +25,8 @@ get_header();
 									esc_attr( get_the_date( 'c' ) ),
 									esc_html( get_the_date() ),
 									wp_get_attachment_url(),
-									$metadata['width'],
-									$metadata['height'],
+									$metadata['width']  ?? 0,
+									$metadata['height'] ?? 0,
 									get_permalink( $post->post_parent ),
 									get_the_title( $post->post_parent )
 								);
