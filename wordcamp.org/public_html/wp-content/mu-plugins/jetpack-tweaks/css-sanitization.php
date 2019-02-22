@@ -132,7 +132,7 @@ function sanitize_csstidy_subvalues( $safecss ) {
  * @return string
  */
 function sanitize_urls_in_css_properties( $url, $property ) {
-	$allowed_properties = array( 'background', 'background-image', 'border-image', 'content', 'cursor', 'list-style', 'list-style-image' );
+	$allowed_properties = array( 'background', 'background-image', 'border-image', 'border-image-source', 'content', 'cursor', 'list-style', 'list-style-image' );
 	$allowed_protocols  = array( 'http', 'https' );
 	// todo maybe add permenant warning note that `data` shouldn't be allowed, see #1616:comment:4
 

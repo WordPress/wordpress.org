@@ -80,3 +80,8 @@ a {
 	font-family: "Fontawesome";
 	content: "\f198";
 }
+
+/* See https://wordpress.slack.com/archives/C08M59V3P/p1550687410005500  */
+.roundcorners {
+	border-image-source: url('https://2019.philadelphia.wordcamp.org/files/2019/02/corners.gif');
+}
