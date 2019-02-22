@@ -163,7 +163,7 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 			// If the venue address was changed, update its coordinates.
 			//phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in `metabox_save` in class-event-admin.php.
 			$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
-			if ( $new_address === $original_meta_values['Physical Address'][0] ) {
+			if ( ! empty( $original_meta_values['Physical Address'][0] ) && $new_address === $original_meta_values['Physical Address'][0] ) {
 				return;
 			}
 
