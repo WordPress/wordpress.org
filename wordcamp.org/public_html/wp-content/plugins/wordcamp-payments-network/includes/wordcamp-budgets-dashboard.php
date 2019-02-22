@@ -785,7 +785,7 @@ function process_import_request() {
 			default:
 				$entry['message'] = 'Unknown payment type.';
 				$results[] = $entry;
-				continue;
+				continue 2;
 		}
 
 		if ( empty( $entry['blog_id'] ) || empty( $entry['post_id'] ) ) {
