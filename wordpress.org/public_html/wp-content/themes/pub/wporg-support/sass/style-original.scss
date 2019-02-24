@@ -167,13 +167,17 @@ div.sidebar #bbpress-forums {
 }
 
 #bbpress-forums .bbp-pagination-count {
-	display: inline-block;
 	float: none;
 }
 
 #bbpress-forums .bbp-pagination-links {
-	display: inline-block;
 	float: right;
+}
+
+#bbpress-forums .bbp-pagination-count,
+#bbpress-forums .bbp-pagination-links {
+	display: inline-block;
+	margin-bottom: 10px;
 }
 
 #bbpress-forums fieldset.bbp-form button {
