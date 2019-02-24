@@ -223,9 +223,14 @@ class Plugin_I18n {
 			return 0;
 		}
 
+		// The slug is optional, use 'default' as .. default.
+		list( $locale, $locale_slug ) = array_merge( explode( '/', $locale ), [ 'default' ] );
+
 		$translation_set_id = $wpdb->get_var( $wpdb->prepare(
-			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s AND slug = "default"',
-			$branch_id, $locale
+			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s AND slug = %s',
+			$branch_id,
+			$locale,
+			$locale_slug
 		) );
 
 		if ( empty( $translation_set_id ) ) {
