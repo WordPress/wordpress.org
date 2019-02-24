@@ -136,7 +136,7 @@ class SVN_Watcher {
 				if ( in_array( strtolower( basename( $path ) ), array( 'readme.txt', 'readme.md' ) ) ) {
 					$plugin['readme_touched'] = true;
 				}
-				if ( ! $plugin['code_touched'] && ( '/' == substr( $path, -1 ) || '.php' == substr( $path, -4 ) ) ) {
+				if ( ! $plugin['code_touched'] && ( '/' === substr( $path, -1 ) || '.php' === substr( $path, -4 ) || '.js' === substr( $path, -3 ) ) ) {
 					$plugin['code_touched'] = true;
 				}
 			}
