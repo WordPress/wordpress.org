@@ -512,6 +512,12 @@ class GP_Locales {
 		$de->google_code = 'de';
 		$de->facebook_locale = 'de_DE';
 
+		$de_formal = clone $de;
+		$de_formal->english_name = 'German (Formal)';
+		$de_formal->native_name = 'Deutsch (Sie)';
+		$de_formal->slug = 'de/formal';
+		$de_formal->wp_locale = 'de_DE_formal';
+
 		$de_ch = new GP_Locale();
 		$de_ch->english_name = 'German (Switzerland)';
 		$de_ch->native_name = 'Deutsch (Schweiz)';
@@ -520,6 +526,12 @@ class GP_Locales {
 		$de_ch->wp_locale = 'de_CH';
 		$de_ch->slug = 'de-ch';
 		$de_ch->google_code = 'de';
+
+		$de_ch_informal = $de_ch;
+		$de_ch_informal->english_name = 'German (Switzerland, Informal)';
+		$de_ch_informal->native_name = 'Deutsch (Schweiz, Du)';
+		$de_ch_informal->slug = 'de-ch/informal';
+		$de_ch_informal->wp_locale = 'de_CH_informal';
 
 		$dv = new GP_Locale();
 		$dv->english_name = 'Dhivehi';
@@ -1590,6 +1602,12 @@ class GP_Locales {
 		$nl->google_code = 'nl';
 		$nl->facebook_locale = 'nl_NL';
 
+		$nl_formal = clone $nl;
+		$nl_formal->english_name = 'Dutch (Formal)';
+		$nl_formal->native_name = 'Nederlands (Formeel)';
+		$nl_formal->slug = 'nl/formal';
+		$nl_formal->wp_locale = 'nl_NL_formal';
+
 		$nl_be = new GP_Locale();
 		$nl_be->english_name = 'Dutch (Belgium)';
 		$nl_be->native_name = 'Nederlands (België)';
@@ -1722,6 +1740,12 @@ class GP_Locales {
 		$pt->slug = 'pt';
 		$pt->google_code = 'pt-PT';
 		$pt->facebook_locale = 'pt_PT';
+
+		$pt_pt_ao90 = clone $pt;
+		$pt_pt_ao90->english_name = 'Portuguese (Portugal, AO90)';
+		$pt_pt_ao90->native_name = 'Português (AO90)';
+		$pt_pt_ao90->slug = 'pt/ao90';
+		$pt_pt_ao90->wp_locale = 'pt_PT_ao90';
 
 		$ps = new GP_Locale();
 		$ps->english_name = 'Pashto';
