@@ -14,8 +14,6 @@
 	<arg value="s"/>
 
 	<rule ref="WordPress">
-		<exclude name="WordPress.VIP.SlowDBQuery.slow_db_query_meta_key" />
-		<exclude name="WordPress.VIP.FileSystemWritesDisallow" />
 		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec" />
 		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.system_calls_shell_exec" />
 	</rule>
