@@ -6,6 +6,7 @@ use GP;
 use GP_Locales;
 use stdClass;
 use WP_CLI;
+use WP_CLI\Utils;
 use WP_CLI_Command;
 use WP_Error;
 
@@ -15,6 +16,13 @@ class Language_Pack extends WP_CLI_Command {
 	const BUILD_DIR = '/nfs/rosetta/builds';
 	const SVN_URL = 'https://i18n.svn.wordpress.org';
 	const PACKAGE_THRESHOLD = 95;
+
+	/**
+	 * Whether a language pack should be enforced.
+	 *
+	 * @var bool
+	 */
+	private $force = false;
 
 	/**
 	 * Generates a language pack.
@@ -35,10 +43,15 @@ class Language_Pack extends WP_CLI_Command {
 	 *
 	 * [--version]
 	 * : Current version of the theme or plugin.
+	 *
+	 * [--force]
+	 * : Generate language pack even when threshold is not reached or no updates exist.
 	 */
 	public function generate( $args, $assoc_args ) {
 		$type = $args[0];
 		$slug = $args[1];
+
+		$this->force = Utils\get_flag_value( $assoc_args, 'force' );
 
 		$args = wp_parse_args( $assoc_args, [
 			'locale'      => false,
@@ -220,7 +233,6 @@ class Language_Pack extends WP_CLI_Command {
 	 * The temporary directory returned will be removed upon script termination.
 	 *
 	 * @param string $prefix Optional. The prefix for the directory, 'hello-dolly' for example.
-	 *
 	 * @return string The temporary directory.
 	 */
 	public static function get_temp_directory( $prefix = '' ) {
@@ -245,7 +257,6 @@ class Language_Pack extends WP_CLI_Command {
 	 * Removes a directory.
 	 *
 	 * @param string $dir The directory which should be removed.
-	 *
 	 * @return bool False if directory is removed, false otherwise.
 	 */
 	public static function remove_temp_directory( $dir ) {
@@ -260,7 +271,6 @@ class Language_Pack extends WP_CLI_Command {
 	 * Retrieves the stable tag of a plugin.
 	 *
 	 * @param string $plugin_slug Slug of a plugin.
-	 *
 	 * @return false|string False on failure, stable tag on success.
 	 */
 	private function get_plugin_stable_tag( $plugin_slug ) {
@@ -278,7 +288,6 @@ class Language_Pack extends WP_CLI_Command {
 	 * Retrieves the current stable version of a theme.
 	 *
 	 * @param string $theme_slug Slug of a theme.
-	 *
 	 * @return false|string False on failure, version on success.
 	 */
 	private function get_latest_theme_version( $theme_slug ) {
@@ -296,7 +305,6 @@ class Language_Pack extends WP_CLI_Command {
 	 * Retrieves the current stable version of a plugin.
 	 *
 	 * @param string $plugin_slug Slug of a plugin.
-	 *
 	 * @return false|string False on failure, version on success.
 	 */
 	private function get_latest_plugin_version( $plugin_slug ) {
@@ -374,20 +382,97 @@ class Language_Pack extends WP_CLI_Command {
 	}
 
 	/**
-	 * Builds a PO file for translations.
+	 * Build a mapping of JS files to translation entries occurring in those files.
+	 * Translation entries occurring in other files are added to the 'po' key.
 	 *
-	 * @param GP_Project         $gp_project The GlotPress project.
-	 * @param GP_Locale          $gp_locale  The GlotPress locale.
-	 * @param GP_Translation_Set $set        The translation set.
-	 * @param string             $dest       Destination file name.
-	 * @return string|WP_Error Last updated date on success, WP_Error on failure.
+	 * @param Translation_Entry[] $entries The translation entries to map.
+	 * @return array The mapping of sources to translation entries.
 	 */
-	private function build_po_file( $gp_project, $gp_locale, $set, $dest ) {
-		$entries = GP::$translation->for_export( $gp_project, $set, [ 'status' => 'current' ] );
-		if ( ! $entries ) {
-			return new WP_Error( 'no_translations', 'No current translations available.' );
+	private function build_mapping( $entries ) {
+		$mapping = [];
+
+		foreach ( $entries as $entry ) {
+			/** @var Translation_Entry $entry */
+
+			// Find all unique sources this translation originates from.
+			$sources = array_map( function ( $reference ) {
+				$parts = explode( ':', $reference );
+				$file  = $parts[0];
+
+				if ( substr( $file, -7 ) === '.min.js' ) {
+					return substr( $file, 0, -7 ) . '.js';
+				}
+
+				if ( substr( $file, -3 ) === '.js' ) {
+					return $file;
+				}
+				return 'po';
+			}, $entry->references );
+
+			// Always add all entries to the PO file.
+			$sources[] = 'po';
+
+			$sources = array_unique( $sources );
+
+			foreach ( $sources as $source ) {
+				$mapping[ $source ][] = $entry;
+			}
 		}
 
+		return $mapping;
+	}
+
+	/**
+	 * Builds a a separate JSON file with translations for each JavaScript file.
+	 *
+	 * @param GP_Project          $gp_project The GlotPress project.
+	 * @param GP_Locale           $gp_locale  The GlotPress locale.
+	 * @param GP_Translation_Set  $set        The translation set.
+	 * @param array               $mapping    A mapping of files to translation entries.
+	 * @param string              $base_dest  Destination file name.
+	 * @return array An array of translation files built, may be empty if no translations in JS files exist.
+	 */
+	private function build_json_files( $gp_project, $gp_locale, $set, $mapping, $base_dest ) {
+		$files  = array();
+		$format = gp_array_get( GP::$formats, 'jed1x' );
+
+		foreach ( $mapping as $file => $entries ) {
+			// Don't create JSON files for source files.
+			if ( 0 === strpos( $file, 'src/' ) || false !== strpos( $file, '/src/' ) ) {
+				continue;
+			}
+
+			// Get the translations in Jed 1.x compatible JSON format.
+			$json_content = $format->print_exported_file( $gp_project, $gp_locale, $set, $entries );
+
+			// Decode and add comment with file reference for debugging.
+			$json_content_decoded          = json_decode( $json_content );
+			$json_content_decoded->comment = [ 'reference' => $file ];
+
+			$json_content = wp_json_encode( $json_content_decoded );
+
+			$hash = md5( $file );
+			$dest = "{$base_dest}-{$hash}.json";
+
+			file_put_contents( $dest, $json_content );
+
+			$files[] = $dest;
+		}
+
+		return $files;
+	}
+
+	/**
+	 * Builds a PO file for translations.
+	 *
+	 * @param GP_Project          $gp_project The GlotPress project.
+	 * @param GP_Locale           $gp_locale  The GlotPress locale.
+	 * @param GP_Translation_Set  $set        The translation set.
+	 * @param Translation_Entry[] $entries    The translation entries.
+	 * @param string              $dest       Destination file name.
+	 * @return string|WP_Error Last updated date on success, WP_Error on failure.
+	 */
+	private function build_po_file( $gp_project, $gp_locale, $set, $entries, $dest ) {
 		$format     = gp_array_get( GP::$formats, 'po' );
 		$po_content = $format->print_exported_file( $gp_project, $gp_locale, $set, $entries );
 
@@ -406,7 +491,6 @@ class Language_Pack extends WP_CLI_Command {
 	 * Executes a command via exec().
 	 *
 	 * @param string $command The escaped command to execute.
-	 *
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
 	private function execute_command( $command ) {
@@ -427,8 +511,7 @@ class Language_Pack extends WP_CLI_Command {
 	 * @param string $language Language the language pack is for.
 	 * @param string $version  Version of the theme/plugin.
 	 * @param string $updated  Last updated.
-	 * @return string|WP_Error 'updated' when language pack was updated, 'inserted' if it's a new
-	 *                         language pack. WP_Error on failure.
+	 * @return true|WP_Error true when language pack was updated, WP_Error on failure.
 	 */
 	private function insert_language_pack( $type, $domain, $language, $version, $updated ) {
 		global $wpdb;
@@ -443,7 +526,7 @@ class Language_Pack extends WP_CLI_Command {
 		) );
 
 		if ( $existing ) {
-			return new WP_Error( 'language_pack_exists', 'The language pack is already imported for this version.' );
+			return true;
 		}
 
 		$now = current_time( 'mysql', 1 );
@@ -473,11 +556,7 @@ class Language_Pack extends WP_CLI_Command {
 			$wpdb->insert_id
 		) );
 
-		if ( $wpdb->rows_affected ) {
-			return 'updated';
-		} else {
-			return 'inserted';
-		}
+		return true;
 	}
 
 	/**
@@ -487,7 +566,7 @@ class Language_Pack extends WP_CLI_Command {
 	 */
 	private function build_language_packs( $data ) {
 		$existing_packs = $this->get_active_language_packs( $data->type, $data->domain, $data->version );
-		$svn_command = $this->get_svn_command();
+		$svn_command    = $this->get_svn_command();
 
 		foreach ( $data->translation_sets as $set ) {
 			// Get WP locale.
@@ -510,13 +589,13 @@ class Language_Pack extends WP_CLI_Command {
 
 			// Check if percent translated is above threshold.
 			$percent_translated = $set->percent_translated();
-			if ( $percent_translated < self::PACKAGE_THRESHOLD ) {
+			if ( ! $this->force && $percent_translated < self::PACKAGE_THRESHOLD ) {
 				WP_CLI::log( "Skip {$wp_locale}, translations below threshold ({$percent_translated}%)." );
 				continue;
 			}
 
 			// Check if new translations are available since last build.
-			if ( isset( $existing_packs[ $wp_locale ] ) ) {
+			if ( ! $this->force && isset( $existing_packs[ $wp_locale ] ) ) {
 				$pack_time = strtotime( $existing_packs[ $wp_locale ]->updated );
 				$glotpress_time = strtotime( $set->last_modified() );
 
@@ -526,25 +605,43 @@ class Language_Pack extends WP_CLI_Command {
 				}
 			}
 
-			$export_directory = "{$data->svn_checkout}/{$data->domain}/{$data->version}/{$wp_locale}";
-			$build_directory  = self::BUILD_DIR . "/{$data->type}s/{$data->domain}/{$data->version}";
-			$filename         = "{$data->domain}-{$wp_locale}";
-			$po_file          = "{$export_directory}/{$filename}.po";
-			$mo_file          = "{$export_directory}/{$filename}.mo";
-			$zip_file         = "{$export_directory}/{$filename}.zip";
-			$build_zip_file   = "{$build_directory}/{$wp_locale}.zip";
+			$entries = GP::$translation->for_export( $data->gp_project, $set, [ 'status' => 'current' ] );
+			if ( ! $entries ) {
+				WP_CLI::warning( "No current translations available for {$wp_locale}." );
+				continue;
+			}
+
+			$working_directory = "{$data->svn_checkout}/{$data->domain}";
+			$export_directory  = "{$working_directory}/{$data->version}/{$wp_locale}";
+			$build_directory   = self::BUILD_DIR . "/{$data->type}s/{$data->domain}/{$data->version}";
+
+			$filename       = "{$data->domain}-{$wp_locale}";
+			$json_file_base = "{$export_directory}/{$filename}";
+			$po_file        = "{$export_directory}/{$filename}.po";
+			$mo_file        = "{$export_directory}/{$filename}.mo";
+			$zip_file       = "{$export_directory}/{$filename}.zip";
+			$build_zip_file = "{$build_directory}/{$wp_locale}.zip";
 
 			// Update/create directories.
 			$this->update_svn_directory( $export_directory );
 
+			// Build a mapping based on where the translation entries occur and separate the po entries.
+			$mapping    = $this->build_mapping( $entries );
+			$po_entries = array_key_exists( 'po', $mapping ) ? $mapping['po'] : [];
+
+			unset( $mapping['po'] );
+
+			// Create JED json files for each JS file.
+			$json_files = $this->build_json_files( $data->gp_project, $gp_locale, $set, $mapping, $json_file_base );
+
 			// Create PO file.
-			$last_modified = $this->build_po_file( $data->gp_project, $gp_locale, $set, $po_file );
+			$last_modified = $this->build_po_file( $data->gp_project, $gp_locale, $set, $po_entries, $po_file );
 
 			if ( is_wp_error( $last_modified ) ) {
 				WP_CLI::warning( sprintf( "PO generation for {$wp_locale} failed: %s", $last_modified->get_error_message() ) );
 
 				// Clean up.
-				$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+				$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 				continue;
 			}
@@ -561,17 +658,18 @@ class Language_Pack extends WP_CLI_Command {
 				WP_CLI::warning( "MO generation for {$wp_locale} failed." );
 
 				// Clean up.
-				$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+				$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 				continue;
 			}
 
 			// Create ZIP file.
 			$result = $this->execute_command( sprintf(
-				'zip -9 -j %s %s %s 2>&1',
+				'zip -9 -j %s %s %s %s 2>&1',
 				escapeshellarg( $zip_file ),
 				escapeshellarg( $po_file ),
-				escapeshellarg( $mo_file )
+				escapeshellarg( $mo_file ),
+				implode( ' ', array_map( 'escapeshellarg', $json_files ) )
 			) );
 
 			if ( is_wp_error( $result ) ) {
@@ -579,7 +677,7 @@ class Language_Pack extends WP_CLI_Command {
 				WP_CLI::warning( "ZIP generation for {$wp_locale} failed." );
 
 				// Clean up.
-				$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+				$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 				continue;
 			}
@@ -595,7 +693,7 @@ class Language_Pack extends WP_CLI_Command {
 				WP_CLI::warning( "Creating build directories for {$wp_locale} failed." );
 
 				// Clean up.
-				$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+				$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 				continue;
 			}
@@ -612,7 +710,7 @@ class Language_Pack extends WP_CLI_Command {
 				WP_CLI::warning( "Moving ZIP file for {$wp_locale} failed." );
 
 				// Clean up.
-				$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+				$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 				continue;
 			}
@@ -624,7 +722,7 @@ class Language_Pack extends WP_CLI_Command {
 				WP_CLI::warning( sprintf( "Language pack for {$wp_locale} failed: %s", $result->get_error_message() ) );
 
 				// Clean up.
-				$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+				$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 				continue;
 			}
@@ -649,13 +747,13 @@ class Language_Pack extends WP_CLI_Command {
 				WP_CLI::warning( "SVN commit for {$wp_locale} failed." );
 
 				// Clean up.
-				$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+				$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 				continue;
 			}
 
 			// Clean up.
-			$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+			$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 			WP_CLI::success( "Language pack for {$wp_locale} generated." );
 		}
