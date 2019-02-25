@@ -527,7 +527,7 @@ class GP_Locales {
 		$de_ch->slug = 'de-ch';
 		$de_ch->google_code = 'de';
 
-		$de_ch_informal = $de_ch;
+		$de_ch_informal = clone $de_ch;
 		$de_ch_informal->english_name = 'German (Switzerland, Informal)';
 		$de_ch_informal->native_name = 'Deutsch (Schweiz, Du)';
 		$de_ch_informal->slug = 'de-ch/informal';
