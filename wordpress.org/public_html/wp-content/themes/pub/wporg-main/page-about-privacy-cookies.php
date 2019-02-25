@@ -79,12 +79,6 @@ the_post();
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
-								<th>__qca</th>
-								<td><?php esc_html_e( '5 years', 'wporg' ); ?></td>
-								<td><a href="https://www.quantcast.com/privacy/">Quantcast</a></td>
-								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
-							</tr>
-							<tr>
 								<th>__utma</th>
 								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
 								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Used to distinguish users and sessions. The cookie is created when the javascript library executes and no existing __utma cookies exists. The cookie is updated every time data is sent to Google Analytics.', 'wporg' ); ?></td>
@@ -324,8 +318,7 @@ the_post();
 						?>
 					</p>
 					<p><?php esc_html_e( 'Some specific opt-out programs are available here:', 'wporg' ); ?></p>
-					<p>Quantcast - <a href="https://www.quantcast.com/opt-out/">https://www.quantcast.com/opt-out/</a><br/>
-					Google Analytics - <a href="https://tools.google.com/dlpage/gaoptout">https://tools.google.com/dlpage/gaoptout</a></p>
+					<p>Google Analytics - <a href="https://tools.google.com/dlpage/gaoptout">https://tools.google.com/dlpage/gaoptout</a></p>
 					<p><?php esc_html_e( 'It&#8217;s important to note that restricting or disabling the use of cookies can limit the functionality of sites, or prevent them from working correctly at all.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></h3>
