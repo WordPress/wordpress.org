@@ -242,6 +242,9 @@ function document_title( $title ) {
 		$title['title']   = __( 'WordPress Plugins', 'wporg-plugins' );
 		$title['tagline'] = __( 'WordPress.org', 'wporg-plugins' );
 	} else {
+		if ( is_singular( 'plugin' ) ) {
+			$title['title'] .= ' - ' . __( 'WordPress plugin', 'wporg-plugins' );
+		}
 		$title['site'] = __( 'WordPress.org', 'wporg-plugins' );
 	}
 
