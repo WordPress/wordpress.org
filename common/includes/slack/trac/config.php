@@ -71,6 +71,7 @@ class Meta extends Trac {
 		'plugins/rosetta'                       => '#meta-i18n',
 		'plugins/wporg-gp-'                     => '#meta-i18n',
 		'translations'                          => '#meta-i18n',
+		'mu-plugins/pub/locales'                => '#meta-i18n',
 		'developer-reference/'                  => '#meta-devhub',
 		'wporg-developer/'                      => '#meta-devhub',
 		'trac.wordpress.org/'                   => '#meta-tracdev',
