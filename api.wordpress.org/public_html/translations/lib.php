@@ -51,35 +51,6 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	}
 
 	require_once GLOTPRESS_LOCALES_PATH;
-	// Temporary: Add language variants to the list of GlotPress locales.
-	$GLOBALS['gp_locales'] = new GP_Locales;
-	$de_formal = clone GP_Locales::by_field( 'wp_locale', 'de_DE' );
-	$de_formal->english_name = 'German (Formal)';
-	$de_formal->native_name = 'Deutsch (Sie)';
-	$de_formal->slug = 'de/formal';
-	$de_formal->wp_locale = 'de_DE_formal';
-	$GLOBALS['gp_locales']->locales['de/formal'] = $de_formal;
-
-	$nl_formal = clone GP_Locales::by_field( 'wp_locale', 'nl_NL' );
-	$nl_formal->english_name = 'Dutch (Formal)';
-	$nl_formal->native_name = 'Nederlands (Formeel)';
-	$nl_formal->slug = 'nl/formal';
-	$nl_formal->wp_locale = 'nl_NL_formal';
-	$GLOBALS['gp_locales']->locales['nl/formal'] = $nl_formal;
-
-	$de_ch_informal = clone GP_Locales::by_field( 'wp_locale', 'de_CH' );
-	$de_ch_informal->english_name = 'German (Switzerland, Informal)';
-	$de_ch_informal->native_name = 'Deutsch (Schweiz, Du)';
-	$de_ch_informal->slug = 'de-ch/informal';
-	$de_ch_informal->wp_locale = 'de_CH_informal';
-	$GLOBALS['gp_locales']->locales['de-ch/informal'] = $de_ch_informal;
-
-	$pt_pt_ao90 = clone GP_Locales::by_field( 'wp_locale', 'pt_PT' );
-	$pt_pt_ao90->english_name = 'Portuguese (Portugal, AO90)';
-	$pt_pt_ao90->native_name = 'Português (AO90)';
-	$pt_pt_ao90->slug = 'pt/ao90';
-	$pt_pt_ao90->wp_locale = 'pt_PT_ao90';
-	$GLOBALS['gp_locales']->locales['pt/ao90'] = $pt_pt_ao90;
 
 	$base_url = is_ssl() ? 'https' : 'http';
 	$base_url .= '://downloads.wordpress.org/translation/';
