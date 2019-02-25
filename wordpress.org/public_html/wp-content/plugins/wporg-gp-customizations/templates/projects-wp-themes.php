@@ -61,26 +61,16 @@ gp_tmpl_header();
 			<?php
 			foreach ( $translation_locale_complete as $locale_slug => $total_complete ) :
 				$gp_locale = GP_Locales::by_slug( $locale_slug );
-				$set_slug  = 'default';
 
-				// Variants (de/formal for example) don't have GP_Locales in this context
-				if ( ! $gp_locale && ( list( $base_locale_slug, $set_slug ) = explode( '/', $locale_slug ) ) ) :
-					$_gp_locale = GP_Locales::by_slug( $base_locale_slug );
-					if ( $_gp_locale ) {
-						$gp_locale = clone $_gp_locale;
-						// Just append it for now..
-						$gp_locale->wp_locale .= '/' . $set_slug;
-						$gp_locale->english_name .= ' (' . ucfirst( $set_slug ) . ')';
-					}
-				endif;
-
-				if ( ! $gp_locale || ! $gp_locale->wp_locale ) :
+				if ( ! $gp_locale || ! $gp_locale->wp_locale ) {
 					continue;
-				endif;
-			?>
+				}
+
+				list( $locale, $set_slug ) = array_merge( explode( '/', $locale_slug ), [ 'default' ] );
+				?>
 				<tr>
 					<th title="<?php echo esc_attr( $gp_locale->wp_locale ); ?>">
-						<a href="<?php echo esc_url( gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug, $project->path ) ) ); ?>">
+						<a href="<?php echo esc_url( gp_url( gp_url_join( 'locale', $locale, $set_slug, $project->path ) ) ); ?>">
 							<?php echo esc_html( $gp_locale->english_name ); ?>
 						</a>
 					</th>
@@ -99,11 +89,11 @@ gp_tmpl_header();
 											$percent_class = 90;
 										}
 
-										$link_url  = gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug, $project->path ) );
+										$link_url  = gp_url( gp_url_join( 'locale', $locale, $set_slug, $project->path ) );
 										$link_text = number_format( $percent );
 									else :
 										$percent_class = (int) ( $percent / 10 ) * 10;
-										$link_url  = gp_url_project( $project->path, gp_url_join( $gp_locale->slug, $set_slug ) );
+										$link_url  = gp_url_project( $project->path, gp_url_join( $locale, $set_slug ) );
 										$link_text = "$percent%";
 
 									endif;

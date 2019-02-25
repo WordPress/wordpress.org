@@ -26,29 +26,22 @@ gp_tmpl_header();
 			<?php
 			foreach ( $translation_locale_complete as $locale_slug => $total_complete ) :
 				$gp_locale = GP_Locales::by_slug( $locale_slug );
-				$set_slug = 'default';
-				// Variants (de/formal for example) don't have GP_Locales in this context
-				if ( ! $gp_locale && strpos( $locale_slug, '/' ) && ( list( $base_locale_slug, $set_slug ) = explode( '/', $locale_slug ) ) ) {
-					$_gp_locale = GP_Locales::by_slug( $base_locale_slug );
-					if ( $_gp_locale ) {
-						$gp_locale = clone $_gp_locale;
-						// Just append it for now..
-						$gp_locale->wp_locale .= '/' . $set_slug;
-					}
-				}
+
 				if ( ! $gp_locale || ! $gp_locale->wp_locale ) {
 					continue;
 				}
-			?>
+
+				list( $locale, $set_slug ) = array_merge( explode( '/', $locale_slug ), [ 'default' ] );
+				?>
 				<tr>
 					<th title="<?php echo esc_attr( $gp_locale->english_name ); ?>">
-						<a href="<?php echo esc_url( gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug ) ) ); ?>">
+						<a href="<?php echo esc_url( gp_url( gp_url_join( 'locale', $locale, $set_slug ) ) ); ?>">
 							<?php echo esc_html( $gp_locale->wp_locale ); ?>
 						</a>
 					</th>
 					<?php
 					foreach ( $projects as $slug => $project ) {
-						$projecturl = gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug, $project->path ) );
+						$projecturl = gp_url( gp_url_join( 'locale', $locale, $set_slug, $project->path ) );
 						$project_name = str_replace( array( 'WordPress.org ', 'WordPress for ', 'WordPress ', 'ectory' ), '', $project->name );
 
 						if ( isset( $translation_locale_statuses[ $locale_slug ][ $project->path ] ) ) {
