@@ -390,6 +390,12 @@ class GP_Locales {
 		$ca->google_code = 'ca';
 		$ca->facebook_locale = 'ca_ES';
 
+		$ca_valencia = clone $ca;
+		$ca_valencia->english_name = 'Catalan (Valencian)';
+		$ca_valencia->native_name = 'Català (Valencià)';
+		$ca_valencia->wp_locale = 'ca_valencia';
+		$ca_valencia->slug = 'ca/valencia';
+
 		$ce = new GP_Locale();
 		$ce->english_name = 'Chechen';
 		$ce->native_name = 'Нохчийн мотт';
