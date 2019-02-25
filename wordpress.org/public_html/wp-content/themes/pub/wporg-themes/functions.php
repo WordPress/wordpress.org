@@ -175,6 +175,9 @@ function wporg_themes_document_title( $title ) {
 	}
 
 	if ( ! is_front_page() ) {
+		if ( is_singular( 'repopackage' ) ) {
+			$title['title'] .= ' - ' . __( 'WordPress theme', 'wporg-themes' );
+		}
 		$title['site'] = __( 'WordPress.org', 'wporg-themes' );
 	}
 
