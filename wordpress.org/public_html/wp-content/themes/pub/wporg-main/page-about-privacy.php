@@ -77,8 +77,8 @@ the_post();
 						<li>
 							<?php
 							printf(
-								/* translators: Login URL */
-								wp_kses_post( __( 'Visit <a href="%s">https://login.wordpress.org</a>, and enter your username and password.', 'wporg' ) ),
+								/* translators: 1: Login URL */
+								wp_kses_post( __( 'Visit <a href="%1$s">%1$s</a>, and enter your username and password.', 'wporg' ) ),
 								'https://login.wordpress.org/'
 							);
 							?>
@@ -93,6 +93,21 @@ the_post();
 					<p><?php esc_html_e( 'WordPress.org shall maintain WordCamp attendee data for 3 years to better track and foster community growth, and then automatically delete non-essential data collected via registration. Attendee names and email addresses will be retained indefinitely, to preserve our ability to respond to code of conduct reports.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'On WordCamp.org sites, banking/financial data collected as part of a reimbursement request is deleted from WordCamp.org 7 days after the request is marked paid. The reason for the 7-day retention period is to prevent organizers having to re-enter their banking details if a wire fails or if a payment was marked &#8220;Paid&#8221; in error. Invoices and receipts related to WordCamp expenses are retained for 7 years after the close of the calendar year&#8217;s audit, by instruction of our financial consultants (auditors & bookkeepers).', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'When deletion is requested or otherwise required, we will anonymise the data of data subjects and/or remove their information from publicly accessible sites if the deletion of data would break essential systems or damage the logs or records necessary to the operation, development, or archival records of the WordPress open source project.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'If you would like to request deletion of your account and associated data, please follow these steps:', 'wporg' ); ?></p>
+					<ol>
+						<li>
+							<?php
+							printf(
+								/* translators: 1: Data erasure request URL */
+								wp_kses_post( __( 'Visit <a href="%1$s">%1$s</a>.', 'wporg' ) ),
+								'https://wordpress.org/about/privacy/data-erasure-request/'
+							);
+							?>
+						</li>
+						<li><?php esc_html_e( 'Enter your email address.', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'Click &#8220;Accept Declaration and Request Permanent Account Deletion&#8221;.', 'wporg' ); ?></li>
+					</ol>
+					<p><?php esc_html_e( 'Note: If you have a WP.org account, it&#8217;s recommended you log in before submitting to associate your account with the request.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'Rights in relation to your information', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'You may have certain rights under data protection law in relation to the personal information we hold about you. In particular, you may have a right to:', 'wporg' ); ?></p>
