@@ -38,27 +38,6 @@ function wcorg_login_css() {
 }
 
 /**
- * Set the locale on the login screen
- *
- * Currently all logins are funneled through the main site, so they're all in English by default. That sucks for
- * international users, so this overrides the main site's locale and uses the one from the site that they're
- * logging into instead.
- *
- * @todo This can be removed after the subdirectory migration.
- *
- * @param string $locale
- * @return string
- */
-function wcorg_login_message_locale( $locale ) {
-	if ( is_main_network() && false !== strpos( $_SERVER['SCRIPT_NAME'], '/wp-login.php' ) ) {
-		$locale = wcorg_get_login_locale( $locale );
-	}
-
-	return $locale;
-}
-add_filter( 'locale', 'wcorg_login_message_locale' );
-
-/**
  * Override the default login message.
  *
  * We share user tables with WordPress.org, so users need to know to use that account.
@@ -69,7 +48,7 @@ add_filter( 'locale', 'wcorg_login_message_locale' );
  * @return string
  */
 function wcorg_login_message( $message, $redirect_to = false ) {
-	$locale           = wcorg_get_login_locale();
+	$locale           = get_locale();
 	$registration_url = wcorg_get_wporg_forums_url( $locale, 'register' );
 
 	if ( ! $redirect_to && ! empty( $_REQUEST['redirect_to'] ) ) {
@@ -114,31 +93,6 @@ function wcorg_login_message( $message, $redirect_to = false ) {
 	return $message;
 }
 add_filter( 'login_message', 'wcorg_login_message' );
-
-/**
- * Get the locale used by the site that the user is logging in to.
- *
- * @todo After subdirectory migration, users will login at city.wordcamp.org/year/wp-login.php instead of being
- * redirected through the main site, so change this to pull from current site's locale instead of using redirect_to
- *
- * @return string
- */
-function wcorg_get_login_locale( $locale = 'en_US' ) {
-	if ( ! empty( $_REQUEST['redirect_to'] ) ) {
-		$url = parse_url( $_REQUEST['redirect_to'] );
-
-		if ( isset( $url['host'] ) ) {
-			$blog_details = get_blog_details( array( 'domain' => $url['host'] ), false );
-
-			if ( $wplang = get_blog_option( $blog_details->blog_id, 'WPLANG' ) ) {
-				$locale = $wplang;
-			}
-		}
-	}
-
-	return $locale;
-}
-
 
 /**
  * Determine the correct WordPress.org forums URL for the given locale
