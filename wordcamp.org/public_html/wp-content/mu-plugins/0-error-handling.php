@@ -196,7 +196,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line, $occurrences = 0 
 	$error_name  = array_search( $err_no, get_defined_constants( true )['Core'] ) ?: '';
 	$messages    = explode( 'Stack trace:', $err_msg, 2 );
 	$text        = ( ! empty( $messages[0] ) ) ? trim( sanitize_text_field( $messages[0] ) ) : '';
-	$stack_trace = ( ! empty( $messages[1] ) ) ? trim( sanitize_text_field( $messages[1] ) ) : '';
+	$stack_trace = wp_debug_backtrace_summary();
 	$domain      = esc_url( get_site_url() );
 	$page_slug   = sanitize_text_field( untrailingslashit( $_SERVER['REQUEST_URI'] ) ) ?: '/';
 	$footer      = '';
@@ -245,15 +245,12 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line, $occurrences = 0 
 			'value' => "$file:$line",
 			'short' => false,
 		],
-	];
-
-	if ( $stack_trace ) {
-		$fields[] = [
+		[
 			'title' => 'Stack Trace',
 			'value' => $stack_trace,
 			'short' => false,
-		];
-	}
+                ],
+	];
 
 	$attachment = array(
 		'fallback'    => $text,
