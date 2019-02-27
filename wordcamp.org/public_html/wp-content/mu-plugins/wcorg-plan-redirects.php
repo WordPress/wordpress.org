@@ -1,10 +1,11 @@
 <?php
+
 // No direct or CLI access.
 if ( ! defined( 'ABSPATH' ) || ! ABSPATH || ( defined( 'WP_CLI' ) && WP_CLI ) )
 	return;
 
 // Redirects for plan.wordcamp.org front-end only.
-if ( $_SERVER['HTTP_HOST'] != 'plan.wordcamp.org' || is_admin() ) {
+if ( $_SERVER['HTTP_HOST'] != 'plan.wordcamp.org' || is_admin() || wp_doing_cron() ) {
 	return;
 }
 
@@ -81,3 +82,4 @@ add_action( 'init', function() {
 
 	die( wp_redirect( esc_url_raw( 'https://make.wordpress.org/community/handbook/wordcamp-organizer' . $_SERVER['REQUEST_URI'] ), 301 ) );
 });
+
