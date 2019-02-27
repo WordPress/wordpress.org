@@ -231,7 +231,8 @@ ADDRESS;
 		add_post_meta( $post_id, 'Date Applied', time() );
 		add_post_meta( $post_id, 'Extra Comments', $data['q_additional_comments'] );
 		add_post_meta( $post_id, 'Meetup Location', $data['q_mtp_loc'] );
-		add_post_meta(
+
+		$status_log_id = add_post_meta(
 			$post_id,
 			'_status_change',
 			array(
@@ -240,6 +241,11 @@ ADDRESS;
 				'message'   => sprintf( '%s &rarr; %s', 'Application', $statuses[ self::get_default_status() ] ),
 			)
 		);
+
+		// See Event_admin::log_status_changes().
+		if ( $status_log_id ) {
+			add_post_meta( $post_id, "_status_change_log_{$post['post_type']} $status_log_id", time() );
+		}
 
 		$this->post = get_post( $post_id );
 
