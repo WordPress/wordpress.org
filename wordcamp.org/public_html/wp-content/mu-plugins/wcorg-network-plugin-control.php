@@ -33,6 +33,7 @@ function _get_network_plugin_state_list( $state ) {
 			'camptix-badge-generator/bootstrap.php',
 			'camptix/camptix.php',
 			'camptix-network-tools/camptix-network-tools.php',
+			'classic-editor/classic-editor.php',
 			'custom-content-width/custom-content-width.php',
 			'email-post-changes/email-post-changes.php',
 			'email-post-changes-specific-post/email-post-changes-specific-post.php',
