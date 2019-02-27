@@ -121,7 +121,7 @@ $date_format = get_option( 'date_format' );
 								<a href="https://make.wordpress.org/core/5-2/">5.2</a>
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td><?php echo date_i18n( 'F Y', strtotime( 'April 30, 2019' ) ); ?></td>
+							<td><?php echo date_i18n( 'F j, Y', strtotime( 'April 30, 2019' ) ); ?></td>
 						</tr>
 						</tbody>
 					</table>
