@@ -64,10 +64,11 @@ function get_whitelist() {
 			'danieltj',
 			'desrosj',
 			'JeffPaul',
-			'karmatosed',
-			'psykro', // @jon_bossenger on Slack
 			'JoshuaWold',
+			'karmatosed',
+			'lukecarbis',
 			'pbiron',
+			'psykro', // @jon_bossenger on Slack
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
 		) ),
