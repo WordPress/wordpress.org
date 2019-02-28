@@ -1,12 +1,13 @@
 <?php
 
 namespace WordCamp\Jetpack_Tweaks;
+use WP_Site;
 
 defined( 'WPINC' ) or die();
 
 add_filter( 'jetpack_get_default_modules',                     __NAMESPACE__ . '\default_jetpack_modules'       );
 add_filter( 'pre_update_site_option_jetpack-network-settings', __NAMESPACE__ . '\auto_connect_new_sites', 10, 2 );
-add_action( 'wpmu_new_blog',                                   __NAMESPACE__ . '\schedule_connect_new_site'     );
+add_action( 'wp_initialize_site',                              __NAMESPACE__ . '\schedule_connect_new_site', 11 );
 add_action( 'wcorg_connect_new_site',                          __NAMESPACE__ . '\wcorg_connect_new_site', 10, 2 );
 
 /*
@@ -39,13 +40,13 @@ function auto_connect_new_sites( $new_value, $old_value ) {
 /**
  * Schedule an email asking to connect Jetpack to WordPress.com
  *
- * @param int $blog_id The blog id.
+ * @param WP_Site $new_site
  */
-function schedule_connect_new_site( $blog_id ) {
+function schedule_connect_new_site( $new_site ) {
 	wp_schedule_single_event(
 		time() + 12 * HOUR_IN_SECONDS + 600, // After the the SSL certificate has been installed
 		'wcorg_connect_new_site_email',
-		array( $blog_id, get_current_user_id() )
+		array( $new_site->blog_id, get_current_user_id() )
 	);
 }
 

@@ -162,9 +162,18 @@ class WordCamp_New_Site {
 		$path              = isset( $url_components['path'] ) ? $url_components['path'] : '';
 		$wordcamp_meta     = get_post_custom( $wordcamp_id );
 		$lead_organizer    = $this->get_user_or_current_user( $wordcamp_meta['WordPress.org Username'][0] );
-		$site_meta         = array( 'public' => 1 );
-		$this->new_site_id = wpmu_create_blog( $url_components['host'], $path, 'WordCamp Event', $lead_organizer->ID, $site_meta );
-		// todo can probably just set the final name here, rather than a generic one here and the final one in set_default_options()
+
+		$blog_name = apply_filters( 'the_title', $wordcamp->post_title );
+		if ( ! empty( $wordcamp->{'Start Date (YYYY-mm-dd)'} ) ) {
+			$blog_name .= date( ' Y', $wordcamp->{'Start Date (YYYY-mm-dd)'} );
+		}
+
+		$this->new_site_id = wp_insert_site( array(
+			'domain'  => $url_components['host'],
+			'path'    => $path,
+			'title'   => $blog_name,
+			'user_id' => $lead_organizer->ID,
+		) );
 
 		if ( is_int( $this->new_site_id ) ) {
 			update_post_meta( $wordcamp_id, '_site_id', $this->new_site_id );    // this is used in other plugins to map the `wordcamp` post to it's corresponding site
@@ -391,13 +400,7 @@ class WordCamp_New_Site {
 		$coming_soon_settings            = $WCCSP_Settings->get_settings();
 		$coming_soon_settings['enabled'] = 'on';
 
-		$blog_name = apply_filters( 'the_title', $wordcamp->post_title );
-		if ( isset( $meta['Start Date (YYYY-mm-dd)'] ) && $meta['Start Date (YYYY-mm-dd)'][0] > 0 ) {
-			$blog_name .= date( ' Y', $meta['Start Date (YYYY-mm-dd)'][0] );
-		}
-
 		update_option( 'admin_email',                  $admin_email );
-		update_option( 'blogname',                     $blog_name );
 		update_option( 'blogdescription',              __( 'Just another WordCamp', 'wordcamporg' ) );
 		update_option( 'close_comments_for_old_posts', 1 );
 		update_option( 'close_comments_days_old',      30 );
