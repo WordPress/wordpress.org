@@ -17,6 +17,9 @@ class WordPressTV_Theme {
 
 			add_action( 'after_setup_theme', array( $this, 'setup' ) );
 		}
+
+		// Add any actions/filters that should run for WordPress.TV & Blog.WordPress.TV here.
+		add_action( 'wp_head', array( $this, 'rel_canonical' ) );
 	}
 
 	/**
@@ -40,6 +43,32 @@ class WordPressTV_Theme {
 			'footer'             => __( 'Footer Menu', 'wptv' ),
 			'featured_wordcamps' => __( 'Featured WordCamps', 'wptv' ),
 		) );
+	}
+
+	/**
+	 * Output `<link rel="canonical">` links where needed.
+	 */
+	function rel_canonical() {
+		$canonical = false;
+
+		if ( is_front_page() ) {
+			$canonical = home_url('/');
+
+		// Speakers, Events, Producers, Tags, Years/WordCamp.TV,
+		} elseif ( is_tax() || is_tag() || is_category() ) {
+			$canonical = get_term_link( get_queried_object() );
+			if ( is_wp_error( $canonical ) ) {
+				$canonical = false;
+			}
+
+			if ( $canonical && get_query_var( 'paged' ) > 1 ) {
+				$canonical .= 'page/' . (int) get_query_var( 'paged' ) . '/';
+			}
+		}
+
+		if ( $canonical ) {
+			printf( '<link rel="canonical" href="%s">', esc_url( $canonical ) );
+		}
 	}
 
 	/**
