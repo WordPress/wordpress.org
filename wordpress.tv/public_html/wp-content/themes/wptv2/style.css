@@ -1817,19 +1817,23 @@ a {
 	clear: both;
 	padding: 10px 0;
 	margin: 0 0 50px 0;
+	text-align: center;
 }
 
-.pagination div {
-	width: 40%
+.pagination .nav-links .page-numbers {
+	margin: auto 0.5em;
 }
 
-.nav-next {
-	float: right;
-	text-align: right;
+.pagination .current {
+	font-weight: bold;
 }
 
-.nav-previous {
+.pagination a.prev {
 	float: left;
+}
+
+.pagination a.next {
+	float: right;
 }
 
 .primary-content #searchform {
