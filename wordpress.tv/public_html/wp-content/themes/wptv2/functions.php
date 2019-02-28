@@ -95,12 +95,35 @@ class WordPressTV_Theme {
 				__( 'Videos in %s', 'wptv' ),
 				get_queried_object()->name
 			);
-		} elseif ( is_tax() || is_tag() || is_category() ) {
-			// Suffix the Taxonomy label to the Term Name
-			$tax = get_taxonomy( get_queried_object()->taxonomy );
-			$tax_label = $tax->labels->singular_name ?? $tax->label;
 
-			$title['title'] .= " $sep $tax_label";
+		} elseif ( is_tax( 'event' ) ) {
+			$title['title'] = sprintf(
+				/* translators: %s: The event name. */
+				__( 'Videos from %s', 'wptv' ),
+				get_queried_object()->name
+			);
+
+		} elseif ( is_tax( 'speakers' ) ) {
+			$title['title'] = sprintf(
+				/* translators: %s: The event name. */
+				__( 'Videos of %s', 'wptv' ),
+				get_queried_object()->name
+			);
+
+		} elseif ( is_category() ) {
+			$title['title'] = sprintf(
+				/* translators: %s: Category name. */
+				__( '%s Videos', 'wptv' ),
+				get_queried_object()->name
+			);
+
+		} elseif ( is_tag() ) {
+			$title['title'] = sprintf(
+				/* translators: %s: Tag name. */
+				__( 'Videos tagged %s', 'wptv' ),
+				get_queried_object()->name
+			);
+
 		}
 
 		return $title;
