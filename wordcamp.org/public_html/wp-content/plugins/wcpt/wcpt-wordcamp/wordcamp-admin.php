@@ -743,9 +743,14 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 		 *
 		 * @param WP_Post $wordcamp
 		 *
-		 * @return null|bool
+		 * @return null|bool|string
 		 */
 		public static function notify_new_wordcamp_in_slack( $wordcamp ) {
+			$scheduled_notification_key = 'sent_scheduled_notification';
+			if ( get_post_meta( $wordcamp->ID, $scheduled_notification_key, true ) ) {
+				return null;
+			}
+
 			// Not translating any string because they will be sent to slack.
 			$city             = get_post_meta( $wordcamp->ID, 'Location', true );
 			$start_date       = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
@@ -761,7 +766,11 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 
 			$attachment = create_event_status_attachment( $message, $wordcamp->ID, $title );
 
-			return wcpt_slack_notify( COMMUNITY_EVENTS_SLACK, $attachment );
+			$notification_sent = wcpt_slack_notify( COMMUNITY_EVENTS_SLACK, $attachment );
+			if ( $notification_sent ) {
+				update_post_meta( $wordcamp->ID, $scheduled_notification_key, true );
+			}
+			return $notification_sent;
 		}
 
 		/**

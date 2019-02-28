@@ -258,7 +258,7 @@ abstract class Event_Admin {
 	 *
 	 * @return string
 	 */
-	public function set_locale_to_en_US() {
+	public function set_locale_to_en_us() {
 		return 'en_US';
 	}
 
@@ -279,7 +279,7 @@ abstract class Event_Admin {
 		}
 
 		// Ensure status labels are in English.
-		add_filter( 'locale', array( $this, 'set_locale_to_en_US' ) );
+		add_filter( 'locale', array( $this, 'set_locale_to_en_us' ) );
 
 		$old_status = get_post_status_object( $old_status );
 		$new_status = get_post_status_object( $new_status );
@@ -301,7 +301,7 @@ abstract class Event_Admin {
 		}
 
 		// Remove the temporary locale change.
-		remove_filter( 'locale', array( $this, 'set_locale_to_en_US' ) );
+		remove_filter( 'locale', array( $this, 'set_locale_to_en_us' ) );
 	}
 
 	/**
@@ -314,7 +314,7 @@ abstract class Event_Admin {
 	abstract public function notify_application_status_in_slack( $new_status, $old_status, WP_Post $event );
 
 	/**
-	 * Schedule notificaiton for declined application. Currently supports WordCamp and Meetup
+	 * Schedule notification for declined application. Currently supports WordCamp and Meetup.
 	 *
 	 * @param WP_Post $event Event object.
 	 * @param string  $label Could be WordCamp or Meetup.
@@ -330,8 +330,15 @@ abstract class Event_Admin {
 	 * @param int    $event_id
 	 * @param string $label
 	 * @param string $location
+	 *
+	 * @return null|bool|string
 	 */
 	public static function send_decline_notification( $event_id, $label, $location ) {
+		$declined_notification_key = 'sent_declined_notification';
+		if ( get_post_meta( $event_id, $declined_notification_key, true ) ) {
+			return null;
+		}
+
 		$message = sprintf(
 			'A %s application for %s has been declined, and the applicant has been informed via email.',
 			$label,
@@ -339,7 +346,12 @@ abstract class Event_Admin {
 		);
 
 		$attachment = create_event_status_attachment( $message, $event_id, '' );
-		wcpt_slack_notify( COMMUNITY_TEAM_SLACK, $attachment );
+
+		$notification_sent = wcpt_slack_notify( COMMUNITY_TEAM_SLACK, $attachment );
+		if ( $notification_sent ) {
+			update_post_meta( $event_id, $declined_notification_key, true );
+		}
+		return $notification_sent;
 	}
 
 	/**
@@ -442,6 +454,7 @@ abstract class Event_Admin {
 		}
 
 		// Don't add/remove meta on trash, untrash, restore, etc.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( empty( $_POST['action'] ) || 'editpost' !== $_POST['action'] ) {
 			return;
 		}
@@ -452,7 +465,6 @@ abstract class Event_Admin {
 				wp_die( 'Unable to verify nonce.' );
 			}
 		}
-
 
 		$meta_keys = $this->meta_keys();
 		$orig_meta_values = get_post_meta( $post_id );
