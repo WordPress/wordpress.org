@@ -14,7 +14,6 @@ global $wptv;
 
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
-	<title><?php wp_title( '|', true, 'right' ); ?></title>
 
 	<link rel="alternate" type="application/rss+xml" title="<?php esc_attr_e( 'WordPress.tv RSS Feed', 'wptv' ); ?>" href="https://wordpress.tv/feed/" />
 	<link rel="alternate" type="application/rss+xml" title="<?php esc_attr_e( 'WordPress.tv Blog RSS Feed', 'wptv' ); ?>" href="https://blog.wordpress.tv/feed/" />

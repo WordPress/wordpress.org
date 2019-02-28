@@ -18,12 +18,11 @@ class WordPressTV_Theme {
 			add_action( 'after_setup_theme', array( $this, 'setup' ) );
 		}
 
-		// Add any actions/filters that should run for WordPress.TV & Blog.WordPress.TV here.
-		add_action( 'wp_head', array( $this, 'rel_canonical' ) );
+		add_action( 'after_setup_theme', array( $this, 'setup_always' ) );
 	}
 
 	/**
-	 * Runs during after_setup_theme.
+	 * Runs during after_setup_theme on WordPress.TV
 	 */
 	function setup() {
 		add_action( 'widgets_init', array( $this, 'widgets_init' ) );
@@ -38,11 +37,23 @@ class WordPressTV_Theme {
 
 		add_filter( 'pre_option_blog_upload_space', array( $this, 'blog_upload_space' ) );
 
+		add_filter( 'document_title_parts', array( $this, 'document_title_parts' ) );
+
 		register_nav_menus( array(
 			'primary'            => __( 'Primary Menu', 'wptv' ),
 			'footer'             => __( 'Footer Menu', 'wptv' ),
 			'featured_wordcamps' => __( 'Featured WordCamps', 'wptv' ),
 		) );
+	}
+
+	/**
+	 * Runs during after_setup_theme on WordPress.TV & blog.WordPress.TV
+	 */
+	function setup_always() {
+		add_theme_support( 'title-tag' );
+
+		// Add any actions/filters that should run for WordPress.TV & Blog.WordPress.TV here.
+		add_action( 'wp_head', array( $this, 'rel_canonical' ) );
 	}
 
 	/**
@@ -70,6 +81,29 @@ class WordPressTV_Theme {
 		if ( $canonical ) {
 			printf( '<link rel="canonical" href="%s">', esc_url( $canonical ) );
 		}
+	}
+
+	/**
+	 * Filter archive titles where needed.
+	 */
+	function document_title_parts( $title ) {
+		$sep = apply_filters( 'document_title_separator', '-' );
+
+		if ( is_tax( 'language' ) ) {
+			$title['title'] = sprintf(
+				/* translators: %s: The language name. */
+				__( 'Videos in %s', 'wptv' ),
+				get_queried_object()->name
+			);
+		} elseif ( is_tax() || is_tag() || is_category() ) {
+			// Suffix the Taxonomy label to the Term Name
+			$tax = get_taxonomy( get_queried_object()->taxonomy );
+			$tax_label = $tax->labels->singular_name ?? $tax->label;
+
+			$title['title'] .= " $sep $tax_label";
+		}
+
+		return $title;
 	}
 
 	/**
@@ -821,43 +855,6 @@ function wptv_enqueue_scripts() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'wptv_enqueue_scripts' );
-
-/**
- * Create a nicely formatted and more specific title element text for output
- * in head of document, based on current view.
- *
- * @global $paged
- * @global $page
- *
- *
- * @param string $title Default title text for current view.
- * @param string $sep   Optional separator.
- * @return string The filtered title.
- */
-function wptv_wp_title( $title, $sep ) {
-	if ( is_feed() ) {
-		return $title;
-	}
-
-	global $paged, $page;
-
-	// Add the site name.
-	$title .= get_bloginfo( 'name', 'display' );
-
-	// Add the site description for the home/front page.
-	$site_description = get_bloginfo( 'description', 'display' );
-	if ( $site_description && ( is_home() || is_front_page() ) ) {
-		$title = "$title $sep $site_description";
-	}
-
-	// Add a page number if necessary.
-	if ( ( $paged >= 2 || $page >= 2 ) && ! is_404() ) {
-		$title = "$title $sep " . sprintf( __( 'Page %s', 'wptv' ), max( $paged, $page ) );
-	}
-
-	return $title;
-}
-add_filter( 'wp_title', 'wptv_wp_title', 10, 2 );
 
 /**
  * Append the slide URL to the excerpt
