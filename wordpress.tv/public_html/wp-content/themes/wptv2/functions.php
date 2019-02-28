@@ -61,9 +61,10 @@ class WordPressTV_Theme {
 				$canonical = false;
 			}
 
-			if ( $canonical && get_query_var( 'paged' ) > 1 ) {
-				$canonical .= 'page/' . (int) get_query_var( 'paged' ) . '/';
-			}
+		}
+
+		if ( $canonical && get_query_var( 'paged' ) > 1 ) {
+			$canonical .= 'page/' . (int) get_query_var( 'paged' ) . '/';
 		}
 
 		if ( $canonical ) {
