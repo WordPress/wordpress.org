@@ -43,7 +43,7 @@ wptv_require_parent( 'functions.php' );
 
 // Change $wptv->home_url to lead to WordPress.tv.
 add_filter( 'wptv_home_url', function( $home_url, $path = '' ) {
-	return esc_url( 'http://wordpress.tv' . $path );
+	return esc_url( 'https://wordpress.tv' . $path );
 }, 10, 2 );
 
 // Care to navigate?
