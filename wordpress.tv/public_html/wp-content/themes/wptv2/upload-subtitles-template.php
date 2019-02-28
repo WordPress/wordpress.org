@@ -258,8 +258,8 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 					<td>
 						<input type="text" id="wptv_wporg_username" name="wptv_wporg_username" /><br />
 						To contribute subtitles, you must be a registered user at the <a href="https://wordpress.org">WordPress.org</a> website. Note that this is the username you use to log in at WordPress.org, not the username you use to log in on your own WordPress-powered site.<br />
-						If you think you are registered but aren't sure, you can try logging in at <a href="https://wordpress.org/support/bb-login.php">WordPress.org/support</a>.<br />
-						If you don't have a WordPress.org username yet, you can <a href="https://wordpress.org/support/register.php">sign up for a free account</a>.
+						If you think you are registered but aren't sure, you can try logging in at <a href="https://login.wordpress.org/">login.WordPress.org</a>.<br />
+						If you don't have a WordPress.org username yet, you can <a href="https://login.wordpress.org/register">sign up for a free account</a>.
 					</td>
 				</tr>
 
