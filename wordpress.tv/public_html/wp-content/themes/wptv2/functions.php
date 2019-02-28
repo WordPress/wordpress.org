@@ -52,8 +52,8 @@ class WordPressTV_Theme {
 	function setup_always() {
 		add_theme_support( 'title-tag' );
 
-		// Add any actions/filters that should run for WordPress.TV & Blog.WordPress.TV here.
 		add_action( 'wp_head', array( $this, 'rel_canonical' ) );
+		add_action( 'wp_head', array( $this, 'archive_link_rel_prev_next' ) );
 	}
 
 	/**
@@ -104,6 +104,38 @@ class WordPressTV_Theme {
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Outputs <link rel="prev|next"> tags for archives.
+	 */
+	function archive_link_rel_prev_next() {
+		global $paged, $wp_query;
+		if ( ! is_archive() && ! is_search() ) {
+			return;
+		}
+
+		$max_page = $wp_query->max_num_pages;
+		if ( ! $paged ) {
+			$paged = 1;
+		}
+
+		$nextpage = intval( $paged ) + 1;
+		$prevpage = intval( $paged ) - 1;
+
+		if ( $prevpage >= 1 ) {
+			printf(
+				'<link rel="prev" href="%s">' . "\n",
+				esc_url( get_pagenum_link( $prevpage ) )
+			);
+		}
+
+		if ( $nextpage <= $max_page ) {
+			printf(
+				'<link rel="next" href="%s">' . "\n",
+				esc_url( get_pagenum_link( $nextpage ) )
+			);
+		}
 	}
 
 	/**
