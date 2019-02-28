@@ -26,8 +26,6 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 
 get_header( 'child-page' );
 the_post();
-
-$date_format = get_option( 'date_format' );
 ?>
 
 	<main id="main" class="site-main col-12" role="main">
