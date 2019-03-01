@@ -360,6 +360,37 @@ if ( !empty($_REQUEST['error']) ) {
 			} );
 			$( 'ul.cats-checkboxes input' ).prop( 'disabled', false );
 
+			$( '#wptv_video_wordcamp, ul.cats-checkboxes input' ).on( 'change', function() {
+				if ( $( '#wptv_event' ).data('user-altered') ) {
+					return;
+				}
+
+				var title = '';
+				// Get the Location
+				title += $( '#category-6418 ul.children input:checked' ).parent().text().trim() + " ";
+
+				// .. and the Year
+				title += $( '#category-91093 ul.children input:checked' ).parent().text().trim();
+
+				// If a location or year has been selected, build the Event Name.
+				if ( $.trim( title ) ) {
+					if ( $( '#wptv_video_wordcamp' ).prop( 'checked' ) ) {
+						title = "WordCamp " + title;
+					} else if ( $( '#in-category-107686937:checked, #in-category-467571547:checked' ).length ) {
+						/* BuddyCamp * Global Translation Day */
+						title = $( '#in-category-107686937:checked, #in-category-467571547:checked' ).parent().text().trim() + " " + title;
+					} else {
+						title = "WordPress Meetup " + title;
+					}
+
+					$( '#wptv_event' ).val( $.trim( title ) );
+				}
+			});
+			$( '#wptv_event' ).on( 'focus', function() {
+				// Not perfect, but will do.
+				$( '#wptv_event' ).data( 'user-altered', true );
+			});
+
 			$( '#video-upload-form' ).submit( function( e ) {
 				var scroll = false;
 
