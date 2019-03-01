@@ -30,6 +30,19 @@ class WordPressTV_REST_API {
 		exit( 'Invalid request.' );
 	}
 
+	/**
+	 * Handle API requests.
+	 *
+	 * Supported Endpoints:
+	 * - /api/videos.json
+	 *   Accepts all WP_Query parameters, such as 'event', 'per_page', and 'paged'.
+	 * - /api/events.json
+	 * - /api/speakers.json
+	 * - /api/languages.json
+	 * - /api/tags.json
+	 * - /api/categories.json
+	 *   All above endpoints accept 'paged'.
+	 */
 	function template_redirect() {
 		global $wp_query, $post, $wptv;
 
@@ -52,6 +65,11 @@ class WordPressTV_REST_API {
 					query_posts( array_merge( $wp_query->query, array( 'posts_per_page' => intval( $_REQUEST['posts_per_page'] ) ) ) );
 				}
 
+				$response['query'] = array(
+					'results' => (int) $wp_query->found_posts,
+					'pages'   => (int) $wp_query->max_num_pages,
+				);
+
 				$response['videos'] = array();
 				while ( have_posts() ) {
 					the_post();
@@ -62,11 +80,131 @@ class WordPressTV_REST_API {
 					$thumbnail = esc_url_raw( trim( ob_get_contents() ) );
 					ob_end_clean();
 
-					$response['videos'][] = array(
-						'title'     => $post->post_title,
-						'permalink' => get_permalink( get_the_ID() ),
-						'thumbnail' => $thumbnail,
+					$video = array(
+						'title'       => $post->post_title,
+						'permalink'   => get_permalink( get_the_ID() ),
+						'thumbnail'   => $thumbnail,
+						'date'        => get_the_date(),
+						'description' => $post->post_excerpt,
+						'slides'      => get_post_meta( $post->ID, '_wptv_slides_url', true ),
+						'speakers'    => array(),
+						'event'       => array(),
+						'language'    => array(),
+						'tags'        => array(),
+						'category'    => array(),
+						'year'        => false,
+						'location'    => false,
+						'producer'    => array(),
+						'video'       => array(
+							'mp4' => array(),
+							'ogg' => array(),
+						)
 					);
+
+					foreach ( [ 'speakers', 'event', 'language', 'tags', 'category' ] as $tax ) {
+						$terms = get_the_terms( get_the_ID(), $tax );
+						if ( ! $terms || is_wp_error( $terms ) ) {
+							continue;
+						}
+						foreach ( $terms as $t ) {
+							// Special Cases
+							if ( 'category' == $tax && $t->parent == 91093 /* Year */ ) {
+								$video['year'] = $t->name;
+								continue;
+							} elseif ( 'category' == $tax && $t->parent == 6418 /* Location */ ) {
+								$video['location'] = $t->name;
+								continue;
+							}
+
+							$video[ $tax ][] = array(
+								'slug' => $t->slug,
+								'name' => $t->name,
+								'link' => get_term_link( $t )
+							);
+						}
+					}
+
+					if ( $producer = get_the_terms( get_the_ID(), 'producer' ) ) {
+						$video['producer']['name'] = $producer[0]->name;
+					}
+					if ( $producer_username = get_the_terms( get_the_ID(), 'producer-username' ) ) {
+						$video['producer']['username'] = $producer_username[0]->name;
+					}
+
+					if ( function_exists( 'find_all_videopress_shortcodes' ) ) {
+						$post_videos = array_keys( find_all_videopress_shortcodes( $post->post_content ) );
+						if ( $post_videos ) {
+							$post_video = video_get_info_by_guid( $post_videos[0] );
+
+							// Ogg
+							if ( $link = video_highest_resolution_ogg( $post_video ) ) {
+								$video['video']['ogg']['low'] = $link;
+							}
+
+							// MP4
+							$mp4_formats = array( 'low' => 'fmt_std', 'med' => 'fmt_dvd', 'high' => 'fmt_hd' );
+							foreach ( $mp4_formats as $mp4_field => $mp4_format ) {
+								if ( $link = video_url_by_format( $post_video, $mp4_format ) ) {
+									$video['video']['mp4'][ $mp4_field ] = $link;
+								}
+							}
+						}
+					}
+
+					$response['videos'][] = $video;
+				}
+
+				break;
+			case 'events':
+			case 'speakers':
+			case 'languages':
+			case 'tags':
+			case 'categories':
+				$taxonomies = array(
+					'events'     => 'event',
+					'speakers'   => 'speakers',
+					'languages'  => 'language',
+					'tags'       => 'post_tag',
+					'categories' => 'category',
+				);
+
+				$taxonomy = $taxonomies[ $method ];
+				$taxonomy_obj = get_taxonomy( $taxonomy );
+				$total_count = wp_count_terms( $taxonomy, array( 'hide_empty	' => true ) );
+
+				$page = get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1;
+				$per_page = 200;
+
+				$terms = get_terms( array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => true,
+					'number'     => $per_page,
+					'offset'     => $per_page * ($page - 1),
+					'orderby'    => 'id',
+					'order'      => 'DESC',
+				) );
+
+				$response['query'] = array(
+					'results' => (int) $total_count,
+					'page'    => $page,
+					'pages'   => ceil( $total_count / $per_page ),
+				);
+
+				$response[ $method ] = array();
+				foreach ( $terms as $t ) {
+					$item = array(
+						'name' => $t->name,
+						'link' => get_term_link( $t ),
+						'api'  => add_query_arg( $taxonomy_obj->query_var, $t->slug, home_url( '/api/videos.json') ),
+						'videos' => $t->count,
+					);
+
+					if ( 'event' == $t->taxonomy ) {
+						$item['youtube_playlist_id'] = get_option( "term_meta_{$t->term_id}_youtube_playlist_id", '' );
+						$item['hashtag'] = get_option( "term_meta_{$t->term_id}_hashtag", '' );
+					}
+
+					$response[ $method ][] = $item;
 				}
 
 				break;
