@@ -84,16 +84,16 @@ class WordPressTV_REST_API {
 						'title'       => $post->post_title,
 						'permalink'   => get_permalink( get_the_ID() ),
 						'thumbnail'   => $thumbnail,
-						'date'        => get_the_date(),
-						'description' => $post->post_excerpt,
+						'date'        => $post->post_date_gmt,
+						'description' => get_the_excerpt(),
 						'slides'      => get_post_meta( $post->ID, '_wptv_slides_url', true ),
 						'speakers'    => array(),
 						'event'       => array(),
 						'language'    => array(),
 						'tags'        => array(),
 						'category'    => array(),
-						'year'        => false,
-						'location'    => false,
+						'year'        => array(),
+						'location'    => array(),
 						'producer'    => array(),
 						'video'       => array(
 							'mp4' => array(),
@@ -109,10 +109,18 @@ class WordPressTV_REST_API {
 						foreach ( $terms as $t ) {
 							// Special Cases
 							if ( 'category' == $tax && $t->parent == 91093 /* Year */ ) {
-								$video['year'] = $t->name;
+								$video['year'] = array(
+									'slug' => $t->slug,
+									'name' => $t->name,
+									'link' => get_term_link( $t )
+								);
 								continue;
 							} elseif ( 'category' == $tax && $t->parent == 6418 /* Location */ ) {
-								$video['location'] = $t->name;
+								$video['location'] = array(
+									'slug' => $t->slug,
+									'name' => $t->name,
+									'link' => get_term_link( $t )
+								);
 								continue;
 							}
 
@@ -129,6 +137,7 @@ class WordPressTV_REST_API {
 					}
 					if ( $producer_username = get_the_terms( get_the_ID(), 'producer-username' ) ) {
 						$video['producer']['username'] = $producer_username[0]->name;
+						$video['producer']['link'] = 'https://profiles.wordpress.org/' . urlencode( $producer_username[0]->name ) . '/';
 					}
 
 					if ( function_exists( 'find_all_videopress_shortcodes' ) ) {
@@ -216,10 +225,12 @@ class WordPressTV_REST_API {
 		if ( ! empty( $response ) ) {
 			switch ( $format ) {
 				case 'json':
-					echo json_encode( $response );
+					header( 'Content-type: application/json' );
+					echo wp_json_encode( $response );
 					break;
 				case 'array':
 					if ( defined( 'WPCOM_SANDBOXED' ) && WPCOM_SANDBOXED ) {
+						header( 'Content-Type: text/plain' );
 						print_r( $response );
 					}
 					break;
