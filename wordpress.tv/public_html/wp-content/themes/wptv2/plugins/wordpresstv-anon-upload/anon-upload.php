@@ -23,14 +23,46 @@ class WPTV_Anon_Upload {
 				$this->success = $this->save();
 			}
 
-			$redir = home_url( 'submit-video' );
+			$redir = home_url( '/submit-video/' );
+
+			// Fields to prefill
+			$keep_fields = array(
+				'wptv_video_wordcamp',
+				'wptv_uploaded_by',
+				'wptv_email',
+				'wptv_language',
+				'post_category', // 'wptv_categories',
+				'wptv_producer_username',
+				'wptv_event',
+			);
 
 			if ( $this->success ) {
 				$redir = add_query_arg( array( 'success' => 1 ), $redir );
 			} elseif ( $this->errors ) {
 				$redir = add_query_arg( array( 'error' => $this->errors ), $redir );
+
+				// Video upload failed, include the video-specific fields in pre-fill.
+				$keep_fields[] = 'wptv_video_title';
+				$keep_fields[] = 'wptv_speakers';
+				$keep_fields[] = 'wptv_video_description';
+				$keep_fields[] = 'wptv_slides_url';
+
 			} else {
+				$keep_fields = array();
 				$redir = add_query_arg( array( 'error' => 5 ), $redir );
+			}
+
+			// Keep some fields.
+			if ( $keep_fields ) {
+				$redir = add_query_arg(
+					urlencode_deep(
+						array_intersect_key(
+							$_POST,
+							array_flip( $keep_fields )
+						)
+					),
+					$redir
+				);
 			}
 
 			wp_redirect( $redir );
