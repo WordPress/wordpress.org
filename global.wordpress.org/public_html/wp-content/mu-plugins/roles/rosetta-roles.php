@@ -510,7 +510,24 @@ class Rosetta_Roles {
 	 * @param \WP_User $user The user object of the translation editor.
 	 */
 	public function update_wporg_profile_badge( $user ) {
+		global $wpdb;
+
 		$action = 'translation_editor_added' === current_filter() ? 'add' : 'remove';
+
+		// Remove badge only when all roles have been removed.
+		if ( 'remove' === $action ) {
+			$count = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->wporg_translation_editors}
+					WHERE `user_id` = %d AND `locale` != 'all-locales'",
+					$user->ID
+				)
+			);
+
+			if ( 0 !== $count ) {
+				return;
+			}
+		}
 
 		$this->notify_profiles_wporg_translation_editor_update( $user->ID, $action );
 	}
