@@ -179,7 +179,7 @@ class WordPressTV_REST_API {
 
 				$taxonomy = $taxonomies[ $method ];
 				$taxonomy_obj = get_taxonomy( $taxonomy );
-				$total_count = wp_count_terms( $taxonomy, array( 'hide_empty	' => true ) );
+				$total_count = wp_count_terms( $taxonomy, array( 'hide_empty' => true ) );
 
 				$page = get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1;
 				$per_page = 200;
