@@ -269,6 +269,8 @@ class WordCamp_Forms_To_Drafts {
 	 *   taxonomy and the selected term is applied to the drafted post. Maybe need to send PR to add filter to
 	 *   insert custom fields programmatically.
 	 * - Sideload the logo from submitted URL and set it as the featured image.
+	 * - Add a Company Description field to the Call For Sponsors form stub, or populate content from something else?
+	 * - Also ensure content is formatted for the block editor.
 	 *
 	 * @param int   $submission_id
 	 * @param array $all_values
@@ -378,11 +380,19 @@ class WordCamp_Forms_To_Drafts {
 	 * @return int | WP_Error
 	 */
 	protected function create_draft_speaker( $speaker ) {
+		$content = $speaker['Your Bio'] ?? '';
+
+		if ( $content ) {
+			$content = wpautop( $content );
+			$content = str_replace( '<p>', "<!-- wp:paragraph -->\n<p>", $content );
+			$content = str_replace( '</p>', "</p>\n<!-- /wp:paragraph -->", $content );
+		}
+
 		$speaker_id = wp_insert_post(
 			array(
 				'post_type'    => 'wcb_speaker',
 				'post_title'   => $speaker['Name'],
-				'post_content' => $speaker['Your Bio'],
+				'post_content' => $content,
 				'post_status'  => 'draft',
 				'post_author'  => $this->get_user_id_from_username( 'wordcamp' ),
 			),
@@ -406,11 +416,19 @@ class WordCamp_Forms_To_Drafts {
 	 * @return int | WP_Error
 	 */
 	protected function create_draft_session( $session, $speaker ) {
+		$content = $session['Topic Description'] ?? '';
+
+		if ( $content ) {
+			$content = wpautop( $content );
+			$content = str_replace( '<p>', "<!-- wp:paragraph -->\n<p>", $content );
+			$content = str_replace( '</p>', "</p>\n<!-- /wp:paragraph -->", $content );
+		}
+
 		$session_id = wp_insert_post(
 			array(
 				'post_type'    => 'wcb_session',
 				'post_title'   => $session['Topic Title'],
-				'post_content' => $session['Topic Description'],
+				'post_content' => $content,
 				'post_status'  => 'draft',
 				'post_author'  => $this->get_user_id_from_username( $session['WordPress.org Username'] ),
 			),
