@@ -22,7 +22,10 @@ module.exports = function( grunt ) {
 						],
 						cascade: false
 					} ),
-					require( 'pixrem' )
+					require( 'pixrem' ),
+					require('cssnano')({
+						mergeRules: false
+					})
 				]
 			},
 			dist: {
