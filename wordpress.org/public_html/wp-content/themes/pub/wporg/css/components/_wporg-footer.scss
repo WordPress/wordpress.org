@@ -35,6 +35,7 @@
 
 			a {
 				text-decoration: none;
+				text-decoration-skip-ink: none;
 
 				&:hover {
 					color: $color__wp-blue;
