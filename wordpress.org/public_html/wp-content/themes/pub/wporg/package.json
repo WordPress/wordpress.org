@@ -14,14 +14,15 @@
   "devDependencies": {
     "autoprefixer": "^6.3.6",
     "cssnano": "^3.7.4",
-    "grunt": "^1.0.1",
+    "es6-promise": "~4.0.5",
+    "grunt": "^1.0.3",
     "grunt-contrib-jshint": "^1.0.0",
-    "grunt-contrib-watch": "^1.0.0",
+    "grunt-contrib-watch": "^1.1.0",
     "grunt-postcss": "^0.8.0",
     "grunt-rtlcss": "^2.0.1",
-    "grunt-sass": "^1.2.0",
+    "grunt-sass": "~3.0.1",
     "grunt-sass-globbing": "^1.5.1",
-    "pixrem": "^3.0.2",
-    "es6-promise": "~4.0.5"
+    "node-sass": "^4.9.3",
+    "pixrem": "^3.0.2"
   }
 }

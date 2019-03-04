@@ -29,6 +29,9 @@ module.exports = function( grunt ) {
 						cascade: false
 					} ),
 					require( 'pixrem' ),
+					require('cssnano')({
+						mergeRules: false
+					})
 				]
 			},
 			dist: {
@@ -54,6 +57,7 @@ module.exports = function( grunt ) {
 		},
 		sass: {
 			options: {
+				implementation: require( 'node-sass' ),
 				sourceMap: true,
 				// Don't add source map URL in built version.
 				omitSourceMapUrl: 'build' === process.argv[2],
