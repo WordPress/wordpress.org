@@ -52,9 +52,10 @@ $latest_release_targz_url = 'https://wordpress.org/latest.tar.gz';
 if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK ) {
 	$rosetta_release = $GLOBALS['rosetta']->rosetta->get_latest_public_release();
 	if ( $rosetta_release ) {
+		$locale                   = get_locale();
 		$latest_release_version   = $rosetta_release['version'];
-		$latest_release_zip_url   = $rosetta_release['zip_url'];
-		$latest_release_targz_url = $rosetta_release['targz_url'];
+		$latest_release_zip_url   = home_url( "latest-{$locale}.zip" );
+		$latest_release_targz_url = home_url( "latest-{$locale}.tar.gz" );
 	}
 }
 
