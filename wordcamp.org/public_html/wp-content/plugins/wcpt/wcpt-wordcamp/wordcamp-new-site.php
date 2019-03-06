@@ -557,7 +557,6 @@ class WordCamp_New_Site {
 
 			array(
 				'title'   => __( 'Slideshow', 'wordcamporg' ),
-				// todo Update this one when Jetpack's Slideshow block becomes available.
 				'content' => $this->get_stub_content( 'page', 'slideshow' ),
 				'status'  => 'draft',
 				'type'    => 'page',

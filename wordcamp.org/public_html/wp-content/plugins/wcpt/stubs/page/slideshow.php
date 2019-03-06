@@ -1,7 +1,3 @@
-<!-- wp:paragraph {"customBackgroundColor":"#eeeeee"} -->
-<p style="background-color:#eeeeee" class="has-background"><?php _e( "<em>Organizers note:</em> Upload photos to this page and they'll automagically appear in a slideshow!", 'wordcamporg' ); ?></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[slideshow]
-<!-- /wp:shortcode -->
+<!-- wp:jetpack/slideshow -->
+<div class="wp-block-jetpack-slideshow aligncenter" data-effect="slide"><div class="wp-block-jetpack-slideshow_container swiper-container"><ul class="wp-block-jetpack-slideshow_swiper-wrappper swiper-wrapper"></ul><a class="wp-block-jetpack-slideshow_button-prev swiper-button-prev swiper-button-white" role="button"></a><a class="wp-block-jetpack-slideshow_button-next swiper-button-next swiper-button-white" role="button"></a><a aria-label="Pause Slideshow" class="wp-block-jetpack-slideshow_button-pause" role="button"></a><div class="wp-block-jetpack-slideshow_pagination swiper-pagination swiper-pagination-white"></div></div></div>
+<!-- /wp:jetpack/slideshow -->
