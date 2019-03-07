@@ -14,8 +14,10 @@
 <?php elseif ( isset( $_POST['verify'] ) ) : ?>
 
 	<div class="notice notice-info">
-		<span>!</span><span><?php _e( 'Please review the data you submitted for accuracy. Make any necessary corrections, then re-submit this form.', 'jobswp' ); ?></span>
+		<div>
+		<?php _e( 'Please review the data you submitted for accuracy. Make any necessary corrections, then re-submit this form.', 'jobswp' ); ?>
 		<?php do_action( 'jobswp_notice', 'verify' ); ?>
+		</div>
 	</div>
 
 <?php endif; ?>

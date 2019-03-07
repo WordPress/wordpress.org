@@ -1115,6 +1115,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	border-style: solid;
 	border-color: #FFF;
 	padding: 1em 1.5em;
+	position: relative;
 	margin-right: 1.5em;
 }
 .notice h2 {
@@ -1134,23 +1135,21 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	color: #9F6000;
 	border-color: #9F6000;
 }
+.notice-info:not(.accept)::before {
+	content: "\f348";
+	font-family: "dashicons";
+	font-size: 36px;
+	position: absolute;
+	top: 6px;
+}
+.notice-info div:first-child {
+	display: block;
+	margin-left: 48px;
+}
 .notice-error {
 	background-color: #FFBABA;
 	color: #D8000C;
 	border-color: #D8000C;
-}
-.notice span:first-child {
-	padding: 1px 10px 3px;
-	border-radius: 25px;
-	color: white;
-	font-size: 18px;
-	font-weight: bold;
-	font-family: Verdana;
-	float: left;
-	margin: 0 0.8em 0 0;
-}
-.notice-info span:first-child {
-	background-color: #9F6000;
 }
 
 .accept {
