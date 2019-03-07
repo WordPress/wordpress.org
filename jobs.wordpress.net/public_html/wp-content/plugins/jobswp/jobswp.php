@@ -720,16 +720,16 @@ EMAIL;
 			if ( $this->success ) {
 				$job_id = $this->create_job();
 
-				// Generate and store a unique token for the job, primarily to be used by
-				// job posters to close their jobs themselves despite the site's lack of
-				// users.
-				$_POST['job_token'] = $this->generate_job_token( $job_id );
-				add_post_meta( $job_id, 'job_token', $_POST['job_token'], true );
-
 				if ( is_wp_error( $job_id ) ) {
 					$_POST['errors'] = $job_id->get_error_message();
 					$this->success = false;
 				} else {
+					// Generate and store a unique token for the job, primarily to be used by
+					// job posters to close their jobs themselves despite the site's lack of
+					// users.
+					$_POST['job_token'] = $this->generate_job_token( $job_id );
+					add_post_meta( $job_id, 'job_token', $_POST['job_token'], true );
+
 					$this->success = $job_id;
 				}
 			}
