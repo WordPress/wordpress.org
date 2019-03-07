@@ -702,7 +702,7 @@ EMAIL;
 				$has_errors = __( 'You must also mark the checkbox indicating that you agree to the terms listed below the form.', 'jobswp' );
 			}
 
-			$has_errors = apply_filters( 'jobswb_save_job_errors', $has_errors );
+			$has_errors = apply_filters( 'jobswp_save_job_errors', $has_errors );
 			if ( $has_errors )
 				$_POST['errors'] = $has_errors;
 			elseif ( $needs_to_verify )

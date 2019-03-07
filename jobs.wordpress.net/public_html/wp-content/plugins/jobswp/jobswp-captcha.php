@@ -18,7 +18,7 @@ class Jobs_Dot_WP_Captcha {
 	 * Initializes plugin.
 	 */
 	public static function init() {
-		add_filter( 'jobswb_save_job_errors',   array( __CLASS__, 'check_captcha' ) );
+		add_filter( 'jobswp_save_job_errors',   array( __CLASS__, 'check_captcha' ) );
 		add_filter( 'jobswp_remove_job_errors', array( __CLASS__, 'check_captcha' ) );
 		add_action( 'jobswp_post_job_form',     array( __CLASS__, 'recaptcha_field' ) );
 		add_action( 'jobswp_remove_job_form',   array( __CLASS__, 'recaptcha_field' ) );
