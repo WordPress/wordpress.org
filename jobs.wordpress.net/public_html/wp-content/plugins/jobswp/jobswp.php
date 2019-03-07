@@ -660,7 +660,7 @@ Cheers.
 
 EMAIL;
 
-			$headers = '';
+			$headers = [];
 			$headers['From'] = 'jobs.wordpress.net <jobs@wordpress.net>';
 
 			$body = sprintf( $body, $title, 'https://jobs.wordpress.net/', $token, self::get_days_until_pruning(), 'https://jobs.wordpress.net/remove-a-job/' );
