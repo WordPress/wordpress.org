@@ -554,7 +554,7 @@ class Jobs_Dot_WP {
 	 * @return string The token.
 	 */
 	protected function generate_job_token( $job_id ) {
-		return $job_id . '|' . bin2hex( openssl_random_pseudo_bytes( 20 ) );
+		return $job_id . '_' . bin2hex( openssl_random_pseudo_bytes( 20 ) );
 	}
 
 	/**
@@ -566,7 +566,13 @@ class Jobs_Dot_WP {
 	public function get_job_by_token( $token ) {
 		$job = false;
 
-		$parts = explode( '|', trim( $token ), 2 );
+		// Reformat legacy token (at least for the few weeks that
+		// they are still valid).
+		if ( false !== strpos( $token, '|' ) ) {
+			$parts = explode( '|', trim( $token ), 2 );
+		} else {
+			$parts = explode( '_', trim( $token ), 2 );
+		}
 
 		if ( count( $parts ) > 1 ) {
 			list( $job_id, $job_token ) = $parts;
