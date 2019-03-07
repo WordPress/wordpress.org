@@ -402,3 +402,38 @@ function syntaxhighlighter_htmlresult( $text ) {
 
 	return $new_text;
 }
+
+/**
+ * Output a <meta name="description" content=""> tag for Functions, Hooks, Classes and Methods.
+ */
+function add_meta_description_for_summary() {
+	if ( ! is_singular( array( 'wp-parser-function', 'wp-parser-hook', 'wp-parser-class', 'wp-parser-method' ) ) ) {
+		return;
+	}
+
+	$summary = wp_strip_all_tags( get_summary() );
+
+	// Trim down to ~150 char based on full words.
+	if ( strlen( $summary ) > 150 ) {
+		$words = preg_split( "/[\n\r\t ]+/", $summary, -1, PREG_SPLIT_NO_EMPTY );
+
+		$summary = '';
+		while ( $words ) {
+			$word = array_shift( $words );
+			if ( strlen( $summary ) + strlen( $word ) >= 141 ) { /* 150 - strlen( ' &hellip;' ) */
+				break;
+			}
+
+			$summary .= $word . ' ';
+		}
+
+		if ( $words ) {
+			$summary .= '&hellip;';
+		}
+	}
+
+	if ( $summary ) {
+		printf( '<meta name="description" content="%s">' . "\n", esc_attr( $summary ) );
+	}
+}
+add_action( 'wp_head', __NAMESPACE__ . '\add_meta_description_for_summary' );
