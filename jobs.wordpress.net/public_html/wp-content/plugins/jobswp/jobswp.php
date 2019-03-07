@@ -118,8 +118,9 @@ class Jobs_Dot_WP {
 		add_filter( 'posts_search',                   array( $this, 'admin_search_job_posts_search' ), 10, 2 );
 		add_filter( 'posts_request',                  array( $this, 'admin_search_job_posts_request' ), 10, 2 );
 
-		foreach ( array( 'the_content', 'the_title', 'single_post_title' ) as $filter )
-			add_filter( $filter,                      array( $this, 'WordPress_dangit' ) );
+		foreach ( [ 'the_content', 'the_title', 'single_post_title' ] as $filter ) {
+			add_filter( $filter,                  array( $this, 'proper_project_names_dangit' ) );
+		}
 
 		add_action( 'save_post_job',                  array( $this, 'email_job_poster' ), 10, 3 );
 		add_action( 'wp',                             array( $this, 'maybe_remove_job' ) );
@@ -496,19 +497,33 @@ class Jobs_Dot_WP {
 	}
 
 	/**
-	 * Replaces all malformed attempts at "WordPress" with "WordPress".
+	 * Replaces all malformed attempts at "WordPress", "BuddyPress", and "bbPress"
+	 * project names with proper spelling of the names.
 	 *
 	 * This is a bit broad-stroked for general use, but should be sufficient for job postings.
 	 *
-	 * @param string $text Text to process for malformed "WordPress" usage
+	 * @param string $text Text to process for malformed project names.
 	 * @return string The fixed text
 	 */
-	public function WordPress_dangit( $text ) {
-		return str_replace(
-			array( 'Wordpress', 'wordpress', 'wordPress', 'word press', 'Word press', 'word Press', 'Word Press' ),
+	public function proper_project_names_dangit( $text ) {
+		$text = str_replace(
+			[ 'Wordpress', 'wordpress', 'wordPress', 'word press', 'Word press', 'word Press', 'Word Press' ],
 			'WordPress',
 			$text
 		);
+
+		$text = str_replace(
+			[ 'Buddypress', 'buddypress', 'buddyPress', 'buddy press', 'Buddy press', 'buddy Press', 'Buddy Press' ],
+			'BuddyPress',
+			$text
+		);
+
+		$text = str_replace(
+			[ 'Bbpress', 'BBpress', 'BBPress', 'BbPress', 'bbpress', 'bb press', 'Bb press', 'bb Press', 'BB press', 'BB Press' ],
+			'bbPress',
+			$text
+		);
+
 		return $text;
 	}
 
