@@ -19,7 +19,7 @@ class Jobs_Dot_WP {
 	 * Fields that must have a value when submitted by job poster.
 	 */
 	private $required_fields = array(
-		'first_name', 'last_name', 'email', 'phone',
+		'first_name', 'last_name', 'email',
 		'company', 'howtoapply_method', 'howtoapply',
 		'job_title', 'category', 'jobtype', 'job_description'
 	);
@@ -28,7 +28,7 @@ class Jobs_Dot_WP {
 	 * All of the meta fields.
 	 */
 	private $meta_fields = array(
-		'first_name', 'last_name', 'email', 'phone',
+		'first_name', 'last_name', 'email',
 		'company', 'howtoapply_method', 'howtoapply',
 		'budget', 'jobtype', 'location'
 	);

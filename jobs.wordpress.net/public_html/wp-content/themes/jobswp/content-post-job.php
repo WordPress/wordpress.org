@@ -33,9 +33,6 @@
 	<?php jobswp_text_field( 'last_name', __( 'Last Name', 'jobswp' ), true ); ?>
 
 	<?php jobswp_text_field( 'email', __( 'Email Address', 'jobswp' ), true, 'email', __( 'This is the email address you would use in contacting us and for us to contact you.', 'jobswp' ) ); ?>
-
-	<?php jobswp_text_field( 'phone', __( 'Phone Number', 'jobswp' ), true, 'tel' ); ?>
-
 </div>
 
 <div class="post-job-company-info grid_4 alpha omega">
