@@ -68,7 +68,7 @@ class Jobs_Dot_WP {
 	 * @return int
 	 */
 	public static function get_days_until_pruning() {
-		return apply_filters( 'jobswp_days_until_pruning', 21 );
+		return (int) apply_filters( 'jobswp_days_until_pruning', 21 );
 	}
 
 	/**
