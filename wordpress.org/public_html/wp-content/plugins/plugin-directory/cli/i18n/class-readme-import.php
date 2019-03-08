@@ -72,7 +72,7 @@ class Readme_Import extends I18n_Import {
 				'extracted_comments' => 'Short description.',
 			] ) );
 
-			$str_priorities[ $readme->name ] = 1;
+			$str_priorities[ $readme->short_description ] = 1;
 		}
 
 		if ( $readme->screenshots ) {
