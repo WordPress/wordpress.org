@@ -89,6 +89,7 @@ class Meta extends Trac {
 		'Trac'                          => '#meta-tracdev',
 		'WordPress.tv'                  => '#wptv',
 		'WordCamp Site & Plugins'       => '#meta-wordcamp',
+		'HelpHub'                       => '#meta-helphub',
 	);
 }
 
