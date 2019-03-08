@@ -115,7 +115,7 @@ abstract class I18n_Import {
 	 * Import generated POT file to GlotPress.
 	 *
 	 * @param string $project       GP project slug to import to
-	 * @param string $branch        GP project branch to import to (dev|stable)
+	 * @param string $branch        GP project branch to import to (dev|stable)-readme
 	 * @param string $file          Path to POT file
 	 * @param array  $str_priorities GP string priorities
 	 */
@@ -130,8 +130,8 @@ abstract class I18n_Import {
 			return;
 		}
 
-		// @todo: Fix this.
-		$gp_branch_id = Plugin_I18n::instance()->get_gp_branch_id( $project, "{$branch}-readme" );
+		// @todo: Make the `glotpress import-originals` CLI command handle this.
+		$gp_branch_id = Plugin_I18n::instance()->get_gp_branch_id( $project, $branch );
 		if ( $gp_branch_id ) {
 			foreach ( $str_priorities as $str => $prio ) {
 				if ( 1 !== $prio && -1 !== $prio ) {
