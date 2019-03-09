@@ -1793,6 +1793,14 @@ class GP_Locales {
 		$pap->wp_locale = 'pap';
 		$pap->slug = 'pap';
 
+		$pcm = new GP_Locale();
+		$pcm->english_name = 'Nigerian Pidgin';
+		$pcm->native_name = 'Nigerian Pidgin';
+		$pcm->lang_code_iso_639_3 = 'pcm';
+		$pcm->country_code = 'ng';
+		$pcm->wp_locale = 'pcm';
+		$pcm->slug = 'pcm';
+
 		$pirate = new GP_Locale();
 		$pirate->english_name = 'English (Pirate)';
 		$pirate->native_name = 'English (Pirate)';
