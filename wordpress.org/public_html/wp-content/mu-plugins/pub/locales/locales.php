@@ -1125,6 +1125,17 @@ class GP_Locales {
 		$hr->google_code = 'hr';
 		$hr->facebook_locale = 'hr_HR';
 
+		$hsb = new GP_Locale();
+		$hsb->english_name = 'Upper Sorbian';
+		$hsb->native_name = 'Hornjoserbšćina';
+		$hsb->lang_code_iso_639_2 = 'hsb';
+		$hsb->lang_code_iso_639_3 = 'hsb';
+		$hsb->country_code = 'de';
+		$hsb->wp_locale = 'hsb';
+		$hsb->slug = 'hsb';
+		$hsb->nplurals = 4;
+		$hsb->plural_expression = '(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3)';
+
 		$hu = new GP_Locale();
 		$hu->english_name = 'Hungarian';
 		$hu->native_name = 'Magyar';
