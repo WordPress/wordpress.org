@@ -1815,6 +1815,30 @@ class GP_Locales {
 		$pl->google_code = 'pl';
 		$pl->facebook_locale = 'pl_PL';
 
+		$pt = new GP_Locale();
+		$pt->english_name = 'Portuguese (Portugal)';
+		$pt->native_name = 'Português';
+		$pt->lang_code_iso_639_1 = 'pt';
+		$pt->country_code = 'pt';
+		$pt->wp_locale = 'pt_PT';
+		$pt->slug = 'pt';
+		$pt->google_code = 'pt-PT';
+		$pt->facebook_locale = 'pt_PT';
+
+		$pt_ao90 = clone $pt;
+		$pt_ao90->english_name = 'Portuguese (Portugal, AO90)';
+		$pt_ao90->native_name = 'Português (AO90)';
+		$pt_ao90->slug = 'pt/ao90';
+		$pt_ao90->wp_locale = 'pt_PT_ao90';
+
+		$pt_ao = new GP_Locale();
+		$pt_ao->english_name = 'Portuguese (Angola)';
+		$pt_ao->native_name = 'Português de Angola';
+		$pt_ao->lang_code_iso_639_1 = 'pt';
+		$pt_ao->country_code = 'ao';
+		$pt_ao->wp_locale = 'pt_AO';
+		$pt_ao->slug = 'pt-ao';
+
 		$pt_br = new GP_Locale();
 		$pt_br->english_name = 'Portuguese (Brazil)';
 		$pt_br->native_name = 'Português do Brasil';
@@ -1827,22 +1851,6 @@ class GP_Locales {
 		$pt_br->plural_expression = '(n > 1)';
 		$pt_br->google_code = 'pt-BR';
 		$pt_br->facebook_locale = 'pt_BR';
-
-		$pt = new GP_Locale();
-		$pt->english_name = 'Portuguese (Portugal)';
-		$pt->native_name = 'Português';
-		$pt->lang_code_iso_639_1 = 'pt';
-		$pt->country_code = 'pt';
-		$pt->wp_locale = 'pt_PT';
-		$pt->slug = 'pt';
-		$pt->google_code = 'pt-PT';
-		$pt->facebook_locale = 'pt_PT';
-
-		$pt_pt_ao90 = clone $pt;
-		$pt_pt_ao90->english_name = 'Portuguese (Portugal, AO90)';
-		$pt_pt_ao90->native_name = 'Português (AO90)';
-		$pt_pt_ao90->slug = 'pt/ao90';
-		$pt_pt_ao90->wp_locale = 'pt_PT_ao90';
 
 		$ps = new GP_Locale();
 		$ps->english_name = 'Pashto';
