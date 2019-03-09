@@ -755,6 +755,17 @@ class GP_Locales {
 		$es_cr->wp_locale = 'es_CR';
 		$es_cr->slug = 'es-cr';
 
+		$es_do = new GP_Locale();
+		$es_do->english_name = 'Spanish (Dominican Republic)';
+		$es_do->native_name = 'Español de República Dominicana';
+		$es_do->lang_code_iso_639_1 = 'es';
+		$es_do->lang_code_iso_639_2 = 'spa';
+		$es_do->lang_code_iso_639_3 = 'spa';
+		$es_do->country_code = 'do';
+		$es_do->wp_locale = 'es_DO';
+		$es_do->slug = 'es-do';
+		$es_do->google_code = 'es';
+
 		$es_gt = new GP_Locale();
 		$es_gt->english_name = 'Spanish (Guatemala)';
 		$es_gt->native_name = 'Español de Guatemala';
