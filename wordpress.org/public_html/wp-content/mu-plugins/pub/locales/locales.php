@@ -375,6 +375,14 @@ class GP_Locales {
 		$br->plural_expression = '(n > 1)';
 		$br->facebook_locale = 'br_FR';
 
+		$brx = new GP_Locale();
+		$brx->english_name = 'Bodo';
+		$brx->native_name = 'बोडो‎';
+		$brx->lang_code_iso_639_3 = 'brx';
+		$brx->country_code = 'in';
+		$brx->wp_locale = 'brx';
+		$brx->slug = 'brx';
+
 		$bs = new GP_Locale();
 		$bs->english_name = 'Bosnian';
 		$bs->native_name = 'Bosanski';
