@@ -118,6 +118,13 @@ class Locale_Associations implements Admin_Page {
 		$locale = sanitize_text_field( $_POST['locale'] );
 		$subdomain = sanitize_text_field( $_POST['subdomain'] );
 
+		if ( 0 !== strpos( $locale, 'test' ) ) {
+			$locales = get_available_languages();
+			if ( ! in_array( $locale, $locales, true ) ) {
+				return new WP_Error( 'locale_does_not_exist' );
+			}
+		}
+
 		$result = $wpdb->insert( Tables::LOCALES, [
 			'locale'    => $locale,
 			'subdomain' => $subdomain,

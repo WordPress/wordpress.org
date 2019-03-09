@@ -79,6 +79,12 @@ class Locale_Associations_View implements Admin_Page_View {
 					__( 'Please provide a locale and a subdomain.', 'rosetta' )
 				);
 				break;
+			case 'add-association|locale_does_not_exist' :
+				printf(
+					'<div class="notice notice-error"><p>%s</p></div>',
+					__( 'The locale does not exist yet.', 'rosetta' )
+				);
+				break;
 			case 'add-association|success' :
 				printf(
 					'<div class="notice notice-success"><p>%s</p></div>',
