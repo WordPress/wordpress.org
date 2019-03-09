@@ -540,6 +540,15 @@ class GP_Locales {
 		$de_formal->slug = 'de/formal';
 		$de_formal->wp_locale = 'de_DE_formal';
 
+		$de_at = new GP_Locale();
+		$de_at->english_name = 'German (Austria)';
+		$de_at->native_name = 'Deutsch (Österreich';
+		$de_at->lang_code_iso_639_1 = 'de';
+		$de_at->country_code = 'de';
+		$de_at->wp_locale = 'de_AT';
+		$de_at->slug = 'de-at';
+		$de_at->google_code = 'de';
+
 		$de_ch = new GP_Locale();
 		$de_ch->english_name = 'German (Switzerland)';
 		$de_ch->native_name = 'Deutsch (Schweiz)';
