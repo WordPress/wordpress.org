@@ -1725,6 +1725,16 @@ class GP_Locales {
 		$no->slug = 'no';
 		$no->google_code = 'no';
 
+		$nqo = new GP_Locale();
+		$nqo->english_name = 'N’ko';
+		$nqo->native_name = 'ߒߞߏ';
+		$nqo->lang_code_iso_639_2 = 'nqo';
+		$nqo->lang_code_iso_639_3 = 'nqo';
+		$nqo->country_code = 'gn';
+		$nqo->wp_locale = 'nqo';
+		$nqo->slug = 'nqo';
+		$nqo->text_direction = 'rtl';
+
 		$oci = new GP_Locale();
 		$oci->english_name = 'Occitan';
 		$oci->native_name = 'Occitan';
