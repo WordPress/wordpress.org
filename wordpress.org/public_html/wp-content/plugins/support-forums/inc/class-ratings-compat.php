@@ -11,6 +11,8 @@ class Ratings_Compat {
 
 	var $filter = false;
 
+	var $old_title = null;
+
 	public function __construct( $args ) {
 		if ( ! class_exists( 'WPORG_Ratings' ) ) {
 			return;
@@ -149,12 +151,28 @@ class Ratings_Compat {
 	 * @param int $topic_id The topic id
 	 */
 	public function get_topic_title( $title, $topic_id ) {
+
+		// save the title
+		$this->old_title = $title;
+
 		if ( bbp_is_single_view() && 'reviews' == bbp_get_view_id() ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
 			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
 				$title .= ' ' . \WPORG_Ratings::get_dashicons_stars( $rating );
 			}
+		}
+		return $title;
+	}
+
+	/**
+	 * Undo the above topic title change for specific cases
+	 *
+	 * @param string $title The topic title
+	 */
+	public function undo_topic_title( $title ) {
+		if ( !empty( $this->old_title ) ) {
+			return $this->old_title;
 		}
 		return $title;
 	}
@@ -166,7 +184,10 @@ class Ratings_Compat {
 
 		// Add the filter for topic titles here.
 		add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10, 2 );
-		?>
+
+		// Undo the above filter, for titles of replies to reviews. See #meta4254
+		add_filter( 'bbp_get_topic_last_topic_title', array( $this, 'undo_topic_title' ), 10, 1 ); 
+?>
 <link itemprop="applicationCategory" href="http://schema.org/OtherApplication" />
 <span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
 	<meta itemprop="price" content="0.00" />
