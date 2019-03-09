@@ -767,6 +767,17 @@ class GP_Locales {
 		$es_gt->google_code = 'es';
 		$es_gt->facebook_locale = 'es_LA';
 
+		$es_hn = new GP_Locale();
+		$es_hn->english_name = 'Spanish (Honduras)';
+		$es_hn->native_name = 'Español de Honduras';
+		$es_hn->lang_code_iso_639_1 = 'es';
+		$es_hn->lang_code_iso_639_2 = 'spa';
+		$es_hn->lang_code_iso_639_3 = 'spa';
+		$es_hn->country_code = 'hn';
+		$es_hn->wp_locale = 'es_HN';
+		$es_hn->slug = 'es-hn';
+		$es_hn->google_code = 'es';
+
 		$es_mx = new GP_Locale();
 		$es_mx->english_name = 'Spanish (Mexico)';
 		$es_mx->native_name = 'Español de México';
