@@ -319,6 +319,14 @@ class GP_Locales {
 		$bh->lang_code_iso_639_2 = 'bih';
 		$bh->slug = 'bh';
 
+		$bho = new GP_Locale();
+		$bho->english_name = 'Bhojpuri';
+		$bho->native_name = 'भोजपुरी';
+		$bho->lang_code_iso_639_3 = 'bho';
+		$bho->country_code = 'in';
+		$bho->wp_locale = 'bho';
+		$bho->slug = 'bho';
+
 		$bi = new GP_Locale();
 		$bi->english_name = 'Bislama';
 		$bi->native_name = 'Bislama';
