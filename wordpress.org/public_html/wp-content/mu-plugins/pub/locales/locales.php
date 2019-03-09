@@ -1187,6 +1187,19 @@ class GP_Locales {
 		$ia->lang_code_iso_639_2 = 'ina';
 		$ia->slug = 'ia';
 
+		$ibo = new GP_Locale();
+		$ibo->english_name = 'Igbo';
+		$ibo->native_name = 'Asụsụ Igbo';
+		$ibo->lang_code_iso_639_1 = 'ig';
+		$ibo->lang_code_iso_639_2 = 'ibo';
+		$ibo->lang_code_iso_639_3 = 'ibo';
+		$ibo->country_code = 'ng';
+		$ibo->wp_locale = 'ibo';
+		$ibo->slug = 'ibo';
+		$ibo->nplurals = 1;
+		$ibo->plural_expression = '0';
+		$ibo->google_code = 'ig';
+
 		$id = new GP_Locale();
 		$id->english_name = 'Indonesian';
 		$id->native_name = 'Bahasa Indonesia';
