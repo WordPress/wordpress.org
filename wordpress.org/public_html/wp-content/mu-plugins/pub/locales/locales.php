@@ -1262,6 +1262,15 @@ class GP_Locales {
 		$ka->google_code = 'ka';
 		$ka->facebook_locale = 'ka_GE';
 
+		$kaa = new GP_Locale();
+		$kaa->english_name = 'Karakalpak';
+		$kaa->native_name = 'Qaraqalpaq tili';
+		$kaa->lang_code_iso_639_2 = 'kaa';
+		$kaa->lang_code_iso_639_3 = 'kaa';
+		$kaa->country_code = 'uz';
+		$kaa->wp_locale = 'kaa';
+		$kaa->slug = 'kaa';
+
 		$kab = new GP_Locale();
 		$kab->english_name = 'Kabyle';
 		$kab->native_name = 'Taqbaylit';
