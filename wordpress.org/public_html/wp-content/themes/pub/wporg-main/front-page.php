@@ -18,7 +18,11 @@ namespace WordPressdotorg\MainTheme;
 
 global $rosetta;
 
-$showcase   = is_object( $rosetta ) ? $rosetta->showcase->front() : false;
+$showcase = false;
+if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) {
+	$showcase = $rosetta->showcase->front();
+}
+
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
