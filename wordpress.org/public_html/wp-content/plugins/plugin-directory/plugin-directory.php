@@ -8,7 +8,7 @@
  * Author URI: https://wordpress.org/
  * Text Domain: wporg-plugins
  * License: GPLv2
- * License URI: http://opensource.org/licenses/gpl-2.0.php
+ * License URI: https://opensource.org/licenses/gpl-2.0.php
  *
  * @package WordPressdotorg_Plugin_Directory
  */

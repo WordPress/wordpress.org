@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: (this should be a list of wordpress.org userid's)
-Donate link: http://example.com/
+Donate link: https://example.com/
 Tags: comments, spam
 Requires at least: 4.6
 Tested up to: 4.7
@@ -105,10 +105,10 @@ Unordered list:
 * something else
 * third thing
 
-Here's a link to [WordPress](http://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax].
+Here's a link to [WordPress](https://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax].
 Titles are optional, naturally.
 
-[markdown syntax]: http://daringfireball.net/projects/markdown/syntax
+[markdown syntax]: https://daringfireball.net/projects/markdown/syntax
             "Markdown is what the parser uses to process much of the readme file"
 
 Markdown uses email style notation for blockquotes and I've been told:

@@ -50,7 +50,7 @@ class Plugins_Info_API {
 
 			default:
 				if ( 'POST' != strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
-					die( '<p>Action not implemented. <a href="http://codex.wordpress.org/WordPress.org_API">API Docs</a>.</p>' );
+					die( '<p>Action not implemented. <a href="https://codex.wordpress.org/WordPress.org_API">API Docs</a>.</p>' );
 				} else {
 					$this->output( (object) array(
 						'error' => 'Action not implemented',
