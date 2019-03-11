@@ -715,6 +715,8 @@ EMAIL;
 				} elseif ( 'email' == $_POST['howtoapply_method'] && ! is_email( $_POST['howtoapply'] ) ) {
 					$has_errors = __( 'The provided "How to Apply" email address is not a proper email address.', 'jobswp' );
 					unset( $_POST['howtoapply'] );
+				} elseif ( 'web' == $_POST['howtoapply_method'] && is_email( $_POST['howtoapply'] ) ) {
+					$has_errors = __( 'The provided "How to Apply" online form address appear to be an email address. Either supply a website address or change the dropdown to "Email Address".', 'jobswp' );
 				}
 			endif;
 
