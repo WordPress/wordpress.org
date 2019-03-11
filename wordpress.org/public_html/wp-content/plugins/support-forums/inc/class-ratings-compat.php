@@ -418,7 +418,7 @@ class Ratings_Compat {
 				printf(
 					/* translators: %s: Forum user guide URL */
 					__( 'Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
-					__( 'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews' )
+					esc_url( __( 'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews', 'wporg-forums' ) )
 				);
 			?></li>
 		</ul>
