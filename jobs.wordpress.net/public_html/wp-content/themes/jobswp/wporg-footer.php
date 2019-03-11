@@ -34,12 +34,8 @@
 		</ul>
 
 		<ul>
-			<li>
-				<iframe allowtransparency="true" frameborder="0" scrolling="no" src="//platform.twitter.com/widgets/follow_button.html?screen_name=WordPress&show_count=false" style="width:135px; height:20px;"></iframe>
-			</li>
-			<li>
-				<iframe src="//www.facebook.com/plugins/like.php?app_id=121415197926116&amp;href=http%3A%2F%2Fwww.facebook.com%2Fwordpress&amp;send=false&amp;layout=button_count&amp;width=135&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font=lucida+grande&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:135px; height:21px;" allowTransparency="true"></iframe>
-			</li>
+			<li><span class="dashicons dashicons-twitter"></span><a href="https://twitter.com/WordPress" title="<?php echo esc_attr( sprintf( __( 'Follow %s on Twitter', 'jobswp' ), '@WordPress' ) ); ?>">@WordPress</a></li>
+			<li><span class="dashicons dashicons-facebook"></span><a href="https://www.facebook.com/WordPress/" title="<?php echo esc_attr( sprintf( __( 'Like %s on Facebook', 'jobswp' ), 'WordPress' ) ); ?>">WordPress</a></li>
 		</ul>
 	</div>
 
