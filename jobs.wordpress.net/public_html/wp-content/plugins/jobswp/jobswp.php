@@ -717,6 +717,8 @@ EMAIL;
 					unset( $_POST['howtoapply'] );
 				} elseif ( 'web' == $_POST['howtoapply_method'] && is_email( $_POST['howtoapply'] ) ) {
 					$has_errors = __( 'The provided "How to Apply" online form address appear to be an email address. Either supply a website address or change the dropdown to "Email Address".', 'jobswp' );
+				} elseif ( 'web' == $_POST['howtoapply_method'] && ! wp_http_validate_url( esc_url_raw( $_POST['howtoapply'] ) ) ) {
+					$has_errors = __( 'The provided "How to Apply" online form address is not a proper URL.', 'jobswp' );
 				}
 			endif;
 
