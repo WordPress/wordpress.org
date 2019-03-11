@@ -652,7 +652,7 @@ html[dir="rtl"] #share nav li {
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
        only screen and (min-resolution: 1.5dppx),
        only screen and (min-resolution: 144dpi) {
-	#browserlist li .icon, #share nav li a, #byline a {
+	#browserlist li .icon, #share nav li a {
 		background-image: url(imgs/browsehappy-sprite-2x.png);
 		background-repeat: no-repeat;
 		background-size: 750px 170px;
