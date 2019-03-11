@@ -44,7 +44,7 @@
 			<li id="<?php echo $browser; ?>">
 				<a href="<?php echo esc_url( $data->url ); ?>" title="<?php echo esc_attr( $data->long_name ); ?>">
 					<div class="icon"></div>
-					<h2><?php echo $data->name; ?></h2>
+					<h2 lang="en"><?php echo $data->name; ?></h2>
 					<p class="info"><?php echo $data->info; ?></p>
 					<p class="version"><?php printf( __( 'Latest Version: %s', 'browsehappy' ), '<strong>' . apply_filters( 'get_browsehappy_version', $browser ) . '</strong>' ); ?></p>
 					<p class="website"><?php _e( 'Visit website for more info', 'browsehappy' ); ?></p>
