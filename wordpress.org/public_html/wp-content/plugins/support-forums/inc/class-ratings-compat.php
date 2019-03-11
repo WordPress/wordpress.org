@@ -414,6 +414,13 @@ class Ratings_Compat {
 			<li><?php printf( $report, esc_url( sprintf( home_url( '/%s/%s/' ), $this->compat, $this->slug ) ) ); ?></li>
 			<li><?php echo esc_html( $rate ); ?></li>
 			<li><?php esc_html_e( 'Please provide as much detail as you can to justify your rating and to help others.', 'wporg-forums' ); ?></li>
+			<li><?php
+				printf(
+					/* translators: %s: Forum user guide URL */
+					__( 'Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
+					__( 'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews' )
+				);
+			?></li>
 		</ul>
 		<?php
 	}
