@@ -14,7 +14,7 @@
 	<meta name="author" content="WordPress" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?8" />
+	<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?9" />
 	<script src="<?php echo get_template_directory_uri(); ?>/js/modernizr-1.6.min.js"></script>
 	<script src="https://use.typekit.com/lsw6yis.js"></script>
 	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
@@ -49,7 +49,7 @@
 					<p class="version"><?php printf( __( 'Latest Version: %s', 'browsehappy' ), '<strong>' . apply_filters( 'get_browsehappy_version', $browser ) . '</strong>' ); ?></p>
 					<p class="website"><?php _e( 'Visit website for more info', 'browsehappy' ); ?></p>
 				</a>
-				<?php do_action( 'browsehappy_like_button', $browser ); ?>
+				<?php do_action( 'browsehappy_browser_after', $browser ); ?>
 			</li><!-- #<?php echo $browser; ?> -->
 <?php endforeach; ?>
 		</ul><!-- #browserlist -->

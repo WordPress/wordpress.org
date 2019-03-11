@@ -471,16 +471,6 @@ html[dir="rtl"] #browserlist li {
 	transition: all .1s ease-out;
 }
 
-#browserlist p.likebutton {
-	text-align: center;
-	margin: 15px 5px 0;
-	min-height: 25px;
-}
-
-html[dir="rtl"] #browserlist p.likebutton iframe html {
-	float: right;
-}
-
 /* Footer */
 
 footer {
