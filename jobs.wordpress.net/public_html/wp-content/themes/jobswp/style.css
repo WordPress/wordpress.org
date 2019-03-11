@@ -1201,8 +1201,48 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	margin-left: 24px;
 }
 
-#wporg-footer ul:first-child {
-	margin-left: 0;
+@media screen and (min-width:960px) {
+    #wporg-footer ul:first-child {
+        margin-left: 0;
+    }
+}
+
+@media screen and (min-width:561px) and (max-width:995px) {
+    #wporg-footer .wrapper {
+        max-width: 600px;
+    }
+
+    #wporg-footer ul:nth-child(3n+1) {
+        margin-left: 0;
+    }
+
+    #wporg-footer ul:nth-child(4n) {
+        clear: both;
+    }
+
+    #wporg-footer ul {
+        margin-left: 2%;
+        width: 32%;
+    }
+}
+
+@media screen and (max-width:560px) {
+    #wporg-footer .wrapper {
+        max-width: 360px;
+    }
+
+    #wporg-footer ul:nth-child(2n+1) {
+        margin-left: 0;
+    }
+
+    #wporg-footer ul:nth-child(odd) {
+        clear: both;
+    }
+
+    #wporg-footer ul {
+        margin-left: 4%;
+        width: 48%;
+    }
 }
 
 #wporg-footer ul li {
@@ -1248,7 +1288,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	padding-right: 0;
 }
 .jobswp #wporg-footer .wrapper {
-	width: 100%;
+	margin: 0 auto;
 	text-align: left;
 }
 .jobswp #wporg-footer p {
@@ -1262,13 +1302,24 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 .jobswp #wporg-footer ol, .jobswp #wporg-footer ul {
 	padding-left: 0;
 	margin-top: 0;
-	margin-left: 28px;
 }
 .jobswp #wporg-footer a:hover {
 	color: #d54e21;
 }
 .jobswp #wporg-footer a:visited {
 	color: #4ca6cf;
+}
+
+@media only screen and (max-width: 767px) {
+	.jobswp #wporg-footer .wrapper {
+		width: 442px;
+	}
+}
+
+@media only screen and (max-width: 560px) {
+	.jobswp #wporg-footer .wrapper {
+		width: 285px;;
+	}
 }
 
 /* Mobile */
@@ -1283,9 +1334,6 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	}
 	#subhead .wporg-link a {
 		font-size: 0.78em;
-	}
-	#wporg-footer ul {
-		width: 110px;
 	}
 }
 @media only screen and (max-width: 767px) {
