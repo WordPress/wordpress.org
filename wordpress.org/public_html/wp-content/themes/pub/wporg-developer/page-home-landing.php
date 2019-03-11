@@ -45,6 +45,12 @@ get_header(); ?>
 					<a href="<?php echo esc_url( get_post_type_archive_link( 'command' ) ); ?>" class="go"><?php _e( 'Run Commands ', 'wporg' ); ?></a>
 				</div>
 
+				<div class="box box-block-editor">
+					<h3 class="widget-title"><div class="dashicons dashicons-edit"></div><?php _e( 'Block Editor', 'wporg' ); ?></h3>
+					<p class="widget-description"><?php _e( 'Creating the building blocks of WordPress?', 'wporg' ); ?></p>
+					<p><?php _e( 'Coming Soon', 'wporg' ); ?></a></p>
+				</div>
+
 			</div>
 
 			<div class="search-guide inner-wrap section">
