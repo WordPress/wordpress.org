@@ -3483,10 +3483,10 @@ section {
 
 .bbpress #bbpress-forums div.bbp-template-notice a {
 	color: #0073aa;
+	text-decoration: underline;
 }
 
 .bbpress #bbpress-forums div.bbp-template-notice a:hover {
-	text-decoration: underline;
 	color: #0073aa;
 }
 

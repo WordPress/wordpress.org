@@ -150,9 +150,9 @@ section {
 
 			a {
 				color: $color__wp-blue;
+				text-decoration: underline;
 
 				&:hover {
-					text-decoration: underline;
 					color: $color__wp-blue;
 				}
 			}
