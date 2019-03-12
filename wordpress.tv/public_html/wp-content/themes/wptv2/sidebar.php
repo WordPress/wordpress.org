@@ -19,5 +19,5 @@
 				]
 			);
 		?>
-	<ul/>
+	</ul>
 </div><!-- .secondary_content -->
