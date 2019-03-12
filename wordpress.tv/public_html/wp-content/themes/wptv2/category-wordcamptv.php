@@ -42,8 +42,8 @@ global $wptv;
 							<img src="<?php $wptv->the_video( true, true ); ?>" />
 						</span>
 						<span class="video-title"><?php the_title(); ?></span>
-						<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
 					</a>
+					<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
 				</li>
 				<?php endwhile; // have_posts ?>
 
