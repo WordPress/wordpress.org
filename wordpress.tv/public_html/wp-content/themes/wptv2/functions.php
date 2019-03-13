@@ -567,30 +567,6 @@ class WordPressTV_Theme {
 	}
 
 	/**
-	 * Get VodPod Thumbnails, used by the_video_image
-	 *
-	 * @param string $code
-	 * @return string
-	 */
-	function get_vodpod_thumbnails( $code ) {
-		preg_match( '/((Groupvideo|ExternalVideo).[0-9]+)/', $code, $matches );
-		$id = $matches[1];
-
-		if ( ! $id ) {
-			return get_template_directory_uri() . '/i/notfound.png';
-		}
-
-		// Argh!!
-		$xml = file_get_contents( 'http://api.vodpod.com/api/video/details.xml?video_id=' . $id . '&api_key=03519ea5faf6a6ed' );
-
-		if ( preg_match( '/<large>(.*)<\/large>/', $xml, $thevideoid ) ) {
-			return $thevideoid[1];
-		} else {
-			return get_template_directory_uri() . '/i/notfound.png';
-		}
-	}
-
-	/**
 	 * Renders the video or a video thumbnail
 	 *
 	 * @global WP_Post $post
@@ -622,34 +598,6 @@ class WordPressTV_Theme {
 				$video      = sprintf( '[%s %s w="%s" %s]', $shortcode[2], trim( $shortcode[3] ), is_single() ? '940' : '575', $hd_param );
 				$video      = apply_filters( 'the_content', $video );
 			}
-		}
-
-		// SlideShare
-		preg_match_all( '|\[slideshare (.+?)]|ie', $post->post_content, $matches );
-		foreach ( $matches[1] as $key => $code ) {
-			$code = '[slideshare ' . $code . ']';
-			if ( $thumb ) {
-				preg_match( '/id=([0-9]+).*/', $code, $matches );
-				$id    = $matches[1];
-				$ssxml = file_get_contents( 'https://www.slideshare.net/api/2/get_slideshow/?slideshow_id=' . $id . '&api_key=sM0rzJvp&ts=' . time() . '&hash=' . sha1( 'vHs2uii6' . time() ) );
-				preg_match( '/<ThumbnailURL>(.+)<\/ThumbnailURL>/', $ssxml, $matches );
-				$image = $matches[1];
-			} else {
-				$slideshare = apply_filters( 'the_content', $code );
-				$slideshare = preg_replace( '/height\=\'[0-9]+?\'/', "height='430'", $slideshare );
-				$video      = str_replace( "width='425'", "width='648'", $slideshare );
-			}
-		}
-
-		// VodPod
-		preg_match_all( '|\[vodpod (.+?)]|ie', $post->post_content, $matches );
-		foreach ( $matches[1] as $key => $code ) {
-			$code   = '[vodpod ' . $code . ']';
-			$vodpod = apply_filters( 'the_content', $code );
-			$id     = trim( str_replace( '</div>','', preg_replace( '/.*key\=([^&]+)&.*/', '$1', $vodpod ) ) );
-
-			$image = $this->get_vodpod_thumbnails( $code );
-			$video = $vodpod;
 		}
 
 		// Output results
@@ -685,30 +633,6 @@ class WordPressTV_Theme {
 			preg_match( '/([0-9A-Za-z]+)/i', $code, $m );
 			$guid = $m[1];
 			$ret = video_image_url_by_guid( $guid, 'fmt_dvd' );
-		}
-
-		preg_match_all( '|\[wporg-screencast (.+?)]|ie', $post->post_content, $matches );
-		foreach ( $matches[1] as $key => $code ) {
-			$wporg = apply_filters( 'the_content', '[wporg-screencast ' . $code . ']' );
-			$ret   = $wporg;
-		}
-
-		preg_match_all( '|\[slideshare (.+?)]|ie', $post->post_content, $matches );
-		foreach ( $matches[1] as $key => $code ) {
-			$code = '[slideshare ' . $code . ']';
-
-			preg_match( '/id=([0-9]+).*/', $code, $matches );
-			$id    = $matches[1];
-			$url   = 'https://www.slideshare.net/api/2/get_slideshow/?slideshow_id=' . $id . '&api_key=sM0rzJvp&ts=' . time() . '&hash=' . sha1( 'vHs2uii6' . time() );
-			$ssxml = wp_remote_retrieve_body( wp_remote_get( esc_url_raw( $url ) ) );
-			preg_match( '/<ThumbnailURL>(.+)<\/ThumbnailURL>/', $ssxml, $matches );
-			$ret = $matches[1];
-		}
-
-		preg_match_all( '|\[vodpod (.+?)]|ie', $post->post_content, $matches );
-		foreach ( $matches[1] as $key => $code ) {
-			$code = '[vodpod ' . $code . ']';
-			$ret  = $this->get_vodpod_thumbnails( $code );
 		}
 
 		if ( $arrow ) {
