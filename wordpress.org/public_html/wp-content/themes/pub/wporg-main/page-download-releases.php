@@ -54,9 +54,9 @@ get_header( 'child-page' );
 					<p>
 						<?php
 						printf(
-							/* translators: Roadmap URL */
-							wp_kses_post( __( 'Curious about which jazzers we highlighted for each release? <a href="%s">It’s on the roadmap</a>.', 'wporg' ) ),
-							esc_url( home_url( '/about/roadmap/' ) )
+							/* translators: History page URL */
+							wp_kses_post( __( 'Curious about which jazzers we highlighted for each release? <a href="%s">It’s on the History page</a>.', 'wporg' ) ),
+							esc_url( home_url( '/about/history/' ) )
 						);
 						?>
 					</p>
