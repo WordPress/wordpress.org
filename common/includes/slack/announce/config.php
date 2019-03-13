@@ -297,6 +297,7 @@ function get_whitelist() {
 			'DrewAPicture', // @drew on Slack
 		),
 		'wptv' => array(
+			'casiepa',
 			'JerrySarcastic',
 			'RoseAppleMedia',
 		),
