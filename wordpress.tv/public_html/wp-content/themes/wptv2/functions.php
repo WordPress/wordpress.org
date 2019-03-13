@@ -594,7 +594,7 @@ class WordPressTV_Theme {
 	 * Renders the video or a video thumbnail
 	 *
 	 * @global WP_Post $post
-	 * @global $originalcontent
+	 * @global string  $originalcontent
 	 *
 	 * @param bool $thumb
 	 * @param bool $no_html
@@ -725,7 +725,7 @@ class WordPressTV_Theme {
 	/**
 	 * Removes shortcodes from $originalcontent global
 	 *
-	 * @global $originalcontent
+	 * @global string $originalcontent
 	 *
 	 * @param string $content
 	 * @return mixed
