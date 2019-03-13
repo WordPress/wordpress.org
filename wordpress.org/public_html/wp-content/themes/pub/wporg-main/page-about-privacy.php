@@ -128,7 +128,12 @@ the_post();
 
 					<h3><?php esc_html_e( 'Cookies', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'Additionally, information about how you use our website is collected automatically using &#8220;cookies&#8221;. Cookies are text files placed on your computer to collect standard internet log information and visitor behaviour information. This information is used to track visitor use of the website and to compile statistical reports on website activity.', 'wporg' ); ?></p>
-					<p><?php echo wp_kses_post( __( 'Please see <a href="https://wordpress.org/about/privacy/cookies/">our cookie policy</a> for more information about what cookies are collected on WordPress.org.', 'wporg' ) ); ?></p>
+					<p><?php echo wp_kses_post( sprintf(
+							/* translators: %s: Link to the Cookie policy. */
+							__( 'Please see <a href="%s">our cookie policy</a> for more information about what cookies are collected on WordPress.org.', 'wporg' ),
+							home_url( '/about/privacy/cookies/' )
+						) );
+					?></p>
 
 					<h3><?php esc_html_e( 'Privacy Policy Changes', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'Although most changes are likely to be minor, WordPress.org may change its Privacy Policy from time to time, and at WordPress.org&#8217;s sole discretion. WordPress.org encourages visitors to frequently check this page for any changes to its Privacy Policy. Your continued use of this site after any change in this Privacy Policy will constitute your acceptance of such change.', 'wporg' ); ?></p>
