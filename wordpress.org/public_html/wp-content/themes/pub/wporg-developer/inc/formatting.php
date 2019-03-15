@@ -278,6 +278,9 @@ class DevHub_Formatting {
 		// In pretty much all cases, the docs mean literal '*' and never emphasis.
 		$text = str_replace( array( '<em>', '</em>' ), '*', $text );
 
+		// Undo parser's Markdown conversion of '__' to `<strong>` and `</strong>`.
+		$text = str_replace( array( '<strong>', '</strong>' ), '__', $text );
+
 		// Encode all htmlentities (but don't double-encode).
 		$text = htmlentities( $text, ENT_COMPAT | ENT_HTML401, 'UTF-8', false );
 
