@@ -7,6 +7,13 @@
 
 send_frame_options_header();
 
+// Search engines don't need to index the upload form. Should help prevent users uploading themes they didn't create.
+if ( ! function_exists( 'wporg_meta_robots' ) ) {
+   	function wporg_meta_robots() {
+		return 'noindex';
+	}
+}
+
 get_header();
 
 if ( have_posts() ) :
