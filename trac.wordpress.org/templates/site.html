@@ -212,7 +212,7 @@
  		${select('*|comment()|text()')}
 	</div>
 	<div class="wp-notice" id="wp-reporter-feedback-notice" py:if="ticket.reporter == req.authname and 'reporter-feedback' in ticket.keywords and ticket.resolution != 'fixed'">
-		<p><strong>Howdy!</strong></p><p></p>
+		<p><strong>Howdy!</strong></p>
 		<p>A contributor marked this ticket with the reporter-feedback keyword. <strong>That means we need feedback from you.</strong></p>
 		<p>Please answer their questions and address their concerns, then remove the keyword, below.</p>
 		<p>If this is a support question, you're better off in the <a href="${support_link}" class="ext-link"><span class="icon">&nbsp;</span>support forums</a>.</p>
