@@ -34,6 +34,10 @@ class Hooks {
 		add_filter( 'bbp_after_get_reply_author_link_parse_args', array( $this, 'get_author_link' ) );
 		add_filter( 'bbp_after_get_author_link_parse_args',       array( $this, 'get_author_link' ) );
 
+		// remove nofollow filter from topic and reply author links, since those are wordpress.org profile urls, not user inputs
+		remove_filter( 'bbp_get_topic_author_link', 'bbp_rel_nofollow' );
+		remove_filter( 'bbp_get_reply_author_link', 'bbp_rel_nofollow' );
+
 		// oEmbed.
 		add_filter( 'oembed_discovery_links', array( $this, 'disable_oembed_discovery_links' ) );
 		add_filter( 'oembed_response_data',   array( $this, 'disable_oembed_response_data' ), 10, 2 );
