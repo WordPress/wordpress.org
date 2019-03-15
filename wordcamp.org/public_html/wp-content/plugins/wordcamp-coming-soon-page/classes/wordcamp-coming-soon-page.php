@@ -62,7 +62,7 @@ class WordCamp_Coming_Soon_Page {
 			'open-sans',
 			'https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,300,400,600',
 			array(),
-			null
+			2
 		);
 
 		wp_enqueue_style(
@@ -92,6 +92,8 @@ class WordCamp_Coming_Soon_Page {
 			return;
 		}
 
+		// TODO: Figure out an alternative here. 
+		//phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- Not sure whats the alternative to this could be.
 		extract( $GLOBALS['WordCamp_Coming_Soon_Page']->get_template_variables() );
 
 		require_once( dirname( __DIR__ ) . '/css/template-coming-soon-dynamic.php' );
@@ -178,17 +180,23 @@ class WordCamp_Coming_Soon_Page {
 			$color     = new Jetpack_Color( $background, 'hex' );
 			$color_hsl = $color->toHsl();
 
-			$lighter_color = new Jetpack_Color( array(
-				$color_hsl['h'],
-				$color_hsl['s'],
-				( $color_hsl['l'] >= 85 ) ? 100 : $color_hsl['l'] + 15,
-			), 'hsl' );
+			$lighter_color = new Jetpack_Color(
+				array(
+					$color_hsl['h'],
+					$color_hsl['s'],
+					( $color_hsl['l'] >= 85 ) ? 100 : $color_hsl['l'] + 15,
+				),
+				'hsl'
+			);
 
-			$darker_color = new Jetpack_Color( array(
-				$color_hsl['h'],
-				$color_hsl['s'],
-				( $color_hsl['l'] < 10 ) ? 0 : $color_hsl['l'] - 10,
-			), 'hsl' );
+			$darker_color = new Jetpack_Color(
+				array(
+					$color_hsl['h'],
+					$color_hsl['s'],
+					( $color_hsl['l'] < 10 ) ? 0 : $color_hsl['l'] - 10,
+				),
+				'hsl'
+			);
 
 			$background_lighter = '#' . $lighter_color->toHex();
 			$background_darker  = '#' . $darker_color->toHex();
@@ -263,7 +271,7 @@ class WordCamp_Coming_Soon_Page {
 	}
 
 	/**
-	 * Retrieve the contact form shortcode string
+	 * Loop through all pages and renders first contact-us form or contact-us block.
 	 *
 	 * We can't just create an arbitrary shortcode because of https://github.com/Automattic/jetpack/issues/102. Instead we have to use a form that's tied to a page.
 	 * This is somewhat fragile, though. It should work in most cases because the first $page that contains [contact-form] will be the one we automatically create
@@ -274,8 +282,8 @@ class WordCamp_Coming_Soon_Page {
 	 * @return string|false
 	 */
 	public function get_contact_form_shortcode() {
-		$contact_form_shortcode = false;
-		$shortcode_regex        = get_shortcode_regex();
+		$contact_form_content = false;
+		$shortcode_regex      = get_shortcode_regex();
 
 		$all_pages = get_posts( array(
 			'post_type'      => 'page',
@@ -283,25 +291,46 @@ class WordCamp_Coming_Soon_Page {
 		) );
 
 		foreach ( $all_pages as $page ) {
-			preg_match_all( '/' . $shortcode_regex . '/s', $page->post_content, $matches, PREG_SET_ORDER );
 
-			foreach ( $matches as $shortcode ) {
-				if ( 'contact-form' === $shortcode[2] ) {
-					global $post;
-					$post = $page;
-					setup_postdata( $post );
+			if ( has_shortcode( $page->post_content, 'contact-form' ) ) {
+				preg_match_all( '/' . $shortcode_regex . '/s', $page->post_content, $matches, PREG_SET_ORDER );
+				foreach ( $matches as $shortcode ) {
+					if ( 'contact-form' === $shortcode[2] ) {
+						global $post;
+						//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- We need this because of jetpack bug #102
+						$post = $page;
+						setup_postdata( $post );
 
-					ob_start();
-					echo do_shortcode( $shortcode[0] );
-					$contact_form_shortcode = ob_get_clean();
+						ob_start();
+						echo do_shortcode( $shortcode[0] );
+						$contact_form_content = ob_get_clean();
 
-					wp_reset_postdata();
-					break;
+						wp_reset_postdata();
+						break;
+					}
 				}
+			} elseif ( has_block( 'jetpack/contact-form', $page->post_content ) ) {
+				// Along with shortcodes, also check for blocks.
+				$blocks = parse_blocks( $page->post_content );
+				foreach ( $blocks as $block ) {
+					if ( 'jetpack/contact-form' === $block['blockName'] ) {
+						global $post;
+						//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- We need this because of jetpack bug #102
+						$post = $page;
+						setup_postdata( $post );
+						$contact_form_content = render_block( $block );
+						wp_reset_postdata();
+						break;
+					}
+				}
+			}
+
+			if ( $contact_form_content ) {
+				break;
 			}
 		}
 
-		return $contact_form_shortcode;
+		return $contact_form_content;
 	}
 
 	/**
@@ -437,7 +466,7 @@ class WordCamp_Coming_Soon_Page {
 	 * post, we will see a message that post has been cross posted in social media accounts. That message is incorrect,
 	 * but can only be fixed in JetPack, not here.
 	 *
-	 * @param bool $should_publicize Whether this post can be publicized or not
+	 * @param bool $should_publicize Whether this post can be publicized or not.
 	 *
 	 * @return bool
 	 */
