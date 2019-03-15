@@ -116,7 +116,7 @@ class Performance_Optimizations {
 		}
 
 		if ( $search_terms ) {
-			$search_url = sprintf( 'https://wordpress.org/search/%s/', urlencode( $search_terms ) );
+			$search_url = sprintf( 'https://wordpress.org/search/%s/?forums=1', urlencode( $search_terms ) );
 			$search_url = esc_url_raw( $search_url );
 		}
 
