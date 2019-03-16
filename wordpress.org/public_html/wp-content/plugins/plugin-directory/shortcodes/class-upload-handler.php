@@ -294,7 +294,7 @@ class Upload_Handler {
 		if ( $this->starts_with_reserved_slug() ) {
 			$message .= sprintf(
 				/* translators: %s: plugin name */
-				__( 'Warning: Your plugin will probably need to be renamed. Your chosen plugin name - %s - starts with a term that may belong to another company. When we review your submision we will either correct this for you or request you approve a new name.' ),
+				__( 'Warning: Your plugin will probably need to be renamed. Your chosen plugin name - %s - starts with a term that may belong to another company. When we review your submission we will either correct this for you or request you approve a new name.' ),
 				esc_html( $this->plugin['Name'] )
 			) . '</p><p>';
 		}
