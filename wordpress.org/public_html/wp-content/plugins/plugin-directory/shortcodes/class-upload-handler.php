@@ -77,10 +77,10 @@ class Upload_Handler {
 			$error = __( 'Error: The plugin has no name.', 'wporg-plugins' );
 
 			return new \WP_Error( 'no_name', $error . ' ' . sprintf(
-				/* translators: 1: plugin header line, 2: Codex URL */
-				__( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
+				/* translators: 1: plugin header line, 2: Documentation URL */
+				__( 'Add a %1$s line to your main plugin file and upload the plugin again. For more information, please review our documentation on <a href="%2$s">Plugin Headers</a>.', 'wporg-plugins' ),
 				'<code>Plugin Name:</code>',
-				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
+				__( 'https://developer.wordpress.org/plugins/plugin-basics/header-requirements/', 'wporg-plugins' )
 			) );
 		}
 
@@ -95,7 +95,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'unsupported_name', $error . ' ' . sprintf(
 				/* translators: %s: 'Plugin Name:' */
-				__( 'Plugin names can only contain latin letters (A-z), numbers, spaces, and hyphens. Please change the %s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+				__( 'Plugin names may only contain latin letters (A-z), numbers, spaces, and hyphens. Please change the %s line in your main plugin file and upload it again.', 'wporg-plugins' ),
 				esc_html( $this->plugin['Name'] ),
 				'<code>Plugin Name:</code>'
 			) );
@@ -121,7 +121,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'already_exists', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-				__( 'There is already a plugin called %1$s by a different author. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+				__( 'There is already a plugin with the name %1$s in the directory. Please rename your plugin by changing the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'<code>Plugin Name:</code>'
 			) );
@@ -132,9 +132,10 @@ class Upload_Handler {
 			$error = __( 'Error: The plugin has already been submitted.', 'wporg-plugins' );
 
 			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
-				/* translators: 1: plugin slug, 2: plugins@wordpress.org */
-				__( 'You have already submitted a plugin called %1$s. Please be patient and wait for a review. If you have made a mistake, email <a href="mailto:%2$s">%2$s</a> and let us know.', 'wporg-plugins' ),
+				/* translators: 1: plugin slug, 2: Documentation URL, 3: plugins@wordpress.org */
+				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Simply update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
+				__( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 'wporg-plugins' ),
 				'plugins@wordpress.org'
 			) );
 		}
@@ -144,7 +145,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'no_description', $error . ' ' . sprintf(
 				/* translators: 1: plugin header line, 2: Documentation URL */
-				__( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
+				__( 'Add a %1$s line to your main plugin file and upload the plugin again. Please review our documentation on <a href="%2$s">Plugin Headers</a> for more information.', 'wporg-plugins' ),
 				'<code>Description:</code>',
 				__( 'https://developer.wordpress.org/plugins/the-basics/header-requirements/', 'wporg-plugins' )
 			) );
@@ -155,7 +156,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'no_version', $error . ' ' . sprintf(
 				/* translators: 1: plugin header line, 2: Documentation URL */
-				__( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
+				__( 'Add a %1$s line to your main plugin file and upload the plugin again. Please review our documentation on <a href="%2$s">Plugin Headers</a> for more information.', 'wporg-plugins' ),
 				'<code>Version:</code>',
 				__( 'https://developer.wordpress.org/plugins/the-basics/header-requirements/', 'wporg-plugins' )
 			) );
@@ -166,7 +167,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'invalid_version', $error . ' ' . sprintf(
 				/* translators: %s: 'Version:' */
-				__( 'Version strings can only contain numeric and period characters (like 1.2). Please fix the %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
+				__( 'Version strings can only contain numeric and period characters (i.e. 1.2). Please correct the %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
 				'<code>Version:</code>'
 			) );
 		}
@@ -177,7 +178,7 @@ class Upload_Handler {
 
 			return new \WP_Error(
 				'plugin_author_uri', $error . ' ' .
-				__( 'A plugin URL is a page/site that provides details about this specific plugin. An author URL is a page/site that provides information about the author of the plugin. You are not required to provide both, so pick the one that best applies to your URL.', 'wporg-plugins' )
+				__( 'A plugin URI (Unique Record Indicator) is a webpage that provides details about this specific plugin. An author URI is a webpage that provides information about the author of the plugin. Those two URIs must be different. You are not required to provide both, so pick the one that best applies to your situation.', 'wporg-plugins' )
 			);
 		}
 
@@ -202,7 +203,7 @@ class Upload_Handler {
 			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
 
 			return new \WP_Error( 'failed_checks', $error . ' ' . sprintf(
-				/* translators: 1: Plugin Check Plugin URL, 2: make.wordpress.org/plugins */
+				/* translators: 1: Plugin Check Plugin URL, 2: https://make.wordpress.org/plugins */
 				__( 'Please correct the problems with the plugin and upload it again. You can also use the <a href="%1$s">Plugin Check Plugin</a> to test your plugin before uploading. If you have any questions about this please post them to %2$s.', 'wporg-plugins' ),
 				'//wordpress.org/plugins/plugin-check/',
 				'<a href="https://make.wordpress.org/plugins">https://make.wordpress.org/plugins</a>'
@@ -276,20 +277,29 @@ class Upload_Handler {
 
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
-		/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
 		$message = sprintf(
-			__( 'Thank you for uploading %1$s to the WordPress Plugin Directory. It has been given the initial plugin slug of %2$s, however that is subject to change based on the results of your code review.' ),
+			/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
+			__( 'Thank you for uploading %1$s to the WordPress Plugin Directory. It has been given the initial plugin slug of %2$s, however that is subject to change based on the results of your code review. If this slug is incorrect, please contact us immediately, as it cannot be changed once your plugin is approved.' ),
 			esc_html( $this->plugin['Name'] ),
 			'<code>' . $this->plugin_slug . '</code>'
 		) . '</p><p>';
 
-		/* translators: 1: plugins@wordpress.org */
 		$message .= sprintf(
+			/* translators: 1: plugins@wordpress.org */
 			__( 'We&rsquo;ve sent you an email verifying this submission. Please make sure to whitelist our email address - <a href="mailto:%1$s">%1$s</a> - to ensure you receive all our communications.' ),
 			'plugins@wordpress.org'
 		) . '</p><p>';
 
-		$message .= __( 'If there is any error in your submission, please email us as we can correct many issues before approval.', 'wporg-plugins' ) . '</p><p>';
+		// Warn if the plugin starts with a reserved slug.
+		if ( $this->starts_with_reserved_slug() ) {
+			$message .= sprintf(
+				/* translators: %s: plugin name */
+				__( 'Warning: Your plugin will probably need to be renamed. Your chosen plugin name - %s - starts with a term that may belong to another company. When we review your submision we will either correct this for you or request you approve a new name.' ),
+				esc_html( $this->plugin['Name'] )
+			) . '</p><p>';
+		}
+
+		$message .= __( 'If there is any error in your submission, please email us as soon as possible. We can correct many issues before approval.', 'wporg-plugins' ) . '</p><p>';
 
 		$message .= sprintf(
 			/* translators: 1: URL to guidelines; 2: URL to FAQs; */
@@ -330,6 +340,33 @@ class Upload_Handler {
 	}
 
 	/**
+	 * Whether the uploaded plugin uses a slug commonly abused by non-reps.
+	 *
+	 * @return bool
+	 */
+	public function starts_with_reserved_slug() {
+		$abused_slugs = array(
+			'apple',
+			'facebook',
+			'google',
+			'ios',
+			'jetpack',
+			'microsoft',
+			'paypal',
+			'twitter',
+			'woocommerce',
+			'wordpress',
+			'yoast',
+		);
+
+		// Get the slug in an array.
+		$slug = explode( '-', $this->plugin_slug );
+
+		// If the slug is the same as the first term, flag for abuse.
+		return in_array( $slug[0], $abused_slugs );
+	}
+
+	/**
 	 * Find the plugin readme file.
 	 *
 	 * Looks for either a readme.txt or readme.md file, prioritizing readme.txt.
@@ -339,7 +376,7 @@ class Upload_Handler {
 	protected function find_readme_file() {
 		$files = Filesystem::list_files( $this->plugin_root, false /* non-recursive */, '!^readme\.(txt|md)$!i' );
 
-		// Prioritize readme.txt
+		// Prioritize readme.txt file.
 		foreach ( $files as $file ) {
 			if ( '.txt' === strtolower( substr( $file, -4 ) ) ) {
 				return $file;
@@ -358,7 +395,7 @@ class Upload_Handler {
 		return true;
 		// Run the checks.
 		// @todo Include plugin checker.
-		// pass $this->plugin_root as the plugin root
+		// Pass $this->plugin_root as the plugin root.
 		$result = true;
 
 		// Display the errors.
@@ -404,7 +441,7 @@ class Upload_Handler {
 
 		/* translators: %s: plugin name */
 		$email_subject = sprintf(
-			__( '[WordPress Plugin Directory] New Plugin - %s', 'wporg-plugins' ),
+			__( '[WordPress Plugin Directory] Successful Plugin Submission - %s', 'wporg-plugins' ),
 			$this->plugin['Name']
 		);
 
@@ -415,9 +452,9 @@ class Upload_Handler {
 
 Your plugin has been given the initial slug of %2$s, however this is subject to change based on the results of your review.
 
-If there is any problem with this submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved. For situations like an incorrect plugin slug, we are unable to change that post approval, so if you do not let us know of your requirements now, we will be unable to honor them later.
+If there is any problem with this submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved. For situations like an incorrect plugin slug, we are unable to change that post approval. If you do not inform us of any requirements now, we will be unable to honor them later.
 
-We recommend you review the following links to understand the
+We recommend you review the following links to understand the review process and our expectations:
 
 Guidelines: https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
 Frequently Asked Questions: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
