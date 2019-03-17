@@ -11,7 +11,7 @@ class Upload {
 	public static function get_submitted_plugins() {
 		$plugins = get_posts( array(
 			'post_type'      => 'plugin',
-			'post_status'    => array( 'new', 'pending' ),
+			'post_status'    => array( 'new', 'pending', 'approved' ),
 			'author'         => get_current_user_id(),
 			'orderby'        => 'title',
 			'order'          => 'ASC',
@@ -31,7 +31,7 @@ class Upload {
 			include_once ABSPATH . 'wp-admin/includes/template.php';
 
 			$submitted_plugins = self::get_submitted_plugins();
-			$submitted_counts  = (object) array_fill_keys( array( 'new', 'pending' ), 0 );
+			$submitted_counts  = (object) array_fill_keys( array( 'new', 'pending', 'approved' ), 0 );
 
 			$submitted_counts->total = count( $submitted_plugins );
 
@@ -42,6 +42,9 @@ class Upload {
 				} elseif ( 'pending' === $plugin->post_status ) {
 					$submitted_plugins[ $key ]->status = __( 'Being Reviewed', 'wporg-plugins' );
 					$submitted_counts->pending++;
+				} elseif ( 'approved' === $plugin->post_status ) {
+					$submitted_plugins[ $key ]->status = __( 'Approved', 'wporg-plugins' );
+					$submitted_counts->approved++;
 				}
 			}
 
@@ -100,19 +103,39 @@ class Upload {
 					<div class="plugin-queue-message notice notice-warning notice-alt">
 						<p>
 						<?php
-						if ( 1 === $submitted_counts->total ) {
-							esc_html_e( 'You already have a plugin in the review queue. Please wait for it to be approved before submitting any more.', 'wporg-plugins' );
-						} else {
+						if ( 0 !== $submitted_counts->approved ) {
 							printf(
-								/* translators: 1: Total amount of plugins; 2: Amount of pending plugins. */
+								/* translators: 1: Amount of approved plugins; 2: URL on how to use SVN */
 								esc_html( _n(
-									'You have %1$s plugins in the review queue, %2$s is being actively reviewed. Please wait for them to be approved before submitting any more.',
-									'You have %1$s plugins in the review queue, %2$s are being actively reviewed. Please wait for them to be approved before submitting any more.',
+									'You have %1$s approved plugin that has not yet been used. We require developers to use the hosting we provide. Please upload your plugin via <a href="%2$s">SVN</a>.',
+									'You have %1$s approved plugins that have not yet been used. We require developers to use the hosting we provide. Please upload your plugins via <a href="%2$s">SVN</a>.',
+									$submitted_counts->approved,
+									'wporg-plugins'
+								) ),
+								'<strong>' . $submitted_counts->approved . '</strong>',
+								'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/'
+							);
+						} elseif ( 0 !== $submitted_counts->pending ) {
+							printf(
+								/* translators: %s: Amount of pending plugins. */
+								esc_html( _n(
+									'You have %s plugin being actively reviewed. You must complete this review before you can submit another plugin.',
+									'You have %s plugins being actively reviewed. You must complete their reviews before you can submit another plugin.',
 									$submitted_counts->pending,
 									'wporg-plugins'
 								) ),
-								'<strong>' . $submitted_counts->total . '</strong>',
 								'<strong>' . $submitted_counts->pending . '</strong>'
+							);
+						} elseif ( 0 !== $submitted_counts->new ) {
+							printf(
+								/* translators: %s: Amount of new plugins. */
+								esc_html( _n(
+									'You have %s plugin that has been recently submitted but not yet reviewed. Please wait for your plugin to be reviewed and approved before submitting another.',
+									'You have %s plugins already submitted but not yet reviewed. Please wait for them to be reviewed and approved before submitting another plugin.',
+									$submitted_counts->new,
+									'wporg-plugins'
+								) ),
+								'<strong>' . $submitted_counts->new . '</strong>'
 							);
 						}
 						?>
@@ -120,6 +143,7 @@ class Upload {
 
 						<ul>
 						<?php
+						// List of all plugins in progress.
 						foreach ( $submitted_plugins as $plugin ) {
 							echo '<li>' . esc_html( $plugin->post_title ) . ' &#8212; ' . $plugin->status . "</li>\n";
 						}
@@ -195,7 +219,7 @@ class Upload {
 					printf( '<script>%s</script>', $upload_script );
 				}
 				?>
-		
+
 			<?php endif; // ! $submitted_counts->total ?>
 
 		<?php else : ?>
