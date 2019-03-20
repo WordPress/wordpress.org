@@ -225,6 +225,7 @@ function get_whitelist() {
 			'joostdevalk',
 			'rosso99', // @sararosso on Slack
 			'bridgetwillard', // @gidgey on Slack
+			'siobhanseija',
 		),
 		'meta' => array(
 			'obenland',
