@@ -522,7 +522,7 @@ add_action( 'template_redirect', function() {
 			'wp-edit-post',
 			'wp.data.dispatch( "core/edit-post" ).closeGeneralSidebar();' .
 			'wp.data.dispatch( "core/nux" ).disableTips();' .
-			'_wpLoadGutenbergEditor.then( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
+			'_wpLoadBlockEditor.then( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
 		);
 
 	}, 11 );
