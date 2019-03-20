@@ -248,6 +248,7 @@ function get_whitelist() {
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
 			'tobifjellner',
+			'tokyobiyori',
 		),
 		'polyglots-events' => array(
 			'casiepa',
@@ -258,6 +259,7 @@ function get_whitelist() {
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
 			'tobifjellner',
+			'tokyobiyori',
 		),
 		'themereview' => array(
 			'cais',
