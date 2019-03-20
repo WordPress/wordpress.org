@@ -169,14 +169,6 @@ add_action( 'template_redirect', function() {
 
 	}, 11 );
 
-	add_action( 'wp_enqueue_scripts', function( $hook ) {
-		// Gutenberg requires the post-locking functions defined within:
-		// See `show_post_locked_dialog` and `get_post_metadata` filters below.
-		include_once ABSPATH . 'wp-admin/includes/post.php';
-
-		gutenberg_editor_scripts_and_styles( $hook );
-	} );
-
 	add_action( 'enqueue_block_editor_assets', function() {
 		wp_enqueue_script( 'button-readonly', get_template_directory_uri() . '/js/button-readonly.js', array( 'wp-blocks', 'wp-element' ), null );
 	} );
