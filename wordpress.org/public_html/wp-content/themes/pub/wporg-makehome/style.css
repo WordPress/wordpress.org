@@ -231,6 +231,7 @@ section.get-involved article.make-tv            h2:before { content: '\f235'; }
 section.get-involved article.make-marketing     h2:before { content: '\f130'; }
 section.get-involved article.make-cli           h2:before { content: '\f345'; }
 section.get-involved article.make-hosting       h2:before { content: '\f176'; }
+section.get-involved article.make-tide          h2:before { content: '\f10d'; }
 
 section.get-involved article.featured-group h2:after {
 	display: block;
