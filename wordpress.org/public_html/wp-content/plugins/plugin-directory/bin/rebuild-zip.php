@@ -39,8 +39,9 @@ if ( empty( $opts['versions'] ) ) {
 foreach ( array( 'url', 'abspath', 'plugin' ) as $opt ) {
 	if ( empty( $opts[ $opt ] ) ) {
 		fwrite( STDERR, "Missing Parameter: $opt\n" );
-		fwrite( STDERR, "Usage: php {$argv[0]} --plugin hello-dolly --abspath /home/example/public_html --url https://wordpress.org/plugins/\n" );
+		fwrite( STDERR, "Usage: php {$argv[0]} --plugin hello-dolly --versions 1.0,trunk --abspath /home/example/public_html --url https://wordpress.org/plugins/\n" );
 		fwrite( STDERR, "--url and --abspath will be guessed if possible.\n" );
+		fwrite( STDERR, "--versions if skipped will rebuild all tags/trunk.\n" );
 		exit( 1 );
 	}
 }
