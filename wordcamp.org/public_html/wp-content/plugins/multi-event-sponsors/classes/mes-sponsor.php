@@ -214,8 +214,6 @@ class MES_Sponsor {
 		if ( isset( $new_values[ 'mes_regional_sponsorships' ] ) ) {
 			array_walk( $new_values[ 'mes_regional_sponsorships' ], 'absint' );
 			update_post_meta( $post_id, 'mes_regional_sponsorships', $new_values[ 'mes_regional_sponsorships' ] );
-		} else {
-			delete_post_meta( $post_id, 'mes_regional_sponsorships' );
 		}
 
 		if ( isset( $new_values["mes_email_address"] ) ) {
@@ -230,16 +228,12 @@ class MES_Sponsor {
 		foreach ( $text_fields as $field ) {
 			if ( isset( $new_values["mes_$field"] ) ) {
 				update_post_meta( $post_id, "mes_$field", sanitize_text_field( $new_values["mes_$field"] ) );
-			} else {
-				delete_post_meta( $post_id, "mes_$field" );
 			}
 		}
 
 		$sponsor_agreement = filter_input( INPUT_POST, '_wcpt_sponsor_agreement', FILTER_SANITIZE_NUMBER_INT );
 		if ( $sponsor_agreement ) {
 			update_post_meta( $post_id, 'mes_sponsor_agreement', $sponsor_agreement );
-		} else {
-			delete_post_meta( $post_id, 'mes_sponsor_agreement' );
 		}
 	}
 
