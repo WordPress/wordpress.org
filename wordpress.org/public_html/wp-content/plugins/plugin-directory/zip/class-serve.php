@@ -37,12 +37,14 @@ class Serve {
 		$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 		$zip  = basename( $path );
 
-		if ( preg_match( '!^(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip$!i', $zip, $m ) ) {
-			// ZIP
-			$checksum_request = false;
+		if ( preg_match( '!^(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip(?P<signature>\.sig)?$!i', $zip, $m ) ) {
+			// ZIP or Signature
+			$checksum_request  = false;
+			$signature_request = isset( $m['signature'] );
 		} elseif ( preg_match( '!^/plugin-checksums/(?P<slug>[a-z0-9-_]+)/(?P<version>.+?)(\.json)?$!i', $path, $m ) ) {
 			// Checksums
-			$checksum_request = true;
+			$checksum_request  = true;
+			$signature_request = false;
 		} else {
 			throw new Exception( __METHOD__ . ': Invalid URL.' );
 		}
@@ -66,7 +68,7 @@ class Serve {
 			'stats' => true,
 		);
 
-		if ( $checksum_request ) {
+		if ( $checksum_request || $signature_request ) {
 			$args['stats'] = false;
 
 		} elseif ( isset( $_GET['stats'] ) ) {
@@ -76,7 +78,7 @@ class Serve {
 			$args['stats'] = ! empty( $_GET['nostats'] );
 		}
 
-		return compact( 'zip', 'slug', 'version', 'args', 'checksum_request' );
+		return compact( 'zip', 'slug', 'version', 'args', 'checksum_request', 'signature_request' );
 	}
 
 	/**
@@ -144,12 +146,18 @@ class Serve {
 			return "{$request['slug']}/{$request['slug']}.{$request['version']}.checksums.json";
 
 		} elseif ( empty( $request['version'] ) || 'trunk' == $request['version'] ) {
-			return "{$request['slug']}/{$request['slug']}.zip";
+			$file = "{$request['slug']}/{$request['slug']}.zip";
 
 		} else {
-			return "{$request['slug']}/{$request['slug']}.{$request['version']}.zip";
+			$file = "{$request['slug']}/{$request['slug']}.{$request['version']}.zip";
 		}
 
+		// Signature requests are valid for any ZIP requests, but not checksums.
+		if ( $request['signature_request'] ) {
+			$file .= '.sig';
+		}
+
+		return $file;
 	}
 
 	/**
@@ -165,6 +173,8 @@ class Serve {
 
 			if ( $request['checksum_request'] ) {
 				header( 'Content-Type: application/json' );
+			} elseif ( $request['signature_request'] ) {
+				header( 'Content-Type: text/plain' );
 			} else {
 				header( 'Content-Type: application/zip' );
 				header( 'Content-Disposition: attachment; filename=' . basename( $file ) );
