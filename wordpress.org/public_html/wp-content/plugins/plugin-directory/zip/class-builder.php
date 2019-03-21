@@ -15,10 +15,11 @@ class Builder {
 	const SVN_URL     = 'https://plugins.svn.wordpress.org';
 	const ZIP_SVN_URL = PLUGIN_ZIP_SVN_URL;
 
-	protected $zip_file      = '';
-	protected $checksum_file = '';
-	protected $tmp_build_dir = '';
-	protected $tmp_dir       = '';
+	protected $zip_file       = '';
+	protected $checksum_file  = '';
+	protected $signature_file = '';
+	protected $tmp_build_dir  = '';
+	protected $tmp_dir        = '';
 
 	protected $slug       = '';
 	protected $version    = '';
@@ -116,6 +117,8 @@ class Builder {
 
 				$this->generate_zip();
 
+				$this->generate_zip_signatures();
+
 				$this->generate_checksums();
 
 				$this->cleanup_plugin_tmp();
@@ -129,6 +132,9 @@ class Builder {
 				if ( $this->checksum_file ) {
 					SVN::up( $this->checksum_file );
 				}
+				if ( $this->signature_file ) {
+					SVN::up( $this->signature_file );
+				}
 				continue;
 			}
 
@@ -136,6 +142,9 @@ class Builder {
 			SVN::add( $this->zip_file );
 			if ( $this->checksum_file ) {
 				SVN::add( $this->checksum_file );
+			}
+			if ( $this->signature_file ) {
+				SVN::add( $this->signature_file );
 			}
 		}
 
@@ -433,6 +442,35 @@ class Builder {
 		}
 	}
 
+	/**
+	 * Generate the signature for a ZIP file.
+	 */
+	protected function generate_zip_signatures() {
+
+		// TODO: Currently disabled, enable when ready.
+		return false;
+
+		if ( ! function_exists( 'wporg_sign_file' ) ) {
+			return false;
+		}
+
+		$signatures = wporg_sign_file( $this->zip_file, 'plugin' );
+		if ( $signatures ) {
+			$this->signature_file = $this->zip_file . '.sig';
+
+			// Fetch any existing signatures if needed.
+			SVN::up( $this->signature_file );
+
+			// If this file was previously signed, keep the previous version.
+			// This would only occur if a ZIP file was replaced in the few moments between ZIP download starting, and fetching the signature for verification.
+			if ( file_exists( $this->signature_file ) ) {
+				$existing_signatures = file( $this->signature_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+				$signatures = array_unique( array_merge( $signatures, $existing_signatures ) );
+			}
+
+			file_put_contents( $this->signature_file, implode( "\n", $signatures ) );
+		}
+	}
 
 	/**
 	 * Purge ZIP caches after ZIP building.
