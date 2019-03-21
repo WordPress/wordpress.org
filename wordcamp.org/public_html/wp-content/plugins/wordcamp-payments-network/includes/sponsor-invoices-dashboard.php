@@ -12,12 +12,12 @@ if ( defined( 'DOING_AJAX' ) ) {
 	add_action( 'save_post',                      __NAMESPACE__ . '\update_index_row',              10, 2 );
 
 } elseif ( defined( 'DOING_CRON' ) ) {
-	add_action( 'wcbdsi_check_for_paid_invoices', __NAMESPACE__ . '\check_for_paid_invoices'       );
+//	add_action( 'wcbdsi_check_for_paid_invoices', __NAMESPACE__ . '\check_for_paid_invoices'       );
 	add_action( 'save_post',                      __NAMESPACE__ . '\update_index_row',       10, 2 );
-	add_action( 'plugins_loaded',                 __NAMESPACE__ . '\schedule_sent_invoice_reminder' );
+//	add_action( 'plugins_loaded',                 __NAMESPACE__ . '\schedule_sent_invoice_reminder' );
 
 } elseif ( is_network_admin() ) {
-	add_action( 'plugins_loaded',        __NAMESPACE__ . '\schedule_cron_events'  );
+//	add_action( 'plugins_loaded',        __NAMESPACE__ . '\schedule_cron_events'  );
 	add_action( 'network_admin_menu',    __NAMESPACE__ . '\register_submenu_page' );
 	add_action( 'init',                  __NAMESPACE__ . '\upgrade_database'      );
 } elseif ( is_admin() ) {
@@ -36,7 +36,7 @@ function schedule_cron_events() {
 		return;
 	}
 
-	wp_schedule_event( current_time( 'timestamp' ), 'hourly', 'wcbdsi_check_for_paid_invoices' );
+//	wp_schedule_event( current_time( 'timestamp' ), 'hourly', 'wcbdsi_check_for_paid_invoices' );
 }
 
 /**

@@ -11,10 +11,10 @@ class Payment_Requests_Dashboard {
 		$current_site = get_current_site();
 
 		// Schedule the aggregate event only on the main blog in the network.
-		if ( get_current_blog_id() == $current_site->blog_id && ! wp_next_scheduled( 'wordcamp_payments_aggregate' ) )
-			wp_schedule_event( time(), 'hourly', 'wordcamp_payments_aggregate' );
+//		if ( get_current_blog_id() == $current_site->blog_id && ! wp_next_scheduled( 'wordcamp_payments_aggregate' ) ) {
+//			wp_schedule_event( time(), 'hourly', 'wordcamp_payments_aggregate' );
 
-		add_action( 'wordcamp_payments_aggregate', array( __CLASS__, 'aggregate' ) );
+//		add_action( 'wordcamp_payments_aggregate', array( __CLASS__, 'aggregate' ) );
 		add_action( 'network_admin_menu', array( __CLASS__, 'network_admin_menu' ) );
 		add_action( 'init', array( __CLASS__, 'upgrade' ) );
 
@@ -22,8 +22,8 @@ class Payment_Requests_Dashboard {
 		add_action( 'save_post', array( __CLASS__, 'save_post' ) );
 		add_action( 'delete_post', array( __CLASS__, 'delete_post' ) );
 
-		if ( ! empty( $_GET['wcp-debug-network'] ) && current_user_can( 'manage_network' ) )
-			add_action( 'admin_init', function() { do_action( 'wordcamp_payments_aggregate' ); }, 99 );
+//		if ( ! empty( $_GET['wcp-debug-network'] ) && current_user_can( 'manage_network' ) )
+//			add_action( 'admin_init', function() { do_action( 'wordcamp_payments_aggregate' ); }, 99 );
 	}
 
 	/**
