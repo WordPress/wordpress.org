@@ -56,3 +56,20 @@ function grunion_unique_subject( $subject ) {
 	return sprintf( '[%s] %s', wp_generate_password( 8, false ), $subject );
 }
 add_filter( 'contact_form_subject', __NAMESPACE__ . '\grunion_unique_subject' );
+
+/**
+ * Lower the timeout for requests to the Brute Protect API to avoid unintentional DDoS.
+ *
+ * The default timeout is 30 seconds, but when the API goes down, the long timeouts will occupy php-fpm threads,
+ * which will stack up until there are no more available, and the site will crash.
+ *
+ * @link https://wordpress.slack.com/archives/G02QCEMRY/p1553203877064600
+ *
+ * @param int $timeout
+ *
+ * @return int
+ */
+function lower_brute_protect_api_timeout( $timeout ) {
+	return 8; // seconds
+}
+add_filter( 'jetpack_protect_connect_timeout', __NAMESPACE__ . '\lower_brute_protect_api_timeout' );
