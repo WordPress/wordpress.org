@@ -27,10 +27,10 @@ add_action( 'admin_init', __NAMESPACE__ . '\process_action_approve', 11 );
 add_action( 'admin_init', __NAMESPACE__ . '\process_action_set_pending_payment', 11 );
 add_action( 'admin_init', __NAMESPACE__ . '\process_import_request', 11 );
 
-//add_action( REDACT_PAID_REQUESTS_CRON_ID, __NAMESPACE__ . '\redact_paid_requests' );
+add_action( REDACT_PAID_REQUESTS_CRON_ID, __NAMESPACE__ . '\redact_paid_requests' );
 
 if ( ! wp_next_scheduled( REDACT_PAID_REQUESTS_CRON_ID ) ) {
-//	wp_schedule_event( time(), 'twicedaily', REDACT_PAID_REQUESTS_CRON_ID );
+	wp_schedule_event( time(), 'twicedaily', REDACT_PAID_REQUESTS_CRON_ID );
 }
 
 /**
