@@ -621,6 +621,7 @@ class Language_Pack extends WP_CLI_Command {
 			$mo_file        = "{$export_directory}/{$filename}.mo";
 			$zip_file       = "{$export_directory}/{$filename}.zip";
 			$build_zip_file = "{$build_directory}/{$wp_locale}.zip";
+			$build_sig_file = "{$build_zip_file}.sig";
 
 			// Update/create directories.
 			$this->update_svn_directory( $export_directory );
@@ -713,6 +714,14 @@ class Language_Pack extends WP_CLI_Command {
 				$this->execute_command( sprintf( 'rm -rf %s', escapeshellarg( $working_directory ) ) );
 
 				continue;
+			}
+
+			// Generate a signature for the ZIP file.
+			if ( false && function_exists( 'wporg_sign_file' ) ) {
+				$signatures = wporg_sign_file( $build_zip_file, 'translation' );
+				if ( $signatures ) {
+					file_put_contents( $build_sig_file, implode( "\n", $signatures ) );
+				}
 			}
 
 			// Insert language pack into database.
