@@ -81,6 +81,11 @@ class Author_Card {
 						urlencode( esc_attr( $author->user_nicename ) ),
 						esc_attr__( 'Click to search Pluginrepo SupportPress for mentions of this author', 'wporg-plugins' )
 					),
+					sprintf(
+						'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
+						urlencode( esc_attr( $author->user_nicename ) ),
+						esc_attr__( 'Click to search HelpScout for mentions of this author', 'wporg-plugins' )
+					),
 				);
 				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_links );
 				?>
@@ -90,13 +95,21 @@ class Author_Card {
 					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>"><?php _e( 'support', 'wporg-plugins' ); ?></a>
 				</span>
 				<div class="profile-email">
-					&lt;<?php echo $author->user_email; ?>&gt;
+					&lt;<?php echo esc_attr( $author->user_email ); ?>&gt;
 					<span class="profile-sp-link">
 					<?php
 					printf(
 						'[ <a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a> ]',
 						esc_attr( $author->user_email ),
 						esc_attr__( 'Click to search Pluginrepo SupportPress for emails sent to/from this email address', 'wporg-plugins' )
+					);
+					?>
+					&nbsp;
+					<?php
+					printf(
+						'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
+						esc_attr( $author->user_email ),
+						esc_attr__( 'Click to search HelpScout for emails sent to/from this email address', 'wporg-plugins' )
 					);
 					?>
 					</span>
@@ -282,6 +295,7 @@ class Author_Card {
 				}
 			}
 
+			$plugin_name = $plugin->post_title;
 			$plugin_slug = $plugin->post_name;
 			if ( in_array( $plugin->post_status, array( 'new', 'pending' ) ) ) {
 				/* translators: %s: time ago */
@@ -359,8 +373,13 @@ class Author_Card {
 				),
 				sprintf(
 					'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
-					urlencode( esc_attr( $plugin_slug ) ),
+					urlencode( esc_attr( $plugin_name ) ),
 					esc_attr__( 'Click to search Plugin SupportPress for mentions of this plugin', 'wporg-plugins' )
+				),
+				sprintf(
+					'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
+					rawurlencode( esc_attr( $plugin_name ) ),
+					esc_attr__( 'Click to search HelpScout for mentions of this plugin', 'wporg-plugins' )
 				),
 			] );
 
