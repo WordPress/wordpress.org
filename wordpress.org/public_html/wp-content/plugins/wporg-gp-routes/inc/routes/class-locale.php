@@ -502,6 +502,8 @@ class Locale extends GP_Route {
 			);
 		}
 
+		$projects = [];
+
 		// Get the names of the contributors.
 		foreach ( $contributors as $contributor ) {
 			if ( isset( $locale_contributors['contributors'][ $contributor->user_id ] ) ) {
@@ -515,6 +517,19 @@ class Locale extends GP_Route {
 				$locale_contributors['contributors'][ $contributor->user_id ]->current_count += $contributor->current_count;
 				$locale_contributors['contributors'][ $contributor->user_id ]->waiting_count += $contributor->waiting_count;
 				$locale_contributors['contributors'][ $contributor->user_id ]->fuzzy_count   += $contributor->fuzzy_count;
+
+				if ( ! isset( $projects[ $contributor->project_id ] ) ) {
+					$projects[ $contributor->project_id ] = GP::$project->get( $contributor->project_id );
+				}
+
+				$locale_contributors['contributors'][ $contributor->user_id ]->detailed[ $contributor->project_id ] = (object) [
+					'total_count'   => $contributor->total_count,
+					'current_count' => $contributor->current_count,
+					'waiting_count' => $contributor->waiting_count,
+					'fuzzy_count'   => $contributor->fuzzy_count,
+					'project'       => $projects[ $contributor->project_id ],
+				];
+
 				continue;
 			}
 
@@ -523,7 +538,12 @@ class Locale extends GP_Route {
 				continue;
 			}
 
+			if ( ! isset( $projects[ $contributor->project_id ] ) ) {
+				$projects[ $contributor->project_id ] = GP::$project->get( $contributor->project_id );
+			}
+
 			$locale_contributors['contributors'][ $contributor->user_id ] = (object) array(
+				'login'         => $user->user_login,
 				'nicename'      => $user->user_nicename,
 				'display_name'  => $this->_encode( $user->display_name ),
 				'email'         => $user->user_email,
@@ -532,6 +552,15 @@ class Locale extends GP_Route {
 				'current_count' => $contributor->current_count,
 				'waiting_count' => $contributor->waiting_count,
 				'fuzzy_count'   => $contributor->fuzzy_count,
+				'detailed'      => [
+					$contributor->project_id => (object) [
+						'total_count'   => $contributor->total_count,
+						'current_count' => $contributor->current_count,
+						'waiting_count' => $contributor->waiting_count,
+						'fuzzy_count'   => $contributor->fuzzy_count,
+						'project'       => $projects[ $contributor->project_id ],
+					],
+				],
 				'is_editor'     => in_array( $user->ID, $editor_ids ),
 			);
 		}
@@ -556,6 +585,7 @@ class Locale extends GP_Route {
 		$contributors = $wpdb->get_results( $wpdb->prepare( "
 			SELECT
 				`t`.`user_id` as `user_id`,
+				`o`.`project_id` as `project_id`,
 				MAX( `t`.`date_added` ) AS `last_update`,
 				COUNT( * ) as `total_count`,
 				COUNT( CASE WHEN `t`.`status` = 'current' THEN `t`.`status` END ) AS `current_count`,
@@ -568,9 +598,8 @@ class Locale extends GP_Route {
 				`t`.`translation_set_id` = %d
 				AND `t`.`user_id` IS NOT NULL AND `t`.`user_id` != 0
 				AND `t`.`status` IN( 'current', 'waiting', 'fuzzy' )
-				AND `t`.`date_modified` > %s
 			GROUP BY `t`.`user_id`
-		", $translation_set->id, date( 'Y-m-d', time() - YEAR_IN_SECONDS ) ) );
+		", $translation_set->id ) );
 
 		return $contributors;
 	}

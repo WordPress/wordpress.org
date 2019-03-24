@@ -206,18 +206,122 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 		<?php if ( $locale_contributors['contributors'] ) : ?>
 		<table class="locale-project-contributors-table">
 			<thead>
-				<th class="contributor-name">Contributor</th>
-				<th class="contributor-stats">Translations*</th>
+				<tr>
+					<th class="contributor-name">Contributor</th>
+					<th class="contributor-stats">Translations</th>
+				</tr>
 			</thead>
 			<tbody>
 			<?php
 			foreach ( $locale_contributors['contributors'] as $contributor ) {
+				$detailed = '';
+
+				if ( 'wp-plugins' === $project->path ) {
+					// Ensure consistent order of development and stable projects.
+					usort( $contributor->detailed, function( $a, $b ) {
+						return strnatcasecmp( $a->project->name, $b->project->name );
+					} );
+				}
+
+				foreach ( $contributor->detailed as $detail_project_id => $detail_data ) {
+					$detailed .= '<strong class="detailed__project-name">' . $detail_data->project->name . ':</strong>';
+
+					if ( $detail_data->total_count > 0 ) {
+						$total_count = gp_link_get(
+							gp_url_project(
+								$detail_data->project->path,
+								gp_url_join( $locale->slug, $set_slug ),
+								[
+									'filters[translated]' => 'yes',
+									'filters[status]'     => 'current_or_waiting_or_fuzzy_or_untranslated',
+									'filters[user_login]' => $contributor->login,
+								]
+							),
+							number_format_i18n( $detail_data->total_count )
+						);
+					} else {
+						$total_count = number_format_i18n( $detail_data->total_count );
+					}
+
+					if ( $detail_data->current_count > 0 ) {
+						$current_count = gp_link_get(
+							gp_url_project(
+								$detail_data->project->path,
+								gp_url_join( $locale->slug, $set_slug ),
+								[
+									'filters[translated]' => 'yes',
+									'filters[status]'     => 'current',
+									'filters[user_login]' => $contributor->login,
+								]
+							),
+							number_format_i18n( $detail_data->current_count )
+						);
+					} else {
+						$current_count = number_format_i18n( $detail_data->current_count );
+					}
+
+					if ( $detail_data->waiting_count > 0 ) {
+						$waiting_count = gp_link_get(
+							gp_url_project(
+								$detail_data->project->path,
+								gp_url_join( $locale->slug, $set_slug ),
+								[
+									'filters[translated]' => 'yes',
+									'filters[status]'     => 'waiting',
+									'filters[user_login]' => $contributor->login,
+								]
+							),
+							number_format_i18n( $detail_data->waiting_count )
+						);
+					} else {
+						$waiting_count = number_format_i18n( $detail_data->waiting_count );
+					}
+
+					if ( $detail_data->fuzzy_count > 0 ) {
+						$fuzzy_count = gp_link_get(
+							gp_url_project(
+								$detail_data->project->path,
+								gp_url_join( $locale->slug, $set_slug ),
+								[
+									'filters[translated]' => 'yes',
+									'filters[status]'     => 'fuzzy',
+									'filters[user_login]' => $contributor->login,
+								]
+							),
+							number_format_i18n( $detail_data->fuzzy_count )
+						);
+					} else {
+						$fuzzy_count = number_format_i18n( $detail_data->fuzzy_count );
+					}
+
+					$detailed .= sprintf(
+						'
+							<div class="total">
+								<p>%s</p>
+							</div>
+							<div class="current">
+								<p>%s</p>
+							</div>
+							<div class="waiting">
+								<p>%s</p>
+							</div>
+							<div class="fuzzy">
+								<p>%s</p>
+							</div>
+						',
+						$total_count,
+						$current_count,
+						$waiting_count,
+						$fuzzy_count
+					);
+				}
+
 				printf(
 					'<tr>
 						<td class="contributor-name">
 							%s
 							<a href="https://profiles.wordpress.org/%s/">%s %s</a>
-							<span>Last Activity: %s ago</span>
+							<span>Last translation submitted: %s ago</span>
 						</td>
 						<td class="contributor-stats">
 							<div class="total">
@@ -236,23 +340,29 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 								<span>Fuzzy</span>
 								<p>%s</p>
 							</div>
-						<td>
+							<div class="detailed">
+								<details>
+									<summary>Per project</summary>
+									%s
+								</details>
+							</div>
+						</td>
 					</tr>',
 					$contributor->is_editor ? '<span class="translation-editor">Editor</span>' : '',
 					$contributor->nicename,
 					get_avatar( $contributor->email, 40 ),
-					$contributor->display_name ? $contributor->display_name : $contributor->nicename,
+					$contributor->display_name ?: $contributor->nicename,
 					human_time_diff( strtotime( $contributor->last_update ) ),
 					number_format_i18n( $contributor->total_count ),
 					number_format_i18n( $contributor->current_count ),
 					number_format_i18n( $contributor->waiting_count ),
-					number_format_i18n( $contributor->fuzzy_count )
+					number_format_i18n( $contributor->fuzzy_count ),
+					$detailed
 				);
 			}
 			?>
 			</tbody>
 		</table>
-		<p class="stats-hint">* Data for the last 365 days.</p>
 		<?php else : ?>
 			<p>None, be the first?</p>
 		<?php endif; ?>
@@ -271,7 +381,7 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 						'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
 						$editor->nicename,
 						get_avatar( $editor->email, 40 ),
-						$editor->display_name ? $editor->display_name : $editor->nicename
+						$editor->display_name ?: $editor->nicename
 					);
 				}
 				?>
