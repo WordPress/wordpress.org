@@ -165,7 +165,7 @@ class Export extends WP_CLI_Command {
 	}
 
 	/**
-	 * Builds a mapping of JS file names to translation entries.
+	 * Builds a a separate JSON file with translations for each JavaScript file.
 	 *
 	 * @param GP_Project          $gp_project The GlotPress project.
 	 * @param GP_Locale           $gp_locale  The GlotPress locale.
@@ -175,11 +175,18 @@ class Export extends WP_CLI_Command {
 	 * @return array An array of translation files built, may be empty if no translations in JS files exist.
 	 */
 	private function build_json_files( $gp_project, $gp_locale, $set, $mapping, $base_dest ) {
-		// Export translations for each JS file to a separate translation file.
 		$files  = array();
 		$format = gp_array_get( GP::$formats, 'jed1x' );
+
 		foreach ( $mapping as $file => $entries ) {
+			// Get the translations in Jed 1.x compatible JSON format.
 			$json_content = $format->print_exported_file( $gp_project, $gp_locale, $set, $entries );
+
+			// Decode and add comment with file reference for debugging.
+			$json_content_decoded          = json_decode( $json_content );
+			$json_content_decoded->comment = [ 'reference' => $file ];
+
+			$json_content = wp_json_encode( $json_content_decoded );
 
 			$hash = md5( $file );
 			$dest = "{$base_dest}-{$hash}.json";
