@@ -1243,11 +1243,20 @@ ul.projects-dropdown li > a > span {
 	padding: 2px;
 }
 
+.wporg-notice-error {
+	background: #fbeaea;
+	border-left-color:#dc3232;
+}
+
 .wporg-notice-warning {
 	background: #fff8e5;
 	border-left-color:#ffb900;
 }
 
+.wporg-notice-info {
+	background: #e5f5fa;
+	border-left-color:#00a0d2;
+}
 
 /* Responsive styles */
 @media (max-width: 700px) {

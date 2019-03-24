@@ -83,7 +83,7 @@ gp_tmpl_header();
 						}
 
 						foreach ( $sub_projects as $_sub_project ) {
-							$status = $sub_project_statuses[ $_sub_project->id ];
+							$status = $sub_project_statuses[ $_sub_project->slug ];
 
 							printf(
 								'<li><a href="%s">%s <span>%s</span></a>',
@@ -109,8 +109,28 @@ gp_tmpl_header();
 <?php
 if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) && ! in_array( 'stable', $sub_project_slugs ) ) {
 	?>
-	<div class="wporg-notice wporg-notice-warning">
+	<div class="wporg-notice wporg-notice-error">
 		<p>This plugin is not <a href="https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/">properly prepared for localization</a> (<a href="https://make.wordpress.org/meta/handbook/documentation/translations/#this-plugin-is-not-properly-prepared-for-localization-%e2%80%93-help">View detailed logs on Slack</a>). If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $sub_project->slug ); ?>">please contact the author</a>.</p>
+	</div>
+	<?php
+}
+
+if ( 'wp-plugins' === $project->path && $sub_project_status->percent_complete < 95 ) {
+	$stable_project_slug = in_array( 'stable', $sub_project_slugs, true ) ? 'stable' : 'dev';
+	$stable_project_name = 'stable' === $stable_project_slug ? 'Stable (latest release) ' : 'Development (trunk) ';
+	$status = $sub_project_statuses[ $stable_project_slug ];
+	?>
+	<div class="wporg-notice wporg-notice-info">
+		<p>Translations for the readme are published almost immediately.
+			The language pack for the plugin will be generated when 95% of the <a href="<?php echo esc_url( gp_url_project( $sub_project->path, gp_url_join( $stable_project_slug, $locale->slug, $set_slug ) ) ); ?>"><?php echo $stable_project_name; ?></a> sub-project strings have been translated (currently <?php echo $status->percent_complete . '%'; ?>).</p>
+	</div>
+	<?php
+}
+
+if ( 'wp-themes' === $project->path && $sub_project_status->percent_complete < 95 ) {
+	?>
+	<div class="wporg-notice wporg-notice-info">
+		<p>The language pack for the theme will be generated when 95% of the project strings have been translated (currently <?php echo $sub_project_status->percent_complete . '%'; ?>).</p>
 	</div>
 	<?php
 }
@@ -168,7 +188,7 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 			}
 
 			foreach ( $sub_projects as $sub_project ) {
-				$status = $sub_project_statuses[ $sub_project->id ];
+				$status = $sub_project_statuses[ $sub_project->slug ];
 				?>
 				<tr>
 					<td class="set-name">

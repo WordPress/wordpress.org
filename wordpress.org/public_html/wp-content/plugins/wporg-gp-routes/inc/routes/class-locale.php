@@ -190,15 +190,20 @@ class Locale extends GP_Route {
 		$sub_projects = $this->get_active_sub_projects( $sub_project, true );
 		$sub_project_slugs = array();
 		if ( $sub_projects ) {
+			$sub_project_ids      = array();
 			$sub_project_statuses = array();
 			foreach ( $sub_projects as $key => $_sub_project ) {
 				$sub_project_slugs[] = $_sub_project->slug;
 				$status = $this->get_project_status( $_sub_project, $locale_slug, $set_slug, null, false );
 
-				$sub_project_statuses[ $_sub_project->id ] = $status;
+				$sub_project_ids[] = $_sub_project->id;
+
+				$sub_project_statuses[ $_sub_project->slug ] = $status;
 			}
 
-			$variants = $this->get_locale_variants( $locale_slug, array_keys( $sub_project_statuses ) );
+			$variants = $this->get_locale_variants( $locale_slug, $sub_project_ids );
+
+			unset( $sub_project_ids );
 		} else {
 			$variants = $this->get_locale_variants( $locale_slug, array( $sub_project->id ) );
 		}
