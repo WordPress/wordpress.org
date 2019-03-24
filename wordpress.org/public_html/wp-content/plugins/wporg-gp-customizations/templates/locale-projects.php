@@ -85,7 +85,16 @@ gp_tmpl_header();
 </div>
 <div class="sort-bar">
 	<form id="sort-filter" action="" method="GET">
+		<input type="hidden" name="s" value="<?php echo esc_attr( $search ?? '' ); ?>"
 		<input type="hidden" name="page" value="1">
+
+		<?php if ( 'waiting' === $project->slug && is_user_logged_in() ) { ?>
+			<input id="filter-without-editors" type="checkbox" name="without-editors" value="1"<?php checked( isset( $_GET['without-editors'] ) ); ?>>
+			<label for="filter-without-editors">Limit to projects without editors</label>
+			<span class="filter-sep" aria-hidden="true">|</span>
+		<?php } ?>
+
+		<label for="filter">Filter:</label>
 		<select id="filter" name="filter">
 			<?php
 				$sorts = array();
@@ -110,16 +119,9 @@ gp_tmpl_header();
 				}
 			?>
 		</select>
+		<button type="submit">Submit</button>
 	</form>
 </div>
-<script>
-	var filterForm  = document.getElementById( 'sort-filter' );
-	var filterSelect = document.getElementById( 'filter' );
-	filterSelect.addEventListener( 'change', function() {
-		filterForm.submit()
-	} );
-</script>
-
 <div id="projects" class="projects">
 	<?php
 	foreach ( $sub_projects as $sub_project ) {

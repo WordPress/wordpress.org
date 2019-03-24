@@ -1429,6 +1429,15 @@ ul.projects-dropdown li > a > span {
 	border-top: none;
 }
 
+.sort-bar label {
+	font-size: 12px;
+	line-height: 14px;
+}
+
+.sort-bar .filter-sep {
+	color: #ccc;
+}
+
 .project-sub-page h3 {
 	margin: 30px 0 10px;
 	font-size: 1.2em;

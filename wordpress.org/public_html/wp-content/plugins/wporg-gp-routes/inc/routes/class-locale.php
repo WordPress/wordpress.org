@@ -46,6 +46,7 @@ class Locale extends GP_Route {
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
 		$filter = gp_get( 'filter', false );
+		$without_editors = gp_get( 'without-editors', false );
 
 		$locale = GP_Locales::by_slug( $locale_slug );
 		if ( ! $locale ) {
@@ -99,6 +100,7 @@ class Locale extends GP_Route {
 				'per_page' => $per_page,
 				'search' => $search,
 				'filter' => $filter,
+				'without_editors' => $without_editors,
 				'set_slug' => $set_slug,
 				'locale' => $locale_slug,
 			)
@@ -697,12 +699,13 @@ class Locale extends GP_Route {
 		global $wpdb;
 
 		$defaults = array(
-			'per_page' => 20,
-			'page'     => 1,
-			'search'   => false,
-			'set_slug' => '',
-			'locale'   => '',
-			'filter'   => false,
+			'per_page'        => 20,
+			'page'            => 1,
+			'search'          => false,
+			'set_slug'        => '',
+			'locale'          => '',
+			'filter'          => false,
+			'without_editors' => false,
 		);
 		$r = wp_parse_args( $args, $defaults );
 		extract( $r, EXTR_SKIP );
@@ -743,6 +746,7 @@ class Locale extends GP_Route {
 
 			// Check to see if they have any special approval permissions.
 			$allowed_projects = array();
+			$allowed_base_level_projects = array();
 			if ( ! $can_approve_for_all && $role = $this->roles_adapter->is_approver_for_locale( $user_id, $locale ) ) {
 				$allowed_projects = $this->roles_adapter->get_project_id_access_list( $user_id, $locale );
 
@@ -760,9 +764,8 @@ class Locale extends GP_Route {
 				// The current user can approve for all projects, so just grab all with any waiting strings.
 				$parent_project_sql = 'AND ( stats.waiting > 0 OR stats.fuzzy > 0 )';
 				$parent_project_sql .= $base_level_project_sql;
-
 			} elseif ( $allowed_projects || $allowed_base_level_projects ) {
-				$parent_project_sql = 'AND stats.waiting > 0 AND ( (';
+				$parent_project_sql = 'AND ( stats.waiting > 0 OR stats.fuzzy > 0 ) AND ( (';
 
 				if ( $allowed_projects ) {
 					/*
@@ -794,6 +797,19 @@ class Locale extends GP_Route {
 				// The current user can't approve for any locale projects, or is logged out.
 				$parent_project_sql = 'AND 0=1';
 
+			}
+
+			// Exclude projects which have an assigned editor.
+			if ( $without_editors ) {
+				$project_ids_with_editor = $wpdb->get_col( $wpdb->prepare(
+					"SELECT DISTINCT(project_id) FROM `translate_translation_editors` WHERE (locale = %s OR locale = 'all-locales') AND project_id != 0 AND user_id != %d",
+					$locale,
+					$user_id
+				) );
+				if ( $project_ids_with_editor ) {
+					$project_ids_with_editor = implode( ', ', array_map( 'intval', $project_ids_with_editor ) );
+					$parent_project_sql .= " AND tp.id NOT IN( $project_ids_with_editor )";
+				}
 			}
 		}
 
