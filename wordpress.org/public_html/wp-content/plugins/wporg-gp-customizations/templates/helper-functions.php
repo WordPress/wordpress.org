@@ -1,5 +1,5 @@
 <?php
-wp_register_style( 'wporg-translate', plugins_url( 'style.css', __FILE__ ), array( 'gp-base' ), '20180704' );
+wp_register_style( 'wporg-translate', plugins_url( 'style.css', __FILE__ ), array( 'gp-base' ), '20190324' );
 gp_enqueue_style( 'wporg-translate' );
 
 gp_enqueue_script( 'jquery' );
