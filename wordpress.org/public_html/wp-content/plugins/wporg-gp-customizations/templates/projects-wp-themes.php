@@ -1,10 +1,10 @@
 <?php
 $edit_link = gp_link_project_edit_get( $project, __( '(edit)' ) );
-$table_headings = array(
-	'locale'        => __( 'Locale' ),
-	'stable'        => __( 'Stable' ),
-	'waiting'       => __( 'Waiting' ),
-);
+$table_headings = [
+	'locale'        => 'Locale',
+	'stable'        => 'Stable',
+	'waiting'       => 'Waiting/Fuzzy',
+];
 
 gp_title( sprintf( __( '%s &lt; GlotPress' ), esc_html( $project->name ) ) );
 gp_breadcrumb_project( $project );

@@ -1,13 +1,13 @@
 <?php
 $edit_link = gp_link_project_edit_get( $project, __( '(edit)' ) );
-$table_headings = array(
-	'locale'        => __( 'Locale' ),
-	'dev'           => __( 'Development' ),
-	'dev-readme'    => __( 'Development Readme' ),
-	'stable'        => __( 'Stable' ),
-	'stable-readme' => __( 'Stable Readme' ),
-	'waiting'       => __( 'Waiting' ),
-);
+$table_headings = [
+	'locale'        => 'Locale',
+	'dev'           => 'Development',
+	'dev-readme'    => 'Development Readme',
+	'stable'        => 'Stable',
+	'stable-readme' => 'Stable Readme',
+	'waiting'       => 'Waiting/Fuzzy',
+];
 
 gp_title( sprintf( __( '%s &lt; GlotPress' ), esc_html( $project->name ) ) );
 gp_breadcrumb_project( $project );
