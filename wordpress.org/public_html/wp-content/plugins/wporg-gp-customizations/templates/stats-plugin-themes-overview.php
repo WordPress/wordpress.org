@@ -3,8 +3,8 @@ gp_title( __( 'Translation status overview &lt; GlotPress' ) );
 gp_enqueue_script( 'tablesorter' );
 
 $breadcrumb   = array();
-$breadcrumb[] = gp_link_get( '/stats', __( 'Locale Stats' ) );
-$breadcrumb[] = gp_link_get( '/locale/' . $locale . '/' . $locale_slug, $gp_locale->english_name );
+$breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
+$breadcrumb[] = gp_link_get( gp_url_join( '/locale', $gp_locale->slug, $locale_slug ), esc_html( $gp_locale->english_name ) );
 $breadcrumb[] = trim( ucwords( $view ), 's' ) . ' translation status overview';
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();

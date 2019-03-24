@@ -620,6 +620,35 @@ ul.filter-header-links {
 	color: #222;
 }
 
+.filter-header-links li.has-children {
+	position: relative;
+}
+
+.filter-header-links li.has-children li a {
+	margin: 0 9px;
+	padding: 5px 0;
+}
+
+.filter-header-links li.has-children ul {
+	display: none;
+}
+
+.filter-header-links li.has-children:hover ul {
+	display: block;
+	position:absolute;
+	background: #efefef;
+	padding: 0;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+	border: 1px solid #dfdfdf;
+	border-top: 0;
+	z-index: 1;
+}
+
+.filter-header-link__sep {
+	color: #ccc;
+}
+
+
 .filter-header .search-form {
 	float: right;
 	margin: 12px 0 11px;

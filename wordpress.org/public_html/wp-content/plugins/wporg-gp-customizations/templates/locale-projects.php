@@ -74,6 +74,14 @@ gp_tmpl_header();
 			);
 		}
 		?>
+		<li class="filter-header-link__sep" aria-hidden="true">|</li>
+		<li class="has-children">
+			<a href="#">Stats</a>
+			<ul>
+				<li><a href="<?php echo esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, 'stats', 'plugins' ) ); ?>">Plugins</a></li>
+				<li><a href="<?php echo esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, 'stats', 'themes' ) ); ?>">Themes</a></li>
+			</ul>
+		</li>
 	</ul>
 	<div class="search-form">
 		<form>
