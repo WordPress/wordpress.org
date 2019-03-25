@@ -3,6 +3,8 @@ const webpack = require( 'webpack' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const SOURCE_MAPS = process.env.SOURCE_MAPS ? true : false;
+
 
 const externals = {
 	react       : 'React',
@@ -11,13 +13,15 @@ const externals = {
 };
 
 const webpackConfig = {
+	// Must be 'none', 'production', or 'development'.
 	mode: NODE_ENV === 'production' ? 'production' : 'development',
 
 	optimization: {
 		minimize: true,
 	},
 
-	devtool: 'production' === NODE_ENV ? 'none' : 'cheap-module-eval-source-map',
+	// Disabled by default because they make the re-build process take longer.
+	devtool: SOURCE_MAPS ? 'cheap-module-eval-source-map' : 'none',
 
 	entry: {
 		blocks: path.resolve( __dirname, 'assets/src/blocks.js' ),
