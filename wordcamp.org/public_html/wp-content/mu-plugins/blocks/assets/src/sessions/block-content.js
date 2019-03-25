@@ -189,6 +189,7 @@ class SessionsBlockContent extends Component {
 								size={featuredImageSize}
 								wpMediaDetails={ get( post, "_embedded.wp:featuredmedia[0].media_details.sizes", {} ) }
 								alt={post.title.rendered}
+								{ ...this.props }
 							/>
 						}
 
