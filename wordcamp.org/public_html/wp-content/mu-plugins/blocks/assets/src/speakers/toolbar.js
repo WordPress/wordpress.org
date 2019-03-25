@@ -11,22 +11,24 @@ class SpeakersToolbar extends Component {
 		const { layout } = attributes;
 		const { layout: layoutOptions = {} } = blockData.options;
 
+		const controls = layoutOptions.map( ( option ) => {
+			const icon     = `${ option.value }-view`;
+			const isActive = layout === option.value;
+
+			return {
+				icon     : icon,
+				title    : option.label,
+				isActive : isActive,
+				onClick  : () => {
+					setAttributes( { layout: option.value } );
+				},
+			};
+		} );
+
 		return (
 			<BlockControls>
 				<Toolbar
-					controls={ layoutOptions.map( ( option ) => {
-						const icon     = `${ option.value }-view`;
-						const isActive = layout === option.value;
-
-						return {
-							icon     : icon,
-							title    : option.label,
-							isActive : isActive,
-							onClick  : () => {
-								setAttributes( { layout: option.value } );
-							},
-						};
-					} ) }
+					controls={ controls }
 				/>
 			</BlockControls>
 		);
