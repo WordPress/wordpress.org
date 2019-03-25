@@ -1063,20 +1063,8 @@ namespace DevHub {
 					$refers .= '()';
 				}
 
-				// Exceptions for externally-linked elements.
-				$exceptions = [
-					'error_log()' => 'https://secure.php.net/manual/en/function.error-log.php',
-				];
-				if ( ! empty( $exceptions[ $refers ] ) ) {
-					$link_to = \DevHub_Formatting::generate_link( $exceptions[ $refers ], $refers );
-				}
-				// Else internally-link the element.
-				else {
-					$link_to = \DevHub_Formatting::link_internal_element( $refers );
-				}
-
 				/* translators: %s: Linked internal element name */
-				$deprecation_info = ' ' . sprintf( __( 'Use %s instead.', 'wporg' ), $link_to );
+				$deprecation_info = ' ' . sprintf( __( 'Use %s instead.', 'wporg' ), \DevHub_Formatting::link_internal_element( $refers ) );
 			}
 		}
 

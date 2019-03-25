@@ -169,8 +169,18 @@ class DevHub_Formatting {
 	public static function link_internal_element( $link ) {
 		$url = '';
 
+		// Exceptions for externally-linked elements.
+		$exceptions = [
+			'error_log()' => 'https://secure.php.net/manual/en/function.error-log.php',
+		];
+
+		// Link exceptions that should actually point to external resources.
+		if ( ! empty( $exceptions[ $link ] ) ) {
+			$url = $exceptions[ $link ];
+		}
+
 		// Link to class variable: {@see WP_Rewrite::$index}
-		if ( false !== strpos( $link, '::$' ) ) {
+		elseif ( false !== strpos( $link, '::$' ) ) {
 			// Nothing to link to currently.
 		}
 
