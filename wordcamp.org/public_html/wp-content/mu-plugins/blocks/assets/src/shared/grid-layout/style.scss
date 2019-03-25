@@ -1,0 +1,50 @@
+.wordcamp-clearfix:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.wordcamp-block-post-list {
+
+	li.wordcamp-grid-layout-item {
+		list-style: none;
+		margin: 0 0 1em 0;
+	}
+
+	&.layout-list > li {
+		margin-bottom: 1em;
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	@media ( min-width: 400px ) {
+		&.layout-grid {
+			display: grid;
+			grid-template-columns: repeat( 2, 1fr );
+			grid-column-gap: 1em;
+			grid-row-gap: 1em;
+
+			/* Ensure columns maintain equal widths. */
+			/* https://stackoverflow.com/a/43312314 */
+			min-height: 0;
+			min-width: 0;
+			& .wordcamp-block-post-list-item {
+				overflow: hidden;
+				min-width: 0;
+			}
+		}
+	}
+
+	@media ( min-width: 600px ) {
+		&.layout-grid.grid-columns-3 {
+			grid-template-columns: repeat( 3, 1fr );
+		}
+	}
+
+	@media ( min-width: 800px ) {
+		&.layout-grid.grid-columns-4 {
+			grid-template-columns: repeat( 4, 1fr );
+		}
+	}
+}
