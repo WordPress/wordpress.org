@@ -54,28 +54,6 @@ function SessionSpeakers( { session } ) {
 	);
 }
 
-function SessionImage( { session } ) {
-	let image;
-
-	const url = get( session, '_embedded[\'wp:featuredmedia\'].media_details.sizes.thumbnail.source_url', '' );
-
-	if ( url ) {
-		image = (
-			<img
-				src={ url }
-				alt={ decodeEntities( session.title.rendered.trim() ) }
-				className={ classnames( 'wordcamp-session-image' ) }
-			/>
-		);
-	} else {
-		image = (
-			<div className="wordcamp-session-default-image" />
-		);
-	}
-
-	return image;
-}
-
 function SessionDetails( { session, show_meta, show_category } ) {
 	let meta, metaContent, category;
 	const terms = get( session, '_embedded[\'wp:term\']', [] ).flat();
@@ -157,7 +135,7 @@ class SessionsBlockContent extends Component {
 
 	render() {
 		const { attributes, sessionPosts } = this.props;
-		const { className, show_speaker, show_images, image_align, featured_image_height, featured_image_width, content, excerpt_more, show_meta, show_category } = attributes;
+		const { show_speaker, show_images, image_align, featured_image_height, featured_image_width, content, excerpt_more, show_meta, show_category } = attributes;
 		const featuredImageSize = { height: featured_image_height, width: featured_image_width };
 
 		return (

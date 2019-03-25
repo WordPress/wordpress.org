@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-const { PanelBody, PanelRow, RangeControl, SelectControl, ToggleControl } = wp.components;
+const { PanelBody, PanelRow, SelectControl, ToggleControl } = wp.components;
 const { InspectorControls } = wp.editor;
 const { Component, Fragment } = wp.element;
 const { __ } = wp.i18n;
