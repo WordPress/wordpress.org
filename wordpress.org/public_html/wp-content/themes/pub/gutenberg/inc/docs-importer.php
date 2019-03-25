@@ -278,22 +278,22 @@ class Import_Gutendocs {
 		}
 
 		// Remove the .md extension from relative links and treat 'readme.md' as an index
-		$markdown = preg_replace( '@(\[.*?\]\(((\.\./)+docs/|/docs/|/packages/).*?)(((?<=/)readme)?\.md)?(#.*)?\)@i', '$1$6)', $markdown );
+		$markdown = preg_replace( '@(\[.*?\]\(((\.\./)+docs/|/docs/|/packages/).*?)(((?<=/)readme)?\.md)?(#.*?)?\)@i', '$1$6)', $markdown );
 
 		// Remove the (../)*docs/ path from relative links, and replace it with an absolute URL
-		$markdown = preg_replace( '@(\[.*?\])\((\.\./)+docs/(.*?)/?(#.*)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/$3/$4)', $markdown );
+		$markdown = preg_replace( '@(\[.*?\])\((\.\./)+docs/(.*?)/?(#.*?)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/$3/$4)', $markdown );
 
 		// Handle /docs/(.+)(/README.md) path for internal links and replace it with an absolute URL
-		$markdown = preg_replace( '@(\[.*?\])\(/docs/(.*?)/?(#.*)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/$2/$3)', $markdown );
+		$markdown = preg_replace( '@(\[.*?\])\(/docs/(.*?)/?(#.*?)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/$2/$3)', $markdown );
 
 		// Handle /packages/compomnents(/README.md)
-		$markdown = preg_replace( '@(\[.*?\])\(/packages/components/?(#.*)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/designers-developers/developers/components/$2)', $markdown );
+		$markdown = preg_replace( '@(\[.*?\])\(/packages/components/?(#.*?)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/designers-developers/developers/components/$2)', $markdown );
 
 		// Handle /packages/components/(src/)(.+)(/README.md)
-		$markdown = preg_replace( '@(\[.*?\])\(/packages/components/(src/)?(.*?)/?(#.*)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/designers-developers/developers/components/$3/$4)', $markdown );
+		$markdown = preg_replace( '@(\[.*?\])\(/packages/components/(src/)?(.*?)/?(#.*?)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/designers-developers/developers/components/$3/$4)', $markdown );
 
 		// Handle /packages/(.+)(/README.md)
-		$markdown = preg_replace( '@(\[.*?\])\(/packages/(.*?)/?(#.*)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/designers-developers/developers/packages/packages-$2/$3)', $markdown );
+		$markdown = preg_replace( '@(\[.*?\])\(/packages/(.*?)/?(#.*?)?\)@i', '$1(https://wordpress.org/gutenberg/handbook/designers-developers/developers/packages/packages-$2/$3)', $markdown );
 
 		// Transform to HTML
 		jetpack_require_lib( 'markdown' );
