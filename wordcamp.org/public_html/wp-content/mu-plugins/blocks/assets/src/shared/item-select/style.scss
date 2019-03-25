@@ -1,0 +1,54 @@
+.wordcamp-item-select-inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	text-align: left;
+}
+
+.wordcamp-item-select-select {
+	flex-grow: 2;
+	margin-right: 1em;
+	.rtl &  {
+		margin-left: 1em;
+		margin-right: 0;
+	}
+	input[type="text"]:focus {
+		box-shadow: none;
+	}
+}
+
+.wordcamp-item-select-option {
+	display: flex;
+	align-items: center;
+}
+
+.wordcamp-item-select-option-icon-container {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 24px;
+	height: 24px;
+	background-color: #f3f3f4;
+}
+
+.wordcamp-item-select-option-label {
+	margin: 0 0.5em;
+	white-space: normal;
+}
+
+.wordcamp-item-select-option-label-term-count {
+	font-size: 0.6em;
+	display: inline-block;
+	border-radius: 50%;
+	background-color: #f3f3f4;
+	width: 2.2em;
+	height: 2.2em;
+	margin: 0 0.5em;
+	text-align: center;
+	line-height: 2.2em;
+	vertical-align: text-top;
+}
+
+.wordcamp-item-select {
+	width: 100%;
+}
