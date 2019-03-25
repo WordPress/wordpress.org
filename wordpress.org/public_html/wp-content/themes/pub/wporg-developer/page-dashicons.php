@@ -198,7 +198,7 @@ get_header(); ?>
 					<div alt="f229" class="dashicons dashicons-leftright">left right</div>
 					<div alt="f503" class="dashicons dashicons-randomize">randomize shuffle</div>
 					<div alt="f163" class="dashicons dashicons-list-view">list view</div>
-					<div alt="f164" class="dashicons dashicons-exerpt-view">exerpt view</div>
+					<div alt="f164" class="dashicons dashicons-excerpt-view">excerpt view</div>
 					<div alt="f509" class="dashicons dashicons-grid-view">grid view</div>
 					<div alt="f545" class="dashicons dashicons-move">move</div>
 
