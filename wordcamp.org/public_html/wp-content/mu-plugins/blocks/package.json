@@ -10,7 +10,6 @@
 	},
 	"dependencies": {
 		"classnames": "2.2.6",
-		"dompurify": "1.0.9",
 		"react-select": "2.3.0"
 	},
 	"devDependencies": {
@@ -24,7 +23,7 @@
 		"@wordpress/eslint-plugin": "1.0.1",
 		"@wordpress/i18n": "3.0.1",
 		"@wordpress/npm-package-json-lint-config": "1.1.6",
-		"@wordpress/scripts": "2.5.0",
+		"@wordpress/scripts": "3.0.0",
 		"acorn": "6.0.4",
 		"babel-loader": "8.0.4",
 		"cross-env": "5.2.0",
@@ -44,7 +43,7 @@
 	],
 	"scripts": {
 		"start": "cross-env BABEL_ENV=development NODE_ENV=development webpack --watch",
-		"build": "cross-env BABEL_ENV=development NODE_ENV=development webpack",
+		"build": "cross-env BABEL_ENV=production NODE_ENV=production webpack",
 		"lint:js": "wp-scripts lint-js ."
 	}
 }

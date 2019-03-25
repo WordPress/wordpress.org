@@ -17,6 +17,8 @@ const webpackConfig = {
 		minimize: true,
 	},
 
+	devtool: 'production' === NODE_ENV ? 'none' : 'cheap-module-eval-source-map',
+
 	entry: {
 		blocks: path.resolve( __dirname, 'assets/src/blocks.js' ),
 	},
