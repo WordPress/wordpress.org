@@ -1,37 +1,37 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * WordPress dependencies
  */
-const { Button, Placeholder, Spinner } = wp.components;
-const { Component, Fragment } = wp.element;
+const { Button, Placeholder } = wp.components;
 const { __ } = wp.i18n;
 
 /**
  * Internal dependencies
  */
+import { BlockControls, PlaceholderNoContent, PlaceholderSpecificMode } from '../shared/block-controls';
 import SpeakersBlockContent from './block-content';
 import SpeakersSelect from './speakers-select';
 
-const data = window.WordCampBlocks.speakers || {};
+const LABEL = __( 'Speakers', 'wordcamporg' );
 
-class SpeakersBlockControls extends Component {
+class SpeakersBlockControls extends BlockControls {
 	render() {
-		const { attributes, setAttributes, speakerPosts } = this.props;
+		const { icon, attributes, setAttributes, speakerPosts } = this.props;
 		const { mode } = attributes;
-		const { mode: modeOptions = {} } = data.options;
 
 		const hasPosts = Array.isArray( speakerPosts ) && speakerPosts.length;
 
 		if ( mode && ! hasPosts ) {
 			return (
-				<Placeholder
-					icon="megaphone"
-					label={ __( 'Speakers', 'wordcamporg' ) }
-				>
-					{ ! Array.isArray( speakerPosts ) ?
-						<Spinner /> :
-						__( 'No posts found.', 'wordcamporg' )
-					}
-				</Placeholder>
+				<PlaceholderNoContent
+					icon={ icon }
+					label={ LABEL }
+					loading={ ! Array.isArray( speakerPosts ) }
+				/>
 			);
 		}
 
@@ -44,49 +44,30 @@ class SpeakersBlockControls extends Component {
 				);
 				break;
 
-			case 'specific_posts' :
-				const postsLabel = modeOptions.find( ( modeOption ) => {
-					return 'specific_posts' === modeOption.value;
-				} ).label;
-
+			case 'wcb_speaker' :
+			case 'wcb_speaker_group' :
 				output = (
-					<Fragment>
-						<SpeakersBlockContent { ...this.props } />
-						<Placeholder
-							icon="megaphone"
-							label={ postsLabel }
-						>
+					<PlaceholderSpecificMode
+						label={ this.getModeLabel( mode ) }
+						icon={ icon }
+						content={
+							<SpeakersBlockContent { ...this.props } />
+						}
+						placeholderChildren={
 							<SpeakersSelect { ...this.props } />
-						</Placeholder>
-					</Fragment>
-				);
-				break;
-
-			case 'specific_terms' :
-				const termsLabel = modeOptions.find( ( modeOption ) => {
-					return 'specific_terms' === modeOption.value;
-				} ).label;
-
-				output = (
-					<Fragment>
-						<SpeakersBlockContent { ...this.props } />
-						<Placeholder
-							icon="megaphone"
-							label={ termsLabel }
-						>
-							<SpeakersSelect { ...this.props } />
-						</Placeholder>
-					</Fragment>
+						}
+					/>
 				);
 				break;
 
 			default :
 				output = (
 					<Placeholder
-						icon="megaphone"
-						label={ __( 'Speakers', 'wordcamporg' ) }
+						className={ classnames( 'wordcamp-block-edit-placeholder', 'wordcamp-block-edit-placeholder-no-mode' ) }
+						icon={ icon }
+						label={ LABEL }
 					>
-						<div className="wordcamp-block-speakers-mode-option">
+						<div className="wordcamp-block-edit-mode-option">
 							<Button
 								isDefault
 								isLarge
@@ -94,13 +75,11 @@ class SpeakersBlockControls extends Component {
 									setAttributes( { mode: 'all' } );
 								} }
 							>
-								{ modeOptions.find( ( modeOption ) => {
-									return 'all' === modeOption.value;
-								} ).label }
+								{ this.getModeLabel( 'all' ) }
 							</Button>
 						</div>
 
-						<div className="wordcamp-block-speakers-mode-option">
+						<div className="wordcamp-block-edit-mode-option">
 							<SpeakersSelect
 								label={ __( 'Choose specific speakers or groups', 'wordcamporg' ) }
 								{ ...this.props }

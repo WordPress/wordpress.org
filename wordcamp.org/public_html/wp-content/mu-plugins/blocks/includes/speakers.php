@@ -1,9 +1,9 @@
 <?php
-namespace WordCamp\Blocks\Speakers;
-defined( 'WPINC' ) || die();
 
-use WP_Post;
+namespace WordCamp\Blocks\Speakers;
 use WordCamp\Blocks;
+
+defined( 'WPINC' ) || die();
 
 /**
  * Register block types and enqueue scripts.
@@ -33,10 +33,10 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @return string
  */
 function render( $attributes ) {
+	$html       = '';
 	$defaults   = wp_list_pluck( get_attributes_schema(), 'default' );
 	$attributes = wp_parse_args( $attributes, $defaults );
-
-	$speakers = get_speaker_posts( $attributes );
+	$speakers   = get_speaker_posts( $attributes );
 
 	$sessions = [];
 	if ( ! empty( $speakers ) && true === $attributes['show_session'] ) {
@@ -44,20 +44,22 @@ function render( $attributes ) {
 	}
 
 	$container_classes = [
+		'wordcamp-block',
+		'wordcamp-block-post-list',
 		'wordcamp-speakers-block',
 		'layout-' . sanitize_html_class( $attributes['layout'] ),
 		sanitize_html_class( $attributes['className'] ),
 	];
-
 	if ( 'grid' === $attributes['layout'] ) {
 		$container_classes[] = 'grid-columns-' . absint( $attributes['grid_columns'] );
 	}
-
 	$container_classes = implode( ' ', $container_classes );
 
-	ob_start();
-	require Blocks\PLUGIN_DIR . 'view/speakers.php';
-	$html = ob_get_clean();
+	if ( $attributes['mode'] ) {
+		ob_start();
+		require Blocks\PLUGIN_DIR . 'view/speakers.php';
+		$html = ob_get_clean();
+	}
 
 	return $html;
 }
@@ -102,16 +104,16 @@ function get_speaker_posts( array $attributes ) {
 	}
 
 	switch ( $attributes['mode'] ) {
-		case 'specific_posts':
-			$post_args['post__in'] = $attributes['post_ids'];
+		case 'wcb_speaker':
+			$post_args['post__in'] = $attributes['item_ids'];
 			break;
 
-		case 'specific_terms':
+		case 'wcb_speaker_group':
 			$post_args['tax_query'] = [
 				[
-					'taxonomy' => 'wcb_speaker_group',
+					'taxonomy' => $attributes['mode'],
 					'field'    => 'id',
-					'terms'    => $attributes['term_ids'],
+					'terms'    => $attributes['item_ids'],
 				],
 			];
 			break;
@@ -169,14 +171,7 @@ function get_attributes_schema() {
 			'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),
 			'default' => '',
 		],
-		'post_ids'     => [
-			'type'    => 'array',
-			'default' => [],
-			'items'   => [
-				'type' => 'integer',
-			],
-		],
-		'term_ids'     => [
+		'item_ids'     => [
 			'type'    => 'array',
 			'default' => [],
 			'items'   => [
@@ -296,11 +291,11 @@ function get_options( $type = '' ) {
 			],
 			[
 				'label' => _x( 'Choose speakers', 'mode option', 'wordcamporg' ),
-				'value' => 'specific_posts',
+				'value' => 'wcb_speaker',
 			],
 			[
 				'label' => _x( 'Choose groups', 'mode option', 'wordcamporg' ),
-				'value' => 'specific_terms',
+				'value' => 'wcb_speaker_group',
 			],
 		],
 		'sort'    => [
@@ -332,29 +327,4 @@ function get_options( $type = '' ) {
 	}
 
 	return $options;
-}
-
-/**
- * Get the full content of a post, ignoring more and noteaser tags and pagination.
- *
- * This works similarly to `the_content`, including applying filters, but:
- * - It skips all of the logic in `get_the_content` that deals with tags like <!--more--> and
- *   <!--noteaser-->, as well as pagination and global state variables like `$page`, `$more`, and
- *   `$multipage`.
- * - It returns a string of content, rather than echoing it.
- *
- * @param int|WP_Post $post Post ID or post object.
- *
- * @return string The full, filtered post content.
- */
-function get_all_the_content( $post ) {
-	$post = get_post( $post );
-
-	$content = $post->post_content;
-
-	/** This filter is documented in wp-includes/post-template.php */
-	$content = apply_filters( 'the_content', $content );
-	$content = str_replace( ']]>', ']]&gt;', $content );
-
-	return $content;
 }

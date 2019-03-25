@@ -5,13 +5,11 @@ const { Toolbar } = wp.components;
 const { BlockControls } = wp.editor;
 const { Component } = wp.element;
 
-const data = window.WordCampBlocks.speakers || {};
-
 class SpeakersToolbar extends Component {
 	render() {
-		const { attributes, setAttributes } = this.props;
+		const { attributes, setAttributes, blockData } = this.props;
 		const { layout } = attributes;
-		const { layout: layoutOptions = {} } = data.options;
+		const { layout: layoutOptions = {} } = blockData.options;
 
 		return (
 			<BlockControls>
