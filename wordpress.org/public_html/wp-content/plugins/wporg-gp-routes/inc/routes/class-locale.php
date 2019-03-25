@@ -899,6 +899,11 @@ class Locale extends GP_Route {
 				$filter_order_by = "tp.path LIKE 'wp/%%' AND (stats.fuzzy + stats.waiting) > 0 DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
 				break;
 
+			case 'strings-waiting-and-fuzzy-by-modified-date':
+				$filter_where = 'AND (stats.waiting > 0 OR stats.fuzzy > 0 ) AND stats.date_modified > "0000-00-00 00:00:00"';
+				$filter_order_by = "stats.date_modified $sort_order, tp.name ASC";
+				break;
+
 			case 'percent-completed':
 				$filter_where = 'AND stats.untranslated > 0';
 				$filter_order_by = "( stats.current / stats.all ) $sort_order, tp.name ASC";

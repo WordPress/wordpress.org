@@ -114,6 +114,8 @@ gp_tmpl_header();
 				$sorts['strings-remaining-asc'] = 'Remaining Strings (Least first)';
 				$sorts['strings-waiting-and-fuzzy'] = 'Waiting + Fuzzy (Most first)';
 				$sorts['strings-waiting-and-fuzzy-asc'] = 'Waiting + Fuzzy (Least first)';
+				$sorts['strings-waiting-and-fuzzy-by-modified-date'] = 'Waiting + Fuzzy (Newest first)';
+				$sorts['strings-waiting-and-fuzzy-by-modified-date-asc'] = 'Waiting + Fuzzy (Oldest first)';
 				$sorts['percent-completed'] = 'Percent Completed (Most first)';
 				$sorts['percent-completed-asc'] = 'Percent Completed (Least first)';
 
