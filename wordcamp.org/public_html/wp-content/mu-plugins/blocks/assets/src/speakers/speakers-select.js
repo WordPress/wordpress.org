@@ -99,7 +99,7 @@ class SpeakersSelect extends Component {
 	}
 
 	render() {
-		const { label, attributes, setAttributes } = this.props;
+		const { label, icon, attributes, setAttributes } = this.props;
 		const { mode, item_ids } = attributes;
 		const options = this.buildSelectOptions( mode );
 
@@ -132,7 +132,10 @@ class SpeakersSelect extends Component {
 					},
 					formatOptionLabel: ( optionData ) => {
 						return (
-							<SpeakersOption { ...optionData } />
+							<SpeakersOption
+								icon={ icon }
+								{ ...optionData }
+							/>
 						);
 					},
 				} }
@@ -141,7 +144,7 @@ class SpeakersSelect extends Component {
 	}
 }
 
-function SpeakersOption( { type, label = '', avatar = '', count = 0 } ) {
+function SpeakersOption( { type, icon, label = '', avatar = '', count = 0 } ) {
 	let image, content;
 
 	switch ( type ) {
@@ -166,7 +169,7 @@ function SpeakersOption( { type, label = '', avatar = '', count = 0 } ) {
 				<div className="wordcamp-item-select-option-icon-container">
 					<Dashicon
 						className="wordcamp-item-select-option-icon"
-						icon={ 'megaphone' }
+						icon={ icon }
 						size={ 16 }
 					/>
 				</div>

@@ -17,10 +17,9 @@ const { addQueryArgs } = wp.url;
 import SessionsBlockControls from './block-controls';
 import SessionsInspectorControls from './inspector-controls';
 import GridToolbar from '../shared/grid-layout/toolbar';
+import { SESSIONS_ICON }         from './index';
 
 const blockData = window.WordCampBlocks.sessions || {};
-
-const SESSIONS_ICON = 'list-view';
 const MAX_POSTS = 100;
 
 const ALL_POSTS_QUERY = {

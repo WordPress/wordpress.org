@@ -4,6 +4,7 @@
 import SponsorInspectorControls from './inspector-controls';
 import SponsorBlockControls from './block-controls';
 import GridToolbar from '../shared/grid-layout/toolbar';
+import { SPONSORS_ICON }        from './index';
 
 /**
  WordPress dependencies.
@@ -64,6 +65,7 @@ class SponsorsEdit extends Component {
 			<Fragment>
 				{
 					<SponsorBlockControls
+						icon={ SPONSORS_ICON }
 						sponsorPosts = { sponsorPosts }
 						sponsorLevels = { sponsorLevels }
 						siteSettings = { siteSettings }

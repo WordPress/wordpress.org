@@ -15,8 +15,7 @@ const { __ } = wp.i18n;
 import { BlockControls, PlaceholderNoContent, PlaceholderSpecificMode } from '../shared/block-controls';
 import SessionsBlockContent from './block-content';
 import SessionsSelect from './sessions-select';
-
-const LABEL = __( 'Sessions', 'wordcamporg' );
+import { LABEL }                                                        from './index';
 
 class SessionsBlockControls extends BlockControls {
 	render() {
@@ -82,6 +81,7 @@ class SessionsBlockControls extends BlockControls {
 
 						<div className="wordcamp-block-edit-mode-option">
 							<SessionsSelect
+								icon={ icon }
 								label={ __( 'Choose specific sessions, tracks, or categories', 'wordcamporg' ) }
 								{ ...this.props }
 							/>

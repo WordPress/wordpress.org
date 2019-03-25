@@ -12,9 +12,9 @@ const { __ } = wp.i18n;
 import { BlockControls, PlaceholderNoContent } from "../shared/block-controls";
 import SponsorBlockContent from './block-content';
 import ItemSelect from '../shared/item-select'
-const { Button, Placeholder } = wp.components;
+import { LABEL }                               from './index';
 
-const LABEL = __( 'Sponsors', 'wordcamporg' );
+const { Button, Placeholder } = wp.components;
 
 function SponsorOption( option ) {
 	if ( 'post' === option.type ) {
@@ -242,7 +242,7 @@ class SponsorBlockControls extends BlockControls {
 	 * Renders Sponsor Block Control view
 	 */
 	render() {
-		const { sponsorPosts, attributes, setAttributes } = this.props;
+		const { icon, attributes, setAttributes, sponsorPosts } = this.props;
 		const { mode, post_ids, term_ids } = attributes;
 		const { fetchedPosts, posts, terms, selectedPosts, sponsorTermOrder } = this.state;
 		const hasPosts = Array.isArray( fetchedPosts ) && fetchedPosts.length;
@@ -289,7 +289,7 @@ class SponsorBlockControls extends BlockControls {
 
 				{'all' !== mode &&
 					<Placeholder
-						icon='heart'
+						icon={ icon }
 						label = { __('Sponsors', 'wordcamporg') }
 					>
 						<div className='' >

@@ -9,11 +9,13 @@ const { __ } = wp.i18n;
 import { edit } from './edit.js';
 
 export const name = 'wordcamp/speakers';
+export const LABEL         = __( 'Speakers', 'wordcamporg' );
+export const SPEAKERS_ICON = 'megaphone';
 
 export const settings = {
 	title       : __( 'Speakers', 'wordcamporg' ),
 	description : __( 'Add a list of speakers.', 'wordcamporg' ),
-	icon        : 'megaphone',
+	icon        : SPEAKERS_ICON,
 	category    : 'wordcamp',
 	edit,
 	save        : function() {

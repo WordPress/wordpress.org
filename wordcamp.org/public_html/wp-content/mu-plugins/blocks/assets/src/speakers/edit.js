@@ -17,10 +17,10 @@ const { addQueryArgs } = wp.url;
 import SpeakersBlockControls from './block-controls';
 import SpeakersInspectorControls from './inspector-controls';
 import SpeakersToolbar from './toolbar';
+import { SPEAKERS_ICON }         from './index';
 
 const blockData = window.WordCampBlocks.speakers || {};
 
-const SPEAKERS_ICON = 'megaphone';
 const MAX_POSTS = 100;
 
 const ALL_POSTS_QUERY = {

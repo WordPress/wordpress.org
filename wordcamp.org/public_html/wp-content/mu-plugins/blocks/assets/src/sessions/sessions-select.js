@@ -106,7 +106,7 @@ class SessionsSelect extends Component {
 	}
 
 	render() {
-		const { label, attributes, setAttributes } = this.props;
+		const { icon, label, attributes, setAttributes } = this.props;
 		const { mode, item_ids } = attributes;
 		const options = this.buildSelectOptions( mode );
 
@@ -139,7 +139,10 @@ class SessionsSelect extends Component {
 					},
 					formatOptionLabel: ( optionData ) => {
 						return (
-							<SessionsOption { ...optionData } />
+							<SessionsOption
+								icon={ icon }
+								{ ...optionData }
+							/>
 						);
 					},
 				} }
@@ -148,7 +151,7 @@ class SessionsSelect extends Component {
 	}
 }
 
-function SessionsOption( { type, label = '', image = '', count = 0 } ) {
+function SessionsOption( { type, icon, label = '', image = '', count = 0 } ) {
 	let optImage, optContent;
 
 	switch ( type ) {
@@ -168,7 +171,7 @@ function SessionsOption( { type, label = '', image = '', count = 0 } ) {
 					<div className="wordcamp-item-select-option-icon-container">
 						<Dashicon
 							className="wordcamp-item-select-option-icon"
-							icon={ 'list-view' }
+							icon={ icon }
 							size={ 16 }
 						/>
 					</div>
@@ -187,7 +190,7 @@ function SessionsOption( { type, label = '', image = '', count = 0 } ) {
 				<div className="wordcamp-item-select-option-icon-container">
 					<Dashicon
 						className="wordcamp-item-select-option-icon"
-						icon={ 'list-view' }
+						icon={ icon }
 						size={ 16 }
 					/>
 				</div>

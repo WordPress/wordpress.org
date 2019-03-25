@@ -15,8 +15,7 @@ const { __ } = wp.i18n;
 import { BlockControls, PlaceholderNoContent, PlaceholderSpecificMode } from '../shared/block-controls';
 import SpeakersBlockContent from './block-content';
 import SpeakersSelect from './speakers-select';
-
-const LABEL = __( 'Speakers', 'wordcamporg' );
+import { LABEL }                                                        from './index';
 
 class SpeakersBlockControls extends BlockControls {
 	render() {
@@ -81,6 +80,7 @@ class SpeakersBlockControls extends BlockControls {
 
 						<div className="wordcamp-block-edit-mode-option">
 							<SpeakersSelect
+								icon={ icon }
 								label={ __( 'Choose specific speakers or groups', 'wordcamporg' ) }
 								{ ...this.props }
 							/>
