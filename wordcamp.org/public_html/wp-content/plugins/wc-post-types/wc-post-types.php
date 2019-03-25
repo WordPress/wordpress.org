@@ -70,13 +70,30 @@ class WordCamp_Post_Types_Plugin {
 
 	function init() {
 		do_action( 'wcpt_back_compat_init' );
+
+		if ( is_user_logged_in() ) {
+			register_setting(
+				'wcb_sponsor_options',
+				'wcb_sponsor_level_order',
+				array(
+					'sanitize_callback' => array( $this, 'validate_sponsor_options' ),
+					'show_in_rest' => array(
+						'schema' => array(
+							'type' => 'array',
+							'items' => array(
+								'type' => 'integer',
+							),
+						)
+					)
+				)
+			);
+		}
 	}
 
 	/**
 	 * Runs during admin_init.
 	 */
 	function admin_init() {
-		register_setting( 'wcb_sponsor_options', 'wcb_sponsor_level_order', array( $this, 'validate_sponsor_options' ) );
 		add_action( 'pre_get_posts', array( $this, 'admin_pre_get_posts' ) );
 	}
 
@@ -2181,7 +2198,7 @@ class WordCamp_Post_Types_Plugin {
 			array(
 				'labels'          => $labels,
 				'rewrite'         => array( 'slug' => 'session', 'with_front' => false, ),
-				'supports'        => array( 'title', 'editor', 'author', 'revisions', 'thumbnail', 'custom-fields' ),
+				'supports'        => array( 'title', 'editor', 'excerpt', 'author', 'revisions', 'thumbnail', 'custom-fields' ),
 				'menu_position'   => 21,
 				'public'          => true,
 				'show_ui'         => true,
@@ -2255,7 +2272,7 @@ class WordCamp_Post_Types_Plugin {
 			array(
 				'labels'          => $labels,
 				'rewrite'         => array( 'slug' => 'organizer', 'with_front' => false, ),
-				'supports'        => array( 'title', 'editor', 'revisions' ),
+				'supports'        => array( 'title', 'editor', 'excerpt', 'revisions' ),
 				'menu_position'   => 22,
 				'public'          => false,
 					// todo public or publicly_queryable = true, so consistent with others? at the very least set show_in_json = true
@@ -2386,6 +2403,8 @@ class WordCamp_Post_Types_Plugin {
 				'hierarchical' => true,
 				'public'       => true,
 				'show_ui'      => true,
+				'show_in_rest' => true,
+				'rest_base'    => 'organizer_team',
 			)
 		);
 
