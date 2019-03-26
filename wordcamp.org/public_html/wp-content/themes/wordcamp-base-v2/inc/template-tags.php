@@ -113,14 +113,17 @@ if ( ! function_exists( 'wcbs_posted_on' ) ) :
  * @since WCBS 1.0
  */
 function wcbs_posted_on() {
-	printf( __( 'Posted on <a href="%1$s" title="%2$s" rel="bookmark"><time class="entry-date" datetime="%3$s" pubdate>%4$s</time></a><span class="byline"> by <span class="author vcard"><a class="url fn n" href="%5$s" title="%6$s" rel="author">%7$s</a></span></span>', 'wordcamporg' ),
-		esc_url( get_permalink() ),
-		esc_attr( get_the_time() ),
-		esc_attr( get_the_date( 'c' ) ),
-		esc_html( get_the_date() ),
-		esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
-		esc_attr( sprintf( __( 'View all posts by %s', 'wordcamporg' ), get_the_author() ) ),
-		esc_html( get_the_author() )
+	/* translators: 1: post date, 2: post author link */
+	printf( __( 'Posted on %1$s <span class="byline">by %2$s</span>', 'wordcamporg' ),
+		sprintf( '<a href="%1$s" rel="bookmark"><time class="entry-date" datetime="%2$s" pubdate>%3$s</time></a>',
+			esc_url( get_permalink() ),
+			esc_attr( get_the_date( 'c' ) ),
+			esc_html( get_the_date() )
+		),
+		sprintf( '<span class="author vcard"><a class="url fn n" href="%1$s" rel="author">%2$s</a></span>',
+			esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
+			esc_html( get_the_author() )
+		)
 	);
 }
 endif;

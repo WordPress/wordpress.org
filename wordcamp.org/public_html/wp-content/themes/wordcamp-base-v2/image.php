@@ -21,14 +21,22 @@ get_header();
 						<div class="entry-meta">
 							<?php
 								$metadata = wp_get_attachment_metadata();
-								printf( __( 'Published <span class="entry-date"><time class="entry-date" datetime="%1$s" pubdate>%2$s</time></span> at <a href="%3$s" title="Link to full-size image">%4$s &times; %5$s</a> in <a href="%6$s" title="Return to %7$s" rel="gallery">%7$s</a>', 'wordcamporg' ),
-									esc_attr( get_the_date( 'c' ) ),
-									esc_html( get_the_date() ),
-									wp_get_attachment_url(),
-									$metadata['width']  ?? 0,
-									$metadata['height'] ?? 0,
-									get_permalink( $post->post_parent ),
-									get_the_title( $post->post_parent )
+								/* translators: 1: attachment date, 2: link to full-size image, 3: link to parent post */
+								printf( __( 'Published %1$s at %2$s in %3$s', 'wordcamporg' ),
+									sprintf( '<span class="entry-date"><time class="entry-date" datetime="%1$s" pubdate>%2$s</time></span>',
+										esc_attr( get_the_date( 'c' ) ),
+										esc_html( get_the_date() )
+									),
+									sprintf( '<a href="%1$s">%2$s &times; %3$s</a>',
+										wp_get_attachment_url(),
+
+										$metadata['width'] ?? 0,
+										$metadata['height'] ?? 0
+									),
+									sprintf( '<a href="%1$s" rel="gallery">%2$s</a>',
+										get_permalink( $post->post_parent ),
+										get_the_title( $post->post_parent )
+									)
 								);
 							?>
 							<?php edit_post_link( __( 'Edit', 'wordcamporg' ), '<span class="sep"> | </span> <span class="edit-link">', '</span>' ); ?>
