@@ -669,82 +669,33 @@ function switch_email_template( $template_slug ) {
  * @return string
  */
 function get_global_sponsors_string( $sponsor_args = array() ) {
-	$sponsor_message_html = '';
-	$sponsors             = get_global_sponsors( $sponsor_args );
-	$sponsor_count        = count( $sponsors );
+	$sponsors = array( 'Jetpack', 'WooCommerce', 'Bluehost', 'GoDaddy', 'Liquid Web', 'GreenGeeks', 'DreamHost' );
 
-	if ( $sponsor_count > 0 ) {
-		$sponsors = wp_list_pluck( $sponsors, 'name' );
+	$sponsors = array_map( function( $string ) {
+		return "<strong>$string</strong>";
+	}, $sponsors );
 
-		$sponsors = array_map( function( $string ) {
-			return "<strong>$string</strong>";
-		}, $sponsors );
+	$last_sponsor = array_pop( $sponsors );
 
-		shuffle( $sponsors );
+	$sponsors_string = sprintf(
+		'%1$s%2$s %3$s',
+		/* translators: Used between sponsor names in a list, there is a space after the comma. */
+		implode( _x( ', ', 'list item separator', 'wordcamporg' ), $sponsors ),
+		/* translators: List item separator, used before the last sponsor name in the list. */
+		__( ' and', 'wordcamporg' ),
+		$last_sponsor
+	);
 
-		switch ( $sponsor_count ) {
-			case 1 :
-				$sponsors_string = array_shift( $sponsors );
-				break;
-			case 2 :
-				$sponsors_string = sprintf(
-					/* translators: The %s placeholders are the names of sponsors. */
-					__( '%s and %s', 'wordcamporg' ),
-					array_shift( $sponsors ),
-					array_shift( $sponsors )
-				);
-				break;
-			default :
-				$last_sponsor = array_pop( $sponsors );
+	$intro = __( 'WordPress Global Community Sponsors help fund WordCamps and meetups around the world.', 'wordcamporg' );
 
-				$sponsors_string = sprintf(
-					'%1$s%2$s %3$s',
-					/* translators: Used between sponsor names in a list, there is a space after the comma. */
-					implode( _x( ', ', 'list item separator', 'wordcamporg' ), $sponsors ),
-					/* translators: List item separator, used before the last sponsor name in the list. */
-					__( ', and', 'wordcamporg' ),
-					$last_sponsor
-				);
-				break;
-		}
+	$thank_you = sprintf(
+	/* translators: %1$s: list of sponsor names; %2$s: URL; */
+		__( 'Thank you to %1$s for <a href="%2$s">their support</a>!', 'wordcamporg' ),
+		$sponsors_string,
+		'https://central.wordcamp.org/global-community-sponsors/'
+	);
 
-		$intro = __( 'WordPress Global Community Sponsors help fund WordCamps and meetups around the world.', 'wordcamporg' );
-
-		$thank_you = sprintf(
-			/* translators: %1$s: list of sponsor names; %2$s: URL; */
-			_n(
-				'Thank you to %1$s for <a href="%2$s">its support</a>!',
-				'Thank you to %1$s for <a href="%2$s">their support</a>!',
-				$sponsor_count,
-				'wordcamporg'
-			),
-			$sponsors_string,
-			'https://central.wordcamp.org/global-community-sponsors/'
-		);
-
-		if ( isset( $sponsor_args['region_id'], $sponsor_args['level_id'] ) ) {
-			$sponsor_level = get_sponsorship_level_name_from_id( $sponsor_args['level_id'] );
-			$sponsor_region = get_sponsorship_region_description_from_id( $sponsor_args['region_id'] );
-
-			if ( $sponsor_level && $sponsor_region ) {
-				$thank_you = sprintf(
-					/* translators: %1$s: sponsorship type; %2$s: list of sponsor names; %3$s: URL; %4$s: sponsorship region; */
-					_n(
-						'Thank you to our %1$s sponsor %2$s for <a href="%3$s">its support</a> in %4$s!',
-						'Thank you to our %1$s sponsors %2$s for <a href="%3$s">their support</a> in %4$s!',
-						$sponsor_count,
-						'wordcamporg'
-					),
-					$sponsor_level,
-					$sponsors_string,
-					'https://central.wordcamp.org/global-community-sponsors/',
-					$sponsor_region
-				);
-			}
-		}
-
-		$sponsor_message_html = sprintf( '%s %s', $intro, $thank_you );
-	}
+	$sponsor_message_html = sprintf( '%s %s', $intro, $thank_you );
 
 	return $sponsor_message_html;
 }
