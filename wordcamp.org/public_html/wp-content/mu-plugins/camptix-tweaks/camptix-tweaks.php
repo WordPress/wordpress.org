@@ -671,9 +671,12 @@ function switch_email_template( $template_slug ) {
 function get_global_sponsors_string( $sponsor_args = array() ) {
 	$sponsors = array( 'Jetpack', 'WooCommerce', 'Bluehost', 'GoDaddy', 'Liquid Web', 'GreenGeeks', 'DreamHost' );
 
-	$sponsors = array_map( function( $string ) {
-		return "<strong>$string</strong>";
-	}, $sponsors );
+	$sponsors = array_map(
+		function ( $string ) {
+			return "<strong>$string</strong>";
+		},
+		$sponsors
+	);
 
 	$last_sponsor = array_pop( $sponsors );
 
@@ -689,7 +692,7 @@ function get_global_sponsors_string( $sponsor_args = array() ) {
 	$intro = __( 'WordPress Global Community Sponsors help fund WordCamps and meetups around the world.', 'wordcamporg' );
 
 	$thank_you = sprintf(
-	/* translators: %1$s: list of sponsor names; %2$s: URL; */
+		/* translators: %1$s: list of sponsor names; %2$s: URL; */
 		__( 'Thank you to %1$s for <a href="%2$s">their support</a>!', 'wordcamporg' ),
 		$sponsors_string,
 		'https://central.wordcamp.org/global-community-sponsors/'
