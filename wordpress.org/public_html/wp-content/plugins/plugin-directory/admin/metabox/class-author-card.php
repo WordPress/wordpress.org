@@ -84,35 +84,34 @@ class Author_Card {
 					sprintf(
 						'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
 						urlencode( esc_attr( $author->user_nicename ) ),
-						esc_attr__( 'Click to search HelpScout for mentions of this author', 'wporg-plugins' )
+						esc_attr__( 'Click to search Help Scout for mentions of this author', 'wporg-plugins' )
 					),
 				);
-				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_links );
+				vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', $author_links );
 				?>
 
 				<span class="profile-links">
 					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>"><?php _e( 'profile', 'wporg-plugins' ); ?></a> |
 					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>"><?php _e( 'support', 'wporg-plugins' ); ?></a>
 				</span>
+
 				<div class="profile-email">
 					&lt;<?php echo esc_attr( $author->user_email ); ?>&gt;
-					<span class="profile-sp-link">
 					<?php
-					printf(
-						'[ <a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a> ]',
-						esc_attr( $author->user_email ),
-						esc_attr__( 'Click to search Pluginrepo SupportPress for emails sent to/from this email address', 'wporg-plugins' )
+					$author_email_links = array(
+						sprintf(
+							'<a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a> ]',
+							urlencode( $author->user_email ),
+							esc_attr__( 'Click to search Pluginrepo SupportPress for emails sent to/from this email address', 'wporg-plugins' )
+						),
+						sprintf(
+							'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
+							urlencode( $author->user_email ),
+							esc_attr__( 'Click to search Help Scout for emails sent to/from this email address', 'wporg-plugins' )
+						),
 					);
+					vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_email_links );
 					?>
-					&nbsp;
-					<?php
-					printf(
-						'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
-						esc_attr( $author->user_email ),
-						esc_attr__( 'Click to search HelpScout for emails sent to/from this email address', 'wporg-plugins' )
-					);
-					?>
-					</span>
 				</div>
 				<div class="profile-join">
 					<?php
@@ -359,7 +358,7 @@ class Author_Card {
 				echo '*';
 			}
 
-			vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', [
+			vprintf( '<span class="profile-sp-link">[ %s | %s | %s | %s ]</span>', [
 				sprintf(
 					'<a href="%s" title="%s">%s</a>',
 					esc_url( get_edit_post_link( $plugin->ID, '' ) ),
@@ -379,7 +378,7 @@ class Author_Card {
 				sprintf(
 					'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
 					rawurlencode( esc_attr( $plugin_name ) ),
-					esc_attr__( 'Click to search HelpScout for mentions of this plugin', 'wporg-plugins' )
+					esc_attr__( 'Click to search Help Scout for mentions of this plugin', 'wporg-plugins' )
 				),
 			] );
 
