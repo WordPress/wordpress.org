@@ -209,6 +209,16 @@ function wporg_themes_meta_tags( $tags ) {
 add_filter( 'jetpack_seo_meta_tags', 'wporg_themes_meta_tags' );
 
 /**
+ * Outputs `noindex,follow` robots tag for search results.
+ */
+function wporg_themes_noindex_for_search() {
+	if ( is_search() ) {
+		wp_no_robots();
+	}
+}
+add_action( 'wp_head', 'wporg_themes_noindex_for_search' );
+
+/**
  * Overrides feeds to use a custom RSS2 feed which contains the current requests themes.
  */
 function wporg_themes_custom_feed() {
