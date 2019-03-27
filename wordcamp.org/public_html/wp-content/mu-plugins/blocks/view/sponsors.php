@@ -16,21 +16,23 @@ setup_postdata( $sponsor );
 
 	<?php if ( $attributes['show_name'] ) { ?>
 		<h3 class="wordcamp-sponsor-title wordcamp-item-title">
-			<a href="<?php esc_attr_e( get_permalink( $sponsor->ID ) ) ?>"><?php echo get_the_title( $sponsor ) ?></a>
+			<a href="<?php echo esc_attr( get_permalink( $sponsor->ID ) ); ?>"><?php echo esc_html( get_the_title( $sponsor ) ); ?></a>
 		</h3>
 	<?php } ?>
 
 	<?php if ( $attributes['show_logo'] ) { ?>
-		<?php echo render_featured_image(
-			array( 'wordcamp-sponsor-featured-image' ),
-			$sponsor,
-			$attributes['featured_image_height'],
-			$attributes['featured_image_width']
+		<?php echo wp_kses_post(
+			render_featured_image(
+				array( 'wordcamp-sponsor-featured-image' ),
+				$sponsor,
+				$attributes['featured_image_height'],
+				$attributes['featured_image_width']
+			)
 		); ?>
 	<?php } ?>
 
 	<?php if ( $attributes['show_desc'] ) { ?>
-		<?php echo wpautop( get_all_the_content( $sponsor ) ) ?>
+		<?php echo wp_kses_post( wpautop( get_all_the_content( $sponsor ) ) ); ?>
 	<?php } ?>
 
 </div>
