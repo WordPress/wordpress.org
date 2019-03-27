@@ -31,7 +31,7 @@ function render_grid_layout( $layout, $columns, $children, $container_classes ) 
 	<ul class="<?php echo esc_attr( $container_classes ); ?>">
 		<?php foreach ( $children as $child ) { ?>
 			<li class="wordcamp-block-post-list-item wordcamp-grid-layout-item wordcamp-clearfix">
-				<?php echo $child ?>
+				<?php printf( wp_kses_post( $child ) ); ?>
 			</li>
 		<?php } ?>
 	</ul>

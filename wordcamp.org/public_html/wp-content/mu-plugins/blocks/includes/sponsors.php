@@ -27,7 +27,7 @@ add_action( 'init', __NAMESPACE__ . '\init' );
 /**
  * Renders content of Sponsor block based on attributes.
  *
- * @param $attributes
+ * @param array $attributes
  *
  * @return false|string
  */
@@ -54,12 +54,12 @@ function render( $attributes ) {
 /**
  * Return sponsor posts what will rendered based on attributes.
  *
- * @param $attributes
+ * @param array $attributes
  *
  * @return array
  */
 function get_sponsor_posts( $attributes ) {
-	if ( empty( $attributes[ 'mode' ] ) ) {
+	if ( empty( $attributes['mode'] ) ) {
 		return array();
 	}
 
@@ -69,7 +69,7 @@ function get_sponsor_posts( $attributes ) {
 		'posts_per_page' => - 1,
 	);
 
-	switch ( $attributes[ 'mode' ] ) {
+	switch ( $attributes['mode'] ) {
 		case 'specific_posts':
 			$post_args['post__in'] = $attributes['post_ids'];
 			break;
@@ -84,12 +84,12 @@ function get_sponsor_posts( $attributes ) {
 			break;
 	}
 
-	switch ( $attributes[ 'sort_by' ] ) {
+	switch ( $attributes['sort_by'] ) {
 		case 'name_asc':
 			$post_args['orderby'] = 'title';
 			$post_args['order']   = 'asc';
 			break;
-		case 'name_desc' :
+		case 'name_desc':
 			$post_args['orderby'] = 'title';
 			$post_args['order']   = 'desc';
 			break;
@@ -98,7 +98,7 @@ function get_sponsor_posts( $attributes ) {
 
 	$posts = get_posts( $post_args );
 
-	if ( 'sponsor_level' === $attributes[ 'sort_by' ] ) {
+	if ( 'sponsor_level' === $attributes['sort_by'] ) {
 		usort( $posts, sponsor_level_sort( $posts ) );
 	}
 
@@ -110,7 +110,7 @@ function get_sponsor_posts( $attributes ) {
  *
  * @param array $posts Sponsor posts to sort.
  *
- * @return
+ * @return callable
  */
 function sponsor_level_sort( $posts ) {
 	$sponsor_level_order = get_option( 'wcb_sponsor_level_order' );
@@ -153,60 +153,60 @@ function sponsor_level_sort( $posts ) {
  */
 function get_attributes_schema() {
 	return array(
-		'mode' => array(
+		'mode'                  => array(
 			'type' => 'string',
 		),
-		'post_ids' => array(
-			'type' => 'array',
+		'post_ids'              => array(
+			'type'    => 'array',
 			'default' => array(),
-			'items' => array(
+			'items'   => array(
 				'type' => 'integer',
 			),
 		),
-		'term_ids' => array(
-			'type' => 'array',
+		'term_ids'              => array(
+			'type'    => 'array',
 			'default' => array(),
-			'items' => array(
+			'items'   => array(
 				'type' => 'integer',
 			),
 		),
-		'sponsor_image_urls' => array(
-			'type' => 'string',
+		'sponsor_image_urls'    => array(
+			'type'    => 'string',
 			'default' => '{}',
 		),
-		'show_name' => array(
-			'type' => 'bool',
+		'show_name'             => array(
+			'type'    => 'bool',
 			'default' => true,
 		),
-		'show_logo' => array(
-			'type' => 'bool',
+		'show_logo'             => array(
+			'type'    => 'bool',
 			'default' => true,
 		),
-		'show_desc' => array(
-			'type' => 'bool',
+		'show_desc'             => array(
+			'type'    => 'bool',
 			'default' => true,
 		),
-		'grid_columns' => array(
-			'type' => 'integer',
+		'grid_columns'          => array(
+			'type'    => 'integer',
 			'minimum' => 1,
 			'maximum' => 4,
-			'default' => 1
+			'default' => 1,
 		),
-		'layout' => [
+		'layout'                => array(
 			'type'    => 'string',
 			'enum'    => array( 'list', 'grid' ),
 			'default' => 'list',
-		],
+		),
 		'featured_image_height' => array(
-			'type' => 'integer',
-			'default' => 150
+			'type'    => 'integer',
+			'default' => 150,
 		),
-		'featured_image_width' => array(
-			'type' => 'integer',
-			'default' => 150
+		'featured_image_width'  => array(
+			'type'    => 'integer',
+			'default' => 150,
 		),
-		'sort_by' => array(
-			'type' => 'string',
+		'sort_by'               => array(
+			'type'    => 'string',
 			'default' => 'name_asc',
 		),
 	);

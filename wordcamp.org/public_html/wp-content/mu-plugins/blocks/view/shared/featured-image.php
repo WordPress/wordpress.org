@@ -7,9 +7,8 @@ namespace WordCamp\Blocks\Shared\Components;
  *
  * @param array    $class_names        Additional classes to add inside <img> tag.
  * @param \WP_Post $post               Current post object. This will be used to calculate srcset attribute.
- * @param string   $selected_image_url URL for selected sized image.
- * @param int      $height             Height of the image
- * @param int      $width              Width of the image
+ * @param int      $height             Height of the image.
+ * @param int      $width              Width of the image.
  *
  * @return string Output markup for featured image.
  */

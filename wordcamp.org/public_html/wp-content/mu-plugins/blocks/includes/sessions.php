@@ -163,15 +163,15 @@ function get_attributes_schema() {
 			'type' => 'integer',
 			'minimum' => 1,
 			'maximum' => 4,
-			'default' => 1
+			'default' => 1,
 		),
 		'featured_image_height' => array(
 			'type' => 'integer',
-			'default' => 150
+			'default' => 150,
 		),
 		'featured_image_width' => array(
 			'type' => 'integer',
-			'default' => 150
+			'default' => 150,
 		),
 	];
 }

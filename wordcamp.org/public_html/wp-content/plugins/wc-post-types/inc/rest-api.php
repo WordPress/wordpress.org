@@ -159,10 +159,12 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_additional_rest_fields' 
 function get_avatar_urls_from_username_email( $post ) {
 	$post        = (object) $post;
 	$avatar_urls = [];
+	$email       = get_post_meta( $post->id, '_wcb_speaker_email', true );
+	$user_id     = get_post_meta( $post->id, '_wcpt_user_id', true );
 
-	if ( $email = get_post_meta( $post->id, '_wcb_speaker_email', true ) ) {
+	if ( $email ) {
 		$avatar_urls = rest_get_avatar_urls( $email );
-	} elseif ( $user_id = get_post_meta( $post->id, '_wcpt_user_id', true ) ) {
+	} elseif ( $user_id ) {
 		$user = get_user_by( 'id', $user_id );
 
 		if ( $user ) {
@@ -187,8 +189,8 @@ function get_avatar_urls_from_username_email( $post ) {
  */
 function register_fav_sessions_email() {
 	register_rest_route(
-		'wc-post-types/v1',     // REST namespace + API version
-		'/email-fav-sessions/', // URL slug
+		'wc-post-types/v1',
+		'/email-fav-sessions/',
 		array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => 'send_favourite_sessions_email',
