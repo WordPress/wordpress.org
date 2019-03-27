@@ -82,7 +82,7 @@ class Author_Card {
 						esc_attr__( 'Click to search Pluginrepo SupportPress for mentions of this author', 'wporg-plugins' )
 					),
 					sprintf(
-						'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
+						'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
 						urlencode( esc_attr( $author->user_nicename ) ),
 						esc_attr__( 'Click to search Help Scout for mentions of this author', 'wporg-plugins' )
 					),
@@ -100,12 +100,12 @@ class Author_Card {
 					<?php
 					$author_email_links = array(
 						sprintf(
-							'<a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a> ]',
+							'<a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a>',
 							urlencode( $author->user_email ),
 							esc_attr__( 'Click to search Pluginrepo SupportPress for emails sent to/from this email address', 'wporg-plugins' )
 						),
 						sprintf(
-							'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
+							'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
 							urlencode( $author->user_email ),
 							esc_attr__( 'Click to search Help Scout for emails sent to/from this email address', 'wporg-plugins' )
 						),
@@ -376,7 +376,7 @@ class Author_Card {
 					esc_attr__( 'Click to search Plugin SupportPress for mentions of this plugin', 'wporg-plugins' )
 				),
 				sprintf(
-					'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%20%s" title="%s">HS</a>',
+					'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
 					rawurlencode( esc_attr( $plugin_name ) ),
 					esc_attr__( 'Click to search Help Scout for mentions of this plugin', 'wporg-plugins' )
 				),
