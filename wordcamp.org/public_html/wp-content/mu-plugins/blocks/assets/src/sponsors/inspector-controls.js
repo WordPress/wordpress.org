@@ -72,7 +72,7 @@ class SponsorInspectorControls extends Component {
 							options = { sortOptions }
 							value = { sort_by || 'name_asc' }
 							onChange={ ( value ) => setAttributes( { sort_by: value } ) }
-							help = { __( 'Select whether to sort by name or sponsor level. Order of sponsor level can be configure by going to Sponsor -> Order Sponsor Levels admin menu.') }
+							help = { __( 'Configure sponsor levels from the Sponsor -> Order Sponsor Levels page.', 'wordcamporg' ) }
 						/>
 					</PanelRow>
 				</PanelBody>
