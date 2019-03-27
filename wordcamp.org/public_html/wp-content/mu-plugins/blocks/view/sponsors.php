@@ -12,7 +12,7 @@ use function WordCamp\Blocks\Shared\Components\{ render_featured_image };
 setup_postdata( $sponsor );
 
 ?>
-<div class="wordcamp-sponsor-details <?php echo sanitize_html_class( $sponsor->post_name ); ?> ">
+<div class="wordcamp-sponsor-details wordcamp-sponsor-details-<?php echo sanitize_html_class( $sponsor->post_name ); ?> ">
 
 	<?php if ( $attributes['show_name'] ) { ?>
 		<h3 class="wordcamp-sponsor-title wordcamp-item-title">
