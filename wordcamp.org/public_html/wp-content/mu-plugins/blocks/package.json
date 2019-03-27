@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"classnames": "2.2.6",
-		"react-select": "2.3.0"
+		"react-select": "2.4.2"
 	},
 	"devDependencies": {
 		"@babel/core": "7.1.2",
@@ -23,7 +23,7 @@
 		"@wordpress/eslint-plugin": "1.0.1",
 		"@wordpress/i18n": "3.0.1",
 		"@wordpress/npm-package-json-lint-config": "1.1.6",
-		"@wordpress/scripts": "3.0.0",
+		"@wordpress/scripts": "3.1.0",
 		"acorn": "6.0.4",
 		"babel-loader": "8.0.4",
 		"cross-env": "5.2.0",
