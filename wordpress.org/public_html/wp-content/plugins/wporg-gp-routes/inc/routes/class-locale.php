@@ -627,6 +627,7 @@ class Locale extends GP_Route {
 			$status->waiting_count      = 0;
 			$status->current_count      = 0;
 			$status->fuzzy_count        = 0;
+			$status->untranslated_count = 0;
 			$status->all_count          = 0;
 			$status->percent_complete   = 0;
 		}
@@ -642,6 +643,7 @@ class Locale extends GP_Route {
 			$status->waiting_count      += (int) $set->waiting_count();
 			$status->current_count      += (int) $set->current_count();
 			$status->fuzzy_count        += (int) $set->fuzzy_count();
+			$status->untranslated_count += (int) $set->untranslated_count();
 			$status->all_count          += (int) $set->all_count();
 
 			if ( $status->all_count ) {

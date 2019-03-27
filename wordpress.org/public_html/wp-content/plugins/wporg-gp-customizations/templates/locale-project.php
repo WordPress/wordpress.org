@@ -162,16 +162,16 @@ if ( 'wp-themes' === $project->path && $sub_project_status->percent_complete < 9
 						<?php endif; ?>
 					</td>
 					<td class="stats translated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), absint( $sub_project_status->current_count ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), $sub_project_status->current_count ); ?>
 					</td>
 					<td class="stats fuzzy">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), absint( $sub_project_status->fuzzy_count ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), $sub_project_status->fuzzy_count ); ?>
 					</td>
 					<td class="stats untranslated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), absint( $sub_project_status->all_count ) -  absint( $sub_project_status->current_count ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), $sub_project_status->untranslated_count ); ?>
 					</td>
 					<td class="stats waiting">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), absint( $sub_project_status->waiting_count ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), $sub_project_status->waiting_count ); ?>
 					</td>
 					</tr>
 				</tr>
@@ -200,16 +200,16 @@ if ( 'wp-themes' === $project->path && $sub_project_status->percent_complete < 9
 						<?php endif; ?>
 					</td>
 					<td class="stats translated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), absint( $status->current_count ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), $status->current_count ); ?>
 					</td>
 					<td class="stats fuzzy">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), absint( $status->fuzzy_count ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), $status->fuzzy_count ); ?>
 					</td>
 					<td class="stats untranslated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), absint( $status->all_count ) -  absint( $status->current_count ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), $status->untranslated_count ); ?>
 					</td>
 					<td class="stats waiting">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), absint( $status->waiting_count ) ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), $status->waiting_count ); ?>
 					</td>
 					</tr>
 				</tr>
