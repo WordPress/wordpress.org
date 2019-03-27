@@ -78,13 +78,15 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 		else :
 			$plugin_sections = Template::get_plugin_sections();
 
-			foreach ( array( 'description', 'screenshots', 'installation', 'faq', 'reviews', 'developers', 'changelog' ) as $section_slug ) :
+			foreach ( array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog' ) as $section_slug ) :
 				$section_content = '';
 
 				if ( 'description' === $section_slug && $is_closed ) {
 					// Don't show the description for closed plugins, show a notice instead.
 					$section_content = get_closed_plugin_notice();
 
+				} elseif ( 'blocks' === $section_slug ) {
+					$section_content = get_post_meta( get_the_ID(), 'all_blocks', true );
 				} elseif ( ! in_array( $section_slug, [ 'screenshots', 'installation', 'faq', 'changelog' ], true ) || ! $is_closed ) {
 					if ( isset( $content[ $section_slug ] ) ) {
 						$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
@@ -98,7 +100,11 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 				$section = wp_list_filter( $plugin_sections, array( 'slug' => $section_slug ) );
 				$section = array_pop( $section );
 
-				get_template_part( 'template-parts/section' );
+				if ( 'blocks' === $section_slug ) {
+					get_template_part( 'template-parts/section-blocks' );
+				} else {
+					get_template_part( 'template-parts/section' );
+				}
 			endforeach;
 		endif; // plugin_advanced.
 		?>
