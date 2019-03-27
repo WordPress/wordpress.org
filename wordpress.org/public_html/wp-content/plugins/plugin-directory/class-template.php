@@ -358,6 +358,7 @@ class Template {
 		$default_sections = array(
 			'description',
 			'screenshots',
+			'blocks',
 			'stats',
 			'support',
 			'reviews',
@@ -365,6 +366,9 @@ class Template {
 		);
 		if ( ! get_post_meta( $plugin->ID, 'screenshots', true ) && ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
 			unset( $default_sections[ array_search( 'screenshots', $default_sections ) ] );
+		}
+		if ( ! get_post_meta( $plugin->ID, 'all_blocks' ) ) {
+			unset( $default_sections[ array_search( 'blocks', $default_sections ) ] );
 		}
 
 		$raw_sections = get_post_meta( $plugin->ID, 'sections', true ) ?: array();
@@ -424,6 +428,11 @@ class Template {
 
 				case 'other_notes':
 					$title = _x( 'Other Notes', 'plugin tab title', 'wporg-plugins' );
+					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
+					break;
+
+				case 'blocks':
+					$title = _x( 'Blocks', 'plugin tab title', 'wporg-plugins' );
 					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
 					break;
 
