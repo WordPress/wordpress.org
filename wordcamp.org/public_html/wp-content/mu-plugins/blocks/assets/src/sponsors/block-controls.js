@@ -12,7 +12,7 @@ const { __ } = wp.i18n;
 import { BlockControls, PlaceholderNoContent } from "../shared/block-controls";
 import SponsorBlockContent from './block-content';
 import ItemSelect from '../shared/item-select'
-import { LABEL }                               from './index';
+import { LABEL } from './index';
 
 const { Button, Placeholder } = wp.components;
 
@@ -28,15 +28,6 @@ function SponsorPostOption( sponsor ) {
 	const imageUrl = get( sponsor.featuredImageData, 'sizes.thumbnail.source_url', false );
 	return(
 		<span>
-			{
-				imageUrl &&
-				<img
-					width={24}
-					height={24}
-					src={ imageUrl }
-					alt={ sponsor.label }
-				/>
-			}
 			{ sponsor.label }
 		</span>
 	);
