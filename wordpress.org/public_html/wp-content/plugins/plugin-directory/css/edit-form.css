@@ -369,3 +369,6 @@ a.profile-plugin-open {
 	margin-right: 0.5em;
 }
 
+.plugin-zip-files a {
+	overflow-wrap: break-word;
+}

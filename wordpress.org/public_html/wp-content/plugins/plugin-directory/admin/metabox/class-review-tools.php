@@ -80,8 +80,42 @@ class Review_Tools {
 		'squarespace',
 		'medium.com',
 		'yahoo.com',
-		'mail.com',
+		'@mail.com',
 		'example.org',
+		'wordpress.com',
+	];
+
+	/**
+	 * List of known problematic IPs
+	 *
+	 * @var array
+	 */
+	public static $iffy_ips = [
+		'2.240.',
+		'2.241.',
+		'5.102.170.',
+		'5.102.171.',
+		'38.78.',
+		'47.15.',
+		'49.50.124.',
+		'65.33.104.38',
+		'71.41.77.202',
+		'76.73.108.',
+		'80.131.192.168',
+		'87.188.',
+		'91.228.',
+		'91.238.',
+		'94.103.41.',
+		'109.123.',
+		'110.55.1.251',
+		'110.55.4.248',
+		'116.193.162.',
+		'119.235.251.',
+		'159.253.145.183',
+		'173.171.9.190',
+		'173.234.140.18',
+		'188.116.36.',
+		'217.87.',
 	];
 
 	/**
@@ -187,6 +221,7 @@ class Review_Tools {
 				array_push( self::$flagged['low'], 'account has no URL' );
 			}
 
+			// URLs and domains that are often abused.
 			foreach ( self::$weird_urls as $url ) {
 				if ( false !== stripos( $author->user_url, $url ) ) {
 					array_push( self::$flagged['med'], 'account URL contains ' . $url );
