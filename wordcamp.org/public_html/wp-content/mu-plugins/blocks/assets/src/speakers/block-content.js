@@ -11,6 +11,7 @@ const { Disabled } = wp.components;
 const { Component, Fragment } = wp.element;
 const { decodeEntities } = wp.htmlEntities;
 const { __, _n } = wp.i18n;
+const { escapeAttribute } = wp.escapeHtml;
 
 /**
  * Internal dependencies
@@ -36,7 +37,7 @@ function SpeakerSessions( { speaker, tracks } ) {
 				<ul className="wordcamp-speaker-sessions-list">
 					{ sessions.map( ( session ) =>
 						<li
-							key={ session.slug }
+							key={ escapeAttribute( session.slug ) }
 							className="wordcamp-speaker-session-content"
 						>
 							<Disabled>

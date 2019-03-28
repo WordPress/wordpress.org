@@ -8,6 +8,7 @@ import classnames from 'classnames';
  * WordPress dependencies.
  */
 const { Component } = wp.element;
+const { escapeAttribute } = wp.escapeHtml;
 
 /**
  * Internal dependencies.
@@ -33,7 +34,7 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 	const featuredImageSizes = get( sponsorPost, '_embedded.wp:featuredmedia[0].media_details.sizes', {} );
 
 	return (
-		<div className={ 'wordcamp-sponsor-details wordcamp-sponsor-details-' + sponsorPost.slug }>
+		<div className={ 'wordcamp-sponsor-details wordcamp-sponsor-details-' + escapeAttribute( sponsorPost.slug ) }>
 
 			{ ( show_name || show_name === undefined ) &&
 			<ItemTitle
