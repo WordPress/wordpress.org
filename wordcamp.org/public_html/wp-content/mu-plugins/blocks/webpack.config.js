@@ -5,7 +5,6 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const SOURCE_MAPS = process.env.SOURCE_MAPS ? true : false;
 
-
 const externals = {
 	react       : 'React',
 	'react-dom' : 'ReactDOM',

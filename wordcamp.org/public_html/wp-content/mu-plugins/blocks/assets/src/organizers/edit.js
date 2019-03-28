@@ -117,7 +117,7 @@ const organizerSelect = ( select, props ) => {
 
 	return {
 		blockData,
-		organizerPosts : getEntityRecords( 'postType', 'wcb_organizer', organizersQuery ),
+		organizerPosts: getEntityRecords( 'postType', 'wcb_organizer', organizersQuery ),
 	};
 };
 

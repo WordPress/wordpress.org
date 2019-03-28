@@ -9,9 +9,9 @@ const { __ } = wp.i18n;
 /**
  * Internal dependencies.
  */
-import { BlockControls, PlaceholderNoContent } from "../shared/block-controls";
+import { BlockControls, PlaceholderNoContent } from '../shared/block-controls';
 import SponsorBlockContent from './block-content';
-import ItemSelect from '../shared/item-select'
+import ItemSelect from '../shared/item-select';
 import { LABEL } from './index';
 
 const { Button, Placeholder } = wp.components;
@@ -19,14 +19,13 @@ const { Button, Placeholder } = wp.components;
 function SponsorOption( option ) {
 	if ( 'post' === option.type ) {
 		return SponsorPostOption( option );
-	} else {
-		return SponsorLevelOption( option );
 	}
+	return SponsorLevelOption( option );
 }
 
 function SponsorPostOption( sponsor ) {
 	const imageUrl = get( sponsor.featuredImageData, 'sizes.thumbnail.source_url', false );
-	return(
+	return (
 		<span>
 			{ sponsor.label }
 		</span>
@@ -34,7 +33,7 @@ function SponsorPostOption( sponsor ) {
 }
 
 function SponsorLevelOption( sponsorLevel ) {
-	return(
+	return (
 		<span className="wordcamp-item-select-option-label">
 			{ sponsorLevel.label }
 			<span className="wordcamp-item-select-option-label-term-count">
@@ -48,15 +47,14 @@ function SponsorLevelOption( sponsorLevel ) {
  * Implements sponsor block controls.
  */
 class SponsorBlockControls extends BlockControls {
-
 	constructor( props ) {
-		super(props);
+		super( props );
 		this.state = {
-			posts   : [],
-			terms   : [],
-			loading : true,
-			selectedPosts : [],
-			sponsorTermOrder : []
+			posts            : [],
+			terms            : [],
+			loading          : true,
+			selectedPosts    : [],
+			sponsorTermOrder : [],
 		};
 	}
 
@@ -87,7 +85,7 @@ class SponsorBlockControls extends BlockControls {
 					}
 					break;
 				case 'specific_terms':
-					if ( intersection( term_ids, post.sponsor_level || [] ) .length ) {
+					if ( intersection( term_ids, post.sponsor_level || [] ).length ) {
 						selectedPosts.push( post );
 					}
 					break;
@@ -109,18 +107,16 @@ class SponsorBlockControls extends BlockControls {
 
 		const parsedPosts = sponsorPosts.then(
 			( fetchedPosts ) => {
-
 				const posts = fetchedPosts.map(
 					( post ) => {
-
 						return {
-							label: decodeEntities(post.title.rendered.trim()) ||
-								__('(Untitled)', 'wordcamporg'),
-							value: post.id,
-							type: 'post',
-							featuredImageData: get( post,
-							'_embedded.wp:featuredmedia[0].media_details', '' ),
-						}
+							label: decodeEntities( post.title.rendered.trim() ) ||
+								__( '(Untitled)', 'wordcamporg' ),
+							value             : post.id,
+							type              : 'post',
+							featuredImageData : get( post,
+								'_embedded.wp:featuredmedia[0].media_details', '' ),
+						};
 					}
 				);
 				if ( this.isStillMounted ) {
@@ -128,9 +124,9 @@ class SponsorBlockControls extends BlockControls {
 					this.setState( { posts } );
 				}
 			}
-		).catch( (e) => {
-			console.error("Error fetching data", e );
-		});
+		).catch( ( e ) => {
+			console.error( 'Error fetching data', e );
+		} );
 
 		const parsedTerms = sponsorLevels.then(
 			( fetchedTerms ) => {
@@ -148,9 +144,9 @@ class SponsorBlockControls extends BlockControls {
 					this.setState( { terms } );
 				}
 			}
-		).catch( (e) => {
-			console.error("Error fetching data", e );
-		});
+		).catch( ( e ) => {
+			console.error( 'Error fetching data', e );
+		} );
 
 		const parsedSettings = siteSettings.then(
 			( fetchedSettings ) => {
@@ -182,7 +178,6 @@ class SponsorBlockControls extends BlockControls {
 		const chosen = selectedOptions.mode;
 
 		if ( newValue && chosen ) {
-
 			switch ( chosen ) {
 				case 'post' :
 					setAttributes( {
@@ -242,12 +237,12 @@ class SponsorBlockControls extends BlockControls {
 		if ( mode && ! hasPosts ) {
 			return (
 				<PlaceholderNoContent
-					label = { LABEL }
-					loading = { () => {
+					label={ LABEL }
+					loading={ () => {
 						return ! Array.isArray( sponsorPosts );
 					} }
 				/>
-			)
+			);
 		}
 
 		let selectedOptions = [];
@@ -274,55 +269,55 @@ class SponsorBlockControls extends BlockControls {
 
 				<SponsorBlockContent
 					selectedPosts={ selectedPosts }
-					sponsorTermOrder = { sponsorTermOrder }
-					{...this.props}
+					sponsorTermOrder={ sponsorTermOrder }
+					{ ...this.props }
 				/>
 
-				{'all' !== mode &&
+				{ 'all' !== mode &&
 					<Placeholder
 						icon={ icon }
-						label = { __('Sponsors', 'wordcamporg') }
+						label={ __( 'Sponsors', 'wordcamporg' ) }
 					>
-						<div className='' >
+						<div className="" >
 							<Button
 								isDefault
 								isLarge
-								onClick = {
+								onClick={
 									() => {
 										setAttributes( { mode: 'all' } );
 										setTimeout( () => this.setSelectedPosts() );
 									}
 								}
 							>
-								{ __('List all sponsors', 'wordcamporg') }
+								{ __( 'List all sponsors', 'wordcamporg' ) }
 							</Button>
 						</div>
 						<div className="wordcamp-block-edit-mode-option">
 							<ItemSelect
 								buildSelectOptions={
 									() => {
-										return this.buildSelectOptions()
+										return this.buildSelectOptions();
 									}
 								}
-								isLoading={this.state.loading}
+								isLoading={ this.state.loading }
 								onChange={
-									(selectedOptions) => {
-										return this.onChange(selectedOptions);
+									( selectedOptions ) => {
+										return this.onChange( selectedOptions );
 									}
 								}
 								selectProps={
 									{
-										formatOptionLabel: (optionData) => {
+										formatOptionLabel: ( optionData ) => {
 											return (
-												<SponsorOption {...optionData} />
+												<SponsorOption { ...optionData } />
 											);
-										}
+										},
 									}
 								}
-								label={__('Or, choose specific sponsors or levels',
-									'wordcamporg')}
+								label={ __( 'Or, choose specific sponsors or levels',
+									'wordcamporg' ) }
 								value={ selectedOptions }
-								{...this.props}
+								{ ...this.props }
 							/>
 						</div>
 					</Placeholder>
@@ -330,7 +325,6 @@ class SponsorBlockControls extends BlockControls {
 			</div>
 		);
 	}
-
 }
 
 export default SponsorBlockControls;

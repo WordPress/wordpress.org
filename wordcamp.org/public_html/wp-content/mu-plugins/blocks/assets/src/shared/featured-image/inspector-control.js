@@ -33,16 +33,15 @@ const sizePresets = [
 	{
 		label : __( '(Custom)', 'wordcamporg' ),
 		value : '',
-	}
+	},
 ];
 
 /**
  * Implements inspector control for FeaturedImage component defined in ./index.js. Uses and sets attribute `featured_image_height` and `featured_image_width`.
  */
 class FeaturedImageInspectorControls extends Component {
-
 	componentWillMount() {
-		this.availableSizes = sizePresets.map( (size) => size.value );
+		this.availableSizes = sizePresets.map( ( size ) => size.value );
 	}
 
 	onPresetSizeSelect( size ) {
@@ -54,18 +53,17 @@ class FeaturedImageInspectorControls extends Component {
 	}
 
 	render() {
-
 		const { attributes, setAttributes, title, help, selectLabel, cropLabel } = this.props;
 		const { featured_image_width } = attributes;
 		const selectedValue = this.availableSizes.indexOf( featured_image_width.toString() ) === -1 ? '' : featured_image_width.toString();
 		return (
 			<PanelBody
-				title = { title }
-				initialopen = { false }
+				title={ title }
+				initialopen={ false }
 			>
 				<PanelRow>
 					<BaseControl
-						help = { help }
+						help={ help }
 					>
 						<PanelRow>
 							<SelectControl
@@ -77,10 +75,10 @@ class FeaturedImageInspectorControls extends Component {
 						</PanelRow>
 						<PanelRow>
 							<TextControl
-								label = { __('Width (in px)', 'wordcamporg' ) }
-								type = 'number'
-								value = { featured_image_width }
-								onChange = { ( width ) => setAttributes( { featured_image_width: Number( width ) } ) }
+								label={ __( 'Width (in px)', 'wordcamporg' ) }
+								type="number"
+								value={ featured_image_width }
+								onChange={ ( width ) => setAttributes( { featured_image_width: Number( width ) } ) }
 							/>
 						</PanelRow>
 					</BaseControl>

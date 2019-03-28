@@ -163,10 +163,10 @@ class SessionsBlockContent extends Component {
 
 						{ show_images &&
 							<FeaturedImage
-								className={'wordcamp-session-image-container align-' + decodeEntities( image_align )  }
-								size={featuredImageSize}
-								wpMediaDetails={ get( post, "_embedded.wp:featuredmedia[0].media_details.sizes", {} ) }
-								alt={post.title.rendered}
+								className={ 'wordcamp-session-image-container align-' + decodeEntities( image_align )  }
+								size={ featuredImageSize }
+								wpMediaDetails={ get( post, '_embedded.wp:featuredmedia[0].media_details.sizes', {} ) }
+								alt={ post.title.rendered }
 								{ ...this.props }
 							/>
 						}

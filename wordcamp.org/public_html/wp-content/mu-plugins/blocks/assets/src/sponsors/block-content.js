@@ -22,23 +22,22 @@ import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
  * @param sponsorPost
  * @param attributes
  * @param onFeatureImageChange
- * @returns {*}
+ * @return {*}
  * @constructor
  */
 function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
-
 	const {
-		show_name, show_logo, show_desc
+		show_name, show_logo, show_desc,
 	} = attributes;
 
-	const featuredImageSizes = get( sponsorPost, "_embedded.wp:featuredmedia[0].media_details.sizes", {} );
+	const featuredImageSizes = get( sponsorPost, '_embedded.wp:featuredmedia[0].media_details.sizes', {} );
 
 	return (
-		<div className={ "wordcamp-sponsor-details wordcamp-sponsor-details-" + sponsorPost.slug }>
+		<div className={ 'wordcamp-sponsor-details wordcamp-sponsor-details-' + sponsorPost.slug }>
 
 			{ ( show_name || show_name === undefined ) &&
 			<ItemTitle
-				className='wordcamp-sponsor-title'
+				className="wordcamp-sponsor-title"
 				headingLevel={ 3 }
 				title={ sponsorPost.title.rendered.trim() }
 				link={ sponsorPost.link }
@@ -46,10 +45,10 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 			}
 			{ ( show_logo || show_logo === undefined ) &&
 			<FeaturedImage
-				className={"wordcamp-sponsor-featured-image wordcamp-sponsor-logo"}
-				wpMediaDetails={featuredImageSizes}
-				alt={sponsorPost.title.rendered}
-				attributes={attributes}
+				className={ 'wordcamp-sponsor-featured-image wordcamp-sponsor-logo' }
+				wpMediaDetails={ featuredImageSizes }
+				alt={ sponsorPost.title.rendered }
+				attributes={ attributes }
 			/>
 			}
 			{ ( show_desc || show_desc === undefined ) &&
@@ -66,13 +65,12 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
  * Component for rendering Sponsors post inside editor.
  */
 class SponsorBlockContent extends Component {
-
 	constructor( props ) {
 		super();
 
 		this.state = {
-			selectedPosts: [],
-			sortBy: 'name_asc',
+			selectedPosts : [],
+			sortBy        : 'name_asc',
 		};
 	}
 	/**
@@ -84,7 +82,7 @@ class SponsorBlockContent extends Component {
 	 * @param sponsorId
 	 * @param imageURL
 	 */
-	setFeaturedImageURL( sponsorId, imageURL) {
+	setFeaturedImageURL( sponsorId, imageURL ) {
 		const sponsor_image_urls = this.sponsorImageUrl || {};
 		sponsor_image_urls[ sponsorId ] = imageURL;
 		this.sponsorImageUrl = sponsor_image_urls;
@@ -98,10 +96,10 @@ class SponsorBlockContent extends Component {
 		// Sort the sponsor posts. Since this could potentially be expensive, lets do it in componentWillReceiveProps hook and set state with result if anything is changed.
 		const { selectedPosts: newSelectedPosts, attributes: newAttributes, sponsorTermOrder: newSponsorTermOrder } = nextProps;
 		const { sort_by: newSortBy } = newAttributes;
-		const newSelectedPostIds = newSelectedPosts.map( post => post.id ).sort();
+		const newSelectedPostIds = newSelectedPosts.map( ( post ) => post.id ).sort();
 
 		const { selectedPosts, sortBy } = this.state;
-		const selectedPostsIds = selectedPosts.map( post => post.id ).sort();
+		const selectedPostsIds = selectedPosts.map( ( post ) => post.id ).sort();
 
 		if ( sortBy === newSortBy && newSelectedPosts.length === selectedPosts.length && difference( selectedPostsIds, newSelectedPostIds ).length === 0 ) {
 			// Everything is same. No need to calculate sorting. Lets bail.
@@ -117,7 +115,7 @@ class SponsorBlockContent extends Component {
 					break;
 				}
 				sortedPosts = newSelectedPosts.sort( ( sponsor1, sponsor2 ) => {
-					return newSponsorTermOrder.indexOf( ( sponsor1.sponsor_level || [] )[0] ) - newSponsorTermOrder.indexOf( ( sponsor2.sponsor_level || [] )[0] )
+					return newSponsorTermOrder.indexOf( ( sponsor1.sponsor_level || [] )[ 0 ] ) - newSponsorTermOrder.indexOf( ( sponsor2.sponsor_level || [] )[ 0 ] );
 				} );
 				break;
 
@@ -125,7 +123,7 @@ class SponsorBlockContent extends Component {
 				sortedPosts = newSelectedPosts.sort( ( sponsor1, sponsor2 ) => {
 					const title1 = sponsor1.title.rendered.trim();
 					const title2 = sponsor2.title.rendered.trim();
-					return title1 > title2 ? -1 : 1 ;
+					return title1 > title2 ? -1 : 1;
 				} );
 				break;
 
@@ -134,14 +132,14 @@ class SponsorBlockContent extends Component {
 				sortedPosts = newSelectedPosts.sort( ( sponsor1, sponsor2 ) => {
 					const title1 = sponsor1.title.rendered.trim();
 					const title2 = sponsor2.title.rendered.trim();
-					return title1 < title2 ? -1 : 1 ;
+					return title1 < title2 ? -1 : 1;
 				} );
 				break;
 		}
 		this.setState(
 			{
-				selectedPosts: sortedPosts,
-				sortBy: newSortBy,
+				selectedPosts : sortedPosts,
+				sortBy        : newSortBy,
 			}
 		);
 	}
@@ -149,7 +147,7 @@ class SponsorBlockContent extends Component {
 	/**
 	 * Renders Sponsor Block content inside editor.
 	 *
-	 * @returns {*}
+	 * @return {*}
 	 */
 	render() {
 		const { attributes } = this.props;
@@ -162,17 +160,16 @@ class SponsorBlockContent extends Component {
 				{
 					selectedPosts.map( ( post ) => {
 						return (
-								<SponsorDetail
-									sponsorPost={ post }
-									attributes={ attributes }
-								/>
-						)
+							<SponsorDetail
+								sponsorPost={ post }
+								attributes={ attributes }
+							/>
+						);
 					} )
 				}
 			</GridContentLayout>
-		)
+		);
 	}
-
 }
 
 export default SponsorBlockContent;

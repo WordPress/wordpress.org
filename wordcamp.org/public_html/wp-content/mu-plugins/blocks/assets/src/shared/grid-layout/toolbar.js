@@ -13,44 +13,43 @@ const { Component } = wp.element;
  * Sets attribute `layout` to `grid` / `list`. Also sets `grid_columns` to 2 for `grid`, and 1 for `list`.
  */
 class GridToolbar extends Component {
-
 	render() {
 		const { attributes, setAttributes } = this.props;
 		const { layout } = attributes;
 		const layoutOptions = [
 			{
-				value: 'grid',
-				label: __('Grid', 'wordcamporg'),
-				isActive: layout === 'grid'
+				value    : 'grid',
+				label    : __( 'Grid', 'wordcamporg' ),
+				isActive : layout === 'grid',
 			},
 			{
-				value: 'list',
-				label: __('List', 'wordcamporg'),
-				isActive: layout === 'grid'
+				value    : 'list',
+				label    : __( 'List', 'wordcamporg' ),
+				isActive : layout === 'grid',
 			},
 		];
 
 		return (
 			<BlockControls>
 				<Toolbar
-					controls={layoutOptions.map((option) => {
-						const icon = `${option.value}-view`;
+					controls={ layoutOptions.map( ( option ) => {
+						const icon = `${ option.value }-view`;
 						const isActive = layout === option.value;
 
 						return {
-							icon: icon,
-							title: option.label,
-							isActive: isActive,
-							onClick: () => {
+							icon     : icon,
+							title    : option.label,
+							isActive : isActive,
+							onClick  : () => {
 								setAttributes(
 									{
-										layout: option.value,
-										grid_columns: option.value === 'grid' ? 2 : 1,
+										layout       : option.value,
+										grid_columns : option.value === 'grid' ? 2 : 1,
 									}
 								);
 							},
 						};
-					})}
+					} ) }
 				/>
 			</BlockControls>
 		);

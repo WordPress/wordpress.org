@@ -12,7 +12,6 @@ const { Component } = wp.element;
  * Displays featured image, can be linked with block control for size.
  */
 export default class FeaturedImage extends Component {
-
 	/**
 	 * @param props Props for function.
 	 * @param props.wpMediaDetails Available sizes of images in the format as returned by WP API. This is the `sizes` object inside `media_details` inside `wp:featuredMedia` object.
@@ -30,7 +29,6 @@ export default class FeaturedImage extends Component {
 	 * Get 'full' size image to be displayed in editor. Or get the widest one.
 	 */
 	getFullImage() {
-
 		const availableSizes = this.props.wpMediaDetails;
 
 		const { selectedImage } = this.state;
@@ -39,19 +37,19 @@ export default class FeaturedImage extends Component {
 			return selectedImage;
 		}
 
-		if ( availableSizes.hasOwnProperty( 'full' ) && availableSizes['full'].hasOwnProperty( 'source_url' ) ) {
-			this.setState( { selectedImage: availableSizes['full'] } );
-			return availableSizes[ 'full' ];
+		if ( availableSizes.hasOwnProperty( 'full' ) && availableSizes.full.hasOwnProperty( 'source_url' ) ) {
+			this.setState( { selectedImage: availableSizes.full } );
+			return availableSizes.full;
 		}
 
-		let widestImage = { source_url : '' };
+		let widestImage = { source_url: '' };
 
 		for ( const size in availableSizes ) {
 			if ( ! availableSizes.hasOwnProperty( size ) ) {
 				continue;
 			}
 
-			if ( availableSizes[ size ]['width'] > ( widestImage[ 'width '] || 0 ) && availableSizes[ size ].hasOwnProperty( 'source_url' ) ) {
+			if ( availableSizes[ size ].width > ( widestImage[ 'width' ] || 0 ) && availableSizes[ size ].hasOwnProperty( 'source_url' ) ) {
 				widestImage = availableSizes[ size ];
 			}
 		}
@@ -64,7 +62,7 @@ export default class FeaturedImage extends Component {
 	/**
 	 * Renders FeaturedImage component.
 	 *
-	 * @returns {*}
+	 * @return {*}
 	 */
 	render() {
 		const { className, alt, attributes } = this.props;
@@ -72,15 +70,15 @@ export default class FeaturedImage extends Component {
 		const { featured_image_width } = attributes;
 		const image = this.getFullImage();
 
-		const width = featured_image_width || 150 ;
+		const width = featured_image_width || 150;
 
-		return(
+		return (
 			<img
 				className={ classnames( 'wordcamp-featured-image', className ) }
-				src = { image['source_url'] }
-				alt = { alt }
-				width = { width + 'px' }
+				src={ image.source_url }
+				alt={ alt }
+				width={ width + 'px' }
 			/>
-		)
+		);
 	}
 }

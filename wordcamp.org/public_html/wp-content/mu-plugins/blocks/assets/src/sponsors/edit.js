@@ -17,7 +17,6 @@ const { addQueryArgs } = wp.url;
 const MAX_PAGE = 100;
 
 class SponsorsEdit extends Component {
-
 	/**
 	 * Constructor for SponsorsEdit block.
 	 *
@@ -31,24 +30,24 @@ class SponsorsEdit extends Component {
 
 	componentWillMount() {
 		const sponsorQuery = {
-			orderby : 'title',
-			order   : 'asc',
-			per_page: MAX_PAGE,
-			_embed  : true,
+			orderby  : 'title',
+			order    : 'asc',
+			per_page : MAX_PAGE,
+			_embed   : true,
 		};
 
 		const sponsorLevelQuery = {
-			orderby : 'id',
-			order: 'asc',
-			per_page: MAX_PAGE,
-			_embed: true
+			orderby  : 'id',
+			order    : 'asc',
+			per_page : MAX_PAGE,
+			_embed   : true,
 		};
 
 		this.setState(
 			{
-				sponsorPosts: apiFetch( { path: addQueryArgs( '/wp/v2/sponsors', sponsorQuery ) } ),
-				sponsorLevels: apiFetch( { path: addQueryArgs( '/wp/v2/sponsor_level', sponsorLevelQuery ) } ),
-				siteSettings: apiFetch( { path: addQueryArgs( '/wp/v2/settings', {} ) } ),
+				sponsorPosts  : apiFetch( { path: addQueryArgs( '/wp/v2/sponsors', sponsorQuery ) } ),
+				sponsorLevels : apiFetch( { path: addQueryArgs( '/wp/v2/sponsor_level', sponsorLevelQuery ) } ),
+				siteSettings  : apiFetch( { path: addQueryArgs( '/wp/v2/settings', {} ) } ),
 			}
 		);
 	}
@@ -66,26 +65,26 @@ class SponsorsEdit extends Component {
 				{
 					<SponsorBlockControls
 						icon={ SPONSORS_ICON }
-						sponsorPosts = { sponsorPosts }
-						sponsorLevels = { sponsorLevels }
-						siteSettings = { siteSettings }
+						sponsorPosts={ sponsorPosts }
+						sponsorLevels={ sponsorLevels }
+						siteSettings={ siteSettings }
 						{ ...this.props }
 					/>
 				}
 				<Fragment>
 					<SponsorInspectorControls
-						sponsorPosts = { sponsorPosts }
-						sponsorLevels = { sponsorLevels }
-						{...this.props}
+						sponsorPosts={ sponsorPosts }
+						sponsorLevels={ sponsorLevels }
+						{ ...this.props }
 					/>
-					{mode &&
+					{ mode &&
 					<GridToolbar
-						{...this.props}
+						{ ...this.props }
 					/>
 					}
 				</Fragment>
 			</Fragment>
-		)
+		);
 	}
 }
 

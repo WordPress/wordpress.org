@@ -67,9 +67,9 @@ class SessionsInspectorControls extends Component {
 				</PanelBody>
 
 				<FeaturedImageInspectorControls
-					title = { __( 'Image size', 'wordcamporg' ) }
-					help = { __( 'Specify image height and width, or select a predefined size.', 'wordcamporg' ) }
-					selectLabel = { __( 'Size', 'wordcamporg') }
+					title={ __( 'Image size', 'wordcamporg' ) }
+					help={ __( 'Specify image height and width, or select a predefined size.', 'wordcamporg' ) }
+					selectLabel={ __( 'Size', 'wordcamporg' ) }
 					{ ...this.props }
 				/>
 
