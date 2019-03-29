@@ -207,7 +207,8 @@ class Plugin {
 			"SELECT `locale`, `all` AS `all_count`, `waiting` AS `waiting_count`, `current` AS `current_count`, `fuzzy` AS `fuzzy_count`
 			FROM {$wpdb->project_translation_status}
 			WHERE `project_id` = %d AND `locale_slug` = %s",
-			2, 'default' // 2 = wp/dev
+			2, // 2 = wp/dev
+			'default'
 		), OBJECT_K );
 
 		if ( ! $translation_status ) {
@@ -227,7 +228,7 @@ class Plugin {
 			return;
 		}
 
-		$locales   = GP::$translation_set->existing_locales();
+		$locales   = $this->get_existing_locales();
 		$db_counts = $wpdb->get_results(
 			"SELECT `locale`, COUNT( DISTINCT user_id ) as `count` FROM {$wpdb->user_translations_count} WHERE `accepted` > 0 GROUP BY `locale`",
 			OBJECT_K
@@ -250,11 +251,30 @@ class Plugin {
 	}
 
 	/**
+	 * Retrieves existing locales of the main wp/dev project.
+	 *
+	 * Much faster alternative to `GP::$translation_set->existing_locales();` since it avoids
+	 * the expensive DISTINCT.
+	 *
+	 * @return array List of GlotPress locales.
+	 */
+	private function get_existing_locales() {
+		global $wpdb;
+
+		return $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT locale FROM {$wpdb->gp_translation_sets} WHERE `project_id` = %d and slug = %s",
+				2, // 2 = wp/dev
+				'default'
+			)
+		);
+	}
+
+	/**
 	 * Updates cache for existing locales.
 	 */
 	public function update_existing_locales_cache() {
-		$existing_locales = GP::$translation_set->existing_locales();
-
+		$existing_locales = $this->get_existing_locales();
 		if ( ! $existing_locales ) {
 			return;
 		}
