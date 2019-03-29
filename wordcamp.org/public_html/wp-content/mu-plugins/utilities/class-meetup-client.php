@@ -269,6 +269,10 @@ class Meetup_Client {
 		// First try v3.
 		$links = wp_remote_retrieve_header( $response, 'link' );
 		if ( $links ) {
+			// Meetup.com is now returning combined link headers
+			if ( is_string( $links ) ) {
+				$links = preg_split( '!,\s+!', $links );
+			}
 			foreach ( (array) $links as $link ) {
 				if ( false !== strpos( $link, 'rel="next"' ) && preg_match( '/^<([^>]+)>/', $link, $matches ) ) {
 					$url = $matches[1];
