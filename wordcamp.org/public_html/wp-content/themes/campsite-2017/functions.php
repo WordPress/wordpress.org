@@ -50,6 +50,8 @@ function setup_theme() {
 		'primary'   => esc_html__( 'Primary',   'wordcamporg' ),
 		'secondary' => esc_html__( 'Secondary', 'wordcamporg' ),
 	) );
+
+	add_theme_support( 'align-wide' );
 }
 
 /**
