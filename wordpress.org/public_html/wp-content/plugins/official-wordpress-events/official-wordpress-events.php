@@ -520,28 +520,30 @@ class Official_WordPress_Events {
 			$chunked_db_events[ $event->meetup_url ][] = $event;
 		}
 
+		require_once( __DIR__ . '/class-meetup-client.php' );
+		$meetup_client = new Meetup_Client();
+
+		if ( ! empty( $meetup_client->error->errors ) ) {
+			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $meetup_client->error ), true );
+			return;
+		}
+
 		foreach ( $chunked_db_events as $group_url => $db_events ) {
 			$url_name = trim( wp_parse_url( $group_url, PHP_URL_PATH ), '/' );
 
-			$request_url = sprintf(
-				'%s%s/events?page=500&status=upcoming,cancelled&key=%s',
-				self::MEETUP_API_BASE_URL,
+			$events = $meetup_client->get_group_events(
 				$url_name,
-				MEETUP_API_KEY
+				array(
+					'status' => 'upcoming,cancelled',
+				)
 			);
 
-			$response   = $this->remote_get( $request_url );
-			$body       = json_decode( wp_remote_retrieve_body( $response ) );
-			$api_events = wp_list_pluck( $body, 'id' );
-
 			// Make sure we have a valid API response, to avoid marking events as deleted just because the request failed.
-			if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			if ( is_wp_error( $events ) ) {
 				continue;
 			}
 
-			if ( empty( $body[0]->status ) || empty( $api_events[0] ) ) {
-				continue;
-			}
+			$api_events = wp_list_pluck( $events, 'id' );
 
 			foreach ( $db_events as $db_event ) {
 				// If the event is still appearing in the Meetup.com API results, it hasn't been deleted.
