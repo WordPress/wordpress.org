@@ -275,4 +275,4 @@ get_header( 'wporg' );
 	</main><!-- #main -->
 
 <?php
-get_footer();
+get_footer( 'wporg' );
