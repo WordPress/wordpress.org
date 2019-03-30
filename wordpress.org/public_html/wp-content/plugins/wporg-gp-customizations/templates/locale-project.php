@@ -116,7 +116,7 @@ if ( 'wp-plugins' === $project->path ) {
 		<?php
 	} else {
 		$stable_project_slug = in_array( 'stable', $sub_project_slugs, true ) ? 'stable' : 'dev';
-		$stable_project_name = 'stable' === $stable_project_slug ? 'Stable (latest release) ' : 'Development (trunk) ';
+		$stable_project_name = 'stable' === $stable_project_slug ? 'Stable (latest release)' : 'Development (trunk)';
 		$status              = $sub_project_statuses[ $stable_project_slug ];
 		?>
 		<div class="wporg-notice wporg-notice-info">

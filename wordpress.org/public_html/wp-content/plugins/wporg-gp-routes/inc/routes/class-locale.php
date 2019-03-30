@@ -133,7 +133,7 @@ class Locale extends GP_Route {
 			$contributors_count = array();
 		}
 
-		$variants = $this->get_locale_variants( $locale_slug, $project_ids );
+		$variants = $this->get_locale_variants( $locale_slug );
 		// If there were no results for the current variant in the current project branch, it should still show it.
 		if ( ! in_array( $set_slug, $variants, true ) ) {
 			$variants[] = $set_slug;
@@ -187,26 +187,23 @@ class Locale extends GP_Route {
 			$contributors_count = array();
 		}
 
-		$sub_projects = $this->get_active_sub_projects( $sub_project, true );
-		$sub_project_slugs = array();
+		$sub_project_statuses = array();
+		$sub_projects         = $this->get_active_sub_projects( $sub_project, true );
 		if ( $sub_projects ) {
-			$sub_project_ids      = array();
-			$sub_project_statuses = array();
 			foreach ( $sub_projects as $key => $_sub_project ) {
-				$sub_project_slugs[] = $_sub_project->slug;
-				$status = $this->get_project_status( $_sub_project, $locale_slug, $set_slug, null, false );
-
-				$sub_project_ids[] = $_sub_project->id;
-
-				$sub_project_statuses[ $_sub_project->slug ] = $status;
+				$sub_project_statuses[ $_sub_project->slug ] = $this->get_project_status(
+					$_sub_project,
+					$locale_slug,
+					$set_slug,
+					null,
+					false
+				);
 			}
-
-			$variants = $this->get_locale_variants( $locale_slug, $sub_project_ids );
-
-			unset( $sub_project_ids );
-		} else {
-			$variants = $this->get_locale_variants( $locale_slug, array( $sub_project->id ) );
 		}
+
+		$sub_project_slugs = array_keys( $sub_project_statuses );
+
+		$variants = $this->get_locale_variants( $locale_slug );
 
 		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
 
@@ -220,57 +217,24 @@ class Locale extends GP_Route {
 	/**
 	 * Whether a translation set slug exists for a locale.
 	 *
+	 * For performance reasons, this checks the wp/dev project which is the canonical
+	 * source for all available and active locales.
+	 *
 	 * @param \GP_Locale $locale The locale.
 	 * @param string     $slug   The slug of a translation set.
 	 * @return bool True if slug exists, false if not.
 	 */
 	private function translation_set_slug_exists( $locale, $slug ) {
-		/*$cache_key = "translation_set_slugs:{$locale->slug}";
-		$slugs = wp_cache_get( $cache_key, $this->cache_group );
+		global $wpdb;
 
-		if ( false === $slugs ) {
-			global $wpdb;
-			$slugs = $wpdb->get_col( $wpdb->prepare(
-				"SELECT DISTINCT(slug) FROM {$wpdb->gp_translation_sets} WHERE locale = %s",
-				$locale->slug
-			) );
+		$id = $wpdb->get_var( $wpdb->prepare(
+			"SELECT id FROM {$wpdb->gp_translation_sets} WHERE locale = %s AND slug = %s AND project_id = %d",
+			$locale->slug,
+			$slug,
+			2 // wp/dev
+		) );
 
-			wp_cache_set( $cache_key, $slugs, $this->cache_group, DAY_IN_SECONDS );
-		}*/
-
-		// Hardcoded list because the query above doesn't perform well due to a missing index.
-		$slugs = [
-			'default' => [
-				'default',
-			],
-			'ca' => [
-				'default',
-				'valencia',
-			],
-			'de' => [
-				'default',
-				'formal',
-			],
-			'de-ch' => [
-				'default',
-				'informal',
-			],
-			'nl' => [
-				'default',
-				'formal',
-			],
-			'pt' => [
-				'default',
-				'informal',
-				'ao90',
-			],
-		];
-
-		if ( isset( $slugs[ $locale->slug ] ) ) {
-			return in_array( $slug, $slugs[ $locale->slug ], true );
-		}
-
-		return in_array( $slug, $slugs['default'], true );
+		return null !== $id;
 	}
 
 	/**
@@ -345,26 +309,22 @@ class Locale extends GP_Route {
 	}
 
 	/**
-	 * Retrieves non-default slugs of translation sets for a list of
-	 * project IDs.
+	 * Retrieves all slugs of translation sets for a locale.
 	 *
-	 * @param string $locale     Slug of a GlotPress locale.
-	 * @param array $project_ids List of project IDs.
-	 * @return array List of non-default slugs.
+	 * For performance reasons, this checks the wp/dev project which is the canonical
+	 * source for all available and active locales.
+	 *
+	 * @param string $locale Slug of a GlotPress locale.
+	 * @return array List of translation set slugs.
 	 */
-	private function get_locale_variants( $locale, $project_ids ) {
+	private function get_locale_variants( $locale ) {
 		global $wpdb;
 
-		$project_ids = implode( ',', $project_ids );
-		$slugs = $wpdb->get_col( $wpdb->prepare( "
-			SELECT DISTINCT slug
-			FROM {$wpdb->gp_translation_sets}
-			WHERE
-				project_id IN( $project_ids )
-				AND locale = %s
-		", $locale ) );
-
-		return $slugs;
+		return $wpdb->get_col( $wpdb->prepare(
+			"SELECT slug FROM {$wpdb->gp_translation_sets} WHERE locale = %s AND project_id = %d",
+			$locale,
+			2 // wp/dev
+		) );
 	}
 
 	/**
