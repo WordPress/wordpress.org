@@ -48,7 +48,7 @@ function SpeakerSessions( { speaker, tracks } ) {
 									{ decodeEntities( session.title.rendered.trim() ) || __( '(Untitled)', 'wordcamporg' ) }
 								</a>
 								<span className="wordcamp-speaker-session-info">
-									{ session.session_track.length &&
+									{ session.session_track.length && Array.isArray( tracks ) &&
 										arrayTokenReplace(
 											/* translators: 1: A date; 2: A time; 3: A location; */
 											tokenSplit( __( '%1$s at %2$s in %3$s', 'wordcamporg' ) ),
