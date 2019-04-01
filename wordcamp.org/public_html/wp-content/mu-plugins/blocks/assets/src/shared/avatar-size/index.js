@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import { debounce } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -47,16 +48,16 @@ class AvatarSizeControl extends Component {
 		super();
 
 		this.state = {
-			value : props.value
+			value    : props.value,
+			onChange : debounce( props.onChange, 10 ) // higher values lead to a noticeable degradation in visual feedback.
 		};
-
 
 		this.onChange = this.onChange.bind( this );
 	}
 
 	onChange( value ) {
 		this.setState( { value: value } );
-		this.props.onChange( value );
+		this.state.onChange( value );
 	}
 
 	render() {
