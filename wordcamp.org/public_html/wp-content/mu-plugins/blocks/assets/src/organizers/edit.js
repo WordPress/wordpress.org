@@ -17,8 +17,7 @@ const { addQueryArgs }        = wp.url;
 import OrganizersBlockControls     from './block-controls';
 import OrganizersInspectorControls from './inspector-controls';
 import OrganizersToolbar           from './toolbar';
-
-export const ORGANIZERS_ICON = 'groups';
+import { ORGANIZERS_ICON }         from './index';
 
 const blockData = window.WordCampBlocks.organizers || {};
 const MAX_POSTS = 100;
@@ -27,7 +26,6 @@ const ALL_POSTS_QUERY = {
 	orderby  : 'title',
 	order    : 'asc',
 	per_page : MAX_POSTS,
-	_embed   : true,
 };
 
 const ALL_TERMS_QUERY = {
@@ -38,28 +36,29 @@ const ALL_TERMS_QUERY = {
 
 class OrganizersEdit extends Component {
 	constructor( props ) {
-		super();
+		super( props );
 
 		this.state = {
-			allSpeakerPosts : null,
-			allSpeakerTerms : null,
+			allOrganizerPosts : null,
+			allOrganizerTerms : null,
 		};
 	}
 
 	componentWillMount() {
 		this.isStillMounted = true;
 
-		const allSpeakerPosts = apiFetch( {
-			path: addQueryArgs( `/wp/v2/organizers`, ALL_POSTS_QUERY ),
+		const allOrganizerPosts = apiFetch( {
+			path: addQueryArgs( '/wp/v2/organizers', ALL_POSTS_QUERY ),
 		} );
-		const allSpeakerTerms = apiFetch( {
-			path: addQueryArgs( `/wp/v2/organizer_team`, ALL_TERMS_QUERY ),
+
+		const allOrganizerTerms = apiFetch( {
+			path: addQueryArgs( '/wp/v2/organizer_team', ALL_TERMS_QUERY ),
 		} );
 
 		if ( this.isStillMounted ) {
 			this.setState( {
-				allSpeakerPosts : allSpeakerPosts, // Promise
-				allSpeakerTerms : allSpeakerTerms, // Promise
+				allOrganizerPosts : allOrganizerPosts, // Promise
+				allOrganizerTerms : allOrganizerTerms, // Promise
 			} );
 		}
 	}
@@ -78,7 +77,8 @@ class OrganizersEdit extends Component {
 					{ ...this.props }
 					{ ...this.state }
 				/>
-				{ mode &&
+
+				{ '' !== mode &&
 					<Fragment>
 						<OrganizersInspectorControls { ...this.props } />
 						<OrganizersToolbar { ...this.props } />
@@ -98,7 +98,6 @@ const organizerSelect = ( select, props ) => {
 		orderby  : orderby,
 		order    : order,
 		per_page : MAX_POSTS, // -1 is not allowed for per_page.
-		_embed   : true,
 		context  : 'view',
 	};
 
@@ -113,7 +112,10 @@ const organizerSelect = ( select, props ) => {
 		}
 	}
 
-	const organizersQuery = pickBy( args, ( value ) => ! isUndefined( value ) );
+	const organizersQuery = pickBy(
+		args,
+		( value ) => ! isUndefined( value )
+	);
 
 	return {
 		blockData,

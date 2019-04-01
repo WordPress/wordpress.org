@@ -6,10 +6,11 @@ const { __ } = wp.i18n;
 /**
  * Internal dependencies
  */
-import { edit }            from './edit.js';
-import { ORGANIZERS_ICON } from './edit.js';
+import { edit }            from './edit';
 
 export const name = 'wordcamp/organizers';
+export const LABEL           = __( 'Organizers', 'wordcamporg' );
+export const ORGANIZERS_ICON = 'groups';
 
 export const settings = {
 	title       : __( 'Organizers',                'wordcamporg' ),
