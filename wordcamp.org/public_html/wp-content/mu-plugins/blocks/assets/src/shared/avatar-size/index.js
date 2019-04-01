@@ -6,6 +6,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
+const { Component }                                      = wp.element;
 const { BaseControl, Button, ButtonGroup, RangeControl } = wp.components;
 const { __, _x } = wp.i18n;
 
@@ -41,64 +42,77 @@ const sizePresets = [
 	},
 ];
 
-function AvatarSizeControl( {
-	className,
-	label,
-	help,
-	value,
-	initialPosition,
-	onChange,
-	rangeProps,
-} ) {
-	return (
-		<BaseControl
-			className={ classnames( 'wordcamp-components-avatar-size', className ) }
-			label={ label }
-			help={ help }
-		>
-			<div className="wordcamp-components-avatar-size-buttons">
-				<ButtonGroup aria-label={ label }>
-					{ sizePresets.map( ( preset ) => {
-						const { name, shortName, size, slug } = preset;
-						const isCurrent = value === size;
+class AvatarSizeControl extends Component {
+	constructor( props ) {
+		super();
 
-						return (
-							<Button
-								key={ slug }
-								isLarge
-								isPrimary={ isCurrent }
-								aria-label={ name }
-								aria-pressed={ isCurrent }
-								onClick={ () => onChange( Number( size ) ) }
-							>
-								{ shortName || name }
-							</Button>
-						);
-					} ) }
-				</ButtonGroup>
+		this.state = {
+			value : props.value
+		};
 
-				<Button
-					className="wordcamp-components-avatar-size-button-reset"
-					isLarge
-					isDefault
-					onClick={ () => onChange( Number( initialPosition ) ) }
-				>
-					{ __( 'Reset', 'wordcamporg' ) }
-				</Button>
-			</div>
 
-			<RangeControl
-				className="wordcamp-components-avatar-size-range"
-				value={ value }
-				initialPosition={ initialPosition }
-				onChange={ onChange }
-				beforeIcon="format-image"
-				afterIcon="format-image"
-				aria-label={ label }
-				{ ...rangeProps }
-			/>
-		</BaseControl>
-	);
+		this.onChange = this.onChange.bind( this );
+	}
+
+	onChange( value ) {
+		this.setState( { value: value } );
+		this.props.onChange( value );
+	}
+
+	render() {
+		const { className, label, help, initialPosition, rangeProps } = this.props;
+		const { value }                                               = this.state;
+
+		return (
+			<BaseControl
+				className={ classnames( 'wordcamp-components-avatar-size', className ) }
+				label={ label }
+				help={ help }
+			>
+				<div className="wordcamp-components-avatar-size-buttons">
+					<ButtonGroup aria-label={ label }>
+						{ sizePresets.map( ( preset ) => {
+							const { name, shortName, size, slug } = preset;
+							const isCurrent                       = value === size;
+
+							return (
+								<Button
+									key={ slug }
+									isLarge
+									isPrimary={ isCurrent }
+									aria-label={ name }
+									aria-pressed={ isCurrent }
+									onClick={ () => this.onChange( Number( size ) ) }
+								>
+									{ shortName || name }
+								</Button>
+							);
+						} ) }
+					</ButtonGroup>
+
+					<Button
+						className="wordcamp-components-avatar-size-button-reset"
+						isLarge
+						isDefault
+						onClick={ () => this.onChange( Number( initialPosition ) ) }
+					>
+						{ __( 'Reset', 'wordcamporg' ) }
+					</Button>
+				</div>
+
+				<RangeControl
+					className="wordcamp-components-avatar-size-range"
+					value={ value }
+					initialPosition={ initialPosition }
+					onChange={ this.onChange }
+					beforeIcon="format-image"
+					afterIcon="format-image"
+					aria-label={ label }
+					{ ...rangeProps }
+				/>
+			</BaseControl>
+		);
+	}
 }
 
 export default AvatarSizeControl;
