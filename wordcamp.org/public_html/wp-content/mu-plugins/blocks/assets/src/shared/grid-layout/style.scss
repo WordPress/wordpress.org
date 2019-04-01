@@ -6,8 +6,11 @@
 
 .wordcamp-block-post-list {
 
-	li.wordcamp-grid-layout-item {
+	li {
 		list-style: none;
+	}
+
+	li.wordcamp-grid-layout-item {
 		margin: 0 0 1em 0;
 	}
 
