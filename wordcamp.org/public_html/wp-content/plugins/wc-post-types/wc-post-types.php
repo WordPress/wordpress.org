@@ -2294,7 +2294,7 @@ class WordCamp_Post_Types_Plugin {
 					'slug'       => 'sponsor',
 					'with_front' => false,
 				),
-				'supports'        => array( 'title', 'editor', 'revisions', 'thumbnail', 'custom-fields' ),
+				'supports'        => array( 'title', 'editor', 'excerpt', 'revisions', 'thumbnail', 'custom-fields' ),
 				'menu_position'   => 21,
 				'public'          => true,
 				'show_ui'         => true,

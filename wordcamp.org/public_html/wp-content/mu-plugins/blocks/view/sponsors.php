@@ -31,8 +31,19 @@ setup_postdata( $sponsor );
 		); ?>
 	<?php } ?>
 
-	<?php if ( $attributes['show_desc'] ) { ?>
-		<?php echo wp_kses_post( wpautop( get_all_the_content( $sponsor ) ) ); ?>
+	<?php if ( 'none' !== $attributes['content'] ) { ?>
+		<?php if ( 'full' === $attributes['content'] ) { ?>
+			<?php echo wp_kses_post( wpautop( get_all_the_content( $sponsor ) ) ); ?>
+		<?php } elseif ( 'excerpt' === $attributes['content'] ) { ?>
+			<?php wpautop( the_excerpt() ); ?>
+			<?php if ( true === $attributes['excerpt_more'] ) { ?>
+				<p class="wordcamp-item-permalink">
+					<a href="<?php echo esc_url( get_permalink( $sponsor ) ); ?>" class="wordcamp-sponsor-permalink">
+						<?php esc_html_e( 'Read more', 'wordcamporg' ); ?>
+					</a>
+				</p>
+			<?php } ?>
+		<?php } ?>
 	<?php } ?>
 
 </div>

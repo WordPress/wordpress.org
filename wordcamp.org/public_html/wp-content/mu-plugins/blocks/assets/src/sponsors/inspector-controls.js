@@ -26,9 +26,15 @@ class SponsorInspectorControls extends Component {
 			{ label: __( 'Sponsor Level', 'wordcamporg' ), value: 'sponsor_level' },
 		];
 
+		const contentOptions = [
+			{ label: __( 'Full', 'wordcamporg' ), value: 'full' },
+			{ label: __( 'Excerpt', 'wordcamporg' ), value: 'excerpt' },
+			{ label: __( 'None', 'wordcamporg'), value: 'none' },
+		];
+
 		const { attributes, setAttributes } = this.props;
 		const {
-			show_name, show_logo, show_desc, sort_by,
+			show_name, show_logo, sort_by, excerpt_more, content
 		} = attributes;
 
 		return (
@@ -57,13 +63,24 @@ class SponsorInspectorControls extends Component {
 						/>
 					</PanelRow>
 					<PanelRow>
-						<ToggleControl
+						<SelectControl
 							label={ __( 'Description', 'wordcamporg' ) }
-							help={ __( 'Show or hide sponsor description', 'wordcamporg' ) }
-							checked={ show_desc === undefined ? true : show_desc }
-							onChange={ ( value ) => setAttributes( { show_desc: value } ) }
+							value={ content }
+							options={ contentOptions }
+							help={ __( 'Length of sponsor description', 'wordcamporg' ) }
+							onChange={ ( value ) => setAttributes( { content: value } ) }
 						/>
 					</PanelRow>
+					{ 'excerpt' === content &&
+					<PanelRow>
+						<ToggleControl
+							label={ __( 'Read More Link', 'wordcamporg' ) }
+							help={ __( 'Show a link at the end of the excerpt (some themes already include this)', 'wordcamporg' ) }
+							checked={ excerpt_more }
+							onChange={ ( value ) => setAttributes( { excerpt_more: value } ) }
+						/>
+					</PanelRow>
+					}
 					<PanelRow>
 						<SelectControl
 							label={ __( 'Sort by', 'wordcamporg' ) }

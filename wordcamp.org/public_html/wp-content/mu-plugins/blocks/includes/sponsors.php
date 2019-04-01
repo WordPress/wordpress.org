@@ -182,7 +182,11 @@ function get_attributes_schema() {
 			'type'    => 'bool',
 			'default' => true,
 		),
-		'show_desc'             => array(
+		'content'               => array(
+			'type'    => 'string',
+			'default' => 'full',
+		),
+		'excerpt_more'          => array(
 			'type'    => 'bool',
 			'default' => true,
 		),

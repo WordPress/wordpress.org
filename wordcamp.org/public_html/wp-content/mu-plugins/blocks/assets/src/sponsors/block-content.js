@@ -9,6 +9,7 @@ import classnames from 'classnames';
  */
 const { Component } = wp.element;
 const { escapeAttribute } = wp.escapeHtml;
+const { __ } = wp.i18n;
 
 /**
  * Internal dependencies.
@@ -28,10 +29,13 @@ import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
  */
 function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 	const {
-		show_name, show_logo, show_desc,
+		show_name, show_logo, show_desc, content, excerpt_more,
 	} = attributes;
 
 	const featuredImageSizes = get( sponsorPost, '_embedded.wp:featuredmedia[0].media_details.sizes', {} );
+	const displayContent = 'full' === content ? sponsorPost.content.rendered.trim() : sponsorPost.excerpt.rendered.trim();
+
+	console.log("content is: ", content, displayContent);
 
 	return (
 		<div className={ 'wordcamp-sponsor-details wordcamp-sponsor-details-' + escapeAttribute( sponsorPost.slug ) }>
@@ -52,10 +56,12 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 				attributes={ attributes }
 			/>
 			}
-			{ ( show_desc || show_desc === undefined ) &&
+			{ ( 'none' !== content ) &&
 			<ItemHTMLContent
 				className={ classnames( 'wordcamp-sponsor-content' ) }
-				content={ sponsorPost.content.rendered.trim() }
+				content={ displayContent }
+				link={ ( 'full' === content || excerpt_more ) ? sponsorPost.link : null }
+				linkText={ 'full' === content ? __( 'Visit sponsor page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
 			/>
 			}
 		</div>
