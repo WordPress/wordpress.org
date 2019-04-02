@@ -255,6 +255,11 @@ function hreflang_link_attributes() {
 				continue;
 			}
 
+			// Skip non-existing subdomains, e.g. 'de_CH_informal'.
+			if ( false !== strpos( $site->subdomain, '_' ) ) {
+				continue;
+			}
+
 			if ( isset( $gp_locale->slug ) && ! in_array( $gp_locale->slug, $unsupported_languages ) ) {
 				$sites[ $site->locale ]->hreflang = $gp_locale->slug;
 			} else {
