@@ -49,11 +49,15 @@
 							<ul>
 								<li><?php
 									/* translators: %s: Handbook URL for forum welcome */
-									printf( __( '<strong>Read the <a href="%s">Forum Welcome</a></strong> to find out how to maximize your odds of getting help!', 'wporg-forums' ), esc_url( __( 'https://wordpress.org/support/welcome/', 'wporg-forums' ) ) );
+									printf( __( '<strong>Read the <a href="%s">Forum Welcome</a></strong> to find out how to maximize your odds of getting help!', 'wporg-forums' ),
+										esc_url( __( 'https://wordpress.org/support/welcome/', 'wporg-forums' ) )
+									);
 								?></li>
 								<li><?php
 									/* translators: %s: URL to search */
-									printf( __( '<strong><a href="%s">Search</a> the forums</strong> to see if your topic has been resolved already.', 'wporg-forums' ), esc_url( bbp_get_search_url() ) );
+									printf( __( '<strong><a href="%s">Search</a> the forums</strong> to see if your topic has been resolved already.', 'wporg-forums' ),
+										esc_url( bbp_get_search_url() )
+									);
 								?></li>
 								<li><?php _e( '<strong>Update to the latest versions</strong> of your plugins, themes, and WordPress.', 'wporg-forums' ); ?></li>
 								<li><?php _e( '<strong>Note the exact steps</strong> needed to reproduce your issue.', 'wporg-forums' ); ?></li>
@@ -69,6 +73,12 @@
 									);
 								?></li>
 								<?php endif; ?>
+								<li><?php
+									/* translators: %s: Handbook URL for reporting security issues */
+									printf( __( '<strong>Reporting a security issue?</strong> Please read <a href="%s">Reporting Security Vulnerabilities</a> to do that safely.', 'wporg-forums' ),
+										esc_url( __( 'https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/' ) )
+									);
+								?></li>
 							</ul>
 
 						<?php endif; ?>
