@@ -76,7 +76,7 @@
 								<li><?php
 									/* translators: %s: Handbook URL for reporting security issues */
 									printf( __( '<strong>Reporting a security issue?</strong> Please read <a href="%s">Reporting Security Vulnerabilities</a> to do that safely.', 'wporg-forums' ),
-										esc_url( __( 'https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/' ) )
+										esc_url( __( 'https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/', 'wporg-forums' ) )
 									);
 								?></li>
 							</ul>
