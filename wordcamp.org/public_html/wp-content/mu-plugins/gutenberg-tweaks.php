@@ -28,6 +28,9 @@ function classic_editor_default_settings( $defaults ) {
  * @return bool
  */
 function disable_block_editor_for_wordcamp( $use_block_editor, $post_type ) {
+	if ( ! defined( 'WCPT_POST_TYPE_ID' ) ) {
+		return $use_block_editor;
+	}
 	return $use_block_editor && WCPT_POST_TYPE_ID !== $post_type;
 }
 
