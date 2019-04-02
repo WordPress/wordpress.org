@@ -257,6 +257,7 @@ function hreflang_link_attributes() {
 
 			// Skip non-existing subdomains, e.g. 'de_CH_informal'.
 			if ( false !== strpos( $site->subdomain, '_' ) ) {
+				unset( $sites[ $site->locale ] );
 				continue;
 			}
 
