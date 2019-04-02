@@ -22,7 +22,7 @@
 							printf( __( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), bbp_get_topic_title() );
 						} else {
 							if ( bbp_is_single_forum() ) {
-								printf( __( 'Create a new topic in &ldquo;%s Forum&rdquo;', 'wporg-forums' ), bbp_get_forum_title() );
+								printf( __( 'Create a new topic in &ldquo;%s&rdquo; Forum', 'wporg-forums' ), bbp_get_forum_title() );
 							} elseif ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
 								_e( 'Create a new review', 'wporg-forums' );
 							} else {
