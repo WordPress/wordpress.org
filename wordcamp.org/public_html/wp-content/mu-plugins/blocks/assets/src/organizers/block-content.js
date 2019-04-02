@@ -42,18 +42,13 @@ class OrganizersBlockContent extends Component {
 						/>
 
 						{ show_avatars &&
-							<div className={ classnames( 'wordcamp-organizer-avatar-container', 'align-' + decodeEntities( avatar_align ) ) }>
-								<Disabled>
-									<a href={ post.link } className="wordcamp-organizer-avatar-link">
-										<AvatarImage
-											className="wordcamp-organizer-avatar"
-											name={ decodeEntities( post.title.rendered.trim() ) || '' }
-											size={ avatar_size }
-											url={ post.avatar_urls[ '24' ] }
-										/>
-									</a>
-								</Disabled>
-							</div>
+							<AvatarImage
+								className={ classnames( 'wordcamp-organizer-avatar-container', 'align-' + decodeEntities( avatar_align ) ) }
+								name={ decodeEntities( post.title.rendered.trim() ) || '' }
+								size={ avatar_size }
+								url={ post.avatar_urls[ '24' ] }
+								imageLink={ post.link }
+							/>
 						}
 
 						{ ( 'none' !== content ) &&
