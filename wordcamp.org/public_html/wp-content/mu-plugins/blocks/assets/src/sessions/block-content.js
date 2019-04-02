@@ -135,8 +135,7 @@ class SessionsBlockContent extends Component {
 
 	render() {
 		const { attributes, sessionPosts } = this.props;
-		const { show_speaker, show_images, image_align, featured_image_height, featured_image_width, content, excerpt_more, show_meta, show_category } = attributes;
-		const featuredImageSize = { height: featured_image_height, width: featured_image_width };
+		const { show_speaker, show_images, image_align, featured_image_width, content, excerpt_more, show_meta, show_category } = attributes;
 
 		return (
 			<GridContentLayout { ...this.props } >
@@ -163,11 +162,11 @@ class SessionsBlockContent extends Component {
 
 						{ show_images &&
 							<FeaturedImage
-								className={ 'wordcamp-session-image-container align-' + decodeEntities( image_align )  }
-								size={ featuredImageSize }
+								className={ classnames( 'wordcamp-session-image-container', 'align-' + decodeEntities( image_align ) ) }
 								wpMediaDetails={ get( post, '_embedded.wp:featuredmedia[0].media_details.sizes', {} ) }
-								alt={ post.title.rendered }
-								{ ...this.props }
+								alt={ decodeEntities( post.title.rendered ) }
+								width={ Number( featured_image_width ) }
+								imageLink={ post.link }
 							/>
 						}
 

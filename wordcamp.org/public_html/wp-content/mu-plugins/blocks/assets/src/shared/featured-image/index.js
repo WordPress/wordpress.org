@@ -6,7 +6,9 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies.
  */
+const { Disabled } = wp.components;
 const { Component } = wp.element;
+const { isURL } = wp.url;
 
 /**
  * Displays featured image, can be linked with block control for size.
@@ -65,20 +67,34 @@ export default class FeaturedImage extends Component {
 	 * @return {*}
 	 */
 	render() {
-		const { className, alt, attributes } = this.props;
+		const { className, alt, width = 150, imageLink } = this.props;
+		const fullImage = this.getFullImage();
 
-		const { featured_image_width } = attributes;
-		const image = this.getFullImage();
-
-		const width = featured_image_width || 150;
-
-		return (
+		let image = (
 			<img
 				className={ classnames( 'wordcamp-featured-image', className ) }
-				src={ image.source_url }
+				src={ fullImage.source_url }
 				alt={ alt }
 				width={ width + 'px' }
 			/>
 		);
+
+		if ( isURL( imageLink ) ) {
+			image = (
+				<Disabled>
+					<a href={ imageLink } className={ classnames( 'wordcamp-image-link', 'wordcamp-featured-image-link' ) }>
+						{ image }
+					</a>
+				</Disabled>
+			);
+		}
+
+		image = (
+			<div className={ classnames( 'wordcamp-image-container', 'wordcamp-featured-image-container', className ) }>
+				{ image }
+			</div>
+		);
+
+		return image;
 	}
 }

@@ -29,7 +29,7 @@ import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
  */
 function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 	const {
-		show_name, show_logo, show_desc, content, excerpt_more,
+		show_name, show_logo, show_desc, content, excerpt_more, featured_image_width
 	} = attributes;
 
 	const featuredImageSizes = get( sponsorPost, '_embedded.wp:featuredmedia[0].media_details.sizes', {} );
@@ -41,28 +41,29 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 		<div className={ 'wordcamp-sponsor-details wordcamp-sponsor-details-' + escapeAttribute( sponsorPost.slug ) }>
 
 			{ ( show_name || show_name === undefined ) &&
-			<ItemTitle
-				className="wordcamp-sponsor-title"
-				headingLevel={ 3 }
-				title={ sponsorPost.title.rendered.trim() }
-				link={ sponsorPost.link }
-			/>
+				<ItemTitle
+					className="wordcamp-sponsor-title"
+					headingLevel={ 3 }
+					title={ sponsorPost.title.rendered.trim() }
+					link={ sponsorPost.link }
+				/>
 			}
 			{ ( show_logo || show_logo === undefined ) &&
-			<FeaturedImage
-				className={ 'wordcamp-sponsor-featured-image wordcamp-sponsor-logo' }
-				wpMediaDetails={ featuredImageSizes }
-				alt={ sponsorPost.title.rendered }
-				attributes={ attributes }
-			/>
+				<FeaturedImage
+					className={ 'wordcamp-sponsor-featured-image wordcamp-sponsor-logo' }
+					wpMediaDetails={ featuredImageSizes }
+					alt={ sponsorPost.title.rendered }
+					width={ featured_image_width }
+					imageLink={ sponsorPost.link }
+				/>
 			}
 			{ ( 'none' !== content ) &&
-			<ItemHTMLContent
-				className={ classnames( 'wordcamp-sponsor-content' ) }
-				content={ displayContent }
-				link={ ( 'full' === content || excerpt_more ) ? sponsorPost.link : null }
-				linkText={ 'full' === content ? __( 'Visit sponsor page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
-			/>
+				<ItemHTMLContent
+					className={ classnames( 'wordcamp-sponsor-content' ) }
+					content={ displayContent }
+					link={ ( 'full' === content || excerpt_more ) ? sponsorPost.link : null }
+					linkText={ 'full' === content ? __( 'Visit sponsor page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
+				/>
 			}
 		</div>
 	);
