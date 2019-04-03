@@ -247,6 +247,9 @@ function document_title( $title ) {
 		if ( is_singular( 'plugin' ) ) {
 			$title['title'] .= ' - ' . __( 'WordPress plugin', 'wporg-plugins' );
 		}
+		elseif ( is_tax() ) {
+			$title['title'] = sprintf( _( 'Plugins categorized as %s', 'wporg-plugins' ), strtolower( $title['title'] ) );
+		}
 
 		// If results are paged and the max number of pages is known.
 		if ( is_paged() && $wp_query->max_num_pages ) {
