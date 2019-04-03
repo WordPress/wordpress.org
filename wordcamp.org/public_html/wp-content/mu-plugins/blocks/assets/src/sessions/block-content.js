@@ -54,48 +54,51 @@ function SessionSpeakers( { session } ) {
 	);
 }
 
-function SessionDetails( { session, show_meta, show_category } ) {
-	let meta, metaContent, category;
+function SessionMeta( { session } ) {
+	let metaContent;
 	const terms = get( session, '_embedded[\'wp:term\']', [] ).flat();
 
-	if ( show_meta ) {
-		if ( session.session_track.length ) {
-			const [ firstTrack ] = terms.filter( ( term ) => {
-				return 'wcb_track' === term.taxonomy;
-			} );
+	if ( session.session_track.length ) {
+		const [ firstTrack ] = terms.filter( ( term ) => {
+			return 'wcb_track' === term.taxonomy;
+		} );
 
-			metaContent = arrayTokenReplace(
-				/* translators: 1: A date; 2: A time; 3: A location; */
-				tokenSplit( __( '%1$s at %2$s in %3$s', 'wordcamporg' ) ),
-				[
-					decodeEntities( session.session_date_time.date ),
-					decodeEntities( session.session_date_time.time ),
-					(
-						<span className={ classnames( 'wordcamp-session-track', 'wordcamp-session-track-' + decodeEntities( firstTrack.slug.trim() ) ) }>
-							{ decodeEntities( firstTrack.name.trim() ) }
-						</span>
-					),
-				]
-			);
-		} else {
-			metaContent = arrayTokenReplace(
-				/* translators: 1: A date; 2: A time; */
-				tokenSplit( __( '%1$s at %2$s', 'wordcamporg' ) ),
-				[
-					decodeEntities( session.session_date_time.date ),
-					decodeEntities( session.session_date_time.time ),
-				]
-			);
-		}
-
-		meta = (
-			<div className="wordcamp-session-time-location">
-				{ metaContent }
-			</div>
+		metaContent = arrayTokenReplace(
+			/* translators: 1: A date; 2: A time; 3: A location; */
+			tokenSplit( __( '%1$s at %2$s in %3$s', 'wordcamporg' ) ),
+			[
+				decodeEntities( session.session_date_time.date ),
+				decodeEntities( session.session_date_time.time ),
+				(
+					<span className={ classnames( 'wordcamp-session-track', 'wordcamp-session-track-' + decodeEntities( firstTrack.slug.trim() ) ) }>
+						{ decodeEntities( firstTrack.name.trim() ) }
+					</span>
+				),
+			]
+		);
+	} else {
+		metaContent = arrayTokenReplace(
+			/* translators: 1: A date; 2: A time; */
+			tokenSplit( __( '%1$s at %2$s', 'wordcamporg' ) ),
+			[
+				decodeEntities( session.session_date_time.date ),
+				decodeEntities( session.session_date_time.time ),
+			]
 		);
 	}
 
-	if ( show_category && session.session_category.length ) {
+	return (
+		<div className="wordcamp-session-time-location">
+			{ metaContent }
+		</div>
+	);
+}
+
+function SessionCategory( { session } ) {
+	let categoryContent;
+	const terms = get( session, '_embedded[\'wp:term\']', [] ).flat();
+
+	if ( session.session_category.length ) {
 		/* translators: used between list items, there is a space after the comma */
 		const separator = __( ', ', 'wordcamporg' );
 		const categories = terms
@@ -113,17 +116,12 @@ function SessionDetails( { session, show_meta, show_category } ) {
 				);
 			} );
 
-		category = (
-			<div className="wordcamp-session-categories">
-				{ intersperse( categories, separator ) }
-			</div>
-		);
+		categoryContent = intersperse( categories, separator );
 	}
 
 	return (
-		<div className="wordcamp-item-meta wordcamp-session-details">
-			{ meta }
-			{ category }
+		<div className="wordcamp-session-categories">
+			{ categoryContent }
 		</div>
 	);
 }
@@ -180,11 +178,14 @@ class SessionsBlockContent extends Component {
 						}
 
 						{ ( show_meta || show_category ) &&
-							<SessionDetails
-								session={ post }
-								show_meta={ show_meta }
-								show_category={ show_category }
-							/>
+							<div className="wordcamp-item-meta wordcamp-session-details">
+								{ show_meta &&
+									<SessionMeta session={ post } />
+								}
+								{ show_category &&
+									<SessionCategory session={ post } />
+								}
+							</div>
 						}
 					</div>
 				) }
