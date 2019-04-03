@@ -17,7 +17,7 @@ setup_postdata( $session );
 <div class="wordcamp-block-post-list-item wordcamp-session wordcamp-session-<?php echo sanitize_html_class( $session->post_name ); ?> wordcamp-clearfix">
 	<h3 class="wordcamp-item-title wordcamp-session-title">
 		<a href="<?php echo esc_url( get_permalink( $session ) ); ?>">
-			<?php echo get_the_title( $session ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<?php echo wp_kses_post( get_the_title( $session ) ); ?>
 		</a>
 	</h3>
 
@@ -45,25 +45,27 @@ setup_postdata( $session );
 	<?php endif; ?>
 
 	<?php if ( true === $attributes['show_images'] ) : ?>
-		<?php echo render_featured_image(
+		<?php
+			echo wp_kses_post( render_featured_image(
 				array( 'wordcamp-session-image-container', 'align-' . esc_attr( $attributes['image_align'] ) ),
 				$session,
 				$attributes['featured_image_height'],
 				$attributes['featured_image_width']
-		); ?>
+			) );
+		?>
 	<?php endif; ?>
 
 	<?php if ( 'none' !== $attributes['content'] ) : ?>
 		<div class="wordcamp-item-content wordcamp-session-content-<?php echo esc_attr( $attributes['content'] ); ?>">
 			<?php if ( 'full' === $attributes['content'] ) : ?>
-				<?php echo wpautop( get_all_the_content( $session ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+				<?php echo wp_kses_post( wpautop( get_all_the_content( $session ) ) ); ?>
 				<p class="wordcamp-item-permalink">
 					<a href="<?php echo esc_url( get_permalink( $session ) ); ?>">
 						<?php esc_html_e( 'Visit session page', 'wordcamporg' ); ?>
 					</a>
 				</p>
 			<?php elseif ( 'excerpt' === $attributes['content'] ) : ?>
-				<?php wpautop( the_excerpt() ); ?>
+				<?php wp_kses_post( wpautop( the_excerpt() ) ); ?>
 				<?php if ( true === $attributes['excerpt_more'] ) : ?>
 					<p class="wordcamp-item-permalink">
 						<a href="<?php echo esc_url( get_permalink( $session ) ); ?>" class="wordcamp-session-permalink">
