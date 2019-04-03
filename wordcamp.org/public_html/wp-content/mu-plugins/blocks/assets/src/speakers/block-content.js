@@ -52,20 +52,24 @@ function SpeakerSessions( { speaker, tracks } ) {
 										arrayTokenReplace(
 											/* translators: 1: A date; 2: A time; 3: A location; */
 											tokenSplit( __( '%1$s at %2$s in %3$s', 'wordcamporg' ) ),
-											decodeEntities( session.session_date_time.date ),
-											decodeEntities( session.session_date_time.time ),
-											get( tracks.find( ( value ) => {
-												const [ firstTrackId ] = session.session_track;
-												return parseInt( value.id ) === firstTrackId;
-											} ), 'name' )
+											[
+												decodeEntities( session.session_date_time.date ),
+												decodeEntities( session.session_date_time.time ),
+												get( tracks.find( ( value ) => {
+													const [ firstTrackId ] = session.session_track;
+													return parseInt( value.id ) === firstTrackId;
+												} ), 'name' ),
+											]
 										)
 									}
-									{ ! session.session_track.length &&
+									{ ( ! session.session_track.length || ! Array.isArray( tracks ) ) &&
 										arrayTokenReplace(
 											/* translators: 1: A date; 2: A time; */
 											tokenSplit( __( '%1$s at %2$s', 'wordcamporg' ), ),
-											decodeEntities( session.session_date_time.date ),
-											decodeEntities( session.session_date_time.time )
+											[
+												decodeEntities( session.session_date_time.date ),
+												decodeEntities( session.session_date_time.time ),
+											]
 										)
 									}
 								</span>
