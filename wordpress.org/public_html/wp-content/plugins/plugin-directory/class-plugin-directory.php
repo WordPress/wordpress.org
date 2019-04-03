@@ -1225,6 +1225,13 @@ class Plugin_Directory {
 			die();
 		}
 
+		// Paginated front page.
+		if ( is_front_page() && is_paged() ) {
+			$GLOBALS['wp_query']->set_404();
+			status_header( 404 );
+			return;
+		}
+
 		// disable feeds
 		if ( is_feed() ) {
 			if( isset( $_GET['feed'] ) ) {
