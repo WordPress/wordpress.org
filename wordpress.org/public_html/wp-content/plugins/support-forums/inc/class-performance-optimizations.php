@@ -36,6 +36,9 @@ class Performance_Optimizations {
 		// Redirect (.+)/page/[01]/ and (.+)?paged=[01] to $1
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_page_zero_one' ) );
 
+		// Redirect Attachments to their file
+		add_action( 'bbp_template_redirect', array( $this, 'redirect_attachments' ) );
+
 		// REST API.
 		add_filter( 'rest_endpoints', array( $this, 'disable_rest_api_users_endpoint' ) );
 
@@ -155,6 +158,27 @@ class Performance_Optimizations {
 				wp_safe_redirect( $pageless_url, 301 );
 				exit;
 			}
+		}
+	}
+
+	public function redirect_attachments() {
+		if ( is_attachment() ) {
+			$url = wp_get_attachment_url( get_queried_object_id() );
+			if ( ! $url ) {
+				return;
+			}
+
+			if (
+				function_exists( 'jetpack_photon_url' ) &&
+				class_exists( '\Jetpack' ) &&
+				method_exists( '\Jetpack', 'get_active_modules' ) &&
+				in_array( 'photon', \Jetpack::get_active_modules() )
+			) {
+				$url = jetpack_photon_url( $url );
+			}
+
+			wp_redirect( $url, 301 );
+			exit;
 		}
 	}
 
