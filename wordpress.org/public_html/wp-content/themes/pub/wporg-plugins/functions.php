@@ -238,6 +238,8 @@ add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
  * @return array Filtered title parts.
  */
 function document_title( $title ) {
+	global $wp_query;
+
 	if ( is_front_page() ) {
 		$title['title']   = __( 'WordPress Plugins', 'wporg-plugins' );
 		$title['tagline'] = __( 'WordPress.org', 'wporg-plugins' );
@@ -245,6 +247,17 @@ function document_title( $title ) {
 		if ( is_singular( 'plugin' ) ) {
 			$title['title'] .= ' - ' . __( 'WordPress plugin', 'wporg-plugins' );
 		}
+
+		// If results are paged and the max number of pages is known.
+		if ( is_paged() && $wp_query->max_num_pages ) {
+			// translators: 1: current page number, 2: total number of pages
+			$title['page'] = sprintf(
+				__( 'Page %1$s of %2$s', 'wporg-plugins' ),
+				get_query_var( 'paged' ),
+				$wp_query->max_num_pages
+			);
+		}
+
 		$title['site'] = __( 'WordPress.org', 'wporg-plugins' );
 	}
 
