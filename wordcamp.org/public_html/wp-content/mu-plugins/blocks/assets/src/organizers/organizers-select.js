@@ -16,6 +16,7 @@ const { __ }             = wp.i18n;
  */
 import AvatarImage from '../shared/avatar';
 import ItemSelect  from '../shared/item-select';
+import { ICON }    from './index';
 
 class OrganizersSelect extends Component {
 	constructor( props ) {
@@ -172,7 +173,7 @@ function OrganizersOption( { type, label = '', avatar = '', count = 0 } ) {
 				<div className="wordcamp-item-select-option-icon-container">
 					<Dashicon
 						className="wordcamp-item-select-option-icon"
-						icon={ 'megaphone' }
+						icon={ ICON }
 						size={ 16 }
 					/>
 				</div>
