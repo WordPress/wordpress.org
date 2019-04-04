@@ -1,12 +1,3 @@
-.wordcamp-organizer-session-list {
-	/* See note in ../speakers/block-content.scss about the double-ampersand. */
-	ul#{&},
-	.block-editor ul#{&} {
-		list-style: none;
-		margin: 0
-	}
-}
-
 .wordcamp-organizer-avatar-container {
 	&.align-left {
 		float: left;
