@@ -17,7 +17,7 @@ const { addQueryArgs }        = wp.url;
 import OrganizersBlockControls     from './block-controls';
 import OrganizersInspectorControls from './inspector-controls';
 import OrganizersToolbar           from './toolbar';
-import { ORGANIZERS_ICON }         from './index';
+import { ICON }                    from './index';
 
 const blockData = window.WordCampBlocks.organizers || {};
 const MAX_POSTS = 100;
@@ -73,7 +73,7 @@ class OrganizersEdit extends Component {
 		return (
 			<Fragment>
 				<OrganizersBlockControls
-					icon={ ORGANIZERS_ICON }
+					icon={ ICON }
 					{ ...this.props }
 					{ ...this.state }
 				/>

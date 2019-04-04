@@ -17,7 +17,7 @@ const { addQueryArgs } = wp.url;
 import SpeakersBlockControls from './block-controls';
 import SpeakersInspectorControls from './inspector-controls';
 import SpeakersToolbar from './toolbar';
-import { SPEAKERS_ICON }         from './index';
+import { ICON }        from './index';
 
 const blockData = window.WordCampBlocks.speakers || {};
 
@@ -74,7 +74,7 @@ class SpeakersEdit extends Component {
 		return (
 			<Fragment>
 				<SpeakersBlockControls
-					icon={ SPEAKERS_ICON }
+					icon={ ICON }
 					{ ...this.props }
 					{ ...this.state }
 				/>

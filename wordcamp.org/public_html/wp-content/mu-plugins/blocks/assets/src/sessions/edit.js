@@ -17,7 +17,7 @@ const { addQueryArgs } = wp.url;
 import SessionsBlockControls from './block-controls';
 import SessionsInspectorControls from './inspector-controls';
 import GridToolbar from '../shared/grid-layout/toolbar';
-import { SESSIONS_ICON }         from './index';
+import { ICON }                  from './index';
 
 const blockData = window.WordCampBlocks.sessions || {};
 const MAX_POSTS = 100;
@@ -78,7 +78,7 @@ class SessionsEdit extends Component {
 		return (
 			<Fragment>
 				<SessionsBlockControls
-					icon={ SESSIONS_ICON }
+					icon={ ICON }
 					{ ...this.props }
 					{ ...this.state }
 				/>
