@@ -56,7 +56,7 @@ class OrganizersBlockContent extends Component {
 								className={ classnames( 'wordcamp-organizer-content-' + decodeEntities( content ) ) }
 								content={  'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
 								link={ (   'full' === content || excerpt_more ) ? post.link : null }
-								linkText={ 'full' === content ? __( 'Visit session page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
+								linkText={ 'full' === content ? __( 'Visit organizer page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
 							/>
 						}
 					</div>,
