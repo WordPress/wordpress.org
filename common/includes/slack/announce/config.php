@@ -342,7 +342,7 @@ function get_pingable_wordcamp_deputies() {
 		'00Sleepy', '_DorsVenabili', 'adityakane', 'andreamiddleton', 'bph', 'brandondove', 'camikaos',
 		'chanthaboune', 'courtneypk', 'drebbits', 'francina', 'gounder', 'heysherie', 'hlashbrooke',
 		'karenalma', 'kcristiano', 'kdrewien', 'Kenshino', 'mayukojpn', 'mikelking', 'miss_jwo',
-		'remediosgraphic', 'Savione', 'vc27', 'yaycheryl',
+		'nukaga', 'remediosgraphic', 'Savione', 'vc27', 'yaycheryl',
 
 		'coreymckrill', 'iandunn', // todo remove after testing
 	);
