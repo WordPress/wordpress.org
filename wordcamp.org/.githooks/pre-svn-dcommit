@@ -31,7 +31,7 @@ function main {
 
 # Get the files that have changes between the local and remote HEADs.
 function get_changed_files {
-	changed_files=$( /usr/bin/git diff git-svn HEAD --name-only )
+	changed_files=$( /usr/bin/git diff git-svn HEAD --name-only --relative )
 }
 
 # Lint PHP files for syntax errors.
