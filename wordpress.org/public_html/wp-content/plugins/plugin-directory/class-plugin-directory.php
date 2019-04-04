@@ -1186,6 +1186,7 @@ class Plugin_Directory {
 
 			// The readme.txt page.
 			if ( 'readme.txt' === $path[2] ) {
+				status_header( 200 );
 				header( 'Content-type: text/plain' );
 				echo file_get_contents( __DIR__ . '/readme/readme.txt' );
 				die();
