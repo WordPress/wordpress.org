@@ -19,7 +19,7 @@ import './style.scss';
 
 class ItemSelect extends Component {
 	constructor( props ) {
-		super();
+		super( props );
 
 		this.state = {
 			selectedOptions: null,

@@ -19,7 +19,7 @@ import ItemSelect from '../shared/item-select';
 
 class SpeakersSelect extends Component {
 	constructor( props ) {
-		super();
+		super( props );
 
 		this.state = {
 			wcb_speaker       : [],

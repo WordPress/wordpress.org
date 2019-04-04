@@ -74,7 +74,7 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
  */
 class SponsorBlockContent extends Component {
 	constructor( props ) {
-		super();
+		super( props );
 
 		this.state = {
 			selectedPosts : [],

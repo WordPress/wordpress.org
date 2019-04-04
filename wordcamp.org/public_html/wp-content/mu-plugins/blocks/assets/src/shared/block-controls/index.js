@@ -17,7 +17,7 @@ import './style.scss';
 
 export class BlockControls extends Component {
 	constructor( props ) {
-		super();
+		super( props );
 
 		this.getModeLabel = this.getModeLabel.bind( this );
 	}

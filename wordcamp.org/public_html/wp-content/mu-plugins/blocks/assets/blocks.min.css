@@ -43,13 +43,6 @@
   .wordcamp-block-post-list.layout-grid.grid-columns-4 {
     grid-template-columns: repeat(4, 1fr); } }
 
-.wordcamp-organizer-session-list {
-  /* See note in ../speakers/block-content.scss about the double-ampersand. */ }
-  .wordcamp-organizer-session-list ul.wordcamp-organizer-session-list,
-  .wordcamp-organizer-session-list .block-editor ul.wordcamp-organizer-session-list {
-    list-style: none;
-    margin: 0; }
-
 .wordcamp-organizer-avatar-container.align-left {
   float: left;
   margin-right: 1em; }

@@ -45,7 +45,7 @@ const sizePresets = [
 
 class AvatarSizeControl extends Component {
 	constructor( props ) {
-		super();
+		super( props );
 
 		this.state = {
 			value    : props.value,

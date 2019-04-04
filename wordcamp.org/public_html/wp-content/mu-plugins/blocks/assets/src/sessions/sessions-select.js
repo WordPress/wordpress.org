@@ -18,7 +18,7 @@ import ItemSelect from '../shared/item-select';
 
 class SessionsSelect extends Component {
 	constructor( props ) {
-		super();
+		super( props );
 
 		this.state = {
 			wcb_session          : [],

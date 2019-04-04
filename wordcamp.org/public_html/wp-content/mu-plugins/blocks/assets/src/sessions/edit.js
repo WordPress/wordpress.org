@@ -37,7 +37,7 @@ const ALL_TERMS_QUERY = {
 
 class SessionsEdit extends Component {
 	constructor( props ) {
-		super();
+		super( props );
 
 		this.state = {
 			allSessionPosts      : null,
