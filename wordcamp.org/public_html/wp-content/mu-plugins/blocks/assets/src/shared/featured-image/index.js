@@ -31,6 +31,7 @@ export default class FeaturedImage extends Component {
 	 * Get 'full' size image to be displayed in editor. Or get the widest one.
 	 */
 	getFullImage() {
+		const { getOwnPropertyDescriptors } = Object;
 		const availableSizes = this.props.wpMediaDetails;
 
 		const { selectedImage } = this.state;
@@ -46,11 +47,7 @@ export default class FeaturedImage extends Component {
 
 		let widestImage = { source_url: '' };
 
-		for ( const size in availableSizes ) {
-			if ( ! availableSizes.hasOwnProperty( size ) ) {
-				continue;
-			}
-
+		for ( const size in getOwnPropertyDescriptors( availableSizes ) ) {
 			if ( availableSizes[ size ].width > ( widestImage[ 'width' ] || 0 ) && availableSizes[ size ].hasOwnProperty( 'source_url' ) ) {
 				widestImage = availableSizes[ size ];
 			}

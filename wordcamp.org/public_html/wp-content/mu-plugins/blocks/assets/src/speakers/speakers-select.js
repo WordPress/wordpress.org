@@ -79,6 +79,7 @@ class SpeakersSelect extends Component {
 	}
 
 	buildSelectOptions( mode ) {
+		const { getOwnPropertyDescriptors } = Object;
 		const options = [];
 
 		const labels = {
@@ -86,8 +87,8 @@ class SpeakersSelect extends Component {
 			wcb_speaker_group : __( 'Groups', 'wordcamporg' ),
 		};
 
-		for ( const type in this.state ) {
-			if ( this.state.hasOwnProperty( type ) && ( ! mode || type === mode ) && this.state[ type ].length ) {
+		for ( const type in getOwnPropertyDescriptors( this.state ) ) {
+			if ( ( ! mode || type === mode ) && this.state[ type ].length ) {
 				options.push( {
 					label   : labels[ type ],
 					options : this.state[ type ],

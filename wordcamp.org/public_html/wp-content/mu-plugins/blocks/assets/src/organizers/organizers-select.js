@@ -80,6 +80,7 @@ class OrganizersSelect extends Component {
 	}
 
 	buildSelectOptions( mode ) {
+		const { getOwnPropertyDescriptors } = Object;
 		const options = [];
 
 		const labels = {
@@ -87,7 +88,7 @@ class OrganizersSelect extends Component {
 			wcb_organizer_team : __( 'Teams',      'wordcamporg' ),
 		};
 
-		for ( const type in this.state ) {
+		for ( const type in getOwnPropertyDescriptors( this.state ) ) {
 			if ( ! this.state[ type ].length ) {
 				continue;
 			}
