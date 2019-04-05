@@ -49,8 +49,8 @@ setup_postdata( $session );
 			echo wp_kses_post( render_featured_image(
 				array( 'wordcamp-session-image-container', 'align-' . esc_attr( $attributes['image_align'] ) ),
 				$session,
-				$attributes['featured_image_height'],
-				$attributes['featured_image_width']
+				$attributes['featured_image_width'],
+				get_permalink( $session )
 			) );
 		?>
 	<?php endif; ?>

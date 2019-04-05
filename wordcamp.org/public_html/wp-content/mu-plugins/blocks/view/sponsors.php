@@ -23,10 +23,10 @@ setup_postdata( $sponsor );
 	<?php if ( $attributes['show_logo'] ) { ?>
 		<?php echo wp_kses_post(
 			render_featured_image(
-				array( 'wordcamp-sponsor-featured-image' ),
+				array( 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo' ),
 				$sponsor,
-				$attributes['featured_image_height'],
-				$attributes['featured_image_width']
+				$attributes['featured_image_width'],
+				get_permalink( $sponsor )
 			)
 		); ?>
 	<?php } ?>

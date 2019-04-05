@@ -17,7 +17,6 @@ export default class FeaturedImage extends Component {
 	/**
 	 * @param props Props for function.
 	 * @param props.wpMediaDetails Available sizes of images in the format as returned by WP API. This is the `sizes` object inside `media_details` inside `wp:featuredMedia` object.
-	 * @param props.height Height in pixels for image.
 	 * @param props.width Width in pixels for image.
 	 * @param props.className Classname for image element
 	 * @param props.alt Alt text for image
