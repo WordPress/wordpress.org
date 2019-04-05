@@ -14,7 +14,7 @@ const { __ }             = wp.i18n;
 /**
  * Internal dependencies
  */
-import AvatarImage from '../shared/avatar';
+import { AvatarImage } from '../shared/avatar';
 import ItemSelect  from '../shared/item-select';
 import { ICON }    from './index';
 

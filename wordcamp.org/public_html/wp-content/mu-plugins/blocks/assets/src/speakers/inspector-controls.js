@@ -9,9 +9,9 @@ const { __ } = wp.i18n;
 /**
  * Internal dependencies
  */
-import AvatarSizeControl from '../shared/avatar-size';
+import { AvatarSizeControl } from '../shared/avatar';
 import ImageAlignmentControl from '../shared/image-alignment';
-import GridInspectorControl from '../shared/grid-layout/inspector-control';
+import GridInspectorControl  from '../shared/grid-layout/inspector-control';
 
 const DEFAULT_SCHEMA = {
 	grid_columns: {

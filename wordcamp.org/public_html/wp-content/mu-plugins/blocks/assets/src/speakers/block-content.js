@@ -16,7 +16,7 @@ const { escapeAttribute } = wp.escapeHtml;
 /**
  * Internal dependencies
  */
-import AvatarImage from '../shared/avatar';
+import { AvatarImage } from '../shared/avatar';
 import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
 import { tokenSplit, arrayTokenReplace } from '../shared/i18n';
 import GridContentLayout from '../shared/grid-layout/block-content';

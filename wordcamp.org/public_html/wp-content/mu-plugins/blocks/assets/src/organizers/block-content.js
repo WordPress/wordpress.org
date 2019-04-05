@@ -14,10 +14,9 @@ const { __ }             = wp.i18n;
 /**
  * Internal dependencies
  */
-import AvatarImage                       from '../shared/avatar';
-import { ItemTitle, ItemHTMLContent }    from '../shared/block-content';
-import GridContentLayout                 from '../shared/grid-layout/block-content';
-import './block-content.scss';
+import { AvatarImage }                from '../shared/avatar';
+import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
+import GridContentLayout              from '../shared/grid-layout/block-content';
 
 class OrganizersBlockContent extends Component {
 	render() {

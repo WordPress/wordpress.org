@@ -10,7 +10,12 @@ const { Disabled } = wp.components;
 const { __, sprintf } = wp.i18n;
 const { addQueryArgs, isURL } = wp.url;
 
-function AvatarImage( {
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
+export function AvatarImage( {
 	className,
 	name,
 	size,
@@ -51,4 +56,4 @@ function AvatarImage( {
 	return image;
 }
 
-export default AvatarImage;
+export * from './inspector-controls';

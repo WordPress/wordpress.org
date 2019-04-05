@@ -6,21 +6,3 @@
 		margin: 0
 	}
 }
-
-.wordcamp-speaker-avatar-container {
-	&.align-left {
-		float: left;
-		margin-right: 1em;
-	}
-
-	&.align-center {
-		margin-left: auto;
-		margin-right: auto;
-		text-align: center;
-	}
-
-	&.align-right {
-		float: right;
-		margin-left: 1em;
-	}
-}

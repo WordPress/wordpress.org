@@ -14,7 +14,7 @@ const { __, _x } = wp.i18n;
 /**
  * Internal dependencies
  */
-import './style.scss';
+import './inspector-controls.scss';
 
 const sizePresets = [
 	{
@@ -43,7 +43,7 @@ const sizePresets = [
 	},
 ];
 
-class AvatarSizeControl extends Component {
+export class AvatarSizeControl extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -115,5 +115,3 @@ class AvatarSizeControl extends Component {
 		);
 	}
 }
-
-export default AvatarSizeControl;

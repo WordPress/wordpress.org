@@ -2,6 +2,26 @@
   flex-basis: 100%;
   padding: 0.5em; }
 
+.wordcamp-avatar-container.align-left {
+  float: left;
+  margin-right: 1em; }
+
+.wordcamp-avatar-container.align-center {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center; }
+
+.wordcamp-avatar-container.align-right {
+  float: right;
+  margin-left: 1em; }
+
+.wordcamp-components-avatar-size-buttons {
+  display: flex;
+  justify-content: space-between; }
+
+.edit-post-settings-sidebar__panel-block .components-panel__body .wordcamp-components-avatar-size-range {
+  margin-top: 1em; }
+
 .wordcamp-item-meta {
   margin: 0 0 1.5em; }
 
@@ -42,19 +62,6 @@
 @media (min-width: 800px) {
   .wordcamp-block-post-list.layout-grid.grid-columns-4 {
     grid-template-columns: repeat(4, 1fr); } }
-
-.wordcamp-organizer-avatar-container.align-left {
-  float: left;
-  margin-right: 1em; }
-
-.wordcamp-organizer-avatar-container.align-center {
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center; }
-
-.wordcamp-organizer-avatar-container.align-right {
-  float: right;
-  margin-left: 1em; }
 
 .wordcamp-block-edit-placeholder .components-placeholder__fieldset {
   /*
@@ -110,13 +117,6 @@
 .wordcamp-item-select {
   width: 100%; }
 
-.wordcamp-components-avatar-size-buttons {
-  display: flex;
-  justify-content: space-between; }
-
-.edit-post-settings-sidebar__panel-block .components-panel__body .wordcamp-components-avatar-size-range {
-  margin-top: 1em; }
-
 img.wordcamp-featured-image {
   height: auto;
   max-width: 100%;
@@ -128,17 +128,4 @@ img.wordcamp-featured-image {
   .wordcamp-speaker-session-list .block-editor ul.wordcamp-speaker-session-list {
     list-style: none;
     margin: 0; }
-
-.wordcamp-speaker-avatar-container.align-left {
-  float: left;
-  margin-right: 1em; }
-
-.wordcamp-speaker-avatar-container.align-center {
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center; }
-
-.wordcamp-speaker-avatar-container.align-right {
-  float: right;
-  margin-left: 1em; }
 
