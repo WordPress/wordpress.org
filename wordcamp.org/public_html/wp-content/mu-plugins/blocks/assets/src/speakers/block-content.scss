@@ -1,5 +1,6 @@
 .wordcamp-speaker-session-list {
-	/* See note above about the double-ampersand. */
+	// The double-ampersand defeats an overzealous ul rule in Core's editor-blocks.css.
+	// https://css-tricks.com/the-sass-ampersand/#article-header-id-11
 	ul#{&},
 	.block-editor ul#{&} {
 		list-style: none;
