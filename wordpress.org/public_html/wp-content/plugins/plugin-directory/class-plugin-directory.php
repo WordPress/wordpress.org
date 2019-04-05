@@ -1220,6 +1220,15 @@ class Plugin_Directory {
 			die();
 		}
 
+		// Existing tag with no plugins.
+		if ( is_tax() && ! $GLOBALS['wp_query']->have_posts() ) {
+			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
+			$path = explode( '/', $_SERVER['REQUEST_URI'] );
+
+			wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ), 301 );
+			die();
+		}
+
 		// Empty search query.
 		if ( 'search' === get_query_var( 'name' ) || isset( $_GET['s'] ) && ! get_query_var( 's' ) ) {
 			wp_safe_redirect( site_url( '/' ), 301 );
