@@ -47,7 +47,6 @@ class OrganizersEdit extends Component {
 	}
 
 	fetchOrganizerDetails() {
-		this.isStillMounted = true;
 
 		const allOrganizerPosts = apiFetch( {
 			path: addQueryArgs( '/wp/v2/organizers', ALL_POSTS_QUERY ),

@@ -44,8 +44,6 @@ class SpeakersEdit extends Component {
 	}
 
 	fetchSpeakers() {
-		this.isStillMounted = true;
-
 		const allSpeakerPosts = apiFetch( {
 			path: addQueryArgs( `/wp/v2/speakers`, ALL_POSTS_QUERY ),
 		} );

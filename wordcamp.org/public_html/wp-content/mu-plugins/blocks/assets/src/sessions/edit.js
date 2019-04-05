@@ -43,8 +43,6 @@ class SessionsEdit extends Component {
 	}
 
 	fetchSessionDetails() {
-		this.isStillMounted = true;
-
 		const allSessionPosts = apiFetch( {
 			path: addQueryArgs( `/wp/v2/sessions`, ALL_POSTS_QUERY ),
 		} );

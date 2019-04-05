@@ -71,10 +71,6 @@ class OrganizersSelect extends Component {
 		} );
 	}
 
-	componentWillUnmount() {
-		this.isStillMounted = false;
-	}
-
 	buildSelectOptions( mode ) {
 		const { getOwnPropertyDescriptors } = Object;
 		const options = [];
