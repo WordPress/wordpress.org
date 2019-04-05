@@ -35,8 +35,6 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 	const featuredImageSizes = get( sponsorPost, '_embedded.wp:featuredmedia[0].media_details.sizes', {} );
 	const displayContent = 'full' === content ? sponsorPost.content.rendered.trim() : sponsorPost.excerpt.rendered.trim();
 
-	console.log("content is: ", content, displayContent);
-
 	return (
 		<div className={ 'wordcamp-sponsor-details wordcamp-sponsor-details-' + escapeAttribute( sponsorPost.slug ) }>
 

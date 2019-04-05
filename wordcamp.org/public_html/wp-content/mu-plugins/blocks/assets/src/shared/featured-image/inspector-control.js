@@ -40,7 +40,9 @@ const sizePresets = [
  * Implements inspector control for FeaturedImage component defined in ./index.js. Uses and sets attribute `featured_image_height` and `featured_image_width`.
  */
 class FeaturedImageInspectorControls extends Component {
-	componentWillMount() {
+
+	constructor( props ) {
+		super( props );
 		this.availableSizes = sizePresets.map( ( size ) => size.value );
 	}
 

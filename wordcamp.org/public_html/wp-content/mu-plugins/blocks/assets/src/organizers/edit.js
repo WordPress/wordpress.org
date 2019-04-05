@@ -42,9 +42,11 @@ class OrganizersEdit extends Component {
 			allOrganizerPosts : null,
 			allOrganizerTerms : null,
 		};
+
+		this.fetchOrganizerDetails();
 	}
 
-	componentWillMount() {
+	fetchOrganizerDetails() {
 		this.isStillMounted = true;
 
 		const allOrganizerPosts = apiFetch( {
@@ -55,16 +57,10 @@ class OrganizersEdit extends Component {
 			path: addQueryArgs( '/wp/v2/organizer_team', ALL_TERMS_QUERY ),
 		} );
 
-		if ( this.isStillMounted ) {
-			this.setState( {
-				allOrganizerPosts : allOrganizerPosts, // Promise
-				allOrganizerTerms : allOrganizerTerms, // Promise
-			} );
+		this.state = {
+			allOrganizerPosts : allOrganizerPosts, // Promise
+			allOrganizerTerms : allOrganizerTerms, // Promise
 		}
-	}
-
-	componentWillUnmount() {
-		this.isStillMounted = false;
 	}
 
 	render() {

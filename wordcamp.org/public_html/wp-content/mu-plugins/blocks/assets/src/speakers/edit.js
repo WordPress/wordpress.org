@@ -40,13 +40,10 @@ class SpeakersEdit extends Component {
 	constructor( props ) {
 		super( props );
 
-		this.state = {
-			allSpeakerPosts : null,
-			allSpeakerTerms : null,
-		};
+		this.fetchSpeakers();
 	}
 
-	componentWillMount() {
+	fetchSpeakers() {
 		this.isStillMounted = true;
 
 		const allSpeakerPosts = apiFetch( {
@@ -56,16 +53,10 @@ class SpeakersEdit extends Component {
 			path: addQueryArgs( `/wp/v2/speaker_group`, ALL_TERMS_QUERY ),
 		} );
 
-		if ( this.isStillMounted ) {
-			this.setState( {
-				allSpeakerPosts : allSpeakerPosts, // Promise
-				allSpeakerTerms : allSpeakerTerms, // Promise
-			} );
+		this.state = {
+			allSpeakerPosts : allSpeakerPosts, // Promise
+			allSpeakerTerms : allSpeakerTerms, // Promise
 		}
-	}
-
-	componentWillUnmount() {
-		this.isStillMounted = false;
 	}
 
 	render() {

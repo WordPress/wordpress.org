@@ -29,12 +29,12 @@ class OrganizersSelect extends Component {
 		};
 
 		this.buildSelectOptions = this.buildSelectOptions.bind( this );
+		this.fetchSelectOptions( props );
 	}
 
-	componentWillMount() {
-		this.isStillMounted = true;
+	fetchSelectOptions( props ) {
 
-		const { allOrganizerPosts, allOrganizerTerms } = this.props;
+		const { allOrganizerPosts, allOrganizerTerms } = props;
 
 		const parsedPosts = allOrganizerPosts.then(
 			( fetchedPosts ) => {
@@ -47,9 +47,7 @@ class OrganizersSelect extends Component {
 					};
 				} );
 
-				if ( this.isStillMounted ) {
-					this.setState( { wcb_organizer: posts } );
-				}
+				this.setState( { wcb_organizer: posts } );
 			}
 		);
 
@@ -64,9 +62,7 @@ class OrganizersSelect extends Component {
 					};
 				} );
 
-				if ( this.isStillMounted ) {
-					this.setState( { wcb_organizer_team: terms } );
-				}
+				this.setState( { wcb_organizer_team: terms } );
 			}
 		);
 

@@ -47,6 +47,7 @@ function SponsorLevelOption( sponsorLevel ) {
  * Implements sponsor block controls.
  */
 class SponsorBlockControls extends BlockControls {
+
 	constructor( props ) {
 		super( props );
 		this.state = {
@@ -56,6 +57,8 @@ class SponsorBlockControls extends BlockControls {
 			selectedPosts    : [],
 			sponsorTermOrder : [],
 		};
+
+		this.fetchSelectOptions( props );
 	}
 
 	/**
@@ -100,10 +103,8 @@ class SponsorBlockControls extends BlockControls {
 	 * Initialize posts and terms arrays and sets loading state till promises
 	 * are not resolved. We will also set posts and terms in array that we want to display.
 	 */
-	componentWillMount() {
-		this.isStillMounted = true;
-
-		const { sponsorPosts, sponsorLevels, siteSettings } = this.props;
+	fetchSelectOptions( props ) {
+		const { sponsorPosts, sponsorLevels, siteSettings } = props;
 
 		const parsedPosts = sponsorPosts.then(
 			( fetchedPosts ) => {
@@ -119,10 +120,8 @@ class SponsorBlockControls extends BlockControls {
 						};
 					}
 				);
-				if ( this.isStillMounted ) {
-					this.setState( { fetchedPosts } );
-					this.setState( { posts } );
-				}
+				this.setState( { fetchedPosts } );
+				this.setState( { posts } );
 			}
 		).catch( ( e ) => {
 			console.error( 'Error fetching data', e );
@@ -139,10 +138,8 @@ class SponsorBlockControls extends BlockControls {
 					};
 				} );
 
-				if ( this.isStillMounted ) {
-					this.setState( { fetchedTerms } );
-					this.setState( { terms } );
-				}
+				this.setState( { fetchedTerms } );
+				this.setState( { terms } );
 			}
 		).catch( ( e ) => {
 			console.error( 'Error fetching data', e );
@@ -160,10 +157,6 @@ class SponsorBlockControls extends BlockControls {
 			// Enqueue set selected posts in next event loop, so that state is up to date when `setSelectedPosts` method actually runs.
 			setTimeout( () => this.setSelectedPosts() );
 		} );
-	}
-
-	componentWillUnmount() {
-		this.isStillMounted = false;
 	}
 
 	/**

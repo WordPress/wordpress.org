@@ -28,12 +28,12 @@ class SessionsSelect extends Component {
 		};
 
 		this.buildSelectOptions = this.buildSelectOptions.bind( this );
+		this.fetchSelectOptions( props );
 	}
 
-	componentWillMount() {
-		this.isStillMounted = true;
+	fetchSelectOptions( props ) {
 
-		const { allSessionPosts, allSessionTracks, allSessionCategories } = this.props;
+		const { allSessionPosts, allSessionTracks, allSessionCategories } = props;
 		const promises = [];
 
 		promises.push( allSessionPosts.then(
@@ -49,9 +49,7 @@ class SessionsSelect extends Component {
 					};
 				} );
 
-				if ( this.isStillMounted ) {
-					this.setState( { wcb_session: posts } );
-				}
+				this.setState( { wcb_session: posts } );
 			}
 		).catch() );
 
@@ -67,10 +65,8 @@ class SessionsSelect extends Component {
 						};
 					} );
 
-					if ( this.isStillMounted ) {
-						const [ firstTerm ] = terms;
-						this.setState( { [ firstTerm.type ]: terms } );
-					}
+					const [ firstTerm ] = terms;
+					this.setState( { [ firstTerm.type ]: terms } );
 				}
 			).catch() );
 		} );
@@ -78,10 +74,6 @@ class SessionsSelect extends Component {
 		Promise.all( promises ).then( () => {
 			this.setState( { loading: false } );
 		} );
-	}
-
-	componentWillUnmount() {
-		this.isStillMounted = false;
 	}
 
 	buildSelectOptions( mode ) {

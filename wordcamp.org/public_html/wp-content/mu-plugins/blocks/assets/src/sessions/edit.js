@@ -39,14 +39,10 @@ class SessionsEdit extends Component {
 	constructor( props ) {
 		super( props );
 
-		this.state = {
-			allSessionPosts      : null,
-			allSessionTracks     : null,
-			allSessionCategories : null,
-		};
+		this.fetchSessionDetails();
 	}
 
-	componentWillMount() {
+	fetchSessionDetails() {
 		this.isStillMounted = true;
 
 		const allSessionPosts = apiFetch( {
@@ -59,17 +55,11 @@ class SessionsEdit extends Component {
 			path: addQueryArgs( `/wp/v2/session_category`, ALL_TERMS_QUERY ),
 		} );
 
-		if ( this.isStillMounted ) {
-			this.setState( {
-				allSessionPosts      : allSessionPosts, // Promise
-				allSessionTracks     : allSessionTracks, // Promise
-				allSessionCategories : allSessionCategories, // Promise
-			} );
+		this.state = {
+			allSessionPosts: allSessionPosts, // Promise
+			allSessionTracks: allSessionTracks, // Promise
+			allSessionCategories: allSessionCategories, // Promise
 		}
-	}
-
-	componentWillUnmount() {
-		this.isStillMounted = false;
 	}
 
 	render() {

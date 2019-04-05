@@ -28,12 +28,11 @@ class SpeakersSelect extends Component {
 		};
 
 		this.buildSelectOptions = this.buildSelectOptions.bind( this );
+		this.fetchSelectOptions( props );
 	}
 
-	componentWillMount() {
-		this.isStillMounted = true;
-
-		const { allSpeakerPosts, allSpeakerTerms } = this.props;
+	fetchSelectOptions( props ) {
+		const { allSpeakerPosts, allSpeakerTerms } = props;
 
 		const parsedPosts = allSpeakerPosts.then(
 			( fetchedPosts ) => {
@@ -46,9 +45,7 @@ class SpeakersSelect extends Component {
 					};
 				} );
 
-				if ( this.isStillMounted ) {
-					this.setState( { wcb_speaker: posts } );
-				}
+				this.setState( { wcb_speaker: posts } );
 			}
 		);
 
@@ -63,19 +60,13 @@ class SpeakersSelect extends Component {
 					};
 				} );
 
-				if ( this.isStillMounted ) {
-					this.setState( { wcb_speaker_group: terms } );
-				}
+				this.setState( { wcb_speaker_group: terms } );
 			}
 		);
 
 		Promise.all( [ parsedPosts, parsedTerms ] ).then( () => {
 			this.setState( { loading: false } );
 		} );
-	}
-
-	componentWillUnmount() {
-		this.isStillMounted = false;
 	}
 
 	buildSelectOptions( mode ) {

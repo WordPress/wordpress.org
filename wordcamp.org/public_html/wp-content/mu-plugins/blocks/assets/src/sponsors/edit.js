@@ -25,10 +25,10 @@ class SponsorsEdit extends Component {
 	constructor( props ) {
 		super( props );
 
-		this.state = {};
+		this.fetchSponsors();
 	}
 
-	componentWillMount() {
+	fetchSponsors() {
 		const sponsorQuery = {
 			orderby  : 'title',
 			order    : 'asc',
@@ -43,13 +43,11 @@ class SponsorsEdit extends Component {
 			_embed   : true,
 		};
 
-		this.setState(
-			{
-				sponsorPosts  : apiFetch( { path: addQueryArgs( '/wp/v2/sponsors', sponsorQuery ) } ),
-				sponsorLevels : apiFetch( { path: addQueryArgs( '/wp/v2/sponsor_level', sponsorLevelQuery ) } ),
-				siteSettings  : apiFetch( { path: addQueryArgs( '/wp/v2/settings', {} ) } ),
-			}
-		);
+		this.state = {
+			sponsorPosts  : apiFetch( { path: addQueryArgs( '/wp/v2/sponsors', sponsorQuery ) } ),
+			sponsorLevels : apiFetch( { path: addQueryArgs( '/wp/v2/sponsor_level', sponsorLevelQuery ) } ),
+			siteSettings  : apiFetch( { path: addQueryArgs( '/wp/v2/settings', {} ) } ),
+		}
 	}
 
 	/**
