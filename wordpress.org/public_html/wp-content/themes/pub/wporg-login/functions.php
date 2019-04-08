@@ -104,11 +104,14 @@ add_action( 'login_head', 'wporg_login_gtm' );
  * wp_die() handler for login.wordpress.org, adds GTM to error pages.
  */
 function wporg_login_die_handler( $message, $title = '', $args = array() ) {
-	ob_start();
-	wporg_login_gtm();
-	$gtm = ob_get_clean();
+	if ( is_string( $message ) ) {
+		ob_start();
+		wporg_login_gtm();
+		$gtm = ob_get_clean();
 
-	$message = $gtm . $message;
+		$message = $gtm . $message;
+	}
+
 	return _default_wp_die_handler( $message, $title, $args );
 }
 
