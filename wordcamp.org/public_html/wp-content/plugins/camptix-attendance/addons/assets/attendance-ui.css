@@ -292,7 +292,7 @@ li.item .spinner:after {
     height: 50px;
     display: block;
     width: 200px;
-    margin: 40px auto 0 auto; }
+    margin: 40px auto 40px auto; }
   .attendee-toggle-wrap a.yes,
   .attendee-toggle-wrap a.no {
     height: 50px;

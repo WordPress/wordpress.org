@@ -19,7 +19,8 @@ jQuery(document).ready(function($){
 				sort: 'firstName',
 				avatar: '',
 				firstName: '',
-				lastName: ''
+				lastName: '',
+				extras: []
 			}
 		},
 
@@ -176,7 +177,7 @@ jQuery(document).ready(function($){
 		syncStart: function() {
 			this.$el.addClass( 'camptix-loading' );
 		},
-		
+
 		/**
 		 * Hide the spinner.
 		 */

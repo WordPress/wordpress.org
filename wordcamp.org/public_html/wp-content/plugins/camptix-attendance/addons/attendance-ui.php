@@ -45,6 +45,17 @@ $camptix_options = $camptix->get_options();
 			<a href="#" class="no">No</a>
 		</div>
 
+		<div class="extras">
+			 <# for ( var i in data.extras ) {
+				var item = data.extras[i];
+				if ( item.length > 1 ) { #>
+					<strong>{{ item[0] }}:</strong> {{ item[1] }}<br>
+				<# } else { #>
+					{{ item[0] }}<br>
+				<# } #>
+			 <# } #>
+		</div>
+
 		<a href="#" class="close dashicons dashicons-no"></a>
 	</script>
 

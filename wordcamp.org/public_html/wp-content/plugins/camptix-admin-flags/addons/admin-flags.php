@@ -63,6 +63,9 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 		// Attendees list shortcode handlers.
 		add_filter( 'shortcode_atts_camptix_attendees', array( $this, 'shortcode_attendees_atts' ), 10, 3 );
 		add_filter( 'camptix_attendees_shortcode_query_args', array( $this, 'shortcode_attendees_query' ), 10, 2 );
+
+		// Add the Flags to the Attendance UI.
+		add_filter( 'camptix_attendance_ui_extras', array( $this, 'attendance_ui_extras' ), 10, 2 );
 	}
 
 	/**
@@ -409,6 +412,33 @@ class CampTix_Admin_Flags_Addon extends CampTix_Addon {
 			'type'    => 'CHAR',
 		);
 	}
+
+	/**
+	 * Register Admin flags to be shown in the Attendance UI.
+	 *
+	 * @param array   $extras   List of 'Extra fields' to show.
+	 * @param WP_Post $attendee The Attendee WP_Post being displayed.
+	 */
+	public function attendance_ui_extras( $extras, $attendee ) {
+		$attendee_flags = (array) get_post_meta( $attendee->ID, 'camptix-admin-flag' );
+
+		$flags = array();
+		foreach ( $attendee_flags as $flag ) {
+			if ( isset( $this->flags[ $flag ] ) ) {
+				$flags[] = $this->flags[ $flag ];
+			}
+		}
+
+		if ( $flags ) {
+			array_unshift(
+				$extras,
+				array( implode( ', ', $flags ) )
+			);
+		}
+
+		return $extras;
+	}
+
 
 	/**
 	 * Render the templates used by JavaScript

@@ -3,6 +3,8 @@
  * Allows event organizers to track which attendees showed up to the event.
  */
 class CampTix_Attendance extends CampTix_Addon {
+	public $secret    = '';
+	public $questions = array();
 	/**
 	 * Runs during CampTix init.
 	 */
@@ -21,6 +23,10 @@ class CampTix_Attendance extends CampTix_Addon {
 			return;
 
 		$this->secret = $camptix_options['attendance-secret'];
+
+		if ( isset( $camptix_options['attendance-questions'] ) ) {
+			$this->questions = $camptix_options['attendance-questions'];
+		}
 
 		if ( empty( $camptix_options['attendance-enabled'] ) )
 			return;
@@ -201,12 +207,35 @@ class CampTix_Attendance extends CampTix_Addon {
 
 		$status = (bool) get_post_meta( $attendee->ID, 'tix_attended', true );
 
+		$extras = array();
+
+		// By default, allow certain questions to be included.
+		$questions = get_post_meta( $attendee->ID, 'tix_questions', true );
+		foreach ( $this->questions as $question_id ) {
+			if ( ! isset( $questions[ $question_id ] ) ) {
+				continue;
+			}
+
+			$question_post = get_post( $question_id );
+			$extras[] = [
+				html_entity_decode( apply_filters( 'the_title', $question_post->post_title ) ), // Escaped on display
+				// The attendees selection, which may be an array.
+				is_array( $questions[ $question_id ] ) ? implode( ', ', $questions[ $question_id ] ) : $questions[ $question_id ],
+			];
+		}
+
+		/**
+		 * Allow other plugins/Camptix Addons to register extra fields.
+		 */
+		$extras = apply_filters( 'camptix_attendance_ui_extras', $extras, $attendee );
+
 		return array(
-			'id' => $attendee->ID,
+			'id'        => $attendee->ID,
 			'firstName' => $first_name,
-			'lastName' => $last_name,
-			'avatar' => esc_url_raw( $avatar_url ),
-			'status' => $status,
+			'lastName'  => $last_name,
+			'avatar'    => esc_url_raw( $avatar_url ),
+			'status'    => $status,
+			'extras'    => $extras,
 		);
 	}
 
@@ -292,6 +321,8 @@ class CampTix_Attendance extends CampTix_Addon {
 			esc_html__( "Don't forget to disable the UI after the event is over.", 'wordcamporg' )
 		);
 
+		add_settings_field( 'attendance-questions', esc_html__( 'Questions', 'wordcamporg' ), array( $this, 'field_questions' ), 'camptix_options', 'general', esc_html__( 'Show these additional ticket questions in the UI.', 'wordcamporg' ) );
+
 		add_settings_field( 'attendance-secret', esc_html__( 'Secret Link', 'wordcamporg' ), array( $this, 'field_secret' ), 'camptix_options', 'general' );
 	}
 
@@ -310,6 +341,31 @@ class CampTix_Attendance extends CampTix_Addon {
 		<input id="camptix-attendance-generate" type="checkbox" name="camptix_options[attendance-generate]" value="1" />
 		<label for="camptix-attendance-generate"><?php esc_html_e( 'Generate a new secret link (old links will expire)', 'wordcamporg' ); ?></label>
 		<?php
+	}
+
+	/**
+	 * Ticket Questions Field
+	 *
+	 * This is a field that allows selection of any of the Ticket Questions specified
+	 * to be output into the Attendance UI.
+	 */
+	public function field_questions() {
+		global $camptix;
+		$questions = $camptix->get_all_questions();
+
+		echo '<p>' . esc_html__( 'Show the following ticket questions in the Attendance UI.', 'wordcamporg' ) . '</p>';
+
+		foreach ( $questions as $question ) {
+			$selections = get_post_meta( $question->ID, 'tix_values', true );
+			printf(
+				'<label><input type="checkbox" name="camptix_options[attendance-questions][]" value="%s" %s> %s %s</label><br>',
+				esc_attr( $question->ID ),
+				checked( in_array( $question->ID, $this->questions, true ), true, false ),
+				esc_html( apply_filters( 'the_title', $question->post_title ) ),
+				$selections ? '<em>' . esc_html( implode( ', ', $selections ) ) . '</em>' : ''
+			);
+		}
+
 	}
 
 	/**
@@ -332,6 +388,12 @@ class CampTix_Attendance extends CampTix_Addon {
 
 		if ( ! empty( $input['attendance-generate'] ) )
 			$output['attendance-secret'] = wp_generate_password( 32, false, false );
+
+		if ( ! empty( $input['attendance-questions'] ) ) {
+			$output['attendance-questions'] = array_map( 'intval', $input['attendance-questions'] );
+		} elseif ( isset( $input['attendance-enabled'] ) ) {
+			$output['attendance-questions'] = array();
+		}
 
 		return $output;
 	}
