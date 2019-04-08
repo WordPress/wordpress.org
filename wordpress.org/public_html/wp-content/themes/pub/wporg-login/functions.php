@@ -83,6 +83,9 @@ function wporg_login_register_scripts() {
 }
 add_action( 'init', 'wporg_login_register_scripts' );
 
+/**
+ * Output the GoogleTagManager <head> tags.
+ */
 function wporg_login_gtm() {
 	?>
 	<link rel="dns-prefetch" href="//www.googletagmanager.com">
@@ -96,6 +99,30 @@ function wporg_login_gtm() {
 }
 add_action( 'wp_head', 'wporg_login_gtm' );
 add_action( 'login_head', 'wporg_login_gtm' );
+
+/**
+ * wp_die() handler for login.wordpress.org, adds GTM to error pages.
+ */
+function wporg_login_die_handler( $message, $title = '', $args = array() ) {
+	ob_start();
+	wporg_login_gtm();
+	$gtm = ob_get_clean();
+
+	$message = $gtm . $message;
+	return _default_wp_die_handler( $message, $title, $args );
+}
+
+/**
+ * Switch the default WP_Die handler for login.wordpress.org to one that includes GTM.
+ */
+function wp_die_handler_switcher( $handler ) {
+	if ( $handler == '_default_wp_die_handler' ) {
+		$handler = 'wporg_login_die_handler';
+	}
+
+	return $handler;
+}
+add_filter( 'wp_die_handler', 'wp_die_handler_switcher' );
 
 /**
  * Avoid sending a 404 header but send a 200 with nocache headers.
