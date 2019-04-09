@@ -20,7 +20,7 @@
 		"@wordpress/browserslist-config": "2.2.2",
 		"@wordpress/compose": "2.1.0",
 		"@wordpress/element": "2.1.4",
-		"@wordpress/eslint-plugin": "1.0.1",
+		"@wordpress/eslint-plugin": "2.1.0",
 		"@wordpress/i18n": "3.0.1",
 		"@wordpress/npm-package-json-lint-config": "1.1.6",
 		"@wordpress/scripts": "3.1.0",
