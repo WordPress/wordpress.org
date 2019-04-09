@@ -24,7 +24,7 @@ if ( empty( $organizers ) ) {
 		<li class="wordcamp-block-post-list-item wordcamp-organizer wordcamp-organizer-<?php echo sanitize_html_class( $organizer->post_name ); ?> wordcamp-clearfix">
 			<h3 class="wordcamp-item-title wordcamp-organizer-title">
 				<a href="<?php echo esc_url( get_permalink( $organizer ) ); ?>">
-					<?php echo get_the_title( $organizer ); ?>
+					<?php echo wp_kses_post( get_the_title( $organizer ) ); ?>
 				</a>
 			</h3>
 
@@ -48,7 +48,7 @@ if ( empty( $organizers ) ) {
 			<?php if ( 'none' !== $attributes['content'] ) : ?>
 				<div class="wordcamp-item-content wordcamp-organizer-content-<?php echo esc_attr( $attributes['content'] ); ?>">
 					<?php if ( 'full' === $attributes['content'] ) : ?>
-						<?php echo wpautop( get_all_the_content( $organizer ) ); ?>
+						<?php echo wp_kses_post( wpautop( get_all_the_content( $organizer ) ) ); ?>
 
 						<p class="wordcamp-item-permalink">
 							<a href="<?php echo esc_url( get_permalink( $organizer ) ); ?>">

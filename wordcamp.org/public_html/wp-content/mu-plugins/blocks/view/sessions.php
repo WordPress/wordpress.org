@@ -1,14 +1,16 @@
 <?php
-namespace WordCamp\Blocks\Sessions;
-defined( 'WPINC' ) || die();
 
+namespace WordCamp\Blocks\Sessions;
+use WP_Post;
 use function WordCamp\Blocks\Shared\{ get_all_the_content, array_to_human_readable_list };
 use function WordCamp\Blocks\Shared\Components\{ render_featured_image };
 
-/** @var array  $attributes */
-/** @var \WP_Post  $session */
-/** @var array  $speakers */
-/** @var string $container_classes */
+defined( 'WPINC' ) || die();
+
+/** @var array   $attributes */
+/** @var WP_Post $session */
+/** @var array   $speakers */
+/** @var string  $container_classes */
 
 setup_postdata( $session );
 
@@ -33,6 +35,7 @@ setup_postdata( $session );
 			$speakers[ $session->ID ]
 		);
 		?>
+
 		<div class="wordcamp-item-meta wordcamp-session-speakers">
 			<?php
 			printf(
@@ -64,6 +67,7 @@ setup_postdata( $session );
 						<?php esc_html_e( 'Visit session page', 'wordcamporg' ); ?>
 					</a>
 				</p>
+
 			<?php elseif ( 'excerpt' === $attributes['content'] ) : ?>
 				<?php wp_kses_post( wpautop( the_excerpt() ) ); ?>
 				<?php if ( true === $attributes['excerpt_more'] ) : ?>
@@ -79,9 +83,9 @@ setup_postdata( $session );
 
 	<?php if ( $attributes['show_meta'] || $attributes['show_category'] ) : ?>
 		<div class="wordcamp-item-meta wordcamp-session-details">
-			<?php if ( $attributes['show_meta'] ) :
-				$tracks = get_the_terms( $session, 'wcb_track' );
-				?>
+			<?php if ( $attributes['show_meta'] ) : ?>
+				<?php $tracks = get_the_terms( $session, 'wcb_track' ); ?>
+
 				<div class="wordcamp-session-time-location">
 					<?php if ( ! is_wp_error( $tracks ) && ! empty( $tracks ) ) :
 						printf(
@@ -95,6 +99,7 @@ setup_postdata( $session );
 								esc_html( $tracks[0]->name )
 							)
 						);
+
 					else :
 						printf(
 							/* translators: 1: A date; 2: A time; */
@@ -105,6 +110,7 @@ setup_postdata( $session );
 					endif; ?>
 				</div>
 			<?php endif; ?>
+
 			<?php if ( $attributes['show_category'] && has_term( null, 'wcb_session_category', $session ) ) :
 				$categories = array_map(
 					function( $category ) {
@@ -117,9 +123,11 @@ setup_postdata( $session );
 					get_the_terms( $session, 'wcb_session_category' )
 				);
 				?>
+
 				<div class="wordcamp-session-categories">
-					<?php /* translators: used between list items, there is a space after the comma */
-					echo implode( esc_html__( ', ', 'wordcamporg' ), $categories ); // phpcs:ignore WordPress.Security.EscapeOutput
+					<?php
+					/* translators: used between list items, there is a space after the comma */
+					echo wp_kses_post( implode( __( ', ', 'wordcamporg' ), $categories ) );
 					?>
 				</div>
 			<?php endif; ?>

@@ -127,8 +127,8 @@ function sponsor_level_sort( $posts ) {
 	}
 
 	return function ( $sponsor1, $sponsor2 ) use ( $sponsor_level_order, $sponsor_terms_cache ) {
-		$index1 = array_search( $sponsor_terms_cache[ $sponsor1->ID ], $sponsor_level_order );
-		$index2 = array_search( $sponsor_terms_cache[ $sponsor2->ID ], $sponsor_level_order );
+		$index1 = array_search( $sponsor_terms_cache[ $sponsor1->ID ], $sponsor_level_order, true );
+		$index2 = array_search( $sponsor_terms_cache[ $sponsor2->ID ], $sponsor_level_order, true );
 
 		if ( false === $index1 && false === $index2 ) {
 			return 0;

@@ -24,17 +24,20 @@ function render_grid_layout( $layout, $columns, $children, $container_classes ) 
 	if ( 'grid' === $layout ) {
 		$container_classes[] = 'grid-columns-' . absint( $columns );
 	}
+
 	$container_classes = implode( ' ', $container_classes );
 
 	ob_start();
 	?>
+
 	<ul class="<?php echo esc_attr( $container_classes ); ?>">
 		<?php foreach ( $children as $child ) { ?>
 			<li class="wordcamp-block-post-list-item wordcamp-grid-layout-item wordcamp-clearfix">
-				<?php printf( wp_kses_post( $child ) ); ?>
+				<?php echo wp_kses_post( $child ); ?>
 			</li>
 		<?php } ?>
 	</ul>
+
 	<?php
 
 	return ob_get_clean();

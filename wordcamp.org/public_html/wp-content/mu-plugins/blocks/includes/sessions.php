@@ -34,7 +34,6 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @return string
  */
 function render( $attributes ) {
-
 	if ( ! $attributes['mode'] ) {
 		return;
 	}
@@ -69,6 +68,7 @@ function render( $attributes ) {
 		$rendered_session_posts,
 		$container_classes
 	);
+
 	return $html;
 }
 
@@ -97,80 +97,95 @@ add_filter( 'wordcamp_blocks_script_data', __NAMESPACE__ . '\add_script_data' );
  */
 function get_attributes_schema() {
 	return [
-		'mode'          => [
+		'mode' => [
 			'type'    => 'string',
 			'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),
 			'default' => '',
 		],
-		'item_ids'      => [
+
+		'item_ids' => [
 			'type'    => 'array',
 			'default' => [],
 			'items'   => [
 				'type' => 'integer',
 			],
 		],
-		'sort'          => [
+
+		'sort' => [
 			'type'    => 'string',
 			'enum'    => wp_list_pluck( get_options( 'sort' ), 'value' ),
 			'default' => 'session_time',
 		],
-		'className'     => [
+
+		'className' => [
 			'type'    => 'string',
 			'default' => '',
 		],
-		'show_speaker'  => [
+
+		'show_speaker' => [
 			'type'    => 'bool',
 			'default' => false,
 		],
-		'show_images'   => [
+
+		'show_images' => [
 			'type'    => 'bool',
 			'default' => true,
 		],
-		'image_size'    => [
+
+		'image_size' => [
 			'type'    => 'integer',
 			'minimum' => 25,
 			'maximum' => 600,
 			'default' => 150,
 		],
-		'image_align'   => [
+
+		'image_align' => [
 			'type'    => 'string',
 			'enum'    => wp_list_pluck( get_options( 'align' ), 'value' ),
 			'default' => 'none',
 		],
-		'content'       => [
+
+		'content' => [
 			'type'    => 'string',
 			'enum'    => wp_list_pluck( get_options( 'content' ), 'value' ),
 			'default' => 'full',
 		],
-		'excerpt_more'  => [
+
+		'excerpt_more' => [
 			'type'    => 'bool',
 			'default' => false,
 		],
-		'show_meta'     => [
+
+		'show_meta' => [
 			'type'    => 'bool',
 			'default' => false,
 		],
+
 		'show_category' => [
 			'type'    => 'bool',
 			'default' => false,
 		],
+
 		'layout' => [
 			'type'    => 'string',
 			'enum'    => array( 'list', 'grid' ),
 			'default' => 'list',
 		],
+
 		'grid_columns' => array(
-			'type' => 'integer',
+			'type'    => 'integer',
 			'minimum' => 1,
 			'maximum' => 4,
 			'default' => 1,
 		),
+
 		'featured_image_height' => array(
-			'type' => 'integer',
+			'type'    => 'integer',
 			'default' => 150,
 		),
+
 		'featured_image_width' => array(
-			'type' => 'integer',
+			'type'    => 'integer',
 			'default' => 150,
 		),
 	];

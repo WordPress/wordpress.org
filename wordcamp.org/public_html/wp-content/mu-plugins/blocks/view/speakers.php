@@ -13,19 +13,20 @@ use function WordCamp\Blocks\Shared\{ get_all_the_content };
 
 <?php if ( ! empty( $speakers ) ) : ?>
 	<ul class="<?php echo esc_attr( $container_classes ); ?>">
-		<?php foreach ( $speakers as $speaker ) : setup_postdata( $speaker ); // phpcs:ignore Squiz.ControlStructures.ControlSignature ?>
+		<?php foreach ( $speakers as $speaker ) : ?>
+			<?php setup_postdata( $speaker ); ?>
+
 			<li class="wordcamp-block-post-list-item wordcamp-speaker wordcamp-speaker-<?php echo sanitize_html_class( $speaker->post_name ); ?> wordcamp-clearfix">
 				<h3 class="wordcamp-item-title wordcamp-speaker-title">
 					<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>">
-						<?php echo get_the_title( $speaker ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+						<?php echo wp_kses_post( get_the_title( $speaker ) ); ?>
 					</a>
 				</h3>
 
 				<?php if ( true === $attributes['show_avatars'] ) : ?>
 					<div class="wordcamp-speaker-avatar-container align-<?php echo esc_attr( $attributes['avatar_align'] ); ?>">
 						<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>" class="wordcamp-speaker-avatar-link">
-							<?php
-							echo get_avatar(
+							<?php echo get_avatar(
 								$speaker->_wcb_speaker_email,
 								$attributes['avatar_size'],
 								'',
@@ -34,8 +35,7 @@ use function WordCamp\Blocks\Shared\{ get_all_the_content };
 									'class'         => 'wordcamp-speaker-avatar',
 									'force_display' => true,
 								]
-							);
-							?>
+							); ?>
 						</a>
 					</div>
 				<?php endif; ?>
@@ -43,14 +43,16 @@ use function WordCamp\Blocks\Shared\{ get_all_the_content };
 				<?php if ( 'none' !== $attributes['content'] ) : ?>
 					<div class="wordcamp-item-content wordcamp-speaker-content-<?php echo esc_attr( $attributes['content'] ); ?>">
 						<?php if ( 'full' === $attributes['content'] ) : ?>
-							<?php echo wpautop( get_all_the_content( $speaker ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+							<?php echo wp_kses_post( wpautop( get_all_the_content( $speaker ) ) ); ?>
 							<p class="wordcamp-item-permalink">
 								<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>">
 									<?php esc_html_e( 'Visit speaker page', 'wordcamporg' ); ?>
 								</a>
 							</p>
+
 						<?php elseif ( 'excerpt' === $attributes['content'] ) : ?>
 							<?php wpautop( the_excerpt() ); ?>
+
 							<?php if ( true === $attributes['excerpt_more'] ) : ?>
 								<p class="wordcamp-item-permalink">
 									<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>" class="wordcamp-speaker-permalink">
@@ -69,13 +71,13 @@ use function WordCamp\Blocks\Shared\{ get_all_the_content };
 						</h4>
 
 						<ul class="wordcamp-speaker-sessions-list">
-							<?php foreach ( $sessions[ $speaker->ID ] as $session ) :
-								$tracks = get_the_terms( $session, 'wcb_track' );
-								?>
+							<?php foreach ( $sessions[ $speaker->ID ] as $session ) : ?>
+								<?php $tracks = get_the_terms( $session, 'wcb_track' ); ?>
 								<li class="wordcamp-speaker-session-content">
 									<a class="wordcamp-speaker-session-link" href="<?php echo esc_url( get_permalink( $session ) ); ?>">
-										<?php echo get_the_title( $session ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+										<?php echo wp_kses_post( get_the_title( $session ) ); ?>
 									</a>
+
 									<span class="wordcamp-speaker-session-info">
 										<?php if ( ! is_wp_error( $tracks ) && ! empty( $tracks ) ) : ?>
 											<?php
@@ -87,6 +89,7 @@ use function WordCamp\Blocks\Shared\{ get_all_the_content };
 													esc_html( $tracks[0]->name )
 												);
 											?>
+
 										<?php else : ?>
 											<?php
 												printf(
@@ -103,7 +106,9 @@ use function WordCamp\Blocks\Shared\{ get_all_the_content };
 						</ul>
 					</div>
 				<?php endif; ?>
+
 			</li>
-		<?php endforeach; wp_reset_postdata(); // phpcs:ignore Generic.Formatting.DisallowMultipleStatements,Squiz.PHP.EmbeddedPhp ?>
+		<?php endforeach; ?>
+		<?php wp_reset_postdata(); ?>
 	</ul>
 <?php endif; ?>

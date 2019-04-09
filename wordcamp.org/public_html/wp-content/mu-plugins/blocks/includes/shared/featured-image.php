@@ -12,20 +12,22 @@ namespace WordCamp\Blocks\Shared\Components;
  * @return string Output markup for featured image.
  */
 function render_featured_image( $class_names, $post, $width, $image_link = '' ) {
-	$class_names[] = 'wordcamp-featured-image';
-	$class_names = implode( ' ', $class_names );
+	$class_names[]     = 'wordcamp-featured-image';
+	$class_names       = implode( ' ', $class_names );
 	$container_classes = "wordcamp-image-container wordcamp-featured-image-container $class_names";
-	$attachment_id = get_post_thumbnail_id( $post->ID );
-	$image_data = wp_get_attachment_metadata( $attachment_id );
-	$size = 'post-thumbnail';
+	$attachment_id     = get_post_thumbnail_id( $post->ID );
+	$image_data        = wp_get_attachment_metadata( $attachment_id );
+	$size              = 'post-thumbnail';
+
 	if ( is_array( $image_data ) && isset( $image_data['sizes'] ) && isset( $image_data['sizes']['full'] ) ) {
 		$aspect_ratio = $image_data['sizes']['full']['height'] / $image_data['sizes']['full']['width'];
-		$height = $aspect_ratio * $width;
-		$size = array( $width, $height );
+		$height       = $aspect_ratio * $width;
+		$size         = array( $width, $height );
 	}
 
 	$image = render_featured_image_element( $post, $size, $class_names );
 	ob_start();
+
 	?>
 		<div class="<?php echo esc_attr( $container_classes ); ?>">
 			<?php if ( '' !== $image_link ) { ?>
