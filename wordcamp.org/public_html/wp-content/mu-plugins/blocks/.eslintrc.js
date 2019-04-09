@@ -54,5 +54,52 @@ module.exports = {
 		 * } ],
 		 */
 		'no-multi-spaces' : 'off',
+
+		/*
+		 * Objects are harder to quickly scan when the formatting is inconsistent.
+		 */
+		'object-shorthand' : [ 'error', 'consistent-as-needed' ],
+
+		/*
+		 * A short description often makes a function easier to understand, and also provides a nice visual
+		 * delineation between functions.
+		 *
+		 * Given that closures should be short and contextually relevant, requiring documentation for them would
+		 * likely hurt readability more than it would help clarity.
+		 */
+		'require-jsdoc': [ 'error', {
+			'require': {
+				'FunctionDeclaration'     : true,
+				'MethodDefinition'        : true,
+				'ClassDeclaration'        : true,
+				'ArrowFunctionExpression' : false,
+				'FunctionExpression'      : true
+			}
+		} ],
+
+		/*
+		 * Descriptions are often obvious from the variable and function names, so always requiring them would be
+		 * inconvenient. The developer should add one whenever it's not obvious, though.
+		 *
+		 * @todo `@param` tags should align the variable name and description, just like in PHP.
+		 */
+		'valid-jsdoc' : [ 'error', {
+			'requireParamDescription'  : false,
+			'requireReturnDescription' : false,
+			'requireReturn'            : false,
+		} ],
+
+		/*
+		 * The rationale behind this rule is that sometimes a variable is defined by a costly operation, but then
+		 * the variable is never used, so that operation was wasted. That's a valid point, but in practice that
+		 * doesn't happen very often, so the benefit is not significant.
+		 *
+		 * The benefits of grouping variable assignments at the start of a function outweigh the costs, since it
+		 * almost always makes the function easier to quickly grok.
+		 *
+		 * In the uncommon case where a significant performance penalty would be introduced, the developer is
+		 * still free to choose to define the variable after the early returns.
+		 */
+		'@wordpress/no-unused-vars-before-return' : [ 'off' ],
 	},
 };
