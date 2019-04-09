@@ -1,3 +1,22 @@
+/*
+ * @todo
+ *
+ * equals in assignment should be aligned          - needs a plugin: https://github.com/eslint/eslint/issues/11025
+ * `from` in `import` statements should be aligned - needs a plugin: https://github.com/eslint/eslint/issues/11025
+ *
+ * indent things like
+ * { mode &&
+ * <GridToolbar
+ * 	{ ...this.props }
+ * />
+ * }
+ *
+ * should use hasOwnProperty or Object.getOwnPropertyDescriptors(). the latter usually makes code more readable, but sometimes the former first better
+ * assignment and control structures/returns/etc should be separate by a blank line for readability.
+ *      same for div and other block-level html elements
+ * disable `no-console` b/c valid use case. if can make exception for `log` function without disabling, then do that. don't want console used for temporary debugging, but there are valid cases where you want to provide the user some insight into what went wrong
+ */
+
 module.exports = {
 	extends : 'plugin:@wordpress/eslint-plugin/recommended',
 
@@ -105,5 +124,14 @@ module.exports = {
 		 * still free to choose to define the variable after the early returns.
 		 */
 		'@wordpress/no-unused-vars-before-return' : [ 'off' ],
+
+		/*
+		 * Short variable names are almost always obscure and non-descriptive, but they should be meaningful,
+		 * obvious, and self-documenting.
+		 */
+		'id-length' : [ 'error', {
+			'min'        : 3,
+			'exceptions' : [ '__', 'a', 'b' ]
+		} ]
 	},
 };
