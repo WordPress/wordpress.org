@@ -728,6 +728,13 @@ class Plugin_Directory {
 			$wp_query->query_vars['browse'] = 'featured';
 		}
 
+		// For any invalid values passed to browse, set it to featured instead
+		if ( !empty ( $wp_query->query ['browse'] ) &&
+		     !in_array( $wp_query->query['browse'], array( 'featured','popular','beta','blocks','new','favorites' ) ) ) {
+			 $wp_query->query['browse'] = 'featured';
+			 $wp_query->query_vars['browse'] = 'featured';
+		}
+
 		// Set up custom queries for the /browse/ URLs
 		switch ( $wp_query->get( 'browse' ) ) {
 			case 'beta':
