@@ -1,9 +1,13 @@
 /**
- * WordPress dependencies.
+ * WordPress dependencies
  */
 const { Component } = wp.element;
-const { PanelBody, PanelRow, TextControl, BaseControl, SelectControl, ToggleControl } = wp.components;
+const { PanelBody, PanelRow, TextControl, BaseControl, SelectControl } = wp.components;
 const { __ } = wp.i18n;
+
+/**
+ * Internal dependencies
+ */
 import './style.scss';
 
 /**
@@ -40,7 +44,6 @@ const sizePresets = [
  * Implements inspector control for FeaturedImage component defined in ./index.js. Uses and sets attribute `featured_image_height` and `featured_image_width`.
  */
 class FeaturedImageInspectorControls extends Component {
-
 	constructor( props ) {
 		super( props );
 		this.availableSizes = sizePresets.map( ( size ) => size.value );
@@ -55,7 +58,7 @@ class FeaturedImageInspectorControls extends Component {
 	}
 
 	render() {
-		const { attributes, setAttributes, title, help, selectLabel, cropLabel } = this.props;
+		const { attributes, setAttributes, title, help, selectLabel } = this.props;
 		const { featured_image_width } = attributes;
 		const selectedValue = this.availableSizes.indexOf( featured_image_width.toString() ) === -1 ? '' : featured_image_width.toString();
 		return (

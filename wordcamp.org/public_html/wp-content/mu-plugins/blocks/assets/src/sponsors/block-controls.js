@@ -1,13 +1,16 @@
+/**
+ * External dependencies
+ */
 import { get, includes, intersection } from 'lodash';
 
 /**
- * WordPress dependencies.
+ * WordPress dependencies
  */
 const { decodeEntities } = wp.htmlEntities;
 const { __ } = wp.i18n;
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { BlockControls, PlaceholderNoContent } from '../shared/block-controls';
 import SponsorBlockContent from './block-content';
@@ -17,14 +20,18 @@ import { LABEL } from './index';
 const { Button, Placeholder } = wp.components;
 
 function SponsorOption( option ) {
+	let sponsorOption;
+
 	if ( 'post' === option.type ) {
-		return SponsorPostOption( option );
+		sponsorOption = SponsorPostOption( option );
+	} else {
+		sponsorOption = SponsorLevelOption( option );
 	}
-	return SponsorLevelOption( option );
+
+	return sponsorOption;
 }
 
 function SponsorPostOption( sponsor ) {
-	const imageUrl = get( sponsor.featuredImageData, 'sizes.thumbnail.source_url', false );
 	return (
 		<span>
 			{ sponsor.label }
@@ -47,9 +54,9 @@ function SponsorLevelOption( sponsorLevel ) {
  * Implements sponsor block controls.
  */
 class SponsorBlockControls extends BlockControls {
-
 	constructor( props ) {
 		super( props );
+
 		this.state = {
 			posts            : [],
 			terms            : [],
@@ -65,43 +72,50 @@ class SponsorBlockControls extends BlockControls {
 	 * Set selectedPosts in state so that SponsorsContentBlock can use them.
 	 */
 	setSelectedPosts() {
-		const { fetchedPosts, sponsorTermOrder } = this.state;
-		const { attributes } = this.props;
+		const { fetchedPosts }             = this.state;
+		const { attributes }               = this.props;
 		const { post_ids, term_ids, mode } = attributes;
+		const selectedPosts                = [];
 
 		if ( ! fetchedPosts || ! fetchedPosts.length ) {
 			return;
 		}
 
-		const selectedPosts = [];
 		for ( const post of fetchedPosts ) {
 			if ( ! post.hasOwnProperty( 'id' ) ) {
 				continue;
 			}
+
 			switch ( mode ) {
 				case 'all':
 					selectedPosts.push( post );
 					break;
+
 				case 'specific_posts':
 					if ( -1 !== post_ids.indexOf( post.id ) ) {
 						selectedPosts.push( post );
 					}
 					break;
+
 				case 'specific_terms':
 					if ( intersection( term_ids, post.sponsor_level || [] ).length ) {
 						selectedPosts.push( post );
 					}
 					break;
-				default :
+
+				default:
 					break;
 			}
 		}
+
 		this.setState( { selectedPosts } );
 	}
 
 	/**
 	 * Initialize posts and terms arrays and sets loading state till promises
 	 * are not resolved. We will also set posts and terms in array that we want to display.
+	 *
+	 * @param {Object} props
 	 */
 	fetchSelectOptions( props ) {
 		const { sponsorPosts, sponsorLevels, siteSettings } = props;
@@ -110,16 +124,17 @@ class SponsorBlockControls extends BlockControls {
 			( fetchedPosts ) => {
 				const posts = fetchedPosts.map(
 					( post ) => {
+						const label = decodeEntities( post.title.rendered.trim() ) || __( '(Untitled)', 'wordcamporg' );
+
 						return {
-							label: decodeEntities( post.title.rendered.trim() ) ||
-								__( '(Untitled)', 'wordcamporg' ),
+							label             : label,
 							value             : post.id,
 							type              : 'post',
-							featuredImageData : get( post,
-								'_embedded.wp:featuredmedia[0].media_details', '' ),
+							featuredImageData : get( post, '_embedded.wp:featuredmedia[0].media_details', '' ),
 						};
 					}
 				);
+
 				this.setState( { fetchedPosts } );
 				this.setState( { posts } );
 			}
@@ -148,13 +163,15 @@ class SponsorBlockControls extends BlockControls {
 		const parsedSettings = siteSettings.then(
 			( fetchedSettings ) => {
 				const sponsorTermOrder = fetchedSettings.wcb_sponsor_level_order;
+
 				this.setState( { sponsorTermOrder } );
 			}
 		);
 
 		Promise.all( [ parsedPosts, parsedTerms, parsedSettings ] ).then( () => {
 			this.setState( { loading: false } );
-			// Enqueue set selected posts in next event loop, so that state is up to date when `setSelectedPosts` method actually runs.
+
+			// Enqueue selected posts in next event loop, so that state is up to date when `setSelectedPosts` method actually runs.
 			setTimeout( () => this.setSelectedPosts() );
 		} );
 	}
@@ -163,12 +180,12 @@ class SponsorBlockControls extends BlockControls {
 	 * Sets `mode`, `term_ids` and `post_ids` attribute when `Apply` button is
 	 * clicked. Pass `onChange` prop to override.
 	 *
-	 * @param selectedOptions Array of values, type of selected options
+	 * @param {Array} selectedOptions Array of values, type of selected options
 	 */
 	onChange( selectedOptions = {} ) {
 		const { setAttributes } = this.props;
-		const newValue = selectedOptions.item_ids;
-		const chosen = selectedOptions.mode;
+		const newValue          = selectedOptions.item_ids;
+		const chosen            = selectedOptions.mode;
 
 		if ( newValue && chosen ) {
 			switch ( chosen ) {
@@ -199,6 +216,8 @@ class SponsorBlockControls extends BlockControls {
 
 	/**
 	 * Generate options array to be passed to select2.
+	 *
+	 * @return {Array}
 	 */
 	buildSelectOptions() {
 		const { posts, terms } = this.state;
@@ -219,6 +238,8 @@ class SponsorBlockControls extends BlockControls {
 
 	/**
 	 * Renders Sponsor Block Control view
+	 *
+	 * @return {Element}
 	 */
 	render() {
 		const { icon, attributes, setAttributes, sponsorPosts } = this.props;
@@ -259,7 +280,6 @@ class SponsorBlockControls extends BlockControls {
 
 		return (
 			<div>
-
 				<SponsorBlockContent
 					selectedPosts={ selectedPosts }
 					sponsorTermOrder={ sponsorTermOrder }
@@ -285,6 +305,7 @@ class SponsorBlockControls extends BlockControls {
 								{ __( 'List all sponsors', 'wordcamporg' ) }
 							</Button>
 						</div>
+
 						<div className="wordcamp-block-edit-mode-option">
 							<ItemSelect
 								buildSelectOptions={
@@ -294,8 +315,8 @@ class SponsorBlockControls extends BlockControls {
 								}
 								isLoading={ this.state.loading }
 								onChange={
-									( selectedOptions ) => {
-										return this.onChange( selectedOptions );
+									( newOptions ) => {
+										return this.onChange( newOptions );
 									}
 								}
 								selectProps={
@@ -307,8 +328,7 @@ class SponsorBlockControls extends BlockControls {
 										},
 									}
 								}
-								label={ __( 'Or, choose specific sponsors or levels',
-									'wordcamporg' ) }
+								label={ __( 'Or, choose specific sponsors or levels', 'wordcamporg' ) }
 								value={ selectedOptions }
 								{ ...this.props }
 							/>

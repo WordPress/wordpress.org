@@ -1,10 +1,12 @@
 module.exports = {
 	extends : 'plugin:@wordpress/eslint-plugin/recommended',
+
 	globals : {
 		wp : true,
 	},
+
 	rules : {
-		/**
+		/*
 		 * Instead of turning this off altogether, we should safelist the parameters that are coming in from
 		 * the REST API. However, the `allow` config for this rule is only available in eslint 5+. Currently
 		 * the @wordpress/scripts package uses eslint 4.x, but the next version will bump it up to 5.
@@ -24,8 +26,10 @@ module.exports = {
 		 * ],
 		 */
 		'camelcase' : 'off',
-		/**
-		 * Copied from our previous custom .eslintrc.js file.
+
+		/*
+		 * Align object parameters on their assignment operator (:), just like assignment statements are
+		 * aligned on `=`.
 		 */
 		'key-spacing' : [ 'error', {
 			'align' : {
@@ -34,13 +38,13 @@ module.exports = {
 				'on'          : 'colon',
 			},
 		} ],
-		/**
-		 * Copied from our previous custom .eslintrc.js file.
+
+		/*
+		 * Allow multiple spaces in a row.
 		 *
 		 * Ideally this should be on, because we don't want to allow things like `const foo  == bar;`, but the rule
 		 * currently isn't flexible enough to allow all the exceptions we need. Specifically, there are times where
-		 * readability is vastly improved by aligning attributes in consecutive lines, like the
-		 * `padding-line-between-statements` objects in this file.
+		 * readability is vastly improved by aligning attributes in consecutive lines.
 		 *
 		 * Alternate configuration if we ever want to re-enable this:
 		 *

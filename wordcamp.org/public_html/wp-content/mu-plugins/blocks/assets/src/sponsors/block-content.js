@@ -1,37 +1,33 @@
 /**
- * External dependencies.
+ * External dependencies
  */
 import { get, difference } from 'lodash';
-import classnames from 'classnames';
+import classnames          from 'classnames';
 
 /**
- * WordPress dependencies.
+ * WordPress dependencies
  */
-const { Component } = wp.element;
+const { Component }       = wp.element;
 const { escapeAttribute } = wp.escapeHtml;
-const { __ } = wp.i18n;
+const { __ }              = wp.i18n;
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
-import FeaturedImage from '../shared/featured-image';
-import GridContentLayout from '../shared/grid-layout/block-content';
+import FeaturedImage                  from '../shared/featured-image';
+import GridContentLayout              from '../shared/grid-layout/block-content';
 import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
 
 /**
  * Renders individual sponsor post inside editor.
  *
- * @param sponsorPost
- * @param attributes
- * @param onFeatureImageChange
- * @return {*}
- * @constructor
+ * @param {Object} sponsorPost
+ * @param {Object} attributes
+ *
+ * @return {Element}
  */
-function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
-	const {
-		show_name, show_logo, show_desc, content, excerpt_more, featured_image_width
-	} = attributes;
-
+function SponsorDetail( { sponsorPost, attributes } ) {
+	const { show_name, show_logo, content, excerpt_more, featured_image_width } = attributes;
 	const featuredImageSizes = get( sponsorPost, '_embedded.wp:featuredmedia[0].media_details.sizes', {} );
 	const displayContent = 'full' === content ? sponsorPost.content.rendered.trim() : sponsorPost.excerpt.rendered.trim();
 
@@ -46,6 +42,7 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 					link={ sponsorPost.link }
 				/>
 			}
+
 			{ ( show_logo || show_logo === undefined ) &&
 				<FeaturedImage
 					className={ 'wordcamp-sponsor-featured-image wordcamp-sponsor-logo' }
@@ -55,6 +52,7 @@ function SponsorDetail( { sponsorPost, attributes, onFeatureImageChange } ) {
 					imageLink={ sponsorPost.link }
 				/>
 			}
+
 			{ ( 'none' !== content ) &&
 				<ItemHTMLContent
 					className={ classnames( 'wordcamp-sponsor-content' ) }
@@ -79,23 +77,27 @@ class SponsorBlockContent extends Component {
 			sortBy        : 'name_asc',
 		};
 	}
+
 	/**
 	 * Call back for when featured image URL is changed for a post.
 	 * We are storing the URL object as JSON stringified value because I was
 	 * not able to get object type to work properly. Maybe its not supported in
 	 * Gutenberg yet.
 	 *
-	 * @param sponsorId
-	 * @param imageURL
+	 * @param {number} sponsorId
+	 * @param {string} imageURL
 	 */
 	setFeaturedImageURL( sponsorId, imageURL ) {
-		const sponsor_image_urls = this.sponsorImageUrl || {};
+		const sponsor_image_urls        = this.sponsorImageUrl || {};
 		sponsor_image_urls[ sponsorId ] = imageURL;
-		this.sponsorImageUrl = sponsor_image_urls;
+		this.sponsorImageUrl            = sponsor_image_urls;
 
-		const { setAttributes } = this.props;
+		const { setAttributes }         = this.props;
 		const sponsor_image_urls_latest = this.sponsorImageUrl;
-		setAttributes( { sponsor_image_urls: encodeURIComponent( JSON.stringify( sponsor_image_urls_latest ) ) } );
+
+		setAttributes( {
+			sponsor_image_urls: encodeURIComponent( JSON.stringify( sponsor_image_urls_latest ) ),
+		} );
 	}
 
 	componentWillReceiveProps( nextProps ) {
@@ -142,31 +144,29 @@ class SponsorBlockContent extends Component {
 				} );
 				break;
 		}
-		this.setState(
-			{
-				selectedPosts : sortedPosts,
-				sortBy        : newSortBy,
-			}
-		);
+
+		this.setState( {
+			selectedPosts : sortedPosts,
+			sortBy        : newSortBy,
+		} );
 	}
 
 	/**
 	 * Renders Sponsor Block content inside editor.
 	 *
-	 * @return {*}
+	 * @return {Element}
 	 */
 	render() {
 		const { attributes } = this.props;
 		const { selectedPosts } = this.state;
 
 		return (
-			<GridContentLayout
-				{ ...this.props }
-			>
+			<GridContentLayout { ...this.props } >
 				{
 					selectedPosts.map( ( post ) => {
 						return (
 							<SponsorDetail
+								key={ post.id }
 								sponsorPost={ post }
 								attributes={ attributes }
 							/>

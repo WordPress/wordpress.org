@@ -1,15 +1,15 @@
 /**
- * External dependencies.
+ * External dependencies
  */
 import classnames from 'classnames';
 
 /**
- * WordPress dependencies.
+ * WordPress dependencies
  */
 const { Component } = wp.element;
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import './style.scss';
 
@@ -38,6 +38,7 @@ class GridContentLayout extends Component {
 						( childComponent ) => {
 							return (
 								<li
+									key={ childComponent.key }
 									className={ classnames( 'wordcamp-grid-layout-item', 'wordcamp-block-post-list-item', 'wordcamp-clearfix' ) }
 								>
 									{ childComponent }

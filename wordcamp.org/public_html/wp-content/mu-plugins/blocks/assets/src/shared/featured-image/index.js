@@ -15,19 +15,22 @@ const { isURL } = wp.url;
  */
 export default class FeaturedImage extends Component {
 	/**
-	 * @param props Props for function.
-	 * @param props.wpMediaDetails Available sizes of images in the format as returned by WP API. This is the `sizes` object inside `media_details` inside `wp:featuredMedia` object.
-	 * @param props.width Width in pixels for image.
-	 * @param props.className Classname for image element
-	 * @param props.alt Alt text for image
+	 * @param {Object} props
+	 * @param {Array}  props.wpMediaDetails Available sizes of images in the format as returned by WP API. This is the `sizes` object inside `media_details` inside `wp:featuredMedia` object.
+	 * @param {number} props.width          Width in pixels for image.
+	 * @param {string} props.className      Class name for image element
+	 * @param {string} props.alt            Alt text for image
 	 */
 	constructor( props ) {
 		super( props );
+
 		this.state = {};
 	}
 
 	/**
 	 * Get 'full' size image to be displayed in editor. Or get the widest one.
+	 *
+	 * @return {Object}
 	 */
 	getFullImage() {
 		const { getOwnPropertyDescriptors } = Object;
@@ -47,7 +50,7 @@ export default class FeaturedImage extends Component {
 		let widestImage = { source_url: '' };
 
 		for ( const size in getOwnPropertyDescriptors( availableSizes ) ) {
-			if ( availableSizes[ size ].width > ( widestImage[ 'width' ] || 0 ) && availableSizes[ size ].hasOwnProperty( 'source_url' ) ) {
+			if ( availableSizes[ size ].width > ( widestImage.width || 0 ) && availableSizes[ size ].hasOwnProperty( 'source_url' ) ) {
 				widestImage = availableSizes[ size ];
 			}
 		}
@@ -60,7 +63,7 @@ export default class FeaturedImage extends Component {
 	/**
 	 * Renders FeaturedImage component.
 	 *
-	 * @return {*}
+	 * @return {Element}
 	 */
 	render() {
 		const { className, alt, width = 150, imageLink } = this.props;

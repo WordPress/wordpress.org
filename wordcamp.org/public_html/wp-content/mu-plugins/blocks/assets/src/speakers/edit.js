@@ -105,7 +105,7 @@ const speakersSelect = ( select, props ) => {
 	const speakersQuery = pickBy( args, ( value ) => ! isUndefined( value ) );
 
 	return {
-		blockData,
+		blockData    : blockData,
 		speakerPosts : getEntityRecords( 'postType', 'wcb_speaker', speakersQuery ),
 		tracks       : getEntityRecords( 'taxonomy', 'wcb_track', { per_page: MAX_POSTS } ),
 	};

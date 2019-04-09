@@ -6,7 +6,6 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-const { Disabled }       = wp.components;
 const { Component }      = wp.element;
 const { decodeEntities } = wp.htmlEntities;
 const { __ }             = wp.i18n;

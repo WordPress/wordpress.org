@@ -32,7 +32,6 @@ class SessionsSelect extends Component {
 	}
 
 	fetchSelectOptions( props ) {
-
 		const { allSessionPosts, allSessionTracks, allSessionCategories } = props;
 		const promises = [];
 

@@ -49,7 +49,7 @@ export class AvatarSizeControl extends Component {
 
 		this.state = {
 			value    : props.value,
-			onChange : debounce( props.onChange, 10 ) // higher values lead to a noticeable degradation in visual feedback.
+			onChange : debounce( props.onChange, 10 ), // higher values lead to a noticeable degradation in visual feedback.
 		};
 
 		this.onChange = this.onChange.bind( this );

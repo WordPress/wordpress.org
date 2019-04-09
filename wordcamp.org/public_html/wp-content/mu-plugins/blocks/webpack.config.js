@@ -25,25 +25,24 @@ const webpackConfig = {
 	entry: {
 		blocks: path.resolve( __dirname, 'assets/src/blocks.js' ),
 	},
+
 	output: {
 		filename : '[name].min.js',
 		path     : path.resolve( __dirname, 'assets' ),
 	},
+
 	module: {
 		rules: [
 			{
 				test    : /\.jsx?$/,
-				exclude : [
-					/node_modules/,
-				],
-				use: 'babel-loader',
+				use     : 'babel-loader',
+				exclude : [ /node_modules/ ],
 			},
+
 			{
 				test    : /\.(sc|sa|c)ss$/,
-				exclude : [
-					/node_modules/,
-				],
-				use: [
+				exclude : [ /node_modules/ ],
+				use     : [
 					MiniCssExtractPlugin.loader,
 					'css-loader',
 					'sass-loader',
@@ -51,15 +50,18 @@ const webpackConfig = {
 			},
 		],
 	},
+
 	plugins: [
 		new MiniCssExtractPlugin( {
 			filename: '[name].min.css',
 		} ),
+
 		new webpack.DefinePlugin( {
 			'process.env.NODE_ENV': JSON.stringify( NODE_ENV ),
 		} ),
 	],
-	externals,
+
+	externals: externals,
 };
 
 module.exports = webpackConfig;

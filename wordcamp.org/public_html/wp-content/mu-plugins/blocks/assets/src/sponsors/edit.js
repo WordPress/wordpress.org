@@ -1,18 +1,17 @@
 /**
- * Displays sponsor block.
+ * Internal dependencies
  */
 import SponsorInspectorControls from './inspector-controls';
-import SponsorBlockControls from './block-controls';
-import GridToolbar from '../shared/grid-layout/toolbar';
+import SponsorBlockControls     from './block-controls';
+import GridToolbar              from '../shared/grid-layout/toolbar';
 import { ICON }                 from './index';
 
 /**
- WordPress dependencies.
- **/
-const { withSelect } = wp.data;
+ * WordPress dependencies
+ */
 const { Component, Fragment } = wp.element;
-const apiFetch = wp.apiFetch;
-const { addQueryArgs } = wp.url;
+const apiFetch                = wp.apiFetch;
+const { addQueryArgs }        = wp.url;
 
 const MAX_PAGE = 100;
 
@@ -20,7 +19,7 @@ class SponsorsEdit extends Component {
 	/**
 	 * Constructor for SponsorsEdit block.
 	 *
-	 * @param props
+	 * @param {Array} props
 	 */
 	constructor( props ) {
 		super( props );
@@ -47,16 +46,18 @@ class SponsorsEdit extends Component {
 			sponsorPosts  : apiFetch( { path: addQueryArgs( '/wp/v2/sponsors', sponsorQuery ) } ),
 			sponsorLevels : apiFetch( { path: addQueryArgs( '/wp/v2/sponsor_level', sponsorLevelQuery ) } ),
 			siteSettings  : apiFetch( { path: addQueryArgs( '/wp/v2/settings', {} ) } ),
-		}
+		};
 	}
 
 	/**
 	 * Renders SponsorEdit component.
+	 *
+	 * @return {Element}
 	 */
 	render() {
 		const { sponsorPosts, sponsorLevels, siteSettings } = this.state;
-		const { attributes } = this.props;
-		const { mode } = attributes;
+		const { attributes }                                = this.props;
+		const { mode }                                      = attributes;
 
 		return (
 			<Fragment>
@@ -75,10 +76,11 @@ class SponsorsEdit extends Component {
 						sponsorLevels={ sponsorLevels }
 						{ ...this.props }
 					/>
+
 					{ mode &&
-					<GridToolbar
-						{ ...this.props }
-					/>
+						<GridToolbar
+							{ ...this.props }
+						/>
 					}
 				</Fragment>
 			</Fragment>

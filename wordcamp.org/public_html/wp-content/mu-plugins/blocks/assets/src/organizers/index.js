@@ -6,10 +6,10 @@ const { __ } = wp.i18n;
 /**
  * Internal dependencies
  */
-import { edit }            from './edit';
+import { edit } from './edit';
 
-export const name = 'wordcamp/organizers';
-export const LABEL           = __( 'Organizers', 'wordcamporg' );
+export const name  = 'wordcamp/organizers';
+export const LABEL = __( 'Organizers', 'wordcamporg' );
 export const ICON  = 'groups';
 
 export const settings = {
@@ -17,8 +17,6 @@ export const settings = {
 	description : __( 'Add a list of organizers.', 'wordcamporg' ),
 	icon        : ICON,
 	category    : 'wordcamp',
-	edit,
-	save        : function() {
-		return null;
-	},
+	edit        : edit,
+	save        : () => null,
 };

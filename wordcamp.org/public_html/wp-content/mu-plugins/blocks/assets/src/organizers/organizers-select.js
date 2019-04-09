@@ -33,7 +33,6 @@ class OrganizersSelect extends Component {
 	}
 
 	fetchSelectOptions( props ) {
-
 		const { allOrganizerPosts, allOrganizerTerms } = props;
 
 		const parsedPosts = allOrganizerPosts.then(

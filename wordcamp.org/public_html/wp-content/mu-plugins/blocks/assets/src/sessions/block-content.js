@@ -7,7 +7,6 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-const { Disabled } = wp.components;
 const { Component } = wp.element;
 const { decodeEntities } = wp.htmlEntities;
 const { __ } = wp.i18n;
@@ -24,7 +23,9 @@ function SessionSpeakers( { session } ) {
 	let speakerData = get( session, '_embedded.speakers', [] );
 
 	speakerData = speakerData.map( ( speaker ) => {
-		let { link = '', title = {} } = speaker;
+		const { link = '' } = speaker;
+		let {  title = {} } = speaker;
+
 		title = title.rendered || __( 'Unnamed', 'wordcamporg' );
 
 		if ( ! link ) {
@@ -70,7 +71,10 @@ function SessionMeta( { session } ) {
 				decodeEntities( session.session_date_time.date ),
 				decodeEntities( session.session_date_time.time ),
 				(
-					<span className={ classnames( 'wordcamp-session-track', 'wordcamp-session-track-' + decodeEntities( firstTrack.slug.trim() ) ) }>
+					<span
+						key={ firstTrack.id }
+						className={ classnames( 'wordcamp-session-track', 'wordcamp-session-track-' + decodeEntities( firstTrack.slug.trim() ) ) }
+					>
 						{ decodeEntities( firstTrack.name.trim() ) }
 					</span>
 				),

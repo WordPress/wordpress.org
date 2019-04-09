@@ -3,7 +3,7 @@
  */
 const { PanelBody, PanelRow, SelectControl, ToggleControl } = wp.components;
 const { InspectorControls } = wp.editor;
-const { Component, Fragment } = wp.element;
+const { Component } = wp.element;
 const { __ } = wp.i18n;
 
 /**

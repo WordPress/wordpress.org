@@ -17,8 +17,6 @@ export const settings = {
 	description : __( 'Add a list of sessions.', 'wordcamporg' ),
 	icon        : ICON,
 	category    : 'wordcamp',
-	edit,
-	save        : function() {
-		return null;
-	},
+	edit        : edit,
+	save        : () => null,
 };

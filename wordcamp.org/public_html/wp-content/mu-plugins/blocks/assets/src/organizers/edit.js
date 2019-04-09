@@ -47,7 +47,6 @@ class OrganizersEdit extends Component {
 	}
 
 	fetchOrganizerDetails() {
-
 		const allOrganizerPosts = apiFetch( {
 			path: addQueryArgs( '/wp/v2/organizers', ALL_POSTS_QUERY ),
 		} );
@@ -113,8 +112,8 @@ const organizerSelect = ( select, props ) => {
 	);
 
 	return {
-		blockData,
-		organizerPosts: getEntityRecords( 'postType', 'wcb_organizer', organizersQuery ),
+		blockData      : blockData,
+		organizerPosts : getEntityRecords( 'postType', 'wcb_organizer', organizersQuery ),
 	};
 };
 

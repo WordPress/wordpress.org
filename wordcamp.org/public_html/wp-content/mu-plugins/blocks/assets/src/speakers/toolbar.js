@@ -1,15 +1,15 @@
 /**
  * WordPress dependencies
  */
-const { Toolbar } = wp.components;
+const { Toolbar }       = wp.components;
 const { BlockControls } = wp.editor;
-const { Component } = wp.element;
+const { Component }     = wp.element;
 
 class SpeakersToolbar extends Component {
 	render() {
 		const { attributes, setAttributes, blockData } = this.props;
-		const { layout } = attributes;
-		const { layout: layoutOptions = {} } = blockData.options;
+		const { layout }                               = attributes;
+		const { layout: layoutOptions = {} }           = blockData.options;
 
 		const controls = layoutOptions.map( ( option ) => {
 			const icon     = `${ option.value }-view`;
