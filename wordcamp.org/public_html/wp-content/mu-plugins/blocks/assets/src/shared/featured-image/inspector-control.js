@@ -2,92 +2,42 @@
  * WordPress dependencies
  */
 const { Component } = wp.element;
-const { PanelBody, PanelRow, TextControl, BaseControl, SelectControl } = wp.components;
-const { __ } = wp.i18n;
+const { PanelBody } = wp.components;
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-
-/**
- * Not sure if these sizes are actually useful.
- */
-const sizePresets = [
-	{
-		label : __( 'Thumbnail', 'wordcamporg' ),
-		value : '150',
-	},
-	{
-		label : __( 'Thumbnail - Large', 'wordcamporg' ),
-		value : '926',
-	},
-	{
-		label : __( 'Medium', 'wordcamporg' ),
-		value : '300',
-	},
-	{
-		label : __( 'Medium - Large', 'wordcamporg' ),
-		value : '768',
-	},
-	{
-		label : __( 'Large', 'wordcamporg' ),
-		value : '1024',
-	},
-	{
-		label : __( '(Custom)', 'wordcamporg' ),
-		value : '',
-	},
-];
+import { AvatarSizeControl } from '../avatar';
 
 /**
  * Implements inspector control for FeaturedImage component defined in ./index.js. Uses and sets attribute `featured_image_height` and `featured_image_width`.
  */
 class FeaturedImageInspectorControls extends Component {
-	constructor( props ) {
-		super( props );
-		this.availableSizes = sizePresets.map( ( size ) => size.value );
-	}
-
-	onPresetSizeSelect( size ) {
-		if ( size === '' ) {
-			return;
-		}
-		const { setAttributes } = this.props;
-		setAttributes( { featured_image_width: Number( size ) } );
-	}
-
+	/**
+	 * Renders inspector controls for FeatureImages.
+	 *
+	 * @returns {*}
+	 */
 	render() {
 		const { attributes, setAttributes, title, help, selectLabel } = this.props;
 		const { featured_image_width } = attributes;
-		const selectedValue = this.availableSizes.indexOf( featured_image_width.toString() ) === -1 ? '' : featured_image_width.toString();
 		return (
 			<PanelBody
 				title={ title }
 				initialopen={ false }
 			>
-				<PanelRow>
-					<BaseControl
-						help={ help }
-					>
-						<PanelRow>
-							<SelectControl
-								label={ selectLabel }
-								value={ selectedValue }
-								options={ sizePresets }
-								onChange={ ( size ) => this.onPresetSizeSelect( size ) }
-							/>
-						</PanelRow>
-						<PanelRow>
-							<TextControl
-								label={ __( 'Width (in px)', 'wordcamporg' ) }
-								type="number"
-								value={ featured_image_width }
-								onChange={ ( width ) => setAttributes( { featured_image_width: Number( width ) } ) }
-							/>
-						</PanelRow>
-					</BaseControl>
-				</PanelRow>
+				<AvatarSizeControl
+					onChange={ ( width ) => setAttributes( { featured_image_width: Number( width ) } ) }
+					label={ selectLabel }
+					initialPosition={ featured_image_width }
+					help={ help }
+					// TODO: Use settings from add_script_data instead of hardcoded values. Related: https://github.com/WordPress/wordcamp.org/issues/57.
+					rangeProps={ {
+						min : 25,
+						max : 1024,
+					} }
+				/>
 			</PanelBody>
 		);
 	}

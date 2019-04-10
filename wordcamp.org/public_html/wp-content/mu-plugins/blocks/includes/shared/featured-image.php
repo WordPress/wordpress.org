@@ -8,10 +8,12 @@ namespace WordCamp\Blocks\Shared\Components;
  * @param array    $class_names        Additional classes to add inside <img> tag.
  * @param \WP_Post $post               Current post object. This will be used to calculate srcset attribute.
  * @param int      $width              Width of the image.
+ * @param string   $image_link         URL link. If provided, image will be linked to this URL.
  *
  * @return string Output markup for featured image.
  */
 function render_featured_image( $class_names, $post, $width, $image_link = '' ) {
+
 	$class_names[]     = 'wordcamp-featured-image';
 	$class_names       = implode( ' ', $class_names );
 	$container_classes = "wordcamp-image-container wordcamp-featured-image-container $class_names";

@@ -201,10 +201,6 @@ function get_attributes_schema() {
 			'enum'    => array( 'list', 'grid' ),
 			'default' => 'list',
 		),
-		'featured_image_height' => array(
-			'type'    => 'integer',
-			'default' => 150,
-		),
 		'featured_image_width'  => array(
 			'type'    => 'integer',
 			'default' => 150,

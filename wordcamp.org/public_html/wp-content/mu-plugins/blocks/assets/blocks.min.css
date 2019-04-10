@@ -25,7 +25,7 @@
 .wordcamp-item-meta {
   margin: 0 0 1.5em; }
 
-.wordcamp-clearfix:after {
+.wordcamp-clearfix::after {
   content: "";
   display: table;
   clear: both; }
