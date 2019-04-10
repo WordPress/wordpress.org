@@ -94,6 +94,8 @@ class Hooks {
 		// Don't 404 user profile pages. Fixed in bbPress 2.6: https://bbpress.trac.wordpress.org/ticket/3047
 		add_filter( 'bbp_template_redirect', array( $this, 'disable_404_for_user_profile' ) );
 
+		// Deindex Support Forum Feeds. bbPress hooks in way earlier than most Core feed functions..
+		add_action( 'request', array( $this, 'deindex_forum_feeds' ), 5 );
 	}
 
 	/**
@@ -857,5 +859,18 @@ class Hooks {
 		if ( bbpress()->displayed_user && bbpress()->displayed_user->exists() ) {
 			status_header( 200 );
 		}
+	}
+
+	/**
+	 * Deindex Forum feeds.
+	 *
+	 * bbPress hooks in way earlier than most Core feed functions, so this is hooked to 'request' at priority 5.
+	 */
+	function deindex_forum_feeds( $query_vars ) {
+		if ( isset( $query_vars['feed'] ) ) {
+			header( 'X-Robots-Tag: noindex, follow' );
+		}
+
+		return $query_vars;
 	}
 }
