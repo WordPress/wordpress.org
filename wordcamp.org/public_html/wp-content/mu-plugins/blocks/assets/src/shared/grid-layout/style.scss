@@ -1,11 +1,10 @@
-.wordcamp-clearfix:after {
+.wordcamp-clearfix::after {
 	content: "";
 	display: table;
 	clear: both;
 }
 
 .wordcamp-block-post-list {
-
 	li {
 		list-style: none;
 	}
@@ -16,6 +15,7 @@
 
 	&.layout-list > li {
 		margin-bottom: 1em;
+
 		&:last-child {
 			margin-bottom: 0;
 		}
@@ -32,6 +32,7 @@
 			/* https://stackoverflow.com/a/43312314 */
 			min-height: 0;
 			min-width: 0;
+
 			& .wordcamp-block-post-list-item {
 				overflow: hidden;
 				min-width: 0;

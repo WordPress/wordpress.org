@@ -45,6 +45,7 @@
 		"start": "cross-env BABEL_ENV=development NODE_ENV=development webpack --watch",
 		"debug": "cross-env BABEL_ENV=development NODE_ENV=development SOURCE_MAPS=1 webpack --watch",
 		"build": "cross-env BABEL_ENV=production NODE_ENV=production webpack",
-		"lint:js": "wp-scripts lint-js ."
+		"lint:js": "wp-scripts lint-js .",
+		"lint:css": "wp-scripts lint-style '**/*.scss'"
 	}
 }
