@@ -67,11 +67,7 @@ get_header( 'child-page' );
 							?>
 							<h3 id="latest"><?php esc_html_e( 'Latest release', 'wporg' ); ?></h3>
 							<table class="releases latest">
-								<col width="15%" />
-								<col width="25%" />
-								<col width="15%" />
-								<col width="15%" />
-								<col width="15%" />
+								<?php release_cols(); ?>
 								<?php release_row( $releases['latest'] ); ?>
 							</table>
 							<?php
@@ -92,11 +88,7 @@ get_header( 'child-page' );
 									?>
 								</h3>
 								<table class="releases">
-									<col width="15%" />
-									<col width="25%" />
-									<col width="15%" />
-									<col width="15%" />
-									<col width="15%" />
+									<?php release_cols(); ?>
 									<?php
 									foreach ( $branch_release as $release ) :
 										release_row( $release );
@@ -112,11 +104,7 @@ get_header( 'child-page' );
 							<h3 id="betas"><?php esc_html_e( 'Beta &amp; RC releases', 'wporg' ); ?></h3>
 							<p><?php esc_html_e( 'These were testing releases and are only available here for archival purposes.', 'wporg' ); ?></p>
 							<table id="beta" class="releases">
-								<col width="15%" />
-								<col width="25%" />
-								<col width="15%" />
-								<col width="15%" />
-								<col width="15%" />
+								<?php release_cols(); ?>
 								<?php
 								foreach ( $releases['betas'] as $release ) :
 									release_row( $release );
@@ -132,11 +120,7 @@ get_header( 'child-page' );
 							<h3 id="mu"><?php esc_html_e( 'MU releases', 'wporg' ); ?></h3>
 							<p><?php esc_html_e( 'WordPress MU releases made prior to MU being merged into WordPress 3.0', 'wporg' ); ?></p>
 							<table class="releases">
-								<col width="15%" />
-								<col width="30%" />
-								<col width="15%" />
-								<col width="15%" />
-								<col width="15%" />
+								<?php release_cols(); ?>
 								<?php
 								foreach ( $releases['mu'] as $release ) :
 									release_row( $release );

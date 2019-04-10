@@ -10,6 +10,21 @@
 namespace WordPressdotorg\MainTheme;
 
 /**
+ * Displays table col tags.
+ */
+function release_cols() {
+	?>
+	<col width="15%" />
+	<col width="25%" />
+	<col width="15%" />
+	<col width="15%" />
+	<?php if ( ! defined( 'IS_ROSETTA_NETWORK' ) || ! IS_ROSETTA_NETWORK ) : ?>
+		<col width="15%" />
+	<?php endif; ?>
+	<?php
+}
+
+/**
  * Displays a table row with release information.
  *
  * @param array $release Release to be processed.
