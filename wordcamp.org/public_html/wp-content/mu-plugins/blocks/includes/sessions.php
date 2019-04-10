@@ -3,6 +3,7 @@
 namespace WordCamp\Blocks\Sessions;
 use WordCamp\Blocks;
 use function WordCamp\Blocks\Shared\Components\{ render_grid_layout };
+use function WordCamp\Blocks\Shared\Definitions\{ get_shared_definitions, get_shared_definition };
 
 defined( 'WPINC' ) || die();
 
@@ -96,99 +97,48 @@ add_filter( 'wordcamp_blocks_script_data', __NAMESPACE__ . '\add_script_data' );
  * @return array
  */
 function get_attributes_schema() {
-	return [
-		'mode' => [
-			'type'    => 'string',
-			'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),
-			'default' => '',
-		],
-
-		'item_ids' => [
-			'type'    => 'array',
-			'default' => [],
-			'items'   => [
-				'type' => 'integer',
+	$schema = array_merge(
+		get_shared_definitions(
+			[
+				'content',
+				'grid_columns',
+				'item_ids',
+				'layout',
 			],
-		],
-
-		'sort' => [
-			'type'    => 'string',
-			'enum'    => wp_list_pluck( get_options( 'sort' ), 'value' ),
-			'default' => 'session_time',
-		],
-
-		'className' => [
-			'type'    => 'string',
-			'default' => '',
-		],
-
-		'show_speaker' => [
-			'type'    => 'bool',
-			'default' => false,
-		],
-
-		'show_images' => [
-			'type'    => 'bool',
-			'default' => true,
-		],
-
-		'image_size' => [
-			'type'    => 'integer',
-			'minimum' => 25,
-			'maximum' => 600,
-			'default' => 150,
-		],
-
-		'image_align' => [
-			'type'    => 'string',
-			'enum'    => wp_list_pluck( get_options( 'align' ), 'value' ),
-			'default' => 'none',
-		],
-
-		'content' => [
-			'type'    => 'string',
-			'enum'    => wp_list_pluck( get_options( 'content' ), 'value' ),
-			'default' => 'full',
-		],
-
-		'excerpt_more' => [
-			'type'    => 'bool',
-			'default' => false,
-		],
-
-		'show_meta' => [
-			'type'    => 'bool',
-			'default' => false,
-		],
-
-		'show_category' => [
-			'type'    => 'bool',
-			'default' => false,
-		],
-
-		'layout' => [
-			'type'    => 'string',
-			'enum'    => array( 'list', 'grid' ),
-			'default' => 'list',
-		],
-
-		'grid_columns' => array(
-			'type'    => 'integer',
-			'minimum' => 1,
-			'maximum' => 4,
-			'default' => 1,
+			'attribute'
 		),
+		[
+			'className'            => get_shared_definition( 'string_empty', 'attribute' ),
+			'excerpt_more'         => get_shared_definition( 'boolean_false', 'attribute' ),
+			'featured_image_width' => array(
+				'type'    => 'integer',
+				'default' => 150,
+			),
+			'image_align'          => get_shared_definition( 'align_image', 'attribute' ),
+			'image_size'           => [
+				'type'    => 'integer',
+				'minimum' => 25,
+				'maximum' => 600,
+				'default' => 150,
+			],
+			'mode'                 => [
+				'type'    => 'string',
+				'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),
+				'default' => '',
+			],
+			'show_category'        => get_shared_definition( 'boolean_false', 'attribute' ),
+			'show_images'          => get_shared_definition( 'boolean_true', 'attribute' ),
+			'show_meta'            => get_shared_definition( 'boolean_false', 'attribute' ),
+			'show_speaker'         => get_shared_definition( 'boolean_false', 'attribute' ),
+			'sort'                 => [
+				'type'    => 'string',
+				'enum'    => wp_list_pluck( get_options( 'sort' ), 'value' ),
+				'default' => 'session_time',
+			],
+		]
+	);
 
-		'featured_image_height' => array(
-			'type'    => 'integer',
-			'default' => 150,
-		),
-
-		'featured_image_width' => array(
-			'type'    => 'integer',
-			'default' => 150,
-		),
-	];
+	return $schema;
 }
 
 /**
@@ -199,84 +149,51 @@ function get_attributes_schema() {
  * @return array
  */
 function get_options( $type = '' ) {
-	$options = [
-		'align'   => [
+	$options = array_merge(
+		get_shared_definitions(
 			[
-				'label' => _x( 'None', 'alignment option', 'wordcamporg' ),
-				'value' => 'none',
+				'align_block',
+				'align_image',
+				'content',
+				'layout',
 			],
-			[
-				'label' => _x( 'Left', 'alignment option', 'wordcamporg' ),
-				'value' => 'left',
+			'option'
+		),
+		[
+			'mode' => [
+				[
+					'label' => '',
+					'value' => '',
+				],
+				[
+					'label' => _x( 'List all sessions', 'mode option', 'wordcamporg' ),
+					'value' => 'all',
+				],
+				[
+					'label' => _x( 'Choose sessions', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_session',
+				],
+				[
+					'label' => _x( 'Choose tracks', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_track',
+				],
+				[
+					'label' => _x( 'Choose session categories', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_session_category',
+				],
 			],
-			[
-				'label' => _x( 'Center', 'alignment option', 'wordcamporg' ),
-				'value' => 'center',
-			],
-			[
-				'label' => _x( 'Right', 'alignment option', 'wordcamporg' ),
-				'value' => 'right',
-			],
-		],
-		'content' => [
-			[
-				'label' => _x( 'Full', 'content option', 'wordcamporg' ),
-				'value' => 'full',
-			],
-			[
-				'label' => _x( 'Excerpt', 'content option', 'wordcamporg' ),
-				'value' => 'excerpt',
-			],
-			[
-				'label' => _x( 'None', 'content option', 'wordcamporg' ),
-				'value' => 'none',
-			],
-		],
-		'mode'    => [
-			[
-				'label' => '',
-				'value' => '',
-			],
-			[
-				'label' => _x( 'List all sessions', 'mode option', 'wordcamporg' ),
-				'value' => 'all',
-			],
-			[
-				'label' => _x( 'Choose sessions', 'mode option', 'wordcamporg' ),
-				'value' => 'wcb_session',
-			],
-			[
-				'label' => _x( 'Choose tracks', 'mode option', 'wordcamporg' ),
-				'value' => 'wcb_track',
-			],
-			[
-				'label' => _x( 'Choose session categories', 'mode option', 'wordcamporg' ),
-				'value' => 'wcb_session_category',
-			],
-		],
-		'sort'    => [
-			[
-				'label' => _x( 'Day and Time', 'sort option', 'wordcamporg' ),
-				'value' => 'session_time',
-			],
-			[
-				'label' => _x( 'A → Z', 'sort option', 'wordcamporg' ),
-				'value' => 'title_asc',
-			],
-			[
-				'label' => _x( 'Z → A', 'sort option', 'wordcamporg' ),
-				'value' => 'title_desc',
-			],
-			[
-				'label' => _x( 'Newest to Oldest', 'sort option', 'wordcamporg' ),
-				'value' => 'date_desc',
-			],
-			[
-				'label' => _x( 'Oldest to Newest', 'sort option', 'wordcamporg' ),
-				'value' => 'date_asc',
-			],
-		],
-	];
+			'sort' => array_merge(
+				[
+					[
+						'label' => _x( 'Day and Time', 'sort option', 'wordcamporg' ),
+						'value' => 'session_time',
+					],
+				],
+				get_shared_definition( 'sort_title', 'option' ),
+				get_shared_definition( 'sort_date', 'option' )
+			),
+		]
+	);
 
 	if ( $type ) {
 		if ( ! empty( $options[ $type ] ) ) {

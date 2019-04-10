@@ -27,9 +27,9 @@ const DEFAULT_SCHEMA = {
 };
 
 const DEFAULT_OPTIONS = {
-	align   : {},
-	content : {},
-	sort    : {},
+	align_image : {},
+	content     : {},
+	sort        : {},
 };
 
 class SpeakerInspectorControls extends Component {
@@ -70,7 +70,7 @@ class SpeakerInspectorControls extends Component {
 									label={ __( 'Alignment', 'wordcamporg' ) }
 									value={ avatar_align }
 									onChange={ ( value ) => setAttributes( { avatar_align: value } ) }
-									alignOptions={ options.align }
+									alignOptions={ options.align_image }
 								/>
 							</PanelRow>
 						</Fragment>

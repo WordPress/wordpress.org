@@ -13,6 +13,7 @@ define( __NAMESPACE__ . '\PLUGIN_URL', \plugins_url( '/', __FILE__ ) );
 function load() {
 	require_once PLUGIN_DIR . 'includes/shared/grid-layout.php';
 	require_once PLUGIN_DIR . 'includes/shared/featured-image.php';
+	require_once PLUGIN_DIR . 'includes/shared/definitions.php';
 
 	require_once PLUGIN_DIR . 'includes/shared.php';
 	require_once PLUGIN_DIR . 'includes/organizers.php';

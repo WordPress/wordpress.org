@@ -74,7 +74,7 @@ class OrganizerInspectorControls extends Component {
 									label={ __( 'Alignment', 'wordcamporg' ) }
 									value={ avatar_align }
 									onChange={ ( value ) => setAttributes( { avatar_align: value } ) }
-									alignOptions={ options.align }
+									alignOptions={ options.align_image }
 								/>
 							</PanelRow>
 						</Fragment>
