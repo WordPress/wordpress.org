@@ -74,6 +74,11 @@ class Theme_Directory_Compat extends Directory_Compat {
 			return;
 		}
 
+		if ( '_redirect_' == $slug ) {
+			wp_safe_redirect( 'https://wordpress.org/themes/', 301 );
+			exit;
+		}
+
 		$theme = $this->get_object( $slug );
 		if ( ! $theme ) {
 			status_header( 404 );

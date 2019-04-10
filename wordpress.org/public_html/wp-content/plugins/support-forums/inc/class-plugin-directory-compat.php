@@ -74,6 +74,11 @@ class Plugin_Directory_Compat extends Directory_Compat {
 			return;
 		}
 
+		if ( '_redirect_' == $slug ) {
+			wp_safe_redirect( 'https://wordpress.org/plugins/', 301 );
+			exit;
+		}
+
 		$plugin = $this->get_object( $slug );
 		if ( ! $plugin ) {
 			status_header( 404 );

@@ -455,6 +455,9 @@ abstract class Directory_Compat {
 		$feed_rule  = $feed_slug  . '/?$';
 		$paged_rule = $paged_slug . '/?([0-9]{1,})/?$';
 
+		// Add base rule, so that /support/$compat_slug/ doesn't redirect to a random topic.
+		add_rewrite_rule( $this->compat() . '/?$',  'index.php?' . $view_id . '=' . $review_id . '&' . $root_var . '=_redirect_', $priority );
+
 		// Add reviews view rewrite rules.
 		add_rewrite_rule( $reviews_rule . $base_rule,  'index.php?' . $view_id . '=' . $review_id . '&' . $root_var . '=$matches[1]',                               $priority );
 		add_rewrite_rule( $reviews_rule . $paged_rule, 'index.php?' . $view_id . '=' . $review_id . '&' . $root_var . '=$matches[1]&' . $paged_id . '=$matches[2]', $priority );
