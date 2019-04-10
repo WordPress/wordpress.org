@@ -289,6 +289,13 @@ abstract class Directory_Compat {
 			// Set the term for this view so we can reuse it.
 			$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
 
+			// New compats won't have any support topics or reviews, so will
+			// not yet exist as a compat term.
+			if ( ! $this->term && $this->get_object( $this->slug() ) ) {
+				$term = wp_insert_term( $this->slug(), $this->taxonomy() );
+				$this->term = get_term( $term['term_id'] );
+			}
+
 			// Add plugin- and theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar',       array( $this, 'do_view_sidebar' ) );
 			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
@@ -741,15 +748,13 @@ abstract class Directory_Compat {
 		do_action( 'bbp_template_notices' );
 
 		$term_subscription = '';
-		$term = $this->term;
-		if ( ! $term ) {
+		if ( ! $this->term && $this->get_object( $this->slug() ) ) {
 			// New compats won't have any support topics or reviews, so will
 			// not yet exist as a compat term.
 			$term = wp_insert_term( $this->slug(), $this->taxonomy() );
-			$term = get_term( $term['term_id'] );
+			$this->term = get_term( $term['term_id'] );
 		}
-		if ( $term ) {
-			$this->term = $term;
+		if ( $this->term ) {
 			$subscribe = $unsubscribe = '';
 			if ( 'plugin' == $this->compat() ) {
 				$subscribe   = esc_html__( 'Subscribe to this plugin', 'wporg-forums' );
@@ -759,7 +764,7 @@ abstract class Directory_Compat {
 				$unsubscribe = esc_html__( 'Unsubscribe from this theme', 'wporg-forums' );
 			}
 			$term_subscription = Term_Subscription\Plugin::get_subscription_link( array(
-				'term_id'     => $term->term_id,
+				'term_id'     => $this->term->term_id,
 				'taxonomy'    => $this->taxonomy(),
 				'subscribe'   => $subscribe,
 				'unsubscribe' => $unsubscribe,
