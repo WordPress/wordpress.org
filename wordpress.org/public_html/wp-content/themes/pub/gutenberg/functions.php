@@ -861,7 +861,8 @@ function gutenbergtheme_handbook_redirects() {
 	// Any handbook pages where the filename changes should be listed here.
 	// If only the parent path changes, it's not needed and WordPress will handle it automatically.
 	$redirects = [
-		'reference/deprecated'           => 'designers-developers/developers/backwards-compatibility/deprecations/',
+		'designers-developers/developers/backwards-compatibility' => 'designers-developers/developers/backward-compatibility/',
+		'reference/deprecated'           => 'designers-developers/developers/backward-compatibility/deprecations/',
 		'extensibility/annotations'      => 'designers-developers/developers/block-api/block-annotations/',
 		'block-api/attributes'           => 'designers-developers/developers/block-api/block-attributes/',
 		'block-api/deprecated-blocks'    => 'designers-developers/developers/block-api/block-deprecation/',
