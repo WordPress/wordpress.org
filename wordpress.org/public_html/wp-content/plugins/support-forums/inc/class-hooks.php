@@ -95,7 +95,7 @@ class Hooks {
 		add_filter( 'bbp_template_redirect', array( $this, 'disable_404_for_user_profile' ) );
 
 		// Deindex Support Forum Feeds. bbPress hooks in way earlier than most Core feed functions..
-		add_action( 'request', array( $this, 'deindex_forum_feeds' ), 5 );
+		add_filter( 'request', array( $this, 'deindex_forum_feeds' ), 5 );
 	}
 
 	/**
