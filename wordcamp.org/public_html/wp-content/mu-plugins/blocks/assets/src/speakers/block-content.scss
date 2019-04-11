@@ -1,4 +1,4 @@
-.wordcamp-speaker-session-list {
+.wordcamp-speaker-sessions-list {
 	// The double-ampersand defeats an overzealous ul rule in Core's editor-blocks.css.
 	// https://css-tricks.com/the-sass-ampersand/#article-header-id-11
 	ul#{&},
@@ -6,4 +6,13 @@
 		list-style: none;
 		margin: 0;
 	}
+}
+
+.wordcamp-speaker-session-link,
+.wordcamp-speaker-session-info {
+	display: block;
+}
+
+.wordcamp-speaker-session-info {
+	font-style: italic;
 }
