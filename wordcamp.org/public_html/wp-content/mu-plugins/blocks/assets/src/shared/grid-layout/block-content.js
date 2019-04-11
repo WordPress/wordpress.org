@@ -19,16 +19,21 @@ import './style.scss';
 class GridContentLayout extends Component {
 	render() {
 		const { attributes, className, children } = this.props;
-		const { grid_columns, layout } = attributes;
+		const { grid_columns, layout, align } = attributes;
 
 		const containerClasses = [
+			'wordcamp-block',
+			'wordcamp-block-post-list',
 			'layout-' + layout,
 			className,
-			'wordcamp-block-post-list',
 		];
 
 		if ( 'grid' === layout ) {
 			containerClasses.push( 'grid-columns-' + Number( grid_columns ) );
+		}
+
+		if ( align ) {
+			containerClasses.push( 'align' + align );
 		}
 
 		return (

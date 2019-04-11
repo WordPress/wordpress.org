@@ -23,7 +23,10 @@ class OrganizersBlockContent extends Component {
 		const { show_avatars, avatar_size, avatar_align, content, excerpt_more } = attributes;
 
 		return (
-			<GridContentLayout { ...this.props } >
+			<GridContentLayout
+				className="wordcamp-organizers-block"
+				{ ...this.props }
+			>
 				{ organizerPosts.map( ( post ) =>
 					<div
 						key={ post.slug }

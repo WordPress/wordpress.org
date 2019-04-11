@@ -55,6 +55,9 @@ function render( $attributes ) {
 		'wordcamp-sessions-block',
 		sanitize_html_class( $attributes['className'] ),
 	];
+	if ( ! empty( $attributes['align'] ) ) {
+		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
+	}
 
 	$rendered_session_posts = [];
 	foreach ( $sessions as $session ) {

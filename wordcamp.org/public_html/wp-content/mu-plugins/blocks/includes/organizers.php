@@ -50,6 +50,9 @@ function render( $attributes ) {
 	if ( 'grid' === $attributes['layout'] ) {
 		$container_classes[] = 'grid-columns-' . absint( $attributes['grid_columns'] );
 	}
+	if ( ! empty( $attributes['align'] ) ) {
+		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
+	}
 
 	$container_classes = implode( ' ', $container_classes );
 

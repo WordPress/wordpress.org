@@ -161,7 +161,10 @@ class SponsorBlockContent extends Component {
 		const { selectedPosts } = this.state;
 
 		return (
-			<GridContentLayout { ...this.props } >
+			<GridContentLayout
+				className="wordcamp-sponsors-block"
+				{ ...this.props }
+			>
 				{
 					selectedPosts.map( ( post ) => {
 						return (

@@ -140,7 +140,10 @@ class SessionsBlockContent extends Component {
 		const { show_speaker, show_images, image_align, featured_image_width, content, excerpt_more, show_meta, show_category } = attributes;
 
 		return (
-			<GridContentLayout { ...this.props } >
+			<GridContentLayout
+				className="wordcamp-sessions-block"
+				{ ...this.props }
+			>
 				{ sessionPosts.map( ( post ) =>
 					<div
 						key={ post.slug }

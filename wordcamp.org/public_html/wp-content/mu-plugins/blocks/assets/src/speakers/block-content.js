@@ -94,6 +94,7 @@ class SpeakersBlockContent extends Component {
 
 		return (
 			<GridContentLayout
+				className="wordcamp-speakers-block"
 				{ ...this.props }
 			>
 				{ speakerPosts.map( ( post ) =>

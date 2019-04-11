@@ -35,9 +35,14 @@ function render( $attributes ) {
 	$sponsors = get_sponsor_posts( $attributes );
 
 	$container_classes = array(
+		'wordcamp-block',
+		'wordcamp-block-post-list',
 		'wordcamp-sponsors-block',
-		'wordcamp-sponsors-list',
+		sanitize_html_class( $attributes['className'] ),
 	);
+	if ( ! empty( $attributes['align'] ) ) {
+		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
+	}
 
 	$rendered_sponsor_posts = array();
 
