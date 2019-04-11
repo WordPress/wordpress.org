@@ -150,6 +150,8 @@ function get_speaker_sessions( array $speaker_ids ) {
 		$session_speaker_ids = get_post_meta( $session->ID, '_wcpt_speaker_id', false );
 
 		foreach ( $session_speaker_ids as $speaker_id ) {
+			$speaker_id = absint( $speaker_id );
+
 			if ( in_array( $speaker_id, $speaker_ids, true ) ) {
 				if ( ! isset( $sessions_by_speaker[ $speaker_id ] ) ) {
 					$sessions_by_speaker[ $speaker_id ] = [];
