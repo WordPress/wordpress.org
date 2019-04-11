@@ -1,7 +1,7 @@
 <?php
 
 namespace WordCamp\Blocks\Organizers;
-use function WordCamp\Blocks\Shared\{ get_all_the_content };
+use function WordCamp\Blocks\Shared\Content\{ get_all_the_content };
 
 defined( 'WPINC' ) || die();
 

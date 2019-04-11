@@ -1,5 +1,5 @@
 <?php
-namespace WordCamp\Blocks\Shared;
+namespace WordCamp\Blocks\Shared\Content;
 defined( 'WPINC' ) || die();
 
 use WP_Post;

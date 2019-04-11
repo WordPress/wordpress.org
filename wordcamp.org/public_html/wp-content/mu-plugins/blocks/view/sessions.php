@@ -2,7 +2,7 @@
 
 namespace WordCamp\Blocks\Sessions;
 use WP_Post;
-use function WordCamp\Blocks\Shared\{ get_all_the_content, array_to_human_readable_list };
+use function WordCamp\Blocks\Shared\Content\{ get_all_the_content, array_to_human_readable_list };
 use function WordCamp\Blocks\Shared\Components\{ render_featured_image };
 
 defined( 'WPINC' ) || die();

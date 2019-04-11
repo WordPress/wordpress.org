@@ -11,11 +11,11 @@ define( __NAMESPACE__ . '\PLUGIN_URL', \plugins_url( '/', __FILE__ ) );
  * @return void
  */
 function load() {
-	require_once PLUGIN_DIR . 'includes/shared/grid-layout.php';
-	require_once PLUGIN_DIR . 'includes/shared/featured-image.php';
+	require_once PLUGIN_DIR . 'includes/shared/content.php';
 	require_once PLUGIN_DIR . 'includes/shared/definitions.php';
+	require_once PLUGIN_DIR . 'includes/shared/featured-image.php';
+	require_once PLUGIN_DIR . 'includes/shared/grid-layout.php';
 
-	require_once PLUGIN_DIR . 'includes/shared.php';
 	require_once PLUGIN_DIR . 'includes/organizers.php';
 	require_once PLUGIN_DIR . 'includes/sessions.php';
 	require_once PLUGIN_DIR . 'includes/speakers.php';

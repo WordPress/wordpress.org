@@ -2,7 +2,7 @@
 namespace WordCamp\Blocks\Sponsors;
 defined( 'WPINC' ) || die();
 
-use function WordCamp\Blocks\Shared\{ get_all_the_content };
+use function WordCamp\Blocks\Shared\Content\{ get_all_the_content };
 use function WordCamp\Blocks\Shared\Components\{ render_featured_image };
 
 /** @var array     $attributes */
