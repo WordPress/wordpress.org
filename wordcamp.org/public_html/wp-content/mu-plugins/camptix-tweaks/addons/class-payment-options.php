@@ -69,6 +69,7 @@ class Payment_Options extends CampTix_Addon {
 	 * @param string $selected_payment_method Already selected payment method.
 	 */
 	function generate_payment_options( $payment_output, $total, $payment_methods, $selected_payment_method ) {
+		ob_start();
 		?>
 		<div class="tix-submit">
 			<?php if ( $total > 0 ) : ?>
@@ -93,6 +94,7 @@ class Payment_Options extends CampTix_Addon {
 			<br class="tix-clear" />
 		</div>
 		<?php
+		return ob_get_clean();
 	}
 
 	/**
