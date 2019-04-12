@@ -3,6 +3,7 @@
 namespace WordCamp\CampTix_Tweaks;
 use CampTix_Plugin;
 use WP_Post;
+use WordCamp\Utilities\Form_Spam_Prevention;
 
 defined( 'WPINC' ) or die();
 
@@ -14,7 +15,9 @@ add_filter( 'camptix_stripe_predefined_accounts',            __NAMESPACE__ . '\s
 add_action( 'init',                                          __NAMESPACE__ . '\hide_empty_tickets'                  );
 add_action( 'wp_print_styles',                               __NAMESPACE__ . '\print_login_message_styles'          );
 add_filter( 'camptix_require_login_please_login_message',    __NAMESPACE__ . '\override_please_login_message'       );
+add_action( 'camptix_checkout_start',                        __NAMESPACE__ . '\check_ip_throttling'                 );
 add_action( 'camptix_form_start_errors',                     __NAMESPACE__ . '\add_form_start_error_messages'       );
+add_filter( 'camptix_form_attendee_info_errors',             __NAMESPACE__ . '\show_throttle_notice'                );
 add_action( 'transition_post_status',                        __NAMESPACE__ . '\ticket_sales_opened',          10, 3 );
 add_action( 'camptix_payment_result',                        __NAMESPACE__ . '\track_payment_results',        10, 3 );
 add_filter( 'camptix_shortcode_contents',                    __NAMESPACE__ . '\modify_shortcode_contents',    10, 2 );
@@ -42,6 +45,8 @@ add_filter( 'camptix_html_message',                          __NAMESPACE__ . '\r
 add_action( 'camptix_tshirt_report_intro',                   __NAMESPACE__ . '\tshirt_report_intro_message',  10, 3 );
 add_filter( 'camptix_stripe_checkout_image_url',             __NAMESPACE__ . '\stripe_default_checkout_image_url'   );
 
+// Prefix for Form_Spam_Prevention class.
+define( 'WC_CAMPTIX_FSP_PREFIX', 'wc-camptix-fsp-prefix' );
 
 /**
  * Warn organizers when CampTix is in sandbox mode
@@ -917,6 +922,42 @@ function modify_shortcode_contents( $shortcode_contents, $tix_action ) {
 	}
 
 	return $shortcode_contents;
+}
+
+/**
+ * Show error message if IP Address has been throttled by `Form_Spam_Prevention`.
+ * We are not using honeypot feature provided by Form_Spam_Prevention because we do not want to be aggressive with blocking requests in ticket purchase page. We only block when we are extremely sure that its a bad actor, and even if it is a bot, we let it go if its not annoying.
+ */
+function show_throttle_notice() {
+	global $camptix;
+
+	$fsp = new Form_Spam_Prevention( [ 'prefix' => WC_CAMPTIX_FSP_PREFIX ] );
+
+	if ( $fsp->is_ip_address_throttled() ) {
+		$camptix->error( __( 'You are purchasing tickets too fast. Your IP address has been throttled for an hour since last ticket purchase.', 'wordcamporg' ) );
+
+		// With some payment methods, payment could have been  deducted in the frontend before making a checkout request.
+		// Therefore its important that we disable payment methods tab if we are going to block the checkout request.
+		add_filter( 'tix_render_payment_options', '__return_empty_string', 20 );
+	}
+
+}
+
+/**
+ * Checks if IP is throttled. If not then increments the score by 0.1. This does not handle any sophisticated attack, but is just there so that we do not have to delete junk tickets if a security researcher runs a test on site.
+ *
+ * Maximum score threshold in Form_Spam_Prevention is 4, so using 0.1 implies an IP address will be able to make 39 purchase request before getting throttled.
+ */
+function check_ip_throttling() {
+	global $camptix;
+
+	$fsp = new Form_Spam_Prevention( [ 'prefix' => WC_CAMPTIX_FSP_PREFIX ] );
+
+	if ( $fsp->is_ip_address_throttled() ) {
+		$camptix->error_flag( 'ip_address_throttled' );
+	} else {
+		$fsp->add_score_to_ip_address( [ 0.1 ] );
+	}
 }
 
 /**
