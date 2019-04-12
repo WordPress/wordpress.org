@@ -293,7 +293,13 @@ abstract class Directory_Compat {
 			// not yet exist as a compat term.
 			if ( ! $this->term && $this->get_object( $this->slug() ) ) {
 				$term = wp_insert_term( $this->slug(), $this->taxonomy() );
-				$this->term = get_term( $term['term_id'] );
+
+				// Term exists already? Race-condition, or get_term_by() couldn't find $slug..
+				if ( is_wp_error( $term ) && $term->get_error_data( 'term_exists' ) ) {
+					$this->term = get_term( $term->get_error_data( 'term_exists' ) );
+				} elseif ( isset( $term['term_id'] ) ) {
+					$this->term = get_term( $term['term_id'] );
+				}
 			}
 
 			// Add plugin- and theme-specific filters and actions.
@@ -748,12 +754,6 @@ abstract class Directory_Compat {
 		do_action( 'bbp_template_notices' );
 
 		$term_subscription = '';
-		if ( ! $this->term && $this->get_object( $this->slug() ) ) {
-			// New compats won't have any support topics or reviews, so will
-			// not yet exist as a compat term.
-			$term = wp_insert_term( $this->slug(), $this->taxonomy() );
-			$this->term = get_term( $term['term_id'] );
-		}
 		if ( $this->term ) {
 			$subscribe = $unsubscribe = '';
 			if ( 'plugin' == $this->compat() ) {
