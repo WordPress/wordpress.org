@@ -8,7 +8,6 @@ import classnames from 'classnames';
  */
 const { Disabled } = wp.components;
 const { Fragment, RawHTML } = wp.element;
-const { decodeEntities } = wp.htmlEntities;
 const { __ } = wp.i18n;
 
 /**
@@ -36,14 +35,14 @@ export function ItemTitle( { headingLevel, className, title, link } ) {
 			{ link &&
 				<Disabled>
 					<a href={ link }>
-						{ decodeEntities( content ) }
+						{ content }
 					</a>
 				</Disabled>
 			}
 
 			{ ! link &&
 				<Fragment>
-					{ decodeEntities( content ) }
+					{ content }
 				</Fragment>
 			}
 		</Tag>

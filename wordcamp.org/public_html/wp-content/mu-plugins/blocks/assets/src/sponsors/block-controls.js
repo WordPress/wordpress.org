@@ -6,7 +6,6 @@ import { get, includes, intersection } from 'lodash';
 /**
  * WordPress dependencies
  */
-const { decodeEntities } = wp.htmlEntities;
 const { __ } = wp.i18n;
 
 /**
@@ -124,7 +123,7 @@ class SponsorBlockControls extends BlockControls {
 			( fetchedPosts ) => {
 				const posts = fetchedPosts.map(
 					( post ) => {
-						const label = decodeEntities( post.title.rendered.trim() ) || __( '(Untitled)', 'wordcamporg' );
+						const label = post.title.rendered.trim() || __( '(Untitled)', 'wordcamporg' );
 
 						return {
 							label             : label,
@@ -146,7 +145,7 @@ class SponsorBlockControls extends BlockControls {
 			( fetchedTerms ) => {
 				const terms = fetchedTerms.map( ( term ) => {
 					return {
-						label : decodeEntities( term.name ) || __( '(Untitled)', 'wordcamporg' ),
+						label : term.name.trim() || __( '(Untitled)', 'wordcamporg' ),
 						value : term.id,
 						type  : 'term',
 						count : term.count,

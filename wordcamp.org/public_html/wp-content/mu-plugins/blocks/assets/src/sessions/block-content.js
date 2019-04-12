@@ -8,7 +8,6 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 const { Component } = wp.element;
-const { decodeEntities } = wp.htmlEntities;
 const { __ } = wp.i18n;
 
 /**
@@ -26,10 +25,10 @@ function SessionSpeakers( { session } ) {
 		const { link = '' } = speaker;
 		let {  title = {} } = speaker;
 
-		title = title.rendered || __( 'Unnamed', 'wordcamporg' );
+		title = title.rendered.trim() || __( 'Unnamed', 'wordcamporg' );
 
 		if ( ! link ) {
-			return decodeEntities( title.trim() );
+			return title;
 		}
 
 		return (
@@ -37,7 +36,7 @@ function SessionSpeakers( { session } ) {
 				key={ link }
 				href={ link }
 			>
-				{ decodeEntities( title.trim() ) }
+				{ title }
 			</a>
 		);
 	} );
@@ -68,14 +67,14 @@ function SessionMeta( { session } ) {
 			/* translators: 1: A date; 2: A time; 3: A location; */
 			tokenSplit( __( '%1$s at %2$s in %3$s', 'wordcamporg' ) ),
 			[
-				decodeEntities( session.session_date_time.date ),
-				decodeEntities( session.session_date_time.time ),
+				session.session_date_time.date,
+				session.session_date_time.time,
 				(
 					<span
 						key={ firstTrack.id }
-						className={ classnames( 'wordcamp-session-track', 'wordcamp-session-track-' + decodeEntities( firstTrack.slug.trim() ) ) }
+						className={ classnames( 'wordcamp-session-track', 'wordcamp-session-track-' + firstTrack.slug.trim() ) }
 					>
-						{ decodeEntities( firstTrack.name.trim() ) }
+						{ firstTrack.name.trim() }
 					</span>
 				),
 			]
@@ -85,8 +84,8 @@ function SessionMeta( { session } ) {
 			/* translators: 1: A date; 2: A time; */
 			tokenSplit( __( '%1$s at %2$s', 'wordcamporg' ) ),
 			[
-				decodeEntities( session.session_date_time.date ),
-				decodeEntities( session.session_date_time.time ),
+				session.session_date_time.date,
+				session.session_date_time.time,
 			]
 		);
 	}
@@ -113,9 +112,9 @@ function SessionCategory( { session } ) {
 				return (
 					<span
 						key={ term.slug }
-						className={ classnames( 'wordcamp-session-category', 'wordcamp-session-category-' + decodeEntities( term.slug ) ) }
+						className={ classnames( 'wordcamp-session-category', 'wordcamp-session-category-' + term.slug ) }
 					>
-						{ decodeEntities( term.name.trim() ) }
+						{ term.name.trim() }
 					</span>
 				);
 			} );
@@ -150,7 +149,7 @@ class SessionsBlockContent extends Component {
 						className={ classnames(
 							'wordcamp-block-post-list-item',
 							'wordcamp-session',
-							'wordcamp-session-' + decodeEntities( post.slug ),
+							'wordcamp-session-' + post.slug,
 							'wordcamp-clearfix'
 						) }
 					>
@@ -167,9 +166,9 @@ class SessionsBlockContent extends Component {
 
 						{ show_images &&
 							<FeaturedImage
-								className={ classnames( 'wordcamp-session-image-container', 'align-' + decodeEntities( image_align ) ) }
+								className={ classnames( 'wordcamp-session-image-container', 'align-' + image_align ) }
 								wpMediaDetails={ get( post, '_embedded.wp:featuredmedia[0].media_details.sizes', {} ) }
-								alt={ decodeEntities( post.title.rendered ) }
+								alt={ post.title.rendered.trim() }
 								width={ Number( featured_image_width ) }
 								imageLink={ post.link }
 							/>
@@ -177,7 +176,7 @@ class SessionsBlockContent extends Component {
 
 						{ 'none' !== content &&
 							<ItemHTMLContent
-								className={ classnames( 'wordcamp-session-content-' + decodeEntities( content ) ) }
+								className={ classnames( 'wordcamp-session-content-' + content ) }
 								content={ 'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
 								link={ ( 'full' === content || excerpt_more ) ? post.link : null }
 								linkText={ 'full' === content ? __( 'Visit session page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }

@@ -8,7 +8,6 @@ import { get, includes } from 'lodash';
  */
 const { Dashicon } = wp.components;
 const { Component } = wp.element;
-const { decodeEntities } = wp.htmlEntities;
 const { __ } = wp.i18n;
 
 /**
@@ -38,7 +37,7 @@ class SpeakersSelect extends Component {
 			( fetchedPosts ) => {
 				const posts = fetchedPosts.map( ( post ) => {
 					return {
-						label  : decodeEntities( post.title.rendered.trim() ) || __( '(Untitled)', 'wordcamporg' ),
+						label  : post.title.rendered.trim() || __( '(Untitled)', 'wordcamporg' ),
 						value  : post.id,
 						type   : 'wcb_speaker',
 						avatar : post.avatar_urls[ '24' ],
@@ -53,7 +52,7 @@ class SpeakersSelect extends Component {
 			( fetchedTerms ) => {
 				const terms = fetchedTerms.map( ( term ) => {
 					return {
-						label : decodeEntities( term.name ) || __( '(Untitled)', 'wordcamporg' ),
+						label : term.name || __( '(Untitled)', 'wordcamporg' ),
 						value : term.id,
 						type  : 'wcb_speaker_group',
 						count : term.count,

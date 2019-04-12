@@ -8,7 +8,6 @@ import { get, includes } from 'lodash';
  */
 const { Dashicon } = wp.components;
 const { Component } = wp.element;
-const { decodeEntities } = wp.htmlEntities;
 const { __ } = wp.i18n;
 
 /**
@@ -41,7 +40,7 @@ class SessionsSelect extends Component {
 					const image = get( post, '_embedded[\'wp:featuredmedia\'].media_details.sizes.thumbnail.source_url', '' );
 
 					return {
-						label : decodeEntities( post.title.rendered.trim() ) || __( '(Untitled)', 'wordcamporg' ),
+						label : post.title.rendered.trim() || __( '(Untitled)', 'wordcamporg' ),
 						value : post.id,
 						type  : 'wcb_session',
 						image : image,
@@ -57,7 +56,7 @@ class SessionsSelect extends Component {
 				( fetchedTerms ) => {
 					const terms = fetchedTerms.map( ( term ) => {
 						return {
-							label : decodeEntities( term.name ) || __( '(Untitled)', 'wordcamporg' ),
+							label : term.name.trim() || __( '(Untitled)', 'wordcamporg' ),
 							value : term.id,
 							type  : term.taxonomy,
 							count : term.count || 0,

@@ -4,7 +4,6 @@
 const { Toolbar }        = wp.components;
 const { BlockControls }  = wp.editor;
 const { Component }      = wp.element;
-const { decodeEntities } = wp.htmlEntities;
 
 class OrganizersToolbar extends Component {
 	render() {
@@ -13,7 +12,7 @@ class OrganizersToolbar extends Component {
 		const { layout: layoutOptions = {} }           = blockData.options;
 
 		const controls = layoutOptions.map( ( option ) => {
-			const icon     = `${ decodeEntities( option.value ) }-view`;
+			const icon     = `${ option.value }-view`;
 			const isActive = layout === option.value;
 
 			return {

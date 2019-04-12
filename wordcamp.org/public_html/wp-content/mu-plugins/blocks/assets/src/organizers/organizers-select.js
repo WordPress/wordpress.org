@@ -6,10 +6,9 @@ import { get, includes } from 'lodash';
 /**
  * WordPress dependencies
  */
-const { Dashicon }       = wp.components;
-const { Component }      = wp.element;
-const { decodeEntities } = wp.htmlEntities;
-const { __ }             = wp.i18n;
+const { Dashicon }  = wp.components;
+const { Component } = wp.element;
+const { __ }        = wp.i18n;
 
 /**
  * Internal dependencies
@@ -39,7 +38,7 @@ class OrganizersSelect extends Component {
 			( fetchedPosts ) => {
 				const posts = fetchedPosts.map( ( post ) => {
 					return {
-						label  : decodeEntities( post.title.rendered.trim() ) || __( '(Untitled)', 'wordcamporg' ),
+						label  : post.title.rendered.trim() || __( '(Untitled)', 'wordcamporg' ),
 						value  : post.id,
 						type   : 'wcb_organizer',
 						avatar : post.avatar_urls[ '24' ],
@@ -54,7 +53,7 @@ class OrganizersSelect extends Component {
 			( fetchedTerms ) => {
 				const terms = fetchedTerms.map( ( term ) => {
 					return {
-						label : decodeEntities( term.name ) || __( '(Untitled)', 'wordcamporg' ),
+						label : term.name.trim() || __( '(Untitled)', 'wordcamporg' ),
 						value : term.id,
 						type  : 'wcb_organizer_team',
 						count : term.count,

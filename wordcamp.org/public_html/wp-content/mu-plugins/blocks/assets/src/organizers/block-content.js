@@ -6,9 +6,8 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-const { Component }      = wp.element;
-const { decodeEntities } = wp.htmlEntities;
-const { __ }             = wp.i18n;
+const { Component } = wp.element;
+const { __ }        = wp.i18n;
 
 /**
  * Internal dependencies
@@ -32,7 +31,7 @@ class OrganizersBlockContent extends Component {
 						key={ post.slug }
 						className={ classnames(
 							'wordcamp-organizer',
-							'wordcamp-organizer-' + decodeEntities( post.slug ),
+							'wordcamp-organizer-' + post.slug.trim(),
 						) }
 					>
 						<ItemTitle
@@ -44,8 +43,8 @@ class OrganizersBlockContent extends Component {
 
 						{ show_avatars &&
 							<AvatarImage
-								className={ classnames( 'wordcamp-organizer-avatar-container', 'align-' + decodeEntities( avatar_align ) ) }
-								name={ decodeEntities( post.title.rendered.trim() ) || '' }
+								className={ classnames( 'wordcamp-organizer-avatar-container', 'align-' + avatar_align ) }
+								name={ post.title.rendered.trim() || '' }
 								size={ avatar_size }
 								url={ post.avatar_urls[ '24' ] }
 								imageLink={ post.link }
@@ -54,7 +53,7 @@ class OrganizersBlockContent extends Component {
 
 						{ ( 'none' !== content ) &&
 							<ItemHTMLContent
-								className={ classnames( 'wordcamp-organizer-content-' + decodeEntities( content ) ) }
+								className={ classnames( 'wordcamp-organizer-content-' + content ) }
 								content={  'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
 								link={ (   'full' === content || excerpt_more ) ? post.link : null }
 								linkText={ 'full' === content ? __( 'Visit organizer page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }

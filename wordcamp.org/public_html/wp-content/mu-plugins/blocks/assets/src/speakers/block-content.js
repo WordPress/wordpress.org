@@ -9,7 +9,6 @@ import classnames from 'classnames';
  */
 const { Disabled } = wp.components;
 const { Component, Fragment } = wp.element;
-const { decodeEntities } = wp.htmlEntities;
 const { __, _n } = wp.i18n;
 const { escapeAttribute } = wp.escapeHtml;
 
@@ -45,7 +44,7 @@ function SpeakerSessions( { speaker, tracks } ) {
 									className="wordcamp-speaker-session-link"
 									href={ session.link }
 								>
-									{ decodeEntities( session.title.rendered.trim() ) || __( '(Untitled)', 'wordcamporg' ) }
+									{ session.title.rendered.trim() || __( '(Untitled)', 'wordcamporg' ) }
 								</a>
 								<span className="wordcamp-speaker-session-info">
 									{ session.session_track.length && Array.isArray( tracks ) &&
@@ -53,8 +52,8 @@ function SpeakerSessions( { speaker, tracks } ) {
 											/* translators: 1: A date; 2: A time; 3: A location; */
 											tokenSplit( __( '%1$s at %2$s in %3$s', 'wordcamporg' ) ),
 											[
-												decodeEntities( session.session_date_time.date ),
-												decodeEntities( session.session_date_time.time ),
+												session.session_date_time.date,
+												session.session_date_time.time,
 												get( tracks.find( ( value ) => {
 													const [ firstTrackId ] = session.session_track;
 													return parseInt( value.id ) === firstTrackId;
@@ -67,8 +66,8 @@ function SpeakerSessions( { speaker, tracks } ) {
 											/* translators: 1: A date; 2: A time; */
 											tokenSplit( __( '%1$s at %2$s', 'wordcamporg' ), ),
 											[
-												decodeEntities( session.session_date_time.date ),
-												decodeEntities( session.session_date_time.time ),
+												session.session_date_time.date,
+												session.session_date_time.time,
 											]
 										)
 									}
@@ -102,7 +101,7 @@ class SpeakersBlockContent extends Component {
 						key={ post.slug }
 						className={ classnames(
 							'wordcamp-speaker',
-							'wordcamp-speaker-' + decodeEntities( post.slug ),
+							'wordcamp-speaker-' + post.slug,
 						) }
 					>
 						<ItemTitle
@@ -114,8 +113,8 @@ class SpeakersBlockContent extends Component {
 
 						{ show_avatars &&
 							<AvatarImage
-								className={ classnames( 'wordcamp-speaker-avatar-container', 'align-' + decodeEntities( avatar_align ) ) }
-								name={ decodeEntities( post.title.rendered.trim() ) || '' }
+								className={ classnames( 'wordcamp-speaker-avatar-container', 'align-' + avatar_align ) }
+								name={ post.title.rendered.trim() || '' }
 								size={ avatar_size }
 								url={ post.avatar_urls[ '24' ] }
 								imageLink={ post.link }
@@ -124,7 +123,7 @@ class SpeakersBlockContent extends Component {
 
 						{ ( 'none' !== content ) &&
 							<ItemHTMLContent
-								className={ classnames( 'wordcamp-speaker-content-' + decodeEntities( content ) ) }
+								className={ classnames( 'wordcamp-speaker-content-' + content ) }
 								content={ 'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
 								link={ ( 'full' === content || excerpt_more ) ? post.link : null }
 								linkText={ 'full' === content ? __( 'Visit session page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
