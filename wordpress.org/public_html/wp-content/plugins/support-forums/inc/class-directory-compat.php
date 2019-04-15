@@ -292,12 +292,17 @@ abstract class Directory_Compat {
 			// New compats won't have any support topics or reviews, so will
 			// not yet exist as a compat term.
 			if ( ! $this->term && $this->get_object( $this->slug() ) ) {
-				$term = wp_insert_term( $this->slug(), $this->taxonomy() );
+				$term_name = $this->slug();
+				if ( ! sanitize_title( $term_name ) ) {
+					// This happens when the slug is all non-ascii such as %e5%8f%8b%e8%a8%80, which fails to insert.
+					$term_name = urldecode( $term_name );
+				}
+				$term = wp_insert_term( $term_name, $this->taxonomy(), array( 'slug' => $this->slug() ) );
 
 				// Term exists already? Race-condition, or get_term_by() couldn't find $slug..
 				if ( is_wp_error( $term ) && $term->get_error_data( 'term_exists' ) ) {
 					$this->term = get_term( $term->get_error_data( 'term_exists' ) );
-				} elseif ( isset( $term['term_id'] ) ) {
+				} elseif ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) {
 					$this->term = get_term( $term['term_id'] );
 				}
 			}
