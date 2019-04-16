@@ -26,6 +26,9 @@ class Hooks {
 		// Output rel="next", rel="prev" meta tags.
 		add_action( 'wp_head', array( $this, 'rel_next_prev' ), 9 );
 
+		// Output robots headers.
+		add_action( 'wp_head', array( $this, 'robots_noindex_header' ));
+
 		// Link to create new topics atop topic list.
 		add_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
 
@@ -356,6 +359,92 @@ class Hooks {
 	}
 
 	/**
+	 * Adds noindex robots headers to various pages.
+	 */
+	public function robots_noindex_header() {
+		$robots = false;
+
+		if ( bbp_is_search() ) {
+			// #3955
+			$robots = true;
+		} elseif (
+			bbp_is_single_view() &&
+			in_array( bbp_get_view_id(), array( 'plugin-committer', 'plugin-contributor' ) )
+		) {
+			// #4329
+			$robots = true;
+		} elseif ( bbp_is_single_view() ) {
+			if ( ! bbpress()->topic_query->query ) {
+				bbp_view_query(); // Populate bbpress()->topic_query.
+			}
+
+			bbpress()->topic_query->is_tax = false;
+
+			// Empty views
+			if ( ! bbpress()->topic_query->have_posts() ) {
+				$robots = true;
+			}
+		} elseif ( bbp_is_topic_tag() ) {
+			if ( ! bbpress()->topic_query->query ) {
+				bbp_has_topics(); // Populate bbpress()->topic_query.
+			}
+
+			// Check all threads
+			$individually_stale = array_map(
+				function( $topic ) {
+					// Thread is 'thin' and hasn't been replied to.
+					if (
+						strlen( $topic->post_content ) <= 100
+						&& ! bbp_get_topic_reply_count( $topic->ID, true )
+					) {
+						return 'stale';
+					}
+
+					// Thread is old
+					$last_modified_date = get_post_meta( $topic->ID, '_bbp_last_active_time', true ) ?: $topic->post_date;
+					if ( strtotime( $last_modified_date ) <= time() - 2*YEAR_IN_SECONDS ) {
+						return 'stale';
+					}
+
+					return 'fresh';
+				},
+				bbpress()->topic_query->posts
+			);
+
+			// See if all posts 'stale' by checking that no fresh topics exists
+			$all_topics_noindexed = array_search( 'fresh', $individually_stale, true ) === false;
+
+			// #4324, #4338
+			// Post count is <= 1
+			// Last Modified <= -2 years
+			// All topics are also noindexed ( See bbp_is_single_topic() logic )
+			if (
+				bbpress()->topic_query->post_count <= 1 ||
+				$all_topics_noindexed
+			) {
+				$robots = true;
+			}
+
+		} elseif ( bbp_is_single_topic() ) {
+			if ( ! bbpress()->reply_query->query ) {
+				bbp_has_replies(); // Populate bbpress()->reply_query.
+			}
+
+			// If no replies and short content - #4283
+			if (
+				! bbpress()->reply_query->has_posts() &&
+				strlen( bbp_get_topic_content() ) <= 100
+			) {
+				$robots = true;
+			}
+		}
+
+		if ( $robots ) {
+			echo '<meta name="robots" content="noindex, follow" />',"\n";
+		}
+	}
+
+	/**
 	 * Outputs rel="next", rel="prev" for paginated archives.
 	 */
 	public function rel_next_prev() {
@@ -366,11 +455,15 @@ class Hooks {
 		$max_pages = $wp_query->max_num_pages;
 
 		if ( bbp_is_single_view() ) {
-			bbp_view_query();  // Populate bbpress()->topic_query.
+			if ( ! bbpress()->topic_query->query ) {
+				bbp_view_query();  // Populate bbpress()->topic_query.
+			}
 			bbpress()->topic_query->is_tax = false;
 			$max_pages = bbpress()->topic_query->max_num_pages;
 		} elseif ( bbp_is_single_topic() ) {
-			bbp_has_replies(); // Populate bbpress()->reply_query.
+			if ( ! bbpress()->reply_query->query ) {
+				bbp_has_replies(); // Populate bbpress()->reply_query.
+			}
 			$max_pages = bbpress()->reply_query->max_num_pages;
 		} elseif ( bbp_is_single_forum() ) {
 			$topic_count = get_post_meta( get_queried_object_id(), '_bbp_topic_count', true );
