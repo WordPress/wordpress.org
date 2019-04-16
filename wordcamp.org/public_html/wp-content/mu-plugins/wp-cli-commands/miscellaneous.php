@@ -45,14 +45,15 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 		WP_CLI::line();
 
 		foreach ( $sites as $site ) {
-			switch_to_blog( $site['blog_id'] );
+			switch_to_blog( $site->blog_id );
 
 			$site_domain = parse_url( get_option( 'siteurl' ) );
 			$site_domain = sprintf( '%s%s', $site_domain['host'], $site_domain['path'] );
 
 			// Skip sites that are above the requested maximum site ID
-			if ( $max_site_id && $site['blog_id'] > $max_site_id ) {
+			if ( $max_site_id && $site->blog_id > $max_site_id ) {
 				$results[] = array( $site_domain, 'skipped' );
+				restore_current_blog();
 				continue;
 			}
 
