@@ -62,21 +62,8 @@ setup_postdata( $session );
 		<div class="wordcamp-item-content wordcamp-session-content-<?php echo esc_attr( $attributes['content'] ); ?>">
 			<?php if ( 'full' === $attributes['content'] ) : ?>
 				<?php echo wp_kses_post( wpautop( get_all_the_content( $session ) ) ); ?>
-				<p class="wordcamp-item-permalink">
-					<a href="<?php echo esc_url( get_permalink( $session ) ); ?>">
-						<?php esc_html_e( 'Visit session page', 'wordcamporg' ); ?>
-					</a>
-				</p>
-
 			<?php elseif ( 'excerpt' === $attributes['content'] ) : ?>
-				<?php wp_kses_post( wpautop( the_excerpt() ) ); ?>
-				<?php if ( true === $attributes['excerpt_more'] ) : ?>
-					<p class="wordcamp-item-permalink">
-						<a href="<?php echo esc_url( get_permalink( $session ) ); ?>" class="wordcamp-session-permalink">
-							<?php esc_html_e( 'Read more', 'wordcamporg' ); ?>
-						</a>
-					</p>
-				<?php endif; ?>
+				<?php echo wp_kses_post( wpautop( apply_filters( 'the_excerpt', get_the_excerpt() ) ) ); ?>
 			<?php endif; ?>
 		</div>
 	<?php endif; ?>
@@ -132,5 +119,13 @@ setup_postdata( $session );
 				</div>
 			<?php endif; ?>
 		</div>
+	<?php endif; ?>
+
+	<?php if ( 'full' === $attributes['content'] ) : ?>
+		<p class="wordcamp-item-permalink">
+			<a href="<?php echo esc_url( get_permalink( $session ) ); ?>">
+				<?php esc_html_e( 'Visit session page', 'wordcamporg' ); ?>
+			</a>
+		</p>
 	<?php endif; ?>
 </div>

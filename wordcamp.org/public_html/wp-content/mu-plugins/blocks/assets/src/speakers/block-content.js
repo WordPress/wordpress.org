@@ -16,7 +16,7 @@ const { escapeAttribute } = wp.escapeHtml;
  * Internal dependencies
  */
 import { AvatarImage } from '../shared/avatar';
-import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
+import { ItemTitle, ItemHTMLContent, ItemPermalink } from '../shared/block-content';
 import { tokenSplit, arrayTokenReplace } from '../shared/i18n';
 import GridContentLayout from '../shared/grid-layout/block-content';
 import './block-content.scss';
@@ -88,7 +88,7 @@ class SpeakersBlockContent extends Component {
 		const { attributes, speakerPosts, tracks } = this.props;
 		const {
 			show_avatars, avatar_size, avatar_align,
-			content, excerpt_more, show_session,
+			content, show_session,
 		} = attributes;
 
 		return (
@@ -125,8 +125,6 @@ class SpeakersBlockContent extends Component {
 							<ItemHTMLContent
 								className={ classnames( 'wordcamp-speaker-content-' + content ) }
 								content={ 'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
-								link={ ( 'full' === content || excerpt_more ) ? post.link : null }
-								linkText={ 'full' === content ? __( 'Visit session page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
 							/>
 						}
 
@@ -134,6 +132,13 @@ class SpeakersBlockContent extends Component {
 							<SpeakerSessions
 								speaker={ post }
 								tracks={ tracks }
+							/>
+						}
+
+						{ ( 'full' === content ) &&
+							<ItemPermalink
+								link={ post.link }
+								linkText={ __( 'Visit speaker page', 'wordcamporg' ) }
 							/>
 						}
 					</div>,

@@ -44,22 +44,8 @@ use function WordCamp\Blocks\Shared\Content\{ get_all_the_content };
 					<div class="wordcamp-item-content wordcamp-speaker-content-<?php echo esc_attr( $attributes['content'] ); ?>">
 						<?php if ( 'full' === $attributes['content'] ) : ?>
 							<?php echo wp_kses_post( wpautop( get_all_the_content( $speaker ) ) ); ?>
-							<p class="wordcamp-item-permalink">
-								<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>">
-									<?php esc_html_e( 'Visit speaker page', 'wordcamporg' ); ?>
-								</a>
-							</p>
-
 						<?php elseif ( 'excerpt' === $attributes['content'] ) : ?>
-							<?php wpautop( the_excerpt() ); ?>
-
-							<?php if ( true === $attributes['excerpt_more'] ) : ?>
-								<p class="wordcamp-item-permalink">
-									<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>" class="wordcamp-speaker-permalink">
-										<?php esc_html_e( 'Read more', 'wordcamporg' ); ?>
-									</a>
-								</p>
-							<?php endif; ?>
+							<?php echo wp_kses_post( wpautop( apply_filters( 'the_excerpt', get_the_excerpt() ) ) ); ?>
 						<?php endif; ?>
 					</div>
 				<?php endif; ?>
@@ -107,6 +93,13 @@ use function WordCamp\Blocks\Shared\Content\{ get_all_the_content };
 					</div>
 				<?php endif; ?>
 
+				<?php if ( 'full' === $attributes['content'] ) : ?>
+					<p class="wordcamp-item-permalink">
+						<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>">
+							<?php esc_html_e( 'Visit speaker page', 'wordcamporg' ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
 			</li>
 		<?php endforeach; ?>
 		<?php wp_reset_postdata(); ?>

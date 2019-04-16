@@ -191,10 +191,6 @@ function get_attributes_schema() {
 			'type'    => 'string',
 			'default' => 'full',
 		),
-		'excerpt_more'          => array(
-			'type'    => 'bool',
-			'default' => true,
-		),
 		'grid_columns'          => array(
 			'type'    => 'integer',
 			'minimum' => 1,

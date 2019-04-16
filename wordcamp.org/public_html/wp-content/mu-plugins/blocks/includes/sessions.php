@@ -112,7 +112,6 @@ function get_attributes_schema() {
 		),
 		[
 			'className'            => get_shared_definition( 'string_empty', 'attribute' ),
-			'excerpt_more'         => get_shared_definition( 'boolean_false', 'attribute' ),
 			'featured_image_width' => array(
 				'type'    => 'integer',
 				'default' => 150,

@@ -35,7 +35,7 @@ class SponsorInspectorControls extends Component {
 		];
 
 		const { attributes, setAttributes }                            = this.props;
-		const { show_name, show_logo, sort_by, excerpt_more, content } = attributes;
+		const { show_name, show_logo, sort_by, content } = attributes;
 
 		return (
 			<InspectorControls>
@@ -74,17 +74,6 @@ class SponsorInspectorControls extends Component {
 							onChange={ ( value ) => setAttributes( { content: value } ) }
 						/>
 					</PanelRow>
-
-					{ 'excerpt' === content &&
-						<PanelRow>
-							<ToggleControl
-								label={ __( 'Read More Link', 'wordcamporg' ) }
-								help={ __( 'Show a link at the end of the excerpt (some themes already include this)', 'wordcamporg' ) }
-								checked={ excerpt_more }
-								onChange={ ( value ) => setAttributes( { excerpt_more: value } ) }
-							/>
-						</PanelRow>
-					}
 
 					<PanelRow>
 						<SelectControl

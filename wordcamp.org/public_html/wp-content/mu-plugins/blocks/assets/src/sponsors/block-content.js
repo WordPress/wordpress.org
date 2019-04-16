@@ -16,7 +16,7 @@ const { __ }              = wp.i18n;
  */
 import FeaturedImage                  from '../shared/featured-image';
 import GridContentLayout              from '../shared/grid-layout/block-content';
-import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
+import {ItemTitle, ItemHTMLContent, ItemPermalink} from '../shared/block-content';
 
 /**
  * Renders individual sponsor post inside editor.
@@ -27,7 +27,7 @@ import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
  * @return {Element}
  */
 function SponsorDetail( { sponsorPost, attributes } ) {
-	const { show_name, show_logo, content, excerpt_more, featured_image_width } = attributes;
+	const { show_name, show_logo, content, featured_image_width } = attributes;
 	const featuredImageSizes = get( sponsorPost, '_embedded.wp:featuredmedia[0].media_details.sizes', {} );
 	const displayContent = 'full' === content ? sponsorPost.content.rendered.trim() : sponsorPost.excerpt.rendered.trim();
 
@@ -57,8 +57,13 @@ function SponsorDetail( { sponsorPost, attributes } ) {
 				<ItemHTMLContent
 					className={ classnames( 'wordcamp-sponsor-content' ) }
 					content={ displayContent }
-					link={ ( 'full' === content || excerpt_more ) ? sponsorPost.link : null }
-					linkText={ 'full' === content ? __( 'Visit sponsor page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
+				/>
+			}
+
+			{ ( 'full' === content ) &&
+				<ItemPermalink
+					link={ sponsorPost.link }
+					linkText={ __( 'Visit sponsor page', 'wordcamporg' ) }
 				/>
 			}
 		</div>

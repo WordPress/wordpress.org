@@ -36,7 +36,7 @@ const DEFAULT_OPTIONS = {
 class OrganizerInspectorControls extends Component {
 	render() {
 		const { attributes, setAttributes, blockData }                                 = this.props;
-		const { show_avatars, avatar_size, avatar_align, content, excerpt_more, sort } = attributes;
+		const { show_avatars, avatar_size, avatar_align, content, sort } = attributes;
 		const { schema = DEFAULT_SCHEMA, options = DEFAULT_OPTIONS }                   = blockData;
 
 		return (
@@ -90,17 +90,6 @@ class OrganizerInspectorControls extends Component {
 							onChange={ ( value ) => setAttributes( { content: value } ) }
 						/>
 					</PanelRow>
-
-					{ 'excerpt' === content &&
-						<PanelRow>
-							<ToggleControl
-								label={ __( 'Read More Link', 'wordcamporg' ) }
-								help={ __( 'Show a link at the end of the excerpt (some themes already include this)', 'wordcamporg' ) }
-								checked={ excerpt_more }
-								onChange={ ( value ) => setAttributes( { excerpt_more: value } ) }
-							/>
-						</PanelRow>
-					}
 				</PanelBody>
 
 				<PanelBody title={ __( 'Sorting & Filtering', 'wordcamporg' ) } initialOpen={ false }>

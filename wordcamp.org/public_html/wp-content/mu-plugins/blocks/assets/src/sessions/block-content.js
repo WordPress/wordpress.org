@@ -13,7 +13,7 @@ const { __ } = wp.i18n;
 /**
  * Internal dependencies
  */
-import { ItemTitle, ItemHTMLContent } from '../shared/block-content';
+import {ItemTitle, ItemHTMLContent, ItemPermalink} from '../shared/block-content';
 import { tokenSplit, arrayTokenReplace, intersperse, listify } from '../shared/i18n';
 import GridContentLayout from '../shared/grid-layout/block-content';
 import FeaturedImage from '../shared/featured-image';
@@ -136,7 +136,7 @@ class SessionsBlockContent extends Component {
 
 	render() {
 		const { attributes, sessionPosts } = this.props;
-		const { show_speaker, show_images, image_align, featured_image_width, content, excerpt_more, show_meta, show_category } = attributes;
+		const { show_speaker, show_images, image_align, featured_image_width, content, show_meta, show_category } = attributes;
 
 		return (
 			<GridContentLayout
@@ -178,8 +178,6 @@ class SessionsBlockContent extends Component {
 							<ItemHTMLContent
 								className={ classnames( 'wordcamp-session-content-' + content ) }
 								content={ 'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
-								link={ ( 'full' === content || excerpt_more ) ? post.link : null }
-								linkText={ 'full' === content ? __( 'Visit session page', 'wordcamporg' ) : __( 'Read more', 'wordcamporg' ) }
 							/>
 						}
 
@@ -192,6 +190,13 @@ class SessionsBlockContent extends Component {
 									<SessionCategory session={ post } />
 								}
 							</div>
+						}
+
+						{ ( 'full' === content ) &&
+							<ItemPermalink
+								link={ post.link }
+								linkText={ __( 'Visit session page', 'wordcamporg' ) }
+							/>
 						}
 					</div>
 				) }

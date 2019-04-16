@@ -35,15 +35,15 @@ setup_postdata( $sponsor );
 		<?php if ( 'full' === $attributes['content'] ) { ?>
 			<?php echo wp_kses_post( wpautop( get_all_the_content( $sponsor ) ) ); ?>
 		<?php } elseif ( 'excerpt' === $attributes['content'] ) { ?>
-			<?php wpautop( the_excerpt() ); ?>
-			<?php if ( true === $attributes['excerpt_more'] ) { ?>
-				<p class="wordcamp-item-permalink">
-					<a href="<?php echo esc_url( get_permalink( $sponsor ) ); ?>" class="wordcamp-sponsor-permalink">
-						<?php esc_html_e( 'Read more', 'wordcamporg' ); ?>
-					</a>
-				</p>
-			<?php } ?>
+			<?php echo wp_kses_post( wpautop( apply_filters( 'the_excerpt', get_the_excerpt() ) ) ); ?>
 		<?php } ?>
 	<?php } ?>
 
+	<?php if ( 'full' === $attributes['content'] ) : ?>
+		<p class="wordcamp-item-permalink">
+			<a href="<?php echo esc_url( get_permalink( $sponsor ) ); ?>">
+				<?php esc_html_e( 'Visit sponsor page', 'wordcamporg' ); ?>
+			</a>
+		</p>
+	<?php endif; ?>
 </div>

@@ -191,7 +191,6 @@ function get_attributes_schema() {
 				'default' => 150,
 			],
 			'className'    => get_shared_definition( 'string_empty', 'attribute' ),
-			'excerpt_more' => get_shared_definition( 'boolean_false', 'attribute' ),
 			'mode'         => [
 				'type'    => 'string',
 				'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),

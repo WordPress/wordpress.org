@@ -60,13 +60,27 @@ export function ItemHTMLContent( { className, content, link, linkText } ) {
 			<Disabled>
 				<RawHTML children={ content } />
 				{ link &&
-					<p className="wordcamp-item-permalink">
-						<a href={ link }>
-							{ linkText || __( 'Read more', 'wordcamporg' ) }
-						</a>
-					</p>
+					<ItemPermalink
+						link={ link }
+						linkText={ linkText }
+					/>
 				}
 			</Disabled>
 		</div>
+	);
+}
+
+export function ItemPermalink( { className, link, linkText } ) {
+	const classes = [
+		'wordcamp-item-permalink',
+		className,
+	];
+
+	return (
+		<p className={ classnames( classes ) }>
+			<a href={ link }>
+				{ linkText || __( 'Read more', 'wordcamporg' ) }
+			</a>
+		</p>
 	);
 }

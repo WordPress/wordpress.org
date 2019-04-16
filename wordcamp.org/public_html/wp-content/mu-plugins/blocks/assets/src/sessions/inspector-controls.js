@@ -15,7 +15,7 @@ import FeaturedImageInspectorControls from '../shared/featured-image/inspector-c
 class SessionsInspectorControls extends Component {
 	render() {
 		const { attributes, setAttributes, blockData } = this.props;
-		const { show_speaker, content, excerpt_more, show_meta, show_category, sort } = attributes;
+		const { show_speaker, content, show_meta, show_category, sort } = attributes;
 		const { options } = blockData;
 
 		return (
@@ -30,16 +30,6 @@ class SessionsInspectorControls extends Component {
 							onChange={ ( value ) => setAttributes( { content: value } ) }
 						/>
 					</PanelRow>
-					{ 'excerpt' === content &&
-						<PanelRow>
-							<ToggleControl
-								label={ __( 'Read More Link', 'wordcamporg' ) }
-								help={ __( 'Show a link at the end of the excerpt (some themes already include this)', 'wordcamporg' ) }
-								checked={ excerpt_more === undefined ? false : excerpt_more }
-								onChange={ ( value ) => setAttributes( { excerpt_more: value } ) }
-							/>
-						</PanelRow>
-					}
 					<PanelRow>
 						<ToggleControl
 							label={ __( 'Details', 'wordcamporg' ) }
