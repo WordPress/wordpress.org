@@ -52,8 +52,6 @@ class Make_Core_Pot extends WP_CLI_Command {
 			WP_CLI::error( 'Unsupported WordPress version. Use makepot.php.' );
 		}
 
-		$extract_js = version_compare( $wp_version, '5.0-beta', '>=' );
-
 		$dry_run = Utils\get_flag_value( $assoc_args, 'dry-run', false );
 
 		$headers = wp_json_encode( [
@@ -113,7 +111,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
 
-		if ( ! $extract_js ) {
+		if ( version_compare( $wp_version, '5.0-beta', '<' ) ) {
 			$command .= ' --skip-js';
 		}
 
@@ -160,9 +158,12 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
 		$command .= ' --headers=' . escapeshellarg( $headers );
 		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-js'; // TODO: No use of wp.i18n, yet.
 		$command .= ' --skip-audit';
 		$command .= ' --ignore-domain';
+
+		if ( version_compare( $wp_version, '5.2-beta', '<' ) ) {
+			$command .= ' --skip-js';
+		}
 
 		WP_CLI::line( $command );
 		! $dry_run && WP_CLI::runcommand( $command );
