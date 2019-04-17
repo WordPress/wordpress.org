@@ -379,6 +379,67 @@ JS;
 
 }
 
+
+/**
+ * This function was removed from the Gutenberg plugin in v5.4.
+ */
+if ( ! function_exists( 'gutenberg_get_available_image_sizes' ) ) {
+/**
+ * Retrieve The available image sizes for a post
+ *
+ * @return array
+ */
+function gutenberg_get_available_image_sizes() {
+	$size_names = apply_filters(
+		'image_size_names_choose',
+		array(
+			'thumbnail' => __( 'Thumbnail', 'gutenberg' ),
+			'medium'    => __( 'Medium', 'gutenberg' ),
+			'large'     => __( 'Large', 'gutenberg' ),
+			'full'      => __( 'Full Size', 'gutenberg' ),
+		)
+	);
+	$all_sizes = array();
+	foreach ( $size_names as $size_slug => $size_name ) {
+		$all_sizes[] = array(
+			'slug' => $size_slug,
+			'name' => $size_name,
+		);
+	}
+	return $all_sizes;
+}
+} // /function_exists()
+
+/**
+ * This function was removed from the Gutenberg plugin in v5.4.
+ */
+if ( ! function_exists( 'gutenberg_get_autosave_newer_than_post_save' ) ) {
+/**
+ * Retrieve a stored autosave that is newer than the post save.
+ *
+ * Deletes autosaves that are older than the post save.
+ *
+ * @param  WP_Post $post Post object.
+ * @return WP_Post|boolean The post autosave. False if none found.
+ */
+function gutenberg_get_autosave_newer_than_post_save( $post ) {
+	// Add autosave data if it is newer and changed.
+	$autosave = wp_get_post_autosave( $post->ID );
+	if ( ! $autosave ) {
+		return false;
+	}
+	// Check if the autosave is newer than the current post.
+	if (
+		mysql2date( 'U', $autosave->post_modified_gmt, false ) > mysql2date( 'U', $post->post_modified_gmt, false )
+	) {
+		return $autosave;
+	}
+	// If the autosave isn't newer, remove it.
+	wp_delete_post_revision( $autosave->ID );
+	return false;
+}
+} // /function_exists()
+
 add_action( 'template_redirect', function() {
 	if ( ! is_page( 'test' ) ) {
 		return;
