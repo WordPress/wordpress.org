@@ -169,7 +169,7 @@ $content .= '<!-- wp:heading {"align":"left"} -->
 $content .= '<!-- wp:list -->
 <ul>
 	<li><a href="https://make.wordpress.org/core/2017/01/17/editor-technical-overview">' . esc_html__( 'Gutenberg Editor Technical Overview', 'wporg' ) . '</a></li>
-	<li><a href="https://wordpress.org/gutenberg/handbook/reference/design-principles/">' . esc_html__( 'Gutenberg Design Principles', 'wporg' ) . '</a></li>
+	<li><a href="https://wordpress.org/gutenberg/handbook/contributors/design/">' . esc_html__( 'Gutenberg Design Principles', 'wporg' ) . '</a></li>
 	<li><a href="https://make.wordpress.org/core/tag/gutenberg/">' . esc_html__( 'Development updates on make.wordpress.org', 'wporg' ) . '</a></li>
 	<li><a href="https://wordpress.tv/?s=gutenberg">' . esc_html__( 'WordPress.tv Talks about Gutenberg', 'wporg' ) . '</a></li>
 	<li><a href="https://wordpress.org/gutenberg/handbook/reference/faq/">' . esc_html__( 'FAQs', 'wporg' ) . '</a></li>
