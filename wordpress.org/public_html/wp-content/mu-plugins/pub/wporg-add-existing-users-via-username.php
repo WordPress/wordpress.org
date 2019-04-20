@@ -22,7 +22,7 @@ function replace_email_label() {
 	?>
 	<script>
 		( function( $ ) {
-			$( 'label[for="adduser-email"]' ).html( '<?php echo esc_js( __( 'E-mail or Username' ) ); ?>' );
+			$( 'label[for="adduser-email"]' ).html( '<?php echo esc_js( __( 'Email or Username' ) ); ?>' );
 			$( '#adduser-email' ).attr( 'type', 'text' );
 			$( '#add-new-user' ).find( '+ div + p' ).html( "<?php echo esc_js( __( 'Enter the email address or username of an existing user on this network to invite them to this site. That person will be sent an email asking them to confirm the invite.' ) ); ?>" );
 		} )( jQuery );
