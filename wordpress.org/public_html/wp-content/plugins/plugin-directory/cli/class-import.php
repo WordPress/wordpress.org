@@ -123,6 +123,8 @@ class Import {
 
 		if ( in_array( 'adopt-me', $readme->tags ) ) {
 			wp_set_object_terms( $plugin->ID, 'adopt-me', 'plugin_section' );
+		} else {
+			wp_remove_object_terms( $plugin->ID, 'adopt-me', 'plugin_section' );
 		}
 
 		// Update the tested-up-to value
