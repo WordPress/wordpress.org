@@ -1,0 +1,13 @@
+.camptix-invoice-details{
+	display:none;
+}
+
+.camptix-invoice-toggle-wrapper {
+	display: inline-block;
+}
+
+.camptix-invoice-toggle-wrapper .camptix-need-invoice,
+.camptix-invoice-toggle-wrapper label[for="camptix-need-invoice"] {
+	display: inline-block;
+	margin-left: 5px;
+}
