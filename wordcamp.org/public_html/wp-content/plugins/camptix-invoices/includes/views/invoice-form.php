@@ -19,7 +19,7 @@ defined( 'WPINC' ) || die();
 			<tr>
 				<td class="tix-left">
 					<label for="invoice-email">
-						<?php echo esc_html__( 'Email for the invoice to be sent to', 'wordcamporg' ); ?><span class="tix-required-star">*</span>
+						<?php echo esc_html__( 'Recipient email', 'wordcamporg' ); ?><span class="tix-required-star">*</span>
 					</label>
 				</td>
 				<td class="tix-right">
@@ -30,7 +30,7 @@ defined( 'WPINC' ) || die();
 			<tr>
 				<td class="tix-left">
 					<label for="invoice-name">
-						<?php echo esc_html__( 'Name or organisation that the invoice should be made out to', 'wordcamporg' ); ?><span class="tix-required-star">*</span>
+						<?php echo esc_html__( 'Recipient name or organisation', 'wordcamporg' ); ?><span class="tix-required-star">*</span>
 					</label>
 				</td>
 				<td class="tix-right">
@@ -41,7 +41,7 @@ defined( 'WPINC' ) || die();
 			<tr>
 				<td class="tix-left">
 					<label for="invoice-address">
-						<?php echo esc_html__( 'Street address', 'wordcamporg' ); ?><span class="tix-required-star">*</span>
+						<?php echo esc_html__( 'Recipient street address', 'wordcamporg' ); ?><span class="tix-required-star">*</span>
 					</label>
 				</td>
 				<td class="tix-right">
