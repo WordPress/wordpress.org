@@ -14,7 +14,7 @@ $widget_args = array(
 	'after_title'  => '</h4>',
 );
 
-//the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Adopt_Me', array(), $widget_args );
+the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Adopt_Me', array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta', array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Ratings', array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support', array(), $widget_args );
