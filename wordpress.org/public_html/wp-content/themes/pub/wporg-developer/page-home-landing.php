@@ -34,7 +34,7 @@ get_header(); ?>
 				</div>
 
 				<div class="box box-rest-api">
-					<h3 class="widget-title"><div class="dashicons dashicons-controls-repeat"></div><?php _e( 'REST API', 'wporg' ); ?></h3>
+					<h3 class="widget-title"><div class="dashicons dashicons-rest-api"></div><?php _e( 'REST API', 'wporg' ); ?></h3>
 					<p class="widget-description"><?php _e( 'Getting started on making WordPress applications?', 'wporg' ); ?></p>
 					<a href="<?php echo esc_url( get_post_type_archive_link( 'rest-api-handbook' ) ); ?>" class="go"><?php _e( 'Make Applications ', 'wporg' ); ?></a>
 				</div>

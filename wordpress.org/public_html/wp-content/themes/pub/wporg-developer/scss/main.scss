@@ -597,6 +597,11 @@
 				display: block;
 				margin: 0 auto;
 				opacity: 0.4;
+
+				&.dashicons-rest-api {
+					font-size:90px;
+					font-size:9rem;
+				}
 			}
 		}
 		.three-columns .widget-title {

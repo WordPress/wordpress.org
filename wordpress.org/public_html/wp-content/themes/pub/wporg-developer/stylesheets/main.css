@@ -946,6 +946,11 @@ input {
   opacity: 0.4;
 }
 
+.devhub-wrap .section .widget-title .dashicons.dashicons-rest-api {
+  font-size: 90px;
+  font-size: 9rem;
+}
+
 @media (min-width: 43em) and (max-width: 915px) {
   .devhub-wrap .section .three-columns .widget-title {
     font-size: 35px;
