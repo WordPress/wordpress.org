@@ -27,7 +27,9 @@ jQuery(document).ready(function() {
 	jQuery( '.menu-item-has-children > div > .dashicons' ).click( function() {
 		var menuToggle = jQuery( this ).closest( '.menu-item-has-children' );
 
-		jQuery( this ).parent().siblings( '.sub-menu' ).slideToggle();
+		jQuery( this ).parent().siblings( '.sub-menu' ).length
+			? jQuery( this ).parent().siblings( '.sub-menu' ).slideToggle()
+			: jQuery( this ).parent().siblings( '.children' ).slideToggle()
 
 		menuToggle.toggleClass( 'open' );
 		jQuery( this ).attr( 'aria-expanded', menuToggle.hasClass( 'open' ) );
