@@ -160,7 +160,7 @@ class WPORG_Explanations {
 	 * @access public
 	 */
 	public function prevent_direct_creation() {
-		if ( $this->exp_post_type == $_GET['post_type'] ) {
+		if ( isset( $_GET['post_type'] ) && $this->exp_post_type == $_GET['post_type'] ) {
 			wp_safe_redirect( admin_url() );
 			exit;
 		}
