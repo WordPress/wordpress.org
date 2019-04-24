@@ -5,6 +5,9 @@
  * @package wporg-developer
  */
 
+$GLOBALS['wp_query']->set_404();
+status_header( 404 );
+
 get_header(); ?>
 
 	<div id="primary" class="content-area">

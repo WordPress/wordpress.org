@@ -26,6 +26,7 @@ class DevHub_Redirects {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_resources' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_singularized_handbooks' ), 1 );
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_pluralized_reference_post_types' ), 1 );
+		add_action( 'template_redirect', array( __CLASS__, 'paginated_home_page_404' ) );
 	}
 
 	/**
@@ -113,6 +114,17 @@ class DevHub_Redirects {
 				wp_redirect( $path, 301 );
 				exit();
 			}
+		}
+	}
+
+	/**
+	 * Returns 404 response to requests for non-first pages of the front page.
+	 */
+	public static function paginated_home_page_404() {
+		// Paginated front page.
+		if ( is_front_page() && is_paged() ) {
+			include( get_stylesheet_directory() . '/404.php' );
+			exit;
 		}
 	}
 
