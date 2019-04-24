@@ -63,6 +63,7 @@ class DevHub_Registrations {
 				'parent_item_colon'  => __( 'Parent Function', 'wporg' ),
 				'menu_name'          => __( 'Functions', 'wporg' ),
 			),
+			'menu_icon'   => 'dashicons-editor-code',
 			'public'      => true,
 			'rewrite'     => array(
 				'feeds'      => false,
@@ -95,6 +96,7 @@ class DevHub_Registrations {
 				'parent_item_colon'  => __( 'Parent Class', 'wporg' ),
 				'menu_name'          => __( 'Classes', 'wporg' ),
 			),
+			'menu_icon'   => 'dashicons-editor-code',
 			'public'      => true,
 			'rewrite'     => array(
 				'feeds'      => false,
@@ -123,6 +125,7 @@ class DevHub_Registrations {
 				'parent_item_colon'  => __( 'Parent Hook', 'wporg' ),
 				'menu_name'          => __( 'Hooks', 'wporg' ),
 			),
+			'menu_icon'   => 'dashicons-editor-code',
 			'public'      => true,
 			'rewrite'     => array(
 				'feeds'      => false,
@@ -151,6 +154,7 @@ class DevHub_Registrations {
 				'parent_item_colon'  => __( 'Parent Method', 'wporg' ),
 				'menu_name'          => __( 'Methods', 'wporg' ),
 			),
+			'menu_icon'   => 'dashicons-editor-code',
 			'public'      => true,
 			'rewrite'     => array(
 				'feeds'      => false,
