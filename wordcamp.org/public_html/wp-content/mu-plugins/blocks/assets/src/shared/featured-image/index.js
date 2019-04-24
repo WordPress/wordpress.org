@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import { sortBy } from 'lodash';
 
 /**
  * WordPress dependencies.
@@ -11,53 +12,73 @@ const { Component } = wp.element;
 const { isURL } = wp.url;
 
 /**
- * Displays featured image, can be linked with block control for size.
+ * Displays a featured image, can be linked with block control for size.
+ *
+ * Unlike the PHP function that outputs a featured image, this doesn't bother with a `srcset` attribute, because
+ * it's assumed that this is being used in the block editor interface, and it just uses the largest image size
+ * available.
  */
 export default class FeaturedImage extends Component {
 	/**
 	 * @param {Object} props
-	 * @param {Array}  props.wpMediaDetails Available sizes of images in the format as returned by WP API. This is the `sizes` object inside `media_details` inside `wp:featuredMedia` object.
-	 * @param {number} props.width          Width in pixels for image.
-	 * @param {string} props.className      Class name for image element
-	 * @param {string} props.alt            Alt text for image
+	 * @param {Array}  props.imageData Meta data about the featured image, including available sizes and the image's
+	 *                                 alt text. This is the `_embedded.wp:featuredMedia[0]` object in a REST response.
+	 * @param {number} props.width     Width in pixels for the image.
+	 * @param {string} props.className Additional class names for the image element
+	 * @param {string} props.imageLink URL for wrapping the image in an anchor tag
 	 */
 	constructor( props ) {
 		super( props );
 
-		this.state = {};
+		const { imageData } = props;
+		const { media_details = {}, alt_text = '' } = imageData;
+		const image = this.constructor.getWidestImage( media_details );
+
+		this.state = {
+			image : image,
+			alt   : alt_text,
+		};
 	}
 
 	/**
-	 * Get 'full' size image to be displayed in editor. Or get the widest one.
+	 * Get the details of the widest image size available.
+	 *
+	 * @param {Object} media_details
 	 *
 	 * @return {Object}
 	 */
-	getFullImage() {
-		const { getOwnPropertyDescriptors } = Object;
-		const availableSizes = this.props.wpMediaDetails;
+	static getWidestImage( media_details ) {
+		let image = {};
+		const { sizes = {} } = media_details;
 
-		const { selectedImage } = this.state;
-
-		if ( selectedImage && selectedImage.hasOwnProperty( 'source_url' ) ) {
-			return selectedImage;
+		if ( sizes.hasOwnProperty( 'full' ) && sizes.full.hasOwnProperty( 'source_url' ) ) {
+			image = sizes.full;
+		} else if ( Object.getOwnPropertyDescriptors( sizes ).length > 0 ) {
+			const sortedSizes = sortBy( sizes, 'width' );
+			image = sortedSizes.pop();
 		}
 
-		if ( availableSizes.hasOwnProperty( 'full' ) && availableSizes.full.hasOwnProperty( 'source_url' ) ) {
-			this.setState( { selectedImage: availableSizes.full } );
-			return availableSizes.full;
+		return image;
+	}
+
+	/**
+	 * Calculate a height based on the aspect ratio and a given width.
+	 *
+	 * @param {number} newWidth
+	 * @param {Object} image
+	 *
+	 * @return {number|null}
+	 */
+	static getNewHeight( newWidth, image ) {
+		let newHeight = null;
+		const { width, height } = image;
+
+		if ( width && height ) {
+			const aspectRatio = Number( height ) / Number( width );
+			newHeight = Number.parseFloat( aspectRatio * newWidth ).toFixed( 1 );
 		}
 
-		let widestImage = { source_url: '' };
-
-		for ( const size in getOwnPropertyDescriptors( availableSizes ) ) {
-			if ( availableSizes[ size ].width > ( widestImage.width || 0 ) && availableSizes[ size ].hasOwnProperty( 'source_url' ) ) {
-				widestImage = availableSizes[ size ];
-			}
-		}
-
-		this.setState( { selectedImage: widestImage } );
-
-		return widestImage;
+		return newHeight;
 	}
 
 	/**
@@ -66,34 +87,42 @@ export default class FeaturedImage extends Component {
 	 * @return {Element}
 	 */
 	render() {
-		const { className, alt, width = 150, imageLink } = this.props;
-		const fullImage = this.getFullImage();
+		const { width, className, imageLink } = this.props;
+		const { image, alt } = this.state;
+		const { source_url: src = '' } = image;
 
-		let image = (
+		if ( ! src ) {
+			return '';
+		}
+
+		const height = this.constructor.getNewHeight( width, image );
+
+		let output = (
 			<img
-				className={ classnames( 'wordcamp-featured-image', className ) }
-				src={ fullImage.source_url }
+				className={ classnames( 'wordcamp-featured-image', 'wp-post-image' ) }
+				src={ src }
 				alt={ alt }
-				width={ width + 'px' }
+				width={ width }
+				height={ height }
 			/>
 		);
 
 		if ( isURL( imageLink ) ) {
-			image = (
+			output = (
 				<Disabled>
 					<a href={ imageLink } className={ classnames( 'wordcamp-image-link', 'wordcamp-featured-image-link' ) }>
-						{ image }
+						{ output }
 					</a>
 				</Disabled>
 			);
 		}
 
-		image = (
+		output = (
 			<div className={ classnames( 'wordcamp-image-container', 'wordcamp-featured-image-container', className ) }>
-				{ image }
+				{ output }
 			</div>
 		);
 
-		return image;
+		return output;
 	}
 }

@@ -23,9 +23,9 @@ setup_postdata( $sponsor );
 	<?php if ( $attributes['show_logo'] ) { ?>
 		<?php echo wp_kses_post(
 			render_featured_image(
-				array( 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo' ),
 				$sponsor,
 				$attributes['featured_image_width'],
+				[ 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo' ],
 				get_permalink( $sponsor )
 			)
 		); ?>

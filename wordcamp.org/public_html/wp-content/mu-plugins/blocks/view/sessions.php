@@ -50,9 +50,9 @@ setup_postdata( $session );
 	<?php if ( true === $attributes['show_images'] ) : ?>
 		<?php
 			echo wp_kses_post( render_featured_image(
-				array( 'wordcamp-session-image-container', 'align-' . esc_attr( $attributes['image_align'] ) ),
 				$session,
 				$attributes['featured_image_width'],
+				[ 'wordcamp-session-image-container', 'align-' . esc_attr( $attributes['image_align'] ) ],
 				get_permalink( $session )
 			) );
 		?>

@@ -28,7 +28,6 @@ import {ItemTitle, ItemHTMLContent, ItemPermalink} from '../shared/block-content
  */
 function SponsorDetail( { sponsorPost, attributes } ) {
 	const { show_name, show_logo, content, featured_image_width } = attributes;
-	const featuredImageSizes = get( sponsorPost, '_embedded.wp:featuredmedia[0].media_details.sizes', {} );
 	const displayContent = 'full' === content ? sponsorPost.content.rendered.trim() : sponsorPost.excerpt.rendered.trim();
 
 	return (
@@ -45,10 +44,9 @@ function SponsorDetail( { sponsorPost, attributes } ) {
 
 			{ ( show_logo || show_logo === undefined ) &&
 				<FeaturedImage
-					className={ 'wordcamp-sponsor-featured-image wordcamp-sponsor-logo' }
-					wpMediaDetails={ featuredImageSizes }
-					alt={ sponsorPost.title.rendered }
+					imageData={ get( sponsorPost, '_embedded.wp:featuredmedia[0]', {} ) }
 					width={ featured_image_width }
+					className={ classnames( 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo' ) }
 					imageLink={ sponsorPost.link }
 				/>
 			}
