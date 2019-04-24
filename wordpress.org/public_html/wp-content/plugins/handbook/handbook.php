@@ -236,6 +236,7 @@ class WPorg_Handbook {
 			'map_meta_cap'      => true,
 			'has_archive'       => true,
 			'hierarchical'      => true,
+			'menu_icon'         => 'dashicons-book',
 			'menu_position'     => 11,
 			'rewrite' => array(
 				'feeds'         => false,
