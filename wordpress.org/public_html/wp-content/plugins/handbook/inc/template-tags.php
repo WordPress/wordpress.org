@@ -39,13 +39,18 @@ function wporg_is_handbook( $handbook = '' ) {
 		return false;
 	}
 
+	// If inquiring about any handbook, and the current page is a handbook landing page.
+	if ( ! $handbook && wporg_is_handbook_landing_page() ) {
+		return true;
+	}
+
 	foreach ( $post_types as $post_type ) {
 		// Skip unless checking for all handbooks or for the specified handbook(s).
 		if ( $handbook && ! in_array( $post_type, $handbook ) ) {
 			continue;
 		}
 
-		$handbook_query = is_post_type_archive( $post_type ) || wporg_is_handbook_landing_page();
+		$handbook_query = is_post_type_archive( $post_type );
 
 		if ( ! $handbook_query && is_singular() ) {
 			$queried_obj = get_queried_object();
