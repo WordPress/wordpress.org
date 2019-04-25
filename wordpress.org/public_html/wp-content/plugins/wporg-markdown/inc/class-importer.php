@@ -340,6 +340,10 @@ abstract class Importer {
 		// Strip YAML doc from the header
 		$markdown = preg_replace( '#^---(.+)---#Us', '', $markdown );
 
+		$markdown = trim( $markdown );
+
+		$markdown = apply_filters( 'wporg_markdown_before_transform', $markdown, $this->get_post_type() );
+
 		$title = null;
 		if ( preg_match( '/^#\s(.+)/', $markdown, $matches ) ) {
 			$title = $matches[1];
@@ -359,6 +363,9 @@ abstract class Importer {
 		$parser = new WPCom_GHF_Markdown_Parser();
 		$parser->preserve_shortcodes = false;
 		$html = $parser->transform( $markdown );
+
+		$html = apply_filters( 'wporg_markdown_after_transform', $html, $this->get_post_type() );
+
 		$post_data = array(
 			'ID'           => $post_id,
 			'post_content' => wp_filter_post_kses( wp_slash( $html ) ),
