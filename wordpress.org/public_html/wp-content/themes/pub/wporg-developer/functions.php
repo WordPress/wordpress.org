@@ -74,12 +74,8 @@ if ( class_exists( '\\WordPressdotorg\\Markdown\\Importer' ) ) {
 
 	// Coding Standards handbook.
 	require __DIR__ . '/inc/import-coding-standards.php';
-}
 
-/**
- * REST API handbook.
- */
-if ( class_exists( '\\WordPressdotorg\\Markdown\\Importer' ) ) {
+	// REST API handbook.
 	require __DIR__ . '/inc/rest-api.php';
 }
 
