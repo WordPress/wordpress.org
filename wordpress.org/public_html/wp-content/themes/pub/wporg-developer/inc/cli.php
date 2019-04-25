@@ -64,6 +64,7 @@ class DevHub_CLI {
 				'parent_item_colon'  => __( 'Parent Command', 'wporg' ),
 				'menu_name'          => __( 'Commands', 'wporg' ),
 			),
+			'menu_icon'   => 'dashicons-arrow-right-alt2',
 			'public'      => true,
 			'hierarchical'=> true,
 			'rewrite'     => array(
