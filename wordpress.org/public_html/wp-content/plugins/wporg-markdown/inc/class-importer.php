@@ -31,7 +31,7 @@ abstract class Importer {
 	 *
 	 * @var int
 	 */
-	protected $posts_per_page = 350;
+	protected $posts_per_page = 500;
 
 	/**
 	 * Get base URL for all pages.
