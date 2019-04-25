@@ -24,7 +24,7 @@ get_header(); ?>
 				<div class="box box-coding-standards">
 					<h3 class="widget-title"><div class="dashicons dashicons-code-standards"></div><?php _e( 'Coding Standards', 'wporg' ); ?></h3>
 					<p class="widget-description"><?php _e( 'Looking to ensure your code meets the standards?', 'wporg' ); ?></p>
-					<span>Coming Soon</span>
+					<a href="<?php echo esc_url( get_post_type_archive_link( 'wpcs-handbook' ) ); ?>" class="go"><?php _e( 'Follow Standards ', 'wporg' ); ?></a>
 				</div>
 
 				<div class="box box-themes">
