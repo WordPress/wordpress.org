@@ -181,7 +181,7 @@ abstract class Importer {
 			'post_name'   => sanitize_title_with_dashes( $doc['slug'] ),
 		);
 		if ( isset( $doc['title'] ) ) {
-			$doc['post_title'] = sanitize_text_field( wp_slash( $doc['title'] ) );
+			$post_data['post_title'] = sanitize_text_field( wp_slash( $doc['title'] ) );
 		}
 		$post_id = wp_insert_post( $post_data );
 		if ( ! $post_id ) {
