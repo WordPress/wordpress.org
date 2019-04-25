@@ -371,9 +371,16 @@ abstract class Importer {
 			'post_content' => wp_filter_post_kses( wp_slash( $html ) ),
 			'post_excerpt' => sanitize_text_field( wp_slash( $excerpt ) ),
 		);
-		if ( ! is_null( $title ) ) {
+		// If no title was extracted from markdown doc, use the value defined in manifest.
+		if ( is_null( $title ) ) {
+			$markdown_entry = get_post_meta( $post_id, $this->manifest_entry_meta_key, true );
+			if ( ! empty( $markdown_entry['title'] ) ) {
+				$post_data['post_title'] = sanitize_text_field( wp_slash( $markdown_entry['title'] ) );
+			}
+		} else {
 			$post_data['post_title'] = sanitize_text_field( wp_slash( $title ) );
 		}
+
 		wp_update_post( $post_data );
 
 		// Set ETag for future updates.
