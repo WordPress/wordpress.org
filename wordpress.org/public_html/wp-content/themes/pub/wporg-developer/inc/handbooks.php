@@ -16,7 +16,7 @@ class Devhub_Handbooks {
 	 * @var array
 	 * @access public
 	 */
-	public static $post_types = array( 'plugin', 'rest-api', 'theme' );
+	public static $post_types = [];
 
 	/**
 	 * Initializer
@@ -96,6 +96,10 @@ class Devhub_Handbooks {
 	 * @return array
 	*/
 	public static function filter_handbook_post_types( $types ) {
+		if ( ! self::$post_types ) {
+			self::$post_types = apply_filters( 'devhub_handbook_post_types', [ 'plugin', 'rest-api', 'theme' ] );
+		}
+
 		return self::$post_types;
 	}
 
