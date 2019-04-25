@@ -112,12 +112,25 @@ abstract class Importer {
 			return new WP_Error( 'invalid-http-code', 'Markdown source returned non-200 http code.' );
 		}
 		$manifest = json_decode( wp_remote_retrieve_body( $response ), true );
+
 		if ( ! $manifest ) {
 			if ( class_exists( 'WP_CLI' ) ) {
 				WP_CLI::error( 'Invalid manifest' );
 			}
 			return new WP_Error( 'invalid-manifest', 'Manifest did not unfurl properly.' );;
 		}
+
+		// A numeric key suggests the manifest did not explicitly specify keys for each item, so define one.
+		$keys = array_keys( $manifest );
+		if ( is_int( array_shift( $keys ) ) ) {
+			$newdata = [];
+			foreach ( $manifest as $key => $item ) {
+				$key = $item['slug'];
+				$newdata[ $key ] = $item;
+			}
+			$manifest = $newdata;
+		}
+
 		// Fetch all handbook posts for comparison
 		$q = new WP_Query( array(
 			'post_type'      => $this->get_post_type(),
@@ -125,15 +138,25 @@ abstract class Importer {
 			'posts_per_page' => $this->posts_per_page,
 		) );
 		$this->existing = [];
+		$this->existing['slug_only'] = [];
 		foreach ( $q->posts as $post ) {
 			list( $key, $data ) = $this->get_existing_for_post( $post );
 			$this->existing[ $key ] = $data;
+
+			// Also store a secondary entry for the post associated
+			// with its slug and not its relative path if the key
+			// looks like a path.
+			if ( false !== strpos( $key, '/' ) ) {
+				$this->existing['slug_only'][ $post->post_name ] = $data;
+			}
 		}
+
 		$created = $updated = 0;
 		foreach ( $manifest as $key => $doc ) {
 			// Already exists, update.
-			if ( ! empty( $this->existing[ $key ] ) ) {
-				$existing_id = $this->existing[ $key ]['post_id'];
+			$existing = $this->existing[ $key ] ?? $this->existing['slug_only'][ $key ] ?? false;
+			if ( $existing ) {
+				$existing_id = $existing['post_id'];
 				if ( $this->update_post_from_manifest_doc( $existing_id, $doc ) ) {
 					$updated++;
 				}
@@ -160,20 +183,23 @@ abstract class Importer {
 		$post_parent = null;
 		if ( ! empty( $doc['parent'] ) ) {
 			// Find the parent in the existing set
-			if ( empty( $this->existing[ $doc['parent'] ] ) ) {
+			$parent = $this->existing[ $doc['parent'] ] ?? $this->existing['slug_only'][ $doc['parent'] ] ?? false;
+
+			if ( ! $parent ) {
 				if ( ! $this->process_manifest_doc( $manifest[ $doc['parent'] ], $this->existing, $manifest ) ) {
 					return false;
 				}
 			}
-			if ( ! empty( $this->existing[ $doc['parent'] ] ) ) {
-				$parent = $this->existing[ $doc['parent'] ];
+			if ( $parent ) {
 				$post_parent = $parent['post_id'];
 			}
 		}
+
 		$post = $this->create_post_from_manifest_doc( $doc, $post_parent );
 		if ( $post ) {
 			list( $key, $data ) = $this->get_existing_for_post( $post );
 			$this->existing[ $key ] = $data;
+			$this->existing['slug_only'][ $post->post_name ] = $data;
 			return true;
 		}
 		return false;
