@@ -34,6 +34,13 @@ abstract class Importer {
 	protected $posts_per_page = 500;
 
 	/**
+	 * Data about existing handbook pages.
+	 *
+	 * @var array
+	 */
+	protected $existing = [];
+
+	/**
 	 * Get base URL for all pages.
 	 *
 	 * This is used for generating the keys for the existing pages.
@@ -110,23 +117,23 @@ abstract class Importer {
 			'post_status'    => 'publish',
 			'posts_per_page' => $this->posts_per_page,
 		) );
-		$existing = array();
+		$this->existing = [];
 		foreach ( $q->posts as $post ) {
 			list( $key, $data ) = $this->get_existing_for_post( $post );
-			$existing[ $key ] = $data;
+			$this->existing[ $key ] = $data;
 		}
 		$created = $updated = 0;
 		foreach ( $manifest as $key => $doc ) {
 			// Already exists, update.
-			if ( ! empty( $existing[ $key ] ) ) {
-				$existing_id = $existing[ $key ]['post_id'];
+			if ( ! empty( $this->existing[ $key ] ) ) {
+				$existing_id = $this->existing[ $key ]['post_id'];
 				if ( $this->update_post_from_manifest_doc( $existing_id, $doc ) ) {
 					$updated++;
 				}
 
 				continue;
 			}
-			if ( $this->process_manifest_doc( $doc, $existing, $manifest ) ) {
+			if ( $this->process_manifest_doc( $doc, $manifest ) ) {
 				$created++;
 			}
 		}
@@ -139,28 +146,27 @@ abstract class Importer {
 	 * Process a document from the manifest.
 	 *
 	 * @param array $doc Document to process.
-	 * @param array $existing List of existing posts, will be added to.
 	 * @param array $manifest Manifest data.
 	 * @return boolean True if processing succeeded, false otherwise.
 	 */
-	protected function process_manifest_doc( $doc, &$existing, $manifest ) {
+	protected function process_manifest_doc( $doc, $manifest ) {
 		$post_parent = null;
 		if ( ! empty( $doc['parent'] ) ) {
 			// Find the parent in the existing set
-			if ( empty( $existing[ $doc['parent'] ] ) ) {
-				if ( ! $this->process_manifest_doc( $manifest[ $doc['parent'] ], $existing, $manifest ) ) {
+			if ( empty( $this->existing[ $doc['parent'] ] ) ) {
+				if ( ! $this->process_manifest_doc( $manifest[ $doc['parent'] ], $this->existing, $manifest ) ) {
 					return false;
 				}
 			}
-			if ( ! empty( $existing[ $doc['parent'] ] ) ) {
-				$parent = $existing[ $doc['parent'] ];
+			if ( ! empty( $this->existing[ $doc['parent'] ] ) ) {
+				$parent = $this->existing[ $doc['parent'] ];
 				$post_parent = $parent['post_id'];
 			}
 		}
 		$post = $this->create_post_from_manifest_doc( $doc, $post_parent );
 		if ( $post ) {
 			list( $key, $data ) = $this->get_existing_for_post( $post );
-			$existing[ $key ] = $data;
+			$this->existing[ $key ] = $data;
 			return true;
 		}
 		return false;
