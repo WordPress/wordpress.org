@@ -1,6 +1,17 @@
 // Mobile Subnav open/close
 jQuery(document).ready(function() {
 
+	jQuery( document ).on( 'click', '.code-tab', function ( e ) {
+		var $tab = jQuery( e.target );
+		if ( $tab.hasClass( 'is-active' ) ) {
+			return;
+		}
+
+		var lang = $tab.text();
+
+		$tab.parent().find( '.is-active, .' + lang ).toggleClass( 'is-active' );
+	} );
+
 	var tocContainer = jQuery( 'div[class*="-table-of-contents-container"]').first();
 
 	if ( 0 === tocContainer.length ) {
