@@ -21,6 +21,12 @@ get_header(); ?>
 					<a href="<?php echo esc_url( home_url( '/reference' ) ); ?>" class="go"><?php _e( 'Visit the reference', 'wporg' ); ?></a>
 				</div>
 
+				<div class="box box-coding-standards">
+					<h3 class="widget-title"><div class="dashicons dashicons-code-standards"></div><?php _e( 'Coding Standards', 'wporg' ); ?></h3>
+					<p class="widget-description"><?php _e( 'Looking to ensure your code meets the standards?', 'wporg' ); ?></p>
+					<span>Coming Soon</span>
+				</div>
+
 				<div class="box box-themes">
 					<h3 class="widget-title"><div class="dashicons dashicons-admin-appearance"></div><?php _e( 'Themes', 'wporg' ); ?></h3>
 					<p class="widget-description"><?php _e( 'Want to learn how to start theming WordPress?', 'wporg' ); ?></p>
