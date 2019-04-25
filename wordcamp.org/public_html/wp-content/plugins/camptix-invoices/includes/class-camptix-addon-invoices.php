@@ -256,9 +256,9 @@ class CampTix_Addon_Invoices extends \CampTix_Addon {
 		update_option( 'invoice_current_number', $current + 1 );
 
 		if ( empty( $opt['invoice-new-year-reset'] ) ) {
-			return $current;
+			return sprintf( '%s-%s', get_current_blog_id(), $current );
 		} else {
-			return sprintf( '%s-%s', $year, $current );
+			return sprintf( '%s-%s-%s', get_current_blog_id(), $year, $current );
 		}
 	}
 
