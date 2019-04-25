@@ -71,6 +71,9 @@ require __DIR__ . '/inc/cli.php';
 if ( class_exists( '\\WordPressdotorg\\Markdown\\Importer' ) ) {
 	// Docs Importer base class.
 	require __DIR__ . '/inc/import-docs.php';
+
+	// Coding Standards handbook.
+	require __DIR__ . '/inc/import-coding-standards.php';
 }
 
 /**
