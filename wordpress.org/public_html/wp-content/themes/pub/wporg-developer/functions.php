@@ -66,6 +66,14 @@ require __DIR__ . '/inc/user-content-edit.php';
 require __DIR__ . '/inc/cli.php';
 
 /**
+ * Docs importer.
+ */
+if ( class_exists( '\\WordPressdotorg\\Markdown\\Importer' ) ) {
+	// Docs Importer base class.
+	require __DIR__ . '/inc/import-docs.php';
+}
+
+/**
  * REST API handbook.
  */
 if ( class_exists( '\\WordPressdotorg\\Markdown\\Importer' ) ) {
