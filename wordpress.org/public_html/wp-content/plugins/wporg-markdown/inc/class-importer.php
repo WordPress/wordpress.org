@@ -186,7 +186,7 @@ abstract class Importer {
 			$parent = $this->existing[ $doc['parent'] ] ?? $this->existing['slug_only'][ $doc['parent'] ] ?? false;
 
 			if ( ! $parent ) {
-				if ( ! $this->process_manifest_doc( $manifest[ $doc['parent'] ], $this->existing, $manifest ) ) {
+				if ( ! $this->process_manifest_doc( $manifest[ $doc['parent'] ], $manifest ) ) {
 					return false;
 				}
 			}
