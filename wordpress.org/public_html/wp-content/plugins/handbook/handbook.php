@@ -357,6 +357,9 @@ class WPorg_Handbook {
 				$slug = substr( $this->post_type, 0, -9 );
 				$page = get_page_by_path( $slug, OBJECT, $this->post_type );
 			}
+			if ( ! $page ) {
+				$page = get_page_by_path( 'handbook', OBJECT, $this->post_type );
+			}
 			if ( $page ) {
 				$query->set( 'p', $page->ID );
 				$query->is_handbook_root     = true;
