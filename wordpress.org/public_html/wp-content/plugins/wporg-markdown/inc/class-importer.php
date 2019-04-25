@@ -125,6 +125,7 @@ abstract class Importer {
 		if ( is_int( array_shift( $keys ) ) ) {
 			$newdata = [];
 			foreach ( $manifest as $key => $item ) {
+				$item['order'] = $key;
 				$key = $item['slug'];
 				$newdata[ $key ] = $item;
 			}
@@ -219,6 +220,9 @@ abstract class Importer {
 			'post_title'  => wp_slash( $doc['slug'] ),
 			'post_name'   => sanitize_title_with_dashes( $doc['slug'] ),
 		);
+		if ( isset( $doc['order'] ) ) {
+			$post_data['menu_order'] = $doc['order'];
+		}
 		if ( isset( $doc['title'] ) ) {
 			$post_data['post_title'] = sanitize_text_field( wp_slash( $doc['title'] ) );
 		}
