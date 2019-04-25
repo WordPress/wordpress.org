@@ -277,8 +277,10 @@ function get_whitelist() {
 			'valendesigns',
 		),
 		'training' => array(
+			'chetan200891',
 			'courtneydawn',
 			'donkiely',
+			'jessecowens', // @Jesse Owens on Slack
 			'liljimmi',
 			'bethsoderberg',
 			'courane01', // @courtneyengle on Slack
