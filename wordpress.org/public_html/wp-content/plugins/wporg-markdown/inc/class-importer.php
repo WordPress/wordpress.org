@@ -24,6 +24,13 @@ abstract class Importer {
 	protected $etag_meta_key = 'wporg_markdown_etag';
 
 	/**
+	 * Meta key to store source manifest entry in.
+	 *
+	 * @var string
+	 */
+	protected $manifest_entry_meta_key = 'wporg_markdown_manifest_entry';
+
+	/**
 	 * Posts per page to query for.
 	 *
 	 * This needs to be set at least as high as the number of pages being
@@ -197,6 +204,7 @@ abstract class Importer {
 			WP_CLI::log( "Created post {$post_id} for {$doc['slug']}." );
 		}
 		update_post_meta( $post_id, $this->meta_key, esc_url_raw( $doc['markdown_source'] ) );
+		update_post_meta( $post_id, $this->manifest_entry_meta_key, $doc );
 		return get_post( $post_id );
 	}
 
@@ -212,6 +220,8 @@ abstract class Importer {
 		if ( ! $did_update ) {
 			return false;
 		}
+
+		update_post_meta( $post_id, $this->manifest_entry_meta_key, $doc );
 
 		if ( isset( $doc['meta'] ) ) {
 			foreach ( $doc['meta'] as $key => $value ) {
