@@ -237,7 +237,7 @@ Topic Link: %3$s
 
 %4$s
 
-Login and visit the topic to reply to the topic or unsubscribe from these emails. Note that replying to this email has no effect.', 'wporg-forums' ),
+Log in and visit the topic to reply to the topic or unsubscribe from these emails. Note that replying to this email has no effect.', 'wporg-forums' ),
 			$topic_author_name,
 			$topic_content,
 			$topic_url,
@@ -353,7 +353,7 @@ Reply Link: %3$s
 
 %4$s
 
-Login and visit the topic to reply to the topic or unsubscribe from these emails. Note that replying to this email has no effect.', 'wporg-forums' ),
+Log in and visit the topic to reply to the topic or unsubscribe from these emails. Note that replying to this email has no effect.', 'wporg-forums' ),
 			$reply_author_name,
 			$reply_content,
 			$reply_url,
