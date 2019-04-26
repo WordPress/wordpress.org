@@ -507,7 +507,7 @@ class Hooks {
 				printf(
 					'<a class="button create-topic login" href="%s">%s</a>',
 					wp_login_url(),
-					__( 'Login to Create a Topic', 'wporg-forums' )
+					__( 'Log in to Create a Topic', 'wporg-forums' )
 				);
 			}
 
