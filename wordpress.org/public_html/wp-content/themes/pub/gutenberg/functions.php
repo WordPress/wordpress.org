@@ -924,14 +924,18 @@ function gutenbergtheme_handbook_redirects() {
 	$redirects = [
 		'designers-developers/developers/backwards-compatibility' => 'designers-developers/developers/backward-compatibility/',
 		'reference/deprecated'           => 'designers-developers/developers/backward-compatibility/deprecations/',
+		'reference/design-principles'    => 'contributors/design/',
 		'extensibility/annotations'      => 'designers-developers/developers/block-api/block-annotations/',
 		'block-api/attributes'           => 'designers-developers/developers/block-api/block-attributes/',
 		'block-api/deprecated-blocks'    => 'designers-developers/developers/block-api/block-deprecation/',
+		'block-api/rich-text-api'        => 'designers-developers/developers/tutorials/format-api/',
 		'block-api'                      => 'designers-developers/developers/block-api/block-registration/',
 		'templates'                      => 'designers-developers/developers/block-api/block-templates/',
+		'extensibility'                  => 'designers-developers/developers/filters/',
 		'extensibility/autocomplete'     => 'designers-developers/developers/filters/autocomplete-filters/',
 		'extensibility/extending-blocks' => 'designers-developers/developers/filters/block-filters/',
 		'extensibility/parser'           => 'designers-developers/developers/filters/parser-filters/',
+		'packages/packages-api-request'  => 'designers-developers/developers/packages/packages-api-fetch/',
 		'blocks'                         => 'designers-developers/developers/tutorials/block-tutorial/intro/',
 		'language'                       => 'designers-developers/key-concepts/',
 
