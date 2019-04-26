@@ -272,7 +272,18 @@ class CampTix_Addon_Invoices extends \CampTix_Addon {
 	 * @todo Link invoice and corresponding attendees
 	 */
 	public static function create_invoice( $attendee, $order, $metas ) {
-		$number         = self::create_invoice_number();
+
+		$invoice = array(
+			'post_type'   => 'tix_invoice',
+			'post_status' => 'draft',
+		);
+
+		$invoice_id = wp_insert_post( $invoice );
+		if ( ! $invoice_id || is_wp_error( $invoice_id ) ) {
+			return;
+		}//end if
+
+		$number         = get_post_meta( $invoice_id, 'invoice_number', true );
 		$attendee_email = get_post_meta( $attendee->ID, 'tix_email', true );
 		$txn_id         = get_post_meta( $attendee->ID, 'tix_transaction_id', true );
 
@@ -299,18 +310,6 @@ class CampTix_Addon_Invoices extends \CampTix_Addon {
 			);
 		}//end if
 
-		$invoice = array(
-			'post_type'   => 'tix_invoice',
-			'post_status' => 'draft',
-			'post_title'  => $invoice_title,
-			'post_name'   => sprintf( 'invoice-%s', $number ),
-		);
-
-		$invoice_id = wp_insert_post( $invoice );
-		if ( ! $invoice_id || is_wp_error( $invoice_id ) ) {
-			return;
-		}//end if
-		update_post_meta( $invoice_id, 'invoice_number', $number );
 		update_post_meta( $invoice_id, 'invoice_metas', $metas );
 		update_post_meta( $invoice_id, 'original_order', $order );
 		update_post_meta( $invoice_id, 'transaction_id', $txn_id );
@@ -319,6 +318,8 @@ class CampTix_Addon_Invoices extends \CampTix_Addon {
 			array(
 				'ID'          => $invoice_id,
 				'post_status' => 'publish',
+				'post_title'  => $invoice_title,
+				'post_name'   => sprintf( 'invoice-%s', $number ),
 			)
 		);
 
