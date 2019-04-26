@@ -948,7 +948,9 @@ class Hooks {
 	}
 
 	/**
-	 * Don't 404 for user profile pages. Fixed in bbPress 2.6: https://bbpress.trac.wordpress.org/ticket/3047
+	 * Don't 404 for user profile pages.
+	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3047
 	 */
 	function disable_404_for_user_profile() {
 		if ( bbpress()->displayed_user && bbpress()->displayed_user->exists() ) {
