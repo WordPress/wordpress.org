@@ -950,7 +950,8 @@ function gutenbergtheme_handbook_redirects() {
 			home_url(
 				'/handbook/' .
 				$redirects[ get_query_var( 'handbook' ) ]
-			)
+			),
+			301
 		);
 		exit;
 	}
