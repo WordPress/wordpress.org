@@ -334,6 +334,8 @@ class Hooks {
 			$supports_paged = false;
 		}
 
+		$canonical_url = mb_strtolower( $canonical_url, 'UTF-8' );
+
 		return [ $canonical_url, $supports_paged ];
 	}
 
