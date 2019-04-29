@@ -58,6 +58,9 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 	 * Ignore warnings/notices that aren't actionable.
 	 *
 	 * Always use constants in the keys here to avoid path disclosure.
+	 *
+	 * Some constants here will require a trailing slash, and some won't. Avoid adding an extra slash if one
+	 * already exists in the constant itself, because double-slashes will prevent the string from matching.
 	 */
 	$error_ignorelist = [
 		// See https://core.trac.wordpress.org/ticket/29204
@@ -67,9 +70,9 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 		WP_PLUGIN_DIR . '/hyperdb/db.php:1230' => 'mysqli_query(): MySQL server has gone away',
 
 		// These are trivial mistakes in 3rd party code. They indicate poor quality, but don't warrant action.
-		ABSPATH . '/wp-includes/class-wp-post.php:342' => 'Undefined property: WP_Post::$filter',
-		ABSPATH . '/wp-includes/comment-template.php:1221' => "Trying to get property 'comment_status' of non-object",
-		ABSPATH . '/wp-includes/rss.php:352' => 'Undefined index: description',
+		ABSPATH . 'wp-includes/class-wp-post.php:342' => 'Undefined property: WP_Post::$filter',
+		ABSPATH . 'wp-includes/comment-template.php:1221' => "Trying to get property 'comment_status' of non-object",
+		ABSPATH . 'wp-includes/rss.php:352' => 'Undefined index: description',
 		WP_PLUGIN_DIR . '/jetpack/_inc/lib/class.media-summary.php:118' => 'Undefined index: id',
 		WP_PLUGIN_DIR . '/jetpack/_inc/lib/class.media-summary.php:119' => 'Undefined index: id',
 		WP_PLUGIN_DIR . '/jetpack/sync/class.jetpack-sync-module-posts.php:151' => "Trying to get property 'post_type' of non-object",
