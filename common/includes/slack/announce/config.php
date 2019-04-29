@@ -236,6 +236,11 @@ function get_whitelist() {
 			'coffee2code',
 			'DrewAPicture', // @drew on Slack
 		),
+		'meta-helphub' => array(
+			'atachibana',
+			'Kenshino',
+			'milana_cap', // @zzap on Slack
+		),
 		'meta-i18n' => array(
 			'ocean90',
 		),
