@@ -391,7 +391,7 @@ class WordCamp_Forms_To_Drafts {
 		$speaker_id = wp_insert_post(
 			array(
 				'post_type'    => 'wcb_speaker',
-				'post_title'   => $speaker['Name'],
+				'post_title'   => $speaker['Name'] ?? 'Untitled',
 				'post_content' => $content,
 				'post_status'  => 'draft',
 				'post_author'  => $this->get_user_id_from_username( 'wordcamp' ),
@@ -400,7 +400,7 @@ class WordCamp_Forms_To_Drafts {
 		);
 
 		if ( $speaker_id ) {
-			update_post_meta( $speaker_id, '_wcb_speaker_email', $speaker['Email Address'] );
+			update_post_meta( $speaker_id, '_wcb_speaker_email', $speaker['Email Address'] ?? '' );
 			update_post_meta( $speaker_id, '_wcpt_user_id',      $this->get_user_id_from_username( $speaker['WordPress.org Username'] ) );
 		}
 
