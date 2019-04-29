@@ -1,6 +1,6 @@
 <?php
 namespace WordCamp\Error_Handling;
-defined( 'WPINC' ) or die();
+defined( 'WPINC' ) || die();
 
 use DirectoryIterator;
 use Dotorg\Slack\Send;
@@ -28,7 +28,7 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 	}
 
 	// Checks to see if the error-throwing expression is prepended with the @ control operator.
-	// See https://secure.php.net/manual/en/function.set-error-handler.php
+	// See https://secure.php.net/manual/en/function.set-error-handler.php.
 	if ( 0 === error_reporting() ) {
 		return false;
 	}
@@ -63,24 +63,25 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 	 * already exists in the constant itself, because double-slashes will prevent the string from matching.
 	 */
 	$error_ignorelist = [
-		// See https://core.trac.wordpress.org/ticket/29204
+		// See https://core.trac.wordpress.org/ticket/29204.
 		ABSPATH . 'wp-includes/SimplePie/Registry.php:215' => 'Non-static method WP_Feed_Cache::create() should not be called statically',
 
 		// This is normal.
 		WP_PLUGIN_DIR . '/hyperdb/db.php:1230' => 'mysqli_query(): MySQL server has gone away',
 
 		// These are trivial mistakes in 3rd party code. They indicate poor quality, but don't warrant action.
-		ABSPATH . 'wp-includes/class-wp-post.php:342' => 'Undefined property: WP_Post::$filter',
-		ABSPATH . 'wp-includes/class-wp-query.php:3918' => "Trying to get property 'ID' of non-object",
-		ABSPATH . 'wp-includes/class-wp-query.php:3920' => "Trying to get property 'post_title' of non-object",
-		ABSPATH . 'wp-includes/class-wp-query.php:3922' => "Trying to get property 'post_name' of non-object",
+		ABSPATH . 'wp-includes/class-wp-post.php:342'     => 'Undefined property: WP_Post::$filter',
+		ABSPATH . 'wp-includes/class-wp-query.php:3918'   => "Trying to get property 'ID' of non-object",
+		ABSPATH . 'wp-includes/class-wp-query.php:3920'   => "Trying to get property 'post_title' of non-object",
+		ABSPATH . 'wp-includes/class-wp-query.php:3922'   => "Trying to get property 'post_name' of non-object",
 		ABSPATH . 'wp-includes/comment-template.php:1221' => "Trying to get property 'comment_status' of non-object",
-		ABSPATH . 'wp-includes/link-template.php:675' => "Trying to get property 'post_type' of non-object",
-		ABSPATH . 'wp-includes/rss.php:352' => 'Undefined index: description',
-		ABSPATH . 'wp-includes/rss.php:505' => 'Undefined property: stdClass::$error',
-		WP_PLUGIN_DIR . '/camptix-paystack/includes/class-paystack.php:337' => 'Undefined variable: txn',
-		WP_PLUGIN_DIR . '/jetpack/_inc/lib/class.media-summary.php:118' => 'Undefined index: id',
-		WP_PLUGIN_DIR . '/jetpack/_inc/lib/class.media-summary.php:119' => 'Undefined index: id',
+		ABSPATH . 'wp-includes/link-template.php:675'     => "Trying to get property 'post_type' of non-object",
+		ABSPATH . 'wp-includes/rss.php:352'               => 'Undefined index: description',
+		ABSPATH . 'wp-includes/rss.php:505'               => 'Undefined property: stdClass::$error',
+
+		WP_PLUGIN_DIR . '/camptix-paystack/includes/class-paystack.php:337'     => 'Undefined variable: txn',
+		WP_PLUGIN_DIR . '/jetpack/_inc/lib/class.media-summary.php:118'         => 'Undefined index: id',
+		WP_PLUGIN_DIR . '/jetpack/_inc/lib/class.media-summary.php:119'         => 'Undefined index: id',
 		WP_PLUGIN_DIR . '/jetpack/sync/class.jetpack-sync-module-posts.php:151' => "Trying to get property 'post_type' of non-object",
 		WP_PLUGIN_DIR . '/jetpack/sync/class.jetpack-sync-module-posts.php:137' => 'Undefined offset:',
 	];
@@ -90,12 +91,13 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 	}
 
 	$err_key      = substr( base64_encode("$file-$line-$err_no" ), -254 ); // Max file length for ubuntu is 255.
-	$data         = array(
+	$send_message = false;
+	$occurrences  = 0;
+
+	$data = array(
 		'last_reported_at' => time(),
 		'error_count'      => 0, // Since last reported.
 	);
-	$send_message = false;
-	$occurrences  = 0;
 
 	if ( error_record_exists( $err_key ) ) {
 		$data                 = get_error_record( $err_key );
@@ -132,7 +134,7 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 function catch_fatal() {
 	$error = error_get_last();
 
-	// See https://secure.php.net/manual/en/function.set-error-handler.php
+	// See https://secure.php.net/manual/en/function.set-error-handler.php.
 	$unhandled_error_types = [ E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING ];
 
 	if ( ! empty( $error ) && in_array( $error['type'], $unhandled_error_types, true ) ) {
@@ -196,8 +198,8 @@ function update_error_record( $err_key, $data ) {
  */
 function send_error_to_slack( $err_no, $err_msg, $file, $line, $occurrences = 0 ) {
 	if ( ! defined( 'WORDCAMP_ENVIRONMENT' )
-	     || ( 'production' !== WORDCAMP_ENVIRONMENT && ! defined( 'SANDBOX_SLACK_USERNAME' ) )
-		 || ! is_readable( __DIR__ . '/includes/slack/send.php' )
+		|| ( 'production' !== WORDCAMP_ENVIRONMENT && ! defined( 'SANDBOX_SLACK_USERNAME' ) )
+		|| ! is_readable( __DIR__ . '/includes/slack/send.php' )
 	) {
 		return;
 	}
@@ -216,11 +218,11 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line, $occurrences = 0 
 		$footer .= "Occurred *$occurrences time(s)* since last reported";
 	}
 
-	switch( $err_no ) {
+	switch ( $err_no ) {
 		case E_ERROR:
 		case E_PARSE:
 		case E_CORE_ERROR:
-		case E_COMPILE_ERROR :
+		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
 		default:
 			$color = '#ff0000'; // Red.
@@ -260,7 +262,7 @@ function send_error_to_slack( $err_no, $err_msg, $file, $line, $occurrences = 0 
 			'title' => 'Stack Trace',
 			'value' => $stack_trace,
 			'short' => false,
-                ],
+		],
 	];
 
 	$attachment = array(

@@ -325,9 +325,10 @@ class WordCamp_Forms_To_Drafts {
 
 		global $current_user;
 
-		$all_values = $this->get_unprefixed_grunion_form_values( $all_values );
+		$all_values      = $this->get_unprefixed_grunion_form_values( $all_values );
+		$speaker_user_id = $this->get_user_id_from_username( $all_values['WordPress.org Username'] );
 
-		if ( ! $speaker_user_id = $this->get_user_id_from_username( $all_values['WordPress.org Username'] ) ) {
+		if ( ! $speaker_user_id ) {
 			$speaker_user_id                      = $current_user->ID;
 			$all_values['WordPress.org Username'] = $current_user->user_login;
 		}
