@@ -12,6 +12,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		);
 
 		add_filter( 'handbook_label', array( $this, 'change_handbook_label' ), 10, 2 );
+		add_filter( 'get_post_metadata',               array( $this, 'fix_markdown_source_meta' ), 10, 4 );
 		add_filter( 'wporg_markdown_before_transform', array( $this, 'wporg_markdown_before_transform' ),  10, 2 );
 		add_filter( 'wporg_markdown_after_transform',  array( $this, 'wporg_markdown_after_transform' ), 10, 2 );
 
@@ -41,6 +42,65 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		}
 
 		return $label;
+	}
+
+	/**
+	 * Fixes fetched value of markdown_source meta field to not be the
+	 * raw.githubcontent.com domain that is currently incorrectly used
+	 * in the block editor manifest.
+	 *
+	 * @param mixed  $null      A value for the meta if its data retrieval is
+	 *                          overridden, else null.
+	 * @param int	 $object_id Object ID.
+	 * @param string $meta_key  Meta key.
+	 * @param bool   $single    Whether to return only the first value of the specified $meta_key.
+	 * @return mixed
+	 */
+	public function fix_markdown_source_meta( $null, $object_id, $meta_key, $single ) {
+		if (
+			// Not the markdown source meta key.
+			$meta_key !== $this->meta_key
+		||
+			// Not the block editor handbook.
+			$this->get_post_type() !== get_post_type( $object_id )
+		) {
+			return $null;
+		}
+
+		$post = get_post( $object_id );
+
+		$meta_type = 'post';
+
+		/* Most of the rest of this is taken from get_metadata() */
+
+		$meta_cache = wp_cache_get( $object_id, $meta_type . '_meta' );
+
+		if ( ! $meta_cache ) {
+			$meta_cache = update_meta_cache( $meta_type, array( $object_id ) );
+			$meta_cache = $meta_cache[ $object_id ];
+		}
+
+		if ( ! $meta_key ) {
+			return $null;
+		}
+
+		if ( isset( $meta_cache[ $meta_key ] ) ) {
+			if ( $single ) {
+				$value = maybe_unserialize( $meta_cache[ $meta_key ][0] );
+				$value = str_replace( 'https://raw.githubusercontent.com/WordPress/gutenberg/', 'https://github.com/WordPress/gutenberg/edit/', $value );
+			} else {
+				$value = array_map( 'maybe_unserialize', $meta_cache[ $meta_key ] );
+				$value = array_map(
+					function( $x ) {
+						return str_replace( 'https://raw.githubusercontent.com/WordPress/gutenberg/', 'https://github.com/WordPress/gutenberg/edit/', $x );
+					},
+					$value
+				);
+			}
+			return $value;
+		}
+
+		return $null;
 	}
 
 	/**
