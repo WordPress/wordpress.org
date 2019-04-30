@@ -123,6 +123,10 @@ function authenticate_requests( $preempt, $request_args, $request_url ) {
 function should_authenticate_url( $request_url_parts, $request_args ) {
 	$authenticate = true;
 
+	if ( ! isset( $request_url_parts['host'], $request_args['method'], $request_url_parts['path'] ) ) {
+		return false;
+	}
+
 	if ( GITHUB_API_HOSTNAME !== $request_url_parts['host'] || 'GET' !== $request_args['method'] ) {
 		$authenticate = false;
 	}
