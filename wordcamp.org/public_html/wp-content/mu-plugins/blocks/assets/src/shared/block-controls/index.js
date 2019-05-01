@@ -6,22 +6,36 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-const { Placeholder, Spinner } = wp.components;
+const { Placeholder }         = wp.components;
 const { Component, Fragment } = wp.element;
-const { __ } = wp.i18n;
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
+/**
+ * Component for extending that adds common functionality for other block controls components.
+ */
 export class BlockControls extends Component {
+	/**
+	 * Run additional operations during component initialization.
+	 *
+	 * @param {Object} props
+	 */
 	constructor( props ) {
 		super( props );
 
 		this.getModeLabel = this.getModeLabel.bind( this );
 	}
 
+	/**
+	 * Find a specific mode option and retrieve its label.
+	 *
+	 * @param {string} value
+	 *
+	 * @return {string}
+	 */
 	getModeLabel( value ) {
 		const { mode } = this.props.blockData.options;
 
@@ -31,27 +45,19 @@ export class BlockControls extends Component {
 	}
 }
 
-export function PlaceholderNoContent( { className, icon, label, loading } ) {
-	const classes = [
-		'wordcamp-block-edit-placeholder',
-		'wordcamp-block-edit-placeholder-no-content',
-		className,
-	];
-
-	return (
-		<Placeholder
-			className={ classnames( classes ) }
-			icon={ icon }
-			label={ label }
-		>
-			{ loading ?
-				<Spinner /> :
-				__( 'No content found.', 'wordcamporg' )
-			}
-		</Placeholder>
-	);
-}
-
+/**
+ * Component for block controls when the block has a specific mode selected.
+ *
+ * @param {Object} props {
+ *     @type {string} className
+ *     @type {string} label
+ *     @type {string} icon
+ *     @type {string} content
+ *     @type {Array}  placeholderChildren
+ * }
+ *
+ * @return {Element}
+ */
 export function PlaceholderSpecificMode( { className, label, icon, content, placeholderChildren } ) {
 	const classes = [
 		'wordcamp-block-edit-placeholder',

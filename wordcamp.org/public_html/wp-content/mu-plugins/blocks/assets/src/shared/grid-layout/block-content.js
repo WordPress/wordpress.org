@@ -17,6 +17,11 @@ import './style.scss';
  * Implements grid / list layout for WordCamp blocks. Should be used with rest of the components in this folder. Uses attribute `layout` and `columnns`.
  */
 class GridContentLayout extends Component {
+	/**
+	 * Render the content.
+	 *
+	 * @return {Element}
+	 */
 	render() {
 		const { attributes, className, children } = this.props;
 		const { grid_columns, layout, align } = attributes;

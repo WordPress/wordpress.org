@@ -16,6 +16,11 @@ const DEFAULT_SCHEMA = {
  * Add a slider for increasing and decreasing columns. Should be used with rest of the components in this folder. Will use and set attributes `layout` and `gird_columns`.
  */
 class GridInspectorControl extends Component {
+	/**
+	 * Render the control.
+	 *
+	 * @return {Element}
+	 */
 	render() {
 		const { attributes, setAttributes } = this.props;
 		const { layout, grid_columns } = attributes;

@@ -13,6 +13,11 @@ const { Component } = wp.element;
  * Sets attribute `layout` to `grid` / `list`. Also sets `grid_columns` to 2 for `grid`, and 1 for `list`.
  */
 class GridToolbar extends Component {
+	/**
+	 * Render the toolbar.
+	 *
+	 * @return {Element}
+	 */
 	render() {
 		const { attributes, setAttributes } = this.props;
 		const { layout } = attributes;

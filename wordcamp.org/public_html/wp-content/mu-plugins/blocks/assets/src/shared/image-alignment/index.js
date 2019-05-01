@@ -8,6 +8,20 @@ import classnames from 'classnames';
  */
 const { BaseControl, Toolbar } = wp.components;
 
+/**
+ * Component for a UI control for image alignment.
+ *
+ * @param {Object} props {
+ *     @type {string}   className
+ *     @type {string}   label
+ *     @type {string}   help
+ *     @type {string}   value
+ *     @type {Function} onChange
+ *     @type {Array}    alignOptions
+ * }
+ *
+ * @return {Element}
+ */
 function ImageAlignmentControl( {
 	className,
 	label,

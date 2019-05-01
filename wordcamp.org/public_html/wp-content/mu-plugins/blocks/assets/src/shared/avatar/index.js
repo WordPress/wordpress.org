@@ -15,6 +15,22 @@ const { addQueryArgs, isURL } = wp.url;
  */
 import './style.scss';
 
+/**
+ * Component for an avatar image, optionally including a link.
+ *
+ * This tries to mirror the markup output by WP's get_avatar function, with the addition
+ * of an optional wrapping link and a container div.
+ *
+ * @param {Object} props {
+ *     @type {string} className
+ *     @type {string} name
+ *     @type {number} size
+ *     @type {string} url
+ *     @type {string} imageLink
+ * }
+ *
+ * @return {Element}
+ */
 export function AvatarImage( {
 	className,
 	name,
@@ -23,6 +39,8 @@ export function AvatarImage( {
 	imageLink,
 } ) {
 	const getSizedURL = ( avatar_url, avatar_size ) => {
+		// 's' is the name of the parameter used by Gravatar.
+		// eslint-disable-next-line id-length
 		return addQueryArgs( avatar_url, { s: avatar_size } );
 	};
 

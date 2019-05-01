@@ -43,7 +43,15 @@ const sizePresets = [
 	},
 ];
 
+/**
+ * Component for a UI control for the size of an avatar image.
+ */
 export class AvatarSizeControl extends Component {
+	/**
+	 * Run additional operations during component initialization.
+	 *
+	 * @param {Object} props
+	 */
 	constructor( props ) {
 		super( props );
 
@@ -55,11 +63,21 @@ export class AvatarSizeControl extends Component {
 		this.onChange = this.onChange.bind( this );
 	}
 
+	/**
+	 * Wrapper for debouncing the onChange callback set in props.
+	 *
+	 * @param {number} value
+	 */
 	onChange( value ) {
-		this.setState( { value: value } );
+		this.setState( { value } );
 		this.state.onChange( value );
 	}
 
+	/**
+	 * Render the size control.
+	 *
+	 * @return {Element}
+	 */
 	render() {
 		const { className, label, help, initialPosition, rangeProps } = this.props;
 		const { value }                                               = this.state;
