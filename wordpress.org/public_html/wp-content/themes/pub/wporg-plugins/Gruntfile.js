@@ -115,10 +115,8 @@ module.exports = function( grunt ) {
 			},
 			options: { signature: false }
 		},
-		shell: {
-			build: {
-				command: './node_modules/wpapi/lib/data/update-default-routes-json.js --endpoint=https://wordpress.org/plugins/wp-json --output=./client'
-			}
+		curl: {
+			'./client/modules/default-routes.json': 'https://wordpress.org/plugins/wp-json'
 		},
 		rtlcss: {
 			options: {
@@ -182,13 +180,20 @@ module.exports = function( grunt ) {
 			}
 		},
 		watch: {
-			eslint: {
-				files: ['<%= eslint.files %>'],
-				tasks: ['eslint']
-			},
 			css: {
 				files: ['**/*.scss', '../wporg/css/**/*scss', 'client/components/**/**.scss'],
 				tasks: ['css']
+			},
+			scripts: {
+				files: ['**/*.jsx'],
+				tasks: ['webpack:build-dev'],
+				options: {
+				  atBegin: true,
+				}
+			},
+			eslint: {
+				files: ['<%= eslint.files %>'],
+				tasks: ['eslint']
 			}
 		}
 	});
@@ -200,9 +205,9 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks('grunt-webpack');
 	grunt.loadNpmTasks('grunt-eslint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-shell');
+	grunt.loadNpmTasks('grunt-curl');
 
 	grunt.registerTask('default', ['eslint', 'sass_globbing', 'sass', 'rtlcss:dynamic']);
 	grunt.registerTask('css', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic']);
-	grunt.registerTask('build', ['webpack:build', 'css', 'shell:build']);
+	grunt.registerTask('build', ['webpack:build', 'css', 'curl']);
 };

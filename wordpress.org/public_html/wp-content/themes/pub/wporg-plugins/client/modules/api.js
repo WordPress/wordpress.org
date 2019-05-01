@@ -1,6 +1,6 @@
 import WPAPI from 'wpapi';
 
-import routes from 'default-routes.json';
+import routes from './default-routes.json';
 
 /** @type {Object} pluginDirectory Config variable */
 const pluginDirectory = window.pluginDirectory || {};

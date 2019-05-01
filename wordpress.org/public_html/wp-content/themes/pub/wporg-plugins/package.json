@@ -29,12 +29,12 @@
     "grunt": "^1.0.3",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-watch": "^1.1.0",
+    "grunt-curl": "^2.5.1",
     "grunt-eslint": "^19.0.0",
     "grunt-postcss": "~0.7.2",
     "grunt-rtlcss": "^2.0.1",
     "grunt-sass": "~3.0.1",
     "grunt-sass-globbing": "^1.5.1",
-    "grunt-shell": "^2.1.0",
     "grunt-webpack": "^1.0.11",
     "history": "^2.0.0",
     "jquery": "^3.1.0",
@@ -58,6 +58,6 @@
   "dependencies": {
     "i18n-calypso": "^1.7.0",
     "json-loader": "^0.5.4",
-    "wpapi": "^1.0.0"
+    "wpapi": "^1.2.1"
   }
 }
