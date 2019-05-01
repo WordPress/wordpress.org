@@ -33,6 +33,7 @@
 	align-items: center;
 }
 
+.wordcamp-item-select-option-avatar,
 .wordcamp-item-select-option-icon-container {
 	display: inline-flex;
 	align-items: center;
@@ -47,7 +48,7 @@
 	white-space: normal;
 }
 
-.wordcamp-item-select-option-label-term-count {
+.wordcamp-item-select-option-label-count {
 	font-size: 0.6em;
 	display: inline-block;
 	border-radius: 50%;

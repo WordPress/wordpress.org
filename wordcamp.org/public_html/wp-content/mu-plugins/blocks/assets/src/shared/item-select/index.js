@@ -17,7 +17,15 @@ const { __ } = wp.i18n;
  */
 import './style.scss';
 
+/**
+ * Component for selecting one or more related entities to be used as content in a block.
+ */
 class ItemSelect extends Component {
+	/**
+	 * Run additional operations during component initialization.
+	 *
+	 * @param {Object} props
+	 */
 	constructor( props ) {
 		super( props );
 
@@ -25,32 +33,50 @@ class ItemSelect extends Component {
 			selectedOptions: null,
 		};
 
-		this.isOptionDisabled = this.isOptionDisabled.bind( this );
 		this.getNewAttributes = this.getNewAttributes.bind( this );
 	}
 
-	isOptionDisabled( option, selected ) {
-		const { mode } = this.props;
+	/**
+	 * Determine if an option should be selectable based on what else is already selected.
+	 *
+	 * @param {Object} option
+	 * @param {Array}  selected
+	 *
+	 * @return {boolean}
+	 */
+	static isOptionDisabled( option, selected ) {
 		let chosen;
-
-		if ( 'loading' === option.type ) {
-			return true;
-		}
 
 		if ( Array.isArray( selected ) && selected.length ) {
 			chosen = selected[ 0 ].type;
 		}
 
-		if ( mode && mode !== option.type ) {
-			return true;
-		}
-
 		return chosen && chosen !== option.type;
 	}
 
+	/**
+	 * Render the label of an option group.
+	 *
+	 * @param {Object} groupData
+	 *
+	 * @returns {Element}
+	 */
+	static formatGroupLabel( groupData ) {
+		return (
+			<span className="wordcamp-item-select-option-group-label">
+				{ groupData.label }
+			</span>
+		);
+	}
+
+	/**
+	 * Convert a selection of options into values for a block's attributes.
+	 *
+	 * @return {Object}
+	 */
 	getNewAttributes() {
-		let attributes = {};
 		const { selectedOptions } = this.state;
+		let attributes = {};
 
 		if ( null === selectedOptions ) {
 			return attributes;
@@ -75,19 +101,20 @@ class ItemSelect extends Component {
 		return attributes;
 	}
 
+	/**
+	 * Render the select dropdown and related UI.
+	 *
+	 * @return {Element}
+	 */
 	render() {
-		const {
-			instanceId, className, label, help, submitLabel,
-			buildSelectOptions, onChange,
-			selectProps,
-		} = this.props;
+		const { instanceId, className, label, help, submitLabel, onChange, selectProps } = this.props;
 		const value = this.state.selectedOptions || this.props.value;
 		const id = `wordcamp-item-select-control-${ instanceId }`;
 
 		const mergedSelectProps = {
-			options          : buildSelectOptions(),
 			isMulti          : true,
-			isOptionDisabled : this.isOptionDisabled,
+			isOptionDisabled : this.constructor.isOptionDisabled,
+			formatGroupLabel : this.constructor.formatGroupLabel,
 			...selectProps,
 		};
 
@@ -98,7 +125,7 @@ class ItemSelect extends Component {
 				label={ label }
 				help={ help }
 			>
-				<div className="wordcaselectedOptionsmp-item-select-inner">
+				<div className="wordcamp-item-select-inner">
 					<Select
 						id={ id }
 						className="wordcamp-item-select-select"
@@ -124,3 +151,4 @@ class ItemSelect extends Component {
 }
 
 export default withInstanceId( ItemSelect );
+export * from './option';
