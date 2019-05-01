@@ -9,10 +9,18 @@ const { __ } = wp.i18n;
 /**
  * Internal dependencies
  */
-import GridInspectorControl from '../shared/grid-layout/inspector-control';
+import GridInspectorControl           from '../shared/grid-layout/inspector-control';
 import FeaturedImageInspectorControls from '../shared/featured-image/inspector-control';
 
+/**
+ * Component for block controls that appear in the Inspector Panel.
+ */
 class SessionsInspectorControls extends Component {
+	/**
+	 * Render the controls.
+	 *
+	 * @return {Element}
+	 */
 	render() {
 		const { attributes, setAttributes, blockData } = this.props;
 		const { show_speaker, content, show_meta, show_category, sort } = attributes;

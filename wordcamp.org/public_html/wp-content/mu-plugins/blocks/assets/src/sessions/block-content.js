@@ -1,29 +1,42 @@
 /**
  * External dependencies
  */
-import { get } from 'lodash';
+import { get }    from 'lodash';
 import classnames from 'classnames';
 
 /**
  * WordPress dependencies
  */
 const { Component } = wp.element;
-const { __ } = wp.i18n;
+const { __ }        = wp.i18n;
 
 /**
  * Internal dependencies
  */
-import {ItemTitle, ItemHTMLContent, ItemPermalink} from '../shared/block-content';
-import { tokenSplit, arrayTokenReplace, intersperse, listify } from '../shared/i18n';
-import GridContentLayout from '../shared/grid-layout/block-content';
-import FeaturedImage from '../shared/featured-image';
+import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../shared/block-content';
+import { tokenSplit, arrayTokenReplace, intersperse, listify }       from '../shared/i18n';
+import GridContentLayout                                             from '../shared/grid-layout/block-content';
+import FeaturedImage                                                 from '../shared/featured-image';
+import { filterEntities }                                            from '../blocks-store';
 
+/**
+ * Component for the section of each session post that displays information about the session's speakers.
+ *
+ * @param {Object} session
+ *
+ * @return {Element}
+ */
 function SessionSpeakers( { session } ) {
 	let speakerData = get( session, '_embedded.speakers', [] );
 
 	speakerData = speakerData.map( ( speaker ) => {
-		const { link = '' } = speaker;
-		let {  title = {} } = speaker;
+		if ( speaker.hasOwnProperty( 'code' ) ) {
+			// The wporg username given for this speaker returned an error.
+			return null;
+		}
+
+		const { link }     = speaker;
+		let { title = {} } = speaker;
 
 		title = title.rendered.trim() || __( 'Unnamed', 'wordcamporg' );
 
@@ -32,10 +45,7 @@ function SessionSpeakers( { session } ) {
 		}
 
 		return (
-			<a
-				key={ link }
-				href={ link }
-			>
+			<a key={ link } href={ link }>
 				{ title }
 			</a>
 		);
@@ -54,6 +64,13 @@ function SessionSpeakers( { session } ) {
 	);
 }
 
+/**
+ * Component for the section of each session post that displays metadata including date, time, and location (track).
+ *
+ * @param {Object} session
+ *
+ * @return {Element}
+ */
 function SessionMeta( { session } ) {
 	let metaContent;
 	const terms = get( session, '_embedded[\'wp:term\']', [] ).flat();
@@ -97,6 +114,13 @@ function SessionMeta( { session } ) {
 	);
 }
 
+/**
+ * Component for the section of each session post that displays a session's assigned categories.
+ *
+ * @param {Object} session
+ *
+ * @return {Element}
+ */
 function SessionCategory( { session } ) {
 	let categoryContent;
 	const terms = get( session, '_embedded[\'wp:term\']', [] ).flat();
@@ -129,21 +153,107 @@ function SessionCategory( { session } ) {
 	);
 }
 
+/**
+ * Component for displaying the block content.
+ */
 class SessionsBlockContent extends Component {
-	hasSpeaker( session ) {
+	/**
+	 * Run additional operations during component initialization.
+	 *
+	 * @param {Object} props
+	 */
+	constructor( props ) {
+		super( props );
+
+		this.getFilteredPosts = this.getFilteredPosts.bind( this );
+	}
+
+	/**
+	 * Determine if a session has related speaker data.
+	 *
+	 * @param {Object} session
+	 *
+	 * @return {boolean}
+	 */
+	static hasSpeaker( session ) {
 		return get( session, '_embedded.speakers', [] ).length > 0;
 	}
 
+	/**
+	 * Filter and sort the content that will be rendered.
+	 *
+	 * @returns {Array}
+	 */
+	getFilteredPosts() {
+		const { attributes, entities } = this.props;
+		const { wcb_session: posts } = entities;
+		const { mode, item_ids, sort } = attributes;
+
+		const args = {};
+
+		if ( Array.isArray( item_ids ) && item_ids.length > 0 ) {
+			let fieldName;
+
+			switch ( mode ) {
+				case 'wcb_session':
+					fieldName = 'id';
+					break;
+				case 'wcb_track':
+					fieldName = 'session_track';
+					break;
+				case 'wcb_session_category':
+					fieldName = 'session_category';
+					break;
+			}
+
+			args.filter  = [
+				{
+					fieldName  : fieldName,
+					fieldValue : item_ids,
+				},
+			];
+		}
+
+		if ( 'session_time' !== sort ) {
+			args.sort = sort;
+		}
+
+		let filtered = filterEntities( posts, args );
+
+		if ( Array.isArray( filtered ) && 'session_time' === sort ) {
+			filtered = filtered.sort( ( a, b ) => {
+				return Number( a.meta._wcpt_session_time ) - Number( b.meta._wcpt_session_time );
+			} );
+		}
+
+		return filtered;
+	}
+
+	/**
+	 * Render the block content.
+	 *
+	 * @return {Element}
+	 */
 	render() {
-		const { attributes, sessionPosts } = this.props;
+		const { attributes } = this.props;
 		const { show_speaker, show_images, image_align, featured_image_width, content, show_meta, show_category } = attributes;
+
+		const posts     = this.getFilteredPosts();
+		const isLoading = ! Array.isArray( posts );
+		const hasPosts  = ! isLoading && posts.length > 0;
+
+		if ( isLoading || ! hasPosts ) {
+			return (
+				<BlockNoContent loading={ isLoading } />
+			);
+		}
 
 		return (
 			<GridContentLayout
 				className="wordcamp-sessions-block"
 				{ ...this.props }
 			>
-				{ sessionPosts.map( ( post ) =>
+				{ posts.map( ( post ) =>
 					<div
 						key={ post.slug }
 						className={ classnames(
@@ -160,7 +270,7 @@ class SessionsBlockContent extends Component {
 							link={ post.link }
 						/>
 
-						{ show_speaker && this.hasSpeaker( post ) &&
+						{ show_speaker && this.constructor.hasSpeaker( post ) &&
 							<SessionSpeakers session={ post } />
 						}
 

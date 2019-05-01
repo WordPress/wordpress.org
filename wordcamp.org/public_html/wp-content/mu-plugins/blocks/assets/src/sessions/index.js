@@ -13,7 +13,7 @@ export const LABEL         = __( 'Sessions', 'wordcamporg' );
 export const ICON  = 'list-view';
 
 const supports = {
-	'align': [ 'wide', 'full' ],
+	align: [ 'wide', 'full' ],
 };
 
 export const settings = {
