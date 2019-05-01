@@ -13,7 +13,7 @@ export const LABEL         = __( 'Speakers', 'wordcamporg' );
 export const ICON  = 'megaphone';
 
 const supports = {
-	'align': [ 'wide', 'full' ],
+	align: [ 'wide', 'full' ],
 };
 
 export const settings = {
