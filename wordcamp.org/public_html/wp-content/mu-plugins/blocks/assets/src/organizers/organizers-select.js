@@ -1,191 +1,126 @@
 /**
  * External dependencies
  */
-import { get, includes } from 'lodash';
+import { every, flatMap, includes } from 'lodash';
 
 /**
  * WordPress dependencies
  */
-const { Dashicon }  = wp.components;
 const { Component } = wp.element;
 const { __ }        = wp.i18n;
 
 /**
  * Internal dependencies
  */
-import { AvatarImage } from '../shared/avatar';
-import ItemSelect  from '../shared/item-select';
-import { ICON }    from './index';
+import ItemSelect, { buildOptions, Option } from '../shared/item-select';
 
+/**
+ * Component for selecting posts/terms for populating the block content.
+ */
 class OrganizersSelect extends Component {
+	/**
+	 * Run additional operations during component initialization.
+	 *
+	 * @param {Object} props
+	 */
 	constructor( props ) {
 		super( props );
 
-		this.state = {
-			wcb_organizer      : [],
-			wcb_organizer_team : [],
-			loading            : true,
-		};
-
-		this.buildSelectOptions = this.buildSelectOptions.bind( this );
-		this.fetchSelectOptions( props );
+		this.buildSelectOptions    = this.buildSelectOptions.bind( this );
+		this.getCurrentSelectValue = this.getCurrentSelectValue.bind( this );
+		this.isLoading             = this.isLoading.bind( this );
 	}
 
-	fetchSelectOptions( props ) {
-		const { allOrganizerPosts, allOrganizerTerms } = props;
+	/**
+	 * Build or retrieve the options that will populate the Select dropdown.
+	 *
+	 * @return {Array}
+	 */
+	buildSelectOptions() {
+		const { entities } = this.props;
+		const { wcb_organizer, wcb_organizer_team } = entities;
 
-		const parsedPosts = allOrganizerPosts.then(
-			( fetchedPosts ) => {
-				const posts = fetchedPosts.map( ( post ) => {
-					return {
-						label  : post.title.rendered.trim() || __( '(Untitled)', 'wordcamporg' ),
-						value  : post.id,
-						type   : 'wcb_organizer',
-						avatar : post.avatar_urls[ '24' ],
-					};
-				} );
+		const optionGroups = [
+			{
+				entityType : 'post',
+				type       : 'wcb_organizer',
+				label      : __( 'Organizers', 'wordcamporg' ),
+				items      : wcb_organizer,
+			},
+			{
+				entityType : 'term',
+				type       : 'wcb_organizer_team',
+				label      : __( 'Teams', 'wordcamporg' ),
+				items      : wcb_organizer_team,
+			},
+		];
 
-				this.setState( { wcb_organizer: posts } );
-			}
-		);
+		return buildOptions( optionGroups );
+	}
 
-		const parsedTerms = allOrganizerTerms.then(
-			( fetchedTerms ) => {
-				const terms = fetchedTerms.map( ( term ) => {
-					return {
-						label : term.name.trim() || __( '(Untitled)', 'wordcamporg' ),
-						value : term.id,
-						type  : 'wcb_organizer_team',
-						count : term.count,
-					};
-				} );
+	/**
+	 * Determine the currently selected options in the Select dropdown based on block attributes.
+	 *
+	 * @return {Array}
+	 */
+	getCurrentSelectValue() {
+		const { attributes } = this.props;
+		const { mode, item_ids } = attributes;
 
-				this.setState( { wcb_organizer_team: terms } );
-			}
-		);
-
-		Promise.all( [ parsedPosts, parsedTerms ] ).then( () => {
-			this.setState( { loading: false } );
+		const options = flatMap( this.buildSelectOptions(), ( group ) => {
+			return group.options;
 		} );
-	}
-
-	buildSelectOptions( mode ) {
-		const { getOwnPropertyDescriptors } = Object;
-		const options = [];
-
-		const labels = {
-			wcb_organizer      : __( 'Organizers', 'wordcamporg' ),
-			wcb_organizer_team : __( 'Teams',      'wordcamporg' ),
-		};
-
-		for ( const type in getOwnPropertyDescriptors( this.state ) ) {
-			if ( ! this.state[ type ].length ) {
-				continue;
-			}
-
-			if ( mode && type !== mode ) {
-				continue;
-			}
-
-			options.push( {
-				label   : labels[ type ],
-				options : this.state[ type ],
-			} );
-		}
-
-		return options;
-	}
-
-	render() {
-		const { label, attributes, setAttributes } = this.props;
-		const { mode, item_ids }                   = attributes;
-		const options                              = this.buildSelectOptions( mode );
 
 		let value = [];
 
 		if ( mode && item_ids.length ) {
-			const modeOptions = get( options, '[0].options', [] );
-
-			value = modeOptions.filter( ( option ) => {
-				return includes( item_ids, option.value );
+			value = options.filter( ( option ) => {
+				return mode === option.type && includes( item_ids, option.value );
 			} );
 		}
 
+		return value;
+	}
+
+	/**
+	 * Check if all of the entity groups have finished loading.
+	 *
+	 * @return {boolean}
+	 */
+	isLoading() {
+		const { entities } = this.props;
+
+		return ! every( entities, ( value ) => {
+			return Array.isArray( value );
+		} );
+	}
+
+	/**
+	 * Render an ItemSelect component with block-specific settings.
+	 *
+	 * @return {Element}
+	 */
+	render() {
+		const { label, setAttributes } = this.props;
+
 		return (
 			<ItemSelect
-				className="wordcamp-organizer-select"
+				className="wordcamp-organizers-select"
 				label={ label }
-				value={ value }
-				buildSelectOptions={ this.buildSelectOptions }
+				value={ this.getCurrentSelectValue() }
 				onChange={ ( changed ) => setAttributes( changed ) }
-				mode={ mode }
 				selectProps={ {
-					isLoading        : this.state.loading,
-					formatGroupLabel : ( groupData ) => {
+					options           : this.buildSelectOptions(),
+					isLoading         : this.isLoading(),
+					formatOptionLabel : ( optionData ) => {
 						return (
-							<span className="wordcamp-item-select-option-group-label">
-								{ groupData.label }
-							</span>
-						);
-					},
-					formatOptionLabel: ( optionData ) => {
-						return (
-							<OrganizersOption { ...optionData } />
+							<Option { ...optionData } />
 						);
 					},
 				} }
 			/>
 		);
 	}
-}
-
-function OrganizersOption( { type, label = '', avatar = '', count = 0 } ) {
-	let image, content;
-
-	switch ( type ) {
-		case 'wcb_organizer' :
-			image = (
-				<AvatarImage
-					className="wordcamp-item-select-option-avatar"
-					name={ label }
-					size={ 24 }
-					url={ avatar }
-				/>
-			);
-			content = (
-				<span className="wordcamp-item-select-option-label">
-					{ label }
-				</span>
-			);
-			break;
-
-		case 'wcb_organizer_team' :
-			image = (
-				<div className="wordcamp-item-select-option-icon-container">
-					<Dashicon
-						className="wordcamp-item-select-option-icon"
-						icon={ ICON }
-						size={ 16 }
-					/>
-				</div>
-			);
-			content = (
-				<span className="wordcamp-item-select-option-label">
-					{ label }
-					<span className="wordcamp-item-select-option-label-term-count">
-						{ count }
-					</span>
-				</span>
-			);
-			break;
-	}
-
-	return (
-		<div className="wordcamp-item-select-option">
-			{ image }
-			{ content }
-		</div>
-	);
 }
 
 export default OrganizersSelect;

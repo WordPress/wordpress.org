@@ -90,6 +90,10 @@ add_filter( 'wordcamp_blocks_script_data', __NAMESPACE__ . '\add_script_data' );
  * @return array
  */
 function get_organizer_posts( array $attributes ) {
+	if ( empty( $attributes['mode'] ) ) {
+		return [];
+	}
+
 	$post_args = [
 		'post_type'      => 'wcb_organizer',
 		'post_status'    => 'publish',
