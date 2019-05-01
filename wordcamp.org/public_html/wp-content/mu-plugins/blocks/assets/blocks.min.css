@@ -22,6 +22,12 @@
 .edit-post-settings-sidebar__panel-block .components-panel__body .wordcamp-components-avatar-size-range {
   margin-top: 1em; }
 
+.wordcamp-block-content-none {
+  margin: 1em 0;
+  text-align: center; }
+  .wordcamp-block-content-none .components-spinner {
+    float: none; }
+
 .wordcamp-item-meta {
   margin: 0 0 1.5em; }
 
@@ -90,6 +96,7 @@
   display: flex;
   align-items: center; }
 
+.wordcamp-item-select-option-avatar,
 .wordcamp-item-select-option-icon-container {
   display: inline-flex;
   align-items: center;
@@ -102,7 +109,7 @@
   margin: 0 0.5em;
   white-space: normal; }
 
-.wordcamp-item-select-option-label-term-count {
+.wordcamp-item-select-option-label-count {
   font-size: 0.6em;
   display: inline-block;
   border-radius: 50%;
