@@ -1,187 +1,132 @@
 /**
  * External dependencies
  */
-import { get, difference } from 'lodash';
-import classnames          from 'classnames';
+import { get }    from 'lodash';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
  */
 const { Component }       = wp.element;
-const { escapeAttribute } = wp.escapeHtml;
 const { __ }              = wp.i18n;
 
 /**
  * Internal dependencies
  */
-import FeaturedImage                  from '../shared/featured-image';
-import GridContentLayout              from '../shared/grid-layout/block-content';
-import {ItemTitle, ItemHTMLContent, ItemPermalink} from '../shared/block-content';
+import FeaturedImage                                                 from '../shared/featured-image';
+import GridContentLayout                                             from '../shared/grid-layout/block-content';
+import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../shared/block-content';
+import { filterEntities }                                            from '../blocks-store';
 
 /**
- * Renders individual sponsor post inside editor.
- *
- * @param {Object} sponsorPost
- * @param {Object} attributes
- *
- * @return {Element}
+ * Component for displaying the block content.
  */
-function SponsorDetail( { sponsorPost, attributes } ) {
-	const { show_name, show_logo, content, featured_image_width } = attributes;
-	const displayContent = 'full' === content ? sponsorPost.content.rendered.trim() : sponsorPost.excerpt.rendered.trim();
-
-	return (
-		<div className={ 'wordcamp-sponsor-details wordcamp-sponsor-details-' + escapeAttribute( sponsorPost.slug ) }>
-
-			{ ( show_name || show_name === undefined ) &&
-				<ItemTitle
-					className="wordcamp-sponsor-title"
-					headingLevel={ 3 }
-					title={ sponsorPost.title.rendered.trim() }
-					link={ sponsorPost.link }
-				/>
-			}
-
-			{ ( show_logo || show_logo === undefined ) &&
-				<FeaturedImage
-					imageData={ get( sponsorPost, '_embedded.wp:featuredmedia[0]', {} ) }
-					width={ featured_image_width }
-					className={ classnames( 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo' ) }
-					imageLink={ sponsorPost.link }
-				/>
-			}
-
-			{ ( 'none' !== content ) &&
-				<ItemHTMLContent
-					className={ classnames( 'wordcamp-sponsor-content' ) }
-					content={ displayContent }
-				/>
-			}
-
-			{ ( 'full' === content ) &&
-				<ItemPermalink
-					link={ sponsorPost.link }
-					linkText={ __( 'Visit sponsor page', 'wordcamporg' ) }
-				/>
-			}
-		</div>
-	);
-}
-
-/**
- * Component for rendering Sponsors post inside editor.
- */
-class SponsorBlockContent extends Component {
+class SponsorsBlockContent extends Component {
+	/**
+	 * Run additional operations during component initialization.
+	 *
+	 * @param {Object} props
+	 */
 	constructor( props ) {
 		super( props );
 
-		this.state = {
-			selectedPosts : [],
-			sortBy        : 'name_asc',
-		};
+		this.getFilteredPosts = this.getFilteredPosts.bind( this );
 	}
 
 	/**
-	 * Call back for when featured image URL is changed for a post.
-	 * We are storing the URL object as JSON stringified value because I was
-	 * not able to get object type to work properly. Maybe its not supported in
-	 * Gutenberg yet.
+	 * Filter and sort the content that will be rendered.
 	 *
-	 * @param {number} sponsorId
-	 * @param {string} imageURL
+	 * @returns {Array}
 	 */
-	setFeaturedImageURL( sponsorId, imageURL ) {
-		const sponsor_image_urls        = this.sponsorImageUrl || {};
-		sponsor_image_urls[ sponsorId ] = imageURL;
-		this.sponsorImageUrl            = sponsor_image_urls;
+	getFilteredPosts() {
+		const { attributes, entities } = this.props;
+		const { wcb_sponsor: posts } = entities;
+		const { mode, item_ids, sort } = attributes;
 
-		const { setAttributes }         = this.props;
-		const sponsor_image_urls_latest = this.sponsorImageUrl;
+		const args = {};
 
-		setAttributes( {
-			sponsor_image_urls: encodeURIComponent( JSON.stringify( sponsor_image_urls_latest ) ),
-		} );
-	}
-
-	componentWillReceiveProps( nextProps ) {
-		// Sort the sponsor posts. Since this could potentially be expensive, lets do it in componentWillReceiveProps hook and set state with result if anything is changed.
-		const { selectedPosts: newSelectedPosts, attributes: newAttributes, sponsorTermOrder: newSponsorTermOrder } = nextProps;
-		const { sort_by: newSortBy } = newAttributes;
-		const newSelectedPostIds = newSelectedPosts.map( ( post ) => post.id ).sort();
-
-		const { selectedPosts, sortBy } = this.state;
-		const selectedPostsIds = selectedPosts.map( ( post ) => post.id ).sort();
-
-		if ( sortBy === newSortBy && newSelectedPosts.length === selectedPosts.length && difference( selectedPostsIds, newSelectedPostIds ).length === 0 ) {
-			// Everything is same. No need to calculate sorting. Lets bail.
-			return;
+		if ( Array.isArray( item_ids ) && item_ids.length > 0 ) {
+			args.filter  = [
+				{
+					fieldName  : mode === 'wcb_sponsor' ? 'id' : 'wcb_sponsor_level',
+					fieldValue : item_ids,
+				},
+			];
 		}
 
-		let sortedPosts;
+		args.sort = sort;
 
-		switch ( newSortBy ) {
-			case 'sponsor_level' :
-				if ( ! Array.isArray( newSponsorTermOrder ) ||
-					newSponsorTermOrder.length === 0 ) {
-					break;
-				}
-				sortedPosts = newSelectedPosts.sort( ( sponsor1, sponsor2 ) => {
-					return newSponsorTermOrder.indexOf( ( sponsor1.sponsor_level || [] )[ 0 ] ) - newSponsorTermOrder.indexOf( ( sponsor2.sponsor_level || [] )[ 0 ] );
-				} );
-				break;
-
-			case 'name_desc' :
-				sortedPosts = newSelectedPosts.sort( ( sponsor1, sponsor2 ) => {
-					const title1 = sponsor1.title.rendered.trim();
-					const title2 = sponsor2.title.rendered.trim();
-					return title1 > title2 ? -1 : 1;
-				} );
-				break;
-
-			case 'name_asc' :
-			default:
-				sortedPosts = newSelectedPosts.sort( ( sponsor1, sponsor2 ) => {
-					const title1 = sponsor1.title.rendered.trim();
-					const title2 = sponsor2.title.rendered.trim();
-					return title1 < title2 ? -1 : 1;
-				} );
-				break;
-		}
-
-		this.setState( {
-			selectedPosts : sortedPosts,
-			sortBy        : newSortBy,
-		} );
+		return filterEntities( posts, args );
 	}
 
 	/**
-	 * Renders Sponsor Block content inside editor.
+	 * Render the block content.
 	 *
 	 * @return {Element}
 	 */
 	render() {
 		const { attributes } = this.props;
-		const { selectedPosts } = this.state;
+		const { show_name, show_logo, content, featured_image_width } = attributes;
+
+		const posts     = this.getFilteredPosts();
+		const isLoading = ! Array.isArray( posts );
+		const hasPosts  = ! isLoading && posts.length > 0;
+
+		if ( isLoading || ! hasPosts ) {
+			return (
+				<BlockNoContent loading={ isLoading } />
+			);
+		}
 
 		return (
 			<GridContentLayout
 				className="wordcamp-sponsors-block"
 				{ ...this.props }
 			>
-				{
-					selectedPosts.map( ( post ) => {
-						return (
-							<SponsorDetail
-								key={ post.id }
-								sponsorPost={ post }
-								attributes={ attributes }
+				{ posts.map( ( post ) =>
+					<div
+						key={ post.slug }
+						className={ classnames(
+							'wordcamp-sponsor',
+							'wordcamp-sponsor-' + post.slug,
+						) }
+					>
+						{ show_name &&
+							<ItemTitle
+								className="wordcamp-sponsor-title"
+								headingLevel={ 3 }
+								title={ post.title.rendered.trim() }
+								link={ post.link }
 							/>
-						);
-					} )
-				}
+						}
+
+						{ show_logo &&
+							<FeaturedImage
+								imageData={ get( post, '_embedded.wp:featuredmedia[0]', {} ) }
+								width={ featured_image_width }
+								className={ classnames( 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo' ) }
+								imageLink={ post.link }
+							/>
+						}
+
+						{ ( 'none' !== content ) &&
+							<ItemHTMLContent
+								className={ classnames( 'wordcamp-sponsor-content-' + content ) }
+								content={ 'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
+							/>
+						}
+
+						{ ( 'full' === content ) &&
+							<ItemPermalink
+								link={ post.link }
+								linkText={ __( 'Visit sponsor page', 'wordcamporg' ) }
+							/>
+						}
+					</div>
+				) }
 			</GridContentLayout>
 		);
 	}
 }
 
-export default SponsorBlockContent;
+export default SponsorsBlockContent;

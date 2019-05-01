@@ -3,6 +3,7 @@
 namespace WordCamp\Blocks\Sponsors;
 use WordCamp\Blocks;
 use function WordCamp\Blocks\Shared\Components\{ render_grid_layout };
+use function WordCamp\Blocks\Shared\Definitions\{ get_shared_definitions, get_shared_definition };
 
 defined( 'WPINC' ) || die();
 
@@ -14,10 +15,10 @@ function init() {
 		'wordcamp/sponsors',
 		[
 			'attributes'      => get_attributes_schema(),
+			'render_callback' => __NAMESPACE__ . '\render',
 			'editor_script'   => 'wordcamp-blocks',
 			'editor_style'    => 'wordcamp-blocks',
 			'style'           => 'wordcamp-blocks',
-			'render_callback' => __NAMESPACE__ . '\render',
 		]
 	);
 }
@@ -32,7 +33,9 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @return false|string
  */
 function render( $attributes ) {
-	$sponsors = get_sponsor_posts( $attributes );
+	$defaults   = wp_list_pluck( get_attributes_schema(), 'default' );
+	$attributes = wp_parse_args( $attributes, $defaults );
+	$sponsors   = get_sponsor_posts( $attributes );
 
 	$container_classes = array(
 		'wordcamp-block',
@@ -53,8 +56,27 @@ function render( $attributes ) {
 	}
 
 	$html = render_grid_layout( $attributes['layout'], $attributes['grid_columns'], $rendered_sponsor_posts, $container_classes );
+
 	return $html;
 }
+
+/**
+ * Add data to be used by the JS scripts in the block editor.
+ *
+ * @param array $data
+ *
+ * @return array
+ */
+function add_script_data( array $data ) {
+	$data['sponsors'] = [
+		'schema'  => get_attributes_schema(),
+		'options' => get_options(),
+	];
+
+	return $data;
+}
+
+add_filter( 'wordcamp_blocks_script_data', __NAMESPACE__ . '\add_script_data' );
 
 /**
  * Return sponsor posts what will rendered based on attributes.
@@ -65,7 +87,7 @@ function render( $attributes ) {
  */
 function get_sponsor_posts( $attributes ) {
 	if ( empty( $attributes['mode'] ) ) {
-		return array();
+		return [];
 	}
 
 	$post_args = array(
@@ -74,81 +96,30 @@ function get_sponsor_posts( $attributes ) {
 		'posts_per_page' => - 1,
 	);
 
+	$sort = explode( '_', $attributes['sort'] );
+
+	if ( 2 === count( $sort ) ) {
+		$post_args['orderby'] = $sort[0];
+		$post_args['order']   = $sort[1];
+	}
+
 	switch ( $attributes['mode'] ) {
-		case 'specific_posts':
-			$post_args['post__in'] = $attributes['post_ids'];
+		case 'wcb_sponsor':
+			$post_args['post__in'] = $attributes['item_ids'];
 			break;
-		case 'specific_terms':
+
+		case 'wcb_sponsor_level':
 			$post_args['tax_query'] = [
 				[
-					'taxonomy' => 'wcb_sponsor_level',
+					'taxonomy' => $attributes['mode'],
 					'field'    => 'id',
-					'terms'    => $attributes['term_ids'],
+					'terms'    => $attributes['item_ids'],
 				],
 			];
 			break;
 	}
 
-	switch ( $attributes['sort_by'] ) {
-		case 'name_asc':
-			$post_args['orderby'] = 'title';
-			$post_args['order']   = 'asc';
-			break;
-		case 'name_desc':
-			$post_args['orderby'] = 'title';
-			$post_args['order']   = 'desc';
-			break;
-		// We will deal with case `sponsor_level` later.
-	}
-
-	$posts = get_posts( $post_args );
-
-	if ( 'sponsor_level' === $attributes['sort_by'] ) {
-		usort( $posts, sponsor_level_sort( $posts ) );
-	}
-
-	return $posts;
-}
-
-/**
- * Helper function for sorting based on sponsor levels.
- *
- * @param array $posts Sponsor posts to sort.
- *
- * @return callable
- */
-function sponsor_level_sort( $posts ) {
-	$sponsor_level_order = get_option( 'wcb_sponsor_level_order' );
-	$sponsor_terms_cache = array();
-
-	//Build the terms cache.
-	foreach ( $posts as $post ) {
-		$sponsor_level_terms = get_the_terms( $post->ID, 'wcb_sponsor_level' );
-		if ( is_array( $sponsor_level_terms ) ) {
-			$sponsor_terms_cache[ $post->ID ] = wp_list_pluck( $sponsor_level_terms, 'term_id' )[0];
-		} else {
-			$sponsor_terms_cache[ $post->ID ] = array();
-		}
-	}
-
-	return function ( $sponsor1, $sponsor2 ) use ( $sponsor_level_order, $sponsor_terms_cache ) {
-		$index1 = array_search( $sponsor_terms_cache[ $sponsor1->ID ], $sponsor_level_order, true );
-		$index2 = array_search( $sponsor_terms_cache[ $sponsor2->ID ], $sponsor_level_order, true );
-
-		if ( false === $index1 && false === $index2 ) {
-			return 0;
-		}
-
-		if ( false === $index1 ) {
-			return 1;
-		}
-
-		if ( false === $index2 ) {
-			return -1;
-		}
-
-		return $index1 - $index2;
-	};
+	return get_posts( $post_args );
 }
 
 /**
@@ -157,58 +128,99 @@ function sponsor_level_sort( $posts ) {
  * @return array
  */
 function get_attributes_schema() {
-	return array(
-		'mode'                  => array(
-			'type' => 'string',
+	$schema = array_merge(
+		get_shared_definitions(
+			[
+				'content',
+				'grid_columns',
+				'item_ids',
+				'layout',
+			],
+			'attribute'
 		),
-		'post_ids'              => array(
-			'type'    => 'array',
-			'default' => array(),
-			'items'   => array(
-				'type' => 'integer',
+		[
+			'align'                => get_shared_definition( 'align_block', 'attribute' ),
+			'className'            => get_shared_definition( 'string_empty', 'attribute' ),
+			'featured_image_width' => array(
+				'type'    => 'integer',
+				'default' => 150,
 			),
-		),
-		'term_ids'              => array(
-			'type'    => 'array',
-			'default' => array(),
-			'items'   => array(
-				'type' => 'integer',
-			),
-		),
-		'sponsor_image_urls'    => array(
-			'type'    => 'string',
-			'default' => '{}',
-		),
-		'show_name'             => array(
-			'type'    => 'bool',
-			'default' => true,
-		),
-		'show_logo'             => array(
-			'type'    => 'bool',
-			'default' => true,
-		),
-		'content'               => array(
-			'type'    => 'string',
-			'default' => 'full',
-		),
-		'grid_columns'          => array(
-			'type'    => 'integer',
-			'minimum' => 1,
-			'maximum' => 4,
-			'default' => 1,
-		),
-		'layout'                => array(
-			'type'    => 'string',
-			'enum'    => array( 'list', 'grid' ),
-			'default' => 'list',
-		),
-		'featured_image_width'  => array(
-			'type'    => 'integer',
-			'default' => 150,
-		),
-		'sort_by'               => array(
-			'type'    => 'string',
-			'default' => 'name_asc',
-		),
+			'image_align'          => get_shared_definition( 'align_image', 'attribute' ),
+			'image_size'           => [
+				'type'    => 'integer',
+				'minimum' => 25,
+				'maximum' => 600,
+				'default' => 150,
+			],
+			'mode'                 => [
+				'type'    => 'string',
+				'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),
+				'default' => '',
+			],
+			'show_logo'            => get_shared_definition( 'boolean_true', 'attribute' ),
+			'show_name'            => get_shared_definition( 'boolean_true', 'attribute' ),
+			'sort'                 => [
+				'type'    => 'string',
+				'enum'    => wp_list_pluck( get_options( 'sort' ), 'value' ),
+				'default' => 'title_asc',
+			],
+		]
 	);
+
+	return $schema;
+}
+
+/**
+ * Get the label/value pairs for all options or a specific type.
+ *
+ * @param string $type
+ *
+ * @return array
+ */
+function get_options( $type = '' ) {
+	$options = array_merge(
+		get_shared_definitions(
+			[
+				'align_block',
+				'align_image',
+				'content',
+				'layout',
+			],
+			'option'
+		),
+		[
+			'mode' => [
+				[
+					'label' => '',
+					'value' => '',
+				],
+				[
+					'label' => _x( 'List all sponsors', 'mode option', 'wordcamporg' ),
+					'value' => 'all',
+				],
+				[
+					'label' => _x( 'Choose sponsors', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_sponsor',
+				],
+				[
+					'label' => _x( 'Choose sponsor level', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_sponsor_level',
+				],
+			],
+			'sort' => array_merge(
+				get_shared_definition( 'sort_title', 'option' ),
+				get_shared_definition( 'sort_date', 'option' )
+			),
+		]
+	);
+
+	if ( $type ) {
+		if ( ! empty( $options[ $type ] ) ) {
+			return $options[ $type ];
+		} else {
+			return [];
+		}
+	}
+
+	return $options;
 }

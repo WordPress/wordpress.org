@@ -13,7 +13,7 @@ export const LABEL = __( 'Sponsors', 'wordcamporg' );
 export const ICON  = 'heart';
 
 const supports = {
-	'align': [ 'wide', 'full' ],
+	align: [ 'wide', 'full' ],
 };
 
 export const settings = {

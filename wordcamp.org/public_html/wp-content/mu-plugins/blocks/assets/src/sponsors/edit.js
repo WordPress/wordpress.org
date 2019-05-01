@@ -1,91 +1,62 @@
 /**
- * Internal dependencies
- */
-import SponsorInspectorControls from './inspector-controls';
-import SponsorBlockControls     from './block-controls';
-import GridToolbar              from '../shared/grid-layout/toolbar';
-import { ICON }                 from './index';
-
-/**
  * WordPress dependencies
  */
 const { Component, Fragment } = wp.element;
-const apiFetch                = wp.apiFetch;
-const { addQueryArgs }        = wp.url;
+const { withSelect }          = wp.data;
 
-const MAX_PAGE = 100;
+/**
+ * Internal dependencies
+ */
+import SponsorsInspectorControls from './inspector-controls';
+import SponsorsBlockControls     from './block-controls';
+import GridToolbar               from '../shared/grid-layout/toolbar';
+import { ICON }                  from './index';
+import { WC_BLOCKS_STORE } from '../blocks-store';
 
+const blockData = window.WordCampBlocks.sponsors || {};
+
+/**
+ * Top-level component for the editing UI for the block.
+ */
 class SponsorsEdit extends Component {
 	/**
-	 * Constructor for SponsorsEdit block.
-	 *
-	 * @param {Array} props
-	 */
-	constructor( props ) {
-		super( props );
-
-		this.fetchSponsors();
-	}
-
-	fetchSponsors() {
-		const sponsorQuery = {
-			orderby  : 'title',
-			order    : 'asc',
-			per_page : MAX_PAGE,
-			_embed   : true,
-		};
-
-		const sponsorLevelQuery = {
-			orderby  : 'id',
-			order    : 'asc',
-			per_page : MAX_PAGE,
-			_embed   : true,
-		};
-
-		this.state = {
-			sponsorPosts  : apiFetch( { path: addQueryArgs( '/wp/v2/sponsors', sponsorQuery ) } ),
-			sponsorLevels : apiFetch( { path: addQueryArgs( '/wp/v2/sponsor_level', sponsorLevelQuery ) } ),
-			siteSettings  : apiFetch( { path: addQueryArgs( '/wp/v2/settings', {} ) } ),
-		};
-	}
-
-	/**
-	 * Renders SponsorEdit component.
+	 * Render the block's editing UI.
 	 *
 	 * @return {Element}
 	 */
 	render() {
-		const { sponsorPosts, sponsorLevels, siteSettings } = this.state;
-		const { attributes }                                = this.props;
-		const { mode }                                      = attributes;
+		const { mode } = this.props.attributes;
 
 		return (
 			<Fragment>
-				{
-					<SponsorBlockControls
-						icon={ ICON }
-						sponsorPosts={ sponsorPosts }
-						sponsorLevels={ sponsorLevels }
-						siteSettings={ siteSettings }
-						{ ...this.props }
-					/>
+				<SponsorsBlockControls
+					icon={ ICON }
+					{ ...this.props }
+				/>
+				{ mode &&
+					<Fragment>
+						<SponsorsInspectorControls { ...this.props } />
+						<GridToolbar { ...this.props } />
+					</Fragment>
 				}
-				<Fragment>
-					<SponsorInspectorControls
-						sponsorPosts={ sponsorPosts }
-						sponsorLevels={ sponsorLevels }
-						{ ...this.props }
-					/>
-
-					{ mode &&
-						<GridToolbar
-							{ ...this.props }
-						/>
-					}
-				</Fragment>
 			</Fragment>
 		);
 	}
 }
 
-export const edit = SponsorsEdit;
+const sponsorSelect = ( select ) => {
+	const { getEntities, getSiteSettings } = select( WC_BLOCKS_STORE );
+
+	const entities = {
+		wcb_sponsor       : getEntities( 'postType', 'wcb_sponsor', { _embed: true } ),
+		wcb_sponsor_level : getEntities( 'taxonomy', 'wcb_sponsor_level' ),
+	};
+
+	return {
+		blockData    : blockData,
+		entities     : entities,
+		siteSettings : getSiteSettings(),
+	};
+};
+
+export const edit = withSelect( sponsorSelect )( SponsorsEdit );

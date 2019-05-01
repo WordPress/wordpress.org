@@ -12,30 +12,25 @@ const { __ }                                                = wp.i18n;
 import GridInspectorControl           from '../shared/grid-layout/inspector-control';
 import FeaturedImageInspectorControls from '../shared/featured-image/inspector-control';
 
+const DEFAULT_OPTIONS = {
+	align_image : {},
+	content     : {},
+	sort        : {},
+};
+
 /**
- * Class for defining Inspector control in sponsor block.
+ * Component for block controls that appear in the Inspector Panel.
  */
-class SponsorInspectorControls extends Component {
+class SponsorsInspectorControls extends Component {
 	/**
-	 * Renders inspector controls.
+	 * Render the controls.
 	 *
 	 * @return {Element}
 	 */
 	render() {
-		const sortOptions = [
-			{ label: __( 'Name (A to Z)', 'wordcamporg' ), value: 'name_asc'      },
-			{ label: __( 'Name (Z to A)', 'wordcamporg' ), value: 'name_desc'     },
-			{ label: __( 'Sponsor Level', 'wordcamporg' ), value: 'sponsor_level' },
-		];
-
-		const contentOptions = [
-			{ label: __( 'Full',    'wordcamporg' ), value: 'full'    },
-			{ label: __( 'Excerpt', 'wordcamporg' ), value: 'excerpt' },
-			{ label: __( 'None',    'wordcamporg' ), value: 'none'    },
-		];
-
-		const { attributes, setAttributes }                            = this.props;
-		const { show_name, show_logo, sort_by, content } = attributes;
+		const { attributes, setAttributes, blockData } = this.props;
+		const { show_name, show_logo, sort, content } = attributes;
+		const { options = DEFAULT_OPTIONS } = blockData;
 
 		return (
 			<InspectorControls>
@@ -51,37 +46,33 @@ class SponsorInspectorControls extends Component {
 						<ToggleControl
 							label={ __( 'Name', 'wordcamporg' ) }
 							help={ __( 'Show or hide sponsor name', 'wordcamporg' ) }
-							checked={ show_name === undefined ? true : show_name }
+							checked={ show_name }
 							onChange={ ( value ) => setAttributes( { show_name: value } ) }
 						/>
 					</PanelRow>
-
 					<PanelRow>
 						<ToggleControl
 							label={ __( 'Logo', 'wordcamporg' ) }
 							help={ __( 'Show or hide sponsor logo', 'wordcamporg' ) }
-							checked={ show_logo === undefined ? true : show_logo }
+							checked={ show_logo }
 							onChange={ ( value ) => setAttributes( { show_logo: value } ) }
 						/>
 					</PanelRow>
-
 					<PanelRow>
 						<SelectControl
 							label={ __( 'Description', 'wordcamporg' ) }
 							value={ content }
-							options={ contentOptions }
+							options={ options.content }
 							help={ __( 'Length of sponsor description', 'wordcamporg' ) }
 							onChange={ ( value ) => setAttributes( { content: value } ) }
 						/>
 					</PanelRow>
-
 					<PanelRow>
 						<SelectControl
 							label={ __( 'Sort by', 'wordcamporg' ) }
-							options={ sortOptions }
-							value={ sort_by || 'name_asc' }
-							onChange={ ( value ) => setAttributes( { sort_by: value } ) }
-							help={ __( 'Configure sponsor levels from the Sponsor -> Order Sponsor Levels page.', 'wordcamporg' ) }
+							options={ options.sort }
+							value={ sort }
+							onChange={ ( value ) => setAttributes( { sort: value } ) }
 						/>
 					</PanelRow>
 				</PanelBody>
@@ -97,4 +88,4 @@ class SponsorInspectorControls extends Component {
 	}
 }
 
-export default SponsorInspectorControls;
+export default SponsorsInspectorControls;
