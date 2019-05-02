@@ -661,7 +661,7 @@ function _reset_tasks() {
 	$new_category_data = get_task_category_data();
 
 	foreach ( $new_category_data as $slug => $label ) {
-		$results[] = wp_insert_term( $slug, Mentors\PREFIX . '_task_category' );
+		$results[] = wp_insert_term( $label, Mentors\PREFIX . '_task_category', array( 'slug' => $slug ) );
 	}
 
 	// Create new tasks.
