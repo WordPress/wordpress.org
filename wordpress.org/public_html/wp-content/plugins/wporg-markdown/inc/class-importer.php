@@ -246,12 +246,12 @@ abstract class Importer {
 	 * @return boolean True if updated, false otherwise.
 	 */
 	protected function update_post_from_manifest_doc( $post_id, $doc ) {
+		update_post_meta( $post_id, $this->manifest_entry_meta_key, $doc );
+
 		$did_update = update_post_meta( $post_id, $this->meta_key, esc_url_raw( $doc['markdown_source'] ) );
 		if ( ! $did_update ) {
 			return false;
 		}
-
-		update_post_meta( $post_id, $this->manifest_entry_meta_key, $doc );
 
 		if ( isset( $doc['meta'] ) ) {
 			foreach ( $doc['meta'] as $key => $value ) {
