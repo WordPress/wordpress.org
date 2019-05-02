@@ -8,9 +8,6 @@
 * Author URI: http://profiles.wordpress.org/georgestephanis
 */
 
-// TEMP: prevent redeclaration during plugin move
-if ( !function_exists( 'make_site_register_cpt' ) ) :
-
 add_action( 'init', 'make_site_register_cpt' );
 function make_site_register_cpt() {
 	error_log( __FUNCTION__ );
@@ -154,4 +151,3 @@ function make_site_save_postdata( $post_id ) {
 	}
 }
 
-endif; // TEMP end
