@@ -58,6 +58,9 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 	 */
 	public function fix_markdown_source_meta( $null, $object_id, $meta_key, $single ) {
 		if (
+			// Running under WP-CLI.
+			( defined( 'WP_CLI' ) && WP_CLI )
+		||
 			// Not the markdown source meta key.
 			$meta_key !== $this->meta_key
 		||
