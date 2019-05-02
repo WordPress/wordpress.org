@@ -371,14 +371,45 @@ abstract class Importer {
 			'post_content' => wp_filter_post_kses( wp_slash( $html ) ),
 			'post_excerpt' => sanitize_text_field( wp_slash( $excerpt ) ),
 		);
+
+		$markdown_entry = get_post_meta( $post_id, $this->manifest_entry_meta_key, true );
+
 		// If no title was extracted from markdown doc, use the value defined in manifest.
 		if ( is_null( $title ) ) {
-			$markdown_entry = get_post_meta( $post_id, $this->manifest_entry_meta_key, true );
 			if ( ! empty( $markdown_entry['title'] ) ) {
 				$post_data['post_title'] = sanitize_text_field( wp_slash( $markdown_entry['title'] ) );
 			}
 		} else {
 			$post_data['post_title'] = sanitize_text_field( wp_slash( $title ) );
+		}
+
+		$parent_id = wp_get_post_parent_id( $post_id );
+
+		if ( ! $markdown_entry ) {
+			// Do nothing with regards to possibly changing post parent as we know
+			// nothing about previous import.
+		}
+		// If post had a parent...
+		elseif ( $parent_id ) {
+			$parent = $parent_id ? get_post( $parent_id ) : null;
+			// ...but no parent is now defined, unset parent.
+			if ( empty( $markdown_entry['parent'] ) ) {
+				$post_data['post_parent'] = '';
+			}
+			// ...and it appears to differ from parent now defined, find new parent.
+			elseif ( $markdown_entry['parent'] !== $parent->post_name ) {
+				$find_parent = get_page_by_path( $markdown_entry['parent'], OBJECT, $this->get_post_type() );
+				if ( $find_parent ) {
+					$post_data['post_parent'] = $find_parent->ID;
+				}
+			}
+		}
+		// Does this parentless post now have one newly defined?
+		elseif ( ! empty( $markdown_entry['parent'] ) ) {
+			$find_parent = get_page_by_path( $markdown_entry['parent'], OBJECT, $this->get_post_type() );
+			if ( $find_parent ) {
+				$post_data['post_parent'] = $find_parent->ID;
+			}
 		}
 
 		wp_update_post( $post_data );
