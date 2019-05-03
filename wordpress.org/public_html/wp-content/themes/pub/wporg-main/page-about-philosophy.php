@@ -76,7 +76,7 @@ the_post();
 					</ul>
 					<p><?php esc_html_e( 'Part of those licensing requirements include licensing derivative works or things that link core WordPress functions (like themes, plugins, etc.) under the GPL as well, thereby passing on the freedom of use for these works as well.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'Obviously there are those who will try to get around these ideals and restrict the freedom of their users by trying to find loopholes or somehow circumvent the intention of the WordPress licensing, which is to ensure freedom of use. We believe that the community as a whole will reward those who focus on supporting these licensing freedoms instead of trying to avoid them.', 'wporg' ); ?></p>
-					<p><?php esc_html_e( 'The most responsible use of WordPress community resources would therefore be put to best use by emphasizing high quality contributions that embrace the freedoms provided by the GPL.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'The WordPress community should emphasize that the freedoms in the GPL help provide high quality software.', 'wporg' ); ?></p>
 				</section>
 			</div><!-- .entry-content -->
 
