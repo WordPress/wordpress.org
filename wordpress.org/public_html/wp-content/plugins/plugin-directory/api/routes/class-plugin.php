@@ -154,24 +154,16 @@ class Plugin extends Base {
 		$result['short_description'] = get_the_excerpt();
 		$result['download_link']     = Template::download_link( $post );
 
-		$result['screenshots'] = array();
-		$descriptions          = get_post_meta( $post->ID, 'screenshots', true ) ?: array();
-		$screen_shots          = get_post_meta( $post->ID, 'assets_screenshots', true ) ?: array();
-
-		/*
-		 * Find the image that corresponds with the text.
-		 * The image numbers are stored within the 'resolution' key.
-		 */
-		foreach ( $screen_shots as $image ) {
-			$src     = Template::get_asset_url( $post, $image );
-			$caption = '';
-			if ( $descriptions && ! empty( $descriptions[ (int) $image['resolution'] ] ) ) {
-				$caption = $descriptions[ (int) $image['resolution'] ];
-				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $post->ID ] );
-			}
-
-			$result['screenshots'][ $image['resolution'] ] = compact( 'src', 'caption' );
-		}
+		// Reduce images to caption + src
+		$result['screenshots'] = array_map(
+			function( $image ) {
+				return [
+					'src'     => $image['src'],
+					'caption' => $image['caption'],
+				];
+			},
+			Template::get_screenshots( $post )
+		);
 
 		if ( $result['screenshots'] ) {
 			$result['sections']['screenshots'] = $this->get_screenshot_markup( $result['screenshots'] );

@@ -364,7 +364,7 @@ class Template {
 			'reviews',
 			'developers',
 		);
-		if ( ! get_post_meta( $plugin->ID, 'screenshots', true ) && ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
+		if ( ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
 			unset( $default_sections[ array_search( 'screenshots', $default_sections ) ] );
 		}
 		if ( ! get_post_meta( $plugin->ID, 'all_blocks' ) ) {
@@ -978,5 +978,87 @@ class Template {
 		}
 
 		return $link;
+	}
+
+	/**
+	 * Fetch plugin Screenshots, accounting for localised screenshots.
+	 *
+	 * @static
+	 *
+	 * @param object|int $plugin The plugin to fetch screenshots for. Optional.
+	 * @param string     $locale The locale requested. Optional.
+	 * @return array Screenshots for the plugin, localised if possible.
+	 */
+	public static function get_screenshots( $plugin = null, $locale = null ) {
+		$plugin = get_post( $plugin );
+
+		if ( ! $locale ) {
+			$locale = get_locale();
+		}
+
+		// All indexed from 1. The Image 'number' is stored in the 'resolution' key
+		$screen_shots = get_post_meta( $plugin->ID, 'assets_screenshots', true ) ?: array();
+		$descriptions = get_post_meta( $plugin->ID, 'screenshots', true ) ?: array();
+
+		if ( empty( $screen_shots ) ) {
+			return array();
+		}
+
+		$sorted = array();
+		foreach ( $screen_shots as $image ) {
+			if ( ! isset( $sorted[ $image['resolution'] ] ) ) {
+				$sorted[ $image['resolution'] ] = array();
+			}
+
+			if ( empty( $image['locale'] ) ) {
+				// if the image has no locale, always insert to the last element (lowerst priority).
+				$sorted[ $image['resolution'] ][] = $image;
+			} elseif ( $locale === $image['locale'] ) {
+				// if the locale is a full match, always insert to the first element (highest priority).
+				array_unshift( $sorted[ $image['resolution'] ], $image );
+			} else {
+				// TODO: de_DE_informal should probably fall back to de_DE before de_CH. Maybe this can wait until Core properly supports locale hierarchy.
+
+				$image_locale_parts = explode( '_', $image['locale'] );
+				$locale_parts       = explode( '_', $locale );
+				// if only the language matches.
+				if ( $image_locale_parts[0] === $locale_parts[0] ) {
+					// image with locale has a higher priority than image without locale.
+					$last_image = end( $sorted[ $image['resolution'] ] );
+					if ( empty( $last_image['locale'] ) ) {
+						array_splice( $sorted[ $image['resolution'] ], count( $sorted[ $image['resolution'] ] ), 0, array( $image ) );
+					} else {
+						$sorted[ $image['resolution'] ][] = $image;
+					}
+				}
+			}
+		}
+
+		// Sort
+		ksort( $sorted, SORT_NATURAL );
+
+		// Reduce images to singulars and attach metadata
+		foreach ( $sorted as $index => $items ) {
+			// The highest priority image is the first.
+			$image = $items[0];
+
+			// Attach caption data
+			$image['caption'] = false;
+			if ( isset( $descriptions[ (int) $index ] ) ) {
+				$image['caption'] = $descriptions[ (int) $index ];
+				$image['caption'] = Plugin_I18n::instance()->translate(
+					'screenshot-' . $image['resolution'],
+					$image['caption'],
+					[ 'post_id' => $plugin->ID ]
+				);
+			}
+
+			// Attach URL information for the asset
+			$image['src'] = Template::get_asset_url( $plugin, $image );
+
+			$sorted[ $index ] = $image;
+		}
+
+		return $sorted;
 	}
 }

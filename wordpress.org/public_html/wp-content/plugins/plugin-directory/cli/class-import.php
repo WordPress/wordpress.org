@@ -364,8 +364,8 @@ class Import {
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
 			foreach ( $svn_assets_folder as $asset ) {
-				// screenshot-0(-rtl).(png|jpg|jpeg|gif)  ||  icon.svg
-				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(-(?P<resolution>[\dx]+)(-rtl)?\.(png|jpg|jpeg|gif)|\.svg)$!i', $asset['filename'], $m ) ) {
+				// screenshot-0(-rtl)(-de_DE).(png|jpg|jpeg|gif)  ||  icon.svg
+				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(?:-(?P<resolution>[\dx]+)(-rtl)?(?:-(?P<locale>[a-z]{2,3}(?:_[A-Z]{2})?(?:_[a-z0-9]+)?))?\.(png|jpg|jpeg|gif)|\.svg)$!i', $asset['filename'], $m ) ) {
 					continue;
 				}
 
@@ -374,8 +374,9 @@ class Import {
 				$revision   = $asset['revision'];
 				$location   = 'assets';
 				$resolution = isset( $m['resolution'] ) ? $m['resolution'] : false;
+				$locale     = isset( $m['locale'] )     ? $m['locale']     : false;
 
-				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location' );
+				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
 			}
 		}
 

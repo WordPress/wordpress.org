@@ -15,34 +15,22 @@ class Screenshots {
 	 * @return string
 	 */
 	static function display() {
-		$plugin = get_post();
 		$output = '';
 
-		// All indexed from 1.
-		$descriptions = get_post_meta( $plugin->ID, 'screenshots', true ) ?: array();
-		$screen_shots = get_post_meta( $plugin->ID, 'assets_screenshots', true ) ?: array();
+		$screenshots = Template::get_screenshots();
 
-		if ( empty( $screen_shots ) ) {
+		if ( ! $screenshots ) {
 			return '';
 		}
 
-		ksort( $screen_shots, SORT_NATURAL );
-
-		/*
-		 * Find the image that corresponds with the text.
-		 * The image numbers are stored within the 'resolution' key.
-		 */
-		foreach ( $screen_shots as $image ) {
+		foreach ( $screenshots as $image ) {
 			$screen_shot = sprintf(
 				'<a href="%1$s" rel="nofollow"><img class="screenshot" src="%1$s" alt="" /></a>',
-				esc_url( Template::get_asset_url( $plugin, $image ) )
+				esc_url( $image['src'] )
 			);
 
-			if ( $descriptions && ! empty( $descriptions[ (int) $image['resolution'] ] ) ) {
-				$caption = $descriptions[ (int) $image['resolution'] ];
-				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $plugin->ID ] );
-
-				$screen_shot .= '<figcaption>' . $caption . '</figcaption>';
+			if ( $image['caption'] ) {
+				$screen_shot .= '<figcaption>' . $image['caption'] . '</figcaption>';
 			}
 
 			$output .= '<li><figure>' . $screen_shot . '</figure></li>';
