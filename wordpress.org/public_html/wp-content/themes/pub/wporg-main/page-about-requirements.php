@@ -51,7 +51,7 @@ the_post();
 						<li>
 							<?php
 							/* translators: 1: URL to MySQL; 2: MySQL Version; 3: URL to MariaDB; 4: MariaDB Version */
-							printf( wp_kses_post( __( '<a href="%1$s">MySQL</a> version %2$s or greater <em>OR</em> <a href="%3$s">MariaDB</a> version %4$s or greater.', 'wporg' ) ), 'https://www.mysql.com/', '5.6', 'https://mariadb.org/', '10.0' );
+							printf( wp_kses_post( __( '<a href="%1$s">MySQL</a> version %2$s or greater <em>OR</em> <a href="%3$s">MariaDB</a> version %4$s or greater.', 'wporg' ) ), 'https://www.mysql.com/', '5.6', 'https://mariadb.org/', '10.1' );
 							?>
 						</li>
 						<li>
