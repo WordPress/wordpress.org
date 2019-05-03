@@ -8,7 +8,7 @@ if ( 'cli' != php_sapi_name() ) {
 
 ob_start();
 
-$opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:', 'async' ) );
+$opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:', 'async', 'create' ) );
 
 // Guess the default parameters:
 if ( empty( $opts ) && $argc == 2 ) {
@@ -28,12 +28,14 @@ if ( empty( $opts['changed-tags'] ) ) {
 	$opts['changed-tags'] = explode( ',', $opts['changed-tags'] );
 }
 
-$opts['async'] = isset( $opts['async'] );
+$opts['async']  = isset( $opts['async'] );
+$opts['create'] = isset( $opts['create'] );
 
 foreach ( array( 'url', 'abspath', 'plugin' ) as $opt ) {
 	if ( empty( $opts[ $opt ] ) ) {
 		fwrite( STDERR, "Missing Parameter: $opt\n" );
 		fwrite( STDERR, "Usage: php {$argv[0]} --plugin hello-dolly --abspath /home/example/public_html --url https://wordpress.org/plugins/\n" );
+		fwrite( STDERR, "Optional: --async to queue a job to import, --create to create a Post if none exist.\n" );
 		fwrite( STDERR, "--url and --abspath will be guessed if possible.\n" );
 		die();
 	}
@@ -57,6 +59,20 @@ if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Plugin_Directory' ) ) {
 $plugin_slug  = $opts['plugin'];
 $changed_tags = $opts['changed-tags'];
 $start_time   = microtime( 1 );
+
+// If the create flag is set, check if the post exists first:
+if ( $opts['create'] && ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
+
+	$create_result = Plugin_Directory::create_plugin_post( array(
+		'post_name' => $plugin_slug,
+	) );
+
+	if ( is_wp_error( $create_result ) ) {
+		echo "Failed. {$plugin_slug} post was not be found, and failed to be created.\n";
+		fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $create_result->get_error_message() . "\n" );
+		exit( 1 );
+	}
+}
 
 // If async, queue it to be parsed instead.
 if ( $opts['async'] ) {
