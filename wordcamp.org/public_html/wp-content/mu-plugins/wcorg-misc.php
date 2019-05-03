@@ -489,6 +489,7 @@ function wcorg_let_admins_activate_some_plugins( $required_capabilities, $reques
 		'camptix-trustpay/camptix-trustpay.php',
 		'edit-flow/edit_flow.php',
 		'liveblog/liveblog.php',
+		'public-post-preview/public-post-preview.php',
 	);
 
 	switch ( $requested_capability ) {
