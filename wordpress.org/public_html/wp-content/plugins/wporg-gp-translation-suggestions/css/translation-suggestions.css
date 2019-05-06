@@ -1,0 +1,84 @@
+.suggestions-wrapper .suggestions-list {
+	list-style: none;
+	padding: 0;
+}
+
+.suggestions__other-languages .suggestions-list {
+	max-height: 400px;
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.suggestions-list li + li {
+	margin-top: 10px;
+}
+
+.translation-suggestion {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	padding: 3px;
+}
+
+.copy-suggestion {
+	visibility: hidden;
+}
+
+.translation-suggestion:focus-within,
+.translation-suggestion:focus,
+.translation-suggestion:hover {
+	background: #F2F0F7;
+	outline: none;
+}
+
+.translation-suggestion:focus-within .copy-suggestion,
+.translation-suggestion:focus .copy-suggestion,
+.translation-suggestion:hover .copy-suggestion {
+	visibility: visible;
+}
+
+.translation-suggestion__score {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 10px;
+	border-radius: 100%;
+	background: #F2F0F7;
+	color: #4E426C;
+	font-size: 12px;
+	height: 3em;
+	width: 3em;
+}
+
+.translation-suggestion__translation {
+	flex: 1;
+	color: #333;
+	white-space: pre-wrap;
+}
+
+.translation-suggestion__translation-raw {
+	display: none;
+}
+
+.translation-suggestion__original-diff,
+.translation-suggestion__translation-meta {
+	display: block;
+	color: #666;
+	font-size: 12px;
+}
+
+.translation-suggestion__original-diff del,
+.translation-suggestion__original-diff ins {
+	text-decoration: none;
+}
+
+.translation-suggestion__original-diff del {
+	color: #9A2323;
+	background: #F1ADAD;
+}
+
+.translation-suggestion__original-diff ins {
+	color: #31843F;
+	background: #B5E1B9;
+}
