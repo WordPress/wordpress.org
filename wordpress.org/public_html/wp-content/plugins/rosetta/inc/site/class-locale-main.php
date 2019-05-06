@@ -65,6 +65,15 @@ class Locale_Main implements Site {
 
 		$this->initialize_jetpack_customizations();
 		$this->initialize_user_role_customizations();
+
+		add_action( 'after_setup_theme', [ $this, 'register_resources_nav_menu' ] );
+	}
+
+	/**
+	 * Registers a nav menu for storing resources for translation contributors.
+	 */
+	public function register_resources_nav_menu() {
+		register_nav_menu( 'rosetta_translation_contributor_resources', __( 'Resources for translation contributors', 'rosetta' ) );
 	}
 
 	/**
