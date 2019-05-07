@@ -344,6 +344,7 @@ class WP_52_Credits extends WP_Credits {
 			[ 'Babel Polyfill', 'https://babeljs.io/docs/en/babel-polyfill' ],
 			[ 'Backbone.js', 'http://backbonejs.org/' ],
 			[ 'Class POP3', 'https://squirrelmail.org/' ],
+			[ 'clipboard.js', 'https://clipboardjs.com/' ],
 			[ 'Closest', 'https://github.com/jonathantneal/closest' ],
 			[ 'CodeMirror', 'https://codemirror.net/' ],
 			[ 'Color Animations', 'https://plugins.jquery.com/color/' ],
