@@ -9,7 +9,7 @@ const { Component, Fragment } = wp.element;
  */
 import SessionsBlockControls     from './block-controls';
 import SessionsInspectorControls from './inspector-controls';
-import GridToolbar               from '../shared/grid-layout/toolbar';
+import { LayoutToolbar }         from '../shared/post-list';
 import { ICON }                  from './index';
 import { WC_BLOCKS_STORE }       from '../blocks-store';
 
@@ -25,7 +25,9 @@ class SessionsEdit extends Component {
 	 * @return {Element}
 	 */
 	render() {
-		const { mode } = this.props.attributes;
+		const { attributes, setAttributes }  = this.props;
+		const { mode, layout }               = attributes;
+		const { layout: layoutOptions = {} } = blockData.options;
 
 		return (
 			<Fragment>
@@ -36,7 +38,11 @@ class SessionsEdit extends Component {
 				{ mode &&
 					<Fragment>
 						<SessionsInspectorControls { ...this.props } />
-						<GridToolbar { ...this.props } />
+						<LayoutToolbar
+							layout={ layout }
+							options={ layoutOptions }
+							setAttributes={ setAttributes }
+						/>
 					</Fragment>
 				}
 			</Fragment>

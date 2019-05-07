@@ -9,7 +9,7 @@ const { Component, Fragment } = wp.element;
  */
 import SpeakersBlockControls     from './block-controls';
 import SpeakersInspectorControls from './inspector-controls';
-import SpeakersToolbar           from './toolbar';
+import { LayoutToolbar }         from '../shared/post-list';
 import { ICON }                  from './index';
 import { WC_BLOCKS_STORE }       from '../blocks-store';
 
@@ -25,7 +25,9 @@ class SpeakersEdit extends Component {
 	 * @return {Element}
 	 */
 	render() {
-		const { mode } = this.props.attributes;
+		const { attributes, setAttributes }  = this.props;
+		const { mode, layout }               = attributes;
+		const { layout: layoutOptions = {} } = blockData.options;
 
 		return (
 			<Fragment>
@@ -36,7 +38,11 @@ class SpeakersEdit extends Component {
 				{ mode &&
 					<Fragment>
 						<SpeakersInspectorControls { ...this.props } />
-						<SpeakersToolbar { ...this.props } />
+						<LayoutToolbar
+							layout={ layout }
+							options={ layoutOptions }
+							setAttributes={ setAttributes }
+						/>
 					</Fragment>
 				}
 			</Fragment>

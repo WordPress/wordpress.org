@@ -2,26 +2,27 @@
 
 namespace WordCamp\Blocks\Sessions;
 use WP_Post;
-use function WordCamp\Blocks\Shared\Content\{ get_all_the_content, array_to_human_readable_list };
+use function WordCamp\Blocks\Shared\Content\{ get_all_the_content, array_to_human_readable_list, render_item_title, render_item_content, render_item_permalink };
 use function WordCamp\Blocks\Shared\Components\{ render_featured_image };
 
 defined( 'WPINC' ) || die();
 
 /** @var array   $attributes */
-/** @var WP_Post $session */
 /** @var array   $speakers */
-/** @var string  $container_classes */
+/** @var WP_Post $session */
 
 setup_postdata( $session );
-
 ?>
 
-<div class="wordcamp-block-post-list-item wordcamp-session wordcamp-session-<?php echo sanitize_html_class( $session->post_name ); ?> wordcamp-clearfix">
-	<h3 class="wordcamp-item-title wordcamp-session-title">
-		<a href="<?php echo esc_url( get_permalink( $session ) ); ?>">
-			<?php echo wp_kses_post( get_the_title( $session ) ); ?>
-		</a>
-	</h3>
+<div class="wordcamp-session wordcamp-session-<?php echo sanitize_html_class( $session->post_name ); ?>">
+	<?php echo wp_kses_post(
+		render_item_title(
+			get_the_title( $session ),
+			get_permalink( $session ),
+			3,
+			[ 'wordcamp-session-title' ]
+		)
+	); ?>
 
 	<?php if ( true === $attributes['show_speaker'] && ! empty( $speakers[ $session->ID ] ) ) :
 		$speaker_linked_names = array_map(
@@ -48,24 +49,25 @@ setup_postdata( $session );
 	<?php endif; ?>
 
 	<?php if ( true === $attributes['show_images'] ) : ?>
-		<?php
-			echo wp_kses_post( render_featured_image(
+		<?php echo wp_kses_post(
+			render_featured_image(
 				$session,
 				$attributes['featured_image_width'],
-				[ 'wordcamp-session-image-container', 'align-' . esc_attr( $attributes['image_align'] ) ],
+				[ 'wordcamp-session-featured-image', 'align-' . esc_attr( $attributes['image_align'] ) ],
 				get_permalink( $session )
-			) );
-		?>
+			)
+		); ?>
 	<?php endif; ?>
 
 	<?php if ( 'none' !== $attributes['content'] ) : ?>
-		<div class="wordcamp-item-content wordcamp-session-content-<?php echo esc_attr( $attributes['content'] ); ?>">
-			<?php if ( 'full' === $attributes['content'] ) : ?>
-				<?php echo wp_kses_post( wpautop( get_all_the_content( $session ) ) ); ?>
-			<?php elseif ( 'excerpt' === $attributes['content'] ) : ?>
-				<?php echo wp_kses_post( wpautop( apply_filters( 'the_excerpt', get_the_excerpt() ) ) ); ?>
-			<?php endif; ?>
-		</div>
+		<?php echo wp_kses_post(
+			render_item_content(
+				'excerpt' === $attributes['content']
+					? apply_filters( 'the_excerpt', get_the_excerpt( $session ) )
+					: get_all_the_content( $session ),
+				[ 'wordcamp-session-content-' . $attributes['content'] ]
+			)
+		); ?>
 	<?php endif; ?>
 
 	<?php if ( $attributes['show_meta'] || $attributes['show_category'] ) : ?>
@@ -122,10 +124,15 @@ setup_postdata( $session );
 	<?php endif; ?>
 
 	<?php if ( 'full' === $attributes['content'] ) : ?>
-		<p class="wordcamp-item-permalink">
-			<a href="<?php echo esc_url( get_permalink( $session ) ); ?>">
-				<?php esc_html_e( 'Visit session page', 'wordcamporg' ); ?>
-			</a>
-		</p>
+		<?php echo wp_kses_post(
+			render_item_permalink(
+				get_permalink( $session ),
+				__( 'Visit session page', 'wordcamporg' ),
+				[ 'wordcamp-session-permalink' ]
+			)
+		); ?>
 	<?php endif; ?>
 </div>
+
+<?php
+wp_reset_postdata();

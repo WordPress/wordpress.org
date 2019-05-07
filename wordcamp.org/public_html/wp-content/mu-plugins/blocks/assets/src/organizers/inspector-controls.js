@@ -9,9 +9,9 @@ const { __ }                                                = wp.i18n;
 /**
  * Internal dependencies
  */
-import { AvatarSizeControl } from '../shared/avatar';
-import ImageAlignmentControl from '../shared/image-alignment';
-import GridInspectorControl  from '../shared/grid-layout/inspector-control';
+import { AvatarSizeControl }  from '../shared/avatar';
+import { GridInspectorPanel } from '../shared/post-list';
+import ImageAlignmentControl  from '../shared/image-alignment';
 
 const DEFAULT_SCHEMA = {
 	grid_columns: {
@@ -49,7 +49,7 @@ class OrganizerInspectorControls extends Component {
 
 		return (
 			<InspectorControls>
-				<GridInspectorControl
+				<GridInspectorPanel
 					{ ...this.props }
 				/>
 

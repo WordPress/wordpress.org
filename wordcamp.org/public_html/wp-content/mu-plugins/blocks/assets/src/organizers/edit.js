@@ -9,7 +9,7 @@ const { Component, Fragment } = wp.element;
  */
 import OrganizersBlockControls     from './block-controls';
 import OrganizersInspectorControls from './inspector-controls';
-import OrganizersToolbar           from './toolbar';
+import { LayoutToolbar }           from '../shared/post-list';
 import { ICON }                    from './index';
 import { WC_BLOCKS_STORE }         from '../blocks-store';
 
@@ -25,7 +25,9 @@ class OrganizersEdit extends Component {
 	 * @return {Element}
 	 */
 	render() {
-		const { mode } = this.props.attributes;
+		const { attributes, setAttributes }  = this.props;
+		const { mode, layout }               = attributes;
+		const { layout: layoutOptions = {} } = blockData.options;
 
 		return (
 			<Fragment>
@@ -37,7 +39,11 @@ class OrganizersEdit extends Component {
 				{ '' !== mode &&
 					<Fragment>
 						<OrganizersInspectorControls { ...this.props } />
-						<OrganizersToolbar { ...this.props } />
+						<LayoutToolbar
+							layout={ layout }
+							options={ layoutOptions }
+							setAttributes={ setAttributes }
+						/>
 					</Fragment>
 				}
 			</Fragment>

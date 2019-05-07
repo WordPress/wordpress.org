@@ -13,7 +13,7 @@ const { Component } = wp.element;
  */
 import { AvatarImage }                                from '../shared/avatar';
 import { BlockNoContent, ItemTitle, ItemHTMLContent } from '../shared/block-content';
-import GridContentLayout                              from '../shared/grid-layout/block-content';
+import PostList                                       from '../shared/post-list';
 import { filterEntities }                             from '../blocks-store';
 
 /**
@@ -77,17 +77,14 @@ class OrganizersBlockContent extends Component {
 		}
 
 		return (
-			<GridContentLayout
-				className="wordcamp-organizers-block"
+			<PostList
 				{ ...this.props }
+				className="wordcamp-organizers-block"
 			>
 				{ posts.map( ( post ) => /* Note that organizer posts are not 'public', so there are no permalinks. */
 					<div
 						key={ post.slug }
-						className={ classnames(
-							'wordcamp-organizer',
-							'wordcamp-organizer-' + post.slug.trim(),
-						) }
+						className={ classnames( 'wordcamp-organizer', 'wordcamp-organizer-' + post.slug.trim() ) }
 					>
 						<ItemTitle
 							className="wordcamp-organizer-title"
@@ -97,7 +94,7 @@ class OrganizersBlockContent extends Component {
 
 						{ show_avatars &&
 							<AvatarImage
-								className={ classnames( 'wordcamp-organizer-avatar-container', 'align-' + avatar_align ) }
+								className={ classnames( 'align-' + avatar_align ) }
 								name={ post.title.rendered.trim() || '' }
 								size={ avatar_size }
 								url={ post.avatar_urls[ '24' ] }
@@ -112,7 +109,7 @@ class OrganizersBlockContent extends Component {
 						}
 					</div>
 				) }
-			</GridContentLayout>
+			</PostList>
 		);
 	}
 }

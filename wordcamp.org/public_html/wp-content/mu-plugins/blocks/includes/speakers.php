@@ -2,6 +2,7 @@
 
 namespace WordCamp\Blocks\Speakers;
 use WordCamp\Blocks;
+use function WordCamp\Blocks\Shared\Components\{ render_post_list };
 use function WordCamp\Blocks\Shared\Definitions\{ get_shared_definitions, get_shared_definition };
 
 defined( 'WPINC' ) || die();
@@ -34,7 +35,6 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @return string
  */
 function render( $attributes ) {
-	$html       = '';
 	$defaults   = wp_list_pluck( get_attributes_schema(), 'default' );
 	$attributes = wp_parse_args( $attributes, $defaults );
 	$speakers   = get_speaker_posts( $attributes );
@@ -44,28 +44,24 @@ function render( $attributes ) {
 		$sessions = get_speaker_sessions( wp_list_pluck( $speakers, 'ID' ) );
 	}
 
+	$rendered_speaker_posts = [];
+
+	foreach ( $speakers as $speaker ) {
+		ob_start();
+		require Blocks\PLUGIN_DIR . 'view/speaker.php';
+		$rendered_speaker_posts[] = ob_get_clean();
+	}
+
 	$container_classes = [
-		'wordcamp-block',
-		'wordcamp-block-post-list',
 		'wordcamp-speakers-block',
-		'layout-' . sanitize_html_class( $attributes['layout'] ),
 		sanitize_html_class( $attributes['className'] ),
 	];
-	if ( 'grid' === $attributes['layout'] ) {
-		$container_classes[] = 'grid-columns-' . absint( $attributes['grid_columns'] );
-	}
+
 	if ( ! empty( $attributes['align'] ) ) {
 		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
 	}
-	$container_classes = implode( ' ', $container_classes );
 
-	if ( $attributes['mode'] ) {
-		ob_start();
-		require Blocks\PLUGIN_DIR . 'view/speakers.php';
-		$html = ob_get_clean();
-	}
-
-	return $html;
+	return render_post_list( $rendered_speaker_posts, $attributes['layout'], $attributes['grid_columns'], $container_classes );
 }
 
 /**

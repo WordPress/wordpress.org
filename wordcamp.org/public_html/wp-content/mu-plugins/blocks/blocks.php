@@ -14,7 +14,7 @@ function load() {
 	require_once PLUGIN_DIR . 'includes/shared/content.php';
 	require_once PLUGIN_DIR . 'includes/shared/definitions.php';
 	require_once PLUGIN_DIR . 'includes/shared/featured-image.php';
-	require_once PLUGIN_DIR . 'includes/shared/grid-layout.php';
+	require_once PLUGIN_DIR . 'includes/shared/post-list.php';
 
 	require_once PLUGIN_DIR . 'includes/organizers.php';
 	require_once PLUGIN_DIR . 'includes/sessions.php';

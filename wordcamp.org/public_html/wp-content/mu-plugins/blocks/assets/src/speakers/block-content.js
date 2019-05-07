@@ -18,7 +18,7 @@ const { escapeAttribute }     = wp.escapeHtml;
 import { AvatarImage }                                               from '../shared/avatar';
 import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../shared/block-content';
 import { tokenSplit, arrayTokenReplace }                             from '../shared/i18n';
-import GridContentLayout                                             from '../shared/grid-layout/block-content';
+import PostList                                                      from '../shared/post-list';
 import { filterEntities }                                            from '../blocks-store';
 
 import './block-content.scss';
@@ -49,7 +49,7 @@ function SpeakerSessions( { speaker, tracks } ) {
 					{ sessions.map( ( session ) =>
 						<li
 							key={ escapeAttribute( session.slug ) }
-							className="wordcamp-speaker-session-content"
+							className="wordcamp-speaker-sessions-list-item"
 						>
 							<Disabled>
 								<a
@@ -157,9 +157,9 @@ class SpeakersBlockContent extends Component {
 		}
 
 		return (
-			<GridContentLayout
-				className="wordcamp-speakers-block"
+			<PostList
 				{ ...this.props }
+				className="wordcamp-speakers-block"
 			>
 				{ posts.map( ( post ) =>
 					<div
@@ -178,7 +178,7 @@ class SpeakersBlockContent extends Component {
 
 						{ show_avatars &&
 							<AvatarImage
-								className={ classnames( 'wordcamp-speaker-avatar-container', 'align-' + avatar_align ) }
+								className={ classnames( 'align-' + avatar_align ) }
 								name={ post.title.rendered.trim() || '' }
 								size={ avatar_size }
 								url={ post.avatar_urls[ '24' ] }
@@ -208,7 +208,7 @@ class SpeakersBlockContent extends Component {
 						}
 					</div>
 				) }
-			</GridContentLayout>
+			</PostList>
 		);
 	}
 }

@@ -9,7 +9,7 @@ const { __ }                                                = wp.i18n;
 /**
  * Internal dependencies
  */
-import GridInspectorControl           from '../shared/grid-layout/inspector-control';
+import { GridInspectorPanel }         from '../shared/post-list';
 import FeaturedImageInspectorControls from '../shared/featured-image/inspector-control';
 
 const DEFAULT_OPTIONS = {
@@ -34,7 +34,7 @@ class SponsorsInspectorControls extends Component {
 
 		return (
 			<InspectorControls>
-				<GridInspectorControl
+				<GridInspectorPanel
 					{ ...this.props }
 				/>
 

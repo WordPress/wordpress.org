@@ -9,8 +9,8 @@ const { __ } = wp.i18n;
 /**
  * Internal dependencies
  */
-import GridInspectorControl           from '../shared/grid-layout/inspector-control';
 import FeaturedImageInspectorControls from '../shared/featured-image/inspector-control';
+import { GridInspectorPanel }         from '../shared/post-list';
 
 /**
  * Component for block controls that appear in the Inspector Panel.
@@ -28,7 +28,10 @@ class SessionsInspectorControls extends Component {
 
 		return (
 			<InspectorControls>
-				<GridInspectorControl { ...this.props } />
+				<GridInspectorPanel
+					{ ...this.props }
+				/>
+
 				<PanelBody title={ __( 'Content Settings', 'wordcamporg' ) } initialOpen={ true }>
 					<PanelRow>
 						<SelectControl

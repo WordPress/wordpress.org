@@ -9,7 +9,7 @@ const { withSelect }          = wp.data;
  */
 import SponsorsInspectorControls from './inspector-controls';
 import SponsorsBlockControls     from './block-controls';
-import GridToolbar               from '../shared/grid-layout/toolbar';
+import { LayoutToolbar }         from '../shared/post-list';
 import { ICON }                  from './index';
 import { WC_BLOCKS_STORE } from '../blocks-store';
 
@@ -25,7 +25,9 @@ class SponsorsEdit extends Component {
 	 * @return {Element}
 	 */
 	render() {
-		const { mode } = this.props.attributes;
+		const { attributes, setAttributes }  = this.props;
+		const { mode, layout }               = attributes;
+		const { layout: layoutOptions = {} } = blockData.options;
 
 		return (
 			<Fragment>
@@ -36,7 +38,11 @@ class SponsorsEdit extends Component {
 				{ mode &&
 					<Fragment>
 						<SponsorsInspectorControls { ...this.props } />
-						<GridToolbar { ...this.props } />
+						<LayoutToolbar
+							layout={ layout }
+							options={ layoutOptions }
+							setAttributes={ setAttributes }
+						/>
 					</Fragment>
 				}
 			</Fragment>

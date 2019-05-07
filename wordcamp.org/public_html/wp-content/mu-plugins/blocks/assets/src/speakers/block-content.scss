@@ -1,8 +1,8 @@
 .wordcamp-speaker-sessions-list {
-	// The double-ampersand defeats an overzealous ul rule in Core's editor-blocks.css.
+	// The double-ampersand will output the same class name twice in a row,
+	// which defeats an overzealous ul rule in Core's editor-blocks.css.
 	// https://css-tricks.com/the-sass-ampersand/#article-header-id-11
-	ul#{&},
-	.block-editor ul#{&} {
+	&#{&} {
 		list-style: none;
 		margin: 0;
 	}

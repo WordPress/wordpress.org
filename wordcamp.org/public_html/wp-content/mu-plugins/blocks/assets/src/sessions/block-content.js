@@ -15,7 +15,7 @@ const { __ }        = wp.i18n;
  */
 import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../shared/block-content';
 import { tokenSplit, arrayTokenReplace, intersperse, listify }       from '../shared/i18n';
-import GridContentLayout                                             from '../shared/grid-layout/block-content';
+import PostList                                                      from '../shared/post-list';
 import FeaturedImage                                                 from '../shared/featured-image';
 import { filterEntities }                                            from '../blocks-store';
 
@@ -249,19 +249,14 @@ class SessionsBlockContent extends Component {
 		}
 
 		return (
-			<GridContentLayout
-				className="wordcamp-sessions-block"
+			<PostList
 				{ ...this.props }
+				className="wordcamp-sessions-block"
 			>
 				{ posts.map( ( post ) =>
 					<div
 						key={ post.slug }
-						className={ classnames(
-							'wordcamp-block-post-list-item',
-							'wordcamp-session',
-							'wordcamp-session-' + post.slug,
-							'wordcamp-clearfix'
-						) }
+						className={ classnames( 'wordcamp-session', 'wordcamp-session-' + post.slug ) }
 					>
 						<ItemTitle
 							className="wordcamp-session-title"
@@ -278,7 +273,7 @@ class SessionsBlockContent extends Component {
 							<FeaturedImage
 								imageData={ get( post, '_embedded.wp:featuredmedia[0]', {} ) }
 								width={ Number( featured_image_width ) }
-								className={ classnames( 'wordcamp-session-image-container', 'align-' + image_align ) }
+								className={ classnames( 'wordcamp-session-featured-image', 'align-' + image_align ) }
 								imageLink={ post.link }
 							/>
 						}
@@ -305,11 +300,12 @@ class SessionsBlockContent extends Component {
 							<ItemPermalink
 								link={ post.link }
 								linkText={ __( 'Visit session page', 'wordcamporg' ) }
+								className="wordcamp-session-permalink"
 							/>
 						}
 					</div>
 				) }
-			</GridContentLayout>
+			</PostList>
 		);
 	}
 }

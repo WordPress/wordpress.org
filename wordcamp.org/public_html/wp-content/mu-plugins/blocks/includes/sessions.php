@@ -2,7 +2,7 @@
 
 namespace WordCamp\Blocks\Sessions;
 use WordCamp\Blocks;
-use function WordCamp\Blocks\Shared\Components\{ render_grid_layout };
+use function WordCamp\Blocks\Shared\Components\{ render_post_list };
 use function WordCamp\Blocks\Shared\Definitions\{ get_shared_definitions, get_shared_definition };
 
 defined( 'WPINC' ) || die();
@@ -35,11 +35,6 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @return string
  */
 function render( $attributes ) {
-	if ( ! $attributes['mode'] ) {
-		return;
-	}
-
-	$html       = '';
 	$defaults   = wp_list_pluck( get_attributes_schema(), 'default' );
 	$attributes = wp_parse_args( $attributes, $defaults );
 	$sessions   = get_session_posts( $attributes );
@@ -49,31 +44,24 @@ function render( $attributes ) {
 		$speakers = get_session_speakers( wp_list_pluck( $sessions, 'ID' ) );
 	}
 
+	$rendered_session_posts = [];
+
+	foreach ( $sessions as $session ) {
+		ob_start();
+		require Blocks\PLUGIN_DIR . 'view/session.php';
+		$rendered_session_posts[] = ob_get_clean();
+	}
+
 	$container_classes = [
-		'wordcamp-block',
-		'wordcamp-block-post-list',
 		'wordcamp-sessions-block',
 		sanitize_html_class( $attributes['className'] ),
 	];
+
 	if ( ! empty( $attributes['align'] ) ) {
 		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
 	}
 
-	$rendered_session_posts = [];
-	foreach ( $sessions as $session ) {
-		ob_start();
-		require Blocks\PLUGIN_DIR . 'view/sessions.php';
-		$rendered_session_posts[] = ob_get_clean();
-	}
-
-	$html = render_grid_layout(
-		$attributes['layout'],
-		$attributes['grid_columns'],
-		$rendered_session_posts,
-		$container_classes
-	);
-
-	return $html;
+	return render_post_list( $rendered_session_posts, $attributes['layout'], $attributes['grid_columns'], $container_classes );
 }
 
 /**

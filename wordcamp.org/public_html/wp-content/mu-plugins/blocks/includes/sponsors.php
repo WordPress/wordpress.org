@@ -2,7 +2,7 @@
 
 namespace WordCamp\Blocks\Sponsors;
 use WordCamp\Blocks;
-use function WordCamp\Blocks\Shared\Components\{ render_grid_layout };
+use function WordCamp\Blocks\Shared\Components\{ render_post_list };
 use function WordCamp\Blocks\Shared\Definitions\{ get_shared_definitions, get_shared_definition };
 
 defined( 'WPINC' ) || die();
@@ -35,29 +35,26 @@ add_action( 'init', __NAMESPACE__ . '\init' );
 function render( $attributes ) {
 	$defaults   = wp_list_pluck( get_attributes_schema(), 'default' );
 	$attributes = wp_parse_args( $attributes, $defaults );
-	$sponsors   = get_sponsor_posts( $attributes );
 
-	$container_classes = array(
-		'wordcamp-block',
-		'wordcamp-block-post-list',
+	$sponsors               = get_sponsor_posts( $attributes );
+	$rendered_sponsor_posts = [];
+
+	foreach ( $sponsors as $sponsor ) {
+		ob_start();
+		require Blocks\PLUGIN_DIR . 'view/sponsor.php';
+		$rendered_sponsor_posts[] = ob_get_clean();
+	}
+
+	$container_classes = [
 		'wordcamp-sponsors-block',
 		sanitize_html_class( $attributes['className'] ),
-	);
+	];
+
 	if ( ! empty( $attributes['align'] ) ) {
 		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
 	}
 
-	$rendered_sponsor_posts = array();
-
-	foreach ( $sponsors as $sponsor ) {
-		ob_start();
-		require Blocks\PLUGIN_DIR . 'view/sponsors.php';
-		$rendered_sponsor_posts[] = ob_get_clean();
-	}
-
-	$html = render_grid_layout( $attributes['layout'], $attributes['grid_columns'], $rendered_sponsor_posts, $container_classes );
-
-	return $html;
+	return render_post_list( $rendered_sponsor_posts, $attributes['layout'], $attributes['grid_columns'], $container_classes );
 }
 
 /**

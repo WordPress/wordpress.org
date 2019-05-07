@@ -2,6 +2,7 @@
 
 namespace WordCamp\Blocks\Organizers;
 use WordCamp\Blocks;
+use function WordCamp\Blocks\Shared\Components\{ render_post_list };
 use function WordCamp\Blocks\Shared\Definitions\{ get_shared_definitions, get_shared_definition };
 
 defined( 'WPINC' ) || die();
@@ -34,35 +35,28 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  * @return string
  */
 function render( $attributes ) {
-	$html       = '';
 	$defaults   = wp_list_pluck( get_attributes_schema(), 'default' );
 	$attributes = wp_parse_args( $attributes, $defaults );
-	$organizers = get_organizer_posts( $attributes );
+
+	$organizers               = get_organizer_posts( $attributes );
+	$rendered_organizer_posts = [];
+
+	foreach ( $organizers as $organizer ) {
+		ob_start();
+		require Blocks\PLUGIN_DIR . 'view/organizer.php';
+		$rendered_organizer_posts[] = ob_get_clean();
+	}
 
 	$container_classes = [
-		'wordcamp-block',
-		'wordcamp-block-post-list',
 		'wordcamp-organizers-block',
-		'layout-' . sanitize_html_class( $attributes['layout'] ),
 		sanitize_html_class( $attributes['className'] ),
 	];
 
-	if ( 'grid' === $attributes['layout'] ) {
-		$container_classes[] = 'grid-columns-' . absint( $attributes['grid_columns'] );
-	}
 	if ( ! empty( $attributes['align'] ) ) {
 		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
 	}
 
-	$container_classes = implode( ' ', $container_classes );
-
-	if ( $attributes['mode'] ) {
-		ob_start();
-		require Blocks\PLUGIN_DIR . 'view/organizers.php';
-		$html = ob_get_clean();
-	}
-
-	return $html;
+	return render_post_list( $rendered_organizer_posts, $attributes['layout'], $attributes['grid_columns'], $container_classes );
 }
 
 /**
