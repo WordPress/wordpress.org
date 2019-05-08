@@ -27,7 +27,7 @@ namespace WordCamp\CampSite_2017;
 			<?php if ( has_nav_menu( 'secondary' ) ) : ?>
 				<nav id="header-navigation" class="secondary-navigation page-navigation-container" role="navigation">
 					<button class="menu-toggle" aria-controls="secondary-menu" aria-expanded="false">
-						<?php esc_html_e( 'Secondary Menu', 'wordcamporg' ); ?>
+						<?php echo esc_html( wp_get_nav_menu_name( 'secondary' ) ); ?>
 					</button>
 
 					<?php wp_nav_menu( array(
@@ -41,7 +41,7 @@ namespace WordCamp\CampSite_2017;
 
 			<nav id="site-navigation" class="main-navigation page-navigation-container" role="navigation">
 				<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
-					<?php esc_html_e( 'Primary Menu', 'wordcamporg' ); ?>
+					<?php echo esc_html( wp_get_nav_menu_name( 'primary' ) ); ?>
 				</button>
 
 				<?php wp_nav_menu( array(
