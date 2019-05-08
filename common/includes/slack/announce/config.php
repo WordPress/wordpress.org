@@ -143,6 +143,7 @@ function get_whitelist() {
 			'valendesigns',
 		) ),
 		'core-php' => array_merge( get_committers(), array(
+			'afragen',
 			'flixos90',
 			'schlessera',
 		) ),
