@@ -76,6 +76,7 @@ function handle_error( $err_no, $err_msg, $file, $line ) {
 		ABSPATH . 'wp-includes/class-wp-query.php:3922'   => "Trying to get property 'post_name' of non-object",
 		ABSPATH . 'wp-includes/comment-template.php:1221' => "Trying to get property 'comment_status' of non-object",
 		ABSPATH . 'wp-includes/link-template.php:675'     => "Trying to get property 'post_type' of non-object",
+		ABSPATH . 'wp-includes/post-template.php:309'     => "Trying to get property 'post_content' of non-object",
 		ABSPATH . 'wp-includes/rss.php:352'               => 'Undefined index: description',
 		ABSPATH . 'wp-includes/rss.php:505'               => 'Undefined property: stdClass::$error',
 
