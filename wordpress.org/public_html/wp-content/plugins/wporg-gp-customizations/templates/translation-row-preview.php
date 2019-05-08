@@ -21,7 +21,7 @@ $priority_char = array(
 	   <?php echo $priority_char[$t->priority][0] ?>
 	</td>
 	<td class="original">
-		<?php echo prepare_original( esc_translation( $t->singular ) ); ?>
+		<span class="original-text"><?php echo esc_translation( $t->singular ); ?></span>
 		<?php if ( $t->context ): ?>
 		<span class="context bubble" title="<?php printf( __( 'Context: %s', 'glotpress' ), esc_html($t->context) ); ?>"><?php echo esc_html($t->context); ?></span>
 		<?php endif; ?>
@@ -43,13 +43,13 @@ $priority_char = array(
 		if ( ! count( array_filter( $t->translations, 'gp_is_not_null' ) ) ) :
 			echo $missing_text;
 		elseif ( ! $t->plural ) :
-			echo esc_translation( $t->translations[0] );
+			echo '<span class="translation-text">' . esc_translation( $t->translations[0] ) . '</span>';
 		else: ?>
 		<ul>
 			<?php
 				foreach( $t->translations as $translation ):
 			?>
-				<li><?php echo gp_is_empty_string( $translation ) ? $missing_text : esc_translation( $translation ); ?></li>
+				<li><?php echo gp_is_empty_string( $translation ) ? $missing_text : '<span class="translation-text">' . esc_translation( $translation ) . '</span>' ; ?></li>
 			<?php
 				endforeach;
 			?>

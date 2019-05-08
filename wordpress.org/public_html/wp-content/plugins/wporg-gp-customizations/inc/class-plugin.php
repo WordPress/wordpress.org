@@ -258,6 +258,7 @@ class Plugin {
 	 */
 	public function after_setup_theme() {
 		register_nav_menu( 'wporg_header_subsite_nav', 'WordPress.org Header Sub-Navigation' );
+		register_nav_menu( 'wporg_translate_global_resources', 'Global Handbook Resources' );
 	}
 
 	/**
