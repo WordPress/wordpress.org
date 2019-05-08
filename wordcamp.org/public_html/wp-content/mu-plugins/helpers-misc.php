@@ -108,54 +108,6 @@ function wcorg_redundant_remote_get( $request_url, $request_args = array() ) {
 }
 
 /**
- * Register post meta so that it only appears on a specific REST API endpoint
- *
- * As of WordPress 4.7, there's no way to register a meta field for a specific post type. Registering a
- * field registers it for all post types, and registering it with `show_in_rest => true` exposes it in all
- * API endpoints. Doing that could lead to unintentional privacy leaks. There's no officially-supported
- * way to avoid that, other than using `register_rest_field()`.
- *
- * See https://core.trac.wordpress.org/ticket/38323
- *
- * `register_rest_field()` isn't an ideal solution for post meta, though, because it's logically
- * inconsistent; i.e., meta fields would not show up in the `meta` tree of the response, where other meta
- * fields are located, and where a client would expect to find them. Instead, meta fields would show up as
- * top-level fields in the response, as if they were first-class `post` object fields, or as if they were
- * arbitrary fields (which is what `register_rest_field()` is really intended for).
- *
- * Having meta fields at the top-level also clutters the post item, making it harder to read, and annoying
- * the crap out of grumpy, old, anal-retentive developers like @iandunn.
- *
- * So, in order to safely add meta fields in the `meta` tree where they belong, but without exposing them
- * on endpoints where they don't belong, an ugly workaround is used. `register_meta()` is only called
- * for `wcb_session` meta fields during API requests for the `sessions` endpoint. During all other API
- * and non-API requests, it is not called.
- *
- * This only works if you don't need the meta registered in non-API contexts, but that's usually true.
- *
- * @todo Once #38323 is resolved, this can be removed and the calling functions can be updated to use
- *       whatever the officially supported solution turns out to be.
- *
- * @param string $meta_type   Type of object this meta is registered to. 'post', 'user', 'term', etc
- * @param array  $meta_fields An array index by the field slug, with values to be passed to `register_meta()` as
- *                            `$args`. For example, `array( '_wcpt_session_slides' => array( 'single' => true ) )`
- * @param string $endpoint    The partial path of the endpoint. For example, '/wp-json/wp/v2/sessions'.
- */
-function wcorg_register_meta_only_on_endpoint( $meta_type, $meta_fields, $endpoint ) {
-	$is_correct_endpoint_request = false !== strpos( $_SERVER['REQUEST_URI'], untrailingslashit( $endpoint ) );
-
-	if ( ! $is_correct_endpoint_request ) {
-		return;
-	}
-
-	foreach ( $meta_fields as $field_key => $arguments ) {
-		$arguments = array_merge( $arguments, array( 'show_in_rest' => true ) );
-
-		register_meta( $meta_type, $field_key, $arguments );
-	}
-}
-
-/**
  * Display the indicator that marks a form field as required
  */
 function wcorg_required_indicator() {
