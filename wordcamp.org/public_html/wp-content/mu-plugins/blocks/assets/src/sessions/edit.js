@@ -53,8 +53,14 @@ class SessionsEdit extends Component {
 const sessionsSelect = ( select ) => {
 	const { getEntities } = select( WC_BLOCKS_STORE );
 
+	const sessionArgs = {
+		_embed        : true,
+		wc_meta_key   : '_wcpt_session_type',
+		wc_meta_value : 'session', // Regular sessions only, no breaks/lunch/etc sessions.
+	};
+
 	const entities = {
-		wcb_session          : getEntities( 'postType', 'wcb_session', { _embed: true } ),
+		wcb_session          : getEntities( 'postType', 'wcb_session', sessionArgs ),
 		wcb_track            : getEntities( 'taxonomy', 'wcb_track' ),
 		wcb_session_category : getEntities( 'taxonomy', 'wcb_session_category' ),
 	};
