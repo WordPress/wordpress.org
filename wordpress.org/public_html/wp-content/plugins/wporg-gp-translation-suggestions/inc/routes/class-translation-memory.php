@@ -9,7 +9,7 @@ use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 
 class Translation_Memory extends GP_Route {
 
-	public function get_suggestions( $project_path, $locale_slug ) {
+	public function get_suggestions( $project_path, $locale_slug, $set_slug ) {
 		$original_id = gp_get( 'original' );
 		$nonce       = gp_get( 'nonce' );
 
@@ -26,7 +26,12 @@ class Translation_Memory extends GP_Route {
 			wp_send_json_error( 'invalid_original' );
 		}
 
-		$suggestions = Translation_Memory_Client::query( $original->singular, $locale_slug );
+		$locale = $locale_slug;
+		if ( 'default' !== $set_slug ) {
+			$locale .= '_' . $set_slug;
+		}
+
+		$suggestions = Translation_Memory_Client::query( $original->singular, $locale );
 
 		if ( is_wp_error( $suggestions ) ) {
 			wp_send_json_error( $suggestions->get_error_code() );
@@ -35,3 +40,4 @@ class Translation_Memory extends GP_Route {
 		wp_send_json_success( gp_tmpl_get_output( 'translation-memory-suggestions', [ 'suggestions' => $suggestions ], PLUGIN_DIR . '/templates/' ) );
 	}
 }
+
