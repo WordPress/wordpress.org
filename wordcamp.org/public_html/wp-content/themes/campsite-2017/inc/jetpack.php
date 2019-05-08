@@ -15,7 +15,6 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\jetpack_setup' );
  * Jetpack setup function.
  *
  * See: https://jetpack.com/support/infinite-scroll/
- * See: https://jetpack.com/support/content-options/
  * See: https://jetpack.com/support/responsive-videos/
  */
 function jetpack_setup() {
@@ -25,22 +24,6 @@ function jetpack_setup() {
 			'container' => 'main',
 			'render'    => __NAMESPACE__ . '\infinite_scroll_render',
 			'footer'    => 'page',
-		)
-	);
-
-	$featured_image_enabled = ! wcorg_skip_feature( 'cs17_display_featured_image' );
-	add_theme_support(
-		'jetpack-content-options',
-		array(
-			'featured-images'    => array(
-				'archive'           => true,
-				'archive-default'   => $featured_image_enabled,
-				'post'              => true,
-				'post-default'      => $featured_image_enabled,
-				'page'              => true,
-				'page-default'      => $featured_image_enabled,
-				'fallback'          => false,
-			),
 		)
 	);
 
