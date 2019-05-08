@@ -6,51 +6,34 @@
  */
 
 namespace WordCamp\Post_Types\REST_API;
-use WP_Rest_Server;
+use WP_Rest_Server, WP_Post_Type;
 
 defined( 'WPINC' ) || die();
 
 require_once( 'favorite-schedule-shortcode.php' );
 
 /**
- * Add non-sensitive meta fields to the speaker/session REST API endpoints
+ * Add non-sensitive meta fields to WordCamp post type REST API endpoints.
  *
  * If we ever want to register meta for purposes other than exposing it in the API, then this function will
  * probably need to be re-thought and re-factored.
  *
- * @uses wcorg_register_meta_only_on_endpoint()
- *
  * @return void
  */
 function expose_public_post_meta() {
-	$public_session_fields = array(
-		'_wcpt_session_time' => array(
-			'type'   => 'integer',
-			'single' => true,
-		),
+	$meta_defaults = [
+		'show_in_rest' => true,
+		'single'       => true,
+	];
 
-		'_wcpt_session_type' => array(
-			'single' => true,
-		),
+	// Session.
+	register_post_meta( 'wcb_session', '_wcpt_session_time', wp_parse_args( [ 'type' => 'integer' ], $meta_defaults ) );
+	register_post_meta( 'wcb_session', '_wcpt_session_type', $meta_defaults );
+	register_post_meta( 'wcb_session', '_wcpt_session_slides', $meta_defaults );
+	register_post_meta( 'wcb_session', '_wcpt_session_video', $meta_defaults );
 
-		'_wcpt_session_slides' => array(
-			'single' => true,
-		),
-
-		'_wcpt_session_video' => array(
-			'single' => true,
-		),
-	);
-
-	wcorg_register_meta_only_on_endpoint( 'post', $public_session_fields, '/wp-json/wp/v2/sessions/' );
-
-	$public_sponsor_fields = array(
-		'_wcpt_sponsor_website' => array(
-			'single' => true,
-		),
-	);
-
-	wcorg_register_meta_only_on_endpoint( 'post', $public_sponsor_fields, '/wp-json/wp/v2/sponsors/' );
+	// Sponsor.
+	register_post_meta( 'wcb_sponsor', '_wcpt_sponsor_website', $meta_defaults );
 }
 
 add_action( 'init', __NAMESPACE__ . '\expose_public_post_meta' );
@@ -147,7 +130,64 @@ function register_additional_rest_fields() {
 		]
 	);
 }
+
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_additional_rest_fields' );
+
+/**
+ * Validate simple meta query parameters in an API request and add them to the args passed to WP_Query.
+ *
+ * @param array $args    The prepared args for the WP_Query object.
+ * @param array $request The args from the REST API request.
+ *
+ * @return array
+ */
+function prepare_meta_query_args( $args, $request ) {
+	if ( isset( $request['wc_meta_key'], $request['wc_meta_value'] ) ) {
+		$args['meta_key']   = $request['wc_meta_key'];
+		$args['meta_value'] = $request['wc_meta_value'];
+	}
+
+	return $args;
+}
+
+add_filter( 'rest_wcb_session_query', __NAMESPACE__ . '\prepare_meta_query_args', 10, 2 );
+
+/**
+ * Add meta field schemas to Sessions collection parameters.
+ *
+ * This enables and validates simple meta query parameters for the Sessions endpoint. Specific meta keys are
+ * safelisted by filtering for ones that have `show_in_rest` set to `true`.
+ *
+ * TODO: This is necessary because as of version 5.2, WP does not support meta queries on the posts endpoint.
+ *       See https://core.trac.wordpress.org/ticket/47194
+ *
+ * The parameters registered here are prefixed with `wc_` because we don't want to have a collision with a
+ * future implementation in Core, if there ever is one.
+ *
+ * @param array        $query_params
+ * @param WP_Post_Type $post_type
+ *
+ * @return array
+ */
+function add_meta_collection_params( $query_params, $post_type ) {
+	// Avoid exposing potentially sensitive data.
+	$public_meta_fields = wp_list_filter( get_registered_meta_keys( 'post', $post_type->name ), [ 'show_in_rest' => true ] );
+
+	$query_params['wc_meta_key'] = [
+		'description' => __( 'Limit result set to posts with a value set for a specific meta key. Use in conjunction with the wc_meta_value parameter.', 'wordcamporg' ),
+		'type'        => 'string',
+		'enum'        => array_keys( $public_meta_fields ),
+	];
+
+	$query_params['wc_meta_value'] = [
+		'description' => __( 'Limit result set to posts with a specific meta value. Use in conjunction with the wc_meta_key parameter.', 'wordcamporg' ),
+		'type'        => 'string',
+	];
+
+	return $query_params;
+}
+
+add_filter( 'rest_wcb_session_collection_params', __NAMESPACE__ . '\add_meta_collection_params', 10, 2 );
 
 /**
  * Get the URLs for an avatar based on an email address or username.
