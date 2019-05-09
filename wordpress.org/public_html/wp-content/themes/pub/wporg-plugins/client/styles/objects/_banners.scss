@@ -8,4 +8,12 @@
 		margin: 1rem auto;
 		max-width: $size__site-main;
 	}
+
+	a {
+		text-decoration: underline;
+
+		&:hover {
+			color: #d54e21;
+		}
+	}
 }
