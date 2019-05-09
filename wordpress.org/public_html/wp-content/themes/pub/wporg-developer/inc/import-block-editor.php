@@ -13,6 +13,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		);
 
 		add_filter( 'handbook_label', array( $this, 'change_handbook_label' ), 10, 2 );
+		add_filter( 'handbook_display_toc',            array( $this, 'disable_toc' ) );
 		add_filter( 'get_post_metadata',               array( $this, 'fix_markdown_source_meta' ), 10, 4 );
 		add_filter( 'wporg_markdown_before_transform', array( $this, 'wporg_markdown_before_transform' ),  10, 2 );
 		add_filter( 'wporg_markdown_after_transform',  array( $this, 'wporg_markdown_after_transform' ), 10, 2 );
@@ -43,6 +44,20 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		}
 
 		return $label;
+	}
+
+	/**
+	 * Disables table of contents in-page widget for the Block Editor handbook.
+	 *
+	 * @param $display Should the table of contents be displayed?
+	 * @return bool
+	 */
+	public function disable_toc( $display ) {
+		if ( $this->get_post_type() === get_post_type() ) {
+			$display = false;
+		}
+
+		return $display;
 	}
 
 	/**
