@@ -13,11 +13,14 @@ class Editor {
 		add_filter( 'the_title', array( $this, 'filter_the_title_edit_link' ), 10, 2 );
 		add_filter( 'get_edit_post_link', array( $this, 'redirect_edit_link_to_github' ), 10, 3 );
 		add_filter( 'o2_filter_post_actions', array( $this, 'redirect_o2_edit_link_to_github' ), 11, 2 );
-		add_action( 'wp_head', array( $this, 'render_edit_button_style' ) );
 		add_action( 'edit_form_top', array( $this, 'render_editor_warning' ) );
+
+		if ( ! has_action( 'wp_head', array( __CLASS__, 'render_edit_button_style' ) ) ) {
+			add_action( 'wp_head', array( __CLASS__, 'render_edit_button_style' ) );
+		}
 	}
 
-	public function render_edit_button_style() {
+	public static function render_edit_button_style() {
 		?>
 		<style>
 			a.github-edit {
