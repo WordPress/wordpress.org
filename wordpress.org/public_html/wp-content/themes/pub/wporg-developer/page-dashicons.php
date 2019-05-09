@@ -36,7 +36,13 @@ get_header(); ?>
 
 					<!-- admin menu -->
 					<div alt="f333" class="dashicons dashicons-menu">menu</div>
+					<div alt="f228" class="dashicons dashicons-menu-alt">menu (alt)</div>
+					<div alt="f329" class="dashicons dashicons-menu-alt2">menu (alt2)</div>
+					<div alt="f349" class="dashicons dashicons-menu-alt3">menu (alt3)</div>
 					<div alt="f319" class="dashicons dashicons-admin-site">site</div>
+					<div alt="f11d" class="dashicons dashicons-admin-site-alt">site (alt)</div>
+					<div alt="f11e" class="dashicons dashicons-admin-site-alt2">site (alt2)</div>
+					<div alt="f11f" class="dashicons dashicons-admin-site-alt3">site (alt3)</div>
 					<div alt="f226" class="dashicons dashicons-dashboard">dashboard</div>
 					<div alt="f109" class="dashicons dashicons-admin-post">post</div>
 					<div alt="f104" class="dashicons dashicons-admin-media">media</div>
@@ -45,6 +51,7 @@ get_header(); ?>
 					<div alt="f101" class="dashicons dashicons-admin-comments">comments</div>
 					<div alt="f100" class="dashicons dashicons-admin-appearance">appearance</div>
 					<div alt="f106" class="dashicons dashicons-admin-plugins">plugins</div>
+					<div alt="f485" class="dashicons dashicons-plugins-checked">plugins checked</div>
 					<div alt="f110" class="dashicons dashicons-admin-users">users</div>
 					<div alt="f107" class="dashicons dashicons-admin-tools">tools</div>
 					<div alt="f108" class="dashicons dashicons-admin-settings">settings</div>
@@ -81,6 +88,7 @@ get_header(); ?>
 					<div alt="f125" class="dashicons dashicons-format-chat">chat</div>
 					<div alt="f127" class="dashicons dashicons-format-audio">audio</div>
 					<div alt="f306" class="dashicons dashicons-camera">camera</div>
+					<div alt="f129" class="dashicons dashicons-camera-alt">camera (alt)</div>
 					<div alt="f232" class="dashicons dashicons-images-alt">images (alt)</div>
 					<div alt="f233" class="dashicons dashicons-images-alt2">images (alt 2)</div>
 					<div alt="f234" class="dashicons dashicons-video-alt">video (alt)</div>
@@ -131,6 +139,7 @@ get_header(); ?>
 					<div alt="f201" class="dashicons dashicons-editor-italic">italic</div>
 					<div alt="f203" class="dashicons dashicons-editor-ul">ul</div>
 					<div alt="f204" class="dashicons dashicons-editor-ol">ol</div>
+					<div alt="f12c" class="dashicons dashicons-editor-ol-rtl">ol rtl</div>
 					<div alt="f205" class="dashicons dashicons-editor-quote">quote</div>
 					<div alt="f206" class="dashicons dashicons-editor-alignleft">alignleft</div>
 					<div alt="f207" class="dashicons dashicons-editor-aligncenter">aligncenter</div>
@@ -155,6 +164,7 @@ get_header(); ?>
 					<div alt="f224" class="dashicons dashicons-editor-strikethrough">strikethrough</div>
 					<div alt="f225" class="dashicons dashicons-editor-unlink">unlink</div>
 					<div alt="f320" class="dashicons dashicons-editor-rtl">rtl</div>
+					<div alt="f10c" class="dashicons dashicons-editor-ltr">ltr</div>
 					<div alt="f474" class="dashicons dashicons-editor-break">break</div>
 					<div alt="f475" class="dashicons dashicons-editor-code">code</div>
 					<div alt="f476" class="dashicons dashicons-editor-paragraph">paragraph</div>
@@ -211,11 +221,13 @@ get_header(); ?>
 					<div alt="f301" class="dashicons dashicons-twitter">twitter social</div>
 					<div alt="f303" class="dashicons dashicons-rss">rss</div>
 					<div alt="f465" class="dashicons dashicons-email">email</div>
-					<div alt="f466" class="dashicons dashicons-email-alt">email</div>
+					<div alt="f466" class="dashicons dashicons-email-alt">email (alt)</div>
+					<div alt="f467" class="dashicons dashicons-email-alt2">email (alt2)</div>
 					<div alt="f304" class="dashicons dashicons-facebook">facebook social</div>
 					<div alt="f305" class="dashicons dashicons-facebook-alt">facebook social</div>
 					<div alt="f462" class="dashicons dashicons-googleplus">googleplus social</div>
 					<div alt="f325" class="dashicons dashicons-networking">networking social</div>
+					<div alt="f12d" class="dashicons dashicons-instagram">instagram social</div>
 
 					<h4><?php _e( 'WordPress.org Specific: Jobs, Profiles, WordCamps', 'wporg' ); ?></h4>
 
@@ -232,6 +244,24 @@ get_header(); ?>
 					<div alt="f487" class="dashicons dashicons-heart">heart</div>
 					<div alt="f488" class="dashicons dashicons-megaphone">megaphone</div>
 					<div alt="f489" class="dashicons dashicons-schedule">schedule</div>
+					<div alt="f10d" class="dashicons dashicons-tide">Tide</div>
+					<div alt="f124" class="dashicons dashicons-rest-api">REST API</div>
+					<div alt="f13a" class="dashicons dashicons-code-standards">code standards</div>
+
+					<h4><?php _e( 'Buddicons' ); ?></h4>
+
+					<!-- BuddyPress and bbPress specific icons -->
+					<div alt="f452" class="dashicons dashicons-buddicons-activity">activity</div>
+					<div alt="f12b" class="dashicons dashicons-buddicons-bbpress-logo">bbPress logo</div>
+					<div alt="f448" class="dashicons dashicons-buddicons-buddypress-logo">BuddyPress logo</div>
+					<div alt="f453" class="dashicons dashicons-buddicons-community">community</div>
+					<div alt="f449" class="dashicons dashicons-buddicons-forums">forums</div>
+					<div alt="f454" class="dashicons dashicons-buddicons-friends">friends</div>
+					<div alt="f456" class="dashicons dashicons-buddicons-groups">groups</div>
+					<div alt="f457" class="dashicons dashicons-buddicons-pm">private message</div>
+					<div alt="f451" class="dashicons dashicons-buddicons-replies">replies</div>
+					<div alt="f450" class="dashicons dashicons-buddicons-topics">topics</div>
+					<div alt="f455" class="dashicons dashicons-buddicons-tracking">tracking</div>
 
 					<h4><?php _e( 'Products', 'wporg' ); ?></h4>
 
@@ -240,6 +270,7 @@ get_header(); ?>
 					<div alt="f324" class="dashicons dashicons-wordpress-alt">wordpress</div>
 					<div alt="f157" class="dashicons dashicons-pressthis">press this</div>
 					<div alt="f463" class="dashicons dashicons-update">update</div>
+					<div alt="f113" class="dashicons dashicons-update-alt">update (alt)</div>
 					<div alt="f180" class="dashicons dashicons-screenoptions">screenoptions</div>
 					<div alt="f348" class="dashicons dashicons-info">info</div>
 					<div alt="f174" class="dashicons dashicons-cart">cart shopping</div>
@@ -264,6 +295,7 @@ get_header(); ?>
 
 					<!-- alerts/notifications/flags -->
 					<div alt="f147" class="dashicons dashicons-yes">yes check checkmark</div>
+					<div alt="f12a" class="dashicons dashicons-yes-alt">yes check checkmark (alt)</div>
 					<div alt="f158" class="dashicons dashicons-no">no x</div>
 					<div alt="f335" class="dashicons dashicons-no-alt">no x</div>
 					<div alt="f132" class="dashicons dashicons-plus">plus add increase</div>
@@ -288,6 +320,7 @@ get_header(); ?>
 					<div alt="f468" class="dashicons dashicons-sos">sos help</div>
 					<div alt="f179" class="dashicons dashicons-search">search</div>
 					<div alt="f181" class="dashicons dashicons-slides">slides</div>
+					<div alt="f121" class="dashicons dashicons-text-page">text page</div>
 					<div alt="f183" class="dashicons dashicons-analytics">analytics</div>
 					<div alt="f184" class="dashicons dashicons-chart-pie">pie chart</div>
 					<div alt="f185" class="dashicons dashicons-chart-bar">bar chart</div>
@@ -295,6 +328,8 @@ get_header(); ?>
 					<div alt="f239" class="dashicons dashicons-chart-area">area chart</div>
 					<div alt="f307" class="dashicons dashicons-groups">groups</div>
 					<div alt="f338" class="dashicons dashicons-businessman">businessman</div>
+					<div alt="f12f" class="dashicons dashicons-businesswoman">businesswoman</div>
+					<div alt="f12e" class="dashicons dashicons-businessperson">businessperson</div>
 					<div alt="f336" class="dashicons dashicons-id">id</div>
 					<div alt="f337" class="dashicons dashicons-id-alt">id</div>
 					<div alt="f312" class="dashicons dashicons-products">products</div>
