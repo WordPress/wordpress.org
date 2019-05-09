@@ -288,3 +288,28 @@ function wporg_gp_count_warnings( $entry ) {
 
 	return $count;
 }
+
+/**
+ * Lists file references for a translation.
+ *
+ * @param \GP_Project $project Current project.
+ * @param object      $entry Current translation entry.
+ */
+function wporg_references( $project, $entry ) {
+	?>
+	<ul>
+		<?php
+		foreach ( $entry->references as $reference ) :
+			list( $file, $line ) = array_pad( explode( ':', $reference ), 2, 0 );
+			if ( $source_url = $project->source_url( $file, $line ) ) :
+				?>
+				<li><a target="_blank" href="<?php echo $source_url; ?>"><?php echo $file.':'.$line ?></a></li>
+			<?php
+			else :
+				echo "<li>$file:$line</li>";
+			endif;
+		endforeach;
+		?>
+	</ul>
+	<?php
+}

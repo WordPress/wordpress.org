@@ -2,6 +2,22 @@
 	var $html = $( 'html' );
 	var $document = $( document );
 
+	function checkStorage() {
+		var test = 'test',
+			result = false;
+
+		try {
+			window.localStorage.setItem( 'test', test );
+			result = window.localStorage.getItem( 'test' ) === test;
+			window.localStorage.removeItem( 'test' );
+		} catch(e) {}
+
+		hasStorage = result;
+		return result;
+	}
+
+	var hasStorage = checkStorage();
+
 	// Handle tab view for plural forms.
 	function switchPluralTabs() {
 		var $tab = $( this );
@@ -124,6 +140,99 @@
 		} );
 	}
 
+	$gp.editor.keydown  = ( function( original ) {
+		return function( event ) {
+			// Shift-Enter = Save.
+			if ( 13 === event.keyCode && event.shiftKey ) {
+				var $textarea = $( event.target );
+
+				if ( ! $textarea.val().trim() ) {
+					$gp.notices.error( 'Translation is empty.' );
+					return false;
+				}
+
+				// Check plural forms.
+				var $textareas = $gp.editor.current.find( '.textareas:not(.active) textarea' );
+				var isValid = true;
+				$textareas.each( function() {
+					if ( ! this.value.trim() ) {
+						isValid = false;
+					}
+				} );
+
+				if ( ! isValid ) {
+					$gp.notices.error( 'Translation is empty.' );
+					return false;
+				}
+
+				$gp.editor.save( $gp.editor.current.find( 'button.translation-actions__save' ) );
+
+			// Ctrl-Enter or Ctrl-Shift-B = Copy original.
+			} else if (
+				( 13 === event.keyCode && event.ctrlKey ) ||
+				( 66 === event.keyCode && event.shiftKey && event.ctrlKey ) )
+			{
+				var $button = $gp.editor.current.find( 'button.translation-actions__copy' );
+
+				$button.trigger( 'click' );
+			} else {
+				return original.apply( $gp.editor, arguments );
+			}
+
+			return false;
+		}
+	})( $gp.editor.keydown );
+
+	// Store the open/close state of <details> element in locale storage and apply state when editor is shown.
+	var DETAILS_STORE_KEY = 'translate-details-state';
+	function updateDetailsState( type, state ) {
+		if ( ! hasStorage ) {
+			return;
+		}
+
+		var store  = window.localStorage.getItem( DETAILS_STORE_KEY );
+		var states = store ? JSON.parse( store ) : {};
+
+		states[ type ] = state;
+
+		window.localStorage.setItem( DETAILS_STORE_KEY, JSON.stringify( states ) );
+	}
+
+	function toggleDetails( event ) {
+		var $el = $( event.target ).closest( 'details' );
+		var isClosed = $el.attr( 'open' ) === 'open'; // Gets closed when open attribute was previously set.
+		var className = $el.attr( 'class' ).replace( /^(\S*).*/, '$1' );
+
+		updateDetailsState( className, isClosed ? 'close' : 'open' );
+	}
+
+	function applyDetailsState() {
+		if ( ! hasStorage || ! $gp.editor.current.length ) {
+			return;
+		}
+
+		var store  = window.localStorage.getItem( DETAILS_STORE_KEY );
+		var states = store ? JSON.parse( store ) : {};
+
+		for ( var type in states ) {
+			var state = states[ type ];
+
+			if ( 'open' === state ) {
+				$gp.editor.current.find( '.' + type ).attr( 'open', 'open' );
+			} else {
+				$gp.editor.current.find( '.' + type ).removeAttr( 'open' );
+			}
+		}
+	}
+
+	$gp.editor.show = ( function( original ) {
+		return function() {
+			original.apply( $gp.editor, arguments );
+
+			applyDetailsState();
+		}
+	})( $gp.editor.show );
+
 	$gp.editor.install_hooks = ( function( original ) {
 		return function() {
 			original.apply( $gp.editor, arguments );
@@ -139,6 +248,7 @@
 				.on( 'click', 'button.translation-actions__ltr', switchTextDirection )
 				.on( 'click', 'button.translation-actions__rtl', switchTextDirection )
 				.on( 'focus', 'textarea', textareaAutosize )
+				.on( 'click', 'summary', toggleDetails )
 				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu );
 		}
 	})( $gp.editor.install_hooks );

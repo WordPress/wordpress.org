@@ -110,25 +110,28 @@ if ( is_object( $glossary ) ) {
 						<?php endif; ?>
 					</div>
 
-					<details class="source-details">
-						<summary>Context</summary>
-
+					<div class="source-details">
 						<?php if ( $t->context ): ?>
-							<dl class="source-details__context">
-								<dt><?php _e( 'Context:', 'glotpress' ); ?></dt>
-								<dd><span class="context bubble"><?php echo esc_translation( $t->context ); ?></span></dd>
-							</dl>
+							<details open class="source-details__context">
+								<summary>Context</summary>
+								<span class="context bubble"><?php echo esc_translation( $t->context ); ?></span>
+							</details>
 						<?php endif; ?>
 						<?php if ( $t->extracted_comments ) :
 							$comments = trim( preg_replace( '/^translators:/ ', '', $t->extracted_comments ) );
 							?>
-							<dl class="source-details__comments">
-								<dt><?php _e( 'Comment:', 'glotpress' ); ?></dt>
-								<dd><?php echo make_clickable( esc_translation( $comments ) ); ?></dd>
-							</dl>
+							<details open class="source-details__comment">
+								<summary><?php _e( 'Comment', 'glotpress' ); ?></summary>
+								<p><?php echo make_clickable( esc_translation( $comments ) ); ?></p>
+							</details>
 						<?php endif; ?>
-						<?php references( $project, $t ); ?>
-					</details>
+						<?php if ( $t->references ) : ?>
+							<details class="source-details__references">
+								<summary>References</summary>
+								<?php wporg_references( $project, $t ); ?>
+							</details>
+						<?php endif; ?>
+					</div>
 
 					<div class="translation-wrapper">
 						<?php if ( $t->plural && $locale->nplurals > 1 ) : ?>

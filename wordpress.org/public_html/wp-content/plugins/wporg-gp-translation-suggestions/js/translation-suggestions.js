@@ -1,7 +1,7 @@
 ( function( $ ){
-	function fetchTranslationMemorySuggestions( $container, originalId, nonce ) {
+	function fetchSuggestions( $container, apiUrl, originalId, nonce ) {
 		var xhr = $.ajax( {
-			url: window.WPORG_TRANSLATION_MEMORY_API_URL,
+			url: apiUrl,
 			data: {
 				'original': originalId,
 				'nonce': nonce
@@ -32,7 +32,7 @@
 
 	function maybeFetchTranslationMemorySuggestions() {
 		var $container = $gp.editor.current.find( '.suggestions__translation-memory' );
-		if ( ! $container.length ) {
+		if ( !$container.length ) {
 			return;
 		}
 
@@ -45,38 +45,7 @@
 		var originalId = $gp.editor.current.original_id;
 		var nonce = $container.data( 'nonce' );
 
-		fetchTranslationMemorySuggestions( $container, originalId , nonce );
-	}
-
-	function fetchOtherLanguageSuggestions( $container, originalId, nonce ) {
-		var xhr = $.ajax( {
-			url: window.WPORG_OTHER_LANGUAGES_API_URL,
-			data: {
-				'original': originalId,
-				'nonce': nonce
-			},
-			dataType: 'json'
-		} );
-
-		xhr.done( function( response ) {
-			$container.find( '.suggestions__loading-indicator' ).remove();
-			if ( response.success ) {
-				$container.append( response.data );
-			} else {
-				$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
-			}
-			$container.addClass( 'initialized' );
-		} );
-
-		xhr.fail( function() {
-			$container.find( '.suggestions__loading-indicator' ).remove();
-			$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
-			$container.addClass( 'initialized' );
-		} );
-
-		xhr.always( function() {
-			$container.removeClass( 'fetching' );
-		} );
+		fetchSuggestions( $container, window.WPORG_TRANSLATION_MEMORY_API_URL, originalId, nonce );
 	}
 
 	function maybeFetchOtherLanguageSuggestions() {
@@ -94,7 +63,7 @@
 		var originalId = $gp.editor.current.original_id;
 		var nonce = $container.data( 'nonce' );
 
-		fetchOtherLanguageSuggestions( $container, originalId , nonce );
+		fetchSuggestions( $container, window.WPORG_OTHER_LANGUAGES_API_URL, originalId , nonce );
 	}
 
 	function copySuggestion( event ) {
@@ -125,6 +94,7 @@
 			original.apply( $gp.editor, arguments );
 
 			maybeFetchTranslationMemorySuggestions();
+			maybeFetchOtherLanguageSuggestions();
 		}
 	})( $gp.editor.show );
 
@@ -133,8 +103,7 @@
 			original();
 
 			$( $gp.editor.table )
-				.on( 'click', '.translation-suggestion', copySuggestion )
-				.on( 'click', '.suggestions__other-languages summary', maybeFetchOtherLanguageSuggestions );
+				.on( 'click', '.translation-suggestion', copySuggestion );
 		}
 	})( $gp.editor.install_hooks );
 
