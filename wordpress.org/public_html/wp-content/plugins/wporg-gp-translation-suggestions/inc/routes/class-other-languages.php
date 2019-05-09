@@ -72,7 +72,7 @@ ORDER BY
 				$sql,
 				$original->id,
 				$set_to_exclude->id,
-				$wpdb->esc_like( $set_to_exclude->locale ) . '%'
+				$wpdb->esc_like( strtok( $set_to_exclude->locale, '-' ) ) . '%'
 			),
 			ARRAY_A
 		);
