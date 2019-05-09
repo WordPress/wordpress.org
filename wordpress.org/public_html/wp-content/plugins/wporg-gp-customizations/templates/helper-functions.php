@@ -3,7 +3,7 @@ wp_register_style(
 		'wporg-translate',
 		plugins_url( 'style.css', __FILE__ ),
 		[ 'gp-base' ],
-		'20190508'
+		'20190510'
 );
 gp_enqueue_style( 'wporg-translate' );
 
@@ -29,7 +29,7 @@ wp_register_script(
 		'wporg-translate-editor',
 		plugins_url( 'js/editor.js', __FILE__ ),
 		[ 'gp-editor', 'autosize' ],
-		'20190506'
+		'20190510'
 );
 
 wp_register_style(

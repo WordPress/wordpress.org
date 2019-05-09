@@ -81,7 +81,7 @@ class Plugin {
 			'gp-translation-suggestions',
 			plugins_url( './js/translation-suggestions.js', PLUGIN_FILE ),
 			[ 'gp-editor' ],
-			'20190506'
+			'20190510'
 		);
 
 		gp_enqueue_script( 'gp-translation-suggestions' );
