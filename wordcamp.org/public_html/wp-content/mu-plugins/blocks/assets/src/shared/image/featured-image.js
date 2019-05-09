@@ -7,9 +7,43 @@ import { sortBy } from 'lodash';
 /**
  * WordPress dependencies.
  */
-const { Disabled } = wp.components;
+const { Disabled }  = wp.components;
 const { Component } = wp.element;
-const { isURL } = wp.url;
+const { __, _x }    = wp.i18n;
+const { isURL }     = wp.url;
+
+/**
+ * Internal dependencies
+ */
+import './featured-image.scss';
+
+// Featured Image-specific presets for the ImageSizeControl component.
+export const featuredImageSizePresets = [
+	{
+		name      : __( 'Small', 'wordcamporg' ),
+		shortName : _x( 'S', 'size small', 'wordcamporg' ),
+		size      : 150,
+		slug      : 'small',
+	},
+	{
+		name      : __( 'Regular', 'wordcamporg' ),
+		shortName : _x( 'M', 'size medium', 'wordcamporg' ),
+		size      : 300,
+		slug      : 'regular',
+	},
+	{
+		name      : __( 'Large', 'wordcamporg' ),
+		shortName : _x( 'L', 'size large', 'wordcamporg' ),
+		size      : 600,
+		slug      : 'large',
+	},
+	{
+		name      : __( 'Larger', 'wordcamporg' ),
+		shortName : _x( 'XL', 'size extra large', 'wordcamporg' ),
+		size      : 1024,
+		slug      : 'larger',
+	},
+];
 
 /**
  * Displays a featured image, can be linked with block control for size.
@@ -18,7 +52,7 @@ const { isURL } = wp.url;
  * it's assumed that this is being used in the block editor interface, and it just uses the largest image size
  * available.
  */
-export default class FeaturedImage extends Component {
+export class FeaturedImage extends Component {
 	/**
 	 * @param {Object} props
 	 * @param {Array}  props.imageData Meta data about the featured image, including available sizes and the image's

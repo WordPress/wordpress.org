@@ -29,7 +29,7 @@ setup_postdata( $sponsor ); // This is necessary for generating an excerpt from 
 			render_featured_image(
 				$sponsor,
 				$attributes['featured_image_width'],
-				[ 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo' ],
+				[ 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo', 'align-' . esc_attr( $attributes['image_align'] ) ],
 				get_permalink( $sponsor )
 			)
 		); ?>

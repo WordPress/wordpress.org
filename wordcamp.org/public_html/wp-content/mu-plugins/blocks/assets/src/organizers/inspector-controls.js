@@ -3,15 +3,14 @@
  */
 const { PanelBody, PanelRow, SelectControl, ToggleControl } = wp.components;
 const { InspectorControls }                                 = wp.editor;
-const { Component, Fragment }                               = wp.element;
+const { Component }                                         = wp.element;
 const { __ }                                                = wp.i18n;
 
 /**
  * Internal dependencies
  */
-import { AvatarSizeControl }  from '../shared/avatar';
+import { avatarSizePresets, ImageInspectorPanel } from '../shared/image';
 import { GridInspectorPanel } from '../shared/post-list';
-import ImageAlignmentControl  from '../shared/image-alignment';
 
 const DEFAULT_SCHEMA = {
 	grid_columns: {
@@ -53,41 +52,18 @@ class OrganizerInspectorControls extends Component {
 					{ ...this.props }
 				/>
 
-				<PanelBody title={ __( 'Avatar Settings', 'wordcamporg' ) } initialOpen={ true }>
-					<PanelRow>
-						<ToggleControl
-							label={ __( 'Show avatars', 'wordcamporg' ) }
-							checked={ show_avatars }
-							onChange={ ( value ) => setAttributes( { show_avatars: value } ) }
-						/>
-					</PanelRow>
-
-					{ show_avatars &&
-						<Fragment>
-							<PanelRow>
-								<AvatarSizeControl
-									label={ __( 'Size', 'wordcamporg' ) }
-									value={ Number( avatar_size ) }
-									initialPosition={ Number( schema.avatar_size.default ) }
-									onChange={ ( value ) => setAttributes( { avatar_size: value } ) }
-									rangeProps={ {
-										min : Number( schema.avatar_size.minimum ),
-										max : Number( schema.avatar_size.maximum ),
-									} }
-								/>
-							</PanelRow>
-
-							<PanelRow>
-								<ImageAlignmentControl
-									label={ __( 'Alignment', 'wordcamporg' ) }
-									value={ avatar_align }
-									onChange={ ( value ) => setAttributes( { avatar_align: value } ) }
-									alignOptions={ options.align_image }
-								/>
-							</PanelRow>
-						</Fragment>
-					}
-				</PanelBody>
+				<ImageInspectorPanel
+					title={ __( 'Avatar Settings', 'wordcamporg' ) }
+					show={ show_avatars }
+					onChangeShow={ ( value ) => setAttributes( { show_avatars: value } ) }
+					size={ avatar_size }
+					onChangeSize={ ( value ) => setAttributes( { avatar_size: value } ) }
+					sizeSchema={ schema.avatar_size }
+					sizePresets={ avatarSizePresets }
+					align={ avatar_align }
+					onChangeAlign={ ( value ) => setAttributes( { avatar_align: value } ) }
+					alignOptions={ options.align_image }
+				/>
 
 				<PanelBody title={ __( 'Content Settings', 'wordcamporg' ) } initialOpen={ false }>
 					<PanelRow>

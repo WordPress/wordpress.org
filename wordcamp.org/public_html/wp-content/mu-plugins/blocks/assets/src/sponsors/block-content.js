@@ -14,7 +14,7 @@ const { __ }              = wp.i18n;
  * Internal dependencies
  */
 import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../shared/block-content';
-import FeaturedImage                                                 from '../shared/featured-image';
+import { FeaturedImage }                                             from '../shared/image';
 import PostList                                                      from '../shared/post-list';
 import { filterEntities }                                            from '../blocks-store';
 
@@ -48,7 +48,7 @@ class SponsorsBlockContent extends Component {
 		if ( Array.isArray( item_ids ) && item_ids.length > 0 ) {
 			args.filter  = [
 				{
-					fieldName  : mode === 'wcb_sponsor' ? 'id' : 'wcb_sponsor_level',
+					fieldName  : mode === 'wcb_sponsor' ? 'id' : 'sponsor_level',
 					fieldValue : item_ids,
 				},
 			];
@@ -66,7 +66,7 @@ class SponsorsBlockContent extends Component {
 	 */
 	render() {
 		const { attributes } = this.props;
-		const { show_name, show_logo, content, featured_image_width } = attributes;
+		const { show_name, show_logo, featured_image_width, image_align, content } = attributes;
 
 		const posts     = this.getFilteredPosts();
 		const isLoading = ! Array.isArray( posts );
@@ -101,7 +101,7 @@ class SponsorsBlockContent extends Component {
 							<FeaturedImage
 								imageData={ get( post, '_embedded.wp:featuredmedia[0]', {} ) }
 								width={ featured_image_width }
-								className={ classnames( 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo' ) }
+								className={ classnames( 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo', 'align-' + image_align ) }
 								imageLink={ post.link }
 							/>
 						}

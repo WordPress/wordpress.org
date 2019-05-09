@@ -15,7 +15,7 @@ const { escapeAttribute }     = wp.escapeHtml;
 /**
  * Internal dependencies
  */
-import { AvatarImage }                                               from '../shared/avatar';
+import { AvatarImage }                                               from '../shared/image';
 import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../shared/block-content';
 import { tokenSplit, arrayTokenReplace }                             from '../shared/i18n';
 import PostList                                                      from '../shared/post-list';

@@ -11,7 +11,7 @@ const { Component } = wp.element;
 /**
  * Internal dependencies
  */
-import { AvatarImage }                                from '../shared/avatar';
+import { AvatarImage }                                from '../shared/image';
 import { BlockNoContent, ItemTitle, ItemHTMLContent } from '../shared/block-content';
 import PostList                                       from '../shared/post-list';
 import { filterEntities }                             from '../blocks-store';

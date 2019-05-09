@@ -7,13 +7,36 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 const { Disabled } = wp.components;
-const { __, sprintf } = wp.i18n;
+const { __, _x, sprintf } = wp.i18n;
 const { addQueryArgs, isURL } = wp.url;
 
-/**
- * Internal dependencies
- */
-import './style.scss';
+// Avatar-specific presets for the ImageSizeControl component.
+export const avatarSizePresets = [
+	{
+		name      : __( 'Small', 'wordcamporg' ),
+		shortName : _x( 'S', 'size small', 'wordcamporg' ),
+		size      : 90,
+		slug      : 'small',
+	},
+	{
+		name      : __( 'Regular', 'wordcamporg' ),
+		shortName : _x( 'M', 'size medium', 'wordcamporg' ),
+		size      : 150,
+		slug      : 'regular',
+	},
+	{
+		name      : __( 'Large', 'wordcamporg' ),
+		shortName : _x( 'L', 'size large', 'wordcamporg' ),
+		size      : 300,
+		slug      : 'large',
+	},
+	{
+		name      : __( 'Larger', 'wordcamporg' ),
+		shortName : _x( 'XL', 'size extra large', 'wordcamporg' ),
+		size      : 500,
+		slug      : 'larger',
+	},
+];
 
 /**
  * Component for an avatar image, optionally including a link.
@@ -73,5 +96,3 @@ export function AvatarImage( {
 
 	return image;
 }
-
-export * from './inspector-controls';

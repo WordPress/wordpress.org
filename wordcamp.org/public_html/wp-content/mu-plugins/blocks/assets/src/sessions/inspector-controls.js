@@ -9,8 +9,8 @@ const { __ } = wp.i18n;
 /**
  * Internal dependencies
  */
-import FeaturedImageInspectorControls from '../shared/featured-image/inspector-control';
-import { GridInspectorPanel }         from '../shared/post-list';
+import { featuredImageSizePresets, ImageInspectorPanel } from '../shared/image';
+import { GridInspectorPanel }                            from '../shared/post-list';
 
 /**
  * Component for block controls that appear in the Inspector Panel.
@@ -23,13 +23,26 @@ class SessionsInspectorControls extends Component {
 	 */
 	render() {
 		const { attributes, setAttributes, blockData } = this.props;
-		const { show_speaker, content, show_meta, show_category, sort } = attributes;
-		const { options } = blockData;
+		const { show_images, featured_image_width, image_align, show_speaker, content, show_meta, show_category, sort } = attributes;
+		const { schema, options } = blockData;
 
 		return (
 			<InspectorControls>
 				<GridInspectorPanel
 					{ ...this.props }
+				/>
+
+				<ImageInspectorPanel
+					title={ __( 'Featured Image Settings', 'wordcamporg' ) }
+					show={ show_images }
+					onChangeShow={ ( value ) => setAttributes( { show_images: value } ) }
+					size={ featured_image_width }
+					onChangeSize={ ( value ) => setAttributes( { featured_image_width: value } ) }
+					sizeSchema={ schema.featured_image_width }
+					sizePresets={ featuredImageSizePresets }
+					align={ image_align }
+					onChangeAlign={ ( value ) => setAttributes( { image_align: value } ) }
+					alignOptions={ options.align_image }
 				/>
 
 				<PanelBody title={ __( 'Content Settings', 'wordcamporg' ) } initialOpen={ true }>
@@ -66,13 +79,6 @@ class SessionsInspectorControls extends Component {
 						/>
 					</PanelRow>
 				</PanelBody>
-
-				<FeaturedImageInspectorControls
-					title={ __( 'Image size', 'wordcamporg' ) }
-					help={ __( 'Specify image height and width, or select a predefined size.', 'wordcamporg' ) }
-					selectLabel={ __( 'Size', 'wordcamporg' ) }
-					{ ...this.props }
-				/>
 
 				<PanelBody title={ __( 'Sorting', 'wordcamporg' ) }>
 					<PanelRow>

@@ -184,12 +184,7 @@ function get_attributes_schema() {
 		[
 			'align'        => get_shared_definition( 'align_block', 'attribute' ),
 			'avatar_align' => get_shared_definition( 'align_image', 'attribute' ),
-			'avatar_size'  => [
-				'type'    => 'integer',
-				'minimum' => 25,
-				'maximum' => 600,
-				'default' => 150,
-			],
+			'avatar_size'  => get_shared_definition( 'image_size_avatar', 'attribute' ),
 			'className'    => get_shared_definition( 'string_empty', 'attribute' ),
 			'mode'         => [
 				'type'    => 'string',

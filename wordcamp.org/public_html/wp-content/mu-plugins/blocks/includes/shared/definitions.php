@@ -18,48 +18,60 @@ function get_shared_definitions( $keys, $type ) {
 		case 'attribute':
 			$definitions = [
 				// Generic attributes.
-				'boolean_false' => [
+				'boolean_false'     => [
 					'type'    => 'bool',
 					'default' => false,
 				],
-				'boolean_true'  => [
+				'boolean_true'      => [
 					'type'    => 'bool',
 					'default' => true,
 				],
-				'string_empty'  => [
+				'string_empty'      => [
 					'type'    => 'string',
 					'default' => '',
 				],
 				// Specific attributes.
-				'align_block'   => [
+				'align_block'       => [
 					'type'    => 'string',
 					'enum'    => wp_list_pluck( get_shared_definition( 'align_block', 'option' ), 'value' ),
 					'default' => '',
 				],
-				'align_image'   => [
+				'align_image'       => [
 					'type'    => 'string',
 					'enum'    => wp_list_pluck( get_shared_definition( 'align_image', 'option' ), 'value' ),
 					'default' => 'none',
 				],
-				'content'       => [
+				'content'           => [
 					'type'    => 'string',
 					'enum'    => wp_list_pluck( get_shared_definition( 'content', 'option' ), 'value' ),
 					'default' => 'full',
 				],
-				'grid_columns'  => [
+				'grid_columns'      => [
 					'type'    => 'integer',
 					'minimum' => 2,
 					'maximum' => 4,
 					'default' => 2,
 				],
-				'item_ids'      => [
+				'image_size'        => [
+					'type'    => 'integer',
+					'minimum' => 100,
+					'maximum' => 1024,
+					'default' => 150,
+				],
+				'image_size_avatar' => [
+					'type'    => 'integer',
+					'minimum' => 25,
+					'maximum' => 600,
+					'default' => 150,
+				],
+				'item_ids'          => [
 					'type'    => 'array',
 					'default' => [],
 					'items'   => [
 						'type' => 'integer',
 					],
 				],
-				'layout'        => [
+				'layout'            => [
 					'type'    => 'string',
 					'enum'    => wp_list_pluck( get_shared_definition( 'layout', 'option' ), 'value' ),
 					'default' => 'list',
@@ -161,16 +173,17 @@ function get_shared_definitions( $keys, $type ) {
 /**
  * Retrieve a single definition for use within a block.
  *
- * @param string $key  The key of the definition to retrieve.
- * @param string $type The type of definition to retrieve. 'attribute' or 'option'.
+ * @param string $key   The key of the definition to retrieve.
+ * @param string $type  The type of definition to retrieve. 'attribute' or 'option'.
+ * @param array  $props Properties to override in the shared definition.
  *
  * @return array
  */
-function get_shared_definition( $key, $type ) {
+function get_shared_definition( $key, $type, $props = [] ) {
 	$result = get_shared_definitions( $key, $type );
 
 	if ( ! empty( $result ) ) {
-		$result = array_shift( $result );
+		$result = wp_parse_args( $props, array_shift( $result ) );
 	}
 
 	return $result;

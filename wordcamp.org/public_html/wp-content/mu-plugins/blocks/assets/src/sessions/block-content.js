@@ -16,7 +16,7 @@ const { __ }        = wp.i18n;
 import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../shared/block-content';
 import { tokenSplit, arrayTokenReplace, intersperse, listify }       from '../shared/i18n';
 import PostList                                                      from '../shared/post-list';
-import FeaturedImage                                                 from '../shared/featured-image';
+import { FeaturedImage }                                             from '../shared/image';
 import { filterEntities }                                            from '../blocks-store';
 
 /**

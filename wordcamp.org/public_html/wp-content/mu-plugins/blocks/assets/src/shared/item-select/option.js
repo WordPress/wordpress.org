@@ -13,7 +13,7 @@ const { __ }       = wp.i18n;
 /**
  * Internal dependencies
  */
-import { AvatarImage }    from '../avatar';
+import { AvatarImage }    from '../image';
 import { filterEntities } from '../../blocks-store';
 
 const buildOptionGroup = ( entityType, type, label, items ) => {

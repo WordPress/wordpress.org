@@ -101,17 +101,8 @@ function get_attributes_schema() {
 		[
 			'align'                => get_shared_definition( 'align_block', 'attribute' ),
 			'className'            => get_shared_definition( 'string_empty', 'attribute' ),
-			'featured_image_width' => array(
-				'type'    => 'integer',
-				'default' => 150,
-			),
+			'featured_image_width' => get_shared_definition( 'image_size', 'attribute' ),
 			'image_align'          => get_shared_definition( 'align_image', 'attribute' ),
-			'image_size'           => [
-				'type'    => 'integer',
-				'minimum' => 25,
-				'maximum' => 600,
-				'default' => 150,
-			],
 			'mode'                 => [
 				'type'    => 'string',
 				'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),
