@@ -15,6 +15,12 @@ namespace WordCamp\CampSite_2017;
 	<header class="entry-header">
 		<?php
 
+		if ( has_post_thumbnail() && ! wcorg_skip_feature( 'cs17_display_featured_image' ) ) : ?>
+			<div class="entry-image">
+				<?php the_post_thumbnail(); ?>
+			</div>
+		<?php endif;
+
 		if ( is_single() ) {
 			the_title( '<h1 class="entry-title">', '</h1>' );
 		} else {
