@@ -7,6 +7,8 @@ wp_register_style(
 );
 gp_enqueue_style( 'wporg-translate' );
 
+gp_enqueue_script( 'jquery' );
+
 wp_register_script(
 	'details-element-polyfill',
 	plugins_url( 'js/details-element-polyfill.min.js', __FILE__ ),
