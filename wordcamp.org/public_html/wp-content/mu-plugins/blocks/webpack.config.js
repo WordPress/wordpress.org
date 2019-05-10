@@ -23,12 +23,12 @@ const webpackConfig = {
 	devtool: SOURCE_MAPS ? 'cheap-module-eval-source-map' : 'none',
 
 	entry: {
-		blocks: path.resolve( __dirname, 'assets/src/blocks.js' ),
+		blocks: path.resolve( __dirname, 'source/blocks.js' ),
 	},
 
 	output: {
 		filename : '[name].min.js',
-		path     : path.resolve( __dirname, 'assets' ),
+		path     : path.resolve( __dirname, 'build' ),
 	},
 
 	module: {
