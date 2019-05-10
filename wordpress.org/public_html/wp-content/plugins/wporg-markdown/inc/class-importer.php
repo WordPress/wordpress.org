@@ -233,7 +233,7 @@ abstract class Importer {
 		if ( class_exists( 'WP_CLI' ) ) {
 			WP_CLI::log( "Created post {$post_id} for {$doc['slug']}." );
 		}
-		update_post_meta( $post_id, $this->meta_key, esc_url_raw( $doc['markdown_source'] ) );
+		update_post_meta( $post_id, $this->meta_key, esc_url_raw( $this->generate_markdown_source_url( $doc['markdown_source'] ) ) );
 		update_post_meta( $post_id, $this->manifest_entry_meta_key, $doc );
 		return get_post( $post_id );
 	}
@@ -248,7 +248,7 @@ abstract class Importer {
 	protected function update_post_from_manifest_doc( $post_id, $doc ) {
 		update_post_meta( $post_id, $this->manifest_entry_meta_key, $doc );
 
-		$did_update = update_post_meta( $post_id, $this->meta_key, esc_url_raw( $doc['markdown_source'] ) );
+		$did_update = update_post_meta( $post_id, $this->meta_key, esc_url_raw( $this->generate_markdown_source_url( $doc['markdown_source'] ) ) );
 		if ( ! $did_update ) {
 			return false;
 		}
@@ -418,6 +418,34 @@ abstract class Importer {
 		update_post_meta( $post_id, $this->etag_meta_key, wp_slash( $etag ) );
 
 		return true;
+	}
+
+	/**
+	 * Generates a fully qualified markdown source URL in the event a relative
+	 * path was defined.
+	 *
+	 * @param string $markdown_source The markdwon_source value defined for a
+	 *                                document in the manifest.
+	 * @return string
+	 */
+	public function generate_markdown_source_url( $markdown_source ) {
+		// If source is not explicit URL, then it is relative.
+		if ( false === strpos( $markdown_source, 'https://' ) ) {
+			// Base URL is the location of the manifest.
+			$base = $this->get_manifest_url();
+			$base = rtrim( dirname( $base ), '/' );
+
+			// Markdown source can relatively refer to manifest's parent directory,
+			// but no higher.
+			if ( false !== strpos( $markdown_source, '../' ) ) {
+				$base = rtrim( dirname( $base ), '/' );
+				$markdown_source = str_replace( '../', '/', $markdown_source );
+			}
+
+			$markdown_source = $base . '/' . ltrim( $markdown_source, '/' );
+		}
+
+		return $markdown_source;
 	}
 
 	/**
