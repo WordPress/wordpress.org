@@ -268,10 +268,13 @@
 	text-align: center;
 	width: inherit;
 
-
 	@include breakpoint( 67rem ) {
 		margin: 1rem auto 0;
 		max-width: 50rem;
+	}
+
+	a {
+		text-decoration: underline;
 	}
 }
 
