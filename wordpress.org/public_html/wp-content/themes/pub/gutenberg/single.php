@@ -24,8 +24,8 @@ do_action( 'handbook_breadcrumbs' );
 			get_template_part( 'template-parts/content', get_post_type() );
 
 			the_post_navigation( array(
-				'prev_text' => '← %title',
-				'next_text' => '%title →',
+				'prev_text' => '←&nbsp;%title',
+				'next_text' => '%title&nbsp;→',
 			) );
 
 			// If comments are open or we have at least one comment, load up the comment template.
