@@ -146,6 +146,7 @@ function get_whitelist() {
 			'afragen',
 			'flixos90',
 			'schlessera',
+			'spacedmonkey',
 		) ),
 		'core-privacy' => array_merge( get_committers(), array(
 			'allendav',
