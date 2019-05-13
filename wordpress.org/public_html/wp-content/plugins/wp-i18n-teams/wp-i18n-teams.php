@@ -281,6 +281,7 @@ class WP_I18n_Teams {
 		$locale_data['validators'] = $contributors['validators'];
 		$locale_data['project_validators'] = $contributors['project_validators'];
 		$locale_data['translators'] = $contributors['translators'];
+		$locale_data['translators_past'] = $contributors['translators_past'];
 
 		return $locale_data;
 	}
@@ -301,7 +302,8 @@ class WP_I18n_Teams {
 		$contributors['locale_managers'] = $this->get_locale_managers( $locale );
 		$contributors['validators'] = $this->get_general_translation_editors( $locale );
 		$contributors['project_validators'] = $this->get_project_translation_editors( $locale );
-		$contributors['translators'] = $this->get_translation_contributors( $locale );
+		$contributors['translators'] = $this->get_translation_contributors( $locale, 365 ); // Contributors from the past year
+		$contributors['translators_past'] = array_diff_key( $this->get_translation_contributors( $locale ), $contributors['translators'] );
 
 		wp_cache_set( 'contributors-data:' . $locale->wp_locale, $contributors, 'wp-i18n-teams', 2 * HOUR_IN_SECONDS );
 
@@ -477,15 +479,19 @@ class WP_I18n_Teams {
 	 * @param GP_Locale $locale
 	 * @return array
 	 */
-	private function get_translation_contributors( $locale ) {
+	private function get_translation_contributors( $locale, $max_age_days = null ) {
 		global $wpdb;
 
 		$contributors = array();
 
+		$date_constraint = '';
+		if ( !is_null( $max_age_days ) )
+			$date_constraint = $wpdb->prepare( " AND date_modified >= CURRENT_DATE - INTERVAL %d DAY", $max_age_days );
+
 		$users = $wpdb->get_col( $wpdb->prepare(
 			"SELECT DISTINCT user_id FROM translate_user_translations_count WHERE accepted > 0 AND locale = %s",
 			$locale->slug
-		) );
+		) . $date_constraint );
 
 		if ( ! $users ) {
 			$contributors;

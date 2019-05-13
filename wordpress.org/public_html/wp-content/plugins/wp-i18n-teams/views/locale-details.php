@@ -129,12 +129,30 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $locale_data['translators'] ) ) : ?>
-	<h2><?php printf( __( 'All Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators'] ) ) ); ?></h2>
+	<h2><?php printf( __( 'Current Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators'] ) ) ); ?></h2>
 
 	<p>
 		<?php
 		$translators = array();
 		foreach ( $locale_data['translators'] as $translator ) {
+			$translators[] = sprintf(
+				'<a href="https://profiles.wordpress.org/%s">%s</a>',
+				esc_attr( $translator['nice_name'] ),
+				esc_html( $translator['display_name'] )
+			);
+		}
+		echo wp_sprintf( '%l.', $translators );
+		?>
+	</p>
+<?php endif; ?>
+
+<?php if ( ! empty( $locale_data['translators_past'] ) ) : ?>
+	<h2><?php printf( __( 'Past Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators_past'] ) ) ); ?></h2>
+
+	<p>
+		<?php
+		$translators = array();
+		foreach ( $locale_data['translators_past'] as $translator ) {
 			$translators[] = sprintf(
 				'<a href="https://profiles.wordpress.org/%s">%s</a>',
 				esc_attr( $translator['nice_name'] ),
