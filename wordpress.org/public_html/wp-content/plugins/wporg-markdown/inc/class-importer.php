@@ -297,6 +297,85 @@ abstract class Importer {
 	}
 
 	/**
+	 * Updates a post for fields that are derived from the manifest.
+	 *
+	 * A manifest specifies post-related values that may be updated even if the
+	 * post's markdown page is not.
+	 *
+	 * A manifest can set or affect the following post fields:
+	 * - menu_order
+	 * - post_parent
+	 * - post_title
+	 *
+	 * @param int    $post_id   Page ID to update.
+	 * @param mixed  $title     Page title from markdown. If false, then no title
+	 *                          handling will occur. If null, then title defined in
+	 *                          manifest will be used. If string, then that's the
+	 *                          title and its value will be compared to manifest value.
+	 * @param bool   $do_update Optional. Should the post actually be updated?
+	 *                          Default true.
+	 * @return array The array of post data that would be used for an update.
+	 */
+	protected function update_post_from_manifest( $post_id, $title = false, $do_update = true ) {
+		$post_data = [];
+
+		$manifest_entry = get_post_meta( $post_id, $this->manifest_entry_meta_key, true );
+
+		// Determine value for 'menu_order'.
+		if ( ! empty( $manifest_entry['order'] ) ) {
+			$post_data['menu_order'] = $manifest_entry['order'];
+		}
+
+		// If no title was extracted from markdown doc, use the value defined in manifest.
+		if ( is_null( $title ) ) {
+			if ( ! empty( $manifest_entry['title'] ) ) {
+				$post_data['post_title'] = sanitize_text_field( wp_slash( $manifest_entry['title'] ) );
+			}
+		} elseif ( $title ) {
+			$post_data['post_title'] = sanitize_text_field( wp_slash( $title ) );
+		}
+
+		$parent_id = wp_get_post_parent_id( $post_id );
+
+		// Determine value for 'post_parent'.
+		if ( ! $manifest_entry ) {
+			// Do nothing with regards to possibly changing post parent as we know
+			// nothing about previous import.
+		}
+		// If post had a parent...
+		elseif ( $parent_id ) {
+			$parent = $parent_id ? get_post( $parent_id ) : null;
+			// ...but no parent is now defined, unset parent.
+			if ( empty( $manifest_entry['parent'] ) ) {
+				$post_data['post_parent'] = '';
+			}
+			// ...and it appears to differ from parent now defined, find new parent.
+			elseif ( $manifest_entry['parent'] !== $parent->post_name ) {
+				$find_parent = get_page_by_path( $manifest_entry['parent'], OBJECT, $this->get_post_type() );
+				if ( $find_parent ) {
+					$post_data['post_parent'] = $find_parent->ID;
+				}
+			}
+		}
+		// Does this parentless post now have one newly defined?
+		elseif ( ! empty( $manifest_entry['parent'] ) ) {
+			$find_parent = get_page_by_path( $manifest_entry['parent'], OBJECT, $this->get_post_type() );
+			if ( $find_parent ) {
+				$post_data['post_parent'] = $find_parent->ID;
+			}
+		}
+
+		if ( $do_update && $post_data ) {
+			$post_data['ID'] = $post_id;
+
+			WP_CLI::log( "Updated {$post_id} from manifest source" );
+			wp_update_post( $post_data );
+		}
+
+		return $post_data;
+	}
+
+	/**
 	 * Update a post from its Markdown source.
 	 *
 	 * @param int $post_id Post ID to update.
@@ -328,7 +407,9 @@ abstract class Importer {
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		} elseif ( 304 === wp_remote_retrieve_response_code( $response ) ) {
-			// No update required!
+			// No content update required. Though certain meta fields that are defined
+			// in the manifest may have been updated.
+			$this->update_post_from_manifest( $post_id );
 			return false;
 		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return new WP_Error( 'invalid-http-code', 'Markdown source returned non-200 http code.' );
@@ -372,48 +453,9 @@ abstract class Importer {
 			'post_excerpt' => sanitize_text_field( wp_slash( $excerpt ) ),
 		);
 
-		$manifest_entry = get_post_meta( $post_id, $this->manifest_entry_meta_key, true );
-
-		if ( ! empty( $manifest_entry['order'] ) ) {
-			$post_data['menu_order'] = $manifest_entry['order'];
-		}
-
-		// If no title was extracted from markdown doc, use the value defined in manifest.
-		if ( is_null( $title ) ) {
-			if ( ! empty( $manifest_entry['title'] ) ) {
-				$post_data['post_title'] = sanitize_text_field( wp_slash( $manifest_entry['title'] ) );
-			}
-		} else {
-			$post_data['post_title'] = sanitize_text_field( wp_slash( $title ) );
-		}
-
-		$parent_id = wp_get_post_parent_id( $post_id );
-
-		if ( ! $manifest_entry ) {
-			// Do nothing with regards to possibly changing post parent as we know
-			// nothing about previous import.
-		}
-		// If post had a parent...
-		elseif ( $parent_id ) {
-			$parent = $parent_id ? get_post( $parent_id ) : null;
-			// ...but no parent is now defined, unset parent.
-			if ( empty( $manifest_entry['parent'] ) ) {
-				$post_data['post_parent'] = '';
-			}
-			// ...and it appears to differ from parent now defined, find new parent.
-			elseif ( $manifest_entry['parent'] !== $parent->post_name ) {
-				$find_parent = get_page_by_path( $manifest_entry['parent'], OBJECT, $this->get_post_type() );
-				if ( $find_parent ) {
-					$post_data['post_parent'] = $find_parent->ID;
-				}
-			}
-		}
-		// Does this parentless post now have one newly defined?
-		elseif ( ! empty( $manifest_entry['parent'] ) ) {
-			$find_parent = get_page_by_path( $manifest_entry['parent'], OBJECT, $this->get_post_type() );
-			if ( $find_parent ) {
-				$post_data['post_parent'] = $find_parent->ID;
-			}
+		$fields_from_manifest = $this->update_post_from_manifest( $post_id, $title, false );
+		if ( $fields_from_manifest ) {
+			$post_data = array_merge( $post_data, $fields_from_manifest );
 		}
 
 		wp_update_post( $post_data );
