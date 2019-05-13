@@ -432,11 +432,10 @@ abstract class Importer {
 		}
 		$markdown = trim( $markdown );
 
-		// Steal the first sentence as the excerpt
+		// Use the first sentence as the excerpt.
 		$excerpt = '';
 		if ( preg_match( '/^(.+)/', $markdown, $matches ) ) {
 			$excerpt = $matches[1];
-			$markdown = preg_replace( '/^(.+)/', '', $markdown );
 		}
 
 		// Transform to HTML and save the post
