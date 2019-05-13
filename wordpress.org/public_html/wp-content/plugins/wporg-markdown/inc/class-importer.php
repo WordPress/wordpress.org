@@ -374,6 +374,10 @@ abstract class Importer {
 
 		$markdown_entry = get_post_meta( $post_id, $this->manifest_entry_meta_key, true );
 
+		if ( ! empty( $markdown_entry['order'] ) ) {
+			$post_data['menu_order'] = $markdown_entry['order'];
+		}
+
 		// If no title was extracted from markdown doc, use the value defined in manifest.
 		if ( is_null( $title ) ) {
 			if ( ! empty( $markdown_entry['title'] ) ) {
