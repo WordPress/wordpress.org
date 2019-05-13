@@ -18,6 +18,8 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		add_filter( 'wporg_markdown_before_transform', array( $this, 'wporg_markdown_before_transform' ),  10, 2 );
 		add_filter( 'wporg_markdown_after_transform',  array( $this, 'wporg_markdown_after_transform' ), 10, 2 );
 
+		add_filter( 'the_content',                     array( $this, 'fix_code_entity_encoding' ), 6 );
+
 		add_action( 'pre_post_update', function( $post_id, $data ) {
 			if ( $this->get_post_type() === $data['post_type'] ) {
 				add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'allow_extra_tags' ), 10, 1 );
@@ -58,6 +60,30 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		}
 
 		return $display;
+	}
+
+	/**
+	 * Fixes unwarranted HTML entity encoding within code shortcodes.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public function fix_code_entity_encoding( $content ) {
+		if ( $this->get_post_type() !== get_post_type() ) {
+			return $content;
+		}
+
+		if ( false !== mb_strpos( $content, '[code' ) ) {
+			$content = preg_replace_callback(
+				'|(\[code[^\]]*\])(.+)(\[\/code\])|Us',
+				function( $matches ) {
+					return $matches[1] . html_entity_decode( $matches[2], ENT_QUOTES | ENT_HTML401 ) . $matches[3];
+				},
+				$content
+			);
+		}
+
+		return $content;
 	}
 
 	/**
