@@ -372,16 +372,16 @@ abstract class Importer {
 			'post_excerpt' => sanitize_text_field( wp_slash( $excerpt ) ),
 		);
 
-		$markdown_entry = get_post_meta( $post_id, $this->manifest_entry_meta_key, true );
+		$manifest_entry = get_post_meta( $post_id, $this->manifest_entry_meta_key, true );
 
-		if ( ! empty( $markdown_entry['order'] ) ) {
-			$post_data['menu_order'] = $markdown_entry['order'];
+		if ( ! empty( $manifest_entry['order'] ) ) {
+			$post_data['menu_order'] = $manifest_entry['order'];
 		}
 
 		// If no title was extracted from markdown doc, use the value defined in manifest.
 		if ( is_null( $title ) ) {
-			if ( ! empty( $markdown_entry['title'] ) ) {
-				$post_data['post_title'] = sanitize_text_field( wp_slash( $markdown_entry['title'] ) );
+			if ( ! empty( $manifest_entry['title'] ) ) {
+				$post_data['post_title'] = sanitize_text_field( wp_slash( $manifest_entry['title'] ) );
 			}
 		} else {
 			$post_data['post_title'] = sanitize_text_field( wp_slash( $title ) );
@@ -389,7 +389,7 @@ abstract class Importer {
 
 		$parent_id = wp_get_post_parent_id( $post_id );
 
-		if ( ! $markdown_entry ) {
+		if ( ! $manifest_entry ) {
 			// Do nothing with regards to possibly changing post parent as we know
 			// nothing about previous import.
 		}
@@ -397,20 +397,20 @@ abstract class Importer {
 		elseif ( $parent_id ) {
 			$parent = $parent_id ? get_post( $parent_id ) : null;
 			// ...but no parent is now defined, unset parent.
-			if ( empty( $markdown_entry['parent'] ) ) {
+			if ( empty( $manifest_entry['parent'] ) ) {
 				$post_data['post_parent'] = '';
 			}
 			// ...and it appears to differ from parent now defined, find new parent.
-			elseif ( $markdown_entry['parent'] !== $parent->post_name ) {
-				$find_parent = get_page_by_path( $markdown_entry['parent'], OBJECT, $this->get_post_type() );
+			elseif ( $manifest_entry['parent'] !== $parent->post_name ) {
+				$find_parent = get_page_by_path( $manifest_entry['parent'], OBJECT, $this->get_post_type() );
 				if ( $find_parent ) {
 					$post_data['post_parent'] = $find_parent->ID;
 				}
 			}
 		}
 		// Does this parentless post now have one newly defined?
-		elseif ( ! empty( $markdown_entry['parent'] ) ) {
-			$find_parent = get_page_by_path( $markdown_entry['parent'], OBJECT, $this->get_post_type() );
+		elseif ( ! empty( $manifest_entry['parent'] ) ) {
+			$find_parent = get_page_by_path( $manifest_entry['parent'], OBJECT, $this->get_post_type() );
 			if ( $find_parent ) {
 				$post_data['post_parent'] = $find_parent->ID;
 			}
