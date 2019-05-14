@@ -97,7 +97,7 @@ $content .= '<!-- wp:paragraph {"align":"left"} -->
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-<p style="text-align:left" class="has-small-font-size"><a href="https://wordpress.org/gutenberg/handbook/language/">' . esc_html__( 'Learn more', 'wporg' ) . '</a></p>
+<p style="text-align:left" class="has-small-font-size"><a href="https://developer.wordpress.org/block-editor/key-concepts/">' . esc_html__( 'Learn more', 'wporg' ) . '</a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->' . "\n\n";
 
@@ -111,7 +111,7 @@ $content .= '<!-- wp:paragraph {"align":"left"} -->
 <!-- /wp:paragraph -->' . "\n\n";
 
 $content .= '<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-<p style="text-align:left" class="has-small-font-size"><a href="https://wordpress.org/gutenberg/handbook/contributors/faq/">' . esc_html__( 'Learn more', 'wporg' ) . '</a></p>
+<p style="text-align:left" class="has-small-font-size"><a href="https://developer.wordpress.org/block-editor/contributors/faq/">' . esc_html__( 'Learn more', 'wporg' ) . '</a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->' . "\n\n";
@@ -169,10 +169,10 @@ $content .= '<!-- wp:heading {"align":"left"} -->
 $content .= '<!-- wp:list -->
 <ul>
 	<li><a href="https://make.wordpress.org/core/2017/01/17/editor-technical-overview">' . esc_html__( 'Gutenberg Editor Technical Overview', 'wporg' ) . '</a></li>
-	<li><a href="https://wordpress.org/gutenberg/handbook/contributors/design/">' . esc_html__( 'Gutenberg Design Principles', 'wporg' ) . '</a></li>
+	<li><a href="https://developer.wordpress.org/block-editor/contributors/design/">' . esc_html__( 'Gutenberg Design Principles', 'wporg' ) . '</a></li>
 	<li><a href="https://make.wordpress.org/core/tag/gutenberg/">' . esc_html__( 'Development updates on make.wordpress.org', 'wporg' ) . '</a></li>
 	<li><a href="https://wordpress.tv/?s=gutenberg">' . esc_html__( 'WordPress.tv Talks about Gutenberg', 'wporg' ) . '</a></li>
-	<li><a href="https://wordpress.org/gutenberg/handbook/contributors/faq/">' . esc_html__( 'FAQs', 'wporg' ) . '</a></li>
+	<li><a href="https://developer.wordpress.org/block-editor/contributors/faq/">' . esc_html__( 'FAQs', 'wporg' ) . '</a></li>
 </ul>
 <!-- /wp:list -->' . "\n\n";
 
