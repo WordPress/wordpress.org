@@ -8,8 +8,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		parent::do_init(
 			'blocks',
 			'block-editor',
-			// Temporary DevHub-specific manifest.
-			'https://raw.githubusercontent.com/WordPress/gutenberg/add/devhub-manifest/docs/manifest-devhub.json'
+			'https://raw.githubusercontent.com/WordPress/gutenberg/master/docs/manifest-devhub.json'
 		);
 
 		add_filter( 'handbook_label', array( $this, 'change_handbook_label' ), 10, 2 );
