@@ -915,48 +915,69 @@ add_filter( 'get_next_post_where', 'gutenbergtheme_next_post_where', 10, 5 );
  * Add redirects for any handbook pages that have been renamed.
  */
 function gutenbergtheme_handbook_redirects() {
-	if ( ! is_404() || ! get_query_var( 'handbook' ) ) {
+	if ( 0 !== strpos( $_SERVER['REQUEST_URI'], '/gutenberg/handbook' ) ) {
+		return;
+	}
+
+	$handbook_path = explode( '/', trailingslashit( $_SERVER['REQUEST_URI'] ), 4 );
+	$handbook_path = $handbook_path[3] ?? null;
+
+	if ( is_null( $handbook_path ) ) {
 		return;
 	}
 
 	// Any handbook pages where the filename changes should be listed here.
-	// If only the parent path changes, it's not needed and WordPress will handle it automatically.
 	$redirects = [
-		'designers-developers/developers/backwards-compatibility' => 'designers-developers/developers/backward-compatibility/',
-		'reference/deprecated'           => 'designers-developers/developers/backward-compatibility/deprecations/',
+		'designers-developers/developers/backwards-compatibility' => 'developers/backward-compatibility/',
+		'reference/deprecated'           => 'developers/backward-compatibility/deprecations/',
 		'reference/design-principles'    => 'contributors/design/',
-		'extensibility/annotations'      => 'designers-developers/developers/block-api/block-annotations/',
-		'block-api/attributes'           => 'designers-developers/developers/block-api/block-attributes/',
-		'block-api/deprecated-blocks'    => 'designers-developers/developers/block-api/block-deprecation/',
-		'block-api/rich-text-api'        => 'designers-developers/developers/tutorials/format-api/',
-		'block-api'                      => 'designers-developers/developers/block-api/block-registration/',
-		'templates'                      => 'designers-developers/developers/block-api/block-templates/',
-		'extensibility'                  => 'designers-developers/developers/filters/',
-		'extensibility/autocomplete'     => 'designers-developers/developers/filters/autocomplete-filters/',
-		'extensibility/extending-blocks' => 'designers-developers/developers/filters/block-filters/',
-		'extensibility/parser'           => 'designers-developers/developers/filters/parser-filters/',
-		'packages/packages-api-request'  => 'designers-developers/developers/packages/packages-api-fetch/',
-		'blocks'                         => 'designers-developers/developers/tutorials/block-tutorial/intro/',
-		'language'                       => 'designers-developers/key-concepts/',
+		'extensibility/annotations'      => 'developers/block-api/block-annotations/',
+		'block-api/attributes'           => 'developers/block-api/block-attributes/',
+		'block-api/deprecated-blocks'    => 'developers/block-api/block-deprecation/',
+		'block-api/rich-text-api'        => 'developers/tutorials/format-api/',
+		'block-api'                      => 'developers/block-api/block-registration/',
+		'templates'                      => 'developers/block-api/block-templates/',
+		'extensibility'                  => 'developers/filters/',
+		'extensibility/autocomplete'     => 'developers/filters/autocomplete-filters/',
+		'extensibility/extending-blocks' => 'developers/filters/block-filters/',
+		'extensibility/parser'           => 'developers/filters/parser-filters/',
+		'packages/packages-api-request'  => 'packages/packages-api-fetch/',
+		'blocks'                         => 'tutorials/block-tutorial/',
+		'language'                       => 'key-concepts/',
 
 		// Redirects for index pages where needed
-		// These next two look like an infinite redirect, but one will exist so the `is_404()` check prevents it above. This is for an inpending changes
-		'designers-developers/developers/tutorials/block-tutorial'       => 'designers-developers/developers/tutorials/block-tutorial/intro/',
-		'designers-developers/developers/tutorials/block-tutorial/intro' => 'designers-developers/developers/tutorials/block-tutorial/',
+		'designers-developers/developers/tutorials/block-tutorial'       => 'tutorials/block-tutorial/',
+		'designers-developers/developers/tutorials/block-tutorial/intro' => 'tutorials/block-tutorial/',
 	];
 
-	if ( isset( $redirects[ get_query_var( 'handbook' ) ] ) ) {
-		wp_redirect(
-			home_url(
-				'/handbook/' .
-				$redirects[ get_query_var( 'handbook' ) ]
-			),
-			301
-		);
-		exit;
+	// General path redirects. (More specific path first.)
+	$path_redirects = [
+		'block-api/'                                  => 'developers/block-api/',
+		'designers-developers/data/'                  => 'data/',
+		'designers-developers/designers/'             => 'designers/',
+		'designers-developers/developers/components/' => 'components/',
+		'designers-developers/developers/packages/'   => 'packages/',
+		'designers-developers/developers/tutorials/'  => 'tutorials/',
+		'designers-developers/developers/'            => 'developers/',
+	];
+
+	if ( ! empty( $redirects[ untrailingslashit( $handbook_path ) ] ) ) {
+		$handbook_path = $redirects[ untrailingslashit( $handbook_path ) ];
+	} else {
+		foreach ( $path_redirects as $old_path => $new_path ) {
+			if ( 0 === strpos( $handbook_path, $old_path ) ) {
+				$handbook_path = str_replace( $old_path, $new_path, $handbook_path );
+				break;
+			}
+		}
 	}
+
+	$redirect_to = 'https://developer.wordpress.org/block-editor/' . $handbook_path ;
+
+	wp_redirect( $redirect_to );
+	exit;
 }
-add_action( 'template_redirect', 'gutenbergtheme_handbook_redirects' );
+add_action( 'template_redirect', 'gutenbergtheme_handbook_redirects', 1 );
 
 /**
  * Implement the Custom Header feature.
