@@ -368,7 +368,9 @@ abstract class Importer {
 		if ( $do_update && $post_data ) {
 			$post_data['ID'] = $post_id;
 
-			WP_CLI::log( "Updated {$post_id} from manifest source" );
+			if ( class_exists( 'WP_CLI' ) ) {
+				WP_CLI::log( "Updated {$post_id} from manifest source" );
+			}
 			wp_update_post( $post_data );
 		}
 
