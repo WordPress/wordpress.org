@@ -63,6 +63,13 @@ class WPORG_Themes_Upload {
 	protected $author;
 
 	/**
+	 * The theme readme.txt data.
+	 *
+	 * @var array
+	 */
+	 protected $readme;
+
+	/**
 	 * Trac ticket information.
 	 *
 	 * @var object
@@ -75,6 +82,21 @@ class WPORG_Themes_Upload {
 	 * @var Trac
 	 */
 	protected $trac;
+
+	/**
+	 * The list of headers to extract from readme.txt.
+	 *
+	 * @var array
+	 */
+	protected $readme_header_fields = array(
+		'tested'       => 'tested up to',
+		'requires'     => 'requires at least',
+		'requires_php' => 'requires php',
+		'readme_tags'  => 'tags',
+		'contributors' => 'contributors',
+		'license'      => 'license',
+		'license_uri'  => 'license uri',
+	);
 
 	/**
 	 * Get set up to run tests on the uploaded theme.
@@ -107,6 +129,9 @@ class WPORG_Themes_Upload {
 				'<code>style.css</code>'
 			);
 		}
+
+		// Do we have a readme.txt? Fetch extra data from there too.
+		$this->readme = $this->get_readme_data( $theme_files );
 
 		// We have a stylesheet, let's set up the theme, theme post, and author.
 		$this->theme = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
@@ -370,6 +395,48 @@ class WPORG_Themes_Upload {
 		usort( $stylesheets, array( $this, 'sort_by_string_length' ) );
 
 		return (string) array_pop( $stylesheets );
+	}
+
+	/**
+	 * Find the first readme.txt file, and extract it's headers.
+	 *
+	 * @param array $theme_files The theme files.
+	 * @return array Array of headers if present.
+	 */
+	public function get_readme_data( $theme_files ) {
+		$readmes = preg_grep( '/readme.txt/i', $theme_files );
+		usort( $readmes, array( $this, 'sort_by_string_length' ) );
+
+		if ( ! $readmes ) {
+			return array();
+		}
+
+		$readme_txt = (string) array_pop( $readmes );
+
+		// WARNING: This function call will be changed in the future to a readme parser.
+		$data = get_file_data( $readme_txt, $this->readme_header_fields );
+		$data = array_filter( $data, 'strlen' );
+
+		// Sanitize Contributors down to a user_nicename
+		if ( isset( $data['contributors'] ) ) {
+			$data['contributors'] = explode( ',', $data['contributors'] );
+			$data['contributors'] = array_map( 'trim', $data['contributors'] );
+			foreach ( $data['contributors'] as $i => $name ) {
+				$user = get_user_by( 'login', $name ) ?: get_user_by( 'slug', $name );
+
+				if ( $user ) {
+					$data['contributors'][ $i ] = $user->user_nicename;
+				} else {
+					unset( $data['contributors'][ $i ] );
+				}
+			}
+
+			if ( ! $data['contributors'] ) {
+				unset( $data['contributors'] );
+			}
+		}
+
+		return $data;
 	}
 
 	/**
@@ -723,13 +790,18 @@ TICKET;
 		}
 
 		// Finally, add post meta.
-		$post_meta   = array(
+		$post_meta = array(
 			'_theme_url'   => $this->theme->get( 'ThemeURI' ),
 			'_author_url'  => $this->theme->get( 'AuthorURI' ),
 			'_upload_date' => $upload_date,
 			'_ticket_id'   => $ticket_id,
 			'_screenshot'  => $this->theme->screenshot,
 		);
+
+		// Store readme.txt data if present.
+		foreach ( $this->readme as $field => $data ) {
+			$post_meta[ "_{$field}" ] = $data;
+		}
 
 		foreach ( $post_meta as $meta_key => $meta_value ) {
 			$meta_data = array_filter( (array) get_post_meta( $post_id, $meta_key, true ) );
