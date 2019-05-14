@@ -72,10 +72,8 @@ if ( class_exists( '\\WordPressdotorg\\Markdown\\Importer' ) ) {
 	// Docs Importer base class.
 	require __DIR__ . '/inc/import-docs.php';
 
-if ( is_user_logged_in() || wp_doing_cron() ) {
 	// Block Editor handbook.
 	require __DIR__ . '/inc/import-block-editor.php';
-}
 
 	// Coding Standards handbook.
 	require __DIR__ . '/inc/import-coding-standards.php';

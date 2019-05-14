@@ -27,6 +27,12 @@ get_header(); ?>
 					<a href="<?php echo esc_url( get_post_type_archive_link( 'wpcs-handbook' ) ); ?>" class="go"><?php _e( 'Follow Standards ', 'wporg' ); ?></a>
 				</div>
 
+				<div class="box box-block-editor">
+					<h3 class="widget-title"><div class="dashicons dashicons-edit"></div><?php _e( 'Block Editor', 'wporg' ); ?></h3>
+					<p class="widget-description"><?php _e( 'Creating the building blocks of WordPress?', 'wporg' ); ?></p>
+					<a href="<?php echo esc_url( get_post_type_archive_link( 'blocks-handbook' ) ); ?>" class="go"><?php _e( 'Build Blocks ', 'wporg' ); ?></a>
+				</div>
+
 				<div class="box box-themes">
 					<h3 class="widget-title"><div class="dashicons dashicons-admin-appearance"></div><?php _e( 'Themes', 'wporg' ); ?></h3>
 					<p class="widget-description"><?php _e( 'Want to learn how to start theming WordPress?', 'wporg' ); ?></p>
@@ -49,12 +55,6 @@ get_header(); ?>
 					<h3 class="widget-title"><div class="dashicons dashicons-arrow-right-alt2"></div><?php _e( 'WP-CLI', 'wporg' ); ?></h3>
 					<p class="widget-description"><?php _e( 'Want to accelerate your workflow managing WordPress?', 'wporg' ); ?></p>
 					<a href="<?php echo esc_url( get_post_type_archive_link( 'command' ) ); ?>" class="go"><?php _e( 'Run Commands ', 'wporg' ); ?></a>
-				</div>
-
-				<div class="box box-block-editor">
-					<h3 class="widget-title"><div class="dashicons dashicons-edit"></div><?php _e( 'Block Editor', 'wporg' ); ?></h3>
-					<p class="widget-description"><?php _e( 'Creating the building blocks of WordPress?', 'wporg' ); ?></p>
-					<p><?php _e( 'Coming Soon', 'wporg' ); ?></a></p>
 				</div>
 
 			</div>
