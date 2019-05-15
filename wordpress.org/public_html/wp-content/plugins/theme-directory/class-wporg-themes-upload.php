@@ -92,7 +92,6 @@ class WPORG_Themes_Upload {
 		'tested'       => 'tested up to',
 		'requires'     => 'requires at least',
 		'requires_php' => 'requires php',
-		'readme_tags'  => 'tags',
 		'contributors' => 'contributors',
 		'license'      => 'license',
 		'license_uri'  => 'license uri',
@@ -433,6 +432,32 @@ class WPORG_Themes_Upload {
 
 			if ( ! $data['contributors'] ) {
 				unset( $data['contributors'] );
+			}
+		}
+
+		// Sanitize some version-like data.
+		foreach ( array( 'requires', 'requires_php', 'tested' ) as $field ) {
+			if ( ! isset( $data[ $field ] ) ) {
+				continue;
+			}
+
+			// Strip 'WP', 'WordPress', and 'PHP' from the fields.
+			$data[ $field ] = trim( str_ireplace( array( 'PHP', 'WP', 'WordPress', '+' ), '', $data[ $field ] ) );
+
+			// Require a version-like value, x.y or x.y.z
+			if ( ! preg_match( '!^\d+\.\d(\.\d+)?$!', $data[ $field ] ) ) {
+				unset( $data[ $field ] );
+				continue;
+			}
+
+			// Allow themes to mark themselves as compatible with Stable+0.1 (trunk/master) but not higher
+			if (
+				( 'requires' === $field || 'tested' === $field ) &&
+				defined( 'WP_CORE_STABLE_BRANCH' ) &&
+				version_compare( (float)$data[ $field ], (float)WP_CORE_STABLE_BRANCH+0.1, '>' )
+			) {
+				unset( $data[ $field ] );
+				continue;
 			}
 		}
 
