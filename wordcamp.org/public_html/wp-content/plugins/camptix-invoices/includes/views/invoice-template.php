@@ -16,6 +16,7 @@ defined('WPINC') || die();
 <html>
 <head>
 	<meta charset="UTF-8">
+	<?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- This is rendered by wkhtmltopdf, so additional libraries are included directly. ?>
 	<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,600,700" rel="stylesheet" type="text/css"/>
 	<style type="text/css">
 		#camptix-invoice-page {
@@ -191,7 +192,7 @@ defined('WPINC') || die();
 						<?php echo esc_html( CampTix_Addon_Invoices::format_currency( 0, $camptix_opts['currency'] ) ); ?>
 					</td>
 				</tr>
-			<?php endif; // VAT field ?>
+			<?php endif; // VAT field. ?>
 
 			<tr>
 				<td class="text-right" colspan="3"><?php esc_html_e( 'TOTAL', 'wordcamporg' ); ?></td>
