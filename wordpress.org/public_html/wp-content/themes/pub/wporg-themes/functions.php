@@ -72,7 +72,10 @@ function wporg_themes_scripts() {
 			'query'    => wporg_themes_get_themes_for_query(),
 			'settings' => array(
 				/* translators: %s: theme name */
-				'title'        => __( '%s &#124; WordPress.org', 'wporg-themes' ),
+				'title'        => array(
+					'default' => __( '%s &#124; WordPress.org', 'wporg-themes' ),
+					'theme'   => '%s - ' . sprintf( __( '%s &#124; WordPress.org', 'wporg-themes' ), __( 'WordPress theme', 'wporg-themes' ) ),
+				),
 				'isMobile'     => wp_is_mobile(),
 				'postsPerPage' => 24,
 				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),

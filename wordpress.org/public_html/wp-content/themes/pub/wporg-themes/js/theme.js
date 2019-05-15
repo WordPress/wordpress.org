@@ -16,8 +16,13 @@ window.wp = window.wp || {};
 	_.extend( themes, { model: {}, view: {}, routes: {}, router: {}, template: wp.template });
 
 	themes.utils = {
-		title: function ( item ) {
-			document.title = $( '<div/>' ).html( themes.data.settings.title.replace( '%s', $( '<div/>' ).text(item).html() ) ).text();
+		title: function ( item, isTheme ) {
+			var format = !!isTheme ? themes.data.settings.title.theme : themes.data.settings.title.default;
+			var title  = $( '<div/>' ).html( format.replace( '%s', $( '<div/>' ).text( item ).html() ) ).text();
+
+			if ( document.title !== title ) {
+				document.title = title;
+			}
 		}
 	};
 
@@ -1131,7 +1136,7 @@ window.wp = window.wp || {};
 
 			// Trigger a route update for the current model
 			themes.router.navigate( themes.router.baseUrl( themes.router.themePath + this.model.id ) );
-			themes.utils.title( this.model.attributes.name );
+			themes.utils.title( this.model.attributes.name, true );
 
 			// Sets this.view to 'detail'
 			this.setView( 'detail' );
