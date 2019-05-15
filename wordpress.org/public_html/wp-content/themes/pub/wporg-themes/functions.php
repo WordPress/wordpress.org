@@ -65,7 +65,7 @@ function wporg_themes_scripts() {
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), 21, true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), 22, true );
 
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
