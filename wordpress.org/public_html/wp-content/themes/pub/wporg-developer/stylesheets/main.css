@@ -3151,8 +3151,8 @@ pre > code.highlight {
   outline-offset: .4em;
 }
 
-.code-tab,
-.code-tab:hover {
+button.code-tab,
+button.code-tab:hover {
   background: #fff;
   border: none;
   box-shadow: none;
@@ -3162,18 +3162,18 @@ pre > code.highlight {
   padding: 8px 20px;
 }
 
-.code-tab + .code-tab {
+button.code-tab + button.code-tab {
   border-radius: 0 30px 30px 0;
 }
 
-.code-tab:focus,
-.code-tab.is-active:focus {
+button.code-tab:focus,
+button.code-tab.is-active:focus {
   outline: none;
   border: 1px solid #222;
   box-shadow: none;
 }
 
-.code-tab.is-active {
+button.code-tab.is-active {
   background: #00B975;
   border: 1px solid #00B975;
   box-shadow: none;
