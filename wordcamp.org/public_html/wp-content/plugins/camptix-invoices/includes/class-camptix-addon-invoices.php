@@ -383,8 +383,7 @@ class CampTix_Addon_Invoices extends \CampTix_Addon {
 
 		$logo = CTX_INV_DIR . '/admin/images/wp-community-support.png';
 		if ( ! empty( $camptix_opts['invoice-logo'] ) ) {
-			$attachment = wp_get_attachment_image_src( $camptix_opts['invoice-logo'], 'full' );
-			$logo       = $attachment[0];
+			$logo = get_attached_file( $camptix_opts['invoice-logo'] );
 		}
 
 		$template = locate_template( 'invoice-template.php' ) ? locate_template( 'invoice-template.php' ) : CTX_INV_DIR . '/includes/views/invoice-template.php';
