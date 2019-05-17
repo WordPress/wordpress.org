@@ -11,6 +11,11 @@ use function WordCamp\Logger\log;
 /**
  * Determine if a specific feature should be skipped on the current site
  *
+ * Warning: Pay careful attention to how things are named, since setting a flag here is typically done when you
+ * want a feature to be _enabled_ by default on new sites. In the cases where you want it _disabled_ by default
+ * on new sites, you can reverse the name (e.g., `local_terms` instead of `global_terms` for the
+ * `global_terms_enabled` callback).
+ *
  * Often times we want to add new functionality to plugins and themes, but can't let it run on older sites
  * because that would break backwards compatibility. To get around that, we set a flag on older sites to
  * indicate that they should not have the new feature, and then setup the feature to run on sites that
