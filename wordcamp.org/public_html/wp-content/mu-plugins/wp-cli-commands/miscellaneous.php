@@ -52,7 +52,7 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 
 			// Skip sites that are above the requested maximum site ID
 			if ( $max_site_id && $site->blog_id > $max_site_id ) {
-				$results[] = array( $site_domain, 'skipped' );
+				$results[] = array( $site->blog_id, $site_domain, 'skipped' );
 				restore_current_blog();
 				continue;
 			}
@@ -65,7 +65,7 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 				update_option( 'wordcamp_skip_features', $flags );
 			}
 
-			$results[] = array( $site_domain, 'applied' );
+			$results[] = array( $site->blog_id, $site_domain, 'applied' );
 
 			restore_current_blog();
 			$notify->tick();
@@ -75,7 +75,7 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 
 		WP_CLI::line();
 		$table = new \cli\Table();
-		$table->setHeaders( array( 'Site', 'Action' ) );
+		$table->setHeaders( array( 'ID', 'Site', 'Action' ) );
 		$table->setRows( $results );
 		$table->display();
 
