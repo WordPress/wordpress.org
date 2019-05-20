@@ -1,8 +1,8 @@
 ### WordCamp.org
 
-This repository mirrors https://meta.svn.wordpress.org/sites/trunk/wordcamp.org/ and can be used to contribute used Git instead of SVN.
+This repository mirrors https://meta.svn.wordpress.org/sites/trunk/wordcamp.org/ and can be used to contribute using Git instead of SVN.
 
-###### Setup 
+#### Setup 
 
 There are two primary ways to setup this repo for local development.
 
