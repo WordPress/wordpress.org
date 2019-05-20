@@ -43,7 +43,7 @@ get_header(); ?>
 								<?php
 
 								$list = new WP_Query( array(
-									'posts_per_page' => 14,
+									'posts_per_page' => 15,
 									'post_type'      => DevHub\get_parsed_post_types(),
 									'orderby'        => 'title',
 									'order'          => 'ASC',
@@ -55,11 +55,15 @@ get_header(); ?>
 								) );
 
 								while ( $list->have_posts() ) : $list->the_post();
-
-									echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a></li>';
-
-								endwhile;
 								?>
+
+									<li>
+										<a href="<?php esc_url( get_permalink() ); ?>" title="<?php the_title_attribute(); ?>">
+											<?php the_title(); ?>
+										</a>
+									</li>
+
+								<?php endwhile; ?>
 								<li class="view-all-new-in"><a href="<?php echo esc_attr( get_term_link( $version, 'wp-parser-since' ) ); ?>"><?php _e( 'View all&hellip;', 'wporg' ); ?></a></li>
 							</ul>
 						</div>
@@ -68,23 +72,38 @@ get_header(); ?>
 					<div class="widget box gray">
 						<h3 class="widget-title"><?php _e( 'API', 'wporg' ); ?></h3>
 						<div class="widget-content">
+						<?php
+
+						if ( has_nav_menu( 'reference-home-api' ) ) :
+							wp_nav_menu(
+								[
+									'theme_location' => 'reference-home-api',
+									'menu_class'     => 'unordered-list no-bullets',
+								]
+							);
+						else:
+						?>
+
 							<ul class="unordered-list no-bullets">
-								<li><a href="https://codex.wordpress.org/Dashboard_Widgets_API">Dashboard widgets</a></li>
-								<li><a href="https://codex.wordpress.org/Database_API">Database</a></li>
-								<li><a href="https://codex.wordpress.org/HTTP_API">HTTP API</a></li>
-								<li><a href="https://codex.wordpress.org/Filesystem_API">Filesystem</a></li>
-								<li><a href="https://codex.wordpress.org/Metadata_API">Metadata</a></li>
-								<li><a href="https://codex.wordpress.org/Options_API">Options</a></li>
-								<li><a href="https://codex.wordpress.org/Plugin_API">Plugins</a></li>
-								<li><a href="https://codex.wordpress.org/Quicktags_API">Quicktags</a></li>
-								<li><a href="https://developer.wordpress.org/rest-api/">REST API</a></li>
-								<li><a href="https://codex.wordpress.org/Rewrite_API">Rewrite</a></li>
-								<li><a href="https://codex.wordpress.org/Settings_API">Settings</a></li>
-								<li><a href="https://codex.wordpress.org/Shortcode_API">Shortcode</a></li>
-								<li><a href="https://codex.wordpress.org/Theme_Modification_API">Theme Modification</a></li>
-								<li><a href="https://codex.wordpress.org/Transients_API">Transients</a></li>
-								<li><a href="https://codex.wordpress.org/XML-RPC_WordPress_API">XML-RPC</a></li>
+								<li><a href="https://codex.wordpress.org/Dashboard_Widgets_API"><?php _e( 'Dashboard widgets', 'wporg'); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Database_API"><?php _e( 'Database', 'worg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/HTTP_API"><?php _e( 'HTTP API', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Filesystem_API"><?php _e( 'Filesystem', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Global_Variables"><?php _e( 'Global Variables', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Metadata_API"><?php _e( 'Metadata', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Options_API"><?php _e( 'Options', 'wporg' ); ?></a></li>
+								<li><a href="https://developer.wordpress.org/plugins/"><?php _e( 'Plugins', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Quicktags_API"><?php _e( 'Quicktags', 'wporg' ); ?></a></li>
+								<li><a href="https://developer.wordpress.org/rest-api/"><?php _e( 'REST API', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Rewrite_API"><?php _e( 'Rewrite', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Settings_API"><?php _e( 'Settings', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Shortcode_API"><?php _e( 'Shortcode', 'wporg' ); ?></a></li>
+								<li><a href="https://developer.wordpress.org/themes/"><?php _e( 'Theme Modification', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/Transients_API"><?php _e( 'Transients', 'wporg' ); ?></a></li>
+								<li><a href="https://codex.wordpress.org/XML-RPC_WordPress_API"><?php _e( 'XML-RPC', 'wporg' ); ?></a></li>
 							</ul>
+						<?php endif; ?>
+
 						</div>
 					</div>
 				</div><!-- /new-in-guide -->
