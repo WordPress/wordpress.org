@@ -7,7 +7,7 @@ WORKDIR /usr/src/public_html
 # Install and configure nginx
 RUN apt-get update
 RUN apt-get install nginx -y
-COPY nginx.conf /etc/nginx/sites-enabled/wordcamp.conf
+COPY nginx.conf /etc/nginx/sites-enabled/default.conf
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/zz-www.conf
 
 # Install and configure SSL
