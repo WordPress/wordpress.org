@@ -360,8 +360,12 @@ function print_templates() {
 	?>
 	<script type="text/javascript">
 		/* <![CDATA[ */
-		var WordCampMentorsTaskData = <?php echo wp_json_encode( $initial_tasks->data ); ?>;
-		var WordCampMentorsTaskCategoryData = <?php echo wp_json_encode( $initial_task_categories->data ); ?>;
+		var WordCampMentorsTaskData = JSON.parse(
+			decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $initial_tasks->data ) ); ?>' )
+		);
+		var WordCampMentorsTaskCategoryData = JSON.parse(
+			decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $initial_task_categories->data ) ); ?>' )
+		);
 		/* ]]> */
 	</script>
 	<?php

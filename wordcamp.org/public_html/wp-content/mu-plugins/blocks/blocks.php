@@ -97,8 +97,8 @@ function register_assets() {
 	wp_add_inline_script(
 		'wordcamp-blocks',
 		sprintf(
-			'var WordCampBlocks = %s;',
-			wp_json_encode( $data )
+			'var WordCampBlocks = JSON.parse( decodeURIComponent( \'%s\' ) );',
+			rawurlencode( wp_json_encode( $data ) )
 		),
 		'before'
 	);
