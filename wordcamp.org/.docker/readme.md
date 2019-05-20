@@ -46,6 +46,8 @@ If you'd like to only setup WordCamp.org and would like to use Docker, you can u
         
     1. Activate plugin or apply theme as needed.
     
-1. (Optional) By default, docker will start with data defined in `.docker/wordcamp_dev.sql` and changes to data will be persisted across runs in `.docker/database`. To start with different database, delete `.docker/database` directory and replace the `.docker/wordcamp_dev.sql` file and run `docker-compose up --build` again.
+1. By default, docker will start with data defined in `.docker/wordcamp_dev.sql` and changes to data will be persisted across runs in `.docker/database`. To start with different database, delete `.docker/database` directory and replace the `.docker/wordcamp_dev.sql` file and run `docker-compose up --build` again.
+
+1. Note that if you want to work on WordCamp blocks, [you would have to install all the node dependencies](../public_html/wp-content/mu-plugins/blocks/readme.md). This can be done either inside, or even from outside the Docker.
 
 After first time provisioning, docker can be started by using `docker-compose up` command from inside the directory. 
