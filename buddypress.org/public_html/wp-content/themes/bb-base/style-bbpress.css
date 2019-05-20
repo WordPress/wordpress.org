@@ -165,7 +165,9 @@ input.submit:hover {
 		background-size: 231px 162px;
 	}
 
-	#header h1 a {
+	#header h1 a,
+	#header h1 :link,
+	#header h1 :link:hover {
 		background-image: url('../bbpress-org/images/bbpress-logo-2x.png');
 		background-size: 208px 65px;
 	}

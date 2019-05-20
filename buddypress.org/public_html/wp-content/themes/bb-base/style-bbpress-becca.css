@@ -9,7 +9,9 @@
 #header-inner {
 	background: url('../bbpress-org/images/bee.png') no-repeat 197px -72px;
 }
-#header h1 a {
+#header h1 a,
+#header h1 :link,
+#header h1 :link:hover {
 	background: url('../bbpress-org/images/bbpress-logo-white.png') no-repeat 0 0;
 }
 
@@ -88,7 +90,9 @@ input.submit:hover {
 		background-size: 231px 162px;
 	}
 
-	#header h1 a {
+	#header h1 a,
+	#header h1 :link,
+	#header h1 :link:hover {
 		background-image: url('../bbpress-org/images/bbpress-logo-white-2x.png');
 		background-size: 208px 65px;
 	}

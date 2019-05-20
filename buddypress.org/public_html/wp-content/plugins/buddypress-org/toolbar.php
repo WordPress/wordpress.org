@@ -7,20 +7,16 @@
  * @since 1.0.1
  */
 function bporg_toolbar_tweaks() {
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_search_menu',    4  );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_wp_menu',        10 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_site_menu',      30 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_customize_menu', 40 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu',  60 );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_search_menu',      4  );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_wp_menu',          10 );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_site_menu',        30 );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_customize_menu',   40 );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu',    60 );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_new_content_menu', 70 );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_edit_menu',        80 );
 
 	// BuddyPress Menus
 	remove_action( 'bp_setup_admin_bar', 'bp_members_admin_bar_my_account_menu', 4 );
-
-	if ( is_super_admin() )
-		return;
-
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_new_content_menu', 70 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_edit_menu',        80 );
 }
 add_action( 'add_admin_bar_menus', 'bporg_toolbar_tweaks', 11 );
 
