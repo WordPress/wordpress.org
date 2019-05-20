@@ -78,11 +78,6 @@ RUN cp ~/wordcamp.key /etc/ssl/private/wordcamp.key
 # Add script to install plugin and themes
 ADD install-plugin-theme.sh /usr/src/public_html/install-plugin-theme.sh
 
-# Unfortunately themes and plugins cannot be installed as part of docker setup and have to be run manually.
-# This is because everything in wp-content folder will be overwritten when we mount this directory from volume.
-# RUN sh install-plugin-theme.sh
-
-
 # Install `wkhtmltopdf` for WordCamp Docs, CampTix Invoices, etc. See https://stackoverflow.com/a/38336153/1845153
 RUN curl -L https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz > wkhtmltox.tar.xz
 RUN apt-get install libxext6 -y
@@ -113,8 +108,9 @@ RUN apt-get install vim -y
 
 COPY wp-config.php /usr/src/public_html/wp-config.php
 
-# Replace nginx default conf because it conflicts with wordcamp.cong
+# Replace nginx default conf because it conflicts with wordcamp.conf
 RUN mv /etc/nginx/sites-enabled/wordcamp.conf /etc/nginx/sites-enabled/default
 
 CMD tail -f /dev/null
+
 

@@ -1,4 +1,4 @@
-If you'd like to only setup WordCamp.org and would like to use Docker, you can use inbuilt docker provisioning. Please follow these steps
+Follow these steps to setup WordCamp.org using [Docker](https://www.docker.com/).
 
 **Note:** This will create `.docker/database` directory which will contain MySQL files to persist data across docker restarts.
 
@@ -9,7 +9,7 @@ If you'd like to only setup WordCamp.org and would like to use Docker, you can u
     git clone git@github.com:WordPress/wordcamp.org.git
     ```
 
-1. Change into the directory, and run docker compose command. This could take some time depending upon the internet speed.
+1. Change into the directory, and run Docker's `compose` command. This could take some time depending upon the speed of your Internet connection.
     ```
     cd wordcamp.org && docker-compose up --build -d
     ```

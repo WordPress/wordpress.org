@@ -55,13 +55,6 @@ $table_prefix  = 'wc_';
  */
 define( 'WP_DEBUG', true );
 
-/*
- * Some code (like .config) is shared between WordCamp.org from other WordPress.org sites.
- * This constant can be used in that code to distinguish between the sites, without having to
- * check hostnames, which can be impractical on Multisite.
- */
-define( 'IS_WORDCAMP_NETWORK', true );
-
 // Set central blog_id as base site to access network admin.
 define( 'PATH_CURRENT_SITE',     '/'             );
 define( 'SITE_ID_CURRENT_SITE',  1               );
