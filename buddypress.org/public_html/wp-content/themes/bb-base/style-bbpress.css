@@ -9,7 +9,9 @@
 #header-inner {
 	background: url('../bbpress-org/images/bee.png') no-repeat 197px -72px;
 }
-#header h1 a {
+#header h1 a,
+#header h1 :link,
+#header h1 :link:hover {
 	background: url('../bbpress-org/images/bbpress-logo.png') no-repeat 0 0;
 }
 
@@ -29,16 +31,12 @@ div.standard {
 /* =Buttons
 -------------------------------------------------------------- */
 
-#nav li a {
-	text-shadow: 0 -1px 0 rgba(0,162,116,0.8);
-}
-
 #nav li.current a,
 #nav li.current-menu-item a,
 #nav li a:hover,
+#header #nav li :link:hover,
 .button:hover {
 	color: rgba(235,255,235,0.9);
-	text-shadow: 0 -1px 0 rgb(0,162,116);
 
 	border: 1px solid #1d6422;
 
@@ -56,7 +54,6 @@ div.standard {
 }
 
 .button {
-	text-shadow: 0 -1px 2 rgba(0,162,116,1);
 	border: 1px solid #1d6422;
 
 	background-color: #009933;
@@ -76,6 +73,7 @@ div.standard {
 #nav li.current a,
 #nav li.current-menu-item a,
 #nav li a:active,
+#header #nav li :link:active,
 .button:active {
 	background-image: -moz-linear-gradient(top, #009933 0%, #008800 100%);
 	background-image: -webkit-linear-gradient(top, #009933 0%,#008800 100%);
@@ -91,6 +89,7 @@ div.standard {
 }
 
 #nav li a:hover,
+#header #nav li :link:hover,
 .dark-context .button:hover {
 	-moz-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
 	-webkit-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);

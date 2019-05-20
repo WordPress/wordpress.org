@@ -12,16 +12,6 @@
 	position: relative;
 }
 
-#header h1 a:after {
-        font: normal 22px/1 'dashicons';
-        position: absolute;
-        color: #fff;
-        content: '\f456';
-        left: 251px;
-        top: 6px;
-        text-indent: 0;
-}
-
 /* =Site Style
 -------------------------------------------------------------- */
 
