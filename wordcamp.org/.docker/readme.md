@@ -28,7 +28,7 @@ If you'd like to only setup WordCamp.org and would like to use Docker, you can u
     
     **Note:** `https` URL scheme must be used to visit these sites. Security exception will be required in first time run.
     
-1. (Optional) Basic installation comes without themes and with only very basic plugins. Add plugins and themes which are installed in wordcamp.org if needed like so:
+1. Basic installation comes without themes and with only very basic plugins. Add plugins and themes which are installed in wordcamp.org if needed like so:
 
     1. Find the docker which is running WordCamp. It will start with `wordcamporg_wordcamp.test` and will most likely be `wordcamporg_wordcamp.test_1`
     
@@ -51,3 +51,5 @@ If you'd like to only setup WordCamp.org and would like to use Docker, you can u
 1. Note that if you want to work on WordCamp blocks, [you would have to install all the node dependencies](../public_html/wp-content/mu-plugins/blocks/readme.md). This can be done either inside, or even from outside the Docker.
 
 After first time provisioning, docker can be started by using `docker-compose up` command from inside the directory. 
+
+Once the Docker instance has started, you can visit [2014.content.wordcamp.org](2014.content.wordcamp.org) to view a sample WordCamp site. WordCamp central would be [central.wordcamp.test](central.wordcamp.test). You can also visit [localhost:1080](localhost:1080) to view the MailCatcher dashboard.
