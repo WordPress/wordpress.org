@@ -16,7 +16,7 @@ RUN cd ~ && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout wordcamp
 RUN cp ~/wordcamp.crt /etc/ssl/certs/wordcamp.crt
 RUN cp ~/wordcamp.key /etc/ssl/private/wordcamp.key
 
-# IAdd script to install plugin and themes
+# Add script to install plugin and themes
 ADD install-plugin-theme.sh /usr/src/public_html/install-plugin-theme.sh
 
 # Unfortunately themes and plugins cannot be installed as part of docker setup and have to be run manually.
@@ -24,18 +24,18 @@ ADD install-plugin-theme.sh /usr/src/public_html/install-plugin-theme.sh
 # RUN sh install-plugin-theme.sh
 
 
-# Install wkhtmltopdf for camptix invoices. See https://stackoverflow.com/a/38336153/1845153
+# Install `wkhtmltopdf` for WordCamp Docs, CampTix Invoices, etc. See https://stackoverflow.com/a/38336153/1845153
 RUN curl -L https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz > wkhtmltox.tar.xz
 RUN tar xvf wkhtmltox.tar.xz
 RUN mv wkhtmltox/bin/wkhtmlto* /usr/bin/
 
-# Install cli
+# Install WP-CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 RUN apt-get install less -y
 
-# Install Mail catcher
+# Install MailCatcher.
 RUN apt-get install build-essential libsqlite3-dev ruby-dev -y
 RUN gem install mailcatcher --no-ri --no-rdoc
 RUN apt-get install ssmtp -y

@@ -10,7 +10,7 @@ There are two primary ways to setup this repo for local development.
 
 1. If you'd like to only setup WordCamp.org and would like to use Docker, you can use inbuilt docker provisioning. Please follow these steps
 
-    **Note:** This will create `.data` directory which will contain MySQL files to persist data across docker restarts.
+    **Note:** This will create `.docker/database` directory which will contain MySQL files to persist data across docker restarts.
 
     1. Make sure you have Docker installed and Docker daemon running on your system.
     
@@ -56,8 +56,8 @@ There are two primary ways to setup this repo for local development.
             
         1. Activate plugin or apply theme as needed.
         
-    1. (Optional) By default, docker will start with data defined in `.docker/wordcamp_dev.sql` and changes to data will be persisted across runs. To start with different database, delete `.data` directory and replace the `.docker/wordcamp_dev.sql` file and run `docker-compose up --build` again.
+    1. (Optional) By default, docker will start with data defined in `.docker/wordcamp_dev.sql` and changes to data will be persisted across runs in `.docker/database`. To start with different database, delete `.docker/database` directory and replace the `.docker/wordcamp_dev.sql` file and run `docker-compose up --build` again.
     
     After first time provisioning, docker can be started by using `docker-compose up` command from inside the directory. 
         
-To contribute, you can send pull requests to this repo, or add patches to https://meta.trac.wordpress.org/.
+To contribute, you can send [pull requests on GitHub](https://github.com/WordPress/wordcamp.org/), or add [patches on Meta Trac](https://make.wordpress.org/meta/handbook/about/get-involved/learn-how-to-contribute-code/#share-your-new-code).
