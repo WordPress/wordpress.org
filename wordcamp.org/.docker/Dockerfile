@@ -1,7 +1,7 @@
 FROM wordpress:5.0.3-fpm
 
-# Move WordPress files to Working Directory
-RUN mv /usr/src/wordpress /usr/src/public_html
+# We store files in `mu` directory to make it consistent with production.
+RUN mkdir -p /usr/src/public_html/mu/ && mv /usr/src/wordpress/* /usr/src/public_html/mu
 WORKDIR /usr/src/public_html
 
 # Install and configure nginx
@@ -29,12 +29,14 @@ RUN curl -L https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/
 RUN apt-get install libxext6 -y
 RUN tar xvf wkhtmltox.tar.xz
 RUN mv wkhtmltox/bin/wkhtmlto* /usr/bin/
+RUN rm -rf wkhtmltox*
 
 # Install WP-CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 RUN apt-get install less -y
+COPY wp-cli.yml /usr/src/public_html/wp-cli.yml
 
 # Install MailCatcher.
 RUN apt-get install build-essential libsqlite3-dev ruby-dev -y

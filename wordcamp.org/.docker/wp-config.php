@@ -94,13 +94,12 @@ define( 'WPLANG',          ''                                        );
 define( 'WP_CONTENT_DIR',  dirname( __FILE__ ) . '/wp-content' );
 define( 'FORCE_SSL_ADMIN', true                                      );
 
-define( 'WP_CONTENT_URL',        'http://' . preg_replace( '/[^-_.0-9a-z:]/i', '', $_SERVER['HTTP_HOST'] ) . '/wp-content' );
-
-require_once(ABSPATH . 'wp-settings.php');
+define( 'WP_CONTENT_URL',        'https://' . preg_replace( '/[^-_.0-9a-z:]/i', '', $_SERVER['HTTP_HOST'] ) . '/wp-content' );
 
 /* That's all, stop editing! Happy blogging. */
 
 /** Absolute path to the WordPress directory. */
 if ( ! defined('ABSPATH') ) {
-	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
+	define( 'ABSPATH', dirname( __FILE__ ) . '/mu' );
 }
+require_once( ABSPATH . 'wp-settings.php' );
