@@ -325,6 +325,7 @@ class WP_52_Credits extends WP_Credits {
 			'odminstudios',
 			'ohiosierra',
 			'olein',
+			'onlanka',
 			'oztaser',
 			'pandelisz',
 			'paragoninitiativeenterprises',
