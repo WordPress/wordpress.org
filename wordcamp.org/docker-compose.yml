@@ -2,12 +2,18 @@ version: "3.2"
 services:
   wordcamp.test:
     build:
-      context: .
+      context: .docker
       dockerfile: Dockerfile
     volumes:
-      - "./public_html:/usr/src/public_html"
+      - "./public_html/wp-content:/usr/src/public_html/wp-content"
     ports:
       - "1234:80"
       - "443:443"
       - "1080:1080"
     command: bash -c "nginx && mailcatcher --http-ip 0.0.0.0 && php-fpm"
+  wordcamp.db:
+    build:
+      context: .docker
+      dockerfile: mysql.Dockerfile
+    volumes:
+      - ".data:/var/lib/mysql"
