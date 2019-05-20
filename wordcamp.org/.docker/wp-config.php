@@ -36,7 +36,7 @@ define('DB_CHARSET', 'utf8');
 /** The Database Collate type. Don't change this if in doubt. */
 define('DB_COLLATE', '');
 
-define ('JETPACK_DEV_DEBUG', true);
+define( 'JETPACK_DEV_DEBUG', true);
 define( 'SAVEQUERIES', true );
 define( 'SCRIPT_DEBUG', true );
 define( 'MULTISITE', true );
@@ -67,6 +67,7 @@ define('NONCE_SALT',       'put your unique phrase here');
  * You can have multiple installations in one database if you give each
  * a unique prefix. Only numbers, letters, and underscores please!
  */
+// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- This is a correct and recommended place to define $table_prefix
 $table_prefix  = 'wc_';
 
 /**
@@ -86,8 +87,9 @@ define('WP_DEBUG', true);
 /* That's all, stop editing! Happy blogging. */
 
 /** Absolute path to the WordPress directory. */
-if ( !defined('ABSPATH') )
-	define('ABSPATH', dirname(__FILE__) . '/');
+if ( ! defined('ABSPATH') ) {
+	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
+}
 
 	/*
  * Some code (like .config) is shared between WordCamp.org from other WordPress.org sites.
@@ -96,14 +98,14 @@ if ( !defined('ABSPATH') )
  */
 define( 'IS_WORDCAMP_NETWORK', true );
 
-// Set central blog_id as base site to access network admin
+// Set central blog_id as base site to access network admin.
 define( 'PATH_CURRENT_SITE',    '/' );
 define( 'SITE_ID_CURRENT_SITE', 1  );
-define( 'BLOG_ID_CURRENT_SITE', 2  ); // Set central.wordcamp.org as main site in network
+define( 'BLOG_ID_CURRENT_SITE', 2  ); // Set central.wordcamp.org as main site in network.
 
 
-define( 'WP_ALLOW_MULTISITE', true ); // @todo - temporary workaround for https://github.com/Automattic/wp-super-cache/issues/97
-define( 'SUBMITDISABLED',     false ); // work around https://github.com/Automattic/wp-super-cache/issues/213
+define( 'WP_ALLOW_MULTISITE', true ); // @todo - temporary workaround for https://github.com/Automattic/wp-super-cache/issues/97.
+define( 'SUBMITDISABLED',     false ); // work around https://github.com/Automattic/wp-super-cache/issues/213.
 define( 'SUBDOMAIN_INSTALL',  true );
 // External users tables
 define( 'CUSTOM_USER_TABLE',      'wc_users'    );
