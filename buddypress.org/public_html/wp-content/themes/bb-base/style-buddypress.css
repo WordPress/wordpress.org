@@ -6,7 +6,9 @@
 	border-bottom: 1px solid #9e1611;
 }
 
-#header h1 a {
+#header h1 a,
+#header h1 :link,
+#header h1 :link:hover {
 	width: 265px;
 	background: url('../buddypress-org/images/buddypress-logo.png') no-repeat 0 0;
 	position: relative;
@@ -46,7 +48,8 @@ div.free-page div.standard {
 /* =Navigation
 -------------------------------------------------------------- */
 
-#nav li a:hover {
+#nav li a:hover,
+#header #nav li :link:hover {
 	background-color: #cf4944;
 	color: rgba(255,255,255,0.9);
 }
@@ -97,7 +100,8 @@ input.submit:hover {
 
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 
-	#header h1 a {
+	#header h1 a,
+	#header h1 :link {
 		background-image: url('../buddypress-org/images/buddypress-logo-2x.png');
 		background-size: 269px 65px;
 	}

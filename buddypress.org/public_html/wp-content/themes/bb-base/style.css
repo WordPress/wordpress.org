@@ -353,7 +353,8 @@ div.single-post table tr.alt td {
 	margin: 0 3px 0 3px;
 	list-style: none;
 }
-#nav li a {
+#nav li a,
+#header #nav li :link {
 	text-decoration: none;
 	color: #fff;
 	height: auto;
