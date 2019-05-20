@@ -7,7 +7,7 @@ WORKDIR /usr/src/public_html
 # Install and configure nginx
 RUN apt-get update
 RUN apt-get install nginx -y
-COPY nginx.conf /etc/nginx/sites-enabled/default.conf
+COPY nginx.conf /etc/nginx/sites-enabled/wordcamp.conf
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/zz-www.conf
 
 # Install and configure SSL
@@ -50,6 +50,9 @@ RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 RUN apt-get install vim -y
 
 COPY wp-config.php /usr/src/public_html/wp-config.php
+
+# Replace nginx default conf because it conflicts with wordcamp.cong
+RUN mv /etc/nginx/sites-enabled/wordcamp.conf /etc/nginx/sites-enabled/default
 
 CMD tail -f /dev/null
 
