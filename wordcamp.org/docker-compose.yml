@@ -11,7 +11,12 @@ services:
       - "1234:80"
       - "443:443"
       - "1080:1080"
-    command: bash -c "nginx && mailcatcher --http-ip 0.0.0.0 && php-fpm"
+    command: >
+      bash -c "touch /usr/src/public_html/wp-content/mu-plugins/blocks/assets/blocks.min.js &&
+               touch /usr/src/public_html/wp-content/mu-plugins/blocks/assets/blocks.min.css &&
+               nginx &&
+               mailcatcher --http-ip 0.0.0.0 &&
+               php-fpm"
   wordcamp.db:
     build:
       context: .docker
