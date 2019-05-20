@@ -17,6 +17,7 @@ services:
                nginx &&
                mailcatcher --http-ip 0.0.0.0 &&
                php-fpm"
+
   wordcamp.db:
     build:
       context: .docker
