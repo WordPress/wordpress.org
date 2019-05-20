@@ -361,9 +361,11 @@ function wcorg_json_v2_compat( $request ) {
 	}
 
 	// Route v2 requests to Core handler
-	$request->query_vars['rest_route'] = $request->query_vars['json_route'];
-	unset( $request->query_vars['json_route'] );
-	$request->matched_query = preg_replace( '#^json_route=(.+)$#', 'rest_route=$1', $request->matched_query );
+	if ( isset( $request->query_vars['json_route'] ) ) {
+		$request->query_vars['rest_route'] = $request->query_vars['json_route'];
+		unset( $request->query_vars['json_route'] );
+		$request->matched_query = preg_replace( '#^json_route=(.+)$#', 'rest_route=$1', $request->matched_query );
+	}
 
 	return;
 }
