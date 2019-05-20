@@ -16,6 +16,14 @@ RUN cd ~ && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout wordcamp
 RUN cp ~/wordcamp.crt /etc/ssl/certs/wordcamp.crt
 RUN cp ~/wordcamp.key /etc/ssl/private/wordcamp.key
 
+# IAdd script to install plugin and themes
+ADD install-plugin-theme.sh /usr/src/public_html/install-plugin-theme.sh
+
+# Unfortunately themes and plugins cannot be installed as part of docker setup and have to be run manually.
+# This is because everything in wp-content folder will be overwritten when we mount this directory from volume.
+# RUN sh install-plugin-theme.sh
+
+
 # Install wkhtmltopdf for camptix invoices. See https://stackoverflow.com/a/38336153/1845153
 RUN curl -L https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz > wkhtmltox.tar.xz
 RUN tar xvf wkhtmltox.tar.xz
@@ -40,6 +48,8 @@ RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 
 # Utils
 RUN apt-get install vim -y
+
+COPY wp-config.php /usr/src/public_html/wp-config.php
 
 CMD tail -f /dev/null
 
