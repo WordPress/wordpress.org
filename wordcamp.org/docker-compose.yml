@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - "./public_html/wp-content:/usr/src/public_html/wp-content"
+      - ".docker/wp-config.php:/usr/src/public_html/wp-config.php"
     ports:
       - "1234:80"
       - "443:443"
@@ -17,3 +18,5 @@ services:
       dockerfile: mysql.Dockerfile
     volumes:
       - ".data:/var/lib/mysql"
+    ports:
+      - "3307:3306"
