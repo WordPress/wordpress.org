@@ -255,6 +255,39 @@ class WPorg_Handbook {
 	}
 
 	/**
+	 * Determines if the given values correspond to a post that acts as the
+	 * landing page for this handbook.
+	 *
+	 * @param int|WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return bool True if the given information would make such a post the
+	 *              handbook's landing page.
+	 */
+	protected function post_is_landing_page( $post = null ) {
+		$is_landing_page = false;
+
+		$post_type = get_post_type( $post );
+		$slug      = get_post_field( 'post_name', $post );
+
+		if (
+			$post_type === $this->post_type
+		&&
+			(
+				$post_type === $slug
+			||
+				$post_type === "{$slug}-handbook"
+			||
+				'handbook' === $slug
+			)
+		&&
+			! wp_get_post_parent_id( $post )
+		) {
+			$is_landing_page = true;
+		}
+
+		return $is_landing_page;
+	}
+
+	/**
 	 * For a handbook page acting as the root page for the handbook, change its
 	 * permalink to be the equivalent of the post type archive link.
 	 *
@@ -265,13 +298,8 @@ class WPorg_Handbook {
 		$post_type = get_post_type( $post );
 
 		// Only change links for this handbook's post type.
-		if ( $post_type === $this->post_type ) {
-			// Verify post is not a child page and that its slug matches the criteria to
-			// be a handbook root page.
-			$post_slug = get_post_field( 'post_name', $post );
-			if ( ( $post_slug === $post_type || "{$post_slug}-handbook" === $post_type ) && ! wp_get_post_parent_id( $post ) ) {
-				$post_link = get_post_type_archive_link( $post_type );
-			}
+		if ( $this->post_is_landing_page( $post ) ) {
+			$post_link = get_post_type_archive_link( $post_type );
 		}
 
 		return $post_link;
@@ -290,7 +318,7 @@ class WPorg_Handbook {
 			&&
 			! $wp_query->is_handbook_root
 			&&
-			in_array( get_query_var( 'name' ), array( $this->post_type, substr( $this->post_type, 0, -9 ) ) )
+			$this->post_is_landing_page( get_queried_object_id() )
 		) {
 			wp_safe_redirect( get_post_type_archive_link( $this->post_type ) );
 			exit;
