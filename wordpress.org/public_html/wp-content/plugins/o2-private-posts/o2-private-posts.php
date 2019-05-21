@@ -123,7 +123,7 @@ function handle_meta_data( $post_id, $message ) {
  * @param \WP_Post $post The full Post object.
  */
 function handle_admin_meta_data( $new, $old, $post ) {
-	if ( 'private' === $new ) {
+	if ( 'private' === $new && ( 'new' === $old || 'draft' === $old ) ) {
 		handle_meta_data( $post->ID, (object) [ '_post_privately' => true ] );
 	}
 }
