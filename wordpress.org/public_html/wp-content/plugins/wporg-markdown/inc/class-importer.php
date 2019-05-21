@@ -440,7 +440,7 @@ abstract class Importer {
 		$title = null;
 		if ( preg_match( '/^#\s(.+)/', $markdown, $matches ) ) {
 			$title = $matches[1];
-			$markdown = preg_replace( '/^#\swp\s(.+)/', '', $markdown );
+			$markdown = preg_replace( '/^#\s(.+)/', '', $markdown );
 		}
 		$markdown = trim( $markdown );
 
