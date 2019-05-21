@@ -123,7 +123,7 @@ abstract class Importer {
 			if ( class_exists( 'WP_CLI' ) ) {
 				WP_CLI::error( 'Invalid manifest' );
 			}
-			return new WP_Error( 'invalid-manifest', 'Manifest did not unfurl properly.' );;
+			return new WP_Error( 'invalid-manifest', 'Manifest did not unfurl properly.' );
 		}
 
 		// A numeric key suggests the manifest did not explicitly specify keys for each item, so define one.
@@ -162,6 +162,10 @@ abstract class Importer {
 		foreach ( $manifest as $key => $doc ) {
 			// Already exists, update.
 			$existing = $this->existing[ $key ] ?? $this->existing['slug_only'][ $key ] ?? false;
+			if ( ! $existing && 'index' === $key ) {
+				$key = $this->get_post_type();
+				$existing = $this->existing[ $key ] ?? $this->existing['slug_only'][ $key ] ?? false;
+			}
 			if ( $existing ) {
 				$existing_id = $existing['post_id'];
 				if ( $this->update_post_from_manifest_doc( $existing_id, $doc ) ) {
