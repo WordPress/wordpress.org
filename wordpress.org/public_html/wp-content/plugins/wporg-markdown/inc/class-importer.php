@@ -83,7 +83,13 @@ abstract class Importer {
 	 */
 	protected function get_existing_for_post( WP_Post $post ) {
 		$key = rtrim( str_replace( $this->get_base(), '', get_permalink( $post->ID ) ), '/' );
-		if ( empty( $key ) ) {
+		// Account for potential handbook landing page, which results in an empty $key.
+		if ( ! $key ) {
+			if ( in_array( $post->post_name, [ 'handbook', $post->post_type, "{$post->post_type}-handbook" ] ) ) {
+				$key = $post->post_name;
+			}
+		}
+		if ( ! $key ) {
 			$key = 'index';
 		}
 
