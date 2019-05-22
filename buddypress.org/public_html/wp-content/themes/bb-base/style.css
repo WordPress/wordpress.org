@@ -354,7 +354,8 @@ div.single-post table tr.alt td {
 	list-style: none;
 }
 #nav li a,
-#header #nav li :link {
+#header #nav li :link,
+#header #nav li :visited {
 	text-decoration: none;
 	color: #fff;
 	height: auto;
