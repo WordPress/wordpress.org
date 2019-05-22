@@ -41,6 +41,7 @@ class Core extends Trac {
 	protected $ticket_component_filters = array(
 		'Bundled Theme'      => '#core-themes',
 		'Customize'          => '#core-customize',
+		'Date/Time'          => '#core-datetime',
 		'Press This'         => '#core-pressthis',
 		'multisite'          => '#core-multisite',
 		'Networks and Sites' => '#core-multisite',
