@@ -179,3 +179,12 @@ input.submit:hover {
 #bbpress-forums p.bbp-topic-meta .bbp-topic-started-in a {
         background-color: #328C00;
 }
+
+/* =Responsive
+-------------------------------------------------------------- */
+
+@media screen and ( max-width: 820px ) {
+	#header-inner {
+		background-position-x: 55px;
+	}
+}

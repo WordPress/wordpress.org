@@ -1685,7 +1685,8 @@ body.trac .attachment {
 		text-shadow: none;
 		border-radius: 0;
 	}
-	#header #nav #bb-nav li.current a {
+	#header #nav #bb-nav li.current a,
+	#header #nav #bb-nav li a:hover {
 		color: #fff;
 	}
 	#header #bb-nav,
@@ -1701,5 +1702,10 @@ body.trac .attachment {
 	#header #nav:hover #bb-menu-icon:before,
 	#header #nav:focus #bb-menu-icon:before {
 		color: #fff;
+	}
+	#wp-admin-bar-my-account img.avatar {
+		height: 38px;
+		width: 38px;
+		border-radius: 50%;
 	}
 }
