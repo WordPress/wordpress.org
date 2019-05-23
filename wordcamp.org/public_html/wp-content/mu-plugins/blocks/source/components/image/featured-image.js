@@ -133,7 +133,7 @@ export class FeaturedImage extends Component {
 
 		let output = (
 			<img
-				className={ classnames( 'wordcamp-featured-image', 'wp-post-image' ) }
+				className={ classnames( 'wordcamp-image__featured-image', 'wp-post-image' ) }
 				src={ src }
 				alt={ alt }
 				width={ width }
@@ -144,7 +144,7 @@ export class FeaturedImage extends Component {
 		if ( isURL( imageLink ) ) {
 			output = (
 				<Disabled>
-					<a href={ imageLink } className={ classnames( 'wordcamp-image-link', 'wordcamp-featured-image-link' ) }>
+					<a href={ imageLink } className={ classnames( 'wordcamp-image__featured-image-link' ) }>
 						{ output }
 					</a>
 				</Disabled>
@@ -152,7 +152,7 @@ export class FeaturedImage extends Component {
 		}
 
 		output = (
-			<div className={ classnames( 'wordcamp-image-container', 'wordcamp-featured-image-container', className ) }>
+			<div className={ classnames( 'wordcamp-image__featured-image-container', className ) }>
 				{ output }
 			</div>
 		);

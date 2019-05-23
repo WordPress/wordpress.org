@@ -79,11 +79,11 @@ export class ImageSizeControl extends Component {
 
 		return (
 			<BaseControl
-				className={ classnames( 'wordcamp-image-size', className ) }
+				className={ classnames( 'wordcamp-image__size', className ) }
 				label={ label }
 				help={ help }
 			>
-				<div className="wordcamp-image-size-preset-buttons">
+				<div className="wordcamp-image__size-preset-buttons">
 					{ sizePresets.length > 0 &&
 						<ButtonGroup aria-label={ label }>
 							{ sizePresets.map( ( preset ) => {
@@ -107,7 +107,7 @@ export class ImageSizeControl extends Component {
 					}
 
 					<Button
-						className="wordcamp-image-size-button-reset"
+						className="wordcamp-image__size-button-reset"
 						isLarge
 						isDefault
 						onClick={ () => this.onChange( Number( initialPosition ) ) }
@@ -117,7 +117,7 @@ export class ImageSizeControl extends Component {
 				</div>
 
 				<RangeControl
-					className="wordcamp-image-size-range"
+					className="wordcamp-image__size-range"
 					value={ value }
 					initialPosition={ initialPosition }
 					onChange={ this.onChange }
@@ -155,7 +155,7 @@ export function ImageAlignmentControl( {
 } ) {
 	return (
 		<BaseControl
-			className={ classnames( 'wordcamp-image-alignment', className ) }
+			className={ classnames( 'wordcamp-image__alignment', className ) }
 			label={ label }
 			help={ help }
 		>
@@ -222,7 +222,7 @@ export class ImageInspectorPanel extends Component {
 			<PanelBody
 				title={ title }
 				initialOpen={ initialOpen }
-				className={ classnames( 'wordcamp-image-inspector-panel', className ) }
+				className={ classnames( 'wordcamp-image__inspector-panel', className ) }
 			>
 				<ToggleControl
 					label={ __( 'Show images', 'wordcamporg' ) }

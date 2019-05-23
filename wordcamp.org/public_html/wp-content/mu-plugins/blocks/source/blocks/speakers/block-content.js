@@ -41,24 +41,24 @@ function SpeakerSessions( { speaker, tracks } ) {
 	if ( sessions.length ) {
 		output = (
 			<div className={ classnames( 'wordcamp-item-meta', 'wordcamp-speaker-sessions' ) }>
-				<h4 className="wordcamp-speaker-sessions-heading">
+				<h4 className="wordcamp-speakers__sessions-heading">
 					{ _n( 'Session', 'Sessions', sessions.length, 'wordcamporg' ) }
 				</h4>
 
-				<ul className="wordcamp-speaker-sessions-list">
+				<ul className="wordcamp-speakers__sessions-list">
 					{ sessions.map( ( session ) =>
 						<li
 							key={ escapeAttribute( session.slug ) }
-							className="wordcamp-speaker-sessions-list-item"
+							className="wordcamp-speakers__sessions-list-item"
 						>
 							<Disabled>
 								<a
-									className="wordcamp-speaker-session-link"
+									className="wordcamp-speakers__session-link"
 									href={ session.link }
 								>
 									{ session.title.rendered.trim() || __( '(Untitled)', 'wordcamporg' ) }
 								</a>
-								<span className="wordcamp-speaker-session-info">
+								<span className="wordcamp-speakers__session-info">
 									{ session.session_track.length && Array.isArray( tracks ) &&
 										arrayTokenReplace(
 											/* translators: 1: A date; 2: A time; 3: A location; */
@@ -159,18 +159,18 @@ export class BlockContent extends Component {
 		return (
 			<PostList
 				{ ...this.props }
-				className="wordcamp-speakers-block"
+				className="wordcamp-speakers__posts"
 			>
 				{ posts.map( ( post ) =>
 					<div
 						key={ post.slug }
 						className={ classnames(
-							'wordcamp-speaker',
-							'wordcamp-speaker-' + post.slug,
+							'wordcamp-speakers__post',
+							'has-slug-' + post.slug,
 						) }
 					>
 						<ItemTitle
-							className="wordcamp-speaker-title"
+							className="wordcamp-speakers__title"
 							headingLevel={ 3 }
 							title={ post.title.rendered.trim() }
 							link={ post.link }
@@ -188,7 +188,7 @@ export class BlockContent extends Component {
 
 						{ ( 'none' !== content ) &&
 							<ItemHTMLContent
-								className={ classnames( 'wordcamp-speaker-content-' + content ) }
+								className={ classnames( 'wordcamp-speakers__content', 'is-' + content ) }
 								content={ 'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
 							/>
 						}

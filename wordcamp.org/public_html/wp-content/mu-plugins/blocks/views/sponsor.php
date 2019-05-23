@@ -13,14 +13,14 @@ defined( 'WPINC' ) || die();
 setup_postdata( $sponsor ); // This is necessary for generating an excerpt from content if the excerpt field is empty.
 ?>
 
-<div class="wordcamp-sponsor wordcamp-sponsor-<?php echo esc_attr( $sponsor->post_name ); ?>">
+<div class="wordcamp-sponsors__post has-slug-<?php echo esc_attr( $sponsor->post_name ); ?>">
 	<?php if ( true === $attributes['show_name'] ) : ?>
 		<?php echo wp_kses_post(
 			render_item_title(
 				get_the_title( $sponsor ),
 				get_permalink( $sponsor ),
 				3,
-				[ 'wordcamp-sponsor-title' ]
+				[ 'wordcamp-sponsors__title' ]
 			)
 		); ?>
 	<?php endif; ?>
@@ -30,7 +30,7 @@ setup_postdata( $sponsor ); // This is necessary for generating an excerpt from 
 			render_featured_image(
 				$sponsor,
 				$attributes['featured_image_width'],
-				[ 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo', 'align-' . esc_attr( $attributes['image_align'] ) ],
+				[ 'wordcamp-sponsors__featured-image', 'wordcamp-sponsors__logo', 'align-' . esc_attr( $attributes['image_align'] ) ],
 				get_permalink( $sponsor )
 			)
 		); ?>
@@ -42,7 +42,7 @@ setup_postdata( $sponsor ); // This is necessary for generating an excerpt from 
 				'excerpt' === $attributes['content']
 					? apply_filters( 'the_excerpt', get_the_excerpt( $sponsor ) )
 					: get_all_the_content( $sponsor ),
-				[ 'wordcamp-sponsor-content-' . $attributes['content'] ]
+				[ 'wordcamp-sponsors__content has-content-' . $attributes['content'] ]
 			)
 		); ?>
 	<?php endif; ?>
@@ -52,7 +52,7 @@ setup_postdata( $sponsor ); // This is necessary for generating an excerpt from 
 			render_item_permalink(
 				get_permalink( $sponsor ),
 				__( 'Visit sponsor page', 'wordcamporg' ),
-				[ 'wordcamp-sponsor-permalink' ]
+				[ 'wordcamp-sponsors__permalink' ]
 			)
 		); ?>
 	<?php endif; ?>

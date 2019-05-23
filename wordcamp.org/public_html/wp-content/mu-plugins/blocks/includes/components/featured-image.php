@@ -28,7 +28,7 @@ function render_featured_image( $post, $width, $class_names = [], $image_link = 
 	$size         = array( $width, $height );
 
 	$container_classes = array_merge(
-		[ 'wordcamp-image-container', 'wordcamp-featured-image-container' ],
+		[ 'wordcamp-image__featured-image-container' ],
 		$class_names
 	);
 	$container_classes = implode( ' ', $container_classes );
@@ -39,7 +39,7 @@ function render_featured_image( $post, $width, $class_names = [], $image_link = 
 	?>
 		<div class="<?php echo esc_attr( $container_classes ); ?>">
 			<?php if ( '' !== $image_link ) { ?>
-				<a href="<?php echo esc_html( $image_link ); ?>" class="wordcamp-image-link wordcamp-featured-image-link">
+				<a href="<?php echo esc_html( $image_link ); ?>" class="wordcamp-image__featured-image-link">
 					<?php echo wp_kses_post( $image ); ?>
 				</a>
 			<?php } else { ?>
@@ -62,7 +62,7 @@ function render_featured_image( $post, $width, $class_names = [], $image_link = 
  */
 function render_featured_image_element( $post, $size ) {
 	$attr = [
-		'class' => 'wordcamp-featured-image',
+		'class' => 'wordcamp-image__featured-image',
 	];
 
 	return get_the_post_thumbnail( $post, $size, $attr );

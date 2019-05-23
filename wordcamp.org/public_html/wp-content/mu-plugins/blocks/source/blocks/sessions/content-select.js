@@ -111,7 +111,7 @@ export class ContentSelect extends Component {
 
 		return (
 			<ItemSelect
-				className="wordcamp-sessions-select"
+				className="wordcamp-sessions__select"
 				label={ label }
 				value={ this.getCurrentSelectValue() }
 				onChange={ ( changed ) => setAttributes( changed ) }

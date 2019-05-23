@@ -62,7 +62,7 @@ export class ItemSelect extends Component {
 	 */
 	static formatGroupLabel( groupData ) {
 		return (
-			<span className="wordcamp-item-select-option-group-label">
+			<span className="wordcamp-item-select__option-group-label">
 				{ groupData.label }
 			</span>
 		);
@@ -124,10 +124,10 @@ export class ItemSelect extends Component {
 				label={ label }
 				help={ help }
 			>
-				<div className="wordcamp-item-select-inner">
+				<div className="wordcamp-item-select__inner">
 					<Select
 						id={ id }
-						className="wordcamp-item-select-select"
+						className="wordcamp-item-select__select"
 						value={ value }
 						aria-label={ label }
 						onChange={ ( selectedOptions ) => {
@@ -136,7 +136,7 @@ export class ItemSelect extends Component {
 						{ ...mergedSelectProps }
 					/>
 					<Button
-						className="wordcamp-item-select-button"
+						className="wordcamp-item-select__button"
 						isLarge
 						isDefault
 						onClick={ () => onChange( this.getNewAttributes() ) }

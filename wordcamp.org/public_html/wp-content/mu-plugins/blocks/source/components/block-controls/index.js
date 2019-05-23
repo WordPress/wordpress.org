@@ -29,8 +29,8 @@ import './style.scss';
  */
 export function PlaceholderSpecificMode( { className, label, icon, content, placeholderChildren } ) {
 	const classes = [
-		'wordcamp-block-edit-placeholder',
-		'wordcamp-block-edit-placeholder-specific-mode',
+		'wordcamp-block__edit-placeholder',
+		'has-specific-mode',
 		className,
 	];
 

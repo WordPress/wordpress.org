@@ -81,16 +81,16 @@ export class BlockContent extends Component {
 		return (
 			<PostList
 				{ ...this.props }
-				className="wordcamp-sponsors-block"
+				className="wordcamp-sponsors__posts"
 			>
 				{ posts.map( ( post ) =>
 					<div
 						key={ post.slug }
-						className={ classnames( 'wordcamp-sponsor', 'wordcamp-sponsor-' + post.slug ) }
+						className={ classnames( 'wordcamp-sponsors__post', 'has-slug-' + post.slug ) }
 					>
 						{ show_name &&
 							<ItemTitle
-								className="wordcamp-sponsor-title"
+								className="wordcamp-sponsors__title"
 								headingLevel={ 3 }
 								title={ post.title.rendered.trim() }
 								link={ post.link }
@@ -101,14 +101,14 @@ export class BlockContent extends Component {
 							<FeaturedImage
 								imageData={ get( post, '_embedded.wp:featuredmedia[0]', {} ) }
 								width={ featured_image_width }
-								className={ classnames( 'wordcamp-sponsor-featured-image', 'wordcamp-sponsor-logo', 'align-' + image_align ) }
+								className={ classnames( 'wordcamp-sponsors__featured-image', 'wordcamp-sponsors__logo', 'align-' + image_align ) }
 								imageLink={ post.link }
 							/>
 						}
 
 						{ ( 'none' !== content ) &&
 							<ItemHTMLContent
-								className={ classnames( 'wordcamp-sponsor-content-' + content ) }
+								className={ classnames( 'wordcamp-sponsors__content', 'has-content-' + content ) }
 								content={ 'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
 							/>
 						}
@@ -117,7 +117,7 @@ export class BlockContent extends Component {
 							<ItemPermalink
 								link={ post.link }
 								linkText={ __( 'Visit sponsor page', 'wordcamporg' ) }
-								className="wordcamp-sponsor-permalink"
+								className="wordcamp-sponsors__permalink"
 							/>
 						}
 					</div>

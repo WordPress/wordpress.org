@@ -15,13 +15,13 @@ defined( 'WPINC' ) || die();
 setup_postdata( $organizer ); // This is necessary for generating an excerpt from content if the excerpt field is empty.
 ?>
 
-<div class="wordcamp-organizer wordcamp-organizer-<?php echo esc_attr( $organizer->post_name ); ?>">
+<div class="wordcamp-organizer wordcamp-organizers__post has-slug-<?php echo esc_attr( $organizer->post_name ); ?>">
 	<?php echo wp_kses_post(
 		render_item_title(
 			get_the_title( $organizer ),
 			'',
 			3,
-			[ 'wordcamp-organizer-title' ]
+			[ 'wordcamp-organizers__title' ]
 		)
 	); ?>
 
@@ -43,7 +43,7 @@ setup_postdata( $organizer ); // This is necessary for generating an excerpt fro
 				'excerpt' === $attributes['content']
 					? apply_filters( 'the_excerpt', get_the_excerpt( $organizer ) )
 					: get_all_the_content( $organizer ),
-				[ 'wordcamp-organizer-content-' . $attributes['content'] ]
+				[ 'wordcamp-organizers__content', 'is-' . $attributes['content'] ]
 			)
 		); ?>
 	<?php endif; ?>

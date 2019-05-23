@@ -26,7 +26,7 @@ import './style.scss';
  */
 export function BlockNoContent( { loading } ) {
 	return (
-		<div className="wordcamp-block-content-none">
+		<div className="wordcamp-block_posts has-no-content">
 			{ loading ?
 				<Spinner /> :
 				__( 'No content found.', 'wordcamporg' )
@@ -56,7 +56,7 @@ export function ItemTitle( { headingLevel, className, title, link } ) {
 	}
 
 	const classes = [
-		'wordcamp-item-title',
+		'wordcamp-block__post-title',
 		className,
 	];
 
@@ -98,7 +98,7 @@ export function ItemTitle( { headingLevel, className, title, link } ) {
  */
 export function ItemHTMLContent( { className, content, link, linkText } ) {
 	const classes = [
-		'wordcamp-item-content',
+		'wordcamp-block__post-content',
 		className,
 	];
 
@@ -130,7 +130,7 @@ export function ItemHTMLContent( { className, content, link, linkText } ) {
  */
 export function ItemPermalink( { className, link, linkText } ) {
 	const classes = [
-		'wordcamp-item-permalink',
+		'wordcamp-block__post-permalink',
 		className,
 	];
 

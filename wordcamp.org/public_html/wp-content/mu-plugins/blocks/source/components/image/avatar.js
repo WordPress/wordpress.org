@@ -81,7 +81,7 @@ export function AvatarImage( {
 	if ( isURL( imageLink ) ) {
 		image = (
 			<Disabled>
-				<a href={ imageLink } className={ classnames( 'wordcamp-image-link', 'wordcamp-avatar-link' ) }>
+				<a href={ imageLink } className={ classnames( 'wordcamp-image__avatar-link' ) }>
 					{ image }
 				</a>
 			</Disabled>
@@ -89,7 +89,7 @@ export function AvatarImage( {
 	}
 
 	image = (
-		<div className={ classnames( 'wordcamp-image-container', 'wordcamp-avatar-container', className ) }>
+		<div className={ classnames( 'wordcamp-image__avatar-container', className ) }>
 			{ image }
 		</div>
 	);

@@ -14,13 +14,13 @@ defined( 'WPINC' ) || die();
 setup_postdata( $session );
 ?>
 
-<div class="wordcamp-session wordcamp-session-<?php echo sanitize_html_class( $session->post_name ); ?>">
+<div class="wordcamp-sessions__post has-slug-<?php echo sanitize_html_class( $session->post_name ); ?>">
 	<?php echo wp_kses_post(
 		render_item_title(
 			get_the_title( $session ),
 			get_permalink( $session ),
 			3,
-			[ 'wordcamp-session-title' ]
+			[ 'wordcamp-sessions__title' ]
 		)
 	); ?>
 
@@ -37,7 +37,7 @@ setup_postdata( $session );
 		);
 		?>
 
-		<div class="wordcamp-item-meta wordcamp-session-speakers">
+		<div class="wordcamp__item-meta wordcamp-sessions__speakers">
 			<?php
 			printf(
 				/* translators: %s is a list of names. */
@@ -53,7 +53,7 @@ setup_postdata( $session );
 			render_featured_image(
 				$session,
 				$attributes['featured_image_width'],
-				[ 'wordcamp-session-featured-image', 'align-' . esc_attr( $attributes['image_align'] ) ],
+				[ 'wordcamp-sessions__featured-image', 'align-' . esc_attr( $attributes['image_align'] ) ],
 				get_permalink( $session )
 			)
 		); ?>
@@ -65,17 +65,17 @@ setup_postdata( $session );
 				'excerpt' === $attributes['content']
 					? apply_filters( 'the_excerpt', get_the_excerpt( $session ) )
 					: get_all_the_content( $session ),
-				[ 'wordcamp-session-content-' . $attributes['content'] ]
+				[ 'wordcamp-sessions__content-' . 'is-' . $attributes['content'] ]
 			)
 		); ?>
 	<?php endif; ?>
 
 	<?php if ( $attributes['show_meta'] || $attributes['show_category'] ) : ?>
-		<div class="wordcamp-item-meta wordcamp-session-details">
+		<div class="wordcamp__item-meta wordcamp-sessions__details">
 			<?php if ( $attributes['show_meta'] ) : ?>
 				<?php $tracks = get_the_terms( $session, 'wcb_track' ); ?>
 
-				<div class="wordcamp-session-time-location">
+				<div class="wordcamp-sessions__time-location">
 					<?php if ( ! is_wp_error( $tracks ) && ! empty( $tracks ) ) :
 						printf(
 							/* translators: 1: A date; 2: A time; 3: A location; */
@@ -83,7 +83,7 @@ setup_postdata( $session );
 							esc_html( date_i18n( get_option( 'date_format' ), $session->_wcpt_session_time ) ),
 							esc_html( date_i18n( get_option( 'time_format' ), $session->_wcpt_session_time ) ),
 							sprintf(
-								'<span class="wordcamp-session-track wordcamp-session-track-%s">%s</span>',
+								'<span class="wordcamp-sessions__track has-slug-%s">%s</span>',
 								esc_attr( $tracks[0]->slug ),
 								esc_html( $tracks[0]->name )
 							)
@@ -104,7 +104,7 @@ setup_postdata( $session );
 				$categories = array_map(
 					function( $category ) {
 						return sprintf(
-							'<span class="wordcamp-session-category wordcamp-session-category-%s">%s</span>',
+							'<span class="wordcamp-sessions__category has-slug-%s">%s</span>',
 							esc_attr( $category->slug ),
 							esc_html( $category->name )
 						);
@@ -113,7 +113,7 @@ setup_postdata( $session );
 				);
 				?>
 
-				<div class="wordcamp-session-categories">
+				<div class="wordcamp-sessions__categories">
 					<?php
 					/* translators: used between list items, there is a space after the comma */
 					echo wp_kses_post( implode( __( ', ', 'wordcamporg' ), $categories ) );
@@ -128,7 +128,7 @@ setup_postdata( $session );
 			render_item_permalink(
 				get_permalink( $session ),
 				__( 'Visit session page', 'wordcamporg' ),
-				[ 'wordcamp-session-permalink' ]
+				[ 'wordcamp-sessions__permalink' ]
 			)
 		); ?>
 	<?php endif; ?>

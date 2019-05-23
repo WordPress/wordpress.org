@@ -14,19 +14,19 @@ defined( 'WPINC' ) || die();
 setup_postdata( $speaker ); // This is necessary for generating an excerpt from content if the excerpt field is empty.
 ?>
 
-<div class="wordcamp-speaker wordcamp-speaker-<?php echo esc_attr( $speaker->post_name ); ?>">
+<div class="wordcamp-speakers__post has-slug-<?php echo esc_attr( $speaker->post_name ); ?>">
 	<?php echo wp_kses_post(
 		render_item_title(
 			get_the_title( $speaker ),
 			get_permalink( $speaker ),
 			3,
-			[ 'wordcamp-speaker-title' ]
+			[ 'wordcamp-speakers__title' ]
 		)
 	); ?>
 
 	<?php if ( true === $attributes['show_avatars'] ) : ?>
 		<div class="wordcamp-image-container wordcamp-avatar-container align-<?php echo esc_attr( $attributes['avatar_align'] ); ?>">
-			<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>" class="wordcamp-image-link wordcamp-avatar-link">
+			<a href="<?php echo esc_url( get_permalink( $speaker ) ); ?>" class="wordcamp-image__avatar-link">
 				<?php echo get_avatar(
 					$speaker->_wcb_speaker_email,
 					$attributes['avatar_size'],
@@ -44,26 +44,26 @@ setup_postdata( $speaker ); // This is necessary for generating an excerpt from 
 				'excerpt' === $attributes['content']
 					? apply_filters( 'the_excerpt', get_the_excerpt( $speaker ) )
 					: get_all_the_content( $speaker ),
-				[ 'wordcamp-speaker-content-' . $attributes['content'] ]
+				[ 'wordcamp-speakers__content is-' . $attributes['content'] ]
 			)
 		); ?>
 	<?php endif; ?>
 
 	<?php if ( true === $attributes['show_session'] && ! empty( $sessions[ $speaker->ID ] ) ) : ?>
 		<div class="wordcamp-item-meta wordcamp-speaker-sessions">
-			<h4 class="wordcamp-speaker-sessions-heading">
+			<h4 class="wordcamp-speakers__sessions-heading">
 				<?php echo esc_html( _n( 'Session', 'Sessions', count( $sessions[ $speaker->ID ] ), 'wordcamporg' ) ); ?>
 			</h4>
 
-			<ul class="wordcamp-speaker-sessions-list">
+			<ul class="wordcamp-speakers__sessions-list">
 				<?php foreach ( $sessions[ $speaker->ID ] as $session ) : ?>
 					<?php $tracks = get_the_terms( $session, 'wcb_track' ); ?>
-					<li class="wordcamp-speaker-sessions-list-item">
-						<a class="wordcamp-speaker-session-link" href="<?php echo esc_url( get_permalink( $session ) ); ?>">
+					<li class="wordcamp-speakers__sessions-list-item">
+						<a class="wordcamp-speakers__session-link" href="<?php echo esc_url( get_permalink( $session ) ); ?>">
 							<?php echo wp_kses_post( get_the_title( $session ) ); ?>
 						</a>
 
-						<span class="wordcamp-speaker-session-info">
+						<span class="wordcamp-speakers__session-info">
 							<?php if ( ! is_wp_error( $tracks ) && ! empty( $tracks ) ) : ?>
 								<?php
 									printf(

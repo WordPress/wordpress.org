@@ -13,7 +13,7 @@ const { __ }        = wp.i18n;
 /**
  * Internal dependencies
  */
-import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../../components/block-content';
+import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent, ItemMeta } from '../../components/block-content';
 import { FeaturedImage }                                             from '../../components/image';
 import { PostList }                                                  from '../../components/post-list';
 import { filterEntities }                                            from '../../data';
@@ -58,9 +58,12 @@ function SessionSpeakers( { session } ) {
 	);
 
 	return (
-		<div className="wordcamp-item-meta wordcamp-session-speakers">
-			{ speakers }
-		</div>
+		<ItemMeta
+			className={ "wordcamp-sessions__speakers" }
+			content={
+				{ speakers }
+			}
+		/>
 	);
 }
 
@@ -89,7 +92,7 @@ function SessionMeta( { session } ) {
 				(
 					<span
 						key={ firstTrack.id }
-						className={ classnames( 'wordcamp-session-track', 'wordcamp-session-track-' + firstTrack.slug.trim() ) }
+						className={ classnames( 'wordcamp-sessions__track', 'has-slug-' + firstTrack.slug.trim() ) }
 					>
 						{ firstTrack.name.trim() }
 					</span>
@@ -108,7 +111,7 @@ function SessionMeta( { session } ) {
 	}
 
 	return (
-		<div className="wordcamp-session-time-location">
+		<div className="wordcamp-sessions__time-location">
 			{ metaContent }
 		</div>
 	);
@@ -136,7 +139,7 @@ function SessionCategory( { session } ) {
 				return (
 					<span
 						key={ term.slug }
-						className={ classnames( 'wordcamp-session-category', 'wordcamp-session-category-' + term.slug ) }
+						className={ classnames( 'wordcamp-sessions__category', 'has-slug-' + term.slug ) }
 					>
 						{ term.name.trim() }
 					</span>
@@ -147,7 +150,7 @@ function SessionCategory( { session } ) {
 	}
 
 	return (
-		<div className="wordcamp-session-categories">
+		<div className="wordcamp-sessions__categories">
 			{ categoryContent }
 		</div>
 	);
@@ -251,15 +254,15 @@ export class BlockContent extends Component {
 		return (
 			<PostList
 				{ ...this.props }
-				className="wordcamp-sessions-block"
+				className="wordcamp-sessions__posts"
 			>
 				{ posts.map( ( post ) =>
 					<div
 						key={ post.slug }
-						className={ classnames( 'wordcamp-session', 'wordcamp-session-' + post.slug ) }
+						className={ classnames( 'wordcamp-sessions__post', 'has-slug--' + post.slug ) }
 					>
 						<ItemTitle
-							className="wordcamp-session-title"
+							className="wordcamp-sessions__title"
 							headingLevel={ 3 }
 							title={ post.title.rendered.trim() }
 							link={ post.link }
@@ -273,34 +276,36 @@ export class BlockContent extends Component {
 							<FeaturedImage
 								imageData={ get( post, '_embedded.wp:featuredmedia[0]', {} ) }
 								width={ Number( featured_image_width ) }
-								className={ classnames( 'wordcamp-session-featured-image', 'align-' + image_align ) }
+								className={ classnames( 'wordcamp-sessions__featured-image', 'align-' + image_align ) }
 								imageLink={ post.link }
 							/>
 						}
 
 						{ 'none' !== content &&
 							<ItemHTMLContent
-								className={ classnames( 'wordcamp-session-content-' + content ) }
+								className={ classnames( 'wordcamp-sessions__content', 'is-' + content ) }
 								content={ 'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
 							/>
 						}
 
 						{ ( show_meta || show_category ) &&
-							<div className="wordcamp-item-meta wordcamp-session-details">
-								{ show_meta &&
-									<SessionMeta session={ post } />
-								}
-								{ show_category &&
+							<ItemMeta
+								className="wordcamp-sessions__details"
+								content={
+									show_meta &&
+									<SessionMeta session={ post }/>
+									+
+									show_category &&
 									<SessionCategory session={ post } />
 								}
-							</div>
+							/>
 						}
 
 						{ ( 'full' === content ) &&
 							<ItemPermalink
 								link={ post.link }
 								linkText={ __( 'Visit session page', 'wordcamporg' ) }
-								className="wordcamp-session-permalink"
+								className="wordcamp-sessions__permalink"
 							/>
 						}
 					</div>

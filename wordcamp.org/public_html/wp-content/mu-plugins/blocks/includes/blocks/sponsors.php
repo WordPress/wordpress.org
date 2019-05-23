@@ -46,7 +46,7 @@ function render( $attributes ) {
 	}
 
 	$container_classes = [
-		'wordcamp-sponsors-block',
+		'wordcamp-sponsors__posts',
 		sanitize_html_class( $attributes['className'] ),
 	];
 

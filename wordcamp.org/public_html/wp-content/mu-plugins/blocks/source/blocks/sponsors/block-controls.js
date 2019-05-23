@@ -13,7 +13,7 @@ const { __ }                  = wp.i18n;
 /**
  * Internal dependencies
  */
-import { PlaceholderSpecificMode } from '../../components/block-controls';
+import { PlaceholderSpecificMode, EditModeOption } from '../../components/block-controls';
 import { getOptionLabel }          from '../../components/item-select';
 import { BlockContent }            from './block-content';
 import { ContentSelect }           from './content-select';
@@ -61,29 +61,35 @@ export class BlockControls extends Component {
 			default :
 				output = (
 					<Placeholder
-						className={ classnames( 'wordcamp-block-edit-placeholder', 'wordcamp-block-edit-placeholder-no-mode' ) }
+						className={ classnames( 'wordcamp__edit-placeholder', 'has-no-mode' ) }
 						icon={ icon }
 						label={ LABEL }
 					>
-						<div className="wordcamp-block-edit-mode-option">
-							<Button
-								isDefault
-								isLarge
-								onClick={ () => {
-									setAttributes( { mode: 'all' } );
-								} }
-							>
-								{ getOptionLabel( 'all', options.mode ) }
-							</Button>
-						</div>
+						<EditModeOption
+							content={
+								<Button
+									isDefault
+									isLarge
+									onClick={ () => {
+										setAttributes( { mode : 'all' } );
+									} }
+								>
+									{ getOptionLabel( 'all', options.mode ) }
+								</Button>
+							}
+						/>
 
-						<div className="wordcamp-block-edit-mode-option">
-							<ContentSelect
-								icon={ icon }
-								label={ __( 'Choose specific sponsors or levels', 'wordcamporg' ) }
-								{ ...this.props }
-							/>
-						</div>
+						<EditModeOption
+							content={
+								<ContentSelect
+									icon={ icon }
+									label={ __(
+										'Choose specific sponsors or levels',
+										'wordcamporg' ) }
+									{ ...this.props }
+								/>
+							}
+						/>
 					</Placeholder>
 				);
 				break;

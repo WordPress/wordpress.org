@@ -43,7 +43,7 @@ function render_post_list( array $rendered_items, $layout = 'list', $columns = 1
 	?>
 		<ul class="<?php echo esc_attr( $container_classes ); ?>">
 			<?php foreach ( $rendered_items as $item ) : ?>
-				<li class="wordcamp-post-list-item wordcamp-clearfix">
+				<li class="wordcamp-post-list__post wordcamp-clearfix">
 					<?php echo wp_kses_post( $item ); ?>
 				</li>
 			<?php endforeach; ?>

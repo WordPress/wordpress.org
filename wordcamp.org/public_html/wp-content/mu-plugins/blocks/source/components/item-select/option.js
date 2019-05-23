@@ -138,7 +138,7 @@ export function Option( { avatar, icon, label, count } ) {
 	if ( avatar ) {
 		image = (
 			<AvatarImage
-				className="wordcamp-item-select-option-avatar"
+				className="wordcamp-item-select__option-avatar"
 				name={ label }
 				size={ 24 }
 				url={ avatar }
@@ -146,9 +146,9 @@ export function Option( { avatar, icon, label, count } ) {
 		);
 	} else if ( icon ) {
 		image = (
-			<div className="wordcamp-item-select-option-icon-container">
+			<div className="wordcamp-item-select__option-icon-container">
 				<Dashicon
-					className="wordcamp-item-select-option-icon"
+					className="wordcamp-item-select__option-icon"
 					icon={ icon }
 					size={ 16 }
 				/>
@@ -157,10 +157,10 @@ export function Option( { avatar, icon, label, count } ) {
 	}
 
 	const content = (
-		<span className="wordcamp-item-select-option-label">
+		<span className="wordcamp-item-select__option-label">
 			{ label }
 			{ 'undefined' !== typeof count &&
-				<span className="wordcamp-item-select-option-label-count">
+				<span className="wordcamp-item-select__option-label-count">
 					{ count }
 				</span>
 			}
@@ -168,7 +168,7 @@ export function Option( { avatar, icon, label, count } ) {
 	);
 
 	return (
-		<div className="wordcamp-item-select-option">
+		<div className="wordcamp-item-select__option">
 			{ image }
 			{ content }
 		</div>

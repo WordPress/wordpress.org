@@ -79,15 +79,15 @@ export class BlockContent extends Component {
 		return (
 			<PostList
 				{ ...this.props }
-				className="wordcamp-organizers-block"
+				className="wordcamp-organizers__posts"
 			>
 				{ posts.map( ( post ) => /* Note that organizer posts are not 'public', so there are no permalinks. */
 					<div
 						key={ post.slug }
-						className={ classnames( 'wordcamp-organizer', 'wordcamp-organizer-' + post.slug.trim() ) }
+						className={ classnames( 'wordcamp-organizers__post', 'has-slug-' + post.slug.trim() ) }
 					>
 						<ItemTitle
-							className="wordcamp-organizer-title"
+							className="wordcamp-organizers__title"
 							headingLevel={ 3 }
 							title={ post.title.rendered.trim() }
 						/>
@@ -103,7 +103,7 @@ export class BlockContent extends Component {
 
 						{ ( 'none' !== content ) &&
 							<ItemHTMLContent
-								className={ classnames( 'wordcamp-organizer-content-' + content ) }
+								className={ classnames( 'wordcamp-organizers__content', 'is-' + content ) }
 								content={  'full' === content ? post.content.rendered.trim() : post.excerpt.rendered.trim() }
 							/>
 						}

@@ -12,7 +12,7 @@
 		list-style: none;
 	}
 
-	.wordcamp-post-list-item {
+	.wordcamp-post-list__post {
 		margin: 0 0 1em 0;
 
 		.layout-list & {
@@ -36,7 +36,7 @@
 			min-height: 0;
 			min-width: 0;
 
-			& .wordcamp-post-list-item {
+			& .wordcamp-post-list__post {
 				overflow: hidden;
 				min-width: 0;
 			}

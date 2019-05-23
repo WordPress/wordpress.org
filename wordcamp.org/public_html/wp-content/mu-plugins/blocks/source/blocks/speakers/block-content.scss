@@ -1,4 +1,4 @@
-.wordcamp-speaker-sessions-list {
+.wordcamp-speakers__sessions-list {
 	// The double-ampersand will output the same class name twice in a row,
 	// which defeats an overzealous ul rule in Core's editor-blocks.css.
 	// https://css-tricks.com/the-sass-ampersand/#article-header-id-11
@@ -9,10 +9,10 @@
 }
 
 .wordcamp-speaker-session-link,
-.wordcamp-speaker-session-info {
+.wordcamp-speakers__session-info {
 	display: block;
 }
 
-.wordcamp-speaker-session-info {
+.wordcamp-speakers__session-info {
 	font-style: italic;
 }

@@ -53,7 +53,7 @@ function render( $attributes ) {
 	}
 
 	$container_classes = [
-		'wordcamp-speakers-block',
+		'wordcamp-speakers__posts',
 		sanitize_html_class( $attributes['className'] ),
 	];
 

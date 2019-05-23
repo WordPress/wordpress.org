@@ -48,7 +48,7 @@ export class PostList extends Component {
 				{ ( children ).map( ( childComponent ) =>
 					<li
 						key={ childComponent.key }
-						className={ classnames( 'wordcamp-post-list-item', 'wordcamp-clearfix' ) }
+						className={ classnames( 'wordcamp-post-list__post', 'wordcamp-clearfix' ) }
 					>
 						{ childComponent }
 					</li>
