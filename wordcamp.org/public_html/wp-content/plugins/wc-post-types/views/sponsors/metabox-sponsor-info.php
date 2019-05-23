@@ -132,6 +132,9 @@
 			id="_wcpt_sponsor_vat_number"
 			name="_wcpt_sponsor_vat_number"
 			value="<?php echo esc_attr( $vat_number ); ?>"
+
+			<?php // QuickBooks will reject values longer than 31 characters. ?>
+			maxlength="31"
 		/>
 
 		<span class="description">
