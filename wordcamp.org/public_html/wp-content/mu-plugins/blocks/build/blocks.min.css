@@ -1,3 +1,22 @@
+/*
+ * When adding elements here, make sure you leave a comment fully explaining which other element they're
+ * conflicting with.
+*/
+.wordcamp__edit-placeholder .components-placeholder__fieldset {
+  /*
+	 * By default the fieldset has a `z-index` of `1`, and `.editor-block-list__insertion-point` has a value of
+	 * `6`, so the `Add Block` button will stack on top of things like an expanded `ItemSelect` list. This
+	 * corrects that.
+	 */
+  z-index: 7; }
+
+.wordcamp__edit-mode-option {
+  flex-basis: 100%;
+  padding: 0.5em; }
+
+.wordcamp__post-meta {
+  margin: 0 0 1.5em; }
+
 .wordcamp-clearfix::after {
   content: "";
   display: table;
@@ -6,68 +25,58 @@
 .wordcamp-post-list.wordcamp-post-list {
   list-style: none; }
 
-.wordcamp-post-list .wordcamp-post-list-item {
+.wordcamp-post-list .wordcamp-post-list__post {
   margin: 0 0 1em 0; }
-  .layout-list .wordcamp-post-list .wordcamp-post-list-item {
+  .has-layout-list .wordcamp-post-list .wordcamp-post-list__post {
     margin-bottom: 1em; }
-    .layout-list .wordcamp-post-list .wordcamp-post-list-item:last-child {
+    .has-layout-list .wordcamp-post-list .wordcamp-post-list__post:last-child {
       margin-bottom: 0; }
 
 @media (min-width: 400px) {
-  .wordcamp-post-list.layout-grid {
+  .wordcamp-post-list.has-layout-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-column-gap: 1em;
     grid-row-gap: 1em;
-    /* Ensure columns maintain equal widths. */
-    /* https://stackoverflow.com/a/43312314 */
+    /*
+			 * Ensure columns maintain equal widths.
+			 * https://stackoverflow.com/a/43312314
+			 */
     min-height: 0;
     min-width: 0; }
-    .wordcamp-post-list.layout-grid .wordcamp-post-list-item {
+    .wordcamp-post-list.has-layout-grid .wordcamp-post-list__post {
       overflow: hidden;
       min-width: 0; } }
 
 @media (min-width: 600px) {
-  .wordcamp-post-list.layout-grid.grid-columns-3 {
+  .wordcamp-post-list.has-layout-grid.has-grid-columns-3 {
     grid-template-columns: repeat(3, 1fr); } }
 
 @media (min-width: 800px) {
-  .wordcamp-post-list.layout-grid.grid-columns-4 {
+  .wordcamp-post-list.has-layout-grid.has-grid-columns-4 {
     grid-template-columns: repeat(4, 1fr); } }
 
-.wordcamp-block-edit-mode-option {
-  flex-basis: 100%;
-  padding: 0.5em; }
-
-.wordcamp-block-edit-placeholder .components-placeholder__fieldset {
-  /*
-	 * By default the fieldset has a `z-index` of `1`, and `.editor-block-list__insertion-point` has a value of
-	 * `6`, so the `Add Block` button will stack on top of things like an expanded `ItemSelect` list. This
-	 * corrects that.
-	 */
-  z-index: 7; }
-
-.wordcamp-item-select-inner {
+.wordcamp-item-select__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   text-align: left; }
 
-.wordcamp-item-select-select {
+.wordcamp-item-select__select {
   flex-grow: 2;
   margin-right: 1em; }
-  .rtl .wordcamp-item-select-select {
+  .rtl .wordcamp-item-select__select {
     margin-left: 1em;
     margin-right: 0; }
-  .wordcamp-item-select-select input[type="text"]:focus {
+  .wordcamp-item-select__select input[type="text"]:focus {
     box-shadow: none; }
 
-.wordcamp-item-select-option {
+.wordcamp-item-select__option {
   display: flex;
   align-items: center; }
 
-.wordcamp-item-select-option-avatar,
-.wordcamp-item-select-option-icon-container {
+.wordcamp-item-select__option-avatar,
+.wordcamp-item-select__option-icon-container {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -75,11 +84,11 @@
   height: 24px;
   background-color: #f3f3f4; }
 
-.wordcamp-item-select-option-label {
+.wordcamp-item-select__option-label {
   margin: 0 0.5em;
   white-space: normal; }
 
-.wordcamp-item-select-option-label-count {
+.wordcamp-item-select__option-label-count {
   font-size: 0.6em;
   display: inline-block;
   border-radius: 50%;
@@ -94,47 +103,47 @@
 .wordcamp-item-select {
   width: 100%; }
 
-.wordcamp-image-container.align-left {
+.wordcamp-image__avatar-container.align-left,
+.wordcamp-image__featured-image-container.align-left {
   float: left;
   margin-right: 1em; }
 
-.wordcamp-image-container.align-center {
+.wordcamp-image__avatar-container.align-center,
+.wordcamp-image__featured-image-container.align-center {
   margin-left: auto;
   margin-right: auto;
   text-align: center; }
 
-.wordcamp-image-container.align-right {
+.wordcamp-image__avatar-container.align-right,
+.wordcamp-image__featured-image-container.align-right {
   float: right;
   margin-left: 1em; }
 
-img.wordcamp-featured-image {
+img.wordcamp-image__featured-image {
   max-width: 100%;
   max-height: 100%; }
 
-.wordcamp-image-size-preset-buttons {
+.wordcamp-image__size-preset-buttons {
   display: flex;
   justify-content: space-between; }
 
-.edit-post-settings-sidebar__panel-block .components-panel__body .wordcamp-image-size-range {
+.edit-post-settings-sidebar__panel-block .components-panel__body .wordcamp-image__size-range {
   margin-top: 1em; }
 
-.wordcamp-block-content-none {
+.wordcamp-block__posts.has-no-content {
   margin: 1em 0;
   text-align: center; }
-  .wordcamp-block-content-none .components-spinner {
+  .wordcamp-block__posts.has-no-content .components-spinner {
     float: none; }
 
-.wordcamp-item-meta {
-  margin: 0 0 1.5em; }
-
-.wordcamp-speaker-sessions-list.wordcamp-speaker-sessions-list {
+.wordcamp-speakers__sessions-list.wordcamp-speakers__sessions-list {
   list-style: none;
   margin: 0; }
 
 .wordcamp-speaker-session-link,
-.wordcamp-speaker-session-info {
+.wordcamp-speakers__session-info {
   display: block; }
 
-.wordcamp-speaker-session-info {
+.wordcamp-speakers__session-info {
   font-style: italic; }
 
