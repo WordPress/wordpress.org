@@ -12,7 +12,9 @@ define( __NAMESPACE__ . '\PLUGIN_URL', \plugins_url( '/', __FILE__ ) );
  * @return void
  */
 function load_includes() {
-	$includes_dir = PLUGIN_DIR . 'includes/';
+	$includes_dir   = PLUGIN_DIR . 'includes/';
+	$blocks_dir     = PLUGIN_DIR . 'source/blocks/';
+	$components_dir = PLUGIN_DIR . 'source/components/';
 
 	require_once $includes_dir . 'definitions.php';
 
@@ -20,15 +22,15 @@ function load_includes() {
 	require_once $includes_dir . 'utilities/content.php';
 
 	// Components.
-	require_once $includes_dir . 'components/block-content.php';
-	require_once $includes_dir . 'components/featured-image.php';
-	require_once $includes_dir . 'components/post-list.php';
+	require_once $components_dir . 'block-content/controller.php';
+	require_once $components_dir . 'image/controller.php';
+	require_once $components_dir . 'post-list/controller.php';
 
 	// Blocks.
-	require_once $includes_dir . 'blocks/organizers.php';
-	require_once $includes_dir . 'blocks/sessions.php';
-	require_once $includes_dir . 'blocks/speakers.php';
-	require_once $includes_dir . 'blocks/sponsors.php';
+	require_once $blocks_dir . 'organizers/controller.php';
+	require_once $blocks_dir . 'sessions/controller.php';
+	require_once $blocks_dir . 'speakers/controller.php';
+	require_once $blocks_dir . 'sponsors/controller.php';
 
 }
 

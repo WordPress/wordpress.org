@@ -16,6 +16,7 @@ import { BlockNoContent, ItemTitle, ItemHTMLContent } from '../../components/blo
 import { PostList }                                   from '../../components/post-list';
 import { filterEntities }                             from '../../data';
 
+
 /**
  * Component for displaying the block content.
  */

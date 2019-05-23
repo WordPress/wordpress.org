@@ -10,11 +10,6 @@ const { Placeholder } = wp.components;
 const { Fragment }    = wp.element;
 
 /**
- * Internal dependencies
- */
-import './style.scss';
-
-/**
  * Component for block controls when the block has a specific mode selected.
  *
  * @param {Object} props {

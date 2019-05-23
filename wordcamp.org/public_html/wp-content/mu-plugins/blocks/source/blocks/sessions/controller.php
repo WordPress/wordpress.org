@@ -48,7 +48,7 @@ function render( $attributes ) {
 
 	foreach ( $sessions as $session ) {
 		ob_start();
-		require Blocks\PLUGIN_DIR . 'views/session.php';
+		require Blocks\PLUGIN_DIR . 'source/blocks/sessions/view.php';
 		$rendered_session_posts[] = ob_get_clean();
 	}
 

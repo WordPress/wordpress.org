@@ -1,5 +1,5 @@
 <?php
-namespace WordCamp\Blocks\Speakers;
+namespace WordCamp\Blocks\Sponsors;
 
 use WordCamp\Blocks;
 use function WordCamp\Blocks\Components\{ render_post_list };
@@ -8,13 +8,11 @@ use function WordCamp\Blocks\Definitions\{ get_shared_definitions, get_shared_de
 defined( 'WPINC' ) || die();
 
 /**
- * Register block types and enqueue scripts.
- *
- * @return void
+ * Register sponsor block and enqueue scripts.
  */
 function init() {
 	register_block_type(
-		'wordcamp/speakers',
+		'wordcamp/sponsors',
 		[
 			'attributes'      => get_attributes_schema(),
 			'render_callback' => __NAMESPACE__ . '\render',
@@ -28,32 +26,27 @@ function init() {
 add_action( 'init', __NAMESPACE__ . '\init' );
 
 /**
- * Render the block on the front end.
+ * Renders content of Sponsor block based on attributes.
  *
- * @param array $attributes Block attributes.
+ * @param array $attributes
  *
- * @return string
+ * @return false|string
  */
 function render( $attributes ) {
 	$defaults   = wp_list_pluck( get_attributes_schema(), 'default' );
 	$attributes = wp_parse_args( $attributes, $defaults );
-	$speakers   = get_speaker_posts( $attributes );
 
-	$sessions = [];
-	if ( ! empty( $speakers ) && true === $attributes['show_session'] ) {
-		$sessions = get_speaker_sessions( wp_list_pluck( $speakers, 'ID' ) );
-	}
+	$sponsors               = get_sponsor_posts( $attributes );
+	$rendered_sponsor_posts = [];
 
-	$rendered_speaker_posts = [];
-
-	foreach ( $speakers as $speaker ) {
+	foreach ( $sponsors as $sponsor ) {
 		ob_start();
-		require Blocks\PLUGIN_DIR . 'views/speaker.php';
-		$rendered_speaker_posts[] = ob_get_clean();
+		require Blocks\PLUGIN_DIR . 'source/blocks/sponsors/view.php';
+		$rendered_sponsor_posts[] = ob_get_clean();
 	}
 
 	$container_classes = [
-		'wordcamp-speakers__posts',
+		'wordcamp-sponsors__posts',
 		sanitize_html_class( $attributes['className'] ),
 	];
 
@@ -61,7 +54,7 @@ function render( $attributes ) {
 		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
 	}
 
-	return render_post_list( $rendered_speaker_posts, $attributes['layout'], $attributes['grid_columns'], $container_classes );
+	return render_post_list( $rendered_sponsor_posts, $attributes['layout'], $attributes['grid_columns'], $container_classes );
 }
 
 /**
@@ -72,7 +65,7 @@ function render( $attributes ) {
  * @return array
  */
 function add_script_data( array $data ) {
-	$data['speakers'] = [
+	$data['sponsors'] = [
 		'schema'  => get_attributes_schema(),
 		'options' => get_options(),
 	];
@@ -83,22 +76,22 @@ function add_script_data( array $data ) {
 add_filter( 'wordcamp_blocks_script_data', __NAMESPACE__ . '\add_script_data' );
 
 /**
- * Get the posts to display in the block.
+ * Return sponsor posts what will rendered based on attributes.
  *
  * @param array $attributes
  *
  * @return array
  */
-function get_speaker_posts( array $attributes ) {
+function get_sponsor_posts( $attributes ) {
 	if ( empty( $attributes['mode'] ) ) {
 		return [];
 	}
 
-	$post_args = [
-		'post_type'      => 'wcb_speaker',
+	$post_args = array(
+		'post_type'      => 'wcb_sponsor',
 		'post_status'    => 'publish',
-		'posts_per_page' => -1,
-	];
+		'posts_per_page' => - 1,
+	);
 
 	$sort = explode( '_', $attributes['sort'] );
 
@@ -108,11 +101,11 @@ function get_speaker_posts( array $attributes ) {
 	}
 
 	switch ( $attributes['mode'] ) {
-		case 'wcb_speaker':
+		case 'wcb_sponsor':
 			$post_args['post__in'] = $attributes['item_ids'];
 			break;
 
-		case 'wcb_speaker_group':
+		case 'wcb_sponsor_level':
 			$post_args['tax_query'] = [
 				[
 					'taxonomy' => $attributes['mode'],
@@ -127,46 +120,7 @@ function get_speaker_posts( array $attributes ) {
 }
 
 /**
- * Get session posts grouped by speaker.
- *
- * @param array $speaker_ids
- *
- * @return array
- */
-function get_speaker_sessions( array $speaker_ids ) {
-	$sessions_by_speaker = [];
-
-	$session_args = [
-		'post_type'      => 'wcb_session',
-		'post_status'    => 'publish',
-		'posts_per_page' => -1,
-		'meta_key'       => '_wcpt_session_time',
-		'orderby'        => 'meta_value_num',
-	];
-
-	$session_posts = get_posts( $session_args );
-
-	foreach ( $session_posts as $session ) {
-		$session_speaker_ids = get_post_meta( $session->ID, '_wcpt_speaker_id', false );
-
-		foreach ( $session_speaker_ids as $speaker_id ) {
-			$speaker_id = absint( $speaker_id );
-
-			if ( in_array( $speaker_id, $speaker_ids, true ) ) {
-				if ( ! isset( $sessions_by_speaker[ $speaker_id ] ) ) {
-					$sessions_by_speaker[ $speaker_id ] = [];
-				}
-
-				$sessions_by_speaker[ $speaker_id ][] = $session;
-			}
-		}
-	}
-
-	return $sessions_by_speaker;
-}
-
-/**
- * Get the schema for the block's attributes.
+ * Get attribute schema for Sponsor block
  *
  * @return array
  */
@@ -182,18 +136,18 @@ function get_attributes_schema() {
 			'attribute'
 		),
 		[
-			'align'        => get_shared_definition( 'align_block', 'attribute' ),
-			'avatar_align' => get_shared_definition( 'align_image', 'attribute' ),
-			'avatar_size'  => get_shared_definition( 'image_size_avatar', 'attribute' ),
-			'className'    => get_shared_definition( 'string_empty', 'attribute' ),
-			'mode'         => [
+			'align'                => get_shared_definition( 'align_block', 'attribute' ),
+			'className'            => get_shared_definition( 'string_empty', 'attribute' ),
+			'featured_image_width' => get_shared_definition( 'image_size', 'attribute', [ 'default' => 600 ] ),
+			'image_align'          => get_shared_definition( 'align_image', 'attribute' ),
+			'mode'                 => [
 				'type'    => 'string',
 				'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),
 				'default' => '',
 			],
-			'show_avatars' => get_shared_definition( 'boolean_true', 'attribute' ),
-			'show_session' => get_shared_definition( 'boolean_false', 'attribute' ),
-			'sort'         => [
+			'show_logo'            => get_shared_definition( 'boolean_true', 'attribute' ),
+			'show_name'            => get_shared_definition( 'boolean_true', 'attribute' ),
+			'sort'                 => [
 				'type'    => 'string',
 				'enum'    => wp_list_pluck( get_options( 'sort' ), 'value' ),
 				'default' => 'title_asc',
@@ -229,16 +183,16 @@ function get_options( $type = '' ) {
 					'value' => '',
 				],
 				[
-					'label' => _x( 'List all speakers', 'mode option', 'wordcamporg' ),
+					'label' => _x( 'List all sponsors', 'mode option', 'wordcamporg' ),
 					'value' => 'all',
 				],
 				[
-					'label' => _x( 'Choose speakers', 'mode option', 'wordcamporg' ),
-					'value' => 'wcb_speaker',
+					'label' => _x( 'Choose sponsors', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_sponsor',
 				],
 				[
-					'label' => _x( 'Choose groups', 'mode option', 'wordcamporg' ),
-					'value' => 'wcb_speaker_group',
+					'label' => _x( 'Choose sponsor level', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_sponsor_level',
 				],
 			],
 			'sort' => array_merge(

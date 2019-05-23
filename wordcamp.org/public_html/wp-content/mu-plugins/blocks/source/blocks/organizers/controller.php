@@ -1,5 +1,5 @@
 <?php
-namespace WordCamp\Blocks\Sponsors;
+namespace WordCamp\Blocks\Organizers;
 
 use WordCamp\Blocks;
 use function WordCamp\Blocks\Components\{ render_post_list };
@@ -7,12 +7,15 @@ use function WordCamp\Blocks\Definitions\{ get_shared_definitions, get_shared_de
 
 defined( 'WPINC' ) || die();
 
+
 /**
- * Register sponsor block and enqueue scripts.
+ * Register block types and enqueue scripts.
+ *
+ * @return void
  */
 function init() {
 	register_block_type(
-		'wordcamp/sponsors',
+		'wordcamp/organizers',
 		[
 			'attributes'      => get_attributes_schema(),
 			'render_callback' => __NAMESPACE__ . '\render',
@@ -22,31 +25,30 @@ function init() {
 		]
 	);
 }
-
 add_action( 'init', __NAMESPACE__ . '\init' );
 
 /**
- * Renders content of Sponsor block based on attributes.
+ * Render the block on the front end.
  *
- * @param array $attributes
+ * @param array $attributes Block attributes.
  *
- * @return false|string
+ * @return string
  */
 function render( $attributes ) {
 	$defaults   = wp_list_pluck( get_attributes_schema(), 'default' );
 	$attributes = wp_parse_args( $attributes, $defaults );
 
-	$sponsors               = get_sponsor_posts( $attributes );
-	$rendered_sponsor_posts = [];
+	$organizers               = get_organizer_posts( $attributes );
+	$rendered_organizer_posts = [];
 
-	foreach ( $sponsors as $sponsor ) {
+	foreach ( $organizers as $organizer ) {
 		ob_start();
-		require Blocks\PLUGIN_DIR . 'views/sponsor.php';
-		$rendered_sponsor_posts[] = ob_get_clean();
+		require Blocks\PLUGIN_DIR . 'source/blocks/organizers/view.php';
+		$rendered_organizer_posts[] = ob_get_clean();
 	}
 
 	$container_classes = [
-		'wordcamp-sponsors__posts',
+		'wordcamp-organizers__posts',
 		sanitize_html_class( $attributes['className'] ),
 	];
 
@@ -54,7 +56,7 @@ function render( $attributes ) {
 		$container_classes[] = 'align' . sanitize_html_class( $attributes['align'] );
 	}
 
-	return render_post_list( $rendered_sponsor_posts, $attributes['layout'], $attributes['grid_columns'], $container_classes );
+	return render_post_list( $rendered_organizer_posts, $attributes['layout'], $attributes['grid_columns'], $container_classes );
 }
 
 /**
@@ -65,33 +67,32 @@ function render( $attributes ) {
  * @return array
  */
 function add_script_data( array $data ) {
-	$data['sponsors'] = [
+	$data['organizers'] = [
 		'schema'  => get_attributes_schema(),
 		'options' => get_options(),
 	];
 
 	return $data;
 }
-
 add_filter( 'wordcamp_blocks_script_data', __NAMESPACE__ . '\add_script_data' );
 
 /**
- * Return sponsor posts what will rendered based on attributes.
+ * Get the posts to display in the block.
  *
  * @param array $attributes
  *
  * @return array
  */
-function get_sponsor_posts( $attributes ) {
+function get_organizer_posts( array $attributes ) {
 	if ( empty( $attributes['mode'] ) ) {
 		return [];
 	}
 
-	$post_args = array(
-		'post_type'      => 'wcb_sponsor',
+	$post_args = [
+		'post_type'      => 'wcb_organizer',
 		'post_status'    => 'publish',
-		'posts_per_page' => - 1,
-	);
+		'posts_per_page' => -1,
+	];
 
 	$sort = explode( '_', $attributes['sort'] );
 
@@ -101,11 +102,11 @@ function get_sponsor_posts( $attributes ) {
 	}
 
 	switch ( $attributes['mode'] ) {
-		case 'wcb_sponsor':
+		case 'wcb_organizer':
 			$post_args['post__in'] = $attributes['item_ids'];
 			break;
 
-		case 'wcb_sponsor_level':
+		case 'wcb_organizer_team':
 			$post_args['tax_query'] = [
 				[
 					'taxonomy' => $attributes['mode'],
@@ -120,7 +121,7 @@ function get_sponsor_posts( $attributes ) {
 }
 
 /**
- * Get attribute schema for Sponsor block
+ * Get the schema for the block's attributes.
  *
  * @return array
  */
@@ -136,18 +137,17 @@ function get_attributes_schema() {
 			'attribute'
 		),
 		[
-			'align'                => get_shared_definition( 'align_block', 'attribute' ),
-			'className'            => get_shared_definition( 'string_empty', 'attribute' ),
-			'featured_image_width' => get_shared_definition( 'image_size', 'attribute', [ 'default' => 600 ] ),
-			'image_align'          => get_shared_definition( 'align_image', 'attribute' ),
-			'mode'                 => [
+			'align'        => get_shared_definition( 'align_block', 'attribute' ),
+			'avatar_align' => get_shared_definition( 'align_image', 'attribute' ),
+			'avatar_size'  => get_shared_definition( 'image_size_avatar', 'attribute' ),
+			'className'    => get_shared_definition( 'string_empty', 'attribute' ),
+			'mode'         => [
 				'type'    => 'string',
 				'enum'    => wp_list_pluck( get_options( 'mode' ), 'value' ),
 				'default' => '',
 			],
-			'show_logo'            => get_shared_definition( 'boolean_true', 'attribute' ),
-			'show_name'            => get_shared_definition( 'boolean_true', 'attribute' ),
-			'sort'                 => [
+			'show_avatars' => get_shared_definition( 'boolean_true', 'attribute' ),
+			'sort'         => [
 				'type'    => 'string',
 				'enum'    => wp_list_pluck( get_options( 'sort' ), 'value' ),
 				'default' => 'title_asc',
@@ -183,16 +183,16 @@ function get_options( $type = '' ) {
 					'value' => '',
 				],
 				[
-					'label' => _x( 'List all sponsors', 'mode option', 'wordcamporg' ),
+					'label' => _x( 'List all organizers', 'mode option', 'wordcamporg' ),
 					'value' => 'all',
 				],
 				[
-					'label' => _x( 'Choose sponsors', 'mode option', 'wordcamporg' ),
-					'value' => 'wcb_sponsor',
+					'label' => _x( 'Choose organizers', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_organizer',
 				],
 				[
-					'label' => _x( 'Choose sponsor level', 'mode option', 'wordcamporg' ),
-					'value' => 'wcb_sponsor_level',
+					'label' => _x( 'Choose teams', 'mode option', 'wordcamporg' ),
+					'value' => 'wcb_organizer_team',
 				],
 			],
 			'sort' => array_merge(
@@ -203,11 +203,7 @@ function get_options( $type = '' ) {
 	);
 
 	if ( $type ) {
-		if ( ! empty( $options[ $type ] ) ) {
-			return $options[ $type ];
-		} else {
-			return [];
-		}
+		return empty( $options[ $type ] ) ? [] : $options[ $type ];
 	}
 
 	return $options;

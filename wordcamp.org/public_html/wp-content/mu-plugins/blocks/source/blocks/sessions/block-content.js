@@ -13,7 +13,7 @@ const { __ }        = wp.i18n;
 /**
  * Internal dependencies
  */
-import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent, ItemMeta } from '../../components/block-content';
+import { ItemTitle, ItemHTMLContent, ItemPermalink, BlockNoContent } from '../../components/block-content';
 import { FeaturedImage }                                             from '../../components/image';
 import { PostList }                                                  from '../../components/post-list';
 import { filterEntities }                                            from '../../data';
@@ -58,12 +58,9 @@ function SessionSpeakers( { session } ) {
 	);
 
 	return (
-		<ItemMeta
-			className={ "wordcamp-sessions__speakers" }
-			content={
-				{ speakers }
-			}
-		/>
+		<div className="wordcamp__post-meta wordcamp-sessions__speakers">
+			{ speakers }
+		</div>
 	);
 }
 
@@ -289,16 +286,15 @@ export class BlockContent extends Component {
 						}
 
 						{ ( show_meta || show_category ) &&
-							<ItemMeta
-								className="wordcamp-sessions__details"
-								content={
-									show_meta &&
-									<SessionMeta session={ post }/>
-									+
-									show_category &&
-									<SessionCategory session={ post } />
-								}
-							/>
+						<div
+							className="wordcamp__post-meta wordcamp-sessions__details">
+							{ show_meta &&
+							<SessionMeta session={ post }/>
+							}
+							{ show_category &&
+							<SessionCategory session={ post }/>
+							}
+						</div>
 						}
 
 						{ ( 'full' === content ) &&

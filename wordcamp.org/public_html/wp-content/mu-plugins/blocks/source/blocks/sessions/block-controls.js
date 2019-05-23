@@ -13,7 +13,7 @@ const { __ }                  = wp.i18n;
 /**
  * Internal dependencies
  */
-import { PlaceholderSpecificMode, EditModeOption } from '../../components/block-controls';
+import { PlaceholderSpecificMode } from '../../components/block-controls';
 import { getOptionLabel }          from '../../components/item-select';
 import { BlockContent }            from './block-content';
 import { ContentSelect }           from './content-select';
@@ -66,31 +66,27 @@ export class BlockControls extends Component {
 						icon={ icon }
 						label={ LABEL }
 					>
-						<EditModeOption
-							content={
-								<Button
-									isDefault
-									isLarge
-									onClick={ () => {
-										setAttributes( { mode : 'all' } );
-									} }
-								>
-									{ getOptionLabel( 'all', options.mode ) }
-								</Button>
-							}
-						/>
+						<div className={ 'wordcamp__edit-mode-option' } >
+							<Button
+								isDefault
+								isLarge
+								onClick={ () => {
+									setAttributes( { mode : 'all' } );
+								} }
+							>
+								{ getOptionLabel( 'all', options.mode ) }
+							</Button>
+						</div>
 
-						<EditModeOption
-							content={
-								<ContentSelect
-									icon={ icon }
-									label={ __(
-										'Choose specific sessions, tracks, or categories',
-										'wordcamporg' ) }
-									{ ...this.props }
-								/>
-							}
-						/>
+						<div className={ 'wordcamp__edit-mode-option' }>
+							<ContentSelect
+								icon={ icon }
+								label={ __(
+									'Choose specific sessions, tracks, or categories',
+									'wordcamporg' ) }
+								{ ...this.props }
+							/>
+						</div>
 					</Placeholder>
 				);
 				break;
