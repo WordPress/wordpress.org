@@ -1616,15 +1616,19 @@ body.trac .attachment {
 	}
 }
 
+/* Shrink logo to make room for navigation */
+@media screen and ( max-width: 820px ) {
+	#header-inner h1 a {
+		width: 65px !important;
+	}
+}
+
 /* Do not fix #header for non-desktops */
 @media screen and ( max-width: 782px ) {
 	#header {
 		top: 0;
 		z-index: 999999;
 		position: absolute;
-	}
-	#header-inner h1 a {
-		width: 65px !important;
 	}
 	#wpadminbar {
 		height: 56px !important;
@@ -1680,6 +1684,9 @@ body.trac .attachment {
 		color: #000;
 		text-shadow: none;
 		border-radius: 0;
+	}
+	#header #nav #bb-nav li.current a {
+		color: #fff;
 	}
 	#header #bb-nav,
 	#bbpress-forums .bbp-pagination-count,
