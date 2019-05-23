@@ -1,7 +1,7 @@
-./public_html/wp-content/mu-plugins/blocks/assets/blocks.min*
 .docker/data/
-
 .docker/database
+
+public_html/wp-content/mu-plugins/blocks/build
 
 public_html/wp-content/plugins/akismet
 public_html/wp-content/plugins/buddypress
