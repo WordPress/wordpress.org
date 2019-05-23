@@ -15,7 +15,7 @@
 	.wordcamp-post-list__post {
 		margin: 0 0 1em 0;
 
-		.layout-list & {
+		.has-layout-list & {
 			margin-bottom: 1em;
 
 			&:last-child {
@@ -25,7 +25,7 @@
 	}
 
 	@media ( min-width: 400px ) {
-		&.layout-grid {
+		&.has-layout-grid {
 			display: grid;
 			grid-template-columns: repeat( 2, 1fr );
 			grid-column-gap: 1em;
@@ -44,13 +44,13 @@
 	}
 
 	@media ( min-width: 600px ) {
-		&.layout-grid.grid-columns-3 {
+		&.has-layout-grid.has-grid-columns-3 {
 			grid-template-columns: repeat( 3, 1fr );
 		}
 	}
 
 	@media ( min-width: 800px ) {
-		&.layout-grid.grid-columns-4 {
+		&.has-layout-grid.has-grid-columns-4 {
 			grid-template-columns: repeat( 4, 1fr );
 		}
 	}

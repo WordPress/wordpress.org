@@ -24,7 +24,7 @@ function render_post_list( array $rendered_items, $layout = 'list', $columns = 1
 		[
 			'wordcamp-block',
 			'wordcamp-post-list',
-			'layout-' . sanitize_html_class( $layout )
+			'has-layout-' . sanitize_html_class( $layout )
 		],
 		$container_classes
 	);
@@ -34,7 +34,7 @@ function render_post_list( array $rendered_items, $layout = 'list', $columns = 1
 			$columns = 2;
 		}
 
-		$container_classes[] = 'grid-columns-' . absint( $columns );
+		$container_classes[] = 'has-grid-columns-' . absint( $columns );
 	}
 
 	$container_classes = render_class_string( $container_classes );

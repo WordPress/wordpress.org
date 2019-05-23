@@ -31,12 +31,12 @@ export class PostList extends Component {
 		const containerClasses = [
 			'wordcamp-block',
 			'wordcamp-post-list',
-			'layout-' + layout,
+			'has-layout-' + layout,
 			className,
 		];
 
 		if ( 'grid' === layout ) {
-			containerClasses.push( 'grid-columns-' + Number( grid_columns ) );
+			containerClasses.push( 'has-grid-columns-' + Number( grid_columns ) );
 		}
 
 		if ( align ) {
