@@ -27,12 +27,14 @@
 	@media ( min-width: 400px ) {
 		&.has-layout-grid {
 			display: grid;
-			grid-template-columns: repeat( 2, 1fr );
+			grid-template-columns: repeat(2, 1fr);
 			grid-column-gap: 1em;
 			grid-row-gap: 1em;
 
-			/* Ensure columns maintain equal widths. */
-			/* https://stackoverflow.com/a/43312314 */
+			/*
+			 * Ensure columns maintain equal widths.
+			 * https://stackoverflow.com/a/43312314
+			 */
 			min-height: 0;
 			min-width: 0;
 
@@ -45,13 +47,13 @@
 
 	@media ( min-width: 600px ) {
 		&.has-layout-grid.has-grid-columns-3 {
-			grid-template-columns: repeat( 3, 1fr );
+			grid-template-columns: repeat(3, 1fr);
 		}
 	}
 
 	@media ( min-width: 800px ) {
 		&.has-layout-grid.has-grid-columns-4 {
-			grid-template-columns: repeat( 4, 1fr );
+			grid-template-columns: repeat(4, 1fr);
 		}
 	}
 }

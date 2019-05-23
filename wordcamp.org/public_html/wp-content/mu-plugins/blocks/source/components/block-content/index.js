@@ -26,7 +26,7 @@ import './style.scss';
  */
 export function BlockNoContent( { loading } ) {
 	return (
-		<div className="wordcamp-block_posts has-no-content">
+		<div className="wordcamp-block__posts has-no-content">
 			{ loading ?
 				<Spinner /> :
 				__( 'No content found.', 'wordcamporg' )

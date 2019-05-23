@@ -70,14 +70,14 @@ export class BlockControls extends Component {
 								isDefault
 								isLarge
 								onClick={ () => {
-									setAttributes( { mode : 'all' } );
+									setAttributes( { mode: 'all' } );
 								} }
 							>
 								{ getOptionLabel( 'all', options.mode ) }
 							</Button>
 						</div>
 
-						<div className={ 'wordcamp__edit-mode-option'} >
+						<div className={ 'wordcamp__edit-mode-option' } >
 							<ContentSelect
 								icon={ icon }
 								label={ __(

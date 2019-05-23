@@ -2,7 +2,7 @@
  * WordPress dependencies.
  */
 const { InspectorControls: CoreInspectorControlsContainer } = wp.blockEditor;
-const { PanelBody, PanelRow, ToggleControl, SelectControl } = wp.components;
+const { PanelBody, ToggleControl, SelectControl }           = wp.components;
 const { Component }                                         = wp.element;
 const { __ }                                                = wp.i18n;
 

@@ -19,8 +19,9 @@ import './inspector-controls.scss';
 /**
  * Component for a UI control for image size.
  *
- * This control assumes the image only has one adjustable size dimension. For avatars, this is because the images are
- * always square. For featured images, this is because the width is adjustable, while the height is automatically
+ * This control assumes the image only has one adjustable size dimension. For
+ * avatars, this is because the images are always square. For featured images,
+ * this is because the width is adjustable, while the height is automatically
  * calculated to maintain the correct aspect ratio.
  *
  * @param {Object} props {
@@ -102,7 +103,7 @@ export class ImageSizeControl extends Component {
 										{ shortName || name }
 									</Button>
 								);
-							})}
+							} ) }
 						</ButtonGroup>
 					}
 
@@ -146,12 +147,12 @@ export class ImageSizeControl extends Component {
  * @return {Element}
  */
 export function ImageAlignmentControl( {
-    className,
-    label,
-    help,
-    value,
-    onChange,
-    alignOptions,
+	className,
+	label,
+	help,
+	value,
+	onChange,
+	alignOptions,
 } ) {
 	return (
 		<BaseControl
@@ -257,5 +258,3 @@ export class ImageInspectorPanel extends Component {
 		);
 	}
 }
-
-

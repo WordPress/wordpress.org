@@ -89,7 +89,7 @@ function SessionMeta( { session } ) {
 				(
 					<span
 						key={ firstTrack.id }
-						className={ classnames( 'wordcamp-sessions__track', `slug-${firstTrack.slug.trim()}` ) }
+						className={ classnames( 'wordcamp-sessions__track', `slug-${ firstTrack.slug.trim() }` ) }
 					>
 						{ firstTrack.name.trim() }
 					</span>
@@ -136,7 +136,7 @@ function SessionCategory( { session } ) {
 				return (
 					<span
 						key={ term.slug }
-						className={ classnames( 'wordcamp-sessions__category', `slug-${term.slug}` ) }
+						className={ classnames( 'wordcamp-sessions__category', `slug-${ term.slug }` ) }
 					>
 						{ term.name.trim() }
 					</span>
@@ -256,7 +256,7 @@ export class BlockContent extends Component {
 				{ posts.map( ( post ) =>
 					<div
 						key={ post.slug }
-						className={ classnames( 'wordcamp-sessions__post', `slug-${post.slug}` ) }
+						className={ classnames( 'wordcamp-sessions__post', `slug-${ post.slug }` ) }
 					>
 						<ItemTitle
 							className="wordcamp-sessions__title"
@@ -286,13 +286,12 @@ export class BlockContent extends Component {
 						}
 
 						{ ( show_meta || show_category ) &&
-						<div
-							className="wordcamp__post-meta wordcamp-sessions__details">
+						<div className="wordcamp__post-meta wordcamp-sessions__details">
 							{ show_meta &&
-							<SessionMeta session={ post }/>
+								<SessionMeta session={ post } />
 							}
 							{ show_category &&
-							<SessionCategory session={ post }/>
+								<SessionCategory session={ post } />
 							}
 						</div>
 						}

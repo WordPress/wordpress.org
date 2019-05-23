@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import * as organizers from './organizers';
 import * as sessions   from './sessions';
 import * as speakers   from './speakers';

@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies.
  */
-const { PanelBody, PanelRow, RangeControl } = wp.components;
+const { PanelBody, RangeControl } = wp.components;
 const { Component, Fragment }               = wp.element;
 const { __ }                                = wp.i18n;
 

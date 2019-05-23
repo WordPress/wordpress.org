@@ -19,7 +19,7 @@ function load_includes() {
 	require_once $includes_dir . 'definitions.php';
 
 	// Utilities.
-	require_once $includes_dir . 'utilities/content.php';
+	require_once $includes_dir . 'content.php';
 
 	// Components.
 	require_once $components_dir . 'block-content/controller.php';

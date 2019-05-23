@@ -71,7 +71,7 @@ export class BlockControls extends Component {
 								isDefault
 								isLarge
 								onClick={ () => {
-									setAttributes( { mode : 'all' } );
+									setAttributes( { mode: 'all' } );
 								} }
 							>
 								{ getOptionLabel( 'all', options.mode ) }

@@ -16,7 +16,6 @@ import { BlockNoContent, ItemTitle, ItemHTMLContent } from '../../components/blo
 import { PostList }                                   from '../../components/post-list';
 import { filterEntities }                             from '../../data';
 
-
 /**
  * Component for displaying the block content.
  */
@@ -80,12 +79,12 @@ export class BlockContent extends Component {
 		return (
 			<PostList
 				{ ...this.props }
-				className="wordcamp-organizerss"
+				className="wordcamp-organizers"
 			>
 				{ posts.map( ( post ) => /* Note that organizer posts are not 'public', so there are no permalinks. */
 					<div
 						key={ post.slug }
-						className={ classnames( 'wordcamp-organizers__post', `slug-${post.slug.trim()}` ) }
+						className={ classnames( 'wordcamp-organizers__post', `slug-${ post.slug.trim() }` ) }
 					>
 						<ItemTitle
 							className="wordcamp-organizers__title"
