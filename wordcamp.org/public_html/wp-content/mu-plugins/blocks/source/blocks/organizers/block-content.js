@@ -80,7 +80,7 @@ export class BlockContent extends Component {
 		return (
 			<PostList
 				{ ...this.props }
-				className="wordcamp-organizers__posts"
+				className="wordcamp-organizerss"
 			>
 				{ posts.map( ( post ) => /* Note that organizer posts are not 'public', so there are no permalinks. */
 					<div

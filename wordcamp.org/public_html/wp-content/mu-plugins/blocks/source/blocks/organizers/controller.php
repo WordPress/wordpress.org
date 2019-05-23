@@ -48,7 +48,7 @@ function render( $attributes ) {
 	}
 
 	$container_classes = [
-		'wordcamp-organizers__posts',
+		'wordcamp-organizers',
 		sanitize_html_class( $attributes['className'] ),
 	];
 

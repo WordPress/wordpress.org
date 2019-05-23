@@ -251,7 +251,7 @@ export class BlockContent extends Component {
 		return (
 			<PostList
 				{ ...this.props }
-				className="wordcamp-sessions__posts"
+				className="wordcamp-sessions"
 			>
 				{ posts.map( ( post ) =>
 					<div
