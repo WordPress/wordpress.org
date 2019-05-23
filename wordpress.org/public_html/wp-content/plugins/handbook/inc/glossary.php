@@ -90,23 +90,27 @@ class WPorg_Handbook_Glossary {
 	static function shortcode() {
 		$glossary = new WP_Query( array( 'post_status' => 'publish', 'post_type' => 'glossary', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC' ) );
 
-		$content = "<style> .glossary-entry { margin-top: -50px; padding-top: 50px; } </style>\n";
+		$content = "<style>dl.glossary-list dd { margin-top: -50px; padding-top: 50px; }</style>\n";
+		$content .= '<dl class="glossary-list">';
 		foreach ( $glossary->posts as $post ) {
-			$entry = '<strong>' . apply_filters( 'the_title', $post->post_title ) . ':</strong> ' . $post->post_content;
+			$entry = '<dt id="' . esc_attr( $post->post_name ) . '">' . apply_filters( 'the_title', $post->post_title ) . '</dt>';
+			$entry .= '<dd>' . $post->post_content;
 
 			$edit = get_edit_post_link( $post );
 			if ( $edit ) {
 				$edit = ' - <a href="' . esc_url( $edit ) . '">edit</a>';
 			}
-			$entry .= ' <a href="' . esc_url( get_permalink( $post ) ) . '">#</a>' . $edit;
+			$entry .= ' <a href="' . esc_url( get_permalink( $post ) ) . '">#</a>' . $edit . '</dd>';
 
 			$entry = apply_filters( 'the_content', $entry );
-			$entry = '<div class="glossary-entry" id="' . esc_attr( $post->post_name ) . '">' . $entry . '</div>' . "\n";
 
-			$content .= $entry;
+			$content .= $entry . "\n";
 		}
+		$content .= '</dl>';
+
 		if ( current_user_can( get_post_type_object('glossary')->cap->edit_posts ) )
 			$content .= '<p><a href="' . admin_url( 'post-new.php?post_type=glossary' ) . '">add new entry</a>';
+
 		return $content;
 	}
 
