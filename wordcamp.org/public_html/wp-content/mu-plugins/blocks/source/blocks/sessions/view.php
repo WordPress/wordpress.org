@@ -14,7 +14,7 @@ defined( 'WPINC' ) || die();
 setup_postdata( $session );
 ?>
 
-<div class="wordcamp-sessions__post has-slug-<?php echo sanitize_html_class( $session->post_name ); ?>">
+<div class="wordcamp-sessions__post slug-<?php echo sanitize_html_class( $session->post_name ); ?>">
 	<?php echo wp_kses_post(
 		render_item_title(
 			get_the_title( $session ),
@@ -83,7 +83,7 @@ setup_postdata( $session );
 							esc_html( date_i18n( get_option( 'date_format' ), $session->_wcpt_session_time ) ),
 							esc_html( date_i18n( get_option( 'time_format' ), $session->_wcpt_session_time ) ),
 							sprintf(
-								'<span class="wordcamp-sessions__track has-slug-%s">%s</span>',
+								'<span class="wordcamp-sessions__track slug-%s">%s</span>',
 								esc_attr( $tracks[0]->slug ),
 								esc_html( $tracks[0]->name )
 							)
@@ -104,7 +104,7 @@ setup_postdata( $session );
 				$categories = array_map(
 					function( $category ) {
 						return sprintf(
-							'<span class="wordcamp-sessions__category has-slug-%s">%s</span>',
+							'<span class="wordcamp-sessions__category slug-%s">%s</span>',
 							esc_attr( $category->slug ),
 							esc_html( $category->name )
 						);

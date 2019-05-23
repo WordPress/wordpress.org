@@ -85,7 +85,7 @@ export class BlockContent extends Component {
 				{ posts.map( ( post ) => /* Note that organizer posts are not 'public', so there are no permalinks. */
 					<div
 						key={ post.slug }
-						className={ classnames( 'wordcamp-organizers__post', 'has-slug-' + post.slug.trim() ) }
+						className={ classnames( 'wordcamp-organizers__post', `slug-${post.slug.trim()}` ) }
 					>
 						<ItemTitle
 							className="wordcamp-organizers__title"

@@ -14,7 +14,7 @@ defined( 'WPINC' ) || die();
 setup_postdata( $speaker ); // This is necessary for generating an excerpt from content if the excerpt field is empty.
 ?>
 
-<div class="wordcamp-speakers__post has-slug-<?php echo esc_attr( $speaker->post_name ); ?>">
+<div class="wordcamp-speakers__post slug-<?php echo esc_attr( $speaker->post_name ); ?>">
 	<?php echo wp_kses_post(
 		render_item_title(
 			get_the_title( $speaker ),

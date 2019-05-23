@@ -166,7 +166,7 @@ export class BlockContent extends Component {
 						key={ post.slug }
 						className={ classnames(
 							'wordcamp-speakers__post',
-							'has-slug-' + post.slug,
+							`slug-${post.slug}`,
 						) }
 					>
 						<ItemTitle

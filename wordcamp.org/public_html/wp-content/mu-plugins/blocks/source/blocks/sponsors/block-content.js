@@ -86,7 +86,7 @@ export class BlockContent extends Component {
 				{ posts.map( ( post ) =>
 					<div
 						key={ post.slug }
-						className={ classnames( 'wordcamp-sponsors__post', 'has-slug-' + post.slug ) }
+						className={ classnames( 'wordcamp-sponsors__post', `slug-{post.slug}` ) }
 					>
 						{ show_name &&
 							<ItemTitle

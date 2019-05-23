@@ -15,7 +15,7 @@ defined( 'WPINC' ) || die();
 setup_postdata( $organizer ); // This is necessary for generating an excerpt from content if the excerpt field is empty.
 ?>
 
-<div class="wordcamp-organizer wordcamp-organizers__post has-slug-<?php echo esc_attr( $organizer->post_name ); ?>">
+<div class="wordcamp-organizer wordcamp-organizers__post slug-<?php echo esc_attr( $organizer->post_name ); ?>">
 	<?php echo wp_kses_post(
 		render_item_title(
 			get_the_title( $organizer ),
