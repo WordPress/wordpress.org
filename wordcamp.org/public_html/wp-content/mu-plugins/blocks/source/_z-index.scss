@@ -1,0 +1,12 @@
+/*
+ * When adding elements here, make sure you leave a comment fully explaining which other element they're conflicting with.
+*/
+
+.wordcamp__edit-placeholder .components-placeholder__fieldset {
+	/*
+	 * By default the fieldset has a `z-index` of `1`, and `.editor-block-list__insertion-point` has a value of
+	 * `6`, so the `Add Block` button will stack on top of things like an expanded `ItemSelect` list. This
+	 * corrects that.
+	 */
+	z-index: 7;
+}
