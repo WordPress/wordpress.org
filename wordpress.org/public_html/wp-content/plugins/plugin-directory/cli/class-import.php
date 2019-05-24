@@ -66,6 +66,7 @@ class Import {
 		$headers         = $data['plugin_headers'];
 		$stable_tag      = $data['stable_tag'];
 		$tagged_versions = $data['tagged_versions'];
+		$blocks          = $data['blocks'];
 
 		$content = '';
 		if ( $readme->sections ) {
@@ -166,6 +167,13 @@ class Import {
 			$banner_average_color = Tools::get_image_average_color( Template::get_asset_url( $plugin, $first_banner, false /* no CDN */ ) );
 		}
 		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
+
+		// Store the block data, if known
+		if ( count( $blocks ) ) {
+			update_post_meta( $plugin->ID, 'all_blocks', $blocks );
+		} else {
+			delete_post_meta( $plugin->ID, 'all_blocks' );
+		}
 
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 
@@ -399,7 +407,21 @@ class Import {
 			);
 		}
 
-		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions' );
+		// Find blocks
+		$blocks = array();
+		foreach ( Filesystem::list_files( "$tmp_dir/export/", false, '!\.(?:php|js|jsx|json)$!i' ) as $filename ) {
+			$file_blocks = $this->find_blocks_in_file( $filename );
+			if ( $file_blocks ) {
+				foreach ( $file_blocks as $block ) {
+					// If the info came from a block.json file with more metadata (like description) then we want it to override less detailed info scraped from php/js.
+					if ( empty( $blocks[ $block->name ]->title ) || isset( $block->description ) ) {
+						$blocks[ $block->name ] = $block;
+					}
+				}
+			}
+		}
+
+		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks' );
 	}
 
 	/**
@@ -460,5 +482,55 @@ class Import {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Look for Gutenberg blocks registered within a single file.
+	 *
+	 * @param string $filename Pathname of the file.
+	 *
+	 * @return array An array of objects representing blocks, corresponding to the block.json format where possible.
+	 */
+	protected function find_blocks_in_file( $filename ) {
+
+		$ext = strtolower( pathinfo($filename, PATHINFO_EXTENSION) );
+
+		$blocks = array();
+
+		if ( 'js' === $ext || 'jsx' === $ext ) {
+			// Parse a js-style registerBlockType() call.
+			// Note that this only works with literal strings for the block name and title, and assumes that order.
+			$contents = file_get_contents( $filename );
+			if ( $contents && preg_match_all( "#registerBlockType\s*[(]\s*'([-\w]+/[-\w]+)'\s*,\s*[{]\s*title\s*:[\s_(]*'([^']*)'#ms", $contents, $matches, PREG_SET_ORDER ) ) {
+				foreach ( $matches as $match ) {
+					$blocks[] = (object) [
+						'name' => $match[1],
+						'title' => $match[2],
+					];
+				}
+			}
+		}
+		if ( 'php' === $ext ) {
+			// Parse a php-style register_block_type() call.
+			// Again this assumes literal strings, and only parses the name and title.
+			$contents = file_get_contents( $filename );
+			if ( $contents && preg_match_all( "#register_block_type\s*[(]\s*['\"]([-\w]+/[-\w]+)['\"]#ms", $contents, $matches, PREG_SET_ORDER ) ) {
+				foreach ( $matches as $match ) {
+					$blocks[] = (object) [
+						'name' => $match[1],
+						'title' => null,
+					];
+				}
+			}
+		}
+		if ( 'block.json' === basename( $filename ) ) {
+			// A block.json file has everything we want.
+			$blockinfo = json_decode( file_get_contents( $filename ) );
+			if ( isset( $blockinfo->name ) && isset( $blockinfo->title ) ) {
+				$blocks[] = $blockinfo;
+			}
+		}
+
+		return $blocks;
 	}
 }
