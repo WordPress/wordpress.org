@@ -24,7 +24,7 @@ get_header(); ?>
 		<div class="main-video">
 			<?php $wptv->the_video(); ?>
 			<h3>
-				<a href="<?php the_permalink() ?>" rel="bookmark" class="video-title"><?php the_title(); ?></a>
+				<a href="<?php the_permalink(); ?>" rel="bookmark" class="video-title"><?php the_title(); ?></a>
 				<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
 			</h3>
 		</div><!-- .main-video -->
