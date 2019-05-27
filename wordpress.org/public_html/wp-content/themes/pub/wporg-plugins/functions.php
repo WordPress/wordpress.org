@@ -70,7 +70,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20190510b' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20190510a' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Make jQuery a footer script.
@@ -84,7 +84,6 @@ function scripts() {
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
 		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), '20180131', true );
-		wp_enqueue_script( 'wporg-plugins-tabs', get_stylesheet_directory_uri() . '/js/tabs.js', array(), '20190527', true );
 	}
 
 	if ( ! is_404() ) {
@@ -116,7 +115,7 @@ function scripts() {
 
 	// React is currently only used on detail pages.
 	if ( is_single() ) {
-		wp_enqueue_script( 'wporg-plugins-client', get_stylesheet_directory_uri() . '/js/theme.js', array(), '20190527', true );
+		wp_enqueue_script( 'wporg-plugins-client', get_stylesheet_directory_uri() . '/js/theme.js', array(), '20180110', true );
 		wp_localize_script( 'wporg-plugins-client', 'pluginDirectory', array(
 			'endpoint' => untrailingslashit( rest_url() ), // 'https://wordpress.org/plugins-wp/wp-json',
 			'nonce'    => wp_create_nonce( 'wp_rest' ),

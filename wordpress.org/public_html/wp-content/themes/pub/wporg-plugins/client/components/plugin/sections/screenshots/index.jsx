@@ -21,7 +21,7 @@ export const Screenshots = ( { screenshots } ) => {
 
 	if ( items ) {
 		return (
-			<div id="screenshots" className="plugin-screenshots tabcontent">
+			<div id="screenshots" className="plugin-screenshots">
 				<h2>{ localeData.screenshots }</h2>
 				<ImageGallery items={ items } />
 			</div>

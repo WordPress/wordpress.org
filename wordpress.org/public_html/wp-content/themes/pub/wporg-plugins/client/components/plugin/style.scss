@@ -40,46 +40,52 @@
 		padding-top: 0;
 	}
 
-	.tab {
-
-		display: flex;
-		flex-wrap: wrap;
-		margin: 0;
+	.tabs {
+		list-style: none;
+		margin:0;
 		border-bottom: 2px solid #eee;
 
-		button, a {
-			cursor: pointer;
-			padding: 8px 22px;
+		li {
+			display: inline-block;
+			margin-bottom: -2px;
+			border: 2px solid transparent;
 			font-size: 0.8rem;
-			border: 0;
-			margin: 4px;
-			background: #fff;
-		}
-
-		button {
 			color: #0073aa;
+			transition: background .2s ease;
 
-			&:hover {
-				background-color: #ddd;
+			a {
+				border: 0;
+				display: block;
+				padding: 0.64rem 1.25rem;
+				background: white;
+				text-decoration: none;
+
+				&.active, &:hover {
+					background: #eee;
+				}
 			}
 
 			&.active, &:hover {
-				border-top: 2px solid #eee;
-				border-left: 2px solid #eee;
-				border-right: 2px solid #eee;
-				background: #fff;
-				margin: -2px 2px;
-				padding-bottom: 10px;
+				padding-bottom: 0 !important;
+				border: 2px solid #eee;
 			}
 		}
-	}
 
+		@media screen and (max-width:34em) {
+			border-top: 2px solid #eee;
 
-	.tabcontent {
-		display: none;
-		padding: 6px 12px;
-		border: 1px solid #ccc;
-		border-top: none;
+			li {
+				display: block;
+				border: none;
+				border-bottom: 1px solid #eee;
+				margin-bottom: 1px;
+
+				&.active, &:hover {
+					border: none;
+					border-bottom: 1px solid #eee;
+				}
+			}
+		}
 	}
 
 	.entry-content {
@@ -93,6 +99,7 @@
 		}
 
 		> div {
+			display:none;
 			border: 0;
 
 			~ button {
@@ -118,6 +125,53 @@
 		padding: 0 ms( 4 );
 	}
 
+	span#description,
+	span#reviews,
+	span#developers,
+	span#installation {
+		position:fixed;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .tabs li#tablink-description ,
+	span#reviews:target ~ .tabs li#tablink-reviews,
+	span#installation:target ~ .tabs li#tablink-installation,
+	span#developers:target ~ .tabs li#tablink-developers  {
+		border-top: 2px solid #eee;
+		border-left: 2px solid #eee;
+		border-right: 2px solid #eee;
+		border-bottom: 0;
+		padding-bottom: 2px;
+		background: #fff;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-description,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #screenshots,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #faq,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #blocks,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers ~ button,
+	span#reviews:target ~ .entry-content #tab-reviews,
+	span#installation:target ~ .entry-content #tab-installation,
+	span#developers:target ~ .entry-content #tab-changelog,
+	span#developers:target ~ .entry-content #tab-developers,
+	span#developers:target ~ .entry-content #tab-developers ~ button,
+	span#developers:target ~ .entry-content #tab-developers .plugin-development {
+		display:block;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers .plugin-development,
+	span#developers:target ~ .entry-content #tab-developers .plugin-contributors {
+		display:none;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-meta .plugin-contributors,
+	span#reviews:target ~ .entry-meta .plugin-meta,
+	span#reviews:target ~ .entry-meta .plugin-support,
+	span#reviews:target ~ .entry-meta .plugin-donate,
+	span#reviews:target ~ .entry-meta .plugin-contributors,
+	span#installation:target ~ .entry-meta .plugin-contributors {
+		display:none;
+	}
 
 	@media screen and ( min-width: $ms-breakpoint ) {
 		.plugin-header,

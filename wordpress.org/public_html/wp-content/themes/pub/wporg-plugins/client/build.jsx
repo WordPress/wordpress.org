@@ -31,9 +31,4 @@ if ( images.length > 0 ) {
 	);
 
 	container.replaceChild( temp.querySelector( '#screenshots' ), document.getElementById( 'screenshots' ) );
-
-	// On page load, we want to show or hide <Screenshots /> after it is rendered, based on the #hash in url.
-	if ( typeof window.showUrlHashTargetTab === 'function' ) {
-		window.showUrlHashTargetTab();
-	}
 }
