@@ -582,13 +582,11 @@ class WP_I18n_Teams {
 
 		$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
 		if ( $data && ( $data = json_decode( $data, true ) ) ) {
-			// Optional Display Name field
 			if ( !empty( $data['profile']['display_name'] ) && empty( $data['deleted'] ) ) {
+				// Optional Display Name field.
 				$slack_username = $data['profile']['display_name'];
-			}
-
-			// Fall back to "Full Name" field.
-			if ( !empty( $data['profile']['real_name'] ) && empty( $data['deleted'] ) ) {
+			} elseif ( !empty( $data['profile']['real_name'] ) && empty( $data['deleted'] ) ) {
+				// Fall back to "Full Name" field.
 				$slack_username = $data['profile']['real_name'];
 			}
 		}
