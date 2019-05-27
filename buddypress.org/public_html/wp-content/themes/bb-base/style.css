@@ -45,7 +45,8 @@ body {
 	margin: 0;
 	color: #222;
 }
-#header {
+#header,
+#wporg-header {
 	border-bottom: 1px solid #252;
 	position: fixed;
 	width: 100%;
@@ -66,10 +67,12 @@ body.page-template-page-homepage-php #header {
 	height: 80px;
 	padding: 0;
 }
-#header h1 {
+#header h1,
+#wporg-header h1 {
 	text-indent: -9999px;
 }
-#header h1 a {
+#header h1 a,
+#wporg-header h1 a {
 	margin-top: 8px;
 	width: 220px;
 	height: 62px;
@@ -332,30 +335,34 @@ div.single-post table tr.alt td {
 /* =Navigation
 -------------------------------------------------------------- */
 
-#bb-menu-icon {
+#bb-menu-icon,
+#mobile-menu-button {
 	display: none;
 }
 
-#bb-menu-icon:before {
+#bb-menu-icon:before,
+#mobile-menu-button:before {
 	font: normal 16px/1 'dashicons';
 	color: #000;
 	content: '\f349'
 }
 
-#nav {
+#nav,
+#wporg-header-menu {
 	float: right;
 	margin: 30px 0 0 0;
 	line-height: 20px;
 }
-#nav li {
+#nav li,
+#wporg-header #wporg-header-menu li {
 	display: inline;
 	float: left;
 	margin: 0 3px 0 3px;
 	list-style: none;
 }
 #nav li a,
-#header #nav li :link,
-#header #nav li :visited {
+#wporg-header #wporg-header-menu li :link,
+#wporg-header #wporg-header-menu li :visited {
 	text-decoration: none;
 	color: #fff;
 	height: auto;
@@ -369,14 +376,16 @@ div.single-post table tr.alt td {
 	border-radius: 3px;
 	border: 1px solid transparent;
 }
-#nav li a:hover {
+#nav li a:hover,
+#wporg-header-menu li :link:hover {
 	color: #ddeedd;
 }
 #nav li a.active {
 	color: #fff;
 }
 
-#subnav {
+#subnav,
+body.buddypress.trac #subnav {
 	background: #eee;
 	border-bottom: #ddd solid 1px;
 	font-size: 12px;
@@ -1652,32 +1661,38 @@ body.trac .attachment {
 		float: none;
 		margin: 10px 0;
 	}
-	#bb-menu-icon {
+	#bb-menu-icon,
+	#mobile-menu-button {
 		display: block;
 		position: absolute;
 		right: 0;
 		padding: 33px 20px 33px 33px;
 		text-decoration: none;
 	}
-	#header #nav {
+	#header #nav,
+	#wporg-header #wporg-header-menu {
 		margin: 0;
 		float: right;
 		overflow: visible;
 	}
-	#header #bb-nav {
+	#header #bb-nav,
+	#wporg-header #wporg-header-menu {
 		position: absolute;
 		width: 100%;
 		right: 0;
 		top: 81px;
 		border-bottom: 1px solid #aaa;
 	}
-	#header #bb-nav li {
+	#header #bb-nav li,
+	#wporg-header #wporg-header-menu li {
 		width: 100%;
 		text-align: center;
 		margin: 0;
 		padding: 0;
 	}
-	#header #nav #bb-nav li a {
+	#header #nav #bb-nav li a,
+	#wporg-header #wporg-header-menu li :link,
+	#wporg-header #wporg-header-menu li :visited {
 		display: block;
 		margin: 0;
 		padding: 20px;
@@ -1691,16 +1706,22 @@ body.trac .attachment {
 	}
 	#header #bb-nav,
 	#bbpress-forums .bbp-pagination-count,
-	.bbp-topic-meta {
+	.bbp-topic-meta,
+	#wporg-header #wporg-header-menu {
 		display: none;
 	}
 	#header #nav:hover #bb-nav,
-	#header #nav:focus #bb-nav {
+	#header #nav:focus #bb-nav,
+	#wporg-header #wporg-header-menu.toggled {
 		background-color: #eee;
 		display: block !important;
 	}
+	#wporg-header #wporg-header-menu.toggled {
+		background: #eee;
+	}
 	#header #nav:hover #bb-menu-icon:before,
-	#header #nav:focus #bb-menu-icon:before {
+	#header #nav:focus #bb-menu-icon:before,
+	#wporg-header #mobile-menu-button[aria-expanded="true"]:before {
 		color: #fff;
 	}
 	#wp-admin-bar-my-account img.avatar {
