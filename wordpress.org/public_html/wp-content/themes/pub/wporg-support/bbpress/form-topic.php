@@ -126,6 +126,7 @@
 
 					<?php do_action( 'bbp_theme_before_topic_form_content' ); ?>
 
+					<label for="bbp_topic_content"><?php esc_html_e( 'Your message:', 'wporg-forums' ); ?></label>
 					<?php bbp_the_content( array( 'context' => 'topic' ) ); ?>
 
 					<?php do_action( 'bbp_theme_after_topic_form_content' ); ?>

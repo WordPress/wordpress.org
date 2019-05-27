@@ -72,6 +72,7 @@ if ( bbp_is_reply_edit() ) : ?>
 
 					<?php do_action( 'bbp_theme_before_reply_form_content' ); ?>
 
+					<label for="bbp_reply_content"><?php esc_html_e( 'Your message:', 'wporg-forums' ); ?></label>
 					<?php bbp_the_content( array( 'context' => 'reply' ) ); ?>
 
 					<?php do_action( 'bbp_theme_after_reply_form_content' ); ?>
