@@ -1,14 +1,17 @@
 /* =Site Style
 -------------------------------------------------------------- */
 
-#header {
+#header,
+#wporg-header {
 	background-color: #be3631;
 	border-bottom: 1px solid #9e1611;
 }
 
 #header h1 a,
 #header h1 :link,
-#header h1 :link:hover {
+#header h1 :link:hover,
+#wporg-header h1 :link,
+#wporg-header h1 :link:hover {
 	width: 265px;
 	background: url('../buddypress-org/images/buddypress-logo.png') no-repeat 0 0;
 	position: relative;
@@ -49,7 +52,8 @@ div.free-page div.standard {
 -------------------------------------------------------------- */
 
 #nav li a:hover,
-#header #nav li :link:hover {
+#header #nav li :link:hover,
+#wporg-header #nav li :link:hover {
 	background-color: #cf4944;
 	color: rgba(255,255,255,0.9);
 }
@@ -102,7 +106,9 @@ input.submit:hover {
 
 	#header h1 a,
 	#header h1 :link,
-	#header h1 :link:hover {
+	#header h1 :link:hover,
+	#wporg-header h1 :link,
+	#wporg-header h1 :link:hover {
 		background-image: url('../buddypress-org/images/buddypress-logo-2x.png');
 		background-size: 269px 65px;
 	}

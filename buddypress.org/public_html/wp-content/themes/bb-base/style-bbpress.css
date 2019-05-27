@@ -1,7 +1,8 @@
 /* =Header
 -------------------------------------------------------------- */
 
-#header {
+#header,
+#wporg-header {
 	background-color: rgb(141,199,112);
 	border-bottom: 1px solid #696;
 }
@@ -11,7 +12,9 @@
 }
 #header h1 a,
 #header h1 :link,
-#header h1 :link:hover {
+#header h1 :link:hover,
+#wporg-header h1 :link,
+#wporg-header h1 :link:hover {
 	background: url('../bbpress-org/images/bbpress-logo.png') no-repeat 0 0;
 }
 
@@ -35,6 +38,7 @@ div.standard {
 #nav li.current-menu-item a,
 #nav li a:hover,
 #header #nav li :link:hover,
+#wporg-header #nav li :link:hover,
 .button:hover {
 	color: rgba(235,255,235,0.9);
 
@@ -74,6 +78,7 @@ div.standard {
 #nav li.current-menu-item a,
 #nav li a:active,
 #header #nav li :link:active,
+#wporg-header #nav li :link:active,
 .button:active {
 	background-image: -moz-linear-gradient(top, #009933 0%, #008800 100%);
 	background-image: -webkit-linear-gradient(top, #009933 0%,#008800 100%);
@@ -90,6 +95,7 @@ div.standard {
 
 #nav li a:hover,
 #header #nav li :link:hover,
+#wporg-header #nav li :link:hover,
 .dark-context .button:hover {
 	-moz-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
 	-webkit-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
@@ -167,7 +173,9 @@ input.submit:hover {
 
 	#header h1 a,
 	#header h1 :link,
-	#header h1 :link:hover {
+	#header h1 :link:hover,
+	#wporg-header h1 :link,
+	#wporg-header h1 :link:hover {
 		background-image: url('../bbpress-org/images/bbpress-logo-2x.png');
 		background-size: 208px 65px;
 	}
