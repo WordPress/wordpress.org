@@ -1318,7 +1318,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 
 @media only screen and (max-width: 560px) {
 	.jobswp #wporg-footer .wrapper {
-		width: 285px;;
+		width: 285px;
 	}
 }
 
