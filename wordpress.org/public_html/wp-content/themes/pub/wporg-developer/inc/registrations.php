@@ -71,6 +71,7 @@ class DevHub_Registrations {
 				'with_front' => false,
 			),
 			'supports'    => $supports,
+			'show_in_rest' => true,
 		) );
 
 		// Methods
@@ -104,6 +105,7 @@ class DevHub_Registrations {
 				'with_front' => false,
 			),
 			'supports'    => $supports,
+			'show_in_rest' => true,
 		) );
 
 		// Hooks
@@ -133,6 +135,7 @@ class DevHub_Registrations {
 				'with_front' => false,
 			),
 			'supports'    => $supports,
+			'show_in_rest' => true,
 		) );
 
 		// Methods
@@ -162,6 +165,7 @@ class DevHub_Registrations {
 				'with_front' => false,
 			),
 			'supports'    => $supports,
+			'show_in_rest' => true,
 		) );
 	}
 
@@ -195,6 +199,7 @@ class DevHub_Registrations {
 			'rewrite'               => array( 'with_front' => false, 'slug' => 'reference/files', 'hierarchical' => true ),
 			'sort'                  => false,
 			'update_count_callback' => '_update_post_term_count',
+			'show_in_rest'          => true,
 		) );
 
 		// Package
@@ -205,6 +210,7 @@ class DevHub_Registrations {
 			'rewrite'               => array( 'with_front' => false, 'slug' => 'reference/package' ),
 			'sort'                  => false,
 			'update_count_callback' => '_update_post_term_count',
+			'show_in_rest'          => true,
 		) );
 
 		// @since
@@ -215,6 +221,7 @@ class DevHub_Registrations {
 			'rewrite'               => array( 'with_front' => false, 'slug' => 'reference/since' ),
 			'sort'                  => false,
 			'update_count_callback' => '_update_post_term_count',
+			'show_in_rest'          => true,
 		) );
 	}
 

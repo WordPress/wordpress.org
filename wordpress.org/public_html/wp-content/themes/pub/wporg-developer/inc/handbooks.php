@@ -182,6 +182,8 @@ class Devhub_Handbooks {
 			);
 		}
 
+		$defaults['show_in_rest'] = true;
+
 		return $defaults;
 	}
 
