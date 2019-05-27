@@ -14,7 +14,7 @@
 						<span class="owe-separator"></span>
 					<?php endif; ?>
 
-					<a href="<?php echo esc_attr( esc_url( $event->url ) ); ?>">
+					<a href="<?php echo esc_url( $event->url ); ?>">
 						<?php echo esc_html( $event->title ); ?>
 					</a>
 
