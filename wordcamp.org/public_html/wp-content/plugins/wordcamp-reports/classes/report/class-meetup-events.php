@@ -467,7 +467,7 @@ class Meetup_Events extends Base {
 		}
 
 		if ( ! wp_verify_nonce( $nonce, 'run-report' ) || ! current_user_can( 'manage_network' ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to export this data.', 'wordcamporg' ) );
+			return;
 		}
 
 		$options = array(
