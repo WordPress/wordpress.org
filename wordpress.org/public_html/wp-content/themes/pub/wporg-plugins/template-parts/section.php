@@ -11,11 +11,11 @@ global $section, $section_slug, $section_content;
 
 $prefix = in_array( $section_slug, array( 'screenshots', 'faq' ), true ) ? '' : 'tab-';
 
-$classes = [ 'plugin-' . $section_slug, 'section' ];
+$classes = [ 'plugin-' . $section_slug, 'section', 'tabcontent' ];
 $classes = implode( ' ', $classes );
 ?>
 
-<div id="<?php echo esc_attr( $prefix . $section_slug ); ?>" class="<?php echo esc_attr( $classes ); ?>">
+<div id="<?php echo esc_attr( $prefix . $section_slug ); ?>" role="tabpanel" aria-labelled-by="<?php echo esc_attr( 'tab-button-' . $section_slug ); ?>" class="<?php echo esc_attr( $classes ); ?>">
 	<h2 id="<?php echo esc_attr( $section_slug . '-header' ); ?>"><?php echo esc_html( $section['title'] ); ?></h2>
 	<?php echo $section_content; ?>
 </div>

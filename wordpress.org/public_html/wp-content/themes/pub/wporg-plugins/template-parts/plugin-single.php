@@ -51,24 +51,44 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 	</header><!-- .entry-header -->
 
 	<?php if ( ! get_query_var( 'plugin_advanced' ) ) : ?>
-		<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.location.hash = '#developers'; }</script>
-		<span id="description"></span>
-		<span id="reviews"></span>
-		<span id="installation"></span>
-		<span id="developers"></span>
-		<ul class="tabs clear">
-			<li id="tablink-description"><a href="#description"><?php esc_html_e( 'Details', 'wporg-plugins' ); ?></a></li>
-			<li id="tablink-reviews"><a href="#reviews"><?php esc_html_e( 'Reviews', 'wporg-plugins' ); ?></a></li>
+		<div class="tab" role="tablist">
+			<button 
+				id="tab-button-description"
+				class="tablinks"
+				role="tab"
+				aria-controls="tab-description"
+			>
+				<?php esc_html_e( 'Details', 'wporg-plugins' ); ?>
+			</button>
+			<button 
+				id="tab-button-reviews"
+				class="tablinks"
+				role="tab"
+				aria-controls="tab-reviews"
+			>
+				<?php esc_html_e( 'Reviews', 'wporg-plugins' ); ?>
+			</button>
 			<?php if ( isset( $content['installation'] ) && ! $is_closed ) : ?>
-				<li id="tablink-installation">
-					<a href="#installation"><?php esc_html_e( 'Installation', 'wporg-plugins' ); ?></a>
-				</li>
+				<button 
+					id="tab-button-installation"
+					class="tablinks"
+					role="tab"
+					aria-controls="tab-installation"
+				>
+					<?php esc_html_e( 'Installation', 'wporg-plugins' ); ?>
+				</button>
 			<?php endif; ?>
-			<li id="tablink-support">
-				<a href="<?php echo esc_url( Template::get_support_url() ); ?>"><?php esc_html_e( 'Support', 'wporg-plugins' ); ?></a>
-			</li>
-			<li id="tablink-developers"><a href="#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
-		</ul>
+			<button 
+				id="tab-button-developers"
+				class="tablinks"
+				role="tab"
+				aria-controls="tab-developers"
+			>
+				<?php esc_html_e( 'Development', 'wporg-plugins' ); ?>
+			</button>
+			<a href="<?php echo esc_url( Template::get_support_url() ); ?>"><?php esc_html_e( 'Support', 'wporg-plugins' ); ?></a>
+		</div>
+		<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.location.hash = '#developers'; }</script>
 	<?php endif; ?>
 
 	<div class="entry-content">
@@ -112,13 +132,13 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 
 	<div class="entry-meta">
 		<?php
-			if ( get_query_var( 'plugin_advanced' ) && ( ! $is_closed || current_user_can( 'plugin_admin_view', $post ) ) ) {
-				get_template_part( 'template-parts/plugin-sidebar', 'advanced' );
-			} elseif ( $is_closed ) {
-				get_template_part( 'template-parts/plugin-sidebar', 'closed' );
-			} else {
-				get_template_part( 'template-parts/plugin-sidebar' );
-			}
+		if ( get_query_var( 'plugin_advanced' ) && ( ! $is_closed || current_user_can( 'plugin_admin_view', $post ) ) ) {
+			get_template_part( 'template-parts/plugin-sidebar', 'advanced' );
+		} elseif ( $is_closed ) {
+			get_template_part( 'template-parts/plugin-sidebar', 'closed' );
+		} else {
+			get_template_part( 'template-parts/plugin-sidebar' );
+		}
 		?>
 	</div><!-- .entry-meta -->
 </article><!-- #post-## -->
