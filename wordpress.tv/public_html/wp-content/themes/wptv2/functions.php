@@ -132,6 +132,8 @@ class WordPressTV_Theme {
 
 	/**
 	 * Outputs <link rel="prev|next"> tags for archives.
+	 * @global Pagination $paged
+	 * @global WP_Query $wp_query
 	 */
 	function archive_link_rel_prev_next() {
 		global $paged, $wp_query;
@@ -771,6 +773,8 @@ class WordCampTV_Walker_Nav_Menu extends Walker {
 	 * followed by a WP_Query that loops through some of the
 	 * videos in the event. start_el does all the work and does not need end_el.
 	 *
+	 * @global WordPressTV_Theme $wptv
+	 *
 	 * @param string $output
 	 * @param object $item
 	 * @param int    $depth
@@ -778,13 +782,12 @@ class WordCampTV_Walker_Nav_Menu extends Walker {
 	 * @param int    $id
 	 */
 	function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+		global $wptv;
 
 		// Skip if it's not an event item.
 		if ( $item->object != 'event' || $item->type != 'taxonomy' ) {
 			return;
 		}
-
-		global $wptv;
 
 		// Use this query to fetch event videos.
 		$query = new WP_Query( array(
