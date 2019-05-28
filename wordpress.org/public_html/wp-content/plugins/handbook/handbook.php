@@ -320,7 +320,7 @@ class WPorg_Handbook {
 			&&
 			$this->post_is_landing_page( get_queried_object_id() )
 		) {
-			wp_safe_redirect( get_post_type_archive_link( $this->post_type ) );
+			wp_safe_redirect( get_post_type_archive_link( $this->post_type ), 301 );
 			exit;
 		}
 	}
