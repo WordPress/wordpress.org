@@ -18,7 +18,7 @@ function wcorg_include_individual_mu_plugins() {
 
 	if (
 		( defined( 'WORDCAMP_ENVIRONMENT' ) && 'production' !== WORDCAMP_ENVIRONMENT )
-		|| in_array( get_current_blog_id(), [ 928 ], true ) // Test sites
+		|| in_array( get_current_blog_id(), [ 928, 1028, 1126 ], true ) // Beta optins.
 	) {
 		require_once( __DIR__ . '/blocks/blocks.php' );
 	}
