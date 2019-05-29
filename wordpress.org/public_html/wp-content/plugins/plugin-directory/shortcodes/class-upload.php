@@ -106,7 +106,7 @@ class Upload {
 						if ( 0 !== $submitted_counts->approved ) {
 							printf(
 								/* translators: 1: Amount of approved plugins; 2: URL on how to use SVN */
-								esc_html( _n(
+								wp_kses_post( _n(
 									'You have %1$s approved plugin that has not yet been used. We require developers to use the hosting we provide. Please upload your plugin via <a href="%2$s">SVN</a>.',
 									'You have %1$s approved plugins that have not yet been used. We require developers to use the hosting we provide. Please upload your plugins via <a href="%2$s">SVN</a>.',
 									$submitted_counts->approved,
