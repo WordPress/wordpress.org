@@ -24,7 +24,7 @@
 		"@wordpress/eslint-plugin": "2.1.0",
 		"@wordpress/i18n": "3.0.1",
 		"@wordpress/npm-package-json-lint-config": "1.1.6",
-		"@wordpress/scripts": "3.1.0",
+		"@wordpress/scripts": "^3.2.1",
 		"acorn": "6.0.4",
 		"babel-loader": "8.0.4",
 		"cross-env": "5.2.0",
