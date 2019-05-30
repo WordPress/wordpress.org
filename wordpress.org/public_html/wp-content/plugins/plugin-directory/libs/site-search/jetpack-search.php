@@ -225,12 +225,15 @@ class Jetpack_Search {
 		$json_es_args = json_encode( $es_args );
 		$cache_key    = md5( $json_es_args );
 		$lock_key     = 'lock-' . $cache_key;
+		$count_key    = 'count-' . $cache_key;
 
 		$response = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
 		// Use a temporary lock to prevent cache stampedes. This ensures only one process (per search term per memcache instance) will run the remote post.
 		// Other processes will use the stale cached value if it's present, even for a while after the expiration time if a fresh value is still being fetched.
 		if ( wp_cache_add( $lock_key, 1, self::CACHE_GROUP, 15 ) ) {
+			// Keep track of the number of concurrent requests for this key
+			wp_cache_set( $count_key, 1, self::CACHE_GROUP, 60 );
 
 			// If the error volume is high, there's a proportionally lower chance that we'll actually attempt to hit the API.
 			if ( $this->error_volume_is_low() ) {
@@ -296,7 +299,12 @@ class Jetpack_Search {
 		} else {
 			// Stampede protection has kicked in, AND we have no stale cached value to display. That's bad - possibly indicates cache exhaustion
 			if ( false === $response ) {
-				trigger_error( 'Plugin directory search: no cached results available during stampede.', E_USER_WARNING );
+				// Keep a track of how many cache stampede's happen per minute.
+				wp_cache_incr( 'search-stampede-failures', 1, self::CACHE_GROUP ) || wp_cache_set( 'search-stampede-failures', 1, self::CACHE_GROUP, 60 );
+
+				// Include the number of times this branch has been hit
+				$request_count = wp_cache_incr( $count_key, 1, self::CACHE_GROUP );
+				trigger_error( 'Plugin directory search: no cached results available during stampede. Requests: ' . $request_count, E_USER_WARNING );
 			}
 		}
 
