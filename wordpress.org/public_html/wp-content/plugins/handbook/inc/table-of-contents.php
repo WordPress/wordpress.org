@@ -88,6 +88,8 @@ class WPorg_Handbook_TOC {
 			$toc .= '<div class="table-of-contents">';
 			$toc .= "<$contents_header>" . esc_html( $this->args->header_text ) . "</$contents_header><ul class=\"items\">";
 			$last_item = false;
+			$used_ids = [];
+
 			foreach ( $items as $item ) {
 				if ( $last_item ) {
 					if ( $last_item < $item[2] )
@@ -99,7 +101,18 @@ class WPorg_Handbook_TOC {
 				}
 
 				$last_item = $item[2];
-				$toc .= '<li><a href="#' . sanitize_title_with_dashes($item[3])  . '">' . $item[3]  . '</a>';
+
+				$id = sanitize_title_with_dashes( $item[3] );
+				// Append unique suffix if anchor ID isn't unique.
+				$count = 2;
+				$orig_id = $id;
+				while ( in_array( $id, $used_ids ) && $count < 50 ) {
+					$id = $orig_id . '-' . $count;
+					$count++;
+				}
+				$used_ids[] = $id;
+
+				$toc .= '<li><a href="#' . esc_attr( $id  ) . '">' . $item[3]  . '</a>';
 			}
 			$toc .= "</ul>\n</div>\n";
 		}
@@ -112,12 +125,22 @@ class WPorg_Handbook_TOC {
 		$first = true;
 		$matches = array();
 		$replacements = array();
+		$used_ids = array();
 
 		foreach ( $items as $item ) {
 			$replacement = '';
 			$matches[] = $item[0];
 			$id = sanitize_title_with_dashes($item[2]);
 
+			// Append unique suffix if anchor ID isn't unique.
+			$count = 2;
+			$orig_id = $id;
+			while ( in_array( $id, $used_ids ) && $count < 50 ) {
+				$id = $orig_id . '-' . $count;
+				$count++;
+			}
+			$used_ids[] = $id;
+		
 			if ( ! $first ) {
 				$replacement .= '<p class="toc-jump"><a href="#top">' . __( 'Top &uarr;', 'wporg' ) . '</a></p>';
 			} else {
@@ -130,7 +153,13 @@ class WPorg_Handbook_TOC {
 		}
 
 		if ( $replacements ) {
-			$content = str_replace( $matches, $replacements, $content );
+			if ( count( array_unique( $matches ) ) !== count( $matches ) ) {
+				foreach ( $matches as $i => $match ) {
+					$content = preg_replace( '/' . preg_quote( $match, '/' ) . '/', $replacements[ $i ], $content, 1 );
+				}
+			} else {
+				$content = str_replace( $matches, $replacements, $content );
+			}
 		}
 
 		return $content;
