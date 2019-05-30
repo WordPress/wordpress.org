@@ -310,7 +310,6 @@ class Import {
 				$tmp_dir . '/export',
 				array(
 					'ignore-externals',
-					'depth' => 'files',
 				)
 			);
 			// Handle tags which we store as 0.blah but are in /tags/.blah
@@ -321,7 +320,6 @@ class Import {
 					$tmp_dir . '/export',
 					array(
 						'ignore-externals',
-						'depth' => 'files',
 					)
 				);
 			}
@@ -345,7 +343,6 @@ class Import {
 				$tmp_dir . '/export',
 				array(
 					'ignore-externals',
-					'depth' => 'files', // Only export the root files, we don't need the rest to read the plugin headers/screenshots
 				)
 			);
 			if ( ! $svn_export['result'] || empty( $svn_export['revision'] ) ) {
@@ -409,7 +406,7 @@ class Import {
 
 		// Find blocks
 		$blocks = array();
-		foreach ( Filesystem::list_files( "$tmp_dir/export/", false, '!\.(?:php|js|jsx|json)$!i' ) as $filename ) {
+		foreach ( Filesystem::list_files( "$tmp_dir/export/", true /* recursive */, '!\.(?:php|js|jsx|json)$!i' ) as $filename ) {
 			$file_blocks = $this->find_blocks_in_file( $filename );
 			if ( $file_blocks ) {
 				foreach ( $file_blocks as $block ) {
