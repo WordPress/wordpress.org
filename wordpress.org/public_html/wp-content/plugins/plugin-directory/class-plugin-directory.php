@@ -794,7 +794,7 @@ class Plugin_Directory {
 		$viewing_own_author_archive = false;
 
 		// Author Archives need to be created
-		if ( $wp_query->is_main_query() && ( isset( $wp_query->query['author_name'] ) || isset( $wp_query->query['author'] ) ) ) {
+		if ( $wp_query->is_main_query() && $wp_query->is_author() ) {
 			$user = isset( $wp_query->query['author_name'] ) ? $wp_query->query['author_name'] : get_user_by( 'id', $wp_query->query['author'] )->user_nicename;
 
 			$viewing_own_author_archive = is_user_logged_in() && ( current_user_can( 'plugin_review' ) || 0 === strcasecmp( $user, wp_get_current_user()->user_nicename ) );
