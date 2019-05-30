@@ -354,6 +354,8 @@ window.wp = window.wp || {};
 							extended_author: true,
 							photon_screenshots: true,
 							active_installs: true,
+							requires: true,
+							requires_php: true,
 						}
 					}, request)
 				},

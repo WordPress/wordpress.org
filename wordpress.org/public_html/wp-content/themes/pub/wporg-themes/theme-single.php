@@ -38,7 +38,7 @@
 
 				<div class="theme-meta-info">
 					<p class="version">
-						<?php printf( __( 'Version: %s', 'wporg-themes' ), '<strong>' . $theme->version . '</strong>' ); ?>
+						<?php printf( __( 'Version: %s', 'wporg-themes' ), '<strong>' . esc_html( $theme->version ) . '</strong>' ); ?>
 					</p>
 					<p class="updated">
 						<?php printf( __( 'Last updated: %s', 'wporg-themes' ),
@@ -57,8 +57,18 @@
 						}
 					?>
 					<p class="active_installs"><?php printf( __( 'Active Installations: %s', 'wporg-themes' ), '<strong>' . $active_installs . '</strong>' ); ?></p>
+					<?php if ( ! empty( $theme->requires ) ) { ?>
+					<p class="requires">
+						<?php printf( __( 'WordPress Version: %s', 'wporg-themes' ), '<strong>' . sprintf( __( '%s or higher', 'wporg-themes' ), esc_html( $theme->requires ) ) . '</strong>' ); ?>
+					</p>
+					<?php } ?>
+					<?php if ( ! empty( $theme->requires_php ) ) { ?>
+					<p class="requires_php">
+						<?php printf( __( 'PHP Version: %s', 'wporg-themes' ), '<strong>' . sprintf( __( '%s or higher', 'wporg-themes' ), esc_html( $theme->requires_php ) ) . '</strong>' ); ?>
+					</p>
+					<?php } ?>
 					<?php if ( $theme->theme_url ) { ?>
-					<a href="<?php echo esc_url( $theme->theme_url ); ?>"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a>
+					<p class="theme_homapge"><a href="<?php echo esc_url( $theme->theme_url ); ?>"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a></p>
 					<?php } ?>
 				</div>
 			</div><!-- .theme-head -->

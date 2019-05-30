@@ -40,8 +40,14 @@
 					<p class="version"><?php printf( __( 'Version: %s', 'wporg-themes' ), '<strong>{{ data.version }}</strong>' ); ?></p>
 					<p class="updated"><?php printf( __( 'Last updated: %s', 'wporg-themes' ), '<strong>{{ data.last_updated }}</strong>' ); ?></p>
 					<p class="active_installs"><?php printf( __( 'Active Installations: %s', 'wporg-themes' ), '<strong>{{ data.active_installs }}</strong>' ); ?></p>
+					<# if ( data.requires ) { #>
+					<p class="requires"><?php printf( __( 'WordPress Version: %s', 'wporg-themes' ), '<strong>' . sprintf( __( '%s or higher', 'wporg-themes' ), '{{ data.requires }}' ) . '</strong>' ); ?></p>
+					<# } #>
+					<# if ( data.requires_php ) { #>
+					<p class="requires_php"><?php printf( __( 'PHP Version: %s', 'wporg-themes' ), '<strong>' . sprintf( __( '%s or higher', 'wporg-themes' ), '{{ data.requires_php }}' ) . '</strong>' ); ?></p>
+					<# } #>
 					<# if ( data.theme_url ) { #>
-					<a href="{{ data.theme_url }}"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a>
+					<p class="theme_homepage"><a href="{{ data.theme_url }}"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a></p>
 					<# } #>
 				</div>
 			</div><!-- .theme-head -->

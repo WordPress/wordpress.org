@@ -396,10 +396,12 @@ body.author .theme-browser .theme .theme-author  {
 	border: 1px solid #eee;
 }
 
-.theme-wrap .theme-meta-info .version,
-.theme-wrap .theme-meta-info .updated,
-.theme-wrap .theme-meta-info .active_installs {
+.theme-wrap .theme-meta-info p {
 	margin: 0 0 0.5em;
+}
+
+.theme-wrap .theme-meta-info a {
+	text-decoration: none;
 }
 
 .theme-wrap .theme-meta-info a:after {
