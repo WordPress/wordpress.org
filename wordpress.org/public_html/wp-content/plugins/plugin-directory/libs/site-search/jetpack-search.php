@@ -229,9 +229,19 @@ class Jetpack_Search {
 
 		$response = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
-		// Use a temporary lock to prevent cache stampedes. This ensures only one process (per search term per memcache instance) will run the remote post.
+
+		// Use a temporary lock to prevent cache stampedes.
+		// This will ensure that a maximum of two processes are performing the search, or one when the stale value is still known.
 		// Other processes will use the stale cached value if it's present, even for a while after the expiration time if a fresh value is still being fetched.
+		$do_fresh_request = false;
 		if ( wp_cache_add( $lock_key, 1, self::CACHE_GROUP, 15 ) ) {
+			$do_fresh_request = true;
+		} elseif ( ! $response && 2 === wp_cache_incr( $lock_key, 1, self::CACHE_GROUP ) ) {
+			// If we don't have cached data, this is the second request and, error volume is low, still perform the request.
+			$do_fresh_request = $this->error_volume_is_low();
+		}
+
+		if ( $do_fresh_request ) {
 			// Keep track of the number of concurrent requests for this key
 			wp_cache_set( $count_key, 1, self::CACHE_GROUP, 60 );
 
@@ -256,7 +266,7 @@ class Jetpack_Search {
 			if ( is_wp_error( $request ) || 200 != wp_remote_retrieve_response_code( $request ) ) {
 
 				// Lock further requests for the same search for 3-7 seconds. We probably don't need anything more complex like exponential backoff here because this is per search.
-				wp_cache_set( $lock_key, 1, self::CACHE_GROUP, mt_rand( 3, 7 ) );
+				wp_cache_set( $lock_key, 2, self::CACHE_GROUP, mt_rand( 3, 7 ) );
 
 				if ( is_wp_error( $request ) ) {
 					$this->search_error( 'http error ' . $request->get_error_message(), E_USER_WARNING );
