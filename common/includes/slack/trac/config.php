@@ -33,6 +33,7 @@ class Core extends Trac {
 		'rest-api'                         => '#core-restapi',
 		'#wp-admin/.*(image|media)\b#'     => '#core-media',
 		'#wp-includes/.*(image|media)\b#'  => '#core-media',
+		'#wp-admin/.*(privacy|personal)#'  => '#core-privacy',
 	);
 
 	/**
