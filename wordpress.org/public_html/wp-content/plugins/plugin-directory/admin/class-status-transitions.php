@@ -236,19 +236,16 @@ class Status_Transitions {
 		// Send email.
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been approved!', 'wporg-plugins' ), $post->post_title );
 
-		/* translators: 1: plugin name, 2: plugin slug */
+		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug */
 		$content = sprintf(
 			__(
 				'Congratulations, your plugin hosting request for %1$s has been approved.
 
-Within one hour you will have access to your SVN repository with the WordPress.org username and password you used to log in and submit your request. Your username is case sensitive.
+Within one (1) hour your account will be granted commit access to your Subversion (SVN) repository. Your username is %2$s and your password is the one you already use to log in to WordPress.org. Keep in mind, your username is case sensitive and you cannot use your email address to log in to SVN.
 
-https://plugins.svn.wordpress.org/%2$s
+https://plugins.svn.wordpress.org/%3$s
 
-Here are some handy links to help you get started.
-
-WordPress Plugin Directory Guidelines:
-https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
+Once your account has been added, you will need to upload your code using a SVN client of your choice. We are unable to upload or maintain your code for you.
 
 Using Subversion with the WordPress Plugin Directory:
 https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/
@@ -265,6 +262,9 @@ https://wordpress.org/plugins/developers/readme-validator/
 Plugin Assets (header images, etc):
 https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
 
+WordPress Plugin Directory Guidelines:
+https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
+
 If you have issues or questions, please reply to this email and let us know.
 
 Enjoy!
@@ -274,6 +274,7 @@ The WordPress Plugin Directory Team
 https://make.wordpress.org/plugins', 'wporg-plugins'
 			),
 			$post->post_title,
+			$plugin_author->user_login,
 			$post->post_name
 		);
 
