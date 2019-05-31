@@ -869,6 +869,29 @@ class Plugin_Directory {
 			$wp_query->query_vars['post_status']   = array_unique( $wp_query->query_vars['post_status'] );
 		}
 
+		// Sanitize / cleanup the search query a little bit.
+		if ( $wp_query->is_search() ) {
+			$s = $wp_query->get( 's' );
+			$s = urldecode( $s );
+
+			// If a URL-like request comes in, reduce to a slug
+			if ( preg_match( '!^http.+/plugins/([^/]+)(/|$)!i', $s, $m ) ) {
+				$s = $m[1];
+			}
+
+			// Jetpack Search has a limit, limit to 200char. This is intentionally using ASCII length + Multibyte substr.
+			if ( strlen( $s ) > 200 ) {
+				$s = mb_substr( $s, 0, 200 );
+			}
+
+			// Trim off special characters, only allowing wordy characters at the end of searches.s
+			$s = preg_replace( '!(\W+)$!i', '', $s );
+			// ..and whitespace
+			$s = trim( $s );
+
+			$wp_query->set( 's', $s );
+		}
+
 		// By default, all archives are sorted by active installs
 		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
 			$wp_query->query_vars['orderby']  = 'meta_value_num';
