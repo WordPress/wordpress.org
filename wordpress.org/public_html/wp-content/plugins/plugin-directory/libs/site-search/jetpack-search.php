@@ -222,13 +222,17 @@ class Jetpack_Search {
 	 */
 	public function search( $es_args ) {
 		$service_url  = 'https://public-api.wordpress.com/rest/v1/sites/' . $this->jetpack_blog_id . '/search';
-		$json_es_args = json_encode( $es_args );
+		$json_es_args = wp_json_encode( $es_args );
 		$cache_key    = md5( $json_es_args );
 		$lock_key     = 'lock-' . $cache_key;
 		$count_key    = 'count-' . $cache_key;
 
-		$response = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		// If the Query args were not able to be encoded, bail.
+		if ( ! $json_es_args ) {
+			return false;
+		}
 
+		$response = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
 		// Use a temporary lock to prevent cache stampedes.
 		// This will ensure that a maximum of two processes are performing the search, or one when the stale value is still known.
