@@ -399,8 +399,10 @@ jQuery( function( $ ) {
 		echo "<strong>Want to help? Start following this component!</strong> <a href='/core/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
 
 		$followers = $this->api->get_component_followers( $post->post_title );
-		$followers = "'" . implode( "', '", esc_sql( $followers ) ) . "'";
-		$followers = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($followers)" );
+		if ( $followers ) {
+			$followers = "'" . implode( "', '", esc_sql( $followers ) ) . "'";
+			$followers = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($followers)" );
+		}
 		if ( $followers ) {
 			echo 'Contributors following this component:';
 			echo '<ul class="followers">';
@@ -483,6 +485,10 @@ jQuery( function( $ ) {
 		}
 
 		$history = $this->api->get_component_history( $component, self::last_x_days );
+		if ( ! $history ) {
+			$history = array( 'change' => 0 ); // Incorrect, but allows full page render.
+		}
+
 		$direction = '';
 		if ( $history['change'] > 0 ) {
 			$direction = ' growing';
@@ -554,6 +560,9 @@ jQuery( function( $ ) {
 		}
 
 		$tickets_by_type = $this->api->get_ticket_counts_for_component( $component );
+		if ( ! $tickets_by_type ) {
+			$tickets_by_type = array( 'defect (bug)' => 0 ); // Incorrect, but allows page render
+		}
 
 		$count = array_sum( $tickets_by_type );
 		echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $count ), $count ) . '</h3>';
@@ -637,8 +646,10 @@ jQuery( function( $ ) {
 		}
 		if ( in_array( 'component', $topics ) ) {
 			$components = $this->api->get_components();
-			foreach ( $components as $component ) {
-				echo '<option value="component/' . esc_attr( rawurlencode( $component ) ) . '">' . esc_html( $component ) . "</option>";
+			if ( $components ) {
+				foreach ( $components as $component ) {
+					echo '<option value="component/' . esc_attr( rawurlencode( $component ) ) . '">' . esc_html( $component ) . "</option>";
+				}
 			}
 		}
 		echo '</select>';
@@ -651,14 +662,18 @@ jQuery( function( $ ) {
 			return;
 		}
 
+		$component = $post->post_title;
+		$history = $this->api->get_component_history( $component );
+
+		if ( ! $history ) {
+			return;
+		}
+
 		static $once = true;
 		if ( $once ) {
 			$once = false;
 			echo '<thead><tr><td>Component</td><td>Tickets</td><td>7 Days</td><td>0&nbsp;Replies</td><td>Maintainers</td></tr></thead>';
 		}
-
-		$component = $post->post_title;
-		$history = $this->api->get_component_history( $component );
 
 		$arrow = '';
 		if ( $history['change'] ) {
