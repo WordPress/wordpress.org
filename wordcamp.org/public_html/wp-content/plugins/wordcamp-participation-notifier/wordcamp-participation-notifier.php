@@ -112,7 +112,7 @@ class WordCamp_Participation_Notifier {
 	 * Updates the activity and associations of a profile when the WordPress.org username on a published speaker
 	 * or organizer post changes.
 	 *
-	 * IMPORTANT NOTE: If a draft post is published via block editor, we will have to add badges and activity here instead of `post_published_or_unpublished` method.
+	 * IMPORTANT NOTE: When a draft post is published via the block editor, badges and activity must be managed here instead of in the `post_published_or_unpublished` method.
 	 * This is because when post is updated via Block editor, the status change request will not have any POST data, see @link https://github.com/WordPress/gutenberg/issues/12897
 	 *
 	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
@@ -173,7 +173,7 @@ class WordCamp_Participation_Notifier {
 	 * @param int     $user_id  User ID to add badge for.
 	 */
 	protected function add_badge( $post, $user_id ) {
-		if ( ! in_array( $post->post_type, [ 'wcb_speaker', 'wcb_organizer' ] ) || ! $user_id ) {
+		if ( ! $this->is_post_notifiable( $post ) ) {
 			return;
 		}
 
@@ -198,7 +198,7 @@ class WordCamp_Participation_Notifier {
 	protected function maybe_remove_badge( $post, $user_id ) {
 		global $wpdb;
 
-		if ( ! in_array( $post->post_type, [ 'wcb_speaker', 'wcb_organizer' ] ) ) {
+		if ( ! $this->is_post_notifiable( $post ) ) {
 			return;
 		}
 
