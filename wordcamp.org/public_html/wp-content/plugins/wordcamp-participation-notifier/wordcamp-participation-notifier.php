@@ -44,9 +44,9 @@ class WordCamp_Participation_Notifier {
 		}
 
 		if ( 'publish' == $new_status && 'publish' == $old_status ) {
-			$this->published_speaker_post_updated( $post );
+			$this->published_post_updated( $post );
 		} elseif ( 'publish' == $new_status || 'publish' == $old_status ) {
-			$this->speaker_post_published_or_unpublished( $new_status, $old_status, $post );
+			$this->post_published_or_unpublished( $new_status, $old_status, $post );
 		}
 	}
 
@@ -116,7 +116,7 @@ class WordCamp_Participation_Notifier {
 	 *
 	 * @param WP_Post $post
 	 */
-	protected function published_speaker_post_updated( $post ) {
+	protected function published_post_updated( $post ) {
 		$previous_user_id = $this->get_saved_wporg_user_id( $post );
 		$new_user_id      = $this->get_new_wporg_user_id( $post );
 
@@ -156,7 +156,7 @@ class WordCamp_Participation_Notifier {
 	 * @param string  $old_status
 	 * @param WP_Post $post
 	 */
-	protected function speaker_post_published_or_unpublished( $new_status, $old_status, $post ) {
+	protected function post_published_or_unpublished( $new_status, $old_status, $post ) {
 		if ( 'publish' == $new_status ) {
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
