@@ -65,8 +65,10 @@ function get_whitelist() {
 			'desrosj',
 			'JeffPaul',
 			'JoshuaWold',
+			'justinahinon',
 			'karmatosed',
 			'lukecarbis',
+			'marybaum',
 			'pbiron',
 			'psykro', // @jon_bossenger on Slack
 			'welcher',
