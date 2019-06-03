@@ -545,7 +545,7 @@
 			width: 640px;
 			margin: 0 auto;
 		}
-		
+
 	}
 	.color.section {
 		color: #fff;
@@ -736,42 +736,42 @@
 		padding-top: 0;
 	}
 
-		div#inner-search {
-			background-color: #666;
-			margin-bottom: 1em;
-			padding-top: 2px;
-			.section.search-section {
+	div#inner-search {
+		background-color: #666;
+		margin-bottom: 1em;
+		padding-top: 2px;
+		.section.search-section {
+			color: #ffffff;
+		}
+		div#inner-search-icon-container {
+			margin: 0 auto;
+			max-width: 60em;
+			cursor: pointer;
+			div#inner-search-icon {
+				background-color: #666;
 				color: #ffffff;
-			}
-			div#inner-search-icon-container {
-				margin: 0 auto;
-				max-width: 60em;
-				cursor: pointer;
-				div#inner-search-icon {
-					background-color: #666;
-					color: #ffffff;
-					text-align: center;
-					margin-right: 26px;
-					margin-left: 4px;
-					float: right;
-					padding: 5px;
-					-webkit-border-bottom-right-radius: 5px;
-					-webkit-border-bottom-left-radius: 5px;
-					-moz-border-radius-bottomright: 5px;
-					-moz-border-radius-bottomleft: 5px;
-					border-bottom-right-radius: 5px;
-					border-bottom-left-radius: 5px;
-					.dashicons-search {
-						height: auto;
-						width: auto;
-						&:before {
-							font-size: 36px;
-							line-height: 36px;
-						}
+				text-align: center;
+				margin-right: 26px;
+				margin-left: 4px;
+				float: right;
+				padding: 5px;
+				-webkit-border-bottom-right-radius: 5px;
+				-webkit-border-bottom-left-radius: 5px;
+				-moz-border-radius-bottomright: 5px;
+				-moz-border-radius-bottomleft: 5px;
+				border-bottom-right-radius: 5px;
+				border-bottom-left-radius: 5px;
+				.dashicons-search {
+					height: auto;
+					width: auto;
+					&:before {
+						font-size: 36px;
+						line-height: 36px;
 					}
 				}
 			}
 		}
+	}
 
 	.archive-filter-form {
 		margin: 5rem 0;
@@ -1282,7 +1282,7 @@
 		.comment-list li.depth-1,
 		#comment-preview {
 			border: 1px solid #dfdfdf;
-			border-radius: 2px;	
+			border-radius: 2px;
 			width: 100%;
 		}
 
@@ -1696,7 +1696,7 @@
 		a {
 			font-size: 68.6646px;
 			font-size: 6.86646rem;
-		
+
 			@media (max-width: 500px) {
 				font-size: 50px;
 				font-size: 5rem;
@@ -2131,7 +2131,7 @@ div[class*="-table-of-contents-container"] {
 		display: block;
 	}
 	.current-menu-ancestor:not(.open) .expandable .dashicons:not(:focus),
-	.current-menu-item .expandable .dashicons:not(:focus) {
+	.current-menu-item > .expandable .dashicons:not(:focus) {
 		background: #fff;
 		color: #0073aa;
 	}
