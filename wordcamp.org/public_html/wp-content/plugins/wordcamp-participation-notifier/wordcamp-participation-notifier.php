@@ -112,37 +112,31 @@ class WordCamp_Participation_Notifier {
 	 * Updates the activity and associations of a profile when the WordPress.org username on a published speaker
 	 * or organizer post changes.
 	 *
+	 * IMPORTANT NOTE: If a draft post is published via block editor, we will have to add badges and activity here instead of `post_published_or_unpublished` method.
+	 * This is because when post is updated via Block editor, the status change request will not have any POST data, see @link https://github.com/WordPress/gutenberg/issues/12897
+	 *
 	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
 	 *
 	 * @param WP_Post $post
 	 */
 	protected function published_post_updated( $post ) {
-		$previous_user_id = $this->get_saved_wporg_user_id( $post );
-		$new_user_id      = $this->get_new_wporg_user_id( $post );
+		$previous_user_id       = $this->get_saved_wporg_user_id( $post );
+		$new_user_id            = $this->get_new_wporg_user_id( $post );
+		$published_activity_key = $this->get_published_activity_key( $post );
 
-		// There is no username, or it hasn't changed, so we don't need to do anything here.
-		if ( $previous_user_id === $new_user_id ) {
-			return;
+
+		if ( $previous_user_id ) {
+			$this->maybe_remove_badge( $post, $previous_user_id );
 		}
 
-		// todo change this to use an if/elseif/elseif structure, just to be safe
+		if ( $new_user_id ) {
 
-		// A new username was added, so add the activity and association.
-		if ( $new_user_id && ! $previous_user_id ) {
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
-		}
+			if ( ! get_user_meta( $new_user_id, $published_activity_key ) ) {
+				$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
+				update_user_meta( $new_user_id, $published_activity_key, true );
+			}
 
-		// The username was removed, so remove the association.
-		if ( ! $new_user_id && $previous_user_id ) {
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $previous_user_id ) );
-		}
-
-		// The username changed, so remove the association from the previous user and add both the activity and association to the new user.
-		if ( $new_user_id && $previous_user_id ) {
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $previous_user_id ) );
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
+			$this->add_badge( $post, $new_user_id );
 		}
 	}
 
@@ -158,15 +152,124 @@ class WordCamp_Participation_Notifier {
 	 */
 	protected function post_published_or_unpublished( $new_status, $old_status, $post ) {
 		if ( 'publish' == $new_status ) {
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
-		} elseif( 'publish' == $old_status ) {
-			// Get the $user_id from post meta instead of $_POST in case it changed during the unpublish update.
-			// This makes sure that the association is removed from the same user that it was originally added to.
+			$user_id = $this->get_new_wporg_user_id( $post );
 
+			if ( ! get_user_meta( $user_id, $this->get_published_activity_key( $post ) ) ) {
+				$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
+				update_user_meta( $user_id, $this->get_published_activity_key( $post ), true );
+			}
+
+			$this->add_badge( $post, $user_id );
+		} elseif( 'publish' == $old_status ) {
 			$user_id = $this->get_saved_wporg_user_id( $post );
+			$this->maybe_remove_badge( $post, $user_id );
+		}
+	}
+
+	/**
+	 * Makes request to Profile URL to add badge to organizer/speaker. Also adds a meta entry which is used by `maybe_remove_badge` function to figure out whether to remove a badge or not.
+	 *
+	 * @param WP_Post $post     Speaker/Organizer Post Object.
+	 * @param int     $user_id  User ID to add badge for.
+	 */
+	protected function add_badge( $post, $user_id ) {
+		if ( ! in_array( $post->post_type, [ 'wcb_speaker', 'wcb_organizer' ] ) || ! $user_id ) {
+			return;
+		}
+
+		$meta_key = $this->get_user_meta_key( $post );
+
+		// User already has a badge. Prevent wasteful API call and bail.
+		if ( get_user_meta( $user_id, $meta_key ) ) {
+			return;
+		}
+
+		update_user_meta( $user_id ,$meta_key, true );
+
+		$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add', $user_id ) );
+	}
+
+	/**
+	 * Makes a request to remove speaker/organizer badge from a user if the user is removed from all WordCamp where they were speaker/organizer.
+	 *
+	 * @param WP_Post $post     Speaker/Organizer Post Object.
+	 * @param int     $user_id  User ID to remove the badge for.
+	 */
+	protected function maybe_remove_badge( $post, $user_id ) {
+		global $wpdb;
+
+		if ( ! in_array( $post->post_type, [ 'wcb_speaker', 'wcb_organizer' ] ) ) {
+			return;
+		}
+
+		$meta_key = $this->get_user_meta_key( $post );
+
+		// User does not have a badge anyway. Prevent wasteful API call and bail.
+		if ( ! $user_id || ! get_user_meta( $user_id, $meta_key ) ) {
+			return;
+		}
+
+		delete_user_meta( $user_id, $meta_key );
+
+		$meta_key_prefix = $this->get_user_meta_key_prefix( $post );
+
+		$count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $wpdb->usermeta
+				WHERE
+					user_id = %d
+					AND meta_key like '$meta_key_prefix%';
+				",
+				$user_id
+			)
+		);
+
+		if ( '0' === $count ) {
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $user_id ) );
 		}
+	}
+
+	/**
+	 * Meta key to store user metadata for organizer/speaker association.
+	 *
+	 * We store meta_key in form of wc_{post_type}_{blog_id}_{post_id} because
+	 *
+	 * 1. Since meta_key is indexed, count query on wc_{post_type}% for a specific user_id will be performant. We will use this query to figure out if we want to remove a badge.
+	 *
+	 * 2. Adding separate rows per WordCamp per User per Post allows us to avoid incorrect badge removal in some cases.
+	 * For egs, when an organizer accidentally adds same wporg name to multiple speaker post, and then corrects their mistake by removing it in all but one post.
+	 *
+	 * 3. Because of verbosity, deleting user meta entry will be less error prone.
+	 *
+	 * @param WP_Post $post Sponsor/Organizer post object.
+	 *
+	 * @return string
+	 */
+	private function get_user_meta_key( $post ) {
+		return $this->get_user_meta_key_prefix( $post ) . get_current_blog_id() . '_' . $post->ID;
+	}
+
+	/**
+	 * Meta key prefix to store user metadata for organizer/speaker association. This prefix is used in count query to figure if a user should have an organizer/speaker badge.
+	 *
+	 * @param WP_Post $post Sponsor/Organizer post object.
+	 *
+	 * @return string
+	 */
+	private function get_user_meta_key_prefix( $post ) {
+		return 'wc_' .  $post->post_type . '_';
+	}
+
+	/**
+	 * Meta key name to store user matadata for whether activity is published or not.
+	 * Used to prevent publishing duplicate activities.
+	 *
+	 * @param WP_Post $post Post object, will be organizer/sponsor/tix_attendee.
+	 *
+	 * @return string
+	 */
+	private function get_published_activity_key( $post ) {
+		return 'wc_published_activity_' . get_current_blog_id() . "_$post->ID";
 	}
 
 	/**
