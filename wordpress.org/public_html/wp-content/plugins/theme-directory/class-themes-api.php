@@ -60,6 +60,8 @@ class Themes_API {
 		'extended_author'    => false,
 		'photon_screenshots' => false,
 		'active_installs'    => false,
+		'requires'           => false,
+		'requires_php'       => false,
 	);
 
 	/**
@@ -368,6 +370,8 @@ class Themes_API {
 			$defaults['num_ratings'] = true;
 			$defaults['reviews_url'] = true;
 			$defaults['parent'] = true;
+			$defaults['requires'] = true;
+			$defaults['requires_php'] = true;
 		}
 
 		if ( empty( $this->request->fields ) ) {
@@ -785,6 +789,14 @@ class Themes_API {
 			foreach ( array_keys( get_post_meta( $theme->ID, '_status', true ) ) as $version ) {
 				$phil->versions[ $version ] = $this->create_download_link( $theme, $version );
 			}
+		}
+
+		if ( $this->fields['requires'] ) {
+			$phil->requires = wporg_themes_get_version_meta( $theme->ID, '_requires', $phil->version );
+		}
+
+		if ( $this->fields['requires_php'] ) {
+			$phil->requires_php = wporg_themes_get_version_meta( $theme->ID, '_requires_php', $phil->version );
 		}
 
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {

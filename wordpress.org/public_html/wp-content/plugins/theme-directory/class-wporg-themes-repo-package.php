@@ -68,6 +68,18 @@ class WPORG_Themes_Repo_Package extends Repo_Package {
 				return $this->wp_post->_author_url[ $version ];
 			case 'ticket' :
 				return $this->wp_post->_ticket_id[ $version ];
+			case 'requires':
+				$values = $this->wp_post->_requires;
+				if ( isset( $values[ $version ] ) ) {
+					return $values[ $version ];
+				}
+				return '';
+			case 'requires-php':
+				$values = $this->wp_post->_requires_php;
+				if ( isset( $values[ $version ] ) ) {
+					return $values[ $version ];
+				}
+				return '';
 			default:
 				return $this->wp_post->$name;
 		}

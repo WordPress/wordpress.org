@@ -757,6 +757,8 @@ function wporg_themes_get_themes_for_query() {
 		'extended_author' => true,
 		'photon_screenshots' => true,
 		'active_installs' => true,
+		'requires' => true,
+		'requires_php' => true,
 	);
 
 	$api_result = wporg_themes_query_api( 'query_themes', $request );
@@ -796,6 +798,8 @@ function wporg_themes_theme_information( $slug ) {
 			'extended_author' => true,
 			'photon_screenshots' => true,
 			'active_installs' => true,
+			'requires' => true,
+			'requires_php' => true,
 		)
 	) );
 }
