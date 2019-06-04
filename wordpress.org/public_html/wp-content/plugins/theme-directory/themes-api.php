@@ -14,7 +14,12 @@ function wporg_themes_update_check( $post_id, $current_version ) {
 	$cache_group = 'theme-update-check';
 	wp_cache_add_global_groups( $cache_group );
 
-	wp_cache_set( "themeid:{$slug}", $post_id, $cache_group );
-	wp_cache_set( "themevers:{$slug}", $current_version, $cache_group );
+	$theme_meta = array(
+		'current_version' => $current_version,
+		'requires'        => wporg_themes_get_version_meta( $post_id, '_requires', $current_version ),
+		'requires_php'    => wporg_themes_get_version_meta( $post_id, '_requires_php', $current_version ),
+	);
+
+	wp_cache_set( $slug, $theme_meta, $cache_group );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_update_check', 10, 2 );
