@@ -1,7 +1,7 @@
 <?php
 
 if ( ! defined( 'THEMES_API_VERSION' ) ) {
-	define( 'THEMES_API_VERSION', basename( dirname( $_SERVER['REQUEST_URI'] ) ) );
+	define( 'THEMES_API_VERSION', '1.0' );
 }
 
 // Load WordPress, pretend we're the Theme Directory in order to avoid having to switch sites after loading.

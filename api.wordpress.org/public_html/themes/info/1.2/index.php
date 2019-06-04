@@ -9,4 +9,8 @@ if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'POST
 	die( 'This API only serves GET requests.' );
 }
 
+if ( ! defined( 'THEMES_API_VERSION' ) ) {
+	define( 'THEMES_API_VERSION', '1.2' );
+}
+
 require dirname( __DIR__ ) . '/1.1/index.php';
