@@ -26,23 +26,46 @@ function wporg_themes_setup() {
 	remove_action( 'template_redirect', 'redirect_canonical' );
 	remove_action( 'template_redirect', 'wp_old_slug_redirect' );
 
-	add_action( 'template_redirect', 'wporg_themes_trailing_slashes' );
+	add_action( 'template_redirect', 'wporg_themes_canonical_redirects' );
 
 	add_theme_support( 'wp4-styles' );
 }
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
 
 /**
- * Handle the root-level redirect to trailing-slash'd uri which redirect_canonical() usually does.
+ * Handle redirects which redirect_canonical() usually would (or should) do.
  */
-function wporg_themes_trailing_slashes() {
+function wporg_themes_canonical_redirects() {
+	// always include the trailing slash for the Site URL
 	if ( '/themes' === $_SERVER['REQUEST_URI'] ) {
 		wp_safe_redirect( '/themes/', 301 );
 		die();
 	}
 
+	// We don't need any urls such as /themes/index.php/twentyten/ working
 	if ( false !== stripos( $_SERVER['REQUEST_URI'], '/index.php' ) ) {
 		$url = str_ireplace( '/index.php', '/', $_SERVER['REQUEST_URI'] );
+		wp_safe_redirect( $url, 301 );
+		die();
+	}
+
+	// Uppercase characters in URLs tend to lead to broken JS pages.
+	// This redirects any URLs that match /$slug or /browse/$section and have an uppercase URL to the lower-case variant.
+	if (
+		preg_match( '![A-Z]!', $_SERVER['REQUEST_URI'] ) &&
+		(
+			preg_match( '!^/themes/[^/]*[A-Z]+!', $_SERVER['REQUEST_URI'] ) ||
+			'/themes/browse/' === strtolower( substr( $_SERVER['REQUEST_URI'], 0, 15 ) )
+		)
+	) {
+		$url = trailingslashit( strtolower( remove_query_arg( array_keys( $_GET ), $_SERVER['REQUEST_URI'] ) ) );
+		wp_safe_redirect( $url, 301 );
+		die();
+	}
+
+	// add a trailing slash to /browse/ requests
+	if ( preg_match( '!^/themes/browse/([^/]+)$!i', $_SERVER['REQUEST_URI'] ) ) {
+		$url = trailingslashit( $_SERVER['REQUEST_URI'] );
 		wp_safe_redirect( $url, 301 );
 		die();
 	}
