@@ -30,18 +30,13 @@ class Reviews {
 			<?php
 			foreach ( $reviews as $review ) :
 				setup_postdata( $review );
-				if ( !empty( $review->post_name ) ) {
-					$url = 'https://wordpress.org/support/topic/' . $review->post_name . '/';
-				} else {
-					$url = add_query_arg( array( 'p' => $review->ID ), 'https://wordpress.org/support/plugin/' );
-				}
 				?>
 				<article class="plugin-review">
 					<div class="review-avatar">
 						<?php echo get_avatar( get_the_author_meta( 'ID' ), 60 ); ?>
 					</div><div class="review">
 						<header>
-							<h3 class="review-title"><a class="url" href="<?php echo esc_url( $url ); ?>"><?php echo get_the_title( $review ); ?></a></h3>
+							<h3 class="review-title"><a class="url" href="<?php echo esc_url( 'https://wordpress.org/support/topic/' . $review->post_name . '/' ); ?>"><?php echo get_the_title( $review ); ?></a></h3>
 							<?php echo Template::dashicons_stars( $review->post_rating ); ?>
 							<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
 						</header>
