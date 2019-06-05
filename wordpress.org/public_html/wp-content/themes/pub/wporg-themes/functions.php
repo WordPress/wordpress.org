@@ -64,7 +64,7 @@ function wporg_themes_canonical_redirects() {
 	}
 
 	// add a trailing slash to /browse/ requests
-	if ( preg_match( '!^/themes/browse/([^/]+)$!i', $_SERVER['REQUEST_URI'] ) ) {
+	if ( preg_match( '!^/themes/browse/([^/?]+)$!i', $_SERVER['REQUEST_URI'] ) ) {
 		$url = trailingslashit( $_SERVER['REQUEST_URI'] );
 		wp_safe_redirect( $url, 301 );
 		die();
