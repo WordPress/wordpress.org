@@ -225,7 +225,6 @@ class Jetpack_Search {
 		$json_es_args = wp_json_encode( $es_args );
 		$cache_key    = md5( $json_es_args );
 		$lock_key     = 'lock-' . $cache_key;
-		$count_key    = 'count-' . $cache_key;
 
 		// If the Query args were not able to be encoded, bail.
 		if ( ! $json_es_args ) {
@@ -246,8 +245,6 @@ class Jetpack_Search {
 		}
 
 		if ( $do_fresh_request ) {
-			// Keep track of the number of concurrent requests for this key
-			wp_cache_set( $count_key, 1, self::CACHE_GROUP, 60 );
 
 			// If the error volume is high, there's a proportionally lower chance that we'll actually attempt to hit the API.
 			if ( $this->error_volume_is_low() ) {
@@ -275,7 +272,16 @@ class Jetpack_Search {
 				if ( is_wp_error( $request ) ) {
 					$this->search_error( 'http error ' . $request->get_error_message(), E_USER_WARNING );
 				} else {
-					$this->search_error( 'http status ' . wp_remote_retrieve_response_code( $request ), E_USER_WARNING );
+					$es_error = json_decode( wp_remote_retrieve_body( $request ), true );
+
+					$this->search_error(
+						sprintf( 'http status %d %s %s',
+							wp_remote_retrieve_response_code( $request ),
+							$es_error['error'] ?? '',
+							$es_error['message'] ?? ''
+						),
+						E_USER_WARNING
+					);
 				}
 
 				// If we have a stale cached response, return that. Otherwise, return the error object.
@@ -313,12 +319,7 @@ class Jetpack_Search {
 		} else {
 			// Stampede protection has kicked in, AND we have no stale cached value to display. That's bad - possibly indicates cache exhaustion
 			if ( false === $response ) {
-				// Keep a track of how many cache stampede's happen per minute.
-				wp_cache_incr( 'search-stampede-failures', 1, self::CACHE_GROUP ) || wp_cache_set( 'search-stampede-failures', 1, self::CACHE_GROUP, 60 );
-
-				// Include the number of times this branch has been hit
-				$request_count = wp_cache_incr( $count_key, 1, self::CACHE_GROUP );
-				trigger_error( 'Plugin directory search: no cached results available during stampede. Requests: ' . $request_count, E_USER_WARNING );
+				trigger_error( 'Plugin directory search: no cached results available during stampede.', E_USER_WARNING );
 			}
 		}
 
