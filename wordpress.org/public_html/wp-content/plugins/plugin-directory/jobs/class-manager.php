@@ -233,6 +233,8 @@ class Manager {
 	 * Queue all of our cron tasks.
 	 *
 	 * The jobs are queued for 1 minutes time to avoid recurring job failures from repeating too soon.
+	 *
+	 * This method is called on wp-admin pageviews and on a two-minutely cron task.
 	 */
 	public function register_cron_tasks() {
 		if ( ! wp_next_scheduled( 'plugin_directory_meta_sync' ) ) {
@@ -248,10 +250,21 @@ class Manager {
 			wp_schedule_event( time() + 60, 'hourly', 'plugin_directory_update_api_check' );
 		}
 		if ( ! wp_next_scheduled( 'plugin_directory_check_cronjobs' ) ) {
+			// This function
 			wp_schedule_event( time() + 60, 'every_120s', 'plugin_directory_check_cronjobs' );
 		}
 		if ( ! wp_next_scheduled ( 'plugin_directory_translation_sync' ) ) {
 			wp_schedule_event( time() + 60, 'daily', 'plugin_directory_translation_sync' );
+		}
+
+		// Check to see if `WP_CORE_LATEST_RELEASE` has changed since we last ran.
+		if ( defined( 'WP_CORE_LATEST_RELEASE' ) && get_option( 'plugins_last_core_release_seen' ) !== WP_CORE_LATEST_RELEASE ) {
+			update_option( 'plugins_last_core_release_seen', WP_CORE_LATEST_RELEASE );
+
+			// If the next "Meta Sync" is more than 5 minutes away, perform one ASAP.
+			if ( wp_next_scheduled( 'plugin_directory_meta_sync' ) > ( time() + 5 * MINUTE_IN_SECONDS ) ) {
+				wp_schedule_single_event( time() + 10, 'plugin_directory_meta_sync' );
+			}
 		}
 	}
 

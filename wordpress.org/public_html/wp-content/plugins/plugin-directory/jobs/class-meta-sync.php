@@ -106,11 +106,7 @@ class Meta_Sync {
 			return;
 		}
 
-		$equivs     = wporg_get_version_equivalents();
-		$equivs_key = md5( serialize( $equivs ) );
-		if ( $equivs_key === get_option( 'plugin_last_tested_sync' ) ) {
-			return;
-		}
+		$equivs = wporg_get_version_equivalents();
 
 		$latest_equiv = array();
 		foreach ( $equivs as $latest_compatible_version => $compatible_with ) {
@@ -120,7 +116,7 @@ class Meta_Sync {
 		}
 
 		$tested_meta_value_esc_sql = '"' . implode( '", "', array_map( 'esc_sql', array_keys( $latest_equiv ) ) ) . '"';
-		$tested_values             = $wpdb->get_results( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'tested' AND meta_value IN( {$tested_meta_value_esc_sql} )" );
+		$tested_values             = $wpdb->get_results( "SELECT post_id, post_name, meta_value FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON pm.post_id = p.ID WHERE meta_key = 'tested' AND meta_value IN( {$tested_meta_value_esc_sql} )" );
 
 		foreach ( $tested_values as $row ) {
 			update_post_meta(
@@ -128,8 +124,9 @@ class Meta_Sync {
 				'tested',
 				$latest_equiv[ $row->meta_value ]
 			);
-		}
 
-		update_option( 'plugin_last_tested_sync', $equivs_key );
+			// Update the API endpoints with the new data
+			API_Update_Updater::update_single_plugin( $row->post_name );
+		}
 	}
 }
