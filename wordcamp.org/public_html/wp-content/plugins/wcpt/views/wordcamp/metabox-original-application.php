@@ -1,3 +1,9 @@
-<?php defined( 'WPINC' ) or die(); ?>
+<?php
+defined( 'WPINC' ) or die();
 
-<pre><?php echo esc_html( print_r( $application_data, true ) ); ?></pre>
+/** @var array $application_data */
+?>
+
+<pre style="white-space: pre-wrap;">
+	<?php echo esc_html( print_r( $application_data, true ) ); ?>
+</pre>
