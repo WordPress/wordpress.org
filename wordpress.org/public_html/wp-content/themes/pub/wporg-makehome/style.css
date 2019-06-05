@@ -203,7 +203,7 @@ section.get-involved article:nth-of-type(odd) {
 	clear: left;
 }
 
-section.get-involved article h2:before {
+section.get-involved article h2 a:before {
 	font-family: 'dashicons';
 	content: '\f109';
 	margin-right: 0.4em;
@@ -214,24 +214,24 @@ section.get-involved article h2:before {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-section.get-involved article.make-core          h2:before { content: "\f475"; }
-section.get-involved article.make-design        h2:before { content: "\f309"; }
-section.get-involved article.make-mobile        h2:before { content: "\f470"; }
-section.get-involved article.make-accessibility h2:before { content: "\f483"; }
-section.get-involved article.make-polyglots     h2:before { content: '\f326'; }
-section.get-involved article.make-support       h2:before { content: "\f125"; }
-section.get-involved article.make-themes        h2:before { content: '\f100'; }
-section.get-involved article.make-plugins       h2:before { content: '\f106'; }
-section.get-involved article.make-docs          h2:before { content: '\f105'; }
-section.get-involved article.make-community     h2:before { content: '\f307'; }
-section.get-involved article.make-meta          h2:before { content: '\f325'; }
-section.get-involved article.make-training      h2:before { content: '\f118'; }
-section.get-involved article.make-flow          h2:before { content: '\f115'; }
-section.get-involved article.make-tv            h2:before { content: '\f235'; }
-section.get-involved article.make-marketing     h2:before { content: '\f130'; }
-section.get-involved article.make-cli           h2:before { content: '\f345'; }
-section.get-involved article.make-hosting       h2:before { content: '\f176'; }
-section.get-involved article.make-tide          h2:before { content: '\f10d'; }
+section.get-involved article.make-core          h2 a:before { content: "\f475"; }
+section.get-involved article.make-mobile        h2 a:before { content: "\f470"; }
+section.get-involved article.make-design        h2 a:before { content: "\f309"; }
+section.get-involved article.make-accessibility h2 a:before { content: "\f483"; }
+section.get-involved article.make-polyglots     h2 a:before { content: '\f326'; }
+section.get-involved article.make-support       h2 a:before { content: "\f125"; }
+section.get-involved article.make-themes        h2 a:before { content: '\f100'; }
+section.get-involved article.make-plugins       h2 a:before { content: '\f106'; }
+section.get-involved article.make-docs          h2 a:before { content: '\f105'; }
+section.get-involved article.make-community     h2 a:before { content: '\f307'; }
+section.get-involved article.make-meta          h2 a:before { content: '\f325'; }
+section.get-involved article.make-training      h2 a:before { content: '\f118'; }
+section.get-involved article.make-flow          h2 a:before { content: '\f115'; }
+section.get-involved article.make-tv            h2 a:before { content: '\f235'; }
+section.get-involved article.make-marketing     h2 a:before { content: '\f130'; }
+section.get-involved article.make-cli           h2 a:before { content: '\f345'; }
+section.get-involved article.make-hosting       h2 a:before { content: '\f176'; }
+section.get-involved article.make-tide          h2 a:before { content: '\f10d'; }
 
 section.get-involved article.featured-group h2:after {
 	display: block;
@@ -243,7 +243,10 @@ section.get-involved article.featured-group h2:after {
 
 section.get-involved article h2 a {
 	font-weight: 600;
-	color: #444444;
+}
+
+section.get-involved article h2 a {
+	font-weight: 600;
 }
 
 section.get-involved article div.team-description p {
@@ -252,15 +255,15 @@ section.get-involved article div.team-description p {
 	line-height: 1.5;
 }
 
-section.get-involved article small {
+div.team-meeting {
 	display: block;
 	font-size: 0.8em;
 	font-style: italic;
-	opacity: 0.5;
+	opacity: 0.75;
 	padding-top: 0.5em;
 }
 
-section.get-involved article small p {
+section.get-involved article .team-meeting {
 	line-height: 1.5;
 }
 
@@ -304,13 +307,24 @@ section.get-involved article small p {
 body.post-type-archive-meeting {
 	background-color: white;
 }
-h2.title {
+
+.header-section{
 	margin: 30px 10px;
+	font-size: 14px;
+}
+.header-section h2.title {
 	font-size: 36px;
 	font-weight: 300;
 	line-height: 1.3;
 }
+
+.header-section * {
+	display: none;
+}
+
 table.schedule {
+  /* table is set to show after JS is completed to avoid fickering */
+  display: none;
   width: 100%;
   margin: 30px 10px;
   font-size: 1.4em;

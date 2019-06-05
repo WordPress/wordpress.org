@@ -1,7 +1,11 @@
 <?php get_header(); ?>
 
 <div class="wrapper">
-	<h2 class="title"><?php _e( 'Upcoming WordPress Meetings', 'make-wporg' ); ?></h2>
+	<div class="header-section">
+		<h2 class="title all"><?php _e( 'Upcoming WordPress Meetings', 'make-wporg' ); ?></h2>
+		<h2 class="title team"><?php _e( 'Upcoming Team Meetings', 'make-wporg' ); ?></h2>
+		<a class="team" href="/meetings"><?php _e( 'Show meetings for other teams', 'make-wporg' ); ?></a>
+	</div>
 <table class="schedule">
 	<thead>
 		<tr>
@@ -111,6 +115,27 @@ function wporg_makehome_time_converter_script() {
 				}
 			}
 		}
+
+		// Allow client side filtering using # in url
+		var hash = window.location.hash.replace('#','');
+		if (hash) {
+			var rowsToRemove = $('.schedule').find('tr td:nth-child(1)').filter(function() {
+				var reg = new RegExp(hash, "i");
+				return !reg.test($(this).text());
+			});
+
+			for (var i = 0; i < rowsToRemove.length; i++) {
+				$(rowsToRemove[i]).parent().remove();
+			}
+
+			$('.header-section').find('.team').show();
+		}
+		else {
+			$('.header-section').find('.all').show();
+		}
+
+		// avoid page flickers on load
+		$('.schedule').show();
 	});
 	</script>
 <?php
