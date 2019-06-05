@@ -30,6 +30,7 @@ class Meeting_Post_Type {
 		add_action( 'admin_head',                         array( $mpt, 'meeting_column_width' ) );
 		add_action( 'admin_bar_menu',                     array( $mpt, 'add_edit_meetings_item_to_admin_bar' ), 80 );
 		add_action( 'wp_enqueue_scripts',                 array( $mpt, 'add_edit_meetings_icon_to_admin_bar' ) );
+		add_shortcode( 'meeting_time',                    array( $mpt, 'meeting_time_shortcode' ) );
 	}
 
 	public function meeting_column_width() { ?>
@@ -64,48 +65,7 @@ class Meeting_Post_Type {
 		$query->set( 'nopaging', true );
 
 		// meta query to eliminate expired meetings from query
-		$query->set( 'meta_query', array(
-			'relation'=>'OR',
-				// not recurring  AND start_date >= CURDATE() = one-time meeting today or still in future
-				array(
-					'relation'=>'AND',
-					array(
-						'key'=>'recurring',
-						'value'=>array( 'weekly', 'biweekly', 'occurrence', 'monthly', '1' ),
-						'compare'=>'NOT IN',
-					),
-					array(
-						'key'=>'start_date',
-						'type'=>'DATE',
-						'compare'=>'>=',
-						'value'=>'CURDATE()',
-					)
-				),
-				// recurring = 1 AND ( end_date = '' OR end_date > CURDATE() ) = recurring meeting that has no end or has not ended yet
-				array(
-					'relation'=>'AND',
-					array(
-						'key'=>'recurring',
-						'value'=>array( 'weekly', 'biweekly', 'occurrence', 'monthly', '1' ),
-						'compare'=>'IN',
-					),
-					array(
-						'relation'=>'OR',
-						array(
-							'key'=>'end_date',
-							'value'=>'',
-							'compare'=>'=',
-						),
-						array(
-							'key'=>'end_date',
-							'type'=>'DATE',
-							'compare'=>'>',
-							'value'=>'CURDATE()',
-						)
-					)
-				),
-			)
-		);
+		$query->set( 'meta_query', $this->meeting_meta_query );
 
 		// WP doesn't understand CURDATE() and prepares it as a quoted string. Repair this:
 		add_filter( 'get_meta_sql', function ($sql) {
@@ -462,6 +422,104 @@ class Meeting_Post_Type {
 		' );
 	}
 
+	/**
+	 * Renders meeting information with the next meeting time based on user's local timezone. Used in Make homepage.
+	 */
+	public function meeting_time_shortcode( $attr, $content = '' ) {
+
+		if ( empty( $attr['team'] ) ) {
+			return '';
+		}
+
+		if ( $attr['team'] === 'Documentation' ) {
+			$attr['team'] = 'Docs';
+		}
+
+		// meta query to eliminate expired meetings from query
+		add_filter( 'get_meta_sql', function ($sql) {
+			return str_replace( "'CURDATE()'", 'CURDATE()', $sql );
+		} );
+
+		$query = new WP_Query(
+			array(
+				'post_type' => 'meeting',
+				'nopaging'  => true,
+				'meta_query' => array(
+					'relation' => 'AND',
+					array(
+						'key'     => 'team',
+						'value'   => $attr['team'],
+						'compare' => 'EQUALS',
+					),
+					$this->meeting_meta_query
+				)
+			)
+		);
+
+		if ( count( $query->posts ) > 0 ) {
+
+			$post = $query->posts[0];
+			$next_meeting_datestring = $post->next_date;
+			$utc_time = strftime( '%H:%M:%S', strtotime( $post->time ) );
+			$next_meeting_iso        = $next_meeting_datestring . 'T' . $utc_time . '+00:00';
+			$next_meeeting_timestamp = strtotime( $next_meeting_datestring . $utc_time );
+	
+			$out = '<p>';
+			$out .= 'Next meeting: ' . __( $post->post_title );
+			$display_count = count( $query->posts ) - 1;
+			$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings#' . esc_attr( $attr['team'] ) . '">' . sprintf( __( '(+%s more)'), $display_count ) . '</a>';
+			$out .= '</br>';
+			$out .= '<time class="date" date-time="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_iso . '</time> ';
+			$out .= sprintf( __( '(%s from now)' ), human_time_diff( $next_meeeting_timestamp, current_time('timestamp') ) );
+			$out .= empty( $post->location ) ? '' : ' ' . sprintf( __('at %s on Slack'), $post->location );
+			$out .= '</p>';
+		}
+
+
+		return $out;
+	}
+
+	private $meeting_meta_query = array(
+		'relation'=>'OR',
+			// not recurring  AND start_date >= CURDATE() = one-time meeting today or still in future
+			array(
+				'relation'=>'AND',
+				array(
+					'key'=>'recurring',
+					'value'=>array( 'weekly', 'biweekly', 'occurrence', 'monthly', '1' ),
+					'compare'=>'NOT IN',
+				),
+				array(
+					'key'=>'start_date',
+					'type'=>'DATE',
+					'compare'=>'>=',
+					'value'=>'CURDATE()',
+				)
+			),
+			// recurring = 1 AND ( end_date = '' OR end_date > CURDATE() ) = recurring meeting that has no end or has not ended yet
+			array(
+				'relation'=>'AND',
+				array(
+					'key'=>'recurring',
+					'value'=>array( 'weekly', 'biweekly', 'occurrence', 'monthly', '1' ),
+					'compare'=>'IN',
+				),
+				array(
+					'relation'=>'OR',
+					array(
+						'key'=>'end_date',
+						'value'=>'',
+						'compare'=>'=',
+					),
+					array(
+						'key'=>'end_date',
+						'type'=>'DATE',
+						'compare'=>'>',
+						'value'=>'CURDATE()',
+					)
+				)
+			),
+		);
 }
 
 // fire it up
