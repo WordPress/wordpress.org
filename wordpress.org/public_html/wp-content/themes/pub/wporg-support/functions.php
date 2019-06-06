@@ -230,7 +230,7 @@ add_filter( 'wp_title_parts', 'wporg_support_document_title' );
 function wporg_support_profile_url( $user_id ) {
 	$user = get_userdata( $user_id );
 
-	return esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename );
+	return esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' );
 }
 // Temporarily remove the redirect to `https://profiles.wordpress.org/`, see #meta1868.
 // add_filter( 'bbp_pre_get_user_profile_url', 'wporg_support_profile_url' );
@@ -245,7 +245,7 @@ function wporg_support_get_wporg_profile_link( $user_id = 0 ) {
 	$user_nicename = bbp_get_user_nicename( $user_id );
 
 	return sprintf( '<a href="%s">@%s</a>',
-		esc_url( 'https://profiles.wordpress.org/' . $user_nicename ),
+		esc_url( 'https://profiles.wordpress.org/' . $user_nicename . '/' ),
 		$user_nicename
 	);
 }
