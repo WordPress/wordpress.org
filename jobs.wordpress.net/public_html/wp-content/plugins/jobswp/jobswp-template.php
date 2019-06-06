@@ -46,7 +46,7 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 				// Prepend 'http://' if no protocol was specified by job poster
 				if ( 0 !== strpos( $val, 'http' ) )
 					$val = 'http://' . $val;
-				$val = sprintf( __( 'Via <a href="%s">web form</a>', 'jobswp' ), esc_attr( esc_url_raw( $val ) ) );
+				$val = sprintf( __( 'Via <a href="%s">web form</a>', 'jobswp' ), esc_url( $val ) );
 			} else {
 				$val = esc_html( $val );
 			}
