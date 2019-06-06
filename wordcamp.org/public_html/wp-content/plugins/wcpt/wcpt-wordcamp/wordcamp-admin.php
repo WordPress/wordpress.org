@@ -367,37 +367,39 @@ if ( ! class_exists( 'WordCamp_Admin' ) ) :
 
 				case 'wordcamp':
 					$retval = array(
-						'Start Date (YYYY-mm-dd)'         => 'date',
-						'End Date (YYYY-mm-dd)'           => 'date',
-						'Location'                        => 'text',
-						'URL'                             => 'wc-url',
-						'E-mail Address'                  => 'text',
+						'Start Date (YYYY-mm-dd)'           => 'date',
+						'End Date (YYYY-mm-dd)'             => 'date',
+						'Location'                          => 'text',
+						'URL'                               => 'wc-url',
+						'E-mail Address'                    => 'text',
 						// Note: This is the address for the entire organizing team, which is different than the "Email Address" field.
-						'Twitter'                         => 'text',
-						'WordCamp Hashtag'                => 'text',
-						'Number of Anticipated Attendees' => 'text',
-						'Multi-Event Sponsor Region'      => 'mes-dropdown',
+						'Twitter'                           => 'text',
+						'WordCamp Hashtag'                  => 'text',
+						'Number of Anticipated Attendees'   => 'text',
+						'Multi-Event Sponsor Region'        => 'mes-dropdown',
 						'Global Sponsorship Grant Currency' => 'select-currency',
-						'Global Sponsorship Grant Amount' => 'number',
-						'Global Sponsorship Grant'        => 'text',
+						'Global Sponsorship Grant Amount'   => 'number',
+						'Global Sponsorship Grant'          => 'text',
+						'Running money through WPCS PBC'    => 'checkbox',
 					);
 					break;
 
 				case 'all':
 				default:
 					$retval = array(
-						'Start Date (YYYY-mm-dd)'          => 'date',
-						'End Date (YYYY-mm-dd)'            => 'date',
-						'Location'                         => 'text',
-						'URL'                              => 'wc-url',
-						'E-mail Address'                   => 'text',
-						'Twitter'                          => 'text',
-						'WordCamp Hashtag'                 => 'text',
-						'Number of Anticipated Attendees'  => 'text',
-						'Multi-Event Sponsor Region'       => 'mes-dropdown',
+						'Start Date (YYYY-mm-dd)'           => 'date',
+						'End Date (YYYY-mm-dd)'             => 'date',
+						'Location'                          => 'text',
+						'URL'                               => 'wc-url',
+						'E-mail Address'                    => 'text',
+						'Twitter'                           => 'text',
+						'WordCamp Hashtag'                  => 'text',
+						'Number of Anticipated Attendees'   => 'text',
+						'Multi-Event Sponsor Region'        => 'mes-dropdown',
 						'Global Sponsorship Grant Currency' => 'select-currency',
-						'Global Sponsorship Grant Amount'  => 'number',
-						'Global Sponsorship Grant'         => 'text',
+						'Global Sponsorship Grant Amount'   => 'number',
+						'Global Sponsorship Grant'          => 'text',
+						'Running money through WPCS PBC'    => 'checkbox',
 
 						'Organizer Name'                   => 'text',
 						'WordPress.org Username'           => 'text',
