@@ -169,6 +169,7 @@ function get_whitelist() {
 			'krogsgard',
 			'rachelbaker',
 			'rmccue',
+			'timothybjacobs',
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'davidakennedy',
