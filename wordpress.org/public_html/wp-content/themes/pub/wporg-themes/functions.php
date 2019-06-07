@@ -67,7 +67,7 @@ function wporg_themes_canonical_redirects() {
 	}
 
 	// Ensure all requests are trailingslash'd.
-	if ( $oath && '/' !== substr( $path, -1 ) ) {
+	if ( $path && '/' !== substr( $path, -1 ) ) {
 		$url = str_replace( $path, $path . '/', $_SERVER['REQUEST_URI'] );
 		wp_safe_redirect( $url, 301 );
 		die();
