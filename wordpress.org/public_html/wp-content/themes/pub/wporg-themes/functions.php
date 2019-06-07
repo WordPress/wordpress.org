@@ -50,22 +50,25 @@ function wporg_themes_canonical_redirects() {
 	}
 
 	// Uppercase characters in URLs tend to lead to broken JS pages.
-	// This redirects any URLs that match /$slug or /browse/$section and have an uppercase URL to the lower-case variant.
+	// Redirect all paths to the lower-case variant, excluding searches..
+	$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 	if (
-		preg_match( '![A-Z]!', $_SERVER['REQUEST_URI'] ) &&
-		(
-			preg_match( '!^/themes/[^/]*[A-Z]+!', $_SERVER['REQUEST_URI'] ) ||
-			'/themes/browse/' === strtolower( substr( $_SERVER['REQUEST_URI'], 0, 15 ) )
-		)
+		$path &&
+		$path !== strtolower( $path ) &&
+		( is_search() && trailingslashit( $path ) !== '/themes/search/' . get_query_var( 's' ) . '/' )
 	) {
-		$url = trailingslashit( strtolower( remove_query_arg( array_keys( $_GET ), $_SERVER['REQUEST_URI'] ) ) );
+		$url = preg_replace(
+			'|^' . preg_quote( $path, '|' ) . '|',
+			trailingslashit( strtolower( $path ) ),
+			$_SERVER['REQUEST_URI']
+		);
 		wp_safe_redirect( $url, 301 );
 		die();
 	}
 
-	// add a trailing slash to /browse/ requests
-	if ( preg_match( '!^/themes/browse/([^/?]+)$!i', $_SERVER['REQUEST_URI'] ) ) {
-		$url = trailingslashit( $_SERVER['REQUEST_URI'] );
+	// Ensure all requests are trailingslash'd.
+	if ( $oath && '/' !== substr( $path, -1 ) ) {
+		$url = str_replace( $path, $path . '/', $_SERVER['REQUEST_URI'] );
 		wp_safe_redirect( $url, 301 );
 		die();
 	}
