@@ -4,19 +4,20 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions;
 
 use GP;
 use GP_Locales;
-use Text_Diff;
-use WP_Error;
-use WP_Http;
-use WP_Text_Diff_Renderer_inline;
-
-require_once ABSPATH . '/wp-includes/wp-diff.php' ;
 
 class Plugin {
+
+	const TM_UPDATE_EVENT = 'wporg_translate_tm_update';
 
 	/**
 	 * @var Plugin The singleton instance.
 	 */
 	private static $instance;
+
+	/**
+	 * @var array
+	 */
+	private $queue = [];
 
 	/**
 	 * Returns always the same instance of this plugin.
@@ -44,6 +45,44 @@ class Plugin {
 		add_action( 'template_redirect', [ $this, 'register_routes' ], 5 );
 		add_action( 'gp_pre_tmpl_load', [ $this, 'pre_tmpl_load' ], 10, 2 );
 		add_action( 'wporg_translate_suggestions', [ $this, 'extend_translation_suggestions' ] );
+
+		if ( 'cli' !== PHP_SAPI ) {
+			add_action( 'gp_translation_created', [ $this, 'translation_updated' ], 3 );
+			add_action( 'gp_translation_saved', [ $this, 'translation_updated' ], 3 );
+
+			// DB Writes are delayed until shutdown to bulk-update the stats during imports.
+			add_action( 'shutdown', [ $this, 'schedule_tm_update' ], 3 );
+		}
+
+		add_action( self::TM_UPDATE_EVENT, [ Translation_Memory_Client::class, 'update' ] );
+	}
+
+	/**
+	 * Adds a translation in queue when a translation was created
+	 * or updated.
+	 *
+	 * @param \GP_Translation $translation Created/updated translation.
+	 */
+	public function translation_updated( $translation ) {
+		if ( ! $translation->user_id || 'current' !== $translation->status ) {
+			return;
+		}
+
+		$this->queue[ $translation->original_id ] = $translation->id;
+	}
+
+	/**
+	 * Schedules a single event to update translation memory for new translations.
+	 */
+	public function schedule_tm_update() {
+		remove_action( 'gp_translation_created', [ $this, 'translation_updated' ], 3 );
+		remove_action( 'gp_translation_saved', [ $this, 'translation_updated' ], 3 );
+
+		if ( ! $this->queue ) {
+			return;
+		}
+
+		wp_schedule_single_event( time() + 60, self::TM_UPDATE_EVENT, [ 'translations' => $this->queue ] );
 	}
 
 	/**

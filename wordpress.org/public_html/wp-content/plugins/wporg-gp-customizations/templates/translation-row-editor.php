@@ -75,7 +75,7 @@ if ( is_object( $glossary ) ) {
 						</button>
 						<div class="button-menu">
 							<button type="button" class="button-menu__toggle with-tooltip" aria-label="Show contextual links">
-								<span class="screen-reader-text">Links</span><span aria-hidden="true" class="dashicons dashicons-paperclip"></span>
+								<span class="screen-reader-text">Links</span><span aria-hidden="true" class="dashicons dashicons-menu-alt"></span>
 							</button>
 							<ul class="button-menu__dropdown">
 								<?php foreach ( $more_links as $link ) : ?>

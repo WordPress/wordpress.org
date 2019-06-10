@@ -13,7 +13,7 @@ use WP_CLI_Command;
 class Sync_Plugin_Translations extends WP_CLI_Command {
 
 	/**
-	 * Delete a plugin project and its translations.
+	 * Sync plugin translations.
 	 *
 	 * ## OPTIONS
 	 *

@@ -6,7 +6,8 @@
 				'original': originalId,
 				'nonce': nonce
 			},
-			dataType: 'json'
+			dataType: 'json',
+			cache: false,
 		} );
 
 		xhr.done( function( response ) {
