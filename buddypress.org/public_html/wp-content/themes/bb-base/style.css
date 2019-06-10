@@ -385,7 +385,8 @@ div.single-post table tr.alt td {
 }
 
 #subnav,
-body.buddypress.trac #subnav {
+body.buddypress.trac #subnav,
+body.bbpress.trac #subnav {
 	background: #eee;
 	border-bottom: #ddd solid 1px;
 	font-size: 12px;
