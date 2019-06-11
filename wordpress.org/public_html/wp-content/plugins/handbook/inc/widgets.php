@@ -42,6 +42,10 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 	}
 
 	public function form( $instance ) {
+		if ( empty( $instance['sortby'] ) ) {
+			$instance['sortby'] = 'menu_order';
+		}
+
 		parent::form( $instance );
 
 		$checked = checked( ! empty( $instance['show_home'] ), true, false );
