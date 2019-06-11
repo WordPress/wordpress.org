@@ -8,14 +8,6 @@
 class WPorg_Handbook_Navigation {
 
 	/**
-	 * Is the handbook table of contents produced by the handbook pages widget?
-	 *
-	 * @access private
-	 * @var bool
-	 */
-	private static $using_pages_widget = false;
-
-	/**
 	 * Initializes handbook navigation.
 	 */
 	public static function init() {
@@ -26,13 +18,45 @@ class WPorg_Handbook_Navigation {
 	 * Fires on 'init' action.
 	 */
 	public static function do_init() {
-		// Note if the WPorg_Handbook_Pages_Widget widget is in use.
-		if ( is_active_widget( false, false, WPorg_Handbook_Pages_Widget::get_widget_id_base(), true ) ) {
-			self::$using_pages_widget = true;
-		}
+		// Determine how handbook sidebar menu is defined
+		add_action( 'wp', [ __CLASS__, 'determine_handbook_sidebar_menu_source' ] );
 
 		// Override o2 navigation defaults.
 		add_filter( 'o2_post_fragment', array( __CLASS__, 'o2_post_fragment' ), 10, 2 );
+	}
+
+	/**
+	 * Determines the source for the handbook sidebar menu.
+	 *
+	 * @return string|false The handbook sidebar menu source. Either 'menu_widget',
+	 *                      'handbook_pages_widget'. False if not on a handbook
+	 *                      page. Empty string if no sidebar menu of its of an
+	 *                      unrecognized source.
+	 */
+	public static function determine_handbook_sidebar_menu_source() {
+		// Bail early if not a handbook.
+		if ( ! $post_type = wporg_get_current_handbook() ) {
+			return false;
+		}
+
+		$menu_source = '';
+
+		$sidebars = wp_get_sidebars_widgets();
+		if ( $sidebars && isset( $sidebars[ $post_type ] ) ) {
+			foreach ( $sidebars[ $post_type ] as $widget ) {
+				$widget_base = _get_widget_id_base( $widget );
+				if ( 'nav_menu' === $widget_base ) {
+					$menu_source = 'menu_widget';
+				} elseif( 'handbook_pages' === $widget_base ) {
+					$menu_source = 'handbook_pages_widget';
+				}
+				if ( $menu_source ) {
+					break;
+				}
+			}
+		}
+
+		return $menu_source;
 	}
 
 	/**
@@ -52,7 +76,7 @@ class WPorg_Handbook_Navigation {
 			return $fragment;
 		}
 
-		if ( self::$using_pages_widget ) {
+		if ( 'handbook_pages_widget' === self::determine_handbook_sidebar_menu_source() ) {
 			$adjacent = self::get_adjacent_posts_via_handbook_pages_widget( $post_id );
 		} else {
 			$adjacent = self::get_adjacent_posts_via_menu( 'Table of Contents', $post_id );
@@ -93,7 +117,7 @@ class WPorg_Handbook_Navigation {
 	public static function show_nav_links( $menu_name = 'Table of Contents' ) {
 		$prev = $next = false;
 
-		if ( self::$using_pages_widget ) {
+		if ( 'handbook_pages_widget' === self::determine_handbook_sidebar_menu_source() ) {
 			$adjacent = self::get_adjacent_posts_via_handbook_pages_widget();
 		} else {
 			$adjacent = self::get_adjacent_posts_via_menu( $menu_name );
