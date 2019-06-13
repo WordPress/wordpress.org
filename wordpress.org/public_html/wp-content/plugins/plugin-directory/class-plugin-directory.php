@@ -495,7 +495,7 @@ class Plugin_Directory {
 		) );
 
 		// Add the browse/* views.
-		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|new|favorites|adopt-me)' );
+		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
 
 		// Create an archive for a users favorites too.
@@ -731,7 +731,7 @@ class Plugin_Directory {
 
 		// For any invalid values passed to browse, set it to featured instead
 		if ( !empty ( $wp_query->query ['browse'] ) &&
-		     !in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'new', 'favorites', 'adopt-me' ) ) ) {
+		     !in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me' ) ) ) {
 			 $wp_query->query['browse'] = 'featured';
 			 $wp_query->query_vars['browse'] = 'featured';
 		}
@@ -775,7 +775,7 @@ class Plugin_Directory {
 		}
 
 		// For /browse/ requests, we conditionally need to avoid querying the taxonomy for most views (as it's handled in code above)
-		if ( isset( $wp_query->query['browse'] ) && ! in_array( $wp_query->query['browse'], array( 'beta', 'blocks', 'featured', 'adopt-me' ) ) ) {
+		if ( isset( $wp_query->query['browse'] ) && ! in_array( $wp_query->query['browse'], array( 'beta', 'blocks', 'block', 'featured', 'adopt-me' ) ) ) {
 			unset( $wp_query->query_vars['browse'] );
 
 			add_filter( 'the_posts', function( $posts, $wp_query ) {
