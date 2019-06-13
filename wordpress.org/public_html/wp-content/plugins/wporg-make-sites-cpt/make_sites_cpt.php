@@ -10,7 +10,6 @@
 
 add_action( 'init', 'make_site_register_cpt' );
 function make_site_register_cpt() {
-	error_log( __FUNCTION__ );
 	$labels = array(
 		'name'               => _x( 'Sites',                   'site', 'make_site_cpt' ),
 		'singular_name'      => _x( 'Site',                    'site', 'make_site_cpt' ),
@@ -49,10 +48,24 @@ function make_site_register_cpt() {
 		'query_var'           => true,
 		'can_export'          => true,
 		'rewrite'             => true,
-		'capability_type'     => 'post'
+		'capability_type'     => 'post',
+		'show_in_rest'        => true
 	);
 
 	register_post_type( 'make_site', $args );
+
+	$make_sites = make_site_get_network_sites();
+	register_rest_field( 'make_site', 'link', array(
+		'get_callback' => function( $site ) use ( $make_sites ) {
+			$make_site_id = get_post_meta( $site['id'], 'make_site_id', true );
+			return isset( $make_sites[ $make_site_id ] ) ? $make_sites[ $make_site_id ] : '';
+		},
+		'update_callback' => null,
+		'schema' => array(
+			'description' => __ ('Site link.' ),
+			'type' => 'string',
+		),
+	) );
 }
 
 function make_site_get_network_sites() {
