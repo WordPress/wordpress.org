@@ -169,7 +169,7 @@ function get_whitelist() {
 			'krogsgard',
 			'rachelbaker',
 			'rmccue',
-			'timothybjacobs',
+			'TimothyBlynJacobs', // @timothybjacobs on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'davidakennedy',
