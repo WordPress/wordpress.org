@@ -153,7 +153,7 @@ function get_whitelist() {
 		'core-privacy' => array_merge( get_committers(), array(
 			'allendav',
 			'azaozz',
-			'casiepa',
+			'casiepa', // @Pascal on Slack
 			'dejliglama',
 			'desrosj',
 			'garrett-eclipse',
@@ -251,7 +251,7 @@ function get_whitelist() {
 		),
 		'meta-wordcamp' => $wordcamp_central,
 		'polyglots' => array(
-			'casiepa',
+			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
 			'Nao',
@@ -262,7 +262,7 @@ function get_whitelist() {
 			'tokyobiyori',
 		),
 		'polyglots-events' => array(
-			'casiepa',
+			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
 			'Nao',
@@ -315,7 +315,7 @@ function get_whitelist() {
 			'DrewAPicture', // @drew on Slack
 		),
 		'wptv' => array(
-			'casiepa',
+			'casiepa', // @Pascal on Slack
 			'JerrySarcastic',
 			'RoseAppleMedia',
 		),
