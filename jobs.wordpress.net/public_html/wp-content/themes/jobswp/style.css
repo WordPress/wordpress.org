@@ -819,6 +819,9 @@ li > ul {
 .job-cat-item-theme-customization:before { /* Themes */
 	content: '\f100';
 }
+.job-cat-item-contributor:before { /* Contributor */
+	content: '\f155';
+}
 
 .job-cat-item-all:before {
 	content: '\f120';
