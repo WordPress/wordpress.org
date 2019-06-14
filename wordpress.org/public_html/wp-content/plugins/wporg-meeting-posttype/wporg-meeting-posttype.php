@@ -487,7 +487,7 @@ class Meeting_Post_Type {
 			$out .= '<p>';
 			$out .= esc_html( $attr['before'] );
 			$out .= '<strong class="meeting-title">' . esc_html( $post->post_title ) . '</strong>';
-			$display_count = count( $query->posts ) - 1;
+			$display_count = $query->found_posts - count($query->posts);
 			if ( $attr['more'] ) {
 				$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings#' . esc_attr( $attr['team'] ) . '">' . sprintf( __( '(+%s more)'), $display_count ) . '</a>';
 			}
