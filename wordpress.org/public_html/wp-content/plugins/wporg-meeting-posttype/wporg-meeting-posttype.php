@@ -219,7 +219,7 @@ class Meeting_Post_Type {
 				'slug'            => __( 'meetings', 'wporg' ),
 			),
 	    );
-	    register_post_type( 'meeting', $args );
+		register_post_type( 'meeting', $args );
 	}
 
 	public function add_meta_boxes() {
@@ -427,6 +427,14 @@ class Meeting_Post_Type {
 	 */
 	public function meeting_time_shortcode( $attr, $content = '' ) {
 
+		$attr = shortcode_atts( array(
+			'team' => null,
+			'limit' => 1,
+			'before' => __( 'Next meeting: ', 'wporg' ),
+			'titletag' => 'strong',
+			'more' => true,
+		), $attr );
+
 		if ( empty( $attr['team'] ) ) {
 			return '';
 		}
@@ -435,15 +443,22 @@ class Meeting_Post_Type {
 			$attr['team'] = 'Docs';
 		}
 
+		if ( ! has_action( 'wp_footer', array( $this, 'time_conversion_script' ) ) ) {
+			add_action( 'wp_footer', array( $this, 'time_conversion_script' ), 999 );
+		}
+
+
 		// meta query to eliminate expired meetings from query
 		add_filter( 'get_meta_sql', function ($sql) {
 			return str_replace( "'CURDATE()'", 'CURDATE()', $sql );
 		} );
 
+		switch_to_blog( get_main_site_id() );
+
 		$query = new WP_Query(
 			array(
 				'post_type' => 'meeting',
-				'nopaging'  => true,
+				'posts_per_page'  => $attr['limit'],
 				'meta_query' => array(
 					'relation' => 'AND',
 					array(
@@ -456,25 +471,36 @@ class Meeting_Post_Type {
 			)
 		);
 
-		if ( count( $query->posts ) > 0 ) {
-
-			$post = $query->posts[0];
+		$out = '';
+		foreach ( $query->posts as $post ) {
 			$next_meeting_datestring = $post->next_date;
 			$utc_time = strftime( '%H:%M:%S', strtotime( $post->time ) );
 			$next_meeting_iso        = $next_meeting_datestring . 'T' . $utc_time . '+00:00';
-			$next_meeeting_timestamp = strtotime( $next_meeting_datestring . $utc_time );
+			$next_meeting_timestamp = strtotime( $next_meeting_datestring . ' '. $utc_time );
+			$next_meeting_display = strftime( '%c %Z', $next_meeting_timestamp );
+
+			$slack_channel = null;
+			if ( $post->location && preg_match( '/^#([-\w]+)$/', trim( $post->location ), $match ) ) {
+				$slack_channel = sanitize_title( $match[1] );
+			}
 	
-			$out = '<p>';
-			$out .= 'Next meeting: ' . __( $post->post_title );
+			$out .= '<p>';
+			$out .= esc_html( $attr['before'] );
+			$out .= '<strong class="meeting-title">' . esc_html( $post->post_title ) . '</strong>';
 			$display_count = count( $query->posts ) - 1;
-			$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings#' . esc_attr( $attr['team'] ) . '">' . sprintf( __( '(+%s more)'), $display_count ) . '</a>';
+			if ( $attr['more'] ) {
+				$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings#' . esc_attr( $attr['team'] ) . '">' . sprintf( __( '(+%s more)'), $display_count ) . '</a>';
+			}
 			$out .= '</br>';
-			$out .= '<time class="date" date-time="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_iso . '</time> ';
-			$out .= sprintf( __( '(%s from now)' ), human_time_diff( $next_meeeting_timestamp, current_time('timestamp') ) );
-			$out .= empty( $post->location ) ? '' : ' ' . sprintf( __('at %s on Slack'), $post->location );
+			$out .= '<time class="date" date-time="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_display . '</time> ';
+			$out .= sprintf( esc_html__( '(%s from now)' ), human_time_diff( $next_meeting_timestamp, current_time('timestamp') ) );
+			if ( $post->location && $slack_channel ) {
+				$out .= ' ' . sprintf( wp_kses( __('at <a href="%s">%s</a> on Slack'), array(  'a' => array( 'href' => array() ) ) ), 'https://wordpress.slack.com/messages/' . $slack_channel,   $post->location );
+			}
 			$out .= '</p>';
 		}
 
+		restore_current_blog();
 
 		return $out;
 	}
@@ -520,6 +546,39 @@ class Meeting_Post_Type {
 				)
 			),
 		);
+
+	public function time_conversion_script() {
+		echo <<<EOF
+<script type="text/javascript">
+
+	var parse_date = function (text) {
+		var m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\+00:00$/.exec(text);
+		var d = new Date();
+		d.setUTCFullYear(+m[1]);
+		d.setUTCDate(+m[3]);
+		d.setUTCMonth(+m[2]-1);
+		d.setUTCHours(+m[4]);
+		d.setUTCMinutes(+m[5]);
+		d.setUTCSeconds(+m[6]);
+		return d;
+	}
+	var format_time = function (d) {
+		return d.toLocaleTimeString(navigator.language, {weekday: 'long', hour: '2-digit', minute: '2-digit', timeZoneName: 'short'});
+	}
+
+	var nodes = document.getElementsByTagName('time');
+	for (var i=0; i<nodes.length; ++i) {
+		var node = nodes[i];
+		if (node.className === 'date') {
+			var d = parse_date(node.getAttribute('date-time'));
+			if (d) {
+				node.textContent = format_time(d);
+			}
+		}
+	}
+</script>
+EOF;
+	}
 }
 
 // fire it up
