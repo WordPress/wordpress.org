@@ -248,6 +248,7 @@ class WP_52_Credits extends WP_Credits {
 			'jrtashjian',
 			'juiiee8487',
 			'juliarrr',
+			'justinahinon',
 			'kadamwhite',
 			'kamataryo',
 			'karinedo',
