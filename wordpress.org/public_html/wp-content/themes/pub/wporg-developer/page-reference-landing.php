@@ -58,7 +58,7 @@ get_header(); ?>
 								?>
 
 									<li>
-										<a href="<?php esc_url( get_permalink() ); ?>" title="<?php the_title_attribute(); ?>">
+										<a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>">
 											<?php the_title(); ?>
 										</a>
 									</li>
