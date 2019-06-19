@@ -1,0 +1,109 @@
+/*
+ * todo
+ * match this to new Schedule block as much as possible, reuse markup/css wherever possible
+ * convert to sass inside components folder when wp-scripts supports that
+ */
+
+
+
+/*
+ * Common
+ */
+
+/* Copied from `wp-components`, see `enqueue_template_assets()` for details. */
+.components-spinner {
+	display: inline-block;
+	background-color: #7e8993;
+	width: 18px;
+	height: 18px;
+	opacity: 0.7;
+	float: right;
+	margin: 5px 11px 0;
+	border-radius: 100%;
+	position: relative;
+}
+
+.components-spinner::before {
+	content: "";
+	position: absolute;
+	background-color: #fff;
+	top: 3px;
+	left: 3px;
+	width: 4px;
+	height: 4px;
+	border-radius: 100%;
+	transform-origin: 6px 6px;
+	animation: components-spinner__animation 1s infinite linear;
+}
+
+@keyframes components-spinner__animation {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+#day-of-event .components-spinner {
+	float: none;
+}
+
+
+/*
+ * LiveSchedule
+ */
+.day-of-event-schedule {
+	background-color: #fbfbfc;
+	border: 1px solid #e0e5e9;
+	margin-bottom: 2em;
+}
+
+.day-of-event-schedule h3 {
+	border-top: 1px solid #e0e5e9;
+	border-bottom: 1px solid #e0e5e9;
+	padding: 0.75rem;
+}
+
+.full-schedule {
+	width: 100%;
+	display: block;
+	border-top: 1px solid #e0e5e9;
+	text-align: center;
+	padding: 0.75rem;
+}
+
+
+/*
+ * Session
+ */
+.wordcamp-schedule-session {
+	display: flex;	/* todo should be grid like the Schedule block */
+	border-bottom: 1px solid #e0e5e9;
+}
+
+.wordcamp-schedule-session:last-child {
+	border-bottom: none;
+}
+
+.wordcamp-schedule-session-track {
+	width: 20%;
+	border-right: 1px solid #e0e5e9;
+}
+
+.wordcamp-schedule-session-details {
+	width: 80%;
+}
+
+.wordcamp-schedule-session-details span {
+	display: block;
+}
+
+
+/*
+ * Post
+ */
+.wordcamp-latest-post {
+	margin-bottom: 1rem;
+}

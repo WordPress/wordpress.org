@@ -90,7 +90,7 @@ function enable_pwa_alpha_test() {
 
 	if ( 'development' === WORDCAMP_ENVIRONMENT || in_array( get_current_blog_id(), $pwa_test_sites, true ) ) {
 		require_once( __DIR__ . '/service-worker-caching.php' );
-		// require_once( __DIR__ . '/theme-templates/bootstrap.php' );
+		require_once( __DIR__ . '/theme-templates/bootstrap.php' );
 	}
 
 	/**

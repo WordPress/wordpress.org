@@ -1,0 +1,22 @@
+{
+	"name": "wordcamp-day-of-template",
+	"description": "Shows attendees the content that is most relevant during the event (directions to the venue, schedule, etc).",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/WordPress/wordcamp.org"
+	},
+	"author": "WordCamp.org",
+	"license": "GPL-2.0-or-later",
+	"bugs": {
+		"url": "https://github.com/WordPress/wordcamp.org/issues"
+	},
+	"homepage": "https://central.wordcamp.org",
+	"scripts": {
+		"start": "wp-scripts start",
+		"build": "wp-scripts build"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@wordpress/scripts": "^3.3.0"
+	}
+}
