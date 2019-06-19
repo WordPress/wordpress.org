@@ -650,6 +650,8 @@ namespace DevHub {
 				return __( 'Plugin Handbook', 'wporg' );
 			case 'themes':
 				return __( 'Theme Handbook', 'wporg' );
+			case 'apis':
+				return __( 'Common APIs Handbook', 'wporg' );
 			case 'block-editor':
 				return __( 'Block Editor Handbook', 'wporg' );
 			case 'cli':
