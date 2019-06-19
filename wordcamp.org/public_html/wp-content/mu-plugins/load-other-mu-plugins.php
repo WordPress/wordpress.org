@@ -85,7 +85,7 @@ function enable_pwa_alpha_test() {
 	 */
 	$pwa_test_sites = array(
 		928,  // 2017.testing
-		// todo enable after testing on 2017.testing production -- 1026, // 2019.europe
+		1026, // 2019.europe
 	);
 
 	if ( 'development' === WORDCAMP_ENVIRONMENT || in_array( get_current_blog_id(), $pwa_test_sites, true ) ) {
