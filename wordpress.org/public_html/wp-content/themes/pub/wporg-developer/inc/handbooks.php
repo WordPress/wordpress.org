@@ -19,11 +19,22 @@ class Devhub_Handbooks {
 	public static $post_types = [];
 
 	/**
+	 * Hidden handbook post types.
+	 *
+	 * Note: Hidden only from users who aren't logged in.
+	 *
+	 * @var array
+	 * @access public
+	 */
+	public static $hidden_handbooks = [ 'apis-handbook' ];
+
+	/**
 	 * Initializer
 	 *
 	 * @access public
 	 */
 	public static function init() {
+		add_filter( 'handbook_label', array( __CLASS__, 'change_handbook_label' ), 10, 2 );
 		add_filter( 'handbook_post_type_defaults', array( __CLASS__, 'filter_handbook_post_type_defaults' ), 10, 2 );
 		add_filter( 'handbook_post_types', array( __CLASS__, 'filter_handbook_post_types' ) );
 		add_action( 'init', array( __CLASS__, 'do_init' ) );
@@ -36,6 +47,8 @@ class Devhub_Handbooks {
 	 */
 	public static function do_init() {
 		add_filter( 'query_vars',  array( __CLASS__, 'add_query_vars' ) );
+
+		add_action( 'template_redirect', array( __CLASS__, 'redirect_hidden_handbooks' ), 1 );
 
 		add_action( 'pre_get_posts',  array( __CLASS__, 'pre_get_posts' ), 9 );
 
@@ -69,6 +82,20 @@ class Devhub_Handbooks {
 	}
 
 	/**
+	 * Redirects handbooks that should be inaccessible to visitors who aren't logged in.
+	 */
+	public static function redirect_hidden_handbooks() {
+		if ( ! self::$hidden_handbooks || get_current_user_id() || ! function_exists( 'wporg_is_handbook' ) || ! wporg_is_handbook() ) {
+			return;
+		}
+
+		if ( in_array( wporg_get_current_handbook(), self::$hidden_handbooks ) ) {
+			wp_safe_redirect( home_url() );
+			exit();
+		}	
+	}
+
+	/**
 	 * Add handbook query vars to the current query.
 	 *
 	 * @param \WP_Query $query
@@ -87,7 +114,7 @@ class Devhub_Handbooks {
 	}
 
 	/**
-	 * Filter handbook post types to create handbooks for: plugins, themes.
+	 * Filter handbook post types to create handbooks for: apis, plugins, themes.
 	 *
 	 * @access public
 	 *
@@ -96,7 +123,7 @@ class Devhub_Handbooks {
 	*/
 	public static function filter_handbook_post_types( $types ) {
 		if ( ! self::$post_types ) {
-			self::$post_types = apply_filters( 'devhub_handbook_post_types', [ 'plugin', 'theme' ] );
+			self::$post_types = apply_filters( 'devhub_handbook_post_types', [ 'apis', 'plugin', 'theme' ] );
 		}
 
 		return self::$post_types;
@@ -238,6 +265,23 @@ class Devhub_Handbooks {
 		}
 
 		return $classes;
+	}
+
+	/**
+	 * Overrides the default handbook label when post type name does not directly
+	 * translate to post type label.
+	 *
+	 * @param string $label     The default label, which is merely a sanitized
+	 *                          version of the handbook name.
+	 * @param string $post_type The handbook post type.
+	 * @return string
+	 */
+	public static function change_handbook_label( $label, $post_type ) {
+		if ( 'apis-handbook' === $post_type ) {
+			$label = __( 'Common APIs Handbook', 'wporg' );
+		}
+
+		return $label;
 	}
 
 } // Devhub_Handbooks
