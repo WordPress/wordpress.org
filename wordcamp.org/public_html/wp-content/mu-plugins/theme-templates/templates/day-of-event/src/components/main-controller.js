@@ -121,7 +121,7 @@ export class MainController extends Component {
 				/>
 
 				<LatestPosts
-					archiveUrl={ config.postArchiveUrl }
+					archiveUrl={ config.postsArchiveUrl }
 					isfetching={ postList.isFetching }
 					posts={ postList.data }
 				/>

@@ -38,12 +38,8 @@ const getScheduleData = ( data ) => {
 	 *
 	 * https://github.com/WordPress/gutenberg/issues/16218
 	 * https://github.com/WordPress/gutenberg/issues/15221
-	 *
-	 * You can test this with something like:
-	 * `const nowUTC = new Date( '2019-06-18T07:59:00.000-07:00' );`
 	 */
-	const nowUTC = new Date();
-	//const nowUTC = new Date( '2019-06-18T13:59:00.000-07:00' );   // todo remove
+	const nowUTC = window.dayOfEventConfig.scheduleNowOverride || Date.now(); // todo remove NowOverride after WCEU testing.
 	const offset = __experimentalGetSettings().timezone.offset * ( 60 * 60 * 1000 ); // todo find future-proof way to do this if aren't remove this after bugs above fixed.
 
 	if ( ! Array.isArray( data.tracks ) ) {
@@ -62,7 +58,7 @@ const getScheduleData = ( data ) => {
 
 		const indexOfNextSession = sessionsInTrack.findIndex(
 			( session ) => {
-				const sessionTimeUTC = new Date( ( session.meta._wcpt_session_time * 1000 ) - offset ); // Convert to UTC, see note above.
+				const sessionTimeUTC = ( session.meta._wcpt_session_time * 1000 ) - offset; // Convert to UTC, see note above.
 
 				return nowUTC < sessionTimeUTC;
 			}
