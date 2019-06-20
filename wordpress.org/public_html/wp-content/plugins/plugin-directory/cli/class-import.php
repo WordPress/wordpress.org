@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\CLI;
 
 use Exception;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
+use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -185,6 +186,9 @@ class Import {
 
 		// Ensure that the API gets the updated data
 		API_Update_Updater::update_single_plugin( $plugin->post_name );
+
+		// Import Tide data
+		Tide_Sync::sync_data( $plugin->post_name );
 
 		return true;
 	}
