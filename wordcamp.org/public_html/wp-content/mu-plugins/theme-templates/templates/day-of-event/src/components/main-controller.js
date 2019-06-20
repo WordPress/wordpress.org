@@ -24,7 +24,7 @@ const entityLists = {
 
 // todo also unfinished comments on https://github.com/wceu/wordcamp-pwa-page/pull/11
 
-// todo run linter on everything after removing all the todos, refactoring, etc
+// todo run php/css/js linters on everything after removing all the todos, refactoring, etc
 
 // todo reduce bundle size, 10k is way too big for a small thing like this
 

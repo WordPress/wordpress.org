@@ -12,7 +12,7 @@ add_action( 'wp_front_service_worker', __NAMESPACE__ . '\register_caching_routes
 add_action( 'wp_front_service_worker',    __NAMESPACE__ . '\set_navigation_caching_strategy' );
 
 
-// is prompt to save offline automatically showing on mobile?
+// todo is prompt to save offline automatically showing on mobile?
 	// if so, not sure we want it to
 	// not really related to this file, but nothing closer at the moment
 	// maybe want it to be eventually, but not until we do more work to really make the site use pwa features well?
@@ -42,7 +42,34 @@ function register_caching_routes() {
 	 *          Or maybe cache all routes, but then add an extra route that caches Tagregator less often?
 	 * All of this needs to be tested to verify that it's working as intended.
 	 *      What's the best way to do that? Document it here if it's not obvious.
+	 * need to explicitly remove older revisions of custom-css (and other assets?) from the cache when they change?
 	 */
+
+	$custom_css_url_parts = wp_parse_url( wcorg_get_custom_css_url() );
+
+	$static_asset_route_params = array(
+		'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
+		'cacheName' => 'assets',
+		'plugins'   => [
+			'expiration' => [
+				'maxEntries'    => 60,
+				'maxAgeSeconds' => DAY_IN_SECONDS,
+			],
+		],
+	);
+
+	wp_register_service_worker_caching_route(
+		'/wp-(content|includes)/.*\.(?:png|gif|jpg|jpeg|svg|webp|css|js)(\?.*)?$',
+		$static_asset_route_params
+	);
+
+	if ( isset( $custom_css_url_parts['path'], $custom_css_url_parts['query'] ) ) {
+		wp_register_service_worker_caching_route(
+			$custom_css_url_parts['path'] . $custom_css_url_parts['query'] . '$',
+			$static_asset_route_params
+		);
+	}
+	// todo test url being false/null
 
 	wp_register_service_worker_caching_route(
 		'/wp-(content|includes)/.*\.(?:png|gif|jpg|jpeg|svg|webp|css|js)(\?.*)?$',

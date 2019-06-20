@@ -21,7 +21,10 @@ defined( 'WPINC' ) || die();
 
 add_filter( 'theme_page_templates',            __NAMESPACE__ . '\register_page_templates' );
 add_filter( 'template_include',                __NAMESPACE__ . '\set_page_template_locations' );
+add_filter( 'template_include',                __NAMESPACE__ . '\inject_offline_template', 20 );  // After others because being offline transcends other templates.
 add_action( 'wp_enqueue_scripts',              __NAMESPACe__ . '\enqueue_template_assets' );
+add_filter( 'wp_offline_error_precache_entry', __NAMESPACE__ . '\add_offline_template_cachebuster' );
+add_action( 'wp_front_service_worker',         __NAMESPACE__ . '\precache_offline_template_assets' );
 
 
 /**
@@ -132,3 +135,85 @@ function enqueue_template_assets() {
 	}
 }
 
+
+/**
+ * Inject the offline template when the service worker pre-caches the response to offline requests.
+ *
+ * This is a dynamic template like search, 404, etc, rather than a page template.
+ *
+ * @param string $template_path
+ *
+ * @return string
+ */
+function inject_offline_template( $template_path ) {
+	if ( is_offline() || is_500() ) {
+		$template_path = __DIR__ . '/templates/offline.php';
+	}
+
+	return $template_path;
+}
+
+/**
+ * Add a cache-buster to the offline template's pre-cache entry.
+ *
+ * @param string
+ *
+ * @return string
+ */
+function add_offline_template_cachebuster( $entry ) {
+	$entry['revision'] .= ';' . filemtime( __DIR__ . '/templates/offline.php' );    // todo test that this is working. doesn't seem like it is, WB_REVISION is 0.2.0 (pwa plugin version), rather than this.
+
+	return $entry;
+}
+
+/**
+ * Precache the current theme's stylesheet
+ *
+ * @param WP_Service_Worker_Scripts $scripts
+ */
+function precache_offline_template_assets( WP_Service_Worker_Scripts $scripts ) {
+	$asset = get_custom_css_precache_details();
+
+	/*
+	 * If we don't have a URL, that's probably because the custom CSS is empty or short enough to be printed
+	 * inline instead of enqueued. In that case, the offline template will have it printed from the `wp_head()`
+	 * call anyway.
+	 */
+	if ( ! $asset ) {
+		return;
+		// todo test
+	}
+
+	$scripts->precaching_routes()->register(
+		$asset['url'],
+		array( 'revision' => $asset['revision'] )
+	);
+}
+
+/**
+ * Get the URL and revision for the custom CSS stylesheet.
+ *
+ * @return array|bool
+ */
+function get_custom_css_precache_details() {
+	$url = wcorg_get_custom_css_url();
+
+	wp_parse_str(
+		wp_parse_url( $url, PHP_URL_QUERY ),
+		$url_query_params
+	);
+
+	// todo precache header image too, but can't for wceu b/c they're specifying in CSS bg image, rather than using Core functions.
+
+	return array(
+		'url' => $url,
+
+		/*
+		 * This could probably be anything, since `$url` actually contains a cachebuster, but a unique revision
+		 * is set just for completeness.
+		 *
+		 * Jetpack stores the cachebuster in the `custom-css` query parameter.
+		 */
+		'revision' => $url_query_params['custom-css'],
+	);
+}
