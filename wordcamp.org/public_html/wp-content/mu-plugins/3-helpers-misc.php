@@ -150,6 +150,10 @@ function wcorg_get_custom_css_url() {
 	Jetpack_Custom_CSS_Enhancements::wp_custom_css_cb();
 	$markup = ob_get_clean();
 
+	if ( ! $markup ) {
+		return false;
+	}
+
 	$dom = new DOMDocument();
 	$dom->loadHTML( $markup );
 	$element = $dom->getElementById( 'wp-custom-css' );

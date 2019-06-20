@@ -181,7 +181,6 @@ function precache_offline_template_assets( WP_Service_Worker_Scripts $scripts ) 
 	 */
 	if ( ! $asset ) {
 		return;
-		// todo test
 	}
 
 	$scripts->precaching_routes()->register(
@@ -204,6 +203,10 @@ function get_custom_css_precache_details() {
 	);
 
 	// todo precache header image too, but can't for wceu b/c they're specifying in CSS bg image, rather than using Core functions.
+
+	if ( ! $url || ! isset( $url_query_params['custom-css'] ) ) {
+		return false;
+	}
 
 	return array(
 		'url' => $url,

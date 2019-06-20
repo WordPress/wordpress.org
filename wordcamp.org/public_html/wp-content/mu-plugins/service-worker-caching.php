@@ -69,7 +69,6 @@ function register_caching_routes() {
 			$static_asset_route_params
 		);
 	}
-	// todo test url being false/null
 
 	wp_register_service_worker_caching_route(
 		'/wp-(content|includes)/.*\.(?:png|gif|jpg|jpeg|svg|webp|css|js)(\?.*)?$',
