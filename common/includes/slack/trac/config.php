@@ -55,6 +55,7 @@ class Core extends Trac {
 		'coding-standards'   => '#core-coding-standards',
 		'Privacy'            => '#core-privacy',
 		'privacy'            => '#core-privacy',
+		'Site Health'        => '#core-sitehealth',
 	);
 }
 
