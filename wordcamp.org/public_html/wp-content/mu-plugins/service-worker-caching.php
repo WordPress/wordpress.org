@@ -12,6 +12,12 @@ add_action( 'wp_front_service_worker', __NAMESPACE__ . '\register_caching_routes
 add_action( 'wp_front_service_worker',    __NAMESPACE__ . '\set_navigation_caching_strategy' );
 
 
+// is prompt to save offline automatically showing on mobile?
+	// if so, not sure we want it to
+	// not really related to this file, but nothing closer at the moment
+	// maybe want it to be eventually, but not until we do more work to really make the site use pwa features well?
+	// otherwise risk giving users bad impression of pwas
+
 /**
  * Register caching routes with both service workers.
  */

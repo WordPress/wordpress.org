@@ -58,6 +58,7 @@ const getScheduleData = ( data ) => {
 
 		const indexOfNextSession = sessionsInTrack.findIndex(
 			( session ) => {
+				// todo when Schedule block adds session `length` meta fields, should take that into account when calculating what sessions at active
 				const sessionTimeUTC = ( session.meta._wcpt_session_time * 1000 ) - offset; // Convert to UTC, see note above.
 
 				return nowUTC < sessionTimeUTC;
@@ -112,16 +113,18 @@ const Schedule = ( { sessionList, trackList } ) => {
 			{ !! onNowSessions.length &&
 				<SessionsGroup
 					sessionTrackPairs={ onNowSessions }
-					title={ _x( 'In Progress', 'title', 'wordcamporg' ) }
+					title={ _x( 'On Now', 'title', 'wordcamporg' ) }
 				/>
 			}
+			{/* todo "Happening Now" might be a better long-term choice, but need more input. See https://github.com/WordPress/wordcamp.org/issues/127 */}
 
 			{ !! upNextSessions.length &&
 				<SessionsGroup
 					sessionTrackPairs={ upNextSessions }
-					title={ _x( 'Coming Up Next', 'title', 'wordcamporg' ) }
+					title={ _x( 'Up Next', 'title', 'wordcamporg' ) }
 				/>
 			}
+			{/* todo "Coming Up Next" might be a better long-term choice, but need more input. See https://github.com/WordPress/wordcamp.org/issues/127 */}
 		</>
 	);
 };

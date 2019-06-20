@@ -19,6 +19,9 @@ const entityLists = {
 // todo need ^ ? should they be class properties instead of separate vars?
 	// maybe b/c they're external b/c can't have const class properties?
 
+// this wont work when 'coming soon' mode is on, b/c front-end rest api is disabled then?
+	// what's a good way to handle that?
+
 // todo also unfinished comments on https://github.com/wceu/wordcamp-pwa-page/pull/11
 
 // todo run linter on everything after removing all the todos, refactoring, etc

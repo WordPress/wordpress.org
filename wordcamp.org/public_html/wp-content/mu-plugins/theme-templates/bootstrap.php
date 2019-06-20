@@ -45,6 +45,7 @@ function register_page_templates( $templates ) {
 	 *      same back-comapt considerations
 	 * need to provide a way for organizers to add arbitrary content to this new day-of event page?
 	 *      otherwise we'll be taking away flexibility when we disable the campsite day of template
+	 *      maybe just have the template call `the_content()` above or below the hardcoded stuff?
 	 */
 	if ( isset( $templates['templates/page-day-of.php'] ) ) {
 		unset( $templates['templates/page-day-of.php'] );

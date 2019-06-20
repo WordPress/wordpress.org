@@ -26,6 +26,7 @@ export const LatestPosts = ( { archiveUrl, isFetching, posts } ) => {
 			{ isFetching && 0 === posts.length &&
 				<Spinner />
 			}
+			{/* todo not seeing spinner while posts are loading initially */}
 
 			{ ( ! isFetching || 0 < posts.length ) &&
 				<>
