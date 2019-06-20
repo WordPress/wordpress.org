@@ -53,8 +53,12 @@ class Tide_Sync {
 		$plugin_slug = $plugin->post_name;
 
 		$data = self::fetch_data( $plugin_slug, $plugin->version );
-		if ( $data->content === "<p>pending</p>" ) {
-			// Not yet available, Check back later.
+		if ( ! $data ) {
+			return false;
+		}
+
+		// Not yet available, Check back later.
+		if ( $data->content === '<p>pending</p>' ) {
 			return self::requeue( $plugin_data );
 		}
 
