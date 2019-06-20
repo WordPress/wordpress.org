@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin name: GlotPress: WordPress.org Discussion
+ * Plugin name: GlotPress: Discussion
  * Description: Provides discussion feature for translate.wordpress.org.
  * Version:     1.0
  * Author:      WordPress.org
