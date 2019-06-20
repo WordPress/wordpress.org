@@ -923,10 +923,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 			return {
 				init: function() {
-					elements.hiddenEl = $('#field-keywords');
+					elements.hiddenEl = $( '#field-keywords' ).attr( 'aria-label', 'Manual keywords' );
 					if ( ! elements.hiddenEl.length ) {
 						return;
 					}
+
+					// Attach change event handler on the field-keywords input.
+					elements.hiddenEl.change( wpTrac.workflow.populate );
 
 					// Designed so the list could have come from another file.
 					if ( typeof coreKeywordList === 'undefined' ) {
@@ -946,9 +949,15 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					elements.hiddenEl.parents('form').submit( wpTrac.workflow.submit );
 
 					// Keyword removal.
-					elements.bin.on( 'click', 'a', function(e) {
-						e.preventDefault();
+					elements.bin.on( 'click', '.keyword-button-remove', function() {
 						wpTrac.workflow.removeKeyword( $(this).parent() );
+						// Move focus to the Manual keyword button to avoid focus loss on keyword removal.
+						$( '#edit-keywords' )
+							.addClass( 'hide-programmatic-focus' )
+							.focus()
+							.on( 'blur', function() {
+								$( this ).removeClass( 'hide-programmatic-focus' );
+							} );
 					});
 
 					// Keyword adds.
@@ -965,20 +974,44 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						$(this).val('');
 					});
 
-					// Manual link.
+					// Manual keyword button.
 					$('#edit-keywords').click( function() {
+						if ( elements.hiddenEl.is( ':visible' ) ) {
+							elements.hiddenEl.hide();
+							$( this ).attr( 'aria-expanded', 'false' );
+							return;
+						}
+
+						$( this ).attr( 'aria-expanded', 'true' );
 						elements.hiddenEl.show().focus();
-						$(this).hide();
-						elements.hiddenEl.change( wpTrac.workflow.populate );
 					});
+
+					// Handle keyboard interaction on the field-keywords field.
+					$( '#field-keywords' ).on( 'keydown', function( event ) {
+						// When pressing Enter or Escape.
+						if ( event.which === 13 || event.which === 27 ) {
+							// Prevent form submission.
+							event.preventDefault();
+							// Hide the input field and populate the keywords.
+							elements.hiddenEl.hide();
+							/*
+							 * Move focus back to the Manual keyword button.
+							 * This blurs the field and triggers the `change`
+							 * event thus the keywords are populated.
+							 */
+							$( '#edit-keywords' )
+								.attr( 'aria-expanded', 'false' )
+								.focus();
+						}
+					} );
 				},
 
 				// Generates the workflow template.
 				template : function() {
 					var container = elements.hiddenEl.parent(), html, labelWidth;
 
-					// Necessary to keep everything in line. The + 4 is a careful CSS balance.
-					labelWidth = container.prev().width() + 4;
+					// Necessary to keep everything in line.
+					labelWidth = container.prev().width();
 
 					// Rearrange the table to suit our needs.
 					container.prev().detach().end()
@@ -989,7 +1022,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					$('#field-owner').parents('tr').hide();
 
 					html = '<div><label id="keyword-label" for="keyword-add" style="width:' + labelWidth + 'px">Workflow Keywords:</label>';
-					html += '<select id="keyword-add"><option value=""> - Add - </option></select> <a id="edit-keywords">manual</a></div>';
+					html += '<select id="keyword-add"><option value=""> - Add - </option></select>';
+					html += '<button type="button" id="edit-keywords" aria-label="Manual keyword" aria-expanded="false">Manual</button></div>';
 					html += '<div id="keyword-bin"></div>';
 					container.prepend( html );
 					elements.bin = $('#keyword-bin');
@@ -1011,7 +1045,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[0] !== '' ) {
 						$.each( keywords, function( k, v ) {
-							var html = $('<span />').text(v).attr('data-keyword', v).prepend('<a class="dashicons dashicons-dismiss" href="#" />');
+							var html = $( '<span />' ).text( v ).attr( 'data-keyword', v ).prepend( '<button type="button" aria-label="Remove ' + v +' keyword" class="keyword-button-remove dashicons dashicons-dismiss" />' );
 							if ( v in coreKeywordList ) {
 								html.attr('title', coreKeywordList[v]);
 							}
@@ -1086,7 +1120,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					}
 
 					// Add it to the bin, and refresh the hidden input.
-					html = $('<span />').text(keyword).attr('data-keyword', keyword).prepend('<a class="dashicons dashicons-dismiss" href="#" />');
+					html = $( '<span />' ).text( keyword ).attr( 'data-keyword', keyword ).prepend( '<button type="button" aria-label="Remove ' + keyword +' keyword" class="keyword-button-remove dashicons dashicons-dismiss" />' );
 					if ( title ) {
 						html.attr('title', title);
 					}
@@ -1171,22 +1205,26 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				originalFocuses = $.merge( [], focuses );
 
 				container = $( '#focuses' );
-				container.append( '<span>Focuses:</span>' );
+
 				ul = $( '<ul />' );
 				$.each( coreFocusesList, function( focus, description ) {
+					var ariaPressed = 'false';
 					classes = focus.replace( ' ', '-' );
 					if ( -1 !== $.inArray( focus, focuses ) ) {
 						classes += ' active';
+						ariaPressed = 'true';
 					}
 					ul.append( $( '<li />', {
 						'data-focus' : focus,
 						title: description,
 						class: classes
-					} ).html( '<a href="#">' + ( focus === 'administration' ? 'admin' : focus ) + '</a>' ) );
+					} ).html( '<button type="button" class="core-focuses-button" aria-pressed="' + ariaPressed + '">' + ( focus === 'administration' ? 'admin' : focus ) + '</a>' ) );
 				});
 				ul.appendTo( container );
+				ul.wrap( '<fieldset id="fieldset-focuses" />' );
+				ul.before( '<legend class="core-focuses-legend">Focuses:</legend>' );
 
-				container.on( 'click', 'a', addRemove );
+				container.on( 'click', '.core-focuses-button', addRemove );
 				container.closest( 'form' ).on( 'submit', submit );
 				$( '#field-component' ).on( 'change', componentSync );
 			}
@@ -1198,7 +1236,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				} else {
 					add( focus );
 				}
-				return false;
 			}
 
 			function add( focus ) {
@@ -1206,6 +1243,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					focus = container.find( 'li.' + focus );
 				}
 				focus.addClass( 'active' );
+				focus.find( '.core-focuses-button' ).attr( 'aria-pressed', 'true' );
 				focuses.push( focus.data( 'focus' ) );
 				updateField();
 			}
@@ -1215,6 +1253,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					focus = container.find( 'li.' + focus );
 				}
 				focus.removeClass( 'active' );
+				focus.find( '.core-focuses-button' ).attr( 'aria-pressed', 'false' );
 				var remove = focus.data( 'focus' );
 				focuses = $.grep( focuses, function( value ) {
 					return value !== remove;

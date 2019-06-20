@@ -697,6 +697,13 @@ input[type=button]:active, input[type=submit]:active, input[type=reset]:active {
 	top: auto;
 	left: auto;
 }
+/* hide focus while clicking the buttons, pending better focus styles */
+button:focus:active,
+input[type=button]:focus:active,
+input[type=submit]:focus:active,
+input[type=reset]:focus:active {
+	outline: none;
+}
 input[type=text], input.textwidget, textarea {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
@@ -1026,6 +1033,16 @@ body.plugins #main .newticket-not-here .support {
 #propertyform[action*="/newticket"] #properties legend {
 	display: none;
 }
+.core-focuses-legend {
+	display: block !important;
+	color: inherit;
+	margin: 0 0 6px;
+	padding: 0;
+	font-size: inherit;
+	font-weight: normal;
+	transform: translateY(-2px);
+}
+#fieldset-focuses,
 #propertyform[action*="/newticket"] fieldset {
 	padding: 0;
 	border: none;
@@ -1035,7 +1052,7 @@ body.plugins #main .newticket-not-here .support {
 	display: none;
 }
 #propertyform[action*="/newticket"] #properties table.trac-properties > tbody > tr > td#focuses {
-	padding-left: 0;
+	padding-left: 58px;
 }
 #propertyform > p,
 #propertyform > .buttons {
@@ -1451,8 +1468,9 @@ body.buddypress #main {
 #keyword-bin span[title] {
 	cursor: help;
 }
-#keyword-bin span a {
+#keyword-bin .keyword-button-remove {
 	margin: 1px 0 0 -15px;
+	padding: 0;
 	cursor: pointer;
 	width: 15px;
 	height: 15px;
@@ -1466,14 +1484,32 @@ body.buddypress #main {
 	background: none;
 	color: #999;
 }
-#keyword-bin span a:hover {
+#keyword-bin .keyword-button-remove:hover,
+#keyword-bin .keyword-button-remove:focus {
 	color: #c00;
 }
 #edit-keywords {
 	cursor: pointer;
-	font-size: 8px;
-	color: #999;
-	margin: 6px 6px 0 6px;
+	font-size: 13px;
+	color: inherit;
+	margin: 2px 0;
+	border-radius: 3px;
+	vertical-align: middle;
+	background: #f7f7f7;
+	border: 1px solid #ccc;
+	box-shadow: 0 1px 0 #ccc;
+	color: #555;
+	box-shadow: none;
+}
+#edit-keywords:hover,
+#edit-keywords:focus {
+	background: #fafafa;
+	color: #23282d;
+	border-color: #999;
+}
+/* hide focus when moved programmatically, pending better focus styles */
+#edit-keywords.hide-programmatic-focus:focus {
+	outline: none;
 }
 .has-js #field-keywords {
 	width: 92%;
@@ -1483,8 +1519,13 @@ body.buddypress #main {
 }
 #keyword-label {
 	float: left;
-	padding: 5px 6px 5px 0;
+	padding: 2px 0.4em 2px 0.1em; /* emulates table cell padding */
 	text-align: right;
+	white-space: nowrap;
+}
+#keyword-add {
+	margin-left: calc( 2px + .3em ); /* emulates table cell padding */
+	margin-right: 6px;
 }
 
 /* =Focuses */
@@ -1495,8 +1536,7 @@ body.core #reportfilters {
 	display: none;
 }
 #properties table.trac-properties > tbody > tr > td#focuses {
-	padding: .6em 0 .3em 60px;
-	height: 66px;
+	padding: .6em 0 .3em 52px;
 }
 #focuses span {
 	float: left;
@@ -1510,33 +1550,30 @@ body.core #reportfilters {
 }
 #focuses li {
 	font-size: 12px;
-	display: inline-block;
 	float: left;
-	margin: 0 0 6px 6px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-	background: #eee;
-	color: #aaa;
+	margin: 0 6px 6px 0;
 }
-#focuses a {
+#focuses .core-focuses-button {
 	display: inline-block;
+	margin: 0;
 	padding: 4px 7px;
 	color: inherit;
-	-webkit-border-radius: 3px;
+	border: 1px solid #ccc;
 	border-radius: 3px;
-	background: inherit;
-	text-decoration: none;
-	border-bottom: none;
-}
-#focuses li:hover,
-#focuses a:focus {
-	color: #000;
+	background: #eee;
 	cursor: pointer;
 }
-#focuses li.active,
-#focuses li.active a:focus {
+#focuses .core-focuses-button:hover,
+#focuses .core-focuses-button:focus {
+	background: #fafafa;
+	color: #23282d;
+	border-color: #999;
+}
+#focuses li.active .core-focuses-button,
+#focuses li.active .core-focuses-button:focus {
 	background: #666;
 	color: #fff;
+	border-color: #666;
 }
 
 /*
