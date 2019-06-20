@@ -314,6 +314,8 @@ if ( is_object( $glossary ) ) {
 							<?php endif; ?>
 						</dl>
 					</div>
+
+					<?php do_action( 'wporg_translate_meta', $t ); ?>
 				</div>
 			</div>
 		</div>
