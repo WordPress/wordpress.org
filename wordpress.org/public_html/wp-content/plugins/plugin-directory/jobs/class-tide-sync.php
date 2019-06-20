@@ -12,6 +12,16 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 class Tide_Sync {
 
 	public static function sync_data( $plugin_slug ) {
+		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $plugin ) {
+			return false;
+		}
+
+		// Tide only supports plugins that are versioned right now.
+		if ( ! $plugin->stable_tag || 'trunk' == $plugin->stable_tag ) {
+			return false;
+		}
+
 		wp_schedule_single_event(
 			time() + 60,
 			"tide_sync:{$plugin_slug}",
@@ -85,7 +95,7 @@ class Tide_Sync {
 		$url_endpoint = "https://wptide.org/api/tide/v1/audit/wporg/plugin/{$plugin_slug}/{$version}?_ts=" . time();
 
 		$request = wp_safe_remote_get( $url_endpoint );
-		if ( ! $request || is_wp_error( $request ) ) {
+		if ( ! $request || is_wp_error( $request ) || 200 !== wp_remote_retrieve_response_code( $request ) ) {
 			return false;
 		}
 
