@@ -33,10 +33,7 @@ function privacy_process_request( $type ) {
 	$requesting_user = is_user_logged_in() ? wp_get_current_user()->user_login : false;
 	$email_user      = get_user_by( 'email', $email );
 
-	// Currently only enabled for special accounts.
-	if ( 'export' === $type && ( ! is_user_logged_in() || ! function_exists( 'wporg_user_has_restricted_password' ) || ! wporg_user_has_restricted_password() ) ) {
-		$error_message = 'This form is currently unavailable.';
-	} elseif ( ! reCAPTCHA\check_status() ) {
+	if ( ! reCAPTCHA\check_status() ) {
 		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
 	} elseif (
 		is_user_logged_in() &&

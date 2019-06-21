@@ -70,8 +70,6 @@ the_post();
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<p><em>This page is under active development and is not currently enabled. All text is not final and will change.</em></p>
-
 					<p><?php esc_html_e( 'WordPress.org respects your privacy and intends to remain transparent about any personal data we store about individuals. Under the General Data Protection Regulation (GDPR), EU citizens and residents are entitled to receive a copy of any personal data we might hold about you.', 'wporg' ); ?></p>
 
 					<p><?php esc_html_e( 'The following form will allow you to request an export of any data linked to your email address. You will be required to authenticate ownership of that address, and may be asked to provide additional identification or information necessary to verify the request and search our records.', 'wporg' ); ?></p>
@@ -86,13 +84,6 @@ the_post();
 					<div class="notice notice-success notice-alt">
 						<p><?php esc_html_e( 'Please check your email for a confirmation link, and follow the instructions to authenticate your request.', 'wporg' ); ?></p>
 					</div>
-					<?php endif; ?>
-
-					<div class="notice notice-error notice-alt">
-						<p>This is currently disabled unless you have a 'special' WordPress.org account.</p>
-					</div>
-					<?php if ( is_user_logged_in() && function_exists( 'wporg_user_has_restricted_password' ) && wporg_user_has_restricted_password() ) : ?>
-						<div class="notice notice-info notice-alt"><p>PS: You have a special account.</p></div>
 					<?php endif; ?>
 
 					<form id="export-request-form" class="request-form" method="POST" action="#">
