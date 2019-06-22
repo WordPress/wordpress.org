@@ -1,0 +1,67 @@
+.feedback-modal .wporg-translate-modal__frame {
+	max-width: 500px;
+}
+
+.feedback-modal .wporg-translate-modal__content {
+	display: block;
+}
+
+.feedback-modal textarea {
+	max-width: 100%;
+	min-height: 100px;
+	padding: 10px;
+	margin: 0 0 15px 0;
+	border-top: 1px solid;
+	border-bottom: 1px solid;
+	border-color: #e2e4e7;
+	background: #fff;
+	outline: none;
+}
+
+.feedback-modal textarea:focus {
+	box-shadow: 0 0 2px 1px #33b3db;
+}
+
+.feedback__actions {
+	text-align: right;
+}
+
+.feedback-modal .feedback__action-submit {
+	font-size: 15px;
+	height: 35px;
+	line-height: 1;
+	background: #0085ba;
+	border-color: #0073aa #006799 #006799;
+	box-shadow: 0 1px 0 #006799;
+	color: #fff;
+	text-decoration: none;
+	text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
+}
+
+
+.feedback-modal .feedback__action-submit:hover {
+	background: #008ec2;
+	border-color: #006799;
+	color: #fff;
+}
+
+.feedback-modal .feedback__action-submit:focus {
+	background: #008ec2;
+	border-color: #006799;
+	box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
+	color: #fff;
+}
+
+.feedback-modal ul.feedback__reasons {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 15px 0;
+	column-count: 2;
+}
+
+
+@media (min-width: 600px) {
+	.feedback-modal ul.feedback__reasons {
+		column-count: 3;
+	}
+}
