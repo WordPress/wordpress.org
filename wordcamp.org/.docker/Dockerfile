@@ -112,5 +112,3 @@ COPY wp-config.php /usr/src/public_html/wp-config.php
 RUN mv /etc/nginx/sites-enabled/wordcamp.conf /etc/nginx/sites-enabled/default
 
 CMD tail -f /dev/null
-
-
