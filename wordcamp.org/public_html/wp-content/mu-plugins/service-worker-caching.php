@@ -12,11 +12,46 @@ add_action( 'wp_front_service_worker', __NAMESPACE__ . '\register_caching_routes
 add_action( 'wp_front_service_worker',    __NAMESPACE__ . '\set_navigation_caching_strategy' );
 
 
-// todo is prompt to save offline automatically showing on mobile?
-	// if so, not sure we want it to
+// todo prompt to install app to home screen is automatically showing on mobile
+	// not sure we want it to
 	// not really related to this file, but nothing closer at the moment
 	// maybe want it to be eventually, but not until we do more work to really make the site use pwa features well?
 	// otherwise risk giving users bad impression of pwas
+
+// also, says "install wordcamp" instead of "install wordcamp europe" - maybe manifest issue?
+
+// after adding to home screen, there's a delay and a "wordcamp" interstitial screen before the site appears.
+	// why? can remove that? it should load instantly, right? that's the whole idea
+
+// experience on mid-level phone (moto e4) and fast bandwidth is pretty poor
+	// what's the cause? big images? too much markup to parse? server slow ttfb?
+	// maybe just needs to have better perceived speed rather than better actual speed? like transitions between screens
+		// maybe new default theme that's a SPA and has a subtle transition animation when fetching new page content from API
+
+// what's the point of adding to home screen? doesn't seem like it has anything extra cached for offline use
+	// maybe if can detect when it's installed, we should pre-cache more things, for faster loading and more offline accessibility?
+
+// maybe avoid loading images on slow connections
+	// related https://github.com/xwp/pwa-wp/issues/110, probably better to contribute to that (or new issue in that repo), than build custom. would be good feature for core
+	// https://github.com/wceu/wordcamp-pwa-page/issues/5
+	// https://deanhume.com/dynamic-resources-using-the-network-information-api-and-service-workers/
+	// this isn't really caching, so maybe create a separate file for it, or refactor this to be everything related to service workers.
+		// probably the former, `service-worker-misc.php`
+
+// having multiple tabs open, when 1 has a youtube embed playing, then refresh other tab, the video in first tab stops playing
+	// doesn't happen every time though
+
+
+
+
+
+
+// open issue w/ pwa lpugin - this may be plugin territory, but save offline button to add to precache route?
+	// similar to that one site
+//	or does it do that automatically already?
+//
+//maybe button to download all pages (not all posts or other cotent types, just pages, so that whole site heirarchy is accessible offline)
+
 
 /**
  * Register caching routes with both service workers.
@@ -25,6 +60,10 @@ function register_caching_routes() {
 	/*
 	 * todo
 	 *
+	 * pre-cache important pages like Location. what others? how to detect programatically?
+	 *      could match `location` slug, and also add a `service-worker-precache` postmeta field to post stubs that we create on new sites
+	 *      maybe pwa feature plugin already supports something like that? if not, maybe propose it
+	 *      offline and day-of-event templates could show warnings to logged-in admins if the key is missing b/c they didn't use the default page
 	 * Is the wp-content/includes caching route even working? Didn't cache assets for offline template.
 	 *      How can you tell if it's working, compared to regular browser caching?
 	 *      devtools Network panel should say "From service worker" for size?

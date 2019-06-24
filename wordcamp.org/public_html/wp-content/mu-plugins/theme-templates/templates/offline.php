@@ -72,6 +72,7 @@ get_header();
 		/*
 		 * todo
 		 *
+		 * this doesn't have headlines for separate days. why not? will probably be fixed by replacing block with shortcode though
 		 * maybe need to specify params to show all days/all tracks/etc
 		 * disable "favorites" b/c it won't work? well, some parts will and some parts won't. probably better to leave it, but think about in more detail
 		 * replace w/ Schedule block once that's available, but use feature flag for back-compat

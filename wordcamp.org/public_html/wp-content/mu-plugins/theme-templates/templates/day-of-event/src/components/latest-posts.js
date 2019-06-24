@@ -40,6 +40,7 @@ export const LatestPosts = ( { archiveUrl, isFetching, posts } ) => {
 
 			<a href={ archiveUrl } className="all-posts">
 				{ _x( 'View all Posts', 'title', 'wordcamporg' ) }
+				{/* todo figure out good solution for this: https://github.com/wceu/wordcamp-pwa-page/issues/6#issuecomment-504268038 */}
 			</a>
 		</div>
 	);
