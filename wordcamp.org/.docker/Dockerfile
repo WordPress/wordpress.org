@@ -69,11 +69,9 @@ RUN apt-get install nginx -y
 COPY nginx.conf /etc/nginx/sites-enabled/wordcamp.conf
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/zz-www.conf
 
-# Install and configure SSL
-COPY wordcamp.ssl.conf /var/wordcamp.ssl.conf
-RUN cd ~ && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout wordcamp.key -out wordcamp.crt -config /var/wordcamp.ssl.conf
-RUN cp ~/wordcamp.crt /etc/ssl/certs/wordcamp.crt
-RUN cp ~/wordcamp.key /etc/ssl/private/wordcamp.key
+# Install SSL certificate
+COPY wordcamp.test.pem     /etc/ssl/certs/wordcamp.test.pem
+COPY wordcamp.test.key.pem /etc/ssl/private/wordcamp.test.key.pem
 
 # Add script to install plugin and themes
 ADD install-plugin-theme.sh /usr/src/public_html/install-plugin-theme.sh
@@ -92,7 +90,7 @@ RUN mv wp-cli.phar /usr/local/bin/wp
 RUN apt-get install less -y
 COPY wp-cli.yml /usr/src/public_html/wp-cli.yml
 
-# Install MailCatcher.
+# Install MailCatcher
 RUN apt-get install build-essential libsqlite3-dev ruby-dev -y
 RUN gem install mailcatcher --no-ri --no-rdoc
 RUN apt-get install ssmtp -y
@@ -105,8 +103,9 @@ RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 
 # Utils
 RUN apt-get install vim -y
+RUN apt-get install nano -y
 
-COPY wp-config.php /usr/src/public_html/wp-config.php
+# shouldn't need this b/c it's mounted in docker-compose- COPY wp-config.php /usr/src/public_html/wp-config.php
 
 # Replace nginx default conf because it conflicts with wordcamp.conf
 RUN mv /etc/nginx/sites-enabled/wordcamp.conf /etc/nginx/sites-enabled/default

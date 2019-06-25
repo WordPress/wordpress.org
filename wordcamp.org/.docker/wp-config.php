@@ -24,14 +24,10 @@ ini_set( 'log_errors',           'On' );
 ini_set( 'display_errors',       'On' );
 ini_set( 'error_reporting',      E_ALL );
 
-/**#@+
- * Authentication Unique Keys and Salts.
- *
- * Change these to different unique phrases!
- * You can generate these using the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}
- * You can change these at any point in time to invalidate all existing cookies. This will force all users to have to log in again.
- *
- * @since 2.6.0
+/**
+ * It doesn't matter for local environments, but use `wp config shuffle-salts` to change this in production
+ * environments, because generating the keys locally is safer than using the API (and exposing the keys to
+ * your OS/browser if you copy/paste, etc).
  */
 define( 'AUTH_KEY',         'put your unique phrase here' );
 define( 'SECURE_AUTH_KEY',  'put your unique phrase here' );

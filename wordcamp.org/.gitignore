@@ -1,5 +1,6 @@
 .docker/data/
 .docker/database
+.docker/wordcamp*.pem
 
 public_html/wp-content/mu-plugins/blocks/build
 

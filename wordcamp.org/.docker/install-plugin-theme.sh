@@ -5,7 +5,7 @@
 
 # Install plugins
 echo "Installing plugins"
-wp --allow-root plugin install akismet buddypress bbpress jetpack wp-multibyte-patch wordpress-importer polldaddy liveblog wp-super-cache custom-content-width camptix-network-tools email-post-changes tagregator supportflow camptix-pagseguro camptix-payfast-gateway camptix-trustpay camptix-trustcard camptix-mercadopago camptix-kdcpay-gateway campt-indian-payment-gateway camptix classic-editor
+wp --allow-root plugin install akismet buddypress bbpress jetpack wp-multibyte-patch wordpress-importer polldaddy pwa liveblog wp-super-cache custom-content-width camptix-network-tools email-post-changes tagregator supportflow camptix-pagseguro camptix-payfast-gateway camptix-trustpay camptix-trustcard camptix-mercadopago camptix-kdcpay-gateway campt-indian-payment-gateway camptix classic-editor
 
 # Install themes
 echo "Installing themes"
