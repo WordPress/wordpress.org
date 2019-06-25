@@ -25,6 +25,7 @@ services:
       # todo maybe setup cron job to run the git pull, like production? the above will only run when starting container
     # todo configure entrypoint to work around annoying wp-cli allow-root problem -- https://github.com/wp-cli/wp-cli/issues/1838#issuecomment-434077907
 
+  # todo document why this is a separate container
   wordcamp.db:
     build:
       context: .docker

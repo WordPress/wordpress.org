@@ -2,9 +2,7 @@
 
 Follow these steps to setup a local WordCamp.org environment using [Docker](https://www.docker.com/).
 
-**Note:** This will create `.docker/database` directory which will contain MySQL files to persist data across docker restarts.
-
-1. Make sure you have Docker installed and Docker daemon running on your system.
+1. Make sure you have Docker installed and running on your system.
 
 1. Clone the repo:
     ```bash
@@ -35,6 +33,8 @@ Follow these steps to setup a local WordCamp.org environment using [Docker](http
     Creating wordcamporg_wordcamp.db_1   ... done
     Creating wordcamporg_wordcamp.test_1 ... done
     ```
+
+	_Note: This will create `.docker/database` directory which will contain MySQL files to persist data across docker restarts._
 
     _Note: You won't be able to test in your browser just yet, so continue with the next steps._
 
@@ -130,3 +130,17 @@ Note: All of these commands are meant to be executed from project directory.
 
 
 Once the Docker instance has started, you can visit [2014.content.wordcamp.org](2014.content.wordcamp.org) to view a sample WordCamp site. WordCamp central would be [central.wordcamp.test](central.wordcamp.test). You can also visit [localhost:1080](localhost:1080) to view the MailCatcher dashboard.
+
+
+## Updating the sample database
+
+1. Make sure WP is running the latest branch, and the database schema has been updated.
+1. Make sure there isn't anything sensitive in the database. Scrub anything that is.
+1. Update the sample file:
+
+	```bash
+	docker-compose exec wordcamp.db bash
+	mysqldump wordcamp_dev -u root -pmysql > /var/lib/mysql/wordcamp_dev.sql
+	exit
+	mv .docker/database/wordcamp_dev.sql .docker/wordcamp_dev.sql
+	```
