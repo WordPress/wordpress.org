@@ -247,12 +247,9 @@ get_header( 'wporg' );
 					<ul id="notable-users" class="notable-users">
 						<?php
 						$user_links = [
-							'nytimes'       => 'https://wordpress.org/showcase/tag/new-york-times/',
-							'cnn'           => 'https://wordpress.org/showcase/tag/cnn/',
 							'rollingstones' => 'https://wordpress.org/showcase/the-rolling-stones/',
 							'people'        => 'https://wordpress.org/showcase/stylewatch-off-the-rack/',
 							'playstation'   => 'https://wordpress.org/showcase/playstationblog/',
-							'motleycrue'    => 'https://wordpress.org/showcase/motley-crue/',
 							'blondie'       => 'https://wordpress.org/showcase/blondie/',
 							'marthastewart' => 'https://wordpress.org/showcase/themarthablog/',
 						];
