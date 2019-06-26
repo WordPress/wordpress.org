@@ -70,7 +70,7 @@ the_post();
 					</ul>
 
 					<h3><?php esc_html_e( 'Access to data', 'wporg' ); ?></h3>
-					<p><?php esc_html_e( 'You have the right to request a copy of the information we hold about you. If you would like a copy of some or all your personal information, please follow the instructions at the end of this policy.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'You have the right to request a copy of the information we hold about you. If you would like a copy of some or all your personal information, please follow the instructions at the end of this section.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'All WordCamp attendee-provided data can be viewed and changed by the attendee via the Access Token URL that is emailed to confirm a successful ticket purchase.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'WordPress.org user accounts can be edited by following these steps:', 'wporg' ); ?></p>
 					<ol>
@@ -86,6 +86,21 @@ the_post();
 						<li><?php esc_html_e( 'You will be redirected to https://profiles.wordpress.org/your_username.', 'wporg' ); ?></li>
 						<li><?php esc_html_e( 'Click the &#8220;Edit&#8221; link next to your username.', 'wporg' ); ?></li>
 					</ol>
+					<p><?php esc_html_e( 'If you would like to request access to your account data, please follow these steps:', 'wporg' ); ?></p>
+					<ol>
+						<li>
+							<?php
+							printf(
+								/* translators: 1: Data export request URL */
+								wp_kses_post( __( 'Visit <a href="%1$s">%1$s</a>.', 'wporg' ) ),
+								'https://wordpress.org/about/privacy/data-export-request/'
+							);
+							?>
+						</li>
+						<li><?php esc_html_e( 'Enter your email address.', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'Click &#8220;Accept Declaration and Request Export&#8221;.', 'wporg' ); ?></li>
+					</ol>
+					<p><?php esc_html_e( 'Note: If you have a WP.org account, it&#8217;s recommended you log in before submitting to associate your account with the request.', 'wporg' ); ?></p>
 
 					<h3><?php esc_html_e( 'Retention of personal information', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'We will retain your personal information on our systems only for as long as we need to, for the success of the WordPress open source project and the programs that support WordPress.org. We keep contact information (such as mailing list information) until a user unsubscribes or requests that we delete that information from our live systems. If you choose to unsubscribe from a mailing list, we may keep certain limited information about you so that we may honor your request.', 'wporg' ); ?></p>
