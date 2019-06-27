@@ -16,7 +16,10 @@
 
 			<div>
 				<h3 class="theme-name entry-title" itemprop="name">{{{ data.name }}}</h3>
+				<# if ( data.author.display_name ) { #>
 				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="{{{ data.path }}}author/{{ data.author.user_nicename }}/"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
+				<# } #>
+
 				<# if ( data.show_favorites && data.is_favorited ) { #>
 					<span class="dashicons dashicons-heart favorite favorited"></span>
 				<# } else if ( data.show_favorites ) { #>

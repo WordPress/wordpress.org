@@ -9,7 +9,9 @@
 		<div class="wp-full-overlay-sidebar-content">
 			<div class="install-theme-info">
 				<h3 class="theme-name">{{ data.name }}</h3>
+				<# if ( data.author.display_name ) { #>
 				<span class="theme-by"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '{{ data.author.display_name }}' ); ?></span>
+				<# } #>
 
 				<img class="theme-screenshot" src="{{ data.screenshot_url }}?w=520&strip=all" alt="" />
 

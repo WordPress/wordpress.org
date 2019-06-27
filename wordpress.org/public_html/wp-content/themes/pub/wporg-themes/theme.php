@@ -8,7 +8,9 @@
 		<div class="theme-screenshot blank"></div>
 		<?php } ?>
 		<span class="more-details"><?php _ex( 'More Info', 'theme', 'wporg-themes' ); ?></span>
+		<?php if ( $theme->author->display_name ) { ?>
 		<div class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<span class="author">' . esc_html( $theme->author->display_name ) . '</span>' ); ?></div>
+		<?php } ?>
 		<h3 class="theme-name entry-title"><?php echo esc_html( $theme->name ); ?></h3>
 	</a>
 	<div class="theme-actions">
