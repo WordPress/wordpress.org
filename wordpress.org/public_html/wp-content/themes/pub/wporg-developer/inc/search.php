@@ -24,6 +24,16 @@ class DevHub_Search {
 		add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ), 20 );
 		add_filter( 'posts_orderby', array( __CLASS__, 'search_posts_orderby' ), 10, 2 );
 		add_filter( 'the_posts',     array( __CLASS__, 'rerun_empty_search' ), 10, 2 );
+		add_action( 'wp_head',       array( __CLASS__, 'noindex_for_search' ) );
+	}
+
+	/**
+	 * Outputs `noindex,follow` robots tag for search results.
+	 */
+	public static function noindex_for_search() {
+		if ( is_search() ) {
+			wp_no_robots();
+		}
 	}
 
 	/**
