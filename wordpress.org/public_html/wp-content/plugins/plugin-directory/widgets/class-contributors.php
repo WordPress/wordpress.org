@@ -61,7 +61,7 @@ class Contributors extends \WP_Widget {
 			<?php foreach ( $contributors as $contributor ) : ?>
 			<li>
 				<?php echo get_avatar( $contributor->ID, 32 ); ?>
-				<a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $contributor->user_nicename ); ?>">
+				<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$contributor->user_nicename}/" ); ?>">
 					<?php echo Template::encode( $contributor->display_name ); ?>
 				</a>
 			</li>

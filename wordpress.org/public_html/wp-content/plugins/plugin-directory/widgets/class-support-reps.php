@@ -58,7 +58,7 @@ class Support_Reps extends \WP_Widget {
 			<?php foreach ( $support_reps as $support_rep ) : ?>
 				<li data-user="<?php echo esc_attr( $support_rep->user_nicename ); ?>">
 					<?php echo get_avatar( $support_rep->ID, 32 ); ?>
-					<a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $support_rep->user_nicename ); ?>">
+					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$support_rep->user_nicename}/" ); ?>">
 						<?php echo Template::encode( $support_rep->display_name ); ?>
 					</a><br>
 
