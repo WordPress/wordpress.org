@@ -32,7 +32,7 @@ function wporg_wordpress_credits_shortcode( $attrs, $content = null ) {
 	asort( $props, SORT_FLAG_CASE | SORT_STRING );
 	$output = array();
 	foreach ( $props as $username => $name ) {
-		$output[] = '<a href="' . sprintf( $results['data']['profiles'], $username ) . '">' . $name . '</a>';
+		$output[] = '<a href="' . sprintf( $results['data']['profiles'], $username ) . '/">' . $name . '</a>';
 	}
 	return wp_sprintf( '%l.', $output );
 }
