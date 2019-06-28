@@ -413,7 +413,7 @@ class Template {
 
 				case 'support':
 					$title = _x( 'Support', 'plugin tab title', 'wporg-plugins' );
-					$url   = 'https://wordpress.org/support/plugin/' . $plugin->post_name;
+					$url   = 'https://wordpress.org/support/plugin/' . $plugin->post_name . '/';
 					break;
 
 				case 'reviews':
@@ -677,7 +677,7 @@ class Template {
 		} elseif ( 'bbpress' === $post->post_name ) {
 			$url = 'https://bbpress.org/forums/';
 		} else {
-			$url = 'https://wordpress.org/support/plugin/' . $post->post_name;
+			$url = 'https://wordpress.org/support/plugin/' . $post->post_name . '/';
 		}
 
 		return $url;
