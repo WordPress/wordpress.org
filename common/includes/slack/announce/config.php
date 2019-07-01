@@ -145,8 +145,10 @@ function get_whitelist() {
 			'valendesigns',
 		) ),
 		'core-site-health' => array_merge( get_committers(), array(
+			'afragen',
 			'Clorith',
 			'miss_jwo',
+			'spacedmonkey', // @Jonny Harris on Slack
 		) ),
 		'core-php' => array_merge( get_committers(), array(
 			'afragen',
