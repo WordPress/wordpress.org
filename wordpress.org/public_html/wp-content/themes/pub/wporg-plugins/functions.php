@@ -70,7 +70,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20190510a' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20190701' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Make jQuery a footer script.
@@ -83,7 +83,7 @@ function scripts() {
 
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
-		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), '20180131', true );
+		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), '20190701', true );
 	}
 
 	if ( ! is_404() ) {
