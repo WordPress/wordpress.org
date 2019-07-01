@@ -4,7 +4,8 @@
 	questions
 		.each( function( index, question ) {
 			var $question = $( question ),
-				$button   = $( '<a href="#" />' ),
+				$button   = $( '<button />' ),
+				$h3       = $( '<h3 />' ),
 				id        = $question.attr( 'id' );
 
 			// If there is no ID, create our own.
@@ -13,11 +14,12 @@
 				$question.attr( 'id', id );
 			}
 
-			$button.attr( 'href', id ).on( 'click', function( event ) {
+			$button.attr( 'formaction', id ).on( 'click', function( event ) {
 				event.preventDefault();
+				window.location.hash = id;
 			} );
 
-			$question.html( $button.text( $question.text() ) );
+			$question.html( $h3.html( $button.text( $question.text() ) ) );
 		} )
 		.on( 'click', function( event ) {
 			var $question = $( event.currentTarget );
@@ -40,6 +42,6 @@
 		} );
 
 	if ( window.location.hash ) {
-		questions.find( '[href="' + window.location.hash + '"]' ).trigger( 'click' );
+		questions.find( '[formaction="' + window.location.hash + '"]' ).trigger( 'click' );
 	}
 } )( jQuery );

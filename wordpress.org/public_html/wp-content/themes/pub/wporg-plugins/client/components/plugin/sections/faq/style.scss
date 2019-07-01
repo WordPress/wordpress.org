@@ -43,6 +43,18 @@
 				outline: none;
 			}
 		}
+		h3 {
+			display: inline;
+			text-transform: none;
+			margin-top: 0;
+			margin-bottom: 0;
+			color: $color__link;
+			text-decoration: underline;
+			button {
+				all: inherit;
+			}
+		}
+
 	}
 
 	dd {
