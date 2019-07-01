@@ -144,7 +144,7 @@ function get_whitelist() {
 			'georgestephanis',
 			'valendesigns',
 		) ),
-		'core-sitehealth' => array_merge( get_committers(), array(
+		'core-site-health' => array_merge( get_committers(), array(
 			'Clorith',
 			'miss_jwo',
 		) ),
