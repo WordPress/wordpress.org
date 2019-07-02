@@ -968,7 +968,15 @@ class Plugin_Directory {
 		if ( is_null( $section ) ) {
 			return $content;
 		}
-		return Plugin_I18n::instance()->translate( $section, $content, [ 'post_id' => $post_id ] );
+
+		$post = get_post( $post_id );
+
+		// Only translate Plugin post objects
+		if ( $post && 'plugin' === $post->post_type ) {
+			return Plugin_I18n::instance()->translate( $section, $content, [ 'post_id' => $post_id ] );
+		}
+
+		return $content;
 	}
 
 	/**
@@ -981,9 +989,9 @@ class Plugin_Directory {
 	public function translate_post_title( $title, $post_id = null ) {
 		$post = get_post( $post_id );
 
-		// The $post_id passed may be a Support Forum post ID, which thankfully is much higher than plugins ID's for now.
-		if ( $post instanceof \WP_Post ) {
-			$title = Plugin_I18n::instance()->translate( 'title', $title, [ 'post_id' => $post ] );
+		// Only translate Post type items.
+		if ( $post && $post->post_type === 'plugin' ) {
+			return Plugin_I18n::instance()->translate( 'title', $title, [ 'post_id' => $post ] );
 		}
 
 		return $title;
@@ -997,7 +1005,14 @@ class Plugin_Directory {
 	 * @return string
 	 */
 	public function translate_post_excerpt( $excerpt, $post ) {
-		return Plugin_I18n::instance()->translate( 'excerpt', $excerpt, [ 'post_id' => $post ] );
+		$post = get_post( $post );
+
+		// Only translate Post type items.
+		if ( $post && $post->post_type === 'plugin' ) {
+			return Plugin_I18n::instance()->translate( 'excerpt', $excerpt, [ 'post_id' => $post ] );
+		}
+
+		return $excerpt;
 	}
 
 	/**

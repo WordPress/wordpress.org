@@ -28,7 +28,13 @@ class Reviews {
 
 		<div class="plugin-reviews">
 			<?php
-			foreach ( $reviews as $review ) :
+			// Switch to the Support Forum so that Template functions that call get_post() work as intended.
+			if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+				switch_to_blog( WPORG_SUPPORT_FORUMS_BLOGID );
+			}
+
+			foreach ( $reviews as $review ) {
+				$GLOBALS['post'] = $review; // Override the_post();
 				setup_postdata( $review );
 				?>
 				<article class="plugin-review">
@@ -43,9 +49,16 @@ class Reviews {
 						<div class="review-content"><?php echo wp_strip_all_tags(get_the_content()); ?></div>
 					</div>
 				</article>
-			<?php endforeach; ?>
+			<?php
+			}
+
+			// Reset back to the plugin post.
+			wp_reset_postdata();
+			if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+				restore_current_blog();
+			}
+		?>
 		</div>
-		<?php wp_reset_postdata(); ?>
 
 		<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/' ); ?>">
 			<?php
