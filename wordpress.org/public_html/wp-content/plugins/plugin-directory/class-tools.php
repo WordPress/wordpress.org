@@ -50,7 +50,9 @@ class Tools {
 		if ( $number < 1 || $number > 100 ) {
 			$number = 2;
 		}
-		if ( false === ( $reviews = wp_cache_get( "{$plugin_slug}_last{$number}", 'plugin-reviews' ) ) ) {
+
+		$reviews = wp_cache_get( "{$plugin_slug}_last{$number}", 'plugin-reviews' );
+		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && false === $reviews ) {
 			global $wpdb;
 
 			$reviews = $wpdb->get_results( $wpdb->prepare(
@@ -58,7 +60,7 @@ class Tools {
 					ID, post_name, post_content, post_title, post_author, post_modified,
 					r.rating as post_rating
 				FROM ratings r
-					LEFT JOIN wporg_419_posts p ON r.post_id = p.ID
+					LEFT JOIN " . $wpdb->base_prefix . WPORG_SUPPORT_FORUMS_BLOGID . "_posts p ON r.post_id = p.ID
 				WHERE r.object_type = 'plugin' AND r.object_slug = %s AND p.post_status = 'publish'
 				ORDER BY r.review_id DESC
 				LIMIT %d",
