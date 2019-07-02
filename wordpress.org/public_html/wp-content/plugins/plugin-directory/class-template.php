@@ -281,8 +281,7 @@ class Template {
 		if ( false === ( $count = wp_cache_get( $post->ID, 'plugin_download_count' ) ) ) {
 			global $wpdb;
 
-			// TODO: While the plugin ZIPs are still being served by bbPress, the download stats are stored there.
-			$count = $wpdb->get_var( $wpdb->prepare( 'SELECT downloads FROM `' . PLUGINS_TABLE_PREFIX . 'download_counts` WHERE topic_id = (SELECT topic_id FROM `' . PLUGINS_TABLE_PREFIX . 'topics` WHERE topic_slug = %s )', $post->post_name ) );
+			$count = $wpdb->get_var( $wpdb->prepare( 'SELECT downloads FROM `' . PLUGINS_TABLE_PREFIX . 'download_counts` WHERE plugin_slug = %s', $post->post_name ) );
 
 			wp_cache_set( $post->ID, $count, 'plugin_download_count', HOUR_IN_SECONDS );
 		}
