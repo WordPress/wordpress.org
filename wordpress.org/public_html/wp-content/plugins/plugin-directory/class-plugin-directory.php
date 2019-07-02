@@ -971,7 +971,7 @@ class Plugin_Directory {
 
 		$post = get_post( $post_id );
 
-		// Only translate Plugin post objects
+		// Only translate Plugin post objects.
 		if ( $post && 'plugin' === $post->post_type ) {
 			return Plugin_I18n::instance()->translate( $section, $content, [ 'post_id' => $post_id ] );
 		}
@@ -989,7 +989,7 @@ class Plugin_Directory {
 	public function translate_post_title( $title, $post_id = null ) {
 		$post = get_post( $post_id );
 
-		// Only translate Post type items.
+		// Only translate Plugin post objects.
 		if ( $post && $post->post_type === 'plugin' ) {
 			return Plugin_I18n::instance()->translate( 'title', $title, [ 'post_id' => $post ] );
 		}
@@ -1007,7 +1007,7 @@ class Plugin_Directory {
 	public function translate_post_excerpt( $excerpt, $post ) {
 		$post = get_post( $post );
 
-		// Only translate Post type items.
+		// Only translate Plugin post objects.
 		if ( $post && $post->post_type === 'plugin' ) {
 			return Plugin_I18n::instance()->translate( 'excerpt', $excerpt, [ 'post_id' => $post ] );
 		}

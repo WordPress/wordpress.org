@@ -538,16 +538,21 @@ class Plugin_I18n {
 		require_once GLOTPRESS_LOCALES_PATH;
 
 		// Get the active language packs of the plugin.
-		$locales = $wpdb->get_col( $wpdb->prepare( "
-			SELECT `language`
-			FROM language_packs
-			WHERE
-				type = 'plugin' AND
-				domain = %s AND
-				active = 1
-			GROUP BY `language`",
-			$plugin_slug
-		) );
+		$locales = wp_cache_get( $plugin_slug, 'language-pack-locales' );
+		if ( $locales === false ) {
+			$locales = $wpdb->get_col( $wpdb->prepare( "
+				SELECT `language`
+				FROM language_packs
+				WHERE
+					type = 'plugin' AND
+					domain = %s AND
+					active = 1
+				GROUP BY `language`",
+				$plugin_slug
+			) );
+
+			wp_cache_set( $plugin_slug, $locales, 'language-pack-locales', HOUR_IN_SECONDS );
+		}
 
 		$translations = [];
 
