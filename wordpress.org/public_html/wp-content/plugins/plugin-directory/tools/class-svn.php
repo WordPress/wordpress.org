@@ -70,6 +70,7 @@ class SVN {
 		if ( preg_match( '/Exported revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
+			$errors   = false;
 		} else {
 			$result = false;
 			$errors = self::parse_svn_errors( $output );

@@ -546,7 +546,7 @@ class Template {
 			return false;
 		}
 
-		$banner      = $banner_2x = false;
+		$banner      = $banner_2x = $banner_rtl = $banner_2x_rtl = false;
 		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true ) ?: array();
 
 		// Split in rtl and non-rtl banners.
