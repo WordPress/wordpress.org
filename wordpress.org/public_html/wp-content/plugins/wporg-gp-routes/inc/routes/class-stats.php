@@ -151,18 +151,19 @@ class Stats extends GP_Route {
 		if ( 'plugins' == $view ) {
 			// Fetch top 100 plugins..
 			$items = get_transient( __METHOD__ . '_plugin_items' );
-			if ( ! $items ) {
+			if ( false === $items ) {
 				$api = wp_safe_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[per_page]=250' );
+				$items = array();
 				foreach ( json_decode( wp_remote_retrieve_body( $api ) )->plugins as $plugin ) {
 					$items[ $plugin->slug ] = (object) [
 						'installs' => $plugin->active_installs,
 					];
 				}
-				set_transient( __METHOD__ . '_plugin_items', $items, DAY_IN_SECONDS );
+				set_transient( __METHOD__ . '_plugin_items', $items, $items ? DAY_IN_SECONDS : 5 * MINUTE_IN_SECONDS );
 			}
 		} elseif ( 'themes' == $view && defined( 'WPORG_THEME_DIRECTORY_BLOGID' ) ) {
 			$items = get_transient( __METHOD__ . '_theme_items' );
-			if ( ! $items ) {
+			if ( false === $items ) {
 				// The Themes API API isn't playing nice.. Easiest way..
 				switch_to_blog( WPORG_THEME_DIRECTORY_BLOGID );
 				$items = $wpdb->get_results(
@@ -178,7 +179,7 @@ class Stats extends GP_Route {
 				foreach ( $items as $slug => $details ) {
 					unset( $items[$slug]->slug );
 				}
-				set_transient( __METHOD__ . '_theme_items', $items, DAY_IN_SECONDS );
+				set_transient( __METHOD__ . '_theme_items', $items, $items ? DAY_IN_SECONDS : 5 * MINUTE_IN_SECONDS );
 			}
 		} else {
 			wp_safe_redirect( '/stats' );
