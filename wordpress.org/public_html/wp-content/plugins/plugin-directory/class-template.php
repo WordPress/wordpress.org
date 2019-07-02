@@ -857,7 +857,7 @@ class Template {
 
 			foreach ( $sites as $key => $site ) {
 				$gp_locale = \GP_Locales::by_field( 'wp_locale', $site->wp_locale );
-				if ( empty( $gp_locale ) ) {
+				if ( empty( $gp_locale ) || ! isset( $subdomains[ $site->wp_locale ] ) ) {
 					unset( $sites[ $key ] );
 					continue;
 				}
