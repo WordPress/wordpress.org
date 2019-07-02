@@ -165,11 +165,11 @@ class Author_Card {
 					/* translators: %s: comma-separated list of negative user status labels */
 					echo '<p>' . sprintf( __( 'This user is: %s', 'wporg-plugins' ), implode( ', ', $labels ) ) . '</p>';
 				}
+
+				$user_notes = get_user_meta( $user->ID, '_wporg_bbp_user_notes', true );
 			}
 
-			$user_notes = get_user_meta( $user->ID, '_wporg_bbp_user_notes', true );
-
-			if ( $user_notes ) {
+			if ( ! empty( $user_notes ) ) {
 				_e( 'User notes:', 'wporg-plugins' );
 				echo '<ul>';
 				foreach ( $user_notes as $note ) {
