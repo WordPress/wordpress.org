@@ -270,7 +270,6 @@ class Template {
 	 * Returns the number of downloads for a plugin.
 	 *
 	 * @static
-	 * @global \wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param int|\WP_Post|null $post Optional.
 	 * @return int
@@ -278,15 +277,7 @@ class Template {
 	public static function get_downloads_count( $post = null ) {
 		$post = get_post( $post );
 
-		if ( false === ( $count = wp_cache_get( $post->ID, 'plugin_download_count' ) ) ) {
-			global $wpdb;
-
-			$count = $wpdb->get_var( $wpdb->prepare( 'SELECT downloads FROM `' . PLUGINS_TABLE_PREFIX . 'download_counts` WHERE plugin_slug = %s', $post->post_name ) );
-
-			wp_cache_set( $post->ID, $count, 'plugin_download_count', HOUR_IN_SECONDS );
-		}
-
-		return (int) $count;
+		return (int)get_post_meta( $post->ID, 'downloads', true );
 	}
 
 	/**
