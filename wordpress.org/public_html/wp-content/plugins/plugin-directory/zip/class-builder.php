@@ -13,7 +13,6 @@ class Builder {
 
 	const TMP_DIR     = '/tmp/plugin-zip-builder';
 	const SVN_URL     = 'https://plugins.svn.wordpress.org';
-	const ZIP_SVN_URL = PLUGIN_ZIP_SVN_URL;
 
 	protected $zip_file       = '';
 	protected $checksum_file  = '';
@@ -58,7 +57,7 @@ class Builder {
 
 		// Create a checkout of the ZIP SVN
 		$res_checkout = SVN::checkout(
-			self::ZIP_SVN_URL,
+			PLUGIN_ZIP_SVN_URL,
 			$this->tmp_dir,
 			array(
 				'depth'    => 'empty',
@@ -86,7 +85,7 @@ class Builder {
 				throw new Exception( __METHOD__ . ": Failed to create {$plugin_folder}." );
 			}
 		} else {
-			throw new Exception( __METHOD__ . ': Failed to create checkout of ' . self::ZIP_SVN_URL . '.' );
+			throw new Exception( __METHOD__ . ': Failed to create checkout of ' . PLUGIN_ZIP_SVN_URL . '.' );
 		}
 
 		// Build the requested ZIPs
