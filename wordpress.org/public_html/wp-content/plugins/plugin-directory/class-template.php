@@ -427,7 +427,8 @@ class Template {
 					break;
 
 				default:
-					continue;
+					// Skip ahead to the next section
+					continue 2;
 			}
 
 			$sections[] = array(
