@@ -458,7 +458,7 @@ class Meeting_Post_Type {
 		$query = new WP_Query(
 			array(
 				'post_type' => 'meeting',
-				'posts_per_page'  => $attr['limit'],
+				'nopaging'  => true,
 				'meta_query' => array(
 					'relation' => 'AND',
 					array(
@@ -471,8 +471,10 @@ class Meeting_Post_Type {
 			)
 		);
 
+		$limit = $attr['limit'] > 0 ? $attr['limit'] : count( $query->posts );
+
 		$out = '';
-		foreach ( $query->posts as $post ) {
+		foreach ( array_slice( $query->posts, 0, $limit ) as $post ) {
 			$next_meeting_datestring = $post->next_date;
 			$utc_time = strftime( '%H:%M:%S', strtotime( $post->time ) );
 			$next_meeting_iso        = $next_meeting_datestring . 'T' . $utc_time . '+00:00';
@@ -487,9 +489,9 @@ class Meeting_Post_Type {
 			$out .= '<p>';
 			$out .= esc_html( $attr['before'] );
 			$out .= '<strong class="meeting-title">' . esc_html( $post->post_title ) . '</strong>';
-			$display_count = $query->found_posts - count($query->posts);
-			if ( $attr['more'] ) {
-				$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings#' . esc_attr( $attr['team'] ) . '">' . sprintf( __( '(+%s more)'), $display_count ) . '</a>';
+			$display_more = $query->found_posts - intval( $limit );
+			if ( $display_more > 0 ) {
+				$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings#' . esc_attr( $attr['team'] ) . '">' . sprintf( __( '(+%s more)'), $display_more ) . '</a>';
 			}
 			$out .= '</br>';
 			$out .= '<time class="date" date-time="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_display . '</time> ';
