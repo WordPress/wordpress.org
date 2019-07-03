@@ -42,9 +42,14 @@ class Reviews {
 						<?php echo get_avatar( get_the_author_meta( 'ID' ), 60 ); ?>
 					</div><div class="review">
 						<header>
-							<h3 class="review-title"><a class="url" href="<?php echo esc_url( 'https://wordpress.org/support/topic/' . $review->post_name . '/' ); ?>"><?php echo get_the_title( $review ); ?></a></h3>
-							<?php echo Template::dashicons_stars( $review->post_rating ); ?>
-							<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
+							<div class="header-top">
+								<?php echo Template::dashicons_stars( $review->post_rating ); ?>
+								<h3 class="review-title"><a class="url" href="<?php echo esc_url( 'https://wordpress.org/support/topic/' . $review->post_name . '/' ); ?>"><?php echo get_the_title( $review ); ?></a></h3>
+							</div>
+							<div class="header-bottom">
+								<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
+								<span class="review-date"><?php echo date_i18n( 'F j, Y', strtotime( $review->post_modified ) ); ?></span>
+							</div>
 						</header>
 						<div class="review-content"><?php echo wp_strip_all_tags(get_the_content()); ?></div>
 					</div>

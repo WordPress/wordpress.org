@@ -11,6 +11,17 @@
 		&:first-child {
 			margin-top: 0;
 		}
+		.header-top {
+			display: flex;
+			.wporg-ratings {
+				flex-shrink: 0;
+			}
+		}
+
+		.header-bottom {
+			display: flex;
+			margin-bottom: 12px;
+		}
 	}
 
 	.review-avatar {
@@ -32,13 +43,20 @@
 		font-size: ms( 0 );
 		font-weight: 600;
 		letter-spacing: 0.01rem;
-		margin: 0 0 0.5rem;
+		margin: 0 0 8px 12px;
 		text-transform: inherit;
+		line-height: 1.25;
 	}
 
-	.review-author {
+	.review-date{
+		margin-left: 12px;
+		color: #999;
+		font-size: 0.9em;
+	}
+
+	.review-author, .review-date {
 		line-height: 1.25;
-		margin-left: 10px;
+		font-size: 0.9em;
 	}
 
 	@media screen and ( min-width: $ms-breakpoint ) {
@@ -59,7 +77,7 @@
 			margin: 0;
 		}
 
-		.review-author {
+		.review-author, .review-date {
 			line-height: 1;
 		}
 	}
