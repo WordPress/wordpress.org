@@ -286,6 +286,11 @@
 	</py:match>
 </py:if>
 
+<!--! Add the wp-exclude-emoji class to the Ticket Description / Ticket Comment fields to prevent emoji's being converted to <img> tags. Note: Must re-define all attributes here otherwise they'll be stripped. -->
+<py:match path="textarea[@id='field-description' or @id='comment' or @name='edited_comment']">
+	<textarea class="${select('@class')} wp-exclude-emoji" id="${select('@id')}" name="${select('@name')}" rows="${select('@rows')}" cols="${select('@cols')}">${select('*|comment()|text()')}</textarea>
+</py:match>
+
 <body py:match="body" id="wordpress-org" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
 	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5Z8B3BX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<!--! WP.org Global Header -->
