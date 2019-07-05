@@ -17,8 +17,9 @@ class SVN {
 	 * @param string $url      The URL to import to.
 	 * @param string $message  The commit message.
 	 * @return array {
-	 *     @type bool $result   The result of the operation.
-	 *     @type int  $revision The revision imported.
+	 *     @type bool        $result   The result of the operation.
+	 *     @type int         $revision The revision imported.
+	 *     @type false|array $errors   Whether any errors or warnings were encountered.
 	 * }
 	 */
 	public static function import( $path, $url, $message, $options = array() ) {
@@ -57,8 +58,9 @@ class SVN {
 	 * @param string $destination The local folder to export into.
 	 * @param array  $options     Optional. A list of options to pass to SVN. Default: empty array.
 	 * @return array {
-	 *     @type bool $result   The result of the operation.
-	 *     @type int  $revision The revision exported.
+	 *     @type bool        $result   The result of the operation.
+	 *     @type int         $revision The revision exported.
+	 *     @type false|array $errors   Whether any errors or warnings were encountered.
 	 * }
 	 */
 	public static function export( $url, $destination, $options = array() ) {
@@ -91,8 +93,9 @@ class SVN {
 	 * @param string $destination The local folder to checkout into.
 	 * @param array  $options     Optional. A list of options to pass to SVN. Default: empty array.
 	 * @return array {
-	 *     @type bool $result   The result of the operation.
-	 *     @type int  $revision The revision exported.
+	 *     @type bool        $result   The result of the operation.
+	 *     @type int         $revision The revision exported.
+	 *     @type false|array $errors   Whether any errors or warnings were encountered.
 	 * }
 	 */
 	public static function checkout( $url, $destination, $options = array() ) {
@@ -124,8 +127,9 @@ class SVN {
 	 * @param string $checkout The path of the SVN checkout to update.
 	 * @param array  $options  Optional. A list of options to pass to SVN. Default: empty array.
 	 * @return array {
-	 *     @type bool $result   The result of the operation.
-	 *     @type int  $revision The revision exported.
+	 *     @type bool        $result   The result of the operation.
+	 *     @type int         $revision The revision exported.
+	 *     @type false|array $errors   Whether any errors or warnings were encountered.
 	 * }
 	 */
 	public static function up( $checkout, $options = array() ) {
@@ -155,7 +159,8 @@ class SVN {
 	 *
 	 * @param string $checkout The path of the file to add to SVN.
 	 * @return array {
-	 *     @type bool $result   The result of the operation.
+	 *     @type bool        $result The result of the operation.
+	 *     @type false|array $errors Whether any errors or warnings were encountered.
 	 * }
 	 */
 	public static function add( $file ) {
@@ -185,8 +190,9 @@ class SVN {
 	 * @param string $message  The commit message.
 	 * @param array  $options  Any specific options to pass to SVN.
 	 * @return array {
-	 *     @type bool $result   The result of the operation.
-	 *     @type int  $revision The revision imported.
+	 *     @type bool        $result   The result of the operation.
+	 *     @type int         $revision The revision imported.
+	 *     @type false|array $errors   Whether any errors or warnings were encountered.
 	 * }
 	 */
 	public static function commit( $checkout, $message, $options = array() ) {
@@ -224,8 +230,9 @@ class SVN {
 	 * @param string $message  The commit message.
 	 * @param array  $options  Any specific options to pass to SVN.
 	 * @return array {
-	 *     @type bool $result   The result of the operation.
-	 *     @type int  $revision The revision imported.
+	 *     @type bool        $result   The result of the operation.
+	 *     @type int         $revision The revision imported.
+	 *     @type false|array $errors   Whether any errors or warnings were encountered.
 	 * }
 	 */
 	public static function mkdir( $url, $message, $options = array() ) {
