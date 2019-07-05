@@ -38,9 +38,11 @@ class SVN {
 		if ( preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
+			$errors   = false;
 		} else {
-			$result = false;
-			$errors = self::parse_svn_errors( $output );
+			$result   = false;
+			$revision = false;
+			$errors   = self::parse_svn_errors( $output );
 		}
 
 		return compact( 'result', 'revision', 'errors' );
@@ -72,8 +74,9 @@ class SVN {
 			$result   = true;
 			$errors   = false;
 		} else {
-			$result = false;
-			$errors = self::parse_svn_errors( $output );
+			$result   = false;
+			$revision = false;
+			$errors   = self::parse_svn_errors( $output );
 		}
 
 		return compact( 'result', 'revision', 'errors' );
@@ -103,9 +106,11 @@ class SVN {
 		if ( preg_match( '/Checked out revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
+			$errors   = false;
 		} else {
-			$result = false;
-			$errors = self::parse_svn_errors( $output );
+			$result   = false;
+			$revision = false;
+			$errors   = self::parse_svn_errors( $output );
 		}
 
 		return compact( 'result', 'revision', 'errors' );
@@ -133,9 +138,11 @@ class SVN {
 		if ( preg_match( '/Updated to revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
+			$errors   = false;
 		} else {
-			$result = false;
-			$errors = self::parse_svn_errors( $output );
+			$result   = false;
+			$revision = false;
+			$errors   = self::parse_svn_errors( $output );
 		}
 
 		return compact( 'result', 'revision', 'errors' );
@@ -160,6 +167,7 @@ class SVN {
 		$output = self::shell_exec( "svn add $esc_options $esc_file 2>&1" );
 		if ( preg_match( "/^A/i", $output ) ) {;
 			$result   = true;
+			$errors   = false;
 		} else {
 			$result = false;
 			$errors = self::parse_svn_errors( $output );
@@ -197,9 +205,11 @@ class SVN {
 		if ( preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
+			$errors   = false;
 		} else {
-			$result = false;
-			$errors = self::parse_svn_errors( $output );
+			$result   = false;
+			$revision = false;
+			$errors   = self::parse_svn_errors( $output );
 		}
 
 		return compact( 'result', 'revision', 'errors' );
@@ -234,9 +244,11 @@ class SVN {
 		if ( preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
+			$errors   = false;
 		} else {
-			$result = false;
-			$errors = self::parse_svn_errors( $output );
+			$result   = false;
+			$revision = false;
+			$errors   = self::parse_svn_errors( $output );
 		}
 
 		return compact( 'result', 'revision', 'errors' );
@@ -423,3 +435,4 @@ class SVN {
 		return shell_exec( 'export LC_CTYPE="en_US.UTF-8" LANG="en_US.UTF-8"; ' . $command );
 	}
 }
+
