@@ -57,7 +57,7 @@ the_post();
 
 					<h3><?php esc_html_e( 'Cookies set by WordPress.org', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'We use cookies for a number of different purposes. Some cookies are necessary for technical reasons; some enable a personalized experience for both visitors and registered users; and some allow the display of advertising from selected third party networks. Some of these cookies may be set when a page is loaded, or when a visitor takes a particular action (clicking the &#8216;like&#8217; or &#8216;follow&#8217; button on a post, for example).', 'wporg' ); ?></p>
-					<p><?php esc_html_e( 'Below the different categories of cookies set by WordPress.org are outlined, with specific examples detailed in the tables that follow. This includes their name and purpose. Certain cookies are only set for logged in visitors, whereas others are set for any visitors, and these are marked below accordingly. Where a cookie only applies to specific subdomains, they are included under the relevant header.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'Below the different categories of cookies set by WordPress.org are outlined, with specific examples detailed in the tables that follow. This includes their name and purpose. Certain cookies are only set for logged-in visitors, whereas others are set for any visitors, and these are marked below accordingly. Where a cookie only applies to specific subdomains, they are included under the relevant header.', 'wporg' ); ?></p>
 					<p><strong><?php esc_html_e( 'Strictly Necessary', 'wporg' ); ?></strong>: <?php esc_html_e( 'These are the cookies that are essential for WordPress.org to perform basic functions. These include those required to allow registered users to authenticate and perform account related functions.', 'wporg' ); ?></p>
 					<p><strong><?php esc_html_e( 'Functionality', 'wporg' ); ?></strong>: <?php esc_html_e( 'These cookies are used to store preferences set by users such as account name, language, and location.', 'wporg' ); ?></p>
 					<p><strong><?php esc_html_e( 'Performance', 'wporg' ); ?></strong>: <?php esc_html_e( 'Performance cookies collect information on how users interact with websites hosted on WordPress.org, including what pages are visited most, as well as other analytical data. These details are only used to improve how the website functions.', 'wporg' ); ?></p>
@@ -126,7 +126,7 @@ the_post();
 							<tr>
 								<th>wporg_logged_in<br/>wporg_sec</th>
 								<td><?php esc_html_e( '14 days if you select &#8220;Remember Me&#8221; when logging in. Otherwise, Session.', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged in WordPress.org user.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged-in WordPress.org user.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 						</tbody>
@@ -146,7 +146,7 @@ the_post();
 							<tr>
 								<th>welcome-{blog_id}</th>
 								<td><?php esc_html_e( 'Permanent', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to record if you&#8217;ve chosen to hidden the &#8220;Welcome&#8221; message at the top of the corresponding blog.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to record if you&#8217;ve chosen to hide the &#8220;Welcome&#8221; message at the top of the corresponding blog.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -198,19 +198,19 @@ the_post();
 							<tr>
 								<th>codexToken</th>
 								<td><?php esc_html_e( '6 months', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged in WordPress.org user. Only set if you select &#8220;Keep me logged in&#8221; when logging in.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged-in WordPress.org user. Only set if you select &#8220;Keep me logged in&#8221; when logging in.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 							<tr>
 								<th>codexUserId<br/>codexUserName</th>
 								<td><?php esc_html_e( '6 months', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged in WordPress.org user.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged-in WordPress.org user.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 							<tr>
 								<th>codex_session</th>
 								<td><?php esc_html_e( 'Session', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged in WordPress.org user.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged-in WordPress.org user.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 						</tbody>
