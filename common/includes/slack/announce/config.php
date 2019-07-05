@@ -324,7 +324,9 @@ function get_whitelist() {
 		'wptv' => array(
 			'casiepa', // @Pascal on Slack
 			'JerrySarcastic',
+			'mgelves', // @maugelves on Slack
 			'RoseAppleMedia',
+			'sbddesign',
 		),
 	);
 }
