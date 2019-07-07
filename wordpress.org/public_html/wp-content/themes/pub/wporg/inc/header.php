@@ -51,7 +51,7 @@ namespace WordPressdotorg\Theme;
 			<li><a href='//wordpress.org/about/' title='About the WordPress Organization, and where we&#039;re going.'>About</a></li>
 			<li><a href='//wordpress.org/news/' title='Come here for the latest scoop.'>Blog</a></li>
 			<li><a href='//wordpress.org/hosting/' title='Find a home for your blog.'>Hosting</a></li>
-			<li id="download" class="button download-button"><a href='//wordpress.org/download/' title='Get it. Got it? Good.'>Download WordPress</a></li>
+			<li id="download" class="button download-button"><a href='//wordpress.org/download/' title='Get it. Got it? Good.'>Get WordPress</a></li>
 		</ul>
 		<div style="clear:both"></div>
 	</div>
