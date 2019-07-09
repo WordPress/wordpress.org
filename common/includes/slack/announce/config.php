@@ -305,10 +305,14 @@ function get_whitelist() {
 			'melindahelt',
 			'juliekuehl',
 		),
+		// NOTE: Private Groups need not be listed here. All members of Private Groups have access to /announce & /here
+		'wcasia' => array(
+			'Nao',
+			'SamSuresh',
+		),
 		'wceu' => array(
 			'casiepa', // @Pascal on Slack
 		),
-		// NOTE: Private Groups need not be listed here. All members of Private Groups have access to /announce & /here
 		'wcus' => array(
 			'cronkled', // @alx on Slack
 			'camikaos',
