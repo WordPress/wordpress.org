@@ -286,7 +286,9 @@ function get_whitelist() {
 			'grapplerulrich',
 			'greenshady',
 			'jcastaneda',
+			'kafleg',
 			'karmatosed',
+			'williampatton',
 		),
 		'tide' => array(
 			'JeffPaul',
