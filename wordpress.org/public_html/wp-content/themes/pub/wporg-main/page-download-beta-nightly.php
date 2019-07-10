@@ -54,7 +54,7 @@ the_post();
 							wp_kses_post( __( 'By their nature these releases are unstable and should not be used any place where your data is important. Please <a href="%1$s">backup your database</a> before upgrading to a beta release. To hear about the latest beta releases your best bet is to watch <a href="%2$s">the development blog</a> and <a href="%3$s">the beta forum</a>.', 'wporg' ) ),
 							esc_url( __( 'https://codex.wordpress.org/Backing_Up_Your_Database', 'wporg' ) ),
 							esc_url( 'https://make.wordpress.org/core/' ),
-							esc_url( 'https://wordpress.org/support/forum/alphabeta/' )
+							esc_url( __( 'https://wordpress.org/support/forum/alphabeta/' ) )
 						);
 						?>
 					</p>
