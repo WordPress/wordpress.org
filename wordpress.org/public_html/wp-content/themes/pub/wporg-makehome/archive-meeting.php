@@ -4,7 +4,7 @@
 	<div class="header-section">
 		<h2 class="title all"><?php _e( 'Upcoming WordPress Meetings', 'make-wporg' ); ?></h2>
 		<h2 class="title team"><?php _e( 'Upcoming Team Meetings', 'make-wporg' ); ?></h2>
-		<a class="team" href="/meetings"><?php _e( 'Show meetings for other teams', 'make-wporg' ); ?></a>
+		<a class="team" href="/meetings/"><?php _e( 'Show meetings for other teams', 'make-wporg' ); ?></a>
 	</div>
 <table class="schedule">
 	<thead>
@@ -18,7 +18,13 @@
 	<tbody>
 	<?php while( have_posts() ): the_post(); ?>
 		<tr id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<td><?php echo $post->team; ?></td>
+			<td class="team"><?php
+				printf(
+					'<a href="#%s">%s</a>',
+					esc_attr( strtolower( $post->team ) ),
+					$post->team
+				);
+			?></td>
 			<td><?php
 				$title = get_the_title();
 				printf(
@@ -117,22 +123,50 @@ function wporg_makehome_time_converter_script() {
 		}
 
 		// Allow client side filtering using # in url
-		var hash = window.location.hash.replace('#','');
-		if (hash) {
+		var filterByTeam = function(team) {
+			team = team.replace('#','');
+
 			var rowsToRemove = $('.schedule').find('tr td:nth-child(1)').filter(function() {
-				var reg = new RegExp(hash, "i");
+				var reg = new RegExp(team, "i");
 				return !reg.test($(this).text());
 			});
 
 			for (var i = 0; i < rowsToRemove.length; i++) {
-				$(rowsToRemove[i]).parent().remove();
+				$(rowsToRemove[i]).parent().hide();
 			}
 
+			$('.header-section').find('.all').hide();
 			$('.header-section').find('.team').show();
+		}
+
+		var showAllMeetings = function() {
+			$('.schedule').find('tr').each(function() {
+				$(this).show();
+			});
+
+			$('.header-section').find('.team').hide();
+			$('.header-section').find('.all').show();
+		}
+
+		if (window.location.hash) {
+			filterByTeam(window.location.hash);
 		}
 		else {
 			$('.header-section').find('.all').show();
 		}
+
+		$('.schedule .team a').click(function() {
+			var team = $(this).attr('href');
+			filterByTeam(team);
+			window.location.hash = team;
+			return false;
+		});
+
+		$('.header-section a.team').click(function() {
+			showAllMeetings();
+			window.location.hash = '';
+			return false;
+		});
 
 		// avoid page flickers on load
 		$('.schedule').show();

@@ -181,7 +181,7 @@ class Meeting_Post_Type {
 	        'name'                => _x( 'Meetings', 'Post Type General Name', 'wporg' ),
 	        'singular_name'       => _x( 'Meeting', 'Post Type Singular Name', 'wporg' ),
 	        'menu_name'           => __( 'Meetings', 'wporg' ),
-	        'name_admin_bar'      => __( 'Meetings', 'wporg' ),
+	        'name_admin_bar'      => __( 'Meeting', 'wporg' ),
 	        'parent_item_colon'   => __( 'Parent Meeting:', 'wporg' ),
 	        'all_items'           => __( 'All Meetings', 'wporg' ),
 	        'add_new_item'        => __( 'Add New Meeting', 'wporg' ),
@@ -491,7 +491,7 @@ class Meeting_Post_Type {
 			$out .= '<strong class="meeting-title">' . esc_html( $post->post_title ) . '</strong>';
 			$display_more = $query->found_posts - intval( $limit );
 			if ( $display_more > 0 ) {
-				$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings#' . esc_attr( $attr['team'] ) . '">' . sprintf( __( '(+%s more)'), $display_more ) . '</a>';
+				$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings/#' . esc_attr( strtolower( $attr['team'] ) ) . '">' . sprintf( __( '(+%s more)'), $display_more ) . '</a>';
 			}
 			$out .= '</br>';
 			$out .= '<time class="date" date-time="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_display . '</time> ';
