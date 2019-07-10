@@ -117,7 +117,7 @@ the_post();
 							printf(
 								/* translators: URL to installation guide */
 								wp_kses_post( __( 'With our famous 5-minute installation, setting up WordPress for the first time is simple. We’ve created a <a href="%1$s">handy guide</a> to see you through the installation process.', 'wporg' ) ),
-								'https://codex.wordpress.org/Installing_WordPress#Famous_5-Minute_Installation'
+								esc_url( __( 'https://codex.wordpress.org/Installing_WordPress#Famous_5-Minute_Installation', 'wporg' ) )
 							);
 							?>
 						</p>
