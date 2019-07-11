@@ -173,13 +173,13 @@ the_post();
 								<th>trac_form_token</th>
 								<td><?php esc_html_e( 'Session', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Used as a security token for cross-site request forgery protection.', 'wporg' ); ?></td>
-								<td>No</td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
 								<th>trac_session</th>
 								<td><?php esc_html_e( '90 days', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Used to keep anonymous session information.', 'wporg' ); ?></td>
-								<td>No</td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 						</tbody>
 					</table>
