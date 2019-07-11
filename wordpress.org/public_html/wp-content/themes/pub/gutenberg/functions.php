@@ -640,6 +640,9 @@ add_action( 'template_redirect', function() {
 		return esc_html__( 'A new editing experience for WordPress is in the works, code name Gutenberg. Read more about it and test it!', 'wporg' );
 	}
 	add_filter( 'option_blogdescription', 'frontenberg_site_description' );
+
+	// Disable Jetpack Blocks for now.
+	add_filter( 'jetpack_gutenberg', '__return_false' );
 });
 
 /**
