@@ -45,6 +45,10 @@ class Theme_Directory_Compat extends Directory_Compat {
 		return ! empty( $this->theme ) ? $this->theme->post_title : '';
 	}
 
+	function status() {
+		return ! empty( $this->theme ) ? $this->theme->post_status : '';
+	}
+
 	function forum_id() {
 		return Plugin::THEMES_FORUM_ID;
 	}

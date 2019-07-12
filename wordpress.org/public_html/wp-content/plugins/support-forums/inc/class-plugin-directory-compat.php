@@ -45,6 +45,10 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		return $this->plugin->post_title;
 	}
 
+	function status() {
+		return $this->plugin->post_status;
+	}
+
 	function forum_id() {
 		return Plugin::PLUGINS_FORUM_ID;
 	}

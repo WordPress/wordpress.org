@@ -12,6 +12,7 @@ abstract class Directory_Compat {
 	abstract protected function unresolved_title();
 	abstract protected function slug();
 	abstract protected function title();
+	abstract protected function status();
 	abstract protected function forum_id();
 	abstract protected function query_var();
 	abstract protected function taxonomy();
@@ -705,6 +706,13 @@ abstract class Directory_Compat {
 		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( $this->compat(), 'reviews' ) ) ) {
 			$retval = bbp_current_user_can_publish_topics();
 		}
+
+		if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+			if ( 'plugin' === $this->compat() && 'publish' !== $this->status() ) {
+				$retval = false;
+			}
+		}
+
 		return $retval;
 	}
 
