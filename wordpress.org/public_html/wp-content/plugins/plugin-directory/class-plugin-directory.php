@@ -885,7 +885,7 @@ class Plugin_Directory {
 			}
 
 			// Trim off special characters, only allowing wordy characters at the end of searches.
-			$s = preg_replace( '!(\W+)$!i', '', $s );
+			$s = preg_replace( '!(\W+)$!iu', '', $s );
 			// ..and whitespace
 			$s = trim( $s );
 
