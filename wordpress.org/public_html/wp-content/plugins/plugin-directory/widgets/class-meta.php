@@ -185,15 +185,35 @@ class Meta extends \WP_Widget {
 			endif;
 			?>
 
-			<?php if ( empty( $args['hide_tags'] ) && $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>
-				<li class="clear">
-					<?php
-					$terms = get_the_terms( $post, 'plugin_tags' );
-					/* translators: %s: tag list */
-					printf( _n( 'Tag: %s', 'Tags: %s', count( $terms ), 'wporg-plugins' ), $tags );
-					?>
-				</li>
-			<?php endif; ?>
+			<?php if ( empty( $args['hide_tags'] ) ) {
+				$terms = get_the_terms( $post, 'plugin_tags' );
+				if ( is_wp_error( $terms ) ) {
+					$terms = array();
+				}
+				// Trim it to tags with more than 1 plugin.
+				$terms = array_filter( $terms, function( $term ) {
+					return $term->count > 1;
+				} );
+
+				// If we have some terms still, generate the sidebar entry.
+				if ( $terms ) {
+					$term_links = array_filter( array_map( function( $term ) {
+						$link = get_term_link( $term, 'plugin_tags' );
+        					if ( is_wp_error( $link ) ) {
+            					return '';
+        					}
+        					return '<a href="' . esc_url( $link ) . '" rel="tag">' . $term->name . '</a>';
+        				}, $terms ) );
+
+					echo '<li class="clear">';
+					printf(
+						/* translators: %s: tag list */
+						_n( 'Tag: %s', 'Tags: %s', count( $term_links ), 'wporg-plugins' ),
+						'<div class="tags">' . implode( $term_links ) . '</div>'
+					);
+					echo '</li>';
+				}
+			} ?>
 
 			<?php if ( ! get_query_var( 'plugin_advanced' ) ) : ?>
 				<li class="hide-if-no-js">
