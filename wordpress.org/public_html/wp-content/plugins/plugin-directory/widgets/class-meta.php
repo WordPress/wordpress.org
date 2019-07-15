@@ -187,7 +187,7 @@ class Meta extends \WP_Widget {
 
 			<?php if ( empty( $args['hide_tags'] ) ) {
 				$terms = get_the_terms( $post, 'plugin_tags' );
-				if ( is_wp_error( $terms ) ) {
+				if ( ! $terms || is_wp_error( $terms ) ) {
 					$terms = array();
 				}
 				// Trim it to tags with more than 1 plugin.
@@ -199,11 +199,11 @@ class Meta extends \WP_Widget {
 				if ( $terms ) {
 					$term_links = array_filter( array_map( function( $term ) {
 						$link = get_term_link( $term, 'plugin_tags' );
-        					if ( is_wp_error( $link ) ) {
-            					return '';
-        					}
-        					return '<a href="' . esc_url( $link ) . '" rel="tag">' . $term->name . '</a>';
-        				}, $terms ) );
+						if ( is_wp_error( $link ) ) {
+							return '';
+						}
+						return '<a href="' . esc_url( $link ) . '" rel="tag">' . $term->name . '</a>';
+					}, $terms ) );
 
 					echo '<li class="clear">';
 					printf(
