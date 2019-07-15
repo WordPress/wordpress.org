@@ -16,6 +16,12 @@ $GLOBALS['menu_items'] = [
 	'about/privacy/data-erasure-request' => esc_html_x( 'Data Erasure Request', 'Page title', 'wporg' ),
 ];
 
+// The Data Export and Data Erasure forms/pages don't currently exist on rosetta sites, and should not be linked here.
+if ( isset( $GLOBALS['rosetta'] ) ) {
+	unset( $GLOBALS['menu_items']['about/privacy/data-export-request'], $GLOBALS['menu_items']['about/privacy/data-erasure-request'] );
+}
+
+
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
