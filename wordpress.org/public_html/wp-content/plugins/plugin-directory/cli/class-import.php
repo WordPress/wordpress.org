@@ -25,13 +25,15 @@ class Import {
 	// Readme fields which get stored in plugin meta
 	public $readme_fields = array(
 		'tested',
-		'requires',
-		'requires_php',
 		'donate_link',
 		'license',
 		'license_uri',
 		'upgrade_notice',
 		'screenshots',
+
+		// These headers are stored as post meta, but are handled separately.
+		// 'requires',
+		// 'requires_php',
 	);
 
 	// Plugin headers that are stored in plugin meta
@@ -39,10 +41,14 @@ class Import {
 		// Header    => meta_key
 		'Name'       => 'header_name',
 		'PluginURI'  => 'header_plugin_uri',
-		'Version'    => 'version',
 		'Author'     => 'header_author',
 		'AuthorURI'  => 'header_author_uri',
 		'TextDomain' => 'header_textdomain',
+
+		// These headers are stored in these fields, but are handled separately.
+		// 'Version'     => 'version',
+		// 'RequiresWP'  => 'requires',
+		// 'RequiresPHP' => 'requires_php',
 	);
 
 	/**
@@ -146,20 +152,31 @@ class Import {
 			update_post_meta( $plugin->ID, $readme_field, wp_slash( $value ) );
 		}
 
+		// Store the plugin headers we need. Note that 'Version', 'RequiresWP', and 'RequiresPHP' are handled below.
 		foreach ( $this->plugin_headers as $plugin_header => $meta_field ) {
-			if ( 'Version' == $plugin_header ) {
-				continue; // We'll specifically update the latest version after everything is built.
-			}
 			update_post_meta( $plugin->ID, $meta_field, ( isset( $headers->$plugin_header ) ? wp_slash( $headers->$plugin_header ) : '' ) );
 		}
 
-		update_post_meta( $plugin->ID, 'tagged_versions', wp_slash( $tagged_versions ) );
-		update_post_meta( $plugin->ID, 'sections', wp_slash( array_keys( $readme->sections ) ) );
+		// Update the Requires and Requires PHP fields, prefering those from the Plugin Headers.
+		// Unfortunately the value within $headers is not always a well-formed value.
+		$requires     = $readme->requires;
+		$requires_php = $readme->requires_php;
+		if ( $headers->RequiresWP && preg_match( '!^[\d.]{3,}$!', $headers->RequiresWP ) ) {
+			$requires = $headers->RequiresWP;
+		}
+		if ( $headers->RequiresPHP && preg_match( '!^[\d.]{3,}$!', $headers->RequiresPHP ) ) {
+			$requires_php = $headers->RequiresPHP;
+		}
+
+		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
+		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
+		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( $tagged_versions ) );
+		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
-		update_post_meta( $plugin->ID, 'assets_icons', wp_slash( $assets['icon'] ) );
-		update_post_meta( $plugin->ID, 'assets_banners', wp_slash( $assets['banner'] ) );
-		update_post_meta( $plugin->ID, 'last_updated', wp_slash( $plugin->post_modified_gmt ) );
-		update_post_meta( $plugin->ID, 'plugin_status', wp_slash( $plugin->post_status ) );
+		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
+		update_post_meta( $plugin->ID, 'assets_banners',     wp_slash( $assets['banner'] ) );
+		update_post_meta( $plugin->ID, 'last_updated',       wp_slash( $plugin->post_modified_gmt ) );
+		update_post_meta( $plugin->ID, 'plugin_status',      wp_slash( $plugin->post_status ) );
 
 		// Calculate the 'plugin color' from the average color of the banner if provided. This is used for fallback icons.
 		$banner_average_color = '';

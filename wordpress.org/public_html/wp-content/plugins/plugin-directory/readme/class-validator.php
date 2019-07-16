@@ -85,12 +85,6 @@ class Validator {
 				'<code>' . number_format( $latest_wordpress_version, 1 ) . '</code>',
 				'<code>' . number_format( $latest_wordpress_version - 0.1, 1 ) . '</code>'
 			);
-		} elseif ( empty( $readme->requires ) ) {
-			$warnings[] = sprintf(
-				/* translators: %s: plugin header tag */
-				__( 'The %s field is missing.', 'wporg-plugins' ),
-				'<code>Requires at least</code>'
-			);
 		}
 
 		if ( isset( $readme->warnings['tested_header_ignored'] ) ) {
@@ -119,13 +113,8 @@ class Validator {
 				'<code>5.2.4</code>',
 				'<code>7.0</code>'
 			);
-		} elseif ( empty( $readme->requires_php ) ) {
-			$warnings[] = sprintf(
-				/* translators: %s: plugin header tag */
-				__( 'The %s field is missing.', 'wporg-plugins' ),
-				'<code>Requires PHP</code>'
-			);
 		}
+
 		if ( empty( $readme->stable_tag ) ) {
 			$warnings[] = sprintf(
 				/* translators: 1: 'Stable tag', 2: /trunk/ SVN directory, 3: 'Stable tag: trunk' */
@@ -151,6 +140,22 @@ class Validator {
 		}
 
 		// Notes.
+		if ( empty( $readme->requires ) ) {
+			$notes[] = sprintf(
+				/* translators: %s: plugin header tag */
+				__( 'The %s field is missing. It should be defined here, or in your main plugin file.', 'wporg-plugins' ),
+				'<code>Requires at least</code>'
+			);
+		}
+
+		if ( empty( $readme->requires_php ) ) {
+			$notes[] = sprintf(
+				/* translators: %s: plugin header tag */
+				__( 'The %s field is missing. It should be defined here, or in your main plugin file.', 'wporg-plugins' ),
+				'<code>Requires PHP</code>'
+			);
+		}
+
 		if ( empty( $readme->sections['faq'] ) ) {
 			$notes[] = sprintf(
 				/* translators: %s: section title */
@@ -158,6 +163,7 @@ class Validator {
 				'<code>== Frequently Asked Questions ==</code>'
 			);
 		}
+
 		if ( empty( $readme->sections['changelog'] ) ) {
 			$notes[] = sprintf(
 				/* translators: %s: section title */
@@ -165,6 +171,7 @@ class Validator {
 				'<code>== Changelog ==</code>'
 			);
 		}
+
 		if ( empty( $readme->upgrade_notice ) ) {
 			$notes[] = sprintf(
 				/* translators: %s: section title */
@@ -172,6 +179,7 @@ class Validator {
 				'<code>== Upgrade Notice ==</code>'
 			);
 		}
+
 		if ( empty( $readme->screenshots ) ) {
 			$notes[] = sprintf(
 				/* translators: %s: section title */
@@ -179,6 +187,7 @@ class Validator {
 				'<code>== Screenshots ==</code>'
 			);
 		}
+
 		if ( empty( $readme->donate_link ) ) {
 			$notes[] = __( 'No donate link was found', 'wporg-plugins' );
 		}
