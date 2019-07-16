@@ -1045,7 +1045,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[0] !== '' ) {
 						$.each( keywords, function( k, v ) {
-							var html = $( '<span />' ).text( v ).attr( 'data-keyword', v ).prepend( '<button type="button" aria-label="Remove ' + v +' keyword" class="keyword-button-remove dashicons dashicons-dismiss" />' );
+							var html = $( '<span />' ).text( v ).attr( 'data-keyword', v ).prepend( $( '<button type="button" aria-label="Remove keyword" class="keyword-button-remove dashicons dashicons-dismiss" />' ).attr( 'aria-label', 'Remove ' + v + ' keyword' ) );
 							if ( v in coreKeywordList ) {
 								html.attr('title', coreKeywordList[v]);
 							}
@@ -1120,7 +1120,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					}
 
 					// Add it to the bin, and refresh the hidden input.
-					html = $( '<span />' ).text( keyword ).attr( 'data-keyword', keyword ).prepend( '<button type="button" aria-label="Remove ' + keyword +' keyword" class="keyword-button-remove dashicons dashicons-dismiss" />' );
+					html = $( '<span />' ).text( keyword ).attr( 'data-keyword', keyword ).prepend( $( '<button type="button" aria-label="Remove keyword" class="keyword-button-remove dashicons dashicons-dismiss" />' ).attr( 'aria-label', 'Remove ' + keyword +' keyword' ) );
 					if ( title ) {
 						html.attr('title', title);
 					}
