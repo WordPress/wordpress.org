@@ -20,6 +20,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'needs-dev-note' : 'Ticket needs a post on the development blog.',
 		'has-privacy-review' : 'Input has been given from the core privacy team reviewing the privacy implications of the suggested changes.',
 		'needs-privacy-review' : 'Input is needed from the core privacy team with regards to the privacy implications of the suggested changes.',
+		'has-copy-review' : 'Input has been given from a copywriter reviewing the suggested verbiage changes.',
+		'needs-copy-review' : 'Input is needed from a copywriter with regards to the suggested verbiage changes.',
 		'needs-docs' : 'Inline documentation is needed.',
 		'needs-codex' : 'The Codex needs to be updated or expanded.',
 		'has-screenshots' : 'Visual changes are documented with screenshots.',
@@ -1111,6 +1113,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						wpTrac.workflow.removeKeyword( 'needs-privacy-review' );
 					} else if ( 'needs-privacy-review' === keyword ) {
 						wpTrac.workflow.removeKeyword( 'has-privacy-review' );
+					}
+
+					if ( 'has-copy-review' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'needs-copy-review' );
+					} else if ( 'needs-copy-review' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'has-copy-review' );
 					}
 
 					if ( 'has-screenshots' === keyword ) {
