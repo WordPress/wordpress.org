@@ -215,6 +215,11 @@ class Plugins_Info_API_Request {
 			if ( ! empty( $this->args->author ) ) {
 				$query['author_name'] = $this->args->author;
 			}
+
+			// Block
+			if ( ! empty( $this->args->block ) ) {
+				$query['block'] = $this->args->block;
+			}
 		}
 
 		return $query;

@@ -59,6 +59,35 @@ class Query_Plugins extends Base {
 			$query['posts_per_page'] = min( $query['posts_per_page'], 250 );
 		}
 
+		// Temporary hacky block search
+		if ( $request->get_param( 'block' ) ) {
+			global $wpdb;
+			$block_search = $request->get_param( 'block' );
+			$meta_query = array(
+				'relation' => 'OR',
+				array(
+					'key' => 'block_name',
+					'value' => '^' . $block_search,
+					'compare' => 'RLIKE',
+				),
+				array(
+					'key' => 'block_name',
+					'value' => '/' . $block_search, // search following the slash
+					'compare' => 'RLIKE',
+				),
+			);
+
+			// Limit the search to the Block section
+			$query[ 'meta_query' ] = $meta_query;
+			$query[ 'tax_query' ] = array(
+				array(
+					'taxonomy' => 'plugin_section',
+					'field' => 'slug',
+					'terms' => 'block',
+				)
+			);
+		}
+
 		if ( ! $query ) {
 			return $response;
 		}
