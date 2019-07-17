@@ -74,6 +74,7 @@ class Import {
 		$stable_tag      = $data['stable_tag'];
 		$tagged_versions = $data['tagged_versions'];
 		$blocks          = $data['blocks'];
+		$block_files     = $data['block_files'];
 
 		$content = '';
 		if ( $readme->sections ) {
@@ -188,9 +189,23 @@ class Import {
 
 		// Store the block data, if known
 		if ( count( $blocks ) ) {
-			update_post_meta( $plugin->ID, 'all_blocks', $blocks );
+			$changed = update_post_meta( $plugin->ID, 'all_blocks', $blocks );
+			if ( $changed || count ( get_post_meta( $plugin->ID, 'block_name' ) ) !== count ( $blocks ) ) {
+				delete_post_meta( $plugin->ID, 'block_name' );
+				foreach ( $blocks as $block ) {
+					add_post_meta( $plugin->ID, 'block_name', $block->name, false );
+				}
+			}
 		} else {
 			delete_post_meta( $plugin->ID, 'all_blocks' );
+			delete_post_meta( $plugin->ID, 'block_name' );
+		}
+
+		// Only store block_files for plugins in the block directory
+		if ( count( $block_files ) && has_term( 'block', 'plugin_section', $plugin->ID ) ) {
+			update_post_meta( $plugin->ID, 'block_files', $block_files );
+		} else {
+			delete_post_meta( $plugin->ID, 'block_files' );
 		}
 
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
@@ -439,7 +454,22 @@ class Import {
 			}
 		}
 
-		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks' );
+		// Find blocks dist/build JS files
+		$block_files = array();
+		$dist_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/dist" ) ?: array();
+		$build_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/build" ) ?: array();
+
+		foreach ( $dist_files as $file ) {
+			#$block_files[] = 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/dist/" . $file;
+			$block_files[] = '/trunk/dist/' . $file;
+		}
+
+		foreach ( $build_files as $file ) {
+			#$block_files[] = 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/build/" . $file;
+			$block_files[] = '/trunk/build/' . $file;
+		}
+
+		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
 	}
 
 	/**
