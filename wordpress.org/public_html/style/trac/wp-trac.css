@@ -37,6 +37,7 @@ fieldset {
 #headline {
 	background: #0073aa;
 	border-bottom: 0;
+	height: 62px;
 }
 @media screen and (min-width: 769px) {
 	#wporg-header ul li a.current ~ .uparrow {
@@ -53,6 +54,7 @@ fieldset {
 }
 #headline h2 {
 	background: none;
+	float: left;
 	text-shadow: none;
 }
 #headline a {
