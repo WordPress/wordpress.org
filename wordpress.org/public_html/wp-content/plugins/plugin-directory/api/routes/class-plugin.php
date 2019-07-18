@@ -217,6 +217,10 @@ class Plugin extends Base {
 			}
 		}
 
+		// Block metadata, if available
+		$result['blocks'] = get_post_meta( $post_id, 'all_blocks', true ) ?: [];
+		$result['block_assets'] = get_post_meta( $post_id, 'block_files', true ) ?: [];
+
 		// That's all folks!
 		return $result;
 	}

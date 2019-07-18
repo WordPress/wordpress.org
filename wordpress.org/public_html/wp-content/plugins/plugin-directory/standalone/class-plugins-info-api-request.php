@@ -32,6 +32,8 @@ class Plugins_Info_API_Request {
 		'tags'              => false,
 		'tested'            => false,
 		'stable_tag'        => false,
+		'blocks'            => false,
+		'block_assets'      => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -51,6 +53,8 @@ class Plugins_Info_API_Request {
 		'sections'          => true,
 		'tags'              => true,
 		'tested'            => true,
+		'blocks'            => false,
+		'block_assets'      => false,
 	);
 
 	// Alterations made to default fields in the info/1.2 API.
@@ -82,6 +86,8 @@ class Plugins_Info_API_Request {
 		'short_description' => true,
 		'tags'              => true,
 		'tested'            => true,
+		'blocks'            => false,
+		'block_assets'      => false,
 	);
 
 	// Alterations made to the default fields in the info/1.2 API.
@@ -149,6 +155,12 @@ class Plugins_Info_API_Request {
 		if ( ! empty( $this->requested_fields['icons'] ) ) {
 			$fields['compatibility'] = false;
 			$fields['description']   = false;
+		}
+
+		// If it's a block search, include blocks in the response by default
+		if ( ! empty( $this->args->block ) ) {
+			$fields['blocks']       = true;
+			$fields['block_assets'] = true;
 		}
 
 		$fields = array_merge( $fields, $this->requested_fields );
