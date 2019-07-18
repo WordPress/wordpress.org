@@ -910,6 +910,9 @@ nav.o2-post-footer-actions ul li > span > a {
 	display: none;
 }
 
+.syntaxhighlighter {
+	padding-bottom: 0.1em;
+}
 
 /*
  * Handbook
