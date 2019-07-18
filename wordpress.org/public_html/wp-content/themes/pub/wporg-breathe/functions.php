@@ -221,6 +221,18 @@ function user_model( $bootstrap_model, $user_data ) {
 add_filter( 'o2_user_model', __NAMESPACE__ . '\user_model', 10, 2 );
 
 /**
+ * Fixes bug in (or at least in using) SyntaxHighlighter code shortcodes that
+ * causes double-encoding of `>` character.
+ *
+ * @param string $content The text being handled as code.
+ * @return string
+ */
+function fix_code_entity_encoding( $content ) {
+	return str_replace( '&amp;gt;', '&gt;', $content );
+}
+add_filter( 'syntaxhighlighter_htmlresult', __NAMESPACE__ . '\fix_code_entity_encoding', 20 );
+
+/**
  * Register translations for plugins without their own GlotPress project.
  */
 // wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
