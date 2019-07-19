@@ -99,6 +99,9 @@ class Hooks {
 
 		// Deindex Support Forum Feeds. bbPress hooks in way earlier than most Core feed functions..
 		add_filter( 'request', array( $this, 'deindex_forum_feeds' ), 5 );
+
+		add_filter( 'request', array( $this, 'ignore_empty_query_vars' ) );
+
 	}
 
 	/**
@@ -970,4 +973,24 @@ class Hooks {
 
 		return $query_vars;
 	}
+
+	/**
+	 * Ignore certain empty set query vars.
+	 *
+	 * TODO: This is probably a bbPress bug in that it doesn't handle "empty" QVs well.
+	 */
+	function ignore_empty_query_vars( $query_vars ) {
+		// bbPress query vars that sometimes have weird urls as a result.
+		$ignore_emptyish_values = [ 'topic', 'reply', 'forum', 'topic-tag', 'bbp_view' ];
+
+		foreach ( $ignore_emptyish_values as $q ) {
+			if ( isset( $query_vars[ $q ] ) && empty( $query_vars[ $q ] ) ) {
+				// It's set, but empty so not a useful QV?
+				unset( $query_vars[ $q ] );
+			}
+		}
+
+		return $query_vars;
+	}
+
 }
