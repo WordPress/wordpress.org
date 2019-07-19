@@ -49,6 +49,18 @@ function wporg_themes_canonical_redirects() {
 		die();
 	}
 
+	// We don't support pagination on the directory at present.
+	if ( get_query_var( 'paged' ) ) {
+		$url = remove_query_arg( 'paged' );
+		$url = preg_replace( '!page/\d+!i', '', $url );
+
+		// Remove any double slashes
+		$url = preg_replace( '!/{2,}!', '/', $url );
+
+		wp_safe_redirect( $url ); // Not 301, as paginated requests will one day be supported hopefully.
+		die();
+	}
+
 	// Uppercase characters in URLs tend to lead to broken JS pages.
 	// Redirect all paths to the lower-case variant, excluding searches..
 	$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
