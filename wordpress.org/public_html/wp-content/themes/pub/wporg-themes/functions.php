@@ -210,9 +210,17 @@ function wporg_themes_document_title( $title ) {
 	if ( is_front_page() ) {
 		$title['title']   = __( 'WordPress Themes', 'wporg-themes' );
 		$title['tagline'] = __( 'WordPress.org', 'wporg-themes' );
-	} else if ( is_category() || is_tag() ) {
+	} elseif ( is_category() || is_tag() ) {
 		/* translators: Category or tag name */
-		$title['title'] = sprintf( __( 'WordPress Themes: %s Free', 'wporg-themes' ), single_term_title( '', false ) );
+		$title['title'] = sprintf(
+			__( 'WordPress Themes: %s Free', 'wporg-themes' ),
+			single_term_title( '', false )
+		);
+	} elseif ( is_author() ) {
+		$title['title'] = sprintf(
+			__( 'Themes by %s', 'wporg-themes' ),
+			get_queried_object()->display_name ?: get_queried_object()->user_nicename
+		);
 	}
 
 	if ( ! is_front_page() ) {
@@ -243,6 +251,11 @@ add_filter( 'document_title_separator', function() {
 function wporg_themes_meta_tags( $tags ) {
 	if ( is_front_page() ) {
 		$tags['description'] = __( 'Find the perfect theme for your WordPress website. Choose from thousands of stunning designs with a wide variety of features and customization options.', 'wporg-themes' );
+	} elseif ( is_author() ) {
+		$tags['description'] = sprintf(
+			__( 'See all WordPress themes developed by %s.', 'wporg-themes' ),
+			get_queried_object()->display_name ?: get_queried_object()->user_nicename
+		);
 	}
 
 	return $tags;
