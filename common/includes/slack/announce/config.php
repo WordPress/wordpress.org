@@ -103,6 +103,7 @@ function get_whitelist() {
 			'iseulde',
 			'JeffPaul',
 			'karmatosed',
+			'mapk',
 			'matveb', // @matias on Slack
 			'mcsf',
 			'youknowriad',
