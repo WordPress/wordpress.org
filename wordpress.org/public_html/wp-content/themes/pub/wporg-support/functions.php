@@ -192,8 +192,8 @@ function wporg_get_global_header() {
 }
 
 function wporg_support_bbp_raw_title( $title ) {
-	if ( $page = get_query_var( 'paged' ) ) {
-		$title .= " - page {$page}";
+	if ( get_query_var( 'paged' ) && ! is_404() ) {
+		$title .= sprintf( ' - page %s', get_query_var( 'paged' ) );
 	}
 
 	return $title;
