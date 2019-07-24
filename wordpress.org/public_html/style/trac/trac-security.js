@@ -3,7 +3,7 @@ window.wp = window.wp || {};
 
 (function($) {
 	var propertyform = $( '#propertyform' ),
-		submit = propertyform.find( 'input[type="submit"]' );
+		submit = propertyform.find( 'input[type="submit"][name="submit"]' );
 
 	if ( $( document.body ).hasClass( 'security' ) ) {
 		return;
@@ -32,6 +32,16 @@ window.wp = window.wp || {};
 				overlap = this.intersect( words, arr);
 
 			return ( overlap.length !== 0 );
+		},
+
+		seems_like_pentest : function(str) {
+			return (
+				str.toLowerCase().indexOf( 'onerror=' ) != -1
+				||
+				str.toLowerCase().indexOf( 'onload=' ) != -1
+				||
+				str.toLowerCase().indexOf( '<script' ) != -1
+			);
 		}
 	};
 
@@ -46,27 +56,46 @@ window.wp = window.wp || {};
 			$( '#security-question' ).show();
 		} else {
 			// We need to add the checkbox
-			$( '.buttons' ).before( '<p id="security-question"><label><input type="checkbox" name="sec_question" />' +
+			$( '.buttons' ).before(
+				'<p id="security-question"><label><input type="checkbox" name="sec_question" />' +
 				'&nbsp;I am <strong>not</strong> reporting a security issue</label>' +
-				' &mdash; report <a href="http://make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">security issues</a> to the <a href="https://hackerone.com/wordpress">WordPress HackerOne program</a></p>' );
+				' &mdash; report <a href="http://make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">security issues</a> to the <a href="https://hackerone.com/wordpress">WordPress HackerOne program</a>' +
+				'</p>'
+			);
 		}
 
 	}
 
 	function hide_box() {
 		submit.prop( 'disabled', false );
-		$( '#sec_question' ).hide();
+		// Continue to ask the question, just don't require it to submit the ticket.
+		// $( '#security-question' ).hide();
 	}
 
-	jQuery( '#field-summary, #field-description, #field-keywords' ).on( 'keyup', function() {
-		var entry = $(this).val();
+	function check_field_value( $el ) {
+		var entry = $el.val();
 
 		if ( wp.trac_security.has_overlap( entry, wp.trac_security.badwords ) ) {
+			show_box();
+		} else if ( wp.trac_security.seems_like_pentest( entry ) ) {
 			show_box();
 		} else {
 			hide_box();
 		}
-	});
+	}
+
+	// Check the field value upon keyup
+	jQuery( '#field-summary, #field-description, #field-keywords' ).on( 'keyup', function() {
+		return check_field_value( $(this) );
+	} );
+
+	// Trigger on pageload too, ie. upon Preview
+	jQuery( '#field-summary, #field-description, #field-keywords' ).each( function( i, el ) {
+		var $el = $(el);
+		if ( $el.val() != '' ) {
+			check_field_value( $el );
+		}
+	} );
 
 	propertyform.on( 'change', '#security-question input', function() {
 		submit.prop( 'disabled', ! $(this).is( ':checked' ) );
