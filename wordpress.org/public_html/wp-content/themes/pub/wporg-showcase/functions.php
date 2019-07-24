@@ -235,7 +235,9 @@ function custom_excerpt_length( $length ) {
 add_filter( 'excerpt_length', 'custom_excerpt_length', 999 );
 
 // Use ... in excerpts
-add_filter( 'excerpt_more', create_function( '$more', 'return "...";' ) );
+add_filter( 'excerpt_more', function() {
+	return '...';
+} );
 
 /**
  * Filters document title to add context based on what is being viewed.
