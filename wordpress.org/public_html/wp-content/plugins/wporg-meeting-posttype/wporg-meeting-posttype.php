@@ -86,8 +86,8 @@ class Meeting_Post_Type {
 					// from the start date, advance the week until it's past now
 					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
-					// minus 1 hour to account for currently ongoing meetings
-					$now   = new DateTime( '-1 hour' );
+					// minus 30 minutes to account for currently ongoing meetings
+					$now   = new DateTime( '-30 minutes' );
 
 					if ( $next < $now ) {
 						$interval = $start->diff( $now );
@@ -106,8 +106,8 @@ class Meeting_Post_Type {
 					// advance the start date 2 weeks at a time until it's past now
 					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
-					// minus 1 hour to account for currently ongoing meetings
-					$now   = new DateTime( '-1 hour' );
+					// minus 30 minutes to account for currently ongoing meetings
+					$now   = new DateTime( '-30 minutes' );
 
 					while ( $next < $now ) {
 						$next->modify( '+2 weeks' );
@@ -123,8 +123,8 @@ class Meeting_Post_Type {
 					// advance the occurrence day in the current month until it's past now
 					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
-					// minus 1 hour to account for currently ongoing meetings
-					$now   = new DateTime( '-1 hour' );
+					// minus 30 minutes to account for currently ongoing meetings
+					$now   = new DateTime( '-30 minutes' );
 
 					$day_index = date( 'w', strtotime( sprintf( '%s %s GMT', $post->start_date, $post->time ) ) );
 					$day_name  = $GLOBALS['wp_locale']->get_weekday( $day_index );
@@ -150,8 +150,8 @@ class Meeting_Post_Type {
 					// advance the start date 1 month at a time until it's past now
 					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
-					// minus 1 hour to account for currently ongoing meetings
-					$now   = new DateTime( '-1 hour' );
+					// minus 30 minutes to account for currently ongoing meetings
+					$now   = new DateTime( '-30 minutes' );
 
 					while ( $next < $now ) {
 						$next->modify( '+1 month' );
