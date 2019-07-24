@@ -500,8 +500,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				$.each( [ ' Wordpress', '&#8216;Wordpress', '&#8220;Wordpress', '>Wordpress', '(Wordpress' ], function( index, value ) {
 					var replacement = value.replace( 'Wordpress', 'WordPress' );
 
-					$description.val( $description.val().replace( value, replacement ) );
-					$comment.val( $comment.val().replace( value, replacement ) );
+					if ( $description.length ) {
+						$description.val( $description.val().replace( value, replacement ) );
+					}
+					if ( $comment.length ) {
+						$comment.val( $comment.val().replace( value, replacement ) );
+					}
 				} );
 			} );
 
