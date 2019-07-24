@@ -46,6 +46,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'rest-api' : 'Relating to the REST API, but assigned a more specific component.',
 		'performance' : 'Performance or caching (but not the Cache API component).',
 		'privacy' : 'Privacy focus.',
+		'ui-copy' : 'Copy focus for the user interface.',
 		'coding-standards' : 'Coding Standards focus.'
 	};
 
