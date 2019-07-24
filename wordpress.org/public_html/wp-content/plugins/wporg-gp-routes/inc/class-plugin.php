@@ -45,9 +45,21 @@ class Plugin {
 
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
 		add_action( 'init', [ $this, 'register_cron_events' ] );
+		add_action( 'init', [ $this, 'respect_robots_txt' ], 9 );
 		add_action( 'wporg_translate_update_existing_locales_cache', [ $this, 'update_existing_locales_cache' ] );
 		add_action( 'wporg_translate_update_translation_status_cache', [ $this, 'update_translation_status_cache' ] );
 		add_action( 'wporg_translate_update_contributors_count_cache', [ $this, 'update_contributors_count_cache' ] );
+	}
+
+	/**
+	 * The GlotPress match-all route is prepended early before a lot of rules, including the robots.txt rules.
+	 *
+	 * gp_rewrite_rules() is called from gp_init() on init at priority 10, we need to insert before that.
+	 */
+	function respect_robots_txt() {
+		// ?robots=1 is here to trigger `is_robots()`, which prevents canonical.
+		// ?gp_route=robots.txt is here, as GlotPress ultimately is the router for the request.
+		add_rewrite_rule( '^robots\.txt$', 'index.php?robots=1&gp_route=robots.txt', 'top' );
 	}
 
 	/**
@@ -78,6 +90,7 @@ class Plugin {
 	 *
 	 * Adds:
 	 *  - /
+	 *  - /robots.txt
 	 *  - /locale/$locale
 	 *  - /locale/$locale/$path
 	 *  - /locale/$locale/$path/$path
@@ -154,6 +167,9 @@ class Plugin {
 			GP::$router->prepend( "/projects/wp-themes/$project", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_projects' ) );
 			GP::$router->prepend( "/projects/wp-themes/$project/contributors", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_contributors' ) );
 			GP::$router->prepend( "/projects/wp-themes/$project/language-packs", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_language_packs' ) );
+
+			// Add Robots.txt support
+			GP::$router->prepend( '/robots\.txt', 'do_robots' );
 
 			if ( defined( 'TRANSLATE_MAINTENANCE_ACTIVE' ) ) {
 				GP::$router->prepend( '.*', array( __NAMESPACE__ . '\Routes\Maintenance', 'show_maintenance_message' ) );
