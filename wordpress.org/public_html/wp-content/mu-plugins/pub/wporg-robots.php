@@ -48,14 +48,14 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 	/*
 	 * Add the Plugins and Theme directory Sitemaps
 	 * Currently disabled for Rosetta as Jetpack sitemaps aren't working there.
+	 * Themes are currently disabled as there's a redirect in place breaking direct access.
 	 */
 	if (
 		'wordpress.org' === $blog_details->domain
 		// || defined( 'WPORG_GLOBAL_NETWORK_ID' ) && WPORG_GLOBAL_NETWORK_ID === $blog_details->site_id
 	) {
-		$robots = "Sitemap: https://{$blog_details->domain}/plugins/sitemap.xml\n" .
-		          "Sitemap: https://{$blog_details->domain}/themes/sitemap.xml\n" .
-		          $robots;
+		$robots = "Sitemap: https://{$blog_details->domain}/plugins/sitemap.xml\n" . $robots;
+		// $robots = "Sitemap: https://{$blog_details->domain}/themes/sitemap.xml\n" . $robots;
 	}
 
 	return $robots;
