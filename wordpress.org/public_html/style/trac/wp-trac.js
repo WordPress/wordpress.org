@@ -55,12 +55,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 	// phpDocumentor tags, but also a few common @-terms.
 	reservedTerms = [
 		'access', 'author', 'category', 'copyright', 'covers', 'deprecated', 'example',
-		'final', 'filesource', 'global', 'group', 'home', 'ignore', 'inheritdoc', 'internal',
-		'license', 'link', 'media', 'mention', 'mentions', 'method', 'name', 'notification',
-		'notifications', 'package', 'param', 'private', 'property', 'requires', 'return',
-		'see', 'since', 'static', 'staticvar', 'subpackage', 'term', 'terms', 'ticket',
-		'toc', 'todo', 'tutorial', 'type', 'user', 'username', 'uses', 'var', 'version',
-		'wordpress', 'wp',
+		'final', 'filesource', 'global', 'group', 'home', 'ignore', 'import', 'inheritdoc',
+		'internal', 'license', 'link', 'media', 'mention', 'mentions', 'method', 'name',
+		'notification', 'notifications', 'package', 'param', 'private', 'property',
+		'requires', 'return', 'see', 'since', 'static', 'staticvar', 'subpackage',
+		'term', 'terms', 'ticket', 'toc', 'todo', 'tutorial', 'type', 'user', 'username',
+		'uses', 'var', 'version', 'wordpress', 'wp',
 	];
 
 	$body = $( document.body );
