@@ -184,7 +184,7 @@ get_header( 'wporg' );
 						<?php
 						printf(
 							/* translators: URL to Hosting page. */
-							__( '<a href="%s">Find a Web Host</a> and get great hosting while supporting WordPress at the same&nbsp;time.', 'wporg' ),
+							__( '<a href="%s">Find a trusted web host</a> and maybe support WordPress at the same&nbsp;time.', 'wporg' ),
 							esc_url( 'https://wordpress.org/hosting/' )
 						);
 						?>
@@ -194,7 +194,7 @@ get_header( 'wporg' );
 						<?php
 						printf(
 							/* translators: URL to Downloads page. */
-							__( '<a href="%s">Download &amp; Install WordPress</a> with our famous 5-minute&nbsp;installation. Feel like a rock star.', 'wporg' ),
+							__( '<a href="%s">Download &amp; install WordPress</a> with our famous 5-minute&nbsp;installation. Publishing has never been&nbsp;easier.', 'wporg' ),
 							esc_url( get_downloads_url() )
 						);
 						?>
@@ -204,7 +204,7 @@ get_header( 'wporg' );
 						<?php
 						printf(
 							/* translators: URL to Developer Hub. */
-							__( '<a href="%s">Read the Documentation</a> and become a WordPress expert yourself, impress your friends.', 'wporg' ),
+							__( '<a href="%s">Spend some time reading our documentation</a>, get to know WordPress better every day and start helping others,&nbsp;too.', 'wporg' ),
 							esc_url( 'https://developer.wordpress.org' )
 						);
 						?>
