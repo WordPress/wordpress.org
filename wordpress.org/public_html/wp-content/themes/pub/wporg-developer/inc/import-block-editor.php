@@ -11,6 +11,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 			'https://raw.githubusercontent.com/WordPress/gutenberg/master/docs/manifest-devhub.json'
 		);
 
+		add_filter( 'template_redirect',               array( $this, 'redirects' ), 1 );
 		add_filter( 'handbook_label', array( $this, 'change_handbook_label' ), 10, 2 );
 		add_filter( 'handbook_display_toc',            array( $this, 'disable_toc' ) );
 		add_filter( 'get_post_metadata',               array( $this, 'fix_markdown_source_meta' ), 10, 4 );
@@ -28,6 +29,51 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		add_action( 'edit_post_' . $this->get_post_type(), function( $post_id ) {
 			remove_filter( 'wp_kses_allowed_html', array( __CLASS__, 'allow_extra_tags' ), 10, 1 );
 		} );
+	}
+
+	/**
+	 * Handles redirects for renamed/removed handbook pages.
+	 */
+	public function redirects() {
+		if ( 0 !== strpos( $_SERVER['REQUEST_URI'], '/block-editor/' ) ) {
+			return;
+		}
+
+	    $handbook_path = explode( '/', trailingslashit( $_SERVER['REQUEST_URI'] ), 3 );
+	    $handbook_path = $handbook_path[2] ?? null;
+
+		if ( is_null( $handbook_path ) ) {
+			return;
+		}
+
+		// Any handbook pages where the slug changes should be listed here.
+		$redirects = [
+			'tutorials/block-tutorial/block-controls-toolbars-and-inspector' => 'tutorials/block-tutorial/block-controls-toolbar-and-sidebar/',
+		];
+
+		// General path redirects. (More specific path first.)
+		$path_redirects = [
+			// 'some-path/' => 'new-path/',
+		];
+
+		$new_handbook_path = '';
+		if ( ! empty( $redirects[ untrailingslashit( $handbook_path ) ] ) ) {
+			$new_handbook_path = $redirects[ untrailingslashit( $handbook_path ) ];
+		} else {
+			foreach ( $path_redirects as $old_path => $new_path ) {
+				if ( 0 === strpos( $handbook_path, $old_path ) ) {
+					$new_handbook_path = str_replace( $old_path, $new_path, $handbook_path );
+					break;
+				}
+			}
+		}
+
+		if ( $new_handbook_path ) {
+			$redirect_to = get_post_type_archive_link( $this->get_post_type() ) . $new_handbook_path;
+
+			wp_safe_redirect( $redirect_to, 301 );
+			exit;
+		}
 	}
 
 	/**
