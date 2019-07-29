@@ -335,6 +335,13 @@ input {
   border: 1px solid #f0f0f0;
 }
 
+@media (max-width: 991px) {
+  .devhub-wrap #content table, .devhub-wrap #content-area table {
+    overflow-x: scroll;
+    display: block;
+  }
+}
+
 .devhub-wrap #content table th, .devhub-wrap #content-area table th {
   padding: 1em;
   border-bottom: 1px solid #f0f0f0;
