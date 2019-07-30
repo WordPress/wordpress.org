@@ -107,8 +107,13 @@ function wporg_themes_pre_get_posts( $query ) {
 			break;
 	}
 
-	// Unless a specific theme, or author is being requested, limit results to the last 2 years.
-	if ( empty( $query->query_vars['name'] ) && empty( $query->query_vars['author_name'] ) && ! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) ) ) {
+	// Unless a specific theme/author is being requested, or it's an internal query, limit results to the last 2 years.
+	if (
+		empty( $query->query_vars['name'] ) &&
+		empty( $query->query_vars['author_name'] ) &&
+		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) ) &&
+		empty( $query->query_vars['meta_query']['trac_sync_ticket_id'] ) // jobs/class-trac-sync.php - Always needs to find the post, and looks up via a meta search.
+	) {
 		$query->query_vars['date_query']['recent_themes_only'] = array(
 			'column' => 'post_modified',
 			'after'  => date( 'Y-m-d', strtotime( '-2 years' ) ),
@@ -116,7 +121,10 @@ function wporg_themes_pre_get_posts( $query ) {
 	}
 
 	// Prioritize translated themes for localized requests, except when viewing a specific ordered themes.
-	if ( 'en_US' !== get_locale() && ! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) )  ) {
+	if (
+		'en_US' !== get_locale() &&
+		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) )
+	) {
 		add_filter( 'posts_clauses', 'wporg_themes_prioritize_translated_posts_clauses' );
 	}
 

@@ -773,9 +773,11 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			// Theme review team auto-approves theme-updates, so mark the theme as live immediately, without sending additional email
+			$theme_is_older_than_two_years = strtotime( $this->theme_post->post_modified ) < strtotime( '-2 years' );
+
+			// Theme review team auto-approves theme-updates, so mark the theme as live immediately, if last updated within two years.
 			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets
-			if ( $this->trac_ticket->priority == 'theme update' ) {
+			if ( ! $theme_is_older_than_two_years && $this->trac_ticket->priority == 'theme update' ) {
 				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically reviewed', array( 'action' => 'review' ), false );
 				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'approve_and_live' ), false );
 			}

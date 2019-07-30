@@ -113,7 +113,7 @@ class Trac_Sync {
 			'post_type'      => 'repopackage',
 			'posts_per_page' => - 1,
 			'meta_query'     => [
-				[
+				'trac_sync_ticket_id' => [
 					'value'   => $ticket_id,
 					'compare' => 'IN',
 				],
