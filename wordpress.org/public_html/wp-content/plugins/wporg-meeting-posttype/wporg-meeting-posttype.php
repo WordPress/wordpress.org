@@ -489,13 +489,13 @@ class Meeting_Post_Type {
 			if ( $post->location && preg_match( '/^#([-\w]+)$/', trim( $post->location ), $match ) ) {
 				$slack_channel = sanitize_title( $match[1] );
 			}
-	
+
 			$out .= '<p>';
 			$out .= esc_html( $attr['before'] );
 			$out .= '<strong class="meeting-title">' . esc_html( $post->post_title ) . '</strong>';
 			$display_more = $query->found_posts - intval( $limit );
 			if ( $display_more > 0 ) {
-				$out .= $display_count === 0 ? '' : ' <a title="Click to view all meetings for this team" href="/meetings/#' . esc_attr( strtolower( $attr['team'] ) ) . '">' . sprintf( __( '(+%s more)'), $display_more ) . '</a>';
+				$out .= ' <a title="Click to view all meetings for this team" href="/meetings/#' . esc_attr( strtolower( $attr['team'] ) ) . '">' . sprintf( __( '(+%s more)'), $display_more ) . '</a>';
 			}
 			$out .= '</br>';
 			$out .= '<time class="date" date-time="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_display . '</time> ';
