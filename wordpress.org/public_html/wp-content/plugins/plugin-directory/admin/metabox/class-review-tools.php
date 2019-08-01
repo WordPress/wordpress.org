@@ -293,8 +293,8 @@ class Review_Tools {
 				$subject = sprintf( __( '[WordPress Plugin Directory] Notice: %s', 'wporg-plugins' ), $post->post_title );
 			}
 
-			// HelpScout requires urlencode() becuase it wants spaces as + signs.
-			$contact_author = 'https://secure.helpscout.net/mailbox/ad3e85554c5bd064/new-ticket/?name=' . $author->display_name . '&email=' . $author->user_email . '&cc=' . $cc_emails . '&subject=' . urlencode( $subject );
+			// HelpScout requires urlencode() because it wants spaces as + signs.
+			$contact_author = 'https://secure.helpscout.net/mailbox/ad3e85554c5bd064/new-ticket/?name=' . $author->display_name . '&email=' . urlencode( $author->user_email ) . '&cc=' . urlencode( $cc_emails ) . '&subject=' . urlencode( $subject );
 			?>
 			<a id="contact-author" class="button button-primary" href="<?php echo esc_url( $contact_author ); ?>">Contact plugin committer(s)</a>
 			<?php

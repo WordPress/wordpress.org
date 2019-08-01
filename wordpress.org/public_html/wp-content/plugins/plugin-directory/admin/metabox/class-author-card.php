@@ -77,17 +77,12 @@ class Author_Card {
 						esc_attr__( 'Click to search Pluginrepo P2 for mentions of this author', 'wporg-plugins' )
 					),
 					sprintf(
-						'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
-						urlencode( esc_attr( $author->user_nicename ) ),
-						esc_attr__( 'Click to search Pluginrepo SupportPress for mentions of this author', 'wporg-plugins' )
-					),
-					sprintf(
 						'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
 						urlencode( esc_attr( $author->user_nicename ) ),
 						esc_attr__( 'Click to search Help Scout for mentions of this author', 'wporg-plugins' )
 					),
 				);
-				vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', $author_links );
+				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_links );
 				?>
 
 				<span class="profile-links">
@@ -100,17 +95,12 @@ class Author_Card {
 					<?php
 					$author_email_links = array(
 						sprintf(
-							'<a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a>',
-							urlencode( $author->user_email ),
-							esc_attr__( 'Click to search Pluginrepo SupportPress for emails sent to/from this email address', 'wporg-plugins' )
-						),
-						sprintf(
 							'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
 							urlencode( $author->user_email ),
 							esc_attr__( 'Click to search Help Scout for emails sent to/from this email address', 'wporg-plugins' )
 						),
 					);
-					vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_email_links );
+					vprintf( '<span class="profile-sp-link">[ %s ]</span>', $author_email_links );
 					?>
 				</div>
 				<div class="profile-join">
@@ -358,7 +348,7 @@ class Author_Card {
 				echo '*';
 			}
 
-			vprintf( '<span class="profile-sp-link">[ %s | %s | %s | %s ]</span>', [
+			vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', [
 				sprintf(
 					'<a href="%s" title="%s">%s</a>',
 					esc_url( get_edit_post_link( $plugin->ID, '' ) ),
@@ -369,11 +359,6 @@ class Author_Card {
 					'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
 					urlencode( esc_attr( $plugin_slug ) ),
 					esc_attr__( 'Click to search Plugin Team P2 for mentions of this plugin', 'wporg-plugins' )
-				),
-				sprintf(
-					'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
-					urlencode( esc_attr( $plugin_name ) ),
-					esc_attr__( 'Click to search Plugin SupportPress for mentions of this plugin', 'wporg-plugins' )
 				),
 				sprintf(
 					'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
