@@ -32,6 +32,24 @@ class HelpHub_Post_Types_Post_Type {
 	public $post_type;
 
 	/**
+	 * The slug used in URLs for the post type items.
+	 *
+	 * @access public
+	 * @since  1.0.0
+	 * @var    string
+	 */
+	public $single_slug;
+
+	/**
+	 * The slug used in URLs for the archive of the post type.
+	 *
+	 * @access public
+	 * @since  1.0.0
+	 * @var    string
+	 */
+	public $archive_slug;
+
+	/**
 	 * The post type singular label.
 	 *
 	 * @access public
@@ -77,14 +95,26 @@ class HelpHub_Post_Types_Post_Type {
 	 * @param string $singular The singular pronunciation of the post type name.
 	 * @param string $plural The plural pronunciation of the post type name.
 	 * @param array $args The typical arguments allowed to register a post type.
+	 * @param string $single_slug The 'singular' slug for the post type.
+	 * @param string $archive_slug The 'archive' slug for the post type.
 	 * @param array $taxonomies The list of taxonomies that the post type is associated with.
 	 */
-	public function __construct( $post_type = 'thing', $singular = '', $plural = '', $args = array(), $taxonomies = array() ) {
+	public function __construct( $post_type = 'thing', $singular = '', $plural = '', $args = array(), $taxonomies = array(), $single_slug = false, $archive_slug = false ) {
 		$this->post_type  = $post_type;
 		$this->singular   = $singular;
 		$this->plural     = $plural;
 		$this->args       = $args;
 		$this->taxonomies = $taxonomies;
+
+		if ( ! $single_slug ) {
+			$single_slug = sanitize_title_with_dashes( $this->singular );
+		}
+		$this->single_slug  = apply_filters( 'helphub_single_slug', $single_slug );
+
+		if ( ! $archive_slug ) {
+			$archive_slug = sanitize_title_with_dashes( $this->plural );
+		}
+		$this->archive_slug = apply_filters( 'helphub_archive_slug', $archive_slug );
 
 		add_action( 'init', array( $this, 'register_post_type' ) );
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
@@ -147,9 +177,6 @@ class HelpHub_Post_Types_Post_Type {
 			'menu_name'          => $this->plural,
 		);
 
-		$single_slug  = apply_filters( 'helphub_single_slug', sanitize_title_with_dashes( $this->singular ) );
-		$archive_slug = apply_filters( 'helphub_archive_slug', sanitize_title_with_dashes( $this->plural ) );
-
 		$defaults = array(
 			'labels'                => $labels,
 			'public'                => true,
@@ -158,16 +185,16 @@ class HelpHub_Post_Types_Post_Type {
 			'show_in_menu'          => true,
 			'query_var'             => true,
 			'rewrite'               => array(
-				'slug' => $single_slug,
+				'slug' => $this->single_slug,
 			),
 			'capability_type'       => 'post',
-			'has_archive'           => $archive_slug,
+			'has_archive'           => $this->archive_slug,
 			'hierarchical'          => false,
 			'supports'              => array( 'title', 'editor', 'excerpt', 'thumbnail', 'page-attributes', 'revisions' ),
 			'menu_position'         => 5,
 			'menu_icon'             => 'dashicons-smiley',
 			'show_in_rest'          => true,
-			'rest_base'             => $archive_slug,
+			'rest_base'             => $this->archive_slug,
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
 		);
 
