@@ -52,6 +52,25 @@ class Official_WordPress_Events {
 	}
 
 	/**
+	 * Get an instance of the Meetup Client, loading files first as necessary.
+	 *
+	 * @return Meetup_Client
+	 */
+	protected function get_meetup_client() {
+		if ( ! class_exists( '\WordCamp\Utilities\Meetup_Client' ) ) {
+			$files = array(
+				'class-meetup-client.php',
+			);
+
+			foreach ( $files as $file ) {
+				require_once trailingslashit( __DIR__ ) . "meetup/$file";
+			}
+		}
+
+		return new Meetup_Client();
+	}
+
+	/**
 	 * Prime the cache of WordPress events
 	 *
 	 * WARNING: The database table is used by api.wordpress.org/events/1.0 (and possibly by future versions), so
@@ -319,9 +338,7 @@ class Official_WordPress_Events {
 	protected function get_meetup_events() {
 		$events = array();
 
-		require_once( __DIR__ . '/class-meetup-client.php' );
-
-		$client = new Meetup_Client();
+		$client = $this->get_meetup_client();
 		if ( ! empty( $client->error->errors ) ) {
 			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $client->error ), true );
 			return $events;
@@ -520,8 +537,7 @@ class Official_WordPress_Events {
 			$chunked_db_events[ $event->meetup_url ][] = $event;
 		}
 
-		require_once( __DIR__ . '/class-meetup-client.php' );
-		$meetup_client = new Meetup_Client();
+		$meetup_client = $this->get_meetup_client();
 
 		if ( ! empty( $meetup_client->error->errors ) ) {
 			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $meetup_client->error ), true );
