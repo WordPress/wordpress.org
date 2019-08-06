@@ -27,12 +27,14 @@ echo $args['before_widget']; // WPCS: XSS OK.
 	<ul class="meta-list">
 		<?php
 		$menu_items = wp_get_nav_menu_items( $instance['menu'] );
-		foreach ( $menu_items as $menu_item ) {
-			printf(
-				'<li><a href="%s">%s</a></li>',
-				esc_url( $menu_item->url ),
-				esc_html( $menu_item->title )
-			);
+		if ( $menu_items ) {
+			foreach ( $menu_items as $menu_item ) {
+				printf(
+					'<li><a href="%s">%s</a></li>',
+					esc_url( $menu_item->url ),
+					esc_html( $menu_item->title )
+				);
+			}
 		}
 		?>
 	</ul>
