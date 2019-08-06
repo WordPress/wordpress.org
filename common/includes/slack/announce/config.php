@@ -190,6 +190,7 @@ function get_whitelist() {
 			'hugobaeta',
 			'JoshuaWold',
 			'karmatosed',
+			'mapk',
 			'melchoyce',
 			'mizejewski',
 		),
