@@ -1518,6 +1518,14 @@ class Plugin_Directory {
 		if ( ! is_wp_error( $result ) ) {
 			wp_cache_set( $result, $slug, 'plugin-slugs' );
 			$result = get_post( $result );
+
+			$owner = get_userdata( $result->post_author );
+
+			Admin\Status_Transitions::instance()->audit_log( sprintf(
+				'Submitted by <a href="%s">%s</a>.',
+				esc_url( '//profiles.wordpress.org/' . $owner->user_nicename ),
+				$owner->user_login
+			), $result->ID );
 		}
 
 		return $result;

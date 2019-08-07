@@ -26,6 +26,7 @@ class Status_Transitions {
 	 */
 	private function __construct() {
 		add_action( 'transition_post_status', array( $this, 'transition_post_status' ), 11, 3 );
+		add_action( 'post_updated', array( $this, 'record_owner_change' ), 11, 3 );
 	}
 
 	/**
@@ -383,7 +384,32 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 		update_post_meta( $post_id, '_close_reason', $close_reason );
 		update_post_meta( $post_id, 'plugin_closed_date', current_time( 'mysql' ) );
 
-		$this->audit_log( sprintf( 'Plugin closed for: %s', $close_reason ), $post_id );
+		$this->audit_log( sprintf( 'Plugin closed. Reason: %s', $close_reason ), $post_id );
+	}
+
+	/**
+	 * Records a plugin owner change.
+	 *
+	 * @param integer $post_id     Post ID.
+	 * @param WP_Post $post_after  Post object following the update.
+	 * @param WP_Post $post_before Post object before the update.
+	 */
+	public function record_owner_change( $post_id, $post_after, $post_before ) {
+		if ( 'plugin' !== $post_after->post_type ) {
+			return;
+		}
+
+		if ( $post_after->post_author === $post_before->post_author ) {
+			return;
+		}
+
+		$new_owner = get_userdata( $post_after->post_author );
+
+		$this->audit_log( sprintf(
+			'Ownership transferred to <a href="%s">%s</a>.',
+			esc_url( '//profiles.wordpress.org/' . $new_owner->user_nicename ),
+			$new_owner->user_login
+		), $post_id );
 	}
 
 	/**
@@ -392,7 +418,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 	 * @param string  $message The message for the audit log.
 	 * @param integer $post_id The Post ID.
 	 */
-	private function audit_log( $message, $post_id ) {
+	public function audit_log( $message, $post_id ) {
 		$user = wp_get_current_user();
 
 		$comment = array(
