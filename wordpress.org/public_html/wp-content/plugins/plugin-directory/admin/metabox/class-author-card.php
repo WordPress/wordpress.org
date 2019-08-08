@@ -13,6 +13,40 @@ use WordPressdotorg\Plugin_Directory\Tools;
  * @package WordPressdotorg\Plugin_Directory\Admin\Metabox
  */
 class Author_Card {
+
+	/**
+	 * List of known problematic IPs
+	 *
+	 * @var array
+	 */
+	public static $iffy_ips = [
+		'2.240.',
+		'2.241.',
+		'5.102.170.',
+		'5.102.171.',
+		'38.78.',
+		'47.15.',
+		'49.50.124.',
+		'65.33.104.38',
+		'71.41.77.202',
+		'76.73.108.',
+		'80.131.192.168',
+		'87.188.',
+		'91.228.',
+		'91.238.',
+		'94.103.41.',
+		'109.123.',
+		'110.55.1.251',
+		'110.55.4.248',
+		'116.193.162.',
+		'119.235.251.',
+		'159.253.145.183',
+		'173.171.9.190',
+		'173.234.140.18',
+		'188.116.36.',
+		'217.87.',
+	];
+
 	/**
 	 * Displays information about the author of the current plugin.
 	 *
@@ -250,14 +284,32 @@ class Author_Card {
 	 * @return string
 	 */
 	protected static function link_ip( $ip ) {
-		return sprintf(
-			'<a href="%1$s">%2$s</a>',
+
+		$ip_data = array(
+			'name'    => $ip,
+			'tooltip' => '',
+			'iffy'    => false,
+		);
+
+		foreach ( self::$iffy_ips as $check_ip ) {
+			if ( false !== strpos( $ip, $check_ip ) ) {
+				$ip_data['name']   .= '*';
+				$ip_data['tooltip'] = 'This IP may be problematic and has been used for abuse before.';
+				$ip_data['iffy']    = true;
+			}
+		}
+
+		$output_ip = sprintf(
+			'<a href="%1$s" title="%2$s">%3$s</a>',
 			esc_url( add_query_arg( array(
 				'post_type' => 'plugin',
 				's'         => $ip,
 			), admin_url( 'edit.php' ) ) ),
-			$ip
+			$ip_data['tooltip'],
+			$ip_data['name']
 		);
+
+		return $output_ip;
 	}
 
 	/**

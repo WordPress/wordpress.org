@@ -32,14 +32,21 @@ class Review_Tools {
 	 * @var array
 	 */
 	public static $reserved_slugs = [
-		'wordpress',
-		'woocommerce',
-		'google',
-		'youtube',
-		'twitter',
+		'apple',
+		'contact-form-7',
 		'facebook',
-		'yoast',
+		'google',
+		'instagram',
+		'ios',
 		'jetpack',
+		'jquery',
+		'microsoft',
+		'paypal',
+		'twitter',
+		'woocommerce',
+		'wordpress',
+		'yoast',
+		'youtube',
 	];
 
 	/**
@@ -49,22 +56,23 @@ class Review_Tools {
 	 */
 	public static $restricted_slugs = [
 		// High-value plugin genres due to their popularity, often abused by spammers.
+		'booking',
+		'bookmark',
+		'cookie',
 		'gallery',
 		'lightbox',
-		'sitemap',
-		'bookmark',
-		'social',
-		'cookie',
-		'slide',
 		'seo',
+		'sitemap',
+		'slide',
+		'social',
 
 		// Plugins we generally don't allow.
 		'autoblog',
 		'auto-blog',
-		'booking',
+		'framework',
+		'library',
 		'plugin',
 		'spinning',
-		'framework',
 	];
 
 	/**
@@ -83,39 +91,6 @@ class Review_Tools {
 		'@mail.com',
 		'example.org',
 		'wordpress.com',
-	];
-
-	/**
-	 * List of known problematic IPs
-	 *
-	 * @var array
-	 */
-	public static $iffy_ips = [
-		'2.240.',
-		'2.241.',
-		'5.102.170.',
-		'5.102.171.',
-		'38.78.',
-		'47.15.',
-		'49.50.124.',
-		'65.33.104.38',
-		'71.41.77.202',
-		'76.73.108.',
-		'80.131.192.168',
-		'87.188.',
-		'91.228.',
-		'91.238.',
-		'94.103.41.',
-		'109.123.',
-		'110.55.1.251',
-		'110.55.4.248',
-		'116.193.162.',
-		'119.235.251.',
-		'159.253.145.183',
-		'173.171.9.190',
-		'173.234.140.18',
-		'188.116.36.',
-		'217.87.',
 	];
 
 	/**

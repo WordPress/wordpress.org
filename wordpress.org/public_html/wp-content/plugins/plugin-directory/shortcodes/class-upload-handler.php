@@ -95,7 +95,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'unsupported_name', $error . ' ' . sprintf(
 				/* translators: %s: 'Plugin Name:' */
-				__( 'Plugin names may only contain latin letters (A-z), numbers, spaces, and hyphens. Please change the %s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+				__( 'Plugin names may only contain latin letters (A-z), numbers, spaces, and hyphens. Please change the %s line in your main plugin file and readme, then you may upload it again.', 'wporg-plugins' ),
 				esc_html( $this->plugin['Name'] ),
 				'<code>Plugin Name:</code>'
 			) );
@@ -107,9 +107,22 @@ class Upload_Handler {
 
 			return new \WP_Error( 'reserved_name', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-				__( 'Your chosen plugin name - %1$s - has been reserved for use by WordPress. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+				__( 'Your chosen plugin name - %1$s - has been reserved and cannot be used. Please change the %2$s line in your main plugin file and readme, then you may upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'<code>Plugin Name:</code>'
+			) );
+		}
+
+		// Make sure it doesn't use a TRADEMARK protected slug.
+		if ( $this->has_trademarked_slug() ) {
+			$error = __( 'Error: The plugin has a trademarked name.', 'wporg-plugins' );
+
+			return new \WP_Error( 'trademarked_name', $error . ' ' . sprintf(
+				/* translators: 1: plugin slug, 2: 'Plugin Name:', 3: plugin email address. */
+				__( 'Your chosen plugin name - %1$s - has been flagged as trademark infringement and cannot be used. We have been legally compelled to protect specific trademarks and as such prevent the use of specific terms. Please change the %2$s line in your main plugin file and readme, then you may upload it again. If you feel this is in error, please email us at %3$s and explain why.', 'wporg-plugins' ),
+				'<code>' . $this->plugin_slug . '</code>',
+				'<code>Plugin Name:</code>',
+				'<code>plugins@wordpress.org</code>'
 			) );
 		}
 
@@ -137,6 +150,18 @@ class Upload_Handler {
 				'<code>' . $this->plugin_slug . '</code>',
 				__( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 'wporg-plugins' ),
 				'plugins@wordpress.org'
+			) );
+		}
+
+		// Prevent short plugin names (they're generally SEO grabs).
+		if ( strlen( $this->plugin_slug ) < 5 ) {
+			$error = __( 'Error: The plugin slug is too short.', 'wporg-plugins' );
+
+			return new \WP_Error( 'trademarked_name', $error . ' ' . sprintf(
+				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+				__( 'Your chosen plugin name - %1$s - is not permitted becuase it is too short. Please change the %2$s line in your main plugin file and readme and upload it again.', 'wporg-plugins' ),
+				'<code>' . $this->plugin_slug . '</code>',
+				'<code>Plugin Name:</code>'
 			) );
 		}
 
@@ -290,15 +315,6 @@ class Upload_Handler {
 			'plugins@wordpress.org'
 		) . '</p><p>';
 
-		// Warn if the plugin starts with a reserved slug.
-		if ( $this->starts_with_reserved_slug() ) {
-			$message .= sprintf(
-				/* translators: %s: plugin name */
-				__( 'Warning: Your plugin will probably need to be renamed. Your chosen plugin name - %s - starts with a term that may belong to another company. When we review your submission we will either correct this for you or request you approve a new name.' ),
-				esc_html( $this->plugin['Name'] )
-			) . '</p><p>';
-		}
-
 		$message .= __( 'If there is any error in your submission, please email us as soon as possible. We can correct many issues before approval.', 'wporg-plugins' ) . '</p><p>';
 
 		$message .= sprintf(
@@ -334,36 +350,47 @@ class Upload_Handler {
 			'admin',
 			'wp-admin',
 			'wordpress',
+			'jquery',
 		);
 
 		return in_array( $this->plugin_slug, $reserved_slugs );
 	}
 
 	/**
-	 * Whether the uploaded plugin uses a slug commonly abused by non-reps.
+	 * Whether the uploaded plugin uses a trademark in the slug.
 	 *
 	 * @return bool
 	 */
-	public function starts_with_reserved_slug() {
-		$abused_slugs = array(
-			'apple',
+	public function has_trademarked_slug() {
+		$trademarked_slugs = array(
+			'contact-form-7',
 			'facebook',
 			'google',
-			'ios',
-			'jetpack',
+			'-gram',
+			'gram-',
+			'instagram',
+			'insta',
 			'microsoft',
 			'paypal',
 			'twitter',
+			'tweet',
+			'whatsapp',
+			'whats-app',
 			'woocommerce',
 			'wordpress',
 			'yoast',
 		);
 
-		// Get the slug in an array.
-		$slug = explode( '-', $this->plugin_slug );
+		$has_trademarked_slug = false;
 
-		// If the slug is the same as the first term, flag for abuse.
-		return in_array( $slug[0], $abused_slugs );
+		foreach ( $trademarked_slugs as $trademark ) {
+			if ( false !== strpos( $this->plugin_slug, $trademark ) ) {
+				$has_trademarked_slug = true;
+				break;
+			}
+		}
+
+		return $has_trademarked_slug;
 	}
 
 	/**
@@ -406,7 +433,7 @@ class Upload_Handler {
 		}
 
 		echo '<h4>' . sprintf( __( 'Results of Automated Plugin Scanning: %s', 'wporg-plugins' ), vsprintf( '<span class="%1$s">%2$s</span>', $verdict ) ) . '</h4>';
-		echo '<ul class="tc-result">' . 'Result' . '</ul>';
+		echo '<ul class="tc-result">' . __( 'Result', 'wporg-plugins' ) . '</ul>';
 		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will pass review. All submitted plugins are reviewed manually before approval.', 'wporg-plugins' ) . '</p></div>';
 
 		return $result;
@@ -445,14 +472,17 @@ class Upload_Handler {
 			$this->plugin['Name']
 		);
 
-		/* translators: 1: plugin name, 2: plugin slug */
+		/*
+			Please leave the blank lines in place.
+		*/
 		$email_content = sprintf(
+			// translators: 1: plugin name, 2: plugin slug.
 			__(
 'Thank you for uploading %1$s to the WordPress Plugin Directory. We will review your submission as soon as possible and send you a follow up email with the results.
 
-Your plugin has been given the initial slug of %2$s, however this is subject to change based on the results of your review.
+Your plugin has been given the initial slug of %2$s based on your diplay name of %1$s. This is subject to change based on the results of your review.
 
-If there is any problem with this submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved. For situations like an incorrect plugin slug, we are unable to change that post approval. If you do not inform us of any requirements now, we will be unable to honor them later.
+If there are any problems with your submission, please REPLY to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved. For situations like an incorrect plugin slug, we are unable to change that post approval. If you do not inform us of any requirements now, we will be unable to honor them later.
 
 We recommend you review the following links to understand the review process and our expectations:
 
@@ -474,7 +504,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 		wp_mail( $user_email, $email_subject, $email_content, 'From: plugins@wordpress.org' );
 	}
 
-	// Helper
+	// Helper.
 	/**
 	 * Whitelist zip files to be allowed to be uploaded to the media library.
 	 *
