@@ -159,7 +159,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'trademarked_name', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-				__( 'Your chosen plugin name - %1$s - is not permitted becuase it is too short. Please change the %2$s line in your main plugin file and readme and upload it again.', 'wporg-plugins' ),
+				__( 'Your chosen plugin name - %1$s - is not permitted because it is too short. Please change the %2$s line in your main plugin file and readme and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'<code>Plugin Name:</code>'
 			) );
