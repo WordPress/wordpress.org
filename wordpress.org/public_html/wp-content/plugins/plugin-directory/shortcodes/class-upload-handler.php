@@ -480,7 +480,7 @@ class Upload_Handler {
 			__(
 'Thank you for uploading %1$s to the WordPress Plugin Directory. We will review your submission as soon as possible and send you a follow up email with the results.
 
-Your plugin has been given the initial slug of %2$s based on your diplay name of %1$s. This is subject to change based on the results of your review.
+Your plugin has been given the initial slug of %2$s based on your display name of %1$s. This is subject to change based on the results of your review.
 
 If there are any problems with your submission, please REPLY to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved. For situations like an incorrect plugin slug, we are unable to change that post approval. If you do not inform us of any requirements now, we will be unable to honor them later.
 
