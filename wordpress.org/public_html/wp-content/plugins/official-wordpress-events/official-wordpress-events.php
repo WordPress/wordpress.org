@@ -7,6 +7,7 @@ Version:     0.1
 Author:      WordPress.org Meta Team
 */
 
+use WordCamp\Utilities\API_Client;
 use WordCamp\Utilities\Meetup_Client;
 
 class Official_WordPress_Events {
@@ -37,9 +38,11 @@ class Official_WordPress_Events {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'wp_enqueue_scripts',           array( $this, 'enqueue_scripts'    ) );
-		add_action( 'owpe_prime_events_cache',      array( $this, 'prime_events_cache' ) );
-		add_action( 'owpe_mark_deleted_meetups',    array( $this, 'mark_deleted_meetups' ) );
+		add_action( 'wp_enqueue_scripts',               array( $this, 'enqueue_scripts'       ) );
+		add_action( 'owpe_prime_events_cache',          array( $this, 'prime_events_cache'    ) );
+		add_action( 'owpe_mark_deleted_meetups',        array( $this, 'mark_deleted_meetups'  ) );
+		add_action( 'api_client_handle_error_response', array( $this, 'handle_error_response' ), 10, 3 );
+
 		add_shortcode( 'official_wordpress_events', array( $this, 'render_events'      ) );
 
 		if ( ! wp_next_scheduled( 'owpe_prime_events_cache' ) ) {
@@ -52,6 +55,25 @@ class Official_WordPress_Events {
 	}
 
 	/**
+	 * Get an instance of the generic API Client, loading files first as necessary.
+	 *
+	 * @return API_Client
+	 */
+	protected function get_api_client() {
+		if ( ! class_exists( '\WordCamp\Utilities\API_Client' ) ) {
+			$files = array(
+				'class-api-client.php',
+			);
+
+			foreach ( $files as $file ) {
+				require_once trailingslashit( __DIR__ ) . "meetup/$file";
+			}
+		}
+
+		return new API_Client();
+	}
+
+	/**
 	 * Get an instance of the Meetup Client, loading files first as necessary.
 	 *
 	 * @return Meetup_Client
@@ -59,6 +81,8 @@ class Official_WordPress_Events {
 	protected function get_meetup_client() {
 		if ( ! class_exists( '\WordCamp\Utilities\Meetup_Client' ) ) {
 			$files = array(
+				'class-api-client.php',
+				'class-meetup-oauth2-client.php',
 				'class-meetup-client.php',
 			);
 
@@ -208,7 +232,10 @@ class Official_WordPress_Events {
 	 * @return array
 	 */
 	protected function fetch_upcoming_events() {
-		$events = array_merge( $this->get_wordcamp_events(), $this->get_meetup_events() );
+		$wordcamp_events = $this->get_wordcamp_events();
+		$meetup_events   = $this->get_meetup_events();
+
+		$events = array_merge( $wordcamp_events, $meetup_events );
 
 		return $events;
 	}
@@ -238,15 +265,19 @@ class Official_WordPress_Events {
 	 * @return array
 	 */
 	protected function get_wordcamp_events() {
-		$request_params = array(
+		$api_client = $this->get_api_client();
+
+		// Note: With the number of WordCamps per year growing fast, we may need to batch requests in the near future, like we do for meetups.
+		$request_url = add_query_arg( array(
 			'status'   => array( 'wcpt-scheduled', 'wcpt-cancelled' ),
 			'per_page' => 100,
-			// Note: With the number of WordCamps per year growing fast, we may need to batch requests in the near future, like we do for meetups
-		);
+		), self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps' );
 
-		$endpoint = add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps' );
-		$response = $this->remote_get( esc_url_raw( $endpoint ) );
-		$events   = $this->parse_wordcamp_events( $response );
+		$response = $api_client->tenacious_remote_get( $request_url );
+
+		$api_client->handle_error_response( $response, $request_url );
+
+		$events = $this->parse_wordcamp_events( $response );
 
 		$this->log( sprintf( 'returning %d events', count( $events ) ) );
 
@@ -338,74 +369,107 @@ class Official_WordPress_Events {
 	protected function get_meetup_events() {
 		$events = array();
 
-		$client = $this->get_meetup_client();
-		if ( ! empty( $client->error->errors ) ) {
-			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $client->error ), true );
+		// Fetching events for a large number of groups from the Meetup API is currently a very inefficient process.
+		ini_set( 'memory_limit', '900M' );
+		ini_set( 'max_execution_time', 500 );
+
+		$meetup_client = $this->get_meetup_client();
+		if ( ! empty( $meetup_client->error->errors ) ) {
+			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $meetup_client->error ), true );
 			return $events;
 		}
 
-		$groups = $client->get_groups();
-		if ( ! empty( $client->error->errors ) ) {
-			$this->log( 'Failed to fetch groups: ' . wp_json_encode( $client->error ), true );
+		$groups = $meetup_client->get_groups();
+		if ( ! empty( $meetup_client->error->errors ) ) {
+			$this->log( 'Failed to fetch groups: ' . wp_json_encode( $meetup_client->error ), true );
 			return $events;
 		}
 
-		$meetups = $client->get_events( wp_list_pluck( $groups, 'id' ) );
-		if ( ! empty( $client->error->errors ) ) {
-			$this->log( 'Failed to fetch meetups: ' . wp_json_encode( $client->error ), true );
+		$yesterday    = date( 'c', strtotime( '-1 day' ) );
+		$one_year_out = date( 'c', strtotime( '+1 year' ) );
+		$meetups      = $meetup_client->get_events(
+			wp_list_pluck( $groups, 'urlname' ),
+			array(
+				// We want cancelled events too so they will be updated in our database table.
+				'status'          => 'upcoming,cancelled',
+				// We don't want cancelled events in the past, but need some leeway here for timezones.
+				'no_earlier_than' => substr( $yesterday, 0, strpos( $yesterday, '+' ) ),
+				// We don't need to cache events happening more than a year from now.
+				'no_later_than'   => substr( $one_year_out, 0, strpos( $one_year_out, '+' ) ),
+			)
+		);
+		if ( ! empty( $meetup_client->error->errors ) ) {
+			$this->log( 'Failed to fetch meetups: ' . wp_json_encode( $meetup_client->error ), true );
 			return $events;
 		}
 
-					foreach ( $meetups as $meetup ) {
-						if ( empty( $meetup['id'] ) || empty( $meetup['name'] ) ) {
-							$this->log( 'Malformed meetup: ' . wp_json_encode( $meetup ) );
-							continue;
-						}
-
-						$start_timestamp = ( $meetup['time'] / 1000 ) + ( $meetup['utc_offset'] / 1000 );    // convert to seconds
-
-						if ( isset( $meetup['venue'] ) ) {
-							$location = $this->format_meetup_venue_location( $meetup['venue'] );
-						} else {
-							$geocoded_location = $this->reverse_geocode( $meetup['group']['group_lat'], $meetup['group']['group_lon'] );
-							$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location );
-							$location          = sprintf(
-								'%s%s%s',
-								$location_parts['city'] ?? '',
-								empty( $location_parts['state'] )        ? '' : ', ' . $location_parts['state'],
-								empty( $location_parts['country_name'] ) ? '' : ', ' . $location_parts['country_name']
-							);
-							$location         = trim( $location, ", \t\n\r\0\x0B" );
-						}
-
-						if ( ! empty( $meetup['venue']['country'] ) ) {
-							$country_code = $meetup['venue']['country'];
-						} elseif ( ! empty( $location_parts['country_code'] ) ) {
-							$country_code = $location_parts['country_code'];
-						} else {
-							$country_code = '';
-						}
-
-						$events[] = new Official_WordPress_Event( array(
-							'type'            => 'meetup',
-							'source_id'       => $meetup['id'],
-							'status'          => 'upcoming' === $meetup['status'] ? 'scheduled' : 'cancelled',
-							'title'           => $meetup['name'],
-							'url'             => $meetup['event_url'],
-							'meetup_name'     => $meetup['group']['name'],
-							'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup['group']['urlname'] ),
-							'description'     => $meetup['description'] ?? '',
-							'num_attendees'   => $meetup['yes_rsvp_count'],
-							'start_timestamp' => $start_timestamp,
-							'end_timestamp'   => ( empty ( $meetup['duration'] ) ? $start_timestamp : $start_timestamp + ( $meetup['duration'] / 1000 ) ), // convert to seconds
-							'location'        => $location,
-							'country_code'    => $country_code,
-							'latitude'        => empty( $meetup['venue']['lat'] ) ? $meetup['group']['group_lat'] : $meetup['venue']['lat'],
-							'longitude'       => empty( $meetup['venue']['lon'] ) ? $meetup['group']['group_lon'] : $meetup['venue']['lon'],
-						) );
-					}
+		$events = $this->parse_meetup_events( $meetups );
 
 		$this->log( sprintf( 'returning %d events', count( $events ) ) );
+
+		return $events;
+	}
+
+	/**
+	 * Parse meetup events out of a response from the Meetup API.
+	 *
+	 * @param array $meetups
+	 *
+	 * @return array
+	 */
+	protected function parse_meetup_events( $meetups ) {
+		$events = array();
+
+		foreach ( $meetups as $meetup ) {
+			if ( empty( $meetup['id'] ) || empty( $meetup['name'] ) ) {
+				$this->log( 'Malformed meetup: ' . wp_json_encode( $meetup ) );
+				continue;
+			}
+
+			$start_timestamp = ( $meetup['time'] / 1000 ) + ( $meetup['utc_offset'] / 1000 ); // convert to seconds
+			$latitude        = ! empty( $meetup['venue']['lat'] ) ? $meetup['venue']['lat'] : $meetup['group']['lat'];
+			$longitude       = ! empty( $meetup['venue']['lon'] ) ? $meetup['venue']['lon'] : $meetup['group']['lon'];
+
+			if ( isset( $meetup['venue'] ) ) {
+				$location = $this->format_meetup_venue_location( $meetup['venue'] );
+			} else {
+				$geocoded_location = $this->reverse_geocode( $latitude, $longitude );
+				$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location );
+				$location          = sprintf(
+					'%s%s%s',
+					$location_parts['city'] ?? '',
+					empty( $location_parts['state'] )        ? '' : ', ' . $location_parts['state'],
+					empty( $location_parts['country_name'] ) ? '' : ', ' . $location_parts['country_name']
+				);
+				$location          = trim( $location, ", \t\n\r\0\x0B" );
+			}
+
+			if ( ! empty( $meetup['venue']['country'] ) ) {
+				$country_code = $meetup['venue']['country'];
+			} elseif ( ! empty( $location_parts['country_code'] ) ) {
+				$country_code = $location_parts['country_code'];
+			} else {
+				$country_code = '';
+			}
+
+			$events[] = new Official_WordPress_Event( array(
+				'type'            => 'meetup',
+				'source_id'       => $meetup['id'],
+				'status'          => 'upcoming' === $meetup['status'] ? 'scheduled' : 'cancelled',
+				'title'           => $meetup['name'],
+				'url'             => $meetup['link'],
+				'meetup_name'     => $meetup['group']['name'],
+				'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup['group']['urlname'] ),
+				'description'     => $meetup['description'] ?? '',
+				'num_attendees'   => $meetup['yes_rsvp_count'],
+				'start_timestamp' => $start_timestamp,
+				'end_timestamp'   => ( empty ( $meetup['duration'] ) ? $start_timestamp : $start_timestamp + ( $meetup['duration'] / 1000 ) ), // convert to seconds
+				'location'        => $location,
+				'country_code'    => $country_code,
+				'latitude'        => $latitude,
+				'longitude'       => $longitude,
+			) );
+		}
 
 		return $events;
 	}
@@ -430,13 +494,16 @@ class Official_WordPress_Events {
 		// Rough attempt at avoiding rate limit.
 		usleep( 75000 );
 
-		$response = $this->remote_get( sprintf(
+		$api_client  = $this->get_api_client();
+		$request_url = sprintf(
 			'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s&sensor=false&key=%s',
 			$latitude,
 			$longitude,
 			OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY
-		) );
-		$body = json_decode( wp_remote_retrieve_body( $response ) );
+		);
+
+		$response = $api_client->tenacious_remote_get( $request_url );
+		$body     = json_decode( wp_remote_retrieve_body( $response ) );
 
 		if ( ! is_wp_error( $response ) && isset( $body->results ) && empty( $body->error_message ) ) {
 			$this->log( 'geocode successful' );
@@ -447,6 +514,7 @@ class Official_WordPress_Events {
 			}
 		}
 		else {
+			$api_client->handle_error_response( $response, $request_url );
 			$this->log( 'geocode failed: ' . wp_json_encode( $response ) );
 		}
 
@@ -570,116 +638,76 @@ class Official_WordPress_Events {
 				// The event is missing from a valid response, so assume that it's been deleted.
 				$wpdb->update( self::EVENTS_TABLE, array( 'status' => 'deleted' ), array( 'id' => $db_event->id ) );
 
-				if ( 'cli' === php_sapi_name() ) {
-					echo "\nMarked {$db_event->source_id} as deleted.";
-				}
+				$this->log( "Marked {$db_event->source_id} as deleted." );
 			}
 		}
 	}
 
 	/**
-	 * Wrapper for wp_remote_get()
+	 * Error logging and notification.
 	 *
-	 * This adds error logging/notification.
+	 * Hooked to `api_client_handle_error_response`.
 	 *
-	 * @param string $url
-	 * @param array  $args
+	 * @param array|WP_Error $response
 	 *
-	 * @return false|array|WP_Error False if a valid $url was not passed; otherwise the results from wp_remote_get()
+	 * @return void
 	 */
-	protected function remote_get( $url, $args = array() ) {
-		$response = $error = false;
+	protected function handle_error_response( $response, $request_url, $request_args ) {
+		$error = null;
 
-		if ( $url ) {
-			$args['timeout'] = 30;
-			$response        = wp_remote_get( $url, $args );
+		$response_code    = wp_remote_retrieve_response_code( $response );
+		$response_message = wp_remote_retrieve_response_message( $response );
+		$response_body    = wp_remote_retrieve_body( $response );
 
-			$this->maybe_pause( wp_remote_retrieve_headers( $response ) );
+		if ( is_wp_error( $response ) ) {
+			$error_messages = implode( ', ', $response->get_error_messages() );
 
-			$response_code    = wp_remote_retrieve_response_code( $response );
-			$response_message = wp_remote_retrieve_response_message( $response );
-			$response_body    = wp_remote_retrieve_body( $response );
-
-			if ( is_wp_error( $response ) ) {
-				$error_messages = implode( ', ', $response->get_error_messages() );
-
-				if ( false === strpos( $error_messages, 'Operation timed out' ) ) {
-					$error = sprintf(
-						'Received WP_Error message: %s; Request was to %s; Arguments were: %s',
-						$error_messages,
-						$url,
-						print_r( $args, true )
-					);
-				}
-			} elseif ( 200 != $response_code ) {
-				// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
+			if ( false === strpos( $error_messages, 'Operation timed out' ) ) {
 				$error = sprintf(
-					"HTTP Code: %d\nMessage: %s\nBody: %s\nRequest URL: %s\nArgs: %s",
-					$response_code,
-					sanitize_text_field( $response_message ),
-					substr( sanitize_text_field( $response_body ), 0, 500 ),
-					$url,
-					print_r( $args, true )
+					'Received WP_Error message: %s; Request was to %s; Arguments were: %s',
+					$error_messages,
+					$request_url,
+					print_r( $request_args, true )
 				);
-
-				$response = new WP_Error( 'owe_invalid_http_response', 'Invalid HTTP response code', $response );
 			}
+		} elseif ( 200 !== $response_code ) {
+			// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
+			$error = sprintf(
+				"HTTP Code: %d\nMessage: %s\nBody: %s\nRequest URL: %s\nArgs: %s",
+				$response_code,
+				sanitize_text_field( $response_message ),
+				substr( sanitize_text_field( $response_body ), 0, 500 ),
+				$request_url,
+				print_r( $request_args, true )
+			);
+		}
 
-			if ( $error ) {
-				$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
-				trigger_error( sprintf(
-					'%s error for %s: %s',
-					__METHOD__,
-					parse_url( site_url(), PHP_URL_HOST ),
+		if ( $error ) {
+			$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
+
+			$this->log( sanitize_text_field( $error ), true );
+
+			trigger_error( sprintf(
+				'%s error for %s: %s',
+				__METHOD__,
+				parse_url( site_url(), PHP_URL_HOST ),
+				sanitize_text_field( $error )
+			), E_USER_WARNING );
+
+			$to = apply_filters( 'owe_error_email_addresses', array() );
+
+			if ( $to && ( ! defined( 'WPORG_SANDBOXED_REQUEST' ) || ! WPORG_SANDBOXED_REQUEST ) ) {
+				wp_mail(
+					$to,
+					sprintf(
+						'%s error for %s',
+						__METHOD__,
+						parse_url( site_url(), PHP_URL_HOST )
+					),
 					sanitize_text_field( $error )
-				), E_USER_WARNING );
-
-				$to = apply_filters( 'owe_error_email_addresses', array() );
-				if ( $to && ( ! defined( 'WPORG_SANDBOXED_REQUEST' ) || ! WPORG_SANDBOXED_REQUEST ) ) {
-					wp_mail(
-						$to,
-						sprintf(
-							'%s error for %s',
-							__METHOD__,
-							parse_url( site_url(), PHP_URL_HOST )
-						),
-						sanitize_text_field( $error )
-					);
-				}
+				);
 			}
 		}
-
-		return $response;
-	}
-
-	/**
-	 * Maybe pause the script to avoid rate limiting
-	 *
-	 * @param array $headers
-	 */
-	protected function maybe_pause( $headers ) {
-		if ( ! isset( $headers['x-ratelimit-remaining'], $headers['x-ratelimit-reset'] ) ) {
-			return;
-		}
-
-		$remaining = absint( $headers['x-ratelimit-remaining'] );
-		$period    = absint( $headers['x-ratelimit-reset'] );
-
-		// Pause more frequently than we need to, and for longer, just to be safe
-		if ( $remaining > 2 ) {
-			return;
-		}
-
-		if ( $period < 2 ) {
-			$period = 2;
-		}
-
-		if ( 'cli' == php_sapi_name() ) {
-			echo "\nPausing for $period seconds to avoid rate-limiting.";
-		}
-
-		$this->log( 'sleeping to avoid api rate limit' );
-		sleep( $period );
 	}
 
 	/**
@@ -696,6 +724,10 @@ class Official_WordPress_Events {
 	protected function log( $message, $write_to_disk = false ) {
 		$limit = 500;
 		$api_keys = array( MEETUP_API_KEY, OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
+
+		if ( 'cli' === php_sapi_name() ) {
+			echo $message;
+		}
 
 		if ( $write_to_disk ) {
 			error_log( sprintf(
