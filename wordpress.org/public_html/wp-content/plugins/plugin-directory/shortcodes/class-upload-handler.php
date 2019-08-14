@@ -119,7 +119,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'trademarked_name', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-				__( 'Your chosen plugin name - %1$s - has been flagged for trademark infringement by containing the term "%2$s" and as such cannot be used. In order to comply with demands from trademark owners and to protect developers, we are disallowing the use of specific terms in plugin slugs entirely. Please change the %3$s line in your main plugin file and readme so that you may upload your plugin for review. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
+				__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used. Per the demands of trademark owners and in order to protect developers, we are disallowing the use of certain terms in ways that are infringing or misleading. Please change the %3$s line in your main plugin file and readme so that you may upload your plugin for review. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				$this->has_trademarked_slug(),
 				'<code>Plugin Name:</code>',
@@ -367,39 +367,36 @@ class Upload_Handler {
 	 */
 	public function has_trademarked_slug() {
 		$trademarked_slugs = array(
-			'contact-form-7',
-			'divi',
-			'easy-digital-downloads',
-			'elementor',
+			'contact-form-7-',
+			'divi-',
+			'easy-digital-downloads-',
+			'elementor-',
 			'facebook',
 			'feedburner',
-			'google',
-			'-gram',
-			'gram-',
-			'gravity-forms',
+			'google-',
+			'gravity-forms-',
 			'gutenberg',
 			'instagram',
 			'insta',
-			'macintosh',
-			'microsoft',
-			'ninja-forms',
-			'pinterest',
-			'samsung',
-			'twitter',
+			'macintosh-',
+			'microsoft-',
+			'ninja-forms-',
+			'pinterest-',
+			'twitter-',
 			'tweet',
 			'whatsapp',
 			'whats-app',
-			'woocommerce',
+			'woocommerce-',
 			'wordpress',
 			'yoast',
-			'youtube',
+			'youtube-',
 		);
 
 		$has_trademarked_slug = false;
 
 		foreach ( $trademarked_slugs as $trademark ) {
 			if ( false !== strpos( $this->plugin_slug, $trademark ) ) {
-				$has_trademarked_slug = $trademark;
+				$has_trademarked_slug = trim( $trademark, '-' );
 				break;
 			}
 		}
@@ -500,7 +497,7 @@ If you need to change the plugin slug, please reply to this email immediately an
 
 If there are any other problems with your submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved.
 
-We remind you review the following links to understand the review process and our expectations:
+We remind you read the following links to understand the review process and our expectations:
 
 Guidelines: https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
 Frequently Asked Questions: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
