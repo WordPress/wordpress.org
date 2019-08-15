@@ -273,12 +273,14 @@ class Meetup_Client extends API_Client {
 	 * Make sure you don't include the full $response in the error as data, as that could expose sensitive information
 	 * from the request payload.
 	 *
-	 * @param array|WP_Error $response
+	 * @param array|WP_Error $response     The response or error generated from the request.
+	 * @param string         $request_url  Optional.
+	 * @param array          $request_args Optional.
 	 *
 	 * @return void
 	 */
-	public function handle_error_response( $response ) {
-		if ( parent::handle_error_response( $response ) ) {
+	public function handle_error_response( $response, $request_url = '', $request_args = array() ) {
+		if ( parent::handle_error_response( $response, $request_url, $request_args ) ) {
 			return;
 		}
 
