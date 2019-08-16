@@ -652,7 +652,7 @@ class Official_WordPress_Events {
 	 *
 	 * @return void
 	 */
-	protected function handle_error_response( $response, $request_url, $request_args ) {
+	public function handle_error_response( $response, $request_url, $request_args ) {
 		$error = null;
 
 		$response_code    = wp_remote_retrieve_response_code( $response );
