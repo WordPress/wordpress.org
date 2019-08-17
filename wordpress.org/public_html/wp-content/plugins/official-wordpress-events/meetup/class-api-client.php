@@ -38,6 +38,16 @@ class API_Client {
 	protected $breaking_response_codes = [];
 
 	/**
+	 * @var string|null The URL for the current request being attempted.
+	 */
+	protected $current_request_url = null;
+
+	/**
+	 * @var array|null The args for the current request being attempted.
+	 */
+	protected $current_request_args = null;
+
+	/**
 	 * API_Client constructor.
 	 *
 	 * @param array $settings {
@@ -85,8 +95,12 @@ class API_Client {
 			$args['timeout'] = 15;
 		}
 
+		// Set current request in state so it can be manipulated between request attempts if necessary.
+		$this->current_request_url  = $url;
+		$this->current_request_args = $args;
+
 		while ( $attempt_count < $max_attempts ) {
-			$response      = wp_remote_request( $url, $args );
+			$response      = wp_remote_request( $this->current_request_url, $this->current_request_args );
 			$response_code = wp_remote_retrieve_response_code( $response );
 
 			// This is called before breaking in case a new request is made immediately.
@@ -117,7 +131,16 @@ class API_Client {
 			 * @param int   $attempt_count
 			 * @param int   $max_attempts
 			 */
-			do_action( 'api_client_tenacious_remote_request_attempt', $response, compact( 'url', 'args' ), $attempt_count, $max_attempts );
+			do_action(
+				'api_client_tenacious_remote_request_attempt',
+				$response,
+				array(
+					'url'  => $this->current_request_url,
+					'args' => $this->current_request_args,
+				),
+				$attempt_count,
+				$max_attempts
+			);
 
 			if ( $attempt_count < $max_attempts ) {
 				$retry_after = wp_remote_retrieve_header( $response, 'retry-after' ) ?: 5;
@@ -128,6 +151,10 @@ class API_Client {
 				sleep( $wait );
 			}
 		}
+
+		// Reset current request.
+		$this->current_request_url  = null;
+		$this->current_request_args = null;
 
 		if ( $attempt_count === $max_attempts && ( 200 !== $response_code || is_wp_error( $response ) ) ) {
 			self::cli_message( "\nRequest failed $attempt_count times. Giving up." );
@@ -221,6 +248,28 @@ class API_Client {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Merge two error objects into one, new error object.
+	 *
+	 * @param WP_Error $error1 An error object.
+	 * @param WP_Error $error2 An error object.
+	 *
+	 * @return WP_Error The combined errors of the two parameters.
+	 */
+	protected function merge_errors( WP_Error $error1, WP_Error $error2 ) {
+		$codes = $error2->get_error_codes();
+
+		foreach ( $codes as $code ) {
+			$messages = $error2->get_error_messages( $code );
+
+			foreach ( $messages as $message ) {
+				$error1->add( $code, $message );
+			}
+		}
+
+		return $error1;
 	}
 
 	/**

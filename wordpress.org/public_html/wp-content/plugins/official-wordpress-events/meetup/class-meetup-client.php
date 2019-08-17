@@ -72,11 +72,44 @@ class Meetup_Client extends API_Client {
 			)
 		);
 
-		$this->oauth_client = new Meetup_OAuth2_Client;
-		$this->debug        = $settings['debug'];
+		$this->debug = $settings['debug'];
 
 		if ( $this->debug ) {
-			self::cli_message( "Meetup Client debug is ON. Results will be truncated." );
+			self::cli_message( "Meetup Client debug is on. Results will be truncated." );
+		}
+
+		$this->oauth_client = new Meetup_OAuth2_Client;
+
+		if ( ! empty( $this->oauth_client->error->get_error_messages() ) ) {
+			$this->error = $this->merge_errors( $this->error, $this->oauth_client->error );
+		}
+
+		add_action( 'api_client_tenacious_remote_request_attempt', array( $this, 'maybe_reset_oauth_token' ) );
+	}
+
+	/**
+	 * Attempt to fix authorization errors before they permanently fail.
+	 *
+	 * Hooked to `api_client_tenacious_remote_request_attempt` so that a request that has failed due to an invalid
+	 * oauth token can be retried after resetting the token.
+	 *
+	 * @param array $response
+	 *
+	 * @return void
+	 */
+	public function maybe_reset_oauth_token( $response ) {
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		if ( 400 === $code && ! empty( $body['error'] ) && 'invalid_grant' === $body['error'] ) {
+			$this->oauth_client->reset_oauth_token();
+
+			if ( ! empty( $this->oauth_client->error->get_error_messages() ) ) {
+				$this->error = $this->merge_errors( $this->error, $this->oauth_client->error );
+			}
+
+			// Reset the request headers, so that they include the new oauth token.
+			$this->current_request_args = $this->get_request_args();
 		}
 	}
 
@@ -122,7 +155,7 @@ class Meetup_Client extends API_Client {
 
 				$request_url = $this->get_next_url( $response );
 			} else {
-				$this->handle_error_response( $response );
+				$this->handle_error_response( $response, $request_url );
 				break;
 			}
 
@@ -167,7 +200,7 @@ class Meetup_Client extends API_Client {
 				);
 			}
 		} else {
-			$this->handle_error_response( $response );
+			$this->handle_error_response( $response, $request_url );
 		}
 
 		if ( ! empty( $this->error->get_error_messages() ) ) {
@@ -294,6 +327,11 @@ class Meetup_Client extends API_Client {
 					$error['message']
 				);
 			}
+		} elseif ( isset( $data['error'], $data['error_description'] ) ) {
+			$this->error->add(
+				$data['error'],
+				$data['error_description']
+			);
 		} elseif ( isset( $data['code'] ) && isset( $data['details'] ) ) {
 			$this->error->add(
 				$data['code'],

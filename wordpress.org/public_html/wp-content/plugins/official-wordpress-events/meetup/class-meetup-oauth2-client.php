@@ -96,6 +96,9 @@ class Meetup_OAuth2_Client extends API_Client {
 				404, // Unable to find group
 			),
 		) );
+
+		// Pre-cache the oauth token.
+		$this->get_oauth_token();
 	}
 
 	/**
@@ -307,6 +310,24 @@ class Meetup_OAuth2_Client extends API_Client {
 		}
 
 		return $oauth_token;
+	}
+
+	/**
+	 * Un-cache any existing oauth token and request a new one.
+	 *
+	 * This also resets the error property so that it has a clean slate when it attempts to request a new token.
+	 *
+	 * Useful if a token stops working during a batch of requests :/
+	 *
+	 * @return void
+	 */
+	public function reset_oauth_token() {
+		delete_site_option( self::SITE_OPTION_KEY_OAUTH );
+
+		$this->oauth_token = array();
+		$this->error       = new WP_Error();
+
+		$this->get_oauth_token();
 	}
 
 	/**
