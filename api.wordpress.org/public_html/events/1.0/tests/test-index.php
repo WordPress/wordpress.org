@@ -21,7 +21,7 @@ function run_tests() {
 	$tests_failed += test_get_location();
 	$tests_failed += test_get_events();
 	$tests_failed += test_get_events_country_restriction();
-	$tests_failed += test_add_regional_wordcamps();
+	$tests_failed += test_maybe_add_regional_wordcamps();
 	$tests_failed += test_maybe_add_wp15_promo();
 	$tests_failed += test_build_response();
 	$tests_failed += test_is_client_core();
@@ -731,7 +731,10 @@ function get_location_test_cases() {
 		),
 
 		/*
-		 * Only the IPv4 address is given
+		 * Only the IPv4 address is given.
+		 *
+		 * Note that IP locations change frequently, so some of these expected results will inevitably become outdated
+		 * and cause tests to fail.
 		 *
 		 * See https://awebanalysis.com/en/ipv4-directory/
 		 */
@@ -749,9 +752,9 @@ function get_location_test_cases() {
 		'ip-asia' => array(
 			'input' => array( 'ip' => '86.108.55.28' ),
 			'expected' => array(
-				'description' => 'amman',
-				'latitude'    => '31.955',
-				'longitude'   => '35.945',
+				'description' => 'hakama',
+				'latitude'    => '32.594',
+				'longitude'   => '35.884',
 				'country'     => 'JO',
 				'internal'    => true,
 			),
@@ -760,9 +763,9 @@ function get_location_test_cases() {
 		'ip-europe' => array(
 			'input' => array( 'ip' => '80.95.186.144' ),
 			'expected' => array(
-				'description' => 'belfast',
-				'latitude'    => '54.583',
-				'longitude'   => '-5.933',
+				'description' => 'antrim',
+				'latitude'    => '54.700',
+				'longitude'   => '-6.200',
 				'country'     => 'GB',
 				'internal'    => true,
 			),
@@ -771,9 +774,9 @@ function get_location_test_cases() {
 		'ip-north-america' => array(
 			'input' => array( 'ip' => '189.147.186.0' ),
 			'expected' => array(
-				'description' => 'cuauhtemoc',
-				'latitude'    => '19.417',
-				'longitude'   => '-99.157',
+				'description' => 'mexico city',
+				'latitude'    => '19.428',
+				'longitude'   => '-99.128',
 				'country'     => 'MX',
 				'internal'    => true,
 			),
@@ -802,7 +805,10 @@ function get_location_test_cases() {
 		),
 
 		/*
-		 * Only an IPv6 address is given
+		 * Only an IPv6 address is given.
+		 *
+		 * Note that IP locations change frequently, so some of these expected results will inevitably become outdated
+		 * and cause tests to fail.
 		 *
 		 * See https://www.google.com/intl/en/ipv6/statistics.html#tab=per-country-ipv6-adoption&tab=per-country-ipv6-adoption
 		 * See https://awebanalysis.com/en/ipv6-directory/
@@ -866,9 +872,9 @@ function get_location_test_cases() {
 		'ipv6-south-america' => array(
 			'input'    => array( 'ip' => '2001:1388:6643:2736:10f1:897c:428c:1b3b' ),
 			'expected' => array(
-				'description' => 'ayacucho',
-				'latitude'    => '-13.158',
-				'longitude'   => '-74.224',
+				'description' => 'lima',
+				'latitude'    => '-12.043',
+				'longitude'   => '-77.028',
 				'country'     => 'PE',
 				'internal'    => true,
 			),
@@ -1161,7 +1167,7 @@ function test_is_client_core() {
  *
  * @return int
  */
-function test_add_regional_wordcamps() {
+function test_maybe_add_regional_wordcamps() {
 	$failed = 0;
 
 	$local_events = get_events( array(
@@ -1172,35 +1178,115 @@ function test_add_regional_wordcamps() {
 		),
 	) );
 
+	$region_data = array(
+		'us' => array(
+			'promo_start'        => strtotime( '2019-08-16 00:00:00' ),
+			'regional_countries' => array(
+				'us', 'ca', 'bz', 'cr', 'sv', 'gt', 'hn', 'mx', 'ni', 'pa',
+				'ar', 'bo', 'br', 'cl', 'co', 'ec', 'gf', 'gy', 'py', 'pe',
+				'sr', 'uy', 've', 'ag', 'aw', 'bs', 'bb', 'ky', 'cu', 'dm',
+				'do', 'gd', 'ht', 'jm', 'kn', 'lc', 'vc', 'tt',
+			),
+			'event'              => array(
+				'type'       => 'wordcamp',
+				'title'      => 'WordCamp US',
+				'url'        => 'https://2019.us.wordcamp.org/',
+				'meetup'     => '',
+				'meetup_url' => '',
+				'date'       => '2019-11-01 00:00:00',
+				'location'   => array(
+					'location'  => 'St. Louis, MO, USA',
+					'country'   => 'US',
+					'latitude'  => 38.6532135,
+					'longitude' => -90.3136733,
+				),
+			),
+		),
+	);
+
+	$core_user_agent  = 'WordPress/5.2; https://example.org';
+	$other_user_agent = 'Smith';
+
+	$time_before_promo         = strtotime( '2019-08-15 00:00:00' );
+	$time_during_promo_phase_1 = strtotime( '+ 1 day', $region_data['us']['promo_start'] );
+	$time_during_promo_phase_2 = strtotime( '+ 2 weeks + 1 day', $region_data['us']['promo_start'] );
+	$time_during_promo_phase_3 = strtotime( '+ 4 weeks + 1 day', $region_data['us']['promo_start'] );
+	$time_after_promo          = strtotime( '+ 6 weeks + 1 day', $region_data['us']['promo_start'] );
+
+	$location_country_within_region = array(
+		'country' => 'us',
+	);
+
+	$location_country_outside_region = array(
+		'country' => 'es',
+	);
+
+	$location_ip_only = array(
+		'ip' => '8.8.8.8',
+	);
+
 	// Make sure there's at least one event, otherwise there could be false positives.
 	if ( ! $local_events ) {
 		$local_events[] = array( 'title' => 'Mock Event' );
 	}
 
-	printf( "\n\nRunning %d add_regional_wordcamps() tests\n", 2 );
+	printf( "\n\nRunning %d add_regional_wordcamps() tests\n", 13 );
 
-	// Test that no changes were made if the user agent isn't Core.
-	$events_no_user_agent = add_regional_wordcamps( $local_events, '' );
+	$tests_expect_no_changes = array();
+	$tests_expect_changes    = array();
 
-	if ( $events_no_user_agent !== $local_events ) {
-		$failed++;
-		output_results( 'no-user-agent', false, $local_events, $events_no_user_agent );
+	// No regional camps should be added if before the promo start date or after the promo window is past (6 weeks).
+	$tests_expect_no_changes['before-promo'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_before_promo, $location_country_within_region );
+	$tests_expect_no_changes['before-promo'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_after_promo, $location_country_within_region );
+
+	// Regional camp should be added if it's within phase 1 of the promo, regardless of location.
+	$tests_expect_changes['promo-phase-1-within-region'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_within_region );
+	$tests_expect_changes['promo-phase-1-outside-region'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_outside_region );
+
+	// Regional camp should only be added during phase 2 of promo if location is within region.
+	$tests_expect_changes['promo-phase-2-within-region'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_2, $location_country_within_region );
+	$tests_expect_no_changes['promo-phase-2-outside-region'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_2, $location_country_outside_region );
+	$tests_expect_no_changes['promo-phase-2-ip-only'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_2, $location_ip_only );
+
+	// Regional camp should only be added during phase 3 of promo if location is within event country.
+	$tests_expect_changes['promo-phase-3-within-event-country'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_3, $location_country_within_region );
+	$tests_expect_no_changes['promo-phase-3-outside-event-country'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_3, $location_country_outside_region );
+	$tests_expect_no_changes['promo-phase-3-ip-only'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_3, $location_ip_only );
+
+	// Regional camp should only be added if the user agent is Core.
+	$tests_expect_no_changes['other-user-agent'] = maybe_add_regional_wordcamps( $local_events, $region_data, $other_user_agent, $time_during_promo_phase_1, $location_country_within_region );
+	$tests_expect_changes['core-user-agent'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_within_region );
+
+	// There should only be one entry for an event, even if the local event array already contains the regional event.
+	$tests_expect_no_changes['duplicate-event'] = maybe_add_regional_wordcamps( array( $region_data['us']['event'] ), $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_within_region );
+
+	foreach ( $tests_expect_no_changes as $name => $result ) {
+		switch ( $name ) {
+			case 'duplicate-event':
+				if ( $result !== array( $region_data['us']['event'] ) ) {
+					$failed++;
+					output_results( $name, false, array( $region_data['us']['event'] ), $result );
+				}
+				break;
+			default:
+				if ( $result !== $local_events ) {
+					$failed++;
+					output_results( $name, false, $local_events, $result );
+				}
+				break;
+		}
 	}
 
-	/*
-	 * Test that local events were unharmed if the user agent is Core.
-	 *
-	 * There isn't an easy way to mock time(), so this doesn't test that the events were added
-	 * correctly. It just makes sure that local events weren't removed.
-	 */
-	$events_core_user_agent = add_regional_wordcamps( $local_events, 'WordPress/4.9; https://example.org' );
+	$unchanged_count = count( $local_events );
+	$expected_count  = $unchanged_count + 1;
 
-	if (
-		count( $events_core_user_agent ) < count( $local_events ) ||
-		! in_array( $local_events[0], $events_core_user_agent, true )
-	) {
-		$failed++;
-		output_results( 'core-user-agent', false, 'local events were not affected', $events_core_user_agent );
+	foreach ( $tests_expect_changes as $name => $result ) {
+		$actual_count = count( $result );
+
+		if ( $actual_count !== $expected_count ) {
+			$failed++;
+			output_results( $name, false, $expected_count, $actual_count );
+		}
 	}
 
 	return $failed;

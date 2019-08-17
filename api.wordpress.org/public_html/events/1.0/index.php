@@ -164,8 +164,16 @@ function build_response( $location, $location_args ) {
 		}
 
 		$events = get_events( $event_args );
-		$events = maybe_add_wp15_promo( $events, $_SERVER['HTTP_USER_AGENT'], time() );
-		$events = add_regional_wordcamps( $events, $_SERVER['HTTP_USER_AGENT'] );
+
+		//$events = maybe_add_wp15_promo( $events, $_SERVER['HTTP_USER_AGENT'], time() );
+
+		$events = maybe_add_regional_wordcamps(
+			$events,
+			get_regional_wordcamp_data(),
+			$_SERVER['HTTP_USER_AGENT'],
+			time(),
+			$location
+		);
 
 		// Internal location data cannot be exposed in the response, see get_location().
 		if ( isset( $location['internal'] ) && $location['internal'] ) {
@@ -176,8 +184,9 @@ function build_response( $location, $location_args ) {
 		$error = 'no_location_available';
 	}
 
-	return compact( 'error', 'location', 'events' );
+	$sandboxed = ( defined( 'WPORG_SANDBOXED' ) ) ? WPORG_SANDBOXED : null;
 
+	return compact( 'sandboxed', 'error', 'location', 'events' );
 }
 
 /**
@@ -915,55 +924,125 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
 }
 
 /**
- * Add regional WordCamps to the Events Widget in Core for extra promotion.
+ * The data for upcoming regional WordCamps.
  *
- * @param array  $local_events
- * @param string $user_agent
+ * Externalizing this makes it easier to test the `maybe_add_regional_wordcamps` function.
  *
  * @return array
  */
-function add_regional_wordcamps( $local_events, $user_agent ) {
-	$time               = time();
-	$regional_wordcamps = array();
+function get_regional_wordcamp_data() {
+	return array(
+		// WordCamp Asia.
+		'asia'   => array(
+			'promo_start'        => 0, // todo
+			'regional_countries' => array(
+				// todo
+			),
+			'event'              => array(
+				'type'       => 'wordcamp',
+				'title'      => 'WordCamp Asia',
+				'url'        => 'https://2020.asia.wordcamp.org/',
+				'meetup'     => '',
+				'meetup_url' => '',
+				'date'       => '2020-02-21 00:00:00',
+				'location'   => array(
+					'location'  => 'Bangkok, Thailand',
+					'country'   => 'TH',
+					'latitude'  => 13.7248934,
+					'longitude' => 100.492683,
+				),
+			),
+		),
+		// WordCamp Europe.
+		'europe' => array(
+			'promo_start'        => 0, // todo
+			'regional_countries' => array(
+				// todo
+			),
+			'event'              => array(
+				'type'       => 'wordcamp',
+				'title'      => 'WordCamp Europe',
+				'url'        => 'https://2020.europe.wordcamp.org/',
+				'meetup'     => '',
+				'meetup_url' => '',
+				'date'       => '', // todo
+				'location' => array(
+					'location'  => 'Porto, Portugal',
+					'country'   => 'PT',
+					'latitude'  => 41.1622022,
+					'longitude' => -8.6570588,
+				),
+			),
+		),
+		// WordCamp US.
+		'us'     => array(
+			'promo_start'        => strtotime( '2019-08-16 00:00:00' ),
+			'regional_countries' => array(
+				'us', 'ca', 'bz', 'cr', 'sv', 'gt', 'hn', 'mx', 'ni', 'pa',
+				'ar', 'bo', 'br', 'cl', 'co', 'ec', 'gf', 'gy', 'py', 'pe',
+				'sr', 'uy', 've', 'ag', 'aw', 'bs', 'bb', 'ky', 'cu', 'dm',
+				'do', 'gd', 'ht', 'jm', 'kn', 'lc', 'vc', 'tt',
+			),
+			'event'              => array(
+				'type'       => 'wordcamp',
+				'title'      => 'WordCamp US',
+				'url'        => 'https://2019.us.wordcamp.org/',
+				'meetup'     => '',
+				'meetup_url' => '',
+				'date'       => '2019-11-01 00:00:00',
+				'location'   => array(
+					'location'  => 'St. Louis, MO, USA',
+					'country'   => 'US',
+					'latitude'  => 38.6532135,
+					'longitude' => -90.3136733,
+				),
+			),
+		),
+	);
+}
 
+/**
+ * Add time- and location-relevant regional WordCamps to the Events Widget in Core.
+ *
+ * @param array  $local_events
+ * @param array  $region_data
+ * @param string $user_agent
+ * @param int    $current_time
+ * @param array  $location
+ *
+ * @return array
+ */
+function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent, $current_time, $location ) {
 	if ( ! is_client_core( $user_agent ) ) {
 		return $local_events;
 	}
 
-	if ( $time > strtotime( 'November 7th, 2018' ) && $time < strtotime( 'December 10th, 2018' ) ) {
-		$regional_wordcamps[] = array(
-			'type'       => 'wordcamp',
-			'title'      => 'WordCamp US',
-			'url'        => 'https://2018.us.wordcamp.org/',
-			'meetup'     => '',
-			'meetup_url' => '',
-			'date'       => '2018-12-07 00:00:00',
+	$regional_wordcamps = array();
 
-			'location' => array(
-				'location'  => 'Nashville, TN, USA',
-				'country'   => 'US',
-				'latitude'  => 36.1566085,
-				'longitude' => -86.7784909,
-			)
-		);
-	}
+	foreach ( $region_data as $region => $data ) {
+		if ( empty( $data['promo_start'] ) ) {
+			continue;
+		}
 
-	if ( $time > strtotime( 'May 20th, 2019' ) && $time < strtotime( 'June 23rd, 2019' ) ) {
-		$regional_wordcamps[] = array(
-			'type'       => 'wordcamp',
-			'title'      => 'WordCamp Europe',
-			'url'        => 'https://2019.europe.wordcamp.org/',
-			'meetup'     => '',
-			'meetup_url' => '',
-			'date'       => '2019-06-20 00:00:00',
+		$start = $data['promo_start'];
 
-			'location' => array(
-				'location'  => 'Berlin, Germany',
-				'country'   => 'DE',
-				'latitude'  => 52.50697,
-				'longitude' => 13.2843064,
-			)
-		);
+		/**
+		 * The targeted area of the regional camp promotion "zooms in" over the course of 6 weeks.
+		 */
+		if ( is_within_date_range( $current_time, $start, strtotime( '+ 2 weeks', $start ) ) ) {
+			// Phase 1: Show worldwide for first two weeks.
+			$regional_wordcamps[] = $data['event'];
+		} elseif ( is_within_date_range( $current_time, strtotime( '+ 2 weeks', $start ), strtotime( '+ 4 weeks', $start ) ) ) {
+			// Phase 2: Show within regional countries for next two weeks.
+			if ( ! empty( $location['country'] ) && in_array( strtolower( $location['country'] ), $data['regional_countries'], true ) ) {
+				$regional_wordcamps[] = $data['event'];
+			}
+		} elseif ( is_within_date_range( $current_time, strtotime( '+ 4 weeks', $start ), strtotime( '+ 6 weeks', $start ) ) ) {
+			// Phase 3: Show only within the event country for the last two weeks.
+			if ( ! empty( $location['country'] ) && strtolower( $data['event']['location']['country'] ) === strtolower( $location['country'] ) ) {
+				$regional_wordcamps[] = $data['event'];
+			}
+		}
 	}
 
 	/**
@@ -971,14 +1050,37 @@ function add_regional_wordcamps( $local_events, $user_agent ) {
 	 * Favor the regional event since it'll be pinned to the top.
 	 */
 	foreach ( $regional_wordcamps as $regional_event ) {
-		foreach ( $local_events as $local_key => $local_event ) {
+		$local_events = array_filter( $local_events, function( $local_event ) use ( $regional_event ) {
 			if ( parse_url( $regional_event['url'], PHP_URL_HOST ) === parse_url( $local_event['url'], PHP_URL_HOST ) ) {
-				unset( $local_events[ $local_key ] );
+				return false;
 			}
-		}
+
+			return true;
+		} );
 	}
 
 	return array_merge( $regional_wordcamps, $local_events );
+}
+
+/**
+ * Determine if a given Unix timestamp is within a date range.
+ *
+ * @param int    $time        A Unix timestamp.
+ * @param string $range_start A date/time string compatible with strtotime.
+ * @param string $range_end   A date/time string compatible with strtotime.
+ *
+ * @return bool
+ */
+function is_within_date_range( $time, $range_start, $range_end ) {
+	if ( ! is_int( $range_start ) ) {
+		$range_start = strtotime( $range_start );
+	}
+
+	if ( ! is_int( $range_end ) ) {
+		$range_end = strtotime( $range_end );
+	}
+
+	return $time > $range_start && $time < $range_end;
 }
 
 /**
