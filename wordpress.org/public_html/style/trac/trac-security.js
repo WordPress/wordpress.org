@@ -63,7 +63,19 @@ window.wp = window.wp || {};
 				'</p>'
 			);
 		}
+	}
 
+	function show_pentest_notice() {
+		if ( ! $( '#security-pentest-notice' ).length ) {
+			// Add a notice
+			$( '.buttons' ).before(
+				'<div class="newticket-not-here wp-notice" style="background-color: #ffe6e6; border-color: red;"><p id="security-pentest-notice" class="security">' +
+				'<span class="dashicons dashicons-lock"></span>' +
+				'<strong>Please Note:</strong> ' +
+				'Performing penetration testing against our trac instances without prior approval is strictly forbidden and will result in any vulnerabilities found being ineligible for bounties per our guidelines.' +
+				'</p></div>'
+			);
+		}
 	}
 
 	function hide_box() {
@@ -75,9 +87,10 @@ window.wp = window.wp || {};
 	function check_field_value( $el ) {
 		var entry = $el.val();
 
-		if ( wp.trac_security.has_overlap( entry, wp.trac_security.badwords ) ) {
+		if ( wp.trac_security.seems_like_pentest( entry ) ) {
 			show_box();
-		} else if ( wp.trac_security.seems_like_pentest( entry ) ) {
+			show_pentest_notice();
+		} else if ( wp.trac_security.has_overlap( entry, wp.trac_security.badwords ) ) {
 			show_box();
 		} else {
 			hide_box();
