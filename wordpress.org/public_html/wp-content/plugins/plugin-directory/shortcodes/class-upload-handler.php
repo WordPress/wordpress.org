@@ -367,6 +367,7 @@ class Upload_Handler {
 	 */
 	public function has_trademarked_slug() {
 		$trademarked_slugs = array(
+			'advanced-custom-fields-',
 			'contact-form-7-',
 			'divi-',
 			'easy-digital-downloads-',
