@@ -22,4 +22,4 @@ define( 'SUPPORTED_PHP', '7.2' );
 define( 'SECURE_PHP', '7.1' );
 
 // The lowest branch of PHP which is still considered acceptable in WordPress.
-define( 'ACCEPTABLE_PHP', '5.6.20' );
+define( 'ACCEPTABLE_PHP', '7.0' );
