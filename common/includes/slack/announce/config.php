@@ -106,6 +106,7 @@ function get_whitelist() {
 			'mapk',
 			'matveb', // @matias on Slack
 			'mcsf',
+			'talldanwp', // @danr on Slack
 			'youknowriad',
 		) ),
 		'core-fields' => array_merge( get_committers(), array(
