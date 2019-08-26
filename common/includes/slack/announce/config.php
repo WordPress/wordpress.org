@@ -65,7 +65,7 @@ function get_whitelist() {
 			'desrosj',
 			'JeffPaul',
 			'JoshuaWold',
-			'justinahinon',
+			'justinahinon', // @justin on Slack
 			'karmatosed',
 			'lukecarbis',
 			'marybaum',
@@ -210,6 +210,8 @@ function get_whitelist() {
 		),
 		'feature-notifications' => array(
 			'johnbillion',
+			'justinahinon', // @justin on Slack
+			'psykro', // @jon_bossenger on Slack
 			'schlessera',
 		),
 		'feature-shinyupdates' => array(
