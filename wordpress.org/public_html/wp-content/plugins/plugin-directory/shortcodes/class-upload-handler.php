@@ -316,14 +316,16 @@ class Upload_Handler {
 			'plugins@wordpress.org'
 		) . '</p><p>';
 
-		$message .= __( 'If there is any error in your submission, please email us as soon as possible. We can correct many issues before approval.', 'wporg-plugins' ) . '</p><p>';
+		$message .= __( 'If there are any errors in your submission, please email us as soon as possible. We can correct many issues before approval.', 'wporg-plugins' ) . '</p><p>';
 
 		$message .= sprintf(
 			/* translators: 1: URL to guidelines; 2: URL to FAQs; */
 			wp_kses_post( __( 'While you&#8217;re waiting on your review, please take the time to read <a href="%1$s">the developer guidelines</a> and <a href="%2$s">the developer FAQ</a> as they will address most questions.', 'wporg-plugins' ) ),
 			'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/',
 			'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/'
-		);
+		) . '</p><p>';
+
+		$message .= __( 'Note: Reviews are currently in English only. We apologize for the inconvenience.', 'wporg-plugins' );
 
 		// Success!
 		return $message;
@@ -340,6 +342,7 @@ class Upload_Handler {
 			'about',
 			'admin',
 			'browse',
+			'category',
 			'developers',
 			'developer',
 			'featured',
@@ -367,8 +370,9 @@ class Upload_Handler {
 	 */
 	public function has_trademarked_slug() {
 		$trademarked_slugs = array(
+			'adobe-',
 			'advanced-custom-fields-',
-			'contact-form-7-',
+			'amazon-',
 			'divi-',
 			'easy-digital-downloads-',
 			'elementor-',
