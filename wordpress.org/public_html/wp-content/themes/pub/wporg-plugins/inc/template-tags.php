@@ -209,26 +209,33 @@ function get_plugin_status_notice( $post = null ) {
 			break;
 
 		case 'disabled':
-			$message = current_user_can( 'plugin_approve' )
-				? __( 'This plugin is disabled (closed, but actively serving updates).', 'wporg-plugins' )
-				: __( 'This plugin has been closed for new installations.', 'wporg-plugins' );
-
-			$message = sprintf( $error_notice, $message );
-			break;
-
 		case 'closed':
-			$closed_date = get_post_meta( get_the_ID(), 'plugin_closed_date', true );
+			$closed_date  = get_post_meta( get_the_ID(), 'plugin_closed_date', true );
+			$close_reason = Template::get_close_reason( $post );
 
 			if ( $closed_date ) {
-				/* translators: %s: plugin closing date */
-				$message = sprintf( __( 'This plugin was closed on %s and is no longer available for download.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
+				if ( 'disabled' === $post_status && current_user_can( 'plugin_approve' ) ) {
+					/* translators: %s: plugin closing date */
+					$message = sprintf( __( 'This plugin has been disabled as of %s -- this means it is closed, but actively serving updates.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
+				} else {
+					/* translators: %s: plugin closing date */
+					$message = sprintf( __( 'This plugin has been closed as of %s and is not available for download.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
+				}
+
+				// Determine permanence of closure.
+				$contributors = get_the_terms( $post, 'plugin_contributors' );
+				$permanent    = ( 'author-request' === $close_reason || ! $contributors || is_wp_error( $contributors ) );
 
 				$days_passed = (int) ( ( current_time( 'timestamp' ) - mysql2date( 'U', $closed_date ) ) / DAY_IN_SECONDS );
 
-				// Display close reason if more than 60 days have passed.
-				if ( $days_passed > 60 ) {
+				if ( $permanent ) {
+					$message .= ' ' . __( 'This closure is permanent.', 'wporg-plugins' );
+				} elseif ( $days_passed < 60 ) {
+					$message .= ' ' . __( 'This closure is temporary, pending a full review.', 'wporg-plugins' );
+				} else {
+					// Display close reason if more than 60 days have passed.
 					/* translators: %s: plugin close/disable reason */
-					$message .= ' ' . sprintf( __( 'Reason: %s.', 'wporg-plugins' ), Template::get_close_reason( $post ) );
+					$message .= ' ' . sprintf( __( 'Reason: %s.', 'wporg-plugins' ), $close_reason );
 				}
 			} else {
 				$message = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
