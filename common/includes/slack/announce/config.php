@@ -62,6 +62,7 @@ function get_whitelist() {
 			'audrasjb',
 			'chanthaboune',
 			'danieltj',
+			'davidbaumwald', // @davidb on Slack
 			'desrosj',
 			'JeffPaul',
 			'JoshuaWold',
