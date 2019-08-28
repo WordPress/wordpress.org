@@ -102,6 +102,14 @@ class Plugins_Info_API_Request {
 		'active_installs' => true,
 	);
 
+	// Default fields for block queries
+	static $query_plugins_fields_defaults_block = array(
+		'blocks'               => true,
+		'block_assets'         => true,
+		'author_block_count'   => true,
+		'author_block_rating'  => true,
+	);
+
 	public function __construct( $args ) {
 		$args = (object) $args;
 
@@ -159,8 +167,7 @@ class Plugins_Info_API_Request {
 
 		// If it's a block search, include blocks in the response by default
 		if ( ! empty( $this->args->block ) ) {
-			$fields['blocks']       = true;
-			$fields['block_assets'] = true;
+			$fields = array_merge( $fields, self::$query_plugins_fields_defaults_block );
 		}
 
 		$fields = array_merge( $fields, $this->requested_fields );

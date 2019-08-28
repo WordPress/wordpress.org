@@ -220,6 +220,8 @@ class Plugin extends Base {
 		// Block metadata, if available
 		$result['blocks'] = get_post_meta( $post_id, 'all_blocks', true ) ?: [];
 		$result['block_assets'] = get_post_meta( $post_id, 'block_files', true ) ?: [];
+		$result['author_block_count'] = get_post_meta( $post_id, 'author_block_count' ) ?: intval( count( $result['blocks'] ) > 0 );
+		$result['author_block_rating'] = get_post_meta( $post_id, 'author_block_rating' ) ?: $result['rating'];
 
 		// That's all folks!
 		return $result;
