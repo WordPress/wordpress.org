@@ -442,9 +442,11 @@ class Import {
 
 		// Find blocks
 		$blocks = array();
+		$files_with_blocks = array();
 		foreach ( Filesystem::list_files( "$tmp_dir/export/", true /* recursive */, '!\.(?:php|js|jsx|json)$!i' ) as $filename ) {
 			$file_blocks = $this->find_blocks_in_file( $filename );
 			if ( $file_blocks ) {
+				$files_with_blocks[] = str_replace( "$tmp_dir/export/", '', $filename );
 				foreach ( $file_blocks as $block ) {
 					// If the info came from a block.json file with more metadata (like description) then we want it to override less detailed info scraped from php/js.
 					if ( empty( $blocks[ $block->name ]->title ) || isset( $block->description ) ) {
@@ -460,14 +462,23 @@ class Import {
 		$build_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/build" ) ?: array();
 
 		foreach ( $dist_files as $file ) {
-			#$block_files[] = 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/dist/" . $file;
 			$block_files[] = '/trunk/dist/' . $file;
 		}
 
 		foreach ( $build_files as $file ) {
-			#$block_files[] = 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/build/" . $file;
 			$block_files[] = '/trunk/build/' . $file;
 		}
+
+		if ( empty( $block_files ) ) {
+			foreach ( $files_with_blocks as $file ) {
+				$block_files[] = '/trunk/' . $file;
+			}
+		}
+
+		// Only allow js or css files
+		$block_files = array_unique( array_filter( $block_files, function( $filename ) {
+			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
+		} ) );
 
 		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
 	}
