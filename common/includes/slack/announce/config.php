@@ -64,6 +64,7 @@ function get_whitelist() {
 			'danieltj',
 			'davidbaumwald', // @davidb on Slack
 			'desrosj',
+			'francina',
 			'JeffPaul',
 			'JoshuaWold',
 			'justinahinon', // @justin on Slack
