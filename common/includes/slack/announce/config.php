@@ -372,15 +372,3 @@ function get_committers() {
 		'lonelyvegan',    // @tofumatt on Slack
 	);
 }
-
-// This is not all deputies; it's only the ones who want to receive `/deputies` pings
-function get_pingable_wordcamp_deputies() {
-	return array(
-		'00Sleepy', '_DorsVenabili', 'adityakane', 'andreamiddleton', 'bph', 'brandondove', 'camikaos',
-		'chanthaboune', 'courtneypk', 'drebbits', 'francina', 'gounder', 'heysherie', 'hlashbrooke',
-		'karenalma', 'kcristiano', 'kdrewien', 'Kenshino', 'mayukojpn', 'mikelking', 'miss_jwo',
-		'nukaga', 'remediosgraphic', 'Savione', 'vc27', 'yaycheryl',
-
-		'coreymckrill', 'iandunn', // todo remove after testing
-	);
-}

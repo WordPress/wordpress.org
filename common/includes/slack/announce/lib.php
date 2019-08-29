@@ -83,33 +83,20 @@ function run( $data ) {
 		return;
 	}
 
-	if ( $data['command'] === '/deputies' ) {
-		$pingable_deputies = get_pingable_wordcamp_deputies();
-
-		if ( ! in_array( $user, $pingable_deputies, true ) ) {
-			return;
-		}
-
-		// TODO: Note that pinging users by `@username` is deprecated, and we have WordPress.org usernames in the above list.
-		// This should be upadted to ping users by the `<@U.....>` format.
-
-		$text = sprintf( "*/deputies:* %s\n_(CC: %s)_", $data['text'], '@' . implode( ', @', $pingable_deputies ) );
-	} else {
-		if ( ! is_user_whitelisted( $user, $channel ) ) {
-			show_authorization( $user, $channel );
-			return;
-		}
-
-		$command = 'channel';
-		if ( $data['command'] === '/here' ) {
-			$command = 'here';
-		} elseif ( $channel === 'privategroup' ) {
-			// @channel and @group are interchangeable, but still.
-			$command = 'group';
-		}
-
-		$text = sprintf( "<!%s> %s", $command, $data['text'] );
+	if ( ! is_user_whitelisted( $user, $channel ) ) {
+		show_authorization( $user, $channel );
+		return;
 	}
+
+	$command = 'channel';
+	if ( $data['command'] === '/here' ) {
+		$command = 'here';
+	} elseif ( $channel === 'privategroup' ) {
+		// @channel and @group are interchangeable, but still.
+		$command = 'group';
+	}
+
+	$text = sprintf( "<!%s> %s", $command, $data['text'] );
 
 	$send = new Send( \Dotorg\Slack\Send\WEBHOOK );
 	$send->set_username( $user );
