@@ -213,6 +213,7 @@ function get_whitelist() {
 		'feature-notifications' => array(
 			'johnbillion',
 			'justinahinon', // @justin on Slack
+			'hrmervin',
 			'psykro', // @jon_bossenger on Slack
 			'schlessera',
 		),
