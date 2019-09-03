@@ -38,7 +38,7 @@ div.standard {
 #nav li.current-menu-item a,
 #nav li a:hover,
 #header #nav li :link:hover,
-#wporg-header #nav li :link:hover,
+#wporg-header #wporg-header-menu li :link:hover,
 .button:hover {
 	color: rgba(235,255,235,0.9);
 

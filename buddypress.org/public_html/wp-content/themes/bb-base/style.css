@@ -392,6 +392,30 @@ body.bbpress.trac #subnav {
 	font-size: 12px;
 	margin-top: 81px;
 }
+body.trac #metanav {
+    font-size: 12px;
+    margin-top: 81px;
+    position: static;
+    top: auto;
+    right: auto;
+    line-height:24px;
+    padding-top: .5em;
+}
+#metanav:after {
+    clear: both;
+    display: block;
+}
+
+body.trac #metanav a,
+body.trac #metanav a:visited,
+body.trac #metanav form.trac-logout button {
+    color: initial;
+}
+
+body.trac #metanav li.last {
+    padding-right: .75em;
+}
+
 #subnav-inner {
 	width: 100%;
 	margin: 0 auto;
