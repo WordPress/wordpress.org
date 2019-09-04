@@ -335,6 +335,7 @@ class WP_52_Credits extends WP_Credits {
 			'nerrad',
 			'netweb',
 			'nfmohit',
+			'nickdaugherty',
 			'nielsdeblaauw',
 			'nielslange',
 			'ninio',
