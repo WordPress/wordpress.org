@@ -89,6 +89,7 @@ class WP_52_Credits extends WP_Credits {
 	public function props() {
 		return [
 			'0mirka00',
+			'762e5e74',
 			'aandrewdixon',
 			'aaroncampbell',
 			'adamsilverstein',
