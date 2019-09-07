@@ -223,8 +223,8 @@ function get_plugin_status_notice( $post = null ) {
 				}
 
 				// Determine permanence of closure.
-				$contributors = get_the_terms( $post, 'plugin_contributors' );
-				$permanent    = ( 'author-request' === $close_reason || ! $contributors || is_wp_error( $contributors ) );
+				$committers = Tools::get_plugin_committers( $post->post_name );
+				$permanent  = ( 'author-request' === $close_reason || ! $committers );
 
 				$days_passed = (int) ( ( current_time( 'timestamp' ) - mysql2date( 'U', $closed_date ) ) / DAY_IN_SECONDS );
 

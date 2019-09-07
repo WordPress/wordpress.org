@@ -48,10 +48,10 @@ class Reviews {
 							</div>
 							<div class="header-bottom">
 								<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
-								<span class="review-date"><?php echo date_i18n( get_option( 'date_format'), strtotime( $review->post_modified ) ); ?></span>
+								<span class="review-date"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ); ?></span>
 							</div>
 						</header>
-						<div class="review-content"><?php echo wp_strip_all_tags(get_the_content()); ?></div>
+						<div class="review-content"><?php echo wp_strip_all_tags( get_the_content() ); ?></div>
 					</div>
 				</article>
 			<?php
