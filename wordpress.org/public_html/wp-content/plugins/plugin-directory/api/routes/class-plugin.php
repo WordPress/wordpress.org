@@ -309,7 +309,7 @@ class Plugin extends Base {
 				printf(
 					__( 'By %1$s on %2$s', 'wporg-plugins' ),
 					$review_author_markup,
-					'<span class="review-date">' . gmdate( 'F j, Y', strtotime( $review->post_modified ) ) . '</span>'
+					'<span class="review-date">' . date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ) . '</span>'
 				);
 				?>
 			</p>

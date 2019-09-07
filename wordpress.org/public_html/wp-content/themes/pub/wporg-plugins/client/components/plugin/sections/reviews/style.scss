@@ -11,6 +11,7 @@
 		&:first-child {
 			margin-top: 0;
 		}
+
 		.header-top {
 			display: flex;
 			.wporg-ratings {
@@ -48,14 +49,15 @@
 		line-height: 1.25;
 	}
 
-	.review-date{
-		margin-left: 12px;
-		color: #999;
+	.review-author,
+	.review-date {
+		line-height: 1.25;
 		font-size: 0.9em;
 	}
 
-	.review-author, .review-date {
-		line-height: 1.25;
+	.review-date {
+		margin-left: 12px;
+		color: #999;
 		font-size: 0.9em;
 	}
 
@@ -77,7 +79,8 @@
 			margin: 0;
 		}
 
-		.review-author, .review-date {
+		.review-author,
+		.review-date {
 			line-height: 1;
 		}
 	}
