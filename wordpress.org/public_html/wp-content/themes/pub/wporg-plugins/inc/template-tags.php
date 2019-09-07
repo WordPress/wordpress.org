@@ -224,7 +224,7 @@ function get_plugin_status_notice( $post = null ) {
 
 				// Determine permanence of closure.
 				$committers = Tools::get_plugin_committers( $post->post_name );
-				$permanent  = ( 'author-request' === $close_reason || ! $committers );
+				$permanent  = ( __( 'Author Request', 'wporg-plugins' ) === $close_reason || ! $committers );
 
 				$days_passed = (int) ( ( current_time( 'timestamp' ) - mysql2date( 'U', $closed_date ) ) / DAY_IN_SECONDS );
 
