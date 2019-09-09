@@ -1,0 +1,345 @@
+# <!=Copyright (C) 2019 The BuddyPress community
+# This file is distributed under the GNU General Public License.=!>
+msgid ""
+msgstr ""
+"Project-Id-Version: bporg-developer 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/imath/bporg-developer/issues\n"
+"POT-Creation-Date: 2019-07-12 06:50:36+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2019-MO-DA HO:MI+ZONE\n"
+"Last-Translator: imath <contact@imathi.eu>\n"
+"Language-Team: FRENCH <contact@imathi.eu>\n"
+"X-Generator: grunt-wp-i18n 1.0.3\n"
+
+#: footer.php:20
+msgid "See also:"
+msgstr ""
+
+#: footer.php:21
+msgid "WordPress.org"
+msgstr ""
+
+#: footer.php:22
+msgid "bbPress.org"
+msgstr ""
+
+#: footer.php:23
+msgid "BuddyPress.org"
+msgstr ""
+
+#: footer.php:24
+msgid "Matt"
+msgstr ""
+
+#: footer.php:25
+msgid "Blog RSS"
+msgstr ""
+
+#: footer.php:30
+msgid "Follow BuddyPress on Twitter"
+msgstr ""
+
+#: footer.php:31
+msgid "GPL"
+msgstr ""
+
+#: footer.php:32
+msgid "Contact Us"
+msgstr ""
+
+#: footer.php:33
+msgid "Privacy"
+msgstr ""
+
+#: footer.php:34
+msgid "Terms of Service"
+msgstr ""
+
+#: functions.php:52 functions.php:123 functions.php:313
+msgid "BP REST API Handbook"
+msgstr ""
+
+#: functions.php:76
+msgid "Chapters"
+msgstr ""
+
+#: functions.php:86
+msgid "More resources"
+msgstr ""
+
+#: functions.php:87
+msgid "BuddyPress Codex"
+msgstr ""
+
+#: functions.php:99
+msgid "Need help?"
+msgstr ""
+
+#: functions.php:100
+msgid "BuddyPress support forums"
+msgstr ""
+
+#. Template Name of the plugin/theme
+msgid "Home"
+msgstr ""
+
+#. Template Name of the plugin/theme
+msgid "Reference"
+msgstr ""
+
+#: functions.php:127
+msgid "Let’s start documenting the BP REST API!"
+msgstr ""
+
+#: functions.php:139
+msgid "BuddyPress Developer Resources"
+msgstr ""
+
+#: functions.php:140
+msgid "Your best buddies ever to help you code."
+msgstr ""
+
+#: functions.php:147
+msgid "BuddyPress.org nav"
+msgstr ""
+
+#: functions.php:151
+msgid "About"
+msgstr ""
+
+#: functions.php:156
+msgid "Plugins"
+msgstr ""
+
+#: functions.php:161
+msgid "Themes"
+msgstr ""
+
+#: functions.php:166
+msgid "Documentation"
+msgstr ""
+
+#: functions.php:171
+msgid "Blog"
+msgstr ""
+
+#: functions.php:176
+msgid "Download"
+msgstr ""
+
+#: functions.php:184
+msgid "DevHub menu"
+msgstr ""
+
+#: functions.php:187
+msgid "All Developer Resources"
+msgstr ""
+
+#: functions.php:194
+msgid "BuddyPress API"
+msgstr ""
+
+#: functions.php:198
+msgid "BP Attachment API"
+msgstr ""
+
+#: functions.php:203
+msgid "BP Theme Compat API"
+msgstr ""
+
+#: functions.php:208
+msgid "BP Component API"
+msgstr ""
+
+#: functions.php:213
+msgid "BP User Query API"
+msgstr ""
+
+#: functions.php:218
+msgid "Member Types API"
+msgstr ""
+
+#: functions.php:223
+msgid "Group Types API"
+msgstr ""
+
+#: functions.php:228
+msgid "BP Nav API"
+msgstr ""
+
+#: functions.php:233
+msgid "Group Extension API"
+msgstr ""
+
+#: functions.php:265
+msgid "BuddyPress latest stable version"
+msgstr ""
+
+#: functions.php:305
+msgid "Developer Resources: %s"
+msgstr ""
+
+#: functions.php:307 page-home-landing.php:20
+msgid "Code Reference"
+msgstr ""
+
+#: functions.php:309
+msgid "Plugin Handbook"
+msgstr ""
+
+#: functions.php:311
+msgid "Theme Handbook"
+msgstr ""
+
+#: functions.php:315
+msgid "Developer Resources"
+msgstr ""
+
+#: header.php:36
+msgid "Menu"
+msgstr ""
+
+#: header.php:50
+msgid "Primary Menu"
+msgstr ""
+
+#: header.php:72
+msgid "Search"
+msgstr ""
+
+#: page-home-landing.php:21
+msgid "Looking for documentation for the BuddyPress codebase?"
+msgstr ""
+
+#: page-home-landing.php:22
+msgid "Visit the reference"
+msgstr ""
+
+#: page-home-landing.php:26
+msgid "BP REST API"
+msgstr ""
+
+#: page-home-landing.php:27
+msgid "Getting started on making BuddyPress applications?"
+msgstr ""
+
+#: page-home-landing.php:28
+msgid "Make Applications "
+msgstr ""
+
+#: page-home-landing.php:32
+msgid "Contribute"
+msgstr ""
+
+#: page-home-landing.php:33
+msgid "Help Make BuddyPress"
+msgstr ""
+
+#: page-home-landing.php:34
+msgid "Visit BuddyPress Trac"
+msgstr ""
+
+#: page-home-landing.php:48
+msgid "Developer news"
+msgstr ""
+
+#: page-home-landing.php:51
+msgid "Follow the development team’s blog."
+msgstr ""
+
+#: page-reference-landing.php:22
+msgid ""
+"Want to know what&#39;s going on inside BuddyPress? Search the Code "
+"Reference for more information about BuddyPress&#39; functions, classes, "
+"methods, and hooks."
+msgstr ""
+
+#: page-reference-landing.php:23
+msgid "Try it out:"
+msgstr ""
+
+#: page-reference-landing.php:28
+msgid "Or browse through topics:"
+msgstr ""
+
+#: page-reference-landing.php:30
+msgid "Functions"
+msgstr ""
+
+#: page-reference-landing.php:31
+msgid "Hooks"
+msgstr ""
+
+#: page-reference-landing.php:32
+msgid "Classes"
+msgstr ""
+
+#: page-reference-landing.php:33
+msgid "Methods"
+msgstr ""
+
+#: page-reference-landing.php:41
+msgid "New &amp; Updated in BuddyPress %s:"
+msgstr ""
+
+#: page-reference-landing.php:67
+msgid "View all&hellip;"
+msgstr ""
+
+#: page-reference-landing.php:74
+msgid "API"
+msgstr ""
+
+#: page-under-construction.php:29
+msgid "Under construction"
+msgstr ""
+
+#: reference/template-source.php:15
+msgid "Source"
+msgstr ""
+
+#: reference/template-source.php:17
+msgid "File: %s"
+msgstr ""
+
+#: reference/template-source.php:28
+msgid "Expand full source code"
+msgstr ""
+
+#: reference/template-source.php:29
+msgid "Collapse full source code"
+msgstr ""
+
+#: reference/template-source.php:31 reference/template-source.php:35
+msgid "View on Trac"
+msgstr ""
+
+#: template-parts/header-accessibility.php:11
+msgid "Skip to:"
+msgstr ""
+
+#: template-parts/header-accessibility.php:12
+msgid "Content"
+msgstr ""
+
+#. Theme Name of the plugin/theme
+msgid "bporg-developer"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://buddypress.org/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "wporg-developer child theme."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "The BuddyPress community"
+msgstr ""
+
+#. Template Name of the plugin/theme
+msgid "Under Construction"
+msgstr ""
