@@ -119,7 +119,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'trademarked_name', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-				__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used. Per the demands of trademark owners and in order to protect developers, we are disallowing the use of certain terms in ways that are infringing or misleading. Please change the %3$s line in your main plugin file and readme so that you may upload your plugin for review. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
+				__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used. Per the demands of trademark owners and in order to protect developers, we disallow the use of certain terms in ways that are infringing or misleading. In many cases, renaming your plugin to end with "for-%2$s" instead will resolve this issue. To do this, please change the %3$s line in your main plugin file and readme and upload the plugin again. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				$this->has_trademarked_slug(),
 				'<code>Plugin Name:</code>',
@@ -147,7 +147,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: Documentation URL, 3: plugins@wordpress.org */
-				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Simply update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know. Make sure to include any error messages in your email.', 'wporg-plugins' ),
+				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Instead, please update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				__( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 'wporg-plugins' ),
 				'plugins@wordpress.org'
@@ -209,6 +209,7 @@ class Upload_Handler {
 		}
 
 		$readme = $this->find_readme_file();
+		// Check for a valid readme.
 		if ( empty( $readme ) ) {
 			$error = __( 'Error: The plugin has no readme.', 'wporg-plugins' );
 
@@ -305,7 +306,7 @@ class Upload_Handler {
 
 		$message = sprintf(
 			/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
-			__( 'Thank you for uploading %1$s to the WordPress Plugin Directory. Your plugin has been given the initial slug of %2$s, however that is subject to change based on the results of your code review. If this slug is incorrect, please contact us immediately, as it cannot be changed once your plugin is approved.' ),
+			__( 'Thank you for uploading %1$s to the WordPress Plugin Directory. Your plugin has been given the initial slug of %2$s, however that is subject to change based on the results of your code review. If this slug is incorrect, please contact us immediately and tell us exactly what the correct slug should be. Remember, a plugin slug cannot be changed once your plugin is approved.' ),
 			esc_html( $this->plugin['Name'] ),
 			'<code>' . $this->plugin_slug . '</code>'
 		) . '</p><p>';
@@ -378,6 +379,7 @@ class Upload_Handler {
 			'elementor-',
 			'facebook',
 			'feedburner',
+			'github-',
 			'google-',
 			'gravity-forms-',
 			'gutenberg',
@@ -498,7 +500,7 @@ class Upload_Handler {
 
 Your plugin has been given the initial slug of %2$s based on your display name of %1$s. This is subject to change based on the results of your review.
 
-If you need to change the plugin slug, please reply to this email immediately and let us know, otherwise we will be unable to do so later.
+If you need to change the plugin slug, please reply to this email immediately and let us know what the correct slug should be. We will be unable to change your plugin slug once your review is completed.
 
 If there are any other problems with your submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved.
 
@@ -508,6 +510,8 @@ Guidelines: https://developer.wordpress.org/plugins/wordpress-org/detailed-plugi
 Frequently Asked Questions: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
 
 Also, make sure to follow our official blog: https://make.wordpress.org/plugins/
+
+Note: Reviews are currently in English only. We apologize for the inconvenience.
 
 --
 The WordPress Plugin Directory Team
