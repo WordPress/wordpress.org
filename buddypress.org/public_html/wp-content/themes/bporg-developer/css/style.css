@@ -10,21 +10,11 @@ body.admin-bar header#masthead {
 	margin-top: 42px;
 }
 
-#wpadminbar {
-	position: absolute;
-}
-
 #header-inner {
 	margin: 0 auto;
 	width: 100%;
 	height: 80px;
 	padding: 0;
-}
-
-@media screen and (min-width: 960px) {
-	#header-inner, #footer {
-		max-width: 960px;
-	}
 }
 
 #header #network-title {

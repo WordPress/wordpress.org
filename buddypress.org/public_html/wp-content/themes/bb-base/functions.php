@@ -596,3 +596,14 @@ function bb_base_filter_is_bbpress( $in_bbpress = false ) {
 	return $in_bbpress;
 }
 add_filter( 'is_bbpress', 'bb_base_filter_is_bbpress' );
+
+/**
+ * Redirect away from the login page (if you're already logged in)
+ */
+function bb_base_login_redirect() {
+	if ( is_user_logged_in() && is_page( 'login' ) ) {
+		wp_safe_redirect( bbp_get_forums_url() );
+		exit();
+	}
+}
+add_action( 'bbp_template_redirect', 'bb_base_login_redirect', 11 );

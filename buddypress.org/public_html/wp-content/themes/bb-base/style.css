@@ -1614,6 +1614,10 @@ body.trac .attachment {
 	margin: 0 auto;
 }
 
+#wp-admin-bar-my-account img.avatar {
+	border-radius: 50%;
+}
+
 /* =Responsive Overrides
 -------------------------------------------------------------- */
 
@@ -1750,8 +1754,7 @@ body.trac .attachment {
 		color: #fff;
 	}
 	#wp-admin-bar-my-account img.avatar {
-		height: 38px;
-		width: 38px;
-		border-radius: 50%;
+		height: 38px !important;
+		width: 38px !important;
 	}
 }
