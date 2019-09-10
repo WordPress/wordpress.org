@@ -1,3 +1,8 @@
+html {
+	font-size: 62.5%;
+	line-height: 1.5;
+}
+
 #header {
 	background-color: #be3631;
 	border-bottom: 1px solid #9e1611;
@@ -7,14 +12,7 @@
 }
 
 body.admin-bar header#masthead {
-	margin-top: 42px;
-}
-
-#header-inner {
-	margin: 0 auto;
-	width: 100%;
-	height: 80px;
-	padding: 0;
+	margin-top: 124px;
 }
 
 #header #network-title {
@@ -222,6 +220,10 @@ div[class*="-table-of-contents-container"] .current-menu-item > .expandable butt
 	display: inline-block;
 }
 
+p {
+	margin-bottom: 1.5em;
+}
+
 p.source-code-links a,
 p#add-user-note a,
 body .meta a,
@@ -246,6 +248,18 @@ body .meta a,
 
 #footer p {
 	margin: 0;
+}
+
+@media screen and ( min-width: 960px ) {
+	#content,
+	div.content,
+	div.site-content,
+	.devhub-wrap #content-area,
+	.devhub-wrap .inner-wrap {
+		width: 960px;
+		margin: 0 auto;
+		max-width: 100%;
+	}
 }
 
 /* Shrink logo to make room for navigation */
