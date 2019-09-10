@@ -1612,7 +1612,6 @@ body.trac .attachment {
 
 #wp-toolbar {
 	margin: 0 auto;
-	z-index: 88888;
 }
 
 #wp-admin-bar-my-account img.avatar {
@@ -1670,6 +1669,7 @@ body.trac .attachment {
 		position: absolute;
 	}
 	#wpadminbar {
+		z-index: 88888;
 		height: 56px !important;
 		position: absolute;
 	}
