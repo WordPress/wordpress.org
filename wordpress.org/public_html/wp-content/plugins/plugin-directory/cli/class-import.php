@@ -459,6 +459,11 @@ class Import {
 			}
 		}
 
+		foreach ( $blocks as $block_name => $block ) {
+			if ( empty( $block->title ) )
+				$blocks[ $block_name ]->title = $trunk_readme->name;
+		}
+
 		// Find blocks dist/build JS files
 		$block_files = array();
 		$dist_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_tag}/dist" ) ?: array();
