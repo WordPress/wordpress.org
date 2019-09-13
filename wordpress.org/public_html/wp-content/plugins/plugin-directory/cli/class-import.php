@@ -192,13 +192,16 @@ class Import {
 			$changed = update_post_meta( $plugin->ID, 'all_blocks', $blocks );
 			if ( $changed || count ( get_post_meta( $plugin->ID, 'block_name' ) ) !== count ( $blocks ) ) {
 				delete_post_meta( $plugin->ID, 'block_name' );
+				delete_post_meta( $plugin->ID, 'block_title' );
 				foreach ( $blocks as $block ) {
 					add_post_meta( $plugin->ID, 'block_name', $block->name, false );
+					add_post_meta( $plugin->ID, 'block_title', ( $block->title ?: $plugin->post_title ), false );
 				}
 			}
 		} else {
 			delete_post_meta( $plugin->ID, 'all_blocks' );
 			delete_post_meta( $plugin->ID, 'block_name' );
+			delete_post_meta( $plugin->ID, 'block_title' );
 		}
 
 		// Only store block_files for plugins in the block directory
@@ -458,20 +461,20 @@ class Import {
 
 		// Find blocks dist/build JS files
 		$block_files = array();
-		$dist_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/dist" ) ?: array();
-		$build_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/trunk/build" ) ?: array();
+		$dist_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_tag}/dist" ) ?: array();
+		$build_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_tag}/build" ) ?: array();
 
 		foreach ( $dist_files as $file ) {
-			$block_files[] = '/trunk/dist/' . $file;
+			$block_files[] = "/{$stable_tag}/dist/" . $file;
 		}
 
 		foreach ( $build_files as $file ) {
-			$block_files[] = '/trunk/build/' . $file;
+			$block_files[] = "/{$stable_tag}/build/" . $file;
 		}
 
 		if ( empty( $block_files ) ) {
 			foreach ( $files_with_blocks as $file ) {
-				$block_files[] = '/trunk/' . $file;
+				$block_files[] = "/{$stable_tag}/" . $file;
 			}
 		}
 
