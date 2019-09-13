@@ -75,6 +75,11 @@ class Query_Plugins extends Base {
 					'value' => '/' . $block_search, // search following the slash
 					'compare' => 'RLIKE',
 				),
+				array(
+					'key' => 'block_title',
+					'value' => $block_search, // search in title
+					'compare' => 'RLIKE',
+				),
 			);
 
 			// Limit the search to the Block section
