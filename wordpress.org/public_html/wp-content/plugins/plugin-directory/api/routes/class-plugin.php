@@ -221,7 +221,8 @@ class Plugin extends Base {
 		$result['blocks'] = get_post_meta( $post_id, 'all_blocks', true ) ?: [];
 		$result['block_assets'] = get_post_meta( $post_id, 'block_files', true ) ?: [];
 		$result['author_block_count'] = get_post_meta( $post_id, 'author_block_count' ) ?: intval( count( $result['blocks'] ) > 0 );
-		$result['author_block_rating'] = get_post_meta( $post_id, 'author_block_rating' ) ?: $result['rating'];
+		// Fun fact: ratings are stored as 1-5 in postmeta, but returned as percentages by the API
+		$result['author_block_rating'] = get_post_meta( $post_id, 'author_block_rating' ) ? 20 * get_post_meta( $post_id, 'author_block_rating' ) : $result['rating'];
 
 		// That's all folks!
 		return $result;

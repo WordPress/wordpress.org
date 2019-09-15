@@ -91,6 +91,54 @@ class Meta_Sync {
 				'ratings',
 				\WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name )
 			);
+
+			$author_block_query = new \WP_Query( array(
+				'author' => $post->post_author,
+				'post_status' => 'publish',
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'plugin_section',
+						'field' => 'slug',
+						'terms' => 'block',
+					)
+				),
+				'posts_per_page' => 10,
+			) );
+
+			$author_block_count = $author_block_query->found_posts;
+
+			$author_block_slugs = wp_list_pluck( $author_block_query->posts, 'post_name' );
+
+			update_post_meta(
+				$post->ID,
+				'author_block_count',
+				$author_block_count
+			);
+
+			if ( count( $author_block_slugs ) > 0 ) {
+
+				// Grab the ratings and counts for each separate block plugin, and use that to calculate the author's average rating
+				$author_rating_total = $author_rating_count = 0;
+				foreach ( $author_block_slugs as $block_slug ) {
+					$block_ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $block_slug );
+					if ( $block_ratings ) {
+						foreach ( $block_ratings as $rating => $rating_count ) {
+							$author_rating_total += ( $rating * $rating_count );
+							$author_rating_count += $rating_count;
+						}
+					};
+				}
+
+				if ( $author_rating_count ) {
+					$avg_block_rating = $author_rating_total / $author_rating_count;
+					update_post_meta(
+						$post->ID,
+						'author_block_rating',
+						$avg_block_rating
+					);
+				}
+
+			}
 		}
 
 		update_option( 'plugin_last_review_sync', $current_review_time, 'no' );
