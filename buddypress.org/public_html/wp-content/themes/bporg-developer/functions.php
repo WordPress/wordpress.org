@@ -16,11 +16,10 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 function bporg_developer_enqueue_styles() {
-	wp_enqueue_style( 'bb-base', content_url( 'themes' ) . '/bb-base/style.css' );
 	wp_enqueue_style( 'wporg-developer', get_template_directory_uri() . '/style.css' );
 	wp_enqueue_style( 'bporg-developer-main',
 		get_stylesheet_directory_uri() . '/css/style.css',
-		array( 'wp-dev-sass-compiled', 'dashicons', 'bb-base' ),
+		array( 'wp-dev-sass-compiled', 'dashicons' ),
 		wp_get_theme()->get( 'Version' )
 	);
 }
