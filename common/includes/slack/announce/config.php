@@ -182,11 +182,14 @@ function get_whitelist() {
 			'TimothyBlynJacobs', // @timothybjacobs on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
+			'anlino', // @andersnoren on Slack
 			'davidakennedy',
 			'iamtakashi',
+			'ianbelanger',
 			'karmatosed',
 			'laurelfulford',
 			'melchoyce',
+			'poena',
 		) ),
 		'design' => array(
 			'boemedia',
@@ -211,9 +214,9 @@ function get_whitelist() {
 			'milana_cap', // @zzap on Slack
 		),
 		'feature-notifications' => array(
+			'hrmervin',
 			'johnbillion',
 			'justinahinon', // @justin on Slack
-			'hrmervin',
 			'psykro', // @jon_bossenger on Slack
 			'schlessera',
 		),
