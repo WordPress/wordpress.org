@@ -5,19 +5,14 @@ function wporg_login_check_recapcha_status() {
 		return false;
 	}
 
-	$verify = array(
-		'secret'   => RECAPTCHA_INVIS_PRIVKEY,
-		'remoteip' => $_SERVER['REMOTE_ADDR'],
-		'response' => $_POST['g-recaptcha-response'],
+	$result = wporg_login_recaptcha_api(
+		$_POST['g-recaptcha-response'],
+		RECAPTCHA_INVIS_PRIVKEY
 	);
 
-	$resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
-	if ( is_wp_error( $resp ) || 200 != wp_remote_retrieve_response_code( $resp ) ) {
+	if ( ! $result ) {
 		return false;
 	}
-
-	$result = json_decode( wp_remote_retrieve_body( $resp ), true );
-
 	return (bool) $result['success'];
 }
 
@@ -53,6 +48,19 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 		),
 		'scores' => array()
 	);
+
+	// reCaptcha v3 logging.
+	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
+		$recaptcha_api = wporg_login_recaptcha_api(
+			$_POST['_reCaptcha_v3_token'],
+			RECAPTCHA_V3_PRIVKEY
+		);
+		$pending_user['scores']['pending'] = -1;
+		if ( $recaptcha_api && $recaptcha_api['success'] && 'register' == $recaptcha_api['action'] ) {
+			$pending_user['scores']['pending'] = $recaptcha_api['score'];
+		}
+		
+	}
 
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
@@ -167,6 +175,19 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 	$pending_user['created'] = 1;
 	$pending_user['created_date'] = gmdate( 'Y-m-d H:i:s' );
 	$pending_user['meta']['confirmed_ip'] = $_SERVER['REMOTE_ADDR']; // Spam/Fraud purposes, will be deleted once not needed.
+
+	// reCaptcha v3 logging.
+	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
+		$recaptcha_api = wporg_login_recaptcha_api(
+			$_POST['_reCaptcha_v3_token'],
+			RECAPTCHA_V3_PRIVKEY
+		);
+		$pending_user['scores']['create'] = -1;
+		if ( $recaptcha_api && $recaptcha_api['success'] && 'pending_create' == $recaptcha_api['action'] ) {
+			$pending_user['scores']['create'] = $recaptcha_api['score'];
+		}
+	}
+
 	wporg_update_pending_user( $pending_user );
 
 	if ( $user_mailinglist ) {

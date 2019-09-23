@@ -80,6 +80,28 @@ function wporg_login_register_scripts() {
 	wp_localize_script( 'wporg-registration', 'wporg_registration', array(
 		'rest_url' => esc_url_raw( rest_url( "wporg/v1" ) )
 	) );
+
+	// reCaptcha v3 is loaded on all login pages, not just the registration flow.
+	wp_enqueue_script( 'recaptcha-api-v3', 'https://www.google.com/recaptcha/api.js?onload=reCaptcha_v3_init&render=' . RECAPTCHA_V3_PUBKEY, array(), '3' );
+	wp_add_inline_script(
+		'recaptcha-api-v3',
+		'function reCaptcha_v3_init() {
+			grecaptcha.execute(' .
+				json_encode( RECAPTCHA_V3_PUBKEY ) .
+				', {action: ' . json_encode(
+					str_replace( '-', '_', WP_WPOrg_SSO::$matched_route ?: 'login' ) // Must match ^[a-Z_ ]$, but we use -
+				) .' }
+			).then( function( token ) {
+				// Add the token to the "primary" form
+				var input = document.createElement( "input" );
+				input.setAttribute( "type", "hidden" );
+				input.setAttribute( "name", "_reCaptcha_v3_token" );
+				input.setAttribute( "value", token );
+
+				document.getElementsByTagName("form")[0].appendChild( input );
+			});
+		}'
+	);
 }
 add_action( 'init', 'wporg_login_register_scripts' );
 
@@ -272,3 +294,21 @@ function wporg_login_language_switcher() {
 }
 add_action( 'wp_footer', 'wporg_login_language_switcher', 1 );
 add_action( 'login_footer', 'wporg_login_language_switcher', 1 );
+
+/**
+ * Simple API for accessing the reCaptcha verify api.
+ */
+function wporg_login_recaptcha_api( $token, $key ) {
+	$verify = array(
+		'secret'   => $key,
+		'remoteip' => $_SERVER['REMOTE_ADDR'],
+		'response' => $token,
+	);
+
+	$resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
+	if ( is_wp_error( $resp ) || 200 != wp_remote_retrieve_response_code( $resp ) ) {
+		return false;
+	}
+
+	return json_decode( wp_remote_retrieve_body( $resp ), true );
+}
