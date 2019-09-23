@@ -192,6 +192,12 @@ function wporg_login_limit_user_meta( $meta ) {
 add_filter( 'insert_user_meta', 'wporg_login_limit_user_meta', 1 );
 
 /**
+ * Remove the default contact methods.
+ * This prevents the user meta being created unless they edit their profiles.
+ */
+add_filter( 'user_contactmethods', '__return_empty_array' );
+
+/**
  * Retreives all avaiable locales with their native names.
  *
  * @return array Locales with their native names.

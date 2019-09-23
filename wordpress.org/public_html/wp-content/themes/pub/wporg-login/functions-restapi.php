@@ -35,6 +35,15 @@ function wporg_login_rest_username_exists( $request ) {
 		];
 	}
 
+	// Check we don't have a pending registration for that username.
+	if ( $pending = wporg_get_pending_user( $login ) ) {
+		return [
+			'available' => false,
+			'error' => __( 'That username is already in use.', 'wporg' ) . '<br>' . __( 'The registration is still pending, please check your email for the confirmation link.', 'wporg' ),
+			'avatar' => get_avatar( $pending->user_email, 64 ),
+		];
+	}
+
 	// Perform general validations.
 	$validate_signup_error = $validate_signup['errors']->get_error_message( 'user_name' );
 
@@ -57,6 +66,15 @@ function wporg_login_rest_email_in_use( $request ) {
 			'available' => false,
 			'error' => __( 'That email address already has an account.', 'wporg' ) . '<br>' . __( 'Is it yours? <a href="/lostpassword">Reset your password</a>.', 'wporg' ),
 			'avatar' => get_avatar( $user, 64 ),
+		];
+	}
+
+	// Check we don't have a pending registration for that email.
+	if ( $pending = wporg_get_pending_user( $email ) ) {
+		return [
+			'available' => false,
+			'error' => __( 'That email address already has an account.', 'wporg' ) . '<br>' . __( 'The registration is still pending, please check your email for the confirmation link.', 'wporg' ),
+			'avatar' => get_avatar( $email, 64 ),
 		];
 	}
 

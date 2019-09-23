@@ -27,7 +27,7 @@ if ( $_POST ) {
 		if ( ! wporg_login_check_recapcha_status() ) {
 			$error_recapcha_status = true;
 		} else {
-			wporg_login_create_user( $user_login, $user_email, $user_mailinglist );
+			wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist );
 			die();
 		}
 	}
