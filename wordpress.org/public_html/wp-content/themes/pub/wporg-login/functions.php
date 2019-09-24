@@ -83,14 +83,19 @@ function wporg_login_register_scripts() {
 
 	// reCaptcha v3 is loaded on all login pages, not just the registration flow.
 	wp_enqueue_script( 'recaptcha-api-v3', 'https://www.google.com/recaptcha/api.js?onload=reCaptcha_v3_init&render=' . RECAPTCHA_V3_PUBKEY, array(), '3' );
+	$login_route = WP_WPOrg_SSO::$matched_route;
+	if ( ! $login_route || 'root' == $login_route ) {
+		$login_route = 'login';
+	}
+	// reCaptcha only supports [a-Z _/] as the action.
+	$login_route = preg_replace( '#[^a-z/_ ]#i', '_', $login_route );
+
 	wp_add_inline_script(
 		'recaptcha-api-v3',
 		'function reCaptcha_v3_init() {
 			grecaptcha.execute(' .
 				json_encode( RECAPTCHA_V3_PUBKEY ) .
-				', {action: ' . json_encode(
-					str_replace( '-', '_', WP_WPOrg_SSO::$matched_route ?: 'login' ) // Must match ^[a-Z_ ]$, but we use -
-				) .' }
+				', {action: ' . json_encode( $login_route ) . ' }
 			).then( function( token ) {
 				// Add the token to the "primary" form
 				var input = document.createElement( "input" );
