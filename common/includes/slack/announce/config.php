@@ -70,6 +70,7 @@ function get_whitelist() {
 			'justinahinon', // @justin on Slack
 			'karmatosed',
 			'lukecarbis',
+			'mapk',
 			'marybaum',
 			'pbiron',
 			'psykro', // @jon_bossenger on Slack
