@@ -291,14 +291,18 @@ function get_whitelist() {
 			'tokyobiyori',
 		),
 		'themereview' => array(
+			'acalfieri',
+			'aristath',
 			'cais',
 			'chipbennett',
+			'dingo_d',
 			'emiluzelac',
 			'grapplerulrich',
 			'greenshady',
 			'jcastaneda',
 			'kafleg',
 			'karmatosed',
+			'poena',
 			'williampatton',
 		),
 		'tide' => array(
