@@ -68,7 +68,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			</li>
 			<li id="tablink-developers"><a href="#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
 		</ul>
-		<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.location.hash = '#developers'; }</script>
+		<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.setTimeout( function() { window.location.hash = '#developers'; }, 10 ); }</script>
 	<?php endif; ?>
 
 	<div class="entry-content">
