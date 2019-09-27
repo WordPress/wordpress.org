@@ -52,7 +52,7 @@ add_action( 'init', 'wporg_login_init' );
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20180217' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20190927' );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
 
