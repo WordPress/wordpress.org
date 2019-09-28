@@ -6,7 +6,7 @@
  */
 ?>
 <!doctype html>
-<html class="no-js" <?php language_attributes(); ?>>
+<html <?php language_attributes(); ?>>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -14,7 +14,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php wp_head(); ?>
 </head>
-<body <?php body_class( 'wp-core-ui login' ); ?>>
+<body <?php body_class( 'wp-core-ui login no-js' ); ?>>
+<script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24PF4B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <div id="login">
