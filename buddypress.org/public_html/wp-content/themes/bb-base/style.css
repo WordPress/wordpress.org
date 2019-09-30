@@ -1510,28 +1510,32 @@ div.plugin-meta img {
 	padding: 5px 3px 5px 8px;
 }
 
-#activity-personal-li a:before {
+#menu-bp #activity-personal-li a:before {
 	content: '\f452';
 }
 
-#xprofile-personal-li a:before {
+#menu-bp #xprofile-personal-li a:before {
 	content: '\f110';
 }
 
-#blogs-personal-li a:before {
+#menu-bp #blogs-personal-li a:before {
 	content: '\f325';
 }
 
-#notifications-personal-li a:before {
+#menu-bp #notifications-personal-li a:before {
 	content: '\f339';
 }
 
-#forums-personal-li a:before {
+#menu-bp #forums-personal-li a:before {
 	content: '\f451';
 }
 
-#settings-personal-li a:before {
+#menu-bp #settings-personal-li a:before {
 	content: '\f111';
+}
+
+#menu-bp #public-personal-li a:before {
+	content: '\f337';
 }
 
 #menu-bp li a:hover {
