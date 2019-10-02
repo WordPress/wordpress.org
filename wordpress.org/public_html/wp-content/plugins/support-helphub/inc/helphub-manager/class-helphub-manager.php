@@ -181,11 +181,11 @@ class HelpHub_Manager {
 
 		/*
 		 * Only allow changing roles of users that are HelpHub related, or do not already hold
-		 * a role within the user hierarchy as is.
+		 * a role within the user hierarchy with sufficient capabilities to modify HelpHub articles.
 		 *
 		 * This is to prevent overriding users with higher capabilities altogether.
 		 */
-		if ( ! empty( $user_role ) && ! isset( $helphub_roles[ $user_role ] ) ) {
+		if ( ! empty( $user_role ) && ! isset( $helphub_roles[ $user_role ] ) && user_can( bbp_get_displayed_user_id(), 'edit_posts' ) ) {
 			return;
 		}
 

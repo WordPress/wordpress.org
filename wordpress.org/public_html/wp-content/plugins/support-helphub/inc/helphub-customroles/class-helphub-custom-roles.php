@@ -222,8 +222,6 @@ class HelpHub_Custom_Roles {
 		$default_editorroles = $wp_roles->get_role( 'editor' );
 		if ( empty( $GLOBALS['wp_roles']->is_role( $role ) ) ) {
 			$wp_roles->add_role( $role, __( 'HelpHub Editor', 'wporg-forums' ), $default_editorroles->capabilities );
-
-			$wp_roles->add_cap( $role, 'edit_theme_options' );
 		}
 	}
 }
