@@ -68,6 +68,12 @@ class Plugin_Directory {
 		// Allow post_modified not to be modified when we don't specifically bump it.
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 
+		add_filter( 'jetpack_active_modules', function( $modules ) {
+			if ( $i = array_search( 'search', $modules ) )
+				unset( $modules[$i] );
+			return $modules;
+		} );
+
 		// Work around caching issues
 		add_filter( 'pre_option_jetpack_sync_full__started', array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__started', '__return_null' );
