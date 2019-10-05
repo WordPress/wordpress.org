@@ -105,4 +105,12 @@ var wpTracAutoCompleteUsers = {
 
 </script>
 </body>
+
+<py:if test="req.authname == 'pento'">
+	<py:match path="div[@id='content' and @class='ticket']//div[@id='attachments']" once="true">
+	<div py:attrs="select('@*')">
+ 		${select('*|comment()|text()')}
+	</div>
+	<div id="prs"></div>
+</py:if>
 </html>
