@@ -114,4 +114,9 @@ var wpTracAutoCompleteUsers = {
 		<div id="prs"></div>
 	</py:match>
 </py:if>
+
+<py:if test="req.authname != 'pento'">
+	<div py:match="label[@for='field-prnumber']" py:strip=""></div>
+	<div py:match="input[@id='prnumber']" py:strip=""></div>
+</py:if>
 </html>
