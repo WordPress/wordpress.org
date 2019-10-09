@@ -74,7 +74,21 @@ add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
 function wporg_login_register_scripts() {
 	wp_register_script( 'recaptcha-api', 'https://www.google.com/recaptcha/api.js', array(), '2' );
-	wp_add_inline_script( 'recaptcha-api', 'function onSubmit(token) { document.getElementById("registerform").submit(); }' );
+	wp_add_inline_script(
+		'recaptcha-api',
+		'function onSubmit(token) {
+			var form = document.getElementById("registerform");
+
+			if ( form.dataset.submitReady ) {
+				form.submit();
+			} else {
+				// Still waiting on reCaptcha V3, disable/please wait the submit button.
+				form.dataset.submitReady = true;
+				document.getElementById("wp-submit").disabled = true;
+				document.getElementById("wp-submit").value = ' . json_encode( __( 'Please Wait..', 'wporg') ) . ';
+			}
+		}'
+	);
 
 	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), '20170219' );
 	wp_localize_script( 'wporg-registration', 'wporg_registration', array(
@@ -98,12 +112,20 @@ function wporg_login_register_scripts() {
 				', {action: ' . json_encode( $login_route ) . ' }
 			).then( function( token ) {
 				// Add the token to the "primary" form
-				var input = document.createElement( "input" );
+				var input = document.createElement( "input" ),
+					form = document.getElementsByTagName("form")[0];
+
 				input.setAttribute( "type", "hidden" );
 				input.setAttribute( "name", "_reCaptcha_v3_token" );
 				input.setAttribute( "value", token );
 
-				document.getElementsByTagName("form")[0].appendChild( input );
+				form.appendChild( input );
+
+				if ( form.dataset.submitReady ) {
+					form.submit();
+				} else {
+					form.dataset.submitReady = true;
+				}
 			});
 		}'
 	);
@@ -304,16 +326,25 @@ add_action( 'login_footer', 'wporg_login_language_switcher', 1 );
  * Simple API for accessing the reCaptcha verify api.
  */
 function wporg_login_recaptcha_api( $token, $key ) {
+	// Just a basic cache for multiple calls on the same token on the same pageload.
+	static $cache = array();
+
 	$verify = array(
 		'secret'   => $key,
 		'remoteip' => $_SERVER['REMOTE_ADDR'],
 		'response' => $token,
 	);
+	$cache_key = implode( ':', $verify );
 
-	$resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
-	if ( is_wp_error( $resp ) || 200 != wp_remote_retrieve_response_code( $resp ) ) {
-		return false;
+	if ( ! isset( $cache[ $cache_key ] ) ) {
+		$resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
+		if ( is_wp_error( $resp ) || 200 != wp_remote_retrieve_response_code( $resp ) ) {
+			$cache[ $cache_key ] = false;
+			return false;
+		}
+
+		$cache[ $cache_key ] = json_decode( wp_remote_retrieve_body( $resp ), true );
 	}
 
-	return json_decode( wp_remote_retrieve_body( $resp ), true );
+	return $cache[ $cache_key ];
 }

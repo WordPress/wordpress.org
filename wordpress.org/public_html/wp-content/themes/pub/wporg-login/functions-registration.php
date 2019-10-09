@@ -1,6 +1,32 @@
 <?php
 
-function wporg_login_check_recapcha_status() {
+function wporg_login_check_recapcha_status( $check_v3_action = false ) {
+
+	// reCaptcha V3 Checks
+	if ( $check_v3_action ) {
+		if ( empty( $_POST['_reCaptcha_v3_token'] ) ) {
+			return false;
+		}
+		$result = wporg_login_recaptcha_api(
+			$_POST['_reCaptcha_v3_token'],
+			RECAPTCHA_V3_PRIVKEY
+		);
+
+		if (
+			! $result ||
+			! $result['success'] ||
+			$check_v3_action !== $result['action']
+		) {
+			return false;
+		}
+
+		// Block super-low scores.
+		if ( (float)$result['score'] < (float) get_option( 'recaptcha_v3_threshold', 0.2 ) ) {
+			return false;
+		}
+	}
+
+	// reCaptcha V2 Checks
 	if ( empty( $_POST['g-recaptcha-response'] ) ) {
 		return false;
 	}
@@ -13,6 +39,7 @@ function wporg_login_check_recapcha_status() {
 	if ( ! $result ) {
 		return false;
 	}
+
 	return (bool) $result['success'];
 }
 

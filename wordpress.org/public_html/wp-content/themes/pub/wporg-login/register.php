@@ -24,7 +24,7 @@ if ( $_POST ) {
 
 	// handle user registrations.
 	if ( ! $error_user_login && ! $error_user_email ) {
-		if ( ! wporg_login_check_recapcha_status() ) {
+		if ( ! wporg_login_check_recapcha_status( 'register' ) ) {
 			$error_recapcha_status = true;
 		} else {
 			wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist );

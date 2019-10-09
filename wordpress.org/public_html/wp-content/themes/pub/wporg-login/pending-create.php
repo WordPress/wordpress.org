@@ -41,6 +41,21 @@ if ( ! $can_access ) {
 	die();
 }
 
+// Check reCaptcha status
+$error_recapcha_status = false;
+if ( isset( $_POST['user_pass'] ) ) {
+	if ( ! wporg_login_check_recapcha_status( 'pending_create' ) ) {
+		// No no. "Please try again."
+		$error_recapcha_status = true;
+		unset( $_POST['user_pass'] );
+	}
+}
+
+if ( wporg_login_save_profile_fields( $pending_user ) ) {
+	// re-fetch the user, it's probably changed.
+	$pending_user = wporg_get_pending_user( $activation_user );
+}
+
 if ( isset( $_POST['user_pass'] ) ) {
 	$user_pass = wp_unslash( $_POST['user_pass'] );
 
@@ -51,8 +66,6 @@ if ( isset( $_POST['user_pass'] ) ) {
 			wp_set_auth_cookie( $user->ID, true );
 		}
 	}
-
-	wporg_login_save_profile_fields();
 
 	wp_safe_redirect( 'https://wordpress.org/support/' );
 	die();
@@ -90,9 +103,14 @@ get_header();
 		$fields = &$pending_user['meta'];
 		include __DIR__ . '/partials/register-profilefields.php';
 	?>
+	<?php
+		if ( $error_recapcha_status ) {
+			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
+		}
+	?>
 
 	<p class="login-submit">
-		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
+		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary button-large" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
 	</p>
 
 </form>
