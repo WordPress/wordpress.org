@@ -372,6 +372,18 @@ class Hooks {
 		if ( bbp_is_search() ) {
 			// #3955
 			$robots = true;
+		} elseif ( bbp_is_single_user() ) {
+			// Blocked users are not indexed.
+			if ( bbpress()->displayed_user && bbpress()->displayed_user->has_cap( 'bbp_blocked' ) ) {
+				$robots = true;
+			// Users with no Topics/Replies/Reviews are not indexed.
+			} elseif (
+				! wporg_support_get_user_topics_count() &&
+				! bbp_get_user_reply_count_raw() &&
+				! wporg_support_get_user_reviews_count()
+			) {
+				$robots = true;
+			}
 		} elseif (
 			bbp_is_single_view() &&
 			in_array( bbp_get_view_id(), array( 'plugin-committer', 'plugin-contributor' ) )
