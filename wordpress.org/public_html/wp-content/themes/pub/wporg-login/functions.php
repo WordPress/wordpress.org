@@ -348,3 +348,27 @@ function wporg_login_recaptcha_api( $token, $key ) {
 
 	return $cache[ $cache_key ];
 }
+
+/**
+ * Schedule a cron-task to clear pending registrations regularly.
+ */
+function wporg_login_cron_tasks() {
+	if ( ! wp_next_scheduled( 'login_purge_pending_registrations' ) ) {
+		wp_schedule_event( time(), 'daily', 'login_purge_pending_registrations' );
+	}
+}
+add_action( 'admin_init', 'wporg_login_cron_tasks' );
+
+/**
+ * Clears the Pending Registrations table reguarly.
+ */
+function wporg_login_purge_pending_registrations() {
+	global $wpdb;
+	$two_weeks_ago = gmdate( 'Y-m-d H:i:s', time() - 14 * DAY_IN_SECONDS );
+
+	$wpdb->query( $wpdb->prepare(
+		"DELETE FROM `{$wpdb->base_prefix}user_pending_registrations`  WHERE `user_registered` <= %s",
+		$two_weeks_ago
+	) );
+}
+add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_registrations' );
