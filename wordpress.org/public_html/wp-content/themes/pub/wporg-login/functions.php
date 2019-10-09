@@ -82,10 +82,9 @@ function wporg_login_register_scripts() {
 			if ( form.dataset.submitReady ) {
 				form.submit();
 			} else {
-				// Still waiting on reCaptcha V3, disable/please wait the submit button.
+				// Still waiting on reCaptcha V3, disable the submit button.
 				form.dataset.submitReady = true;
 				document.getElementById("wp-submit").disabled = true;
-				document.getElementById("wp-submit").value = ' . json_encode( __( 'Please Wait..', 'wporg') ) . ';
 			}
 		}'
 	);
