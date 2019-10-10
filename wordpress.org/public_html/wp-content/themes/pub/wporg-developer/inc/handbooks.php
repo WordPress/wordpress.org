@@ -26,7 +26,7 @@ class Devhub_Handbooks {
 	 * @var array
 	 * @access public
 	 */
-	public static $hidden_handbooks = [ 'apis-handbook' ];
+	public static $hidden_handbooks = [];
 
 	/**
 	 * Initializer
