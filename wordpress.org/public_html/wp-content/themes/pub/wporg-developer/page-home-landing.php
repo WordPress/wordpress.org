@@ -33,6 +33,12 @@ get_header(); ?>
 					<a href="<?php echo esc_url( get_post_type_archive_link( 'blocks-handbook' ) ); ?>" class="go"><?php _e( 'Build Blocks ', 'wporg' ); ?></a>
 				</div>
 
+				<div class="box box-apis">
+					<h3 class="widget-title"><div class="dashicons dashicons-admin-site-alt3"></div><?php _e( 'Common APIs', 'wporg' ); ?></h3>
+					<p class="widget-description"><?php _e( 'Interested in interacting with various APIs?', 'wporg' ); ?></p>
+					<a href="<?php echo esc_url( get_post_type_archive_link( 'apis-handbook' ) ); ?>" class="go"><?php _e( 'Utilize APIs', 'wporg' ); ?></a>
+				</div>
+
 				<div class="box box-themes">
 					<h3 class="widget-title"><div class="dashicons dashicons-admin-appearance"></div><?php _e( 'Themes', 'wporg' ); ?></h3>
 					<p class="widget-description"><?php _e( 'Want to learn how to start theming WordPress?', 'wporg' ); ?></p>
