@@ -39,12 +39,23 @@ class Official_WordPress_Events {
 	 */
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts',               array( $this, 'enqueue_scripts'       ) );
+		add_action( 'init',                             array( $this, 'schedule_cron_jobs'    ) );
 		add_action( 'owpe_prime_events_cache',          array( $this, 'prime_events_cache'    ) );
 		add_action( 'owpe_mark_deleted_meetups',        array( $this, 'mark_deleted_meetups'  ) );
 		add_action( 'api_client_handle_error_response', array( $this, 'handle_error_response' ), 10, 3 );
 
 		add_shortcode( 'official_wordpress_events', array( $this, 'render_events'      ) );
+	}
 
+	/**
+	 * Schedule cron jobs.
+	 *
+	 * This needs to run on the `init` action, because Cavalcade isn't fully loaded before that, and events
+	 * wouldn't be scheduled.
+	 *
+	 * @see https://dotorg.trac.wordpress.org/changeset/15351/
+	 */
+	public function schedule_cron_jobs() {
 		if ( ! wp_next_scheduled( 'owpe_prime_events_cache' ) ) {
 			wp_schedule_event( time(), 'hourly', 'owpe_prime_events_cache' );
 		}
