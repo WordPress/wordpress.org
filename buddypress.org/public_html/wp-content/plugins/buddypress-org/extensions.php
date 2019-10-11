@@ -158,48 +158,6 @@ if ( (bool) strstr( $_SERVER['HTTP_HOST'], 'buddypress' ) && ! is_admin() && def
 	add_action( 'init', 'bporg_redirect', 1 ); // before bp_init
 }
 
-function wporg_profiles_redirect() {
-	$uri_chunks = explode( '/', trim( $_SERVER['REQUEST_URI'], '/' ) );
-	if ( 'users' == $uri_chunks[0] ) {
-		if ( ! empty( $uri_chunks[1] ) ) {
-			wp_redirect( 'https://profiles.wordpress.org/' . $uri_chunks[1] . '/', 301 );
-		} else {
-			wp_redirect( 'https://wordpress.org/' );
-		}
-		exit;
-	}
-
-	if ( get_user_by( 'slug', $uri_chunks[0] ) ) {
-		return;
-	}
-
-	if ( $user = get_user_by( 'login', urldecode( $uri_chunks[0] ) ) ) {
-		wp_redirect( 'https://profiles.wordpress.org/' . $user->user_nicename . '/', 301 );
-		exit;
-	} elseif ( $user = get_user_by( 'login', str_replace( ' ', '', urldecode( $uri_chunks[0] ) ) ) ) {
-		wp_redirect( 'https://profiles.wordpress.org/' . $user->user_nicename . '/', 301 );
-		exit;
-	}
-
-	// For strange reasons, BP uses 'wp' rather than template_redirect.
-	add_action( 'wp', 'wporg_profiles_maybe_template_redirect', 0 );
-}
-
-function wporg_profiles_maybe_template_redirect() {
-	if ( is_robots() || is_feed() || is_trackback() ) {
-		return;
-	}
-
-	ob_start();
-	wp_redirect( 'https://wordpress.org/' );
-	exit;
-}
-
-if ( 'profiles.wordpress.org' == $_SERVER['HTTP_HOST'] && ! is_admin() && defined( 'WP_USE_THEMES' ) && WP_USE_THEMES ) {
-	add_action( 'init', 'wporg_profiles_redirect', 9 ); // before bp_init
-	add_filter( 'bp_do_redirect_canonical', '__return_false' ); // Overrides #BP1741
-}
-
 function bporg_insert_at_mention( $content, $activity_obj ) {
 	global $bp;
 
