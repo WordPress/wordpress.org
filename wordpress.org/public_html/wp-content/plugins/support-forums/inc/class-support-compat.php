@@ -55,6 +55,9 @@ class Support_Compat {
 			// Exclude certain forums from forum queries.
 			add_action( 'pre_get_posts', array( $this, 'exclude_hidden_forums' ), 1 );
 
+			// Prefix the theme/plugin to the title for WordPress.org notifications.
+			add_filter( 'wporg_notifications_info', array( $this, 'wporg_notifications_info' ) );
+
 			$this->loaded = true;
 		}
 	}
@@ -511,6 +514,44 @@ class Support_Compat {
 		array_splice( $r, 1, 1, $link );
 
 		return $r;
+	}
+
+	/**
+	 * Filter notifications data to prefix the name of the Plugin/Theme to the title.
+	 */
+	public function wporg_notifications_info( $data ) {
+		// Bail if this notification isn't a forum topic/reply
+		if ( $data['type'] != 'forum_topic' && $data['type'] != 'forum_topic_reply' ) {
+			return $data;
+		}
+
+		$topic_id = $data['topic_id'];
+		$forum_id = bbp_get_topic_forum_id( $topic_id );
+
+		if ( $forum_id === Plugin::PLUGINS_FORUM_ID ) {
+			$type = 'plugin';
+		} elseif ( $forum_id === Plugin::THEMES_FORUM_ID ) {
+			$type = 'theme';
+		} else {
+			// Not in a Plugin/Theme forum.
+			return $data;
+		}
+
+		$slugs = wp_get_post_terms( $topic_id, 'topic-' . $type, array( 'fields' => 'slugs' ) );
+		$obj   = $slugs ? Directory_Compat::get_object_by_slug_and_type( $slugs[0], $type ) : false;
+
+		if ( ! $obj ) {
+			return $data;
+		}
+
+		// Prefix the Plugin/Theme to the notification title.
+		$data['title'] = sprintf(
+			'[%s] %s',
+			$obj->post_title,
+			$data['title']
+		);
+
+		return $data;
 	}
 
 	/**
