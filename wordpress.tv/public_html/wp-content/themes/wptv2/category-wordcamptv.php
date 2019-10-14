@@ -39,7 +39,7 @@ global $wptv;
 				<li class="group">
 					<a href="<?php the_permalink(); ?>" rel="bookmark">
 						<span class="video-thumbnail">
-							<img src="<?php $wptv->the_video( true, true ); ?>" />
+							<?php $wptv->the_video_image( 50, null, false ); ?>
 						</span>
 						<span class="video-title"><?php the_title(); ?></span>
 					</a>

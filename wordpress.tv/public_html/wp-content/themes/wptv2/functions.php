@@ -573,12 +573,9 @@ class WordPressTV_Theme {
 	 *
 	 * @global WP_Post $post
 	 * @global string  $originalcontent
-	 *
-	 * @param bool $thumb
-	 * @param bool $no_html
 	 */
-	function the_video( $thumb = false, $no_html = false ) {
-		$image = $video = '';
+	function the_video() {
+		$video = '';
 		global $post, $originalcontent;
 		$originalcontent = $post->post_content;
 
@@ -589,7 +586,6 @@ class WordPressTV_Theme {
 		foreach ( $shortcodes as $shortcode ) {
 			if ( 'wpvideo' == $shortcode[2] ) {
 				$attributes = shortcode_parse_atts( $shortcode[0] );
-				$image      = video_image_url_by_guid( rtrim( $attributes[1], ']' ), 'fmt_dvd' ); // dvd image has width = 640
 				$hd_param   = '';
 
 				// Only set HD param is it won't already be set from `$shortcode[3]`.
@@ -602,15 +598,7 @@ class WordPressTV_Theme {
 			}
 		}
 
-		// Output results
-		if ( $thumb ) {
-			if ( ! $no_html ) {
-				$image = '<img width="650" src="' . esc_url( $image ) . '" alt="' . esc_attr( $post->post_title ) . '" />';
-			}
-			echo $image;
-		} else {
-			echo $video;
-		}
+		echo $video;
 
 		add_filter( 'the_content', array( $this, 'remove_shortcodes' ) );
 	}

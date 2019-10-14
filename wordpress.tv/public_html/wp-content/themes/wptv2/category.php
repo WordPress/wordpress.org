@@ -42,7 +42,7 @@ if ( get_query_var( 'paged' ) < 2 && $wp_query->found_posts > 6 ) : ?>
 				<li class="group">
 					<a href="<?php the_permalink(); ?>" rel="bookmark" title="<?php echo esc_attr( sprintf(__('Permanent Link to %s', ''), get_the_title() ) ); ?>" >
 						<span class="video-thumbnail">
-							<img src="<?php $wptv->the_video( true, true ); ?>" />
+							<?php $wptv->the_video_image( 50, null, false ); ?>
 						</span>
 						<span class="video-title"><?php the_title(); ?></span>
 					</a>
