@@ -355,9 +355,8 @@ if ( !empty($_REQUEST['error']) ) {
 			};
 
 			$( '#wptv_video_upload' ).show();
-			$( '#video-upload-form input[type="text"]' ).each( function() {
-				$( this ).attr( 'maxlength', '100' );
-			} );
+			$( '#video-upload-form input[type="text"]' ).prop( 'maxlength', 100 );
+			$( '#video-upload-form input[type="text"]#wptv_slides_url' ).prop( 'maxlength', 200 );
 			$( 'ul.cats-checkboxes input' ).prop( 'disabled', false );
 
 			$( '#wptv_video_wordcamp, ul.cats-checkboxes input' ).on( 'change', function() {
