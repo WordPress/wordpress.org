@@ -919,3 +919,46 @@ function wptv_widont( $str = '' ) {
 }
 remove_filter( 'the_title', 'widont' );
 add_filter( 'the_title', 'wptv_widont' );
+
+/**
+ * Update Attachment titles to match the Post Title.
+ * 
+ * This is done as the Attachment Title is shown within the VideoPress embeds.
+ * This can't be done through a filter in the themes functions.php, as it appears that's not loaded for the Rest API.
+ * 
+ * @see https://meta.trac.wordpress.org/ticket/4667
+ */
+function wptv_update_attachment_titles( $id, $post, $post_before ) {
+	if ( 'post' !== $post->post_type ) {
+		return;
+	}
+
+	// Get attachments - Should only be one?
+	$attachments = get_posts( array(
+		'post_type'   => 'attachment',
+		'post_parent' => $id,
+	) );
+	if ( ! $attachments || count( $attachments ) > 1 ) {
+		return;
+	}
+	$attachment = $attachments[0];
+
+	if ( $post->post_title === $attachment->post_title ) {
+		// Titles match, nothing needs updating.
+		return;
+	} elseif ( sanitize_file_name( $attachment->post_title ) === $attachment->post_title ) {
+		// Default title, Update it.
+	} elseif ( $attachment->post_title === $post_before->post_title ) {
+		// Set to the same as the post, update to the new title.
+	} else {
+		// It's set to something that isn't the current, previous, or default titles.
+		// Assume that the title has been set manually and bail.
+		return;
+	}
+
+	// Update attachment to share the post title.
+	// The attachment title appears in VideoPress thumbnails.
+	$attachment->post_title = $post->post_title;
+	wp_update_post( $attachment );
+}
+add_action( 'post_updated', 'wptv_update_attachment_titles', 10, 3 );
