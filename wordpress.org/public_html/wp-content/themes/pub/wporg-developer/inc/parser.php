@@ -21,6 +21,7 @@ class DevHub_Parser {
 		'wp-includes/IXR/',
 		'wp-includes/SimplePie/',
 		'wp-includes/Text/',
+		'wp-includes/blocks/',
 		'wp-includes/certificates/',
 		'wp-includes/class-IXR.php',
 		'wp-includes/class-json.php',
