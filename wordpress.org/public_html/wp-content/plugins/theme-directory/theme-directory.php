@@ -1104,6 +1104,45 @@ function wporg_themes_add_hreflang_link_attributes() {
 
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
+	// Google doesn't have support for a whole lot of languages and throws errors about it,
+	// so we exclude them, as we're otherwise outputting data that isn't used at all.
+	$unsupported_languages = array(
+		'arq',
+		'art',
+		'art-xemoji',
+		'ary',
+		'ast',
+		'az-ir',
+		'azb',
+		'bcc',
+		'ff-sn',
+		'frp',
+		'fuc',
+		'fur',
+		'haz',
+		'ido',
+		'io',
+		'kab',
+		'li',
+		'li-nl',
+		'lmo',
+		'me',
+		'me-me',
+		'rhg',
+		'rup',
+		'sah',
+		'sc-it',
+		'scn',
+		'skr',
+		'srd',
+		'szl',
+		'tah',
+		'twd',
+		'ty-tj',
+		'tzm',
+	);
+
+	// WARNING: for any changes below, check other uses of the `locale-assosciations` group as there's shared cache keys in use.
 	if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
 		global $wpdb;
 
@@ -1114,10 +1153,22 @@ function wporg_themes_add_hreflang_link_attributes() {
 
 		require_once GLOTPRESS_LOCALES_PATH;
 
-		foreach ( $sites as $site ) {
+		foreach ( $sites as $key => $site ) {
 			$gp_locale = GP_Locales::by_field( 'wp_locale', $site->locale );
 			if ( ! $gp_locale ) {
-				unset( $sites[ $site->locale ] );
+				unset( $sites[ $key ] );
+				continue;
+			}
+
+			// Skip non-existing subdomains, e.g. 'de_CH_informal'.
+			if ( false !== strpos( $site->subdomain, '_' ) ) {
+				unset( $sites[ $key ] );
+				continue;
+			}
+
+			// Skip unsupported locales.
+			if ( in_array( $gp_locale->slug, $unsupported_languages ) ) {
+				unset( $sites[ $key ] );
 				continue;
 			}
 
@@ -1134,10 +1185,10 @@ function wporg_themes_add_hreflang_link_attributes() {
 				$hreflang = $gp_locale->lang_code_iso_639_3;
 			}
 
-			if ( $hreflang && 'art' !== $hreflang ) {
-				$sites[ $site->locale ]->hreflang = strtolower( $hreflang );
+			if ( $hreflang ) {
+				$sites[ $key ]->hreflang = strtolower( $hreflang );
 			} else {
-				unset( $sites[ $site->locale ] );
+				unset( $sites[ $key ] );
 			}
 		}
 
