@@ -168,7 +168,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			if ( preg_match( '!/wp-signup\.php$!', $this->script ) ) {
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
-				$this->_safe_redirect( add_query_arg( 'redirect_to', urlencode( $redirect_req ), $this->sso_signup_url ) );
+				$this->_safe_redirect( add_query_arg( 'redirect_to', urlencode( $redirect_req ), $this->sso_signup_url ), 301 );
 
 			} elseif ( ! $this->is_sso_host() ) {
 				// If we're not on the SSO host
@@ -190,7 +190,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					$redirect_to_sso_login = add_query_arg( 'redirect_to', urlencode( $redirect_req ), $redirect_to_sso_login );
 
 					// And actually redirect to the SSO login
-					$this->_safe_redirect( $redirect_to_sso_login );
+					$this->_safe_redirect( $redirect_to_sso_login, 301 );
 
 				} else {
 					// Otherwise, filter the login_url to point to the SSO
@@ -225,7 +225,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 									// But make sure to show our custom screen when needed
 									$get['redirect_to'] = $this->_get_safer_redirect_to();
 								}
-								$this->_safe_redirect( add_query_arg( $get, $this->sso_login_url . '/wp-login.php' ) );
+								$this->_safe_redirect( add_query_arg( $get, $this->sso_login_url . '/wp-login.php' ), 301 );
 								return;
 							} else {
 								// Else let the theme render, or redirect if logged in
@@ -252,7 +252,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						$this->_redirect_to_profile();
 					} else {
 						// Otherwise, redirect to the login screen.
-						$this->_safe_redirect( $this->sso_login_url );
+						$this->_safe_redirect( $this->sso_login_url, 301 );
 					}
 				} else {
 					// if on login screen, filter network_site_url to make sure our forms go to the SSO host, not wordpress.org
@@ -359,7 +359,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			if ( ! empty( $_GET['redirect_to'] ) ) {
 				$this->_safe_redirect( $this->_get_safer_redirect_to() );
 			} else {
-				$this->_safe_redirect( 'https://profiles.wordpress.org/' . wp_get_current_user()->user_nicename );
+				$this->_safe_redirect( 'https://profiles.wordpress.org/' . wp_get_current_user()->user_nicename . '/' );
 			}
 		}
 	}

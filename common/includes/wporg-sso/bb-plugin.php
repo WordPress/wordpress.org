@@ -34,7 +34,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'BB_WPOrg_SSO' ) ) {
 			} else if ( preg_match( '/\/register\.php$/', $this->script ) ) {
 				// Redirect registration request to the one we want to standardize on.
 				if ( "https://{$this->host}{$this->script}" !== $this->sso_signup_url ) {
-					$this->_safe_redirect( $this->sso_signup_url );
+					$this->_safe_redirect( $this->sso_signup_url, 301 );
 				}
 			} else if ( preg_match( '/\/bb-login\.php$/', $this->script ) ) {
 				if ( ! empty( $_POST ) ) {
@@ -56,7 +56,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'BB_WPOrg_SSO' ) ) {
 				$redirect_to_sso_login = add_query_arg( 'redirect_to', urlencode( $this->_get_safer_redirect_to() ), $redirect_to_sso_login );
 
 				// Redirect to SSO login, trying to pass on a decent redirect_to request.
-				$this->_safe_redirect( $redirect_to_sso_login );
+				$this->_safe_redirect( $redirect_to_sso_login, 301 );
 			}
 		}
 	}
