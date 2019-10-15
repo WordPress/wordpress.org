@@ -1028,3 +1028,21 @@ add_filter( 'get_edit_post_link', array( 'Gutenberg_Handbook', 'redirect_edit_li
 add_filter( 'o2_filter_post_actions', array( 'Gutenberg_Handbook', 'redirect_o2_edit_link_to_github' ), 11, 2 );
 
 add_filter( 'handbook_display_toc', '__return_false' );
+
+/**
+ * Output the GoogleTagManager <head> tags.
+ */
+function wporg_gutenberg_gtm() {
+	?>
+
+	<link rel="dns-prefetch" href="//www.googletagmanager.com">
+
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-P24PF4B');</script>
+
+	<?php
+}
+add_action( 'wp_head', 'wporg_gutenberg_gtm' );
