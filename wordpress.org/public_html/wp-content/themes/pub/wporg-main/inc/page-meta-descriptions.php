@@ -186,7 +186,7 @@ add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\custom_open_graph_tags'
  * @see https://developers.google.com/search/docs/guides/enhance-site
  */
 function sites_attributes_schema() {
-	if ( ! is_front_page() ) {
+	if ( ! is_front_page() || ! isset( $GLOBALS['rosetta'] ) ) {
 		return;
 	}
 
