@@ -470,7 +470,7 @@ class Plugin_Directory {
 		) );
 
 		register_meta( 'post', 'assets_icons', array(
-			'type'         => 'array',
+			'type'         => 'UserDefinedarray',
 			'description'  => __( 'Icon images of the plugin.', 'wporg-plugins' ),
 			'single'       => true,
 			// TODO 'sanitize_callback' => 'esc_url_raw',
@@ -1198,22 +1198,22 @@ class Plugin_Directory {
 	function custom_redirects() {
 		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
 		if ( get_query_var( 'redirect_plugin' ) && get_query_var( 'redirect_plugin_tab' ) ) {
-			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/#' . get_query_var( 'redirect_plugin_tab' ) ) );
+			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/#' . get_query_var( 'redirect_plugin_tab' ) ), 301 );
 			die();
 		}
 
 		// We've disabled WordPress's default 404 redirects, so we'll handle them ourselves.
 		if ( is_404() ) {
 
-			// [1] => plugins [2] => example-plugin-name [2..] => random().
+			// [1] => plugins [2] => example-plugin-name [3..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
 
 			if ( 'tags' === $path[2] ) {
 				if ( isset( $path[3] ) && ! empty( $path[3] ) ) {
-					wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ) );
+					wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ), 301 );
 					die();
 				} else {
-					wp_safe_redirect( home_url( '/' ) );
+					wp_safe_redirect( home_url( '/' ), 301 );
 					die();
 				}
 			}
@@ -1221,18 +1221,18 @@ class Plugin_Directory {
 			// The about page is now over at /developers/.
 			if ( 'about' === $path[2] ) {
 				if ( isset( $path[3] ) && 'add' == $path[3] ) {
-					wp_safe_redirect( home_url( '/developers/add/' ) );
+					wp_safe_redirect( home_url( '/developers/add/' ), 301 );
 				} elseif ( isset( $path[3] ) && 'validator' == $path[3] ) {
-					wp_safe_redirect( home_url( '/developers/readme-validator/' ) );
+					wp_safe_redirect( home_url( '/developers/readme-validator/' ), 301 );
 				} else {
-					wp_safe_redirect( home_url( '/developers/' ) );
+					wp_safe_redirect( home_url( '/developers/' ), 301 );
 				}
 				die();
 			}
 
 			// Browse 404s.
 			if ( 'browse' === $path[2] ) {
-				wp_safe_redirect( home_url( '/' ) );
+				wp_safe_redirect( home_url( '/' ), 301 );
 				die();
 			}
 
@@ -1248,14 +1248,14 @@ class Plugin_Directory {
 			if ( $path[2] && ( $plugin = self::get_plugin_post( $path[2] ) ) ) {
 				$permalink = get_permalink( $plugin->ID );
 				if ( parse_url( $permalink, PHP_URL_PATH ) != $_SERVER['REQUEST_URI'] ) {
-					wp_safe_redirect( $permalink );
+					wp_safe_redirect( $permalink, 301 );
 					die();
 				}
 			}
 
 			// Otherwise, let's redirect to the search page.
 			if ( isset( $path[2] ) && ! empty( $path[2] ) ) {
-				wp_safe_redirect( home_url( '/search/' . urlencode( $path[2] ) . '/' ) );
+				wp_safe_redirect( home_url( '/search/' . urlencode( $path[2] ) . '/' ), 301 );
 				die();
 			}
 		}
@@ -1296,7 +1296,7 @@ class Plugin_Directory {
 
 		// disable feeds
 		if ( is_feed() ) {
-			if( isset( $_GET['feed'] ) ) {
+			if ( isset( $_GET['feed'] ) ) {
 				wp_redirect( esc_url_raw( remove_query_arg( 'feed' ) ), 301 );
 				die();
 			}
