@@ -1429,7 +1429,7 @@ window.wp = window.wp || {};
 			var self = this, sorter;
 
 			if ( -1 === _.indexOf( this.sortValues, sort ) ) {
-				sort = 'featured';
+			//	sort = 'featured'; // https://meta.trac.wordpress.org/ticket/4415
 			}
 
 			sorter = $( '.filter-links [data-sort="' + sort + '"]');

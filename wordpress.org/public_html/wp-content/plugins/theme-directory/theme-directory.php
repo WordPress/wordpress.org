@@ -155,10 +155,10 @@ function wporg_themes_init() {
 	}
 
 	// Add the browse/* views
-	add_rewrite_tag( '%browse%', '(featured|popular|new|updated|favorites)' );
+	add_rewrite_tag( '%browse%', '([^/]+)' );
 	add_permastruct( 'browse', 'browse/%browse%' );
 	add_rewrite_tag( '%favorites_user%', '([^/]+)' );
-	//add_permastruct( 'favorites_user', 'browse/favorites/%favorites_user%' ); // TODO: Implment in JS before enabling
+	//add_permastruct( 'favorites_user', 'browse/favorites/%favorites_user%' ); // TODO: Implement in JS before enabling
 
 	if ( ! defined( 'WPORG_THEME_DIRECTORY_BLOGID' ) ) {
 		define( 'WPORG_THEME_DIRECTORY_BLOGID', get_current_blog_id() );

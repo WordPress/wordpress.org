@@ -105,6 +105,16 @@ function wporg_themes_pre_get_posts( $query ) {
 			$query->query_vars['meta_type'] = 'DECIMAL(20,10)';
 			$query->query_vars['orderby'] = 'meta_value DESC';
 			break;
+
+		default:
+			// Force a 404 for anything else.
+			if ( $query->query_vars['browse'] ) {
+				$query->query_vars['error'] = 404;
+				$query->query_vars['name'] = 'please-trigger-a-404';
+				$query->query_vars['p'] = -404;
+				$query->set_404();
+			}
+			break;
 	}
 
 	// Unless a specific theme/author is being requested, or it's an internal query, limit results to the last 2 years.
@@ -147,3 +157,17 @@ function wporg_themes_prioritize_translated_posts_clauses( $clauses ) {
 
 	return $clauses;
 }
+
+/**
+ * Handle proper 404 errors for requests.
+ */
+function wporg_themes_parse_request( $wp ) {
+	$sections = array(
+		'new', 'updated', 'featured', 'favorites', 'popular'
+	);
+
+	if ( !empty( $wp->query_vars['browse'] ) && ! in_array( $wp->query_vars['browse'], $sections ) ) {
+		$wp->handle_404();
+	}
+}
+add_action( 'parse_request', 'wporg_themes_parse_request' );
