@@ -407,7 +407,7 @@ class WP_45_Credits extends WP_Credits {
 			array( 'Plupload', 'http://www.plupload.com/' ),
 			array( 'random_compat', 'https://github.com/paragonie/random_compat' ),
 			array( 'SimplePie', 'http://simplepie.org/' ),
-			array( 'The Incutio XML-RPC Library', 'http://scripts.incutio.com/xmlrpc/' ),
+			array( 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ),
 			array( 'Thickbox', 'http://codylindley.com/thickbox/' ),
 			array( 'TinyMCE', 'http://www.tinymce.com/' ),
 			array( 'Twemoji', 'https://github.com/twitter/twemoji' ),

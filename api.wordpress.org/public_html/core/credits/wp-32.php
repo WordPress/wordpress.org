@@ -193,7 +193,7 @@ class WP_32_Credits extends WP_Credits {
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'SWFObject', 'http://code.google.com/p/swfobject/' ),
 			array( 'SWFUpload', 'http://www.swfupload.org/' ),
-			array( 'The Incutio XML-RPC Library', 'http://scripts.incutio.com/xmlrpc/' ),
+			array( 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ),
 			array( 'Thickbox', 'http://jquery.com/demo/thickbox/' ),
 			array( 'TinyMCE', 'http://www.tinymce.com/' ),
 		);

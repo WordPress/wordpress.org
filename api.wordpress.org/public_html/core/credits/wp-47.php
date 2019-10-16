@@ -624,7 +624,7 @@ class WP_47_Credits extends WP_Credits {
 			array( 'random_compat', 'https://github.com/paragonie/random_compat' ),
 			array( 'Requests', 'http://requests.ryanmccue.info/' ),
 			array( 'SimplePie', 'http://simplepie.org/' ),
-			array( 'The Incutio XML-RPC Library', 'http://scripts.incutio.com/xmlrpc/' ),
+			array( 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ),
 			array( 'Thickbox', 'http://codylindley.com/thickbox/' ),
 			array( 'TinyMCE', 'https://www.tinymce.com/' ),
 			array( 'Twemoji', 'https://github.com/twitter/twemoji' ),

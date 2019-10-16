@@ -515,7 +515,7 @@ class WP_52_Credits extends WP_Credits {
 			[ 'Redux', 'https://redux.js.org/' ],
 			[ 'Requests', 'http://requests.ryanmccue.info/' ],
 			[ 'SimplePie', 'http://simplepie.org/' ],
-			[ 'The Incutio XML-RPC Library', 'http://scripts.incutio.com/xmlrpc/' ],
+			[ 'The Incutio XML-RPC Library', 'https://code.google.com/archive/p/php-ixr/' ],
 			[ 'Thickbox', 'http://codylindley.com/thickbox/' ],
 			[ 'TinyMCE', 'https://www.tinymce.com/' ],
 			[ 'Twemoji', 'https://github.com/twitter/twemoji' ],
