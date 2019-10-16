@@ -25,12 +25,16 @@ add_action( 'template_redirect', function() {
 }, 9 ); // Before redirect_canonical();
 
 /*
- * WordPress.org/feed/* should redirect to WordPress.org/news/feed/*
+ * WordPress.org/-specific redirects
  */
-if ( 'wordpress.org' === $_SERVER['HTTP_HOST'] && '/feed' === substr( $_SERVER['REQUEST_URI'], 0, 5 ) ) {
+if ( 1 === get_current_blog_id() ) {
 	add_action( 'template_redirect', function() {
 		if ( is_feed() ) {
-			wp_safe_redirect( '/news' . $_SERVER['REQUEST_URI'], 301 );
+			// WordPress.org/feed/* should redirect to WordPress.org/news/feed/*
+			wp_safe_redirect( '/news/feed/' . ( 'feed' !== get_query_var('feed') ? get_query_var('feed') : '' ), 301 );
+			exit;
+		} elseif ( is_search() ) {
+			wp_safe_redirect( '/search/' . urlencode( get_query_var('s') ), 301 );
 			exit;
 		}
 	}, 9 ); // Before redirect_canonical();
