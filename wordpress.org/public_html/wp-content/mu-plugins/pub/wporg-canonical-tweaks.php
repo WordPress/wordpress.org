@@ -23,3 +23,15 @@ add_action( 'template_redirect', function() {
 	}
 
 }, 9 ); // Before redirect_canonical();
+
+/*
+ * WordPress.org/feed/* should redirect to WordPress.org/news/feed/*
+ */
+if ( 'wordpress.org' === $_SERVER['HTTP_HOST'] && '/feed' === substr( $_SERVER['REQUEST_URI'], 0, 5 ) ) {
+	add_action( 'template_redirect', function() {
+		if ( is_feed() ) {
+			wp_safe_redirect( '/news' . $_SERVER['REQUEST_URI'], 301 );
+			exit;
+		}
+	}, 9 ); // Before redirect_canonical();
+}
