@@ -237,7 +237,10 @@ class Hooks {
 		if ( is_404() && 'topic' === get_query_var( 'post_type' ) && get_query_var( 'name' ) ) {
 			$hidden_topic = get_post( $post_id );
 
-			if ( $hidden_topic && ! current_user_can( 'read_topic', $hidden_topic->ID ) ) {
+			if ( $hidden_topic && 
+				 in_array( $hidden_topic->post_status, array( 'spam', 'pending', 'archived' ) ) &&
+				 ! current_user_can( 'read_topic', $hidden_topic->ID )
+			   ) {
 				$post_id = 0;
 			}
 		}
