@@ -743,6 +743,9 @@ nav.o2-post-footer-actions ul li > span > a {
 		padding-right: 0;
 		clear: none;
 	}
+	.o2-editor-content-wrapper {
+		margin-top: auto;
+	}
 }
 
 @media screen and (min-width: 769px) {
