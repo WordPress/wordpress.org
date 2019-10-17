@@ -309,6 +309,15 @@ a:active,
 	color: #0072a9;
 }
 
+.entry-meta .entry-date,
+.entry-meta .entry-actions,
+.entry-meta .entry-tags,
+.comment-meta .comment-date,
+.comment-meta .comment-actions,
+.o2-reply-count {
+	color: #555;
+}
+
 body,
 .widget,
 .o2-app-page-title,
