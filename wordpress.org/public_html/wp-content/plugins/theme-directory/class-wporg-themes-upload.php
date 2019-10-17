@@ -745,8 +745,8 @@ TICKET;
 			$ticket_id = (int) $this->theme_post->_ticket_id[ $this->theme_post->max_version ];
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
-			// Make sure the ticket has no resolution and is not approved (3 = ticket attributes).
-			if ( empty( $ticket[3]['resolution'] ) && 'approved' !== $ticket[3]['status'] ) {
+			// Make sure the ticket has not yet been resolved.
+			if ( empty( $ticket[3]['resolution'] ) ) {
 				$result    = $this->trac->ticket_update( $ticket_id, $this->trac_ticket->description, array( 'summary' => $this->trac_ticket->summary, 'keywords' => implode( ' ', $this->trac_ticket->keywords ) ), true /* Trigger email notifications */ );
 				$ticket_id = $result ? $ticket_id : false;
 			} else {
