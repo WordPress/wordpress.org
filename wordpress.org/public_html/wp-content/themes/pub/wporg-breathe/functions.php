@@ -43,6 +43,7 @@ function customize_register( $wp_customize ) {
  * - date-based archives
  * - search results
  * - 'mentions' taxonomy
+ * - tag archives with fewer than 3 posts
  */
 function no_robots() {
 	if (
@@ -51,6 +52,8 @@ function no_robots() {
 		is_date()
 	||
 		is_tax( 'mentions' )
+	||
+		( is_tag() && get_queried_object()->count < 3 )
 	) {
 		wp_no_robots();
 	}
