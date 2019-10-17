@@ -37,14 +37,22 @@ function customize_register( $wp_customize ) {
 }
 
 /**
- * Outputs a 'noindex,follow' meta tag for search results.
+ * Outputs a 'noindex,follow' `meta` tag when appropriate.
+ *
+ * Currently applies to:
+ * - date-based archives
+ * - search results
  */
-function no_robots_search_results() {
-	if ( is_search() ) {
+function no_robots() {
+	if (
+		is_search()
+	||
+		is_date()
+	) {
 		wp_no_robots();
 	}
 }
-add_action( 'wp_head', __NAMESPACE__ . '\no_robots_search_results', 9 );
+add_action( 'wp_head', __NAMESPACE__ . '\no_robots', 9 );
 
 
 /**
