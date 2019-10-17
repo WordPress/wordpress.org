@@ -16,7 +16,7 @@
 </head>
 <body <?php body_class( 'wp-core-ui login no-js' ); ?>>
 <script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24PF4B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<?php wp_body_open(); ?>
 
 <div id="login">
 	<h1><a href="https://wordpress.org/" title="WordPress.org" tabindex="-1"><?php _e( 'WordPress.org Login', 'wporg' ); ?></a></h1>

@@ -66,6 +66,12 @@ $meta_desc_text = sprintf(
 	number_format_i18n( $num )
 );
 
+// Remove some headers we don't need:
+remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+remove_action( 'wp_head', 'wp_print_styles', 8 );
+remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
+remove_action( 'wp_head', '_admin_bar_bump_cb' );
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -75,13 +81,7 @@ $meta_desc_text = sprintf(
 	<link href="//fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet" type="text/css">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<link rel="canonical" href="<?php echo esc_url( $canonical_url ); ?>">
-	<link rel="dns-prefetch" href="//www.googletagmanager.com">
 	<meta name="description" content="<?php echo esc_attr( $meta_desc_text ); ?>">
-	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-P24PF4B');</script>
 	<style type="text/css">
 		html,
 		body {
@@ -214,10 +214,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 			}
 		}
 	</style>
+	<?php wp_head(); ?>
 </head>
 
 <body>
-	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24PF4B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<?php wp_body_open(); ?>
 	<div class="something-semantic">
 		<div class="something-else-semantic">
 			<div class="counter-inner">

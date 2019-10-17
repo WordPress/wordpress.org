@@ -8,7 +8,7 @@
 	</head>
 
 	<body <?php body_class( 'folded' ); ?>>
-		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24PF4B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<?php wp_body_open(); ?>
 		<div class="gutenberg">
 			<div id="editor" class="gutenberg__editor"></div>
 		</div>

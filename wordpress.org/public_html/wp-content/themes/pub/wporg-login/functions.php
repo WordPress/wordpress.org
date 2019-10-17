@@ -132,29 +132,15 @@ function wporg_login_register_scripts() {
 add_action( 'init', 'wporg_login_register_scripts' );
 
 /**
- * Output the GoogleTagManager <head> tags.
- */
-function wporg_login_gtm() {
-	?>
-	<link rel="dns-prefetch" href="//www.googletagmanager.com">
-
-	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-	'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-	})(window,document,'script','dataLayer','GTM-P24PF4B');</script>
-	<?php
-}
-add_action( 'wp_head', 'wporg_login_gtm' );
-add_action( 'login_head', 'wporg_login_gtm' );
-
-/**
  * wp_die() handler for login.wordpress.org, adds GTM to error pages.
  */
 function wporg_login_die_handler( $message, $title = '', $args = array() ) {
-	if ( is_string( $message ) ) {
+	if ( is_string( $message ) && is_callable( '\WordPressdotorg\Plugin\GoogleTagManager\wp_head' ) ) {
 		ob_start();
-		wporg_login_gtm();
+
+		\WordPressdotorg\Plugin\GoogleTagManager\wp_head();
+		\WordPressdotorg\Plugin\GoogleTagManager\wp_body_open();
+
 		$gtm = ob_get_clean();
 
 		$message = $gtm . $message;
