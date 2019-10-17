@@ -25,6 +25,5 @@ require WPORGPATH . 'header.php';
 <nav id="site-navigation" class="main-navigation" role="navigation">
 	<ul id="menu-theme-directory" class="menu">
 		<li><a href="<?php echo home_url( '/commercial/' ); ?>"><?php _e( 'Commercial Themes', 'wporg-themes' ); ?></a></li>
-		<li><a href="<?php echo home_url( '/getting-started/' ); ?>"><?php _e( 'Upload Your Theme', 'wporg-themes' ); ?></a></li>
 	</ul>
 </nav>

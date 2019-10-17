@@ -13,7 +13,7 @@
 
 get_header();
 ?>
-	<div id="themes" class="wrap">
+	<main id="themes" class="wrap">
 		<div class="wp-filter">
 			<div class="filter-count">
 				<span class="count theme-count"><?php echo number_format_i18n( $wp_query->found_posts ); ?></span>
@@ -92,7 +92,9 @@ get_header();
 		<div class="theme-install-overlay"></div>
 		<div class="theme-overlay"></div>
 		<span class="spinner"></span>
-	</div>
+	</main>
+
+	<?php get_template_part( 'sidebar', 'footer' ); ?>
 
 <?php
 get_footer();

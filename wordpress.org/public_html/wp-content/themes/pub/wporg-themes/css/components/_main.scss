@@ -76,7 +76,8 @@ ul, ol {
 }
 
 .modal-open .wp-filter,
-.modal-open .rendered .themes {
+.modal-open .rendered .themes,
+.modal-open aside.theme-widget-area {
 	display: none;
 }
 
@@ -164,6 +165,34 @@ ul, ol {
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
 	opacity: 1;
 }
+
+// Theme Widget area in the themes screen.
+.theme-widget-area {
+  background-color: #fff;
+  padding-top: 20px;
+}
+
+.theme-widget-area .widget-wrap {
+  display: flex;
+  flex-direction: row;
+}
+
+.theme-widget-area .widget {
+  flex: 1;
+  margin-right: 14px;
+}
+
+.theme-widget-area .textwidget {
+  font-size: 12.8px;
+  font-size: .8rem;
+}
+
+@media only screen and (max-width: 600px) {
+  .theme-widget-area .widget-wrap {
+    flex-direction: column;
+  }
+}
+
 
 /**
  * Theme Screenshot
