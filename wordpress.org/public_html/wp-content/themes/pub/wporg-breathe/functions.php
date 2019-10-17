@@ -42,12 +42,15 @@ function customize_register( $wp_customize ) {
  * Currently applies to:
  * - date-based archives
  * - search results
+ * - 'mentions' taxonomy
  */
 function no_robots() {
 	if (
 		is_search()
 	||
 		is_date()
+	||
+		is_tax( 'mentions' )
 	) {
 		wp_no_robots();
 	}
