@@ -13,6 +13,11 @@
 
 namespace WordPressdotorg\Forums;
 
+// This plugin requires that bbPress be activated. Do nothing if activated without it.
+if ( ! class_exists( 'bbPress' ) ) {
+	return;
+}
+
 // General includes.
 include( dirname( __FILE__ ) . '/inc/class-plugin.php' );
 include( dirname( __FILE__ ) . '/inc/class-users.php' );
