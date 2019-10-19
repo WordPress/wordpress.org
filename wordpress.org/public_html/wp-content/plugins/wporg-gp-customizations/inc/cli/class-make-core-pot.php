@@ -35,9 +35,6 @@ class Make_Core_Pot extends WP_CLI_Command {
 	 *
 	 * <destination>
 	 * : Directory to store resulting POT files.
-	 *
-	 * [--dry-run]
-	 * : Run without creating POT files.
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$this->source      = realpath( $args[0] );
@@ -63,19 +60,24 @@ class Make_Core_Pot extends WP_CLI_Command {
 			date( 'Y' )
 		);
 
-		// Continents and cities.
-		$command  = 'i18n make-pot ' . escapeshellarg( $this->source );
-		$command .= ' ' . escapeshellarg( $this->destination . '/wordpress-continents-cities.pot' );
-		$command .= ' --include="wp-admin/includes/continents-cities.php"';
-		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
-		$command .= ' --headers=' . escapeshellarg( $headers );
-		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-js';
-		$command .= ' --skip-audit';
-		$command .= ' --ignore-domain';
+		$command_args = [
+			'i18n',
+			'make-pot',
+			$this->source,
+			$this->destination . '/wordpress-continents-cities.pot',
+		];
 
-		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command );
+		$command_assoc_args = [
+			'include'       => 'wp-admin/includes/continents-cities.php',
+			'package-name'  => self::PACKAGE_NAME,
+			'headers'       => $headers,
+			'file-comment'  => $file_comment,
+			'skip-js'       => true,
+			'skip-audit'    => true,
+			'ignore-domain' => true,
+		];
+
+		WP_CLI::run_command( $command_args, $command_assoc_args );
 
 		// Front end.
 		$front_end_exclude = [
@@ -120,38 +122,50 @@ class Make_Core_Pot extends WP_CLI_Command {
 			$front_end_exclude[] = 'wp-includes/js/tinymce/*';
 		}
 
-		$command  = 'i18n make-pot ' . escapeshellarg( $this->source );
-		$command .= ' ' . escapeshellarg( $this->destination . '/wordpress.pot' );
-		$command .= ' --exclude=' . escapeshellarg( implode( ',', $front_end_exclude ) );
-		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
-		$command .= ' --headers=' . escapeshellarg( $headers );
-		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-audit';
-		$command .= ' --ignore-domain';
+		$command_args = [
+			'i18n',
+			'make-pot',
+			$this->source,
+			$this->destination . '/wordpress.pot',
+		];
+
+		$command_assoc_args = [
+			'exclude'       => implode( ',', $front_end_exclude ),
+			'package-name'  => self::PACKAGE_NAME,
+			'headers'       => $headers,
+			'file-comment'  => $file_comment,
+			'skip-audit'    => true,
+			'ignore-domain' => true,
+		];
 
 		if ( version_compare( $wp_version, '5.0-beta', '<' ) ) {
-			$command .= ' --skip-js';
+			$command_assoc_args['skip-js'] = true;
 		}
 
-		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command );
+		WP_CLI::run_command( $command_args, $command_assoc_args );
 
 		// Hello Dolly, included in admin.
 		$hello_dolly_pot = wp_tempnam( 'hello-dolly.pot' );
 
-		$command  = 'i18n make-pot ' . escapeshellarg( $this->source . '/wp-content/plugins' );
-		$command .= ' ' . escapeshellarg( $hello_dolly_pot );
-		$command .= ' --exclude="akismet/*"';
-		$command .= ' --include="hello.php"';
-		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
-		$command .= ' --headers=' . escapeshellarg( $headers );
-		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-js';
-		$command .= ' --skip-audit';
-		$command .= ' --ignore-domain';
+		$command_args = [
+			'i18n',
+			'make-pot',
+			$this->source . '/wp-content/plugins',
+			$hello_dolly_pot,
+		];
 
-		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command );
+		$command_assoc_args = [
+			'exclude'       => 'akismet/*',
+			'include'       => 'hello.php',
+			'package-name'  => self::PACKAGE_NAME,
+			'headers'       => $headers,
+			'file-comment'  => $file_comment,
+			'skip-js'       => true,
+			'skip-audit'    => true,
+			'ignore-domain' => true,
+		];
+
+		WP_CLI::run_command( $command_args, $command_assoc_args );
 
 		// Admin.
 		$admin_network_files = [
@@ -177,41 +191,53 @@ class Make_Core_Pot extends WP_CLI_Command {
 
 		$admin_exclude = array_merge( $admin_exclude, $admin_network_files );
 
-		$command  = 'i18n make-pot ' . escapeshellarg( $this->source );
-		$command .= ' ' . escapeshellarg( $this->destination . '/wordpress-admin.pot' );
-		$command .= ' --exclude=' . escapeshellarg( implode( ',', $admin_exclude ) );
-		$command .= ' --include="wp-admin/*"';
-		$command .= ' --merge=' . escapeshellarg( $hello_dolly_pot );
-		$command .= ' --subtract=' . escapeshellarg( $this->destination . '/wordpress.pot' );
-		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
-		$command .= ' --headers=' . escapeshellarg( $headers );
-		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-audit';
-		$command .= ' --ignore-domain';
+		$command_args = [
+			'i18n',
+			'make-pot',
+			$this->source,
+			$this->destination . '/wordpress-admin.pot',
+		];
+
+		$command_assoc_args = [
+			'exclude'       => implode( ',', $admin_exclude ),
+			'include'       => 'wp-admin/*',
+			'merge'         => $hello_dolly_pot,
+			'subtract'      => $this->destination . '/wordpress.pot',
+			'package-name'  => self::PACKAGE_NAME,
+			'headers'       => $headers,
+			'file-comment'  => $file_comment,
+			'skip-audit'    => true,
+			'ignore-domain' => true,
+		];
 
 		if ( version_compare( $wp_version, '5.2-beta', '<' ) ) {
-			$command .= ' --skip-js';
+			$command_assoc_args['skip-js'] = true;
 		}
 
-		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command );
+		WP_CLI::run_command( $command_args, $command_assoc_args );
 
 		unlink( $hello_dolly_pot );
 
 		// Admin Network.
-		$command  = 'i18n make-pot ' . escapeshellarg( $this->source );
-		$command .= ' ' . escapeshellarg( $this->destination . '/wordpress-admin-network.pot' );
-		$command .= ' --include=' . escapeshellarg( implode( ',', $admin_network_files ) );
-		$command .= ' --subtract=' . escapeshellarg( sprintf( '%1$s/wordpress.pot,%1$s/wordpress-admin.pot', $this->destination ) );
-		$command .= ' --package-name=' . escapeshellarg( self::PACKAGE_NAME );
-		$command .= ' --headers=' . escapeshellarg( $headers );
-		$command .= ' --file-comment=' . escapeshellarg( $file_comment );
-		$command .= ' --skip-js'; // TODO: No use of wp.i18n, yet.
-		$command .= ' --skip-audit';
-		$command .= ' --ignore-domain';
+		$command_args = [
+			'i18n',
+			'make-pot',
+			$this->source,
+			$this->destination . '/wordpress-admin-network.pot',
+		];
 
-		WP_CLI::line( $command );
-		! $dry_run && WP_CLI::runcommand( $command );
+		$command_assoc_args = [
+			'include'       => implode( ',', $admin_network_files ),
+			'subtract'      => sprintf( '%1$s/wordpress.pot,%1$s/wordpress-admin.pot', $this->destination ),
+			'package-name'  => self::PACKAGE_NAME,
+			'headers'       => $headers,
+			'file-comment'  => $file_comment,
+			'skip-js'       => true, // TODO: No use of wp.i18n, yet.
+			'skip-audit'    => true,
+			'ignore-domain' => true,
+		];
+
+		WP_CLI::run_command( $command_args, $command_assoc_args );
 	}
 
 	/**
