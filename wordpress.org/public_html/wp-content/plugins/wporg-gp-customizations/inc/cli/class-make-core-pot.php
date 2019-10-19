@@ -81,9 +81,28 @@ class Make_Core_Pot extends WP_CLI_Command {
 		$front_end_exclude = [
 			'wp-admin/*',
 			'wp-content/themes/*',
-			'wp-includes/class-pop3.php',
 			'wp-content/plugins/akismet/*',
-			// External JavaScript libaries.
+			'*.js.map', // TODO: Currently not parsable, https://wordpress.slack.com/archives/C02RP4T41/p1541003227208000.
+			// External libraries.
+			'wp-includes/ID3/*',
+			'wp-includes/IXR/*',
+			'wp-includes/pomo/*',
+			'wp-includes/random_compat/*',
+			'wp-includes/Requests/*',
+			'wp-includes/SimplePie/*',
+			'wp-includes/Text/*',
+			'wp-includes/sodium_compat/*',
+			'wp-includes/atomlib.php',
+			'wp-includes/class-IXR.php',
+			'wp-includes/class-json.php',
+			'wp-includes/class-phpass.php',
+			'wp-includes/class-phpmailer.php',
+			'wp-includes/class-pop3.php',
+			'wp-includes/class-requests.php',
+			'wp-includes/class-simplepie.php',
+			'wp-includes/class-smtp.php',
+			'wp-includes/class-snoopy.php',
+			'wp-includes/rss.php',
 			'wp-includes/js/codemirror/*',
 			'wp-includes/js/crop/*',
 			'wp-includes/js/imgareaselect/*',
@@ -94,7 +113,6 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'wp-includes/js/swfupload/*',
 			'wp-includes/js/thickbox/*',
 			'wp-includes/js/tw-sack.js',
-			'*.js.map', // TODO: Currently not parsable, https://wordpress.slack.com/archives/C02RP4T41/p1541003227208000.
 		];
 
 		// Support https://build.trac.wordpress.org/browser/branches/4.2/wp-includes/js/tinymce/wp-mce-help.php for pre-4.3.
@@ -149,9 +167,19 @@ class Make_Core_Pot extends WP_CLI_Command {
 			] );
 		}
 
+		$admin_exclude = [
+			'wp-admin/includes/continents-cities.php',
+			'editor.min.js', // Explicitly excluded as it's causing a memory leak: https://github.com/wp-cli/i18n-command/issues/185
+			// External libraries.
+			'wp-admin/includes/class-ftp*',
+			'wp-admin/includes/class-pclzip.php',
+		];
+
+		$admin_exclude = array_merge( $admin_exclude, $admin_network_files );
+
 		$command  = 'i18n make-pot ' . escapeshellarg( $this->source );
 		$command .= ' ' . escapeshellarg( $this->destination . '/wordpress-admin.pot' );
-		$command .= ' --exclude=' . escapeshellarg( implode( ',', array_merge( [ 'wp-admin/includes/continents-cities.php' ], $admin_network_files ) ) );
+		$command .= ' --exclude=' . escapeshellarg( implode( ',', $admin_exclude ) );
 		$command .= ' --include="wp-admin/*"';
 		$command .= ' --merge=' . escapeshellarg( $hello_dolly_pot );
 		$command .= ' --subtract=' . escapeshellarg( $this->destination . '/wordpress.pot' );
