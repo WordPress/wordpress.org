@@ -21,7 +21,7 @@ class Commit_Handler {
 
 	public function run() {
 		$this->generate_payload();
-		foreach ( $this->trac->get_commit_channels( $this->svnlook( 'changed' ) ) as $channel ) {
+		foreach ( $this->trac->get_commit_channels( $this->svnlook( 'changed' ), $this->svnlook( 'log' ) ) as $channel ) {
 			$this->send->send( $channel );
 		}
 	}

@@ -79,9 +79,9 @@ class Trac implements User {
 			if ( is_string( $channel ) ) {
 				$this->ticket_component_filters[ $component ] = array( $channel => true );
 			}
-            if ( $this->bypass_primary_channel_for_ticket_filter_matches && empty( $this->ticket_component_filters[ $component ][ $this->primary_channel ] ) ) {
-                $this->ticket_component_filters[ $component ][ $this->primary_channel ] = false;
-            }
+			if ( $this->bypass_primary_channel_for_ticket_filter_matches && empty( $this->ticket_component_filters[ $component ][ $this->primary_channel ] ) ) {
+				$this->ticket_component_filters[ $component ][ $this->primary_channel ] = false;
+			}
 		}
 	}
 
@@ -210,7 +210,7 @@ class Trac implements User {
 		);
 	}
 
-	function get_commit_channels( $changed_files = null ) {
+	function get_commit_channels( $changed_files = null, $log_text = null ) {
 		$channels = array();
 
 		if ( $this->primary_channel ) {
@@ -228,6 +228,12 @@ class Trac implements User {
 					$channels = array_merge( $channels, (array) $channels_to_add );
 				}
 			} elseif ( false !== strpos( $changed_files, $needle ) ) {
+				$channels = array_merge( $channels, (array) $channels_to_add );
+			}
+		}
+
+		foreach ( $this->ticket_component_filters as $component => $channels_to_add ) {
+			if ( 0 === stripos( $log_text, $component ) ) {
 				$channels = array_merge( $channels, (array) $channels_to_add );
 			}
 		}
