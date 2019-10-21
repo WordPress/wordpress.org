@@ -26,15 +26,14 @@ function custom_open_graph_tags( $tags = [] ) {
 			return str_replace( '<meta property="description"', '<meta name="description"', $html );
 		} );
 
-		$locale_native_name = $GLOBALS['rosetta']->rosetta->glotpress_locale->native_name;
+		$site_title = isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ? $GLOBALS['wporg_global_header_options']['rosetta_title'] : 'WordPress.org';
 		return array(
 			'og:type'         => 'website',
-			'og:title'        => __( 'Blog Tool, Publishing Platform, and CMS - WordPress', 'wporg' ),
+			'og:title'        => __( 'Blog Tool, Publishing Platform, and CMS', 'wporg' ) . " - {$site_title}",
 			'og:description'  => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
 			'description'     => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
 			'og:url'          => home_url( '/' ),
-			/* translators: %s - The Locale native name. */
-			'og:site_name'    => sprintf( __( 'WordPress - %s', 'wporg' ), $locale_native_name ),
+			'og:site_name'    => $site_title,
 			'og:image'        => 'https://s.w.org/images/home/screen-themes.png?3',
 			'og:locale'       => get_locale(),
 			'twitter:card'    => 'summary_large_image',
@@ -359,3 +358,19 @@ function custom_page_title( $title, $post = null ) {
 }
 add_filter( 'the_title', __NAMESPACE__ . '\custom_page_title', 10, 2 );
 add_filter( 'single_post_title', __NAMESPACE__ . '\custom_page_title', 10, 2 );
+
+/**
+ * Set the document title on the front page.
+ */
+function document_title_parts( $title ) {
+	if ( isset( $title['site'] ) || is_front_page() ) {
+		$title['site'] = 'WordPress.org'; // Rosetta will replace as needed.
+	}
+
+	if ( is_front_page() ) {
+		$title['title'] = __( 'Blog Tool, Publishing Platform, and CMS', 'wporg' );
+	}
+
+	return $title;
+}
+add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title_parts' );

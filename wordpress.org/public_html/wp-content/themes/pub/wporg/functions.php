@@ -71,7 +71,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 function set_document_title() {
 	$GLOBALS['pagetitle'] = wp_get_document_title();
 }
-add_action( 'template_redirect', __NAMESPACE__ . '\set_document_title' );
+add_action( 'get_header', __NAMESPACE__ . '\set_document_title', 10 );
 
 /**
  * Set the separator for the document title.
