@@ -16,11 +16,24 @@ window.wp = window.wp || {};
 	_.extend( themes, { model: {}, view: {}, routes: {}, router: {}, template: wp.template });
 
 	themes.utils = {
-		title: function ( item, isTheme ) {
-			var format = !!isTheme ? themes.data.settings.title.theme : themes.data.settings.title.default;
+		title: function ( item, type ) {
+			var format = themes.data.settings.title.default;
+
+			if ( 'author' === type ) {
+				format = themes.data.settings.title.author;
+			} else if ( 'tags' === type || 'browse' === type ) {
+				format = themes.data.settings.title.tax;
+			} else if ( 'search' === type ) {
+				format = themes.data.settings.title.search;
+			} else if ( 'theme' === type ) {
+				format = themes.data.settings.title.theme;
+			} else if ( '404' === type || 'notfound' === type ) {
+				format = themes.data.settings.title.notfound;
+			}
+
 			var title  = $( '<div/>' ).html( format.replace( '%s', $( '<div/>' ).text( item ).html() ) ).text();
 
-			if ( document.title !== title ) {
+			if ( document.title !== title && title.length ) {
 				document.title = title;
 			}
 		}
@@ -771,17 +784,20 @@ window.wp = window.wp || {};
 					// Clean the url structure
 					if ( author = themes.Collection.prototype.currentQuery.request.author ) {
 						themes.router.navigate( themes.router.baseUrl( 'author/' + author ) );
-						themes.utils.title( author );
+						themes.utils.title( author, 'author' );
 					}
 					else if ( search = themes.Collection.prototype.currentQuery.request.search ) {
 						themes.router.navigate( themes.router.baseUrl( themes.router.searchPath + search ) );
-						themes.utils.title( search );
+						themes.utils.title( search, 'search' );
 					}
 					else if ( tags = themes.view.Installer.prototype.filtersChecked() ) {
 						themes.router.navigate( themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
-						themes.utils.title( _.each( tags, function( tag, i ) {
-							tags[ i ] = $( 'label[for="filter-id-' + tag + '"]' ).text();
-						}).join( ', ' ) );
+						themes.utils.title(
+							_.each( tags, function( tag, i ) {
+								tags[ i ] = $( 'label[for="filter-id-' + tag + '"]' ).text();
+							})[0],
+							'tags'
+						);
 					}
 					else if ( sorter = $( '.filter-links .current' ) ) {
 						if ( ! sorter.length ) {
@@ -789,7 +805,7 @@ window.wp = window.wp || {};
 							args   = { trigger: true };
 						}
 						themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sorter.data( 'sort' ) ), args );
-						themes.utils.title( sorter.text() );
+						themes.utils.title( sorter.text(), 'browse' );
 					}
 
 					// Restore scroll position
@@ -1138,7 +1154,7 @@ window.wp = window.wp || {};
 
 			// Trigger a route update for the current model
 			themes.router.navigate( themes.router.baseUrl( themes.router.themePath + this.model.id ) );
-			themes.utils.title( this.model.attributes.name, true );
+			themes.utils.title( this.model.attributes.name, 'theme' );
 
 			// Sets this.view to 'detail'
 			this.setView( 'detail' );
@@ -1284,13 +1300,13 @@ window.wp = window.wp || {};
 
 			// Set route
 			if ( value ) {
-				themes.utils.title( value );
+				themes.utils.title( value, 'search' );
 				themes.router.navigate( themes.router.baseUrl( themes.router.searchPath + value ), { replace: true } );
 			} else {
 				delete request.search;
 				request.browse = 'featured';
 
-				themes.utils.title( $( '.filter-links [data-sort="featured"]' ).text() );
+				themes.utils.title( $( '.filter-links [data-sort="featured"]' ).text(), 'browse' );
 				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + 'featured' ), { replace: true } );
 			}
 
@@ -1444,7 +1460,7 @@ window.wp = window.wp || {};
 
 			$( '.filter-links li > a, .theme-filter' ).removeClass( this.activeClass );
 			sorter.addClass( this.activeClass );
-			themes.utils.title( sorter.text() );
+			themes.utils.title( sorter.text(), sorter.length ? 'browse' : 'notfound' );
 
 			this.browse( sort );
 		},
@@ -1509,7 +1525,7 @@ window.wp = window.wp || {};
 			});
 
 			themes.router.navigate( themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
-			themes.utils.title( names.join( ', ' ) );
+			themes.utils.title( names[0], 'tags' );
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
 			// or searching the local cache
@@ -1717,7 +1733,7 @@ window.wp = window.wp || {};
 
 				request.author = author;
 				self.view.collection.query( request );
-				themes.utils.title( author );
+				themes.utils.title( author, 'author' );
 				self.view.trigger( 'theme:close' );
 			});
 		}

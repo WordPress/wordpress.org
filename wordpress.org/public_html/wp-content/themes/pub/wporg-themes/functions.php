@@ -105,14 +105,27 @@ function wporg_themes_scripts() {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
 		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '20191016', true );
 
+		// Use the Rosetta-specific site name. Ie. "WordPress.org $LOCALE"
+		$title_suffix = isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ? $GLOBALS['wporg_global_header_options']['rosetta_title'] : 'WordPess.org';
+
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
 			'query'    => wporg_themes_get_themes_for_query(),
 			'settings' => array(
-				/* translators: %s: theme name */
 				'title'        => array(
-					'default' => __( '%s &#124; WordPress.org', 'wporg-themes' ),
-					'theme'   => '%s - ' . sprintf( __( '%s &#124; WordPress.org', 'wporg-themes' ), __( 'WordPress theme', 'wporg-themes' ) ),
+					'default'  => "%s &#124; ${title_suffix}",
+					'theme'    => '%s - ' . __( 'WordPress theme', 'wporg-themes' ) . " &#124; ${title_suffix}",
+					/* translators: %s: theme author name */
+					'author'   => sprintf(
+							__( 'Themes by %s', 'wporg-themes' ),
+							// The Javascript doesn't handle the author route, so we can just hard-code the author name in here for now.
+							is_author() ? ( get_queried_object()->display_name ?: get_queried_object()->user_nicename ) : '%s'
+					) . " &#124; ${title_suffix}",
+					/* translators: %s: Category/Browse section */
+					'tax'      => __( 'WordPress Themes: %s Free', 'wporg-themes' ) . " &#124; ${title_suffix}",
+					/* translators: %s: Search term */
+					'search'   => __( 'Search Results for &#8220;%s&#8221;', 'wporg-themes' ) . " &#124; ${title_suffix}",
+					'notfound' => __( 'Page not found', 'wporg-themes' ) . " &#124; ${title_suffix}",
 				),
 				'isMobile'     => wp_is_mobile(),
 				'postsPerPage' => 24,
@@ -210,7 +223,7 @@ function wporg_themes_document_title( $title ) {
 	if ( is_front_page() ) {
 		$title['title']   = __( 'WordPress Themes', 'wporg-themes' );
 		$title['tagline'] = __( 'WordPress.org', 'wporg-themes' );
-	} elseif ( is_category() || is_tag() ) {
+	} elseif ( is_category() || is_tag() || is_tax() ) {
 		/* translators: Category or tag name */
 		$title['title'] = sprintf(
 			__( 'WordPress Themes: %s Free', 'wporg-themes' ),
