@@ -109,5 +109,29 @@ function run( $data ) {
 
 	// By sending the channel ID, we can post to private groups.
 	$send->send( $data['channel_id'] );
+
+	// Broadcast this message as a non-@here to the "parent" channel too.
+	list( $parent_channel, ) = explode( '-', $channel, 2 );
+	if (
+		// Skip for private groups.
+		'privategroup' === $parent_channel ||
+		// If this message was posted in the "parent" channel, nothing to do.
+		$parent_channel === $channel ||
+		// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel
+		! get_whitelist_for_channel( $parent_channel )
+	) {
+		return;
+	}
+
+	$text = $data['text'];
+	// Remove any @here or @channel
+	$text = str_ireplace( [ '@here', '@channel', '@group' ], '', $text );
+	if ( mb_strlen( $text ) > 103 ) {
+		$text = mb_subsr( $text, 0, 100 ) . '...';
+	}
+
+	$send->set_text( 'In #' . $channel . ': ' . $text );
+	$send->send( '#' . $parent_channel );
+
 }
 
