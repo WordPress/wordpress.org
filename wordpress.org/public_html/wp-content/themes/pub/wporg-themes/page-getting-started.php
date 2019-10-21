@@ -5,6 +5,15 @@
  * @package wporg-themes
  */
 
+// Use the translated post title.
+add_filter( 'single_post_title', function( $title ) {
+	if ( 'Getting Started' === $title ) {
+		$title = __( 'Getting Started', 'wporg-themes' );
+	}
+
+	return $title;
+}, 1 );
+
 get_header();
 
 if ( have_posts() ) :

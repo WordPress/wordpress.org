@@ -14,6 +14,15 @@ if ( ! function_exists( 'wporg_meta_robots' ) ) {
 	}
 }
 
+// Use the translated post title.
+add_filter( 'single_post_title', function( $title ) {
+	if ( 'Submit Your Theme or Theme Update to the Directory' === $title ) {
+		$title = __( 'Submit Your Theme or Theme Update to the Directory', 'wporg-themes' );
+	}
+
+	return $title;
+}, 1 );
+
 get_header();
 
 if ( have_posts() ) :

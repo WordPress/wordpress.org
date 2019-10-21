@@ -5,6 +5,15 @@
  * @package wporg-themes
  */
 
+// Use the translated post title.
+add_filter( 'single_post_title', function( $title ) {
+	if ( 'Commercially Supported GPL Themes' === $title ) {
+		$title = __( 'Commercially Supported GPL Themes', 'wporg-themes' );
+	}
+
+	return $title;
+}, 1 );
+
 $theme_shops = wporg_themes_query_api( 'get_commercial_shops' )->shops;
 
 get_header();
