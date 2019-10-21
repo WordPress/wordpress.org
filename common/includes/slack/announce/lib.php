@@ -112,6 +112,15 @@ function run( $data ) {
 
 	// Broadcast this message as a non-@here to the "parent" channel too.
 	list( $parent_channel, ) = explode( '-', $channel, 2 );
+
+	// Some channels parents are not a 1:1 match.
+	if ( 'feature' === $parent_channel ) {
+		$parent_channel = 'core';
+	} elseif ( 'community' === $parent_channel ) {
+		$parent_channel = 'community-team';
+	}
+
+	// Validate the channel.
 	if (
 		// Skip for private groups.
 		'privategroup' === $parent_channel ||
