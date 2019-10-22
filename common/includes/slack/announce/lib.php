@@ -62,17 +62,22 @@ function run( $data ) {
 
 	$channel = $data['channel_name'];
 	$user = false;
+	$slack_profiledata = false;
 
 	// Find the user_login for the Slack user_id
 	if ( isset( $data['user_id'] ) ) {
-		$user = $wpdb->get_var( $wpdb->prepare(
-			"SELECT user_login
+		$db_row = $wpdb->get_row( $wpdb->prepare(
+			"SELECT user_login, profiledata
 			FROM slack_users
 				JOIN {$wpdb->users} ON slack_users.user_id = {$wpdb->users}.id
 			WHERE slack_id = %s",
 			$data['user_id']
 		) );
+
+		$user = $db_row->user_login ?? false;
+		$slack_profiledata = json_decode( ($db_row->profiledata ?? '{}'), true );
 	}
+
 	// Default back to the historical 'user_name' Slack field.
 	if ( ! $user ) {
 		$user = $data['user_name'];
@@ -96,15 +101,29 @@ function run( $data ) {
 		$command = 'group';
 	}
 
+	// Use their Slack Display name, falling back to their WordPress.org login if that's not available.
+	$display_name = $user;
+	if ( ! empty( $slack_profiledata['display_name'] ) ) {
+		$display_name = $slack_profiledata['display_name'];
+	}
+
+	$avatar = false;
+	// Respect the avatar set in Slack, and prefer it over their Gravatar.
+	if ( ! empty( $slack_profiledata['image_192'] ) ) {
+		$avatar = $slack_profiledata['image_192'];
+	}
+	$get_avatar = __NAMESPACE__ . '\\' . 'get_avatar';
+	if ( ! $avatar && function_exists( $get_avatar ) ) {
+		$avatar = call_user_func( $get_avatar, $data['user_name'], $data['user_id'], $data['team_id'] );
+	}
+
 	$text = sprintf( "<!%s> %s", $command, $data['text'] );
 
 	$send = new Send( \Dotorg\Slack\Send\WEBHOOK );
-	$send->set_username( $user );
+	$send->set_username( $display_name );
 	$send->set_text( $text );
-
-	$get_avatar = __NAMESPACE__ . '\\' . 'get_avatar';
-	if ( function_exists( $get_avatar ) ) {
-		$send->set_icon( call_user_func( $get_avatar, $data['user_name'], $data['user_id'], $data['team_id'] ) );
+	if ( $avatar ) {
+		$send->set_icon( $avatar );
 	}
 
 	// By sending the channel ID, we can post to private groups.
