@@ -103,14 +103,14 @@ function run( $data ) {
 
 	// Use their Slack Display name, falling back to their WordPress.org login if that's not available.
 	$display_name = $user;
-	if ( ! empty( $slack_profiledata['display_name'] ) ) {
-		$display_name = $slack_profiledata['display_name'];
+	if ( ! empty( $slack_profiledata['profile']['display_name'] ) ) {
+		$display_name = $slack_profiledata['profile']['display_name'];
 	}
 
 	$avatar = false;
 	// Respect the avatar set in Slack, and prefer it over their Gravatar.
-	if ( ! empty( $slack_profiledata['image_192'] ) ) {
-		$avatar = $slack_profiledata['image_192'];
+	if ( ! empty( $slack_profiledata['profile']['image_192'] ) ) {
+		$avatar = $slack_profiledata['profile']['image_192'];
 	}
 	$get_avatar = __NAMESPACE__ . '\\' . 'get_avatar';
 	if ( ! $avatar && function_exists( $get_avatar ) ) {
