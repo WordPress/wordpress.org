@@ -368,7 +368,8 @@ function document_title_parts( $title ) {
 	}
 
 	if ( is_front_page() ) {
-		$title['title'] = __( 'Blog Tool, Publishing Platform, and CMS', 'wporg' );
+		$title['tagline'] = __( 'Blog Tool, Publishing Platform, and CMS', 'wporg' );
+		unset( $title['tagline'] ); // Remove the tagline from the front-page.
 	}
 
 	return $title;
