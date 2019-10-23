@@ -345,7 +345,9 @@ body.route-register #login form p,
 body.route-register-profile #login form p,
 body.route-register-confirm #login form p,
 body.route-pending-profile #login form p,
-body.route-pending-create #login form p {
+body.route-pending-create #login form p,
+body.route-linkexpired h2,
+body.route-linkexpired p {
 	margin-bottom: 16px;
 }
 
@@ -378,7 +380,8 @@ body.route-register #login .message,
 body.route-register-profile #login .message,
 body.route-register-confirm #login .message,
 body.route-pending-profile #login .message,
-body.route-pending-create #login .message {
+body.route-pending-create #login .message,
+body.route-linkexpired #login .message {
 	margin-left: -24px;
 	padding-left: 24px;
 	padding-right: 24px;
@@ -389,7 +392,8 @@ body.route-register #login .message p,
 body.route-register-profile #login .message p,
 body.route-register-confirm #login .message p,
 body.route-pending-profile #login .message p,
-body.route-pending-create #login .message p {
+body.route-pending-create #login .message p,
+body.route-linkexpired #login .message p {
 	margin: 0;
 }
 
@@ -410,7 +414,8 @@ body.route-register #login .message.error,
 body.route-register-profile #login .message.error,
 body.route-register-confirm #login .message.error,
 body.route-pending-profile #login .message.error,
-body.route-pending-create #login .message.error {
+body.route-pending-create #login .message.error,
+body.route-linkexpired #login .message.error {
 	margin-bottom: 30px !important;
 	color: #23282d;
 	background: #fbfbfb;
@@ -427,7 +432,8 @@ body.rtl.route-register #login .message.error,
 body.rtl.route-register-profile #login .message.error,
 body.rtl.route-register-confirm #login .message.error,
 body.rtl.route-pending-profile #login .message.error,
-body.rtl.route-pending-create #login .message.error {
+body.rtl.route-pending-create #login .message.error,
+body.rtl.route-linkexpired #login .message.error {
 	border-right-color: #dc3232;
 }
 

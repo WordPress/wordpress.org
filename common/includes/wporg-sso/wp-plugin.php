@@ -19,7 +19,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			'root'         => '/',
 			'checkemail'   => '/checkemail',
 			'loggedout'    => '/loggedout',
-			'lostpassword' => '/lostpassword',
+			'lostpassword' => '/lostpassword(/(?P<user>[^/]+))?',
+			'linkexpired'  => '/linkexpired(/(?P<reason>register|lostpassword)/(?P<user>[^/]+))?',
 			'oauth'        => '/oauth',
 		);
 
@@ -153,7 +154,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$this->valid_sso_paths['register-confirm'] = '/register/confirm/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+)';
 
 				// Primary registration route.
-				$this->valid_sso_paths['register']         = '/register';
+				$this->valid_sso_paths['register']         = '/register(/(?P<user>[^/]+))?';
 			}
 
 			$redirect_req = $this->_get_safer_redirect_to();

@@ -10,13 +10,13 @@ $activation_key  = WP_WPOrg_SSO::$matched_route_params['confirm_key']  ?? false;
 
 $pending_user = wporg_get_pending_user( $activation_user );
 if ( ! $pending_user ) {
-	// TODO: add a handler for "Link is expired". The pending user record has been purged.
-	// See Line 33 below for the second case where this is needed.
+	wp_safe_redirect( home_url( '/linkexpired/register/' . urlencode( $activation_user ) ) );
+	exit;
 }
 
 $can_access = false;
 if ( $pending_user && $pending_user['user_activation_key'] && ! $pending_user['created'] ) {
-	$expiration_duration = WEEK_IN_SECONDS; // Time that the user has to confirm the account.
+	$expiration_duration = 2 * WEEK_IN_SECONDS; // Time that the user has to confirm the account.
 
 	list( $user_request_time, $hashed_activation_key ) = explode( ':', $pending_user['user_activation_key'], 2 );
 	$expiration_time                                   = $user_request_time + $expiration_duration;
@@ -26,10 +26,8 @@ if ( $pending_user && $pending_user['user_activation_key'] && ! $pending_user['c
 	if ( $hash_is_correct && time() < $expiration_time ) {
 		$can_access = true;
 	} elseif ( $hash_is_correct ) {
-		// TODO: Add a handler for "Link is expired".
-		// For now, ignore the expiry date on the email links.
-		// This URL is invalidated once the user is created anyway.
-		$can_access = true; 
+		wp_safe_redirect( home_url( '/linkexpired/register/' . urlencode( $activation_user ) ) );
+		exit;
 	}
 } elseif ( $pending_user && $pending_user['created'] ) {
 	wp_safe_redirect( 'https://wordpress.org/support/' );

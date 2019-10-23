@@ -28,7 +28,7 @@ if ( $can_access && $pending_user['created']  ) {
 	wp_safe_redirect( 'https://wordpress.org/support/' );
 	die();
 } elseif ( ! $can_access ) {
-	wp_safe_redirect( '/' );
+	wp_safe_redirect( home_url( '/linkexpired/' ) );
 	die();
 }
 

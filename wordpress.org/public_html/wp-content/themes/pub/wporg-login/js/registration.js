@@ -35,5 +35,10 @@
 					}
 				} );
 			} );
+
+			// If the form has data in it upon load, immediately trigger the validation.
+			if ( $loginForm.find('#user_login').val() ) {
+				$loginForm.find('#user_login').blur();
+			}
 		} );
 } )( jQuery );

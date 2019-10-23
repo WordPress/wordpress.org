@@ -6,6 +6,9 @@
  */
 
 $user_login = isset( $_POST['user_login'] ) ? wp_unslash( $_POST['user_login'] ) : '';
+if ( ! $user_login && !empty( WP_WPOrg_SSO::$matched_route_params['user'] ) ) {
+	$user_login = WP_WPOrg_SSO::$matched_route_params['user'];
+}
 $user_email = isset( $_POST['user_email'] ) ? wp_unslash( $_POST['user_email'] ) : '';
 $user_mailinglist = isset( $_POST['user_mailinglist'] ) && 'true' == $_POST['user_mailinglist'];
 
