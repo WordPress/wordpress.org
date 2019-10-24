@@ -14,7 +14,7 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 ?>
 
 	</div><!-- #content -->
-
+</div><!-- #page -->
 <?php
 
 require WPORGPATH . 'footer.php';
