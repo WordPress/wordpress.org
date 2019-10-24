@@ -498,6 +498,7 @@ class Template {
 
 		if ( ! $icon || 'publish' !== $plugin->post_status ) {
 			$generated = true;
+			$icon_2x = false; // For the ! publish branch.
 			$icon = self::get_geopattern_icon_url( $plugin );
 		}
 
