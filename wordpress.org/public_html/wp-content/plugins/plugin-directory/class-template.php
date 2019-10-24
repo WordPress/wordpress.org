@@ -503,16 +503,12 @@ class Template {
 
 		switch ( $output ) {
 			case 'html':
-				$id    = "plugin-icon-{$plugin->post_name}";
-				$html  = "<style type='text/css'>";
-				$html .= ".{$id} { background-image: url('{$icon}'); }";
-				if ( ! empty( $icon_2x ) && ! $generated && ! $svg ) {
-					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { .{$id} { background-image: url('{$icon_2x}'); } }";
-				}
-				$html .= '</style>';
-				$html .= "<div class='plugin-icon {$id}'></div>";
 
-				return $html;
+				if ( $icon_2x && $icon_2x !== $icon ) {
+					return "<img class='plugin-icon' srcset='{$icon_2x} 256w' src='{$icon}'>";
+				} else {
+					return "<img class='plugin-icon' src='{$icon}'>";
+				}
 				break;
 
 			case 'raw':
