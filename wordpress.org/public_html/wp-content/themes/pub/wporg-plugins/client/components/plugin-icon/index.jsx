@@ -33,12 +33,12 @@ export const PluginIcon = ( { plugin } ) => {
 
 	return (
 		<div className="entry-thumbnail">
-			<div className="plugin-icon" id={ `plugin-icon-${ slug }` } />
+			<div className="{ `plugin-icon plugin-icon-${ slug }` }" />
 			<style type="text/css">
-				{ `#plugin-icon-${ slug } { background-image: url('${ icon }'); }` }
+				{ `.plugin-icon-${ slug } { background-image: url('${ icon }'); }` }
 				{ icons[ '2x' ] && icon !== icons.default
 					// eslint-disable-next-line max-len
-					? `@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { #plugin-icon-${ slug } { background-image: url('${ icons[ '2x' ] }'); } }`
+					? `@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { .plugin-icon-${ slug } { background-image: url('${ icons[ '2x' ] }'); } }`
 					: ''
 				}
 			</style>
