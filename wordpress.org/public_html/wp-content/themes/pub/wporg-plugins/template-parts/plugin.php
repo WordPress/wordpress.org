@@ -58,7 +58,6 @@ $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
 			printf( esc_html__( 'Updated %s ago', 'wporg-plugins' ), esc_html( human_time_diff( get_post_modified_time() ) ) );
 			?>
 		</span>
-		</span>
 	</footer>
 	<?php /* This file must not end with a new line */ ?>
 </article>
