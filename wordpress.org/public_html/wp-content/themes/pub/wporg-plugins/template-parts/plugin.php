@@ -15,12 +15,11 @@ $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
 ?>
 <article <?php post_class( 'plugin-card' ); ?>>
 	<div class="entry-thumbnail">
-		<?php
-			$icon_parts = Template::get_plugin_icon( get_post(), 'html-parts' );
-			echo $icon_parts['style_tag'];
-		?>
 		<a href="<?php the_permalink(); ?>" rel="bookmark">
-			<?php echo $icon_parts['icon_tag']; ?>
+			<?php
+			// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+			echo Template::get_plugin_icon( get_post(), 'html' );
+			?>
 		</a>
 	</div><div class="entry">
 		<header class="entry-header">
