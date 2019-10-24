@@ -502,23 +502,17 @@ class Template {
 		}
 
 		switch ( $output ) {
-			case 'html-parts':
 			case 'html':
-				$id         = esc_attr( "plugin-icon-{$plugin->post_name}" );
-				$style_tag  = "<style type='text/css'>";
-				$style_tag .= ".{$id} { background-image: url('{$icon}'); }";
+				$id    = "plugin-icon-{$plugin->post_name}";
+				$html  = "<style type='text/css'>";
+				$html .= ".{$id} { background-image: url('{$icon}'); }";
 				if ( ! empty( $icon_2x ) && ! $generated && ! $svg ) {
-					$style_tag .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { .{$id} { background-image: url('{$icon_2x}'); } }";
+					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { .{$id} { background-image: url('{$icon_2x}'); } }";
 				}
-				$style_tag .= '</style>';
+				$html .= '</style>';
+				$html .= "<div class='plugin-icon {$id}'></div>";
 
-				$icon_tag   = "<div class='plugin-icon {$id}'></div>";
-
-				if ( 'html' === $output ) {
-					return $style_tag . $icon_tag;
-				} else {
-					return compact( 'style_tag', 'icon_tag' );
-				}
+				return $html;
 				break;
 
 			case 'raw':
