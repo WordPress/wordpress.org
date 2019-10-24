@@ -37,8 +37,11 @@ function release_row( $release ) {
 		<td><a href="<?php echo esc_url( $release['zip_url'] ); ?>">zip</a><br>
 			<small>(<a href="<?php echo esc_url( $release['zip_url'] . '.md5' ); ?>">md5</a> | <a href="<?php echo esc_url( $release['zip_url'] . '.sha1' ); ?>">sha1</a>)</small>
 		</td>
-		<td><a href="<?php echo esc_url( $release['targz_url'] ); ?>">tar.gz</a><br>
-			<small>(<a href="<?php echo esc_url( $release['targz_url'] . '.md5' ); ?>">md5</a> | <a href="<?php echo esc_url( $release['targz_url'] . '.sha1' ); ?>">sha1</a>)</small>
+		<td>
+			<?php if ( $release['targz_url'] ) : ?>
+				<a href="<?php echo esc_url( $release['targz_url'] ); ?>">tar.gz</a><br>
+				<small>(<a href="<?php echo esc_url( $release['targz_url'] . '.md5' ); ?>">md5</a> | <a href="<?php echo esc_url( $release['targz_url'] . '.sha1' ); ?>">sha1</a>)</small>
+			<?php endif; ?>
 		</td>
 		<?php if ( ! defined( 'IS_ROSETTA_NETWORK' ) || ! IS_ROSETTA_NETWORK ) : ?>
 			<td>
