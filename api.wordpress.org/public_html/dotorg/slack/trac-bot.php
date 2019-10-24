@@ -91,7 +91,7 @@ namespace Dotorg\Slack\Trac {
 			continue;
 		}
 
-		$slack->send( $parser->get_channel() );
+		$slack->send( $parser->get_channel(), $parser->get_thread() );
 
 		if ( $_POST['channel_name'] === 'test' ) {
 			// Don't post to Trac if we're coming from #test.

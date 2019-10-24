@@ -32,6 +32,10 @@ class Bot {
 		return '#' . $this->post_data['channel_name'];
 	}
 
+	function get_thread() {
+		return $this->post_data['thread_ts'] ?? false;
+	}
+
 	function parse() {
 		$this->parse_tickets( $this->post_data['text'] );
 		$this->parse_commits( $this->post_data['text'] );

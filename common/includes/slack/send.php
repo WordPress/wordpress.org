@@ -100,7 +100,7 @@ class Send {
 		$this->testing = (bool) $enabled;
 	}
 
-	function send( $channel ) {
+	function send( $channel, $thread = false ) {
 		if ( $this->testing() ) {
 			$this->set_text( "[$channel] " . $this->get_text() );
 			$channel = '#test';
@@ -108,6 +108,14 @@ class Send {
 
 		$payload = $this->get_payload();
 		$payload['channel'] = $channel;
+
+		if ( $thread ) {
+			$payload['thread_ts'] = $thread;
+
+			// Setting this to true will broacast a threaded reply to the channel too.
+			// Since outgoing webhooks don't send the broadcast status, this is skipped for now.
+			// $payload['reply_broadcast'] = true;
+		}
 
 		# error_log( print_r( $payload, true ) );
 		$payload = json_encode( $payload );
