@@ -506,7 +506,7 @@ class Template {
 			case 'html':
 
 				if ( $icon_2x && $icon_2x !== $icon ) {
-					return "<img class='plugin-icon' srcset='{$icon_2x} 256w' src='{$icon}'>";
+					return "<img class='plugin-icon' srcset='{$icon}, {$icon_2x} 2x' src='{$icon_2x}'>";
 				} else {
 					return "<img class='plugin-icon' src='{$icon}'>";
 				}
