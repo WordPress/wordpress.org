@@ -96,7 +96,10 @@ class Author_Card {
 			$author_plugins_q['post__not_in'] = array( $post->ID );
 		}
 		$author_plugins = get_posts( $author_plugins_q );
-		$all_plugins    = $wpdb->get_results( "SELECT * FROM {$wpdb->posts} WHERE post_name IN ('" . implode( "', '", array_merge( $author_commit, wp_list_pluck( $author_plugins, 'post_name' ) ) ) . "')" );
+		$all_plugins    = array();
+		if ( $author_plugins || $author_commit ) {
+			$all_plugins = $wpdb->get_results( "SELECT * FROM {$wpdb->posts} WHERE post_name IN ('" . implode( "', '", array_merge( $author_commit, wp_list_pluck( $author_plugins, 'post_name' ) ) ) . "')" );
+		}
 		?>
 		<div class="profile">
 		<div class="profile-personal">
