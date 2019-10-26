@@ -1416,6 +1416,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					document.cookie = 'wp_trac_ngrid=' + (names ? 1 : 0) + ';max-age=31557600;domain=.wordpress.org;path=/';
 					return false;
 				});
+
+				// Trac notification control is broken due to the Trac upgrade to 1.2
+				$( '#notifications p.receiving-notifications, #notifications p.receiving-notifications-because, #notifications p.not-receiving-notifications, #notifications .preferences' ).hide();
 			}
 
 			function save( action, ticket, nonce ) {
