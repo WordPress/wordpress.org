@@ -51,6 +51,8 @@ class Performance_Optimizations {
 		// Disable the 'popular' view.
 		add_filter( 'bbp_register_views', array( $this, 'disable_popular_view' ) );
 
+		// Disable entire-forum subscriptions.
+		add_filter( 'bbp_get_forum_subscribers', '__return_empty_array' );
 	}
 
 	/**
