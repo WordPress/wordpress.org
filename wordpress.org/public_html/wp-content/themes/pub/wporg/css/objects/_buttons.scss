@@ -203,7 +203,8 @@ p .button {
 }
 
 /* Buttons that look like links, for a cross of good semantics with the visual */
-.button-link {
+.button-link,
+input[type="submit"].button-link {
 	background: none;
 	border: 0;
 	border-radius: 0;
