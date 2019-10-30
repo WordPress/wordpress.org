@@ -1442,13 +1442,12 @@ window.wp = window.wp || {};
 		},
 
 		sort: function( sort ) {
-			var self = this, sorter;
+			var self = this,
+				sorter = false;
 
-			if ( -1 === _.indexOf( this.sortValues, sort ) ) {
-			//	sort = 'featured'; // https://meta.trac.wordpress.org/ticket/4415
+			if ( -1 !== _.indexOf( this.sortValues, sort ) ) {
+				sorter = $( '.filter-links [data-sort="' + sort + '"]');
 			}
-
-			sorter = $( '.filter-links [data-sort="' + sort + '"]');
 
 			self.clearSearch();
 
@@ -1459,10 +1458,15 @@ window.wp = window.wp || {};
 			});
 
 			$( '.filter-links li > a, .theme-filter' ).removeClass( this.activeClass );
-			sorter.addClass( this.activeClass );
-			themes.utils.title( sorter.text(), sorter.length ? 'browse' : 'notfound' );
 
-			this.browse( sort );
+			if ( sorter && sorter.length ) {
+				sorter.addClass( this.activeClass );
+				themes.utils.title( sorter.text(), 'browse' );
+
+				this.browse( sort );
+			} else {
+				themes.utils.title( '404', 'notfound' );
+			}
 		},
 
 		// Filters and Tags
