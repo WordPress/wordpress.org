@@ -66,8 +66,13 @@ add_action( 'wp_head', __NAMESPACE__ . '\no_robots', 9 );
  */
 function rel_canonical() {
 	$canonical = false;
+	$queried_object = get_queried_object();
 
-	if ( is_front_page() ) {
+	if ( is_tax() || is_tag() || is_category() ) {
+		$canonical = get_term_link( $queried_object );
+	} elseif ( is_singular() ) {
+		$canonical = get_permalink( $queried_object );
+	} elseif ( is_front_page() ) {
 		$canonical = home_url( '/' );
 	}
 
