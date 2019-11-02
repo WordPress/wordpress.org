@@ -349,9 +349,11 @@ a img.aligncenter {
 }
 
 #wporg-header ul.nav-submenu li a {
+	display: inline-block;
 	height: 24px;
 	line-height: 24px;
 	margin: 0;
+	white-space: nowrap;
 }
 
 #wporg-header ul li#download {
