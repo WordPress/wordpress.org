@@ -147,9 +147,11 @@
 			z-index: 99999;
 
 			li a {
+				display: inline-block;
 				height: 24px;
 				line-height: 24px;
 				margin: 0;
+				white-space: nowrap;
 			}
 		}
 	}
