@@ -470,7 +470,7 @@ jQuery( function( $ ) {
 		$component_count = isset( $component_type[ $component ] ) ? array_sum( $component_type[ $component ] ) : 0;
 
 		if ( is_singular() ) {
-			echo '<div><a class="create-new-ticket button button-large button-primary" href="https://login.wordpress.org/?redirect_to=' . urlencode( 'https://core.trac.wordpress.org/newticket?component=' . urlencode( $component ) ) . '">Create a new ticket</a></div>';
+			echo '<div><a class="create-new-ticket button button-large button-primary" href="https://login.wordpress.org/?redirect_to=' . urlencode( 'https://core.trac.wordpress.org/newticket?component=' . urlencode( $component ) ) . '" rel="nofollow">Create a new ticket</a></div>';
 		}
 
 		if ( ! $component_count ) {
