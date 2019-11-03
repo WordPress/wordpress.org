@@ -165,7 +165,17 @@ class Upload {
 
 			<?php endif; // wp_verify_nonce() && 'upload' === $_POST['action'] ?>
 
-			<?php if ( ! $submitted_counts->total && ( ! $upload_result || is_wp_error( $upload_result ) ) ) : ?>
+			<?php
+			if ( is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
+				echo '<div class="notice notice-error notice-alt"><p>' .
+					sprintf(
+						/* translators: %s: Profile edit url. */
+						__( 'Your email host has email deliverability problems. Please <a href="%s">Update your email address</a> first.', 'wporg-plugins'),
+						esc_url( 'https://wordpress.org/support/users/' . wp_get_current_user()->user_nicename . '/edit' )
+					 ) .
+					 "</p></div>\n";
+
+			} else if ( ! $submitted_counts->total && ( ! $upload_result || is_wp_error( $upload_result ) ) ) : ?>
 
 				<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 					<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
