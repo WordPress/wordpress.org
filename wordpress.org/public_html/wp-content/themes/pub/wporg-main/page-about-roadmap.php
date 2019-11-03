@@ -119,7 +119,7 @@ the_post();
 								<a href="https://make.wordpress.org/core/5-3/">5.3</a>
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td><?php echo date_i18n( 'Y', strtotime( '2019' ) ); ?></td>
+							<td><?php echo date_i18n( 'F j, Y', strtotime( 'November 12, 2019' ) ); ?></td>
 						</tr>
 						</tbody>
 					</table>
