@@ -269,7 +269,7 @@ class Ratings_Compat {
 				echo '<span class="reviews-need-login">';
 				printf(
 					/* translators: %s: login URL */
-					__( 'You must be <a href="%s">logged in</a> to submit a review.', 'wporg-forums' ),
+					__( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ),
 					add_query_arg(
 						'redirect_to',
 						urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
@@ -359,7 +359,7 @@ class Ratings_Compat {
 			echo '<div class="bbp-template-notice"><p>';
 			printf(
 				/* translators: %s: login URL */
-				__( 'You must be <a href="%s">logged in</a> to submit a review.', 'wporg-forums' ),
+				__( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ),
 				add_query_arg(
 					'redirect_to',
 					urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
