@@ -53,7 +53,7 @@ function no_robots() {
 	||
 		is_tax( 'mentions' )
 	||
-		( is_tag() && get_queried_object()->count < 3 )
+		is_tag()
 	) {
 		wp_no_robots();
 	}
