@@ -17,15 +17,14 @@ namespace WordPressdotorg\MainTheme;
  */
 function custom_open_graph_tags( $tags = [] ) {
 
+	// Use `name=""` for description.
+	// See Jetpacks Twitter Card for where it happens for the twitter:* fields.
+	add_filter( 'jetpack_open_graph_output', function( $html ) {
+		return str_replace( '<meta property="description"', '<meta name="description"', $html );
+	} );
+
 	// Override the Front-page tags on Rosetta sites.
 	if ( is_front_page() && isset( $GLOBALS['rosetta'] ) ) {
-
-		// Use `name=""` for description.
-		// See Jetpacks Twitter Card for where it happens for the twitter:* fields.
-		add_filter( 'jetpack_open_graph_output', function( $html ) {
-			return str_replace( '<meta property="description"', '<meta name="description"', $html );
-		} );
-
 		$site_title = isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ? $GLOBALS['wporg_global_header_options']['rosetta_title'] : 'WordPress.org';
 		return array(
 			'og:type'         => 'website',
@@ -174,6 +173,7 @@ function custom_open_graph_tags( $tags = [] ) {
 	$tags['twitter:text:title']  = $title;
 	$tags['og:description']      = $desc;
 	$tags['twitter:description'] = $desc;
+	$tags['description']         = $desc;
 
 	return $tags;
 }
