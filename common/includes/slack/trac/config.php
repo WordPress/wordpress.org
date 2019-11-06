@@ -18,6 +18,8 @@ class Core extends Trac {
 	 */
 	protected $commit_path_filters = array(
 		'wp-content/themes'                => '#core-themes',
+		'wp-admin/css'                     => '#core-css',
+		'wp-includes/css'                  => '#core-css',
 		'customize'                        => '#core-customize',
 		'editor-expand.js'                 => '#core-editor',
 		'wp-admin/css/edit.css'            => '#core-editor',
