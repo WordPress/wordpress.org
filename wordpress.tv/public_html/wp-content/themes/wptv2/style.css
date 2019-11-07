@@ -86,18 +86,8 @@ a img {
 	border: none;
 }
 
-/* Contain floats */
-.group:before, .group:after {
-	content: "";
-	display: table;
-}
-
-.group:after {
-	clear: both;
-}
-
-.group {
-	*zoom: 1;
+iframe {
+	max-width: 100%;
 }
 
 /*************************************/
@@ -109,14 +99,6 @@ body {
 	font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	background: #fff;
 	color: #444;
-}
-
-.group:after {
-	content: ".";
-	display: block;
-	height: 0;
-	clear: both;
-	visibility: hidden;
 }
 
 .clear {
@@ -246,38 +228,56 @@ div.success p {
 
 #header {
 	margin-top: 10px;
-	height: 57px;
+	padding: 0 30px;
+}
+
+#header:after {
+	clear: both;
+	content: '';
+	display: table;
 }
 
 #header h1 {
 	padding-top: 8px;
-	float: left;
 }
 
 #header .sleeve {
-	width: 942px;
+	max-width: 942px;
 	margin: 0 auto;
 }
 
-#menu ul {
-	float: right;
-	height: 57px;;
+/* Menu */
+
+#menu {
+	clear: both;
+	padding: 10px 0;
 }
 
 #menu li {
-	float: left;
-	display: block;
-	margin-left: 10px;
-	line-height: 57px;
+	display: inline-block;
+	font-size: 14px;
+	margin-left: 0;
+	border-bottom: 1px solid white;
 }
+
+#menu li:last-child {
+	border-bottom: none;
+}
+
+#menu li a {
+	border: 0;
+	padding: 0 5px;
+}
+
+#menu #searchform {
+	margin: 0 0 0 15px;
+}
+
 
 #menu li a,
 #menu li a:link,
 #menu li a:visited {
-	padding: 5px;
-	color: #555;
 	text-decoration: none;
-	border: 0;
 }
 
 #menu .current-menu-item > a,
@@ -288,9 +288,8 @@ div.success p {
 	color: #000 !important;
 }
 
-#searchform {
-	float: right;
-	margin-left: 15px;
+#menu.toggled .menu-primary-container {
+	display: block;
 }
 
 #searchform #searchbox,
@@ -303,7 +302,7 @@ div.success p {
 	border-radius: 2px;
 	height: 15px;
 	padding: 5px 6px;
-	width: 140px;
+	width: 71%;
 	-webkit-appearance: textfield;
 }
 
@@ -321,6 +320,8 @@ div.success p {
 	-webkit-box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
 	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
 }
+
+/* Forms */
 
 input[type=submit], button, .button {
 	text-decoration: none;
@@ -395,6 +396,8 @@ input[type=submit]:active, button:active, .button:active {
 			#eee 100%
 	);
 }
+
+/* Intro */
 
 .intro {
 	font-size: 30px;
@@ -1479,11 +1482,6 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	display: none;
 }
 
-#content {
-	width: 100%;
-	float: left;
-}
-
 #content .post {
 	margin-bottom: 20px;
 	clear: both;
@@ -1784,21 +1782,21 @@ a {
 	outline: none
 }
 
-.container {
-	width: 940px;
+.wptv-hero .container,
+#page > .container {
 	margin: auto;
+	max-width: 940px;
+	padding: 0 10px;
 }
 
 .primary-content {
-	float: left;
-	width: 700px;
+	flex: 1 1 650px;
 	margin: 0;
 }
 
 .secondary-content {
-	float: right;
-	width: 200px;
-	margin: 0 0 50px 0;
+	flex: 1 1 auto;
+	margin: 0 30px;
 }
 
 .tag-count {
@@ -1869,35 +1867,6 @@ a {
 /* Typography
 ============================================================= */
 
-/* Menu */
-
-#menu {
-	margin-right: 5px;
-}
-
-#menu li {
-	font-size: 14px;
-}
-
-#menu li a,
-#menu li a:link,
-#menu li a:visited {
-	color: #21759b;
-}
-
-#menu li a.selected {
-	color: #545454;
-}
-
-#menu li a:hover,
-#menu li a:focus {
-	color: #d54e21;
-}
-
-#menu #searchform {
-	margin: 0 0 0 15px;
-}
-
 /* Titles and Body Text */
 
 body, td, p,
@@ -1918,7 +1887,7 @@ body, td, p,
 }
 
 .page-title {
-	width: 940px;
+	max-width: 940px;
 	margin: auto;
 }
 
@@ -1926,6 +1895,7 @@ body, td, p,
 	font-size: 13px;
 	font-weight: bold;
 	-webkit-font-smoothing: antialiased;
+	text-align: left;
 }
 
 h2 {
@@ -2015,25 +1985,19 @@ h5 {
 ============================================================= */
 
 .wptv-hero {
-	clear: both;
-
-	margin: 10px auto 30px auto;
-	padding: 30px 0 10px 0;
-
+	margin: 10px auto 30px;
+	padding: 30px 0 10px;
 	background: #F0F0F0;
 }
 
 .wptv-hero .main-video {
 	background: #2f2f2f;
-	clear: both;
-
-	float: left;
-	width: 575px;
+	margin: 0 auto;
+	max-width: 575px;
+	position: relative;
 }
 
 .wptv-hero .main-video .video-player {
-	width: 100% !important;
-	height: 323px !important;
 	margin: 0 !important;
 }
 
@@ -2050,7 +2014,7 @@ h5 {
 }
 
 .wptv-hero .main-video .video-player .videopress-title,
-.wptv-hero .main-video .video-player .videopress-watemark {
+.wptv-hero .main-video .video-player .videopress-watermark {
 	display: none !important;
 }
 
@@ -2096,8 +2060,8 @@ h5 {
 }
 
 .wptv-hero .secondary-videos {
-	float: right;
-	width: 345px;
+	margin: 20px auto 0;
+	max-width: 575px;
 }
 
 .wptv-hero .secondary-videos h3 {
@@ -2111,20 +2075,13 @@ h5 {
 
 .wptv-hero .secondary-videos li {
 	font-size: 13px;
-
-	min-height: 75px;
-	position: relative;
-
-	margin: 0 auto 23px 0;
-	padding: 0 0 0 142px;
+	margin: 0 auto 23px;
+	max-width: 130px;
 }
 
 .wptv-hero .secondary-videos .video-thumbnail img {
 	width: 130px;
 	height: 75px;
-
-	position: absolute;
-	left: 0;
 }
 
 .wptv-hero .secondary-videos a:hover img {
@@ -2135,19 +2092,25 @@ h5 {
 ============================================================= */
 
 .video-list {
-	clear: both;
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 -5px;
+}
+
+.video-list:after {
+	content: '';
+	flex: auto;
 }
 
 .video-list li {
-	float: left;
-	min-height: 220px;
+	flex: 0 0 160px;
 	margin-bottom: 20px;
+	padding: 0 5px;
 }
 
 .video-list li .video-thumbnail {
 	display: block;
 	width: 100%;
-	height: 100px;
 
 	margin: 0 0 8px 0;
 
@@ -2158,15 +2121,6 @@ h5 {
 .video-list li .video-thumbnail img {
 	width: 100%;
 	min-height: 100px;
-}
-
-.video-list.four-col {
-	width: 860px;
-}
-
-.video-list.four-col li {
-	width: 160px;
-	margin-right: 20px;
 }
 
 .secondary-content .video-list .video-title {
@@ -2203,25 +2157,9 @@ h5 {
 	position: relative;
 }
 
-.archive.video-list .video-thumbnail {
-	position: absolute;
-	top: 0;
-	left: 0;
-
-	width: 220px;
-	height: 120px;
-
-	margin: 0 20px 0 0;
-}
-
 .archive.video-list .video-title {
 	font-size: 16px;
 	margin: 4px 0 8px;
-}
-
-.archive.video-list .video-description {
-	display: block;
-	padding-left: 240px;
 }
 
 .archive.video-list .video-date {
@@ -2280,14 +2218,6 @@ body:not(.single) .video-info {
 }
 
 /* Video Player and Placeholder */
-
-.single .video-player {
-	float: left;
-	width: 940px !important;
-	height: 529px !important;
-
-	overflow: hidden;
-}
 
 .videopress-placeholder,
 .video-player object {
@@ -2418,25 +2348,15 @@ h3#comments {
 }
 
 .category .page-title {
-	float: left;
-	width: auto;
-	margin: -8px 0 20px 0;
+	flex: 0 0 25%;
+	margin: -8px auto 20px;
 }
 
 .desc {
-	float: right;
+	flex: 0 0 70%;
 	color: #969696;
 	margin: 3px 0 20px 0;
-}
-
-.category-wordcamptv .secondary-content {
-	float: left;
-	width: 200px;
-}
-
-.category-wordcamptv .primary-content {
-	float: right;
-	margin: 0;
+	text-align: center;
 }
 
 /* WordCamp Individual Page
@@ -2451,6 +2371,11 @@ h3#comments {
 
 .secondary-content ul {
 	margin: 0 0 40px 0;
+}
+
+.secondary-content li.widget {
+	border: 0;
+	text-align: center;
 }
 
 .secondary-content li li {
@@ -2468,15 +2393,11 @@ h3#comments {
 	padding: 0 0 9px;
 }
 
-.secondary-content li.widget {
-	border: 0;
-}
-
 /* 404 page
 ============================================================= */
 
 .error404 .primary-content {
-	width: 940px;
+	max-width: 940px;
 }
 
 .error404 h2 {
@@ -2512,24 +2433,19 @@ h3#comments {
 
 #footer {
 	background: #f0f0f0;
-	clear: both;
 	color: #888;
-	height: 3.5em;
-	margin: 10px 0 15px 0;
+	margin: 10px 0 0 0;
 	padding: 10px 0;
 }
 
 #footer .automattic {
-	width: 400px;
-	float: right;
-	text-align: right;
 	font-size: 11px;
 	letter-spacing: 0.2em;
-	line-height: 3em;
-	padding-top: 13px;
-	padding-right: 2px;
-	text-transform: uppercase;
 	line-height: 28px;
+	padding-right: 2px;
+	padding-top: 13px;
+	text-align: center;
+	text-transform: uppercase;
 }
 
 #footer .automattic a {
@@ -2540,17 +2456,10 @@ h3#comments {
 
 .menu-footer-container,
 #footer div.menu {
-	float: left;
 	line-height: 4em;
-	margin-left: 2px;
 	font-size: 13px;
 	margin-bottom: 0;
-}
-
-.menu-footer-container li,
-#footer div.menu li {
-	display: inline-block;
-	margin: 0 10px;
+	text-align: center;
 }
 
 .menu-footer-container li:last-of-type:after,
@@ -2586,4 +2495,221 @@ h3#comments {
 
 #footer img.videopress {
 	display: inline;
+}
+
+/* Media Queries
+============================================================= */
+
+@media screen and ( min-width: 415px ) {
+	.wptv-hero .secondary-videos li {
+		max-width: initial;
+		min-height: 75px;
+		padding-left: 150px;
+		position: relative;
+	}
+
+	.wptv-hero .secondary-videos .video-thumbnail {
+		left: 0;
+		position: absolute;
+	}
+}
+
+@media screen and ( min-width: 500px ) {
+	#header {
+		padding: 0 20px;
+	}
+
+	#header h1 {
+		float: left;
+	}
+
+	.menu-primary-container {
+		display: initial;
+	}
+
+	#menu ul {
+		background-color: transparent;
+		margin-left: -10px;
+		margin-right: auto;
+	}
+
+	#menu li {
+		float: left;
+		margin-left: 10px;
+	}
+
+	#menu li a,
+	#menu li a:link,
+	#menu li a:visited {
+		color: #21759b;
+	}
+
+	#menu li a.selected {
+		color: #545454;
+	}
+
+	#menu li a:hover,
+	#menu li a:focus {
+		color: #d54e21;
+	}
+
+	#searchform {
+		float: right;
+	}
+
+	#searchform #searchbox,
+	#searchform input#s {
+		width: 140px;
+	}
+
+	.secondary-content li.widget {
+		width: 45%;
+		display: inline-block;
+		vertical-align: top;
+		margin-right: -6px;	/* http://css-tricks.com/fighting-the-space-between-inline-block-elements/ */
+		padding-right: 30px;
+	}
+
+	.secondary-content li.widget:nth-child( even ) {
+		margin-right: 0;
+		padding-right: 0;
+	}
+
+}
+
+@media screen and ( min-width: 600px ) {
+	#menu li a:link,
+	#menu li a:visited {
+		color: #555;
+	}
+
+	#footer {
+		height: 3.5em;
+	}
+
+	.menu-footer-container li,
+	#footer div.menu li {
+		display: inline-block;
+		margin: 0 10px;
+	}
+}
+
+@media screen and ( min-width: 940px ) {
+	#menu {
+		clear: initial;
+		padding: 0;
+	}
+
+	#menu ul {
+		float: right;
+		margin-top: 18px;
+	}
+
+	#menu li {
+		padding: 0;
+	}
+
+	#menu li a {
+		display: initial;
+		padding: 5px;
+	}
+
+	#searchform {
+		margin-left: 15px;
+	}
+
+	body .wptv-hero .container,
+	body #page > .container {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-between;
+	}
+
+	.wptv-hero .main-video {
+		flex: 0 0 575px;
+		margin-left: 0;
+		margin-right: 0;
+	}
+
+	.wptv-hero .secondary-videos {
+		flex: 1 0 320px;
+		margin-left: 23px;
+		margin-top: 0;
+	}
+
+	.secondary-content {
+		flex: 0 0 200px;
+		margin: -20px 0 50px 40px;
+	}
+
+	.secondary-content li.widget {
+		display: initial;
+		text-align: left;
+		width: auto;
+	}
+
+	.category-wordcamptv .secondary-content {
+		margin: 0 30px 0 0;
+		order: 0;
+		width: 170px;
+	}
+
+	.category-wordcamptv .primary-content {
+		margin: 0;
+		order: 1;
+	}
+
+	.single .video-player {
+		float: left;
+		width: 940px !important;
+		height: 529px !important;
+		overflow: hidden;
+	}
+
+	.menu-footer-container,
+	#footer div.menu {
+		float: left;
+	}
+
+	#footer .automattic {
+		float: right;
+		margin-right: 20px;
+		text-align: right;
+		width: 380px;
+	}
+}
+
+@media screen and ( min-width:920px ) {
+	#footer {
+		height: 3.5em;
+	}
+}
+
+@media screen and ( max-width:620px ) {
+	.dot {
+		display: none;
+	}
+}
+
+@media screen and ( min-width:621px ) {
+	.archive.video-list .video-thumbnail {
+		top: 0;
+		left: 0;
+
+		width: 220px;
+		height: 120px;
+
+		margin: 0 20px 0 0;
+	}
+
+	.archive.video-list .video-description {
+		display: block;
+	}
+}
+
+@media screen and ( max-width:400px ) {
+	.entry .contact-form textarea {
+		width: 98%;
+	}
 }

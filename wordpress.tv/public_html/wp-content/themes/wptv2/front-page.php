@@ -49,12 +49,16 @@ get_header(); ?>
 				?>
 
 				<li class="group">
-					<a href="<?php the_permalink(); ?>" rel="bookmark">
 						<span class="video-thumbnail">
+							<a href="<?php the_permalink(); ?>" rel="bookmark">
 							<?php $wptv->the_video_image( 50, null, false ); ?>
+							</a>
 						</span>
-						<span class="video-title"><?php the_title(); ?></span>
-					</a>
+						<span class="video-title">
+							<a href="<?php the_permalink(); ?>" rel="bookmark">
+								<?php the_title(); ?>
+							</a>
+						</span>
 					<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
 				</li>
 

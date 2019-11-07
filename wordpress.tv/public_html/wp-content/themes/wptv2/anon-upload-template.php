@@ -27,15 +27,8 @@ function anon_upload_css() {
 			padding-top: 10px;
 		}
 
-		.page-template-anon-upload-template-php #footer {
-			position: absolute;
-			bottom: 0;
-			right: 0;
-			left: 0;
-		}
-
 		.video-upload {
-			padding-bottom: 70px;
+			width: 100%;
 		}
 
 		.noscript-show p {
@@ -48,12 +41,21 @@ function anon_upload_css() {
 
 		.video-upload-left {
 			max-width: 550px;
+			margin: 15px;
 		}
 
 		.video-upload-right {
 			float: right;
 			width: 390px;
 			margin: -25px 0 25px;
+		}
+
+		@media screen and ( max-width: 920px ) {
+			.video-upload-right {
+				float: none;
+				width: auto;
+				margin: 0 10px;
+			}
 		}
 
 		.video-upload p {
@@ -72,6 +74,13 @@ function anon_upload_css() {
 			width: 130px;
 			float: left;
 			font-weight: bold;
+		}
+
+		@media screen and ( max-width: 500px ) {
+			.video-upload-left p > label,
+			.video-upload-left div > label {
+				width: 100%;
+			}
 		}
 
 		.video-upload-left p > label.wptv-video-wordcamp-cb {
@@ -93,12 +102,11 @@ function anon_upload_css() {
 			color: #333;
 			background-color: #fff;
 			padding: 4px;
-			width: 329px;
+			width: 96%;
 			max-width: 329px;
 		}
 
 		.video-upload-left ul.cats-checkboxes {
-			margin-left: 130px;
 			height: 150px;
 			overflow: auto;
 		}

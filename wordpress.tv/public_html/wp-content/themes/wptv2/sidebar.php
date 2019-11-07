@@ -1,6 +1,6 @@
 <div class="secondary-content">
 	<ul>
-		<li>
+		<li class="widget">
 			<h3><?php esc_html_e( 'Resources', 'wptv' ); ?></h3>
 
 			<ul>
