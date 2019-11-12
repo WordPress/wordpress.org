@@ -91,9 +91,12 @@ class WP_53_Credits extends WP_Credits {
 					'mattchowning'      => 'Matt Chowning',
 					'nerrad'            => 'Darren Ethier',
 					'SergioEstevao'     => 'Sérgio Estêvão',
+					'get_dave'          => 'Dave Smith',
 					'johnjamesjacoby'   => 'John James Jacoby',
+					'boonebgorges'      => 'Boone Gorges',
 					'poena'             => 'Carolina Nymark',
 					'ryelle'            => 'Kelly Dwan',
+					'anevins'           => 'Andrew Nevins',
 				],
 			],
 		];
