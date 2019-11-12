@@ -47,6 +47,7 @@ abstract class WP_Credits {
 		'5.0' => '2017-11-15 00:00:00',
 		'5.1' => '2017-11-15 00:00:00', // Yes, 5.0 and 5.1 have the same date. #blamepento
 		'5.2' => '2019-02-21 00:00:00',
+		'5.3' => '2019-11-12 00:00:00',
 	);
 
 	final public static function factory( $version, $gp_locale ) {
