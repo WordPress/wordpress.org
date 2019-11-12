@@ -119,7 +119,7 @@ the_post();
 								5.4
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td><?php echo date_i18n( 'Y', strtotime( '2020' ) ); ?></td>
+							<td>2020</td>
 						</tr>
 						</tbody>
 					</table>
