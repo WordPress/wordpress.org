@@ -1,7 +1,7 @@
 <?php if ( is_front_page() ) : ?>
 	<div id="headline"><div id="headline-inner">
-		<h2 class="graphic home"><?php _e( 'Forums, made the WordPress way', 'bbporg' ); ?></h2>
-		<p><?php _e( 'bbPress is forum software with a twist from the creators of WordPress. Easily setup discussion forums inside your WordPress.org powered site.', 'bbporg' ); ?></p>
+		<h2 class="graphic home"><?php _e( 'Discussion forums, for your WordPress.org powered site.', 'bbporg' ); ?></h2>
+		<p><?php _e( 'bbPress is forum software from the creators of WordPress. Quickly setup a place for asyncronous discussion, subscriptions, and more!', 'bbporg' ); ?></p>
 		<div>
 			<a href="//bbpress.org/download/" id="big-demo-button" class="button"><?php _e( 'Download bbPress &rarr;', 'bbporg' ); ?></a>
 			<img src="<?php echo get_stylesheet_directory_uri(); ?>/images/screenshots.png?v=6" srcset="<?php echo get_stylesheet_directory_uri(); ?>/images/screenshots.png?v=6 1x, <?php echo get_stylesheet_directory_uri(); ?>/images/screenshots-2x.png?v=6 2x" alt="">
