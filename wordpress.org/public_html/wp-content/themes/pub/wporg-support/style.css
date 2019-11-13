@@ -3351,6 +3351,7 @@ section {
 
 #bbpress-forums {
 	font-size: 1rem;
+	line-height: inherit;
 	overflow: inherit;
 }
 
