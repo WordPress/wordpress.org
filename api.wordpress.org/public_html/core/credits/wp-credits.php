@@ -47,7 +47,7 @@ abstract class WP_Credits {
 		'5.0' => '2017-11-15 00:00:00',
 		'5.1' => '2017-11-15 00:00:00', // Yes, 5.0 and 5.1 have the same date. #blamepento
 		'5.2' => '2019-02-21 00:00:00',
-		'5.3' => '2019-11-12 00:00:00',
+		'5.3' => '2019-05-07 00:00:00',
 	);
 
 	final public static function factory( $version, $gp_locale ) {
@@ -243,6 +243,13 @@ abstract class WP_Credits {
 	}
 
 	final protected function get_end_date() {
+		// 5.0 and 5.1 have the same start date and don't follow the pattern.
+		if ( '5.0' === $this->branch ) {
+			return '2018-12-06 00:00:00';
+		} elseif ( '5.1' === $this->branch ) {
+			return '2019-02-21 00:00:00';
+		}
+
 		$next = false;
 		foreach ( self::$cycle_dates as $branch => $date ) {
 			if ( $next )
