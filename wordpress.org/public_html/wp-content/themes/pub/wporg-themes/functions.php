@@ -106,7 +106,7 @@ function wporg_themes_scripts() {
 		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '20191030', true );
 
 		// Use the Rosetta-specific site name. Ie. "WordPress.org $LOCALE"
-		$title_suffix = isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ? $GLOBALS['wporg_global_header_options']['rosetta_title'] : 'WordPess.org';
+		$title_suffix = isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ? $GLOBALS['wporg_global_header_options']['rosetta_title'] : 'WordPress.org';
 
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
