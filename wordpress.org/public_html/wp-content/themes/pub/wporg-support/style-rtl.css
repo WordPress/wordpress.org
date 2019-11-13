@@ -3469,6 +3469,10 @@ section {
 	padding: 0 10px 10px;
 }
 
+.bbpress #bbpress-forums {
+	/* bbPress 2.5 */
+}
+
 .bbpress #bbpress-forums div.bbp-template-notice {
 	padding: 0.5rem;
 	border: none;
@@ -3594,7 +3598,9 @@ section {
 }
 
 .bbpress #bbpress-forums div.bbp-reply-author a.bbp-author-name,
-.bbpress #bbpress-forums div.bbp-topic-author a.bbp-author-name {
+.bbpress #bbpress-forums div.bbp-topic-author a.bbp-author-name,
+.bbpress #bbpress-forums div.bbp-reply-author a.bbp-author-link span.bbp-author-name,
+.bbpress #bbpress-forums div.bbp-topic-author a.bbp-author-link span.bbp-author-name {
 	clear: none;
 	font-size: 1rem;
 	display: inline-block;

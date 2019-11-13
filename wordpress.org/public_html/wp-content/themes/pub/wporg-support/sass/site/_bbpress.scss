@@ -261,8 +261,12 @@ section {
 			}
 		}
 
+		/* bbPress 2.5 */
 		div.bbp-reply-author a.bbp-author-name,
-		div.bbp-topic-author a.bbp-author-name {
+		div.bbp-topic-author a.bbp-author-name,
+		/* bbPress 2.6 */
+		div.bbp-reply-author a.bbp-author-link span.bbp-author-name,
+		div.bbp-topic-author a.bbp-author-link span.bbp-author-name {
 			clear: none;
 			font-size: ms(0);
 			display: inline-block;
