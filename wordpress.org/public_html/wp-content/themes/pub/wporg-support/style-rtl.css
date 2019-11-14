@@ -3822,6 +3822,8 @@ section {
 	background: #fff;
 	border: 1px solid #b4b9be;
 	color: #757575;
+	font-size: inherit;
+	line-height: inherit;
 	padding: 2px 8px;
 	margin-right: -1px;
 	opacity: 1;
