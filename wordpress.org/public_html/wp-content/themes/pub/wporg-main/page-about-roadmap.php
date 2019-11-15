@@ -41,7 +41,7 @@ the_post();
 						<?php
 						printf(
 							/* translators: %s: Link to Gutenberg demo page */
-							wp_kses_post( __( 'WordPress is continually under development. Currently, work is underway on Phase 2 of the Gutenberg project. The Gutenberg project is a reimagination of the way we manage content on the web. Its goal is to broaden access to web presence, which is a foundation of successful modern businesses. Phase 1 was the new block editor, which was released in WordPress 5.0, you can <a href="%s">see that in action here</a>. In 2019 we’re focusing on Phase 2 which will provide a way for themes to visually register content areas, and expose these in Gutenberg.', 'wporg' ) ),
+							wp_kses_post( __( 'WordPress is continually under development. Currently, work is underway on Phase 2 of the Gutenberg project. The Gutenberg project is a reimagination of the way we manage content on the web. Its goal is to broaden access to web presence, which is a foundation of successful modern businesses. Phase 1 was the new block editor, which was released in WordPress 5.0, you can <a href="%s">see that in action here</a>. Throughout 2020 there will be a focus on full site editing as we continue to progress through Phase 2.', 'wporg' ) ),
 							esc_url( home_url( '/gutenberg/' ) )
 						);
 						?>
