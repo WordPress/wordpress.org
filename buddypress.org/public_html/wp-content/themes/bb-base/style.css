@@ -39,7 +39,7 @@ html {
 	padding: 0;
 }
 body {
-	font: 400 13px/24px "Open Sans", sans-serif;
+	font: 400 13px/24px sans-serif;
 	text-align: left;
 	background: #fbfbfb;
 	margin: 0;
@@ -318,17 +318,12 @@ div.single-post table tr.alt td {
 
 .button {
 	color: #fff;
-	font-family: "Open Sans", sans-serif;
+	font-family: sans-serif;
 	height: auto;
 	line-height: 1;
 	padding: 5px 10px;
 	font-weight: 600;
 	border: none;
-
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	-o-border-radius: 3px;
-	-ms-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -369,10 +364,6 @@ div.single-post table tr.alt td {
 	line-height: 1;
 	padding: 5px 10px;
 	font-weight: 600;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	-o-border-radius: 3px;
-	-ms-border-radius: 3px;
 	border-radius: 3px;
 	border: 1px solid transparent;
 }
@@ -622,7 +613,7 @@ blockquote p {
 body.blog cite,
 body.archive cite,
 body.single cite {
-	font-family: "Open Sans", sans-serif;
+	font-family: sans-serif;
 	font-size: 12px;
 	font-style: normal;
 	color: #999;
@@ -638,7 +629,7 @@ div.single-post.archive {
 	border: none;
 }
 div.single-post h3 {
-	font-family: "Open Sans", sans-serif !important;
+	font-family: sans-serif !important;
 	font-style: normal;
 }
 div.single-post p {
@@ -684,7 +675,6 @@ div.action a:hover {
 
 .screen-reader-text:focus {
 	background-color: #f1f1f1;
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	-webkit-box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
 	box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
@@ -720,7 +710,7 @@ img.left {
 -------------------------------------------------------------- */
 
 input {
-	font: 14px/16px "Open Sans", sans-serif;
+	font: 14px/16px sans-serif;
 	padding: 2px;
 	color: #333;
 }
@@ -1367,7 +1357,7 @@ div.single-plugin {
 	clear: both;
 }
 div.single-plugin h3 {
-	font-family: "Open Sans", sans-serif !important;
+	font-family: sans-serif !important;
 	font-style: normal;
 	float: left;
 }
@@ -1428,14 +1418,12 @@ div.plugin-meta img {
 
 }
 
-#bbpress-forums .bbp-topic-form fieldset.bbp-form button {
-	float: right;
-	margin-top: -160px;
-}
-
-#bbpress-forums .bbp-reply-form fieldset.bbp-form button {
-	float: right;
-	margin-top: -120px;
+#bbpress-forums div.bbp-submit-wrapper {
+	border: 1px solid #ddd;
+	float: none;
+	text-align: right;
+	padding: 15px;
+	background: #f5f5f5;
 }
 
 #bbpress-forums div.bbp-the-content-wrapper div.quicktags-toolbar,
@@ -1769,10 +1757,10 @@ body.trac .attachment {
 @media only screen and (max-width: 480px) {
 	#bbpress-forums div.bbp-topic-author img.avatar,
 	#bbpress-forums div.bbp-reply-author img.avatar {
-		width: 100px;
-		height: 100px;
-		max-width: 100px;
-		max-height: 100px;
+		width: 72px;
+		height: 72px;
+		margin: -5px 0 0 -5px;
+		transform: rotate(-5deg);
 	}
 
 	#bbpress-forums .bbp-author-role {
@@ -1785,23 +1773,27 @@ body.trac .attachment {
 	#bbpress-forums p.bbp-topic-post-date,
 	#bbpress-forums p.bbp-reply-post-date {
 		position: absolute;
-		right: -15px;
-		top: -15px;
+		right: -13px;
+		top: -17px;
 		font-size: 10px;
+		margin: 0;
 	}
 
 	#bbpress-forums div.bbp-topic-author .bbp-author-avatar + br,
-	#bbpress-forums div.bbp-topic-author .bbp-author-avatar + br,
+	#bbpress-forums div.bbp-reply-author .bbp-author-avatar + br,
 	#bbpress-forums div.bbp-topic-ip,
 	#bbpress-forums div.bbp-reply-ip {
 		display: none;
 	}
 
-	#bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links,
-	#bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links {
-		display: block;
+	#bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links,
+	#bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links {
+		display: block !important;
 		border-top: 1px dotted #ddd;
-		margin: 10px;
+		margin: 10px 10px 0 10px;
 		padding: 5px 0;
+		position: relative !important;
+		top: 0;
+		left: 0;
 	}
 }
