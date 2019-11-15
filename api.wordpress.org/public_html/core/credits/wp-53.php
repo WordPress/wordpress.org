@@ -725,6 +725,7 @@ class WP_53_Credits extends WP_Credits {
 			'vortfu',
 			'vrimill',
 			'w3rkjana',
+			'webcommsat',
 			'webdados',
 			'webmandesign',
 			'welcher',
