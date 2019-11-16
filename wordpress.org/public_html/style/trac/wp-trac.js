@@ -37,6 +37,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'ui' : 'Ticket is focused on user interface changes.',
 		'accessibility' : 'Accessibility focus.',
 		'javascript' : 'Heavy JavaScript focus.',
+		'css' : 'CSS focus.',
 		// 'unit tests' : 'PHP or JS unit tests.',
 		'docs' : 'Inline documentation focus.',
 		'rtl' : 'Right-to-left languages.',
