@@ -25,6 +25,8 @@ class Meta_Sync {
 		$this->sync_downloads();
 		$this->sync_ratings();
 		$this->update_tested_up_to();
+
+		Manager::clear_memory_heavy_variables();
 	}
 
 	/**
@@ -166,7 +168,7 @@ class Meta_Sync {
 		$tested_meta_value_esc_sql = '"' . implode( '", "', array_map( 'esc_sql', array_keys( $latest_equiv ) ) ) . '"';
 		$tested_values             = $wpdb->get_results( "SELECT post_id, post_name, meta_value FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON pm.post_id = p.ID WHERE meta_key = 'tested' AND meta_value IN( {$tested_meta_value_esc_sql} )" );
 
-		foreach ( $tested_values as $row ) {
+		foreach ( $tested_values as $i => $row ) {
 			update_post_meta(
 				$row->post_id,
 				'tested',
@@ -175,6 +177,10 @@ class Meta_Sync {
 
 			// Update the API endpoints with the new data
 			API_Update_Updater::update_single_plugin( $row->post_name );
+
+			if ( $i % 100 === 0 ) {
+				Manager::clear_memory_heavy_variables();
+			}
 		}
 	}
 }

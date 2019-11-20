@@ -69,27 +69,8 @@ GROUP BY t.slug, meta_value", $time_limit ) );
 				update_post_meta( $plugin->ID, 'support_threads_resolved', wp_slash( $stats['yes'] ) );
 			}
 
-			self::stop_the_insanity();
+			Manager::clear_memory_heavy_variables();
 		}
 	}
 
-	/**
-	 * Clear caches for memory management.
-	 *
-	 * @static
-	 * @global \wpdb            $wpdb
-	 * @global \WP_Object_Cache $wp_object_cache
-	 */
-	protected static function stop_the_insanity() {
-		global $wpdb, $wp_object_cache;
-
-		$wpdb->queries = [];
-
-		if ( is_object( $wp_object_cache ) ) {
-			$wp_object_cache->cache          = [];
-			$wp_object_cache->group_ops      = [];
-			$wp_object_cache->memcache_debug = [];
-			$wp_object_cache->stats          = [];
-		}
-	}
 }

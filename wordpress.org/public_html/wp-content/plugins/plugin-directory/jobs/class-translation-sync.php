@@ -29,12 +29,7 @@ class Translation_Sync {
 			}
 
 			// Make sure the cache doesn't exhaust memory
-			global $wp_object_cache;
-			if ( is_object( $wp_object_cache ) ) {
-				$wp_object_cache->cache = array();
-				$wp_object_cache->stats = array( 'add' => 0, 'get' => 0, 'get_multi' => 0, 'delete' => 0);
-				$wp_object_cache->group_ops = array();
-			}
+			Manager::clear_memory_heavy_variables();
 
 			$args['offset'] += $args['posts_per_page'];
 		}
