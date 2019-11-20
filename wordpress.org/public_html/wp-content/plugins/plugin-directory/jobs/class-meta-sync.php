@@ -161,7 +161,9 @@ class Meta_Sync {
 		$latest_equiv = array();
 		foreach ( $equivs as $latest_compatible_version => $compatible_with ) {
 			foreach ( $compatible_with as $version ) {
-				$latest_equiv[ $version ] = $latest_compatible_version;
+				if ( $version != $latest_compatible_version ) {
+					$latest_equiv[ $version ] = $latest_compatible_version;
+				}
 			}
 		}
 
