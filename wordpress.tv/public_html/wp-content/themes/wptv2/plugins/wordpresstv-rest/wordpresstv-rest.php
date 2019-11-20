@@ -202,6 +202,7 @@ class WordPressTV_REST_API {
 				$response[ $method ] = array();
 				foreach ( $terms as $t ) {
 					$item = array(
+						'id'   => $t->term_id,
 						'name' => $t->name,
 						'link' => get_term_link( $t ),
 						'api'  => add_query_arg( $taxonomy_obj->query_var, $t->slug, home_url( '/api/videos.json') ),
