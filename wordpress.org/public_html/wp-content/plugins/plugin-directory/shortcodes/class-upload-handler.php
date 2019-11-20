@@ -107,7 +107,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'reserved_name', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-				__( 'Your chosen plugin name - %1$s - has been reserved and cannot be used. Please change the %2$s line in your main plugin file and readme, then you may upload it again.', 'wporg-plugins' ),
+				__( 'Your chosen plugin name - %1$s - has been reserved or otherwise restricted from use entirely. Please change the %2$s line in your main plugin file and readme, then you may upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'<code>Plugin Name:</code>'
 			) );
@@ -348,17 +348,21 @@ class Upload_Handler {
 			'developer',
 			'featured',
 			'filter',
-			'jquery',
 			'new',
 			'page',
+			'plugins',
 			'popular',
 			'post',
 			'search',
 			'tag',
 			'updated',
 			'upload',
-			'wordpress',
 			'wp-admin',
+			// Reserved names.
+			'jquery',
+			'site-kit-by-google',
+			'wordpress',
+			'yoast-seo',
 		);
 
 		return in_array( $this->plugin_slug, $reserved_slugs );
@@ -374,6 +378,7 @@ class Upload_Handler {
 			'adobe-',
 			'advanced-custom-fields-',
 			'amazon-',
+			'contact-form-7-',
 			'divi-',
 			'easy-digital-downloads-',
 			'elementor-',
