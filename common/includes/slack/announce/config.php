@@ -38,6 +38,10 @@ function get_whitelist() {
 			'nrqsnchz',
 			'rianrietveld',
 		),
+		'accessibility-events' => array(
+			'audrasjb',
+			'nrqsnchz',
+		),
 		'bbpress' => array(
 			'johnjamesjacoby', // @jjj on Slack
 			'netweb',
