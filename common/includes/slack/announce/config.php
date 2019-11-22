@@ -32,10 +32,11 @@ function get_whitelist() {
 	return array(
 		'accessibility' => array(
 			'afercia',
-			'joedolson',
-			'rianrietveld',
-			'audrasjb',
 			'arush',
+			'audrasjb',
+			'joedolson',
+			'nrqsnchz',
+			'rianrietveld',
 		),
 		'bbpress' => array(
 			'johnjamesjacoby', // @jjj on Slack
