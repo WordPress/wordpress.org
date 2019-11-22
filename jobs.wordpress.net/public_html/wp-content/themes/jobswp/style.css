@@ -822,6 +822,9 @@ li > ul {
 .job-cat-item-contributor:before { /* Contributor */
 	content: '\f155';
 }
+.job-cat-item-support:before { /* Support */
+	content: '\f125';
+}
 
 .job-cat-item-all:before {
 	content: '\f120';
