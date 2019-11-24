@@ -255,7 +255,7 @@ class WP_I18n_Teams {
 
 		$latest_release = $locale_data['latest_release'];
 		if ( $latest_release ) {
-			$locale_data['localized_core_url'] = sprintf( 'https://%s.wordpress.org/wordpress-%s-%s.zip', $locale_data['subdomain'], $latest_release, $locale->wp_locale );
+			$locale_data['localized_core_url'] = sprintf( 'https://downloads.wordpress.org/release/%s/wordpress-%s.zip', $locale->wp_locale, $latest_release );
 			$language_packs_data = $this->get_language_packs_data();
 
 			if ( version_compare( $latest_release, '4.0', '>=' ) && ! empty( $language_packs_data[ $locale->wp_locale ] ) ) {
