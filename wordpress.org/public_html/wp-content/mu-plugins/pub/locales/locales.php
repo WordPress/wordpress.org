@@ -421,6 +421,7 @@ class GP_Locales {
 		$ca_valencia->native_name = 'Català (Valencià)';
 		$ca_valencia->wp_locale = 'ca_valencia';
 		$ca_valencia->slug = 'ca/valencia';
+		$ca_valencia->root_slug = $ca->slug;
 
 		$ce = new GP_Locale();
 		$ce->english_name = 'Chechen';
@@ -559,6 +560,7 @@ class GP_Locales {
 		$de_formal->native_name = 'Deutsch (Sie)';
 		$de_formal->slug = 'de/formal';
 		$de_formal->wp_locale = 'de_DE_formal';
+		$de_formal->root_slug = $de->slug;
 
 		$de_at = new GP_Locale();
 		$de_at->english_name = 'German (Austria)';
@@ -583,6 +585,7 @@ class GP_Locales {
 		$de_ch_informal->native_name = 'Deutsch (Schweiz, Du)';
 		$de_ch_informal->slug = 'de-ch/informal';
 		$de_ch_informal->wp_locale = 'de_CH_informal';
+		$de_ch_informal->root_slug = $de_ch->slug;
 
 		$dv = new GP_Locale();
 		$dv->english_name = 'Dhivehi';
@@ -1740,6 +1743,7 @@ class GP_Locales {
 		$nl_formal->native_name = 'Nederlands (Formeel)';
 		$nl_formal->slug = 'nl/formal';
 		$nl_formal->wp_locale = 'nl_NL_formal';
+		$nl_formal->root_slug = $nl->slug;
 
 		$nl_be = new GP_Locale();
 		$nl_be->english_name = 'Dutch (Belgium)';
@@ -1884,6 +1888,7 @@ class GP_Locales {
 		$pt_ao90->native_name = 'Português (AO90)';
 		$pt_ao90->slug = 'pt/ao90';
 		$pt_ao90->wp_locale = 'pt_PT_ao90';
+		$pt_ao90->root_slug = $pt->slug;
 
 		$pt_ao = new GP_Locale();
 		$pt_ao->english_name = 'Portuguese (Angola)';
