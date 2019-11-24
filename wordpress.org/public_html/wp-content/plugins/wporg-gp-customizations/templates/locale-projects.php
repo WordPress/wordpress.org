@@ -96,12 +96,22 @@ gp_tmpl_header();
 		<input type="hidden" name="s" value="<?php echo esc_attr( $search ?? '' ); ?>"
 		<input type="hidden" name="page" value="1">
 
-		<?php if ( 'waiting' === $project->slug && is_user_logged_in() ) { ?>
+		<?php
+		$filter_count = 0;
+
+		if ( 'waiting' === $project->slug && is_user_logged_in() ) {
+			$filter_count++;
+			?>
 			<input id="filter-without-editors" type="checkbox" name="without-editors" value="1"<?php checked( isset( $_GET['without-editors'] ) ); ?>>
 			<label for="filter-without-editors">Limit to projects without editors</label>
 			<span class="filter-sep" aria-hidden="true">|</span>
-		<?php } ?>
+			<?php
+		}
+		?>
 
+		<?php
+		$filter_count++;
+		?>
 		<label for="filter">Filter:</label>
 		<select id="filter" name="filter">
 			<?php
@@ -129,7 +139,8 @@ gp_tmpl_header();
 				}
 			?>
 		</select>
-		<button type="submit">Submit</button>
+
+		<button type="submit"><?php echo ( 1 === $filter_count ? 'Apply Filter' : 'Apply Filters' ); ?></button>
 	</form>
 </div>
 <div id="projects" class="projects">
