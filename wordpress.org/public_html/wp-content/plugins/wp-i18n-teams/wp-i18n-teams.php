@@ -298,10 +298,16 @@ class WP_I18n_Teams {
 			return $cache;
 		}
 
+		// Editors are only assigned to the parent locale.
+		$parent_locale = null;
+		if ( isset( $locale->root_slug ) ) {
+			$parent_locale = GP_Locales::by_slug( $locale->root_slug );
+		}
+
 		$contributors = [];
-		$contributors['locale_managers'] = $this->get_locale_managers( $locale );
-		$contributors['validators'] = $this->get_general_translation_editors( $locale );
-		$contributors['project_validators'] = $this->get_project_translation_editors( $locale );
+		$contributors['locale_managers'] = $this->get_locale_managers( $parent_locale ?? $locale );
+		$contributors['validators'] = $this->get_general_translation_editors( $parent_locale ?? $locale );
+		$contributors['project_validators'] = $this->get_project_translation_editors( $parent_locale ?? $locale );
 		$contributors['translators'] = $this->get_translation_contributors( $locale, 365 ); // Contributors from the past year
 		$contributors['translators_past'] = array_diff_key( $this->get_translation_contributors( $locale ), $contributors['translators'] );
 
@@ -501,16 +507,20 @@ class WP_I18n_Teams {
 		$contributors = array();
 
 		$date_constraint = '';
-		if ( !is_null( $max_age_days ) )
+		if ( null !== $max_age_days ) {
 			$date_constraint = $wpdb->prepare( " AND date_modified >= CURRENT_DATE - INTERVAL %d DAY", $max_age_days );
+		}
+
+		[ $locale, $locale_slug ] = array_merge( explode( '/', $locale->slug ), [ 'default' ] );
 
 		$users = $wpdb->get_col( $wpdb->prepare(
-			"SELECT DISTINCT user_id FROM translate_user_translations_count WHERE accepted > 0 AND locale = %s",
-			$locale->slug
+			"SELECT DISTINCT user_id FROM translate_user_translations_count WHERE accepted > 0 AND locale = %s AND locale_slug = %s",
+			$locale,
+			$locale_slug
 		) . $date_constraint );
 
 		if ( ! $users ) {
-			$contributors;
+			return $contributors;
 		}
 
 		$user_data = $wpdb->get_results( "SELECT user_nicename, display_name, user_email FROM $wpdb->users WHERE ID IN (" . implode( ',', $users ) . ")" );
