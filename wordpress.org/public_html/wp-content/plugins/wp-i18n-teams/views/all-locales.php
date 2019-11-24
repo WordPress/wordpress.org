@@ -121,13 +121,20 @@
 					</td>
 
 					<td data-column-title="<?php esc_attr_e( 'GlotPress', 'wporg' ); ?>" class="center no-right-border">
-						<?php if ( isset( $percentages[ $locale->wp_locale ] ) ) : ?>
-							<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>/default/wp/dev">
+						<?php
+						if ( isset( $percentages[ $locale->wp_locale ] ) ) :
+							$locale_slug = false !== strpos( $locale->slug, '/' ) ? $locale->slug : $locale->slug . '/default';
+							?>
+							<a href="https://translate.wordpress.org/locale/<?php echo $locale_slug; ?>/wp/dev">
 								<?php echo $percentages[ $locale->wp_locale ] . '%'; ?>
 							</a>
-						<?php else : ?>
+							<?php
+						else :
+							?>
 							&mdash;
-						<?php endif; ?>
+							<?php
+						endif;
+						?>
 					</td>
 					<td class="center no-left-border nowrap">
 						<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">
