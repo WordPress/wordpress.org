@@ -316,28 +316,44 @@ class WP_I18n_Teams {
 			return $cache;
 		}
 
-		$projects = array( 'wp/dev', 'wp/dev/admin', 'wp/dev/admin/network' );
+		$projects = array( 'wp/dev', 'wp/dev/cc', 'wp/dev/admin', 'wp/dev/admin/network' );
 		$counts = $percentages = array();
 		foreach ( $projects as $project ) {
 			$results = json_decode( file_get_contents( 'https://translate.wordpress.org/api/projects/' . $project ) );
 			foreach ( $results->translation_sets as $set ) {
-				if ( $set->slug !== 'default' ) {
-					continue;
-				}
+
 				if ( ! isset( $set->wp_locale ) ) {
 					continue;
 				}
-				if ( ! isset( $counts[ $set->wp_locale ] ) ) {
-					$counts[ $set->wp_locale ] = array( 'current' => 0, 'total' => 0 );
+
+				$wp_locale = $set->wp_locale;
+				if ( $set->slug !== 'default' ) {
+					$wp_locale = $wp_locale . '_' . $set->slug;
 				}
-				$counts[ $set->wp_locale ]['total'] += (int) $set->current_count + (int) $set->untranslated_count;
-				$counts[ $set->wp_locale ]['current'] += (int) $set->current_count;
+
+				if ( ! isset( $counts[ $set->wp_locale ] ) ) {
+					$counts[ $wp_locale ] = 0;
+				}
+				$counts[ $wp_locale ] += (int) $set->percent_translated;
 			}
 		}
-		foreach ( $counts as $locale => $count ) {
-			$percentages[ $locale ] = ( $count['total'] > 0 ) ? floor( $count['current'] / $count['total'] * 100 ) : 0;
+
+		foreach ( $counts as $locale => $percent_translated ) {
+			// English locales don't have wp/dev/cc.
+			$projects_count = 0 === strpos( $locale, 'en_' ) ? 3 : 4;
+
+			/*
+			 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
+			 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
+			 */
+			$percent_complete = 100 / ( 100 * $projects_count ) * $percent_translated;
+			$percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
+
+			$percentages[ $locale ] = $percent_complete;
 		}
+
 		set_transient( 'core_translation_data', $percentages, 900 );
+
 		return $percentages;
 	}
 
