@@ -934,7 +934,7 @@ class Locale extends GP_Route {
 			default:
 				// Fall through to include both Themes and Plugins
 			case 'wp-themes':
-				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects
+				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects.
 				$theme_favorites = array_map( function( $slug ) {
 					return "wp-themes/$slug";
 				}, (array) get_user_meta( $user_id, 'theme_favorites', true ) );
@@ -944,17 +944,10 @@ class Locale extends GP_Route {
 				}
 
 			case 'wp-plugins':
-				// Plugin favorites are stored as topic ID's
-				$plugin_fav_ids = array_keys( (array) get_user_meta( $user_id, PLUGINS_TABLE_PREFIX . 'plugin_favorite', true ) );
-				$plugin_fav_slugs = array();
-				if ( $plugin_fav_ids ) {
-					$plugin_fav_ids = implode( ',', array_map( 'intval', $plugin_fav_ids ) );
-					$plugin_fav_slugs = $wpdb->get_col( "SELECT topic_slug FROM " . PLUGINS_TABLE_PREFIX . "topics WHERE topic_id IN( $plugin_fav_ids )" );
-				}
-
+				// Plugin favorites are stored as plugin slugs, these map 1:1 to GlotPress projects.
 				$plugin_favorites = array_map( function( $slug ) {
 					return "wp-plugins/$slug";
-				}, $plugin_fav_slugs );
+				}, (array) get_user_meta( $user_id, 'plugin_favorites', true ) );
 
 				if ( 'wp-plugins' === $project_slug ) {
 					return $plugin_favorites;
