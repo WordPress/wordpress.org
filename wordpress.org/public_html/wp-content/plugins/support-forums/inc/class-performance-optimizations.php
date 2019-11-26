@@ -52,7 +52,8 @@ class Performance_Optimizations {
 		add_filter( 'bbp_register_views', array( $this, 'disable_popular_view' ) );
 
 		// Disable entire-forum subscriptions.
-		add_filter( 'bbp_get_forum_subscribers', '__return_empty_array' );
+		add_filter( 'bbp_get_forum_subscribers', '__return_empty_array' ); // bbPress 2.5; 2.6 deprecated
+		add_filter( 'bbp_get_subscribers', array( $this, 'bbp_get_subscribers' ), 10, 3 ); // bbPress 2.6
 	}
 
 	/**
@@ -460,5 +461,19 @@ class Performance_Optimizations {
 	 */
 	public function disable_popular_view() {
 		bbp_deregister_view( 'popular' );
+	}
+
+	/**
+	 * Block forum subscriptions.
+	 * 
+	 * No user ever actually intends to subscribe to an entire forum, so lets just never do that.
+	 */
+	function bbp_get_subscribers( $user_ids, $object_id, $type ) {
+		// We don't want anyone subscribing to a forum, null it out if that happens.
+		if ( 'post' === $type && bbp_is_forum( $object_id ) ) {
+			$user_ids = array();
+		}
+
+		return $user_ids;
 	}
 }
