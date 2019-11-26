@@ -566,7 +566,7 @@ As a General Translation Editor for the locale, we request that you fill out you
 
 We also ask all WordPress General Translation Editors to subscribe for notifications for their locales, you can find the notification subscription settings in your profile settings (https://profiles.wordpress.org/profile/notifications/).
 
-The Polyglots team connects on Slack once per week at 11am UTC every Wednesday. We’d love to have you there if you can make it. Register from https://chat.wordpress.org.
+The Polyglots team connects on Slack. Check out https://make.wordpress.org/meetings/#polyglots for upcoming team meetings. We’d love to have you there if you can make it. Register from https://chat.wordpress.org.
 If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
 
 Welcome to the WordPress Polyglots team and happy translating!',
@@ -605,7 +605,7 @@ Your local translation team can be found on https://make.wordpress.org/polyglots
 
 ###RESOURCESLIST###
 
-The Polyglots team connects on Slack once per week at 11am UTC every Wednesday. We’d love to have you there if you can make it. Register from https://chat.wordpress.org/.
+The Polyglots team connects on Slack. Check out https://make.wordpress.org/meetings/#polyglots for upcoming team meetings. We’d love to have you there if you can make it. Register from https://chat.wordpress.org/.
 If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
 
 Welcome to the WordPress Polyglots team and happy translating.',
