@@ -54,6 +54,7 @@ class Performance_Optimizations {
 		// Disable entire-forum subscriptions.
 		add_filter( 'bbp_get_forum_subscribers', '__return_empty_array' ); // bbPress 2.5; 2.6 deprecated
 		add_filter( 'bbp_get_subscribers', array( $this, 'bbp_get_subscribers' ), 10, 3 ); // bbPress 2.6
+		add_filter( 'bbp_get_user_subscribe_link', array( $this, 'bbp_get_user_subscribe_link' ), 10, 4 ); // Remove link.
 	}
 
 	/**
@@ -475,5 +476,17 @@ class Performance_Optimizations {
 		}
 
 		return $user_ids;
+	}
+
+	/**
+	 * Disable the 'Subscribe' link for forums.
+	 */
+	function bbp_get_user_subscribe_link( $html, $r, $user_id, $object_id ) {
+		// We don't want end-users accidentally subscribing to a forum, lets remove those links.
+		if ( bbp_is_forum( $object_id ) ) {
+			$html = '';
+		}
+
+		return $html;
 	}
 }
