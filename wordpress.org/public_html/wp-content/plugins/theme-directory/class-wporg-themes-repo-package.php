@@ -37,6 +37,11 @@ class WPORG_Themes_Repo_Package extends Repo_Package {
 	 */
 	public function latest_version() {
 		$status = get_post_meta( $this->wp_post->ID, '_status', true );
+
+		if ( empty( $status ) ) {
+			return '';
+		}
+
 		uksort( $status, 'version_compare' );
 
 		// Find if there is a live version, and use that one.
@@ -63,11 +68,11 @@ class WPORG_Themes_Repo_Package extends Repo_Package {
 			case 'version' :
 				return $version;
 			case 'theme-url' :
-				return $this->wp_post->_theme_url[ $version ];
+				return $this->wp_post->_theme_url[ $version ] ?? '';
 			case 'author-url' :
-				return $this->wp_post->_author_url[ $version ];
+				return $this->wp_post->_author_url[ $version ] ?? '';
 			case 'ticket' :
-				return $this->wp_post->_ticket_id[ $version ];
+				return $this->wp_post->_ticket_id[ $version ] ?? '';
 			case 'requires':
 				$values = $this->wp_post->_requires;
 				if ( isset( $values[ $version ] ) ) {
