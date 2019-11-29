@@ -59,7 +59,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'final', 'filesource', 'global', 'group', 'home', 'ignore', 'import', 'inheritdoc',
 		'internal', 'license', 'link', 'media', 'mention', 'mentions', 'method', 'name',
 		'notification', 'notifications', 'package', 'param', 'private', 'property',
-		'requires', 'return', 'see', 'since', 'static', 'staticvar', 'subpackage',
+		'requires', 'return', 'returns', 'see', 'since', 'static', 'staticvar', 'subpackage',
 		'term', 'terms', 'ticket', 'toc', 'todo', 'tutorial', 'type', 'user', 'username',
 		'uses', 'var', 'version', 'wordpress', 'wp',
 	];
