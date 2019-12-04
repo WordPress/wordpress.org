@@ -103,10 +103,6 @@
 			overflow: hidden;
 			padding: 0 0 34px;
 
-			@media screen and (max-width:820px) {
-				display: none;
-			}
-
 			@media screen and (max-width:768px) {
 				display: block;
 				float: none;
