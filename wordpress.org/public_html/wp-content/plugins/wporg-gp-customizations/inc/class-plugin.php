@@ -361,4 +361,30 @@ class Plugin {
 
 		return $sub_projects;
 	}
+
+	/**
+	 * Localize any WordPress.org links.
+	 * 
+	 * @param string $content   The content to search for WordPress.org links in.
+	 * @param string $wp_locale The WP_Locale subdomain that the content should reference.
+	 * @return string Filtered $content where any WordPress.org links have been replaced with $wp_locale subdomain links.
+	 */
+	function localize_links( $content, $wp_locale = false ) {
+		global $wpdb;
+
+		static $subdomains = null;
+		if ( is_null( $subdomains ) && $wp_locale ) {
+			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM wporg_locales', OBJECT_K );
+		}
+
+		if ( $wp_locale && isset( $subdomains[ $wp_locale ] ) ) {
+			$content = preg_replace(
+				'!(?<=[\'"])https?://wordpress.org/!i', // Only match when it's a url within an attribute.
+				'https://' . $subdomains[ $wp_locale ]->subdomain . '.wordpress.org/',
+				$content
+			);
+		}
+
+		return $content;
+	}
 }

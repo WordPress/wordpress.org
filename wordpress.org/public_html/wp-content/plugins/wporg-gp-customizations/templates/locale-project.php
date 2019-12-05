@@ -11,7 +11,14 @@ gp_tmpl_header();
 ?>
 
 <div class="project-header">
-	<p class="project-description"><?php echo $sub_project->description; ?></p>
+	<p class="project-description"><?php
+		$description = apply_filters( 'project_description', $sub_project->description, $sub_project );
+
+		// Localize the links to the currently viewed locale.
+		$description = WordPressdotorg\GlotPress\Customizations\Plugin::get_instance()->localize_links( $description, $locale->wp_locale );
+
+		echo $description;
+	?></p>
 
 	<div class="project-box percent-<?php echo $project_status->percent_complete; ?>">
 		<div class="project-box-header">
@@ -32,7 +39,6 @@ gp_tmpl_header();
 						<select id="variant-selector" name="variant">
 							<?php
 							foreach ( $variants as $variant ) {
-								$selected =
 								printf(
 									'<option name="%s" data-project-url="%s"%s>%s</option>',
 									$variant,
