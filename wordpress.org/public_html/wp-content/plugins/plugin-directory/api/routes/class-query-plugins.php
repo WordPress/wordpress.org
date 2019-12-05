@@ -57,6 +57,11 @@ class Query_Plugins extends Base {
 		}
 		if ( isset( $query['posts_per_page'] ) ) {
 			$query['posts_per_page'] = min( $query['posts_per_page'], 250 );
+
+			// 0 and -1 are not valid. Just drop the parameter.
+			if ( $query['posts_per_page'] <= 0 ) {
+				unset( $query['posts_per_page'] );
+			}
 		}
 
 		// Temporary hacky block search
