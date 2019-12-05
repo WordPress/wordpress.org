@@ -369,18 +369,18 @@ class Plugin {
 	 * @param string $wp_locale The WP_Locale subdomain that the content should reference.
 	 * @return string Filtered $content where any WordPress.org links have been replaced with $wp_locale subdomain links.
 	 */
-	function localize_links( $content, $wp_locale = false ) {
+	function localize_links( $content, $wp_locale ) {
 		global $wpdb;
 
-		static $subdomains = null;
-		if ( is_null( $subdomains ) && $wp_locale ) {
-			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM wporg_locales', OBJECT_K );
+		static $subdomains = [];
+		if ( ! isset( $subdomains[ $wp_locale ] ) ) {
+			$subdomain[ $wp_locale ] = $wpdb->get_var( $wpdb->prepare( 'SELECT subdomain FROM wporg_locales WHERE locale = %s LIMIT 1', $wp_locale ) );
 		}
 
-		if ( $wp_locale && isset( $subdomains[ $wp_locale ] ) ) {
+		if ( $subdomains[ $wp_locale ] ) {
 			$content = preg_replace(
 				'!(?<=[\'"])https?://wordpress.org/!i', // Only match when it's a url within an attribute.
-				'https://' . $subdomains[ $wp_locale ]->subdomain . '.wordpress.org/',
+				'https://' . $subdomains[ $wp_locale ] . '.wordpress.org/',
 				$content
 			);
 		}
