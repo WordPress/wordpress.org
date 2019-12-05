@@ -374,7 +374,7 @@ class Plugin {
 
 		static $subdomains = [];
 		if ( ! isset( $subdomains[ $wp_locale ] ) ) {
-			$subdomain[ $wp_locale ] = $wpdb->get_var( $wpdb->prepare( 'SELECT subdomain FROM wporg_locales WHERE locale = %s LIMIT 1', $wp_locale ) );
+			$subdomains[ $wp_locale ] = $wpdb->get_var( $wpdb->prepare( 'SELECT subdomain FROM wporg_locales WHERE locale = %s LIMIT 1', $wp_locale ) );
 		}
 
 		if ( $subdomains[ $wp_locale ] ) {
