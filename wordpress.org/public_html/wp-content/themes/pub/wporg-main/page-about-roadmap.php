@@ -119,10 +119,43 @@ the_post();
 								5.4
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td>2020</td>
+							<td><?php echo date_i18n( 'F Y', strtotime( 'Mar 2020' ) ); ?></td>
+						</tr>
+						<tr>
+							<th>5.5</th>
+							<td><?php echo date_i18n( 'F Y', strtotime( 'Aug 2020' ) ); ?></td>
+						</tr>
+						<tr>
+							<th>5.6</th>
+							<td><?php echo date_i18n( 'F Y', strtotime( 'Dec 2020' ) ); ?></td>
+						</tr>
+						<tr>
+							<th>5.7</th>
+							<td><?php echo date_i18n( 'F Y', strtotime( 'Mar 2021' ) ); ?></td>
+						</tr>
+						<tr>
+							<th>5.8</th>
+							<td><?php echo date_i18n( 'F Y', strtotime( 'Jun 2021' ) ); ?></td>
+						</tr>
+						<tr>
+							<th>5.9</th>
+							<td><?php echo date_i18n( 'F Y', strtotime( 'Sep 2021' ) ); ?></td>
+						</tr>
+						<tr>
+							<th>6.0</th>
+							<td><?php echo date_i18n( 'F Y', strtotime( 'Dec 2021' ) ); ?></td>
 						</tr>
 						</tbody>
 					</table>
+
+					<p><?php 
+						printf(
+							/* translators: %s: Link to Make WordPress Core blog post */
+							wp_kses_post( __( 'For more information on the planned release schedule, please read the Make WordPress Core post about the <a href="%s">tentative release calendar for 2020-2021</a>.', 'wporg' ) ),
+							'https://make.wordpress.org/core/2019/11/21/tentative-release-calendar-2020-2021/'
+						);
+						?>
+					</p>
 
 					<p><?php esc_html_e( 'The month prior to a release new features are frozen and the focus is entirely on ensuring the quality of the release by eliminating bugs and profiling the code for any performance issues.', 'wporg' ); ?></p>
 
