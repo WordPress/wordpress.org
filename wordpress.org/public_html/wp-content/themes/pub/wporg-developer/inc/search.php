@@ -21,6 +21,7 @@ class DevHub_Search {
 	 * Handles adding/removing hooks.
 	 */
 	public static function do_init() {
+		add_action( 'pre_get_posts', array( __CLASS__, 'invalid_post_type_filter_404' ), 9 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ), 20 );
 		add_filter( 'posts_orderby', array( __CLASS__, 'search_posts_orderby' ), 10, 2 );
 		add_filter( 'the_posts',     array( __CLASS__, 'rerun_empty_search' ), 10, 2 );
@@ -33,6 +34,26 @@ class DevHub_Search {
 	public static function noindex_for_search() {
 		if ( is_search() || isset( $_GET[ 'post_type' ] ) ) {
 			wp_no_robots();
+		}
+	}
+
+	/*
+	 * Makes request respond as a 404 if request is to filter by an invalid post_type.
+	 *
+	 * @access public
+	 *
+	 * @param  WP_Query $query WP_Query object
+	 */
+	public static function invalid_post_type_filter_404( $query ) {
+		// If the main query is being filtered by post_type.
+		if ( $query->is_main_query() && isset( $_GET['post_type'] ) ) {
+			// Get list of valid parsed post types specified in query.
+			$valid_post_types = array_intersect( $_GET['post_type'], DevHub\get_parsed_post_types() );
+
+			// If no valid post types were specified, then request is a 404.
+			if ( ! $valid_post_types ) {
+				$query->set_404();
+			}
 		}
 	}
 
