@@ -24,6 +24,7 @@ class DevHub_Search {
 		add_action( 'pre_get_posts', array( __CLASS__, 'invalid_post_type_filter_404' ), 9 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ), 20 );
 		add_filter( 'posts_orderby', array( __CLASS__, 'search_posts_orderby' ), 10, 2 );
+		add_filter( 'the_posts',     array( __CLASS__, 'redirect_empty_search' ), 10, 2 );
 		add_filter( 'the_posts',     array( __CLASS__, 'rerun_empty_search' ), 10, 2 );
 		add_action( 'wp_head',       array( __CLASS__, 'noindex_for_search' ), 9 );
 	}
@@ -196,6 +197,51 @@ class DevHub_Search {
 		}
 
 		return $search_orderby;
+	}
+
+	/**
+	 * Redirects empty searches.
+	 *
+	 * @access public
+	 *
+	 * @param  array    $posts Array of posts after the main query
+	 * @param  WP_Query $query WP_Query object
+	 * @return array
+	 *
+	 */
+	public static function redirect_empty_search( $posts, $query ) {
+		$redirect = '';
+
+		// If request is an empty search.
+		if ( $query->is_main_query() && $query->is_search() && ! trim( get_search_query() ) ) {
+			// If search is filtered.
+			if ( isset( $_GET['post_type'] ) ) {
+				$post_types = $_GET['post_type'];
+
+				// Redirect to post type archive if only a single parsed post type is defined.
+				if ( 1 === count( $post_types ) ) {
+					// Note: By this point, via `invalid_post_type_filter_404()`, we know
+					// the post type is valid.
+					$redirect = get_post_type_archive_link( $post_types[0] );
+				}
+				// Otherwise, redirect to Code Reference landing page.
+				else {
+					$redirect = home_url( '/reference' );
+				}
+			}
+			// Else search is unfiltered, so redirect to Code Reference landing page.
+			else {
+				$redirect = home_url( '/reference' );
+			}
+		}
+
+		// Empty unfiltered search should redirect to Code Reference landing page.
+		if ( $redirect ) {
+			wp_safe_redirect( $redirect );
+			exit;
+		}
+
+		return $posts;
 	}
 
 	/**
