@@ -25,7 +25,7 @@ class DevHub_Search {
 		add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ), 20 );
 		add_filter( 'posts_orderby', array( __CLASS__, 'search_posts_orderby' ), 10, 2 );
 		add_filter( 'the_posts',     array( __CLASS__, 'redirect_empty_search' ), 10, 2 );
-		add_filter( 'the_posts',     array( __CLASS__, 'rerun_empty_search' ), 10, 2 );
+		add_filter( 'the_posts',     array( __CLASS__, 'rerun_search_without_results' ), 10, 2 );
 		add_action( 'wp_head',       array( __CLASS__, 'noindex_for_search' ), 9 );
 	}
 
@@ -245,12 +245,12 @@ class DevHub_Search {
 	}
 
 	/**
-	 * Potentially rerun a search if no posts were found.
+	 * Potentially reruns a search if no posts were found.
 	 *
 	 * Situations:
 	 * - For an exact search, try again with the same criteria but without exactness
 	 * - For a search containing characters that can be converted to HTML entities,
-	 * , try again after converting those characters
+	 *   try again after converting those characters
 	 *
 	 * @access public
 	 *
@@ -258,8 +258,8 @@ class DevHub_Search {
 	 * @param  WP_Query $query WP_Query object
 	 * @return array
 	 */
-	public static function rerun_empty_search( $posts, $query ) {
-		if ( is_search() && ! $query->found_posts ) {
+	public static function rerun_search_without_results( $posts, $query ) {
+		if ( $query->is_search() && ! $query->found_posts ) {
 			$s = $query->get( 's' );
 
 			// Return exact search without exactness.
