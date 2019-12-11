@@ -33,19 +33,19 @@ class WPorg_Handbook_Glossary {
 
 		register_post_type( 'glossary', array(
 			'labels' => array(
-				'name' => _x( 'Glossary', 'glossary' ),
-				'singular_name' => _x( 'Entry', 'glossary' ),
-				'add_new' => _x( 'Add New', 'glossary' ),
-				'add_new_item' => _x( 'Add New Entry', 'glossary' ),
-				'edit_item' => _x( 'Edit Entry', 'glossary' ),
-				'new_item' => _x( 'New Entry', 'glossary' ),
-				'view_item' => _x( 'View Entry', 'glossary' ),
-				'search_items' => _x( 'Search Glossary', 'glossary' ),
-				'not_found' => _x( 'No entries found', 'glossary' ),
-				'not_found_in_trash' => _x( 'No entries found in Trash', 'glossary' ),
-				'parent_item_colon' => _x( 'Parent Entry:', 'glossary' ),
-				'menu_name' => _x( 'Glossary', 'glossary' ),
-				'name_admin_bar' => _x( 'Glossary Entry', 'glossary' ),
+				'name' => _x( 'Glossary', 'glossary', 'wporg' ),
+				'singular_name' => _x( 'Entry', 'glossary', 'wporg' ),
+				'add_new' => _x( 'Add New', 'glossary', 'wporg' ),
+				'add_new_item' => _x( 'Add New Entry', 'glossary', 'wporg' ),
+				'edit_item' => _x( 'Edit Entry', 'glossary', 'wporg' ),
+				'new_item' => _x( 'New Entry', 'glossary', 'wporg' ),
+				'view_item' => _x( 'View Entry', 'glossary', 'wporg' ),
+				'search_items' => _x( 'Search Glossary', 'glossary','wporg' ),
+				'not_found' => _x( 'No entries found', 'glossary', 'wporg' ),
+				'not_found_in_trash' => _x( 'No entries found in Trash', 'glossary', 'wporg' ),
+				'parent_item_colon' => _x( 'Parent Entry:', 'glossary', 'wporg' ),
+				'menu_name' => _x( 'Glossary', 'glossary', 'wporg' ),
+				'name_admin_bar' => _x( 'Glossary Entry', 'glossary', 'wporg' ),
 			),
 			'public' => true,
 			'show_ui' => true,
@@ -71,7 +71,7 @@ class WPorg_Handbook_Glossary {
 	}
 
 	static function manage_glossary_posts_columns( $columns ) {
-		$columns['author'] = __( 'Created by' );
+		$columns['author'] = __( 'Created by', 'wporg' );
 		return $columns;
 	}
 
@@ -98,7 +98,7 @@ class WPorg_Handbook_Glossary {
 
 			$edit = get_edit_post_link( $post );
 			if ( $edit ) {
-				$edit = ' - <a href="' . esc_url( $edit ) . '">edit</a>';
+				$edit = ' - <a href="' . esc_url( $edit ) . '">' . esc_html__( 'Edit', 'wporg' ) . '</a>';
 			}
 			$entry .= ' <a href="' . esc_url( get_permalink( $post ) ) . '">#</a>' . $edit . '</dd>';
 
@@ -109,7 +109,7 @@ class WPorg_Handbook_Glossary {
 		$content .= '</dl>';
 
 		if ( current_user_can( get_post_type_object('glossary')->cap->edit_posts ) )
-			$content .= '<p><a href="' . admin_url( 'post-new.php?post_type=glossary' ) . '">add new entry</a>';
+			$content .= '<p><a href="' . admin_url( 'post-new.php?post_type=glossary' ) . '">' . esc_html__( 'Add new entry', 'wporg' ) . '</a>';
 
 		return $content;
 	}
