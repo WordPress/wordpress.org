@@ -16,6 +16,7 @@
 class o2_follow {
 
 	// Use the old p2 meta key, for backwards compatibility.
+	// Warning: Be careful using this in other contexts. See `subscribe_to_comments()` for details.
 	const USER_META_KEY = 'jpflfp2_posts_following';
 
 	/**
@@ -310,6 +311,15 @@ class o2_follow {
 		$subscribed_ids[] = $post_id;
 		$subscribed_ids   = array_unique( $subscribed_ids );
 
+		/*
+		 * Warning: Be careful when using this data in any other context. It's not indexed by blog ID, so there's
+		 * no way to know which post it actually refers to.
+		 *
+		 * For example, if you were to use it to email comment notifications to followers of a private post, you
+		 * would also be emailing followers of posts on other sites which happened to have the same post ID, and
+		 * would expose any sensitive information in those comments to random people who otherwise wouldn't have
+		 * access to it.
+		 */
 		update_user_meta( $current_user->ID, self::USER_META_KEY, $subscribed_ids );
 	}
 }
