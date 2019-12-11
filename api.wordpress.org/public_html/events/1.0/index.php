@@ -934,9 +934,16 @@ function get_regional_wordcamp_data() {
 	return array(
 		// WordCamp Asia.
 		'asia'   => array(
-			'promo_start'        => 0, // todo
+			'promo_start'        => strtotime( '2019-12-20 00:00:00' ), // todo
 			'regional_countries' => array(
-				// todo
+				'cn', 'hk', 'jp', 'kp', 'kr', 'mn', 'mo', 'tw', 'af', 'bd',
+				'bt', 'in', 'ir', 'lk', 'mv', 'np', 'pk', 'bn', 'id', 'kh',
+				'la', 'mm', 'my', 'ph', 'sg', 'th', 'tl', 'vn', 'au', 'nf',
+				'nz', 'fj', 'nc', 'pg', 'sb', 'vu', 'fm', 'gu', 'ki', 'mh',
+				'mp', 'nr', 'pw', 'as', 'ck', 'nu', 'pf', 'pn', 'tk', 'to',
+				'tv', 'wf', 'ws', 'tm', 'tj', 'kg', 'kz', 'uz', 'ae', 'am',
+				'az', 'bh', 'cy', 'ge', 'il', 'iq', 'jo', 'kw', 'lb', 'om',
+				'ps', 'qa', 'sa', 'sy', 'tr', 'ye'
 			),
 			'event'              => array(
 				'type'       => 'wordcamp',
