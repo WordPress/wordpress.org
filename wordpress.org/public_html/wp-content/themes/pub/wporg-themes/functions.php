@@ -67,7 +67,7 @@ function wporg_themes_canonical_redirects() {
 	if (
 		$path &&
 		$path !== strtolower( $path ) &&
-		( is_search() && trailingslashit( $path ) !== '/themes/search/' . get_query_var( 's' ) . '/' )
+		( trailingslashit( $path ) !== '/themes/search/' . get_query_var( 's' ) . '/' )
 	) {
 		$url = preg_replace(
 			'|^' . preg_quote( $path, '|' ) . '|',
