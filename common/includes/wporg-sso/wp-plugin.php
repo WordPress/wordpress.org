@@ -87,7 +87,14 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$support_user = new WP_User( $user->ID, '', WPORG_SUPPORT_FORUMS_BLOGID );
 
 				if ( ! empty( $support_user->allcaps['bbp_blocked'] ) ) {
-					return new WP_Error( 'blocked_account', __( '<strong>ERROR</strong>: Your account has been disabled.', 'wporg' ) );
+					return new WP_Error(
+						'blocked_account',
+						__( '<strong>ERROR</strong>: Your account has been disabled.', 'wporg' )  . '<br>' .
+						sprintf(
+							__( 'Please contact %s for more details.', 'wporg' ),
+							'<a href="mailto:forum-password-resets@wordpress.org">forum-password-resets@wordpress.org</a>'
+						)
+					);
 				}
 			}
 
