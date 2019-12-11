@@ -36,12 +36,24 @@ the_post();
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
-				<section class="col-8">
+				<div class="col-8">
 					<p><?php esc_html_e( 'Here are some charts showing what sorts of systems people are running WordPress on. (You&#8217;ll need JavaScript enabled to see them.)', 'wporg' ); ?></p>
-					<div id="wp_versions" class="wporg-stats-chart loading"></div>
-					<div id="php_versions" class="wporg-stats-chart loading"></div>
-					<div id="mysql_versions" class="wporg-stats-chart loading"></div>
-					<div id="locales" class="wporg-stats-chart loading"></div>
+					<section>
+						<h2><?php esc_html_e( 'WordPress Version', 'wporg' ); ?></h2>
+						<div id="wp_versions" class="wporg-stats-chart loading"></div>
+					</section>
+					<section>
+						<h2><?php esc_html_e( 'PHP Versions', 'wporg' ); ?></h2>
+						<div id="php_versions" class="wporg-stats-chart loading"></div>
+					</section>
+					<section>
+						<h2><?php esc_html_e( 'MySQL Version', 'wporg' ); ?></h2>
+						<div id="mysql_versions" class="wporg-stats-chart loading"></div>
+					</section>
+					<section>
+						<h2><?php esc_html_e( 'Locales', 'wporg' ); ?></h2>
+						<div id="locales" class="wporg-stats-chart loading"></div>
+					</section>
 				</section>
 			</div><!-- .entry-content -->
 		</article><!-- #post-## -->

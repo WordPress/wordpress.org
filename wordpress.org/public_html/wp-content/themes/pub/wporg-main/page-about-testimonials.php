@@ -111,13 +111,13 @@ the_post();
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
+			<header class="entry-header row">
 				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<h3><?php esc_html_e( 'Share your WordPress story', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Share your WordPress story', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'Want to have your story featured on this page?', 'wporg' ); ?></p>
 					<p>
 						<?php
@@ -136,7 +136,18 @@ the_post();
 					</p>
 				</section>
 
-				<section class="col-10" id="embeds"></section>
+				<section class="col-12">
+					<div class="row">
+						<div class="offset-2 col-8">
+							<h2><?php esc_html_e( 'WordPress on Twitter', 'wporg' ); ?></h2>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-10">	
+							<div  id="embeds"></div>
+						</div>
+					</div>
+				</section>
 			</div><!-- .entry-content -->
 		</article><!-- #post-## -->
 

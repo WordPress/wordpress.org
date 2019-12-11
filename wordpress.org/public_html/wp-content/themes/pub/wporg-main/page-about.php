@@ -33,7 +33,7 @@ the_post();
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<h2 id="mission"><?php esc_html_e( 'Our Mission', 'wporg' ); ?></h2>
+					<h2 class="h1" id="mission"><?php esc_html_e( 'Our Mission', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'WordPress is software designed for everyone, emphasizing accessibility, performance, security, and ease of use. We believe great software should work with minimum set up, so you can focus on sharing your story, product, or services freely. The basic WordPress software is simple and predictable so you can easily get started. It also offers powerful features for growth and success.', 'wporg' ); ?></p>
 					<p>
 						<?php
@@ -96,7 +96,7 @@ the_post();
 				</section>
 
 				<section class="col-8">
-					<h2 id="story"><?php esc_html_e( 'Our Story', 'wporg' ); ?></h2>
+					<h2 class="h1" id="story"><?php esc_html_e( 'Our Story', 'wporg' ); ?></h2>
 					<p>
 						<?php
 						/* translators: 1: Link to b2/cafelog; 2: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
@@ -107,7 +107,7 @@ the_post();
 				</section>
 
 				<section class="col-8">
-					<h2 id="bill-of-rights"><?php esc_html_e( 'Bill of Rights', 'wporg' ); ?></h2>
+					<h2 class="h1" id="bill-of-rights"><?php esc_html_e( 'Bill of Rights', 'wporg' ); ?></h2>
 					<p>
 						<?php
 						/* translators: Link to license page */

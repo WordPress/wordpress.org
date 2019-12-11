@@ -33,13 +33,13 @@ the_post();
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
+			<header class="entry-header row">
 				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<h3><?php esc_html_e( 'To run WordPress we recommend your host supports:', 'wporg' ); ?></h3>
+					<h2 class="h3"><?php esc_html_e( 'To run WordPress we recommend your host supports:', 'wporg' ); ?></h2>
 
 					<ul>
 						<li>
@@ -80,7 +80,7 @@ the_post();
 						?>
 					</p>
 
-					<h3><?php esc_html_e( 'Ask for it', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Ask for it', 'wporg' ); ?></h2>
 
 					<p><?php esc_html_e( 'Here&#8217;s a letter you can send to your host; copy and paste!', 'wporg' ); ?></p>
 
@@ -107,7 +107,7 @@ the_post();
 						<p><?php esc_html_e( 'Thanks!', 'wporg' ); ?></p>
 					</blockquote>
 
-					<h3><?php esc_html_e( 'Not required, but recommended for better security', 'wporg' ); ?></h3>
+					<h2 class="h3"><?php esc_html_e( 'Not required, but recommended for better security', 'wporg' ); ?></h2>
 
 					<p><?php esc_html_e( 'Hosting is more secure when PHP applications, like WordPress, are run using your account&#8217;s username instead of the server&#8217;s default shared username. Ask your potential host what steps they take to ensure the security of your account.', 'wporg' ); ?></p>
 				</section>

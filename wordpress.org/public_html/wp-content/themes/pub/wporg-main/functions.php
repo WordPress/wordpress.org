@@ -77,7 +77,7 @@ add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
 function scripts() {
 	$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20191102b' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20191211' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Move jQuery to the footer.
@@ -88,13 +88,9 @@ function scripts() {
 
 	if ( is_page( 'stats' ) ) {
 		wp_enqueue_script( 'google-charts', 'https://www.gstatic.com/charts/loader.js', [], null, true );
-		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts' ], 2, true );
+		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts' ], 3, true );
 		wp_localize_script( 'wporg-page-stats', 'wporgPageStats', [
 			'trunk'         => number_format( WP_CORE_STABLE_BRANCH + 0.1, 1 ), /* trunk */
-			'wpVersions'    => __( 'WordPress Version', 'wporg' ),
-			'phpVersions'   => __( 'PHP Versions', 'wporg' ),
-			'mysqlVersions' => __( 'MySQL Version', 'wporg' ),
-			'locales'       => __( 'Locales', 'wporg' ),
 		] );
 	}
 

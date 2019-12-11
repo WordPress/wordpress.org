@@ -71,7 +71,7 @@ the_post();
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
+			<header class="entry-header row">
 				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
 			</header><!-- .entry-header -->
 

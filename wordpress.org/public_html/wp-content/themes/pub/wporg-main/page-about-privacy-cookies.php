@@ -43,13 +43,13 @@ the_post();
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
+			<header class="entry-header row">
 				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<h3><?php esc_html_e( 'Cookies', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Cookies', 'wporg' ); ?></h2>
 					<p><?php
 						echo wp_kses_post( sprintf(
 							/* translators: %s: Link to the Privacy Policy. */
@@ -58,10 +58,10 @@ the_post();
 						) );
 					?></p>
 
-					<h3><?php esc_html_e( 'What are cookies?', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'What are cookies?', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'Cookies are small pieces of data, stored in text files, that are stored on your computer or other device when websites are loaded in a browser. They are widely used to &#8216;remember&#8217; you and your preferences, either for a single visit (through a &#8216;session cookie&#8217;) or for multiple repeat visits (using a &#8216;persistent cookie&#8217;). They ensure a consistent and efficient experience for visitors, and perform essential functions such as allowing users to register and remain logged in. Cookies may be set by the site that you are visiting (known as &#8216;first party cookies&#8217;), or by third parties, such as those who serve content or provide advertising or analytics services on the website (&#8216;third party cookies&#8217;).', 'wporg' ); ?></p>
 
-					<h3><?php esc_html_e( 'Cookies set by WordPress.org', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Cookies set by WordPress.org', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'We use cookies for a number of different purposes. Some cookies are necessary for technical reasons; some enable a personalized experience for both visitors and registered users; and some allow the display of advertising from selected third party networks. Some of these cookies may be set when a page is loaded, or when a visitor takes a particular action (clicking the &#8216;like&#8217; or &#8216;follow&#8217; button on a post, for example).', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'Below the different categories of cookies set by WordPress.org are outlined, with specific examples detailed in the tables that follow. This includes their name and purpose. Certain cookies are only set for logged-in visitors, whereas others are set for any visitors, and these are marked below accordingly. Where a cookie only applies to specific subdomains, they are included under the relevant header.', 'wporg' ); ?></p>
 					<p><strong><?php esc_html_e( 'Strictly Necessary', 'wporg' ); ?></strong>: <?php esc_html_e( 'These are the cookies that are essential for WordPress.org to perform basic functions. These include those required to allow registered users to authenticate and perform account related functions.', 'wporg' ); ?></p>
@@ -70,7 +70,7 @@ the_post();
 					<p><strong><?php esc_html_e( 'Tracking', 'wporg' ); ?></strong>: <?php esc_html_e( 'These are set by trusted third party networks (e.g. Google Analytics) to track details such as the number of unique visitors, and pageviews to help improve the user experience.', 'wporg' ); ?></p>
 					<p><strong><?php esc_html_e( 'Third Party/Embedded Content', 'wporg' ); ?></strong>: <?php esc_html_e( 'WordPress.org makes use of different third party applications and services to enhance the experience of website visitors. These include social media platforms such as Facebook and Twitter (through the use of sharing buttons), or embedded content from YouTube and Vimeo. As a result, cookies may be set by these third parties, and used by them to track your online activity. We have no direct control over the information that is collected by these cookies.', 'wporg' ); ?></p>
 
-					<h3><?php esc_html_e( 'wordpress.org', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'wordpress.org', 'wporg' ); ?></h2>
 					<table>
 						<thead>
 							<tr>
@@ -138,7 +138,7 @@ the_post();
 						</tbody>
 					</table>
 
-					<h3><?php esc_html_e( 'make.wordpress.org', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'make.wordpress.org', 'wporg' ); ?></h2>
 					<table>
 						<thead>
 							<tr>
@@ -164,7 +164,7 @@ the_post();
 						</tbody>
 					</table>
 
-					<h3><?php esc_html_e( '*.trac.wordpress.org', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( '*.trac.wordpress.org', 'wporg' ); ?></h2>
 					<table>
 						<thead>
 							<tr>
@@ -190,7 +190,7 @@ the_post();
 						</tbody>
 					</table>
 
-					<h3><?php esc_html_e( 'codex.wordpress.org', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'codex.wordpress.org', 'wporg' ); ?></h2>
 					<table>
 						<thead>
 							<tr>
@@ -222,7 +222,7 @@ the_post();
 						</tbody>
 					</table>
 
-					<h3><?php esc_html_e( '*.wordcamp.org', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( '*.wordcamp.org', 'wporg' ); ?></h2>
 					<table>
 						<thead>
 							<tr>
@@ -326,7 +326,7 @@ the_post();
 						</tbody>
 					</table>
 
-					<h3><?php esc_html_e( 'Controlling Cookies', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Controlling Cookies', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'Visitors may wish to restrict the use of cookies, or completely prevent them from being set. Most browsers provide for ways to control cookie behavior such as the length of time they are stored &#8212; either through built-in functionality or by utilizing third party plugins.', 'wporg' ); ?></p>
 					<p>
 						<?php
@@ -342,7 +342,7 @@ the_post();
 					<p>Google Analytics - <a href="https://tools.google.com/dlpage/gaoptout">https://tools.google.com/dlpage/gaoptout</a></p>
 					<p><?php esc_html_e( 'It&#8217;s important to note that restricting or disabling the use of cookies can limit the functionality of sites, or prevent them from working correctly at all.', 'wporg' ); ?></p>
 
-					<h3><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></h2>
 					<p><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" src="https://s.w.org/images/home/ccbysa40.png"></a></p>
 				</section>
 			</div><!-- .entry-content -->

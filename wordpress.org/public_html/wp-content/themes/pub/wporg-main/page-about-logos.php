@@ -31,13 +31,13 @@ the_post();
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
+			<header class="entry-header row">
 				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
 				<section class="col-8">
-					<h3 class="graphics"><?php esc_html_e( 'Official WordPress Logo', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Official WordPress Logo', 'wporg' ); ?></h2>
 					<p>
 						<?php
 						/* translators: Link to Trademark Policy of WordPress Foundation */
@@ -45,7 +45,7 @@ the_post();
 						?>
 					</p>
 
-					<h3 class="graphics"><?php esc_html_e( 'Downloads', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Downloads', 'wporg' ); ?></h2>
 
 					<section class="all-logos col-12 row gutters">
 						<div class="logo col-4" id="logo-all">
@@ -124,7 +124,7 @@ the_post();
 						</div>
 					</section>
 
-					<h3 class="graphics"><?php esc_html_e( 'Fight the Fake Logo (Fauxgo)', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Fight the Fake Logo (Fauxgo)', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'Friends don&#8217;t let friends use the wrong WordPress logo. If you see one of these in the wild, please suggest a change.', 'wporg' ); ?></p>
 					<img class="aligncenter" src="//s.w.org/about/images/logo-comparison.png" width="500" />
 				</section>

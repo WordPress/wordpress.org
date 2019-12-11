@@ -33,7 +33,7 @@ $date_format = get_option( 'date_format' );
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
+			<header class="entry-header row">
 				<?php the_title( '<h1 class="entry-title col-8">', '</h1>' ); ?>
 			</header><!-- .entry-header -->
 
@@ -68,7 +68,7 @@ $date_format = get_option( 'date_format' );
 						</li>
 					</ul>
 
-					<h3><?php esc_html_e( 'Jazzers and Release Dates', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Jazzers and Release Dates', 'wporg' ); ?></h2>
 
 					<p>
 						<?php

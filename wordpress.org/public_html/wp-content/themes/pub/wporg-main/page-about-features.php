@@ -31,7 +31,7 @@ the_post();
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
+			<header class="entry-header row">
 				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
 			</header><!-- .entry-header -->
 
@@ -197,7 +197,7 @@ the_post();
 						</li>
 					</ul>
 
-					<h3 id="developer"><?php echo esc_html_x( 'Developer Features', 'Features page: Section Header', 'wporg' ); ?></h3>
+					<h2 id="developer" ><?php echo esc_html_x( 'Developer Features', 'Features page: Section Header', 'wporg' ); ?></h2>
 					<p><?php esc_html_e( 'For developers, we&#8217;ve got lots of goodies packed under the hood that you can use to extend WordPress in whatever direction takes your fancy.', 'wporg' ); ?></p>
 
 					<ul>

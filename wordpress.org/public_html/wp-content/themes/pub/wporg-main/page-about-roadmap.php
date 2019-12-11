@@ -31,7 +31,7 @@ the_post();
 	<main id="main" class="site-main col-12" role="main">
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<header class="entry-header">
+			<header class="entry-header row">
 				<h1 class="entry-title col-8"><?php the_title(); ?></h1>
 			</header><!-- .entry-header -->
 
@@ -95,7 +95,7 @@ the_post();
 						?>
 					</p>
 
-					<h3><?php esc_html_e( 'Currently planned releases', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Currently planned releases', 'wporg' ); ?></h2>
 
 					<p>
 						<?php
@@ -169,7 +169,7 @@ the_post();
 						?>
 					</p>
 
-					<h3><?php esc_html_e( 'Long term roadmap', 'wporg' ); ?></h3>
+					<h2><?php esc_html_e( 'Long term roadmap', 'wporg' ); ?></h2>
 
 					<p><?php esc_html_e( 'While we expect to need most or all of 2019 to finish phase 2 of Gutenberg, there are already plans for Phase 3 and 4. Phase 3 will focus on collaboration and multi-user editing. Phase 4 will contain support for multilingual sites.', 'wporg' ); ?></p>
 				</section>
