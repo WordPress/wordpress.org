@@ -926,6 +926,47 @@ nav.o2-post-footer-actions ul li > span > a {
 	padding-bottom: 0.1em;
 }
 
+
+/*
+ * Pledges simulated page
+ */
+
+.template-pledges .page-header {
+	margin-left: 0;
+}
+
+.template-pledges .page-header h1 {
+	margin-top: 0;
+}
+
+#post-pledges {
+	border-top: 2px solid #ddd;
+}
+
+#post-pledges .entry-content {
+	padding-top: 35px;
+}
+
+.team-contributor {
+	overflow: auto;
+	margin-bottom: 22px;
+}
+
+.team-contributor .avatar {
+	float: left;
+	margin-right: 20px;
+}
+
+.contributor-name {
+	padding-top: 14px;
+	font-size: 1.8rem;
+}
+
+article.page p.contributor-name {
+	margin-bottom: 8px;
+}
+
+
 /*
  * Handbook
  */
