@@ -72,6 +72,9 @@ remove_action( 'wp_head', 'wp_print_styles', 8 );
 remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
 remove_action( 'wp_head', '_admin_bar_bump_cb' );
 
+// Call the get_header action to similate get_header() being called. It's required for some translation support.
+do_action( 'get_header' );
+
 ?>
 <!DOCTYPE html>
 <html>
