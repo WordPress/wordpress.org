@@ -49,6 +49,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		// Any handbook pages where the slug changes should be listed here.
 		$redirects = [
 			'tutorials/block-tutorial/block-controls-toolbars-and-inspector' => 'tutorials/block-tutorial/block-controls-toolbar-and-sidebar/',
+			'components/server-side-render' => 'packages/packages-server-side-render',
 		];
 
 		// General path redirects. (More specific path first.)
