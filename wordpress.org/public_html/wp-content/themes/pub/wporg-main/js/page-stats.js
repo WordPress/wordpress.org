@@ -12,17 +12,17 @@
 			}
 		}
 
-		drawGraph( data, 'wp_versions', wporgPageStats.wpVersions, 'Version', 'versions' );
+		drawGraph( data, 'wp_versions', 'Version', 'versions' );
 	};
 	window.drawPhpVersionsGraph = function( data ) {
-		drawGraph( data, 'php_versions', wporgPageStats.phpVersions, 'Version', 'versions' );
+		drawGraph( data, 'php_versions', 'Version', 'versions' );
 	};
 	window.drawMysqlVersionsGraph = function( data ) {
 		delete data[ '12.0' ];
-		drawGraph( data, 'mysql_versions', wporgPageStats.mysqlVersions, 'Version', 'versions' );
+		drawGraph( data, 'mysql_versions', 'Version', 'versions' );
 	};
 	window.drawLocalesGraph = function( data ) {
-		drawGraph( data, 'locales', wporgPageStats.locales, 'Locale', 'alphabeticaly' );
+		drawGraph( data, 'locales', 'Locale', 'alphabeticaly' );
 	};
 
 	function drawCharts() {
@@ -40,7 +40,7 @@
 		getStatsData( 'https://api.wordpress.org/stats/locale/1.0/', 'drawLocalesGraph' );
 	}
 
-	function drawGraph( data, id, title, colName, sort ) {
+	function drawGraph( data, id, colName, sort ) {
 		var tableData = [], others = null, chart, chartData, chartOptions;
 
 		for ( var type in data ) {
@@ -125,17 +125,11 @@
 			],
 			height: 450,
 			is3D: false,
-			title: title,
 			chartArea: {
 				top: 65,
 				bottom: 60,
 				width: '100%',
 				height: '100%',
-			},
-			titleTextStyle: {
-				fontSize: 14,
-				color: '#23282d',
-				bold: true
 			},
 			legend: {
 				position: 'right',
