@@ -1435,6 +1435,13 @@ h2.toc-heading + h3.toc-heading:target {
 	top: 10px;
 }
 
+@media (max-width: 550px) {
+	.post-type-archive-handbook nav.o2-post-actions ul,
+	.single-handbook nav.o2-post-actions ul {
+	    left: 0;
+	}
+}
+
 .post-type-archive-handbook .make-welcome,
 .single-handbook .make-welcome {
 	margin: 0 !important;
