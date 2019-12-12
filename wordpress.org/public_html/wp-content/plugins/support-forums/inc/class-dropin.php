@@ -25,6 +25,10 @@ class Dropin {
 		remove_action( 'bbp_approved_reply',   'bbp_update_reply_walker' );
 		remove_action( 'bbp_unapproved_reply', 'bbp_update_reply_walker' );
 
+		// Not needed, causing slowdown when approving topics (due to expensive count queries)
+		remove_action( 'bbp_approved_topic',   'bbp_approved_unapproved_topic_update_forum_reply_count' );
+		remove_action( 'bbp_unapproved_topic', 'bbp_approved_unapproved_topic_update_forum_reply_count' );
+
 		add_action( 'bbp_trashed_reply',       array( $this, 'update_reply_topic_meta' ) );
 		add_action( 'bbp_untrashed_reply',     array( $this, 'update_reply_topic_meta' ) );
 		add_action( 'bbp_deleted_reply',       array( $this, 'update_reply_topic_meta' ) );
