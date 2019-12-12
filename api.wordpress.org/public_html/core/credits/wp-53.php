@@ -691,6 +691,7 @@ class WP_53_Credits extends WP_Credits {
 			'simison',
 			'simonjanin',
 			'simono',
+			'sinatrateam',
 			'sirreal',
 			'sixes',
 			'skithund',
