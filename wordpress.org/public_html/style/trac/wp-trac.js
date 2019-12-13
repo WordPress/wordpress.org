@@ -84,6 +84,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			wpTrac.autocomplete.init();
 			wpTrac.linkMentions();
 			wpTrac.linkGutenbergIssues();
+			wpTrac.githubPRs.init();
 
 			if ( ! $body.hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
@@ -1534,6 +1535,157 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						star.prev().text( count ? count : '' );
 					});
 				});
+			}
+
+			return {
+				init: init
+			};
+		}()),
+
+		githubPRs: (function() {
+			var apiEndpoint = 'https://api.wordpress.org/dotorg/trac/pr/',
+				authenticated = !! ( wpTracCurrentUser && wpTracCurrentUser !== "anonymous" ),
+				trac = false, ticket = 0,
+				container;
+
+			function init() {
+				// TODO: If this is added to other Trac's, expand this..
+				if ( $body.hasClass( 'core' ) ) {
+					trac = 'core';
+				}
+
+				// This seems to be the easiest place to find the current Ticket ID..
+				var canonical = $( 'link[rel="canonical"]' ).prop( 'href' );
+				if ( canonical ) {
+					ticket = canonical.match( /\/ticket\/(\d+)$/ )[1];
+				}
+
+				if ( ! trac || ! ticket ) {
+					return;
+				}
+
+				// Add the section immediately.
+				renderAddSection();
+
+				if ( authenticated ) {
+					// Fetch the PRs immediately for authenciated users.
+					fetchPRs();
+
+					// ..and expand the section by default.
+					container.toggleClass( 'collapsed', false );
+				} else {
+					// Not authenticated? Fetch PRs upon expanding.
+					container.find( 'h3 a' ).one( 'click', function() {
+						fetchPRs();
+					});
+				}
+			}
+
+			function fetchPRs() {
+				$.ajax(
+					apiEndpoint
+						+ '?trac=' + trac
+						+ '&ticket=' + ticket
+						+ ( authenticated ? '&authenticated=1' : '' )
+				).success( function( data ) {
+					// Update the number
+					container.find( 'h3 .trac-count' ).removeClass( 'hidden' ).find( 'span' ).text( data.length );
+
+					var prContainer = container.find( '.pull-requests' );
+					if ( data.length ) {
+						// Remove the placeholder.
+						prContainer.find( '.loading' ).remove();
+
+						// Render the PRs
+						for ( var i in data ) {
+							renderPR( prContainer, data[i] );
+						}
+					} else {
+						// Change the loading placeholder
+						prContainer.find( '.loading' ).text( 'No linked PRs found.' );
+					}
+				});
+			}
+
+			function renderAddSection() {
+				// Add the Pull Requests section.
+				$( '#attachments' ).append(
+					'<div id="github-prs" class="collapsed">' +
+						'<h3 class="foldable"><a id="section-pr" href="#section-pr">Pull requests <span class="trac-count hidden">(<span></span>)</span></a></h3>' +
+						'<ul class="pull-requests">' +
+							'<li class="loading">Loading...</li>' +
+						'</ul>' +
+					'</div>'
+				);
+				// keep this for later.
+				container = $( '#github-prs' );
+
+				// Make the section collapse.
+				container.find( '#section-pr' ).on( 'click', function() {
+					var $div = $( this.parentNode.parentNode ).toggleClass( 'collapsed' );
+					return ! $div.hasClass( 'collapsed' );
+				} );
+			}
+
+			// Logic to determine what the PRs status is
+			function prStatus( data ) {
+				// Closed?
+				if ( data.closed_at ) {
+					if ( data.mergeable_state == 'clean' ) {
+						return '✅ Closed';
+					} else {
+						return '❌ Closed'
+					}
+				}
+
+				// Merge State then
+				switch ( data.mergeable_state ) {
+					case 'draft':
+						return 'Work in progress';
+					case 'clean':
+						return '✅ All checks pass';
+					case 'dirty':
+						return '❌ Merge conflicts';
+					case 'unstable':
+						return '❌ Failing tests';
+				}
+			}
+
+			function renderPR( container, data ) {
+				// Not the nicest, but it works and escapes things properly if given correct inputs.
+				var htmlElement = function( element, attributes, text = '' ) {
+					return $( '<p>' ).append(
+						$( '<' + element + '/>', attributes ).text( text )
+					).html();
+				}
+
+				container.append(
+					'<li>' +
+					'<div>' +
+						htmlElement(
+							'a',
+							{ href: data.changes.html_url, title: data.title },
+							'#' + data.number + ' ' +
+								( data.title.length > 23 ? data.title.substr( 0, 20 ) + '...' : data.title )
+						) +
+						' by ' +
+						htmlElement( 'a', { href: data.user.url }, '@' + data.user.name ) +
+					'</div>' +
+					'<div>' +
+						prStatus( data ) +
+					'</div>' +
+					'<div>' +
+						htmlElement( 'ins', {}, '+' + data.changes.additions ) +
+						'&nbsp;' +
+						htmlElement( 'del', {}, '-' + data.changes.deletions ) +
+					'</div>' +
+					'<div>' +
+						htmlElement( 'a', { href: data.changes.patch_url, class: 'button' }, 'View patch' ) +
+						'&nbsp;' +
+						htmlElement( 'a', { href: data.changes.html_url, class: 'button' }, 'View PR' ) +
+					'</div>' +
+					'</li>'
+				);
 			}
 
 			return {

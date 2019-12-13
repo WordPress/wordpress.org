@@ -2292,3 +2292,40 @@ a.mention.me {
 		width: 40%; /* More room so columns don't overlap */
 	}
 }
+#github-prs .hidden {
+	display: none;
+}
+#github-prs ul.pull-requests {
+	border: 1px solid #ccc;
+	padding: 0 1em;
+	position: relative;
+}
+#github-prs ul.pull-requests li {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	padding: 0;
+}
+#github-prs ul.pull-requests li div {
+	margin: 0.5em 0;
+}
+#github-prs .button {
+	color: black;
+}
+#github-prs ins {
+	color: green;
+	text-decoration: none
+}
+#github-prs del {
+	color: red;
+	text-decoration: none;
+}
+@media screen and (max-width: 782px) {
+	#github-prs .button {
+		line-height: 20px;
+		margin-right: 0.3em;
+	}
+	#github-prs li {
+		display: block;
+	}
+}
