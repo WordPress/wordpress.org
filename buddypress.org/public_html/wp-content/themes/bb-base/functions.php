@@ -522,13 +522,13 @@ function bb_base_recount_current_thing() {
 		return;
 	}
 
+	// Bail if not capable
+	if ( ! current_user_can( 'moderate' ) ) {
+		return;
+	}
+
 	// Refresh topic data
 	if ( bbp_is_single_topic() ) {
-
-		// Bail if not capable
-		if ( ! current_user_can( 'moderate' ) ) {
-			return;
-		}
 
 		// Get the topic ID
 		$topic_id = bbp_get_topic_id();
@@ -543,28 +543,24 @@ function bb_base_recount_current_thing() {
 		bb_base_purge_homepage_topics();
 
 		// Redirect without _GET
-		wp_safe_redirect( bbp_get_topic_permalink() );
-		die;
+		bbp_redirect( bbp_get_topic_permalink() );
 
 	// Refresh forum data
 	} elseif ( bbp_is_single_forum() ) {
 
-		// Bail if not capable
-		if ( ! current_user_can( 'moderate' ) ) {
-			return;
-		}
+		// Get the forum ID
+		$forum_id = bbp_get_forum_id();
 
-		bbp_update_forum_last_reply_id();
-		bbp_update_forum_last_topic_id();
-		bbp_update_forum_last_active_id();
-		bbp_update_forum_last_active_time();
+		bbp_update_forum_last_reply_id( $forum_id );
+		bbp_update_forum_last_topic_id( $forum_id );
+		bbp_update_forum_last_active_id( $forum_id );
+		bbp_update_forum_last_active_time( $forum_id );
 
 		bb_base_purge_support_topics();
 		bb_base_purge_homepage_topics();
 
 		// Redirect without _GET
-		wp_safe_redirect( bbp_get_forum_permalink() );
-		die;
+		bbp_redirect( bbp_get_forum_permalink() );
 	}
 }
 add_action( 'bbp_template_redirect', 'bb_base_recount_current_thing' );
