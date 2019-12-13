@@ -537,6 +537,7 @@ function bb_base_recount_current_thing() {
 		bbp_update_topic_last_reply_id( $topic_id );
 		bbp_update_topic_last_active_id( $topic_id );
 		bbp_update_topic_last_active_time( $topic_id );
+		bbp_recalculate_topic_engagements( $topic_id, true );
 
 		bb_base_purge_support_topics();
 		bb_base_purge_homepage_topics();
