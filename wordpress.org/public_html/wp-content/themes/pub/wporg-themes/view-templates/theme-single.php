@@ -140,8 +140,7 @@
 				</div><!-- .theme-translations -->
 
 				<div class="theme-devs">
-					<h4><?php _e( 'Development', 'wporg-themes' ); ?></h4>
-					<h5><?php _e( 'Subscribe', 'wporg-themes' ); ?></h5>
+					<h4><?php _e( 'Subscribe', 'wporg-themes' ); ?></h4>
 					<ul class="unmarked-list">
 						<li>
 							<a href="//themes.trac.wordpress.org/log/{{data.id}}?limit=100&mode=stop_on_copy&format=rss">
@@ -151,7 +150,7 @@
 						</li>
 					</ul>
 
-					<h5><?php _e( 'Browse the Code', 'wporg-themes' ); ?></h5>
+					<h4><?php _e( 'Browse the Code', 'wporg-themes' ); ?></h4>
 					<ul class="unmarked-list">
 						<li><a href="//themes.trac.wordpress.org/log/{{data.id}}/" rel="nofollow"><?php _e( 'Development Log', 'wporg-themes' ); ?></a></li>
 						<li><a href="//themes.svn.wordpress.org/{{data.id}}/" rel="nofollow"><?php _e( 'Subversion Repository', 'wporg-themes' ); ?></a></li>
