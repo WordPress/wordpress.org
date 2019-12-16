@@ -765,7 +765,7 @@ function get_events( $args = array() ) {
 		"SELECT
 			`type`, `title`, `url`,
 			`meetup`, `meetup_url`,
-			`date_utc`, `date_utc_offset`,
+			`date_utc`, `date_utc_offset`, `end_date`,
 			`location`, `country`, `latitude`, `longitude`
 		FROM `wporg_events`
 		$sql_where
@@ -792,6 +792,7 @@ function get_events( $args = array() ) {
 			'meetup'     => $event->meetup,
 			'meetup_url' => $event->meetup_url,
 			'date'       => $event->date_utc, // TODO: DB stores a local date, not UTC.
+			'end_date'   => $event->end_date,
 			'location'   => array(
 				'location'  => $event->location,
 				'country'   => $event->country,
@@ -905,7 +906,7 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
 		SELECT
 			`type`, `title`, `url`,
 			`meetup`, `meetup_url`,
-			`date_utc`, `date_utc_offset`,
+			`date_utc`, `date_utc_offset`, `end_date`,
 			`location`, `country`, `latitude`, `longitude`
 		FROM `wporg_events`
 		WHERE
@@ -952,6 +953,7 @@ function get_regional_wordcamp_data() {
 				'meetup'     => '',
 				'meetup_url' => '',
 				'date'       => '2020-02-21 00:00:00',
+				'end_date'   => '2020-02-23 00:00:00',
 				'location'   => array(
 					'location'  => 'Bangkok, Thailand',
 					'country'   => 'TH',
@@ -973,6 +975,7 @@ function get_regional_wordcamp_data() {
 				'meetup'     => '',
 				'meetup_url' => '',
 				'date'       => '', // todo
+				'end_date'   => '', // todo
 				'location' => array(
 					'location'  => 'Porto, Portugal',
 					'country'   => 'PT',
@@ -997,6 +1000,7 @@ function get_regional_wordcamp_data() {
 				'meetup'     => '',
 				'meetup_url' => '',
 				'date'       => '2019-11-01 00:00:00',
+				'end_date'   => '2019-11-03 00:00:00',
 				'location'   => array(
 					'location'  => 'St. Louis, MO, USA',
 					'country'   => 'US',
