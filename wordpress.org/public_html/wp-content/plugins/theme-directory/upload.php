@@ -13,41 +13,45 @@ add_action( 'init', 'wporg_themes_upload_shortcode' );
  */
 function wporg_themes_render_upload_shortcode() {
 	if ( ! defined( 'THEME_TRACBOT_PASSWORD' ) || ! defined( 'THEME_DROPBOX_PASSWORD' ) ) {
-		printf( '<!-- %s -->', 'Please define SVN and Trac passwords.' );
-		return;
+		return '<!-- Please define SVN and Trac passwords. -->';
 	}
 
-	if ( is_user_logged_in() ) :
+	if ( ! is_user_logged_in() ) {
 
-		if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-themes-upload' ) && 'upload' === $_POST['action'] ) {
-			$message = wporg_themes_process_upload(); 
-
-			if ( ! empty( $message ) ) {
-				echo "<div class='notice notice-warning'><p>{$message}</p></div>\n";
-			}
-		}
-	?>
-		<h4><?php _e( 'Select your zipped theme file', 'wporg-themes' ); ?></h4>
-		<form enctype="multipart/form-data" id="upload_form" method="POST" action="" onsubmit="jQuery('#upload_button').attr('disabled','disabled'); return true;">
-			<?php wp_nonce_field( 'wporg-themes-upload' ); ?>
-			<input type="hidden" name="action" value="upload"/>
-			<input type="file" id="zip_file" name="zip_file" size="25"/>
-			<input id="upload_button" class="button" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-themes' ); ?>"/>
-
-			<p>
-				<small><?php printf( __( 'Maximum allowed file size: %s', 'wporg-themes' ), esc_html( wporg_themes_get_max_allowed_file_size() ) ); ?></small>
-			</p>
-		</form>
-	<?php else : ?>
-		<p><?php printf(
+		$log_in_text = sprintf(
 			__( 'Before you can upload a new theme, <a href="%s">please log in</a>.', 'wporg-themes' ),
 			add_query_arg(
 				'redirect_to',
 				urlencode( 'https://wordpress.org/themes/upload/' ),
 				'https://login.wordpress.org/'
 			)
-		); ?><p>
-	<?php endif;
+		);
+
+		return '<p>' . $log_in_text . '</p>';
+	}
+
+	$notice = '';
+
+	if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-themes-upload' ) && 'upload' === $_POST['action'] ) {
+		$message = wporg_themes_process_upload();
+
+		if ( ! empty( $message ) ) {
+			$notice = "<div class='notice notice-warning'><p>{$message}</p></div>";
+		}
+	}
+
+	$form = '<h4>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h4>
+		<form enctype="multipart/form-data" id="upload_form" method="POST" action="" onsubmit="jQuery(\'#upload_button\').attr(\'disabled\',\'disabled\'); return true;">
+			' . wp_nonce_field( 'wporg-themes-upload', '_wpnonce', true, false ) . '
+			<input type="hidden" name="action" value="upload"/>
+			<input type="file" id="zip_file" name="zip_file" size="25"/>
+			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
+			<p>
+				<small>' . sprintf( __( 'Maximum allowed file size: %s', 'wporg-themes' ), esc_html( wporg_themes_get_max_allowed_file_size() ) ) . '</small>
+			</p>
+		</form>';
+
+	return $notice . $form;
 }
 
 /**
