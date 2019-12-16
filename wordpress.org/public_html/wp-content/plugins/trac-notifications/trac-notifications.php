@@ -83,7 +83,22 @@ class wporg_trac_notifications {
 
 	function get_trac_focuses() {
 		if ( 'core' === $this->trac ) {
-			return array( 'accessibility', 'administration', 'coding-standards', 'docs', 'javascript', 'multisite', 'performance', 'privacy', 'rest-api', 'rtl', 'template', 'ui' );
+			return array(
+				'accessibility',
+				'administration',
+				'coding-standards',
+				'css',
+				'docs',
+				'javascript',
+				'multisite',
+				'performance',
+				'privacy',
+				'rest-api',
+				'rtl',
+				'template',
+				'ui',
+				'ui-copy',
+			);
 		}
 		return array();
 	}
@@ -91,14 +106,14 @@ class wporg_trac_notifications {
 	function make_components_tree( $components ) {
 		$tree = array();
 		$subcomponents = array(
-			'Comments' => array( 'Pings/Trackbacks' ),
-			'Editor' => array( 'Autosave', 'Quick/Bulk Edit', 'TinyMCE' ),
-			'Formatting' => array( 'Charset', 'Shortcodes' ),
-			'Media' => array( 'Embeds', 'Gallery', 'Upload' ),
-			'Permalinks' => array( 'Canonical', 'Rewrite Rules' ),
+			'Comments'          => array( 'Pings/Trackbacks' ),
+			'Editor'            => array( 'Autosave', 'Quick/Bulk Edit', 'TinyMCE' ),
+			'Formatting'        => array( 'Charset', 'Shortcodes' ),
+			'Media'             => array( 'Embeds', 'Gallery', 'Upload' ),
+			'Permalinks'        => array( 'Canonical', 'Rewrite Rules' ),
 			'Posts, Post Types' => array( 'Post Formats', 'Post Thumbnails', 'Revisions' ),
-			'Themes' => array( 'Appearance', 'Widgets', 'Menus' ),
-			'Users' => array( 'Role/Capability', 'Login and Registration' )
+			'Themes'            => array( 'Appearance', 'Widgets', 'Menus' ),
+			'Users'             => array( 'Role/Capability', 'Login and Registration' )
 		);
 		foreach ( $components as $component ) {
 			if ( isset( $tree[ $component ] ) && false === $tree[ $component ] ) {
