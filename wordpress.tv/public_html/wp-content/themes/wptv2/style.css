@@ -995,7 +995,7 @@ img.videothumb {
 
 .thevideo .ui-tabs a:hover span,
 .thevideo .ui-tabs a:focus span {
-	background-color: none !important;
+	background-color: transparent !important;
 }
 
 .thevideo .showarrow {
