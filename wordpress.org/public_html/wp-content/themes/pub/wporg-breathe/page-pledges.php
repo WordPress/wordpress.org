@@ -28,19 +28,21 @@ $contributors = Pledges\get_team_contributors(
 		<header class="page-header">
 			<h1 class="page-title">
 				<?php
-					esc_html_e(
-						sprintf(
-							'%s Team Contributors',
-							$current_team->post_title
-						),
-						'wporg-5ftf'
-					);
+					esc_html_e( 'Pledged Contributors', 'wporg-5ftf' );
 				?>
 			</h1>
 		</header>
 
 		<article id="post-pledges" class="page type-page status-publish hentry">
 			<div class="entry-content">
+				<p>
+					These people have pledged to the contribute to the <?php echo esc_html( $current_team->post_title ); ?> team every week. When you need help with a task or project, reach out to them!
+				</p>
+
+				<p>
+					If you'd like to add yourself to this list, you can <a href="https://wordpress.org/five-for-the-future/">sign up on the Five for the Future site</a>.
+				</p>
+
 				<?php
 
 				if ( $contributors ) {
