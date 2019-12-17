@@ -116,6 +116,7 @@ class Plugin {
 		$project = '([^/]*)/?';
 
 		$locale = '(' . implode( '|', array_map( function( $locale ) { return $locale->slug; }, GP_Locales::locales() ) ) . ')';
+		$sets   = '(default|formal|informal|ao90|valencia)';
 
 		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) { // API requests.
 			// Delete default routes.
@@ -146,17 +147,17 @@ class Plugin {
 			// Register custom routes.
 			GP::$router->prepend( '/', array( __NAMESPACE__ . '\Routes\Index', 'get_locales' ) );
 			GP::$router->prepend( "/locale/$locale", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
-			GP::$router->prepend( "/locale/$locale/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
-			GP::$router->prepend( "/locale/$locale/$path/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
-			GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_project' ) );
-			GP::$router->prepend( "(/locale)/$locale/$dir/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_get' ) );
-			GP::$router->prepend( "(/locale)/$locale/$dir/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_post' ), 'post' );
-			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-new", array( 'GP_Route_Glossary_Entry', 'glossary_entry_add_post' ), 'post' );
-			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-delete", array( 'GP_Route_Glossary_Entry', 'glossary_entry_delete_post' ), 'post' );
-			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-export", array( 'GP_Route_Glossary_Entry', 'export_glossary_entries_get' ) );
-			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_get' ) );
-			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_post' ), 'post' );
-			GP::$router->prepend( "/locale/$locale/$dir/stats(?:/(plugins|themes))?", array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_plugin_theme_overview' ) );
+			GP::$router->prepend( "/locale/$locale/$sets", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
+			GP::$router->prepend( "/locale/$locale/$sets/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
+			GP::$router->prepend( "/locale/$locale/$sets/$path/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_project' ) );
+			GP::$router->prepend( "(/locale)/$locale/$sets/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_get' ) );
+			GP::$router->prepend( "(/locale)/$locale/$sets/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_post' ), 'post' );
+			GP::$router->prepend( "(/locale)/$locale/$sets/glossary/-new", array( 'GP_Route_Glossary_Entry', 'glossary_entry_add_post' ), 'post' );
+			GP::$router->prepend( "(/locale)/$locale/$sets/glossary/-delete", array( 'GP_Route_Glossary_Entry', 'glossary_entry_delete_post' ), 'post' );
+			GP::$router->prepend( "(/locale)/$locale/$sets/glossary/-export", array( 'GP_Route_Glossary_Entry', 'export_glossary_entries_get' ) );
+			GP::$router->prepend( "(/locale)/$locale/$sets/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_get' ) );
+			GP::$router->prepend( "(/locale)/$locale/$sets/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_post' ), 'post' );
+			GP::$router->prepend( "/locale/$locale/$sets/stats(?:/(plugins|themes))?", array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_plugin_theme_overview' ) );
 			GP::$router->prepend( '/stats', array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_overview' ) );
 			GP::$router->prepend( '/consistency', array( __NAMESPACE__ . '\Routes\Consistency', 'get_search_form' ) );
 
