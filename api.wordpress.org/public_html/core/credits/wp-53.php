@@ -284,6 +284,7 @@ class WP_53_Credits extends WP_Credits {
 			'dushanthi',
 			'dvankooten',
 			'earnjam',
+			'eden159',
 			'ediamin',
 			'edocev',
 			'ehtis',
