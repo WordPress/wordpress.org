@@ -148,7 +148,7 @@ the_post();
 								'https://www.mysql.com/',
 								'5.6',
 								'https://mariadb.org/',
-								'10.0'
+								'10.1'
 							);
 							?>
 							<br>

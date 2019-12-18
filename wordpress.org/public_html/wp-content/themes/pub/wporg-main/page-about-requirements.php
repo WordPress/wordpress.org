@@ -97,7 +97,7 @@ the_post();
 							<li>
 								<?php
 								/* translators: 1: MySQL version; 2: MariaDB Version */
-								printf( esc_html__( 'MySQL %1$s or greater OR MariaDB %2$s or greater', 'wporg' ), '5.6', '10.0' );
+								printf( esc_html__( 'MySQL %1$s or greater OR MariaDB %2$s or greater', 'wporg' ), '5.6', '10.1' );
 								?>
 							</li>
 							<li><?php esc_html_e( 'Nginx or Apache with mod_rewrite module', 'wporg' ); ?></li>
