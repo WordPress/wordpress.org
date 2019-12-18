@@ -878,7 +878,7 @@ span.contributor-label[title]:hover {
 	margin: -1px -1.1em;
 	border: none;
 	background: #fff;
-	padding: 0 11px 0 1em;
+	padding: 0 11px 1px 1em;
 }
 #changelog h3.change:after,
 #ticketchange h3.change:after {
@@ -904,6 +904,9 @@ span.contributor-label[title]:hover {
 }
 #changelog h3.chat-bot a.ext-link:before {
 	content: none;
+}
+#changelog h3.chat-bot .trac-ticket-buttons {
+	display: none;
 }
 span.time-ago {
 	font-size: 0.85em;
