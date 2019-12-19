@@ -387,5 +387,6 @@ function get_committers() {
 		'ellatrix',       // @ella on Slack
 		'johnjamesjacoby',// @JJJ on Slack
 		'lonelyvegan',    // @tofumatt on Slack
+		'talldanwp',      // @danr on Slack
 	);
 }
