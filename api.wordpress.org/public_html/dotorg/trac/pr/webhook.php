@@ -5,6 +5,7 @@ require dirname( dirname( dirname( __DIR__ ) ) ) . '/init.php';
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
 
 require __DIR__ . '/functions.php';
+require __DIR__ . '/class-trac.php';
 
 function verify_signature() {
 	// Validate that the request came from GitHub.
@@ -74,7 +75,16 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 				]
 			);
 
-			// TODO: Create a Trac ticket comment mentioning that the PR has been linked to the ticket.
+			// Add a mention to the Trac Ticket.
+			$trac_uri = 'https://' . $pr_data->trac_ticket[0] . '.trac.wordpress.org/login/rpc';
+			$trac = new Trac( GH_PRBOT_USER, GH_PRBOT_PASS, $trac_uri );
+
+			$trac->update(
+				$pr_data->trac_ticket[1],
+				"''This ticket was mentioned in [{$pr_data->html_url} PR #{$pr_number}] " .
+					"on [https://github.com/{$pr_repo}/ {$pr_repo}] " .
+					"by [{$pr_data->user->url} {$pr_data->user->name}].''"
+			);
 		}
 
 		// Step 4. Update all the instances of this PR with the new data, it may be linked to multiple tickets/tracs.
