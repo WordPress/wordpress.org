@@ -38,6 +38,21 @@ function fetch_pr_data( $repo, $pr ) {
 }
 
 /**
+ * Find a WordPress.org user by a Github login.
+ */
+function find_wporg_user_by_github( $github_user ) {
+	global $wpdb;
+
+	return $wpdb->get_var( $wpdb->prepare(
+		"SELECT u.user_login
+			FROM {$wpdb->base_prefix}github_users g
+				JOIN {$wpdb->users} u ON g.user_id = u.ID
+			WHERE g.github_user = %s",
+		$github_user
+	) );
+}
+
+/**
  * A simple wrapper to make a Github API request..
  */
 function api_request( $url, $args = null, $headers = [], $method = null ) {
@@ -46,20 +61,20 @@ function api_request( $url, $args = null, $headers = [], $method = null ) {
 		$url = 'https://api.github.com' . $url;
 	}
 
-	$context = stream_context_create( $c = [ 'http' => [
+	$context = stream_context_create( [ 'http' => [
 		'method'        => $method ?: ( is_null( $args ) ? 'GET' : 'POST' ),
 		'user_agent'    => 'WordPress.org Trac; trac.WordPress.org',
 		'max_redirects' => 0,
 		'timeout'       => 5,
 		'ignore_errors' => true,
-		'headers'       => array_merge(
+		'header'        => array_merge(
 			[
-				'Accept'        => 'application/json',
-				'Authorization' => get_authorization_token(),
+				'Accept: application/json',
+				'Authorization: ' . get_authorization_token(),
 			],
 			$headers
 		),
-		'body'          => $args ?: null,
+		'content'       => $args ?: null,
 	] ] );
 
 	return json_decode( file_get_contents(
@@ -74,7 +89,7 @@ function api_request( $url, $args = null, $headers = [], $method = null ) {
  */
 function get_authorization_token() {
 	global $wpdb;
-	
+
 	// TODO: This needs to be switched to a Github App token.
 	// This works temporarily to avoid the low unauthenticated limits.
 	return 'BEARER ' . $wpdb->get_var( "SELECT access_token FROM wporg_github_users WHERE github_user = 'dd32'");
