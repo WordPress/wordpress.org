@@ -49,7 +49,7 @@ class DevHub_Search {
 		// If the main query is being filtered by post_type.
 		if ( $query->is_main_query() && isset( $_GET['post_type'] ) ) {
 			// Get list of valid parsed post types specified in query.
-			$valid_post_types = array_intersect( $_GET['post_type'], DevHub\get_parsed_post_types() );
+			$valid_post_types = array_intersect( (array) $_GET['post_type'], DevHub\get_parsed_post_types() );
 
 			// If no valid post types were specified, then request is a 404.
 			if ( ! $valid_post_types ) {
