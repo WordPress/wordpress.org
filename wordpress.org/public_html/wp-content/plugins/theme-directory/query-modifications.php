@@ -135,9 +135,12 @@ function wporg_themes_pre_get_posts( $query ) {
 		'en_US' !== get_locale() &&
 		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) )
 	) {
-		add_filter( 'posts_clauses', 'wporg_themes_prioritize_translated_posts_clauses' );
+		add_filter( 'posts_clauses', 'wporg_themes_prioritize_translated_posts_clauses', 11 );
 	}
 
+	if ( $query->is_search() ) {
+		add_filter( 'posts_clauses', 'wporg_themes_prioritize_exact_matches_clauses', 10, 2 );
+	}
 }
 add_action( 'pre_get_posts', 'wporg_themes_pre_get_posts' );
 
@@ -154,6 +157,38 @@ function wporg_themes_prioritize_translated_posts_clauses( $clauses ) {
 	$clauses['groupby']  = "{$wpdb->posts}.ID";
 	$clauses['join']    .= $wpdb->prepare( " LEFT JOIN language_packs AS l ON ( {$wpdb->posts}.post_name = l.domain AND l.active=1 AND l.type='theme' AND l.language=%s )", get_locale() );
 	$clauses['orderby']  = 'l.domain IS NOT NULL DESC, ' . $clauses['orderby'];
+
+	return $clauses;
+}
+
+/**
+ * Filters SQL clauses, to prioritise exact theme slug matches.
+ */
+function wporg_themes_prioritize_exact_matches_clauses( $clauses, $query ) {
+	global $wpdb;
+
+	// Override the post_modified check to allow matching when an exact title/slug match is found.
+	$clauses['where'] = preg_replace_callback(
+		"!{$wpdb->posts}.post_modified > '(.+?)'!is",
+		function( $m ) use ( $query ) {
+			global $wpdb;
+
+			return $wpdb->prepare(
+				"( {$wpdb->posts}.post_modified > %s OR {$wpdb->posts}.post_name = %s OR {$wpdb->posts}.post_title = %s )",
+				$m[1],
+				$query->get('s'),
+				$query->get('s')
+			);
+		},
+		$clauses['where']
+	);
+
+	// Prioritize exact-match slug/titles in search results
+	$clauses['orderby'] = $wpdb->prepare(
+		"( {$wpdb->posts}.post_name = %s OR {$wpdb->posts}.post_title = %s ) DESC, ",
+		$query->get( 's' ),
+		$query->get( 's' )
+	) . $clauses['orderby'];
 
 	return $clauses;
 }

@@ -449,7 +449,7 @@ class Themes_API {
 		// If there is a cached result, return that.
 		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) . serialize( $this->fields ) ) );
 		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-			return;
+		//	return;
 		}
 
 		if ( isset( $wp_query ) && $wp_query->query_vars ) {
@@ -486,7 +486,7 @@ class Themes_API {
 			$this->response->themes[] = $this->fill_theme( $theme );
 		}
 
-		wp_cache_set( $cache_key, $this->response, $this->cache_group, $this->cache_life );
+		//wp_cache_set( $cache_key, $this->response, $this->cache_group, $this->cache_life );
 	}
 
 	public function perform_wp_query() {
