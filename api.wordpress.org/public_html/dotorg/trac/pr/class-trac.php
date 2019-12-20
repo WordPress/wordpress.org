@@ -127,6 +127,39 @@ class Trac {
 	}
 
 	/**
+	 * Call the Back-channel WordPress Trac API.
+	 * 
+	 * For valid $methods to call, see: https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/trac-notifications/trac-notifications-db.php
+	 */
+	public function wpapi( $method, $args = null ) {
+		$wpapi_url = str_replace( '/login/rpc', '/wpapi/', $this->trac_uri );
+		$wpapi_url .= '?call=' . $method;
+
+		$context = stream_context_create( [ 'http' => [
+			'method'        => 'POST',
+			'user_agent'    => 'WordPress.org Trac; trac.WordPress.org',
+			'max_redirects' => 0,
+			'timeout'       => 5,
+			'ignore_errors' => true,
+			'header'        =>  [
+				'Authorization: Basic ' . base64_encode( $this->credentials[0] . ':' . $this->credentials[1] ),
+			],
+			'content'       => http_build_query( [
+				'secret'    => TRAC_NOTIFICATIONS_API_KEY,
+				'arguments' => json_encode( $args ),
+			] ),
+		] ] );
+
+		$json = file_get_contents(
+			$wpapi_url,
+			false,
+			$context
+		);
+
+		return json_decode( $json );
+	}
+
+	/**
 	 * Encodes DateTime objects into the Trac Date JSON format.
 	 */
 	protected function trac_json_objectify( $json ) {
