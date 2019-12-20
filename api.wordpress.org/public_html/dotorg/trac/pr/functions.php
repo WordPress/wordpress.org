@@ -143,3 +143,11 @@ function determine_trac_ticket( $pr ) {
 	return false;
 }
 
+/**
+ * Returns a instance of the Trac class for a given trac.
+ */
+function get_trac_instance( $trac ) {
+	$trac_uri = 'https://' . $trac . '.trac.wordpress.org/login/rpc';
+
+	return new Trac( GH_PRBOT_USER, GH_PRBOT_PASS, $trac_uri );
+}

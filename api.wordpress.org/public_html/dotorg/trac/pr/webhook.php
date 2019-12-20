@@ -76,8 +76,7 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			);
 
 			// Add a mention to the Trac Ticket.
-			$trac_uri = 'https://' . $pr_data->trac_ticket[0] . '.trac.wordpress.org/login/rpc';
-			$trac = new Trac( GH_PRBOT_USER, GH_PRBOT_PASS, $trac_uri );
+			$trac = get_trac_instance( $pr_data->trac_ticket[0] );
 
 			$trac->update(
 				$pr_data->trac_ticket[1],
