@@ -102,7 +102,76 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 		die( 'OK' );
 		break;
 
+	case 'issue_comment':
+		// This is a singular comment on a PR or issue.
+		// NOT a code review comment.
+
+		$is_edit = isset( $payload->action ) && 'edited' === $payload->action;
+		if ( $is_edit ) {
+			// UNIQUE constraint failed: ticket_change.ticket, ticket_change.time, ticket_change.field
+			die( 'UNSUPPORTED - EDIT' );
+		}
+
+		// Make sure it's a PR comment..
+		if ( empty( $payload->issue->pull_request ) ) {
+			die( 'UNSUPPORTED - Only PR comments supported.' );
+		}
+
+		$pr_repo   = $payload->repository->full_name;
+		$pr_number = $payload->issue->number;
+
+		// Find the tickets that this PR is attached to.
+		$tickets = $wpdb->get_results( $wpdb->prepare(
+			"SELECT trac, ticket FROM trac_github_prs WHERE repo = %s AND pr = %d",
+			$pr_repo,
+			$pr_number
+		) );
+		if ( ! $tickets ) {
+			die( 'PR Not linked to any tickets' );
+		}
+
+		$comment_template = "{{{#!comment\n%s\n}}}\n[%s %s] commented on [%s %s]:\n\n%s";
+		$comment_author   = find_wporg_user_by_github( $payload->comment->user->login );
+		$comment_time     = new \DateTime( $payload->comment->created_at );
+
+		$comment_body = sprintf(
+			$comment_template,
+			$payload->comment->id,
+			$payload->comment->user->html_url,
+			$payload->comment->user->login,
+			$payload->comment->html_url,
+			'PR #' . $payload->issue->number,
+			$payload->comment->body
+		);
+
+		foreach ( $tickets as $t ) {
+			$trac = get_trac_instance( $t->trac );
+
+			if ( ! $is_edit ) {
+				$trac->update(
+					$t->ticket, $comment_body,
+					[], false,
+					$comment_author,
+					$comment_time
+				);
+			} else {
+				// TODO: Need to edit..
+				// use /wpapi endpoint for that.
+			}
+
+		}
+
+		die( 'OK' );
+
 	case 'pull_request_review':
-	case 'pull_request_review_comment':
+		// This is a Pull Request Review.
+		// It's comprised of one or more comments, which are related to a users "review"
+		// The comment(s) in this review may actually be a response to another review or response to a review in response to a review, etc.
+
 		die( 'N/A' );
+	case 'pull_request_review_comment':
+		// This is a comment within a Pull Request Review, but sent before the review is published.
+
+		die( 'Not Needed?' );
+		
 }
