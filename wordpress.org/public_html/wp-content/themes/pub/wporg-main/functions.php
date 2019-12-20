@@ -77,7 +77,7 @@ add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
 function scripts() {
 	$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20191211' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20191220' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Move jQuery to the footer.
@@ -92,6 +92,10 @@ function scripts() {
 		wp_localize_script( 'wporg-page-stats', 'wporgPageStats', [
 			'trunk'         => number_format( WP_CORE_STABLE_BRANCH + 0.1, 1 ), /* trunk */
 		] );
+	} elseif ( is_page( 'download' ) ) {
+		wp_enqueue_style( 'jquery-modal-style', get_theme_file_uri( '/css/jquery.modal.min.css' ), [], '0.9.2' );
+		wp_enqueue_script( 'jquery-modal', get_theme_file_uri( '/js/jquery.modal.min.js' ), [ 'jquery' ], '0.9.2', true );
+		wp_enqueue_script( 'wporg-page-download', get_theme_file_uri( '/js/page-download.js' ), [ 'jquery', 'jquery-modal' ], '20191220', true );
 	}
 
 	if ( is_page() && get_queried_object()->post_parent ) {

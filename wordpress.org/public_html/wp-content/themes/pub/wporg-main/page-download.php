@@ -88,11 +88,48 @@ the_post();
 
 			<div class="entry-content row">
 
+				<div id="after-download" class="modal" role="dialog" aria-modal="true">
+					<div role="document">
+						<header class="entry-header">
+							<h1 id="after-download-title" class="entry-title"><?php esc_html_e( 'Hooray!', 'wporg' ); ?></h1>
+							<p class="entry-description"><?php esc_html_e( 'You&#8217;re on your way with the latest WordPress!', 'wporg' ); ?></p>
+						</header>
+						<div>
+						<p>
+							<?php
+							printf(
+								__( 'For help getting started, check out our <a href="%s">Documentation and Support Forums</a>.', 'wporg' ),
+								esc_url( __( 'https://wordpress.org/support/', 'wporg' ) )
+							);
+							?>
+						</p>
+						<p>
+							<?php
+							printf(
+								/* translators: 1: URL to WordPress Meetup group, 2: URL to WordCamp Central */
+								__( 'Meet other WordPress enthusiasts and share your knowledge at a <a href="%1$s">WordPress meetup group</a> or a <a href="%2$s">WordCamp</a>.', 'wporg' ),
+								esc_url( __( 'https://www.meetup.com/pro/wordpress/', 'wporg' ) ),
+								esc_url( __( 'https://central.wordcamp.org/', 'wporg' ) )
+							);
+							?>
+						</p>
+						<p>
+							<?php
+							printf(
+								__( 'To support education about WordPress and open source software, please donate to the <a href="%s">WordPress Foundation</a>.', 'wporg' ),
+								esc_url( __( 'https://wordpressfoundation.org/donate/', 'wporg' ) )
+							);
+							?>
+						</p>
+						</div>
+					</div>
+				</div>
+
 				<section class="download row gutters between">
 					<h2><?php esc_html_e( 'Priceless, and also free', 'wporg' ); ?></h2>
 					<p class="subheading"><?php esc_html_e( 'Download WordPress and use it on your site.', 'wporg' ); ?></p>
 					<div class="call-to-action col-12">
-						<a class="button button-primary button-xl" href="<?php echo esc_url( $latest_release_zip_url ); ?>">
+						<a id="download-wordpress" class="button button-primary button-xl" href="<?php echo esc_url( $latest_release_zip_url ); ?>">
 							<span class="dashicons-before dashicons-download">
 								<?php
 								echo esc_html( apply_filters( 'no_orphans', sprintf(
