@@ -169,4 +169,19 @@ body.page-download {
 		margin: 0 auto -1rem;
 		width: auto;
 	}
+
+	.modal {
+		.entry-header {
+			margin: -15px -30px 15px;
+			padding: 0.1rem;
+		}
+		.entry-title {
+			font-size: 3rem;
+			margin-top: 1.5rem;
+		}
+		.entry-description {
+			font-size: 1.1rem;
+			margin-bottom: 1.5rem;
+		}
+	}
 }
