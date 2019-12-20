@@ -45,7 +45,7 @@ function find_wporg_user_by_github( $github_user ) {
 
 	return $wpdb->get_var( $wpdb->prepare(
 		"SELECT u.user_login
-			FROM {$wpdb->base_prefix}github_users g
+			FROM wporg_github_users g
 				JOIN {$wpdb->users} u ON g.user_id = u.ID
 			WHERE g.github_user = %s",
 		$github_user
