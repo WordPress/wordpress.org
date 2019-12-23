@@ -83,7 +83,7 @@ the_post();
 							esc_html__( 'WordPress is a free and open source content management system (CMS). It is the most widely-used CMS software in the world and it powers more than %1$s%% of the top 10 million websites%2$s, giving it an estimated %3$s%% market share of all sites using a CMS.', 'wporg' ),
 							esc_html( WP_MARKET_SHARE ),
 							'<sup id="ref1"><a href="#footnote1">1</a></a></sup>',
-							60
+							62
 						);
 					?>
 					</p>
@@ -515,35 +515,35 @@ the_post();
 
 					<h3><?php esc_html_e( 'Footnotes', 'wporg' ); ?></h3>
 					<ul>
-						<li id='footnote1'><a href="#ref1">[1]</a> <a href="https://w3techs.com/">https://w3techs.com/</a>, as of March 2017</li>
+						<li id='footnote1'><a href="#ref1">[1]</a> <a href="https://w3techs.com/">https://w3techs.com/</a>, as of December 2019</li>
 						<li id='footnote2'><a href="#ref2">[2]</a> <a href="https://make.wordpress.org/core/handbook/about/release-cycle/">https://make.wordpress.org/core/handbook/about/release-cycle/</a></li>
 						<li id='footnote3'><a href="#ref3">[3]</a> Andrew Nacin, WordPress lead developer, <a href="https://vip.wordpress.com/security">https://vip.wordpress.com/security</a></li>
 						<li id='footnote4'><a href="#ref4">[4]</a> <a href="https://wordpress.org/news/2014/08/wordpress-3-9-2/">https://wordpress.org/news/2014/08/wordpress-3-9-2/</a></li>
-						<li id='footnote5'><a href="#ref5">[5]</a> <a href="https://codex.wordpress.org/Security_FAQ">https://codex.wordpress.org/Security_FAQ</a></li>
+						<li id='footnote5'><a href="#ref5">[5]</a> <a href="https://hackerone.com/wordpress">https://hackerone.com/wordpress</a></li>
 						<li id='footnote6'><a href="#ref6">[6]</a> <a href="https://wordpress.org/news/">https://wordpress.org/news/</a></li>
 						<li id='footnote7'><a href="#ref7">[7]</a> <a href="https://wordpress.org/news/2013/10/basie/">https://wordpress.org/news/2013/10/basie/</a></li>
 						<li id='footnote8'><a href="#ref8">[8]</a> <a href="https://www.owasp.org/index.php/Top_10_2013-Top_10">https://www.owasp.org/index.php/Top_10_2013-Top_10</a></li>
 						<li id='footnote9'><a href="#ref9">[9]</a> <a href="https://developer.wordpress.org/plugins/security/">https://developer.wordpress.org/plugins/security/</a></li>
 						<li id='footnote10'><a href="#ref10">[10]</a> <a href="https://codex.wordpress.org/Data_Validation#HTML.2FXML">https://codex.wordpress.org/Data_Validation#HTML.2FXML</a></li>
-						<li id='footnote11'><a href="#ref11">[11]</a> <a href="https://codex.wordpress.org/Hardening_WordPress">https://codex.wordpress.org/Hardening_WordPress</a></li>
+						<li id='footnote11'><a href="#ref11">[11]</a> <a href="https://wordpress.org/support/article/hardening-wordpress/">hhttps://wordpress.org/support/article/hardening-wordpress/</a></li>
 						<li id='footnote12'><a href="#ref12">[12]</a> <a href="http://www.openwall.com/phpass/">http://www.openwall.com/phpass/</a></li>
 						<li id='footnote13'><a href="#ref13">[13]</a> <a href="https://developer.wordpress.org/plugins/security/nonces/">https://developer.wordpress.org/plugins/security/nonces/</a></li>
 						<li id='footnote14'><a href="#ref14">[14]</a> <a href="https://wordpress.org/news/2013/06/wordpress-3-5-2/">https://wordpress.org/news/2013/06/wordpress-3-5-2/</a></li>
 						<li id='footnote15'><a href="#ref15">[15]</a> <a href="https://make.wordpress.org/core/2013/06/21/secure-swfupload/">https://make.wordpress.org/core/2013/06/21/secure-swfupload/</a></li>
 						<li id='footnote16'><a href="#ref16">[16]</a> <a href="https://developer.wordpress.org/reference/functions/wp_safe_redirect/">https://developer.wordpress.org/reference/functions/wp_safe_redirect/</a></li>
-						<li id='footnote17'><a href="#ref17">[17]</a> <a href="https://wordpress.org/plugins/about/guidelines/">https://wordpress.org/plugins/about/guidelines/</a></li>
+						<li id='footnote17'><a href="#ref17">[17]</a> <a href="https://wordpress.org/plugins/developers/">https://wordpress.org/plugins/developers/</a></li>
 						<li id='footnote18'><a href="#ref18">[18]</a> <a href="https://developer.wordpress.org/themes/getting-started/">https://developer.wordpress.org/themes/getting-started/</a></li>
-						<li id='footnote19'><a href="#ref19">[19]</a> <a href="https://codex.wordpress.org/Theme_Review">https://codex.wordpress.org/Theme_Review</a></li>
-						<li id='footnote20'><a href="#ref20">[20]</a> <a href="https://codex.wordpress.org/Theme_Unit_Test">https://codex.wordpress.org/Theme_Unit_Test</a></li>
+						<li id='footnote19'><a href="#ref19">[19]</a> <a href="https://make.wordpress.org/themes/handbook/review/">https://make.wordpress.org/themes/handbook/review/</a></li>
+						<li id='footnote20'><a href="#ref20">[20]</a> <a href="http://codex.wordpress.org/Theme_Unit_Test">http://codex.wordpress.org/Theme_Unit_Test</a></li>
 						<li id='footnote21'><a href="#ref21">[21]</a> <a href="https://wordpress.org/plugins/theme-check/">https://wordpress.org/plugins/theme-check/</a></li>
 						<li id='footnote22'><a href="#ref22">[22]</a> <a href="https://automattic.com/security/">https://automattic.com/security/</a></li>
 						<li id='footnote23'><a href="#ref23">[23]</a> <a href="https://codex.wordpress.org/WordPress_APIs">https://codex.wordpress.org/WordPress_APIs</a></li>
-						<li id='footnote24'><a href="#ref24">[24]</a> <a href="https://codex.wordpress.org/Database_API">https://codex.wordpress.org/Database_API</a></li>
+						<li id='footnote24'><a href="#ref24">[24]</a> <a href="https://developer.wordpress.org/apis/handbook/database/">https://developer.wordpress.org/apis/handbook/database/</a></li>
 						<li id='footnote25'><a href="#ref25">[25]</a> <a href="https://codex.wordpress.org/Filesystem_API">https://codex.wordpress.org/Filesystem_API</a></li>
-						<li id='footnote26'><a href="#ref26">[26]</a> <a href="https://codex.wordpress.org/Version_2.6">https://codex.wordpress.org/Version_2.6</a></li>
-						<li id='footnote27'><a href="#ref27">[27]</a> <a href="https://codex.wordpress.org/HTTP_API">https://codex.wordpress.org/HTTP_API</a></li>
-						<li id='footnote28'><a href="#ref28">[28]</a> <a href="https://codex.wordpress.org/Version_2.7">https://codex.wordpress.org/Version_2.7</a></li>
-						<li id='footnote29'><a href="#ref29">[29]</a> <a href="https://codex.wordpress.org/Function_Reference/current_user_can">https://codex.wordpress.org/Function_Reference/current_user_can</a></li>
+						<li id='footnote26'><a href="#ref26">[26]</a> <a href="https://wordpress.org/support/wordpress-version/version-2-6/">https://wordpress.org/support/wordpress-version/version-2-6/</a></li>
+						<li id='footnote27'><a href="#ref27">[27]</a> <a href="https://developer.wordpress.org/plugins/http-api/">https://developer.wordpress.org/plugins/http-api/</a></li>
+						<li id='footnote28'><a href="#ref28">[28]</a> <a href="https://wordpress.org/support/wordpress-version/version-2-7/">https://wordpress.org/support/wordpress-version/version-2-7/</a></li>
+						<li id='footnote29'><a href="#ref29">[29]</a> <a href="https://developer.wordpress.org/reference/functions/current_user_can/">https://developer.wordpress.org/reference/functions/current_user_can/</a></li>
 					</ul>
 				</section>
 			</div><!-- .entry-content -->
