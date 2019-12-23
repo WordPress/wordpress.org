@@ -14,6 +14,12 @@ add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
 } );
 
+// rm the page-child class from this page
+add_filter( 'body_class', function ( $classes ) {
+    return array_diff( $classes, array( 'page-child' ) );
+} );
+
+
 /* See inc/page-meta-descriptions.php for the meta description for this page. */
 
 get_header();
