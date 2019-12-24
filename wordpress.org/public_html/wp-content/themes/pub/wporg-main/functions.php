@@ -253,6 +253,12 @@ function old_page_redirects() {
 		wp_safe_redirect( '/about/license/', 301 );
 		die();
 	}
+
+	// https://*/license.txt > about/license
+	if ( '/license.txt' === $_SERVER['REQUEST_URI'] ) {
+		wp_safe_redirect( '/about/license/', 301 );
+                die();
+	}
 }
 add_filter( 'template_redirect', __NAMESPACE__ . '\old_page_redirects' );
 
