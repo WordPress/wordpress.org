@@ -7,7 +7,7 @@ defined( 'WPINC' ) || die();
 /**
  * Note: There will be a large number of contributors on every page, so don't call any expensive functions like
  * `get_avatar_url( $user_id )` here (which creates a database lookup for the email address). Instead, add the
- * data to `get_contributors()` in a performant way.
+ * data to `get_team_contributors()` in a performant way.
  *
  * @var array $contributor
  */
