@@ -538,8 +538,8 @@ class WPORG_Themes_Upload {
 	 */
 	public function has_reserved_slug() {
 		$slug = str_replace(
-			array( 'twenty-ten', 'twenty-eleven', 'twenty-twelve', 'twenty-thirteen', 'twenty-fourteen', 'twenty-fifteen', 'twenty-sixteen', 'twenty-seventeen', 'twenty-eighteen', 'twenty-nineteen', 'twenty-twenty' ),
-			array( 'twentyten',  'twentyeleven',  'twentytwelve',  'twentythirteen',  'twentyfourteen',  'twentyfifteen',  'twentysixteen',  'twentyseventeen',  'twentyeighteen',  'twentynineteen',  'twentytwenty'  ),
+			array( 'twenty-ten', 'twenty-eleven', 'twenty-twelve', 'twenty-thirteen', 'twenty-fourteen', 'twenty-fifteen', 'twenty-sixteen', 'twenty-seventeen', 'twenty-eighteen', 'twenty-nineteen', 'twenty-twenty', 'twenty-twenty-one', 'twenty-twenty-two', 'twenty-twenty-three', 'twenty-twenty-four', 'twenty-twenty-five', 'twenty-twenty-six', 'twenty-twenty-seven', 'twenty-twenty-eight', 'twenty-twenty-nine', 'twenty-thirty'),
+			array( 'twentyten',  'twentyeleven',  'twentytwelve',  'twentythirteen',  'twentyfourteen',  'twentyfifteen',  'twentysixteen',  'twentyseventeen',  'twentyeighteen',  'twentynineteen',  'twentytwenty', 'twentytwentyone', 'twentytwentytwo', 'twentytwentythree', 'twentytwentyfour',  'twentytwentyfive', 'twentytwentysix', 'twentytwentyseven', 'twentytwentyeight', 'twentytwentynine', 'twentythirty' ),
 			$this->theme_slug
 		);
 
@@ -547,7 +547,8 @@ class WPORG_Themes_Upload {
 			// Reserve "twenty" names for wordpressdotorg.
 			'twentyten', 'twentyeleven', 'twentytwelve','twentythirteen', 'twentyfourteen', 'twentyfifteen',
 			'twentysixteen', 'twentyseventeen','twentyeighteen', 'twentynineteen', 'twentytwenty',
-
+			'twentytwentyone', 'twentytwentytwo', 'twentytwentythree', 'twentytwentyfour', 'twentytwentyfive',
+			'twentytwentysix', 'twentytwentyseven', 'twentytwentyeight', 'twentytwentynine', 'twentythirty',
 			// Theme Showcase URL parameters.
 			'browse', 'tag', 'search', 'filter', 'upload', 'commercial',
 			'featured', 'popular', 'new', 'updated',
