@@ -36,7 +36,7 @@ $contributors = Pledges\get_team_contributors(
 		<article id="post-pledges" class="page type-page status-publish hentry">
 			<div class="entry-content">
 				<p>
-					These people have pledged to the contribute to the <?php echo esc_html( $current_team->post_title ); ?> team every week. When you need help with a task or project, reach out to them!
+					These people have pledged time to contribute to <?php echo esc_html( $current_team->post_title ); ?> Team efforts! When looking for help on a project or program, try starting by reaching out to the people on this list!
 				</p>
 
 				<p>
