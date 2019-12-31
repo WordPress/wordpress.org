@@ -1,4 +1,12 @@
 <?php
+
+/*
+ * NOTE: This isn't actually used, instead the site loads `public_html/index-wporg.php`.
+ *
+ * Please sync any changes in both places.
+ */
+
+
 /**
  * The main template file.
  *
@@ -126,7 +134,7 @@ get_header( 'wporg' );
 					<h2><?php _e( 'Community', 'wporg' ); ?></h2>
 					<p class="subheading">
 						<?php
-						$meetups = 436;
+						$meetups = 817;
 
 						printf(
 							/* translators: Number of meetups. */
