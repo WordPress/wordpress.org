@@ -31,6 +31,12 @@ function setup() {
 	register_nav_menus( array(
 		'rosetta_main' => esc_html__( 'Rosetta', 'wporg' ),
 	) );
+
+	/*
+	 * Featured images are currently not used in the theme but this enables
+	 * to use them via open graph tags when a page is shared.
+	 */
+	add_theme_support( 'post-thumbnails' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 
