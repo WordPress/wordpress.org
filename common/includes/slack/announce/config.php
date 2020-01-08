@@ -281,6 +281,7 @@ function get_whitelist() {
 			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
+			'felipeelia',
 			'Nao',
 			'ocean90',
 			'petya',
@@ -292,6 +293,7 @@ function get_whitelist() {
 			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
+			'felipeelia',
 			'Nao',
 			'ocean90',
 			'petya',
