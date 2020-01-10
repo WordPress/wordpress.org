@@ -63,16 +63,6 @@ if ( post_password_required() ) {
 
 	<?php if ( \DevHub\is_parsed_post_type() && DevHub\can_user_post_note( true, get_the_ID() ) ) : ?>
 
-		<?php if ( is_user_logged_in() ) : ?>
-			<?php 
-				/* Hide the add user note link by default.
-				 * It will be displayed by Javascript.
-				 * If Javascript is disabled the comment form is displayed and the link stays hidden.
-		 		 */
-			?>
-			<p id="add-user-note" style="display: none;"><a href="<?php echo user_trailingslashit( get_permalink() ) . '#respond'; ?>"><?php _e( 'Have a note or feedback to contribute?', 'wporg' ); ?></a></p>
-		<?php endif; ?>
-
 		<?php 
 		if ( class_exists( 'DevHub_User_Submitted_Content' ) )  {
 			$args = \DevHub_User_Submitted_Content::comment_form_args();

@@ -71,7 +71,7 @@
 		} );
 
 		// Set preview heigth when the textarea is visible
-		$( '#add-user-note, .table-of-contents a[href="#add-note-or-feedback"]' ).click( function( e ) {
+		$( '.table-of-contents a[href="#add-note-or-feedback"]' ).click( function( e ) {
 			e.preventDefault();
 			tabs.parents( '.tablist' ).show();
 			setTimeout( function() {

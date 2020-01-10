@@ -6,7 +6,6 @@
 ( function( $ ) {
 
 	var commentForm = $( '.comment-form textarea' );
-	var add_user_note = $( '#add-user-note' );	
 	var commentID = window.location.hash;
 	var wpAdminBar = 0;
 
@@ -52,12 +51,6 @@
 	} );
 
 	function showCommentForm() {
-		if( add_user_note.length ) {
-			add_user_note.hide();
-		}
-
-		$( '#respond' ).show();
-
 		var target = $( '#commentform #add-note-or-feedback' );
 		if ( target.length ) {
 			var pos = target.offset();
@@ -74,14 +67,7 @@
 		return;
 	}
 
-	if( add_user_note.length ) {
-		add_user_note.show();
-
-		// Hide by default if #add-user-note exists
-		$( '#respond' ).hide();
-	}
-
-	$( '#add-user-note, .table-of-contents a[href="#add-note-or-feedback"]' ).click( function( e ) {
+	$( '.table-of-contents a[href="#add-note-or-feedback"]' ).click( function( e ) {
 		e.preventDefault();
 		showCommentForm();
 	} );
