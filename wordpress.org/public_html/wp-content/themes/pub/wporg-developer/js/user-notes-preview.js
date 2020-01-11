@@ -5,7 +5,7 @@
 
 ( function( $ ) {
 
-	var textarea, textareaHeight, text, preview, previewContent, tabs, processing, spinner;
+	var textarea, tabContentHeight, text, preview, previewContent, tabs, processing, spinner;
 
 	function init() {
 
@@ -45,6 +45,13 @@
 
 		tabs.on( "keydown.note_preview, click.note_preview", function( e ) {
 
+			// Preview tab should be at least as tall input tab to prevent resizing wonkiness.
+			tabContentHeight = $( '#comment-form-comment' ).outerHeight( false );
+
+			if ( 0 < tabContentHeight ) {
+				preview.css( 'min-height', tabContentHeight + 'px' );
+			}
+
 			if ( 'comment-preview' === $( this ).attr( 'aria-controls' ) ) {
 
 				if ( !processing ) {
@@ -68,18 +75,6 @@
 			} else {
 				textarea.focus();
 			}
-		} );
-
-		// Set preview heigth when the textarea is visible
-		$( '.table-of-contents a[href="#add-note-or-feedback"]' ).click( function( e ) {
-			e.preventDefault();
-			tabs.parents( '.tablist' ).show();
-			setTimeout( function() {
-				textareaHeight = textarea.outerHeight( true );
-				if ( 0 < textareaHeight ) {
-					preview.css( 'min-height', textareaHeight + 'px' );
-				}
-			}, 500 );
 		} );
 	}
 
