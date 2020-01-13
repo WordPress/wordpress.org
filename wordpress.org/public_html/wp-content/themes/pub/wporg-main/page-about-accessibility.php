@@ -44,7 +44,7 @@ the_post();
 						printf(
 							/* translators: 1: Link to the Core Handbook Accessibility Standards; 2: Link to Core Trac Accessibility focus. */
 							wp_kses_post( __( 'All new and updated code released in WordPress must conform with these guidelines as per the <a href="%1$s">WordPress Accessibility Coding Standards</a>. Some current features and functionality in development may not yet fully comply, and known issues are listed in the <a href="%2$s">WordPress Trac &#8220;accessibility&#8221; focus</a>.', 'wporg' ) ),
-							'https://make.wordpress.org/core/handbook/best-practices/coding-standards/accessibility-coding-standards/',
+							'https://developer.wordpress.org/coding-standards/wordpress-coding-standards/accessibility/',
 							'https://core.trac.wordpress.org/focus/accessibility'
 						);
 					?>
@@ -116,7 +116,7 @@ the_post();
 						printf(
 							/* translators: Link to ATAG */
 							wp_kses_post( __( 'The <a href="%s">WordPress accessibility coding standards</a> require new or updated code to meet the standards of the Web Content Accessibility Guidelines (WCAG) version 2.0 at level AA. ATAG conformance is an additional goal beyond WCAG compliance.', 'wporg' ) ),
-							'https://make.wordpress.org/core/handbook/best-practices/coding-standards/accessibility-coding-standards/'
+							'https://developer.wordpress.org/coding-standards/wordpress-coding-standards/accessibility/'
 						);
 						?>
 					</p>
