@@ -149,11 +149,6 @@ header h1 {
 	margin: 0;
 	color: #324B4B;
 	text-shadow: 0 1px 0 rgba(255,255,255,.5), 0 -1px 0 rgba(0,0,0,.8);
-	word-break: break-word;
-	overflow-wrap: break-word;
-	-webkit-hyphens: auto;
-	-ms-hyphens: auto;
-	hyphens: auto;
 }
 
 .wf-leaguegothic1leaguegothic2-n4-active header h1 {
@@ -601,10 +596,28 @@ html[dir="rtl"] #share nav li {
 	font-variant: initial;
 }
 
-@media (max-width: 1168px) { #main .wrap { max-width: 960px; } }
+@media (max-width: 1168px) {
+	#main .wrap {
+		max-width: 728px;
+	}
+	#browserlist li {
+		width: 242px;
+	}
+}
 @media (max-width: 976px)  { #main .wrap { max-width: 768px; } }
-@media (max-width: 784px)  { #main .wrap { max-width: 576px; } }
-@media (max-width: 592px)  { #main .wrap { max-width: 384px; } }
+@media (max-width: 784px)  {
+	#main .wrap {
+		max-width: 484px;
+	}
+}
+@media (max-width: 592px)  {
+	#main .wrap {
+		max-width: 384px;
+	}
+	#browserlist li {
+		width: 192px;
+	}
+}
 @media (max-width: 500px) {
 	header h1 {
 		font-size: 900%;
@@ -640,6 +653,7 @@ html[dir="rtl"] #share nav li {
 		display: block;
 		float: none;
 		margin: 0 auto;
+		width: 242px;
 	}
 	header h1 {
 		font-size: 600%;
