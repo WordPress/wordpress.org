@@ -78,16 +78,6 @@ function browsehappy_get_browser_data( $browser = false ) {
 				: __( '&#8220;Microsoft Edge ranks first when put to real world page load tests. Whether you use the web to search, watch or play, this browser won&#8217;t slow you down.&#8221;', 'browsehappy' )
 			),
 		),
-		'ie' => (object) array(
-			'name' => 'Internet Explorer',
-			'long_name' => 'Microsoft Internet Explorer',
-			'wikipedia' => 'Internet_Explorer',
-			'wikidata' => 'Q1575',
-			'normalized' => 1, // just first number
-			'facebook' => 'internetexplorer',
-			'url' => 'https://support.microsoft.com/en-us/help/17621/internet-explorer-downloads',
-			'info' => __( '&#8220;Designed to help you take control of your privacy and browse with confidence. Free from&nbsp;Microsoft.&#8221;', 'browsehappy' ),
-		),
 	);
 	if ( false === $browser )
 		return $data;
