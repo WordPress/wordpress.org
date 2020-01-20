@@ -365,7 +365,7 @@ html[dir="rtl"] #browserlist li {
 }
 
 #browserlist p.info {
-	min-height: 160px;
+	min-height: 150px;
 }
 
 .ie6 #browserlist p.info {
@@ -620,7 +620,7 @@ html[dir="rtl"] #share nav li {
 		max-width: 384px;
 	}
 	#browserlist li {
-		width: 192px;
+		width: 230px;
 	}
 }
 @media (max-width: 500px) {
