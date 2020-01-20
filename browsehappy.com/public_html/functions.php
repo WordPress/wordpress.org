@@ -14,7 +14,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1, // just first number
 			'facebook' => 'googlechrome',
 			'url' => 'https://www.google.com/chrome',
-			'info' => __( '&#8220;A fast new browser from Google. Try&nbsp;it&nbsp;now!&#8221;', 'browsehappy' ),
+			'info' => __( '&#8220;Google Chrome is a fast, secure, and free web browser, built for the modern web. Give it a try on your desktop today.&#8221;', 'browsehappy' ),
 		),
 		'firefox' => (object) array(
 			'name' => 'Mozilla Firefox',
@@ -23,8 +23,8 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikidata' => 'Q698',
 			'normalized' => 1.5, // include second number if non-zero
 			'facebook' => 'Firefox',
-			'url' => 'https://www.firefox.com/',
-			'info' => __( "&#8220;Your online security is Firefox's top priority. Firefox is free, and made to help you get the most out of the&nbsp;web.&#8221;", 'browsehappy' ),
+			'url' => 'https://www.mozilla.org/firefox/',
+			'info' => __( "&#8220;Responsive engine, less memory usage and packed with features. Download for desktop now.&#8221;", 'browsehappy' ),
 		),
 		'safari' => (object) array(
 			'name' => 'Safari',
@@ -34,7 +34,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1.5, // include second number if non-zero
 			'facebook' => false,
 			'url' => 'https://www.apple.com/safari/',
-			'info' => str_replace( 'and Windows ', '', __( '&#8220;Safari for Mac and Windows from Apple, the world’s most innovative&nbsp;browser.&#8221;', 'browsehappy' ) ),
+			'info' => __( '&#8220;Safari is faster and more energy efficient than other browsers. Now you can shop even more safely and simply in Safari on your Mac.&#8221;', 'browsehappy' ),
 		),
 		'opera' => (object) array(
 			'name' => 'Opera',
@@ -44,7 +44,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1, // just first number
 			'facebook' => 'Opera',
 			'url' => 'https://www.opera.com/',
-			'info' => __( '&#8220;The fastest browser on Earth—secure, powerful and easy to use, with excellent privacy protection. And&nbsp;it&nbsp;is&nbsp;free.&#8221;', 'browsehappy' ),
+			'info' => __( '&#8220;Opera is a secure, innovative browser used by millions around the world with a built-in ad blocker, free VPN, units converter, social messengers, battery saver and much more - all for your best browsing experience.&#8221;', 'browsehappy' ),
 		),
 		'edge' => (object) array(
 			'name' => 'Microsoft Edge',
@@ -53,8 +53,8 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikidata' => 'Q19668903', // Use version of Microsoft EdgeHTML. Microsoft Edge app is Q18698690.
 			'normalized' => 1, // just first number
 			'facebook' => 'MicrosoftEdge',
-			'url' => 'https://www.microsoft.com/en-us/windows/microsoft-edge',
-			'info' => __( '&#8220;Microsoft Edge ranks first when put to real world page load tests. Whether you use the web to search, watch or play, this browser won&#8217;t slow you down.&#8221;', 'browsehappy' ),
+			'url' => 'https://www.microsoft.com/windows/microsoft-edge',
+			'info' => __( '&#8220;Microsoft Edge, a faster browser for Windows 10. Explore a quicker, safer way to browse the internet and get things done. Try it now!&#8221;', 'browsehappy' ),
 		),
 		'ie' => (object) array(
 			'name' => 'Internet Explorer',
