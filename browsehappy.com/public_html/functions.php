@@ -5,6 +5,13 @@
 
 function browsehappy_get_browser_data( $browser = false ) {
 
+	// In order to avoid non-English language translations of browser
+	// descriptions from being invalidated due to string changes, until such time
+	// as traslators submit translations, only English will immediately show the
+	// latest strings. Other languages will temporarily show the outdated (but
+	// translated at least) strings.
+	$latest_strings = ( ! class_exists( 'Browse_Happy_Locale' ) || 0 === strpos( Browse_Happy_Locale::locale(), 'en' ) );
+
 	$data = array(
 		'chrome' => (object) array(
 			'name' => 'Google Chrome',
@@ -14,7 +21,10 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1, // just first number
 			'facebook' => 'googlechrome',
 			'url' => 'https://www.google.com/chrome',
-			'info' => __( '&#8220;Get more done with the new Google Chrome. A more simple, secure, and faster web browser than ever, with Google’s smarts built-in.&#8221;', 'browsehappy' ),
+			'info' => ( $latest_strings ?
+				__( '&#8220;Get more done with the new Google Chrome. A more simple, secure, and faster web browser than ever, with Google’s smarts built-in.&#8221;', 'browsehappy' )
+				: __( '&#8220;A fast new browser from Google. Try&nbsp;it&nbsp;now!&#8221;', 'browsehappy' )
+			),
 		),
 		'firefox' => (object) array(
 			'name' => 'Mozilla Firefox',
@@ -24,7 +34,10 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1.5, // include second number if non-zero
 			'facebook' => 'Firefox',
 			'url' => 'https://www.mozilla.org/firefox/',
-			'info' => __( '&#8220;Faster page loading, less memory usage and packed with features, the new Firefox is here.&#8221;', 'browsehappy' ),
+			'info' => ( $latest_strings ?
+				 __( '&#8220;Faster page loading, less memory usage and packed with features, the new Firefox is here.&#8221;', 'browsehappy' )
+				 : __( "&#8220;Your online security is Firefox's top priority. Firefox is free, and made to help you get the most out of the&nbsp;web.&#8221;", 'browsehappy' )
+			),
 		),
 		'safari' => (object) array(
 			'name' => 'Safari',
@@ -34,7 +47,10 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1.5, // include second number if non-zero
 			'facebook' => false,
 			'url' => 'https://www.apple.com/safari/',
-			'info' => __( '&#8220;Safari is faster and more energy efficient than other browsers. You can shop safely and simply in Safari on your Mac.&#8221;', 'browsehappy' ),
+			'info' => ( $latest_strings ?
+				__( '&#8220;Safari is faster and more energy efficient than other browsers. You can shop safely and simply in Safari on your Mac.&#8221;', 'browsehappy' )
+				: str_replace( 'and Windows ', '', __( '&#8220;Safari for Mac and Windows from Apple, the world’s most innovative&nbsp;browser.&#8221;', 'browsehappy' ) )
+			),
 		),
 		'opera' => (object) array(
 			'name' => 'Opera',
@@ -44,7 +60,10 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1, // just first number
 			'facebook' => 'Opera',
 			'url' => 'https://www.opera.com/',
-			'info' => __( '&#8220;Opera is a secure, innovative browser used by millions around the world with a built-in ad blocker, free VPN, and much more - all for your best browsing experience.&#8221;', 'browsehappy' ),
+			'info' => ( $latest_strings ?
+				__( '&#8220;Opera is a secure, innovative browser used by millions around the world with a built-in ad blocker, free VPN, and much more - all for your best browsing experience.&#8221;', 'browsehappy' )
+				: __( '&#8220;The fastest browser on Earth—secure, powerful and easy to use, with excellent privacy protection. And&nbsp;it&nbsp;is&nbsp;free.&#8221;', 'browsehappy' )
+			),
 		),
 		'edge' => (object) array(
 			'name' => 'Microsoft Edge',
@@ -54,7 +73,10 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1, // just first number
 			'facebook' => 'MicrosoftEdge',
 			'url' => 'https://www.microsoft.com/windows/microsoft-edge',
-			'info' => __( '&#8220;Microsoft Edge offers world-class performance with more privacy, more productivity, and more value while you browse.!&#8221;', 'browsehappy' ),
+			'info' => ( $latest_strings ?
+				__( '&#8220;Microsoft Edge offers world-class performance with more privacy, more productivity, and more value while you browse.!&#8221;', 'browsehappy' )
+				: __( '&#8220;Microsoft Edge ranks first when put to real world page load tests. Whether you use the web to search, watch or play, this browser won&#8217;t slow you down.&#8221;', 'browsehappy' )
+			),
 		),
 		'ie' => (object) array(
 			'name' => 'Internet Explorer',
