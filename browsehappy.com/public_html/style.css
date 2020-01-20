@@ -96,7 +96,7 @@ header, #main, footer {
 
 .wrap {
 	zoom: 1;
-	max-width: 1152px;
+	max-width: 1150px;
 	margin: 0 auto;
 }
 
@@ -286,7 +286,7 @@ html[dir="rtl"] .browser-status-action {
 }
 
 #browserlist li {
-	width: 192px;
+	width: 230px;
 	float: left;
 	margin: 12px 0 0;
 }
@@ -609,15 +609,22 @@ html[dir="rtl"] #share nav li {
 		width: 242px;
 	}
 }
-@media (max-width: 976px)  { #main .wrap { max-width: 768px; } }
-@media (max-width: 784px)  {
+@media (max-width: 976px)  {
 	#main .wrap {
-		max-width: 484px;
+		max-width: 768px;
 	}
 }
-@media (max-width: 592px)  {
+@media (max-width: 784px)  {
 	#main .wrap {
-		max-width: 384px;
+		max-width: 690px;
+	}
+	#browserlist li {
+		width: 230px;
+	}
+}
+@media (max-width: 705px)  {
+	#main .wrap {
+		max-width: 460px;
 	}
 	#browserlist li {
 		width: 230px;
@@ -640,6 +647,12 @@ html[dir="rtl"] #share nav li {
 	}
 	.browser-status-action a {
 		margin: 0;
+	}
+	#main .wrap {
+		max-width: 242px;
+	}
+	#browserlist li {
+		width: 242px;
 	}
 }
 @media (max-width: 430px) {
