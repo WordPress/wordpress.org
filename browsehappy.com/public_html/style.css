@@ -365,7 +365,7 @@ html[dir="rtl"] #browserlist li {
 }
 
 #browserlist p.info {
-	min-height: 120px;
+	min-height: 160px;
 }
 
 .ie6 #browserlist p.info {
@@ -662,6 +662,9 @@ html[dir="rtl"] #share nav li {
 	}
 	header h1 {
 		font-size: 600%;
+	}
+	#browserlist p.info {
+		min-height: 120px;
 	}
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
