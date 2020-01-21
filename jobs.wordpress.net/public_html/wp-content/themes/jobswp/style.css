@@ -825,6 +825,9 @@ li > ul {
 .job-cat-item-support:before { /* Support */
 	content: '\f125';
 }
+.job-cat-item-translation:before { /* Translation */
+	content: '\f326';
+}
 
 .job-cat-item-all:before {
 	content: '\f120';
