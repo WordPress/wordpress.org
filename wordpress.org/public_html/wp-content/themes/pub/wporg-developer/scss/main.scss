@@ -2108,9 +2108,6 @@ div[class*="-table-of-contents-container"] {
 		}
 	}
 	& > ul > li {
-		&:last-child {
-			border-bottom: 1px solid rgba(0,0,0,0.05);
-		}
 		.children > li > a,
 		.sub-menu > li > a {
 			padding-left: 13px;
@@ -2156,13 +2153,12 @@ div[class*="-table-of-contents-container"] {
 	div[class*="-table-of-contents-container"] {
 		ul {
 			li {
-				border-top: 1px solid rgba(0,0,0,0.05);
-				padding: 0;
+				padding: 1px 0;
 				position: relative;
 			}
 			ul {
 				margin-left: 12px;
-				border-left: 1px solid rgba(0,0,0,0.05);
+				border-left: 2px solid #21759b;
 			}
 		}
 	}
