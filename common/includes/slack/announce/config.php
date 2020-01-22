@@ -172,12 +172,14 @@ function get_whitelist() {
 		'core-privacy' => array_merge( get_committers(), array(
 			'allendav',
 			'azaozz',
+			'carike',
 			'casiepa', // @Pascal on Slack
 			'dejliglama',
 			'desrosj',
 			'garrett-eclipse',
 			'idea15', // @Heather Burns on Slack
 			'lakenh',
+			'xkon',
 		) ),
 		'core-restapi' => array_merge( get_committers(), array(
 			'danielbachhuber',
