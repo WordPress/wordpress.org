@@ -2477,7 +2477,7 @@ div[class*="-table-of-contents-container"] ul a {
   display: block;
   width: 100%;
   font-size: 1.05em;
-  padding: 8px 40px 8px 8px;
+  padding: 8px 40px 8px 13px;
   text-decoration: none;
 }
 
@@ -2502,7 +2502,7 @@ div[class*="-table-of-contents-container"] > ul > li .sub-menu > li > a {
 
 div[class*="-table-of-contents-container"] > ul > li .children > li > ul > li > a,
 div[class*="-table-of-contents-container"] > ul > li .sub-menu > li > ul > li > a {
-  padding-left: 8px;
+  padding-left: 13px;
 }
 
 div[class*="-table-of-contents-container"] > ul > li.open > div > a:not(:focus) {

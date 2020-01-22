@@ -2089,7 +2089,7 @@ div[class*="-table-of-contents-container"] {
 			display: block;
 			width: 100%;
 			font-size: 1.05em;
-			padding: 8px 40px 8px 8px;
+			padding: 8px 40px 8px 13px;
 			text-decoration: none;
 
 			&:hover,
@@ -2114,7 +2114,7 @@ div[class*="-table-of-contents-container"] {
 		}
 		.children > li > ul > li > a,
 		.sub-menu > li > ul > li > a {
-			padding-left: 8px;
+			padding-left: 13px;
 		}
 
 		&.open > div > a {
