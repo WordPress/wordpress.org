@@ -1,5 +1,5 @@
 .callout {
-  padding: 1em 3em 1em 3.7em;
+  padding: 1.5em 3em 1.6em 3.7em;
   margin-bottom: 1.5em;
   overflow: auto;
   position: relative;
@@ -8,11 +8,14 @@
   min-width: 170px;
 }
 .callout p {
-  margin-bottom: 0.6em !important;
-  margin-top: 0.5em !important;
+  margin-bottom: 0.6em;
+  margin-top: 0.5em;
 }
-.callout p ~ p {
-  margin-top: 1em;
+.callout p:first-child {
+  margin-top: 0;
+}
+.callout p:last-child {
+  margin-bottom: 0;
 }
 .callout:before {
   content: "";
