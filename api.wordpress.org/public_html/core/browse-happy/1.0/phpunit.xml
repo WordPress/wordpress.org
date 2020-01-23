@@ -6,7 +6,7 @@
 	convertWarningsToExceptions="true"
 	>
 	<testsuites>
-		<testsuite>
+		<testsuite name="browse-happy-api">
 			<directory suffix=".php">tests/</directory>
 		</testsuite>
 	</testsuites>
