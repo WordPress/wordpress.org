@@ -6,7 +6,7 @@ include dirname( __FILE__ ) . '/../../../parse.php';
  *
  * @group browse-happy
  */
-class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
+class Tests_Browse_Happy extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * Data provider for test_browsehappy_parse_user_agent().
