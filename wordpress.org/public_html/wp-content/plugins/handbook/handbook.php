@@ -277,6 +277,8 @@ class WPorg_Handbook {
 				$post_type === "{$slug}-handbook"
 			||
 				'handbook' === $slug
+			||
+				'welcome'  === $slug
 			)
 		&&
 			! wp_get_post_parent_id( $post )
@@ -387,6 +389,9 @@ class WPorg_Handbook {
 			}
 			if ( ! $page ) {
 				$page = get_page_by_path( 'handbook', OBJECT, $this->post_type );
+			}
+			if ( ! $page ) {
+				$page = get_page_by_path( 'welcome', OBJECT, $this->post_type );
 			}
 			if ( $page ) {
 				$query->set( 'p', $page->ID );
