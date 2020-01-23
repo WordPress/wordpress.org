@@ -179,6 +179,9 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		PREG_PATTERN_ORDER
 	);
 
+	// Create associative array with tokens as keys and versions as values.
+	$tokens = array_combine( array_reverse( $result['name'] ), array_reverse( $result['version'] ) );
+
 	// Properly set platform if Android is actually being reported.
 	if ( 'Linux' === $data['platform'] && false !== strpos( $user_agent, 'Android' ) ) {
 		if ( strpos( $user_agent, 'Kindle' ) ) {
@@ -195,13 +198,13 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	elseif (
 		in_array( $data['platform'], array( 'Symbian', 'SymbOS' ) )
 	||
-		false !== ( $key = array_search( 'SymbianOS', $result['name'] ) )
+		! empty( $tokens['SymbianOS'] )
 	||
-		false !== ( $key = array_search( 'Symbian', $result['name'] ) )
+		! empty( $tokens['Symbian'] )
 	) {
 		if ( ! in_array( $data['platform'], array( 'Symbian', 'SymbOS' ) ) ) {
-			unset( $result['name'][ $key ] );
-			unset( $result['version'][ $key ] );
+			unset( $tokens['SymbianOS'] );
+			unset( $tokens['Symbian'] );
 		}
 		$data['platform'] = 'Symbian';
 	}
@@ -221,16 +224,15 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	}
 
 	// If Version/x.x.x was specified in UA string store it and ignore it
-	if ( false !== ( $key = array_search( 'Version', $result['name'] ) ) ) {
-		$version = $result['version'][ $key ];
-		unset( $result['name'][ $key ] );
-		unset( $result['version'][ $key ] );
+	if ( ! empty( $tokens['Version'] ) ) {
+		$version = $tokens['Version'];
+		unset( $tokens['Version'] );
 	}
 
 	$explicit_tokens = browsehappy_get_explicit_browser_tokens();
 
 	// No indentifiers provided
-	if ( empty( $result['name'] ) ) {
+	if ( ! $tokens ) {
 		if ( 'BlackBerry' === $mobile_device ) {
 			$data['name'] = 'BlackBerry Browser';
 		} else {
@@ -238,8 +240,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		}
 	}
 	// Explicitly identified browser (info defined above in $explicit_tokens).
-	elseif ( $found = array_intersect( array_keys( $explicit_tokens ), $result['name'] ) ) {
-		$tokens = array_combine( $result['name'], $result['version'] );
+	elseif ( $found = array_intersect( array_keys( $explicit_tokens ), array_keys( $tokens ) ) ) {
 		$token = reset( $found );
 
 		$data['name']    = $explicit_tokens[ $token ]['name'] ?? $token;
@@ -255,9 +256,9 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		}
 	}
 	// Puffin
-	elseif ( false !== ( $key = array_search( 'Puffin', $result['name'] ) ) ) {
+	elseif ( ! empty( $tokens['Puffin'] ) ) {
 		$data['name']     = 'Puffin';
-		$data['version']  = $result['version'][ $key ];
+		$data['version']  = $tokens['Puffin'];
 		$version          = '';
 		// If not an already-identified mobile platform, set it as such.
 		if ( ! $data['mobile'] ) {
@@ -266,7 +267,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		}
 	}
 	// Trident (Internet Explorer)
-	elseif ( false !== ( $key = array_search( 'Trident', $result['name'] ) ) ) {
+	elseif ( ! empty( $tokens['Trident'] ) ) {
 		// IE 8-10 more reliably report version via Trident token than MSIE token.
 		// IE 11 uses Trident token without an MSIE token.
 		// https://msdn.microsoft.com/library/hh869301(v=vs.85).aspx
@@ -277,21 +278,20 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			'6.0' => '10.0',
 			'7.0' => '11.0',
 		);
-		$ver = $result['version'][ $key ];
+		$ver = $tokens['Trident'];
 		$data['version'] = $trident_ie_mapping[ $ver ] ?? $ver; 
 	}
 	// Internet Explorer (pre v8.0)
-	elseif ( false !== ( $key = array_search( 'MSIE', $result['name'] ) ) ) {
+	elseif ( ! empty( $tokens['MSIE'] ) ) {
 		$data['name'] = 'Internet Explorer';
-		$key = 0;
-		$data['version'] = $result['version'][ $key ];
+		$data['version'] = $tokens['MSIE'];
 	}
 	// AppleWebKit-emulating browsers
-	elseif ( false !== ( $key = array_search( 'AppleWebKit', $result['name'] ) ) ) {
-		if ( false !== ( $key = array_search( 'Mobile Safari', $result['name'] ) ) ) {
-			if ( false !== ( $key2 = array_search( 'Chrome', $result['name'] ) ) ) {
+	elseif ( ! empty( $tokens['AppleWebKit'] ) ) {
+		if ( ! empty( $tokens['Mobile Safari'] ) ) {
+			if ( ! empty( $tokens['Chrome'] ) ) {
 				$data['name'] = 'Chrome';
-				$version = $result['version'][ $key2 ];
+				$version = $tokens['Chrome'];
 			} elseif ( 'Android' === $data['platform'] ) {
 				$data['name'] = 'Android Browser';
 			} elseif ( 'Fire OS' === $data['platform'] ) {
@@ -301,39 +301,38 @@ function browsehappy_parse_user_agent( $user_agent ) {
 				$data['mobile'] = true;
 
 				if ( false !== stripos( $user_agent, 'BB10' ) ) {
-					$result['version'][ $key ] = '';
+					$tokens['Mobile Safari'] = '';
 					$version = '';
 				}
 			} else {
 				$data['name'] = 'Mobile Safari';
 			}
-		// } elseif ( ( 'Android' == $data['platform'] && !($key = 0) ) || $key = array_search( 'Chrome', $result['name'] ) ) {
-		} elseif ( false !== ( $key = array_search( 'Chrome', $result['name'] ) ) ) {
+		} elseif ( ! empty( $tokens['Chrome'] ) ) {
 			$data['name'] = 'Chrome';
 			$version = '';
 		} elseif ( ! empty( $data['platform'] ) && 'PlayBook' == $data['platform'] ) {
 			$data['name'] = 'PlayBook';
-		} elseif ( false !== ( $key = array_search( 'Safari', $result['name'] ) ) ) {
+		} elseif ( ! empty( $tokens['Safari'] ) ) {
 			if ( 'Android' === $data['platform'] ) {
 				$data['name'] = 'Android Browser';
 			} elseif ( 'Symbian' === $data['platform'] ) {
 				$data['name'] = 'Nokia Browser';
-				$result['version'][ $key ] = '';
+				$tokens['Safari'] = '';
 			} else {
 				$data['name'] = 'Safari';
 			}
 		} else {
-			$key = 0;
 			$data['name'] = 'unknown';
-			$result['version'][ $key ] = '';
+			$tokens['AppleWebKit'] = '';
 			$version = '';
 		}
-		$data['version'] = $result['version'][ $key ];
+		$data['version'] = $tokens[ $data['name'] ] ?? '';
 	}
 	// Fall back to whatever is being reported.
 	else {
-		$data['name'] = $result['name'][0];
-		$data['version'] = $result['version'][0];
+		$ordered_tokens = array_reverse( $tokens );
+		$data['version'] = reset( $ordered_tokens );
+		$data['name'] = key( $ordered_tokens );
 	}
 
 	// Set the platform for Amazon-related browsers.
