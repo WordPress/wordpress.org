@@ -138,8 +138,23 @@ class WPorg_Handbook {
 		add_filter( 'o2_post_fragment',                   array( $this, 'o2_post_fragment' ) );
 		add_filter( 'comments_open',                      array( $this, 'comments_open' ), 10, 2 );
 		add_filter( 'wp_nav_menu_objects',                array( $this, 'highlight_menu_handbook_link' ) );
+		add_filter( 'display_post_states',                array( $this, 'display_post_states' ), 10, 2 );
 	}
 
+	/**
+	 * Adds 'Handbook Front Page' post state indicator for handbook landing pages.
+	 *
+	 * @param string[] $post_states An array of post display states.
+	 * @param WP_Post  $post        The current post object.
+	 * @return string[]
+	 */
+	function display_post_states( $post_states, $post ) {
+		if ( $this->post_is_landing_page( $post ) ) {
+			$post_states[] = __( 'Handbook Front Page', 'wporg' );
+		}
+		return $post_states;
+	}
+	
 	/**
 	 * Adds custom handbook-related classes to body tag.
 	 *
