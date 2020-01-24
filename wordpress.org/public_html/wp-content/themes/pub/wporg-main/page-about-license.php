@@ -53,8 +53,7 @@ the_post();
 
 					<p>
 						<?php
-						/* translators: 1: Link to Serendipity */
-						printf( wp_kses_post( __( 'There is some legal grey area regarding what is considered a derivative work, but we feel strongly that plugins and themes are derivative work and thus inherit the GPL license. If you disagree, you might want to consider a non-GPL platform such as <a href="%1$s">Serendipity</a> (BSD license) instead.', 'wporg' ) ), esc_url( 'https://docs.s9y.org/' )  );
+						printf( wp_kses_post( __( 'There is some legal grey area regarding what is considered a derivative work, but we feel strongly that plugins and themes are derivative work and thus inherit the GPL license. If you disagree, you might want to consider a non-GPL platform such as <a href="%s">Serendipity</a> (BSD license) instead.', 'wporg' ) ), esc_url( 'https://docs.s9y.org/' )  );
 						?>
 					</p>
 				</section>
