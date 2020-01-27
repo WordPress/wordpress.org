@@ -333,6 +333,12 @@ body,
 	color: inherit;
 }
 
+@media only screen and (max-width: 480px) {
+	body.responsive-show #wpadminbar {
+		top: 0;
+	}
+}
+
 @media (max-width: 876px) {
 	body.responsive-show {
 		overflow-y: visible;
@@ -350,6 +356,10 @@ body,
 	#secondary-toggle {
 		margin-left: 22px;
 		margin-right: 0px;
+	}
+
+	.responsive-show #secondary-toggle {
+		margin-top: 22px;
 	}
 
 	#secondary-toggle:before {
