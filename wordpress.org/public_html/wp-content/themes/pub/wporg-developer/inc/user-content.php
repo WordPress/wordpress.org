@@ -167,7 +167,7 @@ class DevHub_User_Submitted_Content {
 			wp_enqueue_style( 'syntaxhighlighter-core' );
 			wp_enqueue_style( 'syntaxhighlighter-theme-default' );
 
-			wp_enqueue_script( 'wporg-developer-user-notes', get_template_directory_uri() . '/js/user-notes.js', array( 'jquery', 'quicktags' ), '20181019', true );
+			wp_enqueue_script( 'wporg-developer-user-notes', get_template_directory_uri() . '/js/user-notes.js', array( 'jquery', 'quicktags' ), '20200110', true );
 			wp_enqueue_script( 'wporg-developer-user-notes-feedback', get_template_directory_uri() . '/js/user-notes-feedback.js', array( 'jquery', 'quicktags' ), '20181023', true );
 			wp_localize_script( 'wporg-developer-user-notes-feedback', 'wporg_note_feedback', array(
 				'show'             => __( 'Show Feedback', 'wporg' ),
