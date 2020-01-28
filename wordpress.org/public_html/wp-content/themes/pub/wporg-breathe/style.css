@@ -1312,7 +1312,7 @@ h2.toc-heading + h3.toc-heading:target {
   position: absolute;
   right: 0;
   cursor: pointer;
-  padding: 8px;
+  padding: 8px 4px;
   display: inline-block;
   width: auto;
   height: 100%;
@@ -1346,7 +1346,7 @@ h2.toc-heading + h3.toc-heading:target {
   text-decoration: none;
 }
 .menu-table-of-contents-container ul li.menu-item-has-children > .expandable > a {
-	padding-right: 40px;
+	padding-right: 32px;
 }
 .menu-table-of-contents-container ul a:hover,
 .menu-table-of-contents-container ul a:focus {
