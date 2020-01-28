@@ -394,7 +394,7 @@ body,
 	text-transform: uppercase;
 	letter-spacing: 1px;
 	background-color: transparent;
-	padding: 1rem 12px;
+	padding: 1rem 12px 1rem 8px;
 	margin-bottom: 0;
 	color: inherit;
 }
@@ -1294,13 +1294,13 @@ h2.toc-heading + h3.toc-heading:target {
   list-style: none;
 }
 #secondary .menu-table-of-contents-container ul li {
-  border-top: 1px solid rgba(0,0,0,0.05);
+  margin: 1px 0;
   padding: 0;
   position: relative;
 }
 #secondary .menu-table-of-contents-container ul ul {
 	margin-left: 12px;
-	border-left: 1px solid rgba(0,0,0,0.05);
+	border-left: 2px solid #21759b;
 }
 .menu-table-of-contents-container ul li .expandable {
   display: flex;
@@ -1342,8 +1342,11 @@ h2.toc-heading + h3.toc-heading:target {
 .menu-table-of-contents-container ul a {
   display: block;
   width: 100%;
-  padding: 8px 40px 8px 8px;
+  padding: 8px 8px 8px 13px;
   text-decoration: none;
+}
+.menu-table-of-contents-container ul li.menu-item-has-children > .expandable > a {
+	padding-right: 40px;
 }
 .menu-table-of-contents-container ul a:hover,
 .menu-table-of-contents-container ul a:focus {
@@ -1359,15 +1362,7 @@ h2.toc-heading + h3.toc-heading:target {
 .menu-table-of-contents-container .current-menu-item > a {
   color: #555;
   background-color: #fff;
-}
-.menu-table-of-contents-container > ul > li:last-child {
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-.menu-table-of-contents-container > ul > li .children > li > a {
-  padding-left: 13px;
-}
-.menu-table-of-contents-container > ul > li .children > li > ul > li > a {
-  padding-left: 8px;
+  font-weight: bold;
 }
 
 .menu-table-of-contents-container > ul > li.open > div > a:not(:focus) {
