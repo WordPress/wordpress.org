@@ -2473,17 +2473,22 @@ div[class*="-table-of-contents-container"] ul li.open > div > .dashicons {
   border-left: none;
 }
 
+div[class*="-table-of-contents-container"] ul li.menu-item-has-children > .expandable > a {
+  padding-right: 40px;
+}
+
 div[class*="-table-of-contents-container"] ul a {
   display: block;
   width: 100%;
   font-size: 1.05em;
-  padding: 8px 40px 8px 13px;
+  padding: 8px 8px 8px 13px;
   text-decoration: none;
 }
 
 div[class*="-table-of-contents-container"] ul a:hover, div[class*="-table-of-contents-container"] ul a:focus {
   color: #fff;
   background-color: #0073aa;
+  font-weight: bold;
 }
 
 div[class*="-table-of-contents-container"] ul a.active {
@@ -2493,16 +2498,6 @@ div[class*="-table-of-contents-container"] ul a.active {
 
 div[class*="-table-of-contents-container"] ul.default-open {
   display: block !important;
-}
-
-div[class*="-table-of-contents-container"] > ul > li .children > li > a,
-div[class*="-table-of-contents-container"] > ul > li .sub-menu > li > a {
-  padding-left: 13px;
-}
-
-div[class*="-table-of-contents-container"] > ul > li .children > li > ul > li > a,
-div[class*="-table-of-contents-container"] > ul > li .sub-menu > li > ul > li > a {
-  padding-left: 13px;
 }
 
 div[class*="-table-of-contents-container"] > ul > li.open > div > a:not(:focus) {

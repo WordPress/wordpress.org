@@ -2083,19 +2083,24 @@ div[class*="-table-of-contents-container"] {
 				border-right: 1px solid rgba(0,0,0,0.05);
 				border-left: none;
 			}
+	
+			&.menu-item-has-children > .expandable > a {
+				padding-right: 40px;
+			}
 		}
 
 		a {
 			display: block;
 			width: 100%;
 			font-size: 1.05em;
-			padding: 8px 40px 8px 13px;
+			padding: 8px 8px 8px 13px;
 			text-decoration: none;
 
 			&:hover,
 			&:focus {
 				color: #fff;
 				background-color: #0073aa;
+				font-weight: bold;
 			}
 			&.active {
 				color: #555;
@@ -2108,15 +2113,6 @@ div[class*="-table-of-contents-container"] {
 		}
 	}
 	& > ul > li {
-		.children > li > a,
-		.sub-menu > li > a {
-			padding-left: 13px;
-		}
-		.children > li > ul > li > a,
-		.sub-menu > li > ul > li > a {
-			padding-left: 13px;
-		}
-
 		&.open > div > a {
 			&:not(:focus) {
 				color: #0073aa;
