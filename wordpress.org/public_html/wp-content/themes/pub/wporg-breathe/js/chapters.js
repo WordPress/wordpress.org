@@ -1,27 +1,42 @@
 // Mobile Subnav open/close
-jQuery(document).ready(function() {
+jQuery( document ).ready( function () {
+
+	var tocContainer = jQuery( 'div[class*="-table-of-contents-container"]' ).first();
+
+	if ( 0 === tocContainer.length ) {
+		return;
+	}
 
 	// Add our expandable button
-	jQuery( '.menu-table-of-contents-container > ul > .menu-item-has-children > a' )
+	tocContainer.find( '> ul .menu-item-has-children > a' )
 		.wrap( '<div class="expandable"></div>' )
 		.after( '<button class="dashicons dashicons-arrow-down-alt2" aria-expanded="false"></button>' );
 
-	// Invisibly open all of the submenus
-	jQuery( '.menu-item-has-children > ul ul' ).addClass( 'default-open' );
+	// Invisibly hide all of the submenus
+	jQuery( '.menu-item-has-children > ul ul' ).hide();
 
 	// Open the current menu
-	jQuery( '.menu-table-of-contents-container .current-menu-item a' ).first()
+	tocContainer.find( '.current-menu-item a' ).first()
 		.addClass( 'active' )
 		.parents( '.menu-item-has-children' )
-			.toggleClass( 'open' )
+		.toggleClass( 'open' )
 		.find( '> div > .dashicons' )
-			.attr( 'aria-expanded', true );
+		.attr( 'aria-expanded', true );
 
+	// Open the current submenu
+	$secondary_menu = tocContainer.find( '.current-menu-item > ul' );
+	if ( $secondary_menu.length ) {
+		$secondary_menu.show();
+	} else {
+		tocContainer.find( '.current-menu-item' ).parents( 'ul' ).show();
+	}
 	// Or if wrapped in a div.expandable
-	jQuery( '.menu-item-has-children > div > .dashicons' ).click( function() {
+	jQuery( '.menu-item-has-children > div > .dashicons' ).click( function () {
 		var menuToggle = jQuery( this ).closest( '.menu-item-has-children' );
 
-		jQuery( this ).parent().siblings( '.children' ).slideToggle();
+		jQuery( this ).parent().siblings( '.sub-menu' ).length
+			? jQuery( this ).parent().siblings( '.sub-menu' ).slideToggle()
+			: jQuery( this ).parent().siblings( '.children' ).slideToggle()
 
 		menuToggle.toggleClass( 'open' );
 		jQuery( this ).attr( 'aria-expanded', menuToggle.hasClass( 'open' ) );

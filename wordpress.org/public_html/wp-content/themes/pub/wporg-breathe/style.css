@@ -1335,7 +1335,7 @@ h2.toc-heading + h3.toc-heading:target {
   border-left: none;
 }
 .menu-table-of-contents-container .current_page_ancestor:not(.open) .expandable .dashicons:not(:focus),
-.menu-table-of-contents-container .current_page_item .expandable .dashicons:not(:focus) {
+.menu-table-of-contents-container .current_page_item > .expandable .dashicons:not(:focus) {
 	background: #fff;
 	color: #0073aa;
 }
