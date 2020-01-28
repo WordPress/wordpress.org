@@ -2058,7 +2058,7 @@ div[class*="-table-of-contents-container"] {
 				position: absolute;
 				right: 0;
 				cursor: pointer;
-				padding: 8px;
+				padding: 8px 4px;
 				display: inline-block;
 				font-size: 20px;
 				width: auto;
@@ -2085,7 +2085,7 @@ div[class*="-table-of-contents-container"] {
 			}
 	
 			&.menu-item-has-children > .expandable > a {
-				padding-right: 40px;
+				padding-right: 30px;
 			}
 		}
 
@@ -2100,11 +2100,11 @@ div[class*="-table-of-contents-container"] {
 			&:focus {
 				color: #fff;
 				background-color: #0073aa;
-				font-weight: bold;
 			}
 			&.active {
 				color: #555;
 				background-color: #fff;
+				font-weight: bold;
 			}
 		}
 
