@@ -6,9 +6,10 @@
  */
 
 namespace WordPressdotorg\MainTheme;
+use WordPressdotorg\API\Serve_Happy\RECOMMENDED_PHP;
 
 /**
- * Add custom open-grapgh tags for page templates where the content is hard-coded.
+ * Add custom open-graph tags for page templates where the content is hard-coded.
  *
  * This is also defined here to allow it to be used on pages where the page template is not included for that page, such as the embed template.
  *
@@ -72,7 +73,7 @@ function custom_open_graph_tags( $tags = [] ) {
 
 		case 'page-about-history.php':
 			$title = esc_html__( 'The History of WordPress', 'wporg' );
-			/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
+			/* translators: %s: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
 			$desc = sprintf( esc_html__( 'WordPress currently powers more than %s%% of the web. How did it grow to become the world&#8217;s leading web publishing platform? Learn about the history of WordPress: an open source software project built by an active community of contributors who are passionate about collaboration, empowerment, and the open web.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ) );
 			break;
 
@@ -83,7 +84,7 @@ function custom_open_graph_tags( $tags = [] ) {
 
 		case 'page-about-logos.php':
 			$title = esc_html__( 'Graphics &amp; Logos', 'wporg' );
-			/* translators: Link to foundation trademark policy ; */
+			/* translators: %s: Link to foundation trademark policy; */
 			$desc = sprintf( __( 'When you need the official WordPress logo for a web site or publication, please use one of the following. Please only use logos in accordance with the <a href="%s">WordPress trademark&nbsp;policy</a>.', 'wporg' ), esc_url( 'http://wordpressfoundation.org/trademark-policy/' ) );
 			break;
 
@@ -99,7 +100,8 @@ function custom_open_graph_tags( $tags = [] ) {
 
 		case 'page-about-requirements.php':
 			$title = esc_html__( 'Hosting Requirements for WordPress', 'wporg' );
-			$desc  = esc_html__( 'Running WordPress doesn&#8217;t require a lot, but your host will still need to meet a few minimum requirements. Learn about the website hosting requirements to run WordPress, including our recommendation to support PHP 7.2+ and HTTPS. Not sure how to ask your host for these details? Use the sample email we include.', 'wporg' );
+			/* translators: %s: PHP version; */
+			$desc  = sprintf( esc_html__( 'Running WordPress doesn&#8217;t require a lot, but your host will still need to meet a few minimum requirements. Learn about the website hosting requirements to run WordPress, including our recommendation to support PHP %s+ and HTTPS. Not sure how to ask your host for these details? Use the sample email we include.', 'wporg' ), RECOMMENDED_PHP );
 			break;
 
 		case 'page-about-roadmap.php':
@@ -109,7 +111,7 @@ function custom_open_graph_tags( $tags = [] ) {
 
 		case 'page-about-security.php':
 			$title = esc_html__( 'WordPress is Secure', 'wporg' );
-			/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
+			/* translators: %s: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
 			$desc = sprintf( esc_html__( 'Why is WordPress recommended as a secure website-building solution? With a passionate open source community and an extensible, easy-to-use platform, WordPress provides flexible and secure options for all levels of users, from beginners to pros. Learn how WordPress guarantees the security of %s%% of the web.', 'wporg' ), number_format_i18n( WP_MARKET_SHARE ) );
 			break;
 
