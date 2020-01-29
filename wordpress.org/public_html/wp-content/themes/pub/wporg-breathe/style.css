@@ -349,6 +349,7 @@ body,
 		overflow-x: hidden;
 	}
 
+	#page.hfeed, /* The feed may have a table and we don't want to stop x-direction scrolling */
 	body.responsive-show #page {
 		overflow-x: visible;
 	}
