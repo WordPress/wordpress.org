@@ -1441,9 +1441,8 @@ h2.toc-heading + h3.toc-heading:target {
 }
 
 @media (max-width: 550px) {
-	.post-type-archive-handbook nav.o2-post-actions ul,
-	.single-handbook nav.o2-post-actions ul {
-	    left: 0;
+	nav.o2-post-actions ul {
+	    left: initial;
 	}
 }
 
