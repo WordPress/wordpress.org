@@ -283,6 +283,11 @@ section {
 			margin: 1rem 0 2rem;
 			padding-left: 10%;
 
+			@media screen and ( max-width: 568px ) {
+				margin-left: 1rem;
+				padding-left: 0;
+			}
+	
 			@media screen and ( max-width: 480px ) {
 				min-height: auto;
 				border-bottom: 0;
@@ -327,13 +332,14 @@ section {
 			padding: 0;
 			margin: 0 0 0 10%;
 
+			@media screen and (max-width: 568px) {
+				clear: left;
+				margin-left: 1rem;
+			}
+
 			@media screen and ( max-width: 480px ) {
 				margin-bottom: 5%;
 			}
-		}
-
-		div.bbp-reply-content {
-			margin-left: 11%;
 		}
 
 		.bbp-user-replies-created div.bbp-reply-content,
@@ -1013,6 +1019,10 @@ select {
 			border: 1px solid #eee;
 			border-bottom: none;
 			padding: 1rem 2rem 0 10%;
+
+			@media screen and (max-width: 568px) {
+				padding-left: 1rem;
+			}
 		}
 	}
 

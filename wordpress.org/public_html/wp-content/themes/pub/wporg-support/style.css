@@ -3621,6 +3621,14 @@ section {
 	padding-left: 10%;
 }
 
+@media screen and (max-width: 568px) {
+	.bbpress #bbpress-forums div.bbp-reply-author,
+	.bbpress #bbpress-forums div.bbp-topic-author {
+		margin-left: 1rem;
+		padding-left: 0;
+	}
+}
+
 @media screen and (max-width: 480px) {
 	.bbpress #bbpress-forums div.bbp-reply-author,
 	.bbpress #bbpress-forums div.bbp-topic-author {
@@ -3668,15 +3676,19 @@ section {
 	margin: 0 0 0 10%;
 }
 
+@media screen and (max-width: 568px) {
+	.bbpress #bbpress-forums div.bbp-reply-content,
+	.bbpress #bbpress-forums div.bbp-topic-content {
+		clear: left;
+		margin-left: 1rem;
+	}
+}
+
 @media screen and (max-width: 480px) {
 	.bbpress #bbpress-forums div.bbp-reply-content,
 	.bbpress #bbpress-forums div.bbp-topic-content {
 		margin-bottom: 5%;
 	}
-}
-
-.bbpress #bbpress-forums div.bbp-reply-content {
-	margin-left: 11%;
 }
 
 .bbpress #bbpress-forums .bbp-user-replies-created div.bbp-reply-content,
@@ -4312,6 +4324,12 @@ select {
 	border: 1px solid #eee;
 	border-bottom: none;
 	padding: 1rem 2rem 0 10%;
+}
+
+@media screen and (max-width: 568px) {
+	.single-topic .entry-content header {
+		padding-left: 1rem;
+	}
 }
 
 .single-topic div.bbp-breadcrumb {
