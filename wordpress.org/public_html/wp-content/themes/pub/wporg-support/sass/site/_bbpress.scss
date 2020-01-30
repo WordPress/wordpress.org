@@ -252,13 +252,14 @@ section {
 			max-height: 80px;
 		}
 
-		@media only screen and (max-width: 480px) {
-
+		@media only screen and (max-width: 1040px) {
 			div.bbp-reply-author img.avatar,
 			div.bbp-topic-author img.avatar {
 				position: relative;
-				top: 0;
-				margin-bottom: 40px;
+				margin: 6px 1rem 2rem 0;
+			}
+			div.bbp-topic-content {
+				clear: left;
 			}
 		}
 
@@ -284,6 +285,7 @@ section {
 
 			@media screen and ( max-width: 480px ) {
 				min-height: auto;
+				border-bottom: 0;
 			}
 		}
 
