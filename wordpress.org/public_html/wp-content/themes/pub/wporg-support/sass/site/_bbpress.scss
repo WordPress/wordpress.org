@@ -1093,6 +1093,15 @@ div.bbp-breadcrumb {
 --------------------------------------------------------------*/
 .bbp-single-user {
 
+	input[type="text"] {
+		padding: 3px 5px;
+		@media (max-width: 767px) {
+			&#ts {
+				margin-bottom: 6px;
+			}
+		}
+	}
+
 	.page-header {
 
 		h1 {

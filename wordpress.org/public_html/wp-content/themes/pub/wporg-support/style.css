@@ -4389,6 +4389,16 @@ div.bbp-breadcrumb p {
 /*--------------------------------------------------------------
 # User Profile
 --------------------------------------------------------------*/
+.bbp-single-user input[type="text"] {
+	padding: 3px 5px;
+}
+
+@media (max-width: 767px) {
+	.bbp-single-user input[type="text"]#ts {
+		margin-bottom: 6px;
+	}
+}
+
 .bbp-single-user .page-header h1 {
 	margin-bottom: 1rem;
 }
