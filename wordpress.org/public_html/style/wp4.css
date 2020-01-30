@@ -301,7 +301,7 @@ a img.aligncenter {
 	top: 100%;
 	-webkit-transition: left 0.3s;
 	transition: left 0.3s;
-	z-index: 100000;
+	z-index: 99998;
 }
 
 #wporg-header ul#wporg-header-menu.toggled {
@@ -2401,4 +2401,5 @@ body.wporg-responsive .col-2 {
 .notification-danger {
 	background: #f2dede;
 }
+
 /*# sourceMappingURL=wp4.css.map */

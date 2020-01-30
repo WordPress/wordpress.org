@@ -301,7 +301,7 @@ a img.aligncenter {
 	top: 100%;
 	-webkit-transition: right 0.3s;
 	transition: right 0.3s;
-	z-index: 100000;
+	z-index: 99998;
 }
 
 #wporg-header ul#wporg-header-menu.toggled {
@@ -349,9 +349,11 @@ a img.aligncenter {
 }
 
 #wporg-header ul.nav-submenu li a {
+	display: inline-block;
 	height: 24px;
 	line-height: 24px;
 	margin: 0;
+	white-space: nowrap;
 }
 
 #wporg-header ul li#download {
