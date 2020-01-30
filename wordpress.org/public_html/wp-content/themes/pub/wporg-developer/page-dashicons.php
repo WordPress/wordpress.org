@@ -381,7 +381,7 @@ get_header(); ?>
 				<h4><?php _e( 'Examples', 'wporg' ); ?></h4>
 
 				<p><?php printf(
-					__( 'In <code><a href="">register_post_type()</a></code>, set <code>menu_icon</code> in the arguments array.', 'wporg' ),
+					__( 'In <code><a href="%s">register_post_type()</a></code>, set <code>menu_icon</code> in the arguments array.', 'wporg' ),
 					'https://developer.wordpress.org/reference/functions/register_post_type/'
 				); ?></p>
 
