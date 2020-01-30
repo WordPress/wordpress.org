@@ -592,6 +592,29 @@ add_filter( 'bbp_get_topic_edit_url', 'wporg_support_fix_pending_posts_reply_url
 add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
 
 /**
+ * Prevent standalone <li> tags from breaking the theme layout.
+ *
+ * If a <li> tag is not preceded by <ul> or <ol>, prepend it with <ul>
+ * and let force_balance_tags() do the rest.
+ *
+ * @see https://meta.trac.wordpress.org/ticket/20
+ * @see https://bbpress.trac.wordpress.org/ticket/2357
+ *
+ * @param string $content Topic or reply content.
+ * @return string Filtered content.
+ */
+function wporg_support_wrap_standalone_li_tags_in_ul( $content ) {
+	if ( false !== strpos( $content, '<li>' ) ) {
+		$content = preg_replace( '#(?<!<ul>\s|<ol>\s)<li>#', '<ul><li>', $content );
+		$content = force_balance_tags( $content );
+	}
+
+	return $content;
+}
+add_filter( 'bbp_get_topic_content', 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
+add_filter( 'bbp_get_reply_content', 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
+
+/**
  * Set 'is_single' query var to true on single replies.
  *
  * @see https://meta.trac.wordpress.org/ticket/2551
