@@ -3123,12 +3123,13 @@ body, #pagebody {
 	box-shadow: none;
 	color: #32373c;
 	display: block;
-	height: 45px;
+	height: 100%;
 	padding: 0.5rem 1rem;
 	position: absolute;
 	right: 0;
 	text-shadow: none;
 	top: 0;
+	margin: 0;
 }
 
 .site-header.home .search-form .button-search:focus,
@@ -3141,6 +3142,11 @@ body, #pagebody {
 	background: transparent;
 	border: none;
 	transform: none;
+}
+
+.site-header.home .search-form .button-search i,
+.site-main .search-form .button-search i {
+	vertical-align: sub;
 }
 
 .site-header:not(.home) .search-form {

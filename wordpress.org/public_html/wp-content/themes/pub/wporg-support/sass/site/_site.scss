@@ -372,12 +372,13 @@ body, #pagebody {
 			box-shadow: none;
 			color: $color__text-input;
 			display: block;
-			height: 45px;
+			height: 100%;
 			padding: 0.5rem 1rem;
 			position: absolute;
 			right: 0;
 			text-shadow: none;
 			top: 0;
+			margin: 0;
 
 			&:focus {
 				box-shadow: 0 0 2px 1px #33b3db;
@@ -387,6 +388,10 @@ body, #pagebody {
 				background: transparent;
 				border: none;
 				transform: none;
+			}
+
+			i {
+				vertical-align: sub;
 			}
 		}
 	}
