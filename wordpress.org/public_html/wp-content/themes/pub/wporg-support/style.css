@@ -3682,10 +3682,16 @@ section {
 	margin: 0 0 0 10%;
 }
 
-@media screen and (max-width: 568px) {
+@media only screen and (max-width: 1040px) {
 	.bbpress #bbpress-forums div.bbp-reply-content,
 	.bbpress #bbpress-forums div.bbp-topic-content {
 		clear: left;
+	}
+}
+
+@media screen and (max-width: 568px) {
+	.bbpress #bbpress-forums div.bbp-reply-content,
+	.bbpress #bbpress-forums div.bbp-topic-content {
 		margin-left: 1rem;
 	}
 }
