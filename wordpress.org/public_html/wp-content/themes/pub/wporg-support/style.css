@@ -250,7 +250,7 @@ body {
 	text-align: left;
 }
 
-body:not(.trac):not(.home-page) #main {
+body:not(.trac):not(.home-page):not(.home) #main {
 	margin-top: 2rem;
 }
 
@@ -3051,6 +3051,10 @@ body, #pagebody {
 	margin: 0 auto;
 	max-width: 35.527136788rem;
 	padding: 0 2rem;
+}
+
+body.home #page .site-main {
+	padding: 5rem 0;
 }
 
 /*--------------------------------------------------------------

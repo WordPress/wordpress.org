@@ -12,7 +12,7 @@ body {
 	text-align: left;
 }
 
-body:not(.trac):not(.home-page) #main {
+body:not(.trac):not(.home-page):not(.home) #main {
 	margin-top: 2rem;
 }
 
