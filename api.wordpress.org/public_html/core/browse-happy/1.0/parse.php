@@ -363,8 +363,9 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	$data['current_version'] = get_browser_version_from_name( $data['name'] );
 	$data['upgrade']         = ( ! empty( $data['current_version'] ) && version_compare( $data['version'], $data['current_version'], '<' ) );
 
-	if ( 'Internet Explorer' === $data['name'] && version_compare( $data['version'], '11', '<' ) ) {
+	if ( 'Internet Explorer' === $data['name'] ) {
 		$data['insecure'] = true;
+		$data['upgrade']  = true;
 	} elseif ( 'Firefox' === $data['name'] && version_compare( $data['version'], '52', '<' ) ) {
 		$data['insecure'] = true;
 	} elseif ( 'Opera' === $data['name'] && version_compare( $data['version'], '12.18', '<' ) ) {

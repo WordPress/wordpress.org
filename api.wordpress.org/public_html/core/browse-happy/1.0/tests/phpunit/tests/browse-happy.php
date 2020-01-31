@@ -824,7 +824,7 @@ class Tests_Browse_Happy extends \PHPUnit\Framework\TestCase {
 	function test_insecure_browsers( $header ) {
 		$parsed = browsehappy_parse_user_agent( $header );
 
-		if ( 'Internet Explorer' === $parsed['name'] && version_compare( $parsed['version'], '11', '<' ) ) {
+		if ( 'Internet Explorer' === $parsed['name'] ) {
 			$this->assertTrue( $parsed['insecure'] );
 		} elseif ( 'Firefox' === $parsed['name'] && version_compare( $parsed['version'], '52', '<' ) ) {
 			$this->assertTrue( $parsed['insecure'] );
