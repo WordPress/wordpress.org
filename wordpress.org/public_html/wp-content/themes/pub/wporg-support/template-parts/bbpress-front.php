@@ -2,7 +2,7 @@
 /**
  * Template part for displaying bbPress topics on the front page.
  *
- * @link https://codex.wordpress.org/Template_Hierarchy
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
  *
  * @package WPBBP
  */
@@ -37,7 +37,7 @@
 					"></span>
 			<h3><?php _e( 'Documentation', 'wporg-forums' ); ?></h3>
 			<p><?php _e( 'Your first stop where you\'ll find information on everything from installing to creating plugins.', 'wporg-forums' ); ?></p>
-			<p><?php _e( '<a href="https://codex.wordpress.org/">Explore documentation</a>', 'wporg-forums' ); ?></p>
+			<p><?php _e( '<a href="https://wordpress.org/support/">Explore documentation</a>', 'wporg-forums' ); ?></p>
 		</div>
 	</div>
 	<div>

@@ -2,7 +2,7 @@
 /**
  * Template part for displaying single posts in an archive list.
  *
- * @link https://codex.wordpress.org/Template_Hierarchy
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
  *
  * @package WPBBP
  */

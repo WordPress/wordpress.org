@@ -42,7 +42,7 @@ get_header(); ?>
 					?>"></span>
 					<h3><?php _e( 'Documentation', 'wporg-forums' ); ?></h3>
 					<p><?php _e( 'Your first stop where you\'ll find information on everything from installing to creating plugins.', 'wporg-forums' ); ?></p>
-					<p><?php _e( '<a href="https://codex.wordpress.org/">Explore documentation</a>', 'wporg-forums' ); ?></p>
+					<p><?php _e( '<a href="https://wordpress.org/support/">Explore documentation</a>', 'wporg-forums' ); ?></p>
 				</div>
 			</div>
 			<div>
@@ -76,10 +76,10 @@ get_header(); ?>
 			<div>
 				<h3><?php _e( 'Helpful Links', 'wporg-forums' ); ?></h3>
 				<ul class="meta-list">
-					<li><?php _e( '<a href="https://codex.wordpress.org/New_To_WordPress_-_Where_to_Start">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://codex.wordpress.org/FAQ_Installation">Frequently Asked Questions about Installing WordPress</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://codex.wordpress.org/First_Steps_With_WordPress">First Steps with WordPress</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://codex.wordpress.org/Writing_Posts">Writing Posts</a>', 'wporg-forums' ); ?></li>
+					<li><?php _e( '<a href="https://wordpress.org/support/article/new_to_wordpress_-_where_to_start/">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ); ?></li>
+					<li><?php _e( '<a href="https://wordpress.org/support/article/faq-installation/">Frequently Asked Questions about Installing WordPress</a>', 'wporg-forums' ); ?></li>
+					<li><?php _e( '<a href="https://wordpress.org/support/article/first-steps-with-wordpress-classic/">First Steps with WordPress</a>', 'wporg-forums' ); ?></li>
+					<li><?php _e( '<a href="https://wordpress.org/support/article/writing-posts/">Writing Posts</a>', 'wporg-forums' ); ?></li>
 				</ul>
 			</div>
 		</section>
