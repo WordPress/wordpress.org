@@ -18,15 +18,15 @@ get_header(); ?>
 
 		<div class="col-6" id="forum-welcome">
 
-			<p class="intro"><?php _e( 'We&rsquo;ve got a variety of resources to help you get the most out of WordPress. Your first stop should be our <a href="https://codex.wordpress.org">documentation</a>, where you&rsquo;ll find information on everything from installing WordPress for the first time to creating your own themes&nbsp;and&nbsp;plugins.', 'wporg-forums' ); ?></p>
+			<p class="intro"><?php _e( 'We&rsquo;ve got a variety of resources to help you get the most out of WordPress. Your first stop should be our <a href="https://wordpress.org/support/">documentation</a>, where you&rsquo;ll find information on everything from installing WordPress for the first time to creating your own themes&nbsp;and&nbsp;plugins.', 'wporg-forums' ); ?></p>
 			<h3><?php _e( 'Getting Started Resources', 'wporg-forums' ); ?></h3>
 			<p><?php _e( 'If you need help getting started with WordPress, try these articles.', 'wporg-forums' ); ?></p>
 			<ul>
-				<li><?php _e( '<a href="https://codex.wordpress.org/Forum_Welcome">Welcome to the WordPress Support Forum</a>', 'wporg-forums' ); ?></li>
-				<li><?php _e( '<a href="https://codex.wordpress.org/New_To_WordPress_-_Where_to_Start">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ); ?></li>
-				<li><?php _e( '<a href="https://codex.wordpress.org/FAQ_Installation">Frequently Asked Questions about Installing WordPress</a>', 'wporg-forums' ); ?></li>
-				<li><?php _e( '<a href="https://codex.wordpress.org/First_Steps_With_WordPress">First Steps with WordPress</a>', 'wporg-forums' ); ?></li>
-				<li><?php _e( '<a href="https://codex.wordpress.org/Writing_Posts">Writing Posts</a>', 'wporg-forums' ); ?></li>
+				<li><?php _e( '<a href="https://wordpress.org/support/welcome/">Welcome to the WordPress Support Forum</a>', 'wporg-forums' ); ?></li>
+				<li><?php _e( '<a href="https://wordpress.org/support/article/new_to_wordpress_-_where_to_start/">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ); ?></li>
+				<li><?php _e( '<a href="https://wordpress.org/support/article/faq-installation/">Frequently Asked Questions about Installing WordPress</a>', 'wporg-forums' ); ?></li>
+				<li><?php _e( '<a href="https://wordpress.org/support/article/first-steps-with-wordpress/">First Steps with WordPress</a>', 'wporg-forums' ); ?></li>
+				<li><?php _e( '<a href="https://wordpress.org/support/article/writing-posts/">Writing Posts</a>', 'wporg-forums' ); ?></li>
 				<li><?php _e( '<a href="https://make.wordpress.org/support/handbook/">Support Handbook</a>', 'wporg-forums' ); ?></li>
 				<li><?php _e( '<a href="https://make.wordpress.org/support/handbook/contributing-to-the-wordpress-forums/support-forums-in-your-language/">Support Forums in Your Language</a>', 'wporg-forums' ); ?></li>
 			</ul>

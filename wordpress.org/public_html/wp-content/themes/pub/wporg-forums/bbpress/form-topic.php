@@ -41,8 +41,8 @@
 						<p><?php _e( 'When posting a new topic, follow these steps:', 'wporg-forums' ); ?></p>
 						<ul>
 							<li><?php
-								/* translators: %s: Codex URL for forum welcome */
-								printf( __( '<strong>Read the <a href="%s">Forum Welcome</a></strong> to find out how to maximize your odds of getting help!', 'wporg-forums' ), esc_url( __( 'https://codex.wordpress.org/Forum_Welcome', 'wporg-forums' ) ) );
+								/* translators: %s: Support URL for forum welcome */
+								printf( __( '<strong>Read the <a href="%s">Forum Welcome</a></strong> to find out how to maximize your odds of getting help!', 'wporg-forums' ), esc_url( __( 'https://wordpress.org/support/welcome/', 'wporg-forums' ) ) );
 							?></li>
 							<li><?php
 								/* translators: %s: URL to search */
