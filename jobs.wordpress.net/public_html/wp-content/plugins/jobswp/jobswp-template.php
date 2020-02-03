@@ -98,7 +98,7 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 		$jobscnt = sprintf( _n( '%d job', '%d jobs', $jobscnt, 'jobswp' ), $jobscnt );
 	}
 
-	$link .= " <span>($orig_jobscnt)</span> $after";
+	$link .= " <span class='posts-count'>($orig_jobscnt)</span> $after";
 	$output .= $link;
     $output .= '<div class="grid_2 omega jobs-count">';
 
