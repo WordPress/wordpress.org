@@ -5,7 +5,7 @@
 		'<div class="job-list-head grid_7 alpha"><h2 class="search-header">' .
 		sprintf( __( 'Search Results for: %s', 'jobswp' ), '<span>' . get_search_query() . '</span>' ),
 		'</h2></div>',
-		5
+		$wp_query->found_posts
 	);
 
 	get_template_part( 'content', 'list' );
