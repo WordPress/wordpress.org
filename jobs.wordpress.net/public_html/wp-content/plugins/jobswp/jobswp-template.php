@@ -46,7 +46,15 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 				// Prepend 'http://' if no protocol was specified by job poster
 				if ( 0 !== strpos( $val, 'http' ) )
 					$val = 'http://' . $val;
-				$val = sprintf( __( 'Via <a href="%s">web form</a>', 'jobswp' ), esc_url( $val ) );
+				$val = sprintf(
+					/* translators: %s: Link to job application web form. */
+					__( 'Via %s', 'jobswp' ),
+					sprintf(
+						/* translators: %s: URL to job application web form. */
+						'<a href="%s" rel="nofollow ugc noopener">' . __( 'web form', 'jobswp' ) . '</a>',
+						esc_url( $val )
+					)
+				);
 			} else {
 				$val = esc_html( $val );
 			}
