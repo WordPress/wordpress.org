@@ -860,6 +860,9 @@ li > ul {
 .job-list-head h2 span.posts-count {
 	display: none;
 }
+.search-results .job-list-head h2 span.posts-count {
+	display: initial;
+}
 .job-list-head h2 a {
 	text-decoration: none;
 	color: #000;
