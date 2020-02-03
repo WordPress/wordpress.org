@@ -857,7 +857,7 @@ li > ul {
 	font-size: 1.5em;
 	margin: 0;
 }
-.job-list-head h2 span {
+.job-list-head h2 span.posts-count {
 	display: none;
 }
 .job-list-head h2 a {
@@ -1588,7 +1588,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 		top: 4px;
 		font-size: 1em;
 	}
-	.job-list-head h2 span {
+	.job-list-head h2 span.posts-count {
 		display: inline;
 		font-size: 0.7em;
 	}
