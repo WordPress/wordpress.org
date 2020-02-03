@@ -17,6 +17,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public $valid_sso_paths = array(
 			'root'         => '/',
+			'robots'       => '/robots\.txt',
 			'checkemail'   => '/checkemail',
 			'loggedout'    => '/loggedout',
 			'lostpassword' => '/lostpassword(/(?P<user>[^/]+))?',
@@ -249,6 +250,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						} else if ( is_user_logged_in() && 'logout' == self::$matched_route ) {
 							// No redirect, ask the user if they really want to log out.
 							return;
+						} else if ( 'robots' === self::$matched_route ) {
+							// No redirect, just display robots.
 						} else if ( is_user_logged_in() ) {
 							// Otherwise, redirect to the their profile.
 							$this->_redirect_to_profile();
