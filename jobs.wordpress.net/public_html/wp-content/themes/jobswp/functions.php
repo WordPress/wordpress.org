@@ -129,6 +129,16 @@ function jobswp_scripts() {
 add_action( 'wp_enqueue_scripts', 'jobswp_scripts' );
 
 /**
+ * Outputs `noindex,follow` robots tag for search results.
+ */
+function jobswp_noindex_for_search() {
+	if ( is_search() ) {
+		wp_no_robots();
+	}
+}
+add_action( 'wp_head', 'jobswp_noindex_for_search', 9 );
+
+/**
  * Implement the Custom Header feature.
  */
 //require get_template_directory() . '/inc/custom-header.php';
