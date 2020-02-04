@@ -515,7 +515,11 @@ class Hooks {
 	 * Displays a link to the new topic form.
 	 */
 	public function new_topic_link() {
-		if ( bbp_is_single_forum() ) {
+		if (
+			bbp_is_single_forum()
+		||
+			bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'plugin', 'reviews', 'theme' ) )
+		) {
 			if ( bbp_current_user_can_access_create_topic_form() ) {
 				printf(
 					'<a class="button create-topic" href="#new-topic-0">%s</a>',
