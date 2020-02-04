@@ -363,7 +363,7 @@ function wporg_login_canonical_link() {
 
 	// If the regular expression for this route is not matching, it's the canonical.
 	if ( false === stripos( WP_WPOrg_SSO::$matched_route_regex, '(' ) ) {
-		$canonical = site_url( WP_WPOrg_SSO::$matched_route_regex );
+		$canonical = site_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
 	}
 
 	if ( $canonical ) {
