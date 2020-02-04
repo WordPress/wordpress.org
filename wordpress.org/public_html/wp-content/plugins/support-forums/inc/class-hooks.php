@@ -520,16 +520,17 @@ class Hooks {
 		||
 			bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'plugin', 'reviews', 'theme' ) )
 		) {
+			$is_reviews = 'reviews' === bbp_get_view_id();
 			if ( bbp_current_user_can_access_create_topic_form() ) {
 				printf(
 					'<a class="button create-topic" href="#new-topic-0">%s</a>',
-					__( 'Create Topic', 'wporg-forums' )
+					$is_reviews ? __( 'Create Review', 'wporg-forums' ) : __( 'Create Topic', 'wporg-forums' )
 				);
 			} elseif ( ! bbp_is_forum_closed() && ! is_user_logged_in() ) {
 				printf(
 					'<a class="button create-topic login" href="%s">%s</a>',
 					wp_login_url(),
-					__( 'Log in to Create a Topic', 'wporg-forums' )
+					$is_reviews ? __( 'Log in to Create a Review', 'wporg-forums' ) : __( 'Log in to Create a Topic', 'wporg-forums' )
 				);
 			}
 
