@@ -32,6 +32,12 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		static $matched_route = false;
 
 		/**
+		 * Holds the route regex hit in `valid_sso_paths`
+		 * @var bool|string
+		 */
+		static $matched_route_regex = false;
+
+		/**
 		 * Holds any matched route params.
 		 * @var array
 		 */
@@ -210,11 +216,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// If on the SSO host
 				if ( ! preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// ... but not on its login screen.
-					self::$matched_route = false;
+					self::$matched_route        = false;
+					self::$matched_route_regex  = false;
 					self::$matched_route_params = array();
 					foreach ( $this->valid_sso_paths as $route => $regex ) {
 						if ( preg_match( '!^' . $regex . '(?:[/?]{1,2}.*)?$!', $_SERVER['REQUEST_URI'], $matches ) ) {
-							self::$matched_route = $route;
+							self::$matched_route        = $route;
+							self::$matched_route_regex  = $regex;
 							self::$matched_route_params = $matches;
 							break;
 						}

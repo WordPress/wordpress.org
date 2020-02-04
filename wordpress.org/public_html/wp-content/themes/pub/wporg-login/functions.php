@@ -354,3 +354,21 @@ function wporg_login_purge_pending_registrations() {
 	) );
 }
 add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_registrations' );
+
+/**
+ * Add a canonical tag to the login screens.
+ */
+function wporg_login_canonical_link() {
+	$canonical = false;
+
+	// If the regular expression for this route is not matching, it's the canonical.
+	if ( false === stripos( WP_WPOrg_SSO::$matched_route_regex, '(' ) ) {
+		$canonical = site_url( WP_WPOrg_SSO::$matched_route_regex );
+	}
+
+	if ( $canonical ) {
+		printf( '<link rel="canonical" href="%s" />', esc_url( $canonical ) );
+	}
+}
+add_action( 'login_head', 'wporg_login_canonical_link' );
+add_action( 'wp_head', 'wporg_login_canonical_link' );
