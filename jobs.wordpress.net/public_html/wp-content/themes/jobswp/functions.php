@@ -129,14 +129,24 @@ function jobswp_scripts() {
 add_action( 'wp_enqueue_scripts', 'jobswp_scripts' );
 
 /**
- * Outputs `noindex,follow` robots tag for search results.
+ * Outputs `noindex,follow` robots tag for appropriate pages.
+ * 
+ * Currently output for:
+ * - empty job category archives
+ * - search results
  */
-function jobswp_noindex_for_search() {
-	if ( is_search() ) {
+function jobswp_noindex() {
+	global $wp_query;
+
+	if (
+		is_search()
+	||
+		( is_tax( 'job_category' ) && 0 === $wp_query->found_posts )
+	) {
 		wp_no_robots();
 	}
 }
-add_action( 'wp_head', 'jobswp_noindex_for_search', 9 );
+add_action( 'wp_head', 'jobswp_noindex', 9 );
 
 /**
  * Implement the Custom Header feature.
