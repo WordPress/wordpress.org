@@ -22,109 +22,116 @@ class Template {
 	 * @static
 	 */
 	public static function json_ld_schema() {
+		$schema = false;
+
 		// Schema for the front page.
-		if ( is_front_page() ) :
-			echo PHP_EOL;
-			?>
-<script type="application/ld+json">
-	{
-		"@context": "http://schema.org",
-		"@type": "WebSite",
-		"name": <?php echo wp_json_encode( __( 'WordPress Plugins', 'wporg-plugins' ) ); ?>,
-		"url": <?php echo wp_json_encode( home_url( '/' ) ); ?>,
-		"potentialAction": [
-			{
-				"@type": "SearchAction",
-				"target": <?php echo wp_json_encode( home_url( '?s={search_term_string}' ) ); ?>,
-				"query-input": "required name=search_term_string"
-			}
-		]
-	}
-</script>
-			<?php
-		endif;
+		if ( is_front_page() ) {
+			$schema = [
+				"@context" => "http://schema.org",
+				"@type"    => "WebSite",
+				"name"     => __( 'WordPress Plugins', 'wporg-plugins' ),
+				"url"      => home_url( '/' ),
+				"potentialAction" => [
+					[
+						"@type"       => "SearchAction",
+						"target"      => home_url( '?s={search_term_string}' ),
+						"query-input" => "required name=search_term_string"
+					]
+				]
+			];
 
 		// Schema for plugin pages.
-		if ( is_singular( 'plugin' ) && 'publish' === get_post_status( get_queried_object_id() ) ) {
-			self::plugin_json_jd_schema( get_queried_object() );
+		} elseif ( is_singular( 'plugin' ) && 'publish' === get_post_status( get_queried_object_id() ) ) {
+			$schema = self::plugin_json_jd_schema( get_queried_object() );
+		}
+
+		// Print the schema.
+		if ( $schema ) {
+			echo PHP_EOL, '<script type="application/ld+json">', PHP_EOL;
+			// Output URLs without escaping the slashes, and print it human readable.
+			echo wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+			echo PHP_EOL, '</script>', PHP_EOL;
 		}
 	}
 
 	/**
-	 * Prints JSON LD schema for a specific plugin.
+	 * Fetches JSON LD schema for a specific plugin.
 	 *
 	 * @static
 	 *
 	 * @param \WP_Post $plugin Plugin to output JSON LD Schema for.
+	 * @return array Schema object.
 	 */
 	protected static function plugin_json_jd_schema( $plugin ) {
 		$rating      = get_post_meta( $plugin->ID, 'rating', true ) ?: 0;
 		$ratings     = get_post_meta( $plugin->ID, 'ratings', true ) ?: [];
 		$num_ratings = array_sum( $ratings );
 
-		echo PHP_EOL;
-		?>
-<script type="application/ld+json">
-	[
-		{
-			"@context": "http://schema.org",
-			"@type": "BreadcrumbList",
-			"itemListElement": [
-				{
-					"@type": "ListItem",
-					"position": 1,
-					"item": {
-						"@id": "https://wordpress.org/",
-						"name": "WordPress"
-					}
-				},
-				{
-					"@type": "ListItem",
-					"position": 2,
-					"item": {
-						"@id": <?php echo wp_json_encode( home_url( '/' ) ); ?>,
-						"name": <?php echo wp_json_encode( __( 'WordPress Plugins', 'wporg-plugins' ) ) . PHP_EOL; ?>
-					}
-				}
+		$schema = [];
+
+		// Add the BreadcrumbList node.
+		$breadcrumb_list = [
+			"@context" => "http://schema.org",
+			"@type"    => "BreadcrumbList",
+			"itemListElement" => [
+				[
+					"@type"    => "ListItem",
+					"position" => 1,
+					"item"     => [
+						"@id"  => "https://wordpress.org/",
+						"name" => "WordPress"
+					]
+				],
+				[
+					"@type"    => "ListItem",
+					"position" => 2,
+					"item"     => [
+						"@id"  => home_url( '/' ),
+						"name" => __( 'WordPress Plugins', 'wporg-plugins' ),
+					]
+				]
 			]
-		},
-		{
-			"@context": "http://schema.org",
-			"@type": "SoftwareApplication",
-			"applicationCategory": "http://schema.org/OtherApplication",
-			"name": <?php echo wp_json_encode( get_the_title( $plugin ) ); ?>,
-			"description": <?php echo wp_json_encode( get_the_excerpt( $plugin ) ); ?>,
-			"softwareVersion": <?php echo wp_json_encode( $plugin->version ); ?>,
-			"fileFormat": "application/zip",
-			"downloadUrl": <?php echo wp_json_encode( self::download_link( $plugin ) ); ?>,
-			"dateModified": <?php echo wp_json_encode( get_post_modified_time( 'c', false, $plugin ) ); ?>,
-			"aggregateRating": {
-				"@type": "AggregateRating",
-				"worstRating": 0,
-				"bestRating": 5,
-				"ratingValue": <?php echo wp_json_encode( $rating ); ?>,
-				"ratingCount": <?php echo wp_json_encode( $num_ratings ); ?>,
-				"reviewCount": <?php echo wp_json_encode( $num_ratings ) . PHP_EOL; ?>
-			},
-			"interactionStatistic": {
-				"@type": "InteractionCounter",
-				"interactionType": "http://schema.org/DownloadAction",
-				"userInteractionCount": <?php echo wp_json_encode( self::get_downloads_count( $plugin ) ) . PHP_EOL; ?>
-			},
-			"offers": {
-				"@type": "Offer",
-				"price": "0.00",
-				"priceCurrency": "USD",
-				"seller": {
-					"@type": "Organization",
-					"name": "WordPress.org",
-					"url": "https://wordpress.org"
-				}
-			}
-		}
-	]
-</script>
-		<?php
+		];
+		$schema[] = $breadcrumb_list;
+
+		// Add the Plugin 'SoftwareApplication' node.
+		$software_application = [
+			"@context"            => "http://schema.org",
+			"@type"               => "SoftwareApplication",
+			"applicationCategory" => "http://schema.org/OtherApplication",
+			"name"                => get_the_title( $plugin ),
+			"description"         => get_the_excerpt( $plugin ),
+			"softwareVersion"     => $plugin->version,
+			"fileFormat"          => "application/zip",
+			"downloadUrl"         => self::download_link( $plugin ),
+			"dateModified"        => get_post_modified_time( 'c', false, $plugin ),
+			"aggregateRating"     => [
+				"@type"       => "AggregateRating",
+				"worstRating" => 0,
+				"bestRating"  => 5,
+				"ratingValue" => $rating,
+				"ratingCount" => $num_ratings,
+				"reviewCount" => $num_ratings,
+			],
+			"interactionStatistic" => [
+				"@type"                => "InteractionCounter",
+				"interactionType"      => "http://schema.org/DownloadAction",
+				"userInteractionCount" => self::get_downloads_count( $plugin ),
+			],
+			"offers" => [
+				"@type"         => "Offer",
+				"price"         => "0.00",
+				"priceCurrency" => "USD",
+				"seller"        => [
+					"@type" => "Organization",
+					"name"  => "WordPress.org",
+					"url"   => "https://wordpress.org"
+				]
+			]
+		];
+		$schema[] = $software_application;
+
+		return $schema;
 	}
 
 	/**
