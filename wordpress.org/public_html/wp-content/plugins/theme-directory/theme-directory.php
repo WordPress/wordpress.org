@@ -1083,6 +1083,11 @@ function wporg_themes_add_meta_tags() {
 		echo "<meta name='twitter:site' content='@WordPress'>\n";
 		echo "<meta name='twitter:image' content='" . esc_attr( $theme->screenshot_url . '?w=560&amp;strip=all' ) . "' />\n";
 	}
+
+	// If it's outdated, noindex the theme.
+	if ( time() - strtotime( $theme->last_updated ) > 2 * YEAR_IN_SECONDS ) {
+		echo "<meta name='robots' content='noindex,follow' />\n";
+	}
 }
 add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
 
