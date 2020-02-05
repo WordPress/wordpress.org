@@ -75,6 +75,7 @@ class Template {
 			"@type"               => "SoftwareApplication",
 			"applicationCategory" => "http://schema.org/OtherApplication",
 			"name"                => get_the_title( $plugin ),
+			"url"                 => get_permalink( $plugin ),
 			"description"         => get_the_excerpt( $plugin ),
 			"softwareVersion"     => $plugin->version,
 			"fileFormat"          => "application/zip",
