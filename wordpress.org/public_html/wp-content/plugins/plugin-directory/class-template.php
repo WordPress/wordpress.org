@@ -107,7 +107,7 @@ class Template {
 			"dateModified"        => get_post_modified_time( 'c', false, $plugin ),
 			"aggregateRating"     => [
 				"@type"       => "AggregateRating",
-				"worstRating" => 0,
+				"worstRating" => 1,
 				"bestRating"  => 5,
 				"ratingValue" => $rating,
 				"ratingCount" => $num_ratings,
@@ -129,6 +129,11 @@ class Template {
 				]
 			]
 		];
+
+		if ( ! $software_application['aggregateRating']['ratingCount'] ) {
+			unset( $software_application['aggregateRating'] );
+		}
+
 		$schema[] = $software_application;
 
 		return $schema;
