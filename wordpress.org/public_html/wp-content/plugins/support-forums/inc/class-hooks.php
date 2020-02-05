@@ -728,7 +728,7 @@ class Hooks {
 			if ( $site_url ) {
 				// Display site URL for logged-in users only.
 				if ( is_user_logged_in() ) {
-					printf( '<p class="wporg-bbp-topic-site-url">%1$s <a href="%2$s" rel="nofollow">%2$s</a></p>',
+					printf( '<p class="wporg-bbp-topic-site-url">%1$s <a href="%2$s" rel="nofollow ugc">%2$s</a></p>',
 						__( 'The page I need help with:', 'wporg-forums' ),
 						esc_url( $site_url )
 					);

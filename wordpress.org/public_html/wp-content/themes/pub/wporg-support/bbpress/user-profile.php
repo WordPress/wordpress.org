@@ -106,7 +106,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 	
 			<p class="bbp-user-website"><?php
 			/* translators: %s: link to user's website */ 
-			printf( esc_html__( 'Website: %s', 'wporg-forums' ), sprintf( '<a href="%s" rel="nofollow">%s</a>', esc_url( $website ), esc_html( $website ) ) );
+			printf( esc_html__( 'Website: %s', 'wporg-forums' ), sprintf( '<a href="%s" rel="nofollow ugc">%s</a>', esc_url( $website ), esc_html( $website ) ) );
 			?></p>
 	
 		<?php endif; ?>
