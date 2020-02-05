@@ -63,6 +63,7 @@ function get_whitelist() {
 			'myselfkhayer',
 		) ),
 		'core' => array_merge( get_committers(), array(
+			'amykamala', // @amy kamala on Slack
 			'antpb',
 			'audrasjb',
 			'chanthaboune',
