@@ -69,31 +69,6 @@ class Template {
 
 		$schema = [];
 
-		// Add the BreadcrumbList node.
-		$breadcrumb_list = [
-			"@context" => "http://schema.org",
-			"@type"    => "BreadcrumbList",
-			"itemListElement" => [
-				[
-					"@type"    => "ListItem",
-					"position" => 1,
-					"item"     => [
-						"@id"  => "https://wordpress.org/",
-						"name" => "WordPress"
-					]
-				],
-				[
-					"@type"    => "ListItem",
-					"position" => 2,
-					"item"     => [
-						"@id"  => home_url( '/' ),
-						"name" => __( 'WordPress Plugins', 'wporg-plugins' ),
-					]
-				]
-			]
-		];
-		$schema[] = $breadcrumb_list;
-
 		// Add the Plugin 'SoftwareApplication' node.
 		$software_application = [
 			"@context"            => "http://schema.org",
