@@ -45,7 +45,7 @@ class Plugin_Directory {
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
-		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
+		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'output_meta' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
@@ -703,16 +703,23 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Filter content to make links rel=nofollow on plugin pages only
+	 * Filter content to make links rel="nofollow ugc" on plugin pages only
 	 *
 	 * @param string $content    The content.
 	 * @return string
 	 */
-	public function filter_rel_nofollow( $content ) {
+	public function filter_rel_nofollow_ugc( $content ) {
 		if ( get_post_type() == 'plugin' ) {
-			// regex copied from wp_rel_nofollow(). Not calling that function because it messes with slashes.
-			$content = preg_replace_callback( '|<a (.+?)>|i', 'wp_rel_nofollow_callback', $content );
+			// regex copied from wp_rel_ugc(). Not calling that function because it messes with slashes.
+			$content = preg_replace_callback(
+				'|<a (.+?)>|i',
+				function( $matches ) {
+						return wp_rel_callback( $matches, 'nofollow ugc' );
+				},
+				$content
+			);
 		}
+
 		return $content;
 	}
 

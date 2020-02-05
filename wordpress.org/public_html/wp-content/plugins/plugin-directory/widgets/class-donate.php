@@ -36,7 +36,7 @@ class Donate extends \WP_Widget {
 
 			<p class="aside"><?php _e( 'Would you like to support the advancement of this plugin?', 'wporg-plugins' ); ?></p>
 			<p>
-				<a class="button button-secondary" href="<?php echo esc_url( $donate_link ); ?>" rel="nofollow">
+				<a class="button button-secondary" href="<?php echo esc_url( $donate_link ); ?>" rel="nofollow ugc">
 					<?php _e( 'Donate to this plugin', 'wporg-plugins' ); ?>
 				</a>
 			</p>
