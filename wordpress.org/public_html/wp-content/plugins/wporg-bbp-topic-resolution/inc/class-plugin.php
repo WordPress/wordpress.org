@@ -357,6 +357,7 @@ class Plugin {
 				'meta_compare'  => '=',
 				'orderby'       => '',
 				'show_stickies' => false,
+				'post_status'   => 'publish',
 			) )
 		);
 	}
