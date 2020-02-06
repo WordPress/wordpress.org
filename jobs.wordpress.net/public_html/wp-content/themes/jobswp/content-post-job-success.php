@@ -9,7 +9,7 @@
 		'/remove-a-job/'
 	); ?></p>
 
-	<p style="font-weight:bold;"><?php printf( __( 'Your job token is: %s', 'jobswp' ), $_POST['job_token'] ); ?></p>
+	<p class="job-token"><?php printf( __( 'Your job token is: %s', 'jobswp' ), esc_html( $_POST['job_token'] ) ); ?></p>
 
 	<p><?php printf( __( 'If you would like to modify your posting, or you are having problems removing the job using the job token, please contact us using our <a href="%s">feedback form</a>. Be sure to specify the email address you supplied in your job posting.',
 	'jobswp' ),

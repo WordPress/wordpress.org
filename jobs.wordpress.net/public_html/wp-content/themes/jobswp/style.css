@@ -1142,6 +1142,10 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	color: #4F8A10;
 	border-color: #4F8A10;
 }
+.notice-success .job-token {
+	font-size: 20px;
+	font-weight: bold;
+}
 .notice-info {
 	background-color: #FEEFB3;
 	color: #9F6000;
