@@ -66,14 +66,25 @@ class Template {
 		$rating      = get_post_meta( $plugin->ID, 'rating', true ) ?: 0;
 		$ratings     = get_post_meta( $plugin->ID, 'ratings', true ) ?: [];
 		$num_ratings = array_sum( $ratings );
+		$banners     = self::get_plugin_banner( $plugin );
+		$icons       = self::get_plugin_icon( $plugin );
+
+		// Ignore the icons if we're relying upon the geopattern default.
+		if ( $icons['generated'] ) {
+			$icons = [];
+		}
 
 		$schema = [];
 
 		// Add the Plugin 'SoftwareApplication' node.
 		$software_application = [
 			"@context"            => "http://schema.org",
-			"@type"               => "SoftwareApplication",
-			"applicationCategory" => "http://schema.org/OtherApplication",
+			"@type"               => [
+				"SoftwareApplication",
+				"Product"
+			],
+			"applicationCategory" => "Plugin",
+			"operatingSystem"     => "WordPress",
 			"name"                => get_the_title( $plugin ),
 			"url"                 => get_permalink( $plugin ),
 			"description"         => get_the_excerpt( $plugin ),
@@ -94,8 +105,15 @@ class Template {
 				"interactionType"      => "http://schema.org/DownloadAction",
 				"userInteractionCount" => self::get_downloads_count( $plugin ),
 			],
+			"image" => array_values( array_filter( [
+				// RTL 2x Banner or RTL 1x Banner, otherwise 2x Banner or 1x Banner
+				( $banners['banner_2x_rtl'] ?: $banners['banner_rtl'] ) ?: ( $banners['banner_2x'] ?: $banners['banner'] ),
+				// Plugin Icon, SVG is priority, otherwise 2x or 1x.
+				( $icons['svg'] ?: $icons['icon_2x'] ) ?: $icons['icon'],
+			] ) ),
 			"offers" => [
 				"@type"         => "Offer",
+				"url"           => get_permalink( $plugin ),
 				"price"         => "0.00",
 				"priceCurrency" => "USD",
 				"seller"        => [
@@ -106,8 +124,14 @@ class Template {
 			]
 		];
 
+		// Remove the aggregateRating node if there's no reviews.
 		if ( ! $software_application['aggregateRating']['ratingCount'] ) {
 			unset( $software_application['aggregateRating'] );
+		}
+
+		// Remove the images property if no images exist.
+		if ( ! $software_application['image'] ) {
+			unset( $software_application['image'] );
 		}
 
 		$schema[] = $software_application;
