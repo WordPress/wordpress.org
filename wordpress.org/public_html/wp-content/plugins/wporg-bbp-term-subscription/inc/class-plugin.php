@@ -391,6 +391,12 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		if ( empty( $user_id ) ) {
 			return;
 		}
+
+		// Don't display the subscriptions unless it's the current user, or they can edit that user.
+		if ( ! bbp_is_user_home() && ! current_user_can( 'edit_user', bbp_get_displayed_user_id() ) ) {
+			return;
+		}
+
 		$terms = self::get_user_taxonomy_subscriptions( $user_id, $this->taxonomy );
 		?>
 
