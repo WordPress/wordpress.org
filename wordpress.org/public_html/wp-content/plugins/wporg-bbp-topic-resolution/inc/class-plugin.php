@@ -351,12 +351,20 @@ class Plugin {
 			'support-forum-no',
 			__( 'Unresolved topics', 'wporg-forums' ),
 			apply_filters( 'wporg_bbp_topic_resolution_view_unresolved', array(
+				// Note: Do not merge into the below meta_query, this needs to use the `meta_key` property.
 				'meta_key'      => 'topic_resolved',
 				'meta_type'     => 'CHAR',
 				'meta_value'    => 'no',
 				'meta_compare'  => '=',
+				// Only query for posts that haven't been auto-closed after 6mths from last reply.
+				'meta_query'    => [
+					'key'       => '_bbp_last_active_time',
+					'compare'   => '>',
+					'value'     => gmdate( 'Y-m-d H:i:s', time() - 6*MONTH_IN_SECONDS ),
+				],
 				'orderby'       => '',
 				'show_stickies' => false,
+				// Only query for topics that are not closed
 				'post_status'   => 'publish',
 			) )
 		);
