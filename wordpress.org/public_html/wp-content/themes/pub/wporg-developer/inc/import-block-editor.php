@@ -8,7 +8,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		parent::do_init(
 			'blocks',
 			'block-editor',
-			'https://raw.githubusercontent.com/WordPress/gutenberg/master/docs/manifest-devhub.json'
+			'https://raw.githubusercontent.com/WordPress/gutenberg/master/docs/manifest.json'
 		);
 
 		add_filter( 'template_redirect',               array( $this, 'redirects' ), 1 );
