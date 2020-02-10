@@ -782,6 +782,7 @@ class Plugin_Directory {
 				}
 				break;
 
+			case 'block':
 			case 'new':
 				$wp_query->query_vars['orderby'] = 'post_date';
 				break;
