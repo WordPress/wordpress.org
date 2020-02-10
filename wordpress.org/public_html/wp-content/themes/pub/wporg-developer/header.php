@@ -13,7 +13,7 @@ require WPORGPATH . 'header.php';
 ?>
 
 <header id="masthead" class="site-header<?php if ( is_front_page() ) { echo ' home'; } ?>" role="banner">
-	<?php if ( get_query_var( 'is_handbook' ) ) : ?>
+	<?php if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() ) : ?>
 	<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu', 'wporg' ); ?></strong></a>
 	<?php endif; ?>
 	<div class="site-branding">
