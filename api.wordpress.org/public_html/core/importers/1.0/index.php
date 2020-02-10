@@ -5,7 +5,7 @@ if ( isset( $_REQUEST['version'] ) ) { // Introduced in WordPress 4.6.
 	$version = str_replace( '-src', '', $_REQUEST['version'] );
 }
 
-if ( version_compare( $version, '5.3-beta', '>=' ) ) {
+if ( version_compare( $version, '5.4-beta', '>=' ) ) {
 	$popular_importers = wporg_api_get_popular_importers_46();
 	// Don't advertise the Blogroll importer - See https://meta.trac.wordpress.org/ticket/4706
 	unset( $popular_importers['opml'] );
