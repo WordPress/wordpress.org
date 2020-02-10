@@ -2054,6 +2054,16 @@ input {
   border-bottom: 0;
 }
 
+@media screen and (max-width: 500px) {
+  .site-title a {
+    font-size: 17px;
+    font-size: 4.5vw;
+    vertical-align: middle;
+    vertical-align: -moz-middle-with-baseline;
+    vertical-align: -webkit-baseline-middle;
+  }
+}
+
 @media screen and (max-width: 769px) {
   .site-title {
     margin-left: 10px;
@@ -2268,6 +2278,10 @@ aside[id^="nav_menu"] .widget-title {
 .single-handbook .site-main p, .single-handbook .site-main ol, .single-handbook .site-main ul {
   font-size: 1.05em;
   color: #555;
+}
+
+.single-handbook .site-title {
+  margin-left: 0;
 }
 
 .single-handbook .content-area h1 {

@@ -1673,6 +1673,14 @@
 		font-weight: 300;
 		line-height: 1;
 		border-bottom: 0;
+
+		@media screen and (max-width: 500px) {
+			font-size: 17px;
+			font-size: 4.5vw;
+			vertical-align: middle;
+			vertical-align: -moz-middle-with-baseline;
+			vertical-align: -webkit-baseline-middle;
+		}
 	}
 
 	@media screen and (max-width: 769px) {
@@ -1890,6 +1898,10 @@ aside[id^="nav_menu"] .widget-title {
 			font-size: 1.05em;
 			color: #555;
 		}
+	}
+
+	.site-title {
+		margin-left: 0;
 	}
 
 	.content-area h1 {
