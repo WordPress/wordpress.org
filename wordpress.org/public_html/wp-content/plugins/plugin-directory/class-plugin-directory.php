@@ -1290,7 +1290,12 @@ class Plugin_Directory {
 		}
 
 		// Empty search query.
-		if ( 'search' === get_query_var( 'name' ) || isset( $_GET['s'] ) && ! get_query_var( 's' ) ) {
+		// This may occur due to WordPress's 1600 character search limit.
+		if (
+				'search' === get_query_var( 'name' ) ||
+				( isset( $_GET['s'] ) && ! get_query_var( 's' ) ) ||
+				( is_search() && 0 === strlen( get_query_var( 's' ) ) )
+		) {
 			wp_safe_redirect( site_url( '/' ), 301 );
 			die();
 		}
