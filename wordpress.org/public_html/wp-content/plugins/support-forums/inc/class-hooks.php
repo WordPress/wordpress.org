@@ -17,6 +17,7 @@ class Hooks {
 		add_filter( 'redirect_canonical',              array( $this, 'disable_redirect_guess_404_permalink' ) );
 		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
+		add_action( 'template_redirect',               array( $this, 'redirect_legacy_user_structure' ) );
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 
@@ -257,6 +258,19 @@ class Hooks {
 		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
 			wp_redirect( home_url( '/update-php/' ), 301 );
 			exit;
+		}
+	}
+
+	/**
+	 * Redirect /users/$id to their new /users/$slug permastructure.
+	 */
+	public function redirect_legacy_user_structure() {
+		if ( is_404() && get_query_var( 'bbp_user' ) && is_numeric( get_query_var( 'bbp_user' ) ) ) {
+			$user = get_user_by( 'id', (int) get_query_var( 'bbp_user' ) );
+			if ( $user ) {
+				wp_redirect( home_url( '/users/' . $user->user_nicename . '/' ), 301 );
+				exit;
+			}
 		}
 	}
 
