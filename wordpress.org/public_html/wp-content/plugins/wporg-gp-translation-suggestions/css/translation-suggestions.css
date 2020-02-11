@@ -55,6 +55,7 @@
 	flex: 1;
 	color: #333;
 	white-space: pre-wrap;
+	word-break: break-word;
 }
 
 .translation-suggestion__translation-raw {
