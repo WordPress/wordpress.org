@@ -63,8 +63,14 @@ class Template {
 	 * @return array Schema object.
 	 */
 	protected static function plugin_json_jd_schema( $plugin ) {
-		$rating      = get_post_meta( $plugin->ID, 'rating', true ) ?: 0;
-		$ratings     = get_post_meta( $plugin->ID, 'ratings', true ) ?: [];
+		if ( class_exists( '\WPORG_Ratings' ) ) {
+			$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $plugin->post_name ) ?: 0;
+			$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $plugin->post_name ) ?: [];
+		} else {
+			$rating  = get_post_meta( $plugin->ID, 'rating', true ) ?: 0;
+			$ratings = get_post_meta( $plugin->ID, 'ratings', true ) ?: [];
+		}
+
 		$num_ratings = array_sum( $ratings );
 		$banners     = self::get_plugin_banner( $plugin );
 		$icons       = self::get_plugin_icon( $plugin );
