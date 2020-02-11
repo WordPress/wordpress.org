@@ -78,6 +78,10 @@ class Performance_Optimizations {
 	 * @return array The filtered endpoints.
 	 */
 	public function disable_rest_api_users_endpoint( $endpoints ) {
+		if ( ! isset( $endpoints['/wp/v2/users'] ) ) {
+			return $endpoints;
+		}
+
 		foreach ( $endpoints['/wp/v2/users'] as &$handler ) {
 			if ( isset( $handler['methods'] ) && 'GET' === $handler['methods'] ) {
 				$handler['permission_callback'] = function() {
@@ -466,7 +470,7 @@ class Performance_Optimizations {
 
 	/**
 	 * Block forum subscriptions.
-	 * 
+	 *
 	 * No user ever actually intends to subscribe to an entire forum, so lets just never do that.
 	 */
 	function bbp_get_subscribers( $user_ids, $object_id, $type ) {
