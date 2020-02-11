@@ -688,7 +688,7 @@ class Hooks {
 	}
 
 	/**
-	 * Limits No Replies view to 21 days by default and hides resolved topics.
+	 * Limits No Replies view to 21 days by default and hides closed/resolved topics.
 	 *
 	 * @param array $args Array of query args for the view.
 	 * @return array
@@ -712,6 +712,9 @@ class Hooks {
 			'value'   => 'no',
 			'compare' => '='
 		) );
+
+		// Exclude closed/hidden/spam/etc topics.
+		$args['post_status'] = 'publish';
 
 		return $args;
 	}
