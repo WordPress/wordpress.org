@@ -202,7 +202,9 @@ class Plugin {
 		gp_enqueue_script( 'admin-bar' );
 		gp_enqueue_style( 'admin-bar' );
 
-		add_action( 'gp_footer', 'wp_admin_bar_render', 1000 );
+		if ( ! did_action( 'wp_body_open' ) ) {
+			add_action( 'gp_footer', 'wp_admin_bar_render', 1000 );
+		}
 	}
 
 	/**
@@ -364,7 +366,7 @@ class Plugin {
 
 	/**
 	 * Localize any WordPress.org links.
-	 * 
+	 *
 	 * @param string $content   The content to search for WordPress.org links in.
 	 * @param string $wp_locale The WP_Locale subdomain that the content should reference.
 	 * @return string Filtered $content where any WordPress.org links have been replaced with $wp_locale subdomain links.
