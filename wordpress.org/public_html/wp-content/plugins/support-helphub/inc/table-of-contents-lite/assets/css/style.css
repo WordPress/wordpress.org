@@ -2,7 +2,7 @@
 .content-area h2,
 .content-area h3,
 .content-area h4 {
-    margin: 0.4em 0 1.1em 0;
+	margin: 0.4em 0 1.1em 0;
 	font-weight: 400;
 	border-bottom: 0 none;
 	padding: 0;
@@ -38,18 +38,19 @@
 	float: right;
 	width: 250px;
 	background-color: #fff;
-	box-shadow: 0 0 8px rgba(0,0,0,0.1);
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 	border: 1px solid #eee;
 	border-radius: 3px;
 	margin: 0 0 15px 15px;
 	z-index: 1;
 	position: relative;
 	color: #555d66;
+	line-height: 1.278rem;
 }
 
 @media (min-width: 971px) {
 
-	div.table-of-contents 	{
+	div.table-of-contents {
 		margin: -15px -30px 15px 15px;
 	}
 }
@@ -62,6 +63,7 @@
 }
 
 .table-of-contents h2.toc-title {
+
 	/**
 	 * originally font-size is 1.3em defined in wporg-breathe theme,
 	 * which is correctly 17px but in HelpHub style this inheritance is wrong
@@ -70,27 +72,26 @@
 	 *
 	 * Recently edited to use rem values instead of pixels.
 	 */
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
 	margin: 0;
-	padding: 7px 12px;
-	font-size: 0.95rem;
-	font-weight: 400;
-	color: #32373c;
-	text-transform: uppercase;
+	font-size: 0.94rem;
+	padding: 0.39rem 0.67rem;
 	border-bottom: 1px solid #eee;
+	text-transform: uppercase;
 }
 
 /**
  * Same thing with font-size and line-height as above
  */
 .table-of-contents .items {
-	font-size: 0.8rem;
+	font-size: 0.754rem;
 	margin: 0;
 	list-style-type: none;
-	padding: 1rem;
+	padding: 0.67rem;
 }
 
 .table-of-contents .items li {
-	padding: 4px;
+	padding: 0.2222rem;
 }
 
 .table-of-contents .items li ul li,
@@ -99,21 +100,8 @@
 }
 
 /**
- * Hiding second level table of contents links.
- * With the second level, things looks too messy and
- * information in the small area is too overwhelming.
- */
-.table-of-contents .items li ul {
-	display: none;
-}
-
-/**
  * This should be inherited from p2-breathe
  */
-.table-of-contents .items li a {
-	word-break: break-word;
-}
-
 .table-of-contents .items li a,
 .table-of-contents .items li a:visited {
 	text-decoration: none;
@@ -128,30 +116,26 @@
  * This should be inherited from p2-breathe
  */
 .table-of-contents .items li ul {
-	list-style: disc;
-    margin-left: 16px;
-}
-
-.table-of-contents .items li ul li {
-	list-style: disc;
+	list-style: circle;
+	margin-left: 1.1944rem;
 }
 
 /* Highlight current heading and adjust scroll position for fixed toolbar */
 .toc-heading:target {
 	border-left: 5px solid #0073aa;
-	padding-left: 5px;
-	margin-left: -10px;
+	padding-left: 0.278rem;
+	margin-left: -0.556rem;
 }
 
 p.toc-jump {
 	position: relative;
 	height: 50px;
-	text-align:right;
-	font-size: 12px;
+	text-align: right;
+	font-size: 0.67rem;
 }
 
-p.toc-jump:after {
-	content: '';
+p.toc-jump::after {
+	content: "";
 	display: table;
 	clear: both;
 }
