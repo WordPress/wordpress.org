@@ -219,6 +219,20 @@ function wporg_themes_sitemap_post_types( $post_types ) {
 add_filter( 'jetpack_sitemap_post_types', 'wporg_themes_sitemap_post_types' );
 
 /**
+ * Disable the Jetpack Sitemap feature when running on rosetta.
+ */
+function wporg_themes_disable_sitemap_for_rosetta( $modules ) {
+	if ( !empty( $GLOBALS['rosetta'] ) ) {
+		if ( false !== ( $i = array_search( 'sitemaps', $modules ) ) ) {
+			unset( $modules[$i] );
+		}
+	}
+
+	return $modules;
+}
+add_filter( 'jetpack_active_modules', 'wporg_themes_disable_sitemap_for_rosetta' );
+
+/**
  * Returns the specified meta value for a version of a theme.
  *
  * @param int          $post_id Post ID.
