@@ -69,8 +69,17 @@ class Plugin_Directory {
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 
 		add_filter( 'jetpack_active_modules', function( $modules ) {
+			// Disable Jetpack Search
 			if ( $i = array_search( 'search', $modules ) )
 				unset( $modules[$i] );
+
+			// Disable Jetpack Sitemaps on Rosetta sites.
+			if ( !empty( $GLOBALS['rosetta'] ) ) {
+				if ( $i = array_search( 'sitemaps', $modules ) ) {
+					unset( $modules[$i] );
+				}
+			}
+
 			return $modules;
 		} );
 
