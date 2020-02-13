@@ -60,6 +60,8 @@ class WPORG_Explanations {
 		// Output checkmark in explanations column if post has an explanation.
 		add_action( 'manage_posts_custom_column', array( $this, 'handle_column_data'  ), 10, 2 );
 
+		add_filter( 'preview_post_link',       array ( $this, 'preview_post_link'     ), 10, 2 );
+
 		// Permissions.
 		add_action( 'after_switch_theme',      array( $this, 'add_roles'              )        );
 		add_filter( 'user_has_cap',            array( $this, 'grant_caps'             )        );
@@ -92,6 +94,7 @@ class WPORG_Explanations {
 				'not_found_in_trash'  => __( 'No Explanations found in trash', 'wporg' ),
 			),
 			'public'            => false,
+			'publicly_queryable'=> true,
 			'hierarchical'      => false,
 			'show_ui'           => true,
 			'show_in_menu'      => true,
@@ -115,6 +118,43 @@ class WPORG_Explanations {
 		foreach ( $this->post_types as $type ) {
 			remove_post_type_support( $type, 'editor' );
 		}
+	}
+
+	/**
+	 * Override preview post links for explanations to preview the explanation
+	 * within the context of its associated function/hook/method/class.
+	 *
+	 * The associated post's preview link is amended with query parameters used
+	 * by `get_explanation_content()` to use the explanation being previewed
+	 * instead of the published explanation currently associated with the post.
+	 *
+	 * @access public
+	 * @see 'preview_post_link' filter
+	 *
+	 * @param string  $preview_link URL used for the post preview.
+	 * @param WP_Post $post         Post object.
+	 * @return string
+	 **/
+	public function preview_post_link( $preview_link, $post ) {
+		if ( $this->exp_post_type !== $post->post_type ) {
+			return $preview_link;
+		}
+
+		if ( false !== strpos( $preview_link, 'preview_nonce=' ) ) {
+			$url = parse_url( $preview_link );
+			$url_query = array();
+			parse_str ( $url['query'], $url_query );
+
+			$preview_link = get_preview_post_link(
+				$post->post_parent,
+				array(
+					'wporg_explanations_preview_id'    => $url_query['preview_id'],
+					'wporg_explanations_preview_nonce' => $url_query['preview_nonce'],
+				)
+			);
+		}
+
+		return $preview_link;
 	}
 
 	/**

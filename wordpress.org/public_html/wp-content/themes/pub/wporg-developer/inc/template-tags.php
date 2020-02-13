@@ -1681,7 +1681,21 @@ namespace DevHub {
 		$post = get_explanation( $_post );
 
 		// Get explanation's raw post content.
-		$content = get_explanation_field( 'post_content', $_post );
+		$content = '';
+		if (
+			! empty( $_GET['wporg_explanations_preview_nonce'] )
+		&&
+			false !== wp_verify_nonce( $_GET['wporg_explanations_preview_nonce'], 'post_preview_' . $post->ID )
+		) {
+			$preview = wp_get_post_autosave( $post->ID );
+
+			if ( is_object( $preview ) ) {
+				$post = $preview;
+				$content = get_post_field( 'post_content', $preview, 'display' );
+			}
+		} else {
+			$content = get_explanation_field( 'post_content', $_post );
+		}
 
 		// Pass the content through expected content filters.
 		$content = apply_filters( 'the_content', apply_filters( 'get_the_content', $content ) );
