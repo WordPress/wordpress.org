@@ -1761,11 +1761,16 @@ ul.ct-legend {
 	margin: 0 0 10px;
 }
 
-.locale-project-contributors-group .avatar {
+.locale-project-contributors-group.locale-project-contributors-contributors .avatar {
 	float: left;
 	vertical-align: middle;
 	margin-right: 10px;
 	margin-top: -0.5em;
+}
+
+.locale-project-contributors-group.locale-project-contributors-editors .avatar {
+	vertical-align: middle;
+	margin-right: 5px;
 }
 
 .locale-project-contributors-group ul.compressed li {
