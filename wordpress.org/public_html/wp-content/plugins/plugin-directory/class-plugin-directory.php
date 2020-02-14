@@ -40,6 +40,7 @@ class Plugin_Directory {
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_filter( 'jetpack_sitemap_post_types', array( $this, 'jetpack_sitemap_post_types' ) );
+		add_filter( 'jetpack_sitemap_skip_post', array( $this, 'jetpack_sitemap_skip_post' ), 10, 2 );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
@@ -1373,6 +1374,21 @@ class Plugin_Directory {
 		$post_types[] = 'plugin';
 
 		return $post_types;
+	}
+
+	/**
+	 * Skip outdated plugins in Jetpack Sitemaps.
+	 * 
+	 * @param bool $skip If this post should be excluded from Sitemaps.
+	 * @param object $plugin_db_row A row from the wp_posts table.
+	 * @return bool
+	 */
+	public function jetpack_sitemap_skip_post( $skip, $plugin_db_row ) {
+		if ( Template::is_plugin_outdated( $plugin_db_row->ID ) ) {
+			$skip = true;
+		}
+
+		return $skip;
 	}
 
 	/**
