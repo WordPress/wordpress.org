@@ -41,7 +41,7 @@ the_post();
 						<?php
 						printf(
 							/* translators: %s: Link to Gutenberg demo page */
-							wp_kses_post( __( 'WordPress is continually under development. Currently, work is underway on Phase 2 of the Gutenberg project. The Gutenberg project is a reimagination of the way we manage content on the web. Its goal is to broaden access to web presence, which is a foundation of successful modern businesses. Phase 1 was the new block editor, which was released in WordPress 5.0, you can <a href="%s">see that in action here</a>. Throughout 2020 there will be a focus on full site editing as we continue to progress through Phase 2.', 'wporg' ) ),
+							wp_kses_post( __( 'WordPress is continually under development. Currently, work is underway on Phase 2 of the Gutenberg project. The Gutenberg project is a reimagination of the way we manage content on the web. Its goal is to broaden access to web presence, which is a foundation of successful modern businesses. Phase 1 was the new block editor, which was released in WordPress 5.0, you can <a href="%s">see that in action here</a>. Throughout 2020 there is a focus on full site editing as we continue to progress through Phase 2.', 'wporg' ) ),
 							esc_url( home_url( '/gutenberg/' ) )
 						);
 						?>
@@ -51,29 +51,19 @@ the_post();
 						<?php
 						printf(
 							/* translators: %s: Link to make/core blog post */
-							wp_kses_post( __( 'For 2019 the project also has the following 9 priorities, as outlined in <a href="%s">this post</a> by project lead Matt Mullenweg:', 'wporg' ) ),
-							'https://make.wordpress.org/core/2018/12/08/9-priorities-for-2019/'
+							wp_kses_post( __( 'For 2020 the project also has the following 7 priorities, as outlined in <a href="%s">this post</a> by project executive director Josepha Haden:', 'wporg' ) ),
+							'https://make.wordpress.org/core/2019/12/06/update-9-projects-for-2019/'
 						);
 						?>
 					</p>
 
 					<ul>
 						<li><?php esc_html_e( 'Creating a block for navigation menus.', 'wporg' ); ?></li>
-						<li><?php esc_html_e( 'Port all existing widgets to blocks.', 'wporg' ); ?></li>
-						<li><?php esc_html_e( 'Upgrade the widgets-editing areas and the Customizer to support blocks.', 'wporg' ); ?></li>
-						<li><?php esc_html_e( 'Provide a way for themes to visually register content areas, and expose them in Gutenberg.', 'wporg' ); ?></li>
-						<li>
-							<?php
-							printf(
-								/* translators: %s: Link to Health Check plugin */
-								wp_kses_post( __( 'Merge <a href="%s">the site health check plugin</a> into Core, to assist with debugging and encourage good software hygiene.', 'wporg' ) ),
-								esc_url( home_url( '/plugins/health-check/' ) )
-							);
-							?>
-						</li>
-						<li><?php esc_html_e( 'Provide a way for users to opt-in to automatic plugin and theme updates.', 'wporg' ); ?></li>
-						<li><?php esc_html_e( 'Provide a way for users to opt-in to automatic updates of major Core releases.', 'wporg' ); ?></li>
 						<li><?php esc_html_e( 'Build a WordPress.org directory for discovering blocks, and a way to seamlessly install them.', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'Provide a way for users to opt-in to automatic plugin and theme updates.', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'Provide a way for themes to visually register content areas, and expose them in Gutenberg.', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'Upgrade the widgets-editing areas and the Customizer to support blocks.', 'wporg' ); ?></li>
+						<li><?php esc_html_e( 'Provide a way for users to opt-in to automatic updates of major Core releases.', 'wporg' ); ?></li>
 						<li>
 							<?php
 							printf(
