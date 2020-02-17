@@ -504,10 +504,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
 					$action = sprintf(
-						'Confirmed as a speaker for <a href="%s">%s</a> coming up on %s',
+						'Confirmed as a speaker for <a href="%s">%s</a>',
 						esc_url( $_POST['url'] ),
-						$_POST['wordcamp_name'],
-						$_POST['wordcamp_date']
+						$_POST['wordcamp_name']
 					);
 				} else {
 					$action = sprintf(
@@ -522,10 +521,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
 					$action = sprintf(
-						'Joined the organizing team for <a href="%s">%s</a> coming up on %s',
+						'Joined the organizing team for <a href="%s">%s</a>',
 						esc_url( $_POST['url'] ),
-						$_POST['wordcamp_name'],
-						$_POST['wordcamp_date']
+						$_POST['wordcamp_name']
 					);
 				} else {
 					$action = sprintf(
@@ -542,10 +540,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 					if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
 						$action = sprintf(
-							'Registered to attend <a href="%s">%s</a> coming up on %s',
+							'Registered to attend <a href="%s">%s</a>',
 							esc_url( $_POST['url'] ),
-							$_POST['wordcamp_name'],
-							$_POST['wordcamp_date']
+							$_POST['wordcamp_name']
 						);
 					} else {
 						$action = sprintf(
