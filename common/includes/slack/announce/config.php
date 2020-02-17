@@ -124,9 +124,6 @@ function get_whitelist() {
 		'core-fields' => array_merge( get_committers(), array(
 			'sc0ttkclark',
 		) ),
-		'core-test' => array_merge( get_committers(), array(
-			'ryan', // @boren on Slack
-		) ),
 		'core-https' => array_merge( get_committers(), array(
 			'ericlewis', // @eric on Slack
 			'tollmanz',
@@ -164,6 +161,9 @@ function get_whitelist() {
 			'miss_jwo',
 			'spacedmonkey', // @Jonny Harris on Slack
 		) ),
+		'core-sitemaps' => array_merge( get_committers(), array(
+			'tweetythierry', // @Thierry Muller on Slack
+		) ),
 		'core-php' => array_merge( get_committers(), array(
 			'afragen',
 			'flixos90',
@@ -192,6 +192,9 @@ function get_whitelist() {
 			'rachelbaker',
 			'rmccue',
 			'TimothyBlynJacobs', // @timothybjacobs on Slack
+		) ),
+		'core-test' => array_merge( get_committers(), array(
+			'ryan', // @boren on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
 			'anlino', // @andersnoren on Slack
