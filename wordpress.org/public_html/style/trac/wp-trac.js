@@ -1567,18 +1567,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				// Add the section immediately.
 				renderAddSection();
 
-				if ( authenticated ) {
-					// Fetch the PRs immediately for authenciated users.
-					fetchPRs();
-
-					// ..and expand the section by default.
-					container.toggleClass( 'collapsed', false );
-				} else {
-					// Not authenticated? Fetch PRs upon expanding.
-					container.find( 'h3 a' ).one( 'click', function() {
-						fetchPRs();
-					});
-				}
+				// Fetch the PRs immediately
+				fetchPRs();
 			}
 
 			function fetchPRs() {
@@ -1610,7 +1600,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			function renderAddSection() {
 				// Add the Pull Requests section.
 				$( '#attachments' ).append(
-					'<div id="github-prs" class="collapsed">' +
+					'<div id="github-prs">' +
 						'<h3 class="foldable"><a id="section-pr" href="#section-pr">Pull requests <span class="trac-count hidden">(<span></span>)</span></a></h3>' +
 						'<ul class="pull-requests">' +
 							'<li class="loading">Loading...</li>' +
