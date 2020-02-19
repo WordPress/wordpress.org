@@ -1598,8 +1598,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			}
 
 			function renderAddSection() {
-				// Add the Pull Requests section.
-				$( '#attachments' ).append(
+				// Add the Pull Requests section, #attachments is only present if authenticated or there exists uploads.
+				var afterDiv = $( '#attachments' );
+				if ( ! afterDiv.length ) {
+					afterDiv = $( '#commits' );
+				}
+
+				afterDiv.after(
 					'<div id="github-prs">' +
 						'<h3 class="foldable"><a id="section-pr" href="#section-pr">Pull Requests <span class="trac-count hidden">(<span></span>)</span></a></h3>' +
 						'<ul class="pull-requests">' +
