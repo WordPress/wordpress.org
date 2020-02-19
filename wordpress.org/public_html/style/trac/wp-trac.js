@@ -1592,7 +1592,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						}
 					} else {
 						// Change the loading placeholder
-						prContainer.find( '.loading' ).text( 'No linked PRs found.' );
+						prContainer.find( '.loading div' ).html( 'To link a Pull Request to this ticket, create a new Pull Request in the <a href="https://github.com/WordPress/wordpress-develop">WordPress GitHub mirror</a> and include this ticket’s URL in the description.' );
 					}
 				});
 			}
@@ -1601,9 +1601,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				// Add the Pull Requests section.
 				$( '#attachments' ).append(
 					'<div id="github-prs">' +
-						'<h3 class="foldable"><a id="section-pr" href="#section-pr">Pull requests <span class="trac-count hidden">(<span></span>)</span></a></h3>' +
+						'<h3 class="foldable"><a id="section-pr" href="#section-pr">Pull Requests <span class="trac-count hidden">(<span></span>)</span></a></h3>' +
 						'<ul class="pull-requests">' +
-							'<li class="loading">Loading...</li>' +
+						'<li class="loading"><div>Loading…</div></li>' +
 						'</ul>' +
 					'</div>'
 				);
