@@ -735,7 +735,6 @@ a.wpsc-hero-learnmore {
 .wpsc-recent>li:first-child a {
 	display: inline-block;
 	max-height: 161px;
-	overflow: hidden;
 }
 
 .wpsc-recent>li .screenshot {
