@@ -425,8 +425,6 @@ class Themes_API {
 	 *          download_url
 	 */
 	public function query_themes() {
-		global $wp_query;
-
 		// Set which fields wanted by default:
 		$defaults = array(
 			'description' => true,
@@ -450,6 +448,7 @@ class Themes_API {
 		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) . serialize( $this->fields ) ) );
 		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
 
+			// TODO: Remove this debug after Feb 21st 2020. See #3215.
 			// DEBUG - Attempt to skip the cache when it only contains one theme when it should contain many.
 			if (
 				isset( $this->request->browse ) &&
@@ -462,13 +461,10 @@ class Themes_API {
 				// The cache is good, use it.
 				return;
 			}
+
 		}
 
-		if ( isset( $wp_query ) && $wp_query->query_vars ) {
-			$this->result = $wp_query;
-		} else {
-			$this->result = $this->perform_wp_query();
-		}
+		$this->result = $this->perform_wp_query();
 
 		if ( empty( $this->request->fields ) ) {
 			$this->request->fields = array();
@@ -491,19 +487,6 @@ class Themes_API {
 		foreach ( (array) $this->result->posts as $theme ) {
 			$this->response->themes[] = $this->fill_theme( $theme );
 		}
-
-		/*
-		// DEBUG - Try to find out why the cache for the popular/featured views occasionally only include 1 theme.
-		if (
-			function_exists( 'slack_dm' ) &&
-			( 1 === $this->response->info['results'] || 0 === $this->response->info['results'] ) &&
-			isset( $this->request->browse ) &&
-			'popular' === $this->request->browse
-		) {
-			slack_dm( $_SERVER['REQUEST_URI'], 'dd32' );
-			slack_dm( print_r( $this->request, 1 ), 'dd32' );
-			slack_dm( print_r( $wp_query, 1 ), 'dd32' );
-		} */
 
 		wp_cache_set( $cache_key, $this->response, $this->cache_group, $this->cache_life );
 	}
