@@ -92,6 +92,7 @@ function get_whitelist() {
 		'core-committers' => get_committers(),
 		'core-css' => array_merge( get_committers(), array(
 			'isabel_brison', // @tellthemachines on Slack
+			'notlaura', // @laras126 on Slack
 		) ),
 		'core-customize' => array_merge( get_committers(), array(
 			'celloexpressions',
