@@ -133,7 +133,9 @@ function run( $data ) {
 	list( $parent_channel, ) = explode( '-', $channel, 2 );
 
 	// Some channels parents are not a 1:1 match.
-	if ( 'feature' === $parent_channel ) {
+	if ( 'accessibility' === $parent_channel ) {
+		$parent_channel = 'core';
+	} elseif ( 'feature' === $parent_channel ) {
 		$parent_channel = 'core';
 	} elseif ( 'community' === $parent_channel ) {
 		$parent_channel = 'community-team';
