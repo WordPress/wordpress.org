@@ -492,6 +492,7 @@ class Themes_API {
 			$this->response->themes[] = $this->fill_theme( $theme );
 		}
 
+		/*
 		// DEBUG - Try to find out why the cache for the popular/featured views occasionally only include 1 theme.
 		if (
 			function_exists( 'slack_dm' ) &&
@@ -502,7 +503,7 @@ class Themes_API {
 			slack_dm( $_SERVER['REQUEST_URI'], 'dd32' );
 			slack_dm( print_r( $this->request, 1 ), 'dd32' );
 			slack_dm( print_r( $wp_query, 1 ), 'dd32' );
-		}
+		} */
 
 		wp_cache_set( $cache_key, $this->response, $this->cache_group, $this->cache_life );
 	}
