@@ -748,7 +748,11 @@ function wporg_themes_get_themes_for_query() {
 	}
 
 	if ( empty( $request ) ) {
-		$request['browse'] = 'featured';
+		if ( defined( 'WPORG_IS_API' ) && WPORG_IS_API ) {
+			$request['browse'] = 'featured';
+		} else {
+			$request['browse'] = 'popular';
+		}
 	}
 
 	$request['locale'] = get_locale();

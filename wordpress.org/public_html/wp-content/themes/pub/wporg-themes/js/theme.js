@@ -801,7 +801,7 @@ window.wp = window.wp || {};
 					}
 					else if ( sorter = $( '.filter-links .current' ) ) {
 						if ( ! sorter.length ) {
-							sorter = $( '.filter-links [data-sort="featured"]' );
+							sorter = $( '.filter-links [data-sort="' + themes.data.settings.browseDefault + '"]' );
 							args   = { trigger: true };
 						}
 						themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sorter.data( 'sort' ) ), args );
@@ -1304,10 +1304,10 @@ window.wp = window.wp || {};
 				themes.router.navigate( themes.router.baseUrl( themes.router.searchPath + value ), { replace: true } );
 			} else {
 				delete request.search;
-				request.browse = 'featured';
+				request.browse = themes.data.settings.browseDefault;
 
-				themes.utils.title( $( '.filter-links [data-sort="featured"]' ).text(), 'browse' );
-				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + 'featured' ), { replace: true } );
+				themes.utils.title( $( '.filter-links [data-sort="' + request.browse + '"]' ).text(), 'browse' );
+				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + request.browse ), { replace: true } );
 			}
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
@@ -1644,7 +1644,7 @@ window.wp = window.wp || {};
 			// Set up the view
 			// Passes the default 'section' as an option
 			this.view = new themes.view.Installer({
-				section: 'featured',
+				section: themes.data.settings.browseDefault,
 				SearchView: themes.view.Search
 			});
 
@@ -1694,7 +1694,7 @@ window.wp = window.wp || {};
 				self.view.collection.queries.push( themes.data.query );
 
 				if ( ! sort ) {
-					sort = 'featured';
+					sort = themes.data.settings.browseDefault;
 				}
 				self.view.sort( sort );
 				self.view.trigger( 'theme:close' );

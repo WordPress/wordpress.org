@@ -17,9 +17,9 @@ function wporg_themes_pre_get_posts( $query ) {
 		return;
 	}
 
-	// Default to the featured view
+	// Default to the ~featured~ popular view
 	if ( empty( $query->query ) ) {
-		$query->query_vars['browse'] = 'featured';
+		$query->query_vars['browse'] = 'popular';
 	}
 
 	// From now on, always query themes.
@@ -198,7 +198,7 @@ function wporg_themes_prioritize_exact_matches_clauses( $clauses, $query ) {
  */
 function wporg_themes_parse_request( $wp ) {
 	$sections = array(
-		'new', 'updated', 'featured', 'favorites', 'popular'
+		'new', 'updated', /*'featured',*/ 'favorites', 'popular'
 	);
 
 	if ( !empty( $wp->query_vars['browse'] ) && ! in_array( $wp->query_vars['browse'], $sections ) ) {

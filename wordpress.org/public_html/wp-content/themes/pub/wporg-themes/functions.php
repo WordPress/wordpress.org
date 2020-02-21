@@ -136,6 +136,7 @@ function wporg_themes_scripts() {
 					'user'   => wp_get_current_user()->user_login,
 					'nonce'  => is_user_logged_in() ? wp_create_nonce( 'modify-theme-favorite' ) : false,
 				),
+				'browseDefault'=> 'popular',
 			),
 			'l10n' => array(
 				'locale'            => str_replace( '_', '-', get_locale() ),
