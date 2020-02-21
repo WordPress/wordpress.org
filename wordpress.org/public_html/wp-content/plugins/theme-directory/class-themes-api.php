@@ -447,21 +447,7 @@ class Themes_API {
 		// If there is a cached result, return that.
 		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) . serialize( $this->fields ) ) );
 		if ( false !== ( $this->response = wp_cache_get( $cache_key, $this->cache_group ) ) && empty( $this->request->cache_buster ) ) {
-
-			// TODO: Remove this debug after Feb 21st 2020. See #3215.
-			// DEBUG - Attempt to skip the cache when it only contains one theme when it should contain many.
-			if (
-				isset( $this->request->browse ) &&
-				'popular' === $this->request->browse &&
-				$this->response->info['results'] <= 1
-			) {
-				// The cache is bad. Don't use it.
-				$this->response = false;
-			} else {
-				// The cache is good, use it.
-				return;
-			}
-
+			return;
 		}
 
 		$this->result = $this->perform_wp_query();
