@@ -135,6 +135,8 @@ function run( $data ) {
 	// Some channels parents are not a 1:1 match.
 	if ( 'accessibility' === $parent_channel ) {
 		$parent_channel = 'core';
+	} elseif ( 'design' === $parent_channel ) {
+		$parent_channel = 'core';
 	} elseif ( 'feature' === $parent_channel ) {
 		$parent_channel = 'core';
 	} elseif ( 'community' === $parent_channel ) {
