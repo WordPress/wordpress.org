@@ -78,6 +78,12 @@ function wporg_themes_canonical_redirects() {
 		die();
 	}
 
+	// Redirect /browse/featured/ to the front-page temporarily, as it's showing in Google results.
+	if ( '/themes/browse/featured' === substr( $path, 0, 23 ) ) {
+		wp_safe_redirect( home_url( '/' ), 302 );
+		die();
+	}
+
 	// Ensure all requests are trailingslash'd.
 	if ( $path && '/' !== substr( $path, -1 ) ) {
 		$url = str_replace( $path, $path . '/', $_SERVER['REQUEST_URI'] );
@@ -136,7 +142,7 @@ function wporg_themes_scripts() {
 					'user'   => wp_get_current_user()->user_login,
 					'nonce'  => is_user_logged_in() ? wp_create_nonce( 'modify-theme-favorite' ) : false,
 				),
-				'browseDefault'=> 'popular',
+				'browseDefault'=> WPORG_THEMES_DEFAULT_BROWSE,
 			),
 			'l10n' => array(
 				'locale'            => str_replace( '_', '-', get_locale() ),
