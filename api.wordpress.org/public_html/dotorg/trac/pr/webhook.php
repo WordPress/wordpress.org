@@ -84,7 +84,9 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 				"''This ticket was mentioned in [{$pr_data->html_url} PR #{$pr_number}] " .
 					"on [https://github.com/{$pr_repo}/ {$pr_repo}] " .
 					"by [{$pr_data->user->url} {$pr_data->user->name}].''" .
-					( trim( $pr_data->body ) ? "\n{$pr_data->body}" : '' )
+					( trim( $pr_data->body ) ? "\n{$pr_data->body}" : '' ),
+				[],  // Attributes changed
+				true // Notify
 			);
 		}
 
