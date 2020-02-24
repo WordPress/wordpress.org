@@ -31,7 +31,7 @@ function fetch_pr_data( $repo, $pr ) {
 		'changes'         => (object) [
 			'additions' => $data->additions,
 			'deletions' => $data->deletions,
-			'patch_url' => $data->patch_url,
+			'patch_url' => $data->diff_url,
 			'html_url'  => $data->html_url,
 		],
 		'trac_ticket'    => determine_trac_ticket( $data ),
