@@ -57,8 +57,9 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			}
 		}
 
+		// Remove the specific Trac Ticket and PR Body from the DB version.
 		$_pr_data_no_ticket = clone $pr_data;
-		unset( $_pr_data_no_ticket->trac_ticket );
+		unset( $_pr_data_no_ticket->trac_ticket, $_pr_data_no_ticket->body );
 
 		// Step 3. If not in DB, or $pr_data->trac_ticket isn't yet in the DB, add a new row of it.
 		if ( $pr_data->trac_ticket && ( ! $existing_refs || ! $matched_existing_ref ) ) {
@@ -82,7 +83,8 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 				$pr_data->trac_ticket[1],
 				"''This ticket was mentioned in [{$pr_data->html_url} PR #{$pr_number}] " .
 					"on [https://github.com/{$pr_repo}/ {$pr_repo}] " .
-					"by [{$pr_data->user->url} {$pr_data->user->name}].''"
+					"by [{$pr_data->user->url} {$pr_data->user->name}].''" .
+					( trim( $pr_data->body ) ? "\n{$pr_data->body}" : '' )
 			);
 		}
 

@@ -32,7 +32,7 @@ Arguments:
   </py:def>
 
 <py:choose>
-<py:when test="'author' in change and ('slackbot' == change.author or 'ircbot' == change.author or ( 'prbot' == change.author and change.comment.startswith('\'\'') ) )"
+<py:when test="'author' in change and ('slackbot' == change.author or 'ircbot' == change.author)"
          py:with="wporg_user = wporg_sanitize_user_nicename(change.author)"  >
   <h3 class="change chat-bot">
     <span class="avatar" py:if="change">
@@ -52,6 +52,26 @@ Arguments:
       </form>
     </div>
   </h3>
+</py:when>
+<py:when test="'author' in change and 'prbot' == change.author and change.comment.startswith('\'\'')"
+         py:with="
+           wporg_user  = wporg_sanitize_user_nicename(change.author);
+           pr_byline   = change.comment.partition('\n')[0];
+           pr_comment  = ''.join(change.comment.partition('\n')[1:]) or False;
+           prbot_class = 'prbot with-context' if pr_comment else 'prbot without-context';
+         ">
+  <h3 class="change chat-bot ${prbot_class}">
+    <span class="avatar">
+      <span class="username-line">
+        <img src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" />
+        ${wiki_to_html(context, pr_byline, escape_newlines=preserve_newlines)}
+      </span>
+      <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
+    </span>
+  </h3>
+  <div py:if="pr_comment" class="comment searchable" xml:space="preserve">
+    ${wiki_to_html(context, pr_comment, escape_newlines=preserve_newlines)}
+  </div>
 </py:when>
 <py:otherwise>
 

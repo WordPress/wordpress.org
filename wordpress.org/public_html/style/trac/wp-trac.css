@@ -880,6 +880,12 @@ span.contributor-label[title]:hover {
 	background: #fff;
 	padding: 0 11px 1px 1em;
 }
+#changelog h3.change.prbot.with-context {
+	color: inherit;
+	margin: 1em -1em;
+	border: 1px;
+	border-bottom: none;
+}
 #changelog h3.change:after,
 #ticketchange h3.change:after {
 	content: "";

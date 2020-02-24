@@ -23,6 +23,7 @@ function fetch_pr_data( $repo, $pr ) {
 		'updated_at'      => $data->updated_at,
 		'closed_at'       => $data->closed_at,
 		'mergeable_state' => $data->mergeable_state,
+		'body'            => $data->body,
 		'user'            => (object) [
 			'url'  => $data->user->html_url,
 			'name' => $data->user->login,
