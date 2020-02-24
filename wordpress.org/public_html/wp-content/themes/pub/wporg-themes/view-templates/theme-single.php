@@ -7,7 +7,7 @@
 		</div>
 	</div>
 	<div class="theme-wrap">
-		<div class="theme-about hentry" itemscope itemtype="http://schema.org/CreativeWork">
+		<div class="theme-about hentry">
 			<# if ( data.is_outdated ) { #>
 			<div class="theme-notice notice notice-warning notice-alt">
 				<p><?php _e( 'This theme <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-themes' ); ?></p>
@@ -15,9 +15,9 @@
 			<# } #>
 
 			<div>
-				<h3 class="theme-name entry-title" itemprop="name">{{{ data.name }}}</h3>
+				<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
 				<# if ( data.author.display_name ) { #>
-				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="{{{ data.path }}}author/{{ data.author.user_nicename }}/"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
+				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="{{{ data.path }}}author/{{ data.author.user_nicename }}/"><span class="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
 				<# } #>
 
 				<# if ( data.show_favorites && data.is_favorited ) { #>
@@ -62,7 +62,7 @@
 				<div class="screenshot blank"></div>
 				<# } #>
 
-				<div class="theme-description entry-summary" itemprop="description"><p>{{{ data.description }}}</p></div>
+				<div class="theme-description entry-summary"><p>{{{ data.description }}}</p></div>
 
 				<# if ( data.tags ) { #>
 				<div class="theme-tags">
@@ -78,8 +78,7 @@
 			</div>
 
 			<div class="theme-meta">
-				<div class="theme-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
-					<meta itemprop="ratingCount" content="{{ data.num_ratings }}"/>
+				<div class="theme-ratings">
 					<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
 
 					<a class="reviews-link" href="//wordpress.org/support/theme/{{ data.id }}/reviews/"><?php esc_html_e( 'See all', 'wporg-themes' ); ?></a>
@@ -91,7 +90,7 @@
 						<span class="three"></span>
 						<span class="four"></span>
 						<span class="five"></span>
-						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span itemprop="ratingValue">{{ Math.round( data.rating / 20 / 0.5 )*0.5 }}</span>' ); ?></p>
+						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span>{{ Math.round( data.rating / 20 / 0.5 )*0.5 }}</span>' ); ?></p>
 					</div>
 					<# } else { #>
 					<div class="rating">

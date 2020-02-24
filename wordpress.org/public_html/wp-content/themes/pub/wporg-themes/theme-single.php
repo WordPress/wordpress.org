@@ -7,7 +7,7 @@
 		</div>
 	</div>
 	<div class="theme-wrap">
-		<div class="theme-about hentry" itemscope itemtype="http://schema.org/CreativeWork">
+		<div class="theme-about hentry">
 			<?php if ( time() - strtotime( $theme->last_updated ) > 2 * YEAR_IN_SECONDS ) { ?>
 			<div class="theme-notice notice notice-warning notice-alt">
 				<p><?php _e( 'This theme <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-themes' ); ?></p>
@@ -15,9 +15,9 @@
 			<?php } ?>
 
 			<div>
-				<h3 class="theme-name entry-title" itemprop="name"><?php echo esc_html( $theme->name ); ?></h3>
+				<h3 class="theme-name entry-title"><?php echo esc_html( $theme->name ); ?></h3>
 				<?php if ( $theme->author->display_name ) { ?>
-				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="https://wordpress.org/themes/author/' . $theme->author->user_nicename . '/"><span class="author" itemprop="author">' . esc_html( $theme->author->display_name ) . '</span></a>' ); ?></h4>
+				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="https://wordpress.org/themes/author/' . $theme->author->user_nicename . '/"><span class="author">' . esc_html( $theme->author->display_name ) . '</span></a>' ); ?></h4>
 				<?php } ?>
 
 				<?php if ( is_user_logged_in() && wporg_themes_is_favourited( $theme->slug ) ) { ?>
@@ -83,7 +83,7 @@
 					<div class="screenshot blank"></div>
 				<?php } ?>
 
-				<div class="theme-description entry-summary" itemprop="description"><p><?php echo esc_html( $theme->description ); ?></p></div>
+				<div class="theme-description entry-summary"><p><?php echo esc_html( $theme->description ); ?></p></div>
 
 				<?php if ( $theme->tags ) { ?>
 				<div class="theme-tags">
@@ -107,8 +107,7 @@
 			</div>
 
 			<div class="theme-meta">
-				<div class="theme-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
-					<meta itemprop="ratingCount" content="<?php echo $theme->num_ratings; ?>"/>
+				<div class="theme-ratings">
 					<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
 
 					<a class="reviews-link" href="//wordpress.org/support/theme/<?php echo $theme->slug; ?>/reviews/"><?php esc_html_e( 'See all', 'wporg-themes' ); ?></a>
@@ -120,7 +119,7 @@
 						<span class="three"></span>
 						<span class="four"></span>
 						<span class="five"></span>
-						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span itemprop="ratingValue">' . round( $theme->rating / 20 / 0.5 )*0.5 . '</span>' ); ?></p>
+						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span>' . round( $theme->rating / 20 / 0.5 )*0.5 . '</span>' ); ?></p>
 					</div>
 					<?php } else { ?>
 					<div class="rating">

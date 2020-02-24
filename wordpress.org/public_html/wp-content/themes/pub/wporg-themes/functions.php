@@ -451,3 +451,110 @@ include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-ut
 if ( class_exists( 'Jetpack_SEO' ) ) {
 	new Jetpack_SEO;
 }
+
+/**
+ * Prints markup information in the head of a page.
+ *
+ * @link http://schema.org/SoftwareApplication
+ * @link https://developers.google.com/search/docs/data-types/software-apps
+ */
+function wporg_themes_json_ld_schema() {
+	$schema = false;
+
+	// Schema for the front page.
+	if ( is_front_page() ) {
+		$schema = [
+			"@context" => "http://schema.org",
+			"@type"    => "WebSite",
+			"name"     => __( 'WordPress Themes', 'wporg-themes' ),
+			"url"      => home_url( '/' ),
+			"potentialAction" => [
+				[
+					"@type"       => "SearchAction",
+					"target"      => home_url( '/search/{search_term_string}' ),
+					"query-input" => "required name=search_term_string"
+				]
+			]
+		];
+
+	// Schema for theme pages.
+	} elseif ( is_singular( 'repopackage' ) && 'publish' === get_post_status( get_queried_object_id() ) ) {
+		$schema = wporg_themes_json_jd_schema( get_queried_object() );
+	}
+
+	// Print the schema.
+	if ( $schema ) {
+		echo PHP_EOL, '<script type="application/ld+json">', PHP_EOL;
+		// Output URLs without escaping the slashes, and print it human readable.
+		echo wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+		echo PHP_EOL, '</script>', PHP_EOL;
+	}
+}
+add_action( 'wp_head', 'wporg_themes_json_ld_schema' );
+
+/**
+ * Fetches JSON LD schema for a specific theme.
+ *
+ * @static
+ *
+ * @param \WP_Post $post Plugin to output JSON LD Schema for.
+ * @return array Schema object.
+ */
+function wporg_themes_json_jd_schema( $post ) {
+
+	$theme = wporg_themes_theme_information( $post->post_name );
+
+	$schema = [];
+
+	// Add the theme 'SoftwareApplication' node.
+	$software_application = [
+		"@context"            => "http://schema.org",
+		"@type"               => [
+			"SoftwareApplication",
+			"Product"
+		],
+		"applicationCategory" => "Theme",
+		"operatingSystem"     => "WordPress",
+		"name"                => $theme->name,
+		"url"                 => get_permalink( $post ),
+		"description"         => $theme->description,
+		"softwareVersion"     => $theme->version,
+		"fileFormat"          => "application/zip",
+		"downloadUrl"         => $theme->download_link,
+		"dateModified"        => get_post_modified_time( 'c', false, $post ),
+		"aggregateRating"     => [
+			"@type"       => "AggregateRating",
+			"worstRating" => 1,
+			"bestRating"  => 5,
+			"ratingValue" => round( $theme->rating / 20 / 0.5 )*0.5,
+			"ratingCount" => (int) $theme->num_ratings,
+			"reviewCount" => (int) $theme->num_ratings,
+		],
+		"interactionStatistic" => [
+			"@type"                => "InteractionCounter",
+			"interactionType"      => "http://schema.org/DownloadAction",
+			"userInteractionCount" => $theme->downloaded,
+		],
+		"image" => $theme->screenshot_url,
+		"offers" => [
+			"@type"         => "Offer",
+			"url"           => get_permalink( $post ),
+			"price"         => "0.00",
+			"priceCurrency" => "USD",
+			"seller"        => [
+				"@type" => "Organization",
+				"name"  => "WordPress.org",
+				"url"   => "https://wordpress.org"
+			]
+		]
+	];
+
+	// Remove the aggregateRating node if there's no reviews.
+	if ( ! $software_application['aggregateRating']['ratingCount'] ) {
+		unset( $software_application['aggregateRating'] );
+	}
+
+	$schema[] = $software_application;
+
+	return $schema;
+}

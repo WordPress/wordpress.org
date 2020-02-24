@@ -803,7 +803,7 @@ function wporg_themes_theme_information( $slug ) {
 			'sections' => false,
 			'tested' => true,
 			'requires' => true,
-			'downloaded' => false,
+			'downloaded' => true,
 			'downloadlink' => true,
 			'last_updated' => true,
 			'homepage' => true,
