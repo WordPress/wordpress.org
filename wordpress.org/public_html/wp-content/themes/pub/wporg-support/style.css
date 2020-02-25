@@ -4551,7 +4551,7 @@ body.helphub-with-sidebar .left-sidebar ul li ul {
 	}
 }
 
-.helphub-page .entry-content section .container .wp-block-image {
+.helphub-page .entry-content section .container figure.wp-block-image {
 	overflow: hidden;
 }
 
