@@ -217,8 +217,13 @@ the_post();
 					<p class="subheading col-8"><?php esc_html_e( 'Choosing a hosting provider can be difficult, so we have selected a few of the best to get you started.', 'wporg' ); ?></p>
 
 					<?php foreach ( array_rand( $hosts, 2 ) as $host ) : ?>
+
 					<div class="host col-6">
-						<img src="<?php echo esc_url( get_theme_file_uri( $hosts[ $host ]['logo'] ) ); ?>" class="logo" />
+						<img src="<?php echo esc_url( get_theme_file_uri( $hosts[ $host ]['logo'] ) ); ?>" class="logo" alt="<?php
+							/* translators: %s: Name of hosting company */
+							printf( esc_attr__( '%s company logo', 'wporg' ), esc_html( $hosts[ $host ]['name'] ) );
+							?>"
+						/>
 						<p><?php echo esc_html( $hosts[ $host ]['description'] ); ?></p>
 						<a href="<?php echo esc_url( $hosts[ $host ]['url'] ); ?>">
 							<?php
@@ -238,8 +243,12 @@ the_post();
 					<p class="subheading"><?php esc_html_e( 'Create or update content on the go with our mobile apps.', 'wporg' ); ?></p>
 
 					<div class="web-stores">
-						<a href="http://appstore.com/WordPress" class="button-ios"><img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-apple.png' ) ); ?>" /></a>
-						<a href="http://play.google.com/store/apps/details?id=org.wordpress.android" class="button-android"><img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-google-play.png' ) ); ?>" /></a>
+						<a href="http://appstore.com/WordPress" class="button-ios" >
+							<img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-apple.png' ) ); ?>" alt="<?php esc_attr_e( 'Available in the Apple App Store', 'wporg' ); ?>" />
+						</a>
+						<a href="http://play.google.com/store/apps/details?id=org.wordpress.android" class="button-android">
+							<img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-google-play.png' ) ); ?>"  alt="<?php esc_attr_e( 'Available in the Google Play Store', 'wporg' ); ?>" />
+						</a>
 					</div>
 					<a href="https://apps.wordpress.com/mobile/" class="call-to-action"><?php esc_html_e( 'Learn more about our mobile apps', 'wporg' ); ?></a>
 				</section>
