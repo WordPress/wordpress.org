@@ -79,12 +79,14 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			// Add a mention to the Trac Ticket.
 			$trac = get_trac_instance( $pr_data->trac_ticket[0] );
 
+			$pr_description = format_pr_desc_for_trac_comment( $pr_data );
+
 			$trac->update(
 				$pr_data->trac_ticket[1],
 				"''This ticket was mentioned in [{$pr_data->html_url} PR #{$pr_number}] " .
 					"on [https://github.com/{$pr_repo}/ {$pr_repo}] " .
 					"by [{$pr_data->user->url} {$pr_data->user->name}].''" .
-					( trim( $pr_data->body ) ? "\n{$pr_data->body}" : '' ),
+					( $pr_description ? "\n{$pr_description}" : '' ),
 				[],  // Attributes changed
 				true // Notify
 			);

@@ -152,3 +152,23 @@ function get_trac_instance( $trac ) {
 
 	return new Trac( GH_PRBOT_USER, GH_PRBOT_PASS, $trac_uri );
 }
+
+/**
+ * Formats a PR description for usage on Trac.
+ * 
+ * This strips out HTML comments and standard boilerplate text.
+ * 
+ * @param object $pr_data PR Data.
+ * @return string Stripped down PR Description
+ */
+function format_pr_desc_for_trac_comment( $pr_data ) {
+	$desc = trim( $pr_data->body );
+
+	// Remove HTML comments
+	$desc = preg_replace( '#<!--.+?-->#', '', $desc );
+
+	// Remove the final line if it matches the specific boilerplate format.
+	$desc = preg_replace( "#---\r?\n\*\*.+\*\*$#", '', $desc );
+
+	return trim( $desc );
+}
