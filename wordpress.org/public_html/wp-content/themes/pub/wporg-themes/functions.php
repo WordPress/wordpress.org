@@ -519,7 +519,7 @@ function wporg_themes_json_jd_schema( $post ) {
 			"SoftwareApplication",
 			"Product"
 		],
-		"applicationCategory" => "Theme",
+		"applicationCategory" => "OtherApplication",
 		"operatingSystem"     => "WordPress",
 		"name"                => $theme->name,
 		"url"                 => get_permalink( $post ),
