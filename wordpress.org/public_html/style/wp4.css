@@ -397,7 +397,7 @@ a img.aligncenter {
 		height: auto;
 	}
 	#wporg-header ul li#download a {
-		padding: 4px 10px;
+		text-align: center;
 	}
 }
 
