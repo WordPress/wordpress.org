@@ -159,7 +159,7 @@ function run( $data ) {
 	// Remove any @here or @channel
 	$text = str_ireplace( [ '@here', '@channel', '@group' ], '', $text );
 	if ( mb_strlen( $text ) > 103 ) {
-		$text = mb_subsr( $text, 0, 100 ) . '...';
+		$text = mb_substr( $text, 0, 100 ) . '...';
 	}
 
 	$send->set_text( 'In #' . $channel . ': ' . $text );
