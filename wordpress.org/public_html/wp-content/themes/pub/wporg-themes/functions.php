@@ -104,7 +104,7 @@ function wporg_themes_scripts() {
 		$GLOBALS['concatenate_scripts'] = true;
 	}
 
-	wp_enqueue_style( 'wporg-themes', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20191102b' );
+	wp_enqueue_style( 'wporg-themes', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20200227' );
 	wp_style_add_data( 'wporg-themes', 'rtl', 'replace' );
 
 	if ( ! is_singular( 'page' ) ) {
