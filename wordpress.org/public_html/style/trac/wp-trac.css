@@ -417,6 +417,9 @@ table.progress td.closed {
 	border-bottom: 1px solid #ddd;
 	color: #666;
 }
+#ticket div.description {
+	word-break: break-all;
+}
 #ticket img,
 .comment img {
 	max-width: 100%;
