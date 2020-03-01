@@ -2406,6 +2406,11 @@ table.translations tbody > tr:last-child .panel-header-actions__next {
 	margin-top: 5px;
 }
 
+.source-details__references {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
 .translation-wrapper {
 	padding: 0 10px;
 	margin: 15px 0;
