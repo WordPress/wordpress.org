@@ -21,21 +21,11 @@
 	padding: 3px;
 }
 
-.copy-suggestion {
-	visibility: hidden;
-}
-
 .translation-suggestion:focus-within,
 .translation-suggestion:focus,
 .translation-suggestion:hover {
 	background: #F2F0F7;
 	outline: none;
-}
-
-.translation-suggestion:focus-within .copy-suggestion,
-.translation-suggestion:focus .copy-suggestion,
-.translation-suggestion:hover .copy-suggestion {
-	visibility: visible;
 }
 
 .translation-suggestion__score {
@@ -53,9 +43,11 @@
 
 .translation-suggestion__translation {
 	flex: 1;
+	min-width: 1%;
 	color: #333;
 	white-space: pre-wrap;
-	word-break: break-word;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
 }
 
 .translation-suggestion__translation-raw {
