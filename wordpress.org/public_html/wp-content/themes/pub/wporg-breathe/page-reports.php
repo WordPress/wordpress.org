@@ -71,7 +71,6 @@ jQuery(document).ready( function($) {
 		</div><!-- #content -->
 
 	</div><!-- #primary -->
-	<div id="primary-modal"></div>
 
 	<!-- A fake o2 content area -->
 	<div style="display: none;"><div id="content"></div></div>
