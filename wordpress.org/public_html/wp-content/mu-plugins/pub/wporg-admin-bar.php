@@ -21,11 +21,9 @@ function wporg_about_links_in_admin_bar( $wp_admin_bar ) {
 	}
 
 	foreach ( $nodes as $node ) {
-		if ( !empty( $node ) ) {
-			$node->href = $about_url;
+		$node->href = $about_url;
 
-			$wp_admin_bar->add_node( $node );
-		}
+		$wp_admin_bar->add_node( $node );
 	}
 }
 add_action( 'admin_bar_menu', 'wporg_about_links_in_admin_bar', 11 );
