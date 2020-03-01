@@ -65,6 +65,9 @@ $contributors = Pledges\get_team_contributors(
 	</div>
 </div>
 
+<!-- A fake o2 content area -->
+<div style="display: none;"><div id="content"></div></div>
+
 <?php
 
 get_sidebar();
