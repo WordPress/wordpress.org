@@ -933,6 +933,12 @@ nav.o2-post-footer-actions ul li > span > a {
 	display: none;
 }
 
+@media (min-width: 877px) {
+	.page-template-full-width #secondary {
+		display: none;
+	}
+}
+
 .syntaxhighlighter {
 	padding-bottom: 0.1em;
 }
@@ -1147,7 +1153,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	.single-handbook .handbook-breadcrumbs ~ #primary {
 		padding-top: 7rem;
 	}
-	
+
 	.single-handbook .handbook-name-container ~ .handbook-breadcrumbs {
 		top: 5rem;
 	}
