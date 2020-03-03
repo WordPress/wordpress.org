@@ -40,6 +40,7 @@ function get_whitelist() {
 		),
 		'accessibility-events' => array(
 			'audrasjb',
+			'joedolson',
 			'nrqsnchz',
 		),
 		'bbpress' => array(
