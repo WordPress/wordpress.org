@@ -15,10 +15,12 @@ class Trac_Notifications_HTTP_Server {
 
 	function serve( $method, $secret, $arguments ) {
 		if ( ! method_exists( 'Trac_Notifications_DB', $method ) || $method[0] === '_' ) {
+			header( ( $_SERVER["SERVER_PROTOCOL"] ?: 'HTTP/1.0' ) . ' 404 Method Not Found', true, 404 );
 			exit;
 		}
 
-		if ( $secret !== $this->secret ) {
+		if ( ! hash_equals( $this->secret,  $secret ) ) {
+			header( ( $_SERVER["SERVER_PROTOCOL"] ?: 'HTTP/1.0' ) . ' 403 Forbidden', true, 403 );
 			exit;
 		}
 
