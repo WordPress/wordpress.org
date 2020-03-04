@@ -71,7 +71,7 @@ function api_request( $url, $args = null, $headers = [], $method = null ) {
 		'header'        => array_merge(
 			[
 				'Accept: application/json',
-				'Authorization: ' . get_authorization_token(),
+				'Authorization: ' . get_authorization_token( $url ),
 			],
 			$headers
 		),
@@ -88,12 +88,82 @@ function api_request( $url, $args = null, $headers = [], $method = null ) {
 /**
  * Fetch an Authorization token for a Github API request.
  */
-function get_authorization_token() {
-	global $wpdb;
+function get_authorization_token( $url ) {
+	// There are two different tokens used, JWT and App Installation tokens.
+	if ( false !== stripos( $url, 'api.github.com/app' ) ) {
+		// App Endpoint, that's a JWT token
+		return 'BEARER ' . get_jwt_app_token();
+	} else {
+		// Regular Endpoint, use an App Installation token
+		return 'BEARER ' . get_app_install_token();
+	}
+}
 
-	// TODO: This needs to be switched to a Github App token.
-	// This works temporarily to avoid the low unauthenticated limits.
-	return 'BEARER ' . $wpdb->get_var( "SELECT access_token FROM wporg_github_users WHERE github_user = 'dd32'");
+/**
+ * Fetch a JWT Authorization token for the Github /app API endpoints.
+ */
+function get_jwt_app_token() {
+	$token = wp_cache_get( GH_TRAC_APP_ID, 'API:JWT-token' );
+	if ( $token ) {
+		return $token;
+	}
+
+	include_once __DIR__ . '/adhocore-php-jwt/ValidatesJWT.php';
+	include_once __DIR__ . '/adhocore-php-jwt/JWTException.php';
+	include_once __DIR__ . '/adhocore-php-jwt/JWT.php';
+
+	$key = openssl_pkey_get_private( base64_decode( GH_TRAC_APP_PRIV_KEY ) );
+	$jwt = new \Ahc\Jwt\JWT( $key, 'RS256' );
+
+	$token = $jwt->encode([
+		'iat' => time(),
+		'exp' => time() + 10*60,
+		'iss' => GH_TRAC_APP_ID,
+	]);
+
+	// Cache it for 9 mins (It's valid for 10min)
+	wp_cache_set( GH_TRAC_APP_ID, $token, 'API:JWT-token', 9 * 60 );
+
+	return $token;
+}
+
+/**
+ * Fetch an App Authorization token for accessing Github Resources.
+ * 
+ * This assumes that the Github App will only ever be installed on the @WordPress organization.
+ */
+function get_app_install_token() {
+	$token = wp_cache_get( GH_TRAC_APP_ID . '-install-token', 'API:JWT-token' );
+	if ( $token ) {
+		return $token;
+	}
+
+	$installs = api_request(
+		'/app/installations',
+		null,
+		[ 'Accept: application/vnd.github.machine-man-preview+json' ]
+	);
+	if ( ! $installs || empty( $installs[0]->access_tokens_url ) ) {
+		return false;
+	}
+
+	$access_token = api_request(
+		$installs[0]->access_tokens_url,
+		null,
+		[ 'Accept: application/vnd.github.machine-man-preview+json' ],
+		'POST'
+	);
+	if ( ! $access_token || empty( $access_token->token ) ) {
+		return false;
+	}
+
+	$token     = $access_token->token;
+	$token_exp = strtotime( $access_token->expires_at );
+
+	// Cache the token for 1 minute less than what it's valid for.
+	wp_cache_set( GH_TRAC_APP_ID . '-install-token', $token, 'API:JWT-token', $token_exp - time() - 60 );
+
+	return $token;
 }
 
 /**
