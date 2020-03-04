@@ -4,6 +4,8 @@ namespace WordPressdotorg\API\Trac\GithubPRs;
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/init.php';
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/includes/wp-json-encode.php';
+require dirname( dirname( dirname( __DIR__ ) ) ) . '/includes/object-cache.php';
+\wp_cache_init();
 
 require __DIR__ . '/functions.php';
 
