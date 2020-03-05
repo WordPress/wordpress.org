@@ -84,6 +84,9 @@ function get_whitelist() {
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
 		) ),
+		'core-auto-updates' => array_merge( get_committers(), array(
+			'audrasjb',
+		) ),
 		'core-bootstrap' => array_merge( get_committers(), array(
 			'schlessera',
 		) ),
