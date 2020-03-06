@@ -301,5 +301,13 @@ add_action( 'pre_get_posts', function( $query ) {
 		wp_safe_redirect( home_url( $query->query_vars['name'] ) );
 		return;
 	}
+
+	// Return a 404 response for paginated front page requests.
+	if ( $query->is_main_query() && $query->is_page() && $query->is_paged() ) {
+		$query->set_404();
+		$query->query_vars['page_id'] = '';
+		status_header( 404 );
+		nocache_headers();
+	}
 } );
 
