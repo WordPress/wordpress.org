@@ -1,6 +1,17 @@
 <?php
 
+// Add support for adding feed links to head.
 add_theme_support( 'automatic-feed-links' );
+
+// Disable comments feed.
+add_filter( 'feed_links_show_comments_feed', '__return_false' ); 
+
+// Remove extra feed links from singular queries.
+add_action( 'wp_head', function () {
+	if ( is_singular() ) {
+		remove_action( 'wp_head', 'feed_links_extra', 3 );
+	}
+}, 1 );
 
 function get_site_domain( $rep_slash = true, $echo = true, $rem_trail_slash = false ) {
 	global $post;
@@ -204,8 +215,8 @@ function tags_with_count( $format = 'list', $before = '', $sep = '', $after = ''
 }
 
 function extras_feed( $is_comments_feed = false ) {
+	// Don't do anything for comment feeds.
 	if ( $is_comments_feed ) {
-		do_feed_rss2( $is_comments_feed ); // Load default for comments
 		return;
 	}
 	load_template( get_template_directory() . '/feed-extras.php' );
@@ -282,3 +293,13 @@ add_filter( 'document_title_parts', 'wporg_showcase_document_title' );
 add_filter( 'document_title_separator', function() {
 	return "&#124;";
 } );
+
+// Potentially change behavior prior to fetching posts.
+add_action( 'pre_get_posts', function( $query ) {
+	// Redirect comment feeds to associated post.
+	if ( $query->is_comment_feed() ) {
+		wp_safe_redirect( home_url( $query->query_vars['name'] ) );
+		return;
+	}
+} );
+
