@@ -1150,6 +1150,51 @@ body #ed_toolbar #ed_pre {
 	margin-bottom: 14px;
 }
 
+@media screen and (max-width:960px) {
+	#home-below .wrapper .col-4 {
+		width: calc(90% - 250px);
+		min-height: 260px;
+	}
+	#home-below .wrapper div:nth-child(odd) {
+		margin-left: 10%;
+	}
+}
+@media screen and (max-width:700px) {
+	#home-below .wrapper div:nth-child(odd) {
+		margin-left: 7%;
+	}
+	#home-below .wrapper .col-4 {
+		width: calc(100% - 250px);
+	}
+}
+@media screen and (max-width:544px) {
+	#home-below .wrapper div:nth-child(odd) {
+		margin-left: 4%;
+	}
+	#home-below .wrapper .col-4 {
+		width: calc(100% - 206px);
+	}
+}
+@media screen and (max-width:440px) {
+	#home-below .wrapper .col-2,
+	#home-below .wrapper .col-4 {
+		width: 92%;
+	}
+
+	#home-below .wrapper .col-2 {
+		text-align: center;
+	}
+
+	#home-below .wrapper .col-2 h4 {
+		text-align: left;
+	}
+
+	ul#notable-users li a {
+		margin: 0 auto;
+		text-align: center;
+	}
+}
+
 .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
 	float: left;
 	margin: 0 14px;
