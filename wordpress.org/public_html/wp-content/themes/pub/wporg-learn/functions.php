@@ -45,3 +45,9 @@ function learn_scripts() {
 	wp_enqueue_style( 'buttons' );
 }
 add_action( 'wp_enqueue_scripts', 'learn_scripts', 9 );
+
+// Remove output of hreflang tags.
+add_action( 'wp_head', function () {
+	remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
+}, 1 );
+
