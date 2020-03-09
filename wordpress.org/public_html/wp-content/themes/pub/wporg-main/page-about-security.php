@@ -517,7 +517,7 @@ the_post();
 					<ul>
 						<li id='footnote1'><a href="#ref1">[1]</a> <a href="https://w3techs.com/">https://w3techs.com/</a>, as of December 2019</li>
 						<li id='footnote2'><a href="#ref2">[2]</a> <a href="https://make.wordpress.org/core/handbook/about/release-cycle/">https://make.wordpress.org/core/handbook/about/release-cycle/</a></li>
-						<li id='footnote3'><a href="#ref3">[3]</a> Andrew Nacin, WordPress lead developer, <a href="https://vip.wordpress.com/security">https://vip.wordpress.com/security</a></li>
+						<li id='footnote3'><a href="#ref3">[3]</a> <a href="https://make.wordpress.org/core/handbook/about/release-cycle/version-numbering/">https://make.wordpress.org/core/handbook/about/release-cycle/version-numbering/</a></li>
 						<li id='footnote4'><a href="#ref4">[4]</a> <a href="https://wordpress.org/news/2014/08/wordpress-3-9-2/">https://wordpress.org/news/2014/08/wordpress-3-9-2/</a></li>
 						<li id='footnote5'><a href="#ref5">[5]</a> <a href="https://hackerone.com/wordpress">https://hackerone.com/wordpress</a></li>
 						<li id='footnote6'><a href="#ref6">[6]</a> <a href="https://wordpress.org/news/">https://wordpress.org/news/</a></li>
