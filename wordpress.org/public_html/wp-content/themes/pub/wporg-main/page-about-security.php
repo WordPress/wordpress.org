@@ -468,7 +468,7 @@ the_post();
 						printf(
 							/* translators: %s: Link to the Drupal Security Whitepaper (english). */
 							wp_kses_post( __( '<em>A special thank you to Drupal&#8217;s </em><a href="%s"><em>security white paper</em></a><em>, which provided some inspiration. </em>', 'wporg' ) ),
-							'http://drupalsecurityreport.org/'
+							'https://www.drupal.org/files/drupal-security-whitepaper-1-3_0.pdf'
 						);
 					?>
 					</p>
