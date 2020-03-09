@@ -29,7 +29,11 @@ function learn_register_sidebars() {
  */
 function learn_remove_frontpage_name_from_title( $parts ) {
 	if ( is_front_page() ) {
-		$parts['title'] = '';
+		$parts['title'] = __( 'Learn WordPress', 'wporg-learn' );
+		$parts['tagline'] = __( 'WordPress.org', 'wporg-showcase' );
+	} else {
+		$parts['site'] = __( 'Learn WordPress', 'wporg-showcase' );
+		$parts['tagline'] = __( 'WordPress.org', 'wporg-learn' );
 	}
 
 	return $parts;
