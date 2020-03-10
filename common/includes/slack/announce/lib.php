@@ -133,14 +133,16 @@ function run( $data ) {
 	list( $parent_channel, ) = explode( '-', $channel, 2 );
 
 	// Some channels parents are not a 1:1 match.
-	if ( 'accessibility' === $parent_channel ) {
-		$parent_channel = 'core';
-	} elseif ( 'design' === $parent_channel ) {
-		$parent_channel = 'core';
-	} elseif ( 'feature' === $parent_channel ) {
-		$parent_channel = 'core';
-	} elseif ( 'community' === $parent_channel ) {
-		$parent_channel = 'community-team';
+	switch ( $parent_channel ) {
+		case 'accessibility':
+		case 'design':
+		case 'feature':
+		case 'tide':
+			$parent_channel = 'core';
+			break;
+		case 'community':
+			$parent_channel = 'community-team';
+			break;
 	}
 
 	// Validate the channel.
