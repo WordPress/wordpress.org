@@ -624,8 +624,13 @@ a img.aligncenter {
 	}
 }
 
-@media screen and (max-width:960px) {
-	#home-welcome {
+
+#home-welcome, #home-below {
+	overflow: auto;
+}
+
+@media screen and (max-width:974px) {
+	#home-welcome, #home-below {
 		min-width: 0 !important;
 	}
 
@@ -1137,8 +1142,7 @@ body #ed_toolbar #ed_pre {
 
 #home-below {
 	font-size: 13px;
-	width: 960px;
-	margin: 0 auto;
+	margin: 50px auto;
 }
 
 #home-below .image img {
@@ -1146,11 +1150,10 @@ body #ed_toolbar #ed_pre {
 }
 
 #home-below .wrapper {
-	float: left;
 	margin-bottom: 14px;
 }
 
-@media screen and (max-width:960px) {
+@media screen and (max-width:974px) {
 	#home-below .wrapper .col-4 {
 		width: calc(90% - 250px);
 		min-height: 260px;
