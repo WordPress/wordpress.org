@@ -1081,7 +1081,7 @@ input[type=submit]:disabled,
 /* ----------------------------------------------------------------------------
   5.0 - Responsive Button Styles
 ---------------------------------------------------------------------------- */
-@media screen and (max-width: 782px) {
+@media screen and (max-width: 820px) {
 	.button,
 	.button.button-xl,
 	.button.button-large,
