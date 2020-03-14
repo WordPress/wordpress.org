@@ -594,6 +594,7 @@ add_action( 'template_redirect', function() {
 		wp_add_inline_script(
 			'wp-edit-post',
 			'wp.data.dispatch( "core/edit-post" ).closeGeneralSidebar();' .
+			'if ( wp.data.select( "core/edit-post" ).isFeatureActive( "welcomeGuide" )) { wp.data.dispatch( "core/edit-post" ).toggleFeature( "welcomeGuide" )};' .
 			'_wpLoadBlockEditor.then( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
 		);
 
