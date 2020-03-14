@@ -493,20 +493,32 @@ add_action( 'template_redirect', function() {
 				"/wp/v2/types?context=edit": { "body": {
 					"page": {
 						"rest_base": "pages",
-						"supports": {}
+						"supports": {},
+						"labels": {
+							"singular_name": "Page",
+						}
 					},
 					"wp_block": {
 						"rest_base": "blocks",
-						"supports": {}
+						"supports": {},
+						"labels": {
+							"singular_name": "Block",
+						}
 					}
 				} },
 				"/wp/v2/types/page?context=edit": { "body": {
 					"rest_base": "pages",
-					"supports": {}
+					"supports": {},
+					"labels": {
+						"singular_name": "Page",
+					}
 				} },
 				"/wp/v2/types/wp_block?context=edit": { "body": {
 					"rest_base": "blocks",
-					"supports": {}
+					"supports": {},
+					"labels": {
+						"singular_name": "Block",
+					}
 				} }
 			} ) );',
 			'after'
@@ -582,7 +594,6 @@ add_action( 'template_redirect', function() {
 		wp_add_inline_script(
 			'wp-edit-post',
 			'wp.data.dispatch( "core/edit-post" ).closeGeneralSidebar();' .
-			'wp.data.dispatch( "core/nux" ).disableTips();' .
 			'_wpLoadBlockEditor.then( function() { wp.blocks.unregisterBlockType( "core/shortcode" ); } );'
 		);
 
