@@ -90,8 +90,6 @@ class WPORG_Themes_Upload {
 	 */
 	protected $readme_header_fields = array(
 		'tested'       => 'tested up to',
-		'requires'     => 'requires at least',
-		'requires_php' => 'requires php',
 		'contributors' => 'contributors',
 		'license'      => 'license',
 		'license_uri'  => 'license uri',
@@ -435,33 +433,42 @@ class WPORG_Themes_Upload {
 			}
 		}
 
-		// Sanitize some version-like data.
-		foreach ( array( 'requires', 'requires_php', 'tested' ) as $field ) {
-			if ( ! isset( $data[ $field ] ) ) {
-				continue;
-			}
-
-			// Strip 'WP', 'WordPress', and 'PHP' from the fields.
-			$data[ $field ] = trim( str_ireplace( array( 'PHP', 'WP', 'WordPress', '+' ), '', $data[ $field ] ) );
-
-			// Require a version-like value, x.y or x.y.z
-			if ( ! preg_match( '!^\d+\.\d(\.\d+)?$!', $data[ $field ] ) ) {
-				unset( $data[ $field ] );
-				continue;
-			}
-
-			// Allow themes to mark themselves as compatible with Stable+0.1 (trunk/master) but not higher
-			if (
-				( 'requires' === $field || 'tested' === $field ) &&
-				defined( 'WP_CORE_STABLE_BRANCH' ) &&
-				version_compare( (float)$data[ $field ], (float)WP_CORE_STABLE_BRANCH+0.1, '>' )
-			) {
-				unset( $data[ $field ] );
-				continue;
+		if ( isset( $data['tested'] ) ) {
+			$data['tested'] = $this->sanitize_version_like_field( $data['tested'], 'tested' );
+			if ( ! $data['tested'] ) {
+				unset( $data['tested'] );
 			}
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Sanitize/strip a field back to it's bare-basics version-like string.
+	 * 
+	 * @param string $value The field value.
+	 * @param string $field The name of the field being processed.
+	 * @return bool|string The version-like field or false on failure.
+	 */
+	public function sanitize_version_like_field( $value, $field = false ) {
+		// Strip 'WP', 'WordPress', and 'PHP' from the fields.
+		$value = trim( str_ireplace( array( 'PHP', 'WP', 'WordPress', '+' ), '', $value ) );
+
+		// Require a version-like value, x.y or x.y.z
+		if ( ! preg_match( '!^\d+\.\d(\.\d+)?$!', $value ) ) {
+			return false;
+		}
+
+		// Allow themes to mark themselves as compatible with Stable+0.1 (trunk/master) but not higher
+		if (
+			( 'requires' === $field || 'tested' === $field ) &&
+			defined( 'WP_CORE_STABLE_BRANCH' ) &&
+			version_compare( (float)$value, (float)WP_CORE_STABLE_BRANCH+0.1, '>' )
+		) {
+			return false;
+		}
+
+		return $value;
 	}
 
 	/**
@@ -820,11 +827,13 @@ TICKET;
 
 		// Finally, add post meta.
 		$post_meta = array(
-			'_theme_url'   => $this->theme->get( 'ThemeURI' ),
-			'_author_url'  => $this->theme->get( 'AuthorURI' ),
-			'_upload_date' => $upload_date,
-			'_ticket_id'   => $ticket_id,
-			'_screenshot'  => $this->theme->screenshot,
+			'_theme_url'    => $this->theme->get( 'ThemeURI' ),
+			'_author_url'   => $this->theme->get( 'AuthorURI' ),
+			'_requires'     => $this->sanitize_version_like_field( $this->theme->get( 'RequiresWP' ), 'requires' ),
+			'_requires_php' => $this->sanitize_version_like_field( $this->theme->get( 'RequiresPHP' ) ),
+			'_upload_date'  => $upload_date,
+			'_ticket_id'    => $ticket_id,
+			'_screenshot'   => $this->theme->screenshot,
 		);
 
 		// Store readme.txt data if present.
