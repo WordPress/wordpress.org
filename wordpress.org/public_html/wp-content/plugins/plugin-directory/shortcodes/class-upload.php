@@ -119,8 +119,8 @@ class Upload {
 							printf(
 								/* translators: %s: Amount of pending plugins. */
 								esc_html( _n(
-									'You have %s plugin being actively reviewed. You must complete this review before you can submit another plugin.',
-									'You have %s plugins being actively reviewed. You must complete their reviews before you can submit another plugin.',
+									'You have %s plugin being actively reviewed and have been sent an email regarding issues. You must complete this review before you can submit another plugin. Please reply to that email with your corrected code attached or linked in order to proceed with the review.',
+									'You have %s plugins being actively reviewed and have been sent emails regarding issues. You must complete their reviews before you can submit another plugin. Please reply to the emails with your corrected code attached or linked in order to proceed with each review.',
 									$submitted_counts->pending,
 									'wporg-plugins'
 								) ),
