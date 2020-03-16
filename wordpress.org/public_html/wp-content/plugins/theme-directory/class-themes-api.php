@@ -435,9 +435,9 @@ class Themes_API {
 		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION >= 1.2 ) {
 			$defaults['extended_author'] = true;
 			$defaults['num_ratings'] = true;
-			$detaults['parent'] = true;
-			$detaults['requires'] = true;
-			$detaults['requires_php'] = true;
+			$defaults['parent'] = true;
+			$defaults['requires'] = true;
+			$defaults['requires_php'] = true;
 		}
 
 		if ( isset( $this->request->fields ) ) {
