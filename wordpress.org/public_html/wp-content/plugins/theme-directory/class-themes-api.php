@@ -436,6 +436,8 @@ class Themes_API {
 			$defaults['extended_author'] = true;
 			$defaults['num_ratings'] = true;
 			$detaults['parent'] = true;
+			$detaults['requires'] = true;
+			$detaults['requires_php'] = true;
 		}
 
 		if ( isset( $this->request->fields ) ) {
