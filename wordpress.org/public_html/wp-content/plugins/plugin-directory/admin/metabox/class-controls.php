@@ -90,8 +90,9 @@ class Controls {
 			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status );
 		}
 
-		$close_reasons = Template::get_close_reasons();
-		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
+		$close_reasons   = Template::get_close_reasons();
+		$close_reason    = (string) get_post_meta( $post->ID, '_close_reason', true );
+		$active_installs = (int) get_post_meta( $post->ID, 'active_installs', true );
 
 		$reason_label   = Template::get_close_reason();
 		$reason_unknown = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $reason_label );
@@ -107,6 +108,12 @@ class Controls {
 			<?php elseif ( 'disabled' === $post->post_status ) : ?>
 
 				<p><?php printf( __( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . $reason_label . '</strong>' ); ?></p>
+
+			<?php elseif ( 'publish' === $post->post_status ) : ?>
+
+				<?php if ( $active_installs >= '20000' ) : ?>
+					<p><strong><?php _e( 'Notice:', 'wporg-plugins' ); ?></strong> <?php _e( 'Due to the large volume of active users, the developers should be warned and their plugin remain open save under extreme circumstances.', 'wporg-plugins' ); ?>.</p>
+				<?php endif; ?>
 
 			<?php endif; ?>
 
