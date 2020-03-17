@@ -1063,8 +1063,18 @@ div.bbp-breadcrumb {
 		content: "\f487";
 	}
 
-	.topic-info li.topic-report::before {
-		content: "\f227";
+	.topic-info li.topic-report {
+
+		&::before {
+			content: "\f227";
+		}
+
+		select,
+		input[type="text"] {
+			width: 100%;
+			padding: 0.2rem 0.5rem 0.1rem;
+			margin: 0;
+		}
 	}
 
 	.topic-info li.topic-previous-reports {
