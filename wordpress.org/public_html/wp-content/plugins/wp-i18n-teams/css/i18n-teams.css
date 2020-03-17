@@ -116,16 +116,26 @@ td.no-right-border {
 #locale-header ul li.download-button,
 #main ul#postlist .postcontent #locale-header ul li.download-button {
 	float: left;
-	height: 34px;
+	height: unset;
 	margin: 8px 12px 0 0;	/* todo put list spacing on the button itself, so that the ul takes up no space when there are no li's inside it */
 	padding: 6px 12px;
+	text-align: center;
+	white-space: unset;
 }
 #locale-header ul li.download-button a {
-	font-size: 1.6em;
+	font-size: 14px;
+	font-size: 1.4rem;
 	line-height: 1.5;
 	color: white;
 	text-decoration: none;
 }
+@media only screen and (max-width: 600px) {
+	#locale-header ul li.download-button,
+	#main ul#postlist .postcontent #locale-header ul li.download-button {
+		width: 100%;
+	}
+}
+
 #locale-details,
 #main ul#locale-details {
 	font-size: 1.2em;
