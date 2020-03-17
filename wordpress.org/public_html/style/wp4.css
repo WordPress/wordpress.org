@@ -458,6 +458,7 @@ a img.aligncenter {
 #download-mobile span.download-ready {
 	font-size: 1.6em;
 	margin: 0 0.25em;
+	vertical-align: middle;
 }
 
 #download-mobile a.download-button {
