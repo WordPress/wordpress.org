@@ -188,23 +188,14 @@ class Ratings_Compat {
 		// Undo the above filter, for titles of replies to reviews. See #meta4254
 		add_filter( 'bbp_get_topic_last_topic_title', array( $this, 'undo_topic_title' ), 10, 1 ); 
 ?>
-<link itemprop="applicationCategory" href="http://schema.org/OtherApplication" />
-<span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-	<meta itemprop="price" content="0.00" />
-	<meta itemprop="priceCurrency" content="USD" />
-	<span itemprop="seller" itemscope itemtype="http://schema.org/Organization">
-		<span itemprop="name" content="WordPress.org"></span>
-	</span>
-</span>
-
-<div class="review-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+<div class="review-ratings">
 	<div class="col-3">
-		<div class="reviews-about" style="display:none;" itemprop="itemReviewed"><?php echo esc_html( $this->object->post_title ); ?></div>
+		<div class="reviews-about" style="display:none;"><?php echo esc_html( $this->object->post_title ); ?></div>
 		<div class="reviews-total-count"><?php
 			printf(
 				/* translators: %s: number of reviews */
 				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
-				'<span itemprop="reviewCount">' . number_format_i18n( $this->reviews_count ) . '</span>'
+				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
 			);
 		?></div>
 		<?php
@@ -252,7 +243,7 @@ class Ratings_Compat {
 				/* translators: 1: number of stars in rating, 2: total number of stars (5) */
 				__( '%1$s out of %2$s stars', 'wporg-forums' ),
 				round( isset( $this->avg_rating ) ? $this->avg_rating : 0, 1 ),
-				'<span itemprop="bestRating">5</span>'
+				'<span>5</span>'
 			);
 		?>
 		<div class="reviews-submit-link">
