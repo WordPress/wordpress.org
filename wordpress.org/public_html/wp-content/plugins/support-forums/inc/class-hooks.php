@@ -30,6 +30,9 @@ class Hooks {
 		// Output robots headers.
 		add_action( 'wp_head', array( $this, 'robots_noindex_header' ));
 
+		// Output meta description.
+		add_action( 'wp_head', array( $this, 'meta_description' ) );
+
 		// Link to create new topics atop topic list.
 		add_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
 
@@ -525,6 +528,65 @@ class Hooks {
 		if ( $page > 1 ) {
 			$prev_page_url = $canonical_url . ( $prev_page > 1 ? 'page/' . absint( $prev_page ) . '/' : '' );
 			echo '<link rel="prev" href="' . esc_url( $prev_page_url ) . '" />' . "\n";
+		}
+	}
+
+	/**
+	 * Outputs meta description tags.
+	 */
+	public function meta_description() {
+		$description = '';
+		$max_length  = 150;
+
+		// Single topic.
+		if ( bbp_is_single_topic() ) {
+			$topic_id = bbp_get_topic_id();
+	
+			// Prepend label if thread is closed.
+			if ( bbp_is_topic_closed( $topic_id ) ) {
+				/* translators: %s: Excerpt of the topic's first post. */
+				$description = __( '[This thread is closed.] %s', 'wporg-support' );
+			} else {
+				$description = '%s '; // trailing space is intentional
+			}
+
+			// Determine remaining available description length.
+			$length = $max_length - mb_strlen( $description ) + 3; // 3 === strlen( ' %s' )
+
+			// Get the excerpt for the topic's first post (similar to
+			// `bbp_get_topic_excerpt()`).
+			$excerpt = get_post_field( 'post_excerpt', $topic_id );
+			if ( ! $excerpt  ) {
+				$excerpt = bbp_get_topic_content( $topic_id );
+			}
+			// Remove tags, condense whitespace, then trim.
+			$excerpt = trim( preg_replace( '/\s+/', ' ', strip_tags( $excerpt ) ) );
+
+			// If excerpt length exceeds description limit, truncate it to end of nearest
+			// word or sentence.
+			if ( mb_strlen( $excerpt ) > $length ) {
+				// Truncate string at max length.
+				$excerpt = substr( $excerpt, 0, $length );
+				// Reverse string for easier handling.
+				$rev = strrev( $excerpt );
+				// Find first reasonable and natural break.
+				preg_match( '/[\s\.\?!\)\]\}]/', $rev, $match, PREG_OFFSET_CAPTURE );
+				$pos = ! empty( $match[0][1] ) ? $match[0][1] : 0;
+				// Get the string up to that natural break and reverse it.
+				$excerpt = trim( strrev( substr( $rev, $pos ) ) );
+				// Append ellipsis.
+				$excerpt .= '&hellip;';
+			}
+
+			$description = sprintf( $description, $excerpt );
+		}
+
+		// Output description meta tags if a description has been set.
+		if ( $description ) {
+			$description = trim( $description );
+
+			printf( '<meta name="og:description" content="%s" />' . "\n", esc_attr( $description ) );
+			printf( '<meta name="description" content="%s" />' . "\n", esc_attr( $description ) );
 		}
 	}
 
