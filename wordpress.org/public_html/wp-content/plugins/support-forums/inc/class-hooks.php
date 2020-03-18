@@ -38,6 +38,9 @@ class Hooks {
 		add_filter( 'bbp_after_get_reply_author_link_parse_args', array( $this, 'get_author_link' ) );
 		add_filter( 'bbp_after_get_author_link_parse_args',       array( $this, 'get_author_link' ) );
 
+		// Mark avatar images as being lazy-loadable.
+		add_filter( 'get_avatar', array( $this, 'avatar_lazy_load' ) );
+
 		// remove nofollow filter from topic and reply author links, since those are wordpress.org profile urls, not user inputs
 		remove_filter( 'bbp_get_topic_author_link', 'bbp_rel_nofollow' );
 		remove_filter( 'bbp_get_reply_author_link', 'bbp_rel_nofollow' );
@@ -570,6 +573,13 @@ class Hooks {
 		}
 
 		return $r;
+	}
+
+	/**
+	 * Change avatar `img` markup to indicate lazy loading of image.
+	 */
+	public function avatar_lazy_load( $markup ) {
+		return str_replace( '<img ', '<img loading="lazy" ', $markup );
 	}
 
 	/**
