@@ -604,9 +604,52 @@ add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url
  * @return string Filtered content.
  */
 function wporg_support_wrap_standalone_li_tags_in_ul( $content ) {
-	if ( false !== strpos( $content, '<li>' ) ) {
-		$content = preg_replace( '#(?<!<ul>\s|<ol>\s)<li>#', '<ul><li>', $content );
-		$content = force_balance_tags( $content );
+	// No lists? No worries.
+	if ( false === stripos( $content, '<li>' ) ) {
+		return $content;
+	}
+
+	// Split the content into chunks of <Not a List, OL/UL tags, Content of Ol/UL tags>.
+	$parts = preg_split( '#(<[uo]l(?:\s+[^>]+)?>)#im', $content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
+
+	// We can rebuild.
+	$content = '';
+
+	for ( $i = 0; $i < count( $parts ); $i++ ) {
+		$part = $parts[ $i ];
+		$next_part = $parts[ $i + 1 ] ?? '';
+
+		// If the chunk is a list element, process it as such.
+		if ( preg_match( '#^<([uo]l)(\s+[^>]+)?>#i', $part, $m ) ) {
+			$closing_tag_pos = stripos( $next_part, '</' . $m[1] . '>' );
+			if ( false !== $closing_tag_pos ) {
+				// List is closed, assume that part of the content is OK
+				$content .= $part . substr( $next_part, 0, $closing_tag_pos + 5 );
+
+				// But check the content after the list too.
+				$next_part = substr( $next_part, $closing_tag_pos + 5 );
+				if ( $next_part ) {
+					// Replace the first li tag if one exists.
+					// This may break nested lists, but that's okay.
+					$next_part = preg_replace( '#<li>#i', '<ul><li>', $next_part, 1 );
+
+					$content .= force_balance_tags( $next_part );
+				}
+			} else {
+				// List is not closed, balance it.
+				$content .= force_balance_tags( $part . $next_part );
+			}
+			$i++; // Skip $next_part;
+
+		// Does this text chunk contain a <li>? If so, it's got no matching start element.
+		} elseif ( false !== stripos( $part, '<li>' ) ) {
+			$part = preg_replace( '#<li>#i', '<ul><li>', $part, 1 ); // Replace the first li tag
+			$content .= force_balance_tags( $part );
+
+		// This shouldn't actually be hit, but is here for completeness.
+		} else {
+			$content .= force_balance_tags( $part );
+		}
 	}
 
 	return $content;
