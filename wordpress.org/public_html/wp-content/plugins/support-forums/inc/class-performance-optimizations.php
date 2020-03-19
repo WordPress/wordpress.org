@@ -266,7 +266,9 @@ class Performance_Optimizations {
 		 */
 		if ( is_feed() ) {
 			$r['no_found_rows'] = true;
-			add_filter( 'posts_where', array( $this, 'posts_in_last_month' ) );
+			if ( ! is_singular( 'topic' ) ) {
+				add_filter( 'posts_where', array( $this, 'posts_in_last_month' ) );
+			}
 		}
 
 		/**
@@ -319,7 +321,9 @@ class Performance_Optimizations {
 	public function has_replies( $r ) {
 		if ( is_feed() ) {
 			$r['no_found_rows'] = true;
-			add_filter( 'posts_where', array( $this, 'posts_in_last_month' ) );
+			if ( ! is_singular( 'topic' ) ) {
+				add_filter( 'posts_where', array( $this, 'posts_in_last_month' ) );
+			}
 		}
 		return $r;
 	}
