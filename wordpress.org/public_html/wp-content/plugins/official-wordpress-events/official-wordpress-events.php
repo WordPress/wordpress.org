@@ -280,7 +280,7 @@ class Official_WordPress_Events {
 
 		// Note: With the number of WordCamps per year growing fast, we may need to batch requests in the near future, like we do for meetups.
 		$request_url = add_query_arg( array(
-			'status'   => array( 'wcpt-scheduled', 'wcpt-cancelled' ),
+			'status'   => array( 'wcpt-scheduled', 'wcpt-pre-planning', 'wcpt-cancelled' ),
 			'per_page' => 100,
 		), self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps' );
 
@@ -310,7 +310,7 @@ class Official_WordPress_Events {
 			foreach ( $wordcamps as $wordcamp ) {
 				$event = array(
 					'source_id'   => $wordcamp->id,
-					'status'      => 'wcpt-scheduled' === $wordcamp->status ? 'scheduled' : 'cancelled',
+					'status'      => str_replace( 'wcpt-', '', $wordcamp->status ),
 					'type'        => 'wordcamp',
 					'title'       => $wordcamp->title->rendered,
 					'description' => $wordcamp->content->rendered,
