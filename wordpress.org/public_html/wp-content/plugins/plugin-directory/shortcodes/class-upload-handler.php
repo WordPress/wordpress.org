@@ -114,17 +114,32 @@ class Upload_Handler {
 		}
 
 		// Make sure it doesn't use a TRADEMARK protected slug.
-		if ( $this->has_trademarked_slug() ) {
+		if ( false !== $this->has_trademarked_slug() ) {
 			$error = __( 'Error: The plugin includes a trademarked name.', 'wporg-plugins' );
 
-			return new \WP_Error( 'trademarked_name', $error . ' ' . sprintf(
-				/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-				__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used. Per the demands of trademark owners and in order to protect developers, we disallow the use of certain terms in ways that are infringing or misleading. In many cases, renaming your plugin to end with "for-%2$s" instead will resolve this issue. To do this, please change the %3$s line in your main plugin file and readme and upload the plugin again. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>',
-				$this->has_trademarked_slug(),
-				'<code>Plugin Name:</code>',
-				'<code>plugins@wordpress.org</code>'
-			) );
+			if ( $this->has_trademarked_slug() === trim( $this->has_trademarked_slug(), '-' ) ) {
+				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
+				$message = sprintf(
+					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
+					__( 'Your chosen plugin name - %1$s - contains the prohibited term "%2$s" and cannot be used. Per the demands of trademark owners we have been required to prevent the use of the term at all. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
+					'<code>' . $this->plugin_slug . '</code>',
+					trim( $this->has_trademarked_slug(), '-' ),
+					'<code>Plugin Name:</code>',
+					'<code>plugins@wordpress.org</code>'
+				);
+			} else {
+				// Trademarks ending in "-" indicate slug cannot BEGIN with that term.
+				$message = sprintf(
+					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
+					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used. Per the demands of trademark owners we disallow the use of certain terms in ways that are infringing or misleading. In order to proceed with this submission, you must change the %3$s line in your main plugin file and readme to end with  "-%2$s" instead. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
+					'<code>' . $this->plugin_slug . '</code>',
+					trim( $this->has_trademarked_slug(), '-' ),
+					'<code>Plugin Name:</code>',
+					'<code>plugins@wordpress.org</code>'
+				);
+			}
+
+			return new \WP_Error( 'trademarked_name', $error . ' ' . $message );
 		}
 
 		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
@@ -376,12 +391,18 @@ class Upload_Handler {
 	public function has_trademarked_slug() {
 		$trademarked_slugs = array(
 			'adobe-',
+			'adsense-',
 			'advanced-custom-fields-',
+			'adwords-',
 			'amazon-',
+			'android-',
+			'apple-',
+			'bing-',
 			'contact-form-7-',
 			'divi-',
 			'easy-digital-downloads-',
 			'elementor-',
+			'envato-',
 			'facebook',
 			'feedburner',
 			'github-',
@@ -389,16 +410,18 @@ class Upload_Handler {
 			'gravity-forms-',
 			'gutenberg',
 			'instagram',
-			'insta',
 			'macintosh-',
 			'microsoft-',
 			'ninja-forms-',
+			'paypal-',
 			'pinterest-',
+			'stripe-',
 			'twitter-',
 			'tweet',
 			'whatsapp',
 			'whats-app',
 			'woocommerce-',
+			'woo-',
 			'wordpress',
 			'yoast',
 			'youtube-',
@@ -407,8 +430,15 @@ class Upload_Handler {
 		$has_trademarked_slug = false;
 
 		foreach ( $trademarked_slugs as $trademark ) {
-			if ( false !== strpos( $this->plugin_slug, $trademark ) ) {
-				$has_trademarked_slug = trim( $trademark, '-' );
+			if ( '-' === $trademark[-1] ) {
+				// Trademarks ending in "-" indicate slug cannot begin with that term.
+				if ( 0 === strpos( $this->plugin_slug, $trademark ) ) {
+					$has_trademarked_slug = $trademark;
+					break;
+				}
+			} elseif ( false !== strpos( $this->plugin_slug, $trademark ) ) {
+				// Otherwise, the term cannot appear anywhere in slug.
+				$has_trademarked_slug = $trademark;
 				break;
 			}
 		}
@@ -457,7 +487,7 @@ class Upload_Handler {
 
 		echo '<h4>' . sprintf( __( 'Results of Automated Plugin Scanning: %s', 'wporg-plugins' ), vsprintf( '<span class="%1$s">%2$s</span>', $verdict ) ) . '</h4>';
 		echo '<ul class="tc-result">' . __( 'Result', 'wporg-plugins' ) . '</ul>';
-		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will pass review. All submitted plugins are reviewed manually before approval.', 'wporg-plugins' ) . '</p></div>';
+		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' ) . '</p></div>';
 
 		return $result;
 	}
@@ -503,9 +533,9 @@ class Upload_Handler {
 			__(
 'Thank you for uploading %1$s to the WordPress Plugin Directory. We will review your submission as soon as possible and send you a follow up email with the results.
 
-Your plugin has been given the initial slug of %2$s based on your display name of %1$s. This is subject to change based on the results of your review.
+Your plugin has been given the initial permalink (aka slug) of %2$s based on your display name of %1$s. This is subject to change based on the results of your review.
 
-If you need to change the plugin slug, please reply to this email immediately and let us know what the correct slug should be. We will be unable to change your plugin slug once your review is completed.
+If you need to change the plugin permalink, please reply to this email immediately and let us know what the correct slug should be. We will be unable to change your plugin slug once your review is completed.
 
 If there are any other problems with your submission, please reply to this email and let us know right away. In most cases, we can correct errors as long as the plugin has not yet been approved.
 
