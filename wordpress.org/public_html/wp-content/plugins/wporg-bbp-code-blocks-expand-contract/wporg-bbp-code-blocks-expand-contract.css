@@ -3,8 +3,8 @@
 	margin-bottom: 24px;
 }
 
-#bbpress-forums div.bbp-reply-content a.wporg-bbp-code-expand,
-#bbpress-forums div.bbp-topic-content a.wporg-bbp-code-expand {
+#bbpress-forums div.bbp-reply-content .wporg-bbp-code-tools a.wporg-bbp-code-expand,
+#bbpress-forums div.bbp-topic-content .wporg-bbp-code-tools a.wporg-bbp-code-expand {
 	background: #f0f0f0;
 	display: inline-block;
 	border: 1px solid #ddd;

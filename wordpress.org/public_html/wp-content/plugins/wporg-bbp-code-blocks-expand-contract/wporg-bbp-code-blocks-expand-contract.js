@@ -3,7 +3,9 @@ jQuery(document).ready( function($) {
 		var $el = $( this );
 
 		if ( typeof this.scrollHeight !== 'undefined' && $el.height() < this.scrollHeight ) {
-			var btn = $( '<div class="wporg-bbp-code-tools"><a class="wporg-bbp-code-expand" href="#">Expand</a></div>' );
+			var btn = $( '<div class="wporg-bbp-code-tools"><a class="wporg-bbp-code-expand" href="#"></a></div>' );
+
+			btn.find( 'a' ).text( bbpCodeBlocksExpandContract.expand );
 
 			btn.insertAfter( $el.closest( 'pre' ) )
 		}
@@ -29,7 +31,7 @@ jQuery(document).ready( function($) {
 			pre.css( 'max-height', maxHeightGoal );
 			code.css( 'max-height', maxHeightGoal );
 			code.animate( { height: heightGoal });
-			$( this ).text( 'Contract' );
+			$( this ).text( bbpCodeBlocksExpandContract.contract );
 		} else {
 			$( [document.documentElement, document.body] ).animate({
 			        scrollTop: scrollGoal
@@ -42,7 +44,7 @@ jQuery(document).ready( function($) {
 			    }
 		    );
 
-			$( this ).text( 'Expand' );
+			$( this ).text( bbpCodeBlocksExpandContract.expand );
 		}
 
 		$( this ).toggleClass( 'wporg-bbp-code-expanded' );

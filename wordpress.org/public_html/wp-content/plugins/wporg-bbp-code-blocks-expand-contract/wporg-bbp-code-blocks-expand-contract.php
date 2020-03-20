@@ -1,7 +1,8 @@
 <?php
+namespace WordPressdotorg\BBP_Code_Blocks_Expand_Contract;
 /**
- * Plugin Name: bbPress: Code blocks formatter
- * Description: Convert wiki markup links into HTML WordPress Codex links.
+ * Plugin Name: bbPress: Code blocks Expand/Contract
+ * Description: Adds an Expander to code blocks which are higher than the default code block size.
  * Version:     1.0
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/
@@ -23,14 +24,12 @@
  *	along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit;
-
-if ( ! class_exists( 'WPORG_bbPress_Code_Blocks' ) ) {
-class WPORG_bbPress_Code_Blocks {
-	public function __construct() {
-		wp_enqueue_script( 'wporg-bbp-code-blocks-expand-contract', plugins_url( 'wporg-bbp-code-blocks-expand-contract.js', __FILE__ ), [ 'jquery' ], 1, true );
-		wp_enqueue_style( 'wporg-bbp-code-blocks-expand-contract', plugins_url( 'wporg-bbp-code-blocks-expand-contract.css', __FILE__ ), [], 1 );
-	}
-} }
-
-new WPORG_bbPress_Code_Blocks;
+function wp_head() {
+	wp_enqueue_script( 'wporg-bbp-code-blocks-expand-contract', plugins_url( 'wporg-bbp-code-blocks-expand-contract.js', __FILE__ ), [ 'jquery' ], 1, true );
+	wp_localize_script( 'wporg-bbp-code-blocks-expand-contract', 'bbpCodeBlocksExpandContract', [
+		'expand'   => __( 'Expand', 'wporg' ),
+		'contract' => __( 'Contract', 'wporg' ),
+	] );
+	wp_enqueue_style( 'wporg-bbp-code-blocks-expand-contract', plugins_url( 'wporg-bbp-code-blocks-expand-contract.css', __FILE__ ), [], 1 );
+}
+add_action( 'wp_head', __NAMESPACE__ . '\wp_head' );
