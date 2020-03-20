@@ -1,0 +1,17 @@
+/* We include this top match the homepage language bar  */
+#lang-guess {
+	width: inherit;
+	max-width: inherit;
+	margin: 0;
+	border: inherit;
+	font: inherit;
+	padding: .5rem;
+	background: #C7E8CA;
+	text-align: center;
+	font-size: .8rem;
+	border-radius: inherit
+}
+
+#lang-guess a {
+	text-decoration: underline
+}

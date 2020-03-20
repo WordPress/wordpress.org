@@ -68,3 +68,4 @@ wporg_get_global_header();
 				<?php endif; ?>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
+		<div id="lang-guess-wrap"></div>
