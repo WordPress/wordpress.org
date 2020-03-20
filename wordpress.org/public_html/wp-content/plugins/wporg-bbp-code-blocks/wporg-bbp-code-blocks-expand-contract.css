@@ -1,0 +1,26 @@
+.wporg-bbp-code-tools {
+	margin-top: -24px;
+	margin-bottom: 24px;
+}
+
+#bbpress-forums div.bbp-reply-content a.wporg-bbp-code-expand,
+#bbpress-forums div.bbp-topic-content a.wporg-bbp-code-expand {
+	background: #f0f0f0;
+	display: inline-block;
+	border: 1px solid #ddd;
+	border-top: none;
+	padding: 3px 8px 3px 4px;
+	text-decoration: none;
+}
+
+.wporg-bbp-code-expand:before {
+	font: 400 16px/1 dashicons;
+	margin-right: 3px;
+	float: left;
+	padding-top: 3px;
+	content: "\f347";
+}
+
+.wporg-bbp-code-expand.wporg-bbp-code-expanded:before {
+	content: "\f343";
+}
