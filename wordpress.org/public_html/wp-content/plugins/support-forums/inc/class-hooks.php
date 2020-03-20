@@ -109,6 +109,13 @@ class Hooks {
 
 		add_filter( 'request', array( $this, 'ignore_empty_query_vars' ) );
 
+		// Support ```...``` and {{{...}}} for code blocks.
+		add_filter( 'bbp_new_reply_pre_content',  array( $this, 'support_slack_trac_code_trick' ),  19 );
+		add_filter( 'bbp_new_topic_pre_content',  array( $this, 'support_slack_trac_code_trick' ),  19 );
+		add_filter( 'bbp_new_forum_pre_content',  array( $this, 'support_slack_trac_code_trick' ),  19 );
+		add_filter( 'bbp_edit_reply_pre_content', array( $this, 'support_slack_trac_code_trick' ),  19 );
+		add_filter( 'bbp_edit_topic_pre_content', array( $this, 'support_slack_trac_code_trick' ),  19 );
+		add_filter( 'bbp_edit_forum_pre_content', array( $this, 'support_slack_trac_code_trick' ),  19 );
 	}
 
 	/**
@@ -1102,4 +1109,28 @@ class Hooks {
 		return $query_vars;
 	}
 
+	/**
+	 * Add support for Slack and Trac style code formatting.
+	 * 
+	 * Upon edit, the blocks will be unwrapped to bbPress style blocks.
+	 * 
+	 * See `bbp_code_trick()` for the regex below.
+	 */
+	function support_slack_trac_code_trick( $content ) {
+		$content = str_replace( array( "\r\n", "\r" ), "\n", $content );
+
+		// Slack style ```...``` Inline and Multiline.
+		$content = preg_replace_callback( '|(`)``(.*?)```|', 'bbp_encode_callback', $content );
+		$content = preg_replace_callback( "!(^|\n)```(.*?)```!s", 'bbp_encode_callback', $content );
+
+		// Trac style {{{...}}} Inline and Multiline.
+		$content = preg_replace_callback( '|({){{(.*?)}}}|', function( $matches ) {
+			 // bbPress expects `...` for inline code blocks.
+			$matches[1] = '`';
+			return bbp_encode_callback( $matches );
+		}, $content );
+		$content = preg_replace_callback( "!(^|\n){{{(.*?)}}}!s", 'bbp_encode_callback', $content );
+
+		return $content;
+	}
 }
