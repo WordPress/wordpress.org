@@ -1,9 +1,9 @@
 <?php
 wp_register_style(
-		'wporg-translate',
-		plugins_url( 'style.css', __FILE__ ),
-		[ 'gp-base' ],
-		'20200301'
+	'wporg-translate',
+	plugins_url( 'style.css', __FILE__ ),
+	[ 'gp-base' ],
+	'20200322'
 );
 gp_enqueue_style( 'wporg-translate' );
 
@@ -26,23 +26,23 @@ wp_register_script(
 );
 
 wp_register_script(
-		'wporg-translate-editor',
-		plugins_url( 'js/editor.js', __FILE__ ),
-		[ 'gp-editor', 'autosize' ],
-		'20190510'
+	'wporg-translate-editor',
+	plugins_url( 'js/editor.js', __FILE__ ),
+	[ 'gp-editor', 'autosize' ],
+	'20190510'
 );
 
 wp_register_style(
-		'chartist',
-		plugins_url( 'css/chartist.min.css', __FILE__ ),
-		[],
-		'0.9.5'
+	'chartist',
+	plugins_url( 'css/chartist.min.css', __FILE__ ),
+	[],
+	'0.9.5'
 );
 wp_register_script(
-		'chartist',
-		plugins_url( 'js/chartist.min.js', __FILE__ ),
-		[],
-		'0.9.5'
+	'chartist',
+	plugins_url( 'js/chartist.min.js', __FILE__ ),
+	[],
+	'0.9.5'
 );
 
 if ( isset( $template ) && 'translations' === $template ) {
