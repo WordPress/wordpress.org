@@ -23,7 +23,7 @@ $main_column_title = trim( ucwords( $view ), 's' );
 	<table id="stats-table" class="table">
 		<thead>
 			<tr>
-				<th><?php echo $main_column_title; ?></th>
+				<th><span class="with-tooltip" aria-label="Sorted by active installations"><?php echo $main_column_title; ?></span></th>
 				<?php
 					foreach ( $columns as $title ) {
 						printf( "<th>%s</th>", $title );
@@ -88,6 +88,7 @@ $main_column_title = trim( ucwords( $view ), 's' );
 <script type="text/javascript">
 jQuery( document ).ready( function( $ ) {
 	$( '#stats-table' ).tablesorter( {
+		theme: 'wporg-translate',
 		textExtraction: function( node ) {
 			var cellValue = $( node ).text(),
 				sortValue = $( node ).data( 'sortValue' );

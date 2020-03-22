@@ -120,6 +120,7 @@ gp_tmpl_header();
 <script type="text/javascript">
 jQuery( function( $ ) {
 	$( '#stats-table' ).tablesorter( {
+		theme: 'wporg-translate',
 		textExtraction: function( node ) {
 			var cellValue = $( node ).text(),
 				sortValue = $( node ).data( 'sortValue' );

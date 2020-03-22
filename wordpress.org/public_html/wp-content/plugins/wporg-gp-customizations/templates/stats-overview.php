@@ -14,11 +14,10 @@ gp_tmpl_header();
 		<thead>
 			<tr>
 				<th class="col-locale-code"><?php _e( 'Locale' ); ?></th>
-				<?php foreach ( $projects as $slug => $project ) : ?>
-					<th><?php
-						$namereplace = array( 'WordPress.org ', 'WordPress for ', 'WordPress ', 'ectory', ' - Development' );
-						echo esc_html( str_replace( $namereplace, '', $project->name ) );
-					?></th>
+				<?php foreach ( $projects as $slug => $project ) :
+					$name = str_replace( array( 'WordPress.org ', 'WordPress for ', 'WordPress ', 'ectory', ' - Development' ), '', $project->name );
+					?>
+					<th class="col-<?php echo esc_attr( sanitize_title( $name ) ); ?>"><?php echo esc_html( $name ); ?></th>
 				<?php endforeach; ?>
 			</tr>
 		</thead>
@@ -75,6 +74,7 @@ gp_tmpl_header();
 <script type="text/javascript">
 jQuery( document ).ready( function( $ ) {
 	$( '#stats-table' ).tablesorter( {
+		theme: 'wporg-translate',
 		textExtraction: function( node ) {
 			var cellValue = $( node ).text(),
 				sortValue = $( node ).data( 'sortValue' );

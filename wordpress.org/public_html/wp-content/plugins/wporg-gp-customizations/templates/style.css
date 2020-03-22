@@ -1417,8 +1417,8 @@ ul.projects-dropdown li > a > span {
 	margin-right: 0px;
 	font-weight: bold;
 	text-align: center;
-	vertical-align: bottom;
-	padding: 10px 3px;
+	vertical-align: middle;
+	padding: 10px .5em 10px 10px;
 	font-size: .8em;
 	line-height: 1.2;
 	border-right: 1px solid #72777C;
@@ -1435,6 +1435,10 @@ ul.projects-dropdown li > a > span {
 
 .stats-table table th.col-locale-code {
 	width: 110px;
+}
+
+.stats-table table th.col-wordpress-org {
+	width: 60px;
 }
 
 .stats-table table th.col-locale {
@@ -2891,4 +2895,30 @@ button.translation-actions__rtl {
 
 table.translations.translation-sets-rtl .textarea-direction-ltr .foreign-text {
 	direction: ltr;
+}
+
+.tablesorter-wporg-translate .header,
+.tablesorter-wporg-translate .tablesorter-header {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 9'%3E%3Cg fill='%2332373C' fill-rule='evenodd'%3E%3Cpath d='M5.5 9L9 5H2zM5.5 0L9 4H2z'/%3E%3C/g%3E%3C/svg%3E");
+	background-position: right center;
+	background-repeat: no-repeat;
+	background-size: 11px 9px;
+	cursor: pointer;
+	white-space: normal;
+}
+
+.tablesorter-wporg-translate thead .headerSortUp,
+.tablesorter-wporg-translate thead .tablesorter-headerSortUp,
+.tablesorter-wporg-translate thead .tablesorter-headerAsc {
+	background-color: #f9f9f9;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 4'%3E%3Cpath fill='%2332373C' fill-rule='evenodd' d='M5.5 0L9 4H2z'/%3E%3C/svg%3E");
+	background-size: 11px 4px;
+}
+
+.tablesorter-wporg-translate thead .headerSortDown,
+.tablesorter-wporg-translate thead .tablesorter-headerSortDown,
+.tablesorter-wporg-translate thead .tablesorter-headerDesc {
+	background-color: #f9f9f9;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 4'%3E%3Cpath fill='%2332373C' fill-rule='evenodd' d='M5.5 4L9 0H2z'/%3E%3C/svg%3E");
+	background-size: 11px 4px;
 }
