@@ -7,6 +7,7 @@ use GP_Locales;
 use GP_Route;
 use stdClass;
 use WordPressdotorg\GlotPress\Rosetta_Roles\Plugin as Rosetta_Roles;
+use WordPressdotorg\GlotPress\Routes\Plugin;
 
 /**
  * Locale Route Class.
@@ -128,10 +129,7 @@ class Locale extends GP_Route {
 			$wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IN( " . implode( ', ', $project_ids ) . ')' )
 		);
 
-		$contributors_count = wp_cache_get( 'contributors-count', 'wporg-translate' );
-		if ( false === $contributors_count ) {
-			$contributors_count = array();
-		}
+		$contributors_count = Plugin::get_contributors_count();
 
 		$variants = $this->get_locale_variants( $locale_slug );
 		// If there were no results for the current variant in the current project branch, it should still show it.
@@ -182,10 +180,7 @@ class Locale extends GP_Route {
 
 		$project_icon = $this->get_project_icon( $project, $sub_project, 64 );
 
-		$contributors_count = wp_cache_get( 'contributors-count', 'wporg-translate' );
-		if ( false === $contributors_count ) {
-			$contributors_count = array();
-		}
+		$contributors_count = Plugin::get_contributors_count();
 
 		$sub_project_statuses = array();
 		$sub_projects         = $this->get_active_sub_projects( $sub_project, true );
