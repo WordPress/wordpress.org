@@ -72,8 +72,8 @@ class Consistency extends GP_Route {
 				'project'        => $project,
 			] );
 
-			$translations = wp_list_pluck( $results, 'translation', 'translation_id' );
-			$translations_unique = array_unique( $translations );
+			$translations               = wp_list_pluck( $results, 'translation', 'translation_id' );
+			$translations_unique        = array_values( array_unique( $translations ) );
 			$translations_unique_counts = array_count_values( $translations );
 		}
 

@@ -81,7 +81,7 @@ if ( $performed_search && ! $results ) {
 		echo '<ul class="translations-unique hidden">';
 		foreach ( $translations_unique as $translation ) {
 			printf(
-				'<li>%s <small>(%s)</small> <a href="#%s">&darr;</a></li>',
+				'<li>%s <small>(%s)</small> <a class="anchor-jumper with-tooltip" aria-label="Go to translation" href="#%s">&darr;</a></li>',
 				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) ),
 				1 === $translations_unique_counts[ $translation ] ? $translations_unique_counts[ $translation ] . ' time' : $translations_unique_counts[ $translation ] . ' times',
 				esc_attr( 't-' . md5( $translation ) )
@@ -99,8 +99,8 @@ if ( $performed_search && ! $results ) {
 		</thead>
 		<tbody>
 			<?php
-			$previous_translation = '';
-
+			$previous_translation      = '';
+			$translations_unique_index = 0;
 			foreach ( $results as $result ) {
 				$project_name = $result->project_name;
 				$parent_project_id = $result->project_parent_id;
@@ -119,12 +119,29 @@ if ( $performed_search && ! $results ) {
 				}
 
 				if ( $has_different_translations && $previous_translation !== $result->translation ) {
-					$previous_translation = $result->translation;
+					$prev_arrow = '';
+					$next_arrow = '';
+
+
+					if ( 0 === $translations_unique_index ) {
+						$next_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="' . esc_attr( '#t-' . md5( $translations_unique[ $translations_unique_index + 1 ] ) ) . '">&darr;</a>';
+					} elseif ( $translations_unique_count - 1 === $translations_unique_index ) {
+						$prev_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to previous translation" href="' . esc_attr( '#t-' . md5( $translations_unique[ $translations_unique_index - 1 ] ) ) . '">&uarr;</a>';
+					} else {
+						$prev_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to previous translation" href="' . esc_attr( '#t-' . md5( $translations_unique[ $translations_unique_index - 1 ] ) ) . '">&uarr;</a>';
+						$next_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="' . esc_attr( '#t-' . md5( $translations_unique[ $translations_unique_index + 1 ] ) ) . '">&darr;</a>';
+					}
+
 					printf(
-						'<tr id="%s" class="new-translation"><td colspan="2"><strong>%s</strong> <a href="#translations-overview">&uarr;</a></td></tr>',
+						'<tr id="%s" class="new-translation"><th colspan="2"><strong>%s</strong> %s %s</th></tr>',
 						esc_attr( 't-' . md5( $result->translation ) ),
-						esc_translation( $result->translation )
+						esc_translation( $result->translation ),
+						$next_arrow,
+						$prev_arrow
 					);
+
+					$previous_translation = $result->translation;
+					$translations_unique_index++;
 				}
 
 				printf(

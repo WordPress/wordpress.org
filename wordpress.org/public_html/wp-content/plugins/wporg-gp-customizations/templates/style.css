@@ -2026,7 +2026,7 @@ ul.ct-legend {
 }
 
 .consistency-table tr.new-translation {
-	border-bottom-width: 3px;
+	border-bottom-width: 0;
 }
 
 .consistency-table td {
@@ -2034,8 +2034,34 @@ ul.ct-legend {
 	vertical-align: top;
 }
 
-.consistency-table tr.new-translation td {
-	padding: 40px 0 10px;
+.consistency-table tr.new-translation th {
+	position: sticky;
+	top: 0;
+	padding: 20px 0 10px;
+	background: #fff;
+	text-align: left;
+	box-shadow: 0 -1px 0 #e2e4e7, 0 3px 0 #e2e4e7;
+}
+
+@media screen and (min-width: 600px) {
+	.consistency-table tr.new-translation th {
+		top: 46px;
+	}
+}
+
+@media screen and (min-width: 783px) {
+	.consistency-table tr.new-translation th {
+		top: 32px;
+	}
+}
+
+.anchor-jumper {
+	padding: 0 5px;
+	font-weight: 600;
+}
+
+.consistency-table tr.new-translation th .anchor-jumper {
+	float: right;
 }
 
 .consistency-table .string.rtl {
