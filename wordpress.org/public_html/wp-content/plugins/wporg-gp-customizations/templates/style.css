@@ -258,8 +258,8 @@ body.wporg-make #headline h2 a:before {
 .gp-content h2 {
 	font-family: 'Open Sans', sans-serif !important;
 	margin: 2px 0 .6em;
+	overflow: hidden;
 }
-
 
 .gp-content h3 {
 	background: none;
@@ -296,6 +296,24 @@ p.description {
 p.actionlist {
 	margin-top: 1em;
 	margin-bottom: 1em;
+}
+
+
+@media screen and (max-width: 960px) {
+	.with-sub-projects {
+		margin-left: 0;
+	}
+
+	#sub-projects,
+	.with-sub-projects #translation-sets {
+		float: none;
+		margin: 0;
+		width: 100%;
+	}
+
+	#translation-sets {
+		overflow-x: auto;
+	}
 }
 
 /* Change some colors (http://codepen.io/hugobaeta/full/RNOzoV/) */
@@ -542,7 +560,6 @@ button.fuzzy strong {
 
 .invisibles {
 	-webkit-user-select: none;
-	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
 }
@@ -2035,6 +2052,7 @@ ul.ct-legend {
 }
 
 .consistency-table tr.new-translation th {
+	position: -webkit-sticky;
 	position: sticky;
 	top: 0;
 	padding: 20px 0 10px;
@@ -2267,7 +2285,13 @@ table.translations tr.editor td {
 	justify-content: flex-end;
 	border-bottom: 1px solid #e2e4e7;
 	background-color: #f3f4f5;
-	height: 40px;
+	min-height: 40px;
+}
+
+@media screen and (min-width: 700px) {
+	.panel-header {
+		height: 40px;
+	}
 }
 
 .editor-panel__left .panel-header {
@@ -2297,7 +2321,7 @@ table.translations tr.editor td {
 	flex: 1;
 	margin: 0 0 0 10px;
 	font-size: 13px;
-	line-height: 1;
+	line-height: 20px;
 	font-weight: 400;
 	letter-spacing: 1px;
 	text-transform: uppercase;
@@ -2305,10 +2329,13 @@ table.translations tr.editor td {
 }
 
 .panel-header__bubble {
-	font-size: 12px;
+	display: inline-block;
 	padding: 2px 4px;
-	text-transform: none;
+	margin: 2px 0;
+	white-space: nowrap;
+	font-size: 12px;
 	font-weight: 600;
+	text-transform: none;
 	border: 1px solid #666;
 }
 
@@ -2335,6 +2362,10 @@ table.translations tr.editor td {
 .panel-header__bubble--old {
 	color: #826EB4;
 	border-color: #826EB4;
+}
+
+.panel-header-actions {
+	align-self: flex-start;
 }
 
 .panel-header-actions button {
@@ -2750,6 +2781,7 @@ html.modal-open {
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: 15px;
+	position: -webkit-sticky;
 	position: sticky;
 	top: -15px;
 	background: #fff;
