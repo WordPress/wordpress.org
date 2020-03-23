@@ -3850,7 +3850,12 @@ section {
 
 .bbpress #bbpress-forums .create-topic {
 	font-size: 0.8rem;
-	float: right;
+}
+
+@media (min-width: 600px) {
+	.bbpress #bbpress-forums .create-topic {
+		float: right;
+	}
 }
 
 .bbpress #bbpress-forums .create-topic::before {
@@ -3865,6 +3870,15 @@ section {
 	font-size: 0.8rem;
 	float: none;
 	width: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+@media (min-width: 600px) {
+	.bbpress #bbpress-forums .bbp-pagination {
+		float: left;
+		display: inline-block;
+	}
 }
 
 .bbpress #bbpress-forums .bbp-pagination .page-numbers {
@@ -3876,6 +3890,13 @@ section {
 	padding: 2px 8px;
 	margin-right: -1px;
 	opacity: 1;
+	flex: 1;
+}
+
+@media (min-width: 600px) {
+	.bbpress #bbpress-forums .bbp-pagination .page-numbers {
+		flex: inherit;
+	}
 }
 
 .bbpress #bbpress-forums .bbp-pagination .page-numbers:not(.current):not(.dots):hover {
@@ -3905,6 +3926,12 @@ section {
 
 .bbpress #bbpress-forums .bbp-topic-pagination a {
 	border: 1px solid #ddd;
+}
+
+.bbpress #bbpress-forums .bbp-pagination-links {
+	display: flex;
+	text-align: center;
+	flex-wrap: wrap;
 }
 
 .bbpress #bbpress-forums ul.bbp-forums,
@@ -4082,6 +4109,7 @@ section {
 	margin-top: 1rem;
 	padding-top: 1rem;
 	border-top: 1px solid #eee;
+	clear: both;
 }
 
 .topic-edit #bbpress-forums .bbp-topic-form legend,

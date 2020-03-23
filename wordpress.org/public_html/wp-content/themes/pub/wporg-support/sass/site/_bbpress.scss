@@ -12,6 +12,8 @@ section {
 	overflow: inherit;
 }
 
+$paginationBreakPoint: "600px";
+
 .three-up { //3-columns section
 
 	@extend .clear;
@@ -472,7 +474,10 @@ section {
 
 		.create-topic {
 			font-size: 0.8rem;
-			float: left;
+
+			@media (min-width: $paginationBreakPoint) {
+				float: left;
+			}
 
 			&::before {
 				color: #000;
@@ -487,6 +492,13 @@ section {
 			font-size: ms(-2);
 			float: none;
 			width: auto;
+			display: flex;
+			flex-direction: column;
+
+			@media (min-width: $paginationBreakPoint) {
+				float: right;
+				display: inline-block;
+			}
 
 			.page-numbers {
 				background: #fff;
@@ -497,6 +509,11 @@ section {
 				padding: 2px 8px;
 				margin-left: -1px;
 				opacity: 1;
+				flex: 1;
+
+				@media (min-width: $paginationBreakPoint) {
+					flex: inherit;
+				}
 
 				&:not(.current):not(.dots):hover {
 					background: $color__wp-blue;
@@ -528,6 +545,12 @@ section {
 		.bbp-topic-pagination a {
 			border: 1px solid #ddd;
 		}
+	}
+
+	#bbpress-forums .bbp-pagination-links {
+		display: flex;
+		text-align: center;
+		flex-wrap: wrap;
 	}
 
 	#bbpress-forums ul.bbp-forums,
@@ -736,6 +759,7 @@ section {
 	margin-top: 1rem;
 	padding-top: 1rem;
 	border-top: 1px solid #eee;
+	clear: both;
 }
 
 .topic-edit #bbpress-forums .bbp-topic-form legend,
