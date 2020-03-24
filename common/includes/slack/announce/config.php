@@ -369,6 +369,8 @@ function get_whitelist() {
 			'casiepa', // @Pascal on Slack
 			'JerrySarcastic',
 			'mgelves', // @maugelves on Slack
+			'nishasingh',
+			'rahuldsarker',
 			'RoseAppleMedia',
 			'sbddesign',
 		),
