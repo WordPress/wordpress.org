@@ -42,12 +42,15 @@ function customize_register( $wp_customize ) {
  * Currently applies to:
  * - date-based archives
  * - search results
+ * - Author archives
  * - 'mentions' taxonomy
  * - tag archives with fewer than 3 posts
  */
 function no_robots() {
 	if (
 		is_search()
+	||
+		is_author()
 	||
 		is_date()
 	||
