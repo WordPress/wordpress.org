@@ -572,6 +572,10 @@ class Official_WordPress_Events {
 	protected function format_meetup_venue_location( $venue ) {
 		$location = array();
 
+		if ( isset( $venue['id'] ) && 26906060 === $venue['id'] ) {
+			return 'online';
+		}
+
 		foreach ( array( 'city', 'state', 'localized_country_name' ) as $part ) {
 			if ( ! empty( $venue[ $part ] ) ) {
 				if ( in_array( $part, array( 'state' ) ) ) {
