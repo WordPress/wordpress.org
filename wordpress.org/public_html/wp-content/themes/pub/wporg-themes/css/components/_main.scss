@@ -218,14 +218,15 @@ ul, ol {
 }
 
 .theme-browser .theme .theme-screenshot img {
+	display: block;
+	margin: 0 auto;
 	height: auto;
-	max-height: 214px;
+	max-height: 300px;
 	left: 0;
 	position: inherit;
 	top: 0;
 	-webkit-transform: translateZ( 0 );
 	transition: opacity 0.2s ease-in-out;
-	width: 100%;
 }
 
 .theme-browser .theme:hover .theme-screenshot img,
@@ -1539,7 +1540,7 @@ span.favorite.favorited {
 	}
 }
 
-@media only screen and (max-width: 1120px) {
+@media only screen and (max-width: 865px) {
 	.filter-drawer {
 		border-bottom: 1px solid #eee;
 	}
@@ -1651,7 +1652,7 @@ span.favorite.favorited {
 	}
 }
 
-@media only screen and (max-width: 480px) {
+@media only screen and (max-width: 400px) {
 	.theme-browser .theme {
 		width: 100%;
 		margin-right: 0;
