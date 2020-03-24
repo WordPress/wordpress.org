@@ -546,16 +546,19 @@ article.page a.author-avatar {
 	border-radius: 50%;
 }
 
-.author-avatar img.avatar:hover {
-	border-radius: 0 !important;
-}
-
 article.post a.author-avatar img.avatar,
 article#post-new a.author-avatar img.avatar,
 article.page a.author-avatar img.avatar {
 	height: 50px !important;
 	width: 50px !important;
 }
+
+/* Don't show the on-hover gravatar previews */
+body > .author-avatar,
+body > #grav-throbber {
+    display: none;
+}
+
 
 /* See .entry-meta .entry-date */
 .page .o2-post .entry-meta {
