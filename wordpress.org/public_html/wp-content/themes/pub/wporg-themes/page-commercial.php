@@ -46,7 +46,7 @@ if ( have_posts() ) :
 							<?php $shop_name = apply_filters( 'the_title', $shop->shop ); ?>
 							<article id="post-<?php echo esc_attr( $shop->slug ); ?>" class="theme hentry">
 								<div class="theme-screenshot">
-									<img src="<?php echo esc_url( $shop->image ); ?>" alt="<?php
+									<img src="<?php echo esc_url( $shop->image ); ?>" loading="lazy" alt="<?php
 										/* translators: %s: name of theme shop */
 										echo esc_attr( sprintf( __( '%s homepage', 'wporg-themes' ), $shop_name ) );
 									?>">

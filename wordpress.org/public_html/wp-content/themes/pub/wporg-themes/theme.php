@@ -2,7 +2,7 @@
 	<a class="url" href="<?php echo home_url( $theme->slug . '/' ); ?>" rel="bookmark" tabindex="-1">
 		<?php if ( $theme->screenshot_url ) { ?>
 		<div class="theme-screenshot">
-			<img src="<?php echo esc_url( $theme->screenshot_url ); ?>?w=572&amp;strip=all" alt="" />
+			<img src="<?php echo esc_url( $theme->screenshot_url ); ?>?w=572&amp;strip=all" loading="lazy" alt="" />
 		</div>
 		<?php } else { ?>
 		<div class="theme-screenshot blank"></div>
