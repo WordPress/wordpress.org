@@ -1,9 +1,3 @@
-<script type="text/template" id="tmpl-owe-timezone">
-	<p class="owe-timezone">
-		All times displayed in {{ data }}
-	</p>
-</script>
-
 <script type="text/template" id="tmpl-official-events">
 	<h3>
 		{{ data.date }}
@@ -21,5 +15,6 @@
 		</a>
 		<span class="owe-separator"></span>
 		{{ data.startTime }}
+		<span class="owe-timezone">{{ data.timezone }}</span>
 	</li>
 </script>

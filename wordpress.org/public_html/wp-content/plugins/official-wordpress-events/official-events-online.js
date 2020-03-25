@@ -4,12 +4,14 @@
  * @param {Array} events
  */
 function getSortedEvents( events ) {
+	const timezone = wp.date.format( '(\\U\\T\\CP)' );
 	const sortedEvents = {};
 	events.forEach( function( event ) {
 		const d = new Date( event.start_timestamp * 1000 );
 		const key = wp.date.format( 'Y-m-d', d );
 		// Inject a human-readable start time.
-		event.startTime = wp.date.format( 'g:i a ', d );
+		event.startTime = wp.date.format( 'g:i a', d );
+		event.timezone = timezone;
 		if ( sortedEvents.hasOwnProperty( key ) ) {
 			sortedEvents[ key ].push( event );
 		} else {
@@ -20,7 +22,6 @@ function getSortedEvents( events ) {
 }
 
 jQuery( function( $ ) {
-	var templateTZ = wp.template( 'owe-timezone' );
 	var templateList = wp.template( 'official-events' );
 	var templateEvent = wp.template( 'official-event' );
 
@@ -35,7 +36,5 @@ jQuery( function( $ ) {
 		}
 	).join( '' );
 
-	var timezone = templateTZ( wp.date.format( '\\U\\T\\CP' ) );
-
-	$( '#official-online-events' ).html( timezone + list );
+	$( '#official-online-events' ).html( list );
 });
