@@ -233,7 +233,7 @@ window.wp = window.wp || {};
 			var collection = this;
 			instance = instance || 0;
 
-			// Themes per instance are set at 24
+			// Themes per instance are set via posts_per_page option in WP admin.
 			collection = _( collection.rest( themes.data.settings.postsPerPage * instance ) );
 			collection = _( collection.first( themes.data.settings.postsPerPage ) );
 

@@ -134,7 +134,7 @@ function wporg_themes_scripts() {
 					'notfound' => __( 'Page not found', 'wporg-themes' ) . " &#124; ${title_suffix}",
 				),
 				'isMobile'     => wp_is_mobile(),
-				'postsPerPage' => 24,
+				'postsPerPage' => get_option( 'posts_per_page' ),
 				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
 				'locale'       => get_locale(),
 				'favorites'    => array(
