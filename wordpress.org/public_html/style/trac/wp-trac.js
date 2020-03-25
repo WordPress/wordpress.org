@@ -648,6 +648,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					}
 				});
 			}
+
+			// Rename the "Submit changes" buttons
+			$('input[type="submit"][value="Submit changes"]').prop( 'value', 'Add Comment' );
 		},
 
 		reports: function() {
