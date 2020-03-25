@@ -5,6 +5,7 @@
  * Author: Nacin
  */
 
+require_once dirname( __FILE__ ) . '/inc/admin-notices.php';
 require_once dirname( __FILE__ ) . '/inc/callout-boxes.php';
 require_once dirname( __FILE__ ) . '/inc/glossary.php';
 require_once dirname( __FILE__ ) . '/inc/navigation.php';
