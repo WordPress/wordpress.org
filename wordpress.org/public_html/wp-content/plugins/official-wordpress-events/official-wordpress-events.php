@@ -15,7 +15,7 @@ class Official_WordPress_Events {
 	const WORDCAMP_API_BASE_URL = 'https://central.wordcamp.org/wp-json/';
 	const MEETUP_API_BASE_URL   = 'https://api.meetup.com/';
 	const MEETUP_MEMBER_ID      = 72560962;
-	const CACHEBUSTER           = 2;
+	const CACHEBUSTER           = 3;
 
 	/*
 	 * @todo
