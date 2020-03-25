@@ -1,11 +1,18 @@
-#ofe-events h3 {
+.ofe-events h3 {
 	margin-bottom: 1.3em;
 	text-transform: uppercase;
+	font-weight: bold;
+	color: #23282D;
+	font-size: 1.2em;
 }
 
 	.owe-day-of-week {
-		color: #a1a1a1;
+		color: #767676;
 	}
+
+.owe-timezone {
+	font-style: italic;
+}
 
 ul.ofe-event-list {
 	margin-left: 0;

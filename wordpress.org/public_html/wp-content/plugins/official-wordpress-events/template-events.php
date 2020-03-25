@@ -1,4 +1,4 @@
-<div id="ofe-events">
+<div id="ofe-events" class="ofe-events">
 	<?php foreach ( $events as $date => $day_events ) : ?>
 
 		<h3>

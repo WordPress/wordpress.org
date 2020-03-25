@@ -15,6 +15,7 @@ class Official_WordPress_Events {
 	const WORDCAMP_API_BASE_URL = 'https://central.wordcamp.org/wp-json/';
 	const MEETUP_API_BASE_URL   = 'https://api.meetup.com/';
 	const MEETUP_MEMBER_ID      = 72560962;
+	const CACHEBUSTER           = 2;
 
 	/*
 	 * @todo
@@ -171,7 +172,12 @@ class Official_WordPress_Events {
 	public function enqueue_scripts() {
 		global $post;
 
-		wp_register_style( 'official-wordpress-events', plugins_url( 'official-wordpress-events.css', __FILE__ ), array(), 1 );
+		wp_register_style(
+			'official-wordpress-events',
+			plugins_url( 'official-wordpress-events.css', __FILE__ ),
+			array(),
+			self::CACHEBUSTER
+		);
 
 		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'official_wordpress_events' ) ) {
 			wp_enqueue_style( 'official-wordpress-events' );
@@ -824,4 +830,5 @@ class Official_WordPress_Events {
 }
 
 require_once( __DIR__ . DIRECTORY_SEPARATOR . 'official-wordpress-event.php' );
+require_once( __DIR__ . DIRECTORY_SEPARATOR . 'official-events-online.php' );
 $GLOBALS['Official_WordPress_Events'] = new Official_WordPress_Events();
