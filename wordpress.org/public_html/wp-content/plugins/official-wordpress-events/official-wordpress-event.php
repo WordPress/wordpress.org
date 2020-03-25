@@ -9,11 +9,11 @@
  */
 class Official_WordPress_Event {
 	public $id, $type, $source_id, $status, $title, $url, $description, $num_attendees, $meetup_name, $meetup_url,
-           $start_timestamp, $end_timestamp, $location, $country_code, $latitude, $longitude;
+		$start_timestamp, $end_timestamp, $utc_offset, $location, $country_code, $latitude, $longitude;
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param array $members
 	 */
 	public function __construct( $members ) {

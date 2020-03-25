@@ -127,25 +127,26 @@ class Official_WordPress_Events {
 
 		foreach ( $events as $event ) {
 			$row_values = array(
-				'id'          => null,
-				'type'        => $event->type,
-				'source_id'   => $event->source_id,
-				'status'      => $event->status,
-				'title'       => $event->title,
-				'url'         => $event->url,
-				'description' => $event->description,
-				'attendees'   => $event->num_attendees,
-				'meetup'      => $event->meetup_name,
-				'meetup_url'  => $event->meetup_url,
-				'date_utc'    => date( 'Y-m-d H:i:s', $event->start_timestamp ),
-				'end_date'    => date( 'Y-m-d H:i:s', $event->end_timestamp ),
-				'location'    => $event->location,
-				'country'     => $event->country_code,
-				'latitude'    => $event->latitude,
-				'longitude'   => $event->longitude,
+				'id'              => null,
+				'type'            => $event->type,
+				'source_id'       => $event->source_id,
+				'status'          => $event->status,
+				'title'           => $event->title,
+				'url'             => $event->url,
+				'description'     => $event->description,
+				'attendees'       => $event->num_attendees,
+				'meetup'          => $event->meetup_name,
+				'meetup_url'      => $event->meetup_url,
+				'date_utc'        => gmdate( 'Y-m-d H:i:s', $event->start_timestamp ),
+				'end_date'        => gmdate( 'Y-m-d H:i:s', $event->end_timestamp ),
+				'date_utc_offset' => $event->utc_offset,
+				'location'        => $event->location,
+				'country'         => $event->country_code,
+				'latitude'        => $event->latitude,
+				'longitude'       => $event->longitude,
 			);
 
-			// Latitude and longitude are required by the database, so skip events that don't have one
+			// Latitude and longitude are required by the database, so skip events that don't have one.
 			if ( empty( $row_values['latitude'] ) || empty( $row_values['longitude'] ) ) {
 				continue;
 			}
@@ -474,7 +475,8 @@ class Official_WordPress_Events {
 				'description'     => $meetup['description'] ?? '',
 				'num_attendees'   => $meetup['yes_rsvp_count'],
 				'start_timestamp' => $start_timestamp,
-				'end_timestamp'   => ( empty ( $meetup['duration'] ) ? $start_timestamp : $start_timestamp + ( $meetup['duration'] / 1000 ) ), // convert to seconds
+				'end_timestamp'   => ( empty( $meetup['duration'] ) ? $start_timestamp : $start_timestamp + ( $meetup['duration'] / 1000 ) ), // convert to seconds.
+				'utc_offset'      => $meetup['utc_offset'] / 1000, // convert to seconds.
 				'location'        => $location,
 				'country_code'    => $country_code,
 				'latitude'        => $latitude,
