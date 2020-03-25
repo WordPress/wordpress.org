@@ -144,7 +144,6 @@ final class HelpHub_Codex_Languages {
 			array( 'Myanmar', 'myanmar', 'mya_codex', 'http://www.myanmarwp.com/%1s' ),
 			array( 'Dutch', 'Nederlands', 'nl_codex', 'https://codex.wordpress.org/nl:%1s' ),
 			array( 'Persian', 'فارسی', 'fa_codex', 'http://codex.wp-persian.com/%1s' ),
-			array( 'Farsi', 'فارسی', 'fax_codex', 'http://www.isawpi.ir/wiki/%1s' ),
 			array( 'Polish', 'Polski', 'pl_codex', 'https://codex.wordpress.org/pl:%1s' ),
 			array( 'Portuguese_Português', 'Português', 'pt_codex', 'https://codex.wordpress.org/pt:%1s' ),
 			array( 'Brazilian Portuguese', 'Português do Brasil', 'ptbr_codex', 'https://codex.wordpress.org/pt-br:%1s' ),
