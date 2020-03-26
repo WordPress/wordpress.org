@@ -109,7 +109,7 @@ function wporg_themes_scripts() {
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '20200221', true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '20200226', true );
 
 		// Use the Rosetta-specific site name. Ie. "WordPress.org $LOCALE"
 		$title_suffix = isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ? $GLOBALS['wporg_global_header_options']['rosetta_title'] : 'WordPress.org';
@@ -120,6 +120,7 @@ function wporg_themes_scripts() {
 			'settings' => array(
 				'title'        => array(
 					'default'  => "%s &#124; ${title_suffix}",
+					'home'     => __( 'WordPress Themes', 'wporg-themes' ) . " &#124; ${title_suffix}",
 					'theme'    => '%s - ' . __( 'WordPress theme', 'wporg-themes' ) . " &#124; ${title_suffix}",
 					/* translators: %s: theme author name */
 					'author'   => sprintf(

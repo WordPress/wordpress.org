@@ -29,6 +29,8 @@ window.wp = window.wp || {};
 				format = themes.data.settings.title.theme;
 			} else if ( '404' === type || 'notfound' === type ) {
 				format = themes.data.settings.title.notfound;
+			} else if ( 'home' === type || ( 'home' === item && undefined === type ) ) {
+				format = themes.data.settings.title.home;
 			}
 
 			var title  = $( '<div/>' ).html( format.replace( '%s', $( '<div/>' ).text( item ).html() ) ).text();
@@ -804,8 +806,13 @@ window.wp = window.wp || {};
 							sorter = $( '.filter-links [data-sort="' + themes.data.settings.browseDefault + '"]' );
 							args   = { trigger: true };
 						}
-						themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sorter.data( 'sort' ) ), args );
-						themes.utils.title( sorter.text(), 'browse' );
+						if ( themes.data.settings.browseDefault === sorter.data( 'sort' ) ) {
+							themes.router.navigate( themes.router.baseUrl( '/' ), args );
+							themes.utils.title( 'home' );
+						} else {
+							themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sorter.data( 'sort' ) ), args );
+							themes.utils.title( sorter.text(), 'browse' );
+						}
 					}
 
 					// Restore scroll position
@@ -1306,8 +1313,8 @@ window.wp = window.wp || {};
 				delete request.search;
 				request.browse = themes.data.settings.browseDefault;
 
-				themes.utils.title( $( '.filter-links [data-sort="' + request.browse + '"]' ).text(), 'browse' );
-				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + request.browse ), { replace: true } );
+				themes.utils.title( 'home' );
+				themes.router.navigate( themes.router.baseUrl( '/' ), { replace: true } );
 			}
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
@@ -1438,7 +1445,11 @@ window.wp = window.wp || {};
 			this.sort( sort );
 
 			// Trigger a router.navigate update
-			themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sort ) );
+			if ( themes.data.settings.browseDefault === sort ) {
+				themes.router.navigate( themes.router.baseUrl( '/' ) );
+			} else {
+				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sort ) );
+			}
 		},
 
 		sort: function( sort ) {
@@ -1461,7 +1472,11 @@ window.wp = window.wp || {};
 
 			if ( sorter && sorter.length ) {
 				sorter.addClass( this.activeClass );
-				themes.utils.title( sorter.text(), 'browse' );
+				if ( themes.data.settings.browseDefault === sort ) {
+					themes.utils.title( 'home' );
+				} else {
+					themes.utils.title( sorter.text(), 'browse' );
+				}
 
 				this.browse( sort );
 			} else {
@@ -1618,7 +1633,10 @@ window.wp = window.wp || {};
 		},
 
 		baseUrl: function( url ) {
-			if ( 0 !== url.length ) {
+			if ( '/' === url ) {
+				// Bad workaround for https://github.com/jashkenas/backbone/issues/3391
+				url = '/#';
+			} else if ( 0 !== url.length ) {
 				url += '/';
 			}
 			return url;
