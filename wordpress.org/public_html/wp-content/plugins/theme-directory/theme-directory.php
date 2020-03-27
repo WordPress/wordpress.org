@@ -1262,6 +1262,9 @@ function wporg_themes_noindex_for_feeds() {
 	if ( is_tag() ) {
 		header( 'X-Robots-Tag: noindex' );
 	}
+	if ( is_search() ) {
+		header( 'X-Robots-Tag: noindex, follow' );
+	}
 }
 add_action( 'themes_custom_feed_head', 'wporg_themes_noindex_for_feeds' );
 
