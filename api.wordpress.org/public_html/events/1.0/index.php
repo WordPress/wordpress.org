@@ -300,10 +300,11 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 		ORDER BY
 			FIELD( %s, country  ) DESC,
 			FIELD( %s, timezone ) DESC,
-			population DESC
+			population DESC,
+			BINARY LOWER( %s ) = BINARY LOWER( name ) DESC
 		LIMIT 1";
 
-	$prepared_query = $wpdb->prepare( $query, $location_name, $country, $timezone );
+	$prepared_query = $wpdb->prepare( $query, $location_name, $country, $timezone, $location_name );
 	$db_handle      = $wpdb->db_connect( $prepared_query );
 
 	$wpdb->set_charset( $db_handle, 'utf8' ); // The content in this table requires a UTF8 connection.
@@ -319,10 +320,11 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 			ORDER BY
 				FIELD( %s, country  ) DESC,
 				FIELD( %s, timezone ) DESC,
-				population DESC
+				population DESC,
+				BINARY LOWER( %s ) = BINARY LOWER( LEFT( name, %d ) ) DESC
 			LIMIT 1";
 
-		$prepared_query = $wpdb->prepare( $query, $wpdb->esc_like( $location_name ) . '%', $country, $timezone );
+		$prepared_query = $wpdb->prepare( $query, $wpdb->esc_like( $location_name ) . '%', $country, $timezone, $location_name, mb_strlen( $location_name ) );
 		$db_handle      = $wpdb->db_connect( $prepared_query );
 
 		$wpdb->set_charset( $db_handle, 'utf8' ); // The content in this table requires a UTF8 connection.
