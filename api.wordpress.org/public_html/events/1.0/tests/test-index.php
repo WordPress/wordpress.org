@@ -192,7 +192,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Africa/Nairobi',
 			),
 			'expected' => array(
-				'description' => 'naíróbí',
+				'description' => 'nairobi',
 				'latitude'    => '-1.283',
 				'longitude'   => '36.817',
 				'country'     => 'KE',
@@ -206,7 +206,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tokyo',
 			),
 			'expected' => array(
-				'description' => 'tōkyō',
+				'description' => 'tokyo',
 				'latitude'    => '35.690',
 				'longitude'   => '139.692',
 				'country'     => 'JP',
@@ -220,7 +220,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Europe/Berlin',
 			),
 			'expected' => array(
-				'description' => 'berlín',
+				'description' => 'berlin',
 				'latitude'    => '52.524',
 				'longitude'   => '13.411',
 				'country'     => 'DE',
@@ -350,7 +350,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Denver',
 			),
 			'expected' => array(
-				'description' => "doña ana",
+				'description' => "dona ana",
 				'latitude'    => '32.390',
 				'longitude'   => '-106.814',
 				'country'     => 'US',
@@ -569,7 +569,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Mexico_City',
 			),
 			'expected' => array(
-				'description' => 'ciudad de mexico',
+				'description' => 'ciudad de méxico',
 				'latitude'    => '19.428',
 				'longitude'   => '-99.128',
 				'country'     => 'MX',
@@ -597,7 +597,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Bogota',
 			),
 			'expected' => array(
-				'description' => 'bogota',
+				'description' => 'bogotá',
 				'latitude'    => '4.610',
 				'longitude'   => '-74.082',
 				'country'     => 'CO',
@@ -752,9 +752,9 @@ function get_location_test_cases() {
 		'ip-asia' => array(
 			'input' => array( 'ip' => '86.108.55.28' ),
 			'expected' => array(
-				'description' => 'hakama',
-				'latitude'    => '32.594',
-				'longitude'   => '35.884',
+				'description' => 'amman',
+				'latitude'    => '31.955',
+				'longitude'   => '35.945',
 				'country'     => 'JO',
 				'internal'    => true,
 			),
@@ -861,9 +861,9 @@ function get_location_test_cases() {
 		'ipv6-oceania-collapsed-prefix' => array(
 			'input'    => array( 'ip' => '::ffff:0190:c500' ),
 			'expected' => array(
-				'description' => 'sydney',
-				'latitude'    => '-33.868',
-				'longitude'   => '151.207',
+				'description' => 'perth',
+				'latitude'    => '-31.952',
+				'longitude'   => '115.861',
 				'country'     => 'AU',
 				'internal'    => true,
 			),
