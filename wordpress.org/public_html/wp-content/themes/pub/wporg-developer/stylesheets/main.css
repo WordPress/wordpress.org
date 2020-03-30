@@ -2659,6 +2659,12 @@ body.responsive-show #secondary .search-section {
   width: 100%;
 }
 
+body.responsive-show #secondary-toggle {
+  height: 32px;
+  margin-left: 8px;
+  width: 100%;
+}
+
 body.responsive-show #primary-modal {
   display: block;
 }
