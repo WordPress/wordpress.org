@@ -161,6 +161,11 @@ function build_response( $location, $location_args ) {
 
 		if ( ! empty( $location['country'] ) ) {
 			$event_args['country'] = $location['country'];
+
+			// If no specific location was found, but a country was, restrict to events from this country.
+			if ( empty( $event_args['nearby'] ) ) {
+				$event_args['restrict_by_country'] = true;
+			}
 		}
 
 		$events = get_events( $event_args );
