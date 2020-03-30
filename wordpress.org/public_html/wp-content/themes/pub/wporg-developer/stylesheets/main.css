@@ -2432,6 +2432,8 @@ h2.toc-heading + h3.toc-heading:target {
 #secondary aside.widget_wporg_handbook_pages,
 #secondary aside.widget_nav_menu {
   font-size: 16px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .widget_wporg_handbook_pages h1,
@@ -2649,6 +2651,7 @@ body.responsive-show {
 
 body.responsive-show #secondary {
   left: 0;
+  overflow-y: scroll;
 }
 
 body.responsive-show #primary-modal {
