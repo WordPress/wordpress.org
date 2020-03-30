@@ -2271,6 +2271,11 @@ body.responsive-show {
 	#secondary {
 		left: 0;
 		overflow-y: scroll;
+
+		.search-section {
+			margin-top: 32px;
+			width: 100%;
+		}
 	}
 	#primary-modal {
 		display: block;

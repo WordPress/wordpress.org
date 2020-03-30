@@ -2654,6 +2654,11 @@ body.responsive-show #secondary {
   overflow-y: scroll;
 }
 
+body.responsive-show #secondary .search-section {
+  margin-top: 32px;
+  width: 100%;
+}
+
 body.responsive-show #primary-modal {
   display: block;
 }
