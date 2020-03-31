@@ -17,7 +17,7 @@ namespace WordPressdotorg\Forums;
 	<label for="s" class="screen-reader-text"><?php _ex( 'Search for:', 'label', 'wporg-forums' ); ?></label>
 	<?php
 		$tab = null;
-		if ( 'wporg_compat_before_single_view' === current_action() ) {
+		if ( in_array( current_action(), [ 'bbp_template_before_pagination_loop', 'wporg_compat_before_single_view' ] ) ) {
 			$placeholder = _x( 'Search this forum', 'placeholder', 'wporg-forums' );
 			$project     = wporg_support_get_compat_object();
 		} elseif ( is_front_page() ) {
