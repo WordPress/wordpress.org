@@ -82,7 +82,7 @@ class Ratings extends \WP_Widget {
 			</div>
 		<?php else: ?>
 			<div class="user-rating">
-				<a href="<?php echo esc_url( wp_login_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/#new-post' ) ); ?>" rel="nofollow" title="<?php esc_attr_e( 'Log in to Wordpress.org', 'wporg-plugins' ); ?>"><?php _e( 'Log in to submit a review.', 'wporg-plugins' ); ?></a>
+				<a href="<?php echo esc_url( wp_login_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/#new-post' ) ); ?>" rel="nofollow" title="<?php esc_attr_e( 'Log in to WordPress.org', 'wporg-plugins' ); ?>"><?php _e( 'Log in to submit a review.', 'wporg-plugins' ); ?></a>
 			</div>
 		<?php
 		endif;
