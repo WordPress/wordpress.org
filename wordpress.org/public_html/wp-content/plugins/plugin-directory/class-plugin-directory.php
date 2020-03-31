@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
+use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Author_Cards;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Stats_Report;
 
@@ -1383,6 +1384,13 @@ class Plugin_Directory {
 	 * @return bool
 	 */
 	public function jetpack_sitemap_skip_post( $skip, $plugin_db_row ) {
+		static $calls = 0;
+		if ( $calls++ >= 50 ) {
+			// Clear some memory caches.
+			$calls = 0;
+			Tools::clear_memory_heavy_variables();
+		}
+
 		if ( Template::is_plugin_outdated( $plugin_db_row->ID ) ) {
 			$skip = true;
 		}

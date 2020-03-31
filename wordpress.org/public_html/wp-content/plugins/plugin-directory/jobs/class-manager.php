@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
  * Manager to wrap up all the logic for Cron tasks.
@@ -313,19 +314,10 @@ class Manager {
 	 * Clear caches for memory management.
 	 *
 	 * @static
-	 * @global \wpdb            $wpdb
-	 * @global \WP_Object_Cache $wp_object_cache
+	 * @see Tools::clear_memory_heavy_variables();
 	 */
 	public static function clear_memory_heavy_variables() {
-		global $wpdb, $wp_object_cache;
-
-		$wpdb->queries = [];
-
-		if ( is_object( $wp_object_cache ) ) {
-			$wp_object_cache->cache          = [];
-			$wp_object_cache->group_ops      = [];
-			$wp_object_cache->memcache_debug = [];
-		}
+		Tools::clear_memory_heavy_variables();
 	}
 
 }
