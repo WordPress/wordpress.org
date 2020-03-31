@@ -8,10 +8,6 @@ $content = '<!-- wp:paragraph {"customTextColor":"#6c7781","customFontSize":17} 
 <p style="color:#6c7781;font-size:17px" class="has-text-color"><em>' . esc_html__( 'It&#8217;s a whole new way to use WordPress. Try it right here!', 'wporg' ) . '</em></p>
 <!-- /wp:paragraph -->' . "\n\n";
 
-$content .= '<!-- wp:image {"id":97629,"align":"full"} -->
-<figure class="wp-block-image alignfull"><img src="https://wordpress.org/gutenberg/files/2018/07/Screenshot-4-1.png" alt="" class="wp-image-97629"/></figure>
-<!-- /wp:image -->' . "\n\n";
-
 $content .= '<!-- wp:paragraph {"align":"left"} -->
 <p style="text-align:left">' . esc_html__( 'We call the new editor Gutenberg. The entire editing experience has been rebuilt for media rich pages and posts. Experience the flexibility that blocks will bring, whether you are building your first site, or write code for a living.', 'wporg' ) . '</p>
 <!-- /wp:paragraph -->' . "\n\n";
