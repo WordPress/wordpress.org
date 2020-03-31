@@ -355,10 +355,14 @@ class Official_WordPress_Events {
 							break;
 
 						case 'Location':
-							$event['location'] = $value;
+							if ( rest_sanitize_boolean( $wordcamp->{'Virtual event only'} ) ) {
+								$event['location'] = 'online';
+							} else {
+								$event['location'] = $value;
+							}
 							break;
 
-						case '_venue_coordinates' :
+						case '_venue_coordinates':
 							if ( isset( $value->latitude, $value->longitude ) ) {
 								$event['latitude']  = $value->latitude;
 								$event['longitude'] = $value->longitude;
