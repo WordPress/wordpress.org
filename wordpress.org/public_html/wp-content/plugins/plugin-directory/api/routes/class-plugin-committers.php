@@ -170,7 +170,7 @@ class Plugin_Committers extends Base {
 			'nicename' => $user->user_nicename,
 			'profile'  => esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename ),
 			'avatar'   => get_avatar_url( $user->ID, 32 ),
-			'name'     => Template::encode( $user->display_name ),
+			'name'     => $user->display_name,
 		);
 
 		if ( current_user_can( 'plugin_review' ) ) {
