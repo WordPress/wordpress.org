@@ -258,13 +258,28 @@ class Review_Tools {
 			$cc_emails = implode( ', ', array_diff( $cc_emails, array( $author->user_email ) ) );
 
 			if ( 'new' === $post->post_status || 'pending' === $post->post_status ) {
-				/* translators: %s: plugin title */
-				$subject = sprintf( __( '[WordPress Plugin Directory] Request: %s', 'wporg-plugins' ), $post->post_title );
+				/* translators: %s: Plugin Title */
+				$subject = sprintf( __( '[WordPress Plugin Directory] Review in Progress: %s', 'wporg-plugins' ), $post->post_title );
 			} elseif ( 'rejected' === $post->post_status ) {
-				/* translators: %s: plugin title */
+				/* translators: %s: Plugin Title */
 				$subject = sprintf( __( '[WordPress Plugin Directory] Rejection Explanation: %s', 'wporg-plugins' ), $post->post_title );
+			} elseif ( 'closed' === $post->post_status || 'disabled' === $post->post_status ) {
+				$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
+				$close_reasons = array(
+					'security-issue'                => __( 'Security', 'wporg-plugins' ),
+					'guideline-violation'           => __( 'Guideline Violation', 'wporg-plugins' ),
+					'licensing-trademark-violation' => __( 'Licensing/Trademark Violation', 'wporg-plugins' ),
+				);
+
+				if ( isset( $close_reasons[ $close_reason ] ) ) {
+					/* translators: 1: Closure Reason, 2: Plugin Title */
+					$subject = sprintf( __( '[WordPress Plugin Directory] Closure Notice - %1$s: %2$s', 'wporg-plugins' ), $close_reasons[ $close_reason ], $post->post_title );
+				} else {
+					/* translators: %s: Plugin Title */
+					$subject = sprintf( __( '[WordPress Plugin Directory] Closure Notice: %s', 'wporg-plugins' ), $post->post_title );
+				}
 			} else {
-				/* translators: %s: plugin title */
+				/* translators: %s: Plugin Title */
 				$subject = sprintf( __( '[WordPress Plugin Directory] Notice: %s', 'wporg-plugins' ), $post->post_title );
 			}
 
