@@ -334,12 +334,15 @@ class Official_WordPress_Events {
 							) {
 								continue 3;
 							}
-							$event['start_timestamp'] = $value;
+							if ( ! $wordcamp->session_start_time ) {
+								$event['start_timestamp'] = $value;
+							} else {
+								$event['start_timestamp'] = absint( $wordcamp->session_start_time );
+							}
 							break;
 
 						case 'End Date (YYYY-mm-dd)':
-							$value                  = absint( $value );
-							$event['end_timestamp'] = $value;
+							$event['end_timestamp'] = absint( $value );
 							break;
 
 						case 'URL':
