@@ -20,7 +20,10 @@ class Reviews {
 		$review_count = array_sum( $ratings );
 
 		if ( empty( $reviews ) ) {
-			return '';
+			return sprintf(
+				'<div class="notice notice-warning notice-alt"><p>%s</p></div>', 
+				__( 'There are no reviews for this plugin.', 'wporg-plugins' )
+			);
 		}
 
 		ob_start();

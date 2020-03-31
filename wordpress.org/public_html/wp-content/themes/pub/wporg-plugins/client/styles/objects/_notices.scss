@@ -9,6 +9,11 @@
 		font-size: ms( -2 );
 		margin: 0.5em 0;
 		padding: 2px;
+
+		/* wp4.css is setting a border bottom on anchor tags in paragraphs tags... The notice block requires a paragraph tag */
+		a {
+			border-bottom: 0;
+		}
 	}
 
 	&.notice-alt {
