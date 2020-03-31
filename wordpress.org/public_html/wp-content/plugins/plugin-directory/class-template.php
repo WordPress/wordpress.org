@@ -151,6 +151,8 @@ class Template {
 	 * @static
 	 */
 	public static function output_meta() {
+		global $wp_query;
+
 		$metas   = [];
 		$noindex = false;
 
@@ -167,6 +169,8 @@ class Template {
 			if ( 'publish' !== get_post_status() || self::is_plugin_outdated() ) {
 				$noindex = true;
 			}
+		} elseif ( is_tax() && $wp_query->found_posts <= 3 ) {
+			$noindex = true;
 		}
 
 		if ( $noindex ) {
