@@ -289,6 +289,7 @@ class Official_WordPress_Events {
 		$request_url = add_query_arg( array(
 			'status'   => array( 'wcpt-scheduled', 'wcpt-pre-planning', 'wcpt-cancelled' ),
 			'per_page' => 100,
+			'orderby'  => 'modified',
 		), self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps' );
 
 		$response = $api_client->tenacious_remote_get( $request_url );
