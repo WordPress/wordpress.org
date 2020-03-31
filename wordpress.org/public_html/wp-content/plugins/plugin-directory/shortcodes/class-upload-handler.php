@@ -237,6 +237,17 @@ class Upload_Handler {
 		}
 		$readme = new Parser( $readme );
 
+		// Check for a readme license.
+		if ( $readme->license ) {
+			$error = __( 'Error: No license defined.', 'wporg-plugins' );
+
+			return new \WP_Error( 'no_license', $error . ' ' . sprintf(
+				/* translators: 1: readme.txt */
+				__( 'Your plugin has no license declared. Please update your %1$s with a GPLv2 (or later) compatible license.', 'wporg-plugins' ),
+				'<code>readme.txt</code>'
+			) );
+		}
+
 		// Pass it through Plugin Check and see how great this plugin really is.
 		// We're not actually using this right now.
 		$result = $this->check_plugin();
