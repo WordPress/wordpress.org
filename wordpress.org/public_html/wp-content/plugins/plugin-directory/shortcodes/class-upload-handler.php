@@ -238,7 +238,7 @@ class Upload_Handler {
 		$readme = new Parser( $readme );
 
 		// Check for a readme license.
-		if ( $readme->license ) {
+		if ( empty( $readme->license ) ) {
 			$error = __( 'Error: No license defined.', 'wporg-plugins' );
 
 			return new \WP_Error( 'no_license', $error . ' ' . sprintf(
