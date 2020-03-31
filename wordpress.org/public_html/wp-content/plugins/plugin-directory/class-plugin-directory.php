@@ -579,7 +579,6 @@ class Plugin_Directory {
 		$allowed_shortcodes = array(
 			'youtube',
 			'vimeo',
-			'videopress',
 			'wporg-plugins-developers',
 			'wporg-plugin-upload',
 			'wporg-plugins-screenshots',
