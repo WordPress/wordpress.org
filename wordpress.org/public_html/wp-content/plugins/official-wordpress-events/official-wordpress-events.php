@@ -328,11 +328,13 @@ class Official_WordPress_Events {
 					switch ( $field ) {
 						case 'Start Date (YYYY-mm-dd)':
 							$value = absint( $value );
-							if ( empty( $value ) || $value < strtotime( '-1 day' ) ) {
+							// If scheduled, but either in the past or undated, don't sync.
+							if ( ( 'wcpt-scheduled' === $wordcamp->status ) &&
+								( empty( $value ) || $value < strtotime( '-1 day' ) )
+							) {
 								continue 3;
-							} else {
-								$event['start_timestamp'] = $value;
 							}
+							$event['start_timestamp'] = $value;
 							break;
 
 						case 'End Date (YYYY-mm-dd)':
