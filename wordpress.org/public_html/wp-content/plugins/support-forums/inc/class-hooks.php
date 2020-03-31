@@ -606,18 +606,37 @@ class Hooks {
 		||
 			bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'plugin', 'reviews', 'theme' ) )
 		) {
+			$btn = null;
 			$is_reviews = 'reviews' === bbp_get_view_id();
+
 			if ( bbp_current_user_can_access_create_topic_form() ) {
-				printf(
-					'<a class="button create-topic" href="#new-topic-0">%s</a>',
+				$btn = sprintf(
+					'<a class="button button-secondary create-topic" href="#new-topic-0">%s</a>',
 					$is_reviews ? __( 'Create Review', 'wporg-forums' ) : __( 'Create Topic', 'wporg-forums' )
 				);
 			} elseif ( ! bbp_is_forum_closed() && ! is_user_logged_in() ) {
-				printf(
-					'<a class="button create-topic login" href="%s">%s</a>',
+				$btn = sprintf(
+					'<a class="button button-secondary create-topic login" href="%s">%s</a>',
 					wp_login_url(),
 					$is_reviews ? __( 'Log in to Create a Review', 'wporg-forums' ) : __( 'Log in to Create a Topic', 'wporg-forums' )
 				);
+			}
+
+			if ( $btn ) {
+				$searchform = get_search_form( [ 'echo' => false ] );
+
+				echo '<div class="bbp-create-topic-wrapper">';
+				if ( $searchform ) {
+					printf(
+						/* translators: 1: markup for forums search field which is primary action, 2: markup for button to create topic */
+						__( '%1$s or %2$s', 'wporg-forums' ),
+						$searchform,
+						$btn
+					);
+				} else {
+					echo $btn;
+				}
+				echo "</div>\n";
 			}
 
 			remove_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
