@@ -553,7 +553,7 @@ namespace DevHub {
 			} else {
 				$version_parts[2] = '0';
 			}
-			$current_version = implode( '-', $version_parts );
+			$current_version = implode( '.', $version_parts );
 		}
 
 		$version = get_terms( 'wp-parser-since', array(
