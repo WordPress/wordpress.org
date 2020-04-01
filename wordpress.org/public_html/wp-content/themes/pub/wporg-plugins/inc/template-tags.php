@@ -306,7 +306,7 @@ function the_previous_version_download( $post = null ) {
 function the_plugin_self_close_button() {
 	$post = get_post();
 
-	if ( ! current_user_can( 'plugin_add_committer', $post ) || 'publish' != $post->post_status ) {
+	if ( ! current_user_can( 'plugin_admin_edit', $post ) || 'publish' != $post->post_status ) {
 		return;
 	}
 

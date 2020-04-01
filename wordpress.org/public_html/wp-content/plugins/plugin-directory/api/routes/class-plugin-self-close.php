@@ -24,7 +24,7 @@ class Plugin_Self_Close extends Base {
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-				return current_user_can( 'plugin_add_committer', $plugin ) && 'publish' === $plugin->post_status;
+				return current_user_can( 'plugin_admin_edit', $plugin ) && 'publish' === $plugin->post_status;
 			},
 		] );
 
