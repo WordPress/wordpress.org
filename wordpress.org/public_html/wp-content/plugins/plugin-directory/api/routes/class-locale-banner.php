@@ -219,6 +219,10 @@ class Locale_Banner extends Base {
 		$result->header( 'Expires', gmdate( 'r', time() + 3600 ) );
 		$result->header( 'Cache-Control', 'max-age=3600' );
 
+		// Don't output the Vary: Origin header, nginx doesn't like multiple Vary headers.
+		// This also disables the Cross-Origin headers, but this API is only used by the same origin.
+		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+
 		return $result;
 	}
 
