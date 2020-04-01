@@ -80,6 +80,19 @@ class Locale_Banner extends Base {
 		$current_locale_is_suggested  = in_array( $current_locale, $suggest_locales );
 		$current_locale_is_translated = in_array( $current_locale, $translated_locales );
 
+		// Check to see if the plugin is localizable.
+		$current_plugin_is_translatable = true;
+		if ( ! $current_locale_is_translated ) {
+			$current_plugin_is_translatable = (bool) $wpdb->get_var( $wpdb->prepare(
+				'SELECT id
+				FROM translate_projects
+				WHERE path IN( %s, %s ) AND active = 1
+				LIMIT 1',
+				'wp-plugins/' . $plugin_slug . '/dev',
+				'wp-plugins/' . $plugin_slug . '/stable'
+			) );
+		}
+
 		// Get the native language names of the locales.
 		$suggest_named_locales = [];
 		foreach ( $suggest_locales as $locale ) {
@@ -188,7 +201,7 @@ class Locale_Banner extends Base {
 			}
 
 			// Localized directory.
-		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated && $is_plugin_request ) {
+		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated && $is_plugin_request && $current_plugin_is_translatable ) {
 			$suggest_string = sprintf(
 				$this->translate( 'This plugin is not translated into %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
 				\GP_Locales::by_field( 'wp_locale', $current_locale )->native_name,
