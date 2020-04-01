@@ -6,7 +6,7 @@
 	}
 
 	$.ajax( {
-		type: 'POST',
+		type: 'GET',
 		url: wporgLocaleBanner.apiURL,
 		dataType: 'json',
 		data: {

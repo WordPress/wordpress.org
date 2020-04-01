@@ -13,7 +13,7 @@ class Locale_Banner extends Base {
 
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/locale-banner', array(
-			'methods'  => WP_REST_Server::EDITABLE,
+			'methods'  => WP_REST_Server::ALLMETHODS,
 			'callback' => array( $this, 'locale_banner' ),
 			'args'     => array(
 				'plugin_slug' => array(
@@ -209,10 +209,15 @@ class Locale_Banner extends Base {
 			);
 		}
 
-		$result = [
+		$result = new \WP_REST_Response( [
 			'suggest_string' => $suggest_string,
 			'translated'     => $translated_locales,
-		];
+		] );
+
+		// Allow this API to be cached, varied by Accept-Language header.
+		$result->header( 'Vary', 'Accept-Language' );
+		$result->header( 'Expires', gmdate( 'r', time() + 3600 ) );
+		$result->header( 'Cache-Control', 'max-age=3600' );
 
 		return $result;
 	}
