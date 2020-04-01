@@ -33,6 +33,25 @@ class Plugin_Favorites extends Base {
 			),
 			'permission_callback' => 'is_user_logged_in',
 		) );
+
+		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );
+	}
+
+	/**
+	 * Redirect back to the plugins page when this endpoint is accessed with an invalid nonce.
+	 */
+	function override_cookie_expired_message( $result, $obj, $request ) {
+		if (
+			is_array( $result ) && isset( $result['code'] ) &&
+			'rest_cookie_invalid_nonce' == $result['code'] &&
+			preg_match( '!^/plugins/v1/plugin/([^/]+)/favorite$!', $request->get_route(), $m )
+		) {
+			$location = get_permalink( Plugin_Directory::get_plugin_post( $m[1] ) ) ?: home_url( '/' );
+			header( "Location: $location" );
+			// Still allow the REST API response to be rendered, browsers will follow the location header though.
+		}
+
+		return $result;
 	}
 
 	/**
