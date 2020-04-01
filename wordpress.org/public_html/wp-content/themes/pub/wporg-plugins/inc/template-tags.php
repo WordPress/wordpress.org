@@ -301,7 +301,7 @@ function the_previous_version_download( $post = null ) {
 }
 
 /**
- * Displays a 
+ * Displays a form for plugin committers to self-close a plugin. Permanently.
  */
 function the_plugin_self_close_button() {
 	$post = get_post();
