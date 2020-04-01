@@ -223,6 +223,22 @@ class Upload_Handler {
 			);
 		}
 
+		// Prevent uploads using popular Plugin names in the wild.
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) ) {
+			$installs = wporg_stats_get_plugin_name_install_count( $this->plugin['Name'] );
+
+			if ( $installs && $installs->count >= 100 ) {
+				$error = __( 'Error: That plugin name is already in use.', 'wporg-plugins' );
+
+				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
+					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+					__( 'There is already a plugin with the name %1$s known to WordPress.org. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
+					'<code>' . $this->plugin['Name'] . '</code>',
+					'<code>Plugin Name:</code>'
+				) );
+			}
+		}
+
 		$readme = $this->find_readme_file();
 		// Check for a valid readme.
 		if ( empty( $readme ) ) {
