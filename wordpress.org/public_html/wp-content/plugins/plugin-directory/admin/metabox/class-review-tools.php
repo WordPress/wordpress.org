@@ -176,6 +176,36 @@ class Review_Tools {
 				array_push( self::$flagged['low'], 'slug used by 500-1000 users' );
 			}
 
+			// Check Active_Installs, prior to sync?
+			if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) ) {
+		
+				$title_matches = wporg_stats_get_plugin_name_install_count( $post->post_title );
+		
+				if ( $post->post_name == sanitize_title( $post->post_title ) ) {
+					$slug_matches = false;
+				} else {
+					$slug = str_replace( '-', ' ', $post->post_name );
+					$slug_matches = wporg_stats_get_plugin_name_install_count( $slug );
+				}
+		
+				if ( $title_matches ) {
+					array_push( self::$flagged['high'], sprintf(
+						'As of %s, %s had %s+ active installs.',
+						esc_html( $title_matches->date ),
+						esc_html( $post->post_title ),
+						number_format( $title_matches->count )
+					) );
+				}
+				if ( $slug_matches ) {
+					array_push( self::$flagged['high'], sprintf(
+						'As of %s, %s had %s+ active installs.',
+						esc_html( $slug_matches->date ),
+						esc_html( $slug ),
+						number_format( $slug_matches->count )
+					) );
+				}
+			}
+
 			// User account was registered less than 2 weeks ago (but longer than 3 days) (user is still fairly new).
 			$two_weeks_ago  = time() - ( 2 * WEEK_IN_SECONDS );
 			$three_days_ago = time() - ( 3 * DAY_IN_SECONDS );
