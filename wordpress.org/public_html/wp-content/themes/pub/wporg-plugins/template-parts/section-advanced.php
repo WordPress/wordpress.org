@@ -34,4 +34,6 @@ global $post;
 	</table>
 
 	<?php the_previous_version_download(); ?>
+
+	<?php the_plugin_self_close_button(); ?>
 </div>

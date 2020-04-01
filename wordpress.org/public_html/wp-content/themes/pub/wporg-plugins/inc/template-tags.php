@@ -299,3 +299,27 @@ function the_previous_version_download( $post = null ) {
 		esc_html__( 'Download', 'wporg-plugins' )
 	);
 }
+
+/**
+ * Displays a 
+ */
+function the_plugin_self_close_button() {
+	$post = get_post();
+
+	if ( ! current_user_can( 'plugin_add_committer', $post ) || 'publish' != $post->post_status ) {
+		return;
+	}
+
+	$close_link = Template::get_self_close_link( $post );
+
+	?>
+	<h5><?php esc_html_e( 'Close This Plugin', 'wporg-plugins' ); ?></h5>
+	<div class="plugin-notice notice notice-warning notice-alt"><p><?php _e( '<strong>Warning:</strong> Closing your plugin is intended to be a permanent action. You will not be able to reopen it without contacting the plugins team.', 'wporg-plugins' ); ?></p></div>
+
+	<form method="POST" action="<?php echo esc_url( $close_link ); ?>">
+	<p>
+		<input class="button" type="submit" value="<?php echo esc_attr( sprintf( __( 'I understand, Please close %s.', 'wporg-plugins' ), get_the_title() ) ); ?>" />
+	</p>
+	</form>
+<?php 
+}
