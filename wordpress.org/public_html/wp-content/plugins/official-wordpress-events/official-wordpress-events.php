@@ -366,7 +366,13 @@ class Official_WordPress_Events {
 							break;
 
 						case '_venue_coordinates':
-							if ( isset( $value->latitude, $value->longitude ) ) {
+							if ( rest_sanitize_boolean( $wordcamp->{'Virtual event only'} ) ) {
+								// Online events don't have coordinates, so we fake them for now. The fake value
+								// needs to pass an `empty` check, so we use 1 instead of 0.
+								// @todo This should be replaced with however we locate online events.
+								$event['latitude']  = 1;
+								$event['longitude'] = 1;
+							} elseif ( isset( $value->latitude, $value->longitude ) ) {
 								$event['latitude']  = $value->latitude;
 								$event['longitude'] = $value->longitude;
 							}
