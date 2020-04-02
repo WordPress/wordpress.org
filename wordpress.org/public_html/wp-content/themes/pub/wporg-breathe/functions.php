@@ -37,33 +37,6 @@ function customize_register( $wp_customize ) {
 }
 
 /**
- * Outputs a 'noindex,follow' `meta` tag when appropriate.
- *
- * Currently applies to:
- * - date-based archives
- * - search results
- * - Author archives
- * - 'mentions' taxonomy
- * - tag archives with fewer than 3 posts
- */
-function no_robots() {
-	if (
-		is_search()
-	||
-		is_author()
-	||
-		is_date()
-	||
-		is_tax( 'mentions' )
-	||
-		is_tag()
-	) {
-		wp_no_robots();
-	}
-}
-add_action( 'wp_head', __NAMESPACE__ . '\no_robots', 9 );
-
-/**
  * Renders the site title for the selective refresh partial.
  */
 function customize_partial_blogname() {

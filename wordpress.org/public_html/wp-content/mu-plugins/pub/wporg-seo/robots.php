@@ -9,11 +9,11 @@ function meta_robots() {
 
 	$noindex = false;
 
-	if ( is_search() || is_author() ) {
+	if ( is_search() || is_author() || is_date() ) {
 		$noindex = true;
 	} elseif ( is_singular() && 'publish' !== get_post_status() ) {
 		$noindex = true;
-	} elseif ( is_tax() && $wp_query->found_posts <= 3 ) {
+	} elseif ( ( is_tax() || is_tag() || is_category() ) && $wp_query->found_posts <= 3 ) {
 		$noindex = true;
 	}
 
