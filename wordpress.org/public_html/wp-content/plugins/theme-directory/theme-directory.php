@@ -1276,7 +1276,7 @@ add_action( 'wp_head', 'wporg_themes_add_hreflang_link_attributes' );
  * Get the current front-end requested URL.
  */
 function wporg_themes_get_current_url( $path_only = false ) {
-	$link = WordPressdotorg\SEO\Canonical\get_canonical_url();
+	$link = \WordPressdotorg\SEO\Canonical\get_canonical_url();
 
 	if ( $path_only && $link ) {
 		$path = parse_url( $link, PHP_URL_PATH );

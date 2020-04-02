@@ -1029,45 +1029,11 @@ class Template {
 	}
 
 	/**
-	 * Outputs a <link rel="canonical"> on archive pages.
-	 */
-	public static function archive_rel_canonical_link() {
-		if ( $url = self::get_current_url() ) {
-			printf(
-				'<link rel="canonical" href="%s">' . "\n",
-				esc_url( $url )
-			);
-		}
-	}
-
-	/**
 	 * Get the current front-end requested URL.
 	 */
 	public static function get_current_url( $path_only = false ) {
-		$queried_object = get_queried_object();
-		$link = false;
 
-		if ( is_tax() || is_tag() || is_category() ) {
-			$link = get_term_link( $queried_object );
-		} elseif ( is_singular() ) {
-			$link = get_permalink( $queried_object );
-
-			if ( is_singular( 'plugin' ) && get_query_var( 'plugin_advanced' ) ) {
-				$link .= 'advanced/';
-			}
-		} elseif ( is_search() ) {
-			$link = home_url( 'search/' . urlencode( get_query_var( 's' ) ) . '/' );
-		} elseif ( is_front_page() ) {
-			$link = home_url( '/' );
-		}
-
-		if ( $link && is_paged() ) {
-			if ( false !== stripos( $link, '?' ) ) {
-				$link = add_query_arg( 'paged', (int) get_query_var( 'paged' ), $link );
-			} else {
-				$link = rtrim( $link, '/' ) . '/page/' . (int) get_query_var( 'paged' ) . '/';
-			}
-		}
+		$link = \WordPressdotorg\SEO\Canonical\get_canonical_url();
 
 		if ( $path_only && $link ) {
 			$path = parse_url( $link, PHP_URL_PATH );
@@ -1076,6 +1042,17 @@ class Template {
 			}
 
 			return $path;
+		}
+
+		return $link;
+	}
+
+	/**
+	 * Filter the WordPress.org Canonical URL to understand the Plugin Directory.
+	 */
+	public static function wporg_canonical_link( $link ) {
+		if ( is_singular( 'plugin' ) && get_query_var( 'plugin_advanced' ) ) {
+			$link = get_permalink( get_queried_object() ) . 'advanced/';
 		}
 
 		return $link;
