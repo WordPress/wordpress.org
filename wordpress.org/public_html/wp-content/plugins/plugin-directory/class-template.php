@@ -179,53 +179,6 @@ class Template {
 	}
 
 	/**
-	 * Prints <link rel="prev|next"> tags for archives.
-	 *
-	 * @static
-	 */
-	public static function archive_link_rel_prev_next() {
-		global $paged, $wp_query, $wp_rewrite;
-		if ( ! is_archive() && ! is_search() ) {
-			return;
-		}
-
-		$max_page = $wp_query->max_num_pages;
-		if ( ! $paged ) {
-			$paged = 1;
-		}
-
-		$nextpage = intval( $paged ) + 1;
-		$prevpage = intval( $paged ) - 1;
-
-		// re-implement get_pagenum_link() using our canonical url.
-		$current_url = Template::get_current_url();
-		if ( ! $current_url ) {
-			return;
-		}
-
-		$current_url = remove_query_arg( 'paged', $current_url );
-		$current_url = preg_replace( "|{$wp_rewrite->pagination_base}/\d+/?$|", '', $current_url );
-
-		// Just assume pretty permalinks everywhere.
-		$next_url = $current_url . "{$wp_rewrite->pagination_base}/{$nextpage}/";
-		$prev_url = $current_url . ( $prevpage > 1 ? "{$wp_rewrite->pagination_base}/{$prevpage}/" : '' );
-
-		if ( $prevpage >= 1 ) {
-			printf(
-				'<link rel="prev" href="%s">' . "\n",
-				esc_url( $prev_url )
-			);
-		}
-
-		if ( $nextpage <= $max_page ) {
-			printf(
-				'<link rel="next" href="%s">' . "\n",
-				esc_url( $next_url )
-			);
-		}
-	}
-
-	/**
 	 * Gets current major WP version to check against "Tested up to" value.
 	 *
 	 * @static
