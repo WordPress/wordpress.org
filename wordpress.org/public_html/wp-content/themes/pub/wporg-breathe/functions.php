@@ -63,32 +63,6 @@ function no_robots() {
 }
 add_action( 'wp_head', __NAMESPACE__ . '\no_robots', 9 );
 
-
-/**
- * Outputs `<link rel="canonical">` tags where needed.
- */
-function rel_canonical() {
-	$canonical = false;
-	$queried_object = get_queried_object();
-
-	if ( is_tax() || is_tag() || is_category() ) {
-		$canonical = get_term_link( $queried_object );
-	} elseif ( is_singular() ) {
-		$canonical = get_permalink( $queried_object );
-	} elseif ( is_front_page() ) {
-		$canonical = home_url( '/' );
-	}
-
-	if ( $canonical && get_query_var( 'paged' ) > 1 ) {
-		$canonical .= 'page/' . (int) get_query_var( 'paged' ) . '/';
-	}
-
-	if ( $canonical ) {
-		printf( '<link rel="canonical" href="%s">' . "\n", esc_url( $canonical ) );
-	}
-}
-add_action( 'wp_head', __NAMESPACE__ . '\rel_canonical' );
-
 /**
  * Renders the site title for the selective refresh partial.
  */
