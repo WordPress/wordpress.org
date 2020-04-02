@@ -14,7 +14,13 @@
 		text-transform: inherit;
 	}
 
+	.image-gallery-content {
+		display: table;
+		width: 100%;
+	}
+
 	.image-gallery-slides {
+		display: table-cell;
 		max-height: 600px;
 	}
 
