@@ -36,6 +36,28 @@ function meta_robots() {
 }
 
 /**
+ * Collect things that belong in HTTP headers.
+ */
+function wp_headers( $headers ) {
+	if ( $value = maybe_add_X_robots_tag() ) {
+		$headers[ 'X-Robots-Tag'] = $value;
+	}
+
+	return $headers;
+}
+add_filter( 'wp_headers', 'wp_headers' );
+
+function maybe_add_X_robots_tag() {
+
+	// Search and Taxonomy feeds should be noindexed.
+	if ( is_feed() && ( is_tax() || is_search() ) ) {
+		return 'noindex, follow';
+	}
+
+	return false;
+}
+
+/**
  * Custom Canonical redirect for Facebook and Twitter referrers.
  */
 function facebook_twitter_referers() {

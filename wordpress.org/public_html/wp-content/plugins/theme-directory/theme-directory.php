@@ -1273,19 +1273,6 @@ function wporg_themes_add_hreflang_link_attributes() {
 add_action( 'wp_head', 'wporg_themes_add_hreflang_link_attributes' );
 
 /**
- * Outputs X-Robots-Tag with noindex for feeds.
- */
-function wporg_themes_noindex_for_feeds() {
-	if ( is_tag() ) {
-		header( 'X-Robots-Tag: noindex' );
-	}
-	if ( is_search() ) {
-		header( 'X-Robots-Tag: noindex, follow' );
-	}
-}
-add_action( 'themes_custom_feed_head', 'wporg_themes_noindex_for_feeds' );
-
-/**
  * Outputs a <link rel="canonical"> on archive pages.
  */
 function wporg_themes_archive_rel_canonical_link() {
