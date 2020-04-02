@@ -49,4 +49,8 @@ get_header(); ?>
 	</section><!-- #primary -->
 
 <?php if ( ! $is_handbook ) { get_sidebar(); } ?>
+<?php if ( $is_handbook ) : ?>
+	<!-- A fake o2 content area -->
+	<div style="display: none;"><div id="content"></div></div>
+<?php endif; ?>
 <?php get_footer(); ?>
