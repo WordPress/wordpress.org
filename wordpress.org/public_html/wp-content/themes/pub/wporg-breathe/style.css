@@ -1429,7 +1429,7 @@ h2.toc-heading + h3.toc-heading:target {
 }
 
 @media(max-width: 876px) {
-	.post-type-archive-handbook, #primary,
+	.post-type-archive-handbook #primary,
 	.single-handbook #primary {
 		padding: 4rem 20px;
 	}
