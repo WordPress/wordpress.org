@@ -50,26 +50,28 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 		<span class="byline"><?php the_author_byline(); ?></span>
 	</header><!-- .entry-header -->
 
-	<?php if ( ! get_query_var( 'plugin_advanced' ) ) : ?>
-		<span id="description"></span>
-		<span id="reviews"></span>
-		<span id="installation"></span>
-		<span id="developers"></span>
-		<ul class="tabs clear">
-			<li id="tablink-description"><a href="#description"><?php esc_html_e( 'Details', 'wporg-plugins' ); ?></a></li>
-			<li id="tablink-reviews"><a href="#reviews"><?php esc_html_e( 'Reviews', 'wporg-plugins' ); ?></a></li>
-			<?php if ( isset( $content['installation'] ) && ! $is_closed ) : ?>
-				<li id="tablink-installation">
-					<a href="#installation"><?php esc_html_e( 'Installation', 'wporg-plugins' ); ?></a>
-				</li>
-			<?php endif; ?>
-			<li id="tablink-support">
-				<a href="<?php echo esc_url( Template::get_support_url() ); ?>"><?php esc_html_e( 'Support', 'wporg-plugins' ); ?></a>
+	<span id="description"></span>
+	<span id="reviews"></span>
+	<span id="installation"></span>
+	<span id="developers"></span>
+	<span id="advanced" class="<?php if ( get_query_var( 'plugin_advanced' ) ) { echo 'displayed'; } ?>"></span>
+	<ul class="tabs clear">
+		<li id="tablink-description"><a href="<?php the_permalink(); ?>#description"><?php esc_html_e( 'Details', 'wporg-plugins' ); ?></a></li>
+		<li id="tablink-reviews"><a href="<?php the_permalink(); ?>#reviews"><?php esc_html_e( 'Reviews', 'wporg-plugins' ); ?></a></li>
+		<?php if ( isset( $content['installation'] ) && ! $is_closed ) : ?>
+			<li id="tablink-installation">
+				<a href="<?php the_permalink(); ?>#installation"><?php esc_html_e( 'Installation', 'wporg-plugins' ); ?></a>
 			</li>
-			<li id="tablink-developers"><a href="#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
-		</ul>
-		<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.setTimeout( function() { window.location.hash = '#developers'; }, 10 ); }</script>
-	<?php endif; ?>
+		<?php endif; ?>
+		<li id="tablink-support">
+			<a href="<?php echo esc_url( Template::get_support_url() ); ?>"><?php esc_html_e( 'Support', 'wporg-plugins' ); ?></a>
+		</li>
+		<li id="tablink-developers"><a href="<?php the_permalink(); ?>#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
+		<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
+			<li id="tablink-advanced"><a href="<?php the_permalink(); ?>advanced/"><?php esc_html_e( 'Advanced View', 'wporg-plugins' ); ?></a></li>
+		<?php endif; ?>
+	</ul>
+	<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.setTimeout( function() { window.location.hash = '#developers'; }, 10 ); }</script>
 
 	<div class="entry-content">
 		<?php

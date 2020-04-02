@@ -132,10 +132,11 @@
 		position:fixed;
 	}
 
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .tabs li#tablink-description ,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#advanced:not(.displayed) ~ .tabs li#tablink-description,
 	span#reviews:target ~ .tabs li#tablink-reviews,
 	span#installation:target ~ .tabs li#tablink-installation,
-	span#developers:target ~ .tabs li#tablink-developers  {
+	span#developers:target ~ .tabs li#tablink-developers,
+	span#advanced.displayed ~ .tabs li#tablink-advanced  {
 		border-top: 2px solid #eee;
 		border-left: 2px solid #eee;
 		border-right: 2px solid #eee;
