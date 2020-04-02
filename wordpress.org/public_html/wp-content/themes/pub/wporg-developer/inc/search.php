@@ -26,16 +26,19 @@ class DevHub_Search {
 		add_filter( 'posts_orderby', array( __CLASS__, 'search_posts_orderby' ), 10, 2 );
 		add_filter( 'the_posts',     array( __CLASS__, 'redirect_empty_search' ), 10, 2 );
 		add_filter( 'the_posts',     array( __CLASS__, 'rerun_search_without_results' ), 10, 2 );
-		add_action( 'wp_head',       array( __CLASS__, 'noindex_for_search' ), 9 );
+
+		add_filter( 'wporg_noindex_request', array( __CLASS__, 'noindex_query' ) );
 	}
 
 	/**
-	 * Outputs `noindex,follow` robots tag for search and post_type-filtered results.
+	 * Noindex post_type-filtered results.
 	 */
-	public static function noindex_for_search() {
-		if ( is_search() || isset( $_GET[ 'post_type' ] ) ) {
-			wp_no_robots();
+	public static function noindex_query( $noindex ) {
+		if ( isset( $_GET[ 'post_type' ] ) ) {
+			$noindex = true;
 		}
+
+		return $noindex;
 	}
 
 	/*
