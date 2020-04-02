@@ -143,6 +143,12 @@
 		border-bottom: 0;
 		padding-bottom: 2px;
 		background: #fff;
+
+		@media screen and (max-width:34em) {
+			&.active, &:hover {
+				padding-bottom: 2px !important;
+			}
+		}
 	}
 
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-description,
