@@ -50,8 +50,6 @@ class Plugin_Directory {
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
-		add_action( 'wp_head', array( Template::class, 'archive_link_rel_prev_next' ), 3 );
-		add_action( 'wp_head', array( Template::class, 'archive_rel_canonical_link' ), 3 );
 
 		// Add no-index headers where appropriate.
 		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
