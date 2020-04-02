@@ -22,7 +22,7 @@ remove_action( 'wp_head', 'rel_canonical' );
  */
 function get_canonical_url() {
     $queried_object = get_queried_object();
-	$link = false;
+	$url = false;
 
     if ( is_tax() || is_tag() || is_category() ) {
 		$url = get_term_link( $queried_object );
@@ -36,7 +36,7 @@ function get_canonical_url() {
 		// On WordPress.org get_author_posts_url() returns profile.wordpress.org links. Build it manually.
 		$url = home_url( 'author/' . $queried_object->user_nicename . '/' );
 	} elseif ( is_post_type_archive() ) {
-		$canonical = get_post_type_archive_link( $queried_object->name ); 
+		$url = get_post_type_archive_link( $queried_object->name );
 	}
 
 	if ( $url && is_paged() ) {
