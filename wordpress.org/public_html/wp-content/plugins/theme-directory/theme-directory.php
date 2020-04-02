@@ -1295,10 +1295,10 @@ function wporg_themes_get_current_url( $path_only = false ) {
  */
 function wporg_canonical_link( $url ) {
 	if ( get_query_var( 'browse' ) && WPORG_THEMES_DEFAULT_BROWSE === get_query_var( 'browse' ) ) {
-		$link = home_url( '/' );
+		$url = home_url( '/' );
 	} elseif ( get_query_var( 'browse' ) ) {
 		// The browse/% urls on the Theme directory are front-page-query alterations.
-		$link = home_url( 'browse/' . get_query_var( 'browse' ) . '/' );
+		$url = home_url( 'browse/' . get_query_var( 'browse' ) . '/' );
 	}
 
 	return $url;
