@@ -1573,7 +1573,7 @@ class Plugin_Directory {
 
 			$owner = get_userdata( $result->post_author );
 
-			Admin\Status_Transitions::instance()->audit_log( sprintf(
+			Tools::audit_log( sprintf(
 				'Submitted by <a href="%s">%s</a>.',
 				esc_url( '//profiles.wordpress.org/' . $owner->user_nicename ),
 				$owner->user_login
