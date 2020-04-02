@@ -46,7 +46,7 @@ class Internal_Notes {
 	 *
 	 * @param string $action Action to perform.
 	 */
-	function get_notes( $action ) {
+	public static function get_notes( $action ) {
 		global $post_id;
 		if ( empty( $action ) ) {
 			$action = 'get-comments';

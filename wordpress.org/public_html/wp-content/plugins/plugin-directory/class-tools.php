@@ -196,6 +196,15 @@ class Tools {
 		wp_cache_delete( $user->user_login, 'committer-plugins' );
 		Tools::sync_plugin_committers_with_taxonomy( $plugin_slug );
 
+		Tools::audit_log(
+			sprintf(
+				'Added <a href="%s">%s</a> as a committer.',
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				$user->user_login
+			),
+			$plugin_slug
+		);
+
 		return $result;
 	}
 
@@ -228,6 +237,15 @@ class Tools {
 		wp_cache_delete( $plugin_slug, 'plugin-committers' );
 		wp_cache_delete( $user->user_login, 'committer-plugins' );
 		Tools::sync_plugin_committers_with_taxonomy( $plugin_slug );
+
+		Tools::audit_log(
+			sprintf(
+				'Removed <a href="%s">%s</a> as a committer.',
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				$user->user_login
+			),
+			$plugin_slug
+		);
 
 		return $result;
 	}
@@ -325,6 +343,15 @@ class Tools {
 		wp_cache_delete( $plugin_slug, 'plugin-support-reps' );
 		wp_cache_delete( $user->user_nicename, 'support-rep-plugins' );
 
+		Tools::audit_log(
+			sprintf(
+				'Added <a href="%s">%s</a> as a support rep.',
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				$user->user_login
+			),
+			$plugin_slug
+		);
+
 		return $result;
 	}
 
@@ -356,6 +383,15 @@ class Tools {
 
 		wp_cache_delete( $plugin_slug, 'plugin-support-reps' );
 		wp_cache_delete( $user->user_nicename, 'support-rep-plugins' );
+
+		Tools::audit_log(
+			sprintf(
+				'Removed <a href="%s">%s</a> as a support rep.',
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				$user->user_login
+			),
+			$plugin_slug
+		);
 
 		return $result;
 	}
@@ -555,5 +591,38 @@ class Tools {
 			$wp_object_cache->group_ops      = [];
 			$wp_object_cache->memcache_debug = [];
 		}
+	}
+
+	/**
+	 * Add an Audit Internal Note for a plugin.
+	 * 
+	 * @param int|string|WP_Post $plugin A Post ID, Plugin Slug or, WP_Post object.
+	 * @param string $note The note to audit log entry to add.
+	 * @param WP_User $user The user which performed the action. Optional.
+	 */
+	public static function audit_log( $note, $plugin = null, $user = false ) {
+		if ( is_string( $plugin ) && ! is_numeric( $plugin ) ) {
+			$plugin = Plugin_Directory::get_plugin_post( $plugin );
+		} else {
+			$plugin = get_post( $plugin );
+		}
+
+		if ( ! $note || ! $plugin ) {
+			return false;
+		}
+		if ( ! $user || ! ( $user instanceof \WP_User ) ) {
+			$user = wp_get_current_user();
+		}
+
+		return wp_insert_comment( [
+			'comment_author'       => $user->display_name,
+			'comment_author_email' => $user->user_email,
+			'comment_author_url'   => $user->user_url,
+			'comment_author_IP'    => $_SERVER['REMOTE_ADDR'],
+			'comment_type'         => 'internal-note',
+			'comment_post_ID'      => $plugin->ID,
+			'user_id'              => $user->ID,
+			'comment_content'      => $note,
+		] );
 	}
 }

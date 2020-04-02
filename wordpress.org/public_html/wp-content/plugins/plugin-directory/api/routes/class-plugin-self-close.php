@@ -73,16 +73,10 @@ class Plugin_Self_Close extends Base {
 		update_post_meta( $plugin->ID, 'plugin_closed_date', current_time( 'mysql' ) );
 
 		// Add an audit-log entry as to why this has happened.
-		$user = wp_get_current_user();
-		wp_insert_comment( [
-			'comment_author'       => $user->display_name,
-			'comment_author_email' => $user->user_email,
-			'comment_author_url'   => $user->user_url,
-			'comment_type'         => 'internal-note',
-			'comment_post_ID'      => $plugin->ID,
-			'user_id'              => get_current_user_id(),
-			'comment_content'      => sprintf( 'Plugin closed. Reason: Author Self-close Request from %s', $_SERVER['REMOTE_ADDR'] ),
-		] );
+		Tools::audit_log(
+			$plugin,
+			sprintf( 'Plugin closed. Reason: Author Self-close Request from %s', $_SERVER['REMOTE_ADDR'] )
+		);
 
 		// Email all Plugin Committers.
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been closed', 'wporg-plugins' ), $plugin->post_title );

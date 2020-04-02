@@ -279,7 +279,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 			$post->post_name
 		);
 
-		$this->audit_log( 'Plugin approved.', $post_id );
+		Tools::audit_log( 'Plugin approved.', $post_id );
 		wp_mail( $plugin_author->user_email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
 
@@ -321,7 +321,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 			'plugins@wordpress.org'
 		);
 
-		$this->audit_log( 'Plugin rejected.', $post_id );
+		Tools::audit_log( 'Plugin rejected.', $post_id );
 		wp_mail( $email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
 
@@ -361,7 +361,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 
 		$post = get_post( $post_id );
 		if ( $post && 'approved' != $post->post_status ) {
-			$this->audit_log( 'Plugin reopened.', $post_id );
+			Tools::audit_log( 'Plugin reopened.', $post_id );
 		}
 	}
 
@@ -384,7 +384,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 		update_post_meta( $post_id, '_close_reason', $close_reason );
 		update_post_meta( $post_id, 'plugin_closed_date', current_time( 'mysql' ) );
 
-		$this->audit_log( sprintf( 'Plugin closed. Reason: %s', $close_reason ), $post_id );
+		Tools::audit_log( sprintf( 'Plugin closed. Reason: %s', $close_reason ), $post_id );
 	}
 
 	/**
@@ -405,31 +405,11 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 
 		$new_owner = get_userdata( $post_after->post_author );
 
-		$this->audit_log( sprintf(
+		Tools::audit_log( sprintf(
 			'Ownership transferred to <a href="%s">%s</a>.',
-			esc_url( '//profiles.wordpress.org/' . $new_owner->user_nicename ),
+			esc_url( 'https://profiles.wordpress.org/' . $new_owner->user_nicename .'/' ),
 			$new_owner->user_login
 		), $post_id );
 	}
 
-	/**
-	 * Saves an audit_log comment for the plugin.
-	 *
-	 * @param string  $message The message for the audit log.
-	 * @param integer $post_id The Post ID.
-	 */
-	public function audit_log( $message, $post_id ) {
-		$user = wp_get_current_user();
-
-		$comment = array(
-			'comment_author'       => $user->display_name,
-			'comment_author_email' => $user->user_email,
-			'comment_author_url'   => $user->user_url,
-			'comment_type'         => 'internal-note',
-			'comment_post_ID'      => $post_id,
-			'user_id'              => get_current_user_id(),
-			'comment_content'      => $message,
-		);
-		wp_insert_comment( $comment );
-	}
 }
