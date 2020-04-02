@@ -154,30 +154,28 @@ class Template {
 		global $wp_query;
 
 		$metas   = [];
-		$noindex = false;
 
-		// Prevent duplicate search engine results.
-		if ( get_query_var( 'plugin_advanced' ) || is_search() ) {
-			$noindex = true;
-		} elseif ( is_singular( 'plugin' ) ) {
+		if ( is_singular( 'plugin' ) ) {
 			$metas[] = sprintf(
 				'<meta name="description" value="%s" />',
 				esc_attr( get_the_excerpt() )
 			);
-
-			// Add noindex for closed or outdated plugins.
-			if ( 'publish' !== get_post_status() || self::is_plugin_outdated() ) {
-				$noindex = true;
-			}
-		} elseif ( is_tax() && $wp_query->found_posts <= 3 ) {
-			$noindex = true;
-		}
-
-		if ( $noindex ) {
-			$metas[] = '<meta name="robots" content="noindex,follow" />' . "\n";
 		}
 
 		echo implode( "\n", $metas );
+	}
+
+	/**
+	 * Whether the current request should be noindexed.
+	 */
+	public static function should_noindex_request( $noindex ) {
+		if ( get_query_var( 'plugin_advanced' ) ) {
+			$noindex = true;
+		} else if ( is_singular( 'plugin' ) && self::is_plugin_outdated() ) {
+			$noindex = true;
+		}
+
+		return $noindex;
 	}
 
 	/**

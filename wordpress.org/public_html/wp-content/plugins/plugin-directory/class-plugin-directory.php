@@ -54,6 +54,9 @@ class Plugin_Directory {
 		add_action( 'wp_head', array( Template::class, 'archive_link_rel_prev_next' ), 3 );
 		add_action( 'wp_head', array( Template::class, 'archive_rel_canonical_link' ), 3 );
 
+		// Add no-index headers where appropriate.
+		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
+
 		// Cron tasks.
 		new Jobs\Manager();
 

@@ -28,10 +28,16 @@ function meta_robots() {
 		$noindex = true;
 	}
 
+	// Allow sites to alter this
 	$noindex = apply_filters( 'wporg_noindex_request', $noindex );
 
 	if ( $noindex ) {
-		echo '<meta name="robots" content="noindex,follow" />' . "\n";
+		// Allow sites to override the value.
+		if ( is_bool( $noindex ) ) {
+			$noindex = 'noindex,follow';
+		}
+
+		echo '<meta name="robots" content="' . $noindex . '" />' . "\n";
 	}
 }
 
