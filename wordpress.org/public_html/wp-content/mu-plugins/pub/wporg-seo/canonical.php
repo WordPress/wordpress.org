@@ -4,7 +4,7 @@ namespace WordPressdotorg\SEO\Canonical;
 /**
  * Outputs a <link rel="canonical"> on most pages.
  */
-function wporg_themes_archive_rel_canonical_link() {
+function rel_canonical_link() {
 	if ( $url = get_canonical_url() ) {
 		printf(
 			'<link rel="canonical" href="%s">' . "\n",
@@ -12,7 +12,9 @@ function wporg_themes_archive_rel_canonical_link() {
 		);
 	}
 }
-add_action( 'wp_head', __NAMESPACE__ . '\wporg_themes_archive_rel_canonical_link' );
+add_action( 'wp_head', __NAMESPACE__ . '\rel_canonical_link' );
+add_action( 'login_head',  __NAMESPACE__ . '\rel_canonical_link' );
+
 remove_action( 'wp_head', 'rel_canonical' );
 
 /**

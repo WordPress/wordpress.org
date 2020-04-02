@@ -359,27 +359,24 @@ function wporg_login_purge_pending_registrations() {
 add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_registrations' );
 
 /**
- * Add a canonical tag to the login screens.
+ * The canonical url for login.wordpress.org is a bit different.
  */
-function wporg_login_canonical_link() {
-	$canonical = false;
+function wporg_login_canonical_link( $url ) {
+	$url = false;
 
 	$matching_route = stripos( WP_WPOrg_SSO::$matched_route_regex, '(' );
 	if ( false === $matching_route ) {
-		$canonical = home_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
+		$url = home_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
 
 	// Else, if there's a long enough slug followed by a `/`, that's a parent page.
 	} elseif ( $matching_route >= 3 && '/' === substr( WP_WPOrg_SSO::$matched_route_regex, $matching_route + 1, 1 ) ) {
-		$canonical = home_url( substr( WP_WPOrg_SSO::$matched_route_regex, 0, $matching_route ) );
+		$url = home_url( substr( WP_WPOrg_SSO::$matched_route_regex, 0, $matching_route ) );
 
 	}
 
-	if ( $canonical ) {
-		printf( '<link rel="canonical" href="%s" />', esc_url( $canonical ) );
-	}
+	return $url;
 }
-add_action( 'login_head', 'wporg_login_canonical_link' );
-add_action( 'wp_head', 'wporg_login_canonical_link' );
+add_filter( 'wporg_canonical_link', 'wporg_login_canonical_link' );
 
 /**
  * Set the title for the wp-login.php page.
