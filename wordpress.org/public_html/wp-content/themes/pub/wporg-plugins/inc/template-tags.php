@@ -318,7 +318,7 @@ function the_plugin_self_close_button() {
 
 	<form method="POST" action="<?php echo esc_url( $close_link ); ?>">
 	<p>
-		<input class="button" type="submit" value="<?php echo esc_attr( sprintf( __( 'I understand, Please close %s.', 'wporg-plugins' ), get_the_title() ) ); ?>" />
+		<input class="button" type="submit" value="<?php echo esc_attr( sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() ) ); ?>" />
 	</p>
 	</form>
 <?php 
