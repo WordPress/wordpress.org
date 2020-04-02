@@ -8,11 +8,7 @@
 send_frame_options_header();
 
 // Search engines don't need to index the upload form. Should help prevent users uploading themes they didn't create.
-if ( ! function_exists( 'wporg_meta_robots' ) ) {
-   	function wporg_meta_robots() {
-		return 'noindex';
-	}
-}
+add_filter( 'wporg_noindex_request', '__return_true' );
 
 // Use the translated post title.
 add_filter( 'single_post_title', function( $title ) {
