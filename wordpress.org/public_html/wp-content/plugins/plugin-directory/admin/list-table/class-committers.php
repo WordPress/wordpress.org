@@ -104,6 +104,7 @@ class Committers extends \WP_List_Table {
 			</colgroup>
 			<tbody id="the-committer-list" data-wp-lists="list:committer">
 				<?php $this->display_rows_or_placeholder(); ?>
+				<?php $this->display_add_new_row(); ?>
 			</tbody>
 		</table>
 	<?php
@@ -118,6 +119,12 @@ class Committers extends \WP_List_Table {
 		foreach ( $this->items as $user_object ) {
 			echo "\n\t" . $this->single_row( $user_object );
 		}
+	}
+
+	/**
+	 * Display the "Add new" row.
+	 */
+	public function display_add_new_row() {
 		?>
 		<tr id="add-committer" class="add-committer wp-hidden-children">
 			<td colspan="2">
