@@ -1123,7 +1123,7 @@ function wporg_themes_add_meta_tags() {
 
 	// If it's outdated, noindex the theme.
 	if ( time() - strtotime( $theme->last_updated ) > 2 * YEAR_IN_SECONDS ) {
-		echo "<meta name='robots' content='noindex,follow' />\n";
+		add_filter( 'wporg_noindex_request', '__return_true' );
 	}
 }
 add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
