@@ -33,6 +33,8 @@ function get_canonical_url() {
 	} elseif ( is_author() ) {
 		// On WordPress.org get_author_posts_url() returns profile.wordpress.org links. Build it manually.
 		$url = home_url( 'author/' . $queried_object->user_nicename . '/' );
+	} elseif ( is_post_type_archive() ) {
+		$canonical = get_post_type_archive_link( $queried_object->name ); 
 	}
 
 	if ( $url && is_paged() ) {
