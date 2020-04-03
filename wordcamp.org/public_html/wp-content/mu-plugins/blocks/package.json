@@ -25,7 +25,7 @@
 		"@wordpress/i18n": "3.0.1",
 		"@wordpress/npm-package-json-lint-config": "1.1.6",
 		"@wordpress/scripts": "^3.2.1",
-		"acorn": "6.0.4",
+		"acorn": "6.4.1",
 		"babel-loader": "8.0.4",
 		"cross-env": "5.2.0",
 		"css-loader": "1.0.1",
