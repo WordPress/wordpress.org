@@ -13,6 +13,36 @@ function fetch_pr_data( $repo, $pr ) {
 		return false;
 	}
 
+	// Get Travis CI State.
+	$check_runs = [];
+	$raw_check_runs = api_request(
+		'/repos/' . $repo . '/commits/' . $data->head->sha . '/check-runs',
+		null,
+		[ 'Accept: application/vnd.github.antiope-preview+json' ]
+	);
+	if ( !empty( $raw_check_runs->check_runs ) ) {
+		foreach ( $raw_check_runs->check_runs as $check ) {
+			switch ( $check->status ) {
+				case 'queued':
+				case 'in_progress':
+					$check_runs[ $check->app->name ] = 'in_progress';
+					break;
+				case 'completed':
+					switch( $check->conclusion ) {
+						case 'success':
+							$check_runs[ $check->app->name ] = 'success';
+							break;
+						case 'failure':
+							$check_runs[ $check->app->name ] = 'failed';
+							break;
+						case 'action_required':
+							$check_runs[ $check->app->name ] = $check->output->title;
+							break;
+					}
+			}
+		}
+	}
+
 	return (object) [
 		'repo'            => $data->base->repo->full_name,
 		'number'          => $data->number,
@@ -23,6 +53,7 @@ function fetch_pr_data( $repo, $pr ) {
 		'updated_at'      => $data->updated_at,
 		'closed_at'       => $data->closed_at,
 		'mergeable_state' => $data->mergeable_state,
+		'check_runs'      => $check_runs,
 		'body'            => $data->body,
 		'user'            => (object) [
 			'url'  => $data->user->html_url,

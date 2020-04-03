@@ -1638,17 +1638,35 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					return '✅ Closed';
 				}
 
+				// Unit Tests?
+				if ( data.check_runs ) {
+					for ( var provider in data.check_runs ) {
+						switch( data.check_runs[ provider ] ) {
+							case 'in_progress':
+								return provider + ' Running';
+							case 'failed':
+								return '❌ ' + provider + ' Failed';
+							case 'success':
+								continue;
+							default:
+								return '❌ ' + provider + ' ' + data.check_runs[ provider ];
+						}
+					}
+				}
+
 				// Merge State then
 				switch ( data.mergeable_state ) {
 					case 'draft':
-						return 'Work in progress';
+						return 'Draft';
+					case 'blocked': // This seems to be returned for our App with PRs but not others..
 					case 'clean':
 						return '✅ All checks pass';
 					case 'dirty':
 						return '❌ Merge conflicts';
-					case 'unstable':
-					case 'blocked':
-						return '❌ Failing tests';
+					case 'unstable': // Not seen, Unit Tests above should catch it.
+						return '❌ Failing Tests';
+					case 'unknown':
+						return 'Unknown';
 				}
 			}
 
