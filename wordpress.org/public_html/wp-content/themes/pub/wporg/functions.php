@@ -107,7 +107,7 @@ function scripts() {
 		$GLOBALS['concatenate_scripts'] = true;
 	}
 
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20200227' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20200403' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Squiz.Commenting.InlineComment.InvalidEndChar

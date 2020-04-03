@@ -22,11 +22,10 @@ blockquote, q {
 }
 
 blockquote {
-	border-left: 2px solid #eee;
-	color: #82878c;
-	font-style: italic;
+	border-left: 2px solid $color__blockquote;
+	color: $color__blockquote;
 	margin: 1rem 0;
-	padding-left: 1rem;
+	padding-left: 0.8rem;
 
 	cite {
 		font-size: ms( -2 );
