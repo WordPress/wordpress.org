@@ -488,6 +488,50 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
+		.bbp-create-topic-wrapper {
+			padding: 15px 0 25px;
+			text-align: center;
+
+			.create-topic {
+				float: none;
+				height: auto;
+				padding: 9px 12px;
+
+				&::before {
+					color: #FFF;
+				}
+
+				&.button-secondary::before {
+					color: #000;
+				}
+
+			}
+
+			> span {
+				margin: 0 8px 0 6px;
+				font-size: 0.8rem;
+			}
+
+			.search-form {
+				display: inline-block;
+				width: 50%;
+				margin-bottom: 0;
+			}
+
+			@media (max-width: 767px) {
+				.create-topic,
+				> span,
+				.search-form {
+					display: block;
+					width: 100%;
+				}
+
+				> span {
+					margin: 3px 0;
+				}
+			}
+		}
+
 		.bbp-pagination {
 			font-size: ms(-2);
 			float: none;

@@ -3867,6 +3867,48 @@ section {
 	vertical-align: middle;
 }
 
+.bbpress #bbpress-forums .bbp-create-topic-wrapper {
+	padding: 15px 0 25px;
+	text-align: center;
+}
+
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic {
+	float: none;
+	height: auto;
+	padding: 9px 12px;
+}
+
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic::before {
+	color: #FFF;
+}
+
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic.button-secondary::before {
+	color: #000;
+}
+
+.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
+	margin: 0 8px 0 6px;
+	font-size: 0.8rem;
+}
+
+.bbpress #bbpress-forums .bbp-create-topic-wrapper .search-form {
+	display: inline-block;
+	width: 50%;
+	margin-bottom: 0;
+}
+
+@media (max-width: 767px) {
+	.bbpress #bbpress-forums .bbp-create-topic-wrapper .create-topic,
+	.bbpress #bbpress-forums .bbp-create-topic-wrapper > span,
+	.bbpress #bbpress-forums .bbp-create-topic-wrapper .search-form {
+		display: block;
+		width: 100%;
+	}
+	.bbpress #bbpress-forums .bbp-create-topic-wrapper > span {
+		margin: 3px 0;
+	}
+}
+
 .bbpress #bbpress-forums .bbp-pagination {
 	font-size: 0.8rem;
 	float: none;
