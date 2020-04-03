@@ -1643,9 +1643,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					for ( var provider in data.check_runs ) {
 						switch( data.check_runs[ provider ] ) {
 							case 'in_progress':
-								return provider + ' Running';
+								return provider + ' running';
 							case 'failed':
-								return '❌ ' + provider + ' Failed';
+								return '❌ ' + provider + ' failed';
 							case 'success':
 								continue;
 							default:
@@ -1664,7 +1664,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					case 'dirty':
 						return '❌ Merge conflicts';
 					case 'unstable': // Not seen, Unit Tests above should catch it.
-						return '❌ Failing Tests';
+						return '❌ Failing tests';
 					case 'unknown':
 						return 'Unknown';
 				}
