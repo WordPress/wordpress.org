@@ -46,6 +46,7 @@ $menu_items = [
 ];
 
 $latest_release_version   = WP_CORE_LATEST_RELEASE;
+$latest_release_zip_ts    = defined( 'WPORG_WP_RELEASES_PATH' ) ? filemtime( WPORG_WP_RELEASES_PATH . 'wordpress-' . WP_CORE_LATEST_RELEASE . '.zip' ) : time();
 $latest_release_zip_url   = 'https://wordpress.org/latest.zip';
 $latest_release_targz_url = 'https://wordpress.org/latest.tar.gz';
 
@@ -54,6 +55,7 @@ if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK ) {
 	if ( $rosetta_release ) {
 		$locale                   = get_locale();
 		$latest_release_version   = $rosetta_release['version'];
+		$latest_release_zip_ts    = $rosetta_release['builton'];
 		$latest_release_zip_url   = home_url( "latest-{$locale}.zip" );
 		$latest_release_targz_url = home_url( "latest-{$locale}.tar.gz" );
 	}
@@ -62,6 +64,45 @@ if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK ) {
 // Prevent Jetpack from looking for a non-existent featured image.
 add_filter( 'jetpack_images_pre_get_images', function() {
 	return new \WP_Error();
+} );
+
+// Add Schema.org structured data.
+add_action( 'wp_head', function() use( $latest_release_version, $latest_release_zip_url, $latest_release_zip_ts ) {
+	$graph_tags  = custom_open_graph_tags();
+	$description = $graph_tags[ 'description' ] ?? '';
+	?>
+	<script type="application/ld+json">
+	[
+		{
+			"@context": "http://schema.org",
+			"@type": [
+				"SoftwareApplication",
+				"Product"
+			],
+			"name": "WordPress",
+			"operatingSystem": [ "Linux", "Windows", "Unix", "Apache", "NGINX" ],
+			"url": "<?php the_permalink(); ?>",
+			"description": <?php echo wp_json_encode( $description ); ?>,
+			"softwareVersion": <?php echo wp_json_encode( $latest_release_version ); ?>,
+			"fileFormat": "application/zip",
+			"downloadUrl": "<?php echo esc_url( $latest_release_zip_url ); ?>",
+			"dateModified": "<?php echo gmdate( 'Y-m-d\TH:i:s\+00:00', $latest_release_zip_ts ); ?>",
+			"applicationCategory": "WebApplication",
+			"offers": {
+				"@type": "Offer",
+				"url": "<?php the_permalink(); ?>",
+				"price": "0.00",
+				"priceCurrency": "USD",
+				"seller": {
+					"@type": "Organization",
+					"name": "WordPress.org",
+					"url": "https://wordpress.org"
+				}
+			}
+		}
+	]
+	</script>
+	<?php
 } );
 
 /* See inc/page-meta-descriptions.php for the meta description for this page. */
