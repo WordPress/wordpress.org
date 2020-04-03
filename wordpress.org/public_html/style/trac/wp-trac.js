@@ -1549,12 +1549,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			var apiEndpoint = 'https://api.wordpress.org/dotorg/trac/pr/',
 				authenticated = !! ( wpTracCurrentUser && wpTracCurrentUser !== "anonymous" ),
 				trac = false, ticket = 0,
-				container;
+				primaryGitRepo, primaryGitRepoDesc, container;
 
 			function init() {
 				// TODO: If this is added to other Trac's, expand this..
 				if ( $body.hasClass( 'core' ) ) {
 					trac = 'core';
+					primaryGitRepo = 'WordPress/wordpress-develop';
+					primaryGitRepoDesc = 'WordPress GitHub mirror';
+				} else if ( $body.hasClass( 'meta' ) ) {
+					trac = 'meta';
+					primaryGitRepo = 'WordPress/wordpress.org';
+					primaryGitRepoDesc = 'WordPress.org Meta GitHub mirror';
 				}
 
 				// This seems to be the easiest place to find the current Ticket ID..
@@ -1595,7 +1601,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						}
 					} else {
 						// Change the loading placeholder
-						prContainer.find( '.loading div' ).html( 'To link a Pull Request to this ticket, create a new Pull Request in the <a href="https://github.com/WordPress/wordpress-develop">WordPress GitHub mirror</a> and include this ticket’s URL in the description.' );
+						prContainer.find( '.loading div' ).html( 'To link a Pull Request to this ticket, create a new Pull Request in the <a href="https://github.com/' + primaryGitRepo + '">' + primaryGitRepoDesc + '</a> and include this ticket’s URL in the description.' );
 					}
 				});
 			}
