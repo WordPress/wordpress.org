@@ -1647,6 +1647,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					case 'dirty':
 						return '❌ Merge conflicts';
 					case 'unstable':
+					case 'blocked':
 						return '❌ Failing tests';
 				}
 			}
