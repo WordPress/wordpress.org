@@ -176,6 +176,9 @@ function determine_trac_ticket( $pr ) {
 
 	// For now, we assume everything is destined for the Core Trac.
 	switch ( $pr->base->repo->full_name ) {
+		case 'WordPress/wordpress.org':
+			$trac = 'meta';
+			break;
 		case 'WordPress/wordpress-develop':
 		default:
 			$trac = 'core';
