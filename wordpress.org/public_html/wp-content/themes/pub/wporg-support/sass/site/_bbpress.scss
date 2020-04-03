@@ -496,8 +496,7 @@ $paginationBreakPoint: "600px";
 			flex-direction: column;
 
 			@media (min-width: $paginationBreakPoint) {
-				float: right;
-				display: inline-block;
+				display: block;
 			}
 
 			.page-numbers {

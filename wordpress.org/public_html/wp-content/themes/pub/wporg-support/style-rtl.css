@@ -3875,8 +3875,7 @@ section {
 
 @media (min-width: 600px) {
 	.bbpress #bbpress-forums .bbp-pagination {
-		float: left;
-		display: inline-block;
+		display: block;
 	}
 }
 
