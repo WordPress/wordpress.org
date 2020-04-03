@@ -1635,11 +1635,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			function prStatus( data ) {
 				// Closed?
 				if ( data.closed_at ) {
-					if ( data.mergeable_state == 'clean' ) {
-						return '✅ Closed';
-					} else {
-						return '❌ Closed'
-					}
+					return '✅ Closed';
 				}
 
 				// Merge State then
