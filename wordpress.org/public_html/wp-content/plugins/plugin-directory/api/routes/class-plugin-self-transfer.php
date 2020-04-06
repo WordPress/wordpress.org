@@ -90,7 +90,7 @@ class Plugin_Self_Transfer extends Base {
 		), $plugin );
 
 		// Email all Plugin Committers.
-		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been trasferred.', 'wporg-plugins' ), $plugin->post_title );
+		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been transferred.', 'wporg-plugins' ), $plugin->post_title );
 		$message = sprintf(
 			/* translators: 1: Author name 2: Date, 3: Plugin Name, 4: New Owners name, 5: Plugin team email address. */
 			__( 'As requested by %1$s on %2$s, the ownership of %3$s in the WordPress Plugin Directory has been transferred to %4$s.
