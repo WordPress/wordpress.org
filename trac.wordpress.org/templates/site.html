@@ -109,6 +109,15 @@
 <!--! Notices and instructions when creating a new ticket -->
 <py:if test="req.environ['PATH_INFO'] == '/newticket'">
 
+	<py:if test="not req.session['authenticated']">
+		<py:match path="div[@id='content' and @class='error']/h1">
+			<h1>Login Required</h1>
+		</py:match>
+		<py:match path="div[@id='content' and @class='error']/p[@class='message']">
+			<p class="info message"><a href="https://login.wordpress.org/?redirect_to=https://${project_slug}.trac.wordpress.org/newticket">You need to login</a> to create a ticket.</p>
+		</py:match>
+	</py:if>
+
 	<py:match path="div[@id='content' and @class='ticket']/form">
 		<div class="wp-notice newticket-not-here">
 			<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
