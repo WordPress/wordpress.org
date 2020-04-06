@@ -77,7 +77,7 @@ class Template {
 
 		// Ignore the icons if we're relying upon the geopattern default.
 		if ( $icons['generated'] ) {
-			$icons = [];
+			$icons = [ 'svg' => false, 'icon_2x' => false, 'icon' => false ];
 		}
 
 		$schema = [];
