@@ -6,25 +6,33 @@ use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
- * An API endpoint for closing a particular plugin.
+ * An API endpoint for transferring a particular plugin.
  *
  * @package WordPressdotorg_Plugin_Directory
  */
-class Plugin_Self_Close extends Base {
+class Plugin_Self_Transfer extends Base {
 
 	public function __construct() {
-		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/self-close', [
+		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/self-transfer', [
 			'methods'             => \WP_REST_Server::CREATABLE,
-			'callback'            => [ $this, 'self_close' ],
+			'callback'            => [ $this, 'self_transfer' ],
 			'args'                => [
 				'plugin_slug' => [
 					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 				],
+				'new_owner' => [
+					'validate_callback' => function( $id ) {
+						return (bool) get_user_by( 'id', $id );
+					}
+				]
 			],
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-				return current_user_can( 'plugin_admin_edit', $plugin ) && 'publish' === $plugin->post_status;
+				return
+					current_user_can( 'plugin_admin_edit', $plugin ) &&
+					get_current_user_id() == $plugin->post_author &&
+					'publish' === $plugin->post_status;
 			},
 		] );
 
@@ -37,7 +45,7 @@ class Plugin_Self_Close extends Base {
 	function override_cookie_expired_message( $result, $obj, $request ) {
 		if (
 			is_array( $result ) && isset( $result['code'] ) &&
-			preg_match( '!^/plugins/v1/plugin/([^/]+)/self-close$!', $request->get_route(), $m )
+			preg_match( '!^/plugins/v1/plugin/([^/]+)/self-transfer$!', $request->get_route(), $m )
 		) {
 			if ( 'rest_cookie_invalid_nonce' == $result['code'] ) {
 				wp_die( 'The link you have followed has expired.' );
@@ -50,43 +58,44 @@ class Plugin_Self_Close extends Base {
 	}
 
 	/**
-	 * Endpoint to self-close a plugin.
+	 * Endpoint to self-transfer a plugin.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return bool True if the favoriting was successful.
 	 */
-	public function self_close( $request ) {
+	public function self_transfer( $request ) {
 		$plugin   = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-		$location = get_permalink( $plugin );
+		$location = get_permalink( $plugin ) . 'advanced/';
 		header( "Location: $location" );
-
 		$result = [
-			'location' => $location,
+			'location'    => $location,
+			'transferred' => false,
 		];
 
-		// Close the plugin.
-		$plugin->post_status = 'closed';
+		// New owner must also have commit rights.
+		$new_owner = get_user_by( 'id', $request['new_owner'] );
+		if ( ! user_can( $new_owner, 'plugin_admin_edit', $plugin ) ) {
+			return $result;
+		}
+
+		// Change the authorship.
+		$plugin->post_author = $new_owner->ID;
 		wp_update_post( $plugin );
 
-		// Update the Metadata
-		update_post_meta( $plugin->ID, '_close_reason', 'author-request' );
-		update_post_meta( $plugin->ID, 'plugin_closed_date', current_time( 'mysql' ) );
-
 		// Add an audit-log entry as to why this has happened.
-		Tools::audit_log(
-			sprintf( 'Plugin closed. Reason: Author Self-close Request from %s', $_SERVER['REMOTE_ADDR'] ),
-			$plugin
-		);
+		Tools::audit_log( sprintf(
+			'Ownership self-transferred to <a href="%s">%s</a>.',
+			esc_url( 'https://profiles.wordpress.org/' . $new_owner->user_nicename .'/' ),
+			$new_owner->user_login
+		), $plugin );
 
 		// Email all Plugin Committers.
-		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been closed', 'wporg-plugins' ), $plugin->post_title );
+		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been trasferred.', 'wporg-plugins' ), $plugin->post_title );
 		$message = sprintf(
-			/* translators: 1: Author name 2: Date, 3: Plugin Name 4: Plugin team email address. */
-			__( 'As requested by %1$s on %2$s, %3$s has been closed in the WordPress Plugin Directory.
+			/* translators: 1: Author name 2: Date, 3: Plugin Name, 4: New Owners name, 5: Plugin team email address. */
+			__( 'As requested by %1$s on %2$s, the ownership of %3$s in the WordPress Plugin Directory has been transferred to %4$s.
 
-Closing your plugin is intended to be a permanent action. You will not be able to reopen it without contacting the plugins team.
-
-If you believe this closure to be in error, please email %4$s and explain why you feel your plugin should be re-opened.
+If you believe this to be in error, please email %5$s immediately.
 
 --
 The WordPress Plugin Directory Team
@@ -94,6 +103,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 			wp_get_current_user()->display_name,
 			gmdate( 'Y-m-d H:i:s \G\M\T' ),
 			$plugin->post_title,
+			$new_owner->display_name . ' (' . $new_owner->user_login . ')',
 			'plugins@wordpress.org'
 		);
 
@@ -104,7 +114,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 
 		wp_mail( $who_to_email, $subject, $message, 'From: plugins@wordpress.org' );
 
-		$result['closed'] = true;
+		$result['transferred'] = true;
 
 		return $result;
 	}

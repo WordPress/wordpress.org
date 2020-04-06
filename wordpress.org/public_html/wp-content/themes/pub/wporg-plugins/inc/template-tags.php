@@ -337,3 +337,61 @@ function the_plugin_self_close_button() {
 	}
 }
 
+/**
+ * Display a form to allow a plugin owner to transfer the ownership of a plugin to someone else.
+ * This does NOT remove their commit ability.
+ */
+function the_plugin_self_transfer_form() {
+	$post = get_post();
+
+	if (
+		! current_user_can( 'plugin_admin_edit', $post ) ||
+		'publish' != $post->post_status
+	) {
+		return;
+	}
+
+	echo '<h4>' . esc_html__( 'Transfer This Plugin', 'wporg-plugins' ) . '</h4>';
+
+	if ( get_current_user_id() != $post->post_author ) {
+		$owner = get_user_by( 'id', $post->post_author );
+		/* translators: %s: Name of plugin owner */
+		echo '<p>' . esc_html( sprintf(
+			__( 'This plugin is currently owned by %s, they can choose to transfer ownership rights of the plugin to you.', 'wporg-plugins' ),
+			$owner->display_name
+		) ) . '</p>';
+		return;
+	}
+
+	echo '<p>' . esc_html__( 'You are the current owner of this plugin, but you can transfer those rights to another person at any time. The new owner must be added as a committer first.', 'wporg-plugins' ) . '</p>';
+
+	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> Transferring a plugin is intended to be <em>permanent</em>. There is no way to get plugin ownership back unless it has been done maliciously.', 'wporg-plugins' ) . '</p></div>';
+
+	$users = [];
+	foreach ( Tools::get_plugin_committers( $post->post_name ) as $user_login ) {
+		$user = get_user_by( 'login', $user_login );
+		if ( $user->ID != get_current_user_id() ) {
+			$users[] = $user;
+		}
+	}
+	if ( ! $users ) {
+		echo '<div class="plugin-notice notice notice-error notice-alt"><p>' . __( 'To transfer a plugin, you must first add the new owner as a committer.', 'wporg-plugins' ) . '</p></div>';
+		return;
+	}
+
+	echo '<form method="POST" action="' . esc_url( Template::get_self_transfer_link() ) . '">';
+	echo '<p><label for="new_owner">' . esc_html__( 'New Owner', 'wporg-plugins' ) . '</label><br>';
+	echo '<select name="new_owner">';
+	foreach ( $users as $user ) {
+		printf(
+			'<option value="%d">%s</option>' . "\n",
+			esc_attr( $user->ID ),
+			esc_html( $user->display_name . ' (' . $user->user_login . ')' )
+		);
+	}
+	echo '</select></p>';
+	// Translators: %s is the plugin name, as defined by the plugin itself.
+	echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'Please transfer %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
+	echo '</form>';
+
+}

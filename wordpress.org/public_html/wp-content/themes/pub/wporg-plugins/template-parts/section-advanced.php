@@ -49,5 +49,8 @@ global $post;
 
 	<div class="plugin-notice notice notice-error notice-alt"><p><?php esc_html_e( 'These features often cannot be undone without intervention. Please do not attempt to use them unless you are absolutely certain. When in doubt, contact the plugins team for assistance.', 'wporg-plugins' ); ?></p></div>
 
+	<?php the_plugin_self_transfer_form(); ?>
+
 	<?php the_plugin_self_close_button(); ?>
+
 </div>

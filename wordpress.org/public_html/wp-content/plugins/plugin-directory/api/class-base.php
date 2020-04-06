@@ -32,6 +32,7 @@ class Base {
 		new Routes\Plugin_Committers();
 		new Routes\Plugin_Support_Reps();
 		new Routes\Plugin_Self_Close();
+		new Routes\Plugin_Self_Transfer();
 	}
 
 	/**
