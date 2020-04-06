@@ -765,7 +765,7 @@ class Official_WordPress_Events {
 		$api_keys = array( MEETUP_API_KEY, OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
 
 		if ( 'cli' === php_sapi_name() ) {
-			echo $message;
+			echo "\n" . $message;
 		}
 
 		if ( $write_to_disk ) {
