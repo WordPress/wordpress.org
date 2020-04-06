@@ -1,5 +1,5 @@
 /* globals wpTracAutoCompleteUsers, wpTracContributorLabels, wpTracCurrentUser */
-var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList, $body;
+var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList, bugTrackerLocations, $body;
 
 (function($){
 
@@ -49,6 +49,31 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'privacy' : 'Privacy focus.',
 		'ui-copy' : 'Copy focus for the user interface.',
 		'coding-standards' : 'Coding Standards focus.'
+	};
+
+	// Other Bug Trackers which the WordPress project uses for various things.
+	bugTrackerLocations = {
+		'WordPress.org Site': {
+			tracker: 'https://meta.trac.wordpress.org/newticket',
+			tracker_text: 'WordPress.org Meta Trac',
+			prevent_changing_to: true
+		},
+		'Editor': {
+			tracker: 'https://github.com/WordPress/gutenberg/issues/new/choose',
+			tracker_text: 'Gutenberg GitHub Repository',
+			bug_text: "the Gutenberg Editor",
+			disable_copy: true, // Gutenberg has a bug-report flow.
+			allow_bypass: true,
+		},
+		'WordCamp Site & Plugins': {
+			tracker: 'https://github.com/WordPress/wordcamp.org/issues/new/choose',
+			tracker_text: 'WordCamp.org GitHub Repository',
+			disable_copy: true // WordCamp has a bug-report flow.
+		},
+		'Five For The Future': {
+			tracker: 'https://github.com/WordPress/five-for-the-future/issues/new',
+			tracker_text: 'Five for the Future GitHub Repository'
+		}
 	};
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major' ];
@@ -276,9 +301,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 			// Ticket-only tweaks.
 			if ( content.hasClass( 'ticket' ) ) {
-				if ( $body.hasClass( 'core' ) ) {
-					wpTrac.coreToMeta();
-				}
+				wpTrac.redirectTicketsToProperTracker();
 
 				// A collection of ticket hacks that must be run again after previews.
 				wpTrac.postPreviewHacks();
@@ -689,36 +712,77 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			});
 		},
 
-		coreToMeta: function() {
+		redirectTicketsToProperTracker: function() {
 			var component = $('#field-component');
-			if ( window.location.pathname !== '/newticket' ) {
-				if ( ! wpTrac.gardener && component.val() !== 'WordPress.org site' ) {
-					component.children('option[value="WordPress.org site"]').remove();
+			// Special hack to not show the warning on Meta Trac for the WordPress.org site.
+			if ( window.location.host === 'meta.trac.wordpress.org' ) {
+				delete bugTrackerLocations['WordPress.org Site'];
+			}
+
+			// Prevent changing to the component if need be.
+ 			if ( window.location.pathname !== '/newticket' ) {
+				for ( var c in bugTrackerLocations ) {
+					if ( ! bugTrackerLocations[c].prevent_changing_to ) {
+						continue;
+					}
+					if ( component.val() != c ) {
+						component.children('option[value="' + c + '"]').remove();
+					}
 				}
 				return;
 			}
 
+			// Show a notice when the component is selected.
 			component.change( function() {
 				var toggle = $('input[name="attachment"]').parent().add('.ticketdraft').add('.wp-notice').add('div.buttons');
-				if ( $(this).val() !== 'WordPress.org site' ) {
+
+				// Reset.
+				$('.wp-notice.component').remove();
+				toggle.hide();
+
+				var selectedComponent = $(this).val();
+				if ( !( selectedComponent in bugTrackerLocations ) ) {
 					toggle.show();
-					$('.wp-notice.component').remove();
 					return;
 				}
-				toggle.hide();
-				$('div.buttons').after( '<div class="wp-notice component"><p><strong>The WordPress.org site now has its own Trac</strong> at ' +
-					'<a href="//meta.trac.wordpress.org/">meta.trac.wordpress.org</a>.</p><p>Would you mind opening this ticket over there instead? ' +
-					'<a href="//meta.trac.wordpress.org/newticket" id="new-meta-ticket">Click here to copy your summary and description over</a>.</p></div>' );
+
+				var tracker = bugTrackerLocations[ selectedComponent ];
+
+				// If the component (ie. Editor) allows bypassing the warning.. or if it's a Bug Gardener, show the create buttons.
+				if ( tracker.allow_bypass || wpTrac.gardener ) {
+					toggle.show();
+				}
+
+				$('div.buttons').before(
+					'<div class="wp-notice component"><p>' +
+						'<strong>Tickets related to ' + ( tracker.bug_text || selectedComponent ) + '</strong> should be filed on the ' +
+						'<a href="' + tracker.tracker + '">' + ( tracker.tracker_text || tracker.tracker ) + '</a>' +
+					'</p><p>' +
+						'Would you mind opening this ticket over there instead? ' +
+						( tracker.disable_copy ? '' : '<a href="' + tracker.tracker + '" id="new-tracker-ticket">Click here to copy your summary and description over</a>.' ) +
+					'</p>' +
+						( tracker.allow_bypass ? '<p>If this isn\'t related to ' + ( tracker.bug_text || selectedComponent ) + ', please continue to open this ticket here.</p>' : '' ) +
+					'</div>'
+				);
 			});
 
-			$('#propertyform').on( 'click', '#new-meta-ticket', function() {
-				var url, href = $(this).attr( 'href' );
-				url = href + '?' + $.param({ summary: $('#field-summary').val(), description: $('#field-description').val() });
+			$('#propertyform').on( 'click', '#new-tracker-ticket', function() {
+				var url, url_params = {}, href = $(this).attr( 'href' ),
+					summary_field = 'summary', description_field = 'description';
+
+				// Trac (default) and GitHub are supported.
+				if ( href.match( /github.com/ ) ) {
+					summary_field = 'title';
+					description_field = 'body';
+				}
+
+				url_params[summary_field]     = $('#field-summary').val();
+				url_params[description_field] = $('#field-description').val()
+
+				url = href + '?' + $.param( url_params );
 				if ( url.length > 1500 ) {
-					url = href + '?' + $.param({
-						summary: $('#field-summary').val(),
-						description: '(Couldn\'t copy over your description as it was too long. Please paste it here. Your old window was not closed.)'
-					});
+					url_params[description_field] = '(Couldn\'t copy over your description as it was too long. Please paste it here. Your old window was not closed.)';
+					url = href + '?' + $.param( url_params );
 					window.open( url );
 				} else {
 					window.location.href = url;
