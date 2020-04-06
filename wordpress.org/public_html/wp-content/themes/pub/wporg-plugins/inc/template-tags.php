@@ -283,12 +283,15 @@ function the_previous_version_download( $post = null ) {
 	// List Trunk, followed by the most recent non-stable release.
 	$tags = array_reverse( $tags );
 
-	echo '<h5>' . esc_html__( 'Previous Versions', 'wporg-plugins' ) . '</h5>';
-	echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . esc_html__( 'Previous versions of this plugin may not be secure or stable and are available for testing purposes only.', 'wporg-plugins' ) . '</p></div>';
+	echo '<h4>' . esc_html__( 'Previous Versions', 'wporg-plugins' ) . '</h4>';
+
+	echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . esc_html__( 'Previous versions of plugins may not be secure or stable. They are not recommended for use on production websites.', 'wporg-plugins' ) . '</p></div>';
+
+	echo '<p>' . esc_html__( 'Please select a specific version to download.', 'wporg-plugins' ) . '</p>';
 
 	echo '<select class="previous-versions" onchange="getElementById(\'download-previous-link\').href=this.value;">';
 	foreach ( $tags as $version ) {
-		$text = ( 'trunk' === $version ? esc_html__( 'Development Version', 'wporg-plugins' ) : $version );
+		$text = ( 'trunk' === $version ? __( 'Development Version', 'wporg-plugins' ) : $version );
 		printf( '<option value="%s">%s</option>', esc_attr( Template::download_link( $post, $version ) ), esc_html( $text ) );
 	}
 	echo '</select> ';
@@ -302,24 +305,35 @@ function the_previous_version_download( $post = null ) {
 
 /**
  * Displays a form for plugin committers to self-close a plugin. Permanently.
+ * It is disabled for plugins with 20,000+ users.
  */
 function the_plugin_self_close_button() {
-	$post = get_post();
+	$post            = get_post();
+	$active_installs = (int) get_post_meta( $post->ID, 'active_installs', true );
+	$close_link      = false;
 
 	if ( ! current_user_can( 'plugin_admin_edit', $post ) || 'publish' != $post->post_status ) {
 		return;
 	}
 
-	$close_link = Template::get_self_close_link( $post );
+	echo '<h4>' . esc_html__( 'Close This Plugin', 'wporg-plugins' ) . '</h4>';
+	echo '<p>' . esc_html__( 'This plugin is currently open. All developers have the ability to close their own plugins at any time.', 'wporg-plugins' ) . '</p>';
 
-	?>
-	<h5><?php esc_html_e( 'Close This Plugin', 'wporg-plugins' ); ?></h5>
-	<div class="plugin-notice notice notice-warning notice-alt"><p><?php _e( '<strong>Warning:</strong> Closing your plugin is intended to be a permanent action. You will not be able to reopen it without contacting the plugins team.', 'wporg-plugins' ); ?></p></div>
+	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
+	if ( $active_installs >= 20000 ) {
+		// Translators: %s is the plugin team email address.
+		printf( __( '<strong>Notice:</strong> Due to the high volume of users for this plugin it cannot be closed without speaking directly to the plugins team. Please contact <a href="mailto:%1$s">%1$s</a> with a link to the plugin and explanation as to why it should be closed.', 'wporg-plugins' ), 'plugins@wordpress.org' );
+	} else {
+		$close_link = Template::get_self_close_link( $post );
+		_e( '<strong>Warning:</strong> Closing a plugin is intended to be a <em>permanent</em> action. There is no way to reopen a plugin without contacting the plugins team.', 'wporg-plugins' );
+	}
+	echo '</p></div>';
 
-	<form method="POST" action="<?php echo esc_url( $close_link ); ?>">
-	<p>
-		<input class="button" type="submit" value="<?php echo esc_attr( sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() ) ); ?>" />
-	</p>
-	</form>
-<?php 
+	if ( $close_link ) {
+		echo '<form method="POST" action="' . esc_url( $close_link ) . '">';
+		// Translators: %s is the plugin name, as defined by the plugin itself.
+		echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
+		echo '</form>';
+	}
 }
+
