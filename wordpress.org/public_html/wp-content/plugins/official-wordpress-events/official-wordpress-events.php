@@ -163,7 +163,7 @@ class Official_WordPress_Events {
 			$wpdb->replace( self::EVENTS_TABLE, $row_values );
 		}
 
-		$this->log( 'finished job' );
+		$this->log( "finished job\n\n" );
 	}
 
 	/**
@@ -334,11 +334,8 @@ class Official_WordPress_Events {
 							) {
 								continue 3;
 							}
-							if ( ! $wordcamp->session_start_time ) {
-								$event['start_timestamp'] = $value;
-							} else {
-								$event['start_timestamp'] = absint( $wordcamp->session_start_time );
-							}
+
+							$event['start_timestamp'] = $this->get_wordcamp_start_time( $value, absint( $wordcamp->session_start_time ) );
 							break;
 
 						case 'End Date (YYYY-mm-dd)':
@@ -393,6 +390,25 @@ class Official_WordPress_Events {
 		}
 
 		return $events;
+	}
+
+	/**
+	 * Determine the best start time for a WordCamp.
+	 *
+	 * The timestamp from the WordCamp post type only tell us the date that the camp is on, not when it starts.
+	 * The earliest session can be used to get the time that the camp starts, but it's likely to be inaccurate
+	 * if it doesn't match the date from the WordCamp post. One common cause of that is when an event is
+	 * postponed, but the organizers haven't gone through and updated all of the sessions yet.
+	 *
+	 * @param string $start_date
+	 * @param string $first_session_start_time
+	 *
+	 * @return string
+	 */
+	protected function get_wordcamp_start_time( $start_date, $first_session_start_time ) {
+		$session_time_is_same_day = date( 'Ymd', $start_date ) === date( 'Ymd', $first_session_start_time );
+
+		return $session_time_is_same_day ? $first_session_start_time : $start_date;
 	}
 
 	/**
