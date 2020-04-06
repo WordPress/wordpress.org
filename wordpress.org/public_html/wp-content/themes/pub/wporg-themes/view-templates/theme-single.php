@@ -57,7 +57,15 @@
 
 			<div class="theme-info">
 				<# if ( data.screenshot_url ) { #>
-				<div class="screenshot"><img src="{{ data.screenshot_url }}?w=1142&strip=all" alt=""/></div>
+				<div class="screenshot">
+					<picture>
+						<source media="(min-width: 782px)" srcset="{{ data.screenshot_url }}?w=572&strip=all, {{ data.screenshot_url }}?w=1144&strip=all 2x">
+						<source media="(min-width: 481px) and (max-width: 782px)" srcset="{{ data.screenshot_url }}?w=700&strip=all, {{ data.screenshot_url }}?w=1400&strip=all 2x">
+						<source media="(min-width: 401px) and (max-width: 480px)" srcset="{{ data.screenshot_url }}?w=420&strip=all, {{ data.screenshot_url }}?w=840&strip=all 2x">
+						<source media="(max-width: 400px)" srcset="{{ data.screenshot_url }}?w=344&strip=all, {{ data.screenshot_url }}?w=688&strip=all 2x">
+						<img src="{{ data.screenshot_url }}?w=572&strip=all" srcset="{{ data.screenshot_url }}?w=1144&strip=all 2x" loading="lazy" alt="">
+					</picture>
+				</div>
 				<# } else { #>
 				<div class="screenshot blank"></div>
 				<# } #>
