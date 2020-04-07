@@ -330,7 +330,7 @@ function the_plugin_self_close_button() {
 	echo '</p></div>';
 
 	if ( $close_link ) {
-		echo '<form method="POST" action="' . esc_url( $close_link ) . '">';
+		echo '<form method="POST" action="' . esc_url( $close_link ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
 		// Translators: %s is the plugin name, as defined by the plugin itself.
 		echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'I understand, please close %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
 		echo '</form>';
@@ -379,9 +379,10 @@ function the_plugin_self_transfer_form() {
 		return;
 	}
 
-	echo '<form method="POST" action="' . esc_url( Template::get_self_transfer_link() ) . '">';
+	echo '<form method="POST" action="' . esc_url( Template::get_self_transfer_link() ) . '" onsubmit="return ( 0 != document.getElementById(\'transfer-new-owner\').value ) && confirm( jQuery(this).prev(\'.notice\').text() );">';
 	echo '<p><label for="new_owner">' . esc_html__( 'New Owner', 'wporg-plugins' ) . '</label><br>';
-	echo '<select name="new_owner">';
+	echo '<select id="transfer-new-owner" name="new_owner">';
+	echo '<option value="0">---</option>';
 	foreach ( $users as $user ) {
 		printf(
 			'<option value="%d">%s</option>' . "\n",
