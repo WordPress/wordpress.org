@@ -48,6 +48,10 @@ class Hooks {
 		remove_filter( 'bbp_get_topic_author_link', 'bbp_rel_nofollow' );
 		remove_filter( 'bbp_get_reply_author_link', 'bbp_rel_nofollow' );
 
+		// add ugc to links in topics and replies. These already have nofollow, this adds ugc as well
+		add_filter( 'bbp_get_reply_content', array( $this, 'add_rel_ugc' ), 80 );
+		add_filter( 'bbp_get_topic_content', array( $this, 'add_rel_ugc' ), 80 );
+
 		// oEmbed.
 		add_filter( 'oembed_discovery_links', array( $this, 'disable_oembed_discovery_links' ) );
 		add_filter( 'oembed_response_data',   array( $this, 'disable_oembed_response_data' ), 10, 2 );
@@ -748,6 +752,20 @@ class Hooks {
 		$link   = sprintf( $anchor, esc_url( $url ), esc_html( $user->user_nicename ) );
 
 		return $matches[1] . $link;
+	}
+
+	/**
+	 * Add nofollow ugc to links in content, for post-save processing. Compare to wp_rel_ugc().
+	 */
+	public function add_rel_ugc( $text ) {
+		$text = preg_replace_callback(
+			'|<a (.+?)>|i',
+			function( $matches ) {
+				return wp_rel_callback( $matches, 'nofollow ugc' );
+			},
+			$text
+		);
+		return $text;
 	}
 
 	/**
