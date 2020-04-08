@@ -341,7 +341,7 @@ if ( 'wp-plugins' === $project->path ) {
 				}
 
 				printf(
-					'<tr>
+					'<tr id="contributor-%s">
 						<td class="contributor-name">
 							%s
 							<a href="https://profiles.wordpress.org/%s/">%s %s</a>
@@ -372,6 +372,7 @@ if ( 'wp-plugins' === $project->path ) {
 							</div>
 						</td>
 					</tr>',
+					$contributor->nicename,
 					$contributor->is_editor ? '<span class="translation-editor">Editor</span>' : '',
 					$contributor->nicename,
 					get_avatar( $contributor->email, 40 ),
