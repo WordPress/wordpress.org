@@ -9,7 +9,9 @@
  */
 class WPorg_GP_User_Stats {
 
-	private $user_stats = array();
+	private $user_stats = [];
+
+	private $user_project_stats = [];
 
 	public function __construct() {
 		global $wpdb, $gp_table_prefix;
@@ -21,6 +23,7 @@ class WPorg_GP_User_Stats {
 		add_action( 'shutdown', array( $this, 'write_stats_to_database' ) );
 
 		$wpdb->user_translations_count = $gp_table_prefix . 'user_translations_count';
+		$wpdb->user_projects           = $gp_table_prefix . 'user_projects';
 	}
 
 	public function translation_updated( $translation ) {
@@ -43,6 +46,21 @@ class WPorg_GP_User_Stats {
 			$this->bump_user_stat( $translation->user_id, $translation_set->locale, $translation_set->slug, 0, 1 );
 
 		}
+
+		// Record the last time the user submitted a translation for a project/locale.
+		if ( 'gp_translation_created' == current_filter() ) {
+			$project = GP::$project->get( $translation_set->project_id );
+
+			// Find the "root" project ID.
+			// For projects with sub-projects, we only want to store the "parent" project.
+			// ie. wp-plugins/plugin-name, wp/dev, or apps/android
+			$project_path_we_want = implode( '/', array_slice( explode( '/', $project->path ), 0, 2 ) );
+			if ( $project_path_we_want != $project->path ) {
+				$project = GP::$project->by_path( $project_path_we_want );
+			}
+
+			$this->user_project_stats[ "{$translation->user_id},{$project->id},{$translation_set->locale},{$translation_set->slug}" ] = true;
+		}
 	}
 
 	private function bump_user_stat( $user_id, $locale, $locale_slug, $suggested = 0, $accepted = 0 ) {
@@ -64,7 +82,7 @@ class WPorg_GP_User_Stats {
 
 		$now = current_time( 'mysql', 1 );
 
-		$values = array();
+		$values = [];
 		foreach ( $this->user_stats as $key => $stats ) {
 			list( $user_id, $locale, $locale_slug ) = explode( ',', $key );
 
@@ -85,7 +103,7 @@ class WPorg_GP_User_Stats {
 					VALUES " . implode( ', ', $values ) . "
 					ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`), `date_modified`=VALUES(`date_modified`)"
 				);
-				$values = array();
+				$values = [];
 			}
 		}
 
@@ -95,12 +113,44 @@ class WPorg_GP_User_Stats {
 				VALUES " . implode( ', ', $values ) . "
 				ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`), `date_modified`=VALUES(`date_modified`)"
 			);
+			$values = [];
+		}
+
+		// Process the project stats too.
+		$values = [];
+		foreach ( $this->user_project_stats as $key => $dummy ) {
+			list( $user_id, $project_id, $locale, $locale_slug ) = explode( ',', $key );
+
+			$values[] = $wpdb->prepare( '(%d, %d, %s, %s, %s)',
+				$user_id,
+				$project_id,
+				$locale,
+				$locale_slug,
+				$now
+			);
+
+			if ( count( $values ) > 50 ) {
+				$wpdb->query(
+					"INSERT INTO {$wpdb->user_projects} (`user_id`, `project_id`, `locale`, `locale_slug`, `last_modified`)
+					VALUES " . implode( ', ', $values ) . "
+					ON DUPLICATE KEY UPDATE `last_modified` = GREATEST( `last_modified`, VALUES(`last_modified`) )"
+				);
+				$values = [];
+			}
+		}
+		if ( $values ) {
+			$wpdb->query(
+				"INSERT INTO {$wpdb->user_projects} (`user_id`, `project_id`, `locale`, `locale_slug`, `last_modified`)
+				VALUES " . implode( ', ', $values ) . "
+				ON DUPLICATE KEY UPDATE `last_modified` = GREATEST( `last_modified`, VALUES(`last_modified`) )"
+			);
+			$values = [];
 		}
 	}
 }
 
 /*
-Table:
+Tables:
 
 Note: WordPress uses BIGINT(20) for user_id; GlotPress uses int(10)
 
@@ -118,4 +168,14 @@ CREATE TABLE `gp_user_translations_count` (
   KEY `locale` (`locale`,`locale_slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE `gp_user_projects` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `project_id` int(11) unsigned NOT NULL,
+  `locale` varchar(255) NOT NULL,
+  `locale_slug` varchar(255) NOT NULL DEFAULT 'default',
+  `last_modified` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_project_locale` (`user_id`,`project_id`,`locale`,`locale_slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 */
