@@ -423,6 +423,7 @@ class WP_54_Credits extends WP_Credits {
 			'mensmaximus',
 			'michael-arestad',
 			'michaelecklund',
+			'mickaelperrin',
 			'miette49',
 			'mihdan',
 			'miinasikk',
