@@ -13,6 +13,45 @@ use GP_Locales;
  */
 class Stats extends GP_Route {
 
+	/**
+	 * Cache some expensive queries to be run on a Cron task.
+	 */
+	public function cache_waiting_strings() {
+		global $wpdb;
+
+		$cached_projects = [
+			GP::$project->by_path( 'wp-plugins' ),
+			GP::$project->by_path( 'wp-themes' ),
+		];
+		$sql = "SELECT
+				locale, locale_slug,
+				SUM( stats.waiting ) + SUM( stats.fuzzy ) as waiting_strings
+			FROM {$wpdb->project_translation_status} stats
+				LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
+			WHERE
+				p.parent_project_id = %d
+				AND p.active = 1
+			GROUP BY locale, locale_slug";
+
+		foreach ( $cached_projects as $project ) {
+			$rows = $wpdb->get_results( $wpdb->prepare( $sql, $project->id ) );
+
+			$cached_data = [];
+			foreach ( $rows as $set ) {
+				$locale_key = $set->locale;
+				if ( 'default' != $set->locale_slug ) {
+					$locale_key = $set->locale . '/' . $set->locale_slug;
+				}
+	
+				$cached_data[ $locale_key ] = (int) $set->waiting_strings;
+			}
+			$cached_data[ 'last_updated' ] = time();
+
+			update_option( __CLASS__ . '_cached_waiting_' . $project->slug, $cached_data, false );
+		}
+
+	}
+
 	public function get_stats_overview() {
 		global $wpdb;
 
@@ -26,6 +65,8 @@ class Stats extends GP_Route {
 			'apps/android' => false,
 			'apps/ios' => false,
 			'waiting' => false,
+			'wp-themes' => false,
+			'wp-plugins' => false,
 		);
 
 		// I'm sure there's somewhere to fetch these from statically defined
@@ -83,29 +124,13 @@ class Stats extends GP_Route {
 		unset( $rows, $locale_key, $set );
 
 		// Append the Plugins/Themes waiting strings
-		/*$parent_project_ids = implode(',', array(
-			GP::$project->by_path( 'wp-plugins' )->id,
-			GP::$project->by_path( 'wp-themes' )->id,
-		) );
-		$sql = "SELECT
-				locale, locale_slug,
-				SUM( stats.waiting ) + SUM( stats.fuzzy ) as waiting_strings
-			FROM {$wpdb->project_translation_status} stats
-				LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
-			WHERE
-				p.parent_project_id IN ( $parent_project_ids )
-				AND p.active = 1
-			GROUP BY locale, locale_slug";
-
-		$rows = $wpdb->get_results( $sql );
-		foreach ( $rows as $set ) {
-			$locale_key = $set->locale;
-			if ( 'default' != $set->locale_slug ) {
-				$locale_key = $set->locale . '/' . $set->locale_slug;
+		foreach ( [ 'wp-plugins', 'wp-themes' ] as $project_slug ) {
+			$cached_data = get_option( __CLASS__ . '_cached_waiting_' . $project_slug, [] );
+			$projects[ $project_slug ]->cache_last_updated = gmdate( 'Y-m-d H:i:s \U\T\C', $cached_data['last_updated'] );
+			foreach ( $cached_data as $locale => $waiting ) {
+				$translation_locale_statuses[ $locale ][ $project_slug ] = $waiting;
 			}
-
-			$translation_locale_statuses[ $locale_key ]['waiting'] += (int) $set->waiting_strings;
-		}*/
+		}
 
 		// Calculate a list of [Locale] = % subtotals
 		$translation_locale_complete = array();

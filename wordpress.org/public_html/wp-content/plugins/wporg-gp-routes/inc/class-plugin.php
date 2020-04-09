@@ -46,6 +46,8 @@ class Plugin {
 		add_filter( 'gp_locale_glossary_path_prefix', [ $this, 'set_locale_glossary_path_prefix' ] );
 
 		add_action( 'init', [ $this, 'respect_robots_txt' ], 9 );
+
+		add_action( 'init', [ $this, 'cron_tasks' ] );
 	}
 
 	/**
@@ -57,6 +59,16 @@ class Plugin {
 		// ?robots=1 is here to trigger `is_robots()`, which prevents canonical.
 		// ?gp_route=robots.txt is here, as GlotPress ultimately is the router for the request.
 		add_rewrite_rule( '^robots\.txt$', 'index.php?robots=1&gp_route=robots.txt', 'top' );
+	}
+
+	/**
+	 * Some pages rely upon a regular cron task to update the stats rather than live updates.
+	 */
+	function cron_tasks() {
+		if ( ! wp_next_scheduled ( 'wporg_gp_stats_cache_waiting_strings' ) ) {
+			wp_schedule_event( time(), 'twicedaily', 'wporg_gp_stats_cache_waiting_strings' );
+		}
+		add_action( 'wporg_gp_stats_cache_waiting_strings', [ __NAMESPACE__ . '\Routes\Stats', 'cache_waiting_strings' ] );
 	}
 
 	/**
