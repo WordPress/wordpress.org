@@ -19,6 +19,11 @@ class Stats extends GP_Route {
 	public function cache_waiting_strings() {
 		global $wpdb;
 
+		// Run the query on a primary DB server to avoid timing out.
+		if ( method_exists( $qpdb, 'send_reads_to_masters' ) ) {
+			$wpdb->send_reads_to_masters();
+		}
+
 		$cached_projects = [
 			GP::$project->by_path( 'wp-plugins' ),
 			GP::$project->by_path( 'wp-themes' ),
@@ -35,6 +40,9 @@ class Stats extends GP_Route {
 
 		foreach ( $cached_projects as $project ) {
 			$rows = $wpdb->get_results( $wpdb->prepare( $sql, $project->id ) );
+			if ( ! $rows ) {
+				continue;
+			}
 
 			$cached_data = [];
 			foreach ( $rows as $set ) {
