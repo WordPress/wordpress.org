@@ -213,6 +213,7 @@ function get_whitelist() {
 		) ),
 		'design' => array(
 			'boemedia',
+			'estelaris',
 			'hugobaeta',
 			'JoshuaWold',
 			'karmatosed',
