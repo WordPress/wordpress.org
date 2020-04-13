@@ -1860,6 +1860,24 @@
 	}
 }
 
+/** WP editor link button modal **/
+
+#wp-link-wrap {
+	height: 210px !important;
+	margin-top: -125px !important;
+
+	@media screen and (max-height: 520px) {
+		margin-top: inherit !important;
+	}
+}
+
+#link-selector {
+	#search-panel,
+	#wplink-link-existing-content,
+	#link-options .link-target {
+		display: none;
+	}
+}
 
 /** Handbook **/
 

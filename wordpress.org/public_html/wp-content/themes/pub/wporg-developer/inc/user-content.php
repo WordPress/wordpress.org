@@ -69,6 +69,9 @@ class DevHub_User_Submitted_Content {
 
 		// Adds hidden fields to a comment form for editing
 		add_filter( 'comment_form_submit_field',       array( __CLASS__, 'add_hidden_fields' ), 10, 2 );
+
+		// Disable the search query in the insert link modal window
+		add_filter( 'wp_link_query_args',              array( __CLASS__, 'disable_link_query' ) );
 	}
 
 	/**
@@ -217,6 +220,18 @@ class DevHub_User_Submitted_Content {
 	}
 
 	/**
+	 * Disable the search query in the insert link modal window.
+	 *
+	 * The search query field in the link modal is hidden with CSS.
+	 *
+	 * @param array $query An array of WP_Query arguments.
+	 */
+	public static function disable_link_query( $query ) {
+		$query['post__in'] = array(0);
+		return $query;
+	}
+
+	/**
 	 * Get the comment form arguments by context.
 	 *
 	 * @param WP_Comment|false $comment Comment object or false. Default false.
@@ -318,7 +333,7 @@ class DevHub_User_Submitted_Content {
 				'textarea_name' => 'comment',
 				'textarea_rows' => 8,
 				'quicktags'     => array(
-					'buttons' => 'strong,em,ul,ol,li'
+					'buttons' => 'strong,em,ul,ol,li,link'
 				),
 				'teeny'         => true,
 				'tinymce'       => false,
@@ -397,7 +412,7 @@ class DevHub_User_Submitted_Content {
 				'textarea_name' => 'comment',
 				'textarea_rows' => 3,
 				'quicktags'     => array(
-					'buttons' => 'strong,em'
+					'buttons' => 'strong,em,link'
 				),
 				'editor_css'    => self::get_editor_style(),
 				'teeny'         => true,

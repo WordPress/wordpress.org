@@ -2241,6 +2241,24 @@ input {
   }
 }
 
+/** WP editor link button modal **/
+#wp-link-wrap {
+  height: 210px !important;
+  margin-top: -125px !important;
+}
+
+@media screen and (max-height: 520px) {
+  #wp-link-wrap {
+    margin-top: inherit !important;
+  }
+}
+
+#link-selector #search-panel,
+#link-selector #wplink-link-existing-content,
+#link-selector #link-options .link-target {
+  display: none;
+}
+
 /** Handbook **/
 aside[id^="handbook"] .widget-title,
 aside[id^="nav_menu"] .widget-title {
