@@ -15,7 +15,7 @@ class Language_Pack extends WP_CLI_Command {
 	const TMP_DIR = '/tmp/language-packs';
 	const BUILD_DIR = '/nfs/rosetta/builds';
 	const SVN_URL = 'https://i18n.svn.wordpress.org';
-	const PACKAGE_THRESHOLD = 95;
+	const PACKAGE_THRESHOLD = 90;
 
 	/**
 	 * Whether a language pack should be enforced.
@@ -319,7 +319,7 @@ class Language_Pack extends WP_CLI_Command {
 	}
 
 	/**
-	 * Retrieves activate language packs for a theme/plugin of a version.
+	 * Retrieves active language packs for a theme/plugin of a version.
 	 *
 	 * @param string $type    Type of the language pack. Supports 'plugin' or 'theme'.
 	 * @param string $domain  Slug of a theme/plugin.
@@ -341,6 +341,25 @@ class Language_Pack extends WP_CLI_Command {
 		}
 
 		return $active_language_packs;
+	}
+
+	/**
+	 * Whether there's at least one active language pack for a theme/plugin of any version.
+	 *
+	 * @param string $type   Type of the language pack. Supports 'plugin' or 'theme'.
+	 * @param string $domain Slug of a theme/plugin.
+	 * @param string $locale WordPress locale.
+	 * @return boolean True if theme/plugin has an active language pack, false if not.
+	 */
+	private function has_active_language_pack( $type, $domain, $locale ) {
+		global $wpdb;
+
+		return (bool) $wpdb->get_var( $wpdb->prepare(
+			'SELECT updated FROM language_packs WHERE type = %s AND domain = %s AND language = %s AND active = 1 LIMIT 1',
+			$type,
+			$domain,
+			$locale
+		) );
 	}
 
 	/**
@@ -587,11 +606,16 @@ class Language_Pack extends WP_CLI_Command {
 				continue;
 			}
 
-			// Check if percent translated is above threshold.
-			$percent_translated = $set->percent_translated();
-			if ( ! $this->force && $percent_translated < self::PACKAGE_THRESHOLD ) {
-				WP_CLI::log( "Skip {$wp_locale}, translations below threshold ({$percent_translated}%)." );
-				continue;
+			// Check if percent translated is above threshold for initial language pack.
+			$has_existing_pack = $this->has_active_language_pack( $data->type, $data->domain, $wp_locale );
+			if ( ! $has_existing_pack ) {
+				$percent_translated = $set->percent_translated();
+				if ( ! $this->force && $percent_translated < self::PACKAGE_THRESHOLD ) {
+					WP_CLI::log( "Skip {$wp_locale}, translations below threshold ({$percent_translated}%)." );
+					continue;
+				}
+			} else {
+				WP_CLI::log( "Skipping threshold check for {$wp_locale}, has existing language pack." );
 			}
 
 			// Check if new translations are available since last build.
