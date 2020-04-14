@@ -69,7 +69,8 @@ p a:hover { border-bottom: 1px solid #d54e21; }
 
 a:hover { color: #d54e21; }
 
-h2 {
+h2,
+h1.heading {
 	font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
 	font-weight: 300;
 	font-size: 22px;
@@ -611,7 +612,8 @@ a img.aligncenter {
 		width: inherit;
 	}
 
-	#headline h2 {
+	#headline h2,
+	#headline .heading {
 		text-rendering: optimizeLegibility;
 	}
 
@@ -1156,6 +1158,7 @@ body #ed_toolbar #ed_pre {
 
 @media screen and (max-width:974px) {
 	#home-below .wrapper .col-4 {
+		width: -webkit-calc(90% - 250px);
 		width: calc(90% - 250px);
 		min-height: 260px;
 	}
@@ -1168,6 +1171,7 @@ body #ed_toolbar #ed_pre {
 		margin-left: 7%;
 	}
 	#home-below .wrapper .col-4 {
+		width: -webkit-calc(100% - 250px);
 		width: calc(100% - 250px);
 	}
 }
@@ -1176,6 +1180,7 @@ body #ed_toolbar #ed_pre {
 		margin-left: 4%;
 	}
 	#home-below .wrapper .col-4 {
+		width: -webkit-calc(100% - 206px);
 		width: calc(100% - 206px);
 	}
 }
@@ -1363,7 +1368,8 @@ input.text {
 	border-bottom: 1px solid #dfdfdf;
 }
 
-#headline h2 {
+#headline h2,
+#headline .heading {
 	color: #555;
 	font-size: 28px;
 	line-height: 1em;
@@ -1754,7 +1760,17 @@ blockquote {
 	margin: 0;
 }
 
-.partner {
+.wporg-page-hosting h2 {
+	font-size: 14px;
+	color: #23282d;
+	font-family: sans-serif;
+    margin: -1px 0 1px 0;
+}
+.wporg-page-hosting h2 a {
+	font-weight: bold;
+}
+
+.wporg-page-hosting .partner {
 	clear: both;
 	min-height: 100px;
 	margin: 40px 10px 40px 0;
@@ -1762,22 +1778,22 @@ blockquote {
 	position: relative;
 }
 
-.partner p {
+.wporg-page-hosting #pagebody .partner p {
 	margin-bottom: 10px;
 }
 
-.partner img {
+.wporg-page-hosting .partner img {
 	margin-left: 10px;
 	position: absolute;
 	top: 0;
 	left: -10px;
 }
 @media (max-width: 359px) {
-	.partner {
+	.wporg-page-hosting .partner {
 		margin-right: 15px;
 		padding-left: 15px;
 	}
-	.partner img {
+	.wporg-page-hosting .partner img {
 		float: right;
 		position: relative;
 	}
@@ -2228,7 +2244,6 @@ img#wpstats {
 	.wporg-responsive.wporg-page-mobile .intro img {
 		float: none;
 		display: block;
-		align: center;
 		margin: 0 auto 2em;
 	}
 }
@@ -2450,5 +2465,4 @@ body.wporg-responsive .col-2 {
 .notification-danger {
 	background: #f2dede;
 }
-
 /*# sourceMappingURL=wp4.css.map */

@@ -69,7 +69,8 @@ p a:hover { border-bottom: 1px solid #d54e21; }
 
 a:hover { color: #d54e21; }
 
-h2 {
+h2,
+h1.heading {
 	font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
 	font-weight: 300;
 	font-size: 22px;
@@ -397,7 +398,7 @@ a img.aligncenter {
 		height: auto;
 	}
 	#wporg-header ul li#download a {
-		padding: 4px 10px;
+		text-align: center;
 	}
 }
 
@@ -458,6 +459,7 @@ a img.aligncenter {
 #download-mobile span.download-ready {
 	font-size: 1.6em;
 	margin: 0 0.25em;
+	vertical-align: middle;
 }
 
 #download-mobile a.download-button {
@@ -610,7 +612,8 @@ a img.aligncenter {
 		width: inherit;
 	}
 
-	#headline h2 {
+	#headline h2,
+	#headline .heading {
 		text-rendering: optimizeLegibility;
 	}
 
@@ -624,8 +627,13 @@ a img.aligncenter {
 	}
 }
 
-@media screen and (max-width:960px) {
-	#home-welcome {
+
+#home-welcome, #home-below {
+	overflow: auto;
+}
+
+@media screen and (max-width:974px) {
+	#home-welcome, #home-below {
 		min-width: 0 !important;
 	}
 
@@ -1076,7 +1084,7 @@ input[type=submit]:disabled,
 /* ----------------------------------------------------------------------------
   5.0 - Responsive Button Styles
 ---------------------------------------------------------------------------- */
-@media screen and (max-width: 782px) {
+@media screen and (max-width: 820px) {
 	.button,
 	.button.button-xl,
 	.button.button-large,
@@ -1137,8 +1145,7 @@ body #ed_toolbar #ed_pre {
 
 #home-below {
 	font-size: 13px;
-	width: 960px;
-	margin: 0 auto;
+	margin: 50px auto;
 }
 
 #home-below .image img {
@@ -1146,8 +1153,55 @@ body #ed_toolbar #ed_pre {
 }
 
 #home-below .wrapper {
-	float: right;
 	margin-bottom: 14px;
+}
+
+@media screen and (max-width:974px) {
+	#home-below .wrapper .col-4 {
+		width: -webkit-calc(90% - 250px);
+		width: calc(90% - 250px);
+		min-height: 260px;
+	}
+	#home-below .wrapper div:nth-child(odd) {
+		margin-right: 10%;
+	}
+}
+@media screen and (max-width:700px) {
+	#home-below .wrapper div:nth-child(odd) {
+		margin-right: 7%;
+	}
+	#home-below .wrapper .col-4 {
+		width: -webkit-calc(100% - 250px);
+		width: calc(100% - 250px);
+	}
+}
+@media screen and (max-width:544px) {
+	#home-below .wrapper div:nth-child(odd) {
+		margin-right: 4%;
+	}
+	#home-below .wrapper .col-4 {
+		width: -webkit-calc(100% - 206px);
+		width: calc(100% - 206px);
+	}
+}
+@media screen and (max-width:440px) {
+	#home-below .wrapper .col-2,
+	#home-below .wrapper .col-4 {
+		width: 92%;
+	}
+
+	#home-below .wrapper .col-2 {
+		text-align: center;
+	}
+
+	#home-below .wrapper .col-2 h4 {
+		text-align: right;
+	}
+
+	ul#notable-users li a {
+		margin: 0 auto;
+		text-align: center;
+	}
 }
 
 .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
@@ -1314,7 +1368,8 @@ input.text {
 	border-bottom: 1px solid #dfdfdf;
 }
 
-#headline h2 {
+#headline h2,
+#headline .heading {
 	color: #555;
 	font-size: 28px;
 	line-height: 1em;
@@ -1528,7 +1583,7 @@ a.rsslink {
 	}
 }
 
-@media screen and (min-width:561px) and (max-width:959px) {
+@media screen and (min-width:561px) and (max-width:974px) {
 	#wporg-footer .wrapper {
 		max-width: 600px;
 	}
@@ -1705,7 +1760,17 @@ blockquote {
 	margin: 0;
 }
 
-.partner {
+.wporg-page-hosting h2 {
+	font-size: 14px;
+	color: #23282d;
+	font-family: sans-serif;
+    margin: -1px 0 1px 0;
+}
+.wporg-page-hosting h2 a {
+	font-weight: bold;
+}
+
+.wporg-page-hosting .partner {
 	clear: both;
 	min-height: 100px;
 	margin: 40px 0 40px 10px;
@@ -1713,22 +1778,22 @@ blockquote {
 	position: relative;
 }
 
-.partner p {
+.wporg-page-hosting #pagebody .partner p {
 	margin-bottom: 10px;
 }
 
-.partner img {
+.wporg-page-hosting .partner img {
 	margin-right: 10px;
 	position: absolute;
 	top: 0;
 	right: -10px;
 }
 @media (max-width: 359px) {
-	.partner {
+	.wporg-page-hosting .partner {
 		margin-left: 15px;
 		padding-right: 15px;
 	}
-	.partner img {
+	.wporg-page-hosting .partner img {
 		float: left;
 		position: relative;
 	}
@@ -2179,7 +2244,6 @@ img#wpstats {
 	.wporg-responsive.wporg-page-mobile .intro img {
 		float: none;
 		display: block;
-		align: center;
 		margin: 0 auto 2em;
 	}
 }
