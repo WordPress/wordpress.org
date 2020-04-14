@@ -111,8 +111,9 @@ do_action( 'get_header' );
 			color: #2ea2cc;
 		}
 
-		h2 {
+		h1 {
 			font-weight: normal;
+			font-size: 1.5em;
 		}
 
 		#numnumnum, #numnumnum2 {
@@ -226,7 +227,7 @@ do_action( 'get_header' );
 	<div class="something-semantic">
 		<div class="something-else-semantic">
 			<div class="counter-inner">
-				<h2>
+				<h1>
 					<?php
 					printf(
 						esc_html( $text ),
@@ -234,7 +235,7 @@ do_action( 'get_header' );
 						wp_kses_post( '<div id="wrap"><span id="numnumnum">' . number_format_i18n( $num ) . '</span><span id="numnumnum2"></span></div>' )
 					);
 					?>
-				</h2>
+				</h1>
 				<p>
 					<a href="<?php echo esc_url( home_url( '/download/' ) ); ?>"><?php esc_html_e( '&larr; Back to WordPress.org', 'wporg' ); ?></a>
 				</p>
