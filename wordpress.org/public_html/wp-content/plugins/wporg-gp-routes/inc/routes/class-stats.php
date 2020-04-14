@@ -13,53 +13,6 @@ use GP_Locales;
  */
 class Stats extends GP_Route {
 
-	/**
-	 * Cache some expensive queries to be run on a Cron task.
-	 */
-	public function cache_waiting_strings() {
-		global $wpdb;
-
-		// Run the query on a primary DB server to avoid timing out.
-		if ( method_exists( $qpdb, 'send_reads_to_masters' ) ) {
-			$wpdb->send_reads_to_masters();
-		}
-
-		$cached_projects = [
-			GP::$project->by_path( 'wp-plugins' ),
-			GP::$project->by_path( 'wp-themes' ),
-		];
-		$sql = "SELECT
-				locale, locale_slug,
-				SUM( stats.waiting ) + SUM( stats.fuzzy ) as waiting_strings
-			FROM {$wpdb->project_translation_status} stats
-				LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
-			WHERE
-				p.parent_project_id = %d
-				AND p.active = 1
-			GROUP BY locale, locale_slug";
-
-		foreach ( $cached_projects as $project ) {
-			$rows = $wpdb->get_results( $wpdb->prepare( $sql, $project->id ) );
-			if ( ! $rows ) {
-				continue;
-			}
-
-			$cached_data = [];
-			foreach ( $rows as $set ) {
-				$locale_key = $set->locale;
-				if ( 'default' != $set->locale_slug ) {
-					$locale_key = $set->locale . '/' . $set->locale_slug;
-				}
-	
-				$cached_data[ $locale_key ] = (int) $set->waiting_strings;
-			}
-			$cached_data[ 'last_updated' ] = time();
-
-			update_option( __CLASS__ . '_cached_waiting_' . $project->slug, $cached_data, false );
-		}
-
-	}
-
 	public function get_stats_overview() {
 		global $wpdb;
 
@@ -99,7 +52,8 @@ class Stats extends GP_Route {
 		$sql = "SELECT
 				path, locale, locale_slug,
 				(100 * stats.current/stats.all) as percent_complete,
-				stats.waiting+stats.fuzzy as waiting_strings
+				stats.waiting+stats.fuzzy as waiting_strings,
+				stats.date_modified as last_modified
 			FROM {$wpdb->project_translation_status} stats
 				LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
 			WHERE
@@ -124,6 +78,13 @@ class Stats extends GP_Route {
 			$percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
 			$translation_locale_statuses[ $locale_key ][ $set->path ] = $percent_complete;
 
+			// Don't include these in the 'waiting' section, override the value to be waiting strings w/ Date Modified.
+			if ( 'wp-plugins' === $set->path || 'wp-themes' === $set->path ) {
+				$translation_locale_statuses[ $locale_key ][ $set->path ] = $set->waiting_strings;
+				$projects[ $set->path ]->cache_last_updated = $set->last_modified;
+				continue;
+			}
+
 			if ( ! isset( $translation_locale_statuses[ $locale_key ]['waiting'] ) ) {
 				$translation_locale_statuses[ $locale_key ]['waiting'] = 0;
 			}
@@ -131,19 +92,10 @@ class Stats extends GP_Route {
 		}
 		unset( $rows, $locale_key, $set );
 
-		// Append the Plugins/Themes waiting strings
-		foreach ( [ 'wp-plugins', 'wp-themes' ] as $project_slug ) {
-			$cached_data = get_option( __CLASS__ . '_cached_waiting_' . $project_slug, [] );
-			$projects[ $project_slug ]->cache_last_updated = gmdate( 'Y-m-d H:i:s \U\T\C', $cached_data['last_updated'] );
-			foreach ( $cached_data as $locale => $waiting ) {
-				$translation_locale_statuses[ $locale ][ $project_slug ] = $waiting;
-			}
-		}
-
 		// Calculate a list of [Locale] = % subtotals
 		$translation_locale_complete = array();
 		foreach ( $translation_locale_statuses as $locale => $sets ) {
-			unset( $sets['waiting'] );
+			unset( $sets['waiting'], $sets['wp-plugins'], $sets['wp-themes'] );
 			$sets_count = count( $sets );
 			if ( $sets_count ) {
 				$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / $sets_count, 3 );
