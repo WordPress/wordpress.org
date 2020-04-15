@@ -326,6 +326,7 @@ function get_whitelist() {
 			'jcastaneda',
 			'kafleg',
 			'karmatosed',
+			'kjellr',
 			'poena',
 			'williampatton',
 		),
