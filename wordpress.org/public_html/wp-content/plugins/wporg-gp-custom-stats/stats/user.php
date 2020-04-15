@@ -59,7 +59,11 @@ class WPorg_GP_User_Stats {
 				$project = GP::$project->by_path( $project_path_we_want );
 			}
 
-			$this->user_project_stats[ "{$translation->user_id},{$project->id},{$translation_set->locale},{$translation_set->slug}" ] = true;
+			$key = "{$translation->user_id},{$project->id},{$translation_set->locale},{$translation_set->slug}";
+			if ( ! isset( $this->user_project_stats[ $key ] ) ) {
+				$this->user_project_stats[ $key ] = 0;
+			}
+			$this->user_project_stats[ $key ]++;
 		}
 	}
 
@@ -116,35 +120,80 @@ class WPorg_GP_User_Stats {
 			$values = [];
 		}
 
-		// Process the project stats too.
+		// Process the user project stats too.
 		$values = [];
-		foreach ( $this->user_project_stats as $key => $dummy ) {
+		foreach ( $this->user_project_stats as $key => $string_count ) {
 			list( $user_id, $project_id, $locale, $locale_slug ) = explode( ',', $key );
 
-			$values[] = $wpdb->prepare( '(%d, %d, %s, %s, %s)',
-				$user_id,
-				$project_id,
-				$locale,
-				$locale_slug,
-				$now
-			);
-
-			if ( count( $values ) > 50 ) {
-				$wpdb->query(
-					"INSERT INTO {$wpdb->user_projects} (`user_id`, `project_id`, `locale`, `locale_slug`, `last_modified`)
-					VALUES " . implode( ', ', $values ) . "
-					ON DUPLICATE KEY UPDATE `last_modified` = GREATEST( `last_modified`, VALUES(`last_modified`) )"
+			// Step 1 - Does this user already have the project listed? Just Bump the date.
+			if ( $id = $wpdb->get_var( $wpdb->prepare( 
+				"SELECT id FROM {$wpdb->user_projects}
+				WHERE user_id = %d AND project_id = %d AND locale = %s AND locale_slug = %s",
+				$user_id, $project_id, $locale, $locale_slug
+			) ) ) {
+				$wpdb->update(
+					$wpdb->user_projects,
+					[ 'last_modified' => $now ],
+					[ 'id' => $id ]
 				);
-				$values = [];
+				continue;
 			}
-		}
-		if ( $values ) {
-			$wpdb->query(
-				"INSERT INTO {$wpdb->user_projects} (`user_id`, `project_id`, `locale`, `locale_slug`, `last_modified`)
-				VALUES " . implode( ', ', $values ) . "
-				ON DUPLICATE KEY UPDATE `last_modified` = GREATEST( `last_modified`, VALUES(`last_modified`) )"
-			);
-			$values = [];
+
+			// Step 2 - More than 5 strings? Import Maybe? Just insert.
+			if ( $string_count >= 5 ) {
+				$wpdb->insert(
+					$wpdb->user_projects,
+					[
+						'user_id'       => $user_id,
+						'project_id'    => $project_id,
+						'locale'        => $locale,
+						'locale_slug'   => $locale_slug,
+						'last_modified' => $now
+					]
+				);
+				continue;
+			}
+
+			// Step 3 - If not, find all the sub-project IDs, then all the translation sets, count strings by user.
+			$this_project        = GP::$project->get( $project_id );
+			$translation_set_ids = [];
+
+			if ( ! $this_project->active ) {
+				continue;
+			}
+
+			if ( $set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $locale_slug, $locale ) ) {
+				$translation_set_ids[] = (int) $set->id;
+			}
+
+			// Fetch the strings from the sub projects too
+			foreach ( $this_project->sub_projects() as $project ) {
+				if ( ! $project->active ) {
+					continue;
+				}
+				if ( $set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $locale_slug, $locale ) ) {
+					$translation_set_ids[] = (int) $set->id;
+				}
+			}
+
+			$user_translations = GP::$translation->find_many_no_map( [
+				'user_id'            => $user_id,
+				'translation_set_id' => $translation_set_ids
+			] );
+
+			if ( $user_translations && count( $user_translations ) >= 5 ) {
+				$wpdb->insert(
+					$wpdb->user_projects,
+					[
+						'user_id'       => $user_id,
+						'project_id'    => $project_id,
+						'locale'        => $locale,
+						'locale_slug'   => $locale_slug,
+						'last_modified' => $now
+					]
+				);
+				continue;
+			}
 		}
 	}
 }
