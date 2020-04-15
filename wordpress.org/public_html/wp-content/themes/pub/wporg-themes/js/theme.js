@@ -1657,6 +1657,13 @@ window.wp = window.wp || {};
 		}
 	});
 
+	themes.History = Backbone.History.extend({
+		getFragment: function() {
+			// We don't use query params, make Backbone work when they're present.
+			return Backbone.History.prototype.getFragment.apply(this, arguments).replace(/\?.*/, '');
+		}
+	});
+
 	themes.Run = {
 		init: function() {
 			// Set up the view
@@ -1665,6 +1672,9 @@ window.wp = window.wp || {};
 				section: themes.data.settings.browseDefault,
 				SearchView: themes.view.Search
 			});
+
+			// Replace Backbones history with our overrides.
+			Backbone.history = new themes.History;
 
 			// Render results
 			this.render();
