@@ -15,6 +15,7 @@ get_header();
 ?>
 	<main id="themes" class="wrap">
 		<div class="wp-filter">
+			<h2 class="screen-reader-text"><?php _e( 'Themes List', 'wporg-themes' ); ?></h2>
 			<div class="filter-count">
 				<span class="count theme-count"><?php echo number_format_i18n( $wp_query->found_posts ); ?></span>
 			</div>

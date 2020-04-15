@@ -15,9 +15,9 @@
 			<?php } ?>
 
 			<div>
-				<h3 class="theme-name entry-title"><?php echo esc_html( $theme->name ); ?></h3>
+				<h1 class="theme-name entry-title"><?php echo esc_html( $theme->name ); ?></h1>
 				<?php if ( $theme->author->display_name ) { ?>
-				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="https://wordpress.org/themes/author/' . $theme->author->user_nicename . '/"><span class="author">' . esc_html( $theme->author->display_name ) . '</span></a>' ); ?></h4>
+				<span class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="https://wordpress.org/themes/author/' . $theme->author->user_nicename . '/"><span class="author">' . esc_html( $theme->author->display_name ) . '</span></a>' ); ?></span>
 				<?php } ?>
 
 				<?php if ( is_user_logged_in() && wporg_themes_is_favourited( $theme->slug ) ) { ?>
@@ -96,7 +96,7 @@
 
 				<?php if ( $theme->tags ) { ?>
 				<div class="theme-tags">
-					<h4><?php _e( 'Tags:', 'wporg-themes' ); ?></h4>
+					<h2><?php _e( 'Tags:', 'wporg-themes' ); ?></h2>
 					<?php
 					$tag_links = array();
 					foreach ( $theme->tags as $slug => $tagname ) {
@@ -117,7 +117,7 @@
 
 			<div class="theme-meta">
 				<div class="theme-ratings">
-					<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
+					<h2><?php _e( 'Ratings', 'wporg-themes' ); ?></h2>
 
 					<a class="reviews-link" href="//wordpress.org/support/theme/<?php echo $theme->slug; ?>/reviews/"><?php esc_html_e( 'See all', 'wporg-themes' ); ?></a>
 
@@ -158,13 +158,13 @@
 				</div><!-- .theme-rating -->
 
 				<div class="theme-support">
-					<h4><?php _e( 'Support', 'wporg-themes' ); ?></h4>
+					<h2><?php _e( 'Support', 'wporg-themes' ); ?></h2>
 					<p><?php _e( 'Got something to say? Need help?', 'wporg-themes' ); ?></p>
 					<a href="//wordpress.org/support/theme/<?php echo $theme->slug; ?>" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-support -->
 
 				<div class="theme-report">
-        				<h4><?php _e( 'Report', 'wporg-themes' ); ?></h4>
+        				<h2><?php _e( 'Report', 'wporg-themes' ); ?></h2>
         				<p><?php _e( 'Does this theme have major issues?', 'wporg-themes' ); ?></p>
         				<?php
         				$report_url = add_query_arg(
@@ -180,7 +180,7 @@
 				</div><!-- .theme-report -->
 
 				<div class="theme-translations">
-					<h4><?php _e( 'Translations', 'wporg-themes' ); ?></h4>
+					<h2><?php _e( 'Translations', 'wporg-themes' ); ?></h2>
 					<p>
 						<a href="<?php echo esc_url( "https://translate.wordpress.org/projects/wp-themes/{$theme->slug}" ); ?>">
 							<?php printf( __( 'Translate %s', 'wporg-themes' ), $theme->name ); ?>
@@ -189,7 +189,7 @@
 				</div><!-- .theme-translations -->
 
 				<div class="theme-devs">
-					<h4><?php _e( 'Subscribe', 'wporg-themes' ); ?></h4>
+					<h2><?php _e( 'Subscribe', 'wporg-themes' ); ?></h2>
 					<ul class="unmarked-list">
 						<li>
 							<a href="//themes.trac.wordpress.org/log/<?php echo $theme->slug; ?>?limit=100&amp;mode=stop_on_copy&amp;format=rss">
@@ -199,7 +199,7 @@
 						</li>
 					</ul>
 
-					<h4><?php _e( 'Browse the Code', 'wporg-themes' ); ?></h4>
+					<h2><?php _e( 'Browse the Code', 'wporg-themes' ); ?></h2>
 					<ul class="unmarked-list">
 						<li><a href="//themes.trac.wordpress.org/log/<?php echo $theme->slug; ?>/" rel="nofollow"><?php _e( 'Development Log', 'wporg-themes' ); ?></a></li>
 						<li><a href="//themes.svn.wordpress.org/<?php echo $theme->slug; ?>/" rel="nofollow"><?php _e( 'Subversion Repository', 'wporg-themes' ); ?></a></li>

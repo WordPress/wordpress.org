@@ -25,7 +25,7 @@ if ( have_posts() ) :
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class( array( 'wrap', 'commercial' ) ); ?>>
 			<header class="entry-header">
-				<h2 class="entry-title"><?php _e( 'Commercially Supported GPL Themes', 'wporg-themes' ); ?></h2>
+				<h1 class="entry-title"><?php _e( 'Commercially Supported GPL Themes', 'wporg-themes' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">
@@ -38,6 +38,8 @@ if ( have_posts() ) :
 					<?php _e( 'Some of them you may pay to access, some of them are membership sites, some may give you the theme for zero-cost and just charge for support.', 'wporg-themes' ); ?>
 					<?php _e( 'What they all have in common is people behind them who support open source, WordPress, and its GPL license.', 'wporg-themes' ); ?>
 				</p>
+
+				<h2 class="screen-reader-text"><?php _e( 'Themes List', 'wporg-themes' ); ?></h2>
 
 				<div id="themes">
 					<div class="theme-browser content-filterable">

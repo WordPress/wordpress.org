@@ -40,7 +40,7 @@ function wporg_themes_render_upload_shortcode() {
 		}
 	}
 
-	$form = '<h4>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h4>
+	$form = '<h2>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h2>
 		<form enctype="multipart/form-data" id="upload_form" method="POST" action="" onsubmit="jQuery(\'#upload_button\').attr(\'disabled\',\'disabled\'); return true;">
 			' . wp_nonce_field( 'wporg-themes-upload', '_wpnonce', true, false ) . '
 			<input type="hidden" name="action" value="upload"/>

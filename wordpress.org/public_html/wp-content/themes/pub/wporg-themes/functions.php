@@ -36,6 +36,7 @@ add_action( 'after_setup_theme', 'wporg_themes_setup' );
  * Handle redirects which redirect_canonical() usually would (or should) do.
  */
 function wporg_themes_canonical_redirects() {
+
 	// always include the trailing slash for the Site URL
 	if ( '/themes' === $_SERVER['REQUEST_URI'] ) {
 		wp_safe_redirect( '/themes/', 301 );
@@ -104,7 +105,7 @@ function wporg_themes_scripts() {
 		$GLOBALS['concatenate_scripts'] = true;
 	}
 
-	wp_enqueue_style( 'wporg-themes', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20200403' );
+	wp_enqueue_style( 'wporg-themes', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20200415' );
 	wp_style_add_data( 'wporg-themes', 'rtl', 'replace' );
 
 	if ( ! is_singular( 'page' ) ) {

@@ -23,7 +23,7 @@ if ( have_posts() ) :
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class( 'wrap' ); ?>>
 			<header class="entry-header">
-				<h2 class="entry-title"><?php _e( 'Getting Started', 'wporg-themes' ); ?></h2>
+				<h1 class="entry-title"><?php _e( 'Getting Started', 'wporg-themes' ); ?></h1>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">

@@ -15,9 +15,9 @@
 			<# } #>
 
 			<div>
-				<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
+				<h2 class="theme-name entry-title">{{{ data.name }}}</h2>
 				<# if ( data.author.display_name ) { #>
-				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="{{{ data.path }}}author/{{ data.author.user_nicename }}/"><span class="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
+				<div class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="{{{ data.path }}}author/{{ data.author.user_nicename }}/"><span class="author">{{{ data.author.display_name }}}</span></a>' ); ?></div>
 				<# } #>
 
 				<# if ( data.show_favorites && data.is_favorited ) { #>
@@ -74,20 +74,20 @@
 
 				<# if ( data.tags ) { #>
 				<div class="theme-tags">
-					<h4><?php _e( 'Tags:', 'wporg-themes' ); ?></h4>
+					<h3><?php _e( 'Tags:', 'wporg-themes' ); ?></h3>
 					{{{ data.tags }}}
 				</div><!-- .theme-tags -->
 				<# } #>
 
 				<div class="theme-downloads">
-					<h4><?php _e( 'Downloads Per Day', 'wporg-themes' ); ?></h4>
+					<h3><?php _e( 'Downloads Per Day', 'wporg-themes' ); ?></h3>
 					<div id="theme-download-stats-{{data.id}}" class="chart"></div>
 				</div><!-- .theme-downloads -->
 			</div>
 
 			<div class="theme-meta">
 				<div class="theme-ratings">
-					<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
+					<h3><?php _e( 'Ratings', 'wporg-themes' ); ?></h3>
 
 					<a class="reviews-link" href="//wordpress.org/support/theme/{{ data.id }}/reviews/"><?php esc_html_e( 'See all', 'wporg-themes' ); ?></a>
 
@@ -126,19 +126,19 @@
 				</div><!-- .theme-rating -->
 
 				<div class="theme-support">
-					<h4><?php _e( 'Support', 'wporg-themes' ); ?></h4>
+					<h3><?php _e( 'Support', 'wporg-themes' ); ?></h3>
 					<p><?php _e( 'Got something to say? Need help?', 'wporg-themes' ); ?></p>
 					<a href="//wordpress.org/support/theme/{{ data.slug }}" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-support -->
 
 				<div class="theme-report">
-        				<h4><?php _e( 'Report', 'wporg-themes' ); ?></h4>
+        				<h3><?php _e( 'Report', 'wporg-themes' ); ?></h3>
         				<p><?php _e( 'Does this theme have major issues?', 'wporg-themes' ); ?></p>
         				<a rel="nofollow" href="https://make.wordpress.org/themes/report-theme/?rep-name={{ data.current_user }}&rep-theme={{ data.homepage }}&rep-subject=Reported+Theme:+{{ data.name }}" class="button button-secondary"><?php _e( 'Report this theme', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-report -->
 
 				<div class="theme-translations">
-					<h4><?php _e( 'Translations', 'wporg-themes' ); ?></h4>
+					<h3><?php _e( 'Translations', 'wporg-themes' ); ?></h3>
 					<p>
 						<a href="https://translate.wordpress.org/projects/wp-themes/{{ data.slug }}">
 							<?php printf( __( 'Translate %s', 'wporg-themes' ), '{{ data.name }}' ); ?>
@@ -147,7 +147,7 @@
 				</div><!-- .theme-translations -->
 
 				<div class="theme-devs">
-					<h4><?php _e( 'Subscribe', 'wporg-themes' ); ?></h4>
+					<h3><?php _e( 'Subscribe', 'wporg-themes' ); ?></h3>
 					<ul class="unmarked-list">
 						<li>
 							<a href="//themes.trac.wordpress.org/log/{{data.id}}?limit=100&mode=stop_on_copy&format=rss">
@@ -157,7 +157,7 @@
 						</li>
 					</ul>
 
-					<h4><?php _e( 'Browse the Code', 'wporg-themes' ); ?></h4>
+					<h3><?php _e( 'Browse the Code', 'wporg-themes' ); ?></h3>
 					<ul class="unmarked-list">
 						<li><a href="//themes.trac.wordpress.org/log/{{data.id}}/" rel="nofollow"><?php _e( 'Development Log', 'wporg-themes' ); ?></a></li>
 						<li><a href="//themes.svn.wordpress.org/{{data.id}}/" rel="nofollow"><?php _e( 'Subversion Repository', 'wporg-themes' ); ?></a></li>
