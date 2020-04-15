@@ -13,12 +13,23 @@ $wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader
 
 require WPORGPATH . 'header.php';
 ?>
-<header id="masthead" class="site-header" role="banner">
+<header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 	<div class="site-branding">
 		<?php if ( is_home() ) : ?>
-		<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Theme Directory', 'Site title', 'wporg-themes' ); ?></a></h1>
+		<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Themes', 'Site title', 'wporg-themes' ); ?></a></h1>
+
+			<p class="site-description">
+				<?php
+				$theme_count = wp_count_posts( 'repopackage' )->publish;
+				printf(
+					/* Translators: Total number of themes. */
+					esc_html( _n( 'Add style to your WordPress site with %s theme.', 'Add style to your WordPress site with %s themes.', $theme_count, 'wporg-themes' ) ),
+					esc_html( number_format_i18n( $theme_count ) )
+				);
+				?>
+			</p>
 		<?php else : ?>
-			<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Theme Directory', 'Site title', 'wporg-themes' ); ?></a></p>
+			<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Themes', 'Site title', 'wporg-themes' ); ?></a></p>
 		<?php endif; ?>
 	</div>
 </header>
