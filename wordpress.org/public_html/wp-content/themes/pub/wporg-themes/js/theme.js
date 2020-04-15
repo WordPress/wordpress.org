@@ -1,4 +1,4 @@
-/* global _wpThemeSettings, confirm */
+/* global _wpThemeSettings, google */
 window.wp = window.wp || {};
 
 ( function($) {
@@ -343,8 +343,8 @@ window.wp = window.wp || {};
 			var options = {
 				type: 'POST',
 				url: 'https://api.wordpress.org/themes/info/1.1/',
-				jsonp: "callback",
-				dataType: "jsonp",
+				jsonp: 'callback',
+				dataType: 'jsonp',
 				data: {
 					action: 'query_themes',
 					// Request data
@@ -369,7 +369,6 @@ window.wp = window.wp || {};
 							extended_author: true,
 							photon_screenshots: true,
 							active_installs: true,
-							requires: true,
 							requires_php: true,
 						}
 					}, request)
@@ -385,7 +384,7 @@ window.wp = window.wp || {};
 
 			return $.Deferred( function( deferred ) {
 				$.ajax( options ).done( function( response ) {
-					deferred['resolveWith']( this, [ response ] );
+					deferred.resolveWith( this, [ response ] );
 				}).fail( function() {
 					deferred.rejectWith( this, arguments );
 				});
@@ -521,7 +520,7 @@ window.wp = window.wp || {};
 
 			// Make tags click-able and separated by a comma.
 			data.tags = _.map( data.tags, function( tag, slug ) {
-				translated_tag = l10n.tags[ slug ] || tag;
+				var translated_tag = l10n.tags[ slug ] || tag;
 				return '<a href="' + themes.data.settings.path + themes.router.baseUrl( 'tags/' + slug ) + '">' + translated_tag + '</a>';
 			}).join( ', ' );
 
@@ -537,7 +536,7 @@ window.wp = window.wp || {};
 			}
 
 			data.show_favorites = !! themes.data.settings.favorites.user;
-			data.is_favorited   = ( themes.data.settings.favorites.themes.indexOf( data.slug ) != -1 );
+			data.is_favorited   = ( themes.data.settings.favorites.themes.indexOf( data.slug ) !== -1 );
 			data.current_user   = themes.data.settings.favorites.user;
 
 			this.$el.html( this.html( data ) );
@@ -550,10 +549,10 @@ window.wp = window.wp || {};
 			this.renderDownloadsGraph();
 		},
 
-		favourite_toggle: function( event ) {
+		favourite_toggle: function() {
 			var $heart = this.$el.find( '.favorite' ),
 				favorited = ! $heart.hasClass( 'favorited' ),
-				slug = this.model.get("slug"),
+				slug = this.model.get('slug'),
 				pos;
 
 			$heart.toggleClass( 'favorited' );
@@ -572,18 +571,18 @@ window.wp = window.wp || {};
 			var options = {
 				type: 'GET',
 				url: 'https://api.wordpress.org/themes/theme-directory/1.0/',
-				jsonp: "callback",
-				dataType: "jsonp",
+				jsonp: 'callback',
+				dataType: 'jsonp',
 				data: {
 					action: favorited ? 'add-favorite' : 'remove-favorite',
-					theme: this.model.get("slug"),
+					theme: this.model.get('slug'),
 					_wpnonce: themes.data.settings.favorites.nonce
 				},
 			};
 
 			$.ajax( options ).done( function( result ) {
 				// If the user is no longer logged in, stop showing the favorite heart
-				if ( 'undefined' != typeof result.error && 'not_logged_in' == result.error ) {
+				if ( 'undefined' !== typeof result.error && 'not_logged_in' === result.error ) {
 					themes.data.settings.favorites.themes = [];
 					themes.data.settings.favorites.user = '';
 				}
@@ -1418,7 +1417,7 @@ window.wp = window.wp || {};
 		browse: function( section ) {
 			// Create a new collection with the proper theme data
 			// for each section
-			if ( 'favorites' == section ) {
+			if ( 'favorites' === section ) {
 				this.collection.query( {
 					browse: section,
 					user: themes.data.settings.favorites.user
@@ -1674,7 +1673,7 @@ window.wp = window.wp || {};
 			});
 
 			// Replace Backbones history with our overrides.
-			Backbone.history = new themes.History;
+			Backbone.history = new themes.History();
 
 			// Render results
 			this.render();
