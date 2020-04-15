@@ -127,14 +127,14 @@ if ( 'wp-plugins' === $project->path ) {
 		?>
 		<div class="wporg-notice wporg-notice-info">
 			<p>Translations for the readme are published almost immediately.
-				The language pack for the plugin will be generated when 95% of the <a href="<?php echo esc_url( gp_url_project( $sub_project->path, gp_url_join( $stable_project_slug, $locale->slug, $set_slug ) ) ); ?>"><?php echo $stable_project_name; ?></a> sub-project strings have been translated (currently <?php echo $status->percent_complete . '%'; ?>).</p>
+				The initial language pack for the plugin will be generated when 90% of the <a href="<?php echo esc_url( gp_url_project( $sub_project->path, gp_url_join( $stable_project_slug, $locale->slug, $set_slug ) ) ); ?>"><?php echo $stable_project_name; ?></a> sub-project strings have been translated (currently <?php echo $status->percent_complete . '%'; ?>).</p>
 		</div>
 		<?php
 	}
 } elseif ( 'wp-themes' === $project->path ) {
 	?>
 	<div class="wporg-notice wporg-notice-info">
-		<p>The language pack for the theme will be generated when 95% of the project strings have been translated (currently <?php echo $sub_project_status->percent_complete . '%'; ?>).</p>
+		<p>The initial language pack for the theme will be generated when 90% of the project strings have been translated (currently <?php echo $sub_project_status->percent_complete . '%'; ?>).</p>
 	</div>
 	<?php
 }
