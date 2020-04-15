@@ -11,6 +11,12 @@ ol {
 	list-style: decimal;
 }
 
+ul.unmarked-list,
+ul.unmarked-list {
+	list-style: none;
+	padding-left: 0;
+}
+
 li > ul,
 li > ol {
 	margin-bottom: 0;

@@ -441,6 +441,15 @@ body.author .theme-browser .theme .theme-author  {
 	margin-left: 5px;
 }
 
+.theme-wrap .theme-meta {
+	a >.dashicons-rss {
+		text-decoration: none;
+		&::before {
+			color: #e89242;
+		}
+	}
+}
+
 /**
  * Theme Screenshots gallery
  */

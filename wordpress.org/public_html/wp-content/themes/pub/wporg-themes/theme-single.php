@@ -193,8 +193,7 @@
 					<ul class="unmarked-list">
 						<li>
 							<a href="//themes.trac.wordpress.org/log/<?php echo $theme->slug; ?>?limit=100&amp;mode=stop_on_copy&amp;format=rss">
-								<img src="//s.w.org/style/images/feedicon.png" />
-								<?php _e( 'Development Log', 'wporg-themes' ); ?>
+								<span class="dashicons dashicons-rss"></span><?php _e( 'Development Log', 'wporg-themes' ); ?>
 							</a>
 						</li>
 					</ul>
