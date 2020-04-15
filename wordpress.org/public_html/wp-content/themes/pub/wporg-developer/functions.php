@@ -166,18 +166,7 @@ function init() {
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items_for_hooks', 10, 2 );
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items_for_handbook_root', 10, 2 );
 
-	add_filter( 'document_title_separator', __NAMESPACE__ . '\\theme_title_separator', 10, 2 );
-
 	add_filter( 'syntaxhighlighter_htmlresult', __NAMESPACE__ . '\\syntaxhighlighter_htmlresult' );
-}
-
-/**
- * Customize the theme title separator.
- *
- * @return string
- */
-function theme_title_separator(){
-	return '|';
 }
 
 /**
@@ -418,27 +407,4 @@ function syntaxhighlighter_htmlresult( $text ) {
 
 	return $new_text;
 }
-
-/**
- * Outputs `<link rel="canonical">` tags where appropriate.
- */
-function rel_canonical() {
-	$canonical = false;
-	$queried_object = get_queried_object();
-
-	if ( is_tax() || is_tag() || is_category() ) {
-		$canonical = get_term_link( $queried_object );
-	} elseif ( is_post_type_archive() ) {
-		$canonical = get_post_type_archive_link( $queried_object->name ); 
-	}
-
-	if ( $canonical && get_query_var( 'paged' ) > 1 ) {
-		$canonical .= 'page/' . (int) get_query_var( 'paged' ) . '/';
-	}
-
-	if ( $canonical ) {
-		printf( '<link rel="canonical" href="%s">' . "\n", esc_url( $canonical ) );
-	}
-}
-add_action( 'wp_head', __NAMESPACE__ . '\rel_canonical', 9 );
 

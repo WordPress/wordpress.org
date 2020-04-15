@@ -21,7 +21,74 @@ class DevHub_Head {
 	 * Handles adding/removing hooks as needed.
 	 */
 	public static function do_init() {
-		add_action( 'wp_head', array( __CLASS__, 'output_head_tags' ), 2 );
+		add_filter( 'document_title_parts',     array( __CLASS__, 'document_title' ) );
+		add_filter( 'document_title_separator', array( __CLASS__, 'document_title_separator' ) );
+		add_action( 'wp_head',                  array( __CLASS__, 'rel_canonical' ), 9 );
+		add_action( 'wp_head',                  array( __CLASS__, 'output_head_tags' ), 2 );
+	}
+
+	/**
+	 * Filters document title to add context based on what is being viewed.
+	 *
+	 * @param array $parts The document title parts.
+	 * @return array The document title parts.
+	 */
+	public static function document_title( $parts ) {
+		global $page, $paged;
+
+		if ( is_feed() ) {
+			return $parts;
+		}
+
+		$title = $parts['title'];
+		$sep = '|';
+
+		$post_type = get_query_var( 'post_type' );
+
+		// Omit 'Home' from the home page.
+		if ( 'Home' === $title ) {
+			$title = '';
+		}
+		// Add post type to title if it's a parsed item.
+		elseif ( is_singular() && \DevHub\is_parsed_post_type( $post_type ) ) {
+			if ( $post_type_object = get_post_type_object( $post_type ) ) {
+				$title .= " $sep " . get_post_type_object( $post_type )->labels->singular_name;
+			}
+		}
+		// Add handbook name to title if relevent
+		elseif ( ( is_singular() || is_post_type_archive() ) && false !== strpos( $post_type, 'handbook' ) ) {
+			if ( $post_type_object = get_post_type_object( $post_type ) ) {
+				$handbook_label = get_post_type_object( $post_type )->labels->name;
+				$handbook_name  = \WPorg_Handbook::get_name( $post_type ) . " Handbook";
+
+				// Replace title with handbook name if this is landing page for the handbook
+				if ( $title == $handbook_label ) {
+					$title = $handbook_name;
+				// Otherwise, append the handbook name
+				} else {
+					$title .= " $sep " . $handbook_name;
+				}
+			}
+		}
+
+		// Add a page number if necessary:
+		if ( isset( $parts['page'] ) && $parts['page'] >= 2 ) {
+			$title .= " $sep " . sprintf( __( 'Page %s', 'wporg' ), $parts['page'] );
+		}
+
+		$parts['title'] = $title;
+
+		return $parts;
+	}
+
+	/**
+	 * Customizes the document title separator.
+	 *
+	 * @param string $separator Current document title separator.
+	 * @return string
+	 */
+	public static function document_title_separator( $separator ) {
+		return '|';
 	}
 
 	/**
@@ -104,6 +171,28 @@ class DevHub_Head {
 				esc_attr( $property ),
 				esc_attr( $content )
 			);
+		}
+	}
+
+	/**
+	 * Outputs `<link rel="canonical">` tags where appropriate.
+	 */
+	public static function rel_canonical() {
+		$canonical = false;
+		$queried_object = get_queried_object();
+
+		if ( is_tax() || is_tag() || is_category() ) {
+			$canonical = get_term_link( $queried_object );
+		} elseif ( is_post_type_archive() ) {
+			$canonical = get_post_type_archive_link( $queried_object->name ); 
+		}
+
+		if ( $canonical && get_query_var( 'paged' ) > 1 ) {
+			$canonical .= 'page/' . (int) get_query_var( 'paged' ) . '/';
+		}
+
+		if ( $canonical ) {
+			printf( '<link rel="canonical" href="%s">' . "\n", esc_url( $canonical ) );
 		}
 	}
 

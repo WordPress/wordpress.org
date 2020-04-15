@@ -36,60 +36,6 @@ function wporg_developer_body_classes( $classes ) {
 add_filter( 'body_class', 'wporg_developer_body_classes' );
 
 /**
- * Filters document title to add context based on what is being viewed.
- *
- * @param array $parts The document title parts.
- * @return array The document title parts.
- */
-function wporg_developer_document_title( $parts ) {
-	global $page, $paged;
-
-	if ( is_feed() ) {
-		return $parts;
-	}
-
-	$title = $parts['title'];
-	$sep = '|';
-
-	$post_type = get_query_var( 'post_type' );
-
-	// Omit 'Home' from the home page.
-	if ( 'Home' === $title ) {
-		$title = '';
-	}
-	// Add post type to title if it's a parsed item.
-	elseif ( is_singular() && \DevHub\is_parsed_post_type( $post_type ) ) {
-		if ( $post_type_object = get_post_type_object( $post_type ) ) {
-			$title .= " $sep " . get_post_type_object( $post_type )->labels->singular_name;
-		}
-	}
-	// Add handbook name to title if relevent
-	elseif ( ( is_singular() || is_post_type_archive() ) && false !== strpos( $post_type, 'handbook' ) ) {
-		if ( $post_type_object = get_post_type_object( $post_type ) ) {
-			$handbook_label = get_post_type_object( $post_type )->labels->name;
-			$handbook_name  = \WPorg_Handbook::get_name( $post_type ) . " Handbook";
-
-			// Replace title with handbook name if this is landing page for the handbook
-			if ( $title == $handbook_label ) {
-				$title = $handbook_name;
-			// Otherwise, append the handbook name
-			} else {
-				$title .= " $sep " . $handbook_name;
-			}
-		}
-	}
-
-	// Add a page number if necessary:
-	if ( isset( $parts['page'] ) && $parts['page'] >= 2 ) {
-		$title .= " $sep " . sprintf( __( 'Page %s', 'wporg' ), $parts['page'] );
-	}
-
-	$parts['title'] = $title;
-	return $parts;
-}
-add_filter( 'document_title_parts', 'wporg_developer_document_title' );
-
-/**
  * Prefixes excerpts for archive view with content type label.
  *
  * @param string  $excerpt The excerpt.
