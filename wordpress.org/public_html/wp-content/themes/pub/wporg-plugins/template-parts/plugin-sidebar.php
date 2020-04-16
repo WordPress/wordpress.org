@@ -10,16 +10,16 @@
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
 $widget_args = array(
-	'before_title' => '<h3 class="widget-title">',
-	'after_title'  => '</h3>',
+	'before_title' => '<h2 class="widget-title">',
+	'after_title'  => '</h2>',
 );
 
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Adopt_Me', array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta', array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Ratings', array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Contributors', array(), array(
-	'before_title'  => '<h4 class="widget-title">',
-	'after_title'   => '</h4>',
+	'before_title'  => '<h2 class="widget-title">',
+	'after_title'   => '</h2>',
 	'before_widget' => '<div id="plugin-contributors" class="widget plugin-contributors">',
 	'after_widget'  => '</div>',
 ) );

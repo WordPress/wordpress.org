@@ -18,8 +18,8 @@ $sections = array(
 );
 
 $widget_args = array(
-	'before_title' => '<h3 class="widget-title">',
-	'after_title'  => '</h3>',
+	'before_title' => '<h2 class="widget-title">',
+	'after_title'  => '</h2>',
 );
 
 get_header();
