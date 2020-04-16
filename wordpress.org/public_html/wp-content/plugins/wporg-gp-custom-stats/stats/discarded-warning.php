@@ -36,6 +36,7 @@ class WPorg_GP_Discarded_Warning_Stats {
 			'translation'     => $translation,
 			'warning'         => $warning,
 			'user'            => $user,
+			'timestamp'       => gmdate( 'Y-m-d H:i:s' ),
 			'status'          => 'needs-review'
 		);
 		$format = array( '%d', '%d', '%d', '%s', '%d', '%s' );
@@ -50,13 +51,14 @@ class WPorg_GP_Discarded_Warning_Stats {
 /*
 Required Table:
 
-CREATE TABLE `gp_dotorg_warnings` (
+CREATE TABLE `translate_dotorg_warnings` (
   `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `project_id` bigint(20) unsigned NOT NULL DEFAULT '0',
   `translation_set` bigint(20) unsigned NOT NULL DEFAULT '0',
   `translation` bigint(20) unsigned NOT NULL DEFAULT '0',
   `warning` varchar(20) NOT NULL DEFAULT '',
   `user` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `timestamp` datetime NOT NULL default '0000-00-00 00:00:00',
   `status` varchar(20) NOT NULL DEFAULT '',
   PRIMARY KEY (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
