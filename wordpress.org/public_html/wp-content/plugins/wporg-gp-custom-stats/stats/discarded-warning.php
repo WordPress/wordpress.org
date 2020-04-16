@@ -39,7 +39,7 @@ class WPorg_GP_Discarded_Warning_Stats {
 			'timestamp'       => gmdate( 'Y-m-d H:i:s' ),
 			'status'          => 'needs-review'
 		);
-		$format = array( '%d', '%d', '%d', '%s', '%d', '%s' );
+		$format = array( '%d', '%d', '%d', '%s', '%d', '%s', '%s' );
 		$wpdb->insert(
 			$this->table_name,
 			$warning,
