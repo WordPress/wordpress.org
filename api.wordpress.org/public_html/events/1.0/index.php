@@ -191,6 +191,7 @@ function build_response( $location, $location_args ) {
 		$error = 'no_location_available';
 	}
 
+	// Help devs know if the response they're testing is coming from their sandbox or not.
 	$sandboxed = ( defined( 'WPORG_SANDBOXED' ) ) ? WPORG_SANDBOXED : null;
 
 	return compact( 'sandboxed', 'error', 'location', 'events' );
@@ -709,6 +710,15 @@ function get_events( $args = array() ) {
 		'meetup'   => 100,
 		'wordcamp' => 400,
 	);
+
+	/*
+	 * Increase range during COVID-19 to mitigate event deserts.
+	 *
+	 * See https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480
+	 */
+	if ( time() < strtotime( 'August 1 2020' ) ) {
+		$event_distances['wordcamp'] = 600;
+	}
 
 	$cache_key = 'events:' . md5( serialize( $args ) );
 	if ( false !== ( $data = wp_cache_get( $cache_key, $cache_group ) ) ) {
