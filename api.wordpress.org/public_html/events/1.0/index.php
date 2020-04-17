@@ -172,6 +172,8 @@ function build_response( $location, $location_args ) {
 
 		//$events = maybe_add_wp15_promo( $events, $_SERVER['HTTP_USER_AGENT'], time() );
 
+		$events = maybe_add_online_wordcamps( $events, $_SERVER['HTTP_USER_AGENT'], time() );
+
 		$events = maybe_add_regional_wordcamps(
 			$events,
 			get_regional_wordcamp_data(),
@@ -1172,6 +1174,30 @@ function is_wp15_event( $title ) {
 	}
 
 	return $match;
+}
+
+function maybe_add_online_wordcamps( $events, $user_agent, $current_time ) {
+	if ( ! is_client_core( $user_agent ) ) {
+		return $events;
+	}
+
+	if ( $current_time < strtotime( 'April 19, 2020' ) ) {
+		$santa_clarita = array(
+			'type'       => 'wordcamp',
+			'title'      => 'WordCamp Santa Clarita Online',
+			'url'        => 'https://2020.santaclarita.wordcamp.org/',
+			'meetup'     => null,
+			'meetup_url' => null,
+			'date'       => '2020-04-18 12:00:00',
+			'location'   => array(
+				'location' => 'Everywhere',
+			),
+		);
+
+		array_unshift( $events, $santa_clarita );
+	}
+
+	return $events;
 }
 
 /**
