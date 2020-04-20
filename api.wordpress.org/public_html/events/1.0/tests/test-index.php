@@ -25,6 +25,7 @@ function run_tests() {
 	$tests_failed += test_maybe_add_wp15_promo();
 	$tests_failed += test_build_response();
 	$tests_failed += test_is_client_core();
+	$tests_failed += test_get_iso_3166_2_country_codes();
 
 	$query_count  = count( $wpdb->queries );
 	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
@@ -1181,11 +1182,10 @@ function test_maybe_add_regional_wordcamps() {
 	$region_data = array(
 		'us' => array(
 			'promo_start'        => strtotime( '2019-08-16 00:00:00' ),
-			'regional_countries' => array(
-				'us', 'ca', 'bz', 'cr', 'sv', 'gt', 'hn', 'mx', 'ni', 'pa',
-				'ar', 'bo', 'br', 'cl', 'co', 'ec', 'gf', 'gy', 'py', 'pe',
-				'sr', 'uy', 've', 'ag', 'aw', 'bs', 'bb', 'ky', 'cu', 'dm',
-				'do', 'gd', 'ht', 'jm', 'kn', 'lc', 'vc', 'tt',
+
+			'regional_countries' => array_merge(
+				get_iso_3166_2_country_codes( 'south america' ),
+				get_iso_3166_2_country_codes( 'north america' )
 			),
 			'event'              => array(
 				'type'       => 'wordcamp',
@@ -1441,6 +1441,40 @@ function test_maybe_add_wp15_promo() {
 	if ( $events_outside_date_range !== $local_events_no_wp15 ) {
 		$failed++;
 		output_results( 'outside-date-range', false, $local_events_no_wp15, $events_outside_date_range );
+	}
+
+	return $failed;
+}
+
+/**
+ * Test `get_iso_3166_2_country_codes()`.
+ */
+function test_get_iso_3166_2_country_codes() {
+	$failed = 0;
+	$cases = array(
+		'antarctica'    => 'HM',
+		'africa'        => 'KM',
+		'asia'          => 'SA',
+		'europe'        => 'IM',
+		'north america' => 'MQ',
+		'oceania'       => 'MP',
+		'south america' => 'GY',
+	);
+
+	printf( "\n\nRunning %d get_iso_3166_2_country_codes() tests\n", count( $cases ) );
+
+	foreach ( $cases as $continent => $sample_country ) {
+		$countries = get_iso_3166_2_country_codes( $continent );
+
+		$expected_result = true;
+		$actual_result   = in_array( $sample_country, $countries, true );
+		$passed          = $expected_result === $actual_result;
+
+		output_results( $continent, $passed, $expected_result, $actual_result );
+
+		if ( ! $passed ) {
+			$failed++;
+		}
 	}
 
 	return $failed;

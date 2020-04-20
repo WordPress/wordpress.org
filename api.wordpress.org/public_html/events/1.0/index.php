@@ -957,15 +957,13 @@ function get_regional_wordcamp_data() {
 		// WordCamp Asia.
 		'asia'   => array(
 			'promo_start'        => strtotime( '2019-12-20 00:00:00' ),
-			'regional_countries' => array(
-				'cn', 'hk', 'jp', 'kp', 'kr', 'mn', 'mo', 'tw', 'af', 'bd',
-				'bt', 'in', 'ir', 'lk', 'mv', 'np', 'pk', 'bn', 'id', 'kh',
-				'la', 'mm', 'my', 'ph', 'sg', 'th', 'tl', 'vn', 'au', 'nf',
-				'nz', 'fj', 'nc', 'pg', 'sb', 'vu', 'fm', 'gu', 'ki', 'mh',
-				'mp', 'nr', 'pw', 'as', 'ck', 'nu', 'pf', 'pn', 'tk', 'to',
-				'tv', 'wf', 'ws', 'tm', 'tj', 'kg', 'kz', 'uz', 'ae', 'am',
-				'az', 'bh', 'cy', 'ge', 'il', 'iq', 'jo', 'kw', 'lb', 'om',
-				'ps', 'qa', 'sa', 'sy', 'tr', 'ye'
+
+			'regional_countries' => array_merge(
+				get_iso_3166_2_country_codes( 'asia' ),
+				get_iso_3166_2_country_codes( 'oceania' ),
+
+				// Russia is often considered to be part of Asia geographically, and part of Europe politically.
+				array( 'RU' )
 			),
 			'event'              => array(
 				'type'       => 'wordcamp',
@@ -986,8 +984,9 @@ function get_regional_wordcamp_data() {
 		// WordCamp Europe.
 		'europe' => array(
 			'promo_start'        => strtotime( '2020-04-04 00:00:00' ),
-			'regional_countries' => array(
-				// todo
+			'regional_countries' => array_merge(
+				get_iso_3166_2_country_codes( 'africa' ),
+				get_iso_3166_2_country_codes( 'europe' )
 			),
 			'event'              => array(
 				'type'       => 'wordcamp',
@@ -1008,11 +1007,10 @@ function get_regional_wordcamp_data() {
 		// WordCamp US.
 		'us'     => array(
 			'promo_start'        => strtotime( '2020-08-27 00:00:00' ),
-			'regional_countries' => array(
-				'us', 'ca', 'bz', 'cr', 'sv', 'gt', 'hn', 'mx', 'ni', 'pa',
-				'ar', 'bo', 'br', 'cl', 'co', 'ec', 'gf', 'gy', 'py', 'pe',
-				'sr', 'uy', 've', 'ag', 'aw', 'bs', 'bb', 'ky', 'cu', 'dm',
-				'do', 'gd', 'ht', 'jm', 'kn', 'lc', 'vc', 'tt',
+
+			'regional_countries' => array_merge(
+				get_iso_3166_2_country_codes( 'south america' ),
+				get_iso_3166_2_country_codes( 'north america' )
 			),
 			'event'              => array(
 				'type'       => 'wordcamp',
@@ -1032,6 +1030,65 @@ function get_regional_wordcamp_data() {
 			),
 		),
 	);
+}
+
+/**
+ * Get a list of ISO-3166-2 countries by continent.
+ *
+ * Data was sourced from https://dev.maxmind.com/geoip/legacy/codes/country_continent/ on 2020-04-17.
+ *
+ * @param string $continent
+ *
+ * @return array
+ */
+function get_iso_3166_2_country_codes( $continent = '' ) {
+	$codes = array(
+		'antarctica' => array( 'AQ', 'BV', 'GS', 'HM', 'TF' ),
+
+		'africa' => array(
+			'AO', 'BF', 'BI', 'BJ', 'BW', 'CD', 'CF', 'CG', 'CI', 'CM', 'CV', 'DJ', 'DZ', 'EG', 'EH', 'ER', 'ET',
+			'GA', 'GH', 'GM', 'GN', 'GQ', 'GW', 'KE', 'KM', 'LR', 'LS', 'LY', 'MA', 'MG', 'ML', 'MR', 'MU', 'MW',
+			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'ST', 'SZ', 'TD', 'TG', 'TN',
+			'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
+		),
+
+		'asia' => array(
+			// Includes the Middle East, Armenia, Azerbaijan, Cyprus, Georgia.
+			'AE', 'AF', 'AM', 'AP', 'AZ', 'BD', 'BH', 'BN', 'BT', 'CC', 'CN', 'CX', 'CY', 'GE', 'HK', 'ID', 'IL',
+			'IN', 'IO', 'IQ', 'IR', 'JO', 'JP', 'KG', 'KH', 'KP', 'KR', 'KW', 'KZ', 'LA', 'LB', 'LK', 'MM', 'MN',
+			'MO', 'MV', 'MY', 'NP', 'OM', 'PH', 'PK', 'PS', 'QA', 'SA', 'SG', 'SY', 'TH', 'TJ', 'TL', 'TM', 'TW',
+			'UZ', 'VN', 'YE',
+		),
+
+		'europe' => array(
+			// Includes Russia, Turkey.
+			'AD', 'AL', 'AT', 'AX', 'BA', 'BE', 'BG', 'BY', 'CH', 'CZ', 'DE', 'DK', 'EE', 'ES', 'EU', 'FI', 'FO',
+			'FR', 'FX', 'GB', 'GG', 'GI', 'GR', 'HR', 'HU', 'IE', 'IM', 'IS', 'IT', 'JE', 'LI', 'LT', 'LU', 'LV',
+			'MC', 'MD', 'ME', 'MK', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'RS', 'RU', 'SE', 'SI', 'SJ', 'SK', 'SM',
+			'TR', 'UA', 'VA',
+		),
+
+		'north america' => array(
+			'AG', 'AI', 'AN', 'AW', 'BB', 'BL', 'BM', 'BS', 'BZ', 'CA', 'CR', 'CU', 'DM', 'DO', 'GD', 'GL', 'GP',
+			'GT', 'HN', 'HT', 'JM', 'KN', 'KY', 'LC', 'MF', 'MQ', 'MS', 'MX', 'NI', 'PA', 'PM', 'PR', 'SV', 'TC',
+			'TT', 'US', 'VC', 'VG', 'VI',
+		),
+
+		'oceania' => array(
+			'AS', 'AU', 'CK', 'FJ', 'FM', 'GU', 'KI', 'MH', 'MP', 'NC', 'NF', 'NR', 'NU', 'NZ', 'PF', 'PG', 'PN',
+			'PW', 'SB', 'TK', 'TO', 'TV', 'UM', 'VU', 'WF', 'WS',
+		),
+
+		'south america' => array(
+			'AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'FK', 'GF', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE',
+		),
+	);
+
+	if ( $continent ) {
+		return $codes[ $continent ];
+	} else {
+		return $codes;
+	}
 }
 
 /**
@@ -1069,12 +1126,12 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			$regional_wordcamps[] = $data['event'];
 		} elseif ( is_within_date_range( $current_time, strtotime( '+ 2 weeks', $start ), strtotime( '+ 4 weeks', $start ) ) ) {
 			// Phase 2: Show within regional countries for next two weeks.
-			if ( ! empty( $location['country'] ) && in_array( strtolower( $location['country'] ), $data['regional_countries'], true ) ) {
+			if ( ! empty( $location['country'] ) && in_array( strtoupper( $location['country'] ), $data['regional_countries'], true ) ) {
 				$regional_wordcamps[] = $data['event'];
 			}
 		} elseif ( is_within_date_range( $current_time, strtotime( '+ 4 weeks', $start ), strtotime( '+ 6 weeks', $start ) ) ) {
 			// Phase 3: Show only within the event country for the last two weeks.
-			if ( ! empty( $location['country'] ) && strtolower( $data['event']['location']['country'] ) === strtolower( $location['country'] ) ) {
+			if ( ! empty( $location['country'] ) && strtoupper( $data['event']['location']['country'] ) === strtoupper( $location['country'] ) ) {
 				$regional_wordcamps[] = $data['event'];
 			}
 		}
