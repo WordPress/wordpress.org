@@ -140,7 +140,7 @@ class Plugin extends Base {
 
 		$_pages = preg_split( '#<!--section=(.+?)-->#', $post->post_content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
-			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ], $_pages[ $i ] );
+			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ] ?? '', $_pages[ $i ] );
 		}
 		$result['sections']['screenshots'] = ''; // placeholder to put screenshots prior to reviews at the end.
 		$result['sections']['reviews']     = $this->get_plugin_reviews_markup( $post->post_name );
