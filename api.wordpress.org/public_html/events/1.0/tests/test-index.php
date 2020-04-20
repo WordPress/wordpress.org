@@ -63,11 +63,35 @@ function output_results( $case_id, $passed, $expected_result, $actual_result ) {
 		$expected_output = is_scalar( $expected_result ) ? var_export( $expected_result, true ) : print_r( $expected_result, true );
 		$actual_output   = is_scalar( $actual_result   ) ? var_export( $actual_result,   true ) : print_r( $actual_result,   true );
 
-		printf(
-			"\n\nExpected result: %s\nActual result: %s",
-			$expected_output,
-			$actual_output
-		);
+		if ( VERBOSE_OUTPUT ) {
+			printf(
+				"\n\nExpected result: %s\nActual result: %s",
+				$expected_output,
+				$actual_output
+			);
+
+		} else {
+			$folder = sys_get_temp_dir();
+			file_put_contents( $folder . '/events-test-expected.txt', $expected_output);
+			file_put_contents( $folder . '/events-test-actual.txt',   $actual_output );
+
+			$diff_results = shell_exec( sprintf(
+				'/usr/bin/diff --unified %s --label "Expected" %s --label "Actual"',
+				$folder . '/events-test-expected.txt',
+				$folder . '/events-test-actual.txt'
+			) );
+
+			if ( empty( $diff_results ) ) {
+				$diff_results = "Error: diff appears to be empty even though test failed.\n";
+			}
+
+			$short_output = sprintf( "\n\n%s
+				Rerun with `--verbose` for detailed failure results.\n",
+				$diff_results
+			);
+
+			printf( str_replace( "\t", '', $short_output ) );
+		}
 	}
 }
 
@@ -1524,5 +1548,8 @@ function wp_cache_get( $key, $group = '', $force = false, &$found = null ) {
 function wp_cache_set( $key, $data, $group = '', $expire = 0 ) {
 	// Intentionally empty
 }
+
+
+define( 'VERBOSE_OUTPUT', in_array( '--verbose', $argv, true ) );
 
 run_tests();
