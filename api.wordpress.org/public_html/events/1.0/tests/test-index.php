@@ -1182,13 +1182,14 @@ function test_maybe_add_regional_wordcamps() {
 
 	$region_data = array(
 		'us' => array(
-			'promo_start'        => strtotime( '2019-08-16 00:00:00' ),
+			'promo_start' => strtotime( '2019-08-16 00:00:00' ),
 
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'south america' ),
 				get_iso_3166_2_country_codes( 'north america' )
 			),
-			'event'              => array(
+
+			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
 				'url'        => 'https://2019.us.wordcamp.org/',

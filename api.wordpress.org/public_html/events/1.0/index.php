@@ -814,6 +814,7 @@ function get_events( $args = array() ) {
 			'meetup_url' => $event->meetup_url,
 			'date'       => $event->date_utc, // TODO: DB stores a local date, not UTC.
 			'end_date'   => $event->end_date,
+
 			'location'   => array(
 				'location'  => $event->location,
 				'country'   => $event->country,
@@ -957,8 +958,8 @@ function get_regional_wordcamp_data() {
 
 	return array(
 		// WordCamp Asia.
-		'asia'   => array(
-			'promo_start'        => strtotime( '2019-12-20 00:00:00' ),
+		'asia' => array(
+			'promo_start' => strtotime( '2019-12-20 00:00:00' ),
 
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'asia' ),
@@ -967,7 +968,8 @@ function get_regional_wordcamp_data() {
 				// Russia is often considered to be part of Asia geographically, and part of Europe politically.
 				array( 'RU' )
 			),
-			'event'              => array(
+
+			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Asia',
 				'url'        => 'https://2020.asia.wordcamp.org/',
@@ -975,7 +977,8 @@ function get_regional_wordcamp_data() {
 				'meetup_url' => '',
 				'date'       => '2020-02-21 00:00:00',
 				'end_date'   => '2020-02-23 00:00:00',
-				'location'   => array(
+
+				'location' => array(
 					'location'  => 'Bangkok, Thailand',
 					'country'   => 'TH',
 					'latitude'  => 13.7248934,
@@ -983,14 +986,17 @@ function get_regional_wordcamp_data() {
 				),
 			),
 		),
+
 		// WordCamp Europe.
 		'europe' => array(
-			'promo_start'        => strtotime( '2020-04-04 00:00:00' ),
+			'promo_start' => strtotime( '2020-04-04 00:00:00' ),
+
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'africa' ),
 				get_iso_3166_2_country_codes( 'europe' )
 			),
-			'event'              => array(
+
+			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
 				'url'        => 'https://2020.europe.wordcamp.org/',
@@ -998,6 +1004,7 @@ function get_regional_wordcamp_data() {
 				'meetup_url' => '',
 				'date'       => '2020-06-04 00:00:00',
 				'end_date'   => '2020-06-06 00:00:00',
+
 				'location' => array(
 					'location'  => 'Porto, Portugal',
 					'country'   => 'PT',
@@ -1006,15 +1013,17 @@ function get_regional_wordcamp_data() {
 				),
 			),
 		),
+
 		// WordCamp US.
-		'us'     => array(
-			'promo_start'        => strtotime( '2020-08-27 00:00:00' ),
+		'us' => array(
+			'promo_start' => strtotime( '2020-08-27 00:00:00' ),
 
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'south america' ),
 				get_iso_3166_2_country_codes( 'north america' )
 			),
-			'event'              => array(
+
+			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
 				'url'        => 'https://2020.us.wordcamp.org/',
@@ -1023,7 +1032,7 @@ function get_regional_wordcamp_data() {
 				'date'       => '2020-10-27 00:00:00',
 				'end_date'   => '2020-10-29 00:00:00',
 
-				'location'   => array(
+				'location' => array(
 					'location'  => 'St. Louis, MO, USA',
 					'country'   => 'US',
 					'latitude'  => 38.6532135,
@@ -1126,11 +1135,13 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 		if ( is_within_date_range( $current_time, $start, strtotime( '+ 2 weeks', $start ) ) ) {
 			// Phase 1: Show worldwide for first two weeks.
 			$regional_wordcamps[] = $data['event'];
+
 		} elseif ( is_within_date_range( $current_time, strtotime( '+ 2 weeks', $start ), strtotime( '+ 4 weeks', $start ) ) ) {
 			// Phase 2: Show within regional countries for next two weeks.
 			if ( ! empty( $location['country'] ) && in_array( strtoupper( $location['country'] ), $data['regional_countries'], true ) ) {
 				$regional_wordcamps[] = $data['event'];
 			}
+
 		} elseif ( is_within_date_range( $current_time, strtotime( '+ 4 weeks', $start ), strtotime( '+ 6 weeks', $start ) ) ) {
 			// Phase 3: Show only within the event country for the last two weeks.
 			if ( ! empty( $location['country'] ) && strtoupper( $data['event']['location']['country'] ) === strtoupper( $location['country'] ) ) {
