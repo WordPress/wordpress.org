@@ -951,10 +951,12 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
  * @return array
  */
 function get_regional_wordcamp_data() {
+	// `promo_start` should be 2 months before the Event's start date. See `maybe_add_regional_wordcamps()`.
+
 	return array(
 		// WordCamp Asia.
 		'asia'   => array(
-			'promo_start'        => strtotime( '2019-12-20 00:00:00' ), // todo
+			'promo_start'        => strtotime( '2019-12-20 00:00:00' ),
 			'regional_countries' => array(
 				'cn', 'hk', 'jp', 'kp', 'kr', 'mn', 'mo', 'tw', 'af', 'bd',
 				'bt', 'in', 'ir', 'lk', 'mv', 'np', 'pk', 'bn', 'id', 'kh',
@@ -983,7 +985,7 @@ function get_regional_wordcamp_data() {
 		),
 		// WordCamp Europe.
 		'europe' => array(
-			'promo_start'        => 0, // todo
+			'promo_start'        => strtotime( '2020-04-04 00:00:00' ),
 			'regional_countries' => array(
 				// todo
 			),
@@ -993,8 +995,8 @@ function get_regional_wordcamp_data() {
 				'url'        => 'https://2020.europe.wordcamp.org/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '', // todo
-				'end_date'   => '', // todo
+				'date'       => '2020-06-04 00:00:00',
+				'end_date'   => '2020-06-06 00:00:00',
 				'location' => array(
 					'location'  => 'Porto, Portugal',
 					'country'   => 'PT',
@@ -1005,7 +1007,7 @@ function get_regional_wordcamp_data() {
 		),
 		// WordCamp US.
 		'us'     => array(
-			'promo_start'        => strtotime( '2019-08-16 00:00:00' ),
+			'promo_start'        => strtotime( '2020-08-27 00:00:00' ),
 			'regional_countries' => array(
 				'us', 'ca', 'bz', 'cr', 'sv', 'gt', 'hn', 'mx', 'ni', 'pa',
 				'ar', 'bo', 'br', 'cl', 'co', 'ec', 'gf', 'gy', 'py', 'pe',
@@ -1015,11 +1017,12 @@ function get_regional_wordcamp_data() {
 			'event'              => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://2019.us.wordcamp.org/',
+				'url'        => 'https://2020.us.wordcamp.org/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2019-11-01 00:00:00',
-				'end_date'   => '2019-11-03 00:00:00',
+				'date'       => '2020-10-27 00:00:00',
+				'end_date'   => '2020-10-29 00:00:00',
+
 				'location'   => array(
 					'location'  => 'St. Louis, MO, USA',
 					'country'   => 'US',
@@ -1058,6 +1061,8 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 
 		/**
 		 * The targeted area of the regional camp promotion "zooms in" over the course of 6 weeks.
+		 *
+		 * For the last 2 weeks before the event, it will just be displayed to everyone in the normal (400km) radius.
 		 */
 		if ( is_within_date_range( $current_time, $start, strtotime( '+ 2 weeks', $start ) ) ) {
 			// Phase 1: Show worldwide for first two weeks.
