@@ -40,7 +40,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'BB_WPOrg_SSO' ) ) {
 				if ( ! empty( $_POST ) ) {
 					// Let users log in from the header's form, for now.
 					return;
-				} else if ( 'logout' == $_GET['action'] ) {
+				} else if ( isset( $_GET['action'] ) && 'logout' == $_GET['action'] ) {
 					// Let users log out without a trip to the SSO host.
 					return;
 				}
