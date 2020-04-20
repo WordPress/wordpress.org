@@ -26,6 +26,7 @@ function run_tests() {
 	$tests_failed += test_build_response();
 	$tests_failed += test_is_client_core();
 	$tests_failed += test_get_iso_3166_2_country_codes();
+	$tests_failed += test_remove_duplicate_events();
 
 	$query_count  = count( $wpdb->queries );
 	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
@@ -1257,23 +1258,10 @@ function test_maybe_add_regional_wordcamps() {
 	$tests_expect_no_changes['other-user-agent'] = maybe_add_regional_wordcamps( $local_events, $region_data, $other_user_agent, $time_during_promo_phase_1, $location_country_within_region );
 	$tests_expect_changes['core-user-agent'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_within_region );
 
-	// There should only be one entry for an event, even if the local event array already contains the regional event.
-	$tests_expect_no_changes['duplicate-event'] = maybe_add_regional_wordcamps( array( $region_data['us']['event'] ), $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_within_region );
-
 	foreach ( $tests_expect_no_changes as $name => $result ) {
-		switch ( $name ) {
-			case 'duplicate-event':
-				if ( $result !== array( $region_data['us']['event'] ) ) {
-					$failed++;
-					output_results( $name, false, array( $region_data['us']['event'] ), $result );
-				}
-				break;
-			default:
-				if ( $result !== $local_events ) {
-					$failed++;
-					output_results( $name, false, $local_events, $result );
-				}
-				break;
+		if ( $result !== $local_events ) {
+			$failed++;
+			output_results( $name, false, $local_events, $result );
 		}
 	}
 
@@ -1478,6 +1466,46 @@ function test_get_iso_3166_2_country_codes() {
 	}
 
 	return $failed;
+}
+
+/**
+ * Test `remove_duplicate_events()`.
+ */
+function test_remove_duplicate_events() {
+	$duplicate_events = array(
+		// Each of these represents an event; extraneous fields have been removed for readability.
+		array (
+			'url' => 'https://2020.us.wordcamp.org/',
+		),
+
+		array (
+			'url' => 'https://2020.detroit.wordcamp.org/',
+		),
+
+		array(
+			// Intentionally missing the trailing slash, to account for inconsistencies in data.
+			'url' => 'https://2020.us.wordcamp.org',
+		)
+	);
+
+	printf( "\n\nRunning 1 remove_duplicate_events() test\n" );
+
+	$expected_result = array(
+		array (
+			'url' => 'https://2020.us.wordcamp.org',
+		),
+
+		array (
+			'url' => 'https://2020.detroit.wordcamp.org/',
+		),
+	);
+
+	$actual_result   = remove_duplicate_events( $duplicate_events );
+	$passed          = $expected_result === $actual_result;
+
+	output_results( 'remove duplicate events', $passed, $expected_result, $actual_result );
+
+	return $passed ? 0 : 1;
 }
 
 /**

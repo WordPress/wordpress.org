@@ -182,6 +182,8 @@ function build_response( $location, $location_args ) {
 			$location
 		);
 
+		$events = remove_duplicate_events( $events );
+
 		// Internal location data cannot be exposed in the response, see get_location().
 		if ( isset( $location['internal'] ) && $location['internal'] ) {
 			// Let the client know that a location was successfully determined based on their IP
@@ -1135,20 +1137,8 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 				$regional_wordcamps[] = $data['event'];
 			}
 		}
-	}
 
-	/**
-	 * Remove duplicates events.
-	 * Favor the regional event since it'll be pinned to the top.
-	 */
-	foreach ( $regional_wordcamps as $regional_event ) {
-		$local_events = array_filter( $local_events, function( $local_event ) use ( $regional_event ) {
-			if ( parse_url( $regional_event['url'], PHP_URL_HOST ) === parse_url( $local_event['url'], PHP_URL_HOST ) ) {
-				return false;
-			}
 
-			return true;
-		} );
 	}
 
 	return array_merge( $regional_wordcamps, $local_events );
@@ -1270,6 +1260,38 @@ function maybe_add_online_wordcamps( $events, $user_agent, $current_time ) {
 	}
 
 	return $events;
+}
+
+/**
+ * Remove duplicate events, based on the URL.
+ *
+ * This is needed because sometimes an event gets added from multiple functions; e.g., `get_events()` and also `maybe_add_regional_wordcamps()` and/or `pin_next_online_wordcamp()`.
+ *
+ * @param array $events
+ *
+ * @return array
+ */
+function remove_duplicate_events( $events ) {
+	// Re-index them by a URL to overwrite duplicates
+	$unique_events = array();
+
+	foreach ( $events as $event ) {
+		$parsed_url = parse_url( $event['url'] );
+
+		// Take all essential parts to cover current URL structures, and potential future ones.
+		$normalized_url = sprintf(
+			'%s%s%s',
+			$parsed_url['host'],
+			$parsed_url['path'],
+			$parsed_url['query']
+		);
+		$normalized_url = str_replace( '/', '', $normalized_url );
+
+		$unique_events[ $normalized_url ] = $event;
+	}
+
+	// Restore integer keys.
+	return array_values( $unique_events );
 }
 
 /**
