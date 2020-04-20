@@ -151,8 +151,11 @@ class WPTV_Anon_Upload {
 
 		$filepath = $file['file'];
 
+		$parent_post = get_post( $parent_id );
+
 		$attachment = array(
-			'post_title'     => $this->sanitize_text( $name ),
+			'post_title'     => $parent_post->post_title ?: sanitize_file_name( $name ),
+			'post_name'      => sanitize_title_with_dashes( sanitize_file_name( $name ) ),
 			'guid'           => $file['url'],
 			'post_mime_type' => $file['type'],
 			'post_content'   => '',
