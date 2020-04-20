@@ -1204,8 +1204,8 @@ function maybe_add_wp15_promo( $local_events, $user_agent, $time ) {
 			'type'       => 'meetup',
 			'title'      => 'WP15',
 			'url'        => 'https://wordpress.org/news/2018/04/celebrate-the-wordpress-15th-anniversary-on-may-27/',
-			'meetup'     => null,
-			'meetup_url' => null,
+			'meetup'     => '',
+			'meetup_url' => '',
 			'date'       => '2018-05-27 12:00:00',
 			'location'   => array(
 				'location' => 'Everywhere',
@@ -1259,8 +1259,8 @@ function maybe_add_online_wordcamps( $events, $user_agent, $current_time ) {
 			'type'       => 'wordcamp',
 			'title'      => 'WordCamp Santa Clarita Online',
 			'url'        => 'https://2020.santaclarita.wordcamp.org/',
-			'meetup'     => null,
-			'meetup_url' => null,
+			'meetup'     => '',
+			'meetup_url' => '',
 			'date'       => '2020-04-18 12:00:00',
 			'location'   => array(
 				'location' => 'Everywhere',

@@ -1332,8 +1332,8 @@ function test_maybe_add_wp15_promo() {
 			'type'       => 'wordcamp',
 			'title'      => 'WordCamp Portland, Oregon, USA',
 			'url'        => 'https://2018.portland.wordcamp.org',
-			'meetup'     => null,
-			'meetup_url' => null,
+			'meetup'     => '',
+			'meetup_url' => '',
 			'date'       => '2018-11-03 00:00:00',
 			'location'   => array(
 				'location'  => 'Portland, OR, USA',
@@ -1363,8 +1363,8 @@ function test_maybe_add_wp15_promo() {
 			'type'       => 'wordcamp',
 			'title'      => 'WordCamp Portland, Oregon, USA',
 			'url'        => 'https://2018.portland.wordcamp.org',
-			'meetup'     => null,
-			'meetup_url' => null,
+			'meetup'     => '',
+			'meetup_url' => '',
 			'date'       => '2018-11-03 00:00:00',
 			'location'   => array(
 				'location'  => 'Portland, OR, USA',
@@ -1380,8 +1380,8 @@ function test_maybe_add_wp15_promo() {
 			'type'       => 'meetup',
 			'title'      => 'WP15',
 			'url'        => 'https://wordpress.org/news/2018/04/celebrate-the-wordpress-15th-anniversary-on-may-27/',
-			'meetup'     => null,
-			'meetup_url' => null,
+			'meetup'     => '',
+			'meetup_url' => '',
 			'date'       => '2018-05-27 12:00:00',
 			'location'   => array(
 				'location' => 'Everywhere',
@@ -1405,8 +1405,8 @@ function test_maybe_add_wp15_promo() {
 			'type'       => 'wordcamp',
 			'title'      => 'WordCamp Portland, Oregon, USA',
 			'url'        => 'https://2018.portland.wordcamp.org',
-			'meetup'     => null,
-			'meetup_url' => null,
+			'meetup'     => '',
+			'meetup_url' => '',
 			'date'       => '2018-11-03 00:00:00',
 			'location'   => array(
 				'location'  => 'Portland, OR, USA',
