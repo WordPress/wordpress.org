@@ -70,6 +70,10 @@ class DevHub_Head {
 				}
 			}
 		}
+		// Add "WP-CLI Command" to individual CLI command pages.
+		elseif ( is_singular( 'command' ) ) {
+			$title .= " $sep WP-CLI Command";
+		}
 
 		// Add a page number if necessary:
 		if ( isset( $parts['page'] ) && $parts['page'] >= 2 ) {
