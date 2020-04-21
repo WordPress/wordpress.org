@@ -162,7 +162,7 @@ class WPorg_GP_User_Stats {
 				continue;
 			}
 
-			if ( $set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $locale_slug, $locale ) ) {
+			if ( $set = GP::$translation_set->by_project_id_slug_and_locale( $project_id, $locale_slug, $locale ) ) {
 				$translation_set_ids[] = (int) $set->id;
 			}
 
