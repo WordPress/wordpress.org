@@ -101,6 +101,9 @@ class Make_Core_Trac_Components {
 
 	function page_is_component( $post ) {
 		$post = get_post( $post );
+		if ( ! $post ) {
+			return false;
+		}
 		if ( $post->post_type != self::POST_TYPE_NAME ) {
 			return false;
 		}
