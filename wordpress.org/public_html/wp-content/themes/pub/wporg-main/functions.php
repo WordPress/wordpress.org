@@ -83,7 +83,7 @@ add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
 function scripts() {
 	$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20200403' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20200421' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Move jQuery to the footer.
