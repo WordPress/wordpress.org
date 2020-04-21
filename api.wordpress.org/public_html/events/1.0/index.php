@@ -1006,7 +1006,7 @@ function get_regional_wordcamp_data() {
 				'end_date'   => '2020-06-06 00:00:00',
 
 				'location' => array(
-					'location'  => 'Porto, Portugal',
+					'location'  => 'Online',
 					'country'   => 'PT',
 					'latitude'  => 41.1622022,
 					'longitude' => -8.6570588,
@@ -1263,7 +1263,7 @@ function maybe_add_online_wordcamps( $events, $user_agent, $current_time ) {
 			'meetup_url' => '',
 			'date'       => '2020-04-18 12:00:00',
 			'location'   => array(
-				'location' => 'Everywhere',
+				'location' => 'Online',
 			),
 		);
 
