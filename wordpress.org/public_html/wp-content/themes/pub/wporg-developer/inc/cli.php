@@ -48,9 +48,9 @@ class DevHub_CLI {
 		);
 		register_post_type( 'command', array(
 			'has_archive' => 'cli/commands',
-			'label'       => __( 'Commands', 'wporg' ),
+			'label'       => __( 'WP-CLI Commands', 'wporg' ),
 			'labels'      => array(
-				'name'               => __( 'Commands', 'wporg' ),
+				'name'               => __( 'WP-CLI Commands', 'wporg' ),
 				'singular_name'      => __( 'Command', 'wporg' ),
 				'all_items'          => __( 'Commands', 'wporg' ),
 				'new_item'           => __( 'New Command', 'wporg' ),
