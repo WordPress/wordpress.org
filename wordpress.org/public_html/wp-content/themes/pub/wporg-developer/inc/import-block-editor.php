@@ -23,6 +23,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		add_filter( 'get_post_metadata',               array( $this, 'fix_markdown_source_meta' ), 10, 4 );
 		add_filter( 'wporg_markdown_before_transform', array( $this, 'wporg_markdown_before_transform' ),  10, 2 );
 		add_filter( 'wporg_markdown_after_transform',  array( $this, 'wporg_markdown_after_transform' ), 10, 2 );
+		add_filter( 'wporg_markdown_edit_link',        array( $this, 'wporg_markdown_edit_link' ), 10, 2 );
 
 		add_filter( 'syntaxhighlighter_htmlresult',    array( $this, 'fix_code_entity_encoding' ) );
 
@@ -286,6 +287,21 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		$html = str_replace( 'class="css"', 'class="language-css"', $html );
 
 		return $html;
+	}
+
+	/**
+	 * Modifies the GitHub edit URL to point to master instead of the imported branch.
+	 *
+	 * @param string $link    The link to edit the post on GitHub.
+	 * @param int    $post_id The post ID.
+	 * @return string
+	 */
+	public function wporg_markdown_edit_link( $link, $post_id ) {
+		if ( $this->get_post_type() === get_post_type( $post_id ) ) {
+			$link = str_replace( '/wp/' . WP_CORE_STABLE_BRANCH . '/', '/master/', $link );
+		}
+
+		return $link;
 	}
 
 	/**
