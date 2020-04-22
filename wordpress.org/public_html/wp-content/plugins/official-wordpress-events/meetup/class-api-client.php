@@ -146,7 +146,7 @@ class API_Client {
 				$retry_after = wp_remote_retrieve_header( $response, 'retry-after' ) ?: 5;
 				$wait        = min( $retry_after * $attempt_count, 30 );
 
-				self::cli_message( "\nRequest failed $attempt_count times. Pausing for $wait seconds before retrying." );
+				self::cli_message( "Request failed $attempt_count times. Pausing for $wait seconds before retrying." );
 
 				sleep( $wait );
 			}
@@ -157,7 +157,7 @@ class API_Client {
 		$this->current_request_args = null;
 
 		if ( $attempt_count === $max_attempts && ( 200 !== $response_code || is_wp_error( $response ) ) ) {
-			self::cli_message( "\nRequest failed $attempt_count times. Giving up." );
+			self::cli_message( "Request failed $attempt_count times. Giving up." );
 		}
 
 		return $response;
@@ -281,7 +281,7 @@ class API_Client {
 	 */
 	protected static function cli_message( $message ) {
 		if ( 'cli' === php_sapi_name() ) {
-			echo $message;
+			echo "\n$message";
 		}
 	}
 }

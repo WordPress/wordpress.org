@@ -295,7 +295,7 @@ class Meetup_Client extends API_Client {
 			$period = 2;
 		}
 
-		self::cli_message( "\nPausing for $period seconds to avoid rate-limiting." );
+		self::cli_message( "Pausing for $period seconds to avoid rate-limiting." );
 
 		sleep( $period );
 	}

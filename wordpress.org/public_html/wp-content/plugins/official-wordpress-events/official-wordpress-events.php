@@ -496,6 +496,10 @@ class Official_WordPress_Events {
 
 			if ( ! empty( $meetup['venue']['country'] ) ) {
 				$country_code = $meetup['venue']['country'];
+
+			} elseif ( ! empty( $meetup['group']['country'] ) ) {
+				$country_code = strtoupper( $meetup['group']['country'] );
+
 			} elseif ( ! empty( $location_parts['country_code'] ) ) {
 				$country_code = $location_parts['country_code'];
 			} else {
