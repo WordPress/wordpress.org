@@ -179,14 +179,14 @@ class WordPressTV_REST_API {
 
 				$taxonomy = $taxonomies[ $method ];
 				$taxonomy_obj = get_taxonomy( $taxonomy );
-				$total_count = wp_count_terms( $taxonomy, array( 'hide_empty' => true ) );
+				$total_count = wp_count_terms( $taxonomy, array( 'hide_empty' => false ) );
 
 				$page = get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1;
 				$per_page = 200;
 
 				$terms = get_terms( array(
 					'taxonomy'   => $taxonomy,
-					'hide_empty' => true,
+					'hide_empty' => false,
 					'number'     => $per_page,
 					'offset'     => $per_page * ($page - 1),
 					'orderby'    => 'id',
