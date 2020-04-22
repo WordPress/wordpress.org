@@ -185,6 +185,7 @@ class Editor {
 			return $markdown_source;
 		}
 		$markdown_source = str_replace( '/blob/master/', '/edit/master/', $markdown_source );
-		return $markdown_source;
+
+		return apply_filters( 'wporg_markdown_edit_link', $markdown_source, $post_id );
 	}
 }
