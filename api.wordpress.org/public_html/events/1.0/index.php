@@ -479,7 +479,7 @@ function _ip2long_v6( $address ) {
  *                            An array with location details on success.
  */
 function get_location( $args = array() ) {
-	$throttle_geonames = $throttle_ip2location = false;
+	$throttle_geonames = $throttle_ip2location = $location = false;
 
 	// For a country request, no lat/long are returned.
 	if ( isset( $args['country'] ) ) {
@@ -1293,8 +1293,8 @@ function remove_duplicate_events( $events ) {
 		$normalized_url = sprintf(
 			'%s%s%s',
 			$parsed_url['host'],
-			$parsed_url['path'],
-			$parsed_url['query']
+			$parsed_url['path'] ?? '',
+			$parsed_url['query'] ?? ''
 		);
 		$normalized_url = str_replace( '/', '', $normalized_url );
 
