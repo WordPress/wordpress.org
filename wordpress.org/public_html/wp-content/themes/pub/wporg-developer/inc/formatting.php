@@ -508,7 +508,7 @@ class DevHub_Formatting {
 		$parts = explode( "\n", $text );
 		foreach ( $parts as $part ) {
 			$part = preg_replace( '/\s+/', ' ', $part );
-			list( $wordtype, $type, $name, $description ) = explode( ' ', $part, 4 );
+			list( $wordtype, $type, $name, $description ) = explode( ' ', $part . '    ', 4 ); // extra spaces ensure we'll always have 4 items.
 			$description = trim( $description );
 			$description = self::autolink_references( $description );
 
