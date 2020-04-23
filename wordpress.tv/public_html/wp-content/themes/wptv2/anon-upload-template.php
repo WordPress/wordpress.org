@@ -319,7 +319,7 @@ if ( !empty($_REQUEST['error']) ) {
 					</p>
 					<p>
 						<label for="wptv_speakers"><?php esc_html_e( 'Speakers' ); ?></label>
-						<input type="text" id="wptv_speakers" name="wptv_speakers" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_speakers'] ?? '' ) ); ?>" />
+						<input type="text" id="wptv_speakers" name="wptv_speakers" placeholder="John Smith, Jane Doe" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_speakers'] ?? '' ) ); ?>" />
 					</p>
 					<p>
 						<label for="wptv_event"><?php esc_html_e( 'Event' ); ?></label>
@@ -396,6 +396,12 @@ if ( !empty($_REQUEST['error']) ) {
 			$( '#wptv_event' ).on( 'focus', function() {
 				// Not perfect, but will do.
 				$( '#wptv_event' ).data( 'user-altered', true );
+			});
+
+			// Make the Speakers field "Name, Name, Name" and not allow "Name and Name".
+			$( '#wptv_speakers' ).on( 'change', function() {
+				var $this = $(this);
+				$this.val( $this.val().replace( /\s(and|&|\+)\s/g, ', ' ).replace( /[ ]{2,}/g, ' ' ) );
 			});
 
 			$( '#video-upload-form' ).submit( function( e ) {
