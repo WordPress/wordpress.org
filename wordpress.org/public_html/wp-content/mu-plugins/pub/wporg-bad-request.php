@@ -72,7 +72,10 @@ function die_bad_request( $reference = '') {
 	header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request' );
 
 	// Use a prettier error page on WordPress.org
-	if ( defined( 'WPORGPATH' ) && file_exists( WPORGPATH . '/403.php' ) ) {
+	if (
+		false !== stripos( $_SERVER['HTTP_HOST'], 'wordpress.org' ) &&
+		defined( 'WPORGPATH' ) && file_exists( WPORGPATH . '/403.php' )
+	) {
 		$header_set_for_403 = true;
 		include WPORGPATH . '/403.php';
 
