@@ -35,8 +35,11 @@ add_action( 'login_init', function() {
  */
 add_action( 'send_headers', function( $wp ) {
 	// Assumption: WP::$public_query_vars will only ever contain non-array query vars.
+	// Assumption invalid. Some fields are valid.
+	$array_fields = [ 'post_type' => true ];
+
 	foreach ( (new \WP)->public_query_vars as $field ) {
-		if ( isset( $wp->query_vars[ $field ] ) && ! is_scalar( $wp->query_vars[ $field ] ) ) {
+		if ( isset( $wp->query_vars[ $field ] ) && ! is_scalar( $wp->query_vars[ $field ] ) && ! isset( $array_fields[ $field ] ) ) {
 			die_bad_request( "non-scalar $field in \$public_query_vars" );
 		}
 	}
