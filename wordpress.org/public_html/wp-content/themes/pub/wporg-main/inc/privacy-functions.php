@@ -33,6 +33,16 @@ function privacy_process_request( $type ) {
 	$requesting_user = is_user_logged_in() ? wp_get_current_user()->user_login : false;
 	$email_user      = get_user_by( 'email', $email );
 
+	// check to see if the user is blocked, meaning they cannot log in
+	$blocked_user    = false;
+	if ( $email_user instanceof \WP_User && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+		$support_user = new \WP_User( $email_user->ID, '', WPORG_SUPPORT_FORUMS_BLOGID );
+		if ( ! empty( $support_user->allcaps['bbp_blocked'] ) ) {
+			// user is a blocked user, so for the purposes of this privacy request, don't expect them to login
+			$blocked_user = true;
+		}
+	}
+
 	if ( ! reCAPTCHA\check_status() ) {
 		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
 	} elseif (
@@ -42,7 +52,7 @@ function privacy_process_request( $type ) {
 		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
 	} elseif (
 		// Check if a user account exists for this email before processing.
-		false !== $email_user && $email_user->user_login !== $requesting_user
+		false !== $email_user && $email_user->user_login !== $requesting_user && ! $blocked_user
 	) {
 		if ( is_user_logged_in() ) {
 			$error_message = sprintf(
