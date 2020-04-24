@@ -18,6 +18,7 @@ namespace WordPressdotorg\BadRequest;
 add_action( 'login_init', function() {
 	$expected_string_fields = [
 		'log', 'pwd', 'redirect_to', 'rememberme',
+		'user_login', 'user_email',
 		'_wp_http_referer', '_wpnonce',
 		'locale' // WordPress.org login localisation.
 	];
@@ -32,11 +33,13 @@ add_action( 'login_init', function() {
 /**
  * Detect invalid query parameters being passed in Core query fields.
  * Generally causes WP_Query to throw a PHP Warning.
+ * 
+ * @see https://core.trac.wordpress.org/ticket/17737
  */
 add_action( 'send_headers', function( $wp ) {
 	// Assumption: WP::$public_query_vars will only ever contain non-array query vars.
 	// Assumption invalid. Some fields are valid.
-	$array_fields = [ 'post_type' => true ];
+	$array_fields = [ 'post_type' => true, 'cat' => true, 'author' => true ];
 
 	foreach ( (new \WP)->public_query_vars as $field ) {
 		if ( isset( $wp->query_vars[ $field ] ) && ! is_scalar( $wp->query_vars[ $field ] ) && ! isset( $array_fields[ $field ] ) ) {
@@ -48,6 +51,8 @@ add_action( 'send_headers', function( $wp ) {
 /**
  * Detect invalid parameters being passed to REST API Endpoints.
  * Not all API endpoints sanitization callbacks check variable types.
+ * 
+ * @see https://core.trac.wordpress.org/ticket/49991
  */
 add_action( 'rest_api_init', function( $wp_rest_server ) {
 	global $wp;
@@ -79,9 +84,11 @@ function die_bad_request( $reference = '') {
 		$header_set_for_403 = true;
 		include WPORGPATH . '/403.php';
 
-		// Log it if possible.
-		if ( function_exists( 'wporg_error_reporter' ) ) {
-			wporg_error_reporter( E_USER_NOTICE, "400 Bad Request: $reference", __FILE__, __LINE__ );
+		// Log it if possible, and not on a sandbox
+		if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
+			if ( function_exists( 'wporg_error_reporter' ) ) {
+				wporg_error_reporter( E_USER_NOTICE, "400 Bad Request: $reference", __FILE__, __LINE__ );
+			}
 		}
 		exit;
 	}
