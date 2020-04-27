@@ -47,6 +47,16 @@ function get_canonical_url() {
 		}
 	}
 
+	// Add order/orderby to Archives.
+	if ( is_archive() ) {
+		if ( get_query_var( 'order' ) && in_array( strtolower( get_query_var( 'order' ) ), [ 'desc', 'asc' ] ) ) {
+			$url = add_query_arg( 'order', strtolower( get_query_var( 'order' ) ), $url );
+		}
+		if ( get_query_var( 'orderby' ) ) {
+			$url = add_query_arg( 'orderby', get_query_var( 'orderby' ), $url );
+		}
+	}
+
     $url = apply_filters( 'wporg_canonical_link', $url );
 
     return $url;
