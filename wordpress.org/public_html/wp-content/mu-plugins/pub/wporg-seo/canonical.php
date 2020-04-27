@@ -1,5 +1,9 @@
 <?php
 namespace WordPressdotorg\SEO\Canonical;
+/**
+ * Adds canonical-related functionality.
+ * @see https://core.trac.wordpress.org/ticket/18660
+ */
 
 /**
  * Outputs a <link rel="canonical"> on most pages.
@@ -41,6 +45,14 @@ function get_canonical_url() {
 		$url = get_post_type_archive_link( 'post' );
 	} elseif ( is_front_page() ) {
 		$url = home_url( '/' );
+	} elseif ( is_date() ) {
+		if ( is_day() ) {
+			$url = get_day_link( get_query_var('year'), get_query_var('monthnum'), get_query_var('day') );
+		} elseif ( is_month() ) {
+			$url = get_month_link( get_query_var('year'), get_query_var('monthnum') );
+		} elseif ( is_year() ) {
+			$url = get_year_link( get_query_var('year') );
+		}
 	}
 
 	// Ensure trailing slashed paths.
