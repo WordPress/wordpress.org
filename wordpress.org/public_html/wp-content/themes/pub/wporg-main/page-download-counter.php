@@ -78,7 +78,7 @@ do_action( 'get_header' );
 
 ?>
 <!DOCTYPE html>
-<html>
+<html <?php language_attributes(); ?>>
 <head>
 	<meta content="charset=utf-8"/>
 	<title><?php echo esc_html( wp_get_document_title() ); ?></title>
