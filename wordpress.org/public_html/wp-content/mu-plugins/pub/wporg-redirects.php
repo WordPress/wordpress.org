@@ -1,7 +1,6 @@
 <?php
-
 /*
- * WordPress.org/-specific redirects
+ * Plugin Name: WordPress.org/-specific redirects
  */
 if ( 1 === get_current_blog_id() ) {
 	add_action( 'template_redirect', function() {
