@@ -37,6 +37,18 @@ function customize_register( $wp_customize ) {
 }
 
 /**
+ * noindex the Mentions archives.
+ */
+function no_robots( $noindex ) {
+	if ( is_tax( 'mentions' ) ) {
+		$noindex = true;
+	}
+
+	return $noindex;
+}
+add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\no_robots' );
+
+/**
  * Renders the site title for the selective refresh partial.
  */
 function customize_partial_blogname() {

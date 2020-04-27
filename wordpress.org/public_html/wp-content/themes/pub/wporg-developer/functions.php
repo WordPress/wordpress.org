@@ -407,3 +407,4 @@ function syntaxhighlighter_htmlresult( $text ) {
 
 	return $new_text;
 }
+
