@@ -172,8 +172,6 @@ function build_response( $location, $location_args ) {
 
 		//$events = maybe_add_wp15_promo( $events, $_SERVER['HTTP_USER_AGENT'], time() );
 
-		$events = maybe_add_online_wordcamps( $events, $_SERVER['HTTP_USER_AGENT'], time() );
-
 		$events = maybe_add_regional_wordcamps(
 			$events,
 			get_regional_wordcamp_data(),
@@ -181,6 +179,8 @@ function build_response( $location, $location_args ) {
 			time(),
 			$location
 		);
+
+		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time() );
 
 		$events = remove_duplicate_events( $events );
 
@@ -1249,25 +1249,39 @@ function is_wp15_event( $title ) {
 	return $match;
 }
 
-function maybe_add_online_wordcamps( $events, $user_agent, $current_time ) {
+/**
+ * Pin the next upcoming online WordCamp.
+ *
+ * @param array  $events
+ * @param string $user_agent
+ * @param int    $current_time
+ *
+ * @return array
+ */
+function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
+	// Re-evaluate pinning after July, per https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480.
+	if ( $current_time >= strtotime( 'August 1 2020' ) ) {
+		return $events;
+	}
+
 	if ( ! is_client_core( $user_agent ) ) {
 		return $events;
 	}
 
-	if ( $current_time < strtotime( 'April 19, 2020' ) ) {
-		$santa_clarita = array(
+	if ( $current_time < strtotime( 'May 10, 2020' ) ) {
+		$spain = array(
 			'type'       => 'wordcamp',
-			'title'      => 'WordCamp Santa Clarita Online',
-			'url'        => 'https://2020.santaclarita.wordcamp.org/',
+			'title'      => 'WordCamp Spain',
+			'url'        => 'https://2020.spain.wordcamp.org/',
 			'meetup'     => '',
 			'meetup_url' => '',
-			'date'       => '2020-04-18 12:00:00',
+			'date'       => '2020-05-06 12:00:00',
 			'location'   => array(
 				'location' => 'Online',
 			),
 		);
 
-		array_unshift( $events, $santa_clarita );
+		array_unshift( $events, $spain );
 	}
 
 	return $events;
