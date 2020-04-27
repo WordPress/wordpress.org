@@ -55,6 +55,9 @@ function get_canonical_url() {
 		}
 	}
 
+	// Filter to override the above logics.
+	$url = apply_filters( 'wporg_canonical_base_url', $url );
+
 	// Ensure trailing slashed paths.
 	if ( $url ) {
 		if ( false !== stripos( $url, '?' ) ) {
