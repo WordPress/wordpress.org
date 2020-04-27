@@ -356,6 +356,11 @@ class Official_WordPress_Events {
 
 						case 'Location':
 							if ( rest_sanitize_boolean( $wordcamp->{'Virtual event only'} ) ) {
+								/*
+								 * This gives the `wporg_events` table a way to distinguish online events from
+								 * in-person, and also standardizes how the "location" is displayed in the Events
+								 * Widget.
+								 */
 								$event['location'] = 'online';
 							} else {
 								$event['location'] = $value;
@@ -363,20 +368,18 @@ class Official_WordPress_Events {
 							break;
 
 						case '_venue_coordinates':
-							if ( rest_sanitize_boolean( $wordcamp->{'Virtual event only'} ) ) {
-								// Online events don't have coordinates, so we fake them for now. The fake value
-								// needs to pass an `empty` check, so we use 1 instead of 0.
-								// @todo This should be replaced with however we locate online events.
-								$event['latitude']  = 1;
-								$event['longitude'] = 1;
-							} elseif ( isset( $value->latitude, $value->longitude ) ) {
+						case '_host_coordinates':
+							if ( isset( $value->latitude, $value->longitude ) ) {
 								$event['latitude']  = $value->latitude;
 								$event['longitude'] = $value->longitude;
 							}
 							break;
 
 						case '_venue_country_code':
-							$event['country_code'] = strtoupper( $value );
+						case '_host_country_code':
+							if ( ! empty( $value ) ) {
+								$event['country_code'] = strtoupper( $value );
+							}
 							break;
 					}
 				}
