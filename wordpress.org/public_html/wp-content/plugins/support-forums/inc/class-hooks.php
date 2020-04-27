@@ -29,7 +29,7 @@ class Hooks {
 		add_action( 'wp_head', array( $this, 'rel_next_prev' ), 9 );
 
 		// Output robots headers.
-		add_action( 'wp_head', array( $this, 'robots_noindex_header' ));
+		add_action( 'wporg_noindex_request', array( $this, 'should_noindex_robots' ));
 
 		// Output meta description.
 		add_action( 'wp_head', array( $this, 'meta_description' ) );
@@ -416,11 +416,9 @@ class Hooks {
 	}
 
 	/**
-	 * Adds noindex robots headers to various pages.
+	 * Enables the noindex robots headers.
 	 */
-	public function robots_noindex_header() {
-		$robots = false;
-
+	public function should_noindex_robots( $robots ) {
 		if ( bbp_is_search() ) {
 			// #3955
 			$robots = true;
@@ -515,9 +513,7 @@ class Hooks {
 			}
 		}
 
-		if ( $robots ) {
-			echo '<meta name="robots" content="noindex, follow" />',"\n";
-		}
+		return $robots;
 	}
 
 	/**
