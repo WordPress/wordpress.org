@@ -167,6 +167,7 @@ get_header(); ?>
 					<div alt="f10c" class="dashicons dashicons-editor-ltr">ltr</div>
 					<div alt="f474" class="dashicons dashicons-editor-break">break</div>
 					<div alt="f475" class="dashicons dashicons-editor-code">code</div>
+					<!-- <div alt="f494" class="dashicons dashicons-editor-code-duplicate">code</div> Duplicate -->
 					<div alt="f476" class="dashicons dashicons-editor-paragraph">paragraph</div>
 					<div alt="f535" class="dashicons dashicons-editor-table">table</div>
 
@@ -178,6 +179,7 @@ get_header(); ?>
 					<div alt="f134" class="dashicons dashicons-align-center">align center</div>
 					<div alt="f138" class="dashicons dashicons-align-none">align none</div>
 					<div alt="f160" class="dashicons dashicons-lock">lock</div>
+					<!-- <div alt="f315" class="dashicons dashicons-lock-duplicate">lock</div> Duplicate -->
 					<div alt="f528" class="dashicons dashicons-unlock">unlock</div>
 					<div alt="f145" class="dashicons dashicons-calendar">calendar</div>
 					<div alt="f508" class="dashicons dashicons-calendar-alt">calendar</div>
@@ -193,6 +195,7 @@ get_header(); ?>
 					<!-- sorting -->
 					<div alt="f504" class="dashicons dashicons-external">external</div>
 					<div alt="f142" class="dashicons dashicons-arrow-up">arrow-up</div>
+					<!-- <div alt="f143" class="dashicons dashicons-arrow-up-duplicate">arrow up duplicate</div> Duplicate -->
 					<div alt="f140" class="dashicons dashicons-arrow-down">arrow-down</div>
 					<div alt="f139" class="dashicons dashicons-arrow-right">arrow-right</div>
 					<div alt="f141" class="dashicons dashicons-arrow-left">arrow-left</div>
@@ -219,6 +222,7 @@ get_header(); ?>
 					<div alt="f240" class="dashicons dashicons-share-alt">share</div>
 					<div alt="f242" class="dashicons dashicons-share-alt2">share</div>
 					<div alt="f301" class="dashicons dashicons-twitter">twitter social</div>
+					<div alt="f302" class="dashicons dashicons-twitter-alt">twitter social</div>
 					<div alt="f303" class="dashicons dashicons-rss">rss</div>
 					<div alt="f465" class="dashicons dashicons-email">email</div>
 					<div alt="f466" class="dashicons dashicons-email-alt">email (alt)</div>
@@ -252,7 +256,7 @@ get_header(); ?>
 
 					<!-- BuddyPress and bbPress specific icons -->
 					<div alt="f452" class="dashicons dashicons-buddicons-activity">activity</div>
-					<div alt="f12b" class="dashicons dashicons-buddicons-bbpress-logo">bbPress logo</div>
+					<div alt="f477" class="dashicons dashicons-buddicons-bbpress-logo">bbPress logo</div>
 					<div alt="f448" class="dashicons dashicons-buddicons-buddypress-logo">BuddyPress logo</div>
 					<div alt="f453" class="dashicons dashicons-buddicons-community">community</div>
 					<div alt="f449" class="dashicons dashicons-buddicons-forums">forums</div>
@@ -266,8 +270,8 @@ get_header(); ?>
 					<h4><?php _e( 'Products', 'wporg' ); ?></h4>
 
 					<!-- internal/products -->
-					<div alt="f120" class="dashicons dashicons-wordpress">wordpress</div>
-					<div alt="f324" class="dashicons dashicons-wordpress-alt">wordpress</div>
+					<div alt="f120" class="dashicons dashicons-wordpress">WordPress</div>
+					<div alt="f324" class="dashicons dashicons-wordpress-alt">WordPress</div>
 					<div alt="f157" class="dashicons dashicons-pressthis">press this</div>
 					<div alt="f463" class="dashicons dashicons-update">update</div>
 					<div alt="f113" class="dashicons dashicons-update-alt">update (alt)</div>
@@ -300,6 +304,7 @@ get_header(); ?>
 					<div alt="f335" class="dashicons dashicons-no-alt">no x</div>
 					<div alt="f132" class="dashicons dashicons-plus">plus add increase</div>
 					<div alt="f502" class="dashicons dashicons-plus-alt">plus add increase</div>
+					<div alt="f543" class="dashicons dashicons-plus-alt2">plus add increase</div>
 					<div alt="f460" class="dashicons dashicons-minus">minus decrease</div>
 					<div alt="f153" class="dashicons dashicons-dismiss">dismiss</div>
 					<div alt="f159" class="dashicons dashicons-marker">marker</div>
@@ -363,6 +368,9 @@ get_header(); ?>
 					<div alt="f542" class="dashicons dashicons-thumbs-down">thumbs down</div>
 					<div alt="f538" class="dashicons dashicons-layout">layout</div>
 					<div alt="f546" class="dashicons dashicons-paperclip">paperclip</div>
+					<div alt="f131" class="dashicons dashicons-color-picker">color picker</div>
+					<div alt="f327" class="dashicons dashicons-edit-large">edit large</div>
+
 				</div>
 
 			</div>
