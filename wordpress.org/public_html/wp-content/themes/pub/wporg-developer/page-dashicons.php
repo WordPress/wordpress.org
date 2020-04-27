@@ -7,8 +7,8 @@
  * @package wporg-developer
  */
 
-wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20150217' );
-wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20150217' );
+wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20200427' );
+wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20200427' );
 
 get_header(); ?>
 
@@ -462,6 +462,7 @@ function wpdocs_add_my_custom_menu() {
 		<script type="text/html" id="tmpl-glyphs">
 			<div class="dashicons {{data.cssClass}}"></div>
 			<div class="info">
+				<span><strong>{{data.sectionName}}</strong></span>
 				<span class="name"><code>{{data.cssClass}}</code></span>
 				<span class="link"><a href='javascript:dashicons.copy( "content: \"\\{{data.attr}}\";", "css" )'><?php _e( 'Copy CSS', 'wporg' ); ?></a></span>
 				<span class="link"><a href="javascript:dashicons.copy( '{{data.html}}', 'html' )"><?php _e( 'Copy HTML', 'wporg' ); ?></a></span>
