@@ -25,7 +25,7 @@ remove_action( 'wp_head', 'rel_canonical' );
  * Get the current Canonical URL.
  */
 function get_canonical_url() {
-	global $wp;
+	global $wp, $wp_rewrite;
 
     $queried_object = get_queried_object();
 	$url = false;
@@ -67,9 +67,10 @@ function get_canonical_url() {
 
 	if ( $url && is_paged() ) {
 		if ( false !== stripos( $url, '?' ) ) {
+			// We're not actually sure 100% here if the current url supports rewrite rules.
 			$url = add_query_arg( 'paged', (int) get_query_var( 'paged' ), $url );
 		} else {
-			$url = rtrim( $url, '/' ) . '/page/' . (int) get_query_var( 'paged' ) . '/';
+			$url = rtrim( $url, '/' ) . '/' . $wp_rewrite->pagination_base . '/' . (int) get_query_var( 'paged' ) . '/';
 		}
 	}
 
