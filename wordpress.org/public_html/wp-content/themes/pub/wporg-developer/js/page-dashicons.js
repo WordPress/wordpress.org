@@ -34,7 +34,7 @@
 			jQuery('#temp').html( glyphtemp );
 			glyphtext = jQuery('#temp').text();
 
-			var sectionName = jQuery('#iconlist div.dashicons-' + permalink ).prevUntil('h4').last().prev().text();
+			var sectionName = jQuery('#iconlist div.dashicons-' + permalink ).prevAll('h4').first().text();
 
 			var tmpl = wp.template( 'glyphs' );
 
