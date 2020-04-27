@@ -48,7 +48,7 @@ function get_canonical_url() {
 	}
 
 	// Add order/orderby to Archives.
-	if ( is_archive() ) {
+	if ( is_archive() || is_search() ) {
 		if ( get_query_var( 'order' ) && in_array( strtolower( get_query_var( 'order' ) ), [ 'desc', 'asc' ] ) ) {
 			$url = add_query_arg( 'order', strtolower( get_query_var( 'order' ) ), $url );
 		}
