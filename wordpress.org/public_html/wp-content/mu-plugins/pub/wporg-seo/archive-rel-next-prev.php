@@ -1,15 +1,13 @@
 <?php
 namespace WordPressdotorg\SEO\Archive_Rel_Next_Prev;
-use WordPressdotorg\SEO\Canonical\get_canonical_url;
+use function WordPressdotorg\SEO\Canonical\get_canonical_url;
 
 /**
  * Prints <link rel="prev|next"> tags for archives.
- *
- * @static
  */
 function output_rel_prev_next_links() {
 	global $paged, $wp_query, $wp_rewrite;
-	if ( ! is_archive() && ! is_search() ) {
+	if ( ! is_archive() && ! is_search() && ! is_home() ) {
 		return;
 	}
 
@@ -27,7 +25,7 @@ function output_rel_prev_next_links() {
 	$prevpage = intval( $paged ) - 1;
 
 	$current_url = remove_query_arg( 'paged', $current_url );
-	$current_url = preg_replace( "#{$wp_rewrite->pagination_base}/\d+/?($|?)#", '$1', $current_url );
+	$current_url = preg_replace( "#{$wp_rewrite->pagination_base}/\d+/?($|\?)#", '$1', $current_url );
 
 	// Support Canonical URLs with query parameters.
 	$current_url_query = '';

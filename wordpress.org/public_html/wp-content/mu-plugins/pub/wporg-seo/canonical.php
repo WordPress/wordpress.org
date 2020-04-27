@@ -30,13 +30,15 @@ function get_canonical_url() {
 		$url = get_permalink( $queried_object );
 	} elseif ( is_search() ) {
 		$url = home_url( 'search/' . urlencode( get_query_var( 's' ) ) . '/' );
-	} elseif ( is_front_page() ) {
-		$url = home_url( '/' );
 	} elseif ( is_author() ) {
 		// On WordPress.org get_author_posts_url() returns profile.wordpress.org links. Build it manually.
 		$url = home_url( 'author/' . $queried_object->user_nicename . '/' );
 	} elseif ( is_post_type_archive() ) {
 		$url = get_post_type_archive_link( $queried_object->name );
+	} elseif ( is_home() ) {
+		$url = get_post_type_archive_link( 'post' );
+	} elseif ( is_front_page() ) {
+		$url = home_url( '/' );
 	}
 
 	if ( $url && is_paged() ) {
@@ -48,9 +50,9 @@ function get_canonical_url() {
 	}
 
 	// Add order/orderby to Archives.
-	if ( is_archive() || is_search() ) {
-		if ( get_query_var( 'order' ) && in_array( strtolower( get_query_var( 'order' ) ), [ 'desc', 'asc' ] ) ) {
-			$url = add_query_arg( 'order', strtolower( get_query_var( 'order' ) ), $url );
+	if ( is_archive() || is_search() || is_home() ) {
+		if ( get_query_var( 'order' ) && strtolower( get_query_var( 'order' ) ) == 'asc' ) {
+			$url = add_query_arg( 'order', 'asc', $url );
 		}
 		if ( get_query_var( 'orderby' ) ) {
 			$url = add_query_arg( 'orderby', get_query_var( 'orderby' ), $url );
