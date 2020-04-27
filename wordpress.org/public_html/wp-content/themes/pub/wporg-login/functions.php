@@ -364,6 +364,7 @@ add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_regi
 function wporg_login_canonical_link( $url ) {
 	$url = false;
 
+	// If the regular expression for this route is not matching, it's the canonical.
 	$matching_route = stripos( WP_WPOrg_SSO::$matched_route_regex, '(' );
 	if ( false === $matching_route ) {
 		$url = home_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
