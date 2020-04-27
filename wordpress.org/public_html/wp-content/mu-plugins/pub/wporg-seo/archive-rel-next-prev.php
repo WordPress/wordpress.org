@@ -27,11 +27,20 @@ function output_rel_prev_next_links() {
     $prevpage = intval( $paged ) - 1;
 
     $current_url = remove_query_arg( 'paged', $current_url );
-    $current_url = preg_replace( "|{$wp_rewrite->pagination_base}/\d+/?$|", '', $current_url );
+    $current_url = preg_replace( "|{$wp_rewrite->pagination_base}/\d+/?($|?)|", '', $current_url );
 
-    // Just assume pretty permalinks everywhere.
-    $next_url = $current_url . "{$wp_rewrite->pagination_base}/{$nextpage}/";
-    $prev_url = $current_url . ( $prevpage > 1 ? "{$wp_rewrite->pagination_base}/{$prevpage}/" : '' );
+	// Support Canonical URLs with query parameters.
+	$current_url_query = '';
+	if ( false !== stripos( $current_url, '?' ) ) {
+		list( $current_url, $current_url_query ) = explode( '?', $current_url, 2 );
+		if ( $current_url_query ) {
+			$current_url_query = '?' . $current_url_query;
+		}
+	}
+
+    // Just assume rewrites are in use everywhere.
+    $next_url = $current_url . "{$wp_rewrite->pagination_base}/{$nextpage}/" . $current_url_query;
+    $prev_url = $current_url . ( $prevpage > 1 ? "{$wp_rewrite->pagination_base}/{$prevpage}/" : '' ) . $current_url_query;
 
     if ( $prevpage >= 1 ) {
         printf(
