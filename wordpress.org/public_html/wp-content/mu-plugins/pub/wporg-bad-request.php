@@ -86,7 +86,7 @@ function die_bad_request( $reference = '') {
 
 		// Log it if possible, and not on a sandbox
 		if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
-			if ( function_exists( 'wporg_error_reporter' ) ) {
+			if ( function_exists( 'wporg_error_reporter' ) && ! empty( $_COOKIE ) ) {
 				wporg_error_reporter( E_USER_NOTICE, "400 Bad Request: $reference", __FILE__, __LINE__ );
 			}
 		}
