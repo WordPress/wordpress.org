@@ -90,5 +90,9 @@ function get_canonical_url() {
 
     $url = apply_filters( 'wporg_canonical_url', $url );
 
+	// Force canonical links to be lowercase.
+	// See https://meta.trac.wordpress.org/ticket/4414
+	$url = mb_strtolower( $url, 'UTF-8' );
+
     return $url;
 }
