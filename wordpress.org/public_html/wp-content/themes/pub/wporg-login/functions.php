@@ -361,7 +361,7 @@ add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_regi
 /**
  * The canonical url for login.wordpress.org is a bit different.
  */
-function wporg_login_canonical_link( $url ) {
+function wporg_login_canonical_url( $url ) {
 	$url = false;
 
 	// If the regular expression for this route is not matching, it's the canonical.
@@ -377,7 +377,7 @@ function wporg_login_canonical_link( $url ) {
 
 	return $url;
 }
-add_filter( 'wporg_canonical_link', 'wporg_login_canonical_link' );
+add_filter( 'wporg_canonical_url', 'wporg_login_canonical_url' );
 
 /**
  * Set the title for the wp-login.php page.

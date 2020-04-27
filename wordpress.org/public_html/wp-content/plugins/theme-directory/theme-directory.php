@@ -1294,7 +1294,7 @@ function wporg_themes_get_current_url( $path_only = false ) {
 /**
  * Filter the WordPress.org SEO plugin Canonical location to respect Theme Directory differences.
  */
-function wporg_canonical_link( $url ) {
+function wporg_canonical_url( $url ) {
 	if ( get_query_var( 'browse' ) && WPORG_THEMES_DEFAULT_BROWSE === get_query_var( 'browse' ) ) {
 		$url = home_url( '/' );
 	} elseif ( get_query_var( 'browse' ) ) {
@@ -1304,7 +1304,7 @@ function wporg_canonical_link( $url ) {
 
 	return $url;
 }
-add_filter( 'wporg_canonical_link', 'wporg_canonical_link' );
+add_filter( 'wporg_canonical_url', 'wporg_canonical_url' );
 
 // Theme Directory doesn't support pagination.
 remove_action( 'wp_head', 'WordPressdotorg\SEO\Archive_Rel_Next_Prev\output_rel_prev_next_links' );

@@ -55,7 +55,7 @@ class Plugin_Directory {
 		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
 
 		// Fix the Canonical link when needed.
-		add_action( 'wporg_canonical_link', [ Template::class, 'wporg_canonical_link' ] );
+		add_action( 'wporg_canonical_url', [ Template::class, 'wporg_canonical_url' ] );
 
 		// Cron tasks.
 		new Jobs\Manager();

@@ -1003,7 +1003,7 @@ class Template {
 	/**
 	 * Filter the WordPress.org Canonical URL to understand the Plugin Directory.
 	 */
-	public static function wporg_canonical_link( $link ) {
+	public static function wporg_canonical_url( $link ) {
 		if ( is_singular( 'plugin' ) && get_query_var( 'plugin_advanced' ) ) {
 			$link = get_permalink( get_queried_object() ) . 'advanced/';
 		}

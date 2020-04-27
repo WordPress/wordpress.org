@@ -85,7 +85,7 @@ function get_canonical_url() {
 		}
 	}
 
-    $url = apply_filters( 'wporg_canonical_link', $url );
+    $url = apply_filters( 'wporg_canonical_url', $url );
 
     return $url;
 }
