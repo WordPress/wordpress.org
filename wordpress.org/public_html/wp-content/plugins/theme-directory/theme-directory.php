@@ -1276,6 +1276,7 @@ add_action( 'wp_head', 'wporg_themes_add_hreflang_link_attributes' );
  * Get the current front-end requested URL.
  */
 function wporg_themes_get_current_url( $path_only = false ) {
+	// Back-compat: TODO: Used by hreflang links.
 	$link = \WordPressdotorg\SEO\Canonical\get_canonical_url();
 
 	if ( $path_only && $link ) {
@@ -1304,3 +1305,6 @@ function wporg_canonical_link( $url ) {
 	return $url;
 }
 add_filter( 'wporg_canonical_link', 'wporg_canonical_link' );
+
+// Theme Directory doesn't support pagination.
+remove_action( 'wp_head', 'WordPressdotorg\SEO\Archive_Rel_Next_Prev\output_rel_prev_next_links' );
