@@ -44,11 +44,13 @@ function get_canonical_url() {
 	}
 
 	// Ensure trailing slashed paths.
-	if ( false !== stripos( $url, '?' ) ) {
-		[ $url, $query ] = explode( '?', $url, 2 );
-		$url = trailingslashit( $url ) . '?' . $query;
-	} else {
-		$url = trailingslashit( $url );
+	if ( $url ) {
+		if ( false !== stripos( $url, '?' ) ) {
+			[ $url, $query ] = explode( '?', $url, 2 );
+			$url = trailingslashit( $url ) . '?' . $query;
+		} else {
+			$url = trailingslashit( $url );
+		}
 	}
 
 	if ( $url && is_paged() ) {
