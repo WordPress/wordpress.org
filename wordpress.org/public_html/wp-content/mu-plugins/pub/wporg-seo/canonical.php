@@ -21,6 +21,8 @@ remove_action( 'wp_head', 'rel_canonical' );
  * Get the current Canonical URL.
  */
 function get_canonical_url() {
+	global $wp;
+
     $queried_object = get_queried_object();
 	$url = false;
 
@@ -51,11 +53,12 @@ function get_canonical_url() {
 
 	// Add order/orderby to Archives.
 	if ( is_archive() || is_search() || is_home() ) {
-		if ( get_query_var( 'order' ) && strtolower( get_query_var( 'order' ) ) == 'asc' ) {
-			$url = add_query_arg( 'order', 'asc', $url );
+		// Check $wp since `get_query_var()` will return default values too.
+		if ( !empty( $wp->query_vars[ 'order'] ) ) {
+			$url = add_query_arg( 'order', get_query_var( 'order' ), $url );
 		}
-		if ( get_query_var( 'orderby' ) ) {
-			$url = add_query_arg( 'orderby', get_query_var( 'orderby' ), $url );
+		if ( !empty( $wp->query_vars[ 'orderby'] ) ) {
+			$url = add_query_arg( 'orderby', strtolower( get_query_var( 'orderby' ) ), $url );
 		}
 	}
 
