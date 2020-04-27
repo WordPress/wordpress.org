@@ -7,9 +7,6 @@ use function WordPressdotorg\SEO\Canonical\get_canonical_url;
  */
 function output_rel_prev_next_links() {
 	global $paged, $wp_query, $wp_rewrite;
-	if ( ! is_archive() && ! is_search() && ! is_home() ) {
-		return;
-	}
 
 	$current_url = get_canonical_url();
 	if ( ! $current_url ) {
@@ -17,6 +14,8 @@ function output_rel_prev_next_links() {
 	}
 
 	$max_page = $wp_query->max_num_pages;
+	// Filters the maximum number of pages for a URL, when it's handled outside of WP_Query (ala bbPress).
+	$max_page = apply_filters( 'wporg_rel_next_pages', $max_page );
 	if ( ! $paged ) {
 		$paged = 1;
 	}
@@ -38,7 +37,7 @@ function output_rel_prev_next_links() {
 
 	// Just assume rewrites are in use everywhere.
 	$next_url = rtrim( $current_url, '/' ) . "/{$wp_rewrite->pagination_base}/{$nextpage}/" . $current_url_query;
-	$prev_url = rtrim( $current_url, '/' ) . ( $prevpage > 1 ? "/{$wp_rewrite->pagination_base}/{$prevpage}/" : '' ) . $current_url_query;
+	$prev_url = rtrim( $current_url, '/' ) . ( $prevpage > 1 ? "/{$wp_rewrite->pagination_base}/{$prevpage}/" : '/' ) . $current_url_query;
 
 	if ( $prevpage >= 1 ) {
 		printf(
