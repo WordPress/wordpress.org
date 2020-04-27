@@ -27,7 +27,7 @@ function output_rel_prev_next_links() {
 	$prevpage = intval( $paged ) - 1;
 
 	$current_url = remove_query_arg( 'paged', $current_url );
-	$current_url = preg_replace( "|{$wp_rewrite->pagination_base}/\d+/?($|?)|", '', $current_url );
+	$current_url = preg_replace( "#{$wp_rewrite->pagination_base}/\d+/?($|?)#", '$1', $current_url );
 
 	// Support Canonical URLs with query parameters.
 	$current_url_query = '';
