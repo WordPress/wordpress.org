@@ -7,8 +7,8 @@
  * @package wporg-developer
  */
 
-wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20150217' );
-wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20150217' );
+wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20200427' );
+wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20200427' );
 
 get_header(); ?>
 
@@ -256,7 +256,7 @@ get_header(); ?>
 
 					<!-- BuddyPress and bbPress specific icons -->
 					<div alt="f452" class="dashicons dashicons-buddicons-activity">activity</div>
-					<div alt="f477" class="dashicons dashicons-buddicons-bbpress-logo">bbpress logo</div>
+					<div alt="f477" class="dashicons dashicons-buddicons-bbpress-logo">bbPress logo</div>
 					<div alt="f448" class="dashicons dashicons-buddicons-buddypress-logo">BuddyPress logo</div>
 					<div alt="f453" class="dashicons dashicons-buddicons-community">community</div>
 					<div alt="f449" class="dashicons dashicons-buddicons-forums">forums</div>
@@ -270,8 +270,8 @@ get_header(); ?>
 					<h4><?php _e( 'Products', 'wporg' ); ?></h4>
 
 					<!-- internal/products -->
-					<div alt="f120" class="dashicons dashicons-wordpress">wordpress</div>
-					<div alt="f324" class="dashicons dashicons-wordpress-alt">wordpress</div>
+					<div alt="f120" class="dashicons dashicons-wordpress">WordPress</div>
+					<div alt="f324" class="dashicons dashicons-wordpress-alt">WordPress</div>
 					<div alt="f157" class="dashicons dashicons-pressthis">press this</div>
 					<div alt="f463" class="dashicons dashicons-update">update</div>
 					<div alt="f113" class="dashicons dashicons-update-alt">update (alt)</div>
@@ -545,6 +545,7 @@ function wpdocs_add_my_custom_menu() {
 		<script type="text/html" id="tmpl-glyphs">
 			<div class="dashicons {{data.cssClass}}"></div>
 			<div class="info">
+				<span><strong>{{data.sectionName}}</strong></span>
 				<span class="name"><code>{{data.cssClass}}</code></span>
 				<span class="link"><a href='javascript:dashicons.copy( "content: \"\\{{data.attr}}\";", "css" )'><?php _e( 'Copy CSS', 'wporg' ); ?></a></span>
 				<span class="link"><a href="javascript:dashicons.copy( '{{data.html}}', 'html' )"><?php _e( 'Copy HTML', 'wporg' ); ?></a></span>
