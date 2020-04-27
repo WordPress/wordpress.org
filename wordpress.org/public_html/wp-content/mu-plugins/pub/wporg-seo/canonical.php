@@ -43,6 +43,14 @@ function get_canonical_url() {
 		$url = home_url( '/' );
 	}
 
+	// Ensure trailing slashed paths.
+	if ( false !== stripos( $url, '?' ) ) {
+		[ $url, $query ] = explode( '?', $url, 2 );
+		$url = trailingslashit( $url ) . '?' . $query;
+	} else {
+		$url = trailingslashit( $url );
+	}
+
 	if ( $url && is_paged() ) {
 		if ( false !== stripos( $url, '?' ) ) {
 			$url = add_query_arg( 'paged', (int) get_query_var( 'paged' ), $url );
