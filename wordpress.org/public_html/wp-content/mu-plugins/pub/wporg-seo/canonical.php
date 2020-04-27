@@ -27,10 +27,10 @@ remove_action( 'wp_head', 'rel_canonical' );
 function get_canonical_url() {
 	global $wp, $wp_rewrite;
 
-    $queried_object = get_queried_object();
+	$queried_object = get_queried_object();
 	$url = false;
 
-    if ( is_tax() || is_tag() || is_category() ) {
+	if ( is_tax() || is_tag() || is_category() ) {
 		$url = get_term_link( $queried_object );
 	} elseif ( is_singular() ) {
 		$url = get_permalink( $queried_object );
@@ -94,5 +94,5 @@ function get_canonical_url() {
 	// See https://meta.trac.wordpress.org/ticket/4414
 	$url = mb_strtolower( $url, 'UTF-8' );
 
-    return $url;
+	return $url;
 }
