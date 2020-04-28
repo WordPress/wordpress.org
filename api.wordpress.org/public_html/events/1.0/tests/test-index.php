@@ -53,11 +53,7 @@ function output_results( $case_id, $passed, $expected_result, $actual_result ) {
 		return;
 	}
 
-	printf(
-		"\n* %s: %s",
-		$case_id,
-		$passed ? 'PASSED' : '_FAILED_'
-	);
+	echo "\n\n* $case_id: _FAILED_";
 
 	if ( ! $passed ) {
 		$expected_output = is_scalar( $expected_result ) ? var_export( $expected_result, true ) : print_r( $expected_result, true );
@@ -104,7 +100,7 @@ function test_get_location() {
 	$failed = 0;
 	$cases  = get_location_test_cases();
 
-	printf( "\nRunning %d location tests\n", count( $cases ) );
+	printf( "\nRunning %d location tests", count( $cases ) );
 
 	foreach ( $cases as $case_id => $case ) {
 		$actual_result = get_location( $case['input'] );
@@ -919,7 +915,7 @@ function test_get_events() {
 	$failed = 0;
 	$cases  = get_events_test_cases();
 
-	printf( "\n\nRunning %d events tests\n", count( $cases ) );
+	printf( "\nRunning %d events tests", count( $cases ) );
 
 	foreach ( $cases as $case_id => $case ) {
 		$actual_result = get_events( $case['input'] );
@@ -986,7 +982,7 @@ function test_get_events_country_restriction() {
 	$failed = 0;
 	$cases  = get_events_country_restriction_test_cases();
 
-	printf( "\n\nRunning %d events restrict by country tests\n", count( $cases ) );
+	printf( "\nRunning %d events restrict by country tests", count( $cases ) );
 
 	foreach ( $cases as $case_id => $case ) {
 		$actual_result    = get_events( $case['input'] );
@@ -1063,7 +1059,7 @@ function test_build_response() {
 	$failed = 0;
 	$cases  = build_response_test_cases();
 
-	printf( "\n\nRunning %d build_response() tests\n", count( $cases ) );
+	printf( "\nRunning %d build_response() tests", count( $cases ) );
 
 	foreach ( $cases as $case_id => $case ) {
 		$actual_result = build_response( $case['input']['location'], $case['input']['location_args'] );
@@ -1172,7 +1168,7 @@ function test_is_client_core() {
 		'WordPress/10.0'                     => true,
 	);
 
-	printf( "\n\nRunning %d is_client_core() tests\n", count( $cases ) );
+	printf( "\nRunning %d is_client_core() tests", count( $cases ) );
 
 	foreach ( $cases as $user_agent => $expected_result ) {
 		$actual_result = is_client_core( $user_agent );
@@ -1256,7 +1252,7 @@ function test_maybe_add_regional_wordcamps() {
 		$local_events[] = array( 'title' => 'Mock Event' );
 	}
 
-	printf( "\n\nRunning %d add_regional_wordcamps() tests\n", 13 );
+	printf( "\nRunning %d add_regional_wordcamps() tests", 13 );
 
 	$tests_expect_no_changes = array();
 	$tests_expect_changes    = array();
@@ -1422,7 +1418,7 @@ function test_maybe_add_wp15_promo() {
 	$time_before_date_range = 1523295832;
 	$time_during_date_range = 1525887832;
 
-	printf( "\n\nRunning %d maybe_add_wp15_promo() tests\n", 4 );
+	printf( "\nRunning %d maybe_add_wp15_promo() tests", 4 );
 
 	// Test that the promo is added if there is not already a WP15 event.
 	$events_promo_added = maybe_add_wp15_promo( $local_events_no_wp15, $user_agent, $time_during_date_range );
@@ -1474,7 +1470,7 @@ function test_get_iso_3166_2_country_codes() {
 		'south america' => 'GY',
 	);
 
-	printf( "\n\nRunning %d get_iso_3166_2_country_codes() tests\n", count( $cases ) );
+	printf( "\nRunning %d get_iso_3166_2_country_codes() tests", count( $cases ) );
 
 	foreach ( $cases as $continent => $sample_country ) {
 		$countries = get_iso_3166_2_country_codes( $continent );
@@ -1513,7 +1509,7 @@ function test_remove_duplicate_events() {
 		)
 	);
 
-	printf( "\n\nRunning 1 remove_duplicate_events() test\n" );
+	printf( "\nRunning 1 remove_duplicate_events() test" );
 
 	$expected_result = array(
 		array (
