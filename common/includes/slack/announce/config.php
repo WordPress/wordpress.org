@@ -123,6 +123,7 @@ function get_whitelist() {
 			'mapk',
 			'matveb', // @matias on Slack
 			'mcsf',
+			'paaljoachim',
 			'talldanwp', // @danr on Slack
 			'youknowriad',
 		) ),
