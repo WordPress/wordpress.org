@@ -39,7 +39,7 @@ add_action( 'login_init', function() {
 add_action( 'send_headers', function( $wp ) {
 	// Assumption: WP::$public_query_vars will only ever contain non-array query vars.
 	// Assumption invalid. Some fields are valid.
-	$array_fields = [ 'post_type' => true, 'cat' => true, 'author' => true ];
+	$array_fields = [ 'post_type' => true, 'cat' => true ];
 
 	foreach ( (new \WP)->public_query_vars as $field ) {
 		if ( isset( $wp->query_vars[ $field ] ) && ! is_scalar( $wp->query_vars[ $field ] ) && ! isset( $array_fields[ $field ] ) ) {
