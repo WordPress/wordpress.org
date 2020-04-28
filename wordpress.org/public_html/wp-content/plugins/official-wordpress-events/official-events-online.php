@@ -32,7 +32,6 @@ function get_synced_online_events() {
 		ORDER BY date_utc ASC
 		LIMIT 300"
 	);
-	// @todo Could also include online WordCamps, using "virtual" question in WCPT.
 	// phpcs:enable
 
 	$cached_events = array();

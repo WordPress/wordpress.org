@@ -10,7 +10,7 @@
 			<?php foreach ( $day_events as $event ) : ?>
 				<li>
 					<?php if ( $event->location ) : ?>
-						<?php echo esc_html( $event->location ); ?>
+						<?php echo esc_html( 'online' === $event->location ? 'Online' : $event->location ); ?>
 						<span class="owe-separator"></span>
 					<?php endif; ?>
 
