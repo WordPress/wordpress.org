@@ -257,6 +257,28 @@ function get_plugin_status_notice( $post = null ) {
 }
 
 /**
+ * Display the ADVANCED Zone.
+ */
+function the_plugin_advanced_zone() {
+	$post = get_post();
+
+	// If the post is closed, this all goes away.
+	if ( 'publish' !== $post->post_status ) {
+		return;
+	}
+
+	echo '<hr>';
+
+	echo '<h2>' . esc_html__( 'Advanced Options', 'wporg-plugins' ) . '</h2>';
+
+	echo '<p>' . esc_html__( 'This section is intended for advanced users and developers only. They are presented here for testing and educational purposes.', 'wporg-plugins' ) . '</p>';
+
+	// Output previous version download.
+	the_previous_version_download();
+
+}
+
+/**
  * Displays a select element with links to previous plugin version to download.
  *
  * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
@@ -301,6 +323,37 @@ function the_previous_version_download( $post = null ) {
 		esc_url( Template::download_link( $post, reset( $tags ) ) ),
 		esc_html__( 'Download', 'wporg-plugins' )
 	);
+}
+
+/**
+ * Display the Danger Zone.
+ */
+function the_plugin_danger_zone() {
+	$post = get_post();
+
+	if ( ! current_user_can( 'plugin_admin_edit', $post ) ) {
+		return;
+	}
+
+	echo '<hr>';
+
+	echo '<h2>' . esc_html__( 'The Danger Zone', 'wporg-plugins' ) . '</h2>';
+
+	echo '<p>' . esc_html__( 'The following features are restricted to plugin committers only. They exist to allow plugin developers more control over their work.', 'wporg-plugins' ) . '</p>';
+
+	echo '<div class="plugin-notice notice notice-error notice-alt"><p>' . esc_html__( 'These features often cannot be undone without intervention. Please do not attempt to use them unless you are absolutely certain. When in doubt, contact the plugins team for assistance.', 'wporg-plugins' ) . '</p></div>';
+
+	// Output the transfer form.
+	the_plugin_self_transfer_form();
+
+	if ( 'publish' != $post->post_status ) {
+		// A reminder of the closed status.
+		the_active_plugin_notice();
+	} else {
+		// Output the self close button.
+		the_plugin_self_close_button();
+	}
+
 }
 
 /**
@@ -363,9 +416,9 @@ function the_plugin_self_transfer_form() {
 		return;
 	}
 
-	echo '<p>' . esc_html__( 'You are the current owner of this plugin, but you can transfer those rights to another person at any time. The new owner must be added as a committer first.', 'wporg-plugins' ) . '</p>';
+	echo '<p>' . esc_html__( 'You are the current owner of this plugin. You may transfer those rights to another person at any time, provided they have commit access to this plugin.', 'wporg-plugins' ) . '</p>';
 
-	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> Transferring a plugin is intended to be <em>permanent</em>. There is no way to get plugin ownership back unless it has been done maliciously.', 'wporg-plugins' ) . '</p></div>';
+	echo '<div class="plugin-notice notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> Transferring a plugin is intended to be <em>permanent</em>. There is no way to get plugin ownership back without contacting the plugin team.', 'wporg-plugins' ) . '</p></div>';
 
 	$users = [];
 	foreach ( Tools::get_plugin_committers( $post->post_name ) as $user_login ) {

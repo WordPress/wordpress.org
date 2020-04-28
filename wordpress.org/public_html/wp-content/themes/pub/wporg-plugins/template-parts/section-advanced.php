@@ -33,25 +33,12 @@ global $post;
 		<tbody></tbody>
 	</table>
 
-	<hr>
+	<?php
+		// Display the advanced controls (only seen if the plugin is open).
+		the_plugin_advanced_zone();
 
-	<h2><?php esc_html_e( 'Advanced Options', 'wporg-plugins' ); ?></h2>
+		// Display the danger zone (only shown to committers of the plugin).
+		the_plugin_danger_zone();
+	?>
 
-	<p><?php esc_html_e( 'This section is intended for advanced users and developers only. They are presented here for testing and educational purposes.', 'wporg-plugins' ); ?></p>
-
-	<?php the_previous_version_download(); ?>
-
-	<?php if ( current_user_can( 'plugin_admin_edit', $post ) && 'publish' == $post->post_status ) : ?>
-		<hr>
-
-		<h2><?php esc_html_e( 'The Danger Zone', 'wporg-plugins' ); ?></h2>
-
-		<p><?php esc_html_e( 'The following features are restricted to plugin committers only. They exist to allow plugin developers more control over their work.', 'wporg-plugins' ); ?></p>
-
-		<div class="plugin-notice notice notice-error notice-alt"><p><?php esc_html_e( 'These features often cannot be undone without intervention. Please do not attempt to use them unless you are absolutely certain. When in doubt, contact the plugins team for assistance.', 'wporg-plugins' ); ?></p></div>
-
-		<?php the_plugin_self_transfer_form(); ?>
-
-		<?php the_plugin_self_close_button(); ?>
-	<?php endif; // current_user_can ?>
 </div>
