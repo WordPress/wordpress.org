@@ -43,6 +43,7 @@ class Official_WordPress_Events {
 		add_action( 'init',                             array( $this, 'schedule_cron_jobs'    ) );
 		add_action( 'owpe_prime_events_cache',          array( $this, 'prime_events_cache'    ) );
 		add_action( 'owpe_mark_deleted_meetups',        array( $this, 'mark_deleted_meetups'  ) );
+		add_action( 'owpe_mark_postponed_wordcamps',    array( $this, 'mark_postponed_wordcamps' ) );
 		add_action( 'api_client_handle_error_response', array( $this, 'handle_error_response' ), 10, 3 );
 
 		add_shortcode( 'official_wordpress_events', array( $this, 'render_events'      ) );
@@ -59,6 +60,10 @@ class Official_WordPress_Events {
 	public function schedule_cron_jobs() {
 		if ( ! wp_next_scheduled( 'owpe_prime_events_cache' ) ) {
 			wp_schedule_event( time(), 'hourly', 'owpe_prime_events_cache' );
+		}
+
+		if ( ! wp_next_scheduled( 'owpe_mark_postponed_wordcamps' ) ) {
+			wp_schedule_event( time(), 'hourly', 'owpe_mark_postponed_wordcamps' );
 		}
 
 		if ( ! wp_next_scheduled( 'owpe_mark_deleted_meetups' ) ) {
@@ -287,7 +292,7 @@ class Official_WordPress_Events {
 
 		// Note: With the number of WordCamps per year growing fast, we may need to batch requests in the near future, like we do for meetups.
 		$request_url = add_query_arg( array(
-			'status'   => array( 'wcpt-scheduled', 'wcpt-pre-planning', 'wcpt-cancelled' ),
+			'status'   => array( 'wcpt-scheduled', 'wcpt-cancelled' ),
 			'per_page' => 100,
 			'orderby'  => 'modified',
 		), self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps' );
@@ -412,6 +417,90 @@ class Official_WordPress_Events {
 		$session_time_is_same_day = date( 'Ymd', $start_date ) === date( 'Ymd', $first_session_start_time );
 
 		return $session_time_is_same_day ? $first_session_start_time : $start_date;
+	}
+
+	/**
+	 * Mark WordCamp events as deleted in our database when they're postponed/cancelled/etc.
+	 *
+	 * Sometimes camps are added to the Scheduled calendar, but then moved back to an earlier status. When that
+	 * happens, they're no longer in the Central API, so `wporg_events` doesn't get updated, and is stuck at the
+	 * old status, which is no longer accurate.
+	 *
+	 * We could make all the statuses available via the Central API, and update the local status to that, but it's
+	 * simpler to just do what we do for meetups, and mark them as `postponed` if they stop appearing in the API
+	 * w/ the `scheduled` status.
+	 */
+	public function mark_postponed_wordcamps() {
+		global $wpdb;
+
+		/*
+		 * Not using `get_wordcamp_events()`, because it removes some some of the entries before returning the
+		 * results (via `parse_wordcamp_events()`. We also only want `wcpt-scheduled` here; cancelled camps will
+		 * already get updated during `prime_events_cache()`.
+		 */
+		$request_url = add_query_arg(
+			array(
+				'status'   => 'wcpt-scheduled',
+				'per_page' => 99,
+				'_fields'  => array( 'id' ),
+			),
+			self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps'
+		);
+
+		$response            = wp_remote_get( $request_url );
+		$remote_events       = json_decode( wp_remote_retrieve_body( $response ) );
+		$remote_source_ids   = wp_list_pluck( $remote_events, 'id' );
+		$successful_response = ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response );
+		$body_is_valid       = is_int( $remote_events[0]->id ?? 'error' ) && ! empty( $remote_source_ids );
+
+		if ( ! $successful_response || ! $body_is_valid ) {
+			trigger_error(
+				"This function had to abort because the request failed. If it didn't, it would mark scheduled events as postponed. Failed response: " . var_export( $response, true ),
+				E_USER_WARNING
+			);
+
+			return;
+		}
+
+		if ( wp_remote_retrieve_header( $response, 'X-WP-Total' ) > 99 ) {
+			trigger_error(
+				"This function had to abort, and will not run successfully until this request is paginated -- like `Meetup_Client::send_paginated_request()` -- or the limit is increased -- like #45140-core. If this continued, it would mark scheduled events as postponed because they weren't in the first page of the results.",
+				E_USER_WARNING
+			);
+
+			return;
+		}
+
+		// Don't include anything before tomorrow, because time zone differences could result in past events being flagged.
+		$local_events = $wpdb->get_results( "
+			SELECT source_id, title
+			FROM `". self::EVENTS_TABLE ."`
+			WHERE
+				type      = 'wordcamp'  AND
+				status    = 'scheduled' AND
+				date_utc >= DATE_ADD( NOW(), INTERVAL 24 HOUR )
+			LIMIT 5000
+		" );
+
+		foreach ( $local_events as $local_event ) {
+			// Events that are still in the Central API are still scheduled.
+			if ( in_array( (int) $local_event->source_id, $remote_source_ids, true ) ) {
+				continue;
+			}
+
+			// The event is missing from a valid response, so assume that it's been postponed.
+			$wpdb->update(
+				self::EVENTS_TABLE,
+				array( 'status'    => 'postponed' ),
+				array( 'source_id' => (string) $local_event->source_id )
+			);
+
+			$this->log( "Marked {$local_event->title} ({$local_event->source_id}) as postponed." );
+		}
+
+		if ( 'cli' === php_sapi_name() ) {
+			echo "\n\n";
+		}
 	}
 
 	/**
