@@ -16,6 +16,13 @@ get_header(); ?>
 
 		<main id="main" class="site-main" role="main">
 
+			<p><?php _e( 'Below is a listing of all currently available WP-CLI commands with links to documentation on usage and subcommands.', 'wporg' ); ?></p>
+
+			<p><?php printf(
+				__( 'Looking to learn more about the internal API of WP-CLI or to contribute to its development? Check out the WP-CLI team&#8217;s <a href="%s">handbook</a>.', 'wporg' ),
+				'https://make.wordpress.org/cli/handbook/'
+			); ?></p>
+
 			<?php if ( have_posts() ) : ?>
 
 				<table>
