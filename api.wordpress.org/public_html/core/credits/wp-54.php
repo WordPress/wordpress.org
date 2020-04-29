@@ -239,7 +239,7 @@ class WP_54_Credits extends WP_Credits {
 			'eden159',
 			'ediamin',
 			'efarem',
-			'ehti',
+			'ehtis',
 			'ellatrix',
 			'elmastudio',
 			'epiqueras',
