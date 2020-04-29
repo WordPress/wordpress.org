@@ -221,6 +221,7 @@ function get_whitelist() {
 			'mapk',
 			'melchoyce',
 			'mizejewski',
+			'paaljoachim',
 		),
 		'design-dashicons' => array(
 			'EmpireOfLight',
