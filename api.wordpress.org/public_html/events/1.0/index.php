@@ -1265,6 +1265,8 @@ function is_wp15_event( $title ) {
  * @return array
  */
 function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
+	global $wpdb, $cache_group, $cache_life;
+
 	// Re-evaluate pinning after July, per https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480.
 	if ( $current_time >= strtotime( 'August 1 2020' ) ) {
 		return $events;
@@ -1274,20 +1276,61 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 		return $events;
 	}
 
-	if ( $current_time < strtotime( 'May 10, 2020' ) ) {
-		$spain = array(
-			'type'       => 'wordcamp',
-			'title'      => 'WordCamp Spain',
-			'url'        => 'https://2020.spain.wordcamp.org/',
-			'meetup'     => '',
-			'meetup_url' => '',
-			'date'       => '2020-05-06 12:00:00',
-			'location'   => array(
-				'location' => 'Online',
-			),
+	$cache_key        = 'next_online_wordcamp';
+	$next_online_camp = wp_cache_get( $cache_key, $cache_group );
+
+	// `false` is a cache miss, the `none scheduled` string is a cache hit but when the SQL query returned 0 results.
+	if ( false === $next_online_camp ) {
+		$raw_camp = $wpdb->get_row( "
+			SELECT
+				`title`, `url`, `meetup`, `meetup_url`, `date_utc`, `end_date`, `country`, `latitude`, `longitude`
+			FROM `wporg_events`
+			WHERE
+				type     = 'wordcamp'  AND
+				status   = 'scheduled' AND
+				location = 'online'    AND
+				date_utc BETWEEN CURDATE() AND CURDATE() + INTERVAL 2 WEEK
+			ORDER BY `date_utc` ASC
+			LIMIT 1"
 		);
 
-		array_unshift( $events, $spain );
+		if ( isset( $raw_camp->url ) ) {
+			$next_online_camp = array(
+				'type'       => 'wordcamp',
+				'title'      => $raw_camp->title,
+				'url'        => $raw_camp->url,
+				'meetup'     => $raw_camp->meetup,
+				'meetup_url' => $raw_camp->meetup_url,
+				'date'       => $raw_camp->date_utc,
+				'end_date'   => $raw_camp->end_date,
+
+				'location'   => array(
+					'location'  => 'Online',
+					'country'   => $raw_camp->country,
+					'latitude'  => (float) $raw_camp->latitude,
+					'longitude' => (float) $raw_camp->longitude,
+				)
+			);
+
+		} else {
+			/*
+			 * Cache a string instead of `false`, to disambiguate between cache-misses, and cache-hits with 0 results.
+			 * `wp_cache_get()` from the `memcached` plugin doesn't support the `$found` parameter, so this has to be
+			 * done manually.
+			 */
+			$next_online_camp = 'none scheduled';
+		}
+
+		/*
+		 * This intentionally stores a cache value when there are 0 results, because that's a normal condition;
+		 * i.e., there aren't currently any online WordCamps on the schedule. If nothing were cached in that
+		 * situation, then this would run a query on every request, which wouldn't be performant at scale.
+		 */
+		wp_cache_set( $cache_key, $next_online_camp, $cache_group, $cache_life );
+	}
+
+	if ( isset( $next_online_camp['url'] ) ) {
+		array_unshift( $events, $next_online_camp );
 	}
 
 	return $events;
