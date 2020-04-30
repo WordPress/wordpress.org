@@ -1035,7 +1035,7 @@ function get_regional_wordcamp_data() {
 				'end_date'   => '2020-10-29 00:00:00',
 
 				'location' => array(
-					'location'  => 'St. Louis, MO, USA',
+					'location'  => 'Online',
 					'country'   => 'US',
 					'latitude'  => 38.6532135,
 					'longitude' => -90.3136733,
