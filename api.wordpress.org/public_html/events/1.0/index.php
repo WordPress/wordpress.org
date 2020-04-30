@@ -934,6 +934,7 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
 		FROM `wporg_events`
 		WHERE
 			`type` = 'wordcamp' AND
+			`status` = 'scheduled' AND
 			$where AND
 			`date_utc` >= %s AND
 			`date_utc` <= %s
