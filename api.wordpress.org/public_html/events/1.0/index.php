@@ -956,13 +956,9 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
  * @return array
  */
 function get_regional_wordcamp_data() {
-	// `promo_start` should be 2 months before the Event's start date. See `maybe_add_regional_wordcamps()`.
-
-	return array(
+	$events = array(
 		// WordCamp Asia.
 		'asia' => array(
-			'promo_start' => strtotime( '2019-12-20 00:00:00' ),
-
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'asia' ),
 				get_iso_3166_2_country_codes( 'oceania' ),
@@ -991,8 +987,6 @@ function get_regional_wordcamp_data() {
 
 		// WordCamp Europe.
 		'europe' => array(
-			'promo_start' => strtotime( '2020-04-04 00:00:00' ),
-
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'africa' ),
 				get_iso_3166_2_country_codes( 'europe' )
@@ -1018,8 +1012,6 @@ function get_regional_wordcamp_data() {
 
 		// WordCamp US.
 		'us' => array(
-			'promo_start' => strtotime( '2020-08-27 00:00:00' ),
-
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'south america' ),
 				get_iso_3166_2_country_codes( 'north america' )
@@ -1043,6 +1035,13 @@ function get_regional_wordcamp_data() {
 			),
 		),
 	);
+
+	// `promo_start` should be 2 months before the Event's start date. See `maybe_add_regional_wordcamps()`.
+	foreach ( $events as & $event ) {
+		$event['promo_start'] = strtotime( $event['event']['date'] . ' - 2 months' );
+	}
+
+	return $events;
 }
 
 /**
