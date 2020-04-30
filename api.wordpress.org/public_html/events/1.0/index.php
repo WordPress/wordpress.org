@@ -760,7 +760,7 @@ function get_events( $args = array() ) {
 		$sql_values[] = $args['country'];
 	}
 
-	// Just show events that are currently scheduled (as opposed to cancelled).
+	// Just show events that are currently scheduled (as opposed to cancelled/planning/postponed).
 	$wheres[]     = '`status` = %s';
 	$sql_values[] = 'scheduled';
 
@@ -816,7 +816,8 @@ function get_events( $args = array() ) {
 			'end_date'   => $event->end_date,
 
 			'location'   => array(
-				'location'  => $event->location,
+				// Capitalize it for use in presentation contexts, like the Events Widget.
+				'location'  => 'online' === $event->location ? 'Online' : $event->location,
 				'country'   => $event->country,
 				'latitude'  => (float) $event->latitude,
 				'longitude' => (float) $event->longitude,
@@ -1129,8 +1130,6 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 
 		/**
 		 * The targeted area of the regional camp promotion "zooms in" over the course of 6 weeks.
-		 *
-		 * For the last 2 weeks before the event, it will just be displayed to everyone in the normal (400km) radius.
 		 */
 		if ( is_within_date_range( $current_time, $start, strtotime( '+ 2 weeks', $start ) ) ) {
 			// Phase 1: Show worldwide for first two weeks.
@@ -1143,13 +1142,19 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			}
 
 		} elseif ( is_within_date_range( $current_time, strtotime( '+ 4 weeks', $start ), strtotime( '+ 6 weeks', $start ) ) ) {
-			// Phase 3: Show only within the event country for the last two weeks.
+			/*
+			 * Phase 3: Show within the event country for the last two weeks of the promo.
+			 *
+			 * Note: This is _in addition to_ any countries that are within the normal search radius. It mostly
+			 * only has an effect in large countries like the US, where not all locations are covered by the
+			 * normal search radius.
+			 */
 			if ( ! empty( $location['country'] ) && strtoupper( $data['event']['location']['country'] ) === strtoupper( $location['country'] ) ) {
 				$regional_wordcamps[] = $data['event'];
 			}
 		}
 
-
+		// After the promo ends, the event will just be displayed to everyone in the normal search radius.
 	}
 
 	return array_merge( $regional_wordcamps, $local_events );
