@@ -16,12 +16,14 @@ class WPorg_GP_Custom_Translation_Warnings {
 	 * @var array
 	 */
 	private $allowed_domain_changes = array(
-		// Allow links to WordPress.org to be changed to a subdomain
+		// Allow links to wordpress.org to be changed to a subdomain.
 		'wordpress.org' => '[^.]+\.wordpress\.org',
-		// Allow links to WordPress.com to be changed to a subdomain
+		// Allow links to wordpress.com to be changed to a subdomain.
 		'wordpress.com' => '[^.]+\.wordpress\.com',
-		// Allow links to Gravatar.org to be changed to a subdomain
-		'en.gravatar.com' => '[^.]+\.gravatar\.com'
+		// Allow links to gravatar.org to be changed to a subdomain.
+		'en.gravatar.com' => '[^.]+\.gravatar\.com',
+		// Allow links to wikipedia.org to be changed to a subdomain.
+		'en.wikipedia.org' => '[^.]+\.wikipedia\.org',
 	);
 
 	/**
