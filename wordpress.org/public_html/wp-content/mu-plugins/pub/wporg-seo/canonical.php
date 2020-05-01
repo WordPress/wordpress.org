@@ -25,13 +25,48 @@ remove_action( 'wp_head', 'rel_canonical' );
  * Get the current Canonical URL.
  */
 function get_canonical_url() {
-	global $wp, $wp_rewrite;
+	global $wp, $wp_query, $wp_rewrite;
 
 	$queried_object = get_queried_object();
 	$url = false;
 
 	if ( is_tax() || is_tag() || is_category() ) {
 		$url = get_term_link( $queried_object );
+
+		// Detect multi-term queries.
+		$term_queries    = count( $wp_query->tax_query->queries );
+		$term_query_zero = count( $wp_query->tax_query->queries[0]['terms'] );
+		if ( $term_queries > 1 || $term_query_zero > 1 ) {
+			// Multiple terms are being queried for.
+			$terms = wp_list_pluck( $wp_query->tax_query->queries, 'terms' );
+			$terms = call_user_func_array( 'array_merge', $terms );
+
+			// Determine how many taxonomies are involved in this query.
+			$taxonomies = array_unique( wp_list_pluck( $wp_query->tax_query->queries, 'taxonomy' ) );
+
+			if ( count( $taxonomies ) > 1 ) {
+				// Multiple-taxonomy query. No canonical produced.
+				// TODO: Edgecase: on a site where a taxonomy query is added via pre_get_posts this will result in no canonical produced.
+				$url = false;
+			} elseif ( $term_queries > 1 && 1 === $term_query_zero ) {
+				// AND +
+				$glue = '+';
+			} elseif( $term_query_zero > 1 && 1 === $term_queries && 'AND' === $wp_query->tax_query->relation ) {
+				// Union ,
+				$glue = ',';
+			} else {
+				$url = false;
+			}
+
+			if ( $url ) {
+				$url = str_replace(
+					'/' . $queried_object->slug . '/',
+					'/' . implode( $glue, $terms ) . '/',
+					$url
+				);
+			}
+		}
+
 	} elseif ( is_singular() ) {
 		$url = get_permalink( $queried_object );
 	} elseif ( is_search() ) {
