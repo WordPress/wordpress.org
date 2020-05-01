@@ -7,6 +7,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
+use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -110,31 +111,32 @@ class Review_Tools {
 			'suppress_filters' => false,
 		] );
 
-		$zip_files = array();
-		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
-			$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
-		}
-		uksort( $zip_files, function ( $a, $b ) {
-			return strtotime( $a ) < strtotime( $b );
-		} );
-
-		$zip_url = get_post_meta( $post->ID, '_submitted_zip', true );
-		if ( $zip_url ) {
-			// Back-compat only.
-			$zip_files['User provided URL'] = array( $zip_url, null );
-		}
-
-		echo '<p><strong>Zip files:</strong></p>';
-		echo '<ul class="plugin-zip-files">';
-		foreach ( $zip_files as $zip_date => $zip ) {
-			list( $zip_url, $zip_file ) = $zip;
-			$zip_size                   = is_object( $zip_file ) ? size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 ) : 'unknown size';
-
-			printf( '<li>%s <a href="%s">%s</a> (%s)</li>', esc_html( $zip_date ), esc_url( $zip_url ), esc_html( $zip_url ), esc_html( $zip_size ) );
-		}
-		echo '</ul>';
-
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
+
+			$zip_files = array();
+			foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
+				$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
+			}
+			uksort( $zip_files, function ( $a, $b ) {
+				return strtotime( $a ) < strtotime( $b );
+			} );
+
+			$zip_url = get_post_meta( $post->ID, '_submitted_zip', true );
+			if ( $zip_url ) {
+				// Back-compat only.
+				$zip_files['User provided URL'] = array( $zip_url, null );
+			}
+
+			echo '<p><strong>Zip files:</strong></p>';
+			echo '<ul class="plugin-zip-files">';
+			foreach ( $zip_files as $zip_date => $zip ) {
+				list( $zip_url, $zip_file ) = $zip;
+				$zip_size                   = is_object( $zip_file ) ? size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 ) : 'unknown size';
+
+				printf( '<li>%s <a href="%s">%s</a> (%s)</li>', esc_html( $zip_date ), esc_url( $zip_url ), esc_html( $zip_url ), esc_html( $zip_size ) );
+			}
+			echo '</ul>';
+
 			$slug_restricted = [];
 			$slug_reserved   = [];
 
@@ -178,16 +180,16 @@ class Review_Tools {
 
 			// Check Active_Installs, prior to sync?
 			if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) ) {
-		
+
 				$title_matches = wporg_stats_get_plugin_name_install_count( $post->post_title );
-		
+
 				if ( $post->post_name == sanitize_title( $post->post_title ) ) {
 					$slug_matches = false;
 				} else {
 					$slug = str_replace( '-', ' ', $post->post_name );
 					$slug_matches = wporg_stats_get_plugin_name_install_count( $slug );
 				}
-		
+
 				if ( $title_matches ) {
 					array_push( self::$flagged['high'], sprintf(
 						'As of %s, %s had %s+ active installs.',
@@ -274,6 +276,7 @@ class Review_Tools {
 				<li><a href='https://plugins.trac.wordpress.org/log/<?php echo esc_attr( $post->post_name ); ?>/'>Development Log</a></li>
 				<li><a href='https://plugins.svn.wordpress.org/<?php echo esc_attr( $post->post_name ); ?>/'>Subversion Repository</a></li>
 				<li><a href='https://plugins.trac.wordpress.org/browser/<?php echo esc_attr( $post->post_name ); ?>/'>Browse in Trac</a></li>
+				<li><a href='<?php echo esc_url( Template::download_link() ); ?>'>Download Current Version</a></li>
 			</ul>
 			<?php
 		}
