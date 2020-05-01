@@ -14,6 +14,10 @@ function isFromHelpScout($data, $signature) {
 $data = file_get_contents( 'php://input' );
 
 // check the signature header
+if ( ! isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+	exit;
+}
+
 $signature = $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'];
 if ( ! isFromHelpScout( $data, $signature ) ) {
 	// failure = no response
@@ -33,6 +37,7 @@ if ( isset ( $request->customer->email ) ) {
 	$user = get_user_by( 'email', $request->customer->email );
 	if ( isset( $user->user_nicename ) ) {
 		$html .= '<p>Profile: <a href="https://profiles.wordpress.org/' . $user->user_nicename . '">'. $user->user_nicename .'</a></p>';
+		$html .= '<p>Forums: <a href="https://wordpress.org/support/users/'. $user->user_nicename . '">'. $user->user_nicename .'</a></p>';
 	} else {
 		$html .= '<p>No profile found</p>';
 	}
