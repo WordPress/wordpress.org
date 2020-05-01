@@ -112,7 +112,7 @@ function get_canonical_url() {
 		}
 	}
 
-	if ( $url && is_paged() && get_query_var( 'paged' ) ) {
+	if ( $url && is_paged() && (int) get_query_var( 'paged' ) > 1 ) {
 		if ( false !== stripos( $url, '?' ) ) {
 			// We're not actually sure 100% here if the current url supports rewrite rules.
 			$url = add_query_arg( 'paged', (int) get_query_var( 'paged' ), $url );
