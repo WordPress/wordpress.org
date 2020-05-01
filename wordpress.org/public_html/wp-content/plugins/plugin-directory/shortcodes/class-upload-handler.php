@@ -121,7 +121,7 @@ class Upload_Handler {
 				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
 				$message = sprintf(
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin name - %1$s - contains the prohibited term "%2$s" and cannot be used. Per the demands of trademark owners we have been required to prevent the use of the term at all. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
+					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used at all in your plugin permalink. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
 					'<code>' . $this->plugin_slug . '</code>',
 					trim( $this->has_trademarked_slug(), '-' ),
 					'<code>Plugin Name:</code>',
@@ -208,7 +208,7 @@ class Upload_Handler {
 
 			return new \WP_Error( 'invalid_version', $error . ' ' . sprintf(
 				/* translators: %s: 'Version:' */
-				__( 'Version strings can only contain numeric and period characters (i.e. 1.2). Please correct the %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
+				__( 'Version strings may only contain numeric and period characters (i.e. 1.2). Please correct the %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
 				'<code>Version:</code>'
 			) );
 		}
@@ -232,9 +232,11 @@ class Upload_Handler {
 
 				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-					__( 'There is already a plugin with the name %1$s known to WordPress.org. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
+					__( 'There is already a plugin with the name %1$s known to exist. This generally means the permalink %2$s is already in use outside of WordPress.org and has a significant user base. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is incorrect, email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
 					'<code>' . $this->plugin['Name'] . '</code>',
-					'<code>Plugin Name:</code>'
+					'<code>' . $this->plugin_slug . '</code>',
+					'<code>Plugin Name:</code>',
+					'plugins@wordpress.org'
 				) );
 			}
 		}
@@ -431,12 +433,15 @@ class Upload_Handler {
 			'elementor-',
 			'envato-',
 			'facebook',
+			'fb-',
 			'feedburner',
 			'github-',
 			'google-',
 			'gravity-forms-',
 			'gutenberg',
+			'ig-',
 			'instagram',
+			'jetpack-',
 			'macintosh-',
 			'microsoft-',
 			'ninja-forms-',
@@ -445,9 +450,10 @@ class Upload_Handler {
 			'stripe-',
 			'twitter-',
 			'tweet',
+			'wa-',
 			'whatsapp',
 			'whats-app',
-			'woocommerce-',
+			'woocommerce',
 			'woo-',
 			'wordpress',
 			'yoast',
