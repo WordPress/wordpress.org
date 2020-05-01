@@ -52,8 +52,13 @@ function get_canonical_url() {
 				// AND +
 				$glue = '+';
 			} elseif( $term_query_zero > 1 && 1 === $term_queries && 'AND' === $wp_query->tax_query->relation ) {
-				// Union ,
-				$glue = ',';
+				if ( 'AND' === $wp_query->tax_query->queries[0]['operator'] ) {
+					// AND +
+					$glue = '+';
+				} else {
+					// Union ,
+					$glue = ',';
+				}
 			} else {
 				$url = false;
 			}
