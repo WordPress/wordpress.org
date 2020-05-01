@@ -58,6 +58,11 @@ function get_canonical_url() {
 	// Filter to override the above logics.
 	$url = apply_filters( 'wporg_canonical_base_url', $url );
 
+	// Certain routes, such as `get_term_link()` can return WP_Error objects.
+	if ( is_wp_error( $url ) ) {
+		$url = false;
+	}
+
 	// Ensure trailing slashed paths.
 	if ( $url ) {
 		if ( false !== stripos( $url, '?' ) ) {
