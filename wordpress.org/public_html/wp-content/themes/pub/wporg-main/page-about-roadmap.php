@@ -157,8 +157,24 @@ the_post();
 
 					<h2><?php esc_html_e( 'Long term roadmap', 'wporg' ); ?></h2>
 
-					<p><?php esc_html_e( 'While we expect to need most or all of 2019 to finish phase 2 of Gutenberg, there are already plans for Phase 3 and 4. Phase 3 will focus on collaboration and multi-user editing. Phase 4 will contain support for multilingual sites.', 'wporg' ); ?></p>
+					<p><?php 
+						printf( 
+							/* translators: %s: link to wordpress.tv State of the Word 2019 */
+							wp_kses_post( __( 'While Phase 2 of Gutenberg is expected to continue at least through 2020, there are already plans for Phase 3 and 4. During the <a href="%s">State of the Word from WordCamp US 2019</a>, Matt shared the following vision for phases in Gutenberg:', 'wporg' ) ), 
+							'https://wordpress.tv/2019/11/03/2019-state-of-the-word/' );
+						?>
+					</p>
+
+						<p><?php esc_html_e( 'The Four Phases of Gutenberg', 'wporg' ); ?></p>
+						<ol>
+							<li><?php esc_html_e( 'Easier Editing &mdash; Already available in WordPress, with ongoing improvements', 'wporg' ); ?></li>
+							<li><?php esc_html_e( 'Customization &mdash; Full Site editing, Block Patterns, Block Directory, Block based themes', 'wporg' ); ?></li>
+							<li><?php esc_html_e( 'Collaboration &mdash; A more intuitive way to co-author content', 'wporg' ); ?></li>
+							<li><?php esc_html_e( 'Multi-lingual &mdash; Core implementation for Multi-lingual sites', 'wporg' ); ?></li>
+						</ol>
+
 				</section>
+
 			</div><!-- .entry-content -->
 
 		</article><!-- #post-## -->
