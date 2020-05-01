@@ -206,3 +206,21 @@ function wporg_themes_parse_request( $wp ) {
 	}
 }
 add_action( 'parse_request', 'wporg_themes_parse_request' );
+
+/**
+ * Remove support for any query vars the Theme Directory doesn't support/need.
+ * 
+ * This should only apply to Rewrite rules, so WP_Query can use anything it needs.
+ */
+function wporg_themes_remove_query_vars( $qv ) {
+	$not_needed = [
+		'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
+		'posts', 'withcomments', 'withoutcomments',
+		'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
+		'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview',
+		'favicon', 'cpage', 'embed', 'post_format',
+	];
+
+	return array_diff( $qv, $not_needed );
+}
+add_filter( 'query_vars', 'wporg_themes_remove_query_vars', 0 );
