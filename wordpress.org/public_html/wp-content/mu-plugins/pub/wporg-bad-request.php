@@ -69,6 +69,22 @@ add_action( 'rest_api_init', function( $wp_rest_server ) {
 } );
 
 /**
+ * Detect invalid parameters being passed to the Jetpack Subscription widget.
+ * 
+ * @see https://github.com/Automattic/jetpack/pull/15638
+ */
+add_action( 'template_redirect', function() {
+	if (
+		isset( $_REQUEST['action'], $_REQUEST['email'], $_REQUEST['redirect_fragment'] )
+		&& 'subscribe' === $_REQUEST['action']
+	) {
+		if ( ! is_string( $_REQUEST['email'] ) || ! is_string( $_REQUEST['redirect_fragment'] ) ) {
+			die_bad_request( "non-scalar input to Jetpack Subscribe widget" );
+		}
+	}
+}, 9 );
+
+/**
  * Die with a 400 Bad Request.
  * 
  * @param string $reference A unique identifying string to make it easier to read logs.
