@@ -488,6 +488,13 @@ class Hooks {
 			) {
 				$robots = true;
 			}
+
+			// If topic is marked as NSFW.
+			$is_nsfw = get_post_meta( bbp_get_topic_id(), '_topic_is_nsfw', true );
+
+			if ( $is_nsfw ) {
+				$robots = true;
+			}
 		}
 
 		if ( $robots ) {
