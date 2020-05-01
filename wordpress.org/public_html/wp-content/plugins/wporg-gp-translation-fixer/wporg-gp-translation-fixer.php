@@ -34,7 +34,7 @@ use GP, GP_Locales;
 		}
 
 		// If no warnings, they're fine.
-		if ( empty( $args['warnings'] ) ) {
+		if ( empty( $args['warnings'] ) || ! is_array( $args['warnings'] ) ) {
 			return $args;
 		}
 
