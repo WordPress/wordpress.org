@@ -460,6 +460,12 @@ class Upload_Handler {
 			'youtube-',
 		);
 
+		// Domains from which exceptions would be accepted.
+		$trademark_exceptions = array(
+			'yoast.com'      => array( 'yoast' ),
+			'automattic.com' => array( 'wordpress', 'woo', 'woocommerce' ),
+		);
+
 		$has_trademarked_slug = false;
 
 		foreach ( $trademarked_slugs as $trademark ) {
@@ -473,6 +479,17 @@ class Upload_Handler {
 				// Otherwise, the term cannot appear anywhere in slug.
 				$has_trademarked_slug = $trademark;
 				break;
+			}
+		}
+
+		// Get the user email domain.
+		$user_email_domain = explode( '@', wp_get_current_user()->user_email, 2 );
+
+		// If email domain is on our list of possible exceptions, we have an extra check.
+		if ( array_key_exists( $user_email_domain[1], $trademark_exceptions ) ) {
+			// If $has_trademarked_slug is in the array for that domain, they can use the term.
+			if ( in_array( $has_trademarked_slug, $trademark_exceptions[ $user_email_domain[1] ] ) ) {
+				$has_trademarked_slug = false;
 			}
 		}
 
