@@ -106,11 +106,21 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 							</details>
 						<?php endif; ?>
 						<?php if ( $translation->extracted_comments ) :
-							$comments = trim( preg_replace( '/^translators:/ ', '', $translation->extracted_comments ) );
 							?>
 							<details open class="source-details__comment">
 								<summary><?php _e( 'Comment', 'glotpress' ); ?></summary>
-								<p><?php echo make_clickable( esc_translation( $comments ) ); ?></p>
+								<p>
+									<?php
+									/**
+									 * Filters the extracted comments of an original.
+									 *
+									 * @param string         $extracted_comments Extracted comments of an original.
+									 * @param GP_Translation $translation        Translation object.
+									 */
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									echo apply_filters( 'gp_original_extracted_comments', $translation->extracted_comments, $translation );
+									?>
+								</p>
 							</details>
 						<?php endif; ?>
 						<?php if ( $translation->references ) : ?>

@@ -45,6 +45,7 @@ class Plugin {
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'apply_capital_P_dangit' ), 10, 2 );
+		add_filter( 'gp_original_extracted_comments', array( $this, 'format_translator_commments' ), 5 );
 
 		// Cron.
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
@@ -65,6 +66,18 @@ class Plugin {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
+	}
+
+	/**
+	 * Splits multiple translator comments for an original into separate lines.
+	 */
+	public function format_translator_commments( $comments ) {
+		$comment_parts = preg_split( '#(^|\n)translators: #i', $comments, 0, PREG_SPLIT_NO_EMPTY );
+		if ( ! $comment_parts ) {
+			return $comments;
+		}
+
+		return implode( '<br/>', $comment_parts );
 	}
 
 	/**
