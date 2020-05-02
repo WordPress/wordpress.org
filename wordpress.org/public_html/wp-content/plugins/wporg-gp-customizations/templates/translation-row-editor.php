@@ -3,19 +3,17 @@
  * Template for a single translation row editor in a translation set display.
  */
 
-$user = wp_get_current_user();
-$can_reject_self = ( isset( $t->user->user_login ) && $user->user_login === $t->user->user_login && 'waiting' === $t->translation_status );
 
 $more_links = array();
-if ( $t->translation_status ) {
-	$translation_permalink = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[status]' => 'either', 'filters[original_id]' => $t->original_id, 'filters[translation_id]' => $t->id ) );
+if ( $translation->translation_status ) {
+	$translation_permalink = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[status]' => 'either', 'filters[original_id]' => $translation->original_id, 'filters[translation_id]' => $translation->id ) );
 	$more_links['translation-permalink'] = '<a href="' . esc_url( $translation_permalink ) . '">Permalink to translation</a>';
 } else {
-	$original_permalink = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[original_id]' => $t->original_id ) );
+	$original_permalink = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[original_id]' => $translation->original_id ) );
 	$more_links['original-permalink'] = '<a href="' . esc_url( $original_permalink ) . '">Permalink to original</a>';
 }
 
-$original_history = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[status]' => 'either', 'filters[original_id]' => $t->original_id, 'sort[by]' => 'translation_date_added', 'sort[how]' => 'asc' ) );
+$original_history = gp_url_project_locale( $project, $locale->slug, $translation_set->slug, array( 'filters[status]' => 'either', 'filters[original_id]' => $translation->original_id, 'sort[by]' => 'translation_date_added', 'sort[how]' => 'asc' ) );
 $more_links['history'] = '<a href="' . esc_url( $original_history ) . '">Translation History</a>';
 
 /**
@@ -23,25 +21,15 @@ $more_links['history'] = '<a href="' . esc_url( $original_history ) . '">Transla
  *
  * @since 2.3.0
  *
- * @param array              $more_links      The links to be output.
- * @param GP_Project         $project         Project object.
- * @param GP_Locale          $locale          Locale object.
+ * @param array $more_links The links to be output.
+ * @param GP_Project $project Project object.
+ * @param GP_Locale $locale Locale object.
  * @param GP_Translation_Set $translation_set Translation Set object.
- * @param GP_Translation     $t               Translation object.
+ * @param GP_Translation $translation Translation object.
  */
-$more_links = apply_filters( 'gp_translation_row_template_more_links', $more_links, $project, $locale, $translation_set, $t );
-
-if ( is_object( $glossary ) ) {
-	if ( ! isset( $glossary_entries_terms ) ) {
-		$glossary_entries = $glossary->get_entries();
-		$glossary_entries_terms = gp_sort_glossary_entries_terms( $glossary_entries );
-	}
-
-	$t = map_glossary_entries_to_translation_originals( $t, $glossary, $glossary_entries_terms );
-}
-
+$more_links = apply_filters( 'gp_translation_row_template_more_links', $more_links, $project, $locale, $translation_set, $translation );
 ?>
-<tr class="editor <?php echo gp_translation_row_classes( $t ); ?>" id="editor-<?php echo esc_attr( $t->row_id ); ?>" row="<?php echo esc_attr( $t->row_id ); ?>">
+<tr class="editor <?php echo gp_translation_row_classes( $translation ); ?>" id="editor-<?php echo esc_attr( $translation->row_id ); ?>" row="<?php echo esc_attr( $translation->row_id ); ?>">
 	<td colspan="<?php echo $can_approve ? 5 : 4 ?>">
 		<div class="editor-panel">
 			<div class="editor-panel__left">
@@ -49,11 +37,11 @@ if ( is_object( $glossary ) ) {
 					<?php
 					$status = sprintf(
 						'<span class="panel-header__bubble%s">%s</span>',
-						$t->translation_status ? ' panel-header__bubble--' . $t->translation_status : '',
-						display_status( $t->translation_status )
+						$translation->translation_status ? ' panel-header__bubble--' . $translation->translation_status : '',
+						display_status( $translation->translation_status )
 					);
 
-					$warnings_count = wporg_gp_count_warnings( $t );
+					$warnings_count = wporg_gp_count_warnings( $translation );
 					$warnings_info  = '';
 					if ( $warnings_count ) {
 						$warnings_info = ' <span class="panel-header__bubble panel-header__bubble--warning">' . sprintf(
@@ -86,55 +74,55 @@ if ( is_object( $glossary ) ) {
 					</div>
 				</div>
 				<div class="panel-content">
-					<?php
-					$singular = isset( $t->singular_glossary_markup ) ? $t->singular_glossary_markup : esc_translation( $t->singular );
-					$plural   = isset( $t->plural_glossary_markup ) ? $t->plural_glossary_markup : esc_translation( $t->plural );
-					?>
 					<div class="source-string strings">
-						<?php if ( ! $t->plural ) : ?>
+						<?php
+						$singular = $translation->singular_glossary_markup ?? esc_translation( $translation->singular );
+						$plural   = $translation->plural_glossary_markup ?? esc_translation( $translation->plural );
+
+						if ( ! $translation->plural ) : ?>
 							<div class="source-string__singular">
 								<span class="original"><?php echo prepare_original( $singular ); ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $t->singular ); ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); ?></span>
 							</div>
 						<?php else: ?>
 							<div class="source-string__singular">
 								<small>Singular:</small>
 								<span class="original"><?php echo $singular; ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $t->singular ); ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); ?></span>
 							</div>
 							<div class="source-string__plural">
 								<small>Plural:</small>
 								<span class="original"><?php echo $plural; ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $t->plural ); ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->plural ); ?></span>
 							</div>
 						<?php endif; ?>
 					</div>
 
 					<div class="source-details">
-						<?php if ( $t->context ): ?>
+						<?php if ( $translation->context ): ?>
 							<details open class="source-details__context">
 								<summary>Context</summary>
-								<span class="context bubble"><?php echo esc_translation( $t->context ); ?></span>
+								<span class="context bubble"><?php echo esc_translation( $translation->context ); ?></span>
 							</details>
 						<?php endif; ?>
-						<?php if ( $t->extracted_comments ) :
-							$comments = trim( preg_replace( '/^translators:/ ', '', $t->extracted_comments ) );
+						<?php if ( $translation->extracted_comments ) :
+							$comments = trim( preg_replace( '/^translators:/ ', '', $translation->extracted_comments ) );
 							?>
 							<details open class="source-details__comment">
 								<summary><?php _e( 'Comment', 'glotpress' ); ?></summary>
 								<p><?php echo make_clickable( esc_translation( $comments ) ); ?></p>
 							</details>
 						<?php endif; ?>
-						<?php if ( $t->references ) : ?>
+						<?php if ( $translation->references ) : ?>
 							<details class="source-details__references">
 								<summary>References</summary>
-								<?php wporg_references( $project, $t ); ?>
+								<?php wporg_references( $project, $translation ); ?>
 							</details>
 						<?php endif; ?>
 					</div>
 
 					<div class="translation-wrapper">
-						<?php if ( $t->plural && $locale->nplurals > 1 ) : ?>
+						<?php if ( $translation->plural && $locale->nplurals > 1 ) : ?>
 							<div class="translation-form-wrapper">
 								<span>Form:</span>
 								<ul class="translation-form-list">
@@ -174,11 +162,11 @@ if ( is_object( $glossary ) ) {
 							</div>
 						<?php endif; ?>
 
-						<?php if ( ! $t->plural ) : ?>
-							<?php wporg_gp_translate_textarea( $t, [ $can_edit, $can_approve_translation ] ); ?>
+						<?php if ( ! $translation->plural ) : ?>
+							<?php wporg_gp_translate_textarea( $translation, [ $can_edit, $can_approve_translation ] ); ?>
 						<?php else : ?>
 							<?php foreach( range( 0, $locale->nplurals - 1 ) as $plural_index ): ?>
-								<?php wporg_gp_translate_textarea( $t, [ $can_edit, $can_approve ], $plural_index ); ?>
+								<?php wporg_gp_translate_textarea( $translation, [ $can_edit, $can_approve ], $plural_index ); ?>
 							<?php endforeach; ?>
 						<?php endif; ?>
 
@@ -188,7 +176,7 @@ if ( is_object( $glossary ) ) {
 									<button class="translation-actions__save with-tooltip"
 											type="button"
 											aria-label="<?php echo $can_approve_translation ? 'Save and approve translation' : 'Suggest new translation'; ?>"
-											data-nonce="<?php echo esc_attr( wp_create_nonce( 'add-translation_' . $t->original_id ) ); ?>">
+											data-nonce="<?php echo esc_attr( wp_create_nonce( 'add-translation_' . $translation->original_id ) ); ?>">
 										<?php echo $can_approve_translation ? 'Save' : 'Suggest'; ?>
 									</button>
 								</div>
@@ -225,7 +213,7 @@ if ( is_object( $glossary ) ) {
 					if ( has_action( 'wporg_translate_suggestions' ) ) {
 						?>
 						<div class="suggestions-wrapper">
-							<?php do_action( 'wporg_translate_suggestions', $t ); ?>
+							<?php do_action( 'wporg_translate_suggestions', $translation ); ?>
 						</div>
 						<?php
 					}
@@ -240,21 +228,21 @@ if ( is_object( $glossary ) ) {
 				<div class="panel-content">
 					<div class="meta">
 
-						<?php if ( $t->translation_status ): ?>
+						<?php if ( $translation->translation_status ): ?>
 							<div class="status-actions">
 							<?php if ( $can_approve_translation ) : ?>
-								<?php if ( 'current' !== $t->translation_status ) : ?>
-									<button class="approve" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $t->id ) ); ?>"><strong>+</strong> <?php _e( 'Approve', 'glotpress' ); ?></button>
+								<?php if ( 'current' !== $translation->translation_status ) : ?>
+									<button class="approve" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>"><strong>+</strong> <?php _e( 'Approve', 'glotpress' ); ?></button>
 								<?php endif; ?>
-								<?php if ( 'rejected' !== $t->translation_status ) : ?>
-									<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $t->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject', 'glotpress' ); ?></button>
+								<?php if ( 'rejected' !== $translation->translation_status ) : ?>
+									<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject', 'glotpress' ); ?></button>
 								<?php endif; ?>
-								<?php if ( 'fuzzy' !== $t->translation_status ) : ?>
-									<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $t->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
+								<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
+									<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
 								<?php endif; ?>
 							<?php elseif ( $can_reject_self ): ?>
-								<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $t->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject Suggestion', 'glotpress' ); ?></button>
-								<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $t->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
+								<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject Suggestion', 'glotpress' ); ?></button>
+								<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
 							<?php endif; ?>
 							</div>
 						<?php endif; ?>
@@ -262,35 +250,35 @@ if ( is_object( $glossary ) ) {
 						<dl>
 							<dt><?php _e( 'Status:', 'glotpress' ); ?></dt>
 							<dd>
-								<?php echo display_status( $t->translation_status ); ?>
+								<?php echo display_status( $translation->translation_status ); ?>
 							</dd>
 						</dl>
 
-						<?php if ( $t->translation_added && $t->translation_added != '0000-00-00 00:00:00' ): ?>
+						<?php if ( $translation->translation_added && $translation->translation_added != '0000-00-00 00:00:00' ): ?>
 							<dl>
 								<dt><?php _e( 'Date added:', 'glotpress' ); ?></dt>
-								<dd><?php echo $t->translation_added; ?> GMT</dd>
+								<dd><?php echo $translation->translation_added; ?> GMT</dd>
 							</dl>
 						<?php endif; ?>
-						<?php if ( $t->user ) : ?>
+						<?php if ( $translation->user ) : ?>
 							<dl>
 								<dt><?php _e( 'Translated by:', 'glotpress' ); ?></dt>
-								<dd><?php gp_link_user( $t->user ); ?></dd>
+								<dd><?php gp_link_user( $translation->user ); ?></dd>
 							</dl>
 						<?php endif; ?>
-						<?php if ( $t->user_last_modified && ( ! $t->user || $t->user->ID !== $t->user_last_modified->ID ) ) : ?>
+						<?php if ( $translation->user_last_modified && ( ! $translation->user || $translation->user->ID !== $translation->user_last_modified->ID ) ) : ?>
 							<dl>
 								<dt><?php
-									if ( 'current' === $t->translation_status ) {
+									if ( 'current' === $translation->translation_status ) {
 										_e( 'Approved by:', 'glotpress' );
-									} elseif ( 'rejected' === $t->translation_status ) {
+									} elseif ( 'rejected' === $translation->translation_status ) {
 										_e( 'Rejected by:', 'glotpress' );
 									} else {
 										_e( 'Last updated by:', 'glotpress' );
 									}
 									?>
 								</dt>
-								<dd><?php gp_link_user( $t->user_last_modified ); ?></dd>
+								<dd><?php gp_link_user( $translation->user_last_modified ); ?></dd>
 							</dl>
 						<?php endif; ?>
 
@@ -299,23 +287,23 @@ if ( is_object( $glossary ) ) {
 							<?php if ( $can_write ): ?>
 								<dd><?php
 									echo gp_select(
-										'priority-' . $t->original_id,
+										'priority-' . $translation->original_id,
 										GP::$original->get_static( 'priorities' ),
-										$t->priority,
+										$translation->priority,
 										array(
 											'class'      => 'priority',
 											'tabindex'   => '-1',
-											'data-nonce' => wp_create_nonce( 'set-priority_' . $t->original_id ),
+											'data-nonce' => wp_create_nonce( 'set-priority_' . $translation->original_id ),
 										)
 									);
 									?></dd>
 							<?php else : ?>
-								<dd><?php echo gp_array_get( GP::$original->get_static( 'priorities' ), $t->priority, 'unknown' ); // WPCS: XSS ok. ?></dd>
+								<dd><?php echo gp_array_get( GP::$original->get_static( 'priorities' ), $translation->priority, 'unknown' ); ?></dd>
 							<?php endif; ?>
 						</dl>
 					</div>
 
-					<?php do_action( 'wporg_translate_meta', $t ); ?>
+					<?php do_action( 'wporg_translate_meta', $translation ); ?>
 				</div>
 			</div>
 		</div>
