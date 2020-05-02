@@ -29,7 +29,9 @@ gp_tmpl_header();
 			<ul class="project-meta">
 				<li class="project-name"><?php echo $sub_project->name; ?></li>
 				<li class="locale-english"><?php echo $locale->english_name; ?></li>
-				<li class="locale-native"><?php echo $locale->native_name; ?></li>
+				<?php if ( $locale->english_name !== $locale->native_name ) : ?>
+					<li class="locale-native"><?php echo $locale->native_name; ?></li>
+				<?php endif; ?>
 				<li class="locale-code">
 					<?php
 					echo $locale->wp_locale;
@@ -166,16 +168,16 @@ if ( 'wp-plugins' === $project->path ) {
 						<?php endif; ?>
 					</td>
 					<td class="stats translated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), $sub_project_status->current_count ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), number_format_i18n( $sub_project_status->current_count ) ); ?>
 					</td>
 					<td class="stats fuzzy">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), $sub_project_status->fuzzy_count ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), number_format_i18n( $sub_project_status->fuzzy_count ) ); ?>
 					</td>
 					<td class="stats untranslated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), $sub_project_status->untranslated_count ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), number_format_i18n( $sub_project_status->untranslated_count ) ); ?>
 					</td>
 					<td class="stats waiting">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), $sub_project_status->waiting_count ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), number_format_i18n( $sub_project_status->waiting_count ) ); ?>
 					</td>
 					</tr>
 				</tr>
@@ -204,16 +206,16 @@ if ( 'wp-plugins' === $project->path ) {
 						<?php endif; ?>
 					</td>
 					<td class="stats translated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), $status->current_count ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), number_format_i18n( $status->current_count ) ); ?>
 					</td>
 					<td class="stats fuzzy">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), $status->fuzzy_count ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'fuzzy' ) ), number_format_i18n( $status->fuzzy_count ) ); ?>
 					</td>
 					<td class="stats untranslated">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), $status->untranslated_count ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), number_format_i18n( $status->untranslated_count ) ); ?>
 					</td>
 					<td class="stats waiting">
-						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), $status->waiting_count ); ?>
+						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), number_format_i18n( $status->waiting_count ) ); ?>
 					</td>
 					</tr>
 				</tr>
