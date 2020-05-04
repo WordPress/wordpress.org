@@ -12,7 +12,7 @@ if ( $params = get_params() ) :
 	?>
 	<hr />
 	<section class="parameters">
-		<h3><?php _e( 'Parameters', 'wporg' ); ?></h3>
+		<h2><?php _e( 'Parameters', 'wporg' ); ?></h2>
 		<dl>
 			<?php foreach ( $params as $param ) : ?>
 				<?php if ( ! empty( $param['variable'] ) ) : ?>

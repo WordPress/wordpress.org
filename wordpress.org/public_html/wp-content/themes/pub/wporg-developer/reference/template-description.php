@@ -7,19 +7,28 @@
  */
 
 namespace DevHub;
+
+$description = get_description();
+$see_tags    = get_see_tags();
+
+// Omit section if it's empty.
+if ( ! $description && ! $see_tags ) {
+	return;
+}
+
 ?>
 
 <hr />
 <section class="description">
 	<h2><?php _e( 'Description', 'wporg' ); ?></h2>
-	<?php echo get_description(); ?>
+	<?php echo $description; ?>
 
-	<?php if ( $see = get_see_tags() ) : ?>
+	<?php if ( $see_tags ) : ?>
 	<h3><?php _e( 'See also', 'wporg' ); ?></h3>
 
 	<ul>
 	<?php
-	foreach ( $see as $tag ) {
+	foreach ( $see_tags as $tag ) {
 		$see_ref = '';
 		if ( ! empty( $tag['refers'] ) ) {
 			$see_ref .= '{@see ' . $tag['refers'] . '}';
