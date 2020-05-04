@@ -235,6 +235,23 @@ function wporg_themes_disable_sitemap_for_rosetta( $modules ) {
 add_filter( 'jetpack_active_modules', 'wporg_themes_disable_sitemap_for_rosetta' );
 
 /**
+ * Skip outdated themes in Jetpack Sitemaps.
+ * 
+ * @param bool $skip If this post should be excluded from Sitemaps.
+ * @param object $plugin_db_row A row from the wp_posts table.
+ * @return bool
+ */
+function wporg_themes_jetpack_sitemap_skip_post( $skip, $theme_db_row ) {
+	// If it's outdated, don't include in Jetpack Sitemap.
+	if ( time() - strtotime( $theme_db_row->post_modified_gmt ) > 2 * YEAR_IN_SECONDS ) {
+		$skip = true;
+	}
+
+	return $skip;
+}
+add_filter( 'jetpack_sitemap_skip_post', 'wporg_themes_jetpack_sitemap_skip_post', 10, 2 );
+
+/**
  * Returns the specified meta value for a version of a theme.
  *
  * @param int          $post_id Post ID.
