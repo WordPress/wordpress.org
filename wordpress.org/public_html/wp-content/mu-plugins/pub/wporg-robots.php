@@ -55,7 +55,7 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 		// || defined( 'WPORG_GLOBAL_NETWORK_ID' ) && WPORG_GLOBAL_NETWORK_ID === $blog_details->site_id
 	) {
 		$robots = "Sitemap: https://{$blog_details->domain}/plugins/sitemap.xml\n" . $robots;
-		// $robots = "Sitemap: https://{$blog_details->domain}/themes/sitemap.xml\n" . $robots;
+		$robots = "Sitemap: https://{$blog_details->domain}/themes/sitemap.xml\n" . $robots;
 	}
 
 	return $robots;
