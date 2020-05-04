@@ -19,6 +19,8 @@ class NSFW_Handler {
 
 		add_filter( 'bbp_get_topic_title', array( $this, 'prepend_topic_title' ), 10, 2 );
 
+		add_filter( 'bbp_title', array( $this, 'strip_abbr_from_title' ) );
+
 		add_action( 'admin_head', array( $this, 'taxonomy_styles' ) );
 	}
 
@@ -197,5 +199,11 @@ class NSFW_Handler {
 		return "$prefix $title";
 	}
 
+	/**
+	 * Strip the NSFW abbr tag from the document <title> in a translation-friendly manner.
+	 */
+	public function strip_abbr_from_title( $title ) {
+		return preg_replace( '!<abbr title="[^"]+">([^>]+?)</abbr>!i', '$1', $title );
+	}
 }
 
