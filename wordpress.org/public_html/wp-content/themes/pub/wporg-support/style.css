@@ -1190,6 +1190,24 @@ table {
 	width: 100%;
 }
 
+.helphub_article figure.wp-block-table {
+	margin: 1em 0;
+}
+
+.helphub_article table tr:nth-child(odd) {
+	background-color: #f3f4f5;
+}
+
+.helphub_article table th,
+.helphub_article table td {
+	padding: 0.5em 1em;
+}
+
+.helphub_article table th:not(:first-of-type),
+.helphub_article table td:not(:first-of-type) {
+	text-align: center;
+}
+
 .notice {
 	background: #fff;
 	border-left: 4px solid #fff;
