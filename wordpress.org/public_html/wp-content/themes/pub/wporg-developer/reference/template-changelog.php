@@ -13,7 +13,7 @@ if ( ! empty( $changelog_data ) ) :
 	?>
 	<hr />
 	<section class="changelog">
-		<h3><?php _e( 'Changelog', 'wporg' ); ?></h3>
+		<h2><?php _e( 'Changelog', 'wporg' ); ?></h2>
 
 		<table>
 			<caption class="screen-reader-text"><?php _e( 'Changelog', 'wporg' ); ?></caption>

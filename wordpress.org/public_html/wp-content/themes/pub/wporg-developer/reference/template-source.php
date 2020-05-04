@@ -13,7 +13,7 @@ if ( ! empty( $source_file ) ) :
 	?>
 	<hr />
 	<section class="source-content">
-		<h3><?php _e( 'Source', 'wporg' ); ?></h3>
+		<h2><?php _e( 'Source', 'wporg' ); ?></h2>
 		<p>
 			<?php printf( __( 'File: %s', 'wporg' ),
 				'<a href="' . esc_url( get_source_file_archive_link( $source_file ) ) . '">' . esc_html( $source_file ) . '</a>'

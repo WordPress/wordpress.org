@@ -1832,11 +1832,11 @@ namespace DevHub {
 			'description',
 			'params',
 			'return',
-			'source',
-			'changelog',
 			'explanation',
 			'related',
 			'methods',
+			'source',
+			'changelog',
 			'notes'
 		);
 
