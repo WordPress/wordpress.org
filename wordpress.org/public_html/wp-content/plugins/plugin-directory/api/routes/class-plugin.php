@@ -332,8 +332,8 @@ class Plugin extends Base {
 	 */
 	protected function get_simplified_faq_markup( $markup ) {
 		$markup = str_replace(
-			array( '<dl>', '</dl>', '<dt>', '</dt>', '<dd>', '</dd>' ),
-			array( '',     '',      '<h4>', '</h4>', '<p>',  '</p>'  ),
+			array( '<dl>', '</dl>', '<dt>', '</dt>', '<h3>', '</h3>', '<dd>', '</dd>' ),
+			array( '',     '',      '<h4>', '</h4>', '',      '',     '<p>',  '</p>'  ),
 			$markup
 		);
 
