@@ -44,6 +44,7 @@ class WPOrg_WP_Activity_Notifier {
 		add_action( 'bbp_untrashed_topic',       array( $this, 'notify_forum_new_topic' )                   );
 		add_action( 'bbp_approved_topic',        array( $this, 'notify_forum_new_topic' )                   );
 		add_action( 'bbp_unapproved_topic',      array( $this, 'notify_forum_remove_topic' )                );
+		add_action( 'wporg_bbp_archived_topic',  array( $this, 'notify_forum_remove_topic' )                );
 
 		// bbPress 2.x reply support
 		add_action( 'bbp_new_reply',             array( $this, 'notify_forum_new_reply' ),               12 );
@@ -53,6 +54,7 @@ class WPOrg_WP_Activity_Notifier {
 		add_action( 'bbp_unapproved_reply',      array( $this, 'notify_forum_remove_reply' )                );
 		add_action( 'bbp_trashed_reply',         array( $this, 'notify_forum_remove_reply' )                );
 		add_action( 'bbp_untrashed_reply',       array( $this, 'notify_forum_new_reply' )                   );
+		add_action( 'wporg_bbp_archived_reply',  array( $this, 'notify_forum_remove_reply' )                );
 	}
 
 	/**
@@ -131,7 +133,7 @@ class WPOrg_WP_Activity_Notifier {
 		$author = get_user_by( 'id', $post->post_author );
 
 		$content = wp_trim_words(
-			( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content ),
+			strip_shortcodes( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content ),
 			55
 		);
 
@@ -262,7 +264,7 @@ class WPOrg_WP_Activity_Notifier {
 				'post_id'   => '',
 				'topic_id'  => $topic_id,
 				'forum_id'  => bbp_get_topic_forum_id( $topic_id ),
-				'title'     => bbp_get_topic_title( $topic_id ),
+				'title'     => strip_tags( bbp_get_topic_title( $topic_id ) ),
 				'url'       => bbp_get_topic_permalink( $topic_id ),
 				'message'   => bbp_get_topic_excerpt( $topic_id, 55 ),
 				'site'      => get_bloginfo( 'name' ),
@@ -330,7 +332,7 @@ class WPOrg_WP_Activity_Notifier {
 				'post_id'   => $reply_id,
 				'topic_id'  => bbp_get_reply_topic_id( $reply_id ),
 				'forum_id'  => bbp_get_reply_forum_id( $reply_id ),
-				'title'     => bbp_get_reply_topic_title( $reply_id ) ,
+				'title'     => strip_tags( bbp_get_reply_topic_title( $reply_id ) ),
 				'url'       => bbp_get_reply_url( $reply_id ),
 				'message'   => $this->get_reply_excerpt( $reply_id, 15 ),
 				'site'      => get_bloginfo( 'name' ),
@@ -400,7 +402,12 @@ class WPOrg_WP_Activity_Notifier {
 		$text = preg_replace( '/<blockquote>.+?<\/blockquote>/s', '', $text );
 
 		// Strip tags and surrounding whitespace.
-		$text = trim ( strip_tags( $text ) );
+		$text = trim( strip_tags( $text ) );
+
+		// Strip shortcodes.
+		if ( function_exists( 'strip_shortcodes' ) ) {
+			$text = strip_shortcodes( $text );
+		}
 
 		// If trimming by chars, behave like a more multibyte-aware
 		// bbp_get_reply_excerp().
