@@ -398,7 +398,7 @@ class Parser {
 				$this->sections['faq'] .= "\n<dl>\n";
 				foreach ( $this->faq as $question => $answer ) {
 					$question_slug          = sanitize_title_with_dashes( $question );
-					$this->sections['faq'] .= "<dt id='{$question_slug}'>{$question}</dt>\n<dd>{$answer}</dd>\n";
+					$this->sections['faq'] .= "<dt id='{$question_slug}'><h3>{$question}</h3></dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
 			}
