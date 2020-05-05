@@ -49,26 +49,6 @@ add_action( 'send_headers', function( $wp ) {
 } );
 
 /**
- * Detect invalid parameters being passed to REST API Endpoints.
- * Not all API endpoints sanitization callbacks check variable types.
- * 
- * @see https://core.trac.wordpress.org/ticket/49991
- */
-add_action( 'rest_api_init', function( $wp_rest_server ) {
-	global $wp;
-
-	// oEmbed endpoint has some not-so-great sanitize callbacks specified
-	if ( '/oembed/1.0/embed' === $wp->query_vars['rest_route'] ) {
-		foreach ( [ 'url', 'maxwidth' ] as $field ) {
-			if ( isset( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
-				die_bad_request( "non-scalar $field in oEmbed call" );
-			}
-		}
-	}
-
-} );
-
-/**
  * Detect invalid parameters being passed to the Jetpack Subscription widget.
  * 
  * @see https://github.com/Automattic/jetpack/pull/15638
@@ -85,29 +65,43 @@ add_action( 'template_redirect', function() {
 }, 9 );
 
 /**
+ * Detect badly formed XMLRPC requests.
+ * pingback.ping is not a valid multicall target, blocking due to the excessive requests.
+ */
+add_action( 'xmlrpc_call', function() {
+	global $HTTP_RAW_POST_DATA;
+	if (
+		false !== stripos( $HTTP_RAW_POST_DATA, '<methodName>system.multicall</methodName>' ) &&
+		false !== stripos( $HTTP_RAW_POST_DATA, '<name>methodName</name><value>pingback.ping</value>' )
+	) {
+		die_bad_request( 'pingback.ping inside a system.multicall' );
+	}
+}, 1 );
+
+/**
  * Die with a 400 Bad Request.
  * 
  * @param string $reference A unique identifying string to make it easier to read logs.
  */
-function die_bad_request( $reference = '') {
-	header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request' );
+function die_bad_request( $reference = '' ) {
+	// Log it if possible, and not on a sandbox
+	if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
+		if ( function_exists( 'wporg_error_reporter' ) && ! empty( $_COOKIE['wporg_logged_in'] ) ) {
+			wporg_error_reporter( E_USER_NOTICE, "400 Bad Request: $reference", __FILE__, __LINE__ );
+		}
+	}
 
 	// Use a prettier error page on WordPress.org
 	if (
 		false !== stripos( $_SERVER['HTTP_HOST'], 'wordpress.org' ) &&
-		defined( 'WPORGPATH' ) && file_exists( WPORGPATH . '/403.php' )
+		defined( 'WPORGPATH' ) && file_exists( WPORGPATH . '/403.php' ) &&
+		! defined( 'XMLRPC_REQUEST' ) && ! defined( 'REST_REQUEST' )
 	) {
+		status_header( 400 );
 		$header_set_for_403 = true;
 		include WPORGPATH . '/403.php';
-
-		// Log it if possible, and not on a sandbox
-		if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
-			if ( function_exists( 'wporg_error_reporter' ) && ! empty( $_COOKIE ) ) {
-				wporg_error_reporter( E_USER_NOTICE, "400 Bad Request: $reference", __FILE__, __LINE__ );
-			}
-		}
-		exit;
+	} else {
+		\wp_die( 'Bad Request', 'Bad Request', [ 'response' => 400 ] );
 	}
-
-	\wp_die( 'Bad Request', 'Bad Request', [ 'code' => 400 ] );
+	exit;
 }
