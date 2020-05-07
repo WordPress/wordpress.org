@@ -361,9 +361,14 @@ add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_regi
 function wporg_login_canonical_link() {
 	$canonical = false;
 
-	// If the regular expression for this route is not matching, it's the canonical.
-	if ( false === stripos( WP_WPOrg_SSO::$matched_route_regex, '(' ) ) {
-		$canonical = site_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
+	$matching_route = stripos( WP_WPOrg_SSO::$matched_route_regex, '(' );
+	if ( false === $matching_route ) {
+		$canonical = home_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
+
+	// Else, if there's a long enough slug followed by a `/`, that's a parent page.
+	} elseif ( $matching_route >= 3 && '/' === substr( WP_WPOrg_SSO::$matched_route_regex, $matching_route + 1, 1 ) ) {
+		$canonical = home_url( substr( WP_WPOrg_SSO::$matched_route_regex, 0, $matching_route ) );
+
 	}
 
 	if ( $canonical ) {
@@ -372,3 +377,11 @@ function wporg_login_canonical_link() {
 }
 add_action( 'login_head', 'wporg_login_canonical_link' );
 add_action( 'wp_head', 'wporg_login_canonical_link' );
+
+/**
+ * Set the title for the wp-login.php page.
+ */
+function wporg_login_title() {
+	return get_bloginfo( 'name', 'display' );
+}
+add_filter( 'login_title', 'wporg_login_title' );
