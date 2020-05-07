@@ -25,8 +25,6 @@ body.login {
 
 /* Don't use Flex alignments for the registration pages, doesn't play nice with content that exceeds the window height  */
 body.route-register,
-body.route-register-profile,
-body.route-register-confirm,
 body.route-pending-profile,
 body.route-pending-create {
 	display: block;
@@ -334,16 +332,12 @@ form input[type="password"] {
 }
 
 body.route-register input.input,
-body.route-register-profile input.input,
-body.route-register-confirm input.input,
 body.route-pending-profile input.input,
 body.route-pending-create input.input {
 	margin-bottom: 0;
 }
 
 body.route-register #login form p,
-body.route-register-profile #login form p,
-body.route-register-confirm #login form p,
 body.route-pending-profile #login form p,
 body.route-pending-create #login form p,
 body.route-linkexpired h2,
@@ -377,8 +371,6 @@ body.login form input.good {
 }
 
 body.route-register #login .message,
-body.route-register-profile #login .message,
-body.route-register-confirm #login .message,
 body.route-pending-profile #login .message,
 body.route-pending-create #login .message,
 body.route-linkexpired #login .message {
@@ -389,8 +381,6 @@ body.route-linkexpired #login .message {
 }
 
 body.route-register #login .message p,
-body.route-register-profile #login .message p,
-body.route-register-confirm #login .message p,
 body.route-pending-profile #login .message p,
 body.route-pending-create #login .message p,
 body.route-linkexpired #login .message p {
@@ -398,8 +388,6 @@ body.route-linkexpired #login .message p {
 }
 
 body.route-register #login .message.with-avatar p,
-body.route-register-profile #login .message.with-avatar p,
-body.route-register-confirm #login .message.with-avatar p,
 body.route-pending-profile #login .message.with-avatar p,
 body.route-pending-create #login .message.with-avatar p {
 	display: -webkit-box;
@@ -411,8 +399,6 @@ body.route-pending-create #login .message.with-avatar p {
 }
 
 body.route-register #login .message.error,
-body.route-register-profile #login .message.error,
-body.route-register-confirm #login .message.error,
 body.route-pending-profile #login .message.error,
 body.route-pending-create #login .message.error,
 body.route-linkexpired #login .message.error {
@@ -429,8 +415,6 @@ body.route-linkexpired #login .message.error {
 }
 
 body.rtl.route-register #login .message.error,
-body.rtl.route-register-profile #login .message.error,
-body.rtl.route-register-confirm #login .message.error,
 body.rtl.route-pending-profile #login .message.error,
 body.rtl.route-pending-create #login .message.error,
 body.rtl.route-linkexpired #login .message.error {
@@ -449,14 +433,11 @@ body.rtl.route-register .message.error .avatar {
 	margin-left: 1em;
 }
 
-body.route-register-profile #login .message.info,
 body.route-pending-profile #login .message.info {
 	margin-top: -24px;
 	width: 350px;
 }
 
-body.route-register-profile #login .message.info,
-body.route-register-profile p.intro,
 body.route-pending-profile #login .message.info,
 body.route-pending-profile p.intro {
 	margin-bottom: 1em !important;
