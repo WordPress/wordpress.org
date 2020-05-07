@@ -13,6 +13,8 @@ function meta_robots() {
 		$noindex = true;
 	} elseif ( is_singular() && 'publish' !== get_post_status() ) {
 		$noindex = true;
+	} elseif ( is_attachment() ) {
+		$noindex = true;
 	} elseif ( ( is_tax() || is_tag() || is_category() ) && $wp_query->found_posts <= 3 ) {
 		$noindex = true;
 	}
