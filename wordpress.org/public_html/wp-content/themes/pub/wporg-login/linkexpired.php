@@ -32,7 +32,7 @@ if ( 'register' == $reason && $user ) {
 ?>
 
 <p id="nav">
-	<a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( '&larr; Back to login', 'wporg' ); ?></a>
+	<a href="/"><?php _e( '&larr; Back to login', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

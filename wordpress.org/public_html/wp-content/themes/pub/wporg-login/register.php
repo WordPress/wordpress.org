@@ -97,7 +97,7 @@ get_header();
 </form>
 
 <p id="nav">
-	<a href="<?php echo esc_url( wp_login_url() ); ?>" title="<?php esc_attr_e( 'Already have an account?', 'wporg' ); ?>"><?php _e( 'Already have an account?', 'wporg' ); ?></a> &nbsp; • &nbsp;
+	<a href="/" title="<?php esc_attr_e( 'Already have an account?', 'wporg' ); ?>"><?php _e( 'Already have an account?', 'wporg' ); ?></a> &nbsp; • &nbsp;
 	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
 
 </p>
