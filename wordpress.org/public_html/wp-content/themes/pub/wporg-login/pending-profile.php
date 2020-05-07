@@ -45,7 +45,7 @@ get_header();
 		printf(
 			/* translators: %s Email address */
 			__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ),
-			'<code>' . esc_html( wp_get_current_user()->user_email ) . '</code>'
+			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>'
 		);
 	?></p>
 </div>
