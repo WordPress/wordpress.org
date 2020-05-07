@@ -34,15 +34,19 @@ function get_canonical_url() {
 		$url = get_term_link( $queried_object );
 
 		// Detect multi-term queries.
-		$term_queries    = count( $wp_query->tax_query->queries );
-		$term_query_zero = count( $wp_query->tax_query->queries[0]['terms'] );
+		// Create a copy and remove the 'relation' param if present.
+		$tax_queries = $wp_query->tax_query->queries;
+		unset( $tax_queries['relation'] );
+
+		$term_queries    = count( $tax_queries );
+		$term_query_zero = count( $tax_queries[0]['terms'] );
 		if ( $term_queries > 1 || $term_query_zero > 1 ) {
 			// Multiple terms are being queried for.
-			$terms = wp_list_pluck( $wp_query->tax_query->queries, 'terms' );
+			$terms = wp_list_pluck( $tax_queries, 'terms' );
 			$terms = call_user_func_array( 'array_merge', $terms );
 
 			// Determine how many taxonomies are involved in this query.
-			$taxonomies = array_unique( wp_list_pluck( $wp_query->tax_query->queries, 'taxonomy' ) );
+			$taxonomies = array_unique( wp_list_pluck( $tax_queries, 'taxonomy' ) );
 
 			if ( count( $taxonomies ) > 1 ) {
 				// Multiple-taxonomy query. No canonical produced.
@@ -51,8 +55,8 @@ function get_canonical_url() {
 			} elseif ( $term_queries > 1 && 1 === $term_query_zero ) {
 				// AND +
 				$glue = '+';
-			} elseif( $term_query_zero > 1 && 1 === $term_queries && 'AND' === $wp_query->tax_query->relation ) {
-				if ( 'AND' === $wp_query->tax_query->queries[0]['operator'] ) {
+			} elseif ( $term_query_zero > 1 && 1 === $term_queries && 'AND' === $wp_query->tax_query->relation ) {
+				if ( 'AND' === $tax_queries[0]['operator'] ) {
 					// AND +
 					$glue = '+';
 				} else {
