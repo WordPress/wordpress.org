@@ -19,6 +19,31 @@ function rel_canonical_link() {
 add_action( 'wp_head', __NAMESPACE__ . '\rel_canonical_link' );
 add_action( 'login_head',  __NAMESPACE__ . '\rel_canonical_link' );
 
+/**
+ * Outputs a Canonical Link header on needed pages.
+ */
+function rel_canonical_header() {
+	$url = get_canonical_url();
+	if ( ! $url || headers_sent() ) {
+		return;
+	}
+
+	$canonical = false;
+
+	if ( is_feed() && ! is_404() && is_archive() && ! is_comment_feed() ) {
+		// $url will NOT contain /feed/ so we can't output this on is_comment_feed()
+		$canonical = true;
+	}
+
+	if ( $canonical ) {
+		header( sprintf(
+			'Link: <%s>; rel="canonical"',
+			esc_url( $url )
+		) );
+	}
+}
+add_action( 'wp', __NAMESPACE__ . '\rel_canonical_header' );
+
 remove_action( 'wp_head', 'rel_canonical' );
 
 /**
