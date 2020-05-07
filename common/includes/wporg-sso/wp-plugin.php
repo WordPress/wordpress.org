@@ -160,8 +160,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Extend registration paths only when registration is open.
 			if ( 'user' === get_site_option( 'registration', 'none' ) ) {
 				// New "pending" registration flow.
-				$this->valid_sso_paths['pending-profile']  = '/register/create-profile/(?P<profile_user>[^/]+)/(?P<profile_key>[^/]+)';
-				$this->valid_sso_paths['pending-create']   = '/register/create/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+)';
+				$this->valid_sso_paths['pending-profile']  = '/register/create-profile(/(?P<profile_user>[^/]+)/(?P<profile_key>[^/]+))?';
+				$this->valid_sso_paths['pending-create']   = '/register/create(/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+))?';
 
 				// Primary registration route.
 				$this->valid_sso_paths['register']         = '/register(/(?P<user>[^/]+))?';

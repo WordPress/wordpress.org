@@ -5,8 +5,23 @@
  * @package wporg-login
  */
 
-$activation_user = WP_WPOrg_SSO::$matched_route_params['confirm_user'] ?? false;
-$activation_key  = WP_WPOrg_SSO::$matched_route_params['confirm_key']  ?? false;
+// Clear the pending cookies, they're no longer needed.
+if ( isset( $_COOKIE['wporg_profile_user'] ) ) {
+	setcookie( 'wporg_profile_user', false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+	setcookie( 'wporg_profile_key', false,  time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+}
+
+// Migrate to cookies.
+if ( !empty( WP_WPOrg_SSO::$matched_route_params['confirm_user'] ) ) {
+	setcookie( 'wporg_confirm_user', WP_WPOrg_SSO::$matched_route_params['confirm_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+	setcookie( 'wporg_confirm_key',  WP_WPOrg_SSO::$matched_route_params['confirm_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+
+	wp_safe_redirect( '/register/create' );
+	die();
+}
+
+$activation_user = $_COOKIE['wporg_confirm_user'] ?? false;
+$activation_key  = $_COOKIE['wporg_confirm_key']  ?? false;
 
 $pending_user = wporg_get_pending_user( $activation_user );
 if ( ! $pending_user ) {
@@ -35,7 +50,7 @@ if ( $pending_user && $pending_user['user_activation_key'] && ! $pending_user['c
 }
 
 if ( ! $can_access ) {
-	wp_safe_redirect( "/" );
+	wp_safe_redirect( '/' );
 	die();
 }
 
@@ -60,6 +75,10 @@ if ( isset( $_POST['user_pass'] ) ) {
 	if ( $pending_user && ! $pending_user['created'] ) {
 		$user = wporg_login_create_user_from_pending( $pending_user, $user_pass );
 		if ( $user ) {
+			setcookie( 'wporg_confirm_user', false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+			setcookie( 'wporg_confirm_key',  false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+
+			// Log the user in
 			wp_set_current_user( $user->ID );
 			wp_set_auth_cookie( $user->ID, true );
 		}
