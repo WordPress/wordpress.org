@@ -36,13 +36,24 @@ add_action( 'wp_head', __NAMESPACE__ . '\meta_robots', 10, 1 );
 /**
  * Add an X-Robots-Tag header when appropriate.
  */
-function add_X_robots_tag( $headers ) {
+function add_X_robots_tag() {
+	$noindex = false;
 
 	// Search and Taxonomy feeds should be noindexed.
 	if ( is_feed() && ( is_tax() || is_tag() || is_category() || is_search() ) ) {
-		$headers['X-Robots-Tag'] = 'noindex, follow';
+		$noindex = true;
 	}
 
-	return $headers;
+	// Allow sites to alter this
+	$noindex = apply_filters( 'wporg_noindex_request', $noindex );
+
+	if ( $noindex && ! headers_sent() ) {
+		// Allow sites to override the value.
+		if ( is_bool( $noindex ) ) {
+			$noindex = 'noindex,follow';
+		}
+
+		header( 'X-Robots-Tag: ' . $noindex );
+	}
 }
-add_filter( 'wp_headers', __NAMESPACE__ . '\add_X_robots_tag' );
+add_action( 'wp', __NAMESPACE__ . '\add_X_robots_tag' );
