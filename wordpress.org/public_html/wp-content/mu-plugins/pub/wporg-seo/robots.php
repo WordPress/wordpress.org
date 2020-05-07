@@ -39,7 +39,7 @@ add_action( 'wp_head', __NAMESPACE__ . '\meta_robots', 10, 1 );
 function add_X_robots_tag( $headers ) {
 
 	// Search and Taxonomy feeds should be noindexed.
-	if ( is_feed() && ( is_tax() || is_search() ) ) {
+	if ( is_feed() && ( is_tax() || is_tag() || is_category() || is_search() ) ) {
 		$headers['X-Robots-Tag'] = 'noindex, follow';
 	}
 
