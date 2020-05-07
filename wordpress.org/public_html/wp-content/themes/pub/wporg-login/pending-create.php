@@ -101,6 +101,11 @@ get_header();
 
 <form name="registerform" id="registerform" action="" method="post">
 
+		<p class="login-login">
+			<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
+			<input type="text" disabled="disabled" class=" disabled" value="<?php echo esc_attr( $activation_user ); ?>" size="20" />
+		</p>
+
 		<div class="user-pass1-wrap">
 		<p>
 			<label for="pass1"><?php _e( 'Password', 'wporg' ); ?></label>

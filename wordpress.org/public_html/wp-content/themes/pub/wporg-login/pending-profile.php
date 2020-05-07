@@ -65,6 +65,12 @@ get_header();
 
 <form name="registerform" id="registerform" action="" method="post">
 
+	<p class="login-login">
+		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
+		<input type="text" disabled="disabled" class=" disabled" value="<?php echo esc_attr( $profile_user ); ?>" size="20" />
+	</p>
+
+
 	<?php
 		$fields = &$pending_user['meta'];
 		include __DIR__ . '/partials/register-profilefields.php';
