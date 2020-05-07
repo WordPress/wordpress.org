@@ -446,10 +446,10 @@ body.route-pending-profile p.intro {
 body.route-pending-profile .login-login input.disabled,
 body.route-pending-create .login-login input.disabled {
 	color: #666;
-    background: transparent;
-    border: none;
-    box-shadow: unset;
-    margin-bottom: 0;
+	background: transparent;
+	border: none;
+	box-shadow: unset;
+	margin-bottom: 0;
 }
 
 form .login-mailinglist label {
