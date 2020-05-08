@@ -56,4 +56,4 @@ function add_X_robots_tag() {
 		header( 'X-Robots-Tag: ' . $noindex );
 	}
 }
-add_action( 'wp', __NAMESPACE__ . '\add_X_robots_tag' );
+add_action( 'template_redirect', __NAMESPACE__ . '\add_X_robots_tag', 1000 );

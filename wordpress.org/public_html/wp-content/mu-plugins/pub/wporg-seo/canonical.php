@@ -42,7 +42,7 @@ function rel_canonical_header() {
 		) );
 	}
 }
-add_action( 'wp', __NAMESPACE__ . '\rel_canonical_header' );
+add_action( 'template_redirect', __NAMESPACE__ . '\rel_canonical_header', 1000 );
 
 remove_action( 'wp_head', 'rel_canonical' );
 
