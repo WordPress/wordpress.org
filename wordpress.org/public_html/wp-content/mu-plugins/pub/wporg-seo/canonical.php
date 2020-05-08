@@ -133,12 +133,8 @@ function get_canonical_url() {
 
 	// Ensure trailing slashed paths.
 	if ( $url ) {
-		if ( false !== stripos( $url, '?' ) ) {
-			[ $url, $query ] = explode( '?', $url, 2 );
-			$url = trailingslashit( $url ) . '?' . $query;
-		} else {
-			$url = trailingslashit( $url );
-		}
+		// Slash before ?.. and/or #...
+		$url = preg_replace( '!^([^?#]*?)([^/])((\?.*)?(#.*)?)$!', '$1$2/$3', $url );
 	}
 
 	if ( $url && is_paged() && (int) get_query_var( 'paged' ) > 1 ) {
