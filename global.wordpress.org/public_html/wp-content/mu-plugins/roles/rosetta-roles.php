@@ -62,6 +62,10 @@ class Rosetta_Roles {
 	 */
 	public function plugins_loaded() {
 		$locale = get_locale();
+		if ( 'en_US' === $locale ) {
+			return;
+		}
+
 		$gp_locale = GP_Locales::by_field( 'wp_locale', $locale );
 		if ( ! $gp_locale ) {
 			return;
@@ -69,17 +73,15 @@ class Rosetta_Roles {
 
 		$this->gp_locale = $gp_locale;
 
-		if ( ! is_main_site() ) {
-			add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
-			add_filter( 'set-screen-option', array( $this, 'save_custom_screen_options' ), 10, 3 );
-			add_action( 'after_setup_theme', array( $this, 'register_resources_nav_menu' ) );
+		add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
+		add_filter( 'set-screen-option', array( $this, 'save_custom_screen_options' ), 10, 3 );
+		add_action( 'after_setup_theme', array( $this, 'register_resources_nav_menu' ) );
 
-			add_action( 'translation_editor_added', array( $this, 'update_wporg_profile_badge' ) );
-			add_action( 'translation_editor_removed', array( $this, 'update_wporg_profile_badge' ) );
+		add_action( 'translation_editor_added', array( $this, 'update_wporg_profile_badge' ) );
+		add_action( 'translation_editor_removed', array( $this, 'update_wporg_profile_badge' ) );
 
-			add_action( 'translation_editor_added', array( $this, 'send_email_notification' ), 10, 2 );
-			add_action( 'translation_editor_updated', array( $this, 'send_email_notification' ), 10, 2 );
-		}
+		add_action( 'translation_editor_added', array( $this, 'send_email_notification' ), 10, 2 );
+		add_action( 'translation_editor_updated', array( $this, 'send_email_notification' ), 10, 2 );
 
 		add_action( 'wp_ajax_rosetta-get-projects', array( $this, 'ajax_rosetta_get_projects' ) );
 
