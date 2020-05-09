@@ -118,10 +118,21 @@ class Locale_Associations_View implements Admin_Page_View {
 
 			<p>
 				<label for="locale"><?php _e( 'Locale:', 'rosetta' ); ?></label>
-				<input type="text" id="locale" name="locale" class="code" />
+				<select id="locale" name="locale" required>
+					<option value=""><?php _e( '&mdash; Select &mdash;', 'rosetta' ); ?></option>
+					<?php
+					foreach ( $this->page->get_available_wp_locales() as $locale ) {
+						printf(
+							'<option value="%s">%s</option>',
+							esc_attr( $locale ),
+							esc_html( $locale )
+						);
+					}
+					?>
+				</select>
 
 				<label for="subdomain"><?php _e( 'Subdomain:', 'rosetta' ); ?></label>
-				<input type="text" id="subdomain" name="subdomain" class="code" />
+				<input type="text" id="subdomain" name="subdomain" class="code" required />
 			</p>
 
 			<p class="submit">

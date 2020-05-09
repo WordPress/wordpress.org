@@ -2,6 +2,7 @@
 
 namespace WordPressdotorg\Rosetta\Admin\Network;
 
+use GP_Locales;
 use WordPressdotorg\Rosetta\Admin\Admin_Page;
 use WordPressdotorg\Rosetta\Admin\Admin_Page_View;
 use WordPressdotorg\Rosetta\Database\Tables;
@@ -220,6 +221,23 @@ class Locale_Associations implements Admin_Page {
 		}
 
 		return $associations;
+	}
+
+	/**
+	 * Retrieves all available WP locales which are not assigned to a site yet.
+	 *
+	 * @return array List of locales.
+	 */
+	public function get_available_wp_locales() {
+		global $wpdb;
+
+		$locales           = GP_Locales::locales();
+		$wp_locales        = array_filter( wp_list_pluck( $locales, 'wp_locale' ) );
+		$wp_locales_in_use = $wpdb->get_col( 'SELECT locale FROM ' . Tables::LOCALES );
+
+		$wp_locales_in_use[] = 'en_US';
+
+		return array_diff( $wp_locales, $wp_locales_in_use );
 	}
 
 	/**
