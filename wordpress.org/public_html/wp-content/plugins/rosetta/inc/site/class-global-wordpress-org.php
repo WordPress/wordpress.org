@@ -42,10 +42,6 @@ class Global_WordPress_Org implements Site {
 	 * Registers actions and filters.
 	 */
 	public function register_events() {
-		$jetpack_connector = new Jetpack\Connector();
-		add_action( 'wpmu_new_blog', [ $jetpack_connector, 'schedule_connect_event' ], 20, 1 );
-		add_action( $jetpack_connector->get_connect_event_name(), [ $jetpack_connector, 'connect_site' ] );
-
 		add_action( 'wpmu_new_blog', [ $this, 'set_new_blog_lang_id' ], 30, 1 );
 
 		add_action( 'network_admin_menu', function() {
