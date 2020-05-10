@@ -62,6 +62,7 @@ class Init_Locale extends WP_CLI_Command {
 				'meta/p2-breathe',
 				'meta/get-involved',
 				'meta/wordcamp',
+				'meta/browsehappy',
 			) );
 		}
 
@@ -70,11 +71,11 @@ class Init_Locale extends WP_CLI_Command {
 		}
 
 		// Themes
-		$theme_projects = $wpdb->get_col( "SELECT path FROM {$wpdb->gp_projects} WHERE `parent_project_id` = 523" );
+		$theme_projects = $wpdb->get_col( "SELECT path FROM {$wpdb->gp_projects} WHERE `parent_project_id` = 523 AND `active` = 1" );
 		$projects = array_merge( $projects, $theme_projects );
 
 		// Plugins
-		$_plugin_projects = $wpdb->get_col( "SELECT path FROM {$wpdb->gp_projects} WHERE `parent_project_id` = 17" );
+		$_plugin_projects = $wpdb->get_col( "SELECT path FROM {$wpdb->gp_projects} WHERE `parent_project_id` = 17 AND `active` = 1" );
 		$plugin_projects = array();
 		foreach ( $_plugin_projects as $plugin_project ) {
 			$plugin_projects[] = $plugin_project . '/dev';
