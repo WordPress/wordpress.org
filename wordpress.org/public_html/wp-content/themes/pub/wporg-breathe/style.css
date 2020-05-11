@@ -7,10 +7,18 @@
 
 /* Show a Slack icon in front of Slack links. */
 a[href*=".slack.com"] {
-	padding-left: 2rem;
-	background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMjcwIDI3MCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjcwIDI3MDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+LnN0MHtmaWxsOiNFMDFFNUE7fS5zdDF7ZmlsbDojMzZDNUYwO30uc3Qye2ZpbGw6IzJFQjY3RDt9LnN0M3tmaWxsOiNFQ0IyMkU7fTwvc3R5bGU+PGc+PGc+PHBhdGggY2xhc3M9InN0MCIgZD0iTTk5LjQsMTUxLjJjMCw3LjEtNS44LDEyLjktMTIuOSwxMi45Yy03LjEsMC0xMi45LTUuOC0xMi45LTEyLjljMC03LjEsNS44LTEyLjksMTIuOS0xMi45aDEyLjlWMTUxLjJ6Ii8+PHBhdGggY2xhc3M9InN0MCIgZD0iTTEwNS45LDE1MS4yYzAtNy4xLDUuOC0xMi45LDEyLjktMTIuOXMxMi45LDUuOCwxMi45LDEyLjl2MzIuM2MwLDcuMS01LjgsMTIuOS0xMi45LDEyLjlzLTEyLjktNS44LTEyLjktMTIuOVYxNTEuMnoiLz48L2c+PGc+PHBhdGggY2xhc3M9InN0MSIgZD0iTTExOC44LDk5LjRjLTcuMSwwLTEyLjktNS44LTEyLjktMTIuOWMwLTcuMSw1LjgtMTIuOSwxMi45LTEyLjlzMTIuOSw1LjgsMTIuOSwxMi45djEyLjlIMTE4Ljh6Ii8+PHBhdGggY2xhc3M9InN0MSIgZD0iTTExOC44LDEwNS45YzcuMSwwLDEyLjksNS44LDEyLjksMTIuOXMtNS44LDEyLjktMTIuOSwxMi45SDg2LjVjLTcuMSwwLTEyLjktNS44LTEyLjktMTIuOXM1LjgtMTIuOSwxMi45LTEyLjlIMTE4Ljh6Ii8+PC9nPjxnPjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xNzAuNiwxMTguOGMwLTcuMSw1LjgtMTIuOSwxMi45LTEyLjljNy4xLDAsMTIuOSw1LjgsMTIuOSwxMi45cy01LjgsMTIuOS0xMi45LDEyLjloLTEyLjlWMTE4Ljh6Ii8+PHBhdGggY2xhc3M9InN0MiIgZD0iTTE2NC4xLDExOC44YzAsNy4xLTUuOCwxMi45LTEyLjksMTIuOWMtNy4xLDAtMTIuOS01LjgtMTIuOS0xMi45Vjg2LjVjMC03LjEsNS44LTEyLjksMTIuOS0xMi45YzcuMSwwLDEyLjksNS44LDEyLjksMTIuOVYxMTguOHoiLz48L2c+PGc+PHBhdGggY2xhc3M9InN0MyIgZD0iTTE1MS4yLDE3MC42YzcuMSwwLDEyLjksNS44LDEyLjksMTIuOWMwLDcuMS01LjgsMTIuOS0xMi45LDEyLjljLTcuMSwwLTEyLjktNS44LTEyLjktMTIuOXYtMTIuOUgxNTEuMnoiLz48cGF0aCBjbGFzcz0ic3QzIiBkPSJNMTUxLjIsMTY0LjFjLTcuMSwwLTEyLjktNS44LTEyLjktMTIuOWMwLTcuMSw1LjgtMTIuOSwxMi45LTEyLjloMzIuM2M3LjEsMCwxMi45LDUuOCwxMi45LDEyLjljMCw3LjEtNS44LDEyLjktMTIuOSwxMi45SDE1MS4yeiIvPjwvZz48L2c+PC9zdmc+) no-repeat;
-	background-size: 2.75rem;
-	background-position: -0.25rem -0.15rem;
+	white-space: nowrap;
+}
+a[href*=".slack.com"]::before {
+	content: '';
+	display: inline-block;
+	vertical-align: middle;
+	height: 1em;
+	width: 1em;
+	margin-right: .2em;
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg height='124' viewBox='0 0 124 124' width='124' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cpath d='m26.4 78.2c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9 5.8-12.9 12.9-12.9h12.9z' fill='%23e01e5a'/%3E%3Cpath d='m32.9 78.2c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9z' fill='%23e01e5a'/%3E%3Cpath d='m45.8 26.4c-7.1 0-12.9-5.8-12.9-12.9s5.8-12.9 12.9-12.9 12.9 5.8 12.9 12.9v12.9z' fill='%2336c5f0'/%3E%3Cpath d='m45.8 32.9c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9h-32.3c-7.1 0-12.9-5.8-12.9-12.9s5.8-12.9 12.9-12.9z' fill='%2336c5f0'/%3E%3Cpath d='m97.6 45.8c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9-5.8 12.9-12.9 12.9h-12.9z' fill='%232eb67d'/%3E%3Cpath d='m91.1 45.8c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9v-32.3c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9z' fill='%232eb67d'/%3E%3Cg fill='%23ecb22e' transform='translate(65 65)'%3E%3Cpath d='m13.2 32.6c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9-12.9-5.8-12.9-12.9v-12.9z'/%3E%3Cpath d='m13.2 26.1c-7.1 0-12.9-5.8-12.9-12.9s5.8-12.9 12.9-12.9h32.3c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+	background-size: 100%;
+	background-repeat: no-repeat;
 }
 
 body, button, input, select, textarea,
