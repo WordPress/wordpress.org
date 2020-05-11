@@ -5,16 +5,19 @@
  * Author: Nacin
  */
 
-require_once dirname( __FILE__ ) . '/inc/admin-notices.php';
-require_once dirname( __FILE__ ) . '/inc/callout-boxes.php';
-require_once dirname( __FILE__ ) . '/inc/glossary.php';
-require_once dirname( __FILE__ ) . '/inc/navigation.php';
-require_once dirname( __FILE__ ) . '/inc/breadcrumbs.php';
-require_once dirname( __FILE__ ) . '/inc/table-of-contents.php';
-require_once dirname( __FILE__ ) . '/inc/template-tags.php';
-require_once dirname( __FILE__ ) . '/inc/email-post-changes.php';
-require_once dirname( __FILE__ ) . '/inc/walker.php';
-require_once dirname( __FILE__ ) . '/inc/watchlist.php';
+const WPORG_HANDBOOK_PLUGIN_FILE = __FILE__;
+
+require_once __DIR__ . '/inc/admin-notices.php';
+require_once __DIR__ . '/inc/callout-boxes.php';
+require_once __DIR__ . '/inc/glossary.php';
+require_once __DIR__ . '/inc/navigation.php';
+require_once __DIR__ . '/inc/breadcrumbs.php';
+require_once __DIR__ . '/inc/table-of-contents.php';
+require_once __DIR__ . '/inc/template-tags.php';
+require_once __DIR__ . '/inc/email-post-changes.php';
+require_once __DIR__ . '/inc/walker.php';
+require_once __DIR__ . '/inc/watchlist.php';
+require_once __DIR__ . '/inc/blocks.php';
 
 /**
  * Initialize our handbooks
@@ -155,7 +158,7 @@ class WPorg_Handbook {
 		}
 		return $post_states;
 	}
-	
+
 	/**
 	 * Adds custom handbook-related classes to body tag.
 	 *
@@ -437,7 +440,7 @@ class WPorg_Handbook {
 
 		register_sidebar( $sidebar_args );
 
-		require_once dirname( __FILE__ ) . '/inc/widgets.php';
+		require_once __DIR__ . '/inc/widgets.php';
 		register_widget( 'WPorg_Handbook_Pages_Widget' );
 	}
 

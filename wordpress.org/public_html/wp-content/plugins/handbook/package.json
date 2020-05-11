@@ -1,0 +1,14 @@
+{
+  "name": "handbook",
+  "version": "1.0.0",
+  "author": "WordPress.org contributors",
+  "license": "GPL-2.0-or-later",
+  "devDependencies": {
+    "@wordpress/scripts": "^9.0.0"
+  },
+  "scripts": {
+    "build": "wp-scripts build ./scripts/src/blocks.js --output-path=scripts",
+    "start": "wp-scripts start ./scripts/src/blocks.js --output-path=scripts",
+    "lint": "wp-scripts lint-js ./scripts/src"
+  }
+}
