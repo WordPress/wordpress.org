@@ -775,6 +775,18 @@ class Official_WordPress_Events {
 
 			// Make sure we have a valid API response, to avoid marking events as deleted just because the request failed.
 			if ( is_wp_error( $events ) ) {
+				$breaking_error_codes = array( 'invalid_grant', 'auth_fail' );
+				if ( in_array( $events->get_error_code(), $breaking_error_codes, true ) ) {
+					$this->log(
+						sprintf(
+							'Failed to check for deleted meetup events: %s',
+							esc_html( $events->get_error_message() )
+						),
+						true
+					);
+					break;
+				}
+
 				continue;
 			}
 
