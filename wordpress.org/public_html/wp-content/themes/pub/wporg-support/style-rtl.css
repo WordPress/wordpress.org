@@ -1190,6 +1190,24 @@ table {
 	width: 100%;
 }
 
+.helphub_article figure.wp-block-table {
+	margin: 1em 0;
+}
+
+.helphub_article table tr:nth-child(odd) {
+	background-color: #f3f4f5;
+}
+
+.helphub_article table th,
+.helphub_article table td {
+	padding: 0.5em 1em;
+}
+
+.helphub_article table th:not(:first-of-type),
+.helphub_article table td:not(:first-of-type) {
+	text-align: center;
+}
+
 .notice {
 	background: #fff;
 	border-right: 4px solid #fff;
@@ -2421,7 +2439,7 @@ p a:hover {
 }
 
 #wporg-header h1 a {
-	background: url(//s.w.org/style/images/wporg-logo.svg?3) center left no-repeat;
+	background: url(//s.w.org/style/images/wporg-logo.svg?3) center right no-repeat;
 	background-size: 290px 46px;
 	display: block;
 	height: 88px;
@@ -4063,6 +4081,12 @@ section {
 #bbpress-forums .bbp-reply-form fieldset.bbp-form button {
 	float: none;
 	margin-top: 0;
+}
+
+#bbpress-forums fieldset.bbp-form select,
+#bbpress-forums fieldset.bbp-form input[type="text"] {
+	min-height: 32px;
+	height: 32px;
 }
 
 #bbpress-forums .bbp-submit-wrapper {

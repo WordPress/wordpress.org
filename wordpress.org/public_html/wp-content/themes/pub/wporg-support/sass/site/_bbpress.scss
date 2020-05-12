@@ -697,6 +697,12 @@ $paginationBreakPoint: "600px";
 		margin-top: 0;
 	}
 
+	fieldset.bbp-form select,
+	fieldset.bbp-form input[type="text"] {
+		min-height: 32px;
+		height: 32px;
+	}
+
 	.bbp-submit-wrapper {
 		margin-top: -35px;
 

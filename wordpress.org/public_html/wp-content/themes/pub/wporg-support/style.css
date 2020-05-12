@@ -4085,6 +4085,12 @@ section {
 	margin-top: 0;
 }
 
+#bbpress-forums fieldset.bbp-form select,
+#bbpress-forums fieldset.bbp-form input[type="text"] {
+	min-height: 32px;
+	height: 32px;
+}
+
 #bbpress-forums .bbp-submit-wrapper {
 	margin-top: -35px;
 }
