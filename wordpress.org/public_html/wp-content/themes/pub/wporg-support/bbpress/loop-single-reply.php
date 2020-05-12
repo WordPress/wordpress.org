@@ -45,7 +45,7 @@ if ( bbp_is_single_view() || bbp_is_search_results() || bbp_is_single_user_repli
 
 		<div class="bbp-reply-meta">
 
-		<p class="bbp-reply-post-date"><a href="<?php bbp_reply_url(); ?>" title="#<?php bbp_reply_id(); ?>" class="bbp-reply-permalink"><?php bbp_reply_post_date( bbp_get_reply_id(), true ); ?></a></p>
+		<p class="bbp-reply-post-date"><a href="<?php bbp_reply_url(); ?>" title="<?php echo esc_attr( bbp_get_reply_post_date( bbp_get_reply_id() ) ); ?>" class="bbp-reply-permalink"><?php bbp_reply_post_date( bbp_get_reply_id(), true ); ?></a></p>
 
 		<?php if ( current_user_can( 'moderate', bbp_get_reply_topic_id() ) ) : ?>
 

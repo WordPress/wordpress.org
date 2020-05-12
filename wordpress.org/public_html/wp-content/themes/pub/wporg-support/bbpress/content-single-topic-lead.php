@@ -58,7 +58,7 @@ if ( bbp_is_single_view() || bbp_is_search_results() ) : ?>
 
 				<?php endif; ?>
 
-				<p class="bbp-topic-post-date"><a href="<?php bbp_topic_permalink(); ?>" title="#<?php bbp_topic_id(); ?>" class="bbp-topic-permalink"><?php bbp_topic_post_date( bbp_get_topic_id(), true ); ?></a></p>
+				<p class="bbp-topic-post-date"><a href="<?php bbp_topic_permalink(); ?>" title="<?php echo esc_attr( bbp_get_topic_post_date( bbp_get_topic_id() ) ); ?>" class="bbp-topic-permalink"><?php bbp_topic_post_date( bbp_get_topic_id(), true ); ?></a></p>
 
 				<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>
 

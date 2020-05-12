@@ -120,6 +120,10 @@ class Hooks {
 		add_filter( 'bbp_edit_reply_pre_content', array( $this, 'support_slack_trac_code_trick' ),  19 );
 		add_filter( 'bbp_edit_topic_pre_content', array( $this, 'support_slack_trac_code_trick' ),  19 );
 		add_filter( 'bbp_edit_forum_pre_content', array( $this, 'support_slack_trac_code_trick' ),  19 );
+
+		// Freshness links should have the datetime as a title rather than the thread title.
+		add_filter( 'bbp_get_topic_freshness_link', array( $this, 'bbp_get_topic_freshness_link' ), 10, 5 );
+
 	}
 
 	/**
@@ -1176,5 +1180,36 @@ class Hooks {
 		$content = preg_replace_callback( "!(^|\n){{{(.*?)}}}!s", 'bbp_encode_callback', $content );
 
 		return $content;
+	}
+	
+	/**
+	 * Alter the bbPress topic freshness links to use the date in the title attribute rather than thread title.
+	 */
+	function bbp_get_topic_freshness_link( $anchor, $topic_id, $time_since, $link_url, $title ) {
+
+		// Copy-paste from bbp_get_topic_last_active_time() which only returns humanized times.
+		// Try to get the most accurate freshness time possible
+		$last_active = get_post_meta( $topic_id, '_bbp_last_active_time', true );
+		if ( empty( $last_active ) ) {
+			if ( ! empty( $reply_id ) ) {
+				$last_active = get_post_field( 'post_date', $reply_id );
+			} else {
+				$last_active = get_post_field( 'post_date', $topic_id );
+			}
+		}
+
+		// This is for translating the date components.
+		$datetime = date_create_immutable_from_format( 'Y-m-d H:i:s', $last_active );
+		$date     = wp_date( get_option( 'date_format' ), $datetime->getTimestamp() );
+		$time     = wp_date( get_option( 'time_format' ), $datetime->getTimestamp() );
+
+		return str_replace(
+			'title="' . esc_attr( $title ) . '"',
+			'title="' . esc_attr(
+				// bbPress string from bbp_get_reply_post_date()
+				sprintf( _x( '%1$s at %2$s', 'date at time', 'wporg-support' ), $date, $time )
+			) . '"',
+			$anchor
+		);
 	}
 }
