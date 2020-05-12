@@ -37,7 +37,7 @@ module.exports = function(grunt) {
 				map: false,
 				processors: [
 					autoprefixer({
-						browsers: [ 'extends @wordpress/browserslist-config' ],
+						overrideBrowserslist: [ 'extends @wordpress/browserslist-config' ],
 						cascade: false,
 					}),
 				],
