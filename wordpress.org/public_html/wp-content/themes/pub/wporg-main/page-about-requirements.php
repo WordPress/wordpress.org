@@ -71,6 +71,13 @@ the_post();
 
 					<p>
 						<?php
+						/* translators: %s: URL to Make WordPress Hosting handbook */
+						printf( wp_kses_post( __( 'For detailed PHP extension recommendations, see the <a href="%s">Hosting Handbook</a>.', 'wporg' ) ), 'https://make.wordpress.org/hosting/handbook/handbook/server-environment/' );
+						?>
+					</p>
+
+					<p>
+						<?php
 						printf(
 							/* translators: 1: PHP Version including; 2: MySQL Version */
 							wp_kses_post( __( 'Note: If you are in a legacy environment where you only have older PHP or MySQL versions, WordPress also works with PHP %1$s+ and MySQL %2$s+, but these versions have reached official End Of Life and as such <strong>may expose your site to security vulnerabilities</strong>.', 'wporg' ) ),
