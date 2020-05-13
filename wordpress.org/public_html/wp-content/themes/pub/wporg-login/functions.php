@@ -189,7 +189,7 @@ function wporg_login_filter_templates( $templates ) {
 add_filter( 'index_template_hierarchy', 'wporg_login_filter_templates' );
 
 // Don't index login/register pages.
-add_action( 'wp_head', 'wp_no_robots', 1 );
+add_filter( 'wporg_noindex_request', '__return_true' );
 
 // No emoji support needed.
 remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
