@@ -411,12 +411,17 @@ class Hooks {
 			// Blocked users are not indexed.
 			if ( bbpress()->displayed_user && bbpress()->displayed_user->has_cap( 'bbp_blocked' ) ) {
 				$robots = true;
+
 			// Users with no Topics/Replies/Reviews are not indexed.
 			} elseif (
 				! wporg_support_get_user_topics_count() &&
 				! bbp_get_user_reply_count_raw() &&
 				! wporg_support_get_user_reviews_count()
 			) {
+				$robots = true;
+
+			// Noindex all of the single user subpages.
+			} elseif ( ! bbp_is_single_user_profile() ) {
 				$robots = true;
 			}
 		} elseif (
