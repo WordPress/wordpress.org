@@ -1123,7 +1123,7 @@ function wporg_themes_add_meta_tags() {
 
 	// If it's outdated, noindex the theme.
 	if ( time() - strtotime( $theme->last_updated ) > 2 * YEAR_IN_SECONDS ) {
-		echo "<meta name='robots' content='noindex,follow' />\n";
+		add_filter( 'wporg_noindex_request', '__return_true' );
 	}
 }
 add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
@@ -1273,65 +1273,11 @@ function wporg_themes_add_hreflang_link_attributes() {
 add_action( 'wp_head', 'wporg_themes_add_hreflang_link_attributes' );
 
 /**
- * Outputs X-Robots-Tag with noindex for feeds.
- */
-function wporg_themes_noindex_for_feeds() {
-	if ( is_tag() ) {
-		header( 'X-Robots-Tag: noindex' );
-	}
-	if ( is_search() ) {
-		header( 'X-Robots-Tag: noindex, follow' );
-	}
-}
-add_action( 'themes_custom_feed_head', 'wporg_themes_noindex_for_feeds' );
-
-/**
- * Outputs a <link rel="canonical"> on archive pages.
- */
-function wporg_themes_archive_rel_canonical_link() {
-	if ( $url = wporg_themes_get_current_url() ) {
-		printf(
-			'<link rel="canonical" href="%s">' . "\n",
-			esc_url( $url )
-		);
-	}
-}
-add_action( 'wp_head', 'wporg_themes_archive_rel_canonical_link' );
-remove_action( 'wp_head', 'rel_canonical' );
-
-/**
  * Get the current front-end requested URL.
  */
 function wporg_themes_get_current_url( $path_only = false ) {
-	$queried_object = get_queried_object();
-	$link = false;
-
-	if ( get_query_var( 'browse' ) && WPORG_THEMES_DEFAULT_BROWSE === get_query_var( 'browse' ) ) {
-		$link = home_url( '/' );
-	} elseif ( get_query_var( 'browse' ) ) {
-		// The browse/% urls on the Theme directory are front-page-query alterations.
-		$link = home_url( 'browse/' . get_query_var( 'browse' ) . '/' );
-	} elseif ( is_author() ) {
-		// On WordPress.org get_author_posts_url() returns profile.wordpress.org links. Build it manually.
-		$link = home_url( 'author/' . $queried_object->user_nicename . '/' );
-	} elseif ( is_tax() || is_tag() || is_category() ) {
-		$link = get_term_link( $queried_object );
-	} elseif ( is_singular() ) {
-		$link = get_permalink( $queried_object );
-	} elseif ( is_search() ) {
-		$link = home_url( 'search/' . urlencode( get_query_var( 's' ) ) . '/' );
-	} elseif ( is_front_page() ) {
-		$link = home_url( '/' );
-	}
-
-
-	if ( $link && is_paged() ) {
-		if ( false !== stripos( $link, '?' ) ) {
-			$link = add_query_arg( 'paged', (int) get_query_var( 'paged' ), $link );
-		} else {
-			$link = rtrim( $link, '/' ) . '/page/' . (int) get_query_var( 'paged' ) . '/';
-		}
-	}
+	// Back-compat: TODO: Used by hreflang links.
+	$link = \WordPressdotorg\SEO\Canonical\get_canonical_url();
 
 	if ( $path_only && $link ) {
 		$path = parse_url( $link, PHP_URL_PATH );
@@ -1344,3 +1290,21 @@ function wporg_themes_get_current_url( $path_only = false ) {
 
 	return $link;
 }
+
+/**
+ * Filter the WordPress.org SEO plugin Canonical location to respect Theme Directory differences.
+ */
+function wporg_canonical_url( $url ) {
+	if ( get_query_var( 'browse' ) && WPORG_THEMES_DEFAULT_BROWSE === get_query_var( 'browse' ) ) {
+		$url = home_url( '/' );
+	} elseif ( get_query_var( 'browse' ) ) {
+		// The browse/% urls on the Theme directory are front-page-query alterations.
+		$url = home_url( 'browse/' . get_query_var( 'browse' ) . '/' );
+	}
+
+	return $url;
+}
+add_filter( 'wporg_canonical_url', 'wporg_canonical_url' );
+
+// Theme Directory doesn't support pagination.
+add_filter( 'wporg_rel_next_pages', '__return_zero' );

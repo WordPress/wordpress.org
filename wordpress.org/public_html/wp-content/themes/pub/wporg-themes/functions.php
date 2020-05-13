@@ -285,16 +285,6 @@ function wporg_themes_meta_tags( $tags ) {
 add_filter( 'jetpack_seo_meta_tags', 'wporg_themes_meta_tags' );
 
 /**
- * Outputs `noindex,follow` robots tag for search results and author archives.
- */
-function wporg_themes_noindex() {
-	if ( is_search() || is_author() ) {
-		wp_no_robots();
-	}
-}
-add_action( 'wp_head', 'wporg_themes_noindex' );
-
-/**
  * Overrides feeds to use a custom RSS2 feed which contains the current requests themes.
  */
 function wporg_themes_custom_feed() {
@@ -308,7 +298,7 @@ function wporg_themes_custom_feed() {
 	include __DIR__ . '/rss.php';
 	die();
 }
-add_filter( 'template_redirect', 'wporg_themes_custom_feed' );
+add_filter( 'template_redirect', 'wporg_themes_custom_feed', 9999 );
 
 /**
  * Include view templates in the footer.
