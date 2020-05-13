@@ -72,6 +72,12 @@ class Ratings_Compat {
 		// Check to see if a topic is being created/edited.
 		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
+
+		// Add the rating to the Feed body/title
+		if ( did_action( 'bbp_feed' ) ) {
+			add_filter( 'bbp_get_topic_content', array( $this, 'feed_prepend_rating' ), 10, 2 );
+			add_filter( 'bbp_get_topic_title', array( $this, 'feed_append_rating' ), 10, 2 );
+		}
 	}
 
 	/**
@@ -438,5 +444,54 @@ class Ratings_Compat {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Prepend the Rating to the feed content.
+	 */
+	public function feed_prepend_rating( $content, $topic_id ) {
+		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
+			$user_id = bbp_get_topic_author_id( $topic_id );
+			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+
+			if ( $rating ) {
+				$content = sprintf(
+					"<p>%s</p>\n%s",
+					sprintf(
+						__( 'Rating: %s', 'wporg-forums' ),	
+						sprintf(
+							_n( '%s star', '%s stars', $rating, 'wporg-forums' ),
+							$rating
+						)
+					),
+					$content
+				);
+			}
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Append the Rating to the feed title.
+	 */
+	public function feed_append_rating( $title, $topic_id ) {
+		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
+			$user_id = bbp_get_topic_author_id( $topic_id );
+			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+
+			if ( $rating ) {
+				$title = sprintf(
+					"%s (%s)",
+					$title,
+					sprintf(
+						_n( '%s star', '%s stars', $rating, 'wporg-forums' ),
+						$rating
+					)
+				);
+			}
+		}
+
+		return $title;
 	}
 }

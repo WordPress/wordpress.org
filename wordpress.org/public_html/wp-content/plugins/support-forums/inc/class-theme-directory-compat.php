@@ -73,9 +73,16 @@ class Theme_Directory_Compat extends Directory_Compat {
 	 * Add views if the theme query_var is present.
 	 */
 	public function parse_query() {
+		global $wp;
+
 		$slug = get_query_var( 'wporg_theme' );
 		if ( ! $slug ) {
-			return;
+			// bbPress feeds are bad and don't actually fill in globals.
+			if ( isset( $wp->query_vars['feed'] ) && ! empty( $wp->query_vars['wporg_theme'] ) ) {
+				$slug = $wp->query_vars['wporg_theme'];
+			} else {
+				return;
+			}
 		}
 
 		if ( '_redirect_' == $slug ) {
@@ -87,13 +94,13 @@ class Theme_Directory_Compat extends Directory_Compat {
 		if ( ! $theme ) {
 			status_header( 404 );
 			return;
-		} else {
-			$this->slug         = $slug;
-			$this->theme        = $theme;
-			$this->authors      = $this->get_authors( $slug );
-			$this->contributors = $this->get_contributors( $slug );
-			$this->support_reps = $this->get_support_reps( $slug );
 		}
+
+		$this->slug         = $slug;
+		$this->theme        = $theme;
+		$this->authors      = $this->get_authors( $slug );
+		$this->contributors = $this->get_contributors( $slug );
+		$this->support_reps = $this->get_support_reps( $slug );
 	}
 
 	public function do_view_sidebar() {

@@ -73,9 +73,16 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	 * Add views if the plugin query_var is present.
 	 */
 	public function parse_query() {
+		global $wp;
+
 		$slug = get_query_var( 'wporg_plugin' );
 		if ( ! $slug ) {
-			return;
+			// bbPress feeds are bad and don't actually fill in globals.
+			if ( isset( $wp->query_vars['feed'] ) && ! empty( $wp->query_vars['wporg_plugin'] ) ) {
+				$slug = $wp->query_vars['wporg_plugin'];
+			} else {
+				return;
+			}
 		}
 
 		if ( '_redirect_' == $slug ) {
