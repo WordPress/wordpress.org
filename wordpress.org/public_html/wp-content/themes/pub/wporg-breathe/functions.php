@@ -37,57 +37,16 @@ function customize_register( $wp_customize ) {
 }
 
 /**
- * Outputs a 'noindex,follow' `meta` tag when appropriate.
- *
- * Currently applies to:
- * - date-based archives
- * - search results
- * - Author archives
- * - 'mentions' taxonomy
- * - tag archives with fewer than 3 posts
+ * noindex the Mentions archives.
  */
-function no_robots() {
-	if (
-		is_search()
-	||
-		is_author()
-	||
-		is_date()
-	||
-		is_tax( 'mentions' )
-	||
-		is_tag()
-	) {
-		wp_no_robots();
+function no_robots( $noindex ) {
+	if ( is_tax( 'mentions' ) ) {
+		$noindex = true;
 	}
+
+	return $noindex;
 }
-add_action( 'wp_head', __NAMESPACE__ . '\no_robots', 9 );
-
-
-/**
- * Outputs `<link rel="canonical">` tags where needed.
- */
-function rel_canonical() {
-	$canonical = false;
-	$queried_object = get_queried_object();
-
-	if ( is_tax() || is_tag() || is_category() ) {
-		$canonical = get_term_link( $queried_object );
-	} elseif ( is_singular() ) {
-		$canonical = get_permalink( $queried_object );
-	} elseif ( is_front_page() ) {
-		$canonical = home_url( '/' );
-	}
-
-	if ( $canonical && get_query_var( 'paged' ) > 1 ) {
-		$canonical .= 'page/' . (int) get_query_var( 'paged' ) . '/';
-	}
-
-	if ( $canonical ) {
-		printf( '<link rel="canonical" href="%s">' . "\n", esc_url( $canonical ) );
-	}
-}
-add_action( 'wp_head', __NAMESPACE__ . '\rel_canonical' );
+add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\no_robots' );
 
 /**
  * Renders the site title for the selective refresh partial.
