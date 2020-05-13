@@ -49,10 +49,13 @@ class Plugin_Directory {
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
-		add_action( 'wp_head', array( Template::class, 'output_meta' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
-		add_action( 'wp_head', array( Template::class, 'archive_link_rel_prev_next' ), 3 );
-		add_action( 'wp_head', array( Template::class, 'archive_rel_canonical_link' ), 3 );
+
+		// Add no-index headers where appropriate.
+		add_filter( 'wporg_noindex_request', [ Template::class, 'should_noindex_request' ] );
+
+		// Fix the Canonical link when needed.
+		add_action( 'wporg_canonical_url', [ Template::class, 'wporg_canonical_url' ] );
 
 		// Cron tasks.
 		new Jobs\Manager();
@@ -543,9 +546,6 @@ class Plugin_Directory {
 		// disable feeds
 		remove_action( 'wp_head', 'feed_links', 2 );
 		remove_action( 'wp_head', 'feed_links_extra', 3 );
-
-		// Remove the core <link rel="canonical"> as we've got a plugin-directory-specific version
-		remove_action( 'wp_head', 'rel_canonical' );
 
 		add_filter( 'get_term', array( __NAMESPACE__ . '\I18n', 'translate_term' ) );
 		add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );

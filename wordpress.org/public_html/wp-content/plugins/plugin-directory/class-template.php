@@ -154,77 +154,28 @@ class Template {
 		global $wp_query;
 
 		$metas   = [];
-		$noindex = false;
 
-		// Prevent duplicate search engine results.
-		if ( get_query_var( 'plugin_advanced' ) || is_search() ) {
-			$noindex = true;
-		} elseif ( is_singular( 'plugin' ) ) {
+		if ( is_singular( 'plugin' ) ) {
 			$metas[] = sprintf(
 				'<meta name="description" value="%s" />',
 				esc_attr( get_the_excerpt() )
 			);
-
-			// Add noindex for closed or outdated plugins.
-			if ( 'publish' !== get_post_status() || self::is_plugin_outdated() ) {
-				$noindex = true;
-			}
-		} elseif ( is_tax() && $wp_query->found_posts <= 3 ) {
-			$noindex = true;
-		}
-
-		if ( $noindex ) {
-			$metas[] = '<meta name="robots" content="noindex,follow" />' . "\n";
 		}
 
 		echo implode( "\n", $metas );
 	}
 
 	/**
-	 * Prints <link rel="prev|next"> tags for archives.
-	 *
-	 * @static
+	 * Whether the current request should be noindexed.
 	 */
-	public static function archive_link_rel_prev_next() {
-		global $paged, $wp_query, $wp_rewrite;
-		if ( ! is_archive() && ! is_search() ) {
-			return;
+	public static function should_noindex_request( $noindex ) {
+		if ( get_query_var( 'plugin_advanced' ) ) {
+			$noindex = true;
+		} else if ( is_singular( 'plugin' ) && self::is_plugin_outdated() ) {
+			$noindex = true;
 		}
 
-		$max_page = $wp_query->max_num_pages;
-		if ( ! $paged ) {
-			$paged = 1;
-		}
-
-		$nextpage = intval( $paged ) + 1;
-		$prevpage = intval( $paged ) - 1;
-
-		// re-implement get_pagenum_link() using our canonical url.
-		$current_url = Template::get_current_url();
-		if ( ! $current_url ) {
-			return;
-		}
-
-		$current_url = remove_query_arg( 'paged', $current_url );
-		$current_url = preg_replace( "|{$wp_rewrite->pagination_base}/\d+/?$|", '', $current_url );
-
-		// Just assume pretty permalinks everywhere.
-		$next_url = $current_url . "{$wp_rewrite->pagination_base}/{$nextpage}/";
-		$prev_url = $current_url . ( $prevpage > 1 ? "{$wp_rewrite->pagination_base}/{$prevpage}/" : '' );
-
-		if ( $prevpage >= 1 ) {
-			printf(
-				'<link rel="prev" href="%s">' . "\n",
-				esc_url( $prev_url )
-			);
-		}
-
-		if ( $nextpage <= $max_page ) {
-			printf(
-				'<link rel="next" href="%s">' . "\n",
-				esc_url( $next_url )
-			);
-		}
+		return $noindex;
 	}
 
 	/**
@@ -1031,45 +982,11 @@ class Template {
 	}
 
 	/**
-	 * Outputs a <link rel="canonical"> on archive pages.
-	 */
-	public static function archive_rel_canonical_link() {
-		if ( $url = self::get_current_url() ) {
-			printf(
-				'<link rel="canonical" href="%s">' . "\n",
-				esc_url( $url )
-			);
-		}
-	}
-
-	/**
 	 * Get the current front-end requested URL.
 	 */
 	public static function get_current_url( $path_only = false ) {
-		$queried_object = get_queried_object();
-		$link = false;
 
-		if ( is_tax() || is_tag() || is_category() ) {
-			$link = get_term_link( $queried_object );
-		} elseif ( is_singular() ) {
-			$link = get_permalink( $queried_object );
-
-			if ( is_singular( 'plugin' ) && get_query_var( 'plugin_advanced' ) ) {
-				$link .= 'advanced/';
-			}
-		} elseif ( is_search() ) {
-			$link = home_url( 'search/' . urlencode( get_query_var( 's' ) ) . '/' );
-		} elseif ( is_front_page() ) {
-			$link = home_url( '/' );
-		}
-
-		if ( $link && is_paged() ) {
-			if ( false !== stripos( $link, '?' ) ) {
-				$link = add_query_arg( 'paged', (int) get_query_var( 'paged' ), $link );
-			} else {
-				$link = rtrim( $link, '/' ) . '/page/' . (int) get_query_var( 'paged' ) . '/';
-			}
-		}
+		$link = \WordPressdotorg\SEO\Canonical\get_canonical_url();
 
 		if ( $path_only && $link ) {
 			$path = parse_url( $link, PHP_URL_PATH );
@@ -1078,6 +995,17 @@ class Template {
 			}
 
 			return $path;
+		}
+
+		return $link;
+	}
+
+	/**
+	 * Filter the WordPress.org Canonical URL to understand the Plugin Directory.
+	 */
+	public static function wporg_canonical_url( $link ) {
+		if ( is_singular( 'plugin' ) && get_query_var( 'plugin_advanced' ) ) {
+			$link = get_permalink( get_queried_object() ) . 'advanced/';
 		}
 
 		return $link;
