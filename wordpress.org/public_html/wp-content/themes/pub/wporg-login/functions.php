@@ -361,21 +361,21 @@ add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_regi
 /**
  * The canonical url for login.wordpress.org is a bit different.
  */
-function wporg_login_canonical_url( $url ) {
-	$url = false;
+function wporg_login_canonical_url( $canonical ) {
+	$canonical = false;
 
 	// If the regular expression for this route is not matching, it's the canonical.
 	$matching_route = stripos( WP_WPOrg_SSO::$matched_route_regex, '(' );
 	if ( false === $matching_route ) {
-		$url = home_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
+		$canonical = home_url( WP_WPOrg_SSO::$matched_route_regex ?: '/' );
 
 	// Else, if there's a long enough slug followed by a `/`, that's a parent page.
 	} elseif ( $matching_route >= 3 && '/' === substr( WP_WPOrg_SSO::$matched_route_regex, $matching_route + 1, 1 ) ) {
-		$url = home_url( substr( WP_WPOrg_SSO::$matched_route_regex, 0, $matching_route ) );
+		$canonical = home_url( substr( WP_WPOrg_SSO::$matched_route_regex, 0, $matching_route ) );
 
 	}
 
-	return $url;
+	return $canonical;
 }
 add_filter( 'wporg_canonical_url', 'wporg_login_canonical_url' );
 
