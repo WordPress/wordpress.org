@@ -101,7 +101,12 @@ class Meetup_Client extends API_Client {
 		$code = wp_remote_retrieve_response_code( $response );
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
-		if ( 400 === $code && ! empty( $body['error'] ) && 'invalid_grant' === $body['error'] ) {
+		$parsed_error = $this->parse_error( $body );
+
+		if (
+			( 400 === $code && $parsed_error->get_error_message( 'invalid_grant' ) )
+			|| ( 401 === $code && $parsed_error->get_error_message( 'auth_fail' ) )
+		) {
 			$this->oauth_client->reset_oauth_token();
 
 			if ( ! empty( $this->oauth_client->error->get_error_messages() ) ) {
@@ -218,6 +223,10 @@ class Meetup_Client extends API_Client {
 	protected function get_request_args() {
 		$oauth_token = $this->oauth_client->get_oauth_token();
 
+		if ( ! empty( $this->oauth_client->error->get_error_messages() ) ) {
+			$this->error = $this->merge_errors( $this->error, $this->oauth_client->error );
+		}
+
 		return array(
 			'headers' => array(
 				'Accept'        => 'application/json',
@@ -320,34 +329,54 @@ class Meetup_Client extends API_Client {
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$data          = json_decode( wp_remote_retrieve_body( $response ), true );
 
-		if ( isset( $data['errors'] ) ) {
-			foreach ( $data['errors'] as $error ) {
-				$this->error->add(
-					$error['code'],
-					$error['message']
-				);
-			}
-		} elseif ( isset( $data['error'], $data['error_description'] ) ) {
-			$this->error->add(
-				$data['error'],
-				$data['error_description']
-			);
-		} elseif ( isset( $data['code'] ) && isset( $data['details'] ) ) {
-			$this->error->add(
-				$data['code'],
-				$data['details']
-			);
-		} elseif ( $response_code ) {
-			$this->error->add(
-				'http_response_code',
-				sprintf( 'HTTP Status: %d', absint( $response_code ) )
-			);
+		$parsed_error = $this->parse_error( $data, $response_code );
+
+		if ( ! empty( $parsed_error->get_error_messages() ) ) {
+			$this->error = self::merge_errors( $this->error, $parsed_error );
 		} else {
 			$this->error->add(
 				'unknown_error',
 				'There was an unknown error.'
 			);
 		}
+	}
+
+	/**
+	 * Attempt to extract codes and messages from a suspected error response.
+	 *
+	 * @param array $data          The data in the response body, parsed as an array.
+	 * @param int   $response_code Optional. The HTTP status code from the response.
+	 *
+	 * @return WP_Error
+	 */
+	protected function parse_error( array $data, $response_code = 0 ) {
+		$error = new WP_Error();
+
+		if ( isset( $data['errors'] ) ) {
+			foreach ( $data['errors'] as $error ) {
+				$error->add(
+					$error['code'],
+					$error['message']
+				);
+			}
+		} elseif ( isset( $data['error'], $data['error_description'] ) ) {
+			$error->add(
+				$data['error'],
+				$data['error_description']
+			);
+		} elseif ( isset( $data['code'], $data['details'] ) ) {
+			$error->add(
+				$data['code'],
+				$data['details']
+			);
+		} elseif ( $response_code ) {
+			$error->add(
+				'http_response_code',
+				sprintf( 'HTTP Status: %d', absint( $response_code ) )
+			);
+		}
+
+		return $error;
 	}
 
 	/**
