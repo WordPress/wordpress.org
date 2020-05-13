@@ -64,7 +64,7 @@ function get_canonical_url() {
 		unset( $tax_queries['relation'] );
 
 		$term_queries    = count( $tax_queries );
-		$term_query_zero = count( $tax_queries[0]['terms'] );
+		$term_query_zero = count( $tax_queries[0]['terms'] ?? [] );
 		if ( $term_queries > 1 || $term_query_zero > 1 ) {
 			// Multiple terms are being queried for.
 			$terms = wp_list_pluck( $tax_queries, 'terms' );
