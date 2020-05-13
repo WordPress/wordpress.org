@@ -111,14 +111,7 @@
 					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/"><?php _e( 'All Recent Topics', 'wporg-forums' ); ?></a></li>
 				</ul>
 			</div>
-<?php /* Temporarily disable this until https://core.trac.wordpress.org/ticket/41796#comment:8 can be fixed
 
-			<div>
-				<h4><?php _e( 'Tags', 'wporg-forums' ); ?></h4>
-				<?php wp_tag_cloud( array( 'smallest' => 14, 'largest' => 24, 'number' => 22, 'taxonomy' => bbp_get_topic_tag_tax_id() ) ); ?>
-			</div>
-
- */ ?>
 		<?php endif; ?>
 
 	<?php endif; ?>
