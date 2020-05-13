@@ -149,7 +149,7 @@ function get_canonical_url() {
 	// Add order/orderby to Archives.
 	if ( is_archive() || is_search() || is_home() ) {
 		// Check $wp since `get_query_var()` will return default values too.
-		if ( !empty( $wp->query_vars[ 'order'] ) ) {
+		if ( !empty( $wp->query_vars[ 'order'] ) && in_array( $wp->query_vars[ 'order'], [ 'asc', 'desc' ], true ) ) {
 			$url = add_query_arg( 'order', get_query_var( 'order' ), $url );
 		}
 		if ( !empty( $wp->query_vars[ 'orderby'] ) ) {
