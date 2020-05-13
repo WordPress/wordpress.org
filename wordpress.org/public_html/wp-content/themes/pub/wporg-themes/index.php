@@ -76,13 +76,6 @@ get_header();
 						$theme = wporg_themes_theme_information( $post->post_name );
 						include __DIR__ . '/theme.php';
 					}
-
-					// Add the navigation between pages
-					echo '<nav class="posts-navigation">';
-					echo paginate_links( array(
-						'mid_size' => 3,
-					) );
-					echo '</nav>';
 				}
 				?>
 			</div>
