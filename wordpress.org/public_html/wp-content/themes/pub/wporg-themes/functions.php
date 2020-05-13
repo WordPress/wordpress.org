@@ -298,7 +298,7 @@ function wporg_themes_custom_feed() {
 	include __DIR__ . '/rss.php';
 	die();
 }
-add_filter( 'template_redirect', 'wporg_themes_custom_feed' );
+add_filter( 'template_redirect', 'wporg_themes_custom_feed', 9999 );
 
 /**
  * Include view templates in the footer.
