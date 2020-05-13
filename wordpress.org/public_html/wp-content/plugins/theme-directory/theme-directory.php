@@ -1098,8 +1098,8 @@ function wporg_themes_add_meta_tags() {
 		return;
 	}
 
-	$post = get_post();
-	if ( ! $post ) {
+	$post = get_queried_object();
+	if ( ! $post || !( $post instanceof WP_Post ) ) {
 		return;
 	}
 
@@ -1120,13 +1120,26 @@ function wporg_themes_add_meta_tags() {
 		echo "<meta name='twitter:site' content='@WordPress'>\n";
 		echo "<meta name='twitter:image' content='" . esc_attr( $theme->screenshot_url . '?w=560&amp;strip=all' ) . "' />\n";
 	}
-
-	// If it's outdated, noindex the theme.
-	if ( time() - strtotime( $theme->last_updated ) > 2 * YEAR_IN_SECONDS ) {
-		add_filter( 'wporg_noindex_request', '__return_true' );
-	}
 }
 add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
+
+/**
+ * Noindex outdated themes.
+ */
+function wporg_themes_noindex_request( $noindex ) {
+	if ( is_single() && ( $post = get_queried_object() ) && $post instanceof WP_Post ) {
+		$theme = wporg_themes_theme_information( $post->post_name );
+		if ( $theme ) {
+			// If it's outdated, noindex the theme.
+			if ( time() - strtotime( $theme->last_updated ) > 2 * YEAR_IN_SECONDS ) {
+				$noindex = true;
+			}
+		}
+	}
+
+	return $noindex;
+}
+add_filter( 'wporg_noindex_request', 'wporg_themes_noindex_request' );
 
 /**
  * Adds hreflang link attributes to theme pages.
