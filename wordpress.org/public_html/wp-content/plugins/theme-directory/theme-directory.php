@@ -1307,4 +1307,4 @@ function wporg_canonical_url( $url ) {
 add_filter( 'wporg_canonical_url', 'wporg_canonical_url' );
 
 // Theme Directory doesn't support pagination.
-remove_action( 'wp_head', 'WordPressdotorg\SEO\Archive_Rel_Next_Prev\output_rel_prev_next_links' );
+add_filter( 'wporg_rel_next_pages', '__return_zero' );
