@@ -143,3 +143,6 @@ p.toc-jump::after {
 p.toc-jump {
 	z-index: 1;
 }
+.table-of-contents {
+	z-index: 2;
+}
