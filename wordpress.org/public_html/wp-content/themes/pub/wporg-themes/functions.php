@@ -335,6 +335,7 @@ function wporg_themes_get_feature_list( $include = 'active' ) {
 			),
 			__( 'Features', 'wporg-themes' ) => array(
 				'accessibility-ready'   => __( 'Accessibility Ready', 'wporg-themes' ),
+				'block-patterns'        => __( 'Block Editor Patterns', 'wporg-themes' ),
 				'block-styles'          => __( 'Block Editor Styles', 'wporg-themes' ),
 				'buddypress'            => __( 'BuddyPress', 'wporg-themes' ),
 				'custom-background'     => __( 'Custom Background', 'wporg-themes' ),
@@ -348,6 +349,7 @@ function wporg_themes_get_feature_list( $include = 'active' ) {
 				'flexible-header'       => __( 'Flexible Header', 'wporg-themes' ),
 				'footer-widgets'        => __( 'Footer Widgets', 'wporg-themes' ),
 				'front-page-post-form'  => __( 'Front Page Posting', 'wporg-themes' ),
+				'full-site-editing'     => __( 'Full Site Editing', 'wporg-themes' ),
 				'full-width-template'   => __( 'Full Width Template', 'wporg-themes' ),
 				'microformats'          => __( 'Microformats', 'wporg-themes' ),
 				'post-formats'          => __( 'Post Formats', 'wporg-themes' ),

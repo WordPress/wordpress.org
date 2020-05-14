@@ -293,11 +293,18 @@ class Themes_API {
 			);
 		}
 
-		// Pending https://core.trac.wordpress.org/ticket/46272
+		// See https://core.trac.wordpress.org/ticket/46272.
 		if ( ! isset( $wp_version ) || version_compare( $wp_version, '5.2-alpha', '>=' ) ) {
 			$tags[ __( 'Layout' ) ]['wide-blocks']    = __( 'Wide Blocks' );
 			$tags[ __( 'Features' ) ]['block-styles'] = __( 'Block Editor Styles' );
 			asort( $tags[ __( 'Features' ) ] ); // To move block-styles to the right place.
+		}
+
+		// See https://core.trac.wordpress.org/ticket/50164.
+		if ( ! isset( $wp_version ) || version_compare( $wp_version, '5.5-alpha', '>=' ) ) {
+			$tags[ __( 'Features' ) ]['block-patterns']    = __( 'Block Editor Patterns' );
+			$tags[ __( 'Features' ) ]['full-site-editing'] = __( 'Full Site Editing' );
+			asort( $tags[ __( 'Features' ) ] );
 		}
 
 		// Only return tag slugs, to stay compatible with bbpress-version of Themes API.
