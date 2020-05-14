@@ -353,10 +353,10 @@ class Meetup_Client extends API_Client {
 		$error = new WP_Error();
 
 		if ( isset( $data['errors'] ) ) {
-			foreach ( $data['errors'] as $error ) {
+			foreach ( $data['errors'] as $details ) {
 				$error->add(
-					$error['code'],
-					$error['message']
+					$details['code'],
+					$details['message']
 				);
 			}
 		} elseif ( isset( $data['error'], $data['error_description'] ) ) {
