@@ -364,7 +364,7 @@ function get_whitelist() {
 			'andrealeebishop', // @bishop on Slack
 			'DustinMeza',
 		),
-		'wcus-contributor-day' => array(
+		'contributor-day' => array(
 			'cronkled', // @alx on Slack
 			'camikaos',
 			'DrewAPicture', // @drew on Slack
