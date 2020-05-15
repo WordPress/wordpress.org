@@ -368,6 +368,8 @@ function get_whitelist() {
 			'cronkled', // @alx on Slack
 			'camikaos',
 			'DrewAPicture', // @drew on Slack
+			'Kau-Boy',
+			'sippis',
 		),
 		'wptv' => array(
 			'casiepa', // @Pascal on Slack
