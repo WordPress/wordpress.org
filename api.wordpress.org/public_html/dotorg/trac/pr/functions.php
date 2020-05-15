@@ -238,7 +238,7 @@ function format_pr_desc_for_trac_comment( $pr_data ) {
 	$desc = trim( $pr_data->body );
 
 	// Remove HTML comments
-	$desc = preg_replace( '#<!--.+?-->#', '', $desc );
+	$desc = preg_replace( '#<!--.+?-->#s', '', $desc );
 
 	// Remove the final line if it matches the specific boilerplate format.
 	$desc = preg_replace( "#---\r?\n\*\*.+\*\*$#", '', $desc );
