@@ -426,9 +426,8 @@ class Hooks {
 			}
 		} elseif (
 			bbp_is_single_view() &&
-			in_array( bbp_get_view_id(), array( 'plugin-committer', 'plugin-contributor' ) )
+			! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'reviews' ) )
 		) {
-			// #4329
 			$robots = true;
 		} elseif ( bbp_is_single_view() ) {
 			if ( ! bbpress()->topic_query->query ) {
