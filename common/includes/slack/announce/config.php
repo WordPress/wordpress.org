@@ -269,10 +269,14 @@ function get_whitelist() {
 			'brettface',
 		),
 		'marketing' => array(
-			'joostdevalk',
-			'rosso99', // @sararosso on Slack
 			'bridgetwillard', // @gidgey on Slack
+			'harryjackson1221',
+			'joostdevalk',
+			'mikerbg', // @miker on Slack
+			'rosso99', // @sararosso on Slack
 			'siobhanseija',
+			'webcommsat', // @abhanonstopnewsuk on Slack
+			'yvettesonneveld',
 		),
 		'meta' => array(
 			'obenland',
