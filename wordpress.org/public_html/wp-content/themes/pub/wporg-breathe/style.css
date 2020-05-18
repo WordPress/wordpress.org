@@ -1155,6 +1155,11 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	padding-top: 10rem;
 }
 
+.single-handbook .entry-content .table-of-contents + p,
+.single-handbook .entry-content .table-of-contents + h2 {
+	margin-top: 0;
+}
+
 @media (max-width: 875px) {
 	.handbook-breadcrumbs {
 		top: 3rem;
@@ -1196,7 +1201,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 @media (min-width: 971px) {
 	.post-type-archive-handbook div.table-of-contents,
 	.single-handbook div.table-of-contents {
-		margin: -15px -30px 15px 15px;
+		margin: 0 -30px 15px 15px;
 	}
 }
 
