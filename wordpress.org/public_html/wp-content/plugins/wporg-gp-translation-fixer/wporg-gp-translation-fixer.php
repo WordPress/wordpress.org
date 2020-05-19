@@ -13,7 +13,7 @@ use GP, GP_Locales;
 
  class Plugin {
 
-	public function instance() {
+	public static function instance() {
 		static $instance;
 		if ( ! $instance ) {
 			$class = __CLASS__;
