@@ -201,7 +201,7 @@ class Upload {
 							printf(
 								/* translators: Maximum allowed file size. */
 								esc_html__( 'Maximum allowed file size: %s', 'wporg-plugins' ),
-								esc_html( self::get_max_allowed_file_size() )
+								esc_html( size_format( wp_max_upload_size() ) )
 							);
 							?>
 						</small>
@@ -250,26 +250,4 @@ class Upload {
 		return ob_get_clean();
 	}
 
-	/**
-	 * Returns a human readable version of the max allowed upload size.
-	 *
-	 * @return string The allowed file size.
-	 */
-	public static function get_max_allowed_file_size() {
-		$upload_size_unit = wp_max_upload_size();
-
-		$byte_sizes       = array( 'KB', 'MB', 'GB' );
-
-		for ( $unit = - 1; $upload_size_unit > 1024 && $unit < count( $byte_sizes ) - 1; $unit ++ ) {
-			$upload_size_unit /= 1024;
-		}
-
-		if ( $unit < 0 ) {
-			$upload_size_unit = $unit = 0;
-		} else {
-			$upload_size_unit = (int) $upload_size_unit;
-		}
-
-		return $upload_size_unit . $byte_sizes[ $unit ];
-	}
 }

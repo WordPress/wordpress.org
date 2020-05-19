@@ -47,31 +47,11 @@ function wporg_themes_render_upload_shortcode() {
 			<input type="file" id="zip_file" name="zip_file" size="25"/>
 			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
 			<p>
-				<small>' . sprintf( __( 'Maximum allowed file size: %s', 'wporg-themes' ), esc_html( wporg_themes_get_max_allowed_file_size() ) ) . '</small>
+				<small>' . sprintf( __( 'Maximum allowed file size: %s', 'wporg-themes' ), esc_html( size_format( wp_max_upload_size() ) ) ) . '</small>
 			</p>
 		</form>';
 
 	return $notice . $form;
-}
-
-/**
- * Returns a human readable version of the max allowed upload size.
- *
- * @return string The allowed file size.
- */
-function wporg_themes_get_max_allowed_file_size() {
-	$upload_size_unit = wp_max_upload_size();
-	$byte_sizes       = array( 'KB', 'MB', 'GB' );
-
-	for ( $unit = - 1; $upload_size_unit > 1024 && $unit < count( $byte_sizes ) - 1; $unit++ ) {
-		$upload_size_unit /= 1024;
-	}
-	if ( $unit < 0 ) {
-		$upload_size_unit = $unit = 0;
-	} else {
-		$upload_size_unit = (int) $upload_size_unit;
-	}
-	return $upload_size_unit . $byte_sizes[ $unit ];
 }
 
 /**
