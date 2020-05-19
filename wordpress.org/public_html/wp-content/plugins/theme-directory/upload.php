@@ -9,6 +9,14 @@ function wporg_themes_upload_shortcode() {
 add_action( 'init', 'wporg_themes_upload_shortcode' );
 
 /**
+ * Sets upload size limit to limit theme ZIP file uploads to 10 MB.
+ */
+function wporg_themes_upload_size_limit() {
+	return 10 * MB_IN_BYTES;
+}
+add_filter( 'upload_size_limit', 'wporg_themes_upload_size_limit', 10, 0 );
+
+/**
  * Renders the upload shortcode.
  */
 function wporg_themes_render_upload_shortcode() {
