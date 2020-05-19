@@ -257,6 +257,12 @@ class Upload {
 	 */
 	public static function get_max_allowed_file_size() {
 		$upload_size_unit = wp_max_upload_size();
+
+		// force max to 10M, since some sites seem to incorrectly report different values (temporary fix during investigation)
+		if ( $upload_size_unit > 10485760 ) {
+			$upload_size_unit = 10485760;
+		}
+			
 		$byte_sizes       = array( 'KB', 'MB', 'GB' );
 
 		for ( $unit = - 1; $upload_size_unit > 1024 && $unit < count( $byte_sizes ) - 1; $unit ++ ) {
