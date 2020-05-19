@@ -60,6 +60,11 @@ class Plugin_Directory {
 		// Cron tasks.
 		new Jobs\Manager();
 
+		// Add upload size limit to limit plugin ZIP file uploads to 10M
+		add_filter( 'upload_size_limit', function( $size ) {
+			return 10 * MB_IN_BYTES;
+		} );
+
 		// oEmbed whitlisting.
 		add_filter( 'embed_oembed_discover', '__return_false' );
 		add_filter( 'oembed_providers', array( $this, 'oembed_whitelist' ) );
