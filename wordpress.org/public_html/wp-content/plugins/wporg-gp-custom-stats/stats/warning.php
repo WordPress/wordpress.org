@@ -33,11 +33,11 @@ class WPorg_GP_Warning_Stats {
 		$project         = GP::$project->get( $original->project_id );
 		$translation_set = GP::$translation_set->get( $translation->translation_set_id );
 
-		$key = "{$translation->user_id},{$translation_set->locale},{$translation_set->slug},{$project->path},{$translation->id}";
-
 		foreach( $translation->warnings as $index => $warnings ) {
 			foreach ( $warnings as $warning_key => $warning ) {
-				$this->warning_stats[ $key ] = $warning_key;
+				$key = "{$translation->user_id},{$translation_set->locale},{$translation_set->slug},{$project->path},{$translation->id},{$warning_key}";
+
+				$this->warning_stats[ $key ] = 1;
 			}
 		}
 	}
@@ -49,8 +49,8 @@ class WPorg_GP_Warning_Stats {
 		$now = current_time( 'mysql', 1 );
 
 		$values = array();
-		foreach ( $this->warning_stats as $key => $warning ) {
-			list( $user_id, $locale, $locale_slug, $project_path, $translation_id ) = explode( ',', $key );
+		foreach ( $this->warning_stats as $key => $_ ) {
+			list( $user_id, $locale, $locale_slug, $project_path, $translation_id, $warning ) = explode( ',', $key );
 
 			$values[] = $wpdb->prepare( '(%d, %s, %s, %s, %d, %s, %s)',
 				$user_id,
