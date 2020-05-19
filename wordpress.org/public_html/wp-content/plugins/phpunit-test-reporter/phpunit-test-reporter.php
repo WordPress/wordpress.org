@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:     PHPUnit Test Reporter
- * Plugin URI:      https://make.wordpress.org/hosting/phpunit-test-results/
+ * Plugin URI:      https://make.wordpress.org/hosting/test-results/
  * Description:     Captures and displays test results from the PHPUnit Test Runner
  * Author:          WordPress Hosting Community
  * Author URI:      https://make.wordpress.org/hosting/
  * Text Domain:     ptr
  * Domain Path:     /languages
- * Version:         0.1.0
+ * Version:         0.1.2
  * License:         GPL v3
  *
  * @package         PTR

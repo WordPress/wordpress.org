@@ -67,14 +67,17 @@ class Display {
 
 		if ( get_queried_object()->post_parent ) {
 			$content = ptr_get_template_part(
-				'single-result', array(
+				'single-result',
+				array(
 					'report' => get_queried_object(),
 				)
 			);
 		} else {
 			$content = ptr_get_template_part(
-				'result-set', array(
-					'revisions' => array(
+				'result-set',
+				array(
+					'posts_per_page' => 500,
+					'revisions'      => array(
 						get_queried_object(),
 					),
 				)
@@ -92,7 +95,7 @@ class Display {
 
 		$output     = '';
 		$query_args = array(
-			'posts_per_page' => 5,
+			'posts_per_page' => 3,
 			'post_type'      => 'result',
 			'post_parent'    => 0,
 			'orderby'        => 'post_name',
@@ -118,8 +121,10 @@ class Display {
 			$output .= self::get_reporter_avatars();
 		}
 		$output .= ptr_get_template_part(
-			'result-set', array(
-				'revisions' => $rev_query->posts,
+			'result-set',
+			array(
+				'posts_per_page' => 50,
+				'revisions'      => $rev_query->posts,
 			)
 		);
 		ob_start();

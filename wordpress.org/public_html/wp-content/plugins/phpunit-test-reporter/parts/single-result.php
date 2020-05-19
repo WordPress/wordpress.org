@@ -16,7 +16,11 @@ if ( $user ) {
 		$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
 	}
 	$host .= get_avatar(
-		$user->ID, 18, '', '', array(
+		$user->ID,
+		18,
+		'',
+		'',
+		array(
 			'extra_attr' => 'style="vertical-align: middle;margin-right:5px;"',
 		)
 	);
@@ -37,7 +41,7 @@ if ( $user ) {
 <?php
 $parent = get_post( $report->post_parent );
 if ( $parent ) :
-?>
+	?>
 <p><a href="<?php echo esc_url( get_permalink( $parent ) ); ?>">&larr; <?php echo esc_html( $parent->post_name ) . ': ' . apply_filters( 'the_title', get_the_title( $parent ) ); ?></a></p>
 <?php endif; ?>
 
@@ -73,7 +77,7 @@ if ( $parent ) :
 			continue;
 		}
 		foreach ( $testsuite['testcases'] as $test_name => $testcase ) :
-		?>
+			?>
 		<p><strong><?php echo esc_html( $suite_name . '::' . $test_name ); ?></strong></p>
 		<pre><?php echo ! empty( $testcase['failure'] ) ? $testcase['failure'] : $testcase['error']; ?></pre>
 		<?php endforeach; ?>

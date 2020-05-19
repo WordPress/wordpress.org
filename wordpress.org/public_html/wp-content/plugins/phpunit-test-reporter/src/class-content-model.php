@@ -50,7 +50,9 @@ class Content_Model {
 	public static function action_init_register_role() {
 		if ( ! get_role( 'test-reporter' ) ) {
 			add_role(
-				'test-reporter', __( 'Test Reporter', 'ptr' ), array(
+				'test-reporter',
+				__( 'Test Reporter', 'ptr' ),
+				array(
 					'read' => true,
 				)
 			);

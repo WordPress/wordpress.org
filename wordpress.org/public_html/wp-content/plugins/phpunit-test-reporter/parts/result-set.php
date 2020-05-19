@@ -17,13 +17,13 @@ echo Display::get_display_css(); ?>
 		$total_cols = 5;
 		foreach ( $revisions as $revision ) :
 			$rev_id = (int) ltrim( $revision->post_name, 'r' );
-		?>
+			?>
 			<tr>
 				<th colspan="<?php echo (int) $total_cols; ?>"><a href="<?php echo esc_url( sprintf( 'https://core.trac.wordpress.org/changeset/%d', $rev_id ) ); ?>">r<?php echo (int) $rev_id; ?></a>: <?php echo wp_kses_post( apply_filters( 'the_title', $revision->post_title ) ); ?></th>
 			</tr>
 			<?php
 			$query_args   = array(
-				'posts_per_page' => 10,
+				'posts_per_page' => $posts_per_page,
 				'post_type'      => 'result',
 				'post_parent'    => $revision->ID,
 				'orderby'        => 'post_title',
@@ -47,7 +47,11 @@ echo Display::get_display_css(); ?>
 							$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
 						}
 						$host .= get_avatar(
-							$user->ID, 18, '', '', array(
+							$user->ID,
+							18,
+							'',
+							'',
+							array(
 								'extra_attr' => 'style="vertical-align: middle;margin-right:5px;"',
 							)
 						);
@@ -69,10 +73,10 @@ echo Display::get_display_css(); ?>
 					<td><?php echo esc_html( Display::get_display_php_version( $report->ID ) ); ?></td>
 					<td><?php echo esc_html( Display::get_display_mysql_version( $report->ID ) ); ?></td>
 				</tr>
-			<?php
+					<?php
 				endforeach;
 			else :
-			?>
+				?>
 				<tr>
 					<td></td>
 					<td colspan="<?php echo (int) $total_cols - 1; ?>">

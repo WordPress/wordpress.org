@@ -12,7 +12,9 @@ class RestAPI {
 	 */
 	public static function register_routes() {
 		register_rest_route(
-			'wp-unit-test-api/v1', 'results', array(
+			'wp-unit-test-api/v1',
+			'results',
+			array(
 				'methods'             => 'POST',
 				'callback'            => array( __CLASS__, 'add_results_callback' ),
 				'args'                => array(
@@ -51,7 +53,9 @@ class RestAPI {
 			case 'commit':
 				if ( ! is_numeric( $value ) ) {
 					return new WP_Error(
-						'rest_invalid', __( 'Value must be numeric.', 'ptr' ), array(
+						'rest_invalid',
+						__( 'Value must be numeric.', 'ptr' ),
+						array(
 							'status' => 400,
 						)
 					);
@@ -60,7 +64,9 @@ class RestAPI {
 			case 'message':
 				if ( empty( $value ) || ! is_string( $value ) ) {
 					return new WP_Error(
-						'rest_invalid', __( 'Value must be a non-empty string.', 'ptr' ), array(
+						'rest_invalid',
+						__( 'Value must be a non-empty string.', 'ptr' ),
+						array(
 							'status' => 400,
 						)
 					);
@@ -70,7 +76,9 @@ class RestAPI {
 			case 'results':
 				if ( null === json_decode( $value ) ) {
 					return new WP_Error(
-						'rest_invalid', __( 'Value must be encoded JSON.', 'ptr' ), array(
+						'rest_invalid',
+						__( 'Value must be encoded JSON.', 'ptr' ),
+						array(
 							'status' => 400,
 						)
 					);
@@ -78,7 +86,9 @@ class RestAPI {
 				return true;
 		}
 		return new WP_Error(
-			'rest_invalid', __( 'Invalid key specified.', 'ptr' ), array(
+			'rest_invalid',
+			__( 'Invalid key specified.', 'ptr' ),
+			array(
 				'status' => 400,
 			)
 		);
@@ -87,7 +97,9 @@ class RestAPI {
 	public static function permission() {
 		if ( ! current_user_can( 'edit_results' ) ) {
 			return new WP_Error(
-				'rest_unauthorized', __( 'Sorry, you are not allowed to create results.', 'ptr' ), array(
+				'rest_unauthorized',
+				__( 'Sorry, you are not allowed to create results.', 'ptr' ),
+				array(
 					'status' => is_user_logged_in() ? 403 : 401,
 				)
 			);
