@@ -10,6 +10,7 @@
 
 require_once __DIR__ . '/stats/user.php';
 require_once __DIR__ . '/stats/project.php';
+require_once __DIR__ . '/stats/warning.php';
 require_once __DIR__ . '/stats/discarded-warning.php';
 
 class WPorg_GP_Custom_Stats {
@@ -29,6 +30,13 @@ class WPorg_GP_Custom_Stats {
 	public $project;
 
 	/**
+	 * Holds the warning stats instance.
+	 *
+	 * @var WPorg_GP_Warning_Stats
+	 */
+	public $warnings;
+
+	/**
 	 * Holds the discarded warning stats instance.
 	 *
 	 * @var WPorg_GP_Discarded_Warning_Stats
@@ -45,6 +53,7 @@ class WPorg_GP_Custom_Stats {
 	public function init_stats() {
 		$this->user    = new WPorg_GP_User_Stats();
 		$this->project = new WPorg_GP_Project_Stats();
+		$this->warnings = new WPorg_GP_Warning_Stats();
 		$this->discarded_warning = new WPorg_GP_Discarded_Warning_Stats();
 	}
 }
