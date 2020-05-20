@@ -37,7 +37,7 @@ class WPorg_GP_Warning_Stats {
 			foreach ( $warnings as $warning_key => $warning ) {
 				$key = "{$translation->user_id},{$translation_set->locale},{$translation_set->slug},{$project->path},{$translation->id},{$warning_key}";
 
-				$this->warning_stats[ $key ] = 1;
+				$this->warning_stats[ $key ] = $warning;
 			}
 		}
 	}
@@ -49,23 +49,24 @@ class WPorg_GP_Warning_Stats {
 		$now = current_time( 'mysql', 1 );
 
 		$values = array();
-		foreach ( $this->warning_stats as $key => $_ ) {
+		foreach ( $this->warning_stats as $key => $message ) {
 			list( $user_id, $locale, $locale_slug, $project_path, $translation_id, $warning ) = explode( ',', $key );
 
-			$values[] = $wpdb->prepare( '(%d, %s, %s, %s, %d, %s, %s)',
+			$values[] = $wpdb->prepare( '(%d, %s, %s, %s, %d, %s, %s, %s)',
 				$user_id,
 				$locale,
 				$locale_slug,
 				$project_path,
 				$translation_id,
 				$warning,
-				$now
+				$now,
+				$message
 			);
 
 			// If we're processing a large batch, add them as we go to avoid query lengths & memory limits.
 			if ( count( $values ) > 50 ) {
 				$wpdb->query(
-					"INSERT INTO {$wpdb->dotorg_translation_warnings} (`user_id`, `locale`, `locale_slug`, `project_path`, `translation_id`, `warning`, `timestamp`)
+					"INSERT INTO {$wpdb->dotorg_translation_warnings} (`user_id`, `locale`, `locale_slug`, `project_path`, `translation_id`, `warning`, `timestamp`, `message`)
 					VALUES " . implode( ', ', $values )
 				);
 				$values = array();
@@ -74,7 +75,7 @@ class WPorg_GP_Warning_Stats {
 
 		if ( $values ) {
 			$wpdb->query(
-				"INSERT INTO {$wpdb->dotorg_translation_warnings} (`user_id`, `locale`, `locale_slug`, `project_path`, `translation_id`, `warning`, `timestamp`)
+				"INSERT INTO {$wpdb->dotorg_translation_warnings} (`user_id`, `locale`, `locale_slug`, `project_path`, `translation_id`, `warning`, `timestamp`, `message`)
 				VALUES " . implode( ', ', $values )
 			);
 		}
@@ -93,6 +94,7 @@ CREATE TABLE `translate_dotorg_translation_warnings` (
   `translation_id` bigint(20) unsigned NOT NULL DEFAULT '0',
   `warning` varchar(20) NOT NULL DEFAULT '',
   `timestamp` datetime NOT NULL default '0000-00-00 00:00:00',
+  `message` longtext
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 */
