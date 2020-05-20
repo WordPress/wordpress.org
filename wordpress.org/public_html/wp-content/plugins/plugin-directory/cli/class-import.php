@@ -464,22 +464,28 @@ class Import {
 				$blocks[ $block_name ]->title = $trunk_readme->name;
 		}
 
+		if ( 'trunk' === $stable_tag ) {
+			$stable_path = $stable_tag;
+		} else {
+			$stable_path = "tags/$stable_tag";
+		}
+
 		// Find blocks dist/build JS files
 		$block_files = array();
-		$dist_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_tag}/dist" ) ?: array();
-		$build_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_tag}/build" ) ?: array();
+		$dist_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_path}/dist" ) ?: array();
+		$build_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_path}/build" ) ?: array();
 
 		foreach ( $dist_files as $file ) {
-			$block_files[] = "/{$stable_tag}/dist/" . $file;
+			$block_files[] = "/{$stable_path}/dist/" . $file;
 		}
 
 		foreach ( $build_files as $file ) {
-			$block_files[] = "/{$stable_tag}/build/" . $file;
+			$block_files[] = "/{$stable_path}/build/" . $file;
 		}
 
 		if ( empty( $block_files ) ) {
 			foreach ( $files_with_blocks as $file ) {
-				$block_files[] = "/{$stable_tag}/" . $file;
+				$block_files[] = "/{$stable_path}/" . $file;
 			}
 		}
 
