@@ -3517,6 +3517,10 @@ section {
 	padding: 0 10px 10px;
 }
 
+.bbpress.bbp-view-reviews #bbpress-forums .bbp-create-topic-wrapper .search-form {
+	width: 100%;
+}
+
 .bbpress #bbpress-forums {
 	/* bbPress 2.5 */
 }

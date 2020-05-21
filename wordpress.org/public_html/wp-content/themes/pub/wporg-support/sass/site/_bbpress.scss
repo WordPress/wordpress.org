@@ -138,6 +138,10 @@ $paginationBreakPoint: "600px";
 		@extend .clear;
 	}
 
+	&.bbp-view-reviews #bbpress-forums .bbp-create-topic-wrapper .search-form {
+		width: 100%;
+	}
+
 	#bbpress-forums {
 
 		div.bbp-template-notice {
