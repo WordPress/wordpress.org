@@ -458,6 +458,8 @@ class DevHub_User_Submitted_Content {
 				. $feedback_rule
 				. '</li><li>'
 				. __( 'This form is not for support requests, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' )
+				. '</li><li>'
+				. __( 'Notes and feedback must be written in English. Entries not written in English will be deleted.', 'wporg' )
 				. '</li><li class="user-notes-are-gpl">'
 				. $license_rule
 				. '</li></ul>';
@@ -465,6 +467,8 @@ class DevHub_User_Submitted_Content {
 
 		return '<ul><li>'
 			. __( 'This form is not for support requests, discussions, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' )
+			. '</li><li>'
+			. __( 'Notes and feedback must be written in English. Entries not written in English will be deleted.', 'wporg' )
 			. '</li><li>'
 			. __( 'In the editing area the Tab key enters a tab character. To move below this area by pressing Tab, press the Esc key followed by the Tab key. In some cases the Esc key will need to be pressed twice before the Tab key will allow you to continue.', 'wporg' )
 			. '</li><li class="user-notes-are-gpl">'
