@@ -45,7 +45,7 @@ class Plugin {
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'apply_capital_P_dangit' ), 10, 2 );
-		add_filter( 'gp_original_extracted_comments', array( $this, 'format_translator_commments' ), 5 );
+		add_filter( 'gp_original_extracted_comments', array( $this, 'format_translator_commments' ), 15 );
 
 		// Cron.
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
