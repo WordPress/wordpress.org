@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Rosetta\Site;
 
+use WordPressdotorg\Rosetta\Filter;
 use WordPressdotorg\Rosetta\Jetpack;
 use WP_Site;
 
@@ -51,8 +52,52 @@ class Locale_Team implements Site {
 			'stats',
 			'markdown',
 			'subscriptions',
+			'sharedaddy',
 		] );
 		$jetpack_module_manager->setup();
+
+		// Options for Jetpack's sharing module.
+		$options = new Filter\Options();
+		$options->add_option(
+			( new Filter\Option() )
+				->set_name( 'sharing-options' )
+				->set_callback( function() {
+					return [
+						'global' => [
+							'button_style'  => 'icon-text',
+							'sharing_label' => __( 'Share this:', 'rosetta' ),
+							'open_links'    => 'same',
+							'show'          => [ 'post' ],
+							'custom'        => [],
+						],
+					];
+				} )
+		);
+		$options->add_option(
+			( new Filter\Option() )
+				->set_name( 'sharing-services' )
+				->set_callback( function() {
+					return [
+						'visible' => [ 'facebook', 'twitter', 'email' ],
+						'hidden'  => [],
+					];
+				} )
+		);
+		$options->add_filter_option(
+			( new Filter\Option() )
+				->set_name( 'stats_options' )
+				->set_callback( function( $options ) {
+					$options['roles'] = [
+						'administrator',
+						'editor',
+						'author',
+					];
+					return $options;
+				} )
+				->set_num_args( 1 )
+		);
+
+		$options->setup();
 	}
 
 	/**

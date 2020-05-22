@@ -112,7 +112,7 @@ class Locale_Main implements Site {
 				->set_name( 'sharing-services' )
 				->set_callback( function() {
 					return [
-						'visible' => [ 'facebook', 'twitter', 'google-plus-1', 'email' ],
+						'visible' => [ 'facebook', 'twitter', 'email' ],
 						'hidden'  => [],
 					];
 				} )
