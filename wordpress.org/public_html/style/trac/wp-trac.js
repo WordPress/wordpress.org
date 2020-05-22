@@ -116,6 +116,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				if ( $body.hasClass( 'core' ) ) {
 					wpTrac.reports();
 					wpTrac.focuses.init();
+					wpTrac.devNote.init();
 				}
 			}
 		},
@@ -1208,6 +1209,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					}
 					html.appendTo( elements.bin );
 					elements.hiddenEl.val( keywords.join(' ') );
+					elements.hiddenEl.trigger('change');
 				},
 
 				// Remove a keyword. Takes a jQuery object of a keyword in the bin, or a sanitized keyword as a string.
@@ -1372,6 +1374,60 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				// If the difference has no length, then restore to the original order.
 				if ( ! testFocuses.length ) {
 					field.val( originalFocuses.join( ', ' ) );
+				}
+			}
+
+			return {
+				init: init
+			};
+		}()),
+
+		devNote: (function() {
+			function init() {
+				hide_on_new();
+				not_a_property();
+				ticket_edit();
+			}
+
+			function hide_on_new() {
+				if ( document.location.href.match( /newticket/ ) ) {
+					$('#field-dev_note').closest('tr').hide();
+				}
+			}
+
+			function not_a_property() {
+				// Move it from the Ticket Properties to a section after the Description.
+				var dev_note = $("#ticket .properties td[headers='h_dev_note'"),
+					section = $( '<div class="description"><h3>Dev Note</h3><div class="searchable"></div></div>' );
+
+				if ( dev_note.text().trim().length ) {
+					section.find('.searchable').html( dev_note.html() );
+					$('#ticket .description').after( section );
+				}
+
+				dev_note.closest('tr').remove();
+			}
+
+			function ticket_edit() {
+				var textarea = $('#propertyform .trac-properties textarea#field-dev_note'),
+					keywords = $('#field-keywords');
+
+				keywords.on( 'change', function() {
+					if ( keywords.val().match( /dev-note/ ) ) {
+						textarea.closest('tr').show();
+					}
+				} );
+
+				textarea.on( 'blur', function() {
+					if ( textarea.val().trim().length ) {
+						wpTrac.workflow.addKeyword( 'has-dev-note' );
+					} else {
+						wpTrac.workflow.addKeyword( 'needs-dev-note' );
+					}
+				} );
+
+				if ( ! textarea.val().length && ! keywords.val().match( /dev-note/ ) ) {
+					textarea.closest( 'tr' ).hide();
 				}
 			}
 

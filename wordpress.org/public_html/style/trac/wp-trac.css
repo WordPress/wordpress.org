@@ -1809,8 +1809,12 @@ span.AtD_proofread_button:before {
 }
 
 #field-description-help,
+#field-dev-note-help,
 label[for=comment] {
 	line-height: 28px;
+}
+#field-dev-note-help {
+	float: right;
 }
 table.dirlist td.rev a.chgset:before,
 a.trac-rawlink:before, a.trac-ziplink:before,
@@ -2142,7 +2146,7 @@ a.mention.me {
 	#ticket table.properties > tbody > tr > th {
 		width: 30%; /* More room so columns don't overlap */
 	}
-	#field-description-help, #content.ticket label[for="comment"] {
+	#field-description-help, #field-dev-note-help, #content.ticket label[for="comment"] {
 		float: none; /* don't let it collide with the editor buttons */
 	}
 	#keyword-label {

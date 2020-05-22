@@ -6,7 +6,7 @@
 <?python
 	profile_link = 'https://profiles.wordpress.org/'
 
-  field_types = [ 'milestone', 'priority', 'type', 'severity', 'version', 'component', 'keywords', 'focuses', ]
+  field_types = [ 'dev_note', 'milestone', 'priority', 'type', 'severity', 'version', 'component', 'keywords', 'focuses', ]
 
   # Sorting function
   def sort_nicely(field1, field2):
@@ -51,6 +51,14 @@
     <img class="avatar" src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" />
   </a>
     ${select('*|comment()|text()')}
+</td>
+
+<!-- Wrap / add Help for the Dev-note field -->
+<td py:match="td[@class='col1 fullrow']" py:attrs="select('@*')">
+  <fieldset>
+    <label for="field-dev-note" id="field-dev-note-help">You may use <a href="/wiki/WikiFormatting">WikiFormatting</a> here.</label>
+    ${select('*|comment()|text()')}
+  </fieldset>
 </td>
 
 <!--! Gravatars for the ticket owner -->
