@@ -51,6 +51,14 @@ array_walk( $prs, function( $data ) use ( $authenticated ) {
 			strtotime( $data->data->updated_at ) > time() - 30*60
 			&&
 			strtotime( $data->last_checked_at ) <= time() - 2*60
+		) ||
+		// or unit tests are running, then 2min.
+		(
+			$data->check_runs
+			&&
+			in_array( 'in_progress', $data->check_runs )
+			&&
+			strtotime( $data->last_checked_at ) <= time() - 2*60
 		)
 	) {
 		$pr_data = fetch_pr_data( $data->repo, $data->pr );

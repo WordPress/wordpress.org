@@ -1699,23 +1699,38 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			function prStatus( data ) {
 				// Closed?
 				if ( data.closed_at ) {
-					if ( data.mergeable_state == 'clean' ) {
-						return '✅ Closed';
-					} else {
-						return '❌ Closed'
+					return '✅ Closed';
+				}
+
+				// Unit Tests?
+				if ( data.check_runs ) {
+					for ( var provider in data.check_runs ) {
+						switch( data.check_runs[ provider ] ) {
+							case 'in_progress':
+								return provider + ' running';
+							case 'failed':
+								return '❌ ' + provider + ' failed';
+							case 'success':
+								continue;
+							default:
+								return '❌ ' + provider + ' ' + data.check_runs[ provider ];
+						}
 					}
 				}
 
 				// Merge State then
 				switch ( data.mergeable_state ) {
 					case 'draft':
-						return 'Work in progress';
+						return 'Draft';
+					case 'blocked': // This seems to be returned for our App with PRs but not others..
 					case 'clean':
 						return '✅ All checks pass';
 					case 'dirty':
 						return '❌ Merge conflicts';
-					case 'unstable':
+					case 'unstable': // Not seen, Unit Tests above should catch it.
 						return '❌ Failing tests';
+					case 'unknown':
+						return 'Unknown';
 				}
 			}
 
