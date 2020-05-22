@@ -66,7 +66,7 @@ class Stats extends GP_Route {
 		$translation_locale_statuses = array();
 		foreach ( $rows as $set ) {
 			$locale_key = $set->locale;
-			if ( 'default' != $set->locale_slug ) {
+			if ( 'default' !== $set->locale_slug ) {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
 
@@ -132,7 +132,7 @@ class Stats extends GP_Route {
 		global $wpdb;
 		if ( ! $locale || ! $locale_slug || ! $view ) {
 			wp_redirect( '/stats', 301 );
-			die();
+			exit;
 		}
 
 		if ( 'default' !== $locale_slug ) {
@@ -145,6 +145,8 @@ class Stats extends GP_Route {
 			wp_redirect( '/stats', 301 );
 			exit;
 		}
+
+		$locale_path = $locale . '/' . $locale_slug;
 
 		$items = array();
 		if ( 'plugins' == $view ) {
@@ -237,6 +239,6 @@ class Stats extends GP_Route {
 			}
 		}
 
-		$this->tmpl( 'stats-plugin-themes-overview', compact( 'locale', 'locale_slug', 'view', 'gp_locale', 'items' ) );
+		$this->tmpl( 'stats-plugin-themes-overview', compact( 'locale_path', 'view', 'gp_locale', 'items' ) );
 	}
 }
