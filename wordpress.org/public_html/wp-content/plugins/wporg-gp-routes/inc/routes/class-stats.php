@@ -70,6 +70,11 @@ class Stats extends GP_Route {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
 
+			$gp_locale = GP_Locales::by_slug( $locale_key );
+			if ( ! $gp_locale || ! $gp_locale->wp_locale ) {
+				continue;
+			}
+
 			/*
 			 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
 			 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
