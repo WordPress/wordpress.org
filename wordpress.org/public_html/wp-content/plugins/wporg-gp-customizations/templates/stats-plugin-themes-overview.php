@@ -4,7 +4,7 @@ gp_enqueue_script( 'tablesorter' );
 
 $breadcrumb   = array();
 $breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
-$breadcrumb[] = gp_link_get( gp_url_join( '/locale', $gp_locale->slug, $locale_slug ), esc_html( $gp_locale->english_name ) );
+$breadcrumb[] = gp_link_get( gp_url_join( '/locale', $gp_locale->slug ), esc_html( $gp_locale->english_name ) );
 $breadcrumb[] = trim( ucwords( $view ), 's' ) . ' translation status overview';
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
@@ -35,10 +35,10 @@ $main_column_title = trim( ucwords( $view ), 's' );
 		<tbody>
 			<?php
 			foreach ( $items as $slug => $details ) {
-				$project_link = gp_url( gp_url_join( 'locale', $gp_locale->slug, $locale_slug, $details->project->path ) );
+				$project_link = gp_url( gp_url_join( 'locale', $gp_locale->slug, $details->project->path ) );
 				// Themes get a shortcut..
 				if ( 'themes' == $view ) {
-					$project_link = gp_url( gp_url_join( 'projects', $details->project->path, $gp_locale->slug, $locale_slug ) );
+					$project_link = gp_url( gp_url_join( 'projects', $details->project->path, $gp_locale->slug ) );
 				}
 
 				$project_overview_link = gp_url( gp_url_join( 'projects', $details->project->path ) );

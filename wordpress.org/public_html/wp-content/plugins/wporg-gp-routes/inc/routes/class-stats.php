@@ -135,7 +135,16 @@ class Stats extends GP_Route {
 			die();
 		}
 
-		$gp_locale = GP_Locales::by_slug( $locale );
+		if ( 'default' !== $locale_slug ) {
+			$gp_locale = GP_Locales::by_slug( $locale . '/' . $locale_slug );
+		} else {
+			$gp_locale = GP_Locales::by_slug( $locale );
+		}
+
+		if ( ! $gp_locale ) {
+			wp_redirect( '/stats', 301 );
+			exit;
+		}
 
 		$items = array();
 		if ( 'plugins' == $view ) {
