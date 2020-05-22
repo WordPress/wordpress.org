@@ -1697,41 +1697,94 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 			// Logic to determine what the PRs status is
 			function prStatus( data ) {
-				// Closed?
+				var stack = [],
+					emojiState = '';
+
+				// Closed? Skip everything else.
 				if ( data.closed_at ) {
 					return '✅ Closed';
-				}
-
-				// Unit Tests?
-				if ( data.check_runs ) {
-					for ( var provider in data.check_runs ) {
-						switch( data.check_runs[ provider ] ) {
-							case 'in_progress':
-								return provider + ' running';
-							case 'failed':
-								return '❌ ' + provider + ' failed';
-							case 'success':
-								continue;
-							default:
-								return '❌ ' + provider + ' ' + data.check_runs[ provider ];
-						}
-					}
 				}
 
 				// Merge State then
 				switch ( data.mergeable_state ) {
 					case 'draft':
-						return 'Draft';
-					case 'blocked': // This seems to be returned for our App with PRs but not others..
+						stack.push( 'Draft' );
+						break;
+					case 'blocked':
+						// All Good, Changes Requested, or unit tests failing.
+						// Why 'blocked' is returned for some PRs is not obvious.
+						if (
+							data.reviews.CHANGES_REQUESTED ||
+							(
+								data.check_runs &&
+								'failed' == Object.values( data.check_runs ).reduce( function( result, element ) {
+									return 'failed' == element ? element : result;
+								} )
+							)
+						) {
+							// Let the unit tests / reviews section take care of it.
+							break;
+						} // else fall through.
 					case 'clean':
-						return '✅ All checks pass';
+						emojiState = '✅';
+						stack.push( 'All checks pass' );
+						break;
 					case 'dirty':
-						return '❌ Merge conflicts';
-					case 'unstable': // Not seen, Unit Tests above should catch it.
-						return '❌ Failing tests';
+						emojiState = '❌';
+						stack.push( 'Merge conflicts' );
+						break;
+					case 'unstable':
+						emojiState = '❌';
+						stack.push( 'Failing tests' );
+						break;
 					case 'unknown':
-						return 'Unknown';
+						stack.push( 'Unknown' );
+						break;
 				}
+
+				// Unit Tests?
+				if ( data.check_runs ) {
+					for ( var provider in data.check_runs ) {
+						switch ( data.check_runs[ provider ] ) {
+							case 'in_progress':
+								stack.push( provider + ' running' );
+								break;
+							case 'failed':
+								emojiState = '❌';
+								stack.push( provider );
+								break;
+							case 'success':
+								continue;
+							default:
+								stack.push( provider + ' ' + data.check_runs[ provider ] );
+								break;
+						}
+					}
+				}
+
+				// Changes requested?
+				if ( data.reviews ) {
+					if ( data.reviews.APPROVED ) {
+						emojiState = '✅';
+						stack.push(
+							$('<span>Approved</span>').prop(
+								'title',
+								'Changes approved by: ' + data.reviews.APPROVED.join(', ')
+							)[0].outerHTML
+						);
+					}
+					if ( data.reviews.CHANGES_REQUESTED ) {
+						emojiState = '❌';
+						stack.push(
+							$('<span>Changes Requested</span>').prop(
+								'title',
+								'Changes requested by: ' + data.reviews.CHANGES_REQUESTED.join(', ')
+							)[0].outerHTML
+						);
+					}
+				}
+
+				return emojiState + ' ' + stack.join( ', ' );
 			}
 
 			function renderPR( container, data ) {

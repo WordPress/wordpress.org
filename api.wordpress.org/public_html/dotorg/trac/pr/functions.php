@@ -43,6 +43,21 @@ function fetch_pr_data( $repo, $pr ) {
 		}
 	}
 
+	$_reviews = api_request(
+		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/reviews',
+		null,
+		[ 'Accept: application/vnd.github.antiope-preview+json' ]
+	);
+	$reviews = [];
+	foreach ( $_reviews as $r ) {
+		if (
+			in_array( $r->state, [ 'CHANGES_REQUESTED', 'APPROVED' ] ) &&
+			! in_array( $r->user->login, $reviews[ $r->state ] ?? [], true )
+		) {
+			$reviews[ $r->state ][] = $r->user->login;
+		}
+	}
+
 	return (object) [
 		'repo'            => $data->base->repo->full_name,
 		'number'          => $data->number,
@@ -54,6 +69,7 @@ function fetch_pr_data( $repo, $pr ) {
 		'closed_at'       => $data->closed_at,
 		'mergeable_state' => $data->mergeable_state,
 		'check_runs'      => $check_runs,
+		'reviews'         => $reviews,
 		'body'            => $data->body,
 		'user'            => (object) [
 			'url'  => $data->user->html_url,
