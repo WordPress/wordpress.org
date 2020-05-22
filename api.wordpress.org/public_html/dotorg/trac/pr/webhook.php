@@ -82,6 +82,37 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			$trac = get_trac_instance( $pr_data->trac_ticket[0] );
 
 			$pr_description = format_pr_desc_for_trac_comment( $pr_data );
+			$attributes     = [];
+
+			// Update ticket keywords if possible.
+			$ticket = $trac->get( $pr_data->trac_ticket[1] );
+			if ( $ticket ) {
+				$keywords = preg_split( '![,\s]+!', $ticket['keywords'] );
+
+				// Remove needs-patch
+				if ( false !== ( $key = array_search( 'needs-patch', $keywords ) ) ) {
+					unset( $keywords[ $key ] );
+				}
+				if ( false !== ( $key = array_search( 'needs-refresh', $keywords ) ) ) {
+					unset( $keywords[ $key ] );
+				}
+
+				// Add has-patch if not already there.
+				if ( false === array_search( 'has-patch', $keywords ) ) {
+					$keywords[] = 'has-patch';
+				}
+
+				if ( $pr_data->touches_tests ) {
+					if ( false !== ( $key = array_search( 'needs-unit-tests', $keywords ) ) ) {
+						unset( $keywords[ $key ] );
+					}
+					if ( false === array_search( 'has-unit-tests', $keywords ) ) {
+						$keywords[] = 'has-unit-tests';
+					}
+				}
+
+				$attributes['keywords'] = implode( ' ', $keywords );
+			}
 
 			$trac->update(
 				$pr_data->trac_ticket[1],
@@ -89,7 +120,7 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 					"on [https://github.com/{$pr_repo}/ {$pr_repo}] " .
 					"by [{$pr_data->user->url} {$pr_data->user->name}].''" .
 					( $pr_description ? "\n{$pr_description}" : '' ),
-				[],  // Attributes changed
+				$attributes,  // Attributes changed
 				true // Notify
 			);
 		}

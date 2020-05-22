@@ -58,7 +58,7 @@ Arguments:
            wporg_user  = wporg_sanitize_user_nicename(change.author);
            pr_byline   = change.comment.partition('\n')[0];
            pr_comment  = ''.join(change.comment.partition('\n')[1:]) or False;
-           prbot_class = 'prbot with-context' if pr_comment else 'prbot without-context';
+           prbot_class = 'prbot with-context' if pr_comment or change.fields else 'prbot without-context';
          ">
   <h3 class="change chat-bot ${prbot_class}">
     <span class="avatar">
@@ -69,6 +69,24 @@ Arguments:
       <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
     </span>
   </h3>
+  <ul py:if="change.fields" class="changes">
+    <li py:for="field_name, field in sorted(change.fields.iteritems(), key=lambda item: item[1].label.lower())"
+        class="trac-field-${field_name}">
+      <strong class="trac-field-${field_name}">${field.label}</strong>
+      <py:choose>
+        <py:when test="'rendered' in field">${field.rendered}</py:when>
+        <py:when test="field.old and field.new"><i18n:msg params="old, new">
+          changed from <em>${field.old}</em> to <em>${field.new}</em>
+        </i18n:msg></py:when>
+        <py:when test="not field.old and field.new"><i18n:msg params="value">
+          set to <em>${field.new}</em>
+        </i18n:msg></py:when>
+        <py:otherwise><i18n:msg params="value">
+          <em>${field.old}</em> deleted
+        </i18n:msg></py:otherwise>
+      </py:choose>
+    </li>
+  </ul>
   <div py:if="pr_comment" class="comment searchable" xml:space="preserve">
     ${wiki_to_html(context, pr_comment, escape_newlines=preserve_newlines)}
   </div>

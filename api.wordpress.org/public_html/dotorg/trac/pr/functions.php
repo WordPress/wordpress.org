@@ -58,6 +58,19 @@ function fetch_pr_data( $repo, $pr ) {
 		}
 	}
 
+	$touches_tests = false;
+	$_files = api_request(
+		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/files?per_page=999',
+		null,
+		[ 'Accept: application/vnd.github.antiope-preview+json' ]
+	);
+	foreach ( $_files as $f ) {
+		if ( preg_match( '!(^tests/|/tests/)!', $f->filename ) ) {
+			$touches_tests = true;
+			break;
+		}
+	}
+
 	return (object) [
 		'repo'            => $data->base->repo->full_name,
 		'number'          => $data->number,
@@ -70,6 +83,7 @@ function fetch_pr_data( $repo, $pr ) {
 		'mergeable_state' => $data->mergeable_state,
 		'check_runs'      => $check_runs,
 		'reviews'         => $reviews,
+		'touches_tests'   => $touches_tests,
 		'body'            => $data->body,
 		'user'            => (object) [
 			'url'  => $data->user->html_url,
