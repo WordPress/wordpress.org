@@ -217,7 +217,7 @@ class Stats extends GP_Route {
 
 		$sql_project_ids = implode( ', ', array_map( 'intval', array_keys( $project_ids ) ) );
 		$stats = $wpdb->get_results( $wpdb->prepare(
-			"SELECT `project_id`, `all`, `current`, `waiting`, `untranslated`
+			"SELECT `project_id`, `all`, `current`, `waiting`, `fuzzy`, `untranslated`
 				FROM {$wpdb->project_translation_status}
 				WHERE project_id IN ($sql_project_ids)
 				AND locale = %s AND locale_slug = %s",
