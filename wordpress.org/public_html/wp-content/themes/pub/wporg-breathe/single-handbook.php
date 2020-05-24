@@ -31,9 +31,21 @@ get_header(); ?>
 				<h1 class="handbook-page-title"><?php the_title(); ?></h1>
 			</header><!-- .handbook-header -->
 
-			<?php the_content(); ?>
+			<?php
+			the_content();
 
-			<?php \WPorg_Handbook_Navigation::show_nav_links(); ?>
+			printf(
+				/* translators: %s: Date of last update. */
+				'<p class="handbook-last-updated">' . __( 'Last updated: %s', 'wporg' ) . '</p>',
+				sprintf(
+					'<time datetime="%s">%s</time>',
+					esc_attr( get_the_modified_date( DATE_W3C ) ),
+					esc_html( get_the_modified_date() )
+				)
+			);
+
+			\WPorg_Handbook_Navigation::show_nav_links();
+			?>
 
 		<?php endwhile; // end of the loop. ?>
 

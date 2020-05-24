@@ -1037,6 +1037,13 @@ article.page p.contributor-name {
 	padding-top: 5rem;
 }
 
+.handbook-last-updated {
+	font-size: 1.25rem;
+	color: #555;
+	margin: 2.4em 0 0;
+	font-weight: 300;
+}
+
 /*
  * Callout boxes
  */

@@ -13,8 +13,9 @@ function after_setup_theme() {
 	remove_action( 'customize_register', 'breathe_customize_register' );
 	remove_action( 'customize_preview_init', 'breathe_customize_preview_js' );
 	remove_filter( 'wp_head', 'breathe_color_styles' );
-
 	add_action( 'customize_register', __NAMESPACE__ . '\customize_register' );
+
+	add_filter( 'o2_filtered_content', __NAMESPACE__ . '\append_last_updated', 10, 2 );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\after_setup_theme', 11 );
 
@@ -233,6 +234,30 @@ function fix_code_entity_encoding( $content ) {
 	return str_replace( [ '&amp;gt;', '&amp;amp;' ], [ '&gt;', '&amp;' ], $content );
 }
 add_filter( 'syntaxhighlighter_htmlresult', __NAMESPACE__ . '\fix_code_entity_encoding', 20 );
+
+/**
+ * Appends a 'Last updated' to handbook pages.
+ *
+ * @param string $content Content of the current post.
+ * @return Content of the current post.
+ */
+function append_last_updated( $content, $post ) {
+	if ( ! function_exists( 'wporg_is_handbook' ) || ! wporg_is_handbook( $post->post_type ) ) {
+		return $content;
+	}
+
+	$content .= sprintf(
+		/* translators: %s: Date of last update. */
+		'<p class="handbook-last-updated">' . __( 'Last updated: %s', 'wporg' ) . '</p>',
+		sprintf(
+			'<time datetime="%s">%s</time>',
+			esc_attr( get_the_modified_date( DATE_W3C ) ),
+			esc_html( get_the_modified_date() )
+		)
+	);
+
+	return $content;
+}
 
 /**
  * Register translations for plugins without their own GlotPress project.
