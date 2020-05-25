@@ -64,6 +64,37 @@ add_action( 'template_redirect', function() {
 	}
 }, 9 );
 
+// Jetpack Contact form - https://github.com/Automattic/jetpack/pull/15826
+add_action( 'template_redirect', function () {
+	if ( isset( $_REQUEST['contact-form-id'] ) ) {
+		// Jetpack supports contact forms in widgets, but AFAIK we don't have any.
+		if ( ! is_numeric( $_REQUEST['contact-form-id'] ) ) {
+			die_bad_request( "Bad input to Jetpack Contact Form" );
+		}
+		if ( ! isset( $_SERVER['HTTP_REFERER'] ) || ! isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
+			die_bad_request( "Missing referer or user-agent" );
+		}
+		// Jetpack Contact forms can have array fields, but we have none on WordPress.org
+		foreach ( $_REQUEST as $k => $v ) {
+			if ( ! is_scalar( $v ) ) {
+				die_bad_request( "non-scalar input to Jetpack Contact Form" );
+			}
+			if ( 'sample@email.tst' === $v ) {
+				die_bad_request( "sample@email.tst input to Jetpack Contact Form" );
+			}
+		}
+	}
+} );
+
+// bbPress - https://bbpress.trac.wordpress.org/ticket/3373
+add_action( 'template_redirect', function () {
+	if ( isset( $_REQUEST['action'] ) && is_array( $_REQUEST['action'] ) && function_exists( 'bbpress' ) ) {
+		if ( isset( $_REQUEST['action'][0] ) && 'bbp' === substr( $_REQUEST['action'][0], 0, 3 ) ) {
+			die_bad_request( "non-scalar input to bbPress subactions." );
+		}
+	}
+} );
+
 /**
  * Detect badly formed XMLRPC requests.
  * pingback.ping is not a valid multicall target, blocking due to the excessive requests.
