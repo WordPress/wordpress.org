@@ -244,7 +244,7 @@ class Make_Core_Trac_Components {
 	}
 
 	function wp_enqueue_scripts() {
-		wp_enqueue_style( 'make-core-trac', plugins_url( '/make-core.css', __FILE__ ), array(), '3' );
+		wp_enqueue_style( 'make-core-trac', plugins_url( '/make-core.css', __FILE__ ), array(), 4 );
 	}
 
 	function wp_head() {
