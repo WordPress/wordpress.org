@@ -16,6 +16,11 @@
 		}
 	}
 
+	ul {
+		list-style: none;
+		margin: 0.5em;
+	}
+
 	&.notice-alt {
 		box-shadow: none;
 	}
