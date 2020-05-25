@@ -11,8 +11,6 @@ class Readme_Validator {
 	public static function display() {
 		?>
 		<div class="wrap">
-			<h2><?php _e( 'WordPress Plugin readme.txt Validator', 'wporg-plugins' ); ?></h2>
-
 			<?php
 			if ( $_POST ) {
 				self::validate_readme();
@@ -76,11 +74,22 @@ class Readme_Validator {
 		);
 		foreach ( $error_types as $field => $warning_label ) {
 			if ( ! empty( $errors[ $field ] ) ) {
-				$output .= "{$warning_label}\n<ul class='{$field} error'>\n";
+				if ( 'errors' === $field ) {
+					$class = 'error';
+				} elseif ( 'warnings' === $field ) {
+					$class = 'warning';
+				} else {
+					$class = 'info';
+				}
+
+				$output .= "<h3>{$warning_label}</h3>\n";
+				$output .= "<div class='notice notice-{$class} notice-alt'>\n";
+				$output .= "<ul class='{$field}'>\n";
 				foreach ( $errors[ $field ] as $notice ) {
 					$output .= "<li>{$notice}</li>\n";
 				}
 				$output .= "</ul>\n";
+				$output .= "</div>\n";
 			}
 		}
 
