@@ -1297,7 +1297,11 @@ class Plugin_Directory {
 		}
 
 		// Existing tag with no plugins.
-		if ( is_tax() && ! $GLOBALS['wp_query']->have_posts() ) {
+		if (
+			( is_tax() || is_category() || is_tag() ) &&
+			! have_posts() &&
+			! is_tax( 'plugin_section' ) // All sections have something, or intentionall don't (favorites)
+		) {
 			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
 
