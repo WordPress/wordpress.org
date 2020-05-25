@@ -1,3 +1,5 @@
+/* Grunt needs to be run after changes are made to compile wp4-rtl.css */ 
+
 /* The Reset ---------------------------------- */
 body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,
 h6,pre,form,fieldset,input,p,blockquote,table,
@@ -104,6 +106,32 @@ sup {
 	clip: rect(0 0 0 0);
 	border: 0;
 	word-wrap: normal !important;
+}
+
+/* We also provide the a.screen-reader-text:focus declaration to be more specific than third party implementations that cause issues */
+a.screen-reader-text:focus,
+.screen-reader-text:focus {
+	background-color: #f1f1f1;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	-webkit-box-shadow: 0 0 2px 2px rgba(0,0,0,.6);
+	box-shadow: 0 0 2px 2px rgba(0,0,0,.6);
+	clip: auto !important;
+	-webkit-clip-path: inherit;
+	clip-path: inherit;
+	color: #21759b;
+	display: block;
+	font-size: 14px;
+	font-size: .875rem;
+	font-weight: 700;
+	height: auto;
+	left: 5px;
+	line-height: normal;
+	padding: 15px 23px 14px;
+	text-decoration: none;
+	top: 5px;
+	width: auto;
+	z-index: 100000;
 }
 
 /* =WordPress Core
@@ -2465,4 +2493,5 @@ body.wporg-responsive .col-2 {
 .notification-danger {
 	background: #f2dede;
 }
+
 /*# sourceMappingURL=wp4.css.map */
