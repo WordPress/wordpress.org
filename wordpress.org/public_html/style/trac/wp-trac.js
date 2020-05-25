@@ -1796,6 +1796,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					).html();
 				}
 
+				// Strip off any ticket numbers from the start of the PR title for display.
+				data.title = data.title.replace( /^#\d+\s*/, '' );
+
 				container.append(
 					'<li>' +
 					'<div>' +
