@@ -123,6 +123,6 @@ body.ticket-reports-open #report-popup {
 	border: none;
 }
 
-body.trac .glossary-item-container {
+body.trac .glossary-item-hidden-content {
     display: none;
 }
