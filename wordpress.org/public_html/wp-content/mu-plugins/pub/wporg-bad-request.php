@@ -93,7 +93,7 @@ add_action( 'template_redirect', function () {
 			die_bad_request( "non-scalar input to bbPress subactions." );
 		}
 	}
-} );
+}, 5 ); // before bbp_template_redirect
 
 /**
  * Detect badly formed XMLRPC requests.
