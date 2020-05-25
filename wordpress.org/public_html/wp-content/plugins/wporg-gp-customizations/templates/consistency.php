@@ -60,6 +60,12 @@ gp_tmpl_header();
 			<input type="checkbox" name="search_case_sensitive" value="1"<?php checked( $search_case_sensitive ); ?>>
 			Case Sensitive
 		</label>
+		<?php if ( $user_can_wildcard ) : ?>
+			<label>
+				<input type="checkbox" name="search_wildcard" value="1"<?php checked( $search_wildcard ); ?>>
+				Wildcard Search
+			</label>
+		<?php endif; ?>
 	</p>
 
 	<p>

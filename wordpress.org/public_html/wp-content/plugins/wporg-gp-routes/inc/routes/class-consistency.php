@@ -31,6 +31,7 @@ class Consistency extends GP_Route {
 
 		$search = $set = $project = '';
 		$search_case_sensitive = false;
+		$search_wildcard       = false;
 
 		if ( ! empty( $_REQUEST['search'] ) ) {
 			$search = wp_unslash( $_REQUEST['search'] );
@@ -47,6 +48,10 @@ class Consistency extends GP_Route {
 			$search_case_sensitive = true;
 		}
 
+		if ( ! empty( $_REQUEST['search_wildcard'] ) ) {
+			$search_wildcard = true;
+		}
+
 		if ( ! empty( $_REQUEST['project'] ) && isset( self::PROJECTS[ $_REQUEST['project'] ] ) ) {
 			$project = $_REQUEST['project'];
 		}
@@ -60,6 +65,11 @@ class Consistency extends GP_Route {
 			$locale_is_rtl = 'rtl' === GP_Locales::by_slug( $locale )->text_direction;
 		}
 
+		$user_can_wildcard = is_user_logged_in(); // TODO: Needs to limit to PTE/GTE.
+		if ( ! $user_can_wildcard ) {
+			$search_wildcard = false;
+		}
+
 		$results = [];
 		$performed_search = false;
 		if ( $search && $locale && $set_slug ) {
@@ -69,6 +79,7 @@ class Consistency extends GP_Route {
 				'locale'         => $locale,
 				'set_slug'       => $set_slug,
 				'case_sensitive' => $search_case_sensitive,
+				'wildcard'       => $search_wildcard,
 				'project'        => $project,
 			] );
 
@@ -122,7 +133,12 @@ class Consistency extends GP_Route {
 			$collation = '';
 		}
 
-		$search   = $wpdb->prepare( "= {$collation} %s", $args['search'] );
+		if ( $args['wildcard'] ) {
+			$search = $wpdb->prepare( "LIKE {$collation} %s", $wpdb->esc_like( $args['search'] ) . '%' );
+		} else {
+			$search = $wpdb->prepare( "= {$collation} %s", $args['search'] );
+		}
+
 		$locale   = $wpdb->prepare( '%s', $args['locale'] );
 		$set_slug = $wpdb->prepare( '%s', $args['set_slug'] );
 
