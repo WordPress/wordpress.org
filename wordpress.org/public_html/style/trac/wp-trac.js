@@ -1711,15 +1711,16 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						stack.push( 'Draft' );
 						break;
 					case 'blocked':
-						// All Good, Changes Requested, or unit tests failing.
-						// Why 'blocked' is returned for some PRs is not obvious.
+						// All Good (but blocked due to Branch protection rules, or Merge requirements)
+						// or Changes Requested
+						// or Unit Tests Failing.
 						if (
 							data.reviews.CHANGES_REQUESTED ||
 							(
 								data.check_runs &&
 								'failed' == Object.values( data.check_runs ).reduce( function( result, element ) {
 									return 'failed' == element ? element : result;
-								} )
+								}, 'no-reviews' )
 							)
 						) {
 							// Let the unit tests / reviews section take care of it.
