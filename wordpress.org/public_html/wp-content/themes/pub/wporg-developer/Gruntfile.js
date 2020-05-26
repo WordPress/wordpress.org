@@ -1,5 +1,7 @@
 module.exports = function( grunt ) {
 
+	const sass = require('node-sass');
+
 	// Load tasks.
 	require( 'matchdep' ).filterDev(['grunt-*']).forEach( grunt.loadNpmTasks );
 
@@ -13,6 +15,7 @@ module.exports = function( grunt ) {
 				ext: '.css',
 				src: [ '**/*.scss' ],
 				options: {
+					implementation: sass,
 					outputStyle: 'expanded'
 				}
 			}
