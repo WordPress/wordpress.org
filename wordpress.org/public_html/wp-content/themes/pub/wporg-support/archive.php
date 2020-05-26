@@ -32,9 +32,10 @@ get_header(); ?>
 
 			<?php endwhile; ?>
 
-			<div class="archive-pagination">
-				<?php posts_nav_link(); ?>
-			</div>
+		</div>
+
+		<div class="archive-pagination">
+			<?php posts_nav_link(); ?>
 		</div>
 	</main>
 

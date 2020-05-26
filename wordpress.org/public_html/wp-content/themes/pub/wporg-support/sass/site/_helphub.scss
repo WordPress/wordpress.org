@@ -20,6 +20,21 @@
 				text-decoration: none;
 			}
 		}
+
+		@media (min-width: $ms-breakpoint) {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: flex-start;
+
+			.archive-block,
+			> div {
+				margin-right: 0;
+				margin-left: 0;
+				width: 30%;
+				font-size: ms( -2 );
+			}
+		}
 	}
 }
 
@@ -39,6 +54,11 @@
 		margin-top: 0.5rem;
 		display: inline-block;
 	}
+}
+
+.archive-pagination {
+	text-align: center;
+	margin-top: 4rem;
 }
 
 body.helphub-with-sidebar {

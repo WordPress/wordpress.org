@@ -16,7 +16,9 @@ $paginationBreakPoint: "600px";
 
 .three-up { //3-columns section
 
-	@extend .clear;
+	&:not(.helphub-front-page) {
+		@extend .clear;
+	}
 
 	@media (min-width: $ms-breakpoint) {
 

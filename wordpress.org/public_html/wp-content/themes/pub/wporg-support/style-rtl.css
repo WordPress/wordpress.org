@@ -2383,9 +2383,9 @@ p a:hover {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear::before, .three-up::before, .bbpress main#main::before, .bbp-view .review-ratings::before,
+.clear::before, .three-up:not(.helphub-front-page)::before, .bbpress main#main::before, .bbp-view .review-ratings::before,
 .clear::after,
-.three-up::after,
+.three-up:not(.helphub-front-page)::after,
 .bbpress main#main::after,
 .bbp-view .review-ratings::after,
 .entry-content::before,
@@ -2405,7 +2405,7 @@ p a:hover {
 
 
 .clear::after,
-.three-up::after,
+.three-up:not(.helphub-front-page)::after,
 .bbpress main#main::after,
 .bbp-view .review-ratings::after,
 .entry-content::after,
@@ -3515,6 +3515,10 @@ section {
 	padding: 0 10px 10px;
 }
 
+.bbpress.bbp-view-reviews #bbpress-forums .bbp-create-topic-wrapper .search-form {
+	width: 100%;
+}
+
 .bbpress #bbpress-forums {
 	/* bbPress 2.5 */
 }
@@ -4605,6 +4609,22 @@ div.bbp-breadcrumb p {
 	text-decoration: none;
 }
 
+@media (min-width: 48em) {
+	.three-up.helphub-front-page {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: flex-start;
+	}
+	.three-up.helphub-front-page .archive-block,
+	.three-up.helphub-front-page > div {
+		margin-left: 0;
+		margin-right: 0;
+		width: 30%;
+		font-size: 0.8rem;
+	}
+}
+
 #helphub-forum-link {
 	margin-top: 5rem;
 }
@@ -4619,6 +4639,11 @@ div.bbp-breadcrumb p {
 #helphub-forum-link a {
 	margin-top: 0.5rem;
 	display: inline-block;
+}
+
+.archive-pagination {
+	text-align: center;
+	margin-top: 4rem;
 }
 
 body.helphub-with-sidebar .left-sidebar {
