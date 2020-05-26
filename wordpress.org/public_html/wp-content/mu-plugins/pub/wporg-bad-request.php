@@ -74,11 +74,7 @@ add_action( 'template_redirect', function () {
 		if ( ! isset( $_SERVER['HTTP_REFERER'] ) || ! isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
 			die_bad_request( "Missing referer or user-agent" );
 		}
-		// Jetpack Contact forms can have array fields, but we have none on WordPress.org
 		foreach ( $_REQUEST as $k => $v ) {
-			if ( ! is_scalar( $v ) ) {
-				die_bad_request( "non-scalar input to Jetpack Contact Form" );
-			}
 			if ( 'sample@email.tst' === $v ) {
 				die_bad_request( "sample@email.tst input to Jetpack Contact Form" );
 			}
@@ -128,6 +124,9 @@ function die_bad_request( $reference = '' ) {
 		defined( 'WPORGPATH' ) && file_exists( WPORGPATH . '/403.php' ) &&
 		! defined( 'XMLRPC_REQUEST' ) && ! defined( 'REST_REQUEST' )
 	) {
+		// Bare header, we don't need Block assets.
+		remove_all_actions( 'wp_head' );
+
 		status_header( 400 );
 		$header_set_for_403 = true;
 		include WPORGPATH . '/403.php';
