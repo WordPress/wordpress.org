@@ -537,7 +537,6 @@ export default class ImageGallery extends React.Component {
 										<button
 											type="button"
 											className="button-link image-gallery-left-nav"
-											onTouchStart={ slideLeft }
 											onClick={ slideLeft }/>
 									}
 									{
@@ -545,7 +544,6 @@ export default class ImageGallery extends React.Component {
 										<button
 											type="button"
 											className="button-link image-gallery-right-nav"
-											onTouchStart={ slideRight }
 											onClick={ slideRight }/>
 									}
 								</span>,

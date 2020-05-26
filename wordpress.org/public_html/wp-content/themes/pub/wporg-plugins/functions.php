@@ -115,7 +115,7 @@ function scripts() {
 
 	// React is currently only used on detail pages.
 	if ( is_single() ) {
-		wp_enqueue_script( 'wporg-plugins-client', get_stylesheet_directory_uri() . '/js/theme.js', array(), '20180110', true );
+		wp_enqueue_script( 'wporg-plugins-client', get_stylesheet_directory_uri() . '/js/theme.js', array(), '20200526', true );
 		wp_localize_script( 'wporg-plugins-client', 'pluginDirectory', array(
 			'endpoint' => untrailingslashit( rest_url() ), // 'https://wordpress.org/plugins-wp/wp-json',
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
