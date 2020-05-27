@@ -443,16 +443,49 @@ class Import {
 			);
 		}
 
-		// Find blocks
+		if ( 'trunk' === $stable_tag ) {
+			$stable_path = $stable_tag;
+		} else {
+			$stable_path  = 'tags/';
+			$stable_path .= $_stable_tag ?? $stable_tag;
+		}
+
+		// Find registered blocks and their files.
 		$blocks = array();
-		$files_with_blocks = array();
-		foreach ( Filesystem::list_files( "$tmp_dir/export/", true /* recursive */, '!\.(?:php|js|jsx|json)$!i' ) as $filename ) {
-			$file_blocks = $this->find_blocks_in_file( $filename );
-			if ( $file_blocks ) {
-				$files_with_blocks[] = str_replace( "$tmp_dir/export/", '', $filename );
-				foreach ( $file_blocks as $block ) {
-					// If the info came from a block.json file with more metadata (like description) then we want it to override less detailed info scraped from php/js.
-					if ( empty( $blocks[ $block->name ]->title ) || isset( $block->description ) ) {
+		$block_files = array();
+		$potential_block_directories = array();
+		$base_dir = "$tmp_dir/export";
+
+		$block_json_files = Filesystem::list_files( $base_dir, true, '!^block\.json$!i' );
+		if ( ! empty( $block_json_files ) ) {
+			foreach ( $block_json_files as $filename ) {
+				$blocks_in_file = $this->find_blocks_in_file( $filename );
+				$relative_filename = str_replace( "$base_dir/", '', $filename );
+				$potential_block_directories[] = dirname( $relative_filename );
+				foreach ( $blocks_in_file as $block ) {
+					$blocks[ $block->name ] = $block;
+
+					$extracted_files = $this->extract_file_paths_from_block_json( $block, dirname( $relative_filename ) );
+					if ( ! empty( $extracted_files ) ) {
+						$block_files = array_merge(
+							$block_files,
+							array_map(
+								function( $file ) use ( $stable_path ) {
+									return "/$stable_path/" . ltrim( $file, '\\' );
+								},
+								$extracted_files
+							)
+						);
+					}
+				}
+			}
+		} else {
+			foreach ( Filesystem::list_files( $base_dir, true, '!\.(?:php|js|jsx)$!i' ) as $filename ) {
+				$blocks_in_file = $this->find_blocks_in_file( $filename );
+				if ( ! empty( $blocks_in_file ) ) {
+					$relative_filename = str_replace( "$base_dir/", '', $filename );
+					$potential_block_directories[] = dirname( $relative_filename );
+					foreach ( $blocks_in_file as $block ) {
 						$blocks[ $block->name ] = $block;
 					}
 				}
@@ -460,32 +493,60 @@ class Import {
 		}
 
 		foreach ( $blocks as $block_name => $block ) {
-			if ( empty( $block->title ) )
+			if ( empty( $block->title ) ) {
 				$blocks[ $block_name ]->title = $trunk_readme->name;
+			}
 		}
 
-		if ( 'trunk' === $stable_tag ) {
-			$stable_path = $stable_tag;
-		} else {
-			$stable_path = "tags/$stable_tag";
-		}
-
-		// Find blocks dist/build JS files
-		$block_files = array();
-		$dist_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_path}/dist" ) ?: array();
-		$build_files = SVN::ls( 'https://plugins.svn.wordpress.org' . "/{$plugin_slug}/{$stable_path}/build" ) ?: array();
-
-		foreach ( $dist_files as $file ) {
-			$block_files[] = "/{$stable_path}/dist/" . $file;
-		}
-
-		foreach ( $build_files as $file ) {
-			$block_files[] = "/{$stable_path}/build/" . $file;
-		}
-
+		// Only search for block files if none were found in a block.json.
 		if ( empty( $block_files ) ) {
-			foreach ( $files_with_blocks as $file ) {
-				$block_files[] = "/{$stable_path}/" . $file;
+			$build_files = array();
+
+			if ( ! empty( $potential_block_directories ) ) {
+				$potential_block_directories = array_unique( $potential_block_directories );
+
+				foreach ( $potential_block_directories as $block_dir ) {
+					// dirname() returns . when there is no directory separator present.
+					if ( '.' === $block_dir ) {
+						$block_dir = '';
+					}
+
+					// First look for a dedicated "build" or "dist" directory.
+					foreach ( array( 'build', 'dist' ) as $dirname ) {
+						if ( is_dir( "$base_dir/$block_dir/$dirname" ) ) {
+							$build_files += Filesystem::list_files( "$base_dir/$block_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
+						}
+					}
+
+					// There must be at least on JS file, so if only css was found, keep looking.
+					if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+						// Then check for files in the current directory with "build" or "min" in the filename.
+						$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '![_\-\.]+(?:build|dist|min)[_\-\.]+!i' );
+					}
+
+					if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+						// Finally, just grab whatever js/css files there are in the current directory.
+						$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '!\.(?:js|jsx|css)$!i' );
+					}
+				}
+			}
+
+			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+				// Nothing in the potential block directories. Check if we somehow missed build/dist directories in the root.
+				foreach ( array( 'build', 'dist' ) as $dirname ) {
+					if ( is_dir( "$base_dir/$dirname" ) ) {
+						$build_files += Filesystem::list_files( "$base_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
+					}
+				}
+			}
+
+			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+				// Still nothing. Take on last wild swing.
+				$build_files += Filesystem::list_files( $base_dir, false, '!\.(?:js|jsx|css)$!i' );
+			}
+
+			foreach ( $build_files as $file ) {
+				$block_files[] = "/$stable_path/" . str_replace( "$base_dir/", '', $file );
 			}
 		}
 
@@ -605,5 +666,27 @@ class Import {
 		}
 
 		return $blocks;
+	}
+
+	/**
+	 * Get script and style file paths from an imported block.json.
+	 *
+	 * @param object $parsed_json
+	 * @param string $block_json_path
+	 *
+	 * @return array
+	 */
+	protected function extract_file_paths_from_block_json( $parsed_json, $block_json_path = '' ) {
+		$files = array();
+
+		$props = array( 'editorScript', 'script', 'editorStyle', 'style' );
+
+		foreach ( $props as $prop ) {
+			if ( isset( $parsed_json->$prop ) ) {
+				$files[] = trailingslashit( $block_json_path ) . $parsed_json->$prop;
+			}
+		}
+
+		return $files;
 	}
 }
