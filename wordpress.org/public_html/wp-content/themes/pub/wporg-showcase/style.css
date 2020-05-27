@@ -90,21 +90,11 @@ textarea.text {
 	color: #666;
 }
 
-h4 {
-	border-bottom:1px solid #DEDEDE;
-	color:#333333;
-	font-size:12px;
-	font-weight:bold;
-	margin-bottom:10px;
-	padding-bottom:4px;
-	padding-top:1px;
-}
-
-h4.search {
+.heading.search {
 	padding-top: 0;
 }
 
-.archives h4 {
+.archives-content .heading {
 	margin-top: 10px;
 }
 
@@ -139,16 +129,17 @@ h4.search {
 	text-align: left;
 }
 
-.gallery-caption h5 {
+.gallery-caption h4 {
 	margin-top: 10px;
 }
 
-h5 {
+h4,
+.archives-content .heading {
 	font-size: 16px;
 	margin-bottom: 5px;
 }
 
-h5 a {
+h4 a {
 	font-weight: normal;
 }
 
@@ -207,13 +198,22 @@ ul#flavors li.flavor-used {
 	margin: 0 0 30px 0;
 }
 
-h3 {
+.story-excerpt .heading {
+	font-size: 16px;
+	margin-bottom: 5px;
+}
+
+.story-excerpt .heading a {
+	font-weight: normal;
+}
+
+h2 {
 	font-weight: normal;
 	font-size: 20px;
 	margin-bottom: 20px;
 }
 
-h3 a {
+h2 a {
 	font-weight: normal;
 }
 
@@ -592,14 +592,26 @@ a.wpsc-hero-learnmore {
 	width: 150px;
 }
 
-.secondary h4 {
+.secondary .heading,
+.archives-content .heading,
+.rightsidebarwrapper .heading {
 	color: #444;
 	font-size: 13px;
 	line-height: 1.2;
 
 	padding: 0 0 10px 0;
 
-	margin: 47px 0 11px 0;
+	margin: 48px 0 12px 0;
+	border-bottom: 1px solid #DEDEDE;
+	font-weight: bold;
+}
+
+.rightsidebarwrapper .heading {
+	margin-top: 30px;
+}
+
+.archives-content .heading {
+	margin-top: 16px;
 }
 
 .home .secondary h4.search {
@@ -714,7 +726,7 @@ a.wpsc-hero-learnmore {
 	float: left;
 }
 
-.home .main-content h3 {
+.home .main-content h2 {
 	font-weight: bold;
 	margin: 0 0 29px 14px;
 }
@@ -760,13 +772,13 @@ a.wpsc-hero-learnmore {
 	line-height: 1.4
 }
 
-.wpsc-recent h5 {
+.wpsc-recent h3 {
 	font-size: 14px;
 	line-height: 1.2;
 	margin: 13px 0 0 0;
 }
 
-.wpsc-recent h5 a {
+.wpsc-recent h3 a {
 	font-style: normal;
 	font-weight: bold;
 }
@@ -810,6 +822,23 @@ a.wpsc-hero-learnmore {
 
 #wporg-footer {
 	margin-top: 50px;
+}
+
+#headline h1 {
+	color: #555;
+	font-size: 28px;
+	line-height: 1em;
+	text-shadow: #fff 0px 1px 0px;
+	padding-top: 18px;
+	padding-left: 9px;
+	padding-bottom: 18px;
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: flex;
+	font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
+	font-weight: 300;
 }
 
 /* Large devices */

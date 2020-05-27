@@ -2,7 +2,7 @@
 <div id="pagebody">
 	<div class="wrapper archives">
 		<?php get_sidebar( 'left' ); ?>
-		<div class="col-5">
+		<div class="col-5 archives-content">
 		<?php
 			breadcrumb();
 			$num_posts = 400;
@@ -13,7 +13,7 @@
 		<?php if ( have_posts() ) : ?>
 			<?php while ( have_posts() ) : the_post(); ?>
 
-				<?php the_date('', '<h4>', '</h4>'); ?>
+				<?php the_date('', '<h3 class="heading">', '</h3>'); ?>
 				<div class="storycontent"><a href='<?php the_permalink(); ?>' title='<?php the_title_attribute(); ?>'><?php the_title(); ?></a></div>
 
 			<?php endwhile; // have_posts ?>

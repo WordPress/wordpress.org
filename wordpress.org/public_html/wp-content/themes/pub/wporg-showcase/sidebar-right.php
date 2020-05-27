@@ -5,7 +5,7 @@
 
 				<?php wp_flavors(); ?>
 				<br />
-				<?php tags_with_count( 'list', '<h4>' . __( 'Tags', 'wporg-showcase' ) . '</h4><ul>', '', '</ul>' ); ?>
+				<?php tags_with_count( 'list', '<h2 class="heading">' . __( 'Tags', 'wporg-showcase' ) . '</h2><ul>', '', '</ul>' ); ?>
 			</div>
 		</div>
 	</div>

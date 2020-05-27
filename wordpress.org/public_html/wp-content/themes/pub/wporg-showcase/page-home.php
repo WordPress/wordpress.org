@@ -13,6 +13,7 @@ add_action( 'wp_head', function() {
 get_header();
 ?>
 <div id="pagebody" class="home">
+	<h2 class="screen-reader-text"><?php _e( 'Featured Sites', 'wporg-showcase' ); ?></h2>
 	<?php query_posts( array( 'cat' => 4, 'posts_per_page' => 9, 'post_status' => 'publish' ) ); ?>
 	<?php if ( have_posts() ) : ?>
 
@@ -68,7 +69,7 @@ get_header();
 		<div class="maincontentwrapper">
 			<?php query_posts( array( 'cat' => 4, 'posts_per_page' => 3, 'tag' => 'business', 'orderby' => 'rand' ) ); ?>
 			<?php if ( have_posts() ) : ?>
-			<h3><?php _e( 'Featured Business Sites', 'wporg-showcase' ); ?></h3>
+			<h2><?php _e( 'Featured Business Sites', 'wporg-showcase' ); ?></h2>
 			<ul class="wpsc-recent">
 
 				<?php while ( have_posts() ) : the_post(); ?>
@@ -77,7 +78,7 @@ get_header();
 						<a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>">
 							<?php site_screenshot_tag( 215 ); ?>
 						</a>
-						<h5><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h5>
+						<h3><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h3>
 						<?php
 							the_content_limit( 90 );
 							the_tags( '<ul class="wpsc-tags"><li>', '</li><li>', '</li></ul>' );
@@ -91,7 +92,7 @@ get_header();
 			<?php query_posts( array( 'posts_per_page' => 9 ) ); ?>
 			<?php if ( have_posts() ) : ?>
 
-			<h3><?php _e( 'Recently Added Sites', 'wporg-showcase' ); ?></h3>
+			<h2><?php _e( 'Recently Added Sites', 'wporg-showcase' ); ?></h2>
 			<ul class="wpsc-recent">
 
 				<?php while ( have_posts() ) : the_post(); ?>
@@ -100,7 +101,7 @@ get_header();
 					<a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>">
 						<?php site_screenshot_tag( 215 ); ?>
 					</a>
-					<h5><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h5>
+					<h3><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h3>
 					<?php
 						the_tags( '<ul class="wpsc-tags"><li>', '</li><li>', '</li></ul>' );
 					?>

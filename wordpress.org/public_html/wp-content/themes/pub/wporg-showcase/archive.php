@@ -17,7 +17,7 @@ get_header();
 					<a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>">
 						<?php site_screenshot_tag( 145, 'screenshot alignleft' ); ?>
 					</a>
-					<h5><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h5>
+					<h3 class="heading"><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h3>
 					<div class="excerpt"><?php the_content_limit(200); ?></div>
 					<div class="meta"><?php tags_with_count( 'flat', '<strong>' . __( 'Tags:', 'wporg-showcase' ) . '</strong> ', ', ', '<br />'); ?><?php edit_post_link( __( 'Edit this entry', 'wporg-showcase' ) ); ?></div>
 					<div style="clear:both;"></div>

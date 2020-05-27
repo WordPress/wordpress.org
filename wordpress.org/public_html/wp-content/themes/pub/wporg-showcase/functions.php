@@ -81,7 +81,7 @@ function site_screenshot_tag( $width = '', $classes='screenshot' ) {
 function wp_flavors() {
 	global $post;
 
-	echo '<h4>' . __( 'Flavor', 'wporg-showcase' ). '</h4>';
+	echo '<h2 class="heading">' . __( 'Flavor', 'wporg-showcase' ). '</h2>';
 	echo '<ul id="flavors">';
 
 	$flavors = array( 'WordPress.org', 'WordPress.com', 'WordPress.com VIP', 'WordPress MS' );
@@ -131,7 +131,7 @@ function popular_tags ($number = 10) {
 	$args = array('number' => $number, 'orderby' => 'count', 'order' => 'DESC');
 	$tags = get_terms( 'post_tag', $args );
 
-	$out = '<h4>' . __( 'Browse Popular Tags', 'wporg-showcase' ). '</h4>';
+	$out = '<h2 class="heading">' . __( 'Browse Popular Tags', 'wporg-showcase' ). '</h2>';
 	$out .= '<ul class="submenu wpsc-popular-tags">';
 
 	foreach ($tags as $tag) {
@@ -150,7 +150,7 @@ function popular_tags ($number = 10) {
 
 function breadcrumb() { ?>
 
-	<h3><a href="<?php echo home_url( '/' ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php _e( 'Showcase', 'wporg-showcase' ); ?></a>
+	<h2><a href="<?php echo home_url( '/' ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php _e( 'Showcase', 'wporg-showcase' ); ?></a>
 
 		<?php if ( is_search() ) : ?>
 			<?php
@@ -172,7 +172,7 @@ function breadcrumb() { ?>
 			?>
 		<?php endif; // is_search ?>
 
-	</h3>
+	</h2>
 <?php
 }
 
