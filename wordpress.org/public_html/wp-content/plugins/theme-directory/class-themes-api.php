@@ -756,16 +756,10 @@ class Themes_API {
 			}
 		}
 
-		if ( $this->fields['template'] || $this->fields['parent'] ) {
-			/*
-			 * On requests for single themes the post global can be set, returning that theme as the parent
-			 * if the current theme is not a child theme.
-			 */
-			unset( $GLOBALS['post'] );
-
+		if ( $theme->post_parent && ( $this->fields['template'] || $this->fields['parent'] ) ) {
 			$parent = get_post( $theme->post_parent );
 
-			if ( is_a( $parent, 'WP_Post' ) ) {
+			if ( $parent ) {
 				if ( $this->fields['template'] ) {
 					$phil->template = $parent->post_name;
 				}
