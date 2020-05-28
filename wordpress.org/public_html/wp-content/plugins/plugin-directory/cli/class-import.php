@@ -546,7 +546,7 @@ class Import {
 			}
 
 			foreach ( $build_files as $file ) {
-				$block_files[] = "/$stable_path/" . str_replace( "$base_dir/", '', $file );
+				$block_files[] = "/$stable_path/" . ltrim( str_replace( "$base_dir/", '', $file ), '/' );
 			}
 		}
 
