@@ -1098,8 +1098,8 @@ function wporg_themes_add_meta_tags() {
 		return;
 	}
 
-	$post = get_queried_object();
-	if ( ! $post || !( $post instanceof WP_Post ) ) {
+	$post = get_post();
+	if ( ! $post ) {
 		return;
 	}
 
@@ -1127,7 +1127,7 @@ add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
  * Noindex outdated themes.
  */
 function wporg_themes_noindex_request( $noindex ) {
-	if ( is_single() && ( $post = get_queried_object() ) && $post instanceof WP_Post ) {
+	if ( is_single() && ( $post = get_post() ) ) {
 		$theme = wporg_themes_theme_information( $post->post_name );
 		if ( $theme ) {
 			// If it's outdated, noindex the theme.
