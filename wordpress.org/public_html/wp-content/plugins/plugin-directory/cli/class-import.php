@@ -635,7 +635,7 @@ class Import {
 			// Parse a js-style registerBlockType() call.
 			// Note that this only works with literal strings for the block name and title, and assumes that order.
 			$contents = file_get_contents( $filename );
-			if ( $contents && preg_match_all( "#registerBlockType\s*[(]\s*'([-\w]+/[-\w]+)'\s*,\s*[{]\s*title\s*:[\s_(]*'([^']*)'#ms", $contents, $matches, PREG_SET_ORDER ) ) {
+			if ( $contents && preg_match_all( "#registerBlockType[^{}]{0,500}[(]\s*[\"']([-\w]+/[-\w]+)[\"']\s*,\s*[{]\s*title\s*:[\s\w(]*[\"']([^\"']*)[\"']#ms", $contents, $matches, PREG_SET_ORDER ) ) {
 				foreach ( $matches as $match ) {
 					$blocks[] = (object) [
 						'name' => $match[1],
