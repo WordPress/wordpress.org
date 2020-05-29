@@ -451,7 +451,7 @@ function bbporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 			'parent' => 'user-actions',
 			'id'     => 'user-info',
 			'title'  => $user_info,
-			'href'   => 'https://bbpress.org/login/',
+			'href'   => wp_login_url(),
 			'meta'   => array(
 				'tabindex' => -1,
 			),
@@ -461,19 +461,13 @@ function bbporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 			'parent' => 'user-actions',
 			'id'     => 'register',
 			'title'  => __( 'Register' ),
-			'href'   => 'https://bbpress.org/register/'
-		) );
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'user-actions',
-			'id'     => 'lost-pass',
-			'title'  => __( 'Lost Password' ),
-			'href'   => 'https://bbpress.org/lost-password/'
+			'href'   => wp_registration_url(),
 		) );
 		$wp_admin_bar->add_menu( array(
 			'parent' => 'user-actions',
 			'id'     => 'login',
 			'title'  => __( 'Log In' ),
-			'href'   => 'https://bbpress.org/login/'
+			'href'   => wp_login_url(),
 		) );
 	}
 }

@@ -64,9 +64,8 @@
 				<li><?php edit_post_link( __( 'Edit This Page', 'bborg' ) ); ?></li>
 			<?php endif; ?>
 			<?php if ( ! is_user_logged_in() ) : ?>
-				<li><a href="//wordpress.org/support/register.php">Register</a></li>
-				<li><a href="//wordpress.org/support/bb-login.php">Lost Password</a></li>
-				<li><a href="<?php bloginfo( 'url' ); ?>/login/">Log In</a></li>
+				<li><a href="<?php echo wp_login_url(); ?>">Log In</a></li>
+				<li><a href="<?php echo wp_registration_url(); ?>">Register</a></li>
 			<?php endif; ?>
 		</ul>
 	</div>

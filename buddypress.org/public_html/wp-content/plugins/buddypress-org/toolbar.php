@@ -320,7 +320,7 @@ function bporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 		$wp_admin_bar->add_menu( array(
 			'id'     => 'bp-login',
 			'title'  => __( 'Log in' ),
-			'href'   => 'https://buddypress.org/login/'
+			'href'   => wp_login_url(),
 		) );
 	}
 }
@@ -373,7 +373,7 @@ function bporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 			'parent' => 'user-actions',
 			'id'     => 'user-info',
 			'title'  => $user_info,
-			'href'   => 'https://buddypress.org/login/',
+			'href'   => wp_login_url(),
 			'meta'   => array(
 				'tabindex' => -1,
 			),
@@ -383,19 +383,13 @@ function bporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 			'parent' => 'user-actions',
 			'id'     => 'register',
 			'title'  => __( 'Register' ),
-			'href'   => 'https://buddypress.org/register/'
-		) );
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'user-actions',
-			'id'     => 'lost-pass',
-			'title'  => __( 'Lost Password' ),
-			'href'   => 'https://buddypress.org/lost-password/'
+			'href'   => wp_registration_url(),
 		) );
 		$wp_admin_bar->add_menu( array(
 			'parent' => 'user-actions',
 			'id'     => 'login',
 			'title'  => __( 'Log In' ),
-			'href'   => 'https://buddypress.org/login/'
+			'href'   => wp_login_url(),
 		) );
 	}
 }
@@ -420,7 +414,7 @@ function bporg_admin_bar_my_account_item( $wp_admin_bar ) {
 		'id'        => 'my-account',
 		'parent'    => 'top-secondary',
 		'title'     => $howdy . $avatar,
-		'href'      => 'https://buddypress.org/login/',
+		'href'      => wp_login_url(),
 		'meta'      => array(
 			'class'     => $class,
 			'title'     => __('My Account'),
