@@ -1,7 +1,7 @@
 <?php
 if ( ! class_exists( 'WPOrg_SSO' ) ) {
 	/**
-	 * Single Sign-On (SSO) handling for WordPress/bbPress instances under *.wordpress.org.
+	 * Single Sign-On (SSO) handling for WordPress/bbPress instances on wordpress.org.
 	 *
 	 * @author stephdau
 	 */
@@ -9,6 +9,13 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		const SSO_HOST = 'login.wordpress.org';
 
 		const SUPPORT_EMAIL = 'forum-password-resets@wordpress.org';
+
+		const VALID_HOSTS = [
+			'wordpress.org',
+			'bbpress.org',
+			'buddypress.org',
+			'wordcamp.org'
+		];
 
 		public $sso_host_url;
 		public $sso_login_url;
@@ -75,6 +82,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$login_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $login_url );
 			}
 
+			if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
+				$login_url = add_query_arg( 'from', $this->host, $login_url );
+			}
+
 			return $login_url;
 
 		}
@@ -116,10 +127,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			} else if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
 				// We didn't get a redirect_to, but we got a referrer, use that if a valid target.
 				$redirect_to_referrer = $_SERVER['HTTP_REFERER'];
-				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) ) {
+				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) && self::SSO_HOST != parse_url( $redirect_to_referrer, PHP_URL_HOST ) ) {
 					$redirect_to = $redirect_to_referrer;
 				}
-			} else {
+			} elseif ( self::SSO_HOST !== $this->host ) {
 				// Otherwise, attempt to guess the parent dir of where they came from and validate that.
 				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$_SERVER['REQUEST_URI']}" );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_source_parent ) ) {
@@ -131,28 +142,28 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		}
 
 		/**
-		 * Tests if the passed host/domain, or URL, is part of the WordPress.org domain.
+		 * Tests if the passed host/domain, or URL, is part of the WordPress.org network.
 		 *
-		 * @param unknown $string A domain, hostname, or URL
+		 * @param unknown $host A domain, hostname, or URL
 		 * @return boolean True is ok, false if not
 		 */
-		protected function _is_valid_targeted_domain( $string ) {
-			if ( empty( $string ) || ! is_string( $string ) ) {
-				$string = '';
+		protected function _is_valid_targeted_domain( $host ) {
+			if ( empty( $host ) || ! is_string( $host ) || ! strstr( $host, '.' ) ) {
+				return false;
 			}
 
-			if ( strstr( $string , '/' ) ) {
-				$url = parse_url( $string );
-				$host = ( ! empty( $url['host'] ) ) ? $url['host'] : '';
-			} else {
-				$host = $string;
+			if ( strstr( $host, '/' ) ) {
+				$host = parse_url( $host, PHP_URL_HOST );
 			}
 
-			if ( ! empty( $host ) && strstr( $host , '.' ) ) {
-				return ( preg_match( '/^(.+\.)?wordpress\.org$/', $host ) ) ? true : false;
+			if ( in_array( $host, self::VALID_HOSTS, true ) ) {
+				return true;
 			}
 
-			return false;
+			// If not a top-level domain, shrink it down and try again.
+			$top_level_host = implode( '.', array_slice( explode( '.', $host ), -2 ) );
+
+			return in_array( $top_level_host, self::VALID_HOSTS, true );
 		}
 
 		/**

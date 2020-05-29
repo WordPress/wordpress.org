@@ -66,6 +66,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					add_filter( 'login_url', [ $this, 'add_locale' ], 21 );
 					add_filter( 'register_url', [ $this, 'add_locale' ], 21 );
 					add_filter( 'lostpassword_url', [ $this, 'add_locale' ], 21 );
+				} else {
+					add_filter( 'login_redirect', [ $this, 'maybe_add_remote_login_bounce_to_post_login_url' ], 10, 3 );
 				}
 			}
 		}
@@ -185,8 +187,20 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// If we're not on the SSO host
 				if ( preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// Don't redirect the 'confirmaction' wp-login handlers to login.wordpress.org.
-					if ( isset( $_GET['action']  ) && empty( $_POST ) && 'confirmaction' == $_GET['action'] ) {
+					if ( isset( $_GET['action'] ) && empty( $_POST ) && 'confirmaction' == $_GET['action'] ) {
 						return;
+					}
+
+					// Allow logout on non-dotorg hosts.
+					if ( isset( $_GET['action'] ) && empty( $_POST ) && 'logout' == $_GET['action'] ) {
+						if ( ! preg_match( '!wordpress\.org$!', $_SERVER['HTTP_HOST'] ) ) {
+							return;
+						}
+					}
+
+					// Remote SSO login?
+					if ( isset( $_GET['action'] ) && 'remote-login' === $_GET['action'] && ! empty( $_GET['sso_token'] ) ) {
+						$this->_maybe_perform_remote_login();
 					}
 
 					// If on a WP login screen...
@@ -199,6 +213,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 					// Pay extra attention to the post-process redirect_to
 					$redirect_to_sso_login = add_query_arg( 'redirect_to', urlencode( $redirect_req ), $redirect_to_sso_login );
+					if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
+						$redirect_to_sso_login = add_query_arg( 'from', $this->host, $redirect_to_sso_login );
+					}
 
 					// And actually redirect to the SSO login
 					$this->_safe_redirect( $redirect_to_sso_login, 301 );
@@ -243,7 +260,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 							} else {
 								// Else let the theme render, or redirect if logged in
 								if ( is_user_logged_in() ) {
-									$this->_redirect_to_profile();
+									$this->_redirect_to_source_or_profile();
 								} else {
 									if ( empty( $_GET['screen'] ) ) {
 										add_filter( 'login_form_defaults', array( $this, 'login_form_defaults' ) );
@@ -258,13 +275,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 							// No redirect, just display robots.
 						} else if ( is_user_logged_in() ) {
 							// Otherwise, redirect to the their profile.
-							$this->_redirect_to_profile();
+							$this->_redirect_to_source_or_profile();
 						}
 					} elseif ( ( is_admin() && is_super_admin() ) || 0 === strpos( $_SERVER['REQUEST_URI'], '/wp-json' ) || 0 === strpos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' ) ) {
 						// Do nothing, allow access to wp-admin, wp-json and xmlrpc.php on login.wordpress.org
 					} elseif ( is_user_logged_in() ) {
 						// Logged in catch all, before last fallback
-						$this->_redirect_to_profile();
+						$this->_redirect_to_source_or_profile();
 					} else {
 						// Otherwise, redirect to the login screen.
 						$this->_safe_redirect( $this->sso_login_url, 301 );
@@ -364,18 +381,107 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
-		 * Redirects the user to her/his (support) profile.
+		 * Redirects the user back to where they came from (or w.org profile)
 		 */
-		protected function _redirect_to_profile() {
-			if ( ! is_user_logged_in() ) {
-				return;
+		protected function _redirect_to_source_or_profile() {
+			$redirect = $this->_get_safer_redirect_to();
+
+			if ( $redirect ) {
+				$this->_safe_redirect( $this->_maybe_add_remote_login_bounce( $redirect ) );
+			} elseif ( is_user_logged_in() ) {
+				$this->_safe_redirect( 'https://profiles.wordpress.org/' . wp_get_current_user()->user_nicename . '/' );
+			} else {
+				$this->_safe_redirect( 'https://wordpress.org/' );
+			}
+		}
+
+		/**
+		 * Logs in a user on the current domain on a remote-login action.
+		 */
+		protected function _maybe_perform_remote_login() {
+			$remote_token = wp_unslash( $_GET['sso_token'] );
+			if ( ! is_string( $remote_token ) || 3 !== substr_count( $remote_token, '|' ) ) {
+				wp_die( 'Invalid token.' );
 			}
 
-			if ( ! empty( $_GET['redirect_to'] ) ) {
-				$this->_safe_redirect( $this->_get_safer_redirect_to() );
-			} else {
-				$this->_safe_redirect( 'https://profiles.wordpress.org/' . wp_get_current_user()->user_nicename . '/' );
+			list( $user_id, $sso_hash, $valid_until, $remember_me ) = explode( '|', $remote_token, 4 );
+
+			$remote_expiration_valid = (
+				// +/- 5s on a 5s timeout.
+				$valid_until >= ( time() - 5 ) &&
+				$valid_until <= ( time() + 10 )
+			);
+
+			$valid_remote_hash = false;
+			$user = get_user_by( 'id', $user_id );
+			if ( $user ) {
+				$valid_remote_hash = hash_equals( 
+					$this->_generate_remote_login_hash( $user, $valid_until, $remember_me ),
+					$sso_hash
+				);
 			}
+
+			if ( $remote_expiration_valid && $valid_remote_hash ) {
+				wp_set_current_user( (int) $user_id );
+				wp_set_auth_cookie( (int) $user_id, (bool) $remember_me );
+
+				if ( isset( $_GET['redirect_to'] ) ) {
+					$this->_safe_redirect( wp_unslash( $_GET['redirect_to'] ) );
+				} else {
+					$this->_safe_redirect( home_url( '/' ) );
+				}
+				exit;
+			}
+
+			return false;
+		}
+
+		public function maybe_add_remote_login_bounce_to_post_login_url( $redirect, $requested, $user ) {
+			return $this->_maybe_add_remote_login_bounce( $redirect, $user );
+		}
+
+		protected function _maybe_add_remote_login_bounce( $redirect, $user = false ) {
+			if ( ! $user ) {
+				$user = wp_get_current_user();
+			}
+
+			// If it's on a different _supported_ host, bounce through the remote-login.
+			$redirect_host = parse_url( $redirect, PHP_URL_HOST );
+
+			if ( $user && $this->_is_valid_targeted_domain( $redirect_host ) && ! preg_match( '!wordpress.org$!i', $redirect_host ) ) {
+
+				// Fetch auth cookie parts to find out if the user has selected 'remember me'.
+				$auth_cookie_parts = wp_parse_auth_cookie( '', 'secure_auth' );
+
+				$valid_until = time() + 5; // Super short timeout.
+				$remember_me = ! empty( $_POST['rememberme'] ) || ( $auth_cookie_parts && $auth_cookie_parts['expiration'] >= ( time() + ( 2 * DAY_IN_SECONDS ) ) );
+
+				$hash        = $this->_generate_remote_login_hash( $user, $valid_until, $remember_me );
+				$sso_token   = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me;
+
+				$redirect = add_query_arg(
+					array(
+						'action'      => 'remote-login',
+						'sso_token'   => urlencode( $sso_token ),
+						'redirect_to' => urlencode( $redirect ),
+					),
+					'https://' . $redirect_host . '/wp-login.php' // Assume that wp-login exists and is accessible
+				);
+			}
+
+			return $redirect;
+		}
+
+		/**
+		 * Generate a hash for remote-login for non-wordpress.org domains
+		 */
+		protected function _generate_remote_login_hash( $user, $valid_until, $remember_me = false ) {
+			// re-use the same frag that Auth cookies use to invalidate sessions.
+			$pass_frag = substr( $user->user_pass, 8, 4 );
+			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until );
+			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me, $key );
+
+			return $hash;
 		}
 	}
 
