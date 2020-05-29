@@ -56,9 +56,9 @@ add_action( 'send_headers', function( $wp ) {
 add_action( 'template_redirect', function() {
 	if (
 		isset( $_REQUEST['action'], $_REQUEST['email'], $_REQUEST['redirect_fragment'] )
-		&& 'subscribe' === $_REQUEST['action']
+		&& ( 'subscribe' === $_REQUEST['action'] || isset( $_REQUEST['jetpack_subscriptions_widget'] ) )
 	) {
-		if ( ! is_string( $_REQUEST['email'] ) || ! is_string( $_REQUEST['redirect_fragment'] ) ) {
+		if ( ! is_string( $_REQUEST['action'] ) || ! is_string( $_REQUEST['email'] ) || ! is_string( $_REQUEST['redirect_fragment'] ) ) {
 			die_bad_request( "non-scalar input to Jetpack Subscribe widget" );
 		}
 	}
@@ -72,24 +72,15 @@ add_action( 'template_redirect', function () {
 			die_bad_request( "Bad input to Jetpack Contact Form" );
 		}
 		if ( ! isset( $_SERVER['HTTP_REFERER'] ) || ! isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-			die_bad_request( "Missing referer or user-agent" );
+			die_bad_request( "Missing referer or user-agent for Jetpack Contact Form" );
 		}
 		foreach ( $_REQUEST as $k => $v ) {
-			if ( 'sample@email.tst' === $v ) {
+			if ( 'sample@email.tst' === $v || ( !empty( $v[0] ) && 'sample@email.tst' === $v[0] ) ) {
 				die_bad_request( "sample@email.tst input to Jetpack Contact Form" );
 			}
 		}
 	}
-} );
-
-// bbPress - https://bbpress.trac.wordpress.org/ticket/3373
-add_action( 'template_redirect', function () {
-	if ( isset( $_REQUEST['action'] ) && is_array( $_REQUEST['action'] ) && function_exists( 'bbpress' ) ) {
-		if ( isset( $_REQUEST['action'][0] ) && 'bbp' === substr( $_REQUEST['action'][0], 0, 3 ) ) {
-			die_bad_request( "non-scalar input to bbPress subactions." );
-		}
-	}
-}, 5 ); // before bbp_template_redirect
+}, 9 );
 
 /**
  * Detect badly formed XMLRPC requests.
