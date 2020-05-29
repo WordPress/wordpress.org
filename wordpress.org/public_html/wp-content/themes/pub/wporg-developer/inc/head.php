@@ -23,7 +23,6 @@ class DevHub_Head {
 	public static function do_init() {
 		add_filter( 'document_title_parts',     array( __CLASS__, 'document_title' ) );
 		add_filter( 'document_title_separator', array( __CLASS__, 'document_title_separator' ) );
-		add_action( 'wp_head',                  array( __CLASS__, 'rel_canonical' ), 9 );
 		add_action( 'wp_head',                  array( __CLASS__, 'output_head_tags' ), 2 );
 	}
 
@@ -175,28 +174,6 @@ class DevHub_Head {
 				esc_attr( $property ),
 				esc_attr( $content )
 			);
-		}
-	}
-
-	/**
-	 * Outputs `<link rel="canonical">` tags where appropriate.
-	 */
-	public static function rel_canonical() {
-		$canonical = false;
-		$queried_object = get_queried_object();
-
-		if ( is_tax() || is_tag() || is_category() ) {
-			$canonical = get_term_link( $queried_object );
-		} elseif ( is_post_type_archive() ) {
-			$canonical = get_post_type_archive_link( $queried_object->name ); 
-		}
-
-		if ( $canonical && get_query_var( 'paged' ) > 1 ) {
-			$canonical .= 'page/' . (int) get_query_var( 'paged' ) . '/';
-		}
-
-		if ( $canonical ) {
-			printf( '<link rel="canonical" href="%s">' . "\n", esc_url( $canonical ) );
 		}
 	}
 
