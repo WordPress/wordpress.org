@@ -18,18 +18,6 @@ if ( !function_exists( 'bporg_unhook_single_user_filter' ) )
 if ( 'profiles.wordpress.org' != $_SERVER['HTTP_HOST'] )
 	add_filter( 'show_admin_bar', '__return_true' );
 
-/**
- * This function forces the encoding to utf8
- */
-function bporg_force_encoding() {
-	global $wpdb;
-
-	// Set dbhs to an empty array - unsetting it causes headaches
-	$wpdb->dbhs    = array();
-	$wpdb->charset = 'utf8';
-}
-bporg_force_encoding();
-
 function bporg_maintenance() {
 	if ( is_super_admin() )
 		return;
