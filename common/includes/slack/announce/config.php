@@ -63,6 +63,13 @@ function get_whitelist() {
 			'francina',
 			'myselfkhayer',
 		) ),
+		'contributor-day' => array(
+			'camikaos',
+			'cronkled', // @alx on Slack
+			'DrewAPicture', // @drew on Slack
+			'Kau-Boy',
+			'sippis',
+		),
 		'core' => array_merge( get_committers(), array(
 			'amykamala', // @amy kamala on Slack
 			'antpb',
@@ -361,19 +368,16 @@ function get_whitelist() {
 		'wceu' => array(
 			'casiepa', // @Pascal on Slack
 		),
+		'wceu-volunteers' => array(
+			'Kau-Boy',
+			'sippis',
+		),
 		'wcus' => array(
 			'cronkled', // @alx on Slack
 			'camikaos',
 			'vc27', // @randy_hicks on Slack
 			'andrealeebishop', // @bishop on Slack
 			'DustinMeza',
-		),
-		'contributor-day' => array(
-			'cronkled', // @alx on Slack
-			'camikaos',
-			'DrewAPicture', // @drew on Slack
-			'Kau-Boy',
-			'sippis',
 		),
 		'wptv' => array(
 			'casiepa', // @Pascal on Slack
