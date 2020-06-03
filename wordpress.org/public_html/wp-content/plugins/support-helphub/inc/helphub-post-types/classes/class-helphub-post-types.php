@@ -117,7 +117,7 @@ final class HelpHub_Post_Types {
 	 */
 	public function __construct() {
 		$this->token       = 'helphub';
-		$this->plugin_url  = plugin_dir_url( __FILE__ );
+		$this->plugin_url  = plugin_dir_url( __DIR__ );
 		$this->plugin_path = plugin_dir_path( __FILE__ );
 		$this->version     = '1.0.0';
 
