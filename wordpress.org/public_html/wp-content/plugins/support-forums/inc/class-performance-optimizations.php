@@ -39,9 +39,6 @@ class Performance_Optimizations {
 		// Redirect Attachments to their file
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_attachments' ) );
 
-		// REST API.
-		add_filter( 'rest_endpoints', array( $this, 'disable_rest_api_users_endpoint' ) );
-
 		// Disable post meta key lookup, see https://core.trac.wordpress.org/ticket/33885.
 		add_filter( 'postmeta_form_keys', '__return_empty_array' );
 
@@ -67,36 +64,6 @@ class Performance_Optimizations {
 		if ( is_404() && get_query_var( 'name' ) && strlen( get_query_var( 'name' ) ) < 5 ) {
 			remove_filter( 'template_redirect', 'redirect_canonical' );
 		}
-	}
-
-	/**
-	 * Disables REST API endpoint for users listing.
-	 *
-	 * @link https://core.trac.wordpress.org/ticket/38878
-	 *
-	 * @param array $endpoints The available endpoints.
-	 * @return array The filtered endpoints.
-	 */
-	public function disable_rest_api_users_endpoint( $endpoints ) {
-		if ( ! isset( $endpoints['/wp/v2/users'] ) ) {
-			return $endpoints;
-		}
-
-		foreach ( $endpoints['/wp/v2/users'] as &$handler ) {
-			if ( isset( $handler['methods'] ) && 'GET' === $handler['methods'] ) {
-				$handler['permission_callback'] = function() {
-					return new WP_Error(
-						'rest_not_implemented',
-						__( 'Sorry, you are not allowed to list users.' ),
-						array( 'status' => 501 )
-					);
-				};
-
-				break;
-			}
-		}
-
-		return $endpoints;
 	}
 
 	/**
