@@ -94,33 +94,39 @@ the_post();
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
-								<th>__utma</th>
+								<th>_ga</th>
 								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Used to distinguish users and sessions. The cookie is created when the javascript library executes and no existing __utma cookies exists. The cookie is updated every time data is sent to Google Analytics.', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
-								<th>__utmb</th>
-								<td><?php esc_html_e( '30 minutes', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Used to determine new sessions/visits. The cookie is created when the javascript library executes and no existing __utmb cookies exists. The cookie is updated every time data is sent to Google Analytics.', 'wporg' ); ?></td>
+								<th>_gat_&lt;property-id&gt;</th>
+								<td><?php esc_html_e( '1 minute', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to throttle request rate.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
-								<th>__utmc</th>
-								<td><?php esc_html_e( 'Session', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Set for interoperability with urchin.js. Historically, this cookie operated in conjunction with the __utmb cookie to determine whether the user was in a new session/visit.', 'wporg' ); ?></td>
+								<th>_gid</th>
+								<td><?php esc_html_e( '24 hours', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
-								<th>__utmt</th>
-								<td><?php esc_html_e( '10 minutes', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Used to throttle request rate.', 'wporg' ); ?></td>
+								<th>tk_ai</th>
+								<td><?php esc_html_e( '24 hours', 'wporg' ); ?></td>
+								<td><a href="https://jetpack.com/support/cookies/"><?php esc_html_e( 'Jetpack', 'wporg' ); ?></a> - <?php esc_html_e( 'Stores the unique identifier for the publisher to enable Jetpack to collect data.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
-								<th>__utmz</th>
-								<td><?php esc_html_e( '6 months', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a> - <?php esc_html_e( 'Stores the traffic source or campaign that explains how the user reached your site. The cookie is created when the javascript library executes and is updated every time data is sent to Google Analytics.', 'wporg' ); ?></td>
+								<th>tk_lr</th>
+								<td><?php esc_html_e( '1 year', 'wporg' ); ?></td>
+								<td><a href="https://jetpack.com/support/cookies/"><?php esc_html_e( 'Jetpack', 'wporg' ); ?></a> - <?php esc_html_e( 'Stores the unique identifier for the publisher to enable Jetpack to collect data.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
+								<th>tk_or</th>
+								<td><?php esc_html_e( '5 years', 'wporg' ); ?></td>
+								<td><a href="https://jetpack.com/support/cookies/"><?php esc_html_e( 'Jetpack', 'wporg' ); ?></a> - <?php esc_html_e( 'Stores the unique identifier for the publisher to enable Jetpack to collect data.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -133,6 +139,12 @@ the_post();
 								<th>wporg_logged_in<br/>wporg_sec</th>
 								<td><?php esc_html_e( '14 days if you select &#8220;Remember Me&#8221; when logging in. Otherwise, Session.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Used to check whether the current visitor is a logged-in WordPress.org user.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
+							</tr>
+							<tr>
+								<th>wporg_locale</th>
+								<td><?php esc_html_e( '1 year', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'Used to persist a user&#8217;s locale configuration.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 						</tbody>
