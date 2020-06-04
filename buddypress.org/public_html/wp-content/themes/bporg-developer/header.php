@@ -19,6 +19,8 @@
 <?php get_template_part( 'template-parts/header', 'accessibility' ); ?>
 
 <div id="header">
+	<?php get_template_part( 'template-parts/header', 'survey' ); ?>
+
 	<div id="header-inner">
 
 		<?php get_template_part( 'template-parts/header', 'nav' ); ?>
@@ -26,7 +28,6 @@
 		<div id="network-title">
 			<a href="https://buddypress.org"><?php bloginfo( 'name' ); ?></a>
 		</div>
-
 	</div>
 	<div style="clear:both"></div>
 </div>

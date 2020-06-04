@@ -7,11 +7,14 @@
 <?php get_template_part( 'header', 'accessibility' ); ?>
 
 	<div id="header">
-		<div id="header-inner">
-		<?php get_template_part( 'header', 'nav' ); ?>
+		<?php get_template_part( 'header', 'survey' ); ?>
 
-		<h1><a href="<?php bloginfo( 'url' ); ?>"><?php bloginfo( 'name' ); ?></a></h1>
-	</div></div>
+		<div id="header-inner">
+			<?php get_template_part( 'header', 'nav' ); ?>
+
+			<h1><a href="<?php bloginfo( 'url' ); ?>"><?php bloginfo( 'name' ); ?></a></h1>
+		</div>
+	</div>
 	<hr class="hidden" />
 
 <?php get_template_part( 'header', 'front'  ); ?>
