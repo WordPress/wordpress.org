@@ -329,6 +329,7 @@ function get_whitelist() {
 		),
 		'themereview' => array(
 			'acalfieri',
+			'acosmin',
 			'aristath',
 			'cais',
 			'chipbennett',
