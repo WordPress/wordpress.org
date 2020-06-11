@@ -344,12 +344,12 @@ class Meetup_Client extends API_Client {
 	/**
 	 * Attempt to extract codes and messages from a suspected error response.
 	 *
-	 * @param array $data          The data in the response body, parsed as an array.
+	 * @param array $data          The data in the response body, parsed as an array. May be null for HTTP errors such as 404's.
 	 * @param int   $response_code Optional. The HTTP status code from the response.
 	 *
 	 * @return WP_Error
 	 */
-	protected function parse_error( array $data, $response_code = 0 ) {
+	protected function parse_error( $data, $response_code = 0 ) {
 		$error = new WP_Error();
 
 		if ( isset( $data['errors'] ) ) {
