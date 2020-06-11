@@ -150,15 +150,17 @@ class Stats extends GP_Route {
 
 		$items = array();
 		if ( 'plugins' == $view ) {
-			// Fetch top 100 plugins..
+			// Fetch top ~500 plugins..
 			$items = get_transient( __METHOD__ . '_plugin_items' );
 			if ( false === $items ) {
-				$api = wp_safe_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[per_page]=250' );
 				$items = array();
-				foreach ( json_decode( wp_remote_retrieve_body( $api ) )->plugins as $plugin ) {
-					$items[ $plugin->slug ] = (object) [
-						'installs' => $plugin->active_installs,
-					];
+				foreach ( range( 1, 2 ) as $page ) { // 2 pages x 250 items per page.
+					$api = wp_safe_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[per_page]=250&request[page]=' . $page );
+					foreach ( json_decode( wp_remote_retrieve_body( $api ) )->plugins as $plugin ) {
+						$items[ $plugin->slug ] = (object) [
+							'installs' => $plugin->active_installs,
+						];
+					}
 				}
 				set_transient( __METHOD__ . '_plugin_items', $items, $items ? DAY_IN_SECONDS : 5 * MINUTE_IN_SECONDS );
 			}
@@ -173,7 +175,7 @@ class Stats extends GP_Route {
 					LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_active_installs'
 					WHERE p.post_type = 'repopackage' AND p.post_status = 'publish'
 					ORDER BY pm.meta_value+0 DESC, p.post_date
-					LIMIT 250",
+					LIMIT 500",
 					OBJECT_K
 				);
 				restore_current_blog();
