@@ -21,5 +21,6 @@ define( 'SUPPORTED_PHP', '7.3' );
 // The lowest branch of PHP which is receiving security updates.
 define( 'SECURE_PHP', '7.2' );
 
+// The lowest branch of PHP which is still considered acceptable in WordPress.
 // Sites with a version lower than this will see the ServeHappy dashboard widget urging them to update.
 define( 'ACCEPTABLE_PHP', '7.2' );
