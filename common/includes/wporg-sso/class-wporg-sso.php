@@ -77,13 +77,18 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		public function login_url( $login_url = '', $redirect_to = '' ) {
 			$login_url = $this->sso_login_url;
 
+			if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
+				$login_url = add_query_arg( 'from', $this->host, $login_url );
+
+				// Not all browsers send referers cross-origin, ensure that a redirect_to is set for this hostname.
+				if ( empty( $redirect_to ) ) {
+					$redirect_to = 'https://' . $this->host . $_SERVER['REQUEST_URI'];
+				}
+			}
+
 			if ( ! empty( $redirect_to ) && $this->_is_valid_targeted_domain( $redirect_to ) ) {
 				$redirect_to = preg_replace( '/\/wp-(login|signup)\.php\??.*$/', '/', $redirect_to );
 				$login_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $login_url );
-			}
-
-			if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
-				$login_url = add_query_arg( 'from', $this->host, $login_url );
 			}
 
 			return $login_url;
