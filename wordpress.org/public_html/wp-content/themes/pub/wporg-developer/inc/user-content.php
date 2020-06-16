@@ -457,14 +457,22 @@ class DevHub_User_Submitted_Content {
 				. __( 'Feedback is part of the documentation.', 'wporg' ) . ' '
 				. $feedback_rule
 				. '</li><li>'
-				. __( 'This form is not for support requests, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' )
+				. __( 'Notes and feedback must be written in English.', 'wporg' )
+				. '</li><li>'
+				. __( 'This form is not for support requests, spam, bug reports, complaints, or self-promotion.', 'wporg' )
+				. '</li><li>'
+				. __( 'Any feedback not meeting these requirements will be removed by the moderation team.', 'wporg' )
 				. '</li><li class="user-notes-are-gpl">'
 				. $license_rule
 				. '</li></ul>';
 		}
 
 		return '<ul><li>'
-			. __( 'This form is not for support requests, discussions, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' )
+			. __( 'Notes and feedback must be written in English.', 'wporg' )
+			. '</li><li>'
+			. __( 'This form is not for support requests, discussions, spam, bug reports, complaints, or self-promotion.', 'wporg' )
+			. '</li><li>'
+			. __( 'Any notes not meeting these requirements will be removed by the moderation team.', 'wporg' )
 			. '</li><li>'
 			. __( 'In the editing area the Tab key enters a tab character. To move below this area by pressing Tab, press the Esc key followed by the Tab key. In some cases the Esc key will need to be pressed twice before the Tab key will allow you to continue.', 'wporg' )
 			. '</li><li class="user-notes-are-gpl">'
