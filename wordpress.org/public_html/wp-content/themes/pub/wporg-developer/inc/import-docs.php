@@ -34,6 +34,13 @@ class DevHub_Docs_Importer extends Importer {
 	protected $manifest_url;
 
 	/**
+	 * The cron update interval schedule.
+	 *
+	 * @var string
+	 */
+	protected $cron_interval = '15_minutes';
+
+	/**
 	 * Get the singleton instance, or create if needed.
 	 *
 	 * @return static
@@ -151,12 +158,17 @@ class DevHub_Docs_Importer extends Importer {
 	 * Registers cron jobs.
 	 */
 	public function register_cron_jobs() {
+		// If configured cron interval does not exist, then fall back to default.
+		if ( ! in_array( $this->cron_interval, array_keys( wp_get_schedules() ) ) ) {
+			$this->cron_interval = '15_minutes';
+		}
+
 		if ( ! wp_next_scheduled( "devhub_{$this->post_type}_import_manifest" ) ) {
-			wp_schedule_event( time(), '15_minutes', "devhub_{$this->post_type}_import_manifest" );
+			wp_schedule_event( time(), $this->cron_interval, "devhub_{$this->post_type}_import_manifest" );
 		}
 
 		if ( ! wp_next_scheduled( "devhub_{$this->post_type}_import_all_markdown" ) ) {
-			wp_schedule_event( time(), '15_minutes', "devhub_{$this->post_type}_import_all_markdown" );
+			wp_schedule_event( time(), $this->cron_interval, "devhub_{$this->post_type}_import_all_markdown" );
 		}
 	}
 }
