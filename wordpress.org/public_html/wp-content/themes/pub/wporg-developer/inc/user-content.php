@@ -474,7 +474,7 @@ class DevHub_User_Submitted_Content {
 			. '</li><li>'
 			. __( 'Any notes not meeting these requirements will be removed by the moderation team.', 'wporg' )
 			. '</li><li>'
-			. __( '<strong>TIP:</strong> In the editing area the Tab key enters a tab character. To move below this area by pressing Tab, press the Esc key followed by the Tab key. In some cases the Esc key will need to be pressed twice before the Tab key will allow you to continue.', 'wporg' )
+			. __( '<strong>TIP:</strong> In the editing area the <kbd>Tab</kbd> key enters a tab character. To move below this area by pressing <kbd>Tab</kbd>, press the <kbd>Esc</kbd> key followed by the <kbd>Tab</kbd> key. In some cases the <kbd>Esc</kbd> key will need to be pressed twice before the <kbd>Tab</kbd> key will allow you to continue.', 'wporg' )
 			. '</li><li class="user-notes-are-gpl">'
 			. $license_rule
 			. '</li></ul>';
