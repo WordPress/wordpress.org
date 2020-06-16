@@ -5,11 +5,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 	 * Initializes object.
 	 */
 	public function init() {
-		if ( defined( 'WP_CORE_STABLE_BRANCH' ) ) {
-			$manifest = 'https://raw.githubusercontent.com/WordPress/gutenberg/wp/' . WP_CORE_STABLE_BRANCH . '/docs/manifest.json';
-		} else {
-			$manifest = 'https://raw.githubusercontent.com/WordPress/gutenberg/master/docs/manifest.json';
-		}
+		$manifest = 'https://raw.githubusercontent.com/WordPress/gutenberg/master/docs/manifest.json';
 
 		parent::do_init(
 			'blocks',
