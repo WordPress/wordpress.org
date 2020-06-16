@@ -149,6 +149,8 @@ function get_whitelist() {
 		'core-js' => array_merge( get_committers(), array(
 			'adamsilverstein',
 			'aduth',
+			'nerrad',
+			'psykro', // @jon_bossenger on Slack
 			'rmccue',
 		) ),
 		'core-media' => array_merge( get_committers(), array(
