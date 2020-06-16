@@ -72,7 +72,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikidata' => 'Q18698690',
 			'normalized' => 1, // just first number
 			'facebook' => 'MicrosoftEdge',
-			'url' => 'https://www.microsoft.com/windows/microsoft-edge',
+			'url' => 'https://www.microsoft.com/edge',
 			'info' => ( $latest_strings ?
 				__( '&#8220;Microsoft Edge offers world-class performance with more privacy, more productivity, and more value while you browse.&#8221;', 'browsehappy' )
 				: __( '&#8220;Microsoft Edge ranks first when put to real world page load tests. Whether you use the web to search, watch or play, this browser won&#8217;t slow you down.&#8221;', 'browsehappy' )
