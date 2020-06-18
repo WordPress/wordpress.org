@@ -295,7 +295,7 @@ function bbporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 		$wp_admin_bar->add_menu( array(
 			'id'     => 'bbp-login',
 			'title'  => __( 'Log in' ),
-			'href'   => 'https://bbpress.org/login/'
+			'href'   => wp_login_url()
 		) );
 	}
 }
@@ -336,7 +336,7 @@ function bbporg_admin_bar_my_account_item( $wp_admin_bar ) {
 			'id'        => 'my-account',
 			'parent'    => 'top-secondary',
 			'title'     => $howdy . $avatar,
-			'href'      => 'https://bbpress.org/login/',
+			'href'      => wp_login_url(),
 			'meta'      => array(
 				'class'     => $class,
 				'title'     => __('My Account'),
