@@ -32,6 +32,7 @@ class Manager {
 			add_action( 'pre_option_cron', array( $this, 'register_colon_based_hook_handlers' ), 100 );
 			add_filter( 'pre_get_ready_cron_jobs', array( $this, 'register_colon_based_hook_handlers' ), 100 );
 		}
+		$jobs = get_option('cron');
 	}
 
 	/**
