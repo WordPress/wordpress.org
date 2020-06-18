@@ -30,6 +30,7 @@ class Manager {
 		// Register the wildcard cron hook tasks.
 		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
 			add_action( 'pre_option_cron', array( $this, 'register_colon_based_hook_handlers' ), 100 );
+			add_filter( 'pre_get_ready_cron_jobs', array( $this, 'register_colon_based_hook_handlers' ), 100 );
 		}
 	}
 
