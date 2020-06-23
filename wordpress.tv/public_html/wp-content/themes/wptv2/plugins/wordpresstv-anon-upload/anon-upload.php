@@ -426,18 +426,13 @@ class WPTV_Anon_Upload {
 
 			<div id="anon-data-wrap" class="inside">
 
-				<p>To change the default thumbnail image, play the video and click "Capture Thumbnail" button.</p>
-				<table>
-					<tr>
-						<td>
-							<?php
-								if ( function_exists( 'video_embed' ) ) {
-									echo video_embed( $embed_args );
-								}
-							?>
-						</td>
-					</tr>
-				</table>
+				<p>To change the default thumbnail image, <a href="https://wordpress.com/media/wordpress.tv/<?php echo $attachment_post->ID; ?>">go here and select Edit Thumbnail</a>.</p>
+
+				<div class="wp_attachment_holder wp-clearfix">
+				<?php
+				echo wp_video_shortcode( array( 'src' => wp_get_attachment_url( $attachment_post->ID ) ) )
+				?>
+				</div>
 
 				<div class="anon-data">
 					<div class="row">
