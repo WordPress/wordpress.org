@@ -128,7 +128,7 @@ function wporg_support_get_views() {
 	$output = array();
 
 	foreach ( $views as $view ) {
-		if ( ! bbp_get_view_id( $view ) ) {
+		if ( empty( bbpress()->views[ $view ] ) ) {
 			continue;
 		}
 
