@@ -93,6 +93,7 @@ function get_whitelist() {
 		) ),
 		'core-auto-updates' => array_merge( get_committers(), array(
 			'audrasjb',
+			'pbiron',
 		) ),
 		'core-bootstrap' => array_merge( get_committers(), array(
 			'schlessera',
