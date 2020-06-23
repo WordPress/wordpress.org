@@ -4035,6 +4035,7 @@ section {
 
 .bbpress h1.page-title {
 	margin-top: 0;
+	word-break: break-word;
 }
 
 .bbpress .forum-titles .bbp-topic-voice-count,
