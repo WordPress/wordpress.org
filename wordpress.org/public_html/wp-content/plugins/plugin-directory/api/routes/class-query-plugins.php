@@ -65,26 +65,33 @@ class Query_Plugins extends Base {
 		}
 
 		// Temporary hacky block search
-		if ( $request->get_param( 'block' ) ) {
+		$block_search = trim( strtolower( $request->get_param( 'block' ) ) );
+		if ( $block_search ) {
 			global $wpdb;
-			$block_search = $request->get_param( 'block' );
 			$meta_query = array(
-				'relation' => 'OR',
+				'relation' => 'AND',
 				array(
-					'key' => 'block_name',
-					'value' => '^' . $block_search,
-					'compare' => 'RLIKE',
+					'key' => 'block_files',
+					'compare' => 'EXISTS',
 				),
 				array(
-					'key' => 'block_name',
-					'value' => '/' . $block_search, // search following the slash
-					'compare' => 'RLIKE',
-				),
-				array(
-					'key' => 'block_title',
-					'value' => $block_search, // search in title
-					'compare' => 'RLIKE',
-				),
+					'relation' => 'OR',
+					array(
+						'key' => 'block_name',
+						'value' => '^' . $block_search,
+						'compare' => 'RLIKE',
+					),
+					array(
+						'key' => 'block_name',
+						'value' => '/' . $block_search, // search following the slash
+						'compare' => 'RLIKE',
+					),
+					array(
+						'key' => 'block_title',
+						'value' => $block_search, // search in title
+						'compare' => 'RLIKE',
+					),
+				)
 			);
 
 			// Limit the search to the Block section
