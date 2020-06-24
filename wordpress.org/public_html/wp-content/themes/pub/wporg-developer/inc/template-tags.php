@@ -1833,9 +1833,9 @@ namespace DevHub {
 			'params',
 			'return',
 			'explanation',
+			'source',
 			'related',
 			'methods',
-			'source',
 			'changelog',
 			'notes'
 		);
