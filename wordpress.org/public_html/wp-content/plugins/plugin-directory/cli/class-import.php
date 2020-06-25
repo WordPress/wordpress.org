@@ -526,7 +526,7 @@ class Import {
 
 					if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
 						// Finally, just grab whatever js/css files there are in the current directory.
-						$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '!\.(?:js|jsx|css)$!i' );
+						$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '#(?<!webpack\.config)\.(?:js|jsx|css)$#i' );
 					}
 				}
 			}
