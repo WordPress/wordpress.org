@@ -37,11 +37,13 @@ function get_whitelist() {
 			'joedolson',
 			'nrqsnchz',
 			'rianrietveld',
+			'ryokuhi',
 		),
 		'accessibility-events' => array(
 			'audrasjb',
 			'joedolson',
 			'nrqsnchz',
+			'ryokuhi',
 		),
 		'bbpress' => array(
 			'johnjamesjacoby', // @jjj on Slack
