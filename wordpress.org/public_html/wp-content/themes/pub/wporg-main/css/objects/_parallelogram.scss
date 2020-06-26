@@ -21,3 +21,31 @@
 		transform: skew( 15deg );
 	}
 }
+
+@media screen and (max-width: 768px) {
+	body.page-about .shapes .parallelogram p {
+    -webkit-transform: skew(0deg); 
+    -ms-transform: skew(0deg);
+    transform: skew(0deg);
+	}
+	.parallelogram {
+	position: inherit;
+	-webkit-transform: skew(0deg);
+	-ms-transform: skew(0deg);
+	transform: skew(0deg); 
+
+	&:before {
+	    width: 20px;
+		-webkit-transform: skew(0deg);
+		-ms-transform: skew(0deg);
+		transform: skew(0deg); 
+	}
+
+	> * {
+	-webkit-transform: skew(0deg); 
+    -ms-transform: skew(0deg);
+    transform: skew(0deg); 
+	}
+    }
+
+}
