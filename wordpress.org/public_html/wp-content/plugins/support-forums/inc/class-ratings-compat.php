@@ -308,14 +308,29 @@ class Ratings_Compat {
 	 * @param int $topic_id The topic id
 	 */
 	public function topic_post_extras( $topic_id ) {
-		if ( isset( $_POST['rating'] ) && in_array( (int) $_POST['rating'], array( 1, 2, 3, 4, 5 ) ) ) {
-			if (
-				Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id )
-			&&
-				bbp_get_topic_author_id( $topic_id ) == get_current_user_id()
-			) {
-				\WPORG_Ratings::set_rating( $topic_id, $this->compat, $this->slug, bbp_get_topic_author_id( $topic_id ), absint( $_POST['rating'] ) );
+
+		// if this is in the reviews forum, and the user is editing their own post
+		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id )
+			&& bbp_get_topic_author_id( $topic_id ) == get_current_user_id() ) {
+
+			// if the rating is set, get it
+			if ( isset( $_POST['rating'] ) ) {
+				$rating = absint( $_POST[ 'rating' ] );
 			}
+
+			// if the rating isn't 1-5, then set it to a default value (prevent zero star ratings and the like)
+			if ( ! in_array( $rating, array( 1, 2, 3, 4, 5 ) ) ) {
+					$rating = 5; // default is 5
+			}
+
+			// set the rating
+			\WPORG_Ratings::set_rating( 
+				$topic_id, 
+				$this->compat, 
+				$this->slug, 
+				bbp_get_topic_author_id( $topic_id ), 
+				$rating 
+			);
 		}
 	}
 
