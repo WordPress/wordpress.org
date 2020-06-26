@@ -316,6 +316,8 @@ class Ratings_Compat {
 			// if the rating is set, get it
 			if ( isset( $_POST['rating'] ) ) {
 				$rating = absint( $_POST[ 'rating' ] );
+			} else {
+				$rating = 5;
 			}
 
 			// if the rating isn't 1-5, then set it to a default value (prevent zero star ratings and the like)
