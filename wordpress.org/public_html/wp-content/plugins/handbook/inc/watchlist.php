@@ -13,6 +13,8 @@ class WPorg_Handbook_Watchlist {
 		self::$post_types = array_map( array( __CLASS__, 'append_suffix' ), self::$post_types );
 
 		add_action( 'p2_action_links', array(__CLASS__, 'display_action_link'), 100 );
+		add_filter( 'o2_filter_post_actions', array( __CLASS__, 'add_o2_action_link' ) );
+		add_filter( 'o2_filter_post_action_html', array( __CLASS__, 'get_o2_action_link' ), 10, 2 );
 	}
 
 	/**
@@ -27,6 +29,57 @@ class WPorg_Handbook_Watchlist {
 		}
 
 		return $t . '-handbook';
+	}
+
+	/**
+	 * Adds a 'Watch' action link to O2
+	 */
+	public static function add_o2_action_link( $actions ) {
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		$post = get_post();
+
+		if ( 'page' == $post->post_type || ( in_array( $post->post_type, self::$post_types ) && ! is_post_type_archive( self::$post_types ) ) ) {
+			$watchlist = get_post_meta( $post->ID, '_wporg_watchlist', true );
+
+			if ( $watchlist && in_array( get_current_user_id(), $watchlist ) ) {
+				$actions[35] = [
+					'action'  => 'watch',
+					'text'    => __( 'Unwatch', 'wporg' ),
+					'href'    => wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&post_id=' . $post->ID ), 'unwatch-' . $post->ID ),
+					'title'   => __( 'Stop getting notified about changes to this page', 'wporg' ),
+					'classes' => [ 'genericon', 'genericon-unsubscribe' ],	
+				];
+			} else {
+				$actions[35] = [
+					'action'  => 'watch',
+					'text'    => __( 'Watch', 'wporg' ),
+					'href'    => wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&watch=1&post_id=' . $post->ID ), 'watch-' . $post->ID ),
+					'title'   => __( 'Get notified about changes to this page', 'wporg' ),
+					'classes' => [ 'genericon', 'genericon-subscribe' ],
+				];
+			}
+		}
+		return $actions;
+	}
+
+	/**
+	 * Create the HTML for the watch o2 post action.
+	 */
+	public static function get_o2_action_link( $html, $action ) {
+		if ( 'watch' === $action['action'] ) {
+			$html = sprintf(
+				'<a href="%s" title="%s" class="%s">%s</a>',
+				$action['href'],
+				$action['title'],
+				implode( ' ', $action['classes'] ),
+				$action['text']
+			);
+		}
+
+		return $html;
 	}
 
 	/**
