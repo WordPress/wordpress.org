@@ -36,7 +36,7 @@ class WPorg_Handbook_Watchlist {
 	 */
 	public static function add_o2_action_link( $actions ) {
 		if ( ! is_user_logged_in() ) {
-			return;
+			return $actions;
 		}
 
 		$post = get_post();
