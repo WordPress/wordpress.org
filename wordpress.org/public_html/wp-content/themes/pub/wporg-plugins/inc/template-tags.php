@@ -228,12 +228,15 @@ function get_plugin_status_notice( $post = null ) {
 
 				$days_passed = (int) ( ( current_time( 'timestamp' ) - mysql2date( 'U', $closed_date ) ) / DAY_IN_SECONDS );
 
+				// If we're closed, it may be permanent.
 				if ( $permanent ) {
 					$message .= ' ' . __( 'This closure is permanent.', 'wporg-plugins' );
 				} elseif ( $days_passed < 60 ) {
 					$message .= ' ' . __( 'This closure is temporary, pending a full review.', 'wporg-plugins' );
-				} else {
-					// Display close reason if more than 60 days have passed.
+				}
+
+				// Display close reason if more than 60 days have passed.
+				if ( $days_passed >= 60 ) {
 					/* translators: %s: plugin close/disable reason */
 					$message .= ' ' . sprintf( __( 'Reason: %s.', 'wporg-plugins' ), $close_reason );
 				}
