@@ -45,7 +45,7 @@ class Plugin_Directory {
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
-		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
+		add_filter( 'query_vars', array( $this, 'filter_query_vars' ), 1 );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
@@ -1157,7 +1157,16 @@ class Plugin_Directory {
 		$vars[] = 'plugin_advanced';
 		$vars[] = 'geopattern_icon';
 
-		return $vars;
+		// Remove support for any query vars the Plugin Directory doesn't support/need.
+		$not_needed = [
+			'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
+			'posts', 'withcomments', 'withoutcomments', 'favicon', 'cpage',
+			'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
+			'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview',
+			'post_format', 'cat', 'category_name', 'tag', // We use custom cats/tags.
+		];
+
+		return array_diff( $vars, $not_needed );
 	}
 
 	/**
@@ -1302,7 +1311,7 @@ class Plugin_Directory {
 		if (
 			( is_tax() || is_category() || is_tag() ) &&
 			! have_posts() &&
-			! is_tax( 'plugin_section' ) // All sections have something, or intentionall don't (favorites)
+			! is_tax( 'plugin_section' ) // All sections have something, or intentionally don't (favorites)
 		) {
 			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );

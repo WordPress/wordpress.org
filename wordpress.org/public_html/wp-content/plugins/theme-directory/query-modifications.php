@@ -215,11 +215,10 @@ add_action( 'parse_request', 'wporg_themes_parse_request' );
 function wporg_themes_remove_query_vars( $qv ) {
 	$not_needed = [
 		'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
-		'posts', 'withcomments', 'withoutcomments',
+		'posts', 'withcomments', 'withoutcomments', 'favicon', 'cpage',
 		'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
 		'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview',
-		'favicon', 'cpage', 'embed', 'post_format',
-		'cat', 'category_name',
+		'post_format', 'cat', 'category_name',
 	];
 
 	return array_diff( $qv, $not_needed );
