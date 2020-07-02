@@ -1,0 +1,34 @@
+{
+	"name": "my-plugin/notice",
+	"title": "Notice",
+	"category": "text",
+	"parent": [ "core/group" ],
+	"icon": "star",
+	"description": "Shows warning, error or success notices  ...",
+	"keywords": [ "alert", "message" ],
+	"textdomain": "my-plugin",
+	"attributes": {
+		"message": {
+			"type": "string",
+			"source": "html",
+			"selector": ".message"
+		}
+	},
+	"supports": {
+		"align": true,
+		"lightBlockWrapper": true
+	},
+	"styles": [
+		{ "name": "default", "label": "Default", "isDefault": true },
+		{ "name": "other", "label": "Other" }
+	],
+	"example": {
+		"attributes": {
+			"message": "This is a notice!"
+		}
+	},
+	"editorScript": "build/editor.js",
+	"script": "build/main.js",
+	"editorStyle": "build/editor.css",
+	"style": "build/style.css"
+}
