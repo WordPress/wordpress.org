@@ -219,6 +219,7 @@ function wporg_themes_remove_query_vars( $qv ) {
 		'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
 		'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview',
 		'favicon', 'cpage', 'embed', 'post_format',
+		'cat', 'category_name',
 	];
 
 	return array_diff( $qv, $not_needed );
