@@ -575,6 +575,7 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
 		add_shortcode( 'wporg-plugins-reviews', array( __NAMESPACE__ . '\Shortcodes\Reviews', 'display' ) );
 		add_shortcode( 'readme-validator', array( __NAMESPACE__ . '\Shortcodes\Readme_Validator', 'display' ) );
+		add_shortcode( 'block-validator', array( __NAMESPACE__ . '\Shortcodes\Block_Validator', 'display' ) );
 	}
 
 	/**
@@ -590,6 +591,7 @@ class Plugin_Directory {
 			'wporg-plugins-screenshots',
 			'wporg-plugins-reviews',
 			'readme-validator',
+			'block-validator',
 		);
 
 		$not_allowed_shortcodes = array_diff( array_keys( $shortcode_tags ), $allowed_shortcodes );

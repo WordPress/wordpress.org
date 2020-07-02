@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\CLI;
 use Exception;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
+use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -567,8 +568,8 @@ class Import {
 	 *
 	 * @return string The plugin readme.txt or readme.md filename.
 	 */
-	protected function find_readme_file( $directory ) {
-		$files = Filesystem::list_files( $directory, false /* non-recursive */, '!^readme\.(txt|md)$!i' );
+	static function find_readme_file( $directory ) {
+		$files = Filesystem::list_files( $directory, false /* non-recursive */, '!(?:^|/)readme\.(txt|md)$!i' );
 
 		// prioritize readme.txt
 		foreach ( $files as $f ) {
@@ -587,7 +588,7 @@ class Import {
 	 *
 	 * @return object The plugin headers.
 	 */
-	protected function find_plugin_headers( $directory ) {
+	static function find_plugin_headers( $directory ) {
 		$files = Filesystem::list_files( $directory, false, '!\.php$!i' );
 
 		if ( ! function_exists( 'get_plugin_data' ) ) {
@@ -625,7 +626,7 @@ class Import {
 	 *
 	 * @return array An array of objects representing blocks, corresponding to the block.json format where possible.
 	 */
-	protected function find_blocks_in_file( $filename ) {
+	static function find_blocks_in_file( $filename ) {
 
 		$ext = strtolower( pathinfo($filename, PATHINFO_EXTENSION) );
 
@@ -658,10 +659,26 @@ class Import {
 			}
 		}
 		if ( 'block.json' === basename( $filename ) ) {
-			// A block.json file has everything we want.
-			$blockinfo = json_decode( file_get_contents( $filename ) );
-			if ( isset( $blockinfo->name ) && isset( $blockinfo->title ) ) {
-				$blocks[] = $blockinfo;
+			// A block.json file should have everything we want.
+			$validator = new Block_JSON\Validator();
+			$block     = Block_JSON\Parser::parse( array( 'file' => $filename ) );
+			$result    = $validator->validate( $block );
+			if ( ! is_wp_error( $block ) && is_wp_error( $result ) ) {
+				// Only certain properties must be valid for our purposes here.
+				$required_valid_props = array(
+					'block.json',
+					'block.json:editorScript',
+					'block.json:editorStyle',
+					'block.json:name',
+					'block.json:script',
+					'block.json:style',
+				);
+				$invalid_props = array_intersect( $required_valid_props, $result->get_error_data( 'error' ) );
+				if ( empty( $invalid_props ) ) {
+					$blocks[] = $block;
+				}
+			} elseif ( true === $result ) {
+				$blocks[] = $block;
 			}
 		}
 
@@ -676,7 +693,7 @@ class Import {
 	 *
 	 * @return array
 	 */
-	protected function extract_file_paths_from_block_json( $parsed_json, $block_json_path = '' ) {
+	static function extract_file_paths_from_block_json( $parsed_json, $block_json_path = '' ) {
 		$files = array();
 
 		$props = array( 'editorScript', 'script', 'editorStyle', 'style' );

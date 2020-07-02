@@ -140,7 +140,7 @@ class Block_Plugin_Checker {
 
 
 		// Generate a unique tmp file directory name, but don't create it.
-		$path = Filesystem::temp_directory( '/tmp/blockplugin' );
+		$path = Filesystem::temp_directory( 'blockplugin' );
 
 		$export = SVN::export( $svn_url, $path, array( 'ignore-externals', 'force' ) );
 		if ( $export['result'] ) {
