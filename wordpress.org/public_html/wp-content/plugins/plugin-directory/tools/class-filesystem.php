@@ -27,7 +27,8 @@ class Filesystem {
 	 */
 	public static function temp_directory( $prefix = '' ) {
 		if ( ! is_dir( self::TMP_DIR ) ) {
-			mkdir( self::TMP_DIR, 0777 );
+			mkdir( self::TMP_DIR );
+			chmod( self::TMP_DIR, 0777 );
 		}
 
 		// Generate a unique filename.
@@ -35,7 +36,8 @@ class Filesystem {
 
 		// Replace that filename with a directory.
 		unlink( $tmp_dir );
-		mkdir( $tmp_dir, 0777 );
+		mkdir( $tmp_dir );
+		chmod( $tmp_dir, 0777 );
 
 		// Automatically remove this temporary directory on shutdown:
 		register_shutdown_function( array( __CLASS__, 'rmdir' ), $tmp_dir );
