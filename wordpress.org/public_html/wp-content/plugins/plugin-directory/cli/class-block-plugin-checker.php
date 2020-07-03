@@ -471,6 +471,15 @@ class Block_Plugin_Checker {
 	 */
 	function check_block_json_is_valid() {
 		foreach ( $this->block_json_validation as $block_json_file => $result ) {
+			if ( true === $result ) { 
+				$this->record_result( __FUNCTION__,
+					'info',
+					sprintf( __( '%s is valid.', 'wporg-plugins' ), $this->relative_filename( $block_json_file ) ),
+					$this->relative_filename( $block_json_file )
+				);
+				continue;
+			}
+
 			foreach ( $result->get_error_codes() as $code ) {
 				$messages = $result->get_error_messages( $code );
 				foreach ( $messages as $i => $message ) {
