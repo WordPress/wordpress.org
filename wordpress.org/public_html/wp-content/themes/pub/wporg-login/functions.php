@@ -349,11 +349,14 @@ add_action( 'admin_init', 'wporg_login_cron_tasks' );
  */
 function wporg_login_purge_pending_registrations() {
 	global $wpdb;
-	$two_weeks_ago = gmdate( 'Y-m-d H:i:s', time() - 14 * DAY_IN_SECONDS );
+	$two_weeks_ago_s = time() - 14 * DAY_IN_SECONDS;
+	$two_weeks_ago   = gmdate( 'Y-m-d H:i:s', $two_weeks_ago_s );
 
 	$wpdb->query( $wpdb->prepare(
-		"DELETE FROM `{$wpdb->base_prefix}user_pending_registrations`  WHERE `user_registered` <= %s",
-		$two_weeks_ago
+		"DELETE FROM `{$wpdb->base_prefix}user_pending_registrations`
+		WHERE `user_registered` <= %s AND LEFT( `user_activation_key`, 10 ) <= %d",
+		$two_weeks_ago,
+		$two_weeks_ago_s
 	) );
 }
 add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_registrations' );
