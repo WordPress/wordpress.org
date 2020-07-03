@@ -20,7 +20,7 @@ class Block_Validator {
 					<label for="plugin_url"><?php _e( 'Plugin repo URL', 'wporg-plugins' ); ?></label>
 				</p>
 				<p>
-					<input type="text" id="plugin_url" name="plugin_url" size="70" placeholder="https://plugins.svn.wordpress.org/" value="<?php echo esc_url( $plugin_url ); ?>" />
+					<input type="text" id="plugin_url" name="plugin_url" size="70" placeholder="https://plugins.svn.wordpress.org/" value="<?php echo esc_attr( $plugin_url ); ?>" />
 					<input type="submit" class="button button-secondary" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
 					<?php wp_nonce_field( 'validate-block-plugin', 'block-nonce' ); ?>
 				</p>

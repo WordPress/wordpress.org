@@ -60,6 +60,10 @@ class Block_Plugin_Checker {
 			$url = 'https://github.com/' . $matches[1];
 		}
 
+		if ( preg_match( '#^(?:https://wordpress.org/plugins/)?([-\w]+)/?$#', $url, $matches ) ) {
+			$url = 'https://plugins.svn.wordpress.org/' . $matches[1];
+		}
+
 		// Parse the URL with whitespace and trailing / trimmed
 		$url_parts = wp_parse_url( rtrim( trim( $url ), '/' ) );
 
