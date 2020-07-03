@@ -2,12 +2,12 @@
 #
 # Markdown  -  A text-to-HTML conversion tool for web writers
 #
-# PHP Markdown  
-# Copyright (c) 2004-2015 Michel Fortin  
+# PHP Markdown
+# Copyright (c) 2004-2015 Michel Fortin
 # <https://michelf.ca/projects/php-markdown/>
 #
-# Original Markdown  
-# Copyright (c) 2004-2006 John Gruber  
+# Original Markdown
+# Copyright (c) 2004-2006 John Gruber
 # <https://daringfireball.net/projects/markdown/>
 #
 namespace Michelf;
@@ -73,7 +73,7 @@ class Markdown implements MarkdownInterface {
 	# number that is defined first.  For example:
 	# 2. List item two
 	# 3. List item three
-	# 
+	#
 	# becomes
 	# <ol start="2">
 	# <li>List item two</li>
@@ -103,11 +103,11 @@ class Markdown implements MarkdownInterface {
 		$this->_initDetab();
 		$this->prepareItalicsAndBold();
 	
-		$this->nested_brackets_re = 
+		$this->nested_brackets_re =
 			str_repeat('(?>[^\[\]]+|\[', $this->nested_brackets_depth).
 			str_repeat('\])*', $this->nested_brackets_depth);
 	
-		$this->nested_url_parenthesis_re = 
+		$this->nested_url_parenthesis_re =
 			str_repeat('(?>[^()\s]+|\(', $this->nested_url_parenthesis_depth).
 			str_repeat('(?>\)))*', $this->nested_url_parenthesis_depth);
 		
@@ -131,7 +131,7 @@ class Markdown implements MarkdownInterface {
 	
 	protected function setup() {
 	#
-	# Called before the transformation process starts to setup parser 
+	# Called before the transformation process starts to setup parser
 	# states.
 	#
 		# Clear global hashes.
@@ -144,7 +144,7 @@ class Markdown implements MarkdownInterface {
 	
 	protected function teardown() {
 	#
-	# Called after the transformation process to clear any variable 
+	# Called after the transformation process to clear any variable
 	# which may be taking up memory unnecessarly.
 	#
 		$this->urls = array();
@@ -256,8 +256,8 @@ class Markdown implements MarkdownInterface {
 		# hard-coded:
 		#
 		# *  List "a" is made of tags which can be both inline or block-level.
-		#    These will be treated block-level when the start tag is alone on 
-		#    its line, otherwise they're not matched here and will be taken as 
+		#    These will be treated block-level when the start tag is alone on
+		#    its line, otherwise they're not matched here and will be taken as
 		#    inline later.
 		# *  List "b" is made of tags which are always block-level;
 		#
@@ -324,7 +324,7 @@ class Markdown implements MarkdownInterface {
 			)
 			(						# save in $1
 
-			  # Match from `\n<tag>` to `</tag>\n`, handling nested tags 
+			  # Match from `\n<tag>` to `</tag>\n`, handling nested tags
 			  # in between.
 					
 						[ ]{0,'.$less_than_tab.'}
@@ -345,7 +345,7 @@ class Markdown implements MarkdownInterface {
 						[ ]*				# trailing spaces/tabs
 						(?=\n+|\Z)	# followed by a newline or end of document
 					
-			| # Special case just for <hr />. It was easier to make a special 
+			| # Special case just for <hr />. It was easier to make a special
 			  # case than to make the other regex more complicated.
 			
 						[ ]{0,'.$less_than_tab.'}
@@ -391,7 +391,7 @@ class Markdown implements MarkdownInterface {
 	
 	protected function hashPart($text, $boundary = 'X') {
 	#
-	# Called whenever a tag must be hashed when a function insert an atomic 
+	# Called whenever a tag must be hashed when a function insert an atomic
 	# element in the text stream. Passing $text to through this function gives
 	# a unique text-token which will be reverted back when calling unhash.
 	#
@@ -437,10 +437,10 @@ class Markdown implements MarkdownInterface {
 	#
 	# Run block gamut tranformations.
 	#
-		# We need to escape raw HTML in Markdown source before doing anything 
-		# else. This need to be done for each block, and not only at the 
+		# We need to escape raw HTML in Markdown source before doing anything
+		# else. This need to be done for each block, and not only at the
 		# begining in the Markdown function since hashed blocks can be part of
-		# list items and could have been indented. Indented blocks would have 
+		# list items and could have been indented. Indented blocks would have
 		# been seen as a code block in a previous pass of hashHTMLBlocks.
 		$text = $this->hashHTMLBlocks($text);
 		
@@ -449,7 +449,7 @@ class Markdown implements MarkdownInterface {
 	
 	protected function runBasicBlockGamut($text) {
 	#
-	# Run block gamut tranformations, without hashing HTML blocks. This is 
+	# Run block gamut tranformations, without hashing HTML blocks. This is
 	# useful when HTML blocks are known to be already hashed, like in the first
 	# whole-document pass.
 	#
@@ -477,7 +477,7 @@ class Markdown implements MarkdownInterface {
 				[ ]*		# Tailing spaces
 				$			# End of line.
 			}mx',
-			"\n".$this->hashBlock("<hr$this->empty_element_suffix")."\n", 
+			"\n".$this->hashBlock("<hr$this->empty_element_suffix")."\n",
 			$text);
 	}
 
@@ -520,7 +520,7 @@ class Markdown implements MarkdownInterface {
 	
 	protected function doHardBreaks($text) {
 		# Do hard breaks:
-		return preg_replace_callback('/ {2,}\n/', 
+		return preg_replace_callback('/ {2,}\n/',
 			array($this, '_doHardBreaks_callback'), $text);
 	}
 	protected function _doHardBreaks_callback($matches) {
@@ -680,7 +680,7 @@ class Markdown implements MarkdownInterface {
 			  \]
 
 			)
-			}xs', 
+			}xs',
 			array($this, '_doImages_reference_callback'), $text);
 
 		#
@@ -765,7 +765,7 @@ class Markdown implements MarkdownInterface {
 		# Setext-style headers:
 		#	  Header 1
 		#	  ========
-		#  
+		#
 		#	  Header 2
 		#	  --------
 		#
@@ -987,7 +987,7 @@ class Markdown implements MarkdownInterface {
 		$marker_space = $matches[3];
 		$tailing_blank_line =& $matches[5];
 
-		if ($leading_line || $tailing_blank_line || 
+		if ($leading_line || $tailing_blank_line ||
 			preg_match('/\n{2,}/', $item))
 		{
 			# Replace marker with the appropriate whitespace indentation
@@ -1104,7 +1104,7 @@ class Markdown implements MarkdownInterface {
 			$token_re = $this->em_strong_prepared_relist["$em$strong"];
 			
 			#
-			# Each loop iteration search for the next emphasis token. 
+			# Each loop iteration search for the next emphasis token.
 			# Each token is then passed to handleSpanToken.
 			#
 			$parts = preg_split($token_re, $text, 2, PREG_SPLIT_DELIM_CAPTURE);
@@ -1160,7 +1160,7 @@ class Markdown implements MarkdownInterface {
 						$$tag = ''; # $$tag stands for $em or $strong
 					}
 				} else {
-					# Reached opening three-char emphasis marker. Push on token 
+					# Reached opening three-char emphasis marker. Push on token
 					# stack; will be handled by the special condition above.
 					$em = $token{0};
 					$strong = "$em$em";
@@ -1234,9 +1234,9 @@ class Markdown implements MarkdownInterface {
 		$bq = $this->runBlockGamut($bq);		# recurse
 
 		$bq = preg_replace('/^/m', "  ", $bq);
-		# These leading spaces cause problem with <pre> content, 
+		# These leading spaces cause problem with <pre> content,
 		# so we need to fix that:
-		$bq = preg_replace_callback('{(\s*<pre>.+?</pre>)}sx', 
+		$bq = preg_replace_callback('{(\s*<pre>.+?</pre>)}sx',
 			array($this, '_doBlockQuotes_callback2'), $bq);
 
 		return "\n". $this->hashBlock("<blockquote>\n$bq\n</blockquote>")."\n\n";
@@ -1358,7 +1358,7 @@ class Markdown implements MarkdownInterface {
 	
 	protected function encodeAmpsAndAngles($text) {
 	#
-	# Smart processing for ampersands and angle brackets that need to 
+	# Smart processing for ampersands and angle brackets that need to
 	# be encoded. Valid character entities are left alone unless the
 	# no-entities mode is set.
 	#
@@ -1367,7 +1367,7 @@ class Markdown implements MarkdownInterface {
 		} else {
 			# Ampersand-encoding based entirely on Nat Irons's Amputator
 			# MT plugin: <http://bumppo.net/projects/amputator/>
-			$text = preg_replace('/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/', 
+			$text = preg_replace('/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/',
 								'&amp;', $text);
 		}
 		# Encode remaining <'s
@@ -1497,8 +1497,8 @@ class Markdown implements MarkdownInterface {
 
 		while (1) {
 			#
-			# Each loop iteration seach for either the next tag, the next 
-			# openning code span marker, or the next escaped character. 
+			# Each loop iteration seach for either the next tag, the next
+			# openning code span marker, or the next escaped character.
 			# Each token is then passed to handleSpanToken.
 			#
 			$parts = preg_split($span_re, $str, 2, PREG_SPLIT_DELIM_CAPTURE);
@@ -1524,7 +1524,7 @@ class Markdown implements MarkdownInterface {
 	
 	protected function handleSpanToken($token, &$str) {
 	#
-	# Handle $token provided by parseSpan by determining its nature and 
+	# Handle $token provided by parseSpan by determining its nature and
 	# returning the corresponding value that should replace it.
 	#
 		switch ($token{0}) {
@@ -1532,7 +1532,7 @@ class Markdown implements MarkdownInterface {
 				return $this->hashPart("&#". ord($token{1}). ";");
 			case "`":
 				# Search for end marker in remaining text.
-				if (preg_match('/^(.*?[^`])'.preg_quote($token).'(?!`)(.*)$/sm', 
+				if (preg_match('/^(.*?[^`])'.preg_quote($token).'(?!`)(.*)$/sm',
 					$str, $matches))
 				{
 					$str = $matches[2];
@@ -1554,7 +1554,7 @@ class Markdown implements MarkdownInterface {
 	}
 
 
-	# String length function for detab. `_initDetab` will create a function to 
+	# String length function for detab. `_initDetab` will create a function to
 	# hanlde UTF-8 if the default function does not exist.
 	protected $utf8_strlen = 'mb_strlen';
 	
@@ -1563,7 +1563,7 @@ class Markdown implements MarkdownInterface {
 	# Replace tabs with the appropriate amount of space.
 	#
 		# For each line we separate the line in blocks delemited by
-		# tab characters. Then we reconstruct every line by adding the 
+		# tab characters. Then we reconstruct every line by adding the
 		# appropriate number of space between each blocks.
 		
 		$text = preg_replace_callback('/^.*\t.*$/m',
@@ -1582,7 +1582,7 @@ class Markdown implements MarkdownInterface {
 		unset($blocks[0]); # Do not add first block twice.
 		foreach ($blocks as $block) {
 			# Calculate amount of space, insert spaces, insert block.
-			$amount = $this->tab_width - 
+			$amount = $this->tab_width -
 				$strlen($line, 'UTF-8') % $this->tab_width;
 			$line .= str_repeat(" ", $amount) . $block;
 		}
@@ -1591,13 +1591,13 @@ class Markdown implements MarkdownInterface {
 	protected function _initDetab() {
 	#
 	# Check for the availability of the function in the `utf8_strlen` property
-	# (initially `mb_strlen`). If the function is not available, create a 
+	# (initially `mb_strlen`). If the function is not available, create a
 	# function that will loosely count the number of UTF-8 characters with a
 	# regular expression.
 	#
 		if (function_exists($this->utf8_strlen)) return;
 		$this->utf8_strlen = create_function('$text', 'return preg_match_all(
-			"/[\\\\x00-\\\\xBF]|[\\\\xC0-\\\\xFF][\\\\x80-\\\\xBF]*/", 
+			"/[\\\\x00-\\\\xBF]|[\\\\xC0-\\\\xFF][\\\\x80-\\\\xBF]*/",
 			$text, $m);');
 	}
 
@@ -1606,7 +1606,7 @@ class Markdown implements MarkdownInterface {
 	#
 	# Swap back in all the tags hashed by _HashHTMLBlocks.
 	#
-		return preg_replace_callback('/(.)\x1A[0-9]+\1/', 
+		return preg_replace_callback('/(.)\x1A[0-9]+\1/',
 			array($this, '_unhash_callback'), $text);
 	}
 	protected function _unhash_callback($matches) {

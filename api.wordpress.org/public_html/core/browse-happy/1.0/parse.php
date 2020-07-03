@@ -279,7 +279,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			'7.0' => '11.0',
 		);
 		$ver = $tokens['Trident'];
-		$data['version'] = $trident_ie_mapping[ $ver ] ?? $ver; 
+		$data['version'] = $trident_ie_mapping[ $ver ] ?? $ver;
 	}
 	// Internet Explorer (pre v8.0)
 	elseif ( ! empty( $tokens['MSIE'] ) ) {

@@ -169,7 +169,7 @@ function wporg_update_pending_user( $pending_user ) {
 }
 
 /**
- * Create a user record from a pending record. 
+ * Create a user record from a pending record.
  */
 function wporg_login_create_user_from_pending( $pending_user, $password = false ) {
 	global $wpdb;

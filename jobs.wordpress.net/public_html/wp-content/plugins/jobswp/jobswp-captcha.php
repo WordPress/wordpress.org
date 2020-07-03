@@ -113,7 +113,7 @@ class Jobs_Dot_WP_Captcha {
 
 				$verify = array(
 					'secret'    => self::get_secret_key(),
-					'remoteip'	=> $_SERVER['REMOTE_ADDR'], 
+					'remoteip'	=> $_SERVER['REMOTE_ADDR'],
 					'response'  => $_POST['g-recaptcha-response'],
 				);
 
@@ -136,7 +136,7 @@ class Jobs_Dot_WP_Captcha {
 	/**
 	 * Amends notice on job verfication page to point out the captcha.
 	 *
-	 * @param string $type The type of notice being displayed. 
+	 * @param string $type The type of notice being displayed.
 	 */
 	public static function add_notice( $type ) {
 		if ( 'verify' == $type ) {

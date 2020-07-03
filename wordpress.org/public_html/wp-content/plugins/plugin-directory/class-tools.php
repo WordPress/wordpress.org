@@ -595,7 +595,7 @@ class Tools {
 
 	/**
 	 * Add an Audit Internal Note for a plugin.
-	 * 
+	 *
 	 * @param int|string|WP_Post $plugin A Post ID, Plugin Slug or, WP_Post object.
 	 * @param string $note The note to audit log entry to add.
 	 * @param WP_User $user The user which performed the action. Optional.

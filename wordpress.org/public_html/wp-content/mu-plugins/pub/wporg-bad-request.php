@@ -33,7 +33,7 @@ add_action( 'login_init', function() {
 /**
  * Detect invalid query parameters being passed in Core query fields.
  * Generally causes WP_Query to throw a PHP Warning.
- * 
+ *
  * @see https://core.trac.wordpress.org/ticket/17737
  */
 add_action( 'send_headers', function( $wp ) {
@@ -50,7 +50,7 @@ add_action( 'send_headers', function( $wp ) {
 
 /**
  * Detect invalid parameters being passed to the Jetpack Subscription widget.
- * 
+ *
  * @see https://github.com/Automattic/jetpack/pull/15638
  */
 add_action( 'template_redirect', function() {
@@ -98,7 +98,7 @@ add_action( 'xmlrpc_call', function() {
 
 /**
  * Die with a 400 Bad Request.
- * 
+ *
  * @param string $reference A unique identifying string to make it easier to read logs.
  */
 function die_bad_request( $reference = '' ) {

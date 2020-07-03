@@ -415,7 +415,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$valid_remote_hash = false;
 			$user = get_user_by( 'id', $user_id );
 			if ( $user ) {
-				$valid_remote_hash = hash_equals( 
+				$valid_remote_hash = hash_equals(
 					$this->_generate_remote_login_hash( $user, $valid_until, $remember_me ),
 					$sso_hash
 				);

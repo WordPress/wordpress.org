@@ -1398,7 +1398,7 @@ class Plugin_Directory {
 
 	/**
 	 * Skip outdated plugins in Jetpack Sitemaps.
-	 * 
+	 *
 	 * @param bool $skip If this post should be excluded from Sitemaps.
 	 * @param object $plugin_db_row A row from the wp_posts table.
 	 * @return bool

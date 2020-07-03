@@ -192,7 +192,7 @@ class Ratings_Compat {
 		add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10, 2 );
 
 		// Undo the above filter, for titles of replies to reviews. See #meta4254
-		add_filter( 'bbp_get_topic_last_topic_title', array( $this, 'undo_topic_title' ), 10, 1 ); 
+		add_filter( 'bbp_get_topic_last_topic_title', array( $this, 'undo_topic_title' ), 10, 1 );
 ?>
 <div class="review-ratings">
 	<div class="col-3">
@@ -326,12 +326,12 @@ class Ratings_Compat {
 			}
 
 			// set the rating
-			\WPORG_Ratings::set_rating( 
-				$topic_id, 
-				$this->compat, 
-				$this->slug, 
-				bbp_get_topic_author_id( $topic_id ), 
-				$rating 
+			\WPORG_Ratings::set_rating(
+				$topic_id,
+				$this->compat,
+				$this->slug,
+				bbp_get_topic_author_id( $topic_id ),
+				$rating
 			);
 		}
 	}

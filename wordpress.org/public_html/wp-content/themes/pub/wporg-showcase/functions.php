@@ -4,7 +4,7 @@
 add_theme_support( 'automatic-feed-links' );
 
 // Disable comments feed.
-add_filter( 'feed_links_show_comments_feed', '__return_false' ); 
+add_filter( 'feed_links_show_comments_feed', '__return_false' );
 
 // Remove extra feed links from singular queries.
 add_action( 'wp_head', function () {

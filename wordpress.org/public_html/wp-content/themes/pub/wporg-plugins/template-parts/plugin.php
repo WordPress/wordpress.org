@@ -51,7 +51,7 @@ $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
 			</span>
 		<?php endif; ?>
 		<span class="last-updated">
-			<i class="dashicons dashicons-calendar"></i> 
+			<i class="dashicons dashicons-calendar"></i>
 			<?php
 			/* Translators: Plugin modified time. */
 			printf( esc_html__( 'Updated %s ago', 'wporg-plugins' ), esc_html( human_time_diff( get_post_modified_time() ) ) );

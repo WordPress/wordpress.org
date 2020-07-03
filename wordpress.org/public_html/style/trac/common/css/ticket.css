@@ -271,7 +271,7 @@ label[for=comment] { float: right }
 
 #propertyform {
  clear: both;
- margin-bottom: 2em; 
+ margin-bottom: 2em;
 }
 #propertyform table.trac-properties {
  border-spacing: 0;

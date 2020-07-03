@@ -236,7 +236,7 @@ add_filter( 'jetpack_active_modules', 'wporg_themes_disable_sitemap_for_rosetta'
 
 /**
  * Skip outdated themes in Jetpack Sitemaps.
- * 
+ *
  * @param bool $skip If this post should be excluded from Sitemaps.
  * @param object $plugin_db_row A row from the wp_posts table.
  * @return bool

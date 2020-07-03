@@ -13,7 +13,7 @@ Licensed under GPL and MIT
 /* =============================================================================
    Base 966px Grid
    ========================================================================== */
-   
+
 	body {min-width: 996px;}
 
 	/* Container */
@@ -233,7 +233,7 @@ Licensed under GPL and MIT
 /* =============================================================================
    Less than 768px
    ========================================================================== */
-   
+
 @media only screen and (max-width: 767px) {
 	
 	body{min-width:0;}
@@ -286,9 +286,9 @@ Licensed under GPL and MIT
 	}
 	
 	.container .push_1, .container .push_2,
-	.container .push_3, .container .push_4, 
+	.container .push_3, .container .push_4,
 	.container .push_5, .container .push_6,
-	.container .push_7, .container .push_8, 
+	.container .push_7, .container .push_8,
 	.container .push_9, .container .push_10,
 	.container .push_11	{
 		left: 0;

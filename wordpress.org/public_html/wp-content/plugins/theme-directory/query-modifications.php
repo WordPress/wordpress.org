@@ -209,7 +209,7 @@ add_action( 'parse_request', 'wporg_themes_parse_request' );
 
 /**
  * Remove support for any query vars the Theme Directory doesn't support/need.
- * 
+ *
  * This should only apply to Rewrite rules, so WP_Query can use anything it needs.
  */
 function wporg_themes_remove_query_vars( $qv ) {

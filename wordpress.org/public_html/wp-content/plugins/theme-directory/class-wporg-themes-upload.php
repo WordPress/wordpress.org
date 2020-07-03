@@ -445,7 +445,7 @@ class WPORG_Themes_Upload {
 
 	/**
 	 * Sanitize/strip a field back to it's bare-basics version-like string.
-	 * 
+	 *
 	 * @param string $value The field value.
 	 * @param string $field The name of the field being processed.
 	 * @return bool|string The version-like field or false on failure.

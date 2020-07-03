@@ -922,10 +922,10 @@ add_filter( 'the_title', 'wptv_widont' );
 
 /**
  * Update Attachment titles to match the Post Title.
- * 
+ *
  * This is done as the Attachment Title is shown within the VideoPress embeds.
  * This can't be done through a filter in the themes functions.php, as it appears that's not loaded for the Rest API.
- * 
+ *
  * @see https://meta.trac.wordpress.org/ticket/4667
  */
 function wptv_update_attachment_titles( $id, $post, $post_before ) {

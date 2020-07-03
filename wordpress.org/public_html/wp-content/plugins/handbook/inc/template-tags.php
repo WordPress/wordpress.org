@@ -84,7 +84,7 @@ function wporg_is_handbook( $handbook = '' ) {
  */
  function wporg_is_handbook_landing_page() {
 	 return $GLOBALS['wp_query']->is_handbook_root;
- } 
+ }
 
 /**
  * Is the current (or specified) post_type a handbook post type?

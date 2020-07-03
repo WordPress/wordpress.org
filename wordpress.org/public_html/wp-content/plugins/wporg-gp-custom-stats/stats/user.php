@@ -126,7 +126,7 @@ class WPorg_GP_User_Stats {
 			list( $user_id, $project_id, $locale, $locale_slug ) = explode( ',', $key );
 
 			// Step 1 - Does this user already have the project listed? Just Bump the date.
-			if ( $id = $wpdb->get_var( $wpdb->prepare( 
+			if ( $id = $wpdb->get_var( $wpdb->prepare(
 				"SELECT id FROM {$wpdb->user_projects}
 				WHERE user_id = %d AND project_id = %d AND locale = %s AND locale_slug = %s",
 				$user_id, $project_id, $locale, $locale_slug

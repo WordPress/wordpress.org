@@ -9,7 +9,7 @@ function make_enqueue_scripts() {
 add_action( 'after_setup_theme', 'make_setup_theme' );
 function make_setup_theme() {
 	register_nav_menu( 'primary', __( 'Navigation Menu', 'make-wporg' ) );
-	add_theme_support( 'post-thumbnails' ); 
+	add_theme_support( 'post-thumbnails' );
 }
 
 add_action( 'pre_get_posts', 'make_query_mods' );

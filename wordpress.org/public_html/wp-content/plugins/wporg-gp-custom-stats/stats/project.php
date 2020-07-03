@@ -86,7 +86,7 @@ class WPorg_GP_Project_Stats {
 
 	/**
 	 * Cron task to cache the string counts for the wp-themes and wp-plugins parent categories.
-	 * 
+	 *
 	 * These don't have any translation sets, but we need to be able to query the waiting strings for them.
 	 */
 	public function cache_wp_themes_wp_plugins_strings() {

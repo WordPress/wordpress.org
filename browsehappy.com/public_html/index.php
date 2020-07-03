@@ -1,5 +1,5 @@
 <?php defined( 'ABSPATH' ) or die(); ?>
-<!DOCTYPE html>  
+<!DOCTYPE html>
 
 <!--[if lt IE 7 ]> <html <?php language_attributes(); ?> class="no-js ie6"> <![endif]-->
 <!--[if IE 7 ]>    <html <?php language_attributes(); ?> class="no-js ie7"> <![endif]-->

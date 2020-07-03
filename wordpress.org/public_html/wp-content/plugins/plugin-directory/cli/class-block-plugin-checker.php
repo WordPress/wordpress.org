@@ -266,7 +266,7 @@ class Block_Plugin_Checker {
 		$this->results[] = (object) array(
 			'check_name' => $check_name,
 			'type' => $type,
-			'message' => $message, 
+			'message' => $message,
 			'data' => $data );
 	}
 
@@ -330,9 +330,9 @@ class Block_Plugin_Checker {
 					if ( $this->slug && $this->slug === $post->post_name )
 						continue; // It's this very same plugin
 
-					$this->record_result( __FUNCTION__, 
-						'info', 
-						sprintf( __( 'Block name already exists in plugin %s', 'wporg-plugins' ), $query->posts[0]->post_name ), 
+					$this->record_result( __FUNCTION__,
+						'info',
+						sprintf( __( 'Block name already exists in plugin %s', 'wporg-plugins' ), $query->posts[0]->post_name ),
 						[ 'block_name' => $block->name, 'slug' => $post->post_name ]
 					);
 				}
@@ -471,7 +471,7 @@ class Block_Plugin_Checker {
 	 */
 	function check_block_json_is_valid() {
 		foreach ( $this->block_json_validation as $block_json_file => $result ) {
-			if ( true === $result ) { 
+			if ( true === $result ) {
 				$this->record_result( __FUNCTION__,
 					'info',
 					sprintf( __( '%s is valid.', 'wporg-plugins' ), $this->relative_filename( $block_json_file ) ),
@@ -489,7 +489,7 @@ class Block_Plugin_Checker {
 						$this->record_result( __FUNCTION__,
 							( 'error' === $code ? 'warning' : $code ), // TODO: be smarter about mapping these
 							$message,
-							array( 
+							array(
 								$this->relative_filename( $block_json_file ),
 								$result->get_error_data( $code )
 							)

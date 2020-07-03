@@ -3,11 +3,11 @@
 # Markdown Extra  -  A text-to-HTML conversion tool for web writers
 #
 # PHP Markdown Extra
-# Copyright (c) 2004-2015 Michel Fortin  
+# Copyright (c) 2004-2015 Michel Fortin
 # <https://michelf.ca/projects/php-markdown/>
 #
 # Original Markdown
-# Copyright (c) 2004-2006 John Gruber  
+# Copyright (c) 2004-2006 John Gruber
 # <https://daringfireball.net/projects/markdown/>
 #
 namespace Michelf;
@@ -57,11 +57,11 @@ class MarkdownExtra extends \Michelf\Markdown {
 	#
 	# Constructor function. Initialize the parser object.
 	#
-		# Add extra escapable characters before parent constructor 
+		# Add extra escapable characters before parent constructor
 		# initialize the table.
 		$this->escape_chars .= ':|';
 		
-		# Insert extra document, block, and span transformations. 
+		# Insert extra document, block, and span transformations.
 		# Parent constructor will do the sorting.
 		$this->document_gamut += array(
 			"doFencedCodeBlocks" => 5,
@@ -236,14 +236,14 @@ class MarkdownExtra extends \Michelf\Markdown {
 	
 	# Tags that are always treated as block tags:
 	protected $block_tags_re = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|address|form|fieldset|iframe|hr|legend|article|section|nav|aside|hgroup|header|footer|figcaption|figure';
-						   
+						
 	# Tags treated as block tags only if the opening tag is alone on its line:
 	protected $context_block_tags_re = 'script|noscript|style|ins|del|iframe|object|source|track|param|math|svg|canvas|audio|video';
 	
 	# Tags where markdown="1" default to span mode:
 	protected $contain_span_tags_re = 'p|h[1-6]|li|dd|dt|td|th|legend|address';
 	
-	# Tags which must not have their contents modified, no matter where 
+	# Tags which must not have their contents modified, no matter where
 	# they appear:
 	protected $clean_tags_re = 'script|style|math|svg';
 	
@@ -262,7 +262,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 	# hard-coded.
 	#
 	# This works by calling _HashHTMLBlocks_InMarkdown, which then calls
-	# _HashHTMLBlocks_InHTML when it encounter block tags. When the markdown="1" 
+	# _HashHTMLBlocks_InHTML when it encounter block tags. When the markdown="1"
 	# attribute is found within a tag, _HashHTMLBlocks_InHTML calls back
 	#  _HashHTMLBlocks_InMarkdown to handle the Markdown syntax within the tag.
 	# These two functions are calling each other. It's recursive!
@@ -282,8 +282,8 @@ class MarkdownExtra extends \Michelf\Markdown {
 	#
 	# Parse markdown text, calling _HashHTMLBlocks_InHTML for block tags.
 	#
-	# *   $indent is the number of space to be ignored when checking for code 
-	#     blocks. This is important because if we don't take the indent into 
+	# *   $indent is the number of space to be ignored when checking for code
+	#     blocks. This is important because if we don't take the indent into
 	#     account, something like this (which looks right) won't work as expected:
 	#
 	#     <div>
@@ -295,11 +295,11 @@ class MarkdownExtra extends \Michelf\Markdown {
 	#     If you don't like this, just don't indent the tag on which
 	#     you apply the markdown="1" attribute.
 	#
-	# *   If $enclosing_tag_re is not empty, stops at the first unmatched closing 
+	# *   If $enclosing_tag_re is not empty, stops at the first unmatched closing
 	#     tag with that name. Nested tags supported.
 	#
-	# *   If $span is true, text inside must treated as span. So any double 
-	#     newline will be replaced by a single newline so that it does not create 
+	# *   If $span is true, text inside must treated as span. So any double
+	#     newline will be replaced by a single newline so that it does not create
 	#     paragraphs.
 	#
 	# Returns an array of that form: ( processed text , remaining text )
@@ -308,7 +308,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 
 		# Regex to check for the presense of newlines around a block tag.
 		$newline_before_re = '/(?:^\n?|\n\n)*$/';
-		$newline_after_re = 
+		$newline_after_re =
 			'{
 				^						# Start of text following the tag.
 				(?>[ ]*<!--.*?-->)?		# Optional comment.
@@ -381,13 +381,13 @@ class MarkdownExtra extends \Michelf\Markdown {
 			#
 			# Split the text using the first $tag_match pattern found.
 			# Text before  pattern will be first in the array, text after
-			# pattern will be at the end, and between will be any catches made 
+			# pattern will be at the end, and between will be any catches made
 			# by the pattern.
 			#
-			$parts = preg_split($block_tag_re, $text, 2, 
+			$parts = preg_split($block_tag_re, $text, 2,
 								PREG_SPLIT_DELIM_CAPTURE);
 			
-			# If in Markdown span mode, add a empty-string span-level hash 
+			# If in Markdown span mode, add a empty-string span-level hash
 			# after each newline to prevent triggering any block element.
 			if ($span) {
 				$void = $this->hashPart("", ':');
@@ -417,7 +417,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 				$fence_indent = strlen($capture[1]); # use captured indent in re
 				$fence_re = $capture[2]; # use captured fence in re
 				if (preg_match('{^(?>.*\n)*?[ ]{'.($fence_indent).'}'.$fence_re.'[ ]*(?:\n|$)}', $text,
-					$matches)) 
+					$matches))
 				{
 					# End marker found: pass text unchanged until marker.
 					$parsed .= $tag . $matches[0];
@@ -432,7 +432,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 			# Check for: Indented code block.
 			#
 			else if ($tag{0} == "\n" || $tag{0} == " ") {
-				# Indented code block: pass it unchanged, will be handled 
+				# Indented code block: pass it unchanged, will be handled
 				# later.
 				$parsed .= $tag;
 			}
@@ -457,7 +457,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 			}
 			#
 			# Check for: Opening Block level tag or
-			#            Opening Context Block tag (like ins and del) 
+			#            Opening Context Block tag (like ins and del)
 			#               used as a block tag (tag is alone on it's line).
 			#
 			else if (preg_match('{^<(?:'.$this->block_tags_re.')\b}', $tag) ||
@@ -467,7 +467,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 				)
 			{
 				# Need to parse tag and following text using the HTML parser.
-				list($block_text, $text) = 
+				list($block_text, $text) =
 					$this->_hashHTMLBlocks_inHTML($tag . $text, "hashBlock", true);
 				
 				# Make sure it stays outside of any paragraph by adding newlines.
@@ -482,7 +482,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 			{
 				# Need to parse tag and following text using the HTML parser.
 				# (don't check for markdown attribute)
-				list($block_text, $text) = 
+				list($block_text, $text) =
 					$this->_hashHTMLBlocks_inHTML($tag . $text, "hashClean", false);
 				
 				$parsed .= $block_text;
@@ -590,7 +590,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 			#
 			# Split the text using the first $tag_match pattern found.
 			# Text before  pattern will be first in the array, text after
-			# pattern will be at the end, and between will be any catches made 
+			# pattern will be at the end, and between will be any catches made
 			# by the pattern.
 			#
 			$parts = preg_split($tag_re, $text, 2, PREG_SPLIT_DELIM_CAPTURE);
@@ -599,7 +599,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 				#
 				# End of $text reached with unbalenced tag(s).
 				# In that case, we return original text unchanged and pass the
-				# first character as filtered to prevent an infinite loop in the 
+				# first character as filtered to prevent an infinite loop in the
 				# parent function.
 				#
 				return array($original_text{0}, substr($original_text, 1));
@@ -632,7 +632,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 				#
 				# Check for `markdown="1"` attribute and handle it.
 				#
-				if ($md_attr && 
+				if ($md_attr &&
 					preg_match($markdown_attr_re, $tag, $attr_m) &&
 					preg_match('/^1|block|span$/', $attr_m[2] . $attr_m[3]))
 				{
@@ -663,12 +663,12 @@ class MarkdownExtra extends \Michelf\Markdown {
 					
 					# Parse the content using the HTML-in-Markdown parser.
 					list ($block_text, $text)
-						= $this->_hashHTMLBlocks_inMarkdown($text, $indent, 
+						= $this->_hashHTMLBlocks_inMarkdown($text, $indent,
 							$tag_name_re, $span_mode);
 					
 					# Outdent markdown text.
 					if ($indent > 0) {
-						$block_text = preg_replace("/^[ ]{1,$indent}/m", "", 
+						$block_text = preg_replace("/^[ ]{1,$indent}/m", "",
 													$block_text);
 					}
 					
@@ -696,7 +696,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 	protected function hashClean($text) {
 	#
 	# Called whenever a tag must be hashed when a function inserts a "clean" tag
-	# in $text, it passes through this function and is automaticaly escaped, 
+	# in $text, it passes through this function and is automaticaly escaped,
 	# blocking invalid nested overlap.
 	#
 		return $this->hashPart($text, 'C');
@@ -860,7 +860,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 			  \]
 
 			)
-			}xs', 
+			}xs',
 			array($this, '_doImages_reference_callback'), $text);
 
 		#
@@ -953,7 +953,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 		# Setext-style headers:
 		#	  Header 1  {#header1}
 		#	  ========
-		#  
+		#
 		#	  Header 2  {#header2 .class1 .class2}
 		#	  --------
 		#
@@ -1110,7 +1110,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 				$attr[$n] = '';
 		}
 		
-		# Parsing span elements, including code spans, character escapes, 
+		# Parsing span elements, including code spans, character escapes,
 		# and inline HTML tags, so that pipes inside those gets ignored.
 		$head		= $this->parseSpan($head);
 		$headers	= preg_split('/ *[|] */', $head);
@@ -1131,7 +1131,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 		
 		$text .= "<tbody>\n";
 		foreach ($rows as $row) {
-			# Parsing span elements, including code spans, character escapes, 
+			# Parsing span elements, including code spans, character escapes,
 			# and inline HTML tags, so that pipes inside those gets ignored.
 			$row = $this->parseSpan($row);
 			
@@ -1224,7 +1224,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 											#   mark (colon) or more whitespace.
 				(?> \S.* \n)+?				# actual term (not whitespace).	
 			)			
-			(?=\n?[ ]{0,3}:[ ])				# lookahead for following line feed 
+			(?=\n?[ ]{0,3}:[ ])				# lookahead for following line feed
 											#   with a definition mark.
 			}xm',
 			array($this, '_processDefListItems_callback_dt'), $list_str);
@@ -1346,7 +1346,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 		return "\n\n".$this->hashBlock($codeblock)."\n\n";
 	}
 	protected function _doFencedCodeBlocks_newlines($matches) {
-		return str_repeat("<br$this->empty_element_suffix", 
+		return str_repeat("<br$this->empty_element_suffix",
 			strlen($matches[0]));
 	}
 
@@ -1398,7 +1398,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 			$grafs[$key] = $value;
 		}
 		
-		# Join grafs in one text, then unhash HTML tags. 
+		# Join grafs in one text, then unhash HTML tags.
 		$text = implode("\n\n", $grafs);
 		
 		# Finish by removing any tag hashes still present in $text.
@@ -1426,9 +1426,9 @@ class MarkdownExtra extends \Michelf\Markdown {
 				(?:					
 					.+				# actual text
 				|
-					\n				# newlines but 
+					\n				# newlines but
 					(?!\[.+?\][ ]?:\s)# negative lookahead for footnote or link definition marker.
-					(?!\n+[ ]{0,3}\S)# ensure line is not blank and followed 
+					(?!\n+[ ]{0,3}\S)# ensure line is not blank and followed
 									# by non-indented content
 				)*
 			)		
@@ -1446,7 +1446,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 
 	protected function doFootnotes($text) {
 	#
-	# Replace footnote references in $text [^id] with a special text-token 
+	# Replace footnote references in $text [^id] with a special text-token
 	# which will be replaced by the actual footnote marker in appendFootnotes.
 	#
 		if (!$this->in_anchor) {
@@ -1460,7 +1460,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 	#
 	# Append footnote list to text.
 	#
-		$text = preg_replace_callback('{F\x1Afn:(.*?)\x1A:}', 
+		$text = preg_replace_callback('{F\x1Afn:(.*?)\x1A:}',
 			array($this, '_appendFootnotes_callback'), $text);
 	
 		if (!empty($this->footnotes_ordered)) {
@@ -1493,7 +1493,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 				
 				$footnote .= "\n"; # Need to append newline before parsing.
 				$footnote = $this->runBlockGamut("$footnote\n");				
-				$footnote = preg_replace_callback('{F\x1Afn:(.*?)\x1A:}', 
+				$footnote = preg_replace_callback('{F\x1Afn:(.*?)\x1A:}',
 					array($this, '_appendFootnotes_callback'), $footnote);
 				
 				$attr = str_replace("%%", ++$num, $attr);
@@ -1597,13 +1597,13 @@ class MarkdownExtra extends \Michelf\Markdown {
 	# Find defined abbreviations in text and wrap them in <abbr> elements.
 	#
 		if ($this->abbr_word_re) {
-			// cannot use the /x modifier because abbr_word_re may 
+			// cannot use the /x modifier because abbr_word_re may
 			// contain significant spaces:
 			$text = preg_replace_callback('{'.
 				'(?<![\w\x1A])'.
 				'(?:'.$this->abbr_word_re.')'.
 				'(?![\w\x1A])'.
-				'}', 
+				'}',
 				array($this, '_doAbbreviations_callback'), $text);
 		}
 		return $text;

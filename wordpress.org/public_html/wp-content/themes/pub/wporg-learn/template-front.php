@@ -9,7 +9,7 @@ get_header();
 
 	<header>
 		<div class="wrap">
-		<?php 
+		<?php
 		$fronthead = new WP_Query('page_id=29');
 		$fronthead->the_post();
 		the_content();
@@ -24,7 +24,7 @@ get_header();
 
 	<section class="learn-main">
 	<article>
-	<?php 
+	<?php
 		$fronthead = new WP_Query( array( 'posts_per_page' => 1 ) );
 		$fronthead->the_post();
 		?>

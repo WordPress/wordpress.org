@@ -105,7 +105,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 		<?php if ( is_user_logged_in() && $website = bbp_get_displayed_user_field( 'user_url' ) ) : ?>
 	
 			<p class="bbp-user-website"><?php
-			/* translators: %s: link to user's website */ 
+			/* translators: %s: link to user's website */
 			printf( esc_html__( 'Website: %s', 'wporg-forums' ), sprintf( '<a href="%s" rel="nofollow ugc">%s</a>', esc_url( $website ), esc_html( $website ) ) );
 			?></p>
 	

@@ -42,7 +42,7 @@ $file_prefix         = 'wp-cache-';
 $ossdlcdn            = 0;
 //$use_flock = true; // Set it true or false if you know what to use
 
-// Array of files that have 'wp-' but should still be cached 
+// Array of files that have 'wp-' but should still be cached
 $cache_acceptable_files    = array( 'wp-comments-popup.php', 'wp-links-opml.php', 'wp-locations.php' );
 $cache_rejected_uri        = array( 'wp-.*\\.php', 'index\\.php' );
 $cache_rejected_user_agent = array(

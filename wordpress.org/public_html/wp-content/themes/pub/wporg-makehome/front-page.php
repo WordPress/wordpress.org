@@ -20,7 +20,7 @@
 			<article id="site-<?php the_ID(); ?>" <?php post_class(); ?>>
 				<h2>
 					<?php if ( $url ) : ?>
-						<a 
+						<a
 							title="<?php printf( esc_attr( 'Learn more about %s.', 'make-wporg' ), esc_html( get_the_title() ) ); ?>"
 							href="<?php echo esc_url( $url ); ?>"
 						><?php the_title(); ?></a>

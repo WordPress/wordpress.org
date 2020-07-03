@@ -2,7 +2,7 @@
 
 /*
  * An official WordPress event
- * 
+ *
  * This doesn't have any real functionality, but it exists to provide a standard data structure
  * for events across various event types. It mostly matches the schema for the `wporg_events`
  * database table.

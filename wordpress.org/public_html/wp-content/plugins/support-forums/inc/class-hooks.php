@@ -272,7 +272,7 @@ class Hooks {
 		if ( is_404() && 'topic' === get_query_var( 'post_type' ) && get_query_var( 'name' ) ) {
 			$hidden_topic = get_post( $post_id );
 
-			if ( $hidden_topic && 
+			if ( $hidden_topic &&
 				 in_array( $hidden_topic->post_status, array( 'spam', 'pending', 'archived' ) ) &&
 				 ! current_user_can( 'read_topic', $hidden_topic->ID )
 			   ) {
@@ -1144,9 +1144,9 @@ class Hooks {
 
 	/**
 	 * Add support for Slack and Trac style code formatting.
-	 * 
+	 *
 	 * Upon edit, the blocks will be unwrapped to bbPress style blocks.
-	 * 
+	 *
 	 * See `bbp_code_trick()` for the regex below.
 	 */
 	function support_slack_trac_code_trick( $content ) {

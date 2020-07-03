@@ -78,7 +78,7 @@ twttr.ready( function( twttr ) {
 				align: 'left',
 				conversation: 'none',
 				cards: 'hidden',
-				margin: 0, 
+				margin: 0,
 				width: 372
 			}
 		).then( function() {

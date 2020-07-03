@@ -190,7 +190,7 @@ function get_jwt_app_token() {
 
 /**
  * Fetch an App Authorization token for accessing Github Resources.
- * 
+ *
  * This assumes that the Github App will only ever be installed on the @WordPress organization.
  */
 function get_app_install_token() {
@@ -229,7 +229,7 @@ function get_app_install_token() {
 
 /**
  * Use some rough heuristics to find the Trac ticket for a given PR.
- * 
+ *
  * TODO: This should probably support multiple Trac Tickets, but once you start to use the final few regexes it can start to match Gutenberg references.
  */
 function determine_trac_ticket( $pr ) {
@@ -289,9 +289,9 @@ function get_trac_instance( $trac ) {
 
 /**
  * Formats a PR description for usage on Trac.
- * 
+ *
  * This strips out HTML comments and standard boilerplate text.
- * 
+ *
  * @param object $pr_data PR Data.
  * @return string Stripped down PR Description
  */
