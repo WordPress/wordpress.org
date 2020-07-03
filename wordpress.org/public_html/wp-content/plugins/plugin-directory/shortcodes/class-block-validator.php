@@ -69,6 +69,18 @@ class Block_Validator {
 
 		$output = '';
 
+		if ( empty( $results_by_type['error'] ) ) {
+			$output .= '<h3>' . __( 'Success', 'wporg-plugins' ) . '</h3>';
+			$output .= "<div class='notice notice-success notice-alt'>\n";
+			$output .= __( 'No problems were found. Your plugin has passed the first step towards being included in the Block Directory.', 'wporg-plugins' );
+			$output .= "</div>\n";
+		} else {
+			$output .= '<h3>' . __( 'Problems were encountered', 'wporg-plugins' ) . '</h3>';
+			$output .= "<div class='notice notice-error notice-alt'>\n";
+			$output .= __( 'Some problems were found. They need to be addressed before your plugin will work in the Block Directory.', 'wporg-plugins' );
+			$output .= "</div>\n";
+		}
+
 		$error_types = array(
 			'error'   => __( 'Fatal Errors:', 'wporg-plugins' ),
 			'warning' => __( 'Warnings:', 'wporg-plugins' ),
