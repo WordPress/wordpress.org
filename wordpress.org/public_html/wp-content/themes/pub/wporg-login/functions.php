@@ -8,6 +8,10 @@
 require __DIR__ . '/functions-restapi.php';
 require __DIR__ . '/functions-registration.php';
 
+if ( is_admin() ) {
+	require __DIR__ . '/admin/ui.php';
+}
+
 /**
  * No-cache headers.
  */
@@ -73,6 +77,10 @@ function wporg_login_scripts() {
 add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
 function wporg_login_register_scripts() {
+	if ( is_admin() ) {
+		return;
+	}
+
 	wp_register_script( 'recaptcha-api', 'https://www.google.com/recaptcha/api.js', array(), '2' );
 	wp_add_inline_script(
 		'recaptcha-api',
