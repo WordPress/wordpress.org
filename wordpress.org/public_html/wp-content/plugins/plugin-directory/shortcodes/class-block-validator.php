@@ -11,6 +11,8 @@ class Block_Validator {
 	public static function display() {
 		ob_start();
 		$plugin_url = $_REQUEST['plugin_url'] ?? '';
+
+		if ( is_user_logged_in() ) :
 		?>
 		<div class="wrap">
 			<form method="post" action="">
@@ -30,7 +32,11 @@ class Block_Validator {
 			}
 			?>
 		</div>
-		<?php
+		<?php else: ?>
+		<div class="wrap">
+			<p><?php _e( 'Please log in to use the validator.', 'wporg-plugins' ); ?></p>
+		</div>
+		<?php endif;
 		return ob_get_clean();
 	}
 
