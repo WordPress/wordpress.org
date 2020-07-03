@@ -9,6 +9,7 @@ class Block_Validator {
 	 * Displays a form to validate block plugins.
 	 */
 	public static function display() {
+		ob_start();
 		$plugin_url = $_REQUEST['plugin_url'] ?? '';
 		?>
 		<div class="wrap">
@@ -30,6 +31,7 @@ class Block_Validator {
 			?>
 		</div>
 		<?php
+		return ob_get_clean();
 	}
 
 	/**
