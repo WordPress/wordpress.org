@@ -85,7 +85,7 @@ class Block_Validator {
 			foreach ( $results_by_type[ $type ] as $item ) {
 				$docs_link = '';
 				if ( 'check' === substr( $item->check_name, 0, 5 ) ) {
-					$docs_link = "<a href='/hypothetical/doc/page#{$item->check_name}'>" . __( 'More about this.', 'wporg-plugins' ) . '</a>';
+					$docs_link = "<a href='help#{$item->check_name}'>" . __( 'More about this.', 'wporg-plugins' ) . '</a>';
 				}
 				$output .= "<li class='{$item->check_name}'>{$item->message} {$docs_link}</li>\n";
 			}
