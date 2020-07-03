@@ -67,7 +67,7 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
-				sprintf( __( 'Invalid url %s', 'wporg-plugins' ), $url ),
+				sprintf( __( 'Invalid url: %s', 'wporg-plugins' ), $url ),
 				$url
 			);
 			return $this->results;
@@ -77,7 +77,7 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
-				sprintf( __( 'URL must be GitHub or plugins.svn.wordpress.org %s', 'wporg-plugins' ), $url ),
+				sprintf( __( 'URL must be GitHub or plugins.svn.wordpress.org: %s', 'wporg-plugins' ), $url ),
 				$url
 			);
 			return $this->results;
@@ -89,7 +89,7 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
-					sprintf( __( 'URL must be a plugin repository %s', 'wporg-plugins' ), $url ),
+					sprintf( __( 'URL must be a plugin repository: %s', 'wporg-plugins' ), $url ),
 					$url
 				);
 				return $this->results;
@@ -115,7 +115,7 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
-					sprintf( __( 'URL must be a plugin repository %s', 'wporg-plugins' ), $url ),
+					sprintf( __( 'URL must be a plugin repository: %s', 'wporg-plugins' ), $url ),
 					$url
 				);
 				return $this->results;
@@ -212,6 +212,7 @@ class Block_Plugin_Checker {
 	}
 
 	public function find_blocks( $base_dir ) {
+		$blocks = array();
 		$this->block_json_files = Filesystem::list_files( $base_dir, true, '!(?:^|/)block\.json$!i' );
 		if ( false && ! empty( $this->block_json_files ) ) {
 			foreach ( $block_json_files as $filename ) {
@@ -281,7 +282,7 @@ class Block_Plugin_Checker {
 		if ( empty( $this->readme_path ) || !file_exists( $this->readme_path ) ) {
 			$this->record_result( __FUNCTION__,
 				'error',
-				__( 'Missing readme.txt file', 'wporg-plugins' ),
+				__( 'Missing readme.txt file.', 'wporg-plugins' ),
 				$this->relative_filename( $this->readme_path )
 			);
 		}
@@ -332,7 +333,7 @@ class Block_Plugin_Checker {
 
 					$this->record_result( __FUNCTION__,
 						'info',
-						sprintf( __( 'Block name already exists in plugin %s', 'wporg-plugins' ), $query->posts[0]->post_name ),
+						sprintf( __( 'Block name %s already exists in plugin %s.', 'wporg-plugins' ), $block->name, $query->posts[0]->post_name ),
 						[ 'block_name' => $block->name, 'slug' => $post->post_name ]
 					);
 				}
@@ -353,7 +354,7 @@ class Block_Plugin_Checker {
 		} else {
 			$this->record_result( __FUNCTION__,
 				'info',
-				sprintf( _n( 'Found %d block', 'Found %d blocks', count( $this->blocks ), 'wporg-plugins' ), count( $this->blocks ) ),
+				sprintf( _n( 'Found %d block.', 'Found %d blocks.', count( $this->blocks ), 'wporg-plugins' ), count( $this->blocks ) ),
 				array_keys( $this->blocks )
 			);
 		}
@@ -367,7 +368,7 @@ class Block_Plugin_Checker {
 			if ( !empty( $this->block_json_files[ $block_name ] ) ) {
 				$this->record_result( __FUNCTION__,
 					'info',
-					sprintf( __( 'block.json file exists for block %s', 'wporg-plugins' ), $block_name ),
+					sprintf( __( 'block.json file exists for block %s.', 'wporg-plugins' ), $block_name ),
 					$this->block_json_files[ $block_name ]
 				);
 			}
@@ -376,7 +377,7 @@ class Block_Plugin_Checker {
 		if ( empty( $this->block_json_files ) ) {
 			$this->record_result( __FUNCTION__,
 				'warning',
-				__( 'No block.json files were found', 'wporg-plugins' )
+				__( 'No block.json files were found.', 'wporg-plugins' )
 			);
 		}
 	}
@@ -391,13 +392,13 @@ class Block_Plugin_Checker {
 			if ( !empty( $block_scripts[ $block_name ] ) ) {
 				$this->record_result( __FUNCTION__,
 					'info',
-					sprintf( __( 'Scripts found for block %s', 'wporg-plugins' ), $block_name ),
+					sprintf( __( 'Scripts found for block %s.', 'wporg-plugins' ), $block_name ),
 					$block_scripts[ $block_name ]
 				);
 			} else {
 				$this->record_result( __FUNCTION__,
 					'warning',
-					sprintf( __( 'No scripts found for block %s', 'wporg-plugins' ), $block_name ),
+					sprintf( __( 'No scripts found for block %s.', 'wporg-plugins' ), $block_name ),
 					$block_name
 				);
 			}
@@ -413,13 +414,13 @@ class Block_Plugin_Checker {
 				if ( file_exists( $this->path_to_plugin . $script ) ) {
 					$this->record_result( __FUNCTION__,
 						'info',
-						sprintf( __( 'Script file exists for block %s', 'wporg-plugins' ), $block_name ),
+						sprintf( __( 'Script file exists for block %s.', 'wporg-plugins' ), $block_name ),
 						$script
 					);
 				} else {
 					$this->record_result( __FUNCTION__,
 						'warning',
-						sprintf( __( 'Missing script file for block %s', 'wporg-plugins' ), $block_name ),
+						sprintf( __( 'Missing script file for block %s.', 'wporg-plugins' ), $block_name ),
 						$script
 					);
 				}
@@ -444,7 +445,7 @@ class Block_Plugin_Checker {
 		if ( empty( $block_files ) ) {
 			$this->record_result( __FUNCTION__,
 				'error',
-				sprintf( __( 'registerBlockType() must be called in a JavaScript file', 'wporg-plugins' ) )
+				sprintf( __( '<code>registerBlockType()</code> must be called in a JavaScript file.', 'wporg-plugins' ) )
 			);
 		}
 	}
