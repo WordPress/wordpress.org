@@ -67,7 +67,14 @@ class Ticket extends Resource {
 			$this->trac->get_url(),
 			$this->id
 		);
-		$contents = @file_get_contents( $url );
+
+		$context = stream_context_create( array(
+			'http' => array(
+				'user_agent' => 'WordPress.org Trac:Slack Notifications'
+			)
+		) );
+
+		$contents = @file_get_contents( $url, false, $context );
 		if ( $contents === false ) {
 			$this->data = false;
 			return;
