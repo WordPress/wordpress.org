@@ -38,6 +38,7 @@ get_header();
 				'post_type'      => 'plugin',
 				'posts_per_page' => 4,
 				'browse'         => $browse,
+				'post_status'    => 'publish',
 			);
 
 			if ( 'popular' === $browse ) {
