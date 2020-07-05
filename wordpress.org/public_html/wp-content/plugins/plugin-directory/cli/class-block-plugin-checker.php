@@ -479,7 +479,7 @@ class Block_Plugin_Checker {
 			if ( true === $result ) {
 				$this->record_result( __FUNCTION__,
 					'info',
-					sprintf( __( '%s is valid.', 'wporg-plugins' ), $this->relative_filename( $block_json_file ) ),
+					sprintf( __( 'JSON file %s is valid.', 'wporg-plugins' ), $this->relative_filename( $block_json_file ) ),
 					$this->relative_filename( $block_json_file )
 				);
 				continue;
@@ -493,7 +493,7 @@ class Block_Plugin_Checker {
 					} else {
 						$this->record_result( __FUNCTION__,
 							( 'error' === $code ? 'warning' : $code ), // TODO: be smarter about mapping these
-							$message,
+							$this->relative_filename( $block_json_file ) . ': ' . $message,
 							array(
 								$this->relative_filename( $block_json_file ),
 								$result->get_error_data( $code )
