@@ -52,6 +52,23 @@ class Block_Plugin_Checker {
 	}
 
 	/**
+	 * Getter function for results.
+	 */
+	public function get_results( $type = null, $check = null ) {
+		$out = array();
+		foreach ( $this->results as $result ) {
+			if ( 
+				( is_null( $type ) || $type === $result->type ) &&
+				( is_null( $check ) || $check === $result->check_name )
+			) {
+				$out[] = $result;
+			}
+		}
+
+		return $out;
+	}
+
+	/**
 	 * Check a plugin given the URL of a Subversion or GitHub repo.
 	 * Note that only hosts listed in $allowed_hosts are permitted.
 	 *
@@ -226,7 +243,7 @@ class Block_Plugin_Checker {
 	public function find_blocks( $base_dir ) {
 		$blocks = array();
 		$this->block_json_files = Filesystem::list_files( $base_dir, true, '!(?:^|/)block\.json$!i' );
-		if ( false && ! empty( $this->block_json_files ) ) {
+		if ( ! empty( $this->block_json_files ) ) {
 			foreach ( $block_json_files as $filename ) {
 				$blocks_in_file = Import::find_blocks_in_file( $filename );
 				$relative_filename = $this->relative_filename( $filename );
@@ -235,17 +252,16 @@ class Block_Plugin_Checker {
 					$blocks[ $block->name ] = $block;
 				}
 			}
-		} else {
-			foreach ( Filesystem::list_files( $base_dir, true, '!\.(?:php|js|jsx)$!i' ) as $filename ) {
-				$blocks_in_file = Import::find_blocks_in_file( $filename );
-				if ( ! empty( $blocks_in_file ) ) {
-					$relative_filename = $this->relative_filename( $filename );
-					$potential_block_directories[] = dirname( $relative_filename );
-					foreach ( $blocks_in_file as $block ) {
-						if ( preg_match( '!\.(?:js|jsx)$!i', $relative_filename ) && empty( $block->script ) )
-							$block->script = $relative_filename;
+		}
+		foreach ( Filesystem::list_files( $base_dir, true, '!\.(?:php|js|jsx)$!i' ) as $filename ) {
+			$blocks_in_file = Import::find_blocks_in_file( $filename );
+			if ( ! empty( $blocks_in_file ) ) {
+				$relative_filename = $this->relative_filename( $filename );
+				foreach ( $blocks_in_file as $block ) {
+					if ( preg_match( '!\.(?:js|jsx)$!i', $relative_filename ) && empty( $block->script ) )
+						$block->script = $relative_filename;
+					if ( empty( $blocks[ $block->name ] ) || empty( $blocks[ $block->name ]->title ) )
 						$blocks[ $block->name ] = $block;
-					}
 				}
 			}
 		}
