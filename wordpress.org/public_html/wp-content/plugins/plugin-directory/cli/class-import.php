@@ -454,7 +454,7 @@ class Import {
 		// Find registered blocks and their files.
 		$blocks = array();
 		$block_files = array();
-		$potential_block_directories = array();
+		$potential_block_directories = array( '.' );
 		$base_dir = "$tmp_dir/export";
 
 		$block_json_files = Filesystem::list_files( $base_dir, true, '!^block\.json$!i' );
