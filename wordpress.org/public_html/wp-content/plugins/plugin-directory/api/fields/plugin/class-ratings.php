@@ -23,7 +23,12 @@ class Ratings {
 	 * @return array
 	 */
 	public function get_ratings( $object ) {
-		$ratings = array_map( 'absint', get_post_meta( $object['id'], 'ratings', true ) );
+		$data = get_post_meta( $object['id'], 'ratings', true );
+		if ( is_array( $data ) ) {
+			$ratings = array_map( 'absint', $data );
+		} else {
+			$ratings = array();
+		}
 
 		return $ratings ?: [];
 	}
