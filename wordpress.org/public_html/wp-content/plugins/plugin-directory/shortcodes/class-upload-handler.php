@@ -181,6 +181,7 @@ class Upload_Handler {
 			) );
 		}
 
+		// Plugins need descriptions.
 		if ( ! $this->plugin['Description'] ) {
 			$error = __( 'Error: The plugin has no description.', 'wporg-plugins' );
 
@@ -192,6 +193,7 @@ class Upload_Handler {
 			) );
 		}
 
+		// Plugins need versions.
 		if ( ! $this->plugin['Version'] ) {
 			$error = __( 'Error: The plugin has no version.', 'wporg-plugins' );
 
@@ -203,6 +205,7 @@ class Upload_Handler {
 			) );
 		}
 
+		// Versions should be NUMBERS.
 		if ( preg_match( '|[^\d\.]|', $this->plugin['Version'] ) ) {
 			$error = __( 'Error: Plugin versions are expected to be numbers.', 'wporg-plugins' );
 
@@ -214,6 +217,7 @@ class Upload_Handler {
 		}
 
 		// Prevent duplicate URLs.
+		// This is part of how the API looks for updates, so having them different helps prevent conflicts.
 		if ( ! empty( $this->plugin['PluginURI'] ) && ! empty( $this->plugin['AuthorURI'] ) && $this->plugin['PluginURI'] == $this->plugin['AuthorURI'] ) {
 			$error = __( 'Error: Your plugin and author URIs are the same.', 'wporg-plugins' );
 
@@ -241,8 +245,8 @@ class Upload_Handler {
 			}
 		}
 
-		$readme = $this->find_readme_file();
 		// Check for a valid readme.
+		$readme = $this->find_readme_file();
 		if ( empty( $readme ) ) {
 			$error = __( 'Error: The plugin has no readme.', 'wporg-plugins' );
 
@@ -404,8 +408,10 @@ class Upload_Handler {
 			'wp-admin',
 			// Reserved names.
 			'jquery',
-			'site-kit-by-google',
 			'wordpress',
+			// common submissions by people trying to upload locally.
+			'akismet-anti-spam',
+			'site-kit-by-google',
 			'yoast-seo',
 		);
 
@@ -423,10 +429,14 @@ class Upload_Handler {
 			'adsense-',
 			'advanced-custom-fields-',
 			'adwords-',
+			'akismet-',
 			'amazon-',
 			'android-',
 			'apple-',
+			'aws-',
+			'bbpress-',
 			'bing-',
+			'buddypress-',
 			'contact-form-7-',
 			'divi-',
 			'easy-digital-downloads-',
@@ -453,17 +463,29 @@ class Upload_Handler {
 			'wa-',
 			'whatsapp',
 			'whats-app',
-			'woocommerce',
+			'watson',
+			'windows-',
+			'woocommerce', // technically ending with '-for-woocommerce' is allowed.
+			'woo-commerce',
 			'woo-',
 			'wordpress',
+			'yahoo-',
 			'yoast',
 			'youtube-',
 		);
 
 		// Domains from which exceptions would be accepted.
 		$trademark_exceptions = array(
-			'yoast.com'      => array( 'yoast' ),
-			'automattic.com' => array( 'wordpress', 'woo', 'woocommerce' ),
+			'yoast.com'             => array( 'yoast' ),
+			'automattic.com'        => array( 'akismet', 'jetpack', 'wordpress', 'woo', 'woo-', 'woocommerce' ),
+			'facebook.com'          => array( 'facebook', 'whatsapp', 'instagram' ),
+			'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
+			'microsoft.com'         => array( 'bing-', 'microsoft-' ),
+		);
+
+		// Trademarks that are allowed as 'for-whatever' ONLY.
+		$for_use_exceptions = array(
+			'woocommerce',
 		);
 
 		$has_trademarked_slug = false;
@@ -482,13 +504,23 @@ class Upload_Handler {
 			}
 		}
 
+		// check for 'for-TRADEMARK' exceptions.
+		if ( $has_trademarked_slug && in_array( $has_trademarked_slug, $for_use_exceptions ) ) {
+			$for_trademark = '-for-' . $has_trademarked_slug;
+			// At this point we might be okay, but there's one more check.
+			if ( $for_trademark === substr( $this->plugin_slug, -1 * strlen( $for_trademark ) ) ) {
+				// Yes the slug ENDS with 'for-TRADEMARK'.
+				$has_trademarked_slug = false;
+			}
+		}
+
 		// Get the user email domain.
-		$user_email_domain = explode( '@', wp_get_current_user()->user_email, 2 );
+		list( ,$user_email_domain ) = explode( '@', wp_get_current_user()->user_email, 2 );
 
 		// If email domain is on our list of possible exceptions, we have an extra check.
-		if ( array_key_exists( $user_email_domain[1], $trademark_exceptions ) ) {
+		if ( $has_trademarked_slug && array_key_exists( $user_email_domain, $trademark_exceptions ) ) {
 			// If $has_trademarked_slug is in the array for that domain, they can use the term.
-			if ( in_array( $has_trademarked_slug, $trademark_exceptions[ $user_email_domain[1] ] ) ) {
+			if ( in_array( $has_trademarked_slug, $trademark_exceptions[ $user_email_domain ] ) ) {
 				$has_trademarked_slug = false;
 			}
 		}
