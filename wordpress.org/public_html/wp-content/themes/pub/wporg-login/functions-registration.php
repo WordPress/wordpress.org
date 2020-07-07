@@ -57,7 +57,6 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 		wp_die( __( 'Registration Blocked. Please stop.', 'wporg' ) );
 	}
 
-
 	$profile_key        = wp_generate_password( 24, false, false );
 	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
@@ -112,17 +111,16 @@ function wporg_send_confirmation_email( $user_email ) {
 
 	$user = wporg_get_pending_user( $user_email );
 
-	if ( ! $user ) {
+	if ( ! $user || $user['created'] ) {
 		return false;
 	}
 
 	$user_login = $user['user_login'];
 
-	// Every email gets a new key (and expiration time..)
-	$activation_key        = wp_generate_password( 24, false, false );
-	$hashed_activation_key = time() . ':' . wp_hash_password( $activation_key );
+	$activation_key = wp_hash( $user_login . ':' . $user_email, 'activation' );
 
-	$user['user_activation_key'] = $hashed_activation_key;
+	// Every email bumps the expiration time.
+	$user['user_activation_key'] = time() . ':' . wp_hash_password( $activation_key );
 	if ( ! wporg_update_pending_user( $user ) ) {
 		return false;
 	}
