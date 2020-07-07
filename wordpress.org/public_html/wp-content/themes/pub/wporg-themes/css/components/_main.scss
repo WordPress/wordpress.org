@@ -114,6 +114,7 @@ ul, ol {
 .theme-browser .theme:focus {
 	border-color: #5b9dd9;
 	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+	outline: none;
 }
 
 .theme-browser .theme .url {
