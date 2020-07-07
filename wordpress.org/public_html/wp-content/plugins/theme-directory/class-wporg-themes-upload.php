@@ -717,6 +717,11 @@ TICKET;
 				$e = preg_replace( '!<span class=[^>]+>([^<]+)</span>!', '$1', $e );
 				$e = str_replace( '<br>', ' ', $e );
 
+				// Decode some entities.
+				$e = preg_replace_callback( '!(&[lg]t;)!', function( $f ) {
+					return html_entity_decode( $f[0] );
+				}, $e );
+
 				if ( 'INFO' !== substr( $e, 0, 4 ) ) {
 					$tc_results[] = '* ' . $e;
 				}
