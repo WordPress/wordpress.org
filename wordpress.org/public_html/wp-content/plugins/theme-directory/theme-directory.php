@@ -490,12 +490,12 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 	if ( 'publish' == $post->post_status ) {
 		$subject = sprintf( __( '[WordPress Themes] %1$s %2$s is now live', 'wporg-themes' ), $post->post_title, $version );
 		// Translators: 1: Theme version number; 2: Theme name; 3: Theme URL.
-		$content = sprintf( __( 'Version %1$s of %2$s is now live at %3$s.', 'wporg-themes' ), $version, $post->post_title, "https://wordpress.org/themes/{$post->post_name}" ) . "\n\n";
+		$content = sprintf( __( 'Version %1$s of %2$s is now live at %3$s.', 'wporg-themes' ), $version, $post->post_title, "https://wordpress.org/themes/{$post->post_name}/" ) . "\n\n";
 
 	} else {
 		$subject = sprintf( __( '[WordPress Themes] %s has been approved!', 'wporg-themes' ), $post->post_title );
 		// Translators: 1: Theme name; 2: Theme URL.
-		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at %2$s.', 'wporg-themes' ), $post->post_title, "https://wordpress.org/themes/{$post->post_name}" ) . "\n\n";
+		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at %2$s.', 'wporg-themes' ), $post->post_title, "https://wordpress.org/themes/{$post->post_name}/" ) . "\n\n";
 
 		// First time approval: Publish the theme.
 		$post_args = array(
