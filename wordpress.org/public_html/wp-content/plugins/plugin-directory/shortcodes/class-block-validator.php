@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
 use WordPressdotorg\Plugin_Directory\CLI\Block_Plugin_Checker;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 class Block_Validator {
 
@@ -27,8 +28,23 @@ class Block_Validator {
 			</form>
 
 			<?php
-			if ( $_POST && wp_verify_nonce( $_POST['block-nonce'], 'validate-block-plugin' ) ) {
+			if ( $_POST && !empty( $_POST['plugin_url'] ) && wp_verify_nonce( $_POST['block-nonce'], 'validate-block-plugin' ) ) {
 				self::validate_block( $_POST['plugin_url'] );
+			} elseif ( $_POST && !empty( $_POST['block-directory-edit'] ) ) {
+				$post = get_post( intval( $_POST['plugin-id'] ) );
+				if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-edit-' . $post->ID ) ) {
+					if ( current_user_can( 'edit_post', $post->ID ) ) {
+						$terms = wp_list_pluck( get_the_terms( $post->ID, 'plugin_section' ), 'slug' );
+						if ( 'add' === $_POST['block-directory-edit'] ) {
+							$terms[] = 'block';
+						} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
+							$terms = array_diff( $terms, array( 'block' ) );
+						}
+						wp_set_object_terms( $post->ID, $terms, 'plugin_section' );
+					}
+
+					self::validate_block( $post->post_name );
+				}
 			}
 			?>
 		</div>
@@ -38,6 +54,16 @@ class Block_Validator {
 		</div>
 		<?php endif;
 		return ob_get_clean();
+	}
+
+	protected static function plugin_is_in_block_directory( $slug ) {
+		$plugin = Plugin_Directory::get_plugin_post( $slug );
+
+		return ( 
+			$plugin &&
+			$plugin->post_name === $slug && 
+			has_term( 'block', 'plugin_section', $plugin )
+		);
 	}
 
 	/**
@@ -62,6 +88,27 @@ class Block_Validator {
 			echo '</p>';
 		}
 
+		if ( $checker->slug ) {
+			$plugin = Plugin_Directory::get_plugin_post( $checker->slug );
+			if ( current_user_can( 'edit_post', $plugin->ID ) ) {
+				echo '<form method="post">';
+				echo '<fieldset>';
+				echo '<legend>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</legend>';
+				echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
+				echo '<input type="hidden" name="plugin-id" value="' . esc_attr( $plugin->ID ) . '" />';
+				if ( self::plugin_is_in_block_directory( $checker->slug ) ) {
+					echo '<button type="submit" name="block-directory-edit" value="remove">' . __( 'Remove from Block Directory', 'wporg-plugins' ) . '</button>';
+				} else {
+					echo '<button type="submit" name="block-directory-edit" value="add">' . __( 'Add to Block Directory', 'wporg-plugins' ) . '</button>';
+				}
+	
+				echo '<ul><li><a href="' . get_edit_post_link( $plugin->ID ) . '">' . __( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
+				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) .'">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li></ul>';
+				echo '</fieldset>';
+				echo '</form>';
+			}
+		}
+
 		$results_by_type = array();
 		foreach ( $results as $item ) {
 			$results_by_type[ $item->type ][] = $item;
@@ -72,7 +119,11 @@ class Block_Validator {
 		if ( empty( $results_by_type['error'] ) ) {
 			$output .= '<h3>' . __( 'Success', 'wporg-plugins' ) . '</h3>';
 			$output .= "<div class='notice notice-success notice-alt'>\n";
-			$output .= __( 'No problems were found. Your plugin has passed the first step towards being included in the Block Directory.', 'wporg-plugins' );
+			if ( $checker->slug && self::plugin_is_in_block_directory( $checker->slug ) ) {
+				$output .= __( 'No problems were found. This plugin is already in the Block Directory.', 'wporg-plugins' );
+			} else {
+				$output .= __( 'No problems were found. Your plugin has passed the first step towards being included in the Block Directory.', 'wporg-plugins' );
+			}
 			$output .= "</div>\n";
 		} else {
 			$output .= '<h3>' . __( 'Problems were encountered', 'wporg-plugins' ) . '</h3>';
