@@ -670,7 +670,14 @@ function wporg_themes_get_header_data( $theme_file ) {
 		'strong'  => array(),
 	);
 
-	$theme_data = implode( '', file( $theme_file ) );
+	$context = stream_context_create( array(
+		'http' => array(
+			'user_agent' => 'WordPress.org Theme Directory'
+		)
+	) );
+
+	$theme_data = file_get_contents( $theme_file, false, $context );
+
 	$theme_data = str_replace( '\r', '\n', $theme_data );
 	preg_match( '|^[ \t\/*#@]*Theme Name:(.*)$|mi', $theme_data, $theme_name );
 	preg_match( '|^[ \t\/*#@]*Theme URI:(.*)$|mi', $theme_data, $theme_uri );
