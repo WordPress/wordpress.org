@@ -291,6 +291,10 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 	 */
 	public function rejected( $post_id, $post ) {
 
+		// Default data for review.
+		$original_permalink = $post->post_name;
+		$submission_date    = get_the_modified_date( 'F j, Y', $post_id );
+
 		// Delete zips.
 		foreach ( get_attached_media( 'application/zip', $post_id ) as $attachment ) {
 			wp_delete_attachment( $attachment->ID, true );
@@ -306,22 +310,32 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 		$email   = get_user_by( 'id', $post->post_author )->user_email;
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
 
-		/* translators: 1: plugin name, 2: plugins@wordpress.org */
+		/* translators: 1: plugin name, 2: plugin permalink, 3: date of submission, 4: plugins@wordpress.org */
 		$content = sprintf(
 			__(
-				'Unfortunately your plugin submission for %1$s has been rejected from the WordPress Plugin Directory.
+				'Unfortunately your plugin submission for %1$s (%2$s), submitted on %3$s, has been rejected from the WordPress Plugin Directory.
 
-If you believe this to be in error, please email %2$s with your plugin attached as a zip and explain why you feel your plugin should be an exception.
+Plugins are rejected after six months when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours.
+
+If you believe this to be in error, please email %4$s with your plugin attached as a zip and explain why you feel your plugin should be accepted.
 
 --
 The WordPress Plugin Directory Team
 https://make.wordpress.org/plugins', 'wporg-plugins'
 			),
 			$post->post_title,
+			$original_permalink,
+			$submission_date,
 			'plugins@wordpress.org'
 		);
 
+		// Update last_updated to now.
+		update_post_meta( $post_id, 'last_updated', gmdate( 'Y-m-d H:i:s' ) );
+
+		// Log rejection.
 		Tools::audit_log( 'Plugin rejected.', $post_id );
+
+		// Send email.
 		wp_mail( $email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
 
