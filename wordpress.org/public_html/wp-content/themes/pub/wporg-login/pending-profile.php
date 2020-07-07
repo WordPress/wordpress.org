@@ -49,21 +49,23 @@ wp_enqueue_script( 'wporg-registration' );
 
 get_header();
 ?>
-<div class="message info">
-	<p><?php
-		printf(
-			/* translators: %s Email address */
-			__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ),
-			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>'
-		);
-	?></p>
-</div>
-
-<p class="intro">
-<?php _e( 'Complete your WordPress.org Profile information.', 'wporg' ); ?>
-</p>
-
 <form name="registerform" id="registerform" action="" method="post">
+
+	<div class="message info">
+		<p><?php
+			printf(
+				/* translators: %s Email address */
+				__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) . '<br>' .
+				'<a href="#" class="resend" data-account="%s">' . __( 'Resend confirmation email.', 'wporg' ) . '</a>',
+				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
+				esc_attr( $pending_user['user_email'] )
+			);
+		?></p>
+	</div>
+
+	<p class="intro">
+	<?php _e( 'Complete your WordPress.org Profile information.', 'wporg' ); ?>
+	</p>
 
 	<p class="login-login">
 		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>

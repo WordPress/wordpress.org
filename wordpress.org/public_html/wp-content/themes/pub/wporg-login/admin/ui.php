@@ -54,7 +54,7 @@ add_action( 'admin_post_login_resend_email', function() {
 	check_admin_referer( 'resend_' . $email );
 
 	if ( $email ) {
-		wporg_send_confirmation_email( $email );
+		wporg_login_send_confirmation_email( $email );
 	}
 
 	wp_safe_redirect( add_query_arg(

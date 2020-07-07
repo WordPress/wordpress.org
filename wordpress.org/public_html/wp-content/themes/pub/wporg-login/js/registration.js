@@ -19,22 +19,45 @@
 					$this.val();
 
 				$.get( rest_url, function( datas ) {
-					$this.parents( 'p' ).nextUntil( 'p', 'div.message.error' ).remove();
+					$this.closest( 'p' ).nextUntil( 'p', 'div.message' ).remove();
 					$this.removeClass( 'good' );
 
 					if ( ! datas.available ) {
 						$this.addClass( 'error' );
-						$this.parents( 'p' ).after(
+						$this.closest( 'p' ).after(
 							'<div class="message error' + ( datas.avatar ? ' with-avatar' : '' ) +  '"><p>' +
 							( datas.avatar ? datas.avatar : '' ) + '<span>' +
 							datas.error +
 							'</span></p></div>'
 						);
+						$this.closest( 'p' ).next('div.message.error').find( '.resend' ).data( 'account', $this.val() );
 					} else {
 						$this.addClass( 'good' );
 					}
 				} );
 			} );
+
+			$loginForm.on( 'click', '.resend', function( e ) {
+				var $this = $(this),
+					account = $this.data('account');
+
+				e.preventDefault();
+
+				$this.closest( 'div.message' ).next('div.message.info').remove();
+
+				$.post(
+					wporg_registration.rest_url + '/resend-confirmation-email',
+					{
+						account: account,
+					},
+					function( datas ) {
+						$this.closest( 'div.message' ).after(
+							'<div class="message info"><p><span>' + datas + '</span></p></div>'
+						);
+					}
+				);
+
+			});
 
 			// If the form has data in it upon load, immediately trigger the validation.
 			if ( $loginForm.find('#user_login').val() ) {
