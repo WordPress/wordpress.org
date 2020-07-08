@@ -440,7 +440,8 @@ class Block_Plugin_Checker {
 		} else {
 			$this->record_result(
 				__FUNCTION__,
-				'info',
+				// Over 15 blocks is probably too many.
+				count( $this->blocks ) < 15 ? 'info' : 'warning',
 				sprintf(
 					// translators: %d number of blocks.
 					_n( 'Found %d block.', 'Found %d blocks.', count( $this->blocks ), 'wporg-plugins' ),
@@ -500,6 +501,41 @@ class Block_Plugin_Checker {
 					$block_name
 				);
 			}
+		}
+	}
+
+	/**
+	 * Check for a single parent block
+	 */
+	function check_for_single_parent() {
+		if ( empty( $this->blocks ) || ! is_array( $this->blocks ) ) {
+			return;
+		}
+
+		$top_level_blocks = array_filter(
+			$this->blocks,
+			function( $block ) {
+				return ! isset( $block->parent ) || is_null( $block->parent );
+			}
+		);
+
+		if ( count( $top_level_blocks ) > 1 ) {
+			$list = array_map(
+				function( $block ) {
+					return ! empty( $block->title ) ? $block->title : $block->name;
+				},
+				$top_level_blocks
+			);
+			$this->record_result(
+				__FUNCTION__,
+				'warning',
+				sprintf(
+					/* translators: %s is a list of block names. */
+					__( 'More than one top level block was found: %s', 'wporg-plugins' ),
+					implode( ', ', $list )
+				),
+				$block_name
+			);
 		}
 	}
 
