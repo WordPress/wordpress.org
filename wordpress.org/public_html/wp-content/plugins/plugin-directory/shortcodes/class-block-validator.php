@@ -16,7 +16,7 @@ class Block_Validator {
 		if ( is_user_logged_in() ) :
 		?>
 		<div class="wrap">
-			<form method="post" action="">
+			<form method="post" action=".">
 				<p>
 					<label for="plugin_url"><?php _e( 'Plugin repo URL', 'wporg-plugins' ); ?></label>
 				</p>
