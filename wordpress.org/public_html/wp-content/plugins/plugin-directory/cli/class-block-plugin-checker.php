@@ -135,9 +135,13 @@ class Block_Plugin_Checker {
 			// https://github.com/sortabrilliant/jumbotron
 			// git@github.com:sortabrilliant/jumbotron.git
 			// https://github.com/sortabrilliant/jumbotron.git
-			//
-			if ( preg_match( '#^/(\w+/[^.]+)(?:\.git)?$#', $url_parts[ 'path' ], $matches ) ) {
-				$url = 'https://github.com/' . $matches[1] . '.git/trunk';
+			if ( preg_match( '#^/(\w+/[^./]+)(?:\.git)?(.*)$#', $url_parts['path'], $matches ) ) {
+				if ( empty( $matches[2] ) ) {
+					$url = 'https://github.com/' . $matches[1] . '.git/trunk';
+				} else {
+					$branch = str_replace( '/tree/', '/branches/', $matches[2] );
+					$url = 'https://github.com/' . $matches[1] . '.git' . $branch;
+				}
 			} else {
 				$this->record_result(
 					__FUNCTION__,
