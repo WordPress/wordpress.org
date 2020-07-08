@@ -14,23 +14,22 @@ class Block_Validator {
 		$plugin_url = $_REQUEST['plugin_url'] ?? '';
 
 		if ( is_user_logged_in() ) :
-		?>
-		<div class="wrap">
-			<form method="post" action=".">
-				<p>
-					<label for="plugin_url"><?php _e( 'Plugin repo URL', 'wporg-plugins' ); ?></label>
-				</p>
-				<p>
-					<input type="text" id="plugin_url" name="plugin_url" size="70" placeholder="https://plugins.svn.wordpress.org/" value="<?php echo esc_attr( $plugin_url ); ?>" />
-					<input type="submit" class="button button-secondary" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
+			?>
+
+		<div class="wrap block-validator">
+			<form method="post" action="." class="block-validator__plugin-form">
+				<label for="plugin_url"><?php _e( 'Plugin repo URL', 'wporg-plugins' ); ?></label>
+				<div class="block-validator__plugin-input-container">
+					<input type="text" class="block-validator__plugin-input" id="plugin_url" name="plugin_url" placeholder="https://plugins.svn.wordpress.org/" value="<?php echo esc_attr( $plugin_url ); ?>" />
+					<input type="submit" class="button button-secondary block-validator__plugin-submit" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
 					<?php wp_nonce_field( 'validate-block-plugin', 'block-nonce' ); ?>
-				</p>
+				</div>
 			</form>
 
 			<?php
-			if ( $_POST && !empty( $_POST['plugin_url'] ) && wp_verify_nonce( $_POST['block-nonce'], 'validate-block-plugin' ) ) {
+			if ( $_POST && ! empty( $_POST['plugin_url'] ) && wp_verify_nonce( $_POST['block-nonce'], 'validate-block-plugin' ) ) {
 				self::validate_block( $_POST['plugin_url'] );
-			} elseif ( $_POST && !empty( $_POST['block-directory-edit'] ) ) {
+			} elseif ( $_POST && ! empty( $_POST['block-directory-edit'] ) ) {
 				$post = get_post( intval( $_POST['plugin-id'] ) );
 				if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-edit-' . $post->ID ) ) {
 					if ( current_user_can( 'edit_post', $post->ID ) ) {
@@ -48,8 +47,8 @@ class Block_Validator {
 			}
 			?>
 		</div>
-		<?php else: ?>
-		<div class="wrap">
+		<?php else : ?>
+		<div class="wrap block-validator">
 			<p><?php _e( 'Please log in to use the validator.', 'wporg-plugins' ); ?></p>
 		</div>
 		<?php endif;
@@ -122,15 +121,15 @@ class Block_Validator {
 			$output .= '<h3>' . __( 'Success', 'wporg-plugins' ) . '</h3>';
 			$output .= "<div class='notice notice-success notice-alt'>\n";
 			if ( $checker->slug && self::plugin_is_in_block_directory( $checker->slug ) ) {
-				$output .= __( 'No problems were found. This plugin is already in the Block Directory.', 'wporg-plugins' );
+				$output .= '<p>' . __( 'No problems were found. This plugin is already in the Block Directory.', 'wporg-plugins' ) . '</p>';
 			} else {
-				$output .= __( 'No problems were found. Your plugin has passed the first step towards being included in the Block Directory.', 'wporg-plugins' );
+				$output .= '<p>' . __( 'No problems were found. Your plugin has passed the first step towards being included in the Block Directory.', 'wporg-plugins' ) . '</p>';
 			}
 			$output .= "</div>\n";
 		} else {
 			$output .= '<h3>' . __( 'Problems were encountered', 'wporg-plugins' ) . '</h3>';
 			$output .= "<div class='notice notice-error notice-alt'>\n";
-			$output .= __( 'Some problems were found. They need to be addressed before your plugin will work in the Block Directory.', 'wporg-plugins' );
+			$output .= '<p>' . __( 'Some problems were found. They need to be addressed before your plugin will work in the Block Directory.', 'wporg-plugins' ) . '</p>';
 			$output .= "</div>\n";
 		}
 
