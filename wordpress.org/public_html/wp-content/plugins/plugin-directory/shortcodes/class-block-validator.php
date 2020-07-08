@@ -88,30 +88,32 @@ class Block_Validator {
 			echo '</p>';
 		}
 
+		$results_by_type = array();
+		foreach ( $results as $item ) {
+			$results_by_type[ $item->type ][] = $item;
+		}
+
 		if ( $checker->slug ) {
 			$plugin = Plugin_Directory::get_plugin_post( $checker->slug );
 			if ( current_user_can( 'edit_post', $plugin->ID ) ) {
 				echo '<form method="post">';
-				echo '<fieldset>';
-				echo '<legend>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</legend>';
+				echo '<h3>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</h3>';
 				echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 				echo '<input type="hidden" name="plugin-id" value="' . esc_attr( $plugin->ID ) . '" />';
-				if ( self::plugin_is_in_block_directory( $checker->slug ) ) {
-					echo '<button type="submit" name="block-directory-edit" value="remove">' . __( 'Remove from Block Directory', 'wporg-plugins' ) . '</button>';
+				echo '<p>';
+				if ( ! empty( $results_by_type['error'] ) ) {
+					printf( __( "%s can't be added to the block directory, due to errors in validation.", 'wporg-plugins' ), $plugin->post_title );
+				} else if ( self::plugin_is_in_block_directory( $checker->slug ) ) {
+					echo '<button type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
 				} else {
-					echo '<button type="submit" name="block-directory-edit" value="add">' . __( 'Add to Block Directory', 'wporg-plugins' ) . '</button>';
+					echo '<button type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
 				}
+				echo '</p>';
 	
 				echo '<ul><li><a href="' . get_edit_post_link( $plugin->ID ) . '">' . __( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
 				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) .'">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li></ul>';
-				echo '</fieldset>';
 				echo '</form>';
 			}
-		}
-
-		$results_by_type = array();
-		foreach ( $results as $item ) {
-			$results_by_type[ $item->type ][] = $item;
 		}
 
 		$output = '';
