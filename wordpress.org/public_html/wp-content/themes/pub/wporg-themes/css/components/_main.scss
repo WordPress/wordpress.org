@@ -679,11 +679,9 @@ body.author .theme-browser .theme .theme-author  {
 	top: 0;
 }
 
-[dir="ltr"] .theme-ratings .reviews-link:after,
-[dir="rtl"] .theme-ratings .reviews-link:before {
+.theme-ratings .reviews-link:after {
 	content: "\f345";
 	font-family: dashicons;
-	float: right;
 	padding-left: 3px;
 	position: relative;
 	top: 1px;
