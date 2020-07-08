@@ -141,6 +141,10 @@ module.exports = function( grunt ) {
 										value = '"\\f340"';
 									} else if ( value === '"\\f345"' ) { // dashicons-arrow-right-alt2.
 										value = '"\\f341"';
+									} else if ( value === '"\\2190"' ) { // Unicode left/rightwards arrows
+										value = '"\\2192"';
+									} else if ( value === '"\\2192"' ) {
+										value = '"\\2190"';
 									}
 									return { prop: prop, value: value };
 								}
