@@ -244,7 +244,7 @@ class Block_Plugin_Checker {
 		$blocks = array();
 		$this->block_json_files = Filesystem::list_files( $base_dir, true, '!(?:^|/)block\.json$!i' );
 		if ( ! empty( $this->block_json_files ) ) {
-			foreach ( $block_json_files as $filename ) {
+			foreach ( $this->block_json_files as $filename ) {
 				$blocks_in_file = Import::find_blocks_in_file( $filename );
 				$relative_filename = $this->relative_filename( $filename );
 				$potential_block_directories[] = dirname( $relative_filename );
@@ -363,7 +363,7 @@ class Block_Plugin_Checker {
 	 * Should have the 'block' tag.
 	 */
 	function check_block_tag() {
-		if ( empty( $this->readme->tags ) || !in_array( 'block', array_map( 'strtolower', $this->readme_tags ) ) ) {
+		if ( empty( $this->readme->tags ) || ! in_array( 'block', array_map( 'strtolower', $this->readme->tags ) ) ) {
 			$this->record_result( __FUNCTION__,
 				'warning',
 				__( 'No block tag found in readme.txt.', 'wporg-plugins' ),
@@ -594,7 +594,7 @@ class Block_Plugin_Checker {
 			$this->record_result( __FUNCTION__,
 				'warning',
 				sprintf( __( 'Found %s PHP asset files.', 'wporg-plugins' ), $count ),
-				array_map( array( $this, relative_filename ), $this->asset_php_files )
+				array_map( null, array( $this->relative_filename( $file ) ), $this->asset_php_files )
 			);
 		}
 	}
