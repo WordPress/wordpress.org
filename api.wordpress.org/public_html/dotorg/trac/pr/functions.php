@@ -290,16 +290,22 @@ function get_trac_instance( $trac ) {
 /**
  * Formats a PR description for usage on Trac.
  *
- * This strips out HTML comments and standard boilerplate text.
+ * This:
+ *  - Strips HTML comments
+ *  - Strips standard boilerplate text
+ *  - Converts code blocks
  *
  * @param object $pr_data PR Data.
- * @return string Stripped down PR Description
+ * @return string Converted PR Description
  */
 function format_pr_desc_for_trac_comment( $pr_data ) {
 	$desc = trim( $pr_data->body );
 
 	// Remove HTML comments
 	$desc = preg_replace( '#<!--.+?-->#s', '', $desc );
+
+	// Convert Code blocks.
+	$desc = preg_replace( '#```(.+?)```#s', '{{{$1}}}', $desc );
 
 	// Remove the final line if it matches the specific boilerplate format.
 	$desc = preg_replace( "#---\r?\n\*\*.+\*\*$#", '', $desc );
