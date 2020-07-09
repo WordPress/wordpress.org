@@ -152,20 +152,27 @@ class Parser {
 	/**
 	 * Parser constructor.
 	 *
-	 * @param string $file
+	 * @param string $file_or_url
 	 */
-	public function __construct( $file ) {
-		if ( $file ) {
-			$this->parse_readme( $file );
+	public function __construct( $file_or_url ) {
+		if ( $file_or_url ) {
+			$this->parse_readme( $file_or_url );
 		}
 	}
 
 	/**
-	 * @param string $file
+	 * @param string $file_or_url
 	 * @return bool
 	 */
-	protected function parse_readme( $file ) {
-		$contents = file_get_contents( $file );
+	protected function parse_readme( $file_or_url ) {
+		$context = stream_context_create( array(
+			'http' => array(
+				'user_agent' => 'WordPress.org Plugin Readme Parser',
+			)
+		) );
+
+		$contents = file_get_contents( $file_or_url, false, $context );
+
 		if ( preg_match( '!!u', $contents ) ) {
 			$contents = preg_split( '!\R!u', $contents );
 		} else {
