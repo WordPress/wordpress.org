@@ -74,6 +74,7 @@ class Import {
 		$headers         = $data['plugin_headers'];
 		$stable_tag      = $data['stable_tag'];
 		$tagged_versions = $data['tagged_versions'];
+		$last_modified   = $data['last_modified'];
 		$blocks          = $data['blocks'];
 		$block_files     = $data['block_files'];
 
@@ -102,7 +103,11 @@ class Import {
 			$plugin->post_modified == '0000-00-00 00:00:00' ||
 			( $svn_changed_tags && in_array( ( $stable_tag ?: 'trunk' ), $svn_changed_tags, true ) )
 		) {
-			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
+			if ( $last_modified ) {
+				$plugin->post_modified = $plugin->post_modified_gmt = $last_modified;
+			} else {
+				$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
+			}
 		}
 
 		// Plugins should move from 'approved' to 'publish' on first parse
@@ -330,6 +335,7 @@ class Import {
 		$trunk_readme_files = preg_grep( '!^readme.(txt|md)$!i', $trunk_files );
 		if ( $trunk_readme_files ) {
 			$trunk_readme_file = reset( $trunk_readme_files );
+			// Preference readme.txt over readme.md if both exist.
 			foreach ( $trunk_readme_files as $f ) {
 				if ( '.txt' == strtolower( substr( $f, -4 ) ) ) {
 					$trunk_readme_file = $f;
@@ -343,51 +349,54 @@ class Import {
 			$stable_tag = $trunk_readme->stable_tag;
 		}
 
-		$exported = false;
+		$svn_info = false;
 		if ( $stable_tag && 'trunk' != $stable_tag ) {
-			$svn_export = SVN::export(
-				self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$stable_tag}",
-				$tmp_dir . '/export',
-				array(
-					'ignore-externals',
-				)
-			);
-			// Handle tags which we store as 0.blah but are in /tags/.blah
-			if ( ! $svn_export['result'] && '0.' == substr( $stable_tag, 0, 2 ) ) {
+			$stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$stable_tag}";
+			$svn_info = SVN::info( $stable_url );
+
+			if ( ! $svn_info['result'] && '0.' === substr( $stable_tag, 0, 2 ) ) {
+				// Handle tags which we store as 0.blah but are in /tags/.blah
 				$_stable_tag = substr( $stable_tag, 1 );
-				$svn_export  = SVN::export(
-					self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$_stable_tag}",
-					$tmp_dir . '/export',
-					array(
-						'ignore-externals',
-					)
-				);
+				$stable_url  = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$_stable_tag}";
+				$svn_info    = SVN::info( $stable_url );
 			}
-			if ( $svn_export['result'] && false !== $this->find_readme_file( $tmp_dir . '/export' ) ) {
-				$exported = true;
-			} else {
-				// Clear out any files that exist in the export.
-				Filesystem::rmdir( $tmp_dir . '/export' );
+
+			// Verify that the tag has files, falling back to trunk if not.
+			if ( ! SVN::ls( $stable_tag ) ) {
+				$svn_info = false;
 			}
 		}
-		if ( ! $exported ) {
+
+		if ( ! $svn_info || ! $svn_info['result'] ) {
+			$stable_tag = 'trunk';
+			$stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk";
+			$svn_info   = SVN::info( $stable_url );
+		}
+
+		if ( ! $svn_info['result'] ) {
+			throw new Exception( 'Could not find stable SVN URL: ' . implode( ' ', reset( $svn_info['errors'] ) ) );
+		}
+
+		$last_modified = false;
+		if ( preg_match( '/^([0-9]{4}\-[0-9]{2}\-[0-9]{2} [0-9]{1,2}:[0-9]{2}:[0-9]{2})/', $svn_info['result']['Last Changed Date'] ?? '', $m ) ) {
+			$last_modified = $m[0];
+		}
+
+		$svn_export = SVN::export(
+			$stable_url,
+			$tmp_dir . '/export',
+			array(
+				'ignore-externals',
+			)
+		);
+
+		if ( ! $svn_export['result'] || empty( $svn_export['revision'] ) ) {
 			// Catch the case where exporting a tag finds nothing, but there was nothing in trunk either.
 			if ( ! $trunk_files ) {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
-			$stable_tag = 'trunk';
-			// Either stable_tag = trunk, or the stable_tag tag didn't exist.
-			$svn_export = SVN::export(
-				self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk",
-				$tmp_dir . '/export',
-				array(
-					'ignore-externals',
-				)
-			);
-			if ( ! $svn_export['result'] || empty( $svn_export['revision'] ) ) {
-				throw new Exception( 'Could not create SVN export: ' . implode( ' ', reset( $svn_export['errors'] ) ) );
-			}
+			throw new Exception( 'Could not create SVN export: ' . implode( ' ', reset( $svn_export['errors'] ) ) );
 		}
 
 		// The readme may not actually exist, but that's okay.
@@ -401,11 +410,12 @@ class Import {
 		}
 
 		// Now we look in the /assets/ folder for banners, screenshots, and icons.
-		$assets            = array(
+		$assets = array(
 			'screenshot' => array(),
 			'banner'     => array(),
 			'icon'       => array(),
 		);
+
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
 			foreach ( $svn_assets_folder as $asset ) {
@@ -556,7 +566,7 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
-		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
+		return compact( 'readme', 'stable_tag', 'last_modified', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
 	}
 
 	/**

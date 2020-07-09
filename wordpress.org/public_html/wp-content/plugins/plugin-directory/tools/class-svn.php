@@ -7,6 +7,55 @@ namespace WordPressdotorg\Plugin_Directory\Tools;
  * @package WordPressdotorg\Plugin_Directory\Tools
  */
 class SVN {
+	/**
+	 * Get SVN info about a URL.
+	 *
+	 * @static
+	 *
+	 * @param string $url     The URL of the svn repo.
+	 * @param array  $options Optional. A list of options to pass to SVN. Default: empty array.
+	 *
+	 * @return array {
+	 *     @type bool|array $result False on failure. Otherwise an associative array.
+	 *     @type bool|array $errors Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function info( $url, $options = array() ) {
+		$esc_url = escapeshellarg( $url );
+
+		$options[]   = 'non-interactive';
+		if ( empty( $options['username'] ) ) {
+			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
+			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$output = self::shell_exec( "svn info $esc_options $esc_url 2>&1" );
+		if ( preg_match( '!URL: ' . untrailingslashit( $url ) . '\n!i', $output ) ) {
+			$lines  = explode( "\n", $output );
+			$result = array_filter( array_reduce(
+				$lines,
+				function( $carry, $item ) {
+					$pair = explode( ':', $item, 2 );
+					if ( isset( $pair[1] ) ) {
+						$key = trim( $pair[0] );
+						$carry[ $key ] = trim( $pair[1] );
+					} else {
+						$carry[] = trim( $pair[0] );
+					}
+
+					return $carry;
+				},
+				array()
+			) );
+			$errors = false;
+		} else {
+			$result   = false;
+			$errors   = self::parse_svn_errors( $output );
+		}
+
+		return compact( 'result', 'errors' );
+	}
 
 	/**
 	 * Import a local directory to a SVN path.
