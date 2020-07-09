@@ -362,7 +362,7 @@ class Import {
 			}
 
 			// Verify that the tag has files, falling back to trunk if not.
-			if ( ! SVN::ls( $stable_tag ) ) {
+			if ( ! SVN::ls( $stable_url ) ) {
 				$svn_info = false;
 			}
 		}
