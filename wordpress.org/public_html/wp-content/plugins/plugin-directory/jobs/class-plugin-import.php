@@ -32,13 +32,21 @@ class Plugin_Import {
 	 */
 	public static function cron_trigger( $plugin_data ) {
 		$plugin_slug  = $plugin_data['plugin'];
-		$changed_tags = isset( $plugin_data['tags_touched'] ) ? $plugin_data['tags_touched'] : array( 'trunk' );
 
-		$revision = isset( $plugin_data['revisions'] ) ? max( (array) $plugin_data['revisions'] ) : false;
+		if ( ! isset( $plugin_data['tags_touched'] ) ) {
+			$plugin_data['tags_touched'] = array( 'trunk' );
+		}
+
+		if ( ! isset( $plugin_data['revisions'] ) ) {
+			$plugin_data['revisions'] = [];
+		}
+
+		$tags_touched = $plugin_data['tags_touched'];
+		$revision     = max( (array) $plugin_data['revisions'] );
 
 		try {
 			$importer = new CLI\Import();
-			$importer->import_from_svn( $plugin_slug, $changed_tags, $revision );
+			$importer->import_from_svn( $plugin_slug, $tags_touched, $revision );
 		} catch ( Exception $e ) {
 			fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
 		}
