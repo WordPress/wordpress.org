@@ -28,11 +28,11 @@ class WPorg_Handbook_Init {
 	}
 
 	static public function enqueue_styles() {
-		wp_enqueue_style( 'wporg-handbook-css', plugins_url( '/stylesheets/callout-boxes.css', __FILE__ ), array(), '20200121' );
+		wp_enqueue_style( 'wporg-handbook-css', plugins_url( 'stylesheets/callout-boxes.css', WPORG_HANDBOOK_PLUGIN_FILE ), array(), '20200121' );
 	}
 
 	static public function enqueue_scripts() {
-		wp_enqueue_script( 'wporg-handbook', plugins_url( '/scripts/handbook.js', __FILE__ ), array( 'jquery' ), '20150930' );
+		wp_enqueue_script( 'wporg-handbook', plugins_url( 'scripts/handbook.js', WPORG_HANDBOOK_PLUGIN_FILE ), array( 'jquery' ), '20150930' );
 	}
 
 }
