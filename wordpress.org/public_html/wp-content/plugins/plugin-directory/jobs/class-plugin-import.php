@@ -38,7 +38,7 @@ class Plugin_Import {
 		}
 
 		if ( ! isset( $plugin_data['revisions'] ) ) {
-			$plugin_data['revisions'] = [];
+			$plugin_data['revisions'] = [ 0 ];
 		}
 
 		$tags_touched = $plugin_data['tags_touched'];
