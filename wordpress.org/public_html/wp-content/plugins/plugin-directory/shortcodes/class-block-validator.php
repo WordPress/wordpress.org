@@ -58,9 +58,9 @@ class Block_Validator {
 	protected static function plugin_is_in_block_directory( $slug ) {
 		$plugin = Plugin_Directory::get_plugin_post( $slug );
 
-		return ( 
+		return (
 			$plugin &&
-			$plugin->post_name === $slug && 
+			$plugin->post_name === $slug &&
 			has_term( 'block', 'plugin_section', $plugin )
 		);
 	}
@@ -88,8 +88,13 @@ class Block_Validator {
 		}
 
 		$results_by_type = array();
+		$block_json_issues = array();
 		foreach ( $results as $item ) {
-			$results_by_type[ $item->type ][] = $item;
+			if ( 'check_block_json_is_valid' === $item->check_name ) {
+				$block_json_issues[] = $item;
+			} else {
+				$results_by_type[ $item->type ][] = $item;
+			}
 		}
 
 		if ( $checker->slug ) {
@@ -101,16 +106,19 @@ class Block_Validator {
 				echo '<input type="hidden" name="plugin-id" value="' . esc_attr( $plugin->ID ) . '" />';
 				echo '<p>';
 				if ( ! empty( $results_by_type['error'] ) ) {
+					// translators: %s plugin title.
 					printf( __( "%s can't be added to the block directory, due to errors in validation.", 'wporg-plugins' ), $plugin->post_title );
 				} else if ( self::plugin_is_in_block_directory( $checker->slug ) ) {
+					// translators: %s plugin title.
 					echo '<button type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
 				} else {
+					// translators: %s plugin title.
 					echo '<button type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
 				}
 				echo '</p>';
-	
+
 				echo '<ul><li><a href="' . get_edit_post_link( $plugin->ID ) . '">' . __( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
-				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) .'">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li></ul>';
+				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li></ul>';
 				echo '</form>';
 			}
 		}
@@ -145,15 +153,26 @@ class Block_Validator {
 
 			$output .= "<h3>{$warning_label}</h3>\n";
 			$output .= "<div class='notice notice-{$type} notice-alt'>\n";
-			$output .= "<ul class='{$type}'>\n";
 			foreach ( $results_by_type[ $type ] as $item ) {
-				$docs_link = '';
-				if ( 'check' === substr( $item->check_name, 0, 5 ) ) {
-					$docs_link = "<a href='help#{$item->check_name}'>" . __( 'More about this.', 'wporg-plugins' ) . '</a>';
+				// Only get details if this is a warning or error.
+				$details = ( 'info' === $type ) ? false : self::get_detailed_help( $item->check_name );
+				if ( $details ) {
+					$details = '<p>' . implode( '</p><p>', (array) $details ) . '</p>';
+					$output .= "<details class='{$item->check_name}'><summary>{$item->message}</summary>{$details}</details>";
+				} else {
+					$output .= "<p>{$item->message}</p>";
 				}
-				$output .= "<li class='{$item->check_name}'>{$item->message} {$docs_link}</li>\n";
 			}
-			$output .= "</ul>\n";
+			// Collapse block.json warnings into one details at the end of warnings list.
+			if ( 'warning' === $type && ! empty( $block_json_issues ) ) {
+				$messages = wp_list_pluck( $block_json_issues, 'message' );
+				$details = '<p>' . implode( '</p><p>', (array) $messages ) . '</p>';
+				$output .= sprintf(
+					'<details class="check_block_json_is_valid"><summary>%1$s</summary>%2$s</details>',
+					__( 'Issues found in block.json file.', 'wporg-plugins' ),
+					$details
+				);
+			}
 			$output .= "</div>\n";
 		}
 
@@ -164,5 +183,52 @@ class Block_Validator {
 		}
 
 		echo $output;
+	}
+
+	/**
+	 * Get a more detailed help message for a given check.
+	 *
+	 * @param string $method The name of the check method.
+	 *
+	 * @return string|array More details for a given block issue. Array of strings if there should be a linebreak.
+	 */
+	public static function get_detailed_help( $method ) {
+		switch ( $method ) {
+			// These don't need more details.
+			case 'check_readme_exists':
+			case 'check_license':
+			case 'check_plugin_headers':
+				return false;
+			// This is a special case, since multiple values may be collapsed.
+			case 'check_block_json_is_valid':
+				return false;
+			case 'check_block_tag':
+				return __( 'The readme.txt file must contain the tag "block" for this to be added to the block directory.', 'wporg-plugins' );
+			case 'check_for_duplicate_block_name':
+				return [
+					__( "Block names must be unique, otherwise it can cause problems when using the block. It is recommended to use your plugin's name as the namespace.", 'wporg-plugins' ),
+					'<em>' . __( 'If this is a different version of your own plugin, you can ignore this warning.', 'wporg-plugins' ) . '</em>',
+				];
+			case 'check_for_blocks':
+				return [
+					__( 'In order to work in the Block Directory, a plugin must register a block. Generally one per plugin (multiple blocks may be permitted if those blocks are interdependent, such as a list block that contains list item blocks).', 'wporg-plugins' ),
+					__( 'If your plugin doesn’t register a block, it probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' ),
+					sprintf( '<a href="TUTORIAL">%s</a>', __( 'Learn how to create a block.' ) ),
+				];
+			case 'check_for_block_json':
+				return __( 'Your plugin should contain at least one <code>block.json</code> file. This file contains metadata describing the block and its JavaScript and CSS assets. Make sure you include at least one <code>script</code> or <code>editorScript</code> item.', 'wporg-plugins' );
+			case 'check_for_block_scripts':
+				return 'TODO';
+			case 'check_for_block_script_files':
+				return 'TODO';
+			case 'check_for_register_block_type':
+				return __( 'At least one of your JavaScript files must explicitly call registerBlockType(). Without that call, your block will not work in the editor.', 'wporg-plugins' );
+			case 'check_block_json_is_valid_json':
+				return __( 'This block.json file is invalid. The Block Directory needs to be able to read this file.', 'wporg-plugins' );
+			case 'check_asset_php_file':
+				return 'TODO'; // Is this really an issue?
+			case 'check_php_size':
+				return __( 'Block plugins should keep the PHP code to a mimmum. If you need a lot of PHP code, your plugin probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' );
+		}
 	}
 }
