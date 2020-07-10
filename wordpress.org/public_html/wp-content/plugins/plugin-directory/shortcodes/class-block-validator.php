@@ -40,7 +40,15 @@ class Block_Validator {
 						} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
 							$terms = array_diff( $terms, array( 'block' ) );
 						}
-						wp_set_object_terms( $post->ID, $terms, 'plugin_section' );
+						$result = wp_set_object_terms( $post->ID, $terms, 'plugin_section' );
+						if ( !is_wp_error( $result ) && !empty( $result ) ) {
+							if ( 'add' === $_POST['block-directory-edit'] ) {
+								Tools::audit_log( 'Plugin added to block directory.', $post->ID );
+								self::maybe_send_email_plugin_added( $post );
+							} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
+								Tools::audit_log( 'Plugin removed from block directory.', $post->ID );
+							}
+						}
 					}
 
 					self::validate_block( $post->post_name );
@@ -251,5 +259,54 @@ class Block_Validator {
 			case 'check_php_size':
 				return __( 'Block plugins should keep the PHP code to a mimmum. If you need a lot of PHP code, your plugin probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' );
 		}
+	}
+
+	/**
+	 * Sends an email confirmation to the plugin's author the first time a plugin is added to the directory.
+	 */
+	protected static function maybe_send_email_plugin_added( $post ) {
+
+		$plugin_author = get_user_by( 'id', $post->post_author );
+		if ( empty( $plugin_author ) )
+			return false;
+
+		// Only send the email the first time it's added.
+		if ( !add_post_meta( $post->ID, 'added_to_block_directory', time(), true ) )
+			return false;
+
+
+		/* translators: %s: plugin name */
+		$email_subject = sprintf(
+			__( '[WordPress Plugin Directory] Added to Block Directory - %s', 'wporg-plugins' ),
+			$post->post_name
+		);
+
+		/*
+			Please leave the blank lines in place.
+		*/
+		$email_content = sprintf(
+			// translators: 1: plugin name, 2: plugin slug.
+			__(
+'This email is to let you know that your plugin %1$s has been added to the Block Directory here: https://wordpress.org/plugins/browse/block/.
+
+We\'re still working on improving Block Directory search and automated detection of blocks, so don\'t be alarmed if your block isn\'t immediately visible there. We\'ve built a new tool to help developers identify problems and potential improvements to block plugins, which you\'ll find here: https://wordpress.org/plugins/developers/block-plugin-validator/.
+
+In case you missed it, the Block Directory is a new feature coming to WordPress 5.5 in August. By having your plugin automatically added here, WordPress users will be able to discover your block plugin and install it directly from the editor when searching for blocks. If you have any feedback (bug, enhancement, etc) about this new feature, please open an issue here: https://github.com/wordpress/gutenberg/.
+
+If you would like your plugin removed from the Block Directory, you can do so here: https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=%2$s
+
+Otherwise, you\'re all set!
+
+--
+The WordPress Plugin Directory Team
+https://make.wordpress.org/plugins', 'wporg-plugins'
+			),
+			$post->post_title,
+			$post->post_name
+		);
+
+		$user_email = $plugin_author->user_email;
+
+		return wp_mail( $user_email, $email_subject, $email_content, 'From: plugins@wordpress.org' );
 	}
 }
