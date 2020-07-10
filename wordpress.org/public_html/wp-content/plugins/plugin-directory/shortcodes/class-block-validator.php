@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
 use WordPressdotorg\Plugin_Directory\CLI\Block_Plugin_Checker;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 class Block_Validator {
 
@@ -32,7 +33,7 @@ class Block_Validator {
 			} elseif ( $_POST && ! empty( $_POST['block-directory-edit'] ) ) {
 				$post = get_post( intval( $_POST['plugin-id'] ) );
 				if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-edit-' . $post->ID ) ) {
-					if ( current_user_can( 'edit_post', $post->ID ) ) {
+					if ( current_user_can( 'edit_post', $post->ID ) || current_user_can( 'plugin_admin_edit', $post->ID ) ) {
 						$terms = wp_list_pluck( get_the_terms( $post->ID, 'plugin_section' ), 'slug' );
 						if ( 'add' === $_POST['block-directory-edit'] ) {
 							$terms[] = 'block';
@@ -100,6 +101,7 @@ class Block_Validator {
 		if ( $checker->slug ) {
 			$plugin = Plugin_Directory::get_plugin_post( $checker->slug );
 			if ( current_user_can( 'edit_post', $plugin->ID ) ) {
+				// Plugin reviewers etc
 				echo '<form method="post">';
 				echo '<h3>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</h3>';
 				echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
@@ -120,6 +122,25 @@ class Block_Validator {
 				echo '<ul><li><a href="' . get_edit_post_link( $plugin->ID ) . '">' . __( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
 				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li></ul>';
 				echo '</form>';
+			} elseif ( current_user_can( 'plugin_admin_edit', $plugin->ID ) ) {
+				// Plugin committers
+				echo '<form method="post">';
+				echo '<h3>' . __( 'Committer Tools', 'wporg-plugins' ) . '</h3>';
+				echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
+				echo '<input type="hidden" name="plugin-id" value="' . esc_attr( $plugin->ID ) . '" />';
+				echo '<p>';
+				if ( ! empty( $results_by_type['error'] ) ) {
+					// translators: %s plugin title.
+					printf( __( "%s can't be added to the block directory, due to errors in validation.", 'wporg-plugins' ), $plugin->post_title );
+				} else if ( self::plugin_is_in_block_directory( $checker->slug ) ) {
+					// translators: %s plugin title.
+					echo '<button type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
+				} else {
+					// translators: %s plugin title.
+					echo '<button type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
+				}
+				echo '</p>';
+
 			}
 		}
 
