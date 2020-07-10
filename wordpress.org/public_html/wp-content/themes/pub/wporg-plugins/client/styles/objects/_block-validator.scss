@@ -37,14 +37,25 @@
 
 	.notice {
 
-		ul,
+		details,
 		p {
 			font-size: ms( 0 );
 			margin: ms(-3) 0;
 		}
-		
-		li {
-			margin-bottom: ms(-6);
+
+		details p {
+			margin-left: 1rem;
+			font-size: ms( -2 );
 		}
+
+		code {
+			font-size: 1em;
+		}
+
+		summary {
+			/* Needed for Firefox to make the triangle visible */
+			display: list-item;
+		}
+
 	}
 }
