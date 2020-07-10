@@ -101,7 +101,7 @@ class Block_Validator {
 		$results_by_type = array();
 		$block_json_issues = array();
 		foreach ( $results as $item ) {
-			if ( 'check_block_json_is_valid' === $item->check_name ) {
+			if ( 'info' !== $item->type && 'check_block_json_is_valid' === $item->check_name ) {
 				$block_json_issues[] = $item;
 			} else {
 				$results_by_type[ $item->type ][] = $item;
