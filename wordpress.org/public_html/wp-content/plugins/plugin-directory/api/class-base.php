@@ -53,7 +53,7 @@ class Base {
 	 * @return bool Whether the plugin slug exists.
 	 */
 	function validate_plugin_slug_callback( $value ) {
-		return (bool) Plugin_Directory::get_plugin_post( $value );
+		return is_string( $value ) && $value && Plugin_Directory::get_plugin_post( $value );
 	}
 
 	/**
