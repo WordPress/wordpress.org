@@ -46,7 +46,7 @@ class Block_Validator {
 							if ( 'add' === $_POST['block-directory-edit'] ) {
 								Tools::audit_log( 'Plugin added to block directory.', $post->ID );
 								self::maybe_send_email_plugin_added( $post );
-								Plugin_Import::queue( $post->post_name, array( 'tags_touched' => $post->stable_tag ) );
+								Plugin_Import::queue( $post->post_name, array( 'tags_touched' => array( $post->stable_tag ) ) );
 							} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
 								Tools::audit_log( 'Plugin removed from block directory.', $post->ID );
 							}
