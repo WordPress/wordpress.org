@@ -239,7 +239,7 @@ class Block_Validator {
 			case 'check_block_json_is_valid':
 				return false;
 			case 'check_block_tag':
-				return __( 'The readme.txt file must contain the tag "block" for this to be added to the block directory.', 'wporg-plugins' );
+				return __( 'The readme.txt file must contain the tag "block" (singular) for this to be added to the block directory.', 'wporg-plugins' );
 			case 'check_for_duplicate_block_name':
 				return [
 					__( "Block names must be unique, otherwise it can cause problems when using the block. It is recommended to use your plugin's name as the namespace.", 'wporg-plugins' ),
@@ -253,16 +253,17 @@ class Block_Validator {
 				];
 			case 'check_for_block_json':
 				return __( 'Your plugin should contain at least one <code>block.json</code> file. This file contains metadata describing the block and its JavaScript and CSS assets. Make sure you include at least one <code>script</code> or <code>editorScript</code> item.', 'wporg-plugins' );
-			case 'check_for_block_scripts':
-				return 'TODO';
 			case 'check_for_block_script_files':
-				return 'TODO';
+				return [
+					__( 'The value of <code>script</code>, <code>style</code>, <code>editorScript</code>, <code>editorStyle</code> must be a valid file path. This value was detected, but there is no file at this location in your plugin.', 'wporg-plugins' ),
+					__( 'Unlike regular blocks, plugins in the block directory cannot use a script handle for these values.', 'wporg-plugins' ),
+				];
 			case 'check_for_register_block_type':
 				return __( 'At least one of your JavaScript files must explicitly call registerBlockType(). Without that call, your block will not work in the editor.', 'wporg-plugins' );
 			case 'check_block_json_is_valid_json':
 				return __( 'This block.json file is invalid. The Block Directory needs to be able to read this file.', 'wporg-plugins' );
 			case 'check_asset_php_file':
-				return 'TODO'; // Is this really an issue?
+				return __( '', 'wporg-plugins' ); // @todo
 			case 'check_php_size':
 				return __( 'Block plugins should keep the PHP code to a mimmum. If you need a lot of PHP code, your plugin probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' );
 		}

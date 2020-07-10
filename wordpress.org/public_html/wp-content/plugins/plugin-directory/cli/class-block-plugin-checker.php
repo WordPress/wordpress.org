@@ -274,15 +274,20 @@ class Block_Plugin_Checker {
 	}
 
 	public function find_block_scripts() {
-		$block_scripts = array();
-		foreach ( $this->blocks as $block ) {
-			$scripts = Import::extract_file_paths_from_block_json( $block );
-			if ( isset( $block_scripts[ $block->name ] ) ) {
-				$block_scripts[ $block->name ] = array_merge( $block_scripts[ $block->name ], $scripts );
-			} else {
-				$block_scripts[ $block->name ] = $scripts;
-			}
-		}
+		$block_scripts = \array_map(
+			function( $block ) {
+				$assets = array();
+				$props = array( 'editorScript', 'script', 'editorStyle', 'style' );
+
+				foreach ( $props as $prop ) {
+					if ( isset( $block->$prop ) ) {
+						$assets[ $prop ] = $block->$prop;
+					}
+				}
+				return $assets;
+			},
+			$this->blocks
+		);
 
 		return $block_scripts;
 	}
@@ -478,33 +483,6 @@ class Block_Plugin_Checker {
 	}
 
 	/**
-	 * Do the blocks all have available script assets, either discoverable or in the block.json file?
-	 */
-	function check_for_block_scripts() {
-		$block_scripts = $this->find_block_scripts();
-
-		foreach ( $this->blocks as $block_name => $block_info ) {
-			if ( ! empty( $block_scripts[ $block_name ] ) ) {
-				$this->record_result(
-					__FUNCTION__,
-					'info',
-					// translators: %s is the block name.
-					sprintf( __( 'Scripts found for block %s.', 'wporg-plugins' ), '<code>' . $block_name . '</code>' ),
-					$block_scripts[ $block_name ]
-				);
-			} else {
-				$this->record_result(
-					__FUNCTION__,
-					'warning',
-					// translators: %s is the block name.
-					sprintf( __( 'No scripts found for block %s.', 'wporg-plugins' ), '<code>' . $block_name . '</code>' ),
-					$block_name
-				);
-			}
-		}
-	}
-
-	/**
 	 * Check for a single parent block
 	 */
 	function check_for_single_parent() {
@@ -543,23 +521,38 @@ class Block_Plugin_Checker {
 	 * Do the script files all exist?
 	 */
 	function check_for_block_script_files() {
+		$seen_scripts = array();
 		foreach ( $this->find_block_scripts() as $block_name => $scripts ) {
-			foreach ( $scripts as $script ) {
-				if ( file_exists( $this->path_to_plugin . $script ) ) {
+			foreach ( $scripts as $kind => $script ) {
+				// No need to warn multiple times for the same value.
+				if ( in_array( $script, $seen_scripts ) ) {
+					continue;
+				}
+				$seen_scripts[] = $script;
+				$file_path = trailingslashit( $this->path_to_plugin ) . str_replace( 'file:', '', $script );
+				if ( file_exists( $file_path ) ) {
 					$this->record_result(
 						__FUNCTION__,
 						'info',
 						// translators: %s is the block name.
-						sprintf( __( 'Script file exists for block %s.', 'wporg-plugins' ), '<code>' . $block_name . '</code>' ),
-						$script
+						sprintf( __( 'Found file %s.', 'wporg-plugins' ), '<code>' . $script . '</code>' ),
+						compact( $kind, $script )
 					);
 				} else {
+					// translators: %s is the file name.
+					$message = __( 'Expected %s to be a valid file path.', 'wporg-plugins' );
+					if ( in_array( $kind, array( 'editorScript', 'script' ) ) ) {
+						// translators: %s is the file name.
+						$message = __( 'Expected %s to be a valid JavaScript file path.', 'wporg-plugins' );
+					} else if ( in_array( $kind, array( 'editorStyle', 'style' ) ) ) {
+						// translators: %s is the file name.
+						$message = __( 'Expected %s to be a valid CSS file path.', 'wporg-plugins' );
+					}
 					$this->record_result(
 						__FUNCTION__,
-						'warning',
-						// translators: %s is the block name.
-						sprintf( __( 'Missing script file for block %s.', 'wporg-plugins' ), '<code>' . $block_name . '</code>' ),
-						$script
+						'error',
+						sprintf( $message, '<code>' . $script . '</code>' ),
+						compact( $kind, $script )
 					);
 				}
 			}
