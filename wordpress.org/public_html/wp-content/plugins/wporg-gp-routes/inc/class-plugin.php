@@ -72,6 +72,7 @@ class Plugin {
 	 * Registers custom routes and removes default routes.
 	 *
 	 * Removes:
+	 *  - API: /languages
 	 *  - API: /languages/$locale
 	 *  - /languages/$locale
 	 *  - /languages/$locale
@@ -117,6 +118,7 @@ class Plugin {
 
 		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) { // API requests.
 			// Delete default routes.
+			GP::$router->remove( '/languages' );
 			GP::$router->remove( "/languages/$locale" );
 			GP::$router->remove( '/profile' );
 		} else {
