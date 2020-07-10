@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\CLI\Block_Plugin_Checker;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
 
 class Block_Validator {
 
@@ -45,6 +46,7 @@ class Block_Validator {
 							if ( 'add' === $_POST['block-directory-edit'] ) {
 								Tools::audit_log( 'Plugin added to block directory.', $post->ID );
 								self::maybe_send_email_plugin_added( $post );
+								Plugin_Import::queue( $post->post_name, array( 'tags_touched' => $post->stable_tag ) );
 							} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
 								Tools::audit_log( 'Plugin removed from block directory.', $post->ID );
 							}
