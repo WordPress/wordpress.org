@@ -148,6 +148,7 @@ class Export extends WP_CLI_Command {
 				if ( substr( $file, -3 ) === '.js' ) {
 					return $file;
 				}
+
 				return 'po';
 			}, $entry->references );
 
@@ -186,12 +187,31 @@ class Export extends WP_CLI_Command {
 			$json_content_decoded          = json_decode( $json_content );
 			$json_content_decoded->comment = [ 'reference' => $file ];
 
-			$json_content = wp_json_encode( $json_content_decoded );
-
 			$hash = md5( $file );
 			$dest = "{$base_dest}-{$hash}.json";
 
-			file_put_contents( $dest, $json_content );
+			/*
+			 * Merge translations into an existing JSON file.
+			 *
+			 * Some strings occur in multiple source files which may be used on the frontend
+			 * or in the admin or both, thus they can be part of different translation
+			 * projects (wp/dev, wp/dev/admin, wp/dev/admin/network).
+			 * Unlike in PHP with gettext, where translations from multiple MO files are merged
+			 * automatically, we have do merge the translations before shipping the
+			 * single JSON file per reference.
+			 */
+			if ( file_exists( $dest ) ) {
+				$existing_json_content_decoded = json_decode( file_get_contents( $dest ) );
+				if ( isset( $existing_json_content_decoded->locale_data->messages ) ) {
+					foreach ( $existing_json_content_decoded->locale_data->messages as $key => $translations ) {
+						if ( ! isset( $json_content_decoded->locale_data->messages->{ $key } ) ) {
+							$json_content_decoded->locale_data->messages->{ $key } = $translations;
+						}
+					}
+				}
+			}
+
+			file_put_contents( $dest, wp_json_encode( $json_content_decoded ) );
 
 			$files[] = $dest;
 		}
