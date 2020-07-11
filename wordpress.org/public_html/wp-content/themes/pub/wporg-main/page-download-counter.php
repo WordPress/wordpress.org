@@ -31,10 +31,15 @@ $num = $wpdb->get_var( $wpdb->prepare(
 ) );
 
 if ( ! empty( $_GET['ajaxupdate'] ) ) {
+	header( 'Link: <' . $canonical_url  . '>; rel="canonical"' );
+
 	die( esc_html( number_format_i18n( $num ) ) );
 }
 
 if ( ! empty( $_GET['json'] ) ) {
+	header( 'Content-Type: application/json' );
+	header( 'Link: <' . $canonical_url  . '>; rel="canonical"' );
+
 	?>
 	{"wpcounter": {
 	"branch": "<?php echo esc_js( $branch ); ?>",
