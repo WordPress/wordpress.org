@@ -11,16 +11,12 @@
 
 $branch = WP_CORE_STABLE_BRANCH;
 
-$canonical_url = get_permalink();
-
 if (
 	isset( $_GET['branch'] )
 	&& preg_match( '/^[0-9]\.[0-9]$/', wp_unslash( $_GET['branch'] ), $matches ) // phpcs:ignore WordPress.VIP
 	&& version_compare( WP_CORE_STABLE_BRANCH, $matches[0], '>' )
 ) {
 	$branch = $matches[0];
-
-	$canonical_url = add_query_arg( 'branch', $branch, $canonical_url );
 }
 
 // phpcs:ignore WordPress.VIP.DirectDatabaseQuery
@@ -31,14 +27,14 @@ $num = $wpdb->get_var( $wpdb->prepare(
 ) );
 
 if ( ! empty( $_GET['ajaxupdate'] ) ) {
-	header( 'Link: <' . $canonical_url  . '>; rel="canonical"' );
+	header( 'Link: <' . get_permalink()  . '>; rel="canonical"' );
 
 	die( esc_html( number_format_i18n( $num ) ) );
 }
 
 if ( ! empty( $_GET['json'] ) ) {
 	header( 'Content-Type: application/json' );
-	header( 'Link: <' . $canonical_url  . '>; rel="canonical"' );
+	header( 'Link: <' . get_permalink() . '>; rel="canonical"' );
 
 	?>
 	{"wpcounter": {
@@ -89,7 +85,6 @@ do_action( 'get_header' );
 	<title><?php echo esc_html( wp_get_document_title() ); ?></title>
 	<link href="//fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet" type="text/css">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
-	<link rel="canonical" href="<?php echo esc_url( $canonical_url ); ?>">
 	<meta name="description" content="<?php echo esc_attr( $meta_desc_text ); ?>">
 	<style type="text/css">
 		html,
