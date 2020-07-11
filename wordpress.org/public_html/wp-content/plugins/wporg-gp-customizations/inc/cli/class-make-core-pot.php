@@ -2,10 +2,13 @@
 
 namespace WordPressdotorg\GlotPress\Customizations\CLI;
 
+use Gettext\Extractors\Po;
+use Gettext\Translations;
 use GP;
 use WP_CLI;
 use WP_CLI\Utils;
 use WP_CLI_Command;
+use WP_CLI\I18n\PotGenerator;
 
 class Make_Core_Pot extends WP_CLI_Command {
 
@@ -56,9 +59,10 @@ class Make_Core_Pot extends WP_CLI_Command {
 		], JSON_UNESCAPED_SLASHES );
 
 		$file_comment = sprintf(
-			'Copyright (C) %s by the contributors\nThis file is distributed under the same license as the WordPress package.',
+			"Copyright (C) %s by the contributors\nThis file is distributed under the same license as the WordPress package.",
 			date( 'Y' )
 		);
+		PotGenerator::setCommentBeforeHeaders( $file_comment );
 
 		$command_args = [
 			'i18n',
@@ -71,7 +75,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'include'       => 'wp-admin/includes/continents-cities.php',
 			'package-name'  => self::PACKAGE_NAME,
 			'headers'       => $headers,
-			'file-comment'  => $file_comment,
+			'file-comment'  => '',
 			'skip-js'       => true,
 			'skip-audit'    => true,
 			'ignore-domain' => true,
@@ -107,6 +111,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'wp-includes/rss.php',
 			'wp-includes/js/codemirror/*',
 			'wp-includes/js/crop/*',
+			'wp-includes/js/dist/vendor/*',
 			'wp-includes/js/imgareaselect/*',
 			'wp-includes/js/jcrop/*',
 			'wp-includes/js/jquery/*',
@@ -114,7 +119,14 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'wp-includes/js/plupload/*',
 			'wp-includes/js/swfupload/*',
 			'wp-includes/js/thickbox/*',
+			'wp-includes/js/clipboard.js',
+			'wp-includes/js/colorpicker.js',
+			'wp-includes/js/hoverIntent.js',
+			'wp-includes/js/json2.js',
+			'wp-includes/js/swfobject.js',
 			'wp-includes/js/tw-sack.js',
+			'wp-includes/js/twemoji.js',
+			'wp-includes/js/underscore.js',
 		];
 
 		// Support https://build.trac.wordpress.org/browser/branches/4.2/wp-includes/js/tinymce/wp-mce-help.php for pre-4.3.
@@ -133,7 +145,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'exclude'       => implode( ',', $front_end_exclude ),
 			'package-name'  => self::PACKAGE_NAME,
 			'headers'       => $headers,
-			'file-comment'  => $file_comment,
+			'file-comment'  => '',
 			'skip-audit'    => true,
 			'ignore-domain' => true,
 		];
@@ -159,7 +171,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'include'       => 'hello.php',
 			'package-name'  => self::PACKAGE_NAME,
 			'headers'       => $headers,
-			'file-comment'  => $file_comment,
+			'file-comment'  => '',
 			'skip-js'       => true,
 			'skip-audit'    => true,
 			'ignore-domain' => true,
@@ -183,11 +195,15 @@ class Make_Core_Pot extends WP_CLI_Command {
 
 		$admin_exclude = [
 			'wp-admin/includes/continents-cities.php',
-			'editor.min.js', // Explicitly excluded as it's causing a memory leak: https://github.com/wp-cli/i18n-command/issues/185
 			// External libraries.
 			'wp-admin/includes/class-ftp*',
 			'wp-admin/includes/class-pclzip.php',
 		];
+
+		// Explicitly exclude minified JavaScript files as they may
+		// cause memory leaks: https://github.com/wp-cli/i18n-command/issues/185.
+		$admin_min_js  = array_map( 'basename', glob( $this->source . '/wp-admin/js/*.min.js' ) );
+		$admin_exclude = array_merge( $admin_exclude, $admin_min_js );
 
 		$admin_exclude = array_merge( $admin_exclude, $admin_network_files );
 
@@ -202,10 +218,9 @@ class Make_Core_Pot extends WP_CLI_Command {
 			'exclude'       => implode( ',', $admin_exclude ),
 			'include'       => 'wp-admin/*',
 			'merge'         => $hello_dolly_pot,
-			'subtract'      => $this->destination . '/wordpress.pot',
 			'package-name'  => self::PACKAGE_NAME,
 			'headers'       => $headers,
-			'file-comment'  => $file_comment,
+			'file-comment'  => '',
 			'skip-audit'    => true,
 			'ignore-domain' => true,
 		];
@@ -218,6 +233,8 @@ class Make_Core_Pot extends WP_CLI_Command {
 
 		unlink( $hello_dolly_pot );
 
+		$this->merge_pot( $this->destination . '/wordpress.pot', $this->destination . '/wordpress-admin.pot' );
+
 		// Admin Network.
 		$command_args = [
 			'i18n',
@@ -228,16 +245,18 @@ class Make_Core_Pot extends WP_CLI_Command {
 
 		$command_assoc_args = [
 			'include'       => implode( ',', $admin_network_files ),
-			'subtract'      => sprintf( '%1$s/wordpress.pot,%1$s/wordpress-admin.pot', $this->destination ),
 			'package-name'  => self::PACKAGE_NAME,
 			'headers'       => $headers,
-			'file-comment'  => $file_comment,
+			'file-comment'  => '',
 			'skip-js'       => true, // TODO: No use of wp.i18n, yet.
 			'skip-audit'    => true,
 			'ignore-domain' => true,
 		];
 
 		WP_CLI::run_command( $command_args, $command_assoc_args );
+
+		$this->merge_pot( $this->destination . '/wordpress.pot', $this->destination . '/wordpress-admin-network.pot' );
+		$this->merge_pot( $this->destination . '/wordpress-admin.pot', $this->destination . '/wordpress-admin-network.pot' );
 	}
 
 	/**
@@ -252,5 +271,39 @@ class Make_Core_Pot extends WP_CLI_Command {
 		}
 
 		return preg_match( '/\$wp_version\s*=\s*\'(.*?)\';/', file_get_contents( $version_php ), $matches ) ? $matches[1] : false;
+	}
+
+	/**
+	 * Merges duplicate originals of two POT files.
+	 *
+	 * Preserves the references and comments of each original.
+	 *
+	 * @param string $to_file   Path to the POT file where duplicates should be merged into.
+	 * @param string $from_file Path to the POT file where duplicates should be extracted from.
+	 */
+	private function merge_pot( $to_file, $from_file ) {
+		$to = new Translations();
+		Po::fromFile( $to_file, $to );
+		$from = new Translations();
+		Po::fromFile( $from_file, $from );
+
+		foreach ( $to as $original ) {
+			// Check for duplicate.
+			$existing = $from->find( $original );
+			if ( ! $existing ) {
+				continue;
+			}
+
+			// Merge.
+			$original->mergeWith( $existing );
+
+			// Remove original from source
+			unset( $from[ $existing->getId() ] );
+		}
+
+		$to->deleteHeader( Translations::HEADER_LANGUAGE );
+		$from->deleteHeader( Translations::HEADER_LANGUAGE );
+		PotGenerator::toFile( $to, $to_file );
+		PotGenerator::toFile( $from, $from_file );
 	}
 }
