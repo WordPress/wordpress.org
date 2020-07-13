@@ -270,6 +270,11 @@ class Block_Validator {
 				return __( '', 'wporg-plugins' ); // @todo
 			case 'check_php_size':
 				return __( 'Block plugins should keep the PHP code to a mimmum. If you need a lot of PHP code, your plugin probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' );
+			case 'check_for_standard_block_name':
+				return [
+					__( 'Block names must contain a namespace prefix, include only lowercase alphanumeric characters or dashes, and start with a letter. The namespace should be unique to your block plugin, make sure to change any defaults from block templates like "create-block/" or "cgb/".', 'wporg-plugins' ),
+					__( 'Example: <code>my-plugin/my-custom-block</code>', 'wporg-plugins' ),
+				];
 		}
 	}
 

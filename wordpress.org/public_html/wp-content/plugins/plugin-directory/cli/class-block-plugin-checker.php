@@ -444,6 +444,42 @@ class Block_Plugin_Checker {
 	}
 
 	/**
+	 * Does the block name follow expected naming conventions
+	 */
+	function check_for_standard_block_name() {
+		foreach ( $this->blocks as $block ) {
+			if ( ! trim( strval( $block->name ) ) ) {
+				continue;
+			}
+			if ( ! preg_match( '/^[a-z][a-z0-9-]*\/[a-z][a-z0-9-]+$/', $block->name ) ) {
+				$this->record_result(
+					__FUNCTION__,
+					'error',
+					// translators: %s is the block name.
+					sprintf( __( 'Block name %s is invalid. Please use lowercase alphanumeric characters.', 'wporg-plugins' ), '<code>' . $block->name . '</code>' )
+				);
+			} else {
+				$disallowed_ns = array( 'cgb/', 'create-block/', 'example/', 'block/', 'core/' );
+				foreach ( $disallowed_ns as $ns ) {
+					if ( 0 === strpos( $block->name, $ns ) ) {
+						$this->record_result(
+							__FUNCTION__,
+							'warning',
+							sprintf(
+								// translators: %1$s is the block name, %2$s is the namespace.
+								__( 'Block %1$s uses namespace %2$s. Please use a unique namespace.', 'wporg-plugins' ),
+								'<code>' . $block->name . '</code>',
+								'<code>' . $ns . '</code>'
+							)
+						);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * There should be at least one block.
 	 */
 	function check_for_blocks() {
