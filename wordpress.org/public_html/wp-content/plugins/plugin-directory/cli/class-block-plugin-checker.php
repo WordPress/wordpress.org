@@ -399,12 +399,15 @@ class Block_Plugin_Checker {
 
 	/**
 	 * Does the plugin have a block name that already exists in the DB?
-	 * Note that this isn't a blocker if we're re-running checks on a plugin that has already been uploaded, since it will match with itself.
+	 * Note that this does not flag a match if we can tell it's the same plugin already in the repo. It will only
+	 * trigger a warning if we identify the matched plugin to be the same author, and will trigger an error in all
+	 * other cases.
 	 */
 	function check_for_duplicate_block_name() {
 		foreach ( $this->blocks as $block ) {
-			if ( !trim( strval( $block->name ) ) )
+			if ( ! trim( strval( $block->name ) ) ) {
 				continue;
+			}
 
 			$query_args = array(
 				'post_type' => 'plugin',
@@ -412,19 +415,27 @@ class Block_Plugin_Checker {
 					array(
 						'key' => 'block_name',
 						'value' => $block->name,
-					)
-				)
+					),
+				),
 			);
 
 			$query = new \WP_Query( $query_args );
 			if ( $query->found_posts > 0 ) {
 				foreach ( $query->posts as $post ) {
-					if ( $this->slug && $this->slug === $post->post_name )
-						continue; // It's this very same plugin
+					if ( $this->slug && $this->slug === $post->post_name ) {
+						continue; // It's this very same plugin.
+					}
 
-					$this->record_result( __FUNCTION__,
-						'info',
-						sprintf( __( 'Block name %s already exists in plugin %s.', 'wporg-plugins' ), $block->name, $query->posts[0]->post_name ),
+					$this->record_result(
+						__FUNCTION__,
+						// Check the author, since this might be the same plugin hosted on github.
+						( get_current_user_id() === $post->post_author ) ? 'warning' : 'error',
+						sprintf(
+							// translators: %1$s is the block slug, %2$s is the found plugin title.
+							__( 'Block name %1$s already exists in the plugin "%2$s."', 'wporg-plugins' ),
+							'<code>' . $block->name . '</code>',
+							$query->posts[0]->post_title
+						),
 						[ 'block_name' => $block->name, 'slug' => $post->post_name ]
 					);
 				}

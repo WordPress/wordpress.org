@@ -191,7 +191,7 @@ class Block_Validator {
 			$output .= "<div class='notice notice-{$type} notice-alt'>\n";
 			foreach ( $results_by_type[ $type ] as $item ) {
 				// Only get details if this is a warning or error.
-				$details = ( 'info' === $type ) ? false : self::get_detailed_help( $item->check_name );
+				$details = ( 'info' === $type ) ? false : self::get_detailed_help( $item->check_name, $item );
 				if ( $details ) {
 					$details = '<p>' . implode( '</p><p>', (array) $details ) . '</p>';
 					$output .= "<details class='{$item->check_name}'><summary>{$item->message}</summary>{$details}</details>";
@@ -225,10 +225,11 @@ class Block_Validator {
 	 * Get a more detailed help message for a given check.
 	 *
 	 * @param string $method The name of the check method.
+	 * @param array  $result The full result data.
 	 *
 	 * @return string|array More details for a given block issue. Array of strings if there should be a linebreak.
 	 */
-	public static function get_detailed_help( $method ) {
+	public static function get_detailed_help( $method, $result ) {
 		switch ( $method ) {
 			// These don't need more details.
 			case 'check_readme_exists':
@@ -241,10 +242,13 @@ class Block_Validator {
 			case 'check_block_tag':
 				return __( 'The readme.txt file must contain the tag "block" (singular) for this to be added to the block directory.', 'wporg-plugins' );
 			case 'check_for_duplicate_block_name':
-				return [
+				$details = [
 					__( "Block names must be unique, otherwise it can cause problems when using the block. It is recommended to use your plugin's name as the namespace.", 'wporg-plugins' ),
-					'<em>' . __( 'If this is a different version of your own plugin, you can ignore this warning.', 'wporg-plugins' ) . '</em>',
 				];
+				if ( 'warning' === $result->type ) {
+					$details[] = '<em>' . __( 'If this is a different version of your own plugin, you can ignore this warning.', 'wporg-plugins' ) . '</em>';
+				}
+				return $details;
 			case 'check_for_blocks':
 				return [
 					__( 'In order to work in the Block Directory, a plugin must register a block. Generally one per plugin (multiple blocks may be permitted if those blocks are interdependent, such as a list block that contains list item blocks).', 'wporg-plugins' ),
