@@ -1891,7 +1891,7 @@ table.dirlist tr span.expander:before {
 	content: "\f139"; /* dashicons-arrow-right */
 	width: 15px;
 }
-table.dirlist tr.expanded span.expander:before {
+table.dirlist tr span.expander.expanded:before {
 	content: "\f140"; /* dashicons-arrow-down */
 	width: 15px;
 }
