@@ -690,39 +690,6 @@ class Block_Plugin_Checker {
 	}
 
 	/**
-	 * Does it have an index.asset.php file generate by the create block scripts?
-	 */
-	function check_asset_php_file() {
-		$count = 0;
-		foreach ( $this->asset_php_files as $file ) {
-			$contents = file_get_contents( $file );
-			if ( false !== strpos( $contents, '<?php return array(' ) )
-				++ $count;
-		}
-
-		if ( 1 === $count ) {
-			$this->record_result(
-				__FUNCTION__,
-				'info',
-				// translators: %s is the name of asset file.
-				sprintf(
-					__( 'PHP asset file found: %s.', 'wporg-plugins' ),
-					'<code>' . $this->relative_filename( $file ) . '</code>'
-				),
-				$this->relative_filename( $file )
-			);
-		} elseif ( $count > 1 ) {
-			$this->record_result(
-				__FUNCTION__,
-				'warning',
-				// translators: %s is the number of asset files.
-				sprintf( __( 'Found %s PHP asset files.', 'wporg-plugins' ), $count ),
-				array_map( null, array( $this->relative_filename( $file ) ), $this->asset_php_files )
-			);
-		}
-	}
-
-	/**
 	 * Does it have a lot of PHP code?
 	 */
 	function check_php_size() {

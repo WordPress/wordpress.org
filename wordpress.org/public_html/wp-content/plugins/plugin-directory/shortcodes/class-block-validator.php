@@ -266,8 +266,6 @@ class Block_Validator {
 				return __( 'At least one of your JavaScript files must explicitly call registerBlockType(). Without that call, your block will not work in the editor.', 'wporg-plugins' );
 			case 'check_block_json_is_valid_json':
 				return __( 'This block.json file is invalid. The Block Directory needs to be able to read this file.', 'wporg-plugins' );
-			case 'check_asset_php_file':
-				return __( '', 'wporg-plugins' ); // @todo
 			case 'check_php_size':
 				return __( 'Block plugins should keep the PHP code to a mimmum. If you need a lot of PHP code, your plugin probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' );
 			case 'check_for_standard_block_name':
