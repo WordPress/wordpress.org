@@ -288,27 +288,48 @@ function get_trac_instance( $trac ) {
 }
 
 /**
- * Formats a PR description for usage on Trac.
+ * Formats a PR description/comment for usage on Trac.
+ *
+ * This:
+ *  - Strips standard boilerplate text
+ *  - format_github_content_for_trac_comment();
+ *
+ * @param string $desc.
+ * @return string Converted PR Description
+ */
+function format_pr_desc_for_trac_comment( $desc ) {
+	$desc = trim( $desc );
+
+	// Remove the final line if it matches the specific boilerplate format.
+	$desc = preg_replace( "#---\r?\n\*\*.+\*\*$#", '', $desc );
+
+	return format_github_content_for_trac_comment( $desc );
+}
+
+/**
+ * Formats github content for usage on Trac.
  *
  * This:
  *  - Strips HTML comments
- *  - Strips standard boilerplate text
  *  - Converts code blocks
+ *  - Converts image embeds
+ *  - Converts links
  *
- * @param object $pr_data PR Data.
+ * @param string $desc.
  * @return string Converted PR Description
  */
-function format_pr_desc_for_trac_comment( $pr_data ) {
-	$desc = trim( $pr_data->body );
-
+function format_github_content_for_trac_comment( $desc ) {
 	// Remove HTML comments
 	$desc = preg_replace( '#<!--.+?-->#s', '', $desc );
 
 	// Convert Code blocks.
 	$desc = preg_replace( '#```(.+?)```#s', '{{{$1}}}', $desc );
 
-	// Remove the final line if it matches the specific boilerplate format.
-	$desc = preg_replace( "#---\r?\n\*\*.+\*\*$#", '', $desc );
+	// Convert Images (Must happen prior to Links, as the only difference is a preceeding !)
+	$desc = preg_replace( '#!\[(.+?)\]\((.+?)\)#', '[[Image($2)]]', $desc );
+
+	// Convert Links.
+	$desc = preg_replace( '#\[(.+?)\]\((.+?)\)#', '[$2 $1]', $desc );
 
 	return trim( $desc );
 }

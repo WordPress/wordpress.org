@@ -81,7 +81,7 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			// Add a mention to the Trac Ticket.
 			$trac = get_trac_instance( $pr_data->trac_ticket[0] );
 
-			$pr_description = format_pr_desc_for_trac_comment( $pr_data );
+			$pr_description = format_pr_desc_for_trac_comment( $pr_data->body );
 			$attributes     = [];
 
 			// Update ticket keywords if possible.
@@ -180,7 +180,7 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			$payload->comment->user->login,
 			$payload->comment->html_url,
 			'PR #' . $payload->issue->number,
-			$payload->comment->body
+			format_github_content_for_trac_comment( $payload->comment->body )
 		);
 
 		foreach ( $tickets as $t ) {
