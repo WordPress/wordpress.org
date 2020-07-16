@@ -67,7 +67,6 @@ class Query_Plugins extends Base {
 		// Temporary hacky block search
 		$block_search = trim( strtolower( $request->get_param( 'block' ) ) );
 		if ( $block_search ) {
-			global $wpdb;
 			$meta_query = array(
 				'relation' => 'AND',
 				array(
@@ -78,18 +77,23 @@ class Query_Plugins extends Base {
 					'relation' => 'OR',
 					array(
 						'key' => 'block_name',
-						'value' => '^' . $block_search,
+						'value' => '^' . preg_quote( $block_search ),
 						'compare' => 'RLIKE',
 					),
 					array(
 						'key' => 'block_name',
 						'value' => '/' . $block_search, // search following the slash
-						'compare' => 'RLIKE',
+						'compare' => 'LIKE',
 					),
 					array(
 						'key' => 'block_title',
 						'value' => $block_search, // search in title
-						'compare' => 'RLIKE',
+						'compare' => 'LIKE',
+					),
+					array(
+						'key' => 'header_name',
+						'value' => $block_search, // search in plugin title
+						'compare' => 'LIKE',
 					),
 				)
 			);
@@ -114,6 +118,7 @@ class Query_Plugins extends Base {
 
 		// Use the main query so that is_main_query() is triggered for the filters.
 		$wp_query->query( $query );
+
 		$response['info']['page']    = (int) $wp_query->get( 'paged' ) ?: 1;
 		$response['info']['pages']   = (int) $wp_query->max_num_pages ?: 0;
 		$response['info']['results'] = (int) $wp_query->found_posts ?: 0;
