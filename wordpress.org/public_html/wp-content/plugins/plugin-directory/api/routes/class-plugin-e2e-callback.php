@@ -44,7 +44,7 @@ class Plugin_E2E_Callback extends Base {
 		// TODO: More sanitized/formatted data / transforming into other fields.
 
 		// POST data.
-		foreach ( $request->get_body_params() as $key => $val ) {
+		foreach ( $request->get_json_params() as $key => $val ) {
 			update_post_meta( $plugin->ID, 'e2e_' . $key, wp_slash( $val ) );
 		}
 
