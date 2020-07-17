@@ -47,8 +47,10 @@ class Block_Validator {
 								Tools::audit_log( 'Plugin added to block directory.', $post->ID );
 								self::maybe_send_email_plugin_added( $post );
 								Plugin_Import::queue( $post->post_name, array( 'tags_touched' => array( $post->stable_tag ) ) );
+								echo '<div class="notice notice-success notice-alt"><p>' . __( 'Plugin added to the block directory.', 'wporg-plugins' ) . '</p></div>';
 							} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
 								Tools::audit_log( 'Plugin removed from block directory.', $post->ID );
+								echo '<div class="notice notice-info notice-alt"><p>' . __( 'Plugin removed from the block directory.', 'wporg-plugins' ) . '</p></div>';
 							}
 						}
 					}
@@ -77,7 +79,30 @@ class Block_Validator {
 	}
 
 	/**
-	 * Validates readme.txt contents and adds feedback.
+	 * Render the form to add/remove the block from the directory.
+	 *
+	 * @param WP_Post $plugin     The post object representing this plugin.
+	 * @param bool    $has_errors Whether this plugin has errors preventing it from inclusion in the directory.
+	 */
+	protected static function render_plugin_actions( $plugin, $has_errors ) {
+		echo '<form method="post">';
+		echo '<input type="hidden" name="plugin-id" value="' . esc_attr( $plugin->ID ) . '" />';
+
+		if ( self::plugin_is_in_block_directory( $plugin->post_name ) ) {
+			echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
+			// translators: %s plugin title.
+			echo '<p><button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button></p>';
+		} else if ( ! $has_errors ) {
+			echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
+			// translators: %s plugin title.
+			echo '<p><button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button></p>';
+		}
+
+		echo '</form>';
+	}
+
+	/**
+	 * Validates a block plugin to check that blocks are correctly registered and detectable.
 	 *
 	 * @param string $plugin_url The URL of a Subversion or GitHub repository.
 	 */
@@ -91,7 +116,8 @@ class Block_Validator {
 		if ( $checker->repo_url && $checker->repo_revision ) {
 			echo '<p>';
 			printf(
-				'Results for %1$s revision %2$s',
+				// translators: %1$s is the repo URL, %2$s is a version number.
+				__( 'Results for %1$s revision %2$s', 'wporg-plugins' ),
 				'<code>' . esc_url( $checker->repo_url ) . '</code>',
 				esc_html( $checker->repo_revision )
 			);
@@ -108,88 +134,94 @@ class Block_Validator {
 			}
 		}
 
+		$has_errors = ! empty( $results_by_type['error'] );
+		$has_warnings = ! empty( $results_by_type['warning'] ) || ! empty( $block_json_issues );
+
+		if ( $has_errors ) :
+			?>
+			<div class="notice notice-error notice-alt">
+				<p><?php _e( 'Some problems were found. They need to be addressed in order for your plugin to be included in the Block Directory.', 'wporg-plugins' ); ?></p>
+			</div>
+		<?php elseif ( $checker->slug ) : ?>
+			<?php if ( self::plugin_is_in_block_directory( $checker->slug ) ) : ?>
+				<div class="notice notice-info notice-alt">
+					<p><?php _e( 'This plugin is already in the Block Directory.', 'wporg-plugins' ); ?></p>
+				</div>
+			<?php elseif ( $has_warnings ) : ?>
+				<div class="notice notice-info notice-alt">
+					<p><?php _e( 'You can add your plugin to the Block Directory.', 'wporg-plugins' ); ?></p>
+				</div>
+			<?php else : ?>
+				<div class="notice notice-success notice-alt">
+					<p><?php _e( 'No issues were found. You can add your plugin to the Block Directory.', 'wporg-plugins' ); ?></p>
+				</div>
+			<?php endif; ?>
+		<?php else : ?>
+			<div class="notice notice-info notice-alt">
+				<p>
+					<?php
+					printf(
+						__( 'Your plugin passed the checks, but only plugins hosted on WordPress.org can be added to the Block Directory. <a href="%s">Upload your plugin to the WordPress.org repo,</a> then come back here to add it to the Block Directory.', 'wporg-plugins' ),
+						esc_url( home_url( 'developers' ) )
+					);
+					?>
+				</p>
+			</div>
+			<?php
+		endif;
+
 		if ( $checker->slug ) {
 			$plugin = Plugin_Directory::get_plugin_post( $checker->slug );
 			if ( current_user_can( 'edit_post', $plugin->ID ) ) {
 				// Plugin reviewers etc
-				echo '<form method="post">';
 				echo '<h3>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</h3>';
 				echo '<ul>';
 				echo '<li><a href="' . get_edit_post_link( $plugin->ID ) . '">' . __( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
 				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li>';
 				echo '</ul>';
 
-				echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
-				echo '<input type="hidden" name="plugin-id" value="' . esc_attr( $plugin->ID ) . '" />';
-				echo '<p>';
-				if ( ! empty( $results_by_type['error'] ) ) {
-					// translators: %s plugin title.
-					printf( __( "%s can't be added to the block directory, due to errors in validation.", 'wporg-plugins' ), $plugin->post_title );
-				} else if ( self::plugin_is_in_block_directory( $checker->slug ) ) {
-					// translators: %s plugin title.
-					echo '<button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
-				} else {
-					// translators: %s plugin title.
-					echo '<button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
-				}
-				echo '</p>';
-				echo '</form>';
+				self::render_plugin_actions( $plugin, $has_errors );
 			} elseif ( current_user_can( 'plugin_admin_edit', $plugin->ID ) ) {
 				// Plugin committers
-				echo '<form method="post">';
 				echo '<h3>' . __( 'Committer Tools', 'wporg-plugins' ) . '</h3>';
 				echo '<ul>';
 				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . __( 'Browse code on trac', 'wporg-plugins' ) . '</a></li>';
 				echo '</ul>';
 
-				echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
-				echo '<input type="hidden" name="plugin-id" value="' . esc_attr( $plugin->ID ) . '" />';
-				echo '<p>';
-				if ( ! empty( $results_by_type['error'] ) ) {
-					// translators: %s plugin title.
-					printf( __( "%s can't be added to the block directory, due to errors in validation.", 'wporg-plugins' ), $plugin->post_title );
-				} else if ( self::plugin_is_in_block_directory( $checker->slug ) ) {
-					// translators: %s plugin title.
-					echo '<button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
-				} else {
-					// translators: %s plugin title.
-					echo '<button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
-				}
-				echo '</p>';
+				self::render_plugin_actions( $plugin, $has_errors );
 			}
 		}
 
 		$output = '';
 
-		if ( empty( $results_by_type['error'] ) ) {
-			$output .= '<h3>' . __( 'Success', 'wporg-plugins' ) . '</h3>';
-			$output .= "<div class='notice notice-success notice-alt'>\n";
-			if ( $checker->slug && self::plugin_is_in_block_directory( $checker->slug ) ) {
-				$output .= '<p>' . __( 'No problems were found. This plugin is already in the Block Directory.', 'wporg-plugins' ) . '</p>';
-			} else {
-				$output .= '<p>' . __( 'No problems were found. Your plugin has passed the first step towards being included in the Block Directory.', 'wporg-plugins' ) . '</p>';
-			}
-			$output .= "</div>\n";
-		} else {
-			$output .= '<h3>' . __( 'Problems were encountered', 'wporg-plugins' ) . '</h3>';
-			$output .= "<div class='notice notice-error notice-alt'>\n";
-			$output .= '<p>' . __( 'Some problems were found. They need to be addressed before your plugin will work in the Block Directory.', 'wporg-plugins' ) . '</p>';
-			$output .= "</div>\n";
-		}
-
 		$error_types = array(
-			'error'   => __( 'Fatal Errors:', 'wporg-plugins' ),
-			'warning' => __( 'Warnings:', 'wporg-plugins' ),
-			'info'    => __( 'Notes:', 'wporg-plugins' ),
+			'error'   => array(
+				'title' => __( 'Fatal Errors', 'wporg-plugins' ),
+				'description' => __( 'These issues must be fixed before this block can appear in the block directory.', 'wporg-plugis' ),
+			),
+			'warning' => array(
+				'title' => __( 'Recommendations', 'wporg-plugins' ),
+				'description' => __( 'These are suggestions to improve your block. While they are not required for your block plugin to be added to the Block Directory, addressing them will help people discover and use your block.', 'wporg-plugins' ),
+			),
+			'info'    => array(
+				'title' => __( 'Notes', 'wporg-plugins' ),
+				'description' => false,
+			),
 		);
-		foreach ( $error_types as $type => $warning_label ) {
+		foreach ( $error_types as $type => $labels ) {
 			if ( empty( $results_by_type[ $type ] ) ) {
-				continue;
+				// Print out the warning wrapper if we have block.json issues.
+				if ( 'warning' !== $type || empty( $block_json_issues ) ) {
+					continue;
+				}
 			}
 
-			$output .= "<h3>{$warning_label}</h3>\n";
+			$output .= "<h3>{$labels['title']}</h3>\n";
+			if ( $labels['description'] ) {
+				$output .= "<p class='small'>{$labels['description']}</p>\n";
+			}
 			$output .= "<div class='notice notice-{$type} notice-alt'>\n";
-			foreach ( $results_by_type[ $type ] as $item ) {
+			foreach ( (array) $results_by_type[ $type ] as $item ) {
 				// Only get details if this is a warning or error.
 				$details = ( 'info' === $type ) ? false : self::get_detailed_help( $item->check_name, $item );
 				if ( $details ) {
@@ -231,14 +263,22 @@ class Block_Validator {
 	 */
 	public static function get_detailed_help( $method, $result ) {
 		switch ( $method ) {
-			// These don't need more details.
 			case 'check_readme_exists':
+				return [
+					__( 'All plugins need a readme.txt file.', 'wporg-plugins' ),
+					sprintf(
+						'<a href="%1$s">%2$s</a>',
+						esc_url( home_url( 'developers/#readme' ) ),
+						__( 'Learn more about readmes.', 'wporg-plugins' )
+					),
+				];
 			case 'check_license':
+				return [
+					__( 'Plugins should include a GPL-compatible license in either readme.txt or the plugin headers.', 'wporg-plugins' ),
+					sprintf( '<a href="https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#1-plugins-must-be-compatible-with-the-gnu-general-public-license">%s</a>', __( 'Learn more about readmes.', 'wporg-plugins' ) ),
+				];
 			case 'check_plugin_headers':
-				return false;
-			// This is a special case, since multiple values may be collapsed.
-			case 'check_block_json_is_valid':
-				return false;
+				return sprintf( '<a href="https://developer.wordpress.org/plugins/plugin-basics/header-requirements/">%s</a>', __( 'Learn more about plugin headers.', 'wporg-plugins' ) );
 			case 'check_block_tag':
 				return __( 'The readme.txt file must contain the tag "block" (singular) for this to be added to the block directory.', 'wporg-plugins' );
 			case 'check_for_duplicate_block_name':
@@ -253,7 +293,7 @@ class Block_Validator {
 				return [
 					__( 'In order to work in the Block Directory, a plugin must register a block. Generally one per plugin (multiple blocks may be permitted if those blocks are interdependent, such as a list block that contains list item blocks).', 'wporg-plugins' ),
 					__( 'If your plugin doesn’t register a block, it probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' ),
-					sprintf( '<a href="TUTORIAL">%s</a>', __( 'Learn how to create a block.' ) ),
+					sprintf( '<a href="https://developer.wordpress.org/block-editor/tutorials/create-block/">%s</a>', __( 'Learn how to create a block.' ) ),
 				];
 			case 'check_for_block_json':
 				return __( 'Your plugin should contain at least one <code>block.json</code> file. This file contains metadata describing the block and its JavaScript and CSS assets. Make sure you include at least one <code>script</code> or <code>editorScript</code> item.', 'wporg-plugins' );
@@ -273,6 +313,11 @@ class Block_Validator {
 					__( 'Block names must contain a namespace prefix, include only lowercase alphanumeric characters or dashes, and start with a letter. The namespace should be unique to your block plugin, make sure to change any defaults from block templates like "create-block/" or "cgb/".', 'wporg-plugins' ),
 					__( 'Example: <code>my-plugin/my-custom-block</code>', 'wporg-plugins' ),
 				];
+			case 'check_for_single_parent':
+				return __( 'Block plugins should contain a single main block, which is added to the editor when the block is installed. If multiple blocks are used (ex: list items in a list block), the list items should set the `parent` property in their `block.json` file.', 'wporg-plugins' );
+			// This is a special case, since multiple values may be collapsed.
+			case 'check_block_json_is_valid':
+				return false;
 		}
 	}
 
