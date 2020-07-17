@@ -104,8 +104,8 @@ function get_canonical_url() {
 		$url = get_permalink( $queried_object );
 	} elseif ( is_search() ) {
 		$url = home_url( 'search/' . urlencode( get_query_var( 's' ) ) . '/' );
-	} elseif ( is_author() ) {
-		// On WordPress.org get_author_posts_url() returns profile.wordpress.org links. Build it manually.
+	} elseif ( is_author() && $queried_object instanceOf \WP_User ) {
+		// On WordPress.org get_author_posts_url() returns profile.wordpress.org links. Build it manually
 		$url = home_url( 'author/' . $queried_object->user_nicename . '/' );
 	} elseif ( is_post_type_archive() ) {
 		$url = get_post_type_archive_link( $queried_object->name );
