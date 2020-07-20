@@ -529,48 +529,7 @@ class Import {
 		if ( empty( $block_files ) ) {
 			$build_files = array();
 
-			if ( ! empty( $potential_block_directories ) ) {
-				$potential_block_directories = array_unique( $potential_block_directories );
-
-				foreach ( $potential_block_directories as $block_dir ) {
-					// dirname() returns . when there is no directory separator present.
-					if ( '.' === $block_dir ) {
-						$block_dir = '';
-					}
-
-					// First look for a dedicated "build" or "dist" directory.
-					foreach ( array( 'build', 'dist' ) as $dirname ) {
-						if ( is_dir( "$base_dir/$block_dir/$dirname" ) ) {
-							$build_files += Filesystem::list_files( "$base_dir/$block_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
-						}
-					}
-
-					// There must be at least on JS file, so if only css was found, keep looking.
-					if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
-						// Then check for files in the current directory with "build" or "min" in the filename.
-						$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '![_\-\.]+(?:build|dist|min)[_\-\.]+!i' );
-					}
-
-					if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
-						// Finally, just grab whatever js/css files there are in the current directory.
-						$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '#(?<!webpack\.config)\.(?:js|jsx|css)$#i' );
-					}
-				}
-			}
-
-			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
-				// Nothing in the potential block directories. Check if we somehow missed build/dist directories in the root.
-				foreach ( array( 'build', 'dist' ) as $dirname ) {
-					if ( is_dir( "$base_dir/$dirname" ) ) {
-						$build_files += Filesystem::list_files( "$base_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
-					}
-				}
-			}
-
-			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
-				// Still nothing. Take on last wild swing.
-				$build_files += Filesystem::list_files( $base_dir, false, '!\.(?:js|jsx|css)$!i' );
-			}
+			$build_files = self::find_possible_block_assets( $base_dir, $potential_block_directories );
 
 			foreach ( $build_files as $file ) {
 				$block_files[] = "/$stable_path/" . ltrim( str_replace( "$base_dir/", '', $file ), '/' );
@@ -731,5 +690,62 @@ class Import {
 		}
 
 		return $files;
+	}
+
+	/**
+	 * Find likely JS and CSS block asset files in a given directory.
+	 *
+	 * @param string $base_dir Base path in which to search.
+	 * @param array $potential_block_directories Subdirectories likely to contain block assets, if known. Optional.
+	 *
+	 * @return array
+	 */
+	static function find_possible_block_assets( $base_dir, $potential_block_directories = null ) {
+		if ( empty( $potential_block_directories ) || !is_array( $potential_block_directories ) ) {
+			$potential_block_directories = array( '.' );
+		}
+
+		$build_files = array();
+
+		foreach ( $potential_block_directories as $block_dir ) {
+			// dirname() returns . when there is no directory separator present.
+			if ( '.' === $block_dir ) {
+				$block_dir = '';
+			}
+
+			// First look for a dedicated "build" or "dist" directory.
+			foreach ( array( 'build', 'dist' ) as $dirname ) {
+				if ( is_dir( "$base_dir/$block_dir/$dirname" ) ) {
+					$build_files += Filesystem::list_files( "$base_dir/$block_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
+				}
+			}
+
+			// There must be at least on JS file, so if only css was found, keep looking.
+			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+				// Then check for files in the current directory with "build" or "min" in the filename.
+				$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '![_\-\.]+(?:build|dist|min)[_\-\.]+!i' );
+			}
+
+			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+				// Finally, just grab whatever js/css files there are in the current directory.
+				$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '#(?<!webpack\.config)\.(?:js|jsx|css)$#i' );
+			}
+		}
+
+		if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+			// Nothing in the potential block directories. Check if we somehow missed build/dist directories in the root.
+			foreach ( array( 'build', 'dist' ) as $dirname ) {
+				if ( is_dir( "$base_dir/$dirname" ) ) {
+					$build_files += Filesystem::list_files( "$base_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
+				}
+			}
+		}
+
+		if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+			// Still nothing. Take on last wild swing.
+			$build_files += Filesystem::list_files( $base_dir, false, '!\.(?:js|jsx|css)$!i' );
+		}
+
+		return array_unique( $build_files );
 	}
 }
