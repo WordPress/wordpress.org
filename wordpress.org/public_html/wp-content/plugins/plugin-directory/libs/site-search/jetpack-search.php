@@ -234,13 +234,15 @@ class Jetpack_Search {
 		$response = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
 		// Use a temporary lock to prevent cache stampedes.
-		// This will ensure that a maximum of two processes are performing the search, or one when the stale value is still known.
+		// This will ensure that a maximum number of processes are performing the same search, or one when the stale value is still known.
 		// Other processes will use the stale cached value if it's present, even for a while after the expiration time if a fresh value is still being fetched.
+		$maximum_concurrent_requests = 3;
+
 		$do_fresh_request = false;
-		if ( wp_cache_add( $lock_key, 1, self::CACHE_GROUP, 15 ) ) {
+		if ( wp_cache_add( $lock_key, 1, self::CACHE_GROUP, 20 ) ) {
 			$do_fresh_request = true;
-		} elseif ( ! $response && 2 === wp_cache_incr( $lock_key, 1, self::CACHE_GROUP ) ) {
-			// If we don't have cached data, this is the second request and, error volume is low, still perform the request.
+		} elseif ( ! $response && $maximum_concurrent_requests >= wp_cache_incr( $lock_key, 1, self::CACHE_GROUP ) ) {
+			// If we don't have cached data, we haven't exceeded the maximum concurrent requests and, error volume is low, still perform the request.
 			$do_fresh_request = $this->error_volume_is_low();
 		}
 
