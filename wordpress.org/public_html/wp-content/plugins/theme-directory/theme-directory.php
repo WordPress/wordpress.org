@@ -1131,7 +1131,9 @@ function wporg_themes_add_meta_tags() {
 add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
 
 /**
- * Noindex outdated themes.
+ * SEO Tweaks
+ *  - noindex outdated themes.
+ *  - noindex filtered views.
  */
 function wporg_themes_noindex_request( $noindex ) {
 	if ( is_single() && ( $post = get_post() ) ) {
@@ -1142,6 +1144,10 @@ function wporg_themes_noindex_request( $noindex ) {
 				$noindex = true;
 			}
 		}
+	}
+
+	if ( is_tag() ) {
+		$noindex = true;
 	}
 
 	return $noindex;
@@ -1314,7 +1320,7 @@ function wporg_themes_get_current_url( $path_only = false ) {
 /**
  * Filter the WordPress.org SEO plugin Canonical location to respect Theme Directory differences.
  */
-function wporg_canonical_url( $url ) {
+function wporg_themes_canonical_url( $url ) {
 	if ( get_query_var( 'browse' ) && WPORG_THEMES_DEFAULT_BROWSE === get_query_var( 'browse' ) ) {
 		$url = home_url( '/' );
 	} elseif ( get_query_var( 'browse' ) ) {
@@ -1324,7 +1330,7 @@ function wporg_canonical_url( $url ) {
 
 	return $url;
 }
-add_filter( 'wporg_canonical_url', 'wporg_canonical_url' );
+add_filter( 'wporg_canonical_url', 'wporg_themes_canonical_url' );
 
 // Theme Directory doesn't support pagination.
 add_filter( 'wporg_rel_next_pages', '__return_zero' );
