@@ -36,6 +36,8 @@ class Block_Plugin_Checker {
 	protected $block_json_files = null;
 	protected $asset_php_files = null;
 	protected $block_json_validation = array();
+	protected $block_assets = array();
+	protected $block_scripts = array();
 
 	/**
 	 * Constructor.
@@ -232,6 +234,9 @@ class Block_Plugin_Checker {
 		}
 
 		$this->asset_php_files = $this->find_asset_php_files( $this->path_to_plugin );
+
+		$this->block_assets = $this->find_block_assets( $this->path_to_plugin );
+		$this->block_scripts = $this->find_block_scripts( $this->path_to_plugin );
 	}
 
 	public function relative_filename( $filename ) {
@@ -273,7 +278,27 @@ class Block_Plugin_Checker {
 		return $blocks;
 	}
 
-	public function find_block_scripts() {
+	public function find_block_assets( $base_dir ) {
+		$assets = Import::find_possible_block_assets( $base_dir );
+		$assets = array_map( array( $this, 'relative_filename' ), $assets );
+
+		$block_assets = array(
+			'js' => array(),
+			'css' => array(),
+		);
+
+		foreach ( $assets as $file ) {
+			$ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
+			if ( array_key_exists( $ext, $block_assets ) ) {
+				$block_assets[ $ext ][] = $file;
+			}
+		}
+
+		return $block_assets;
+	}
+
+	public function find_block_scripts( $base_dir ) {
+
 		$block_scripts = \array_map(
 			function( $block ) {
 				$assets = array();
@@ -282,6 +307,18 @@ class Block_Plugin_Checker {
 				foreach ( $props as $prop ) {
 					if ( isset( $block->$prop ) ) {
 						$assets[ $prop ] = $block->$prop;
+					}
+				}
+
+				// If no block.json data was found, try to guess.
+				if ( empty( $assets ) ) {
+					// If js or css assets were found, assume we can use the first one.
+					if ( !empty( $this->block_assets[ 'js' ] ) ) {
+						$assets[ 'script' ] = reset( $this->block_assets[ 'js' ] );
+					}
+
+					if ( !empty( $this->block_assets[ 'css' ] ) ) {
+						$assets[ 'style' ] = reset( $this->block_assets[ 'css' ] );
 					}
 				}
 				return $assets;
@@ -569,7 +606,7 @@ class Block_Plugin_Checker {
 	 */
 	function check_for_block_script_files() {
 		$seen_scripts = array();
-		foreach ( $this->find_block_scripts() as $block_name => $scripts ) {
+		foreach ( $this->block_scripts as $block_name => $scripts ) {
 			foreach ( $scripts as $kind => $script ) {
 				// No need to warn multiple times for the same value.
 				if ( in_array( $script, $seen_scripts ) ) {
