@@ -19,8 +19,8 @@ function verify_signature() {
 	$expected_signature = 'sha1=' . hash_hmac( 'sha1', file_get_contents( 'php://input' ), GH_PRBOT_WEBHOOK_SECRET );
 
 	if ( ! hash_equals( $expected_signature, $sent_signature ) ) {
-		header( 'HTTP/1.0 403 Forbidden' );
-		die('-1');
+		header( 'HTTP/1.0 403 Forbidden', true, 403 );
+		die( 'Signature Failure' );
 	}
 }
 
@@ -39,7 +39,17 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 		$pr_number = $payload->number;
 
 		// API call to get the latest PR details, not all actions that trigger this include the full PR details.
-		$pr_data   = fetch_pr_data( $pr_repo, $pr_number );
+		$pr_data = fetch_pr_data( $pr_repo, $pr_number );
+		if ( ! $pr_data ) {
+			// One retry..
+			sleep( 2 );
+			$pr_data = fetch_pr_data( $pr_repo, $pr_number );
+		}
+		if ( ! $pr_data ) {
+			// Failed, we need the PR data to be able to process the request.
+			header( 'HTTP/1.0 500 Internal Server Error', true, 500 );
+			die( 'Unable to fetch PR data.' );
+		}
 
 		// Step 1. Is this PR associated with any Trac tickets?
 		$existing_refs = $wpdb->get_results( $wpdb->prepare(
