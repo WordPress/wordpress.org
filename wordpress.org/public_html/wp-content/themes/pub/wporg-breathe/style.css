@@ -7,7 +7,7 @@
 
 /* Show a Slack icon in front of Slack links. */
 a[href*=".slack.com"] {
-	white-space: nowrap;
+	word-break: break-all;
 }
 a[href*=".slack.com"]::before {
 	content: '';
