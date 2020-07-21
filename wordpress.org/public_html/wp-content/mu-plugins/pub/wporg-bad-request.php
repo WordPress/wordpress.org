@@ -52,7 +52,7 @@ add_action( 'send_headers', function( $wp ) {
  * Detect invalid parameters being passed to o2.
  */
 add_action( 'wp_ajax_nopriv_o2_read', function() {
-	foreach ( array( 'postId', 'rando', 'scripts', 'styles', 'since' ) as $field ) {
+	foreach ( array( 'postId', 'rando', 'scripts', 'styles', 'since', 'method' ) as $field ) {
 		if ( !empty( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
 			die_bad_request( "non-scalar input to o2" );
 		}
