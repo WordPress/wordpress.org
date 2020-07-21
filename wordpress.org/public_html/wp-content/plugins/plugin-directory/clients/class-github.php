@@ -42,9 +42,9 @@ class GitHub {
 	 * Fetch an App Authorization token for accessing Github Resources.
 	 */
 	protected static function get_app_install_token() {
-		$token = false; get_site_transient( __CLASS__ . 'app_install_token' );
-		if ( $token ) {
-			return $token;
+		$token = get_site_transient( __CLASS__ . 'app_install_token' );
+		if ( $token && is_array( $token ) && $token['exp'] > time() ) {
+			return $token['token'];
 		}
 
 		$jwt_token = self::get_jwt_app_token();
@@ -87,7 +87,8 @@ class GitHub {
 		$token_exp = strtotime( $access_token->expires_at );
 
 		// Cache the token for 1 minute less than what it's valid for.
-		set_site_transient( __CLASS__ . 'app_install_token', $token, $token_exp - time() - MINUTE_IN_SECONDS );
+		$exp = $token_exp - time() - MINUTE_IN_SECONDS;
+		set_site_transient( __CLASS__ . 'app_install_token', [ 'exp' => time() + $exp, 'token' => $token ], $exp );
 
 		return $token;
 	}
@@ -97,8 +98,8 @@ class GitHub {
 	 */
 	protected static function get_jwt_app_token() {
 		$token = get_site_transient( __CLASS__ . 'app_token' );
-		if ( $token ) {
-			return $token;
+		if ( $token && is_array( $token ) && $token['exp'] > time() ) {
+			return $token['token'];
 		}
 
 		// This should be replaced with an Autoloader.
@@ -118,7 +119,8 @@ class GitHub {
 		) );
 
 		// Cache it for 9 mins (It's valid for 10min).
-		set_site_transient( __CLASS__ . 'app_token', $token, 9 * MINUTE_IN_SECONDS );
+		$exp = 9 * MINUTE_IN_SECONDS;
+		set_site_transient( __CLASS__ . 'app_token', [ 'exp' => time() + $exp, 'token' => $token ], $exp );
 
 		return $token;
 	}
