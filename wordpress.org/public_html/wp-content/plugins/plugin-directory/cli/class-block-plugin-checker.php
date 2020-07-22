@@ -846,6 +846,7 @@ class Block_Plugin_Checker {
 	function check_php_function_calls() {
 		$warning_functions = array(
 			'wp_localize_script',
+			'wp_add_inline_script',
 		);
 		$error_functions = array(
 			'header',
@@ -858,18 +859,25 @@ class Block_Plugin_Checker {
 				$this->record_result(
 					__FUNCTION__,
 					'warning',
-					sprintf( __( 'Found PHP call <a href="%s">%s</a>. This may cause problems.', 'wporg-plugins' ), $this->get_browser_url( $call[2] ) . '#L' . $call[1], $call[0] . '()' ),
+					sprintf(
+						// translators: %s is the function name.
+						__( 'Found PHP call %s. This may cause problems.', 'wporg-plugins' ),
+						'<a href="' . $this->get_browser_url( $call[2] ) . '#L' . $call[1] . '"><code>' . $call[0] . '()</code></a>'
+					),
 					$call
 				);
 			} elseif ( in_array( $call[0], $error_functions ) ) {
 				$this->record_result(
 					__FUNCTION__,
 					'error',
-					sprintf( __( 'Found PHP call <a href="%s">%s</a>. This is likely to prevent your plugin from working as expected.', 'wporg-plugins' ), $this->get_browser_url( $call[2] ) . '#L' . $call[1], $call[0] . '()' ),
+					sprintf(
+						// translators: %s is the function name.
+						__( 'Found PHP call %s. This is likely to prevent your plugin from working as expected.', 'wporg-plugins' ),
+						'<a href="' . $this->get_browser_url( $call[2] ) . '#L' . $call[1] . '"><code>' . $call[0] . '()</code></a>'
+					),
 					$call
 				);
 			}
-			
 		}
 
 	}
