@@ -54,6 +54,17 @@ class Block_Plugin_Checker {
 	}
 
 	/**
+	 * Magic accessor method, for read-only access to internals.
+	 *
+	 * @param string $name Property name.
+	 */
+	public function __get( $name ) {
+		if ( property_exists( $this, $name ) ) {
+			return $this->$name;
+		}
+	}
+
+	/**
 	 * Getter function for results.
 	 */
 	public function get_results( $type = null, $check = null ) {
@@ -68,6 +79,22 @@ class Block_Plugin_Checker {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * Return a trac/github browser link to a file in the plugin.
+	 *
+	 * @param string $file The file pathname.
+	 */
+	public function get_browser_url( $file ) {
+		if ( !empty( $this->repo_url ) ) {
+			$file = $this->relative_filename( $file );
+			if ( 0 === strpos( $this->repo_url, 'https://github.com' ) ) {
+				return str_replace( '.git/trunk', '/blob/master', $this->repo_url ) . '/' . $file;
+			} elseif ( 0 === strpos( $this->repo_url, 'https://plugins.svn.wordpress.org' ) ) {
+				return str_replace( 'https://plugins.svn.wordpress.org', 'https://plugins.trac.wordpress.org/browser', $this->repo_url ) . '/' . $file;
+			}
+		}
 	}
 
 	/**
