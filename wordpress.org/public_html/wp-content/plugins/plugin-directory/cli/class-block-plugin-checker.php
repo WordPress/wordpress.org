@@ -38,6 +38,7 @@ class Block_Plugin_Checker {
 	protected $block_json_validation = array();
 	protected $block_assets = array();
 	protected $block_scripts = array();
+	protected $php_function_calls = array();
 
 	/**
 	 * Constructor.
@@ -264,6 +265,8 @@ class Block_Plugin_Checker {
 
 		$this->block_assets = $this->find_block_assets( $this->path_to_plugin );
 		$this->block_scripts = $this->find_block_scripts( $this->path_to_plugin );
+
+		$this->php_function_calls = $this->find_php_functions( $this->path_to_plugin );
 	}
 
 	public function relative_filename( $filename ) {
@@ -361,6 +364,54 @@ class Block_Plugin_Checker {
 	 */
 	public function find_asset_php_files( $base_dir ) {
 		return Filesystem::list_files( $base_dir, true, '!(:^|/)\w+\.asset\.php$!' );
+	}
+
+	/**
+	 * Return a list of functions called in a given PHP file.
+	 * This is not perfect, and will miss some.
+	 *
+	 * @param string $file Path to a PHP file.
+	 * @return array A list of functions found, in (function, line, file) form.
+	 */ 
+	public static function find_called_functions_in_file($file) {
+		$source = file_get_contents($file);
+		$tokens = token_get_all($source, TOKEN_PARSE);
+
+		$function_calls = array();
+		$context = array();
+
+		foreach($tokens as $token) {
+			if ( T_STRING === $token[0] ) {
+				$context[] = $token;
+			} elseif ( '(' === $token[0] ) {
+
+				while ( $last = array_pop( $context ) ) {
+					if ( T_STRING === $last[0] && function_exists( $last[1] ) ) {
+						$function_calls[] = array( $last[1], $last[2], $file );
+					}
+				}
+				$context[] = array();
+			} elseif ( ';' === $token[0] || '}' === $token[0] || T_COMMENT === $token[0] ) {
+				$context = array();
+			} elseif ( T_WHITESPACE === $token[0] ) {
+				$context[] = ' ';
+			} else {
+				$context[] = $token[0];
+			}	
+		}
+
+		return $function_calls;
+	}
+
+	public function find_php_functions( $base_dir ) {
+		$all_calls = array();
+
+		foreach ( Filesystem::list_files( $base_dir, true, '!\.php$!i' ) as $filename ) {
+			$php_calls = self::find_called_functions_in_file( $filename );
+			$all_calls += $php_calls;
+		}
+
+		return $all_calls;
 	}
 
 	/**
@@ -787,5 +838,39 @@ class Block_Plugin_Checker {
 				$total_size
 			);
 		}
+	}
+
+	/**
+	 * Does it make PHP function calls that shouldn't be in a block plugin?
+	 */
+	function check_php_function_calls() {
+		$warning_functions = array(
+			'wp_localize_script',
+		);
+		$error_functions = array(
+			'header',
+			'wp_redirect',
+			'wp_safe_redirect',
+		);
+
+		foreach ( $this->php_function_calls as $call ) {
+			if ( in_array( $call[0], $warning_functions ) ) {
+				$this->record_result(
+					__FUNCTION__,
+					'warning',
+					sprintf( __( 'Found PHP call <a href="%s">%s</a>. This may cause problems.', 'wporg-plugins' ), $this->get_browser_url( $call[2] ) . '#L' . $call[1], $call[0] . '()' ),
+					$call
+				);
+			} elseif ( in_array( $call[0], $error_functions ) ) {
+				$this->record_result(
+					__FUNCTION__,
+					'error',
+					sprintf( __( 'Found PHP call <a href="%s">%s</a>. This is likely to prevent your plugin from working as expected.', 'wporg-plugins' ), $this->get_browser_url( $call[2] ) . '#L' . $call[1], $call[0] . '()' ),
+					$call
+				);
+			}
+			
+		}
+
 	}
 }

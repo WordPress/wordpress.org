@@ -315,6 +315,8 @@ class Block_Validator {
 				];
 			case 'check_for_single_parent':
 				return __( 'Block plugins should contain a single main block, which is added to the editor when the block is installed. If multiple blocks are used (ex: list items in a list block), the list items should set the `parent` property in their `block.json` file.', 'wporg-plugins' );
+			case 'check_php_function_calls':
+				return __( 'Block plugins should contain minimal PHP with no UI outside the editor. JavaScript should be used instead of PHP where possible.', 'wporg-plugins' );
 			// This is a special case, since multiple values may be collapsed.
 			case 'check_block_json_is_valid':
 				return false;
