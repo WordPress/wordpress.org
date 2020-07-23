@@ -167,6 +167,18 @@ div.sidebar #bbpress-forums {
 	}
 }
 
+@media screen and ( max-width: 482px ) {
+	#bbpress-forums #bbp-single-user-details {
+		margin-bottom: 20px;
+		text-align: center;
+		width: 100%;
+
+		#bbp-user-avatar {
+			width: inherit;
+		}
+	}
+}
+
 #bbpress-forums li.bbp-footer {
 	display: none;
 }
