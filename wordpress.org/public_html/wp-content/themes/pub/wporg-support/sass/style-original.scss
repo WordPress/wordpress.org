@@ -149,8 +149,22 @@ div.sidebar #bbpress-forums {
 	padding: 5px 15px;
 }
 
-#bbpress-forums #bbp-your-profile fieldset label {
-	white-space: nowrap;
+@media screen and ( max-width: 782px ) {
+	#bbpress-forums #bbp-your-profile fieldset {
+		padding: 0px 20px 30px;
+	}
+
+	#bbpress-forums #bbp-your-profile fieldset label[for] {
+		text-align: left;
+		width: 100%;
+		white-space: inherit;
+	}
+
+	#bbpress-forums #bbp-your-profile fieldset input,
+	#bbpress-forums #bbp-your-profile fieldset select,
+	#bbpress-forums #bbp-your-profile fieldset textarea {
+		width: 100%;
+	}
 }
 
 #bbpress-forums li.bbp-footer {
