@@ -10,31 +10,33 @@ class Plugins_Info_API_Request {
 	protected $requested_fields = array();
 
 	static $fields = array(
-		'active_installs'   => false,
-		'added'             => false,
-		'banners'           => false,
-		'compatibility'     => false,
-		'contributors'      => false,
-		'description'       => false,
-		'donate_link'       => false,
-		'downloaded'        => false,
-		'downloadlink'      => false,
-		'homepage'          => false,
-		'icons'             => false,
-		'last_updated'      => false,
-		'rating'            => false,
-		'ratings'           => false,
-		'reviews'           => false,
-		'requires'          => false,
-		'requires_php'      => false,
-		'sections'          => false,
-		'short_description' => false,
-		'tags'              => false,
-		'tested'            => false,
-		'stable_tag'        => false,
-		'blocks'            => false,
-		'block_assets'      => false,
-		'language_pack'     => false,
+		'active_installs'     => false,
+		'added'               => false,
+		'banners'             => false,
+		'compatibility'       => false,
+		'contributors'        => false,
+		'description'         => false,
+		'donate_link'         => false,
+		'downloaded'          => false,
+		'downloadlink'        => false,
+		'homepage'            => false,
+		'icons'               => false,
+		'last_updated'        => false,
+		'rating'              => false,
+		'ratings'             => false,
+		'reviews'             => false,
+		'requires'            => false,
+		'requires_php'        => false,
+		'sections'            => false,
+		'short_description'   => false,
+		'tags'                => false,
+		'tested'              => false,
+		'stable_tag'          => false,
+		'blocks'              => false,
+		'block_assets'        => false,
+		'author_block_count'  => false,
+		'author_block_rating' => false,
+		'language_pack'       => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -54,9 +56,6 @@ class Plugins_Info_API_Request {
 		'sections'          => true,
 		'tags'              => true,
 		'tested'            => true,
-		'language_pack'     => false,
-		'blocks'            => false,
-		'block_assets'      => false,
 	);
 
 	// Alterations made to default fields in the info/1.2 API.
@@ -88,8 +87,6 @@ class Plugins_Info_API_Request {
 		'short_description' => true,
 		'tags'              => true,
 		'tested'            => true,
-		'blocks'            => false,
-		'block_assets'      => false,
 	);
 
 	// Alterations made to the default fields in the info/1.2 API.
