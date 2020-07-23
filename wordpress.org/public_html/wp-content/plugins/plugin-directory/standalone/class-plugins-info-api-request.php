@@ -34,6 +34,7 @@ class Plugins_Info_API_Request {
 		'stable_tag'        => false,
 		'blocks'            => false,
 		'block_assets'      => false,
+		'language_pack'     => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -53,6 +54,7 @@ class Plugins_Info_API_Request {
 		'sections'          => true,
 		'tags'              => true,
 		'tested'            => true,
+		'language_pack'     => false,
 		'blocks'            => false,
 		'block_assets'      => false,
 	);

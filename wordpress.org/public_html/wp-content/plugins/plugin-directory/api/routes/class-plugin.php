@@ -224,6 +224,28 @@ class Plugin extends Base {
 		// Fun fact: ratings are stored as 1-5 in postmeta, but returned as percentages by the API
 		$result['author_block_rating'] = get_post_meta( $post_id, 'author_block_rating', true ) ? 20 * get_post_meta( $post_id, 'author_block_rating', true ) : $result['rating'];
 
+		// Translations.
+		$result['language_pack'] = [];
+		if ( defined ( 'API_WPORGPATH' ) && file_exists( API_WPORGPATH . '/translations/lib.php' ) ) {
+			require API_WPORGPATH . '/translations/lib.php';
+
+			$result['language_pack'] = find_all_translations_for_type_and_domain(
+				'plugin',
+				$result['slug'],
+				$result['version']
+			);
+			$result['language_pack'] = array_map( function( $item ) use ( $result ) {
+				return [
+					'type'     => 'plugin',
+					'slug'     => $result['slug'],
+					'language' => $item->language,
+					'version'  => $item->version,
+					'updated'  => $item->updated,
+					'package'  => $item->package,
+				];
+			}, $result['language_pack'] );
+		}
+
 		// That's all folks!
 		return $result;
 	}

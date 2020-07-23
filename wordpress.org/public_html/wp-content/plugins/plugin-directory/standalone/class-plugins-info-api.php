@@ -179,6 +179,13 @@ class Plugins_Info_API {
 			}
 		}
 
+		// Only include language packs for the requested locale.
+		if ( ! empty( $fields['language_pack'] ) ) {
+			$response['language_pack'] = array_values( array_filter( $response['language_pack'], function( $item ) use ( $request ) {
+				return ( $request->locale === $item['language'] );
+			} ) );
+		}
+
 		return $response;
 	}
 
