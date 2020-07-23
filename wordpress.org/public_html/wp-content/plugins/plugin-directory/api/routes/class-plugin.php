@@ -227,7 +227,7 @@ class Plugin extends Base {
 		// Translations.
 		$result['language_pack'] = [];
 		if ( defined ( 'API_WPORGPATH' ) && file_exists( API_WPORGPATH . '/translations/lib.php' ) ) {
-			require API_WPORGPATH . '/translations/lib.php';
+			require_once API_WPORGPATH . '/translations/lib.php';
 
 			$result['language_pack'] = find_all_translations_for_type_and_domain(
 				'plugin',
