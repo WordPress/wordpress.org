@@ -152,9 +152,6 @@ class Export extends WP_CLI_Command {
 				return 'po';
 			}, $entry->references );
 
-			// Always add all entries to the PO file.
-			$sources[] = 'po';
-
 			$sources = array_unique( $sources );
 
 			foreach ( $sources as $source ) {
