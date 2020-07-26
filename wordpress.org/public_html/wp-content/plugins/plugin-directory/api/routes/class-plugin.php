@@ -225,16 +225,16 @@ class Plugin extends Base {
 		$result['author_block_rating'] = get_post_meta( $post_id, 'author_block_rating', true ) ? 20 * get_post_meta( $post_id, 'author_block_rating', true ) : $result['rating'];
 
 		// Translations.
-		$result['language_pack'] = [];
+		$result['language_packs'] = [];
 		if ( defined ( 'API_WPORGPATH' ) && file_exists( API_WPORGPATH . '/translations/lib.php' ) ) {
 			require_once API_WPORGPATH . '/translations/lib.php';
 
-			$result['language_pack'] = find_all_translations_for_type_and_domain(
+			$result['language_packs'] = find_all_translations_for_type_and_domain(
 				'plugin',
 				$result['slug'],
 				$result['version']
 			);
-			$result['language_pack'] = array_map( function( $item ) use ( $result ) {
+			$result['language_packs'] = array_map( function( $item ) use ( $result ) {
 				return [
 					'type'     => 'plugin',
 					'slug'     => $result['slug'],
@@ -243,7 +243,7 @@ class Plugin extends Base {
 					'updated'  => $item->updated,
 					'package'  => $item->package,
 				];
-			}, $result['language_pack'] );
+			}, $result['language_packs'] );
 		}
 
 		// That's all folks!

@@ -36,7 +36,7 @@ class Plugins_Info_API_Request {
 		'block_assets'        => false,
 		'author_block_count'  => false,
 		'author_block_rating' => false,
-		'language_pack'       => false,
+		'language_packs'      => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
