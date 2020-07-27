@@ -37,7 +37,6 @@ class Block_Plugin_Checker {
 	protected $asset_php_files = null;
 	protected $block_json_validation = array();
 	protected $block_assets = array();
-	protected $block_scripts = array();
 	protected $php_function_calls = array();
 
 	/**
@@ -264,7 +263,6 @@ class Block_Plugin_Checker {
 		$this->asset_php_files = $this->find_asset_php_files( $this->path_to_plugin );
 
 		$this->block_assets = $this->find_block_assets( $this->path_to_plugin );
-		$this->block_scripts = $this->find_block_scripts( $this->path_to_plugin );
 
 		$this->php_function_calls = $this->find_php_functions( $this->path_to_plugin );
 	}
@@ -325,38 +323,6 @@ class Block_Plugin_Checker {
 		}
 
 		return $block_assets;
-	}
-
-	public function find_block_scripts( $base_dir ) {
-
-		$block_scripts = \array_map(
-			function( $block ) {
-				$assets = array();
-				$props = array( 'editorScript', 'script', 'editorStyle', 'style' );
-
-				foreach ( $props as $prop ) {
-					if ( isset( $block->$prop ) ) {
-						$assets[ $prop ] = $block->$prop;
-					}
-				}
-
-				// If no block.json data was found, try to guess.
-				if ( empty( $assets ) ) {
-					// If js or css assets were found, assume we can use the first one.
-					if ( !empty( $this->block_assets[ 'js' ] ) ) {
-						$assets[ 'script' ] = reset( $this->block_assets[ 'js' ] );
-					}
-
-					if ( !empty( $this->block_assets[ 'css' ] ) ) {
-						$assets[ 'style' ] = reset( $this->block_assets[ 'css' ] );
-					}
-				}
-				return $assets;
-			},
-			$this->blocks
-		);
-
-		return $block_scripts;
 	}
 
 	/**
@@ -683,15 +649,9 @@ class Block_Plugin_Checker {
 	 * Do the script files all exist?
 	 */
 	function check_for_block_script_files() {
-		$seen_scripts = array();
-		foreach ( $this->block_scripts as $block_name => $scripts ) {
-			foreach ( $scripts as $kind => $script ) {
-				// No need to warn multiple times for the same value.
-				if ( in_array( $script, $seen_scripts ) ) {
-					continue;
-				}
-				$seen_scripts[] = $script;
-				$file_path = trailingslashit( $this->path_to_plugin ) . str_replace( 'file:', '', $script );
+		foreach ( $this->block_assets as $kind => $scripts ) {
+			foreach ( $scripts as $script ) {
+				$file_path = trailingslashit( $this->path_to_plugin ) . $script;
 				if ( file_exists( $file_path ) ) {
 					$this->record_result(
 						__FUNCTION__,
@@ -703,10 +663,10 @@ class Block_Plugin_Checker {
 				} else {
 					// translators: %s is the file name.
 					$message = __( 'Expected %s to be a valid file path.', 'wporg-plugins' );
-					if ( in_array( $kind, array( 'editorScript', 'script' ) ) ) {
+					if ( 'js' === $kind ) {
 						// translators: %s is the file name.
 						$message = __( 'Expected %s to be a valid JavaScript file path.', 'wporg-plugins' );
-					} else if ( in_array( $kind, array( 'editorStyle', 'style' ) ) ) {
+					} else if ( 'css' === $kind ) {
 						// translators: %s is the file name.
 						$message = __( 'Expected %s to be a valid CSS file path.', 'wporg-plugins' );
 					}
