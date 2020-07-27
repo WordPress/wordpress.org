@@ -179,6 +179,11 @@ class Plugins_Info_API {
 			}
 		}
 
+		// Only include block translation data for the selected locale.
+		if ( ! empty( $response['block_translations'] ) ) {
+			$response['block_translations'] = !empty( $response['block_translations'][ $request->locale ] ) ? $response['block_translations'][ $request->locale ] : [];
+		}
+
 		return $response;
 	}
 

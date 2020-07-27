@@ -105,6 +105,7 @@ class Plugins_Info_API_Request {
 	static $query_plugins_fields_defaults_block = array(
 		'blocks'               => true,
 		'block_assets'         => true,
+		'block_translations'   => true,
 		'author_block_count'   => true,
 		'author_block_rating'  => true,
 	);

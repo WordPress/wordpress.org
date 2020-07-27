@@ -246,6 +246,29 @@ class Plugin extends Base {
 			}, $result['language_packs'] );
 		}
 
+		// Include json translation data directly for block plugins, so it's immediately available on insert
+		if ( !empty( $result['language_pack'] ) && !empty( $result['block_assets'] ) ) {
+			foreach ( $result['block_assets'] as $file ) {
+				if ( 'js' === pathinfo( $file, PATHINFO_EXTENSION ) ) {
+					// Look inside language pack zip files for a correctly names .json
+					foreach ( $result['language_pack'] as $lp ) {
+						$version_path = 'trunk' === $result['stable_tag'] ? 'trunk' : 'tags/' . $result['stable_tag'];
+						$_file = str_replace( "/{$version_path}/", '', $file );
+						$zip_path = '/nfs/rosetta/builds/plugins/' . $result['slug'] . '/' . $result['version'] . '/' . $lp['language'] . '.zip';
+						$json_file = $result['slug'] . '-' . $lp['language'] . '-' . md5( $_file ) . '.json';
+						if ( $fp = fopen( "zip://$zip_path#$json_file", 'r' ) ) {
+							$json = fread( $fp, 100 * KB_IN_BYTES ); // max 100kb
+							if ( $json && feof($fp) ) {
+								// Note that we're intentionally not decoding the json here, as we don't want to alter it by converting to and from PHP data types.
+								$result['block_translations'][ $lp['language'] ][ $file ] = $json;
+							}
+							fclose( $fp );
+						}
+					}
+				}
+			}
+		}
+
 		// That's all folks!
 		return $result;
 	}
