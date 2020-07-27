@@ -801,6 +801,21 @@ class Block_Plugin_Checker {
 	}
 
 	/**
+	 * Check that the plugin uses `wp_set_script_translations`.
+	 */
+	function check_for_translation_function() {
+		$functions = wp_list_pluck( $this->php_function_calls, 0 );
+		if ( ! in_array( 'wp_set_script_translations', $functions ) ) {
+			$this->record_result(
+				__FUNCTION__,
+				'warning',
+				__( 'No translations are loaded for the scripts.', 'wporg-plugins' ),
+				$call
+			);
+		}
+	}
+
+	/**
 	 * Does it make PHP function calls that shouldn't be in a block plugin?
 	 */
 	function check_php_function_calls() {
