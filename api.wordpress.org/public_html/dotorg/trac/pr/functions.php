@@ -326,7 +326,7 @@ function format_github_content_for_trac_comment( $desc ) {
 	$desc = preg_replace( '#```(.+?)```#s', '{{{$1}}}', $desc );
 
 	// Convert Images (Must happen prior to Links, as the only difference is a preceeding !)
-	$desc = preg_replace( '#!\[(.+?)\]\((.+?)\)#', '[[Image($2)]]', $desc );
+	$desc = preg_replace( '#!\[(.+?)\]\(https?://(.+?)\)#', '[[Image(https://i0.wp.com/$2)]]', $desc );
 
 	// Convert Links.
 	$desc = preg_replace( '#\[(.+?)\]\((.+?)\)#', '[$2 $1]', $desc );
