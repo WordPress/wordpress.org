@@ -471,6 +471,13 @@ body,
 	margin-bottom: 5em;
 }
 
+pre, code {
+	font-size: initial;
+}
+code {
+	padding: 0.1em .25em;
+}
+
 pre code {
 	padding: 0;
 }
