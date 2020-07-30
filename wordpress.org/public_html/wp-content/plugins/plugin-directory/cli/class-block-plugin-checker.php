@@ -341,7 +341,11 @@ class Block_Plugin_Checker {
 	 */ 
 	public static function find_called_functions_in_file($file) {
 		$source = file_get_contents($file);
-		$tokens = token_get_all($source, TOKEN_PARSE);
+		try {
+			$tokens = token_get_all($source, TOKEN_PARSE);
+		} catch( \Error $e ) {
+			return new \WP_Error( 'php_error', $e->getMessage(), $e->getLine() );
+		}
 
 		$function_calls = array();
 		$context = array();
@@ -374,7 +378,23 @@ class Block_Plugin_Checker {
 
 		foreach ( Filesystem::list_files( $base_dir, true, '!\.php$!i' ) as $filename ) {
 			$php_calls = self::find_called_functions_in_file( $filename );
-			$all_calls += $php_calls;
+			if ( is_wp_error( $php_calls ) ) {
+				$this->record_result(
+					__FUNCTION__,
+					'error',
+					sprintf( 
+						__( 'PHP error %s in %s', 'wporg-plugins' ),
+						$php_calls->get_error_message(), 
+						sprintf( '<a href="%s">%s</a>', 
+							$this->get_browser_url( $filename ) . '#L' . $php_calls->get_error_data(), 
+							$this->relative_filename( $filename ) 
+						)
+					),
+					[ $filename, $php_calls->get_error_data() ]
+				);
+			} else {
+				$all_calls += $php_calls;
+			}
 		}
 
 		return $all_calls;
