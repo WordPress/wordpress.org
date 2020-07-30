@@ -9,6 +9,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\Block_e2e;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Zip\Builder;
@@ -230,6 +231,11 @@ class Import {
 
 		// Import Tide data
 		Tide_Sync::sync_data( $plugin->post_name );
+
+		// Run the Block Directory e2e tests if applicable.
+		if ( has_term( 'block', 'plugin_section', $plugin->ID ) ) {
+			Block_e2e::run( $plugin->post_name );
+		}
 
 		return true;
 	}
