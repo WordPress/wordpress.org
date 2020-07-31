@@ -37,6 +37,8 @@ class Core extends Trac {
 		'#wp-includes/.*(image|media)\b#'  => '#core-media',
 		'#wp-admin/.*(privacy|personal)#'  => '#core-privacy',
 		'wp-includes/sitemaps'             => '#core-sitemaps',
+		'#wp-admin/includes/.*upgrader#'   => [ '#core' => true, '#core-auto-updates' => true ],
+		'#wp-admin/includes/.*install#'    => [ '#core' => true, '#core-auto-updates' => true ],
 	);
 
 	/**
@@ -60,6 +62,7 @@ class Core extends Trac {
 		'privacy'            => '#core-privacy',
 		'Site Health'        => '#core-site-health',
 		'Sitemaps'           => '#core-sitemaps',
+		'Upgrade/Install'    => [ '#core' => true, '#core-auto-updates' => true ],
 	);
 }
 
