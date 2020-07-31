@@ -472,10 +472,7 @@ body,
 }
 
 pre, code {
-	font-size: initial;
-}
-code {
-	padding: 0.1em .25em;
+	font-size: 0.9em;
 }
 
 pre code {
