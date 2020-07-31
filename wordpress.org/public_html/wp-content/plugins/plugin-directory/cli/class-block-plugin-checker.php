@@ -791,7 +791,11 @@ class Block_Plugin_Checker {
 		$php_files = Filesystem::list_files( $this->path_to_plugin, true, '!\.php$!i' );
 		$total_size = 0;
 		foreach ( $php_files as $file ) {
-			$total_size += filesize( $file );
+			// Skip files from composer framework, which are any top-level php files
+			// in `vendor/`, or any files in `vendor/composer/`.
+			if ( ! preg_match( '/vendor\/(?:composer\/.+|[\w.-]+\.php)$/', $file ) ) {
+				$total_size += filesize( $file );
+			}
 		}
 		if ( $total_size > 50 * KB_IN_BYTES ) {
 			$this->record_result(
