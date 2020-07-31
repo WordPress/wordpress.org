@@ -62,7 +62,7 @@ class Block_Validator {
 		</div>
 		<?php else : ?>
 		<div class="wrap block-validator">
-			<p><?php _e( 'Please log in to use the validator.', 'wporg-plugins' ); ?></p>
+			<p><?php _e( 'Please log in to use the block plugin checker.', 'wporg-plugins' ); ?></p>
 		</div>
 		<?php endif;
 		return ob_get_clean();
@@ -140,7 +140,7 @@ class Block_Validator {
 		if ( $has_errors ) :
 			?>
 			<div class="notice notice-error notice-alt">
-				<p><?php _e( 'Some problems were found. They need to be addressed in order for your plugin to be included in the Block Directory.', 'wporg-plugins' ); ?></p>
+				<p><?php _e( 'Some problems were found. They need to be addressed for your plugin to be included in the Block Directory.', 'wporg-plugins' ); ?></p>
 			</div>
 		<?php elseif ( $checker->slug ) : ?>
 			<?php if ( self::plugin_is_in_block_directory( $checker->slug ) ) : ?>
@@ -275,7 +275,7 @@ class Block_Validator {
 			case 'check_license':
 				return [
 					__( 'Plugins should include a GPL-compatible license in either readme.txt or the plugin headers.', 'wporg-plugins' ),
-					sprintf( '<a href="https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#1-plugins-must-be-compatible-with-the-gnu-general-public-license">%s</a>', __( 'Learn more about readmes.', 'wporg-plugins' ) ),
+					sprintf( '<a href="https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#1-plugins-must-be-compatible-with-the-gnu-general-public-license">%s</a>', __( 'Learn more about licenses.', 'wporg-plugins' ) ),
 				];
 			case 'check_plugin_headers':
 				return sprintf( '<a href="https://developer.wordpress.org/plugins/plugin-basics/header-requirements/">%s</a>', __( 'Learn more about plugin headers.', 'wporg-plugins' ) );
@@ -286,12 +286,12 @@ class Block_Validator {
 					__( "Block names must be unique, otherwise it can cause problems when using the block. It is recommended to use your plugin's name as the namespace.", 'wporg-plugins' ),
 				];
 				if ( 'warning' === $result->type ) {
-					$details[] = '<em>' . __( 'If this is a different version of your own plugin, you can ignore this warning.', 'wporg-plugins' ) . '</em>';
+					$details[] = '<em>' . __( 'If this is a different version of your plugin, you can ignore this warning.', 'wporg-plugins' ) . '</em>';
 				}
 				return $details;
 			case 'check_for_blocks':
 				return [
-					__( 'In order to work in the Block Directory, a plugin must register a block. Generally one per plugin (multiple blocks may be permitted if those blocks are interdependent, such as a list block that contains list item blocks).', 'wporg-plugins' ),
+					__( 'To work in the Block Directory, a plugin must register a block. Generally one per plugin (multiple blocks may be permitted if those blocks are interdependent, such as a list block that contains list item blocks).', 'wporg-plugins' ),
 					__( 'If your plugin doesn’t register a block, it probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' ),
 					sprintf( '<a href="https://developer.wordpress.org/block-editor/tutorials/create-block/">%s</a>', __( 'Learn how to create a block.' ) ),
 				];
@@ -307,7 +307,7 @@ class Block_Validator {
 			case 'check_block_json_is_valid_json':
 				return __( 'This block.json file is invalid. The Block Directory needs to be able to read this file.', 'wporg-plugins' );
 			case 'check_php_size':
-				return __( 'Block plugins should keep the PHP code to a mimmum. If you need a lot of PHP code, your plugin probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' );
+				return __( 'Block plugins should keep the PHP code to a minimum. If you need a lot of PHP code, your plugin probably belongs in the main Plugin Directory rather than the Block Directory.', 'wporg-plugins' );
 			case 'check_for_standard_block_name':
 				return [
 					__( 'Block names must contain a namespace prefix, include only lowercase alphanumeric characters or dashes, and start with a letter. The namespace should be unique to your block plugin, make sure to change any defaults from block templates like "create-block/" or "cgb/".', 'wporg-plugins' ),

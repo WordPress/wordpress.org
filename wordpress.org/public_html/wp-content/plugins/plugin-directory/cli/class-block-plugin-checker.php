@@ -657,7 +657,7 @@ class Block_Plugin_Checker {
 				'warning',
 				sprintf(
 					/* translators: %s is a list of block names. */
-					__( 'More than one top level block was found: %s', 'wporg-plugins' ),
+					__( 'More than one top-level block was found: %s', 'wporg-plugins' ),
 					implode( ', ', $list )
 				),
 				$block_name
