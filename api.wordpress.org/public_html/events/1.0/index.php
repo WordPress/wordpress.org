@@ -718,7 +718,7 @@ function get_events( $args = array() ) {
 	 *
 	 * See https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480
 	 */
-	if ( time() < strtotime( 'August 1 2020' ) ) {
+	if ( time() < strtotime( 'December 31 2020' ) ) {
 		$event_distances['wordcamp'] = 600;
 	}
 
@@ -1267,7 +1267,7 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 	global $wpdb, $cache_group, $cache_life;
 
 	// Re-evaluate pinning after July, per https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480.
-	if ( $current_time >= strtotime( 'August 1 2020' ) ) {
+	if ( $current_time >= strtotime( 'December 31 2020' ) ) {
 		return $events;
 	}
 
