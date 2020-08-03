@@ -23,7 +23,7 @@ class DevHub_REST_API extends DevHub_Docs_Importer {
 	 * @param string $post_type The handbook post type.
 	 * @return string
 	 */
-	public static function change_handbook_label( $label, $post_type ) {
+	public function change_handbook_label( $label, $post_type ) {
 		if ( $this->get_post_type() === $post_type ) {
 			$label = __( 'REST API Handbook', 'wporg' );
 		}
