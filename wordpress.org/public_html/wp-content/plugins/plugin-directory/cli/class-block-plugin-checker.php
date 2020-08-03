@@ -825,6 +825,26 @@ class Block_Plugin_Checker {
 	}
 
 	/**
+	 * File size check for downloads.
+	 */
+	function check_total_size() {
+		$files = Filesystem::list_files( $this->path_to_plugin, true );
+		$total_size = 0;
+		foreach ( $files as $file ) {
+			$total_size += filesize( $file );
+		}
+		if ( $total_size > 1 * MB_IN_BYTES ) {
+			$this->record_result(
+				__FUNCTION__,
+				'warning',
+				// translators: %s is the file size.
+				sprintf( __( 'Plugin size is %s.', 'wporg-plugins' ), size_format( $total_size ) ),
+				$total_size
+			);
+		}
+	}
+
+	/**
 	 * Check that the plugin uses `wp_set_script_translations`.
 	 */
 	function check_for_translation_function() {

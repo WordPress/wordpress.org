@@ -323,6 +323,8 @@ class Block_Validator {
 					__( 'Block plugins should use <code>wp_set_script_translations</code> to load translations for each script file. <a href="%s">Learn more about internationalization.</a>', 'wporg-plugins' ),
 					'https://developer.wordpress.org/block-editor/developers/internationalization/'
 				);
+			case 'check_total_size':
+				return __( 'Larger plugins will take longer to install. This is more noticeable in the Block Directory, where the user expects blocks to be added immediately. Try reducing your file size by optimizing images & SVGs, only including the assets you need (images, fonts, etc), and using core-provided JavaScript libraries.', 'wporg-plugins' );
 			// This is a special case, since multiple values may be collapsed.
 			case 'check_block_json_is_valid':
 				return false;
