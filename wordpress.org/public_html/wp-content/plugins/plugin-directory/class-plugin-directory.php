@@ -1061,7 +1061,11 @@ class Plugin_Directory {
 		$locales_to_sync = array();
 		$post            = get_post( $post_id );
 		if ( $post ) {
-			$translations = Plugin_I18n::instance()->find_all_translations_for_plugin( $post->post_name, 'stable-readme', $min_translated ); // at least $min_translated % translated
+			$project = 'stable-readme';
+			if ( ! $plugin->stable_tag || 'trunk' === $plugin->stable_tag ) {
+				$project = 'dev-readme';
+			}
+			$translations = Plugin_I18n::instance()->find_all_translations_for_plugin( $post->post_name, $project, $min_translated ); // at least $min_translated % translated
 			if ( $translations ) {
 				// Eliminate translations that start with unwanted prefixes, so we don't waste space on near-duplicates like en_AU, en_CA etc.
 				foreach ( $translations as $i => $_locale ) {
