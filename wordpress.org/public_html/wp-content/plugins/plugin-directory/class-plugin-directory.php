@@ -1106,15 +1106,11 @@ class Plugin_Directory {
 	 * @param int    $post_id    Post ID to update.
 	 * @param string $locale  Locale to translate.
 	 */
-	public function sync_translation_to_meta( $post_id, $_locale ) {
-		global $locale;
-
-		$old_locale = $locale;
+	public function sync_translation_to_meta( $post_id, $locale ) {
 		// Keep track of the original untranslated strings
 		$orig_title   = get_the_title( $post_id );
 		$orig_excerpt = get_the_excerpt( $post_id );
 		$orig_content = get_post_field( 'post_content', $post_id );
-		$locale       = $_locale;
 
 		// Update postmeta values for the translated title, excerpt, and content, if they are available and different from the originals.
 		// There is a bug here, in that no attempt is made to remove old meta values for translations that do not have new translations.
@@ -1143,7 +1139,27 @@ class Plugin_Directory {
 			update_post_meta( $post_id, 'content_' . $locale, implode( $the_content ) );
 		}
 
-		$locale = $old_locale;
+		// Translate Block Titles. A bit more complicated as there's multiple postmeta values.
+		$existing_translated_titles = array_unique( get_post_meta( $post_id, 'block_title_' . $locale ) );
+		foreach ( array_unique( get_post_meta( $post_id, 'block_title' ) ) as $block_title ) {
+			$translated_title = Plugin_I18n::instance()->translate( 'block_title:' . md5( $block_title ), $block_title, [ 'post_id' => $post_id ] );
+
+			if ( $translated_title == $block_title ) {
+				continue;
+			}
+
+			if ( false !== ( $pos = array_search( $translated_title, $existing_translated_titles, true ) ) ) {
+				// If translation is meta'd, skip
+				unset( $existing_translated_titles[ $pos ] );
+			} else {
+				// If tranlation is unknown, add it.
+				add_post_meta( $post_id, 'block_title_' . $locale, $translated_title );
+			}
+		}
+		// Delete any unknown translations.
+		foreach ( $existing_translated_titles as $block_title ) {
+			delete_post_meta( $post_id, 'block_title_' . $locale, $block_title );
+		}
 	}
 
 	/**
