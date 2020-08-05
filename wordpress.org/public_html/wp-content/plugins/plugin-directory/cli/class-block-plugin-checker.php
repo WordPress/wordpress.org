@@ -581,6 +581,30 @@ class Block_Plugin_Checker {
 	}
 
 	/**
+	 * Blocks with different namespaces points to a problem, most likely a suite of blocks.
+	 */
+	function check_for_multiple_namespaces() {
+		$namespaces = array();
+		foreach ( $this->blocks as $block ) {
+			if ( $parts = explode( '/', $block->name ) ) {
+				$namespaces[] = $parts[0];
+			}
+		}
+
+		$namespaces = array_unique( $namespaces );
+
+		if ( count( $namespaces ) > 1 ) {
+			$this->record_result(
+				__FUNCTION__,
+				'error',
+				// translators: %s is the block name.
+				sprintf( __( 'Found blocks with %d different namespaces: %s.', 'wporg-plugins' ), count( $namespaces ), '<code>' . implode( ', ', $namespaces ) . '</code>' ),
+				$namespaces
+			);
+		}
+	}
+
+	/**
 	 * There should be at least one block.
 	 */
 	function check_for_blocks() {
