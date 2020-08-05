@@ -559,10 +559,20 @@ class Plugin_Directory {
 		add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1, 2 );
 
 		// Instantiate our copy of the Jetpack_Search class.
-		if ( class_exists( 'Jetpack' ) && \Jetpack::get_option( 'id' ) && ! class_exists( 'Jetpack_Search' )
-			&& ! isset( $_GET['s'] ) ) { // Don't run the ES query if we're going to redirect to the pretty search URL
-				require_once __DIR__ . '/libs/site-search/jetpack-search.php';
-				\Jetpack_Search::instance();
+		if (
+			class_exists( 'Jetpack' ) &&
+			\Jetpack::get_option( 'id' ) && // Don't load in Meta Environments
+			! class_exists( 'Jetpack_Search' ) &&
+			(
+				// Don't run the ES query if we're going to redirect to the pretty search URL
+				! isset( $_GET['s'] )
+			||
+				// But load it for the query-plugins REST API endpoint, for simpler debugging
+				( false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/plugins/v1/query-plugins' ) )
+			)
+		) {
+			require_once __DIR__ . '/libs/site-search/jetpack-search.php';
+			\Jetpack_Search::instance();
 		}
 	}
 
