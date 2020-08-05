@@ -22,6 +22,7 @@ class Query_Plugins extends Base {
 		'author_name',
 		'installed_plugins',
 		'plugin_tags',
+		'locale',
 	);
 
 	function __construct() {

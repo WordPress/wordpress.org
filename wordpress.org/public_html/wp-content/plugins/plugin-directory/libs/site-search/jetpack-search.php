@@ -429,7 +429,7 @@ class Jetpack_Search {
 			}
 		}
 
-		$es_wp_query_args['locale'] = get_locale();
+		$es_wp_query_args['locale'] = $query->get( 'locale' ) ?: get_locale();
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
 		// These arguments are in the format for convert_wp_es_to_es_args(), i.e. WP-style.

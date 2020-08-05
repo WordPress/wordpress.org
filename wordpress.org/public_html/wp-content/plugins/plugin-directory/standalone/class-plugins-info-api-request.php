@@ -241,6 +241,9 @@ class Plugins_Info_API_Request {
 			}
 		}
 
+		// Locale
+		$query['locale'] = $this->locale;
+
 		return $query;
 	}
 
