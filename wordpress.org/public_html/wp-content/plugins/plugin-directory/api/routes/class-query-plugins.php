@@ -65,49 +65,11 @@ class Query_Plugins extends Base {
 			}
 		}
 
-		// Temporary hacky block search
-		$block_search = trim( strtolower( $request->get_param( 'block' ) ) );
+		// Block Directory searches
+		$block_search = $request->get_param( 'block' );
 		if ( $block_search ) {
-			$meta_query = array(
-				'relation' => 'AND',
-				array(
-					'key' => 'block_files',
-					'compare' => 'EXISTS',
-				),
-				array(
-					'relation' => 'OR',
-					array(
-						'key' => 'block_name',
-						'value' => '^' . preg_quote( $block_search ),
-						'compare' => 'RLIKE',
-					),
-					array(
-						'key' => 'block_name',
-						'value' => '/' . $block_search, // search following the slash
-						'compare' => 'LIKE',
-					),
-					array(
-						'key' => 'block_title',
-						'value' => $block_search, // search in title
-						'compare' => 'LIKE',
-					),
-					array(
-						'key' => 'header_name',
-						'value' => $block_search, // search in plugin title
-						'compare' => 'LIKE',
-					),
-				)
-			);
-
-			// Limit the search to the Block section
-			$query[ 'meta_query' ] = $meta_query;
-			$query[ 'tax_query' ] = array(
-				array(
-					'taxonomy' => 'plugin_section',
-					'field' => 'slug',
-					'terms' => 'block',
-				)
-			);
+			$query['s'] = $block_search;
+			$query['block_search'] = true;
 		}
 
 		if ( ! $query ) {

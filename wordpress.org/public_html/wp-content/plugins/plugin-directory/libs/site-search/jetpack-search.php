@@ -429,6 +429,20 @@ class Jetpack_Search {
 			}
 		}
 
+		// Block Search.
+		if ( !empty( $query->query['block_search'] ) ) {
+			$es_wp_query_args['block_search'] = $query->query['block_search'];
+
+			// Limit to the Block Tax.
+			$es_wp_query_args['filters'][] = array(
+				'term' => array(
+					'taxonomy.plugin_section.name' => array(
+						'value' => 'block'
+					)
+				)
+			);
+		}
+
 		$es_wp_query_args['locale'] = $query->get( 'locale' ) ?: get_locale();
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
@@ -762,6 +776,8 @@ class Jetpack_Search {
 			}
 		}
 
+		$is_block_search = ! empty( $args['block_search'] );
+
 		if ( $args['locale'] && $args['locale'] !== 'en' && substr( $args['locale'], 0, 3 ) !== 'en_' ) {
 			$locale = $args['locale'];
 
@@ -787,6 +803,10 @@ class Jetpack_Search {
 				'description_en^' . $en_boost,
 				'taxonomy.plugin_tags.name',
 			);
+			if ( $is_block_search ) {
+				$boost_phrase_fields[] = 'block_title_' . $locale;
+				$boost_phrase_fields[] = 'block_title_en^' . $en_boost;
+			}
 			$boost_ngram_fields   = array(
 				'title_' . $locale . '.ngram',
 				'title_en.ngram^' . $en_boost,
@@ -796,6 +816,11 @@ class Jetpack_Search {
 				'title_en^' . $en_boost,
 				'slug_text',
 			);
+			if ( $is_block_search ) {
+				$boost_title_fields[] = 'block_title_' . $locale;
+				$boost_title_fields[] = 'block_title_en^' . $en_boost;
+				$boost_title_fields[] = 'block_name';
+			}
 			$boost_content_fields = array(
 				'excerpt_' . $locale,
 				'description_' . $locale,
@@ -813,6 +838,9 @@ class Jetpack_Search {
 				'description_en',
 				'taxonomy.plugin_tags.name',
 			);
+			if ( $is_block_search ) {
+				$boost_phrase_fields[] = 'block_title_en';
+			}
 			$boost_ngram_fields   = array(
 				'title_en.ngram',
 			);
@@ -820,6 +848,10 @@ class Jetpack_Search {
 				'title_en',
 				'slug_text',
 			);
+			if ( $is_block_search ) {
+				$boost_title_fields[] = 'block_title_en';
+				$boost_title_fields[] = 'block_name';
+			}
 			$boost_content_fields = array(
 				'excerpt_en',
 				'description_en',
