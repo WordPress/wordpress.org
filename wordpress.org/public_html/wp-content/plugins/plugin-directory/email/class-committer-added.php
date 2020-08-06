@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Email;
 
 use WordPressdotorg\Plugin_Directory\Tools;
 
-class Committer_Added_Notification extends Base {
+class Committer_Added extends Base {
 	protected $required_args = [ 'committer' ];
 
 	function subject() {

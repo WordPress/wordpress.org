@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Email;
 
 use WordPressdotorg\Plugin_Directory\Tools;
 
-class Plugin_Transferred_Notification extends Base {
+class Plugin_Transferred extends Base {
 	protected $required_args = [ 'owner' ];
 
 	function subject() {

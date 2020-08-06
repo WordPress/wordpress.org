@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Email;
 
 use WordPressdotorg\Plugin_Directory\Tools;
 
-class Support_Rep_Added_Notification extends Base {
+class Support_Rep_Added extends Base {
 	protected $required_args = [ 'rep' ];
 
 	function subject() {

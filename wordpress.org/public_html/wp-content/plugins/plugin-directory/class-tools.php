@@ -2,8 +2,8 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use WP_User;
-use WordPressdotorg\Plugin_Directory\Email\Committer_Added_Notification;
-use WordPressdotorg\Plugin_Directory\Email\Support_Rep_Added_Notification;
+use WordPressdotorg\Plugin_Directory\Email\Committer_Added as Committer_Added_Email;
+use WordPressdotorg\Plugin_Directory\Email\Support_Rep_Added as Support_Rep_Added_Email;
 
 /**
  * Various functions used by other processes, will make sense to move to specific classes.
@@ -217,7 +217,7 @@ class Tools {
 		if ( $should_notify ) {
 			$existing_committers[] = $user->user_login;
 
-			$email = new Committer_Added_Notification(
+			$email = new Committer_Added_Email(
 				$plugin_slug,
 				$existing_committers,
 				[
@@ -384,7 +384,7 @@ class Tools {
 		}
 
 		if ( $should_notify ) {
-			$email = new Support_Rep_Added_Notification(
+			$email = new Support_Rep_Added_Email(
 				$plugin_slug,
 				$committers,
 				[
