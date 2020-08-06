@@ -20,7 +20,7 @@ class Support_Rep_Added extends Base {
 
 %2$s has been added as a support rep to %3$s by %4$s.
 
-The following people are now suport representatives for %3$s:
+The following people are now support representatives for %3$s:
 %5$s
 
 You can manage your plugin support representatives here:
