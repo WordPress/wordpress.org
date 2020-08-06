@@ -5,6 +5,8 @@ namespace WordPressdotorg\Plugin_Directory\Admin;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Email\Plugin_Approved as Plugin_Approved_Email;
+use WordPressdotorg\Plugin_Directory\Email\Plugin_Rejected as Plugin_Rejected_Email;
 
 /**
  * All functionality related to Status Transitions.
@@ -235,52 +237,10 @@ class Status_Transitions {
 		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
 
 		// Send email.
-		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been approved!', 'wporg-plugins' ), $post->post_title );
-
-		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug */
-		$content = sprintf(
-			__(
-				'Congratulations, your plugin hosting request for %1$s has been approved.
-
-Within one (1) hour your account will be granted commit access to your Subversion (SVN) repository. Your username is %2$s and your password is the one you already use to log in to WordPress.org. Keep in mind, your username is case sensitive and you cannot use your email address to log in to SVN.
-
-https://plugins.svn.wordpress.org/%3$s
-
-Once your account has been added, you will need to upload your code using a SVN client of your choice. We are unable to upload or maintain your code for you.
-
-Using Subversion with the WordPress Plugin Directory:
-https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/
-
-FAQ about the WordPress Plugin Directory:
-https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
-
-WordPress Plugin Directory readme.txt standard:
-https://wordpress.org/plugins/developers/#readme
-
-A readme.txt validator:
-https://wordpress.org/plugins/developers/readme-validator/
-
-Plugin Assets (header images, etc):
-https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
-
-WordPress Plugin Directory Guidelines:
-https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
-
-If you have issues or questions, please reply to this email and let us know.
-
-Enjoy!
-
---
-The WordPress Plugin Directory Team
-https://make.wordpress.org/plugins', 'wporg-plugins'
-			),
-			$post->post_title,
-			$plugin_author->user_login,
-			$post->post_name
-		);
+		$email = new Plugin_Approved_Email( $post, $plugin_author );
+		$email->send();
 
 		Tools::audit_log( 'Plugin approved.', $post_id );
-		wp_mail( $plugin_author->user_email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
 
 	/**
@@ -306,37 +266,24 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 			'post_name' => sprintf( 'rejected-%s-rejected', $post->post_name ),
 		) );
 
-		// Send email.
-		$email   = get_user_by( 'id', $post->post_author )->user_email;
-		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
-
-		/* translators: 1: plugin name, 2: plugin permalink, 3: date of submission, 4: plugins@wordpress.org */
-		$content = sprintf(
-			__(
-				'Unfortunately your plugin submission for %1$s (%2$s), submitted on %3$s, has been rejected from the WordPress Plugin Directory.
-
-Plugins are rejected after six months when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours.
-
-If you believe this to be in error, please email %4$s with your plugin attached as a zip and explain why you feel your plugin should be accepted.
-
---
-The WordPress Plugin Directory Team
-https://make.wordpress.org/plugins', 'wporg-plugins'
-			),
-			$post->post_title,
-			$original_permalink,
-			$submission_date,
-			'plugins@wordpress.org'
-		);
-
 		// Update last_updated to now.
 		update_post_meta( $post_id, 'last_updated', gmdate( 'Y-m-d H:i:s' ) );
 
-		// Log rejection.
-		Tools::audit_log( 'Plugin rejected.', $post_id );
-
 		// Send email.
-		wp_mail( $email, $subject, $content, 'From: plugins@wordpress.org' );
+		$email = new Plugin_Rejected_Email(
+			$post,
+			$post->post_author,
+			[
+				'slug'            => $original_permalink,
+				'submission_date' => $submission_date,
+			]
+		);
+		// ..and log rejection.
+		if ( $email->send() ) {
+			Tools::audit_log( 'Plugin rejected.', $post_id ); 
+		} else {
+			Tools::audit_log( 'Plugin rejected. Email not sent.', $post_id );
+		}
 	}
 
 	/**

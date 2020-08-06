@@ -31,6 +31,11 @@ abstract class Base {
 	public function __construct( $plugin, $users, $args = array() ) {
 		$this->plugin = Plugin_Directory::get_plugin_post( $plugin );
 
+		// Don't cast an object to an array, but rather an array of object.
+		if ( is_object( $users ) ) {
+			$users = [ $users ];
+		}
+
 		foreach ( (array) $users as $user ) {
 			if ( is_string( $user ) && is_email( $user ) ) {
 				$user = get_user_by( 'email', $user );
@@ -108,7 +113,7 @@ abstract class Base {
 		}
 
 		// Blocked users don't need emails.
-		if ( !empty( $this->user->caps[ 'bbp_blocked'] ) ) {
+		if ( ! empty( $this->user->caps[ 'bbp_blocked'] ) ) {
 			return false;
 		}
 
