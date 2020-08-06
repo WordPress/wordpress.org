@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Email\Plugin_Transferred_Notification;
 
 /**
  * An API endpoint for transferring a particular plugin.
@@ -90,29 +91,14 @@ class Plugin_Self_Transfer extends Base {
 		), $plugin );
 
 		// Email all Plugin Committers.
-		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been transferred.', 'wporg-plugins' ), $plugin->post_title );
-		$message = sprintf(
-			/* translators: 1: Author name 2: Date, 3: Plugin Name, 4: New Owners name, 5: Plugin team email address. */
-			__( 'As requested by %1$s on %2$s, the ownership of %3$s in the WordPress Plugin Directory has been transferred to %4$s.
-
-If you believe this to be in error, please email %5$s immediately.
-
---
-The WordPress Plugin Directory Team
-https://make.wordpress.org/plugins', 'wporg-plugins' ),
-			wp_get_current_user()->display_name,
-			gmdate( 'Y-m-d H:i:s \G\M\T' ),
-			$plugin->post_title,
-			$new_owner->display_name . ' (' . $new_owner->user_login . ')',
-			'plugins@wordpress.org'
+		$email = new Plugin_Transferred_Notification(
+			$plugin,
+			Tools::get_plugin_committers( $plugin->post_name ),
+			[
+				'owner' => $new_owner
+			]
 		);
-
-		$who_to_email = [];
-		foreach ( Tools::get_plugin_committers( $plugin->post_name ) as $user_login ) {
-			$who_to_email[] = get_user_by( 'login', $user_login )->user_email;
-		}
-
-		wp_mail( $who_to_email, $subject, $message, 'From: plugins@wordpress.org' );
+		$email->send();
 
 		$result['transferred'] = true;
 
