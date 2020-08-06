@@ -2,6 +2,8 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use WP_User;
+use WordPressdotorg\Plugin_Directory\Email\Committer_Added_Notification;
+use WordPressdotorg\Plugin_Directory\Email\Support_Rep_Added_Notification;
 
 /**
  * Various functions used by other processes, will make sense to move to specific classes.
@@ -205,6 +207,26 @@ class Tools {
 			$plugin_slug
 		);
 
+		// Only notify if the current process is interactive - a user is logged in.
+		$should_notify = (bool) get_current_user_id();
+		// Don't notify if a plugin admin is taking action on a plugin they're not (yet) a committer for.
+		if ( current_user_can( 'plugin_approve' ) && ! in_array( wp_get_current_user()->user_login, $existing_committers, true ) ) {
+			$should_notify = false;
+		}
+
+		if ( $should_notify ) {
+			$existing_committers[] = $user->user_login;
+
+			$email = new Committer_Added_Notification(
+				$plugin_slug,
+				$existing_committers,
+				[
+					'committer' => $user,
+				]
+			);
+			$email->send();
+		}
+
 		return $result;
 	}
 
@@ -351,6 +373,26 @@ class Tools {
 			),
 			$plugin_slug
 		);
+
+		$committers = self::get_plugin_committers( $plugin_slug );
+
+		// Only notify if the current process is interactive - a user is logged in.
+		$should_notify = (bool) get_current_user_id();
+		// Don't notify if a plugin admin is taking action on a plugin they're not a committer for.
+		if ( current_user_can( 'plugin_approve' ) && ! in_array( wp_get_current_user()->user_login, $committers, true ) ) {
+			$should_notify = false;
+		}
+
+		if ( $should_notify ) {
+			$email = new Support_Rep_Added_Notification(
+				$plugin_slug,
+				$committers,
+				[
+					'rep' => $user,
+				]
+			);
+			$email->send();
+		}
 
 		return $result;
 	}
