@@ -4,7 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Email\Plugin_Transferred_Notification;
+use WordPressdotorg\Plugin_Directory\Email\Plugin_Transferred as Plugin_Transferred_Email;
 
 /**
  * An API endpoint for transferring a particular plugin.
@@ -91,7 +91,7 @@ class Plugin_Self_Transfer extends Base {
 		), $plugin );
 
 		// Email all Plugin Committers.
-		$email = new Plugin_Transferred_Notification(
+		$email = new Plugin_Transferred_Email(
 			$plugin,
 			Tools::get_plugin_committers( $plugin->post_name ),
 			[
