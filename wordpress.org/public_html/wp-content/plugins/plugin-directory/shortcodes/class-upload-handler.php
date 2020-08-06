@@ -223,7 +223,7 @@ class Upload_Handler {
 
 			return new \WP_Error(
 				'plugin_author_uri', $error . ' ' .
-				__( 'A plugin URI (Uniform Resource Identifier) is a webpage that provides details about this specific plugin. An author URI is a webpage that provides information about the author of the plugin. Those two URIs must be different. You are not required to provide both, so pick the one that best applies to your situation.', 'wporg-plugins' )
+				__( 'Your plugin headers in the main plugin file headers have the same value for both the plugin and author URI (Uniform Resource Identifier). A plugin URI is a webpage that provides details about this specific plugin. An author URI is a webpage that provides information about the author of the plugin. Those two must be different. You are not required to provide both, so pick the one that best applies to your situation.', 'wporg-plugins' )
 			);
 		}
 
