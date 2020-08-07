@@ -597,8 +597,12 @@ class Block_Plugin_Checker {
 			$this->record_result(
 				__FUNCTION__,
 				'error',
-				// translators: %s is the block name.
-				sprintf( __( 'Found blocks with %d different namespaces: %s.', 'wporg-plugins' ), count( $namespaces ), '<code>' . implode( ', ', $namespaces ) . '</code>' ),
+				sprintf(
+					// translators: %1$d is the number of namespaces, %2$s is the list of namespaces.
+					__( 'Found blocks with %1$d different namespaces: %2$s.', 'wporg-plugins' ),
+					count( $namespaces ),
+					'<code>' . implode( ', ', $namespaces ) . '</code>'
+				),
 				$namespaces
 			);
 		}

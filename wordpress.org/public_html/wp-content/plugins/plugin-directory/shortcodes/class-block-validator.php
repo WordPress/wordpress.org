@@ -326,7 +326,7 @@ class Block_Validator {
 			case 'check_total_size':
 				return __( 'Larger plugins will take longer to install. This is more noticeable in the Block Directory, where the user expects blocks to be added immediately. Try reducing your file size by optimizing images & SVGs, only including the assets you need (images, fonts, etc), and using core-provided JavaScript libraries.', 'wporg-plugins' );
 			case 'check_for_multiple_namespaces':
-				return __( 'Block plugins should contain a single main block. Please ensure there are no extraneous blocks included by mistake.' );
+				return __( 'Block plugins should contain a single main block. Any children blocks should use the same namespace prefix as the main block. Please ensure there are no extraneous blocks included by mistake.', 'wporg-plugins' );
 			// This is a special case, since multiple values may be collapsed.
 			case 'check_block_json_is_valid':
 				return false;
