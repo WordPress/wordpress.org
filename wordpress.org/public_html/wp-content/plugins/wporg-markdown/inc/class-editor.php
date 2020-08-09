@@ -126,7 +126,7 @@ class Editor {
 	 * add the edit link if it isn't there - it always redirects to GitHub, so it doesn't need to
 	 * obey the edit_post capability in this instance.
 	 */
-	public static function redirect_o2_edit_link_to_github( $actions, $post_id ) {
+	public function redirect_o2_edit_link_to_github( $actions, $post_id ) {
 		$post = get_post( $post_id );
 		if ( ! $post ) {
 			return $actions;
