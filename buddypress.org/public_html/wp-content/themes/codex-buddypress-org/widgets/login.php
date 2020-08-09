@@ -1,7 +1,11 @@
 <?php
 class BPOrg_Login_Widget extends WP_Widget {
-	function bporg_login_widget() {
-		parent::WP_Widget( false, $name = __( "Login Form", 'bporg' ) );
+	function __construct() {
+		parent::__construct( false, $name = __( "Login Form", 'bporg' ) );
+	}
+
+	function BPOrg_Login_Widget() {
+		self::__construct();
 	}
 
 	function widget( $args, $instance ) {
@@ -72,4 +76,4 @@ class BPOrg_Login_Widget extends WP_Widget {
 	<?php
 	}
 }
-add_action( 'widgets_init', create_function( '', 'return register_widget("BPOrg_Login_Widget");' ) );
+add_action( 'widgets_init', function () { return register_widget("BPOrg_Login_Widget"); } );
