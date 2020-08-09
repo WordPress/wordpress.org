@@ -161,7 +161,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 	 *
 	 * @since 0.1-dev
 	 */
-	public function login_form_validate_2fa() {
+	public static function login_form_validate_2fa() {
 		if ( ! is_user_logged_in() ) {
 			return;
 		}
