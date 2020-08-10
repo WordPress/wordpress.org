@@ -85,7 +85,7 @@ class Import {
 		// Release confirmation.
 		if ( $plugin->release_confirmation_enabled ) {
 			if ( 'trunk' === $stable_tag ) {
-				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation.' );
+				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
 
 			$confirmed_releases = $plugin->confirmed_releases ?: [];
@@ -109,6 +109,7 @@ class Import {
 						'readme'  => $readme,
 					]
 				);
+				$email->send();
 
 				update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases );
 
