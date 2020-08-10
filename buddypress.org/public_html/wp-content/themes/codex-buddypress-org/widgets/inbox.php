@@ -1,7 +1,7 @@
 <?php
 class BPOrg_Inbox_Widget extends WP_Widget {
-	function bporg_inbox_widget() {
-		parent::WP_Widget( false, $name = __( "Inbox", 'bporg' ) );
+	function __construct() {
+		parent::__construct( false, $name = __( 'Inbox', 'bporg' ) );
 	}
 
 	function widget( $args, $instance ) {
@@ -38,4 +38,4 @@ class BPOrg_Inbox_Widget extends WP_Widget {
 	<?php
 	}
 }
-add_action( 'widgets_init', create_function( '', 'return register_widget("BPOrg_Inbox_Widget");' ) );
+add_action( 'widgets_init', function () { return register_widget("BPOrg_Inbox_Widget"); } );
