@@ -6,6 +6,7 @@ use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -74,10 +75,65 @@ class Import {
 		$assets          = $data['assets'];
 		$headers         = $data['plugin_headers'];
 		$stable_tag      = $data['stable_tag'];
+		$last_committer  = $data['last_committer'];
+		$last_revision   = $data['last_revision'];
 		$tagged_versions = $data['tagged_versions'];
 		$last_modified   = $data['last_modified'];
 		$blocks          = $data['blocks'];
 		$block_files     = $data['block_files'];
+
+		// Release confirmation.
+		if ( $plugin->release_confirmation_enabled ) {
+			if ( 'trunk' === $stable_tag ) {
+				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation.' );
+			}
+
+			$confirmed_releases = $plugin->confirmed_releases ?: [];
+
+			// This tag is unknown? Trigger email.
+			if ( empty( $confirmed_releases[ $stable_tag ] ) ) {
+				$confirmed_releases[ $stable_tag ] = [
+					'date'      => time(),
+					'tag'       => $stable_tag,
+					'confirmed' => false,
+					'committer' => [ $last_committer ],
+					'revision'  => [ $last_revision ],
+				];
+
+				$email = new Release_Confirmation_Email(
+					$plugin,
+					Tools::get_plugin_committers( $plugin_slug ),
+					[
+						'release' => $confirmed_releases[ $stable_tag ],
+						'who'     => $last_committer,
+						'readme'  => $readme,
+					]
+				);
+
+				update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases );
+
+				throw new Exception( 'Plugin release not confirmed; email triggered.' );
+			}
+
+			// Check that the tag is approved.
+			if ( ! $confirmed_releases[ $stable_tag ]['confirmed'] ) {
+
+				if ( ! in_array( $last_committer, $confirmed_releases[ $stable_tag ]['comitter'], true ) ) {
+					$confirmed_releases[ $stable_tag ]['committer'][] = $last_committer;
+				}
+				if ( ! in_array( $last_revision, $confirmed_releases[ $stable_tag ]['revision'], true ) ) {
+					$confirmed_releases[ $stable_tag ]['revision'][] = $last_committer;
+				}
+
+				if ( $confirmed_releases !== $plugin->confirmed_releaes ) {
+					update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases );
+				}
+
+				throw new Exception( 'Plugin release not confirmed.' );
+			}
+
+			// At this point we can assume that the release was confirmed, and should be imported.
+		}
 
 		$content = '';
 		if ( $readme->sections ) {
@@ -389,6 +445,9 @@ class Import {
 			$last_modified = $m[0];
 		}
 
+		$last_committer = $svn_info['result']['Last Changed Author'] ?? '';
+		$last_revision  = $svn_info['result']['Last Changed Rev'] ?? 0;
+
 		$svn_export = SVN::export(
 			$stable_url,
 			$tmp_dir . '/export',
@@ -548,7 +607,7 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
-		return compact( 'readme', 'stable_tag', 'last_modified', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
+		return compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision,' 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
 	}
 
 	/**
