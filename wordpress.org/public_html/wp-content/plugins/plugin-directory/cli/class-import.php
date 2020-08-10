@@ -128,9 +128,7 @@ class Import {
 					$confirmed_releases[ $stable_tag ]['revision'][] = $last_committer;
 				}
 
-				if ( $confirmed_releases !== $plugin->confirmed_releaes ) {
-					update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases );
-				}
+				update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases ); // no-op if unchanged.
 
 				throw new Exception( 'Plugin release not confirmed.' );
 			}
