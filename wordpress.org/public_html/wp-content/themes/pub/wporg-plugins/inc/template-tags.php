@@ -481,7 +481,7 @@ function the_plugin_release_confirmation_form() {
 			_e( '<strong>Warning:</strong> Enabling release confirmations is intended to be a <em>permanent</em> action. There is no way to disable this without contacting the plugins team.', 'wporg-plugins' );
 		echo '</p></div>';
 
-		echo '<form method="POST" action="' /*. esc_url( Template::get_self_transfer_link() )*/ . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
+		echo '<form method="POST" action="' . esc_url( Template::get_enable_release_confirmation_link() ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
 		echo '<p><input class="button" type="submit" value="' . esc_attr__( 'I understand, please enable release confirmations.', 'wporg-plugins' ) . '" /></p>';
 		echo '</form>';
 	} else {
