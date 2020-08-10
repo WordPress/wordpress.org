@@ -88,7 +88,7 @@ class Import {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
 
-			$confirmed_releases = $plugin->confirmed_releases ?: [];
+			$confirmed_releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
 
 			// This tag is unknown? Trigger email.
 			if ( empty( $confirmed_releases[ $stable_tag ] ) ) {
