@@ -409,6 +409,13 @@ class Customizations {
 		);
 
 		add_meta_box(
+			'plugin-release-confirmation',
+			__( 'Plugin Release Confirmation', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'display' ),
+			'plugin', 'normal', 'high'
+		);
+
+		add_meta_box(
 			'plugin-author',
 			__( 'Author Card', 'wporg-plugins' ),
 			array( __NAMESPACE__ . '\Metabox\Author_Card', 'display' ),
