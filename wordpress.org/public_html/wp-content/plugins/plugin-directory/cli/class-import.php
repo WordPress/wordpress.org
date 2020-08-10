@@ -95,6 +95,7 @@ class Import {
 				$confirmed_releases[ $stable_tag ] = [
 					'date'      => time(),
 					'tag'       => $stable_tag,
+					'version'   => $headers->Version,
 					'confirmed' => false,
 					'committer' => [ $last_committer ],
 					'revision'  => [ $last_revision ],
@@ -107,6 +108,7 @@ class Import {
 						'release' => $confirmed_releases[ $stable_tag ],
 						'who'     => $last_committer,
 						'readme'  => $readme,
+						'headers' => $headers,
 					]
 				);
 				$email->send();
