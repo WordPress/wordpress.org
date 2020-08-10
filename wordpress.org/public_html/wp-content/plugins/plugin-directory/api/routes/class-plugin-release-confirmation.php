@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation_Enabled as Release_Confirmation_Enabled_Email;
 
 /**
  * An API endpoint for closing a particular plugin.
@@ -76,6 +77,12 @@ class Plugin_Release_Confirmation extends Base {
 		Tools::audit_log( 'Release Confirmations Enabled.', $plugin );
 
 		// TODO: Send all committers an email that this has been enabled.
+		$email = new Release_Confirmation_Enabled_Email(
+			$plugin,
+			Tools::get_plugin_committers( $plugin->post_name ),
+			[]
+		);
+		$email->send();
 
 		return $result;
 	}
