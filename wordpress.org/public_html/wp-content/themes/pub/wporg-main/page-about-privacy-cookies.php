@@ -330,7 +330,7 @@ the_post();
 								<td><?php esc_html_e( 'Yes', 'wporg' ); ?></td>
 							</tr>
 							<tr>
-								<th>wordpres_test_cookie</th>
+								<th>wordpress_test_cookie</th>
 								<td><?php esc_html_e( 'Session', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Test if cookie can be set', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
