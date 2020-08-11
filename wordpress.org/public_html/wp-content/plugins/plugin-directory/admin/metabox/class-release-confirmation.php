@@ -13,9 +13,13 @@ class Release_Confirmation {
 		global $post;
 
 		$confirmations_required = $post->release_confirmation_enabled;
-		$confirmed_releases     = get_post_meta( $post->ID, 'confirmed_releases', true );
+		$confirmed_releases     = get_post_meta( $post->ID, 'confirmed_releases', true ) ?: [];
 
 		echo 'Release Confirmation: <strong>' . ( $confirmations_required ? 'Enabled' : 'Disabled' ) . '</strong>';
+
+		if ( ! $confirmed_releaes ) {
+			return;
+		}
 
 		echo '<table class="widefat">
 		<thead>
@@ -24,9 +28,9 @@ class Release_Confirmation {
 				<th>Date</th>
 				<th>Committer</th>
 				<th>Approval</th>
-				<th>Override</th>;
-		</thead>
-		';
+				<th>Override</th>
+		</thead>';
+
 		foreach ( $confirmed_releases as $tag => $data ) {
 			$data['confirmations_required'] = $confirmations_required;
 
