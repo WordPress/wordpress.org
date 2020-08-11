@@ -54,8 +54,8 @@ function wporg_get_lesson_plans_by_tax_slugs_query( $slugs ) {
 			),
 		),
 	);
-	
-	// Get all the lesson plans associated to 
+
+	// Get all the lesson plans associated to
 	return new WP_Query( $args );
 }
 
@@ -95,7 +95,7 @@ function wporg_get_default_cat() {
  */
 function wporg_get_cat_or_default_slug() {
 	$cat = wporg_get_filter_category();
-	
+
 	if( empty( $cat ) ) {
 		return wporg_get_default_cat()->slug;
 	}
@@ -109,7 +109,7 @@ function wporg_get_cat_or_default_slug() {
  *
  * @param string $id Id of the post
  * @param string $tax_slug The slug for the custom taxonomy
- * @return string 
+ * @return string
  */
 function get_taxonomy_values( $id, $tax_slug ){
 	$terms = wp_get_post_terms( $id, $tax_slug, array( 'fields' => 'names' )  );
@@ -185,19 +185,19 @@ return get_post_meta( get_the_ID(), 'download_lesson_plan_slides_url', true );
 }
 
 /**
- * Submit CTA button 
+ * Submit CTA button
  *
  * @package WPBBP
  */
-function wporg_submit_idea_cta() { ?> 
+function wporg_submit_idea_cta() { ?>
 
 	<section class="submit-idea-cta">
 		<div class="content-icon"><span class="dashicons dashicons-lightbulb"></span></div>
-		<h3><?php _e( 'Have an Idea for a Workshop? Let us know!' ); ?></h3>
-		<a class="button button-primary button-large" href="<?php echo esc_url( site_url( '/submit-an-idea/' ) ); ?>"><?php _e( 'Submit an Idea' ); ?></a>
+		<h2><?php _e( 'Have an Idea for a Workshop? Let us know!' ); ?></h2>
+		<a class="button button-primary button-large" href="https://wordcampcentral.survey.fm/learn-wordpress-workshop-application"><?php _e( 'Submit an Idea' ); ?></a>
 	</section>
 
-<?php } 
+<?php }
 
 /**
  * Returns whether all post for workshop
@@ -212,8 +212,31 @@ function wporg_get_workshops( $options = NULL ) {
 	if( ! is_null( $options ) ) {
 		$args = array_merge( $args, $options );
 
-	} 
+	}
 
 	$query = new \WP_Query( $args );
 	return $query;
+}
+
+/**
+ * Returns the presenters for the workshop.
+ *
+ * @param WP_Post|int $workshop
+ *
+ * @return WP_User[]|array
+ */
+function wporg_get_workshop_presenters( $workshop = null ) {
+	$post       = get_post( $workshop );
+	$presenters = get_post_meta( $post->ID, 'presenter_wporg_username' );
+	$wp_users   = array();
+
+	foreach ( $presenters as $presenter ) {
+		$wp_user = get_user_by( 'login', $presenter );
+
+		if ( $wp_user ) {
+			array_push( $wp_users, $wp_user );
+		}
+	}
+
+	return $wp_users;
 }
