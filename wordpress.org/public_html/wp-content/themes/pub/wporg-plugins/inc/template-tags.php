@@ -259,6 +259,30 @@ function get_plugin_status_notice( $post = null ) {
 	return $message;
 }
 
+function the_unconfirmed_releases_notice() {
+	$plugin = get_post();
+
+	if ( ! $plugin->release_confirmation_enabled || ! current_user_can( 'plugin_admin_edit', $plugin ) ) {
+		return;
+	}
+
+	$confirmations_required = $post->release_confirmation_enabled;
+	$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+	$unconfirmed_releases   = wp_list_filter( $confirmed_releases, [ 'confirmed' => false ] );
+
+	if ( ! $unconfirmed_releases ) {
+		return;
+	}
+
+	printf(
+		'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+		sprintf(
+			__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
+			home_url( '/developers/release-approval/' )
+		)
+	);
+}
+
 /**
  * Display the ADVANCED Zone.
  */
