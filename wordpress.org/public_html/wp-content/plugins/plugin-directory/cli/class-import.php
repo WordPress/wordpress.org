@@ -125,7 +125,7 @@ class Import {
 					$confirmed_releases[ $stable_tag ]['committer'][] = $last_committer;
 				}
 				if ( ! in_array( $last_revision, $confirmed_releases[ $stable_tag ]['revision'], true ) ) {
-					$confirmed_releases[ $stable_tag ]['revision'][] = $last_committer;
+					$confirmed_releases[ $stable_tag ]['revision'][] = $last_revision;
 				}
 
 				update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases ); // no-op if unchanged.
