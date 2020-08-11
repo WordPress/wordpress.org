@@ -603,6 +603,7 @@ class Plugin_Directory {
 			'wporg-plugins-reviews',
 			'readme-validator',
 			'block-validator',
+			'release-confirmation',
 		);
 
 		$not_allowed_shortcodes = array_diff( array_keys( $shortcode_tags ), $allowed_shortcodes );
