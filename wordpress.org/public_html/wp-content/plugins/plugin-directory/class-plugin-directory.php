@@ -586,6 +586,7 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugins-reviews', array( __NAMESPACE__ . '\Shortcodes\Reviews', 'display' ) );
 		add_shortcode( 'readme-validator', array( __NAMESPACE__ . '\Shortcodes\Readme_Validator', 'display' ) );
 		add_shortcode( 'block-validator', array( __NAMESPACE__ . '\Shortcodes\Block_Validator', 'display' ) );
+		add_shortcode( 'release-confirmation', array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'display' ) );
 	}
 
 	/**
