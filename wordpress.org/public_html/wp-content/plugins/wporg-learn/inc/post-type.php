@@ -87,6 +87,7 @@ function register_workshop() {
 				'className'    => 'is-style-secondary-full-width',
 			) ),
 			array( 'core/paragraph', array(
+				'className' => 'terms',
 				'content' => sprintf(
 					__( 'You must agree to our <a href="%s">Code of Conduct</a> in order to participate.', 'wporg-learn' ),
 					'https://learn.wordpress.org/code-of-conduct/'
@@ -99,8 +100,8 @@ function register_workshop() {
 		'label'                 => __( 'Workshop', 'wporg_learn' ),
 		'description'           => __( 'WordPress.org Training Workshop', 'wporg_learn' ),
 		'labels'                => $labels,
-		'supports'              => array( 'title', 'editor', 'comments', 'revisions', 'custom-fields', 'thumbnail' ),
-		'taxonomies'            => array( 'level', 'topic', 'category' ),
+		'supports'              => array( 'title', 'editor', 'comments', 'revisions', 'custom-fields', 'thumbnail', 'excerpt' ),
+		'taxonomies'            => array( 'level', 'topic' ),
 		'hierarchical'          => true,
 		'public'                => true,
 		'show_ui'               => true,
@@ -116,6 +117,7 @@ function register_workshop() {
 		'capability_type'       => 'page',
 		'show_in_rest'          => true,
 		'template_lock'         => 'all',
+		'rewrite'               => array( 'slug' => 'workshop' ),
 		'template' => array(
 			array( 'core/group',
 			array( 'className' => 'workshop-page_content' ),
