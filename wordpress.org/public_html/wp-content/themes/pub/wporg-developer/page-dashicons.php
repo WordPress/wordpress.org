@@ -132,6 +132,52 @@ get_header(); ?>
 					<div alt="f171" class="dashicons dashicons-undo">undo</div>
 					<div alt="f172" class="dashicons dashicons-redo">redo</div>
 
+					<h4><?php _e( 'Databases', 'wporg' ); ?></h4>
+
+					<!-- databases -->
+					<div alt="f170" class="dashicons dashicons-database-add">database add</div>
+					<div alt="f17e" class="dashicons dashicons-database">database</div>
+					<div alt="f17a" class="dashicons dashicons-database-export">database export</div>
+					<div alt="f17b" class="dashicons dashicons-database-import">database import</div>
+					<div alt="f17c" class="dashicons dashicons-database-remove">database remove</div>
+					<div alt="f17d" class="dashicons dashicons-database-view">database view</div>
+
+					<h4><?php _e( 'Block Editor', 'wporg' ); ?></h4>
+
+					<!-- block editor -->
+					<div alt="f134" class="dashicons dashicons-align-full-width">align full width</div>
+					<div alt="f10a" class="dashicons dashicons-align-pull-left">align pull left</div>
+					<div alt="f10b" class="dashicons dashicons-align-pull-right">align pull right</div>
+					<div alt="f11b" class="dashicons dashicons-align-wide">align wide</div>
+					<div alt="f12b" class="dashicons dashicons-block-default">block default</div>
+					<div alt="f11a" class="dashicons dashicons-button">button</div>
+					<div alt="f137" class="dashicons dashicons-cloud-saved">cloud saved</div>
+					<div alt="f13b" class="dashicons dashicons-cloud-upload">cloud upload</div>
+					<div alt="f13c" class="dashicons dashicons-columns">columns</div>
+					<div alt="f13d" class="dashicons dashicons-cover-image">cover image</div>
+					<div alt="f11c" class="dashicons dashicons-ellipsis">ellipsis</div>
+					<div alt="f13e" class="dashicons dashicons-embed-audio">embed audio</div>
+					<div alt="f13f" class="dashicons dashicons-embed-generic">embed generic</div>
+					<div alt="f144" class="dashicons dashicons-embed-photo">embed photo</div>
+					<div alt="f146" class="dashicons dashicons-embed-post">embed post</div>
+					<div alt="f149" class="dashicons dashicons-embed-video">embed video</div>
+					<div alt="f14a" class="dashicons dashicons-exit">exit</div>
+					<div alt="f10e" class="dashicons dashicons-heading">heading</div>
+					<div alt="f14b" class="dashicons dashicons-html">html</div>
+					<div alt="f14c" class="dashicons dashicons-info-outline">info outline</div>
+					<div alt="f10f" class="dashicons dashicons-insert">insert</div>
+					<div alt="f14d" class="dashicons dashicons-insert-after">insert after</div>
+					<div alt="f14e" class="dashicons dashicons-insert-before">insert before</div>
+					<div alt="f14f" class="dashicons dashicons-remove">remove</div>
+					<div alt="f15e" class="dashicons dashicons-saved">saved</div>
+					<div alt="f150" class="dashicons dashicons-shortcode">shortcode</div>
+					<div alt="f151" class="dashicons dashicons-table-col-after">table col after</div>
+					<div alt="f152" class="dashicons dashicons-table-col-before">table col before</div>
+					<div alt="f15a" class="dashicons dashicons-table-col-delete">table col delete</div>
+					<div alt="f15b" class="dashicons dashicons-table-row-after">table row after</div>
+					<div alt="f15c" class="dashicons dashicons-table-row-before">table row before</div>
+					<div alt="f15d" class="dashicons dashicons-table-row-delete">table row delete</div>
+
 					<h4><?php _e( 'TinyMCE', 'wporg' ); ?></h4>
 
 					<!-- tinymce -->
@@ -221,17 +267,28 @@ get_header(); ?>
 					<div alt="f237" class="dashicons dashicons-share">share</div>
 					<div alt="f240" class="dashicons dashicons-share-alt">share</div>
 					<div alt="f242" class="dashicons dashicons-share-alt2">share</div>
-					<div alt="f301" class="dashicons dashicons-twitter">twitter social</div>
-					<div alt="f302" class="dashicons dashicons-twitter-alt">twitter social</div>
 					<div alt="f303" class="dashicons dashicons-rss">rss</div>
 					<div alt="f465" class="dashicons dashicons-email">email</div>
 					<div alt="f466" class="dashicons dashicons-email-alt">email (alt)</div>
 					<div alt="f467" class="dashicons dashicons-email-alt2">email (alt2)</div>
+					<div alt="f325" class="dashicons dashicons-networking">networking social</div>
+					<div alt="f162" class="dashicons dashicons-amazon">amazon</div>
 					<div alt="f304" class="dashicons dashicons-facebook">facebook social</div>
 					<div alt="f305" class="dashicons dashicons-facebook-alt">facebook social</div>
+					<div alt="f18b" class="dashicons dashicons-google">google social</div>
 					<div alt="f462" class="dashicons dashicons-googleplus">googleplus social</div>
-					<div alt="f325" class="dashicons dashicons-networking">networking social</div>
 					<div alt="f12d" class="dashicons dashicons-instagram">instagram social</div>
+					<div alt="f18d" class="dashicons dashicons-linkedin">linkedin social</div>
+					<div alt="f192" class="dashicons dashicons-pinterest">pinterest social</div>
+					<div alt="f19c" class="dashicons dashicons-podio">podio</div>
+					<div alt="f195" class="dashicons dashicons-reddit">reddit social</div>
+					<div alt="f196" class="dashicons dashicons-spotify">spotify social</div>
+					<div alt="f199" class="dashicons dashicons-twitch">twitch social</div>
+					<div alt="f301" class="dashicons dashicons-twitter">twitter social</div>
+					<div alt="f302" class="dashicons dashicons-twitter-alt">twitter social</div>
+					<div alt="f19a" class="dashicons dashicons-whatsapp">whatsapp social</div>
+					<div alt="f19d" class="dashicons dashicons-xing">xing</div>
+					<div alt="f19b" class="dashicons dashicons-youtube">youtube social</div>
 
 					<h4><?php _e( 'WordPress.org Specific: Jobs, Profiles, WordCamps', 'wporg' ); ?></h4>
 
@@ -298,6 +355,7 @@ get_header(); ?>
 					<h4><?php _e( 'Notifications', 'wporg' ); ?></h4>
 
 					<!-- alerts/notifications/flags -->
+					<div alt="f16d" class="dashicons dashicons-bell">bell</div>
 					<div alt="f147" class="dashicons dashicons-yes">yes check checkmark</div>
 					<div alt="f12a" class="dashicons dashicons-yes-alt">yes check checkmark (alt)</div>
 					<div alt="f158" class="dashicons dashicons-no">no x</div>
@@ -363,6 +421,7 @@ get_header(); ?>
 					<div alt="f527" class="dashicons dashicons-palmtree">palm tree</div>
 					<div alt="f524" class="dashicons dashicons-tickets-alt">tickets (alt)</div>
 					<div alt="f526" class="dashicons dashicons-money">money</div>
+					<div alt="f18e" class="dashicons dashicons-money-alt">money alt</div>
 					<div alt="f328" class="dashicons dashicons-smiley">smiley smile</div>
 					<div alt="f529" class="dashicons dashicons-thumbs-up">thumbs up</div>
 					<div alt="f542" class="dashicons dashicons-thumbs-down">thumbs down</div>
@@ -370,6 +429,26 @@ get_header(); ?>
 					<div alt="f546" class="dashicons dashicons-paperclip">paperclip</div>
 					<div alt="f131" class="dashicons dashicons-color-picker">color picker</div>
 					<div alt="f327" class="dashicons dashicons-edit-large">edit large</div>
+					<div alt="f186" class="dashicons dashicons-edit-page">edit page</div>
+					<div alt="f15f" class="dashicons dashicons-airplane">airplane</div>
+					<div alt="f16a" class="dashicons dashicons-bank">bank</div>
+					<div alt="f16c" class="dashicons dashicons-beer">beer</div>
+					<div alt="f16e" class="dashicons dashicons-calculator">calculator</div>
+					<div alt="f16b" class="dashicons dashicons-car">car</div>
+					<div alt="f16f" class="dashicons dashicons-coffee">coffee</div>
+					<div alt="f17f" class="dashicons dashicons-drumstick">drumstick</div>
+					<div alt="f187" class="dashicons dashicons-food">food</div>
+					<div alt="f188" class="dashicons dashicons-fullscreen-alt">fullscreen alt</div>
+					<div alt="f189" class="dashicons dashicons-fullscreen-exit-alt">fullscreen exit alt</div>
+					<div alt="f18a" class="dashicons dashicons-games">games</div>
+					<div alt="f18c" class="dashicons dashicons-hourglass">hourglass</div>
+					<div alt="f18f" class="dashicons dashicons-open-folder">open folder</div>
+					<div alt="f190" class="dashicons dashicons-pdf">pdf</div>
+					<div alt="f191" class="dashicons dashicons-pets">pets</div>
+					<div alt="f193" class="dashicons dashicons-printer">printer</div>
+					<div alt="f194" class="dashicons dashicons-privacy">privacy</div>
+					<div alt="f198" class="dashicons dashicons-superhero">superhero</div>
+					<div alt="f197" class="dashicons dashicons-superhero-alt">superhero</div>
 
 				</div>
 
