@@ -637,6 +637,7 @@ class WP_55_Credits extends WP_Credits {
 			'overclokk',
 			'p_enrique',
 			'paaljoachim',
+			'pablohoneyhoney',
 			'pacifika',
 			'palmiak',
 			'paresh07',
