@@ -19,9 +19,14 @@ class Release_Confirmation {
 		if ( ! self::can_access() ) {
 			return self::not_authorized();
 		}
-		ob_start();
 
-		$plugins = Tools::get_users_write_access_plugins( wp_get_current_user() );
+		ob_start();
+		self::display_for_user( wp_get_current_user() );
+		return ob_get_clean();
+	}
+
+	static function display_for_user( $user ) {
+		$plugins = Tools::get_users_write_access_plugins( $user );
 
 		$plugins = array_map( function( $slug ) {
 			return Plugin_Directory::get_plugin_post( $slug );
@@ -52,23 +57,23 @@ class Release_Confirmation {
 				}, $not_enabled ) ) )
 			);
 		}
-
-		return ob_get_clean();
 	}
 
-	static function single_plugin_row( $plugin ) {
-		if ( ! $plugin->release_confirmation_enabled ) {
+	static function single_plugin_row( $plugin, $include_header = true ) {
+		$confirmations_required = $plugin->release_confirmation_enabled;
+		$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+
+		if ( ! $confirmations_required && ! $confirmed_releases ) {
 			return false;
 		}
 
-		printf(
-			'<h2><a href="%s">%s</a></h2>',
-			get_permalink( $plugin ),
-			get_the_title( $plugin )
-		);
-
-		$confirmations_required = $plugin->release_confirmation_enabled;
-		$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+		if ( $include_header ) {
+			printf(
+				'<h2><a href="%s">%s</a></h2>',
+				get_permalink( $plugin ),
+				get_the_title( $plugin )
+			);
+		}
 
 		echo '<table class="widefat">
 		<thead>
@@ -153,9 +158,7 @@ class Release_Confirmation {
 	}
 
 	static function get_actions( $plugin, $data ) {
-		return '<button class="button button-primary override-approve-release">Approve</button>' .
-			'&nbsp' .
-			'<button class="button button-secondary override-deny-release">Deny</button>';
+		return '<button class="button button-primary override-approve-release">Approve</button>';
 	}
 
 	static function can_access() {
