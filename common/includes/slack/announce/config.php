@@ -338,7 +338,6 @@ function get_whitelist() {
 			'aristath',
 			'cais',
 			'chipbennett',
-			'dingo_d',
 			'emiluzelac',
 			'grapplerulrich',
 			'greenshady',
