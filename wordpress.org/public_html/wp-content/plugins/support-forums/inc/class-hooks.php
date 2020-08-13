@@ -124,6 +124,8 @@ class Hooks {
 		// Freshness links should have the datetime as a title rather than the thread title.
 		add_filter( 'bbp_get_topic_freshness_link', array( $this, 'bbp_get_topic_freshness_link' ), 10, 5 );
 
+		// Add a no-reply-to-email suggestion to topic subscription emails
+		add_filter( 'bbp_subscription_mail_message', array( $this, 'bbp_subscription_mail_message'), 5, 3 );
 	}
 
 	/**
@@ -1196,5 +1198,34 @@ class Hooks {
 			) . '"',
 			$anchor
 		);
+	}
+
+	/**
+	 * Filter the topic subscription message to 
+	 */
+	public function bbp_subscription_mail_message( $message, $reply_id, $topic_id ) {
+		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
+
+		remove_all_filters( 'bbp_get_reply_content' );
+
+		// Strip tags from text and set up message body.
+		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );
+		$reply_url = bbp_get_reply_url( $reply_id );
+
+		$message = sprintf( __( '%1$s wrote:
+
+%2$s
+
+Post Link: %3$s
+-----------
+You are receiving this email because you subscribed to a forum topic.
+
+Log in and visit the topic to reply to the topic or unsubscribe from these emails. Note that replying to this email has no effect.', 'wporg-forums' ),
+                $reply_author_name,
+                $reply_content,
+                $reply_url
+        );
+
+		return $message;
 	}
 }
