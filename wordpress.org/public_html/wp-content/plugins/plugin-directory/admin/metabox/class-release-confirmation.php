@@ -41,12 +41,12 @@ class Release_Confirmation {
 			if ( current_user_can( 'plugin_admin_edit', $post_id ) ) {
 				if ( update_post_meta( $post_id, 'release_confirmation', (int) $_REQUEST['release_confirmation'] ) ) {
 					if ( ! (int) $_REQUEST['release_confirmation'] ) {
-						Tools::audit_log( 'Plugin release approval disabled.', $post_id ); 
+						Tools::audit_log( 'Plugin release approval disabled.', $post_id );
 					}
 					Tools::audit_log( sprintf(
 						'Plugin release approval now requires %s confirmations.',
 						(int) $_REQUEST['release_confirmation']
-					), $post_id ); 
+					), $post_id );
 				}
 			}
 		}
