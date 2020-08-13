@@ -1,7 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
-use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation as Release_Confirmation_Shortcode;
 
 /**
@@ -39,7 +39,15 @@ class Release_Confirmation {
 	static function save_post( $post_id ) {
 		if ( isset( $_REQUEST['release_confirmation'] ) && is_numeric( $_REQUEST['release_confirmation'] ) ) {
 			if ( current_user_can( 'plugin_admin_edit', $post_id ) ) {
-				update_post_meta( $post_id, 'release_confirmation', (int) $_REQUEST['release_confirmation'] );
+				if ( update_post_meta( $post_id, 'release_confirmation', (int) $_REQUEST['release_confirmation'] ) ) {
+					if ( ! (int) $_REQUEST['release_confirmation'] ) {
+						Tools::audit_log( 'Plugin release approval disabled.', $post_id ); 
+					}
+					Tools::audit_log( sprintf(
+						'Plugin release approval now requires %s confirmations.',
+						(int) $_REQUEST['release_confirmation']
+					), $post_id ); 
+				}
 			}
 		}
 	}
