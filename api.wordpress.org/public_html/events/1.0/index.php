@@ -729,7 +729,22 @@ function get_events( $args = array() ) {
 		return $data;
 	}
 
-	$wheres = array();
+	$wheres = array(
+		/*
+		 * This group is online-only events, and `pin_next_workshop_discussion_group()` will take care of adding
+		 * them to the event array. Meetup.com requires groups to claim a physical location, so this one uses
+		 * San Francisco.
+		 *
+		 * If these events weren't excluded here, then people in San Francisco would get them mixed in with their
+		 * actual local meetup events, and the local events would often be pushed out of the widget.
+		 *
+		 * @todo This do mean that non-Core requests will never see events from this group, but there isn't a
+		 * tangible use case for that yet. We could maybe support an `online` value for the `location` parameter
+		 * in the future if that's desired. If we do that, the Codex documentation should be updated.
+		 */
+		"meetup_url <> 'https://www.meetup.com/learn-wordpress-discussions/' "
+	);
+
 	if ( ! empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
 		$wheres[]     = '`type` = %s';
 		$sql_values[] = $args['type'];
