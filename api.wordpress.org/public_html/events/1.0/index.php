@@ -182,6 +182,8 @@ function build_response( $location, $location_args ) {
 
 		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time() );
 
+		$events = pin_next_workshop_discussion_group( $events, $_SERVER['HTTP_USER_AGENT'] );
+
 		$events = remove_duplicate_events( $events );
 
 		// Internal location data cannot be exposed in the response, see get_location().
@@ -1255,7 +1257,7 @@ function is_wp15_event( $title ) {
 }
 
 /**
- * Pin the next upcoming online WordCamp.
+ * Pin the next upcoming online WordCamp to the Events Widget.
  *
  * @param array  $events
  * @param string $user_agent
@@ -1330,6 +1332,44 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 
 	if ( isset( $next_online_camp['url'] ) ) {
 		array_unshift( $events, $next_online_camp );
+	}
+
+	return $events;
+}
+
+/**
+ * Pin upcoming learn.wordpress.org discussion groups to the Events Widget.
+ *
+ * @param array  $events
+ * @param string $user_agent
+ *
+ * @return array
+ */
+function pin_next_workshop_discussion_group( $events, $user_agent ) {
+	if ( ! is_client_core( $user_agent ) ) {
+		return $events;
+	}
+
+	if ( time() <= strtotime( '2020-08-13 2pm PDT' ) ) {
+		array_unshift(
+			$events,
+			array(
+				'type'       => 'meetup',
+				'title'      => 'Discussion Group: Introduction to Contributing to WordPress',
+				'url'        => 'https://www.meetup.com/learn-wordpress-discussions/events/272512607/',
+				'meetup'     => 'Learn WordPress',
+				'meetup_url' => 'https://www.meetup.com/learn-wordpress-discussions/',
+				'date'       => '2020-08-13 14:00:00',
+				'end_date'   => '2020-08-13 15:00:00',
+
+				'location'   => array(
+					'location'  => 'Online',
+					'country'   => 'US',
+					'latitude'  => 37.78,
+					'longitude' => -122.42,
+				)
+			)
+		);
 	}
 
 	return $events;
