@@ -1333,6 +1333,8 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 			 * Cache a string instead of `false`, to disambiguate between cache-misses, and cache-hits with 0 results.
 			 * `wp_cache_get()` from the `memcached` plugin doesn't support the `$found` parameter, so this has to be
 			 * done manually.
+			 *
+			 * todo $found is now available as of r16106-dotorg.
 			 */
 			$next_online_camp = 'none scheduled';
 		}
@@ -1361,30 +1363,58 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
  * @return array
  */
 function pin_next_workshop_discussion_group( $events, $user_agent ) {
+	global $wpdb, $cache_group, $cache_life;
+
 	if ( ! is_client_core( $user_agent ) ) {
 		return $events;
 	}
 
-	if ( time() <= strtotime( '2020-08-13 2pm PDT' ) ) {
-		array_unshift(
-			$events,
-			array(
+	$cache_key             = 'next_workshop_discussion_group';
+	$next_discussion_group = wp_cache_get( $cache_key, $cache_group, false, $found );
+
+	if ( ! $found ) {
+		$raw_discussion_group = $wpdb->get_row( "
+			SELECT `title`, `url`, `meetup`, `meetup_url`, `date_utc`, `end_date`, `country`, `latitude`, `longitude`
+			FROM `wporg_events`
+			WHERE
+				type       = 'meetup'    AND
+				meetup_url = 'https://www.meetup.com/learn-wordpress-discussions/' AND
+				status     = 'scheduled' AND
+				location   = 'online'    AND
+				date_utc BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 WEEK
+			ORDER BY `date_utc` ASC
+			LIMIT 1"
+		);
+
+		if ( isset( $raw_discussion_group->url ) ) {
+			$next_discussion_group = array(
 				'type'       => 'meetup',
-				'title'      => 'Discussion Group: Introduction to Contributing to WordPress',
-				'url'        => 'https://www.meetup.com/learn-wordpress-discussions/events/272512607/',
-				'meetup'     => 'Learn WordPress',
-				'meetup_url' => 'https://www.meetup.com/learn-wordpress-discussions/',
-				'date'       => '2020-08-13 14:00:00',
-				'end_date'   => '2020-08-13 15:00:00',
+				'title'      => $raw_discussion_group->title,
+				'url'        => $raw_discussion_group->url,
+				'meetup'     => $raw_discussion_group->meetup,
+				'meetup_url' => $raw_discussion_group->meetup_url,
+				'date'       => $raw_discussion_group->date_utc,
+				'end_date'   => $raw_discussion_group->end_date,
 
 				'location'   => array(
 					'location'  => 'Online',
-					'country'   => 'US',
-					'latitude'  => 37.78,
-					'longitude' => -122.42,
+					'country'   => $raw_discussion_group->country,
+					'latitude'  => (float) $raw_discussion_group->latitude,
+					'longitude' => (float) $raw_discussion_group->longitude,
 				)
-			)
-		);
+			);
+		}
+
+		/*
+		 * This intentionally stores a cache value when there are 0 results, because that's a normal condition;
+		 * i.e., there aren't currently any discussion groups events on the schedule. If nothing were cached in
+		 * that situation, then this would run a query on every request, which wouldn't be performant at scale.
+		 */
+		wp_cache_set( $cache_key, $next_discussion_group, $cache_group, $cache_life );
+	}
+
+	if ( isset( $next_discussion_group['url'] ) ) {
+		array_unshift( $events, $next_discussion_group );
 	}
 
 	return $events;
