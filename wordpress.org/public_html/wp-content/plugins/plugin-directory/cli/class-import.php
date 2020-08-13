@@ -93,12 +93,13 @@ class Import {
 			// This tag is unknown? Trigger email.
 			if ( empty( $confirmed_releases[ $stable_tag ] ) ) {
 				$confirmed_releases[ $stable_tag ] = [
-					'date'      => time(),
-					'tag'       => $stable_tag,
-					'version'   => $headers->Version,
-					'confirmed' => false,
-					'committer' => [ $last_committer ],
-					'revision'  => [ $last_revision ],
+					'date'          => time(),
+					'tag'           => $stable_tag,
+					'version'       => $headers->Version,
+					'confirmations' => [],
+					'confirmed'     => false,
+					'committer'     => [ $last_committer ],
+					'revision'      => [ $last_revision ],
 				];
 
 				$email = new Release_Confirmation_Email(
