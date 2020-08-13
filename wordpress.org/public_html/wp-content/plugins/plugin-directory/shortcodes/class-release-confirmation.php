@@ -107,7 +107,7 @@ class Release_Confirmation {
 				),
 				esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
 				esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
-				esc_html( $data['committer'] ),
+				esc_html( implode( ', ', (array) $data['committer'] ) ),
 				self::get_approval_text( $plugin, $data ),
 				self::get_actions( $plugin, $data )
 			);
