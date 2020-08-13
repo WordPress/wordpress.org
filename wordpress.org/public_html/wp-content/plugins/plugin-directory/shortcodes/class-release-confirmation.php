@@ -158,7 +158,29 @@ class Release_Confirmation {
 	}
 
 	static function get_actions( $plugin, $data ) {
-		return '<button class="button button-primary override-approve-release">Approve</button>';
+		$buttons = [];
+		if ( $data['confirmations_required'] && count( $data['confirmations'] ) < $data['confirmations_required'] ) {
+			if ( isset( $data['confirmations'][ wp_get_current_user()->user_login ] ) ) {
+				$buttons[] = sprintf(
+					'<button class="button button-secondary disabled approve-release">%s</button>',
+					'Already confirmed'
+				);
+			} else {
+				$buttons[] = sprintf(
+					'<a href="%s" class="button button-primary approve-release">%s</a>',
+					Template::get_release_confirmation_link( $data['tag'] ),
+					esc_attr( $plugin->post_name ),
+					'Confirm'
+				);
+			}
+		} else {
+			$buttons[] = sprintf(
+				'<button class="button button-secondary disabled approve-release">%s</button>',
+				'Already confirmed'
+			);
+		}
+
+		return implode( ' ', $buttons );
 	}
 
 	static function can_access() {
