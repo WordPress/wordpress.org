@@ -60,7 +60,7 @@ class Release_Confirmation {
 	}
 
 	static function single_plugin_row( $plugin, $include_header = true ) {
-		$confirmations_required = $plugin->release_confirmation_enabled;
+		$confirmations_required = $plugin->release_confirmation;
 		$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
 
 		if ( ! $confirmations_required && ! $confirmed_releases ) {

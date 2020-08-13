@@ -13,7 +13,7 @@ class Release_Confirmation {
 	static function display() {
 		global $post;
 
-		$confirmations_required = $post->release_confirmation_enabled;
+		$confirmations_required = $post->release_confirmation;
 		$confirmed_releases     = get_post_meta( $post->ID, 'confirmed_releases', true ) ?: [];
 		echo 'Release Confirmation: <strong>' . ( $confirmations_required ? 'Enabled' : 'Disabled' ) . '</strong>';
 

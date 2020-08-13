@@ -83,7 +83,7 @@ class Import {
 		$block_files     = $data['block_files'];
 
 		// Release confirmation.
-		if ( $plugin->release_confirmation_enabled ) {
+		if ( $plugin->release_confirmation ) {
 			if ( 'trunk' === $stable_tag ) {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}

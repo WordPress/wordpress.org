@@ -66,12 +66,12 @@ class Plugin_Release_Confirmation extends Base {
 		];
 
 		// Abort early if needed.
-		if ( $plugin->release_confirmation_enabled ) {
+		if ( $plugin->release_confirmation ) {
 			return $result;
 		}
 
 		// Update the Metadata.
-		update_post_meta( $plugin->ID, 'release_confirmation_enabled', 1 );
+		update_post_meta( $plugin->ID, 'release_confirmation', 1 );
 
 		// Add an audit-log entry.
 		Tools::audit_log( 'Release Confirmations Enabled.', $plugin );

@@ -262,11 +262,11 @@ function get_plugin_status_notice( $post = null ) {
 function the_unconfirmed_releases_notice() {
 	$plugin = get_post();
 
-	if ( ! $plugin->release_confirmation_enabled || ! current_user_can( 'plugin_admin_edit', $plugin ) ) {
+	if ( ! $plugin->release_confirmation || ! current_user_can( 'plugin_admin_edit', $plugin ) ) {
 		return;
 	}
 
-	$confirmations_required = $post->release_confirmation_enabled;
+	$confirmations_required = $post->release_confirmation;
 	$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
 	$unconfirmed_releases   = wp_list_filter( $confirmed_releases, [ 'confirmed' => false ] );
 
@@ -490,7 +490,7 @@ function the_plugin_release_confirmation_form() {
 		return;
 	}
 
-	$confirmations_required = $post->release_confirmation_enabled;
+	$confirmations_required = $post->release_confirmation;
 
 	echo '<h4>' . esc_html__( 'Release Confirmation', 'wporg-plugins' ) . '</h4>';
 	if ( $confirmations_required ) {
