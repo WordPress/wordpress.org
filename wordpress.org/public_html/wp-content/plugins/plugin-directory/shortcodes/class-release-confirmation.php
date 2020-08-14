@@ -141,7 +141,7 @@ class Release_Confirmation {
 			);
 		}
 
-		if ( count( $confirmations ) >= $data['confirmations_required'] ) {
+		if ( !empty( $data['confirmed'] ) || count( $confirmations ) >= $data['confirmations_required'] ) {
 			_e( 'Release confirmed.', 'wporg-plugins' );
 		} else {
 			printf(
