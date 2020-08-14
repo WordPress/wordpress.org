@@ -565,7 +565,7 @@ class Block_Plugin_Checker {
 					if ( 0 === strpos( $block->name, $ns ) ) {
 						$this->record_result(
 							__FUNCTION__,
-							'warning',
+							'error',
 							sprintf(
 								// translators: %1$s is the block name, %2$s is the namespace.
 								__( 'Block %1$s uses namespace %2$s. Please use a unique namespace.', 'wporg-plugins' ),
