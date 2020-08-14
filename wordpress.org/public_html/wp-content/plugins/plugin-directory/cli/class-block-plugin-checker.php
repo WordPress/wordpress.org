@@ -682,7 +682,7 @@ class Block_Plugin_Checker {
 			);
 			$this->record_result(
 				__FUNCTION__,
-				'warning',
+				( count( $top_level_blocks ) > 4 ? 'error' : 'warning' ), // error or warning depending on how many
 				sprintf(
 					/* translators: %s is a list of block names. */
 					__( 'More than one top-level block was found: %s', 'wporg-plugins' ),
