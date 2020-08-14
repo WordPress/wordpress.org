@@ -76,11 +76,52 @@ class Query_Plugins extends Base {
 			return $response;
 		}
 
+		/*
+		 * Allow an API search bypass for exact-post matches.
+		 * - `slug:example-plugin` will only return THAT plugin, nothing else.
+		 * - `block:example-plugin/my-block` will return Block directory plugins, or
+		 *    regular plugins that supply that block if there were no matches in the block directory.
+		 * 
+		 * TODO: This might have been useful as a general search filter for the website too.
+		 */
+		if ( !empty( $query['s'] ) ) {
+			if ( 'slug:' === substr( $query['s'], 0, 5 ) ) {
+				$query['name'] = substr( $query['s'], 5 );
+
+				unset( $query['s'] );
+			}
+
+			if ( 'block:' === substr( $query['s'], 0, 6 ) ) {
+				$query['meta_query'][] = [
+					'key' => 'block_name',
+					'value' => substr( $query['s'], 6 )
+				];
+
+				$query['tax_query'][] = [
+					'taxonomy' => 'plugin_section',
+					'field' => 'slug',
+					'terms' => 'block',
+				];
+
+				// Prioritise block plugins, but try again without the restriction.
+				$try_again_without_tax_query = true;
+
+				unset( $query['s'], $query['block_search'] );
+			}
+
+		}
+
 		$query['post_type']   = 'plugin';
 		$query['post_status'] = 'publish';
 
 		// Use the main query so that is_main_query() is triggered for the filters.
 		$wp_query->query( $query );
+
+		// Maybe retry without the the block-specific query if no plugins were found.
+		if ( ! $wp_query->found_posts && isset( $try_again_without_tax_query ) ) {
+			unset( $query['tax_query'] );
+			$wp_query->query( $query );
+		}
 
 		$response['info']['page']    = (int) $wp_query->get( 'paged' ) ?: 1;
 		$response['info']['pages']   = (int) $wp_query->max_num_pages ?: 0;

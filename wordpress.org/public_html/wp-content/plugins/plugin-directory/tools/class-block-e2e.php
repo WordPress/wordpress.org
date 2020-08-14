@@ -22,7 +22,6 @@ class Block_e2e {
 			json_encode([
 				'event_type'     => $plugin->post_title,
 				'client_payload' => [
-					'searchTerm' => $plugin->post_title,
 					'slug'       => $plugin->post_name,
 				],
 			])
