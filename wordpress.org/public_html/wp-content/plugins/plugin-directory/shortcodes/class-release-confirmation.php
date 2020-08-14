@@ -12,12 +12,16 @@ use WordPressdotorg\Plugin_Directory\Tools;
  */
 class Release_Confirmation {
 
+	const SHORTCODE = 'release-confirmation';
+	const COOKIE    = 'release_confirmation_access_token';
+
 	/**
 	 * @return string
 	 */
 	static function display() {
-		if ( ! self::can_access() ) {
-			return self::not_authorized();
+
+		if ( ! is_user_logged_in() ) {
+			return;
 		}
 
 		ob_start();
@@ -35,6 +39,27 @@ class Release_Confirmation {
 		usort( $plugins, function( $a, $b ) {
 			return strtotime( $b->last_updated ) <=> strtotime( $a->last_updated );
 		} );
+
+		if ( ! $plugins ) {
+			printf(
+				'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+				// TODO text.
+				__( 'You have no plugins.', 'wporg-plugins')
+			);
+			// TODO? wp_safe_redirect( home_url() ); ?
+		} else if ( ! self::can_access() ) {
+			printf(
+				'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+				sprintf(
+					/* translators: %s: URL */
+					__( 'Check your email for an access link, or <a href="%s">request a new email</a> to perform actions.', 'wporg-plugins'),
+					self::generate_access_url() // TODO..
+				)
+			);
+
+			// Hide the actions columns, as they'll be empty.
+			echo '<style>table.plugin-releases-listing tr > .actions { display: none; }</style>';
+		}
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
@@ -75,14 +100,14 @@ class Release_Confirmation {
 			);
 		}
 
-		echo '<table class="widefat">
+		echo '<table class="widefat plugin-releases-listing">
 		<thead>
 			<tr>
 				<th>Version</th>
 				<th>Date</th>
 				<th>Committer</th>
 				<th>Approval</th>
-				<th>Actions</th>
+				<th class="actions">Actions</th>
 		</thead>';
 
 		if ( ! $confirmed_releases ) {
@@ -98,7 +123,7 @@ class Release_Confirmation {
 					<td title="%s">%s</td>
 					<td>%s</td>
 					<td>%s</td>
-					<td>%s</td>
+					<td class="actions">%s</td>
 				</tr>',
 				sprintf(
 					'<a href="https://plugins.trac.wordpress.org/browser/%s/tags/%s/">%s</a>',
@@ -156,6 +181,13 @@ class Release_Confirmation {
 
 	static function get_actions( $plugin, $data ) {
 		$buttons = [];
+
+		if ( ! self::can_access() ) {
+			// User is not accessing with a valid token.
+			return '';
+		}
+
+
 		if ( $data['confirmations_required'] && count( $data['confirmations'] ) < $data['confirmations_required'] ) {
 			if ( isset( $data['confirmations'][ wp_get_current_user()->user_login ] ) ) {
 				$buttons[] = sprintf(
@@ -181,7 +213,103 @@ class Release_Confirmation {
 	}
 
 	static function can_access() {
-		// TODO: require timed url, etc.
-		return is_user_logged_in();
+		static $can_access = null;
+		if ( ! is_null( $can_access ) ) {
+			return $can_access;
+		}
+
+		// Assume no access.
+		$can_access = false;
+
+		// Must be logged in..
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+
+		// Must have an access token..
+		$access_token = '';
+		if ( isset( $_REQUEST['access_token'] ) ) {
+			$access_token = base64_decode( $_REQUEST['access_token'] );
+		} else if ( isset( $_COOKIE[ self::COOKIE ] ) ) {
+			$access_token = $_COOKIE[ self::COOKIE ];
+		}
+
+		if ( ! $access_token ) {
+			return false;
+		}
+
+		$user  = wp_get_current_user();
+		list( $user_id, $hash, $expire ) = explode( ',', $access_token, 3 );
+
+		if ( $user_id != $user->ID || $expire < time() ) {
+			setcookie( self::COOKIE, false, time() - DAY_IN_SECONDS );
+
+			return false;
+		}
+
+		$expected_hash = self::generate_access_token( $user, $expire );
+
+		if ( ! hash_equals( $expected_hash, $hash ) ) {
+			return false;
+		}
+
+		// Convert GET tokens to Cookie tokens.
+		if ( isset( $_REQUEST['access_token'] ) ) {
+			setcookie( self::COOKIE, $access_token, $expire, '/plugins/', 'wordpress.org', true, true );
+
+			wp_safe_redirect( remove_query_arg( 'access_token' ) );
+			die();
+		}
+
+		return $can_access = true;
+	}
+
+	static function generate_access_token( $user, $valid_until ) {
+		$pass_frag     = substr( $user->user_pass, 8, 4 );
+		$key           = wp_hash( $user->ID . '|' . $pass_frag . '|' . $valid_until );
+		$expected_hash = hash_hmac( 'sha256', $user->ID . '|' . $valid_until, $key );
+
+		return $expected_hash;
+	}
+
+	static function generate_access_url( $user = null ) {
+		if ( ! $user ) {
+			$user = wp_get_current_user();
+		}
+		if ( ! $user || ! $user->exists() ) {
+			return false;
+		}
+
+		$expire = time() + HOUR_IN_SECONDS; // TODO DAY
+		$hash   = self::generate_access_token( $user, $expire );
+
+		$token  = base64_encode( "{$user->ID},{$hash},{$expire}" );
+
+		// TODO: hardcoded url..
+		return add_query_arg( 'access_token', $token, home_url( '/developers/releases/' ) );
+	}
+
+	static function template_redirect() {
+		$post = get_post();
+		if ( ! $post || ! is_page() || ! has_shortcode( $post->post_content, self::SHORTCODE ) ) {
+			return;
+		}
+
+		// This page requires login.
+		if ( ! is_user_logged_in() ) {
+			// Migrate any request token to a cookie.
+			if ( isset( $_REQUEST['access_token'] ) ) {
+				setcookie( self::COOKIE, $_REQUEST['access_token'], $valid_until, '/plugins/', 'wordpress.org', true, true );
+			}
+
+			wp_safe_redirect( wp_login_url( get_permalink() ?: home_url() ) );
+			exit;
+		}
+
+		// Check auth this will set the static var for later, and it might also perform a redirect.
+		self::can_access();
+
+		// A page with this shortcode has no need to be indexed.
+		add_filter( 'wporg_noindex_request', '__return_true' );
 	}
 }
