@@ -142,10 +142,7 @@ class Release_Confirmation {
 		}
 
 		if ( count( $confirmations ) >= $data['confirmations_required'] ) {
-			printf(
-				__( '%s confirmations recieved.', 'wporg-plugins' ),
-				count( $confirmations )
-			);
+			_e( 'Release confirmed.', 'wporg-plugins' );
 		} else {
 			printf(
 				'%s of %s required confirmations received.',
