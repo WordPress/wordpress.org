@@ -1021,6 +1021,7 @@ class Block_Plugin_Checker {
 			'header',
 			'wp_redirect',
 			'wp_safe_redirect',
+			'add_shortcode',
 		);
 
 		foreach ( $this->php_function_calls as $call ) {
