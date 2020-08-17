@@ -6,6 +6,7 @@ use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Block_JSON\Parser as Block_JSON_Parser;
 use WordPressdotorg\Plugin_Directory\Block_JSON\Validator as Block_JSON_Validator;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**
  * A class that can examine a plugin, and evaluate and return status info that would be useful for a validator or similar tool.
@@ -95,6 +96,42 @@ class Block_Plugin_Checker {
 				return str_replace( 'https://plugins.svn.wordpress.org', 'https://plugins.trac.wordpress.org/browser', $this->repo_url ) . '/' . $file;
 			}
 		}
+	}
+
+	/**
+	 * Return the namespace part of a block name.
+	 *
+	 * @param string $block The block name.
+	 * @return string|bool The namespace, or false if the block name was invalid.
+	 */
+	public function get_namespace( $block ) {
+		$parts = explode( '/', $block, 2 );
+		if ( 2 === count( $parts ) ) {
+			return $parts[0];
+		}
+		return false;
+	}
+
+	/**
+	 * Return a list of contributors for a given plugin.
+	 *
+	 * @param WP_Post|int $post The post object or ID.
+	 */
+	public function get_plugin_contributors( $post ) {
+		$post = get_post( $post );
+
+		$contributors = get_terms( array(
+			'taxonomy'   => 'plugin_contributors',
+			'object_ids' => array( $post->ID ),
+			'orderby'    => 'term_order',
+			'fields'     => 'names',
+		) );
+
+		if ( is_wp_error( $contributors ) ) {
+			return array();
+		}
+
+		return $contributors;
 	}
 
 	/**
@@ -356,7 +393,7 @@ class Block_Plugin_Checker {
 			} elseif ( '(' === $token[0] ) {
 
 				while ( $last = array_pop( $context ) ) {
-					if ( T_STRING === $last[0] && function_exists( $last[1] ) ) {
+					if ( is_array( $last ) && T_STRING === $last[0] && function_exists( $last[1] ) ) {
 						$function_calls[] = array( $last[1], $last[2], $file );
 					}
 				}
@@ -609,6 +646,92 @@ class Block_Plugin_Checker {
 	}
 
 	/**
+	 * Namespace shouldn't clash with other plugins.
+	 */
+	function check_for_unique_namespace() {
+		$namespaces = array();
+		foreach ( $this->blocks as $block ) {
+			if ( $parts = explode( '/', $block->name ) ) {
+				$namespaces[] = $parts[0] . '/';
+			}
+		}
+
+		$namespaces = array_unique( $namespaces );
+
+		// Ignore known bogus namespaces
+		$namespaces = array_diff( $namespaces, array( 'cgb/', 'create-block/', 'example/', 'block/', 'core/' ) );
+
+		if ( count( $namespaces ) > 0 ) {
+			foreach ( $namespaces as $namespace ) {
+				$meta_query[] = array(
+					'key'      => 'block_name',
+					'value'    => $namespace,
+					'compare'  => 'LIKE',
+				);
+			}
+			if ( count( $meta_query ) > 1 ) {
+				$meta_query[ 'relation' ] = 'OR';
+			}
+
+			$args = array(
+				'post_type' => 'plugin',
+				'post_status' => 'publish',
+				'nopaging' => true,
+				'meta_query' => $meta_query,
+			);
+
+			$query = new \WP_Query( $args );
+
+			foreach ( $query->posts as $post ) {
+				if ( $post->post_name === $this->slug ) {
+					continue;
+				}
+
+				$blocks = get_post_meta( $post->ID, 'block_name', false );
+				foreach ( $blocks as $block ) {
+					if ( in_array( $this->get_namespace( $block ) . '/', $namespaces ) ) {
+
+						if ( $this->slug ) {
+							// We're testing a plugin that's in the directory already, so we can check to see if the other plugin shares some contributors.
+
+							$this_plugin_contribs = $this->get_plugin_contributors( Plugin_Directory::get_plugin_post( $this->slug ) );
+							$other_plugin_contribs = $this->get_plugin_contributors( $post );
+
+							if ( !array_intersect( $this_plugin_contribs, $other_plugin_contribs ) ) { 
+								// If the other plugin has some contributors in common, it's probably fine to share a namespace.
+								// If not, it's an error that needs to be fixed.
+								$this->record_result(
+									__FUNCTION__,
+									'error',
+									// translators: %1$s is the namespace, %2$s is a link to the plugin.
+									sprintf( __( 'Please use a unique block namespace. Namespace %1$s is already used by %2$s.' ), 
+										'<code>' . $this->get_namespace( $block ) . '</code>', 
+										'<a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $post->post_title ) . '</a>'
+									)
+								);
+							}
+						} else {
+							// We're testing a plugin that's elsewhere (GitHub?) so we don't know its authors.
+							// If the namespace is used by another plugin we'll just warn about it, since that might be by the same author.
+							$this->record_result(
+								__FUNCTION__,
+								'warning',
+								// translators: %1$s is the namespace, %2$s is a link to the plugin.
+								sprintf( __( 'Please use a unique block namespace. Namespace %1$s is already used by %2$s.' ), 
+									'<code>' . $this->get_namespace( $block ) . '</code>', 
+									'<a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $post->post_title ) . '</a>'
+								)
+							);
+						}
+					}
+				}
+			}
+
+		}
+
+	}
+
+	/**
 	 * There should be at least one block.
 	 */
 	function check_for_blocks() {
@@ -687,8 +810,7 @@ class Block_Plugin_Checker {
 					/* translators: %s is a list of block names. */
 					__( 'More than one top-level block was found: %s', 'wporg-plugins' ),
 					implode( ', ', $list )
-				),
-				$block_name
+				)
 			);
 		}
 	}
