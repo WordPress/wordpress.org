@@ -887,7 +887,7 @@ class Block_Plugin_Checker {
 						sprintf(
 							// translators: %1$s is the file name, %2$s is the json error message.
 							__( 'Error attempting to parse json in %1$s: %2$s', 'wporg-plugins' ),
-							'<code>' . $this->relative_filename( $block_json_file ) . '</code>',
+							'<code><a href="' . $this->get_browser_url( $block_json_file ) . '">' . $this->relative_filename( $block_json_file ) . '</a></code>',
 							$message
 						),
 						$this->relative_filename( $block_json_file )
@@ -922,7 +922,7 @@ class Block_Plugin_Checker {
 						$this->record_result(
 							__FUNCTION__,
 							( 'error' === $code ? 'warning' : $code ), // TODO: be smarter about mapping these
-							'<code>' . $this->relative_filename( $block_json_file ) . '</code>: ' . $message,
+							'<code><a href="' . $this->get_browser_url( $block_json_file ) . '">' . $this->relative_filename( $block_json_file ) . '</a></code>: ' . $message,
 							array(
 								$this->relative_filename( $block_json_file ),
 								$result->get_error_data( $code ),
