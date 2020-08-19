@@ -4,10 +4,8 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 	define( 'THEMES_API_VERSION', '1.0' );
 }
 
-// Load WordPress, pretend we're the Theme Directory in order to avoid having to switch sites after loading.
-$_SERVER['HTTP_HOST'] = 'wordpress.org';
-$_SERVER['REQUEST_URI'] = '/themes/';
-
+// Load WordPress as the Theme Directory in order to avoid having to switch sites after loading.
+$wp_init_host = 'https://wordpress.org/themes/';
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
 // Set up action and request information.
@@ -28,4 +26,10 @@ if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 $action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
 
 // Serve an API request.
-echo wporg_themes_query_api( $action, $request, $format );
+$api = wporg_themes_query_api( $action, $request, 'api_object' );
+
+if ( ! empty( $api->bad_input ) ) {
+	status_header( 400 );
+}
+
+echo $api->get_result( $format );
