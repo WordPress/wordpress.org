@@ -489,7 +489,7 @@ class Import {
 		$potential_block_directories = array( '.' );
 		$base_dir = "$tmp_dir/export";
 
-		$block_json_files = Filesystem::list_files( $base_dir, true, '!^block\.json$!i' );
+		$block_json_files = Filesystem::list_files( $base_dir, true, '!(?:^|/)block\.json$!i' );
 		if ( ! empty( $block_json_files ) ) {
 			foreach ( $block_json_files as $filename ) {
 				$blocks_in_file = $this->find_blocks_in_file( $filename );
