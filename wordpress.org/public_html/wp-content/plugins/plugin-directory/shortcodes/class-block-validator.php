@@ -145,7 +145,7 @@ class Block_Validator {
 
 	protected static function handle_test() {
 		$post = get_post( intval( $_POST['plugin-id'] ) );
-		if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-test-' . $post->ID ) ) {
+		if ( $post && 'test' === $_POST['block-directory-test'] && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-test-' . $post->ID ) ) {
 			if ( wp_cache_get( "plugin-e2e-test-{$post->ID}", 'plugin-test' ) ) {
 				echo '<div class="notice notice-warning notice-alt"><p>' . __( 'Test already in progress.', 'wporg-plugins' ) . '</p></div>';
 			} elseif ( current_user_can( 'edit_post', $post->ID ) || current_user_can( 'plugin_admin_edit', $post->ID ) ) {
