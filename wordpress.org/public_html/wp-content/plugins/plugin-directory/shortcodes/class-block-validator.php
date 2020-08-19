@@ -28,35 +28,61 @@ class Block_Validator {
 				</div>
 			</form>
 
+
+			<details>
+			<summary>Or upload a plugin ZIP file.</summary>
+			<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
+				<?php wp_nonce_field( 'wporg-block-upload', 'block-upload-nonce' ); ?>
+				<input type="hidden" name="action" value="upload"/>
+
+				<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+				<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
+
+				<input id="upload_button" name="block-directory-upload" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
+
+				<p>
+					<small>
+						<?php
+						printf(
+							/* translators: Maximum allowed file size. */
+							esc_html__( 'Maximum allowed file size: %s', 'wporg-plugins' ),
+							esc_html( size_format( wp_max_upload_size() ) )
+						);
+						?>
+					</small>
+					</p>
+				</form>
+
+				<?php
+				$upload_script = '
+					( function ( $ ) {
+						var $label = $( "label.button" ),
+							labelText = $label.text();
+						$( "#zip_file" )
+							.on( "change", function( event ) {
+								var fileName = event.target.value.split( "\\\\" ).pop();
+								fileName ? $label.text( fileName ) : $label.text( labelText );
+							} )
+							.on( "focus", function() { $label.addClass( "focus" ); } )
+							.on( "blur", function() { $label.removeClass( "focus" ); } );
+					} ( window.jQuery ) );';
+
+				if ( ! wp_script_is( 'jquery', 'done' ) ) {
+					wp_enqueue_script( 'jquery' );
+					wp_add_inline_script( 'jquery-migrate', $upload_script );
+				} else {
+					printf( '<script>%s</script>', $upload_script );
+				}
+			?>
+			</details>
 			<?php
+
 			if ( $_POST && ! empty( $_POST['plugin_url'] ) && wp_verify_nonce( $_POST['block-nonce'], 'validate-block-plugin' ) ) {
 				self::validate_block( $_POST['plugin_url'] );
+			} elseif ( $_POST && ! empty( $_POST['block-directory-upload'] ) ) {
+				self::handle_file_upload();
 			} elseif ( $_POST && ! empty( $_POST['block-directory-edit'] ) ) {
-				$post = get_post( intval( $_POST['plugin-id'] ) );
-				if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-edit-' . $post->ID ) ) {
-					if ( current_user_can( 'edit_post', $post->ID ) || current_user_can( 'plugin_admin_edit', $post->ID ) ) {
-						$terms = wp_list_pluck( get_the_terms( $post->ID, 'plugin_section' ), 'slug' );
-						if ( 'add' === $_POST['block-directory-edit'] ) {
-							$terms[] = 'block';
-						} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
-							$terms = array_diff( $terms, array( 'block' ) );
-						}
-						$result = wp_set_object_terms( $post->ID, $terms, 'plugin_section' );
-						if ( !is_wp_error( $result ) && !empty( $result ) ) {
-							if ( 'add' === $_POST['block-directory-edit'] ) {
-								Tools::audit_log( 'Plugin added to block directory.', $post->ID );
-								self::maybe_send_email_plugin_added( $post );
-								Plugin_Import::queue( $post->post_name, array( 'tags_touched' => array( $post->stable_tag ) ) );
-								echo '<div class="notice notice-success notice-alt"><p>' . __( 'Plugin added to the block directory.', 'wporg-plugins' ) . '</p></div>';
-							} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
-								Tools::audit_log( 'Plugin removed from block directory.', $post->ID );
-								echo '<div class="notice notice-info notice-alt"><p>' . __( 'Plugin removed from the block directory.', 'wporg-plugins' ) . '</p></div>';
-							}
-						}
-					}
-
-					self::validate_block( $post->post_name );
-				}
+				self::handle_edit_form();
 			}
 			?>
 		</div>
@@ -66,6 +92,53 @@ class Block_Validator {
 		</div>
 		<?php endif;
 		return ob_get_clean();
+	}
+
+	protected static function handle_file_upload() {
+		if (
+			! empty( $_POST['block-upload-nonce'] )
+			&& wp_verify_nonce( $_POST['block-upload-nonce'], 'wporg-block-upload' )
+			&& 'upload' === $_POST['action']
+			) {
+			if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) {
+				self::validate_block_from_zip( $_FILES['zip_file']['tmp_name'] );
+			} else {
+				$message = __( 'Error in file upload.', 'wporg-plugins' );
+			}
+
+			if ( ! empty( $message ) ) {
+				echo "<div class='notice notice-warning notice-alt'><p>{$message}</p></div>\n";
+			}
+		}
+
+	}
+
+	protected static function handle_edit_form() {
+		$post = get_post( intval( $_POST['plugin-id'] ) );
+		if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-edit-' . $post->ID ) ) {
+			if ( current_user_can( 'edit_post', $post->ID ) || current_user_can( 'plugin_admin_edit', $post->ID ) ) {
+				$terms = wp_list_pluck( get_the_terms( $post->ID, 'plugin_section' ), 'slug' );
+				if ( 'add' === $_POST['block-directory-edit'] ) {
+					$terms[] = 'block';
+				} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
+					$terms = array_diff( $terms, array( 'block' ) );
+				}
+				$result = wp_set_object_terms( $post->ID, $terms, 'plugin_section' );
+				if ( !is_wp_error( $result ) && !empty( $result ) ) {
+					if ( 'add' === $_POST['block-directory-edit'] ) {
+						Tools::audit_log( 'Plugin added to block directory.', $post->ID );
+						self::maybe_send_email_plugin_added( $post );
+						Plugin_Import::queue( $post->post_name, array( 'tags_touched' => array( $post->stable_tag ) ) );
+						echo '<div class="notice notice-success notice-alt"><p>' . __( 'Plugin added to the block directory.', 'wporg-plugins' ) . '</p></div>';
+					} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
+						Tools::audit_log( 'Plugin removed from block directory.', $post->ID );
+						echo '<div class="notice notice-info notice-alt"><p>' . __( 'Plugin removed from the block directory.', 'wporg-plugins' ) . '</p></div>';
+					}
+				}
+			}
+
+			return self::validate_block( $post->post_name );
+		}
 	}
 
 	protected static function plugin_is_in_block_directory( $slug ) {
@@ -107,11 +180,33 @@ class Block_Validator {
 	 * @param string $plugin_url The URL of a Subversion or GitHub repository.
 	 */
 	protected static function validate_block( $plugin_url ) {
-
 		$checker = new Block_Plugin_Checker();
 		$results = $checker->run_check_plugin_repo( $plugin_url );
+		self::display_results( $checker );
+	}
+
+	/**
+	 * Validates a block plugin to check that blocks are correctly registered and detectable.
+	 *
+	 * @param string $plugin_url The URL of a Subversion or GitHub repository.
+	 */
+	protected static function validate_block_from_zip( $zip_file ) {
+		$path = Tools\Filesystem::unzip( $zip_file );
+		$checker = new Block_Plugin_Checker();
+		$results = $checker->run_check_plugin_files( $path );
+		self::display_results( $checker );
+	}
+
+	/**
+	 * Display the results of a Block_Plugin_Checker run.
+	 *
+	 * @param array $results The Block_Plugin_Checker output.
+	 */
+	protected static function display_results( $checker ) {
 
 		echo '<h2>' . __( 'Results', 'wporg-plugins' ) . '</h2>';
+
+		$results = $checker->get_results();
 
 		if ( $checker->repo_url && $checker->repo_revision ) {
 			echo '<p>';
