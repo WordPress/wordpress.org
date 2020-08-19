@@ -78,6 +78,12 @@ class Themes_API {
 	 */
 	private $cache_life = 600; // 10 minutes.
 
+	/**
+	 * Flag the input as having been malformed.
+	 * 
+	 * @var bool
+	 */
+	public $bad_input = false;
 
 	/**
 	 * Constructor.
@@ -87,6 +93,41 @@ class Themes_API {
 	 */
 	public function __construct( $action = '', $request = array() ) {
 		$this->request = (object) $request;
+
+		// Filter out bad inputs.
+		$scalar_only_fields = [
+			'author',
+			'browse',
+			'locale',
+			'per_page',
+			'slug',
+			'search',
+			'theme',
+			'wp_version',
+		];
+		foreach ( $scalar_only_fields as $field ) {
+			if ( isset( $this->request->$field ) && ! is_scalar( $this->request->$field ) ) {
+				unset( $this->request->$field );
+				$this->bad_input = true;
+			}
+		}
+
+		$array_of_string_fields = [
+			'fields',
+			'slugs',
+			'tag',
+		];
+		foreach ( $array_of_string_fields as $field ) {
+			if ( isset( $this->request->$field ) ) {
+				$this->request->$field = $this->array_of_strings( $this->request->$field );
+
+				// If the resulting field is invalid, ignore it entirely.
+				if ( ! $this->request->$field ) {
+					unset( $this->request->$field );
+					$this->bad_input = true;
+				}
+			}
+		}
 
 		// The locale we should use is specified by the request
 		add_filter( 'locale', array( $this, 'filter_locale' ) );
@@ -112,7 +153,11 @@ class Themes_API {
 	 * Filter get_locale() to use the locale which is specified in the request.
 	 */
 	function filter_locale( $locale ) {
-		return isset( $this->request->locale ) ? $this->request->locale : $locale;
+		if ( ! empty( $this->request->locale ) ) {
+			$locale = (string) $this->request->locale;
+		}
+
+		return $locale;
 	}
 
 	/**
@@ -134,6 +179,8 @@ class Themes_API {
 			return wp_json_encode( $response );
 		} elseif ( 'php' === $format ) {
 			return serialize( $response );
+		} elseif ( 'api_object' === $format ) {
+			return $this;
 		} else { // 'raw' === $format, or anything else.
 			return $response;
 		}
@@ -166,7 +213,7 @@ class Themes_API {
 		}
 
 		if ( ! empty( $this->request->number ) ) {
-			$this->response = array_slice( $this->response, 0, $this->request->number );
+			$this->response = array_slice( $this->response, 0, (int) $this->request->number );
 		}
 	}
 
@@ -236,8 +283,8 @@ class Themes_API {
 
 		// The 1.2+ api expects a `wp_version` field to be sent and does not use the UA.
 		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION >= 1.2 ) {
-			if ( isset( $this->request->wp_version ) ) {
-				$wp_version = $this->request->wp_version;
+			if ( ! empty( $this->request->wp_version ) ) {
+				$wp_version = (string) $this->request->wp_version;
 			}
 		} elseif ( preg_match( '|WordPress/([^;]+)|', $_SERVER['HTTP_USER_AGENT'], $matches ) ) {
 			// Get version from user agent since it's not explicitly sent to feature_list requests in older API branches.
@@ -324,8 +371,7 @@ class Themes_API {
 			return;
 		}
 
-		$slugs = is_array( $this->request->slugs ) ? $this->request->slugs : explode( ',', $this->request->slugs );
-		$slugs = array_unique( array_map( 'trim', $slugs ) );
+		$slugs = (array) $this->request->slugs;
 
 		if ( count( $slugs ) > 100 ) {
 			$this->response = (object) array( 'error' => 'A maximum of 100 themes can be queried at once.' );
@@ -356,10 +402,12 @@ class Themes_API {
 		}
 
 		// Theme slug to identify theme.
-		if ( empty( $this->request->slug ) ) {
+		if ( empty( $this->request->slug ) || ! trim( $this->request->slug ) ) {
 			$this->response = (object) array( 'error' => 'Slug not provided' );
 			return;
 		}
+
+		$this->request->slug = trim( $this->request->slug );
 
 		// Set which fields wanted by default:
 		$defaults = array(
@@ -381,9 +429,8 @@ class Themes_API {
 			$defaults['requires_php'] = true;
 		}
 
-		if ( empty( $this->request->fields ) ) {
-			$this->request->fields = array();
-		}
+		$this->request->fields = (array) $this->request->fields ?? [];
+
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
 
 		// If there is a cached result, return that.
@@ -447,11 +494,9 @@ class Themes_API {
 			$defaults['requires_php'] = true;
 		}
 
-		if ( isset( $this->request->fields ) ) {
-			$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
-		} else {
-			$this->fields = array_merge( $this->fields, $defaults );
-		}
+		$this->request->fields = (array) $this->request->fields ?? [];
+
+		$this->fields = array_merge( $this->fields, $defaults, $this->request->fields );
 
 		// If there is a cached result, return that.
 		$cache_key = sanitize_key( __METHOD__ . ':' . get_locale() . ':' . md5( serialize( $this->request ) . serialize( $this->fields ) ) );
@@ -460,10 +505,6 @@ class Themes_API {
 		}
 
 		$this->result = $this->perform_wp_query();
-
-		if ( empty( $this->request->fields ) ) {
-			$this->request->fields = array();
-		}
 
 		// Basic information about the request.
 		$this->response = (object) array(
@@ -495,27 +536,24 @@ class Themes_API {
 			$this->query['paged'] = (int) $this->request->page;
 		}
 		if ( isset( $this->request->per_page ) ) {
-			$this->query['posts_per_page'] = min( $this->request->per_page, 999 );
+			$this->query['posts_per_page'] = min( (int) $this->request->per_page, 999 );
 		}
 
 		// Views
 		if ( ! empty( $this->request->browse ) ) {
-			$this->query['browse'] = $this->request->browse;
+			$this->query['browse'] = (string) $this->request->browse;
 
 			if ( 'featured' == $this->request->browse ) {
 				$this->cache_life = HOUR_IN_SECONDS;
 			} elseif ( 'favorites' == $this->request->browse ) {
-				$this->query['favorites_user'] = $this->request->user;
+				$this->query['favorites_user'] = (string) $this->request->user;
 			}
 
 		}
 
 		// Tags
 		if ( ! empty( $this->request->tag ) ) {
-			if ( ! is_array( $this->request->tag ) ) {
-				$this->request->tag = explode( ',', $this->request->tag );
-			}
-			$this->request->tag = array_unique( $this->request->tag );
+			$this->request->tag = (array) $this->request->tag;
 
 			// Replace updated tags.
 			$updated_tags = array(
@@ -540,19 +578,19 @@ class Themes_API {
 
 		// Search
 		if ( ! empty( $this->request->search ) ) {
-			$this->query['s'] = $this->request->search;
+			$this->query['s'] = (string) $this->request->search;
 		}
 
 		// Direct theme
 		if ( ! empty( $this->request->theme ) ) {
-			$this->query['name'] = $this->request->theme;
+			$this->query['name'] = (string) $this->request->theme;
 
 			add_filter( 'parse_query', array( $this, 'direct_theme_query' ) );
 		}
 
 		// Author
 		if ( ! empty( $this->request->author ) ) {
-			$this->query['author_name'] = $this->request->author;
+			$this->query['author_name'] = (string) $this->request->author;
 		}
 
 		// Query
@@ -866,5 +904,29 @@ class Themes_API {
 		$description = strip_tags( $description );
 
 		return $description;
+	}
+
+	/**
+	 * Helper method to return an array of trimmed strings.
+	 */
+	protected function array_of_strings( $input ) {
+		if ( is_string( $input ) ) {
+			$input = explode( ',', $input );
+		}
+
+		if ( ! $input || ! is_array( $input ) ) {
+			return [];
+		}
+
+		foreach ( $input as $k => $v ) {
+			if ( ! is_scalar( $v ) ) {
+				unset( $input[ $k ] );
+			} elseif ( is_string( $v ) ) {
+				// Don't affect non-strings such as int's and bools.
+				$input[ $k ] = trim( $v );
+			}
+		}
+
+		return array_unique( $input );
 	}
 }

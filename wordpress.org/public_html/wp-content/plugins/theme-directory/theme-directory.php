@@ -856,7 +856,7 @@ function wporg_themes_theme_information( $slug ) {
  *
  * @param $method string The Method being called. Valid values: 'query_themes', 'theme_information', 'hot_tags', 'feature_list', and 'get_commercial_shops'
  * @param $args   array  The arguements for the call.
- * @param $format string The format to return the data in. Valid values: 'json', 'php', 'raw' (default)
+ * @param $format string The format to return the data in. Valid values: 'json', 'php', 'api_object', 'raw' (default)
  */
 function wporg_themes_query_api( $method, $args = array(), $format = 'raw' ) {
 	if ( ! class_exists( 'Themes_API' ) ) {
