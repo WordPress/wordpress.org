@@ -927,6 +927,11 @@ class Themes_API {
 			}
 		}
 
-		return array_unique( $input );
+		// Only unique if it's a non-associative array.
+		if ( wp_is_numeric_array( $input ) ) {
+			$input = array_unique( $input );
+		}
+
+		return $input;
 	}
 }
