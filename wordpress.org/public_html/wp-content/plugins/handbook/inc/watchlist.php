@@ -40,6 +40,9 @@ class WPorg_Handbook_Watchlist {
 		}
 
 		$post = get_post();
+		if ( ! $post ) {
+			return $actions;
+		}
 
 		if ( 'page' == $post->post_type || ( in_array( $post->post_type, self::$post_types ) && ! is_post_type_archive( self::$post_types ) ) ) {
 			$watchlist = get_post_meta( $post->ID, '_wporg_watchlist', true );
