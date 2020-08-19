@@ -83,6 +83,8 @@ class Block_Validator {
 				self::handle_file_upload();
 			} elseif ( $_POST && ! empty( $_POST['block-directory-edit'] ) ) {
 				self::handle_edit_form();
+			} elseif ( $_POST && ! empty( $_POST['block-directory-test'] ) ) {
+				self::handle_test();
 			}
 			?>
 		</div>
@@ -141,6 +143,25 @@ class Block_Validator {
 		}
 	}
 
+	protected static function handle_test() {
+		$post = get_post( intval( $_POST['plugin-id'] ) );
+		if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-test-' . $post->ID ) ) {
+			if ( wp_cache_get( "plugin-e2e-test-{$post->ID}", 'plugin-test' ) ) {
+				echo '<div class="notice notice-warning notice-alt"><p>' . __( 'Test already in progress.', 'wporg-plugins' ) . '</p></div>';
+			} elseif ( current_user_can( 'edit_post', $post->ID ) || current_user_can( 'plugin_admin_edit', $post->ID ) ) {
+				$result = Tools\Block_e2e::run( $post );
+				if ( $result ) {
+					echo '<div class="notice notice-success notice-alt"><p>' . __( 'Test run started. Please check back in 10 minutes.', 'wporg-plugins' ) . '</p></div>';
+					wp_cache_add( "plugin-e2e-test-{$post->ID}", '1', 'plugin-test', 10 * MINUTE_IN_SECONDS );
+				} else {
+					echo '<div class="notice notice-error notice-alt"><p>' . __( 'Unable to start a test run.', 'wporg-plugins' ) . '</p></div>';
+				}
+			}
+		}
+
+		return self::validate_block( $post->post_name );
+	}
+
 	protected static function plugin_is_in_block_directory( $slug ) {
 		$plugin = Plugin_Directory::get_plugin_post( $slug );
 
@@ -161,16 +182,25 @@ class Block_Validator {
 		echo '<form method="post">';
 		echo '<input type="hidden" name="plugin-id" value="' . esc_attr( $plugin->ID ) . '" />';
 
+		echo '<p>';
 		if ( self::plugin_is_in_block_directory( $plugin->post_name ) ) {
 			echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 			// translators: %s plugin title.
-			echo '<p><button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button></p>';
+			echo '<button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
 		} else if ( ! $has_errors ) {
 			echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 			// translators: %s plugin title.
-			echo '<p><button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button></p>';
+			echo '<button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
 		}
 
+		if ( current_user_can( 'edit_post', $post->ID ) ) {
+			echo wp_nonce_field( 'block-directory-test-' . $plugin->ID, 'block-directory-nonce' );
+			// translators: %s plugin title.
+			$disabled = ( wp_cache_get( "plugin-e2e-test-{$plugin->ID}", 'plugin-test' ) ? ' disabled="disabled"' : '' );
+			echo '<button class="button button-secondary button-large" type="submit" name="block-directory-test" value="test"' . $disabled . '>' . sprintf( __( 'Test %s', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
+		}
+
+		echo '</p>';
 		echo '</form>';
 	}
 
@@ -270,12 +300,35 @@ class Block_Validator {
 			if ( current_user_can( 'edit_post', $plugin->ID ) ) {
 				// Plugin reviewers etc
 				echo '<h3>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</h3>';
+
+				$e2e_result = get_post_meta( $plugin->ID, 'e2e_success', true );
+				if ( false !== $e2e_result ) {
+					echo '<h4>' . __( 'Test Results', 'wporg-plugins' ) . '</h4>';
+					if ( 'true' === $e2e_result ) {
+						echo "<div class='notice notice-info notice-alt'><p>\n";
+						echo __( 'Test passed.', 'wporg-plugins' );
+						echo "</p></div>\n";
+					} else {
+						echo "<div class='notice notice-error notice-alt'><p>\n";
+						echo sprintf( esc_html__( 'Test failed: %s', wporg-plugins ), '<code>' . esc_html( get_post_meta( $plugin->ID, 'e2e_error', true ) ) . '</code>' );
+						echo "</p></div>\n";
+					}
+				}
+
+				if ( $image = get_post_meta( $plugin->ID, 'e2e_screenshotBlock', true ) ) {
+					echo '<div class="test-screenshot"><figure>';
+					echo '<img src="data:image/png;base64, ' . esc_attr( $image ) . '" />';
+					echo '<figcaption>Screenshot from last test run</figcaption>';
+					echo '</figure></div>';
+				}
+
 				echo '<ul>';
 				echo '<li><a href="' . get_edit_post_link( $plugin->ID ) . '">' . __( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
 				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li>';
 				echo '</ul>';
 
 				self::render_plugin_actions( $plugin, $has_errors );
+
 			} elseif ( current_user_can( 'plugin_admin_edit', $plugin->ID ) ) {
 				// Plugin committers
 				echo '<h3>' . __( 'Committer Tools', 'wporg-plugins' ) . '</h3>';
