@@ -276,7 +276,7 @@ get_header(); ?>
 					<div alt="f304" class="dashicons dashicons-facebook">facebook social</div>
 					<div alt="f305" class="dashicons dashicons-facebook-alt">facebook social</div>
 					<div alt="f18b" class="dashicons dashicons-google">google social</div>
-					<div alt="f462" class="dashicons dashicons-googleplus">googleplus social</div>
+					<!-- <div alt="f462" class="dashicons dashicons-googleplus">googleplus social</div> Defunct -->
 					<div alt="f12d" class="dashicons dashicons-instagram">instagram social</div>
 					<div alt="f18d" class="dashicons dashicons-linkedin">linkedin social</div>
 					<div alt="f192" class="dashicons dashicons-pinterest">pinterest social</div>
