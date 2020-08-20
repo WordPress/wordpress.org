@@ -425,7 +425,7 @@ if ( 'wp-plugins' === $project->path ) {
 			<?php
 		else :
 			?>
-			<p>There are no editors for this specific project, yet. <a href="https://make.wordpress.org/polyglots/handbook/plugin-theme-authors-guide/">Become an editor.</a></p>
+			<p>There are no editors for this specific project, yet. <a href="https://make.wordpress.org/polyglots/handbook/plugin-theme-authors-guide/pte-request/">Become an editor.</a></p>
 			<?php
 		endif;
 
