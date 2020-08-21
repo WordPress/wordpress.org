@@ -5,6 +5,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
+use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation as Release_Confirmation_Shortcode;
 use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation_Enabled as Release_Confirmation_Enabled_Email;
 
 /**
@@ -44,7 +45,11 @@ class Plugin_Release_Confirmation extends Base {
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-				return current_user_can( 'plugin_admin_edit', $plugin ) && 'publish' === $plugin->post_status;
+				return (
+					Release_Confirmation_Shortcode::can_access() &&
+					current_user_can( 'plugin_admin_edit', $plugin ) &&
+					'publish' === $plugin->post_status
+				);
 			},
 		] );
 
@@ -59,10 +64,8 @@ class Plugin_Release_Confirmation extends Base {
 			is_array( $result ) && isset( $result['code'] ) &&
 			preg_match( '!^/plugins/v1/plugin/([^/]+)/release-confirmation(/[^/]+)?$!', $request->get_route(), $m )
 		) {
-			if ( 'rest_cookie_invalid_nonce' == $result['code'] ) {
+			if ( 'rest_cookie_invalid_nonce' == $result['code'] || 'rest_forbidden' == $result['code'] ) {
 				wp_die( 'The link you have followed has expired.' );
-			} elseif ( 'rest_forbidden' == $result['code'] ) {
-				wp_die( "Sorry, You can't do that." );
 			}
 		}
 
