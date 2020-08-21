@@ -74,7 +74,7 @@ class Release_Confirmation {
 			}
 		}
 
-	//	echo '<p>' . ( 'Intro to this page goes here.', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . 'Intro to this page goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' . '</p>';
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
