@@ -61,12 +61,11 @@ class Plugin_Favorites extends Base {
 	 * @return bool True if the favoriting was successful.
 	 */
 	public function favorite( $request ) {
-		$location = get_permalink( Plugin_Directory::get_plugin_post( $request['plugin_slug'] ) );
-		header( "Location: $location" );
-
-		$result = array(
-			'location' => $location,
-		);
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+		$result = [
+			'location' => wp_get_referer() ?: get_permalink( $plugin ),
+		];
+		header( 'Location: ' . $result['location'] );
 
 		if ( ! isset( $request['favorite'] ) && ! isset( $request['unfavorite'] ) ) {
 			$result['error'] = 'Unknown Action';

@@ -65,13 +65,12 @@ class Plugin_Self_Transfer extends Base {
 	 * @return bool True if the favoriting was successful.
 	 */
 	public function self_transfer( $request ) {
-		$plugin   = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-		$location = get_permalink( $plugin ) . 'advanced/';
-		header( "Location: $location" );
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 		$result = [
-			'location'    => $location,
+			'location'    => wp_get_referer() ?: get_permalink( $plugin ),
 			'transferred' => false,
 		];
+		header( 'Location: ' . $result['location'] );
 
 		// New owner must also have commit rights.
 		$new_owner = get_user_by( 'id', $request['new_owner'] );
