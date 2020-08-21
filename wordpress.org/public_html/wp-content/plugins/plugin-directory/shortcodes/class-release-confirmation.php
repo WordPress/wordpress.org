@@ -92,6 +92,11 @@ class Release_Confirmation {
 			return false;
 		}
 
+		// Sort releases most recent first.
+		usort( $confirmed_releases, function( $a, $b ) {
+			return $b['date'] <=> $a['date'];
+		} );
+
 		if ( $include_header ) {
 			printf(
 				'<h2><a href="%s">%s</a></h2>',
