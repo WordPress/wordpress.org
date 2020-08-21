@@ -79,13 +79,11 @@ class Plugin_Release_Confirmation extends Base {
 	 * @return bool True if the favoriting was successful.
 	 */
 	public function enable_release_confirmation( $request ) {
-		$plugin   = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-		$location = get_permalink( $plugin );
-		header( "Location: $location" );
-
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 		$result = [
-			'location' => $location,
+			'location' => wp_get_referer() ?: get_permalink( $plugin ),
 		];
+		header( 'Location: ' . $result['location'] );
 
 		// Abort early if needed.
 		if ( $plugin->release_confirmation ) {
@@ -116,13 +114,10 @@ class Plugin_Release_Confirmation extends Base {
 		$plugin   = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 		$releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
 		$tag      = $request['plugin_tag'];
-
-		$location = wp_get_referer( $plugin ) ?: home_url( '/developers/releases/');
-		header( "Location: $location" );
-
-		$result = [
-			'location' => $location,
+		$result   = [
+			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
 		];
+		header( 'Location: ' . $result['location'] );
 
 		$user_login = wp_get_current_user()->user_login;
 
