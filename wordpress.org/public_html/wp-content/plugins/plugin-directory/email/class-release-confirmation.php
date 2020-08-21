@@ -21,15 +21,18 @@ class Release_Confirmation extends Base {
 
 	function body() {
 		return sprintf(
-			/* translators: 1: Username, 2: Plugin Name, 3: Version identifier, 4: Access URL */
-			__( '%1$s has committed a new version of %2$s - %3$s.
+			/* translators: 1: Name, 2: Committer, 3: Plugin Name, 4: Version identifier, 5: Access URL */
+			__( 'Howdy %1$s,
+
+$2$s has committed a new version of %3$s - %4$s.
 
 An email confirmation is required before the new version will be released.
 
 Follow the link below to login and confirm the release.
 
-<%4$s>', 'wporg-plugins' ),
-			$this->args['who'],
+<%5$s>', 'wporg-plugins' ),
+			$this->user_text( $this->user ),
+			$this->user_text( $this->args['who'] ),
 			$this->args['readme']->name,
 			$this->args['headers']->Version,
 			esc_url( Release_Confirmation_Shortcode::generate_access_url( $this->user ) )

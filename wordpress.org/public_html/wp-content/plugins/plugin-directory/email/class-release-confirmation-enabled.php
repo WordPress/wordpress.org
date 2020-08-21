@@ -9,22 +9,25 @@ class Release_Confirmation_Enabled extends Base {
 	function subject() {
 		return sprintf(
 			/* translators: 1: Plugin Name */
-			__( 'Release confirmations now required for %s', 'wporg-plugins' ),
+			__( 'Release confirmation now required for %s', 'wporg-plugins' ),
 			$this->plugin->post_title
 		);
 	}
 
 	function body() {
-		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug */
-		$email_text = "TODO Describe what release confirmations are, etc..";
+		/* translators: 1: Plugin Author, 2: Plugin Name, 3: URL to the handbook */
+		return sprintf(
+			__( 'Howdy %1$s,
 
-		return $email_text . print_r( $this->args, true );
+Release confirmations are now enabled for %2$s.
 
-	/*	return sprintf(
-			$email_text,
+This means that every time you release a new version of %2$s you\'ll be required to confirm the release by following a link in an automated email.
+
+For more information, please read the following handbook article:
+<%3$s>', 'wporg-plugins' ),
+			$this->user_text( $this->user ),
 			$this->plugin->post_title,
-			$this->user->user_login,
-			$this->plugin->post_name
-		); */
+			'https://developer.wordpress.org/plugins/wordpress-org/' // TODO: Handbook page.
+		);
 	}
 }
