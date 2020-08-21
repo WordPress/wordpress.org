@@ -34,8 +34,18 @@ class Release_Confirmation {
 			return Plugin_Directory::get_plugin_post( $slug );
 		}, $plugins );
 
-		usort( $plugins, function( $a, $b ) {
-			return strtotime( $b->last_updated ) <=> strtotime( $a->last_updated );
+		uasort( $plugins, function( $a, $b ) {
+			// Get the most recent commit confirmation.
+			$a_releases = get_post_meta( $a->ID, 'confirmed_releases', true ) ?: [];
+			$b_releases = get_post_meta( $b->ID, 'confirmed_releases', true ) ?: [];
+
+			$a_latest_release = $a_releases ? max( wp_list_pluck( $a_releases, 'date' ) ) : 0;
+			$b_latest_release = $b_releases ? max( wp_list_pluck( $b_releases, 'date' ) ) : 0;
+
+			$a_latest_release = max( $a_latest_release, strtotime( $a->last_updated ) );
+			$b_latest_release = max( $b_latest_release, strtotime( $b->last_updated ) );
+
+			return $b_latest_release <=> $a_latest_release;
 		} );
 
 		ob_start();
