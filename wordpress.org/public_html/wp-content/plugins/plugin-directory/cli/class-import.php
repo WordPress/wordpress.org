@@ -122,7 +122,7 @@ class Import {
 			// Check that the tag is approved.
 			if ( ! $confirmed_releases[ $stable_tag ]['confirmed'] ) {
 
-				if ( ! in_array( $last_committer, $confirmed_releases[ $stable_tag ]['comitter'], true ) ) {
+				if ( ! in_array( $last_committer, $confirmed_releases[ $stable_tag ]['committer'], true ) ) {
 					$confirmed_releases[ $stable_tag ]['committer'][] = $last_committer;
 				}
 				if ( ! in_array( $last_revision, $confirmed_releases[ $stable_tag ]['revision'], true ) ) {
