@@ -21,18 +21,14 @@ class Release_Confirmation {
 	 * @return string
 	 */
 	static function display() {
+		$plugins = Tools::get_users_write_access_plugins( wp_get_current_user() );
 
-		if ( ! is_user_logged_in() ) {
-			return;
+		if ( ! $plugins ) {
+			wp_safe_redirect( home_url( '/developers/' ) );
+			// Redirect via JS too, as technically the page output should've already started (but probably hasn't on WordPress.org)
+			echo '<script>document.location=' . json_encode( home_url( '/developers/' ) ) . '</script>';
+			exit;
 		}
-
-		ob_start();
-		self::display_for_user( wp_get_current_user() );
-		return ob_get_clean();
-	}
-
-	static function display_for_user( $user ) {
-		$plugins = Tools::get_users_write_access_plugins( $user );
 
 		$plugins = array_map( function( $slug ) {
 			return Plugin_Directory::get_plugin_post( $slug );
@@ -42,14 +38,9 @@ class Release_Confirmation {
 			return strtotime( $b->last_updated ) <=> strtotime( $a->last_updated );
 		} );
 
-		if ( ! $plugins ) {
-			printf(
-				'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-				// TODO text.
-				__( 'You have no plugins.', 'wporg-plugins')
-			);
-			// TODO? wp_safe_redirect( home_url() ); ?
-		} else if ( ! self::can_access() ) {
+		ob_start();
+
+		if ( ! self::can_access() ) {
 			printf(
 				'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 				sprintf(
@@ -62,6 +53,8 @@ class Release_Confirmation {
 			// Hide the actions columns, as they'll be empty.
 			echo '<style>table.plugin-releases-listing tr > .actions { display: none; }</style>';
 		}
+
+	//	echo '<p>' . ( 'Intro to this page goes here.', 'wporg-plugins' ) . '</p>';
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
@@ -84,6 +77,8 @@ class Release_Confirmation {
 				}, $not_enabled ) ) )
 			);
 		}
+
+		return ob_get_clean();
 	}
 
 	static function single_plugin_row( $plugin, $include_header = true ) {
