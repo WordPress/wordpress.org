@@ -38,7 +38,7 @@ class Release_Confirmation {
 			return Plugin_Directory::get_plugin_post( $slug );
 		}, $plugins );
 
-		uasort( $plugins, function( $a, $b ) {
+		usort( $plugins, function( $a, $b ) {
 			return strtotime( $b->last_updated ) <=> strtotime( $a->last_updated );
 		} );
 
@@ -96,7 +96,7 @@ class Release_Confirmation {
 		}
 
 		// Sort releases most recent first.
-		usort( $confirmed_releases, function( $a, $b ) {
+		uasort( $confirmed_releases, function( $a, $b ) {
 			return $b['date'] <=> $a['date'];
 		} );
 
