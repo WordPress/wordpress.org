@@ -24,7 +24,7 @@ class Release_Confirmation extends Base {
 			/* translators: 1: Name, 2: Committer, 3: Plugin Name, 4: Version identifier, 5: Access URL */
 			__( 'Howdy %1$s,
 
-$2$s has committed a new version of %3$s - %4$s.
+%2$s has committed a new version of %3$s - %4$s.
 
 An email confirmation is required before the new version will be released.
 
