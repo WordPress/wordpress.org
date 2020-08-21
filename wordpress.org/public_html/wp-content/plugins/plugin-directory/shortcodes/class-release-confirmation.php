@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation_Access as Release_Confirmation_Access_Email;
 
 /**
  * The [release-confirmation] shortcode handler.
@@ -51,14 +52,26 @@ class Release_Confirmation {
 		ob_start();
 
 		if ( ! self::can_access() ) {
-			printf(
-				'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-				sprintf(
-					/* translators: %s: URL */
-					__( 'Check your email for an access link, or <a href="%s">request a new email</a> to perform actions.', 'wporg-plugins'),
-					self::generate_access_url() // TODO..
-				)
-			);
+			if ( isset( $_REQUEST['send_access_email'] ) ) {
+				$email = new Release_Confirmation_Access_Email(
+					wp_get_current_user()
+				);
+				$email->send();
+
+				printf(
+					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+					__( 'Check your email for an access link to perform actions.', 'wporg-plugins'),
+				);
+			} else {
+				printf(
+					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+					sprintf(
+						/* translators: %s: URL */
+						__( 'Check your email for an access link, or <a href="%s">request a new email</a> to perform actions.', 'wporg-plugins'),
+						add_query_arg( 'send_access_email', 1 )
+					)
+				);
+			}
 		}
 
 	//	echo '<p>' . ( 'Intro to this page goes here.', 'wporg-plugins' ) . '</p>';
@@ -151,10 +164,6 @@ class Release_Confirmation {
 
 		// So we know this output something.
 		return true;
-	}
-
-	static function not_authorized() {
-		return 'Please login and follow link in your emailz.';
 	}
 
 	static function get_approval_text( $plugin, $data ) {

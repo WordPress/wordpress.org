@@ -24,12 +24,20 @@ abstract class Base {
 	protected $users = false;
 
 	/**
-	 * @param $plugin The plugin this email relates to.
+	 * @param $plugin  The plugin this email relates to.
 	 * @param $users[] A list of users to email.
-	 * @param $args[] A list of args that the email requires.
+	 * @param $args[]  A list of args that the email requires.
 	 */
-	public function __construct( $plugin, $users, $args = array() ) {
-		$this->plugin = Plugin_Directory::get_plugin_post( $plugin );
+	public function __construct( $plugin, $users = [], $args = array() ) {
+
+		// Sometimes we don't have a plugin context, just a user..
+		if ( $plugin instanceOf WP_User && empty( $users ) ) {
+			$users = [ $plugin ];
+
+			$this->plugin = true; // To pass checks..
+		} else {
+			$this->plugin = Plugin_Directory::get_plugin_post( $plugin );
+		}
 
 		// Don't cast an object to an array, but rather an array of object.
 		if ( is_object( $users ) ) {
