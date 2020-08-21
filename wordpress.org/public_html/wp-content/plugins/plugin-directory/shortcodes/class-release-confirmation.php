@@ -92,7 +92,6 @@ class Release_Confirmation {
 	}
 
 	static function single_plugin_row( $plugin, $include_header = true ) {
-
 		$confirmations_required = $plugin->release_confirmation;
 		$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
 
@@ -141,7 +140,8 @@ class Release_Confirmation {
 				sprintf(
 					'<a href="https://plugins.trac.wordpress.org/browser/%s/tags/%s/">%s</a>',
 					$plugin->post_name,
-					esc_html( $tag ), esc_html( $data['version'] )
+					esc_html( $tag ),
+					esc_html( $data['version'] )
 				),
 				esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
 				esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
@@ -165,29 +165,44 @@ class Release_Confirmation {
 
 		$confirmations = $data['confirmations'] ?? [];
 
-		foreach ( $confirmations as $who => $time ) {
-			$user = get_user_by( 'slug', $who );
+		if ( !empty( $data['confirmed'] ) || count( $confirmations ) >= $data['confirmations_required'] ) {
+			_e( 'Release confirmed.', 'wporg-plugins' );
+		} else if ( 1 == $data['confirmations_required'] ) {
+			_e( 'Waiting for confirmation.', 'wporg-plugins' );
+		} else {
 			printf(
-				'<span title="%s">%s</span><br>',
-				esc_attr( gmdate( 'Y-m-d H:i:s', $time ) ),
-				sprintf(
-					/* translators: 1: Username, 2: '5 hours' */
-					__( 'Approved by %1$s, %2$s ago', 'wporg-plugins' ),
-					$user->display_name ?: $user->user_nicename,
-					human_time_diff( $time )
-				)
+				__( '%s of %s required confirmations.', 'wporg-plugins' ),
+				number_format_i18n( count( $confirmations ) ),
+				number_format_i18n( $data['confirmations_required'] )
 			);
 		}
 
-		if ( !empty( $data['confirmed'] ) || count( $confirmations ) >= $data['confirmations_required'] ) {
-			_e( 'Release confirmed.', 'wporg-plugins' );
-		} else {
+		echo '<div>';
+		foreach ( $confirmations as $who => $time ) {
+			$user = get_user_by( 'slug', $who );
+
+			if ( $who === wp_get_current_user()->user_login ) {
+				$approved_text = sprintf(
+					/* translators: 1: '5 hours' */
+					__( 'You approved this, %1$s ago.', 'wporg-plugins' ),
+					human_time_diff( $time )
+				);
+			} else {
+				$approved_text = sprintf(
+					/* translators: 1: Username, 2: '5 hours' */
+					__( 'Approved by %1$s, %2$s ago.', 'wporg-plugins' ),
+					$user->display_name ?: $user->user_nicename,
+					human_time_diff( $time )
+				);
+			}
+
 			printf(
-				'%s of %s required confirmations received.',
-				count( $confirmations ),
-				$data['confirmations_required']
+				'<span title="%s">%s</span><br>',
+				esc_attr( gmdate( 'Y-m-d H:i:s', $time ) ),
+				$approved_text
 			);
 		}
+		echo '</div>';
 
 		return ob_get_clean();
 	}
@@ -201,23 +216,13 @@ class Release_Confirmation {
 		}
 
 		if ( $data['confirmations_required'] && count( $data['confirmations'] ) < $data['confirmations_required'] ) {
-			if ( isset( $data['confirmations'][ wp_get_current_user()->user_login ] ) ) {
-				$buttons[] = sprintf(
-					'<button class="button button-secondary disabled approve-release">%s</button>',
-					'Already confirmed'
-				);
-			} else {
+			if ( ! isset( $data['confirmations'][ wp_get_current_user()->user_login ] ) ) {
 				$buttons[] = sprintf(
 					'<a href="%s" class="button button-primary approve-release">%s</a>',
 					Template::get_release_confirmation_link( $data['tag'], $plugin ),
 					'Confirm'
 				);
 			}
-		} else {
-			$buttons[] = sprintf(
-				'<button class="button button-secondary disabled approve-release">%s</button>',
-				'Already confirmed'
-			);
 		}
 
 		return implode( ' ', $buttons );
