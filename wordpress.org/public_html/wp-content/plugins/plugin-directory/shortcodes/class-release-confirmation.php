@@ -14,6 +14,8 @@ class Release_Confirmation {
 
 	const SHORTCODE = 'release-confirmation';
 	const COOKIE    = 'release_confirmation_access_token';
+	const NONCE     = 'plugins-developers-releases-page';
+	const URL_PARAM = 'access_token';
 
 	/**
 	 * @return string
@@ -217,63 +219,18 @@ class Release_Confirmation {
 	}
 
 	static function can_access() {
-		static $can_access = null;
-		if ( ! is_null( $can_access ) ) {
-			return $can_access;
-		}
-
-		// Assume no access.
-		$can_access = false;
-
-		// Must be logged in..
-		if ( ! is_user_logged_in() ) {
-			return false;
-		}
-
 		// Must have an access token..
-		$access_token = '';
-		if ( isset( $_REQUEST['access_token'] ) ) {
-			$access_token = base64_decode( $_REQUEST['access_token'] );
-		} else if ( isset( $_COOKIE[ self::COOKIE ] ) ) {
-			$access_token = $_COOKIE[ self::COOKIE ];
-		}
-
-		if ( ! $access_token ) {
+		if ( ! is_user_logged_in() || empty( $_COOKIE[ self::COOKIE ] ) ) {
 			return false;
 		}
 
-		$user  = wp_get_current_user();
-		list( $user_id, $hash, $expire ) = explode( ',', $access_token, 3 );
-
-		if ( $user_id != $user->ID || $expire < time() ) {
-			setcookie( self::COOKIE, false, time() - DAY_IN_SECONDS );
-
-			return false;
+		if ( false !== wp_verify_nonce( $_COOKIE[ self::COOKIE ], self::NONCE ) ) {
+			return true;
 		}
 
-		$expected_hash = self::generate_access_token( $user, $expire );
+		setcookie( self::COOKIE, false, time() - DAY_IN_SECONDS );
 
-		if ( ! hash_equals( $expected_hash, $hash ) ) {
-			return false;
-		}
-
-		// Convert GET tokens to Cookie tokens.
-		if ( isset( $_REQUEST['access_token'] ) ) {
-			setcookie( self::COOKIE, $access_token, $expire, '/plugins/', 'wordpress.org', true, true );
-
-			wp_safe_redirect( remove_query_arg( 'access_token' ) );
-			die();
-		}
-
-		return $can_access = true;
-	}
-
-	static function generate_access_token( $user, $valid_until ) {
-		$pass_frag     = substr( $user->user_pass, 8, 4 );
-		$key           = wp_hash( $user->ID . '|' . $pass_frag . '|' . $valid_until );
-		$expected_hash = hash_hmac( 'sha256', $user->ID . '|' . $valid_until, $key );
-
-		return $expected_hash;
+		return false;
 	}
 
 	static function generate_access_url( $user = null ) {
@@ -284,13 +241,18 @@ class Release_Confirmation {
 			return false;
 		}
 
-		$expire = time() + HOUR_IN_SECONDS; // TODO DAY
-		$hash   = self::generate_access_token( $user, $expire );
+		$current_user = wp_get_current_user()->ID;
+		wp_set_current_user( $user->ID );
 
-		$token  = base64_encode( "{$user->ID},{$hash},{$expire}" );
+		$url = wp_nonce_url(
+			home_url( '/developers/releases/' ), // TODO: Hardcoded url.
+			self::NONCE,
+			self::URL_PARAM
+		);
 
-		// TODO: hardcoded url..
-		return add_query_arg( 'access_token', $token, home_url( '/developers/releases/' ) );
+		wp_set_current_user( $current_user );
+
+		return $url;
 	}
 
 	static function template_redirect() {
@@ -299,19 +261,19 @@ class Release_Confirmation {
 			return;
 		}
 
-		// This page requires login.
-		if ( ! is_user_logged_in() ) {
-			// Migrate any request token to a cookie.
-			if ( isset( $_REQUEST['access_token'] ) ) {
-				setcookie( self::COOKIE, $_REQUEST['access_token'], $valid_until, '/plugins/', 'wordpress.org', true, true );
-			}
-
-			wp_safe_redirect( wp_login_url( get_permalink() ?: home_url() ) );
-			exit;
+		// Migrate URL param to cookie.
+		if ( isset( $_REQUEST[ self::URL_PARAM ] ) ) {
+			setcookie( self::COOKIE, $_REQUEST[ self::URL_PARAM ], DAY_IN_SECONDS, '/plugins/', 'wordpress.org', true, true );
 		}
 
-		// Check auth this will set the static var for later, and it might also perform a redirect.
-		self::can_access();
+		// This page requires login.
+		if ( ! is_user_logged_in() ) {
+			wp_safe_redirect( wp_login_url( get_permalink() ) );
+			exit;
+		} else if ( isset( $_REQUEST[ self::URL_PARAM ] ) ) {
+			wp_safe_redirect( remove_query_arg( self::URL_PARAM ) );
+			exit;
+		}
 
 		// A page with this shortcode has no need to be indexed.
 		add_filter( 'wporg_noindex_request', '__return_true' );
