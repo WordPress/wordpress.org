@@ -323,10 +323,9 @@ class SVN {
 	public static function ls( $url, $verbose = false ) {
 		$options = array(
 			'non-interactive',
+			'xml',
 		);
-		if ( $verbose ) {
-			$options[] = 'v';
-		}
+
 		$esc_options = self::parse_esc_parameters( $options );
 		$esc_url     = escapeshellarg( $url );
 
@@ -336,23 +335,27 @@ class SVN {
 			return false;
 		}
 
-		if ( ! $verbose ) {
-			return array_filter( array_map( 'trim', explode( "\n", $output ) ) );
-		} else {
+		// Parse the output
+		$errors = libxml_use_internal_errors( true );
+		$xml    = simplexml_load_string( $output );
+		libxml_use_internal_errors( $errors );
 
-			/*
-			 * Parse SVN verbose output.
-			 * ^revision author [filesize] date filename$
-			 */
-			preg_match_all( '!^\s*(?P<revision>\d+)\s(?P<author>\S+)\s*(?P<filesize>\d+)?\s*(?P<date>.+?)\s*(?P<filename>\S+)\s*$!im', $output, $files, PREG_SET_ORDER );
-
-			// Remove numeric keys from output.
-			$files = array_map( function ( $item ) {
-				return array_filter( $item, 'is_string', ARRAY_FILTER_USE_KEY );
-			}, $files );
-
-			return $files;
+		foreach ( $xml->list->children() as $entry ) {
+			$files[] = [
+				'revision' => (int) $entry->commit['revision'],
+				'author'   => (string) $entry->commit->author,
+				'filesize' => (int) $entry->size,
+				'date'     => gmdate( 'Y-m-d H:i:s', strtotime( (string) $entry->commit->date ) ),
+				'filename' => (string) $entry->name,
+				'kind'     => (string) $entry['kind'],
+			];
 		}
+
+		if ( ! $verbose ) {
+			return wp_list_pluck( $files, 'filename' );
+		}
+
+		return $files;
 	}
 
 	/**
