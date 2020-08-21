@@ -258,7 +258,7 @@ class Release_Confirmation {
 
 		// Migrate URL param to cookie.
 		if ( isset( $_REQUEST[ self::URL_PARAM ] ) ) {
-			setcookie( self::COOKIE, $_REQUEST[ self::URL_PARAM ], DAY_IN_SECONDS, '/plugins/', 'wordpress.org', true, true );
+			setcookie( self::COOKIE, $_REQUEST[ self::URL_PARAM ], time() + DAY_IN_SECONDS, '/plugins/', 'wordpress.org', true, true );
 		}
 
 		// This page requires login.
