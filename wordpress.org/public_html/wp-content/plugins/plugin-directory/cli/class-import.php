@@ -321,7 +321,7 @@ class Import {
 			}
 
 			$tagged_versions[ $tag ] = [
-				'tag'    => $tag,
+				'tag'    => $entry['filename'],
 				'author' => $entry['author'],
 				'date'   => $entry['date'],
 			];
