@@ -36,7 +36,7 @@ class Release_Confirmation {
 			return Plugin_Directory::get_plugin_post( $slug );
 		}, $plugins );
 
-		usort( $plugins, function( $a, $b ) {
+		uasort( $plugins, function( $a, $b ) {
 			return strtotime( $b->last_updated ) <=> strtotime( $a->last_updated );
 		} );
 
@@ -85,6 +85,7 @@ class Release_Confirmation {
 	}
 
 	static function single_plugin_row( $plugin, $include_header = true ) {
+
 		$confirmations_required = $plugin->release_confirmation;
 		$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
 
@@ -192,7 +193,6 @@ class Release_Confirmation {
 			return '';
 		}
 
-
 		if ( $data['confirmations_required'] && count( $data['confirmations'] ) < $data['confirmations_required'] ) {
 			if ( isset( $data['confirmations'][ wp_get_current_user()->user_login ] ) ) {
 				$buttons[] = sprintf(
@@ -202,8 +202,7 @@ class Release_Confirmation {
 			} else {
 				$buttons[] = sprintf(
 					'<a href="%s" class="button button-primary approve-release">%s</a>',
-					Template::get_release_confirmation_link( $data['tag'] ),
-					esc_attr( $plugin->post_name ),
+					Template::get_release_confirmation_link( $data['tag'], $plugin ),
 					'Confirm'
 				);
 			}
