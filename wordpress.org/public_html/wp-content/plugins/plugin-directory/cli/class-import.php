@@ -178,7 +178,8 @@ class Import {
 
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
-		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( $tagged_versions ) );
+		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
+		update_post_meta( $plugin->ID, 'tags',               wp_slash( $tagged_versions ) );
 		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
 		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
@@ -304,27 +305,27 @@ class Import {
 		$trunk_files = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk" ) ?: array();
 
 		// Find the list of tagged versions of the plugin.
-		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" ) ?: array();
-		$tagged_versions = array_map( function( $item ) {
-			$trimmed_item = rtrim( $item, '/' );
-
-			if ( $trimmed_item == $item ) {
-				// If attempting to trim `/` off didn't do anything, it was a file and we want to discard it.
-				return null;
+		$tagged_versions    = [];
+		$tagged_versions_raw = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/", true ) ?: [];
+		foreach ( $tagged_versions_raw as $entry ) {
+			// Discard files
+			if ( 'dir' !== $entry['kind'] ) {
+				continue;
 			}
+
+			$tag = $entry['filename'];
 
 			// Prefix the 0 for plugin versions like 0.1
-			if ( '.' == substr( $trimmed_item, 0, 1 ) ) {
-				$trimmed_item = "0{$trimmed_item}";
+			if ( '.' == substr( $tag, 0, 1 ) ) {
+				$tag = "0{$tag}";
 			}
 
-			return $trimmed_item;
-		}, $tagged_versions );
-
-		// Strip out any of the before-found files which we set to NULL
-		$tagged_versions = array_filter( $tagged_versions, function( $item ) {
-			return ! is_null( $item );
-		} );
+			$tagged_versions[ $tag ] = [
+				'tag'    => $tag,
+				'author' => $entry['author'],
+				'date'   => $entry['date'],
+			];
+		}
 
 		// Not all plugins utilise `trunk`, some just tag versions.
 		if ( ! $trunk_files ) {
@@ -332,7 +333,7 @@ class Import {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
-			$stable_tag = array_reduce( $tagged_versions, function( $a, $b ) {
+			$stable_tag = array_reduce( array_keys( $tagged_versions ), function( $a, $b ) {
 				return version_compare( $a, $b, '>' ) ? $a : $b;
 			} );
 		}
