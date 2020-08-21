@@ -59,9 +59,6 @@ class Release_Confirmation {
 					self::generate_access_url() // TODO..
 				)
 			);
-
-			// Hide the actions columns, as they'll be empty.
-			echo '<style>table.plugin-releases-listing tr > .actions { display: none; }</style>';
 		}
 
 	//	echo '<p>' . ( 'Intro to this page goes here.', 'wporg-plugins' ) . '</p>';
@@ -210,17 +207,29 @@ class Release_Confirmation {
 	static function get_actions( $plugin, $data ) {
 		$buttons = [];
 
-		if ( ! self::can_access() ) {
-			// User is not accessing with a valid token.
-			return '';
-		}
+		if ( $data['confirmations_required'] ) {
+			$has_enough_confirmations = count( $data['confirmations'] ) >= $data['confirmations_required'];
+			$current_user_confirmed   = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
-		if ( $data['confirmations_required'] && count( $data['confirmations'] ) < $data['confirmations_required'] ) {
-			if ( ! isset( $data['confirmations'][ wp_get_current_user()->user_login ] ) ) {
+			if ( ! $current_user_confirmed && ! $has_enough_confirmations ) {
+				if ( self::can_access() ) {
+					$class = 'button-primary';
+					$url   = Template::get_release_confirmation_link( $data['tag'], $plugin );
+				} else {
+					$class = 'button-secondary disabled';
+					$url   = '';
+				}
+
 				$buttons[] = sprintf(
-					'<a href="%s" class="button button-primary approve-release">%s</a>',
-					Template::get_release_confirmation_link( $data['tag'], $plugin ),
-					'Confirm'
+					'<a href="%s" class="button approve-release %s">%s</a>',
+					$url,
+					$class,
+					__( 'Confirm', 'wporg-plugins' )
+				);
+			} elseif ( $current_user_confirmed ) {
+				$buttons[] = sprintf(
+					'<a class="button approve-release button-secondary disabled">%s</a>',
+					__( 'Confirmed', 'wporg-plugins' )
 				);
 			}
 		}
