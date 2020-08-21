@@ -247,4 +247,43 @@ class Plugins_Info_API_Request {
 		return $query;
 	}
 
+	/**
+	 * Validate that the request is valid.
+	 */
+	public function is_valid_params( $method ) {
+		if ( 'query_plugins' === $method ) {
+			$scalar_only_fields = [
+				'page', 'per_page',
+				'browse', 'user',
+				'tag', 'search',
+				'author', 'block',
+				'wp_version'
+			];
+
+			foreach ( $scalar_only_fields as $field ) {
+				if ( isset( $this->args->$field ) && ! is_scalar( $this->args->$field ) ) {
+					return false;
+				}
+			}
+
+			if ( isset( $this->args->installed_plugins ) && ! is_array( $this->args->installed_plugins ) ) {
+				return false;
+			}
+
+			if ( ! is_string( $this->locale ) ) {
+				return false;
+			}
+
+		} else if ( 'plugin_information' === $method ) {
+			if ( empty( $this->args->slug ) && empty( $this->args->slugs ) ) {
+				return false;
+			}
+
+			if ( ! is_string( $this->locale ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 }

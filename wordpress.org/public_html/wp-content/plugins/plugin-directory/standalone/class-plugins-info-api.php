@@ -34,6 +34,11 @@ class Plugins_Info_API {
 	 */
 	public function handle_request( $method, $request ) {
 		$request = new Plugins_Info_API_Request( $request );
+
+		if ( ! $request->is_valid_params( $method ) ) {
+			$this->output( [ 'error' => 'Invalid Input' ], 400 );
+		}
+
 		switch ( $method ) {
 			case 'plugin_information':
 				$this->plugin_information( $request );
@@ -52,9 +57,7 @@ class Plugins_Info_API {
 				if ( 'POST' != strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 					die( '<p>Action not implemented. <a href="https://codex.wordpress.org/WordPress.org_API">API Docs</a>.</p>' );
 				} else {
-					$this->output( (object) array(
-						'error' => 'Action not implemented',
-					) );
+					$this->output( (object) [ 'error' => 'Action not implemented' ], 400 );
 				}
 				break;
 		}
@@ -70,7 +73,7 @@ class Plugins_Info_API {
 		$slugs = array_unique( array_map( 'trim', $slugs ) );
 
 		if ( count( $slugs ) > 100 ) {
-			$this->output( (object) array( 'error' => 'A maximum of 100 plugins can be queried at once.' ) );
+			$this->output( (object) [ 'error' => 'A maximum of 100 plugins can be queried at once.' ], 422 );
 			return;
 		}
 
@@ -103,16 +106,13 @@ class Plugins_Info_API {
 			return;
 		}
 
-		$response = false;
-		if ( ! $request->slug ) {
-			$response = array( 'error' => 'Plugin slug not provided.' );
-		}
-
-		if ( ! $response && false === ( $response = wp_cache_get( $cache_key = $this->plugin_information_cache_key( $request ), self::CACHE_GROUP ) ) ) {
+		if ( false === ( $response = wp_cache_get( $cache_key = $this->plugin_information_cache_key( $request ), self::CACHE_GROUP ) ) ) {
 			$response = $this->internal_rest_api_call( 'plugins/v1/plugin/' . $request->slug, array( 'locale' => $request->locale ) );
 
 			if ( 200 != $response->status ) {
-				$response = array( 'error' => 'Plugin not found.' );
+				$response = [
+					'error' => 'Plugin not found.'
+				];
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 15 * 60 ); // shorter TTL for missing/erroring plugins.
 			} else {
 				$response = $response->data;
@@ -124,16 +124,17 @@ class Plugins_Info_API {
 			return $response;
 		}
 
-		// Backwards compatibility; the API returns null in case of error for the 1.0/1.1 API endpoints.
-		if ( isset( $response['error'] ) && defined( 'PLUGINS_API_VERSION' ) && PLUGINS_API_VERSION < 1.2 ) {
-			$this->output( null );
-			return;
+		if ( isset( $response['error'] ) ) {
+			// Backwards compatibility; the API returns null in case of error for the 1.0/1.1 API endpoints.
+			if ( defined( 'PLUGINS_API_VERSION' ) && PLUGINS_API_VERSION < 1.2 ) {
+				$response = null;
+			}
+
+			$this->output( $response, 404 );
 		}
 
 		// Only include the fields requested.
-		if ( ! isset( $response['error'] ) ) {
-			$response = $this->remove_unexpected_fields( $response, $request, 'plugin_information' );
-		}
+		$response = $this->remove_unexpected_fields( $response, $request, 'plugin_information' );
 
 		$this->output( (object) $response );
 	}
@@ -205,7 +206,9 @@ class Plugins_Info_API {
 		if ( false === ( $response = wp_cache_get( $cache_key, self::CACHE_GROUP ) ) ) {
 			$response = $this->internal_rest_api_call( 'plugins/v1/query-plugins', $request->query_plugins_params_for_query() );
 			if ( 200 != $response->status ) {
-				$response = array( 'error' => 'Query Failed.' );
+				$response = [
+					'error' => 'Query Failed.',
+				];
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 30 ); // Short expiry for when we've got issues
 			} else {
 				$response = $response->data;
@@ -214,8 +217,7 @@ class Plugins_Info_API {
 		}
 
 		if ( isset( $response['error'] ) ) {
-			$this->output( $response );
-			return;
+			$this->output( $response, 500 );
 		}
 
 		// Fill in the plugin details
@@ -247,7 +249,7 @@ class Plugins_Info_API {
 	/**
 	 * Generates a cache key for a given query_plugins request.
 	 */
-	public function query_plugins_cache_key( $request ) {
+	protected function query_plugins_cache_key( $request ) {
 		return 'query_plugins:' . md5( serialize( $request->query_plugins_params_for_query() ) ) . ':' . ( $request->locale ?: 'en_US' );
 	}
 
@@ -289,8 +291,12 @@ class Plugins_Info_API {
 	/**
 	 * Output a given $response to the API client in the format specified by $this->format.
 	 */
-	function output( $response ) {
+	function output( $response, $http_code = false ) {
 		header( 'Content-Type: ' . $this->formats[ $this->format ] );
+
+		if ( $http_code ) {
+			header( $_SERVER['SERVER_PROTOCOL'] . "$http_code $http_code", true, $http_code );
+		}
 
 		switch ( $this->format ) {
 			default:
