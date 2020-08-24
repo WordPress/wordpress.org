@@ -63,7 +63,6 @@ class Release_Confirmation {
 				// For some reason, this is causing a 502 bad gateway - upstream sent too big header
 				// See if it works in production.
 				rest_do_request( $request );
-
 			}
 		}
 	}
