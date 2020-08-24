@@ -82,7 +82,7 @@ class Import {
 		$blocks          = $data['blocks'];
 		$block_files     = $data['block_files'];
 
-		// Release confirmation.
+		// Release confirmation
 		if ( $plugin->release_confirmation ) {
 			if ( 'trunk' === $stable_tag ) {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
@@ -96,6 +96,7 @@ class Import {
 					'date'          => time(),
 					'tag'           => $stable_tag,
 					'version'       => $headers->Version,
+					'zips_built'    => false,
 					'confirmations' => [],
 					'confirmed'     => false,
 					'committer'     => [ $last_committer ],
@@ -318,6 +319,21 @@ class Import {
 			$versions_to_build[] = $stable_tag;
 		}
 
+		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+
+		// Don't rebuild release-confirmation-required tags.
+		if ( $plugin->release_confirmation ) {
+			$confirmed_releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+
+			foreach ( $versions_to_build as $i => $tag ) {
+				if ( ! empty( $confirmed_releases[ $tag ]['zips_built'] ) ) {
+					unset( $versions_to_build[ $i ] );
+				} else {
+					$confirmed_releases[ $tag ]['zips_built'] = true;
+				}
+			}
+		}
+
 		// Rebuild/Build $build_zips
 		try {
 			// This will rebuild the ZIP.
@@ -332,6 +348,10 @@ class Import {
 			);
 		} catch ( Exception $e ) {
 			return false;
+		}
+
+		if ( $plugin->release_confirmation ) {
+			update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases );
 		}
 
 		return true;
