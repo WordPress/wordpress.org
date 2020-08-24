@@ -18,11 +18,10 @@ class Release_Confirmation_Access extends Base {
 	function body() {
 		return sprintf(
 			/* translators: 1: Username; 1: Access URL */
-			__( 'Howdy %1$1,
+			__( 'Howdy %1$s,
 
 To manage your plugin releases, follow the link below:
-
-<%2$s>', 'wporg-plugins' ),
+%2$s', 'wporg-plugins' ),
 			$this->user_text( $this->user ),
 			esc_url( Release_Confirmation_Shortcode::generate_access_url( $this->user ) )
 		);
