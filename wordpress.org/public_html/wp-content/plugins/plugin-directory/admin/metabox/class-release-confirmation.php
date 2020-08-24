@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
+use WP_REST_Request;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation as Release_Confirmation_Shortcode;
 
@@ -31,23 +32,38 @@ class Release_Confirmation {
 		}
 		echo "</select><span class='hidden'>&nbsp;Don't forget to save the changes!</span></p>";
 
-		Release_Confirmation_Shortcode::single_plugin_row( $post, $include_header = false );
-
+		if ( $confirmations_required ) {
+			Release_Confirmation_Shortcode::single_plugin_row( $post, $include_header = false );
+		}
 	}
 
 	// Save the selection.
 	static function save_post( $post_id ) {
-		if ( isset( $_REQUEST['release_confirmation'] ) && is_numeric( $_REQUEST['release_confirmation'] ) ) {
-			if ( current_user_can( 'plugin_admin_edit', $post_id ) ) {
-				if ( update_post_meta( $post_id, 'release_confirmation', (int) $_REQUEST['release_confirmation'] ) ) {
-					if ( ! (int) $_REQUEST['release_confirmation'] ) {
-						Tools::audit_log( 'Plugin release approval disabled.', $post_id );
-					}
-					Tools::audit_log( sprintf(
-						'Plugin release approval now requires %s confirmations.',
-						(int) $_REQUEST['release_confirmation']
-					), $post_id );
-				}
+		if (
+			isset( $_REQUEST['release_confirmation'] ) &&
+			is_numeric( $_REQUEST['release_confirmation'] ) &&
+			current_user_can( 'plugin_admin_edit', $post_id )
+		) {
+			if ( 0 == $_REQUEST['release_confirmation'] ) {
+				// Disable
+				Tools::audit_log( 'Plugin release approval disabled.', $post_id );
+				update_post_meta( $post_id, 'release_confirmation', 0 );
+
+			} else {
+				// Enable, re-use the API for this one.
+				$request = new WP_REST_Request(
+					'POST',
+					'/plugins/v1/plugin/' . get_post( $post_id )->post_name . '/release-confirmation'
+				);
+				$request->set_param(
+					'confirmations_required',
+					(int) $_REQUEST['release_confirmation']
+				);
+
+				// For some reason, this is causing a 502 bad gateway - upstream sent too big header
+				// See if it works in production.
+				rest_do_request( $request );
+
 			}
 		}
 	}
