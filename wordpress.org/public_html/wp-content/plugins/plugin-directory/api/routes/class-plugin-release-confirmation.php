@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
+use WP_REST_Response;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -98,20 +99,62 @@ class Plugin_Release_Confirmation extends Base {
 		$result = [
 			'location' => wp_get_referer() ?: get_permalink( $plugin ),
 		];
-		header( 'Location: ' . $result['location'] );
+
+		// Only redirect if we've been called via the rest api, and not an internal api request.
+		if ( wp_is_json_request() ) {
+		//	header( 'Location: ' . $result['location'] );
+		}
+
+		$confirmations_required = $request['confirmations_required'] ?? 1;
 
 		// Abort early if needed.
-		if ( $plugin->release_confirmation ) {
+		if ( $plugin->release_confirmation == $confirmations_required ) {
 			return $result;
 		}
 
 		// Update the Metadata.
-		update_post_meta( $plugin->ID, 'release_confirmation', 1 );
+		update_post_meta( $plugin->ID, 'release_confirmation', $confirmations_required );
+
+		// Mark all existing releases as confirmed.
+		$tags     = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
+		$releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+		if ( ! $tags ) {
+			$tags = get_post_meta( $plugin->ID, 'tagged_versions', true ) ?: [];
+		}
+		foreach ( $tags as $tag => $tag_data ) {
+			// tagged_data compat.
+			if ( is_string( $tag_data ) ) {
+				$tag      = $tag_data;
+				$tag_data = [
+					'date'   => $plugin->last_updated,
+					'author' => '',
+					'tag'    => $tag_data,
+				];
+			}
+			if ( ! isset( $releases[ $tag ] ) ) {
+				$releases[ $tag ] = [
+					'date'          => strtotime( $tag_data['date'] ),
+					'tag'           => $tag,
+					'version'       => $tag,
+					'zips_built'    => true,
+					'confirmations' => [],
+					'confirmed'     => true,
+					'committer'     => [ $tag_data['author'] ],
+					'revision'      => [],
+				];
+			}
+		}
+		update_post_meta( $plugin->ID, 'confirmed_releases', $releases );
 
 		// Add an audit-log entry.
-		Tools::audit_log( 'Release Confirmations Enabled.', $plugin );
+		Tools::audit_log(
+			sprintf(
+				'Release Confirmations Enabled. %d confirmations required',
+				$confirmations_required
+			),
+			$plugin
+		);
 
-		// TODO: Send all committers an email that this has been enabled.
 		$email = new Release_Confirmation_Enabled_Email(
 			$plugin,
 			Tools::get_plugin_committers( $plugin->post_name ),
