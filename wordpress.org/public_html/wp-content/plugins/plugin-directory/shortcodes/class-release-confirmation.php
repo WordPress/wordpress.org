@@ -75,8 +75,28 @@ class Release_Confirmation {
 
 		echo '<p>' . 'Intro to this page goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' . '</p>';
 
+		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
 			self::single_plugin_row( $plugin );
+
+			if ( ! $plugin->release_confirmation ) {
+				$not_enabled[] = $plugin;
+			}
+		}
+
+		if ( $not_enabled ) {
+			printf( 
+				'<em>' . __( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em>',
+				wp_sprintf_l( '%l', array_filter( array_map( function( $plugin ) {
+					if ( 'publish' == get_post_status( $plugin ) ) {
+						return sprintf(
+							'<a href="%s">%s</a>',
+							get_permalink( $plugin ),
+							get_the_title( $plugin )
+						);
+					}
+				}, $not_enabled ) ) )
+			);
 		}
 
 		return ob_get_clean();
@@ -85,6 +105,7 @@ class Release_Confirmation {
 	static function single_plugin_row( $plugin, $include_header = true ) {
 		$confirmations_required = $plugin->release_confirmation;
 		$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+		$all_tags               = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
 
 		// Sort releases most recent first.
 		uasort( $confirmed_releases, function( $a, $b ) {
@@ -106,10 +127,10 @@ class Release_Confirmation {
 				<th>Date</th>
 				<th>Committer</th>
 				<th>Approval</th>
-				<th class="actions">Actions</th>
+				<th>Actions</th>
 		</thead>';
 
-		if ( ! $confirmed_releases ) {
+		if ( ! $confirmed_releases && ! $all_tags ) {
 			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
 		}
 
@@ -135,6 +156,32 @@ class Release_Confirmation {
 				esc_html( implode( ', ', (array) $data['committer'] ) ),
 				self::get_approval_text( $plugin, $data ),
 				self::get_actions( $plugin, $data )
+			);
+		}
+
+		// List older releases too.
+		foreach ( $all_tags as $tag => $tag_data ) {
+			if ( isset( $confirmed_releases[ $tag ] ) ) {
+				continue;
+			}
+
+			printf(
+				'<tr class="non-confirmed">
+					<td>%s</td>
+					<td title="%s">%s</td>
+					<td>%s</td>
+					<td colspan="2"><em>%s</em></td>
+				</tr>',
+				sprintf(
+					'<a href="https://plugins.trac.wordpress.org/browser/%s/tags/%s/">%s</a>',
+					$plugin->post_name,
+					esc_html( $tag_data['tag'] ),
+					esc_html( $tag )
+				),
+				esc_attr( $tag_data['date'] ),
+				esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( strtotime( $tag_data['date'] ) ) ) ),
+				esc_html( $tag_data['author'] ),
+				__( 'Release did not require confirmation.', 'wporg-plugins' )
 			);
 		}
 
