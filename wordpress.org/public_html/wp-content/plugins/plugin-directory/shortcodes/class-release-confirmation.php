@@ -4,7 +4,6 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation_Access as Release_Confirmation_Access_Email;
 
 /**
  * The [release-confirmation] shortcode handler.
@@ -58,11 +57,6 @@ class Release_Confirmation {
 
 		if ( ! self::can_access() ) {
 			if ( isset( $_REQUEST['send_access_email'] ) ) {
-				$email = new Release_Confirmation_Access_Email(
-					wp_get_current_user()
-				);
-				$email->send();
-
 				printf(
 					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 					__( 'Check your email for an access link to perform actions.', 'wporg-plugins'),
@@ -73,7 +67,7 @@ class Release_Confirmation {
 					sprintf(
 						/* translators: %s: URL */
 						__( 'Check your email for an access link, or <a href="%s">request a new email</a> to perform actions.', 'wporg-plugins'),
-						add_query_arg( 'send_access_email', 1 )
+						Template::get_release_confirmation_access_link(),
 					)
 				);
 			}
