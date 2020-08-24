@@ -100,12 +100,15 @@ class Plugin_Release_Confirmation extends Base {
 			'location' => wp_get_referer() ?: get_permalink( $plugin ),
 		];
 
+		$confirmations_required = $request['confirmations_required'] ?? 1;
+
 		// Only redirect if we've been called via the rest api, and not an internal api request.
 		if ( wp_is_json_request() ) {
 			header( 'Location: ' . $result['location'] );
-		}
 
-		$confirmations_required = $request['confirmations_required'] ?? 1;
+			// When requested via the REST API, confirmations can only be increased.
+			$confirmations_required = max( (int)$confirmations_required, (int)$plugin->release_confirmation );
+		}
 
 		// Abort early if needed.
 		if ( $plugin->release_confirmation == $confirmations_required ) {
