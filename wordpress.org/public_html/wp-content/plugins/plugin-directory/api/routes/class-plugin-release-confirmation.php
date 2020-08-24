@@ -103,7 +103,7 @@ class Plugin_Release_Confirmation extends Base {
 		$confirmations_required = $request['confirmations_required'] ?? 1;
 
 		// Only redirect if we've been called via the rest api, and not an internal api request.
-		if ( wp_is_json_request() ) {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			header( 'Location: ' . $result['location'] );
 
 			// When requested via the REST API, confirmations can only be increased.
