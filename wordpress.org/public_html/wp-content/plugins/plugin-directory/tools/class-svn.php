@@ -340,6 +340,7 @@ class SVN {
 		$xml    = simplexml_load_string( $output );
 		libxml_use_internal_errors( $errors );
 
+		$files = [];
 		foreach ( $xml->list->children() as $entry ) {
 			$files[] = [
 				'revision' => (int) $entry->commit['revision'],
