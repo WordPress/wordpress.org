@@ -21,7 +21,7 @@ class Release_Confirmation_Enabled extends Base {
 
 Release confirmations are now enabled for %2$s.
 
-This means that every time you release a new version of %2$s you\'ll be required to confirm the release by following a link in an automated email.
+This means that each time you release a new version of %2$s you\'ll be required to confirm the release by following a link in an automated email.
 
 For more information, please read the following handbook article:
 %3$s', 'wporg-plugins' ),
