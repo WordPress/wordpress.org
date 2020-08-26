@@ -302,7 +302,7 @@ class Block_Validator {
 				echo '<h3>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</h3>';
 
 				$e2e_result = get_post_meta( $plugin->ID, 'e2e_success', true );
-				if ( false !== $e2e_result ) {
+				if ( !empty( $e2e_result ) ) {
 					echo '<h4>' . __( 'Test Results', 'wporg-plugins' ) . '</h4>';
 					if ( 'true' === $e2e_result ) {
 						echo "<div class='notice notice-info notice-alt'><p>\n";
