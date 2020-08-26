@@ -112,6 +112,10 @@ class Release_Confirmation {
 			return $b['date'] <=> $a['date'];
 		} );
 
+		uasort( $all_tags, function( $a, $b ) {
+			return strtotime( $b['date'] ) <=> strtotime( $a['date'] );
+		} );
+
 		if ( $include_header ) {
 			printf(
 				'<h2><a href="%s">%s</a></h2>',
