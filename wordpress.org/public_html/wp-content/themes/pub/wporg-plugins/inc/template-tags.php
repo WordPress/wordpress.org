@@ -500,7 +500,12 @@ function the_plugin_release_confirmation_form() {
 	}
 	echo '<p>' . esc_html__( 'All future releases will require email confirmation before being made available. This increases security and ensures that plugin releases are only made when intended.', 'wporg-plugins' ) . '</p>';
 
-	if ( ! $confirmations_required ) {
+	if ( ! $confirmations_required && 'trunk' === $post->stable_tag ) {
+		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
+			_e( "Release confirmations currently require tagged releases, as you're releasing from trunk they cannot be enabled.", 'wporg-plugins' );
+		echo '</p></div>';
+
+	} elseif ( ! $confirmations_required ) {
 		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
 			_e( '<strong>Warning:</strong> Enabling release confirmations is intended to be a <em>permanent</em> action. There is no way to disable this without contacting the plugins team.', 'wporg-plugins' );
 		echo '</p></div>';
@@ -508,6 +513,7 @@ function the_plugin_release_confirmation_form() {
 		echo '<form method="POST" action="' . esc_url( Template::get_enable_release_confirmation_link() ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
 		echo '<p><input class="button" type="submit" value="' . esc_attr__( 'I understand, please enable release confirmations.', 'wporg-plugins' ) . '" /></p>';
 		echo '</form>';
+
 	} else {
 		/* translators: 1: plugins@wordpress.org */
 		echo '<p>' . sprintf( __( 'To disable release confirmations, please contact the plugins team by emailing %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
