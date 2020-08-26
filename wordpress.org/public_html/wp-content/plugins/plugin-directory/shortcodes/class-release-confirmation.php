@@ -103,9 +103,8 @@ class Release_Confirmation {
 	}
 
 	static function single_plugin_row( $plugin, $include_header = true ) {
-		$confirmations_required = $plugin->release_confirmation;
-		$confirmed_releases     = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
-		$all_tags               = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
+		$confirmed_releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+		$all_tags           = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
 
 		// Sort releases most recent first.
 		uasort( $confirmed_releases, function( $a, $b ) {
@@ -139,8 +138,6 @@ class Release_Confirmation {
 		}
 
 		foreach ( $confirmed_releases as $tag => $data ) {
-			$data['confirmations_required'] = $confirmations_required;
-
 			printf(
 				'<tr>
 					<td>%s</td>
@@ -195,26 +192,22 @@ class Release_Confirmation {
 	static function get_approval_text( $plugin, $data ) {
 		ob_start();
 
-		$confirmations = $data['confirmations'] ?? [];
-
-		if ( !empty( $data['confirmed'] ) && ! $confirmations ) {
+		if ( ! $data['confirmed'] && ! $data['confirmations'] ) {
 			_e( 'Release did not require confirmation.', 'wporg-plugins' );
-		} else if ( !empty( $data['confirmed'] ) || count( $confirmations ) >= $data['confirmations_required'] ) {
+		} else if ( ! $data['confirmed'] || count( $data['confirmations'] ) >= $plugin->release_confirmation ) {
 			_e( 'Release confirmed.', 'wporg-plugins' );
-		} else if ( 1 == $data['confirmations_required'] ) {
+		} else if ( 1 == $plugin->release_confirmation ) {
 			_e( 'Waiting for confirmation.', 'wporg-plugins' );
 		} else {
 			printf(
 				__( '%s of %s required confirmations.', 'wporg-plugins' ),
-				number_format_i18n( count( $confirmations ) ),
-				number_format_i18n( $data['confirmations_required'] )
+				number_format_i18n( count( $data['confirmations'] ) ),
+				number_format_i18n( $plugin->release_confirmation )
 			);
 		}
 
 		echo '<div>';
-		foreach ( $confirmations as $who => $time ) {
-			$user = get_user_by( 'slug', $who );
-
+		foreach ( $data['confirmations'] as $who => $time ) {
 			if ( $who === wp_get_current_user()->user_login ) {
 				$approved_text = sprintf(
 					/* translators: 1: '5 hours' */
@@ -222,6 +215,8 @@ class Release_Confirmation {
 					human_time_diff( $time )
 				);
 			} else {
+				$user = get_user_by( 'slug', $who );
+
 				$approved_text = sprintf(
 					/* translators: 1: Username, 2: '5 hours' */
 					__( 'Approved by %1$s, %2$s ago.', 'wporg-plugins' ),
@@ -244,7 +239,7 @@ class Release_Confirmation {
 	static function get_actions( $plugin, $data ) {
 		$buttons = [];
 
-		if ( $data['confirmations_required'] ) {
+		if ( $plugin->release_confirmation ) {
 			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
 			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
