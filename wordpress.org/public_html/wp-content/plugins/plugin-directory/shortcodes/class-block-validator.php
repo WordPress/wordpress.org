@@ -145,7 +145,7 @@ class Block_Validator {
 
 	protected static function handle_test() {
 		$post = get_post( intval( $_POST['plugin-id'] ) );
-		if ( $post && 'test' === $_POST['block-directory-test'] && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-test-' . $post->ID ) ) {
+		if ( $post && 'test' === $_POST['block-directory-test'] && wp_verify_nonce( $_POST['block-directory-test-nonce'], 'block-directory-test-' . $post->ID ) ) {
 			if ( wp_cache_get( "plugin-e2e-test-{$post->ID}", 'plugin-test' ) ) {
 				echo '<div class="notice notice-warning notice-alt"><p>' . __( 'Test already in progress.', 'wporg-plugins' ) . '</p></div>';
 			} elseif ( current_user_can( 'edit_post', $post->ID ) || current_user_can( 'plugin_admin_edit', $post->ID ) ) {
@@ -194,7 +194,7 @@ class Block_Validator {
 		}
 
 		if ( current_user_can( 'edit_post', $post->ID ) ) {
-			echo wp_nonce_field( 'block-directory-test-' . $plugin->ID, 'block-directory-nonce' );
+			echo wp_nonce_field( 'block-directory-test-' . $plugin->ID, 'block-directory-test-nonce' );
 			// translators: %s plugin title.
 			$disabled = ( wp_cache_get( "plugin-e2e-test-{$plugin->ID}", 'plugin-test' ) ? ' disabled="disabled"' : '' );
 			echo '<button class="button button-secondary button-large" type="submit" name="block-directory-test" value="test"' . $disabled . '>' . sprintf( __( 'Test %s', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
