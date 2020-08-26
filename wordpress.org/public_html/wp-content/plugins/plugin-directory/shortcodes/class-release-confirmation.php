@@ -85,7 +85,7 @@ class Release_Confirmation {
 		}
 
 		if ( $not_enabled ) {
-			printf( 
+			printf(
 				'<em>' . __( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em>',
 				wp_sprintf_l( '%l', array_filter( array_map( function( $plugin ) {
 					if ( 'publish' == get_post_status( $plugin ) ) {
@@ -241,10 +241,9 @@ class Release_Confirmation {
 		$buttons = [];
 
 		if ( $data['confirmations_required'] ) {
-			$has_enough_confirmations = count( $data['confirmations'] ) >= $data['confirmations_required'];
-			$current_user_confirmed   = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
+			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
-			if ( ! $current_user_confirmed && ! $has_enough_confirmations ) {
+			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
 				if ( self::can_access() ) {
 					$class = 'button-primary';
 					$url   = Template::get_release_confirmation_link( $data['tag'], $plugin );
