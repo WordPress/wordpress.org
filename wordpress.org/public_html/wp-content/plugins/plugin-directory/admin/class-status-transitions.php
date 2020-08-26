@@ -207,7 +207,7 @@ class Status_Transitions {
 
 		// Create SVN repo.
 		$dir = Filesystem::temp_directory( $post->post_name );
-		foreach ( array( 'assets', 'branches', 'tags', 'trunk' ) as $folder ) {
+		foreach ( array( 'assets', 'tags', 'trunk' ) as $folder ) {
 			mkdir( "$dir/$folder", 0777 );
 		}
 
