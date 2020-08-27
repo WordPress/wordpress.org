@@ -1577,7 +1577,8 @@ class Plugin_Directory {
 			'version'                => '',
 			'zips_built'             => false,
 			'confirmations'          => [],
-			'confirmed'              => false,
+			// Confirmed by default if no release confiration.
+			'confirmed'              => ! $plugin->release_confirmation,
 			'confirmations_required' => (int) $plugin->release_confirmation,
 			'committer'              => [],
 			'revision'               => [],
