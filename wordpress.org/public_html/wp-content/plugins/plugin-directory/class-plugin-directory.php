@@ -1510,6 +1510,92 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Get a list of all Plugin Releases.
+	 */
+	public static function get_releases( $plugin ) {
+		$plugin   = self::get_plugin_post( $plugin );
+		$releases = get_post_meta( $plugin->ID, 'releases', true );
+
+		// Meta doesn't exist yet? Lets fill it out.
+		if ( false === $releases || ! is_array( $releases ) ) {
+			update_post_meta( $plugin->ID, 'releases', [] );
+
+			$tags            = get_post_meta( $plugin->ID, 'tags', true );
+			$tagged_versions = get_post_meta( $plugin->ID, 'tagged_versions', true );
+			if ( $tags ) {
+				foreach ( $tags as $tag ) {
+					self::add_release( $plugin, [
+						'date' => strtotime( $tag['date'] ),
+						'tag'  => $tag['tag'],
+						'version' => $tag['tag'],
+						'committer' => [ $tag['author'] ],
+					] );
+				}
+			} else if ( $tagged_versions ) {
+				foreach ( $tagged_versions as $tag ) {
+					self::add_release( $plugin, [
+						'date' => strtotime( $plugin->last_updated ),
+						'tag'  => $tag,
+						'version' => $tag,
+					] );
+				}
+			}
+
+			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+		}
+
+		return $releases;
+	}
+
+	/**
+	 * Fetch a specific release of the plugin, by tag.
+	 */
+	public static function get_release( $plugin, $tag ) {
+		$releases = self::get_releases( $plugin );
+
+		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
+
+		if ( $filtered ) {
+			return array_shift( $filtered );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Add a Plugin Release to the internal storage.
+	 */
+	public static function add_release( $plugin, $data ) {
+		if ( ! isset( $data['tag'] ) ) {
+			return false;
+		}
+		$plugin = self::get_plugin_post( $plugin );
+
+		$release = self::get_release( $plugin, $data['tag'] ) ?: [
+			'date'                   => time(),
+			'tag'                    => '',
+			'version'                => '',
+			'zips_built'             => false,
+			'confirmations'          => [],
+			'confirmed'              => false,
+			'confirmations_required' => (int) $plugin->release_confirmation,
+			'committer'              => [],
+			'revision'               => [],
+		];
+
+		// Fill
+		foreach ( $data as $k => $v ) {
+			$release[ $k ] = $v;
+		}
+
+		$releases = self::get_releases( $plugin );
+
+		$releases[] = $release;
+
+		return update_post_meta( $plugin->ID, 'releases', $releases );
+	}
+
+	/**
 	 * Retrieve the WP_Post object representing a given plugin.
 	 *
 	 * @static
