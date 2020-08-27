@@ -14,9 +14,6 @@ class Release_Confirmation {
 	static function display() {
 		global $post;
 
-		$confirmations_required = $post->release_confirmation;
-		$releases               = get_post_meta( $post->ID, 'releases', true ) ?: [];
-
 		echo '<p><select name="release_confirmation" onchange="jQuery(this).next().removeClass(\'hidden\');">';
 		foreach ( [
 			0 => 'No approval required',
@@ -26,13 +23,13 @@ class Release_Confirmation {
 			printf(
 				'<option value="%s" %s>%s</option>',
 				$num,
-				selected( $confirmations_required, $num, false ),
+				selected( $post->release_confirmation, $num, false ),
 				$text
 			);
 		}
 		echo "</select><span class='hidden'>&nbsp;Don't forget to save the changes!</span></p>";
 
-		if ( $confirmations_required ) {
+		if ( $post->release_confirmation ) {
 			Release_Confirmation_Shortcode::single_plugin_row( $post, $include_header = false );
 		}
 	}
