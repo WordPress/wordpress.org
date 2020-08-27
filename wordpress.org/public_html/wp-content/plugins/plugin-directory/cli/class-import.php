@@ -127,7 +127,7 @@ class Import {
 				}
 
 				// Update with ^
-				Plugin_Directory::add_release( $release );
+				Plugin_Directory::add_release( $plugin, $release );
 
 				throw new Exception( 'Plugin release not confirmed.' );
 			}
