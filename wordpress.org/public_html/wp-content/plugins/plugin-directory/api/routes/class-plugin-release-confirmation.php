@@ -122,18 +122,17 @@ class Plugin_Release_Confirmation extends Base {
 		$tags     = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
 		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
 		if ( ! $tags ) {
-			$tags = get_post_meta( $plugin->ID, 'tagged_versions', true ) ?: [];
-		}
-		foreach ( $tags as $tag => $tag_data ) {
-			// tagged_data compat.
-			if ( is_string( $tag_data ) ) {
-				$tag      = $tag_data;
-				$tag_data = [
-					'date'   => $plugin->last_updated,
+			$tags  = [];
+			$_tags = get_post_meta( $plugin->ID, 'tagged_versions', true ) ?: [];
+			foreach ( $_tags as $tag ) {
+				$tags[ $tag ] = [
+					'date'   => $plugin->last_updated, // Assumption.
 					'author' => '',
-					'tag'    => $tag_data,
+					'tag'    => $tag,
 				];
 			}
+		}
+		foreach ( $tags as $tag => $tag_data ) {
 			if ( ! isset( $releases[ $tag ] ) ) {
 				$releases[ $tag ] = [
 					'date'          => strtotime( $tag_data['date'] ),
