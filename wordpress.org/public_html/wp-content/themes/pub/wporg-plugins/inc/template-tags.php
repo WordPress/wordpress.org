@@ -483,6 +483,11 @@ function the_plugin_self_transfer_form() {
 function the_plugin_release_confirmation_form() {
 	$post = get_post();
 
+	// Temporary: Plugin Reviewers only.
+	if ( ! current_user_can( 'edit_post', $post ) ) {
+		return;
+	}
+
 	if (
 		! current_user_can( 'plugin_admin_edit', $post ) ||
 		'publish' != $post->post_status
@@ -505,7 +510,7 @@ function the_plugin_release_confirmation_form() {
 			_e( "Release confirmations currently require tagged releases, as you're releasing from trunk they cannot be enabled.", 'wporg-plugins' );
 		echo '</p></div>';
 
-	} elseif ( ! $confirmations_required ) {
+	} else if ( ! $confirmations_required ) {
 		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
 			_e( '<strong>Warning:</strong> Enabling release confirmations is intended to be a <em>permanent</em> action. There is no way to disable this without contacting the plugins team.', 'wporg-plugins' );
 		echo '</p></div>';
