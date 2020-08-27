@@ -88,20 +88,18 @@ class Import {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
 
-			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+			$release = Plugin_Directory::get_release( $plugin, $stable_tag );
 
 			// This tag is unknown? Trigger email.
-			if ( empty( $releases[ $stable_tag ] ) ) {
-				$releases[ $stable_tag ] = [
-					'date'          => time(),
-					'tag'           => $stable_tag,
-					'version'       => $headers->Version,
-					'zips_built'    => false,
-					'confirmations' => [],
-					'confirmed'     => false,
-					'committer'     => [ $last_committer ],
-					'revision'      => [ $last_revision ],
-				];
+			if ( ! $release ) {
+				Plugin_Directory::add_release(
+					[
+						'tag'       => $stable_tag,
+						'version'   => $headers->Version,
+						'committer' => [ $last_committer ],
+						'revision'  => [ $last_revision ]
+					]
+				);
 
 				$email = new Release_Confirmation_Email(
 					$plugin,
@@ -115,22 +113,21 @@ class Import {
 				);
 				$email->send();
 
-				update_post_meta( $plugin->ID, 'releases', $releases );
-
 				throw new Exception( 'Plugin release not confirmed; email triggered.' );
 			}
 
 			// Check that the tag is approved.
-			if ( ! $releases[ $stable_tag ]['confirmed'] ) {
+			if ( ! $release['confirmed'] ) {
 
-				if ( ! in_array( $last_committer, $releases[ $stable_tag ]['committer'], true ) ) {
-					$releases[ $stable_tag ]['committer'][] = $last_committer;
+				if ( ! in_array( $last_committer, $release['committer'], true ) ) {
+					$release['committer'][] = $last_committer;
 				}
-				if ( ! in_array( $last_revision, $releases[ $stable_tag ]['revision'], true ) ) {
-					$releases[ $stable_tag ]['revision'][] = $last_revision;
+				if ( ! in_array( $last_revision, $release['revision'], true ) ) {
+					$release['revision'][] = $last_revision;
 				}
 
-				update_post_meta( $plugin->ID, 'releases', $releases ); // no-op if unchanged.
+				// Update with ^
+				Plugin_Directory::add_release( $release );
 
 				throw new Exception( 'Plugin release not confirmed.' );
 			}
@@ -323,15 +320,21 @@ class Import {
 
 		// Don't rebuild release-confirmation-required tags.
 		if ( $plugin->release_confirmation ) {
-			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
-
 			foreach ( $versions_to_build as $i => $tag ) {
-				if ( ! empty( $releases[ $tag ]['zips_built'] ) ) {
+				$release = Plugin_Directory::get_release( $plugin, $tag );
+
+				if ( ! $release || $release['zips_built'] ) {
 					unset( $versions_to_build[ $i ] );
 				} else {
-					$releases[ $tag ]['zips_built'] = true;
+					$release['zips_built'] = true;
+					Plugin_Directory::add_release( $release );
 				}
+
 			}
+		}
+
+		if ( ! $versions_to_build ) {
+			return false;
 		}
 
 		// Rebuild/Build $build_zips
