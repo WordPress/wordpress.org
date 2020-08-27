@@ -41,8 +41,8 @@ class Release_Confirmation {
 
 		uasort( $plugins, function( $a, $b ) {
 			// Get the most recent commit confirmation.
-			$a_releases = get_post_meta( $a->ID, 'confirmed_releases', true ) ?: [];
-			$b_releases = get_post_meta( $b->ID, 'confirmed_releases', true ) ?: [];
+			$a_releases = get_post_meta( $a->ID, 'releases', true ) ?: [];
+			$b_releases = get_post_meta( $b->ID, 'releases', true ) ?: [];
 
 			$a_latest_release = $a_releases ? max( wp_list_pluck( $a_releases, 'date' ) ) : 0;
 			$b_latest_release = $b_releases ? max( wp_list_pluck( $b_releases, 'date' ) ) : 0;
@@ -103,11 +103,11 @@ class Release_Confirmation {
 	}
 
 	static function single_plugin_row( $plugin, $include_header = true ) {
-		$confirmed_releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
-		$all_tags           = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
+		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+		$all_tags = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
 
 		// Sort releases most recent first.
-		uasort( $confirmed_releases, function( $a, $b ) {
+		uasort( $releases, function( $a, $b ) {
 			return $b['date'] <=> $a['date'];
 		} );
 
@@ -133,11 +133,11 @@ class Release_Confirmation {
 				<th>Actions</th>
 		</thead>';
 
-		if ( ! $confirmed_releases && ! $all_tags ) {
+		if ( ! $releases && ! $all_tags ) {
 			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
 		}
 
-		foreach ( $confirmed_releases as $tag => $data ) {
+		foreach ( $releases as $tag => $data ) {
 			printf(
 				'<tr>
 					<td>%s</td>
@@ -162,7 +162,7 @@ class Release_Confirmation {
 
 		// List older releases too.
 		foreach ( $all_tags as $tag => $tag_data ) {
-			if ( isset( $confirmed_releases[ $tag ] ) ) {
+			if ( isset( $releases[ $tag ] ) ) {
 				continue;
 			}
 

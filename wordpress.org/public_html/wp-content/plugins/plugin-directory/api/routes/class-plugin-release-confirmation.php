@@ -120,7 +120,7 @@ class Plugin_Release_Confirmation extends Base {
 
 		// Mark all existing releases as confirmed.
 		$tags     = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
-		$releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
 		if ( ! $tags ) {
 			$tags = get_post_meta( $plugin->ID, 'tagged_versions', true ) ?: [];
 		}
@@ -147,7 +147,7 @@ class Plugin_Release_Confirmation extends Base {
 				];
 			}
 		}
-		update_post_meta( $plugin->ID, 'confirmed_releases', $releases );
+		update_post_meta( $plugin->ID, 'releases', $releases );
 
 		// Add an audit-log entry.
 		Tools::audit_log(
@@ -173,7 +173,7 @@ class Plugin_Release_Confirmation extends Base {
 	 */
 	public function confirm_release( $request ) {
 		$plugin   = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-		$releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
 		$tag      = $request['plugin_tag'];
 		$result   = [
 			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
@@ -198,7 +198,7 @@ class Plugin_Release_Confirmation extends Base {
 			$result['fully_confirmed']     = true;
 		}
 
-		if ( ! update_post_meta( $plugin->ID, 'confirmed_releases', $releases ) ) {
+		if ( ! update_post_meta( $plugin->ID, 'releases', $releases ) ) {
 			$result['confirmed'] = false;
 			unset( $result['fully_confirmed'] );
 			return $result;
@@ -245,7 +245,7 @@ class Plugin_Release_Confirmation extends Base {
 	public function validate_plugin_tag_callback( $tag, $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-		$releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
 
 		return !empty( $releases[ $tag ] );
 	}

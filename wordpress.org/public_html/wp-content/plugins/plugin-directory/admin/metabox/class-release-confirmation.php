@@ -15,7 +15,7 @@ class Release_Confirmation {
 		global $post;
 
 		$confirmations_required = $post->release_confirmation;
-		$confirmed_releases     = get_post_meta( $post->ID, 'confirmed_releases', true ) ?: [];
+		$releases               = get_post_meta( $post->ID, 'releases', true ) ?: [];
 
 		echo '<p><select name="release_confirmation" onchange="jQuery(this).next().removeClass(\'hidden\');">';
 		foreach ( [

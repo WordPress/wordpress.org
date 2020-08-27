@@ -88,11 +88,11 @@ class Import {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
 
-			$confirmed_releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
 
 			// This tag is unknown? Trigger email.
-			if ( empty( $confirmed_releases[ $stable_tag ] ) ) {
-				$confirmed_releases[ $stable_tag ] = [
+			if ( empty( $releases[ $stable_tag ] ) ) {
+				$releases[ $stable_tag ] = [
 					'date'          => time(),
 					'tag'           => $stable_tag,
 					'version'       => $headers->Version,
@@ -107,7 +107,7 @@ class Import {
 					$plugin,
 					Tools::get_plugin_committers( $plugin_slug ),
 					[
-						'release' => $confirmed_releases[ $stable_tag ],
+						'release' => $releases[ $stable_tag ],
 						'who'     => $last_committer,
 						'readme'  => $readme,
 						'headers' => $headers,
@@ -115,22 +115,22 @@ class Import {
 				);
 				$email->send();
 
-				update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases );
+				update_post_meta( $plugin->ID, 'releases', $releases );
 
 				throw new Exception( 'Plugin release not confirmed; email triggered.' );
 			}
 
 			// Check that the tag is approved.
-			if ( ! $confirmed_releases[ $stable_tag ]['confirmed'] ) {
+			if ( ! $releases[ $stable_tag ]['confirmed'] ) {
 
-				if ( ! in_array( $last_committer, $confirmed_releases[ $stable_tag ]['committer'], true ) ) {
-					$confirmed_releases[ $stable_tag ]['committer'][] = $last_committer;
+				if ( ! in_array( $last_committer, $releases[ $stable_tag ]['committer'], true ) ) {
+					$releases[ $stable_tag ]['committer'][] = $last_committer;
 				}
-				if ( ! in_array( $last_revision, $confirmed_releases[ $stable_tag ]['revision'], true ) ) {
-					$confirmed_releases[ $stable_tag ]['revision'][] = $last_revision;
+				if ( ! in_array( $last_revision, $releases[ $stable_tag ]['revision'], true ) ) {
+					$releases[ $stable_tag ]['revision'][] = $last_revision;
 				}
 
-				update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases ); // no-op if unchanged.
+				update_post_meta( $plugin->ID, 'releases', $releases ); // no-op if unchanged.
 
 				throw new Exception( 'Plugin release not confirmed.' );
 			}
@@ -323,13 +323,13 @@ class Import {
 
 		// Don't rebuild release-confirmation-required tags.
 		if ( $plugin->release_confirmation ) {
-			$confirmed_releases = get_post_meta( $plugin->ID, 'confirmed_releases', true ) ?: [];
+			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
 
 			foreach ( $versions_to_build as $i => $tag ) {
-				if ( ! empty( $confirmed_releases[ $tag ]['zips_built'] ) ) {
+				if ( ! empty( $releases[ $tag ]['zips_built'] ) ) {
 					unset( $versions_to_build[ $i ] );
 				} else {
-					$confirmed_releases[ $tag ]['zips_built'] = true;
+					$releases[ $tag ]['zips_built'] = true;
 				}
 			}
 		}
@@ -351,7 +351,7 @@ class Import {
 		}
 
 		if ( $plugin->release_confirmation ) {
-			update_post_meta( $plugin->ID, 'confirmed_releases', $confirmed_releases );
+			update_post_meta( $plugin->ID, 'releases', $releases );
 		}
 
 		return true;
