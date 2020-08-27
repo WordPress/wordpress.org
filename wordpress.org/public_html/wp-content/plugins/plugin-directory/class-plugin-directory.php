@@ -1520,8 +1520,7 @@ class Plugin_Directory {
 		if ( false === $releases || ! is_array( $releases ) ) {
 			update_post_meta( $plugin->ID, 'releases', [] );
 
-			$tags            = get_post_meta( $plugin->ID, 'tags', true );
-			$tagged_versions = get_post_meta( $plugin->ID, 'tagged_versions', true );
+			$tags = get_post_meta( $plugin->ID, 'tags', true );
 			if ( $tags ) {
 				foreach ( $tags as $tag ) {
 					self::add_release( $plugin, [
@@ -1531,12 +1530,27 @@ class Plugin_Directory {
 						'committer' => [ $tag['author'] ],
 					] );
 				}
-			} else if ( $tagged_versions ) {
-				foreach ( $tagged_versions as $tag ) {
+			} else {
+				// Pull from SVN directly.
+				$svn_tags = Tools\SVN::ls( "https://plugins.svn.wordpress.org/{$plugin->post_name}/tags/", true ) ?: [];
+				foreach ( $svn_tags as $entry ) {
+					// Discard files
+					if ( 'dir' !== $entry['kind'] ) {
+						continue;
+					}
+
+					$tag = $entry['filename'];
+
+					// Prefix the 0 for plugin versions like 0.1
+					if ( '.' == substr( $tag, 0, 1 ) ) {
+						$tag = "0{$tag}";
+					}
+
 					self::add_release( $plugin, [
-						'date' => strtotime( $plugin->last_updated ),
+						'date' => strtotime( $entry['date'] ),
 						'tag'  => $tag,
 						'version' => $tag,
+						'committer' => [ $entry['author'] ],
 					] );
 				}
 			}
