@@ -115,38 +115,11 @@ class Plugin_Release_Confirmation extends Base {
 			return $result;
 		}
 
+		// Fetch the releases first, to prefill them if needed with the old release_confirmation count.
+		Plugin_Directory::get_releases();
+
 		// Update the Metadata.
 		update_post_meta( $plugin->ID, 'release_confirmation', $confirmations_required );
-
-		// Mark all existing releases as confirmed.
-		$tags     = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
-		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
-		if ( ! $tags ) {
-			$tags  = [];
-			$_tags = get_post_meta( $plugin->ID, 'tagged_versions', true ) ?: [];
-			foreach ( $_tags as $tag ) {
-				$tags[ $tag ] = [
-					'date'   => $plugin->last_updated, // Assumption.
-					'author' => '',
-					'tag'    => $tag,
-				];
-			}
-		}
-		foreach ( $tags as $tag => $tag_data ) {
-			if ( ! isset( $releases[ $tag ] ) ) {
-				$releases[ $tag ] = [
-					'date'          => strtotime( $tag_data['date'] ),
-					'tag'           => $tag,
-					'version'       => $tag,
-					'zips_built'    => true,
-					'confirmations' => [],
-					'confirmed'     => true,
-					'committer'     => [ $tag_data['author'] ],
-					'revision'      => [],
-				];
-			}
-		}
-		update_post_meta( $plugin->ID, 'releases', $releases );
 
 		// Add an audit-log entry.
 		Tools::audit_log(
@@ -171,37 +144,32 @@ class Plugin_Release_Confirmation extends Base {
 	 * A simple endpoint to confirm a release.
 	 */
 	public function confirm_release( $request ) {
-		$plugin   = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
-		$tag      = $request['plugin_tag'];
-		$result   = [
+		$user_login = wp_get_current_user()->user_login;
+		$plugin     = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+		$tag        = $request['plugin_tag'];
+		$release    = Plugin_Directory::get_release( $plugin, $tag );
+		$result     = [
 			'location' => wp_get_referer() ?: home_url( '/developers/releases/' ),
 		];
 		header( 'Location: ' . $result['location'] );
 
-		$user_login = wp_get_current_user()->user_login;
-
-		if ( ! empty( $releases[ $tag ]['confirmed'][ $user_login ] ) ) {
+		if ( ! $release || ! empty( $release['confirmed'][ $user_login ] ) ) {
 			// Already confirmed.
 			$result['confirmed'] = false;
 			return $result;
 		}
 
 		// Record this user as confirming the release.
-		$releases[ $tag ]['confirmations'][ $user_login ] = time();
-		$result['confirmed']                              = true;
+		$release['confirmations'][ $user_login ] = time();
+		$result['confirmed']                     = true;
 
 		// Mark the release as confirmed if enough confirmations.
-		if ( count( $releases[ $tag ]['confirmations'] ) >= $plugin->release_confirmation ) {
-			$releases[ $tag ]['confirmed'] = true;
+		if ( count( $release['confirmations'] ) >= $release['confirmations_required'] ) {
+			$release['confirmed'] = true;
 			$result['fully_confirmed']     = true;
 		}
 
-		if ( ! update_post_meta( $plugin->ID, 'releases', $releases ) ) {
-			$result['confirmed'] = false;
-			unset( $result['fully_confirmed'] );
-			return $result;
-		}
+		Plugin_Directory::add_release( $release );
 
 		// Trigger the import for the plugin.
 		Plugin_Import::queue(
@@ -216,7 +184,7 @@ class Plugin_Release_Confirmation extends Base {
 				'readme_touched' => true,
 				'code_touched'   => true,
 				'assets_touched' => true,
-				'revisions'      => $releases[ $tag ]['revision'],
+				'revisions'      => $release['revision'],
 			]
 		);
 
@@ -244,8 +212,6 @@ class Plugin_Release_Confirmation extends Base {
 	public function validate_plugin_tag_callback( $tag, $request ) {
 		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
-
-		return !empty( $releases[ $tag ] );
+		return $plugin && (bool) Plugin_Directory::get_release( $plugin, $tag );
 	}
 }
