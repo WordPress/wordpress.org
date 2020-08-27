@@ -441,6 +441,14 @@ class Jetpack_Search {
 					)
 				)
 			);
+			// Exclude blocks with failing tests.
+			$es_wp_query_args['filters'][] = array(
+				'term' => array(
+					'e2e_success' => array(
+						'value' => 'true'
+					)
+				)
+			);
 		}
 
 		$es_wp_query_args['locale'] = $query->get( 'locale' ) ?: get_locale();
