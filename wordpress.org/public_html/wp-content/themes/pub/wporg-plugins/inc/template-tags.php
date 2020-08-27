@@ -267,7 +267,7 @@ function the_unconfirmed_releases_notice() {
 	}
 
 	$confirmations_required = $plugin->release_confirmation;
-	$releases               = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+	$releases               = Plugin_Directory::get_releases( $plugin ) ?: [];
 	$unconfirmed_releases   = wp_list_filter( $confirmed_releases, [ 'confirmed' => false ] );
 
 	if ( ! $unconfirmed_releases ) {
