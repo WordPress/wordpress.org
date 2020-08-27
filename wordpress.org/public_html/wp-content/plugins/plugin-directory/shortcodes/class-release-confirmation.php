@@ -41,8 +41,8 @@ class Release_Confirmation {
 
 		uasort( $plugins, function( $a, $b ) {
 			// Get the most recent commit confirmation.
-			$a_releases = get_post_meta( $a->ID, 'releases', true ) ?: [];
-			$b_releases = get_post_meta( $b->ID, 'releases', true ) ?: [];
+			$a_releases = Plugin_Directory::get_releases( $a );
+			$b_releases = Plugin_Directory::get_releases( $b );
 
 			$a_latest_release = $a_releases ? max( wp_list_pluck( $a_releases, 'date' ) ) : 0;
 			$b_latest_release = $b_releases ? max( wp_list_pluck( $b_releases, 'date' ) ) : 0;
@@ -103,16 +103,11 @@ class Release_Confirmation {
 	}
 
 	static function single_plugin_row( $plugin, $include_header = true ) {
-		$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
-		$all_tags = get_post_meta( $plugin->ID, 'tags', true ) ?: [];
+		$releases = Plugin_Directory::get_releases( $plugin );
 
 		// Sort releases most recent first.
 		uasort( $releases, function( $a, $b ) {
 			return $b['date'] <=> $a['date'];
-		} );
-
-		uasort( $all_tags, function( $a, $b ) {
-			return strtotime( $b['date'] ) <=> strtotime( $a['date'] );
 		} );
 
 		if ( $include_header ) {
@@ -133,7 +128,7 @@ class Release_Confirmation {
 				<th>Actions</th>
 		</thead>';
 
-		if ( ! $releases && ! $all_tags ) {
+		if ( ! $releases ) {
 			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
 		}
 
@@ -160,43 +155,17 @@ class Release_Confirmation {
 			);
 		}
 
-		// List older releases too.
-		foreach ( $all_tags as $tag => $tag_data ) {
-			if ( isset( $releases[ $tag ] ) ) {
-				continue;
-			}
-
-			printf(
-				'<tr class="non-confirmed">
-					<td>%s</td>
-					<td title="%s">%s</td>
-					<td>%s</td>
-					<td colspan="2"><em>%s</em></td>
-				</tr>',
-				sprintf(
-					'<a href="https://plugins.trac.wordpress.org/browser/%s/tags/%s/">%s</a>',
-					$plugin->post_name,
-					esc_html( $tag_data['tag'] ),
-					esc_html( $tag )
-				),
-				esc_attr( $tag_data['date'] ),
-				esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( strtotime( $tag_data['date'] ) ) ) ),
-				esc_html( $tag_data['author'] ),
-				__( 'Release did not require confirmation.', 'wporg-plugins' )
-			);
-		}
-
 		echo '</table>';
 	}
 
 	static function get_approval_text( $plugin, $data ) {
 		ob_start();
 
-		if ( ! $data['confirmed'] && ! $data['confirmations'] ) {
+		if ( ! $data['confirmations_required'] ) {
 			_e( 'Release did not require confirmation.', 'wporg-plugins' );
-		} else if ( ! $data['confirmed'] || count( $data['confirmations'] ) >= $plugin->release_confirmation ) {
+		} else if ( ! $data['confirmed'] || count( $data['confirmations'] ) >= $data['confirmations_required'] ) {
 			_e( 'Release confirmed.', 'wporg-plugins' );
-		} else if ( 1 == $plugin->release_confirmation ) {
+		} else if ( 1 == $data['confirmations_required'] ) {
 			_e( 'Waiting for confirmation.', 'wporg-plugins' );
 		} else {
 			printf(
@@ -239,7 +208,7 @@ class Release_Confirmation {
 	static function get_actions( $plugin, $data ) {
 		$buttons = [];
 
-		if ( $plugin->release_confirmation ) {
+		if ( $data['confirmations_required'] ) {
 			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
 			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
