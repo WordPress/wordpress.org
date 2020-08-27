@@ -1,0 +1,44 @@
+
+.video-grid {
+	margin: 0 -8px;
+	list-style: none;
+
+	&_item {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+		padding: $gutter-default * 2 8px $gutter-default * 2;
+		margin: 0;
+
+		@media only screen and (min-width: $breakpoint-tablet) {
+			align-items: start;
+			padding-bottom: 0;
+		}
+
+		&_link {
+			display: block;
+			margin-top: 8px;
+			font-weight: 600;
+			text-align: center;
+
+			@media only screen and (min-width: $breakpoint-small) {
+				padding: 0 $gutter-default * 2 $gutter-default;
+			}
+
+			@media only screen and (min-width: $breakpoint-tablet) {
+				padding: 0;
+				text-align: left;
+			}
+
+			> img {
+				width: 100%;
+			}
+		}
+
+		&--no-image {
+			height: 100%;
+			background: #eee;
+		}
+	}
+}

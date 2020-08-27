@@ -288,7 +288,7 @@ class DevHub_User_Submitted_Content {
 
 		$args['comment_field'] = self::wp_editor_comments( $label, $comment );
 
-		// Args for adding hidden links after the comment form submit field. 
+		// Args for adding hidden links after the comment form submit field.
 		$args['context']      = $context;
 		$args['comment_edit'] = $comment;
 
@@ -392,7 +392,7 @@ class DevHub_User_Submitted_Content {
 				/* translators: 1: note, 2: note author name */
 				$note_link = sprintf( __( '%1$s by %2$s', 'wporg' ), "<a href='{$post_url}'>{$parent_note}</a>", $parent_author );
 			}
-		} 
+		}
 
 		$allowed_tags = '';
 		foreach ( array( '<strong>', '<em>', '<code>', '<a>' ) as $tag ) {

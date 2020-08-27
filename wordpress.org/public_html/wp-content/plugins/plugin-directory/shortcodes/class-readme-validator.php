@@ -9,6 +9,7 @@ class Readme_Validator {
 	 * Displays a form to validate readme.txt files and blobs of text.
 	 */
 	public static function display() {
+		ob_start();
 		?>
 		<div class="wrap">
 			<?php
@@ -49,6 +50,7 @@ class Readme_Validator {
 			</script>
 		</div>
 		<?php
+		return ob_get_clean();
 	}
 
 	/**

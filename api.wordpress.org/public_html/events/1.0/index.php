@@ -182,6 +182,8 @@ function build_response( $location, $location_args ) {
 
 		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time() );
 
+		$events = pin_next_workshop_discussion_group( $events, $_SERVER['HTTP_USER_AGENT'] );
+
 		$events = remove_duplicate_events( $events );
 
 		// Internal location data cannot be exposed in the response, see get_location().
@@ -718,7 +720,7 @@ function get_events( $args = array() ) {
 	 *
 	 * See https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480
 	 */
-	if ( time() < strtotime( 'August 1 2020' ) ) {
+	if ( time() < strtotime( 'December 31 2020' ) ) {
 		$event_distances['wordcamp'] = 600;
 	}
 
@@ -727,7 +729,22 @@ function get_events( $args = array() ) {
 		return $data;
 	}
 
-	$wheres = array();
+	$wheres = array(
+		/*
+		 * This group is online-only events, and `pin_next_workshop_discussion_group()` will take care of adding
+		 * them to the event array. Meetup.com requires groups to claim a physical location, so this one uses
+		 * San Francisco.
+		 *
+		 * If these events weren't excluded here, then people in San Francisco would get them mixed in with their
+		 * actual local meetup events, and the local events would often be pushed out of the widget.
+		 *
+		 * @todo This do mean that non-Core requests will never see events from this group, but there isn't a
+		 * tangible use case for that yet. We could maybe support an `online` value for the `location` parameter
+		 * in the future if that's desired. If we do that, the Codex documentation should be updated.
+		 */
+		"meetup_url <> 'https://www.meetup.com/learn-wordpress-discussions/' "
+	);
+
 	if ( ! empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
 		$wheres[]     = '`type` = %s';
 		$sql_values[] = $args['type'];
@@ -1255,7 +1272,7 @@ function is_wp15_event( $title ) {
 }
 
 /**
- * Pin the next upcoming online WordCamp.
+ * Pin the next upcoming online WordCamp to the Events Widget.
  *
  * @param array  $events
  * @param string $user_agent
@@ -1267,7 +1284,7 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 	global $wpdb, $cache_group, $cache_life;
 
 	// Re-evaluate pinning after July, per https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480.
-	if ( $current_time >= strtotime( 'August 1 2020' ) ) {
+	if ( $current_time >= strtotime( 'December 31 2020' ) ) {
 		return $events;
 	}
 
@@ -1316,6 +1333,8 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 			 * Cache a string instead of `false`, to disambiguate between cache-misses, and cache-hits with 0 results.
 			 * `wp_cache_get()` from the `memcached` plugin doesn't support the `$found` parameter, so this has to be
 			 * done manually.
+			 *
+			 * todo $found is now available as of r16106-dotorg.
 			 */
 			$next_online_camp = 'none scheduled';
 		}
@@ -1330,6 +1349,72 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 
 	if ( isset( $next_online_camp['url'] ) ) {
 		array_unshift( $events, $next_online_camp );
+	}
+
+	return $events;
+}
+
+/**
+ * Pin upcoming learn.wordpress.org discussion groups to the Events Widget.
+ *
+ * @param array  $events
+ * @param string $user_agent
+ *
+ * @return array
+ */
+function pin_next_workshop_discussion_group( $events, $user_agent ) {
+	global $wpdb, $cache_group, $cache_life;
+
+	if ( ! is_client_core( $user_agent ) ) {
+		return $events;
+	}
+
+	$cache_key             = 'next_workshop_discussion_group';
+	$next_discussion_group = wp_cache_get( $cache_key, $cache_group, false, $found );
+
+	if ( ! $found ) {
+		$raw_discussion_group = $wpdb->get_row( "
+			SELECT `title`, `url`, `meetup`, `meetup_url`, `date_utc`, `end_date`, `country`, `latitude`, `longitude`
+			FROM `wporg_events`
+			WHERE
+				type       = 'meetup'    AND
+				meetup_url = 'https://www.meetup.com/learn-wordpress-discussions/' AND
+				status     = 'scheduled' AND
+				location   = 'online'    AND
+				date_utc BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 WEEK
+			ORDER BY `date_utc` ASC
+			LIMIT 1"
+		);
+
+		if ( isset( $raw_discussion_group->url ) ) {
+			$next_discussion_group = array(
+				'type'       => 'meetup',
+				'title'      => $raw_discussion_group->title,
+				'url'        => $raw_discussion_group->url,
+				'meetup'     => $raw_discussion_group->meetup,
+				'meetup_url' => $raw_discussion_group->meetup_url,
+				'date'       => $raw_discussion_group->date_utc,
+				'end_date'   => $raw_discussion_group->end_date,
+
+				'location'   => array(
+					'location'  => 'Online',
+					'country'   => $raw_discussion_group->country,
+					'latitude'  => (float) $raw_discussion_group->latitude,
+					'longitude' => (float) $raw_discussion_group->longitude,
+				)
+			);
+		}
+
+		/*
+		 * This intentionally stores a cache value when there are 0 results, because that's a normal condition;
+		 * i.e., there aren't currently any discussion groups events on the schedule. If nothing were cached in
+		 * that situation, then this would run a query on every request, which wouldn't be performant at scale.
+		 */
+		wp_cache_set( $cache_key, $next_discussion_group, $cache_group, $cache_life );
+	}
+
+	if ( isset( $next_discussion_group['url'] ) ) {
+		array_unshift( $events, $next_discussion_group );
 	}
 
 	return $events;

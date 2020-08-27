@@ -1087,12 +1087,23 @@
 				.default {
 					font-style: italic;
 				}
+
+				ul {
+					margin-left: 25px;
+					margin-left: 2.5rem;
+				}
 			}
 			.param-hash {
 				margin-left: 1.2em;
 				margin-bottom: 0.5em;
-				li {
+				> li {
 					margin-top: 1em;
+				}
+				li li {
+					list-style-type: circle;
+				}
+				.param-hash > li {
+					list-style-type: disc;
 				}
 			}
 		}

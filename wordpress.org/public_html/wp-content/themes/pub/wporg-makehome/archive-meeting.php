@@ -42,7 +42,7 @@
 					);
 				}
 			?></td>
-			<td><?php 
+			<td><?php
 			// convert the date time to a pretty format
 			$time = strtotime( $post->next_date.' '. $post->time.' GMT' ); // note, strtotime doesn't grok UTC very well, GMT works fine though
 			echo '<a href="http://www.timeanddate.com/worldclock/fixedtime.html?iso='.gmdate('Ymd\THi', $time).'"><abbr class="date" title="'.gmdate('c', $time).'">';

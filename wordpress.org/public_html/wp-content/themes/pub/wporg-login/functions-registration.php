@@ -57,17 +57,14 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 		wp_die( __( 'Registration Blocked. Please stop.', 'wporg' ) );
 	}
 
-	$activation_key = wp_generate_password( 24, false, false );
-	$profile_key    = wp_generate_password( 24, false, false );
-
-	$hashed_activation_key = time() . ':' . wp_hash_password( $activation_key );
-	$hashed_profile_key    = time() . ':' . wp_hash_password( $profile_key );
+	$profile_key        = wp_generate_password( 24, false, false );
+	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
 	$pending_user = array(
 		'user_login' => $user_login,
 		'user_email' => $user_email,
 		'user_registered' => gmdate('Y-m-d  H:i:s'),
-		'user_activation_key' => $hashed_activation_key,
+		'user_activation_key' => '',
 		'user_profile_key' => $hashed_profile_key,
 		'meta' => array(
 			'user_mailinglist' => $user_mailinglist,
@@ -94,23 +91,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
 	}
 
-	$body  = sprintf( __( 'Hi %s,', 'wporg' ), $user_login ) . "\n\n";
-	$body .= __( 'Welcome to WordPress.org! Your new account has been setup.', 'wporg' ) . "\n";
-	$body .= "\n";
-	$body .= sprintf( __( 'Your username is: %s', 'wporg' ), $user_login ) . "\n";
-	$body .= __( 'You can create a password at the following URL:', 'wporg' ) . "\n";
-	$body .= home_url( "/register/create/{$user_login}/{$activation_key}/" );
-	$body .= "\n\n";
-	$body .= __( '-- The WordPress.org Team', 'wporg' );
-
-	wp_mail(
-		$user_email,
-		__( '[WordPress.org] Your new account', 'wporg' ),
-		$body,
-		array(
-			'From: "WordPress.org" <noreply@wordpress.org>'
-		)
-	);
+	wporg_login_send_confirmation_email( $user_email );
 
 	$url = home_url( sprintf(
 		'/register/create-profile/%s/%s/',
@@ -123,10 +104,57 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 }
 
 /**
+ * Send a "Welcome to WordPress.org" confirmation email.
+ */
+function wporg_login_send_confirmation_email( $user ) {
+	global $wpdb;
+
+	$user = wporg_get_pending_user( $user );
+
+	if ( ! $user || $user['created'] ) {
+		return false;
+	}
+
+	$user_login = $user['user_login'];
+	$user_email = $user['user_email'];
+
+	$activation_key = wp_hash( $user_login . ':' . $user_email, 'activation' );
+
+	// Every email bumps the expiration time.
+	$user['user_activation_key'] = time() . ':' . wp_hash_password( $activation_key );
+	if ( ! wporg_update_pending_user( $user ) ) {
+		return false;
+	}
+
+	$body  = sprintf( __( 'Hi %s,', 'wporg' ), $user_login ) . "\n\n";
+	$body .= __( 'Welcome to WordPress.org! Your new account has been setup.', 'wporg' ) . "\n";
+	$body .= "\n";
+	$body .= sprintf( __( 'Your username is: %s', 'wporg' ), $user_login ) . "\n";
+	$body .= __( 'You can create a password at the following URL:', 'wporg' ) . "\n";
+	$body .= home_url( "/register/create/{$user_login}/{$activation_key}/" );
+	$body .= "\n\n";
+	$body .= __( '-- The WordPress.org Team', 'wporg' );
+
+	return wp_mail(
+		$user_email,
+		__( '[WordPress.org] Your new account', 'wporg' ),
+		$body,
+		array(
+			'From: "WordPress.org" <noreply@wordpress.org>'
+		)
+	);
+}
+
+/**
  * Fetches a pending user record from the database by username or Email.
  */
 function wporg_get_pending_user( $login_or_email ) {
 	global $wpdb;
+
+	// Is it a pending user object already?
+	if ( is_array( $login_or_email ) && isset( $login_or_email['pending_id'] ) ) {
+		return $login_or_email;
+	}
 
 	$pending_user = $wpdb->get_row( $wpdb->prepare(
 		"SELECT * FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE ( `user_login` = %s OR `user_email` = %s ) LIMIT 1",
@@ -169,7 +197,7 @@ function wporg_update_pending_user( $pending_user ) {
 }
 
 /**
- * Create a user record from a pending record. 
+ * Create a user record from a pending record.
  */
 function wporg_login_create_user_from_pending( $pending_user, $password = false ) {
 	global $wpdb;

@@ -41,7 +41,7 @@ class WPorg_Handbook_Email_Post_Changes {
 		$verify = wp_verify_nonce( $_GET['_wpnonce'], ( $watch ? 'watch-' : 'unwatch-' ) . $post_id );
 
 		if ( $verify ) {
-			$users = $_users = get_post_meta( $post_id, '_wporg_watchlist', true );
+			$users = $_users = get_post_meta( $post_id, '_wporg_watchlist', true ) ?: array();
 			if ( $watch )
 				$users[] = get_current_user_id();
 			else

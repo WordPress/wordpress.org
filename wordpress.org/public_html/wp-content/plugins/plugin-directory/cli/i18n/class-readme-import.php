@@ -123,7 +123,7 @@ class Readme_Import extends I18n_Import {
 		foreach ( $section_strings as $text => $comments ) {
 			$pot->add_entry( new Translation_Entry( [
 				'singular'           => $text,
-				'extracted_comments' => 'Found in ' . implode( $comments, ', ' ) . '.',
+				'extracted_comments' => 'Found in ' . implode( ', ', $comments ) . '.',
 			] ) );
 		}
 

@@ -130,7 +130,7 @@ add_action( 'wp_enqueue_scripts', 'jobswp_scripts' );
 
 /**
  * Outputs `noindex,follow` robots tag for appropriate pages.
- * 
+ *
  * Currently output for:
  * - empty job category archives
  * - search results

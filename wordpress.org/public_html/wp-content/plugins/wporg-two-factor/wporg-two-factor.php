@@ -26,8 +26,8 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		remove_action( 'show_user_profile', [ 'Two_Factor_Core', 'user_two_factor_options' ] );
 
 		if ( ! is_admin() ) {
-			add_action( 'edit_user_profile', [ $this, 'user_two_factor_options' ] );
-			add_action( 'show_user_profile', [ $this, 'user_two_factor_options' ] );
+			add_action( 'edit_user_profile', [ __CLASS__, 'user_two_factor_options' ] );
+			add_action( 'show_user_profile', [ __CLASS__, 'user_two_factor_options' ] );
 		}
 
 		add_action( 'wp_ajax_two-factor-totp-verify-code', [ $this, 'ajax_verify_code' ] );
@@ -38,9 +38,9 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		remove_action( 'login_form_validate_2fa', [ 'Two_Factor_Core', 'login_form_validate_2fa' ] );
 		remove_action( 'login_form_backup_2fa',   [ 'Two_Factor_Core', 'backup_2fa' ] );
 
-		add_action( 'wp_login',                [ $this, 'wp_login' ], 10, 2 );
-		add_action( 'login_form_validate_2fa', [ $this, 'login_form_validate_2fa' ] );
-		add_action( 'login_form_backup_2fa',   [ $this, 'backup_2fa' ] );
+		add_action( 'wp_login',                [ __CLASS__, 'wp_login' ], 10, 2 );
+		add_action( 'login_form_validate_2fa', [ __CLASS__, 'login_form_validate_2fa' ] );
+		add_action( 'login_form_backup_2fa',   [ __CLASS__, 'backup_2fa' ] );
 
 	}
 
@@ -111,7 +111,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		}
 
 		// At this point we know they have a 2FA account, were already logged in, and had a 2FA cookie
-		$this->set_2fa_cookies( get_userdata( $user_id ), $expire );
+		self::set_2fa_cookies( get_userdata( $user_id ), $expire );
 	}
 
 
@@ -120,7 +120,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 		setcookie( self::WPORG_2FA_COOKIE, ' ', time() - YEAR_IN_SECONDS, PLUGINS_COOKIE_PATH, COOKIE_DOMAIN );
 	}
 
-	function set_2fa_cookies( $user, $expiration = false ) {
+	static function set_2fa_cookies( $user, $expiration = false ) {
 		if ( ! $expiration ) {
 			// Set the Expiration based on the main Authentication cookie
 			$auth_cookie_parts = wp_parse_auth_cookie( '', 'secure_auth' );
@@ -193,7 +193,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 			exit;
 		}
 
-		$this->set_2fa_cookies( $user );
+		self::set_2fa_cookies( $user );
 
 		// Must be global because that's how login_header() uses it.
 		global $interim_login;
@@ -374,7 +374,7 @@ class WPORG_Two_Factor extends Two_Factor_Core {
 
 		if ( $result && $user_id == get_current_user_id() ) {
 			$user = wp_get_current_user();
-			$this->set_2fa_cookies( $user );
+			self::set_2fa_cookies( $user );
 		}
 
 		return $result;

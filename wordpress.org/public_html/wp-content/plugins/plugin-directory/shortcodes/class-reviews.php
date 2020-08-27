@@ -21,7 +21,7 @@ class Reviews {
 
 		if ( empty( $reviews ) ) {
 			return sprintf(
-				'<div class="notice notice-warning notice-alt"><p>%s</p></div>', 
+				'<div class="notice notice-warning notice-alt"><p>%s</p></div>',
 				__( 'There are no reviews for this plugin.', 'wporg-plugins' )
 			);
 		}

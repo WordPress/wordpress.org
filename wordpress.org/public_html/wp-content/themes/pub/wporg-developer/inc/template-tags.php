@@ -146,7 +146,7 @@ namespace {
 					$comments[ $key ]->child_notes = array_reverse( $children[ $comment->comment_ID ] );
 				}
 
-				if ( ! $show_editor && ( $reply_id && ( $reply_id === (int) $comment->comment_ID ) ) ) { 
+				if ( ! $show_editor && ( $reply_id && ( $reply_id === (int) $comment->comment_ID ) ) ) {
 					/* The query var 'replytocom' is used and the value is the same as the current comment ID.
 					 * We show the editor for the current comment because we assume Javascript is disabled.
 					 * If Javascript is not disabled the editor is hidden (as normal) by the class 'hide-if-js'.
@@ -1446,7 +1446,7 @@ namespace DevHub {
 	 *
 	 * A user can only edit their own notes if it's in moderation and
 	 * if it's a note for a parsed post type.
-	 *      
+	 *
 	 * Users with the 'edit_comment' capability can edit
 	 * all notes from a parsed post type (regardless if it's in moderation).
 	 *

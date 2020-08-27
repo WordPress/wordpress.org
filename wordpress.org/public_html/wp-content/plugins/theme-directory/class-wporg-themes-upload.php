@@ -445,7 +445,7 @@ class WPORG_Themes_Upload {
 
 	/**
 	 * Sanitize/strip a field back to it's bare-basics version-like string.
-	 * 
+	 *
 	 * @param string $value The field value.
 	 * @param string $field The name of the field being processed.
 	 * @return bool|string The version-like field or false on failure.
@@ -716,6 +716,11 @@ TICKET;
 				$e = str_replace( '</pre>', "\r\n}}}\r\n", $e );
 				$e = preg_replace( '!<span class=[^>]+>([^<]+)</span>!', '$1', $e );
 				$e = str_replace( '<br>', ' ', $e );
+
+				// Decode some entities.
+				$e = preg_replace_callback( '!(&[lg]t;)!', function( $f ) {
+					return html_entity_decode( $f[0] );
+				}, $e );
 
 				if ( 'INFO' !== substr( $e, 0, 4 ) ) {
 					$tc_results[] = '* ' . $e;

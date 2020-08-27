@@ -12,7 +12,7 @@
 <?php } ?>
 
 <!-- Also called on in footer but will not display the second time. -->
-<?php get_sidebar( 'handbook' ); ?> 
+<?php get_sidebar( 'handbook' ); ?>
 
 <div class="sleeve_main">
 

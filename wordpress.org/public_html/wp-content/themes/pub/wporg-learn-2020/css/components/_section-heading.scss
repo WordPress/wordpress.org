@@ -1,0 +1,29 @@
+.section-heading {
+	&_title,
+	&_link {
+		margin-bottom: 0;
+	}
+
+	&_title {
+		font-weight: 300;
+
+		.archive-title-prefix {
+			display: block;
+			font-size: 1rem;
+		}
+	}
+
+	&_link {
+		text-decoration: underline;
+		font-weight: 600;
+		margin-top: $gutter-default !important; // Override button styles
+
+		@media only screen and (min-width: $breakpoint-tablet) {
+			margin-top: 0 !important; // Override button styles
+		}
+	}
+
+	&--with-space {
+		padding-bottom: 16px;
+	}
+}

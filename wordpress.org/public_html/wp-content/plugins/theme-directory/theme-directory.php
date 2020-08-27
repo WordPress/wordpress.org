@@ -236,7 +236,7 @@ add_filter( 'jetpack_active_modules', 'wporg_themes_disable_sitemap_for_rosetta'
 
 /**
  * Skip outdated themes in Jetpack Sitemaps.
- * 
+ *
  * @param bool $skip If this post should be excluded from Sitemaps.
  * @param object $plugin_db_row A row from the wp_posts table.
  * @return bool
@@ -490,12 +490,12 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 	if ( 'publish' == $post->post_status ) {
 		$subject = sprintf( __( '[WordPress Themes] %1$s %2$s is now live', 'wporg-themes' ), $post->post_title, $version );
 		// Translators: 1: Theme version number; 2: Theme name; 3: Theme URL.
-		$content = sprintf( __( 'Version %1$s of %2$s is now live at %3$s.', 'wporg-themes' ), $version, $post->post_title, "https://wordpress.org/themes/{$post->post_name}" ) . "\n\n";
+		$content = sprintf( __( 'Version %1$s of %2$s is now live at %3$s.', 'wporg-themes' ), $version, $post->post_title, "https://wordpress.org/themes/{$post->post_name}/" ) . "\n\n";
 
 	} else {
 		$subject = sprintf( __( '[WordPress Themes] %s has been approved!', 'wporg-themes' ), $post->post_title );
 		// Translators: 1: Theme name; 2: Theme URL.
-		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at %2$s.', 'wporg-themes' ), $post->post_title, "https://wordpress.org/themes/{$post->post_name}" ) . "\n\n";
+		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at %2$s.', 'wporg-themes' ), $post->post_title, "https://wordpress.org/themes/{$post->post_name}/" ) . "\n\n";
 
 		// First time approval: Publish the theme.
 		$post_args = array(
@@ -670,7 +670,14 @@ function wporg_themes_get_header_data( $theme_file ) {
 		'strong'  => array(),
 	);
 
-	$theme_data = implode( '', file( $theme_file ) );
+	$context = stream_context_create( array(
+		'http' => array(
+			'user_agent' => 'WordPress.org Theme Directory'
+		)
+	) );
+
+	$theme_data = file_get_contents( $theme_file, false, $context );
+
 	$theme_data = str_replace( '\r', '\n', $theme_data );
 	preg_match( '|^[ \t\/*#@]*Theme Name:(.*)$|mi', $theme_data, $theme_name );
 	preg_match( '|^[ \t\/*#@]*Theme URI:(.*)$|mi', $theme_data, $theme_uri );
@@ -849,7 +856,7 @@ function wporg_themes_theme_information( $slug ) {
  *
  * @param $method string The Method being called. Valid values: 'query_themes', 'theme_information', 'hot_tags', 'feature_list', and 'get_commercial_shops'
  * @param $args   array  The arguements for the call.
- * @param $format string The format to return the data in. Valid values: 'json', 'php', 'raw' (default)
+ * @param $format string The format to return the data in. Valid values: 'json', 'php', 'api_object', 'raw' (default)
  */
 function wporg_themes_query_api( $method, $args = array(), $format = 'raw' ) {
 	if ( ! class_exists( 'Themes_API' ) ) {
@@ -1124,7 +1131,9 @@ function wporg_themes_add_meta_tags() {
 add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
 
 /**
- * Noindex outdated themes.
+ * SEO Tweaks
+ *  - noindex outdated themes.
+ *  - noindex filtered views.
  */
 function wporg_themes_noindex_request( $noindex ) {
 	if ( is_single() && ( $post = get_post() ) ) {
@@ -1135,6 +1144,10 @@ function wporg_themes_noindex_request( $noindex ) {
 				$noindex = true;
 			}
 		}
+	}
+
+	if ( is_tag() ) {
+		$noindex = true;
 	}
 
 	return $noindex;
@@ -1307,7 +1320,7 @@ function wporg_themes_get_current_url( $path_only = false ) {
 /**
  * Filter the WordPress.org SEO plugin Canonical location to respect Theme Directory differences.
  */
-function wporg_canonical_url( $url ) {
+function wporg_themes_canonical_url( $url ) {
 	if ( get_query_var( 'browse' ) && WPORG_THEMES_DEFAULT_BROWSE === get_query_var( 'browse' ) ) {
 		$url = home_url( '/' );
 	} elseif ( get_query_var( 'browse' ) ) {
@@ -1317,7 +1330,7 @@ function wporg_canonical_url( $url ) {
 
 	return $url;
 }
-add_filter( 'wporg_canonical_url', 'wporg_canonical_url' );
+add_filter( 'wporg_canonical_url', 'wporg_themes_canonical_url' );
 
 // Theme Directory doesn't support pagination.
 add_filter( 'wporg_rel_next_pages', '__return_zero' );

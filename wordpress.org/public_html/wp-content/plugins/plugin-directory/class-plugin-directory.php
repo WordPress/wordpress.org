@@ -45,7 +45,7 @@ class Plugin_Directory {
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
-		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
+		add_filter( 'query_vars', array( $this, 'filter_query_vars' ), 1 );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
@@ -559,10 +559,20 @@ class Plugin_Directory {
 		add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1, 2 );
 
 		// Instantiate our copy of the Jetpack_Search class.
-		if ( class_exists( 'Jetpack' ) && \Jetpack::get_option( 'id' ) && ! class_exists( 'Jetpack_Search' )
-			&& ! isset( $_GET['s'] ) ) { // Don't run the ES query if we're going to redirect to the pretty search URL
-				require_once __DIR__ . '/libs/site-search/jetpack-search.php';
-				\Jetpack_Search::instance();
+		if (
+			class_exists( 'Jetpack' ) &&
+			\Jetpack::get_option( 'id' ) && // Don't load in Meta Environments
+			! class_exists( 'Jetpack_Search' ) &&
+			(
+				// Don't run the ES query if we're going to redirect to the pretty search URL
+				! isset( $_GET['s'] )
+			||
+				// But load it for the query-plugins REST API endpoint, for simpler debugging
+				( false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/plugins/v1/query-plugins' ) )
+			)
+		) {
+			require_once __DIR__ . '/libs/site-search/jetpack-search.php';
+			\Jetpack_Search::instance();
 		}
 	}
 
@@ -575,6 +585,7 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
 		add_shortcode( 'wporg-plugins-reviews', array( __NAMESPACE__ . '\Shortcodes\Reviews', 'display' ) );
 		add_shortcode( 'readme-validator', array( __NAMESPACE__ . '\Shortcodes\Readme_Validator', 'display' ) );
+		add_shortcode( 'block-validator', array( __NAMESPACE__ . '\Shortcodes\Block_Validator', 'display' ) );
 	}
 
 	/**
@@ -590,6 +601,7 @@ class Plugin_Directory {
 			'wporg-plugins-screenshots',
 			'wporg-plugins-reviews',
 			'readme-validator',
+			'block-validator',
 		);
 
 		$not_allowed_shortcodes = array_diff( array_keys( $shortcode_tags ), $allowed_shortcodes );
@@ -1059,7 +1071,11 @@ class Plugin_Directory {
 		$locales_to_sync = array();
 		$post            = get_post( $post_id );
 		if ( $post ) {
-			$translations = Plugin_I18n::instance()->find_all_translations_for_plugin( $post->post_name, 'stable-readme', $min_translated ); // at least $min_translated % translated
+			$project = 'stable-readme';
+			if ( ! $plugin->stable_tag || 'trunk' === $plugin->stable_tag ) {
+				$project = 'dev-readme';
+			}
+			$translations = Plugin_I18n::instance()->find_all_translations_for_plugin( $post->post_name, $project, $min_translated ); // at least $min_translated % translated
 			if ( $translations ) {
 				// Eliminate translations that start with unwanted prefixes, so we don't waste space on near-duplicates like en_AU, en_CA etc.
 				foreach ( $translations as $i => $_locale ) {
@@ -1090,15 +1106,11 @@ class Plugin_Directory {
 	 * @param int    $post_id    Post ID to update.
 	 * @param string $locale  Locale to translate.
 	 */
-	public function sync_translation_to_meta( $post_id, $_locale ) {
-		global $locale;
-
-		$old_locale = $locale;
+	public function sync_translation_to_meta( $post_id, $locale ) {
 		// Keep track of the original untranslated strings
 		$orig_title   = get_the_title( $post_id );
 		$orig_excerpt = get_the_excerpt( $post_id );
 		$orig_content = get_post_field( 'post_content', $post_id );
-		$locale       = $_locale;
 
 		// Update postmeta values for the translated title, excerpt, and content, if they are available and different from the originals.
 		// There is a bug here, in that no attempt is made to remove old meta values for translations that do not have new translations.
@@ -1127,7 +1139,27 @@ class Plugin_Directory {
 			update_post_meta( $post_id, 'content_' . $locale, implode( $the_content ) );
 		}
 
-		$locale = $old_locale;
+		// Translate Block Titles. A bit more complicated as there's multiple postmeta values.
+		$existing_translated_titles = array_unique( get_post_meta( $post_id, 'block_title_' . $locale ) );
+		foreach ( array_unique( get_post_meta( $post_id, 'block_title' ) ) as $block_title ) {
+			$translated_title = Plugin_I18n::instance()->translate( 'block_title:' . md5( $block_title ), $block_title, [ 'post_id' => $post_id ] );
+
+			if ( $translated_title == $block_title ) {
+				continue;
+			}
+
+			if ( false !== ( $pos = array_search( $translated_title, $existing_translated_titles, true ) ) ) {
+				// If translation is meta'd, skip
+				unset( $existing_translated_titles[ $pos ] );
+			} else {
+				// If tranlation is unknown, add it.
+				add_post_meta( $post_id, 'block_title_' . $locale, $translated_title );
+			}
+		}
+		// Delete any unknown translations.
+		foreach ( $existing_translated_titles as $block_title ) {
+			delete_post_meta( $post_id, 'block_title_' . $locale, $block_title );
+		}
 	}
 
 	/**
@@ -1155,7 +1187,16 @@ class Plugin_Directory {
 		$vars[] = 'plugin_advanced';
 		$vars[] = 'geopattern_icon';
 
-		return $vars;
+		// Remove support for any query vars the Plugin Directory doesn't support/need.
+		$not_needed = [
+			'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
+			'posts', 'withcomments', 'withoutcomments', 'favicon', 'cpage',
+			'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
+			'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview',
+			'post_format', 'cat', 'category_name', 'tag', // We use custom cats/tags.
+		];
+
+		return array_diff( $vars, $not_needed );
 	}
 
 	/**
@@ -1300,7 +1341,7 @@ class Plugin_Directory {
 		if (
 			( is_tax() || is_category() || is_tag() ) &&
 			! have_posts() &&
-			! is_tax( 'plugin_section' ) // All sections have something, or intentionall don't (favorites)
+			! is_tax( 'plugin_section' ) // All sections have something, or intentionally don't (favorites)
 		) {
 			// [1] => plugins [2] => tags [3] => example-plugin-name [4..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
@@ -1387,7 +1428,7 @@ class Plugin_Directory {
 
 	/**
 	 * Skip outdated plugins in Jetpack Sitemaps.
-	 * 
+	 *
 	 * @param bool $skip If this post should be excluded from Sitemaps.
 	 * @param object $plugin_db_row A row from the wp_posts table.
 	 * @return bool

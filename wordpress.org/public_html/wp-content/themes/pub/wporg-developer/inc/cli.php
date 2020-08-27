@@ -321,8 +321,8 @@ class DevHub_CLI {
 
 		$repo_url = get_post_meta( get_the_ID(), 'repo_url', true );
 		$cmd_slug = str_replace( 'wp ', '', get_the_title() );
-		$open_issues = 'https://github.com/issues?q=label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aopen';
-		$closed_issues = 'https://github.com/issues?q=label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aclosed';
+		$open_issues = 'https://github.com/login?return_to=%2Fissues%3Fq%3Dlabel%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aopen';
+		$closed_issues = 'https://github.com/login?return_to=%2Fissues%3Fq%3Dlabel%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aclosed';
 		$issue_count = array( 'open' => false, 'closed' => false );
 		foreach( $issue_count as $type => $value ) {
 			$cache_key = 'wpcli_issue_count_' . md5( $cmd_slug . $type );

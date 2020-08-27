@@ -402,8 +402,12 @@ function wporg_themes_meta_box_callback( $post ) {
 	wp_nonce_field( 'wporg_themes_meta_box', 'wporg_themes_meta_box_nonce' );
 
 	foreach ( $versions as $version => $status ) :
+		$text = esc_html( $version );
+		if ( $ticket = get_post_meta( $post->ID, sanitize_key( '_trac_ticket_' . $version ), true ) ) {
+			$text = '<a href="https://themes.trac.wordpress.org/ticket/' . (int)$ticket . '">' . $text . '</a>';
+		}
 		?>
-		<p><?php echo $version; ?> -
+		<p><?php echo $text; ?> -
 			<select name="wporg_themes_status[<?php echo base64_encode( $version ); // base64 because version numbers don't work so well as parts of keys ?>]">
 				<option value="new" <?php selected( $status, 'new' ); ?>><?php esc_html_e( 'New', 'wporg-themes' ); ?></option>
 				<option value="live" <?php selected( $status, 'live' ); ?>><?php esc_html_e( 'Live', 'wporg-themes' ); ?></option>

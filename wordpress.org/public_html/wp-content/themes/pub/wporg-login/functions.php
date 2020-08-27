@@ -8,6 +8,10 @@
 require __DIR__ . '/functions-restapi.php';
 require __DIR__ . '/functions-registration.php';
 
+if ( is_admin() ) {
+	require __DIR__ . '/admin/ui.php';
+}
+
 /**
  * No-cache headers.
  */
@@ -73,6 +77,10 @@ function wporg_login_scripts() {
 add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
 function wporg_login_register_scripts() {
+	if ( is_admin() ) {
+		return;
+	}
+
 	wp_register_script( 'recaptcha-api', 'https://www.google.com/recaptcha/api.js', array(), '2' );
 	wp_add_inline_script(
 		'recaptcha-api',
@@ -89,7 +97,7 @@ function wporg_login_register_scripts() {
 		}'
 	);
 
-	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), '20191023' );
+	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), '20200707' );
 	wp_localize_script( 'wporg-registration', 'wporg_registration', array(
 		'rest_url' => esc_url_raw( rest_url( "wporg/v1" ) )
 	) );
@@ -349,11 +357,14 @@ add_action( 'admin_init', 'wporg_login_cron_tasks' );
  */
 function wporg_login_purge_pending_registrations() {
 	global $wpdb;
-	$two_weeks_ago = gmdate( 'Y-m-d H:i:s', time() - 14 * DAY_IN_SECONDS );
+	$two_weeks_ago_s = time() - 14 * DAY_IN_SECONDS;
+	$two_weeks_ago   = gmdate( 'Y-m-d H:i:s', $two_weeks_ago_s );
 
 	$wpdb->query( $wpdb->prepare(
-		"DELETE FROM `{$wpdb->base_prefix}user_pending_registrations`  WHERE `user_registered` <= %s",
-		$two_weeks_ago
+		"DELETE FROM `{$wpdb->base_prefix}user_pending_registrations`
+		WHERE `user_registered` <= %s AND LEFT( `user_activation_key`, 10 ) <= %d",
+		$two_weeks_ago,
+		$two_weeks_ago_s
 	) );
 }
 add_action( 'login_purge_pending_registrations', 'wporg_login_purge_pending_registrations' );

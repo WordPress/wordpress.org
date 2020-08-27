@@ -190,7 +190,7 @@ function get_jwt_app_token() {
 
 /**
  * Fetch an App Authorization token for accessing Github Resources.
- * 
+ *
  * This assumes that the Github App will only ever be installed on the @WordPress organization.
  */
 function get_app_install_token() {
@@ -229,7 +229,7 @@ function get_app_install_token() {
 
 /**
  * Use some rough heuristics to find the Trac ticket for a given PR.
- * 
+ *
  * TODO: This should probably support multiple Trac Tickets, but once you start to use the final few regexes it can start to match Gutenberg references.
  */
 function determine_trac_ticket( $pr ) {
@@ -288,21 +288,48 @@ function get_trac_instance( $trac ) {
 }
 
 /**
- * Formats a PR description for usage on Trac.
- * 
- * This strips out HTML comments and standard boilerplate text.
- * 
- * @param object $pr_data PR Data.
- * @return string Stripped down PR Description
+ * Formats a PR description/comment for usage on Trac.
+ *
+ * This:
+ *  - Strips standard boilerplate text
+ *  - format_github_content_for_trac_comment();
+ *
+ * @param string $desc.
+ * @return string Converted PR Description
  */
-function format_pr_desc_for_trac_comment( $pr_data ) {
-	$desc = trim( $pr_data->body );
-
-	// Remove HTML comments
-	$desc = preg_replace( '#<!--.+?-->#s', '', $desc );
+function format_pr_desc_for_trac_comment( $desc ) {
+	$desc = trim( $desc );
 
 	// Remove the final line if it matches the specific boilerplate format.
 	$desc = preg_replace( "#---\r?\n\*\*.+\*\*$#", '', $desc );
+
+	return format_github_content_for_trac_comment( $desc );
+}
+
+/**
+ * Formats github content for usage on Trac.
+ *
+ * This:
+ *  - Strips HTML comments
+ *  - Converts code blocks
+ *  - Converts image embeds
+ *  - Converts links
+ *
+ * @param string $desc.
+ * @return string Converted PR Description
+ */
+function format_github_content_for_trac_comment( $desc ) {
+	// Remove HTML comments
+	$desc = preg_replace( '#<!--.+?-->#s', '', $desc );
+
+	// Convert Code blocks.
+	$desc = preg_replace( '#```(.+?)```#s', '{{{$1}}}', $desc );
+
+	// Convert Images (Must happen prior to Links, as the only difference is a preceeding !)
+	$desc = preg_replace( '#!\[(.+?)\]\(https?://(.+?)\)#', '[[Image(https://i0.wp.com/$2)]]', $desc );
+
+	// Convert Links.
+	$desc = preg_replace( '#\[(.+?)\]\((.+?)\)#', '[$2 $1]', $desc );
 
 	return trim( $desc );
 }

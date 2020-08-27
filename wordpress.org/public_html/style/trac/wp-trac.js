@@ -73,6 +73,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'Five For The Future': {
 			tracker: 'https://github.com/WordPress/five-for-the-future/issues/new',
 			tracker_text: 'Five for the Future GitHub Repository'
+		},
+		'learn.wordpress.org': {
+			tracker: 'https://github.com/WordPress/learn/issues/new',
+			tracker_text: 'WordPress.org Learn GitHub Repository'
 		}
 	};
 

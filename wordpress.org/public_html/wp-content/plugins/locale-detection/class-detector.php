@@ -211,6 +211,10 @@ class Detector {
 	 * @return string
 	 */
 	protected function sanitize_locale( $locale ) {
+		if ( ! is_string( $locale ) ) {
+			return '';
+		}
+
 		return preg_replace( '/[^a-zA-Z0-9_]/', '', $locale );
 	}
 }

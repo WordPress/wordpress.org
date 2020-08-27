@@ -33,7 +33,7 @@ add_action( 'login_init', function() {
 /**
  * Detect invalid query parameters being passed in Core query fields.
  * Generally causes WP_Query to throw a PHP Warning.
- * 
+ *
  * @see https://core.trac.wordpress.org/ticket/17737
  */
 add_action( 'send_headers', function( $wp ) {
@@ -49,35 +49,12 @@ add_action( 'send_headers', function( $wp ) {
 } );
 
 /**
- * Detect invalid parameters being passed to the Jetpack Subscription widget.
- * 
- * @see https://github.com/Automattic/jetpack/pull/15638
+ * Detect invalid parameters being passed to o2.
  */
-add_action( 'template_redirect', function() {
-	if (
-		isset( $_REQUEST['action'], $_REQUEST['email'], $_REQUEST['redirect_fragment'] )
-		&& ( 'subscribe' === $_REQUEST['action'] || isset( $_REQUEST['jetpack_subscriptions_widget'] ) )
-	) {
-		if ( ! is_string( $_REQUEST['action'] ) || ! is_string( $_REQUEST['email'] ) || ! is_string( $_REQUEST['redirect_fragment'] ) ) {
-			die_bad_request( "non-scalar input to Jetpack Subscribe widget" );
-		}
-	}
-}, 9 );
-
-// Jetpack Contact form - https://github.com/Automattic/jetpack/pull/15826
-add_action( 'template_redirect', function () {
-	if ( isset( $_REQUEST['contact-form-id'] ) ) {
-		// Jetpack supports contact forms in widgets, but AFAIK we don't have any.
-		if ( ! is_numeric( $_REQUEST['contact-form-id'] ) ) {
-			die_bad_request( "Bad input to Jetpack Contact Form" );
-		}
-		if ( ! isset( $_SERVER['HTTP_REFERER'] ) || ! isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-			die_bad_request( "Missing referer or user-agent for Jetpack Contact Form" );
-		}
-		foreach ( $_REQUEST as $k => $v ) {
-			if ( 'sample@email.tst' === $v || ( !empty( $v[0] ) && 'sample@email.tst' === $v[0] ) ) {
-				die_bad_request( "sample@email.tst input to Jetpack Contact Form" );
-			}
+add_action( 'wp_ajax_nopriv_o2_read', function() {
+	foreach ( array( 'postId', 'rando', 'scripts', 'styles', 'since', 'method' ) as $field ) {
+		if ( !empty( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+			die_bad_request( "non-scalar input to o2" );
 		}
 	}
 }, 9 );
@@ -98,7 +75,7 @@ add_action( 'xmlrpc_call', function() {
 
 /**
  * Die with a 400 Bad Request.
- * 
+ *
  * @param string $reference A unique identifying string to make it easier to read logs.
  */
 function die_bad_request( $reference = '' ) {

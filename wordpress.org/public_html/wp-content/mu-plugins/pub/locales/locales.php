@@ -2,9 +2,9 @@
 /**
  * Locales used on WordPress.org.
  *
- * - Copy of https://github.com/GlotPress/GlotPress-WP/blob/ed1160237f77fa4f8e5bbb8ae195573f6232423e/locales/no-variants/locales.php
+ * - Copy of https://github.com/GlotPress/GlotPress-WP/blob/4e75ab6/locales/locales.php
  * - With support for custom locale variants.
- * - Without https://github.com/GlotPress/GlotPress-WP/pull/1012.
+ * - Without https://github.com/GlotPress/GlotPress-WP/pull/1012 and https://github.com/GlotPress/GlotPress-WP/pull/1017.
  * - Without other dependencies because the file gets also loaded in api.wordpress.org context.
  */
 if ( ! class_exists( 'GP_Locale' ) ) :
@@ -114,6 +114,16 @@ class GP_Locale {
 		return $f( $number );
 	}
 
+	/**
+	 * When converting the object to a string, the combined name is returned.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @return string Combined name of locale.
+	 */
+	public function __toString() {
+		return $this->combined_name();
+	}
 }
 
 endif;
@@ -784,7 +794,7 @@ class GP_Locales {
 		$es_cl->wp_locale = 'es_CL';
 		$es_cl->slug = 'es-cl';
 		$es_cl->google_code = 'es';
-		$es_cl->facebook_locale = 'es_CL';
+		$es_cl->facebook_locale = 'es_LA';
 
 		$es_co = new GP_Locale();
 		$es_co->english_name = 'Spanish (Colombia)';
@@ -796,7 +806,7 @@ class GP_Locales {
 		$es_co->wp_locale = 'es_CO';
 		$es_co->slug = 'es-co';
 		$es_co->google_code = 'es';
-		$es_co->facebook_locale = 'es_CO';
+		$es_co->facebook_locale = 'es_LA';
 
 		$es_cr = new GP_Locale();
 		$es_cr->english_name = 'Spanish (Costa Rica)';
@@ -807,6 +817,8 @@ class GP_Locales {
 		$es_cr->country_code = 'cr';
 		$es_cr->wp_locale = 'es_CR';
 		$es_cr->slug = 'es-cr';
+		$es_cr->google_code = 'es';
+		$es_cr->facebook_locale = 'es_LA';
 
 		$es_do = new GP_Locale();
 		$es_do->english_name = 'Spanish (Dominican Republic)';
@@ -818,6 +830,19 @@ class GP_Locales {
 		$es_do->wp_locale = 'es_DO';
 		$es_do->slug = 'es-do';
 		$es_do->google_code = 'es';
+		$es_do->facebook_locale = 'es_LA';
+
+		$es_ec = new GP_Locale();
+		$es_ec->english_name = 'Spanish (Ecuador)';
+		$es_ec->native_name = 'Español de Ecuador';
+		$es_ec->lang_code_iso_639_1 = 'es';
+		$es_ec->lang_code_iso_639_2 = 'spa';
+		$es_ec->lang_code_iso_639_3 = 'spa';
+		$es_ec->country_code = 'ec';
+		$es_ec->wp_locale = 'es_EC';
+		$es_ec->slug = 'es-ec';
+		$es_ec->google_code = 'es';
+		$es_ec->facebook_locale = 'es_LA';
 
 		$es_gt = new GP_Locale();
 		$es_gt->english_name = 'Spanish (Guatemala)';
@@ -841,6 +866,7 @@ class GP_Locales {
 		$es_hn->wp_locale = 'es_HN';
 		$es_hn->slug = 'es-hn';
 		$es_hn->google_code = 'es';
+		$es_hn->facebook_locale = 'es_LA';
 
 		$es_mx = new GP_Locale();
 		$es_mx->english_name = 'Spanish (Mexico)';
@@ -896,6 +922,8 @@ class GP_Locales {
 		$es_uy->country_code = 'uy';
 		$es_uy->wp_locale = 'es_UY';
 		$es_uy->slug = 'es-uy';
+		$es_uy->google_code = 'es';
+		$es_uy->facebook_locale = 'es_LA';
 
 		$es_ve = new GP_Locale();
 		$es_ve->english_name = 'Spanish (Venezuela)';
@@ -907,7 +935,7 @@ class GP_Locales {
 		$es_ve->wp_locale = 'es_VE';
 		$es_ve->slug = 'es-ve';
 		$es_ve->google_code = 'es';
-		$es_ve->facebook_locale = 'es_VE';
+		$es_ve->facebook_locale = 'es_LA';
 
 		$et = new GP_Locale();
 		$et->english_name = 'Estonian';
@@ -993,6 +1021,15 @@ class GP_Locales {
 		$fo->wp_locale = 'fo';
 		$fo->slug = 'fo';
 		$fo->facebook_locale = 'fo_FO';
+
+		$fon = new GP_Locale();
+		$fon->english_name = 'Fon';
+		$fon->native_name = 'fɔ̀ngbè';
+		$fon->lang_code_iso_639_2 = 'fon';
+		$fon->lang_code_iso_639_3 = 'fon';
+		$fon->country_code = 'bj';
+		$fon->wp_locale = 'fon';
+		$fon->slug = 'fon';
 
 		$fr = new GP_Locale();
 		$fr->english_name = 'French (France)';
@@ -1565,7 +1602,7 @@ class GP_Locales {
 		$lo->native_name = 'ພາສາລາວ';
 		$lo->lang_code_iso_639_1 = 'lo';
 		$lo->lang_code_iso_639_2 = 'lao';
-		$lo->country_code = 'LA';
+		$lo->country_code = 'la';
 		$lo->wp_locale = 'lo';
 		$lo->slug = 'lo';
 		$lo->nplurals = 1;
@@ -2031,7 +2068,8 @@ class GP_Locales {
 		$roh = new GP_Locale();
 		$roh->english_name = 'Romansh';
 		$roh->native_name = 'Rumantsch';
-		$roh->lang_code_iso_639_2 = 'rm';
+		$roh->lang_code_iso_639_1 = 'rm';
+		$roh->lang_code_iso_639_2 = 'roh';
 		$roh->lang_code_iso_639_3 = 'roh';
 		$roh->country_code = 'ch';
 		$roh->wp_locale = 'roh';
@@ -2155,7 +2193,7 @@ class GP_Locales {
 		$snd->english_name = 'Sindhi';
 		$snd->native_name = 'سنڌي';
 		$snd->lang_code_iso_639_1 = 'sd';
-		$snd->lang_code_iso_639_2 = 'sd';
+		$snd->lang_code_iso_639_2 = 'snd';
 		$snd->lang_code_iso_639_3 = 'snd';
 		$snd->country_code = 'pk';
 		$snd->wp_locale = 'snd';
@@ -2486,11 +2524,12 @@ class GP_Locales {
 
 		$vec = new GP_Locale();
 		$vec->english_name = 'Venetian';
-		$vec->native_name = 'Vèneta';
+		$vec->native_name = 'Vèneto';
 		$vec->lang_code_iso_639_2 = 'roa';
 		$vec->lang_code_iso_639_3 = 'vec';
 		$vec->country_code = 'it';
 		$vec->slug = 'vec';
+		$vec->wp_locale = 'vec';
 
 		$vi = new GP_Locale();
 		$vi->english_name = 'Vietnamese';
@@ -2564,6 +2603,17 @@ class GP_Locales {
 		$yor->slug = 'yor';
 		$yor->google_code = 'yo';
 		$yor->facebook_locale = 'yo_NG';
+
+		$zgh = new GP_Locale();
+		$zgh->english_name = 'Tamazight';
+		$zgh->native_name = 'ⵜⴰⵎⴰⵣⵉⵖⵜ';
+		$zgh->lang_code_iso_639_2 = 'zgh';
+		$zgh->lang_code_iso_639_3 = 'zgh';
+		$zgh->country_code = 'ma';
+		$zgh->wp_locale = 'zgh';
+		$zgh->slug = 'zgh';
+		$zgh->nplurals = 2;
+		$zgh->plural_expression = 'n >= 2 && (n < 11 || n > 99)';
 
 		$zh = new GP_Locale();
 		$zh->english_name = 'Chinese';

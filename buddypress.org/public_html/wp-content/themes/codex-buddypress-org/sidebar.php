@@ -87,7 +87,7 @@
 				echo '<div class="inner">';
 				echo '<h5>' . esc_html( $userdata->display_name ) . '</h5>';
 				echo '<p>' . esc_html( $count ) . ' document';
-				if ( $count > 1 ) 
+				if ( $count > 1 )
 					echo 's';
 				echo '</p>';
 				echo '</div>';

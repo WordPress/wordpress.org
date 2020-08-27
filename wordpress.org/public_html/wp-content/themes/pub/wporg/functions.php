@@ -149,9 +149,11 @@ function style_src( $src, $handle ) {
 		return $src;
 	}
 
-	// Use CDN url.
-	if ( in_array( $handle, $cdn_handles, true ) ) {
-		$src = str_replace( get_home_url(), 'https://s.w.org', $src );
+	// Use CDN url when running on WordPress.org production.
+	if ( defined( 'IS_WPORG' ) && IS_WPORG ) {
+		if ( in_array( $handle, $cdn_handles, true ) ) {
+			$src = str_replace( get_home_url(), 'https://s.w.org', $src );
+		}
 	}
 
 	// Remove version argument.

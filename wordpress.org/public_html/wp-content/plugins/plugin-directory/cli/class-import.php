@@ -4,10 +4,12 @@ namespace WordPressdotorg\Plugin_Directory\CLI;
 use Exception;
 use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
+use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\Block_e2e;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Zip\Builder;
@@ -73,6 +75,7 @@ class Import {
 		$headers         = $data['plugin_headers'];
 		$stable_tag      = $data['stable_tag'];
 		$tagged_versions = $data['tagged_versions'];
+		$last_modified   = $data['last_modified'];
 		$blocks          = $data['blocks'];
 		$block_files     = $data['block_files'];
 
@@ -101,7 +104,11 @@ class Import {
 			$plugin->post_modified == '0000-00-00 00:00:00' ||
 			( $svn_changed_tags && in_array( ( $stable_tag ?: 'trunk' ), $svn_changed_tags, true ) )
 		) {
-			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
+			if ( $last_modified ) {
+				$plugin->post_modified = $plugin->post_modified_gmt = $last_modified;
+			} else {
+				$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
+			}
 		}
 
 		// Plugins should move from 'approved' to 'publish' on first parse
@@ -171,7 +178,8 @@ class Import {
 
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
-		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( $tagged_versions ) );
+		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
+		update_post_meta( $plugin->ID, 'tags',               wp_slash( $tagged_versions ) );
 		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
 		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
@@ -224,6 +232,11 @@ class Import {
 
 		// Import Tide data
 		Tide_Sync::sync_data( $plugin->post_name );
+
+		// Run the Block Directory e2e tests if applicable.
+		if ( has_term( 'block', 'plugin_section', $plugin->ID ) ) {
+			Block_e2e::run( $plugin->post_name );
+		}
 
 		return true;
 	}
@@ -292,27 +305,27 @@ class Import {
 		$trunk_files = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk" ) ?: array();
 
 		// Find the list of tagged versions of the plugin.
-		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" ) ?: array();
-		$tagged_versions = array_map( function( $item ) {
-			$trimmed_item = rtrim( $item, '/' );
-
-			if ( $trimmed_item == $item ) {
-				// If attempting to trim `/` off didn't do anything, it was a file and we want to discard it.
-				return null;
+		$tagged_versions    = [];
+		$tagged_versions_raw = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/", true ) ?: [];
+		foreach ( $tagged_versions_raw as $entry ) {
+			// Discard files
+			if ( 'dir' !== $entry['kind'] ) {
+				continue;
 			}
+
+			$tag = $entry['filename'];
 
 			// Prefix the 0 for plugin versions like 0.1
-			if ( '.' == substr( $trimmed_item, 0, 1 ) ) {
-				$trimmed_item = "0{$trimmed_item}";
+			if ( '.' == substr( $tag, 0, 1 ) ) {
+				$tag = "0{$tag}";
 			}
 
-			return $trimmed_item;
-		}, $tagged_versions );
-
-		// Strip out any of the before-found files which we set to NULL
-		$tagged_versions = array_filter( $tagged_versions, function( $item ) {
-			return ! is_null( $item );
-		} );
+			$tagged_versions[ $tag ] = [
+				'tag'    => $entry['filename'],
+				'author' => $entry['author'],
+				'date'   => $entry['date'],
+			];
+		}
 
 		// Not all plugins utilise `trunk`, some just tag versions.
 		if ( ! $trunk_files ) {
@@ -320,7 +333,7 @@ class Import {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
-			$stable_tag = array_reduce( $tagged_versions, function( $a, $b ) {
+			$stable_tag = array_reduce( array_keys( $tagged_versions ), function( $a, $b ) {
 				return version_compare( $a, $b, '>' ) ? $a : $b;
 			} );
 		}
@@ -329,6 +342,7 @@ class Import {
 		$trunk_readme_files = preg_grep( '!^readme.(txt|md)$!i', $trunk_files );
 		if ( $trunk_readme_files ) {
 			$trunk_readme_file = reset( $trunk_readme_files );
+			// Preference readme.txt over readme.md if both exist.
 			foreach ( $trunk_readme_files as $f ) {
 				if ( '.txt' == strtolower( substr( $f, -4 ) ) ) {
 					$trunk_readme_file = $f;
@@ -342,51 +356,54 @@ class Import {
 			$stable_tag = $trunk_readme->stable_tag;
 		}
 
-		$exported = false;
+		$svn_info = false;
 		if ( $stable_tag && 'trunk' != $stable_tag ) {
-			$svn_export = SVN::export(
-				self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$stable_tag}",
-				$tmp_dir . '/export',
-				array(
-					'ignore-externals',
-				)
-			);
-			// Handle tags which we store as 0.blah but are in /tags/.blah
-			if ( ! $svn_export['result'] && '0.' == substr( $stable_tag, 0, 2 ) ) {
+			$stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$stable_tag}";
+			$svn_info = SVN::info( $stable_url );
+
+			if ( ! $svn_info['result'] && '0.' === substr( $stable_tag, 0, 2 ) ) {
+				// Handle tags which we store as 0.blah but are in /tags/.blah
 				$_stable_tag = substr( $stable_tag, 1 );
-				$svn_export  = SVN::export(
-					self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$_stable_tag}",
-					$tmp_dir . '/export',
-					array(
-						'ignore-externals',
-					)
-				);
+				$stable_url  = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$_stable_tag}";
+				$svn_info    = SVN::info( $stable_url );
 			}
-			if ( $svn_export['result'] && false !== $this->find_readme_file( $tmp_dir . '/export' ) ) {
-				$exported = true;
-			} else {
-				// Clear out any files that exist in the export.
-				Filesystem::rmdir( $tmp_dir . '/export' );
+
+			// Verify that the tag has files, falling back to trunk if not.
+			if ( ! SVN::ls( $stable_url ) ) {
+				$svn_info = false;
 			}
 		}
-		if ( ! $exported ) {
+
+		if ( ! $svn_info || ! $svn_info['result'] ) {
+			$stable_tag = 'trunk';
+			$stable_url = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk";
+			$svn_info   = SVN::info( $stable_url );
+		}
+
+		if ( ! $svn_info['result'] ) {
+			throw new Exception( 'Could not find stable SVN URL: ' . implode( ' ', reset( $svn_info['errors'] ) ) );
+		}
+
+		$last_modified = false;
+		if ( preg_match( '/^([0-9]{4}\-[0-9]{2}\-[0-9]{2} [0-9]{1,2}:[0-9]{2}:[0-9]{2})/', $svn_info['result']['Last Changed Date'] ?? '', $m ) ) {
+			$last_modified = $m[0];
+		}
+
+		$svn_export = SVN::export(
+			$stable_url,
+			$tmp_dir . '/export',
+			array(
+				'ignore-externals',
+			)
+		);
+
+		if ( ! $svn_export['result'] || empty( $svn_export['revision'] ) ) {
 			// Catch the case where exporting a tag finds nothing, but there was nothing in trunk either.
 			if ( ! $trunk_files ) {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
-			$stable_tag = 'trunk';
-			// Either stable_tag = trunk, or the stable_tag tag didn't exist.
-			$svn_export = SVN::export(
-				self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk",
-				$tmp_dir . '/export',
-				array(
-					'ignore-externals',
-				)
-			);
-			if ( ! $svn_export['result'] || empty( $svn_export['revision'] ) ) {
-				throw new Exception( 'Could not create SVN export: ' . implode( ' ', reset( $svn_export['errors'] ) ) );
-			}
+			throw new Exception( 'Could not create SVN export: ' . implode( ' ', reset( $svn_export['errors'] ) ) );
 		}
 
 		// The readme may not actually exist, but that's okay.
@@ -400,16 +417,28 @@ class Import {
 		}
 
 		// Now we look in the /assets/ folder for banners, screenshots, and icons.
-		$assets            = array(
+		$assets = array(
 			'screenshot' => array(),
 			'banner'     => array(),
 			'icon'       => array(),
 		);
+
+		$asset_limits = array(
+			'screenshot' => 10 * MB_IN_BYTES,
+			'banner'     => 4 * MB_IN_BYTES,
+			'icon'       => 1 * MB_IN_BYTES,
+		);
+
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
 			foreach ( $svn_assets_folder as $asset ) {
 				// screenshot-0(-rtl)(-de_DE).(png|jpg|jpeg|gif)  ||  icon.svg
 				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(?:-(?P<resolution>[\dx]+)(-rtl)?(?:-(?P<locale>[a-z]{2,3}(?:_[A-Z]{2})?(?:_[a-z0-9]+)?))?\.(png|jpg|jpeg|gif)|\.svg)$!i', $asset['filename'], $m ) ) {
+					continue;
+				}
+
+				// Don't import oversize assets.
+				if ( $asset['filesize'] > $asset_limits[ $m['type'] ] ) {
 					continue;
 				}
 
@@ -435,6 +464,11 @@ class Import {
 				continue;
 			}
 
+			// Don't import oversize assets.
+			if ( filesize( $plugin_screenshot ) > $asset_limits['screenshot'] ) {
+				continue;
+			}
+
 			$assets['screenshot'][ $filename ] = array(
 				'filename'   => $filename,
 				'revision'   => $svn_export['revision'],
@@ -453,10 +487,10 @@ class Import {
 		// Find registered blocks and their files.
 		$blocks = array();
 		$block_files = array();
-		$potential_block_directories = array();
+		$potential_block_directories = array( '.' );
 		$base_dir = "$tmp_dir/export";
 
-		$block_json_files = Filesystem::list_files( $base_dir, true, '!^block\.json$!i' );
+		$block_json_files = Filesystem::list_files( $base_dir, true, '!(?:^|/)block\.json$!i' );
 		if ( ! empty( $block_json_files ) ) {
 			foreach ( $block_json_files as $filename ) {
 				$blocks_in_file = $this->find_blocks_in_file( $filename );
@@ -502,48 +536,7 @@ class Import {
 		if ( empty( $block_files ) ) {
 			$build_files = array();
 
-			if ( ! empty( $potential_block_directories ) ) {
-				$potential_block_directories = array_unique( $potential_block_directories );
-
-				foreach ( $potential_block_directories as $block_dir ) {
-					// dirname() returns . when there is no directory separator present.
-					if ( '.' === $block_dir ) {
-						$block_dir = '';
-					}
-
-					// First look for a dedicated "build" or "dist" directory.
-					foreach ( array( 'build', 'dist' ) as $dirname ) {
-						if ( is_dir( "$base_dir/$block_dir/$dirname" ) ) {
-							$build_files += Filesystem::list_files( "$base_dir/$block_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
-						}
-					}
-
-					// There must be at least on JS file, so if only css was found, keep looking.
-					if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
-						// Then check for files in the current directory with "build" or "min" in the filename.
-						$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '![_\-\.]+(?:build|dist|min)[_\-\.]+!i' );
-					}
-
-					if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
-						// Finally, just grab whatever js/css files there are in the current directory.
-						$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '#(?<!webpack\.config)\.(?:js|jsx|css)$#i' );
-					}
-				}
-			}
-
-			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
-				// Nothing in the potential block directories. Check if we somehow missed build/dist directories in the root.
-				foreach ( array( 'build', 'dist' ) as $dirname ) {
-					if ( is_dir( "$base_dir/$dirname" ) ) {
-						$build_files += Filesystem::list_files( "$base_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
-					}
-				}
-			}
-
-			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
-				// Still nothing. Take on last wild swing.
-				$build_files += Filesystem::list_files( $base_dir, false, '!\.(?:js|jsx|css)$!i' );
-			}
+			$build_files = self::find_possible_block_assets( $base_dir, $potential_block_directories );
 
 			foreach ( $build_files as $file ) {
 				$block_files[] = "/$stable_path/" . ltrim( str_replace( "$base_dir/", '', $file ), '/' );
@@ -555,7 +548,7 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
-		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
+		return compact( 'readme', 'stable_tag', 'last_modified', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
 	}
 
 	/**
@@ -567,8 +560,8 @@ class Import {
 	 *
 	 * @return string The plugin readme.txt or readme.md filename.
 	 */
-	protected function find_readme_file( $directory ) {
-		$files = Filesystem::list_files( $directory, false /* non-recursive */, '!^readme\.(txt|md)$!i' );
+	static function find_readme_file( $directory ) {
+		$files = Filesystem::list_files( $directory, false /* non-recursive */, '!(?:^|/)readme\.(txt|md)$!i' );
 
 		// prioritize readme.txt
 		foreach ( $files as $f ) {
@@ -587,7 +580,7 @@ class Import {
 	 *
 	 * @return object The plugin headers.
 	 */
-	protected function find_plugin_headers( $directory ) {
+	static function find_plugin_headers( $directory ) {
 		$files = Filesystem::list_files( $directory, false, '!\.php$!i' );
 
 		if ( ! function_exists( 'get_plugin_data' ) ) {
@@ -625,7 +618,7 @@ class Import {
 	 *
 	 * @return array An array of objects representing blocks, corresponding to the block.json format where possible.
 	 */
-	protected function find_blocks_in_file( $filename ) {
+	static function find_blocks_in_file( $filename ) {
 
 		$ext = strtolower( pathinfo($filename, PATHINFO_EXTENSION) );
 
@@ -658,10 +651,26 @@ class Import {
 			}
 		}
 		if ( 'block.json' === basename( $filename ) ) {
-			// A block.json file has everything we want.
-			$blockinfo = json_decode( file_get_contents( $filename ) );
-			if ( isset( $blockinfo->name ) && isset( $blockinfo->title ) ) {
-				$blocks[] = $blockinfo;
+			// A block.json file should have everything we want.
+			$validator = new Block_JSON\Validator();
+			$block     = Block_JSON\Parser::parse( array( 'file' => $filename ) );
+			$result    = $validator->validate( $block );
+			if ( ! is_wp_error( $block ) && is_wp_error( $result ) ) {
+				// Only certain properties must be valid for our purposes here.
+				$required_valid_props = array(
+					'block.json',
+					'block.json:editorScript',
+					'block.json:editorStyle',
+					'block.json:name',
+					'block.json:script',
+					'block.json:style',
+				);
+				$invalid_props = array_intersect( $required_valid_props, $result->get_error_data( 'error' ) );
+				if ( empty( $invalid_props ) ) {
+					$blocks[] = $block;
+				}
+			} elseif ( true === $result ) {
+				$blocks[] = $block;
 			}
 		}
 
@@ -676,7 +685,7 @@ class Import {
 	 *
 	 * @return array
 	 */
-	protected function extract_file_paths_from_block_json( $parsed_json, $block_json_path = '' ) {
+	static function extract_file_paths_from_block_json( $parsed_json, $block_json_path = '' ) {
 		$files = array();
 
 		$props = array( 'editorScript', 'script', 'editorStyle', 'style' );
@@ -688,5 +697,62 @@ class Import {
 		}
 
 		return $files;
+	}
+
+	/**
+	 * Find likely JS and CSS block asset files in a given directory.
+	 *
+	 * @param string $base_dir Base path in which to search.
+	 * @param array $potential_block_directories Subdirectories likely to contain block assets, if known. Optional.
+	 *
+	 * @return array
+	 */
+	static function find_possible_block_assets( $base_dir, $potential_block_directories = null ) {
+		if ( empty( $potential_block_directories ) || !is_array( $potential_block_directories ) ) {
+			$potential_block_directories = array( '.' );
+		}
+
+		$build_files = array();
+
+		foreach ( $potential_block_directories as $block_dir ) {
+			// dirname() returns . when there is no directory separator present.
+			if ( '.' === $block_dir ) {
+				$block_dir = '';
+			}
+
+			// First look for a dedicated "build" or "dist" directory.
+			foreach ( array( 'build', 'dist' ) as $dirname ) {
+				if ( is_dir( "$base_dir/$block_dir/$dirname" ) ) {
+					$build_files += Filesystem::list_files( "$base_dir/$block_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
+				}
+			}
+
+			// There must be at least on JS file, so if only css was found, keep looking.
+			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+				// Then check for files in the current directory with "build" or "min" in the filename.
+				$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '![_\-\.]+(?:build|dist|min)[_\-\.]+!i' );
+			}
+
+			if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+				// Finally, just grab whatever js/css files there are in the current directory.
+				$build_files += Filesystem::list_files( "$base_dir/$block_dir", false, '#(?<!webpack\.config)\.(?:js|jsx|css)$#i' );
+			}
+		}
+
+		if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+			// Nothing in the potential block directories. Check if we somehow missed build/dist directories in the root.
+			foreach ( array( 'build', 'dist' ) as $dirname ) {
+				if ( is_dir( "$base_dir/$dirname" ) ) {
+					$build_files += Filesystem::list_files( "$base_dir/$dirname", true, '!\.(?:js|jsx|css)$!i' );
+				}
+			}
+		}
+
+		if ( empty( preg_grep( '!\.(?:js|jsx)$!i', $build_files ) ) ) {
+			// Still nothing. Take on last wild swing.
+			$build_files += Filesystem::list_files( $base_dir, false, '!\.(?:js|jsx|css)$!i' );
+		}
+
+		return array_unique( $build_files );
 	}
 }

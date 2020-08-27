@@ -33,6 +33,7 @@ class Base {
 		new Routes\Plugin_Support_Reps();
 		new Routes\Plugin_Self_Close();
 		new Routes\Plugin_Self_Transfer();
+		new Routes\Plugin_E2E_Callback();
 	}
 
 	/**
@@ -53,7 +54,7 @@ class Base {
 	 * @return bool Whether the plugin slug exists.
 	 */
 	function validate_plugin_slug_callback( $value ) {
-		return (bool) Plugin_Directory::get_plugin_post( $value );
+		return is_string( $value ) && $value && Plugin_Directory::get_plugin_post( $value );
 	}
 
 	/**

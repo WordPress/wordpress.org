@@ -189,7 +189,16 @@ if ( 'wp-plugins' === $project->path ) {
 			if ( 'wp-plugins' === $project->path ) {
 				// Ensure consistent order of development and stable projects.
 				usort( $sub_projects, function( $a, $b ) {
-					return strnatcasecmp( $a->name, $b->name );
+					$a_is_dev = ( substr( $a->slug, 0, 3 ) == 'dev' );
+					$b_is_dev = ( substr( $b->slug, 0, 3 ) == 'dev' );
+
+					// Sort same-type projects alphabetically
+					if ( $a_is_dev === $b_is_dev ) {
+						return strnatcasecmp( $a->name, $b->name );
+					}
+
+					// Sort Stable before Dev.
+					return $a_is_dev <=> $b_is_dev;
 				} );
 			}
 
@@ -416,7 +425,7 @@ if ( 'wp-plugins' === $project->path ) {
 			<?php
 		else :
 			?>
-			<p>There are no editors for this specific project, yet. <a href="https://make.wordpress.org/polyglots/handbook/rosetta/theme-plugin-directories/">Become an editor.</a></p>
+			<p>There are no editors for this specific project, yet. <a href="https://make.wordpress.org/polyglots/handbook/plugin-theme-authors-guide/pte-request/">Become an editor.</a></p>
 			<?php
 		endif;
 

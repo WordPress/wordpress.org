@@ -56,13 +56,11 @@ class Plugin_Self_Close extends Base {
 	 * @return bool True if the favoriting was successful.
 	 */
 	public function self_close( $request ) {
-		$plugin   = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-		$location = get_permalink( $plugin );
-		header( "Location: $location" );
-
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 		$result = [
-			'location' => $location,
+			'location' => wp_get_referer() ?: get_permalink( $plugin ),
 		];
+		header( 'Location: ' . $result['location'] );
 
 		// Close the plugin.
 		$plugin->post_status = 'closed';

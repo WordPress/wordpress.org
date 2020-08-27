@@ -61,7 +61,14 @@ class Commit extends Resource {
 		}
 
 		$url = $this->trac->get_commit_info_url( $this->id );
-		$contents = @file_get_contents( $url );
+
+		$context = stream_context_create( array(
+			'http' => array(
+				'user_agent' => 'WordPress.org Trac:Slack Notifications'
+			)
+		) );
+
+		$contents = @file_get_contents( $url, false, $context );
 		if ( false === $contents ) {
 			$this->data = false;
 			return;

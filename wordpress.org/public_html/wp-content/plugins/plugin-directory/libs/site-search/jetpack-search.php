@@ -234,13 +234,15 @@ class Jetpack_Search {
 		$response = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
 		// Use a temporary lock to prevent cache stampedes.
-		// This will ensure that a maximum of two processes are performing the search, or one when the stale value is still known.
+		// This will ensure that a maximum number of processes are performing the same search, or one when the stale value is still known.
 		// Other processes will use the stale cached value if it's present, even for a while after the expiration time if a fresh value is still being fetched.
+		$maximum_concurrent_requests = 3;
+
 		$do_fresh_request = false;
-		if ( wp_cache_add( $lock_key, 1, self::CACHE_GROUP, 15 ) ) {
+		if ( wp_cache_add( $lock_key, 1, self::CACHE_GROUP, 20 ) ) {
 			$do_fresh_request = true;
-		} elseif ( ! $response && 2 === wp_cache_incr( $lock_key, 1, self::CACHE_GROUP ) ) {
-			// If we don't have cached data, this is the second request and, error volume is low, still perform the request.
+		} elseif ( ! $response && $maximum_concurrent_requests >= wp_cache_incr( $lock_key, 1, self::CACHE_GROUP ) ) {
+			// If we don't have cached data, we haven't exceeded the maximum concurrent requests and, error volume is low, still perform the request.
 			$do_fresh_request = $this->error_volume_is_low();
 		}
 
@@ -427,7 +429,21 @@ class Jetpack_Search {
 			}
 		}
 
-		$es_wp_query_args['locale'] = get_locale();
+		// Block Search.
+		if ( !empty( $query->query['block_search'] ) ) {
+			$es_wp_query_args['block_search'] = $query->query['block_search'];
+
+			// Limit to the Block Tax.
+			$es_wp_query_args['filters'][] = array(
+				'term' => array(
+					'taxonomy.plugin_section.name' => array(
+						'value' => 'block'
+					)
+				)
+			);
+		}
+
+		$es_wp_query_args['locale'] = $query->get( 'locale' ) ?: get_locale();
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
 		// These arguments are in the format for convert_wp_es_to_es_args(), i.e. WP-style.
@@ -760,6 +776,8 @@ class Jetpack_Search {
 			}
 		}
 
+		$is_block_search = ! empty( $args['block_search'] );
+
 		if ( $args['locale'] && $args['locale'] !== 'en' && substr( $args['locale'], 0, 3 ) !== 'en_' ) {
 			$locale = $args['locale'];
 
@@ -785,6 +803,10 @@ class Jetpack_Search {
 				'description_en^' . $en_boost,
 				'taxonomy.plugin_tags.name',
 			);
+			if ( $is_block_search ) {
+				$boost_phrase_fields[] = 'block_title_' . $locale;
+				$boost_phrase_fields[] = 'block_title_en^' . $en_boost;
+			}
 			$boost_ngram_fields   = array(
 				'title_' . $locale . '.ngram',
 				'title_en.ngram^' . $en_boost,
@@ -794,6 +816,11 @@ class Jetpack_Search {
 				'title_en^' . $en_boost,
 				'slug_text',
 			);
+			if ( $is_block_search ) {
+				$boost_title_fields[] = 'block_title_' . $locale;
+				$boost_title_fields[] = 'block_title_en^' . $en_boost;
+				$boost_title_fields[] = 'block_name';
+			}
 			$boost_content_fields = array(
 				'excerpt_' . $locale,
 				'description_' . $locale,
@@ -811,6 +838,9 @@ class Jetpack_Search {
 				'description_en',
 				'taxonomy.plugin_tags.name',
 			);
+			if ( $is_block_search ) {
+				$boost_phrase_fields[] = 'block_title_en';
+			}
 			$boost_ngram_fields   = array(
 				'title_en.ngram',
 			);
@@ -818,6 +848,10 @@ class Jetpack_Search {
 				'title_en',
 				'slug_text',
 			);
+			if ( $is_block_search ) {
+				$boost_title_fields[] = 'block_title_en';
+				$boost_title_fields[] = 'block_name';
+			}
 			$boost_content_fields = array(
 				'excerpt_en',
 				'description_en',

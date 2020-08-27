@@ -36,6 +36,9 @@ class Core extends Trac {
 		'#wp-admin/.*(image|media)\b#'     => '#core-media',
 		'#wp-includes/.*(image|media)\b#'  => '#core-media',
 		'#wp-admin/.*(privacy|personal)#'  => '#core-privacy',
+		'wp-includes/sitemaps'             => '#core-sitemaps',
+		'#wp-admin/includes/.*upgrader#'   => [ '#core' => true, '#core-auto-updates' => true ],
+		'#wp-admin/includes/.*install#'    => [ '#core' => true, '#core-auto-updates' => true ],
 	);
 
 	/**
@@ -58,6 +61,8 @@ class Core extends Trac {
 		'Privacy'            => '#core-privacy',
 		'privacy'            => '#core-privacy',
 		'Site Health'        => '#core-site-health',
+		'Sitemaps'           => '#core-sitemaps',
+		'Upgrade/Install'    => [ '#core' => true, '#core-auto-updates' => true ],
 	);
 }
 
@@ -84,6 +89,10 @@ class Meta extends Trac {
 		'wordpress.org/public_html/style/trac/' => '#meta-tracdev',
 		'trac-notifications/'                   => '#meta-tracdev',
 		'wordcamp.org/'                         => '#meta-wordcamp',
+		'wporg-themes/'                         => [ '#meta' => true, '#themereview' => true ],
+		'theme-directory/'                      => [ '#meta' => true, '#themereview' => true ],
+		'wporg-plugins/'                        => [ '#meta' => true, '#pluginreview' => true ],
+		'plugin-directory/'                     => [ '#meta' => true, '#pluginreview' => true ],
 	);
 
 	protected $ticket_component_filters = array(
@@ -95,6 +104,9 @@ class Meta extends Trac {
 		'WordPress.tv'                  => '#wptv',
 		'WordCamp Site & Plugins'       => '#meta-wordcamp',
 		'HelpHub'                       => '#meta-helphub',
+		'Theme Review'                  => '#themereview',
+		'Theme Directory'               => [ '#meta' => true, '#themereview' => true ],
+		'Plugin Directory'              => [ '#meta' => true, '#pluginreview' => true ],
 	);
 }
 

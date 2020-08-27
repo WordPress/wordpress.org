@@ -7,6 +7,55 @@ namespace WordPressdotorg\Plugin_Directory\Tools;
  * @package WordPressdotorg\Plugin_Directory\Tools
  */
 class SVN {
+	/**
+	 * Get SVN info about a URL.
+	 *
+	 * @static
+	 *
+	 * @param string $url     The URL of the svn repo.
+	 * @param array  $options Optional. A list of options to pass to SVN. Default: empty array.
+	 *
+	 * @return array {
+	 *     @type bool|array $result False on failure. Otherwise an associative array.
+	 *     @type bool|array $errors Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function info( $url, $options = array() ) {
+		$esc_url = escapeshellarg( $url );
+
+		$options[]   = 'non-interactive';
+		if ( empty( $options['username'] ) ) {
+			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
+			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$output = self::shell_exec( "svn info $esc_options $esc_url 2>&1" );
+		if ( preg_match( '!URL: ' . untrailingslashit( $url ) . '\n!i', $output ) ) {
+			$lines  = explode( "\n", $output );
+			$result = array_filter( array_reduce(
+				$lines,
+				function( $carry, $item ) {
+					$pair = explode( ':', $item, 2 );
+					if ( isset( $pair[1] ) ) {
+						$key = trim( $pair[0] );
+						$carry[ $key ] = trim( $pair[1] );
+					} else {
+						$carry[] = trim( $pair[0] );
+					}
+
+					return $carry;
+				},
+				array()
+			) );
+			$errors = false;
+		} else {
+			$result   = false;
+			$errors   = self::parse_svn_errors( $output );
+		}
+
+		return compact( 'result', 'errors' );
+	}
 
 	/**
 	 * Import a local directory to a SVN path.
@@ -274,10 +323,9 @@ class SVN {
 	public static function ls( $url, $verbose = false ) {
 		$options = array(
 			'non-interactive',
+			'xml',
 		);
-		if ( $verbose ) {
-			$options[] = 'v';
-		}
+
 		$esc_options = self::parse_esc_parameters( $options );
 		$esc_url     = escapeshellarg( $url );
 
@@ -287,23 +335,28 @@ class SVN {
 			return false;
 		}
 
-		if ( ! $verbose ) {
-			return array_filter( array_map( 'trim', explode( "\n", $output ) ) );
-		} else {
+		// Parse the output
+		$errors = libxml_use_internal_errors( true );
+		$xml    = simplexml_load_string( $output );
+		libxml_use_internal_errors( $errors );
 
-			/*
-			 * Parse SVN verbose output.
-			 * ^revision author [filesize] date filename$
-			 */
-			preg_match_all( '!^\s*(?P<revision>\d+)\s(?P<author>\S+)\s*(?P<filesize>\d+)?\s*(?P<date>.+?)\s*(?P<filename>\S+)\s*$!im', $output, $files, PREG_SET_ORDER );
-
-			// Remove numeric keys from output.
-			$files = array_map( function ( $item ) {
-				return array_filter( $item, 'is_string', ARRAY_FILTER_USE_KEY );
-			}, $files );
-
-			return $files;
+		$files = [];
+		foreach ( $xml->list->children() as $entry ) {
+			$files[] = [
+				'revision' => (int) $entry->commit['revision'],
+				'author'   => (string) $entry->commit->author,
+				'filesize' => (int) $entry->size,
+				'date'     => gmdate( 'Y-m-d H:i:s', strtotime( (string) $entry->commit->date ) ),
+				'filename' => (string) $entry->name,
+				'kind'     => (string) $entry['kind'],
+			];
 		}
+
+		if ( ! $verbose ) {
+			return wp_list_pluck( $files, 'filename' );
+		}
+
+		return $files;
 	}
 
 	/**

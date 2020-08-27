@@ -8,7 +8,7 @@
  * @package wporg-developer
  */
 
-get_header(); 
+get_header();
 
 $comment_id    = get_query_var( 'edit_user_note' );
 $comment       = get_comment( $comment_id );
@@ -17,7 +17,7 @@ $post_id       = get_queried_object_id();
 $can_user_edit = \DevHub\can_user_edit_note( $comment_id );
 
 if ( ! ( $comment && $post && $post_id && $can_user_edit ) ) {
-	// Bail if the current user can't edit this note, or if 
+	// Bail if the current user can't edit this note, or if
 	// the comment or global post data is not found.
 	include get_404_template();
 	return;

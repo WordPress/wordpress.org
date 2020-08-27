@@ -32,7 +32,7 @@ if ( post_password_required() ) {
 		<?php endif; // check for comment navigation ?>
 
 		<ol class="comment-list">
-			<?php 
+			<?php
 				$feedback_editor = false;
 
 				/* Loop through and list the comments. Use wporg_developer_list_notes() to format the comments.
@@ -45,7 +45,7 @@ if ( post_password_required() ) {
 				} else {
 					$ordered_comments = wporg_developer_get_ordered_notes();
 					if ( $ordered_comments ) {
-						wporg_developer_list_notes( $ordered_comments, array( 'avatar_size' => 32 ) ); 
+						wporg_developer_list_notes( $ordered_comments, array( 'avatar_size' => 32 ) );
 					}
 				}
 			?>
@@ -63,7 +63,7 @@ if ( post_password_required() ) {
 
 	<?php if ( \DevHub\is_parsed_post_type() && DevHub\can_user_post_note( true, get_the_ID() ) ) : ?>
 
-		<?php 
+		<?php
 		if ( class_exists( 'DevHub_User_Submitted_Content' ) )  {
 			$args = \DevHub_User_Submitted_Content::comment_form_args();
 			comment_form( $args );

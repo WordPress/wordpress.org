@@ -109,11 +109,7 @@ ul, ol {
 	border-color: #5b9dd9;
 	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
 	cursor: pointer;
-}
-
-.theme-browser .theme:focus {
-	border-color: #5b9dd9;
-	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+	outline: none;
 }
 
 .theme-browser .theme .url {
@@ -683,11 +679,9 @@ body.author .theme-browser .theme .theme-author  {
 	top: 0;
 }
 
-[dir="ltr"] .theme-ratings .reviews-link:after,
-[dir="rtl"] .theme-ratings .reviews-link:before {
+.theme-ratings .reviews-link:after {
 	content: "\f345";
 	font-family: dashicons;
-	float: right;
 	padding-left: 3px;
 	position: relative;
 	top: 1px;

@@ -56,7 +56,7 @@ class Bot {
 	}
 
 	function parse_commits( $text ) {
-		$digits = '[1-9][0-9]{1,4}'; // two digits minimum, five digits maximum (avoid clashing with colors), cannot start with 0.
+		$digits = Trac::get_digit_capture();
 		$commit_tracs = '?<trac>' . Trac::get_regex();
 		preg_match_all( "/\br(?<id>$digits)(?:\-($commit_tracs))?\b/", $text, $revisions, PREG_SET_ORDER );
 		preg_match_all( "/\[($commit_tracs)?(?<id>$digits)\]/", $text, $commits, PREG_SET_ORDER );

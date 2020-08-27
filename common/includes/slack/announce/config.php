@@ -74,22 +74,30 @@ function get_whitelist() {
 		),
 		'core' => array_merge( get_committers(), array(
 			'amykamala', // @amy kamala on Slack
+			'angelasjin',
 			'antpb',
 			'audrasjb',
+			'cbringmann', // @Chloé Bringmann on Slack
 			'chanthaboune',
 			'danieltj',
 			'davidbaumwald', // @davidb on Slack
 			'desrosj',
 			'francina',
+			'hellofromtonya',
 			'JeffPaul',
 			'JoshuaWold',
 			'justinahinon', // @justin on Slack
 			'karmatosed',
+			'laurora', // @laura on Slack
 			'lukecarbis',
 			'mapk',
 			'marybaum',
+			'meaganhanes',
+			'metalandcoffee',
 			'pbiron',
 			'psykro', // @jon_bossenger on Slack
+			'thelmachido', // @thelmachido-zw on Slack
+			'thewebprincess',
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
 		) ),
@@ -312,6 +320,7 @@ function get_whitelist() {
 			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
+			'evarlese', 
 			'felipeelia',
 			'Nao',
 			'ocean90',
@@ -324,6 +333,7 @@ function get_whitelist() {
 			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
+			'evarlese',
 			'felipeelia',
 			'Nao',
 			'ocean90',
@@ -338,7 +348,6 @@ function get_whitelist() {
 			'aristath',
 			'cais',
 			'chipbennett',
-			'dingo_d',
 			'emiluzelac',
 			'grapplerulrich',
 			'greenshady',

@@ -22,9 +22,9 @@ get_header(); ?>
 
                     <?php while ( have_posts() ) : the_post(); ?>
 
-                        <?php if ( get_the_content() ) : 
+                        <?php if ( get_the_content() ) :
                             get_template_part( 'content', 'page' );
-                            
+
                         else: ?>
                             <h2><?php esc_html_e( 'Under construction', 'bporg-developer' ); ?></h2>
                         <?php endif; ?>

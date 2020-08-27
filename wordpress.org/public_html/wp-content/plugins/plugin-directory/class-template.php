@@ -72,12 +72,27 @@ class Template {
 		}
 
 		$num_ratings = array_sum( $ratings );
+		$images      = [];
 		$banners     = self::get_plugin_banner( $plugin );
 		$icons       = self::get_plugin_icon( $plugin );
 
-		// Ignore the icons if we're relying upon the geopattern default.
-		if ( $icons['generated'] ) {
-			$icons = [ 'svg' => false, 'icon_2x' => false, 'icon' => false ];
+		// First non-generated icon.
+		if ( $icons && ! $icons['generated'] ) {
+			foreach ( [ 'svg', 'icon_2x', 'icon' ] as $field ) {
+				if ( !empty( $icons[ $field ] ) ) {
+					$images[] = $icons[ $field ];
+					break;
+				}
+			}
+		}
+		// Largest appropriate banner. rtl fields returned when is_rtl().
+		if ( $banners ) {
+			foreach ( [ 'banner_2x_rtl', 'banner_rtl', 'banner_2x', 'banner' ] as $field ) {
+				if ( !empty( $banners[ $field ] ) ) {
+					$images[] = $banners[ $field ];
+					break;
+				}
+			}
 		}
 
 		$schema = [];
@@ -111,12 +126,7 @@ class Template {
 				"interactionType"      => "http://schema.org/DownloadAction",
 				"userInteractionCount" => self::get_downloads_count( $plugin ),
 			],
-			"image" => array_values( array_filter( [
-				// RTL 2x Banner or RTL 1x Banner, otherwise 2x Banner or 1x Banner
-				( $banners['banner_2x_rtl'] ?: $banners['banner_rtl'] ) ?: ( $banners['banner_2x'] ?: $banners['banner'] ),
-				// Plugin Icon, SVG is priority, otherwise 2x or 1x.
-				( $icons['svg'] ?: $icons['icon_2x'] ) ?: $icons['icon'],
-			] ) ),
+			"image" => $images,
 			"offers" => [
 				"@type"         => "Offer",
 				"url"           => get_permalink( $plugin ),

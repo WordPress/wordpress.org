@@ -1,19 +1,16 @@
 <?php
 
-$_tests_dir = getenv( 'WP_TESTS_DIR' );
-if ( ! $_tests_dir ) {
-	$_tests_dir = '/tmp/wordpress-tests-lib';
+namespace WordPressdotorg\Plugin_Directory\Tests;
+
+if ( 'cli' !== php_sapi_name() ) {
+	return;
 }
 
-require_once $_tests_dir . '/includes/functions.php';
-
 /**
- * Load the plugin.
+ * Manually load the plugin being tested.
  */
-function _manually_load_plugin_directory_plugin() {
+function manually_load_plugin() {
 	require_once dirname( __FILE__ ) . '/../plugin-directory.php';
 }
 
-tests_add_filter( 'muplugins_loaded', '_manually_load_plugin_directory_plugin' );
-
-require $_tests_dir . '/includes/bootstrap.php';
+tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );

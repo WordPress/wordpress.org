@@ -90,8 +90,8 @@ pre[class*="language-"] > code {
 .token.keyword,
 .token.attr-value,
 .language-autohotkey .token.selector,
-.language-json .token.boolean, 
-.language-json .token.number, 
+.language-json .token.boolean,
+.language-json .token.number,
 code[class*="language-css"]{
     color: #0000ff;
 }

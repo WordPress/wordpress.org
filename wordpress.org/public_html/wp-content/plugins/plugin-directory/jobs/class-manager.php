@@ -29,9 +29,9 @@ class Manager {
 
 		// Register the wildcard cron hook tasks.
 		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
-			//add_action( 'pre_option_cron', array( $this, 'register_colon_based_hook_handlers' ), 100 );
+			// This must be run after plugins_loaded, as that's when Cavalcade hooks in.
+			add_action( 'init', array( $this, 'register_colon_based_hook_handlers' ) );
 		}
-		add_action( 'wporg_after_cron_event_run', array( $this, 'after_cron_event_run' ), 10, 2 );
 	}
 
 	/**
@@ -277,34 +277,9 @@ class Manager {
 	 *
 	 * These cron tasks are in the form of 'import_plugin:$slug', this maps them to their expected handlers.
 	 */
-	public function after_cron_event_run( $hook, $args ) {
-		if ( has_action( $hook ) ) {
-			return;
-		}
-		list( $base, ) = explode( ':', $hook, 2 );
+	public function register_colon_based_hook_handlers() {
+		$cron_array = get_option( 'cron' );
 
-		$wildcard_cron_tasks = array(
-			'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
-			'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
-			'tide_sync'          => array( __NAMESPACE__ . '\Tide_Sync', 'cron_trigger' ),
-		);
-
-		if ( isset( $wildcard_cron_tasks[ $base ] ) ) {
-			call_user_func_array( $wildcard_cron_tasks[ $base ], $args );
-		}
-	}
-
-	/**
-	 * The WordPress Cron implementation isn't great at determining if a job is already enqueued,
-	 * as a result, we use a "fake" hook to encode the plugin slug into the job name to allow us to
-	 * detect if a cron task for that plugin has already been registered.
-	 *
-	 * These cron tasks are in the form of 'import_plugin:$slug', this maps them to their expected handlers.
-	 *
-	 * @param array $cron_array The Cron array.
-	 * @return array The Cron array passed, unchanged.
-	 */
-	public function register_colon_based_hook_handlers( $cron_array ) {
 		$wildcard_cron_tasks = array(
 			'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
 			'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
@@ -331,8 +306,6 @@ class Manager {
 				}
 			}
 		}
-
-		return $cron_array;
 	}
 
 	/**

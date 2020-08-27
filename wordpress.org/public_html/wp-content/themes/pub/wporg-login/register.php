@@ -49,7 +49,7 @@ get_header();
 	<p class="login-username">
 		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
 		<input type="text" name="user_login" id="user_login" class="input <?php if ( $error_user_login ) echo 'error'; ?>" value="<?php echo esc_attr( $user_login ) ?>" size="20" maxlength="60" />
-		<span class="small"><?php _e( 'Required. Only lower case letters (a-z) and numbers (0-9) are allowed.', 'wporg' ); ?></span>
+		<span class="small"><?php _e( 'Only lower case letters (a-z) and numbers (0-9) are allowed.', 'wporg' ); ?></span>
 	</p>
 	<?php
 	if ( $error_user_login ) {
@@ -65,7 +65,7 @@ get_header();
 	<p class="login-email">
 		<label for="user_email"><?php _e( 'Email', 'wporg' ); ?></label>
 		<input type="email" name="user_email" id="user_email" class="input <?php if ( $error_user_email ) echo 'error'; ?>" value="<?php echo esc_attr( $user_email ) ?>" size="20" maxlength="100" />
-		<span class="small"><?php _e( 'Required. Your password will be emailed here.', 'wporg' ); ?></span>
+		<span class="small"><?php _e( 'A link to set your password will be sent here.', 'wporg' ); ?></span>
 	</p>
 	<?php
 	if ( $error_user_email ) {

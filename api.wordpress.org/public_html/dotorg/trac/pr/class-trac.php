@@ -27,7 +27,7 @@ class Trac {
 
 	/**
 	 * Update a Trac ticket to add a comment, or alter ticket properties.
-	 * 
+	 *
 	 * To set the Author or Time of a comment, the Trac API user must have TICKET_ADMIN priv.
 	 */
 	function update( $id, $comment, $attr = [], $notify = false, $author = false, $when = false ) {
@@ -95,7 +95,7 @@ class Trac {
 			'max_redirects' => 0,
 			'timeout'       => 5,
 			'ignore_errors' => true,
-			'header'        => 
+			'header'        =>
 				[
 					'Content-Type: application/json',
 					'Authorization: Basic ' . base64_encode( $this->credentials[0] . ':' . $this->credentials[1] ),
@@ -128,7 +128,7 @@ class Trac {
 
 	/**
 	 * Call the Back-channel WordPress Trac API.
-	 * 
+	 *
 	 * For valid $methods to call, see: https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/trac-notifications/trac-notifications-db.php
 	 */
 	public function wpapi( $method, $args = null ) {

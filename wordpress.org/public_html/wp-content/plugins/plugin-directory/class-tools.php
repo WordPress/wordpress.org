@@ -2,6 +2,8 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use WP_User;
+use WordPressdotorg\Plugin_Directory\Email\Committer_Added as Committer_Added_Email;
+use WordPressdotorg\Plugin_Directory\Email\Support_Rep_Added as Support_Rep_Added_Email;
 
 /**
  * Various functions used by other processes, will make sense to move to specific classes.
@@ -205,6 +207,26 @@ class Tools {
 			$plugin_slug
 		);
 
+		// Only notify if the current process is interactive - a user is logged in.
+		$should_notify = (bool) get_current_user_id();
+		// Don't notify if a plugin admin is taking action on a plugin they're not (yet) a committer for.
+		if ( current_user_can( 'plugin_approve' ) && ! in_array( wp_get_current_user()->user_login, $existing_committers, true ) ) {
+			$should_notify = false;
+		}
+
+		if ( $should_notify ) {
+			$existing_committers[] = $user->user_login;
+
+			$email = new Committer_Added_Email(
+				$plugin_slug,
+				$existing_committers,
+				[
+					'committer' => $user,
+				]
+			);
+			$email->send();
+		}
+
 		return $result;
 	}
 
@@ -351,6 +373,26 @@ class Tools {
 			),
 			$plugin_slug
 		);
+
+		$committers = self::get_plugin_committers( $plugin_slug );
+
+		// Only notify if the current process is interactive - a user is logged in.
+		$should_notify = (bool) get_current_user_id();
+		// Don't notify if a plugin admin is taking action on a plugin they're not a committer for.
+		if ( current_user_can( 'plugin_approve' ) && ! in_array( wp_get_current_user()->user_login, $committers, true ) ) {
+			$should_notify = false;
+		}
+
+		if ( $should_notify ) {
+			$email = new Support_Rep_Added_Email(
+				$plugin_slug,
+				$committers,
+				[
+					'rep' => $user,
+				]
+			);
+			$email->send();
+		}
 
 		return $result;
 	}
@@ -538,18 +580,6 @@ class Tools {
 
 		$users = array();
 
-		// Include the subscribers from the bbPress plugin directory until we've fully migrated.
-		/*
-		$bbpress_subscribers = maybe_unserialize( $wpdb->get_var( $wpdb->prepare( 'SELECT m.meta_value FROM ' . PLUGINS_TABLE_PREFIX . 'topics t JOIN ' . PLUGINS_TABLE_PREFIX . 'meta m ON ( m.object_type = "bb_topic" AND m.object_id = t.topic_id AND m.meta_key = "commit_subscribed") WHERE t.topic_slug = %s', $plugin_slug ) ) );
-		if ( $bbpress_subscribers ) {
-			foreach ( array_keys( $bbpress_subscribers ) as $subscriber_id ) {
-				if ( $subscriber_id && $user = get_user_by( 'id', $subscriber_id ) ) {
-					$users[] = $user;
-				}
-			}
-		}
-		 */
-
 		// Plugin Committers are always subscrived to plugin commits.
 		$committers = self::get_plugin_committers( $plugin_slug );
 		foreach ( $committers as $committer ) {
@@ -595,7 +625,7 @@ class Tools {
 
 	/**
 	 * Add an Audit Internal Note for a plugin.
-	 * 
+	 *
 	 * @param int|string|WP_Post $plugin A Post ID, Plugin Slug or, WP_Post object.
 	 * @param string $note The note to audit log entry to add.
 	 * @param WP_User $user The user which performed the action. Optional.

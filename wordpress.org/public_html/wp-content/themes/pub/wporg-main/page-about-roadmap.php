@@ -106,13 +106,9 @@ the_post();
 						<tbody>
 						<tr>
 							<th>
-								5.5
+								5.6
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td><?php echo date_i18n( 'F Y', strtotime( 'Aug 2020' ) ); ?></td>
-						</tr>
-						<tr>
-							<th>5.6</th>
 							<td><?php echo date_i18n( 'F Y', strtotime( 'Dec 2020' ) ); ?></td>
 						</tr>
 						<tr>
@@ -134,7 +130,7 @@ the_post();
 						</tbody>
 					</table>
 
-					<p><?php 
+					<p><?php
 						printf(
 							/* translators: %s: Link to Make WordPress Core blog post */
 							wp_kses_post( __( 'For more information on the planned release schedule, please read the Make WordPress Core post about the <a href="%s">tentative release calendar for 2020-2021</a>.', 'wporg' ) ),
@@ -157,10 +153,10 @@ the_post();
 
 					<h2><?php esc_html_e( 'Long term roadmap', 'wporg' ); ?></h2>
 
-					<p><?php 
-						printf( 
+					<p><?php
+						printf(
 							/* translators: %s: link to wordpress.tv State of the Word 2019 */
-							wp_kses_post( __( 'While Phase 2 of Gutenberg is expected to continue at least through 2020, there are already plans for Phase 3 and 4. During the <a href="%s">State of the Word from WordCamp US 2019</a>, Matt shared the following vision for phases in Gutenberg:', 'wporg' ) ), 
+							wp_kses_post( __( 'While Phase 2 of Gutenberg is expected to continue at least through 2020, there are already plans for Phase 3 and 4. During the <a href="%s">State of the Word from WordCamp US 2019</a>, Matt shared the following vision for phases in Gutenberg:', 'wporg' ) ),
 							'https://wordpress.tv/2019/11/03/2019-state-of-the-word/' );
 						?>
 					</p>

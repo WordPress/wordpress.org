@@ -10,30 +10,33 @@ class Plugins_Info_API_Request {
 	protected $requested_fields = array();
 
 	static $fields = array(
-		'active_installs'   => false,
-		'added'             => false,
-		'banners'           => false,
-		'compatibility'     => false,
-		'contributors'      => false,
-		'description'       => false,
-		'donate_link'       => false,
-		'downloaded'        => false,
-		'downloadlink'      => false,
-		'homepage'          => false,
-		'icons'             => false,
-		'last_updated'      => false,
-		'rating'            => false,
-		'ratings'           => false,
-		'reviews'           => false,
-		'requires'          => false,
-		'requires_php'      => false,
-		'sections'          => false,
-		'short_description' => false,
-		'tags'              => false,
-		'tested'            => false,
-		'stable_tag'        => false,
-		'blocks'            => false,
-		'block_assets'      => false,
+		'active_installs'     => false,
+		'added'               => false,
+		'banners'             => false,
+		'compatibility'       => false,
+		'contributors'        => false,
+		'description'         => false,
+		'donate_link'         => false,
+		'downloaded'          => false,
+		'downloadlink'        => false,
+		'homepage'            => false,
+		'icons'               => false,
+		'last_updated'        => false,
+		'rating'              => false,
+		'ratings'             => false,
+		'reviews'             => false,
+		'requires'            => false,
+		'requires_php'        => false,
+		'sections'            => false,
+		'short_description'   => false,
+		'tags'                => false,
+		'tested'              => false,
+		'stable_tag'          => false,
+		'blocks'              => false,
+		'block_assets'        => false,
+		'author_block_count'  => false,
+		'author_block_rating' => false,
+		'language_packs'      => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -53,8 +56,6 @@ class Plugins_Info_API_Request {
 		'sections'          => true,
 		'tags'              => true,
 		'tested'            => true,
-		'blocks'            => false,
-		'block_assets'      => false,
 	);
 
 	// Alterations made to default fields in the info/1.2 API.
@@ -86,8 +87,6 @@ class Plugins_Info_API_Request {
 		'short_description' => true,
 		'tags'              => true,
 		'tested'            => true,
-		'blocks'            => false,
-		'block_assets'      => false,
 	);
 
 	// Alterations made to the default fields in the info/1.2 API.
@@ -106,6 +105,7 @@ class Plugins_Info_API_Request {
 	static $query_plugins_fields_defaults_block = array(
 		'blocks'               => true,
 		'block_assets'         => true,
+		'block_translations'   => true,
 		'author_block_count'   => true,
 		'author_block_rating'  => true,
 	);
@@ -241,7 +241,49 @@ class Plugins_Info_API_Request {
 			}
 		}
 
+		// Locale
+		$query['locale'] = $this->locale;
+
 		return $query;
 	}
 
+	/**
+	 * Validate that the request is valid.
+	 */
+	public function is_valid_params( $method ) {
+		if ( 'query_plugins' === $method ) {
+			$scalar_only_fields = [
+				'page', 'per_page',
+				'browse', 'user',
+				'tag', 'search',
+				'author', 'block',
+				'wp_version'
+			];
+
+			foreach ( $scalar_only_fields as $field ) {
+				if ( isset( $this->args->$field ) && ! is_scalar( $this->args->$field ) ) {
+					return false;
+				}
+			}
+
+			if ( isset( $this->args->installed_plugins ) && ! is_array( $this->args->installed_plugins ) ) {
+				return false;
+			}
+
+			if ( ! is_string( $this->locale ) ) {
+				return false;
+			}
+
+		} else if ( 'plugin_information' === $method ) {
+			if ( empty( $this->args->slug ) && empty( $this->args->slugs ) ) {
+				return false;
+			}
+
+			if ( ! is_string( $this->locale ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 }
