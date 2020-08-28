@@ -1528,6 +1528,7 @@ class Plugin_Directory {
 						'tag'  => $tag['tag'],
 						'version' => $tag_version,
 						'committer' => [ $tag['author'] ],
+						'confirmations_required' => 0, // Old release, assume it's released.
 					] );
 				}
 			} else {
@@ -1551,6 +1552,7 @@ class Plugin_Directory {
 						'tag'  => $entry['filename'],
 						'version' => $tag,
 						'committer' => [ $entry['author'] ],
+						'confirmations_required' => 0, // Old release, assume it's released.
 					] );
 				}
 			}
