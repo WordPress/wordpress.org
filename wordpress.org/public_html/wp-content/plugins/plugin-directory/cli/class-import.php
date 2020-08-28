@@ -323,7 +323,7 @@ class Import {
 			foreach ( $versions_to_build as $i => $tag ) {
 				$release = Plugin_Directory::get_release( $plugin, $tag );
 
-				if ( ! $release || $release['zips_built'] ) {
+				if ( ! $release || ( $release['zips_built'] && $release['confirmations_required'] ) ) {
 					unset( $versions_to_build[ $i ] );
 				} else {
 					$release['zips_built'] = true;
