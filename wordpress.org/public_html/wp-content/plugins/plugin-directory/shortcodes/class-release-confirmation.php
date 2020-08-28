@@ -66,7 +66,7 @@ class Release_Confirmation {
 			if ( isset( $_REQUEST['send_access_email'] ) ) {
 				printf(
 					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
-					__( 'Check your email for an access link to perform actions.', 'wporg-plugins'),
+					__( 'Check your email for an access link to perform actions.', 'wporg-plugins')
 				);
 			} else {
 				printf(
@@ -74,7 +74,7 @@ class Release_Confirmation {
 					sprintf(
 						/* translators: %s: URL */
 						__( 'Check your email for an access link, or <a href="%s">request a new email</a> to perform actions.', 'wporg-plugins'),
-						Template::get_release_confirmation_access_link(),
+						Template::get_release_confirmation_access_link()
 					)
 				);
 			}
