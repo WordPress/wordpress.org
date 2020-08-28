@@ -55,7 +55,14 @@ class Release_Confirmation {
 
 		ob_start();
 
-		if ( ! self::can_access() ) {
+		$should_show_access_notice = false;
+		foreach ( $plugins as $plugin ) {
+			if ( $plugin->release_confirmation ) {
+				$should_show_access_notice = true;
+			}
+		}
+
+		if ( ! self::can_access() && $should_show_access_notice ) {
 			if ( isset( $_REQUEST['send_access_email'] ) ) {
 				printf(
 					'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
