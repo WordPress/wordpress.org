@@ -105,11 +105,6 @@ class Release_Confirmation {
 	static function single_plugin_row( $plugin, $include_header = true ) {
 		$releases = Plugin_Directory::get_releases( $plugin );
 
-		// Sort releases most recent first.
-		uasort( $releases, function( $a, $b ) {
-			return $b['date'] <=> $a['date'];
-		} );
-
 		if ( $include_header ) {
 			printf(
 				'<h2><a href="%s">%s</a></h2>',
@@ -132,7 +127,7 @@ class Release_Confirmation {
 			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
 		}
 
-		foreach ( $releases as $tag => $data ) {
+		foreach ( $releases as $data ) {
 			printf(
 				'<tr>
 					<td>%s</td>
@@ -142,9 +137,12 @@ class Release_Confirmation {
 					<td>%s</td>
 				</tr>',
 				sprintf(
-					'<a href="https://plugins.trac.wordpress.org/browser/%s/tags/%s/">%s</a>',
-					$plugin->post_name,
-					esc_html( $tag ),
+					'<a href="%s">%s</a>',
+					esc_url( sprintf(
+						'https://plugins.trac.wordpress.org/browser/%s/tags/%s/',
+						$plugin->post_name,
+						$data['tag']
+					) ),
 					esc_html( $data['version'] )
 				),
 				esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
