@@ -328,7 +328,7 @@ class Import {
 					unset( $versions_to_build[ $i ] );
 				} else {
 					$release['zips_built'] = true;
-					Plugin_Directory::add_release( $release );
+					Plugin_Directory::add_release( $plugin, $release );
 				}
 
 			}
