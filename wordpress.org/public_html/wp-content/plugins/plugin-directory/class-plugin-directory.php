@@ -1522,11 +1522,11 @@ class Plugin_Directory {
 
 			$tags = get_post_meta( $plugin->ID, 'tags', true );
 			if ( $tags ) {
-				foreach ( $tags as $tag ) {
+				foreach ( $tags as $tag_version => $tag ) {
 					self::add_release( $plugin, [
 						'date' => strtotime( $tag['date'] ),
 						'tag'  => $tag['tag'],
-						'version' => $tag['tag'],
+						'version' => $tag_version,
 						'committer' => [ $tag['author'] ],
 					] );
 				}
@@ -1548,7 +1548,7 @@ class Plugin_Directory {
 
 					self::add_release( $plugin, [
 						'date' => strtotime( $entry['date'] ),
-						'tag'  => $tag,
+						'tag'  => $entry['filename'],
 						'version' => $tag,
 						'committer' => [ $entry['author'] ],
 					] );
@@ -1606,6 +1606,11 @@ class Plugin_Directory {
 		$releases = self::get_releases( $plugin );
 
 		$releases[] = $release;
+
+		// Sort releases most recent first.
+		uasort( $releases, function( $a, $b ) {
+			return $b['date'] <=> $a['date'];
+		} );
 
 		return update_post_meta( $plugin->ID, 'releases', $releases );
 	}
