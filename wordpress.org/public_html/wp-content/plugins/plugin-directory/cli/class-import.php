@@ -353,10 +353,6 @@ class Import {
 			return false;
 		}
 
-		if ( $plugin->release_confirmation ) {
-			update_post_meta( $plugin->ID, 'releases', $releases );
-		}
-
 		return true;
 	}
 
