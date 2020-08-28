@@ -169,7 +169,7 @@ class Plugin_Release_Confirmation extends Base {
 			$result['fully_confirmed']     = true;
 		}
 
-		Plugin_Directory::add_release( $release );
+		Plugin_Directory::add_release( $plugin, $release );
 
 		// Trigger the import for the plugin.
 		Plugin_Import::queue(
