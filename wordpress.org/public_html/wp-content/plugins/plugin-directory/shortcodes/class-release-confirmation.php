@@ -168,7 +168,7 @@ class Release_Confirmation {
 
 		if ( ! $data['confirmations_required'] ) {
 			_e( 'Release did not require confirmation.', 'wporg-plugins' );
-		} else if ( ! $data['confirmed'] || count( $data['confirmations'] ) >= $data['confirmations_required'] ) {
+		} else if ( $data['confirmed'] ) {
 			_e( 'Release confirmed.', 'wporg-plugins' );
 		} else if ( 1 == $data['confirmations_required'] ) {
 			_e( 'Waiting for confirmation.', 'wporg-plugins' );
