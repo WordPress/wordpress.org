@@ -211,19 +211,18 @@ class Release_Confirmation {
 
 			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
 				if ( self::can_access() ) {
-					$class = 'button-primary';
-					$url   = Template::get_release_confirmation_link( $data['tag'], $plugin );
+					$buttons[] = sprintf(
+						'<a href="%s" class="button approve-release button-primary">%s</a>',
+						Template::get_release_confirmation_link( $data['tag'], $plugin ),
+						__( 'Confirm', 'wporg-plugins' )
+					);
 				} else {
-					$class = 'button-secondary disabled';
-					$url   = '';
+					$buttons[] = sprintf(
+						'<a class="button approve-release button-secondary disabled">%s</a>',
+						__( 'Confirm', 'wporg-plugins' )
+					);
 				}
 
-				$buttons[] = sprintf(
-					'<a href="%s" class="button approve-release %s">%s</a>',
-					$url,
-					$class,
-					__( 'Confirm', 'wporg-plugins' )
-				);
 			} elseif ( $current_user_confirmed ) {
 				$buttons[] = sprintf(
 					'<a class="button approve-release button-secondary disabled">%s</a>',
