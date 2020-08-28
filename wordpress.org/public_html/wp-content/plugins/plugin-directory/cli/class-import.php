@@ -93,6 +93,7 @@ class Import {
 			// This tag is unknown? Trigger email.
 			if ( ! $release ) {
 				Plugin_Directory::add_release(
+					$plugin,
 					[
 						'tag'       => $stable_tag,
 						'version'   => $headers->Version,
