@@ -9,6 +9,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
@@ -259,6 +260,30 @@ function get_plugin_status_notice( $post = null ) {
 	return $message;
 }
 
+function the_unconfirmed_releases_notice() {
+	$plugin = get_post();
+
+	if ( ! $plugin->release_confirmation || ! current_user_can( 'plugin_admin_edit', $plugin ) ) {
+		return;
+	}
+
+	$confirmations_required = $plugin->release_confirmation;
+	$releases               = Plugin_Directory::get_releases( $plugin ) ?: [];
+	$unconfirmed_releases   = wp_list_filter( $confirmed_releases, [ 'confirmed' => false ] );
+
+	if ( ! $unconfirmed_releases ) {
+		return;
+	}
+
+	printf(
+		'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+		sprintf(
+			__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
+			home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
+		)
+	);
+}
+
 /**
  * Display the ADVANCED Zone.
  */
@@ -345,6 +370,9 @@ function the_plugin_danger_zone() {
 	echo '<p>' . esc_html__( 'The following features are restricted to plugin committers only. They exist to allow plugin developers more control over their work.', 'wporg-plugins' ) . '</p>';
 
 	echo '<div class="plugin-notice notice notice-error notice-alt"><p>' . esc_html__( 'These features often cannot be undone without intervention. Please do not attempt to use them unless you are absolutely certain. When in doubt, contact the plugins team for assistance.', 'wporg-plugins' ) . '</p></div>';
+
+	// Output the Release Confirmation form.
+	the_plugin_release_confirmation_form();
 
 	// Output the transfer form.
 	the_plugin_self_transfer_form();
@@ -451,4 +479,49 @@ function the_plugin_self_transfer_form() {
 	echo '<p><input class="button" type="submit" value="' . esc_attr( sprintf( __( 'Please transfer %s.', 'wporg-plugins' ), get_the_title() ) ) . '" /></p>';
 	echo '</form>';
 
+}
+
+function the_plugin_release_confirmation_form() {
+	$post = get_post();
+
+	// Temporary: Plugin Reviewers only.
+	if ( ! current_user_can( 'edit_post', $post ) ) {
+		return;
+	}
+
+	if (
+		! current_user_can( 'plugin_admin_edit', $post ) ||
+		'publish' != $post->post_status
+	) {
+		return;
+	}
+
+	$confirmations_required = $post->release_confirmation;
+
+	echo '<h4>' . esc_html__( 'Release Confirmation', 'wporg-plugins' ) . '</h4>';
+	if ( $confirmations_required ) {
+		echo '<p>' . __( 'Release confirmations for this plugin are <strong>enabled</strong>.', 'wporg-plugins' ) . '</p>';
+	} else {
+		echo '<p>' . __( 'Release confirmations for this plugin are <strong>disabled</strong>', 'wporg-plugins' ) . '</p>';
+	}
+	echo '<p>' . esc_html__( 'All future releases will require email confirmation before being made available. This increases security and ensures that plugin releases are only made when intended.', 'wporg-plugins' ) . '</p>';
+
+	if ( ! $confirmations_required && 'trunk' === $post->stable_tag ) {
+		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
+			_e( "Release confirmations currently require tagged releases, as you're releasing from trunk they cannot be enabled.", 'wporg-plugins' );
+		echo '</p></div>';
+
+	} else if ( ! $confirmations_required ) {
+		echo '<div class="plugin-notice notice notice-warning notice-alt"><p>';
+			_e( '<strong>Warning:</strong> Enabling release confirmations is intended to be a <em>permanent</em> action. There is no way to disable this without contacting the plugins team.', 'wporg-plugins' );
+		echo '</p></div>';
+
+		echo '<form method="POST" action="' . esc_url( Template::get_enable_release_confirmation_link() ) . '" onsubmit="return confirm( jQuery(this).prev(\'.notice\').text() );">';
+		echo '<p><input class="button" type="submit" value="' . esc_attr__( 'I understand, please enable release confirmations.', 'wporg-plugins' ) . '" /></p>';
+		echo '</form>';
+
+	} else {
+		/* translators: 1: plugins@wordpress.org */
+		echo '<p>' . sprintf( __( 'To disable release confirmations, please contact the plugins team by emailing %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
+	}
 }

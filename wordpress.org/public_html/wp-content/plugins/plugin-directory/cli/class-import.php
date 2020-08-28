@@ -6,6 +6,7 @@ use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Jobs\Tide_Sync;
 use WordPressdotorg\Plugin_Directory\Block_JSON;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Email\Release_Confirmation as Release_Confirmation_Email;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -74,10 +75,65 @@ class Import {
 		$assets          = $data['assets'];
 		$headers         = $data['plugin_headers'];
 		$stable_tag      = $data['stable_tag'];
+		$last_committer  = $data['last_committer'];
+		$last_revision   = $data['last_revision'];
 		$tagged_versions = $data['tagged_versions'];
 		$last_modified   = $data['last_modified'];
 		$blocks          = $data['blocks'];
 		$block_files     = $data['block_files'];
+
+		// Release confirmation
+		if ( $plugin->release_confirmation ) {
+			if ( 'trunk' === $stable_tag ) {
+				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
+			}
+
+			$release = Plugin_Directory::get_release( $plugin, $stable_tag );
+
+			// This tag is unknown? Trigger email.
+			if ( ! $release ) {
+				Plugin_Directory::add_release(
+					[
+						'tag'       => $stable_tag,
+						'version'   => $headers->Version,
+						'committer' => [ $last_committer ],
+						'revision'  => [ $last_revision ]
+					]
+				);
+
+				$email = new Release_Confirmation_Email(
+					$plugin,
+					Tools::get_plugin_committers( $plugin_slug ),
+					[
+						'release' => $releases[ $stable_tag ],
+						'who'     => $last_committer,
+						'readme'  => $readme,
+						'headers' => $headers,
+					]
+				);
+				$email->send();
+
+				throw new Exception( 'Plugin release not confirmed; email triggered.' );
+			}
+
+			// Check that the tag is approved.
+			if ( ! $release['confirmed'] ) {
+
+				if ( ! in_array( $last_committer, $release['committer'], true ) ) {
+					$release['committer'][] = $last_committer;
+				}
+				if ( ! in_array( $last_revision, $release['revision'], true ) ) {
+					$release['revision'][] = $last_revision;
+				}
+
+				// Update with ^
+				Plugin_Directory::add_release( $plugin, $release );
+
+				throw new Exception( 'Plugin release not confirmed.' );
+			}
+
+			// At this point we can assume that the release was confirmed, and should be imported.
+		}
 
 		$content = '';
 		if ( $readme->sections ) {
@@ -260,6 +316,27 @@ class Import {
 			$versions_to_build[] = $stable_tag;
 		}
 
+		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
+
+		// Don't rebuild release-confirmation-required tags.
+		if ( $plugin->release_confirmation ) {
+			foreach ( $versions_to_build as $i => $tag ) {
+				$release = Plugin_Directory::get_release( $plugin, $tag );
+
+				if ( ! $release || ( $release['zips_built'] && $release['confirmations_required'] ) ) {
+					unset( $versions_to_build[ $i ] );
+				} else {
+					$release['zips_built'] = true;
+					Plugin_Directory::add_release( $release );
+				}
+
+			}
+		}
+
+		if ( ! $versions_to_build ) {
+			return false;
+		}
+
 		// Rebuild/Build $build_zips
 		try {
 			// This will rebuild the ZIP.
@@ -388,6 +465,9 @@ class Import {
 		if ( preg_match( '/^([0-9]{4}\-[0-9]{2}\-[0-9]{2} [0-9]{1,2}:[0-9]{2}:[0-9]{2})/', $svn_info['result']['Last Changed Date'] ?? '', $m ) ) {
 			$last_modified = $m[0];
 		}
+
+		$last_committer = $svn_info['result']['Last Changed Author'] ?? '';
+		$last_revision  = $svn_info['result']['Last Changed Rev'] ?? 0;
 
 		$svn_export = SVN::export(
 			$stable_url,
@@ -548,7 +628,7 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
-		return compact( 'readme', 'stable_tag', 'last_modified', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
+		return compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files' );
 	}
 
 	/**

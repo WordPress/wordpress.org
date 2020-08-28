@@ -25,6 +25,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 
 	<header class="plugin-header">
 		<?php the_active_plugin_notice(); ?>
+		<?php the_unconfirmed_releases_notice(); ?>
 
 		<div class="entry-thumbnail">
 			<?php

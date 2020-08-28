@@ -786,7 +786,7 @@ class Template {
 	}
 
 	/**
-	 * Generates a link to self-transfer a plugin..
+	 * Generates a link to self-transfer a plugin.
 	 *
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
 	 * @return string URL to toggle status.
@@ -797,6 +797,49 @@ class Template {
 		return add_query_arg(
 			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-transfer' )
+		);
+	}
+
+	/**
+	 * Generates a link to enable Release Confirmations.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string URL to enable confirmations.
+	 */
+	public static function get_enable_release_confirmation_link( $post = null ) {
+		$post = get_post( $post );
+
+		return add_query_arg(
+			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/release-confirmation' )
+		);
+	}
+
+	/**
+	 * Generates a link to confirm a release.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string URL to enable confirmations.
+	 */
+	public static function get_release_confirmation_link( $tag, $post = null) {
+		$post = get_post( $post );
+
+		return add_query_arg(
+			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/release-confirmation/' . $tag )
+		);
+	}
+
+	/**
+	 * Generates a link to email the release confirmation link.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string URL to enable confirmations.
+	 */
+	public static function get_release_confirmation_access_link() {
+		return add_query_arg(
+			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			home_url( 'wp-json/plugins/v1/release-confirmation-access' )
 		);
 	}
 

@@ -58,6 +58,8 @@ class Customizations {
 		add_filter( 'wp_ajax_add-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'add_support_rep' ) );
 		add_filter( 'wp_ajax_delete-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
+
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 	}
 
 	/**
@@ -405,6 +407,13 @@ class Customizations {
 			'plugin-review',
 			__( 'Plugin Review Tools', 'wporg-plugins' ),
 			array( __NAMESPACE__ . '\Metabox\Review_Tools', 'display' ),
+			'plugin', 'normal', 'high'
+		);
+
+		add_meta_box(
+			'plugin-release-confirmation',
+			__( 'Plugin Release Confirmation', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'display' ),
 			'plugin', 'normal', 'high'
 		);
 

@@ -586,6 +586,9 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugins-reviews', array( __NAMESPACE__ . '\Shortcodes\Reviews', 'display' ) );
 		add_shortcode( 'readme-validator', array( __NAMESPACE__ . '\Shortcodes\Readme_Validator', 'display' ) );
 		add_shortcode( 'block-validator', array( __NAMESPACE__ . '\Shortcodes\Block_Validator', 'display' ) );
+
+		add_shortcode( Shortcodes\Release_Confirmation::SHORTCODE, array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'display' ) );
+		add_action( 'template_redirect', array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'template_redirect' ) );
 	}
 
 	/**
@@ -602,6 +605,7 @@ class Plugin_Directory {
 			'wporg-plugins-reviews',
 			'readme-validator',
 			'block-validator',
+			'release-confirmation',
 		);
 
 		$not_allowed_shortcodes = array_diff( array_keys( $shortcode_tags ), $allowed_shortcodes );
@@ -1503,6 +1507,114 @@ class Plugin_Directory {
 		}
 
 		return $content_pages;
+	}
+
+	/**
+	 * Get a list of all Plugin Releases.
+	 */
+	public static function get_releases( $plugin ) {
+		$plugin   = self::get_plugin_post( $plugin );
+		$releases = get_post_meta( $plugin->ID, 'releases', true );
+
+		// Meta doesn't exist yet? Lets fill it out.
+		if ( false === $releases || ! is_array( $releases ) ) {
+			update_post_meta( $plugin->ID, 'releases', [] );
+
+			$tags = get_post_meta( $plugin->ID, 'tags', true );
+			if ( $tags ) {
+				foreach ( $tags as $tag_version => $tag ) {
+					self::add_release( $plugin, [
+						'date' => strtotime( $tag['date'] ),
+						'tag'  => $tag['tag'],
+						'version' => $tag_version,
+						'committer' => [ $tag['author'] ],
+						'confirmations_required' => 0, // Old release, assume it's released.
+					] );
+				}
+			} else {
+				// Pull from SVN directly.
+				$svn_tags = Tools\SVN::ls( "https://plugins.svn.wordpress.org/{$plugin->post_name}/tags/", true ) ?: [];
+				foreach ( $svn_tags as $entry ) {
+					// Discard files
+					if ( 'dir' !== $entry['kind'] ) {
+						continue;
+					}
+
+					$tag = $entry['filename'];
+
+					// Prefix the 0 for plugin versions like 0.1
+					if ( '.' == substr( $tag, 0, 1 ) ) {
+						$tag = "0{$tag}";
+					}
+
+					self::add_release( $plugin, [
+						'date' => strtotime( $entry['date'] ),
+						'tag'  => $entry['filename'],
+						'version' => $tag,
+						'committer' => [ $entry['author'] ],
+						'confirmations_required' => 0, // Old release, assume it's released.
+					] );
+				}
+			}
+
+			$releases = get_post_meta( $plugin->ID, 'releases', true ) ?: [];
+		}
+
+		return $releases;
+	}
+
+	/**
+	 * Fetch a specific release of the plugin, by tag.
+	 */
+	public static function get_release( $plugin, $tag ) {
+		$releases = self::get_releases( $plugin );
+
+		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
+
+		if ( $filtered ) {
+			return array_shift( $filtered );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Add a Plugin Release to the internal storage.
+	 */
+	public static function add_release( $plugin, $data ) {
+		if ( ! isset( $data['tag'] ) ) {
+			return false;
+		}
+		$plugin = self::get_plugin_post( $plugin );
+
+		$release = self::get_release( $plugin, $data['tag'] ) ?: [
+			'date'                   => time(),
+			'tag'                    => '',
+			'version'                => '',
+			'zips_built'             => false,
+			'confirmations'          => [],
+			// Confirmed by default if no release confiration.
+			'confirmed'              => ! $plugin->release_confirmation,
+			'confirmations_required' => (int) $plugin->release_confirmation,
+			'committer'              => [],
+			'revision'               => [],
+		];
+
+		// Fill
+		foreach ( $data as $k => $v ) {
+			$release[ $k ] = $v;
+		}
+
+		$releases = self::get_releases( $plugin );
+
+		$releases[] = $release;
+
+		// Sort releases most recent first.
+		uasort( $releases, function( $a, $b ) {
+			return $b['date'] <=> $a['date'];
+		} );
+
+		return update_post_meta( $plugin->ID, 'releases', $releases );
 	}
 
 	/**
