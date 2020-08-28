@@ -1600,13 +1600,22 @@ class Plugin_Directory {
 			'revision'               => [],
 		];
 
-		// Fill
+		// Fill the $release with the newish data. This could/should use wp_parse_args()?
 		foreach ( $data as $k => $v ) {
 			$release[ $k ] = $v;
 		}
 
 		$releases = self::get_releases( $plugin );
 
+		// Find any other releases using this slug (as in the case of updates) and remove it.
+		// Only one release can exist in any given tag.
+		foreach ( $releases as $i => $r ) {
+			if ( $r['tag'] === $release['tag'] ) {
+				unset( $releases[ $i ] );
+			}
+		}
+
+		// Add this release in
 		$releases[] = $release;
 
 		// Sort releases most recent first.
