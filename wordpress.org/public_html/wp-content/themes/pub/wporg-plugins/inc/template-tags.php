@@ -279,7 +279,7 @@ function the_unconfirmed_releases_notice() {
 		'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 		sprintf(
 			__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
-			home_url( '/developers/release-approval/' )
+			home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
 		)
 	);
 }
