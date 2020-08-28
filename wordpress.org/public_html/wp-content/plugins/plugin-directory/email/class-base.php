@@ -28,11 +28,12 @@ abstract class Base {
 	 * @param $users[] A list of users to email.
 	 * @param $args[]  A list of args that the email requires.
 	 */
-	public function __construct( $plugin, $users = [], $args = array() ) {
+	public function __construct( $plugin, $users = [], $args = [] ) {
 
 		// Sometimes we don't have a plugin context, just a user..
-		if ( $plugin instanceOf WP_User && empty( $users ) ) {
+		if ( $plugin instanceOf WP_User ) {
 			$users = [ $plugin ];
+			$args  = $users; // Just assume that args will have been passed in there.
 
 			$this->plugin = true; // To pass checks..
 		} else {
