@@ -304,6 +304,10 @@ div.code {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
+.image-file img {
+	max-width: 100%;
+	height: auto;
+}
 
 /* =diff.css */
 .diff h2 {
