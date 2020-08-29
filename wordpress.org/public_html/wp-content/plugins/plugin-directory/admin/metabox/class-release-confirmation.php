@@ -41,9 +41,11 @@ class Release_Confirmation {
 			is_numeric( $_REQUEST['release_confirmation'] ) &&
 			current_user_can( 'plugin_admin_edit', $post_id )
 		) {
-			if ( 0 == $_REQUEST['release_confirmation'] ) {
+			if ( $_REQUEST['release_confirmation'] == get_post_meta( $post_id, 'release_confirmation', true ) ) {
+				// Do nothing, it's all good.
+			} else if ( 0 == $_REQUEST['release_confirmation'] ) {
 				// Disable
-				Tools::audit_log( 'Plugin release approval disabled.', $post_id );
+				Tools::audit_log( 'Plugin release confirmation disabled.', $post_id );
 				update_post_meta( $post_id, 'release_confirmation', 0 );
 
 			} else {

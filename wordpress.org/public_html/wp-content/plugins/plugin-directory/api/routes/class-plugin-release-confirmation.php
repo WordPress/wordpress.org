@@ -116,7 +116,7 @@ class Plugin_Release_Confirmation extends Base {
 		}
 
 		// Fetch the releases first, to prefill them if needed with the old release_confirmation count.
-		Plugin_Directory::get_releases();
+		Plugin_Directory::get_releases( $plugin );
 
 		// Update the Metadata.
 		update_post_meta( $plugin->ID, 'release_confirmation', $confirmations_required );
