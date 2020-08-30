@@ -137,22 +137,28 @@ class Export extends WP_CLI_Command {
 			/** @var Translation_Entry $entry */
 
 			// Find all unique sources this translation originates from.
-			$sources = array_map( function ( $reference ) {
-				$parts = explode( ':', $reference );
-				$file  = $parts[0];
+			if ( ! empty( $entry->references ) ) {
+				$sources = array_map(
+					function ( $reference ) {
+						$parts = explode( ':', $reference );
+						$file  = $parts[0];
 
-				if ( substr( $file, -7 ) === '.min.js' ) {
-					return substr( $file, 0, -7 ) . '.js';
-				}
+						if ( substr( $file, -7 ) === '.min.js' ) {
+							return substr( $file, 0, -7 ) . '.js';
+						}
 
-				if ( substr( $file, -3 ) === '.js' ) {
-					return $file;
-				}
+						if ( substr( $file, -3 ) === '.js' ) {
+							return $file;
+						}
+						return 'po';
+					},
+					$entry->references
+				);
 
-				return 'po';
-			}, $entry->references );
-
-			$sources = array_unique( $sources );
+				$sources = array_unique( $sources );
+			} else {
+				$sources = [ 'po' ];
+			}
 
 			foreach ( $sources as $source ) {
 				$mapping[ $source ][] = $entry;
