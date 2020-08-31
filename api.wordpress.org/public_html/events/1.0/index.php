@@ -1028,6 +1028,7 @@ function get_regional_wordcamp_data() {
 		),
 
 		// WordCamp US.
+		/* WCUS is canceled for 2020. https://us.wordcamp.org/2020/wcus-2020-an-update/
 		'us' => array(
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'south america' ),
@@ -1051,6 +1052,7 @@ function get_regional_wordcamp_data() {
 				),
 			),
 		),
+		*/
 	);
 
 	// `promo_start` should be 2 months before the Event's start date. See `maybe_add_regional_wordcamps()`.
