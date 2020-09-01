@@ -24,7 +24,7 @@ class Plugin_E2E_Callback extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 				],
 			],
-			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
+			'permission_callback' => [ $this, 'permission_check_github_api_bearer' ]
 		] );
 	}
 

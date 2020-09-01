@@ -59,19 +59,41 @@ class Base {
 	}
 
 	/**
-	 * A Permission Check callback which validates the request with a Bearer token.
+	 * A Permission Check callback which validates the request against the internal api-call token.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return bool|\WP_Error True if the token exists, WP_Error upon failure.
 	 */
 	function permission_check_internal_api_bearer( $request ) {
+		return $this->permission_check_api_bearer( $request, 'PLUGIN_API_INTERNAL_BEARER_TOKEN' );
+	}
+
+	/**
+	 * A Permission Check callback which validates the request against a GitHub specific token.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool|\WP_Error True if the token exists, WP_Error upon failure.
+	 */
+	function permission_check_github_api_bearer( $request ) {
+		return $this->permission_check_api_bearer( $request, 'PLUGIN_API_GITHUB_BEARER_TOKEN' );
+	}
+
+	/**
+	 * A Permission Check callback which validates the a request against a given token.
+	 *
+	 * @param \WP_REST_Request $request  The Rest API Request.
+	 * @param string           $constant The constant that contains the expected bearer.
+	 * @return bool|\WP_Error True if the token exists, WP_Error upon failure.
+	 */
+	function permission_check_api_bearer( $request, $constant = false ) {
 		$authorization_header = $request->get_header( 'authorization' );
 		$authorization_header = trim( str_ireplace( 'bearer', '', $authorization_header ) );
 
 		if (
 			! $authorization_header ||
-			! defined( 'PLUGIN_API_INTERNAL_BEARER_TOKEN' ) ||
-			! hash_equals( PLUGIN_API_INTERNAL_BEARER_TOKEN, $authorization_header )
+			! $constant ||
+			! defined( $constant ) ||
+			! hash_equals( constant( $constant ), $authorization_header )
 		) {
 			return new \WP_Error(
 				'not_authorized',
