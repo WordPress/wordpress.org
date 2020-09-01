@@ -35,28 +35,36 @@ class Release_Confirmation {
 	}
 
 	// Save the selection.
-	static function save_post( $post_id ) {
+	static function save_post( $post ) {
+		$post = get_post( $post );
+
 		if (
+			$post &&
 			isset( $_REQUEST['release_confirmation'] ) &&
 			is_numeric( $_REQUEST['release_confirmation'] ) &&
-			current_user_can( 'plugin_admin_edit', $post_id )
+			current_user_can( 'plugin_admin_edit', $post->ID )
 		) {
-			if ( $_REQUEST['release_confirmation'] == get_post_meta( $post_id, 'release_confirmation', true ) ) {
-				// Do nothing, it's all good.
-			} else if ( 0 == $_REQUEST['release_confirmation'] ) {
+			$current = (int) $post->release_confirmation;
+			$new     = (int) $_REQUEST['release_confirmation'];
+
+			if ( $new == $current ) {
+				return;
+			}
+
+			if ( 0 == $new ) {
 				// Disable
-				Tools::audit_log( 'Plugin release confirmation disabled.', $post_id );
-				update_post_meta( $post_id, 'release_confirmation', 0 );
+				Tools::audit_log( 'Plugin release confirmation disabled.', $post );
+				update_post_meta( $post->ID, 'release_confirmation', $new );
 
 			} else {
 				// Enable, re-use the API for this one.
 				$request = new WP_REST_Request(
 					'POST',
-					'/plugins/v1/plugin/' . get_post( $post_id )->post_name . '/release-confirmation'
+					'/plugins/v1/plugin/' . $post->post_name . '/release-confirmation'
 				);
 				$request->set_param(
 					'confirmations_required',
-					(int) $_REQUEST['release_confirmation']
+					$new
 				);
 
 				// For some reason, this is causing a 502 bad gateway - upstream sent too big header
