@@ -121,7 +121,7 @@ class Block_Validator {
 		$post = get_post( intval( $_POST['plugin-id'] ) );
 		if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-edit-' . $post->ID ) ) {
 			if ( current_user_can( 'edit_post', $post->ID ) || current_user_can( 'plugin_admin_edit', $post->ID ) ) {
-				$terms = wp_list_pluck( get_the_terms( $post->ID, 'plugin_section' ), 'slug' );
+				$terms = wp_list_pluck( get_the_terms( $post->ID, 'plugin_section' ) ?: [], 'slug' );
 				if ( 'add' === $_POST['block-directory-edit'] ) {
 					$terms[] = 'block';
 				} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
