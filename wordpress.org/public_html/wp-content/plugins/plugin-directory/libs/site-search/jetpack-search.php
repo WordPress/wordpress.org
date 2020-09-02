@@ -430,7 +430,8 @@ class Jetpack_Search {
 		}
 
 		// Block Search.
-		if ( !empty( $query->query['block_search'] ) ) {
+		$is_block_search = !empty( $query->query['block_search'] );
+		if ( $is_block_search ) {
 			$es_wp_query_args['block_search'] = $query->query['block_search'];
 
 			// Limit to the Block Tax.
@@ -455,6 +456,13 @@ class Jetpack_Search {
 		// Only trust ES to give us IDs, not the content since it is a mirror
 		$es_query_args['fields'] = array(
 			'slug',
+			'post_id',
+			'blog_id',
+
+			/*
+			// For debugging, enabling extra fields to be returned can be helpful.
+			'title_en',
+			'excerpt_en',
 			'support_threads_resolved',
 			'support_threads_percentage',
 			'support_resolution_yes',
@@ -465,10 +473,8 @@ class Jetpack_Search {
 			'tested',
 			'rating',
 			'plugin_modified',
-			'post_id',
-			'blog_id',
+			// */
 		);
-
 		// This filter is harder to use if you're unfamiliar with ES but it allows complete control over the query
 		$es_query_args      = apply_filters( 'jetpack_search_es_query_args', $es_query_args, $query );
 		$this->search_query = $es_query_args;
@@ -479,6 +485,22 @@ class Jetpack_Search {
 		if ( is_wp_error( $this->search_result ) || ! is_array( $this->search_result ) || empty( $this->search_result['results'] ) || empty( $this->search_result['results']['hits'] ) ) {
 			$this->found_posts = 0;
 			return '';
+		}
+
+		// Try filtering out super irrelevant lower 1% results from searches for Blocks.
+		if ( $is_block_search && 1 === $page ) {
+			// Include the 99%.
+			$cutoff = 0.01 * $this->search_result['results']['max_score'];
+
+			foreach ( $this->search_result['results']['hits'] as $i => $result ) {
+				if ( $result['_score'] < $cutoff ) {
+					unset( $this->search_result['results']['hits'][ $i ] );
+
+					// If we've removed an entry, pretend that this is all we've got.
+					$this->search_result['results']['total'] = count( $this->search_result['results'] );
+				}
+			}
+
 		}
 
 		// Total number of results for paging purposes
@@ -778,6 +800,10 @@ class Jetpack_Search {
 
 		$is_block_search = ! empty( $args['block_search'] );
 
+		// How much weighting to put on the Description field.
+		// Blocks get a much lower value here, as it's more title/excerpt (short description) based.
+		$desc_boost = $is_block_search ? 0.05 : 1;
+
 		if ( $args['locale'] && $args['locale'] !== 'en' && substr( $args['locale'], 0, 3 ) !== 'en_' ) {
 			$locale = $args['locale'];
 
@@ -790,6 +816,8 @@ class Jetpack_Search {
 			// As of 2017-01-23 it looked like we were off by about 10,000x,
 			// so rather than 0.1 we use a much smaller multiplier of en content
 			$en_boost             = 0.00001;
+			$desc_en_boost        = $desc_boost * $en_boost;
+
 			$matching_fields      = array(
 				'all_content_' . $locale,
 				'all_content_en^' . $en_boost,
@@ -797,16 +825,12 @@ class Jetpack_Search {
 			$boost_phrase_fields  = array(
 				'title_' . $locale,
 				'excerpt_' . $locale,
-				'description_' . $locale,
+				'description_' . $locale . '^' . $desc_boost,
 				'title_en^' . $en_boost,
 				'excerpt_en^' . $en_boost,
-				'description_en^' . $en_boost,
+				'description_en^' . $desc_en_boost,
 				'taxonomy.plugin_tags.name',
 			);
-			if ( $is_block_search ) {
-				$boost_phrase_fields[] = 'block_title_' . $locale;
-				$boost_phrase_fields[] = 'block_title_en^' . $en_boost;
-			}
 			$boost_ngram_fields   = array(
 				'title_' . $locale . '.ngram',
 				'title_en.ngram^' . $en_boost,
@@ -816,16 +840,11 @@ class Jetpack_Search {
 				'title_en^' . $en_boost,
 				'slug_text',
 			);
-			if ( $is_block_search ) {
-				$boost_title_fields[] = 'block_title_' . $locale;
-				$boost_title_fields[] = 'block_title_en^' . $en_boost;
-				$boost_title_fields[] = 'block_name';
-			}
 			$boost_content_fields = array(
 				'excerpt_' . $locale,
-				'description_' . $locale,
+				'description_' . $locale . '^' . $desc_boost,
 				'excerpt_en^' . $en_boost,
-				'description_en^' . $en_boost,
+				'description_en^' . $desc_en_boost,
 				'taxonomy.plugin_tags.name',
 			);
 		} else {
@@ -835,12 +854,9 @@ class Jetpack_Search {
 			$boost_phrase_fields  = array(
 				'title_en',
 				'excerpt_en',
-				'description_en',
+				'description_en^' . $desc_boost,
 				'taxonomy.plugin_tags.name',
 			);
-			if ( $is_block_search ) {
-				$boost_phrase_fields[] = 'block_title_en';
-			}
 			$boost_ngram_fields   = array(
 				'title_en.ngram',
 			);
@@ -848,18 +864,13 @@ class Jetpack_Search {
 				'title_en',
 				'slug_text',
 			);
-			if ( $is_block_search ) {
-				$boost_title_fields[] = 'block_title_en';
-				$boost_title_fields[] = 'block_name';
-			}
 			$boost_content_fields = array(
 				'excerpt_en',
-				'description_en',
+				'description_en^' . $desc_boost,
 				'taxonomy.plugin_tags.name',
 			);
 		}
 
-		//
 		// Build the query - potentially extracting more filters
 		// TODO: add auto phrase searching
 		// TODO: add fuzzy searching to correct for spelling mistakes
