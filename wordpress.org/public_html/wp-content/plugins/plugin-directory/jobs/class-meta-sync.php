@@ -40,12 +40,14 @@ class Meta_Sync {
 		$changed_download_counts = $wpdb->get_results(
 			"SELECT p.id as post_id, downloads
 			FROM `{$wpdb->posts}` p
-				JOIN `{$download_count_table}` c on p.post_name = c.plugin_slug
+				JOIN `{$download_count_table}` c ON p.post_name = c.plugin_slug
 				LEFT JOIN `{$wpdb->postmeta}` pm ON p.id = pm.post_id AND pm.meta_key = 'downloads'
 
 			WHERE
-				downloads != pm.meta_value OR
-				pm.meta_id IS NULL"
+				pm.meta_id IS NULL
+				OR
+				downloads - pm.meta_value > 10
+			"
 		);
 
 		foreach ( $changed_download_counts as $row ) {

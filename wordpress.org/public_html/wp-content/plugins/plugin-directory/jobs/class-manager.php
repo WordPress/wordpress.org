@@ -240,7 +240,7 @@ class Manager {
 	 */
 	public function register_cron_tasks() {
 		if ( ! wp_next_scheduled( 'plugin_directory_meta_sync' ) ) {
-			wp_schedule_event( time() + 60, 'hourly', 'plugin_directory_meta_sync' );
+			wp_schedule_event( time() + 60, 'half_hourly', 'plugin_directory_meta_sync' );
 		}
 		if ( ! wp_next_scheduled( 'plugin_directory_plugin_support_resolved' ) ) {
 			wp_schedule_event( time() + 60, 'half_hourly', 'plugin_directory_plugin_support_resolved' );
