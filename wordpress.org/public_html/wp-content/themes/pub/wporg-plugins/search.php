@@ -24,6 +24,15 @@ get_header();
 					);
 					?>
 				</h1>
+				<?php
+				if ( get_query_var( 'block_search' ) ) {
+					printf(
+						/* translators: %s: Search URL */
+						'<p>' . __( 'Searching the block directory. <a href="%s">Search all plugins</a>.', 'wporg-plugins' ) . '</p>',
+						remove_query_arg( 'block_search' )
+					);
+				}
+				?>
 			</header><!-- .page-header -->
 
 			<?php

@@ -1190,6 +1190,7 @@ class Plugin_Directory {
 		$vars[] = 'redirect_plugin_tab';
 		$vars[] = 'plugin_advanced';
 		$vars[] = 'geopattern_icon';
+		$vars[] = 'block_search';
 
 		// Remove support for any query vars the Plugin Directory doesn't support/need.
 		$not_needed = [
@@ -1337,7 +1338,12 @@ class Plugin_Directory {
 
 		// New-style search links.
 		if ( get_query_var( 's' ) && isset( $_GET['s'] ) ) {
-			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ), 301 );
+			$url = site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' );
+			if ( get_query_var( 'block_search' ) ) {
+				$url = add_query_arg( 'block_search', get_query_var( 'block_search' ), $url );
+			}
+
+			wp_safe_redirect( $url, 301 );
 			die();
 		}
 
