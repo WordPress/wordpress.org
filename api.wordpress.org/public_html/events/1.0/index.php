@@ -742,7 +742,7 @@ function get_events( $args = array() ) {
 		 * tangible use case for that yet. We could maybe support an `online` value for the `location` parameter
 		 * in the future if that's desired. If we do that, the Codex documentation should be updated.
 		 */
-		"meetup_url <> 'https://www.meetup.com/learn-wordpress-discussions/' "
+		"( `meetup_url` IS NULL OR `meetup_url` <> 'https://www.meetup.com/learn-wordpress-discussions/' ) "
 	);
 
 	if ( ! empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
