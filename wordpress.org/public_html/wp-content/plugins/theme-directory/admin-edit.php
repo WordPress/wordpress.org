@@ -43,6 +43,15 @@ function wporg_themes_post_status() {
 		'exclude_from_search' => true,
 		'label_count'         => _n_noop( 'Suspended <span class="count">(%s)</span>', 'Suspended <span class="count">(%s)</span>', 'wporg-themes' ),
 	) );
+
+	// Themes can be "delisted" to hide them from search, but allow them to be uploaded.
+	register_post_status( 'delist', array(
+		'label'               => __( 'Delisted', 'wporg-themes' ),
+		'protected'           => false,
+		'public'              => true,
+		'exclude_from_search' => true,
+		'label_count'         => _n_noop( 'Delisted <span class="count">(%s)</span>', 'Delisted <span class="count">(%s)</span>', 'wporg-themes' ),
+	) );
 }
 add_action( 'init', 'wporg_themes_post_status' );
 
@@ -124,6 +133,13 @@ function wporg_themes_post_submitbox_misc_actions() {
 		$links[] = sprintf( '<a class="submit-reinstate_theme" title="%1$s" href="%2$s">%3$s</a>', esc_attr__( 'Suspend this item', 'wporg-themes' ), esc_url( wporg_themes_get_reinstate_url( $post ) ), __( 'Reinstate', 'wporg-themes' ) );
 	}
 
+	if ( current_user_can( 'suspend_theme', $post->ID ) && 'publish' == $post->post_status ) {
+		$links[] = sprintf( '<a class="submit-delist_theme submitdelete" title="%1$s" href="%2$s">%3$s</a>', esc_attr__( 'Delist this item', 'wporg-themes' ), esc_url( wporg_themes_get_delist_url( $post ) ), __( 'Delist', 'wporg-themes' ) );
+	}
+	elseif ( current_user_can( 'reinstate_theme', $post->ID ) && 'delist' == $post->post_status ) {
+		$links[] = sprintf( '<a class="submit-relist_theme" title="%1$s" href="%2$s">%3$s</a>', esc_attr__( 'Relist this item', 'wporg-themes' ), esc_url( wporg_themes_get_relist_url( $post ) ), __( 'Relist', 'wporg-themes' ) );
+	}
+
 	if ( ! empty( $links ) ) {
 		echo '<div class="misc-pub-section">' . implode( ' | ', $links ) . '</div>';
 	}
@@ -184,7 +200,7 @@ function wporg_themes_suspend_theme() {
 
 	wporg_themes_remove_wpthemescom( $post->post_name );
 
-	wp_redirect( add_query_arg( 'suspended', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated' ), wp_get_referer() ) ) );
+	wp_redirect( add_query_arg( 'suspended', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_suspend', 'wporg_themes_suspend_theme' );
@@ -227,10 +243,104 @@ function wporg_themes_reinstate_theme() {
 	 */
 	add_post_meta( $post_id, '_wporg_themes_reinstated', true );
 
-	wp_redirect( add_query_arg( 'reinstated', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended' ), wp_get_referer() ) ) );
+	wp_redirect( add_query_arg( 'reinstated', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_reinstate', 'wporg_themes_reinstate_theme' );
+
+/**
+ * Action link to delist a theme.
+ *
+ * @param WP_Post $post
+ * @return string URL
+ */
+function wporg_themes_get_delist_url( $post ) {
+	return wp_nonce_url( add_query_arg( 'action', 'delist', admin_url( sprintf( get_post_type_object( $post->post_type )->_edit_link, $post->ID ) ) ), "delist-post_{$post->ID}" );
+}
+
+/**
+ * Action link to relist a theme.
+ *
+ * @param WP_Post $post
+ * @return string URL
+ */
+function wporg_themes_get_relist_url( $post ) {
+	return wp_nonce_url( add_query_arg( 'action', 'relist', admin_url( sprintf( get_post_type_object( $post->post_type )->_edit_link, $post->ID ) ) ), "relist-post_{$post->ID}" );
+}
+
+/**
+ * Delist a theme.
+ */
+function wporg_themes_delist_theme() {
+	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
+
+	if ( ! $post_id ) {
+		wp_redirect( admin_url( 'edit.php' ) );
+		exit();
+	}
+
+	check_admin_referer( 'delist-post_' . $post_id );
+
+	$post = get_post( $post_id );
+
+	if ( 'delist' == $post->post_status ) {
+		wp_die( __( 'This item has already been delisted.', 'wporg-themes' ) );
+	}
+
+	if ( ! get_post_type_object( $post->post_type ) ) {
+		wp_die( __( 'Unknown post type.', 'wporg-themes' ) );
+	}
+
+	if ( ! current_user_can( 'suspend_theme', $post_id ) || 'repopackage' != $post->post_type ) {
+		wp_die( __( 'You are not allowed to delist this item.', 'wporg-themes' ) );
+	}
+
+	wp_update_post( array(
+		'ID'          => $post_id,
+		'post_status' => 'delist',
+	) );
+
+	wp_redirect( add_query_arg( 'delisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	exit();
+}
+add_filter( 'admin_action_delist', 'wporg_themes_delist_theme' );
+
+/**
+ * Reinstate a theme.
+ */
+function wporg_themes_relist_theme() {
+	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
+
+	if ( ! $post_id ) {
+		wp_redirect( admin_url( 'edit.php' ) );
+		exit();
+	}
+
+	check_admin_referer( 'relist-post_' . $post_id );
+
+	$post = get_post( $post_id );
+
+	if ( 'delist' != $post->post_status ) {
+		wp_die( __( 'This item has already been relisted.', 'wporg-themes' ) );
+	}
+
+	if ( ! get_post_type_object( $post->post_type ) ) {
+		wp_die( __( 'Unknown post type.', 'wporg-themes' ) );
+	}
+
+	if ( ! current_user_can( 'reinstate_theme', $post_id ) || 'repopackage' != $post->post_type ) {
+		wp_die( __( 'You are not allowed to relist this item.', 'wporg-themes' ) );
+	}
+
+	wp_update_post( array(
+		'ID'          => $post_id,
+		'post_status' => 'publish',
+	) );
+
+	wp_redirect( add_query_arg( 'relisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	exit();
+}
+add_filter( 'admin_action_relist', 'wporg_themes_relist_theme' );
 
 /**
  * Remove themes from wp-themes.com upon theme status moving to draft.
@@ -260,6 +370,19 @@ function wporg_themes_admin_notices() {
 		$message    = _n( '%s theme reinstated.', '%s themes reinstated.', $reinstated, 'wporg-themes' );
 
 		add_settings_error( 'wporg_themes', 'reinstated', sprintf( $message, $reinstated ), 'updated' );
+	}
+
+	elseif ( ! empty( $_GET['delisted'] ) ) {
+		$delisted = absint( $_GET['delisted'] );
+		$message    = _n( '%s theme delisted.', '%s themes delisted.', $delisted, 'wporg-themes' );
+
+		add_settings_error( 'wporg_themes', 'delisted', sprintf( $message, $delisted ) );
+	}
+	elseif ( ! empty( $_GET['relisted'] ) ) {
+		$relisted = absint( $_GET['relisted'] );
+		$message    = _n( '%s theme relisted.', '%s themes relisted.', $relisted, 'wporg-themes' );
+
+		add_settings_error( 'wporg_themes', 'relisted', sprintf( $message, $relisted ), 'updated' );
 	}
 
 	// Display admin notices, if any.
