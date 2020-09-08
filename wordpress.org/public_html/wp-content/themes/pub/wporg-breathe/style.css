@@ -8,6 +8,7 @@
 /* Show a Slack icon in front of Slack links. */
 a[href*=".slack.com"] {
 	word-break: break-all;
+	display: inline-block; /* So that the slack link doesn't break unless absolutely needed. */
 }
 a[href*=".slack.com"]::before {
 	content: '';
