@@ -245,10 +245,13 @@ function document_title( $title ) {
 		$title['tagline'] = __( 'WordPress.org', 'wporg-plugins' );
 	} else {
 		if ( is_singular( 'plugin' ) ) {
-			$title['title'] .= ' - ' . __( 'WordPress plugin', 'wporg-plugins' );
-		}
-		elseif ( is_tax() ) {
-			$title['title'] = sprintf( _( 'Plugins categorized as %s', 'wporg-plugins' ), strtolower( $title['title'] ) );
+			if ( get_query_var( 'plugin_advanced' ) ) {
+				$title['title'] .= ' ' . __( '(advanced view)', 'wporg-plugins' ) . ' - ' . __( 'WordPress plugin', 'wporg-plugins' );
+			} else {
+				$title['title'] .= ' - ' . __( 'WordPress plugin', 'wporg-plugins' );
+			}
+		} elseif ( is_tax() ) {
+			$title['title'] = sprintf( __( 'Plugins categorized as %s', 'wporg-plugins' ), strtolower( $title['title'] ) );
 		}
 
 		// If results are paged and the max number of pages is known.
