@@ -1144,10 +1144,6 @@ function wporg_themes_noindex_request( $noindex ) {
 				$noindex = true;
 			}
 		}
-
-		if ( !$noindex && 'delist' === $post->post_status ) {
-			$noindex = 'nosnippet';
-		}
 	}
 
 	if ( is_tag() ) {

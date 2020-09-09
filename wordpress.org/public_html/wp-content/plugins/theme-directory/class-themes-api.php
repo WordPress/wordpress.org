@@ -446,7 +446,6 @@ class Themes_API {
 			$themes = get_posts( array(
 				'name'      => $this->request->slug,
 				'post_type' => 'repopackage',
-				'post_status' => 'publish,delist',
 			) );
 
 			if ( $themes ) {
