@@ -1,73 +1,23 @@
 /* global module:false, require:function, process:object */
 
-var webpack       = require( 'webpack' ),
-	webpackConfig = require( './webpack.config' );
-
 module.exports = function( grunt ) {
 	var isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 
-	grunt.initConfig({
-		webpack: {
-			options: webpackConfig,
-			build: {
-				plugins: webpackConfig.plugins.concat(
-					new webpack.optimize.DedupePlugin(),
-					new webpack.DefinePlugin( {
-						'process.env.NODE_ENV': JSON.stringify( 'production' )
-					} ),
-					new webpack.optimize.UglifyJsPlugin( {
-						compress: { warnings: false }
-					} )
-				),
-				output: {
-					path: 'js/'
-				}
-			},
-			'build-dev': {
-				devtool: 'sourcemap',
-				debug: true
-			},
-			watch: {
-				devtool: 'sourcemap',
-				debug: true,
-				watch: true,
-				keepalive: true
-			}
-		},
+	grunt.initConfig( {
 		postcss: {
 			options: {
 				map: 'build' !== process.argv[2],
 				processors: [
-					require( 'autoprefixer' )( {
-						browsers: [
-							'Android >= 2.1',
-							'Chrome >= 21',
-							'Edge >= 12',
-							'Explorer >= 7',
-							'Firefox >= 17',
-							'Opera >= 12.1',
-							'Safari >= 6.0'
-						],
-						cascade: false
-					} ),
+					require( 'autoprefixer' ),
 					require( 'pixrem' ),
-					require('cssnano')({
+					require('cssnano')( {
 						mergeRules: false
-					})
+					} ),
 				]
 			},
 			dist: {
 				src: 'css/style.css'
 			}
-		},
-		eslint: {
-			files: [
-				'client/**/*.js',
-				'client/**/*.jsx',
-
-				// External library. For now.
-				'!client/**/**/image-gallery/index.jsx'
-			]
 		},
 		sass: {
 			options: {
@@ -114,9 +64,6 @@ module.exports = function( grunt ) {
 				}())
 			},
 			options: { signature: false }
-		},
-		curl: {
-			'./client/modules/default-routes.json': 'https://wordpress.org/plugins/wp-json'
 		},
 		rtlcss: {
 			options: {
@@ -182,32 +129,17 @@ module.exports = function( grunt ) {
 		watch: {
 			css: {
 				files: ['**/*.scss', '../wporg/css/**/*scss', 'client/components/**/**.scss'],
-				tasks: ['css']
+				tasks: ['build']
 			},
-			scripts: {
-				files: ['**/*.jsx'],
-				tasks: ['webpack:build-dev'],
-				options: {
-				  atBegin: true,
-				}
-			},
-			eslint: {
-				files: ['<%= eslint.files %>'],
-				tasks: ['eslint']
-			}
 		}
-	});
+	} );
 
 	grunt.loadNpmTasks('grunt-sass');
 	grunt.loadNpmTasks('grunt-rtlcss');
 	grunt.loadNpmTasks('grunt-postcss');
 	grunt.loadNpmTasks('grunt-sass-globbing');
-	grunt.loadNpmTasks('grunt-webpack');
-	grunt.loadNpmTasks('grunt-eslint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-curl');
 
 	grunt.registerTask('default', ['eslint', 'sass_globbing', 'sass', 'rtlcss:dynamic']);
-	grunt.registerTask('css', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic']);
-	grunt.registerTask('build', ['webpack:build', 'css', 'curl']);
+	grunt.registerTask('build', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic']);
 };

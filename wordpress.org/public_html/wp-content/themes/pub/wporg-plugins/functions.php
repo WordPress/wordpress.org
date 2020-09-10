@@ -115,21 +115,29 @@ function scripts() {
 
 	// React is currently only used on detail pages.
 	if ( is_single() ) {
-		wp_enqueue_script( 'wporg-plugins-client', get_stylesheet_directory_uri() . '/js/theme.js', array(), '20200527', true );
-		wp_localize_script( 'wporg-plugins-client', 'pluginDirectory', array(
-			'endpoint' => untrailingslashit( rest_url() ), // 'https://wordpress.org/plugins-wp/wp-json',
-			'nonce'    => wp_create_nonce( 'wp_rest' ),
-			'base'     => get_blog_details()->path,
-			'userId'   => get_current_user_id(),
-		) );
-		wp_localize_script( 'wporg-plugins-client', 'localeData', array(
-			''            => array(
-				'Plural-Forms' => _x( 'nplurals=2; plural=n != 1;', 'plural forms', 'wporg-plugins' ),
-				'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
-				'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ),
-			),
-			'screenshots' => __( 'Screenshots', 'wporg-plugins' ),
-		) );
+		$assets_path = dirname( __FILE__ ) . '/js/build/theme.asset.php';
+		if ( file_exists( $assets_path ) ) {
+			$script_info = require( $assets_path );
+			wp_enqueue_script(
+				'wporg-plugins-client',
+				get_stylesheet_directory_uri() . '/js/build/theme.js',
+				$script_info['dependencies'],
+				$script_info['version'],
+				true
+			);
+			wp_localize_script(
+				'wporg-plugins-client',
+				'localeData',
+				array(
+					'' => array(
+						'Plural-Forms' => _x( 'nplurals=2; plural=n != 1;', 'plural forms', 'wporg-plugins' ),
+						'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
+						'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ),
+					),
+					'screenshots' => __( 'Screenshots', 'wporg-plugins' ),
+				)
+			);
+		}
 	}
 
 	// No Jetpack scripts needed.
