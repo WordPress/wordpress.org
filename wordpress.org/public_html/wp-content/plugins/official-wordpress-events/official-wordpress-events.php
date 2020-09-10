@@ -331,6 +331,7 @@ class Official_WordPress_Events {
 
 				foreach ( $wordcamp as $field => $value ) {
 					switch ( $field ) {
+						// This is the local time, not a true Unix timestamp.
 						case 'Start Date (YYYY-mm-dd)':
 							$value = absint( $value );
 							// If scheduled, but either in the past or undated, don't sync.
@@ -343,6 +344,7 @@ class Official_WordPress_Events {
 							$event['start_timestamp'] = $this->get_wordcamp_start_time( $value, absint( $wordcamp->session_start_time ) );
 							break;
 
+						// This is the local time, not a true Unix timestamp.
 						case 'End Date (YYYY-mm-dd)':
 							$event['end_timestamp'] = absint( $value );
 							break;
@@ -391,6 +393,17 @@ class Official_WordPress_Events {
 
 				if ( $event['start_timestamp'] && empty( $event['end_timestamp'] ) ) {
 					$event['end_timestamp'] = $event['start_timestamp'];
+				}
+
+				if ( $wordcamp->{'Event Timezone'} && $event['start_timestamp'] ) {
+					$wordcamp_timezone = new DateTimeZone( $wordcamp->{'Event Timezone'} );
+
+					$wordcamp_datetime = new DateTime(
+						'@' . $event['start_timestamp'],
+						$wordcamp_timezone
+					);
+
+					$event['utc_offset'] = $wordcamp_timezone->getOffset( $wordcamp_datetime );
 				}
 
 				$events[] = new Official_WordPress_Event( $event );
@@ -568,6 +581,10 @@ class Official_WordPress_Events {
 				continue;
 			}
 
+			/*
+			 * Convert to local time, because the `date_utc` column in `wporg_events` is misnomed and actually
+			 * expects the _local_ time.
+			 */
 			$start_timestamp = ( $meetup['time'] / 1000 ) + ( $meetup['utc_offset'] / 1000 ); // convert to seconds
 			$latitude        = ! empty( $meetup['venue']['lat'] ) ? $meetup['venue']['lat'] : $meetup['group']['lat'];
 			$longitude       = ! empty( $meetup['venue']['lon'] ) ? $meetup['venue']['lon'] : $meetup['group']['lon'];
