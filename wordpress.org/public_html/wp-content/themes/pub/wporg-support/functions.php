@@ -339,6 +339,22 @@ function wporg_support_is_single_review() {
 }
 
 /**
+ * Get post title for single review
+ *
+ * @return string|bool Returns post title if it exists. Otherwise returns false.
+ */
+function wporg_support_get_single_review_title() {
+	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) || ! bbp_is_single_topic() ) {
+		return false;
+	}
+
+	$plugin_instance = WordPressdotorg\Forums\Plugin::get_instance();
+	$review = $plugin_instance->plugins->plugin ?? $plugin_instance->themes->theme;
+
+	return isset( $review ) ? $review->post_title : false;
+}
+
+/**
  * Check if the current page is a user's "Reviews Written" page.
  *
  * @return bool True if the page is a "Reviews Written" page, false otherwise.
