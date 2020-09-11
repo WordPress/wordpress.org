@@ -271,7 +271,7 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 	 * delimiter.
 	 */
 	$location_name_parts = preg_split( '/\s+/u', $location_name );
-	$location_word_count = count( $location_name_parts );
+	$location_word_count = is_array( $location_name_parts ) ? count( $location_name_parts ) : 1;
 
 	if ( ! $guess && $location_word_count >= 2 ) {
 		// Catch input like "Portland Maine"
