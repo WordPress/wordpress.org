@@ -1529,23 +1529,6 @@ function test_remove_duplicate_events() {
 	return $passed ? 0 : 1;
 }
 
-/**
- * Stub to simulate cache misses, so that the tests always get fresh results
- *
- * @return false
- */
-function wp_cache_get( $key, $group = '', $force = false, &$found = null ) {
-	return false;
-}
-
-/**
- * Stub to simulate cache misses, so that the tests always get fresh results
- */
-function wp_cache_set( $key, $data, $group = '', $expire = 0 ) {
-	// Intentionally empty
-}
-
-
 define( 'VERBOSE_OUTPUT', in_array( '--verbose', $argv, true ) );
 
 run_tests();

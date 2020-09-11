@@ -39,10 +39,16 @@ function main() {
 
 	// The test suite just needs the functions defined and doesn't want any headers or output
 	if ( defined( 'RUNNING_TESTS' ) && RUNNING_TESTS ) {
+		disable_caching();
 		return;
 	}
 
-	wp_cache_init();
+	// Disable object caching during manual testing, unless explicitly testing caching.
+	if ( is_test_request() && empty( $_GET['cache'] ) ) {
+		disable_caching();
+	} else {
+		wp_cache_init();
+	}
 
 	$cache_group   = 'events';
 	$cache_life    = 12 * 60 * 60;
@@ -52,6 +58,39 @@ function main() {
 	$response      = build_response( $location, $location_args );
 
 	send_response( $response, $ttl );
+}
+
+/**
+ * Determine if the current request is a developer manually testing on their sandbox.
+ *
+ * @return bool
+ */
+function is_test_request() {
+	$proxied = defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST;
+	$sandbox = defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED;
+
+	return $proxied && $sandbox;
+}
+
+/**
+ * Mock the caching functions.
+ */
+function disable_caching() {
+	/**
+	 * Stub to simulate cache misses, so that the tests always get fresh results
+	 *
+	 * @return false
+	 */
+	function wp_cache_get( $key, $group = '', $force = false, &$found = null ) {
+		return false;
+	}
+
+	/**
+	 * Stub to avoid setting production object cache values while testing.
+	 */
+	function wp_cache_set( $key, $data, $group = '', $expire = 0 ) {
+		// Intentionally empty
+	}
 }
 
 /**
