@@ -342,7 +342,12 @@ class Official_WordPress_Events {
 								continue 3;
 							}
 
-							$event['start_timestamp'] = $this->get_wordcamp_start_time( $value, absint( $wordcamp->session_start_time ) );
+							$event['start_timestamp'] = $this->get_wordcamp_start_time(
+								$value,
+								absint( $wordcamp->session_start_time ),
+								$event['utc_offset']
+							);
+
 							break;
 
 						// This is the local time, not a true Unix timestamp.
@@ -429,20 +434,27 @@ class Official_WordPress_Events {
 	/**
 	 * Determine the best start time for a WordCamp.
 	 *
-	 * The timestamp from the WordCamp post type only tell us the date that the camp is on, not when it starts.
-	 * The earliest session can be used to get the time that the camp starts, but it's likely to be inaccurate
+	 * The WP timestamp from the WordCamp post type only tell us the date that the camp is on, not what time it starts.
+	 * The earliest session Unix timestamp can be used to get the time that the camp starts, but it's likely to be inaccurate
 	 * if it doesn't match the date from the WordCamp post. One common cause of that is when an event is
 	 * postponed, but the organizers haven't gone through and updated all of the sessions yet.
 	 *
-	 * @param string $start_date
-	 * @param string $first_session_start_time
+	 * @param string $start_date               _WP_ timestamp.
+	 * @param string $first_session_start_time _Unix_ timestamp.
+	 * @param int    $utc_offset               The event's UTC offset in seconds.
 	 *
-	 * @return string
+	 * @return string Returns a _WP_ timestamp.
 	 */
-	protected function get_wordcamp_start_time( $start_date, $first_session_start_time ) {
-		$session_time_is_same_day = date( 'Ymd', $start_date ) === date( 'Ymd', $first_session_start_time );
+	protected function get_wordcamp_start_time( $start_date, $first_session_start_time, $utc_offset ) {
+		if ( ! $utc_offset ) {
+			return $start_date;
+		}
 
-		return $session_time_is_same_day ? $first_session_start_time : $start_date;
+		// Convert the Unix timestamp to a WP timestamp, so we can compare apples to apples.
+		$first_session_wp         = (int) $first_session_start_time + $utc_offset;
+		$session_time_is_same_day = date( 'Ymd', $start_date ) === date( 'Ymd', $first_session_wp );
+
+		return $session_time_is_same_day ? $first_session_wp : $start_date;
 	}
 
 	/**
