@@ -327,6 +327,7 @@ class Official_WordPress_Events {
 					'type'        => 'wordcamp',
 					'title'       => $wordcamp->title->rendered,
 					'description' => $wordcamp->content->rendered,
+					'utc_offset'  => self::get_wordcamp_offset( $wordcamp ),
 				);
 
 				foreach ( $wordcamp as $field => $value ) {
@@ -395,22 +396,34 @@ class Official_WordPress_Events {
 					$event['end_timestamp'] = $event['start_timestamp'];
 				}
 
-				if ( $wordcamp->{'Event Timezone'} && $event['start_timestamp'] ) {
-					$wordcamp_timezone = new DateTimeZone( $wordcamp->{'Event Timezone'} );
-
-					$wordcamp_datetime = new DateTime(
-						'@' . $event['start_timestamp'],
-						$wordcamp_timezone
-					);
-
-					$event['utc_offset'] = $wordcamp_timezone->getOffset( $wordcamp_datetime );
-				}
-
 				$events[] = new Official_WordPress_Event( $event );
 			}
 		}
 
 		return $events;
+	}
+
+	/**
+	 * Get a WordCamp's UTC offset in seconds.
+	 *
+	 * @param object $wordcamp
+	 *
+	 * @return int
+	 * @throws Exception
+	 */
+	static function get_wordcamp_offset( $wordcamp ) {
+		if ( ! $wordcamp->{'Event Timezone'} || ! $wordcamp->{'Start Date (YYYY-mm-dd)'} ) {
+			return 0;
+		}
+
+		$wordcamp_timezone = new DateTimeZone( $wordcamp->{'Event Timezone'} );
+
+		$wordcamp_datetime = new DateTime(
+			'@' . $wordcamp->{'Start Date (YYYY-mm-dd)'},
+			$wordcamp_timezone
+		);
+
+		return $wordcamp_timezone->getOffset( $wordcamp_datetime );
 	}
 
 	/**
