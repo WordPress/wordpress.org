@@ -1096,6 +1096,17 @@ class Hooks {
 	public function bbp_raw_title_array( $title ) {
 		if ( bbp_is_single_forum() || bbp_is_single_topic() || bbp_is_single_view() ) {
 			$title['format'] = '%s';
+
+			if( wporg_support_is_single_review() ) {
+				$page_title = wporg_support_get_single_review_title();
+
+				if( $page_title ) {
+					$title['text'] .= sprintf( ' &#45; [%s] %s',
+						$page_title,
+							__( 'Review', 'wporg-forums' )
+						);
+				}
+			}
 		}
 
 		return $title;
