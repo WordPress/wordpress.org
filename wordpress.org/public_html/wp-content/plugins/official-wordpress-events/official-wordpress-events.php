@@ -397,8 +397,10 @@ class Official_WordPress_Events {
 					}
 				}
 
-				if ( $event['start_timestamp'] && empty( $event['end_timestamp'] ) ) {
-					$event['end_timestamp'] = $event['start_timestamp'];
+				if ( $event['start_timestamp'] ) {
+					if ( empty( $event['end_timestamp'] ) || $event['end_timestamp'] < $event['start_timestamp'] ) {
+						$event['end_timestamp'] = $event['start_timestamp'];
+					}
 				}
 
 				$events[] = new Official_WordPress_Event( $event );
