@@ -613,6 +613,25 @@ class Import {
 			}
 		}
 
+		// Filter the blocks list so that the parent block is first.
+		if ( count( $blocks ) > 1 ) {
+			$children = array_filter(
+				$blocks,
+				function( $block ) {
+					return isset( $block->parent ) && count( $block->parent );
+				}
+			);
+
+			$parent = array_filter(
+				$blocks,
+				function( $block ) {
+					return ! isset( $block->parent ) || ! count( $block->parent );
+				}
+			);
+
+			$blocks = array_merge( $parent, $children );
+		}
+
 		// Only search for block files if none were found in a block.json.
 		if ( empty( $block_files ) ) {
 			$build_files = array();
