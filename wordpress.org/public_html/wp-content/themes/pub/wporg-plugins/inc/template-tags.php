@@ -489,11 +489,6 @@ function the_plugin_self_transfer_form() {
 function the_plugin_release_confirmation_form() {
 	$post = get_post();
 
-	// Temporary: Plugin Reviewers only.
-	if ( ! current_user_can( 'edit_post', $post ) ) {
-		return;
-	}
-
 	if (
 		! current_user_can( 'plugin_admin_edit', $post ) ||
 		'publish' != $post->post_status
