@@ -165,6 +165,13 @@ class DevHub_Head {
 			$fields[ 'og:description'] = $desc;
 		}
 
+		/**
+		 * Allow filtering of the tag field values.
+		 *
+		 * @param array $fields List of meta tags to render to the page.
+		 */
+		$fields = apply_filters( 'devhub_head_tag_fields', $fields );
+
 		// Output fields.
 		foreach ( $fields as $property => $content ) {
 			$attribute = 0 === strpos( $property, 'og:' ) ? 'property' : 'name';
