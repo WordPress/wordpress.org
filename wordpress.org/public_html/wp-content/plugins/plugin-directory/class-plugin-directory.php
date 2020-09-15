@@ -94,6 +94,8 @@ class Plugin_Directory {
 			return $modules;
 		} );
 
+/*
+		// Temporarily disabled to see if this is still needed / causing issues.
 		// Work around caching issues
 		add_filter( 'pre_option_jetpack_sync_full__started', array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__started', '__return_null' );
@@ -105,6 +107,7 @@ class Plugin_Directory {
 		add_filter( 'default_option_jetpack_sync_full__send_started', '__return_null' );
 		add_filter( 'pre_option_jetpack_sync_full__finished', array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__finished', '__return_null' );
+*/
 
 		// Fix login URLs in admin bar
 		add_filter( 'login_url', array( $this, 'fix_login_url' ), 10, 3 );
