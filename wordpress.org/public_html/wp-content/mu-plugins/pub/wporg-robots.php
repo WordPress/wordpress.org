@@ -39,16 +39,13 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 	// Prefix the News and Showcase sitemaps
 	if ( 'wordpress.org' === $blog_details->domain ) {
 		$robots = "Sitemap: https://wordpress.org/news/sitemap.xml\n" .
-		          "Sitemap: https://wordpress.org/news/news-sitemap.xml\n" .
 		          "Sitemap: https://wordpress.org/showcase/sitemap.xml\n" .
-		          "Sitemap: https://wordpress.org/showcase/news-sitemap.xml\n" .
 		          $robots;
 	}
 
 	/*
 	 * Add the Plugins and Theme directory Sitemaps
 	 * Currently disabled for Rosetta as Jetpack sitemaps aren't working there.
-	 * Themes are currently disabled as there's a redirect in place breaking direct access.
 	 */
 	if (
 		'wordpress.org' === $blog_details->domain
@@ -61,3 +58,13 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 	return $robots;
 }
 add_filter( 'robots_txt', 'wporg_robots_prefix_sitemaps', 1 );
+
+// Remove the Jetpack News sitemap when there's no news on the site.
+// Remove once the upstream Jetpack issue is closed or merged https://meta.trac.wordpress.org/ticket/5438
+add_filter( 'jetpack_news_sitemap_include_in_robotstxt', function( $include ) {
+	if ( $include && empty( wp_count_posts()->publish ) ) {
+		$include = false;
+	}
+
+	return $include;
+} );
