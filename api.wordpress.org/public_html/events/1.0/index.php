@@ -34,7 +34,8 @@ function main() {
 	define( 'THROTTLE_GEONAMES',         0 );
 	define( 'THROTTLE_IP2LOCATION',      0 );
 
-	defined( 'DAY_IN_SECONDS'  ) or define( 'DAY_IN_SECONDS', 60 * 60 * 24 );
+	defined( 'HOUR_IN_SECONDS' ) or define( 'HOUR_IN_SECONDS', 60 * 60 );
+	defined( 'DAY_IN_SECONDS'  ) or define( 'DAY_IN_SECONDS', HOUR_IN_SECONDS * 24 );
 	defined( 'WEEK_IN_SECONDS' ) or define( 'WEEK_IN_SECONDS', 7 * DAY_IN_SECONDS );
 
 	// The test suite just needs the functions defined and doesn't want any headers or output
@@ -868,8 +869,17 @@ function get_events( $args = array() ) {
 			'url'        => $event->url,
 			'meetup'     => $event->meetup,
 			'meetup_url' => $event->meetup_url,
-			'date'       => $event->date_utc, // TODO: DB stores a local date, not UTC.
+
+			/*
+			 * The `date_utc` column in the database is misnomed, and contains times in the event's local
+			 * timezone. So the `date` field in the response is the local time, and the `date_utc` field in
+			 * the response here is _actually_ UTC.
+			 */
+			'date'       => $event->date_utc,
 			'end_date'   => $event->end_date,
+			'start_unix_timestamp'  => strtotime( $event->date_utc ) - $event->date_utc_offset,
+			'end_unix_timestamp'    => strtotime( $event->end_date ) - $event->date_utc_offset,
+
 
 			'location'   => array(
 				// Capitalize it for use in presentation contexts, like the Events Widget.
@@ -1031,6 +1041,8 @@ function get_regional_wordcamp_data() {
 				'meetup_url' => '',
 				'date'       => '2020-02-21 00:00:00',
 				'end_date'   => '2020-02-23 00:00:00',
+				'start_unix_timestamp' => strtotime( '2020-02-21 00:00:00' ) - 7 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2020-02-23 00:00:00' ) - 7 * HOUR_IN_SECONDS,
 
 				'location' => array(
 					'location'  => 'Bangkok, Thailand',
@@ -1056,6 +1068,8 @@ function get_regional_wordcamp_data() {
 				'meetup_url' => '',
 				'date'       => '2020-06-04 00:00:00',
 				'end_date'   => '2020-06-06 00:00:00',
+				'start_unix_timestamp' => strtotime( '2020-06-04 00:00:00' ) - 1 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2020-06-06 00:00:00' ) - 1 * HOUR_IN_SECONDS,
 
 				'location' => array(
 					'location'  => 'Online',
@@ -1082,6 +1096,8 @@ function get_regional_wordcamp_data() {
 				'meetup_url' => '',
 				'date'       => '2020-10-27 00:00:00',
 				'end_date'   => '2020-10-29 00:00:00',
+				'start_unix_timestamp' => strtotime( '2020-10-27 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2020-10-29 00:00:00' ) - 5 * HOUR_IN_SECONDS,
 
 				'location' => array(
 					'location'  => 'Online',
@@ -1270,6 +1286,7 @@ function maybe_add_wp15_promo( $local_events, $user_agent, $time ) {
 			'meetup'     => '',
 			'meetup_url' => '',
 			'date'       => '2018-05-27 12:00:00',
+
 			'location'   => array(
 				'location' => 'Everywhere',
 			),
@@ -1340,7 +1357,7 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 	if ( false === $next_online_camp ) {
 		$raw_camp = $wpdb->get_row( "
 			SELECT
-				`title`, `url`, `meetup`, `meetup_url`, `date_utc`, `end_date`, `country`, `latitude`, `longitude`
+				`title`, `url`, `meetup`, `meetup_url`, `date_utc`, `date_utc_offset`, `end_date`, `country`, `latitude`, `longitude`
 			FROM `wporg_events`
 			WHERE
 				type     = 'wordcamp'  AND
@@ -1358,8 +1375,12 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 				'url'        => $raw_camp->url,
 				'meetup'     => $raw_camp->meetup,
 				'meetup_url' => $raw_camp->meetup_url,
+
+				// See notes about UTC in `get_events()`.
 				'date'       => $raw_camp->date_utc,
 				'end_date'   => $raw_camp->end_date,
+				'start_unix_timestamp'  => strtotime( $raw_camp->date_utc ) - $raw_camp->date_utc_offset,
+				'end_unix_timestamp'    => strtotime( $raw_camp->end_date ) - $raw_camp->date_utc_offset,
 
 				'location'   => array(
 					'location'  => 'Online',
@@ -1415,7 +1436,7 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
 
 	if ( ! $found ) {
 		$raw_discussion_group = $wpdb->get_row( "
-			SELECT `title`, `url`, `meetup`, `meetup_url`, `date_utc`, `end_date`, `country`, `latitude`, `longitude`
+			SELECT `title`, `url`, `meetup`, `meetup_url`, `date_utc`, `date_utc_offset`, `end_date`, `country`, `latitude`, `longitude`
 			FROM `wporg_events`
 			WHERE
 				type       = 'meetup'    AND
@@ -1434,8 +1455,12 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
 				'url'        => $raw_discussion_group->url,
 				'meetup'     => $raw_discussion_group->meetup,
 				'meetup_url' => $raw_discussion_group->meetup_url,
+
+				// See notes about UTC in `get_events()`.
 				'date'       => $raw_discussion_group->date_utc,
 				'end_date'   => $raw_discussion_group->end_date,
+				'start_unix_timestamp' => strtotime( $raw_discussion_group->date_utc ) - $raw_discussion_group->date_utc_offset,
+				'end_unix_timestamp'   => strtotime( $raw_discussion_group->end_date ) - $raw_discussion_group->date_utc_offset,
 
 				'location'   => array(
 					'location'  => 'Online',
