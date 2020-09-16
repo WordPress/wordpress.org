@@ -15,9 +15,9 @@ function run_tests() {
 	define( 'RUNNING_TESTS', true );
 	define( 'SAVEQUERIES',   true );
 
-	require_once( dirname( __DIR__ ) . '/index.php' );
+	require_once dirname( __DIR__ ) . '/index.php';
 
-	$tests_failed = 0;
+	$tests_failed  = 0;
 	$tests_failed += test_get_location();
 	$tests_failed += test_get_events();
 	$tests_failed += test_get_events_country_restriction();
@@ -28,8 +28,8 @@ function run_tests() {
 	$tests_failed += test_get_iso_3166_2_country_codes();
 	$tests_failed += test_remove_duplicate_events();
 
-	$query_count  = count( $wpdb->queries );
-	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
+	$query_count = count( $wpdb->queries );
+	$query_time  = array_sum( array_column( $wpdb->queries, 1 ) );
 
 	printf(
 		"\n\nFinished running all tests.\n\n* %d tests failed\n* %d queries ran in %f seconds\n* Average time per query: %f seconds\n",
@@ -183,14 +183,13 @@ function get_location_test_cases() {
 			),
 		),
 
-
 		/*
 		 * A location couldn't be found
 		 */
 		'city-invalid-private-ip' => array(
 			'input' => array(
 				'location_name' => 'Rivendell',
-				'ip'            => '127.0.0.1'
+				'ip'            => '127.0.0.1',
 			),
 			'expected' => false,
 		),
@@ -353,12 +352,12 @@ function get_location_test_cases() {
 
 		'city-with-diacritics-in-query' => array(
 			'input' => array(
-				'location_name' => "Doña Ana",
+				'location_name' => 'Doña Ana',
 				'locale'        => 'en_US',
 				'timezone'      => 'America/Denver',
 			),
 			'expected' => array(
-				'description' => "doña ana",
+				'description' => 'doña ana',
 				'latitude'    => '32.390',
 				'longitude'   => '-106.814',
 				'country'     => 'US',
@@ -367,12 +366,12 @@ function get_location_test_cases() {
 
 		'city-with-diacritics-in-formal-name-but-not-in-query' => array(
 			'input' => array(
-				'location_name' => "Dona Ana",
+				'location_name' => 'Dona Ana',
 				'locale'        => 'en_US',
 				'timezone'      => 'America/Denver',
 			),
 			'expected' => array(
-				'description' => "dona ana",
+				'description' => 'dona ana',
 				'latitude'    => '32.390',
 				'longitude'   => '-106.814',
 				'country'     => 'US',
@@ -381,12 +380,12 @@ function get_location_test_cases() {
 
 		'city-with-period-in-query' => array(
 			'input' => array(
-				'location_name' => "St. Louis",
+				'location_name' => 'St. Louis',
 				'locale'        => 'en_US',
 				'timezone'      => 'America/Chicago',
 			),
 			'expected' => array(
-				'description' => "st. louis",
+				'description' => 'st. louis',
 				'latitude'    => '38.627',
 				'longitude'   => '-90.198',
 				'country'     => 'US',
@@ -395,12 +394,12 @@ function get_location_test_cases() {
 
 		'city-with-period-in-formal-name-but-not-in-query' => array(
 			'input' => array(
-				'location_name' => "St Louis",
+				'location_name' => 'St Louis',
 				'locale'        => 'en_US',
 				'timezone'      => 'America/Chicago',
 			),
 			'expected' => array(
-				'description' => "st louis",
+				'description' => 'st louis',
 				'latitude'    => '38.627',
 				'longitude'   => '-90.198',
 				'country'     => 'US',
@@ -1495,34 +1494,34 @@ function test_get_iso_3166_2_country_codes() {
 function test_remove_duplicate_events() {
 	$duplicate_events = array(
 		// Each of these represents an event; extraneous fields have been removed for readability.
-		array (
+		array(
 			'url' => 'https://2020.us.wordcamp.org/',
 		),
 
-		array (
+		array(
 			'url' => 'https://2020.detroit.wordcamp.org/',
 		),
 
 		array(
 			// Intentionally missing the trailing slash, to account for inconsistencies in data.
 			'url' => 'https://2020.us.wordcamp.org',
-		)
+		),
 	);
 
 	printf( "\nRunning 1 remove_duplicate_events() test" );
 
 	$expected_result = array(
-		array (
+		array(
 			'url' => 'https://2020.us.wordcamp.org',
 		),
 
-		array (
+		array(
 			'url' => 'https://2020.detroit.wordcamp.org/',
 		),
 	);
 
-	$actual_result   = remove_duplicate_events( $duplicate_events );
-	$passed          = $expected_result === $actual_result;
+	$actual_result = remove_duplicate_events( $duplicate_events );
+	$passed        = $expected_result === $actual_result;
 
 	output_results( 'remove duplicate events', $passed, $expected_result, $actual_result );
 

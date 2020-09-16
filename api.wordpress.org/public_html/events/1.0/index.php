@@ -100,12 +100,12 @@ function disable_caching() {
 function bootstrap() {
 	$base_dir = dirname( dirname( __DIR__ ) );
 
-	require( $base_dir . '/init.php' );
-	require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
-	include( $base_dir . '/includes/wp-json-encode.php' );
+	require $base_dir . '/init.php';
+	require $base_dir . '/includes/hyperdb/bb-10-hyper-db.php';
+	include $base_dir . '/includes/wp-json-encode.php';
 
 	if ( ! defined( 'RUNNING_TESTS' ) || ! RUNNING_TESTS ) {
-		include( $base_dir . '/includes/object-cache.php' );
+		include $base_dir . '/includes/object-cache.php';
 	}
 }
 
@@ -124,7 +124,7 @@ function parse_request() {
 	}
 
 	if ( isset( $_GET['country'] ) ) {
-		$location_args['country'] = $_GET['country'];
+		$location_args['country']             = $_GET['country'];
 		$location_args['restrict_by_country'] = true;
 	}
 
@@ -345,7 +345,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 	// And we sort by population desc, assuming that the biggest matching location is the most likely one.
 
 	// Exact match
-	$query = "
+	$query = '
 		SELECT name, latitude, longitude, country
 		FROM geoname_summary
 		WHERE name = %s
@@ -354,7 +354,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 			FIELD( %s, timezone ) DESC,
 			population DESC,
 			BINARY LOWER( %s ) = BINARY LOWER( name ) DESC
-		LIMIT 1";
+		LIMIT 1';
 
 	$prepared_query = $wpdb->prepare( $query, $location_name, $country, $timezone, $location_name );
 	$db_handle      = $wpdb->db_connect( $prepared_query );
@@ -365,7 +365,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 
 	// Wildcard match
 	if ( ! $row && $wildcard && 'ASCII' !== mb_detect_encoding( $location_name ) ) {
-		$query = "
+		$query = '
 			SELECT name, latitude, longitude, country
 			FROM geoname_summary
 			WHERE name LIKE %s
@@ -374,7 +374,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 				FIELD( %s, timezone ) DESC,
 				population DESC,
 				BINARY LOWER( %s ) = BINARY LOWER( LEFT( name, %d ) ) DESC
-			LIMIT 1";
+			LIMIT 1';
 
 		$prepared_query = $wpdb->prepare( $query, $wpdb->esc_like( $location_name ) . '%', $country, $timezone, $location_name, mb_strlen( $location_name ) );
 		$db_handle      = $wpdb->db_connect( $prepared_query );
@@ -431,10 +431,10 @@ function guess_location_from_ip( $dotted_ip ) {
 		$long_ip = ip2long( $dotted_ip );
 		$from    = 'ip2location';
 		$where   = 'ip_to >= %d';
-	} else if ( filter_var( $dotted_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
+	} elseif ( filter_var( $dotted_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
 		$long_ip = _ip2long_v6( $dotted_ip );
 		$from    = 'ipv62location';
-		$where   = "ip_to >= CAST( %s AS DECIMAL( 39, 0 ) )";
+		$where   = 'ip_to >= CAST( %s AS DECIMAL( 39, 0 ) )';
 	}
 
 	if ( false === $long_ip || ! isset( $from, $where ) ) {
@@ -495,7 +495,7 @@ function _ip2long_v6( $address ) {
 	$ipv6long = 0;
 
 	while ( $bits >= 0 ) {
-		$bin = sprintf( "%08b", ( ord( $int[ $bits ] ) ) );
+		$bin = sprintf( '%08b', ( ord( $int[ $bits ] ) ) );
 
 		if ( $ipv6long ) {
 			$ipv6long = $bin . $ipv6long;
@@ -540,7 +540,7 @@ function get_location( $args = array() ) {
 		$location = array(
 			'description' => false,
 			'latitude'    => $args['latitude'],
-			'longitude'   => $args['longitude']
+			'longitude'   => $args['longitude'],
 		);
 	}
 
@@ -684,7 +684,7 @@ function guess_location_from_country( $location_name ) {
 			$location_name_parts[ $location_word_count - 2 ],
 			$location_name_parts[ $location_word_count - 1 ]
 		);
-		$country = get_country_from_name( $country_name );
+		$country      = get_country_from_name( $country_name );
 	}
 
 	if ( ! $country && $location_word_count >= 4 ) {
@@ -695,7 +695,7 @@ function guess_location_from_country( $location_name ) {
 			$location_name_parts[ $location_word_count - 2 ],
 			$location_name_parts[ $location_word_count - 1 ]
 		);
-		$country = get_country_from_name( $country_name );
+		$country      = get_country_from_name( $country_name );
 	}
 
 	wp_cache_set( $cache_key, ( $country ?: '__NOT_FOUND__' ), $cache_group, $cache_life );
@@ -782,7 +782,7 @@ function get_events( $args = array() ) {
 		 * tangible use case for that yet. We could maybe support an `online` value for the `location` parameter
 		 * in the future if that's desired. If we do that, the Codex documentation should be updated.
 		 */
-		"( `meetup_url` IS NULL OR `meetup_url` <> 'https://www.meetup.com/learn-wordpress-discussions/' ) "
+		"( `meetup_url` IS NULL OR `meetup_url` <> 'https://www.meetup.com/learn-wordpress-discussions/' ) ",
 	);
 
 	if ( ! empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
@@ -880,14 +880,13 @@ function get_events( $args = array() ) {
 			'start_unix_timestamp'  => strtotime( $event->date_utc ) - $event->date_utc_offset,
 			'end_unix_timestamp'    => strtotime( $event->end_date ) - $event->date_utc_offset,
 
-
 			'location'   => array(
 				// Capitalize it for use in presentation contexts, like the Events Widget.
 				'location'  => 'online' === $event->location ? 'Online' : $event->location,
 				'country'   => $event->country,
 				'latitude'  => (float) $event->latitude,
 				'longitude' => (float) $event->longitude,
-			)
+			),
 		);
 	}
 
@@ -1005,8 +1004,7 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
 			`date_utc` >= %s AND
 			`date_utc` <= %s
 		ORDER BY `date_utc` ASC
-		LIMIT 1"
-	;
+		LIMIT 1";
 
 	$values[] = gmdate( 'Y-m-d', time() - DAY_IN_SECONDS );
 	$values[] = gmdate( 'Y-m-d', time() + $date_upper_bound );
@@ -1316,7 +1314,7 @@ function is_wp15_event( $title ) {
 	$keywords = array(
 		'wp15', '15 year', '15 ano', '15 año', '15 candeline', 'wordt 15',
 		'anniversary', 'aniversário', 'aniversario', 'birthday', 'cumpleaños',
-		'Tanti auguri'
+		'Tanti auguri',
 	);
 
 	foreach ( $keywords as $keyword ) {
@@ -1387,7 +1385,7 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 					'country'   => $raw_camp->country,
 					'latitude'  => (float) $raw_camp->latitude,
 					'longitude' => (float) $raw_camp->longitude,
-				)
+				),
 			);
 
 		} else {
@@ -1467,7 +1465,7 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
 					'country'   => $raw_discussion_group->country,
 					'latitude'  => (float) $raw_discussion_group->latitude,
 					'longitude' => (float) $raw_discussion_group->longitude,
-				)
+				),
 			);
 		}
 
@@ -1567,12 +1565,12 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 	return array(
 		'latitude' => array(
 			'min' => rad2deg( $minimum_lat ),
-			'max' => rad2deg( $maximum_lat )
+			'max' => rad2deg( $maximum_lat ),
 		),
 		'longitude' => array(
 			'min' => rad2deg( $minimum_lon ),
-			'max' => rad2deg( $maximum_lon )
-		)
+			'max' => rad2deg( $maximum_lon ),
+		),
 	);
 }
 
