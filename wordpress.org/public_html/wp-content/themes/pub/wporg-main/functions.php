@@ -100,6 +100,13 @@ function scripts() {
 		] );
 	} elseif ( is_page( 'download' ) ) {
 		wp_enqueue_style( 'jquery-modal-style', get_theme_file_uri( '/css/jquery.modal.min.css' ), [], '0.9.2' );
+		if ( is_rtl() ) {
+			wp_add_inline_style(
+				'jquery-modal-style',
+				'.modal { text-align: right; }' .
+				'.modal a.close-modal { right: unset; left: -12.5px; }'
+			);
+		}
 		wp_enqueue_script( 'jquery-modal', get_theme_file_uri( '/js/jquery.modal.min.js' ), [ 'jquery' ], '0.9.2', true );
 		wp_enqueue_script( 'wporg-page-download', get_theme_file_uri( '/js/page-download.js' ), [ 'jquery', 'jquery-modal' ], '20191220', true );
 	}
