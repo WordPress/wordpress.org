@@ -26,6 +26,8 @@ function init() {
 	add_action( 'set_current_user', __NAMESPACE__ . '\p2_kses_init' );
 
 	add_filter( 'force_filtered_html_on_import', __NAMESPACE__ . '\force_filtered_html_on_import', 10000 );
+
+	add_filter( 'wp_kses_allowed_html', __NAMESPACE__ . '\wp_kses_allowed_html' );
 }
 add_action( 'setup_theme', __NAMESPACE__ . '\init' );
 
@@ -62,4 +64,15 @@ function force_filtered_html_on_import( $force ) {
 	}
 
 	return $force;
+}
+
+/**
+ * Remove <title> as a valid post tag, this should never actually be used and breaks o2.
+ */
+function wp_kses_allowed_html( $tags ) {
+	if ( is_array( $tags ) ) {
+		unset( $tags['title'] );
+	}
+
+	return $tags;
 }
