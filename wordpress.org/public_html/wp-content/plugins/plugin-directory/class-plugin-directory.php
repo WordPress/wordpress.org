@@ -976,12 +976,12 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Adjust the login URL to point back to whatever part of the support forums we're
+	 * Adjust the login URL to point back to whatever part of the plugin directory we're
 	 * currently looking at. This allows the redirect to come back to the same place
 	 * instead of the main /support URL by default.
 	 */
 	public function fix_login_url( $login_url, $redirect, $force_reauth ) {
-		// modify the redirect_to for the support forums to point to the current page
+		// modify the redirect_to for the plugin directory to point to the current page
 		if ( 0 === strpos( $_SERVER['REQUEST_URI'], '/plugins' ) ) {
 			// Note that this is not normal because of the code in /mu-plugins/wporg-sso/class-wporg-sso.php.
 			// The login_url function there expects the redirect_to as the first parameter passed into it instead of the second
@@ -1003,7 +1003,6 @@ class Plugin_Directory {
 		}
 		return $login_url;
 	}
-
 
 	/**
 	 * Returns the requested page's content, translated.
@@ -1269,6 +1268,8 @@ class Plugin_Directory {
 	 * Handles all the custom redirects needed in the Plugin Directory.
 	 */
 	function custom_redirects() {
+		global $wp_query;
+
 		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
 		if ( get_query_var( 'redirect_plugin' ) && get_query_var( 'redirect_plugin_tab' ) ) {
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/#' . get_query_var( 'redirect_plugin_tab' ) ), 301 );
@@ -1333,6 +1334,22 @@ class Plugin_Directory {
 			}
 		}
 
+		// Redirect mixed-case plugin names to the canonical location.
+		if (
+			get_query_var( 'name' ) && // A sanitized lowercase value is here
+			is_singular() &&
+			! empty( $wp_query->query['name'] ) && // The raw value is available here.
+			get_query_var( 'name' ) != $wp_query->query['name']
+		) {
+			$url = get_permalink();
+			if ( get_query_var( 'plugin_advanced' ) ) {
+				$url .= 'advanced/';
+			}
+
+			wp_safe_redirect( $url, 301 );
+			die();
+		}
+
 		// If it's an old search query, handle that too.
 		if ( 'search.php' == get_query_var( 'name' ) && isset( $_GET['q'] ) ) {
 			wp_safe_redirect( site_url( '/search/' . urlencode( wp_unslash( $_GET['q'] ) ) . '/' ), 301 );
@@ -1381,7 +1398,7 @@ class Plugin_Directory {
 			return;
 		}
 
-		// disable feeds
+		// Disable feeds
 		if ( is_feed() ) {
 			if ( isset( $_GET['feed'] ) ) {
 				wp_redirect( esc_url_raw( remove_query_arg( 'feed' ) ), 301 );
