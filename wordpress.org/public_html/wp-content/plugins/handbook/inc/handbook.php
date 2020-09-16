@@ -361,7 +361,7 @@ class WPorg_Handbook {
 				$page = get_page_by_path( 'welcome', OBJECT, $this->post_type );
 			}
 			if ( $page ) {
-				$query->set( 'p', $page->ID );
+				$query->set( 'page_id', $page->ID );
 				$query->is_handbook_root     = true;
 
 				$query->is_archive           = false;
