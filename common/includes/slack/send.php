@@ -17,6 +17,7 @@ class Send {
 	protected $username;
 	protected $text = '';
 	protected $attachments = array();
+	protected $link_names = 0;
 
 	function __construct( $webhook ) {
 		$this->webhook = $webhook;
@@ -68,6 +69,10 @@ class Send {
 		return $this->attachments;
 	}
 
+	function set_link_names( $bool = false ) {
+		$this->link_names = (int) $bool;
+	}
+
 	function get_payload() {
 		$icon = $this->get_icon();
 		$icon_type = ':' === substr( $icon, 0, 1 ) ? 'icon_emoji' : 'icon_url';
@@ -76,7 +81,7 @@ class Send {
 			$icon_type    => $icon,
 			'username'    => $this->get_username(),
 			'attachments' => $this->get_attachments(),
-			'link_names'  => 1,
+			'link_names'  => $this->link_names,
 		);
 
 		if ( $text = $this->get_text() ) {
