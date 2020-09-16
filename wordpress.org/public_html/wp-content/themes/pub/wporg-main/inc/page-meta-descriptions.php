@@ -320,7 +320,11 @@ function custom_page_title( $title, $post = null ) {
 			break;
 
 		case 'page-about.php':
-			$title = esc_html_x( 'About Us: Our Mission', 'Page title', 'wporg' );
+			if ( 'single_post_title' === current_filter() ) {
+				$title = esc_html_x( 'About Us: Our Mission', 'Page title', 'wporg' );
+			} else {
+				$title = esc_html_x( 'About', 'Page title', 'wporg' );
+			}
 			break;
 
 		case 'page-about-privacy-data-erasure-request.php':
