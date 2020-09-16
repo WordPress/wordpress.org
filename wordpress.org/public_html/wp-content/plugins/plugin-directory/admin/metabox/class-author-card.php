@@ -25,6 +25,7 @@ class Author_Card {
 		'5.102.170.',
 		'5.102.171.',
 		'38.78.',
+		'42.109.',
 		'47.15.',
 		'49.50.124.',
 		'65.33.104.38',
@@ -36,8 +37,10 @@ class Author_Card {
 		'91.238.',
 		'94.103.41.',
 		'109.123.',
+		'101.0.',
 		'110.55.1.251',
 		'110.55.4.248',
+		'114.31.',
 		'116.193.162.',
 		'119.235.251.',
 		'159.253.145.183',
@@ -162,6 +165,7 @@ class Author_Card {
 
 		<div class="profile-user-notes">
 			<?php
+			// Check user status.
 			if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 				$user     = new \WP_User( $author, '', WPORG_SUPPORT_FORUMS_BLOGID );
 				$statuses = array();
@@ -196,6 +200,42 @@ class Author_Card {
 				$user_notes = get_user_meta( $user->ID, '_wporg_bbp_user_notes', true );
 			}
 
+			// Include any warning flags.
+			$warning_flags = self::get_user_flags( $user->ID );
+			if ( $warning_flags ) {
+				echo '<strong>' . __( 'Warning Flags:', 'wporg-plugins' ) . '</strong>';
+				echo '<ul class="plugin-flagged">';
+				foreach ( $warning_flags as $flag => $reasons ) {
+					echo '<li class="plugin-flagged-' . esc_attr( $flag ) . '"><strong>' . esc_html( strtoupper( $flag ) ) . ' (' . esc_html( count( $reasons ) ) . '):</strong> ' . esc_html( implode( '; ', $reasons ) ) . '</li>';
+				}
+				echo '</ul>';
+			}
+
+			// Check IPs.
+			$post_ids = get_posts( array(
+				'fields'         => 'ids',
+				'post_type'      => 'plugin',
+				'post_status'    => 'any',
+				'author'         => $author->ID,
+				'meta_key'       => '_author_ip',
+				'posts_per_page' => -1,
+			) );
+
+			$user_ips = array_unique( array_map( function( $post_id ) {
+				return get_post_meta( $post_id, '_author_ip', true );
+			}, $post_ids ) );
+
+			if ( $user_ips ) {
+				sort( $user_ips, SORT_NUMERIC );
+
+				/* translators: %s: comma-separated list of plugin author's IP addresses */
+				printf(
+					'<p>' . __( 'IPs : %s', 'wporg-plugins' ) . '</p>',
+					implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) )
+				);
+			}
+
+			// Include any user notes.
 			if ( ! empty( $user_notes ) ) {
 				_e( 'User notes:', 'wporg-plugins' );
 				echo '<ul>';
@@ -216,35 +256,6 @@ class Author_Card {
 			}
 			?>
 		</div>
-
-		<?php
-		$post_ids = get_posts( array(
-			'fields'         => 'ids',
-			'post_type'      => 'plugin',
-			'post_status'    => 'any',
-			'author'         => $author->ID,
-			'meta_key'       => '_author_ip',
-			'posts_per_page' => -1,
-		) );
-
-		$user_ips = array_unique( array_map( function( $post_id ) {
-			return get_post_meta( $post_id, '_author_ip', true );
-		}, $post_ids ) );
-
-		if ( $user_ips ) :
-			sort( $user_ips, SORT_NUMERIC );
-
-			/* translators: %s: comma-separated list of plugin author's IP addresses */
-			printf(
-				'<p>' . __( 'IPs : %s', 'wporg-plugins' ) . '</p>',
-				implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) )
-			);
-		endif;
-		?>
-
-		<?php if ( $author->user_pass == '~~~' ) : ?>
-			<p><strong><?php _e( 'Has not logged in since we reset passwords in June 2011', 'wporg-plugins' ); ?></strong></p>
-		<?php endif; ?>
 
 		<div class="profile-plugins">
 			<?php
@@ -313,6 +324,92 @@ class Author_Card {
 		);
 
 		return $output_ip;
+	}
+
+	protected static function get_user_flags( $user_id ) {
+		$author  = get_user_by( 'id', $user_id );
+		$flagged = array(
+			'low'  => [],
+			'med'  => [],
+			'high' => [],
+		);
+
+		// Check for login.
+		if ( $author->user_pass == '~~~' ) {
+			array_push( $flagged['high'], 'has not logged in since we reset passwords in June 2011' );
+		}
+
+		// Check for Yahoo.
+		if ( false !== stripos( $author->user_email, 'yahoo' ) ) {
+			array_push( $flagged['med'], 'account email contains yahoo and may not get our emails.' );
+		}
+
+		// There has been an uptick in users with names ending in numbers AND being very new, submitting
+		// a lot of plugins after being banned.
+		$two_weeks_ago = time() - ( 2 * WEEK_IN_SECONDS );
+		$four_days_ago = time() - ( 4 * DAY_IN_SECONDS );
+		if ( is_numeric( substr( $author->user_login, - 1, 1 ) ) && strtotime( $author->user_registered ) > $four_days_ago ) {
+			// Username ends in numbers and is less than 4 days old.
+			array_push( $flagged['high'], 'account registered less than 4 days ago and username ends in numbers' );
+		} elseif ( is_numeric( substr( $author->user_login, - 1, 1 ) ) ) {
+			// Username just ends in numbers.
+			array_push( $flagged['med'], 'username ends in numbers' );
+		} elseif ( strtotime( $author->user_registered ) > $two_weeks_ago && strtotime( $author->user_registered ) < $four_days_ago ) {
+			// User account was registered less than 2 weeks ago (but longer than 4 days).
+			array_push( $flagged['low'], 'account registered less than 2 weeks ago' );
+			// If they have 4+ plugins in 2 weeks, it MAY be an issue.
+			if ( 4 <= count( $author_plugins ) ) {
+				array_push( $flagged['med'], 'high number of submitted plugins in a short timeframe' );
+			}
+		} elseif ( strtotime( $author->user_registered ) > $four_days_ago ) {
+			// User account was registered less than 4 days ago.
+			array_push( $flagged['med'], 'account registered less than 4 days ago' );
+			// If they have 2+ plugins in 4 days, it's a problem.
+			if ( 2 <= count( $author_plugins ) ) {
+				array_push( $flagged['high'], 'high number of submitted plugins in a short timeframe' );
+			}
+		}
+
+		// Check IPs.
+		$post_ids = get_posts( array(
+			'fields'         => 'ids',
+			'post_type'      => 'plugin',
+			'post_status'    => 'any',
+			'author'         => $author->ID,
+			'meta_key'       => '_author_ip',
+			'posts_per_page' => -1,
+		) );
+
+		$user_ips = array_unique( array_map( function( $post_id ) {
+			return get_post_meta( $post_id, '_author_ip', true );
+		}, $post_ids ) );
+
+		if ( $user_ips ) {
+			sort( $user_ips, SORT_NUMERIC );
+
+			foreach ( $user_ips as $check_ip ) {
+				// if IP is 100% bad, it's a high flag.
+				if ( in_array( $check_ip, self::$iffy_ips ) ) {
+					array_push( $flagged['high'], 'uses known bad IP - ' . $check_ip );
+				} else {
+					foreach ( self::$iffy_ips as $check_iffy_ip ) {
+						if ( false !== strpos( $check_ip, $check_iffy_ip ) ) {
+							array_push( $flagged['med'], 'IP is partial match to known bad IPs - ' . $check_ip . ' vs ' . $check_iffy_ip );
+						}
+					}
+				}
+			}
+		}
+
+		// Remove any keys that have no warnngs.
+		foreach ( $flagged as $level => $reasons ) {
+			if ( ! $reasons ) {
+				unset( $flagged[ $level ] );
+			}
+		}
+
+		return $flagged;
+
 	}
 
 	/**
