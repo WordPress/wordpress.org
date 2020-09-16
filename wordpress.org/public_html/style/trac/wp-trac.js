@@ -355,6 +355,15 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					}
 				});
 
+				// Move all of the ticket actions text into the label.
+				// Trac markup is like this: `<label>close</label> as fixed`
+				jQuery('#action div label' ).each( function() {
+					if ( this.nextSibling && Node.TEXT_NODE === this.nextSibling.nodeType ) {
+						this.textContent += this.nextSibling.nodeValue;
+						this.nextSibling.nodeValue = '';
+					}
+				} );
+
 				// Point users to open new tickets when they comment on old tickets.
 				if ( $('#ticket').find('.milestone').hasClass('closed') ) {
 					var component = $('#field-component').val(), ticket_id = $('.trac-id').text(),
