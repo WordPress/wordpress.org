@@ -421,7 +421,8 @@ table.progress td.closed {
 	border-bottom: 1px solid #ddd;
 	color: #666;
 }
-#ticket div.description {
+#ticket div.description,
+#ticket span.summary {
 	word-break: break-word;
 }
 #ticket img,
