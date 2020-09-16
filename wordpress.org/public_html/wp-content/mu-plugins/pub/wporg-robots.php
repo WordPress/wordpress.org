@@ -58,13 +58,3 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 	return $robots;
 }
 add_filter( 'robots_txt', 'wporg_robots_prefix_sitemaps', 1 );
-
-// Remove the Jetpack News sitemap when there's no news on the site.
-// Remove once the upstream Jetpack issue is closed or merged https://meta.trac.wordpress.org/ticket/5438
-add_filter( 'jetpack_news_sitemap_include_in_robotstxt', function( $include ) {
-	if ( $include && empty( wp_count_posts()->publish ) ) {
-		$include = false;
-	}
-
-	return $include;
-} );
