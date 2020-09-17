@@ -122,6 +122,7 @@ function run( $data ) {
 	$send = new Send( \Dotorg\Slack\Send\WEBHOOK );
 	$send->set_username( $display_name );
 	$send->set_text( $text );
+	$send->set_link_names( true );
 	if ( $avatar ) {
 		$send->set_icon( $avatar );
 	}
