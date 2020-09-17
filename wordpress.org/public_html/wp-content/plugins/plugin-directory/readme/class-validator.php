@@ -30,11 +30,14 @@ class Validator {
 	public function validate_url( $url ) {
 		$url = esc_url_raw( $url );
 
-		if ( strtolower( substr( $url, -10 ) ) != 'readme.txt' ) {
+		if (
+			strtolower( substr( $url, -10 ) ) != 'readme.txt' &&
+			strtolower( substr( $url, -9 ) ) != 'readme.md'
+		) {
 			$error = sprintf(
 				/* translators: %s: readme.txt */
-				__( 'URL must end in %s!', 'wporg-plugins' ),
-				'<code>readme.txt</code>'
+				__( 'URL must end in %s or %s!', 'wporg-plugins' ),
+				'<code>readme.txt</code>', '<code>readme.md</code>'
 			);
 			return array(
 				'errors' => array( $error ),
