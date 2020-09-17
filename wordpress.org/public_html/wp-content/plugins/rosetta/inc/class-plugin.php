@@ -33,7 +33,7 @@ class Plugin {
 	 */
 	private function __construct() {
 		add_action( 'plugins_loaded', [ $this, 'plugins_loaded' ], 1 );
-		add_action( 'wp_nav_menu_objects', [ $this, 'download_button_menu_item' ], 11 );
+		add_filter( 'wp_nav_menu_objects', [ $this, 'download_button_menu_item' ], 11 );
 
 		$this->sites = [
 			Site\Global_WordPress_Org::class,
@@ -72,7 +72,15 @@ class Plugin {
 	 */
 	public function download_button_menu_item( $menu_items ) {
 		foreach ( $menu_items as $menu_item ) {
-			if ( false !== stripos( $menu_item->url, 'download/' ) || 'page-download.php' === get_page_template_slug( $menu_item->object_id ) ) {
+			if (
+				false !== stripos( $menu_item->url, 'download/' ) ||
+				(
+					$menu_item->object_id &&
+					'post_type' == $menu_item->type &&
+					'page-download.php' === get_page_template_slug( $menu_item->object_id )
+				)
+			) {
+				$menu_item->ID      = -1; // Prevents the title being overwritten by the page title.
 				$menu_item->classes = array_merge( $menu_item->classes, ['button', 'button-primary', 'download'] );
 				$menu_item->title   = _x( 'Get WordPress', 'Menu title', 'rosetta' );
 				break;
