@@ -72,6 +72,9 @@ class DevHub_User_Submitted_Content {
 
 		// Disable the search query in the insert link modal window
 		add_filter( 'wp_link_query_args',              array( __CLASS__, 'disable_link_query' ) );
+
+		// Disable moderation emails to post author.
+		add_filter( 'comment_notification_recipients', array( __CLASS__, 'disable_moderation_emails' ), 10, 2 );
 	}
 
 	/**
@@ -509,6 +512,27 @@ class DevHub_User_Submitted_Content {
 		return $fields;
 	}
 
+	/**
+	 * Disables moderation emails to post author for parsed post types.
+	 *
+	 * Parsed post types aren't legitimately authored by any given user, so whoever
+	 * is assigned does not need these notifications. A team of moderators are
+	 * responsible for handling submitted comments, most of which start off in
+	 * moderation.
+	 *
+	 * @param string[] $emails     An array of email addresses to receive a comment notification.
+	 * @param int      $comment_id The comment ID.
+	 */
+	public static function disable_comment_notifications( $emails, $comment_id ) {
+		$comment = get_comment( $comment_id );
+
+		if ( $comment && DevHub\is_parsed_post_type( get_post_type( $comment->comment_post_ID ) ) ) {
+			$emails = [];
+		}
+
+		return $emails;
+	}
+	
 } // DevHub_User_Submitted_Content
 
 DevHub_User_Submitted_Content::init();
