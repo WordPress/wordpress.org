@@ -17,24 +17,20 @@ class DevHub_Command extends WP_CLI_Command {
 	 * : The path to a copy of WordPress to be parsed. Should not be code used in
 	 * an active install.
 	 *
-	 * <user-id>
-	 * : ID of user to attribute all parsed posts to.
+	 * [--user_id=<user_id>]
+	 * : ID of user to attribute all parsed posts to. Default is 5911429, the ID for wordpressdotorg.
 	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Parse WP 4.9.5 into DevHub.
-	 *     $ wp devhub /home/wporgdev/developer/wp495 3606
+	 *     $ wp devhub /home/wporgdev/developer/wp495
 	 *
 	 * @when after_wp_load
 	 */
 	public function parse( $args, $assoc_args ) {
-		list( $path, $user_id ) = $args;
+		list( $path ) = $args;
 
-		if ( ! is_numeric( $user_id ) ) {
-			WP_CLI::error( 'Invalid user_id provided.' );
-		} else {
-			$user_id = (int) $user_id;
-		}
+		$user_id = $assoc_args['user_id'] ?? 5911429; // 5911429 = ID for wordpressdotorg
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
 			WP_CLI::error( 'Invalid user_id provided.' );
