@@ -201,7 +201,7 @@ class Author_Card {
 			}
 
 			// Include any warning flags.
-			$warning_flags = self::get_user_flags( $user->ID );
+			$warning_flags = self::get_user_flags( $user->ID, $author_plugins );
 			if ( $warning_flags ) {
 				echo '<strong>' . __( 'Warning Flags:', 'wporg-plugins' ) . '</strong>';
 				echo '<ul class="plugin-flagged">';
@@ -326,7 +326,7 @@ class Author_Card {
 		return $output_ip;
 	}
 
-	protected static function get_user_flags( $user_id ) {
+	protected static function get_user_flags( $user_id, $author_plugins ) {
 		$author  = get_user_by( 'id', $user_id );
 		$flagged = array(
 			'low'  => [],
