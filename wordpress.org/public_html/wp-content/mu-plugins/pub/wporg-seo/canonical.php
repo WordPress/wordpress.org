@@ -56,6 +56,12 @@ function get_canonical_url() {
 	$url = false;
 
 	if ( is_tax() || is_tag() || is_category() ) {
+		// Bail early for taxonomy queries that have no queried objects.
+		// This is most likely a 404 request for a term that doesn't exist.
+		if ( ! $queried_object ) {
+			return false;
+		}
+
 		$url = get_term_link( $queried_object );
 
 		// Detect multi-term queries.
