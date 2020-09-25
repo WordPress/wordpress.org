@@ -232,6 +232,7 @@ function get_whitelist() {
 			'ianbelanger',
 			'karmatosed',
 			'laurelfulford',
+			'luminuu', // @jessica on Slack
 			'melchoyce',
 			'poena',
 		) ),
