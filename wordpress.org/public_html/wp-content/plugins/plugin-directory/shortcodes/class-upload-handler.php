@@ -121,7 +121,7 @@ class Upload_Handler {
 				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
 				$message = sprintf(
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used at all in your plugin permalink. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
+					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used at all in your plugin permalink nor the display name. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, please email us at %4$s and explain why.', 'wporg-plugins' ),
 					'<code>' . $this->plugin_slug . '</code>',
 					trim( $this->has_trademarked_slug(), '-' ),
 					'<code>Plugin Name:</code>',
@@ -236,7 +236,7 @@ class Upload_Handler {
 
 				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-					__( 'There is already a plugin with the name %1$s known to exist. This generally means the permalink %2$s is already in use outside of WordPress.org and has a significant user base. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is incorrect, email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
+					__( 'There is already a plugin with the name %1$s known to exist, though it is not hosted on WordPress.org. This means the permalink %2$s is already in use, and has a significant user base. Were we to accept it as-is, our system would overwrite those other installs and potentially damage any existing users. This is especially true since WordPress 5.5 and up will automatically update plugins and themes. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is an incorrect assessment of the situation, please email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
 					'<code>' . $this->plugin['Name'] . '</code>',
 					'<code>' . $this->plugin_slug . '</code>',
 					'<code>Plugin Name:</code>',
@@ -436,6 +436,7 @@ class Upload_Handler {
 			'aws-',
 			'bbpress-',
 			'bing-',
+			'bootstrap-',
 			'buddypress-',
 			'contact-form-7-',
 			'divi-',
@@ -447,6 +448,7 @@ class Upload_Handler {
 			'feedburner',
 			'github-',
 			'google-',
+			'googles-',
 			'gravity-forms-',
 			'gutenberg',
 			'ig-',
@@ -465,7 +467,8 @@ class Upload_Handler {
 			'whats-app',
 			'watson',
 			'windows-',
-			'woocommerce', // technically ending with '-for-woocommerce' is allowed.
+			'wocommerce', 
+			'woocommerce',  // technically ending with '-for-woocommerce' is allowed.
 			'woo-commerce',
 			'woo-',
 			'wordpress',
