@@ -5,11 +5,11 @@
  * @package wporg-login
  */
 
-$user_login = isset( $_POST['user_login'] ) ? wp_unslash( $_POST['user_login'] ) : '';
+$user_login = isset( $_POST['user_login'] ) ? trim( wp_unslash( $_POST['user_login'] ) ) : '';
 if ( ! $user_login && !empty( WP_WPOrg_SSO::$matched_route_params['user'] ) ) {
-	$user_login = WP_WPOrg_SSO::$matched_route_params['user'];
+	$user_login = trim( WP_WPOrg_SSO::$matched_route_params['user'] );
 }
-$user_email = isset( $_POST['user_email'] ) ? wp_unslash( $_POST['user_email'] ) : '';
+$user_email = isset( $_POST['user_email'] ) ? trim( wp_unslash( $_POST['user_email'] ) ) : '';
 $user_mailinglist = isset( $_POST['user_mailinglist'] ) && 'true' == $_POST['user_mailinglist'];
 
 $error_user_login = $error_user_email = $error_recapcha_status = false;

@@ -49,6 +49,10 @@ function wporg_login_check_recapcha_status( $check_v3_action = false ) {
 function wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist = false  ) {
 	global $wpdb, $wp_hasher;
 
+	// Remove any whitespace which might have accidentally been added.
+	$user_login = trim( $user_login );
+	$user_email = trim( $user_email );
+
 	// Allow for w.org plugins to block registrations based on spam checks, etc.
 	if ( null !== ( $pre_register_error = apply_filters( 'wporg_login_pre_registration', null, $user_login, $user_email, $user_mailinglist ) ) ) {
 		if ( is_wp_error( $pre_register_error ) ) {
@@ -131,7 +135,7 @@ function wporg_login_send_confirmation_email( $user ) {
 	$body .= "\n";
 	$body .= sprintf( __( 'Your username is: %s', 'wporg' ), $user_login ) . "\n";
 	$body .= __( 'You can create a password at the following URL:', 'wporg' ) . "\n";
-	$body .= home_url( "/register/create/{$user_login}/{$activation_key}/" );
+	$body .= home_url( '/register/create/' . urlencode( $user_login ) . '/' . urlencode( $activation_key ) . '/' );
 	$body .= "\n\n";
 	$body .= __( '-- The WordPress.org Team', 'wporg' );
 
@@ -203,8 +207,8 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 	global $wpdb;
 
 	// Insert user, no password tho.
-	$user_login = $pending_user['user_login'];
-	$user_email = $pending_user['user_email'];
+	$user_login = trim( $pending_user['user_login'] );
+	$user_email = trim( $pending_user['user_email'] );
 	$user_mailinglist = !empty( $pending_user['meta']['user_mailinglist'] ) && $pending_user['meta']['user_mailinglist'];
 
 	if ( ! $password ) {
@@ -278,7 +282,7 @@ function wporg_login_save_profile_fields( $pending_user = false ) {
 
 	foreach ( $fields as $field ) {
 		if ( isset( $_POST['user_fields'][ $field ] ) ) {
-			$value = sanitize_text_field( wp_unslash( $_POST['user_fields'][ $field ] ) );
+			$value = trim( sanitize_text_field( wp_unslash( $_POST['user_fields'][ $field ] ) ) );
 			if ( 'url' == $field ) {
 				if ( $pending_user ) {
 					$pending_user['meta'][ $field ] = esc_url_raw( $value );
