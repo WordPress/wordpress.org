@@ -135,6 +135,17 @@ class Release_Confirmation {
 		}
 
 		foreach ( $releases as $data ) {
+			if ( ! is_array( $data['committer'] ) ) {
+				$data['committer'] = (array) $data['committer'];
+			}
+			foreach ( $data['committer'] as $i => $login ) {
+				$data['committer'][ $i ] = sprintf(
+					'<a href="%s">%s</a>',
+					'https://profiles.wordpress.org/' . get_user_by( 'login', $login )->user_nicename,
+					esc_html( $login )
+				);
+			}
+
 			printf(
 				'<tr>
 					<td>%s</td>
@@ -154,7 +165,7 @@ class Release_Confirmation {
 				),
 				esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
 				esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
-				esc_html( implode( ', ', (array) $data['committer'] ) ),
+				implode( ', ', $data['committer'] ),
 				self::get_approval_text( $plugin, $data ),
 				self::get_actions( $plugin, $data )
 			);
