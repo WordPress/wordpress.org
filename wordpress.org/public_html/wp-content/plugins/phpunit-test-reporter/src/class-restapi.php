@@ -19,10 +19,9 @@ class RestAPI {
 				'callback'            => array( __CLASS__, 'add_results_callback' ),
 				'args'                => array(
 					'commit'  => array(
-						'required'          => true,
-						'description'       => 'The SVN commit changeset number.',
-						'type'              => 'numeric',
-						'validate_callback' => array( __CLASS__, 'validate_callback' ),
+						'required'    => true,
+						'description' => 'The SVN commit changeset number.',
+						'type'        => 'integer',
 					),
 					'results' => array(
 						'required'          => true,
@@ -50,17 +49,6 @@ class RestAPI {
 
 	public static function validate_callback( $value, $request, $key ) {
 		switch ( $key ) {
-			case 'commit':
-				if ( ! is_numeric( $value ) ) {
-					return new WP_Error(
-						'rest_invalid',
-						__( 'Value must be numeric.', 'ptr' ),
-						array(
-							'status' => 400,
-						)
-					);
-				}
-				return true;
 			case 'message':
 				if ( empty( $value ) || ! is_string( $value ) ) {
 					return new WP_Error(

@@ -68,7 +68,12 @@ if ( $parent ) :
 	</tr>
 </table>
 
-<?php if ( ! empty( $results['failures'] ) ) : ?>
+<?php
+if (
+	! empty( $results['failures'] ) ||
+	! empty( $results['errors'] )
+	) :
+	?>
 	<h2>Errors/Failures</h2>
 
 	<?php

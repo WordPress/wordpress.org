@@ -7,7 +7,7 @@
  * Author URI:      https://make.wordpress.org/hosting/
  * Text Domain:     ptr
  * Domain Path:     /languages
- * Version:         0.1.2
+ * Version:         0.1.3
  * License:         GPL v3
  *
  * @package         PTR

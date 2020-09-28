@@ -2,8 +2,8 @@
 Contributors: octalmage, danielbachhuber, wpamitkumar, mikeschroder, pfefferle
 Tags: phpunit
 Requires at least: 4.7
-Tested up to: 5.4.1
-Stable tag: 0.1.2
+Tested up to: 5.5
+Stable tag: 0.1.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,27 +13,14 @@ Captures and displays test results from the PHPUnit Test Runner
 
 Captures and displays test results from the [PHPUnit Test Runner](https://github.com/WordPress/phpunit-test-runner).
 
+This is the plugin that receives and generates the results displayed on https://make.wordpress.org/hosting/test-results.
+
 For more details, [please read through the project overview](https://make.wordpress.org/hosting/test-results-getting-started/).
 
 == Contributing ==
 
-There’s a Docker environment with several tools built in for testing.
-To configure it, run `make` and it will automatically run `docker-compose`.
-After that, to view the test environment, visit http://localhost:8080.
-
-Usage:
-- `make` or `make start`:  Builds a Docker environment for testing.
-- `make stop`: Stops Docker test environment.
-- `make shell`: SSH to Docker test environment.
-- `make test`: Runs `php-unit` and `phpcs` in Docker test environment.
-
-There is also a [Grunt](https://gruntjs.com/) command for updating the `README.md` file for Github
-after updating `readme.txt`.
-
-Usage:
-- `npm install`: Installs necessary dependencies.
-- `grunt readme`: Generates `README.md` with
-  `[grunt-wp-readme-to-markdown](https://github.com/stephenharris/wp-readme-to-markdown)`.
+Contributors are welcome!
+Check out the [contribution guidelines](https://github.com/WordPress/phpunit-test-reporter/blob/master/CONTRIBUTING.md) for details, including how to use the build/testing tools.
 
 == Changelog ==
 
@@ -53,3 +40,7 @@ Usage:
   grunt-wp-readme-to-markdown ^2.0.1, and update plugin version in `package.json`.
 * Upgrade Docker environment to use `wordpress:5.4.1-php7.4` image.
 * Correct contributor list in `readme.txt` and update `README.md`.
+
+= 0.1.3 (September 23th, 2020) =
+* Include errors along with failures on the error report page ([PR](https://github.com/WordPress/phpunit-test-reporter/pull/84)).
+* Change to `integer` built-in type for `commit` field, following updates in WordPress 5.5.
