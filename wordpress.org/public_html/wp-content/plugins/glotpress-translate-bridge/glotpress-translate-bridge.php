@@ -182,6 +182,9 @@ class GlotPress_Translate_Bridge {
 		}
 
 		preg_match( '!^([a-z]{2,3})(_([A-Z]{2}))?(_([a-z0-9]+))?$!', $wp_locale, $matches );
+		if ( ! $matches ) {
+			return false;
+		}
 
 		$wp_locale = $matches[1] . ( isset( $matches[2] ) ? $matches[2] : '' );
 		$locale = $matches[1];
