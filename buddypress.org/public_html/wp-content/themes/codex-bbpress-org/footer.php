@@ -20,7 +20,11 @@
 								<?php
 								$codex_contributors = array_slice( $codex_contributors, 0, 3, true );
 								foreach ( (array) $codex_contributors as $contributor_id => $count ) :
-									$userdata = get_userdata( $contributor_id ); ?>
+									$userdata = get_userdata( $contributor_id );
+									if ( ! $userdata ) {
+										continue;
+									}
+									?>
 
 									<div class="contributor">
 										<a href="#">

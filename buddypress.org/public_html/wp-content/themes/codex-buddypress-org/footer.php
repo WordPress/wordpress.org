@@ -50,6 +50,10 @@
 					$codex_contributors = array_slice( $codex_contributors, 0, 3, true );
 					foreach( (array)$codex_contributors as $contributor_id => $count ) {
 						$userdata = get_userdata( $contributor_id );
+						if ( ! $userdata ) {
+							continue;
+						}
+
 						echo '<div class="contributor">';
 							echo '<a href="#"><div class="contributor-avatar float-left">';
 								echo get_avatar( $contributor_id, 48 );
