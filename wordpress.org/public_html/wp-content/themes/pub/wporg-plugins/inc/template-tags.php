@@ -170,6 +170,7 @@ function get_closed_plugin_notice( $post = null ) {
  * @return string Message markup.
  */
 function get_plugin_status_notice( $post = null ) {
+	$post           = get_post( $post );
 	$post_status    = get_post_status( $post );
 	$info_notice    = '<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div><!-- .plugin-notice -->';
 	$error_notice   = '<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div><!-- .plugin-notice -->';
