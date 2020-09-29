@@ -176,6 +176,7 @@ function parse_request() {
  */
 function build_response( $location, $location_args ) {
 	$events = array();
+	$error  = null;
 
 	if ( 'temp-request-throttled' === $location ) {
 		$location = array();
