@@ -98,6 +98,7 @@ class Themes_API {
 		$scalar_only_fields = [
 			'author',
 			'browse',
+			'user',
 			'locale',
 			'per_page',
 			'slug',
@@ -110,6 +111,12 @@ class Themes_API {
 				unset( $this->request->$field );
 				$this->bad_input = true;
 			}
+		}
+
+		// Favorites requests require a user to fetch favorites for.
+		if ( isset( $this->request->browse ) && 'favorites' === $this->request->browse && ! isset( $this->request->user ) ) {
+			$this->request->user = '';
+			$this->bad_input = true;
 		}
 
 		$array_of_string_fields = [
@@ -546,7 +553,7 @@ class Themes_API {
 			if ( 'featured' == $this->request->browse ) {
 				$this->cache_life = HOUR_IN_SECONDS;
 			} elseif ( 'favorites' == $this->request->browse ) {
-				$this->query['favorites_user'] = (string) $this->request->user;
+				$this->query['favorites_user'] = $this->request->user;
 			}
 
 		}
