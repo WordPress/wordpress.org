@@ -225,7 +225,7 @@ class Make_Core_Trac_Components {
 	 * @return array Primitive caps.
 	 */
 	public function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
-		if ( in_array( $cap, [ 'edit_post', 'publish_post', 'edit_others_posts' ], true ) ) {
+		if ( $user_id && in_array( $cap, [ 'edit_post', 'publish_post', 'edit_others_posts' ], true ) ) {
 			if ( empty( $context[0] ) ) {
 				$context[0] = isset( $_POST['post_ID'] ) ? absint( $_POST['post_ID'] ) : 0;
 			}
