@@ -337,7 +337,7 @@ class WP_I18n_Teams {
 					$wp_locale = $wp_locale . '_' . $set->slug;
 				}
 
-				if ( ! isset( $counts[ $set->wp_locale ] ) ) {
+				if ( ! isset( $counts[ $wp_locale ] ) ) {
 					$counts[ $wp_locale ] = 0;
 				}
 				$counts[ $wp_locale ] += (int) $set->percent_translated;
