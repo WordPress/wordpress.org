@@ -4,9 +4,10 @@
 
 				<?php
 					$current_page = isset( $_GET['ppage'] ) ? absint( $_GET['ppage'] ) : 1;
-					$plugins  = bb_base_get_plugins( $current_page, $_GET['ps'], 'bbpress' );
-					$from_num = intval( ( (int) $plugins->info['page'] - 1 ) * 10 ) + 1;
-					$to_num   = ( $from_num + 9 > (int) $plugins->info['results'] ) ? $plugins->info['results'] : $from_num + 9;
+					$search       = isset( $_GET['ps'] ) ? $_GET['ps'] : false;
+					$plugins      = bb_base_get_plugins( $current_page, $search, 'bbpress' );
+					$from_num     = intval( ( (int) $plugins->info['page'] - 1 ) * 10 ) + 1;
+					$to_num       = ( $from_num + 9 > (int) $plugins->info['results'] ) ? $plugins->info['results'] : $from_num + 9;
 				?>
 
 				<div class="bbp-pagination">
