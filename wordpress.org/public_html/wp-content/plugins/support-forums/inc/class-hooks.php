@@ -197,6 +197,9 @@ class Hooks {
 			case 'edit_topic':
 			case 'edit_reply':
 				$post = get_post( $args[0] );
+				if ( ! $post ) {
+					break;
+				}
 
 				// Reviews can be edited at any time.
 				if ( 'topic' === $post->post_type && Plugin::REVIEWS_FORUM_ID == $post->post_parent ) {
@@ -204,7 +207,7 @@ class Hooks {
 				}
 
 				if (
-					$post && bbp_past_edit_lock( $post->post_date_gmt )
+					bbp_past_edit_lock( $post->post_date_gmt )
 				&&
 					! user_can( $user_id, 'moderate', $post->ID )
 				) {
