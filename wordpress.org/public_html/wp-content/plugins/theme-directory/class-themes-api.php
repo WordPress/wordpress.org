@@ -429,7 +429,7 @@ class Themes_API {
 			$defaults['requires_php'] = true;
 		}
 
-		$this->request->fields = (array) $this->request->fields ?? [];
+		$this->request->fields = (array) ( $this->request->fields ?? [] );
 
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
 
@@ -494,7 +494,7 @@ class Themes_API {
 			$defaults['requires_php'] = true;
 		}
 
-		$this->request->fields = (array) $this->request->fields ?? [];
+		$this->request->fields = (array) ( $this->request->fields ?? [] );
 
 		$this->fields = array_merge( $this->fields, $defaults, $this->request->fields );
 
