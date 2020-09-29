@@ -392,12 +392,10 @@ add_action('wp_ajax_author-lookup', 'wporg_themes_author_lookup');
  *                  false on failure.
  */
 function wporg_themes_update_version_status( $post_id, $current_version, $new_status ) {
-	$meta = get_post_meta( $post_id, '_status', true );
+	$meta = get_post_meta( $post_id, '_status', true ) ?: array();
 
-	if ( empty( $meta ) ) {
-		$meta = array();
-		$old_status = false;
-	} else {
+	$old_status = false;
+	if ( isset( $meta[ $current_version ] ) ) {
 		$old_status = $meta[ $current_version ];
 	}
 
