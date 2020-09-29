@@ -441,6 +441,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		protected function _maybe_add_remote_login_bounce( $redirect, $user = false ) {
+			// Authentication failed, don't need to add the login nonces yet.
+			if ( is_wp_error( $user ) ) {
+				return $redirect;
+			}
+
 			if ( ! $user ) {
 				$user = wp_get_current_user();
 			}
