@@ -193,7 +193,7 @@ class Jetpack_Search {
 	 * Determine whether or not the recent error volume is low enough to allow a fresh API call.
 	 */
 	protected function error_volume_is_low() {
-		// This cache key keeps a global-ish count of recent errors (per memcache instance).
+		// This cache key keeps a global-ish count of recent errors.
 		// Used for random exponential backoff when errors start to pile up, as they will if there is a network outage for example.
 		$error_volume = max( $this->get_error_volume(), 0 ); // >= 0
 
@@ -250,18 +250,30 @@ class Jetpack_Search {
 
 			// If the error volume is high, there's a proportionally lower chance that we'll actually attempt to hit the API.
 			if ( $this->error_volume_is_low() ) {
-				$request = wp_remote_post( $service_url, array(
+				$service_args = array(
 					'headers'    => array(
 						'Content-Type' => 'application/json',
 					),
 					'timeout'    => 10,
 					'user-agent' => 'WordPress.org/jetpack_search',
 					'body'       => $json_es_args,
-				) );
+				);
+				$request = wp_remote_post( $service_url, $service_args );
 			} else {
 				trigger_error( 'Plugin directory search: skipping search due to high error volume', E_USER_WARNING );
 				// Hopefully we still have a cached response to return
 				return $response;
+			}
+
+			// Retry 400 responses if the error volume is still low.
+			// These 400's are not bad requests but rather timeouts between the API and ES
+			if ( 400 === wp_remote_retrieve_response_code( $request ) ) {
+				// Bump the error counter
+				$this->increment_error_volume();
+
+				if ( $this->error_volume_is_low() ) {
+					$request = wp_remote_post( $service_url, $service_args );
+				}
 			}
 
 			// If there's a network or HTTP error, we'll intentionally leave the temporary lock to expire in a few seconds.
