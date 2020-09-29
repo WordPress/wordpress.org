@@ -94,8 +94,12 @@
 			$args         = array( 'order' => 'ASC', );
 			$revisions    = wp_get_post_revisions( get_queried_object_id(), $args );
 			$post_authors = array( $post->post_author => 1 );
-			foreach( (array)$revisions as $revision ) {
-				$post_authors[$revision->post_author] += 1;
+			foreach( (array) $revisions as $revision ) {
+				if ( isset( $post_authors[ $revision->post_author ] ) ) {
+					$post_authors[ $revision->post_author ]++;
+				} else {
+					$post_authors[ $revision->post_author ] = 1;
+				}
 			}
 			asort( $post_authors, SORT_NUMERIC );
 

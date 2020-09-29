@@ -16,7 +16,7 @@
 
 			Commented out "Similar" Pages
 
-			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->post_parent . '&exclude=' . $exclude_pages);
+			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->post_parent );
 			$rel = '<ul>' . $children . '</ul>';
 			echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Similar</h3>' . $rel . '</div>';
 			$show_related = false;
@@ -35,7 +35,7 @@
 			if ( !is_page( 'home' ) && $show_related ) {
 				$rel = '';
 				$cat = get_the_category();
-				$relateds = get_posts('nopaging=1&post_type=page&post_parent=0&orderby=title&order=ASC&cat=' . $cat[0]->term_id . '&exclude=' . $post->ID . ',');
+				$relateds = get_posts('nopaging=1&post_type=page&post_parent=0&orderby=title&order=ASC&cat=' . $cat[0]->term_id . '&exclude=' . $post->ID );
 				if ( $relateds ) {
 					foreach ($relateds as $related) {
 						$title = apply_filters('the_title', $related->post_title);

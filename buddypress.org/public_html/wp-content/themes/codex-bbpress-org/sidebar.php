@@ -18,12 +18,12 @@
 		$show_related = true;
 
 		if ( !empty( $post->post_parent ) ) {
-			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->post_parent . '&exclude=' . $exclude_pages);
+			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->post_parent );
 			$rel      = '<ul>' . $children . '</ul>';
 			echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Similar</h3>' . $rel . '</div>';
 			$show_related = false;
 		} else {
-			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->ID . '&exclude=' . $exclude_pages);
+			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->ID );
 			if ( !empty( $children ) ) {
 				$rel = '<ul>' . $children . '</ul>';
 				echo '<div class="related-content-widget widget listified"><h3 class="widgettitle">Subpages</h3>' . $rel . '</div>';
@@ -34,7 +34,7 @@
 		if ( ! is_page( 'home' ) && !empty( $show_related ) ) {
 			$rel      = '';
 			$cat      = get_the_category();
-			$relateds = get_posts( 'nopaging=1&post_type=page&post_parent=0&orderby=title&order=ASC&cat=' . $cat[0]->term_id . '&exclude=' . $post->ID . ',' . $exclude_pages );
+			$relateds = get_posts( 'nopaging=1&post_type=page&post_parent=0&orderby=title&order=ASC&cat=' . $cat[0]->term_id . '&exclude=' . $post->ID );
 			if ( !empty( $relateds ) ) {
 				foreach ( $relateds as $related ) {
 					$title = apply_filters( 'the_title', $related->post_title );

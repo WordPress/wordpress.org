@@ -9,15 +9,8 @@
 				);
 			?></cite>
 			<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_excerpt(); ?></div>
-			<?php $post_authors[get_the_author_meta( 'ID' )] += 1; ?>
 <?php endwhile;  ?>
 	
-			<?php
-				asort( $post_authors, SORT_NUMERIC );
-				global $codex_contributors;
-				$codex_contributors = array_reverse( $post_authors, true );
-			?>
-
 <?php else : ?>
 			<p><em><?php _e( 'Sorry, no posts matched your criteria.' ); ?></em></p>
 <?php endif; ?>
