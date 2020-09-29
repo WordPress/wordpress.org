@@ -92,9 +92,9 @@ array_walk( $prs, function( $data ) use ( $authenticated ) {
 $expiry = 60*60;
 if ( $authenticated ) {
 	foreach ( $prs as $pr ) {
-		if ( strtotime( $pr->updated_at ) > time() - 30*60 ) {
+		if ( strtotime( $pr->data->updated_at ) > time() - 30*60 ) {
 			$expiry = min( $expiry, 2*60 );
-		} elseif ( strtotime( $pr->updated_at ) > time() - 7*24*60*60 ) {
+		} elseif ( strtotime( $pr->data->updated_at ) > time() - 7*24*60*60 ) {
 			$expiry = min( $expiry, 5*60 );
 		}
 	}
