@@ -42,6 +42,11 @@ class Locale_Banner extends Base {
 		// Retrieve all the WordPress locales.
 		$all_locales = wp_list_pluck( $locale_subdomain_assoc, 'locale' );
 
+		// Validate that all the locale subdomains have valid WordPress locale values (hint: They don't).
+		$all_locales = array_filter( $all_locales, function( $locale ) {
+			return \GP_Locales::by_field( 'wp_locale', $locale );
+		} );
+
 		$is_plugin_request = ! empty( $plugin_slug );
 
 		if ( $is_plugin_request ) {
