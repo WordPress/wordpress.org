@@ -123,6 +123,7 @@ function welcome_box() {
 	}
 
 	setup_postdata( $welcome );
+	$GLOBALS['post'] = $welcome; // setup_postdata() doesn't do this for us.
 
 	// Disable Jetpack sharing buttons
 	add_filter( 'sharing_show', '__return_false' );
