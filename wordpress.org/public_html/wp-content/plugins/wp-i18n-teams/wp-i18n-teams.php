@@ -560,7 +560,7 @@ class WP_I18n_Teams {
 			return 'no-releases';
 		}
 
-		$one_lower = WP_CORE_LATEST_RELEASE - 0.1;
+		$one_lower = floatval( WP_CORE_LATEST_RELEASE ) - 0.1;
 
 		if ( $latest_release == WP_CORE_LATEST_RELEASE ) {
 			return 'latest';
