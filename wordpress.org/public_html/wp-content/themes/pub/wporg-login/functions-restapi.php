@@ -2,26 +2,31 @@
 
 function wporg_login_rest_routes() {
 	register_rest_route( 'wporg/v1', '/username-available/(?P<login>.*)', array(
-		'methods'  => WP_REST_Server::READABLE,
-		'callback' => 'wporg_login_rest_username_exists'
+		'methods'             => WP_REST_Server::READABLE,
+		'callback'            => 'wporg_login_rest_username_exists',
+		'permission_callback' => '__return_true',
 	) );
 	register_rest_route( 'wporg/v1', '/username-available/?', array(
-		'methods'  => WP_REST_Server::READABLE,
-		'callback' => 'wporg_login_rest_username_exists'
+		'methods'             => WP_REST_Server::READABLE,
+		'callback'            => 'wporg_login_rest_username_exists',
+		'permission_callback' => '__return_true',
 	) );
 
 	register_rest_route( 'wporg/v1', '/email-in-use/(?P<email>.*)', array(
-		'methods'  => WP_REST_Server::READABLE,
-		'callback' => 'wporg_login_rest_email_in_use'
+		'methods'             => WP_REST_Server::READABLE,
+		'callback'            => 'wporg_login_rest_email_in_use',
+		'permission_callback' => '__return_true',
 	) );
 	register_rest_route( 'wporg/v1', '/email-in-use/?', array(
-		'methods'  => WP_REST_Server::READABLE,
-		'callback' => 'wporg_login_rest_email_in_use'
+		'methods'             => WP_REST_Server::READABLE,
+		'callback'            => 'wporg_login_rest_email_in_use',
+		'permission_callback' => '__return_true',
 	) );
 
 	register_rest_route( 'wporg/v1', '/resend-confirmation-email/?', array(
-		'methods'  => WP_REST_Server::EDITABLE,
-		'callback' => 'wporg_login_rest_resend_confirmation_email'
+		'methods'             => WP_REST_Server::EDITABLE,
+		'callback'            => 'wporg_login_rest_resend_confirmation_email',
+		'permission_callback' => '__return_true',
 	) );
 }
 add_action( 'rest_api_init', 'wporg_login_rest_routes' );
@@ -48,7 +53,7 @@ function wporg_login_rest_username_exists( $request ) {
 			'error' => __( 'That username is already in use.', 'wporg' ) . '<br>' .
 				__( 'The registration is still pending, please check your email for the confirmation link.', 'wporg' ) . '<br>' .
 				'<a href="#" class="resend">' . __( 'Resend confirmation email.', 'wporg' ) . '</a>',
-			'avatar' => get_avatar( $pending->user_email, 64 ),
+			'avatar' => get_avatar( $pending['user_email'], 64 ),
 		];
 	}
 
