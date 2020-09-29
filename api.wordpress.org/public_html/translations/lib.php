@@ -78,6 +78,10 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	$i = 0;
 	foreach ( $translations as $translation ) {
 		$locale = GP_Locales::by_field( 'wp_locale', $translation->language );
+		if ( ! $locale ) {
+			// Locale not known to us.
+			continue;
+		}
 
 		$isos = array( 1 => false, 2 => false, 3 => false );
 		// We'll use ISO codes for sorting.
