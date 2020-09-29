@@ -1517,7 +1517,7 @@ class Plugin_Directory {
 	 * @return array
 	 */
 	public function split_post_content_into_pages( $content ) {
-		$_pages        = preg_split( '#<!--section=(.+?)-->#', $content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+		$_pages        = preg_split( '#<!--section=(.+?)-->#', ltrim( $content ), - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		$content_pages = array(
 			'screenshots' => '[wporg-plugins-screenshots]',
 			'developers'  => '[wporg-plugins-developers]',
@@ -1528,7 +1528,7 @@ class Plugin_Directory {
 
 			// Don't overwrite existing tabs.
 			if ( ! isset( $content_pages[ $_pages[ $i ] ] ) ) {
-				$content_pages[ $_pages[ $i ] ] = $_pages[ $i + 1 ];
+				$content_pages[ $_pages[ $i ] ] = $_pages[ $i + 1 ] ?? '';
 			}
 		}
 

@@ -138,7 +138,7 @@ class Plugin extends Base {
 		$result['homepage']                 = get_post_meta( $post_id, 'header_plugin_uri', true );
 		$result['sections']                 = array();
 
-		$_pages = preg_split( '#<!--section=(.+?)-->#', $post->post_content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+		$_pages = preg_split( '#<!--section=(.+?)-->#', ltrim( $post->post_content ), - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
 			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ] ?? '', $_pages[ $i ] );
 		}
