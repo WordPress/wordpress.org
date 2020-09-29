@@ -161,7 +161,7 @@ if ( (bool) strstr( $_SERVER['HTTP_HOST'], 'buddypress' ) && ! is_admin() && def
 function bporg_insert_at_mention( $content, $activity_obj ) {
 	global $bp;
 
-	if ( bp_is_my_profile() || !$bp->displayed_user->id )
+	if ( bp_is_my_profile() || empty( $bp->displayed_user->id ) )
 		return $content;
 
 	if ( 'activity_update' != $activity_obj->type )
@@ -193,7 +193,7 @@ function bporg_fix_activity_redirect( $redirect, $activity ) {
 
 	$redirect = false;
 	/* Redirect based on the type of activity */
-	if ( $activity->component == $bp->groups->id ) {
+	if ( bp_is_active( 'groups' ) && $activity->component == $bp->groups->id ) {
 		if ( $activity->user_id ) {
 			$redirect = bp_core_get_user_domain( $activity->user_id, $activity->user_nicename, $activity->user_login ) . $bp->activity->name . '/' . $activity->id . '/';
 		}
