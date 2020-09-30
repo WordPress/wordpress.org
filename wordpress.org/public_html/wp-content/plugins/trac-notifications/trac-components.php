@@ -389,10 +389,15 @@ jQuery( function( $ ) {
 			echo 'Component maintainers: ';
 			echo '<ul class="maintainers">';
 			foreach ( $maintainers as $maintainer ) {
+				$maintainer = get_user_by( 'login', $maintainer );
+				if ( ! $maintainer ) {
+					continue;
+				}
+
 				printf( '<li><a href="//profiles.wordpress.org/%s">%s %s</a></li>',
-					esc_attr( $maintainer ),
-					get_avatar( get_user_by( 'login', $maintainer )->user_email, 36 ),
-					$maintainer
+					esc_attr( $maintainer->user_nicename ),
+					get_avatar( $maintainer->user_email, 36 ),
+					$maintainer->display_name ?: $maintainer->user_login
 				);
 			}
 			echo "</ul>\n\n";
@@ -717,7 +722,12 @@ jQuery( function( $ ) {
 		$maintainers = $this->get_component_maintainers_by_post( $post->ID );
 		echo '<td class="no-grav maintainers">';
 		foreach ( $maintainers as $maintainer ) {
-			echo '<a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '" title="' . esc_attr( $maintainer ) . '">' . get_avatar( get_user_by( 'login', $maintainer )->user_email, 24 ) . "</a>";
+			$maintainer = get_user_by( 'login', $maintainer );
+			if ( ! $maintainer ) {
+				continue;
+			}
+
+			echo '<a href="//profiles.wordpress.org/' . esc_attr( $maintainer->user_nicename ) . '" title="' . esc_attr( $maintainer->display_name ) . '">' . get_avatar( $maintainer->user_email, 24 ) . "</a>";
 		}
 		echo '</td>';
 		echo '</tr>';
