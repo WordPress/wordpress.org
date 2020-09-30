@@ -74,7 +74,7 @@ class DevHub_User_Submitted_Content {
 		add_filter( 'wp_link_query_args',              array( __CLASS__, 'disable_link_query' ) );
 
 		// Disable moderation emails to post author.
-		add_filter( 'comment_notification_recipients', array( __CLASS__, 'disable_moderation_emails' ), 10, 2 );
+		add_filter( 'comment_notification_recipients', array( __CLASS__, 'disable_comment_notifications' ), 10, 2 );
 	}
 
 	/**
