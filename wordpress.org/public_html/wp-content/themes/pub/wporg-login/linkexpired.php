@@ -21,7 +21,7 @@ if ( 'register' == $reason && $user ) {
 			sprintf(
 				/* translators: %s: An account name. */
 				__( 'Start over, and register %s.', 'wporg' ),
-				'<code>' . esc_html( $register_user ) . '</code>'
+				'<code>' . esc_html( $user ) . '</code>'
 			) .
 			'</a></p>';
 } elseif ( 'lostpassword' == $reason && $user ) {
