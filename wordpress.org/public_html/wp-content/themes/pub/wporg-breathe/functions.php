@@ -123,22 +123,27 @@ function welcome_box() {
 	}
 
 	setup_postdata( $welcome );
-//	$GLOBALS['post'] = $welcome; // setup_postdata() doesn't do this for us.
+	$GLOBALS['post'] = $welcome; // setup_postdata() doesn't do this for us.
 
 	// Disable Jetpack sharing buttons
 	add_filter( 'sharing_show', '__return_false' );
+	// Disable o2 showing the post inline
+	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link ' . $class ); ?>
 			<button type="button" id="make-welcome-toggle" data-hash="<?php echo $content_hash; ?>" data-cookie="<?php echo $cookie; ?>"><?php echo $label; ?></button>
 		</div>
-		<div class="entry-content clear <?php echo $class; ?>"">
+		<div class="entry-content clear <?php echo $class; ?>">
 			<?php the_content(); ?>
 		</div>
 	</div>
 	<?php
 	remove_filter( 'sharing_show', '__return_false' );
+	remove_filter( 'o2_post_fragment', '__return_empty_array' );
+
+	$GLOBALS['post'] = false; // wp_reset_postdata() may not do this.
 	wp_reset_postdata();
 }
 add_action( 'wporg_breathe_after_header', __NAMESPACE__ . '\welcome_box' );
