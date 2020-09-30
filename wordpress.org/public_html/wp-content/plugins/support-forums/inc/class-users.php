@@ -369,7 +369,7 @@ class Users {
 		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
 			if ( bbp_is_user_home() ) {
 				$title['text'] = __( 'Your Reviews Written', 'wporg-forums' );
-			} else {
+			} elseif ( bbp_get_user_id() ) {
 				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
 				/* translators: user's display name */
 				$title['format'] = __( "%s's Reviews Written", 'wporg-forums' );
@@ -379,7 +379,7 @@ class Users {
 		if ( get_query_var( 'wporg_single_user_topics_replied_to' ) ) {
 			if ( bbp_is_user_home() ) {
 				$title['text'] = __( "Topics You've Replied To", 'wporg-forums' );
-			} else {
+			} elseif ( bbp_get_user_id() ) {
 				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
 				/* translators: user's display name */
 				$title['format'] = __( 'Topics %s Has Replied To', 'wporg-forums' );
