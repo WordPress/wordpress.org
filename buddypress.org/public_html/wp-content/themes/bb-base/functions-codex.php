@@ -19,7 +19,7 @@ function codex_get_breadcrumb() {
 
 	$crumb = array();
 
-	if ( ! is_front_page() && ! is_page('home') ) {
+	if ( ! is_front_page() && ! is_page('home') & ! is_404() ) {
 
 		$crumb[] = '&rarr; ' . get_the_title( $post->ID );
 
