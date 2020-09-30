@@ -71,13 +71,17 @@ function wporg_themes_pre_get_posts( $query ) {
 		case 'favorites':
 			$favorites = array();
 
+			$user_id = 0;
 			if ( ! empty( $query->query_vars['favorites_user'] ) ) {
-				$user_id = get_user_by( 'login', $query->query_vars['favorites_user'] )->ID;
+				$user = get_user_by( 'login', $query->query_vars['favorites_user'] );
+				if ( $user ) {
+					$user_id = $user->ID;
+				}
 			} elseif ( is_user_logged_in() ) {
 				$user_id = get_current_user_id();
 			}
 
-			if ( ! empty( $user_id ) ) {
+			if ( $user_id ) {
 				$favorites = array_filter( (array) get_user_meta( $user_id, 'theme_favorites', true ) );
 			}
 
