@@ -13,9 +13,5 @@
 				$( '.leftsidebar' ).removeClass( 'wpscMobileMenuSlideIn' );
 			}
 		};
-
-		if ( $( '#pagebody' ).hasClass( 'post' ) ) {
-			$( '.currentSiteRating' ).css( 'display', 'block' );
-		}
 	} );
 } )( jQuery );

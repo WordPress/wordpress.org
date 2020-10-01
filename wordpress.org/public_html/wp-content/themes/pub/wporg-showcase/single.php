@@ -55,7 +55,7 @@
 						<?php comments_template(); ?>
 					</div><!-- .col-5 -->
 
-					<?php get_sidebar( 'right' ) ?>
+					<?php get_sidebar( 'right-single' ) ?>
 
 				<?php endwhile; // have_posts ?>
 			<?php endif; // have_posts ?>
