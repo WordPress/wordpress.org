@@ -75,6 +75,9 @@ class Consistency extends GP_Route {
 			$translations               = wp_list_pluck( $results, 'translation', 'translation_id' );
 			$translations_unique        = array_values( array_unique( $translations ) );
 			$translations_unique_counts = array_count_values( $translations );
+
+			// Sort the unique translations by highest count first.
+			arsort( $translations_unique_counts );
 		}
 
 		$projects = self::PROJECTS;
