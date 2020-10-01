@@ -33,11 +33,12 @@
 
 		<?php
 			if ( !is_page( 'home' ) && $show_related ) {
-				$rel = '';
-				$cat = get_the_category();
-				$relateds = get_posts('nopaging=1&post_type=page&post_parent=0&orderby=title&order=ASC&cat=' . $cat[0]->term_id . '&exclude=' . $post->ID );
+				$rel      = '';
+				$cat      = get_the_category();
+				$incat    = ! empty( $cat[0]->term_id ) ? '&cat=' . $cat[0]->term_id : '';
+				$relateds = get_posts( 'nopaging=1&post_type=page&post_parent=0&orderby=title&order=ASC&exclude=' . $post->ID . $incat );
 				if ( $relateds ) {
-					foreach ($relateds as $related) {
+					foreach ( $relateds as $related ) {
 						$title = apply_filters('the_title', $related->post_title);
 						$rel .= '<li><a href="' . get_permalink($related->ID) . '" title="' . $title . '">' . $title . '</a></li>';
 					}
