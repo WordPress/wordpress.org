@@ -149,9 +149,8 @@ class Plugin extends Base {
 			$result['sections']['faq'] = $this->get_simplified_faq_markup( $result['sections']['faq'] );
 		}
 
-		$result['description'] = $result['sections']['description'];
-
 		$result['short_description'] = get_the_excerpt();
+		$result['description']       = $result['sections']['description'] ?: $result['short_description'];;
 		$result['download_link']     = Template::download_link( $post );
 
 		// Reduce images to caption + src
