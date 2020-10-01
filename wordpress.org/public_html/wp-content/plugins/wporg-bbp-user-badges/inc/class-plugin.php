@@ -104,9 +104,12 @@ class Plugin {
 			return false;
 		}
 
-		$slugs = $types = array();
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return false;
+		}
 
-		$user_nicename = get_user_by( 'id', $user_id )->user_nicename;
+		$slugs = $types = array();
 
 		// Check if the thread is associated with a plugin.
 		if ( $forum_id === \WordPressdotorg\Forums\Plugin::PLUGINS_FORUM_ID ) {
@@ -140,7 +143,7 @@ class Plugin {
 		return array(
 			'type'          => $type,
 			'slug'          => $slugs[0],
-			'user_nicename' => $user_nicename,
+			'user_nicename' => $user->user_nicename,
 		);
 	}
 
