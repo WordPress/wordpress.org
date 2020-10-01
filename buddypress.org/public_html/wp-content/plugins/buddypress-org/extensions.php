@@ -110,8 +110,12 @@ function bporg_redirect() {
 	// Redirect old plugin groups to deprecated plugin forums
 	if ( ( $uri_chunks[1] === 'community' ) && ( $uri_chunks[2] === 'groups' ) ) {
 
+		// /community/groups/ to Support root.
+		if ( empty( $uri_chunks[3] ) ) {
+			bp_core_redirect( home_url( '/support/' ) );
+
 		// Single group topic redirect
-		if ( !empty( $uri_chunks[5] ) && ( $uri_chunks[5] === 'topic' ) ) {
+		} elseif ( !empty( $uri_chunks[5] ) && ( $uri_chunks[5] === 'topic' ) ) {
 			bp_core_redirect( home_url( '/support/topic/' . $uri_chunks[6] . '/' ) );
 
 		// Single group forum redirect
