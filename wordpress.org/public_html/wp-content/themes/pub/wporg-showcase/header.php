@@ -13,6 +13,6 @@ require WPORGPATH . 'header.php';
 <div id="headline">
 	<div class="wrapper">
 		<a id="wpsc-mobile-menu-button" class="" href="#" onclick="toggle_wpsc_mobile_menu();"></a>
-		<h1><?php _e( 'WordPress Website Showcase', 'wporg-showcase' ); ?></h1>
+		<h1><a href="<?php echo home_url('/'); ?>"><?php _e( 'WordPress Website Showcase', 'wporg-showcase' ); ?></a></h1>
 	</div>
 </div>
