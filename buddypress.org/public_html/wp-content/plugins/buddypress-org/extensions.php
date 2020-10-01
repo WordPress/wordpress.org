@@ -81,12 +81,16 @@ add_filter( 'bp_group_members_count_user_join_filter', 'bporg_group_members_coun
  * BuddyPress.org root site page locations.
  *
  * @author johnjamesjacoby
- * @return if not BuddyPress.org root site
  */
 function bporg_redirect() {
 
 	// Explode the request. parse_url() is used here to exclude any query args which caused some redirects to be missed.
 	$uri_chunks = explode( '/', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+
+	// No path, no redirects to handle.
+	if ( empty( $uri_chunks[1] ) ) {
+		return;
+	}
 
 	// Redirect /forums/ to /support/
 	if ( $uri_chunks[1] === 'forums' && empty( $uri_chunks[2] ) ) {
