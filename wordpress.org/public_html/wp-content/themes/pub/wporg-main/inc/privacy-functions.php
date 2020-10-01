@@ -24,7 +24,7 @@ function privacy_process_request( $type ) {
 	$success       = false;
 	$nonce_action  = 'request_' . $type;
 
-	if ( empty( $_POST['email'] ) || ! $type || ! in_array( $type, [ 'erase', 'export' ], true ) ) {
+	if ( empty( $_POST['email'] ) || ! is_string( $_POST['email'] ) || ! $type || ! in_array( $type, [ 'erase', 'export' ], true ) ) {
 		return compact( 'email', 'error_message', 'success', 'nonce_action' );
 	}
 
