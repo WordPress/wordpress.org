@@ -84,7 +84,7 @@ if (
 		foreach ( $testsuite['testcases'] as $test_name => $testcase ) :
 			?>
 		<p><strong><?php echo esc_html( $suite_name . '::' . $test_name ); ?></strong></p>
-		<pre><?php echo ! empty( $testcase['failure'] ) ? $testcase['failure'] : $testcase['error']; ?></pre>
+		<pre><?php echo esc_html( ! empty( $testcase['failure'] ) ? $testcase['failure'] : $testcase['error'] ); ?></pre>
 		<?php endforeach; ?>
 		<?php endforeach; ?>
 <?php endif; ?>
