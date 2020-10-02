@@ -71,9 +71,10 @@ class Locale_Banner extends Base {
 		// Get the WordPress locales based on the HTTP accept language header.
 		$locales_from_header = $this->get_locale_from_header( $all_locales );
 
-		$current_locale = get_locale();
-
 		require_once GLOTPRESS_LOCALES_PATH;
+
+		$current_locale    = get_locale();
+		$current_gp_locale = \GP_Locales::by_field( 'wp_locale', $current_locale );
 
 		// Validate the list of locales can be found by `wp_locale`.
 		$translated_locales = array_filter( $translated_locales, function( $locale ) {
@@ -107,7 +108,7 @@ class Locale_Banner extends Base {
 		$suggest_string = '';
 
 		// English directory.
-		if ( 'en_US' === $current_locale ) {
+		if ( 'en_US' === $current_locale || ! $current_gp_locale ) {
 			$current_path   = get_site()->path;
 			$referring_path = wp_parse_url( $request->get_header( 'referer' ), PHP_URL_PATH );
 
@@ -209,7 +210,7 @@ class Locale_Banner extends Base {
 		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated && $is_plugin_request && $current_plugin_is_translatable ) {
 			$suggest_string = sprintf(
 				$this->translate( 'This plugin is not translated into %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
-				\GP_Locales::by_field( 'wp_locale', $current_locale )->native_name,
+				$current_gp_locale->native_name,
 				esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
 			);
 		}
