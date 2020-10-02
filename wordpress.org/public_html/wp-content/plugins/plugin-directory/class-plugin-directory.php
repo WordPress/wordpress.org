@@ -1078,7 +1078,7 @@ class Plugin_Directory {
 		$post            = get_post( $post_id );
 		if ( $post ) {
 			$project = 'stable-readme';
-			if ( ! $plugin->stable_tag || 'trunk' === $plugin->stable_tag ) {
+			if ( ! $post->stable_tag || 'trunk' === $post->stable_tag ) {
 				$project = 'dev-readme';
 			}
 			$translations = Plugin_I18n::instance()->find_all_translations_for_plugin( $post->post_name, $project, $min_translated ); // at least $min_translated % translated
