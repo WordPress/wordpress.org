@@ -20,19 +20,23 @@ function codex_get_breadcrumb() {
 	$crumb = array();
 
 	if ( ! is_front_page() && ! is_page('home') && ! is_404() ) {
+		if ( is_singular() ) {
+			$crumb[] = get_the_title( $post->ID );
 
-		$crumb[] = '&rarr; ' . get_the_title( $post->ID );
-
-		if ( !empty( $post->ancestors ) ) {
-			foreach ( $post->ancestors as $post_id ) {
-				$crumb[] = '&rarr; <a href="' . get_permalink( $post_id ) . '">' . get_the_title( $post_id ) . '</a>';
+			if ( ! empty( $post->ancestors ) ) {
+				foreach ( $post->ancestors as $post_id ) {
+					$crumb[] = '<a href="' . get_permalink( $post_id ) . '">' . get_the_title( $post_id ) . '</a>';
+				}
 			}
+		} elseif ( is_search() ) {
+			$crumb[] = esc_html( get_search_query( false ) );
+			$crumb[] = __( 'Search Results', 'bborg' );
 		}
 
 		$crumb[] = '<a href="/">' . __( 'Codex Home', 'bborg' ) . '</a>';
 
 		krsort( $crumb );
-		$crumb = implode( ' ', $crumb );
+		$crumb = implode( ' &rarr; ', $crumb );
 		echo $crumb;
 	}
 }
