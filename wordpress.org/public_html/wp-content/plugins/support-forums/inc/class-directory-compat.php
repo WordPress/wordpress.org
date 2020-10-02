@@ -419,7 +419,9 @@ abstract class Directory_Compat {
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 				$term = $terms[0];
 				$object = $this->get_object( $term->slug );
-				$title = sprintf( "[%s] %s", esc_html( $object->post_title ), esc_html( $title ) );
+				if ( $object ) {
+					$title = sprintf( "[%s] %s", esc_html( $object->post_title ), esc_html( $title ) );
+				}
 			}
 		}
 		return $title;
