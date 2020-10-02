@@ -40,7 +40,7 @@ class Ratings_Compat {
 		// Set up a filter on star rating number.
 		if ( isset( $_GET['filter'] ) ) {
 			$filter = absint( $_GET['filter'] );
-			if ( $filter > 5 ) {
+			if ( $filter > 5 || ! $filter ) {
 				$filter = 5;
 			}
 			$this->filter = $filter;
