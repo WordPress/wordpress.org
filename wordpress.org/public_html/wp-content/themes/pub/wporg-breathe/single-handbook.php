@@ -22,6 +22,9 @@ get_header(); ?>
 <?php do_action( 'handbook_breadcrumbs' ); ?>
 
 <div id="primary" class="content-area">
+	
+	<!-- A fake o2 content area -->
+	<div style="display: none;"><div id="content"></div></div>
 
 	<div class="site-content" role="main">
 
