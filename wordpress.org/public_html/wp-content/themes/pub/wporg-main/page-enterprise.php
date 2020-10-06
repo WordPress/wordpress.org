@@ -139,39 +139,6 @@ the_post();
 				</div>
 			</div>
 
-			<div class="entry-content row resources">
-				<section class="col-12">
-					<h3>Resource & Learning</h3>
-				</section>
-				<div class="entry-content row resource-list">
-					<section class="col-4">
-						<h4>Lorem ipsum</h4>
-						<p>dolor sit amet, consectetur adipiscing elit. Nam eu varius nibh. Aliquam erat volutpat.</p>
-						<hr>
-						<a>bvbvknd</a>
-						<hr>
-						<a>bvbvknd</a>
-						<hr>
-						<a>bvbvknd</a>
-						<hr>
-						<a>bvbvknd</a>
-					</section>
-					<section class="col-4">
-						<h4>Lorem ipsum</h4>
-						<p>dolor sit amet, consectetur adipiscing elit. Nam eu varius nibh. Aliquam erat volutpat.</p>
-						<ul>
-							<li>vuvdnkfdvnkfdj</li>
-							<li>vuvdnkfdvnkfdj</li>
-							<li>vuvdnkfdvnkfdj</li>
-							<li>vuvdnkfdvnkfdj</li>
-						</ul>
-					</section>
-					<section class="col-4">
-						<h4>Lorem ipsum</h4>
-						<p>dolor sit amet, consectetur adipiscing elit. Nam eu varius nibh. Aliquam erat volutpat.</p>
-					</section>
-				</div>
-			</div>
 			<div class="entry-content row getstarted">
 				<section class="col-12">
 					<h3>Get started now</h3>
