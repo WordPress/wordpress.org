@@ -1066,21 +1066,20 @@ class Plugin_Directory {
 	/**
 	 * Fetch all translated content for a given post, and push it into postmeta.
 	 *
-	 * @global string $locale Current locale.
-	 *
-	 * @param int $post_id    Post ID to update.
+	 * @param int|string|WP_Post $plugin Plugin to update.
 	 * @param int $min_translated Translations below this % threshold will not be synced to meta, to save space.
 	 * @return array
 	 */
-	public function sync_all_translations_to_meta( $post_id, $min_translated = 40, $skip_pfx = array( 'en_' ) ) {
+	public function sync_all_translations_to_meta( $plugin, $min_translated = 40, $skip_pfx = array( 'en_' ) ) {
 
 		$locales_to_sync = array();
-		$post            = get_post( $post_id );
+		$post            = self::get_plugin_post( $plugin );
 		if ( $post ) {
 			$project = 'stable-readme';
 			if ( ! $post->stable_tag || 'trunk' === $post->stable_tag ) {
 				$project = 'dev-readme';
 			}
+
 			$translations = Plugin_I18n::instance()->find_all_translations_for_plugin( $post->post_name, $project, $min_translated ); // at least $min_translated % translated
 			if ( $translations ) {
 				// Eliminate translations that start with unwanted prefixes, so we don't waste space on near-duplicates like en_AU, en_CA etc.
@@ -1097,7 +1096,7 @@ class Plugin_Directory {
 
 		if ( count( $locales_to_sync ) > 0 ) {
 			foreach ( $locales_to_sync as $locale ) {
-				$this->sync_translation_to_meta( $post_id, $locale );
+				$this->sync_translation_to_meta( $post->ID, $locale );
 			}
 		}
 
@@ -1106,8 +1105,6 @@ class Plugin_Directory {
 
 	/**
 	 * Fetch translated content for a given post and locale, and push it into postmeta.
-	 *
-	 * @global string $locale Current locale.
 	 *
 	 * @param int    $post_id    Post ID to update.
 	 * @param string $locale  Locale to translate.
@@ -1120,12 +1117,12 @@ class Plugin_Directory {
 
 		// Update postmeta values for the translated title, excerpt, and content, if they are available and different from the originals.
 		// There is a bug here, in that no attempt is made to remove old meta values for translations that do not have new translations.
-		$the_title = Plugin_I18n::instance()->translate( 'title', $orig_title, [ 'post_id' => $post_id ] );
+		$the_title = Plugin_I18n::instance()->translate( 'title', $orig_title, [ 'post_id' => $post_id, 'locale' => $locale ] );
 		if ( $the_title && $the_title != $orig_title ) {
 			update_post_meta( $post_id, 'title_' . $locale, $the_title );
 		}
 
-		$the_excerpt = $this->translate_post_excerpt( $orig_excerpt, $post_id );
+		$the_excerpt =  Plugin_I18n::instance()->translate( 'excerpt', $orig_excerpt, [ 'post_id' => $post_id, 'locale' => $locale ] );
 		if ( $the_excerpt && $the_excerpt != $orig_excerpt ) {
 			update_post_meta( $post_id, 'excerpt_' . $locale, $the_excerpt );
 		}
@@ -1134,7 +1131,7 @@ class Plugin_Directory {
 		$the_content = array();
 		$sections    = $this->split_post_content_into_pages( $orig_content );
 		foreach ( $sections as $section => $section_content ) {
-			$translated_section = $this->translate_post_content( $section_content, $section, $post_id );
+			$translated_section = Plugin_I18n::instance()->translate( $section, $section_content, [ 'post_id' => $post_id, 'locale' => $locale ] );
 			if ( $translated_section && $translated_section != $section_content ) {
 				// ES expects the section delimiters to still be present
 				$the_content[ $section ] = "<!--section={$section}-->\n" . $translated_section;
@@ -1148,7 +1145,7 @@ class Plugin_Directory {
 		// Translate Block Titles. A bit more complicated as there's multiple postmeta values.
 		$existing_translated_titles = array_unique( get_post_meta( $post_id, 'block_title_' . $locale ) );
 		foreach ( array_unique( get_post_meta( $post_id, 'block_title' ) ) as $block_title ) {
-			$translated_title = Plugin_I18n::instance()->translate( 'block_title:' . md5( $block_title ), $block_title, [ 'post_id' => $post_id ] );
+			$translated_title = Plugin_I18n::instance()->translate( 'block_title:' . md5( $block_title ), $block_title, [ 'post_id' => $post_id, 'locale' => $locale ] );
 
 			if ( $translated_title == $block_title ) {
 				continue;
