@@ -886,30 +886,36 @@ abstract class Directory_Compat {
 		}
 
 		// Check the cache.
-		$cache_key = $slug;
+		$cache_key   = $slug;
 		$cache_group = $this->compat() . '-authors-slugs';
-		$authors = wp_cache_get( $cache_key, $cache_group );
-		if ( ! $authors ) {
-
+		$authors     = wp_cache_get( $cache_key, $cache_group );
+		if ( $authors === false ) {
+			$authors = array();
 			if ( $this->compat() == 'theme' ) {
 				$theme = $this->get_object( $slug );
-				$author = get_user_by( 'id', $theme->post_author );
-				$authors = array( $author->user_nicename );
+				if ( $theme ) {
+					$author = get_user_by( 'id', $theme->post_author );
+					if ( $author ) {
+						$authors = array( $author->user_nicename );
+					}
+				}
 			} else {
 				$plugin = $this->get_object( $slug );
-				$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
-				// Note: Intentionally not considering posts of 'plugin' post_type with
-				// 'post_author' matching this author because the field only relates to
-				// the user who submitted the plugin. It does not confer special access,
-				// rights, or ownership.
-				$authors = $wpdb->get_col( $wpdb->prepare(
-					"SELECT slug
-					 FROM {$prefix}terms AS t
-					 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
-					 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
-					 WHERE tt.taxonomy = 'plugin_committers' AND tr.object_id = %d",
-					 $plugin->ID
-				) );
+				if ( $plugin ) {
+					$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+					// Note: Intentionally not considering posts of 'plugin' post_type with
+					// 'post_author' matching this author because the field only relates to
+					// the user who submitted the plugin. It does not confer special access,
+					// rights, or ownership.
+					$authors = $wpdb->get_col( $wpdb->prepare(
+						"SELECT slug
+						 FROM {$prefix}terms AS t
+						 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
+						 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						 WHERE tt.taxonomy = 'plugin_committers' AND tr.object_id = %d",
+						 $plugin->ID
+					) );
+				}
 			}
 
 			wp_cache_set( $cache_key, $authors, $cache_group, HOUR_IN_SECONDS );
@@ -931,23 +937,28 @@ abstract class Directory_Compat {
 		}
 
 		// Check the cache.
-		$cache_key = $slug;
-		$cache_group = $this->compat() . '-contributors-slugs';
+		$cache_key    = $slug;
+		$cache_group  = $this->compat() . '-contributors-slugs';
 		$contributors = wp_cache_get( $cache_key, $cache_group );
-		if ( ! $contributors ) {
-			$plugin = $this->get_object( $slug );
-			$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
-			$contributors = $wpdb->get_col( $wpdb->prepare(
-				"SELECT slug
-				 FROM {$prefix}terms AS t
-				 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
-				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
-				 WHERE tt.taxonomy = 'plugin_contributors' AND tr.object_id = %d",
-				 $plugin->ID
-			) );
+		if ( $contributors === false ) {
+			$contributors = array();
+			$plugin       = $this->get_object( $slug );
+
+			if ( $plugin ) {
+				$prefix       = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+				$contributors = $wpdb->get_col( $wpdb->prepare(
+					"SELECT slug
+					 FROM {$prefix}terms AS t
+					 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
+					 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+					 WHERE tt.taxonomy = 'plugin_contributors' AND tr.object_id = %d",
+					 $plugin->ID
+				) );
+			}
 
 			wp_cache_set( $cache_key, $contributors, $cache_group, HOUR_IN_SECONDS );
 		}
+
 		return $contributors;
 	}
 
@@ -965,23 +976,28 @@ abstract class Directory_Compat {
 		}
 
 		// Check the cache.
-		$cache_key = $slug;
-		$cache_group = $this->compat() . '-support-reps-slugs';
+		$cache_key    = $slug;
+		$cache_group  = $this->compat() . '-support-reps-slugs';
 		$support_reps = wp_cache_get( $cache_key, $cache_group );
-		if ( ! $support_reps ) {
-			$plugin = $this->get_object( $slug );
-			$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
-			$support_reps = $wpdb->get_col( $wpdb->prepare(
-				"SELECT slug
-				 FROM {$prefix}terms AS t
-				 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
-				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
-				 WHERE tt.taxonomy = 'plugin_support_reps' AND tr.object_id = %d",
-				 $plugin->ID
-			) );
+		if ( $support_reps === false ) {
+			$support_reps = array();
+			$plugin       = $this->get_object( $slug );
+
+			if ( $plugin ) {
+				$prefix       = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+				$support_reps = $wpdb->get_col( $wpdb->prepare(
+					"SELECT slug
+					 FROM {$prefix}terms AS t
+					 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
+					 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+					 WHERE tt.taxonomy = 'plugin_support_reps' AND tr.object_id = %d",
+					 $plugin->ID
+				) );
+			}
 
 			wp_cache_set( $cache_key, $support_reps, $cache_group, HOUR_IN_SECONDS );
 		}
+
 		return $support_reps;
 	}
 }
