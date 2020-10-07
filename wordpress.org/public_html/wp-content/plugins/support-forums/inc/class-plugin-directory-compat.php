@@ -110,6 +110,10 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	}
 
 	public function do_topic_sidebar() {
+		if ( ! $this->plugin ) {
+			return;
+		}
+
 		if ( file_exists( WPORGPATH . 'wp-content/plugins/plugin-directory/class-template.php' ) ) {
 			include_once WPORGPATH . 'wp-content/plugins/plugin-directory/class-template.php';
 		}

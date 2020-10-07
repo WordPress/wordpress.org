@@ -110,6 +110,10 @@ class Theme_Directory_Compat extends Directory_Compat {
 	}
 
 	public function do_topic_sidebar() {
+		if ( ! $this->theme ) {
+			return;
+		}
+
 		$theme      = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
 		$support    = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
 		$active     = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
