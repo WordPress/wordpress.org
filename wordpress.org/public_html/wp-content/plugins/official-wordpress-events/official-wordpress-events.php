@@ -608,6 +608,12 @@ class Official_WordPress_Events {
 				continue;
 			}
 
+			// Events that are "Needs a date and time" do not have the time/utc fields. Treat them as 1970-01-01 for now.
+			if ( ! isset( $meetup['time'] ) ) {
+				$meetup['time']       = 0;
+				$meetup['utc_offset'] = 0;
+			}
+
 			/*
 			 * Convert to local time, because the `date_utc` column in `wporg_events` is misnomed and actually
 			 * expects the _local_ time.
