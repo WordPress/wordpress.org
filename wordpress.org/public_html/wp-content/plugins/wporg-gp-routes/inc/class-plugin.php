@@ -114,7 +114,7 @@ class Plugin {
 		$project = '([^/]*)/?';
 
 		$locale = '(' . implode( '|', array_map( function( $locale ) { return $locale->slug; }, GP_Locales::locales() ) ) . ')';
-		$sets   = '(default|formal|informal|ao90|valencia)';
+		$sets   = '(default|formal|informal|ao90|valencia|latin)';
 
 		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) { // API requests.
 			// Delete default routes.
