@@ -38,6 +38,11 @@ class Plugin {
 	const LOCALE_MANAGER_ROLE = 'locale_manager';
 
 	/**
+	 * Paths of translation sets the user cannot edit.
+	 */
+	const READ_ONLY_TRANSLATION_SETS = [ 'sr/latin' ];
+
+	/**
 	 * @var Plugin The singleton instance.
 	 */
 	private static $instance;
@@ -113,15 +118,20 @@ class Plugin {
 			return false;
 		}
 
-		// Allow logged in users to submit translations.
-		if ( 'edit' == $args['action'] && 'translation-set' === $args['object_type'] ) {
-			return is_user_logged_in();
-		}
-
 		// Get locale and current project ID.
 		$locale_and_project_id = (object) $this->get_locale_and_project_id( $args['object_type'], $args['object_id'], $args );
 		if ( ! $locale_and_project_id ) {
 			return false;
+		}
+
+		$set_path = $locale_and_project_id->locale . '/' . $locale_and_project_id->set_slug;
+		if ( \in_array( $set_path, self::READ_ONLY_TRANSLATION_SETS, true ) ) {
+			return false;
+		}
+
+		// Allow logged in users to submit translations.
+		if ( 'edit' == $args['action'] && 'translation-set' === $args['object_type'] ) {
+			return true;
 		}
 
 		// Grant permissions to import plugin/theme translations with status 'waiting'.
@@ -511,7 +521,7 @@ class Plugin {
 					$set_cache[ $translation_set_id ] = $set;
 				}
 
-				return array( 'locale' => $set->locale, 'project_id' => (int) $set->project_id );
+				return array( 'locale' => $set->locale, 'set_slug' => $set->slug, 'project_id' => (int) $set->project_id );
 
 			case 'translation-set' :
 				if ( isset( $set_cache[ $object_id ] ) ) {
@@ -521,11 +531,11 @@ class Plugin {
 					$set_cache[ $object_id ] = $set;
 				}
 
-				return array( 'locale' => $set->locale, 'project_id' => (int) $set->project_id );
+				return array( 'locale' => $set->locale, 'set_slug' => $set->slug, 'project_id' => (int) $set->project_id );
 
 			case 'project|locale|set-slug' :
-				list( $project_id, $locale ) = explode( '|', $object_id );
-				return array( 'locale' => $locale, 'project_id' => (int) $project_id );
+				list( $project_id, $locale, $set_slug ) = explode( '|', $object_id );
+				return array( 'locale' => $locale, 'set_slug' => $set_slug, 'project_id' => (int) $project_id );
 		}
 
 		return false;
