@@ -2244,6 +2244,13 @@ class GP_Locales {
 		$sr->google_code = 'sr';
 		$sr->facebook_locale = 'sr_RS';
 
+		$sr_latin = clone $sr;
+		$sr_latin->english_name = 'Serbian (Latin)';
+		$sr_latin->native_name = 'Srpski jezik';
+		$sr_latin->slug = 'sr/latin';
+		$sr_latin->wp_locale = 'sr_RS_latin';
+		$sr_latin->root_slug = $sr->slug;
+
 		$srd = new GP_Locale();
 		$srd->english_name = 'Sardinian';
 		$srd->native_name = 'Sardu';
