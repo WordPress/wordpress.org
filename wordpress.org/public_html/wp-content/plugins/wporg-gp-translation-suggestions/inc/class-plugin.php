@@ -104,7 +104,7 @@ class Plugin {
 	 * Enqueue custom styles and scripts.
 	 */
 	public function pre_tmpl_load( $template, $args ) {
-		if ( 'translations' !== $template || ! is_user_logged_in() ) {
+		if ( 'translations' !== $template || ! isset( $args['translation_set']->id ) || ! GP::$permission->current_user_can( 'edit', 'translation-set', $args['translation_set']->id ) ) {
 			return;
 		}
 
@@ -142,7 +142,7 @@ class Plugin {
 	 * @param object $entry Current translation row entry.
 	 */
 	public function extend_translation_suggestions( $entry ) {
-		if ( ! is_user_logged_in() ) {
+		if ( ! isset( $entry->translation_set_id ) || ! GP::$permission->current_user_can( 'edit', 'translation-set', $entry->translation_set_id ) ) {
 			return;
 		}
 

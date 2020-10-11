@@ -205,7 +205,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 									</button>
 								</div>
 							<?php elseif ( is_user_logged_in() ) : ?>
-								You are not allowed to edit this translation.
+								<?php echo apply_filters( 'wporg_translate_cannot_edit_translation_hint', '<p class="info">Sorry, you are not allowed to edit this translation.</p>', $translation ); ?>
 							<?php else : ?>
 								<p class="info">
 									<?php
@@ -220,7 +220,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 					</div>
 
 					<?php
-					if ( has_action( 'wporg_translate_suggestions' ) ) {
+					if ( $can_edit && has_action( 'wporg_translate_suggestions' ) ) {
 						?>
 						<div class="suggestions-wrapper">
 							<?php do_action( 'wporg_translate_suggestions', $translation ); ?>
