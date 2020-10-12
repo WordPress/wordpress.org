@@ -195,7 +195,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 
 	function get_user_anonymization_items( $username ) {
 		$ticket_subscriptions = $this->get_trac_ticket_subscriptions_for_user( $username );
-		$ticket_notifications = $this->get_trac_notifications_for_user( $user );
+		$ticket_notifications = $this->get_trac_notifications_for_user( $username );
 
 		$ticket_reporter = $this->db->get_col( $this->db->prepare(
 			"SELECT id FROM ticket WHERE reporter = %s",
