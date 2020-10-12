@@ -54,9 +54,9 @@ array_walk( $prs, function( $data ) use ( $authenticated ) {
 		) ||
 		// or unit tests are running, then 2min.
 		(
-			$data->check_runs
+			$data->data->check_runs
 			&&
-			in_array( 'in_progress', $data->check_runs )
+			in_array( 'in_progress', $data->data->check_runs )
 			&&
 			strtotime( $data->last_checked_at ) <= time() - 2*60
 		)
