@@ -56,7 +56,7 @@ array_walk( $prs, function( $data ) use ( $authenticated ) {
 		(
 			$data->data->check_runs
 			&&
-			in_array( 'in_progress', $data->data->check_runs )
+			in_array( 'in_progress', (array) $data->data->check_runs )
 			&&
 			strtotime( $data->last_checked_at ) <= time() - 2*60
 		)
