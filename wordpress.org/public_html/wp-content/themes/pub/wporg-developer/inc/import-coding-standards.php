@@ -53,8 +53,8 @@ class DevHub_Coding_Standards_Importer extends DevHub_Docs_Importer {
 	public function fix_double_encoding( $content ) {
 		if ( $this->get_post_type() === get_post_type() ) {
 			$content = str_replace(
-				[ '&amp;amp;', '&amp;042;', '&amp;#042;', '&amp;lt;', '&amp;quest;', '&amp;quot;' ],
-				[ '&amp;', '&#042;', '&#042;', '&lt;', '&quest;', '&quot;' ],
+				[ '&amp;amp;', '&amp;#039;', '&amp;042;', '&amp;#042;', '&amp;lt;', '&amp;quest;', '&amp;quot;' ],
+				[ '&amp;', '&#039;', '&#042;', '&#042;', '&lt;', '&quest;', '&quot;' ],
 				$content
 			);
 		}
