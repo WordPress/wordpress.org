@@ -192,4 +192,38 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			}
 		}
 	}
+
+	function get_user_anonymization_items( $username ) {
+		$ticket_subscriptions = $this->get_trac_ticket_subscriptions_for_user( $username );
+		$ticket_notifications = $this->get_trac_notifications_for_user( $user );
+
+		$ticket_reporter = $this->db->get_col( $this->db->prepare(
+			"SELECT id FROM ticket WHERE reporter = %s",
+			$username
+		) );
+
+		$ticket_owner = $this->db->get_col( $this->db->prepare(
+			"SELECT id FROM ticket WHERE owner = %s",
+			$username
+		) );
+
+		$attachments = $this->db->get_results( $this->db->prepare(
+			"SELECT type, id, filename FROM attachment WHERE author = %s",
+			$username
+		), ARRAY_A );
+
+		$comments = $this->db->get_results( $this->db->prepare(
+			"SELECT ticket, time FROM ticket_change WHERE author = %s",
+			$username
+		), ARRAY_A );
+
+		return compact(
+			'ticket_subscriptions',
+			'ticket_notifications',
+			'ticket_reporter',
+			'ticket_owner',
+			'attachments',
+			'comments',
+		);
+	}
 }
