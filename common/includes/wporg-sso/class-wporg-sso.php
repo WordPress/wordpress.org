@@ -184,6 +184,12 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				return;
 			}
 
+			// When available, sanitize the redirect prior to redirecting.
+			// This isn't strictly needed, but prevents harmless invalid inputs being passed through to the Location header.
+			if ( function_exists( 'wp_sanitize_redirect' ) ) {
+				$to = wp_sanitize_redirect( $to );
+			}
+
 			if ( ! $this->_is_valid_targeted_domain( $to ) ) {
 				$to = $this->_get_safer_redirect_to();
 			}
