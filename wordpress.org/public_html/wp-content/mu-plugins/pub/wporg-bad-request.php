@@ -65,7 +65,7 @@ add_action( 'send_headers', function( $wp ) {
 				die_bad_request( "non-scalar $field in \$public_query_vars" );
 			}
 
-			if ( isset( $must_be_num[ $field ] ) && ! is_numeric( $wp->query_vars[ $field ] ) ) {
+			if ( isset( $must_be_num[ $field ] ) && ! empty( $wp->query_vars[ $field ] ) && ! is_numeric( $wp->query_vars[ $field ] ) ) {
 				die_bad_request( "non-numeric $field in \$public_query_vars" );
 			}
 		}
