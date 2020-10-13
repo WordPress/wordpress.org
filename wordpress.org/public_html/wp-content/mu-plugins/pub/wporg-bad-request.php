@@ -41,11 +41,36 @@ add_action( 'send_headers', function( $wp ) {
 	// Assumption invalid. Some fields are valid.
 	$array_fields = [ 'post_type' => true, 'cat' => true ];
 
+	// Some fields only accept numeric values.
+	$must_be_num = [
+		'm'             => true,
+		'p'             => true,
+		'w'             => true,
+		'page'          => true,
+		'paged'         => true,
+		'page_id'       => true,
+		'attachment_id' => true,
+		'year'          => true,
+		'month'         => true,
+		'monthnum'      => true,
+		'day'           => true,
+		'hour'          => true,
+		'minute'        => true,
+		'second'        => true,
+	];
+
 	foreach ( (new \WP)->public_query_vars as $field ) {
-		if ( isset( $wp->query_vars[ $field ] ) && ! is_scalar( $wp->query_vars[ $field ] ) && ! isset( $array_fields[ $field ] ) ) {
-			die_bad_request( "non-scalar $field in \$public_query_vars" );
+		if ( isset( $wp->query_vars[ $field ] ) ) {
+			if ( ! is_scalar( $wp->query_vars[ $field ] ) && ! isset( $array_fields[ $field ] ) ) {
+				die_bad_request( "non-scalar $field in \$public_query_vars" );
+			}
+
+			if ( isset( $must_be_num[ $field ] ) && ! is_numeric( $wp->query_vars[ $field ] ) ) {
+				die_bad_request( "non-numeric $field in \$public_query_vars" );
+			}
 		}
 	}
+
 } );
 
 /**
