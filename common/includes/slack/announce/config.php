@@ -97,6 +97,7 @@ function get_whitelist() {
 			'metalandcoffee',
 			'pbiron',
 			'psykro', // @jon_bossenger on Slack
+			'sncoker', // @shawntellecoker on Slack
 			'thelmachido', // @thelmachido-zw on Slack
 			'thewebprincess',
 			'welcher',
