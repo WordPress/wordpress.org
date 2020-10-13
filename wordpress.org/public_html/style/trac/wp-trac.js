@@ -1663,6 +1663,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						+ '?trac=' + trac
 						+ '&ticket=' + ticket
 						+ ( authenticated ? '&authenticated=1' : '' )
+						+ ( ( authenticated && 'URLSearchParams' in window ) ? '&_lastmod=' + ( new URLSearchParams( jQuery('a.timeline').last().prop('href').split('?')[1] ) ).get( 'from' ) : '' )
 				).success( function( data ) {
 					// Update the number
 					container.find( 'h3 .trac-count' ).removeClass( 'hidden' ).find( 'span' ).text( data.length );
