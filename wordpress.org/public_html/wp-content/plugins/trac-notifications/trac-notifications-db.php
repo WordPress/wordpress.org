@@ -226,4 +226,143 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			'comments',
 		);
 	}
+
+	/**
+	 * Anonymize a user on Trac.
+	 *  - Switches their tickets, comments, and attachments to be owned by $to
+	 *  - Removes Subscriptions & notification prefs
+	 *  - Removes user Trac preferences
+	 * 
+	 * @param string $from The user login of the user to anonymize.
+	 * @param string $to   The new user login placeholder for the user, must be unique.
+	 */
+	function anonymize_user( $from, $to ) {
+		$from = trim( $from );
+		$to   = trim( $to );
+
+		if ( empty( $from ) || empty( $to ) ) {
+			return false;
+		}
+
+		// Perform rename
+		if ( ! $this->rename_user( $from, $to ) ) {
+			return false;
+		}
+
+		// Remove Trac sessions & preferences
+		$this->db->delete( 'session', array( 'sid' => $from ) );
+		$this->db->delete( 'session', array( 'sid' => $to ) );
+		$this->db->delete( 'session_attribute', array( 'sid' => $from ) );
+		$this->db->delete( 'session_attribute', array( 'sid' => $to ) );
+
+		// Remove Authentication cookies (May not be applicable to WordPress.org trac)
+		$this->db->delete( 'auth_cookie', array( 'name' => $from ) );
+		$this->db->delete( 'auth_cookie', array( 'name' => $to ) );
+
+		// Remove any Trac notification & subscription settings (May not be applicable to WordPress.org trac)
+		$this->db->delete( 'notify_watch', array( 'sid' => $from ) );
+		$this->db->delete( 'notify_watch', array( 'sid' => $to ) );
+		$this->db->delete( 'notify_subscription', array( 'sid' => $from ) );
+		$this->db->delete( 'notify_subscription', array( 'sid' => $to ) );
+
+		// Remove subscriptions and notifications (Should all be owned by $to, but do $from just in case)
+		$this->db->delete( '_ticket_subs',   array( 'username' => $from ) );
+		$this->db->delete( '_ticket_subs',   array( 'username' => $to ) );
+		$this->db->delete( '_notifications', array( 'username' => $from ) );
+		$this->db->delete( '_notifications', array( 'username' => $to ) );
+
+		return true;
+	}
+
+	/**
+	 * Rename a user on Trac, can be used for username migrations and GDPR anonymization needs.
+	 * 
+	 * @param string $from The user login of the user to rename.
+	 * @param string $to   The new user login that the items owned by $from will be reauthored to.
+	 */
+	function rename_user( $from, $to ) {
+		$from = trim( $from );
+		$to   = trim( $to );
+
+		// Prevent data issues by ensuring that both are supplied.
+		if ( empty( $from ) || empty( $to ) ) {
+			return false;
+		}
+
+		// If the user has (or will have) specific permissions on the trac instance, bail.
+		if ( $this->db->get_var( $wpdb->prepare(
+			"SELECT action FROM permission WHERE username IN( %s, %s )",
+			$from,
+			$to
+		) ) ) {
+			return false;
+		}
+
+		// Trac Sessions & Prefs
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE session SET sid = %s WHERE sid = %s",
+			$to,
+			$from
+		) );
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE auth_cookie SET name = %s WHERE name = %s",
+			$to,
+			$from
+		) );
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE session_attribute SET sid = %s WHERE sid = %s",
+			$to,
+			$from
+		) );
+
+		// Tickets, Attachments, and Comments.
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE ticket SET reporter = %s WHERE reporter = %s",
+			$to,
+			$from
+		) );
+
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE ticket SET owner = %s WHERE owner = %s",
+			$to,
+			$from
+		) );
+
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE attachment SET author = %s WHERE author = %s",
+			$to,
+			$from
+		) );
+
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE ticket_change SET author = %s WHERE author = %s",
+			$to,
+			$from
+		) );
+	
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE wiki SET author = %s WHERE author = %s",
+			$to,
+			$from
+		) );
+
+		// WordPress.org Subscriptions and notifications.
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE _ticket_subs SET username = %s WHERE username = %s",
+			$to,
+			$from
+		) );
+
+		$this->db->get_var( $this->db->prepare(
+			"UPDATE _notifications SET username = %s WHERE username = %s",
+			$to,
+			$from
+		) );
+
+		// DO NOT update the following tables:
+		// - revision (SVN "cache")
+		// - permission (Trac permissions)
+
+		return true;
+	}
 }
