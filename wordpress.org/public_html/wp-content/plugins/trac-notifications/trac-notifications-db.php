@@ -217,6 +217,11 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			$username
 		), ARRAY_A );
 
+		$profile_data = $this->db->get_results( $this->db->prepare(
+			"SELECT name, value FROM session_attribute WHERE sid = %s",
+			$username
+		), ARRAY_A );
+
 		return compact(
 			'ticket_subscriptions',
 			'ticket_notifications',
@@ -224,6 +229,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			'ticket_owner',
 			'attachments',
 			'comments',
+			'profile_data',
 		);
 	}
 
@@ -233,8 +239,10 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 	 *  - Removes Subscriptions & notification prefs
 	 *  - Removes user Trac preferences
 	 * 
+	 * The $to user doesn't have to be unique, but associated user-data (NOT content) of that user will be lost.
+	 * 
 	 * @param string $from The user login of the user to anonymize.
-	 * @param string $to   The new user login placeholder for the user, must be unique.
+	 * @param string $to   The new user login placeholder for the user, should be unique.
 	 */
 	function anonymize_user( $from, $to ) {
 		$from = trim( $from );
@@ -244,7 +252,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			return false;
 		}
 
-		// Perform rename
+		// Perform rename first.
 		if ( ! $this->rename_user( $from, $to ) ) {
 			return false;
 		}
@@ -290,6 +298,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		}
 
 		// If the user has (or will have) specific permissions on the trac instance, bail.
+		// If this needs to be bypassed, remove the user permissions first before migration.
 		if ( $this->db->get_var( $wpdb->prepare(
 			"SELECT action FROM permission WHERE username IN( %s, %s )",
 			$from,
@@ -298,22 +307,35 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			return false;
 		}
 
-		// Trac Sessions & Prefs
-		$this->db->get_var( $this->db->prepare(
-			"UPDATE session SET sid = %s WHERE sid = %s",
-			$to,
-			$from
+		// Check for the user existing. If exists, delete old user prefs, else, migrate.
+		$dest_user_exists = (bool) $this->db->get_var( $this->db->prepare(
+			"SELECT sid FROM session WHERE sid = %s",
+			$to
 		) );
-		$this->db->get_var( $this->db->prepare(
-			"UPDATE auth_cookie SET name = %s WHERE name = %s",
-			$to,
-			$from
-		) );
-		$this->db->get_var( $this->db->prepare(
-			"UPDATE session_attribute SET sid = %s WHERE sid = %s",
-			$to,
-			$from
-		) );
+
+		// Trac Sessions & Prefs. If the $to user doesn't exist, migrate prefs, otherwise delete old prefs.
+		if ( ! $dest_user_exists ) {
+			$this->db->get_var( $this->db->prepare(
+				"UPDATE session SET sid = %s WHERE sid = %s",
+				$to,
+				$from
+			) );
+			$this->db->get_var( $this->db->prepare(
+				"UPDATE auth_cookie SET name = %s WHERE name = %s",
+				$to,
+				$from
+			) );
+			$this->db->get_var( $this->db->prepare(
+				"UPDATE session_attribute SET sid = %s WHERE sid = %s",
+				$to,
+				$from
+			) );
+		} else {
+			// Dest user existed, delete those data values instead.
+			$this->db->delete( 'session', array( 'sid' => $from ) );
+			$this->db->delete( 'auth_cookie', array( 'name' => $from ) );
+			$this->db->delete( 'session_attribute', array( 'sid' => $from ) );
+		}
 
 		// Tickets, Attachments, and Comments.
 		$this->db->get_var( $this->db->prepare(
