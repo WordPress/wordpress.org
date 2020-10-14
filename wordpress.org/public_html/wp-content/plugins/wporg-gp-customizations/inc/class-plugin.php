@@ -46,6 +46,7 @@ class Plugin {
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'apply_capital_P_dangit' ), 10, 2 );
 		add_filter( 'gp_original_extracted_comments', array( $this, 'format_translator_commments' ), 15 );
+		add_filter( 'wporg_translate_language_pack_theme_args', array( $this, 'set_version_for_default_themes_in_development' ), 10, 2 );
 
 		// Cron.
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
@@ -68,6 +69,23 @@ class Plugin {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
+	}
+
+	/**
+	 * Defines a version for WordPress default themes which are still in development.
+	 *
+	 * @param array  $args WP-CLI arguments.
+	 * @param string $slug Slug of a theme.
+	 * @return array Filtered WP-CLI arguments.
+	 */
+	public function set_version_for_default_themes_in_development(  $args, $slug ) {
+		if ( 'twentytwentyone' !== $slug || ! empty( $args['version'] ) ) {
+			return $args;
+		}
+
+		$args['version'] = '1.0';
+
+		return $args;
 	}
 
 	/**
