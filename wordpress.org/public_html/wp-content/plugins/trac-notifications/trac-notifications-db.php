@@ -299,7 +299,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 
 		// If the user has (or will have) specific permissions on the trac instance, bail.
 		// If this needs to be bypassed, remove the user permissions first before migration.
-		if ( $this->db->get_var( $wpdb->prepare(
+		if ( $this->db->get_var( $this->db->prepare(
 			"SELECT action FROM permission WHERE username IN( %s, %s )",
 			$from,
 			$to
