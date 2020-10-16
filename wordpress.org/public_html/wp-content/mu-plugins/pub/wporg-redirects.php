@@ -124,7 +124,7 @@ function wporg_redirect_site_not_found() {
 		case '2019.wordpress.org':
 		case '2020.wordpress.org':
 		case '2021.wordpress.org':
-			$location = 'https://' . explode( $host, '.' )[0] . '.wordpress.net/';
+			$location = 'https://' . explode( '.', $host )[0] . '.wordpress.net/';
 			break;
 
 		case 'slack.wordpress.org':
