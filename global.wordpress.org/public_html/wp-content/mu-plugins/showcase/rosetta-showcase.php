@@ -61,7 +61,7 @@ class Rosetta_Showcase {
 
 		$args = [
 			'labels'               => $labels,
-			'public'               => true,
+			'public'               => false,
 			'show_ui'              => true,
 			'rewrite'              => false,
 			'has_archive'          => false,
