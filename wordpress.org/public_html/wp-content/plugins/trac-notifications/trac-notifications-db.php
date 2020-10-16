@@ -222,6 +222,9 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			$username
 		), ARRAY_A );
 
+		// Convert from [ name: "field", value: "value" ] to [ field: value ]
+		$profile_data = array_column( $profile_data, 'value', 'name' );
+
 		return compact(
 			'ticket_subscriptions',
 			'ticket_notifications',
