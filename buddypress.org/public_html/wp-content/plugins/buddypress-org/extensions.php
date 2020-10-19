@@ -92,8 +92,8 @@ function bporg_redirect() {
 		return;
 	}
 
-	// Redirect /forums/ to /support/
-	if ( $uri_chunks[1] === 'forums' && empty( $uri_chunks[2] ) ) {
+	// Redirect /forums/ to /support/ & /community/ to /support
+	if ( ( $uri_chunks[1] === 'forums' || $uri_chunks[1] === 'community' ) && empty( $uri_chunks[2] ) ) {
 		bp_core_redirect( home_url( '/support/' ) );
 	}
 
@@ -102,13 +102,13 @@ function bporg_redirect() {
 		bp_core_redirect( home_url( '/' ) );
 	}
 
-	// Redirect old members profile pages to
+	// Redirect old members profile pages to their new location
 	if ( ( $uri_chunks[1] === 'community' ) && ( $uri_chunks[2] === 'members' ) && ! empty( $uri_chunks[3] ) ) {
 		bp_core_redirect( home_url( '/members/' . $uri_chunks[3] . '/' ) );
 	}
 
 	// Redirect old plugin groups to deprecated plugin forums
-	if ( ( $uri_chunks[1] === 'community' ) && isset( $uri_chunks[2] ) && ( $uri_chunks[2] === 'groups' ) ) {
+	if ( ( $uri_chunks[1] === 'community' ) && ( $uri_chunks[2] === 'groups' ) ) {
 
 		// /community/groups/ to Support root.
 		if ( empty( $uri_chunks[3] ) ) {
