@@ -264,6 +264,7 @@ function get_whitelist() {
 			'johnbillion',
 			'justinahinon', // @justin on Slack
 			'psykro', // @jon_bossenger on Slack
+			'raaaahman', // @Sylvain Schellenberger on slack
 			'schlessera',
 		),
 		'feature-shinyupdates' => array(
