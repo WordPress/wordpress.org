@@ -106,7 +106,6 @@ class Import {
 					$plugin,
 					Tools::get_plugin_committers( $plugin_slug ),
 					[
-						'release' => $releases[ $stable_tag ],
 						'who'     => $last_committer,
 						'readme'  => $readme,
 						'headers' => $headers,
