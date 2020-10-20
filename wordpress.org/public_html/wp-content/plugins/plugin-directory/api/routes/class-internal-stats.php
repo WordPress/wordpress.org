@@ -152,7 +152,7 @@ class Internal_Stats extends Base {
 		// Due to rounding issues, sometimes we'll end up with the total being .01 or .02 off 100
 		// In these cases, we'll just alter the 'other' or final number slightly so everything adds up to 100.
 		// This is ultimately needed for the stats graphs to display properly.
-		if ( array_sum( $usage ) != 100.00 ) {
+		if ( $usage && array_sum( $usage ) != 100.00 ) {
 			$last_key = array_keys( $usage )[ count( $usage ) - 1 ];
 			$usage[ $last_key ] -= array_sum( $usage ) - 100.00;
 		}
