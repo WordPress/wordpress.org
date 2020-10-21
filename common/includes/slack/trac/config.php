@@ -39,30 +39,33 @@ class Core extends Trac {
 		'wp-includes/sitemaps'             => '#core-sitemaps',
 		'#wp-admin/includes/.*upgrader#'   => [ '#core' => true, '#core-auto-updates' => true ],
 		'#wp-admin/includes/.*install#'    => [ '#core' => true, '#core-auto-updates' => true ],
+		'application-passwords'            => '#core-passwords',
+		'auth-app'                         => '#core-passwords',
 	);
 
 	/**
 	 * Components or focuses that cause new tickets to be piped to particular channels.
 	 */
 	protected $ticket_component_filters = array(
-		'Bundled Theme'      => '#core-themes',
-		'Customize'          => '#core-customize',
-		'Date/Time'          => '#core-datetime',
-		'Press This'         => '#core-pressthis',
-		'multisite'          => '#core-multisite',
-		'Networks and Sites' => '#core-multisite',
-		'REST API'           => '#core-restapi',
-		'rest-api'           => '#core-restapi',
-		'I18N'               => '#core-i18n',
-		'Media'              => '#core-media',
-		'docs'               => '#core-docs',
-		'javascript'         => '#core-js',
-		'coding-standards'   => '#core-coding-standards',
-		'Privacy'            => '#core-privacy',
-		'privacy'            => '#core-privacy',
-		'Site Health'        => '#core-site-health',
-		'Sitemaps'           => '#core-sitemaps',
-		'Upgrade/Install'    => [ '#core' => true, '#core-auto-updates' => true ],
+		'Bundled Theme'          => '#core-themes',
+		'Customize'              => '#core-customize',
+		'Date/Time'              => '#core-datetime',
+		'Press This'             => '#core-pressthis',
+		'multisite'              => '#core-multisite',
+		'Networks and Sites'     => '#core-multisite',
+		'REST API'               => '#core-restapi',
+		'rest-api'               => '#core-restapi',
+		'I18N'                   => '#core-i18n',
+		'Media'                  => '#core-media',
+		'docs'                   => '#core-docs',
+		'javascript'             => '#core-js',
+		'coding-standards'       => '#core-coding-standards',
+		'Privacy'                => '#core-privacy',
+		'privacy'                => '#core-privacy',
+		'Site Health'            => '#core-site-health',
+		'Sitemaps'               => '#core-sitemaps',
+		'Upgrade/Install'        => [ '#core' => true, '#core-auto-updates' => true ],
+		'Login and Registration' => '#core-passwords',
 	);
 }
 
