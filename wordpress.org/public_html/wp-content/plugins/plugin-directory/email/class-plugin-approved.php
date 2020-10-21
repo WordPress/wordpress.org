@@ -17,13 +17,24 @@ class Plugin_Approved extends Base {
 	function body() {
 		/* translators: 1: plugin name, 2: plugin author's username, 3: plugin slug */
 		$email_text = __(
-'Congratulations, your plugin hosting request for %1$s has been approved.
+'Congratulations, the plugin hosting request for %1$s has been approved.
 
-Within one (1) hour your account will be granted commit access to your Subversion (SVN) repository. Your username is %2$s and your password is the one you already use to log in to WordPress.org. Keep in mind, your username is case sensitive and you cannot use your email address to log in to SVN.
+Within one (1) hour your account (%2$s) will be granted commit access to your Subversion (SVN) repository.
 
-https://plugins.svn.wordpress.org/%3$s
+* SVN URL: https://plugins.svn.wordpress.org/%3$s
+* Public URL: https://wordpress.org/plugins/%3$s
 
-Once your account has been added, you will need to upload your code using a SVN client of your choice. We are unable to upload or maintain your code for you.
+Once your account access has been activated, you may upload your code using a SVN client of your choice. If you are new to SVN (or the Plugin Directory) make sure to review all the links in this email.
+
+To answer some common questions:
+
+* You must use SVN to upload your code -- we are unable to do that for you
+* Your SVN username is %2$s and your password is the same as you use to log in to WordPress.org
+* Your username is case sensitive
+* SVN will not accept your email address as a username
+* Due to the size of the directory, it may take 72 hours before all search results are properly updated
+
+To help you get started, here are some links:
 
 Using Subversion with the WordPress Plugin Directory:
 https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/
@@ -42,6 +53,9 @@ https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
 
 WordPress Plugin Directory Guidelines:
 https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
+
+Block Specific Plugin Guidelines:
+https://developer.wordpress.org/plugins/wordpress-org/block-specific-plugin-guidelines/
 
 If you have issues or questions, please reply to this email and let us know.
 
