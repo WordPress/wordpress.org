@@ -39,12 +39,17 @@ function get_whitelist() {
 			'nrqsnchz',
 			'rianrietveld',
 			'ryokuhi',
+			'sarahricker',
+		),
+		'accessibility-docs' => array(
+			'sarahricker',
 		),
 		'accessibility-events' => array(
 			'audrasjb',
 			'joedolson',
 			'nrqsnchz',
 			'ryokuhi',
+			'sarahricker',
 		),
 		'bbpress' => array(
 			'johnjamesjacoby', // @jjj on Slack
@@ -245,6 +250,7 @@ function get_whitelist() {
 			'michaelarestad',
 			'noahrshrader', // @noah on Slack
 			'paaljoachim',
+			'sarahricker',
 		),
 		'design-dashicons' => array(
 			'EmpireOfLight',
