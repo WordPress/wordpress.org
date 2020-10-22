@@ -512,22 +512,31 @@ class Import {
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
 			foreach ( $svn_assets_folder as $asset ) {
-				// screenshot-0(-rtl)(-de_DE).(png|jpg|jpeg|gif)  ||  icon.svg
-				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(?:-(?P<resolution>[\dx]+)(-rtl)?(?:-(?P<locale>[a-z]{2,3}(?:_[A-Z]{2})?(?:_[a-z0-9]+)?))?\.(png|jpg|jpeg|gif)|\.svg)$!i', $asset['filename'], $m ) ) {
+				// screenshot-0(-rtl)(-de_DE).(png|jpg|jpeg|gif) || banner-772x250.PNG || icon.svg
+				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(?:-(?P<resolution>\d+(?:\D\d+)?)(-rtl)?(?:-(?P<locale>[a-z]{2,3}(?:_[A-Z]{2})?(?:_[a-z0-9]+)?))?\.(png|jpg|jpeg|gif)|\.svg)$!iu', $asset['filename'], $m ) ) {
 					continue;
 				}
+
+				$type = strtolower( $m['type'] );
 
 				// Don't import oversize assets.
-				if ( $asset['filesize'] > $asset_limits[ $m['type'] ] ) {
+				if ( $asset['filesize'] > $asset_limits[ $type ] ) {
 					continue;
 				}
 
-				$type       = $m['type'];
 				$filename   = $asset['filename'];
 				$revision   = $asset['revision'];
 				$location   = 'assets';
 				$resolution = isset( $m['resolution'] ) ? $m['resolution'] : false;
 				$locale     = isset( $m['locale'] )     ? $m['locale']     : false;
+
+				// Ensure the resolution key is in the expected 123x123 format.
+				// Resolution is also the screenshot number, in which case it's stringy numeric only.
+				if ( $resolution && 'screenshot' === $type ) {
+					$resolution = (string)( (int) $resolution );
+				} else if ( $resolution ) {
+					$resolution = preg_replace( '/[^0-9]/u', 'x', $resolution );
+				}
 
 				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location', 'locale' );
 			}
