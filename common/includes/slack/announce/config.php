@@ -124,6 +124,7 @@ function get_whitelist() {
 			'notlaura', // @laras126 on Slack
 			'kburgoine',
 			'ryelle',
+			'danfarrow ',
 		) ),
 		'core-customize' => array_merge( get_committers(), array(
 			'celloexpressions',
