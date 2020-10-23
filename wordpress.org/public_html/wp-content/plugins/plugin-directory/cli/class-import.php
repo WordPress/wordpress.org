@@ -542,30 +542,6 @@ class Import {
 			}
 		}
 
-		// Find screenshots in the stable plugin folder (but don't overwrite /assets/)
-		foreach ( Filesystem::list_files( "$tmp_dir/export/", false /* non-recursive */, '!^screenshot-\d+\.(jpeg|jpg|png|gif)$!' ) as $plugin_screenshot ) {
-			$filename      = basename( $plugin_screenshot );
-			$screenshot_id = substr( $filename, strpos( $filename, '-' ) + 1 );
-			$screenshot_id = substr( $screenshot_id, 0, strpos( $screenshot_id, '.' ) );
-
-			if ( isset( $assets['screenshot'][ $filename ] ) ) {
-				// Skip it, it exists within /assets/ already
-				continue;
-			}
-
-			// Don't import oversize assets.
-			if ( filesize( $plugin_screenshot ) > $asset_limits['screenshot'] ) {
-				continue;
-			}
-
-			$assets['screenshot'][ $filename ] = array(
-				'filename'   => $filename,
-				'revision'   => $svn_export['revision'],
-				'resolution' => $screenshot_id,
-				'location'   => 'plugin',
-			);
-		}
-
 		if ( 'trunk' === $stable_tag ) {
 			$stable_path = $stable_tag;
 		} else {
