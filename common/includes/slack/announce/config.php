@@ -100,6 +100,7 @@ function get_whitelist() {
 			'marybaum',
 			'meaganhanes',
 			'metalandcoffee',
+			'monikarao',
 			'pbiron',
 			'psykro', // @jon_bossenger on Slack
 			'sncoker', // @shawntellecoker on Slack
