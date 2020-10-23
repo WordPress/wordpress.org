@@ -1473,11 +1473,9 @@ class Plugin_Directory {
 			die();
 		}
 
-		// Is it a SVG?
-		if (
-			false !== stripos( $body, '<svg' ) &&
-			false !== stripos( $body, '</svg>' )
-		) {
+		// Is it a SVG? Just check for the closing SVG tag as we'll be replacing that.
+		// If it's a SVG without a closing tag, it'll ultimately be treated as a static image and 404.
+		if ( false !== stripos( $body, '</svg>' ) ) {
 			status_header( 200 );
 			header( 'Content-Type: image/svg+xml' );
 			header( 'Content-Disposition: attachment' ); // Force download
@@ -1485,7 +1483,7 @@ class Plugin_Directory {
 			header( 'Cache-Control: public, max-age=' . YEAR_IN_SECONDS );
 			header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + YEAR_IN_SECONDS ) );
 
-			$body = str_replace(
+			$body = str_ireplace(
 				'</svg>',
 				// Pause SVG based animations.
 				'<script> SVGRoot.pauseAnimations(); </script>' .
@@ -1514,8 +1512,10 @@ class Plugin_Directory {
 		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + YEAR_IN_SECONDS ) );
 
 		imagepng( $img );
+
 		imagedestroy( $img );
-		exit;
+
+		die();
 	}
 
 	/**
