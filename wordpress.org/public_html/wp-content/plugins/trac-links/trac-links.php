@@ -65,8 +65,12 @@ function markup_wporg_links( $content ) {
 	$ignore_element = false;
 	$len            = count( $arr );
 	
-	for ( $i = 0; $i <= $len; $i++ ) {
-		$text   = $arr[ $i ];
+	for ( $i = 0; $i < $len; $i++ ) {
+		$text = $arr[ $i ];
+		if ( ! $text ) {
+			continue;
+		}
+
 		$is_tag = '<' === $text[0];
 
 		// Is this a HTML tag we want to skip the contents of?
@@ -80,7 +84,7 @@ function markup_wporg_links( $content ) {
 		}
 
 		// Process this stand-alone chunk of text.
-		if ( ! $is_tag && ! $ignore_element && strlen( $text ) ) {
+		if ( ! $is_tag && ! $ignore_element ) {
 			$content = str_replace( $text, preg_replace( $find, $replace, $text ), $content );
 		}
 
