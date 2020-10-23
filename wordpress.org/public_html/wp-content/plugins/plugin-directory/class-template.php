@@ -625,7 +625,7 @@ class Template {
 			$format = 'https://plugins.svn.wordpress.org/%1$s/assets/%2$s';
 
 			// TODO, assume all icons are animated for now.
-			if ( false != stripos( $asset['filename'], 'icon' ) ) {
+			if ( false !== stripos( $asset['filename'], 'icon' ) ) {
 				$asset['animated'] = true;
 			}
 
