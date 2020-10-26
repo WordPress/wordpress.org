@@ -828,7 +828,7 @@ class Block_Plugin_Checker {
 						'info',
 						// translators: %s is the block name.
 						sprintf( __( 'Found file %s.', 'wporg-plugins' ), '<code>' . $script . '</code>' ),
-						compact( $kind, $script )
+						compact( 'kind', 'script' )
 					);
 				} else {
 					// translators: %s is the file name.
@@ -844,7 +844,7 @@ class Block_Plugin_Checker {
 						__FUNCTION__,
 						'error',
 						sprintf( $message, '<code>' . $script . '</code>' ),
-						compact( $kind, $script )
+						compact( 'kind', 'script' )
 					);
 				}
 			}
