@@ -54,7 +54,7 @@ function show_authorization( $user, $channel ) {
 		printf( "You are not allowed to use /announce or /here in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
 	}
 
-	printf( " If you are a team lead and need to be whitelisted, contact an admin in <#%s|%s> for assistance.", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME );
+	printf( " If you are a team lead and need to be whitelisted, contact an admin in <#%s|%s> for assistance. Your linked WordPress.org account is '%s'.", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME, $user );
 }
 
 function run( $data ) {
