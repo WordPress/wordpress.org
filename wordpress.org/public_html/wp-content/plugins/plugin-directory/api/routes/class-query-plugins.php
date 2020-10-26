@@ -91,7 +91,7 @@ class Query_Plugins extends Base {
 				unset( $query['s'] );
 			}
 
-			if ( 'block:' === substr( $query['s'], 0, 6 ) ) {
+			if ( isset( $query['s'] ) && 'block:' === substr( $query['s'], 0, 6 ) ) {
 				$query['meta_query'][] = [
 					'key' => 'block_name',
 					'value' => substr( $query['s'], 6 )
