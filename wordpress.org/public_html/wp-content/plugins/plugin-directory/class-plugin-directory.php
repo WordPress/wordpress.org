@@ -1204,7 +1204,7 @@ class Plugin_Directory {
 			'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
 			'posts', 'withcomments', 'withoutcomments', 'favicon', 'cpage',
 			'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
-			'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview',
+			'attachment_id', 'subpost', 'subpost_id', 'preview',
 			'post_format', 'cat', 'category_name', 'tag', // We use custom cats/tags.
 		];
 
