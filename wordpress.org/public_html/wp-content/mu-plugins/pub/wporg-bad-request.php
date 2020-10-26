@@ -99,6 +99,15 @@ add_action( 'xmlrpc_call', function() {
 }, 1 );
 
 /**
+ * Detect invalid requests from over hungry vulnerability scanners.
+ */
+add_action( 'send_headers', function() {
+	if ( isset( $_REQUEST['EGOTEC'] ) ) {
+		die_bad_request( 'EGOTEC request parameter set' );
+	}
+}, 1 );
+
+/**
  * Die with a 400 Bad Request.
  *
  * @param string $reference A unique identifying string to make it easier to read logs.
