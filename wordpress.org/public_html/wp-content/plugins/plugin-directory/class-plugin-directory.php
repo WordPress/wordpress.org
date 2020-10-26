@@ -524,7 +524,7 @@ class Plugin_Directory {
 		) );
 
 		// Add the browse/* views.
-		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me)' );
+		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
 
 		// Create an archive for a users favorites too.
@@ -779,7 +779,7 @@ class Plugin_Directory {
 
 		// For any invalid values passed to browse, set it to featured instead
 		if ( !empty ( $wp_query->query ['browse'] ) &&
-		     !in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me' ) ) ) {
+		     !in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated' ) ) ) {
 			 $wp_query->query['browse'] = 'featured';
 			 $wp_query->query_vars['browse'] = 'featured';
 		}
@@ -815,6 +815,10 @@ class Plugin_Directory {
 				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
 					$wp_query->query_vars['p'] = -1;
 				}
+				break;
+
+			case 'updated':
+				$wp_query->query_vars['orderby'] = 'modified_date';
 				break;
 
 			case 'block':
