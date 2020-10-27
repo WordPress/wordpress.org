@@ -143,6 +143,7 @@ final class HelpHub_Post_Types {
 			__( 'Articles', 'wporg-forums' ),
 			array(
 				'menu_icon' => 'dashicons-media-document',
+				'supports'  => array( 'title', 'editor', 'excerpt', 'thumbnail', 'page-attributes', 'revisions', 'comments' ),
 			),
 			array(),
 			'article',
