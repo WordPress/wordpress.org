@@ -571,7 +571,7 @@ function wporg_support_current_user_can_stick( $topic_id ) {
 		$stickies = $plugin_instance->themes->stickies;
 	}
 
-	if ( $stickies ) {
+	if ( $stickies && $stickies->term ) {
 		$user_can_stick = $stickies->user_can_stick( get_current_user_id(), $stickies->term->term_id, $topic_id );
 	}
 
