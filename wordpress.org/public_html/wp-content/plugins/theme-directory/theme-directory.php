@@ -34,7 +34,12 @@ include __DIR__ . '/jobs/class-manager.php';
 include __DIR__ . '/jobs/class-trac-sync.php';
 new WordPressdotorg\Theme_Directory\Jobs\Manager();
 
+// Load the GitHub API client.
+include __DIR__ . '/lib/class-github.php';
+
 define( 'WPORG_THEMES_DEFAULT_BROWSE', 'popular' );
+
+define( 'WPORG_THEMES_E2E_REPO', 'WordPress/theme-review-e2e' );
 
 /**
  * Things to change on activation.

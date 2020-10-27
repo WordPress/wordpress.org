@@ -1,4 +1,5 @@
 <?php
+use WordPressdotorg\Theme_Directory\Lib\GitHub;
 
 /**
  * Class WPORG_Themes_Upload
@@ -322,6 +323,9 @@ class WPORG_Themes_Upload {
 		$this->send_email_notification( $ticket_id );
 
 		do_action( 'theme_upload', $this->theme, $this->theme_post );
+
+		// Initiate a GitHub actions run for the theme.
+		$this->trigger_e2e_run( $ticket_id );
 
 		// Success!
 		/* translators: 1: theme name, 2: Trac ticket URL */
@@ -945,6 +949,27 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 		}
 
 		wp_mail( $this->author->user_email, $email_subject, $email_content, 'From: themes@wordpress.org' );
+	}
+
+	/**
+	 * Triggers a GitHub actions run for the upload.
+	 */
+	public function trigger_e2e_run( $ticket_id ) {
+		$api = GitHub::api(
+			'/repos/' . WPORG_THEMES_E2E_REPO . '/dispatches',
+			json_encode([
+				'event_type'     => $this->theme->display( 'Name' ),
+				'client_payload' => [
+					'theme_slug'       => $this->theme_slug,
+					'theme_zip'        => "https://wordpress.org/themes/download/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1",
+					'accessible_ready' => in_array( 'accessibility-ready', $this->theme->get( 'Tags' ) ),
+					'trac_ticket_id'   => $ticket_id,
+				],
+			])
+		);
+	
+		// Upon failure a message is returned, success returns nothing.
+		return empty( $api );
 	}
 
 	// Helper
