@@ -184,6 +184,10 @@ textarea {
 	overflow: auto;
 	padding: 2px 6px;
 	resize: vertical;
+
+	.comment-form-comment & {
+		width: 100%;
+	}
 }
 
 input[type="file"] {

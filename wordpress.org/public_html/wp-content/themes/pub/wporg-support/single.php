@@ -17,6 +17,10 @@ get_header(); ?>
 				the_post();
 
 				get_template_part( 'template-parts/content', 'single' );
+
+				if ( comments_open() ) :
+					comments_template();
+				endif;
 			endwhile; // End of the loop.
 			?>
 		</div>

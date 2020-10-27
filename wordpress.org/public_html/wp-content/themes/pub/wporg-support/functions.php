@@ -12,6 +12,14 @@
 add_filter( 'bbp_show_lead_topic', '__return_true' );
 
 /**
+ * Add theme support for some features.
+ */
+function wporg_support_theme_support() {
+	add_theme_support( 'html5', array( 'comment-form' ) );
+}
+add_action( 'after_setup_theme', 'wporg_support_theme_support' );
+
+/**
  * Enqueue scripts and styles.
  *
  * Enqueue existing wordpress.org/support stylesheets
@@ -19,7 +27,7 @@ add_filter( 'bbp_show_lead_topic', '__return_true' );
  */
 function wporg_support_scripts() {
 
-	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [], '20200723' );
+	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [], '20201023' );
 	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
@@ -49,6 +57,67 @@ function wporg_support_register_widget_areas() {
 	) );
 }
 add_action( 'widgets_init', 'wporg_support_register_widget_areas' );
+
+/**
+ * Don't include comments on HelpHub articles in REST responses.
+ *
+ * These comments are not intended to be public, and only read by HelpHub editors.
+ *
+ * @param array $args
+ *
+ * @return array
+ */
+function wporg_support_rest_comment_query( $args ) {
+	$post_types        = get_post_types( array( 'name' => 'helphub_article' ), 'names', 'NOT' );
+	$args['post_type'] = $post_types;
+
+	return $args;
+}
+add_filter( 'rest_comment_query', 'wporg_support_rest_comment_query' );
+
+/**
+ * Prevent viewing of individual comments on HelpHub articles via the REST API.
+ *
+ * These comments are not intended to be public, and only read by HelpHub editors.
+ *
+ * @param WP_REST_Response $response
+ * @param WP_Comment       $comment
+ *
+ * @return WP_REST_Response|WP_Error
+ */
+function wporg_support_rest_prepare_comment( $response, $comment ) {
+	$post_type = get_post_type( $comment->comment_post_ID );
+
+	if ( 'helphub_article' === $post_type ) {
+		return new WP_Error(
+			'rest_cannot_read',
+			__( 'Sorry, you are not allowed to read this comment.' ),
+			array( 'status' => rest_authorization_required_code() )
+		);
+	}
+
+	return $response;
+}
+add_filter( 'rest_prepare_comment', 'wporg_support_rest_prepare_comment', 10, 2 );
+
+/**
+ * Modify the redirect after a feedback comment is submitted on an Article.
+ *
+ * @param string     $location
+ * @param WP_Comment $comment
+ *
+ * @return string
+ */
+function wporg_support_comment_post_redirect( $location, $comment ) {
+	if ( 'helphub_article' === get_post_type( $comment->comment_post_ID ) ) {
+		$location  = substr( $location, 0, strpos( $location, '#' ) );
+		$location  = add_query_arg( 'feedback_submitted', 1, $location );
+		$location .= '#reply-title';
+	}
+
+	return $location;
+}
+add_filter( 'comment_post_redirect', 'wporg_support_comment_post_redirect', 10, 2 );
 
 /**
  * Customized breadcrumb arguments

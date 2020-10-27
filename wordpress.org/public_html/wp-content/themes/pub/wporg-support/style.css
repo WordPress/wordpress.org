@@ -997,9 +997,20 @@ h2 {
 	font-weight: 300;
 }
 
+h2.comment-reply-title {
+	font-weight: 400;
+	font-size: 1.45rem;
+	line-height: 1.5em;
+}
+
 h3 {
 	font-size: 1.5625rem;
 	font-weight: 400;
+}
+
+h3.comment-reply-title {
+	font-size: 1.25rem;
+	font-weight: 700;
 }
 
 h4, .bbp-view .review-ratings .col-5 > div:first-child {
@@ -2167,6 +2178,10 @@ textarea {
 	overflow: auto;
 	padding: 2px 6px;
 	resize: vertical;
+}
+
+.comment-form-comment textarea {
+	width: 100%;
 }
 
 input[type="file"] {
@@ -4726,6 +4741,10 @@ body.helphub-with-sidebar .left-sidebar ul li ul {
 		margin: 0;
 		width: 65%;
 	}
+}
+
+.helphub-page .comment-respond {
+	padding-bottom: 2rem;
 }
 
 /*--------------------------------------------------------------

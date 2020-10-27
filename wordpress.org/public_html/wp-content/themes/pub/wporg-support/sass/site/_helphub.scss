@@ -120,12 +120,16 @@ body.helphub-with-sidebar {
 					overflow: hidden;
 				}
 
-				 @media screen and ( min-width: $ms-breakpoint ) {
-					 margin: 0;
-					 width: 65%;
-				 }
-			 }
-		 }
-	 }
+				@media screen and ( min-width: $ms-breakpoint ) {
+					margin: 0;
+					width: 65%;
+				}
+			}
+		}
+	}
+
+	.comment-respond {
+		padding-bottom: 2rem;
+	}
 }
 
