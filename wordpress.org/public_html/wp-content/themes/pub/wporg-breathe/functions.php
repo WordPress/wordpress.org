@@ -16,6 +16,12 @@ function after_setup_theme() {
 	add_action( 'customize_register', __NAMESPACE__ . '\customize_register' );
 
 	add_filter( 'o2_filtered_content', __NAMESPACE__ . '\append_last_updated', 10, 2 );
+
+	// Customize Code Syntax Block syntax highlighting theme to use styles from theme.
+	// Based on the plugin's docs, this should be default behavior but isn't.
+	add_filter( 'mkaz_prism_css_path', function() {
+		return '/assets/prism/prism.css';
+	} );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\after_setup_theme', 11 );
 
