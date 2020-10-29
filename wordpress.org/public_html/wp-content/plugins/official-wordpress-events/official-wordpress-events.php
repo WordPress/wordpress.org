@@ -807,14 +807,31 @@ class Official_WordPress_Events {
 		}
 
 		$meetup_client = $this->get_meetup_client();
-
 		if ( ! empty( $meetup_client->error->errors ) ) {
 			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $meetup_client->error ), true );
 			return;
 		}
 
+		$groups = $meetup_client->get_groups();
+		if ( ! empty( $meetup_client->error->errors ) ) {
+			$this->log( 'Failed to fetch groups: ' . wp_json_encode( $meetup_client->error ), true );
+			return;
+		}
+		$group_urlnames = wp_list_pluck( $groups, 'urlname' );
+
 		foreach ( $chunked_db_events as $group_url => $db_events ) {
 			$url_name = trim( wp_parse_url( $group_url, PHP_URL_PATH ), '/' );
+
+			if ( ! in_array( $url_name, $group_urlnames, true ) ) {
+				// The group doesn't exist anymore, mark its events as deleted.
+				foreach ( $db_events as $db_event ) {
+					$wpdb->update( self::EVENTS_TABLE, array( 'status' => 'deleted' ), array( 'id' => $db_event->id ) );
+
+					$this->log( "Group missing. Marked {$db_event->source_id} as deleted." );
+				}
+
+				continue;
+			}
 
 			$events = $meetup_client->get_group_events(
 				$url_name,
@@ -851,7 +868,7 @@ class Official_WordPress_Events {
 				// The event is missing from a valid response, so assume that it's been deleted.
 				$wpdb->update( self::EVENTS_TABLE, array( 'status' => 'deleted' ), array( 'id' => $db_event->id ) );
 
-				$this->log( "Marked {$db_event->source_id} as deleted." );
+				$this->log( "Event missing. Marked {$db_event->source_id} as deleted." );
 			}
 		}
 	}
