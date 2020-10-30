@@ -241,9 +241,9 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 	 *  - Switches their tickets, comments, and attachments to be owned by $to
 	 *  - Removes Subscriptions & notification prefs
 	 *  - Removes user Trac preferences
-	 * 
+	 *
 	 * The $to user doesn't have to be unique, but associated user-data (NOT content) of that user will be lost.
-	 * 
+	 *
 	 * @param string $from The user login of the user to anonymize.
 	 * @param string $to   The new user login placeholder for the user, should be unique.
 	 */

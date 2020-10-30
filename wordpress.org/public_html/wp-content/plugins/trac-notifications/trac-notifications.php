@@ -10,6 +10,7 @@ require __DIR__ . '/autoload.php';
 class wporg_trac_notifications {
 
 	protected $trac;
+	protected $api;
 	protected $components;
 
 	protected $tracs_supported = array( 'core', 'meta', /* 'themes', 'plugins' */ );
@@ -26,15 +27,7 @@ class wporg_trac_notifications {
 		}
 
 		$this->trac = $trac;
-
-		if ( 'core' === $trac && function_exists( 'add_db_table' ) ) {
-			$tables = array( 'ticket', '_ticket_subs', '_notifications', 'ticket_change', 'component', 'milestone', 'ticket_custom' );
-			foreach ( $tables as $table ) {
-				add_db_table( 'trac_' . $trac, $table );
-			}
-		}
-
-		$this->api = new Trac_Notifications_HTTP_Client( $this->trac_url() . '/wpapi', TRAC_NOTIFICATIONS_API_KEY );
+		$this->api  = new Trac_Notifications_HTTP_Client( $this->trac_url() . '/wpapi', TRAC_NOTIFICATIONS_API_KEY );
 
 		if ( 'core' === $trac ) {
 			require __DIR__ . '/trac-components.php';
@@ -48,6 +41,18 @@ class wporg_trac_notifications {
 
 	function trac_url() {
 		return 'https://' . $this->trac . '.trac.wordpress.org';
+	}
+
+	function trac_name() {
+		return ucfirst( $this->trac );
+	}
+
+	function trac_api() {
+		if ( ! $this->trac || ! $this->api ) {
+			return false;
+		}
+
+		return $this->api;
 	}
 
 	function filter_allowed_http_origins( $origins ) {
