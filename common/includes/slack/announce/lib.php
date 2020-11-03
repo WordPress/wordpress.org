@@ -37,24 +37,30 @@ function is_user_whitelisted( $user, $channel ) {
 }
 
 function show_authorization( $user, $channel ) {
-	$channels = get_whitelisted_channels_for_user( $user ) ;
+
+	echo "Valid commands are /at-channel for an @channel, and /announce or /here to perform an @here.\n";
+
+	$channels = get_whitelisted_channels_for_user( $user );
 	if ( $channel === 'privategroup' ) {
-		echo "Any private group members can use /announce and /here in this group.";
+		echo "Any private group members can use these commands in this group.";
 		return;
 	} elseif ( empty( $channels ) ) {
-		echo "You are not allowed to use /announce or /here.";
+		echo "You are not allowed to use these commands.";
 	} elseif ( in_array( $channel, $channels ) ) {
 		$channels = array_filter( $channels, function( $c ) use ( $channel ) { return $c !== $channel; } );
 		if ( $channels ) {
-			printf( "You are allowed to use /announce and /here in #%s (also %s).", $channel, '#' . implode( ' #', $channels ) );
+			printf( "You are allowed to use these commands in #%s (also %s).", $channel, '#' . implode( ' #', $channels ) );
 		} else {
-			echo "You are allowed to use /announce and /here in #$channel.";
+			echo "You are allowed to use these commands in in #$channel.";
 		}
 	} else {
-		printf( "You are not allowed to use /announce or /here in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
+		printf( "You are not allowed to use these commands in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
 	}
 
-	printf( " If you are a team lead and need to be whitelisted, contact an admin in <#%s|%s> for assistance. Your linked WordPress.org account is '%s'.", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME, $user );
+	echo "\n";
+
+	printf( "If you are a team lead and need to be granted access, contact an admin in <#%s|%s> for assistance.\n", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME );
+	printf( "Your linked WordPress.org account that needs to be granted access is '%s'.", $user );
 }
 
 function run( $data ) {
@@ -93,11 +99,17 @@ function run( $data ) {
 		return;
 	}
 
-	$command = 'channel';
-	if ( $data['command'] === '/here' ) {
-		$command = 'here';
+	if ( str_word_count( $data['text'] ) <= 2 ) {
+		printf( "When making announcements, please use a descriptive message for notifications. %s is too short.", $data['text'] );
+		return;
+	}
+
+	// Default to an @here, unless explicitely an @channel OR it's a private group.
+	$command = 'here';
+	if ( $data['command'] === '/at-channel' ) {
+		$command = 'channel';
 	} elseif ( $channel === 'privategroup' ) {
-		// @channel and @group are interchangeable, but still.
+		// @channel and @group are interchangeable.
 		$command = 'group';
 	}
 
