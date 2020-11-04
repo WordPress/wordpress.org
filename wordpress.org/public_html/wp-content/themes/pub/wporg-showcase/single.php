@@ -10,7 +10,7 @@
 					<div class="col-5">
 						<div class="storycontent">
 								<?php breadcrumb(); ?>
-								<a href=' http://<?php get_site_domain( false ); ?>'>
+								<a href='http://<?php get_site_domain( false ); ?>'>
 									<?php site_screenshot_tag( 518, 'screenshot site-screenshot'); ?>
 								</a>
 								<?php the_content(); ?>
