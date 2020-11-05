@@ -63,6 +63,9 @@ class Validator {
 	 */
 	public function validate_content( $readme ) {
 
+		// Security note: Keep the data: protocol here, Parser accepts a string HOWEVER
+		// if a submitted readme.txt URL contents were to contain a file or URL-like string,
+		// it could bypass the protections above in validate_url().
 		$readme = new Parser( 'data:text/plain,' . urlencode( $readme ) );
 
 		$errors = $warnings = $notes = array();
