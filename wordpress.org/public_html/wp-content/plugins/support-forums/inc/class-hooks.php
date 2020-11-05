@@ -19,6 +19,7 @@ class Hooks {
 		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_legacy_user_structure' ) );
+		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 
@@ -310,6 +311,20 @@ class Hooks {
 				wp_redirect( home_url( '/users/' . $user->user_nicename . '/' ), 301 );
 				exit;
 			}
+		}
+	}
+
+	/**
+	 * Redirect the defunct plugin 'ask-question' to the how to / troubleshooting forum
+	 * as it's a better destination for the users reaching the plugin forum from search engines.
+	 */
+	public function redirect_ask_question_plugin_forum() {
+		if (
+			'plugin' === get_query_var( 'bbp_view' ) &&
+			'ask-question' === get_query_var( 'wporg_plugin' )
+		) {
+			wp_safe_redirect( home_url( '/forum/how-to-and-troubleshooting/' ) );
+			exit;
 		}
 	}
 
