@@ -289,7 +289,7 @@ class WPORG_Themes_Upload {
 			if ( $theme_owners && ! in_array( $this->author->ID, $theme_owners ) ) {
 				return sprintf(
 					/* translators: 1: theme name, 2: style.css */
-					__( 'There is already a theme using the Theme URL %1$s by a different author. Please check the URI of your theme in %2$s and upload it again.', 'wporg-themes' ),
+					__( 'There is already a theme using the Theme URL %1$s by a different author. Please check the URL of your theme in %2$s and upload it again.', 'wporg-themes' ),
 					'<code>' . esc_html( $theme_uri ) . '</code>',
 					'<code>style.css</code>'
 				) . $are_you_in_the_right_place;
