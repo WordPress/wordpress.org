@@ -59,6 +59,16 @@ the_post();
 						?>
 					</p>
 
+					<p>
+						<?php
+						printf(
+							/* translators: %s Link to https://wordpress.org/download/releases/#betas */
+							__( 'You can find the latest beta releases on the <a href="%s">Beta Releases</a> page.', 'wporg' ),
+							'https://wordpress.org/download/releases/#betas'
+						);
+						?>
+					</p>
+
 					<h3><?php esc_html_e( 'Nightly Builds', 'wporg' ); ?></h3>
 					<p><?php esc_html_e( 'Development of WordPress moves fairly quickly and day-to-day things break as often as they are fixed. This high churn is part of our development process that aims to produce the most stable releases possible.', 'wporg' ); ?></p>
 
@@ -71,6 +81,17 @@ the_post();
 						);
 						?>
 					</p>
+
+					<p>
+						<?php
+						printf(
+							/* translators: %s Link to the latest nightly release ZIP. */
+							__( 'You can download the latest nightly release here: <a href="%s">wordpress-latest.zip</a>.', 'wporg' ),
+							'https://wordpress.org/nightly-builds/wordpress-latest.zip'
+						);
+						?>
+					</p>
+
 				</section>
 			</div><!-- .entry-content -->
 		</article><!-- #post-## -->
