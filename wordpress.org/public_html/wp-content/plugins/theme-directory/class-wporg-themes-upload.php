@@ -155,7 +155,7 @@ class WPORG_Themes_Upload {
 			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
 				'<code>Theme Name:</code>',
 				'<code>style.css</code>',
-				__( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' )
+				__( 'https://codex.wordpress.org/Theme_Development#Theme_Stylesheet', 'wporg-themes' )
 			);
 
 			return $error;
@@ -196,7 +196,7 @@ class WPORG_Themes_Upload {
 			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
 				'<code>Description:</code>',
 				'<code>style.css</code>',
-				__( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' )
+				__( 'https://codex.wordpress.org/Theme_Development#Theme_Stylesheet', 'wporg-themes' )
 			);
 
 			return $error;
@@ -209,7 +209,7 @@ class WPORG_Themes_Upload {
 			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
 				'<code>Tags:</code>',
 				'<code>style.css</code>',
-				__( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' )
+				__( 'https://codex.wordpress.org/Theme_Development#Theme_Stylesheet', 'wporg-themes' )
 			);
 
 			return $error;
@@ -222,7 +222,7 @@ class WPORG_Themes_Upload {
 			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
 				'<code>Version:</code>',
 				'<code>style.css</code>',
-				__( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' )
+				__( 'https://codex.wordpress.org/Theme_Development#Theme_Stylesheet', 'wporg-themes' )
 			);
 
 			return $error;
@@ -235,15 +235,7 @@ class WPORG_Themes_Upload {
 			);
 		}
 
-		// Make sure we have version that is higher than any previously uploaded version of this theme.
-		if ( ! empty( $this->theme_post ) && ! version_compare( $this->theme->get( 'Version' ), $this->theme_post->max_version, '>' ) ) {
-			/* translators: 1: theme name, 2: theme version, 3: style.css */
-			return sprintf( __( 'You need to upload a version of %1$s higher than %2$s. Increase the theme version number in %3$s, then upload your zip file again.', 'wporg-themes' ),
-				$this->theme->display( 'Name' ),
-				'<code>' . $this->theme_post->max_version . '</code>',
-				'<code>style.css</code>'
-			);
-		}
+		// Version is greater than current version happens after authorship checks.
 
 		// Prevent duplicate URLs.
 		$themeuri = $this->theme->get( 'ThemeURI' );
@@ -260,13 +252,48 @@ class WPORG_Themes_Upload {
 			);
 		}
 
+		// Generic text to suggest "Are you in the right place?"
+		$are_you_in_the_right_place = '<br>' . 
+			__( 'The WordPress.org Theme Directory is for sharing a unique theme with others, duplicates are not allowed.', 'wporg-themes' ) .
+			'<br>' .
+			sprintf(
+				/* translators: %s: A link to https://wordpress.org/support/article/using-themes/ */
+				__( "If you're attempting to install a theme on your website, <a href='%s'>please see this article</a>.", 'wporg-themes' ),
+				'https://wordpress.org/support/article/using-themes/'
+			);
+
 		// Is there already a theme with the name name by a different author?
 		if ( ! empty( $this->theme_post ) && $this->theme_post->post_author != $this->author->ID ) {
 			/* translators: 1: theme slug, 2: style.css */
 			return sprintf( __( 'There is already a theme called %1$s by a different author. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
 				'<code>' . $this->theme_slug . '</code>',
 				'<code>style.css</code>'
-			);
+			) . $are_you_in_the_right_place;
+		}
+
+		// Check if the ThemeURI is already in use by another theme by another author.
+		if ( empty( $this->theme_post ) && ! empty( $themeuri ) ) {
+			$theme_uri_matches = get_posts( [
+				'post_type'        => 'repopackage',
+				'post_status'      => 'publish',
+				'meta_query'       => [
+					'theme_uri_search' => [
+						'key'     => '_theme_url',
+						'value'   => '"' . $themeuri . '"', // Searching within a Serialized PHP value
+						'compare' => 'LIKE'
+					],
+				]
+			] );
+			$theme_owners = wp_list_pluck( $theme_uri_matches, 'post_author' );
+
+			if ( $theme_owners && ! in_array( $this->author->ID, $theme_owners ) ) {
+				return sprintf(
+					/* translators: 1: theme name, 2: style.css */
+					__( 'There is already a theme using the Theme URL %1$s by a different author. Please check the URI of your theme in %2$s and upload it again.', 'wporg-themes' ),
+					'<code>' . esc_html( $theme_uri ) . '</code>',
+					'<code>style.css</code>'
+				) . $are_you_in_the_right_place;
+			}
 		}
 
 		// We know it's the correct author, now we can check if it's suspended.
@@ -274,6 +301,16 @@ class WPORG_Themes_Upload {
 			/* translators: %s: mailto link */
 			return sprintf( __( 'This theme is suspended from the Theme Repository and it can&rsquo;t be updated. If you have any questions about this please contact %s.', 'wporg-themes' ),
 				'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+			);
+		}
+
+		// Make sure we have version that is higher than any previously uploaded version of this theme. This check happens last to allow the non-author blocks to kick in.
+		if ( ! empty( $this->theme_post ) && ! version_compare( $this->theme->get( 'Version' ), $this->theme_post->max_version, '>' ) ) {
+			/* translators: 1: theme name, 2: theme version, 3: style.css */
+			return sprintf( __( 'You need to upload a version of %1$s higher than %2$s. Increase the theme version number in %3$s, then upload your zip file again.', 'wporg-themes' ),
+				$this->theme->display( 'Name' ),
+				'<code>' . $this->theme_post->max_version . '</code>',
+				'<code>style.css</code>'
 			);
 		}
 
