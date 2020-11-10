@@ -64,7 +64,7 @@ twttr.ready( function( twttr ) {
 		embed_holder_masonry;
 
 	embed_holder_masonry = embed_holder_jq.masonry({
-		itemSelector: 'iframe, twitter-widget',
+		itemSelector: '.wp-embed, .twitter-tweet-rendered',
 		columnWidth: 372,
 		gutter: 10,
 		initLayout: false
@@ -78,6 +78,7 @@ twttr.ready( function( twttr ) {
 				align: 'left',
 				conversation: 'none',
 				cards: 'hidden',
+				dnt: true,
 				margin: 0,
 				width: 372
 			}
@@ -87,13 +88,16 @@ twttr.ready( function( twttr ) {
 	});
 
 	embeds.wpembeds.forEach( function( wpembed ) {
-		var iframe = jQuery( '<iframe security="restricted" src="' + wpembed + '" width="372" height="500" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content"></iframe>' );
+		var embed = jQuery( '<div class="wp-embed"><iframe security="restricted" src="' + wpembed + '" width="372" height="500" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content"></iframe></div>' );
 
-		iframe.on( 'load', function() {
+		// Extra margin top/bottom to match Twitter embeds (that have set a 0 margin)
+		embed.css( 'margin', '10px 0' );
+
+		embed.on( 'load', function() {
 			embed_holder_masonry.masonry('reloadItems').masonry();
 		});
 
-		embed_holder_jq.append( iframe );
+		embed_holder_jq.append( embed );
 	});
 
 });
@@ -143,7 +147,7 @@ the_post();
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-10">	
+						<div class="offset-1 col-10">	
 							<div  id="embeds"></div>
 						</div>
 					</div>
