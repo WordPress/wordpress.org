@@ -359,6 +359,11 @@ class wporg_trac_notifications {
 			return;
 		}
 
+		$reporter = get_user_by( 'login', $ticket['reporter'] );
+		if ( ! $reporter ) {
+			return;
+		}
+
 		if ( 1 == count( $activity['tickets'] ) ) {
 			$output = sprintf( '<strong>Make sure %s receives a warm welcome.</strong><br/>', $ticket['reporter'] );
 
@@ -382,7 +387,7 @@ class wporg_trac_notifications {
 		}
 
 		echo '<p class="ticket-note note-new-reporter">';
-		echo get_avatar( get_user_by( 'login', $ticket['reporter'] )->user_email, 36, 'retro' );
+		echo get_avatar( $reporter->user_email, 36, 'retro' );
 		echo '<span class="note">' . $output . '</span>';
 		echo '<span class="dashicons dashicons-welcome-learn-more"></span>';
 	}
