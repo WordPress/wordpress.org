@@ -49,6 +49,8 @@ class Customizations {
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
 		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
 
+		add_filter( 'postmeta_form_keys', array( $this, 'postmeta_form_keys' ) );
+
 		add_filter( 'postbox_classes_plugin_internal-notes', array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
 		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers', 'postbox_classes' ) );
 		add_filter( 'postbox_classes_plugin_plugin-support-reps', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'postbox_classes' ) );
@@ -656,5 +658,39 @@ class Customizations {
 		$x = new \WP_Ajax_Response();
 		$x->add( $response );
 		$x->send();
+	}
+
+	/**
+	 * Cache / Filter the keys to display in the dropdown list for custom post meta.
+	 */
+	function postmeta_form_keys( $keys ) {
+		global $wpdb;
+		if ( ! is_null( $keys ) ) {
+			return $keys;
+		}
+
+		// We're going to cache this for 24hrs.. that might be enough.
+		$keys = wp_cache_get( __METHOD__, 'distinct-meta-keys' );
+
+		if ( ! $keys ) {
+			// Exclude the translated meta fields.
+			$keys = $wpdb->get_col(
+				"SELECT DISTINCT meta_key
+				FROM $wpdb->postmeta
+				WHERE meta_key NOT BETWEEN '_' AND '_z'
+				HAVING
+					meta_key NOT LIKE '\_%' AND
+					meta_key NOT LIKE 'title\_%' AND
+					meta_key NOT LIKE 'block_title\_%' AND
+					meta_key NOT LIKE 'excerpt\_%' AND
+					meta_key NOT LIKE 'content\_%'
+				ORDER BY meta_key
+				LIMIT 300",
+			);
+		}
+
+		wp_cache_set( __METHOD__, $keys, 'distinct-meta-keys', DAY_IN_SECONDS );
+
+		return $keys;
 	}
 }
