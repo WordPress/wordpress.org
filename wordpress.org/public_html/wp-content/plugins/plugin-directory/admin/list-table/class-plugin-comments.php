@@ -1,7 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
 
-_get_list_table( 'WP_Post_Comments_List_Table' );
+_get_list_table( 'WP_Post_Comments_List_Table', [ 'screen' => 'edit-comments' ] );
 
 /**
  * Comments list table for comments meta box.
