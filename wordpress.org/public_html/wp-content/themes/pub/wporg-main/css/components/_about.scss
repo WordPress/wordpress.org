@@ -1,6 +1,9 @@
 body.page-about,
 body.page-template-about {
-	overflow-x: hidden;
+
+	.site-main {
+		overflow-x: hidden;
+	}
 
 	.entry-header {
 		padding: ms( 4 ) ms( 1 );

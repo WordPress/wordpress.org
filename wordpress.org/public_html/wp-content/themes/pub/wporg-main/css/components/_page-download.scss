@@ -1,6 +1,9 @@
 body.page-template-page-download,
 body.page-download {
-	overflow-x: hidden;
+
+	.site-main {
+		overflow-x: hidden;
+	}
 
 	.entry-header {
 		padding: ms( 4 ) ms( 1 );

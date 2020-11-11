@@ -8,7 +8,10 @@ body.page-template-page-enterprise-education,
 body.page-template-page-enterprise-extensibility,
 body.page-template-page-enterprise-contentmarketing,
 body.page-template-page-enterprise-security {
-	overflow-x: hidden;
+
+	.site-main {
+		overflow-x: hidden;
+	}
 
 	.entry-header {
 		padding: ms( 4 ) ms( 1 );
