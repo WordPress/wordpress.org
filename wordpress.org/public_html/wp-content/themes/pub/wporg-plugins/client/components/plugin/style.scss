@@ -121,6 +121,52 @@
 		}
 	}
 
+	.plugin-blocks-list {
+		list-style: none;
+		margin-left: 0;
+
+		.plugin-blocks-list-item {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			margin-bottom: ms(2);
+		}
+
+		.block-icon {
+			display: inline-block;
+			margin-right: ms(0);
+			padding: ms(1);
+			width: 3.5rem; // 56px
+			height: 3.5rem; // 56px
+			border: 1px solid $color__border;
+			border-radius: 2px;
+
+			&.dashicons {
+				color: inherit; // Prevent rating color being applied to star icons
+			}
+
+			svg {
+				width: 16px;
+				height: 16px;
+				fill: currentColor;
+			}
+		}
+
+		.block-title {
+			align-self: center;
+			font-weight: bold;
+		}
+
+		.has-description {
+			.block-icon {
+				grid-row: 1 / span 2;
+			}
+
+			.block-title {
+				margin-bottom: ms(-8);
+			}
+		}
+	}
+
 	.entry-meta {
 		padding: 0 ms( 4 );
 	}
