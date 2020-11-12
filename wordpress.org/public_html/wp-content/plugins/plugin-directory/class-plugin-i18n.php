@@ -175,12 +175,8 @@ class Plugin_I18n {
 		$cache_suffix = 'originals';
 
 		if ( false !== ( $originals = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
-			if ( isset( $originals[0] ) ) {
-				// old cache style.
-				foreach ( $originals as $i => $o ) {
-					$originals[ $o->id ] = $o->singular;
-					unset( $originals[ $i ] ); // Safe: Original IDs are huge for plugins.
-				}
+			if ( $originals && is_object( $originals[ array_keys($originals)[0] ] ) ) {
+				$originals = array_column( $originals, 'singular', 'id' );
 			}
 
 			return $originals;
