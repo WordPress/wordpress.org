@@ -175,6 +175,14 @@ class Plugin_I18n {
 		$cache_suffix = 'originals';
 
 		if ( false !== ( $originals = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
+			if ( isset( $originals[0] ) ) {
+				// old cache style.
+				foreach ( $originals as $i => $o ) {
+					$originals[ $o->id ] = $o->singular;
+					unset( $originals[ $i ] ); // Safe: Original IDs are huge for plugins.
+				}
+			}
+
 			return $originals;
 		}
 
@@ -185,15 +193,11 @@ class Plugin_I18n {
 		}
 
 		$originals = $wpdb->get_results( $wpdb->prepare(
-			'SELECT id, singular, comment FROM ' . GLOTPRESS_TABLE_PREFIX . 'originals WHERE project_id = %d AND status = %s ORDER BY CHAR_LENGTH(singular) DESC',
+			'SELECT id, singular FROM ' . GLOTPRESS_TABLE_PREFIX . 'originals WHERE project_id = %d AND status = %s ORDER BY CHAR_LENGTH(singular) DESC',
 			$branch_id, '+active'
-		) );
+		), ARRAY_A );
 
-		if ( empty( $originals ) ) {
-
-			// Still cache if empty, but as array, never false.
-			$originals = array();
-		}
+		$originals = array_column( $originals, 'singular', 'id' );
 
 		$this->cache_set( $slug, $branch, $originals, $cache_suffix );
 
@@ -407,16 +411,16 @@ class Plugin_I18n {
 
 		// Sort the originals so as to process long strings first.
 		uasort( $originals, function( $a, $b ) {
-			$a_len = strlen( $a->singular );
-			$b_len = strlen( $b->singular );
+			$a_len = strlen( $a );
+			$b_len = strlen( $b );
 
 			return $a_len == $b_len ? 0 : ($a_len > $b_len ? -1 : 1);
 		} );
 
 		// Mark each original for translation
-		foreach ( $originals as $original ) {
-			if ( ! empty( $original->id ) && array_key_exists( $original->id, $translations ) ) {
-				$content = $this->mark_gp_original( $original->id, $original->singular, $content );
+		foreach ( $originals as $original_id => $original ) {
+			if ( isset( $translations[ $original_id ] ) ) {
+				$content = $this->mark_gp_original( $original_id, $original, $content );
 			}
 		}
 
