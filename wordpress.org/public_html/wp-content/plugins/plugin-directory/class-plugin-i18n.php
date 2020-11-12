@@ -382,15 +382,6 @@ class Plugin_I18n {
 			$branch .= '-readme';
 		}
 
-		$cache_suffix = "{$locale}:{$key}";
-
-		// Try the cache.
-		if ( false !== ( $cache = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
-			// DEBUG
-			// var_dump( array( $slug, $branch, $cache_suffix, $cache ) );
-			return $cache;
-		}
-
 		$originals = $this->get_gp_originals( $slug, $branch, $key, $content );
 
 		if ( empty( $originals ) ) {
@@ -422,8 +413,6 @@ class Plugin_I18n {
 
 		// Translate the marked originals.
 		$content = $this->translate_marked_gp_originals( $content, $translations, $originals );
-
-		$this->cache_set( $slug, $branch, $content, $cache_suffix );
 
 		return $content;
 	}
