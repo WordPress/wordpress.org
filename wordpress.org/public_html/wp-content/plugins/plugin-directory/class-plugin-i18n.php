@@ -308,7 +308,7 @@ class Plugin_I18n {
 			$translations = [];
 
 			$raw_translations = $wpdb->get_results( $wpdb->prepare(
-				'SELECT original_id, translation_0 FROM ' . GLOTPRESS_TABLE_PREFIX . 'translations WHERE original_id IN (' . implode( ', ', wp_list_pluck( $originals, 'id' ) ) . ') AND translation_set_id = %d AND status = %s',
+				'SELECT original_id, translation_0 FROM ' . GLOTPRESS_TABLE_PREFIX . 'translations WHERE original_id IN (' . implode( ', ', array_keys( $originals ) ) . ') AND translation_set_id = %d AND status = %s',
 				$translation_set_id, 'current'
 			) );
 
