@@ -470,7 +470,10 @@ class Plugin_I18n {
 				$id     = $m[1];
 
 				// The translation by ID, Original by ID, or the marker if it was never actually marking a original translation.
-				return $translations[ $id ] ?? ( $originals[ $id ] ?? $marker );
+				$translation = $translations[ $id ] ?? ( $originals[ $id ] ?? $marker );
+
+				// Run the gettext filter for simpler compat with translation plugins.
+				return apply_filters( 'gettext', $translation, $originals[ $id ], 'dynamic-plugin-i18n' /* fake textdomain*/ );
 			},
 			$content
 		);
