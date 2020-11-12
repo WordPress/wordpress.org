@@ -252,44 +252,6 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Searches GlotPress "originals" for the passed string.
-	 *
-	 * @param string $slug   Plugin slug
-	 * @param string $branch dev|stable
-	 * @param string $key    Unique key
-	 * @param string $str    String to be searched for
-	 * @return bool|mixed|null
-	 */
-	public function search_gp_original( $slug, $branch, $key, $str ) {
-		global $wpdb;
-
-		$cache_suffix = "original:{$key}";
-
-		if ( false !== ( $original = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
-			return $original;
-		}
-
-		$branch_id = $this->get_gp_branch_id( $slug, $branch );
-
-		if ( empty( $branch_id ) ) {
-			return false;
-		}
-
-		$original = $wpdb->get_row( $wpdb->prepare(
-			'SELECT id, singular, comment FROM ' . GLOTPRESS_TABLE_PREFIX . 'originals WHERE project_id = %d AND status = %s AND singular = %s',
-			$branch_id, '+active', $str
-		) );
-
-		if ( empty( $original ) ) {
-			$original = null;
-		}
-
-		$this->cache_set( $slug, $branch, $original, $cache_suffix );
-
-		return $original;
-	}
-
-	/**
 	 * Returns GlotPress translations for the passed original string IDs.
 	 *
 	 * @param string $slug               Plugin slug
