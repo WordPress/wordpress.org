@@ -119,7 +119,7 @@ class GP_Route_Translation_Extended extends GP_Route_Main {
 				continue;
 			}
 			$contexts = array( false );
-			if ( property_exists( $original, 'context' )  && $original->context ) {
+			if ( property_exists( $original, 'context' ) && $original->context ) {
 				if ( is_array( $original->context ) ) {
 					$contexts = $original->context;
 				} else {
@@ -314,7 +314,7 @@ class GP_Route_Translation_Extended extends GP_Route_Main {
 
 		$where = implode( ' AND ', $where );
 
-		$query = "SELECT * FROM gp_originals WHERE $where";
+		$query = "SELECT * FROM $wpdb->gp_originals WHERE $where";
 		$result = GP::$original->one( $query, $entry->context, $entry->singular, $entry->plural, $project_id );
 		if ( ! $result ) {
 			return null;
