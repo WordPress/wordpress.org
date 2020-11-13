@@ -286,6 +286,14 @@ class Plugin {
 				);
 
 			} else {
+				// The translation might be run through content filters, texturize this string and add that too.
+				$original_texturize = wptexturize( $original );
+				if ( $original_texturize != $original ) {
+					$this->strings_used[ html_entity_decode( $original_texturize ) ] = array(
+						$original,
+					);
+				}
+
 				$this->strings_used[ $key ] = array(
 					$original,
 				);
