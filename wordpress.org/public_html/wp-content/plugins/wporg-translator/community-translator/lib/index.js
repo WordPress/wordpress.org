@@ -23,10 +23,9 @@ var TranslationPair = require( './translation-pair' ),
  */
 var debounceTimeout,
 	currentlyWalkingTheDom = false,
-	loadCSS, loadData, registerContentChangedCallback, registerDomChangedCallback,
+	loadData, registerContentChangedCallback, registerDomChangedCallback,
 	registerPopoverHandlers, findNewTranslatableTexts,
 	glotPress, currentUserId, walker,
-	baseUrl = 'https://widgets.wp.com/community-translator/',
 	translationData = {
 		currentUserId: false,
 		localeCode: 'en',
@@ -46,7 +45,6 @@ module.exports = {
 		if ( 'undefined' === typeof window.translatorJumpstart ) {
 			return false;
 		}
-		loadCSS();
 		loadData( window.translatorJumpstart );
 
 		registerPopoverHandlers();
@@ -77,22 +75,6 @@ function notifyTranslated( newTranslationPair ) {
 		hook( newTranslationPair.serialize() );
 	} );
 }
-
-loadCSS = function() {
-	var s = document.createElement( 'link' );
-	s.setAttribute( 'rel', 'stylesheet' );
-	s.setAttribute( 'type', 'text/css' );
-	s.setAttribute( 'href', baseUrl + 'community-translator.css' );
-	document.getElementsByTagName( 'head' )[ 0 ].appendChild( s );
-
-	var t = document.createElement( 'link' );
-	t.setAttribute( 'rel', 'stylesheet' );
-	t.setAttribute( 'type', 'text/css' );
-	t.setAttribute( 'href', 'https://s1.wp.com/i/noticons/noticons.css' );
-	document.getElementsByTagName( 'head' )[ 0 ].appendChild( t );
-
-	jQuery( 'iframe' ).addClass( 'translator-untranslatable' );
-};
 
 loadData = function( translationDataFromJumpstart ) {
 	if (
