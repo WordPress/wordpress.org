@@ -50,7 +50,9 @@ class Plugin {
 			return;
 		}
 
-		$this->glotpress_projects = apply_filters( 'translator_project_paths', $this->glotpress_projects );
+		include __DIR__ . '/wporg-projects.php';
+
+		$this->glotpress_projects = apply_filters( 'translator_projects', $this->glotpress_projects );
 		$this->textdomains        = apply_filters( 'translator_textdomains', $this->textdomains );
 
 		add_action( 'wp_footer', array( $this, 'load_translator' ), 1000 );
@@ -144,10 +146,15 @@ class Plugin {
 	 * Register a GlotPress project for fetching strings from.
 	 *
 	 * @param string $project The GlotPress project.
+	 * @param bool   $add_at_front The most specific project should be listed first, set to bump it up the list.
 	 */
-	public function register_glotpress_project( $project ) {
+	public function register_glotpress_project( $project, $add_at_front = false ) {
 		if ( ! in_array( $project, $this->glotpress_projects ) ) {
-			$this->glotpress_projects[] = $project;
+			if ( $add_at_front ) {
+				array_unshift( $this->glotpress_projects, $project );
+			} else {
+				$this->glotpress_projects[] = $project;
+			}
 		}
 	}
 
