@@ -289,8 +289,8 @@ class Plugin {
 			if ( $this->contains_placeholder( $translation ) ) {
 				$this->placeholders_used[ $key ] = array(
 					$original,
-					$this->convert_placeholders_to_regex(
-						$this->convert_links_to_regex( $translation )
+					$this->convert_links_to_regex(
+						$this->convert_placeholders_to_regex( $translation )
 					),
 				);
 			} elseif ( false !== stripos( $translation, '<a ' ) ) {
