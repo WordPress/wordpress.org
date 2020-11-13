@@ -1,0 +1,54 @@
+
+#translator-launcher {
+	position: fixed;
+	bottom: 45px;
+	right: 20px;
+	border-radius: 27px;
+	background: #0085be !important;
+	padding: 4px !important;
+	font-size: 16px;
+	z-index: 99;
+	display: none;
+}
+#translator-launcher a {
+	color: white;
+	text-decoration: none;
+	outline: 0;
+}
+#translator-launcher a .dashicons {
+	font-size: 32px;
+	width: 32px;
+	height:32px;
+}
+#translator-launcher a span.dashicons.dashicons-translation:before {
+	content: "\f326"; !important;
+}
+#translator-launcher a .text {
+	float: right;
+	display: inline;
+	width: 0;
+	overflow: hidden;
+	line-height: 32px;
+	white-space: nowrap;
+	color: #fff;
+}
+#translator-launcher a:hover .text {
+	transition: all 0.25s ease-in-out;
+	width: auto;
+	margin-right: 6px;
+	padding: 0 10px;
+}
+#translator-launcher.active {
+	background: white;
+}
+#translator-launcher.active a {
+	color: #0085be;
+}
+
+#translator-launcher a .text .enable, #translator-launcher a .text .disable {
+    display: none;
+}
+
+#translator-launcher a:hover .text.disabled .enable, #translator-launcher a:hover .text.enabled .disable {
+	display: inline;
+}
