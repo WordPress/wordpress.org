@@ -193,6 +193,13 @@ class Plugin {
 		return $text;
 	}
 
+	protected function convert_links_to_regex( $text ) {
+		// Standardise links.
+		$text = preg_replace( '#<a [^>]+>#', '<a ([^>]{0,' . self::PLACEHOLDER_MAXLENGTH . '}?)>', $text );
+
+		return $text;
+	}
+
 	protected function get_hash_key( $original, $context = null ) {
 		if ( ! empty( $context ) && $context !== 'default' ) {
 			$context .= "\u0004";
@@ -282,9 +289,24 @@ class Plugin {
 			if ( $this->contains_placeholder( $translation ) ) {
 				$this->placeholders_used[ $key ] = array(
 					$original,
-					$this->convert_placeholders_to_regex( $translation ),
+					$this->convert_placeholders_to_regex(
+						$this->convert_links_to_regex( $translation )
+					),
+				);
+			} elseif ( false !== stripos( $translation, '<a ' ) ) {
+				$this->placeholders_used[ $key ] = array(
+					$original,
+					$this->convert_links_to_regex( $translation ),
 				);
 
+				// The translation might be run through content filters, texturize this string and add that too.
+				$original_texturize = wptexturize( $original );
+				if ( $original_texturize != $original ) {
+					$this->placeholders_used[ html_entity_decode( $original_texturize ) ] = array(
+						$original,
+						$this->convert_links_to_regex( $translation ),
+					);
+				}
 			} else {
 				// The translation might be run through content filters, texturize this string and add that too.
 				$original_texturize = wptexturize( $original );
