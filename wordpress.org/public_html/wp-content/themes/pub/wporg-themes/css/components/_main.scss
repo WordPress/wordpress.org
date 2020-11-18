@@ -168,7 +168,10 @@ ul, ol {
 
 	// Bit of a hack, checks the `nojs` class on the admin bar (also shown to logged out users).
 	.nojs ~ .wrap &,
-	.show-filters & {
+	// The feature filter drawer is open.
+	.show-filters:not(.filters-applied) &,
+	// A single theme is selected.
+	.modal-open & {
 		display: none;
 	}
 }
