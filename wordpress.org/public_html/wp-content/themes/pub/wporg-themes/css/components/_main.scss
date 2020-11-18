@@ -162,6 +162,17 @@ ul, ol {
 	opacity: 1;
 }
 
+.theme-load-more {
+	margin-top: 40px;
+	text-align: center;
+
+	// Bit of a hack, checks the `nojs` class on the admin bar (also shown to logged out users).
+	.nojs ~ .wrap &,
+	.show-filters & {
+		display: none;
+	}
+}
+
 // Theme Widget area in the themes screen.
 .theme-widget-area {
   background-color: #fff;

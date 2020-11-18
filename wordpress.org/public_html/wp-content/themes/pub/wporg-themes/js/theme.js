@@ -72,15 +72,13 @@ window.wp = window.wp || {};
 		// Pagination instance
 		page: 0,
 
-		// Sets up a throttler for binding to 'scroll'
-		initialize: function( options ) {
-			// Scroller checks how far the scroll position is
-			_.bindAll( this, 'scroller' );
+		loadMore: $('.js-load-more-themes'),
 
+		initialize: function( options ) {
 			this.SearchView = options.SearchView ? options.SearchView : themes.view.Search;
-			// Bind to the scroll event and throttle
-			// the results from this.scroller
-			this.window.bind( 'scroll', _.throttle( this.scroller, 300 ) );
+
+			this.loadMoreThemes = this.loadMoreThemes.bind( this );
+			this.loadMore.bind( 'click', this.loadMoreThemes );
 		},
 
 		// Main render control
@@ -122,20 +120,10 @@ window.wp = window.wp || {};
 				.append( view.el );
 		},
 
-		// Checks when the user gets close to the bottom
-		// of the mage and triggers a theme:scroll event
-		scroller: function() {
-			var self = this,
-				bottom, threshold;
-
-			bottom = this.window.scrollTop() + self.window.height();
-			threshold = self.$el.offset().top + self.$el.outerHeight( false ) - self.window.height();
-			threshold = Math.round( threshold * 0.9 );
-
-			if ( bottom > threshold ) {
-				this.trigger( 'theme:scroll' );
-			}
-		}
+		// Trigger loading additional themes
+		loadMoreThemes: function () {
+			this.trigger( 'theme:loadMore' );
+		},
 	});
 
 	// Set up the Collection for our theme data
@@ -305,6 +293,9 @@ window.wp = window.wp || {};
 						// Add the new themes to the current collection
 						// @todo update counter
 						self.add( data.themes );
+
+						self.trigger( 'themes:rerender' );
+
 						self.trigger( 'query:success', data.info.results );
 
 						// We are done loading themes for now.
@@ -1036,7 +1027,11 @@ window.wp = window.wp || {};
 				$( 'body' ).addClass( 'no-results' );
 			});
 
-			this.listenTo( this.parent, 'theme:scroll', function() {
+			this.listenTo( this.parent, 'theme:loadMore', function() {
+				self.renderThemes( self.parent.page );
+			});
+
+			this.listenTo( self.collection, 'themes:rerender', function() {
 				self.renderThemes( self.parent.page );
 			});
 
@@ -1383,9 +1378,26 @@ window.wp = window.wp || {};
 				self.collection.query( self.collection.currentQuery.request );
 			});
 
-			this.listenTo( this.collection, 'query:success', function() {
+			this.listenTo( this.collection, 'query:success', function( count ) {
 				$( 'body' ).removeClass( 'loading-content' );
 				$( '.theme-browser' ).find( 'div.error' ).remove();
+
+				// If we've loaded another page, set focus to the first of the new themes.
+				if ( self.page > 1 ) {
+					var nextTheme = 1 + ( ( self.page - 1 ) * themes.data.settings.postsPerPage );
+					this.$el.find( '.theme:nth-child(' + nextTheme + ')' ).focus();
+				}
+
+				if ( ! _.isNumber( count ) ) {
+					count = self.collection.count;
+				}
+				// Hide the load more button when all themes matching this
+				// collection query are on the page.
+				if ( count <= self.collection.length ) {
+					self.loadMore.hide();
+				} else {
+					self.loadMore.show();
+				}
 			});
 
 			this.listenTo( this.collection, 'query:fail', function() {

@@ -21,7 +21,6 @@ get_header();
 			</div>
 
 			<ul class="filter-links">
-				<?php /* <li><a href="<?php echo esc_url( home_url( 'browse/featured/' ) ); ?>" data-sort="featured" <?php if ( (is_front_page() && !get_query_var('browse') ) || 'featured' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Featured', 'themes', 'wporg-themes' ); ?></a></li> */ ?>
 				<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>" data-sort="popular" <?php if ( (is_front_page() && !get_query_var('browse') ) || 'popular' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Popular', 'themes', 'wporg-themes' ); ?></a></li>
 				<li><a href="<?php echo esc_url( home_url( 'browse/new/' ) ); ?>" data-sort="new" <?php if ( 'new' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Latest', 'themes', 'wporg-themes' ); ?></a></li>
 				<?php if ( is_user_logged_in() ) { ?>
@@ -82,6 +81,9 @@ get_header();
 
 			<?php /* TODO: Don't display this for no-js queries where $wp_query->post_count > 0, but JS needs it too. */ ?>
 			<p class="no-themes"><?php _e( 'No themes found. Try a different search.', 'wporg-themes' ); ?></p>
+		</div>
+		<div class="theme-load-more">
+			<button class="button button-primary button-large js-load-more-themes"><?php esc_html_e( 'Load more themes', 'wporg-themes' ); ?></button>
 		</div>
 		<div class="theme-install-overlay"></div>
 		<div class="theme-overlay"></div>
