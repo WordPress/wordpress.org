@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Theme_Preview;
-/* Plugin Name: Starter Content previews for wp-themes.com
+/**
+ * Plugin Name: Starter Content previews for wp-themes.com
  * Author: Tung Du
  * Version: 0.1
  */
@@ -465,7 +466,7 @@ add_action(
 			add_theme_support( 'starter-content', twentytwenty_get_starter_content() );
 		} elseif ( 'twentytwentyone' === get_template() ) {
 			require_once get_template_directory() . '/inc/starter-content.php';
-            add_theme_support( 'starter-content', twenty_twenty_one_get_starter_content() );
+			add_theme_support( 'starter-content', twenty_twenty_one_get_starter_content() );
 		}
 
 		( new Starter_Content() )->init();
