@@ -139,6 +139,18 @@ the_post();
 				</div>
 			</div>
 
+			<div class="entry-content row getstarted">
+				<section class="col-12">
+					<h3>Get started now</h3>
+				</section>
+				<section class="col-12">
+					<p>WordPress&apos; famous five-minute install means that whoever you are, you can get going with WordPress today.</p>
+				</section>
+				<section class="col-12">
+					<a href="/download" class="button download-button">Try WordPress</a>
+				</section>
+			</div>
+
 			<div class="entry-content row resources">
 				<div class="col-12">
 					<h3>Resources</h3>
@@ -169,18 +181,6 @@ the_post();
 						</ul>
 					</section>
 				</div>
-			</div>
-
-			<div class="entry-content row getstarted">
-				<section class="col-12">
-					<h3>Get started now</h3>
-				</section>
-				<section class="col-12">
-					<p>WordPress&apos; famous five-minute install means that whoever you are, you can get going with WordPress today.</p>
-				</section>
-				<section class="col-12">
-					<a href="/download" class="button download-button">Try WordPress</a>
-				</section>
 			</div>
 
 		</article><!-- #post-## -->
