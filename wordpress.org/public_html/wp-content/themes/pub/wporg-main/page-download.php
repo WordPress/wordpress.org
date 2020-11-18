@@ -129,7 +129,7 @@ the_post();
 
 			<div class="entry-content row">
 
-				<div id="after-download" class="modal" role="dialog" aria-modal="true">
+				<div id="after-download" class="modal" role="dialog" aria-modal="true" tabindex="0">
 					<div role="document">
 						<header class="entry-header">
 							<h1 id="after-download-title" class="entry-title"><?php esc_html_e( 'Hooray!', 'wporg' ); ?></h1>
