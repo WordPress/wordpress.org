@@ -139,6 +139,38 @@ the_post();
 				</div>
 			</div>
 
+			<div class="entry-content row resources">
+				<div class="col-12">
+					<h3>Resources</h3>
+				</div>
+				<div class="col-12 row gutters between resource-list">
+					<section class="col-4">
+						<h4>Case Studies</h4>
+						<ul>
+							<li><a href="https://wordpress.org/files/2020/11/case-studies-grupo-abril.pdf">Abril</a></li>
+							<li><a href="https://wordpress.org/files/2020/11/case-studies-kff.pdf">KFF</a></li>
+							<li><a href="https://wordpress.org/files/2020/11/case-studies-newscorp-australia.pdf">NewsCorp Australia</a></li>
+						</ul>
+					</section>
+					<section class="col-4">
+						<h4>White Paper References</h4>
+						<ul>
+							<li><a href="https://wordpress.org/files/2020/11/IDC-Report-Choosing-a-CMS-to-Meet-Todays-Digital-Experience-Challenges.pdf">IDC Report</a></li>
+							<li><a href="https://wordpress.org/files/2020/11/wordpress-as-a-content-hub-whitepaper.pdf">WP as a Content Hub</a></li>
+							<li><a href="https://wordpress.org/files/2020/11/Personalization-whitepaper.pdf">Personalization</a></li>
+						</ul>
+					</section>
+					<section class="col-4">
+						<h4>Tutorials</h4>
+						<ul>
+							<li><a href="https://vimeo.com/443114625/c2f798174f">Drive Digital Commerce with Content Marketing</a></li>
+							<li><a href="https://vimeo.com/374961815/040fe06be7">Gutenberg for Enterprise</a></li>
+							<li><a href="https://vimeo.com/425968597/80d24a1bf4">Lead a Successful Digital Transformation</a></li>
+						</ul>
+					</section>
+				</div>
+			</div>
+
 			<div class="entry-content row getstarted">
 				<section class="col-12">
 					<h3>Get started now</h3>
