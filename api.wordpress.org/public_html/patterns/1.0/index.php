@@ -38,7 +38,7 @@ function main( $query_string ) {
 			$endpoint = '/wp/v2/wporg-pattern';
 
 			// `_links` is a workaround for https://core.trac.wordpress.org/ticket/49985. Related https://core.trac.wordpress.org/ticket/49538.
-			$query_args['_fields'] = 'title,content,meta,_links';
+			$query_args['_fields'] = 'id,title,content,meta,_links';
 			$query_args['_embed']  = 'wp:term';
 
 			break;
