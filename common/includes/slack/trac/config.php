@@ -65,6 +65,7 @@ class Core extends Trac {
 		'Site Health'            => '#core-site-health',
 		'Sitemaps'               => '#core-sitemaps',
 		'Upgrade/Install'        => [ '#core' => true, '#core-auto-updates' => true ],
+		'Application Passwords'  => [ '#core-passwords' => true, '#core-restapi' => true ],
 		'Login and Registration' => '#core-passwords',
 	);
 }
