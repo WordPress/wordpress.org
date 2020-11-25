@@ -55,6 +55,7 @@ class WordPressTV_Theme {
 
 		add_action( 'wp_head', array( $this, 'rel_canonical' ) );
 		add_action( 'wp_head', array( $this, 'archive_link_rel_prev_next' ) );
+		add_action( 'wp_head', array( $this, 'json_ld' ) );
 	}
 
 	/**
@@ -160,6 +161,77 @@ class WordPressTV_Theme {
 			printf(
 				'<link rel="next" href="%s">' . "\n",
 				esc_url( get_pagenum_link( $nextpage ) )
+			);
+		}
+	}
+
+	function json_ld() {
+		$post = get_post();
+		$data = [];
+
+		if ( is_singular() ) {
+
+			$video = $this->get_the_video_details();
+
+			$lang = false;
+			if ( $lang_terms = get_the_terms( $post, 'language' ) ) {
+				if ( ! is_wp_error( $lang_terms ) ) {
+					$lang = $this->locale_to_wp_locale( $lang_terms[0]->slug );
+					$lang = str_replace( '_', '-', $lang ); // TODO Might not always be correct.
+				}
+			}
+			if ( ! $lang ) {
+				$lang = 'en';
+			}
+
+			$video_data = [
+				'@type'            => 'VideoObject',
+				'actor'            => [],
+				'name'             => get_the_title(),
+				'url'              => get_the_permalink(),
+				'contentUrl'       => $this->get_the_video_urls(),
+				'description'      => get_the_excerpt(),
+				'duration'         => gmdate( '\P0\D\TH\Hi\Ms\S', $video->duration ), // 1970-01-01 + duration
+				'height'           => $vid->height ?? 530,
+				'inLanguage'       => $lang,
+				'isFamilyFriendly' => ( 'G' === $video->rating || 'PG' === $video->rating ),
+				'recordedAt'       => [],
+				'thumbnailUrl'     => $this->get_the_video_image(),
+				'uploadDate'       => gmdate( 'Y-m-d', strtotime( get_the_date() ) ),
+				'width'            => $vid->width ?? 940,
+			];
+
+			foreach ( get_the_terms( $post, 'speakers' ) as $speaker ) {
+				$video_data['actor'][] = [
+					'@type' => 'Person',
+					'name'  => $speaker->name,
+					'url'   => get_term_link( $speaker ),
+				];
+			}
+
+			foreach ( get_the_terms( $post, 'event' ) as $event ) {
+				$video_data['recordedAt'][] = [
+					'@type' => 'Event',
+					'name'  => $event->name,
+					'url'   => get_term_link( $event ),
+				];
+			}
+
+			$data[] = array_filter( $video_data, function( $item ) { 
+				return '' !== $item && [] !== $item;
+			} );
+		}
+
+		if ( $data ) {
+			printf(
+				"\n" . '<script type="application/ld+json">%s</script>' . "\n",
+				wp_json_encode(
+					[
+						'@context' => 'https://schema.org',
+						'@graph'   => $data
+					],
+					JSON_PRETTY_PRINT
+				)
 			);
 		}
 	}
@@ -614,16 +686,7 @@ class WordPressTV_Theme {
 	 * @param bool $html_code
 	 */
 	function the_video_image( $h = 196, $w = 400, $arrow = true, $html_code = true ) {
-		$ret = '';
-		global $post;
-		remove_filter( 'the_content', array( $this, 'remove_shortcodes' ) );
-
-		preg_match_all( '/\[wpvideo +([a-zA-Z0-9,\#,\&,\/,;,",=, ]*?)\]/i', $post->post_content, $matches );
-		foreach ( $matches[1] as $key => $code ) {
-			preg_match( '/([0-9A-Za-z]+)/i', $code, $m );
-			$guid = $m[1];
-			$ret = video_image_url_by_guid( $guid, 'fmt_dvd' );
-		}
+		$ret = $this->get_the_video_image();
 
 		if ( $arrow ) {
 			?><a href="<?php the_permalink() ?>" class="showarrow arrow"><?php the_title(); ?></a><?php
@@ -632,8 +695,76 @@ class WordPressTV_Theme {
 			$ret = '<img src="' . $ret . '" alt="' . esc_attr( $post->post_title ) . '" />';
 		}
 		echo $ret;
+	}
+
+	/**
+	 * Retrieves the Video thumbnail image for a post.
+	 */
+	function get_the_video_image( $post = null ) {
+		$ret = false;
+
+		$guid = $this->get_the_video_guid( $post );
+
+		if ( $guid && function_exists( 'video_get_highest_resolution_image_url' ) ) {
+			$ret = video_get_highest_resolution_image_url( $guid );
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * Retrieve the video files for a given video guid.
+	 */
+	function get_the_video_urls( $post = null ) {
+		$details = $this->get_the_video_details( $post );
+		if ( ! $details ) {
+			return;
+		}
+
+		$urls = [];
+		foreach ( [ 'fmt_hd', 'fmt_dvd', 'fmt_std', 'fmt1_ogg' ] as $format ) {
+			$fmt_url = video_url_by_format( $details, $format );
+			if ( $fmt_url ) {
+				$urls[] = $fmt_url;
+			}
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Retrieve the Video details for a given guid.
+	 */
+	function get_the_video_details( $post = null ) {
+		$guid = $this->get_the_video_guid( $post );
+
+		$ret = false;
+		if ( $guid && function_exists( 'video_get_info_by_guid' ) ) {
+			$ret = video_get_info_by_guid( $guid );
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * Retrieves the guid for the wpvideo video for a given post.
+	 */
+	function get_the_video_guid( $post = null ) {
+		$post = get_post( $post );
+
+		remove_filter( 'the_content', array( $this, 'remove_shortcodes' ) );
+
+		$guid = false;
+
+		preg_match_all( '/\[wpvideo +([a-zA-Z0-9,\#,\&,\/,;,",=, ]*?)\]/i', $post->post_content, $matches );
+		foreach ( $matches[1] as $key => $code ) {
+			preg_match( '/([0-9A-Za-z]+)/i', $code, $m );
+			$guid = $m[1];
+		}
 
 		add_filter( 'the_content', array( $this, 'remove_shortcodes' ) );
+
+		return $guid;
 	}
 
 	/**
@@ -734,6 +865,71 @@ class WordPressTV_Theme {
 		}
 
 		bump_stats_extras( 'wptv-activity', 'publish-video' );
+	}
+
+	/**
+	 * Convert a WPTV Locale to a WP Locale code.
+	 * 
+	 * This isn't all correct, and many of these need to be combined.
+	 * 
+	 * See https://meta.trac.wordpress.org/ticket/1156
+	 */
+	function locale_to_wp_locale( $locale ) {
+		static $locales = [
+			'bengali' => 'bn_BD',
+			'bulgarianбългарски-език' => 'bg_BG',
+			// 'cantonese-廣東話' => '',
+			'catalan' => 'ca',
+			'croatianhrvatski' => 'hr',
+			'czechcestina' => 'cs_CZ',
+			'danishdansk' => 'da_DK',
+			'dutchnederlands' => 'nl_NL',
+			'english' => 'en',
+			'english-swahili' => 'sw',
+			'english-and-dutch' => 'nl_NL',
+			// 'euskera' => '',
+			'finnishsuomi' => 'fi',
+			'frenchfrancais' => 'fr_FR',
+			// 'galician-galego' => '',
+			'germandeutsch' => 'de_DE',
+			'greek-ελληνικά' => 'el',
+			'gujarati' => 'gu',
+			'hebrewעברית' => 'he_IL',
+			'hindi' => 'hi_IN',
+			'indonesian' => 'id_ID',
+			'italianitaliano' => 'it_IT',
+			'ελληνικά' => 'el',
+			'japanese' => 'ja',
+			'japanese-and-english' => 'ja',
+			'japanese日本語' => 'ja',
+			'kananda' => 'kn',
+			'lithuanian' => 'lt_LT',
+			'malay' => 'ms_MY',
+			'malay-bahasa-melayu' => 'ms_MY',
+			'malayalam' => 'ms_MY',
+			'marathi' => 'mr',
+			'maori' => 'mri',
+			'nepaliनेपाली' => 'ne_NP',
+			'norwegiannorsk' => 'nb_NO',
+			'persian-farsi' => 'fa_IR',
+			'polishpolski' => 'pl_PL',
+			'portugueseportugues' => 'pt_BR',
+			'romanianromana' => 'ro_RO',
+			'russianрусский' => 'ru_RU',
+			'serbianсрпски' => 'sr_RS',
+			'slovakslovencina' => 'sk_SK',
+			//'span' => '',
+			'spanishespanol' => 'es_ES',
+			'swedishsvenska' => 'sv_SE',
+			'thai' => 'th',
+			'traditional-chinese' => 'zh_CN',
+			'ukrainianукраїнська' => 'uk',
+			'urdu' => 'ur',
+			'urdu-and-english' => 'ur',
+			'vietnamese' => 'vi',
+		];
+
+		return $locales[ $locale ] ?? false;
 	}
 }
 
