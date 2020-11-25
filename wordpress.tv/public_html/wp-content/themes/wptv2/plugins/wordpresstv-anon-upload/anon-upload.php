@@ -31,6 +31,7 @@ class WPTV_Anon_Upload {
 				'wptv_uploaded_by',
 				'wptv_email',
 				'wptv_language',
+				'wptv_date',
 				'post_category', // 'wptv_categories',
 				'wptv_producer_username',
 				'wptv_event',
@@ -303,6 +304,7 @@ class WPTV_Anon_Upload {
 		$description       = $this->sanitize_text( $_posted['wptv_video_description'], false );
 		$language          = $this->sanitize_text( $_posted['wptv_language'] );
 		$slides            = $this->sanitize_text( $_posted['wptv_slides_url'] );
+		$recorded          = $this->sanitize_tett( $_posted['wptv_date'] );
 		$ip                = $_SERVER['REMOTE_ADDR'];
 
 		$categories = '';
@@ -328,6 +330,7 @@ class WPTV_Anon_Upload {
 			'description'       => $description,
 			'slides'            => $slides,
 			'ip'                => $ip,
+			'recorded'          => $recorded,
 		);
 
 		$post_meta['video_guid'] = $video_data->guid;
@@ -471,6 +474,15 @@ class WPTV_Anon_Upload {
 							<a class="button-secondary anon-approve" href="#new-tag-language">Approve</a>
 						</p>
 					</div>
+
+					<?php if ( !empty( $meta['recorded'] ) ) : ?>
+					<div class="row">
+						<p class="label">Date Recorded:</p>
+						<p class="data">
+							<input type="text" value="<?php echo esc_attr( $meta['recorded'] ); ?>"/>
+						</p>
+					</div>
+					<?php endif; ?>
 
 					<div class="row">
 						<p class="label">Categories:</p>

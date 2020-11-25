@@ -298,6 +298,10 @@ if ( !empty($_REQUEST['error']) ) {
 						<label for="wptv_language"><?php esc_html_e( 'Language' ); ?></label>
 						<input type="text" id="wptv_language" name="wptv_language" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_language'] ?? '' ) ); ?>" />
 					</p>
+					<p>
+						<label for="wptv_date"><?php esc_html_e( 'Date Recorded' ); ?></label>
+						<input type="date" id="wptv_date" name="wptv_date" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_date'] ?? '' ) ); ?>" />
+					</p>
 
 					<div class="cats">
 						<label for="post_category"><?php esc_html_e( 'Category' ); ?></label>
@@ -352,6 +356,7 @@ if ( !empty($_REQUEST['error']) ) {
 				uploaded_by = $( '#wptv_uploaded_by' ),
 				email       = $( '#wptv_email' ),
 				file        = $( '#wptv_file' ),
+				recorded    = $( '#wptv_date' ),
 				honey       = $( '#wptv_honey' );
 
 			invalid = function( el, e ) {
@@ -403,6 +408,19 @@ if ( !empty($_REQUEST['error']) ) {
 				var $this = $(this);
 				$this.val( $this.val().replace( /\s(and|&|\+)\s/g, ', ' ).replace( /[ ]{2,}/g, ' ' ) );
 			});
+
+			// Pre-select the date category.
+			$( '#wptv_date' ).on( 'change', function() {
+				var year = parseInt( this.value.substring( 0, 4 ) );
+
+				// Blank the year selections.
+				$( '#category-91093 ul.children input' ).prop( 'checked', false );
+
+				// Check the year
+				$( '#category-91093 ul.children input' ).filter( function() {
+					return parseInt( $(this).parent().text() ) === year;
+				} ).prop( 'checked', true )
+			} );
 
 			$( '#video-upload-form' ).submit( function( e ) {
 				var scroll = false;
