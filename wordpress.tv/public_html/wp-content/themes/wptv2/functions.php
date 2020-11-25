@@ -192,13 +192,13 @@ class WordPressTV_Theme {
 				'contentUrl'       => $this->get_the_video_urls(),
 				'description'      => get_the_excerpt(),
 				'duration'         => gmdate( '\P0\D\TH\Hi\Ms\S', $video->duration ), // 1970-01-01 + duration
-				'height'           => $vid->height ?? 530,
+				'height'           => $video->height ?? 530,
 				'inLanguage'       => $lang,
 				'isFamilyFriendly' => ( 'G' === $video->rating || 'PG' === $video->rating ),
 				'recordedAt'       => [],
 				'thumbnailUrl'     => $this->get_the_video_image(),
 				'uploadDate'       => gmdate( 'Y-m-d', strtotime( get_the_date() ) ),
-				'width'            => $vid->width ?? 940,
+				'width'            => $video->width ?? 940,
 			];
 
 			foreach ( get_the_terms( $post, 'speakers' ) as $speaker ) {
