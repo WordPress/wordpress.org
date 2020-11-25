@@ -169,9 +169,10 @@ class WordPressTV_Theme {
 		$post = get_post();
 		$data = [];
 
-		if ( is_singular() ) {
-
-			$video = $this->get_the_video_details();
+		if (
+			is_singular( 'post' ) &&
+			( $video = $this->get_the_video_details() )
+		) {
 
 			$lang = false;
 			if ( $lang_terms = get_the_terms( $post, 'language' ) ) {
