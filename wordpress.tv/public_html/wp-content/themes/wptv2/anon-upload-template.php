@@ -109,6 +109,7 @@ function anon_upload_css() {
 		.video-upload-left ul.cats-checkboxes {
 			height: 150px;
 			overflow: auto;
+			margin-top: 4px;
 		}
 
 		.video-upload-left ul.cats-checkboxes ul.children {
@@ -210,10 +211,19 @@ if ( !empty($_REQUEST['error']) ) {
 		case 14:
 			$message = "Error: please enter a valid WordPress.org username for the producer, or leave the field empty.";
 			break;
+		case 15:
+			$message = 'Error: form nonce was missing or invalid.';
+			break;
 	}
 	$message = '<div class="error"><p>' . $message . '</p></div>';
 } elseif ( !empty($_REQUEST['success']) ) {
 	$message = '<div class="success"> <p>Thank you for submitting a video; it was uploaded successfully.</p> <p>Submit another?</p> </div>';
+}
+
+$selected_cats = [];
+if ( isset( $_GET['post_category'] ) ) {
+	// [ selected Id => 0.. ]
+	$selected_cats = array_flip( array_map( 'intval', $_GET['post_category'] ) );
 }
 
 ?>
@@ -303,16 +313,45 @@ if ( !empty($_REQUEST['error']) ) {
 						<input type="date" id="wptv_date" name="wptv_date" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_date'] ?? '' ) ); ?>" />
 					</p>
 
+					<div class="location">
+						<label for="wptv_location"><?php esc_html_e( 'Location' ); ?></label>
+						<ul class="cats-checkboxes">
+							<?php
+
+							foreach ( get_categories( [
+								'parent'     => get_term_by( 'slug', 'location', 'category' )->term_id,
+								'hide_empty' => false,
+							] ) as $term ) {
+								printf(
+									'<li id="category-%1$d"><label class="selectit"><input value="%1$d" type="checkbox" name="post_category[]" id="in-category-%1$d" %2$s> %3$s</label></li>',
+									$term->term_id,
+									isset( $selected_cats[ $term->term_id ] ) ? 'checked="checked" ' : '',
+									$term->name,
+								);
+							}
+							?>
+						</ul>
+					</div>
+
 					<div class="cats">
 						<label for="post_category"><?php esc_html_e( 'Category' ); ?></label>
 						<ul class="cats-checkboxes">
 							<?php
-							include_once( ABSPATH . '/wp-admin/includes/template.php' );
-							$selected_cats = false;
-							if ( isset( $_GET['post_category'] ) ) {
-								$selected_cats = array_map( 'intval', $_GET['post_category'] );
+							foreach ( get_categories( [
+								'exclude_tree' => [
+									get_term_by( 'slug', 'location', 'category' )->term_id,
+									get_term_by( 'slug', 'year', 'category' )->term_id,
+								],
+								'parent'       => 0,
+								'hide_empty'   => false,
+							] ) as $term ) {
+								printf(
+									'<li id="category-%1$d"><label class="selectit"><input value="%1$d" type="checkbox" name="post_category[]" id="in-category-%1$d" %2$s> %3$s</label></li>',
+									$term->term_id,
+									isset( $selected_cats[ $term->term_id ] ) ? 'checked="checked" ' : '',
+									$term->name,
+								);
 							}
-							wp_category_checklist( 0, 0, $selected_cats, false, null, false );
 							?>
 						</ul>
 					</div>
@@ -372,17 +411,30 @@ if ( !empty($_REQUEST['error']) ) {
 			$( '#video-upload-form input[type="text"]#wptv_slides_url' ).prop( 'maxlength', 200 );
 			$( 'ul.cats-checkboxes input' ).prop( 'disabled', false );
 
-			$( '#wptv_video_wordcamp, ul.cats-checkboxes input' ).on( 'change', function() {
+			// Float selected items to the start.
+			$( '.location ul.cats-checkboxes, .cats ul.cats-checkboxes' ).each( function() {
+				var list = $(this),
+					selected = list.find( 'input:checked, #in-category-2648' ); // checked & World-Wide-Web
+
+				selected.each( function() {
+					var li = $(this).parents( 'li' );
+					li.remove();
+					list.prepend( li );
+				} );
+			} );
+
+			// Generate the Event Name
+			$( '#wptv_video_wordcamp, .location ul.cats-checkboxes input, .cats ul.cats-checkboxes input, #wptv_date' ).on( 'change', function() {
 				if ( $( '#wptv_event' ).data('user-altered') ) {
 					return;
 				}
 
 				var title = '';
 				// Get the Location
-				title += $( '#category-6418 ul.children input:checked' ).parent().text().trim() + " ";
+				title += $( '.location input:checked' ).parent().text().trim() + " ";
 
 				// .. and the Year
-				title += $( '#category-91093 ul.children input:checked' ).parent().text().trim();
+				title += $( '#wptv_date' ).value.substring( 0, 4 );
 
 				// If a location or year has been selected, build the Event Name.
 				if ( $.trim( title ) ) {
@@ -409,18 +461,10 @@ if ( !empty($_REQUEST['error']) ) {
 				$this.val( $this.val().replace( /\s(and|&|\+)\s/g, ', ' ).replace( /[ ]{2,}/g, ' ' ) );
 			});
 
-			// Pre-select the date category.
-			$( '#wptv_date' ).on( 'change', function() {
-				var year = parseInt( this.value.substring( 0, 4 ) );
-
-				// Blank the year selections.
-				$( '#category-91093 ul.children input' ).prop( 'checked', false );
-
-				// Check the year
-				$( '#category-91093 ul.children input' ).filter( function() {
-					return parseInt( $(this).parent().text() ) === year;
-				} ).prop( 'checked', true )
-			} );
+			$( '#wptv_video_wordcamp' ).on( 'change', function() {
+				// WordCampTV cat
+				$( '#in-category-12784353' ).prop( 'checked', $( this ).prop( 'checked' ) );
+			});
 
 			$( '#video-upload-form' ).submit( function( e ) {
 				var scroll = false;

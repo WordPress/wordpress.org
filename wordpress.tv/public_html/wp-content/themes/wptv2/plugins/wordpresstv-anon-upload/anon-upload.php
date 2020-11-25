@@ -10,68 +10,72 @@ class WPTV_Anon_Upload {
 	function __construct() {
 		$this->drafts_author = apply_filters( 'wptv_drafts_author_id', $this->drafts_author );  // this is filterable in order to support local development
 
-		add_action( 'admin_post_wptv_video_upload', array( &$this, 'init' ) );
-		add_action( 'admin_post_nopriv_wptv_video_upload', array( &$this, 'init' ) );
-		add_action( 'dbx_post_sidebar', array( &$this, 'display' ) );
+		add_action( 'admin_post_wptv_video_upload', array( $this, 'init' ) );
+		add_action( 'admin_post_nopriv_wptv_video_upload', array( $this, 'init' ) );
+		add_action( 'dbx_post_sidebar', array( $this, 'display' ) );
 	}
 
 	function init() {
-		if ( ! empty( $_POST['wptvvideon'] ) && wp_verify_nonce( $_POST['wptvvideon'], 'wptv-upload-video' ) ) {
+		$redir = home_url( '/submit-video/' );
+
+		if (
+			empty( $_POST['wptvvideon'] ) ||
+			(
+				empty( $_POST['wptv_uploaded_by'] ) &&
+				! wp_verify_nonce( $_POST['wptvvideon'], 'wptv-upload-video' )
+			)
+		) {
+			$this->errors = 15; /* no-nonce / invalid nonce */
+		} else {
 			$this->validate();
 
 			if ( ! $this->errors ) {
 				$this->success = $this->save();
 			}
-
-			$redir = home_url( '/submit-video/' );
-
-			// Fields to prefill
-			$keep_fields = array(
-				'wptv_video_wordcamp',
-				'wptv_uploaded_by',
-				'wptv_email',
-				'wptv_language',
-				'wptv_date',
-				'post_category', // 'wptv_categories',
-				'wptv_producer_username',
-				'wptv_event',
-			);
-
-			if ( $this->success ) {
-				$redir = add_query_arg( array( 'success' => 1 ), $redir );
-			} elseif ( $this->errors ) {
-				$redir = add_query_arg( array( 'error' => $this->errors ), $redir );
-
-				// Video upload failed, include the video-specific fields in pre-fill.
-				$keep_fields[] = 'wptv_video_title';
-				$keep_fields[] = 'wptv_speakers';
-				$keep_fields[] = 'wptv_video_description';
-				$keep_fields[] = 'wptv_slides_url';
-
-			} else {
-				$keep_fields = array();
-				$redir = add_query_arg( array( 'error' => 5 ), $redir );
-			}
-
-			// Keep some fields.
-			if ( $keep_fields ) {
-				$redir = add_query_arg(
-					urlencode_deep(
-						array_intersect_key(
-							$_POST,
-							array_flip( $keep_fields )
-						)
-					),
-					$redir
-				);
-			}
-
-			wp_redirect( $redir );
-		} else {
-			// no nonce, send them "home"?
-			wp_redirect( home_url() );
 		}
 
+		// Fields to prefill
+		$keep_fields = array(
+			'wptv_video_wordcamp',
+			'wptv_uploaded_by',
+			'wptv_email',
+			'wptv_language',
+			'wptv_date',
+			'post_category', // 'wptv_categories',
+			'wptv_producer_username',
+			'wptv_event',
+		);
+
+		if ( $this->success ) {
+			$redir = add_query_arg( array( 'success' => 1 ), $redir );
+		} elseif ( $this->errors ) {
+			$redir = add_query_arg( array( 'error' => $this->errors ), $redir );
+
+			// Video upload failed, include the video-specific fields in pre-fill.
+			$keep_fields[] = 'wptv_video_title';
+			$keep_fields[] = 'wptv_speakers';
+			$keep_fields[] = 'wptv_video_description';
+			$keep_fields[] = 'wptv_slides_url';
+
+		} else {
+			$keep_fields = array();
+			$redir = add_query_arg( array( 'error' => 5 ), $redir );
+		}
+
+		// Keep some fields.
+		if ( $keep_fields ) {
+			$redir = add_query_arg(
+				urlencode_deep(
+					array_intersect_key(
+						$_POST,
+						array_flip( $keep_fields )
+					)
+				),
+				$redir
+			);
+		}
+
+		wp_redirect( $redir );
 		exit;
 	}
 
@@ -304,7 +308,7 @@ class WPTV_Anon_Upload {
 		$description       = $this->sanitize_text( $_posted['wptv_video_description'], false );
 		$language          = $this->sanitize_text( $_posted['wptv_language'] );
 		$slides            = $this->sanitize_text( $_posted['wptv_slides_url'] );
-		$recorded          = $this->sanitize_tett( $_posted['wptv_date'] );
+		$recorded          = $this->sanitize_text( $_posted['wptv_date'] ); // yyyy-mm-dd
 		$ip                = $_SERVER['REMOTE_ADDR'];
 
 		$categories = '';
@@ -314,6 +318,14 @@ class WPTV_Anon_Upload {
 				if ( $cat ) {
 					$categories .= "$cat,";
 				}
+			}
+		}
+
+		// Add the year category.
+		if ( $recorded ) {
+			$year = substr( $recorded, 0, 4 );
+			if ( $term = get_term_by( 'name', $year, 'category' ) ) {
+				$categories .= $term->term_id;
 			}
 		}
 
@@ -480,6 +492,14 @@ class WPTV_Anon_Upload {
 						<p class="label">Date Recorded:</p>
 						<p class="data">
 							<input type="text" value="<?php echo esc_attr( $meta['recorded'] ); ?>"/>
+							<?php
+								// Find the year cat
+								$cat = get_term_by( 'name', substr( $meta['recorded'], 0, 4 ), 'category' );
+								if ( $cat ) {
+									echo '<a href="#in-category-' . $cat->term_id . '" class="button-secondary anon-approve anon-cat-link" title="Click to approve">Approve</a>';
+								}
+							?>
+							
 						</p>
 					</div>
 					<?php endif; ?>
