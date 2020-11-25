@@ -209,13 +209,17 @@ class WordPressTV_Theme {
 				];
 			}
 
+			/*
 			foreach ( get_the_terms( $post, 'event' ) as $event ) {
 				$video_data['recordedAt'][] = [
-					'@type' => 'Event',
-					'name'  => $event->name,
-					'url'   => get_term_link( $event ),
+					'@type'     => 'Event',
+					'name'      => $event->name,
+					'url'       => get_term_link( $event ),
+					'location'  => '', // City is stored in Categories.
+					'startDate' => '', // Year is stored in Categories, but not event date.
 				];
 			}
+			*/
 
 			$data[] = array_filter( $video_data, function( $item ) { 
 				return '' !== $item && [] !== $item;
