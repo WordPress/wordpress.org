@@ -311,17 +311,18 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 	 * delimiter.
 	 */
 	$location_name_parts = preg_split( '/\s+/u', $location_name );
-	$location_word_count = is_array( $location_name_parts ) ? count( $location_name_parts ) : 1;
+	$location_word_count = count( $location_name_parts );
 
-	if ( ! $guess && $location_word_count >= 2 ) {
-		// Catch input like "Portland Maine"
-		$guess = guess_location_from_geonames( $location_name_parts[0], $timezone, $country_code, $wildcard = false );
-	}
+	// Catch input like "Portland Maine" and "Sao Paulo Brazil"
+	if ( ! $guess && $location_word_count > 1 ) {
+		foreach ( range( $location_word_count - 1, 1 ) as $i ) {
+			$city_name = implode( ' ', array_slice( $location_name_parts, 0, $i ) );
+			$guess     = guess_location_from_geonames( $city_name, $timezone, $country_code, $wildcard = false );
 
-	if ( ! $guess && $location_word_count >= 3 ) {
-		// Catch input like "Sao Paulo Brazil"
-		$city_name = sprintf( '%s %s', $location_name_parts[0], $location_name_parts[1] );
-		$guess     = guess_location_from_geonames( $city_name, $timezone, $country_code, $wildcard = false );
+			if ( $guess ) {
+				break; // end foreach
+			}
+		}
 	}
 
 	wp_cache_set( $cache_key, ( $guess ?: '__NOT_FOUND__' ), $cache_group, $cache_life );
@@ -385,12 +386,6 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 			$location_name,
 			mb_strlen( $location_name )
 		) );
-	}
-
-	// Strip off null bytes
-	// @todo Modify geoname script to to this instead?
-	if ( ! empty( $row->name ) ) {
-		$row->name = trim( $row->name );
 	}
 
 	return $row;
