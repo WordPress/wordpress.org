@@ -1,5 +1,4 @@
 <?php
-
 namespace Dotorg\API\Events;
 use stdClass;
 
@@ -357,12 +356,13 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 			BINARY LOWER( %s ) = BINARY LOWER( name ) DESC
 		LIMIT 1';
 
-	$prepared_query = $wpdb->prepare( $query, $location_name, $country, $timezone, $location_name );
-	$db_handle      = $wpdb->db_connect( $prepared_query );
-
-	$wpdb->set_charset( $db_handle, 'utf8' ); // The content in this table requires a UTF8 connection.
-	$row = $wpdb->get_row( $prepared_query );
-	$wpdb->set_charset( $db_handle, 'latin1' ); // Revert to the default charset to avoid affecting other queries.
+	$row = $wpdb->get_row( $wpdb->prepare(
+		$query,
+		$location_name,
+		$country,
+		$timezone,
+		$location_name
+	) );
 
 	// Wildcard match
 	if ( ! $row && $wildcard && 'ASCII' !== mb_detect_encoding( $location_name ) ) {
@@ -377,20 +377,15 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 				BINARY LOWER( %s ) = BINARY LOWER( LEFT( name, %d ) ) DESC
 			LIMIT 1';
 
-		$prepared_query = $wpdb->prepare( $query, $wpdb->esc_like( $location_name ) . '%', $country, $timezone, $location_name, mb_strlen( $location_name ) );
-		$db_handle      = $wpdb->db_connect( $prepared_query );
-
-		$wpdb->set_charset( $db_handle, 'utf8' ); // The content in this table requires a UTF8 connection.
-		$row = $wpdb->get_row( $prepared_query );
-		$wpdb->set_charset( $db_handle, 'latin1' ); // Revert to the default charset to avoid affecting other queries.
+		$row = $wpdb->get_row( $wpdb->prepare(
+			$query,
+			$wpdb->esc_like( $location_name ) . '%',
+			$country,
+			$timezone,
+			$location_name,
+			mb_strlen( $location_name )
+		) );
 	}
-
-	// Suffix the "State", good in some countries (western countries) horrible in others
-	// (where geonames data is not as complete, or region names are similar (but not quite the same) to city names)
-	// LEFT JOIN admin1codes ac ON gs.statecode = ac.code
-	// if ( $row->state && $row->state != $row->name && $row->name NOT CONTAINED WITHIN $row->state? ) {
-	//	 $row->name .= ', ' . $row->state;
-	// }
 
 	// Strip off null bytes
 	// @todo Modify geoname script to to this instead?
