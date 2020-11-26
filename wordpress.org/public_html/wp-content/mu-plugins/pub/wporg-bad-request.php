@@ -108,6 +108,28 @@ add_action( 'send_headers', function() {
 }, 1 );
 
 /**
+ * Detect invalid requests from vulnerability scanners to Jetpack Share by Email forms.
+ */
+add_action( 'send_headers', function() {
+	if ( ! isset( $_REQUEST['share'] ) ) {
+		return;
+	}
+
+	$share_by_email_fields = [
+		'target_email',
+		'source_email',
+		'source_f_name',
+		'source_name',
+	];
+
+	foreach ( $share_by_email_fields as $field ) {
+		if ( isset( $_POST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+			die_bad_request( "non-scalar $field in Jetpack Share By Email" );
+		}
+	}
+} );
+
+/**
  * Die with a 400 Bad Request.
  *
  * @param string $reference A unique identifying string to make it easier to read logs.
