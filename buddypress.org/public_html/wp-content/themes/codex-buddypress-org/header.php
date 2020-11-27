@@ -7,8 +7,6 @@
 <?php get_template_part( 'header', 'accessibility' ); ?>
 
 	<div id="header">
-		<?php get_template_part( 'header', 'survey' ); ?>
-
 		<div id="header-inner">
 			<?php get_template_part( 'header', 'nav' ); ?>
 
