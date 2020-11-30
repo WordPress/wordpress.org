@@ -188,7 +188,7 @@ function get_location_test_cases() {
 		 */
 		'city-invalid-private-ip' => array(
 			'input' => array(
-				'location_name' => 'Rivendell',
+				'location_name' => 'InvalidCity',
 				'ip'            => '127.0.0.1',
 			),
 			'expected' => false,
@@ -408,10 +408,6 @@ function get_location_test_cases() {
 
 		/*
 		 * The city endonym, locale, and timezone are given
-		 *
-		 * @todo
-		 * This is currently failing. A query from PHP shows row id 2220957 has "Yaound?" instead of
-		 * "Yaoundé", but it's correct in the database itself.
 		 */
 		'city-endonym-accents-africa' => array(
 			'input' => array(
@@ -420,7 +416,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Africa/Douala',
 			),
 			'expected' => array(
-				'description' => 'yaounde',
+				'description' => 'yaoundé',
 				'latitude'    => '3.867',
 				'longitude'   => '11.517',
 				'country'     => 'CM',
@@ -562,8 +558,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'Санкт-Петербург',
-				'latitude'    => '59.894',
-				'longitude'   => '30.264',
+				'latitude'    => '59.939',
+				'longitude'   => '30.314',
 				'country'     => 'RU',
 			),
 		),
@@ -577,8 +573,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'Санкт-Петербург',
-				'latitude'    => '59.894',
-				'longitude'   => '30.264',
+				'latitude'    => '59.939',
+				'longitude'   => '30.314',
 				'country'     => 'RU',
 			),
 		),
@@ -638,8 +634,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'portland',
-				'latitude'    => '43.661',
-				'longitude'   => '-70.255',
+				'latitude'    => '43.657',
+				'longitude'   => '-70.259',
 				'country'     => 'US',
 			),
 		),
@@ -651,7 +647,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Sao_Paulo',
 			),
 			'expected' => array(
-				'description' => 'sao',
+				'description' => 'são paulo',
 				'latitude'    => '-23.548',
 				'longitude'   => '-46.636',
 				'country'     => 'BR',

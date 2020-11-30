@@ -347,12 +347,13 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 
 	// Exact match
 	$query = '
-		SELECT name, latitude, longitude, country
+		SELECT name, latitude, longitude, country, type
 		FROM geoname_summary
 		WHERE name = %s
 		ORDER BY
 			FIELD( %s, country  ) DESC,
 			FIELD( %s, timezone ) DESC,
+			LEFT( type, 1 ) = "P" DESC,
 			population DESC,
 			BINARY LOWER( %s ) = BINARY LOWER( name ) DESC
 		LIMIT 1';
@@ -368,12 +369,13 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 	// Wildcard match
 	if ( ! $row && $wildcard && 'ASCII' !== mb_detect_encoding( $location_name ) ) {
 		$query = '
-			SELECT name, latitude, longitude, country
+			SELECT name, latitude, longitude, country, type
 			FROM geoname_summary
 			WHERE name LIKE %s
 			ORDER BY
 				FIELD( %s, country  ) DESC,
 				FIELD( %s, timezone ) DESC,
+				LEFT( type, 1 ) = "P" DESC,
 				population DESC,
 				BINARY LOWER( %s ) = BINARY LOWER( LEFT( name, %d ) ) DESC
 			LIMIT 1';
@@ -546,7 +548,27 @@ function get_location( $args = array() ) {
 		$country_code = get_country_code_from_locale( $args['locale'] ?? '' );
 		$guess        = guess_location_from_city( $args['location_name'], $args['timezone'] ?? '', $country_code );
 
-		if ( $guess ) {
+		$country_types = array(
+			// See http://download.geonames.org/export/dump/featureCodes_en.txt
+
+			'A.PCL',   // political entity	
+			'A.PCLD',  // dependent political entity	
+			'A.PCLF',  // freely associated state	
+			'A.PCLH',  // historical political entity	a former political entity
+			'A.PCLI',  // independent political entity	
+			'A.PCLIX', // section of independent political entity	
+			'A.PCLS',  // semi-independent political entity
+			'A.PRSH',  // parish an ecclesiastical district
+			'A.TERR',  // territory
+			'A.ZN',    // zone
+		);
+
+		if ( $guess && in_array( $guess->type, $country_types, true ) ) {
+			$location = array(
+				'country'     => $guess->country,
+				'description' => $guess->name,
+			);
+		} elseif ( $guess ) {
 			$location = array(
 				'description' => $guess->name,
 				'latitude'    => $guess->latitude,
