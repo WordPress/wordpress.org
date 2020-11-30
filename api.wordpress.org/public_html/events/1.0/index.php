@@ -134,7 +134,7 @@ function parse_request() {
 
 	// Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
 	if ( isset( $_REQUEST['location'] ) ) {
-		$location_args['location_name'] = trim( str_replace( ',', ' ', $_REQUEST['location'] ) );
+		$location_args['location_name'] = trim( $_REQUEST['location'] );
 	}
 
 	if ( isset( $_REQUEST['timezone'] ) ) {
@@ -310,7 +310,7 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 	 * This won't work for most ideographic languages, because they don't use the space character as a word
 	 * delimiter.
 	 */
-	$location_name_parts = preg_split( '/\s+/u', $location_name );
+	$location_name_parts = preg_split( '/[,\s]+/u', $location_name );
 	$location_word_count = count( $location_name_parts );
 
 	// Catch input like "Portland Maine" and "Sao Paulo Brazil"

@@ -621,6 +621,61 @@ function get_location_test_cases() {
 			),
 		),
 
+		// https://meta.trac.wordpress.org/ticket/3367
+		// The following tests ensure that West/East portlands return correctly with inversed timezones.
+		'usa-city-disambiguation' => array(
+			'input' => array(
+				'location_name' => 'Portland',
+				'locale'        => 'en_US',
+				'timezone'      => 'America/Los_Angeles',
+			),
+			'expected' => array(
+				'description' => 'portland',
+				'latitude'    => '45.523',
+				'longitude'   => '-122.676',
+				'country'     => 'US',
+			),
+		),
+		'usa-city-disambiguation-2' => array(
+			'input' => array(
+				'location_name' => 'Portland, OR',
+				'locale'        => 'en_US',
+				'timezone'      => 'America/New_York',
+			),
+			'expected' => array(
+				'description' => 'portland, or',
+				'latitude'    => '45.523',
+				'longitude'   => '-122.676',
+				'country'     => 'US',
+			),
+		),
+		'usa-city-disambiguation-3' => array(
+			'input' => array(
+				'location_name' => 'Portland',
+				'locale'        => 'en_US',
+				'timezone'      => 'America/New_York',
+			),
+			'expected' => array(
+				'description' => 'portland',
+				'latitude'    => '43.657',
+				'longitude'   => '-70.259',
+				'country'     => 'US',
+			),
+		),
+		'usa-city-disambiguation-4' => array(
+			'input' => array(
+				'location_name' => 'Portland, ME',
+				'locale'        => 'en_US',
+				'timezone'      => 'America/Los_Angeles',
+			),
+			'expected' => array(
+				'description' => 'portland, me',
+				'latitude'    => '43.657',
+				'longitude'   => '-70.259',
+				'country'     => 'US',
+			),
+		),
+
 		/*
 		 * A combination of city, region, and country are given, along with the locale and timezone
 		 *
