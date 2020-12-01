@@ -13,11 +13,6 @@ if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== \Dotorg\Slack\Trac\URL_
 
 $payload = json_decode( wp_unslash( $_POST['payload'] ) );
 
-// Debug to figure out why the incoming JSON is sometimes not able to be parsed, despite appearing to be valid.
-if ( ! $payload ) {
-	slack_dm( var_export( $_POST, true ), 'dd32' );
-}
-
 require_once WP_PLUGIN_DIR . '/wporg-notifications.php';
 $notif = WPOrg_Notifications::get_instance();
 
@@ -50,6 +45,14 @@ function wporg_user_has_visited_trac( $user_login ) {
 }
 
 function wporg_get_trac_ticket_subscription_status( $username, $ticket ) {
+	/*
+	 * TODO: This no longer works.
+	 * 
+	 * The _ticket_subs table is no longer accessible from PHP, as Trac doesn't use MySQL accessible via HyperDB.
+	 * 
+	 * The replacement is a HTTP API call via Trac_Notifications_API::get_trac_ticket_subscription_status_for_user( $ticket, $username )
+	 */
+/*
 	global $wpdb;
 	add_db_table( 'trac_core', '_ticket_subs' ); // HyperDB
 	$status = $wpdb->get_var( $wpdb->prepare(
@@ -60,6 +63,7 @@ function wporg_get_trac_ticket_subscription_status( $username, $ticket ) {
 	if ( is_numeric( $status ) ) {
 		return (int) $status;
 	}
+*/
 	return false;
 }
 
@@ -111,11 +115,20 @@ add_filter( 'wporg_notifications_notify_username', function( $notify, $username 
 	if ( wporg_user_has_visited_trac( $username ) ) {
 		// If on Core Trac, a user is not a reporter, owner, or subscriber, subscribe them.
 		if ( isset( $status ) && false === $status ) {
+			/*
+			 * TODO: This no longer works.
+			 * 
+			 * The _ticket_subs table is no longer accessible from PHP, as Trac doesn't use MySQL accessible via HyperDB.
+			 * 
+			 * Trac_Notifications_API does not have a replacement function.
+			*/
+			/*
 			$wpdb->insert( '_ticket_subs', array(
 				'username' => $username,
 				'ticket'   => $payload->ticket_id,
 				'status'   => MENTIONED,
 			) );
+			*/
 		}
 
 		return true;
