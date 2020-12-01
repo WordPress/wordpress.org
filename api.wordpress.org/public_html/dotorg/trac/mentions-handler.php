@@ -11,7 +11,7 @@ if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== \Dotorg\Slack\Trac\URL_
 	exit;
 }
 
-$payload = json_decode( $_POST['payload'] );
+$payload = json_decode( wp_unslash( $_POST['payload'] ) );
 
 // Debug to figure out why the incoming JSON is sometimes not able to be parsed, despite appearing to be valid.
 if ( ! $payload ) {
