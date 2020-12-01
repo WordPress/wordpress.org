@@ -13,6 +13,11 @@ if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== \Dotorg\Slack\Trac\URL_
 
 $payload = json_decode( $_POST['payload'] );
 
+// Debug to figure out why the incoming JSON is sometimes not able to be parsed, despite appearing to be valid.
+if ( ! $payload ) {
+	slack_dm( var_export( $_POST, true ), 'dd32' );
+}
+
 require_once WP_PLUGIN_DIR . '/wporg-notifications.php';
 $notif = WPOrg_Notifications::get_instance();
 
