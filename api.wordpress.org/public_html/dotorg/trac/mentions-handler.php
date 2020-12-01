@@ -4,6 +4,7 @@ define( 'BLOCKED',    0 );
 define( 'SUBSCRIBED', 1 );
 define( 'MENTIONED',  2 );
 
+require dirname( dirname( __DIR__ ) ) . '/wp-init.php';
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
 if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== \Dotorg\Slack\Trac\URL_SECRET__MENTIONS ) {
@@ -11,9 +12,6 @@ if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== \Dotorg\Slack\Trac\URL_
 }
 
 $payload = json_decode( $_POST['payload'] );
-
-$_SERVER['HTTP_HOST'] = 'wordpress.org';
-require WPORGPATH . 'wp-load.php';
 
 require_once WP_PLUGIN_DIR . '/wporg-notifications.php';
 $notif = WPOrg_Notifications::get_instance();
@@ -37,6 +35,9 @@ if ( 'comment' === $type ) {
 }
 
 $user = get_user_by( 'login', $user_login );
+if ( ! $user ) {
+	exit;
+}
 
 function wporg_user_has_visited_trac( $user_login ) {
 	global $wpdb;
