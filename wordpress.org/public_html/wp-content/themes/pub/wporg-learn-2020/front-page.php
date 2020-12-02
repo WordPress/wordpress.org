@@ -44,6 +44,7 @@ get_header(); ?>
 		</section>
 
 		<hr>
+
 		<section>
 			<div class="row align-middle between section-heading">
 				<h2 class="h4 section-heading_title"><?php esc_html_e( 'Recent Workshops', 'wporg-learn' ); ?></h2>
@@ -62,7 +63,37 @@ get_header(); ?>
 			get_template_part( 'template-parts/component', 'video-grid', $args );
 			?>
 		</section>
+
 		<hr>
+
+		<?php $discussion_events = \WPOrg_Learn\Events\get_discussion_events(); ?>
+		<?php if ( ! empty( $discussion_events ) ) : ?>
+			<section class="wporg-learn-workshop-discussion-events">
+				<div class="row align-middle between section-heading">
+					<h2 class="h4 section-heading_title">
+						<?php esc_html_e( 'Upcoming Discussion Groups', 'wporg-learn' ); ?>
+					</h2>
+					<a class="section-heading_link" href="https://www.meetup.com/learn-wordpress-discussions/">
+						<?php esc_html_e( 'View All »', 'wporg-learn' ); ?>
+					</a>
+				</div>
+				<ul class="discussion-event-list">
+					<?php foreach ( $discussion_events as $event ) : ?>
+						<?php get_template_part( 'template-parts/component', 'discussion-event-short-item', $event ); ?>
+					<?php endforeach; ?>
+				</ul>
+				<p>
+					<?php
+					printf(
+						wp_kses_post( __( 'Want to facilitate a discussion group about a workshop? <a href="%s">Apply to become a facilitator.</a>', 'wporg-learn' ) ),
+						'https://learn.wordpress.org/discussion-groups/'
+					);
+					?>
+				</p>
+			</section>
+
+			<hr>
+		<?php endif; ?>
 
 		<?php get_template_part( 'template-parts/component', 'submit-idea-cta', array( 'icon' => 'lightbulb' ) ); ?>
 	</main>

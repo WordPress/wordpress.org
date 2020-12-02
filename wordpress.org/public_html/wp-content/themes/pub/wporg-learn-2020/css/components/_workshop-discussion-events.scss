@@ -1,0 +1,40 @@
+.wporg-learn-workshop-discussion-events {
+	:last-child {
+		margin-bottom: 0;
+	}
+
+	.discussion-event-list {
+		list-style: none;
+		margin: 0 0 2rem;
+		padding: 2rem 0 0;
+	}
+
+	.discussion-event {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.discussion-event-date {
+		display: block;
+		border: 0;
+		cursor: default;
+		color: #555;
+		font-size: 0.8rem;
+	}
+
+	.discussion-event-link {
+		display: block;
+	}
+
+	.wp-block-button__link,
+	.wp-block-button__link:visited {
+		margin: 0;
+		padding: 0.5rem;
+	}
+}
