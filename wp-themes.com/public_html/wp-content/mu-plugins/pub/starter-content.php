@@ -20,6 +20,10 @@ class Starter_Content {
 			return;
 		}
 
+		if ( is_admin() ) {
+			return;
+		}
+
 		// Some themes require is_customize_preview() before loading starter content.
 		add_action( 'after_setup_theme', array( $this, 'pre_after_setup_theme' ), -1 * PHP_INT_MAX );
 
@@ -514,9 +518,9 @@ new Starter_Content();
 
 /**
  * Define a custom WP_Customize_Manager class that claims this request is a customizer preview request.
- * 
+ *
  * This is needed as many themes (including 2020/2021) limit starter content to customizer preview requests.
- * 
+ *
  * As PHP cannot handle nested classes, this is defined in a function outside of the above class.
  */
 function polyfill_wp_customize_manager() {
