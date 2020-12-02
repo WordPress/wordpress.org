@@ -332,7 +332,7 @@ function get_whitelist() {
 			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
-			'evarlese', 
+			'evarlese',
 			'felipeelia',
 			'Nao',
 			'ocean90',
@@ -375,18 +375,15 @@ function get_whitelist() {
 			'lukecarbis',
 			'valendesigns',
 		),
-		'training' => array(
-			'chetan200891',
-			'courtneydawn',
-			'donkiely',
-			'jessecowens', // @Jesse Owens on Slack
-			'liljimmi',
-			'bethsoderberg',
-			'courane01', // @courtneyengle on Slack
+		'training' => array_merge( $wordcamp_central, array(
+			'azhiyadev', // @Hauwa Abashiya on Slack
 			'chanthaboune',
-			'melindahelt',
+			'chetan200891',
+			'courane01', // @courtneyengle on Slack
+			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
-		),
+			'onealtr', // @oneal on Slack
+		) ),
 		// NOTE: Private Groups need not be listed here. All members of Private Groups have access to /announce & /here
 		'wcasia' => array(
 			'Nao',
