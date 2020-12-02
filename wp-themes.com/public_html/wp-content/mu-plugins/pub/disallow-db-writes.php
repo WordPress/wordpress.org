@@ -11,7 +11,7 @@ add_filter( 'query', function( $query ) {
 
 	// Borrowed from HyperDB, only SELECT queries are considered non-write
 	if ( ! preg_match( '/^\s*(?:SELECT|SHOW|DESCRIBE|DESC|EXPLAIN)\s/i', $query ) ) {
-		if ( ! is_admin() && ! is_user_logged_in() ) {
+		if ( ! is_admin() || ! is_user_logged_in() ) {
 			$query = '';
 		}
 	}
@@ -21,7 +21,7 @@ add_filter( 'query', function( $query ) {
 
 // Disable update_option() directly.
 add_filter( 'pre_update_option', function( $value, $option, $old_value ) {
-	if ( ! is_user_logged_in() && ! is_admin() ) {
+	if ( ! is_admin() || ! is_user_logged_in() ) {
 		$value = $old_value;
 	}
 
