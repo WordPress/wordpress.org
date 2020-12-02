@@ -14,7 +14,67 @@ class Starter_Content {
 
 	private $mapping = array();
 
+	public function __construct() {
+		// This plugin relies upon the object cache being the internal WordPress per-request cache.
+		if ( wp_using_ext_object_cache() ) {
+			return;
+		}
+
+		// Some themes require is_customize_preview() before loading starter content.
+		add_action( 'after_setup_theme', array( $this, 'pre_after_setup_theme' ), -1 * PHP_INT_MAX );
+
+		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'wp_head', array( $this, 'head_debug_info' ), 1 );
+	}
+
+	public function pre_after_setup_theme() {
+		if ( class_exists( 'WP_Customize_Manager' ) ) {
+			return;
+		}
+
+		if ( ! $this->is_supported_theme() ) {
+			return;
+		}
+
+		// Disable customizer loading parameters.
+		unset(
+			$_REQUEST['wp_customize'],
+			$_REQUEST['customize_changeset_uuid'],
+			$_GET['customize_changeset_uuid'],
+			$_POST['customize_changeset_uuid']
+		);
+
+		// Define a custom `WP_Customize_Manager` class to force `is_customize_preview()` truthful.
+		polyfill_wp_customize_manager();
+
+		$GLOBALS['wp_customize'] = new WP_Customize_Manager();
+
+		// Undo this the override after this action is fully run.
+		add_action(
+			'after_setup_theme',
+			function() {
+				unset( $GLOBALS['wp_customize'] );
+			},
+			PHP_INT_MAX
+		);
+	}
+
+	private function is_supported_theme() {
+		$whitelisted_themes = array(
+			// Other default themes don't have supported starter content.
+			'twentyseventeen',
+			'twentytwenty',
+			'twentytwentyone',
+		);
+
+		return in_array( get_template(), $whitelisted_themes );
+	}
+
 	public function init() {
+		if ( ! $this->is_supported_theme() ) {
+			return;
+		}
+
 		$this->set_starter_content();
 
 		if ( empty( $this->starter_content ) ) {
@@ -29,6 +89,15 @@ class Starter_Content {
 		$this->filter_post_thumbnails();
 		$this->filter_sidebars();
 		$this->filter_theme_mods();
+	}
+
+	public function head_debug_info() {
+		if ( current_theme_supports( 'starter-content' ) && $this->starter_content ) {
+			echo "\n<!-- Preview using Starter content -->\n";
+		} else {
+			echo "\n<!-- Preview is not using Starter content -->\n";
+		}
+		
 	}
 
 	public function cache_posts() {
@@ -441,34 +510,31 @@ class Starter_Content {
 
 }
 
-add_action(
-	'init',
-	function () {
-		// This plugin relies upon the object cache being the internal WordPress per-request cache.
-		if ( wp_using_ext_object_cache() ) {
-			return;
+new Starter_Content();
+
+/**
+ * Define a custom WP_Customize_Manager class that claims this request is a customizer preview request.
+ * 
+ * This is needed as many themes (including 2020/2021) limit starter content to customizer preview requests.
+ * 
+ * As PHP cannot handle nested classes, this is defined in a function outside of the above class.
+ */
+function polyfill_wp_customize_manager() {
+	class WP_Customize_Manager {
+		// Yes, this is a theme preview.
+		function is_preview() {
+			return true;
 		}
 
-		$whitelisted_themes = array(
-			// Other default themes don't have supported starter content.
-			'twentyseventeen',
-			'twentytwenty',
-			'twentytwentyone',
-		);
-
-		if ( ! in_array( get_template(), $whitelisted_themes ) ) {
-			return;
+		// Ensure that any calls return false too.
+		function __get( $property ) {
+			return false;
 		}
-
-		// These themes don't always load the starter content, so we'll have to do it for them..
-		if ( 'twentytwenty' === get_template() ) {
-			require_once get_template_directory() . '/inc/starter-content.php';
-			add_theme_support( 'starter-content', twentytwenty_get_starter_content() );
-		} elseif ( 'twentytwentyone' === get_template() ) {
-			require_once get_template_directory() . '/inc/starter-content.php';
-			add_theme_support( 'starter-content', twenty_twenty_one_get_starter_content() );
+		function __call( $method, $args ) {
+			return false;
 		}
-
-		( new Starter_Content() )->init();
 	}
-);
+
+	// This needs to be defined in the global namespace.
+	class_alias( __NAMESPACE__ . '\WP_Customize_Manager', 'WP_Customize_Manager', false );
+}
