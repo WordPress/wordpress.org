@@ -98,6 +98,53 @@ add_action( 'template_redirect', function() {
 }, 9 );
 
 /**
+ * Redirect some invalid/malformed URL requests to their proper locations.
+ */
+add_action( 'template_redirect', function() {
+	global $wp;
+
+	if ( ! is_404() ) {
+		return;
+	}
+
+	$name = false;
+	foreach ( [ 'name', 'attachment', 'pagename' ] as $field ) {
+		if ( isset( $wp->query_vars[ $field ] ) ) {
+			// Get the raw unmodified query var from WP directly.
+			$name = urldecode( $wp->query_vars[ $field ] );
+		}
+	}
+	if ( ! $name ) {
+		return;
+	}
+
+	$new_path = $path = $_SERVER['REQUEST_URI'];
+
+	// Remove any common URL paths.
+	$new_path = preg_replace( '!^/?(index|contact(-us)?)(\.(html?|php))?!i', '', $new_path );
+
+	// Remove any `<a>` attributes from the URL.
+	$new_path = preg_replace( '!(target|rel|href)=?(.+)$!i', '', $new_path );
+
+	// Remove any trailing punctuation.
+	$new_path = preg_replace( '!([ +\'"\W]|(?:%20))+$!', '', $new_path );
+
+	if ( $path === $new_path ) {
+		return;
+	}
+
+	// Determine URL, save a redirect and check the canonical too.
+	$url = home_url( $new_path );
+	if ( $canonical_url = redirect_canonical( $url, false ) ) {
+		$url = $canonical_url;
+	}
+
+	wp_safe_redirect( $url, 301, 'W.org Redirects Malformed URLs' );
+	die();
+
+}, 20 ); // After canonical.
+
+/**
  * Handle the domain-based redirects
  * 
  * Called from sunrise.php on ms_site_not_found and ms_network_not_found actions.
