@@ -33,6 +33,7 @@ function get_whitelist() {
 	return array(
 		'accessibility' => array(
 			'afercia',
+			'alexstine',
 			'arush',
 			'audrasjb',
 			'joedolson',
