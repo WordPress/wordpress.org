@@ -134,7 +134,7 @@ add_action( 'template_redirect', function() {
 	}
 
 	// Determine URL, save a redirect and check the canonical too.
-	$url = home_url( $new_path );
+	$url = home_url( $new_path ?: '/' );
 	if ( $canonical_url = redirect_canonical( $url, false ) ) {
 		$url = $canonical_url;
 	}
