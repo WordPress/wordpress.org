@@ -358,7 +358,7 @@ function wporg_support_get_slack_username( $user_id = 0 ) {
 function wporg_support_get_user_registered_date( $user_id = 0 ) {
 	$user = get_userdata( bbp_get_user_id( $user_id ) );
 
-	/* translators: registration date format, see https://secure.php.net/date */
+	/* translators: registration date format, see https://www.php.net/date */
 	return mysql2date( __( 'F jS, Y', 'wporg-forums' ), $user->user_registered );
 }
 

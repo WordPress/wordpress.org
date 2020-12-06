@@ -25,9 +25,9 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 						/* translators: 1: linked moderator's username, 2: moderation date, 3: moderation time */
 						__( 'This user has been flagged by %1$s on %2$s at %3$s.', 'wporg-forums' ),
 						sprintf( '<a href="%s">%s</a>', esc_url( home_url( "/users/$moderator/" ) ), $moderator ),
-						/* translators: localized date format, see https://secure.php.net/date */
+						/* translators: localized date format, see https://www.php.net/date */
 						mysql2date( __( 'F j, Y', 'wporg-forums' ), $moderation_date ),
-						/* translators: localized time format, see https://secure.php.net/date */
+						/* translators: localized time format, see https://www.php.net/date */
 						mysql2date( __( 'g:i a', 'wporg-forums' ), $moderation_date )
 					);
 				} elseif ( $moderator ) {
