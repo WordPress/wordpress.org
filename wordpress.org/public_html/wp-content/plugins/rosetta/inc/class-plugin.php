@@ -101,7 +101,7 @@ class Plugin {
 				->set_name( 'timezone_string' )
 				->set_callback( function() {
 					/* translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
-					 * or a valid timezone string (America/New_York). See https://secure.php.net/manual/timezones.php
+					 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
 					 * for all timezone strings supported by PHP.
 					 */
 					$offset_or_tz = _x( '0', 'default GMT offset or timezone string', 'rosetta' );
@@ -128,7 +128,7 @@ class Plugin {
 					}
 
 					/* translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
-					 * or a valid timezone string (America/New_York). See https://secure.php.net/manual/timezones.php
+					 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
 					 * for all timezone strings supported by PHP.
 					 */
 					$offset_or_tz = _x( '0', 'default GMT offset or timezone string', 'rosetta' );
@@ -145,7 +145,7 @@ class Plugin {
 			( new Filter\Option() )
 				->set_name( 'date_format' )
 				->set_callback( function() {
-					/* translators: default date format, see https://secure.php.net/date */
+					/* translators: default date format, see https://www.php.net/date */
 					return __( 'F j, Y', 'rosetta' );
 				} )
 		);
@@ -154,7 +154,7 @@ class Plugin {
 			( new Filter\Option() )
 				->set_name( 'time_format' )
 				->set_callback( function() {
-					/* translators: default time format, see https://secure.php.net/date */
+					/* translators: default time format, see https://www.php.net/date */
 					return __( 'g:i a', 'rosetta' );
 				} )
 		);
