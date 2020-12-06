@@ -222,7 +222,7 @@ the_post();
 								/* translators: 1: PHP version; 2: URL to PHP website; 3: URL to MySQL website; 4: MySQL version; 5: URL to MariaDB website; 6: MariaDB version */
 								wp_kses_post( __( 'We recommend servers running version %1$s or greater of <a href="%2$s">PHP</a> and <a href="%3$s">MySQL</a> version %4$s <em>OR</em> <a href="%5$s">MariaDB</a> version %6$s or greater.', 'wporg' ) ),
 								RECOMMENDED_PHP,
-								'https://secure.php.net/',
+								'https://www.php.net/',
 								'https://www.mysql.com/',
 								'5.6',
 								'https://mariadb.org/',
