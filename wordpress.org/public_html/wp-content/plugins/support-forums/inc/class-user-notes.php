@@ -219,9 +219,9 @@ class User_Notes {
 						$note->moderator
 					),
 					esc_url( $post_permalink ),
-					/* translators: localized date format, see https://secure.php.net/date */
+					/* translators: localized date format, see https://www.php.net/date */
 					mysql2date( __( 'F j, Y', 'wporg-forums' ), $note->date ),
-					/* translators: localized time format, see https://secure.php.net/date */
+					/* translators: localized time format, see https://www.php.net/date */
 					mysql2date( __( 'g:i a', 'wporg-forums' ), $note->date )
 				)
 			);

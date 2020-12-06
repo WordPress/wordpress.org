@@ -232,9 +232,9 @@ class Report_Topic {
 							esc_url( bbp_get_user_profile_url( $report['user']) ),
 							get_the_author_meta( 'display_name', $report['user'] )
 						),
-						/* translators: localized date format, see https://secure.php.net/date */
+						/* translators: localized date format, see https://www.php.net/date */
 						mysql2date( __( 'F j, Y', 'wporg-forums' ), $report['time'] ),
-						/* translators: localized time format, see https://secure.php.net/date */
+						/* translators: localized time format, see https://www.php.net/date */
 						mysql2date( __( 'g:i a', 'wporg-forums' ), $report['time'] ),
 						( ! isset( $report['reason'] ) || empty( $report['reason'] ) ?  '' : sprintf(
 							/* translators: %s: The reason this topic was reported. */
