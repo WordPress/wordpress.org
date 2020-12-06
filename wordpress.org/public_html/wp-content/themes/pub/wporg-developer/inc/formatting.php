@@ -187,7 +187,7 @@ class DevHub_Formatting {
 
 		// Exceptions for externally-linked elements.
 		$exceptions = [
-			'error_log()' => 'https://secure.php.net/manual/en/function.error-log.php',
+			'error_log()' => 'https://www.php.net/manual/en/function.error-log.php',
 		];
 
 		// Link exceptions that should actually point to external resources.
