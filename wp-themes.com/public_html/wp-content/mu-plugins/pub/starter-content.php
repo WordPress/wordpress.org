@@ -64,6 +64,10 @@ class Starter_Content {
 	}
 
 	private function is_supported_theme() {
+		if ( isset( $_GET['use-starter-content'] ) || isset( $_COOKIE['use-starter-content'] ) ) {
+			return true;
+		}
+
 		$whitelisted_themes = array(
 			// Other default themes don't have supported starter content.
 			'twentyseventeen',
