@@ -118,7 +118,11 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
-	$new_path = $path = $_SERVER['REQUEST_URI'];
+	$path = $_SERVER['REQUEST_URI'] ?? '/';
+	// Remove the site prefix.
+	$path = preg_replace( '!^' . preg_quote( wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '!' ) . '!', '/', $path );
+
+	$new_path = $path;
 
 	// Remove any common URL paths.
 	$new_path = preg_replace( '!^/?(index|contact(-us)?)(\.(html?|php))?!i', '', $new_path );
@@ -127,7 +131,7 @@ add_action( 'template_redirect', function() {
 	$new_path = preg_replace( '!(target|rel|href)=?(.+)$!i', '', $new_path );
 
 	// Remove any trailing punctuation.
-	$new_path = preg_replace( '!([ +\'"\W]|(?:%20))+$!', '', $new_path );
+	$new_path = preg_replace( '!([ +\'"]|(?:%20))+$!', '', $new_path );
 
 	if ( $path === $new_path ) {
 		return;
