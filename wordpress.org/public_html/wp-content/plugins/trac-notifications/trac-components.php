@@ -567,18 +567,10 @@ jQuery( function( $ ) {
 			$this->render_tickets( $next_milestone );
 		}
 
-		$tickets_by_type = $this->api->get_ticket_counts_for_component( $component );
-		if ( ! $tickets_by_type ) {
-			$tickets_by_type = array( 'defect (bug)' => 0 ); // Incorrect, but allows page render
-		}
+		$tickets_by_type = (array) $this->api->get_ticket_counts_for_component( $component );
 
 		$count = array_sum( $tickets_by_type );
 		echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $count ), $count ) . '</h3>';
-		echo "\n" . '<strong>Open bugs: ' . $tickets_by_type['defect (bug)'] . '</strong>. ';
-		echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'defect (bug)' ) );
-		echo "\n\n";
-
-		return;
 
 		$types = array(
 			'enhancement'     => 'Open enhancements',
@@ -587,12 +579,10 @@ jQuery( function( $ ) {
 		);
 
 		foreach ( $types as $type => $title ) {
-			$args = compact( 'component', 'type' );
-			if ( $tickets = $this->api->get_tickets_by( $args ) ) {
-				printf( '<h3>%s (%d)</h3>', $title, count( $tickets ) );
-				echo $this->trac_query_link( 'View list on Trac', $args );
-				$this->render_tickets( $tickets );
-			}
+			$count = $tickets_by_type[ $type ] ?? 0;
+			printf( '<strong>%s: %d<strong> ', $title, $count );
+			echo $this->trac_query_link( 'View list on Trac', compact( 'component', 'type' ) );
+			echo '<br>';
 		}
 	}
 
