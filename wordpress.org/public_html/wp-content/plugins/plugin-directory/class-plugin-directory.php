@@ -1667,7 +1667,7 @@ class Plugin_Directory {
 	 * @static
 	 * @global \WP_Post $post WordPress post object.
 	 *
-	 * @param string|\WP_Post $plugin_slug The slug of the plugin to retrieve.
+	 * @param int|string|\WP_Post $plugin_slug The slug of the plugin to retrieve.
 	 * @return \WP_Post|bool
 	 */
 	public static function get_plugin_post( $plugin_slug ) {
@@ -1675,6 +1675,16 @@ class Plugin_Directory {
 
 		if ( $plugin_slug instanceof \WP_Post ) {
 			return $plugin_slug;
+		}
+
+		// Handle int $plugin_slug being passed. NOT numeric slugs
+		if (
+			is_int( $plugin_slug ) &&
+			( $post_obj = get_post( $plugin_slug ) ) &&
+			( $post_obj->ID === $plugin_slug )
+		) {
+			$post = $post_obj;
+			return $post_obj;
 		}
 
 		// Use the global $post object when it matches to avoid hitting the database.
