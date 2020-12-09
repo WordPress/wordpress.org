@@ -106,13 +106,9 @@ the_post();
 						<tbody>
 						<tr>
 							<th>
-								5.6
+								5.7
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td><?php echo date_i18n( 'F Y', strtotime( 'Dec 2020' ) ); ?></td>
-						</tr>
-						<tr>
-							<th>5.7</th>
 							<td><?php echo date_i18n( 'F Y', strtotime( 'Mar 2021' ) ); ?></td>
 						</tr>
 						<tr>
