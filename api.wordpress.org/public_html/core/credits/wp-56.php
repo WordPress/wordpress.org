@@ -676,6 +676,7 @@ class WP_56_Credits extends WP_Credits {
 			'trepmal',
 			'tw2113',
 			'twentyzerotwo',
+			'tyxla',
 			'tzafrir',
 			'usestrict',
 			'utz119',
