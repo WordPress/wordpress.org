@@ -25,7 +25,7 @@ class Translation_Sync {
 
 		while ( $posts = get_posts( $args ) ) {
 			foreach ( $posts as $post ) {
-				$directory->sync_all_translations_to_meta( $post->ID );
+				$directory->sync_all_translations_to_meta( $post );
 			}
 
 			// Make sure the cache doesn't exhaust memory
