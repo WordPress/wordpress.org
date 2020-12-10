@@ -145,6 +145,7 @@ function get_whitelist() {
 			'chrisvanpatten',
 		) ),
 		'core-editor' => array_merge( get_committers(), array(
+			'annezazu',
 			'azaozz',
 			'gziolo',
 			'ellatrix', // @ella on Slack
@@ -287,6 +288,9 @@ function get_whitelist() {
 			'Ipstenu',
 			'jdembowski', // @jan_dembowski on Slack
 			'macmanx',
+		),
+		'fse-outreach-experiment' => array(
+			'annezazu',
 		),
 		'glotpress' => array(
 			'ocean90',
