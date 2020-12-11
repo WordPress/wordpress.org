@@ -10,7 +10,7 @@ add_action( 'wp_footer', function() {
 ( function( base ) {
 	var links = document.getElementsByTagName( "a" );
 	for ( var i = 0; i < links.length; i++ ) {
-		var href = links[i].getAttribute( "href" ).split( "#" )[0];
+		var href = links[i].href.split( "#" )[0];
 		if ( href && base !== href.substring( 0, base.length ) ) {
 			links[i].target = "_blank";
 		}
