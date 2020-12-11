@@ -9,6 +9,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'needs-refresh' : 'Patch no longer applies cleanly and needs to be updated.',
 		'reporter-feedback' : 'Feedback is needed from the reporter.',
 		'dev-feedback' : 'Feedback is needed from a core developer.',
+		'dev-reviewed' : 'Indicates that a ticket has been reviewed by two committers and can be backported when used in combination with the commit keyword.',
 		'2nd-opinion' : 'A second opinion is desired for the problem or solution.',
 		'close' : 'The ticket is a candidate for closure.',
 		'needs-testing' : 'Patch has a particular need for testing.',
@@ -80,7 +81,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		}
 	};
 
-	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major' ];
+	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major', 'dev-reviewed' ];
 
 	// phpDocumentor tags, but also a few common @-terms.
 	reservedTerms = [
@@ -1194,6 +1195,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						wpTrac.workflow.removeKeyword( 'needs-dev-note' );
 					} else if ( 'needs-dev-note' === keyword ) {
 						wpTrac.workflow.removeKeyword( 'has-dev-note' );
+					}
+
+					if ( 'dev-reviewed' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'dev-feedback' );
 					}
 
 					if ( 'has-privacy-review' === keyword ) {
