@@ -37,6 +37,13 @@ function main() {
 	defined( 'DAY_IN_SECONDS'  ) or define( 'DAY_IN_SECONDS', HOUR_IN_SECONDS * 24 );
 	defined( 'WEEK_IN_SECONDS' ) or define( 'WEEK_IN_SECONDS', 7 * DAY_IN_SECONDS );
 
+	/*
+	 * Increase range during COVID-19 to mitigate event deserts.
+	 *
+	 * This is just a guess, and needs to be re-evaluated before it expires.
+	 */
+	define( 'COVID_IMPACT_EXPIRATION', strtotime( 'June 30 2021' ) );
+
 	// The test suite just needs the functions defined and doesn't want any headers or output
 	if ( defined( 'RUNNING_TESTS' ) && RUNNING_TESTS ) {
 		disable_caching();
@@ -768,12 +775,7 @@ function get_events( $args = array() ) {
 		'wordcamp' => 400,
 	);
 
-	/*
-	 * Increase range during COVID-19 to mitigate event deserts.
-	 *
-	 * See https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480
-	 */
-	if ( time() < strtotime( 'December 31 2020' ) ) {
+	if ( time() < COVID_IMPACT_EXPIRATION ) {
 		$event_distances['wordcamp'] = 600;
 	}
 
@@ -1352,8 +1354,7 @@ function is_wp15_event( $title ) {
 function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 	global $wpdb, $cache_group, $cache_life;
 
-	// Re-evaluate pinning after July, per https://make.wordpress.org/core/2020/04/02/showing-online-wordcamps-in-the-events-widget/#comment-38480.
-	if ( $current_time >= strtotime( 'December 31 2020' ) ) {
+	if ( $current_time >= COVID_IMPACT_EXPIRATION ) {
 		return $events;
 	}
 
