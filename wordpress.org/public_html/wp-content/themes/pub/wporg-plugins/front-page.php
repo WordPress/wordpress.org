@@ -9,6 +9,8 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+use WordPressdotorg\Plugin_Directory\Template;
+
 $sections = array(
     'blocks'    => __( 'Block-Enabled Plugins', 'wporg-plugins' ),
 	'featured'  => __( 'Featured Plugins', 'wporg-plugins' ),
@@ -47,6 +49,19 @@ get_header();
 				unset( $section_args['browse'] );
 			} else if ( 'blocks' === $browse ) {
 				$section_args['orderby'] = 'rand';
+				$section_args['meta_query'] = [
+					[
+						'key'     => '_active_installs',
+						'value'   => 200,
+						'type'    => 'numeric',
+						'compare' => '>=',
+					],
+					[
+						'key'     => 'tested',
+						'value'   => Template::get_current_major_wp_version() - 0.2,
+						'compare' => '>=',
+					],
+				];
 			}
 
 			$section_query = new \WP_Query( $section_args );
