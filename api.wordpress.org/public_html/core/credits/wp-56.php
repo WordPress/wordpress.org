@@ -332,6 +332,7 @@ class WP_56_Credits extends WP_Credits {
 			'herregroen',
 			'hlashbrooke',
 			'hoasi',
+			'hongnizzle',
 			'howdy_mcgee',
 			'hvar',
 			'iandunn',
