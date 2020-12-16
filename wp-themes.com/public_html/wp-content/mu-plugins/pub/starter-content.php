@@ -28,13 +28,13 @@ class Starter_Content {
 		}
 
 		// Some themes require is_customize_preview() before loading starter content.
-		add_action( 'after_setup_theme', array( $this, 'pre_after_setup_theme' ), -1 * PHP_INT_MAX );
+		add_action( 'setup_theme', array( $this, 'pre_setup_theme' ), 0 );
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'wp_head', array( $this, 'head_debug_info' ), 1 );
 	}
 
-	public function pre_after_setup_theme() {
+	public function pre_setup_theme() {
 		if ( class_exists( 'WP_Customize_Manager' ) ) {
 			return;
 		}
