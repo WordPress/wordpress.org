@@ -81,7 +81,7 @@ class Starter_Content {
 			'twentytwentyone',
 		);
 
-		return in_array( get_template(), $whitelisted_themes );
+		return in_array( get_stylesheet(), $whitelisted_themes );
 	}
 
 	public function init() {
