@@ -30,6 +30,9 @@ class Starter_Content {
 		// Some themes require is_customize_preview() before loading starter content.
 		add_action( 'setup_theme', array( $this, 'pre_setup_theme' ), 0 );
 
+		// Some themes check to see if the site is fresh through `get_option( 'fresh_site' )` before loading starter content.
+		add_filter( 'pre_option_fresh_site', '__return_true' );
+
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'wp_head', array( $this, 'head_debug_info' ), 1 );
 	}
@@ -496,6 +499,10 @@ class Starter_Content {
 	}
 
 	private function find_data_by_id( $id, $type = 'posts' ) {
+		if ( empty( $this->starter_content[ $type ] ) ) {
+			return array();
+		}
+
 		foreach ( $this->starter_content[ $type ] as $name => $data ) {
 			if ( $id === $data['ID'] ) {
 				return $data;

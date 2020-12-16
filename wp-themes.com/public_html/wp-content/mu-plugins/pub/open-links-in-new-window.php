@@ -24,7 +24,7 @@ add_action( 'wp_footer', function() {
 			// Internet Explorer and invalid links, fall back to regex.
 			if ( hostname = link.href.match( /^\s*(?:(?:https?:)?\/\/)([^/]+)(\/|$)/ ) ) {
 				hostname = hostname[1];
-			} else if ( "mailto" === link.href.substr( 0, 6 ) {
+			} else if ( "mailto" === link.href.substr( 0, 6 ) ) {
 				hostname = "mailto"; // not whitelisted hostname to fall through.
 			}
 		}
