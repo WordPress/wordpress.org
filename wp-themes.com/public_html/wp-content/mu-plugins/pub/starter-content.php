@@ -12,7 +12,10 @@ class Starter_Content {
 
 	private $starter_content = array();
 
-	private $mapping = array();
+	private $mapping = array(
+		'nav_menus' => array(),
+		'posts'     => array(),
+	);
 
 	public function __construct() {
 		// This plugin relies upon the object cache being the internal WordPress per-request cache.
@@ -109,6 +112,10 @@ class Starter_Content {
 	}
 
 	public function cache_posts() {
+		if ( empty( $this->starter_content['posts'] ) ) {
+			return;
+		}
+
 		foreach ( $this->starter_content['posts'] as $post ) {
 
 			wp_cache_add( $post['ID'], (object) $post, 'posts' );
