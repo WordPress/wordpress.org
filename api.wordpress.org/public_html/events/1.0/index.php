@@ -233,6 +233,28 @@ function build_response( $location, $location_args ) {
 
 		$events = remove_duplicate_events( $events );
 
+		// tmp remove, only here b/c last minute
+		if ( time() < strtotime( 'December 18, 2020' ) ) {
+			array_unshift( $events, array(
+				'type'                 => 'wordcamp',
+				'title'                => 'State of the Word',
+				'url'                  => 'https://wordpress.org/news/2020/12/state-of-the-word-2020/',
+				'meetup'               => '',
+				'meetup_url'           => '',
+				'date'                 => '2020-12-17 00:00:00',
+				'end_date'             => '2020-12-17 23:00:00',
+				'start_unix_timestamp' => 1608195600,
+				'end_unix_timestamp'   => 1608267600,
+
+				'location' => array(
+					'location'  => 'Online',
+					'country'   => 'US',
+					'latitude'  => 29.768241024468665,
+					'longitude' => -95.36765276500797,
+				),
+			) );
+		}
+
 		// Internal location data cannot be exposed in the response, see get_location().
 		if ( isset( $location['internal'] ) && $location['internal'] ) {
 			// Let the client know that a location was successfully determined based on their IP
