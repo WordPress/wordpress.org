@@ -107,6 +107,7 @@ function get_whitelist() {
 			'sncoker', // @shawntellecoker on Slack
 			'thelmachido', // @thelmachido-zw on Slack
 			'thewebprincess',
+			'webcommsat', // @abhanonstopnewsuk on Slack
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
 		) ),
