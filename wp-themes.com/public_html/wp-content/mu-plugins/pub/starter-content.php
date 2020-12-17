@@ -570,7 +570,17 @@ function polyfill_wp_customize_manager() {
 	// Some themes assume the customizer is loaded, and attempt to use other customize classes.
 	// Polyfill them as needed.
 	spl_autoload_register( function( $class ) {
-		if ( 'WP_Customize_' === substr( $class, 0, 13 ) ) {
+		if (
+			// WP_Customize_*
+			'WP_Customize_' === substr( $class, 0, 13 ) ||
+			// Some customizer classes don't follow that naming.
+			in_array(
+				$class,
+				[
+					'WP_Widget_Area_Customize_Control',
+				]
+			)
+		) {
 			class_alias( __NAMESPACE__ . '\WP_Customize_Manager', $class, false );	
 		}
 	} );
