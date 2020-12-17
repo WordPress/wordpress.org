@@ -70,18 +70,22 @@ class Starter_Content {
 	}
 
 	private function is_supported_theme() {
-		if ( isset( $_GET['use-starter-content'] ) || isset( $_COOKIE['use-starter-content'] ) ) {
-			return true;
+		// Allow using `?use-starter-content=0` to disable the starter content for a request.
+		if (
+			isset( $_GET['use-starter-content'] ) &&
+			! $_GET['use-starter-content']
+		) {
+			return false;
 		}
 
-		$whitelisted_themes = array(
-			// Other default themes don't have supported starter content.
-			'twentyseventeen',
-			'twentytwenty',
-			'twentytwentyone',
+		// If a theme causes problems, this can block loading.
+		$blocked_themes = array(
 		);
 
-		return in_array( get_stylesheet(), $whitelisted_themes );
+		return (
+			! $blocked_themes ||
+			! in_array( get_stylesheet(), $blocked_themes )
+		);
 	}
 
 	public function init() {
@@ -106,12 +110,15 @@ class Starter_Content {
 	}
 
 	public function head_debug_info() {
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
 		if ( current_theme_supports( 'starter-content' ) && $this->starter_content ) {
 			echo "\n<!-- Preview using Starter content -->\n";
 		} else {
 			echo "\n<!-- Preview is not using Starter content -->\n";
 		}
-		
 	}
 
 	public function cache_posts() {
