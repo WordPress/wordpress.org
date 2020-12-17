@@ -564,6 +564,19 @@ function polyfill_wp_customize_manager() {
 		}
 	}
 
-	// This needs to be defined in the global namespace.
-	class_alias( __NAMESPACE__ . '\WP_Customize_Manager', 'WP_Customize_Manager', false );
+	$polyfill_classes = [
+		// This needs to be defined in the global namespace.
+		'WP_Customize_Manager',
+
+		// Some themes assume the customizer is loaded based on `is_customize_preview()`
+		// alias the required customizer classes for now.
+		'WP_Customize_Control',
+		'WP_Customize_Panel',
+		'WP_Customize_Partial',
+		'WP_Customize_Section',
+		'WP_Customize_Setting',
+	];
+	foreach ( $polyfill_classes as $class ) {
+		class_alias( __NAMESPACE__ . '\WP_Customize_Manager', $class, false );	
+	}
 }
