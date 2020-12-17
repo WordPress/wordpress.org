@@ -166,6 +166,14 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			die( 'UNSUPPORTED - Only PR comments supported.' );
 		}
 
+		// Ignore some bots.
+		$ignored_users = [
+			'github-actions[bot]',
+		];
+		if ( in_array( $payload->comment->user->login, $ignored_users, true ) ) {
+			die( 'IGNORED - Comment by ignored user.' );
+		}
+
 		$pr_repo   = $payload->repository->full_name;
 		$pr_number = $payload->issue->number;
 
