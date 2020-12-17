@@ -80,6 +80,7 @@ class Starter_Content {
 
 		// If a theme causes problems, this can block loading.
 		$blocked_themes = array(
+			'posterity', // Customizer polyfill causes E_ERROR: Cannot redeclare posterity_get_user_css()
 		);
 
 		return (
