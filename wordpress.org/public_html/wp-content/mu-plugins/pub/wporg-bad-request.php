@@ -37,6 +37,13 @@ add_action( 'login_init', function() {
  * @see https://core.trac.wordpress.org/ticket/17737
  */
 add_action( 'send_headers', function( $wp ) {
+	check_for_invalid_query_vars( $wp->query_vars, '$public_query_vars' );
+} );
+
+/**
+ * Check a set of internal query variables against the WordPress WP_Query values to detect invalid input.
+ */
+function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
 	// Assumption: WP::$public_query_vars will only ever contain non-array query vars.
 	// Assumption invalid. Some fields are valid.
 	$array_fields = [ 'post_type' => true, 'cat' => true ];
@@ -60,18 +67,17 @@ add_action( 'send_headers', function( $wp ) {
 	];
 
 	foreach ( (new \WP)->public_query_vars as $field ) {
-		if ( isset( $wp->query_vars[ $field ] ) ) {
-			if ( ! is_scalar( $wp->query_vars[ $field ] ) && ! isset( $array_fields[ $field ] ) ) {
-				die_bad_request( "non-scalar $field in \$public_query_vars" );
+		if ( isset( $vars[ $field ] ) ) {
+			if ( ! is_scalar( $vars[ $field ] ) && ! isset( $array_fields[ $field ] ) ) {
+				die_bad_request( "non-scalar $field in $ref" );
 			}
 
-			if ( isset( $must_be_num[ $field ] ) && ! empty( $wp->query_vars[ $field ] ) && ! is_numeric( $wp->query_vars[ $field ] ) ) {
-				die_bad_request( "non-numeric $field in \$public_query_vars" );
+			if ( isset( $must_be_num[ $field ] ) && ! empty( $vars[ $field ] ) && ! is_numeric( $vars[ $field ] ) ) {
+				die_bad_request( "non-numeric $field in $ref" );
 			}
 		}
 	}
-
-} );
+}
 
 /**
  * Detect invalid parameters being passed to o2.
@@ -81,6 +87,9 @@ add_action( 'wp_ajax_nopriv_o2_read', function() {
 		if ( !empty( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
 			die_bad_request( "non-scalar input to o2" );
 		}
+	}
+	if ( isset( $_REQUEST['queryVars'] ) ) {
+		check_for_invalid_query_vars( $_REQUEST['queryVars'], 'o2 queryVars' );
 	}
 }, 9 );
 
