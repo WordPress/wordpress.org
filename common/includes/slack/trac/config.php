@@ -97,6 +97,9 @@ class Meta extends Trac {
 		'theme-directory/'                      => [ '#meta' => true, '#themereview' => true ],
 		'wporg-plugins/'                        => [ '#meta' => true, '#pluginreview' => true ],
 		'plugin-directory/'                     => [ '#meta' => true, '#pluginreview' => true ],
+		'plugins/support-forums/'               => [ '#meta' => true, '#forums' => true ],
+		'plugins/wporg-bbp-'                    => [ '#meta' => true, '#forums' => true ],
+		'themes/pub/wporg-support/'             => [ '#meta' => true, '#forums' => true ],
 	);
 
 	protected $ticket_component_filters = array(
@@ -111,6 +114,7 @@ class Meta extends Trac {
 		'Theme Review'                  => '#themereview',
 		'Theme Directory'               => [ '#meta' => true, '#themereview' => true ],
 		'Plugin Directory'              => [ '#meta' => true, '#pluginreview' => true ],
+		'Support Forums'                => [ '#meta' => true, '#forums' => true ],
 	);
 }
 
