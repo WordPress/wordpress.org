@@ -557,6 +557,9 @@ function polyfill_wp_customize_manager() {
 			return true;
 		}
 
+		// Define a constructor, for components that call `parent::__construct()`.
+		function __construct() {}
+
 		// Ensure that any calls return false too.
 		function __get( $property ) {
 			return false;
