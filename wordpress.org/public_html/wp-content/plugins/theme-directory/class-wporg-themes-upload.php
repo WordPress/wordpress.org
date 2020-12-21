@@ -22,6 +22,13 @@ class WPORG_Themes_Upload {
 	const RM = '/bin/rm';
 
 	/**
+	 * Path to `cp` script.
+	 *
+	 * @var string
+	 */
+	const CP = '/bin/cp';
+
+	/**
 	 * Path to `unzip` script.
 	 *
 	 * @var string
@@ -34,6 +41,13 @@ class WPORG_Themes_Upload {
 	 * @var string
 	 */
 	protected $tmp_dir;
+
+	/**
+	 * Path to a temporary SVN checkout directory.
+	 * 
+	 * @var string
+	 */
+	protected $tmp_svn_dir;
 
 	/**
 	 * Path to temporary theme folder.
@@ -76,6 +90,13 @@ class WPORG_Themes_Upload {
 	 * @var object
 	 */
 	protected $trac_ticket;
+
+	/**
+	 * Trac changeset.
+	 * 
+	 * @var string
+	 */
+	protected $trac_changeset;
 
 	/**
 	 * A Trac instance to communicate with theme.trac.
@@ -389,12 +410,17 @@ class WPORG_Themes_Upload {
 		unlink( $this->tmp_dir );
 
 		// Create a directory with that unique name.
-		mkdir( $this->tmp_dir, 0777 );
+		mkdir( $this->tmp_dir );
+		chmod( $this->tmp_dir, 0777 );
 
 		// Get a sanitized name for that theme and create a directory for it.
-		$base_name       = $this->get_sanitized_zip_name();
-		$this->theme_dir = "{$this->tmp_dir}/{$base_name}";
-		mkdir( $this->theme_dir, 0777 );
+		$base_name         = $this->get_sanitized_zip_name();
+		$this->theme_dir   = "{$this->tmp_dir}/{$base_name}";
+		$this->tmp_svn_dir = "{$this->tmp_dir}/svn";
+		mkdir( $this->theme_dir );
+		mkdir( $this->tmp_svn_dir );
+		chmod( $this->theme_dir, 0777 );
+		chmod( $this->tmp_svn_dir, 0777 );
 
 		// Make sure we clean up after ourselves.
 		add_action( 'shutdown', array( $this, 'remove_files' ) );
@@ -691,7 +717,7 @@ class WPORG_Themes_Upload {
 		// Diff line.
 		$this->trac_ticket->diff_line = '';
 		if ( ! empty( $this->theme_post->max_version ) ) {
-			$this->trac_ticket->diff_line = "\nDiff with previous version: https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}\n";
+			$this->trac_ticket->diff_line = "\nDiff with previous version: [{$this->trac_changeset}] https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}\n";
 		}
 
 		// Description
@@ -800,7 +826,7 @@ TICKET;
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
 			// Make sure the ticket has not yet been resolved.
-			if ( empty( $ticket[3]['resolution'] ) ) {
+			if ( $ticket && empty( $ticket[3]['resolution'] ) ) {
 				$result    = $this->trac->ticket_update( $ticket_id, $this->trac_ticket->description, array( 'summary' => $this->trac_ticket->summary, 'keywords' => implode( ' ', $this->trac_ticket->keywords ) ), true /* Trigger email notifications */ );
 				$ticket_id = $result ? $ticket_id : false;
 			} else {
@@ -902,8 +928,63 @@ TICKET;
 
 	/**
 	 * Add theme files to SVN.
+	 * 
+	 * This attempts to do a SVN copy to allow for simpler diff views, but falls back to a svn import as an error condition.
 	 */
 	public function add_to_svn() {
+		// Either new theme upload, or we don't have the needed variables to copy it directly.
+		if ( empty( $this->theme_post ) || empty( $this->theme_post->max_version ) ) {
+			return $this->add_to_svn_via_svn_import();
+		}
+
+		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
+
+		// Theme exists, attempt to do a copy from old version to new.
+		exec( self::SVN . " co https://themes.svn.wordpress.org/{$this->theme_slug}/ {$this->tmp_svn_dir} --depth=empty  2>&1", $output, $return_var );
+		if ( $return_var > 0 ) {
+			return $this->add_to_svn_via_svn_import();
+		}
+
+		// Try to copy the previous version over.
+		$prev_version = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
+		exec( self::SVN . " cp $prev_version $new_version_dir 2>&1", $output, $return_var );
+		if ( $return_var > 0 ) {
+			return $this->add_to_svn_via_svn_import();
+		}
+
+		// Remove the files from the old version, so that we can track file removals.
+		exec( self::RM . " -rf {$new_version_dir}/*" );
+
+		$theme_dir = escapeshellarg( $this->theme_dir );
+		exec( self::CP . " -R {$theme_dir}/* {$new_version_dir}" );
+
+		// Process file additions and removals.
+		exec( self::SVN . " st {$new_version_dir} | grep '^?' | cut -c 2- | xargs " . self::SVN . " add" );
+		exec( self::SVN . " st {$new_version_dir} | grep '^!' | cut -c 2- | xargs " . self::SVN . " rm" );
+
+		// Commit it to SVN.
+		$password = escapeshellarg( THEME_DROPBOX_PASSWORD );
+		$message  = escapeshellarg( sprintf(
+			__( 'New version of %1$s - %2$s', 'wporg-themes' ),
+			$this->theme->display( 'Name' ),
+			$this->theme->display( 'Version' )
+		) );
+		exec( self::SVN . " ci --non-interactive --username themedropbox --password {$password} -m {$message} {$new_version_dir} 2>&1", $output, $return_var );
+		if ( $return_var > 0 ) {
+			return $this->add_to_svn_via_svn_import();
+		}
+
+		if ( preg_match( '/Committed revision (\d+)./i', implode( '', $output ), $m ) ) {
+			$this->trac_changeset = $m[1];
+		}
+
+		return true;
+	}
+
+	/**
+	 * Add the theme files to SVN via svn import.
+	 */
+	function add_to_svn_via_svn_import() {
 		$import_msg = empty( $this->theme_post ) ?  __( 'New theme: %1$s - %2$s', 'wporg-themes' ) : __( 'New version of %1$s - %2$s', 'wporg-themes' );
 		$import_msg = escapeshellarg( sprintf( $import_msg, $this->theme->display( 'Name' ), $this->theme->display( 'Version' ) ) );
 		$svn_path   = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}" );
@@ -913,7 +994,12 @@ TICKET;
 
 		$result = exec( "{$svn} --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path} 2>&1" );
 
-		return ( false !== strpos( $result, 'Committed revision' ) );
+		if ( preg_match( '/Committed revision (\d+)./i', $result, $m ) ) {
+			$this->trac_changeset = $m[1];
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
