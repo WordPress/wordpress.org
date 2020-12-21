@@ -543,7 +543,11 @@ class Themes_API {
 			$this->query['paged'] = (int) $this->request->page;
 		}
 		if ( isset( $this->request->per_page ) ) {
+			// Maximum of 999 themes per page, and a minimum of 1.
 			$this->query['posts_per_page'] = min( (int) $this->request->per_page, 999 );
+			if ( $this->query['posts_per_page'] < 1 ) {
+				unset( $this->query['posts_per_page'] );
+			}
 		}
 
 		// Views
