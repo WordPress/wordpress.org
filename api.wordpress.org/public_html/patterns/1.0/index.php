@@ -6,6 +6,9 @@ namespace WordPressdotorg\API\Patterns;
  * This is cached by nginx, so we don't have to worry about the performance costs of loading WP, and don't need to
  * do any any object caching.
  *
+ * todo
+ *  publish caching sysreq once query args settled, etc -- https://make.wordpress.org/systems/wp-admin/post.php?post=1788&action=edit
+ *
  */
 
 
@@ -32,7 +35,7 @@ function main( $query_string ) {
 
 	switch ( $query_args['action'] ) {
 		// List all patterns, or all with in category.
-		// To restrict to a category, the client needs to provide `category={id}` param.
+		// To restrict to a category, the client needs to provide `pattern-categories={id}` param.
 		default:
 		case 'get_patterns':
 			$endpoint = '/wp/v2/wporg-pattern';
@@ -64,5 +67,6 @@ function main( $query_string ) {
 		$wp_init_host .= '?' . urldecode( http_build_query( $query_args ) );
 	}
 
+	// Load WordPress to process the request and output the response.
 	require_once dirname( dirname( __DIR__ ) ) . '/wp-init.php';
 }
