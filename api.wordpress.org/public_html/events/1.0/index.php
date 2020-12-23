@@ -106,12 +106,12 @@ function disable_caching() {
 function bootstrap() {
 	$base_dir = dirname( dirname( __DIR__ ) );
 
-	require $base_dir . '/init.php';
-	require $base_dir . '/includes/hyperdb/bb-10-hyper-db.php';
-	include $base_dir . '/includes/wp-json-encode.php';
+	require_once $base_dir . '/init.php';
+	require_once $base_dir . '/includes/hyperdb/bb-10-hyper-db.php';
+	require_once $base_dir . '/includes/wp-json-encode.php';
 
 	if ( ! defined( 'RUNNING_TESTS' ) || ! RUNNING_TESTS ) {
-		include $base_dir . '/includes/object-cache.php';
+		require_once $base_dir . '/includes/object-cache.php';
 	}
 }
 
