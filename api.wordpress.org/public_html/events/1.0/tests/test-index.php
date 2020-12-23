@@ -1,9 +1,23 @@
 <?php
 
+/*
+ * @todo Move these into proper PHPUnit tests in `tests/test-index.php` as have time.
+ *
+ * When that's done, delete this file and rename that one to `test-index.php`.
+ * Also delete the `test_port_remaining_tests()` test in the PHPUnit class.
+ */
+
 namespace Dotorg\API\Events;
 
 if ( 'cli' !== php_sapi_name() ) {
 	die();
+}
+
+/*
+ * Don't run these tests from PHPUnit.
+ */
+if ( defined( 'WPORG_RUNNING_TESTS' ) ) {
+	return;
 }
 
 /**
@@ -19,8 +33,6 @@ function run_tests() {
 
 	$tests_failed  = 0;
 	$tests_failed += test_get_location();
-	$tests_failed += test_get_events();
-	$tests_failed += test_get_events_country_restriction();
 	$tests_failed += test_maybe_add_regional_wordcamps();
 	$tests_failed += test_maybe_add_wp15_promo();
 	$tests_failed += test_build_response();
@@ -950,147 +962,6 @@ function get_location_test_cases() {
 				'country'     => 'PE',
 				'internal'    => true,
 			),
-		),
-	);
-
-	return $cases;
-}
-
-/**
- * Test `get_events()`
- *
- * @return bool The number of failures
- */
-function test_get_events() {
-	$failed = 0;
-	$cases  = get_events_test_cases();
-
-	printf( "\nRunning %d events tests", count( $cases ) );
-
-	foreach ( $cases as $case_id => $case ) {
-		$actual_result = get_events( $case['input'] );
-
-		$passed = $case['expected']['count'] === count( $actual_result ) &&
-		          ! empty( $actual_result[0]['url'] ) &&
-		          strtotime( $actual_result[0]['date'] ) > time() - ( 2 * 24 * 60 * 60 ) &&
-		          $case['expected']['country'] === strtoupper( $actual_result[0]['location']['country'] );
-
-		output_results( $case_id, $passed, $case['expected'], $actual_result );
-
-		if ( ! $passed ) {
-			$failed++;
-		}
-	}
-
-	return $failed;
-}
-
-/**
- * Get the cases for testing `get_events()`.
- *
- * @return array
- */
-function get_events_test_cases() {
-	$cases = array(
-		// This assumes there will always be at least 2 upcoming events, so it needs to be a very active community.
-		'2-near-seattle' => array(
-			'input' => array(
-				'number' => '2',
-				'nearby' => array(
-					'latitude'  => '47.609023',
-					'longitude' => '-122.335903',
-				),
-			),
-			'expected' => array(
-				'count'   => 2,
-				'country' => 'US',
-			),
-		),
-
-		'1-in-australia' => array(
-			'input' => array(
-				'number'  => '1',
-				'country' => 'AU',
-				'restrict_by_country' => true,
-			),
-			'expected' => array(
-				'count'   => 1,
-				'country' => 'AU',
-			),
-		),
-	);
-
-	return $cases;
-}
-
-/**
- * Test `get_events()` `restricted_by_country` parameter.
- *
- * @return bool The number of failures
- */
-function test_get_events_country_restriction() {
-	$failed = 0;
-	$cases  = get_events_country_restriction_test_cases();
-
-	printf( "\nRunning %d events restrict by country tests", count( $cases ) );
-
-	foreach ( $cases as $case_id => $case ) {
-		$actual_result    = get_events( $case['input'] );
-		$actual_countries = array_column( array_column( $actual_result, 'location' ), 'country' );
-		$actual_countries = array_unique( array_map( 'strtoupper', $actual_countries ) );
-
-		sort( $actual_countries );
-
-		$passed = $actual_countries === $case['expected_countries'];
-
-		output_results( $case_id, $passed, $case['expected_countries'], $actual_countries );
-
-		if ( ! $passed ) {
-			$failed++;
-		}
-	}
-
-	return $failed;
-}
-
-/**
- * Get the cases for testing the `get_events()` `restricted_by_country` parameter.
- *
- * @return array
- */
-function get_events_country_restriction_test_cases() {
-	$cases = array(
-		'restricted-by-country' => array(
-			'input' => array(
-				'number'              => '500',
-				'country'             => 'CA',
-				'restrict_by_country' => true,
-			),
-			'expected_countries' => array( 'CA' ),
-		),
-
-		/*
-		 * This assumes there will always be at least an upcoming event on both sides of the border, so the
-		 * coordinates need to be half-way between two very active groups in different countries, where the
-		 * mid-point is less than `$event_distances['meetup']`.
-		 *
-		 * If Toronto, CA and Buffalo, US no longer work in the future, then another possible location would be
-		 * `53.997654, -6.403377` -- between Belfast, GB and Dublin, IE -- or `47.986952, -122.961350` --
-		 * between Seattle, US and Victoria, CA.
-		 *
-		 * See https://wordpress.slack.com/archives/C08M59V3P/p1524168308000202.
-		 */
-		'not-restricted-by-country' => array(
-			'input' => array(
-				'number'              => '500',
-				'restrict_by_country' => false,
-
-				'nearby' => array(
-					'latitude'  => '43.254372',
-					'longitude' => '-79.063746',
-				),
-			),
-			'expected_countries' => array( 'CA', 'US' ),
 		),
 	);
 
