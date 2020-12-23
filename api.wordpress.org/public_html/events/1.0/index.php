@@ -162,8 +162,8 @@ function parse_request() {
 	if ( isset( $_REQUEST['ip'] ) ) {
 		/*
 		 * In local development environments, the IP sent by the Events widget will typically be
-		 * private. In those cases, we can use the web server's IP address, which is the user's
-		 * actual public address.
+		 * private. In those cases, we can use the web server's IP address, which should be the same
+		 * as the dev's browser IP.
 		 */
 		$public_ip = filter_var(
 			$_REQUEST['ip'],
