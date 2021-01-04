@@ -2,7 +2,7 @@
 
 namespace Dotorg\API\Events\Tests;
 use PHPUnit\Framework\TestCase;
-use function Dotorg\API\Events\{ get_events, get_location, build_response, is_client_core };
+use function Dotorg\API\Events\{ get_events, get_location, build_response, is_client_core, pin_one_off_events };
 
 /**
  * @group events
@@ -1047,6 +1047,25 @@ class Test_Events extends TestCase {
 				),
 			),
 		);
+	}
+
+	/**
+	 * @covers ::pin_one_off_events
+	 *
+	 * @group unit
+	 */
+	function test_pin_one_off_events() {
+		$seed_events = array();
+
+		// Don't forget to update the values here when they're updated in the FUT.
+		$actual_events_before_expiration = pin_one_off_events( $seed_events, strtotime( 'December 17, 2020' ) );
+		$actual_events_after_expiration  = pin_one_off_events( $seed_events, strtotime( 'December 18, 2020' ) );
+
+		$this->assertIsArray( $actual_events_after_expiration );
+		$this->assertEmpty( $actual_events_after_expiration );
+
+		$this->assertIsArray( $actual_events_before_expiration );
+		$this->assertSame( 'State of the Word', $actual_events_before_expiration[0]['title'] );
 	}
 
 	/**

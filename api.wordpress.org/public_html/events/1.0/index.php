@@ -235,32 +235,9 @@ function build_response( $location, $location_args ) {
 		);
 
 		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time() );
-
 		$events = pin_next_workshop_discussion_group( $events, $_SERVER['HTTP_USER_AGENT'] );
-
+		$events = pin_one_off_events( $events, time() );
 		$events = remove_duplicate_events( $events );
-
-		// tmp remove, only here b/c last minute
-		if ( time() < strtotime( 'December 18, 2020' ) ) {
-			array_unshift( $events, array(
-				'type'                 => 'wordcamp',
-				'title'                => 'State of the Word',
-				'url'                  => 'https://wordpress.org/news/2020/12/state-of-the-word-2020/',
-				'meetup'               => '',
-				'meetup_url'           => '',
-				'date'                 => '2020-12-17 00:00:00',
-				'end_date'             => '2020-12-17 23:00:00',
-				'start_unix_timestamp' => 1608195600,
-				'end_unix_timestamp'   => 1608267600,
-
-				'location' => array(
-					'location'  => 'Online',
-					'country'   => 'US',
-					'latitude'  => 29.768241024468665,
-					'longitude' => -95.36765276500797,
-				),
-			) );
-		}
 
 		// Internal location data cannot be exposed in the response, see get_location().
 		if ( isset( $location['internal'] ) && $location['internal'] ) {
@@ -1522,6 +1499,34 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
 
 	if ( isset( $next_discussion_group['url'] ) ) {
 		array_unshift( $events, $next_discussion_group );
+	}
+
+	return $events;
+}
+
+/**
+ * Pin one-off events.
+ */
+function pin_one_off_events( $events, $current_time ) {
+	if ( $current_time < strtotime( 'December 18, 2020' ) ) {
+		array_unshift( $events, array(
+			'type'                 => 'wordcamp',
+			'title'                => 'State of the Word',
+			'url'                  => 'https://wordpress.org/news/2020/12/state-of-the-word-2020/',
+			'meetup'               => '',
+			'meetup_url'           => '',
+			'date'                 => '2020-12-17 00:00:00',
+			'end_date'             => '2020-12-17 23:00:00',
+			'start_unix_timestamp' => 1608195600,
+			'end_unix_timestamp'   => 1608267600,
+
+			'location' => array(
+				'location'  => 'Online',
+				'country'   => 'US',
+				'latitude'  => 29.768241024468665,
+				'longitude' => -95.36765276500797,
+			),
+		) );
 	}
 
 	return $events;
