@@ -234,7 +234,7 @@ function build_response( $location, $location_args ) {
 			$location
 		);
 
-		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time() );
+		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time(), $location['country'] ?? '' );
 		$events = pin_next_workshop_discussion_group( $events, $_SERVER['HTTP_USER_AGENT'] );
 		$events = pin_one_off_events( $events, time() );
 		$events = remove_duplicate_events( $events );
@@ -1354,10 +1354,11 @@ function is_wp15_event( $title ) {
  * @param array  $events
  * @param string $user_agent
  * @param int    $current_time
+ * @param string $user_country
  *
  * @return array
  */
-function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
+function pin_next_online_wordcamp( $events, $user_agent, $current_time, $user_country ) {
 	global $wpdb, $cache_group, $cache_life;
 
 	if ( $current_time >= COVID_IMPACT_EXPIRATION ) {
@@ -1381,7 +1382,7 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 				type     = 'wordcamp'  AND
 				status   = 'scheduled' AND
 				location = 'online'    AND
-				date_utc BETWEEN CURDATE() AND CURDATE() + INTERVAL 2 WEEK
+				date_utc BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 MONTH
 			ORDER BY `date_utc` ASC
 			LIMIT 1"
 		);
@@ -1428,7 +1429,25 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time ) {
 	}
 
 	if ( isset( $next_online_camp['url'] ) ) {
-		array_unshift( $events, $next_online_camp );
+		$camp_is_in_users_country = $user_country === $next_online_camp['location']['country'];
+
+		$camp_is_in_next_two_weeks = is_within_date_range(
+			$current_time,
+			$next_online_camp['start_unix_timestamp'] - ( 2 * WEEK_IN_SECONDS ),
+			$next_online_camp['start_unix_timestamp']
+		);
+
+		/*
+		 * Online WordCamps often represent the entire country, in contrast to offline camps, which are local
+		 * events. Because of that, they should be promoted to the entire country, even if that's outside the
+		 * normal `$event_distances['wordcamp']` range.
+		 *
+		 * If it's not the user's country, then 2 weeks is a good balance between promoting a
+		 * potentially-interesting event, and crowding out local events.
+		 */
+		if ( $camp_is_in_users_country || $camp_is_in_next_two_weeks ) {
+			array_unshift( $events, $next_online_camp );
+		}
 	}
 
 	return $events;
