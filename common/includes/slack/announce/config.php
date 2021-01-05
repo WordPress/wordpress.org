@@ -23,6 +23,7 @@ function get_whitelist() {
 		'chanthaboune',
 		'coreymckrill',
 		'courtneypk',
+		'evarlese',
 		'harishanker',
 		'harmonyromo', // @Harmony Romo on Slack
 		'hlashbrooke',
