@@ -62,8 +62,8 @@ function main() {
 	}
 
 	$cache_group   = 'events';
-	$cache_life    = 12 * 60 * 60;
-	$ttl           = 12 * 60 * 60; // Time the client should cache the document.
+	$cache_life    = 12 * HOUR_IN_SECONDS;
+	$ttl           = 12 * HOUR_IN_SECONDS; // Time the client should cache the document.
 	$location_args = parse_request();
 	$location      = get_location( $location_args );
 	$response      = build_response( $location, $location_args );
