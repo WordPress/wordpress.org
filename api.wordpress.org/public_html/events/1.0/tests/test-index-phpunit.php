@@ -830,9 +830,9 @@ class Test_Events extends TestCase {
 			'ip-asia' => array(
 				'input' => array( 'ip' => '86.108.55.28' ),
 				'expected' => array(
-					'description' => 'amman',
-					'latitude'    => '31.955',
-					'longitude'   => '35.945',
+					'description' => 'zarqa',
+					'latitude'    => '32.073',
+					'longitude'   => '36.088',
 					'country'     => 'JO',
 					'internal'    => true,
 				),
@@ -856,6 +856,17 @@ class Test_Events extends TestCase {
 					'latitude'    => '19.428',
 					'longitude'   => '-99.128',
 					'country'     => 'MX',
+					'internal'    => true,
+				),
+			),
+
+			'ip-seattle' => array(
+				'input' => array( 'ip' => '97.113.10.69' ),
+				'expected' => array(
+					'description' => 'seattle',
+					'latitude'    => '47.606',
+					'longitude'   => '-122.332',
+					'country'     => 'US',
 					'internal'    => true,
 				),
 			),
