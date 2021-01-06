@@ -682,6 +682,33 @@ class Test_Events extends TestCase {
 				),
 			),
 
+			'usa-city-altname-disambiguation-by-population' => array(
+				'input' => array(
+					'location_name' => 'Chicago',
+					'locale'        => 'en_US',
+					'timezone'      => 'America/Chicago',
+				),
+				'expected' => array(
+					'description' => 'chicago',
+					'latitude'    => '41.850',
+					'longitude'   => '-87.650',
+					'country'     => 'US',
+				),
+			),
+			'usa-city-altname-disambiguation-by-population-2' => array(
+				'input' => array(
+					'location_name' => 'Chicago',
+					'locale'        => 'en_US',
+					'timezone'      => 'America/Los_Angeles',
+				),
+				'expected' => array(
+					'description' => 'chicago',
+					'latitude'    => '41.850',
+					'longitude'   => '-87.650',
+					'country'     => 'US',
+				),
+			),
+
 			/*
 			 * A combination of city, region, and country are given, along with the locale and timezone
 			 *
