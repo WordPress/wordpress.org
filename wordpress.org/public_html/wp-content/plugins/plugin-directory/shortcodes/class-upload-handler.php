@@ -477,6 +477,7 @@ class Upload_Handler {
 			'woo-commerce',
 			'woo-',
 			'wordpress',
+			'wp-mail-smtp-',
 			'yahoo-',
 			'yoast',
 			'youtube-',
