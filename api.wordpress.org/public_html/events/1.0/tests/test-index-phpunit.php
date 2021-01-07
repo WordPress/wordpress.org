@@ -593,8 +593,8 @@ class Test_Events extends TestCase {
 				),
 				'expected' => array(
 					'description' => 'ciudad de méxico',
-					'latitude'    => '19.428',
-					'longitude'   => '-99.128',
+					'latitude'    => '19.283',
+					'longitude'   => '-99.133',
 					'country'     => 'MX',
 				),
 			),

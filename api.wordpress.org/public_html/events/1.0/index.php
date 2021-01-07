@@ -1,5 +1,4 @@
 <?php
-
 namespace Dotorg\API\Events;
 use stdClass;
 
@@ -355,8 +354,10 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 function guess_location_from_geonames( $location_name, $timezone, $country, $wildcard = true ) {
 	global $wpdb;
 	// Look for a location that matches the name.
+	// The asc ordering provides preference to the oreferred name of the locations.
+	// The population ordering provides preference to the populated areas over unpopulated/unknown.
 	// The FIELD() orderings give preference to rows that match the country and/or timezone, without excluding rows that don't match.
-	// And we sort by population desc, assuming that the biggest matching location is the most likely one.
+	// And we sort by population desc, assuming that the biggest matching location is the most likely one within the above matching groups.
 
 	// Exact match
 	$query = '
@@ -364,6 +365,8 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 		FROM geoname_summary
 		WHERE name = %s
 		ORDER BY
+			alt ASC,
+			population > 0 DESC,
 			FIELD( %s, country  ) DESC,
 			FIELD( %s, timezone ) DESC,
 			LEFT( type, 1 ) = "P" DESC,
@@ -386,6 +389,8 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 			FROM geoname_summary
 			WHERE name LIKE %s
 			ORDER BY
+				alt ASC,
+				population > 0 DESC,
 				FIELD( %s, country  ) DESC,
 				FIELD( %s, timezone ) DESC,
 				LEFT( type, 1 ) = "P" DESC,
