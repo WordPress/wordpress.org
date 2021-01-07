@@ -369,9 +369,9 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 		FROM geoname_summary
 		WHERE name = %s
 		ORDER BY
+			FIELD( %s, country ) DESC,
 			alt ASC,
 			population > 0 DESC,
-			FIELD( %s, country  ) DESC,
 			FIELD( %s, timezone ) DESC,
 			LEFT( type, 1 ) = "P" DESC,
 			population DESC,
@@ -393,9 +393,9 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 			FROM geoname_summary
 			WHERE name LIKE %s
 			ORDER BY
+				FIELD( %s, country ) DESC,
 				alt ASC,
 				population > 0 DESC,
-				FIELD( %s, country  ) DESC,
 				FIELD( %s, timezone ) DESC,
 				LEFT( type, 1 ) = "P" DESC,
 				population DESC,
@@ -414,7 +414,6 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 
 	return $row;
 }
-
 
 /**
  * Determine a location for the given IPv4 address

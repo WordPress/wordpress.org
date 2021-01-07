@@ -682,7 +682,7 @@ class Test_Events extends TestCase {
 				),
 			),
 
-			'usa-city-altname-disambiguation-by-population' => array(
+			'usa-city-disambiguation-by-preferred-name' => array(
 				'input' => array(
 					'location_name' => 'Chicago',
 					'locale'        => 'en_US',
@@ -695,7 +695,7 @@ class Test_Events extends TestCase {
 					'country'     => 'US',
 				),
 			),
-			'usa-city-altname-disambiguation-by-population-2' => array(
+			'usa-city-disambiguation-by-preferred-name-2' => array(
 				'input' => array(
 					'location_name' => 'Chicago',
 					'locale'        => 'en_US',
@@ -706,6 +706,21 @@ class Test_Events extends TestCase {
 					'latitude'    => '41.850',
 					'longitude'   => '-87.650',
 					'country'     => 'US',
+				),
+			),
+
+			// Calcutta, Ohio, USA is a preferred name, but the country is more relevant here.
+			'city-disambiguation-by-country' => array(
+				'input' => array(
+					'location_name' => 'Calcutta',
+					'locale'        => 'hi_IN',
+					'timezone'      => 'Asia/Kolkata',
+				),
+				'expected' => array(
+					'description' => 'calcutta',
+					'latitude'    => '22.563',
+					'longitude'   => '88.363',
+					'country'     => 'IN',
 				),
 			),
 
