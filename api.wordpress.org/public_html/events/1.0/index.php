@@ -323,6 +323,10 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 	 * delimiter.
 	 */
 	$location_name_parts = preg_split( '/[,\s]+/u', $location_name );
+	if ( ! $location_name_parts ) {
+		// Invalid/Unsupported UTF8 characters encountered.
+		$location_name_parts = array( $location_name );
+	}
 	$location_word_count = count( $location_name_parts );
 
 	// Catch input like "Portland Maine" and "Sao Paulo Brazil"
@@ -697,6 +701,10 @@ function guess_location_from_country( $location_name ) {
 	// Check if they entered only the country name, e.g. "Germany" or "New Zealand"
 	$country             = get_country_from_name( $location_name );
 	$location_name_parts = preg_split( '/\s+/u', $location_name );
+	if ( ! $location_name_parts ) {
+		// Invalid/Unsupported UTF8 characters encountered.
+		$location_name_parts = array( $location_name );
+	}
 	$location_word_count = count( $location_name_parts );
 
 	/*
