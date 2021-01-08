@@ -221,8 +221,8 @@ get_header( 'wporg' );
 			</div>
 
 			<div class="<?php echo esc_attr( $swag_class ); ?> first">
-				<h4><a href="/about/swag/"><?php _e( 'WordPress&nbsp;Swag', 'wporg' ); ?></a></h4>
-				<a href="/about/swag/">
+				<h4><a href="https://mercantile.wordpress.org/"><?php _e( 'WordPress&nbsp;Swag', 'wporg' ); ?></a></h4>
+				<a href="https://mercantile.wordpress.org/">
 					<?php if ( $showcase ) : ?>
 						<img width="288" height="288" src="https://s.w.org/images/home/swag_col-2.png" srcset="https://s.w.org/images/home/swag_col-2_x2.png 2x" alt="<?php esc_attr_e( 'WordPress Swag', 'wporg' ); ?>" />
 					<?php else : ?>
