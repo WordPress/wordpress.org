@@ -211,9 +211,9 @@ get_header( 'wporg' );
 						<span></span>
 						<?php
 						printf(
-							/* translators: URL to Developer Hub. */
+							/* translators: URL to HelpHub. */
 							__( '<a href="%s">Spend some time reading our documentation</a>, get to know WordPress better every day and start helping others,&nbsp;too.', 'wporg' ),
-							esc_url( 'https://developer.wordpress.org' )
+							esc_url( 'https://wordpress.org/support/' )
 						);
 						?>
 					</li>
