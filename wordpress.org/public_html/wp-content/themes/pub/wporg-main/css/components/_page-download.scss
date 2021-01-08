@@ -28,7 +28,7 @@ body.page-download {
 	}
 
 	section {
-		padding: ms( 10 ) 0;
+		margin-top: 4em;
 
 		h2:first-of-type {
 			width: 100%;
@@ -36,8 +36,12 @@ body.page-download {
 	}
 
 	section.download {
-		padding-top: 0;
 		text-align: center;
+		order: 3;
+
+		@include breakpoint( 768px ) {
+			order: 2;
+		}
 
 		.call-to-action {
 			margin-top: 0;
@@ -67,7 +71,7 @@ body.page-download {
 				list-style-type: none;
 			}
 		}
-		
+
 		.dashicons-download:before {
 			margin-right: 5px;
 			vertical-align: middle;
@@ -85,6 +89,12 @@ body.page-download {
 	section.hosting {
 		position: relative;
 		text-align: center;
+		padding: ms( 10 ) 0;
+		order: 2;
+
+		@include breakpoint( 768px ) {
+			order: 1;
+		}
 
 		.parallelogram {
 			background: #f5f5f5;
@@ -124,11 +134,10 @@ body.page-download {
 	section.apps-mobile {
 		text-align: center;
 		width: 100%;
+		order: 1; /* Assume that mobile users want to install the apps on their phones, and desktop users want to setup WP on a server. */
 
-		@include breakpoint( 0, 768px ) {
-			border-top: none;
-			border-bottom: 2px solid #eee;
-			padding-top: 0;
+		@include breakpoint( 768px ) {
+			order: 3;
 		}
 
 		.web-stores [class*='button-'] {

@@ -119,7 +119,7 @@ the_post();
 				<p class="entry-description">
 					<?php
 					printf(
-						/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
+						/* translators: WordPress market share: 39 - Note: The following percent sign is '%%' for escaping purposes; */
 						esc_html__( 'Use the software that powers over %s%% of the web.', 'wporg' ),
 						esc_html( number_format_i18n( WP_MARKET_SHARE ) )
 					);
@@ -128,45 +128,68 @@ the_post();
 			</header><!-- .entry-header -->
 
 			<div class="entry-content row">
+				<p>
+					<?php printf(
+						wp_kses_data( __(
+							'There are several ways to get WordPress. The <strong>easiest</strong> is <a href="%1$s">through a hosting provider</a>, but sometimes <strong>tech-savvy</strong> folks prefer to <a href="%2$s">download and install</a> it themselves.',
+							'wporg'
+						) ),
+						'#hosting',
+						'#download-install'
+					); ?>
+				</p>
 
-				<div id="after-download" class="modal" role="dialog" aria-modal="true" tabindex="0">
-					<div role="document">
-						<header class="entry-header">
-							<h1 id="after-download-title" class="entry-title"><?php esc_html_e( 'Hooray!', 'wporg' ); ?></h1>
-							<p class="entry-description"><?php esc_html_e( 'You&#8217;re on your way with the latest WordPress!', 'wporg' ); ?></p>
-						</header>
-						<div>
-						<p>
-							<?php
-							printf(
-								__( 'For help getting started, check out our <a href="%s">Documentation and Support Forums</a>.', 'wporg' ),
-								esc_url( __( 'https://wordpress.org/support/', 'wporg' ) )
-							);
-							?>
-						</p>
-						<p>
-							<?php
-							printf(
-								/* translators: 1: URL to WordPress Meetup group, 2: URL to WordCamp Central */
-								__( 'Meet other WordPress enthusiasts and share your knowledge at a <a href="%1$s">WordPress meetup group</a> or a <a href="%2$s">WordCamp</a>.', 'wporg' ),
-								esc_url( __( 'https://www.meetup.com/pro/wordpress/', 'wporg' ) ),
-								esc_url( __( 'https://central.wordcamp.org/', 'wporg' ) )
-							);
-							?>
-						</p>
-						<p>
-							<?php
-							printf(
-								__( 'To support education about WordPress and open source software, please donate to the <a href="%s">WordPress Foundation</a>.', 'wporg' ),
-								esc_url( __( 'https://wordpressfoundation.org/donate/', 'wporg' ) )
-							);
-							?>
-						</p>
-						</div>
+				<p>
+					<?php printf(
+						wp_kses_data( __( 'Either way, you can use your WordPress through a web browser and with <a href="%s">our mobile apps</a>.', 'wporg' ) ),
+						'#mobile'
+					); ?>
+				</p>
+
+				<section id="mobile" class="apps-mobile">
+					<span class="dashicons dashicons-smartphone"></span>
+					<h2><?php esc_html_e( 'Inspiration strikes anywhere, anytime', 'wporg' ); ?></h2>
+					<p class="subheading"><?php esc_html_e( 'Create or update content on the go with our mobile apps.', 'wporg' ); ?></p>
+
+					<div class="web-stores">
+						<a href="http://appstore.com/WordPress" class="button-ios" >
+							<img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-apple.png' ) ); ?>" alt="<?php esc_attr_e( 'Available in the Apple App Store', 'wporg' ); ?>" />
+						</a>
+						<a href="http://play.google.com/store/apps/details?id=org.wordpress.android" class="button-android">
+							<img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-google-play.png' ) ); ?>"  alt="<?php esc_attr_e( 'Available in the Google Play Store', 'wporg' ); ?>" />
+						</a>
 					</div>
-				</div>
+					<a href="https://apps.wordpress.com/mobile/" class="call-to-action"><?php esc_html_e( 'Learn more about our mobile apps', 'wporg' ); ?></a>
+				</section>
 
-				<section class="download row gutters between">
+				<section id="hosting" class="hosting row gutters between">
+					<div class="parallelogram"></div>
+					<span class="dashicons dashicons-cloud"></span>
+					<h2><?php esc_html_e( 'WordPress Hosting', 'wporg' ); ?></h2>
+					<p class="subheading col-8"><?php esc_html_e( 'Choosing a hosting provider can be difficult, so we have selected a few of the best to get you started.', 'wporg' ); ?></p>
+
+					<?php foreach ( array_rand( $hosts, 2 ) as $host ) : ?>
+
+					<div class="host col-6">
+						<img src="<?php echo esc_url( get_theme_file_uri( $hosts[ $host ]['logo'] ) ); ?>" class="logo" alt="<?php
+							/* translators: %s: Name of hosting company */
+							printf( esc_attr__( '%s company logo', 'wporg' ), esc_html( $hosts[ $host ]['name'] ) );
+							?>"
+						/>
+						<p><?php echo esc_html( $hosts[ $host ]['description'] ); ?></p>
+						<a href="<?php echo esc_url( $hosts[ $host ]['url'] ); ?>">
+							<?php
+							/* translators: Name of hosting company */
+							printf( esc_html__( 'Visit %s', 'wporg' ), esc_html( $hosts[ $host ]['name'] ) );
+							?>
+						</a>
+					</div>
+					<?php endforeach; ?>
+
+					<a href="https://wordpress.org/hosting/" class="call-to-action col-12"><?php esc_html_e( 'See all of our recommended hosts', 'wporg' ); ?></a>
+				</section>
+
+				<section id="download-install" class="download row gutters between">
 					<h2><?php esc_html_e( 'Priceless, and also free', 'wporg' ); ?></h2>
 					<p class="subheading"><?php esc_html_e( 'Download WordPress and use it on your site.', 'wporg' ); ?></p>
 					<div class="call-to-action col-12">
@@ -251,48 +274,42 @@ the_post();
 					</aside>
 				</section>
 
-				<section class="hosting row gutters between">
-					<div class="parallelogram"></div>
-					<span class="dashicons dashicons-cloud"></span>
-					<h2><?php esc_html_e( 'WordPress Hosting', 'wporg' ); ?></h2>
-					<p class="subheading col-8"><?php esc_html_e( 'Choosing a hosting provider can be difficult, so we have selected a few of the best to get you started.', 'wporg' ); ?></p>
-
-					<?php foreach ( array_rand( $hosts, 2 ) as $host ) : ?>
-
-					<div class="host col-6">
-						<img src="<?php echo esc_url( get_theme_file_uri( $hosts[ $host ]['logo'] ) ); ?>" class="logo" alt="<?php
-							/* translators: %s: Name of hosting company */
-							printf( esc_attr__( '%s company logo', 'wporg' ), esc_html( $hosts[ $host ]['name'] ) );
-							?>"
-						/>
-						<p><?php echo esc_html( $hosts[ $host ]['description'] ); ?></p>
-						<a href="<?php echo esc_url( $hosts[ $host ]['url'] ); ?>">
+				<div id="after-download" class="modal" role="dialog" aria-modal="true" tabindex="0">
+					<div role="document">
+						<header class="entry-header">
+							<h1 id="after-download-title" class="entry-title"><?php esc_html_e( 'Hooray!', 'wporg' ); ?></h1>
+							<p class="entry-description"><?php esc_html_e( 'You&#8217;re on your way with the latest WordPress!', 'wporg' ); ?></p>
+						</header>
+						<div>
+						<p>
 							<?php
-							/* translators: Name of hosting company */
-							printf( esc_html__( 'Visit %s', 'wporg' ), esc_html( $hosts[ $host ]['name'] ) );
+							printf(
+								__( 'For help getting started, check out our <a href="%s">Documentation and Support Forums</a>.', 'wporg' ),
+								esc_url( __( 'https://wordpress.org/support/', 'wporg' ) )
+							);
 							?>
-						</a>
+						</p>
+						<p>
+							<?php
+							printf(
+								/* translators: 1: URL to WordPress Meetup group, 2: URL to WordCamp Central */
+								__( 'Meet other WordPress enthusiasts and share your knowledge at a <a href="%1$s">WordPress meetup group</a> or a <a href="%2$s">WordCamp</a>.', 'wporg' ),
+								esc_url( __( 'https://www.meetup.com/pro/wordpress/', 'wporg' ) ),
+								esc_url( __( 'https://central.wordcamp.org/', 'wporg' ) )
+							);
+							?>
+						</p>
+						<p>
+							<?php
+							printf(
+								__( 'To support education about WordPress and open source software, please donate to the <a href="%s">WordPress Foundation</a>.', 'wporg' ),
+								esc_url( __( 'https://wordpressfoundation.org/donate/', 'wporg' ) )
+							);
+							?>
+						</p>
+						</div>
 					</div>
-					<?php endforeach; ?>
-
-					<a href="https://wordpress.org/hosting/" class="call-to-action col-12"><?php esc_html_e( 'See all of our recommended hosts', 'wporg' ); ?></a>
-				</section>
-
-				<section class="apps-mobile first-sm">
-					<span class="dashicons dashicons-smartphone"></span>
-					<h2><?php esc_html_e( 'Inspiration strikes anywhere, anytime', 'wporg' ); ?></h2>
-					<p class="subheading"><?php esc_html_e( 'Create or update content on the go with our mobile apps.', 'wporg' ); ?></p>
-
-					<div class="web-stores">
-						<a href="http://appstore.com/WordPress" class="button-ios" >
-							<img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-apple.png' ) ); ?>" alt="<?php esc_attr_e( 'Available in the Apple App Store', 'wporg' ); ?>" />
-						</a>
-						<a href="http://play.google.com/store/apps/details?id=org.wordpress.android" class="button-android">
-							<img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-google-play.png' ) ); ?>"  alt="<?php esc_attr_e( 'Available in the Google Play Store', 'wporg' ); ?>" />
-						</a>
-					</div>
-					<a href="https://apps.wordpress.com/mobile/" class="call-to-action"><?php esc_html_e( 'Learn more about our mobile apps', 'wporg' ); ?></a>
-				</section>
+				</div>
 
 			</div><!-- .entry-content -->
 		</article><!-- #post-## -->
