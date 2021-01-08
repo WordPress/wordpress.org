@@ -418,6 +418,9 @@ class Breadcrumb_Trail {
 		/* Get the queried post. */
 		$post    = get_queried_object();
 		$post_id = get_queried_object_id();
+		if ( ! $post || ! $post_id ) {
+			return;
+		}
 
 		/* If the post has a parent, follow the parent trail. */
 		if ( 0 < $post->post_parent )

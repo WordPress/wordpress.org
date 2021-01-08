@@ -129,7 +129,9 @@ class DevHub_Head {
 		}
 		elseif ( is_singular() ) {
 			$post = get_queried_object();
-			$desc = $post->post_content;
+			if ( $post ) {
+				$desc = $post->post_content;
+			}
 		}
 
 		// Actually set field values for description.
