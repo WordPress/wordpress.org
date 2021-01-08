@@ -2267,18 +2267,53 @@ img#wpstats {
 .wporg-page-download .download-button-container {
 	text-align: center;
 }
-.wporg-page-mobile .intro img {
-	display: inline-block;
-	float:left;
-	margin:0 3em 3em 0;
+
+.wporg-page-mobile .intro-wrapper img {
+	display: block;
+	margin: 0 auto 1em auto;
 }
-@media screen and (max-width:768px) {
-	.wporg-responsive.wporg-page-mobile .intro img {
-		float: none;
-		display: block;
-		margin: 0 auto 2em;
+
+body.wporg-page-mobile .web-stores {
+	text-align: center;
+}
+
+body.wporg-page-mobile .web-stores img {
+	width: 150px;
+	margin: 0 0 10px 10px;
+}
+
+@media screen and (min-width:810px) {
+	.wporg-page-mobile .intro-wrapper {
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -moz-box;
+		display: -ms-flexbox;
+		display: flex;
+		max-width: 800px; /* Keep the .intro text roughly the same height as the image. */
+		margin-bottom: 30px;
+	}
+
+	.wporg-page-mobile .intro {
+		-webkit-box-ordinal-group: 2;
+		-webkit-order: 1;
+		-moz-box-ordinal-group: 2;
+		-ms-flex-order: 1;
+		order: 1;
+		padding-left: 30px;
+	}
+
+	.wporg-page-mobile .intro-wrapper img {
+		-webkit-box-ordinal-group: 3;
+		-webkit-order: 2;
+		-moz-box-ordinal-group: 3;
+		-ms-flex-order: 2;
+		order: 2;
+		max-height: -webkit-max-content;
+		max-height: -moz-max-content;
+		max-height: max-content;
 	}
 }
+
 .wporg-responsive .col-7,
 body.wporg-responsive .col-8,
 body.wporg-responsive .col-10 {
