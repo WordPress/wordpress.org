@@ -1410,11 +1410,22 @@ class Plugin_Directory {
 		// Disable feeds
 		if ( is_feed() ) {
 			if ( isset( $_GET['feed'] ) ) {
-				wp_redirect( esc_url_raw( remove_query_arg( 'feed' ) ), 301 );
+				wp_safe_redirect( esc_url_raw( remove_query_arg( 'feed' ) ), 301 );
 				die();
 			}
+
 			set_query_var( 'feed', '' );
-			redirect_canonical();
+
+			if ( ! redirect_canonical() ) {
+				// There exists no canonical location for this request according to `redirect_canonical()`.
+				if ( get_query_var( 's' ) ) {
+					wp_safe_redirect( home_url( '/search/' . get_query_var('s')  . '/' ), 301 );
+				} else {
+					// If all else fails, homepage.
+					wp_safe_redirect( home_url( '/' ) );
+				}
+			}
+
 			die();
 		}
 
