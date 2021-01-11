@@ -20,6 +20,10 @@ if ( 1 === get_current_blog_id() ) {
 				// The news blog is often thought to be at /blog
 				'/blog' => '/news/',
 
+				// The ideas forum was migrated to the Support Forums.
+				'/extend/ideas' => '/support/forum/requests-and-feedback/',
+				'/ideas'        => '/support/forum/requests-and-feedback/',
+
 				// new Downloads pages https://meta.trac.wordpress.org/ticket/3673
 				'/download/beta'            => '/download/beta-nightly/',
 				'/download/nightly'         => '/download/beta-nightly/',
