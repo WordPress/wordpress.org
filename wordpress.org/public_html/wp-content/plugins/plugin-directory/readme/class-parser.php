@@ -159,7 +159,13 @@ class Parser {
 	 * that they can be turned from a URL into plain text via the stream.
 	 */
 	public function __construct( $string ) {
-		if ( file_exists( $string ) 
+		if (
+			(
+				// If it's longer than the Filesystem path limit or contains newlines, it's not worth a file_exists() check.
+				strlen( $string ) <= PHP_MAXPATHLEN
+				&& false === strpos( $string, "\n" )
+				&& file_exists( $string )
+			)
 			|| preg_match( '!^https?://!i', $string ) 
 			|| preg_match( '!^data:text/plain!i', $string) ) 
 		{
