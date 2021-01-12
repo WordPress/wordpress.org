@@ -311,7 +311,7 @@ class WPORG_Themes_Upload {
 				return sprintf(
 					/* translators: 1: theme name, 2: style.css */
 					__( 'There is already a theme using the Theme URL %1$s by a different author. Please check the URL of your theme in %2$s and upload it again.', 'wporg-themes' ),
-					'<code>' . esc_html( $theme_uri ) . '</code>',
+					'<code>' . esc_html( $themeuri ) . '</code>',
 					'<code>style.css</code>'
 				) . $are_you_in_the_right_place;
 			}
