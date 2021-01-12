@@ -275,6 +275,7 @@ function get_whitelist() {
 			'hrmervin',
 			'johnbillion',
 			'justinahinon', // @justin on Slack
+			'loganfive', // @Garrett Hunter on Slack
 			'psykro', // @jon_bossenger on Slack
 			'raaaahman', // @Sylvain Schellenberger on slack
 			'schlessera',
