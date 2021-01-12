@@ -617,7 +617,7 @@ class Import {
 
 		foreach ( $blocks as $block_name => $block ) {
 			if ( empty( $block->title ) ) {
-				$blocks[ $block_name ]->title = $trunk_readme->name;
+				$blocks[ $block_name ]->title = $readme->name;
 			}
 		}
 
