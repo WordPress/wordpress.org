@@ -854,7 +854,7 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			$theme_is_older_than_two_years = strtotime( $this->theme_post->post_modified ) < strtotime( '-2 years' );
+			$theme_is_older_than_two_years = $this->theme_post && ( strtotime( $this->theme_post->post_modified ) < strtotime( '-2 years' ) );
 
 			// Theme review team auto-approves theme-updates, so mark the theme as live immediately, if last updated within two years.
 			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets

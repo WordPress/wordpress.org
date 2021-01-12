@@ -1001,6 +1001,11 @@ function wporg_themes_remove_favorite( $theme_slug ) {
  * @param WP_post $theme_post The WP_Post representing the theme.
  */
 function wporg_themes_glotpress_import_on_update( $theme, $theme_post ) {
+	// Newly loaded themes don't have a theme post.
+	if ( ! $theme_post ) {
+		return;
+	}
+
 	$status = (array) get_post_meta( $theme_post->ID, '_status', true );
 	if ( array_search( 'live', $status ) ) {
 		// Previously live, import updated strings immediately.
