@@ -2,6 +2,8 @@
 
 namespace WordPressdotorg\GlotPress\Customizations;
 
+use GP;
+use GP_Locales;
 use GP_Translation;
 use WP_CLI;
 
@@ -47,6 +49,8 @@ class Plugin {
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'apply_capital_P_dangit' ), 10, 2 );
 		add_filter( 'gp_original_extracted_comments', array( $this, 'format_translator_commments' ), 15 );
 		add_filter( 'wporg_translate_language_pack_theme_args', array( $this, 'set_version_for_default_themes_in_development' ), 10, 2 );
+
+		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 100, 2 );
 
 		// Cron.
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
@@ -184,6 +188,68 @@ class Plugin {
 			if ( isset( $args[ "translation_$i" ] ) ) {
 				$args[ "translation_$i" ] = capital_P_dangit( $args[ "translation_$i" ] );
 			}
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Rejects translation submissions where the suggested string has already been rejected for the user.
+	 *
+	 * @param array          $args        Translation arguments.
+	 * @param GP_Translation $translation Translation instance.
+	 * @return array Translation arguments.
+	 */
+	public function auto_reject_already_rejected( $args, GP_Translation $translation ) {
+		if (
+			! $translation->id &&
+			'waiting' === $args['status'] &&
+			GP::$current_route->class_name === 'GP_Route_Translation' &&
+			GP::$current_route->last_method_called === 'translations_post'
+		) {
+			// New translation being added.
+
+			$translation_set = GP::$translation_set->get( $args['translation_set_id'] );
+			$project = GP::$project->get( $translation_set->project_id );
+
+			// If the current user can approve / write to the project, skip.
+			if (
+				GP::$permission->current_user_can( 'approve', 'translation-set', $translation_set->id )
+				||
+				GP::$permission->current_user_can( 'write', 'project', $project->id )
+			) {
+				return $args;
+			}
+
+			$existing_rejected_translations = GP::$translation->for_translation(
+				$project,
+				$translation_set,
+				'no-limit',
+				array(
+					'user_login'  => get_user_by( 'ID', $args['user_id'] )->user_login,
+					'original_id' => $args['original_id'],
+					'status'      => 'rejected',
+				),
+				array()
+			);
+
+			if ( $existing_rejected_translations ) {
+				$locale = GP_Locales::by_slug( $translation_set->locale );
+
+				$translations = [];
+				foreach ( range( 0, GP::$translation->get_static( 'number_of_plural_translations' ) - 1 ) as $i ) {
+					if ( isset( $args[ "translation_$i" ] ) ) {
+						$translations[] = $args[ "translation_$i" ];
+					}
+				}
+
+				foreach ( $existing_rejected_translations as $e ) {
+					if ( array_pad( $translations, $locale->nplurals, null ) == $e->translations ) {
+						GP::$current_route->die_with_error( __( 'Identical rejected translation already exists.', 'wporg' ), 200 );
+					}
+				}
+			}
+
 		}
 
 		return $args;
