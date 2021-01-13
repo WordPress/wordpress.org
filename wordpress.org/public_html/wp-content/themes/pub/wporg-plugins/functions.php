@@ -83,7 +83,7 @@ function scripts() {
 
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
-		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), '20190701', true );
+		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), '20200113', true );
 	}
 
 	if ( ! is_404() ) {
