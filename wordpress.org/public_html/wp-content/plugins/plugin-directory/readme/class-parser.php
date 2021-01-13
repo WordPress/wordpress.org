@@ -427,7 +427,7 @@ class Parser {
 			if ( $this->faq ) {
 				$this->sections['faq'] .= "\n<dl>\n";
 				foreach ( $this->faq as $question => $answer ) {
-					$question_slug          = sanitize_title_with_dashes( $question );
+					$question_slug          = rawurlencode( trim( strtolower( $question ) ) );
 					$this->sections['faq'] .= "<dt id='{$question_slug}'><h3>{$question}</h3></dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
@@ -523,7 +523,9 @@ class Parser {
 			'ul'         => array(),
 			'ol'         => array(),
 			'dl'         => array(),
-			'dt'         => array(),
+			'dt'         => array(
+				'id' => true,
+			),
 			'dd'         => array(),
 			'li'         => array(),
 			'h3'         => array(),

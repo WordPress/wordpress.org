@@ -10,7 +10,7 @@
 
 			// If there is no ID, create our own.
 			if ( ! id ) {
-				id = '#' + encodeURIComponent( $question.text().toLowerCase() );
+				id = '#' + encodeURIComponent( $question.text().toLowerCase().trim() );
 				$question.attr( 'id', id );
 			}
 
@@ -42,6 +42,9 @@
 		} );
 
 	if ( window.location.hash ) {
-		questions.find( '[formaction="' + window.location.hash + '"]' ).trigger( 'click' );
+		jQuery(
+			// Decode/Encode here is to work with any existing links that are not fully-encoded, the trim handles whitespace/newlines.
+			document.getElementById( encodeURIComponent( decodeURIComponent( window.location.hash.substr(1) ).trim() ) )
+		).trigger( 'click' );
 	}
 } )( jQuery );
