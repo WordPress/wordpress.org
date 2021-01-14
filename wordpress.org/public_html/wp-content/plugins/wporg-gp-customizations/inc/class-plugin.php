@@ -50,7 +50,8 @@ class Plugin {
 		add_filter( 'gp_original_extracted_comments', array( $this, 'format_translator_commments' ), 15 );
 		add_filter( 'wporg_translate_language_pack_theme_args', array( $this, 'set_version_for_default_themes_in_development' ), 10, 2 );
 
-		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 100, 2 );
+		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 10, 2 );
+		add_action( 'gp_translation_created', array( $this, 'auto_reject_replaced_suggestions' ) );
 
 		// Cron.
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
@@ -253,6 +254,55 @@ class Plugin {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Auto-Rejects a translators submissions when the translator submits a replacement suggestion.
+	 *
+	 * @see https://github.com/GlotPress/GlotPress-WP/issues/889
+	 *
+	 * @param GP_Translation $translation Translation instance.
+	 */
+	public function auto_reject_replaced_suggestions( GP_Translation $translation ) {
+		// If the suggestion isn't in a waiting status, it's can be skipped, they've got better access than most.
+		if ( 'waiting' !== $translation->status ) {
+			return;
+		}
+
+		$translation_set = GP::$translation_set->get( $translation->translation_set_id );
+		$project = GP::$project->get( $translation_set->project_id );
+
+		// If the current user can approve / write to the project, skip. Probably not needed due to the `waiting` check above.
+		if (
+			GP::$permission->current_user_can( 'approve', 'translation-set', $translation_set->id )
+			||
+			GP::$permission->current_user_can( 'write', 'project', $project->id )
+		) {
+			return;
+		}
+
+		$previous_translations = GP::$translation->for_translation(
+			$project,
+			$translation_set,
+			'no-limit',
+			array(
+				'user_login'  => get_user_by( 'ID', $translation->user_id )->user_login,
+				'original_id' => $translation->original_id,
+				'status'      => 'waiting_or_fuzzy',
+			),
+			array()
+		);
+
+		// This will include the current translation, so skip that.
+		foreach ( $previous_translations as $prev_translation ) {
+			if ( $prev_translation->id >= $translation->id ) {
+				// >= to match the current translation and any race-condition situations
+				continue;
+			}
+
+			// Previous translation from this translator, reject it.
+			GP::$translation->get( $prev_translation->id )->reject();
+		}
 	}
 
 	/**
