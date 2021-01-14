@@ -1284,6 +1284,8 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 
 	/**
 	 * Catch a user being blocked / unblocked and set their password appropriately.
+	 *
+	 * Note: This method is called even when the users role is not changed.
 	 */
 	public function user_blocked_password_handler( $new_role, $user_id, \WP_User $user ) {
 		global $wpdb;
@@ -1318,6 +1320,14 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			$manager = \WP_Session_Tokens::get_instance( $user->ID );
 			$manager->destroy_all();
 
+			// Add a user note about this action.
+			Plugin::get_instance()->user_notes->add_user_note(
+				$user->ID,
+				sprintf(
+					'Forum role changed to %s.',
+					get_role( $new_role )->name
+				)
+			);
 		} else if (
 			$password_broken &&
 			! $user->has_role( $blocked_role )
@@ -1335,6 +1345,16 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			);
 
 			clean_user_cache( $user );
+
+			// Add a user note about this action.
+			Plugin::get_instance()->user_notes->add_user_note(
+				$user->ID,
+				sprintf(
+					'Forum role changed to %s.',
+					get_role( $new_role )->name
+				)
+			);
 		}
+
 	}
 }

@@ -21,8 +21,8 @@ class User_Notes {
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts',                   array( $this, 'enqueue_scripts' ) );
 
-		add_action( 'bbp_post_request',                     array( $this, 'add_user_note' ) );
-		add_action( 'bbp_get_request',                      array( $this, 'delete_user_note' ) );
+		add_action( 'bbp_post_request',                     array( $this, 'add_user_note_request' ) );
+		add_action( 'bbp_get_request',                      array( $this, 'delete_user_note_request' ) );
 
 		add_action( 'bbp_theme_after_topic_author_details', array( $this, 'display_user_notes_toggle_link' ) );
 		add_action( 'bbp_theme_after_reply_author_details', array( $this, 'display_user_notes_toggle_link' ) );
@@ -48,7 +48,7 @@ class User_Notes {
 	 *
 	 * @param string $action Requested action.
 	 */
-	public function add_user_note( $action = '' ) {
+	public function add_user_note_request( $action = '' ) {
 		if ( 'wporg_bbp_add_user_note' !== $action || ! current_user_can( 'moderate' ) ) {
 			return;
 		}
@@ -68,10 +68,27 @@ class User_Notes {
 			return;
 		}
 
+		$this->add_user_note( $user_id, $note_text, $post_id, $note_id );
+
+		$redirect_url = set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+
+		// Redirect to clear form data.
+		bbp_redirect( $redirect_url );
+	}
+
+	/**
+	 * Saves a note to a users meta data.
+	 * 
+	 * @param int    $user_id   The User ID.
+	 * @param string $note_text The note text to add.
+	 * @param int    $post_id   The support thread this text is related to. Optional.
+	 * @param int    $note_id   The note ID to edit. Optional.
+	 */
+	public function add_user_note( $user_id, $note_text, $post_id = 0, $note_id = 0 ) {
 		// Make sure the user exists.
 		$user = get_userdata( $user_id );
 		if ( ! $user ) {
-			return;
+			return false;
 		}
 
 		// Get an array of existing notes, or create an array if there are none.
@@ -100,7 +117,7 @@ class User_Notes {
 			&&
 				$user_notes[ $note_id ]->moderator !== wp_get_current_user()->user_nicename
 			) {
-				return;
+				return false;
 			}
 
 			// Save new text for an existing note.
@@ -114,10 +131,7 @@ class User_Notes {
 
 		update_user_meta( $user_id, self::META, $user_notes );
 
-		$redirect_url = set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-
-		// Redirect to clear form data.
-		bbp_redirect( $redirect_url );
+		return true;
 	}
 
 	/**
@@ -125,7 +139,7 @@ class User_Notes {
 	 *
 	 * @param string $action Requested action.
 	 */
-	public function delete_user_note( $action = '' ) {
+	public function delete_user_note_request( $action = '' ) {
 		if ( 'wporg_bbp_delete_user_note' !== $action || ! current_user_can( 'keep_gate' ) ) {
 			return;
 		}
@@ -142,16 +156,31 @@ class User_Notes {
 			return;
 		}
 
+		$this->delete_user_note( $user_id, $note_id );
+
+		$redirect_url = remove_query_arg( array( 'action', 'user_id', 'note_id', '_wpnonce' ) );
+
+		// Redirect to clear URL.
+		bbp_redirect( $redirect_url );
+	}
+
+	/**
+	 * Delete a user note.
+	 *
+	 * @param int $user_id The user ID.
+	 * @param int $note_id The note ID.
+	 */
+	public function delete_user_note( $user_id, $note_id ) {
 		// Make sure the user exists.
 		$user = get_userdata( $user_id );
 		if ( ! $user ) {
-			return;
+			return false;
 		}
 
 		// Get an array of existing notes.
 		$user_notes = get_user_meta( $user_id, self::META, true );
-		if ( ! $user_notes ) {
-			return;
+		if ( ! $user_notes || ! isset( $user_notes[ $note_id ] ) ) {
+			return false;
 		}
 
 		unset( $user_notes[ $note_id ] );
@@ -163,10 +192,7 @@ class User_Notes {
 
 		update_user_meta( $user_id, self::META, $user_notes );
 
-		$redirect_url = remove_query_arg( array( 'action', 'user_id', 'note_id', '_wpnonce' ) );
-
-		// Redirect to clear URL.
-		bbp_redirect( $redirect_url );
+		return true;
 	}
 
 	/**
