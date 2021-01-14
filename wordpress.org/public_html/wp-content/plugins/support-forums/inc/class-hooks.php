@@ -127,6 +127,9 @@ class Hooks {
 
 		// Add a no-reply-to-email suggestion to topic subscription emails
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'bbp_subscription_mail_message'), 5, 3 );
+
+		// Break users sessions / passwords when they get blocked.
+		add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
 	}
 
 	/**
@@ -1277,5 +1280,61 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
         );
 
 		return $message;
+	}
+
+	/**
+	 * Catch a user being blocked / unblocked and set their password appropriately.
+	 */
+	public function user_blocked_password_handler( $new_role, $user_id, \WP_User $user ) {
+		global $wpdb;
+
+		// ~~~ is a reset password on WordPress.org. Let's ignore those.
+		if ( '~~~' === $user->user_pass ) {
+			return;
+		}
+
+		// bbPress 1.x used `{$user_pass}---{$secret}` while we're using the reverse here.
+		// This is to ensure that anything that uses the password hash as part of a cookie no longer validates.
+		$blocked_prefix  = 'BLOCKED' . substr( wp_hash( 'bb_break_password' ), 0, 13 ) . '---';
+		$blocked_role    = bbp_get_blocked_role();
+		$password_broken = ( 0 === strpos( $user->user_pass, $blocked_prefix ) );
+
+		if ( $blocked_role === $new_role && ! $password_broken ) {
+			// User has been blocked, break their password and sessions.
+			// WordPress doesn't have a way to edit a user password without re-hashing it.
+			$wpdb->update(
+				$wpdb->users,
+				array(
+					'user_pass' => $blocked_prefix . $user->user_pass,
+				),
+				array(
+					'ID' => $user->ID
+				)
+			);
+
+			clean_user_cache( $user );
+
+			// Destroy all of their WordPress sessions.
+			$manager = \WP_Session_Tokens::get_instance( $user->ID );
+			$manager->destroy_all();
+
+		} else if (
+			$password_broken &&
+			! $user->has_role( $blocked_role )
+		) {
+			// User was blocked (broken password) but no longer is.
+			// WordPress doesn't have a way to edit a user password without re-hashing it.
+			$wpdb->update(
+				$wpdb->users,
+				array(
+					'user_pass' => substr( $user->user_pass, strlen( $blocked_prefix ) ),
+				),
+				array(
+					'ID' => $user->ID
+				)
+			);
+
+			clean_user_cache( $user );
+		}
 	}
 }
