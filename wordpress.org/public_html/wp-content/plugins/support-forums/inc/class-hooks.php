@@ -18,7 +18,7 @@ class Hooks {
 		add_filter( 'redirect_canonical',              array( $this, 'handle_bbpress_root_pages' ), 10, 2 );
 		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
-		add_action( 'template_redirect',               array( $this, 'redirect_legacy_user_structure' ) );
+		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
@@ -302,13 +302,34 @@ class Hooks {
 	}
 
 	/**
-	 * Redirect /users/$id to their new /users/$slug permastructure.
+	 * Redirect legacy urls to their new permastructure.
+	 *  - /users/$id & /profile/$slug to /users/$slug
+	 * 
 	 */
-	public function redirect_legacy_user_structure() {
-		if ( is_404() && get_query_var( 'bbp_user' ) && is_numeric( get_query_var( 'bbp_user' ) ) ) {
+	public function redirect_legacy_urls() {
+		global $wp_query;
+
+		if ( ! is_404() ) {
+			return;
+		}
+
+		// Legacy /profile/$user route
+		if (
+			! empty( $wp_query->query['pagename'] ) &&
+			preg_match( '!^profile/(?P<user>.+)(/|$)!', $wp_query->query['pagename'], $m )
+		) {
+			wp_safe_redirect( home_url( '/users/' . urlencode( $m['user'] ) . '/' ), 301 );
+			exit;
+		}
+
+		// Legacy /users/$user_id route
+		if (
+			get_query_var( 'bbp_user' ) &&
+			is_numeric( get_query_var( 'bbp_user' ) )
+		) {
 			$user = get_user_by( 'id', (int) get_query_var( 'bbp_user' ) );
 			if ( $user ) {
-				wp_redirect( home_url( '/users/' . $user->user_nicename . '/' ), 301 );
+				wp_safe_redirect( home_url( '/users/' . $user->user_nicename . '/' ), 301 );
 				exit;
 			}
 		}
