@@ -55,7 +55,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				remove_action( 'after_password_reset', 'wp_password_change_notification' );
 
 				add_filter( 'allow_password_reset', array( $this, 'disable_password_reset_for_blocked_users' ), 10, 2 );
-				add_filter( 'authenticate', array( $this, 'authenticate_block_check' ), 30 );
+				add_filter( 'authenticate', array( $this, 'authenticate_block_check' ), 5, 2 );
 
 				add_filter( 'password_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
 				add_filter( 'email_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
@@ -89,13 +89,23 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 *
 		 * @param WP_User|WP_Error|null $user WP_User or WP_Error object if a previous
 		 *                                    callback failed authentication.
+		 * @param string $user_login The user login attmpting to login.
 		 * @return WP_User|WP_Error WP_User on success, WP_Error on failure.
 		 */
-		public function authenticate_block_check( $user ) {
-			if ( $user instanceof WP_User && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
-				$support_user = new WP_User( $user->ID, '', WPORG_SUPPORT_FORUMS_BLOGID );
+		public function authenticate_block_check( $user, $user_login ) {
 
-				if ( ! empty( $support_user->allcaps['bbp_blocked'] ) ) {
+			$support_user = get_user_by( 'login', $user_login );
+			if ( $support_user && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+				$support_user->for_site( WPORG_SUPPORT_FORUMS_BLOGID );
+
+				if (
+					'BLOCKED' === substr( $support_user->user_pass, 0, 7 ) ||
+					! empty( $support_user->allcaps['bbp_blocked'] )
+				) {
+					// Returning a WP_Error from an authenticate filter doesn't block auth, as a later hooked item can return truthful.
+					// By removing all actions, we can catch both the bbp_blocked role for old users, and those whose passwords were broken via https://meta.trac.wordpress.org/changeset/10578
+					remove_all_actions( 'authenticate' );
+
 					return new WP_Error(
 						'blocked_account',
 						__( '<strong>ERROR</strong>: Your account has been disabled.', 'wporg' )  . '<br>' .
