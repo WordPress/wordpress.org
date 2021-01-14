@@ -119,6 +119,7 @@ function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) 
 		SELECT ?version WHERE {
 			wd:{$fragment} p:P348 [
 				ps:P348 ?version;
+				pq:P548 wd:Q2804309;
 				wikibase:rank wikibase:{$rank_type}
 			].
 		}
