@@ -2,7 +2,10 @@
 
 namespace Dotorg\API\Events\Tests;
 use PHPUnit\Framework\TestCase;
-use function Dotorg\API\Events\{ get_events, get_location, build_response, is_client_core, pin_one_off_events };
+use function Dotorg\API\Events\{
+	get_events, get_location, build_response, is_client_core, pin_one_off_events,
+	maybe_add_regional_wordcamps, get_iso_3166_2_country_codes, maybe_add_wp15_promo, remove_duplicate_events
+};
 
 /**
  * @group events
@@ -113,6 +116,309 @@ class Test_Events extends TestCase {
 				'expected_countries' => array( 'CA', 'US' ),
 			),
 		);
+	}
+
+	/**
+	 * @covers ::maybe_add_regional_wordcamps
+	 * @covers ::get_iso_3166_2_country_codes
+	 *
+	 * @group unit
+	 */
+	public function test_maybe_add_regional_wordcamps() : void {
+		$local_events = get_events( array(
+			'number' => '5',
+			'nearby' => array(
+				'latitude'  => '-33.849951',
+				'longitude' => '18.426246',
+			),
+		) );
+
+		$region_data = array(
+			'us' => array(
+				'promo_start' => strtotime( '2019-08-16 00:00:00' ),
+
+				'regional_countries' => array_merge(
+					get_iso_3166_2_country_codes( 'south america' ),
+					get_iso_3166_2_country_codes( 'north america' )
+				),
+
+				'event' => array(
+					'type'       => 'wordcamp',
+					'title'      => 'WordCamp US',
+					'url'        => 'https://2019.us.wordcamp.org/',
+					'meetup'     => '',
+					'meetup_url' => '',
+					'date'       => '2019-11-01 00:00:00',
+					'location'   => array(
+						'location'  => 'St. Louis, MO, USA',
+						'country'   => 'US',
+						'latitude'  => 38.6532135,
+						'longitude' => -90.3136733,
+					),
+				),
+			),
+		);
+
+		$core_user_agent  = 'WordPress/5.2; https://example.org';
+		$other_user_agent = 'Smith';
+
+		$time_before_promo         = strtotime( '2019-08-15 00:00:00' );
+		$time_during_promo_phase_1 = strtotime( '+ 1 day', $region_data['us']['promo_start'] );
+		$time_during_promo_phase_2 = strtotime( '+ 2 weeks + 1 day', $region_data['us']['promo_start'] );
+		$time_during_promo_phase_3 = strtotime( '+ 4 weeks + 1 day', $region_data['us']['promo_start'] );
+		$time_after_promo          = strtotime( '+ 6 weeks + 1 day', $region_data['us']['promo_start'] );
+
+		$location_country_within_region = array(
+			'country' => 'us',
+		);
+
+		$location_country_outside_region = array(
+			'country' => 'es',
+		);
+
+		$location_ip_only = array(
+			'ip' => '8.8.8.8',
+		);
+
+		// Make sure there's at least one event, otherwise there could be false positives.
+		if ( ! $local_events ) {
+			$local_events[] = array( 'title' => 'Mock Event' );
+		}
+
+		$tests_expect_no_changes = array();
+		$tests_expect_changes    = array();
+
+		// No regional camps should be added if before the promo start date or after the promo window is past (6 weeks).
+		$tests_expect_no_changes['before-promo'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_before_promo, $location_country_within_region );
+		$tests_expect_no_changes['before-promo'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_after_promo, $location_country_within_region );
+
+		// Regional camp should be added if it's within phase 1 of the promo, regardless of location.
+		$tests_expect_changes['promo-phase-1-within-region'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_within_region );
+		$tests_expect_changes['promo-phase-1-outside-region'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_outside_region );
+
+		// Regional camp should only be added during phase 2 of promo if location is within region.
+		$tests_expect_changes['promo-phase-2-within-region'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_2, $location_country_within_region );
+		$tests_expect_no_changes['promo-phase-2-outside-region'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_2, $location_country_outside_region );
+		$tests_expect_no_changes['promo-phase-2-ip-only'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_2, $location_ip_only );
+
+		// Regional camp should only be added during phase 3 of promo if location is within event country.
+		$tests_expect_changes['promo-phase-3-within-event-country'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_3, $location_country_within_region );
+		$tests_expect_no_changes['promo-phase-3-outside-event-country'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_3, $location_country_outside_region );
+		$tests_expect_no_changes['promo-phase-3-ip-only'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_3, $location_ip_only );
+
+		// Regional camp should only be added if the user agent is Core.
+		$tests_expect_no_changes['other-user-agent'] = maybe_add_regional_wordcamps( $local_events, $region_data, $other_user_agent, $time_during_promo_phase_1, $location_country_within_region );
+		$tests_expect_changes['core-user-agent'] = maybe_add_regional_wordcamps( $local_events, $region_data, $core_user_agent, $time_during_promo_phase_1, $location_country_within_region );
+
+		foreach ( $tests_expect_no_changes as $name => $result ) {
+			$this->assertSame( $local_events, $result );
+		}
+
+		$unchanged_count = count( $local_events );
+		$expected_count  = $unchanged_count + 1;
+
+		foreach ( $tests_expect_changes as $name => $result ) {
+			$actual_count = count( $result );
+
+			$this->assertSame( $expected_count, $actual_count );
+		}
+	}
+
+	/**
+	 * @covers ::get_iso_3166_2_country_codes
+	 *
+	 * @dataProvider data_get_iso_3166_2_country_codes
+	 *
+	 * @group unit
+	 */
+	public function test_get_iso_3166_2_country_codes( $continent, $sample_country ) : void {
+		$countries = get_iso_3166_2_country_codes( $continent );
+
+		$this->assertContains( $sample_country, $countries );
+	}
+
+	public function data_get_iso_3166_2_country_codes() : array {
+		return array(
+			array( 'antarctica',    'HM' ),
+			array( 'africa',        'KM' ),
+			array( 'asia',          'SA' ),
+			array( 'europe',        'IM' ),
+			array( 'north america', 'MQ' ),
+			array( 'oceania',       'MP' ),
+			array( 'south america', 'GY' ),
+		);
+	}
+
+	/**
+	 * @covers ::maybe_add_wp15_promo
+	 *
+	 * @group unit
+	 */
+	public function test_maybe_add_wp15_promo() : void {
+		$local_events_yes_wp15 = array(
+			array(
+				'type'       => 'meetup',
+				'title'      => 'WordPress 15th Anniversary Celebration',
+				'url'        => 'https://www.meetup.com/pdx-wp/events/250109566/',
+				'meetup'     => 'Portland WordPress Meetup',
+				'meetup_url' => 'https://www.meetup.com/pdx-wp/',
+				'date'       => '2018-05-27 12:00:00',
+				'location'   => array(
+					'location'  => 'Portland, OR, USA',
+					'country'   => 'us',
+					'latitude'  => 45.540115,
+					'longitude' => - 122.630699,
+				),
+			),
+
+			array(
+				'type'       => 'wordcamp',
+				'title'      => 'WordCamp Portland, Oregon, USA',
+				'url'        => 'https://2018.portland.wordcamp.org',
+				'meetup'     => '',
+				'meetup_url' => '',
+				'date'       => '2018-11-03 00:00:00',
+				'location'   => array(
+					'location'  => 'Portland, OR, USA',
+					'country'   => 'us',
+					'latitude'  => 45.540115,
+					'longitude' => - 122.630699,
+				),
+			),
+		);
+
+		$local_events_no_wp15 = array(
+			array(
+				'type'       => 'meetup',
+				'title'      => 'Kickoff: Meet and greet, roundtable discussion',
+				'url'        => 'https://www.meetup.com/Corvallis-WordPress-Meetup/events/250327006/',
+				'meetup'     => 'Corvallis WordPress Meetup',
+				'meetup_url' => 'https://www.meetup.com/Corvallis-WordPress-Meetup/',
+				'date'       => '2018-05-22 18:30:00',
+				'location'   => array(
+					'location'  => 'Corvallis, OR, USA',
+					'country'   => 'us',
+					'latitude'  => 44.563564,
+					'longitude' => - 123.26095,
+				),
+			),
+
+			array(
+				'type'       => 'wordcamp',
+				'title'      => 'WordCamp Portland, Oregon, USA',
+				'url'        => 'https://2018.portland.wordcamp.org',
+				'meetup'     => '',
+				'meetup_url' => '',
+				'date'       => '2018-11-03 00:00:00',
+				'location'   => array(
+					'location'  => 'Portland, OR, USA',
+					'country'   => 'us',
+					'latitude'  => 45.540115,
+					'longitude' => - 122.630699,
+				),
+			),
+		);
+
+		$local_events_added_wp15 = array(
+			array(
+				'type'       => 'meetup',
+				'title'      => 'WP15',
+				'url'        => 'https://wordpress.org/news/2018/04/celebrate-the-wordpress-15th-anniversary-on-may-27/',
+				'meetup'     => '',
+				'meetup_url' => '',
+				'date'       => '2018-05-27 12:00:00',
+				'location'   => array(
+					'location' => 'Everywhere',
+				),
+			),
+
+			array(
+				'type'       => 'meetup',
+				'title'      => 'Kickoff: Meet and greet, roundtable discussion',
+				'url'        => 'https://www.meetup.com/Corvallis-WordPress-Meetup/events/250327006/',
+				'meetup'     => 'Corvallis WordPress Meetup',
+				'meetup_url' => 'https://www.meetup.com/Corvallis-WordPress-Meetup/',
+				'date'       => '2018-05-22 18:30:00',
+				'location'   => array(
+					'location'  => 'Corvallis, OR, USA',
+					'country'   => 'us',
+					'latitude'  => 44.563564,
+					'longitude' => - 123.26095,
+				),
+			),
+
+			array(
+				'type'       => 'wordcamp',
+				'title'      => 'WordCamp Portland, Oregon, USA',
+				'url'        => 'https://2018.portland.wordcamp.org',
+				'meetup'     => '',
+				'meetup_url' => '',
+				'date'       => '2018-11-03 00:00:00',
+				'location'   => array(
+					'location'  => 'Portland, OR, USA',
+					'country'   => 'us',
+					'latitude'  => 45.540115,
+					'longitude' => - 122.630699,
+				),
+			),
+		);
+
+		$user_agent = 'WordPress/4.9; https://example.org';
+
+		$time_before_date_range = 1523295832;
+		$time_during_date_range = 1525887832;
+
+		// Test that the promo is added if there is not already a WP15 event.
+		$events_promo_added = maybe_add_wp15_promo( $local_events_no_wp15, $user_agent, $time_during_date_range );
+		$this->assertSame( $local_events_added_wp15, $events_promo_added, 'needs-promo' );
+
+		// Test that no promo is added if there is already a WP15 event.
+		$events_already_has_one = maybe_add_wp15_promo( $local_events_yes_wp15, $user_agent, $time_during_date_range );
+
+		$this->assertSame( $local_events_yes_wp15, $events_already_has_one, 'already-has-event' );
+
+		// Test that no changes are made if the user agent isn't Core.
+		$events_no_user_agent = maybe_add_wp15_promo( $local_events_no_wp15, '', $time_during_date_range );
+		$this->assertSame( $local_events_no_wp15, $events_no_user_agent, 'no-user-agent' );
+
+		// Test that no promo is added if the time is outside the date range.
+		$events_outside_date_range = maybe_add_wp15_promo( $local_events_no_wp15, $user_agent, $time_before_date_range );
+		$this->assertSame( $local_events_no_wp15, $events_outside_date_range, 'outside-date-range' );
+	}
+
+	/**
+	 * @covers ::remove_duplicate_events
+	 *
+	 * @group unit
+	 */
+	public function test_remove_duplicate_events() : void {
+		$duplicate_events = array(
+			// Each of these represents an event; extraneous fields have been removed for readability.
+			array(
+				'url' => 'https://2020.us.wordcamp.org/',
+			),
+
+			array(
+				'url' => 'https://2020.detroit.wordcamp.org/',
+			),
+
+			array(
+				// Intentionally missing the trailing slash, to account for inconsistencies in data.
+				'url' => 'https://2020.us.wordcamp.org',
+			),
+		);
+
+		$unique_events = array(
+			array(
+				'url' => 'https://2020.us.wordcamp.org',
+			),
+
+			array(
+				'url' => 'https://2020.detroit.wordcamp.org/',
+			),
+		);
+
+		$this->assertSame( $unique_events, remove_duplicate_events( $duplicate_events ) );
 	}
 
 	/**
@@ -1141,9 +1447,5 @@ class Test_Events extends TestCase {
 			'Core old version'                => array( 'WordPress/4.9; https://example.org', true ),
 			'Core future version, no URL'     => array( 'WordPress/10.0', true ),
 		);
-	}
-
-	function test_port_remaining_tests() {
-		$this->markTestIncomplete( 'Not all of the tests from ./test-index.php have been ported to PHPUnit yet. See the notes in that file.' );
 	}
 }
