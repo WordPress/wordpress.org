@@ -7,6 +7,9 @@
  * @subpackage Theme
  */
 
+$is_user_blocked     = bbpress()->displayed_user->has_cap( bbp_get_blocked_role() );
+$hide_profile_fields = ( $is_user_blocked && ! current_user_can( 'moderate' ) );
+
 do_action( 'bbp_template_before_user_profile' ); ?>
 
 <div id="bbp-user-profile" class="bbp-user-profile">
@@ -48,7 +51,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 		}
 		?>
 
-		<?php if ( bbp_get_displayed_user_field( 'description' ) ) : ?>
+		<?php if ( ! $hide_profile_fields && bbp_get_displayed_user_field( 'description' ) ) : ?>
 
 			<p class="bbp-user-description"><?php bbp_displayed_user_field( 'description' ); ?></p>
 
@@ -88,7 +91,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 			}
 		?></p>
 
-		<?php if ( $custom_title = get_user_option( 'title', bbp_get_displayed_user_id() ) ) : ?>
+		<?php if ( ! $hide_profile_fields && ( $custom_title = get_user_option( 'title', bbp_get_displayed_user_id() ) ) ) : ?>
 	
 			<p class="bbp-user-custom-title"><?php
 				/* translators: %s: user's custom title */
@@ -97,12 +100,21 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 	
 		<?php endif; ?>
 
-		<p class="bbp-user-forum-role"><?php
-			/* translators: %s: user's forum role */
-			printf( esc_html__( 'Forum Role: %s', 'wporg-forums' ), bbp_get_user_display_role() );
-		?></p>
+		<?php
+			// Only show the forum role when they're privledged, or the current user is privledged.
+			if (
+				current_user_can( 'moderate' ) ||
+				bbpress()->displayed_user->has_cap( bbp_get_moderator_role() ) ||
+				bbpress()->displayed_user->has_cap( bbp_get_keymaster_role() )
+			) {
+				?><p class="bbp-user-forum-role"><?php
+				/* translators: %s: user's forum role */
+				printf( esc_html__( 'Forum Role: %s', 'wporg-forums' ), bbp_get_user_display_role() );
+				?></p><?php
+			}
+		?>
 
-		<?php if ( is_user_logged_in() && $website = bbp_get_displayed_user_field( 'user_url' ) ) : ?>
+		<?php if ( is_user_logged_in() && ! $hide_profile_fields && ( $website = bbp_get_displayed_user_field( 'user_url' ) ) ) : ?>
 	
 			<p class="bbp-user-website"><?php
 			/* translators: %s: link to user's website */
