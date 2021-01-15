@@ -204,6 +204,7 @@ class Plugin {
 	public function auto_reject_already_rejected( $args, GP_Translation $translation ) {
 		if (
 			! $translation->id &&
+			! empty( $args['user_id'] ) &&
 			'waiting' === $args['status'] &&
 			GP::$current_route->class_name === 'GP_Route_Translation' &&
 			GP::$current_route->last_method_called === 'translations_post'
@@ -265,7 +266,7 @@ class Plugin {
 	 */
 	public function auto_reject_replaced_suggestions( GP_Translation $translation ) {
 		// If the suggestion isn't in a waiting status, it's can be skipped, they've got better access than most.
-		if ( 'waiting' !== $translation->status ) {
+		if ( 'waiting' !== $translation->status || ! $translation->user_id ) {
 			return;
 		}
 
