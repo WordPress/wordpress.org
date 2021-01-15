@@ -42,9 +42,9 @@ add_filter( 'bbp_get_displayed_user_field', function( $value, $field, $filter ) 
 /**
  * Filter the BuddyPress displayed name.
  */
-add_filter( 'bp_displayed_user_fullname', function( $name ) { 
+add_filter( 'bp_displayed_user_fullname', function( $name ) {
 	if ( '' === $name ) {
-		buddypress()->displayed_user->user_nicename;
+		$name = buddypress()->displayed_user->userdata->user_nicename;
 	}
 
 	$name = maybe_replace_blocked_user_name( $name, buddypress()->displayed_user );
