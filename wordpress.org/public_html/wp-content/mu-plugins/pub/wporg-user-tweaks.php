@@ -40,6 +40,19 @@ add_filter( 'bbp_get_displayed_user_field', function( $value, $field, $filter ) 
 }, 1, 3 );
 
 /**
+ * Filter the BuddyPress displayed name.
+ */
+add_filter( 'bp_displayed_user_fullname', function( $name ) { 
+	if ( '' === $name ) {
+		buddypress()->displayed_user->user_nicename;
+	}
+
+	$name = maybe_replace_blocked_user_name( $name, buddypress()->displayed_user );
+
+	return $name;
+} );
+
+/**
  * Some users have an empty display_name field, which shouldn't happen, but does due to sanitization.
  *
  * bbPress also doesn't use it's own functions sometimes, and instead uses get_userdata( bbp_get_user_id() )
@@ -61,27 +74,34 @@ add_filter( 'user_has_cap', function( $allcaps, $caps, $args, $wp_user ) {
  * Use the nicename field for blocked users.
  */
 function maybe_replace_blocked_user_name( $name, $user ) {
-	if ( ! defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
-		return $name;
-	}
-
-	$user_id = is_object( $user ) ? $user->ID : $user;
-	if ( ! $user_id ) {
-		return $name;
-	}
-
 	if ( ! ( $user instanceof WP_User ) ) {
-		$user = get_user_by( 'id', $user );
+		if ( ! empty( $user->ID ) ) {
+			$user_id = $user->ID;
+		} elseif ( !empty( $user->id ) ) {
+			$user_id = $user->id;
+		} else {
+			$user_id = $user;
+		}
+
+		$user = get_user_by( 'id', $user_id );
 	}
 
-	if ( ! $user ) {
+	if ( ! $user || ! $user->exists() ) {
 		return $name;
 	}
 
-	$user->for_site( WPORG_SUPPORT_FORUMS_BLOGID );
+	// If it's a recently blocked user, it'll have a broken user_pass, use that.
+	if ( 'BLOCKED' === substr( $user->user_pass, 0, 7 ) ) {
+		return $user->user_nicename;
+	}
 
-	/* Cannot use $user->has_cap( 'bbp_blocked' ), as we may be within a capability filter. */
-	if ( !empty( $user->roles ) && in_array( 'bbp_blocked', $user->roles ) ) {
+	if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+		$user->for_site( WPORG_SUPPORT_FORUMS_BLOGID );
+	}
+
+	// Cannot use $user->has_cap( 'bbp_blocked' ), as we may be within a capability filter.
+	// Only works on the WordPress.org network.
+	if ( ! empty( $user->roles ) && in_array( 'bbp_blocked', $user->roles ) ) {
 		return $user->user_nicename;
 	}
 
