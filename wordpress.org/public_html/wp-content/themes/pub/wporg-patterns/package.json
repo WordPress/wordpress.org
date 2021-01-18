@@ -1,0 +1,41 @@
+{
+	"name": "wporg-pattern-directory-theme",
+	"version": "0.0.0",
+	"description": "Theme for wordpress.org/patterns",
+	"author": "WordPress.org",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/WordPress/pattern-directory/"
+	},
+	"scripts": {
+		"start": "grunt watch",
+		"build": "grunt build",
+		"dev": "grunt",
+		"format:js": "echo \"No JS.\"",
+		"lint:css": "wp-scripts lint-style css",
+		"lint:js": "echo \"No JS.\"",
+		"packages-update": "wp-scripts packages-update"
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	],
+	"devDependencies": {
+		"@wordpress/browserslist-config": "2.7.0",
+		"@wordpress/scripts": "12.5.0",
+		"autoprefixer": "9.8.6",
+		"cssnano": "4.1.10",
+		"grunt": "1.3.0",
+		"grunt-contrib-watch": "1.1.0",
+		"grunt-postcss": "0.9.0",
+		"grunt-sass": "3.1.0",
+		"grunt-sass-globbing": "1.5.1",
+		"node-sass": "4.14.1",
+		"pixrem": "5.0.0"
+	},
+	"stylelint": {
+		"extends": "../../../../.stylelintrc",
+		"ignoreFiles": ["**/*.css", "**/*.css.map"]
+	}
+}
