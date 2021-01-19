@@ -499,7 +499,7 @@ class Performance_Optimizations {
 
 		if ( ! empty( $topic['tax_input'][ $taxonomy ] ) ) {
 			if ( ! is_array( $topic['tax_input'][ $taxonomy ] ) ) {
-				$topic['tax_input'][ $taxonomy ] = preg_split( '/,\s+/', trim( $topic['tax_input'][ $taxonomy ], " \n\t\r\0\x0B," ) );
+				$topic['tax_input'][ $taxonomy ] = preg_split( '/,\s*/', trim( $topic['tax_input'][ $taxonomy ], " \n\t\r\0\x0B," ) );
 			}
 
 			// Loop through the proposed terms
@@ -530,7 +530,7 @@ class Performance_Optimizations {
 		}
 
 		if ( ! is_array( $terms ) ) {
-			$terms = preg_split( '/,\s+/', trim( $terms, " \n\t\r\0\x0B," ) );
+			$terms = preg_split( '/,\s*/', trim( $terms, " \n\t\r\0\x0B," ) );
 		}
 
 		$existing_terms = array();
