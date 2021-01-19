@@ -4477,6 +4477,12 @@ select {
 	width: 30px;
 }
 
+@media screen and (max-width: 568px) {
+	.single-topic .entry-content #bbpress-forums .topic.sticky > .topic-indicator, .single-topic .entry-content #bbpress-forums .topic.super-sticky > .topic-indicator, .single-topic .entry-content #bbpress-forums .topic.status-closed > .topic-indicator {
+		left: -16px;
+	}
+}
+
 .single-topic .entry-content #bbpress-forums .topic.sticky .dashicons-admin-post,
 .single-topic .entry-content #bbpress-forums .topic.super-sticky .dashicons-admin-post,
 .single-topic .entry-content #bbpress-forums .topic.status-closed .dashicons-lock {

@@ -1078,6 +1078,9 @@ select {
 						top: -32px;
 						left: -2px;
 						width: 30px;
+						@media screen and (max-width: 568px) {
+							left: -16px;
+						}
 					}
 				}
 
