@@ -388,6 +388,10 @@ $paginationBreakPoint: "600px";
 				padding: 3px 7px;
 			}
 
+			@media screen and (max-width: 767px) {
+				display: block;
+			}
+
 			a {
 				color: #0073aa;
 				text-transform: inherit;
