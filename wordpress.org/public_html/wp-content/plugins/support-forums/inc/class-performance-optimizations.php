@@ -498,6 +498,10 @@ class Performance_Optimizations {
 		$taxonomy = bbp_get_topic_tag_tax_slug();
 
 		if ( ! empty( $topic['tax_input'][ $taxonomy ] ) ) {
+			if ( ! is_array( $topic['tax_input'][ $taxonomy ] ) ) {
+				$topic['tax_input'][ $taxonomy ] = preg_split( '/,\s+/', trim( $topic['tax_input'][ $taxonomy ], " \n\t\r\0\x0B," ) );
+			}
+
 			// Loop through the proposed terms
 			foreach ( $topic['tax_input'][ $taxonomy ] as $i => $term ) {
 				if ( ! term_exists( $term, $taxonomy ) ) {
@@ -526,7 +530,7 @@ class Performance_Optimizations {
 		}
 
 		if ( ! is_array( $terms ) ) {
-			$terms = explode( ',', trim( $terms, " \n\t\r\0\x0B," ) );
+			$terms = preg_split( '/,\s+/', trim( $terms, " \n\t\r\0\x0B," ) );
 		}
 
 		$existing_terms = array();
