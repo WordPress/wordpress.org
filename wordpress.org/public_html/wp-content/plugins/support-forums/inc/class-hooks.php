@@ -1300,6 +1300,7 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		$blocked_prefix  = 'BLOCKED' . substr( wp_hash( 'bb_break_password' ), 0, 13 ) . '---';
 		$blocked_role    = bbp_get_blocked_role();
 		$password_broken = ( 0 === strpos( $user->user_pass, $blocked_prefix ) );
+		$note_text       = false;
 
 		if ( $blocked_role === $new_role && ! $password_broken ) {
 			// User has been blocked, break their password and sessions.
@@ -1321,12 +1322,9 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			$manager->destroy_all();
 
 			// Add a user note about this action.
-			Plugin::get_instance()->user_notes->add_user_note(
-				$user->ID,
-				sprintf(
-					'Forum role changed to %s.',
-					get_role( $new_role )->name
-				)
+			$note_text = sprintf(
+				'Forum role changed to %s.',
+				get_role( $new_role )->name
 			);
 		} else if (
 			$password_broken &&
@@ -1347,12 +1345,40 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			clean_user_cache( $user );
 
 			// Add a user note about this action.
+			$note_text = sprintf(
+				'Forum role changed to %s.',
+				get_role( $new_role )->name
+			);
+		}
+
+		if ( $note_text ) {
+			// Add a user note about this action.
+			$notes   = Plugin::get_instance()->user_notes->get_user_notes( $user->ID );
+			$note_id = 0;
+
+			// Check to see if the last note added was from the current user in the last few minutes, and if so, append to it.
+			if ( $notes->count ) {
+				$last_note_id = array_key_last( $notes->raw );
+				$last_note    = $notes->raw[ $last_note_id ];
+				if (
+					// Note from the current user
+					$last_note->moderator === wp_get_current_user()->user_nicename &&
+					// ..and created within 5 minutes.
+					absint( time() - strtotime( $last_note->date ) ) <= 5 * MINUTE_IN_SECONDS
+				) {
+					$note_id = $last_note_id;
+
+					// Prefix the existing message.
+					$note_text = trim( $last_note->text . "\n\n" . $note_text );
+				}
+			}
+
+			// Add a user note about this action.
 			Plugin::get_instance()->user_notes->add_user_note(
 				$user->ID,
-				sprintf(
-					'Forum role changed to %s.',
-					get_role( $new_role )->name
-				)
+				$note_text,
+				null,
+				$note_id
 			);
 		}
 
