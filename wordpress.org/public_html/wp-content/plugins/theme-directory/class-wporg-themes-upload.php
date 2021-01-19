@@ -976,9 +976,10 @@ TICKET;
 
 		if ( preg_match( '/Committed revision (\d+)./i', implode( '', $output ), $m ) ) {
 			$this->trac_changeset = $m[1];
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	/**
