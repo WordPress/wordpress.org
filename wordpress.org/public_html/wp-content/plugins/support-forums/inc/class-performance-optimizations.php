@@ -52,6 +52,13 @@ class Performance_Optimizations {
 		add_filter( 'bbp_get_forum_subscribers', '__return_empty_array' ); // bbPress 2.5; 2.6 deprecated
 		add_filter( 'bbp_get_subscribers', array( $this, 'bbp_get_subscribers' ), 10, 3 ); // bbPress 2.6
 		add_filter( 'bbp_get_user_subscribe_link', array( $this, 'bbp_get_user_subscribe_link' ), 10, 4 ); // Remove link.
+
+		// Disable new tag creation for non-moderators.
+		add_filter( 'bbp_new_topic_pre_insert',        array( $this, 'limit_topic_tag_creation' ) );
+		add_filter( 'bbp_edit_topic_pre_insert',       array( $this, 'limit_topic_tag_creation' ) );
+		add_filter( 'bbp_new_reply_pre_set_terms',     array( $this, 'limit_topic_reply_tag_creation' ) );
+		add_filter( 'bbp_edit_reply_pre_set_terms',    array( $this, 'limit_topic_reply_tag_creation' ) );
+
 	}
 
 	/**
@@ -465,4 +472,78 @@ class Performance_Optimizations {
 
 		return $html;
 	}
+
+	/**
+	 * Limit the creation of new tags to moderators or above.
+	 *
+	 * This curates the list of tags, keeping the tag list short and relevant.
+	 *
+	 * @param array $topic Array of post details.
+	 *
+	 * @return array Filtered post details array.
+	 */
+	public function limit_topic_tag_creation( $topic ) {
+		// Only affect the topic post type.
+		if ( bbp_get_topic_post_type() !== $topic['post_type'] ) {
+			return $topic;
+		}
+
+		// Do not modify anything if the user has moderator capabilities.
+		if ( current_user_can( 'moderate' ) ) {
+			return $topic;
+		}
+
+		$existing_tags = array();
+
+		$taxonomy = bbp_get_topic_tag_tax_slug();
+
+		if ( ! empty( $topic['tax_input'][ $taxonomy ] ) ) {
+			// Loop through the proposed terms
+			foreach ( $topic['tax_input'][ $taxonomy ] as $i => $term ) {
+				if ( ! term_exists( $term, $taxonomy ) ) {
+					// ..and remove anything that doesn't exist.
+					unset( $topic['tax_input'][ $taxonomy ][ $i ] );
+				}
+			}
+		}
+
+		return $topic;
+	}
+
+	/**
+	 * Limit the creation of new tags to moderators or above.
+	 *
+	 * This curates the list of tags, keeping the tag list short and relevant.
+	 *
+	 * @param array|string $terms Array of terms to apply to a topic.
+	 *
+	 * @return array|string Filtered array of terms to apply to a topic.
+	 */
+	public function limit_topic_reply_tag_creation( $terms ) {
+		// Do not modify anything if the user has moderator capabilities.
+		if ( current_user_can( 'moderate' ) ) {
+			return $terms;
+		}
+
+		if ( ! is_array( $terms ) ) {
+			$terms = explode( ',', trim( $terms, " \n\t\r\0\x0B," ) );
+		}
+
+		$existing_terms = array();
+
+		// Loop through the proposed tags and keep only the existing ones.
+		foreach ( $terms as $term ) {
+			if ( term_exists( $term, bbp_get_topic_tag_tax_id() ) ) {
+				$existing_terms[] = $term;
+			}
+		}
+
+		// Return a string if the input value was one.
+		if ( ! is_array( $terms ) ) {
+			return implode( ', ', $terms );
+		}
+
+		return $existing_terms;
+	}
+
 }
