@@ -308,6 +308,7 @@ class Hooks {
 	 * Redirect legacy urls to their new permastructure.
 	 *  - /users/$id & /profile/$slug to /users/$slug
 	 * 
+	 * See also: Support_Compat in inc/class-support-compat.php
 	 */
 	public function redirect_legacy_urls() {
 		global $wp_query;

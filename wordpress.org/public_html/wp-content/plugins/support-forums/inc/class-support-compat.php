@@ -562,30 +562,54 @@ class Support_Compat {
 	 */
 	public function redirect_old_topic_id() {
 		global $wpdb;
-		if ( is_404() && 'topic' == get_query_var( 'post_type' ) && is_numeric( get_query_var( 'topic' ) ) ) {
+
+		if ( ! is_404() ) {
+			return;
+		}
+
+		$topic_id = false;
+
+		// /support/topic/1234
+		if (
+			'topic' == get_query_var( 'post_type' ) &&
+			is_numeric( get_query_var( 'topic' ) )
+		) {
 			$topic_id = absint( get_query_var( 'topic' ) );
-			if ( ! $topic_id ) {
-				return;
-			}
+		}
 
-			$cache_key = $topic_id;
-			$cache_group = 'topic2post';
-			$post_id = wp_cache_get( $cache_key, $cache_group );
-			if ( false === $post_id ) {
-				$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}topic2post WHERE topic_id = %d LIMIT 1", $topic_id ) );
-				if ( $post_id ) {
-					$post_id = absint( $post_id );
-					wp_cache_set( $cache_key, $post_id, $cache_group );
-				}
-			}
+		// /support/topic.php?id=1234
+		if (
+			// topic.php sanitized to topic-php.
+			'topic-php' === get_query_var( 'pagename' ) &&
+			isset( $_GET['id'] ) &&
+			is_numeric( $_GET['id'] )
+		) {
+			$topic_id = absint( $_GET['id'] );
+		}
 
+		if ( ! $topic_id ) {
+			return;
+		}
+
+		$cache_key = $topic_id;
+		$cache_group = 'topic2post';
+		$post_id = wp_cache_get( $cache_key, $cache_group );
+		if ( false === $post_id ) {
+			$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}topic2post WHERE topic_id = %d LIMIT 1", $topic_id ) );
 			if ( $post_id ) {
-				$permalink = get_permalink( $post_id );
-				if ( $permalink ) {
-					wp_safe_redirect( $permalink, 301 );
-					exit;
-				}
+				$post_id = absint( $post_id );
+				wp_cache_set( $cache_key, $post_id, $cache_group );
 			}
+		}
+
+		if ( ! $post_id ) {
+			return;
+		}
+
+		$permalink = get_permalink( $post_id );
+		if ( $permalink ) {
+			wp_safe_redirect( $permalink, 301 );
+			exit;
 		}
 	}
 }
