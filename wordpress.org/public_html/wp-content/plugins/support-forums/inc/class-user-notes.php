@@ -21,7 +21,7 @@ class User_Notes {
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts',                   array( $this, 'enqueue_scripts' ) );
 
-		add_action( 'bbp_post_request',                     array( $this, 'add_user_note_request' ) );
+		add_action( 'bbp_post_request',                     array( $this, 'add_user_note_request' ), 0 ); // Low priority to get below bbp_edit_user_handler()
 		add_action( 'bbp_get_request',                      array( $this, 'delete_user_note_request' ) );
 
 		add_action( 'bbp_theme_after_topic_author_details', array( $this, 'display_user_notes_toggle_link' ) );
@@ -30,6 +30,7 @@ class User_Notes {
 		add_action( 'bbp_theme_before_topic_content',       array( $this, 'display_user_notes_in_content' ) );
 		add_action( 'bbp_theme_before_reply_content',       array( $this, 'display_user_notes_in_content' ) );
 		add_action( 'bbp_template_after_user_profile',      array( $this, 'display_user_notes_in_profile' ) );
+		add_action( 'bbp_user_edit_after',                  array( $this, 'display_user_notes_in_profile_edit' ) );
 	}
 
 	/**
@@ -49,9 +50,14 @@ class User_Notes {
 	 * @param string $action Requested action.
 	 */
 	public function add_user_note_request( $action = '' ) {
-		if ( 'wporg_bbp_add_user_note' !== $action || ! current_user_can( 'moderate' ) ) {
+		if (
+			! current_user_can( 'moderate' ) ||
+			! in_array( $action, [ 'bbp-update-user', 'wporg_bbp_add_user_note' ] )
+		) {
 			return;
 		}
+
+		$should_redirect = 'wporg_bbp_add_user_note' === $action;
 
 		$user_id   = isset( $_POST['user_id'] ) ? (int) $_POST['user_id'] : 0;
 		$post_id   = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
@@ -64,16 +70,18 @@ class User_Notes {
 		}
 
 		// Make sure our nonces are in order.
-		if ( ! bbp_verify_nonce_request( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ) ) ) {
+		if ( ! bbp_verify_nonce_request( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ), '_notenonce' ) ) {
 			return;
 		}
 
 		$this->add_user_note( $user_id, $note_text, $post_id, $note_id );
 
-		$redirect_url = set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+		if ( $should_redirect ) {
+			$redirect_url = set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 
-		// Redirect to clear form data.
-		bbp_redirect( $redirect_url );
+			// Redirect to clear form data.
+			bbp_redirect( $redirect_url );
+		}
 	}
 
 	/**
@@ -129,7 +137,10 @@ class User_Notes {
 			}
 		}
 
-		update_user_meta( $user_id, self::META, $user_notes );
+		if ( update_user_meta( $user_id, self::META, $user_notes ) ) {
+			// Clear internal cache.
+			unset( $this->user_notes[ $user_id ] );
+		}
 
 		return true;
 	}
@@ -152,13 +163,13 @@ class User_Notes {
 		}
 
 		// Make sure our nonces are in order.
-		if ( ! bbp_verify_nonce_request( sprintf( 'wporg-bbp-delete-user-note_%d_%d', $user_id, $note_id ) ) ) {
+		if ( ! bbp_verify_nonce_request( sprintf( 'wporg-bbp-delete-user-note_%d_%d', $user_id, $note_id ), '_notenonce' ) ) {
 			return;
 		}
 
 		$this->delete_user_note( $user_id, $note_id );
 
-		$redirect_url = remove_query_arg( array( 'action', 'user_id', 'note_id', '_wpnonce' ) );
+		$redirect_url = remove_query_arg( array( 'action', 'user_id', 'note_id', '_notenonce' ) );
 
 		// Redirect to clear URL.
 		bbp_redirect( $redirect_url );
@@ -199,6 +210,7 @@ class User_Notes {
 	 * Retrieves all notes for a particular user.
 	 *
 	 * @param int $user_id User ID. Defaults to the current post author.
+	 * @param bool $display_add_note_form Whether to show the Add New Note form.
 	 * @return array {
 	 *     Array of user notes.
 	 *
@@ -207,7 +219,7 @@ class User_Notes {
 	 *     @type string $html  User notes output.
 	 * }
 	 */
-	public function get_user_notes( $user_id = 0 ) {
+	public function get_user_notes( $user_id = 0, $display_add_note_form = true ) {
 		if ( ! $user_id ) {
 			$user_id = get_the_author_meta( 'ID' );
 		}
@@ -224,6 +236,11 @@ class User_Notes {
 
 		$note_id   = isset( $_GET['note_id'] ) ? (int) $_GET['note_id'] : 0;
 		$edit_note = isset( $user_notes[ $note_id ] );
+
+		// Don't display the new note form when editing a note.
+		if ( $edit_note ) {
+			$display_add_note_form = false;
+		}
 
 		$this->user_notes[ $user_id ] = (object) array(
 			'count' => count( $user_notes ),
@@ -279,7 +296,8 @@ class User_Notes {
 							'user_id' => $user_id,
 							'note_id' => $key,
 						), $redirect_on_delete ),
-						sprintf( 'wporg-bbp-delete-user-note_%d_%d', $user_id, $key )
+						sprintf( 'wporg-bbp-delete-user-note_%d_%d', $user_id, $key ),
+						'_notenonce'
 					) ),
 					__( 'Delete', 'wporg-forums' )
 				);
@@ -307,7 +325,7 @@ class User_Notes {
 			);
 		}
 
-		if ( ! $edit_note ) {
+		if ( $display_add_note_form ) {
 			ob_start();
 			$this->display_note_form( $user_id );
 			$this->user_notes[ $user_id ]->html .= ob_get_clean();
@@ -323,10 +341,11 @@ class User_Notes {
 	 * in the note adding/editing form with the current post ID and permalink.
 	 *
 	 * @param int $user_id User ID. Default 0.
+	 * @param bool $display_add_note_form Whether to show the add new note form. Default true.
 	 * @return string User notes output.
 	 */
-	public function get_user_notes_html( $user_id = 0 ) {
-		$user_notes = $this->get_user_notes( $user_id )->html;
+	public function get_user_notes_html( $user_id = 0, $display_add_note_form = true ) {
+		$user_notes = $this->get_user_notes( $user_id, $display_add_note_form )->html;
 
 		if ( ! bbp_is_single_user_profile() ) {
 			$post_id = get_the_ID();
@@ -419,7 +438,7 @@ class User_Notes {
 		}
 		?>
 		<form action="###POST_PERMALINK###" method="post" class="wporg-bbp-add-user-note">
-			<?php wp_nonce_field( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ) ); ?>
+			<?php wp_nonce_field( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ), '_notenonce' ); ?>
 			<input type="hidden" name="action" value="wporg_bbp_add_user_note">
 			<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
 			<input type="hidden" name="post_id" value="###POST_ID###">
@@ -531,6 +550,43 @@ class User_Notes {
 			<h2 id="user-notes" class="entry-title"><?php esc_html_e( 'User Notes', 'wporg-forums' ); ?></h2>
 			<div class="bbp-user-section">
 				<?php echo $this->get_user_notes_html( $user_id ); ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	
+	/**
+	 * Displays existing notes and the form for adding a new note in user edit profile.
+	 */
+	public function display_user_notes_in_profile_edit() {
+		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		$user_id = bbp_get_displayed_user_id();
+
+		// Only super admins can see notes on the current user.
+		if ( ! is_super_admin() && $user_id == get_current_user_id() ) {
+			return;
+		}
+
+		// Only keymasters can see notes on moderators.
+		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
+			return;
+		}
+		?>
+		<div class="wporg-bbp-user-notes">
+			<h2 id="user-notes" class="entry-title"><?php esc_html_e( 'User Notes', 'wporg-forums' ); ?></h2>
+			<div class="bbp-user-section">
+				<?php echo $this->get_user_notes_html( $user_id, false ); ?>
+
+				<div class="wporg-bbp-add-user-note">
+					<?php wp_nonce_field( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ), '_notenonce' ); ?>
+					<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
+					<label for="wporg-bbp-user-note-text" class=""><?php esc_html_e( 'Add your note', 'wporg-forums' ); ?></label><br>
+					<textarea name="note_text" id="wporg-bbp-user-note-text" cols="40" rows="5"><?php echo esc_textarea( $note_text ); ?></textarea>
+				</div>
 			</div>
 		</div>
 		<?php
