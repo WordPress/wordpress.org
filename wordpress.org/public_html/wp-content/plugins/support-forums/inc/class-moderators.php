@@ -119,6 +119,22 @@ class Moderators {
 				'orderby'       => 'ID',
 			)
 		);
+
+		bbp_register_view(
+			'all-replies',
+			__( 'All Replies', 'wporg-forums' ),
+			array(
+				'meta_key'      => null,
+				'post_type'     => 'reply',
+				'post_status'   => array(
+					'spam',
+					'pending',
+					'publish'
+				),
+				'show_stickies' => false,
+				'orderby'       => 'ID',
+			)
+		);
 	}
 
 	public function enqueue_styles() {

@@ -289,6 +289,11 @@ class Performance_Optimizations {
 				$r['post_parent__not_in'] = array( Plugin::THEMES_FORUM_ID, Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
 			}
 		}
+
+		if ( bbp_is_single_view() && 'all-replies' === bbp_get_view_id() ) {
+			add_filter( 'posts_where', array( $this, 'posts_in_last_month' ) );
+		}
+
 		return $r;
 	}
 

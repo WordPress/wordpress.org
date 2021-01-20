@@ -696,7 +696,7 @@ class Hooks {
 		if (
 			bbp_is_single_topic() || bbp_is_single_reply() || bbp_is_search_results()
 		||
-			bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'spam', 'pending', 'archived' ) )
+			bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'spam', 'pending', 'archived', 'all-replies' ) )
 		) {
 			return $r;
 		}

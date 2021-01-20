@@ -7,6 +7,18 @@
  * @subpackage Theme
  */
 
+/*
+ * Stub this in for this template, as bbPress not too smart sometimes.
+ * On a "topic query" which is a reply query, it'll fail to return an ID.
+ */
+add_filter( 'bbp_get_reply_id', function( $reply_id, $passed_id ) {
+	if ( ! $reply_id && ! $passed_id && bbp_is_reply( get_the_ID() ) ) {
+		$reply_id = get_the_ID();
+	}
+
+	return $reply_id;
+}, 10, 2 );
+
 if ( bbp_is_single_view() || bbp_is_search_results() || bbp_is_single_user_replies() ) : ?>
 
 <div id="post-<?php bbp_reply_id(); ?>" class="bbp-reply-header">
