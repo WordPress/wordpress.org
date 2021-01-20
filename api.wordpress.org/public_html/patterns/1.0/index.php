@@ -37,14 +37,7 @@ function main( $query_string ) {
 	 */
 	parse_str( $query_string, $query_args );
 
-	/*
-	 * Filter the returned fields down to only the ones Core uses.
-	 *
-	 * `_links` is necessary for `wp:term` to be embedded, see https://core.trac.wordpress.org/ticket/49985.
-	 * Related https://core.trac.wordpress.org/ticket/49538.
-	 */
-	$query_args['_fields'] = 'id,title,content,meta,_links';
-	$query_args['_embed']  = 'wp:term';
+	$query_args['_fields'] = 'id,title,content,meta';
 
 	// Sort alphabetically so that browsing is intuitive. Search will be sorted by rank.
 	if ( ! isset( $query_args['search'] ) ) {

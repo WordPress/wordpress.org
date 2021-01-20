@@ -49,6 +49,8 @@ class Test_Patterns extends TestCase {
 		$this->assertSame( 200, $response->status_code );
 		$this->assertIsString( $patterns[0]->title->rendered );
 		$this->assertIsInt( $patterns[0]->meta->wpop_viewport_width );
+		$this->assertIsArray( $patterns[0]->meta->wpop_category_slugs );
+		$this->assertIsArray( $patterns[0]->meta->wpop_keyword_slugs );
 	}
 
 	/**
@@ -58,17 +60,17 @@ class Test_Patterns extends TestCase {
 	 *
 	 * @return int[]
 	 */
-	public function get_term_ids( $patterns ) {
-		$term_ids = array();
+	public function get_term_slugs( $patterns ) {
+		$term_slugs = array();
 
 		foreach ( $patterns as $pattern ) {
-			$term_ids = array_merge(
-				$term_ids,
-				array_column( $pattern->_embedded->{'wp:term'}[0], 'id' )
+			$term_slugs = array_merge(
+				$term_slugs,
+				$pattern->meta->wpop_category_slugs
 			);
 		}
 
-		return array_unique( $term_ids );
+		return array_unique( $term_slugs );
 	}
 
 	/**
@@ -77,12 +79,12 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_all_patterns() : void {
-		$response = $this->send_request( '/' );
-		$patterns = json_decode( $response->body );
-		$term_ids = $this->get_term_ids( $patterns );
+		$response   = $this->send_request( '/' );
+		$patterns   = json_decode( $response->body );
+		$term_slugs = $this->get_term_slugs( $patterns );
 
 		$this->assertResponseHasPattern( $response );
-		$this->assertGreaterThan( 1, count( $term_ids ) );
+		$this->assertGreaterThan( 1, count( $term_slugs ) );
 	}
 
 	/**
@@ -91,13 +93,13 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_category() : void {
-		$query_term_id = 2;
-		$response      = $this->send_request( '/?pattern-categories=' . $query_term_id );
-		$patterns      = json_decode( $response->body );
-		$term_ids      = $this->get_term_ids( $patterns );
+		$button_term_id = 2;
+		$response       = $this->send_request( '/?pattern-categories=' . $button_term_id );
+		$patterns       = json_decode( $response->body );
+		$term_slugs     = $this->get_term_slugs( $patterns );
 
 		$this->assertResponseHasPattern( $response );
-		$this->assertSame( array( $query_term_id ), $term_ids );
+		$this->assertSame( array( 'buttons' ), $term_slugs );
 	}
 
 	/**
