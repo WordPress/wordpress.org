@@ -3,6 +3,8 @@
 namespace WordPressdotorg\API\Patterns;
 
 /*
+ * Supply Block Pattern Directory data to the block editor.
+ *
  * This is cached by nginx, so we don't have to worry about the performance costs of loading WP, and don't need to
  * do any any object caching.
  *
@@ -43,6 +45,12 @@ function main( $query_string ) {
 	 */
 	$query_args['_fields'] = 'id,title,content,meta,_links';
 	$query_args['_embed']  = 'wp:term';
+
+	// Sort alphabetically so that browsing is intuitive. Search will be sorted by rank.
+	if ( ! isset( $query_args['search'] ) ) {
+		$query_args['orderby'] = 'title';
+		$query_args['order']   = 'asc';
+	}
 
 	$wp_init_host = $api_url_base . $endpoint . '?' . urldecode( http_build_query( $query_args ) );
 
