@@ -10,7 +10,7 @@
 
 			// If there is no ID, create our own.
 			if ( ! id ) {
-				id = '#' + encodeURIComponent( $question.text().toLowerCase().trim() );
+				id = encodeURIComponent( $question.text().toLowerCase().trim() );
 				$question.attr( 'id', id );
 			}
 
