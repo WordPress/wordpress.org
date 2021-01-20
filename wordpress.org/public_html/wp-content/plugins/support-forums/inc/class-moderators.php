@@ -124,15 +124,16 @@ class Moderators {
 			'all-replies',
 			__( 'All Replies', 'wporg-forums' ),
 			array(
-				'meta_key'      => null,
-				'post_type'     => 'reply',
-				'post_status'   => array(
+				'meta_key'       => null,
+				'post_type'      => 'reply',
+				'post_status'    => array(
 					'spam',
 					'pending',
 					'publish'
 				),
-				'show_stickies' => false,
-				'orderby'       => 'ID',
+				'show_stickies'  => false,
+				'orderby'        => 'ID',
+				'posts_per_page' => 50
 			)
 		);
 	}
