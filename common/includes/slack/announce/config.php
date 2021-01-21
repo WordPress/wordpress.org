@@ -319,6 +319,7 @@ function get_whitelist() {
 			'yvettesonneveld',
 		),
 		'meta' => array(
+			'coreymckrill',
 			'obenland',
 			'SergeyBiryukov', // @sergey on Slack
 			'tellyworth',
@@ -334,6 +335,10 @@ function get_whitelist() {
 		),
 		'meta-i18n' => array(
 			'ocean90',
+		),
+		'meta-learn' => array(
+			'coreymckrill',
+			'tellyworth',
 		),
 		'meta-wordcamp' => $wordcamp_central,
 		'polyglots' => array(
