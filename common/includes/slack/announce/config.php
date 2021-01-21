@@ -320,6 +320,7 @@ function get_whitelist() {
 		),
 		'meta' => array(
 			'coreymckrill',
+			'dd32',
 			'obenland',
 			'SergeyBiryukov', // @sergey on Slack
 			'tellyworth',
