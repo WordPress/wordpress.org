@@ -584,8 +584,8 @@ class User_Notes {
 				<div class="wporg-bbp-add-user-note">
 					<?php wp_nonce_field( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ), '_notenonce' ); ?>
 					<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
-					<label for="wporg-bbp-user-note-text" class=""><?php esc_html_e( 'Add your note', 'wporg-forums' ); ?></label><br>
-					<textarea name="note_text" id="wporg-bbp-user-note-text" cols="40" rows="5"><?php echo esc_textarea( $note_text ); ?></textarea>
+					<label for="wporg-bbp-user-note-text"><?php esc_html_e( 'Add your note', 'wporg-forums' ); ?></label><br>
+					<textarea name="note_text" id="wporg-bbp-user-note-text" cols="40" rows="5"></textarea>
 				</div>
 			</div>
 		</div>
