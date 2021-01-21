@@ -25,18 +25,29 @@ function get_whitelist_for_channel( $channel ) {
 	return $users;
 }
 
-function get_whitelisted_channels_for_user( $user ) {
+/**
+ * Get the whitelisted channels for a user.
+ * 
+ * @param $user           string The user to get the list of channels for.
+ * @param $known_channels array  An optional list of channels which are known, so messaging can correctly identify a channel that's not whitelisted. Optional.
+ */
+function get_whitelisted_channels_for_user( $user, $known_channels = array() ) {
 	// Note: Due to inherited whitelisting from parent channels, only channels which are known by config.php will be listed.
 	// although the user might have access to other #parent-xxxx channels that are unknown to the API.
+	// $known_channels attempts to help with this, ensuring that the authorization message has the context of the current channel.
 
 	$whitelist   = get_whitelist();
 	$whitelisted = array();
 
-	foreach ( array_keys( $whitelist ) as $channel ) {
+	$channels = array_unique( array_merge( array_keys( $whitelist ), (array) $known_channels ) );
+
+	foreach ( $channels as $channel ) {
 		if ( is_user_whitelisted( $user, $channel ) ) {
 			$whitelisted[] = $channel;
 		}
 	}
+
+	sort( $whitelisted );
 
 	return $whitelisted;
 }
@@ -56,7 +67,7 @@ function show_authorization( $user, $channel ) {
 
 	echo "Valid commands are /at-channel for an @channel, and /announce or /here to perform an @here.\n";
 
-	$channels = get_whitelisted_channels_for_user( $user );
+	$channels = get_whitelisted_channels_for_user( $user, $channel );
 	if ( $channel === 'privategroup' ) {
 		echo "Any private group members can use these commands in this group.";
 		return;
