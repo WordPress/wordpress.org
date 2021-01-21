@@ -7,17 +7,33 @@ require_once __DIR__ . '/config.php';
 
 function get_whitelist_for_channel( $channel ) {
 	$whitelist = get_whitelist();
-	if ( isset( $whitelist[ $channel ] ) ) {
-		return $whitelist[ $channel ];
+
+	$users = [];
+
+	if ( ! empty( $whitelist[ $channel ] ) ) {
+		$users = $whitelist[ $channel ];
 	}
-	return array();
+
+	$parent_channel = get_parent_channel( $channel );
+	if ( $parent_channel && ! empty( $whitelist[ $parent_channel ] ) ) {
+		$users = array_merge( $users, $whitelist[ $parent_channel ] );
+	}
+
+	// Some users are listed twice, due to array_merge() in config & parent channel above.
+	$users = array_unique( $users );
+
+	return $users;
 }
 
 function get_whitelisted_channels_for_user( $user ) {
-	$whitelist = get_whitelist();
+	// Note: Due to inherited whitelisting from parent channels, only channels which are known by config.php will be listed.
+	// although the user might have access to other #parent-xxxx channels that are unknown to the API.
+
+	$whitelist   = get_whitelist();
 	$whitelisted = array();
-	foreach ( $whitelist as $channel => $users ) {
-		if ( in_array( $user, $users, true ) ) {
+
+	foreach ( array_keys( $whitelist ) as $channel ) {
+		if ( is_user_whitelisted( $user, $channel ) ) {
 			$whitelisted[] = $channel;
 		}
 	}
@@ -61,6 +77,40 @@ function show_authorization( $user, $channel ) {
 
 	printf( "If you are a team lead and need to be granted access, contact an admin in <#%s|%s> for assistance.\n", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME );
 	printf( "Your linked WordPress.org account that needs to be granted access is '%s'.", $user );
+}
+
+function get_parent_channel( $channel ) {
+	// Private groups are not actually channels.
+	if ( 'privategroup' === $channel ) {
+		return false;
+	}
+
+	list( $parent_channel, ) = explode( '-', $channel, 2 );
+
+	// Some channels parents are not a 1:1 match.
+	switch ( $parent_channel ) {
+		case 'accessibility':
+		case 'design':
+		case 'feature':
+		case 'tide':
+			$parent_channel = 'core';
+			break;
+		case 'community':
+			$parent_channel = 'community-team';
+			break;
+	}
+
+	// No parent channel!
+	if ( $parent_channel === $channel ) {
+		return false;
+	}
+
+	// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel
+	if ( ! get_whitelist_for_channel( $parent_channel ) ) {
+		return false;
+	}
+
+	return $parent_channel;
 }
 
 function run( $data ) {
@@ -143,30 +193,10 @@ function run( $data ) {
 	$send->send( $data['channel_id'] );
 
 	// Broadcast this message as a non-@here to the "parent" channel too.
-	list( $parent_channel, ) = explode( '-', $channel, 2 );
+	$parent_channel = get_parent_channel( $channel );
 
-	// Some channels parents are not a 1:1 match.
-	switch ( $parent_channel ) {
-		case 'accessibility':
-		case 'design':
-		case 'feature':
-		case 'tide':
-			$parent_channel = 'core';
-			break;
-		case 'community':
-			$parent_channel = 'community-team';
-			break;
-	}
-
-	// Validate the channel.
-	if (
-		// Skip for private groups.
-		'privategroup' === $parent_channel ||
-		// If this message was posted in the "parent" channel, nothing to do.
-		$parent_channel === $channel ||
-		// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel
-		! get_whitelist_for_channel( $parent_channel )
-	) {
+	// Validate the parent channel exists.
+	if ( ! $parent_channel ) {
 		return;
 	}
 

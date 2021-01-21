@@ -11,8 +11,12 @@ namespace Dotorg\Slack\Announce;
  * As Slack has deprecated the usage of user_names, please use WordPress.org user_logins here. Case Sensitive.
  * See https://api.slack.com/changelog/2017-09-the-one-about-usernames
  *
- * The array keys are the channel name (omit #) and the
- * values are an array of users.
+ * The array keys are the channel name (omit #) and the values are an array of users.
+ * 
+ * NOTES:
+ *  - Use the linked WordPress.org username, which is case-sensitive. Ask the user to type in `/here` in slack to find out the correct account.
+ *  - Private groups do NOT need to be listed here. All members of a private group can use announcements.
+ *  - Sub-channels inherit access, if a user is granted announce in #foo, they can also announce in #foo-bar.
  */
 function get_whitelist() {
 	$wordcamp_central = array(
