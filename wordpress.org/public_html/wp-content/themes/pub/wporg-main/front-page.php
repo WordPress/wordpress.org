@@ -255,7 +255,6 @@ get_header( 'wporg' );
 					<ul id="notable-users" class="notable-users">
 						<?php
 						$user_links = [
-							'rollingstones' => 'https://wordpress.org/showcase/the-rolling-stones/',
 							'people'        => 'https://wordpress.org/showcase/stylewatch-off-the-rack/',
 							'playstation'   => 'https://wordpress.org/showcase/playstationblog/',
 							'blondie'       => 'https://wordpress.org/showcase/blondie/',
