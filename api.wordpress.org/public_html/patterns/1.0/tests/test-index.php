@@ -12,30 +12,28 @@ class Test_Patterns extends TestCase {
 	 * Make an API request to the current sandbox.
 	 */
 	private function send_request( string $query_string ) : Requests_Response {
-		global $wporg_sandbox_hostname;
-
-		/*
-		 * This has to use HTTP rather than HTTPS, because the request will be made from the sandbox, which is
-		 * already behind the load balancer.
-		 */
-		$url = sprintf(
-			'http://%s/patterns/1.0%s',
-			$wporg_sandbox_hostname,
-			$query_string
-		);
+		$url = 'https://127.0.0.1/patterns/1.0' . $query_string;
 
 		$headers = array(
 			'Accept' => 'application/json',
 			'Host'   => 'api.wordpress.org',
 		);
 
+		$options = array(
+			/*
+			 * It's expected that the sandbox hostname won't be valid. This is safe because we're only connecting
+			 * to `127.0.0.1`.
+			 */
+			'verifyname' => false,
+		);
+
 		/*
-		 * Warning: Only make `get()` requests in this suite.
+		 * ⚠️ Warning: Only make `get()` requests in this suite.
 		 *
 		 * POST/UPDATE/DELETE requests would change production data, so those would have to be done in a local
 		 * environment.
 		 */
-		return Requests::get( $url, $headers );
+		return Requests::get( $url, $headers, $options );
 	}
 
 	/**
