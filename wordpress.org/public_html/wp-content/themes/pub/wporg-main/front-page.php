@@ -34,6 +34,8 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
+$cdn_domain = defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ? 's-origin.wordpress.org' : 's.w.org';
+
 get_header( 'wporg' );
 ?>
 	<header id="masthead" class="site-header" role="banner">
@@ -255,15 +257,18 @@ get_header( 'wporg' );
 					<ul id="notable-users" class="notable-users">
 						<?php
 						$user_links = [
-							'people'        => 'https://wordpress.org/showcase/stylewatch-off-the-rack/',
+							'whitehouse'    => 'https://wordpress.org/showcase/the-white-house/',
+							'rolling-stone' => 'https://wordpress.org/showcase/rolling-stone/',
+							'bbc-america'   => 'https://wordpress.org/showcase/bbc-america/',
+							'unicef-uk'     => 'https://wordpress.org/showcase/unicef-uk/',
+							'pioneer-woman' => 'https://wordpress.org/showcase/the-pioneer-woman',
 							'playstation'   => 'https://wordpress.org/showcase/playstationblog/',
 							'blondie'       => 'https://wordpress.org/showcase/blondie/',
-							'marthastewart' => 'https://wordpress.org/showcase/themarthablog/',
 						];
 
 						foreach ( array_rand( $user_links, 3 ) as $slug ) :
 							printf(
-								'<li><a href="%1$s"><img src="https://s.w.org/images/notableusers/%2$s-2x.png" alt="%2$s" width="130" height="57" /></a></li>',
+								'<li><a href="%1$s"><img src="https://'. $cdn_domain .'/images/notableusers/%2$s-2x.png?version=2" alt="%2$s" width="130" height="57" /></a></li>',
 								$user_links[ $slug ],
 								$slug
 							);
