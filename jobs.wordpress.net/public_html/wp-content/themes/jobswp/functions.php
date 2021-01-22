@@ -149,6 +149,24 @@ function jobswp_noindex() {
 add_action( 'wp_head', 'jobswp_noindex', 9 );
 
 /**
+ * Add a body class incorporating page slug.
+ *
+ * @param string[] $classes An array of body class names.
+ * @return string[]
+ */
+function jobswp_add_page_slug_to_body_class( $classes ) {
+	if ( is_page() ) {
+		$page = get_post();
+		if ( $page ) {
+			$classes[] = 'page-' . $page->post_name;
+		}
+	}
+
+	return $classes;
+}
+add_filter( 'body_class', 'jobswp_add_page_slug_to_body_class' );
+
+/**
  * Implement the Custom Header feature.
  */
 //require get_template_directory() . '/inc/custom-header.php';
