@@ -2,6 +2,8 @@
 
 namespace Dotorg\API\Events\Tests;
 use PHPUnit\Framework\TestCase;
+use Requests_Response;
+
 use function Dotorg\API\Events\{
 	get_events, get_location, build_response, is_client_core, pin_one_off_events,
 	maybe_add_regional_wordcamps, get_iso_3166_2_country_codes, maybe_add_wp15_promo, remove_duplicate_events
@@ -13,6 +15,44 @@ use function Dotorg\API\Events\{
 class Test_Events extends TestCase {
 	public static function setUpBeforeClass() : void {
 		require_once dirname( __DIR__ ) . '/index.php';
+	}
+
+	/**
+	 * Asserts that an HTTP response is valid and contains an event.
+	 *
+	 * @param Requests_Response $response
+	 */
+	public function assertResponseHasEvent( $response ) {
+		$body  = json_decode( $response->body );
+		$event = $body->events[0];
+
+		$this->assertSame( 200, $response->status_code );
+		$this->assertNull( $body->error );
+
+		$this->assertIsObject( $body->location );
+		$this->assertTrue(
+			( isset( $body->location->ip ) && is_numeric( $body->location->ip ) ) ||
+			( isset( $body->location->latitude ) && is_numeric( $body->location->latitude ) )
+		);
+
+		$this->assertContains( $event->type, array( 'wordcamp', 'meetup' ) );
+		$this->assertIsString( $event->title );
+		$this->assertIsNumeric( $event->start_unix_timestamp );
+		$this->assertSame( $event->url, filter_var( $event->url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED & FILTER_FLAG_QUERY_REQUIRED ) );
+		$this->assertIsNumeric( $event->location->latitude );
+	}
+
+	/**
+	 * @covers ::main
+	 *
+	 * @group e2e
+	 */
+	public function test_get_events_e2e() : void {
+		$response = send_request( '/events/1.0/?location=seattle&locale=en_US&timezone=America/Los_Angeles' );
+		$body     = json_decode( $response->body );
+
+		$this->assertResponseHasEvent( $response );
+		$this->assertSame( 'Seattle', $body->location->description );
 	}
 
 	/**
