@@ -2,40 +2,12 @@
 
 namespace WordPressdotorg\API\Patterns\Tests;
 use PHPUnit\Framework\TestCase;
-use Requests, Requests_Response;
+use Requests_Response;
 
 /**
  * @group patterns
  */
 class Test_Patterns extends TestCase {
-	/**
-	 * Make an API request to the current sandbox.
-	 */
-	private function send_request( string $query_string ) : Requests_Response {
-		$url = 'https://127.0.0.1/patterns/1.0' . $query_string;
-
-		$headers = array(
-			'Accept' => 'application/json',
-			'Host'   => 'api.wordpress.org',
-		);
-
-		$options = array(
-			/*
-			 * It's expected that the sandbox hostname won't be valid. This is safe because we're only connecting
-			 * to `127.0.0.1`.
-			 */
-			'verifyname' => false,
-		);
-
-		/*
-		 * ⚠️ Warning: Only make `get()` requests in this suite.
-		 *
-		 * POST/UPDATE/DELETE requests would change production data, so those would have to be done in a local
-		 * environment.
-		 */
-		return Requests::get( $url, $headers, $options );
-	}
-
 	/**
 	 * Asserts that an HTTP response is valid and contains a pattern.
 	 *
@@ -77,7 +49,7 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_all_patterns() : void {
-		$response   = $this->send_request( '/' );
+		$response   = send_request( '/patterns/1.0/' );
 		$patterns   = json_decode( $response->body );
 		$term_slugs = $this->get_term_slugs( $patterns );
 
@@ -92,7 +64,7 @@ class Test_Patterns extends TestCase {
 	 */
 	public function test_browse_category() : void {
 		$button_term_id = 2;
-		$response       = $this->send_request( '/?pattern-categories=' . $button_term_id );
+		$response       = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id );
 		$patterns       = json_decode( $response->body );
 		$term_slugs     = $this->get_term_slugs( $patterns );
 
@@ -110,7 +82,7 @@ class Test_Patterns extends TestCase {
 	 * @param string $search_query
 	 */
 	public function test_search_patterns( $search_term, $match_expected ) : void {
-		$response = $this->send_request( '/?search=' . $search_term );
+		$response = send_request( '/patterns/1.0/?search=' . $search_term );
 		$patterns = json_decode( $response->body );
 
 		if ( $match_expected ) {
