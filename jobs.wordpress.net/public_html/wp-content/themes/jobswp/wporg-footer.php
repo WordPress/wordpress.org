@@ -11,6 +11,7 @@
 			<li><a href="https://wordpress.org/support/" title="Forums, documentation, and other resources">Support</a></li>
 			<li><a href="https://developer.wordpress.org/" title="Resources for WordPress developers">Developers</a></li>
 			<li><a href="https://make.wordpress.org/" title="Give back to WordPress through code, support, translation and more">Get Involved</a></li>
+			<li><a href="https://learn.wordpress.org/" title="Workshops and training materials">Learn</a></li>
 		</ul>
 
 		<ul>
