@@ -1188,6 +1188,11 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 .page-faq .entry-content {
 	margin-top: inherit;
 }
+.page-faq h2 {
+	border-bottom: 1px solid #ccc;
+	font-size: 20px;
+	margin-bottom: 2rem;
+}
 .page-faq .entry-content dl {
 	font-size: 0.9em;
 }
