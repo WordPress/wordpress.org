@@ -19,8 +19,8 @@ class Test_Patterns extends TestCase {
 		$this->assertSame( 200, $response->status_code );
 		$this->assertIsString( $patterns[0]->title->rendered );
 		$this->assertIsInt( $patterns[0]->meta->wpop_viewport_width );
-		$this->assertIsArray( $patterns[0]->meta->wpop_category_slugs );
-		$this->assertIsArray( $patterns[0]->meta->wpop_keyword_slugs );
+		$this->assertIsArray( $patterns[0]->category_slugs );
+		$this->assertIsArray( $patterns[0]->keyword_slugs );
 	}
 
 	/**
@@ -36,7 +36,7 @@ class Test_Patterns extends TestCase {
 		foreach ( $patterns as $pattern ) {
 			$term_slugs = array_merge(
 				$term_slugs,
-				$pattern->meta->wpop_category_slugs
+				$pattern->category_slugs
 			);
 		}
 
@@ -64,7 +64,7 @@ class Test_Patterns extends TestCase {
 	 */
 	public function test_browse_category() : void {
 		$button_term_id = 2;
-		$response       = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id );
+		$response       = send_request( '/patterns/1.0/?pattern_categories=' . $button_term_id );
 		$patterns       = json_decode( $response->body );
 		$term_slugs     = $this->get_term_slugs( $patterns );
 

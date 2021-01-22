@@ -32,12 +32,12 @@ function main( $query_string ) {
 	 * Core clients should pass params for the desired action:
 	 *
 	 * @example Browse all:        `/patterns/1.0/`
-	 * @example Browse a category: `/patterns/1.0/?pattern-categories={id}`
+	 * @example Browse a category: `/patterns/1.0/?pattern_categories={id}`
 	 * @example Search:            `/patterns/1.0/?search={query}`
 	 */
 	parse_str( $query_string, $query_args );
 
-	$query_args['_fields'] = 'id,title,content,meta';
+	$query_args['_fields'] = 'id,title,content,meta,category_slugs,keyword_slugs';
 
 	// Sort alphabetically so that browsing is intuitive. Search will be sorted by rank.
 	if ( ! isset( $query_args['search'] ) ) {
