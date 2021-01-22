@@ -1185,13 +1185,13 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 }
 
 /* FAQ page */
-.page-id-47 .entry-content {
+.page-faq .entry-content {
 	margin-top: inherit;
 }
-.page-id-47 .entry-content dl {
+.page-faq .entry-content dl {
 	font-size: 0.9em;
 }
-.page-id-47 .entry-content dd {
+.page-faq .entry-content dd {
 	margin: 0 0 1.5em;
 }
 
