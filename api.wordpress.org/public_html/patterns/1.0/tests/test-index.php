@@ -64,7 +64,7 @@ class Test_Patterns extends TestCase {
 	 */
 	public function test_browse_category() : void {
 		$button_term_id = 2;
-		$response       = send_request( '/patterns/1.0/?pattern_categories=' . $button_term_id );
+		$response       = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id );
 		$patterns       = json_decode( $response->body );
 		$term_slugs     = $this->get_term_slugs( $patterns );
 
