@@ -100,12 +100,10 @@ function get_locales_data() {
 	$wporg_data = $wpdb->get_results( 'SELECT locale, subdomain, latest_release FROM wporg_locales ORDER BY locale', OBJECT_K );
 
 	foreach ( $gp_locales as $locale ) {
-		$subdomain = $latest_release = '';
-		if ( ! empty( $wporg_data[ $locale->wp_locale ] ) ) {
-			$subdomain      = $wporg_data[ $locale->wp_locale ]->subdomain;
-			$latest_release = $wporg_data[ $locale->wp_locale ]->latest_release;
-		}
+		$subdomain      = $wporg_data[ $locale->wp_locale ]->subdomain ?? '';
+		$latest_release = $wporg_data[ $locale->wp_locale ]->latest_release ?? '';
 		$release_status = get_locale_release_status( $subdomain, $latest_release );
+
 		$statuses[ $release_status ]++;
 
 		if ( isset( $translation_data[ $locale->wp_locale ] ) ) {
@@ -137,7 +135,7 @@ function get_locales_data() {
 			'language_pack_status' => $language_pack_status,
 			'sites'                => $sites,
 			'subdomain'            => $subdomain,
-			'rosetta_site_url'     => "https://$subdomain.wordpress.org/",
+			'rosetta_site_url'     => $subdomain ? "https://$subdomain.wordpress.org/" : '',
 			'latest_release'       => $latest_release ? $latest_release : false,
 		];
 	}
