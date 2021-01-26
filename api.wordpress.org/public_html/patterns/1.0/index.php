@@ -9,7 +9,7 @@ namespace WordPressdotorg\API\Patterns;
  * do any any object caching.
  *
  * todo
- * - publish caching sysreq once query args settled, etc -- https://make.wordpress.org/systems/wp-admin/post.php?post=1788&action=edit
+ * - publish caching sysreq once query args settled for patterns and categories, etc -- https://make.wordpress.org/systems/wp-admin/post.php?post=1788&action=edit
  * - add docs to codex
  */
 
@@ -26,23 +26,33 @@ main( $_SERVER['QUERY_STRING'] );
 function main( $query_string ) {
 	$api_url_base  = 'https://wordpress.org/patterns/wp-json';
 	$wp_init_query = true;
-	$endpoint      = '/wp/v2/wporg-pattern';
 
 	/*
 	 * Core clients should pass params for the desired action:
 	 *
-	 * @example Browse all:        `/patterns/1.0/`
-	 * @example Browse a category: `/patterns/1.0/?pattern_categories={id}`
-	 * @example Search:            `/patterns/1.0/?search={query}`
+	 * @example Browse all patterns:         `/patterns/1.0/`
+	 * @example Browse patterns by category: `/patterns/1.0/?pattern-categories={id}`
+	 * @example Search patterns:             `/patterns/1.0/?search={query}`
+	 *
+	 * @example Browse all categories:       `/patterns/1.0/?categories`
+	 *
+	 * Other query args will be passed on to the w.org endpoint.
 	 */
 	parse_str( $query_string, $query_args );
 
-	$query_args['_fields'] = 'id,title,content,meta,category_slugs,keyword_slugs';
+	if ( isset( $query_args['categories'] ) ) { // Return categories.
+		$endpoint              = '/wp/v2/pattern-categories';
+		$query_args['_fields'] = 'id,name,slug';
 
-	// Sort alphabetically so that browsing is intuitive. Search will be sorted by rank.
-	if ( ! isset( $query_args['search'] ) ) {
-		$query_args['orderby'] = 'title';
-		$query_args['order']   = 'asc';
+	} else { // Return patterns.
+		$endpoint              = '/wp/v2/wporg-pattern';
+		$query_args['_fields'] = 'id,title,content,meta,category_slugs,keyword_slugs';
+
+		// Sort alphabetically so that browsing is intuitive. Search will be sorted by rank.
+		if ( ! isset( $query_args['search'] ) ) {
+			$query_args['orderby'] = 'title';
+			$query_args['order']   = 'asc';
+		}
 	}
 
 	$wp_init_host = $api_url_base . $endpoint . '?' . urldecode( http_build_query( $query_args ) );

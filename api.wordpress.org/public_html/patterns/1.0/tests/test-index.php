@@ -62,7 +62,7 @@ class Test_Patterns extends TestCase {
 	 *
 	 * @group e2e
 	 */
-	public function test_browse_category() : void {
+	public function test_browse_patterns_by_category() : void {
 		$button_term_id = 2;
 		$response       = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id );
 		$patterns       = json_decode( $response->body );
@@ -126,5 +126,22 @@ class Test_Patterns extends TestCase {
 				'match_expected' => false,
 			),
 		);
+	}
+
+	/**
+	 * @covers ::main()
+	 *
+	 * @group e2e
+	 */
+	public function test_browse_all_categories() : void {
+		$response   = send_request( '/patterns/1.0/?categories' );
+		$categories = json_decode( $response->body );
+
+		$this->assertSame( 200, $response->status_code );
+		$this->assertGreaterThan( 0, count( $categories ) );
+
+		$this->assertIsInt( $categories[0]->id );
+		$this->assertIsString( $categories[0]->name );
+		$this->assertIsString( $categories[0]->slug );
 	}
 }
