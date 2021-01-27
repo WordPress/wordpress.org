@@ -253,12 +253,11 @@ function get_whitelist() {
 			'poena',
 		) ),
 		'design' => array(
+			'chaion07',
 			'estelaris',
+			'hedgefield',
 			'karmatosed',
-			'mapk',
 			'melchoyce',
-			'michaelarestad',
-			'noahrshrader', // @noah on Slack
 			'paaljoachim',
 			'sarahricker',
 		),
