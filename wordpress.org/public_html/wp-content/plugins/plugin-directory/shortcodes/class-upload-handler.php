@@ -413,6 +413,9 @@ class Upload_Handler {
 			'akismet-anti-spam',
 			'site-kit-by-google',
 			'yoast-seo',
+			'wp-media-folder',
+			'wp-file-download',
+			'wp-table-manager',
 		);
 
 		return in_array( $this->plugin_slug, $reserved_slugs );
@@ -476,7 +479,10 @@ class Upload_Handler {
 			'woocommerce',  // technically ending with '-for-woocommerce' is allowed.
 			'woo-commerce',
 			'woo-',
+			'wo-',
 			'wordpress',
+			'wpress',
+			'wp-',
 			'wp-mail-smtp-',
 			'yahoo-',
 			'yoast',
@@ -486,7 +492,7 @@ class Upload_Handler {
 		// Domains from which exceptions would be accepted.
 		$trademark_exceptions = array(
 			'yoast.com'             => array( 'yoast' ),
-			'automattic.com'        => array( 'akismet', 'akismet-', 'jetpack', 'jetpack-', 'wordpress', 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
+			'automattic.com'        => array( 'akismet', 'akismet-', 'jetpack', 'jetpack-', 'wordpress', 'wp-', 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
 			'facebook.com'          => array( 'facebook', 'instagram', 'oculus', 'whatsapp' ),
 			'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
 			'microsoft.com'         => array( 'bing-', 'microsoft-' ),
