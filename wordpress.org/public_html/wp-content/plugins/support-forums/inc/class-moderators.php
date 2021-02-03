@@ -32,6 +32,7 @@ class Moderators {
 		add_action( 'bbp_get_request',                  array( $this, 'archive_handler' ) );
 		add_filter( 'bbp_after_has_topics_parse_args',  array( $this, 'add_post_status_to_query' ) );
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'add_post_status_to_query' ) );
+		add_filter( 'bbp_is_topic_pending',             array( $this, 'archived_is_pending_topic' ), 10, 2 );
 
 		// Adjust the list of admin links for topics and replies.
 		add_filter( 'bbp_topic_admin_links',            array( $this, 'admin_links' ), 10, 2 );
@@ -1036,5 +1037,23 @@ class Moderators {
 	 */
 	public function store_moderator_username( $post_id ) {
 		update_post_meta( $post_id, self::MODERATOR_META, wp_get_current_user()->user_nicename );
+	}
+
+	/**
+	 * Treat the archived status as a pending status to ensure that bbp_get_reply_url() doesn't slash a non-pretty url.
+	 * 
+	 * @param bool $topic_status Whether the topic is pending.
+	 * @param int  $topic_id     The topic ID.
+	 * @return bool
+	 */
+	public function archived_is_pending_topic( $topic_status, $topic_id ) {
+		if (
+			! $topic_status &&
+			( bbp_get_topic_status( $topic_id ) === self::ARCHIVED )
+		) {
+			$topic_status = true;
+		}
+
+		return $topic_status;
 	}
 }
