@@ -673,6 +673,8 @@ class WPORG_Themes_Upload {
 	public function prepare_trac_ticket() {
 		$this->trac_ticket = new StdClass;
 
+		$this->trac_ticket->resolution = '';
+
 		// todo - check trac xml-rpc, maybe data needs to be escaped before sending it there.
 		$this->trac_ticket->summary = sprintf( 'THEME: %1$s – %2$s', $this->theme->display( 'Name' ), $this->theme->display( 'Version' ) );
 
@@ -859,8 +861,9 @@ TICKET;
 			// Theme review team auto-approves theme-updates, so mark the theme as live immediately, if last updated within two years.
 			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets
 			if ( ! $theme_is_older_than_two_years && $this->trac_ticket->priority == 'theme update' ) {
-				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically reviewed', array( 'action' => 'review' ), false );
-				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'approve_and_live' ), false );
+				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically reviewed & approved', array( 'action' => 'new_no_review' ), false );
+
+				$this->trac_ticket->resolution = 'live';
 			}
 
 		}
@@ -919,11 +922,15 @@ TICKET;
 			update_post_meta( $post_id, $meta_key, $meta_data );
 		}
 
-		// Discard versions that are awaiting review.
-		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), 'new' );
-
 		// Add an additional row with the trac ticket ID, to make it possible to find the post by this ID later.
 		add_post_meta( $post_id, sanitize_key( '_trac_ticket_' . $this->theme->get( 'Version' ) ), $ticket_id );
+
+		// Discard versions that are awaiting review, and maybe set this upload as live.
+		$version_status = 'new';
+		if ( ! empty( $this->trac_ticket->resolution ) && 'live' === $this->trac_ticket->resolution ) {
+			$version_status = 'live';
+		}
+		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), $version_status );
 	}
 
 	/**
@@ -1010,6 +1017,16 @@ TICKET;
 	 */
 	public function send_email_notification( $ticket_id ) {
 		if ( ! empty( $this->theme_post ) ) {
+
+			if (
+				! empty( $this->trac_ticket->resolution ) &&
+				'live' === $this->trac_ticket->resolution
+			) {
+				// Do nothing. The update has been set as live. No nee to let them know it's been uploaded.
+				// wporg_themes_approve_version() will send a "Congratulations! It's live!" email momentarily.
+				return;
+			}
+
 			/* translators: 1: theme name, 2: theme version */
 			$email_subject = sprintf( __( '[WordPress Themes] %1$s, new version %2$s', 'wporg-themes' ),
 				$this->theme->display( 'Name' ),
