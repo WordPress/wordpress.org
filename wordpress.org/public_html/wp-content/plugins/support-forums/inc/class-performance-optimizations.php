@@ -59,6 +59,8 @@ class Performance_Optimizations {
 		add_filter( 'bbp_new_reply_pre_set_terms',     array( $this, 'limit_topic_reply_tag_creation' ) );
 		add_filter( 'bbp_edit_reply_pre_set_terms',    array( $this, 'limit_topic_reply_tag_creation' ) );
 
+		// Add some caching on count_users().
+		add_filter( 'pre_count_users', array( $this, 'cache_count_users' ), 10, 3 );
 	}
 
 	/**
@@ -555,4 +557,32 @@ class Performance_Optimizations {
 		return $existing_terms;
 	}
 
+	/**
+	 * Cache the result of `count_users()` as the Support Forums site has a lot of users.
+	 * 
+	 * This slows wp-admin/users.php down so much that it's hard to use when required.
+	 * As these numbers don't change often, it's cached for 6 hours, which avoids a 20-60s query on each users.php pageload.
+	 */
+	public function cache_count_users( $result, $strategy, $site_id ) {
+		static $running = false;
+
+		if ( $result || ! is_multisite() || $running ) {
+			return $result;
+		}
+
+		switch_to_blog( $site_id );
+
+		$result = get_site_transient( 'count_users' );
+		if ( ! $result ) {
+			$running = true;
+			$result  = count_users( $strategy, $site_id );
+			$running = false;
+
+			set_site_transient( 'count_users', $result, 6 * HOUR_IN_SECONDS );
+		}
+
+		restore_current_blog();
+
+		return $result;
+	}
 }
