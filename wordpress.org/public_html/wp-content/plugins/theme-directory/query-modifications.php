@@ -38,6 +38,10 @@ function wporg_themes_pre_get_posts( $query ) {
 		$query->query_vars['post_status'] = 'publish';
 	}
 
+	if ( !empty( $query->query_vars['name'] ) ) {
+		$query->query_vars['post_status'] = 'publish,delist';
+	}
+
 	switch ( $query->query_vars['browse'] ) {
 		case 'new':
 			$query->query_vars['orderby'] = 'post_date';
