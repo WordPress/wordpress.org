@@ -18,7 +18,7 @@ if ( empty( $suggestions ) ) {
 					}
 					$gp_locale = GP_Locales::by_slug( $gp_locale_slug );
 
-					echo esc_html( $gp_locale->english_name );
+					echo esc_html( $gp_locale ? $gp_locale->english_name : $gp_locale_slug );
 
 					if ( $suggestion['user_id'] ) {
 						$user = get_user_by( 'id', $suggestion['user_id'] );
