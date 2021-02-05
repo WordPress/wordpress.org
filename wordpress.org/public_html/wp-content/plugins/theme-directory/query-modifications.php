@@ -34,13 +34,15 @@ function wporg_themes_pre_get_posts( $query ) {
 	}
 
 	// eliminate draft posts from showing up in the directory
-	if ( !isset( $query->query_vars['post_status'] ) ) {
-		$query->query_vars['post_status'] = 'publish';
-	}
-
-	if ( !empty( $query->query_vars['name'] ) ) {
-		$query->query_vars['post_status'] = 'publish,delist';
-	}
+	if (
+		! isset( $query->query_vars['post_status'] ) ||
+		'publish' === $query->query_vars['post_status']
+	) {
+		$query->query_vars['post_status'] = array(
+			'publish',
+			'delist',
+		);
+	} 
 
 	switch ( $query->query_vars['browse'] ) {
 		case 'new':
