@@ -80,14 +80,18 @@ class Starter_Content {
 
 		// If a theme causes problems, this can block loading.
 		$blocked_themes = array(
-			'posterity', // Customizer polyfill causes E_ERROR: Cannot redeclare posterity_get_user_css()
+			'posterity', // +child themes - Customizer polyfill causes E_ERROR: Cannot redeclare posterity_get_user_css()
 			'finedine',  // Customizer polyfill causes E_ERROR: Uncaught Error: Call to a member function add_partial() on bool
 		);
 
-		return (
-			! $blocked_themes ||
-			! in_array( get_stylesheet(), $blocked_themes )
-		);
+		if (
+			in_array( get_stylesheet(), $blocked_themes ) ||
+			in_array( get_template(), $blocked_themes )
+		) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function init() {
