@@ -1004,7 +1004,7 @@ class Block_Plugin_Checker {
 				__FUNCTION__,
 				'warning',
 				__( 'No translations are loaded for the scripts.', 'wporg-plugins' ),
-				$call
+				'wp_set_script_translations'
 			);
 		}
 	}
