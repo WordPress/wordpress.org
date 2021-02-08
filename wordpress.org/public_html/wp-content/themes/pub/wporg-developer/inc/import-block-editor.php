@@ -5,7 +5,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 	 * Initializes object.
 	 */
 	public function init() {
-		$manifest = 'https://raw.githubusercontent.com/WordPress/gutenberg/master/docs/manifest.json';
+		$manifest = 'https://raw.githubusercontent.com/WordPress/gutenberg/trunk/docs/manifest.json';
 
 		parent::do_init(
 			'blocks',
@@ -286,7 +286,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 	}
 
 	/**
-	 * Modifies the GitHub edit URL to point to master instead of the imported branch.
+	 * Modifies the GitHub edit URL to point to trunk instead of the imported branch.
 	 *
 	 * @param string $link    The link to edit the post on GitHub.
 	 * @param int    $post_id The post ID.
@@ -294,7 +294,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 	 */
 	public function wporg_markdown_edit_link( $link, $post_id ) {
 		if ( $this->get_post_type() === get_post_type( $post_id ) ) {
-			$link = str_replace( '/wp/' . WP_CORE_STABLE_BRANCH . '/', '/master/', $link );
+			$link = str_replace( '/wp/' . WP_CORE_STABLE_BRANCH . '/', '/trunk/', $link );
 		}
 
 		return $link;
