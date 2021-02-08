@@ -773,7 +773,7 @@ class Import {
 					'block.json:script',
 					'block.json:style',
 				);
-				$invalid_props = array_intersect( $required_valid_props, $result->get_error_data( 'error' ) );
+				$invalid_props = array_intersect( $required_valid_props, $result->get_error_data( 'error' ) ?: [] );
 				if ( empty( $invalid_props ) ) {
 					$blocks[] = $block;
 				}
