@@ -9,6 +9,7 @@
  */
 
 namespace WordPressdotorg\o2\Cross_Posting_Access;
+use o2_Xposts;
 
 class Plugin {
 
@@ -37,6 +38,9 @@ class Plugin {
 
 		// Include all current network sites in the suggestions.
 		add_filter( 'o2_xposts_site_list', [ $this, 'add_network_blogs_to_o2_site_list'] );
+
+		// List all sites in the auto-complete.
+		add_action( 'init', [ $this, 'override_o2_xposts_get_data' ], 9 ); // before o2_Xposts::get_data();
 	}
 
 	/**
@@ -65,11 +69,32 @@ class Plugin {
 				'title'     => $site->blogname,
 				'siteurl'   => $site->siteurl,
 				'subdomain' => $site->domain . $site->path,
+				// Name is used for the search index. This allows searching by each component, such as the path.
+				'name'      => $site->domain . ' ' . trim( $site->path, '/' ) . ' ' . $site->blogname,
 				'blavatar'  => ''
 			);
 		}
 
 		return $site_suggestions;
+	}
+
+	public function override_o2_xposts_get_data() {
+		$xposts = new o2_Xposts();
+		if (
+			! isset( $_GET['get-xpost-data'] ) ||
+			! is_user_logged_in() ||
+			! $xposts->should_process_terms()
+		) {
+			return;
+		}
+
+		$data = [
+			'data'  => array_values( $xposts->site_suggestions() ),
+			'limit' => 30, // Show all sites
+		];
+
+		wp_send_json_success( json_encode( $data ) );
+		die();
 	}
 
 	/**
@@ -116,4 +141,4 @@ class Plugin {
 	}
 }
 
-add_action( 'init', [ new Plugin(), 'init' ], 9 );
+add_action( 'init', [ new Plugin(), 'init' ], 5 );
