@@ -1664,6 +1664,10 @@ a.rsslink {
 	border: none;
 }
 
+#wporg-footer .social-media-links .dashicons {
+	margin-right: 4px;
+}
+
 #wporg-footer .cip {
 	clear: both;
 	float: none;
