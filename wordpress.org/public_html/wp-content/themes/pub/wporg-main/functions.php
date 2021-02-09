@@ -87,7 +87,7 @@ function scripts() {
 		'wporg-style',
 		get_theme_file_uri( '/css/style.css' ),
 		array( 'dashicons', 'open-sans' ),
-		filemtime( __DIR__ . '/style.css' )
+		100
 	);
 
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
