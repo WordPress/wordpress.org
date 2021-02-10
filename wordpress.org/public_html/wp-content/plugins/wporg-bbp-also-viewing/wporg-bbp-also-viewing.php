@@ -257,7 +257,7 @@ function get_currently_viewing( $page ) {
 function get_others_currently_viewing( $page ) {
 	$users = get_currently_viewing( $page );
 	foreach ( $users as $i => $u ) {
-		if ( $u->user_id == get_current_user_id() ) {
+		if ( $u['user_id'] == get_current_user_id() ) {
 			unset( $users[ $i ] );
 		}
 	}

@@ -56,7 +56,7 @@
 
 			if ( userCount > 1 ) {
 				userlistPretty = __( '%1$s and %2$s' )
-				.replace( '%1$s', userList.slice( 0, -1 ).join( ', ' ) )
+				.replace( '%1$s', userList.slice( 0, -1 ).join( ', ' ) + ( userCount > 2 ? ',' : '' ) )
 				.replace( '%2$s', userList.slice( -1 ) );
 			} else {
 				userlistPretty = userList.join( ', ' ); // only one element.
