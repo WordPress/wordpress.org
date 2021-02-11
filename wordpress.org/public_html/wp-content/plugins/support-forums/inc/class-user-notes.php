@@ -30,7 +30,7 @@ class User_Notes {
 		add_action( 'bbp_theme_before_topic_content',       array( $this, 'display_user_notes_in_content' ) );
 		add_action( 'bbp_theme_before_reply_content',       array( $this, 'display_user_notes_in_content' ) );
 		add_action( 'bbp_template_after_user_profile',      array( $this, 'display_user_notes_in_profile' ) );
-		add_action( 'bbp_user_edit_after',                  array( $this, 'display_user_notes_in_profile_edit' ) );
+		add_action( 'bbp_user_edit_after',                  array( $this, 'display_user_notes_in_profile_edit' ), 20 );
 	}
 
 	/**

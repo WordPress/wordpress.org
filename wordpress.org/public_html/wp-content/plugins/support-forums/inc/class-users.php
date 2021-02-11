@@ -7,6 +7,7 @@ class Users {
 	public function __construct() {
 		// Add custom fields to user's profile.
 		add_action( 'bbp_user_edit_after_name',        array( $this, 'add_custom_title_input' ) );
+		add_action( 'bbp_user_edit_after',             array( $this, 'add_options_section_header' ), 0 );
 		add_action( 'bbp_user_edit_after',             array( $this, 'add_auto_topic_subscription_checkbox' ) );
 
 		// Save custom field values.
@@ -79,6 +80,16 @@ class Users {
 			<input type="text" name="title" id="title" value="<?php echo esc_attr( $title ); ?>" class="regular-text" />
 		</div>
 		<?php
+	}
+
+	/**
+	 * Add a section header to the extra user options.
+	 */
+	public function add_options_section_header() {
+		printf(
+			'<h2 id="user-settings" class="entry-title">%s</h2>',
+			esc_html__( 'User Options', 'wporg-forums' )
+		);
 	}
 
 	/**

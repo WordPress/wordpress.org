@@ -9,6 +9,7 @@
 		currentlyViewing = options.currentlyViewing || [],
 		page = options.currentPage || '',
 		banner = false,
+		bannerOffset = 200,
 		isTyping = false,
 		_n = wp.i18n._n,
 		__ = wp.i18n.__,
@@ -42,20 +43,20 @@
 			}
 
 			jQuery('#main').before(
-				'<div id="also-viewing-banner" style="display: none; font-size: 14px; color: #fff; line-height: 30px; font-family: Helvetica,sans-serif; background: #d54e21; border-bottom: 1px solid #dfdfdf; width:100%; height:30px; text-align: center; position: initial; top: 32px; left: 0; z-index: 9999;"></div>'
+				'<div id="also-viewing-banner" style="display: none; font-size: 0.8rem; color: #fff; line-height: 2rem; background: #d54e21; width:100%; text-align: center; position: initial; top: 32px; left: 0; z-index: 9999;"></div>'
 			);
 			banner = jQuery( '#also-viewing-banner' );
 		}
 
 		if ( ! userCount ) {
-			banner.show( false );
+			banner.hide();
 		} else {
 			userList = currentlyViewing.map( function( item ) {
-				return item.who + ( item.isTyping ? ' ' + __( '(is typing)', 'wporg-bbp-also-viewing' ) : '' );
+				return item.who + ( item.isTyping ? ' ' + __( '(is typing)', 'wporg-forums' ) : '' );
 			} );
 
 			if ( userCount > 1 ) {
-				userlistPretty = __( '%1$s and %2$s' )
+				userlistPretty = __( '%1$s and %2$s', 'wporg-forums' )
 				.replace( '%1$s', userList.slice( 0, -1 ).join( ', ' ) + ( userCount > 2 ? ',' : '' ) )
 				.replace( '%2$s', userList.slice( -1 ) );
 			} else {
@@ -63,10 +64,11 @@
 			}
 
 			banner.text(
-				_n( '%s is also viewing this page.', '%s are also viewing this page.', userCount, 'wporg-bbp-also-viewing' )
+				_n( '%s is also viewing this page.', '%s are also viewing this page.', userCount, 'wporg-forums' )
 				.replace( '%s', userlistPretty )
 			);
-			banner.show( true );
+			banner.show();
+			bannerOffset = banner.offset().top - jQuery('#wpadminbar').height();
 		}
 	}
 
@@ -76,12 +78,15 @@
 			return;
 		}
 
-		if ( jQuery(window).scrollTop() > 200 ) {
+		var $main = jQuery('#main');
+		if ( jQuery(window).scrollTop() > bannerOffset ) {
 			banner.css( 'position', 'fixed' );
+			$main.css( 'padding-top', banner.height() );
 		} else {
 			banner.css( 'position', 'initial' );
+			$main.css( 'padding-top', 0 );
 		}
-	});
+	} );
 
 	// When a textarea is focused, mark the user as typing.
 	jQuery(document).on( 'keydown', 'textarea', function() {

@@ -26,13 +26,12 @@ use function WordPressdotorg\SEO\Canonical\get_canonical_url;
  *	along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-const TOGGLE_KEY   = 'toggle-also-viewing';
 const USER_OPTION  = 'also-viewing';
-const NONCE        = 'also-viewing';
 const TIMEOUT      = 5 * \MINUTE_IN_SECONDS;
-const REFRESH_INT  = 45; // How often the client should check for new viewers.
+const REFRESH_INT  = 45; // How often the client should check for new viewers in seconds.
 const CACHE_GROUP  = 'also-viewing';
 const CACHE_TIME   = 5 * \MINUTE_IN_SECONDS;
+const REPLY_THRESH = 20; // The number of replies a user must have before the feature can be opt'd into.
 
 function init() {
 
@@ -50,15 +49,17 @@ function init() {
 	}
 
 	// Add a UI to enable/disable the feature.
-	add_action( 'admin_bar_menu', __NAMESPACE__ . '\admin_bar_menu', 1000 );
-	maybe_toggle();
+	add_action( 'bbp_user_edit_after', __NAMESPACE__ . '\bbp_user_edit_after' );
+	add_action( 'bbp_profile_update', __NAMESPACE__ . '\bbp_profile_update', 10, 1 );
 
 	// If enabled, queue up the JS, and register the API endpoints.
 	if ( enabled() ) {
 		add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wp_enqueue_scripts' );
 
 		// Record the user as being on the page.
-		add_action( 'wp_head', __NAMESPACE__ . '\user_viewing', 10, 0 );
+		add_action( 'wp_head', function() {
+			user_viewing(); // Record the user as being on the current page.
+		} );
 	}
 
 	// Add some REST API endpoints for JS usage:
@@ -86,8 +87,12 @@ function enabled() {
  * @return bool
  */
 function allowed_for_user() {
-	// TODO: Enable for non-moderator? users with more than x replies?
-	return is_user_logged_in() && current_user_can( 'moderate' );
+	return
+		is_user_logged_in() &&
+		(
+			current_user_can( 'moderate' ) ||
+			bbp_get_user_reply_count( get_current_user_id(), true ) >= REPLY_THRESH
+		);
 }
 
 /**
@@ -147,7 +152,7 @@ function wp_enqueue_scripts() {
 		[ 'jquery', 'wp-i18n' ],
 		filemtime( __DIR__ . '/wporg-bbp-also-viewing.js' )
 	);
-	wp_set_script_translations( 'also-viewing', 'wporg-bbp-also-viewing' );
+	wp_set_script_translations( 'also-viewing', 'wporg-forums' );
 
 	wp_localize_script(
 		'also-viewing',
@@ -165,48 +170,39 @@ function wp_enqueue_scripts() {
 }
 
 /**
- * Add a Admin bar entry to enable/disable the Also Viewing tool.
+ * Add an option to the user profile to enable/disable it.
  */
-function admin_bar_menu( $wp_admin_bar ) {
-	$args = [
-		'id'    => 'toggle_translator',
-		'title' => '<span class="ab-icon dashicons-welcome-view-site"></span> ' . __( 'Also Viewing', 'wporg-bbp-also-viewing' ),
-		'href'  => wp_nonce_url( add_query_arg( TOGGLE_KEY, (int)( ! enabled() ) ), NONCE ),
-		'meta'  => [
-			'class' => 'toggle-also-viewing',
-			'title' => ( enabled() ? __( 'Disable also viewing', 'wporg-bbp-also-viewing' ) : __( 'Enable also viewing', 'wporg-bbp-also-viewing' ) )
-		]
-	];
-	$wp_admin_bar->add_node( $args );
-
-	// Add a descriptive sub-child menu.
-	$args['title'] = $args['meta']['title'];
-	$args['parent'] = $args['id'];
-	$args['id'] .= '-child';
-	$wp_admin_bar->add_node( $args );
-}
-
-/**
- * Handle the admin bar toggle actions.
- */
-function maybe_toggle() {
-	if (
-		! isset( $_GET[ TOGGLE_KEY ] ) ||
-		! isset( $_GET['_wpnonce'] ) ||
-		! wp_verify_nonce( $_GET['_wpnonce'], NONCE )
-	) {
+function bbp_user_edit_after() {
+	if ( ! allowed_for_user() ) {
 		return;
 	}
 
-	update_user_meta( get_current_user_id(), USER_OPTION, (int) $_GET[ TOGGLE_KEY ] );
+	printf(
+		'<p>
+		<input name="also_viewing" id="also_viewing_toggle" type="checkbox" value="yes" %s>
+		<label for="also_viewing_toggle">%s</label>
+		</p>',
+		checked( enabled(), true, false ),
+		sprintf(
+			'Enable the <a href="%s">Also Viewing</a> feature.', // TODO: Translate once text is figured out __( , 'wporg-forums' ),
+			esc_attr( 'javascript:alert("The Also Viewing feature allows regular support forum contributors to opt-in to allowing other users of this feature to see who else is viewing the current page.");' ) // TODO: This needs a support page explaining what it is.
+		)
+	);
+}
+
+/**
+ * Save the user option to enable/disable.
+ */
+function bbp_profile_update( $user_id ) {
+	$enabled = ! empty( $_REQUEST['also_viewing'] ) && 'yes' === $_REQUEST['also_viewing'];
+
+	update_user_meta( $user_id, USER_OPTION, (int) $enabled );
 
 	// Cleanup.
-	if ( ! enabled() ) {
-		clear_viewing( null, get_current_user_id() );
+	if ( ! $enabled ) {
+		clear_viewing( null, $user_id );
 	}
 
-	wp_safe_redirect( remove_query_arg( [ TOGGLE_KEY, '_wpnonce' ] ) );
-	die();
 }
 
 /**
