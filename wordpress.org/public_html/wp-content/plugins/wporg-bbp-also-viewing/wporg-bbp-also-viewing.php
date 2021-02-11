@@ -234,6 +234,10 @@ function get_currently_viewing( $page ) {
 	$table  = get_table();
 	$page   = sanitize_page_url_for_db( $page );
 
+	if ( ! $page ) {
+		return [];
+	}
+
 	$users = wp_cache_get( $page, CACHE_GROUP );
 	if ( false === $users ) {
 		$users = $wpdb->get_results( $wpdb->prepare(
@@ -300,6 +304,10 @@ function user_viewing( $page = false, $typing = false, $user_id = false ) {
 
 	if ( ! $user_id ) {
 		$user_id = get_current_user_id();
+	}
+
+	if ( ! $page ) {
+		return false;
 	}
 
 	$table  = get_table();
