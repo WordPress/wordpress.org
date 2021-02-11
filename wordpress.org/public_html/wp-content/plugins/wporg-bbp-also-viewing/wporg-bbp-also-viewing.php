@@ -35,6 +35,16 @@ const CACHE_GROUP  = 'also-viewing';
 const CACHE_TIME   = 5 * \MINUTE_IN_SECONDS;
 
 function init() {
+
+	// Non-user-specific cron needs to be registered first.
+	add_action( 'admin_init', function() {
+		if ( ! wp_next_scheduled ( 'also_viewing_cleanup' ) ) {
+			wp_schedule_event( time(), 'hourly', 'also_viewing_cleanup' );
+		}
+	} );
+	add_action( 'also_viewing_cleanup', __NAMESPACE__ . '\cron_cleanup' );
+
+	// If the user can't enable it, we can skip registering the panels and such.
 	if ( ! allowed_for_user() ) {
 		return;
 	}
@@ -54,14 +64,8 @@ function init() {
 	// Add some REST API endpoints for JS usage:
 	add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_init' );
 
-	// Maintain it, maybe create the storage table, and setup a cron to cleanup hourly if needed.
+	// Maintain it, maybe create the storage table
 	add_action( 'admin_init', __NAMESPACE__ . '\maybe_create_table' );
-	add_action( 'also_viewing_cleanup', __NAMESPACE__ . '\cron_cleanup' );
-	add_action( 'admin_init', function() {
-		if ( ! wp_next_scheduled ( 'also_viewing_cleanup' ) ) {
-			wp_schedule_event( time(), 'hourly', 'also_viewing_cleanup', $args );
-		}
-	} );
 }
 add_action( 'init', __NAMESPACE__ . '\init' );
 
@@ -73,7 +77,7 @@ add_action( 'init', __NAMESPACE__ . '\init' );
 function enabled() {
 	return
 		allowed_for_user() &&
-		get_user_meta( get_current_user_id(), 'also-viewing', true );
+		get_user_meta( get_current_user_id(), USER_OPTION, true );
 }
 
 /**
