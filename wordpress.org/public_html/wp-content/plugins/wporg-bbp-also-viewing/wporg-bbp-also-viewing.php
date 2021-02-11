@@ -186,7 +186,7 @@ function wp_enqueue_scripts() {
  * Add an option to the user profile to enable/disable it.
  */
 function bbp_user_edit_after() {
-	$user_id = bbp_displayed_user_id();
+	$user_id = bbp_get_displayed_user_id();
 
 	if ( ! allowed_for_user( $user_id ) && ! current_user_can( 'moderate' ) ) {
 		return;
