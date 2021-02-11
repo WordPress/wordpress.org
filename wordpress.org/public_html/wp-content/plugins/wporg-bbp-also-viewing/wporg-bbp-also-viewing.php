@@ -73,26 +73,39 @@ add_action( 'init', __NAMESPACE__ . '\init' );
 /**
  * Whether Also Viewing is enabled for the current user.
  * 
+ * @param int $user_id The user ID to check for.
+ * 
  * @return bool
  */
-function enabled() {
+function enabled( $user_id = 0 ) {
+	if ( ! $user_id ) {
+		$user_id = get_current_user_id();
+	}
+
 	return
-		allowed_for_user() &&
-		get_user_meta( get_current_user_id(), USER_OPTION, true );
+		allowed_for_user( $user_id ) &&
+		get_user_meta( $user_id, USER_OPTION, true );
 }
 
 /**
  * Whether Also Viewing is able to be activated for the current user.
  * 
+ * @param int $user_id The user ID to check for.
+ * 
  * @return bool
  */
-function allowed_for_user() {
+function allowed_for_user( $user_id = 0 ) {
+	if ( ! $user_id ) {
+		$user_id = get_current_user_id();
+	}
+
+	if ( ! $user_id ) {
+		return false;
+	}
+
 	return
-		is_user_logged_in() &&
-		(
-			current_user_can( 'moderate' ) ||
-			bbp_get_user_reply_count( get_current_user_id(), true ) >= REPLY_THRESH
-		);
+		user_can( $user_id, 'moderate' ) ||
+		bbp_get_user_reply_count( $user_id, true ) >= REPLY_THRESH;
 }
 
 /**
@@ -173,7 +186,9 @@ function wp_enqueue_scripts() {
  * Add an option to the user profile to enable/disable it.
  */
 function bbp_user_edit_after() {
-	if ( ! allowed_for_user() ) {
+	$user_id = bbp_displayed_user_id();
+
+	if ( ! allowed_for_user( $user_id ) && ! current_user_can( 'moderate' ) ) {
 		return;
 	}
 
