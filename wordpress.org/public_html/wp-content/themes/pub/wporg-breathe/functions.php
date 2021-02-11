@@ -271,6 +271,26 @@ function append_last_updated( $content, $post ) {
 }
 
 /**
+ * Noindex some requests:
+ *  - all o2 taxonomy pages, rather than the default of only noindexing archives with less than 3 posts
+ *  - Posts/pages/etc with less than 100char.
+ */
+function maybe_noindex( $noindex ) {
+	// Noindex all o2 taxonomy pages.
+	if ( is_tax() || is_tag() || is_category() ) {
+		$noindex = true;
+	}
+
+	// Noindex empty/short pages
+	if ( is_singular() && ( strlen( get_the_content() ) < 100 ) ) {
+		$noindex = true;
+	}
+
+	return $noindex;
+}
+add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\maybe_noindex' );
+
+/**
  * Register translations for plugins without their own GlotPress project.
  */
 // wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
