@@ -486,8 +486,16 @@ class Moderators {
 
 		$permalink = $this->get_permalink( $post->ID );
 
+		$classes = array();
+
+		if ( bbp_is_topic( $r['post_id'] ) ) {
+			$classes[] = 'bbp-topic-archive-link';
+		} else {
+			$classes[] = 'bbp-reply-archive-link';
+		}
+
 		$url = esc_url( wp_nonce_url( add_query_arg( $query_args, $permalink ), 'toggle-post-archive_' . $user_id . '_' . $post->ID ) );
-		return sprintf( "<a href='%s'>%s</a>", $url, esc_html( $text ) );
+		return sprintf( "<a href='%s' class='%s'>%s</a>", $url, esc_attr( implode( ' ', $classes ) ), esc_html( $text ) );
 	}
 
 	public function is_post_archived( $post_id ) {

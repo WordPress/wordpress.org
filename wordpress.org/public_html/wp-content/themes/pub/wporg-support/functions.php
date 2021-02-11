@@ -31,7 +31,20 @@ function wporg_support_scripts() {
 	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
-	wp_enqueue_script( 'wporg-support-forums', get_template_directory_uri() . '/js/forums.js', array( 'jquery' ), '20200318', true );
+	wp_enqueue_script( 'wporg-support-forums', get_template_directory_uri() . '/js/forums.js', array( 'jquery' ), '20210211', true );
+
+	wp_localize_script(
+		'wporg-support-forums',
+		'wporgSupport',
+		array(
+			'strings' => array(
+				'approve'       => __( 'The approval status of this post has been changed.', 'wporg-forums' ),
+				'spam'          => __( 'The spam status of this post has been changed.', 'wporg-forums' ),
+				'archive'       => __( 'The archive status of this post has been changed.', 'wporg-forums' ),
+				'action_failed' => __( 'Unable to complete the requested action, please try again.', 'wporg-forums' ),
+			),
+		)
+	);
 }
 add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
 
