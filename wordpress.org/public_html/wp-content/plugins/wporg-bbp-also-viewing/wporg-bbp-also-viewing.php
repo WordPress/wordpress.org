@@ -200,7 +200,7 @@ function bbp_user_edit_after() {
 		checked( enabled( $user_id ), true, false ),
 		sprintf(
 			'Enable the <a href="%s">Also Viewing</a> feature.', // TODO: Translate once text is figured out __( , 'wporg-forums' ),
-			esc_attr( 'javascript:alert("The Also Viewing feature allows regular support forum contributors to opt-in to allowing other users of this feature to see who else is viewing the current page.");' ) // TODO: This needs a support page explaining what it is.
+			'https://make.wordpress.org/support/handbook/appendix/helpful-tools/#avoiding-overlapping-replies'
 		)
 	);
 }
