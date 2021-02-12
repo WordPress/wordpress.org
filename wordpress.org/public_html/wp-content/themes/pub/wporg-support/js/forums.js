@@ -22,7 +22,7 @@
 		} );
 	}
 
-	if ( $('body.bbp-is-view' ) ) {
+	if ( $( 'body' ).is( '.bbp-is-view' ) ) {
 		$( '.bbp-body .bbp-admin-links a' ).click( function( e ) {
 			var $this = $( this ),
 				$element = $this.closest( '.bbp-body' ),
