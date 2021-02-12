@@ -229,7 +229,7 @@ class o2_follow {
 				$initial_state        = 'subscribed';
 			}
 
-			$link = add_query_arg( $query_args, home_url( '', is_ssl() ? 'https' : 'http' ) );
+			$link = add_query_arg( $query_args, home_url( '/', is_ssl() ? 'https' : 'http' ) );
 			$link = wp_nonce_url( $link, 'post-comment-subscribe' );
 
 			$actions[31] = [
@@ -251,7 +251,7 @@ class o2_follow {
 	 * @param object $message Message.
 	 */
 	public function check_post_for_subscription( $post_id, $message ) {
-		if ( $message->isFollowing ) {
+		if ( ! empty( $message->isFollowing ) ) {
 			$this->subscribe_to_comments( $post_id );
 		}
 	}
