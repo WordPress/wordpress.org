@@ -197,6 +197,7 @@ class Plugin {
 		}
 
 		// Class related to thread starter
+		/*
 		if (
 			'reply' === $item_type &&
 			bbp_get_reply_author_id( $item_id ) === bbp_get_topic_author_id( bbp_get_reply_topic_id( $item_id ) )
@@ -204,6 +205,7 @@ class Plugin {
 			$classes[] = 'by-thread-starter';
 			$has_badge = true;
 		}
+		*/
 
 		// Class related to plugin and theme authors/contributors.
 		if ( $info = $this->get_author_badge_info( $item_type, $item_id ) ) {
