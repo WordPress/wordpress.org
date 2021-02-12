@@ -950,11 +950,21 @@ class Template {
 
 			if ( $post ) {
 				$sites = Plugin_I18n::instance()->get_locales();
+
+				// Always include the current locale, regardless of translation status. #5614
+				if ( 'en_US' !== get_locale() ) {
+					if ( ! wp_list_filter( $sites, [ 'wp_locale' => get_locale() ] ) ) {
+						$sites[] = (object) array(
+							'wp_locale' => get_locale(),
+						);
+					}
+				}
+
 			} else {
 				$sites = array();
 				foreach ( array_keys( $subdomains ) as $locale ) {
 					$sites[] = (object) array(
-						'wp_locale'    => $locale
+						'wp_locale' => $locale,
 					);
 				}
 			}
