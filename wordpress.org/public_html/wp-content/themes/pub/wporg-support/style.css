@@ -1327,6 +1327,10 @@ table {
 	box-shadow: -4px 0 0 #fff, -6px 0 0 #4e3288;
 }
 
+.by-thread-starter {
+	box-shadow: -4px 0 0 #fff, -6px 0 0 #43cc99;
+}
+
 .author-badge {
 	position: absolute;
 	top: 14px;
@@ -1340,6 +1344,10 @@ table {
 
 .author-badge-moderator {
 	background-color: #33b4ce;
+}
+
+.author-badge-thread-starter {
+	background-color: #43cc99;
 }
 
 .author-badge-plugin {
@@ -1362,6 +1370,12 @@ table {
 .bbp-search .bbp-search-results .by-moderator,
 .bbp-user-replies-created .by-moderator {
 	border-left-color: #33b4ce;
+}
+
+.bbp-view .bbp-topics .by-thread-starter,
+.bbp-search .bbp-search-results .by-thread-starter,
+.bbp-user-replies-created .by-thread-starter {
+	border-left-color: #43cc99;
 }
 
 .bbp-view .bbp-topics .by-plugin-author,

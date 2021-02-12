@@ -18,6 +18,10 @@
 	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__theme-author;
 }
 
+.by-thread-starter {
+	box-shadow: -4px 0 0 #fff, -6px 0 0 $color__thread_starter;
+}
+
 .author-badge {
 	position: absolute;
 	top: 14px;
@@ -31,6 +35,10 @@
 
 .author-badge-moderator {
 	background-color: $color__moderator;
+}
+
+.author-badge-thread-starter {
+	background-color: $color__thread-starter;
 }
 
 .author-badge-plugin {
@@ -53,6 +61,10 @@
 
 	.by-moderator {
 		border-left-color: $color__moderator;
+	}
+
+	.by-thread-starter {
+		border-left-color: $color__thread-starter;
 	}
 
 	.by-plugin-author,

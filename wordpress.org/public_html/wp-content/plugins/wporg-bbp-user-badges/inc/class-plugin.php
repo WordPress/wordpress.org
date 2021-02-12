@@ -174,6 +174,7 @@ class Plugin {
 	 *
 	 * Possible badge classes:
 	 * - by-moderator (Note: will always be added if author is a moderator)
+	 * - by-thread-starter (Note: will always be added if author is the op)
 	 * - by-plugin-author
 	 * - by-plugin-contributor
 	 * - by-theme-author
@@ -192,6 +193,15 @@ class Plugin {
 		// Class related to moderators.
 		if ( $this->is_user_moderator() ) {
 			$classes[] = 'by-moderator';
+			$has_badge = true;
+		}
+
+		// Class related to thread starter
+		if (
+			'reply' === $item_type &&
+			bbp_get_reply_author_id( $item_id ) === bbp_get_topic_author_id( bbp_get_reply_topic_id( $item_id ) )
+		) {
+			$classes[] = 'by-thread-starter';
 			$has_badge = true;
 		}
 
@@ -248,6 +258,10 @@ class Plugin {
 		// Don't assign moderator badge if already assigning author badge.
 		if ( ! $output ) {
 			$output = $this->get_moderator_badge();
+		}
+		// Don't assign thread starter badge if already assigning a badge.
+		if ( ! $output ) {
+			$output = $this->get_thread_starter_badge( $item_type, $item_id );
 		}
 
 		if ( $output ) {
@@ -347,6 +361,28 @@ class Plugin {
 		}
 
 		return $label ? array( 'type' => 'moderator', 'label' => $label, 'help' => $help ) : false;
+	}
+
+	/**
+	 * Get badge if the author started the thread.
+	 *
+	 * @access protected
+	 *
+	 * @return array|false Associative array with keys 'type', 'label', and
+	 *                     'help' if author merits a badge, else false.
+	 */
+	protected function get_thread_starter_badge( $item_type, $item_id ) {
+		$label = $help = null;
+
+		if (
+			'reply' === $item_type &&
+			bbp_get_reply_author_id( $item_id ) === bbp_get_topic_author_id( bbp_get_reply_topic_id( $item_id ) )
+		) {
+			$label = __( 'Thread Starter', 'wporg-forums' );
+			$help  = __( 'This person created the thread', 'wporg-forums' );
+		}
+
+		return $label ? array( 'type' => 'thread-starter', 'label' => $label, 'help' => $help ) : false;
 	}
 
 	/**
