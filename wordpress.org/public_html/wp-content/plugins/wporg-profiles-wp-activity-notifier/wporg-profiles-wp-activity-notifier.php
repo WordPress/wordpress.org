@@ -255,6 +255,10 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
+		$url = bbp_get_topic_permalink( $topic_id );
+		// Remove moderator flags
+		$url = remove_query_arg( [ 'view' ], $url );
+
 		$args = array(
 			'body' => array(
 				'action'    => 'wporg_handle_activity',
@@ -265,14 +269,14 @@ class WPOrg_WP_Activity_Notifier {
 				'topic_id'  => $topic_id,
 				'forum_id'  => bbp_get_topic_forum_id( $topic_id ),
 				'title'     => strip_tags( bbp_get_topic_title( $topic_id ) ),
-				'url'       => bbp_get_topic_permalink( $topic_id ),
+				'url'       => $url,
 				'message'   => bbp_get_topic_excerpt( $topic_id, 55 ),
 				'site'      => get_bloginfo( 'name' ),
 				'site_url'  => site_url(),
 			)
 		);
 
-		$x = wp_remote_post( $this->activity_handler_url, $args );
+		wp_remote_post( $this->activity_handler_url, $args );
 	}
 
 	/**
@@ -323,6 +327,10 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
+		$url = bbp_get_reply_url( $reply_id );
+		// Remove moderator flags
+		$url = remove_query_arg( [ 'view' ], $url );
+
 		$args = array(
 			'body' => array(
 				'action'    => 'wporg_handle_activity',
@@ -333,7 +341,7 @@ class WPOrg_WP_Activity_Notifier {
 				'topic_id'  => bbp_get_reply_topic_id( $reply_id ),
 				'forum_id'  => bbp_get_reply_forum_id( $reply_id ),
 				'title'     => strip_tags( bbp_get_reply_topic_title( $reply_id ) ),
-				'url'       => bbp_get_reply_url( $reply_id ),
+				'url'       => $url,
 				'message'   => $this->get_reply_excerpt( $reply_id, 15 ),
 				'site'      => get_bloginfo( 'name' ),
 				'site_url'  => site_url(),
