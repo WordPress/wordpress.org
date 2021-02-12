@@ -36,13 +36,15 @@ function site_screenshot_src( $width = '', $echo = true ) {
 	global $post;
 
 	$screenshot = get_post_meta($post->ID, 'screenshot', true);
-
-	$prefix = is_ssl() ? 'https://' : 'http://s.';
+	
 	if ( empty( $screenshot ) ) {
+		$prefix = is_ssl() ? 'https://' : 'http://s.';
 		$screenshot = $prefix.'wordpress.com/mshots/v1/http%3A%2F%2F' . get_site_domain( true, false );
+	} elseif ( function_exists( 'jetpack_photon_url' ) ) {
+		$screenshot = jetpack_photon_url( $screenshot );
 	}
 
-	if ( '' != $width ) {
+	if ( $width ) {
 		$screenshot = add_query_arg( 'w', $width, $screenshot);
 	}
 
