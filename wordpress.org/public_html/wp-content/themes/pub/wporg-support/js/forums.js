@@ -22,11 +22,17 @@
 		} );
 	}
 
-	if ( $( 'body' ).is( '.bbp-is-view' ) ) {
+	if ( $( 'body' ).is( '.bbp-view' ) ) {
 		$( '.bbp-body .bbp-admin-links a' ).click( function( e ) {
 			var $this = $( this ),
 				$element = $this.closest( '.bbp-body' ),
+				$content = $element.find( '.bbp-topic-content' ),
 				type;
+
+			// Don't affect open-in-new-tab.
+			if ( e.metaKey || e.ctrlKey || e.which === 2 ) {
+				return;
+			}
 
 			if ( $this.is( '[class*=approve]' ) ) {
 				type = 'approve';
@@ -40,18 +46,23 @@
 
 			e.preventDefault();
 
+			$element.fadeTo( 500, .5 );
+
 			$.get( $this.prop( 'href' ) ).done( function() {
-				$element.fadeOut( 250, function() {
-					$element.html(
-						'<div class="bbp-template-notice">' + wporgSupport.strings[ type ] + '</div>'
-					);
-				} ).fadeIn( 250 );
+				$content.append(
+					'<div class="bbp-template-notice">' + wporgSupport.strings[ type ] + '</div>'
+				);
+
+				// Remove actions.
+				$this.parent().find('a:not(.bbp-topic-edit-link)').remove();
+
+				$element.fadeTo( 250, 1 );
 			} ).error( function() {
-				$element.fadeOut( 250, function() {
-					$element.find( '.bbp-topic-content' ).prepend(
-						'<div class="bbp-template-notice">' + wporgSupport.strings.action_failed + '</div>'
-					);
-				} ).fadeIn( 250 );
+				$content.append(
+					'<div class="bbp-template-notice">' + wporgSupport.strings.action_failed + '</div>'
+				);
+
+				$element.fadeTo( 250, 1 );
 			} );
 		} );
 	}
