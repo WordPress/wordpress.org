@@ -583,8 +583,10 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			'user_id'     => get_current_user_id(),
 			'term_id'     => 0,
 			'taxonomy'    => 'topic-tag',
+			'class'       => 'button',
 			'subscribe'   => esc_html__( 'Subscribe to this topic tag', 'wporg-forums' ),
 			'unsubscribe' => esc_html__( 'Unsubscribe from this topic tag', 'wporg-forums' ),
+			'js_confirm'  => esc_html__( 'Are you sure you wish to subscribe by email to all future topics created in this tag?', 'wporg-forums' ),
 		), 'get_term_subscription_link' );
 		if ( empty( $r['user_id'] ) || empty( $r['term_id'] ) || empty( $r['taxonomy'] ) ) {
 			return false;
@@ -595,13 +597,21 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		$taxonomy = $r['taxonomy'];
 
 		$url = self::get_subscription_url( $r['user_id'], $r['term_id'], $r['taxonomy'] );
-		$text = $r['subscribe'];
 		if ( self::is_user_subscribed_to_term( $r['user_id'], $r['term_id'] ) ) {
-			$text = $r['unsubscribe'];
+			$text       = $r['unsubscribe'];
+			$js_confirm = '';
+		} else {
+			$text       = $r['subscribe'];
+			$js_confirm = 'javascript:return confirm(' . json_encode( $r['js_confirm'] ) . ');';
 		}
-		return sprintf( "<div class='wporg-bbp-term-subscription'><a href='%s'>%s</a></div>",
+
+		return sprintf(
+			"<div class='wporg-bbp-term-subscription'><a href='%s' class='%s' onclick='%s'>%s</a></div>",
 			$url,
-			esc_html( $text ) );
+			esc_attr( $r['class'] ),
+			esc_attr( $js_confirm ),
+			esc_html( $text )
+		);
 	}
 
 	public static function get_valid_actions() {

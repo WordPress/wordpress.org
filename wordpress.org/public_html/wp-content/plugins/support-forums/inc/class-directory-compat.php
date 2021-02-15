@@ -285,8 +285,8 @@ abstract class Directory_Compat {
 
 			// Add plugin- and theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar',       array( $this, 'do_view_sidebar' ) );
+			add_action( 'wporg_compat_view_sidebar',       array( $this, 'do_subscription_link' ), 11 );
 			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
-			add_action( 'wporg_compat_before_single_view', array( $this, 'do_subscription_link' ), 11 );
 
 			// Add output filters and actions.
 			add_filter( 'bbp_get_view_link', array( $this, 'get_view_link' ), 10, 2 );
@@ -750,15 +750,18 @@ abstract class Directory_Compat {
 			if ( 'plugin' == $this->compat() ) {
 				$subscribe   = esc_html__( 'Subscribe to this plugin', 'wporg-forums' );
 				$unsubscribe = esc_html__( 'Unsubscribe from this plugin', 'wporg-forums' );
+				$js_confirm  = esc_html__( 'Are you sure you wish to subscribe by email to all future topics created in this plugin forum?', 'wporg-forums' );
 			} else {
 				$subscribe   = esc_html__( 'Subscribe to this theme', 'wporg-forums' );
 				$unsubscribe = esc_html__( 'Unsubscribe from this theme', 'wporg-forums' );
+				$js_confirm  = esc_html__( 'Are you sure you wish to subscribe by email to all future topics created in this theme forum?', 'wporg-forums' );
 			}
 			$term_subscription = Term_Subscription\Plugin::get_subscription_link( array(
 				'term_id'     => $this->term->term_id,
 				'taxonomy'    => $this->taxonomy(),
 				'subscribe'   => $subscribe,
 				'unsubscribe' => $unsubscribe,
+				'js_confirm'  => $js_confirm,
 			) );
 		}
 
