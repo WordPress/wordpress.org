@@ -21,9 +21,7 @@ function wporg_robots_txt( $robots ) {
 		           "Allow: /locale/*/stats/themes/$\n";
 	} else {
 		$robots .= "\nUser-agent: *\n" .
-		           "Disallow: /search\n" .
-		           "Disallow: /support/rss\n" .
-		           "Disallow: /archive/\n";
+		           "Disallow: /search\n";
 	}
 
 	return $robots;
