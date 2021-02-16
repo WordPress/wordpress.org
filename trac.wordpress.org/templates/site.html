@@ -53,11 +53,6 @@
 	ticket_preview.html (as site.html isn't) -->
 <xi:include href="site-ticket.html" />
 
-<!--! Append a version string to CSS files hosted on the w.org CDN -->
-<py:match path="link[@rel='stylesheet' and starts-with(@href,'https://s.w.org/') and substring-after(@href,'.css') = '']">
-	<link rel="stylesheet" href="${select('@href')}?v=${scripts_version}" />
-</py:match>
-
 <!--! Styles and such. Load before first JS file (jquery.js) -->
 <py:match path="head/script[contains(@src,'jquery.js')]">
 	<link rel="dns-prefetch" href="//s.w.org" />
@@ -73,9 +68,9 @@
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-head.html" />
 	<meta name="viewport" content="width=device-width" />
-	<link rel='stylesheet' href='https://s.w.org/wp-includes/css/dashicons.min.css?20150710' type='text/css' />
+	<link rel='stylesheet' href='https://s.w.org/wp-includes/css/dashicons.min.css?${scripts_version}' type='text/css' />
 	<link rel="stylesheet" type="text/css" href="https://s.w.org/style/trac/wp-trac.css?${scripts_version}" />
-	<link py:if="req.session['authenticated']" rel="stylesheet" href="https://s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
+	<link py:if="req.session['authenticated']" rel="stylesheet" href="https://s.w.org/wp-includes/css/wp-auth-check.css?${scripts_version}" type="text/css" media="all" />
 
 	<script py:attrs="select('@*')"></script>
 
@@ -95,11 +90,6 @@
 	<py:if test="robots">
 		<meta name="robots" content="$robots"/>
 	</py:if>
-</py:match>
-
-<!--! Append a version string to JS files hosted on the w.org CDN -->
-<py:match path="script[starts-with(@src,'https://s.w.org/') and substring-after(@src,'.js') = '']">
-	<script src="${select('@src')}?v=${scripts_version}">${select('*|comment()|text()')}</script>
 </py:match>
 
 <!--! Remove Trac logo and footer -->
@@ -329,9 +319,9 @@
 	</script>
 
 	<!--! JavaScript -->
-	<script src="https://s.w.org/style/js/navigation.min.js?20190128"></script>
-	<script src="https://s.w.org/style/trac/jquery.caret.min.js?ver=2015-02-01"></script>
-	<script src="https://s.w.org/style/trac/jquery.atwho.min.js?ver=1.0.1"></script>
+	<script src="https://s.w.org/style/js/navigation.min.js?${scripts_version}"></script>
+	<script src="https://s.w.org/style/trac/jquery.caret.min.js?${scripts_version}"></script>
+	<script src="https://s.w.org/style/trac/jquery.atwho.min.js?${scripts_version}"></script>
 	<script src="https://s.w.org/style/trac/wp-trac.js?${scripts_version}"></script>
 
 	<!--! Check for security buzzwords on new tickets -->
@@ -379,4 +369,27 @@
 </body>
 
 <xi:include href="site-specific.html"><xi:fallback /></xi:include>
+
+<!--! The following rules should be just before `</html>` to ensure it affects all of the document. -->
+
+<!--! Append a version string to CSS files hosted on the w.org CDN -->
+<py:match path="link[@rel='stylesheet' and starts-with(@href,'https://s.w.org/') and substring-after(@href,'.css') = '']">
+	<link rel="stylesheet" href="${select('@href')}?v=${scripts_version}" />
+</py:match>
+
+<!--! Append a version string to JS files hosted on the w.org CDN -->
+<py:match path="script[starts-with(@src,'https://s.w.org/') and substring-after(@src,'.js') = '']">
+	<script src="${select('@src')}?v=${scripts_version}">${select('*|comment()|text()')}</script>
+</py:match>
+
+<!--! Allow bypassing the WordPress.org CDN for testing. -->
+<py:if test="'cdn' in req.args and 'wordpress.org' == req.args.cdn">
+	<py:match path="link[@rel='stylesheet' and starts-with(@href,'https://s.w.org/')]">
+		<link rel="stylesheet" href="${select('@href').render().replace('s.w.org','wordpress.org')}" />
+	</py:match>
+	<py:match path="script[starts-with(@src,'https://s.w.org/')]">
+		<script src="${select('@src').render().replace('s.w.org','wordpress.org')}">${select('*|comment()|text()')}</script>
+	</py:match>
+</py:if>
+
 </html>
