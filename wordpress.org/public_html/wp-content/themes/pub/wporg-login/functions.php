@@ -196,8 +196,17 @@ function wporg_login_filter_templates( $templates ) {
 }
 add_filter( 'index_template_hierarchy', 'wporg_login_filter_templates' );
 
-// Don't index login/register pages.
-add_filter( 'wporg_noindex_request', '__return_true' );
+// Don't index login/register sub-pages.
+add_filter( 'wporg_noindex_request', function( $noindex ) {
+
+	// Don't no-index the front page, see https://meta.trac.wordpress.org/ticket/5530
+	if ( '/' === $_SERVER['REQUEST_URI'] ) {
+		return $noindex;
+	}
+
+	// noindex it.
+	return true;
+} );
 
 // No emoji support needed.
 remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
