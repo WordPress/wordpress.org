@@ -2082,6 +2082,12 @@ a.mention.me {
 		float: none;
 		min-width: 100%;
 	}
+	#ticket table.properties img.avatar {
+		margin: 0 .5em 0 0;
+	}
+	#properties table.trac-properties > tbody > tr > td#focuses {
+		padding-left: 22px;
+	}
 }
 
 @media (max-width: 640px) {
@@ -2133,10 +2139,6 @@ a.mention.me {
 	}
 	#content.ticket, .milestone .info .progress, .milestone .info dl, #content.timeline dl, #stats {
 		margin-left: 0; /* use all the available space */
-	}
-	#ticket table.properties img.avatar {
-		float: right; /* move it to the right to help prevent collisions */
-		margin: 0 .5em 0 0;
 	}
 	#ticket table.properties > tbody > th {
 		padding: 0.5em .2em .5em 0; /* reduce side padding */
@@ -2222,17 +2224,19 @@ a.mention.me {
 	#trac-ticket-title {
 		margin-top: 10px;
 	}
-	#ticket table.properties > tbody > th,
-	#ticket table.properties > tbody > td {
-		display: block;
-		float: left;
-		width: 60%;
+	#ticket table.properties > tbody > tr > th,
+	#ticket table.properties > tbody > tr > td {
+		display: inline-block;
 		-webkit-box-sizing: border-box;
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 	}
-	#ticket table.properties > tbody > th {
-		width: 40%;
+	#ticket table.properties > tbody > tr > th {
+		width: 30%;
+		clear: left;
+	}
+	#ticket table.properties > tbody > tr > td {
+		width: 70%;
 		clear: left;
 	}
 	#ticket table.properties img.avatar {
@@ -2307,6 +2311,9 @@ a.mention.me {
 	}
 	#ticket table.properties > tbody > tr > th {
 		width: 40%; /* More room so columns don't overlap */
+	}
+	#ticket table.properties > tbody > tr > td {
+		width: 60%; /* Less room so columns don't overlap */
 	}
 }
 #github-prs .hidden {
