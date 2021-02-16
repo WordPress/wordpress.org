@@ -59,11 +59,7 @@
 </py:match>
 
 <!--! Styles and such. Load before first JS file (jquery.js) -->
-<py:match path="head/title">
-	<title py:attrs="select('@*')">
-		${select('*|comment()|text()')}
-	</title>
-
+<py:match path="head/script[contains(@src,'jquery.js')]">
 	<link rel="dns-prefetch" href="//s.w.org" />
 	<link rel="dns-prefetch" href="//fonts.googleapis.com" />
 	<link rel="dns-prefetch" href="//fonts.gstatic.com" />
@@ -80,6 +76,8 @@
 	<link rel='stylesheet' href='https://s.w.org/wp-includes/css/dashicons.min.css?20150710' type='text/css' />
 	<link rel="stylesheet" type="text/css" href="https://s.w.org/style/trac/wp-trac.css?${scripts_version}" />
 	<link py:if="req.session['authenticated']" rel="stylesheet" href="https://s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
+
+	<script py:attrs="select('@*')"></script>
 
 	<py:if test="req.environ['PATH_INFO'] == '/newticket'">
 		<!--! Prevent Trac from focusing #field-summary on load, as this can scroll past the instructions -->
