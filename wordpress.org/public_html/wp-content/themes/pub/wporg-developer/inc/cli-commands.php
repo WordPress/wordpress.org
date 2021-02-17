@@ -162,6 +162,15 @@ class DevHub_Command extends WP_CLI_Command {
 		// Confirm the parsing.
 		WP_CLI::confirm( "Are you sure you want to parse the source code for WP {$version} (and that you've run a backup of the existing data)?" );
 
+		/**
+		 * Fires just before actual parsing process takes place.
+		 *
+		 * @param string  $path    Path to the directory containing the WP files to parse.
+		 * @param string  $version Versin of WP being parsed.
+		 * @param WP_User $user    User to be treated as post author for everything created.  
+		 */
+		do_action( 'wporg_devhub_cli_before_parsing', $path, $version, $user );
+
 		// 1. Deactivate posts-to-posts plugin.
 		if ( is_plugin_active( $plugins['posts-to-posts'] ) ) {
 			WP_CLI::log( 'Deactivating posts-to-posts plugin...' );
@@ -198,6 +207,15 @@ class DevHub_Command extends WP_CLI_Command {
 
 		// Done.
 		WP_CLI::success( "Parsing of WP $version is complete." );
+
+		/**
+		 * Fires after parsing process completes.
+		 *
+		 * @param string  $path    Path to the directory containing the WP files to parse.
+		 * @param string  $version Versin of WP being parsed.
+		 * @param WP_User $user    User to be treated as post author for everything created.  
+		 */
+		do_action( 'wporg_devhub_cli_after_parsing', $path, $version, $user );
 	}
 
 	/**
