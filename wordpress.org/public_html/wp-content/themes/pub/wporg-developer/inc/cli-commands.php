@@ -193,6 +193,9 @@ class DevHub_Command extends WP_CLI_Command {
 		// 6. Pre-cache source code.
 		WP_CLI::runcommand( 'devhub pre-cache-source' );
 
+		// 7. Clean up after itself.
+		WP_CLI::runcommand( 'devhub clean' );
+
 		// Done.
 		WP_CLI::success( "Parsing of WP $version is complete." );
 	}
@@ -221,6 +224,55 @@ class DevHub_Command extends WP_CLI_Command {
 		} else {
 			WP_CLI::error( 'Unable to pre-cache source codde.' );
 		}
+	}
+
+	/**
+	 * Cleans up temporary files created for, and used only, in parsing.
+	 *
+	 * Cleans:
+	 * - Temp directory created to install the version of WP to parse
+	 * - Removes the phpdoc-parser plugin (only if it was fully installed and
+	 *   configured as part of the parsing process)
+	 *
+	 * Note: This automatically gets called at the end of a successful `parse`
+	 * invocation, so it would only need to be directly called if parsing
+	 * didn't complete successfully.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp devhub clean
+	 *
+	 * @when after_wp_load
+	 */
+	public function clean() {
+		WP_CLI::log( 'Cleaning up after the parser...' );
+
+		$tmp_dirs = glob( WP_CLI\Utils\get_temp_dir() . 'devhub_*' );
+
+		foreach ( $tmp_dirs as $tmp_dir ) {
+			//WP_CLI::log( "Deleting temporary directory $tmp_dir...");
+			$cmd = "rm -rf {$tmp_dir}";
+			WP_CLI::confirm( "About to delete temporary directory. Does this look proper? `$cmd`" );
+			WP_CLI::launch( $cmd, false, true );
+		}
+
+		// Remove the phpdoc-parser plugin.
+		// @todo Add argument to facilitate disabling this step, or do a git checkout and only delete if no local changes.
+		$plugin = 'phpdoc-parser';
+		$all_plugins = get_plugins();
+		if ( in_array( $plugin . '/plugin.php', array_keys( $all_plugins ) ) ) {
+			// Only delete the plugin if it was automatically installed via parse command.
+			if ( file_exists( WP_PLUGIN_DIR . '/phpdoc-parser/.devhub-parser-installed' ) ) {
+				WP_CLI::log( "Deleting plugin {$plugin}..." );
+				WP_CLI::runcommand( "plugin delete {$plugin}" );
+			} else {
+				WP_CLI::log( "Plugin {$plugin} present but was manually installed or looks to have customizations so it must be deleted manually, if so desired." );
+			}
+		} else {
+			WP_CLI::log( "Plugin {$plugin} not present so it can't be deleted." );
+		}
+
+		WP_CLI::success( 'Clean-up is complete.' );
 	}
 
 	/**
