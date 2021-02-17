@@ -97,6 +97,48 @@ class WPorg_GP_Custom_Translation_Warnings {
 		return trim( $error );
 	}
 
+	/**
+	 * Extends the GlotPress tags warning to allow some URL changes.
+	 *
+	 * @param string    $original    The original string.
+	 * @param string    $translation The translated string.
+	 * @param GP_Locale $locale      The locale.
+	 */
+	public function warning_tags( $original, $translation, $locale ) {
+		// Allow URL changes in `href` attributes by substituting the original URL when appropriate
+		// if that passes the checks, assume it's okay, otherwise throw the warning with the original payload.
+
+		$altered_translation = $translation;
+		foreach ( $this->allowed_domain_changes as $domain => $regex ) {
+			if ( false === stripos( $original, '://' . $domain ) ) {
+				continue;
+			}
+
+			// Make an assumption that the first protocol for the given domain is the protocol in use.
+			$protocol = 'https';
+			if ( preg_match( '!(https?)://' . $regex . '!', $original, $m ) ) {
+				$protocol = $m[1];
+			}
+
+			$altered_translation = preg_replace_callback(
+				'!(href=[\'"]?)(https?)://(' . $regex . ')!i',
+				function( $m ) use( $protocol, $domain ) {
+					return $m[1] . $protocol . '://' . $domain;
+				},
+				$altered_translation
+			);
+		}
+
+		if ( $altered_translation !== $translation ) {
+			$altered_warning = GP::$builtin_translation_warnings->warning_tags( $original, $altered_translation, $locale );
+			if ( true === $altered_warning ) {
+				return true;
+			}
+		}
+
+		// Pass through to the core GlotPress warning method.
+		return GP::$builtin_translation_warnings->warning_tags( $original, $translation, $locale );
+	}
 
 	/**
 	 * Adds a warning for changing placeholders.
