@@ -21,18 +21,27 @@ class DevHub_Command extends WP_CLI_Command {
 	 * [--user_id=<user_id>]
 	 * : ID of user to attribute all parsed posts to. Default is 5911429, the ID for wordpressdotorg.
 	 *
+	 * [--wp_ver=<wp_ver>]
+	 * : Version of WordPress to install. Only taken into account if --src_path is
+	 * not defined. Default is the latest release (or whatever version is present
+	 * in --src_path if that is defined).
+	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Parse lastest WP.
+	 *     # Parse latest WP.
 	 *     $ wp devhub parse
 	 *
 	 *     # Parse specific copy of WP.
 	 *     $ wp devhub parse --src_path=/path/to/wordpress
 	 *
+	 *     # Parse a particular version of WP.
+	 *     $ wp evhub parse --wp_ver=5.5.2
+	 *
 	 * @when after_wp_load
 	 */
 	public function parse( $args, $assoc_args ) {
 		$path = $assoc_args['src_path'] ?? null;
+		$wp_ver = $assoc_args['wp_ver'] ?? null;
 
 		// Verify path is a file or directory.
 		if ( $path ) {
@@ -41,23 +50,30 @@ class DevHub_Command extends WP_CLI_Command {
 			} else {
 				WP_CLI::error( 'Provided path for WordPress source to parse does not exist.' );
 			}
-		 }
- 
+		}
+
 		// If no path provided, use a temporary path.
 		if ( ! $path ) {
 			$path = WP_CLI\Utils\get_temp_dir() . 'devhub_' . time();
-	 
+
 			// @todo Attempt to reuse an existing temp dir.
 			if ( mkdir( $path ) ) {
-				WP_CLI::log( "Installing latest WordPress into temporary directory ({$path})..." );
+				if ( $wp_ver ) {
+					WP_CLI::log( "Installing WordPress {$wp_ver} into temporary directory ({$path})..." );
+				} else {
+					WP_CLI::log( "Installing latest WordPress into temporary directory ({$path})..." );
+				}
 				$cmd = "core download --path={$path}";
+				if ( $wp_ver ) {
+					$cmd .= " --version={$wp_ver}";
+				}
 				// Install WP into the temp directory.
 				WP_CLI::runcommand( $cmd, [] );
 			} else {
 				$path = null;
 			}
 		}
-	 
+
 		if ( ! $path ) {
 			WP_CLI::error( 'Unable to create temporary directory for downloading WordPress. If retrying fails, consider obtaining the files manually and supplying that path via --src_path argument.' );
 		}
