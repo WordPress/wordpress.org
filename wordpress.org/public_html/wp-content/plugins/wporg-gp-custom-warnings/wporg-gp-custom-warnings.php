@@ -51,14 +51,27 @@ class WPorg_GP_Custom_Translation_Warnings {
 			return true;
 		}
 
-		// Check to see if only the scheme was changed (https <=> http), discard if so.
+		// Check to see if only the scheme (https <=> http) or a trailing slash was changed, discard if so.
 		foreach ( $missing_urls as $key => $missing_url ) {
-			$scheme = parse_url( $missing_url, PHP_URL_SCHEME );
-			$alternate_scheme = ( 'http' == $scheme ? 'https' : 'http' );
+			$scheme               = parse_url( $missing_url, PHP_URL_SCHEME );
+			$alternate_scheme     = ( 'http' == $scheme ? 'https' : 'http' );
 			$alternate_scheme_url = preg_replace( "@^$scheme(?=:)@", $alternate_scheme, $missing_url );
 
-			if ( false !== ( $alternate_index = array_search( $alternate_scheme_url, $added_urls ) ) ) {
-				unset( $missing_urls[ $key ], $added_urls[ $alternate_index ] );
+			$alt_urls = [
+				// Scheme changes
+				$alternate_scheme_url,
+
+				// Slashed/unslashed changes.
+				( '/' === substr( $missing_url, -1 )          ? rtrim( $missing_url, '/' )          : "{$missing_url}/" ),
+
+				// Scheme & Slash changes.
+				( '/' === substr( $alternate_scheme_url, -1 ) ? rtrim( $alternate_scheme_url, '/' ) : "{$alternate_scheme_url}/" ),
+			];
+
+			foreach ( $alt_urls as $alt_url ) {
+				if ( false !== ( $alternate_index = array_search( $alt_url, $added_urls ) ) ) {
+					unset( $missing_urls[ $key ], $added_urls[ $alternate_index ] );
+				}
 			}
 		}
 
