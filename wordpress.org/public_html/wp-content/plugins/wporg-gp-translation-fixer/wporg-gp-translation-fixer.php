@@ -64,13 +64,22 @@ use GP, GP_Locales;
 						break;
 					case 'placeholders':
 						// Try replacing unicode percent signs with a ascii percent sign.
-						$translation = preg_replace( '!(﹪|％)((\d+\$(?:\d+)?)?[bcdefgosuxEFGX])!', '%$2', $translation );
+						$translation = preg_replace( '!(﹪|％)((\d+\$(?:\d+)?)?[bcdefgosux])!i', '%$2', $translation );
 
 						// Try replacing spaced translation type with no spaces `% 1 $ s` (Machine translated text)
 						$translation = preg_replace_callback(
-							'!%\s?(\d+\s?\$(?:\d+)?)?\s?[bcdefgosuxEFGX]!',
+							'!%\s?(\d+\s?\$(?:\d+)?)?\s?[bcdefgosux]!i',
 							function( $m ) {
 								return str_replace( ' ', '', $m[0] );
+							},
+							$translation
+						);
+
+						// Check case of format specifer. EFGX can be both upper or lower case.
+						$translation = preg_replace_callback(
+							'!%(\d+\$(?:\d+)?)?([bcdosu])!i',
+							function( $m ) {
+								return '%' . $m[1] . strtolower( $m[2] );
 							},
 							$translation
 						);
