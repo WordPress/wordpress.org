@@ -383,7 +383,7 @@ class WPORG_Themes_Upload {
 		do_action( 'theme_upload', $this->theme, $this->theme_post );
 
 		// Initiate a GitHub actions run for the theme.
-	//	$this->trigger_e2e_run( $ticket_id );
+		$this->trigger_e2e_run( $ticket_id );
 
 		// Success!
 		/* translators: 1: theme name, 2: Trac ticket URL */
