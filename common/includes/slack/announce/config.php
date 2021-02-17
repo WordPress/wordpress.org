@@ -117,6 +117,7 @@ function get_whitelist() {
 			'whitneyyadrich', // @Whitney on Slack
 		) ),
 		'core-auto-updates' => array_merge( get_committers(), array(
+			'afragen',
 			'audrasjb',
 			'pbiron',
 		) ),
