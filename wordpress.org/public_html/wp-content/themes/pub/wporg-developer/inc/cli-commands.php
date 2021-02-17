@@ -267,6 +267,10 @@ class DevHub_Command extends WP_CLI_Command {
 
 		$tmp_dirs = glob( WP_CLI\Utils\get_temp_dir() . 'devhub_*' );
 
+		if ( count( $tmp_dirs ) > 1 ) {
+			WP_CLI::log( "Multiple temporary directories were detected. This can be the case if earlier parsings were aborted or cancelled without completing." );
+		}
+
 		foreach ( $tmp_dirs as $tmp_dir ) {
 			//WP_CLI::log( "Deleting temporary directory $tmp_dir...");
 			$cmd = "rm -rf {$tmp_dir}";
