@@ -63,7 +63,7 @@ class DevHub_Command extends WP_CLI_Command {
 				} else {
 					WP_CLI::log( "Installing latest WordPress into temporary directory ({$path})..." );
 				}
-				$cmd = "core download --path={$path}";
+				$cmd = "core download --skip-content --path={$path}";
 				if ( $wp_ver ) {
 					$cmd .= " --version={$wp_ver}";
 				}
