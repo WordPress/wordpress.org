@@ -13,23 +13,56 @@ class DevHub_Command extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <path>
+	 * [--src_path=<src_path>]
 	 * : The path to a copy of WordPress to be parsed. Should not be code used in
-	 * an active install.
+	 * an active install. If not defined, then the latest version of WordPress will
+	 * be downloaded to a temp directory and parsed.
 	 *
 	 * [--user_id=<user_id>]
 	 * : ID of user to attribute all parsed posts to. Default is 5911429, the ID for wordpressdotorg.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Parse WP 4.9.5 into DevHub.
-	 *     $ wp devhub /home/wporgdev/developer/wp495
+	 *     # Parse lastest WP.
+	 *     $ wp devhub parse
+	 *
+	 *     # Parse specific copy of WP.
+	 *     $ wp devhub parse --src_path=/path/to/wordpress
 	 *
 	 * @when after_wp_load
 	 */
 	public function parse( $args, $assoc_args ) {
-		list( $path ) = $args;
+		$path = $assoc_args['src_path'] ?? null;
 
+		// Verify path is a file or directory.
+		if ( $path ) {
+			if ( file_exists( $path ) ) {
+				WP_CLI::log( 'Parsing WordPress source from specified directory: ' . $path );
+			} else {
+				WP_CLI::error( 'Provided path for WordPress source to parse does not exist.' );
+			}
+		 }
+ 
+		// If no path provided, use a temporary path.
+		if ( ! $path ) {
+			$path = WP_CLI\Utils\get_temp_dir() . 'devhub_' . time();
+	 
+			// @todo Attempt to reuse an existing temp dir.
+			if ( mkdir( $path ) ) {
+				WP_CLI::log( "Installing latest WordPress into temporary directory ({$path})..." );
+				$cmd = "core download --path={$path}";
+				// Install WP into the temp directory.
+				WP_CLI::runcommand( $cmd, [] );
+			} else {
+				$path = null;
+			}
+		}
+	 
+		if ( ! $path ) {
+			WP_CLI::error( 'Unable to create temporary directory for downloading WordPress. If retrying fails, consider obtaining the files manually and supplying that path via --src_path argument.' );
+		}
+
+		// Determine importing user's ID. 
 		$user_id = $assoc_args['user_id'] ?? 5911429; // 5911429 = ID for wordpressdotorg
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
@@ -41,11 +74,6 @@ class DevHub_Command extends WP_CLI_Command {
 			'phpdoc-parser'  => 'phpdoc-parser/plugin.php',
 			'posts-to-posts' => 'posts-to-posts/posts-to-posts.php',
 		];
-
-		// Verify path is a file or directory.
-		if ( ! file_exists( $path ) ) {
-			WP_CLI::error( 'Path for WordPress source to parse does not exist.' );
-		}
 
 		// Verify path is not a file.
 		if ( is_file( $path ) ) {
