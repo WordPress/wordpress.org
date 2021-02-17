@@ -53,8 +53,8 @@ get_header( 'wporg' );
 			<section class="intro">
 				<p class="subheading"><?php _e( 'Beautiful designs, powerful features, and the freedom to build anything you want. WordPress is both free and priceless at the same time.', 'wporg' ); ?></p>
 				<div class="screenshots">
-					<img src="https://s.w.org/images/home/screen-themes.png?3" class="dashboard" />
-					<img src="https://s.w.org/images/home/iphone-themes.png?3" class="dashboard-mobile" />
+					<img src="https://s.w.org/images/home/screen-themes.png?4" class="dashboard" />
+					<img src="https://s.w.org/images/home/mobile-themes.png?4" class="dashboard-mobile" />
 				</div>
 			</section>
 
