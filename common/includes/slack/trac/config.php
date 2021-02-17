@@ -80,11 +80,11 @@ class Meta extends Trac {
 	protected $bypass_primary_channel_for_ticket_filter_matches = true;
 
 	protected $commit_path_filters = array(
-		'translate.wordpress.org/'              => '#meta-i18n',
-		'global.wordpress.org/'                 => '#meta-i18n',
-		'plugins/rosetta'                       => '#meta-i18n',
-		'plugins/wporg-gp-'                     => '#meta-i18n',
-		'translations'                          => '#meta-i18n',
+		'translate.wordpress.org/'              => [ '#meta-i18n' => true, '#polyglots' => true ],
+		'global.wordpress.org/'                 => [ '#meta-i18n' => true, '#polyglots' => true ],
+		'plugins/rosetta'                       => [ '#meta-i18n' => true, '#polyglots' => true ],
+		'plugins/wporg-gp-'                     => [ '#meta-i18n' => true, '#polyglots' => true ],
+		'translations'                          => [ '#meta-i18n' => true, '#polyglots' => true ],
 		'mu-plugins/pub/locales'                => '#meta-i18n',
 		'developer-reference/'                  => '#meta-devhub',
 		'wporg-developer/'                      => '#meta-devhub',
@@ -103,9 +103,9 @@ class Meta extends Trac {
 	);
 
 	protected $ticket_component_filters = array(
-		'International Forums'          => '#meta-i18n',
-		'International Sites (Rosetta)' => '#meta-i18n',
-		'Translate Site & Plugins'      => '#meta-i18n',
+		'International Forums'          => [ '#meta-i18n' => true, '#polyglots' => true ],
+		'International Sites (Rosetta)' => [ '#meta-i18n' => true, '#polyglots' => true ],
+		'Translate Site & Plugins'      => [ '#meta-i18n' => true, '#polyglots' => true ],
 		'Developer Hub'                 => '#meta-devhub',
 		'Trac'                          => '#meta-tracdev',
 		'WordPress.tv'                  => '#wptv',
