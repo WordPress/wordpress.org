@@ -35,7 +35,7 @@ class DevHub_Command extends WP_CLI_Command {
 	 *     $ wp devhub parse --src_path=/path/to/wordpress
 	 *
 	 *     # Parse a particular version of WP.
-	 *     $ wp evhub parse --wp_ver=5.5.2
+	 *     $ wp devhub parse --wp_ver=5.5.2
 	 *
 	 * @when after_wp_load
 	 */
@@ -145,7 +145,7 @@ class DevHub_Command extends WP_CLI_Command {
 			$res = WP_CLI::launch( "cd {$plugin_dir} && COMPOSER_HOME={$plugin_dir} php composer.phar about", false, true );
 			if ( $res && ! empty( $res->stderr ) ) {
 				// Remove file that indicates plugin was automatically installed since
-				// user needs to intervene to build dependencies and we dont' want to
+				// user needs to intervene to build dependencies and we don't want to
 				// inconvenience them for every parsing.
 				// @todo Consider using git checkout
 				unlink( $plugin_dir . '.devhub-parser-installed' );
