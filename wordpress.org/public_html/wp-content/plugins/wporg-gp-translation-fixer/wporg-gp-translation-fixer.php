@@ -65,6 +65,16 @@ use GP, GP_Locales;
 					case 'placeholders':
 						// Try replacing unicode percent signs with a ascii percent sign.
 						$translation = preg_replace( '!(﹪|％)((\d+\$(?:\d+)?)?[bcdefgosuxEFGX])!', '%$2', $translation );
+
+						// Try replacing spaced translation type with no spaces `% 1 $ s` (Machine translated text)
+						$translation = preg_replace_callback(
+							'!%\s?(\d+\s?\$(?:\d+)?)?\s?[bcdefgosuxEFGX]!',
+							function( $m ) {
+								return str_replace( ' ', '', $m[0] );
+							},
+							$translation
+						);
+
 						break;
 				}
 			}
