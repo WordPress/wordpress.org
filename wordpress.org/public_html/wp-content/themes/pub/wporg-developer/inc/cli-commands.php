@@ -41,6 +41,7 @@ class DevHub_Command extends WP_CLI_Command {
 	 */
 	public function parse( $args, $assoc_args ) {
 		$path = $assoc_args['src_path'] ?? null;
+		$user_id = $assoc_args['user_id'] ?? 5911429; // 5911429 = ID for wordpressdotorg
 		$wp_ver = $assoc_args['wp_ver'] ?? null;
 
 		// Verify path is a file or directory.
@@ -79,7 +80,6 @@ class DevHub_Command extends WP_CLI_Command {
 		}
 
 		// Determine importing user's ID. 
-		$user_id = $assoc_args['user_id'] ?? 5911429; // 5911429 = ID for wordpressdotorg
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
 			WP_CLI::error( 'Invalid user_id provided.' );
