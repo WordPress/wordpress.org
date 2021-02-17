@@ -113,11 +113,50 @@ class DevHub_Command extends WP_CLI_Command {
 			WP_CLI::confirm( "Looks like WP $version was already parsed on " . date_i18n( 'Y-m-d H:i', $last_parsed_date ) . ". Proceed anyway?" );
 		}
 
-		// Verify that the PHP-Parser plugin is available locally.
+		// Get the phpdoc-parser plugin if not installed.
 		$all_plugins = get_plugins();
 		if ( ! in_array( $plugins['phpdoc-parser'], array_keys( $all_plugins ) ) ) {
-			// TODO: Attempt to install the plugin automatically.
-			WP_CLI::error( 'The PHP-Parser plugin (from https://github.com/WordPress/phpdoc-parser) is not installed locally in ' . WP_PLUGIN_DIR . '/.' );
+			WP_CLI::log( "Installing phpdoc-parser plugin..." );
+			WP_CLI::runcommand( 'plugin install https://github.com/WordPress/phpdoc-parser/archive/master.zip' );
+			touch( WP_PLUGIN_DIR . '/phpdoc-parser/.devhub-parser-installed' );
+		}
+
+		// Verify the phpdoc-parser plugin is available locally.
+		wp_cache_set( 'plugins', [], 'plugins' ); // Reset cache of plugins.
+		$all_plugins = get_plugins();
+		if ( ! in_array( $plugins['phpdoc-parser'], array_keys( $all_plugins ) ) ) {
+			WP_CLI::error( 'The PHPDoc-Parser plugin (from https://github.com/WordPress/phpdoc-parser) could not be automatically installed locally in ' . WP_PLUGIN_DIR . '/. Please do so manually.' );
+		}
+
+		// Install phpdoc-parser plugin dependencies if not installed.
+		$plugin_dir = WP_PLUGIN_DIR . '/phpdoc-parser/';
+		if ( ! file_exists( $plugin_dir . 'vendor' ) ) {
+			WP_CLI::log( "About to install plugin dependencies for phpdoc-parser..." );
+			// Install Composer if necessary.
+			if ( ! file_exists( $plugin_dir . "composer.phar" ) ) {
+				WP_CLI::log( "About to install Composer..." );
+				if ( ! copy( 'https://getcomposer.org/installer', $plugin_dir . 'composer-setup.php' ) ) {
+					WP_CLI::error( 'Unable to obtain the Composer setup script while attempting to install dependencies for phpdoc-parser.' );
+				}
+				WP_CLI::launch( "cd {$plugin_dir} && COMPOSER_HOME={$plugin_dir} php composer-setup.php" );
+				unlink( $plugin_dir . 'composer-setup.php' );
+			}
+			// Check if Composer is actually available.
+			$res = WP_CLI::launch( "cd {$plugin_dir} && COMPOSER_HOME={$plugin_dir} php composer.phar about", false, true );
+			if ( $res && ! empty( $res->stderr ) ) {
+				// Remove file that indicates plugin was automatically installed since
+				// user needs to intervene to build dependencies and we dont' want to
+				// inconvenience them for every parsing.
+				// @todo Consider using git checkout
+				unlink( $plugin_dir . '.devhub-parser-installed' );
+
+				WP_CLI::log( 'Looks like phpdoc-parser plugin dependencies must be built manually:' );
+				WP_CLI::log( "\tcd {$plugin_dir}" );
+				WP_CLI::log( "\tphp composer.phar install -n" );
+				WP_CLI::log( "Afterwards, rerun the parse command." );
+				WP_CLI::error( 'Unable to run composer installer: ' . trim( $res->stderr ) );
+			}
+
 		}
 
 		// Confirm the parsing.
