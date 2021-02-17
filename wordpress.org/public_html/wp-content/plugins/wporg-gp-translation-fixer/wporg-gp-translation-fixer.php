@@ -76,6 +76,28 @@ use GP, GP_Locales;
 						);
 
 						break;
+					case 'tags':
+						// Try replacing curly quotes.
+						$translation = str_replace(
+							[
+								'“', // &#8220; - Left double quotation mark
+								'”', // &#8221; - Right double quotation mark
+								'″', // &#8243; - Double Prime
+							],
+							'"',
+							$translation
+						);
+						$translation = str_replace(
+							[
+								'‘', // &#8216; - Opening curly single quote
+								'’', // &#8217; - Closing curly single quote
+								'′', // &#8242; - Prime
+							],
+							"'",
+							$translation
+						);
+
+						break;
 				}
 			}
 		}
