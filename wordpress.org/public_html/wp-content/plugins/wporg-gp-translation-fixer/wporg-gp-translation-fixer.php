@@ -97,6 +97,14 @@ use GP, GP_Locales;
 							$translation
 						);
 
+						// Try correcting HTML tags containing extra spaces, eg </ p>, <a href="#" >, < / p>, relies upon the original having well-formed HTML.
+						$translation = preg_replace(
+							// Opening HTML element, Tag Name, Attributes (zero or more), Closing HTML element
+							'!<\s*(/)?\s*' . '([a-z]+)\s*' . '(\s+[a-z]+=["\'][^>]+["\'])*' . '\s*>!i',
+							'<$1$2$3>', // 1: Closing slash, 2: Tag, 3: Attributes
+							$translation
+						);
+
 						break;
 				}
 			}
