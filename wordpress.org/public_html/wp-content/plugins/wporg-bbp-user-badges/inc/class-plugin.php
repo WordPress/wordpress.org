@@ -130,19 +130,19 @@ class Plugin {
 		}
 
 		foreach ( $types as $type ) {
-			$slugs = wp_get_post_terms( $topic_id, 'topic-' . $type, array( 'fields' => 'slugs' ) );
-			if ( $slugs ) {
+			$terms = get_the_terms( $topic_id, 'topic-' . $type );
+			if ( $terms ) {
 				break;
 			}
 		}
 
-		if ( ! $slugs || is_wp_error( $slugs ) ) {
+		if ( ! $terms || is_wp_error( $terms ) ) {
 			return false;
 		}
 
 		return array(
 			'type'          => $type,
-			'slug'          => $slugs[0],
+			'slug'          => $terms[0]->slug,
 			'user_nicename' => $user->user_nicename,
 		);
 	}
