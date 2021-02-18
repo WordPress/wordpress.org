@@ -22,6 +22,33 @@
 		} );
 	}
 
+	// Wrap long pastes in code tags.
+	$( '#new-post textarea' ).on( 'paste', function( e ) {
+		var $this = $(this),
+			$val  = $this.val(),
+			paste = ( e.originalEvent.clipboardData || window.clipboardData ).getData('text');
+
+		// If no pasted text, or no textarea value, skip.
+		if ( ! paste.length || ! $val.length ) {
+			return;
+		}
+
+		if (
+			paste.length < 1000 &&        // Super long pastes get code wrapped
+			paste.split("\n").length < 10 // in addition to many-lines pastes.
+		) {
+			return;
+		}
+	
+		$this.val(
+			$val.substring( 0, $this.prop('selectionStart') ) +       // Text before cusor/selection
+			"`" + paste.trim().replace(/^`|`$/g, '') + "`" +          // The pasted text, trimming ` off it and wrapping with `
+			$val.substring( $this.prop('selectionEnd'), $val.length ) // Text after cursor position/selection
+		);
+
+		e.preventDefault();
+	} );
+
 	if ( $( 'body' ).is( '.bbp-view' ) ) {
 		$( '.bbp-body .bbp-admin-links a' ).click( function( e ) {
 			var $this = $( this ),
