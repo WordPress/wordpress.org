@@ -659,6 +659,7 @@ pre.wiki, pre.literal-block {
 	border: 1px solid #ccc;
 	padding-right: 1em;
 	position: relative;
+	word-break: break-word;
 }
 #attachments > div.attachments p {
 	float: none;
@@ -962,6 +963,7 @@ div.change ul.changes {
 	box-shadow: none;
 	background: inherit;
 	color: inherit;
+	word-break: break-word;
 }
 h3.change .profile-link {
 	border-bottom: none;
