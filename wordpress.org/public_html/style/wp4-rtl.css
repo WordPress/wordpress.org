@@ -1664,6 +1664,10 @@ a.rsslink {
 	border: none;
 }
 
+#wporg-footer .social-media-links .dashicons {
+	margin-left: 4px;
+}
+
 #wporg-footer .cip {
 	clear: both;
 	float: none;
@@ -2268,7 +2272,7 @@ img#wpstats {
 	text-align: center;
 }
 
-.wporg-page-mobile .intro-wrapper img {
+.wporg-page-mobile .intro-wrapper img.feature {
 	display: block;
 	margin: 0 auto 1em auto;
 }
@@ -2278,18 +2282,21 @@ body.wporg-page-mobile .web-stores {
 }
 
 body.wporg-page-mobile .web-stores img {
-	width: 150px;
-	margin: 0 0 10px 10px;
+	width: 140px;
+	margin-bottom: 10px;
 }
 
-@media screen and (min-width:810px) {
+body.wporg-page-mobile .web-stores a:first-of-type img {
+	margin-left: 10px;
+}
+
+@media screen and (min-width:900px) {
 	.wporg-page-mobile .intro-wrapper {
 		display: -webkit-box;
 		display: -webkit-flex;
 		display: -moz-box;
 		display: -ms-flexbox;
 		display: flex;
-		max-width: 800px; /* Keep the .intro text roughly the same height as the image. */
 		margin-bottom: 30px;
 	}
 
@@ -2302,15 +2309,16 @@ body.wporg-page-mobile .web-stores img {
 		padding-left: 30px;
 	}
 
-	.wporg-page-mobile .intro-wrapper img {
-		-webkit-box-ordinal-group: 3;
-		-webkit-order: 2;
+	.wporg-page-mobile .intro-wrapper img.feature {
+		-webkit-box-ordinal-group: 4;
+		-webkit-order: 3;
 		-moz-box-ordinal-group: 3;
-		-ms-flex-order: 2;
-		order: 2;
+		-ms-flex-order: 3;
+		order: 3;
 		max-height: -webkit-max-content;
 		max-height: -moz-max-content;
 		max-height: max-content;
+		height: intrinsic;
 	}
 }
 
