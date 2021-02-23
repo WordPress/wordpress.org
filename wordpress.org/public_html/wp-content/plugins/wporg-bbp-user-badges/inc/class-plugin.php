@@ -174,7 +174,6 @@ class Plugin {
 	 *
 	 * Possible badge classes:
 	 * - by-moderator (Note: will always be added if author is a moderator)
-	 * - by-thread-starter (Note: will always be added if author is the op)
 	 * - by-plugin-author
 	 * - by-plugin-contributor
 	 * - by-theme-author
@@ -195,17 +194,6 @@ class Plugin {
 			$classes[] = 'by-moderator';
 			$has_badge = true;
 		}
-
-		// Class related to thread starter
-		/*
-		if (
-			'reply' === $item_type &&
-			bbp_get_reply_author_id( $item_id ) === bbp_get_topic_author_id( bbp_get_reply_topic_id( $item_id ) )
-		) {
-			$classes[] = 'by-thread-starter';
-			$has_badge = true;
-		}
-		*/
 
 		// Class related to plugin and theme authors/contributors.
 		if ( $info = $this->get_author_badge_info( $item_type, $item_id ) ) {

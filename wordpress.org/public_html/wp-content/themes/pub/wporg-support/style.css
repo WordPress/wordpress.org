@@ -1372,12 +1372,6 @@ table {
 	border-left-color: #33b4ce;
 }
 
-.bbp-view .bbp-topics .by-thread-starter,
-.bbp-search .bbp-search-results .by-thread-starter,
-.bbp-user-replies-created .by-thread-starter {
-	border-left-color: #43cc99;
-}
-
 .bbp-view .bbp-topics .by-plugin-author,
 .bbp-view .bbp-topics .by-plugin-contributor,
 .bbp-view .bbp-topics .by-plugin-support-rep,
