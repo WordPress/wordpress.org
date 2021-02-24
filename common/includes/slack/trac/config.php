@@ -58,6 +58,7 @@ class Core extends Trac {
 		'I18N'                   => '#core-i18n',
 		'Media'                  => '#core-media',
 		'docs'                   => '#core-docs',
+		'css'                    => '#core-css',
 		'javascript'             => '#core-js',
 		'coding-standards'       => '#core-coding-standards',
 		'Privacy'                => '#core-privacy',
