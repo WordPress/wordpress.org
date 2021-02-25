@@ -197,6 +197,10 @@ function hreflang_link_attributes() {
 		return;
 	}
 
+	if ( ! defined( 'GLOTPRESS_LOCALES_PATH' ) ) {
+		return;
+	}
+
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
 	// Google doesn't have support for a whole lot of languages and throws errors about it,

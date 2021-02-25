@@ -1178,6 +1178,10 @@ function wporg_themes_add_hreflang_link_attributes() {
 		return;
 	}
 
+	if ( ! defined( 'GLOTPRESS_LOCALES_PATH' ) ) {
+		return;
+	}
+
 	$path = wporg_themes_get_current_url( $path_only = true );
 	if ( ! $path ) {
 		return;
