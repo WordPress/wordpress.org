@@ -45,6 +45,7 @@ class Themes_API {
 		'downloaded'         => false,
 		'downloadlink'       => false,
 		'last_updated'       => false,
+		'creation_time'      => false,
 		'parent'             => false,
 		'rating'             => false,
 		'ratings'            => false,
@@ -434,6 +435,7 @@ class Themes_API {
 			$defaults['parent'] = true;
 			$defaults['requires'] = true;
 			$defaults['requires_php'] = true;
+			$defaults['creation_time'] = true;
 		}
 
 		$this->request->fields = (array) ( $this->request->fields ?? [] );
@@ -770,7 +772,12 @@ class Themes_API {
 		}
 
 		if ( $this->fields['last_updated'] ) {
-			$phil->last_updated = get_post_modified_time( 'Y-m-d', null, $theme->ID, true );
+			$phil->last_updated      = get_post_modified_time( 'Y-m-d', true, $theme->ID, true );
+			$phil->last_updated_time = get_post_modified_time( 'Y-m-d H:i:s', true, $theme->ID, true );
+		}
+
+		if ( $this->fields['creation_time'] ) {
+			$phil->creation_time = get_post_time( 'Y-m-d H:i:s', true, $theme->ID, true );
 		}
 
 		if ( $this->fields['homepage'] ) {
