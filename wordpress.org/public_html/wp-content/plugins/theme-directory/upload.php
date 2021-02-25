@@ -20,10 +20,6 @@ add_filter( 'upload_size_limit', 'wporg_themes_upload_size_limit', 10, 0 );
  * Renders the upload shortcode.
  */
 function wporg_themes_render_upload_shortcode() {
-	if ( ! defined( 'THEME_TRACBOT_PASSWORD' ) || ! defined( 'THEME_DROPBOX_PASSWORD' ) ) {
-		return '<!-- Please define SVN and Trac passwords. -->';
-	}
-
 	if ( ! is_user_logged_in() ) {
 
 		$log_in_text = sprintf(
@@ -36,6 +32,10 @@ function wporg_themes_render_upload_shortcode() {
 		);
 
 		return '<p>' . $log_in_text . '</p>';
+	}
+
+	if ( ! defined( 'THEME_TRACBOT_PASSWORD' ) || ! defined( 'THEME_DROPBOX_PASSWORD' ) ) {
+		return '<div class="notice notice-warning"><p>Error: Please configure the required Trac and SVN details.</p></div>';
 	}
 
 	$notice = '';
