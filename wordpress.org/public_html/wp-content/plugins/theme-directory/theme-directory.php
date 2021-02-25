@@ -66,10 +66,11 @@ function wporg_themes_activate() {
 			continue;
 		}
 		wp_insert_post( array(
-			'post_type'   => 'page',
-			'post_title'  => $page_slug,
-			'post_name'   => $page_slug,
-			'post_status' => 'publish'
+			'post_type'    => 'page',
+			'post_title'   => ucwords( str_replace( '-', ' ', $page_slug ) ),
+			'post_name'    => $page_slug,
+			'post_status'  => 'publish',
+			'post_content' => ( 'upload' == $page_slug ? '[wporg-themes-upload]' : '' )
 		) );
 	}
 
