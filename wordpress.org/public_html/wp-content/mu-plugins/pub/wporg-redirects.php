@@ -3,7 +3,7 @@
 /*
  * WordPress.org/-specific redirects
  */
-if ( 1 === get_current_blog_id() ) {
+if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_blog_details()->domain ) {
 	add_action( 'template_redirect', function() {
 		// WordPress.org/feed/* should redirect to WordPress.org/news/feed/*
 		if ( is_feed() ) {
