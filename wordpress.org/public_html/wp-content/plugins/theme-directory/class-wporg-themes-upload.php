@@ -849,7 +849,7 @@ TICKET;
 		} else {
 			$ticket_id = $this->trac->ticket_create( $this->trac_ticket->summary, $this->trac_ticket->description, array(
 				'type'      => 'theme',
-				'keywords'  => implode( ', ', $this->trac_ticket->keywords ),
+				'keywords'  => implode( ' ', $this->trac_ticket->keywords ),
 				'reporter'  => $this->author->user_login,
 				'cc'        => $this->author->user_email,
 				'priority'  => $this->trac_ticket->priority,
@@ -1022,7 +1022,7 @@ TICKET;
 				! empty( $this->trac_ticket->resolution ) &&
 				'live' === $this->trac_ticket->resolution
 			) {
-				// Do nothing. The update has been set as live. No nee to let them know it's been uploaded.
+				// Do nothing. The update has been set as live. No need to let them know it's been uploaded.
 				// wporg_themes_approve_version() will send a "Congratulations! It's live!" email momentarily.
 				return;
 			}
