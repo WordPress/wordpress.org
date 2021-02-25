@@ -12,7 +12,7 @@
 ?>
 
 <div id="wporg-footer">
-	<h6 class="aligncenter cip-image">Code is Poetry.</h6>
+	<h6 class="aligncenter cip cip-image">Code is Poetry.</h6>
 </div>
 
 <?php wp_footer(); ?>
