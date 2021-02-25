@@ -22,6 +22,10 @@ namespace WordPressdotorg\NoBlogsNoAdminbar;
  * @return bool
  */
 function show_admin_bar( $show ) {
+	if ( ! is_multisite() ) {
+		return $show;
+	}
+
 	$blogs = (array) get_blogs_of_user( get_current_user_id() );
 
 	foreach ( $blogs as $blog ) {
