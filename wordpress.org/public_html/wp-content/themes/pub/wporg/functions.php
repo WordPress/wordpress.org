@@ -244,7 +244,7 @@ function hreflang_link_attributes() {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-		$sites = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
+		$sites = $wpdb->get_results( 'SELECT locale, subdomain FROM wporg_locales', OBJECT_K );
 		if ( ! $sites ) {
 			return;
 		}
