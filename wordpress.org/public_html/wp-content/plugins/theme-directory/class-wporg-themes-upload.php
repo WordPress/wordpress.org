@@ -903,6 +903,7 @@ TICKET;
 		// Finally, add post meta.
 		$post_meta = array(
 			'_theme_url'    => $this->theme->get( 'ThemeURI' ),
+			'_author'       => $this->theme->get( 'Author' ),
 			'_author_url'   => $this->theme->get( 'AuthorURI' ),
 			'_requires'     => $this->sanitize_version_like_field( $this->theme->get( 'RequiresWP' ), 'requires' ),
 			'_requires_php' => $this->sanitize_version_like_field( $this->theme->get( 'RequiresPHP' ) ),
