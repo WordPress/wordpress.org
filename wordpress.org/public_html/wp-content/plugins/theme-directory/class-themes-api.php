@@ -63,6 +63,7 @@ class Themes_API {
 		'active_installs'    => false,
 		'requires'           => false,
 		'requires_php'       => false,
+		'trac_tickets'       => false,
 	);
 
 	/**
@@ -850,6 +851,10 @@ class Themes_API {
 
 		if ( $this->fields['requires_php'] ) {
 			$phil->requires_php = wporg_themes_get_version_meta( $theme->ID, '_requires_php', $phil->version );
+		}
+
+		if ( $this->fields['trac_tickets'] ) {
+			$phil->trac_tickets = get_post_meta( $theme->ID, '_ticket_id', true );
 		}
 
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {
