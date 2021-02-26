@@ -61,7 +61,7 @@ class Import {
 	 *
 	 * @param string $plugin_slug            The slug of the plugin to import.
 	 * @param array  $svn_changed_tags       A list of tags/trunk which the SVN change touched. Optional.
-	 * @param array  $svn_revision_triggered The SVN revision which this import has been triggered by.
+	 * @param array  $svn_revision_triggered The SVN revision which this import has been triggered by. Optional.
 	 */
 	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_revision_triggered = 0 ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
@@ -293,6 +293,17 @@ class Import {
 		if ( has_term( 'block', 'plugin_section', $plugin->ID ) ) {
 			Block_e2e::run( $plugin->post_name );
 		}
+
+		/**
+		 * Action that fires after a plugin is imported.
+		 * 
+		 * @param WP_Post $plugin         The plugin updated.
+		 * @param string  $stable_tag     The new stable tag for the plugin.
+		 * @param string  $old_stable_tag The previous stable tag for the plugin.
+		 * @param array   $changed_tags   The list of SVN tags/trunk affected to trigger the import.
+		 * @param int     $svn_revision   The SVN revision that triggered the import.
+		 */
+		do_action( 'wporg_plugins_imported', $plugin, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
 		return true;
 	}
