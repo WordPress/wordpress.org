@@ -236,13 +236,18 @@ function determine_trac_ticket( $pr ) {
 	$ticket = false;
 
 	// For now, we assume everything is destined for the Core Trac.
+	$trac = 'core';
 	switch ( $pr->base->repo->full_name ) {
 		case 'WordPress/wordpress.org':
 			$trac = 'meta';
 			break;
 		case 'WordPress/wordpress-develop':
-		default:
 			$trac = 'core';
+			break;
+		default:
+			if ( defined( 'WEBHOOK_TRAC_HINT' ) && WEBHOOK_TRAC_HINT ) {
+				$trac = WEBHOOK_TRAC_HINT;
+			}
 			break;
 	}
 

@@ -28,6 +28,10 @@ verify_signature();
 
 $payload = json_decode( file_get_contents( 'php://input' ) );
 
+if ( ! empty( $_GET['trac'] ) ) {
+	define( 'WEBHOOK_TRAC_HINT', $_GET['trac'] );
+}
+
 switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 	// Pull Request
 	case 'pull_request':
