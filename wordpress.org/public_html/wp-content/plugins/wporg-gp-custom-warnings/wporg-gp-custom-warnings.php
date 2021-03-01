@@ -181,7 +181,7 @@ class WPorg_GP_Custom_Translation_Warnings {
 
 		$attribute_regex       = '/(\s*(?P<attr>%s))=([\'"])(?P<value>.+)\\3(\s*)/i';
 		$attribute_replace     = '$1=$3...$3$5';
-		$changeable_attr_regex = sprintf( $attribute_regex, implode( '|', $changable_attributes ) );
+		$changeable_attr_regex = sprintf( $attribute_regex, implode( '|', $changeable_attributes ) );
 		$link_attr_regex       = sprintf( $attribute_regex, 'href|src' );
 
 		// Items are sorted, so if all is well, will match up.
