@@ -111,47 +111,108 @@ class WPorg_GP_Custom_Translation_Warnings {
 	}
 
 	/**
-	 * Extends the GlotPress tags warning to allow some URL changes.
+	 * Replaces the GlotPress tags warning to allow some URL changes.
+	 * 
+	 * Differences from GlotPress:
+	 *  - URLs (href + src) are run through `self::warning_mismatching_urls()`
+	 *    - The domain may change for some safe domains
+	 *    - The protocol may change between https & http
+	 *    - The URL may include/remove a trailing slash
+	 *  - The value of translatable/url attributes is excluded from the error message if it's not related to the issue at hand.
+	 *  - Tags are sorted, <em>One</em> <strong>Two</strong> can be translated as <strong>foo</strong> <em>bar</em> without generating warning.
+	 *  - TODO: Tags are not validated to be nested correctly. GlotPress handles this by validating the ordering of the tags remained the same.
+	 *  - TODO: Allow Japanese (and other locales?) remove certain style/formatting tags that don't apply in the locale.
 	 *
-	 * @param string    $original    The original string.
-	 * @param string    $translation The translated string.
-	 * @param GP_Locale $locale      The locale.
+	 * @param string    $original    The source string.
+	 * @param string    $translation The translation.
+	 * @param GP_Locale $locale      The locale of the translation.
+	 * @return string|true True if check is OK, otherwise warning message.
 	 */
 	public function warning_tags( $original, $translation, $locale ) {
-		// Allow URL changes in `href` attributes by substituting the original URL when appropriate
-		// if that passes the checks, assume it's okay, otherwise throw the warning with the original payload.
+		$tag_pattern       = '(<[^>]*>)';
+		$tag_re            = "/$tag_pattern/Us";
+		$original_parts    = [];
+		$translation_parts = [];
 
-		$altered_translation = $translation;
-		foreach ( $this->allowed_domain_changes as $domain => $regex ) {
-			if ( false === stripos( $original, '://' . $domain ) ) {
+		if ( preg_match_all( $tag_re, $original, $m ) ) {
+			$original_parts = $m[1];
+		}
+		if ( preg_match_all( $tag_re, $translation, $m ) ) {
+			$translation_parts = $m[1];
+		}
+
+		if ( count( $original_parts ) > count( $translation_parts ) ) {
+			return 'Missing tags from translation. Expected: ' . implode( ' ', array_diff( $original_parts, $translation_parts ) );
+		}
+		if ( count( $original_parts ) < count( $translation_parts ) ) {
+			return 'Too many tags in translation. Found: ' . implode( ' ', array_diff( $translation_parts, $original_parts ) );
+		}
+
+		// TODO: Validate nesting of HTML is same.
+		// GlotPress handled this by requiring the HTML be in the same order.
+
+		// Sort the tags, from this point out as long as all the tags are present is okay.
+		rsort( $original_parts );
+		rsort( $translation_parts );
+
+		$changeable_attributes = array(
+			// We allow certain attributes to be different in translations.
+			'title',
+			'aria-label',
+			// src and href will be checked separately.
+			'src',
+			'href',
+		);
+
+		$attribute_regex       = '/(\s*(?P<attr>%s))=([\'"])(?P<value>.+)\\3(\s*)/i';
+		$attribute_replace     = '$1=$3...$3$5';
+		$changeable_attr_regex = sprintf( $attribute_regex, implode( '|', $changable_attributes ) );
+		$link_attr_regex       = sprintf( $attribute_regex, 'href|src' );
+
+		// Items are sorted, so if all is well, will match up.
+		$parts_tags = array_combine( $original_parts, $translation_parts );
+
+		$warnings = [];
+		foreach ( $parts_tags as $original_tag => $translation_tag ) {
+			if ( $original_tag === $translation_tag ) {
 				continue;
 			}
 
-			// Make an assumption that the first protocol for the given domain is the protocol in use.
-			$protocol = 'https';
-			if ( preg_match( '!(https?)://' . $regex . '!', $original, $m ) ) {
-				$protocol = $m[1];
-			}
+			// Remove any attributes that can be expected to differ.
+			$original_tag    = preg_replace( $changeable_attr_regex, $attribute_replace, $original_tag );
+			$translation_tag = preg_replace( $changeable_attr_regex, $attribute_replace, $translation_tag );
 
-			$altered_translation = preg_replace_callback(
-				'!(href=[\'"]?)(https?)://(' . $regex . ')!i',
-				function( $m ) use( $protocol, $domain ) {
-					return $m[1] . $protocol . '://' . $domain;
-				},
-				$altered_translation
-			);
-		}
-
-		if ( $altered_translation !== $translation ) {
-			$altered_warning = GP::$builtin_translation_warnings->warning_tags( $original, $altered_translation, $locale );
-			if ( true === $altered_warning ) {
-				return true;
+			if ( $original_tag !== $translation_tag ) {
+				$warnings[] = "Expected $original_tag, got $translation_tag.";
 			}
 		}
 
-		// Pass through to the core GlotPress warning method.
-		return GP::$builtin_translation_warnings->warning_tags( $original, $translation, $locale );
-	}
+		// Now check that the URLs mentioned within href & src tags match.
+		$original_links    = '';
+		$translation_links = '';
+
+		if ( preg_match_all( $link_attr_regex, implode( ' ', $original_parts ), $m ) ) {
+			$original_links = implode( "\n", $m['value'] );
+		}
+		if ( preg_match_all( $link_attr_regex, implode( ' ', $translation_parts ), $m ) ) {
+			$translation_links = implode( "\n", $m['value'] );
+		}
+
+		// Validate the URLs if present.
+		if ( $original_links || $translation_links ) {
+			$url_warnings = $this->warning_mismatching_urls( $original_links, $translation_links );
+
+			if ( true !== $url_warnings ) {
+				$warnings[] = $url_warnings;
+			}
+		}
+
+		if ( empty( $warnings ) ) {
+			return true;
+		}
+
+		return implode( "\n", $warnings );
+   }
 
 	/**
 	 * Adds a warning for changing placeholders.
