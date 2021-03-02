@@ -129,7 +129,7 @@ class WPorg_Themes_Rest_API_Auto_Review_Controller extends WP_REST_Controller {
 			require_once __DIR__ . '/lib/class-trac.php';
 		}
 
-		$trac_instance = new \Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );;
+		$trac_instance = new \Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
 		$theme_slug = $request[ 'theme_slug' ];
 		$ticket_id = $request[ 'ticket_id' ];
 
