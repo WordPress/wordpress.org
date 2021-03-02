@@ -334,7 +334,7 @@ class Block_Validator {
 						echo "</p></div>\n";
 					} else {
 						echo "<div class='notice notice-error notice-alt'><p>\n";
-						echo sprintf( esc_html__( 'Test failed: %s', wporg-plugins ), '<code>' . esc_html( get_post_meta( $plugin->ID, 'e2e_error', true ) ) . '</code>' );
+						echo sprintf( esc_html__( 'Test failed: %s', 'wporg-plugins' ), '<code>' . esc_html( get_post_meta( $plugin->ID, 'e2e_error', true ) ) . '</code>' );
 						echo "</p></div>\n";
 					}
 				}
