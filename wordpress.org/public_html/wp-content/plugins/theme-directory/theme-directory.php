@@ -179,6 +179,7 @@ add_action( 'init', 'wporg_themes_init' );
  */
 function wporg_themes_rest_apis() {
 	include __DIR__ . '/class-wporg-themes-rest-api-internal-stats.php';
+	include __DIR__ . '/class-wporg-themes-auto-review.php';
 }
 add_action( 'rest_api_init', 'wporg_themes_rest_apis' );
 
