@@ -243,7 +243,7 @@ get_header( 'wporg' );
 							$post_url  = get_permalink( $showcase_post->ID );
 							$thumbnail = has_post_thumbnail( $showcase_post->ID )
 								? get_the_post_thumbnail( $showcase_post->ID, 'showcase-thumbnail' )
-								: sprintf( '<img src="%1$s" width="220" alt="%2$s" />', esc_url( $rosetta->screenshot_url( $post_url, 220 ) ), esc_attr( $showcase_post->post_title ) );
+								: sprintf( '<img src="%1$s" width="220" loading="lazy" alt="%2$s" />', esc_url( $rosetta->screenshot_url( $post_url, 220 ) ), esc_attr( $showcase_post->post_title ) );
 
 							printf(
 								'<div class="col-3"><a href="%1$s">%2$s</a></div>',
