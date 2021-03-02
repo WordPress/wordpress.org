@@ -170,12 +170,15 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			die( 'UNSUPPORTED - Only PR comments supported.' );
 		}
 
-		// Ignore some bots.
+		// Ignore all bots, keeping the explicit list for future reference.
 		$ignored_users = [
 			'github-actions[bot]',
 			'codecov[bot]',
 		];
-		if ( in_array( $payload->comment->user->login, $ignored_users, true ) ) {
+		if (
+			in_array( $payload->comment->user->login, $ignored_users, true ) ||
+			'[bot]' === substr( $payload->comment->user->login, -5 ) // All bot users.
+		) {
 			die( 'IGNORED - Comment by ignored user.' );
 		}
 
