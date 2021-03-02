@@ -173,6 +173,7 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 		// Ignore some bots.
 		$ignored_users = [
 			'github-actions[bot]',
+			'codecov[bot]',
 		];
 		if ( in_array( $payload->comment->user->login, $ignored_users, true ) ) {
 			die( 'IGNORED - Comment by ignored user.' );
