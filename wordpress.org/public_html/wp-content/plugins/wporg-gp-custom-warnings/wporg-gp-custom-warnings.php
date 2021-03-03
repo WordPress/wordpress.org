@@ -120,9 +120,8 @@ class WPorg_GP_Custom_Translation_Warnings {
 	 *    - The URL may include/remove a trailing slash
 	 *  - The value of translatable/url attributes is excluded from the error message if it's not related to the issue at hand.
 	 *  - Tags are sorted, <em>One</em> <strong>Two</strong> can be translated as <strong>foo</strong> <em>bar</em> without generating warning.
-	 *  - Japanese can remove `<em>` tags.
+	 *  - East asian languages can remove emphasis/italic tags.
 	 *  - TODO: Tags are not validated to be nested correctly. GlotPress handles this by validating the ordering of the tags remained the same.
-	 *  - TODO: Extend/abstract the locales which can remove certain tags.
 	 *
 	 * @param string    $original    The source string.
 	 * @param string    $translation The translation.
@@ -142,12 +141,11 @@ class WPorg_GP_Custom_Translation_Warnings {
 			$translation_parts = $m[1];
 		}
 
-		// Allow Japanese to exclude <em>. TODO: Abstract this / extend it to all languages affected / extend to full list of tags.
+		// Allow certain laguages to exclude certain tags.
 		if ( count( $original_parts ) > count( $translation_parts ) ) {
 
 			$languages_without_italics = [
-				'ja',
-				// 'ko', 'zh', 'zh-hk', 'zh-cn', 'zh-sg', 'zh-tw' ??
+				'ja', 'ko', 'zh', 'zh-hk', 'zh-cn', 'zh-sg', 'zh-tw'
 			];
 
 			// Remove Italic requirements.
