@@ -1,6 +1,6 @@
 <?php
 
-namespace WPORG_Theme_Directory_Trac;
+namespace WordPressdotorg\Theme_Directory\Rest_API;
 
 use WP_Error;
 use WP_REST_Controller, WP_REST_Server, WP_REST_Response;
@@ -11,7 +11,7 @@ defined( 'WPINC' ) || die();
  *
  * @see WP_REST_Controller
  */
-class WPorg_Themes_Rest_API_Auto_Review_Controller extends WP_REST_Controller {
+class Auto_Review_Controller extends WP_REST_Controller {
 
 	/**
 	 * Constructor.
@@ -168,4 +168,4 @@ class WPorg_Themes_Rest_API_Auto_Review_Controller extends WP_REST_Controller {
 	}
 }
 
-new WPorg_Themes_Rest_API_Auto_Review_Controller();
+new Auto_Review_Controller();
