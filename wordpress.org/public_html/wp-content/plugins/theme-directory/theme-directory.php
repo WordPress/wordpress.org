@@ -11,9 +11,6 @@
  * License URI: http://opensource.org/licenses/gpl-2.0.php
  */
 
-// Load base repo package.
-include __DIR__ . '/class-repo-package.php';
-
 // Load theme repo package.
 include __DIR__ . '/class-wporg-themes-repo-package.php';
 

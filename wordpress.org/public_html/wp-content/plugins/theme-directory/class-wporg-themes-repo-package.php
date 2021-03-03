@@ -3,10 +3,28 @@
 /**
  * Class WPORG_Themes_Repo_Package
  *
- * The WPORG_Themes_Repo_Package class extends the base package class for theme-specific info.
+ * The WPORG_Themes_Repo_Package class wraps the WP_Post class with theme-specific info.
  * You can create one with new and pass it either a post or post id.
  */
-class WPORG_Themes_Repo_Package extends Repo_Package {
+class WPORG_Themes_Repo_Package {
+
+	/**
+	 * Holds a WP_Post object representing this post.
+	 *
+	 * @var WP_Post
+	 */
+	public $wp_post;
+
+	/**
+	 * Construct a new Package for the given post ID or object.
+	 *
+	 * @param WP_Post|int $post
+	 */
+	public function __construct( $post = 0 ) {
+		if ( $post ) {
+			$this->wp_post = get_post( $post );
+		}
+	}
 
 	/**
 	 * Returns the screen shot URL for a theme.
