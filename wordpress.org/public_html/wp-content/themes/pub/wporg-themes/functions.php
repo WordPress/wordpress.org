@@ -110,10 +110,18 @@ function wporg_themes_scripts() {
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
-		wp_enqueue_script( 'wporg-theme', get_stylesheet_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '20201118', true );
+		wp_enqueue_script( 'wporg-theme', get_stylesheet_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '20210303', true );
 
 		// Use the Rosetta-specific site name. Ie. "WordPress.org $LOCALE"
 		$title_suffix = isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ? $GLOBALS['wporg_global_header_options']['rosetta_title'] : 'WordPress.org';
+
+		$api_endpoints = [
+			'query'    => 'https://api.wordpress.org/themes/info/1.2/',
+			'favorite' => 'https://api.wordpress.org/themes/theme-directory/1.0/',
+		];
+		if ( 'local' === wp_get_environment_type() ) {
+			$api_endpoints['query'] = rest_url( 'themes/1.2/query' );
+		}
 
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
@@ -140,11 +148,13 @@ function wporg_themes_scripts() {
 				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
 				'locale'       => get_locale(),
 				'favorites'    => array(
+					'api'    => $api_endpoints['favorite'],
 					'themes' => wporg_themes_get_user_favorites(),
 					'user'   => wp_get_current_user()->user_login,
 					'nonce'  => is_user_logged_in() ? wp_create_nonce( 'modify-theme-favorite' ) : false,
 				),
 				'browseDefault'=> WPORG_THEMES_DEFAULT_BROWSE,
+				'apiEndpoint'  => $api_endpoints['query'],
 			),
 			'l10n' => array(
 				'locale'            => str_replace( '_', '-', get_locale() ),

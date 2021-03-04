@@ -330,40 +330,49 @@ window.wp = window.wp || {};
 
 		// Send request to api.wordpress.org/themes
 		apiCall: function( request, paginated ) {
+			var url = themes.data.settings.apiEndpoint,
+				data, options;
 
-			var options = {
-				type: 'POST',
-				url: 'https://api.wordpress.org/themes/info/1.1/',
-				jsonp: 'callback',
-				dataType: 'jsonp',
-				data: {
+			data = _.extend({
+				per_page: themes.data.settings.postsPerPage,
+				locale: themes.data.settings.locale,
+				fields: {
+					description: true,
+					sections: false,
+					tested: true,
+					requires: true,
+					downloaded: false,
+					downloadlink: true,
+					last_updated: true,
+					homepage: true,
+					theme_url: true,
+					parent: true,
+					tags: true,
+					rating: true,
+					ratings: true,
+					num_ratings: true,
+					extended_author: true,
+					photon_screenshots: true,
+					active_installs: true,
+					requires_php: true,
+				}
+			}, request);
+
+			// Requests against api.WordPress.org need to be nested.
+			if ( 'api.wordpress.org' === ( new URL(url) ).hostname ) {
+				data = {
 					action: 'query_themes',
 					// Request data
-					request: _.extend({
-						per_page: themes.data.settings.postsPerPage,
-						locale: themes.data.settings.locale,
-						fields: {
-							description: true,
-							sections: false,
-							tested: true,
-							requires: true,
-							downloaded: false,
-							downloadlink: true,
-							last_updated: true,
-							homepage: true,
-							theme_url: true,
-							parent: true,
-							tags: true,
-							rating: true,
-							ratings: true,
-							num_ratings: true,
-							extended_author: true,
-							photon_screenshots: true,
-							active_installs: true,
-							requires_php: true,
-						}
-					}, request)
-				},
+					request: data
+				};
+			}
+
+			options = {
+				type: 'GET',
+				url: url,
+				jsonp: 'callback',
+				dataType: 'jsonp',
+				data: data,
 
 				beforeSend: function() {
 					if ( ! paginated ) {
@@ -561,7 +570,7 @@ window.wp = window.wp || {};
 			// Update the server with the changed data
 			var options = {
 				type: 'GET',
-				url: 'https://api.wordpress.org/themes/theme-directory/1.0/',
+				url: themes.data.settings.favorites.api,
 				jsonp: 'callback',
 				dataType: 'jsonp',
 				data: {
