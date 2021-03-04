@@ -269,7 +269,9 @@ class WPorg_Handbook {
 		$config = (array) apply_filters( 'handbook_post_type_defaults', $default_config, $slug );
 
 		// Override the presumed label with a potentially customized value.
-		$this->label = $config['labels']['name'];
+		if ( ! empty( $config['labels']['name'] ) ) {
+			$this->label = $config['labels']['name'];
+		}
 
 		register_post_type( $this->post_type, $config );
 	}
@@ -515,6 +517,10 @@ class WPorg_Handbook {
 	 * @return array
 	 */
 	public function o2_post_fragment( $post_fragment ) {
+		if ( empty( $post_fragment['id'] ) ) {
+			return $post_fragment;
+		}
+
 		$post = get_post( $post_fragment['id'] );
 		if ( ! $post ) {
 			return $post_fragment;
