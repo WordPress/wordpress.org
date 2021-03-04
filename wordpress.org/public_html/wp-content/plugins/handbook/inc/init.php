@@ -36,6 +36,22 @@ class WPorg_Handbook_Init {
 	}
 
 	/**
+	 * Resets memoized and cached variables.
+	 *
+	 * @param bool $delete_handbook_objects Optional. Delete associated handbook
+	 *                                      objects? Default false.
+	 */
+	public static function reset( $delete_handbook_objects = false ) {
+		if ( $delete_handbook_objects ) {
+			foreach ( self::get_handbook_objects() as $obj ) {
+				unset( $obj );
+			}
+		}
+
+		self::$handbooks  = [];
+	}
+
+	/**
 	 * Initializes handbooks.
 	 */
 	public static function init() {
