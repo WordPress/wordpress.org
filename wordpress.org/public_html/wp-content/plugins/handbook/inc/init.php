@@ -69,6 +69,11 @@ class WPorg_Handbook_Init {
 	 * Initializes handbooks.
 	 */
 	public static function init() {
+		/**
+		 * Fires before handbooks have been initialized.
+		 */
+		do_action( 'before_handbooks_init' );
+
 		$post_types = self::get_post_types();
 
 		// Enable table of contents.
@@ -86,6 +91,11 @@ class WPorg_Handbook_Init {
 		// Enqueue styles and scripts.
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_styles' ] );
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_scripts' ] );
+
+		/**
+		 * Fires after handbooks have been initialized.
+		 */
+		do_action( 'after_handbooks_init' );
 	}
 
 	/**
