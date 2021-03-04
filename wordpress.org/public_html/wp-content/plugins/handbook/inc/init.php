@@ -22,6 +22,18 @@ class WPorg_Handbook_Init {
 	}
 
 	/**
+	 * Returns a handbook of the given post type.
+	 *
+	 * @param string $post_type The handbook post type.
+	 * @return WPorg_Handbook|false The handbook object, or false if no such
+	 *                              handbook.
+	 */
+	public static function get_handbook( $post_type ) {
+		$handbooks = self::get_handbook_objects();
+		return $handbooks[ $post_type ] ?? false;
+	}
+
+	/**
 	 * Returns the post types of all handbooks.
 	 *
 	 * @return array
