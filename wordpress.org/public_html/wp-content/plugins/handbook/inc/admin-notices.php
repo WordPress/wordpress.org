@@ -35,6 +35,8 @@ class WPorg_Handbook_Admin_Notices {
 			in_array( $current_screen->post_type, wporg_get_handbook_post_types() )
 		&&
 			0 === $wp_query->post_count
+		&&
+			( empty( $wp_query->query_vars['post_status'] ) || 'publish' === $wp_query->query_vars['post_status'] )
 		) {
 			echo '<div class="notice notice-success"><p>';
 			printf(
