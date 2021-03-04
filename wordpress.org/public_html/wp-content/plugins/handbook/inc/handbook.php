@@ -111,6 +111,7 @@ class WPorg_Handbook {
 		add_action( 'template_redirect',                  [ $this, 'redirect_handbook_root_page' ] );
 		add_filter( 'template_include',                   [ $this, 'template_include' ] );
 		add_filter( 'pre_get_posts',                      [ $this, 'pre_get_posts' ] );
+		add_filter( 'posts_pre_query',                    [ $this, 'posts_pre_query' ], 10, 2 );
 		add_action( 'widgets_init',                       [ $this, 'handbook_sidebar' ], 11 ); // After P2
 		add_action( 'wporg_email_changes_for_post_types', [ $this, 'wporg_email_changes_for_post_types' ] );
 		add_action( 'p2_action_links',                    [ $this, 'disable_p2_resolved_posts_action_links' ] );
@@ -390,6 +391,22 @@ class WPorg_Handbook {
 	}
 
 	/**
+	 * Pre-emptively sets the query posts to the handbook landing page when
+	 * appropriate.
+	 *
+	 * @param array $posts    Posts.
+	 * @param WP_Query $query Query object.
+	 * @return array
+	 */
+	public function posts_pre_query( $posts, $query ) {
+		if ( $query->is_main_query() && ! $query->is_admin && ! $query->is_search && $query->is_handbook_root ) {
+			$posts = [ $query->is_handbook_root ];
+		}
+
+		return $posts;
+	}
+
+	/**
 	 * Performs query object adjustments for handbook requests prior to querying
 	 * for posts.
 	 */
@@ -421,7 +438,7 @@ class WPorg_Handbook {
 			}
 			if ( $page ) {
 				$query->set( 'page_id', $page->ID );
-				$query->is_handbook_root     = true;
+				$query->is_handbook_root     = $page;
 
 				$query->is_archive           = false;
 				$query->is_post_type_archive = false;

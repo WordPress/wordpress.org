@@ -82,8 +82,18 @@ function wporg_is_handbook( $handbook = '' ) {
  *
  * @return bool True if the current page is the landing page for a handbook, false otherwise.
  */
- function wporg_is_handbook_landing_page() {
-	 return $GLOBALS['wp_query']->is_handbook_root;
+function wporg_is_handbook_landing_page() {
+	return (
+		$GLOBALS['wp_query']->is_handbook_root
+	||
+		(
+			! empty( $GLOBALS['wp_query']->query_vars['handbook'] )
+		&&
+			$GLOBALS['wp_query']->found_posts === 1
+		&&
+			! empty( $GLOBALS['wp_query']->query_vars['page_id'] )
+		)
+	);
  }
 
 /**
