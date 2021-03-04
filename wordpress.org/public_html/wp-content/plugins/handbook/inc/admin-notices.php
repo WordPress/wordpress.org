@@ -30,6 +30,8 @@ class WPorg_Handbook_Admin_Notices {
 
 		// Only show message in listing of handbook posts when no posts are present yet.
 		if (
+			$current_screen
+		&&
 			'edit' === $current_screen->base
 		&&
 			in_array( $current_screen->post_type, wporg_get_handbook_post_types() )
