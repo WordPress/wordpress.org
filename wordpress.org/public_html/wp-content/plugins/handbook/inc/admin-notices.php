@@ -41,11 +41,20 @@ class WPorg_Handbook_Admin_Notices {
 			( empty( $wp_query->query_vars['post_status'] ) || 'publish' === $wp_query->query_vars['post_status'] )
 		) {
 			echo '<div class="notice notice-success"><p>';
+
+			$suggested_slugs = array_unique( [
+				str_replace( '-handbook', '', $current_screen->post_type ),
+				'welcome',
+				$current_screen->post_type,
+				'handbook',
+			] );
+			$suggested_slugs = array_map( function( $x ) { return "<code>{$x}</code>"; }, $suggested_slugs );
+
 			printf(
 				/* translators: 1: example landing page title that includes post type name, 2: comma-separated list of acceptable post slugs */
 				__( '<strong>Welcome to your new handbook!</strong> It is recommended that the first post you create is the landing page for the handbook. You can title it anything you like (suggestions: <code>%1$s</code> or <code>Welcome</code>). However, you must ensure that it has one of the following slugs: %2$s.', 'wporg' ),
 				WPorg_Handbook::get_name( $current_screen->post_type ),
-				'<code>' . str_replace( '-handbook', '', $current_screen->post_type ) . '</code>, <code>welcome</code>, <code>' . $current_screen->post_type . '</code>, <code>handbook</code>'
+				implode( ', ', $suggested_slugs )
 			);
 			echo "</p></div>\n";
 		}
