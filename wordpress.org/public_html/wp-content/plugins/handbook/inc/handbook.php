@@ -7,11 +7,32 @@
 
 class WPorg_Handbook {
 
+	/**
+	 * The handbook post type.
+	 *
+	 * @var string
+	 */
 	public $post_type = '';
+
+	/**
+	 * The name of the setting for the handbook's name.
+	 *
+	 * @var string
+	 */
 	public $setting_name = '';
 
+	/**
+	 * The memoized and filtered label text for the handbook.
+	 *
+	 * @var string
+	 */
 	protected $label = '';
 
+	/**
+	 * Returns the custom handbook-related capabilities granted to site users.
+	 *
+	 * @return array
+	 */
 	public static function caps() {
 		return [
 			'edit_handbook_pages',
@@ -20,6 +41,11 @@ class WPorg_Handbook {
 		];
 	}
 
+	/**
+	 * Returns the custom capabilities granted to handbook editors.
+	 *
+	 * @return array
+	 */
 	public static function editor_caps() {
 		return [
 			'publish_handbook_pages',
@@ -64,6 +90,9 @@ class WPorg_Handbook {
 		return trim( $name );
 	}
 
+	/**
+	 * Constructor
+	 */
 	public function __construct( $type ) {
 		if ( 'handbook' !== $type ) {
 			$this->post_type = $type . '-handbook';
@@ -153,6 +182,9 @@ class WPorg_Handbook {
 		return $classes;
 	}
 
+	/**
+	 * Adds the setting for the handbook's name.
+	 */
 	public function add_name_setting() {
 		register_setting( 'general', $this->setting_name, 'esc_attr' );
 
@@ -168,11 +200,19 @@ class WPorg_Handbook {
 		);
 	}
 
+	/**
+	 * Outputs the HTML for the input field for the handbook's name.
+	 */
 	public function name_setting_html() {
 		$value = get_option( $this->setting_name, '' );
 		echo '<input type="text" id="' . esc_attr( $this->setting_name ) . '" name="' . esc_attr( $this->setting_name ) . '" value="' . esc_attr( $value ) . '" class="regular-text ltr" />';
 	}
 
+	/**
+	 * Grants handbook caps to the current user.
+	 *
+	 * @return array
+	 */
 	public function grant_handbook_caps( $caps ) {
 		if ( ! is_user_member_of_blog() ) {
 			return $caps;
@@ -191,6 +231,9 @@ class WPorg_Handbook {
 		return $caps;
 	}
 
+	/**
+	 * Registers handbook post types.
+	 */
 	public function register_post_type() {
 		if ( 'handbook' != $this->post_type ) {
 			$slug = substr( $this->post_type, 0, -9 );
@@ -344,6 +387,10 @@ class WPorg_Handbook {
 		return $template;
 	}
 
+	/**
+	 * Performs query object adjustments for handbook requests prior to querying
+	 * for posts.
+	 */
 	public function pre_get_posts( $query ) {
 		// Bail early if query is not for this handbook's post type.
 		if ( get_query_var( 'post_type' ) !== $this->post_type ) {
@@ -383,6 +430,9 @@ class WPorg_Handbook {
 		}
 	}
 
+	/**
+	 * Registers sidebar and widgets for handbook pages.
+	 */
 	public function handbook_sidebar() {
 		$sidebar_args = [
 			'id'            => $this->post_type,
@@ -402,6 +452,13 @@ class WPorg_Handbook {
 		register_widget( 'WPorg_Handbook_Pages_Widget' );
 	}
 
+	/**
+	 * Amends list of post types for which users can opt into receiving emails
+	 * about changes.
+	 *
+	 * @param array $post_types Post types.
+	 * @return array
+	 */
 	public function wporg_email_changes_for_post_types( $post_types ) {
 		if ( ! in_array( $this->post_type, $post_types ) ) {
 			$post_types[] = $this->post_type;
