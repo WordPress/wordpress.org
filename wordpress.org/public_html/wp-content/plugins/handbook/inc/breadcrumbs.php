@@ -29,7 +29,7 @@ class WPorg_Handbook_Breadcrumbs {
 	 */
 	public static function do_init() {
 		// Note if the WPorg_Handbook_Pages_Widget widget is in use.
-		if ( is_active_widget( false, false, WPorg_Handbook_Pages_Widget::get_widget_id_base(), true ) ) {
+		if ( class_exists( 'WPorg_Handbook_Pages_Widget' ) && is_active_widget( false, false, WPorg_Handbook_Pages_Widget::get_widget_id_base(), true ) ) {
 			self::$using_pages_widget = true;
 		}
 
