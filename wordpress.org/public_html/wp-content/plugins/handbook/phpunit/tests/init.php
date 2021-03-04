@@ -51,9 +51,8 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_handbook_objects_filtered() {
-		add_filter( 'handbook_post_types', function ( $pt ) { return ['plugins', 'themes']; } );
+		reinit_handbooks( [ 'plugins', 'themes' ], 'post_types' );
 
-		WPorg_Handbook_Init::init();
 		$handbooks = WPorg_Handbook_Init::get_handbook_objects();
 
 		$this->assertIsArray( $handbooks );
@@ -73,7 +72,7 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_post_types_filtered() {
-		add_filter( 'handbook_post_types', function ( $pt ) { return ['plugins', 'themes']; } );
+		reinit_handbooks( [ 'plugins', 'themes' ], 'post_types' );
 
 		$this->assertEquals( ['plugins', 'themes'], WPorg_Handbook_Init::get_post_types() );
 	}

@@ -98,7 +98,8 @@ class WPorg_Handbook_Admin_Notices_Test extends WP_UnitTestCase {
 	}
 
 	public function test_show_new_handbook_message_takes_into_account_custom_handbook_post_type_in_message() {
-		add_filter( 'handbook_post_types', function ( $x ) { return ['plugin-handbook', 'theme-handbook']; } );
+		reinit_handbooks( ['plugin-handbook', 'theme-handbook'], 'post_types' );
+
 		set_current_screen( 'edit' );
 		$screen = get_current_screen();
 		$screen->post_type = 'plugin-handbook';
