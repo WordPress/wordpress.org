@@ -25,6 +25,33 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 	}
 
 	/*
+	 * get_handbook_objects()
+	 */
+
+	public function test_get_handbook_objects_default() {
+		$handbooks = WPorg_Handbook_Init::get_handbook_objects();
+
+		$this->assertIsArray( $handbooks );
+		$this->assertCount( 1, $handbooks );
+		$this->assertInstanceOf( 'WPorg_Handbook', $handbooks[0] );
+		$this->assertEquals( 'handbook', $handbooks[0]->post_type );
+	}
+
+	public function test_get_handbook_objects_filtered() {
+		add_filter( 'handbook_post_types', function ( $pt ) { return ['plugins', 'themes']; } );
+
+		WPorg_Handbook_Init::init();
+		$handbooks = WPorg_Handbook_Init::get_handbook_objects();
+
+		$this->assertIsArray( $handbooks );
+		$this->assertCount( 2, $handbooks );
+		$this->assertInstanceOf( 'WPorg_Handbook', $handbooks[0] );
+		$this->assertEquals( 'plugins-handbook', $handbooks[0]->post_type );
+		$this->assertInstanceOf( 'WPorg_Handbook', $handbooks[1] );
+		$this->assertEquals( 'themes-handbook', $handbooks[1]->post_type );
+	}
+
+	/*
 	 * get_post_types()
 	 */
 

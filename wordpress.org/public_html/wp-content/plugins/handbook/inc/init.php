@@ -8,6 +8,20 @@
 class WPorg_Handbook_Init {
 
 	/**
+	 * Array of WPorg_Handbook objects.
+	 *
+	 * @var array
+	 */
+	protected static $handbooks = [];
+
+	/**
+	 * Returns the instantiated handbook objects.
+	 */
+	public static function get_handbook_objects() {
+		return self::$handbooks;
+	}
+
+	/**
 	 * Returns the post types of all handbooks.
 	 *
 	 * @return array
@@ -31,8 +45,9 @@ class WPorg_Handbook_Init {
 		new WPorg_Handbook_TOC( $post_types );
 
 		// Instantiate each of the handbooks.
+		self::$handbooks = [];
 		foreach ( $post_types as $type ) {
-			new WPorg_Handbook( $type );
+			self::$handbooks[] = new WPorg_Handbook( $type );
 		}
 
 		// Enable glossary.
