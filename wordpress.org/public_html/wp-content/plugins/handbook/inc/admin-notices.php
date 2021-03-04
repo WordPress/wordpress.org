@@ -8,12 +8,12 @@
 class WPorg_Handbook_Admin_Notices {
 
 	/**
-	 * Constructor.
+	 * Initializes functionality.
 	 *
 	 * @access public
 	 */
-	public function __construct() {
-		add_action( 'admin_notices', array( $this, 'show_new_handbook_message' ) );
+	public static function init() {
+		add_action( 'admin_notices', [ __CLASS__, 'show_new_handbook_message' ] );
 	}
 
 	/**
@@ -23,7 +23,7 @@ class WPorg_Handbook_Admin_Notices {
 	 *
 	 * @access public
 	 */
-	public function show_new_handbook_message() {
+	public static function show_new_handbook_message() {
 		global $wp_query;
 
 		$current_screen = get_current_screen();
@@ -51,4 +51,4 @@ class WPorg_Handbook_Admin_Notices {
 
 }
 
-$admin_notices = new WPorg_Handbook_Admin_Notices();
+add_action( 'plugins_loaded', [ 'WPorg_Handbook_Admin_Notices', 'init' ] );
