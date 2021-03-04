@@ -4,6 +4,18 @@ defined( 'ABSPATH' ) or die();
 
 class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 
+	public function setUp() {
+		parent::setup();
+
+		WPorg_Handbook_Init::init();
+	}
+
+	public function tearDown() {
+		parent::tearDown();
+
+		WPorg_Handbook_Init::reset( true );
+	}
+
 
 	//
 	//
