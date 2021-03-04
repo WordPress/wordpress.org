@@ -15,7 +15,9 @@ class WPorg_Handbook_Init {
 	protected static $handbooks = [];
 
 	/**
-	 * Returns the instantiated handbook objects.
+	 * Returns the handbook objects.
+	 *
+	 * @return WPorg_Handbook[]
 	 */
 	public static function get_handbook_objects() {
 		return self::$handbooks;
