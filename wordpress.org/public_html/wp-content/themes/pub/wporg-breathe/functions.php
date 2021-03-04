@@ -82,22 +82,22 @@ function inline_scripts() {
 		var el = document.getElementById( 'make-welcome-toggle' );
 		if ( el ) {
 			el.addEventListener( 'click', function( e ) {
-				if ( jQuery( '.make-welcome .entry-content' ).is( ':hidden' ) ) {
-					document.cookie = el.dataset.cookie + '=' +
-						'; expires=Thu, 01 Jan 1970 00:00:00 GMT' +
-						'; domain=<?php echo esc_js( $current_site->domain ); ?>' +
-						'; path=<?php echo esc_js( $current_site->path ); ?>';
-					jQuery( '#make-welcome-toggle' ).text( '<?php esc_attr_e( 'Hide welcome box', 'wporg' ); ?>' );
-				} else {
-					document.cookie = el.dataset.cookie + '=' + el.dataset.hash +
-						'; expires=Fri, 31 Dec 9999 23:59:59 GMT' +
-						'; domain=<?php echo esc_js( $current_site->domain ); ?>' +
-						'; path=<?php echo esc_js( $current_site->path ); ?>';
-					jQuery( '#make-welcome-toggle' ).text( '<?php esc_attr_e( 'Show welcome box', 'wporg' ); ?>' );
-				}
+				var $welcome = jQuery( '.make-welcome' ),
+					$toggle  = $welcome.find( '#make-welcome-toggle'),
+					$content = $welcome.find( '#make-welcome-content'),
+					isHide   = ! $content.is( ':hidden' );
 
-				jQuery( '.make-welcome .entry-content' ).slideToggle();
-				jQuery( '.make-welcome .post-edit-link' ).toggle();
+				// Toggle it
+				$toggle.text( $toggle.data( isHide ? 'show' : 'hide' ) );
+				$content.slideToggle();
+				$welcome.find('.post-edit-link' ).toggle( ! isHide );
+
+				// Remember it
+				document.cookie = $content.data( 'cookie' ) + '=' +
+					( isHide ? $content.data( 'hash' ) : '' ) +
+					'; expires=Fri, 31 Dec 9999 23:59:59 GMT' +
+					'; domain=<?php echo esc_js( $current_site->domain ); ?>' +
+					'; path=<?php echo esc_js( $current_site->path ); ?>';
 			} );
 		}
 	</script>
@@ -115,14 +115,6 @@ function welcome_box() {
 		return;
 	}
 
-	if ( ! $hash || $content_hash !== $hash ) {
-		$class = '';
-		$label = __( 'Hide welcome box', 'wporg' );
-	} else {
-		$class = 'hidden';
-		$label = __( 'Show welcome box', 'wporg' );
-	}
-
 	$columns = preg_split( '|<hr\s*/?>|', $welcome->post_content );
 	if ( count( $columns ) === 2 ) {
 		$welcome->post_content = "<div class='content-area'>\n\n{$columns[0]}</div><div class='widget-area'>\n\n{$columns[1]}</div>";
@@ -138,10 +130,32 @@ function welcome_box() {
 	?>
 	<div class="make-welcome">
 		<div class="entry-meta">
-			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link ' . $class ); ?>
-			<button type="button" id="make-welcome-toggle" data-hash="<?php echo $content_hash; ?>" data-cookie="<?php echo $cookie; ?>"><?php echo $label; ?></button>
+			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
+			<button
+				type="button"
+				id="make-welcome-toggle"
+				data-show="<?php esc_attr_e( 'Show welcome box', 'wporg' ); ?>"
+				data-hide="<?php esc_attr_e( 'Hide welcome box', 'wporg' ); ?>"
+			><?php _e( 'Hide welcome box', 'wporg' ); ?></button>
 		</div>
-		<div class="entry-content clear <?php echo $class; ?>">
+		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo $cookie; ?>" data-hash="<?php echo $content_hash; ?>">
+			<script type="text/javascript">
+				var elContent = document.getElementById( 'make-welcome-content' );
+				if ( elContent ) {
+					if ( -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash ) ) {
+						var elToggle = document.getElementById( 'make-welcome-toggle' ),
+							elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' )
+
+						// It's hidden, hide it ASAP.
+						elContent.className += " hidden";
+						elToggle.innerText = elToggle.dataset.show;
+
+						if ( elEditLink.length ) {
+							elEditLink[0].className += " hidden";
+						}
+					}
+				}
+			</script>
 			<?php the_content(); ?>
 		</div>
 	</div>
@@ -282,7 +296,7 @@ function maybe_noindex( $noindex ) {
 	}
 
 	// Noindex empty/short pages
-	if ( is_singular() && ( strlen( get_the_content() ) < 100 ) ) {
+	if ( is_singular() && strlen( get_the_content() ) < 100 ) {
 		$noindex = true;
 	}
 
