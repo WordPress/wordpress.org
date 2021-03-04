@@ -4,26 +4,6 @@ defined( 'ABSPATH' ) or die();
 
 class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 
-	//
-	//
-	// HELPERS
-	//
-	//
-
-
-	/**
-	 * Reinitializes handbooks.
-	 *
-	 * Necessary when defining new handbooks.
-	 */
-	protected function reinit_handbooks() {
-		WPorg_Handbook_Init::init();
-
-		foreach ( WPorg_Handbook_Init::get_handbook_objects() as $handbook ) {
-			$handbook->register_post_type();
-		}
-	}
-
 
 	//
 	//
@@ -41,7 +21,7 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 	}
 
 	public function test_wporg_get_handbook_post_types_custom_post_types() {
-		add_filter( 'handbook_post_types', function( $post_types ) { return [ 'plugin', 'theme' ]; } );
+		reinit_handbooks( [ 'plugin', 'theme' ], 'post_types' );
 
 		$this->assertEquals( [ 'plugin-handbook', 'theme-handbook' ], wporg_get_handbook_post_types() );
 	}
@@ -145,7 +125,7 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 	}
 
 	public function test_wporg_is_handbook_post_type_with_custom_post_types() {
-		add_filter( 'handbook_post_types', function( $post_types ) { return [ 'plugin', 'theme' ]; } );
+		reinit_handbooks( [ 'plugin', 'theme' ], 'post_types' );
 
 		$this->assertFalse( wporg_is_handbook_post_type( 'handbook' ) );
 		$this->assertTrue( wporg_is_handbook_post_type( 'plugin-handbook' ) );
@@ -172,9 +152,7 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 	}
 
 	public function test_wporg_get_current_handbook_for_multi_handbook() {
-		add_filter( 'handbook_post_types', function( $post_types ) { return [ 'plugin', 'theme' ]; } );
-
-		$this->reinit_handbooks();
+		reinit_handbooks( [ 'plugin', 'theme' ], 'post_types' );
 
 		$post_id1 = $this->factory()->post->create( [ 'post_type' => 'plugin-handbook' ] );
 		$post_id2 = $this->factory()->post->create( [ 'post_type' => 'theme-handbook' ] );
@@ -210,9 +188,7 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 	}
 
 	public function test_wporg_get_current_handbook_home_url_for_multi_handbook() {
-		add_filter( 'handbook_post_types', function( $post_types ) { return [ 'plugin', 'theme' ]; } );
-
-		$this->reinit_handbooks();
+		reinit_handbooks( [ 'plugin', 'theme' ], 'post_types' );
 
 		$post_id1 = $this->factory()->post->create( [ 'post_type' => 'plugin-handbook', 'post_name' => 'something' ] );
 		$post_id2 = $this->factory()->post->create( [ 'post_type' => 'theme-handbook', 'post_name' => 'example' ] );
@@ -261,8 +237,7 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 	}
 
 	public function test_wporg_get_current_handbook_name_multi_handbook_with_names_set() {
-		add_filter( 'handbook_post_types', function( $post_types ) { return [ 'custom', 'example' ]; } );
-		$this->reinit_handbooks();
+		reinit_handbooks( [ 'custom', 'example' ], 'post_types' );
 
 		$post_id1 = $this->factory()->post->create( [ 'post_type' => 'custom-handbook' ] );
 		update_option( 'custom-handbook_name', 'My Custom Handbook' );
@@ -278,8 +253,7 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 	}
 
 	public function test_wporg_get_current_handbook_name_multi_handbook_with_no_names_set() {
-		add_filter( 'handbook_post_types', function( $post_types ) { return [ 'custom', 'example' ]; } );
-		$this->reinit_handbooks();
+		reinit_handbooks( [ 'custom', 'example' ], 'post_types' );
 
 		$post_id1 = $this->factory()->post->create( [ 'post_type' => 'custom-handbook' ] );
 		$post_id2 = $this->factory()->post->create( [ 'post_type' => 'example-handbook' ] );
