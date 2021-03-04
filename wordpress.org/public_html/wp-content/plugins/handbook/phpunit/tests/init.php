@@ -43,11 +43,12 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 
 	public function test_get_handbook_objects_default() {
 		$handbooks = WPorg_Handbook_Init::get_handbook_objects();
+		$first_handbook = reset( $handbooks );
 
 		$this->assertIsArray( $handbooks );
 		$this->assertCount( 1, $handbooks );
-		$this->assertInstanceOf( 'WPorg_Handbook', $handbooks[0] );
-		$this->assertEquals( 'handbook', $handbooks[0]->post_type );
+		$this->assertInstanceOf( 'WPorg_Handbook', $first_handbook );
+		$this->assertEquals( 'handbook', $first_handbook->post_type );
 	}
 
 	public function test_get_handbook_objects_filtered() {
@@ -57,10 +58,14 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 
 		$this->assertIsArray( $handbooks );
 		$this->assertCount( 2, $handbooks );
-		$this->assertInstanceOf( 'WPorg_Handbook', $handbooks[0] );
-		$this->assertEquals( 'plugins-handbook', $handbooks[0]->post_type );
-		$this->assertInstanceOf( 'WPorg_Handbook', $handbooks[1] );
-		$this->assertEquals( 'themes-handbook', $handbooks[1]->post_type );
+
+		$first_handbook = reset( $handbooks );
+		$this->assertInstanceOf( 'WPorg_Handbook', $first_handbook );
+		$this->assertEquals( 'plugins-handbook', $first_handbook->post_type );
+
+		$second_handbook = next( $handbooks );
+		$this->assertInstanceOf( 'WPorg_Handbook', $second_handbook );
+		$this->assertEquals( 'themes-handbook', $second_handbook->post_type );
 	}
 
 	/*
@@ -74,7 +79,8 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 	public function test_get_post_types_filtered() {
 		reinit_handbooks( [ 'plugins', 'themes' ], 'post_types' );
 
-		$this->assertEquals( ['plugins', 'themes'], WPorg_Handbook_Init::get_post_types() );
+		// Note: The automatic appending of '-handbook' is for back-compat.
+		$this->assertEquals( ['plugins-handbook', 'themes-handbook'], WPorg_Handbook_Init::get_post_types() );
 	}
 
 	/*
