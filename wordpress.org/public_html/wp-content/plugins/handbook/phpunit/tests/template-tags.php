@@ -38,6 +38,12 @@ class WPorg_Handbook_Template_Tags_Test extends WP_UnitTestCase {
 		$this->assertEquals( [ 'plugin-handbook', 'theme-handbook' ], wporg_get_handbook_post_types() );
 	}
 
+	public function test_wporg_get_handbook_post_types_custom_post_types_with_dash_handbook() {
+		reinit_handbooks( [ 'plugin-handbook', 'theme-handbook' ], 'post_types' );
+
+		$this->assertEquals( [ 'plugin-handbook', 'theme-handbook' ], wporg_get_handbook_post_types() );
+	}
+
 	/*
 	 * wporg_is_handbook()
 	 */
