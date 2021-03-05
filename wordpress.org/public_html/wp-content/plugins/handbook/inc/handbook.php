@@ -15,6 +15,13 @@ class WPorg_Handbook {
 	public $post_type = '';
 
 	/**
+	 * The handbook's settings.
+	 *
+	 * @var array
+	 */
+	public $settings = [];
+
+	/**
 	 * The name of the setting for the handbook's name.
 	 *
 	 * @var string
@@ -59,6 +66,23 @@ class WPorg_Handbook {
 	}
 
 	/**
+	 * Returns handbook default config.
+	 *
+	 * @return array
+	 */
+	public static function get_default_handbook_config() {
+		/**
+		 * Filters default handbook configuration array.
+		 *
+		 * @param string $slug The slug for the post type. Default is post type.
+		 */
+		return (array) apply_filters( 'handbook_default_handbook_config', [
+			'label'         => '',
+			'slug'          => '',
+		] );
+	}
+
+	/**
 	 * Returns the handbook name.
 	 *
 	 * If one isn't set via settings, one is generated.
@@ -94,12 +118,18 @@ class WPorg_Handbook {
 	 * Constructor
 	 *
 	 * @param string $type   The post type for the handbook.
+	 * @param array  $config The config array for the handbook.
 	 */
-	public function __construct( $type ) {
+	public function __construct( $type, $config = [] ) {
 		$this->post_type = sanitize_title( $type );
 
-		$this->label = ucwords( str_replace( [ '-', '_' ], ' ', $this->post_type ) );
-		$this->label = apply_filters( 'handbook_label', $this->label, $this->post_type );
+		$config = $this->config = wp_parse_args( $config, self::get_default_handbook_config() );
+
+		$this->label = apply_filters(
+			'handbook_label',
+			$config['label'] ?: ucwords( str_replace( [ '-', '_' ], ' ', $this->post_type ) ),
+			$this->post_type
+		);
 
 		$this->setting_name = $this->post_type . '_name';
 
@@ -123,6 +153,15 @@ class WPorg_Handbook {
 		add_filter( 'comments_open',                      [ $this, 'comments_open' ], 10, 2 );
 		add_filter( 'wp_nav_menu_objects',                [ $this, 'highlight_menu_handbook_link' ] );
 		add_filter( 'display_post_states',                [ $this, 'display_post_states' ], 10, 2 );
+	}
+
+	/**
+	 * Returns the configuration array for handbooks.
+	 *
+	 * @return array
+	 */
+	public function get_config() {
+		return $this->config;
 	}
 
 	/**
@@ -234,8 +273,12 @@ class WPorg_Handbook {
 	 * Registers handbook post types.
 	 */
 	public function register_post_type() {
-		if ( 'handbook' != $this->post_type ) {
-			$slug = substr( $this->post_type, 0, -9 );
+		$config = $this->get_config();
+
+		if ( ! empty( $config['slug'] ) ) {
+			$slug = $config['slug'];
+		} elseif ( 'handbook' !== $this->post_type ) {
+			$slug = str_replace( '-handbook', '', $this->post_type );
 		} else {
 			$slug = 'handbook';
 		}

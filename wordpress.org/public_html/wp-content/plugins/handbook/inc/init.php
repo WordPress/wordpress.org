@@ -8,7 +8,7 @@
 class WPorg_Handbook_Init {
 
 	/**
-	 * Array of WPorg_Handbook objects.
+	 * Asociative array of WPorg_Handbook objects.
 	 *
 	 * @var array
 	 */
@@ -41,19 +41,34 @@ class WPorg_Handbook_Init {
 	 * @return array
 	 */
 	public static function get_post_types() {
-		/**
-		 * Filters the handbook post types for creating handbooks.
-		 *
-		 * @param array $handbooks Array of handbook post types. Default 'handbook'.
-		 */
-		$post_types = (array) apply_filters( 'handbook_post_types', [ 'handbook' ] );
-		return array_map(
-			function( $pt ) {
-				$pt = sanitize_title( $pt );
-				return ( in_array( $pt, [ 'handbook', 'page' ] ) || false !== strpos( $pt, '-handbook' ) ) ? $pt : $pt . '-handbook';
-			},
-			$post_types
-		);
+		return array_keys( self::$handbooks );
+	}
+
+	/**
+	 * Returns the handbooks configurations.
+	 *
+	 * @param string $handbook Optional. A specific handbook to return config for.
+	 *                         If none specified, then all are returned. Default ''.
+	 * @return array|false If $handbook defined, then the config for that handbook
+	 *                     if handbook exists, else false. If no $handbook specified,
+	 *                     then an associative array of config for all handbooks,
+	 *                     keyed by post type.
+	 */
+	public static function get_handbooks_config( $handbook = '' ) {
+		$return = false;
+		$handbooks = self::get_handbook_objects();
+
+		// If no handbook specified, return configs for all handbooks.
+		if ( ! $handbook ) {
+			$return = [];
+			foreach ( $handbooks as $type => $handbook_obj ) {
+				$return[ $type ] = $handbook_obj->get_config();
+			}
+		}
+
+		return ( $handbook && ! empty( $handbooks[ $handbook ] ) && is_a( $handbooks[ $handbook ], 'WPorg_Handbook' ) )
+			? $handbooks[ $handbook ]->get_config()
+			: $return;
 	}
 
 	/**
@@ -76,10 +91,66 @@ class WPorg_Handbook_Init {
 	 * Initializes handbooks.
 	 */
 	public static function init() {
+		$config = [];
+		$handbooks_config = [];
+
 		/**
 		 * Fires before handbooks have been initialized.
 		 */
 		do_action( 'before_handbooks_init' );
+
+		/**
+		 * Filters the handbook post types for creating handbooks.
+		 *
+		 * @deprecated Use {@see 'handbooks_config'} instead.
+		 *
+		 * @param array $handbooks Array of handbook post types. Default empty
+		 *                         array, which later will be interpreted to
+		 *                         be 'handbook'.
+		 */
+		$post_types = (array) apply_filters( 'handbook_post_types', [] );
+
+		foreach ( $post_types as $post_type ) {
+			$config[ $post_type ] = [];
+		}
+
+		/**
+		 * Defines and configures all handbooks.
+		 *
+		 * @param array $config {
+		 *     Associative array of post types and their configuration options. The keys should actually be
+		 *     the post type base, hypenated and without appending '-handbook' (which will automatically get
+		 *     appended when the handbook post type is created, if the key isn't "handbook"). Default is 'handbook'.
+		 *
+		 *     @type string $label The label for the handbook. Default is the
+		 *                         post type slug converted to titlecase (e.g.
+		 *                         plugin-handbok => "Plugin Handbook").
+		 *     @type string $slug  The slug for the post type. Default is the
+		 *                         post type.
+		 * }
+		 */
+		$config = (array) apply_filters( 'handbooks_config', $config );
+
+		// If no handbooks were configured, default to a basic handbook.
+		if ( ! $config ) {
+			$config = [ 'handbook' => [] ];
+		}
+
+		// Get default settings for a handbook.
+		$defaults = WPorg_Handbook::get_default_handbook_config();
+
+		// Determine each handbook's config.
+		foreach ( $config as $key => $value ) {
+			$key = sanitize_title( $key );
+			$post_type = ( 'handbook' === $key || false !== strpos( $key, '-handbook' ) ) ? $key : $key . '-handbook';
+
+			$handbooks_config[ $post_type ] = wp_parse_args( $value, $defaults );
+
+			// Set slug if not explicitly set.
+			if ( empty( $handbooks_config[ $post_type ]['slug'] ) ) {
+				$handbooks_config[ $post_type ]['slug'] = $key;
+			}
+		}
 
 		$post_types = self::get_post_types();
 
@@ -88,8 +159,8 @@ class WPorg_Handbook_Init {
 
 		// Instantiate each of the handbooks.
 		self::$handbooks = [];
-		foreach ( $post_types as $type ) {
-			self::$handbooks[] = new WPorg_Handbook( $type );
+		foreach ( $handbooks_config as $type => $conf ) {
+			self::$handbooks[ $type ] = new WPorg_Handbook( $type, $conf );
 		}
 
 		// Enable glossary.

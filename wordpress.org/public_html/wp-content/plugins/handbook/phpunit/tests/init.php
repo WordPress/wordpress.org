@@ -19,6 +19,23 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 
 	//
 	//
+	// DATA PROVIDERS
+	//
+	//
+
+
+	public static function get_default_config() {
+		return [
+			[ 'label', '' ],
+			[ 'manifest', '' ],
+			[ 'slug', '' ],
+			[ 'with_front', '' ],
+		];
+	}
+
+
+	//
+	//
 	// TESTS
 	//
 	//
@@ -140,6 +157,74 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 		WPorg_Handbook_Init::enqueue_scripts();
 
 		$this->assertTrue( wp_script_is( 'wporg-handbook', 'enqueued' ) );
+	}
+
+	/*
+	 * get_handbooks_config()
+	 */
+
+	/**
+	 * @dataProvider get_default_config
+	 */
+	public function test_get_handbooks_config_default( $key, $default ) {
+		$configs = WPorg_Handbook_Init::get_handbooks_config();
+		$this->assertArrayHasKey( 'handbook', $configs );
+		$this->assertEquals( 1, count( $configs ) );
+
+		$config = $configs['handbook'];
+
+		$this->assertArrayHasKey( $key, $config );
+		$value = $config[ $key ];
+
+		if ( 'slug' === $key ) {
+			$this->assertEquals( 'handbook', $value );
+		} elseif ( '' === $default ) {
+			$this->assertEmpty( $value );
+		} else {
+			$this->assertEquals( $default, $value );
+		}
+	}
+
+	public function test_get_handbooks_config_non_handbook() {
+		$this->assertEmpty( WPorg_Handbook_Init::get_handbooks_config( 'nonexistent-handbook' ) );
+	}
+
+	/**
+	 * @dataProvider get_default_config
+	 */
+	public function test_get_handbooks_config_specific_handbook_default( $key, $default ) {
+		$config = WPorg_Handbook_Init::get_handbooks_config( 'handbook' );
+
+		$this->assertArrayHasKey( $key, $config );
+		$value = $config[ $key ];
+
+		if ( 'slug' === $key ) {
+			$this->assertEquals( 'handbook', $value );
+		} elseif ( '' === $default ) {
+			$this->assertEmpty( $value );
+		} else {
+			$this->assertEquals( $default, $value );
+		}
+	}
+
+	/**
+	 * @dataProvider get_default_config
+	 */
+	public function test_get_handbooks_config_specific_custom_handbook( $key, $default ) {
+		reinit_handbooks( [ 'plugins' => [] ] );
+
+		$config = WPorg_Handbook_Init::get_handbooks_config( 'plugins-handbook' );
+
+		$this->assertArrayHasKey( $key, $config );
+		$value = $config[ $key ];
+
+		if ( 'slug' === $key ) {
+			$this->assertEquals( 'plugins', $value );
+		} elseif ( '' === $default ) {
+			$this->assertEmpty( $value );
+		} else {
+			$this->assertEquals( $default, $value );
+		}
 	}
 
 }
