@@ -92,7 +92,6 @@ function get_whitelist() {
 			'cbringmann', // @Chloé Bringmann on Slack
 			'chanthaboune',
 			'danieltj',
-			'davidbaumwald', // @davidb on Slack
 			'desrosj',
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
@@ -443,10 +442,11 @@ function get_committers() {
 		'lancewillett', 'laurelfulford', 'matt', 'mattmiklic', 'mcsf', 'mdawaffe',
 		'melchoyce', 'michaelarestad', 'nacin', 'noisysocks', 'obenland', 'ocean90',
 		'omarreiss', 'pento', 'peterwilsoncc', 'rachelbaker', 'rmccue', 'swissspidy',
-		'tellyworth', 'westi', 'westonruter', 'whyisjake', 'wonderboymusic', 'xknown',
-		'youknowriad',
+		'tellyworth', 'westi', 'westonruter', 'williampatton', 'whyisjake', 'wonderboymusic',
+		'xknown', 'youknowriad',
 
 		'boonebgorges',      // @boone on Slack
+		'davidbaumwald',     // @davidb on Slack
 		'DrewAPicture',      // @drew on Slack
 		'ellatrix',          // @ella on Slack
 		'ericlewis',         // @eric on Slack
