@@ -441,11 +441,11 @@ class WPORG_Themes_Upload {
 		$tmp_dir   = escapeshellarg( $this->tmp_dir );
 
 		// Unzip it into the theme directory.
-		exec( escapeshellcmd( "{$unzip} -DD {$zip_file} -d {$tmp_dir}/{$base_name}" ) );
+		$this->exec_with_notify( escapeshellcmd( "{$unzip} -DD {$zip_file} -d {$tmp_dir}/{$base_name}" ) );
 
 		// Fix any permissions issues with the files. Sets 755 on directories, 644 on files
-		exec( escapeshellcmd( "chmod -R 755 {$tmp_dir}/{$base_name}" ) );
-		exec( escapeshellcmd( "find {$tmp_dir}/{$base_name} -type f -print0" ) . ' | xargs -I% -0 chmod 644 %' );
+		$this->exec_with_notify( escapeshellcmd( "chmod -R 755 {$tmp_dir}/{$base_name}" ) );
+		$this->exec_with_notify( escapeshellcmd( "find {$tmp_dir}/{$base_name} -type f -print0" ) . ' | xargs -I% -0 chmod 644 %' );
 	}
 
 	/**
@@ -947,28 +947,31 @@ TICKET;
 
 		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
 
+		// Keeps a copy of the output of the commands for debugging.
+		$output = array();
+
 		// Theme exists, attempt to do a copy from old version to new.
-		exec( self::SVN . " co https://themes.svn.wordpress.org/{$this->theme_slug}/ {$this->tmp_svn_dir} --depth=empty  2>&1", $output, $return_var );
+		$this->exec_with_notify( self::SVN . " co https://themes.svn.wordpress.org/{$this->theme_slug}/ {$this->tmp_svn_dir} --depth=empty", $output, $return_var );
 		if ( $return_var > 0 ) {
 			return $this->add_to_svn_via_svn_import();
 		}
 
 		// Try to copy the previous version over.
 		$prev_version = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
-		exec( self::SVN . " cp $prev_version $new_version_dir 2>&1", $output, $return_var );
+		$this->exec_with_notify( self::SVN . " cp $prev_version $new_version_dir", $output, $return_var );
 		if ( $return_var > 0 ) {
 			return $this->add_to_svn_via_svn_import();
 		}
 
 		// Remove the files from the old version, so that we can track file removals.
-		exec( self::RM . " -rf {$new_version_dir}/*" );
+		$this->exec_with_notify( self::RM . " -rf {$new_version_dir}/*", $output );
 
 		$theme_dir = escapeshellarg( $this->theme_dir );
-		exec( self::CP . " -R {$theme_dir}/* {$new_version_dir}" );
+		$this->exec_with_notify( self::CP . " -R {$theme_dir}/* {$new_version_dir}", $output );
 
 		// Process file additions and removals.
-		exec( self::SVN . " st {$new_version_dir} | grep '^?' | cut -c 2- | xargs -I{} " . self::SVN . " add {}" );
-		exec( self::SVN . " st {$new_version_dir} | grep '^!' | cut -c 2- | xargs -I{} " . self::SVN . " rm {}" );
+		$this->exec_with_notify( self::SVN . " st {$new_version_dir} | grep '^?' | cut -c 2- | xargs -I% " . self::SVN . " add %", $output );
+		$this->exec_with_notify( self::SVN . " st {$new_version_dir} | grep '^!' | cut -c 2- | xargs -I% " . self::SVN . " rm %", $output );
 
 		// Commit it to SVN.
 		$password = escapeshellarg( THEME_DROPBOX_PASSWORD );
@@ -977,12 +980,17 @@ TICKET;
 			$this->theme->display( 'Name' ),
 			$this->theme->display( 'Version' )
 		) );
-		exec( self::SVN . " ci --non-interactive --username themedropbox --password {$password} -m {$message} {$new_version_dir} 2>&1", $output, $return_var );
+
+		/* DEBUGGING
+			dump the output of $output here and return false;
+		*/
+
+		$last_line = $this->exec_with_notify( self::SVN . " ci --non-interactive --username themedropbox --password {$password} -m {$message} {$new_version_dir}", $output, $return_var );
 		if ( $return_var > 0 ) {
 			return $this->add_to_svn_via_svn_import();
 		}
 
-		if ( preg_match( '/Committed revision (\d+)./i', implode( '', $output ), $m ) ) {
+		if ( preg_match( '/Committed revision (\d+)\./i', $last_line, $m ) ) {
 			$this->trac_changeset = $m[1];
 			return true;
 		}
@@ -1001,9 +1009,9 @@ TICKET;
 		$svn        = escapeshellarg( self::SVN );
 		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
 
-		$result = exec( "{$svn} --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path} 2>&1" );
+		$last_line = $this->exec_with_notify( "{$svn} --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path}" );
 
-		if ( preg_match( '/Committed revision (\d+)./i', $result, $m ) ) {
+		if ( preg_match( '/Committed revision (\d+)\./i', $last_line, $m ) ) {
 			$this->trac_changeset = $m[1];
 			return true;
 		}
@@ -1210,7 +1218,7 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 		$rm    = escapeshellarg( self::RM );
 		$files = escapeshellarg( $this->tmp_dir );
 
-		exec( escapeshellcmd( "{$rm} -rf {$files}" ) );
+		$this->exec_with_notify( escapeshellcmd( "{$rm} -rf {$files}" ) );
 	}
 
 	/**
@@ -1236,5 +1244,54 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 	 */
 	protected function sort_by_string_length( $a, $b ) {
 		return strlen( $b ) - strlen( $a );
+	}
+
+	/**
+	 * Execute a shell process, same behaviour as `exec()` but with PHP Warnings/Notices generated on errors.
+	 * 
+	 * @param string $command    Command to execute. Escape it.
+	 * @param array  $output     Array to append program output to. Passed by reference.
+	 * @param int    $return_var The commands return value. Passed by reference.
+	 * 
+	 * @return false|string False on failure, last line of output on success, as per exec().
+	 */
+	public function exec_with_notify( $command, &$output = null, &$return_var = null ) {
+		$proc = proc_open(
+			$command,
+			[
+				1 => [ 'pipe', 'w' ], // STDOUT
+				2 => [ 'pipe', 'w' ], // STDERR
+			],
+			$pipes
+		);
+
+		$stdout = stream_get_contents( $pipes[1] );
+		$stderr = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] );
+		fclose( $pipes[2] );
+
+		$return_var = proc_close( $proc );
+
+		// Append to $output, as `exec()` does.
+		if ( ! is_array( $output ) ) {
+			$output = [];
+		}
+		if ( $stdout ) {
+			$output = array_merge( $output, explode( "\n", rtrim( $stdout, "\r\n" ) ) );
+		}
+
+		if ( $return_var > 0 ) {
+			trigger_error( "Command failed, `{$command}` return value: {$return_var} STDOUT: ```{$stdout}``` STDERR: ```{$stderr}```", E_USER_WARNING );
+		} elseif ( $stderr ) {
+			trigger_error( "Command produced errors, `{$command}` return value: {$return_var} STDOUT: ```{$stdout}``` STDERR: ```{$stderr}```", E_USER_NOTICE );
+		}
+
+		// Execution failed.
+		if ( $return_var > 0 ) {
+			return false;
+		}
+
+		// Successful, return the last output line.
+		return $stdout ? end( $output ) : '';
 	}
 }
