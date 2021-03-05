@@ -967,8 +967,8 @@ TICKET;
 		exec( self::CP . " -R {$theme_dir}/* {$new_version_dir}" );
 
 		// Process file additions and removals.
-		exec( self::SVN . " st {$new_version_dir} | grep '^?' | cut -c 2- | xargs " . self::SVN . " add" );
-		exec( self::SVN . " st {$new_version_dir} | grep '^!' | cut -c 2- | xargs " . self::SVN . " rm" );
+		exec( self::SVN . " st {$new_version_dir} | grep '^?' | cut -c 2- | xargs -I{} " . self::SVN . " add {}" );
+		exec( self::SVN . " st {$new_version_dir} | grep '^!' | cut -c 2- | xargs -I{} " . self::SVN . " rm {}" );
 
 		// Commit it to SVN.
 		$password = escapeshellarg( THEME_DROPBOX_PASSWORD );
