@@ -53,10 +53,11 @@ class WPorg_Handbook_Breadcrumbs {
 		$links[] = sprintf( '<a href="%s/">%s</a>', esc_url( site_url() ), __( 'Home', 'wporg' ) );
 
 		// Second link is always link to handbook home page.
+		$handbook_name = wporg_get_current_handbook_name();
 		if ( wporg_is_handbook_landing_page() ) {
-			$links[] = __( 'Handbook', 'wporg' );
+			$links[] = $handbook_name;
 		} else {
-			$links[] = sprintf( '<a href="%s">%s</a>', esc_url( wporg_get_current_handbook_home_url() ), __( 'Handbook', 'wporg' ) );
+			$links[] = sprintf( '<a href="%s">%s</a>', esc_url( wporg_get_current_handbook_home_url() ), $handbook_name );
 		}
 
 		// Add in links to current handbook page and all of its ancestor pages.
