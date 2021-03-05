@@ -525,12 +525,14 @@ class WPorg_Handbook {
 			$page = get_page_by_path( $this->post_type, OBJECT, $this->post_type );
 			if ( ! $page ) {
 				$slug = str_replace( '-handbook', '', $this->post_type );
-				$page = get_page_by_path( $slug, OBJECT, $this->post_type );
+				if ( $slug !== $this->post_type ) {
+					$page = get_page_by_path( $slug, OBJECT, $this->post_type );
+				}
 			}
-			if ( ! $page ) {
+			if ( ! $page && 'handbook' !== $this->post_type ) {
 				$page = get_page_by_path( 'handbook', OBJECT, $this->post_type );
 			}
-			if ( ! $page ) {
+			if ( ! $page && 'welcome' !== $this->post_type ) {
 				$page = get_page_by_path( 'welcome', OBJECT, $this->post_type );
 			}
 			if ( $page ) {
