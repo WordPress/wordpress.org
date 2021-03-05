@@ -133,7 +133,7 @@ class WPorg_Handbook_Importer extends Importer {
 
 		$cron_interval = $this->handbook->get_config()['cron_interval'] ?: $default;
 
-		return $cron_intervals[ $cron_interval ] ?? $cron_intervals[ $default ];
+		return empty( $cron_intervals[ $cron_interval ] ) ? $default : $cron_interval;
 	}
 
 	/**
