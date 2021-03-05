@@ -168,6 +168,9 @@ class WPorg_Handbook_Init {
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_styles' ] );
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_scripts' ] );
 
+		// Disable (temporarily?) to prevent error_log messages.
+		remove_filter( 'o2_filter_post_action_html', 'o2_default_post_action_html', 10 );
+
 		/**
 		 * Fires after handbooks have been initialized.
 		 */
