@@ -150,7 +150,7 @@ class WPorg_Handbook_Init {
 			}
 		}
 
-		$post_types = self::get_post_types();
+		$post_types = array_keys( $handbooks_config );
 
 		// Enable table of contents.
 		new WPorg_Handbook_TOC( $post_types );
