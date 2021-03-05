@@ -2,33 +2,18 @@
 
 class WPorg_Handbook_Watchlist {
 
-	private static $post_types = array( 'handbook' );
+	private static $post_types;
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'on_init' ) );
 	}
 
 	public static function on_init() {
-		self::$post_types = (array) apply_filters( 'handbook_post_types', self::$post_types );
-		self::$post_types = array_map( array( __CLASS__, 'append_suffix' ), self::$post_types );
+		self::$post_types = WPorg_Handbook_Init::get_post_types();
 
 		add_action( 'p2_action_links', array(__CLASS__, 'display_action_link'), 100 );
 		add_filter( 'o2_filter_post_actions', array( __CLASS__, 'add_o2_action_link' ) );
 		add_filter( 'o2_filter_post_action_html', array( __CLASS__, 'get_o2_action_link' ), 10, 2 );
-	}
-
-	/**
-	 * Appends '-handbook' to the dynamic post type, if not already 'handbook'.
-	 *
-	 * @param  string $t Hanbook post type name.
-	 * @return string
-	 */
-	private static function append_suffix( $t ) {
-		if ( in_array( $t, array( 'handbook', 'page' ) ) ) {
-			return $t;
-		}
-
-		return $t . '-handbook';
 	}
 
 	/**

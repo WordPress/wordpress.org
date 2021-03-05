@@ -10,7 +10,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 	 */
 	protected static $widget_id_base = 'handbook_pages';
 
-	protected $post_types = array( 'handbook' );
+	protected $post_types;
 
 	/**
 	 * Gets the widget_id_base value.
@@ -71,8 +71,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 			$instance['show_home'] = false;
 		}
 
-		$this->post_types = (array) apply_filters( 'handbook_post_types', $this->post_types );
-		$this->post_types = array_map( array( $this, 'append_suffix' ), $this->post_types );
+		$this->post_types = WPorg_Handbook_Init::get_post_types();
 
 		$post_type = '';
 
@@ -93,7 +92,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		}
 
 		// Exclude root handbook page from the table of contents.
-		$page = get_page_by_path( $this->append_suffix( $post_type ), OBJECT, $post_type );
+		$page = get_page_by_path( $post_type, OBJECT, $post_type );
 		if ( ! $page ) {
 			$slug = substr( $post_type, 0, -9 );
 			$page = get_page_by_path( $slug, OBJECT, $post_type );
@@ -107,14 +106,6 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		$args['walker'] = new WPorg_Handbook_Walker;
 
 		return $args;
-	}
-
-	public function append_suffix( $t ) {
-		if ( in_array( $t, array( 'handbook', 'page' ) ) ) {
-			return $t;
-		}
-
-		return $t . '-handbook';
 	}
 
 	/**

@@ -100,11 +100,22 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 		$this->assertEquals( ['handbook'], WPorg_Handbook_Init::get_post_types() );
 	}
 
-	public function test_get_post_types_filtered() {
-		reinit_handbooks( [ 'plugins', 'themes' ], 'post_types' );
+	public function test_get_post_types_custom() {
+		reinit_handbooks( [ 'plugins-handbook', 'themes' ], 'post_types' );
 
 		// Note: The automatic appending of '-handbook' is for back-compat.
 		$this->assertEquals( ['plugins-handbook', 'themes-handbook'], WPorg_Handbook_Init::get_post_types() );
+	}
+
+	public function test_get_post_types_filtered() {
+		add_filter( 'handbook_post_types', function ( $post_types ) {
+			$post_types[] = 'example';
+			return $post_types;
+		}, 11 );
+		reinit_handbooks( [ 'plugins', 'themes' ], 'post_types' );
+
+		// Note: The automatic appending of '-handbook' is for back-compat.
+		$this->assertEquals( [ 'plugins-handbook', 'themes-handbook', 'example-handbook' ], WPorg_Handbook_Init::get_post_types() );
 	}
 
 	/*

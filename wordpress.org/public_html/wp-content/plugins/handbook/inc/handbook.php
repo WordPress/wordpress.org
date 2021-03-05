@@ -92,13 +92,11 @@ class WPorg_Handbook {
 
 	/**
 	 * Constructor
+	 *
+	 * @param string $type   The post type for the handbook.
 	 */
 	public function __construct( $type ) {
-		if ( 'handbook' !== $type ) {
-			$this->post_type = $type . '-handbook';
-		} else {
-			$this->post_type = $type;
-		}
+		$this->post_type = sanitize_title( $type );
 
 		$this->label = ucwords( str_replace( [ '-', '_' ], ' ', $this->post_type ) );
 		$this->label = apply_filters( 'handbook_label', $this->label, $this->post_type );

@@ -46,7 +46,14 @@ class WPorg_Handbook_Init {
 		 *
 		 * @param array $handbooks Array of handbook post types. Default 'handbook'.
 		 */
-		return (array) apply_filters( 'handbook_post_types', array( 'handbook' ) );
+		$post_types = (array) apply_filters( 'handbook_post_types', [ 'handbook' ] );
+		return array_map(
+			function( $pt ) {
+				$pt = sanitize_title( $pt );
+				return ( in_array( $pt, [ 'handbook', 'page' ] ) || false !== strpos( $pt, '-handbook' ) ) ? $pt : $pt . '-handbook';
+			},
+			$post_types
+		);
 	}
 
 	/**

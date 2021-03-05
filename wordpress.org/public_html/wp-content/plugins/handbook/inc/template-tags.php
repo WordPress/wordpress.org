@@ -5,22 +5,14 @@
  *
  * Wrapper function for WPorg_Handbook_Init::get_post_types().
  *
- * @return array Array with full handbook post type names {post-type}-handbook.
+ * @return array Array of handbook post types.
  */
 function wporg_get_handbook_post_types() {
 	if ( ! class_exists( 'WPorg_Handbook_Init' ) ) {
 		return array();
 	}
 
-	$post_types = WPorg_Handbook_Init::get_post_types();
-
-	foreach ( $post_types as $key => $post_type ) {
-		if ( 'handbook' !== $post_type ) {
-			$post_types[ $key ] = $post_type . '-handbook';
-		}
-	}
-
-	return $post_types;
+	return WPorg_Handbook_Init::get_post_types();
 }
 
 /**
