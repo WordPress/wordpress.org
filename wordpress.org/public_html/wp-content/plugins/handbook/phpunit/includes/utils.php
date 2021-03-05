@@ -31,7 +31,9 @@ function reinit_handbooks( $data, $type = 'config' ) {
  */
 function dataprovider_get_default_config() {
 	return [
+		[ 'cron_interval', '15_minutes' ],
 		[ 'label', '' ],
+		[ 'manifest', '' ],
 		[ 'slug', '' ],
 	];
 }

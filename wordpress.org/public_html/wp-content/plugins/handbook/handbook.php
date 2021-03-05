@@ -2,6 +2,7 @@
 /**
  * Plugin Name: Handbook
  * Description: Features for a handbook, complete with glossary and table of contents
+ * Version:     2.0
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/
  * License:     GPLv2 or later
@@ -24,3 +25,8 @@ require_once __DIR__ . '/inc/walker.php';
 require_once __DIR__ . '/inc/watchlist.php';
 require_once __DIR__ . '/inc/blocks.php';
 
+add_action( 'plugins_loaded', function () {
+	if ( class_exists( 'WordPressdotorg\\Markdown\\Importer' ) ) {
+		require_once __DIR__ . '/inc/importer.php';
+	}
+}, 1 );

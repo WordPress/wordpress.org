@@ -36,6 +36,11 @@ class WPorg_Handbook {
 	protected $label = '';
 
 	/**
+	 * The associated importer object, if warranted.
+	 */
+	protected $importer;
+
+	/**
 	 * Returns the custom handbook-related capabilities granted to site users.
 	 *
 	 * @return array
@@ -77,15 +82,23 @@ class WPorg_Handbook {
 		 * @param array $config {
 		 *     Associative array of handbook configuration.
 		 *
+		 *     @type string $cron_interval The cron interval for which an imported handbook gets
+		 *                                 imported, e.g. 'hourly', 'daily'. If defined as an
+		 *                                 unrecognized interval, 'hourly' will be used.
+		 *                                 Default '15_minutes'.
 		 *     @type string $label The label for the handbook. Default is the
 		 *                         post type slug converted to titlecase (e.g.
 		 *                         plugin-handbok => "Plugin Handbook").
+		 *     @type string manifest       The URL to the manifest JSON file for an imported
+		 *                                 handbook.
 		 *     @type string $slug  The slug for the post type. Default is the
 		 *                         post type.
 		 * }
 		 */
 		return (array) apply_filters( 'handbook_default_handbook_config', [
+			'cron_interval' => '15_minutes',
 			'label'         => '',
+			'manifest'      => '',
 			'slug'          => '',
 		] );
 	}
@@ -141,6 +154,7 @@ class WPorg_Handbook {
 
 		$this->setting_name = $this->post_type . '_name';
 
+		add_action( 'after_handbooks_init',               [ $this, 'init_importer' ] );
 		add_filter( 'user_has_cap',                       [ $this, 'grant_handbook_caps' ] );
 		add_action( 'widgets_init',                       [ $this, 'register_post_type' ] );
 		add_filter( 'post_type_link',                     [ $this, 'post_type_link' ], 10, 2 );
@@ -170,6 +184,32 @@ class WPorg_Handbook {
 	 */
 	public function get_config() {
 		return $this->config;
+	}
+
+	/**
+	 * Returns the handbook's importer object, if applicable.
+	 *
+	 * @return WPorg_Handbook_Importer|null
+	 */
+	public function get_importer() {
+		return $this->importer;
+	}
+
+	/**
+	 * Initializes the importer, if applicable.
+	 */
+	public function init_importer() {
+		$config = $this->get_config();
+
+		if ( class_exists( 'WPorg_Handbook_Importer' ) ) {
+			if ( WPorg_Handbook_Importer::is_handbook_imported( $this->post_type ) ) {
+				$this->importer = new WPorg_Handbook_Importer( $this );
+			}
+		} elseif ( is_admin() && ( $config['manifest'] ?: false ) ) {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-error"><p>' . __( 'Error: The <strong>WPORG Markdown Importer</strong> plugin needs to be activated in order to allow importing of handbooks.', 'wporg' ) . '</p></div>';
+			} );
+		}
 	}
 
 	/**
