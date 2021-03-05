@@ -160,6 +160,22 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 	}
 
 	/*
+	 * reset()
+	 */
+
+	public function test_reset() {
+		$this->test_get_post_types_custom();
+
+		$this->assertEquals( 2, count( WPorg_Handbook_Init::get_handbook_objects() ) );
+		$this->assertEquals( 2, count( WPorg_Handbook_Init::get_post_types() ) );
+
+		WPorg_Handbook_Init::reset();
+
+		$this->assertEmpty( count( WPorg_Handbook_Init::get_handbook_objects() ) );
+		$this->assertEmpty( count( WPorg_Handbook_Init::get_post_types() ) );
+	}
+
+	/*
 	 * get_handbooks_config()
 	 */
 
