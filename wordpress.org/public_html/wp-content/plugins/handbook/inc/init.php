@@ -117,17 +117,15 @@ class WPorg_Handbook_Init {
 		/**
 		 * Defines and configures all handbooks.
 		 *
-		 * @param array $config {
-		 *     Associative array of post types and their configuration options. The keys should actually be
-		 *     the post type base, hypenated and without appending '-handbook' (which will automatically get
-		 *     appended when the handbook post type is created, if the key isn't "handbook"). Default is 'handbook'.
+		 * @see WPorg_Handbook::get_default_handbook_config()
 		 *
-		 *     @type string $label The label for the handbook. Default is the
-		 *                         post type slug converted to titlecase (e.g.
-		 *                         plugin-handbok => "Plugin Handbook").
-		 *     @type string $slug  The slug for the post type. Default is the
-		 *                         post type.
-		 * }
+		 * @param array $config Associative array of handbooks and their
+		 *                      configuration options. Keys should be the handbook
+		 *                      post type (which will get appended '-handbook' if
+		 *                      the post type isn't 'handbook' and doesn't already
+		 *                      contain '-handbook'. See
+		 *                      {@see WPorg_Handbook::get_default_handbook_config()}
+		 *                      for list of per-handbook configuration options.
 		 */
 		$config = (array) apply_filters( 'handbooks_config', $config );
 

@@ -74,7 +74,15 @@ class WPorg_Handbook {
 		/**
 		 * Filters default handbook configuration array.
 		 *
-		 * @param string $slug The slug for the post type. Default is post type.
+		 * @param array $config {
+		 *     Associative array of handbook configuration.
+		 *
+		 *     @type string $label The label for the handbook. Default is the
+		 *                         post type slug converted to titlecase (e.g.
+		 *                         plugin-handbok => "Plugin Handbook").
+		 *     @type string $slug  The slug for the post type. Default is the
+		 *                         post type.
+		 * }
 		 */
 		return (array) apply_filters( 'handbook_default_handbook_config', [
 			'label'         => '',
