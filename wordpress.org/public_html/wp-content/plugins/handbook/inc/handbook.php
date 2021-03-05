@@ -134,7 +134,7 @@ class WPorg_Handbook {
 
 			// If no name defined yet, try handbook post type if not standard.
 			if ( ! $name && ( 'handbook' !== $post_type ) ) {
-				$name = ucfirst( substr( $post_type, 0, -9 ) );
+				$name = ucfirst( str_replace( '-handbook', '', $post_type ) );
 			}
 
 			$name .= ' Handbook';
@@ -284,7 +284,7 @@ class WPorg_Handbook {
 
 		$label = ( 'handbook' === $this->post_type ) ?
 			__( 'Handbook name', 'wporg' ) :
-			sprintf( __( 'Handbook name (%s)', 'wporg' ), substr( $this->post_type, 0, -9 ) );
+			sprintf( __( 'Handbook name (%s)', 'wporg' ), str_replace( '-handbook', '', $this->post_type ) );
 
 		add_settings_field(
 			$this->setting_name,
@@ -524,7 +524,7 @@ class WPorg_Handbook {
 			// If the post type has a page to act as an archive index page, get that.
 			$page = get_page_by_path( $this->post_type, OBJECT, $this->post_type );
 			if ( ! $page ) {
-				$slug = substr( $this->post_type, 0, -9 );
+				$slug = str_replace( '-handbook', '', $this->post_type );
 				$page = get_page_by_path( $slug, OBJECT, $this->post_type );
 			}
 			if ( ! $page ) {

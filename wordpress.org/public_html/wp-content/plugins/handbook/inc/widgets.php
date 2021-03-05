@@ -94,7 +94,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		// Exclude root handbook page from the table of contents.
 		$page = get_page_by_path( $post_type, OBJECT, $post_type );
 		if ( ! $page ) {
-			$slug = substr( $post_type, 0, -9 );
+			$slug = str_replace( '-handbook', '', $post_type );
 			$page = get_page_by_path( $slug, OBJECT, $post_type );
 		}
 		if ( $page && ! $instance['show_home'] ) {
