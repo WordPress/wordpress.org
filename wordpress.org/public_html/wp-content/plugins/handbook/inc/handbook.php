@@ -116,6 +116,14 @@ class WPorg_Handbook {
 		// Prefer explicitly configured handbook name.
 		$name = get_option( $post_type . '_name' );
 
+		// If handbook name isn't set, try configured label.
+		if ( ! $raw && ! $name ) {
+			$config = WPorg_Handbook_Init::get_handbooks_config( $post_type );
+			if ( ! empty( $config['label'] ) ) {
+				$name = $config['label'];
+			}
+		}
+
 		// If handbook name isn't set, try root relative site path.
 		if ( ! $raw && ! $name ) {
 			if ( is_multisite() ) {
