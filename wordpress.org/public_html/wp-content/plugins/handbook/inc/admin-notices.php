@@ -14,6 +14,7 @@ class WPorg_Handbook_Admin_Notices {
 	 */
 	public static function init() {
 		add_action( 'admin_notices', [ __CLASS__, 'show_new_handbook_message' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'show_imported_handbook_notice' ] );
 	}
 
 	/**
@@ -55,6 +56,53 @@ class WPorg_Handbook_Admin_Notices {
 				__( '<strong>Welcome to your new handbook!</strong> It is recommended that the first post you create is the landing page for the handbook. You can title it anything you like (suggestions: <code>%1$s</code> or <code>Welcome</code>). However, you must ensure that it has one of the following slugs: %2$s. The slug will ultimately be omitted from the page&#8216;s permalink URL.', 'wporg' ),
 				WPorg_Handbook::get_name( $current_screen->post_type ),
 				implode( ', ', $suggested_slugs )
+			);
+			echo "</p></div>\n";
+		}
+	}
+
+	/**
+	 * Outputs admin notice indicating the handbook is an imported handbook, if applicable.
+	 *
+	 * @access public
+	 */
+	public static function show_imported_handbook_notice() {
+		global $wp_query;
+
+		// Bail if handbook importer is not available.
+		if ( ! class_exists( 'WPorg_Handbook_Importer' ) ) {
+			return;
+		}
+
+		$current_screen = get_current_screen();
+
+		// Only show message in listing of handbook posts when no posts are present yet.
+		if (
+			$current_screen
+		&&
+			'edit' === $current_screen->base
+		&&
+			in_array( $current_screen->post_type, wporg_get_handbook_post_types() )
+		&&
+			WPorg_Handbook_Importer::is_handbook_imported( $current_screen->post_type )
+		) {
+			$handbook_config = WPorg_Handbook_Init::get_handbooks_config( $current_screen->post_type );
+
+			$handbook = WPorg_Handbook_Init::get_handbook( $current_screen->post_type );
+			if ( ! $handbook ) {
+				return;
+			}
+
+			$importer = $handbook->get_importer();
+			$interval = $importer ? $importer->get_cron_interval() : false;
+			$interval_display = ! empty( $interval['display'] ) ? strtolower( $interval['display'] ) : __( 'DISABLED', 'wporg' );
+
+			echo '<div class="notice notice-info"><p>';
+			printf(
+				/* translators: 1: URL to remote manifest. 2: cron interval. */
+				__( '<strong>This is an imported handbook!</strong> This handbook is imported according to a <a href="%1$s">remote manifest</a>. Any local changes will be overwritten during the next import, so make any changes at the remote location. Import interval: <strong>%2$s</strong>.', 'wporg' ),
+				$handbook_config['manifest'],
+				$interval_display
 			);
 			echo "</p></div>\n";
 		}
