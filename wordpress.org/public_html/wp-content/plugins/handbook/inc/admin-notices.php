@@ -15,6 +15,7 @@ class WPorg_Handbook_Admin_Notices {
 	public static function init() {
 		add_action( 'admin_notices', [ __CLASS__, 'show_new_handbook_message' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'show_imported_handbook_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'show_imported_handbook_config_errors' ] );
 	}
 
 	/**
@@ -108,6 +109,55 @@ class WPorg_Handbook_Admin_Notices {
 		}
 	}
 
+	/**
+	 * Outputs admin error notice(s) for any misconfigured imported handbooks.
+	 *
+	 * @access public
+	 */
+	public static function show_imported_handbook_config_errors() {
+		global $wp_query;
+
+		// Bail if handbook importer is not available.
+		if ( ! class_exists( 'WPorg_Handbook_Importer' ) ) {
+			return;
+		}
+
+		$current_screen = get_current_screen();
+
+		// Only show message in listing of handbook posts when no posts are present yet.
+		if (
+			$current_screen
+		&&
+			'edit' === $current_screen->base
+		&&
+			in_array( $current_screen->post_type, wporg_get_handbook_post_types() )
+		&&
+			WPorg_Handbook_Importer::is_handbook_imported( $current_screen->post_type )
+		) {
+			$handbook_config = WPorg_Handbook_Init::get_handbooks_config( $current_screen->post_type );
+
+			$handbook = WPorg_Handbook_Init::get_handbook( $current_screen->post_type );
+			if ( ! $handbook ) {
+				return;
+			}
+
+			$handbook_config = $handbook->get_config();
+			$cron_intervals = wp_get_schedules();
+			$interval_display = $handbook_config[ 'cron_interval' ] ?? '';
+
+			if ( ! empty( $cron_intervals[ $interval_display ] ) ) {
+				return;
+			}
+
+			echo '<div class="notice notice-warning"><p>';
+			printf(
+				/* translators: %s: cron interval. */
+				__( '<strong>Misconfigured cron interval!</strong> This imported handbook has a misconfigured cron interval. The config defines an interval of <strong>%s</strong>, which has not been defined. The fallback import interval shown in a notice above includes the default cron interval currently in use.', 'wporg' ),
+				$interval_display
+			);
+			echo "</p></div>\n";
+		}
+	}
 }
 
 add_action( 'plugins_loaded', [ 'WPorg_Handbook_Admin_Notices', 'init' ] );
