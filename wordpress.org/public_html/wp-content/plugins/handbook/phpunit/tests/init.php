@@ -25,12 +25,7 @@ class WPorg_Handbook_Init_Test extends WP_UnitTestCase {
 
 
 	public static function get_default_config() {
-		return [
-			[ 'label', '' ],
-			[ 'manifest', '' ],
-			[ 'slug', '' ],
-			[ 'with_front', '' ],
-		];
+		return \dataprovider_get_default_config();
 	}
 
 

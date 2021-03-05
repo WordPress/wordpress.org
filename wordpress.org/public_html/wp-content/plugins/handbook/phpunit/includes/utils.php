@@ -23,3 +23,15 @@ function reinit_handbooks( $data, $type = 'config' ) {
 		$handbook->register_post_type();
 	}
 }
+
+/**
+ * Data provider for default handbook config options.
+ *
+ * @return array
+ */
+function dataprovider_get_default_config() {
+	return [
+		[ 'label', '' ],
+		[ 'slug', '' ],
+	];
+}
