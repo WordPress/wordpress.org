@@ -1286,17 +1286,21 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 		if ( $return_var > 0 ) {
 			trigger_error(
 				"Command failed, `{$command}`\n" .
-					"Return Value: {$return_var}\n" . 
-					"STDOUT: ```{$stdout}```\n" .
-					"STDERR: ```{$stderr}```",
+					"```\n" .
+					"Return Value: {$return_var}\n" .
+					"STDOUT: {$stdout}\n" .
+					"STDERR: {$stderr}\n" .
+					"```",
 				E_USER_WARNING
 			);
 		} elseif ( $stderr ) {
 			trigger_error(
 				"Command produced errors, `{$command}`\n" .
+					"```\n" .
 					"Return Value: {$return_var}\n" .
-					"STDOUT: ```{$stdout}```\n" .
-					"STDERR: ```{$stderr}```",
+					"STDOUT: {$stdout}\n" .
+					"STDERR: {$stderr}\n" .
+					"```",
 				E_USER_NOTICE
 			);
 		}
