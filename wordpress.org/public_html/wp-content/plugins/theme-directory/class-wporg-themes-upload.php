@@ -1280,10 +1280,25 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 			$output = array_merge( $output, explode( "\n", rtrim( $stdout, "\r\n" ) ) );
 		}
 
+		// Redact any passwords that might be in a command and included in logged errors.
+		$command = str_replace( [ THEME_TRACBOT_PASSWORD, THEME_DROPBOX_PASSWORD ], '[redacted]', $command );
+
 		if ( $return_var > 0 ) {
-			trigger_error( "Command failed, `{$command}` return value: {$return_var} STDOUT: ```{$stdout}``` STDERR: ```{$stderr}```", E_USER_WARNING );
+			trigger_error(
+				"Command failed, `{$command}`\n" .
+					"Return Value: {$return_var}\n" . 
+					"STDOUT: ```{$stdout}```\n" .
+					"STDERR: ```{$stderr}```",
+				E_USER_WARNING
+			);
 		} elseif ( $stderr ) {
-			trigger_error( "Command produced errors, `{$command}` return value: {$return_var} STDOUT: ```{$stdout}``` STDERR: ```{$stderr}```", E_USER_NOTICE );
+			trigger_error(
+				"Command produced errors, `{$command}`\n" .
+					"Return Value: {$return_var}\n" .
+					"STDOUT: ```{$stdout}```\n" .
+					"STDERR: ```{$stderr}```",
+				E_USER_NOTICE
+			);
 		}
 
 		// Execution failed.
