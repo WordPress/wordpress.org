@@ -27,9 +27,59 @@ class WPorg_Handbook_Watchlist {
 	public static function on_init() {
 		self::$post_types = WPorg_Handbook_Init::get_post_types();
 
+		self::o2_register_default_post_action_states();
+
 		add_action( 'p2_action_links',            [ __CLASS__, 'display_action_link' ], 100 );
 		add_filter( 'o2_filter_post_actions',     [ __CLASS__, 'add_o2_action_link' ] );
 		add_filter( 'o2_filter_post_action_html', [ __CLASS__, 'get_o2_action_link' ], 10, 2 );
+	}
+
+	/**
+	 * Returns default post action info.
+	 *
+	 * @param string $type The post action type. Either 'watch' or 'unwatch'.
+	 * @return array
+	 */
+	protected static function get_default_post_action_info( $type ) {
+		$info = [];
+
+		if ( ! in_array( $type, [ 'unwatch', 'watch' ] ) ) {
+			return $info;
+		}
+
+		if ( 'watch' === $type ) {
+			$info = [
+				'shortText' => __( 'Watch', 'wporg' ),
+				'title'     => __( 'Get notified about changes to this page', 'wporg' ),
+				'genericon' => 'genericon-subscribe',
+				'classes'   => [ 'genericon', 'genericon-subscribe' ],
+				'rel'       => false,
+			];
+		} else {
+			$info = [
+				'shortText' => __( 'Unwatch', 'wporg' ),
+				'title'     => __( 'Stop getting notified about changes to this page', 'wporg' ),
+				'genericon' => 'genericon-unsubscribe',
+				'classes'   => [ 'genericon', 'genericon-unsubscribe' ],
+				'rel'       => false,
+			];
+		}
+
+		return $info;
+	}
+
+	/**
+	 * Registers default post action states.
+	 */
+	public static function o2_register_default_post_action_states() {
+		if( ! function_exists( 'o2_register_post_action_states' ) ) {
+			return;
+		}
+
+		o2_register_post_action_states( 'watch', [
+			'unwatch' => self::get_default_post_action_info( 'unwatch' ),
+			'watch'   => self::get_default_post_action_info( 'watch' ),
+		] );
 	}
 
 	/**
@@ -52,21 +102,17 @@ class WPorg_Handbook_Watchlist {
 			$watchlist = get_post_meta( $post->ID, '_wporg_watchlist', true );
 
 			if ( $watchlist && in_array( get_current_user_id(), $watchlist ) ) {
-				$actions[35] = [
+				$actions[35] = wp_parse_args( [
 					'action'  => 'watch',
-					'text'    => __( 'Unwatch', 'wporg' ),
 					'href'    => wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&post_id=' . $post->ID ), 'unwatch-' . $post->ID ),
-					'title'   => __( 'Stop getting notified about changes to this page', 'wporg' ),
-					'classes' => [ 'genericon', 'genericon-unsubscribe' ],	
-				];
+					'initialState' => 'unwatch',
+				], self::get_default_post_action_info( 'unwatch' ) );
 			} else {
-				$actions[35] = [
+				$actions[35] = wp_parse_args( [
 					'action'  => 'watch',
-					'text'    => __( 'Watch', 'wporg' ),
 					'href'    => wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&watch=1&post_id=' . $post->ID ), 'watch-' . $post->ID ),
-					'title'   => __( 'Get notified about changes to this page', 'wporg' ),
-					'classes' => [ 'genericon', 'genericon-subscribe' ],
-				];
+					'initialState' => 'watch',
+				], self::get_default_post_action_info( 'watch' ) );
 			}
 		}
 
@@ -87,7 +133,7 @@ class WPorg_Handbook_Watchlist {
 				$action['href'],
 				$action['title'],
 				implode( ' ', $action['classes'] ),
-				$action['text']
+				$action['shortText']
 			);
 		}
 
