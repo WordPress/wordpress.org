@@ -970,8 +970,8 @@ TICKET;
 		$this->exec_with_notify( self::CP . " -R {$theme_dir}/* {$new_version_dir}", $output );
 
 		// Process file additions and removals.
-		$this->exec_with_notify( self::SVN . " st {$new_version_dir} | grep '^?' | cut -c 2- | xargs -I% " . self::SVN . " add %", $output );
-		$this->exec_with_notify( self::SVN . " st {$new_version_dir} | grep '^!' | cut -c 2- | xargs -I% " . self::SVN . " rm %", $output );
+		$this->exec_with_notify( self::SVN . " st {$new_version_dir} | grep '^?' | cut -c 2- | xargs -I% " . self::SVN . " add '%@'", $output );
+		$this->exec_with_notify( self::SVN . " st {$new_version_dir} | grep '^!' | cut -c 2- | xargs -I% " . self::SVN . " rm '%@'", $output );
 
 		// Commit it to SVN.
 		$password = escapeshellarg( THEME_DROPBOX_PASSWORD );
