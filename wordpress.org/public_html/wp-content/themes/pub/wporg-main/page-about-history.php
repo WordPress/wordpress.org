@@ -87,6 +87,11 @@ $date_format = get_option( 'date_format' );
 						</thead>
 						<tbody>
 						<tr>
+							<th><a href="https://wordpress.org/news/2021/03/esperanza/">5.7</a></th>
+							<td>Esperanza Spalding</td>
+							<td><?php echo esc_html( date_i18n( $date_format, strtotime( 'March 9, 2021' ) ) ); ?></td>
+						</tr>
+						<tr>
 							<th><a href="https://wordpress.org/news/2020/12/simone/">5.6</a></th>
 							<td>Nina Simone</td>
 							<td><?php echo esc_html( date_i18n( $date_format, strtotime( 'December 8, 2020' ) ) ); ?></td>
