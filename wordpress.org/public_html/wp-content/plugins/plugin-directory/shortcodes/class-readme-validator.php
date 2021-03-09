@@ -13,18 +13,18 @@ class Readme_Validator {
 		?>
 		<div class="wrap">
 			<?php
-			if ( $_POST ) {
+			if ( $_REQUEST ) {
 				self::validate_readme();
 			}
 
-			$readme_url      = $_POST['readme_url'] ?? '';
+			$readme_url      = $_REQUEST['readme'] ?? '';
 			$readme_contents = $_POST['readme_contents'] ?? '';
 			$readme_contents = base64_decode( wp_unslash( $readme_contents ) );
 			?>
 
-			<form method="post" action="">
+			<form method="get" action="">
 				<p>
-					<input type="text" name="readme_url" size="70" placeholder="https://" value="<?php echo esc_attr( $readme_url ); ?>" />
+					<input type="text" name="readme" size="70" placeholder="https://" value="<?php echo esc_attr( $readme_url ); ?>" />
 					<input type="submit" class="button button-secondary" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
 				</p>
 			</form>
@@ -32,6 +32,7 @@ class Readme_Validator {
 			<p><?php _e( '... or paste your <code>readme.txt</code> here:', 'wporg-plugins' ); ?></p>
 				<textarea rows="20" cols="100" name="readme_visible" placeholder="=== Plugin Name ==="><?php echo esc_textarea( $readme_contents ); ?></textarea>
 				<form id="readme-data" method="post" action="">
+					<input type="hidden" name="readme" value="" />
 					<textarea class="screen-reader-text" rows="20" cols="100" name="readme_contents"><?php echo esc_textarea( $readme_contents ); ?></textarea>
 				<p><input type="submit" class="button button-secondary" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></p>
 			</form>
@@ -57,8 +58,8 @@ class Readme_Validator {
 	 * Validates readme.txt contents and adds feedback.
 	 */
 	protected static function validate_readme() {
-		if ( ! empty( $_POST['readme_url'] ) ) {
-			$errors = Validator::instance()->validate_url( wp_unslash( $_POST['readme_url'] ) );
+		if ( ! empty( $_REQUEST['readme'] ) ) {
+			$errors = Validator::instance()->validate_url( wp_unslash( $_REQUEST['readme'] ) );
 
 		} elseif ( ! empty( $_POST['readme_contents'] ) ) {
 			$errors = Validator::instance()->validate_content( base64_decode( wp_unslash( $_REQUEST['readme_contents'] ) ) );
