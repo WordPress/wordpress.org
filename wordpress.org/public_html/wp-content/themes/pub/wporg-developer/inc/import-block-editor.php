@@ -53,11 +53,44 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		$redirects = [
 			'tutorials/block-tutorial/block-controls-toolbars-and-inspector' => 'tutorials/block-tutorial/block-controls-toolbar-and-sidebar/',
 			'components/server-side-render' => 'packages/packages-server-side-render',
+
+			// After handbook restructuring, March 2021.
+			'handbook/versions-in-wordpress/' => 'contributors/versions-in-wordpress',
+			'architecture/fse-templates' => 'explanations/architecture/full-site-editing-templates',
+			'handbook/outreach' => 'getting-started/outreach',
+			'handbook/history' => 'getting-started/history',
+			'handbook/glossary' => 'getting-started/glossary',
+			'handbook/faq' => 'getting-started/faq',
+			'developers/internationalization' => 'how-to-guides/internationalization',
+			'developers/richtext' => 'reference-guides/richtext',
+			'developers/accessibility' => 'how-to-guides/accessibility',
+			'developers/feature-flags' => 'how-to-guides/feature-flags',
+			'tutorials/devenv' => 'getting-started/tutorials/devenv',
+			'tutorials/devenv/docker-ubuntu' => 'getting-started/tutorials/devenv/docker-ubuntu',
+			'tutorials/block-based-themes' => 'how-to-guides/block-based-theme',
+			'tutorials/block-based-themes/block-based-themes-2-adding-blocks' => 'how-to-guides/block-based-theme/block-based-themes-2-adding-blocks',
 		];
 
 		// General path redirects. (More specific path first.)
 		$path_redirects = [
 			// 'some-path/' => 'new-path/',
+
+			// After handbook restructuring, March 2021.
+			'architecture/' => 'explanations/architecture/',
+			'contributors/develop/' => 'contributors/code/',
+			'contributors/document/' => 'contributors/documentation/',
+			'data/' => 'reference-guides/data/',
+			'designers/' => 'how-to-guides/designers/',
+			'developers/backward-compatibility/' => 'how-to-guides/backward-compatibility/',
+			'developers/block-api/' => 'reference-guides/block-api/',
+			'developers/filters/' => 'reference-guides/filters/',
+			'developers/platform/' => 'how-to-guides/platform/',
+			'developers/slotfills/' => 'reference-guides/slotfills/',
+			'developers/themes/' => 'how-to-guides/themes/',
+			'packages/' => 'reference-guides/packages/',
+			'tutorials/create-block/' => 'getting-started/tutorials/create-block/',
+			'tutorials/plugin-sidebar-0/' => 'how-to-guides/sidebar-tutorial/',
+			'tutorials/' => 'how-to-guides/',
 		];
 
 		$new_handbook_path = '';
