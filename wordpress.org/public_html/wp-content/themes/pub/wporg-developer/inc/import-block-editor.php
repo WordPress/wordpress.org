@@ -57,16 +57,12 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 			// After handbook restructuring, March 2021.
 			'handbook/versions-in-wordpress/' => 'contributors/versions-in-wordpress',
 			'architecture/fse-templates' => 'explanations/architecture/full-site-editing-templates',
-			'handbook/outreach' => 'getting-started/outreach',
-			'handbook/history' => 'getting-started/history',
-			'handbook/glossary' => 'getting-started/glossary',
-			'handbook/faq' => 'getting-started/faq',
 			'developers/internationalization' => 'how-to-guides/internationalization',
 			'developers/richtext' => 'reference-guides/richtext',
 			'developers/accessibility' => 'how-to-guides/accessibility',
 			'developers/feature-flags' => 'how-to-guides/feature-flags',
-			'tutorials/devenv' => 'getting-started/tutorials/devenv',
-			'tutorials/devenv/docker-ubuntu' => 'getting-started/tutorials/devenv/docker-ubuntu',
+			'tutorials/devenv' => 'handbook/tutorials/devenv',
+			'tutorials/devenv/docker-ubuntu' => 'handbook/tutorials/devenv/docker-ubuntu',
 			'tutorials/block-based-themes' => 'how-to-guides/block-based-theme',
 			'tutorials/block-based-themes/block-based-themes-2-adding-blocks' => 'how-to-guides/block-based-theme/block-based-themes-2-adding-blocks',
 		];
@@ -88,7 +84,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 			'developers/slotfills/' => 'reference-guides/slotfills/',
 			'developers/themes/' => 'how-to-guides/themes/',
 			'packages/' => 'reference-guides/packages/',
-			'tutorials/create-block/' => 'getting-started/tutorials/create-block/',
+			'tutorials/create-block/' => 'handbook/tutorials/create-block/',
 			'tutorials/plugin-sidebar-0/' => 'how-to-guides/sidebar-tutorial/',
 			'tutorials/' => 'how-to-guides/',
 		];
