@@ -1681,7 +1681,7 @@ class Plugin_Directory {
 	 * @param int|string|\WP_Post $plugin_slug The slug of the plugin to retrieve.
 	 * @return \WP_Post|bool
 	 */
-	public static function get_plugin_post( $plugin_slug ) {
+	public static function get_plugin_post( $plugin_slug = null ) {
 		global $post;
 
 		if ( $plugin_slug instanceof \WP_Post ) {
@@ -1698,17 +1698,34 @@ class Plugin_Directory {
 			return $post_obj;
 		}
 
-		// Use the global $post object when it matches to avoid hitting the database.
-		if ( ! empty( $post ) && 'plugin' == $post->post_type && $plugin_slug == $post->post_name ) {
-			return $post;
+		// Use the global $post object when appropriate
+		if ( ! empty( $post ) && 'plugin' == $post->post_type ) {
+			// Default to the global object.
+			if ( is_null( $plugin_slug ) || 0 === $plugin_slug ) {
+				return get_post( $post->ID );
+			}
+
+			// Avoid hitting the database if it matches.
+			if ( $plugin_slug == $post->post_name ) {
+				return get_post( $post->ID );
+			}
 		}
 
 		$plugin_slug = sanitize_title_for_query( $plugin_slug );
+		if ( ! $plugin_slug ) {
+			return false;
+		}
 
-		if ( false !== ( $post_id = wp_cache_get( $plugin_slug, 'plugin-slugs' ) ) && ( $post = get_post( $post_id ) ) ) {
-			// We have a $post.
-		} else {
+		$post    = false;
+		$post_id = wp_cache_get( $plugin_slug, 'plugin-slugs' );
+		if ( 0 === $post_id ) {
+			// Unknown plugin slug.
+			return false;
+		} else if ( $post_id ) {
+			$post = get_post( $post_id );
+		}
 
+		if ( ! $post ) {
 			// get_post_by_slug();
 			$posts = get_posts( array(
 				'post_type'   => 'plugin',
