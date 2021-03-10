@@ -1682,8 +1682,6 @@ class Plugin_Directory {
 	 * @return \WP_Post|bool
 	 */
 	public static function get_plugin_post( $plugin_slug = null ) {
-		global $post;
-
 		if ( $plugin_slug instanceof \WP_Post ) {
 			return $plugin_slug;
 		}
@@ -1691,23 +1689,25 @@ class Plugin_Directory {
 		// Handle int $plugin_slug being passed. NOT numeric slugs
 		if (
 			is_int( $plugin_slug ) &&
-			( $post_obj = get_post( $plugin_slug ) ) &&
-			( $post_obj->ID === $plugin_slug )
+			( $post = get_post( $plugin_slug ) ) &&
+			( $post->ID === $plugin_slug )
 		) {
-			$post = $post_obj;
-			return $post_obj;
+			return $post;
 		}
 
 		// Use the global $post object when appropriate
-		if ( ! empty( $post ) && 'plugin' == $post->post_type ) {
+		if (
+			! empty( $GLOBALS['post']->post_type ) &&
+			'plugin' === $GLOBALS['post']->post_type
+		) {
 			// Default to the global object.
 			if ( is_null( $plugin_slug ) || 0 === $plugin_slug ) {
-				return get_post( $post->ID );
+				return get_post( $GLOBALS['post']->ID );
 			}
 
 			// Avoid hitting the database if it matches.
-			if ( $plugin_slug == $post->post_name ) {
-				return get_post( $post->ID );
+			if ( $plugin_slug == $GLOBALS['post']->post_name ) {
+				return get_post( $GLOBALS['post']->ID );
 			}
 		}
 
