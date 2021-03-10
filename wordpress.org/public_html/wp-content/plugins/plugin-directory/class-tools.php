@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 
+use WP_Query;
 use WP_User;
 use WordPressdotorg\Plugin_Directory\Email\Committer_Added as Committer_Added_Email;
 use WordPressdotorg\Plugin_Directory\Email\Support_Rep_Added as Support_Rep_Added_Email;
@@ -44,16 +45,21 @@ class Tools {
 	 *
 	 * @todo Populate with review title/content.
 	 *
-	 * @param string $plugin_slug The plugin slug.
+	 * @param mixed $post The plugin slug, WP_Post, or ID.
 	 * @return array|false
 	 */
-	public static function get_plugin_reviews( $plugin_slug, $number = 6 ) {
+	public static function get_plugin_reviews( $post, $number = 6 ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+		if ( ! $post ) {
+			return false;
+		}
+
 		$number = absint( $number );
 		if ( $number < 1 || $number > 100 ) {
 			$number = 2;
 		}
 
-		$reviews = wp_cache_get( "{$plugin_slug}_last{$number}", 'plugin-reviews' );
+		$reviews = wp_cache_get( "{$post->post_name}_last{$number}", 'plugin-reviews' );
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && false === $reviews ) {
 			global $wpdb;
 
@@ -66,11 +72,11 @@ class Tools {
 				WHERE r.object_type = 'plugin' AND r.object_slug = %s AND p.post_status = 'publish'
 				ORDER BY r.review_id DESC
 				LIMIT %d",
-				$plugin_slug,
+				$post->post_name,
 				$number
 			) );
 
-			wp_cache_set( "{$plugin_slug}_last{$number}", $reviews, 'plugin-reviews', HOUR_IN_SECONDS );
+			wp_cache_set( "{$post->post_name}_last{$number}", $reviews, 'plugin-reviews', HOUR_IN_SECONDS );
 		}
 
 		return $reviews;
@@ -82,21 +88,27 @@ class Tools {
 	 * @static
 	 * @global \wpdb $wpdb WordPress database abstraction object.
 	 *
-	 * @param string $plugin_slug The plugin slug.
-	 * @param bool   $use_cache   If we should use the cache, or fetch new data.
+	 * @param mixed  $post      The plugin slug, WP_Post, or ID.
+	 * @param bool   $use_cache If we should use the cache, or fetch new data.
 	 * @return array The list of user_login's which have commit.
 	 */
-	public static function get_plugin_committers( $plugin_slug, $use_cache = true ) {
-		if ( ! $plugin_slug ) {
-			return array();
+	public static function get_plugin_committers( $post, $use_cache = true ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+		if ( ! $post ) {
+			return [];
 		}
 
-		if ( ! $use_cache || false === ( $committers = wp_cache_get( $plugin_slug, 'plugin-committers' ) ) ) {
+		$committers = wp_cache_get( $post->post_name, 'plugin-committers' );
+
+		if ( false === $committers || ! $use_cache ) {
 			global $wpdb;
 
-			$committers = $wpdb->get_col( $wpdb->prepare( 'SELECT user FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE path = %s', "/{$plugin_slug}" ) );
+			$committers = $wpdb->get_col( $wpdb->prepare(
+				'SELECT user FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE path = %s',
+				'/' . $post->post_name
+			) );
 
-			wp_cache_set( $plugin_slug, $committers, 'plugin-committers', 12 * HOUR_IN_SECONDS );
+			wp_cache_set( $post->post_name, $committers, 'plugin-committers', 12 * HOUR_IN_SECONDS );
 		}
 
 		return $committers;
@@ -112,10 +124,7 @@ class Tools {
 	 * @return array The list of plugins the user has commit to.
 	 */
 	public static function get_users_write_access_plugins( $user ) {
-		if ( ! $user instanceof \WP_User ) {
-			$user = new \WP_User( $user );
-		}
-
+		$user = new WP_User( $user );
 		if ( ! $user->exists() ) {
 			return false;
 		}
@@ -123,7 +132,10 @@ class Tools {
 		if ( false === ( $plugins = wp_cache_get( $user->user_login, 'committer-plugins' ) ) ) {
 			global $wpdb;
 
-			$plugins = $wpdb->get_col( $wpdb->prepare( 'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s', $user->user_login ) );
+			$plugins = $wpdb->get_col( $wpdb->prepare(
+				'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s',
+				$user->user_login
+			) );
 			$plugins = array_map( function ( $plugin ) {
 				return trim( $plugin, '/' );
 			}, $plugins );
@@ -141,16 +153,16 @@ class Tools {
 	 * Syncs the list of committers from the svn_access table to a taxonomy.
 	 *
 	 * @static
-	 * @param string $plugin_slug The Plugin Slug to sync.
+	 * @param mixed $post The plugin slug, WP_Post, or ID.
 	 */
-	public static function sync_plugin_committers_with_taxonomy( $plugin_slug ) {
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+	public static function sync_plugin_committers_with_taxonomy( $post ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
 		if ( ! $post ) {
 			return false;
 		}
 
-		$committer_slugs = array();
-		foreach ( Tools::get_plugin_committers( $plugin_slug, false /* Do not use the cache */ ) as $committer ) {
+		$committer_slugs = [];
+		foreach ( Tools::get_plugin_committers( $post, false /* Do not use the cache */ ) as $committer ) {
 			$user = get_user_by( 'login', $committer );
 			if ( $user ) {
 				$committer_slugs[] = $user->user_nicename;
@@ -166,37 +178,37 @@ class Tools {
 	 * @static
 	 * @global \wpdb $wpdb WordPress database abstraction object.
 	 *
-	 * @param string          $plugin_slug The plugin slug.
-	 * @param string|\WP_User $user        The user to grant access to.
+	 * @param mixed           $post The plugin slug, WP_Post, or ID.
+	 * @param string|\WP_User $user The user to grant access to.
 	 * @return bool
 	 */
-	public static function grant_plugin_committer( $plugin_slug, $user ) {
+	public static function grant_plugin_committer( $post, $user ) {
 		global $wpdb;
 
-		if ( ! $user instanceof \WP_User ) {
-			$user = new \WP_User( $user );
-		}
-
-		if ( ! $user->exists() || ! $plugin_slug || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+		$user = new WP_User( $user );
+		if ( ! $post || ! $user->exists() ) {
 			return false;
 		}
 
-		$existing_committers = self::get_plugin_committers( $plugin_slug );
+		$existing_committers = Tools::get_plugin_committers( $post );
 		if ( in_array( $user->user_login, $existing_committers, true ) ) {
-
 			// User already has write access.
 			return true;
 		}
 
-		$result = (bool) $wpdb->insert( PLUGINS_TABLE_PREFIX . 'svn_access', array(
-			'path'   => "/{$plugin_slug}",
-			'user'   => $user->user_login,
-			'access' => 'rw',
-		) );
+		$result = (bool) $wpdb->insert(
+			PLUGINS_TABLE_PREFIX . 'svn_access',
+			[
+				'path'   => '/' . $post->post_name,
+				'user'   => $user->user_login,
+				'access' => 'rw',
+			]
+		);
 
-		wp_cache_delete( $plugin_slug, 'plugin-committers' );
+		wp_cache_delete( $post->post_name, 'plugin-committers' );
 		wp_cache_delete( $user->user_login, 'committer-plugins' );
-		Tools::sync_plugin_committers_with_taxonomy( $plugin_slug );
+		Tools::sync_plugin_committers_with_taxonomy( $post );
 
 		Tools::audit_log(
 			sprintf(
@@ -204,7 +216,7 @@ class Tools {
 				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
 				$user->user_login
 			),
-			$plugin_slug
+			$post
 		);
 
 		// Only notify if the current process is interactive - a user is logged in.
@@ -218,7 +230,7 @@ class Tools {
 			$existing_committers[] = $user->user_login;
 
 			$email = new Committer_Added_Email(
-				$plugin_slug,
+				$post,
 				$existing_committers,
 				[
 					'committer' => $user,
@@ -236,29 +248,30 @@ class Tools {
 	 * @static
 	 * @global \wpdb $wpdb WordPress database abstraction object.
 	 *
-	 * @param string          $plugin_slug The plugin slug.
-	 * @param string|\WP_User $user        The user to revoke access of.
+	 * @param mixed           $post The plugin slug, WP_Post, or ID.
+	 * @param string|\WP_User $user The user to revoke access of.
 	 * @return bool
 	 */
-	public static function revoke_plugin_committer( $plugin_slug, $user ) {
+	public static function revoke_plugin_committer( $post, $user ) {
 		global $wpdb;
 
-		if ( ! $user instanceof \WP_User ) {
-			$user = new \WP_User( $user );
-		}
-
-		if ( ! $user->exists() || ! $plugin_slug || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+		$user = new WP_User( $user );
+		if ( ! $post || ! $user->exists() ) {
 			return false;
 		}
 
-		$result = (bool) $wpdb->delete( PLUGINS_TABLE_PREFIX . 'svn_access', array(
-			'path' => "/{$plugin_slug}",
-			'user' => $user->user_login,
-		) );
+		$result = (bool) $wpdb->delete(
+			PLUGINS_TABLE_PREFIX . 'svn_access',
+			[
+				'path' => '/' . $post->post_name,
+				'user' => $user->user_login,
+			]
+		);
 
-		wp_cache_delete( $plugin_slug, 'plugin-committers' );
+		wp_cache_delete( $post->post_name, 'plugin-committers' );
 		wp_cache_delete( $user->user_login, 'committer-plugins' );
-		Tools::sync_plugin_committers_with_taxonomy( $plugin_slug );
+		Tools::sync_plugin_committers_with_taxonomy( $post );
 
 		Tools::audit_log(
 			sprintf(
@@ -266,7 +279,7 @@ class Tools {
 				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
 				$user->user_login
 			),
-			$plugin_slug
+			$post
 		);
 
 		return $result;
@@ -284,14 +297,16 @@ class Tools {
 	public static function get_support_rep_plugins( $user ) {
 		global $wpdb;
 
-		if ( ! $user instanceof \WP_User ) {
-			$user = new \WP_User( $user );
+		$user = new WP_User( $user );
+		if ( ! $user->exists() ) {
+			return [];
 		}
 
-		$plugins = [];
+		$plugins = wp_cache_get( $user->user_nicename, 'support-rep-plugins' );
 
-		if ( $user->exists() && ( false === ( $plugins = wp_cache_get( $user->user_nicename, 'support-rep-plugins' ) ) ) ) {
-			$query = new \WP_Query( [
+		if ( false === $plugins ) {
+			$plugins = get_posts( [
+				'fields'         => 'ids',
 				'post_type'      => 'plugin',
 				'post_status'    => 'publish',
 				'posts_per_page' => 250,
@@ -305,9 +320,12 @@ class Tools {
 				],
 			] );
 
-			$plugins = $query->have_posts() ? $query->posts : [];
-
 			wp_cache_set( $user->user_nicename, $plugins, 'support-rep-plugins', 12 * HOUR_IN_SECONDS );
+		}
+
+		// ID's to objects.
+		if ( $plugins && is_int( $plugins[0] ) ) {
+			$plugins = array_map( 'get_post', $plugins );
 		}
 
 		return $plugins;
@@ -318,19 +336,21 @@ class Tools {
 	 *
 	 * @static
 	 *
-	 * @param string $plugin_slug The plugin slug.
+	 * @param mixed $post The plugin slug, WP_Post, or ID.
 	 * @return array The list of user_nicename's which are support reps.
 	 */
-	public static function get_plugin_support_reps( $plugin_slug ) {
-		if ( ! $plugin_slug ) {
-			return array();
+	public static function get_plugin_support_reps( $post ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+		if ( ! $post ) {
+			return [];
 		}
 
-		if ( false === ( $support_reps = wp_cache_get( $plugin_slug, 'plugin-support-reps' ) ) ) {
-			$post         = Plugin_Directory::get_plugin_post( $plugin_slug );
-			$support_reps = wp_get_object_terms( $post->ID, 'plugin_support_reps', array( 'fields' => 'names' ) );
+		$support_reps = wp_cache_get( $post->post_name, 'plugin-support-reps' );
 
-			wp_cache_set( $plugin_slug, $support_reps, 'plugin-support-reps', 12 * HOUR_IN_SECONDS );
+		if ( false === $support_reps ) {
+			$support_reps = wp_get_object_terms( $post->ID, 'plugin_support_reps', [ 'fields' => 'names' ] );
+
+			wp_cache_set( $post->post_name, $support_reps, 'plugin-support-reps', 12 * HOUR_IN_SECONDS );
 		}
 
 		return $support_reps;
@@ -341,28 +361,20 @@ class Tools {
 	 *
 	 * @static
 	 *
-	 * @param string          $plugin_slug The plugin slug.
-	 * @param string|\WP_User $user        The user to add.
+	 * @param mixed           $post The plugin slug, WP_Post, or ID.
+	 * @param string|\WP_User $user The user to add.
 	 * @return bool
 	 */
-	public static function add_plugin_support_rep( $plugin_slug, $user ) {
-		if ( ! $user instanceof \WP_User ) {
-			$user = new \WP_User( $user );
-		}
-
-		if ( ! $user->exists() || ! $plugin_slug ) {
-			return false;
-		}
-
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-
-		if ( ! $post ) {
+	public static function add_plugin_support_rep( $post, $user ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+		$user = new WP_User( $user );
+		if ( ! $post || ! $user->exists() ) {
 			return false;
 		}
 
 		$result = wp_add_object_terms( $post->ID, $user->user_nicename, 'plugin_support_reps' );
 
-		wp_cache_delete( $plugin_slug, 'plugin-support-reps' );
+		wp_cache_delete( $post->post_name, 'plugin-support-reps' );
 		wp_cache_delete( $user->user_nicename, 'support-rep-plugins' );
 
 		Tools::audit_log(
@@ -371,10 +383,10 @@ class Tools {
 				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
 				$user->user_login
 			),
-			$plugin_slug
+			$post
 		);
 
-		$committers = self::get_plugin_committers( $plugin_slug );
+		$committers = Tools::get_plugin_committers( $post );
 
 		// Only notify if the current process is interactive - a user is logged in.
 		$should_notify = (bool) get_current_user_id();
@@ -385,7 +397,7 @@ class Tools {
 
 		if ( $should_notify ) {
 			$email = new Support_Rep_Added_Email(
-				$plugin_slug,
+				$post,
 				$committers,
 				[
 					'rep' => $user,
@@ -402,28 +414,20 @@ class Tools {
 	 *
 	 * @static
 	 *
-	 * @param string          $plugin_slug The plugin slug.
-	 * @param string|\WP_User $user        The user to remove.
+	 * @param mixed           $post The plugin slug, WP_Post, or ID.
+	 * @param string|\WP_User $user The user to remove.
 	 * @return bool
 	 */
-	public static function remove_plugin_support_rep( $plugin_slug, $user ) {
-		if ( ! $user instanceof \WP_User ) {
-			$user = new \WP_User( $user );
-		}
-
-		if ( ! $user->exists() || ! $plugin_slug ) {
-			return false;
-		}
-
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-
-		if ( ! $post ) {
+	public static function remove_plugin_support_rep( $post, $user ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
+		$user = new WP_User( $user );
+		if ( ! $post || ! $user->exists() ) {
 			return false;
 		}
 
 		$result = wp_remove_object_terms( $post->ID, $user->user_nicename, 'plugin_support_reps' );
 
-		wp_cache_delete( $plugin_slug, 'plugin-support-reps' );
+		wp_cache_delete( $post->post_name, 'plugin-support-reps' );
 		wp_cache_delete( $user->user_nicename, 'support-rep-plugins' );
 
 		Tools::audit_log(
@@ -432,7 +436,7 @@ class Tools {
 				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
 				$user->user_login
 			),
-			$plugin_slug
+			$post
 		);
 
 		return $result;
@@ -446,24 +450,20 @@ class Tools {
 	 *
 	 * @static
 	 *
-	 * @param string      $plugin_slug The plugin to subscribe to.
-	 * @param int|WP_User $user        Optional. The user to subscribe. Default current user.
-	 * @param bool        $subscribe   Optional. Whether to subscribe (true) or unsubscribe (false).
-	 *                                 Default: true.
+	 * @param mixed       $post      The plugin slug, WP_Post, or ID.
+	 * @param int|WP_User $user      The user to subscribe. Optional. Default current user.
+	 * @param bool        $subscribe Whether to subscribe (true) or unsubscribe (false).
+	 *                                 Optional. Default: true.
 	 * @return bool Whether the user is subscribed.
 	 */
-	public static function subscribe_to_plugin_commits( $plugin_slug, $user = 0, $subscribe = true ) {
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-		if ( ! $post ) {
-			return false;
-		}
-
+	public static function subscribe_to_plugin_commits( $post, $user = 0, $subscribe = true ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
 		$user = new WP_User( $user ?: get_current_user_id() );
-		if ( ! $user->exists() ) {
+		if ( ! $post || ! $user->exists() ) {
 			return false;
 		}
 
-		$users = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: array();
+		$users = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: [];
 
 		if ( $subscribe ) {
 			$users[] = $user->ID;
@@ -476,7 +476,7 @@ class Tools {
 
 		update_post_meta( $post->ID, '_commit_subscribed', $users );
 
-		return self::subscribed_to_plugin_commits( $plugin_slug, $user->ID );
+		return Tools::subscribed_to_plugin_commits( $post, $user->ID );
 	}
 
 	/**
@@ -487,22 +487,18 @@ class Tools {
 	 *
 	 * @static
 	 *
-	 * @param string      $plugin_slug The plugin to subscribe to.
-	 * @param int|WP_User $user        Optional. The user to check. Default current user.
+	 * @param mixed       $post The plugin slug, WP_Post, or ID.
+	 * @param int|WP_User $user The user to check. Optional. Default current user.
 	 * @return bool Whether the specified user is subscribed to commits.
 	 */
-	public static function subscribed_to_plugin_commits( $plugin_slug, $user = 0 ) {
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-		if ( ! $post ) {
-			return false;
-		}
-
+	public static function subscribed_to_plugin_commits( $post, $user = 0 ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
 		$user = new WP_User( $user ?: get_current_user_id() );
-		if ( ! $user->exists() ) {
+		if ( ! $post || ! $user->exists() ) {
 			return false;
 		}
 
-		$users = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: array();
+		$users = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: [];
 
 		return in_array( $user->ID, $users, true );
 	}
@@ -510,22 +506,18 @@ class Tools {
 	/**
 	 * Determine if a plugin has been favorited by a user.
 	 *
-	 * @param string $plugin_slug The plugin to check.
-	 * @param mixed  $user        The user to check.
+	 * @param mixed $post The plugin to check.
+	 * @param mixed $user The user to check.
 	 * @return bool
 	 */
-	public static function favorited_plugin( $plugin_slug, $user = 0 ) {
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-		if ( ! $post ) {
-			return false;
-		}
-
+	public static function favorited_plugin( $post, $user = 0 ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
 		$user = new WP_User( $user ?: get_current_user_id() );
-		if ( ! $user->exists() ) {
+		if ( ! $post || ! $user->exists() ) {
 			return false;
 		}
 
-		$users_favorites = get_user_meta( $user->ID, 'plugin_favorites', true ) ?: array();
+		$users_favorites = get_user_meta( $user->ID, 'plugin_favorites', true ) ?: [];
 
 		return in_array( $post->post_name, $users_favorites, true );
 	}
@@ -533,23 +525,19 @@ class Tools {
 	/**
 	 * Favorite a plugin
 	 *
-	 * @param string $plugin_slug The plugin to favorite
-	 * @param mixed  $user        The user favorite
-	 * @param bool   $favorite    Whether it's a favorite, or unfavorite.
+	 * @param mixed  $post     The plugin to favorite
+	 * @param mixed  $user     The user favoriting. Optional. Default current user.
+	 * @param bool   $favorite Whether it's a favorite, or unfavorite. Optional. Default true
 	 * @return bool
 	 */
-	public static function favorite_plugin( $plugin_slug, $user = 0, $favorite = true ) {
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-		if ( ! $post ) {
-			return false;
-		}
-
+	public static function favorite_plugin( $post, $user = 0, $favorite = true ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
 		$user = new WP_User( $user ?: get_current_user_id() );
-		if ( ! $user->exists() ) {
+		if ( ! $post || ! $user->exists() ) {
 			return false;
 		}
 
-		$users_favorites   = get_user_meta( $user->ID, 'plugin_favorites', true ) ?: array();
+		$users_favorites   = get_user_meta( $user->ID, 'plugin_favorites', true ) ?: [];
 		$already_favorited = in_array( $post->post_name, $users_favorites, true );
 
 		if ( $favorite && $already_favorited ) {
@@ -571,30 +559,29 @@ class Tools {
 	/**
 	 * Retrieve a list of users who are subscribed to plugin commits.
 	 *
-	 * @param string $plugin_slug       The plugin to retrieve subscribers for.
+	 * @param mixed  $post               The plugin to retrieve subscribers for.
 	 * @param bool   $include_committers Whether to include Plugin Committers in the list. Default false.
 	 * @return array Array of \WP_User's who are subscribed.
 	 */
-	public static function get_plugin_subscribers( $plugin_slug, $include_committers = false ) {
+	public static function get_plugin_subscribers( $post, $include_committers = false ) {
 		global $wpdb;
+		$post = Plugin_Directory::get_plugin_post( $post );
+		if ( ! $post ) {
+			return [];
+		}
 
-		$users = array();
+		$users = [];
 
 		// Plugin Committers are always subscrived to plugin commits.
-		$committers = self::get_plugin_committers( $plugin_slug );
+		$committers = Tools::get_plugin_committers( $post );
 		foreach ( $committers as $committer ) {
 			if ( $committer && $user = get_user_by( 'login', $committer ) ) {
 				$users[] = $user;
 			}
 		}
 
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-		if ( ! $post ) {
-			return $users;
-		}
-
 		// These users are subscribed the plugin commits.
-		$subscribers = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: array();
+		$subscribers = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: [];
 		foreach ( $subscribers as $subscriber_id ) {
 			if ( $subscriber_id && $user = get_user_by( 'id', $subscriber_id ) ) {
 				$users[] = $user;
@@ -626,18 +613,14 @@ class Tools {
 	/**
 	 * Add an Audit Internal Note for a plugin.
 	 *
-	 * @param int|string|WP_Post $plugin A Post ID, Plugin Slug or, WP_Post object.
+	 * @param mixed  $post A Post ID, Plugin Slug or, WP_Post object.
 	 * @param string $note The note to audit log entry to add.
 	 * @param WP_User $user The user which performed the action. Optional.
 	 */
-	public static function audit_log( $note, $plugin = null, $user = false ) {
-		if ( is_string( $plugin ) && ! is_numeric( $plugin ) ) {
-			$plugin = Plugin_Directory::get_plugin_post( $plugin );
-		} else {
-			$plugin = get_post( $plugin );
-		}
+	public static function audit_log( $note, $post = null, $user = false ) {
+		$post = Plugin_Directory::get_plugin_post( $post );
 
-		if ( ! $note || ! $plugin ) {
+		if ( ! $note || ! $post ) {
 			return false;
 		}
 		if ( ! $user || ! ( $user instanceof \WP_User ) ) {
@@ -650,7 +633,7 @@ class Tools {
 			'comment_author_url'   => $user->user_url,
 			'comment_author_IP'    => $_SERVER['REMOTE_ADDR'],
 			'comment_type'         => 'internal-note',
-			'comment_post_ID'      => $plugin->ID,
+			'comment_post_ID'      => $post->ID,
 			'user_id'              => $user->ID,
 			'comment_content'      => $note,
 		] );
