@@ -107,6 +107,11 @@ function the_plugin_favorite_button( $post = null ) {
 function the_author_byline( $post = null ) {
 	$post = get_post( $post );
 
+	// Anonymize the author byline when all committers have been removed.
+	if ( ! Tools::get_plugin_committers( $post->post_name ) ) {
+		return;
+	}
+
 	$url    = get_post_meta( $post->ID, 'header_author_uri', true );
 	$author = strip_tags( get_post_meta( $post->ID, 'header_author', true ) ) ?: get_the_author();
 	$author = $url ? '<a class="url fn n" rel="nofollow" href="' . esc_url( $url ) . '">' . $author . '</a>' : $author;
