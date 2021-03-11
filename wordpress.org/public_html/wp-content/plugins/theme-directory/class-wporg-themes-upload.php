@@ -882,9 +882,6 @@ TICKET;
 					'priority'  => $this->trac_ticket->priority,
 					'owner'     => '',
 				) );
-
-				// temporary debugging - email Otto when this specific branch occurs TODO remove this after testing
-				wp_mail( 'otto@wordpress.org', 'Theme ticket creation '. $ticket_id, 'https://themes.trac.wordpress.org/ticket/' . $ticket_id, 'From:       themes@wordpress.org' );
 			}
 
 			// In all other cases we create a new ticket.
@@ -1140,7 +1137,7 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 			);
 		}
 
-		wp_mail( $this->author->user_email, $email_subject, $email_content, 'From: themes@wordpress.org' );
+		wp_mail( $this->author->user_email, $email_subject, $email_content, 'From: "WordPress Theme Directory" <themes@wordpress.org>' );
 	}
 
 	/**
