@@ -18,6 +18,13 @@ class WPorg_Handbook_Importer extends Importer {
 	protected static $instances;
 
 	/**
+	 * Memoized user ID of default import post author.
+	 *
+	 * @var int
+	 */
+	protected static $import_user_id;
+
+	/**
 	 * The slug base.
 	 *
 	 * @var string
@@ -117,6 +124,7 @@ class WPorg_Handbook_Importer extends Importer {
 		add_action( "handbook_{$post_type_base}_import_manifest",     [ $this, 'import_manifest' ] );
 		add_action( "handbook_{$post_type_base}_import_all_markdown", [ $this, 'import_all_markdown' ] );
 		add_filter( 'display_post_states',                            [ $this, 'display_post_states' ], 10, 2 );
+		add_filter( 'wporg_markdown_post_data_pre_insert',            [ $this, 'assign_post_author' ] );
 
 		$editor = new Editor( $this );
 		$editor->init();
@@ -186,6 +194,52 @@ class WPorg_Handbook_Importer extends Importer {
 		if ( ! wp_next_scheduled( "handbook_{$post_type_base}_import_all_markdown" ) ) {
 			wp_schedule_event( time(), $cron_interval, "handbook_{$post_type_base}_import_all_markdown" );
 		}
+	}
+
+	/**
+	 * Adds user as the default post author for imported posts that don't have
+	 * a post author already assigned.
+	 *
+	 * By default, assigns all imported posts to the 'wordpressdotorg' user if
+	 * it exists. Use {@see 'handbooks_import_default_author_slug'} to filter
+	 * the default imported post author. Otherwise, no post author is assigned.
+	 *
+	 * @param array $post_data Post data.
+	 * @return array
+	 */
+	public static function assign_post_author( $post_data ) {
+		// Bail early if the post already has a post author specified.
+		if ( isset( $post_data['post_author'] ) ) {
+			return $post_data;
+		}
+
+		// Get the default import author if not already memoized.
+		if ( ! self::$import_user_id ) {
+			/**
+			 * Filters the slug of the user to be assigned as the post
+			 * author for all imported posts.
+			 *
+			 * @param string $slug Slug of user to assign as imported post author.
+			 *                     Use empty string or false to prevent a post author
+			 *                     from being assigned. Default 'wordpressdotorg'.
+			 * @return string
+			 */
+			$default_user_slug = apply_filters( 'handbooks_import_default_author_slug', 'wordpressdotorg' );
+
+			if ( $default_user_slug ) {
+				$user = get_user_by( 'slug', $default_user_slug );
+				if ( $user ) {
+					self::$import_user_id = $user->ID;
+				}
+			}
+		}
+
+		// Add the default import author if it was found.
+		if ( self::$import_user_id ) {
+			$post_data['post_author'] = self::$import_user_id;
+		}
+
+		return $post_data;
 	}
 
 	/**
