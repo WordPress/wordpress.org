@@ -127,6 +127,7 @@ abstract class Importer {
 		}
 
 		// A numeric key suggests the manifest did not explicitly specify keys for each item, so define one.
+		// Note: not explicitly specifying a key means the slugs defined must be unique.
 		$keys = array_keys( $manifest );
 		if ( is_int( array_shift( $keys ) ) ) {
 			$newdata = [];
