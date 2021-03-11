@@ -112,7 +112,9 @@ class DevHub_Docs_Importer extends Importer {
 	 * @return array
 	 */
 	public function amend_post_types( $post_types ) {
-		$post_types[] = $this->post_type;
+		if ( ! in_array( $this->post_type, $post_types ) ) {
+			$post_types[] = $this->post_type;
+		}
 
 		return $post_types;
 	}
