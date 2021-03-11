@@ -26,6 +26,11 @@ function verify_signature() {
 
 verify_signature();
 
+if ( empty( $_SERVER['CONTENT_TYPE'] ) || 'application/json' !== $_SERVER['CONTENT_TYPE'] ) {
+	header( 'HTTP/1.0 400 Bad Request', true, 400 );
+	die( 'Please set the Content type to application/json' );
+}
+
 $payload = json_decode( file_get_contents( 'php://input' ) );
 
 if ( ! empty( $_GET['trac'] ) ) {
