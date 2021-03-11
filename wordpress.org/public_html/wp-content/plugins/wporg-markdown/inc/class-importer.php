@@ -236,6 +236,14 @@ abstract class Importer {
 		if ( isset( $doc['title'] ) ) {
 			$post_data['post_title'] = sanitize_text_field( wp_slash( $doc['title'] ) );
 		}
+
+		/**
+		 * Filters the post data used to create a post from the manifest.
+		 *
+		 * @param array $post_data Post data.
+		 */
+		$post_data = apply_filters( 'wporg_markdown_post_data_pre_insert', $post_data );
+
 		$post_id = wp_insert_post( $post_data );
 		if ( ! $post_id ) {
 			return false;
