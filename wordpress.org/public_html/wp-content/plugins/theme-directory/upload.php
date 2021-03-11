@@ -17,6 +17,14 @@ function wporg_themes_upload_size_limit() {
 add_filter( 'upload_size_limit', 'wporg_themes_upload_size_limit', 10, 0 );
 
 /**
+ * Allows upload of .zip files on Multisite.
+ */
+function wporg_themes_upload_allow_zip( $allowed ) {
+	return "$allowed zip";
+}
+add_filter( 'site_option_upload_filetypes', 'wporg_themes_upload_allow_zip' );
+
+/**
  * Renders the upload shortcode.
  */
 function wporg_themes_render_upload_shortcode() {
@@ -72,7 +80,7 @@ function wporg_themes_process_upload( ) {
 		return __( 'You must be logged in to upload a new theme.', 'wporg-themes' );
 	}
 
-	if ( 0 !== $_FILES['zip_file']['error'] ) {
+	if ( empty( $_FILES['zip_file'] ) ) {
 		return __( 'Error in file upload.', 'wporg-themes' );
 	}
 
@@ -81,7 +89,7 @@ function wporg_themes_process_upload( ) {
 	}
 
 	$upload = new WPORG_Themes_Upload;
-	$message = $upload->process_upload();
+	$message = $upload->process_upload( $_FILES['zip_file'] );
 
 	return $message;
 }

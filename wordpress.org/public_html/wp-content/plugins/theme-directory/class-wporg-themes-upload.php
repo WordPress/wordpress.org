@@ -36,6 +36,13 @@ class WPORG_Themes_Upload {
 	const UNZIP = '/usr/bin/unzip';
 
 	/**
+	 * Temporary directory where uploads are stored.
+	 * 
+	 * @var string
+	 */
+	const TMP = '/tmp/wporg-theme-upload';
+
+	/**
 	 * Path to temporary directory.
 	 *
 	 * @var string
@@ -118,11 +125,34 @@ class WPORG_Themes_Upload {
 	);
 
 	/**
-	 * Get set up to run tests on the uploaded theme.
+	 * Validate that a theme upload succeeded and was a valid file.
 	 */
-	public function __construct() {
-		$this->create_tmp_dirs();
-		$this->unwrap_package();
+	public function validate_upload( $file ) {
+		// Check to see if PHP detected any errors in the upload.
+		if ( 0 !== $file['error'] ) {
+			return false;
+		}
+
+		// Validate the file uploaded correctly.
+		$size = filesize( $file['tmp_name'] );
+		if ( ! $size || $size !== $file['size'] ) {
+			return false;
+		}
+
+		// Validate that the file is a ZIP file before processing it.
+		$check = wp_check_filetype_and_ext(
+			$file['tmp_name'],
+			$file['name'],
+			[
+				'zip' => 'application/zip'
+			]
+		);
+		if ( ! $check['ext'] || ! $check['type'] ) {
+			return false;
+		}
+
+		// Everything seems fine, the ZIP file might still be invalid still if it was corrupted on the authors computer.
+		return true;
 	}
 
 	/**
@@ -132,7 +162,15 @@ class WPORG_Themes_Upload {
 	 *
 	 * @return string Failure or success message.
 	 */
-	public function process_upload() {
+	public function process_upload( $file_upload ) {
+		$valid_upload = $this->validate_upload( $file_upload );
+		if ( ! $valid_upload ) {
+			return __( 'Error in file upload.', 'wporg-themes' );
+		}
+
+		$this->create_tmp_dirs( $file_upload['name'] );
+		$this->unzip_package( $file_upload );
+
 		$theme_files = $this->get_all_files( $this->theme_dir );
 
 		// First things first. Do we have something to work with?
@@ -396,11 +434,12 @@ class WPORG_Themes_Upload {
 	/**
 	 * Creates a temporary directory, and the theme dir within it.
 	 */
-	public function create_tmp_dirs() {
+	public function create_tmp_dirs( $base_name ) {
 		// Create a temporary directory if it doesn't exist yet.
-		$tmp = '/tmp/wporg-theme-upload';
+		$tmp = self::TMP;
 		if ( ! is_dir( $tmp ) ) {
-			mkdir( $tmp, 0777 );
+			mkdir( $tmp );
+			chmod( $tmp, 0777 );
 		}
 
 		// Create file with unique file name.
@@ -414,7 +453,7 @@ class WPORG_Themes_Upload {
 		chmod( $this->tmp_dir, 0777 );
 
 		// Get a sanitized name for that theme and create a directory for it.
-		$base_name         = $this->get_sanitized_zip_name();
+		$base_name         = $this->get_sanitized_zip_name( $base_name );
 		$this->theme_dir   = "{$this->tmp_dir}/{$base_name}";
 		$this->tmp_svn_dir = "{$this->tmp_dir}/svn";
 		mkdir( $this->theme_dir );
@@ -429,23 +468,26 @@ class WPORG_Themes_Upload {
 	/**
 	 * Unzips the uploaded theme and saves it in the temporary theme dir.
 	 */
-	public function unwrap_package() {
-		$base_name = $this->get_sanitized_zip_name();
+	public function unzip_package( $file ) {
+		$base_name = $this->get_sanitized_zip_name( $file['name'] );
 		$zip_file  = "{$this->tmp_dir}/{$base_name}.zip";
 
-		// Move the uploaded zip in the temporary directory.
-		move_uploaded_file( $_FILES['zip_file']['tmp_name'], $zip_file );
+		// Move the uploaded zip into the temporary directory.
+		move_uploaded_file( $file['tmp_name'], $zip_file );
 
 		$unzip     = escapeshellarg( self::UNZIP );
 		$zip_file  = escapeshellarg( $zip_file );
 		$tmp_dir   = escapeshellarg( $this->tmp_dir );
 
 		// Unzip it into the theme directory.
-		$this->exec_with_notify( escapeshellcmd( "{$unzip} -DD {$zip_file} -d {$tmp_dir}/{$base_name}" ) );
+		$this->exec_with_notify( escapeshellcmd( "{$unzip} -DDn {$zip_file} -d {$tmp_dir}/{$base_name}" ) );
 
-		// Fix any permissions issues with the files. Sets 755 on directories, 644 on files
+		// Fix any permissions issues with the files. Sets 755 on directories, 644 on files.
 		$this->exec_with_notify( escapeshellcmd( "chmod -R 755 {$tmp_dir}/{$base_name}" ) );
 		$this->exec_with_notify( escapeshellcmd( "find {$tmp_dir}/{$base_name} -type f -print0" ) . ' | xargs -I% -0 chmod 644 %' );
+
+		// Remove any unexpected entries, we only need basic files and directories, anything else will cause problems when installed onto a site.
+		$this->exec_with_notify( escapeshellcmd( "find {$tmp_dir}/{$base_name} -not -type f -not -type d -delete" ) );
 	}
 
 	/**
@@ -1135,8 +1177,8 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 	 *
 	 * @return string
 	 */
-	public function get_sanitized_zip_name() {
-		return preg_replace( '|\W|', '', strtolower( basename( $_FILES['zip_file']['name'], '.zip') ) );
+	public function get_sanitized_zip_name( $name ) {
+		return preg_replace( '|\W|', '', strtolower( basename( $name, '.zip') ) );
 	}
 
 	/**
