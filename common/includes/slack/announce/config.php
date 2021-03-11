@@ -102,6 +102,7 @@ function get_whitelist() {
 			'laurora', // @laura on Slack
 			'lukecarbis',
 			'mapk',
+			'markparnell',
 			'marybaum',
 			'meaganhanes',
 			'metalandcoffee',
