@@ -124,7 +124,7 @@ class Plugin extends Base {
 			$result['ratings'] = get_post_meta( $post->ID, 'ratings', true ) ?: array();
 		}
 
-		$result['rating']  = $result['rating'] * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
+		$result['rating']  = (int) ( $result['rating'] * 20 ); // Stored as 0.0 ~ 5.0, API outputs as 0..100
 		$result['ratings'] = array_map( 'intval', $result['ratings'] );
 		krsort( $result['ratings'] );
 
