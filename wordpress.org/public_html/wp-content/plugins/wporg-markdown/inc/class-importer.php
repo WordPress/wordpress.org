@@ -116,6 +116,10 @@ abstract class Importer {
 				WP_CLI::error( 'Non-200 from Markdown source' );
 			}
 			return new WP_Error( 'invalid-http-code', 'Markdown source returned non-200 http code.' );
+		} else {
+			if ( class_exists( 'WP_CLI' ) ) {
+				WP_CLI::log( "Importing manifest from " . $this->get_manifest_url() );
+			}	
 		}
 		$manifest = json_decode( wp_remote_retrieve_body( $response ), true );
 
