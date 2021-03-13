@@ -184,7 +184,11 @@ abstract class Importer {
 			}
 		}
 		if ( class_exists( 'WP_CLI' ) ) {
-			WP_CLI::success( "Successfully created {$created} and updated {$updated} handbook pages." );
+			if ( 0 === $created && 0 === $updated ) {
+				WP_CLI::success( "No updates detected for any handbook page." );
+			} else {
+				WP_CLI::success( "Successfully created {$created} and updated {$updated} handbook pages." );
+			}
 		}
 	}
 
