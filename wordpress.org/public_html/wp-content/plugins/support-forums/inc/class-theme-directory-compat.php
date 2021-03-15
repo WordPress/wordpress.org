@@ -96,7 +96,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 			return;
 		}
 
-		$this->slug         = $slug;
+		$this->slug         = $theme->post_name;
 		$this->theme        = $theme;
 		$this->authors      = $this->get_authors( $slug );
 		$this->contributors = $this->get_contributors( $slug );
