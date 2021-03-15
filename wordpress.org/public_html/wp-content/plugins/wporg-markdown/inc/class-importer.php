@@ -166,7 +166,11 @@ abstract class Importer {
 		$created = $updated = 0;
 		foreach ( $manifest as $key => $doc ) {
 			// Already exists, update.
-			$existing = $this->existing[ $key ] ?? $this->existing['slug_only'][ $key ] ?? false;
+			$existing = $this->existing[ $key ]
+				?? $this->existing['slug_only'][ $key ]
+				?? $this->existing[ $doc['slug'] ]
+				?? $this->existing['slug_only'][ $doc['slug'] ]
+				?? false;
 			if ( ! $existing && 'index' === $key ) {
 				$key = $this->get_post_type();
 				$existing = $this->existing[ $key ] ?? $this->existing['slug_only'][ $key ] ?? false;
