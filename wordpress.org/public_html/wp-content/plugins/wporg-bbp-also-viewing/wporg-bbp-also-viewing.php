@@ -199,7 +199,7 @@ function bbp_user_edit_after() {
 		</p>',
 		checked( enabled( $user_id ), true, false ),
 		sprintf(
-			'Enable the <a href="%s">Also Viewing</a> feature.', // TODO: Translate once text is figured out __( , 'wporg-forums' ),
+			__( 'Enable the <a href="%s">Also Viewing</a> feature.', 'wporg-forums' ),
 			'https://make.wordpress.org/support/handbook/appendix/helpful-tools/#avoiding-overlapping-replies'
 		)
 	);
@@ -367,7 +367,7 @@ function clear_viewing( $page = null, $user_id = false ) {
 	}
 
 	foreach ( $pages as $p ) {
-		wp_cache_delete( $page, CACHE_GROUP );
+		wp_cache_delete( $p, CACHE_GROUP );
 	}
 }
 
@@ -441,7 +441,7 @@ function get_table() {
 function maybe_create_table() {
 	global $wpdb;
 
-	if ( get_site_option( 'also-viewing' ) ) {
+	if ( get_option( 'also-viewing' ) ) {
 		return;
 	}
 
@@ -461,5 +461,5 @@ function maybe_create_table() {
 	  )"
 	);
 
-	update_site_option( 'also-viewing', true );
+	update_option( 'also-viewing', true );
 }

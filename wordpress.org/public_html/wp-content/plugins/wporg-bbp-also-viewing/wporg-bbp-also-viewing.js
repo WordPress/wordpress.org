@@ -19,7 +19,7 @@
 		return;
 	}
 
-	jQuery( document ).on( 'ready', function($) {
+	jQuery( document ).ready( function() {
 		maybeDisplay();
 
 		if ( options.heartbeatTime ) {
@@ -73,7 +73,7 @@
 	}
 
 	// Pin the banner to the top of the screen when scrolling.
-	jQuery(window).scroll( function() {
+	jQuery(window).on( 'scroll', function() {
 		if ( ! banner ) {
 			return;
 		}
@@ -160,12 +160,4 @@
 			}
 		} );
 	} );
-
-	// DEBUG. Expose the functions for testing.
-	window.alsoViewing = {
-		refreshViewers: refreshViewers,
-		updateState: updateState,
-		transmitIsTyping: transmitIsTyping,
-		transmitNoLongerTyping: transmitNoLongerTyping,
-	}
 })();
