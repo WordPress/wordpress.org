@@ -448,6 +448,11 @@ class Ratings_Compat {
 			return;
 		}
 
+		printf(
+			'<label for="rating">%s</label>',
+			__( 'Your Rating:', 'wporg-forums' )
+		);
+
 		\WPORG_Ratings::get_dashicons_form( $this->compat, $this->slug, true );
 	}
 

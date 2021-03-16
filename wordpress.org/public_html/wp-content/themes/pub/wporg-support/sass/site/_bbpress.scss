@@ -795,6 +795,10 @@ $paginationBreakPoint: "600px";
 		input#bbp_topic_tags {
 			margin-bottom: 0;
 		}
+
+		div.rate {
+			margin-bottom: 8px;
+		}
 	}
 
 	fieldset.log-edit {
@@ -1014,7 +1018,7 @@ select {
 /*--------------------------------------------------------------
 # Single Topic
 --------------------------------------------------------------*/
-.single-topic {
+body.single-topic:not(body.topic-edit) {
 
 	.entry-content {
 
