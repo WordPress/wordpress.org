@@ -102,6 +102,13 @@ class Auto_Review_Controller extends WP_REST_Controller {
 		$content = str_replace( "]:", "]:" . $padding, $content );
 		$content = str_replace( "[", $padding . "[", $content );
 
+		// Replace any links tp documentation
+		$content = preg_replace(
+			'%See: \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))%s',
+			'See: <a href="$1">$1</a>',
+			$content
+		);
+
 		// Remove empty spaces
 		$content = trim( $content );
 
@@ -157,7 +164,7 @@ class Auto_Review_Controller extends WP_REST_Controller {
 		}
 
 		$body_params =  $request->get_body_params();
-		$content = $this->get_formatted_content( $body_params[ 'content' ] );
+		$content = $this->get_formatted_content( urldecode( $request->get_body() ) );
 
 		$updated_ticket = $trac_instance->ticket_update( $ticket_id, $content, [], false );
 
