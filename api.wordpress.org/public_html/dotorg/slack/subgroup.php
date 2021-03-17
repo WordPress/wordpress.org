@@ -1,6 +1,7 @@
 <?php
 
 namespace Dotorg\Slack\Subgroup;
+use const Dotorg\Slack\WORDPRESSORG_USER_ID as WORDPRESSORG_SLACK_USER_ID;
 
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
@@ -21,15 +22,13 @@ function api_call( $method, $content = array() ) {
 
 // Confirm it came from Slack.
 if ( $_POST['token'] !== WEBHOOK_TOKEN ) {
-	die;
+	die( "Invalid Token" );
 }
 
 $current_group_id = $_POST['channel_id'];
 
-// If it didn't come from a group, die.
-if ( $current_group_id[0] !== 'G' ) {
-	die;
-}
+// Note: We no longer check to see if the calling channel is a group, as the below list command will limit it to private channels.
+// Groups can begin with `G` (old created groups) or `C` (private channel), public channels also begin with `C` so the below check is safer.
 
 // Get a list of all groups @wordpressdotorg is in.
 $groups = api_call(
@@ -40,10 +39,10 @@ $groups = api_call(
 		'types'            => 'private_channel',
 		'limit'            => 999,
 	]
-);
+)['channels'];
 
 // Find the group that we are in right now.
-foreach ( $groups['channels'] as $group ) {
+foreach ( $groups as $group ) {
 	if ( $group['id'] === $current_group_id ) {
 		$found = true;
 		break;
@@ -60,8 +59,18 @@ if ( $pos = strpos( $group['name'], '-' ) ) {
 	die( sprintf( 'Call this from the main `%s` group.', substr( $group['name'], 0, $pos ) ) );
 }
 
+// Get the current groups members.
+$members = api_call(
+	// https://api.slack.com/methods/conversations.members
+	'conversations.members',
+	[
+		'channel' => $group['id'],
+		'limit'   => 999,
+	]
+)['members'];
+
 // Ensure the calling user is in the main group.
-if ( ! in_array( $_POST['user_id'], $group['members'], true ) ) {
+if ( ! in_array( $_POST['user_id'], $members, true ) ) {
 	die;
 }
 
@@ -78,7 +87,7 @@ switch ( $command ) {
 		$new_group = api_call(
 			'conversations.create',
 			[
-				'name' => $subcommand,
+				'name'       => $subcommand,
 				'is_private' => true,
 			]
 		);
@@ -94,7 +103,7 @@ switch ( $command ) {
 				'channel' => $group['id'],
 				'text'    => sprintf(
 					'Group %s created by <@%s>.',
-					$new_group['group']['name'],
+					$new_group['channel']['name'],
 					$_POST['user_id']
 				),
 				'as_user' => true,
@@ -102,24 +111,13 @@ switch ( $command ) {
 		);
 
 		// Invite all current parent channel members to the new channel.
-		$members = api_call(
-			// https://api.slack.com/methods/conversations.members
-			'conversations.members',
-			[
-				'channel' => 'CMYKV0D7B',
-				'limit'            => 999,
-			]
-		);
-		if ( empty( $members['members'] ) ) {
-			die( sprintf( "Group %s created, but could not invite members.", $new_group['group']['name'] ) );
-		}
-
+		// Note: Cannot invite self.
 		api_call(
 			// https://api.slack.com/methods/conversations.invite
 			'conversations.invite',
 			[
-				'channel' => $new_group['group']['id'],
-				'users'   => implode( ',', $members['members'] ),
+				'channel' => $new_group['channel']['id'],
+				'users'   => implode( ',', array_diff( $members, [ WORDPRESSORG_SLACK_USER_ID ] ) ),
 			]
 		);
 
@@ -151,7 +149,17 @@ switch ( $command ) {
 		$parent_group = $group;
 		foreach ( $groups as $group ) {
 			if ( strpos( $group['name'], $parent_group['name'] . '-' ) === 0 ) {
-				if ( ! in_array( $_POST['user_id'], $group['members'], true ) ) {
+
+				$group_members = api_call(
+					// https://api.slack.com/methods/conversations.members
+					'conversations.members',
+					[
+						'channel' => $group['id'],
+						'limit'   => 999,
+					]
+				);
+
+				if ( ! in_array( $_POST['user_id'], $group_members['members'], true ) ) {
 					$groups_to_add[] = $group['name'];
 				}
 			}
