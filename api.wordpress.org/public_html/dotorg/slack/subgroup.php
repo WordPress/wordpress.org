@@ -32,10 +32,18 @@ if ( $current_group_id[0] !== 'G' ) {
 }
 
 // Get a list of all groups @wordpressdotorg is in.
-$groups = api_call( 'groups.list' )['groups'];
+$groups = api_call(
+	// https://api.slack.com/methods/conversations.list
+	'conversations.list',
+	[
+		'exclude_archived' => true,
+		'types'            => 'private_channel',
+		'limit'            => 999,
+	]
+);
 
 // Find the group that we are in right now.
-foreach ( $groups as $group ) {
+foreach ( $groups['channels'] as $group ) {
 	if ( $group['id'] === $current_group_id ) {
 		$found = true;
 		break;
@@ -65,21 +73,55 @@ switch ( $command ) {
 		if ( 0 !== strpos( $subcommand, $group['name'] . '-' ) ) {
 			die( "Must create a group that starts with `{$group['name']}-`." );
 		}
-	
-		$new_group = api_call( 'groups.create', array( 'name' => $subcommand ) );
+
+		// Create the new private channel.
+		$new_group = api_call(
+			'conversations.create',
+			[
+				'name' => $subcommand,
+				'is_private' => true,
+			]
+		);
 		if ( empty( $new_group['ok'] ) ) {
 			die( "Group creation failed. Does it already exist?" );
 		}
-	
-		foreach ( $group['members'] as $member ) {
-			api_call( 'groups.invite', array( 'channel' => $new_group['group']['id'], 'user' => $member ) );
+
+		// Post a message to the parent channel about this channels creation.
+		api_call(
+			// https://api.slack.com/methods/chat.postMessage
+			'chat.postMessage',
+			[
+				'channel' => $group['id'],
+				'text'    => sprintf(
+					'Group %s created by <@%s>.',
+					$new_group['group']['name'],
+					$_POST['user_id']
+				),
+				'as_user' => true,
+			]
+		);
+
+		// Invite all current parent channel members to the new channel.
+		$members = api_call(
+			// https://api.slack.com/methods/conversations.members
+			'conversations.members',
+			[
+				'channel' => 'CMYKV0D7B',
+				'limit'            => 999,
+			]
+		);
+		if ( empty( $members['members'] ) ) {
+			die( sprintf( "Group %s created, but could not invite members.", $new_group['group']['name'] ) );
 		}
-	
-		api_call( 'chat.postMessage', array(
-			'channel' => $group['id'],
-			'text'    => sprintf( 'Group %s created by <@%s>.', $new_group['group']['name'], $_POST['user_id'] ),
-			'as_user' => true,
-		) );
+
+		api_call(
+			// https://api.slack.com/methods/conversations.invite
+			'conversations.invite',
+			[
+				'channel' => $new_group['group']['id'],
+				'users'   => implode( ',', $members['members'] ),
+			]
+		);
 
 		die( sprintf( "Group %s created.", $new_group['group']['name'] ) );
 
@@ -87,17 +129,25 @@ switch ( $command ) {
 	case 'join':
 		foreach ( $groups as $group ) {
 			if ( $group['name'] === $subcommand ) {
-				api_call( 'groups.invite', array( 'channel' => $group['id'], 'user' => $_POST['user_id'] ) );
+				api_call(
+					// https://api.slack.com/methods/conversations.invite
+					'conversations.invite',
+					[
+						'channel' => $group['id'],
+						'users'   => $_POST['user_id'],
+					]
+				);
+
 				die( "Invited to {$group['name']}." );
 			}
 		}
-	
+
 		die( "$subcommand group not found." );
-	
+
 	case 'list':
 	default:
 		$groups_to_add = array();
-	
+
 		$parent_group = $group;
 		foreach ( $groups as $group ) {
 			if ( strpos( $group['name'], $parent_group['name'] . '-' ) === 0 ) {
@@ -106,13 +156,13 @@ switch ( $command ) {
 				}
 			}
 		}
-	
+
 		if ( $groups_to_add ) {
 			echo "You may join any of these groups:\n -- `" . implode( "`\n -- `", $groups_to_add ) . "`\n\n\n";
 		} else {
 			echo "You are in all {$parent_group['name']} subgroups that the @wordpressdotorg user knows about.\n\n";
 		}
-	
+
 		die( "*Help:*\n`/subgroup list` - display this message\n`/subgroup join {name}` - join a subgroup\n`/subgroup create {name}` - create a subgroup" );
 }
-	
+
