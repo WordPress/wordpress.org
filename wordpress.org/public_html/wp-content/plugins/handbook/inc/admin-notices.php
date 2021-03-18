@@ -54,7 +54,7 @@ class WPorg_Handbook_Admin_Notices {
 
 			printf(
 				/* translators: 1: example landing page title that includes post type name, 2: comma-separated list of acceptable post slugs */
-				__( '<strong>Welcome to your new handbook!</strong> It is recommended that the first post you create is the landing page for the handbook. You can title it anything you like (suggestions: <code>%1$s</code> or <code>Welcome</code>). However, you must ensure that it has one of the following slugs: %2$s. The slug will ultimately be omitted from the page&#8216;s permalink URL.', 'wporg' ),
+				__( '<strong>Welcome to your new handbook!</strong> It is recommended that the first post you create is the landing page for the handbook. You can title it anything you like (suggestions: <code>%1$s</code> or <code>Welcome</code>). However, you must ensure that it has one of the following slugs: %2$s. The slug will ultimately be omitted from the page&#8216;s permalink URL, but will still appear in the permalinks for sub-pages.', 'wporg' ),
 				WPorg_Handbook::get_name( $current_screen->post_type ),
 				implode( ', ', $suggested_slugs )
 			);
