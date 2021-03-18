@@ -173,15 +173,25 @@ class Detector {
 	 */
 	public function check_variants( $locale ) {
 		$locale   = str_replace( '-', '_', $locale );
-		$locale   = explode( '_', $locale, 2 );
+		$locale   = explode( '_', $locale, 3 );
 		$variants = [];
 
 		if ( 1 === count( $locale ) ) {
 			$lang = strtolower( $locale[0] );
-		} else {
+		} elseif ( 2 === count( $locale ) ) {
 			list( $lang, $region ) = $locale;
 
 			$lang       = strtolower( $lang );
+			$variants[] = $lang . '_' . strtolower( $region );
+			$variants[] = $lang . '_' . strtoupper( $region );
+		} else {
+			list( $lang, $region, $variant ) = $locale;
+
+			$lang       = strtolower( $lang );
+			$variant    = strtolower( $variant );
+			$variants[] = $lang . '_' . strtolower( $region ) . '_' . $variant;
+			$variants[] = $lang . '_' . strtoupper( $region ) . '_' . $variant;
+			$variants[] = $lang . '_' . strtolower( $region );
 			$variants[] = $lang . '_' . strtoupper( $region );
 		}
 
