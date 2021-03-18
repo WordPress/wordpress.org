@@ -284,6 +284,8 @@ function wporg_login_get_locales() {
 
 /**
  * Prints markup for a simple language switcher.
+ * 
+ * Note: See the 'Locale Detection' plugin for the switching of the locale.
  */
 function wporg_login_language_switcher() {
 	$current_locale = get_locale();
@@ -403,6 +405,15 @@ add_filter( 'wporg_canonical_url', 'wporg_login_canonical_url' );
  * Set the title for the wp-login.php page.
  */
 function wporg_login_title() {
-	return get_bloginfo( 'name', 'display' );
+
+	// Note: This does a poor job of duplicating the title from the rosetta header.
+	//  On rosetta networks, the title is defined in the Blog title field, not from GP_Locale.
+
+	return
+		( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ? WPORG_SANDBOXED . ': ' : '' ) .
+		__( 'WordPress.org Login', 'wporg' ) . 
+		' &#124; WordPress.org ' . 
+		( wporg_login_get_locales()[ get_locale() ] ?? '' );
+
 }
 add_filter( 'login_title', 'wporg_login_title' );
