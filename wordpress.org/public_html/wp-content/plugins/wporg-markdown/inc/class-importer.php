@@ -479,11 +479,15 @@ abstract class Importer {
 
 		$html = apply_filters( 'wporg_markdown_after_transform', $html, $this->get_post_type() );
 
+		add_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allow_links' ], 10, 2 );
+
 		$post_data = array(
 			'ID'           => $post_id,
 			'post_content' => wp_filter_post_kses( wp_slash( $html ) ),
 			'post_excerpt' => sanitize_text_field( wp_slash( $excerpt ) ),
 		);
+
+		remove_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allow_links' ], 10 );
 
 		$fields_from_manifest = $this->update_post_from_manifest( $post_id, $title, false );
 		if ( $fields_from_manifest ) {
@@ -496,6 +500,36 @@ abstract class Importer {
 		update_post_meta( $post_id, $this->etag_meta_key, wp_slash( $etag ) );
 
 		return true;
+	}
+
+	/**
+	 * Ensures that the 'a' tag and certain of its attributes are allowed in
+	 * posts if not already.
+	 *
+	 * Supported 'a' attributes are those defined for `$allowedposttags` by default.
+	 *
+	 * This is necessary since the 'a' tag is being removed somewhere along the way.
+	 *
+	 * @param array[]|string $allowed_tags Allowed HTML tags and their attributes
+	 *                                     or the context to judge allowed tags by.
+	 * @param string         $context      Context name.
+	 * @return array[]|string
+	 */
+	public function wp_kses_allow_links( $allowed_tags, $context ) {
+		if ( 'post' === $context && is_array( $allowed_tags ) && empty( $allowed_tags[ 'a' ] ) ) {
+			$allowed_tags['a'] = [
+				'href'     => true,
+				'rel'      => true,
+				'rev'      => true,
+				'name'     => true,
+				'target'   => true,
+				'download' => [
+						'valueless' => 'y',
+				],
+			];
+		}
+
+		return $allowed_tags;
 	}
 
 	/**
