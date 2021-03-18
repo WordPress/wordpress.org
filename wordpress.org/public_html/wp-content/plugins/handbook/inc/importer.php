@@ -133,15 +133,20 @@ class WPorg_Handbook_Importer extends Importer {
 	/**
 	 * Returns the handbook's cron interval schedule.
 	 *
-	 * @return string
+	 * @param string $as_string Return the interval as a label? True if a cron
+	 *                          interval should be returned as string or false
+	 *                          to return array of interval's data. Default true.
+	 * @return string|array
 	 */
-	public function get_cron_interval() {
+	public function get_cron_interval( $as_string = true ) {
 		$cron_intervals = wp_get_schedules();
 		$default = 'hourly';
 
 		$cron_interval = $this->handbook->get_config()['cron_interval'] ?: $default;
 
-		return empty( $cron_intervals[ $cron_interval ] ) ? $default : $cron_interval;
+		$cron_label = empty( $cron_intervals[ $cron_interval ] ) ? $default : $cron_interval;
+
+		return $as_string ? $cron_label : ( $cron_intervals[ $cron_label ] ?? [] );
 	}
 
 	/**
