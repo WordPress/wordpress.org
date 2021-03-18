@@ -95,7 +95,7 @@ class WPorg_Handbook_Admin_Notices {
 			}
 
 			$importer = $handbook->get_importer();
-			$interval = $importer ? $importer->get_cron_interval() : false;
+			$interval = $importer ? $importer->get_cron_interval( false ) : [];
 			$interval_display = ! empty( $interval['display'] ) ? strtolower( $interval['display'] ) : __( 'DISABLED', 'wporg' );
 
 			echo '<div class="notice notice-info"><p>';
