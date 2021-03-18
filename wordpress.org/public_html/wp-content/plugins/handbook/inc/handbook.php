@@ -134,10 +134,11 @@ class WPorg_Handbook {
 
 			// If no name defined yet, try handbook post type if not standard.
 			if ( ! $name && ( 'handbook' !== $post_type ) ) {
-				$name = ucfirst( str_replace( '-handbook', '', $post_type ) );
+				$name = str_replace( '-handbook', '', $post_type );
 			}
 
 			$name .= ' Handbook';
+			$name = ucfirst( $name );
 		}
 
 		return trim( $name );
