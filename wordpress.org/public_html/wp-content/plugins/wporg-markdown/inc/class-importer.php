@@ -431,7 +431,13 @@ abstract class Importer {
 		$args = array(
 			'headers' => array(),
 		);
-		$last_etag = get_post_meta( $post_id, $this->etag_meta_key, true );
+		/**
+		 * Filters if HTTP ETags should be included in request for remote Markdown
+		 * source update.
+		 *
+		 * @param bool $check_etags Should HTTP ETags be checcked? Default true.
+		 */
+		$last_etag = apply_filters( 'wporg_markdown_check_etags', true ) ? get_post_meta( $post_id, $this->etag_meta_key, true ) : false;
 		if ( ! empty( $last_etag ) ) {
 			$args['headers']['If-None-Match'] = $last_etag;
 		}
