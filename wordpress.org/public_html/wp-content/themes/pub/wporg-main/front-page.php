@@ -215,7 +215,7 @@ get_header( 'wporg' );
 						printf(
 							/* translators: URL to HelpHub. */
 							__( '<a href="%s">Spend some time reading our documentation</a>, get to know WordPress better every day and start helping others,&nbsp;too.', 'wporg' ),
-							esc_url( 'https://wordpress.org/support/' )
+							esc_url( __( 'https://wordpress.org/support/', 'wporg' ) )
 						);
 						?>
 					</li>
