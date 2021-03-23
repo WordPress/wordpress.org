@@ -19,9 +19,18 @@ function wporg_robots_txt( $robots ) {
 		           "Allow: /locale/*/glossary/$\n" .
 		           "Allow: /locale/*/stats/plugins/$\n" .
 		           "Allow: /locale/*/stats/themes/$\n";
-	} else {
+
+	} elseif ( 'wordpress.org' === $blog_details->domain ) {
+		// WordPress.org/search/ should not be indexed.
 		$robots .= "\nUser-agent: *\n" .
 		           "Disallow: /search\n";
+
+	} elseif ( 's-origin.wordpress.org' === $blog_details->domain ) {
+		// Placeholder for the s.w.org domain. See https://meta.trac.wordpress.org/ticket/5668
+		// Intentional overwite of value.
+		$robots = "User-agent: *\n" .
+		          "Disallow:\n";
+
 	}
 
 	return $robots;
