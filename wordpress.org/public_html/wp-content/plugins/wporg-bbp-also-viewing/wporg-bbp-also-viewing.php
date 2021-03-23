@@ -82,9 +82,7 @@ function enabled( $user_id = 0 ) {
 		$user_id = get_current_user_id();
 	}
 
-	return
-		allowed_for_user( $user_id ) &&
-		get_user_meta( $user_id, USER_OPTION, true );
+	return (bool) get_user_meta( $user_id, USER_OPTION, true );
 }
 
 /**
@@ -104,6 +102,7 @@ function allowed_for_user( $user_id = 0 ) {
 	}
 
 	return
+		enabled( $user_id ) ||
 		user_can( $user_id, 'moderate' ) ||
 		bbp_get_user_reply_count( $user_id, true ) >= REPLY_THRESH;
 }
