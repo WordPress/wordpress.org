@@ -1,5 +1,6 @@
 module.exports = function( grunt ) {
 	const isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
+	const defaultWebpackConfig = require( '@wordpress/scripts/config/webpack.config' );
 
 	const getSassFiles = () => {
 		const files = {};
@@ -63,10 +64,18 @@ module.exports = function( grunt ) {
 			options: { signature: false },
 		},
 
+		webpack: {
+			myConfig: defaultWebpackConfig,
+		},
+
 		watch: {
 			css: {
 				files: [ '**/*.scss', '../wporg/css/**/*scss' ],
 				tasks: [ 'css' ],
+			},
+			javascript: {
+				files: [ 'src/**/*.js' ],
+				tasks: [ 'webpack' ],
 			},
 		},
 	} );
@@ -79,9 +88,11 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-sass-globbing' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+	grunt.loadNpmTasks( 'grunt-webpack' );
 
 	grunt.registerTask( 'css', [ 'sass_globbing', 'sass', 'postcss' ] );
+	grunt.registerTask( 'js', [ 'webpack' ] );
 
-	grunt.registerTask( 'default', [ 'css' ] );
-	grunt.registerTask( 'build', [ 'css' ] ); // Automatically runs "production" steps
+	grunt.registerTask( 'default', [ 'css', 'webpack' ] );
+	grunt.registerTask( 'build', [ 'css', 'webpack' ] ); // Automatically runs "production" steps
 };

@@ -1,0 +1,57 @@
+body.single-wporg-pattern {
+	box-sizing: border-box;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.2;
+
+	.site-content {
+		margin: auto;
+		max-width: none;
+		padding: 0;
+	}
+
+	.entry-header {
+		max-width: $size__site-main;
+		padding: 2rem 0;
+		margin-left: auto;
+		margin-right: auto;
+
+		.entry-title {
+			margin-top: 0;
+			line-height: 1.2;
+		}
+	}
+
+	.pattern-actions {
+		display: flex;
+		align-items: stretch;
+
+		button + button {
+			margin-left: 2em;
+		}
+	}
+
+	.entry-content {
+		max-width: $size__site-main;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.pattern__meta {
+		padding: 2rem 0;
+		background: $color-gray-light-200;
+
+		> div {
+			max-width: $size__site-main;
+			margin-left: auto;
+			margin-right: auto;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.pattern-preview__report {
+			text-align: right;
+		}
+	}
+
+}
