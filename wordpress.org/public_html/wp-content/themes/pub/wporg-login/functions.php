@@ -417,3 +417,56 @@ function wporg_login_title() {
 
 }
 add_filter( 'login_title', 'wporg_login_title' );
+
+function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
+
+	$message = '';
+
+	$from = 'wordpress.org';
+	if ( $redirect_to ) {
+		$from = $redirect_to;
+	} elseif ( !empty( $_REQUEST['from'] ) ) {
+		$from = $_REQUEST['from'];
+	} elseif ( !empty( $_REQUEST['redirect_to'] ) ) {
+		$from = $_REQUEST['redirect_to'];
+	}
+
+	if ( false !== stripos( $from, 'buddypress.org' ) ) {
+		$message .= '<strong>' . __( 'BuddyPress is part of WordPress.org', 'wporg' ) . '</strong><br>';
+		$message .= __( 'Log in to your WordPress.org account to contribute to BuddyPress, or get help in the support forums.', 'wporg' );
+	
+	} elseif ( false !== stripos( $from, 'bbpress.org' ) ) {
+		$message .= '<strong>' . __( 'bbPress is part of WordPress.org', 'wporg' ) . '</strong><br>';
+		$message .= __( 'Log in to your WordPress.org account to contribute to bbPress, or get help in the support forums.', 'wporg' );
+	
+	} elseif ( false !== stripos( $from, 'wordcamp.org' ) ) {
+		$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong><br>';
+		$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
+	
+	} else {
+		$message .= __( 'Log in to your WordPress.org account to contribute to WordPress, get help in the support forum, or rate and review themes and plugins.', 'wporg' );
+	}
+
+	return $message;
+}
+
+// This is the action in the top of `wp_login_form()`, which is not used on wp-login.php, see below.
+function wporg_login_form_top( $message ) {
+	$message .= '<p class="intro">' . wporg_login_wporg_is_starpress() . '</p>';
+
+	return $message;
+}
+add_filter( 'login_form_top', 'wporg_login_form_top' );
+
+// This is the login messages, which is displayed on wp-login.php, which does not use wp_login_form() or it's actions.
+function wporg_login_message( $errors, $redirect_to ) {
+	$errors->add(
+		'pre_login_message',
+		( isset( $_GET['loggedout'] ) ? '<br>' : '' ) .
+			wporg_login_wporg_is_starpress( $redirect_to ),
+		'message' // This is not an error..
+	);
+
+	return $errors;
+}
+add_filter( 'wp_login_errors', 'wporg_login_message', 10, 2 );
