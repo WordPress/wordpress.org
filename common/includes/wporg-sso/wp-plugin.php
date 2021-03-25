@@ -54,6 +54,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// De-hooking the password change notification, too high volume on wp.org, for no admin value.
 				remove_action( 'after_password_reset', 'wp_password_change_notification' );
 
+				// Disable the 'admin' user with a nicer message. Must be before authenticate_block_check.
+				add_filter( 'authenticate', array( $this, 'authenticate_admin_check' ), 4, 2 );
+
 				add_filter( 'allow_password_reset', array( $this, 'disable_password_reset_for_blocked_users' ), 10, 2 );
 				add_filter( 'authenticate', array( $this, 'authenticate_block_check' ), 5, 2 );
 
@@ -82,6 +85,33 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$value = get_network_option( 1, 'registration', 'none' );
 			add_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
 			return $value;
+		}
+		/**
+		 * Checks if the authenticated is "admin" and returns a nicer error message.
+		 *
+		 * @param WP_User|WP_Error|null $user WP_User or WP_Error object if a previous
+		 *                                    callback failed authentication.
+		 * @param string $user_login The user login attmpting to login.
+		 * @return WP_User|WP_Error WP_User on success, WP_Error on failure.
+		 */
+		public function authenticate_admin_check( $user, $user_login ) {
+
+			if ( 'admin' === $user_login ) {
+
+				// Returning a WP_Error from an authenticate filter doesn't block auth, as a later hooked item can return truthful.
+				remove_all_actions( 'authenticate' );
+
+				return new WP_Error(
+					'admin_wrong_place',
+					sprintf(
+						'<strong>%s</strong><br><br>%s',
+						__( 'Are you in the right place?', 'wporg' ),
+						__( 'This login form is for the WordPress.org website, rather than your personal WordPress site.', 'wporg' )
+					)
+				);
+			}
+
+			return $user;
 		}
 
 		/**
