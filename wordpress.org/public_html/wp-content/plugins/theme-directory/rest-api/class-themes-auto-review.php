@@ -166,7 +166,7 @@ class Auto_Review_Controller extends WP_REST_Controller {
 			);
 		}
 
-		return new WP_REST_Response( $body_params[ 'content' ], \WP_Http::OK );
+		return new WP_REST_Response( $body, \WP_Http::OK );
 	}
 }
 
