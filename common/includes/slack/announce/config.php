@@ -109,6 +109,7 @@ function get_whitelist() {
 			'monikarao',
 			'pbiron',
 			'psykro', // @jon_bossenger on Slack
+			'sabernhardt',
 			'sncoker', // @shawntellecoker on Slack
 			'thelmachido', // @thelmachido-zw on Slack
 			'thewebprincess',
