@@ -89,6 +89,7 @@ function get_whitelist() {
 			'angelasjin',
 			'antpb',
 			'audrasjb',
+			'boniu91', // @Piotrek Boniu on Slack
 			'cbringmann', // @Chloé Bringmann on Slack
 			'chanthaboune',
 			'danieltj',
