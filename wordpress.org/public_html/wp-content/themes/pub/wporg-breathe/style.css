@@ -1051,14 +1051,6 @@ article.page p.contributor-name {
 	font-weight: 300;
 }
 
-/*
- * Callout boxes
- */
-
-.post .callout {
-	padding-bottom: 0;
-}
-
 @media(max-width: 876px) {
 	.handbook-name-container {
 		width: 100%;
