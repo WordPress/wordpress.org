@@ -129,6 +129,18 @@ function jobswp_scripts() {
 add_action( 'wp_enqueue_scripts', 'jobswp_scripts' );
 
 /**
+ * Sets 404 response for author archive requests.
+ */
+function jobswp_author_archives_404() {
+	if ( is_author() ) {
+		global $wp_query;
+		$wp_query->set_404();
+		status_header( 404 );
+	}
+}
+add_action( 'wp', 'jobswp_author_archives_404' );
+
+/**
  * Outputs `noindex,follow` robots tag for appropriate pages.
  *
  * Currently output for:
