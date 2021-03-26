@@ -459,7 +459,7 @@ function wporg_login_form_top( $message ) {
 add_filter( 'login_form_top', 'wporg_login_form_top' );
 
 // This is the login messages, which is displayed on wp-login.php, which does not use wp_login_form() or it's actions.
-function wporg_login_message( $errors, $redirect_to ) {
+function wp_login_errors_message( $errors, $redirect_to ) {
 	$errors->add(
 		'pre_login_message',
 		( isset( $_GET['loggedout'] ) ? '<br>' : '' ) .
@@ -469,4 +469,33 @@ function wporg_login_message( $errors, $redirect_to ) {
 
 	return $errors;
 }
-add_filter( 'wp_login_errors', 'wporg_login_message', 10, 2 );
+add_filter( 'wp_login_errors', 'wp_login_errors_message', 10, 2 );
+
+/**
+ * Replace some login related error messages with nicer forms.
+ * 
+ * See https://core.trac.wordpress.org/ticket/52915
+ */
+function wp_login_errors_nicify( $errors, $redirect_to ) {
+
+	$replace_errors = [
+		'invalid_username' => sprintf(
+			/* translators: %s: <strong>UserLogin</strong> */
+			__( "<strong>Error:</strong> The username %s is not registered on WordPress.org. If you're unsure of your username, you can attempt to login using your email address instead.", 'wporg' ),
+			'<strong>' . esc_html( wp_unslash( $_POST['log'] ?? '' ) ) . '</strong>'
+		),
+
+	];
+
+	foreach ( $replace_errors as $error_code => $error_message ) {
+		if ( $errors->get_error_message( $error_code ) ) {
+			// Remove the existing one.
+			$errors->remove( $error_code );
+			// Replace it.
+			$errors->add( $error_code, $error_message );
+		}
+	}
+
+	return $errors;
+}
+add_filter( 'wp_login_errors', 'wp_login_errors_nicify', 10, 2 );
