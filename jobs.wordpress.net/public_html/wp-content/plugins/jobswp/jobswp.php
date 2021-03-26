@@ -325,8 +325,15 @@ class Jobs_Dot_WP {
 	public function alert_if_no_jobposter() {
 		global $pagenow;
 
-		if ( 'edit.php' != $pagenow || ! isset( $_GET['post_type'] ) || 'job' != $_GET['post_type'] )
+		if (
+			// Not on post or user listings.
+			! in_array( $pagenow, [ 'edit.php', 'users.php' ] )
+		||
+			// On post listing but listing another post type.
+			( 'edit.php' === $pagenow && ( ! isset( $_GET['post_type'] ) || 'job' !== $_GET['post_type'] ) )
+		) {
 			return;
+		}
 
 		$jobposter_username = apply_filters( 'jobswp_jobposter_username', 'jobposter' );
 		if ( $user = get_user_by( 'login', $jobposter_username ) )
