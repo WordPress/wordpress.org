@@ -15,9 +15,16 @@
 
 			<span class="job-categories">
 				<?php echo get_the_category_list(); ?>
-				<?php foreach ( get_the_terms( get_the_ID(), 'job_category' ) as $job_cat ) : ?>
+				<?php
+					$job_cats = get_the_terms( get_the_ID(), 'job_category' );
+					if ( $job_cats && ! is_wp_error( $job_cats ) ) :
+						foreach ( $job_cats as $job_cat ) :
+				?>
 					<span class="job-cat-item job-cat-item-<?php echo esc_attr( $job_cat->slug ); ?>"><?php echo esc_html( $job_cat->name ); ?></span>
-				<?php endforeach; ?>
+				<?php
+						endforeach;
+					endif;
+				?>
 			</span>
 		</div><!-- .entry-meta -->
 	</header><!-- .entry-header -->
