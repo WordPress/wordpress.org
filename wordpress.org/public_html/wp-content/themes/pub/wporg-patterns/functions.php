@@ -7,6 +7,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
+add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -98,4 +99,24 @@ function generate_block_editor_styles_html() {
 		),
 		'before'
 	);
+}
+
+/**
+ * Update the archive views to show block patterns.
+ *
+ * @param \WP_Query $wp_query The WordPress Query object.
+ */
+function pre_get_posts( $wp_query ) {
+	if ( is_admin() ) {
+		return;
+	}
+
+	// Unless otherwise specified, queries should fetch published block patterns.
+	if (
+		empty( $wp_query->query_vars['pagename'] ) &&
+		( empty( $wp_query->query_vars['post_type'] ) || 'post' == $wp_query->query_vars['post_type'] )
+	) {
+		$wp_query->query_vars['post_type']   = array( POST_TYPE );
+		$wp_query->query_vars['post_status'] = array( 'publish' );
+	}
 }
