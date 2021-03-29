@@ -191,14 +191,11 @@ google.charts.load( 'current', {
 				} );
 
 				new google.visualization.BarChart( document.getElementById( 'plugin-version-stats' ) ).draw( data, {
-					legend: {
-						position: 'bottom'
-					},
 					chartArea: {
 						left: '0',
 						width: '100%',
 						height: '80%',
-						top: '10%'
+						top: '20%'
 					},
 					hAxis: {
 						gridlines: {
