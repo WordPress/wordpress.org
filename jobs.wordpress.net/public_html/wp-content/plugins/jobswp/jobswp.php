@@ -130,6 +130,8 @@ class Jobs_Dot_WP {
 		add_action( 'jobswp_scheduled_job_pruning',   array( $this, 'scheduled_job_pruning' ) );
 
 		add_filter( 'wp_sitemaps_add_provider',       array( $this, 'disable_users_sitemap' ), 10, 2 );
+
+		add_action( 'wp_head',                        array( $this, 'rel_canonical_link' ) );
 	}
 
 	/**
@@ -1071,6 +1073,22 @@ EMAIL;
 	
 		return $provider;
 	}
+
+	/**
+	 * Outputs a rel="canonical" link tag.
+	 */
+	public function rel_canonical_link() {
+		$url = '';
+
+		if ( is_front_page() ) {
+			$url = home_url( '/' );
+		}
+
+		if ( $url ) {
+			printf( '<link rel="canonical" href="%s" />' . "\n", esc_url( $url ) );
+		}
+	}
+
 }
 
 Jobs_Dot_WP::get_instance();
