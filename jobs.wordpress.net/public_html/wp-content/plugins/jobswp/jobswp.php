@@ -128,6 +128,8 @@ class Jobs_Dot_WP {
 		$this->schedule_job_pruning();
 
 		add_action( 'jobswp_scheduled_job_pruning',   array( $this, 'scheduled_job_pruning' ) );
+
+		add_filter( 'wp_sitemaps_add_provider',       array( $this, 'disable_users_sitemap' ), 10, 2 );
 	}
 
 	/**
@@ -1053,6 +1055,21 @@ EMAIL;
 		$q = new WP_Query( $args );
 
 		return $q->get_posts();
+	}
+
+	/**
+	 * Disable the Users sitemap functionality.
+	 * 
+	 * @param WP_Sitemaps_Provider $provider
+	 * @param string               $name
+	 * @return WP_Sitemaps_Provider|false
+	 */
+	public function disable_users_sitemap( $provider, $name ) {
+		if ( 'users' === $name ) {
+			$provider = false;
+		}
+	
+		return $provider;
 	}
 }
 
