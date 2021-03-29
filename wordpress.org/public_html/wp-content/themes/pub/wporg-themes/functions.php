@@ -558,3 +558,12 @@ function wporg_themes_json_jd_schema( $post ) {
 
 	return $schema;
 }
+
+/**
+ * Use the index.php template for various WordPress views that would otherwise be handled by the parent theme.
+ */
+function use_index_php_as_template() {
+	return __DIR__ . '/index.php';
+}
+add_filter( 'single_template',  'use_index_php_as_template' );
+add_filter( 'archive_template', 'use_index_php_as_template' );
