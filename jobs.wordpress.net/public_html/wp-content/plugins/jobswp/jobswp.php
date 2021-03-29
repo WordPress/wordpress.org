@@ -1078,10 +1078,23 @@ EMAIL;
 	 * Outputs a rel="canonical" link tag.
 	 */
 	public function rel_canonical_link() {
+		global $wp_rewrite;
+
 		$url = '';
 
 		if ( is_front_page() ) {
 			$url = home_url( '/' );
+		} elseif ( is_tax( 'job_category' ) ) {
+			$url = get_term_link( get_queried_object_id(), 'job_category' );
+		}
+	
+		if ( $url && is_paged() && (int) get_query_var( 'paged' ) > 1 ) {
+			if ( false !== stripos( $url, '?' ) ) {
+				// We're not actually sure 100% here if the current url supports rewrite rules.
+				$url = add_query_arg( 'paged', (int) get_query_var( 'paged' ), $url );
+			} else {
+				$url = rtrim( $url, '/' ) . '/' . $wp_rewrite->pagination_base . '/' . (int) get_query_var( 'paged' ) . '/';
+			}
 		}
 
 		if ( $url ) {
