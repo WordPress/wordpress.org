@@ -473,7 +473,7 @@ function bporg_toolbar_css_overrides() {
 			#wpadminbar li a:focus .ab-icon:before,
 			#wpadminbar li .ab-item:focus:before,
 			#wpadminbar li.hover .ab-icon:before,
-			wpadminbar li.hover .ab-item:before,
+			#wpadminbar li.hover .ab-item:before,
 			#wpadminbar li:hover .ab-item:after,
 			#wpadminbar li.hover .ab-item:after,
 			#wpadminbar li:hover #adminbarsearch:before { color: #d84800; }
