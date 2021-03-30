@@ -439,30 +439,13 @@ function get_whitelist() {
 function get_committers() {
 	return array(
 		'aaroncampbell', 'adamsilverstein', 'aduth', 'afercia', 'allancole', 'allendav',
-		'antpb', 'atimmer', 'azaozz', 'bpayton', 'davidakennedy', 'dd32', 'desrosj',
-		'flixos90', 'gziolo', 'helen', 'herregroen', 'ianbelanger', 'iandunn', 'iandstewart',
-		'jeremyfelt', 'joedolson', 'joehoyle', 'joemcgill', 'joen', 'johnbillion', 'jorbin',
-		'jorgefilipecosta', 'josephscott', 'jrf', 'kadamwhite', 'karmatosed', 'kovshenin',
-		'lancewillett', 'laurelfulford', 'matt', 'mattmiklic', 'mcsf', 'mdawaffe',
-		'melchoyce', 'michaelarestad', 'nacin', 'noisysocks', 'obenland', 'ocean90',
-		'omarreiss', 'pento', 'peterwilsoncc', 'rachelbaker', 'rmccue', 'swissspidy',
-		'tellyworth', 'westi', 'westonruter', 'williampatton', 'whyisjake', 'wonderboymusic',
-		'xknown', 'youknowriad',
+		'antpb', 'atimmer', 'azaozz', 'bpayton', 'davidbaumwald', 'dd32', 'desrosj',
+		'DrewAPicture', 'ellatrix', 'flixos90', 'gziolo', 'helen', 'herregroen', 'ianbelanger',
+		'iandunn', 'joedolson', 'joemcgill', 'joen', 'johnbillion', 'johnjamesjacoby', 'jorbin',
+		'jorgefilipecosta', 'jrf', 'karmatosed', 'laurelfulford', 'matt', 'matveb', 'mcsf', 'melchoyce',
+		'michaelarestad', 'mikeschroder', 'nacin', 'noisysocks', 'ocean90', 'omarreiss', 'pento',
+		'peterwilsoncc', 'ryelle', 'SergeyBiryukov', 'swissspidy', 'talldanwp', 'tellyworth',
+		'TimothyBlynJacobs', 'westi', 'westonruter', 'whyisjake', 'williampatton', 'xknown', 'youknowriad',
 
-		'boonebgorges',      // @boone on Slack
-		'davidbaumwald',     // @davidb on Slack
-		'DrewAPicture',      // @drew on Slack
-		'ellatrix',          // @ella on Slack
-		'ericlewis',         // @eric on Slack
-		'johnjamesjacoby',   // @JJJ on Slack
-		'jnylen0',           // @jnylen on Slack
-		'lonelyvegan',       // @tofumatt on Slack
-		'markjaquith',       // @mark on Slack
-		'matveb',            // @matias on Slack
-		'mikeschroder',      // @mike on Slack
-		'nbachiyski',        // @nb on Slack
-		'SergeyBiryukov',    // @sergey on Slack
-		'talldanwp',         // @danr on Slack
-		'TimothyBlynJacobs', // @timothybjacobs on Slack
 	);
 }
