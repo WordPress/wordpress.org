@@ -43,10 +43,6 @@ module.exports = function( grunt ) {
 			options: grunt.file.readJSON( '.jshintrc' )
 		},
 		uglify: {
-			options: {
-				ASCIIOnly: true,
-				screwIE8: false
-			},
 			js: {
 				expand: true,
 				cwd: 'js/',
