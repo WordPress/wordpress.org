@@ -1,0 +1,16 @@
+body.page {
+	.entry-header {
+		background: none;
+		padding: 0;
+
+		.entry-title {
+			color: inherit;
+			margin: 2rem auto 1rem;
+			max-width: 960px;
+
+			@include breakpoint( $ms-breakpoint ) {
+				padding: 0 10px;
+			}
+		}
+	}
+}

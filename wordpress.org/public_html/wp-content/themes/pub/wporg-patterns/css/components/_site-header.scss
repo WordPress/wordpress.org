@@ -1,0 +1,91 @@
+body.home {
+	.site-header {
+		padding: 3.75rem 1rem;
+		text-align: left;
+	}
+
+	.site-branding {
+		display: grid;
+		grid-template-rows: auto 1fr;
+		grid-template-columns: 1fr 22rem;
+
+		> * {
+			align-self: center;
+		}
+
+		@include breakpoint( 0, $ms-breakpoint - 1 ) {
+			display: block;
+		}
+	}
+
+	// Duplicate class for specifity override.
+	.site-title.site-title {
+		grid-column-start: 1;
+		grid-row-start: 1;
+		margin-top: 0;
+		text-align: left;
+		font-size: 3rem;
+		line-height: $type__header--line-height;
+	}
+
+	.site-description {
+		grid-column-start: 1;
+		grid-row-start: 2;
+		margin: 0;
+		font-size: 1.25rem;
+		line-height: $type__line-height;
+		text-align: left;
+		color: $color-white;
+	}
+
+	.site-callout {
+		grid-column-start: 2;
+		grid-row-start: 1;
+		grid-row-end: span 2;
+		margin-left: 4rem;
+		padding: 1.125rem 1.5rem 1.5rem;
+		font-size: 0.875rem;
+		line-height: $type__line-height;
+		background: $color-white;
+		box-shadow: 0.75rem 0.75rem 0 rgba($color-black, 0.15);
+
+		h2 {
+			margin-top: 0;
+			font-size: 1.125rem;
+			line-height: $type__header--line-height;
+			font-weight: 600;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
+
+		@include breakpoint( 0, $ms-breakpoint - 1 ) {
+			margin: 2rem auto 0;
+			max-width: 24rem;
+		}
+	}
+}
+
+body:not(.home) {
+	.site-branding {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		font-size: 0.8125rem;
+		color: $color-white;
+
+		a {
+			color: $color-white;
+		}
+
+		.sep {
+			margin-left: 0.5rem;
+			margin-right: 0.5rem;
+		}
+
+		.is-current-page {
+			font-weight: 600;
+		}
+	}
+}

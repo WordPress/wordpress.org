@@ -1,0 +1,98 @@
+.pattern__favorite-button {
+	position: relative;
+	font-size: 0.875rem;
+	height: 2.25rem;
+	width: 2.25rem;
+	border-radius: 2px;
+	color: $color-gray-400;
+
+	svg {
+		position: absolute;
+		top: calc(50% - 0.75rem);
+		left: calc(50% - 0.75rem);
+		height: 1.5rem;
+		width: 1.5rem;
+		transition: all 0.15s ease-out;
+
+		path {
+			fill: $color-gray-300;
+		}
+	}
+
+	.favorite-filled {
+		opacity: 0;
+	}
+
+	&:hover {
+		color: $color__text;
+		background: transparent;
+
+		svg path {
+			fill: $color__text;
+		}
+	}
+
+	&:active {
+		background: transparent;
+		box-shadow: none;
+		transform: none;
+	}
+
+	&.is-favorited {
+		color: $color__text;
+
+		svg path {
+			fill: $color-alert-red;
+		}
+
+		.pattern__favorite-outline {
+			opacity: 0;
+			transform: scale(2.8);
+		}
+
+		.pattern__favorite-filled {
+			opacity: 1;
+		}
+
+		&:hover .pattern__favorite-filled {
+			animation: 0.9s infinite HeartBeat;
+
+			@media (prefers-reduced-motion) {
+				animation: none;
+			}
+		}
+	}
+
+	&.has-label {
+		padding: 12px 18px 12px 38px;
+		height: auto;
+		width: auto;
+
+		svg {
+			top: calc(50% - 12px);
+			left: 9px;
+		}
+	}
+}
+
+@keyframes HeartBeat {
+	0% {
+		transform: scale(1);
+	}
+
+	25% {
+		transform: scale(1.2);
+	}
+
+	40% {
+		transform: scale(1);
+	}
+
+	60% {
+		transform: scale(1.2);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}

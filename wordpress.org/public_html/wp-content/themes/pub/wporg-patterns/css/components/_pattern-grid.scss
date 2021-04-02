@@ -1,0 +1,75 @@
+.pattern-grid {
+	max-width: 960px;
+	margin: 1.5rem;
+
+	@include breakpoint( $breakpoint-small ) {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1.5rem;
+		align-items: baseline;
+	}
+
+	@include breakpoint( $breakpoint-large ) {
+		margin-left: auto;
+		margin-right: auto;
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+.pattern-grid__pattern {
+	position: relative;
+	margin: 0 0 1.5rem;
+	border: 1px solid $color-gray-light-600;
+	border-radius: 2px;
+	transition: all 0.075s ease-in-out;
+	overflow: hidden;
+
+	@include breakpoint( $breakpoint-small ) {
+		display: inline-block;
+		margin: 0;
+	}
+
+	.pattern-grid__preview {
+		background: $color-gray-light-300;
+	}
+
+	.pattern-grid__actions {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		display: flex;
+		align-items: center;
+		padding: 0.375rem;
+		background: rgba($color-white, 0.8);
+		backdrop-filter: blur(3px);
+		opacity: 0;
+		transform: translateY(6px);
+		transition: all 0.075s ease-in-out;
+
+		.pattern-grid__title {
+			flex-grow: 1;
+			margin: 0;
+			padding: 0 0.375rem 0 0.75rem;
+			font-size: 0.75rem;
+			pointer-events: none;
+		}
+
+		.pattern__favorite-button,
+		.pattern__copy-button {
+			flex-shrink: 0;
+		}
+
+		.button + .button {
+			margin-left: 0.375rem;
+		}
+	}
+
+	&:hover,
+	&:focus-within {
+		.pattern-grid__actions {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+}

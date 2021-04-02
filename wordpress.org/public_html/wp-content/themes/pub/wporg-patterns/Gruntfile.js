@@ -30,6 +30,7 @@ module.exports = function( grunt ) {
 				processors: [
 					require( 'autoprefixer' )( {
 						cascade: false,
+						grid: true,
 					} ),
 					require( 'pixrem' ),
 					require( 'cssnano' )( {
