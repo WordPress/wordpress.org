@@ -41,6 +41,7 @@ function get_whitelist() {
 			'alexstine',
 			'arush',
 			'audrasjb',
+			'azhiyadev', // @Hauwa Abashiya on Slack
 			'joedolson',
 			'nrqsnchz',
 			'rianrietveld',
