@@ -206,8 +206,14 @@ class WPORG_Themes_Upload {
 		$this->theme_dir = dirname( $style_css );
 
 		// Let's check some theme headers, shall we?
+		$this->theme_name = $this->theme->get( 'Name' );
 
-		if ( ! $this->theme_name = $this->theme->get( 'Name' ) ) {
+		// Determine the theme slug (ascii only for compatibility) based on the name of the theme in the stylesheet
+		$this->theme_slug = remove_accents( $this->theme_name );
+		$this->theme_slug = preg_replace( '/%[a-f0-9]{2}/i', '', $this->theme_slug );
+		$this->theme_slug = sanitize_title_with_dashes( $this->theme_slug );
+
+		if ( ! $this->theme_name || ! $this->theme_slug ) {
 			$error = __( 'The theme has no name.', 'wporg-themes' ) . ' ';
 
 			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
@@ -219,9 +225,6 @@ class WPORG_Themes_Upload {
 
 			return $error;
 		}
-
-		// determine the theme slug based on the name of the theme in the stylesheet
-		$this->theme_slug = sanitize_title_with_dashes( $this->theme_name );
 
 		// Do not allow themes with WordPress and Theme in the theme name.
 		if ( false !== strpos( $this->theme_slug, 'wordpress' ) || preg_match( '/\btheme\b/i', $this->theme_slug ) ) {
