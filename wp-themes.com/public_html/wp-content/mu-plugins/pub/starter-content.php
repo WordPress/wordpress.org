@@ -80,9 +80,22 @@ class Starter_Content {
 
 		// If a theme causes problems, this can block loading.
 		$blocked_themes = array(
-			'posterity', // +child themes - Customizer polyfill causes E_ERROR: Cannot redeclare posterity_get_user_css()
 			'finedine',  // Customizer polyfill causes E_ERROR: Uncaught Error: Call to a member function add_partial() on bool
 		);
+
+		// If a theme authors themes often cause a problem, just block them all.
+		$blocked_authors = array(
+			'sktthemes',
+				// 'posterity', // +child themes - Customizer polyfill causes E_ERROR: Cannot redeclare posterity_get_user_css()
+				// 'barter', // E_COMPILE_ERROR: Cannot redeclare barter_get_user_css()
+		);
+
+		$theme_author = wp_get_theme()['Author'];
+		foreach ( $blocked_authors as $author ) {
+			if ( false !== stripos( $theme_author, str_replace( ' ', '', $author ) ) ) {
+				$blocked_themes[] = get_stylesheet();
+			}
+		}
 
 		if (
 			in_array( get_stylesheet(), $blocked_themes ) ||
