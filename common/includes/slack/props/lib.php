@@ -35,6 +35,7 @@ function run( $data, $force_test = false ) {
 	$send = new Send( \Dotorg\Slack\Send\WEBHOOK );
 	$send->set_username( $sender );
 	$send->set_text( $text );
+	$send->set_link_names( true ); // We want to the person getting props!
 
 	$get_avatar = __NAMESPACE__ . '\\' . 'get_avatar';
 
