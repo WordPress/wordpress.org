@@ -455,16 +455,80 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
  */
 function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 	$post = get_post( $post_id );
+	if ( ! $post ) {
+		// Should never happen.
+		return;
+	}
 
+	// Update wp-themes.com with this version.
 	wporg_themes_update_wpthemescom( $post->post_name, $version );
 
-	// Update the post with this version's description and tags.
-	$theme_data = wporg_themes_get_header_data( sprintf( 'https://themes.svn.wordpress.org/%1$s/%2$s/style.css', $post->post_name, $version ) );
-	wp_update_post( array(
-		'ID'           => $post_id,
-		'post_content' => $theme_data['Description'],
-		'tags_input'   => $theme_data['Tags'],
+	// Update the post with this version's name, parent theme, description, and tags.
+	$theme_data = wporg_themes_get_header_data( sprintf(
+		'https://themes.svn.wordpress.org/%1$s/%2$s/style.css',
+		$post->post_name,
+		$version
 	) );
+
+	if ( $theme_data ) {
+
+		// Find the parent theme for this version.
+		$theme_parent_post_id = $post->post_parent;
+		if ( ! $theme_data['Template'] ) {
+			// No parent theme.
+			$theme_parent_post_id = 0;
+
+		} else if (
+			$post->post_parent &&
+			$theme_data['Template'] === get_post( $post->post_parent )->post_name
+		) {
+			// The post_parent field is currently set correctly, since that post_id matches the template header.
+			$theme_parent_post_id = $post->post_parent;
+
+		} else {
+			// Theme headers say it has a parent, but we don't have the correct one set, search for it.
+			$parent_theme = get_posts( array(
+				'name'             => $theme_data['Template'],
+				'post_type'        => 'repopackage',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'orderby'          => 'ID',
+				'suppress_filters' => false,
+				'fields'           => 'ids',
+			) );
+
+			if ( $parent_theme ) {
+				$theme_parent_post_id = $parent_theme[0];
+			} else {
+				// We don't host the theme? Temporary problem? Assume it's right for now.
+			}
+		}
+
+		$theme_post_name = $post->post_title;
+		// Allow theme titles to change in case or accent: `ThemeName` => `Themename` + `ThemeName` => `ThemèName`
+		if ( $theme_post_name !== $theme_data['Name'] ) {
+			// Theme name has been updated. Make sure it still sanitizes to the same post.
+			$name_slugified = remove_accents( $theme_data['Name'] );
+			$name_slugified = preg_replace( '/%[a-f0-9]{2}/i', '', $name_slugified );
+			$name_slugified = sanitize_title_with_dashes( $name_slugified );
+
+			if ( $name_slugified === $post->post_name ) {
+				// The new name still ends up at the same post_name slug value, let them have it.
+				$theme_post_name = $theme_data['Name'];
+			}
+		}
+
+		wp_update_post( array(
+			'ID'           => $post_id,
+			'post_title'   => $theme_post_name,
+			'post_content' => $theme_data['Description'],
+			'post_parent'  => $theme_parent_post_id,
+			'tags_input'   => $theme_data['Tags'],
+		) );
+
+		// Refresh the $post object for notifications.
+		$post = get_post( $post_id );
+	}
 
 	// Update current version. Used to prioritize localized themes.
 	update_post_meta( $post_id, '_live_version', $version );
@@ -647,7 +711,7 @@ function wporg_themes_remove_wpthemescom( $theme_slug ) {
  * Custom version of core's deprecated `get_theme_data()` function.
  *
  * @param string $theme_file Path to the file.
- * @return array File headers.
+ * @return array|false File headers, or false on failure.
  */
 function wporg_themes_get_header_data( $theme_file ) {
 	$themes_allowed_tags = array(
@@ -673,55 +737,63 @@ function wporg_themes_get_header_data( $theme_file ) {
 	) );
 
 	$theme_data = file_get_contents( $theme_file, false, $context );
+	if ( ! $theme_data ) {
+		// Failure reading, or empty style.css file.
+		return false;
+	}
 
 	$theme_data = str_replace( '\r', '\n', $theme_data );
-	preg_match( '|^[ \t\/*#@]*Theme Name:(.*)$|mi', $theme_data, $theme_name );
-	preg_match( '|^[ \t\/*#@]*Theme URI:(.*)$|mi', $theme_data, $theme_uri );
-	preg_match( '|^[ \t\/*#@]*Description:(.*)$|mi', $theme_data, $description );
 
-	if ( preg_match( '|^[ \t\/*#@]*Author URI:(.*)$|mi', $theme_data, $author_uri ) ) {
-		$author_uri = esc_url( trim( $author_uri[1] ) );
-	} else {
-		$author_uri = '';
+	// Set defaults.
+	$author_uri  = '';
+	$template    = '';
+	$version     = '';
+	$status      = 'publish';
+	$tags        = array();
+	$author      = 'Anonymous';
+	$name        = '';
+	$theme_uri   = '';
+	$description = '';
+
+	if ( preg_match( '|^[ \t\/*#@]*Theme Name:(.*)$|mi', $theme_data, $m ) ) {
+		$name = wp_strip_all_tags( trim( $m[1] ) );
 	}
 
-	if ( preg_match( '|^[ \t\/*#@]*Template:(.*)$|mi', $theme_data, $template ) ) {
-		$template = wp_kses( trim( $template[1] ), $themes_allowed_tags );
-	} else {
-		$template = '';
+	if ( preg_match( '|^[ \t\/*#@]*Theme URI:(.*)$|mi', $theme_data, $m ) ) {
+		$theme_uri = esc_url( trim( $m[1] ) );
 	}
 
-	if ( preg_match( '|^[ \t\/*#@]*Version:(.*)$|mi', $theme_data, $version ) ) {
-		$version = wp_kses( trim( $version[1] ), $themes_allowed_tags );
-	} else {
-		$version = '';
+	if ( preg_match( '|^[ \t\/*#@]*Description:(.*)$|mi', $theme_data, $m ) ) {
+		$description = wp_kses( trim( $m[1] ), $themes_allowed_tags );
 	}
 
-	if ( preg_match( '|^[ \t\/*#@]*Status:(.*)$|mi', $theme_data, $status ) ) {
-		$status = wp_kses( trim( $status[1] ), $themes_allowed_tags );
-	} else {
-		$status = 'publish';
+	if ( preg_match( '|^[ \t\/*#@]*Author:(.*)$|mi', $theme_data, $m ) ) {
+		$author = wp_kses( trim( $m[1] ), $themes_allowed_tags );
 	}
 
-	if ( preg_match( '|^[ \t\/*#@]*Tags:(.*)$|mi', $theme_data, $tags ) ) {
-		$tags = array_map( 'trim', explode( ',', wp_kses( trim( $tags[1] ), array() ) ) );
-	} else {
-		$tags = array();
+	if ( preg_match( '|^[ \t\/*#@]*Author URI:(.*)$|mi', $theme_data, $m ) ) {
+		$author_uri = esc_url( trim( $m[1] ) );
 	}
 
-	if ( preg_match( '|^[ \t\/*#@]*Author:(.*)$|mi', $theme_data, $author_name ) ) {
-		$author = wp_kses( trim( $author_name[1] ), $themes_allowed_tags );
-	} else {
-		$author = 'Anonymous';
+	if ( preg_match( '|^[ \t\/*#@]*Version:(.*)$|mi', $theme_data, $m ) ) {
+		$version = wp_strip_all_tags( trim( $m[1] ) );
 	}
 
-	$name        = $theme = wp_kses( trim( $theme_name[1] ), $themes_allowed_tags );
-	$theme_uri   = esc_url( trim( $theme_uri[1] ) );
-	$description = wp_kses( trim( $description[1] ), $themes_allowed_tags );
+	if ( preg_match( '|^[ \t\/*#@]*Template:(.*)$|mi', $theme_data, $m ) ) {
+		$template = wp_strip_all_tags( trim( $m[1] ) );
+	}
+
+	if ( preg_match( '|^[ \t\/*#@]*Status:(.*)$|mi', $theme_data, $m ) ) {
+		$status = wp_strip_all_tags( trim( $meta_key[1] ) );
+	}
+
+	if ( preg_match( '|^[ \t\/*#@]*Tags:(.*)$|mi', $theme_data, $m ) ) {
+		$tags = array_map( 'trim', explode( ',', wp_strip_all_tags( trim( $m[1] ) ) ) );
+	}
 
 	return array(
 		'Name'        => $name,
-		'Title'       => $theme,
+		'Title'       => $name,
 		'URI'         => $theme_uri,
 		'Description' => $description,
 		'Author'      => $author,

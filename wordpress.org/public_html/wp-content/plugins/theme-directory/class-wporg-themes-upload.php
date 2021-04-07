@@ -924,6 +924,7 @@ TICKET;
 		// If we already have a post, get its ID.
 		if ( ! empty( $this->theme_post ) ) {
 			$post_id = $this->theme_post->ID;
+			// see wporg_themes_approve_version() for where the post is updated.
 
 		// Otherwise create it for this new theme.
 		} else {
