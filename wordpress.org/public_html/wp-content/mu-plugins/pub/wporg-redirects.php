@@ -175,6 +175,8 @@ function wporg_redirect_site_not_found() {
 
 		// WordPress.org => WordPress.net
 		case 'wp15.wordpress.org':
+		case 'jobs.wordpress.org':
+		// Default Theme Demo sites are on WordPress.net
 		case '2017.wordpress.org':
 		case '2019.wordpress.org':
 		case '2020.wordpress.org':
