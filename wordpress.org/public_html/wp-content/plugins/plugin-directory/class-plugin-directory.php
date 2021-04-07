@@ -923,7 +923,7 @@ class Plugin_Directory {
 		}
 
 		// Allow anyone to view a closed plugin directly from its page. It won't show in search results or lists.
-		if ( $wp_query->is_main_query() && ! empty( $wp_query->query_vars['name'] ) ) {
+		if ( $wp_query->is_main_query() && ! empty( $wp_query->query_vars['name'] ) && ! empty( $wp_query->query_vars['post_status'] ) ) {
 			$wp_query->query_vars['post_status']   = (array) $wp_query->query_vars['post_status'];
 			$wp_query->query_vars['post_status'][] = 'closed';
 			$wp_query->query_vars['post_status'][] = 'disabled';
