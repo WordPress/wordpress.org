@@ -32,7 +32,6 @@ module.exports = function( grunt ) {
 						cascade: false,
 						grid: true,
 					} ),
-					require( 'pixrem' ),
 					require( 'cssnano' )( {
 						mergeRules: false,
 					} ),

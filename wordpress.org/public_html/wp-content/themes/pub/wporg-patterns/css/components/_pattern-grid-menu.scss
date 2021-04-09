@@ -1,0 +1,32 @@
+.pattern-grid-menu {
+	margin: 0 auto;
+	max-width: $size__site-main;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+
+	> *:first-child,
+	> *:last-child {
+		width: 100%;
+	}
+
+	> *:last-child {
+		margin: $gutter-default;
+		width: calc(100% - #{$gutter-default * 2});
+	}
+
+	@media only screen and ( min-width: $breakpoint-medium ) {
+		margin: $gutter-default;
+		flex-direction: row;
+
+		> *:last-child {
+			margin: 0;
+			width: auto;
+		}
+	}
+
+	@media only screen and ( min-width: $breakpoint-large ) {
+		margin: $gutter-default auto;
+	}
+}

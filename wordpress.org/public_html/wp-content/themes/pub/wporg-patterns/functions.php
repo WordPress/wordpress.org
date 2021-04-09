@@ -45,7 +45,7 @@ function enqueue_assets() {
 	);
 
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
-	if ( is_singular( POST_TYPE ) && file_exists( $script_asset_path ) ) {
+	if ( file_exists( $script_asset_path ) ) {
 		$script_asset = require( $script_asset_path );
 		wp_enqueue_script(
 			'wporg-pattern-script',
@@ -68,10 +68,6 @@ function enqueue_assets() {
  * See https://github.com/WordPress/gutenberg/blob/6ad2a433769a4514fc52083e97aa47a0bc9edf07/lib/client-assets.php#L710
  */
 function generate_block_editor_styles_html() {
-	if ( ! is_singular( POST_TYPE ) ) {
-		return;
-	}
-
 	$handles = array(
 		'wp-block-editor',
 		'wp-block-library',

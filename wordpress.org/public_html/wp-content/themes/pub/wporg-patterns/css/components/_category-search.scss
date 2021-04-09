@@ -1,0 +1,36 @@
+.category-search {
+	display: flex;
+	align-items: center;
+	background: $color-white;
+	border: 1px solid $color__text-lighter;
+	border-radius: 2px;
+
+	input[type="search"] {
+		flex-grow: 1;
+		margin: 0;
+		padding: 0.25rem 0.5rem;
+		border: none;
+		box-shadow: none;
+		font-size: 0.8125rem;
+	}
+
+	&__button {
+		display: flex;
+		background: transparent;
+		border: none;
+		color: $color__text-lighter;
+	}
+
+	&--is-loading {
+		display: block;
+		height: 24px;
+		min-width: 100%;
+		background: $color-gray-light-200;
+		border-radius: 4px;
+
+		@media only screen and (min-width: $breakpoint-mobile) {
+			width: 224px;
+		}
+
+	}
+}

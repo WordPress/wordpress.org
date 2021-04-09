@@ -19,23 +19,22 @@ get_header();
 
 	<main id="main" class="site-main" role="main">
 
-		<!-- Filter placeholder -->
-		<header style="background:whitesmoke;padding:24px;text-align:center;margin:0 0 24px;">
-			Section filters
-		</header>
+		<div id="pattern-grid__container">
+			<!-- Filter placeholder -->
 
-		<div class="pattern-grid">
-			<?php
-			if ( have_posts() ) :
-				/* Start the Loop */
-				while ( have_posts() ) :
-					the_post();
-					get_template_part( 'template-parts/content', 'grid' );
-				endwhile;
-			else :
-				get_template_part( 'template-parts/content', 'none' );
-			endif;
-			?>
+			<div class="pattern-grid">
+				<?php
+				if ( have_posts() ) :
+					/* Start the Loop */
+					while ( have_posts() ) :
+						the_post();
+						get_template_part( 'template-parts/content', 'grid' );
+					endwhile;
+				else :
+					get_template_part( 'template-parts/content', 'none' );
+				endif;
+				?>
+			</div>
 		</div>
 
 	</main><!-- #main -->

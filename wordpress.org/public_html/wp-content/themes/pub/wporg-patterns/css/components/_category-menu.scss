@@ -1,0 +1,85 @@
+.category-menu {
+	margin: 0;
+	padding: 0;
+	position: relative;
+
+	background: linear-gradient(180deg, hsla(0, 0%, 100%, 0) 94%, $color__wp-blue 0);
+	background-repeat: no-repeat;
+	background-size: 0;
+	background-position-x: 20px;
+	transition: all 75ms ease-out;
+
+	li {
+		display: inline-block;
+		margin: 0;
+		list-style: none;
+	}
+
+	a {
+		display: block;
+		padding: $gutter-default / 2;
+		color: $color-gray-600;
+		font-size: 0.875rem;
+		text-decoration: none;
+
+		&:hover,
+		&:active,
+		&:focus {
+			color: $color-black;
+		}
+	}
+
+	li &--is-active {
+		color: $color-black;
+	}
+
+	&__mobile {
+		ul {
+			margin: 0;
+			padding: 0;
+			background: $color-dark-gray;
+		}
+
+		li {
+			list-style: none;
+			border-top: 1px solid $color-gray-700;
+
+			a {
+				display: block;
+				padding: $gutter-default / 1.5 $gutter-default;
+				font-size: 0.875rem;
+				text-decoration: none;
+				color: $color-gray-light-700;
+			}
+		}
+
+		// Gutenberg overwrites
+		padding: 0 !important;
+		border-top: none !important;
+
+		> .components-panel__body-title {
+			margin: 0 !important;
+
+			> button {
+				padding: $gutter-default;
+			}
+		}
+		// End
+	}
+
+	&--is-loading {
+		height: 24px;
+		position: relative;
+	}
+
+	&--is-loading::after {
+		content: "";
+		position: absolute;
+		background: $color-gray-light-200;
+		border-radius: 4px;
+		width: 80%;
+		height: 24px;
+		left: 0;
+		transition: none;
+	}
+}
