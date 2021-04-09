@@ -446,7 +446,7 @@ function get_committers() {
 		'iandunn', 'joedolson', 'joemcgill', 'joen', 'johnbillion', 'johnjamesjacoby', 'jorbin',
 		'jorgefilipecosta', 'jrf', 'karmatosed', 'laurelfulford', 'matt', 'matveb', 'mcsf', 'melchoyce',
 		'michaelarestad', 'mikeschroder', 'nacin', 'noisysocks', 'ocean90', 'omarreiss', 'pento',
-		'peterwilsoncc', 'ryelle', 'SergeyBiryukov', 'swissspidy', 'talldanwp', 'tellyworth',
+		'peterwilsoncc', 'rachelbaker', 'ryelle', 'SergeyBiryukov', 'swissspidy', 'talldanwp', 'tellyworth',
 		'TimothyBlynJacobs', 'westi', 'westonruter', 'whyisjake', 'williampatton', 'xknown', 'youknowriad',
 
 	);
