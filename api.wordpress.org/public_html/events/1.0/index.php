@@ -1078,6 +1078,33 @@ function get_regional_wordcamp_data() {
 			),
 		),
 
+		// WordCamp Centroamérica.
+		'centroamerica' => array(
+			'regional_countries' => array_merge(
+				get_iso_3166_2_country_codes( 'south america' ),
+				get_iso_3166_2_country_codes( 'north america' ),
+			),
+
+			'event' => array(
+				'type'                 => 'wordcamp',
+				'title'                => 'WordCamp Centroamérica',
+				'url'                  => 'https://centroamerica.wordcamp.org/2021/',
+				'meetup'               => '',
+				'meetup_url'           => '',
+				'date'                 => '2021-04-15 00:00:00',
+				'end_date'             => '2021-04-17 00:00:00',
+				'start_unix_timestamp' => strtotime( '2021-04-15 00:00:00' ) - 7 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2021-04-17 00:00:00' ) - 7 * HOUR_IN_SECONDS,
+
+				'location' => array(
+					'location'  => 'Online',
+					'country'   => 'NI',
+					'latitude'  => 12.9260679,
+					'longitude' => -85.9170732,
+				),
+			),
+		),
+
 		// WordCamp Europe.
 		'europe' => array(
 			'regional_countries' => array_merge(
