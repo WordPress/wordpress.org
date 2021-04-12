@@ -1061,7 +1061,7 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Asia',
-				'url'        => 'https://2020.asia.wordcamp.org/',
+				'url'        => 'https://asia.wordcamp.org/2020/',
 				'meetup'     => '',
 				'meetup_url' => '',
 				'date'       => '2020-02-21 00:00:00',
@@ -1088,13 +1088,13 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
-				'url'        => 'https://2020.europe.wordcamp.org/',
+				'url'        => 'https://europe.wordcamp.org/2021/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2020-06-04 00:00:00',
-				'end_date'   => '2020-06-06 00:00:00',
-				'start_unix_timestamp' => strtotime( '2020-06-04 00:00:00' ) - 1 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2020-06-06 00:00:00' ) - 1 * HOUR_IN_SECONDS,
+				'date'                 => '2021-06-07 00:00:00',
+				'end_date'             => '2021-06-10 00:00:00',
+				'start_unix_timestamp' => strtotime( '2021-06-07 00:00:00' ) - 1 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2021-06-10 00:00:00' ) - 1 * HOUR_IN_SECONDS,
 
 				'location' => array(
 					'location'  => 'Online',
@@ -1116,7 +1116,7 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://2020.us.wordcamp.org/',
+				'url'        => 'https://us.wordcamp.org/2020/',
 				'meetup'     => '',
 				'meetup_url' => '',
 				'date'       => '2020-10-27 00:00:00',
