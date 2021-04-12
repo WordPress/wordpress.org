@@ -45,10 +45,7 @@ function main() {
 	define( 'COVID_IMPACT_EXPIRATION', strtotime( 'June 30 2021' ) );
 
 	// The test suite just needs the functions defined and doesn't want any headers or output
-	if (
-		( defined( 'RUNNING_TESTS' ) && RUNNING_TESTS ) ||
-		( defined( 'WPORG_RUNNING_TESTS' ) && WPORG_RUNNING_TESTS )
-	) {
+	if ( defined( 'WPORG_RUNNING_TESTS' ) && WPORG_RUNNING_TESTS ) {
 		disable_caching();
 		return;
 	}
@@ -113,10 +110,7 @@ function bootstrap() {
 	require_once $base_dir . '/includes/hyperdb/bb-10-hyper-db.php';
 	require_once $base_dir . '/includes/wp-json-encode.php';
 
-	if (
-		( ! defined( 'RUNNING_TESTS' ) || ! RUNNING_TESTS ) ||
-		( ! defined( 'WPORG_RUNNING_TESTS' ) || ! WPORG_RUNNING_TESTS )
-	) {
+	if ( ! defined( 'WPORG_RUNNING_TESTS' ) || ! WPORG_RUNNING_TESTS ) {
 		require_once $base_dir . '/includes/object-cache.php';
 	}
 }
