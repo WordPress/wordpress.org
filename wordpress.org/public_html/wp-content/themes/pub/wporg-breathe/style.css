@@ -555,6 +555,14 @@ article.page a.author-avatar {
 	box-shadow: none;
 }
 
+.rtl article.post .entry-header .author-avatar,
+.rtl article#post-new .entry-header .author-avatar,
+.rtl article.page .entry-header .author-avatar {
+	float: right;
+	margin-left: 10px;
+	margin-right: 0;
+}
+
 .author-avatar .avatar,
 .o2-comment .avatar,
 .tag-p2-xpost .avatar {
@@ -626,6 +634,10 @@ article.state-unresolved {
 	background: #00a0d2;
 }
 
+.rtl .sticky .o2-post:after {
+	left: 45px;
+	right: initial;
+}
 
 /*
  * Private post status
