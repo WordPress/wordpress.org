@@ -10,6 +10,9 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 		const SUPPORT_EMAIL = 'forum-password-resets@wordpress.org';
 
+		const LOGIN_TOS_COOKIE  = 'wporg_tos_login';
+		const TOS_USER_META_KEY = 'tos_revision';
+
 		const VALID_HOSTS = [
 			'wordpress.org',
 			'bbpress.org',
@@ -24,6 +27,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		public $host;
 		public $script;
 
+		private static $instance = null;
+
 		/**
 		 * Constructor, instantiate common properties
 		 */
@@ -36,6 +41,15 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$this->host   = $_SERVER['HTTP_HOST'];
 				$this->script = $_SERVER['SCRIPT_NAME'];
 			}
+		}
+
+		public static function get_instance() {
+			if ( is_null( self::$instance ) ) {
+				$class = get_called_class();
+				self::$instance = new $class;
+			}
+
+			return self::$instance;
 		}
 
 		/**
@@ -192,6 +206,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			if ( ! $this->_is_valid_targeted_domain( $to ) ) {
 				$to = $this->_get_safer_redirect_to();
+			}
+
+			if ( function_exists( 'apply_filters' ) ) {
+				$to = apply_filters( 'wp_redirect', $to, $status );
 			}
 
 			header(

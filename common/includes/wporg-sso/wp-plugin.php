@@ -23,6 +23,27 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			'lostpassword' => '/lostpassword(/(?P<user>[^/]+))?',
 			'linkexpired'  => '/linkexpired(/(?P<reason>register|lostpassword)/(?P<user>[^/]+))?',
 			'oauth'        => '/oauth',
+
+			// Only for logged in users, but prior to cookies.
+			'updated-tos'  => '/updated-policies',
+		);
+
+		/**
+		 * List of additional valid paths on login.wordpress.org for logged in requests.
+		 * @var array
+		 */
+		public $valid_sso_paths_logged_in = array(
+			'logout' => '/logout',
+		);
+
+		/**
+		 * List of additional valid paths on login.wordpress.org for logged-out requests.
+		 * @var array
+		 */
+		public $valid_sso_paths_registration = array(
+			'pending-profile' => '/register/create-profile(/(?P<profile_user>[^/]+)/(?P<profile_key>[^/]+))?',
+			'pending-create'  => '/register/create(/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+))?',
+			'register'        => '/register(/(?P<user>[^/]+))?',
 		);
 
 		/**
@@ -71,6 +92,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					add_filter( 'lostpassword_url', [ $this, 'add_locale' ], 21 );
 				} else {
 					add_filter( 'login_redirect', [ $this, 'maybe_add_remote_login_bounce_to_post_login_url' ], 10, 3 );
+
+					// Updated TOS interceptor.
+					add_action( 'set_auth_cookie',   [ $this, 'maybe_block_auth_cookies_context_provider' ], 10, 4 );
+					add_filter( 'send_auth_cookies', [ $this, 'maybe_block_auth_cookies' ], 100 );
 				}
 			}
 		}
@@ -84,8 +109,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			remove_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
 			$value = get_network_option( 1, 'registration', 'none' );
 			add_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
+
 			return $value;
 		}
+
 		/**
 		 * Checks if the authenticated is "admin" and returns a nicer error message.
 		 *
@@ -196,17 +223,17 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			// Extend paths which are only available for logged in users.
 			if ( is_user_logged_in() ) {
-				$this->valid_sso_paths['logout'] = '/logout';
-			}
+				$this->valid_sso_paths = array_merge(
+					$this->valid_sso_paths,
+					$this->valid_sso_paths_logged_in
+				);
 
 			// Extend registration paths only when registration is open.
-			if ( 'user' === get_site_option( 'registration', 'none' ) ) {
-				// New "pending" registration flow.
-				$this->valid_sso_paths['pending-profile']  = '/register/create-profile(/(?P<profile_user>[^/]+)/(?P<profile_key>[^/]+))?';
-				$this->valid_sso_paths['pending-create']   = '/register/create(/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+))?';
-
-				// Primary registration route.
-				$this->valid_sso_paths['register']         = '/register(/(?P<user>[^/]+))?';
+			} elseif ( 'user' === get_site_option( 'registration', 'none' ) ) {
+				$this->valid_sso_paths = array_merge(
+					$this->valid_sso_paths,
+					$this->valid_sso_paths_registration
+				);
 			}
 
 			$redirect_req = $this->_get_safer_redirect_to();
@@ -528,7 +555,82 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			return $hash;
 		}
+
+		/**
+		 * The `send_auth_cookies` action used for the below function has no user context.
+		 * This function provides user context to it via the local static.
+		 */
+		public function maybe_block_auth_cookies_context_provider( $auth_cookie = null, $expire = null, $expiration = null, $user_id = null ) {
+			static $_user_id_remember_me = false;
+			if ( ! is_null( $auth_cookie ) ) {
+				$remember_me = ( 0 !== $expire );
+				$_user_id_remember_me = compact( 'user_id', 'remember_me' );
+			} else {
+				// Fetching the data.
+				return $_user_id_remember_me;
+			}
+		}
+
+		/**
+		 * Hooked to 'send_auth_cookies' to prevent sending of the Authentication cookies and redirect
+		 * to the updated policy interstitial if required.
+		 *
+		 * Note: This action provides no context about the request, which is why the context is being
+		 * provided via the 'set_auth_cookie' filter hook above.
+		 */
+		public function maybe_block_auth_cookies( $send_cookies ) {
+			$user_id = $this->maybe_block_auth_cookies_context_provider()['user_id'] ?? false;
+
+			if (
+				$user_id &&
+				! $this->has_agreed_to_tos( $user_id )
+			) {
+				$send_cookies = false;
+
+				// Set a cookie so that we can keep the user in a auth'd (but not) state.
+				$token_cookie = wp_generate_auth_cookie( $user_id, time() + HOUR_IN_SECONDS, 'tos_token' );
+				$remember_me  = (int) $this->maybe_block_auth_cookies_context_provider()['remember_me'];
+
+				setcookie( self::LOGIN_TOS_COOKIE, $token_cookie, time() + HOUR_IN_SECONDS, '/', self::SSO_HOST, true, true );
+				setcookie( self::LOGIN_TOS_COOKIE . '_remember', $remember_me, time() + HOUR_IN_SECONDS, '/', self::SSO_HOST, true, true );
+
+				// Redirect them to the interstitial.
+				add_filter( 'login_redirect', [ $this, 'redirect_to_policy_update' ], 1000 );
+			}
+
+			return $send_cookies;
+		}
+
+		/**
+		 * Redirects the user to the policy update interstitial.
+		 */
+		public function redirect_to_policy_update( $redirect ) {
+			if ( false === strpos( $redirect, home_url( '/updated-policies' ) ) ) {
+				$redirect = add_query_arg(
+					'redirect_to',
+					urlencode( $redirect ),
+					home_url( '/updated-policies' )
+				);
+			}
+
+			return $redirect;
+		}
+
+		/**
+		 * Whether the given user_id has agreed to the current version of the TOS.
+		 */
+		protected function has_agreed_to_tos( $user_id ) {
+			// TEMPORARY: Limit to supes.
+			if ( ! is_super_admin() ) {
+				return true;
+			}
+
+			$tos_agreed_to = get_user_meta( $user_id, self::TOS_USER_META_KEY, true ) ?: 0;
+
+			return $tos_agreed_to >= TOS_REVISION;
+		}
+
 	}
 
-	new WP_WPOrg_SSO();
+	WP_WPOrg_SSO::get_instance();
 }

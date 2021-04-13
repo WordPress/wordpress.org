@@ -61,5 +61,5 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'BB_WPOrg_SSO' ) ) {
 		}
 	}
 
-	new BB_WPOrg_SSO();
+	BB_WPOrg_SSO::get_instance();
 }
