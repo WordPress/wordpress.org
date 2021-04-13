@@ -44,6 +44,37 @@ function wporg_login_check_recapcha_status( $check_v3_action = false ) {
 }
 
 /**
+ * Check the user registration attempt against Akismet.
+ */
+function wporg_login_check_akismet( $user_login, $user_email ) {
+	if ( ! class_exists( 'Akismet' ) ) {
+		return true;
+	}
+
+	$payload = [
+		'type'                 => 'user_signup',
+		'comment_author'       => $user_login,
+		'comment_author_email' => $user_email,
+		'comment_post_ID'      => 0,
+	];
+
+	$akismet = Akismet::rest_auto_check_comment( $c );
+	if ( is_wp_error( $akismet ) ) {
+		return $akismet->get_error_code();
+	}
+
+	if ( ! empty( $akismet['akismet_pro_tip'] ) ) {
+		return $akismet['akismet_pro_tip'];
+	} elseif ( 'true' === $akismet['akismet_result'] ) {
+		return 'spam';
+	} elseif ( 'false' === $akismet['akismet_result'] ) {
+		return 'OK';
+	} else {
+		return 'unsure';
+	}
+}
+
+/**
  * Handles creating a "Pending" registration that will later be converted to an actual user  account.
  */
 function wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist = false  ) {
@@ -87,8 +118,10 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 		if ( $recaptcha_api && $recaptcha_api['success'] && 'register' == $recaptcha_api['action'] ) {
 			$pending_user['scores']['pending'] = $recaptcha_api['score'];
 		}
-		
 	}
+
+	$akismet_says = wporg_login_check_akismet( $user_login, $user_email );
+	$pending_user['meta']['akismet_result'] = $akismet_says;
 
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
