@@ -46,7 +46,7 @@ function wporg_login_check_recapcha_status( $check_v3_action = false ) {
 /**
  * Check the user registration attempt against Akismet.
  */
-function wporg_login_check_akismet( $user_login, $user_email, $user_url = '' ) {
+function wporg_login_check_akismet( $user_login, $user_email, $user_url = '', $content = array() ) {
 	if ( ! class_exists( 'Akismet' ) ) {
 		return true;
 	}
@@ -56,6 +56,7 @@ function wporg_login_check_akismet( $user_login, $user_email, $user_url = '' ) {
 		'comment_author'       => $user_login,
 		'comment_author_email' => $user_email,
 		'comment_author_url'   => $user_url,
+		'comment_content'      => imlpode( "\n", $content ),
 		'comment_post_ID'      => 0,
 	];
 
@@ -341,6 +342,18 @@ function wporg_login_save_profile_fields( $pending_user = false ) {
 	}
 
 	if ( $pending_user ) {
+		$akismet_says = wporg_login_check_akismet(
+			$pending_user['user_login'],
+			$pending_user['user_email'],
+			$pending_user['meta']['url'] ?? '',
+			array_filter( [
+				$pending_user['meta']['from'] ?? '',
+				$pending_user['meta']['occ'] ?? '',
+				$pending_user['meta']['interests'] ?? '',
+			] )
+		);
+		$pending_user['meta']['akismet_result_update'] = $akismet_says;
+
 		wporg_update_pending_user( $pending_user );
 	}
 
