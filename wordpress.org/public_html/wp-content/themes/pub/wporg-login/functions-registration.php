@@ -56,7 +56,7 @@ function wporg_login_check_akismet( $user_login, $user_email, $user_url = '', $c
 		'comment_author'       => $user_login,
 		'comment_author_email' => $user_email,
 		'comment_author_url'   => $user_url,
-		'comment_content'      => imlpode( "\n", $content ),
+		'comment_content'      => implode( "\n", $content ),
 		'comment_post_ID'      => 0,
 	];
 
