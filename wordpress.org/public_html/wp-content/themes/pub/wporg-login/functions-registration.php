@@ -46,7 +46,7 @@ function wporg_login_check_recapcha_status( $check_v3_action = false ) {
 /**
  * Check the user registration attempt against Akismet.
  */
-function wporg_login_check_akismet( $user_login, $user_email ) {
+function wporg_login_check_akismet( $user_login, $user_email, $user_url = '' ) {
 	if ( ! class_exists( 'Akismet' ) ) {
 		return true;
 	}
@@ -55,10 +55,11 @@ function wporg_login_check_akismet( $user_login, $user_email ) {
 		'type'                 => 'user_signup',
 		'comment_author'       => $user_login,
 		'comment_author_email' => $user_email,
+		'comment_author_url'   => $user_url,
 		'comment_post_ID'      => 0,
 	];
 
-	$akismet = Akismet::rest_auto_check_comment( $c );
+	$akismet = Akismet::rest_auto_check_comment( $payload );
 	if ( is_wp_error( $akismet ) ) {
 		return $akismet->get_error_code();
 	}
