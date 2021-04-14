@@ -344,7 +344,14 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 							// Otherwise, redirect to the their profile.
 							$this->_redirect_to_source_or_profile();
 						}
-					} elseif ( ( is_admin() && is_super_admin() ) || 0 === strpos( $_SERVER['REQUEST_URI'], '/wp-json' ) || 0 === strpos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' ) ) {
+					} elseif (
+						(
+							( is_admin() || wp_installing() ) &&
+							( is_super_admin() || is_user_member_of_blog() )
+						) ||
+						0 === strpos( $_SERVER['REQUEST_URI'], '/wp-json' ) ||
+						0 === strpos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' )
+					) {
 						// Do nothing, allow access to wp-admin, wp-json and xmlrpc.php on login.wordpress.org
 					} elseif ( is_user_logged_in() ) {
 						// Logged in catch all, before last fallback
@@ -557,8 +564,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
-		 * The `send_auth_cookies` action used for the below function has no user context.
-		 * This function provides user context to it via the local static.
+		 * Hooked to 'set_auth_cookie' to provide action to the below function, as the
+		 * `send_auth_cookies` filter used for the below function has no user context.
 		 */
 		public function maybe_block_auth_cookies_context_provider( $auth_cookie = null, $expire = null, $expiration = null, $user_id = null ) {
 			static $_user_id_remember_me = false;
