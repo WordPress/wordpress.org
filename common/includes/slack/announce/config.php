@@ -441,7 +441,7 @@ function get_whitelist() {
 function get_committers() {
 	return array(
 		'aaroncampbell', 'adamsilverstein', 'aduth', 'afercia', 'allancole', 'allendav',
-		'antpb', 'atimmer', 'azaozz', 'bpayton', 'clorith', 'davidbaumwald', 'dd32', 'desrosj',
+		'antpb', 'atimmer', 'azaozz', 'bpayton', 'Clorith', 'davidbaumwald', 'dd32', 'desrosj',
 		'DrewAPicture', 'ellatrix', 'flixos90', 'gziolo', 'helen', 'herregroen', 'ianbelanger',
 		'iandunn', 'joedolson', 'joemcgill', 'joen', 'johnbillion', 'johnjamesjacoby', 'jorbin',
 		'jorgefilipecosta', 'jrf', 'karmatosed', 'laurelfulford', 'matt', 'matveb', 'mcsf', 'melchoyce',
