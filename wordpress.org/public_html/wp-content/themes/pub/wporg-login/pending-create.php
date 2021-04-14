@@ -82,14 +82,14 @@ if ( isset( $_POST['user_pass'] ) ) {
 		] )
 	);
 
-	if ( 'OK' !== $akismet ) {
+	// Store for reference.
+	$pending_user['meta']['akismet_result'] = $akismet;
+	wporg_update_pending_user( $pending_user );
+
+	if ( 'spam' == $akismet ) {
 		// No no. "Please try again."
 		$error_akismet = true;
 		unset( $_POST['user_pass'] );
-
-		// Store for reference.
-		$pending_user['meta']['akismet_result'] = $akismet;
-		wporg_update_pending_user( $pending_user );
 	}
 
 }

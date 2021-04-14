@@ -62,25 +62,24 @@ function wporg_login_check_akismet( $user_login, $user_email, $user_url = '', $c
 
 	$akismet = Akismet::rest_auto_check_comment( $payload );
 	if ( is_wp_error( $akismet ) ) {
-		return 'OK'; // Assume it's okay in the event of failure / unknown.
-		// return $akismet->get_error_code();
+		return $akismet->get_error_code();
 	}
 
-	if ( ! empty( $akismet['akismet_pro_tip'] ) ) {
-		return $akismet['akismet_pro_tip'];
+	if ( ! empty( $akismet['akismet_pro_tip'] ) && 'discard' === $akismet['akismet_pro_tip'] ) {
+		return 'spam';
 	} elseif ( 'true' === $akismet['akismet_result'] ) {
 		return 'spam';
 	} elseif ( 'false' === $akismet['akismet_result'] ) {
 		return 'OK';
 	} else {
-		return 'OK'; // Assume it's okay in the event of failure / unknown.
+		return 'unknown';
 	}
 }
 
 /**
  * Handles creating a "Pending" registration that will later be converted to an actual user  account.
  */
-function wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist = false, $tos_revision = 0  ) {
+function wporg_login_create_pending_user( $user_login, $user_email, $meta = array() ) {
 	global $wpdb, $wp_hasher;
 
 	// Remove any whitespace which might have accidentally been added.
@@ -98,18 +97,14 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 	$profile_key        = wp_generate_password( 24, false, false );
 	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
-	$tos_meta_key = WPOrg_SSO::TOS_USER_META_KEY;
-
 	$pending_user = array(
 		'user_login' => $user_login,
 		'user_email' => $user_email,
 		'user_registered' => gmdate('Y-m-d  H:i:s'),
 		'user_activation_key' => '',
 		'user_profile_key' => $hashed_profile_key,
-		'meta' => array(
-			'user_mailinglist' => $user_mailinglist,
+		'meta' => $meta + array(
 			'registration_ip'  => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
-			$tos_meta_key      => $tos_revision,
 		),
 		'scores' => array()
 	);

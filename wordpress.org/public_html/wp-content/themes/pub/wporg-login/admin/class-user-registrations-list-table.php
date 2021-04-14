@@ -10,6 +10,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			'user_email'      => 'User Email',
 			'user_ip'         => 'IP',
 			'scores'          => 'reCaptcha',
+			'akismet'         => 'Akismet',
 			'user_registered' => 'Registered Date',
 			'created_date'    => 'Created Date',
 		];
@@ -22,6 +23,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			'user_login'      => array( 'user_login', true ),
 			'user_email'      => array( 'user_email', true ),
 			'scores'          => array( 'scores', true ),
+			'akismet'         => array( 'akismet', true ),
 			'user_registered' => array( 'user_registered', true ),
 			'created_date'    => array( 'created_date', true ),
 		];
@@ -165,6 +167,12 @@ class User_Registrations_List_Table extends WP_List_Table {
 				esc_html( $val )
 			);
 		}
+	}
+
+	function column_akismet( $item ) {
+		$meta = json_decode( $item->meta, true );
+
+		echo $meta['akismet_result'] ?? '';
 	}
 
 }

@@ -35,11 +35,22 @@ if ( $_POST ) {
 	if ( ! $error_user_login && ! $error_user_email && ! $terms_of_service_error ) {
 		if ( ! wporg_login_check_recapcha_status( 'register' ) ) {
 			$error_recapcha_status = true;
-		} elseif ( 'OK' !== wporg_login_check_akismet( $user_login, $user_email ) ) {
-			$error_akismet = true;
 		} else {
-			wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist, $terms_of_service );
-			die();
+			$akismet = wporg_login_check_akismet( $user_login, $user_email );
+
+			$tos_meta_key = WPOrg_SSO::TOS_USER_META_KEY;
+			$meta = [
+				'user_mailinglist' => $user_mailinglist,
+				'akismet_result'   => $akismet,
+				$tos_meta_key      => $terms_of_service,
+			];
+
+			if ( 'spam' === $akismet ) {
+				$error_akismet = true;
+			} else {
+				wporg_login_create_pending_user( $user_login, $user_email, $meta );
+				die();
+			}
 		}
 	}
 
