@@ -628,7 +628,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		protected function has_agreed_to_tos( $user_id ) {
 			// TEMPORARY: Limit to supes.
-			if ( ! is_super_admin() ) {
+			if ( ! is_super_admin( $user_id ) ) {
 				return true;
 			}
 
