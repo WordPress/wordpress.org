@@ -452,7 +452,11 @@ body.route-pending-create .login-login input.disabled {
 	margin-bottom: 0;
 }
 
-form .login-mailinglist label {
+form p.checkbox.error {
+	color: #dc3232;
+}
+
+form p.checkbox label {
 	position: relative;
 	display: block;
 	padding-left: 24px;
@@ -460,30 +464,30 @@ form .login-mailinglist label {
 	line-height: 19px;
 }
 
-.rtl form .login-mailinglist label {
+.rtl form p.checkbox label {
 	padding-left: 0;
 	padding-right: 24px;
 }
 
 @media screen and (max-width: 782px) {
-	form .login-mailinglist label {
+	form p.checkbox label {
 		padding-left: 33px;
 	}
 
-	.rtl form .login-mailinglist label {
+	.rtl form p.checkbox label {
 		padding-left: 0;
 		padding-right: 33px;
 	}
 }
 
-form .login-mailinglist label input {
+form p.checkbox label input {
 	position: absolute;
 	top: 0;
 	left: 0;
 	margin: 2px 0 0;
 }
 
-.rtl form .login-mailinglist label input {
+.rtl form p.checkbox label input {
 	left: auto;
 	right: 0;
 }

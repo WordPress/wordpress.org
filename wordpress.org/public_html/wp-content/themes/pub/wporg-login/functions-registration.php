@@ -79,7 +79,7 @@ function wporg_login_check_akismet( $user_login, $user_email, $user_url = '', $c
 /**
  * Handles creating a "Pending" registration that will later be converted to an actual user  account.
  */
-function wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist = false  ) {
+function wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist = false, $tos_revision = 0  ) {
 	global $wpdb, $wp_hasher;
 
 	// Remove any whitespace which might have accidentally been added.
@@ -97,6 +97,8 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 	$profile_key        = wp_generate_password( 24, false, false );
 	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
+	$tos_meta_key = WPOrg_SSO::TOS_USER_META_KEY;
+
 	$pending_user = array(
 		'user_login' => $user_login,
 		'user_email' => $user_email,
@@ -106,6 +108,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 		'meta' => array(
 			'user_mailinglist' => $user_mailinglist,
 			'registration_ip'  => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
+			$tos_meta_key      => $tos_revision,
 		),
 		'scores' => array()
 	);
@@ -288,7 +291,9 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 		update_user_meta( $user_id, 'notify_list', 'true' );
 	}
 
-	foreach ( array( 'url', 'from', 'occ', 'interests' ) as $field ) {
+	$tos_meta_key = WPOrg_SSO::TOS_USER_META_KEY;
+
+	foreach ( array( 'url', 'from', 'occ', 'interests', $tos_meta_key ) as $field ) {
 		if ( !empty( $pending_user['meta'][ $field ] ) ) {
 			$value = $pending_user['meta'][ $field ];
 			if ( 'url' == $field ) {

@@ -5,12 +5,14 @@
  * @package wporg-login
  */
 
-$user_login = isset( $_POST['user_login'] ) ? trim( wp_unslash( $_POST['user_login'] ) ) : '';
-if ( ! $user_login && !empty( WP_WPOrg_SSO::$matched_route_params['user'] ) ) {
+$user_login       = isset( $_POST['user_login'] ) ? trim( wp_unslash( $_POST['user_login'] ) ) : '';
+$user_email       = isset( $_POST['user_email'] ) ? trim( wp_unslash( $_POST['user_email'] ) ) : '';
+$user_mailinglist = isset( $_POST['user_mailinglist'] ) && 'true' == $_POST['user_mailinglist'];
+$terms_of_service = isset( $_POST['terms_of_service'] ) ? $_POST['terms_of_service'] : false;
+
+if ( ! $user_login && ! empty( WP_WPOrg_SSO::$matched_route_params['user'] ) ) {
 	$user_login = trim( WP_WPOrg_SSO::$matched_route_params['user'] );
 }
-$user_email = isset( $_POST['user_email'] ) ? trim( wp_unslash( $_POST['user_email'] ) ) : '';
-$user_mailinglist = isset( $_POST['user_mailinglist'] ) && 'true' == $_POST['user_mailinglist'];
 
 $error_user_login = $error_user_email = $error_recapcha_status = false;
 if ( $_POST ) {
@@ -25,12 +27,16 @@ if ( $_POST ) {
 		$error_user_email = false;
 	}
 
+	// Don't validate that it's equal to the current revision, just that they've agreed to one.
+	// Let the post-login interstitial handle TOS updates at time of registration.
+	$terms_of_service_error = ! $terms_of_service || $terms_of_service > TOS_REVISION;
+
 	// handle user registrations.
-	if ( ! $error_user_login && ! $error_user_email ) {
+	if ( ! $error_user_login && ! $error_user_email && ! $terms_of_service_error ) {
 		if ( ! wporg_login_check_recapcha_status( 'register' ) ) {
 			$error_recapcha_status = true;
 		} else {
-			wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist );
+			wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist, $terms_of_service );
 			die();
 		}
 	}
@@ -78,7 +84,24 @@ get_header();
 	}
 	?>
 
-	<p class="login-mailinglist">
+	<p class="login-tos checkbox <?php if ( $terms_of_service_error ) { echo 'message error'; } ?>">
+		<label for="terms_of_service">
+			<input name="terms_of_service" type="checkbox" id="terms_of_service" value="<?php echo esc_attr( TOS_REVISION ); ?>" <?php checked( $terms_of_service, TOS_REVISION ); ?> required="required">
+			<?php
+				$localised_domain = parse_url( wporg_login_wordpress_url(), PHP_URL_HOST );
+				printf(
+					__( 'I have read and accept the %s.', 'wporg' ),
+					wp_sprintf_l( '%l', [
+						"<a href='https://{$localised_domain}/about/privacy/'>" . __( 'Privacy Policy', 'wporg' ) . '</a>',
+						// "<a href='https://{$localised_domain}/about/terms-of-service/'>" . __( 'Terms of Service', 'wporg' ) . '</a>',
+						// "<a href='https://{$localised_domain}/about/code-of-conduct/'>" . __( 'Code of Conduct', 'wporg' ) . '</a>',
+					] )
+				)
+			?>
+		</label>
+	</p>
+
+	<p class="login-mailinglist checkbox">
 		<label for="user_mailinglist">
 			<input name="user_mailinglist" type="checkbox" id="user_mailinglist" value="true" <?php checked( $user_mailinglist, true ); ?>>
 			<?php _e( 'Subscribe to WordPress Announcements mailing list (a few messages a year)', 'wporg' ); ?>
