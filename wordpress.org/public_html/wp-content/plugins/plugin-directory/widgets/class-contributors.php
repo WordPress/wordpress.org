@@ -48,8 +48,8 @@ class Contributors extends \WP_Widget {
 		}
 
 		// If no contributors were explicitly or properly listed, default to associated author.
-		if ( ! $contributors ) {
-			$contributors = [ get_user_by( 'ID', $post->post_author ) ];
+		if ( ! $contributors && ( $author = get_user_by( 'ID', $post->post_author ) ) ) {
+			$contributors = [ $author ];
 		}
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Contributors', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
