@@ -87,7 +87,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	$user_email = trim( $user_email );
 
 	// Allow for w.org plugins to block registrations based on spam checks, etc.
-	if ( null !== ( $pre_register_error = apply_filters( 'wporg_login_pre_registration', null, $user_login, $user_email, $user_mailinglist ) ) ) {
+	if ( null !== ( $pre_register_error = apply_filters( 'wporg_login_pre_registration', null, $user_login, $user_email, $meta ) ) ) {
 		if ( is_wp_error( $pre_register_error ) ) {
 			wp_die( $pre_register_error );
 		}
