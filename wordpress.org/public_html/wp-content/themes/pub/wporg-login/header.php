@@ -19,4 +19,5 @@
 <?php wp_body_open(); ?>
 
 <div id="login">
-	<h1><a href="<?php /* This mimicks the wp-login.php header */ echo apply_filters( 'login_headerurl', __( 'https://wordpress.org/' ) ); ?>" tabindex="-1"><?php /* This mimicks the wp-login.php header */ _e( 'Powered by WordPress' ); ?></a></h1>
+	<?php /* The following translation pulls from the WordPress translations, mimicking wp-login.php intentionally for consistency. */ ?>
+	<h1><a href="<?php echo wporg_login_wordpress_url(); ?>" tabindex="-1"><?php echo translate( 'Powered by WordPress' ); ?></a></h1>

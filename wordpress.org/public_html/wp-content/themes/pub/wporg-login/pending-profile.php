@@ -85,7 +85,7 @@ get_header();
 </form>
 
 <p id="nav">
-	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

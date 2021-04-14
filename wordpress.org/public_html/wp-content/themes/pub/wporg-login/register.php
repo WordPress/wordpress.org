@@ -98,8 +98,7 @@ get_header();
 
 <p id="nav">
 	<a href="/" title="<?php esc_attr_e( 'Already have an account?', 'wporg' ); ?>"><?php _e( 'Already have an account?', 'wporg' ); ?></a> &nbsp; • &nbsp;
-	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
-
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer();

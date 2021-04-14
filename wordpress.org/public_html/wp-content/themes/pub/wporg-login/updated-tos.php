@@ -36,6 +36,9 @@ if (
 	exit;
 }
 
+// Localised domain for about pages.
+$localised_domain = parse_url( wporg_login_wordpress_url(), PHP_URL_HOST );
+
 get_header();
 ?>
 
@@ -53,14 +56,14 @@ get_header();
 <p>&nbsp;</p>
 
 <p>
-	<a href="<?php _eu( 'https://wordpress.org/about/privacy/', 'wporg' ); ?>"><?php _eu( 'Privacy Policy', 'wporg' ); ?></a>
+	<a href="https://<?php echo $localised_domain; ?>/about/privacy/"><?php _e( 'Privacy Policy', 'wporg' ); ?></a>
 </p>
 <?php /* ?>
 <p>
-	<a href="<?php _eu( 'https://wordpress.org/about/terms-of-service/', 'wporg' ); ?>"><?php _eu( 'Terms of Service', 'wporg' ); ?></a>
+	<a href="https://<?php echo $localised_domain; ?>/about/terms-of-service/"><?php _eu( 'Terms of Service', 'wporg' ); ?></a>
 </p>
 <p>
-	<a href="<?php _eu( 'https://wordpress.org/about/code-of-conduct/', 'wporg' ); ?>"><?php _eu( 'Code of Conduct', 'wporg' ); ?></a>
+	<a href="https://<?php echo $localised_domain; ?>/code-of-conduct/"><?php _eu( 'Code of Conduct', 'wporg' ); ?></a>
 </p>
 <?php //*/ ?>
 
@@ -75,11 +78,12 @@ get_header();
 </form>
 
 <p class="center">
-	<a href="https://wordpress.org/" style="font-style: italic;"><?php _eu( 'I do not agree', 'wporg' ); ?></a>
+	<a href="<?php echo wporg_login_wordpress_url(); ?>" style="font-style: italic;"><?php _eu( 'I do not agree', 'wporg' ); ?></a>
 </p>
 
 <p id="nav">
-	<a href="/"><?php _e( '&larr; Back to login', 'wporg' ); ?></a>
+	<a href="/"><?php _e( '&larr; Back to login', 'wporg' ); ?></a> &nbsp; • &nbsp;
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

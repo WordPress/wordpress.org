@@ -459,7 +459,7 @@ function wporg_login_form_top( $message ) {
 add_filter( 'login_form_top', 'wporg_login_form_top' );
 
 // This is the login messages, which is displayed on wp-login.php, which does not use wp_login_form() or it's actions.
-function wp_login_errors_message( $errors, $redirect_to ) {
+function wporg_login_errors_message( $errors, $redirect_to ) {
 	$errors->add(
 		'pre_login_message',
 		( isset( $_GET['loggedout'] ) ? '<br>' : '' ) .
@@ -469,14 +469,14 @@ function wp_login_errors_message( $errors, $redirect_to ) {
 
 	return $errors;
 }
-add_filter( 'wp_login_errors', 'wp_login_errors_message', 10, 2 );
+add_filter( 'wp_login_errors', 'wporg_login_errors_message', 10, 2 );
 
 /**
  * Replace some login related error messages with nicer forms.
  * 
  * See https://core.trac.wordpress.org/ticket/52915
  */
-function wp_login_errors_nicify( $errors, $redirect_to ) {
+function wporg_login_errors_nicify( $errors, $redirect_to ) {
 
 	$replace_errors = [
 		'invalid_username' => sprintf(
@@ -498,4 +498,18 @@ function wp_login_errors_nicify( $errors, $redirect_to ) {
 
 	return $errors;
 }
-add_filter( 'wp_login_errors', 'wp_login_errors_nicify', 10, 2 );
+add_filter( 'wp_login_errors', 'wporg_login_errors_nicify', 10, 2 );
+
+/**
+ * Fetch the URL to the locales WordPress.org site.
+ */
+function wporg_login_wordpress_url() {
+	/* This pulls the translation from the WordPress translations, mimicking wp-login.php */
+	$url = apply_filters( 'login_headerurl', translate( 'https://wordpress.org/' ) );
+
+	if ( ! $url || false === stripos( $url, '.wordpress.org' ) ) {
+		$url = 'https://wordpress.org/';
+	}
+
+	return esc_url( $url );
+}
