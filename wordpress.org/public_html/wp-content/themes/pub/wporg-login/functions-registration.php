@@ -48,7 +48,7 @@ function wporg_login_check_recapcha_status( $check_v3_action = false ) {
  */
 function wporg_login_check_akismet( $user_login, $user_email, $user_url = '', $content = array() ) {
 	if ( ! class_exists( 'Akismet' ) ) {
-		return true;
+		return 'OK';
 	}
 
 	$payload = [
@@ -62,7 +62,8 @@ function wporg_login_check_akismet( $user_login, $user_email, $user_url = '', $c
 
 	$akismet = Akismet::rest_auto_check_comment( $payload );
 	if ( is_wp_error( $akismet ) ) {
-		return $akismet->get_error_code();
+		return 'OK'; // Assume it's okay in the event of failure / unknown.
+		// return $akismet->get_error_code();
 	}
 
 	if ( ! empty( $akismet['akismet_pro_tip'] ) ) {
@@ -72,7 +73,7 @@ function wporg_login_check_akismet( $user_login, $user_email, $user_url = '', $c
 	} elseif ( 'false' === $akismet['akismet_result'] ) {
 		return 'OK';
 	} else {
-		return 'unsure';
+		return 'OK'; // Assume it's okay in the event of failure / unknown.
 	}
 }
 
@@ -124,9 +125,6 @@ function wporg_login_create_pending_user( $user_login, $user_email, $user_mailin
 			$pending_user['scores']['pending'] = $recaptcha_api['score'];
 		}
 	}
-
-	$akismet_says = wporg_login_check_akismet( $user_login, $user_email );
-	$pending_user['meta']['akismet_result'] = $akismet_says;
 
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
@@ -347,18 +345,6 @@ function wporg_login_save_profile_fields( $pending_user = false ) {
 	}
 
 	if ( $pending_user ) {
-		$akismet_says = wporg_login_check_akismet(
-			$pending_user['user_login'],
-			$pending_user['user_email'],
-			$pending_user['meta']['url'] ?? '',
-			array_filter( [
-				$pending_user['meta']['from'] ?? '',
-				$pending_user['meta']['occ'] ?? '',
-				$pending_user['meta']['interests'] ?? '',
-			] )
-		);
-		$pending_user['meta']['akismet_result_update'] = $akismet_says;
-
 		wporg_update_pending_user( $pending_user );
 	}
 

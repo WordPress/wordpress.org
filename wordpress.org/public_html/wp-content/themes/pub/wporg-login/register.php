@@ -14,7 +14,7 @@ if ( ! $user_login && ! empty( WP_WPOrg_SSO::$matched_route_params['user'] ) ) {
 	$user_login = trim( WP_WPOrg_SSO::$matched_route_params['user'] );
 }
 
-$error_user_login = $error_user_email = $error_recapcha_status = false;
+$error_user_login = $error_user_email = $error_recapcha_status = $error_akismet = $terms_of_service_error = false;
 if ( $_POST ) {
 
 	$error_user_login = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/username-available/' . $user_login ) );
@@ -35,6 +35,8 @@ if ( $_POST ) {
 	if ( ! $error_user_login && ! $error_user_email && ! $terms_of_service_error ) {
 		if ( ! wporg_login_check_recapcha_status( 'register' ) ) {
 			$error_recapcha_status = true;
+		} elseif ( 'OK' !== wporg_login_check_akismet( $user_login, $user_email ) ) {
+			$error_akismet = true;
 		} else {
 			wporg_login_create_pending_user( $user_login, $user_email, $user_mailinglist, $terms_of_service );
 			die();
@@ -108,7 +110,7 @@ get_header();
 		</label>
 	</p>
 	<?php
-		if ( $error_recapcha_status ) {
+		if ( $error_recapcha_status || $error_akismet ) {
 			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
 		}
 	?>

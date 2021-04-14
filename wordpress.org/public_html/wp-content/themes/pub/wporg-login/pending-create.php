@@ -54,19 +54,44 @@ if ( ! $can_access ) {
 	die();
 }
 
-// Check reCaptcha status
-$error_recapcha_status = false;
+if ( wporg_login_save_profile_fields( $pending_user ) ) {
+	// re-fetch the user, it's probably changed.
+	$pending_user = wporg_get_pending_user( $activation_user );
+}
+
+
+$error_recapcha_status = $error_akismet = false;
 if ( isset( $_POST['user_pass'] ) ) {
+
+	// Check reCaptcha status
 	if ( ! wporg_login_check_recapcha_status( 'pending_create' ) ) {
 		// No no. "Please try again."
 		$error_recapcha_status = true;
 		unset( $_POST['user_pass'] );
 	}
-}
 
-if ( wporg_login_save_profile_fields( $pending_user ) ) {
-	// re-fetch the user, it's probably changed.
-	$pending_user = wporg_get_pending_user( $activation_user );
+	// Check Akismet
+	$akismet = wporg_login_check_akismet(
+		$pending_user['user_login'],
+		$pending_user['user_email'],
+		$pending_user['meta']['url'] ?? '',
+		array_filter( [
+			$pending_user['meta']['from'] ?? '',
+			$pending_user['meta']['occ'] ?? '',
+			$pending_user['meta']['interests'] ?? '',
+		] )
+	);
+
+	if ( 'OK' !== $akismet ) {
+		// No no. "Please try again."
+		$error_akismet = true;
+		unset( $_POST['user_pass'] );
+
+		// Store for reference.
+		$pending_user['meta']['akismet_result'] = $akismet;
+		wporg_update_pending_user( $pending_user );
+	}
+
 }
 
 if ( isset( $_POST['user_pass'] ) ) {
@@ -126,7 +151,7 @@ get_header();
 		include __DIR__ . '/partials/register-profilefields.php';
 	?>
 	<?php
-		if ( $error_recapcha_status ) {
+		if ( $error_recapcha_status || $error_akismet ) {
 			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
 		}
 	?>
