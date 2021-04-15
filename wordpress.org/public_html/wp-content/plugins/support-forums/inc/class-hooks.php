@@ -74,6 +74,9 @@ class Hooks {
 		// Limit no-replies view to a certain number of days and hide resolved topics.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
 
+		// Remove the description from the CPT to avoid Jetpack using it as the og:description.
+		add_filter( 'bbp_register_forum_post_type', array( $this, 'bbp_register_forum_post_type' ) );
+
 		// Display extra topic fields after content.
 		add_action( 'bbp_theme_after_topic_content', array( $this, 'display_extra_topic_fields' ) );
 
@@ -886,6 +889,15 @@ class Hooks {
 
 		// Exclude closed/hidden/spam/etc topics.
 		$args['post_status'] = 'publish';
+
+		return $args;
+	}
+
+	/**
+	 * Remove the Forum CPT description field to prevent Jetpack using it as the og:description on /forums/.
+	 */
+	public function bbp_register_forum_post_type( $args ) {
+		$args['description'] = '';
 
 		return $args;
 	}
