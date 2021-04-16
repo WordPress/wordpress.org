@@ -10,7 +10,7 @@ if ( empty( $request->customer->email ) ) {
 }
 
 // This needs to run as a user.
-wp_set_current_user( get_user_by( 'login', 'wordpressdotorg' ) );
+wp_set_current_user( get_user_by( 'login', 'wordpressdotorg' )->ID );
 
 // default empty output
 $html = '';
