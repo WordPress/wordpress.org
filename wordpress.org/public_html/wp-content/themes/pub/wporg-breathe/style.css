@@ -1485,6 +1485,11 @@ h2.toc-heading + h3.toc-heading:target {
 	nav.o2-post-actions ul {
 	    left: initial;
 	}
+
+	.rtl nav.o2-post-actions ul {
+		left: 0;
+		right: initial;
+	}
 }
 
 .post-type-archive-handbook .make-welcome,
