@@ -525,7 +525,7 @@ the_post();
 						<li id='footnote8'><a href="#ref8">[8]</a> <a href="https://www.owasp.org/index.php/Top_10_2013-Top_10">https://www.owasp.org/index.php/Top_10_2013-Top_10</a></li>
 						<li id='footnote9'><a href="#ref9">[9]</a> <a href="https://developer.wordpress.org/plugins/security/">https://developer.wordpress.org/plugins/security/</a></li>
 						<li id='footnote10'><a href="#ref10">[10]</a> <a href="https://codex.wordpress.org/Data_Validation#HTML.2FXML">https://codex.wordpress.org/Data_Validation#HTML.2FXML</a></li>
-						<li id='footnote11'><a href="#ref11">[11]</a> <a href="https://wordpress.org/support/article/hardening-wordpress/">hhttps://wordpress.org/support/article/hardening-wordpress/</a></li>
+						<li id='footnote11'><a href="#ref11">[11]</a> <a href="https://wordpress.org/support/article/hardening-wordpress/">https://wordpress.org/support/article/hardening-wordpress/</a></li>
 						<li id='footnote12'><a href="#ref12">[12]</a> <a href="https://www.openwall.com/phpass/">https://www.openwall.com/phpass/</a></li>
 						<li id='footnote13'><a href="#ref13">[13]</a> <a href="https://developer.wordpress.org/plugins/security/nonces/">https://developer.wordpress.org/plugins/security/nonces/</a></li>
 						<li id='footnote14'><a href="#ref14">[14]</a> <a href="https://wordpress.org/news/2013/06/wordpress-3-5-2/">https://wordpress.org/news/2013/06/wordpress-3-5-2/</a></li>
