@@ -36,6 +36,9 @@ class Validator {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
+				'apiVersion'   => array(
+					'type' => 'string',
+				),
 				'attributes'   => array(
 					'type'                 => 'object',
 					'additionalProperties' => array(
