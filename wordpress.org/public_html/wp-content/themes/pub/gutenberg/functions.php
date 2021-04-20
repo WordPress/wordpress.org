@@ -176,13 +176,7 @@ function gutenberg_editor_scripts_and_styles( $hook ) {
 
 	// Editor Styles.
 	global $editor_styles;
-	$styles = array(
-		array(
-			'css' => file_get_contents(
-				ABSPATH . WPINC . '/css/dist/editor/editor-styles.css'
-			),
-		),
-	);
+	$styles = array();
 
 	/* Translators: Use this to specify the CSS font family for the default font */
 	$locale_font_family = esc_html_x( 'Noto Serif', 'CSS Font Family for Editor Font', 'gutenberg' );
