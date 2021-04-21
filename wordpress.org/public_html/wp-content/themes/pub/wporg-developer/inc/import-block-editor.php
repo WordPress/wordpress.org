@@ -53,6 +53,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		$redirects = [
 			'tutorials/block-tutorial/block-controls-toolbars-and-inspector' => 'tutorials/block-tutorial/block-controls-toolbar-and-sidebar/',
 			'components/server-side-render' => 'packages/packages-server-side-render',
+			'reference-guides/block-api/versions' => 'reference-guides/block-api/block-api-versions',
 
 			// After handbook restructuring, March 2021.
 			'handbook/versions-in-wordpress/' => 'contributors/versions-in-wordpress',
