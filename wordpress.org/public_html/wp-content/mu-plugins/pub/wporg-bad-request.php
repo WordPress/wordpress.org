@@ -73,6 +73,12 @@ function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
 			}
 
 			if ( isset( $must_be_num[ $field ] ) && ! empty( $vars[ $field ] ) && ! is_numeric( $vars[ $field ] ) ) {
+
+				// Allow the `p` variable to contain `p=12345/`: https://bbpress.trac.wordpress.org/ticket/3424
+				if ( 'p' === $field && ( intval( $vars[ $field ] ) . '/' === $vars[ $field ] ) ) {
+					continue;
+				}
+
 				die_bad_request( "non-numeric $field in $ref" );
 			}
 		}
