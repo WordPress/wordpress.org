@@ -200,13 +200,16 @@ function bporg_fix_activity_redirect( $redirect, $activity ) {
 	global $bp;
 
 	$redirect = false;
+	$has_user = isset( $activity->user_id, $activity->user_nicename, $activity->user_login );
+
 	/* Redirect based on the type of activity */
 	if ( bp_is_active( 'groups' ) && $activity->component == $bp->groups->id ) {
-		if ( $activity->user_id ) {
+		if ( $has_user ) {
 			$redirect = bp_core_get_user_domain( $activity->user_id, $activity->user_nicename, $activity->user_login ) . $bp->activity->name . '/' . $activity->id . '/';
 		}
-	} else
+	} else if ( $has_user ) {
 		$redirect = bp_core_get_user_domain( $activity->user_id, $activity->user_nicename, $activity->user_login ) . $bp->activity->name . '/' . $activity->id;
+	}
 
 	return $redirect;
 }
