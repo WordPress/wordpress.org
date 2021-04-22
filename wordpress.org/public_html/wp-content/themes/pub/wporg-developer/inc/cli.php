@@ -447,7 +447,6 @@ class DevHub_CLI {
 
 	protected static function add_ids_and_jumpto_links( $tag, $content ) {
 		$items = self::get_tags( $tag, $content );
-		$first = true;
 		$matches = array();
 		$replacements = array();
 
@@ -456,11 +455,6 @@ class DevHub_CLI {
 			$matches[] = $item[0];
 			$id = sanitize_title_with_dashes($item[2]);
 
-			if ( ! $first ) {
-				$replacement .= '<p class="toc-jump"><a href="#top">' . __( 'Top &uarr;', 'wporg' ) . '</a></p>';
-			} else {
-				$first = false;
-			}
 			$a11y_text      = sprintf( '<span class="screen-reader-text">%s</span>', $item[2] );
 			$anchor         = sprintf( '<a href="#%1$s" class="anchor"><span aria-hidden="true">#</span>%2$s</a>', $id, $a11y_text );
 			$replacement   .= sprintf( '<%1$s class="toc-heading" id="%2$s" tabindex="-1">%3$s %4$s</%1$s>', $tag, $id, $item[2], $anchor );
