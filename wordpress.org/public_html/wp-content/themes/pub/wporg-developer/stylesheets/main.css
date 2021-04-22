@@ -2329,6 +2329,16 @@ aside[id^="nav_menu"] .widget-title {
   border-top: none;
 }
 
+.single-handbook .devhub-wrap main h2 {
+    margin-top: 4rem;
+    border-bottom: 2px solid #333;
+}
+
+.single-handbook .devhub-wrap main h3 {
+    margin-top: 4rem;
+    border-bottom: 1px solid #333;
+}
+
 .single-handbook .handbook-name-container + #primary {
   padding-top: 5rem;
 }
