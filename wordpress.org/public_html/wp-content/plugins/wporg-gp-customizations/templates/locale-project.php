@@ -119,7 +119,7 @@ if ( 'wp-plugins' === $project->path ) {
 	if ( ! in_array( 'dev', $sub_project_slugs ) && ! in_array( 'stable', $sub_project_slugs ) ) {
 		?>
 		<div class="wporg-notice wporg-notice-error">
-			<p>This plugin is not <a href="https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/">properly prepared for localization</a> (<a href="https://make.wordpress.org/meta/handbook/documentation/translations/#this-plugin-is-not-properly-prepared-for-localization-%e2%80%93-help">View detailed logs on Slack</a>). If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $sub_project->slug ); ?>">please contact the author</a>.</p>
+			<p>This plugin is not <a href="https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/">properly prepared for localization</a> (<a href="https://wordpress.slack.com/archives/C0E7F4RND">View detailed logs on Slack</a>). If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $sub_project->slug ); ?>">please contact the author</a>.</p>
 		</div>
 		<?php
 	} else {
