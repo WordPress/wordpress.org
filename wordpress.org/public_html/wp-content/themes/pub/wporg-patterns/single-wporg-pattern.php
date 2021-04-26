@@ -11,7 +11,7 @@ namespace WordPressdotorg\Theme;
 
 get_header();
 ?>
-
+	<input id="block-data" type="hidden" value="<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>" />
 	<main id="main" class="site-main col-12" role="main">
 
 		<?php
@@ -23,7 +23,7 @@ get_header();
 				<header class="entry-header">
 					<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 					<p>A large hero section with an example background image and a heading in the center.</p>
-					<div class="pattern-actions">
+					<div id="pattern-actions" class="pattern-actions">
 						<button class="button button-primary">Copy Pattern</button>
 						<button class="button">Add to favorites</button>
 					</div>

@@ -51,3 +51,64 @@ export function getPatternsByQuery( state, query ) {
 export function getPattern( state, id ) {
 	return state.patterns.byId[ id ] || null;
 }
+
+/**
+ * Get the current query.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Object} The current query.
+ */
+export function getCurrentQuery( state ) {
+	return state.currentQuery;
+}
+
+/**
+ * Check if there is a pending request for category query.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {boolean} True if an API request is in progress for this query.
+ */
+export function isLoadingCategories( state ) {
+	return state.categories === null;
+}
+
+/**
+ * Check if the categories have been loaded.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {boolean} True if categories is an array.
+ */
+export function hasLoadedCategories( state ) {
+	return Array.isArray( state.categories );
+}
+
+/**
+ * Get all loaded categories.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Array} A list of all categories.
+ */
+export function getCategories( state ) {
+	return state.categories;
+}
+
+/**
+ * Get category by its slug.
+ *
+ * @param {Object} state Global application state.
+ * @param {string} slug Category slug.
+ *
+ * @return {Array|undefined} The requested category.
+ */
+export function getCategoryBySlug( state, slug ) {
+	if ( ! hasLoadedCategories( state ) ) {
+		return;
+	}
+
+	const [ cat ] = state.categories.filter( ( i ) => i.slug === slug );
+	return cat;
+}

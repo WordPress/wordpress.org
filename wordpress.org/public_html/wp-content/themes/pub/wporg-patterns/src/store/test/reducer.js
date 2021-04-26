@@ -3,7 +3,8 @@
  */
 import apiPatterns from './fixtures/patterns';
 import apiPatternsPage2 from './fixtures/patterns-page-2';
-import { patterns } from '../reducer';
+import apiCategories from './fixtures/categories';
+import { categories, patterns } from '../reducer';
 
 describe( 'state', () => {
 	describe( 'patterns', () => {
@@ -56,6 +57,33 @@ describe( 'state', () => {
 			expect( state.queries[ 'pattern-categories=3' ] ).toHaveLength( 5 );
 			expect( state.byId ).toHaveProperty( '31' );
 			expect( state.byId ).toHaveProperty( '15' );
+		} );
+	} );
+
+	describe( 'categories', () => {
+		it( 'should return null when fetching categories', () => {
+			const state = categories(
+				{},
+				{
+					type: 'FETCH_CATEGORIES',
+				}
+			);
+
+			expect( state ).toBeNull();
+		} );
+
+		it( 'should store categories in the state with the "all" category', () => {
+			const state = categories(
+				{},
+				{
+					type: 'LOAD_CATEGORIES',
+					categories: apiCategories,
+				}
+			);
+
+			const lengthWithAll = apiCategories.length + 1;
+
+			expect( state ).toHaveLength( lengthWithAll );
 		} );
 	} );
 } );

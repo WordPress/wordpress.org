@@ -2,7 +2,18 @@
  * Internal dependencies
  */
 import apiPatterns from './fixtures/patterns';
-import { getPattern, getPatterns, getPatternsByQuery, isLoadingPatternsByQuery } from '../selectors';
+import apiCategories from './fixtures/categories';
+import {
+	getCategories,
+	getCategoryBySlug,
+	getCurrentQuery,
+	getPattern,
+	getPatterns,
+	getPatternsByQuery,
+	hasLoadedCategories,
+	isLoadingCategories,
+	isLoadingPatternsByQuery,
+} from '../selectors';
 
 describe( 'selectors', () => {
 	const initialState = {
@@ -88,6 +99,118 @@ describe( 'selectors', () => {
 			const pattern = getPattern( state, 25 );
 			expect( pattern ).toHaveProperty( 'id', 25 );
 			expect( pattern ).toHaveProperty( 'title.rendered', 'Large header with a heading' );
+		} );
+	} );
+
+	describe( 'getCurrentQuery', () => {
+		it( 'should get an empty object if there is no query', () => {
+			const initialQueryState = {
+				currentQuery: {},
+			};
+
+			expect( getCurrentQuery( initialQueryState ) ).toMatchObject( {} );
+		} );
+
+		it( 'should get an the correct query object', () => {
+			const initialQueryState = {
+				currentQuery: {
+					'pattern-categories': [ 1 ],
+				},
+			};
+
+			expect( getCurrentQuery( initialQueryState ) ).toMatchObject( initialQueryState.currentQuery );
+		} );
+	} );
+
+	describe( 'isLoadingCategories', () => {
+		it( 'should get true when state is null', () => {
+			const categoryState = {
+				categories: null,
+			};
+
+			expect( isLoadingCategories( categoryState ) ).toBe( true );
+		} );
+
+		it( 'should get false when state is an array', () => {
+			const categoryState = {
+				categories: apiCategories,
+			};
+			expect( isLoadingCategories( categoryState ) ).toBe( false );
+		} );
+	} );
+
+	describe( 'hasLoadedCategories', () => {
+		it( 'should get false when state is undefined', () => {
+			const categoryState = {
+				categories: undefined,
+			};
+			expect( hasLoadedCategories( categoryState ) ).toBe( false );
+		} );
+
+		it( 'should get true when state is an array', () => {
+			const categoryState = {
+				categories: apiCategories,
+			};
+			expect( hasLoadedCategories( categoryState ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'getCategories', () => {
+		it( 'should get a list of categories', () => {
+			const categoryState = {
+				categories: apiCategories,
+			};
+
+			expect( getCategories( categoryState ) ).toHaveLength( apiCategories.length );
+		} );
+	} );
+
+	describe( 'getCategoryBySlug', () => {
+		it( 'should get undefined if categories have not loaded', () => {
+			expect(
+				getCategoryBySlug(
+					{
+						categories: undefined,
+					},
+					'header'
+				)
+			).toBeUndefined();
+
+			expect(
+				getCategoryBySlug(
+					{
+						categories: null,
+					},
+					'header'
+				)
+			).toBeUndefined();
+		} );
+
+		it( 'should get undefined if there are no categories', () => {
+			const categoryState = {
+				categories: [],
+			};
+
+			expect( getCategoryBySlug( categoryState, apiCategories[ 0 ].slug ) ).toBeUndefined();
+		} );
+
+		it( 'should get undefined if no category exist', () => {
+			const categoryState = {
+				categories: apiCategories,
+			};
+
+			expect( getCategoryBySlug( categoryState, 'missing-category-slug' ) ).toBeUndefined();
+		} );
+
+		it( 'should get the correct category', () => {
+			const categoryState = {
+				categories: apiCategories,
+			};
+
+			expect( getCategoryBySlug( categoryState, apiCategories[ 0 ].slug ) ).toHaveProperty(
+				'id',
+				apiCategories[ 0 ].id
+			);
 		} );
 	} );
 } );

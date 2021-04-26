@@ -19,7 +19,7 @@ get_header();
 
 	<main id="main" class="site-main" role="main">
 
-		<div id="pattern-grid__container">
+		<div id="patterns__container">
 			<!-- Filter placeholder -->
 
 			<div class="pattern-grid">

@@ -12,9 +12,13 @@ body.single-wporg-pattern {
 
 	.entry-header {
 		max-width: $size__site-main;
-		padding: 2rem 0;
+		padding: 1.5rem;
 		margin-left: auto;
 		margin-right: auto;
+
+		@media only screen and (min-width: $breakpoint-large) {
+			padding: 1.5rem 0;
+		}
 
 		.entry-title {
 			margin-top: 0;
@@ -25,10 +29,67 @@ body.single-wporg-pattern {
 	.pattern-actions {
 		display: flex;
 		align-items: stretch;
+		flex-wrap: wrap;
 
 		button + button {
 			margin-left: 2em;
 		}
+	}
+
+	.pattern-actions__notice {
+		margin: 1.5rem 0 0;
+		height: auto;
+		flex-basis: 100%;
+
+		// @wordpress/components/notice wraps content
+		> * {
+			display: flex;
+			flex-direction: column; // stack on mobile
+			justify-content: space-between;
+			align-items: flex-start;
+			margin: 0;
+
+			button {
+				margin-top: 0.75rem;
+			}
+
+			@media only screen and (min-width: $breakpoint-small) {
+				align-items: center;
+				flex-direction: row;
+
+				button {
+					margin-top: 0;
+				}
+			}
+		}
+	}
+
+	.pattern-actions__guide {
+		max-width: $breakpoint-mobile / 1.25;
+
+		// @wordpress/components/guide overrides
+		height: auto;
+		max-height: none;
+	}
+
+	.pattern-actions__guide-content {
+		padding: 1.5rem;
+		line-height: 1.5;
+	}
+
+	.pattern-actions__guide-title {
+		margin: 0;
+	}
+
+	.pattern-actions__guide-shortcut {
+		background: $color-gray-light-300;
+		box-shadow: 0 0 0 1px $color-gray-light-700;
+		padding: 1px;
+		font-weight: 600;
+		min-width: 20px;
+		display: inline-block;
+		text-align: center;
+		border-radius: 2px;
 	}
 
 	.entry-content {

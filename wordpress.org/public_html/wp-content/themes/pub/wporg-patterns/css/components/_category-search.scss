@@ -12,6 +12,10 @@
 		border: none;
 		box-shadow: none;
 		font-size: 0.8125rem;
+
+		&:focus {
+			outline: $color__wp-blue auto 1px;
+		}
 	}
 
 	&__button {
@@ -19,6 +23,14 @@
 		background: transparent;
 		border: none;
 		color: $color__text-lighter;
+
+		&:active {
+			background: $color-gray-light-600;
+		}
+
+		&:focus {
+			outline: $color__wp-blue auto 1px;
+		}
 	}
 
 	&--is-loading {
@@ -29,7 +41,8 @@
 		border-radius: 4px;
 
 		@media only screen and (min-width: $breakpoint-mobile) {
-			width: 224px;
+			width: 224px !important;
+			min-width: auto !important;
 		}
 
 	}

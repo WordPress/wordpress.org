@@ -7,7 +7,7 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { fetchPatterns, loadPatterns } from './actions';
+import { fetchCategories, fetchPatterns, loadCategories, loadPatterns } from './actions';
 import { getQueryString } from './utils';
 
 export function* getPatternsByQuery( query ) {
@@ -18,5 +18,15 @@ export function* getPatternsByQuery( query ) {
 			path: addQueryArgs( '/wp/v2/wporg-pattern', query ),
 		} );
 		yield loadPatterns( queryString, results );
+	} catch ( error ) {}
+}
+
+export function* getCategories() {
+	try {
+		yield fetchCategories();
+		const results = yield apiFetch( {
+			path: addQueryArgs( '/wp/v2/pattern-categories' ),
+		} );
+		yield loadCategories( results );
 	} catch ( error ) {}
 }

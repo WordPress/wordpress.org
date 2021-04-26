@@ -1,10 +1,9 @@
 /**
- * External dependencies
+ * WordPress dependencies
  */
-import { store as coreStore } from '@wordpress/core-data';
+import { useDebounce } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
-import { getPath } from '@wordpress/url';
+import { addQueryArgs, getPath, getQueryArg } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -12,67 +11,73 @@ import { getPath } from '@wordpress/url';
 import CategoryMenu from '../category-menu';
 import CategorySearch from '../category-search';
 import CategoryContextBar from '../category-context-bar';
-import contextMessaging from './messaging';
+import { store as patternStore } from '../../store';
+import { useRoute } from '../../hooks';
+import { removeQueryString } from '../../utils';
 
 /**
  * Module constants
  */
-const PATTERN_TAXONOMY = 'wporg-pattern-category';
+const DEBOUNCE_MS = 300;
 
 const PatternGridMenu = () => {
-	// Show loading state
-	const [ showLoading, setShowLoading ] = useState( true );
-	const [ isFetching, setIsFetching ] = useState( false );
-	const [ path, setPath ] = useState();
-	const [ categoryContext, setCategoryContext ] = useState( undefined );
+	const { path, update: updatePath } = useRoute();
 
-	const categories = useSelect( ( select ) =>
-		select( coreStore ).getEntityRecords( 'taxonomy', PATTERN_TAXONOMY )
-	);
+	const { categories, isLoading, hasLoaded } = useSelect( ( select ) => {
+		const { getCategories, isLoadingCategories, hasLoadedCategories } = select( patternStore );
+		return {
+			categories: getCategories(),
+			isLoading: isLoadingCategories(),
+			hasLoaded: hasLoadedCategories(),
+		};
+	} );
 
-	useEffect( () => {
-		const pathOnLoad = getPath( window.location.href );
-		setPath( pathOnLoad );
-	}, [] );
+	const handleUpdatePath = ( value ) => {
+		const updatedPath = addQueryArgs( path, {
+			search: value,
+		} );
 
-	useEffect( () => {
-		// Since categories starts as an [] then switches to null
-		if ( showLoading && categories === null ) {
-			setIsFetching( true );
-		}
+		updatePath( updatedPath );
+	};
 
-		if ( isFetching && Array.isArray( categories ) ) {
-			setShowLoading( false );
-			setIsFetching( false );
-		}
-	}, [ isFetching, categories ] );
-
-	useEffect( () => {
-		setCategoryContext( contextMessaging[ path ] );
-	}, [ path ] );
+	const debouncedHandleUpdate = useDebounce( handleUpdatePath, DEBOUNCE_MS );
 
 	return (
 		<>
 			<nav className="pattern-grid-menu">
 				<CategoryMenu
-					path={ path }
+					path={ removeQueryString( path ) }
 					options={
 						categories
 							? categories.map( ( record ) => {
 								return {
-									// TODO: This url is temporary and won't use the # symbol
-									value: `#/pattern-categories/${ record.slug }`,
+									value: `/${ getPath( record.link ) || '' }`,
 									label: record.name,
 								};
 							} )
 							: []
 					}
-					onClick={ ( _path ) => setPath( _path ) }
-					isLoading={ showLoading }
+					onClick={ ( event ) => {
+						event.preventDefault();
+						updatePath( event.target.pathname );
+					} }
+					isLoading={ isLoading }
 				/>
-				<CategorySearch isLoading={ showLoading } />
+				<CategorySearch
+					isLoading={ isLoading }
+					isVisible={ hasLoaded }
+					defaultValue={ getQueryArg( window.location.href, 'search' ) }
+					onUpdate={ ( event ) => {
+						event.preventDefault();
+						debouncedHandleUpdate( event.target.value );
+					} }
+					onSubmit={ ( event ) => {
+						event.preventDefault();
+						debouncedHandleUpdate( event.target.elements[ 0 ].value );
+					} }
+				/>
 			</nav>
-			<CategoryContextBar { ...categoryContext } />
+			<CategoryContextBar />
 		</>
 	);
 };

@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Convert a query object into a standardized string.
@@ -37,4 +38,21 @@ export function getQueryString( query = {} ) {
 	}
 
 	return stableKey;
+}
+
+/**
+ * Get the first category used to display all patterns.
+ *
+ * See Schema:
+ * https://developer.wordpress.org/rest-api/reference/categories/
+ *
+ * @return {Object} A category object
+ */
+export function getAllCategory() {
+	return {
+		id: -1,
+		slug: '', // Slug matches url
+		name: __( 'All', 'wporg-patterns' ),
+		link: '/',
+	};
 }

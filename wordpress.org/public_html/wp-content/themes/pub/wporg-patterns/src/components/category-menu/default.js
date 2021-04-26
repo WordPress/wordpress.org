@@ -28,7 +28,7 @@ const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
 			width: activeRef.current.offsetWidth,
 			height: activeRef.current.offsetHeight,
 		} );
-	}, [ containerRef, activeRef, path ] );
+	} );
 
 	if ( ! isLoading && ! options.length ) {
 		return null;
@@ -36,18 +36,22 @@ const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
 
 	return (
 		<ul className={ `category-menu ${ isLoading ? 'category-menu--is-loading' : '' } ` } ref={ containerRef }>
-			{ options.map( ( i ) => (
-				<li key={ i.value }>
-					<a
-						className={ path === i.value ? 'category-menu--is-active' : '' }
-						href={ i.value }
-						ref={ path === i.value ? activeRef : null }
-						onClick={ ( { target } ) => onClick( target.hash ) }
-					>
-						{ i.label }
-					</a>
-				</li>
-			) ) }
+			{ options.map( ( i ) => {
+				const isActive = path === i.value;
+
+				return (
+					<li key={ i.value }>
+						<a
+							className={ isActive ? 'category-menu--is-active' : '' }
+							href={ i.value }
+							ref={ isActive ? activeRef : null }
+							onClick={ onClick }
+						>
+							{ i.label }
+						</a>
+					</li>
+				);
+			} ) }
 		</ul>
 	);
 };
