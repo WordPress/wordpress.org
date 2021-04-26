@@ -54,6 +54,8 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 			'tutorials/block-tutorial/block-controls-toolbars-and-inspector' => 'tutorials/block-tutorial/block-controls-toolbar-and-sidebar/',
 			'components/server-side-render' => 'packages/packages-server-side-render',
 			'reference-guides/block-api/versions' => 'reference-guides/block-api/block-api-versions',
+			'how-to-guides/block-theme' => 'how-to-guides/themes/create-block-theme',
+			'how-to-guides/block-based-theme' => 'how-to-guides/themes/block-theme-overview',
 
 			// After handbook restructuring, March 2021.
 			'handbook/versions-in-wordpress/' => 'contributors/versions-in-wordpress',
@@ -64,8 +66,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 			'developers/feature-flags' => 'how-to-guides/feature-flags',
 			'tutorials/devenv' => 'handbook/tutorials/devenv',
 			'tutorials/devenv/docker-ubuntu' => 'handbook/tutorials/devenv/docker-ubuntu',
-			'tutorials/block-based-themes' => 'how-to-guides/block-based-theme',
-			'tutorials/block-based-themes/block-based-themes-2-adding-blocks' => 'how-to-guides/block-based-theme/block-based-themes-2-adding-blocks',
+			'tutorials/block-based-theme' => 'how-to-guides/themes/block-theme-overview',
 		];
 
 		// General path redirects. (More specific path first.)
