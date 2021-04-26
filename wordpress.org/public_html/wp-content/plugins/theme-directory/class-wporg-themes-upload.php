@@ -743,6 +743,10 @@ class WPORG_Themes_Upload {
 			$this->trac_ticket->keywords[] = 'accessibility-ready';
 		}
 
+		if ( in_array( 'full-site-editing', $this->theme->get( 'Tags' ) ) ) {
+			$this->trac_ticket->keywords[] = 'full-site-editing';
+		}
+
 		if ( in_array( 'holiday', $this->theme->get( 'Tags' ) ) ) {
 			$this->trac_ticket->keywords[] = 'holiday';
 		}
