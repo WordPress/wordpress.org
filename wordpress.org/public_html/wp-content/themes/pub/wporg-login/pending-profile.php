@@ -5,10 +5,12 @@
  * @package wporg-login
  */
 
+$sso = WPOrg_SSO::get_instance();
+
  // Migrate to cookies.
-if ( !empty( WP_WPOrg_SSO::$matched_route_params['profile_user'] ) ) {
-	setcookie( 'wporg_profile_user', WP_WPOrg_SSO::$matched_route_params['profile_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-	setcookie( 'wporg_profile_key',  WP_WPOrg_SSO::$matched_route_params['profile_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+if ( !empty( $sso::$matched_route_params['profile_user'] ) ) {
+	setcookie( 'wporg_profile_user', $sso::$matched_route_params['profile_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+	setcookie( 'wporg_profile_key',  $sso::$matched_route_params['profile_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 
 	wp_safe_redirect( '/register/create-profile' );
 	die();
@@ -53,6 +55,7 @@ get_header();
 
 	<div class="message info">
 		<p><?php
+		if ( $pending_user['cleared'] ) {
 			printf(
 				/* translators: %s Email address */
 				__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) . '<br>' .
@@ -60,18 +63,26 @@ get_header();
 				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
 				esc_attr( $pending_user['user_email'] )
 			);
+		} else {
+			printf(
+				/* translators: %s Email address */
+				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . '<br>' .
+				__( 'Please contact %s for more details.', 'wporg' ),
+				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
+				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+			);
+		}
 		?></p>
 	</div>
 
 	<p class="intro">
-	<?php _e( 'Complete your WordPress.org Profile information.', 'wporg' ); ?>
+		<?php _e( 'Complete your WordPress.org Profile information.', 'wporg' ); ?>
 	</p>
 
 	<p class="login-login">
 		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
 		<input type="text" disabled="disabled" class=" disabled" value="<?php echo esc_attr( $profile_user ); ?>" size="20" />
 	</p>
-
 
 	<?php
 		$fields = &$pending_user['meta'];

@@ -5,16 +5,12 @@
  * @package wporg-login
  */
 
-// Clear the pending cookies, they're no longer needed.
-if ( isset( $_COOKIE['wporg_profile_user'] ) ) {
-	setcookie( 'wporg_profile_user', false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-	setcookie( 'wporg_profile_key', false,  time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-}
+$sso = WPOrg_SSO::get_instance();
 
 // Migrate to cookies.
-if ( !empty( WP_WPOrg_SSO::$matched_route_params['confirm_user'] ) ) {
-	setcookie( 'wporg_confirm_user', WP_WPOrg_SSO::$matched_route_params['confirm_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-	setcookie( 'wporg_confirm_key',  WP_WPOrg_SSO::$matched_route_params['confirm_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+if ( !empty( $sso::$matched_route_params['confirm_user'] ) ) {
+	setcookie( 'wporg_confirm_user', $sso::$matched_route_params['confirm_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+	setcookie( 'wporg_confirm_key',  $sso::$matched_route_params['confirm_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 
 	wp_safe_redirect( '/register/create' );
 	die();
@@ -59,19 +55,34 @@ if ( wporg_login_save_profile_fields( $pending_user ) ) {
 	$pending_user = wporg_get_pending_user( $activation_user );
 }
 
-
-$error_recapcha_status = $error_akismet = false;
-if ( isset( $_POST['user_pass'] ) ) {
+$error_recapcha_status = false;
+if ( isset( $_POST['user_pass'] ) && 2 !== $pending_user['cleared'] ) {
 
 	// Check reCaptcha status
-	if ( ! wporg_login_check_recapcha_status( 'pending_create' ) ) {
-		// No no. "Please try again."
-		$error_recapcha_status = true;
+	if ( ! wporg_login_check_recapcha_status( 'pending_create', false ) ) {
 		unset( $_POST['user_pass'] );
+		$error_recapcha_status = true;
+
+		// Allow a recaptcha fail to try again, but if they're blocked due to low score, mark them as needing approval.
+		if ( ! wporg_login_check_recapcha_status( 'pending_create', true ) ) {
+			$pending_user['cleared'] = 0;
+		}
+
+		// Store for reference.
+		if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
+			$recaptcha_api = wporg_login_recaptcha_api(
+				$_POST['_reCaptcha_v3_token'],
+				RECAPTCHA_V3_PRIVKEY
+			);
+			$pending_user['scores']['create_attempt'] = -1;
+			if ( $recaptcha_api && $recaptcha_api['success'] && 'pending_create' == $recaptcha_api['action'] ) {
+				$pending_user['scores']['create_attempt'] = $recaptcha_api['score'];
+			}
+		}
 	}
 
-	// Check Akismet
-	$akismet = wporg_login_check_akismet(
+	// Check Akismet with new profile information
+	$pending_user['meta']['akismet_result'] = wporg_login_check_akismet(
 		$pending_user['user_login'],
 		$pending_user['user_email'],
 		$pending_user['meta']['url'] ?? '',
@@ -82,16 +93,22 @@ if ( isset( $_POST['user_pass'] ) ) {
 		] )
 	);
 
-	// Store for reference.
-	$pending_user['meta']['akismet_result'] = $akismet;
-	wporg_update_pending_user( $pending_user );
-
-	if ( 'spam' == $akismet ) {
-		// No no. "Please try again."
-		$error_akismet = true;
+	if ( 'spam' === $pending_user['meta']['akismet_result'] ) {
+		$pending_user['cleared'] = 0;
 		unset( $_POST['user_pass'] );
 	}
 
+	wporg_update_pending_user( $pending_user );
+}
+
+if ( ! $pending_user['cleared'] ) {
+	if ( ! empty( $_COOKIE['wporg_profile_user'] ) ) {
+		// Throw the user back to the pending screen after being detected as spam at this point.
+		wp_safe_redirect( '/register/create-profile/' );
+		die();
+	}
+
+	unset( $_POST['user_pass'] );
 }
 
 if ( isset( $_POST['user_pass'] ) ) {
@@ -100,6 +117,10 @@ if ( isset( $_POST['user_pass'] ) ) {
 	if ( $pending_user && ! $pending_user['created'] ) {
 		$user = wporg_login_create_user_from_pending( $pending_user, $user_pass );
 		if ( $user ) {
+
+			// Clear the cookies, they're no longer needed.
+			setcookie( 'wporg_profile_user', false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+			setcookie( 'wporg_profile_key',  false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 			setcookie( 'wporg_confirm_user', false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 			setcookie( 'wporg_confirm_key',  false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 
@@ -120,18 +141,32 @@ wp_enqueue_script( 'wporg-registration' );
 get_header();
 ?>
 
-<p class="intro">
-<?php _e( 'Set your password and complete your WordPress.org Profile information.', 'wporg' ); ?>
-</p>
-
 <form name="registerform" id="registerform" action="" method="post">
 
-		<p class="login-login">
-			<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
-			<input type="text" disabled="disabled" class=" disabled" value="<?php echo esc_attr( $activation_user ); ?>" size="20" />
-		</p>
+	<?php if ( ! $pending_user['cleared'] ) { ?>
+	<div class="message info">
+		<p><?php
+			printf(
+				/* translators: %s Email address */
+				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . '<br>' .
+				__( 'Please contact %s for more details.', 'wporg' ),
+				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
+				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+			);
+		?></p>
+	</div>
+	<?php } ?>
 
-		<div class="user-pass1-wrap">
+	<p class="intro">
+		<?php _e( 'Set your password and complete your WordPress.org Profile information.', 'wporg' ); ?>
+	</p>
+
+	<p class="login-login">
+		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
+		<input type="text" disabled="disabled" class=" disabled" value="<?php echo esc_attr( $activation_user ); ?>" size="20" />
+	</p>
+
+	<div class="user-pass1-wrap">
 		<p>
 			<label for="pass1"><?php _e( 'Password', 'wporg' ); ?></label>
 		</p>
@@ -144,14 +179,13 @@ get_header();
 		</div>
 	</div>
 
-<!--	<p class="description indicator-hint"><?php _e( 'Hint: The password should be at least twelve characters long. To make it stronger, use upper and lower case letters, numbers, and symbols like ! " ? $ % ^ &amp; ).', 'wporg' ); ?></p> -->
-
 	<?php
 		$fields = &$pending_user['meta'];
 		include __DIR__ . '/partials/register-profilefields.php';
 	?>
+
 	<?php
-		if ( $error_recapcha_status || $error_akismet ) {
+		if ( $error_recapcha_status ) {
 			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
 		}
 	?>

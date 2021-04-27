@@ -121,7 +121,7 @@ function wporg_login_rest_resend_confirmation_email( $request ) {
 	);
 
 	$pending_user = wporg_get_pending_user( $request['account'] );
-	if ( ! $pending_user || $pending_user['created'] ) {
+	if ( ! $pending_user || $pending_user['created'] || ! $pending_user['user_activation_key'] ) {
 		return $success_message;
 	}
 

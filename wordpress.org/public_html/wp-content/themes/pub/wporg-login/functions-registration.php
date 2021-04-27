@@ -1,6 +1,6 @@
 <?php
 
-function wporg_login_check_recapcha_status( $check_v3_action = false ) {
+function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low_scores = true ) {
 
 	// reCaptcha V3 Checks
 	if ( $check_v3_action ) {
@@ -21,7 +21,7 @@ function wporg_login_check_recapcha_status( $check_v3_action = false ) {
 		}
 
 		// Block super-low scores.
-		if ( (float)$result['score'] < (float) get_option( 'recaptcha_v3_threshold', 0.2 ) ) {
+		if ( $block_low_scores && (float)$result['score'] < (float) get_option( 'recaptcha_v3_threshold', 0.2 ) ) {
 			return false;
 		}
 	}
@@ -121,6 +121,13 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		}
 	}
 
+	$pending_user['meta']['akismet_result'] = wporg_login_check_akismet( $user_login, $user_email );
+
+	$pending_user['cleared'] = (
+		'spam' !== $pending_user['meta']['akismet_result'] &&
+		(float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 ) 
+	);
+
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
 		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
@@ -146,7 +153,7 @@ function wporg_login_send_confirmation_email( $user ) {
 
 	$user = wporg_get_pending_user( $user );
 
-	if ( ! $user || $user['created'] ) {
+	if ( ! $user || $user['created'] || ! $user['cleared'] ) {
 		return false;
 	}
 
@@ -229,6 +236,19 @@ function wporg_update_pending_user( $pending_user ) {
 		);
 	}
 
+}
+
+function wporg_delete_pending_user( $pending_user ) {
+	global $wpdb;
+
+	if ( empty( $pending_user['pending_id'] ) ) {
+		return false;
+	}
+
+	return $wpdb->delete(
+		"{$wpdb->base_prefix}user_pending_registrations",
+		array( 'pending_id' => $pending_user['pending_id'] )
+	);
 }
 
 /**

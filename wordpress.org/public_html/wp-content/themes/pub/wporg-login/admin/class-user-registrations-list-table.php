@@ -2,30 +2,121 @@
 
 class User_Registrations_List_Table extends WP_List_Table {
 
+	function get_views() {
+		global $wpdb;
+
+		$views = [
+			[
+				'all',
+				'All',
+			],
+			[
+				'pending',
+				'Pending Email Confirmation',
+			],
+			[
+				'registered',
+				'Completed registration',
+			],
+			[
+				'spam',
+				'Caught in spam',
+			],
+			[
+				'akismet',
+				'Akismet said no',
+			]
+		];
+
+		$default      = 'all';
+		$current_view = $_REQUEST['view'] ?? $default;
+
+		if ( isset( $_GET['s'] ) ) {
+			$default = 'search';
+			$views[0] = [
+				'search', 'All search results'
+			];
+
+			array_unshift( $views, [ 'all', 'All' ] );
+
+			if ( 'all' === $current_view ) {
+				$current_view = 'search';
+			}
+		}
+
+		return array_map(
+			function( $item ) use ( $current_view ) {
+				global $wpdb;
+
+				$count = $wpdb->get_var(
+					"SELECT count(*) FROM {$wpdb->base_prefix}user_pending_registrations WHERE " .
+					$this->get_where_sql( $item[0] )
+				);
+
+				$url = admin_url( 'index.php?page=user-registrations' );
+				if ( !empty( $_GET['s'] ) && 'all' != $item[0] ) {
+					$url = add_query_arg( 's', urlencode( $_GET['s'] ), $url );
+				}
+
+				$url = add_query_arg( 'view', $item[0], $url );
+
+				return sprintf(
+					'<a href="%s" class="%s">%s <span class="count">(%s)</span></a>',
+					$url,
+					$current_view === $item[0] ? 'current' : '',
+					$item[1],
+					number_format_i18n( $count ),
+				);
+			}, $views
+		);
+	}
+
+	protected function get_view_sql_where( $view ) {
+		switch ( $view ) {
+			case 'pending':
+				return 'created = 0 AND cleared = 1';
+			case 'spam':
+				return 'cleared = 0';
+			case 'akismet':
+				return "meta LIKE '%akismet_result\":\"spam%'";
+			case 'registered':
+				return 'created = 1';
+			default:
+			case 'all':
+				return '1=1';
+		}
+	}
+
+	protected function get_where_sql( $view = null ) {
+		global $wpdb;
+
+		$where = $this->get_view_sql_where( $view ?: ( $_REQUEST['view'] ?? 'all' ) );
+
+		if ( isset( $_GET['s'] ) && 'all' != $view ) {
+			 $search_like = '%' . $wpdb->esc_like( wp_unslash( $_GET['s'] ) ) . '%';
+			 $where .= $wpdb->prepare(
+				 " AND ( user_login LIKE %s OR user_email LIKE %s OR meta LIKE %s )",
+				 $search_like, $search_like, $search_like
+			);
+		}
+
+		return $where;
+	}
+
 	function get_columns() {
 		return [
-			'pending_id'      => 'ID',
-			'created'         => 'Created',
 			'user_login'      => 'User Login',
-			'user_email'      => 'User Email',
-			'user_ip'         => 'IP',
-			'scores'          => 'reCaptcha',
-			'akismet'         => 'Akismet',
-			'user_registered' => 'Registered Date',
-			'created_date'    => 'Created Date',
+			'meta'            => 'Meta',
+			'scores'          => 'Anti-spam<br>reCaptcha Akismet',
+			'user_registered' => 'Registered',
 		];
 	 }
 
 	 public function get_sortable_columns() {
 		return [
-			'pending_id'      => array( 'pending_id', false ),
-			'created'         => array( 'created', true ),
 			'user_login'      => array( 'user_login', true ),
-			'user_email'      => array( 'user_email', true ),
 			'scores'          => array( 'scores', true ),
-			'akismet'         => array( 'akismet', true ),
 			'user_registered' => array( 'user_registered', true ),
-			'created_date'    => array( 'created_date', true ),
 		];
 	 }
 
@@ -51,14 +142,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 	   $per_page     = $this->get_items_per_page( 'users_per_page', 100 );
 	   $current_page = $this->get_pagenum();
 
-	   $where = '1 = 1 ';
-	   if ( isset( $_GET['s'] ) ) {
-			$search_like = '%' . $wpdb->esc_like( $_GET['s'] ) . '%';
-			$where .= $wpdb->prepare(
-				"AND ( user_login LIKE %s OR user_email LIKE %s OR meta LIKE %s )",
-				$search_like, $search_like, $search_like
-		   );
-	   }
+	   $where = $this->get_where_sql();
 
 	   $per_page_offset = ($current_page-1) * $per_page;
 
@@ -81,39 +165,19 @@ class User_Registrations_List_Table extends WP_List_Table {
 		echo esc_html( $item->$column_name );
 	}
 
-	function column_created( $item ) {
-		echo ( $item->created ? 'Yes' : 'No' );
-
-		if ( ! $item->created ) {
-			$url = add_query_arg(
-				'email',
-				urlencode( $item->user_email ),
-				admin_url( 'admin-post.php?action=login_resend_email' )
-			);
-			$url = wp_nonce_url( $url, 'resend_' . $item->user_email );
-			echo $this->row_actions( [
-				'resend' => '<a href="' . esc_url( $url ) . '">Resend Email</a>',
-			] );
-		}
-	}
-
 	function column_user_registered( $item ) {
 		printf(
 			'<abbr title="%s">%s ago</abbr>',
 			esc_attr( $item->user_registered ),
 			human_time_diff( strtotime( $item->user_registered ) )
 		);
-	}
 
-	function column_created_date( $item ) {
 		if ( $item->created_date && '0000-00-00 00:00:00' !== $item->created_date ) {
 			printf(
-				'<abbr title="%s">%s ago</abbr>',
+				'<br>Created: <abbr title="%s">%s ago</abbr>',
 				esc_attr( $item->created_date ),
 				human_time_diff( strtotime( $item->created_date ) )
 			);
-		} else {
-			echo '&nbsp;';
 		}
 	}
 
@@ -121,12 +185,20 @@ class User_Registrations_List_Table extends WP_List_Table {
 		if ( $item->created ) {
 			$url = esc_url( 'https://profiles.wordpress.org/' . $item->user_login . '/' );
 			echo "<a href='$url'>" . esc_html( $item->user_login ) . '</a>';
+
+			if (
+				( $user = get_user_by( 'login', $item->user_login ) ) &&
+				'BLOCKED' === substr( $user->user_pass, 0, 7 )
+			) {
+				echo ' <span class="delete-red">(blocked)</span>';
+			}
+
 		} else {
 			echo esc_html( $item->user_login );
 		}
-	}
 
-	function column_user_email( $item ) {
+		echo '<hr>';
+
 		list( $email_user, $domain ) = explode( '@', $item->user_email, 2 );
 
 		printf(
@@ -135,10 +207,66 @@ class User_Registrations_List_Table extends WP_List_Table {
 			urlencode( $domain ),
 			esc_html( $domain )
 		);
+
+		$row_actions = [];
+
+		if ( ! $item->created && $item->cleared ) {
+			$url = add_query_arg(
+				'email',
+				urlencode( $item->user_email ),
+				admin_url( 'admin-post.php?action=login_resend_email' )
+			);
+			$url = wp_nonce_url( $url, 'resend_' . $item->user_email );
+
+			$row_actions['resend'] = '<a href="' . esc_url( $url ) . '">Resend Email</a>';
+		}
+
+		if ( ! $item->created ) {
+			if ( $item->user_activation_key ) {
+				$url = add_query_arg(
+					'email',
+					urlencode( $item->user_email ),
+					admin_url( 'admin-post.php?action=login_block' )
+				);
+				$url = wp_nonce_url( $url, 'block_' . $item->user_email );
+	
+				$row_actions['block'] = '<a href="' . esc_url( $url ) . '">Block Registration</a>';
+			}
+
+			$url = add_query_arg(
+				'email',
+				urlencode( $item->user_email ),
+				admin_url( 'admin-post.php?action=login_delete' )
+			);
+			$url = wp_nonce_url( $url, 'delete_' . $item->user_email );
+
+			$row_actions['delete'] = '<a href="' . esc_url( $url ) . '">Delete</a>';
+
+		} else {
+			$url = add_query_arg(
+				'email',
+				urlencode( $item->user_email ),
+				admin_url( 'admin-post.php?action=login_block_account' )
+			);
+			$url = wp_nonce_url( $url, 'block_account_' . $item->user_email );
+
+			if (
+				! ( $user = get_user_by( 'login', $item->user_login ) ) ||
+				'BLOCKED' !== substr( $user->user_pass, 0, 7 )
+			) {
+				$row_actions['block-account'] = '<a href="' . esc_url( $url ) . '">Block Account</a>';
+			}
+
+		}
+
+		if ( $row_actions ) {
+			echo $this->row_actions( $row_actions );
+		}
+
 	}
 
 
-	function column_user_ip( $item ) {
+	function column_meta( $item ) {
 		$meta = json_decode( $item->meta );
 
 		echo implode( ', ',
@@ -157,9 +285,19 @@ class User_Registrations_List_Table extends WP_List_Table {
 				] ) )
 			)
 		);
+		echo '<hr>';
+
+		foreach ( [ 'url', 'from', 'occ', 'interests' ] as $field ) {
+			if ( !empty( $meta->$field ) ) {
+				printf( "%s: %s<br>", esc_html( $field ), esc_html( $meta->$field ) );
+			}
+		}
 	}
 
 	function column_scores( $item ) {
+
+		echo ( $item->cleared ? 'Passed' : 'Failed' ) . '<br>';
+
 		foreach ( json_decode( $item->scores ) as $type => $val ) {
 			printf(
 				'<abbr title="%s">%s</abbr> ',
@@ -167,12 +305,43 @@ class User_Registrations_List_Table extends WP_List_Table {
 				esc_html( $val )
 			);
 		}
-	}
 
-	function column_akismet( $item ) {
-		$meta = json_decode( $item->meta, true );
+		$meta    = json_decode( $item->meta );
+		$akismet = $meta->akismet_result ?? '';
+		if ( $akismet ) {
+			printf(
+				'<abbr title="%s">%s</abbr> ',
+				esc_attr( 'Akismet' ),
+				esc_html( strtolower( $akismet ) )
+			);
+		}
 
-		echo $meta['akismet_result'] ?? '';
+		$row_actions = [];
+
+		if ( ! $item->created && $item->user_activation_key ) {
+			$url = add_query_arg(
+				'email',
+				urlencode( $item->user_email ),
+				admin_url( 'admin-post.php?action=login_block' )
+			);
+			$url = wp_nonce_url( $url, 'block_' . $item->user_email );
+
+			$row_actions['block'] = '<a href="' . esc_url( $url ) . '">Block Registration</a>';
+		}
+
+		if ( ! $item->cleared ) {
+			$url = add_query_arg(
+				'email',
+				urlencode( $item->user_email ),
+				admin_url( 'admin-post.php?action=login_mark_as_cleared' )
+			);
+			$url = wp_nonce_url( $url, 'clear_' . $item->user_email );
+			$row_actions['approve-reg'] = '<a href="' . esc_url( $url ) . '">Approve</a>';
+		}
+
+		if ( $row_actions ) {
+			echo $this->row_actions( $row_actions );
+		}
 	}
 
 }
