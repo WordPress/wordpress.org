@@ -58,6 +58,12 @@ function enqueue_assets() {
 		wp_enqueue_style( 'wp-components' );
 
 		wp_set_script_translations( 'wporg-pattern-script', 'wporg-patterns' );
+
+		wp_add_inline_script(
+			'wporg-pattern-script',
+			sprintf( 'var wporgAssetUrl = "%s";', esc_url( get_stylesheet_directory_uri() ) ),
+			'before'
+		);
 	}
 
 	wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . "/js/navigation$suffix.js", array(), '20210331', true );

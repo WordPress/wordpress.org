@@ -90,8 +90,17 @@ function setHead( doc, head ) {
 		'<style>body{margin:0}</style>' + head;
 }
 
-function Iframe( { contentRef, children, head, headHTML, ...props }, ref ) {
+function Iframe( { contentRef, children, head, headHTML, themeSlug, ...props }, ref ) {
 	const [ iframeDocument, setIframeDocument ] = useState();
+
+	headHTML +=
+		'<style>body{pointer-events:none;display: flex;align-items: center;justify-content: center;min-height: 100vh;} body > div {width: 100%}</style>';
+
+	if ( themeSlug ) {
+		headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${ themeSlug }/style.css" media="all" />`;
+	} else {
+		headHTML += '<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css" media="all" />';
+	}
 
 	const setRef = useCallback( ( node ) => {
 		if ( ! node ) {

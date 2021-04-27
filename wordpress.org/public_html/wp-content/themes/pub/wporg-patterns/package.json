@@ -54,7 +54,7 @@
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js",
 		"globals": {
-			"wporgBlockPattern": "readonly"
+			"wporgAssetUrl": "readonly"
 		}
 	},
 	"prettier": "../../../../.prettierrc.js",

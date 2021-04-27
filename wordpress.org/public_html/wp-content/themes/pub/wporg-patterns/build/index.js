@@ -11337,12 +11337,21 @@ function Iframe(_ref, ref) {
       children = _ref.children,
       head = _ref.head,
       headHTML = _ref.headHTML,
-      props = _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2___default()(_ref, ["contentRef", "children", "head", "headHTML"]);
+      themeSlug = _ref.themeSlug,
+      props = _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2___default()(_ref, ["contentRef", "children", "head", "headHTML", "themeSlug"]);
 
   var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["useState"])(),
       _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default()(_useState, 2),
       iframeDocument = _useState2[0],
       setIframeDocument = _useState2[1];
+
+  headHTML += '<style>body{pointer-events:none;display: flex;align-items: center;justify-content: center;min-height: 100vh;} body > div {width: 100%}</style>';
+
+  if (themeSlug) {
+    headHTML += "<link rel=\"stylesheet\" href=\"https://wp-themes.com/wp-content/themes/".concat(themeSlug, "/style.css\" media=\"all\" />");
+  } else {
+    headHTML += '<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css" media="all" />';
+  }
 
   var setRef = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["useCallback"])(function (node) {
     if (!node) {
@@ -11595,7 +11604,7 @@ var CopyPasteImage = function CopyPasteImage() {
         height: '220px'
       }
     }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("img", {
-      src: "/wp-content/themes/pattern-directory/images/copy-paste-demo.gif",
+      src: "".concat(wporgAssetUrl, "/images/copy-paste-demo.gif"),
       alt: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('GIF of copy and pasting.', 'wporg-patterns')
     }))
   );
@@ -11747,12 +11756,11 @@ var PatternPreviewActions = function PatternPreviewActions() {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
-/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _iframe__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../iframe */ "./src/components/iframe/index.js");
 
 
 /**
- * WordPress dependencies
+ * Internal dependencies
  */
 
 
@@ -11764,12 +11772,10 @@ function Canvas(_ref) {
     minHeight: '600px',
     overflowY: 'auto'
   };
-  var extraIframeStyles = // @todo - Should we keep the TT1 style? Load css from a local file?
-  '<link rel="stylesheet" id="twenty-twenty-one-style-css"  href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css?ver=1.2" media="all" />' + '<style>body{pointer-events:none;display: flex;align-items: center;justify-content: center;min-height: 100vh;} body > div {width: 100%}</style>';
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__["__unstableIframe"], {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_iframe__WEBPACK_IMPORTED_MODULE_1__["default"], {
     className: "pattern-preview__viewport-iframe",
     style: style,
-    headHTML: window.__editorStyles.html + extraIframeStyles
+    headHTML: window.__editorStyles.html
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
     dangerouslySetInnerHTML: {
       __html: html
@@ -13134,17 +13140,6 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports) {
 
 (function() { module.exports = window["regeneratorRuntime"]; }());
-
-/***/ }),
-
-/***/ "@wordpress/block-editor":
-/*!*************************************!*\
-  !*** external ["wp","blockEditor"] ***!
-  \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["wp"]["blockEditor"]; }());
 
 /***/ }),
 
