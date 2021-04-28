@@ -2331,12 +2331,12 @@ aside[id^="nav_menu"] .widget-title {
 
 .single-handbook .devhub-wrap main h2 {
     margin-top: 4rem;
-    border-bottom: 2px solid #333;
+    border-bottom: 1px solid #AAA;
 }
 
 .single-handbook .devhub-wrap main h3 {
     margin-top: 4rem;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #CCC;
 }
 
 .single-handbook .handbook-name-container + #primary {
