@@ -1066,7 +1066,7 @@ TICKET;
 		// Commit it to SVN.
 		$password = escapeshellarg( THEME_DROPBOX_PASSWORD );
 		$message  = escapeshellarg( sprintf(
-			__( 'New version of %1$s - %2$s', 'wporg-themes' ),
+			'New version of %1$s - %2$s', // Intentionally not translated.
 			$this->theme->display( 'Name' ),
 			$this->theme->display( 'Version' )
 		) );
@@ -1092,14 +1092,13 @@ TICKET;
 	 * Add the theme files to SVN via svn import.
 	 */
 	function add_to_svn_via_svn_import() {
-		$import_msg = empty( $this->theme_post ) ?  __( 'New theme: %1$s - %2$s', 'wporg-themes' ) : __( 'New version of %1$s - %2$s', 'wporg-themes' );
+		$import_msg = empty( $this->theme_post ) ?  'New theme: %1$s - %2$s' : 'New version of %1$s - %2$s'; // Intentionally not translated
 		$import_msg = escapeshellarg( sprintf( $import_msg, $this->theme->display( 'Name' ), $this->theme->display( 'Version' ) ) );
 		$svn_path   = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}" );
 		$theme_path = escapeshellarg( $this->theme_dir );
-		$svn        = escapeshellarg( self::SVN );
 		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
 
-		$last_line = $this->exec_with_notify( "{$svn} --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path}" );
+		$last_line = $this->exec_with_notify( self::SVN . " --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path}" );
 
 		if ( preg_match( '/Committed revision (\d+)\./i', $last_line, $m ) ) {
 			$this->trac_changeset = $m[1];
