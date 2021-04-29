@@ -75,6 +75,11 @@ class WPTV_Anon_Upload {
 			);
 		}
 
+		// For an XHR request, just send the redirect location, don't redirect to it.
+		if ( isset( $_GET['xhr'] ) ) {
+			die( $redir );
+		}
+
 		wp_redirect( $redir );
 		exit;
 	}

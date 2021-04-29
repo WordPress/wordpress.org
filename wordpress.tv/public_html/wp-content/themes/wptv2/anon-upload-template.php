@@ -164,6 +164,14 @@ function anon_upload_css() {
 			display: inline;
 			width: auto;
 		}
+
+		#upload-progress .status,
+		#upload-progress .percent {
+			font-family: monospace;
+		}
+		#upload-progress a.abort:hover {
+			color: red;
+		}
 	</style>
 	<?php
 }
@@ -275,7 +283,7 @@ if ( isset( $_GET['post_category'] ) ) {
 					<p>Please review the guidelines listed on the right, then submit your video below:</p>
 				<?php } ?>
 
-				<form method="post" action="<?php echo admin_url('admin-post.php'); ?>" id="video-upload-form" enctype="multipart/form-data">
+				<form method="post" action="<?php echo admin_url('admin-post.php'); ?>" data-xhr-action="<?php echo admin_url('admin-post.php?xhr=1'); ?>" id="video-upload-form" enctype="multipart/form-data">
 					<?php wp_nonce_field('wptv-upload-video', 'wptvvideon'); ?>
 					<input type="hidden" name="action" value="wptv_video_upload" />
 
@@ -383,6 +391,10 @@ if ( isset( $_GET['post_category'] ) ) {
 					<p class="last">
 						<input type="submit" id="wptv_video_upload" style="display:none;" value="<?php esc_attr_e( 'Submit' ); ?>" />
 					</p>
+					<p id="upload-progress" style="display:none;">
+						<progress value="0" max="100" style="width:90%;"></progress><span class="percent"></span><br>
+  						<span class="status"></span> <a href="#" class="abort">Cancel</a>
+					</p>
 				</form>
 			</div>
 		</div>
@@ -434,7 +446,7 @@ if ( isset( $_GET['post_category'] ) ) {
 				title += $( '.location input:checked' ).parent().text().trim() + " ";
 
 				// .. and the Year
-				title += $( '#wptv_date' ).value.substring( 0, 4 );
+				title += $( '#wptv_date' ).val().substring( 0, 4 );
 
 				// If a location or year has been selected, build the Event Name.
 				if ( $.trim( title ) ) {
@@ -486,6 +498,7 @@ if ( isset( $_GET['post_category'] ) ) {
 				// Changes to this list must be synced with WPTV_Anon_Upload::save()
 				if ( ! file.val() || !/\.(avi|mov|qt|mpeg|mpg|mpe|mp4|m4v|asf|asx|wax|wmv|wmx|ogv|3gp|3g2)$/.test( file.val() ) ) {
 					invalid(file, e);
+					scroll = true;
 				}
 
 				// If there's any input in the honeypot field, it was probably put there by a bot, so reject the submission
@@ -494,11 +507,137 @@ if ( isset( $_GET['post_category'] ) ) {
 					scroll = true;
 				}
 
-				if ( scroll && uploaded_by.length ) {
-					uploaded_by.get( 0 ).scrollIntoView();
+				if ( scroll ) {
+					jQuery( '.invalid' ).get(0).scrollIntoView();
+					return;
+				}
+
+				// Start the upload!
+				if ( 
+					'undefined' != typeof XMLHttpRequest &&
+					'undefined' != typeof FormData
+				) {
+					e.preventDefault();
+					processXHRUpload();
 				}
 			} );
 		} );
+
+		function processXHRUpload() {
+			var $form        = jQuery( '#video-upload-form' ),
+				$file        = $form.find('input[type="file"]'),
+				$submit      = $form.find( 'p.last' ),
+				$progressBar = $form.find( '#upload-progress' ),
+				$progress    = $progressBar.find( 'progress' ),
+				$status      = $progressBar.find( '.status' ),
+				$percent     = $progressBar.find( '.percent' ),
+				$abort       = $progressBar.find( '.abort' ),
+				formdata     = new FormData( $form.get(0) ),
+				xhr          = new XMLHttpRequest(),
+				startTime    = (new Date()).getTime(),
+				round_to, disable_form;
+
+			round_to = function(x, precision ) {
+				return x.toLocaleString(
+					undefined,
+					{
+						minimumFractionDigits: precision,
+						maximumFractionDigits: precision
+					}
+				);
+			};
+
+			disable_form = function( disable ) {
+				$form.find( 'input,select,option,textarea' ).prop( 'disabled', !! disable );
+			};
+
+			disable_form( true );
+			$submit.hide();
+			$progress.val( 0 );
+			$percent.text( '0%' );
+			$progressBar.show();
+			$abort.show();
+
+			$status.text( 'Preparing upload..' );
+
+			xhr.upload.addEventListener( 'progress', function(e) {
+				var percent     = Math.round( e.loaded / e.total * 100 ),
+					size        = round_to( e.total / 1024 / 1024, 1 ),
+					uploaded    = round_to( e.loaded / 1024 / 1024, 1 ),
+					elapsed     = ( (new Date()).getTime() - startTime ) / 1000,
+					// This isn't a perfect speed measurement, but is close enough for our needs.
+					speed_kbps  = e.loaded / elapsed / 1024,
+					eta_seconds = Math.round( ( e.total - e.loaded ) / 1024 / speed_kbps ),
+					eta_minutes = Math.floor( eta_seconds / 60 ),
+					eta         = '',
+					speed;
+
+				// Give some time for the upload speed to settle.
+				if ( elapsed > 10 || percent > 5 ) {
+					if ( eta_minutes ) {
+						eta += eta_minutes + ( eta_minutes > 1 ? ' mins ' : ' min ' );
+					}
+					if ( eta_seconds % 60 ) {
+						eta += ( eta_seconds - eta_minutes * 60 ) + 's';
+					}
+				} else {
+					eta = 'Calculating..';
+				}
+
+				if ( speed_kbps > 1024 ) {
+					speed = round_to( speed_kbps / 1024, 2 ) + 'mb/s';
+				} else {
+					speed = round_to( Math.round( speed_kbps ), 0 ) + 'kb/s';
+				}
+
+				$progress.val( percent );
+
+				$percent.text( `${percent}%` );
+
+				$status.text(
+					`Uploaded ${uploaded}MB of ${size}MB. ${speed} Remaining: ${eta}`
+				);
+				if ( percent >= 100 ) {
+					$status.text( 'Processing upload.. please wait..' );
+					$abort.hide();
+				}
+
+			}, false);
+
+			xhr.addEventListener( 'load', function( e ) {
+				$status.text( 'Done.. please wait..' );
+				$abort.hide();
+				// Redirect. Upload done.
+				document.location = e.target.responseText;
+			}, false);
+
+			xhr.addEventListener( 'error', function( e ) {
+				$status.text( 'Upload failed. Network or Browser issue encountered.' );
+				console.log( e );
+
+				disable_form( false );
+				$submit.show();
+				$abort.hide();
+			}, false );
+
+			xhr.addEventListener( 'abort', function( e ) {
+				$status.text( 'Aborted.' );
+
+				disable_form( false );
+				$submit.show();
+				$progressBar.hide();
+			}, false );
+
+			// Note: form.action will return the `<input name="action">` element, which is why a data attribute is ued.
+			xhr.withCredentials = true;
+			xhr.open( $form.prop( 'method' ), $form.data( 'xhr-action' ) );
+			xhr.send( formdata );
+
+			$abort.click( function( e ) {
+				xhr.abort();
+				e.preventDefault();
+			} );
+		}
 	</script>
 
 <?php get_footer();
