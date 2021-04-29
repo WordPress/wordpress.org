@@ -100,7 +100,7 @@ function get_whitelist() {
 			'hellofromTonya', // @hellofromtonya on Slack
 			'JeffPaul',
 			'JoshuaWold',
-			'justinahinon', // @justin on Slack
+			'justinahinon',
 			'karmatosed',
 			'laurora', // @laura on Slack
 			'lukecarbis',
@@ -244,6 +244,11 @@ function get_whitelist() {
 			'TimothyBlynJacobs', // @timothybjacobs on Slack
 		) ),
 		'core-test' => array_merge( get_committers(), array(
+			'boniu91', // @Piotrek Boniu on Slack
+			'francina',
+			'hellofromTonya', // @hellofromtonya on Slack
+			'justinahinon',
+			'monikarao',
 			'ryan', // @boren on Slack
 		) ),
 		'core-themes' => array_merge( get_committers(), array(
@@ -282,7 +287,7 @@ function get_whitelist() {
 		'feature-notifications' => array(
 			'hrmervin',
 			'johnbillion',
-			'justinahinon', // @justin on Slack
+			'justinahinon',
 			'loganfive', // @Garrett Hunter on Slack
 			'psykro', // @jon_bossenger on Slack
 			'raaaahman', // @Sylvain Schellenberger on slack
