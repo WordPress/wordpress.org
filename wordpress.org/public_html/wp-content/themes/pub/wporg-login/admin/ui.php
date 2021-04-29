@@ -6,7 +6,7 @@ add_action( 'admin_menu', function() {
 	add_submenu_page(
 		'index.php',
 		'Pending User Registrations', 'Pending User Registrations',
-		'manage_users',
+		'promote_users',
 		'user-registrations',
 		'wporg_login_admin_page'
 	);
@@ -89,7 +89,7 @@ function wporg_login_admin_page() {
 }
 
 add_action( 'admin_post_login_resend_email', function() { 
-	if ( ! current_user_can( 'manage_users' ) ) {
+	if ( ! current_user_can( 'promote_users' ) ) {
 		wp_die();
 	}
 
@@ -114,7 +114,7 @@ add_action( 'admin_post_login_resend_email', function() {
 } );
 
 add_action( 'admin_post_login_mark_as_cleared', function() { 
-	if ( ! current_user_can( 'manage_users' ) ) {
+	if ( ! current_user_can( 'promote_users' ) ) {
 		wp_die();
 	}
 
@@ -143,7 +143,7 @@ add_action( 'admin_post_login_mark_as_cleared', function() {
 } );
 
 add_action( 'admin_post_login_block', function() { 
-	if ( ! current_user_can( 'manage_users' ) ) {
+	if ( ! current_user_can( 'promote_users' ) ) {
 		wp_die();
 	}
 
@@ -173,7 +173,7 @@ add_action( 'admin_post_login_block', function() {
 } );
 
 add_action( 'admin_post_login_delete', function() { 
-	if ( ! current_user_can( 'manage_users' ) ) {
+	if ( ! current_user_can( 'promote_users' ) ) {
 		wp_die();
 	}
 
@@ -199,7 +199,7 @@ add_action( 'admin_post_login_delete', function() {
 } );
 
 add_action( 'admin_post_login_block_account', function() { 
-	if ( ! current_user_can( 'manage_users' ) ) {
+	if ( ! current_user_can( 'promote_users' ) ) {
 		wp_die();
 	}
 
