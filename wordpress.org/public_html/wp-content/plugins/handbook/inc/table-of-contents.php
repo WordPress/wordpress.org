@@ -45,6 +45,44 @@ class WPorg_Handbook_TOC {
 	}
 
 	/**
+	 * Returns reserved markup IDs likely to conflict with ToC-generated heading IDs.
+	 *
+	 * This list isn't meant to be exhaustive, just IDs that are likely to conflict
+	 * with ToC-generated section heading IDs.
+	 *
+	 * If a reserved ID is encountered when a ToC section heading ID is being
+	 * generated, the generated ID is incremented to avoid a conflict.
+	 *
+	 * @return array
+	 */
+	public function get_reserved_ids() {
+		/**
+		 * Filters the array of reserved IDs considered when auto-generating IDs for
+		 * ToC sections.
+		 *
+		 * This is mostly for specifying markup IDs that may appear on the same page
+		 * as the ToC for which any ToC-generated IDs would conflict. In such
+		 * cases, the first instance of the ID on the page would be the target of
+		 * the ToC section permalink which is likely not the ToC section itself.
+		 *
+		 * By specifying these reserved IDs, any potential use of the IDs by the theme
+		 * can be accounted for by incrementing the auto-generated ID to avoid conflict.
+		 *
+		 * E.g. if the theme has `<div id="main">`, a ToC with a section titled "Main"
+		 * would have a permalink that links to the div and not the ToC section.
+		 *
+		 * @param array $ids Array of IDs.
+		 */
+		return (array) apply_filters(
+			'handbooks_reserved_ids',
+			[
+				'main', 'masthead', 'menu-header', 'page', 'primary', 'secondary', 'secondary-content', 'site-navigation',
+				'wordpress-org', 'wp-toolbar', 'wpadminbar', 'wporg-footer', 'wporg-header'
+			]
+		);
+	}
+
+	/**
 	 * Converts given content to dynamically add the ToC.
 	 *
 	 * @access public
@@ -78,7 +116,7 @@ class WPorg_Handbook_TOC {
 			$toc .= '<div class="table-of-contents">';
 			$toc .= "<$contents_header>" . esc_html( $this->args->header_text ) . "</$contents_header><ul class=\"items\">";
 			$last_item = false;
-			$used_ids = [];
+			$used_ids = $this->get_reserved_ids();
 
 			foreach ( $items as $item ) {
 				if ( $last_item ) {
@@ -115,7 +153,7 @@ class WPorg_Handbook_TOC {
 		$first = true;
 		$matches = array();
 		$replacements = array();
-		$used_ids = array();
+		$used_ids = $this->get_reserved_ids();
 
 		foreach ( $items as $item ) {
 			$replacement = '';
