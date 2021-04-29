@@ -299,6 +299,7 @@ function get_whitelist() {
 			'Ipstenu',
 			'jdembowski', // @jan_dembowski on Slack
 			'macmanx',
+			'mariaojob', // @Mary Job on Slack
 		),
 		'fse-outreach-experiment' => array(
 			'annezazu',
