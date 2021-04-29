@@ -64,8 +64,10 @@ class DevHub_User_Contributed_Notes_Voting {
 	public static function scripts_and_styles() {
 		// Only need to enqueue voting-related resources if there are comments to vote on.
 		if ( self::user_can_vote() && is_singular() && '0' != get_comments_number() ) {
-			wp_register_script( 'wporg-developer-user-notes-voting', get_template_directory_uri() . '/js/user-notes-voting.js', array( 'wp-a11y' ), '20180606', true );
-			wp_localize_script( 'wporg-developer-user-notes-voting', 'ajaxurl', admin_url( 'admin-ajax.php' ) );
+			wp_register_script( 'wporg-developer-user-notes-voting', get_template_directory_uri() . '/js/user-notes-voting.js', array( 'wp-a11y' ), '20210428', true );
+			wp_localize_script( 'wporg-developer-user-notes-voting', 'wporg_note_voting', array(
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+			) );
 			wp_enqueue_script( 'wporg-developer-user-notes-voting' );
 		}
 	}

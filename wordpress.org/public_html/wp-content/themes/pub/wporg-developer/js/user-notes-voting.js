@@ -11,7 +11,7 @@
 			comment = $item.closest( '.comment' );
 
 		$.post(
-			ajaxurl,
+			wporg_note_voting.ajaxurl,
 			{
 				action:   'note_vote',
 				comment:  $item.attr( 'data-id' ),
