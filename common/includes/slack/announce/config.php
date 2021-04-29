@@ -205,18 +205,10 @@ function get_whitelist() {
 			'georgestephanis',
 			'valendesigns',
 		) ),
-		'core-site-health' => array_merge( get_committers(), array(
-			'afragen',
-			'Clorith',
-			'miss_jwo',
-			'spacedmonkey', // @Jonny Harris on Slack
-		) ),
-		'core-sitemaps' => array_merge( get_committers(), array(
-			'tweetythierry', // @Thierry Muller on Slack
-		) ),
 		'core-php' => array_merge( get_committers(), array(
 			'afragen',
 			'flixos90',
+			'hellofromTonya', // @hellofromtonya on Slack
 			'schlessera',
 			'spacedmonkey',
 		) ),
@@ -242,6 +234,15 @@ function get_whitelist() {
 			'rachelbaker',
 			'rmccue',
 			'TimothyBlynJacobs', // @timothybjacobs on Slack
+		) ),
+		'core-site-health' => array_merge( get_committers(), array(
+			'afragen',
+			'Clorith',
+			'miss_jwo',
+			'spacedmonkey', // @Jonny Harris on Slack
+		) ),
+		'core-sitemaps' => array_merge( get_committers(), array(
+			'tweetythierry', // @Thierry Muller on Slack
 		) ),
 		'core-test' => array_merge( get_committers(), array(
 			'boniu91', // @Piotrek Boniu on Slack
