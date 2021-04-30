@@ -243,17 +243,17 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$row_actions['delete'] = '<a href="' . esc_url( $url ) . '">Delete</a>';
 
 		} else {
+			// Account created, find the user.
+			$user = get_user_by( 'login', $item->user_login );
+
 			$url = add_query_arg(
-				'email',
-				urlencode( $item->user_email ),
+				'user_id',
+				urlencode( $user->ID ),
 				admin_url( 'admin-post.php?action=login_block_account' )
 			);
-			$url = wp_nonce_url( $url, 'block_account_' . $item->user_email );
+			$url = wp_nonce_url( $url, 'block_account_' . $user->ID );
 
-			if (
-				! ( $user = get_user_by( 'login', $item->user_login ) ) ||
-				'BLOCKED' !== substr( $user->user_pass, 0, 7 )
-			) {
+			if ( $user && 'BLOCKED' !== substr( $user->user_pass, 0, 7 ) ) {
 				$row_actions['block-account'] = '<a href="' . esc_url( $url ) . '">Block Account</a>';
 			}
 

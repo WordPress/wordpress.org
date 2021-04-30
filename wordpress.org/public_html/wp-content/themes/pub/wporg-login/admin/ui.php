@@ -203,21 +203,26 @@ add_action( 'admin_post_login_block_account', function() {
 		wp_die();
 	}
 
-	$email = $_REQUEST['email'] ?? '';
+	if ( empty( $_REQUEST['user_id'] ) ) {
+		die();
+	}
 
-	check_admin_referer( 'block_account_' . $email );
+	$user_id = (int) $_REQUEST['user_id'];
 
-	$user = get_user_by( 'email', $email );
-	if ( $user && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+	check_admin_referer( 'block_account_' . $user_id );
+
+	if ( $user_id && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+
+		// Switch first so that bbPress loads with the correct context.
+		// This also ensures that the bbp_participant code doesn't kick in.
+		switch_to_blog( WPORG_SUPPORT_FORUMS_BLOGID );
+
 		// Load the support forums.. 
 		include_once WP_PLUGIN_DIR . '/bbpress/bbpress.php';
 		include_once WP_PLUGIN_DIR . '/support-forums/support-forums.php';
 
-		// Then switch to it (Must be done after bbPress is loaded to get roles)
-		switch_to_blog( WPORG_SUPPORT_FORUMS_BLOGID );
-
 		// Set the user to blocked. Support forum hooks will take care of the rest.
-		bbp_set_user_role( $user->ID, bbp_get_blocked_role() );
+		bbp_set_user_role( $user_id, bbp_get_blocked_role() );
 
 		restore_current_blog();
 	}
