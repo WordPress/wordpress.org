@@ -84,7 +84,14 @@ function wporg_login_rest_email_in_use( $request ) {
 	}
 
 	// Check we don't have a pending registration for that email.
-	if ( $pending = wporg_get_pending_user( $email ) ) {
+	$pending = wporg_get_pending_user( $email );
+
+	// And that there's no pending account signups for other emails for that inbox.
+	if ( ! $pending && false !== strpos( $email, '+' ) ) {
+		$pending = wporg_get_pending_user_by_email_wildcard( $email );
+	}
+
+	if ( $pending ) {
 		return [
 			'available' => false,
 			'error' => __( 'That email address already has an account.', 'wporg' ) . '<br>' .

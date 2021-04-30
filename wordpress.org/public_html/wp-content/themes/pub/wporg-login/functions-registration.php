@@ -215,6 +215,28 @@ function wporg_get_pending_user( $login_or_email ) {
 }
 
 /**
+ * Fetches a pending user record from the database by "inbox", ignoring plus addressing.
+ */
+function wporg_get_pending_user_by_email_wildcard( $email ) {
+	global $wpdb;
+
+	$email_wildcard = preg_replace( '/[+][^@]+@/i', '+%@', $wpdb->esc_like( $email ) );  // abc+def@ghi => abc+%@ghi
+	$email_base     = preg_replace( '/[+][^@]+@/i', '@', $email ); // abc+def@ghi => abc@ghi
+
+	$matching_email = $wpdb->get_var( $sql = $wpdb->prepare(
+		"SELECT `user_email` FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE ( `user_email` = %s OR `user_email` LIKE %s ) LIMIT 1",
+		$email_base,
+		$email_wildcard
+	) );
+
+	if ( $matching_email ) {
+		return wporg_get_pending_user( $matching_email );
+	}
+
+	return false;
+}
+
+/**
  * Update the pending user record, similar to `wp_update_user()` but for the not-yet-created user record.
  */
 function wporg_update_pending_user( $pending_user ) {
