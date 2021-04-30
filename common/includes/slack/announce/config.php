@@ -90,7 +90,7 @@ function get_whitelist() {
 			'angelasjin',
 			'antpb',
 			'audrasjb',
-			'boniu91', // @Piotrek Boniu on Slack
+			'Boniu91', // @Piotrek Boniu on Slack
 			'cbringmann', // @Chloé Bringmann on Slack
 			'chaion07',
 			'chanthaboune',
@@ -245,7 +245,7 @@ function get_whitelist() {
 			'tweetythierry', // @Thierry Muller on Slack
 		) ),
 		'core-test' => array_merge( get_committers(), array(
-			'boniu91', // @Piotrek Boniu on Slack
+			'Boniu91', // @Piotrek Boniu on Slack
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
 			'justinahinon',
