@@ -1315,8 +1315,11 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		$password_broken = ( 0 === strpos( $user->user_pass, $blocked_prefix ) );
 		$note_text       = false;
 
+		// WP_User::has_role() does not exist, and WP_User::has_cap( 'bbp_blocked' ) will be truthful for super admins.
+		$user_has_blocked_role = ! empty( $user->roles ) && in_array( $blocked_role, $user->roles, true );
+
 		if (
-			( $blocked_role === $new_role || $user->has_cap( $blocked_role ) ) &&
+			( $blocked_role === $new_role || $user_has_blocked_role ) &&
 			! $password_broken
 		) {
 			// User has been blocked, break their password and sessions.
@@ -1344,7 +1347,7 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			);
 		} else if (
 			$password_broken &&
-			! $user->has_cap( $blocked_role )
+			! $user_has_blocked_role
 		) {
 			// User was blocked (broken password) but no longer is.
 			// WordPress doesn't have a way to edit a user password without re-hashing it.
