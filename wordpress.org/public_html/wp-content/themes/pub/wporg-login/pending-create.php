@@ -77,6 +77,9 @@ if ( isset( $_POST['user_pass'] ) && 2 !== $pending_user['cleared'] ) {
 			$pending_user['scores']['create_attempt'] = -1;
 			if ( $recaptcha_api && $recaptcha_api['success'] && 'pending_create' == $recaptcha_api['action'] ) {
 				$pending_user['scores']['create_attempt'] = $recaptcha_api['score'];
+			} else {
+				// Debug.
+				$pending_user['meta']['recaptcha_debug'] = $recaptcha_api;
 			}
 		}
 	}

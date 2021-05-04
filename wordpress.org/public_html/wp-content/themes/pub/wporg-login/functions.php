@@ -341,8 +341,16 @@ function wporg_login_recaptcha_api( $token, $key ) {
 	$cache_key = implode( ':', $verify );
 
 	if ( ! isset( $cache[ $cache_key ] ) ) {
-		$resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
+		$resp = wp_remote_post(
+			'https://www.google.com/recaptcha/api/siteverify',
+			array(
+				'body' => $verify
+			)
+		);
 		if ( is_wp_error( $resp ) || 200 != wp_remote_retrieve_response_code( $resp ) ) {
+
+			trigger_error( 'reCaptcha: ' . ( is_wp_error( $resp ) ? $resp->get_error_message() : wp_remote_retrieve_response_code( $resp ) . wp_remote_retrieve_body( $resp ) ), E_USER_NOTICE );
+
 			$cache[ $cache_key ] = false;
 			return false;
 		}
