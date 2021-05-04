@@ -115,6 +115,18 @@ use GP, GP_Locales;
 						);
 
 						break;
+					case 'unexpected_sprintf_token': // Custom dotorg warning
+						// This is reliant upon that there is another warning that requires
+						// the same count of sprintf-like tokens. `Missing %s placeholder in translation.`
+
+						$translation = preg_replace(
+							// Escape any % not already escaped (preceeded by %) and followed by a non-printf-char
+							'/(?<!%)%(?![bcdefgosux%])/i',
+							'%%',
+							$translation
+						);
+
+						break;
 				}
 			}
 		}
