@@ -43,7 +43,7 @@ if ( isset ( $request->customer->email ) ) {
 		foreach ( $records as $u ) {
 			$html .= sprintf(
 				'<li><a href="%s">%s <strong>%s</strong></a></li>',
-				esc_url( add_query_arg( 's', urlencode( $u->user_email ), 'https://login.wordpress.org/wp-admin/index.php?page=user-registrations&s=' ) ),
+				esc_url( add_query_arg( 's', urlencode( $u->user_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations&s=' ) ),
 				esc_html( $u->user_login ) . (
 					$request->customer->email == $u->user_email ? '' : ' (' . esc_html( $u->user_email ) . ')'
 				),
@@ -56,7 +56,7 @@ if ( isset ( $request->customer->email ) ) {
 
 	$html .= sprintf(
 		'<p><a href="%s">Search pending signups</a></p>',
-		esc_url( add_query_arg( 's', urlencode( $request->customer->email ), 'https://login.wordpress.org/wp-admin/index.php?page=user-registrations&s=' ) ),
+		esc_url( add_query_arg( 's', urlencode( $request->customer->email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations&s=' ) ),
 	);
 
 }

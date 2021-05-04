@@ -3,12 +3,14 @@
 include __DIR__  . '/class-user-registrations-list-table.php';
 
 add_action( 'admin_menu', function() {
-	add_submenu_page(
-		'index.php',
-		'Pending User Registrations', 'Pending User Registrations',
+	add_menu_page(
+		'Pending User Registrations',
+		'Pending User Registrations',
 		'promote_users',
 		'user-registrations',
-		'wporg_login_admin_page'
+		'wporg_login_admin_page',
+		'dashicons-admin-users',
+		1
 	);
 });
 
@@ -55,13 +57,13 @@ function wporg_login_admin_page() {
 	} );
 	</script>
 	<style>
-		table.dashboard_page_user-registrations td > a {
+		table.wp-list-table td > a {
 			color: inherit;
 		}
-		table.dashboard_page_user-registrations td > a:hover {
+		table.wp-list-table td > a:hover {
 			text-decoration: underline;
 		}
-		table.dashboard_page_user-registrations .delete-red {
+		table.wp-list-table .delete-red {
 			color: #b32d2e;
 		}
 	</style>

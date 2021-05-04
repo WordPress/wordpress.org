@@ -53,7 +53,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 					$this->get_where_sql( $item[0] )
 				);
 
-				$url = admin_url( 'index.php?page=user-registrations' );
+				$url = admin_url( 'admin.php?page=user-registrations' );
 				if ( !empty( $_GET['s'] ) && 'all' != $item[0] ) {
 					$url = add_query_arg( 's', urlencode( $_GET['s'] ), $url );
 				}
@@ -202,7 +202,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		list( $email_user, $domain ) = explode( '@', $item->user_email, 2 );
 
 		printf(
-			'%s@<a href="index.php?page=user-registrations&s=%s">%s</a>',
+			'%s@<a href="admin.php?page=user-registrations&s=%s">%s</a>',
 			esc_html( $email_user ),
 			urlencode( $domain ),
 			esc_html( $domain )
@@ -275,7 +275,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 					$url = add_query_arg(
 						's',
 						urlencode( $ip ),
-						admin_url( 'index.php?page=user-registrations' )
+						admin_url( 'admin.php?page=user-registrations' )
 					);
 					return '<a href="' . $url . '">' . esc_html( $ip ) . '</a>';
 				},
