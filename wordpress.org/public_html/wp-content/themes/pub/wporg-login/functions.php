@@ -348,9 +348,6 @@ function wporg_login_recaptcha_api( $token, $key ) {
 			)
 		);
 		if ( is_wp_error( $resp ) || 200 != wp_remote_retrieve_response_code( $resp ) ) {
-
-			trigger_error( 'reCaptcha: ' . ( is_wp_error( $resp ) ? $resp->get_error_message() : wp_remote_retrieve_response_code( $resp ) . wp_remote_retrieve_body( $resp ) ), E_USER_NOTICE );
-
 			$cache[ $cache_key ] = false;
 			return false;
 		}
