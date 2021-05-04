@@ -237,7 +237,7 @@ function check_for_translations_of_installed_items( $args ) {
 	$translations = array();
 	foreach ( $translations_for_current as $language_pack ) {
 		$update = true;
-		if ( isset( $language_data[ $language_pack['language'] ] ) ) {
+		if ( isset( $language_data[ $language_pack['language'] ]['PO-Revision-Date'] ) ) {
 			$wporg_updated = strtotime( $language_pack['updated'] );
 			$site_updated  = strtotime( $language_data[ $language_pack['language'] ]['PO-Revision-Date'] );
 
