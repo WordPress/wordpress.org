@@ -254,7 +254,7 @@ class Table_Of_Contents_Lite {
 					}
 				}
 				$last_item = $item[2];
-				$toc .= sprintf( '<li><a href="#%1s">%2s</a>', sanitize_title_with_dashes( remove_accents( $item[3] ) ), $item[3] );
+				$toc .= sprintf( '<li><a href="#%1s">%2s</a>', sanitize_title( $item[3] ), $item[3] );
 			}
 			$toc .= '</ul></div>';
 		}
@@ -296,7 +296,7 @@ class Table_Of_Contents_Lite {
 		foreach ( $items as $item ) {
 			$replacement = '';
 			$matches[]   = $item[0];
-			$id          = sanitize_title_with_dashes( remove_accents( $item[2] ) );
+			$id          = sanitize_title( $item[2] );
 			if ( ! $first ) {
 				$replacement .= '<p class="toc-jump"><a href="#top">' . __( 'Top &uarr;', 'wporg-forums' ) . '</a></p>';
 			} else {

@@ -130,7 +130,7 @@ class WPorg_Handbook_TOC {
 
 				$last_item = $item[2];
 
-				$id = sanitize_title_with_dashes( remove_accents( $item[3] ) );
+				$id = sanitize_title( $item[3] );
 				// Append unique suffix if anchor ID isn't unique.
 				$count = 2;
 				$orig_id = $id;
@@ -158,7 +158,7 @@ class WPorg_Handbook_TOC {
 		foreach ( $items as $item ) {
 			$replacement = '';
 			$matches[] = $item[0];
-			$id = sanitize_title_with_dashes( remove_accents( $item[2] ) );
+			$id = sanitize_title( $item[2] );
 
 			// Append unique suffix if anchor ID isn't unique.
 			$count = 2;
