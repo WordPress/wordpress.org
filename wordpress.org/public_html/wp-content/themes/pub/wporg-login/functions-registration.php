@@ -211,6 +211,11 @@ function wporg_get_pending_user( $login_or_email ) {
 	$pending_user['meta']   = json_decode( $pending_user['meta'], true );
 	$pending_user['scores'] = json_decode( $pending_user['scores'], true );
 
+	// Cast the int fields to an integer.
+	foreach ( [ 'pending_id', 'cleared', 'created' ] as $field ) {
+		$pending_user[ $field ] = (int) $pending_user[ $field ];
+	}
+
 	return $pending_user;
 }
 
