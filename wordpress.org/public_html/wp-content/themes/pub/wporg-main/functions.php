@@ -115,6 +115,8 @@ function scripts() {
 		}
 		wp_enqueue_script( 'jquery-modal', get_theme_file_uri( '/js/jquery.modal.min.js' ), [ 'jquery' ], '0.9.2', true );
 		wp_enqueue_script( 'wporg-page-download', get_theme_file_uri( '/js/page-download.js' ), [ 'jquery', 'jquery-modal' ], '20201118', true );
+	} elseif ( is_page( '40-percent-of-web' ) ) {
+		wp_enqueue_style( 'page-40-percent', get_theme_file_uri( '/css/page-40-percent-style.css' ), [], '1' );
 	}
 
 	if ( is_page() && get_queried_object()->post_parent ) {
