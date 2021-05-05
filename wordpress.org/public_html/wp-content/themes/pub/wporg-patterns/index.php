@@ -9,10 +9,10 @@
  *
  * @link https://codex.wordpress.org/Template_Hierarchy
  *
- * @package WordPressdotorg\Theme
+ * @package WordPressdotorg\Pattern_Directory\Theme
  */
 
-namespace WordPressdotorg\Theme;
+namespace WordPressdotorg\Pattern_Directory\Theme;
 
 get_header();
 ?>

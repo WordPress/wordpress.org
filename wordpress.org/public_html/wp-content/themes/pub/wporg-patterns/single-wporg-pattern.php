@@ -4,10 +4,10 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
  *
- * @package WordPressdotorg\Theme
+ * @package WordPressdotorg\Pattern_Directory\Theme
  */
 
-namespace WordPressdotorg\Theme;
+namespace WordPressdotorg\Pattern_Directory\Theme;
 
 get_header();
 ?>

@@ -11072,6 +11072,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
 
 
 /**
@@ -11080,26 +11081,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /**
- * Uses a hidden textarea that is added and removed from the DOM in order to copy to clipboard via the Browser.
- *
- * @param {string} stringToCopy A string that will be copied to the clipboard
- * @return {boolean} Whether the copy function succeeded
+ * Internal dependencies
  */
 
-var copyToClipboard = function copyToClipboard(stringToCopy) {
-  var element = document.createElement('textarea'); // We don't want the text area to be selected since it's temporary.
 
-  element.setAttribute('readonly', ''); // We don't want the text area to be visible since it's temporary.
-
-  element.style.position = 'absolute';
-  element.style.left = '-9999px';
-  element.value = stringToCopy;
-  document.body.appendChild(element);
-  element.select();
-  var success = document.execCommand('copy');
-  document.body.removeChild(element);
-  return success;
-};
 
 var CopyPatternButton = function CopyPatternButton(_ref) {
   var onSuccess = _ref.onSuccess;
@@ -11109,7 +11094,7 @@ var CopyPatternButton = function CopyPatternButton(_ref) {
     // Grab the pattern markup from hidden input
     var blockData = document.getElementById('block-data');
     var blockPattern = JSON.parse(decodeURIComponent(blockData.value));
-    var success = copyToClipboard(blockPattern); // Make sure we reset focus in case it was lost in the 'copy' command.
+    var success = Object(_utils__WEBPACK_IMPORTED_MODULE_3__["copyToClipboard"])(blockPattern); // Make sure we reset focus in case it was lost in the 'copy' command.
 
     target.focus();
 
@@ -12047,13 +12032,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _icons_heart_outline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../icons/heart-outline */ "./src/components/icons/heart-outline.js");
-/* harmony import */ var _icons_heart_filled__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../icons/heart-filled */ "./src/components/icons/heart-filled.js");
-/* harmony import */ var _canvas__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./canvas */ "./src/components/pattern-thumbnail/canvas.js");
+/* harmony import */ var _wordpress_a11y__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/a11y */ "@wordpress/a11y");
+/* harmony import */ var _wordpress_a11y__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_a11y__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _icons_heart_outline__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../icons/heart-outline */ "./src/components/icons/heart-outline.js");
+/* harmony import */ var _icons_heart_filled__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../icons/heart-filled */ "./src/components/icons/heart-filled.js");
+/* harmony import */ var _canvas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./canvas */ "./src/components/pattern-thumbnail/canvas.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
 
 
 
@@ -12063,9 +12051,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 /**
  * Internal dependencies
  */
+
 
 
 
@@ -12080,6 +12070,31 @@ function PatternThumbnail(_ref) {
       isFavorite = _useState2[0],
       setFavorite = _useState2[1];
 
+  var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(false),
+      _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState3, 2),
+      copied = _useState4[0],
+      setCopied = _useState4[1];
+
+  var handleCopy = function handleCopy() {
+    var result = Object(_utils__WEBPACK_IMPORTED_MODULE_8__["copyToClipboard"])(pattern.pattern_content);
+    setCopied(result);
+  };
+
+  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+    if (!copied) {
+      return;
+    }
+
+    Object(_wordpress_a11y__WEBPACK_IMPORTED_MODULE_2__["speak"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["sprintf"])(
+    /* translators: %s: pattern title. */
+    Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Copied %s pattern to clipboard.', 'wporg-patterns'), pattern.title.rendered));
+    var timer = setTimeout(function () {
+      return setCopied(false);
+    }, 20000);
+    return function () {
+      clearTimeout(timer);
+    };
+  }, [copied]);
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     className: "pattern-grid__pattern"
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
@@ -12087,28 +12102,29 @@ function PatternThumbnail(_ref) {
     rel: "bookmark"
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("span", {
     className: "screen-reader-text"
-  }, pattern.title.rendered), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["Disabled"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_canvas__WEBPACK_IMPORTED_MODULE_6__["default"], {
+  }, pattern.title.rendered), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["Disabled"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_canvas__WEBPACK_IMPORTED_MODULE_7__["default"], {
     className: "pattern-grid__preview",
     html: pattern.content.rendered
   }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     className: "pattern-grid__actions"
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", {
     className: "pattern-grid__title"
-  }, pattern.title.rendered), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["Tooltip"], {
-    text: isFavorite ? Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Remove pattern from favorites', 'wporg-patterns') : Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Favorite pattern', 'wporg-patterns')
+  }, pattern.title.rendered), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["Tooltip"], {
+    text: isFavorite ? Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Remove pattern from favorites', 'wporg-patterns') : Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Favorite pattern', 'wporg-patterns')
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("button", {
     className: 'button button-link pattern__favorite-button' + (isFavorite ? ' is-favorited' : ''),
     onClick: function onClick() {
       return setFavorite(!isFavorite);
     }
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_icons_heart_filled__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_icons_heart_filled__WEBPACK_IMPORTED_MODULE_6__["default"], {
     className: "pattern__favorite-filled"
-  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_icons_heart_outline__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_icons_heart_outline__WEBPACK_IMPORTED_MODULE_5__["default"], {
     className: "pattern__favorite-outline"
-  }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+  }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["Button"], {
     className: "pattern__copy-button is-small",
-    isPrimary: true
-  }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Copy', 'wporg-patterns'))));
+    isPrimary: true,
+    onClick: handleCopy
+  }, copied ? Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Copied!', 'wporg-patterns') : Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Copy', 'wporg-patterns'))));
 }
 
 /* harmony default export */ __webpack_exports__["default"] = (PatternThumbnail);
@@ -13112,11 +13128,46 @@ var getCategoryFromPath = function getCategoryFromPath(path) {
 
 /***/ }),
 
+/***/ "./src/utils/copy-to-clipboard.js":
+/*!****************************************!*\
+  !*** ./src/utils/copy-to-clipboard.js ***!
+  \****************************************/
+/*! exports provided: copyToClipboard */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "copyToClipboard", function() { return copyToClipboard; });
+/**
+ * Uses a hidden textarea that is added and removed from the DOM in order to copy to clipboard via the Browser.
+ *
+ * @param {string} stringToCopy A string that will be copied to the clipboard
+ * @return {boolean} Whether the copy function succeeded
+ */
+var copyToClipboard = function copyToClipboard(stringToCopy) {
+  var element = document.createElement('textarea'); // We don't want the text area to be selected since it's temporary.
+
+  element.setAttribute('readonly', ''); // We don't want screen readers to read the content since it's pattern markup
+
+  element.setAttribute('aria-hidden', 'true'); // We don't want the text area to be visible since it's temporary.
+
+  element.style.position = 'absolute';
+  element.style.left = '-9999px';
+  element.value = stringToCopy;
+  document.body.appendChild(element);
+  element.select();
+  var success = document.execCommand('copy');
+  document.body.removeChild(element);
+  return success;
+};
+
+/***/ }),
+
 /***/ "./src/utils/index.js":
 /*!****************************!*\
   !*** ./src/utils/index.js ***!
   \****************************/
-/*! exports provided: getCategoryFromPath, removeQueryString, removeEmptyArgs */
+/*! exports provided: getCategoryFromPath, removeQueryString, removeEmptyArgs, copyToClipboard */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -13127,6 +13178,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "removeQueryString", function() { return _category__WEBPACK_IMPORTED_MODULE_0__["removeQueryString"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "removeEmptyArgs", function() { return _category__WEBPACK_IMPORTED_MODULE_0__["removeEmptyArgs"]; });
+
+/* harmony import */ var _copy_to_clipboard__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./copy-to-clipboard */ "./src/utils/copy-to-clipboard.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "copyToClipboard", function() { return _copy_to_clipboard__WEBPACK_IMPORTED_MODULE_1__["copyToClipboard"]; });
+
 
 
 
@@ -13140,6 +13195,17 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports) {
 
 (function() { module.exports = window["regeneratorRuntime"]; }());
+
+/***/ }),
+
+/***/ "@wordpress/a11y":
+/*!******************************!*\
+  !*** external ["wp","a11y"] ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+(function() { module.exports = window["wp"]["a11y"]; }());
 
 /***/ }),
 

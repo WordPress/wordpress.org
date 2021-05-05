@@ -2,10 +2,10 @@
 /**
  * The template part for displaying content
  *
- * @package WordPressdotorg\Theme;
+ * @package WordPressdotorg\Pattern_Directory\Theme;
  */
 
-namespace WordPressdotorg\Theme;
+namespace WordPressdotorg\Pattern_Directory\Theme;
 
 ?>
 
