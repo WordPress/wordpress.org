@@ -68,7 +68,7 @@ use GP, GP_Locales;
 
 						// Try replacing spaced translation type with no spaces `% 1 $ s` (Machine translated text)
 						$translation = preg_replace_callback(
-							'!%\s?(\d+\s?\$(?:\d+)?)?\s?[bcdefgosux]!i',
+							'!%\s?(\d+\s?\$(?:\d+)?)?\s?[bcdefgosux]\b!i',
 							function( $m ) {
 								return str_replace( ' ', '', $m[0] );
 							},
