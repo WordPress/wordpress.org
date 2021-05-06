@@ -308,6 +308,14 @@ class WPorg_GP_Custom_Translation_Warnings {
 		foreach ( $warnings as $warning ) {
 			GP::$translation_warnings->add( str_replace( 'warning_', '', $warning ), array( $this, $warning ) );
 		}
+
+		// https://github.com/GlotPress/GlotPress-WP/pull/1237
+		add_filter( 'gp_warning_placeholders_re', function( $re ) {
+			if ( '%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX]' === $re ) {
+				$re = '(?<!%)%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX%]';
+			}
+			return $re;
+		} );
 	}
 
 }
