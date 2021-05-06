@@ -6,6 +6,7 @@ $request = include __DIR__ . '/common.php';
 
 // default empty output
 $html = '';
+$user = false;
 
 // Look up a user based on email address
 if ( isset ( $request->customer->email ) ) {
@@ -59,6 +60,32 @@ if ( isset ( $request->customer->email ) ) {
 		esc_url( add_query_arg( 's', urlencode( $request->customer->email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations&s=' ) ),
 	);
 
+}
+
+// If this is related to a slack user, include the details of the slack account.
+if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', $request->ticket->subject, $m ) ) {
+
+	if ( $user ) {
+		$slack_user = $wpdb->get_row( $sql = $wpdb->prepare(
+			'SELECT * FROM slack_users WHERE user_id = %d',
+			$user->ID
+		) );
+	} else {
+		$slack_user = $wpdb->get_row( $sql = $wpdb->prepare(
+			'SELECT * FROM slack_users WHERE profiledata LIKE %s',
+			'%' . $wpdb->esc_like( '"email":"' . $m[1] . '"' ) . '%',
+		) );
+	}
+
+	if ( $slack_user ) {
+		$slack_data = json_decode( $slack_user->profiledata );
+		$html .= '<hr/>';
+		$html .= '<ul>';
+		$html .= '<li>Slack: <a href="https://wordpress.slack.com/archives/' . $slack_user->dm_id .  '">' . esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ) . '</a></li>';
+		$html .= '<li>Account ' . ( !empty( $slack_data->deleted ) ? 'Deactivated' : 'Enabled' ) . '</li>';
+		$html .= '<li>Last Updated: ' . gmdate( 'Y-m-d H:i:s', $slack_data->updated ) . '</li>';
+		$html .= '</ul>';
+	}
 }
 
 // response to HS is just HTML to display in the sidebar

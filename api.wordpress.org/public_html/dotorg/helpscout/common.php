@@ -1,5 +1,6 @@
 <?php
 
+$wp_init_host = 'https://wordpress.org/';
 $base_dir = dirname( dirname( __DIR__ ) );
 require( $base_dir . '/wp-init.php' );
 
@@ -24,4 +25,18 @@ if ( ! isFromHelpScout( $data, $signature ) ) {
 }
 
 // get the info from HS
-return json_decode( $data );
+$data = json_decode( $data );
+
+// If this is related to a slack user, fetch their details instead.
+if (
+	isset ( $data->customer->email, $data->ticket->subject ) &&
+	false !== stripos( $data->customer->email, 'slack' ) &&
+	preg_match( '/(\S+)@chat.wordpress.org/i', $data->ticket->subject, $m )
+) {
+	$user = get_user_by( 'slug', $m[1] );
+	if ( $user ) {
+		$data->customer->email = $user->user_email;
+	}
+}
+
+return $data;

@@ -1,7 +1,6 @@
 <?php
 // Add current DPO Export/Erasure status for the customer.
 
-$wp_init_host = 'https://wordpress.org/';
 // $request is the validated HelpScout request.
 $request = include __DIR__ . '/common.php';
 
@@ -13,8 +12,7 @@ if ( empty( $request->customer->email ) ) {
 wp_set_current_user( get_user_by( 'login', 'wordpressdotorg' )->ID );
 
 // default empty output
-$html = '';
-
+$html  = '';
 $email = $request->customer->email;
 
 $html .= sprintf(
