@@ -169,6 +169,11 @@ function custom_open_graph_tags( $tags = [] ) {
 			$title = esc_html_x( 'Source Code', 'Page title', 'wporg' );
 			$desc  = esc_html__( 'See how WordPress works under the hood, and contribute your own code to the world&#8217;s most popular content management system.', 'wporg' );
 			break;
+
+		case 'page-40-percent-of-web.php':
+			$title = esc_html_x( 'WordPress and the Journey to 40% of the Web', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'Getting to 40% of the web came with lots of hard work from our amazing WordPress community.', 'wporg' );
+			break;
 	}
 
 	$tags['og:title']            = $title;

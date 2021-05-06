@@ -71,6 +71,7 @@ body.page-40-percent-of-web {
 
 ._40p-timeline-header {
 	position: relative;
+	margin-top: 70px;
 }
 
 ._40p-timeline-header ._40p-timeline-title {
@@ -81,6 +82,10 @@ body.page-40-percent-of-web {
 }
 
 @media (max-width: 781px) {
+	._40p-timeline-header {
+		margin-top: 0;
+	}
+
 	._40p-timeline-header ._40p-timeline-title {
 		font-size: 40px;
 	}
@@ -182,6 +187,10 @@ p._40p-timeline-intro {
 
 ._40p-timeline-block .ctl-instant-timeline .timeline-content {
 	position: relative;
+}
+
+._40p-timeline-block .ctl-instant-timeline .timeline-content:focus {
+	outline: none;
 }
 
 ._40p-timeline-block .ctl-instant-timeline .timeline-content::before {
