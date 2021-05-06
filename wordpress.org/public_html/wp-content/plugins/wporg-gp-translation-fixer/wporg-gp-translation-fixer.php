@@ -121,7 +121,9 @@ use GP, GP_Locales;
 
 						$translation = preg_replace(
 							// Escape any % not already escaped (preceeded by %) and followed by a non-printf-char
-							'/(?<!%)%(?![bcdefgosux%])/i',
+							// % is included to not affect a escaped placeholder
+							// \d+-'# is to not affect %1$s, fixed width, and precision
+							'/(?<!%)%(?![bcdefgosux%\d+\-\'#])/i',
 							'%%',
 							$translation
 						);
