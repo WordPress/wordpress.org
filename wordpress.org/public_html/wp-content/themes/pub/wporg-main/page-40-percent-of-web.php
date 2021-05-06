@@ -674,7 +674,7 @@ the_post();
 					<p>
 						<?php
 						printf(
-							__( 'In March 2004, the <a href="%1$s">plugin system</a> transformed WordPress for core developers and the wider community. It meant that the core product didn’t need to include every developer’s pet feature, just the features that made sense for a majority of users. Ryan Boren <a href="%2$s">stated</a> that the plugin system enabled core developers to implement the 80/20 rule: “Is this useful to 80% of our users? If not, try it in a plugin.”', 'wporg' ),
+							__( 'In March 2004, the <a href="%1$s">plugin system</a> transformed WordPress for core developers and the wider community. It meant that the core product didn’t need to include every developer’s pet feature, just the features that made sense for a majority of users. Ryan Boren <a href="%2$s">stated</a> that the plugin system enabled core developers to implement the 80/20 rule: “Is this useful to 80%% of our users? If not, try it in a plugin.”', 'wporg' ),
 							'http://core.trac.wordpress.org/changeset/1008',
 							'http://archive.wordpress.org/interviews/2013_05_15_Boren1.html#L65'
 						);
