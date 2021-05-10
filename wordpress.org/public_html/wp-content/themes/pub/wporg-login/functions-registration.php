@@ -121,9 +121,15 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		}
 	}
 
+	if ( function_exists( 'wporg_registration_check_private_heuristics' ) ) {
+		// Returns block, review, allow.
+		$pending_user['meta']['heuristics'] = wporg_registration_check_private_heuristics( compact( 'user_login', 'user_email' ) );
+	}
+
 	$pending_user['meta']['akismet_result'] = wporg_login_check_akismet( $user_login, $user_email );
 
 	$pending_user['cleared'] = (
+		// ( !isset( $pending_user['meta']['heuristics'] ) || 'allow' === $pending_user['meta']['heuristics'] ) && // Disabled for now, review results first, replace Akismet below
 		'spam' !== $pending_user['meta']['akismet_result'] &&
 		(float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 ) 
 	);
@@ -212,9 +218,9 @@ function wporg_get_pending_user( $login_or_email ) {
 	$pending_user['scores'] = json_decode( $pending_user['scores'], true );
 
 	// Cast the int fields to an integer.
-	foreach ( [ 'pending_id', 'cleared', 'created' ] as $field ) {
-		$pending_user[ $field ] = (int) $pending_user[ $field ];
-	}
+	$pending_user['pending_id'] = (int) $pending_user['pending_id'];
+	$pending_user['cleared']    = (int) $pending_user['cleared'];
+	$pending_user['created']    = (int) $pending_user['created'];
 
 	return $pending_user;
 }

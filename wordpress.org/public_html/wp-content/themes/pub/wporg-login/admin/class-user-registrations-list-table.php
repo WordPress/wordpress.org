@@ -25,6 +25,10 @@ class User_Registrations_List_Table extends WP_List_Table {
 			[
 				'akismet',
 				'Akismet said no',
+			],
+			[
+				'heuristics',
+				'Heiristics: Review / Block',
 			]
 		];
 
@@ -79,6 +83,8 @@ class User_Registrations_List_Table extends WP_List_Table {
 				return 'cleared = 0';
 			case 'akismet':
 				return "meta LIKE '%akismet_result\":\"spam%'";
+			case 'heuristics':
+				return "meta LIKE '%heuristics%' AND meta NOT LIKE '%heuristics\":\"allow%'";
 			case 'registered':
 				return 'created = 1';
 			default:
@@ -313,6 +319,15 @@ class User_Registrations_List_Table extends WP_List_Table {
 				'<abbr title="%s">%s</abbr> ',
 				esc_attr( 'Akismet' ),
 				esc_html( strtolower( $akismet ) )
+			);
+		}
+
+		$heuristics = $meta->heuristics ?? '';
+		if ( $heuristics ) {
+			printf(
+				'<abbr title="%s">%s</abbr> ',
+				esc_attr( 'Heuristics' ),
+				esc_html( strtolower( $heuristics ) )
 			);
 		}
 
