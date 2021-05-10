@@ -223,6 +223,11 @@ add_action( 'admin_post_login_block_account', function() {
 		include_once WP_PLUGIN_DIR . '/bbpress/bbpress.php';
 		include_once WP_PLUGIN_DIR . '/support-forums/support-forums.php';
 
+		// bbPress roles still aren't quite right, need to switch away and back..
+		// This is hacky, but otherwise the bbp_set_user_role() call below will appear to succeed, but no role aleration will actually happen.
+		restore_current_blog();
+		switch_to_blog( WPORG_SUPPORT_FORUMS_BLOGID );
+
 		// Set the user to blocked. Support forum hooks will take care of the rest.
 		bbp_set_user_role( $user_id, bbp_get_blocked_role() );
 
