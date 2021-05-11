@@ -53,8 +53,8 @@ class User_Registrations_List_Table extends WP_List_Table {
 				global $wpdb;
 
 				$count = $wpdb->get_var(
-					"SELECT count(*) FROM {$wpdb->base_prefix}user_pending_registrations WHERE " .
-					$this->get_where_sql( $item[0] )
+					"SELECT count(*) FROM {$wpdb->base_prefix}user_pending_registrations registrations " .
+					$this->get_join_where_sql( $item[0] )
 				);
 
 				$url = admin_url( 'admin.php?page=user-registrations' );
@@ -97,20 +97,32 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 	}
 
-	protected function get_where_sql( $view = null ) {
+	protected function get_join_where_sql( $view = null ) {
 		global $wpdb;
 
-		$where = $this->get_view_sql_where( $view ?: ( $_REQUEST['view'] ?? 'all' ) );
+		$join  = '';
+		$where = 'WHERE ';
+		$where .= $this->get_view_sql_where( $view ?: ( $_REQUEST['view'] ?? 'all' ) );
 
 		if ( isset( $_GET['s'] ) && 'all' != $view ) {
 			 $search_like = '%' . $wpdb->esc_like( wp_unslash( $_GET['s'] ) ) . '%';
 			 $where .= $wpdb->prepare(
-				 " AND ( user_login LIKE %s OR user_email LIKE %s OR meta LIKE %s )",
-				 $search_like, $search_like, $search_like
+				 " AND (
+					registrations.user_login LIKE %s OR
+					registrations.user_email LIKE %s OR
+					registrations.meta LIKE %s OR
+					description.meta_value LIKE %s
+				)",
+				 $search_like, $search_like, $search_like, $search_like
 			);
+
+			$join = "
+				LEFT JOIN {$wpdb->users} users ON registrations.created = 1 AND registrations.user_login = users.user_login
+				LEFT JOIN {$wpdb->usermeta} description ON users.ID = description.user_id AND description.meta_key = 'description'
+		   ";
 		}
 
-		return $where;
+		return $join . $where;
 	}
 
 	function get_columns() {
@@ -152,14 +164,14 @@ class User_Registrations_List_Table extends WP_List_Table {
 	   $per_page     = $this->get_items_per_page( 'users_per_page', 100 );
 	   $current_page = $this->get_pagenum();
 
-	   $where = $this->get_where_sql();
+	   $join_where = $this->get_join_where_sql();
 
 	   $per_page_offset = ($current_page-1) * $per_page;
 
 		$this->items = $wpdb->get_results(
-			"SELECT SQL_CALC_FOUND_ROWS *
-			FROM {$wpdb->base_prefix}user_pending_registrations
-			WHERE $where
+			$sql = "SELECT SQL_CALC_FOUND_ROWS registrations.*
+			FROM {$wpdb->base_prefix}user_pending_registrations registrations
+			$join_where
 			ORDER BY {$sort_column} {$sort_order}
 			LIMIT {$per_page_offset}, {$per_page}"
 		);
@@ -208,15 +220,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		echo '<hr>';
-
-		list( $email_user, $domain ) = explode( '@', $item->user_email, 2 );
-
-		printf(
-			'%s@<a href="admin.php?page=user-registrations&s=%s">%s</a>',
-			esc_html( $email_user ),
-			urlencode( $domain ),
-			esc_html( $domain )
-		);
+		echo $this->link_to_search( $item->user_email );
 
 		$row_actions = [];
 
@@ -280,14 +284,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		echo implode( ', ',
 			array_map(
-				function( $ip ) {
-					$url = add_query_arg(
-						's',
-						urlencode( $ip ),
-						admin_url( 'admin.php?page=user-registrations' )
-					);
-					return '<a href="' . $url . '">' . esc_html( $ip ) . '</a>';
-				},
+				[ $this, 'link_to_search' ],
 				array_filter( array_unique( [
 					$meta->registration_ip ?? false,
 					$meta->confirmed_ip ?? false
@@ -296,10 +293,20 @@ class User_Registrations_List_Table extends WP_List_Table {
 		);
 		echo '<hr>';
 
+
 		foreach ( [ 'url', 'from', 'occ', 'interests' ] as $field ) {
 			if ( !empty( $meta->$field ) ) {
-				printf( "%s: %s<br>", esc_html( $field ), esc_html( $meta->$field ) );
+				printf( "%s: %s<br>", esc_html( $field ), $this->link_to_search( $meta->$field ) );
 			}
+		}
+
+		// Add other meta after an account is created
+		if ( $user = get_user_by( 'login', $item->user_login ) ) {
+			// Forum profile description (this is where the spam usually is)
+			if ( $desc = get_user_meta( $user->ID, 'description', true ) ) {
+				printf( "forum bio: %s<br>", $this->link_to_search( $desc ) );
+			}
+
 		}
 	}
 
@@ -360,6 +367,17 @@ class User_Registrations_List_Table extends WP_List_Table {
 		if ( $row_actions ) {
 			echo $this->row_actions( $row_actions );
 		}
+	}
+
+	function link_to_search( $s ) {
+		$parts = preg_split( '/([^\w\.-])/ui', $s, -1, PREG_SPLIT_DELIM_CAPTURE );
+
+		return implode( '', array_map( function( $s ) {
+			if ( strlen( $s ) >= 3 ) {
+				return '<a href="' . add_query_arg( 's', urlencode( $s ), admin_url( 'admin.php?page=user-registrations' ) ) . '">' . esc_html( $s ) . '</a>';
+			}
+			return esc_html( $s );
+		}, $parts ) );
 	}
 
 }
