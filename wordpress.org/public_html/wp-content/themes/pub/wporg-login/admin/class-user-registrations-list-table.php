@@ -23,12 +23,12 @@ class User_Registrations_List_Table extends WP_List_Table {
 				'Caught in spam',
 			],
 			[
-				'akismet',
-				'Akismet said no',
+				'heuristics-review',
+				'Heuristics: Review',
 			],
 			[
-				'heuristics',
-				'Heiristics: Review / Block',
+				'heuristics-block',
+				'Heuristics: Block',
 			]
 		];
 
@@ -83,8 +83,12 @@ class User_Registrations_List_Table extends WP_List_Table {
 				return 'cleared = 0';
 			case 'akismet':
 				return "meta LIKE '%akismet_result\":\"spam%'";
-			case 'heuristics':
-				return "meta LIKE '%heuristics%' AND meta NOT LIKE '%heuristics\":\"allow%'";
+			case 'heuristics-allow':
+				return "meta LIKE '%heuristics\":\"allow%'";
+			case 'heuristics-review':
+				return "meta LIKE '%heuristics\":\"review%'";
+			case 'heuristics-block':
+				return "meta LIKE '%heuristics\":\"block%'";
 			case 'registered':
 				return 'created = 1';
 			default:
@@ -270,7 +274,6 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 	}
-
 
 	function column_meta( $item ) {
 		$meta = json_decode( $item->meta );

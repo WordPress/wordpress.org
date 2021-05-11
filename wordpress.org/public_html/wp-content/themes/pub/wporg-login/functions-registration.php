@@ -44,39 +44,6 @@ function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low
 }
 
 /**
- * Check the user registration attempt against Akismet.
- */
-function wporg_login_check_akismet( $user_login, $user_email, $user_url = '', $content = array() ) {
-	if ( ! class_exists( 'Akismet' ) ) {
-		return 'OK';
-	}
-
-	$payload = [
-		'type'                 => 'user_signup',
-		'comment_author'       => $user_login,
-		'comment_author_email' => $user_email,
-		'comment_author_url'   => $user_url,
-		'comment_content'      => implode( "\n", $content ),
-		'comment_post_ID'      => 0,
-	];
-
-	$akismet = Akismet::rest_auto_check_comment( $payload );
-	if ( is_wp_error( $akismet ) ) {
-		return $akismet->get_error_code();
-	}
-
-	if ( ! empty( $akismet['akismet_pro_tip'] ) && 'discard' === $akismet['akismet_pro_tip'] ) {
-		return 'spam';
-	} elseif ( 'true' === $akismet['akismet_result'] ) {
-		return 'spam';
-	} elseif ( 'false' === $akismet['akismet_result'] ) {
-		return 'OK';
-	} else {
-		return 'unknown';
-	}
-}
-
-/**
  * Handles creating a "Pending" registration that will later be converted to an actual user  account.
  */
 function wporg_login_create_pending_user( $user_login, $user_email, $meta = array() ) {
@@ -121,16 +88,14 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		}
 	}
 
+	$pending_user['meta']['heuristics'] = 'allow';
 	if ( function_exists( 'wporg_registration_check_private_heuristics' ) ) {
 		// Returns block, review, allow.
 		$pending_user['meta']['heuristics'] = wporg_registration_check_private_heuristics( compact( 'user_login', 'user_email' ) );
 	}
 
-	$pending_user['meta']['akismet_result'] = wporg_login_check_akismet( $user_login, $user_email );
-
 	$pending_user['cleared'] = (
-		// ( !isset( $pending_user['meta']['heuristics'] ) || 'allow' === $pending_user['meta']['heuristics'] ) && // Disabled for now, review results first, replace Akismet below
-		'spam' !== $pending_user['meta']['akismet_result'] &&
+		'allow' === $pending_user['meta']['heuristics'] &&
 		(float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 ) 
 	);
 

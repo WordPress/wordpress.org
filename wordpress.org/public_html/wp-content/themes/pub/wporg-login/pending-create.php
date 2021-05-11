@@ -83,23 +83,6 @@ if ( isset( $_POST['user_pass'] ) && 2 !== $pending_user['cleared'] ) {
 		}
 	}
 
-	// Check Akismet with new profile information
-	$pending_user['meta']['akismet_result'] = wporg_login_check_akismet(
-		$pending_user['user_login'],
-		$pending_user['user_email'],
-		$pending_user['meta']['url'] ?? '',
-		array_filter( [
-			$pending_user['meta']['from'] ?? '',
-			$pending_user['meta']['occ'] ?? '',
-			$pending_user['meta']['interests'] ?? '',
-		] )
-	);
-
-	if ( 'spam' === $pending_user['meta']['akismet_result'] ) {
-		$pending_user['cleared'] = 0;
-		unset( $_POST['user_pass'] );
-	}
-
 	wporg_update_pending_user( $pending_user );
 }
 
