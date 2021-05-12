@@ -556,6 +556,7 @@ class WP_57_Credits extends WP_Credits {
 			'wonderboymusic',
 			'worldedu',
 			'wponlinesupport',
+			'xknown',
 			'xkon',
 			'yakimun',
 			'yannkozon',
