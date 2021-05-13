@@ -101,7 +101,7 @@ class API_Update_Updater {
 
 		// Clear plugin info caches also
 		if ( defined( 'GLOTPRESS_LOCALES_PATH' ) && GLOTPRESS_LOCALES_PATH ) {
-			require GLOTPRESS_LOCALES_PATH;
+			require_once GLOTPRESS_LOCALES_PATH;
 
 			$locales = array_filter( array_values( wp_list_pluck( \GP_Locales::locales(), 'wp_locale' ) ) );
 
