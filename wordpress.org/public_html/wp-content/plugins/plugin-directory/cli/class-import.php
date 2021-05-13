@@ -296,7 +296,7 @@ class Import {
 
 		/**
 		 * Action that fires after a plugin is imported.
-		 * 
+		 *
 		 * @param WP_Post $plugin         The plugin updated.
 		 * @param string  $stable_tag     The new stable tag for the plugin.
 		 * @param string  $old_stable_tag The previous stable tag for the plugin.
@@ -679,7 +679,7 @@ class Import {
 	 *
 	 * @return string The plugin readme.txt or readme.md filename.
 	 */
-	static function find_readme_file( $directory ) {
+	public static function find_readme_file( $directory ) {
 		$files = Filesystem::list_files( $directory, false /* non-recursive */, '!(?:^|/)readme\.(txt|md)$!i' );
 
 		// prioritize readme.txt
@@ -699,7 +699,7 @@ class Import {
 	 *
 	 * @return object The plugin headers.
 	 */
-	static function find_plugin_headers( $directory ) {
+	public static function find_plugin_headers( $directory ) {
 		$files = Filesystem::list_files( $directory, false, '!\.php$!i' );
 
 		if ( ! function_exists( 'get_plugin_data' ) ) {

@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 
 use Exception;
+use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
@@ -85,10 +86,17 @@ class Code_Import extends I18n_Import {
 	 * @return true|\WP_Error True if valid, WP_Error in case of failures.
 	 */
 	private function is_plugin_valid( $export_directory ) {
-		$readme = new Parser( $this->find_readme_file( $export_directory ) );
+		$readme   = new Parser( Import::find_readme_file( $export_directory ) );
+		$requires = $readme->requires;
 
-		// Whether plugin files should be checked for valid text domains.
-		if ( empty( $readme->requires ) || version_compare( $readme->requires, '4.6', '<' ) ) {
+		// Prefer requires field from the plugin headers if set.
+		$headers = Import::find_plugin_headers( $export_directory );
+		if ( $headers->RequiresWP && preg_match( '!^[\d.]{3,}$!', $headers->RequiresWP ) ) {
+			$requires = $headers->RequiresWP;
+		}
+
+		// Whether plugin files should be checked for valid text domain setup.
+		if ( empty( $requires ) || version_compare( $requires, '4.6', '<' ) ) {
 			$error                = new WP_Error();
 			$esc_export_directory = escapeshellarg( $export_directory );
 
@@ -100,14 +108,14 @@ class Code_Import extends I18n_Import {
 				$has_slug_as_textdomain_header = shell_exec( 'grep -r -i --include "*.php" "Text Domain:[[:blank:]]*' . trim( escapeshellarg( $this->plugin ), '\'' ) . '" ' . $esc_export_directory );
 
 				if ( ! $has_slug_as_textdomain_header ) {
-					$error->add( 'wrong_textdomain', 'Wrong text domain in header.' );
+					$error->add( 'wrong_textdomain', 'Requires WordPress ' . ( $requires ?: 'n/a' ) . '; wrong text domain in header, expected `' . $this->plugin . '`.' );
 				}
 			} else {
-				$error->add( 'missing_textdomain', 'Missing text domain in header.' );
+				$error->add( 'missing_textdomain', 'Requires WordPress ' .  ( $requires ?: 'n/a' ) . '; missing text domain in header.' );
 			}
 
 			if ( ! $has_load_plugin_textdomain ) {
-				$error->add( 'missing_load_plugin_textdomain', 'Missing load_plugin_textdomain().' );
+				$error->add( 'missing_load_plugin_textdomain', 'Requires WordPress ' .  ( $requires ?: 'n/a' ) . '; missing load_plugin_textdomain() call.' );
 			}
 
 			if ( $error->get_error_codes() ) {
@@ -116,26 +124,5 @@ class Code_Import extends I18n_Import {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Find the plugin readme file.
-	 *
-	 * Looks for either a readme.txt or readme.md file, prioritizing readme.txt.
-	 *
-	 * @param string $directory
-	 * @return string The plugin readme.txt or readme.md filename.
-	 */
-	private function find_readme_file( $directory ) {
-		$files = Filesystem::list_files( $directory, false /* non-recursive */, '!^readme\.(txt|md)$!i' );
-
-		// Prioritize readme.txt
-		foreach ( $files as $file ) {
-			if ( '.txt' === strtolower( substr( $file, -4 ) ) ) {
-				return $file;
-			}
-		}
-
-		return reset( $files );
 	}
 }
