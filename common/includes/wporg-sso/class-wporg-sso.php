@@ -216,11 +216,18 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			}
 
 			// DEBUG - login.w.org redirecting to self?
-			if (
-				'login.wordpress.org' === strtolower( $_SERVER['HTTP_HOST'] ) &&
-				preg_match( '!^(https:)?//login.wordpress.org/?$!i', trim( $to ) )
-			) {
-				trigger_error( 'Login redirect to self: ' . var_export( [ __METHOD__, wp_debug_backtrace_summary(), $to, $requested_to, $_SERVER ], true ), E_USER_WARNING );
+			if ( function_exists( 'wp_cache_set' ) ) {
+				$debug_payload = [
+					'trace'   => debug_backtrace( false ),
+					'get'     => $_GET,
+					'post'    => $_POST,
+					'server'  => $_SERVER,
+					'to'      => $to,
+					'to_orig' => $requested_to,
+				];
+				$debug_key = sha1( serialize( $debug_payload ) );
+				wp_cache_set( $debug_key, $debug_payload, 'debug', 60*60 );
+				header( 'X-Debug-Location: ' . $debug_key );
 			}
 
 			header(
