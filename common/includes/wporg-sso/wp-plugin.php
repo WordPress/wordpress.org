@@ -246,7 +246,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			add_filter( 'site_url', array( $this, 'login_post_url' ), 20, 3 );
 			add_filter( 'register_url', array( $this, 'register_url' ), 20 );
 
-			if ( preg_match( '!/wp-signup\.php$!', $this->script ) ) {
+			if ( preg_match( '!/wp-signup\.php$!', $_SERVER['REQUEST_URI'] ) ) {
+				// Note: wp-signup.php is not a physical file, and so it's matched on it's request uri.
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
 				$this->_safe_redirect( add_query_arg( 'redirect_to', urlencode( $redirect_req ), $this->sso_signup_url ), 301 );
 
