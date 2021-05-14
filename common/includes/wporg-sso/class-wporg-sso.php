@@ -198,6 +198,9 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				return;
 			}
 
+			// DEBUG, store for later incase the filters alter it.
+			$requested_to = $to;
+
 			// When available, sanitize the redirect prior to redirecting.
 			// This isn't strictly needed, but prevents harmless invalid inputs being passed through to the Location header.
 			if ( function_exists( 'wp_sanitize_redirect' ) ) {
@@ -214,12 +217,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			// DEBUG - login.w.org redirecting to self?
 			if (
-				! $_POST &&
-				'login.wordpress.org' === $_SERVER['HTTP_HOST'] &&
-				'/' === $_SERVER['REQUEST_URI'] &&
-				'https://login.wordpress.org/' === $to
+				'login.wordpress.org' === strtolower( $_SERVER['HTTP_HOST'] ) &&
+				preg_match( '!^(https:)?//login.wordpress.org/?$!i', trim( $to ) )
 			) {
-				trigger_error( 'Login redirect to self: ' . var_export( [ __METHOD__, wp_debug_backtrace_summary(), $to, $_SERVER ], true ), E_USER_WARNING );
+				trigger_error( 'Login redirect to self: ' . var_export( [ __METHOD__, wp_debug_backtrace_summary(), $to, $requested_to, $_SERVER ], true ), E_USER_WARNING );
 			}
 
 			header(
