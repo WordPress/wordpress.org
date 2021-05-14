@@ -212,6 +212,16 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$to = apply_filters( 'wp_redirect', $to, $status );
 			}
 
+			// DEBUG - login.w.org redirecting to self?
+			if (
+				! $_POST &&
+				'login.wordpress.org' === $_SERVER['HTTP_HOST'] &&
+				'/' === $_SERVER['REQUEST_URI'] &&
+				'https://login.wordpress.org/' === $to
+			) {
+				trigger_error( 'Login redirect to self: ' . var_export( [ __METHOD__, wp_debug_backtrace_summary(), $to, $_SERVER ], true ), E_USER_WARNING );
+			}
+
 			header(
 				'Location: ' . $to,
 				true,
