@@ -198,9 +198,6 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				return;
 			}
 
-			// DEBUG, store for later incase the filters alter it.
-			$requested_to = $to;
-
 			// When available, sanitize the redirect prior to redirecting.
 			// This isn't strictly needed, but prevents harmless invalid inputs being passed through to the Location header.
 			if ( function_exists( 'wp_sanitize_redirect' ) ) {
@@ -215,25 +212,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$to = apply_filters( 'wp_redirect', $to, $status );
 			}
 
-			// DEBUG - login.w.org redirecting to self?
-			if ( function_exists( 'wp_cache_set' ) ) {
-				$debug_payload = [
-					'trace'   => debug_backtrace( false ),
-					'get'     => $_GET,
-					'post'    => $_POST,
-					'server'  => $_SERVER,
-					'to'      => $to,
-					'to_orig' => $requested_to,
-				];
-				$debug_key = sha1( serialize( $debug_payload ) );
-				wp_cache_set( $debug_key, $debug_payload, 'debug', 60*60 );
-				header( 'X-Debug-Location: ' . $debug_key );
-			}
-
 			header(
 				'Location: ' . $to,
 				true,
-				302 // preg_match( '/^30(1|2)$/', $status ) ? $status : 302
+				preg_match( '/^30(1|2)$/', $status ) ? $status : 302
 			);
 
 			die();
