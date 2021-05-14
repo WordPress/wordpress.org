@@ -41,15 +41,21 @@ class Trac {
 		}
 
 		try {
+			// Retrying this is safe, as the `_ts` parameter must be set correctly for it to succeed.
 			$this->api( 'ticket.update', [ $id, $comment, $attr, (bool) $notify, $author, $when ] );
 
 			return true;
 		} catch( \Exception $e ) {
-			// Try once more.. `_ts` may have been outdated.
+			// `_ts` may have been outdated, update and try again.
 			if ( isset( $get ) && $attr['_ts'] === $get['_ts'] ) {
 				$get = $this->get( $id ); // refetch the ticket.
-				$attr['_ts'] = $get['_ts'];
+				if ( $attr['_ts'] === $get['_ts'] ) {
+					// Didn't change, api already retried, throw it.
+					throw $e;
+				}
+
 				try {
+					$attr['_ts'] = $get['_ts'];
 
 					$this->api( 'ticket.update', [ $id, $comment, $attr, (bool) $notify, $author, $when ] );
 					return true;
@@ -57,6 +63,7 @@ class Trac {
 					throw $e;
 				}
 			}
+
 			return false;
 		}
 	}
@@ -88,12 +95,29 @@ class Trac {
 	/**
 	 * Fetch/POST a Trac JSONRPC endpoint.
 	 */
-	public function api( $method, $params ) {
+	public function api( $method, $params, $retry = 3 ) {
+		$tries = 0;
+		$retry = (int) $retry;
+
+		do {
+			try {
+				return $this->_api( $method, $params );	
+			} catch( \Exception $e ) {
+				// Retry with a short delay
+				sleep( 1 );
+			}
+		} while ( ++$tries < $retry );
+
+		// If we make it this far, all retries have failed, throw that exception.
+		throw $e;
+	}
+
+	protected function _api( $method, $params ) {
 		$context = stream_context_create( [ 'http' => [
 			'method'        => 'POST',
 			'user_agent'    => 'WordPress.org Trac; trac.WordPress.org',
 			'max_redirects' => 0,
-			'timeout'       => 5,
+			'timeout'       => 30,
 			'ignore_errors' => true,
 			'header'        =>
 				[
@@ -139,7 +163,7 @@ class Trac {
 			'method'        => 'POST',
 			'user_agent'    => 'WordPress.org Trac; trac.WordPress.org',
 			'max_redirects' => 0,
-			'timeout'       => 5,
+			'timeout'       => 30,
 			'ignore_errors' => true,
 			'header'        =>  [
 				'Authorization: Basic ' . base64_encode( $this->credentials[0] . ':' . $this->credentials[1] ),
