@@ -323,7 +323,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 									// But make sure to show our custom screen when needed
 									$get['redirect_to'] = $this->_get_safer_redirect_to();
 								}
-								$this->_safe_redirect( add_query_arg( $get, $this->sso_login_url . '/wp-login.php' ), 301 );
+								$this->_safe_redirect( add_query_arg( $get, $this->sso_host_url . '/wp-login.php' ), 301 );
 								return;
 							} else {
 								// Else let the theme render, or redirect if logged in
