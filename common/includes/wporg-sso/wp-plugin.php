@@ -301,7 +301,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					self::$matched_route_regex  = false;
 					self::$matched_route_params = array();
 					foreach ( $this->valid_sso_paths as $route => $regex ) {
-						if ( preg_match( '!^' . $regex . '(?:[/?]{1,2}.*)?$!', $_SERVER['REQUEST_URI'], $matches ) ) {
+						// Process the URI with trailing `/.`, `/..`, `/. ` and `/.%20` normalised to `/`.
+						$request_uri = preg_replace( '!/[ .]+$!', '/', urldecode( $_SERVER['REQUEST_URI'] ) );
+						if ( preg_match( '!^' . $regex . '(?:[/?]{1,2}.*)?$!', $request_uri, $matches ) ) {
 							self::$matched_route        = $route;
 							self::$matched_route_regex  = $regex;
 							self::$matched_route_params = $matches;
