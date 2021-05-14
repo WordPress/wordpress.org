@@ -225,7 +225,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			header(
 				'Location: ' . $to,
 				true,
-				preg_match( '/^30(1|2)$/', $status ) ? $status : 302
+				302 // preg_match( '/^30(1|2)$/', $status ) ? $status : 302
 			);
 
 			die();
