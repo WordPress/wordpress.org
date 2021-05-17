@@ -59,6 +59,13 @@
 
 			});
 
+			$loginForm.on( 'click', '.change-email', function( e ) {
+				e.preventDefault();
+
+				$(this).remove();
+				$loginForm.find( '.login-email' ).removeClass( 'hidden' ).find( 'input' ).addClass( 'error' );
+			});
+
 			// If the form has data in it upon load, immediately trigger the validation.
 			if ( $loginForm.find('#user_login').val() ) {
 				$loginForm.find('#user_login').blur();

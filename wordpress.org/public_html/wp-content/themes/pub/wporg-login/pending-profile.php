@@ -43,11 +43,14 @@ if ( $can_access && $pending_user['created']  ) {
 	die();
 }
 
-if ( wporg_login_save_profile_fields( $pending_user ) ) {
+if ( wporg_login_save_profile_fields( $pending_user, 'pending' ) ) {
 	// re-fetch the user, it's probably changed.
 	$pending_user = wporg_get_pending_user( $profile_user );
 }
 wp_enqueue_script( 'wporg-registration' );
+
+// Allow changing the email, if they've not already changed it once.
+$email_change_available = empty( $pending_user['meta']['changed_email'] );
 
 get_header();
 ?>
@@ -58,16 +61,18 @@ get_header();
 		if ( $pending_user['cleared'] ) {
 			printf(
 				/* translators: %s Email address */
-				__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) . '<br>' .
-				'<a href="#" class="resend" data-account="%s">' . __( 'Resend confirmation email.', 'wporg' ) . '</a>',
+				__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) .
+				'<br><br>' . '<a href="#" class="resend" data-account="%s">' . __( 'Resend confirmation email.', 'wporg' ) . '</a>' .
+				( $email_change_available ? '<br>' . '<a href="#" class="change-email">' . __( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
 				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
 				esc_attr( $pending_user['user_email'] )
 			);
 		} else {
 			printf(
 				/* translators: %s Email address */
-				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . '<br>' .
-				__( 'Please contact %s for more details.', 'wporg' ),
+				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . 
+				'<br>' . __( 'Please contact %s for more details.', 'wporg' ) .
+				( $email_change_available ? '<br><br>' . '<a href="#" class="change-email">' . __( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
 				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
 				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
 			);
@@ -82,6 +87,11 @@ get_header();
 	<p class="login-login">
 		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
 		<input type="text" disabled="disabled" class=" disabled" value="<?php echo esc_attr( $profile_user ); ?>" size="20" />
+	</p>
+
+	<p class="login-email hidden">
+		<label for="user_email"><?php _e( 'Email', 'wporg' ); ?></label>
+		<input type="text" name="user_email" value="<?php echo esc_attr( $pending_user['user_email'] ); ?>" size="20" maxlength="100" />
 	</p>
 
 	<?php

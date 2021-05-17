@@ -50,7 +50,7 @@ if ( ! $can_access ) {
 	die();
 }
 
-if ( wporg_login_save_profile_fields( $pending_user ) ) {
+if ( wporg_login_save_profile_fields( $pending_user, 'create' ) ) {
 	// re-fetch the user, it's probably changed.
 	$pending_user = wporg_get_pending_user( $activation_user );
 }
@@ -148,7 +148,7 @@ get_header();
 
 	<p class="login-login">
 		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
-		<input type="text" disabled="disabled" class=" disabled" value="<?php echo esc_attr( $activation_user ); ?>" size="20" />
+		<input type="text" disabled="disabled" class="disabled" value="<?php echo esc_attr( $activation_user ); ?>" size="20" />
 	</p>
 
 	<div class="user-pass1-wrap">

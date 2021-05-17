@@ -49,7 +49,7 @@ body.route-pending-create {
 	height: 40px;
 	font-size: 14px;
 }
-
+.hidden,
 #backtoblog {
 	display: none;
 }
@@ -443,8 +443,8 @@ body.route-pending-profile p.intro {
 	margin-bottom: 1em !important;
 }
 
-body.route-pending-profile .login-login input.disabled,
-body.route-pending-create .login-login input.disabled {
+body.route-pending-profile input.disabled,
+body.route-pending-create input.disabled {
 	color: #666;
 	background: transparent;
 	border: none;

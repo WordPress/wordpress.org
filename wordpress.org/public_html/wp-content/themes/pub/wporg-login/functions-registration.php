@@ -325,7 +325,7 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 /**
  * Save the user profile fields, potentially prior to user creation and prior to email confirmation.
  */
-function wporg_login_save_profile_fields( $pending_user = false ) {
+function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	if ( ! $_POST || empty( $_POST['user_fields'] ) ) {
 		return false;
 	}
@@ -357,8 +357,43 @@ function wporg_login_save_profile_fields( $pending_user = false ) {
 		}
 	}
 
+	$updated_email = false;
+	if (
+		'pending' === $state &&
+		empty( $pending_user['meta']['changed_email'] ) && // Only if they've not changed it before.
+		! empty( $_POST['user_email'] ) &&
+		wp_unslash( $_POST['user_email'] ) !== $pending_user['user_email']
+	) {
+		// Validate the email
+		$error_user_email = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/email-in-use/' . wp_unslash( $_POST['user_email'] ) ) );
+		if ( $error_user_email->get_data()['available'] ) {
+			// Change their email, resend confirmation.
+			$pending_user['meta']['changed_email'] = $pending_user['user_email'];
+			$pending_user['user_email']            = wp_unslash( $_POST['user_email'] );
+			$pending_user['user_activation_key']   = ''; // Clear any existing email hash.
+			$updated_email                         = true;
+
+			// Validate heuristics.
+			if ( function_exists( 'wporg_registration_check_private_heuristics' ) ) {
+				// Returns block, review, allow.
+				$pending_user['meta']['heuristics'] = wporg_registration_check_private_heuristics( [
+					'user_login' => $pending_user['user_login'],
+					'user_email' => $pending_user['user_email']
+				] );
+			}
+
+			// If the new email fails our checks, and the user hasn't manually been approved..
+			if ( 'allow' !== $pending_user['meta']['heuristics'] && $pending_user['cleared'] < 2 ) {
+				$pending_user['cleared'] = 0;
+			}
+		}
+	}
+
 	if ( $pending_user ) {
 		wporg_update_pending_user( $pending_user );
+		if ( $updated_email ) {
+			wporg_login_send_confirmation_email( $pending_user );
+		}
 	}
 
 	return true;
