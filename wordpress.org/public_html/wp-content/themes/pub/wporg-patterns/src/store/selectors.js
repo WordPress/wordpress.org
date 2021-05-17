@@ -112,3 +112,48 @@ export function getCategoryBySlug( state, slug ) {
 	const [ cat ] = state.categories.filter( ( i ) => i.slug === slug );
 	return cat;
 }
+
+/**
+ * Get pattern flag reasons.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Array} A list of pattern flag reasons.
+ */
+export function getPatternFlagReasons( state ) {
+	return state.patternFlagReasons;
+}
+
+/**
+ * Check if pattern flag reasons are loading.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Array} A list of pattern flag reasons.
+ */
+export function isLoadingPatternFlagReasons( state ) {
+	return state.patternFlagReasons === null;
+}
+
+/**
+ * Get the list of favorites.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {number[]} A list of favorite pattern IDs.
+ */
+export function getFavorites( state ) {
+	return state.favorites;
+}
+
+/**
+ * Check if a pattern ID is in the list of favorites.
+ *
+ * @param {Object} state Global application state.
+ * @param {number} patternId The pattern to check.
+ *
+ * @return {number[]} A list of favorite pattern IDs.
+ */
+export function isFavorite( state, patternId ) {
+	return state.favorites.includes( patternId );
+}

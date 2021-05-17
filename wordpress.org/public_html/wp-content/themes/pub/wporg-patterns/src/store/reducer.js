@@ -22,6 +22,26 @@ export function patterns( state = {}, action ) {
 	};
 }
 
+function byId( state = {}, action ) {
+	const patternsById = ( action.patterns || [] ).reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} );
+	switch ( action.type ) {
+		case 'LOAD_BLOCK_PATTERNS':
+			return { ...state, ...patternsById };
+		default:
+			return state;
+	}
+}
+
+function queries( state = {}, action ) {
+	const patternIds = ( action.patterns || [] ).map( ( { id } ) => id );
+	switch ( action.type ) {
+		case 'LOAD_BLOCK_PATTERNS':
+			return { ...state, [ action.query ]: [ ...( state[ action.query ] || [] ), ...patternIds ] };
+		default:
+			return state;
+	}
+}
+
 /**
  * Reducer to track categories.
  *
@@ -60,29 +80,49 @@ export function currentQuery( state = undefined, action ) {
 	return state;
 }
 
-function byId( state = {}, action ) {
-	const patternsById = ( action.patterns || [] ).reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} );
+/**
+ * Reducer to track pattern flag reasons.
+ *
+ * @param {Object} state Current state.
+ * @param {Object} action Dispatched action.
+ * @return {Object} Updated state.
+ */
+export function patternFlagReasons( state = undefined, action ) {
 	switch ( action.type ) {
-		case 'LOAD_BLOCK_PATTERNS':
-			return { ...state, ...patternsById };
+		case 'FETCH_PATTERN_FLAG_REASONS':
+			return null;
+		case 'LOAD_PATTERN_FLAG_REASONS':
+			return [ ...action.reasons ];
 		default:
 			return state;
 	}
 }
 
-function queries( state = {}, action ) {
-	const patternIds = ( action.patterns || [] ).map( ( { id } ) => id );
+/**
+ * Reducer to track the user's favorites.
+ *
+ * @param {Object} state Current state.
+ * @param {Object} action Dispatched action.
+ * @return {Object} Updated state.
+ */
+export function favorites( state = [], action ) {
+	const { patternId } = action;
 	switch ( action.type ) {
-		case 'LOAD_BLOCK_PATTERNS':
-			return { ...state, [ action.query ]: [ ...( state[ action.query ] || [] ), ...patternIds ] };
-		default:
-			return state;
+		case 'LOAD_FAVORITES':
+			return action.patternIds;
+		case 'ADD_FAVORITE':
+			return state.includes( patternId ) ? state : [ ...state, patternId ];
+		case 'REMOVE_FAVORITE':
+			return state.filter( ( id ) => id !== patternId );
 	}
+
+	return state;
 }
 
 export default combineReducers( {
 	patterns,
 	categories,
 	currentQuery,
-	// favorites,
+	patternFlagReasons,
+	favorites,
 } );

@@ -7,7 +7,15 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { fetchCategories, fetchPatterns, loadCategories, loadPatterns } from './actions';
+import {
+	fetchCategories,
+	fetchPatternFlagReasons,
+	fetchPatterns,
+	loadCategories,
+	loadFavorites,
+	loadPatternFlagReasons,
+	loadPatterns,
+} from './actions';
 import { getQueryString } from './utils';
 
 export function* getPatternsByQuery( query ) {
@@ -28,5 +36,25 @@ export function* getCategories() {
 			path: addQueryArgs( '/wp/v2/pattern-categories' ),
 		} );
 		yield loadCategories( results );
+	} catch ( error ) {}
+}
+
+export function* getPatternFlagReasons() {
+	try {
+		yield fetchPatternFlagReasons();
+
+		const results = yield apiFetch( {
+			path: addQueryArgs( '/wp/v2/wporg-pattern-flag-reason' ),
+		} );
+		yield loadPatternFlagReasons( results );
+	} catch ( error ) {}
+}
+
+export function* getFavorites() {
+	try {
+		const results = yield apiFetch( {
+			path: '/wporg/v1/pattern-favorites',
+		} );
+		yield loadFavorites( results );
 	} catch ( error ) {}
 }

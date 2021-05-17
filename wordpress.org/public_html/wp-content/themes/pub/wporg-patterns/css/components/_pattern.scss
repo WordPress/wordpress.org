@@ -28,11 +28,17 @@ body.single-wporg-pattern {
 
 	.pattern-actions {
 		display: flex;
-		align-items: stretch;
+		justify-content: flex-start;
+		align-items: center;
 		flex-wrap: wrap;
+		gap: 0.5em 2em;
 
-		button + button {
-			margin-left: 2em;
+		button {
+			margin: 0;
+		}
+
+		@media (max-width: $breakpoint-mobile) {
+			justify-content: center;
 		}
 	}
 

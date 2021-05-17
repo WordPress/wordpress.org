@@ -1,0 +1,15 @@
+.pattern-report-button {
+	color: $color-gray-800 !important;
+}
+
+.pattern-report-button__copy {
+	margin: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	svg {
+		margin-right: $gutter-default / 4;
+	}
+}
+

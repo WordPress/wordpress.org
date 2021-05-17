@@ -1,4 +1,9 @@
 /**
+ * WordPress dependencies
+ */
+import { apiFetch } from '@wordpress/data-controls';
+
+/**
  * Get the action object signalling that patterns have been requested.
  *
  * @param {string} query Search string.
@@ -48,4 +53,72 @@ export function fetchCategories() {
  */
 export function loadCategories( categories ) {
 	return { type: 'LOAD_CATEGORIES', categories: categories };
+}
+
+/**
+ * Get the action object signalling that pattern flag reasons have been requested.
+ *
+ * @return {Object} Action object.
+ */
+export function fetchPatternFlagReasons() {
+	return { type: 'FETCH_PATTERN_FLAG_REASONS' };
+}
+
+/**
+ * Get the action object signalling that pattern flag reasons have been loaded.
+ *
+ * @param {Array} reasons A list of reasons.
+ * @return {Object} Action object.
+ */
+export function loadPatternFlagReasons( reasons ) {
+	return { type: 'LOAD_PATTERN_FLAG_REASONS', reasons: reasons };
+}
+
+/**
+ * Get the action object signalling that the favorites list has been loaded.
+ *
+ * @param {number[]} patternIds A list of pattern IDs.
+ *
+ * @return {Object} Action object.
+ */
+export function loadFavorites( patternIds ) {
+	return { type: 'LOAD_FAVORITES', patternIds: patternIds };
+}
+
+/**
+ * Get the action object to favorite a pattern.
+ *
+ * @param {number} patternId The pattern to favorite.
+ *
+ * @return {Object} Action object.
+ */
+export function* addFavorite( patternId ) {
+	const success = yield apiFetch( {
+		path: '/wporg/v1/pattern-favorites',
+		method: 'POST',
+		data: { id: patternId },
+	} );
+	// Silently discarding any errors.
+	if ( success === true ) {
+		return { type: 'ADD_FAVORITE', patternId: patternId };
+	}
+}
+
+/**
+ * Get the action object to unfavorite a pattern.
+ *
+ * @param {number} patternId The pattern to unfavorite.
+ *
+ * @return {Object} Action object.
+ */
+export function* removeFavorite( patternId ) {
+	const success = yield apiFetch( {
+		path: '/wporg/v1/pattern-favorites',
+		method: 'DELETE',
+		data: { id: patternId },
+	} );
+	// Silently discarding any errors.
+	if ( success === true ) {
+		return { type: 'REMOVE_FAVORITE', patternId: patternId };
+	}
 }

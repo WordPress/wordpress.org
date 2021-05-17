@@ -73,6 +73,12 @@
 			left: 9px;
 		}
 	}
+
+	&[disabled] {
+		background: transparent !important;
+		text-shadow: none !important;
+		color: $color-gray-400 !important;
+	}
 }
 
 @keyframes HeartBeat {

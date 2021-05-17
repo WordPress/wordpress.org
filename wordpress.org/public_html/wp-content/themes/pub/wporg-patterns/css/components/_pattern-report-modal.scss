@@ -1,0 +1,36 @@
+.pattern-report-modal {
+	max-width: 400px;
+	width: 100%;
+
+	@include breakpoint( $breakpoint-small ) {
+		width: 400px;
+	}
+
+	form > *:first-child {
+		padding-bottom: $gutter-default;
+	}
+}
+
+.pattern-report-modal__has-fixed-height {
+	min-height: 400px;
+}
+
+.pattern-report-modal__copy {
+	text-align: center;
+	line-height: 1.5;
+}
+
+.pattern-report-modal__actions {
+	margin-top: $gutter-default;
+	display: grid;
+	grid-template-columns: 48% 48%;
+	column-gap: 4%;
+
+	button {
+		justify-content: center;
+	}
+}
+
+.pattern-report-modal__radio .components-radio-control__option {
+	margin-top: $gutter-default / 2;
+}

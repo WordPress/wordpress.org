@@ -3,6 +3,7 @@
 namespace WordPressdotorg\Pattern_Directory\Theme;
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
 
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
@@ -135,4 +136,22 @@ function pre_get_posts( $wp_query ) {
  */
 function use_index_php_as_template() {
 	return __DIR__ . '/index.php';
+}
+
+/**
+ * Checks whether the user has a pending flag for a specific pattern.
+ *
+ * @return bool
+ */
+function user_has_flagged_pattern() {
+	$args = array(
+		'author' => get_current_user_id(),
+		'post_parent' => get_the_ID(),
+		'post_type' => FLAG_POST_TYPE,
+		'post_status' => 'pending',
+	);
+
+	$items = new \WP_Query( $args );
+
+	return $items->have_posts();
 }

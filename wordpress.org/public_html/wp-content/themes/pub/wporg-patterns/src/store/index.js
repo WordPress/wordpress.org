@@ -7,10 +7,10 @@ import { controls } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import reducer from './reducer';
-import * as selectors from './selectors';
 import * as actions from './actions';
+import reducer from './reducer';
 import * as resolvers from './resolvers';
+import * as selectors from './selectors';
 
 /**
  * Module Constants

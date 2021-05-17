@@ -3,20 +3,17 @@
  */
 import { speak } from '@wordpress/a11y';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Disabled, Tooltip } from '@wordpress/components';
+import { Button, Disabled } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import IconHeartOutline from '../icons/heart-outline';
-import IconHeartFilled from '../icons/heart-filled';
+import FavoriteButton from '../favorite-button';
 import Canvas from './canvas';
 import { copyToClipboard } from '../../utils';
 
 function PatternThumbnail( { pattern } ) {
-	// @todo Implement a real favoriting process.
-	const [ isFavorite, setFavorite ] = useState( Math.random() < 0.3 );
 	const [ copied, setCopied ] = useState( false );
 
 	const handleCopy = () => {
@@ -54,23 +51,7 @@ function PatternThumbnail( { pattern } ) {
 			</a>
 			<div className="pattern-grid__actions">
 				<h2 className="pattern-grid__title">{ pattern.title.rendered }</h2>
-				<Tooltip
-					text={
-						isFavorite
-							? __( 'Remove pattern from favorites', 'wporg-patterns' )
-							: __( 'Favorite pattern', 'wporg-patterns' )
-					}
-				>
-					<button
-						className={
-							'button button-link pattern__favorite-button' + ( isFavorite ? ' is-favorited' : '' )
-						}
-						onClick={ () => setFavorite( ! isFavorite ) }
-					>
-						<IconHeartFilled className="pattern__favorite-filled" />
-						<IconHeartOutline className="pattern__favorite-outline" />
-					</button>
-				</Tooltip>
+				<FavoriteButton showLabel={ false } patternId={ pattern.id } />
 				<Button className="pattern__copy-button is-small" isPrimary onClick={ handleCopy }>
 					{ copied ? __( 'Copied!', 'wporg-patterns' ) : __( 'Copy', 'wporg-patterns' ) }
 				</Button>
