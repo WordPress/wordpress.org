@@ -25,4 +25,4 @@ function init() {
 
 	add_action( 'locale', [ $detector, 'get_locale' ] );
 }
-add_action( 'plugins_loaded', __NAMESPACE__ . '\init' );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\init', 1 );
