@@ -42,7 +42,7 @@ function main() {
 	 *
 	 * This is just a guess, and needs to be re-evaluated before it expires.
 	 */
-	define( 'COVID_IMPACT_EXPIRATION', strtotime( 'June 30 2021' ) );
+	define( 'COVID_IMPACT_EXPIRATION', strtotime( 'January 1 2022' ) );
 
 	// The test suite just needs the functions defined and doesn't want any headers or output
 	if ( defined( 'WPORG_RUNNING_TESTS' ) && WPORG_RUNNING_TESTS ) {
@@ -566,12 +566,12 @@ function get_location( $args = array() ) {
 		$country_types = array(
 			// See http://download.geonames.org/export/dump/featureCodes_en.txt
 
-			'A.PCL',   // political entity	
-			'A.PCLD',  // dependent political entity	
-			'A.PCLF',  // freely associated state	
+			'A.PCL',   // political entity
+			'A.PCLD',  // dependent political entity
+			'A.PCLF',  // freely associated state
 			'A.PCLH',  // historical political entity	a former political entity
-			'A.PCLI',  // independent political entity	
-			'A.PCLIX', // section of independent political entity	
+			'A.PCLI',  // independent political entity
+			'A.PCLIX', // section of independent political entity
 			'A.PCLS',  // semi-independent political entity
 			'A.PRSH',  // parish an ecclesiastical district
 			'A.TERR',  // territory
