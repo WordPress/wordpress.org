@@ -91,7 +91,7 @@ class Code_Import extends I18n_Import {
 
 		// Prefer requires field from the plugin headers if set.
 		$headers = Import::find_plugin_headers( $export_directory );
-		if ( $headers->RequiresWP && preg_match( '!^[\d.]{3,}$!', $headers->RequiresWP ) ) {
+		if ( ! empty( $headers->RequiresWP ) && preg_match( '!^[\d.]{3,}$!', $headers->RequiresWP ) ) {
 			$requires = $headers->RequiresWP;
 		}
 
