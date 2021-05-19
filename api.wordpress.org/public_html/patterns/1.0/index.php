@@ -45,8 +45,9 @@ function main( $query_string ) {
 		$query_args['_fields'] = 'id,name,slug';
 
 	} else { // Return patterns.
-		$endpoint              = '/wp/v2/wporg-pattern';
-		$query_args['_fields'] = 'id,title,content,meta,category_slugs,keyword_slugs,pattern_content';
+		$endpoint               = '/wp/v2/wporg-pattern';
+		$query_args['_fields']  = 'id,title,content,meta,category_slugs,keyword_slugs,pattern_content';
+		$query_args['per_page'] = 100;
 
 		// Sort alphabetically so that browsing is intuitive. Search will be sorted by rank.
 		if ( ! isset( $query_args['search'] ) ) {
