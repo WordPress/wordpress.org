@@ -1,0 +1,6 @@
+.openverse_embed {
+    width: 100%;
+    height: var(--openverse-embed-height, 100vh); /* This will be updated by JavaScript */
+
+    border: none;
+}

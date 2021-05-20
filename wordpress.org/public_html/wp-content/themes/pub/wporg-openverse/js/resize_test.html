@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>iframe Resize test</title>
+    <style>
+      .row:not(:first-of-type) {
+        margin-top: 1em;
+      }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('height');
+        const button = document.getElementById('send');
+
+        document.forms['test'].addEventListener('submit', (event) => {
+          event.preventDefault();
+          
+          const value = input.value;
+          console.log(`Value: ${value}px`);
+          
+          if (window.parent !== window) {
+            console.log('Sending message to parent window');
+            window.parent.postMessage({ height: value, debug: true });
+          } else {
+            console.log('No parent window, no message sent!');
+          }
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1><code>iframe</code> Resize test</h1>
+    <form name="test">
+      <div class="row">
+        <label for="height">Height:</label>
+        <input
+          id="height"
+          type="number"
+          placeholder="Height in px"
+          required/>
+        <span>px</span>
+      </div>
+      <div class="row">
+        <button
+          id="send"
+          type="submit">
+          Send message
+        </button>
+      </div>
+    </form>
+  </body>
+</html>
