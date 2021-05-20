@@ -179,6 +179,7 @@ class Cross_Locale_PTE {
 
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
+				'removeTranslator'  => __( 'Are you sure you wish to completely remove CLPTE status for this user?', 'rosetta' ),
 				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
 			),
 			'lastUpdated' => $last_updated,

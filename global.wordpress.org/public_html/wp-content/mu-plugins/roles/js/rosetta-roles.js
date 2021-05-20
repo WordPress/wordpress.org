@@ -552,11 +552,21 @@
 	} );
 
 	$window.on( 'uncheck-all-projects.rosetta', function() {
-		var checked =  $projectAllCheckbox.prop( 'checked' );
+		var checked = $projectAllCheckbox.prop( 'checked' );
 
 		if ( checked ) {
 			projects.selection.remove( { id: 'all' } );
 			$projectAllCheckbox.prop( 'checked', false );
 		}
 	} );
+
+	// Confirm removal of CLPTE status.
+	$( '#project-access-list' ).parents( 'form' ).on( 'submit', function( e ) {
+		if ( ! $( '#project-access-list' ).val() ) {
+			if ( ! confirm( l10n.removeTranslator ) ) {
+				e.preventDefault();
+			}
+		}
+	} );
+
 } )( jQuery );
