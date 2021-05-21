@@ -23,7 +23,8 @@ function wporg_robots_txt( $robots ) {
 	} elseif ( 'wordpress.org' === $blog_details->domain ) {
 		// WordPress.org/search/ should not be indexed.
 		$robots .= "\nUser-agent: *\n" .
-		           "Disallow: /search\n";
+		           "Disallow: /search\n" .
+			   "Disallow: /?s=";
 
 	} elseif ( 's-origin.wordpress.org' === $blog_details->domain ) {
 		// Placeholder for the s.w.org domain. See https://meta.trac.wordpress.org/ticket/5668
