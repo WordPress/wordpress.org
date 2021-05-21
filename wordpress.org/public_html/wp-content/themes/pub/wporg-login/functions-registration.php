@@ -358,18 +358,19 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	}
 
 	$updated_email = false;
+	$new_email     = trim( wp_unslash( $_POST['user_email'] ?? '' ) );
 	if (
 		'pending' === $state &&
 		empty( $pending_user['meta']['changed_email'] ) && // Only if they've not changed it before.
-		! empty( $_POST['user_email'] ) &&
-		wp_unslash( $_POST['user_email'] ) !== $pending_user['user_email']
+		$new_email &&
+		$new_email !== $pending_user['user_email']
 	) {
 		// Validate the email
-		$error_user_email = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/email-in-use/' . wp_unslash( $_POST['user_email'] ) ) );
+		$error_user_email = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/email-in-use/' . $new_email ) );
 		if ( $error_user_email->get_data()['available'] ) {
 			// Change their email, resend confirmation.
 			$pending_user['meta']['changed_email'] = $pending_user['user_email'];
-			$pending_user['user_email']            = wp_unslash( $_POST['user_email'] );
+			$pending_user['user_email']            = $new_email;
 			$pending_user['user_activation_key']   = ''; // Clear any existing email hash.
 			$updated_email                         = true;
 
