@@ -3,7 +3,7 @@
 namespace WordPressdotorg\Openverse\Theme;
 
 if ( !defined('OPENVERSE_URL') ) {
-	define('OPENVERSE_URL', 'https://search.creativecommons.org');
+	define('OPENVERSE_URL', 'https://search.openverse.engineering');
 }
 
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
