@@ -1,11 +1,14 @@
-.category-context__bar {
+.category-context-bar {
 	margin: 0 $gutter-default;
 	background: $color-gray-light-300;
 	border-radius: 2px;
 	font-size: 0.8125rem;
 	overflow: auto;
-	transition: all 100ms ease-out;
-	transition-delay: 100ms;
+	transition: all 300ms ease-out;
+
+	@media (prefers-reduced-motion) {
+		transition: none;
+	}
 
 	> div {
 		display: flex;
@@ -13,11 +16,11 @@
 		justify-content: space-between;
 	}
 
-	@media only screen and (min-width: $breakpoint-medium) {
+	@media only screen and ( min-width: $breakpoint-medium ) {
 		margin: 0 $gutter-default;
 	}
 
-	@media only screen and (min-width: $breakpoint-large) {
+	@media only screen and ( min-width: $breakpoint-large ) {
 		margin: 0 auto;
 		max-width: $size__site-main;
 	}
@@ -43,34 +46,56 @@
 			}
 		}
 	}
+}
 
-	&__copy {
+.category-context-bar__copy {
+	display: flex;
+	align-items: center;
+
+	margin: 0;
+	padding: $gutter-default * 0.75 $gutter-default;
+	font-size: 0.8125rem;
+	font-weight: 400;
+}
+
+.category-context-bar__title {
+	margin: 0;
+	padding-right: $gutter-default;
+	color: $color__text;
+	font-size: 0.75rem;
+	font-weight: 400;
+	text-transform: uppercase;
+}
+
+.category-context-bar__links {
+	display: flex;
+	align-items: center;
+
+	@media only screen and ( max-width: $breakpoint-medium ) {
+		display: none;
+	}
+}
+
+.category-context-bar__spinner {
+	display: flex;
+	width: 28px;
+	margin: 0;
+	transition: transform 100ms linear, width 150ms ease-out, opacity 50ms linear 50ms;
+	transform: scale(1);
+
+	@media (prefers-reduced-motion) {
+		transition: none;
+	}
+
+	// @wordpress/components/spinner has default margin we don't need
+	.components-spinner {
 		margin: 0;
-		padding: $gutter-default * 0.75 $gutter-default;
-		font-size: 0.8125rem;
-		font-weight: 400;
 	}
+}
 
-	&__title {
-		margin: 0;
-		padding-right: $gutter-default;
-		color: $color__text;
-		font-size: 0.75rem;
-		font-weight: 400;
-		text-transform: uppercase;
-	}
-
-	&__links {
-		display: flex;
-		align-items: center;
-
-		@media only screen and (max-width: $breakpoint-medium) {
-			display: none;
-		}
-	}
-
-	&--is-hidden {
-		height: 0;
-		overflow: hidden;
-	}
+.category-context-bar__spinner--is-hidden {
+	overflow: hidden;
+	width: 0;
+	opacity: 0;
+	transform: scale(0);
 }

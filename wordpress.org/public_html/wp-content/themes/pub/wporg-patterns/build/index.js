@@ -7379,68 +7379,6 @@ var wordpress = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 
 /***/ }),
 
-/***/ "../../../../node_modules/classnames/index.js":
-/*!**************************************************************************************!*\
-  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/classnames/index.js ***!
-  \**************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-  Copyright (c) 2017 Jed Watson.
-  Licensed under the MIT License (MIT), see
-  http://jedwatson.github.io/classnames
-*/
-/* global define */
-
-(function () {
-	'use strict';
-
-	var hasOwn = {}.hasOwnProperty;
-
-	function classNames () {
-		var classes = [];
-
-		for (var i = 0; i < arguments.length; i++) {
-			var arg = arguments[i];
-			if (!arg) continue;
-
-			var argType = typeof arg;
-
-			if (argType === 'string' || argType === 'number') {
-				classes.push(arg);
-			} else if (Array.isArray(arg) && arg.length) {
-				var inner = classNames.apply(null, arg);
-				if (inner) {
-					classes.push(inner);
-				}
-			} else if (argType === 'object') {
-				for (var key in arg) {
-					if (hasOwn.call(arg, key) && arg[key]) {
-						classes.push(key);
-					}
-				}
-			}
-		}
-
-		return classes.join(' ');
-	}
-
-	if ( true && module.exports) {
-		classNames.default = classNames;
-		module.exports = classNames;
-	} else if (true) {
-		// register as 'classnames', consistent with npm package name
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function () {
-			return classNames;
-		}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	} else {}
-}());
-
-
-/***/ }),
-
 /***/ "./node_modules/@babel/runtime/helpers/arrayLikeToArray.js":
 /*!*****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/arrayLikeToArray.js ***!
@@ -7773,6 +7711,74 @@ function _unsupportedIterableToArray(o, minLen) {
 
 module.exports = _unsupportedIterableToArray;
 module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/classnames/index.js":
+/*!******************************************!*\
+  !*** ./node_modules/classnames/index.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+  Copyright (c) 2018 Jed Watson.
+  Licensed under the MIT License (MIT), see
+  http://jedwatson.github.io/classnames
+*/
+/* global define */
+
+(function () {
+	'use strict';
+
+	var hasOwn = {}.hasOwnProperty;
+
+	function classNames() {
+		var classes = [];
+
+		for (var i = 0; i < arguments.length; i++) {
+			var arg = arguments[i];
+			if (!arg) continue;
+
+			var argType = typeof arg;
+
+			if (argType === 'string' || argType === 'number') {
+				classes.push(arg);
+			} else if (Array.isArray(arg)) {
+				if (arg.length) {
+					var inner = classNames.apply(null, arg);
+					if (inner) {
+						classes.push(inner);
+					}
+				}
+			} else if (argType === 'object') {
+				if (arg.toString === Object.prototype.toString) {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				} else {
+					classes.push(arg.toString());
+				}
+			}
+		}
+
+		return classes.join(' ');
+	}
+
+	if ( true && module.exports) {
+		classNames.default = classNames;
+		module.exports = classNames;
+	} else if (true) {
+		// register as 'classnames', consistent with npm package name
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function () {
+			return classNames;
+		}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else {}
+}());
+
 
 /***/ }),
 
@@ -10688,20 +10694,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../hooks */ "./src/hooks/index.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
-/* harmony import */ var _messaging__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./messaging */ "./src/components/category-context-bar/messaging.js");
-/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../hooks */ "./src/hooks/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
+/* harmony import */ var _messaging__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./messaging */ "./src/components/category-context-bar/messaging.js");
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
 
 
 
 /**
  * WordPress dependencies
  */
+
 
 
 
@@ -10715,7 +10724,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function CategoryContextBar() {
-  var _useRoute = Object(_hooks__WEBPACK_IMPORTED_MODULE_4__["useRoute"])(),
+  var _useRoute = Object(_hooks__WEBPACK_IMPORTED_MODULE_5__["useRoute"])(),
       path = _useRoute.path;
 
   var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(0),
@@ -10723,21 +10732,28 @@ function CategoryContextBar() {
       height = _useState2[0],
       setHeight = _useState2[1];
 
-  var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])({}),
+  var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(),
       _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState3, 2),
-      context = _useState4[0],
-      setContext = _useState4[1];
+      message = _useState4[0],
+      setMessage = _useState4[1];
+
+  var _useState5 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])({
+    title: '',
+    links: []
+  }),
+      _useState6 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState5, 1),
+      context = _useState6[0];
 
   var innerRef = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
 
-  var _useSelect = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_2__["useSelect"])(function (select) {
-    var _select = select(_store__WEBPACK_IMPORTED_MODULE_7__["store"]),
+  var _useSelect = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_3__["useSelect"])(function (select) {
+    var _select = select(_store__WEBPACK_IMPORTED_MODULE_8__["store"]),
         getCategoryBySlug = _select.getCategoryBySlug,
         getPatternsByQuery = _select.getPatternsByQuery,
         isLoadingPatternsByQuery = _select.isLoadingPatternsByQuery,
         getCurrentQuery = _select.getCurrentQuery;
 
-    var categorySlug = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getCategoryFromPath"])(path);
+    var categorySlug = Object(_utils__WEBPACK_IMPORTED_MODULE_6__["getCategoryFromPath"])(path);
 
     var _category = getCategoryBySlug(categorySlug);
 
@@ -10755,44 +10771,47 @@ function CategoryContextBar() {
       patterns = _useSelect.patterns;
 
   Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
-    if (!category || isLoadingPatterns) {
+    if (!category) {
       return;
     }
 
-    var searchTerm = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__["getQueryArg"])(path, 'search');
-    var _context = {}; // Use the category count as default since it has the count of all the associated patterns
-
-    var count = category.count; // If we have a search term use the pattern results length.
-    // Not: This is okay until we start using paging.
-
-    if (searchTerm) {
-      count = patterns.length;
+    if (isLoadingPatterns) {
+      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_7__["getLoadingMessage"])(category.name));
+      return;
     }
 
-    if (!isAllCategory || searchTerm) {
-      _context = Object(_messaging__WEBPACK_IMPORTED_MODULE_6__["getContextMessage"])(count, category.name, searchTerm);
-    }
+    var searchTerm = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_4__["getQueryArg"])(path, 'search');
 
-    setContext(_context);
+    if (searchTerm && !isAllCategory) {
+      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_7__["getDefaultSearchMessage"])(patterns.length, category.name, searchTerm));
+    } else if (searchTerm && isAllCategory) {
+      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_7__["getAllSearchMessage"])(patterns.length, searchTerm));
+    } else if (!isAllCategory) {
+      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_7__["getDefaultMessage"])(category.count || 0, category.name));
+    } else {
+      setMessage('');
+    }
   }, [category, isLoadingPatterns, patterns]);
   Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
-    var _height = context.message ? innerRef.current.offsetHeight : 0;
+    var _height = message ? innerRef.current.offsetHeight : 0;
 
     setHeight(_height);
-  }, [context.message]);
+  }, [message]);
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("header", {
-    className: "category-context__bar",
+    className: "category-context-bar",
     style: {
       height: "".concat(height, "px")
     }
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     ref: innerRef
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", {
-    className: "category-context__bar__copy"
-  }, context.message), context.links && context.links.length > 0 && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
-    className: "category-context__bar__links"
+    className: "category-context-bar__copy"
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("span", {
+    className: "category-context-bar__spinner ".concat(!isLoadingPatterns ? 'category-context-bar__spinner--is-hidden' : '')
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Spinner"], null)), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("span", null, message)), context.links && context.links.length > 0 && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
+    className: "category-context-bar__links"
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h3", {
-    className: "category-context__bar__title"
+    className: "category-context-bar__title"
   }, context.title), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("ul", null, context.links.map(function (i) {
     return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("li", {
       key: i.href
@@ -10810,12 +10829,15 @@ function CategoryContextBar() {
 /*!**********************************************************!*\
   !*** ./src/components/category-context-bar/messaging.js ***!
   \**********************************************************/
-/*! exports provided: getContextMessage */
+/*! exports provided: getDefaultMessage, getLoadingMessage, getDefaultSearchMessage, getAllSearchMessage */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getContextMessage", function() { return getContextMessage; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDefaultMessage", function() { return getDefaultMessage; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLoadingMessage", function() { return getLoadingMessage; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDefaultSearchMessage", function() { return getDefaultSearchMessage; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAllSearchMessage", function() { return getAllSearchMessage; });
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
@@ -10828,7 +10850,36 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /**
- * Returns an object with extra information about the category.
+ * Returns a message regarding current category filter status.
+ *
+ * @param {number} count Number of patterns associated to the current category.
+ * @param {string} categoryName The category name.
+ * @return {Object}
+ */
+
+var getDefaultMessage = function getDefaultMessage(count, categoryName) {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
+  /* translators: %1$d: number of patterns. %2$s category name. */
+  Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d <b>%2$s</b> pattern.', '%1$d <b>%2$s</b> patterns.', count, 'wporg-patterns'), count, categoryName, 'wporg-patterns'), {
+    b: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("b", null)
+  });
+};
+/**
+ * Returns a message regarding current loading status.
+ *
+ * @param {string} categoryName The category name.
+ * @return {Object}
+ */
+
+var getLoadingMessage = function getLoadingMessage(categoryName) {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
+  /* translators: %1$d: number of patterns. %2$s category name. */
+  Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Loading <b>%s</b> patterns.', 'wporg-patterns'), categoryName, 'wporg-patterns'), {
+    b: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("b", null)
+  });
+};
+/**
+ * Returns a message regarding current search status.
  *
  * @param {number} count Number of patterns associated to the category.
  * @param {string} categoryName The category name.
@@ -10836,31 +10887,27 @@ __webpack_require__.r(__webpack_exports__);
  * @return {Object}
  */
 
-var getContextMessage = function getContextMessage(count, categoryName, searchTerm) {
-  var message = Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
-  /* translators: %1$d: number of patterns. %2$s category name. */
-  Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d <b>%2$s</b> pattern.', '%1$d <b>%2$s</b> patterns.', count, 'wporg-patterns'), count, categoryName.toLowerCase(), 'wporg-patterns');
+var getDefaultSearchMessage = function getDefaultSearchMessage(count, categoryName, searchTerm) {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
+  /* translators: %1$d: number of patterns. %2$s category name. %3$s search term  */
+  Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d <b>%2$s</b> pattern matching "<b>%3$s</b>".', '%1$d <b>%2$s</b> patterns matching "<b>%3$s</b>".', count, 'wporg-patterns'), count, categoryName, searchTerm, 'wporg-patterns'), {
+    b: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("b", null)
+  });
+};
+/**
+ * Returns a message regarding current search status for when no category is selected.
+ *
+ * @param {number} count Number of patterns associated to the category.
+ * @param {string|void} searchTerm The search term.
+ * @return {Object}
+ */
 
-  if (searchTerm) {
-    if (categoryName !== 'All') {
-      message = Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
-      /* translators: %1$d: number of patterns. %2$s category name. %3$s search term  */
-      Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d <b>%2$s</b> pattern matching "<b>%3$s</b>".', '%1$d <b>%2$s</b> patterns matching "<b>%3$s</b>".', count, 'wporg-patterns'), count, categoryName.toLowerCase(), searchTerm, 'wporg-patterns');
-    } else {
-      message = Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
-      /* translators: %1$d: number of patterns. %2$s search term.  */
-      Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d pattern matching "<b>%2$s</b>".', '%1$d patterns matching "<b>%2$s</b>".', count, 'wporg-patterns'), count, searchTerm, 'wporg-patterns');
-    }
-  }
-
-  return {
-    message: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(message, {
-      b: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("b", null)
-    }),
-    // TODO Fetch these from somewhere
-    title: '',
-    links: []
-  };
+var getAllSearchMessage = function getAllSearchMessage(count, searchTerm) {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
+  /* translators: %1$d: number of patterns. %2$s search term.  */
+  Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d pattern matching "<b>%2$s</b>".', '%1$d patterns matching "<b>%2$s</b>".', count, 'wporg-patterns'), count, searchTerm, 'wporg-patterns'), {
+    b: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("b", null)
+  });
 };
 
 /***/ }),
@@ -11143,7 +11190,7 @@ var CopyPatternButton = function CopyPatternButton(_ref) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! classnames */ "../../../../node_modules/classnames/index.js");
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! classnames */ "./node_modules/classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__);
