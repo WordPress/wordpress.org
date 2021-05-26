@@ -546,3 +546,13 @@ h2._40p-milestones-header {
 .rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n) .ctl-row .ctl-col-6:nth-child(2) .story-time {
 	text-align: right;
 }
+
+@media (max-width: 61.938em){
+	.rtl .timeline-content .ctl-col-6 {
+		padding: 0 !important;
+	}
+
+	.rtl .timeline-content .story-time {
+		text-align: center !important;
+	}
+}
