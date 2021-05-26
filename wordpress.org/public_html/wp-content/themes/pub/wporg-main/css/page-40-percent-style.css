@@ -486,3 +486,63 @@ h2._40p-milestones-header {
 ._40p-social a:hover svg {
 	fill: #d13638;
 }
+
+/* RTL Style Overrides */
+.rtl #pills {
+	transform: scaleX(-1);
+}
+
+.rtl ._40p-timeline-title {
+	margin-right: 0 !important;
+	text-align: right;
+}
+
+.rtl ._40p-timeline-intro {
+	left: 0;
+	right: auto;
+}
+
+.rtl ._40p-timeline-block .ctl-instant-timeline .story-time {
+	text-align: left;
+}
+
+.rtl ._40p-timeline-block .ctl-instant-timeline .story-details h3 em:last-child {
+	margin-left: 0;
+	margin-right: 4px;
+}
+
+/* Odd rows */
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n+1) .ctl-row .ctl-col-6:nth-child(1),
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n+1) .story-details {
+	text-align: right;
+}
+
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n+1) .ctl-row .ctl-col-6:nth-child(2) {
+	padding: 0 35px 0 0;
+}
+
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n+1) .story-time {
+	text-align: left;
+}
+
+/* Even rows */
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n) .ctl-row .ctl-col-6:nth-child(1) { 
+	padding: 0 0 0 35px;
+}
+
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n) .story-details {
+	text-align: left;
+}
+
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n) > div > div:nth-child(2n):before {
+	left: auto;
+	right: -35px;
+}
+
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n) .ctl-row .ctl-col-6:nth-child(2) {
+	padding: 0 35px 0 0;
+}
+
+.rtl ._40p-timeline-block .ctl-instant-timeline .timeline-content:nth-child(2n) .ctl-row .ctl-col-6:nth-child(2) .story-time {
+	text-align: right;
+}
