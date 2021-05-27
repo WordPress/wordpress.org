@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable WordPress.Security.EscapeOutput
 /**
  * Template Name: 40% Milestones Page
  *
@@ -312,16 +313,30 @@ the_post();
 								</div>
 							</div>
 						</div>
-						<div class="timeline-content" id="2012-ms-community-summit">
+						<div class="timeline-content" id="2010-ms-first-kids-camp">
 							<div class="ctl-row">
 								<div class="ctl-col-6">
 									<div class="story-details">
-										<h3><a href="#2012-community-summit"><?php _e( 'First WordPress Community Summit', 'wporg' ); ?><em>+</em></a></h3>
+										<h3><a href="#2010-first-kids-camp"><?php _e( 'First Kids Camp', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 								<div class="ctl-col-6">
 									<div class="story-time">
+										<div>2010</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="timeline-content" id="2012-ms-community-summit">
+							<div class="ctl-row">
+								<div class="ctl-col-6">
+									<div class="story-time">
 										<div>2012</div>
+									</div>
+								</div>
+								<div class="ctl-col-6">
+									<div class="story-details">
+										<h3><a href="#2012-community-summit"><?php _e( 'First WordPress Community Summit', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 							</div>
@@ -329,13 +344,13 @@ the_post();
 						<div class="timeline-content" id="2013-ms-wordcamp-europe">
 							<div class="ctl-row">
 								<div class="ctl-col-6">
-									<div class="story-time">
-										<div>2013</div>
+									<div class="story-details">
+										<h3><a href="#2013-wordcamp-europe"><?php _e( 'First WordCamp Europe', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 								<div class="ctl-col-6">
-									<div class="story-details">
-										<h3><a href="#2013-wordcamp-europe"><?php _e( 'First WordCamp Europe', 'wporg' ); ?><em>+</em></a></h3>
+									<div class="story-time">
+										<div>2013</div>
 									</div>
 								</div>
 							</div>
@@ -343,13 +358,13 @@ the_post();
 						<div class="timeline-content" id="2013-ms-mp6-design">
 							<div class="ctl-row">
 								<div class="ctl-col-6">
-									<div class="story-details">
-										<h3><a href="#2013-mp6-design"><?php _e( 'MP6 Design &amp; Flat Icons', 'wporg' ); ?><em>+</em></a></h3>
+									<div class="story-time">
+										<div>2014</div>
 									</div>
 								</div>
 								<div class="ctl-col-6">
-									<div class="story-time">
-										<div>2014</div>
+									<div class="story-details">
+										<h3><a href="#2013-mp6-design"><?php _e( 'MP6 Design &amp; Flat Icons', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 							</div>
@@ -357,13 +372,13 @@ the_post();
 						<div class="timeline-content" id="2014-ms-improved-visual-editing">
 							<div class="ctl-row">
 								<div class="ctl-col-6">
-									<div class="story-time">
-										<div>2014</div>
+									<div class="story-details">
+										<h3><a href="#2014-improved-visual-editing"><?php _e( 'Improved Visual Editing', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 								<div class="ctl-col-6">
-									<div class="story-details">
-										<h3><a href="#2014-improved-visual-editing"><?php _e( 'Improved Visual Editing', 'wporg' ); ?><em>+</em></a></h3>
+									<div class="story-time">
+										<div>2014</div>
 									</div>
 								</div>
 							</div>
@@ -371,13 +386,13 @@ the_post();
 						<div class="timeline-content" id="2014-ms-more-visual-editing-enhancements">
 							<div class="ctl-row">
 								<div class="ctl-col-6">
-									<div class="story-details">
-										<h3><a href="#2014-more-visual-editing-enhancements"><?php _e( 'More Visual Editing Enhancements', 'wporg' ); ?><em>+</em></a></h3>
+									<div class="story-time">
+										<div>2014</div>
 									</div>
 								</div>
 								<div class="ctl-col-6">
-									<div class="story-time">
-										<div>2014</div>
+									<div class="story-details">
+										<h3><a href="#2014-more-visual-editing-enhancements"><?php _e( 'More Visual Editing Enhancements', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 							</div>
@@ -385,13 +400,13 @@ the_post();
 						<div class="timeline-content" id="2015-ms-1b-plugin-downloads">
 							<div class="ctl-row">
 								<div class="ctl-col-6">
-									<div class="story-time">
-										<div>2015</div>
+									<div class="story-details">
+										<h3><a href="#2015-1b-plugin-downloads"><?php _e( 'One Billion Plugin Downloads', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 								<div class="ctl-col-6">
-									<div class="story-details">
-										<h3><a href="#2015-1b-plugin-downloads"><?php _e( 'One Billion Plugin Downloads', 'wporg' ); ?><em>+</em></a></h3>
+									<div class="story-time">
+										<div>2015</div>
 									</div>
 								</div>
 							</div>
@@ -399,13 +414,13 @@ the_post();
 						<div class="timeline-content" id="2015-ms-25-percent-of-web">
 							<div class="ctl-row">
 								<div class="ctl-col-6">
-									<div class="story-details">
-										<h3><a href="#2015-25-percent-of-web"><?php _e( 'Powering More Than 25% Of The Web', 'wporg' ); ?><em>+</em></a></h3>
+									<div class="story-time">
+										<div>2015</div>
 									</div>
 								</div>
 								<div class="ctl-col-6">
-									<div class="story-time">
-										<div>2015</div>
+									<div class="story-details">
+										<h3><a href="#2015-25-percent-of-web"><?php _e( 'Powering More Than 25% Of The Web', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 							</div>
@@ -413,22 +428,8 @@ the_post();
 						<div class="timeline-content" id="2015-ms-first-wordcamp-us">
 							<div class="ctl-row">
 								<div class="ctl-col-6">
-									<div class="story-time">
-										<div>2015</div>
-									</div>
-								</div>
-								<div class="ctl-col-6">
 									<div class="story-details">
 										<h3><a href="#2015-first-wordcamp-us"><?php _e( 'Inaugural WordCamp US', 'wporg' ); ?><em>+</em></a></h3>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="timeline-content" id="2015-ms-first-kids-camp">
-							<div class="ctl-row">
-								<div class="ctl-col-6">
-									<div class="story-details">
-										<h3><a href="#2015-first-kids-camp"><?php _e( 'First Kids Camp', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 								<div class="ctl-col-6">
@@ -885,7 +886,22 @@ the_post();
 						?>
 					</p>
 
-					<p class="has-text-align-center _40p-milestones-back-link"><a id="2012-community-summit" href="#2010-ms-foundation">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
+					<p class="has-text-align-center _40p-milestones-back-link"><a id="2010-first-kids-camp" href="#2010-ms-foundation">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
+					<h3><?php _e( 'First “Kids Camp” at WordCamp', 'wporg' ); ?></h3>
+					<p>
+						<?php
+						printf(
+							__( 'WordCamp Ireland, organized by <a href="%1$s">Sabrina Kent</a> and <a href="%2$s">Katherine Nolan</a>, was the first WordPress event <a href="%3$s">to offer activities for kids ages 3-12</a>. Krishna De might be the first person to coin the term “<a href="%4$s">Kids Camp</a>.” More events for kids followed, as outlined by <a href="%5$s">this list</a>, which is current through 2019.', 'wporg' ),
+							'http://www.sabrinadent.com/',
+							'https://twitter.com/dochara',
+							'https://twitter.com/WordCampIRL/status/10021454195',
+							'https://www.krishna.me/wordcamp-ireland-in-kilkenny-has-its-own-kids-camp/',
+							'https://heropress.com/essays/history-and-future-of-kids-heroes-in-wordpress/'
+						);
+						?>
+					</p>
+
+					<p class="has-text-align-center _40p-milestones-back-link"><a id="2012-community-summit" href="#2010-ms-first-kids-camp">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
 					<h3><a href="https://milestonesbook.wordpress.com/2015/11/25/the-community-summit/"><?php _e( 'First WordPress Community Summit', 'wporg' ); ?></a></h3>
 					<p>
 						<?php
@@ -970,11 +986,7 @@ the_post();
 						?>
 					</p>
 
-					<p class="has-text-align-center _40p-milestones-back-link"><a id="2015-first-kids-camp" href="#2015-ms-first-wordcamp-us">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
-					<h3><a href="https://stlouis.wordcamp.org/2015/session/kids-camp/">First Kids Camp</a> </h3>
-					<p><?php _e( 'Introduced at WordCamp St. Louis in March 2015, and geared towards 8-13 year olds, it covered the basics of setting up a site and what it means to publish to the web.', 'wporg' ); ?></p>
-
-					<p class="has-text-align-center _40p-milestones-back-link"><a id="2015-kim-parsell" href="#2015-ms-first-kids-camp">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
+					<p class="has-text-align-center _40p-milestones-back-link"><a id="2015-kim-parsell" href="#2015-ms-first-wordcamp-us">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
 					<h3><a href="https://wordpressfoundation.org/projects/kim-parsell-memorial-scholarship/"><?php _e( 'Kim Parsell Memorial Scholarship', 'wporg' ); ?></a></h3>
 					<p>
 						<?php
@@ -1023,7 +1035,7 @@ the_post();
 
 					<p class="has-text-align-center _40p-milestones-back-link"><a id="2019-leadership-expansion" href="#2018-ms-gutenberg-new-default-editor">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
 					<h3><a href="https://make.wordpress.org/updates/2019/01/16/expanding-wordpress-leadership/"><?php _e( 'Leadership Expansion', 'wporg' ); ?></a></h3>
-					<p><?php _e( 'New WordPress leadership roles were created in 2019, which would help lead the project more efficiently. Josepha Haden was named Executive Director, and Joost de Valk was named Marketing & Communications Lead.', 'wporg' ); ?></p>
+					<p><?php _e( 'WordPress leadership was expanded in 2019 to help lead the project more efficiently. Josepha Haden Chomphosy was named Executive Director and took on day-to-day operations of the project as well as support of contributor teams.', 'wporg' ); ?></p>
 
 					<p class="has-text-align-center _40p-milestones-back-link"><a id="2019-honoring-alex-mills" href="#2019-ms-leadership-expansion">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
 					<h3><a href="https://poststatus.com/matt-mullenweg-state-of-the-word-2019/"><?php _e( 'Honoring Alex Mills', 'wporg' ); ?></a></h3>
