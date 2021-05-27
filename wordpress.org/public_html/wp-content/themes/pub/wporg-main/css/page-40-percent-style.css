@@ -39,6 +39,7 @@ body.page-40-percent-of-web {
 
 .entry-40-percent-of-web {
 	line-height: 1.7;
+	overflow-x: hidden;
 }
 
 .entry-40-percent-of-web a {
