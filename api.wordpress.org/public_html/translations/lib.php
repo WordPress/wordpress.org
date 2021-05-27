@@ -19,6 +19,14 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		$version = WP_CORE_LATEST_RELEASE;
 	}
 
+	// Optimize against junk inputs.
+	if ( ! $domain || ! is_string( $domain ) ) {
+		return array();
+	}
+	if ( $version && ! is_string( $version ) ) {
+		return array();
+	}
+
 	$cache_group = 'translations-query';
 	$cache_time = 900; // 15 min
 	$cache_key = "$type:$domain:$version";
