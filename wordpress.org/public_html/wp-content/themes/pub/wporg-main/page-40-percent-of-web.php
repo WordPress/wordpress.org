@@ -55,7 +55,7 @@ the_post();
 								</div>
 								<div class="ctl-col-6">
 									<div class="story-details">
-										<h3><a href="#2003-wordpress-born"><?php _e( 'Matt Mullenweg Forks b2, WordPress Is Born', 'wporg' ); ?><em>+</em></a></h3>
+										<h3><a href="#2003-wordpress-born"><?php _e( 'The blogging software b2 is forked, WordPress is born', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 							</div>
@@ -620,7 +620,8 @@ the_post();
 					<p>
 						<?php
 						printf(
-							__( 'On April 1, 2003, <a href="%1$s">Matt Mullenweg</a> created <a href="%2$s">a new branch of b2</a> on SourceForge, and, with the name coined by his friend <a href="%3$s">Christine Tremoulet</a>, called it WordPress. WordPress.org launched the same month. Initially, it was home to the development blog, some schematic documentation, and support forums. The <a href="%4$s">original WordPress homepage</a> told the world that “WordPress is a semantic personal publishing platform with a focus on aesthetics, web standards, and usability.” The site gave the WordPress community a presence and the forums provided a home.', 'wporg' ),
+							__( 'After discussions with <a href="%1$s">Mike Little</a>, <a href="%2$s">Matt Mullenweg</a> created <a href="%3$s">a new branch of b2</a> on SourceForge, and, with the name coined by his friend <a href="%4$s">Christine Tremoulet</a>, called it WordPress. WordPress.org launched May 27. Initially, it was home to the development blog, some schematic documentation, and support forums. The <a href="%5$s">original WordPress homepage</a> told the world that “WordPress is a semantic personal publishing platform with a focus on aesthetics, web standards, and usability.” The site gave the WordPress community a presence and the forums provided a home.', 'wporg' ),
+							'https://mikelittle.org/',
 							'https://ma.tt/about/',
 							'https://milestonesbook.wordpress.com/2015/11/13/hello-world/',
 							'https://christinetremoulet.com/site/about/',
