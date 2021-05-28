@@ -13,6 +13,8 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 add_filter( 'search_template', __NAMESPACE__ . '\use_index_php_as_template' );
 add_filter( 'archive_template', __NAMESPACE__ . '\use_index_php_as_template' );
 
+add_filter( 'pre_handle_404', __NAMESPACE__ . '\bypass_404_page', 10, 2 );
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *
@@ -154,4 +156,19 @@ function user_has_flagged_pattern() {
 	$items = new \WP_Query( $args );
 
 	return $items->have_posts();
+}
+
+/**
+ * Handle a possible 404 page when viewing patterns, which might happen if the JS pagination is
+ * different than the WP default.
+ *
+ * @param bool     $preempt  Whether to short-circuit default header status handling. Default false.
+ * @param WP_Query $wp_query WordPress Query object.
+ * @return bool
+ */
+function bypass_404_page( $preempt, $wp_query ) {
+	if ( isset( $wp_query->query_vars['post_type'][0] ) && POST_TYPE === $wp_query->query_vars['post_type'][0] ) {
+		return true;
+	}
+	return $preempt;
 }

@@ -1,9 +1,9 @@
 /**
  * WordPress dependencies
  */
+import { addQueryArgs, getPath, getQueryArg } from '@wordpress/url';
 import { useDebounce } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import { addQueryArgs, getPath, getQueryArg } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -11,9 +11,9 @@ import { addQueryArgs, getPath, getQueryArg } from '@wordpress/url';
 import CategoryMenu from '../category-menu';
 import CategorySearch from '../category-search';
 import CategoryContextBar from '../category-context-bar';
+import { getCategoryFromPath } from '../../utils';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
-import { removeQueryString } from '../../utils';
 
 /**
  * Module constants
@@ -22,6 +22,7 @@ const DEBOUNCE_MS = 300;
 
 const PatternGridMenu = () => {
 	const { path, update: updatePath } = useRoute();
+	const categorySlug = getCategoryFromPath( path );
 
 	const { categories, isLoading, hasLoaded } = useSelect( ( select ) => {
 		const { getCategories, isLoadingCategories, hasLoadedCategories } = select( patternStore );
@@ -46,12 +47,13 @@ const PatternGridMenu = () => {
 		<>
 			<nav className="pattern-grid-menu">
 				<CategoryMenu
-					path={ removeQueryString( path ) }
+					currentCategory={ categorySlug }
 					options={
 						categories
 							? categories.map( ( record ) => {
 								return {
 									value: `/${ getPath( record.link ) || '' }`,
+									slug: record.slug,
 									label: record.name,
 								};
 							} )

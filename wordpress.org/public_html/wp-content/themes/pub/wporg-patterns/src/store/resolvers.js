@@ -2,7 +2,8 @@
  * WordPress dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
-import { apiFetch } from '@wordpress/data-controls';
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+import { __unstableAwaitPromise, apiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
@@ -15,18 +16,53 @@ import {
 	loadFavorites,
 	loadPatternFlagReasons,
 	loadPatterns,
+	setErrorPatterns,
 } from './actions';
 import { getQueryString } from './utils';
+
+async function parseResponse( response ) {
+	try {
+		return {
+			total: Number( response.headers?.get( 'X-WP-Total' ) || 0 ),
+			totalPages: Number( response.headers?.get( 'X-WP-TotalPages' ) || 0 ),
+			results: await response.json(),
+		};
+	} catch ( error ) {
+		return {};
+	}
+}
+
+async function parseError( response ) {
+	try {
+		return await response.json();
+	} catch ( error ) {
+		return {};
+	}
+}
 
 export function* getPatternsByQuery( query ) {
 	const queryString = getQueryString( query );
 	try {
 		yield fetchPatterns( queryString );
-		const results = yield apiFetch( {
+		const response = yield apiFetch( {
 			path: addQueryArgs( '/wp/v2/wporg-pattern', query ),
+			parse: false,
 		} );
-		yield loadPatterns( queryString, results );
-	} catch ( error ) {}
+		const { total, totalPages, results } = yield __unstableAwaitPromise( parseResponse( response ) );
+		yield loadPatterns( queryString, {
+			page: query.page || 1,
+			patterns: results,
+			total: total,
+			totalPages: totalPages,
+		} );
+	} catch ( error ) {
+		const parsedError = yield __unstableAwaitPromise( parseError( error ) );
+		// @todo Do something with this error message.
+		yield setErrorPatterns( queryString, {
+			page: query.page || 1,
+			error: parsedError,
+		} );
+	}
 }
 
 export function* getCategories() {

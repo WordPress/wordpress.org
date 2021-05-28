@@ -30,8 +30,6 @@ get_header();
 						the_post();
 						get_template_part( 'template-parts/content', 'grid' );
 					endwhile;
-				else :
-					get_template_part( 'template-parts/content', 'none' );
 				endif;
 				?>
 			</div>

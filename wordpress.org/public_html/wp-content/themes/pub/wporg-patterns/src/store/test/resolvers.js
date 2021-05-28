@@ -7,7 +7,7 @@ import apiPatternFlagReasons from './fixtures/pattern-flag-reasons';
 import { getCategories, getFavorites, getPatternFlagReasons, getPatternsByQuery } from '../resolvers';
 
 describe( 'getPatternsByQuery', () => {
-	it( 'yields with the requested patterns', async () => {
+	it( 'yields with the requested patterns & query meta', async () => {
 		const generator = getPatternsByQuery( {} );
 
 		expect( generator.next().value ).toEqual( {
@@ -18,15 +18,27 @@ describe( 'getPatternsByQuery', () => {
 		// trigger apiFetch
 		const { value: apiFetchAction } = generator.next();
 		expect( apiFetchAction.request ).toEqual( {
-			path: '/wp/v2/wporg-pattern',
+			path: `/wp/v2/wporg-pattern`,
+			parse: false,
 		} );
 
-		// Provide response and trigger action
-		const { value: received } = generator.next( apiPatterns );
+		// Step through the promise - the response is omitted here & mocked in the next step because `Response`
+		// is a browser feature, not available in node.
+		const { value: awaitPromiseControl } = generator.next( { /* Response omitted */ } );
+		expect( awaitPromiseControl ).toEqual( {
+			type: 'AWAIT_PROMISE',
+			promise: expect.any( Promise ),
+		} );
+
+		// Complete the promise and return content
+		const { value: received } = generator.next( { total: 8, totalPages: 2, results: apiPatterns } );
 		expect( received ).toEqual( {
 			type: 'LOAD_BLOCK_PATTERNS',
 			query: '',
+			page: 1,
 			patterns: apiPatterns,
+			total: 8,
+			totalPages: 2,
 		} );
 	} );
 } );

@@ -1,27 +1,37 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
+
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
 import { ifViewportMatches } from '@wordpress/viewport';
 
-const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
+const DefaultMenu = ( { currentCategory, options, onClick, isLoading } ) => {
 	if ( ! isLoading && ! options.length ) {
 		return null;
 	}
 
 	return (
-		<ul className={ `category-menu ${ isLoading ? 'category-menu--is-loading' : '' } ` }>
-			{ options.map( ( i ) => (
-				<li key={ i.value }>
-					<a
-						className={ path === i.value ? 'category-menu--is-active' : '' }
-						href={ i.value }
-						onClick={ onClick }
-					>
-						{ i.label }
-					</a>
-				</li>
-			) ) }
-		</ul>
+		<>
+			<h2 className="screen-reader-text">{ __( 'Main Menu', 'wporg-patterns' ) }</h2>
+			<ul className={ classnames( { 'category-menu': true, 'category-menu--is-loading': isLoading } ) }>
+				{ options.map( ( i ) => (
+					<li key={ i.value }>
+						<a
+							className={ classnames( { 'category-menu--is-active': currentCategory === i.slug } ) }
+							href={ i.value }
+							onClick={ onClick }
+							aria-current={ currentCategory === i.slug ? 'page' : undefined }
+						>
+							{ i.label }
+						</a>
+					</li>
+				) ) }
+			</ul>
+		</>
 	);
 };
 

@@ -10,7 +10,7 @@ import { getQueryArgs } from '@wordpress/url';
  */
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
-import { getCategoryFromPath } from '../../utils';
+import { getCategoryFromPath, getPageFromPath } from '../../utils';
 
 /**
  * Listens for changes to the path and reconstructs the query object based on the path
@@ -41,6 +41,11 @@ const QueryMonitor = () => {
 					..._query,
 					'pattern-categories': category.id,
 				};
+			}
+
+			const page = getPageFromPath( path );
+			if ( page > 1 ) {
+				_query.page = page;
 			}
 
 			return _query;

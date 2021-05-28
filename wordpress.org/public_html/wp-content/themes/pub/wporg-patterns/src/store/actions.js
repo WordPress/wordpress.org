@@ -18,12 +18,42 @@ export function fetchPatterns( query ) {
  * Get the action object signalling that patterns have been loaded.
  *
  * @param {string} query Search string.
- * @param {Array} patterns A list of patterns.
+ * @param {Object} response
+ * @param {Array} response.page The current page.
+ * @param {Array} response.patterns A list of patterns.
+ * @param {number} response.total The total number of patterns.
+ * @param {number} response.totalPages The total number of pages.
  *
  * @return {Object} Action object.
  */
-export function loadPatterns( query, patterns ) {
-	return { type: 'LOAD_BLOCK_PATTERNS', query: query, patterns: patterns };
+export function loadPatterns( query, { page, patterns, total, totalPages } ) {
+	return {
+		type: 'LOAD_BLOCK_PATTERNS',
+		query: query,
+		page: page,
+		patterns: patterns,
+		total: total,
+		totalPages: totalPages,
+	};
+}
+
+/**
+ * Get the action object signalling that patterns have been loaded.
+ *
+ * @param {string} query Search string.
+ * @param {Object} response
+ * @param {Array} response.page The current page.
+ * @param {Object} response.error The error message, as reported from the API.
+ *
+ * @return {Object} Action object.
+ */
+export function setErrorPatterns( query, { page, error } ) {
+	return {
+		type: 'ERROR_BLOCK_PATTERNS',
+		query: query,
+		page: page,
+		error: error,
+	};
 }
 
 /**
