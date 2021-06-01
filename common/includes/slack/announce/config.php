@@ -12,7 +12,7 @@ namespace Dotorg\Slack\Announce;
  * See https://api.slack.com/changelog/2017-09-the-one-about-usernames
  *
  * The array keys are the channel name (omit #) and the values are an array of users.
- * 
+ *
  * NOTES:
  *  - Use the linked WordPress.org username, which is case-sensitive. Ask the user to type in `/here` in slack to find out the correct account.
  *  - Private groups do NOT need to be listed here. All members of a private group can use announcements.
@@ -358,6 +358,9 @@ function get_whitelist() {
 			'tellyworth',
 		),
 		'meta-wordcamp' => $wordcamp_central,
+		'openverse' => array(
+			'zackkrida',
+		),
 		'polyglots' => array(
 			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
