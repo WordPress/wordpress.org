@@ -240,7 +240,7 @@ add_action( 'admin_post_login_block_account', function() {
 
 	wp_safe_redirect( add_query_arg(
 		's',
-		urlencode( $email ),
+		urlencode( get_user_by( 'id', $user_id )->user_email ),
 		'https://login.wordpress.org/wp-admin/index.php?page=user-registrations&action=blocked_account'
 	) );
 	exit;
