@@ -87,7 +87,7 @@ function scripts() {
 		'wporg-style',
 		get_theme_file_uri( '/css/style.css' ),
 		array( 'dashicons', 'open-sans' ),
-		100
+		filemtime( __DIR__ . '/css/style.css' )
 	);
 
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
@@ -100,9 +100,11 @@ function scripts() {
 
 	if ( is_page( 'stats' ) ) {
 		wp_enqueue_script( 'google-charts', 'https://www.gstatic.com/charts/loader.js', [], null, true );
-		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts' ], 3, true );
+		wp_enqueue_script( 'wporg-page-stats', get_theme_file_uri( '/js/page-stats.js' ), [ 'jquery', 'google-charts' ], filemtime( __DIR__ . '/js/page-stats.js' ), true );
 		wp_localize_script( 'wporg-page-stats', 'wporgPageStats', [
-			'trunk'         => number_format( WP_CORE_STABLE_BRANCH + 0.1, 1 ), /* trunk */
+			'trunk'       => number_format( WP_CORE_STABLE_BRANCH + 0.1, 1 ), /* trunk */
+			'viewAsChart' => __( 'View as Chart', 'wporg' ),
+			'viewAsTable' => __( 'View as Table', 'wporg' ),
 		] );
 	} elseif ( is_page( 'download' ) ) {
 		wp_enqueue_style( 'jquery-modal-style', get_theme_file_uri( '/css/jquery.modal.min.css' ), [], '0.9.2' );

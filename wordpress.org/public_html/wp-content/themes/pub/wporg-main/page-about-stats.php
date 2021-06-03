@@ -39,19 +39,19 @@ the_post();
 				<div class="col-8">
 					<p><?php esc_html_e( 'Here are some charts showing what sorts of systems people are running WordPress on. (You&#8217;ll need JavaScript enabled to see them.)', 'wporg' ); ?></p>
 					<section>
-						<h2><?php esc_html_e( 'WordPress Version', 'wporg' ); ?></h2>
+						<h2><?php esc_html_e( 'WordPress Version', 'wporg' ); ?> <a class="swap-table dashicons dashicons-editor-table" title="<?php esc_attr_e( 'View as Table', 'wporg' ); ?>" aria-hidden="true"></a></h2>
 						<div id="wp_versions" class="wporg-stats-chart loading"></div>
 					</section>
 					<section>
-						<h2><?php esc_html_e( 'PHP Versions', 'wporg' ); ?></h2>
+						<h2><?php esc_html_e( 'PHP Versions', 'wporg' ); ?> <a class="swap-table dashicons dashicons-editor-table" title="<?php esc_attr_e( 'View as Table', 'wporg' ); ?>" aria-hidden="true"></a></h2>
 						<div id="php_versions" class="wporg-stats-chart loading"></div>
 					</section>
 					<section>
-						<h2><?php esc_html_e( 'MySQL Version', 'wporg' ); ?></h2>
+						<h2><?php esc_html_e( 'MySQL Version', 'wporg' ); ?> <a class="swap-table dashicons dashicons-editor-table" title="<?php esc_attr_e( 'View as Table', 'wporg' ); ?>" aria-hidden="true"></a></h2>
 						<div id="mysql_versions" class="wporg-stats-chart loading"></div>
 					</section>
 					<section>
-						<h2><?php esc_html_e( 'Locales', 'wporg' ); ?></h2>
+						<h2><?php esc_html_e( 'Locales', 'wporg' ); ?> <a class="swap-table dashicons dashicons-editor-table" title="<?php esc_attr_e( 'View as Table', 'wporg' ); ?>" aria-hidden="true"></a></h2>
 						<div id="locales" class="wporg-stats-chart loading"></div>
 					</section>
 				</section>

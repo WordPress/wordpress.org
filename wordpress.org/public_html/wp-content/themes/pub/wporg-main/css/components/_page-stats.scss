@@ -1,10 +1,24 @@
 .page-stats {
+	h2 .swap-table {
+		vertical-align: initial;
+
+		&:hover {
+			cursor: pointer;
+			text-decoration: none;
+		}
+	}
+
 	.wporg-stats-chart {
 		align-items: center;
 		display: flex;
 		height: 450px;
 		justify-content: center;
 		position: relative;
+
+		table thead {
+			color: inherit;
+			background: inherit;
+		}
 	}
 
 	.loading:before {

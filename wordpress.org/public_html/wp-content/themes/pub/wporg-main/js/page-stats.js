@@ -1,47 +1,118 @@
 /* global wporgPageStats */
-( function( $, google ) {
-	google.charts.load( '44', { 'packages': [ 'corechart' ] } );
+( function( $, google, i18n ) {
+	google.charts.load( '44', { 'packages': [ 'corechart', 'table' ] } );
 	google.charts.setOnLoadCallback( drawCharts );
 
-	window.drawWpVersionsGraph = function( data ) {
+	var charts = {
+		wp_versions: {
+			id: 'wp_versions',
+			colName: 'Version',
+			sort: 'versions',
+			type: 'PieChart',
+			url: 'https://api.wordpress.org/stats/wordpress/1.0/',
+			data: false,
+			dataTransform: function( data ) {
+				// Remove trunk from display.
+				for ( var version in data ) {
+					if ( parseFloat( version ) >= parseFloat( i18n.trunk ) ) {
+						delete data[ version ];
+					}
+				}
 
-		// Remove trunk from display.
-		for ( var version in data ) {
-			if ( parseFloat( version ) >= parseFloat( wporgPageStats.trunk ) ) {
-				delete data[ version ];
+				return data;
 			}
-		}
+		},
+		php_versions: {
+			id: 'php_versions',
+			colName: 'Version',
+			sort: 'versions',
+			type: 'PieChart',
+			url: 'https://api.wordpress.org/stats/php/1.0/',
+			data: false,
+		},
+		mysql_versions: {
+			id: 'mysql_versions',
+			colName: 'Version',
+			sort: 'versions',
+			type: 'PieChart',
+			url: 'https://api.wordpress.org/stats/mysql/1.0/',
+			data: false,
+			dataTransform: function( data ) {
+				delete data[ '12.0' ]; // Not a MySQL version.
 
-		drawGraph( data, 'wp_versions', 'Version', 'versions' );
-	};
-	window.drawPhpVersionsGraph = function( data ) {
-		drawGraph( data, 'php_versions', 'Version', 'versions' );
-	};
-	window.drawMysqlVersionsGraph = function( data ) {
-		delete data[ '12.0' ];
-		drawGraph( data, 'mysql_versions', 'Version', 'versions' );
-	};
-	window.drawLocalesGraph = function( data ) {
-		drawGraph( data, 'locales', 'Locale', 'alphabeticaly' );
+				return data;
+			}
+		},
+		locales: {
+			id: 'locales',
+			colName: 'Locale',
+			sort: 'alphabeticaly',
+			type: 'PieChart',
+			url: 'https://api.wordpress.org/stats/locale/1.0/',
+			data: false,
+		}
 	};
 
 	function drawCharts() {
-		function getStatsData( endpoint, callback ) {
-			$.ajax({
-				url: endpoint,
-				cache: true,
-				jsonpCallback: callback,
-				dataType: 'jsonp',
-			});
+		for ( var chartId in charts ) {
+			drawChart( charts[ chartId ] );
 		}
-		getStatsData( 'https://api.wordpress.org/stats/wordpress/1.0/', 'drawWpVersionsGraph' );
-		getStatsData( 'https://api.wordpress.org/stats/php/1.0/', 'drawPhpVersionsGraph' );
-		getStatsData( 'https://api.wordpress.org/stats/mysql/1.0/', 'drawMysqlVersionsGraph' );
-		getStatsData( 'https://api.wordpress.org/stats/locale/1.0/', 'drawLocalesGraph' );
 	}
 
-	function drawGraph( data, id, colName, sort ) {
+	jQuery(document).on( 'click', 'a.swap-table', function( e ) {
+		e.preventDefault();
+		var $this = $( this ),
+			chartId = $this.parents( 'section' ).find( '.wporg-stats-chart' ).attr( 'id' ),
+			chart = charts[ chartId ];
+
+		if ( 'Table' == chart.type ) {
+			chart.type = chart.originalType;
+			$this.prop( 'title', i18n.viewAsTable );
+			$this.toggleClass( 'dashicons-chart-pie' );
+			$this.toggleClass( 'dashicons-editor-table' );
+		} else {
+			chart.originalType = chart.type;
+			chart.type         = 'Table';
+			$this.prop( 'title', i18n.viewAsChart );
+			$this.toggleClass( 'dashicons-chart-pie' );
+			$this.toggleClass( 'dashicons-editor-table' );
+		}
+
+		drawChart( chart );
+	} );
+
+	function drawChart( chart ) {
+		if ( ! chart.data ) {
+			if ( chart.loading ) {
+				return;
+			}
+			chart.loading = true;
+
+			jQuery.get({
+				url: chart.url,
+				success: ( function( chart ) {
+					return function( data ) {
+						chart.data    = data;
+						chart.loading = false;
+						drawChart( chart );
+					};
+				})( chart ),
+			});
+			return;
+		}
+
+		data = chart.data;
+		if ( 'undefined' != typeof chart.dataTransform ) {
+			data = chart.dataTransform( data );
+		}
+
+		drawGraph( data, chart.id, chart.colName, chart.sort, chart.type );
+	}
+
+	function drawGraph( data, id, colName, sort, chartType ) {
 		var tableData = [], others = null, chart, chartData, chartOptions;
+
+		chartType = chartType || 'PieChart';
 
 		for ( var type in data ) {
 			if ( 'Others' === type ) { // Make sure "Others" is always the last element.
@@ -68,6 +139,15 @@
 		tableData.unshift( [ { label: colName, type: 'string' }, { label: 'Usage', type: 'number' } ] );
 
 		chartData = google.visualization.arrayToDataTable( tableData );
+
+		// All charts are percentages.
+		var formatter = new google.visualization.NumberFormat( {
+			suffix: '%',
+			fractionDigits: 2
+		} );
+
+		// Apply formatter to second column
+		formatter.format( chartData, 1 );
 
 		chartOptions = {
 			colors: [
@@ -154,7 +234,13 @@
 		};
 
 		var $el = $( '#' + id ).removeClass( 'loading' );
-		chart = new google.visualization.PieChart( $el[0] );
-		chart.draw( chartData, chartOptions );
+		chart = new google.visualization.ChartWrapper({
+			container: $el[0],
+			dataTable: chartData,
+		});
+
+		chart.setChartType( chartType );
+		chart.setOptions( chartOptions );
+		chart.draw();
 	}
-} )( window.jQuery, window.google );
+} )( window.jQuery, window.google, window.wporgPageStats );
