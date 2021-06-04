@@ -7,6 +7,9 @@ import apiCategories from './fixtures/categories';
 import apiPatternFlagReasons from './fixtures/pattern-flag-reasons';
 import { categories, favorites, patternFlagReasons, patterns } from '../reducer';
 
+// Set up the global.
+global.wporgSiteUrl = 'http://localhost:8889/';
+
 describe( 'state', () => {
 	describe( 'patterns', () => {
 		it( 'should store the patterns in state', () => {

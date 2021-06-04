@@ -1,6 +1,16 @@
 .pattern-preview__container {
-	padding: 2rem 0 0;
+	padding: 0;
 	background: $color-gray-light-200;
+}
+
+.pattern-preview__size-control {
+	margin: 0 auto;
+	padding: 1rem 0;
+	max-width: 12rem;
+
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
 }
 
 .pattern-preview__viewport {

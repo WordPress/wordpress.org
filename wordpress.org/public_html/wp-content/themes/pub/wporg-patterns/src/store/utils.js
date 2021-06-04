@@ -53,6 +53,6 @@ export function getAllCategory() {
 		id: -1,
 		slug: '', // Slug matches url
 		name: __( 'All', 'wporg-patterns' ),
-		link: '/',
+		link: wporgSiteUrl,
 	};
 }
