@@ -3,7 +3,7 @@ wp_register_style(
 	'wporg-translate',
 	plugins_url( 'style.css', __FILE__ ),
 	[ 'gp-base' ],
-	'20200322'
+	'20210606'
 );
 gp_enqueue_style( 'wporg-translate' );
 
