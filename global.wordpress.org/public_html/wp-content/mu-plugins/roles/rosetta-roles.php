@@ -552,7 +552,7 @@ class Rosetta_Roles {
 		if ( [ '0' ] === $projects_added ) {
 			// General Translation Editor.
 
-			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, LOCALEURL. */
+			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, LOCALEURL, CURRENTUSERNAME. */
 			$message = __(
 				'Howdy ###USERNAME###,
 
@@ -571,6 +571,8 @@ We also ask all WordPress General Translation Editors to subscribe for notificat
 The Polyglots team connects on Slack. Check out https://make.wordpress.org/meetings/#polyglots for upcoming team meetings. We’d love to have you there if you can make it. Register from https://chat.wordpress.org.
 If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
 
+The access has been granted by ###CURRENTUSERNAME###.
+
 Welcome to the WordPress Polyglots team and happy translating!',
 				'rosetta'
 			);
@@ -580,18 +582,20 @@ Welcome to the WordPress Polyglots team and happy translating!',
 					'###USERNAME###',
 					'###LOCALENAME###',
 					'###LOCALEURL###',
+					'###CURRENTUSERNAME###',
 				],
 				[
 					$user->user_login,
 					'#' . $this->gp_locale->wp_locale . ' (' . $this->gp_locale->native_name . ')',
 					'https://translate.wordpress.org/locale/' . $this->gp_locale->slug,
+					wp_get_current_user()->user_login,
 				],
 				$message
 			);
 		} else {
 			// Project Translation Editor.
 
-			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, PROJECTLIST, RESOURCESLIST. */
+			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, PROJECTLIST, RESOURCESLIST, CURRENTUSERNAME. */
 			$message = __(
 				'Howdy ###USERNAME###,
 
@@ -609,6 +613,8 @@ Your local translation team can be found on https://make.wordpress.org/polyglots
 
 The Polyglots team connects on Slack. Check out https://make.wordpress.org/meetings/#polyglots for upcoming team meetings. We’d love to have you there if you can make it. Register from https://chat.wordpress.org/.
 If you have any questions about the processes or need any help, reach the team on Slack or on https://make.wordpress.org/polyglots/.
+
+The access has been granted by ###CURRENTUSERNAME###.
 
 Welcome to the WordPress Polyglots team and happy translating.',
 				'rosetta'
@@ -686,12 +692,14 @@ Welcome to the WordPress Polyglots team and happy translating.',
 					'###LOCALENAME###',
 					'###PROJECTLIST###',
 					'###RESOURCESLIST###',
+					'###CURRENTUSERNAME###',
 				],
 				[
 					$user->user_login,
 					'#' . $this->gp_locale->wp_locale . ' (' . $this->gp_locale->native_name . ')',
 					implode( "\n", $project_list ),
 					$resources_list,
+					wp_get_current_user()->user_login,
 				],
 				$message
 			);
