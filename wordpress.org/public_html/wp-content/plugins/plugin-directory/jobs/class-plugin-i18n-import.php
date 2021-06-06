@@ -91,6 +91,13 @@ class Plugin_i18n_Import {
 			}
 		}
 
+		// Handle the case where a new stable tag is marked as latest
+		// without any other changes.
+		if ( [ 'trunk|readme' ] === $i18n_processes ) {
+			$i18n_processes[] = "{$stable_tag}|code";
+			$i18n_processes[] = "{$stable_tag}|readme";
+		}
+
 		self::process_i18n_for_plugin( $plugin_slug, $i18n_processes );
 	}
 
