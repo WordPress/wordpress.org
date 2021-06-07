@@ -796,10 +796,9 @@ the_post();
 					<p>
 						<?php
 						printf(
-							__( 'WordPress.com opened to signups in August 2005, <a href="%1$s">by invitation only</a>, to control user growth on untested servers. Many who were involved with the WordPress project got WordPress.com blogs, including <a href="%2$s">Lorelle VanFossen</a> and <a href="%3$s">Mark Riley</a>. Every new WordPress.com member also got one invite to share.', 'wporg' ),
+							__( 'WordPress.com opened to signups in August 2005, <a href="%1$s">by invitation only</a>, to control user growth on untested servers. Many who were involved with the WordPress project got WordPress.com blogs, including <a href="%2$s">Lorelle VanFossen</a> and Mark Riley. Every new WordPress.com member also got one invite to share.', 'wporg' ),
 							'http://matt.wordpress.com/2005/08/15/invites/',
-							'http://lorelle.wordpress.com/',
-							'http://mark.wordpress.com/'
+							'http://lorelle.wordpress.com/'
 						);
 						?>
 					</p>
