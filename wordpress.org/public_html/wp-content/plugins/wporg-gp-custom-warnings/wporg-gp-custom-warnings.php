@@ -275,7 +275,7 @@ class WPorg_GP_Custom_Translation_Warnings {
 	 */
 	public function warning_unexpected_sprintf_token( $original, $translation ) {
 		$unexpected_tokens = [];
-		$is_sprintf        = preg_match( '!%((\d+\$(?:\d+)?)?[bcdefgosux])!i', $original );
+		$is_sprintf        = preg_match( '!%((\d+\$(?:\d+)?)?[bcdefgosuxl])!i', $original );
 
 		// Find any percents that are not valid or escaped.
 		if ( $is_sprintf ) {
@@ -284,7 +284,7 @@ class WPorg_GP_Custom_Translation_Warnings {
 
 			foreach ( $m['char'] as $i => $char ) {
 				// % is included for escaped %%.
-				if ( false === strpos( 'bcdefgosux%', $char ) ) {
+				if ( false === strpos( 'bcdefgosux%l', $char ) ) {
 					$unexpected_tokens[] = $m[0][ $i ];
 				}
 			}
@@ -311,8 +311,8 @@ class WPorg_GP_Custom_Translation_Warnings {
 
 		// https://github.com/GlotPress/GlotPress-WP/pull/1237
 		add_filter( 'gp_warning_placeholders_re', function( $re ) {
-			if ( '%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX]' === $re ) {
-				$re = '(?<!%)%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX%]';
+			if ( '%(\d+\$(?:\d+)?)?[bcdefgosuxEFGXl]' === $re ) {
+				$re = '(?<!%)%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX%l]';
 			}
 			return $re;
 		} );
