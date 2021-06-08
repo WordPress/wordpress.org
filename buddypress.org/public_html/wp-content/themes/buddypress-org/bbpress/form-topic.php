@@ -6,6 +6,10 @@
 
 <?php if ( bbp_current_user_can_access_create_topic_form() ) : ?>
 
+	<script type="text/javascript">
+		document.body.className = document.body.className.replace( 'no-js', 'js' );
+	</script>
+
 	<div id="new-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-form">
 
 		<form id="new-post" name="new-post" method="post" action="">
