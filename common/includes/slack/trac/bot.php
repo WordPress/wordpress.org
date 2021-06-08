@@ -14,6 +14,11 @@ class Bot {
 		'#outreach'     => false,
 	);
 
+	// Channels that are primarily GitHub issues, where digit-only tickets should not be expanded.
+	static protected $github_channels = array(
+		'#core-editor',
+	);
+
 	protected $parsed = array();
 
 	// We want to post to Trac no more than once per two hours, and to Slack no more than once every 10 minutes.
@@ -43,11 +48,21 @@ class Bot {
 	}
 
 	function parse_tickets( $text ) {
-		$digits = Trac::get_digit_capture();
+		$digits       = Trac::get_digit_capture();
 		$ticket_tracs = '?<trac>' . Trac::get_regex();
-		preg_match_all( "/(?:\s|^|\()#(?<id>$digits)(?:\-($ticket_tracs))?\b/", $text, $tickets, PREG_SET_ORDER );
+		$tickets      = array();
+
+		// If the channel is not GitHub centric, match #1234 as a Trac ticket
+		if ( ! in_array( $this->get_channel(), $this->github_channels, true ) ) {
+			preg_match_all( "/(?:\s|^|\()#(?<id>$digits)(?:\-($ticket_tracs))?\b/", $text, $tickets, PREG_SET_ORDER );
+		}
+
+		// Always match trac-prefixed Tickets
 		preg_match_all( "/(?:\s|^|\()#($ticket_tracs)(?<id>$digits)\b/", $text, $tickets_alt, PREG_SET_ORDER );
+
+		// Always match full URI's
 		preg_match_all( "~https?://($ticket_tracs).trac.wordpress.org/ticket/(?<id>$digits)~", $text, $tickets_url, PREG_SET_ORDER );
+
 		foreach ( $tickets_url as &$ticket ) {
 			$ticket['url'] = true;
 		}
