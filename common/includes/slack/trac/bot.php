@@ -52,10 +52,11 @@ class Bot {
 		$ticket_tracs = '?<trac>' . Trac::get_regex();
 		$tickets      = array();
 
-		// If the channel is not GitHub centric, match #1234 as a Trac ticket
-		if ( ! in_array( $this->get_channel(), $this->github_channels, true ) ) {
-			preg_match_all( "/(?:\s|^|\()#(?<id>$digits)(?:\-($ticket_tracs))?\b/", $text, $tickets, PREG_SET_ORDER );
-		}
+		// If the channel is not GitHub centric, require the trac to be suffixed like #1234-core
+		$require_trac = in_array( $this->get_channel(), self::$github_channels, true );
+		$require_trac = $require_trac ? '' : '?'; // regex optional.
+
+		preg_match_all( "/(?:\s|^|\()#(?<id>$digits)(?:\-($ticket_tracs)){$require_trac}\b/", $text, $tickets, PREG_SET_ORDER );
 
 		// Always match trac-prefixed Tickets
 		preg_match_all( "/(?:\s|^|\()#($ticket_tracs)(?<id>$digits)\b/", $text, $tickets_alt, PREG_SET_ORDER );
