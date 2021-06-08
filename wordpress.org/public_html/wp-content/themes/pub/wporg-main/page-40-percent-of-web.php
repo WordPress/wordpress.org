@@ -695,7 +695,7 @@ the_post();
 					<p>
 						<?php
 						printf(
-							__( 'Also in May 2004, the first plugin, which is still bundled with WordPress — the <a href="%s">Hello Dolly plugin</a>, randomly displays a lyric from the Louis Armstrong song <em>Hello, Dolly!</em> in the top right of the admin dashboard. It was intended as a guide for developers interested in making plugins, and for users learning how to activate or deactivate plugins.', 'wporg' ),
+							__( 'Also in May 2004, the first plugin, which is still bundled with WordPress — the <a href="%s">Hello Dolly plugin</a>, randomly displays a lyric from the Louis Armstrong song <em>Hello, Dolly!</em> in the top right of the admin dashboard was launched. It was intended as a guide for developers interested in making plugins, and for users learning how to activate or deactivate plugins.', 'wporg' ),
 							'https://core.trac.wordpress.org/changeset/1340'
 						);
 						?>
