@@ -275,7 +275,7 @@ class WPorg_GP_Custom_Translation_Warnings {
 	 */
 	public function warning_unexpected_sprintf_token( $original, $translation ) {
 		$unexpected_tokens = [];
-		$is_sprintf        = preg_match( '!%((\d+\$(?:\d+)?)?[bcdefgosuxl])!i', $original );
+		$is_sprintf        = preg_match( '!%((\d+\$(?:\d+)?)?[bcdefgosuxl])\b!i', $original );
 
 		// Find any percents that are not valid or escaped.
 		if ( $is_sprintf ) {
