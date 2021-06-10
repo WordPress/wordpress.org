@@ -10,13 +10,33 @@ export default [
 		parent: 0,
 		meta: [],
 		_links: {
-			self: [ { href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag-reason/8' } ],
-			collection: [ { href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag-reason' } ],
-			about: [ { href: 'http://localhost:8888/wp-json/wp/v2/taxonomies/wporg-pattern-flag-reason' } ],
-			'wp:post_type': [
-				{ href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag?wporg-pattern-flag-reason=8' },
+			self: [
+				{
+					href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag-reason/8',
+				},
 			],
-			curies: [ { name: 'wp', href: 'https://api.w.org/{rel}', templated: true } ],
+			collection: [
+				{
+					href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag-reason',
+				},
+			],
+			about: [
+				{
+					href: 'http://localhost:8888/wp-json/wp/v2/taxonomies/wporg-pattern-flag-reason',
+				},
+			],
+			'wp:post_type': [
+				{
+					href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag?wporg-pattern-flag-reason=8',
+				},
+			],
+			curies: [
+				{
+					name: 'wp',
+					href: 'https://api.w.org/{rel}',
+					templated: true,
+				},
+			],
 		},
 	},
 	{
@@ -30,13 +50,33 @@ export default [
 		parent: 0,
 		meta: [],
 		_links: {
-			self: [ { href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag-reason/7' } ],
-			collection: [ { href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag-reason' } ],
-			about: [ { href: 'http://localhost:8888/wp-json/wp/v2/taxonomies/wporg-pattern-flag-reason' } ],
-			'wp:post_type': [
-				{ href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag?wporg-pattern-flag-reason=7' },
+			self: [
+				{
+					href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag-reason/7',
+				},
 			],
-			curies: [ { name: 'wp', href: 'https://api.w.org/{rel}', templated: true } ],
+			collection: [
+				{
+					href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag-reason',
+				},
+			],
+			about: [
+				{
+					href: 'http://localhost:8888/wp-json/wp/v2/taxonomies/wporg-pattern-flag-reason',
+				},
+			],
+			'wp:post_type': [
+				{
+					href: 'http://localhost:8888/wp-json/wp/v2/wporg-pattern-flag?wporg-pattern-flag-reason=7',
+				},
+			],
+			curies: [
+				{
+					name: 'wp',
+					href: 'https://api.w.org/{rel}',
+					templated: true,
+				},
+			],
 		},
 	},
 ];

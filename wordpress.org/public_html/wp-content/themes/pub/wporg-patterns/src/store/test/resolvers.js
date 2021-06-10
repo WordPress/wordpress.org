@@ -24,14 +24,20 @@ describe( 'getPatternsByQuery', () => {
 
 		// Step through the promise - the response is omitted here & mocked in the next step because `Response`
 		// is a browser feature, not available in node.
-		const { value: awaitPromiseControl } = generator.next( { /* Response omitted */ } );
+		const { value: awaitPromiseControl } = generator.next( {
+			/* Response omitted */
+		} );
 		expect( awaitPromiseControl ).toEqual( {
 			type: 'AWAIT_PROMISE',
 			promise: expect.any( Promise ),
 		} );
 
 		// Complete the promise and return content
-		const { value: received } = generator.next( { total: 8, totalPages: 2, results: apiPatterns } );
+		const { value: received } = generator.next( {
+			total: 8,
+			totalPages: 2,
+			results: apiPatterns,
+		} );
 		expect( received ).toEqual( {
 			type: 'LOAD_BLOCK_PATTERNS',
 			query: '',

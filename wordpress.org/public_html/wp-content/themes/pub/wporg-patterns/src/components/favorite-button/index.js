@@ -41,7 +41,7 @@ const FavoriteButton = ( { showLabel = true, patternId } ) => {
 		return null;
 	}
 
-	const buttonClasses = classnames( 'button button-link pattern__favorite-button', {
+	const buttonClasses = classnames( 'button button-link pattern-favorite-button', {
 		'is-favorited': isFavorite,
 		'has-label': showLabel,
 	} );

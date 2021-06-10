@@ -3,10 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
+import { useInstanceId } from '@wordpress/compose';
 
-const CategorySearch = ( { defaultValue, isLoading, isVisible, onUpdate, onSubmit } ) => {
+const Search = ( { defaultValue, isLoading, isVisible, onUpdate, onSubmit } ) => {
+	const instanceId = useInstanceId( Search );
 	if ( isLoading ) {
-		return <span className="category-search--is-loading" />;
+		return <span className="search is-loading" />;
 	}
 
 	if ( ! isVisible ) {
@@ -14,18 +16,18 @@ const CategorySearch = ( { defaultValue, isLoading, isVisible, onUpdate, onSubmi
 	}
 
 	return (
-		<form method="get" action="/" className="category-search" onSubmit={ onSubmit }>
-			<label htmlFor="pattern-search" className="screen-reader-text">
+		<form method="get" action="/" className="pattern-search" onSubmit={ onSubmit }>
+			<label htmlFor={ `search-${ instanceId }` } className="screen-reader-text">
 				{ __( 'Search for:', 'wporg-patterns' ) }
 			</label>
 			<input
 				onChange={ onUpdate }
 				defaultValue={ defaultValue }
-				id="pattern-search"
+				id={ `search-${ instanceId }` }
 				type="search"
 				placeholder={ __( 'Search patterns', 'wporg-patterns' ) }
 			/>
-			<button type="submit" className="category-search__button">
+			<button type="submit" className="pattern-search__button">
 				<span className="screen-reader-text"> { __( 'Search patterns', 'wporg-patterns' ) }</span>
 				<Icon icon={ search } />
 			</button>
@@ -33,4 +35,4 @@ const CategorySearch = ( { defaultValue, isLoading, isVisible, onUpdate, onSubmi
 	);
 };
 
-export default CategorySearch;
+export default Search;

@@ -37,7 +37,11 @@ function queries( state = {}, action ) {
 	const { page, total, totalPages } = action;
 	switch ( action.type ) {
 		case 'LOAD_BLOCK_PATTERNS': {
-			const _queryState = { ...( state[ action.query ] || {} ), total, totalPages };
+			const _queryState = {
+				...( state[ action.query ] || {} ),
+				total,
+				totalPages,
+			};
 			_queryState[ page ] = patternIds;
 			return { ...state, [ action.query ]: _queryState };
 		}

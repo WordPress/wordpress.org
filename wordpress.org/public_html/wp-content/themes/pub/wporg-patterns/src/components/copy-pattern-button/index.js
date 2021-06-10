@@ -60,7 +60,7 @@ const CopyPatternButton = ( { isSmall = false, onSuccess = noop, content } ) => 
 	}
 
 	const classes = classnames( {
-		'pattern__copy-button': true,
+		'pattern-copy-button': true,
 		'is-small-label': isSmall,
 	} );
 

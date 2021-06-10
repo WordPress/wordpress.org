@@ -104,4 +104,3 @@ export const getCategoryFromPath = ( path ) => {
 export const getPageFromPath = ( path ) => {
 	return Number( getValueFromPath( path, 'page' ) || 1 );
 };
-

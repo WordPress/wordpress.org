@@ -23,23 +23,25 @@ export default function getPaginationList( length, current = 1 ) {
 	}
 	list.push( ...range.slice( -2 ) );
 
-	return list
-		// Remove duplicates.
-		.filter( ( value, i, a ) => a.indexOf( value ) === i )
-		// Add in … where there's a jump larger than 1.
-		.reduce( ( acc, value, i, a ) => {
-			if ( i === 0 ) {
+	return (
+		list
+			// Remove duplicates.
+			.filter( ( value, i, a ) => a.indexOf( value ) === i )
+			// Add in … where there's a jump larger than 1.
+			.reduce( ( acc, value, i, a ) => {
+				if ( i === 0 ) {
+					acc.push( value );
+					return acc;
+				}
+				const diff = Math.abs( a[ i ] - a[ i - 1 ] );
+				if ( diff === 0 ) {
+					return acc;
+				}
+				if ( diff > 1 ) {
+					acc.push( '…' );
+				}
 				acc.push( value );
 				return acc;
-			}
-			const diff = Math.abs( a[ i ] - a[ i - 1 ] );
-			if ( diff === 0 ) {
-				return acc;
-			}
-			if ( diff > 1 ) {
-				acc.push( '…' );
-			}
-			acc.push( value );
-			return acc;
-		}, [] );
+			}, [] )
+	);
 }

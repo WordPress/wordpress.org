@@ -9,22 +9,30 @@ import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { ifViewportMatches } from '@wordpress/viewport';
 
-const DefaultMenu = ( { currentCategory, options, onClick, isLoading } ) => {
+const DefaultMenu = ( { current, isLoading, label = __( 'Main Menu', 'wporg-patterns' ), onClick, options } ) => {
 	if ( ! isLoading && ! options.length ) {
 		return null;
 	}
 
 	return (
 		<>
-			<h2 className="screen-reader-text">{ __( 'Main Menu', 'wporg-patterns' ) }</h2>
-			<ul className={ classnames( { 'category-menu': true, 'category-menu--is-loading': isLoading } ) }>
+			<h2 className="screen-reader-text">{ label }</h2>
+			<ul
+				className={ classnames( {
+					'pattern-menu': true,
+					'is-loading': isLoading,
+				} ) }
+			>
 				{ options.map( ( i ) => (
 					<li key={ i.value }>
 						<a
-							className={ classnames( { 'category-menu--is-active': currentCategory === i.slug } ) }
+							className={ classnames( {
+								'pattern-menu__item': true,
+								'is-active': current === i.slug,
+							} ) }
 							href={ i.value }
 							onClick={ onClick }
-							aria-current={ currentCategory === i.slug ? 'page' : undefined }
+							aria-current={ current === i.slug ? 'page' : undefined }
 						>
 							{ i.label }
 						</a>

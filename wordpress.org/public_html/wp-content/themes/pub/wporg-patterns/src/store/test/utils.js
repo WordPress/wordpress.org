@@ -12,9 +12,12 @@ describe( 'getQueryString', () => {
 
 	it( 'should convert a simple query to string', () => {
 		expect( getQueryString( { 'pattern-categories': 3 } ) ).toEqual( 'pattern-categories=3' );
-		expect( getQueryString( { 'pattern-categories': 3, 'pattern-keywords': 10 } ) ).toEqual(
-			'pattern-categories=3&pattern-keywords=10'
-		);
+		expect(
+			getQueryString( {
+				'pattern-categories': 3,
+				'pattern-keywords': 10,
+			} )
+		).toEqual( 'pattern-categories=3&pattern-keywords=10' );
 	} );
 
 	it( 'should handle array values', () => {

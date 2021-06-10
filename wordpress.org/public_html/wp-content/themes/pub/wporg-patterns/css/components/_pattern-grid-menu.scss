@@ -6,12 +6,11 @@
 	justify-content: space-between;
 	align-items: center;
 
-	> *:first-child,
-	> *:last-child {
+	> * {
 		width: 100%;
 	}
 
-	> *:last-child {
+	> form {
 		margin: $gutter-default;
 		width: calc(100% - #{$gutter-default * 2});
 	}
@@ -20,7 +19,7 @@
 		margin: $gutter-default;
 		flex-direction: row;
 
-		> *:last-child {
+		> form {
 			margin: 0;
 			width: auto;
 		}

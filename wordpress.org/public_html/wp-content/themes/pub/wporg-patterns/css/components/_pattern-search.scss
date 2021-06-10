@@ -1,4 +1,4 @@
-.category-search {
+.pattern-search {
 	display: flex;
 	align-items: center;
 	background: $color-white;
@@ -18,22 +18,7 @@
 		}
 	}
 
-	&__button {
-		display: flex;
-		background: transparent;
-		border: none;
-		color: $color__text-lighter;
-
-		&:active {
-			background: $color-gray-light-600;
-		}
-
-		&:focus {
-			outline: $color__wp-blue auto 1px;
-		}
-	}
-
-	&--is-loading {
+	&.is-loading {
 		display: block;
 		height: 24px;
 		min-width: 100%;
@@ -45,5 +30,20 @@
 			min-width: auto !important;
 		}
 
+	}
+}
+
+.pattern-search__button {
+	display: flex;
+	background: transparent;
+	border: none;
+	color: $color__text-lighter;
+
+	&:active {
+		background: $color-gray-light-600;
+	}
+
+	&:focus {
+		outline: $color__wp-blue auto 1px;
 	}
 }

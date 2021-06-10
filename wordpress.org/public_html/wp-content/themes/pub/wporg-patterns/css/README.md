@@ -1,6 +1,8 @@
 # CSS Structure
 
-This loosely follows [ITCSS.](https://www.xfive.co/blog/itcss-scalable-maintainable-css-architecture/)
+This loosely follows [ITCSS](https://www.xfive.co/blog/itcss-scalable-maintainable-css-architecture/) in folder structure, and [Gutenberg's CSS naming scheme](https://github.com/WordPress/gutenberg/blob/trunk/docs/contributors/code/coding-guidelines.md) for class names.
+
+Generally components will use `pattern-{kebab-case-component}` for the top-level export, and `pattern-{kebab-case-component}__{child-element}` for any children classes. Conditional classes, for loading state or active state, should use an `is-` or `has-` prefix.
 
 ## 01 Settings
 

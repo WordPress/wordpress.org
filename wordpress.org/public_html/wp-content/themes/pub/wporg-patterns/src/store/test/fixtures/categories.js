@@ -14,7 +14,13 @@ export default [
 			collection: [ { href: 'wp-json/wp/v2/pattern-categories' } ],
 			about: [ { href: 'wp-json/wp/v2/taxonomies/wporg-pattern-category' } ],
 			'wp:post_type': [ { href: 'wp-json/wp/v2/wporg-pattern?pattern-categories=2' } ],
-			curies: [ { name: 'wp', href: 'https://api.w.org/{rel}', templated: true } ],
+			curies: [
+				{
+					name: 'wp',
+					href: 'https://api.w.org/{rel}',
+					templated: true,
+				},
+			],
 		},
 	},
 	{
@@ -32,7 +38,13 @@ export default [
 			collection: [ { href: 'wp-json/wp/v2/pattern-categories' } ],
 			about: [ { href: 'wp-json/wp/v2/taxonomies/wporg-pattern-category' } ],
 			'wp:post_type': [ { href: 'wp-json/wp/v2/wporg-pattern?pattern-categories=3' } ],
-			curies: [ { name: 'wp', href: 'https://api.w.org/{rel}', templated: true } ],
+			curies: [
+				{
+					name: 'wp',
+					href: 'https://api.w.org/{rel}',
+					templated: true,
+				},
+			],
 		},
 	},
 ];

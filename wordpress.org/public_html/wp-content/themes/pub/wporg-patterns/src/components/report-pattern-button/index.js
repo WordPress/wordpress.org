@@ -29,7 +29,11 @@ const ReportPatternButton = ( { postId, loggedIn, userHasReported } ) => {
 	if ( ! loggedIn ) {
 		return (
 			<p className="pattern-report-button__copy">
-				<a href={ addQueryArgs( '/wp-login.php', { redirect_to: window.location.pathname } ) }>
+				<a
+					href={ addQueryArgs( '/wp-login.php', {
+						redirect_to: window.location.pathname,
+					} ) }
+				>
 					{ __( 'Login to report this pattern', 'wporg-patterns' ) }
 				</a>
 			</p>

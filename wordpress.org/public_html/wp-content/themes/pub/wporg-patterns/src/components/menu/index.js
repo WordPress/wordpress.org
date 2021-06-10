@@ -4,7 +4,7 @@
 import DefaultMenu from './default';
 import MobileMenu from './mobile';
 
-const CategoryMenu = ( props ) => {
+const Menu = ( props ) => {
 	return (
 		<>
 			<DefaultMenu { ...props } />
@@ -13,4 +13,4 @@ const CategoryMenu = ( props ) => {
 	);
 };
 
-export default CategoryMenu;
+export default Menu;

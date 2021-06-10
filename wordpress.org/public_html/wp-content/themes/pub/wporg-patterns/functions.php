@@ -25,6 +25,12 @@ add_filter( 'pre_handle_404', __NAMESPACE__ . '\bypass_404_page', 10, 2 );
 function setup() {
 	add_theme_support( 'post-thumbnails' );
 
+	// Add gutenberg styling supports.
+	add_theme_support( 'align-wide' );
+	add_theme_support( 'custom-spacing' );
+	add_theme_support( 'custom-line-height' );
+	add_theme_support( 'experimental-link-color' );
+
 	// The parent wporg theme is designed for use on wordpress.org/* and assumes locale-domains are available.
 	// Remove hreflang support.
 	remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
