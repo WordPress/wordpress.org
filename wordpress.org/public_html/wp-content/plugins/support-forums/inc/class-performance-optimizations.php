@@ -93,13 +93,14 @@ class Performance_Optimizations {
 		$search_terms = get_search_query( false );
 
 		$tab = $_GET['tab'] ?? 'support';
-		if ( ! in_array( $tab, [ 'support', 'docs', 'plugin', 'theme' ] ) ) {
+		if ( ! in_array( $tab, [ 'support', 'docs', 'plugin', 'theme', 'searchforum' ] ) ) {
 			$tab = 'support';
 		}
 
 		switch ( $tab ) {
 			case 'theme':
 			case 'plugin':
+			case 'searchforum':
 				wp_safe_redirect( add_query_arg( $tab, $_GET[ $tab ], home_url( "/search/{$search_terms}/" ) ) );
 				exit;
 			case 'support':
@@ -150,6 +151,10 @@ class Performance_Optimizations {
 					'terms' => [ $_GET['theme'] ]
 				]
 			] );
+
+			add_filter( 'posts_where', array( $this, 'posts_in_last_year' ) );
+		} elseif ( ! empty( $_GET['searchforum'] ) ) {
+			$query->set( 'post_parent', (int) $_GET['searchforum'] );
 
 			add_filter( 'posts_where', array( $this, 'posts_in_last_year' ) );
 		} else {

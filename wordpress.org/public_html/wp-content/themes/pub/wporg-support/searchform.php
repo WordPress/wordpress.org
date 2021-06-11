@@ -23,8 +23,14 @@ namespace WordPressdotorg\Forums;
 		if ( in_array( current_action(), [ 'bbp_template_before_pagination_loop', 'wporg_compat_before_single_view' ] ) ) {
 			$placeholder = _x( 'Search this forum', 'placeholder', 'wporg-forums' );
 			$project     = wporg_support_get_compat_object();
-			$tab         = $project->type;
-			$project     = $project->post_name;
+			if ( $project ) {
+				$tab     = $project->type;
+				$project = $project->post_name;
+			} else {
+				// Specific forum.
+				$tab     = 'searchforum';
+				$project = bbp_get_forum_id();
+			}
 		} elseif ( is_front_page() ) {
 			$placeholder = _x( 'Search documentation', 'placeholder', 'wporg-forums' );
 			$tab         = 'docs';
