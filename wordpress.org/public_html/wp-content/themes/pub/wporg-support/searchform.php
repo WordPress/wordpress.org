@@ -20,18 +20,26 @@ namespace WordPressdotorg\Forums;
 		if ( in_array( current_action(), [ 'bbp_template_before_pagination_loop', 'wporg_compat_before_single_view' ] ) ) {
 			$placeholder = _x( 'Search this forum', 'placeholder', 'wporg-forums' );
 			$project     = wporg_support_get_compat_object();
+			$tab         = $project->type;
+			$project     = $project->post_name;
 		} elseif ( is_front_page() ) {
 			$placeholder = _x( 'Search documentation', 'placeholder', 'wporg-forums' );
 			$project     = null;
 			$tab         = 'docs';
+		} elseif ( is_search() || bbp_is_search() ) {
+			if ( isset( $_GET['tab'] ) ) {
+				$tab     = $_GET['tab'];
+				$project = $_GET[ $_GET['tab'] ];
+			}
 		} else {
 			$placeholder = _x( 'Search forums', 'placeholder', 'wporg-forums' );
 			$project     = null;
+			$tab         = 'support';
 		}
 	?>
-	<input type="search" id="s" class="search-field" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php the_search_query(); ?>" name="s" />
+	<input type="search" id="s" class="search-field" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php echo esc_attr( get_query_var( 's' ) ?: get_query_var( 'bbp_search' ) ) ?>" name="s" />
 	<?php if ( $project ) : ?>
-	<input type="hidden" name="intext" value="<?php echo esc_attr( $project->prefixed_title ); ?>" />
+	<input type="hidden" name="<?php echo esc_attr( $tab ); ?>" value="<?php echo esc_attr( $project ); ?>" />
 	<?php endif; ?>
 	<?php if ( $tab ) : ?>
 	<input type="hidden" name="tab" value="<?php echo esc_attr( $tab ); ?>" />

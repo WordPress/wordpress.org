@@ -8,7 +8,7 @@
 
 			<?php if ( 'topic' === get_post_type() ) : ?>
 
-				<?php bbp_get_template_part( 'content', 'single-topic-lead' ); ?>
+				<?php bbp_get_template_part( 'loop', 'single-topic' ); ?>
 
 			<?php else : ?>
 
