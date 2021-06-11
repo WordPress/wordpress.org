@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { ifViewportMatches } from '@wordpress/viewport';
 import { PanelBody } from '@wordpress/components';
 
 const MobileMenu = ( { onClick, options, label = __( 'Browse categories', 'wporg-patterns' ) } ) => {
@@ -36,5 +35,4 @@ const MobileMenu = ( { onClick, options, label = __( 'Browse categories', 'wporg
 	);
 };
 
-// Will only render if the viewport is < medium
-export default ifViewportMatches( '< medium' )( MobileMenu );
+export default MobileMenu;

@@ -7,7 +7,6 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ifViewportMatches } from '@wordpress/viewport';
 
 const DefaultMenu = ( { current, isLoading, label = __( 'Main Menu', 'wporg-patterns' ), onClick, options } ) => {
 	if ( ! isLoading && ! options.length ) {
@@ -43,5 +42,4 @@ const DefaultMenu = ( { current, isLoading, label = __( 'Main Menu', 'wporg-patt
 	);
 };
 
-// Will only render if the viewport is >= medium
-export default ifViewportMatches( '>= medium' )( DefaultMenu );
+export default DefaultMenu;

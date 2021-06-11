@@ -11410,8 +11410,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_viewport__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/viewport */ "@wordpress/viewport");
-/* harmony import */ var _wordpress_viewport__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_viewport__WEBPACK_IMPORTED_MODULE_3__);
 
 
 /**
@@ -11421,7 +11419,6 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * WordPress dependencies
  */
-
 
 
 
@@ -11454,10 +11451,9 @@ const DefaultMenu = ({
     onClick: onClick,
     "aria-current": current === i.slug ? 'page' : undefined
   }, i.label)))));
-}; // Will only render if the viewport is >= medium
+};
 
-
-/* harmony default export */ __webpack_exports__["default"] = (Object(_wordpress_viewport__WEBPACK_IMPORTED_MODULE_3__["ifViewportMatches"])('>= medium')(DefaultMenu));
+/* harmony default export */ __webpack_exports__["default"] = (DefaultMenu);
 
 /***/ }),
 
@@ -11472,9 +11468,15 @@ const DefaultMenu = ({
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _default__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./default */ "./src/components/menu/default.js");
-/* harmony import */ var _mobile__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./mobile */ "./src/components/menu/mobile.js");
+/* harmony import */ var _wordpress_compose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/compose */ "@wordpress/compose");
+/* harmony import */ var _wordpress_compose__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _default__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./default */ "./src/components/menu/default.js");
+/* harmony import */ var _mobile__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./mobile */ "./src/components/menu/mobile.js");
 
+
+/**
+ * WordPress dependencies
+ */
 
 /**
  * Internal dependencies
@@ -11482,8 +11484,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 const Menu = props => {
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_default__WEBPACK_IMPORTED_MODULE_1__["default"], props), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_mobile__WEBPACK_IMPORTED_MODULE_2__["default"], props));
+  const isMobile = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__["useViewportMatch"])('medium', '<');
+  return isMobile ? Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_mobile__WEBPACK_IMPORTED_MODULE_3__["default"], props) : Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_default__WEBPACK_IMPORTED_MODULE_2__["default"], props);
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (Menu);
@@ -11503,16 +11507,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_viewport__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/viewport */ "@wordpress/viewport");
-/* harmony import */ var _wordpress_viewport__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_viewport__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 
 
 /**
  * External dependencies
  */
-
 
 
 
@@ -11523,7 +11524,7 @@ const MobileMenu = ({
   label = Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Browse categories', 'wporg-patterns')
 }) => {
   const [isOpen, setIsOpen] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])(false);
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["PanelBody"], {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
     className: "pattern-menu is-mobile",
     title: label,
     initialOpen: isOpen,
@@ -11538,10 +11539,9 @@ const MobileMenu = ({
       onClick(event);
     }
   }, i.label)))));
-}; // Will only render if the viewport is < medium
+};
 
-
-/* harmony default export */ __webpack_exports__["default"] = (Object(_wordpress_viewport__WEBPACK_IMPORTED_MODULE_2__["ifViewportMatches"])('< medium')(MobileMenu));
+/* harmony default export */ __webpack_exports__["default"] = (MobileMenu);
 
 /***/ }),
 
@@ -14674,17 +14674,6 @@ const getPageFromPath = path => {
 /***/ (function(module, exports) {
 
 (function() { module.exports = window["wp"]["url"]; }());
-
-/***/ }),
-
-/***/ "@wordpress/viewport":
-/*!**********************************!*\
-  !*** external ["wp","viewport"] ***!
-  \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-(function() { module.exports = window["wp"]["viewport"]; }());
 
 /***/ }),
 

@@ -6,7 +6,7 @@
 	justify-content: space-between;
 	align-items: center;
 
-	> * {
+	.pattern-menu {
 		width: 100%;
 	}
 
@@ -15,7 +15,7 @@
 		width: calc(100% - #{$gutter-default * 2});
 	}
 
-	@media only screen and ( min-width: $breakpoint-medium ) {
+	@media only screen and ( min-width: #{$breakpoint-medium + 1} ) {
 		margin: $gutter-default;
 		flex-direction: row;
 
