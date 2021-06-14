@@ -13,10 +13,11 @@ use function WordPressdotorg\Pattern_Directory\Theme\get_all_the_content;
 get_header();
 
 $user_has_reported = is_user_logged_in() ? user_has_flagged_pattern() : false;
-$block_content = get_all_the_content( get_the_ID() );
+$raw_block_content = get_the_content();
+$parsed_block_content = get_all_the_content( get_the_ID() );
 
 ?>
-	<input id="block-data" type="hidden" value="<?php echo rawurlencode( wp_json_encode( $block_content ) ); ?>" />
+	<input id="block-data" type="hidden" value="<?php echo rawurlencode( wp_json_encode( $raw_block_content ) ); ?>" />
 	<main id="main" class="site-main col-12" role="main">
 
 		<?php
@@ -44,7 +45,7 @@ $block_content = get_all_the_content( get_the_ID() );
 					data-logged-in="<?php echo json_encode( is_user_logged_in() ); ?>"
 					data-user-has-reported="<?php echo json_encode( $user_has_reported ); ?>"
 				>
-					<?php echo rawurlencode( wp_json_encode( $block_content ) ); ?>
+					<?php echo rawurlencode( wp_json_encode( $parsed_block_content ) ); ?>
 				</div>
 
 				<div class="entry-content">
