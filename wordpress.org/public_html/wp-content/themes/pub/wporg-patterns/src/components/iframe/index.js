@@ -93,8 +93,22 @@ function setHead( doc, head ) {
 function Iframe( { contentRef, children, head, headHTML, themeSlug, ...props }, ref ) {
 	const [ iframeDocument, setIframeDocument ] = useState();
 
-	headHTML +=
-		'<style>body{pointer-events:none;display: flex;align-items: center;justify-content: center;min-height: 100vh;} body > div {width: 100%}</style>';
+	headHTML += `<style>
+    body {
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+    }
+    .${ BODY_CLASS_NAME } {
+        padding: 0;
+    }
+    body > div {
+        width: 100%;
+        max-height: 100%;
+        pointer-events: none;
+    }
+    </style>`;
 
 	if ( themeSlug ) {
 		headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${ themeSlug }/style.css" media="all" />`;
