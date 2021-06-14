@@ -36,7 +36,7 @@ if ( have_posts() ) :
 				<h2><?php esc_html_e( 'Read the requirements before updating a theme', 'wporg-themes' ); ?></h2>
 				<p><?php printf(
 					/* translators: 1: Link to WordPress.org; 2: Link to the Theme Handbook Required Review items. */
-					__( 'In order to have your theme hosted on <a href="%1$s">WordPress.org</a>, your code is required to comply with all the <a href="%2$s">requirements on the Theme Review Teams handbook page</a>.'),
+					__( 'In order to have your theme hosted on <a href="%1$s">WordPress.org</a>, your code is required to comply with all the <a href="%2$s">requirements on the Theme Review Teams handbook page</a>.', 'wporg-themes' ),
 					esc_url( 'https://wordpress.org/' ),
 					esc_url( 'https://make.wordpress.org/themes/handbook/review/required/' )
 				); ?></p>
