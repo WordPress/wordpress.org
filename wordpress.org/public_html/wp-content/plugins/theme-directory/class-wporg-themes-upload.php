@@ -1491,7 +1491,13 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 				'accessory' => [
 					'type'      => 'image',
 					'alt_text'  => 'Theme Screenshot',
-					'image_url' => "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}/{$this->theme->screenshot}",
+					'image_url' => sprintf(
+						// Slack doesn't like using themes.svn due to forced image download, so use ts.w.org instead.
+						'https://ts.w.org/wp-content/themes/%1$s/%2$s?ver=%3$s',
+						$this->theme_slug,
+						$this->theme->screenshot,
+						$this->theme->display( 'Version' )
+					),
 				],
 				'fields' => array_filter( [
 					[
