@@ -740,14 +740,12 @@ class WPORG_Themes_Upload {
 	 */
 	public function check_theme( $files ) {
 		// Load the theme checking code.
-		if ( ! function_exists( 'run_themechecks' ) ) {
+		if ( ! function_exists( 'run_themechecks_against_theme' ) ) {
 			include_once WP_PLUGIN_DIR . '/theme-check/checkbase.php';
 		}
 
-		list( $php_files, $css_files, $other_files ) = $this->separate_files( $files );
-
 		// Run the checks.
-		$result = run_themechecks( $php_files, $css_files, $other_files );
+		$result = run_themechecks_against_theme( $this->theme, $this->theme_slug );
 
 		// Display the errors.
 		$verdict = $result ? array( 'tc-pass', __( 'Pass', 'wporg-themes' ) ) : array( 'tc-fail', __( 'Fail', 'wporg-themes' ) );
@@ -1265,35 +1263,6 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 		}
 
 		return $files;
-	}
-
-	/**
-	 * Separates files in three buckets, PHP files, CSS files, and others.
-	 *
-	 * Most likely used in preparation for the Theme Check plugin.
-	 *
-	 * @param array $files Files to separate.
-	 * @return array
-	 */
-	public function separate_files( $files ) {
-		$php_files = $css_files = $other_files = array();
-
-		foreach ( $files as $file ) {
-			// PHP files.
-			if ( true === fnmatch( "*.php", $file ) ) {
-				$php_files[ $file ] = php_strip_whitespace( $file );
-
-				// CSS files.
-			} else if ( true === fnmatch( "*.css", $file ) ) {
-				$css_files[ $file ] = file_get_contents( $file );
-
-				// All the rest.
-			} else {
-				$other_files[ $file ] = file_get_contents( $file );
-			}
-		}
-
-		return array( $php_files, $css_files, $other_files );
 	}
 
 	/**
