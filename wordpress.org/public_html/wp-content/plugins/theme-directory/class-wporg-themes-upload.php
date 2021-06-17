@@ -1488,7 +1488,10 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 					] : null,
 					[
 						'type' => 'mrkdwn',
-						'text' => "*Ticket:*\n<https://themes.trac.wordpress.org/ticket/{$this->trac_ticket->id}|#{$this->trac_ticket->id}>",
+						'text' => "*Trac:*\n" . 
+							"<https://themes.trac.wordpress.org/ticket/{$this->trac_ticket->id}|#{$this->trac_ticket->id}>" .
+							' ' .
+							"<https://themes.trac.wordpress.org/changeset/{$this->trac_changeset}|[{$this->trac_changeset}]>",
 					]
 				] )
 			];
