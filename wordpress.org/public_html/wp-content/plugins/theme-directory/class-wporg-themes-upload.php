@@ -1404,6 +1404,7 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 
 		$errors = array(
 			'required'    => [],
+			'warning'    => [],
 			'recommended' => [],
 			'info'        => [],
 		);
@@ -1414,16 +1415,17 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 				$class = get_class( $check );
 
 				// Humanize the class name.
-				$class = preg_replace( '/([a-z])_?([A-Z][a-z])/', '$1 $2', $class );
+				$class = str_replace( '_', ' ', $class ); // Theme_Check
+				$class = preg_replace( '/([a-z])([A-Z][a-z])/', '$1 $2', $class ); // ThemeCheck
 
 				foreach ( (array) $check->getError() as $e ) {
 					$type = 'unknown';
-					if ( preg_match( '!<span[^>]+(tc-(?P<code>info|required|recommended))!i', $e, $m ) ) {
+					if ( preg_match( '!<span[^>]+(tc-(?P<code>info|required|recommended|warning))!i', $e, $m ) ) {
 						$type = $m['code'];
 					}
 
 					// Strip the span.
-					$e = preg_replace( '!<span[^>]+tc-.+</span>:?\s*!i', '', $e );
+					$e = preg_replace( '!<span[^>]+tc-[^<]+</span>:?\s*!i', '', $e );
 
 					// First sentence only.
 					if ( false !== ( $pos = strpos( $e, '. ', 10 ) ) ) {
@@ -1446,6 +1448,9 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 				}
 			}
 		}
+
+		// Hide `TextDomainCheck` Info warning that only a single textdomain is in use.
+		unset( $errors[ 'info' ][ 'Text Domain Check' ] );
 
 		$blocks = [];
 
@@ -1523,7 +1528,7 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 					'type' => 'section',
 					'text' => [
 						'type' => 'mrkdwn',
-						'text' => "*{$class}:*\n" . implode( "\n", $errors ),
+						'text' => "*{$class}:*\n" . implode( "\n", array_unique( $errors ) ),
 					]
 				];
 
