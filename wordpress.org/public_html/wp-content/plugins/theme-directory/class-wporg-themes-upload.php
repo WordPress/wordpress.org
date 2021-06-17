@@ -397,6 +397,9 @@ class WPORG_Themes_Upload {
 			$result = $this->check_theme( $theme_files );
 
 			if ( ! $result ) {
+				// Log it to slack.
+				$this->log_to_slack( 'blocked' );
+
 				/* translators: 1: Theme Check Plugin URL, 2: make.wordpress.org/themes */
 				return sprintf( __( 'Your theme has failed the theme check. Please correct the problems with it and upload it again. You can also use the <a href="%1$s">Theme Check Plugin</a> to test your theme before uploading. If you have any questions about this please post them to %2$s.', 'wporg-themes' ),
 					'//wordpress.org/plugins/theme-check/',
@@ -430,6 +433,8 @@ class WPORG_Themes_Upload {
 			);
 		}
 
+		$this->trac_ticket->id = $ticket_id;
+
 		// Add a or update the Theme Directory entry for this theme.
 		$this->create_or_update_theme_post( $ticket_id );
 
@@ -437,6 +442,9 @@ class WPORG_Themes_Upload {
 		$this->send_email_notification( $ticket_id );
 
 		do_action( 'theme_upload', $this->theme, $this->theme_post );
+
+		// Log it to slack.
+		$this->log_to_slack( 'allowed' );
 
 		// Initiate a GitHub actions run for the theme.
 		$this->trigger_e2e_run( $ticket_id );
@@ -747,8 +755,8 @@ class WPORG_Themes_Upload {
 		echo '<ul class="tc-result">' . display_themechecks() . '</ul>';
 		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
 
-		// Override some of the upload checks for child themes.
-		if ( !! $this->theme->parent() ) {
+		// Override ALL of the upload checks for child themes.
+		if ( $this->theme->parent() ) {
 			$result = true;
 		}
 
@@ -1411,5 +1419,148 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 
 		// Successful, return the last output line.
 		return $stdout ? end( $output ) : '';
+	}
+
+	/**
+	 * Log a Theme Upload to the slack `#themereview-firehose` channel.
+	 * 
+	 * @param string $status Whether the upload was 'allowed' or 'blocked'.
+	 */
+	public function log_to_slack( $status = 'allowed' ) {
+		global $themechecks;
+
+		if ( ! defined( 'THEME_DIRECTORY_SLACK_WEBHOOK' ) || empty( $themechecks ) ) {
+			return;
+		}
+
+		$errors = array(
+			'required'    => [],
+			'recommended' => [],
+			'info'        => [],
+		);
+		foreach ( $themechecks as $check ) {
+			if ( $check instanceof themecheck ) {
+				$error = $check->getError();
+
+				$class = get_class( $check );
+
+				// Humanize the class name.
+				$class = preg_replace( '/([a-z])_?([A-Z][a-z])/', '$1 $2', $class );
+
+				foreach ( (array) $check->getError() as $e ) {
+					$type = 'unknown';
+					if ( preg_match( '!<span[^>]+(tc-(?P<code>info|required|recommended))!i', $e, $m ) ) {
+						$type = $m['code'];
+					}
+
+					// Strip the span.
+					$e = preg_replace( '!<span[^>]+tc-.+</span>:?\s*!i', '', $e );
+
+					// First sentence only.
+					if ( false !== ( $pos = strpos( $e, '. ', 10 ) ) ) {
+						$e = substr( $e, 0, $pos + 1 );
+					}
+
+					// Strip any remaining tags.
+					$e = wp_kses( $e, [ 'strong' => true, 'code' => true, 'em' => true ] );
+
+					// Convert to markdown.
+					$e = preg_replace( '!</?(strong)[^>]*>!i', '*', $e );
+					$e = preg_replace( '!</?(code)[^>]*>!i', '`', $e );
+					$e = preg_replace( '!</?(em)[^>]*>!i', '_', $e );
+
+					if ( empty( $errors[ $type ][ $class ] ) ) {
+						$errors[ $type ][ $class ] = [];
+					}
+
+					$errors[ $type ][ $class ][] = $e;
+				}
+			}
+		}
+
+		$blocks = [];
+
+		// Preamble / header
+		if ( $this->theme_post && 'allowed' === $status ) {
+			$blocks[] = [
+				'type' => 'section',
+				'text' => [
+					'type' => 'mrkdwn',
+					'text' => "*Theme Update: <" . get_permalink( $this->theme_post ) . "|{$this->theme_post->post_title}>*"
+				],
+				'accessory' => [
+					'type'      => 'image',
+					'alt_text'  => 'Theme Screenshot',
+					'image_url' => "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}/{$this->theme->screenshot}",
+				],
+				'fields' => array_filter( [
+					[
+						'type' => 'mrkdwn',
+						'text' => "*Version:*\n{$this->theme->get('Version')}",
+					],
+					[
+						'type' => 'mrkdwn',
+						'text' => "*Priority:*\n{$this->trac_ticket->priority}",
+					],
+					$this->trac_ticket->resolution ? [
+						'type' => 'mrkdwn',
+						'text' => "*Resolution:*\n{$this->trac_ticket->resolution}",
+					] : null,
+					[
+						'type' => 'mrkdwn',
+						'text' => "*Ticket:*\n<https://themes.trac.wordpress.org/ticket/{$this->trac_ticket->id}|#{$this->trac_ticket->id}>",
+					]
+				] )
+			];
+		} elseif ( $this->theme_post ) {
+			$blocks[] = [
+				'type' => 'section',
+				'text' => [
+					'type' => 'mrkdwn',
+					'text' => "*Theme update blocked for {$this->theme_post->post_title}*"
+				],
+			];
+		} else {
+			$blocks[] = [
+				'type' => 'section',
+				'text' => [
+					'type' => 'mrkdwn',
+					'text' => "*New Theme upload blocked for {$this->theme->get('Name')} {$this->theme->get('Version')}*",
+				]
+			];
+		}
+
+		foreach ( $errors as $type => $error_classes ) {
+			if ( ! $error_classes ) {
+				continue;
+			}
+
+			$blocks[] = [
+				'type' => 'header',
+				'text' => [
+					'type' => 'plain_text',
+					'text' => 'Theme Check ' . ucwords( $type ),
+				]
+			];
+
+			foreach ( $error_classes as $class => $errors ) {
+				$section = [
+					'type' => 'section',
+					'text' => [
+						'type' => 'mrkdwn',
+						'text' => "*{$class}:*\n" . implode( "\n", $errors ),
+					]
+				];
+
+				$blocks[] = $section;
+			}
+		}
+
+		require_once API_WPORGPATH . 'includes/slack-config.php';
+		$send = new \Dotorg\Slack\Send( THEME_DIRECTORY_SLACK_WEBHOOK );
+		$send->add_attachment( [ 'blocks' => $blocks ] );
+		$send->set_username( 'allowed' === $status ? 'Theme Upload' : 'Theme Check Blocked' );
+		$send->set_icon( ':themes:' );
+		$send->send( '#themereview-firehose' );
 	}
 }
