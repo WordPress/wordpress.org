@@ -311,10 +311,7 @@ class WPorg_GP_Custom_Translation_Warnings {
 
 		// https://github.com/GlotPress/GlotPress-WP/pull/1237
 		add_filter( 'gp_warning_placeholders_re', function( $re ) {
-			if ( '%(\d+\$(?:\d+)?)?[bcdefgosuxEFGXl]' === $re ) {
-				$re = '(?<!%)%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX%l]';
-			}
-			return $re;
+			return '(?<!%)%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX%l]';
 		} );
 	}
 
