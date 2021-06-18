@@ -1412,7 +1412,8 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 			if ( $check instanceof themecheck ) {
 				$error = $check->getError();
 
-				$class = get_class( $check );
+				// Account for namespaces by getting the short name.
+				$class = (new \ReflectionClass( $check ))->getShortName();
 
 				// Humanize the class name.
 				$class = str_replace( '_', ' ', $class ); // Theme_Check
@@ -1542,8 +1543,15 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 		require_once API_WPORGPATH . 'includes/slack-config.php';
 		$send = new \Dotorg\Slack\Send( THEME_DIRECTORY_SLACK_WEBHOOK );
 		$send->add_attachment( [ 'blocks' => $blocks ] );
-		$send->set_username( 'allowed' === $status ? 'Theme Upload' : 'Theme Check Blocked' );
-		$send->set_icon( ':themes:' );
+
+		if ( 'allowed' === $status ) {
+			$send->set_username( 'Theme Upload' );
+			$send->set_icon( ':themes:' );
+		} else {
+			$send->set_username( 'Theme Check Blocked Upload' );
+			$send->set_icon( ':x:' );
+		}
+
 		$send->send( '#themereview-firehose' );
 	}
 }
