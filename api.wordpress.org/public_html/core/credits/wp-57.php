@@ -148,6 +148,7 @@ class WP_57_Credits extends WP_Credits {
 			'cenay',
 			'ceyhun0',
 			'cfinke',
+			'chaion07',
 			'chanthaboune',
 			'chaton666',
 			'chemiker',
