@@ -7,7 +7,7 @@ html,
 .gp-content,
 .gp-content textarea,
 .gp-content input {
-	color: #191e23;
+	color: #1e1e1e;
 }
 
 .site-header {
@@ -359,8 +359,33 @@ table.translations thead tr {
 	display: table-row !important;
 }
 
-table.translations td.translation li {
-	border-bottom: 1px dotted #e2e4e7;
+table.translations td.original ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+
+table.translations td.original ul li,
+table.translations td.translation ul li {
+	padding-bottom: .2em;
+	border-bottom: 1px dotted #72777c;
+}
+
+table.translations td.original li:last-child,
+table.translations td.translation li:last-child {
+	padding-bottom: 0;
+	border-bottom: none;
+}
+
+table.translations td.original small,
+table.translations td.translation small {
+	color: #293139;
+	font-size: 12px;
+}
+
+table.translations td.original ul:not(:last-child),
+table.translations td.translation ul:not(:last-child) {
+	margin-bottom: .2em;
 }
 
 table.translations thead th,
@@ -370,15 +395,26 @@ table.translations tfoot th,
 table.glossary thead th,
 table.locale-sub-projects thead th,
 table.locales thead th {
-	background-color: #72777c;
+	background-color: #808286;
 	color: #fff;
+}
+
+table.translations thead th:not(:last-child),
+table.translations tfoot th:not(:last-child),
+table.translation-sets thead th:not(:last-child),
+table.translations tfoot th:not(:last-child),
+table.glossary thead th:not(:last-child),
+table.locale-sub-projects thead th:not(:last-child),
+table.locales thead th:not(:last-child) {
+	border-right-color: #434648;
 }
 
 table.translations,
 table.translation-sets,
 table.glossary,
 table.locale-sub-projects {
-	font-size: 100%;
+	font-size: 15px;
+	line-height: 1.6;
 	border-spacing: 0;
 }
 
@@ -393,8 +429,8 @@ table.glossary td,
 table.locale-sub-projects th,
 table.locale-sub-projects td {
 	border: 0;
-	border-bottom: 1px solid #e2e4e7;
-	border-right: 1px solid #e2e4e7;
+	border-bottom: 1px solid #72777c;
+	border-right: 1px solid #72777c;
 }
 
 table.translations td:first-child,
@@ -407,13 +443,13 @@ table.glossary th:first-child,
 table.glossary td:first-child,
 table.locale-sub-projects th:first-child,
 table.locale-sub-projects td:first-child {
-	border-left: 1px solid #e2e4e7;
+	border-left: 1px solid #72777c;
 }
 
 table.translations tr:nth-child(4n+3),
 .translation-sets tr,
 .locales tr {
-	background-color: #f9f9f9;
+	background-color: #f6f7f7;
 }
 
 .translations tr.preview:hover,
@@ -423,6 +459,10 @@ table.translations tr:nth-child(4n+3),
 .locales tr:hover,
 .locale-sub-projects tr:hover td {
 	background-color: #e5f5fa;
+}
+
+#legend .box {
+	border-color: #72777c;
 }
 
 table.translations tr.preview.status-current,
@@ -494,7 +534,7 @@ dt a.edit {
 
 .editor .meta {
 	background: #fff;
-	border: 1px solid #e2e4e7;
+	border: 1px solid #72777c;
 	font-size: 13px;
 	margin: 0;
 	padding: 5px 10px;
@@ -505,7 +545,7 @@ dt a.edit {
 
 .editor .meta h3 {
 	text-align: center;
-	border-bottom: 1px solid #e2e4e7;
+	border-bottom: 1px solid #72777c;
 	margin-bottom: 15px;
 }
 
@@ -588,7 +628,18 @@ button.fuzzy strong {
 
 span.translation-text,
 span.original-text {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	white-space: pre-wrap;
+}
+
+
+.glossary-word {
+	border: 0;
+	text-decoration: underline;
+	text-decoration-style: dashed;
+	text-underline-offset: 2px;
+	text-decoration-skip-ink: none;
+	text-decoration-thickness: 1px;
 }
 
 .ui-tooltip {
@@ -903,7 +954,7 @@ a.contribute-button:hover {
 	margin-top: 20px;
 	padding: 10px 20px;
 	color: #006799;
-	border-left: 1px solid #e2e4e7;
+	border-left: 1px solid #72777c;
 	text-align: center;
 }
 
@@ -1072,7 +1123,7 @@ a.contribute-button:hover {
 }
 
 .projects .project-status > div:not(:first-child) {
-	border-left: 1px solid #e2e4e7;
+	border-left: 1px solid #72777c;
 }
 
 @media screen and (max-width: 500px) {
@@ -1206,7 +1257,7 @@ a.contribute-button:hover {
 	font-weight: 600;
 	color: #509040;
 	padding: 10px 0 10px 15px;
-	border-left: 1px solid #e2e4e7;
+	border-left: 1px solid #72777c;
 }
 
 .project-box .project-box-footer {
@@ -1277,7 +1328,7 @@ ul.projects-dropdown > li > span:after {
 	width: 20px;
 	height: 20px;
 	font: 20px/1 "dashicons";
-	border-left: 1px solid #e2e4e7;
+	border-left: 1px solid #72777c;
 	padding: 5px 0 5px 12px;
 	box-shadow: inset 1px 0 0 #fff;
 	-webkit-font-smoothing: antialiased;
@@ -1590,7 +1641,7 @@ ul.projects-dropdown li > a > span {
 .sort-bar {
 	float: right;
 	margin: -30px 0 5px 5px;
-	background-color: #e2e4e7;
+	background-color: #72777c;
 	padding: 5px;
 	border: 1px solid #dfdfdf;
 	border-top: none;
@@ -1912,7 +1963,7 @@ ul.ct-legend {
 
 .locale-project-contributors-table th {
 	font-weight: bold;
-	border-bottom: 1px solid #e2e4e7;
+	border-bottom: 1px solid #72777c;
 }
 
 .locale-project-contributors-table th.contributor-stats {
@@ -1965,7 +2016,7 @@ ul.ct-legend {
 
 .locale-project-contributors-table tbody td {
 	padding: 10px 0;
-	border-bottom: 1px solid #e2e4e7;
+	border-bottom: 1px solid #72777c;
 }
 
 .locale-project-contributors-table tbody tr:last-child td {
@@ -2112,7 +2163,7 @@ ul.ct-legend {
 }
 
 .consistency-table tr {
-	border-bottom: 1px solid #e2e4e7;
+	border-bottom: 1px solid #72777c;
 }
 
 .consistency-table tr.new-translation {
@@ -2131,7 +2182,7 @@ ul.ct-legend {
 	padding: 20px 0 10px;
 	background: #fff;
 	text-align: left;
-	box-shadow: 0 -1px 0 #e2e4e7, 0 3px 0 #e2e4e7;
+	box-shadow: 0 -1px 0 #72777c, 0 3px 0 #72777c;
 }
 
 @media screen and (min-width: 600px) {
@@ -2290,9 +2341,10 @@ table.translations td.translation span.missing {
 	width: 100%;
 	border: 0;
 	background: #fff;
-	color: #191e23;
+	color: #1e1e1e;
 	outline: none;
 	padding: 15px 0;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	font-size: 16px;
 	resize: vertical;
 }
@@ -2305,6 +2357,7 @@ table.translations td.translation span.missing {
 .editor .original {
 	max-width: 100%;
 	font-weight: normal;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	font-size: 15px;
 }
 
@@ -2321,6 +2374,8 @@ table.translations td.translation span.missing {
 
 table.translations tr.editor td {
 	padding: 0;
+	border-bottom-width: 2px;
+	border-top: 1px solid #72777c;
 }
 
 @media screen and (min-width: 700px) {
@@ -2336,14 +2391,14 @@ table.translations tr.editor td {
 
 .editor-panel__left {
 	flex: 1;
-	border-bottom: 3px solid #e2e4e7;
+	border-bottom: 1px solid #72777c;
 	min-width: 1%;
 }
 
 @media screen and (min-width: 700px) {
 	.editor-panel__left {
 		border-bottom: 0;
-		border-right: 3px solid #e2e4e7;
+		border-right: 1px solid #72777c;
 	}
 }
 
@@ -2356,7 +2411,7 @@ table.translations tr.editor td {
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
-	border-bottom: 1px solid #e2e4e7;
+	border-bottom: 1px solid #72777c;
 	background-color: #f3f4f5;
 	min-height: 40px;
 }
@@ -2398,7 +2453,7 @@ table.translations tr.editor td {
 	font-weight: 400;
 	letter-spacing: 1px;
 	text-transform: uppercase;
-	color: #191e23;
+	color: #1e1e1e;
 }
 
 .panel-header__bubble {
@@ -2454,7 +2509,7 @@ table.translations tr.editor td {
 }
 
 .panel-header-actions button:hover {
-	background: #e2e4e7;
+	background: #bdbdbd;
 }
 
 table.translations tbody > tr:first-child + tr  .panel-header-actions__previous,
@@ -2497,7 +2552,7 @@ table.translations tbody > tr:last-child .panel-header-actions__next {
 }
 
 .panel-content summary:focus {
-	color: #191e23;
+	color: #1e1e1e;
 }
 
 .panel-content details[open] summary {
@@ -2521,7 +2576,7 @@ table.translations tbody > tr:last-child .panel-header-actions__next {
 
 .source-details {
 	padding: 0 10px;
-	font-size: 13px;
+	font-size: 14px;
 }
 
 .source-details summary {
@@ -2546,7 +2601,7 @@ table.translations tbody > tr:last-child .panel-header-actions__next {
 	margin: 15px 0;
 	border-top: 1px solid;
 	border-bottom: 1px solid;
-	border-color: #e2e4e7;
+	border-color: #72777c;
 	background: #fff;
 }
 
@@ -2567,7 +2622,7 @@ table.translations tbody > tr:last-child .panel-header-actions__next {
 }
 
 .translation-form-wrapper {
-	border-bottom: 1px solid #e2e4e7;
+	border-bottom: 1px solid #72777c;
 	margin-left: -10px;
 	margin-right: -10px;
 	padding: 0 10px;
