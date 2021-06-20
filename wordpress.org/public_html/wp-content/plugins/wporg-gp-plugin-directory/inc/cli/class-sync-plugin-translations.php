@@ -52,6 +52,7 @@ class Sync_Plugin_Translations extends WP_CLI_Command {
 
 		$set_slug = isset( $assoc_args['set'] ) ? $assoc_args['set'] : 'default';
 
+
 		$translation_set_src = GP::$translation_set->by_project_id_slug_and_locale( $project_src->id, $set_slug, $locale->slug );
 		if ( ! $translation_set_src ) {
 			WP_CLI::error( 'Source translation set not found!' );
@@ -59,7 +60,7 @@ class Sync_Plugin_Translations extends WP_CLI_Command {
 
 		$translation_set_dest = GP::$translation_set->by_project_id_slug_and_locale( $project_dest->id, $set_slug, $locale->slug );
 		if ( ! $translation_set_dest ) {
-			WP_CLI::error( 'Source translation set not found!' );
+			WP_CLI::error( 'Destination translation set not found!' );
 		}
 
 		$current_translations_list = GP::$translation->for_translation( $project_src, $translation_set_src, 'no-limit', array( 'status' => 'current' ) );
@@ -68,18 +69,23 @@ class Sync_Plugin_Translations extends WP_CLI_Command {
 			return;
 		}
 
-		$current_translations = new Translations();
-		$user_id_map = [];
+		$current_translations     = new Translations();
+		$current_translations_map = [];
 		foreach ( $current_translations_list as $translation ) {
 			$current_translations->add_entry( $translation );
-			$user_id_map[ $translation->key() ] = $translation->user_id;
+			$current_translations_map[ $translation->key() ] = [
+				'user_id'  => $translation->user_id,
+				'status'   => $translation->translation_status,
+				'warnings' => $translation->warnings,
+			];
+
 		}
 		unset( $current_translations_list );
 
-		add_action( 'gp_translation_created', function( $translation ) use ( $user_id_map ) {
-			$original = GP::$original->get( $translation->original_id );
+		add_filter( 'gp_translation_prepare_for_save', function( $args, $translation ) use ( $current_translations_map ) {
+			$original = GP::$original->get( $args['original_id'] );
 			if ( ! $original ) {
-				return;
+				return $args;
 			}
 
 			$translation_entry = new Translation_Entry( [
@@ -88,10 +94,30 @@ class Sync_Plugin_Translations extends WP_CLI_Command {
 				'context'  => $original->context,
 			] );
 			$key = $translation_entry->key();
-			if ( isset( $user_id_map[ $key ] ) && $user_id_map[ $key ] !== $translation->user_id ) {
-				$translation->update( [ 'user_id' => $user_id_map[ $key ] ] );
+
+			if ( ! isset( $current_translations_map[ $key ] ) ) {
+				return $args;
 			}
-		} );
+
+			$current_translation = $current_translations_map[ $key ];
+
+			$args['user_id']  = $current_translation['user_id'];
+			$args['status']   = $current_translation['status'];
+			$args['warnings'] = $current_translation['warnings'];
+
+			return $args;
+		}, 50, 2 );
+
+		// GP_Translation_Set::import() calls `$translation->set_status()` which may reset the status set above.
+		add_filter( 'gp_translation_set_import_status', function( $status, $entry ) use ( $current_translations_map ) {
+			if ( ! isset( $current_translations_map[ $entry->key() ] ) ) {
+				return $status;
+			}
+
+			$current_translation = $current_translations_map[ $entry->key() ];
+
+			return $current_translation['status'];
+		}, 50, 2 );
 
 		$synced = $translation_set_dest->import( $current_translations );
 
