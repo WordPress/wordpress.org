@@ -401,6 +401,15 @@ table.translations td.translation small {
 	font-size: 12px;
 }
 
+table.translations a.action {
+	color: #1e1e1e;
+	text-decoration: underline;
+}
+
+table.translations a.action:hover {
+	color: #000;
+}
+
 .original-tags {
 	margin-top: .2em;
 }
