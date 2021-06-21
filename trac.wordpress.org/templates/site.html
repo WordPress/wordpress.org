@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '152'
+	scripts_version = '153'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = 'https://make.wordpress.org/' + project_slug + '/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
@@ -113,6 +113,11 @@
 <!--! Replace logout form with logout link -->
 <py:match path="div[@id='metanav']//form[@id='logout']">
 	<a href="https://login.wordpress.org/logout?redirect_to=$current_url_encoded">Logout</a>
+</py:match>
+
+<!--! Replace login destination -->
+<py:match path="div[@id='metanav']//a[@href='/login']">
+	<a href="https://login.wordpress.org/?redirect_to=$current_url_encoded" class="login">Login</a>
 </py:match>
 
 <!--! Notices and instructions when creating a new ticket -->
