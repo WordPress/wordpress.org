@@ -313,3 +313,32 @@ function wporg_references( $project, $entry ) {
 	</ul>
 	<?php
 }
+
+/**
+ * Whether to show the context or not.
+ *
+ * Prevents displaying the context if it doesn't provide any new information
+ * to the translator.
+ * Especially for mobile projects the context is mostly a duplicate of the singular string.
+ *
+ * @param \Translation_Entry $translation Current translation entry.
+ * @return bool Whether to show the context or not.
+ */
+function wporg_gp_should_display_original_context( $translation ) {
+	// No context available.
+	if ( ! $translation->context ) {
+		return false;
+	}
+
+	// Context is the same as the singular.
+	if ( $translation->singular === $translation->context ) {
+		return false;
+	}
+
+	// Context was cut-off due to VARCHAR(255) in the database schema.
+	if ( 255 === mb_strlen( $translation->context ) && 0 === strpos( $translation->singular, $translation->context ) ) {
+		return false;
+	}
+
+	return true;
+}

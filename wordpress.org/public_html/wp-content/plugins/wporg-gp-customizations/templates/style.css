@@ -345,14 +345,32 @@ span.morethan90 {
 	color: #509040;
 }
 
-span.context {
-	font-size: 90%;
+span.context,
+span.priority {
+	color: #1e1e1e;
+	font-size: 12px;
 	padding: .1em 0;
 	margin-left: .2em;
 	background-color: #a0a5aa;
 	-webkit-box-decoration-break: clone;
 	box-decoration-break: clone;
 	box-shadow: .3em 0 0 #a0a5aa, -.3em 0 0 #a0a5aa;
+	border-radius: 0;
+}
+
+span.context + span.priority {
+	margin-left: 1em;
+}
+
+.priority-high span.priority {
+	color: #fff;
+	background-color: rgba( 154, 35, 35, 0.65 );
+	box-shadow: 0.3em 0 0 rgba( 154, 35, 35, 0.65 ), -0.3em 0 0 rgba( 154, 35, 35, 0.65 );
+}
+
+.priority-low span.priority {
+	background-color: rgba( 213, 213, 213, 0.65 );
+	box-shadow: 0.3em 0 0 rgba( 213, 213, 213, 0.65 ), -0.3em 0 0 rgba( 213, 213, 213, 0.65 );
 }
 
 table.translations thead tr {
@@ -383,9 +401,8 @@ table.translations td.translation small {
 	font-size: 12px;
 }
 
-table.translations td.original ul:not(:last-child),
-table.translations td.translation ul:not(:last-child) {
-	margin-bottom: .2em;
+.original-tags {
+	margin-top: .2em;
 }
 
 table.translations thead th,
@@ -447,6 +464,7 @@ table.locale-sub-projects td:first-child {
 }
 
 table.translations tr:nth-child(4n+3),
+table.locale-sub-projects tr:nth-child(even),
 .translation-sets tr,
 .locales tr {
 	background-color: #f6f7f7;
@@ -1010,7 +1028,7 @@ a.contribute-button:hover {
 .locale-box {
 	float: right;
 	width: 250px;
-	border: 1px solid #ccc;
+	border: 1px solid #72777c;
 	box-shadow: 0 1px 1px -1px rgba(0,0,0,0.1);
 	background: #fff;
 	box-sizing: border-box;
@@ -1024,7 +1042,7 @@ a.contribute-button:hover {
 	float: left;
 	margin: 0 0 2.083% 2.083%;
 	width: 47.917%;
-	border: 1px solid #ccc;
+	border: 1px solid #72777c;
 	box-shadow: 0 1px 1px -1px rgba(0,0,0,0.1);
 	background: #fff;
 	box-sizing: border-box;
@@ -1052,7 +1070,7 @@ a.contribute-button:hover {
 
 .projects .project-name h4 {
 	border: 0;
-	margin: 0 0 12px;
+	margin: 0 0 8px;
 	font-size: 18px;
 	font-weight: 600;
 	line-height: 1.3;
@@ -1060,6 +1078,9 @@ a.contribute-button:hover {
 
 .projects .project-description {
 	font-size: 13px;
+	border-left: 0;
+	margin-top: 0;
+	padding: 0;
 }
 
 .projects .project-icon {
@@ -1169,13 +1190,15 @@ a.contribute-button:hover {
 	margin-top: 20px;
 	margin-left: 0;
 	max-width: 100%;
+	padding: 0;
+	border: 0;
 }
 
 .project-header .project-box {
 	position: relative;
 	width: 350px;
 	margin-left: 20px;
-	border: 1px solid #ccc;
+	border: 1px solid #72777c;
 	box-shadow: 0 1px 1px -1px rgba(0,0,0,0.1);
 	background: #fff;
 	box-sizing: border-box;
@@ -1265,7 +1288,7 @@ a.contribute-button:hover {
 }
 
 ul.projects-dropdown {
-	border-top: 1px solid #ccc;
+	border-top: 1px solid #72777c;
 }
 
 .project-status-progress + .project-box-footer > ul.projects-dropdown {
@@ -1297,7 +1320,7 @@ ul.projects-dropdown ul {
 	left: -1px;
 	width: 100%;
 	background: #f9f9f9;
-	border: 1px solid #ccc;
+	border: 1px solid #72777c;
 	border-top: 0;
 	box-shadow: 1px 1px 1px 0 rgba(0,0,0,0.04);
 	display: none;
@@ -1641,7 +1664,7 @@ ul.projects-dropdown li > a > span {
 .sort-bar {
 	float: right;
 	margin: -30px 0 5px 5px;
-	background-color: #72777c;
+	background-color: #e2e4e7;
 	padding: 5px;
 	border: 1px solid #dfdfdf;
 	border-top: none;
@@ -1886,6 +1909,7 @@ ul.ct-legend {
 
 .locale-project-contributors-group hr {
 	margin: 30px 0;
+	border-color: #72777c;
 }
 
 .locale-project-contributors-group ul {
@@ -2310,9 +2334,9 @@ table.translations th.checkbox {
 	text-align: center;
 }
 
-table.translations th.priority {
-	width: 2em;
-	text-align: center;
+table.translations th.priority,
+table.translations td.priority {
+	display: none;
 }
 
 table.translations th.original,
@@ -2587,13 +2611,21 @@ table.translations tbody > tr:last-child .panel-header-actions__next {
 	margin: 0;
 }
 
-.source-details details + details{
+.source-details details + details {
 	margin-top: 5px;
 }
 
 .source-details__references {
 	word-wrap: break-word;
 	overflow-wrap: break-word;
+}
+
+.source-details__context .context {
+	font-size: 100%;
+	background: transparent;
+	box-shadow: none;
+	margin: 0;
+	padding: 0;
 }
 
 .translation-wrapper {
