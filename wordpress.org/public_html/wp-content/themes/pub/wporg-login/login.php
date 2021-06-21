@@ -8,7 +8,12 @@
 get_header();
 ?>
 
-<?php wp_login_form(); ?>
+<?php
+wp_login_form( [
+	// pre-fill the last user if their session has simply timed out.
+	'value_username' => wp_parse_auth_cookie()['username'] ?? ''
+] );
+?>
 
 <p id="nav">
 	<a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" title="<?php _e( 'Password Lost and Found', 'wporg' ); ?>"><?php _e( 'Lost password?', 'wporg' ); ?></a> &nbsp; • &nbsp;
@@ -18,7 +23,10 @@ get_header();
 <script type="text/javascript">
 setTimeout( function() {
 	try {
-		d = document.getElementById( 'user_login' );
+		var d = document.getElementById( 'user_login' );
+		if ( d.value ) {
+			d = document.getElementById( 'user_pass' );
+		}
 		d.focus();
 		d.select();
 	} catch( e ){}
