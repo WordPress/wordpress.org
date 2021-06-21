@@ -14,6 +14,12 @@ if ( ! $user_login && ! empty( WP_WPOrg_SSO::$matched_route_params['user'] ) ) {
 	$user_login = trim( WP_WPOrg_SSO::$matched_route_params['user'] );
 }
 
+// Already logged in.. Warn about duplicate accounts, etc.
+if ( is_user_logged_in() ) {
+	wp_safe_redirect( home_url( '/linkexpired/register-logged-in' ) );
+	exit;
+}
+
 $error_user_login = $error_user_email = $error_recapcha_status = $terms_of_service_error = false;
 if ( $_POST ) {
 

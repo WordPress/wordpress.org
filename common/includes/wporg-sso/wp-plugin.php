@@ -16,31 +16,19 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @var array
 		 */
 		public $valid_sso_paths = array(
-			'root'         => '/',
-			'robots'       => '/robots\.txt',
-			'checkemail'   => '/checkemail',
-			'loggedout'    => '/loggedout',
-			'lostpassword' => '/lostpassword(/(?P<user>[^/]+))?',
-			'linkexpired'  => '/linkexpired(/(?P<reason>register|lostpassword)/(?P<user>[^/]+))?',
-			'oauth'        => '/oauth',
+			'root'            => '/',
+			'robots'          => '/robots\.txt',
+			'checkemail'      => '/checkemail',
+			'loggedout'       => '/loggedout',
+			'lostpassword'    => '/lostpassword(/(?P<user>[^/]+))?',
+			'linkexpired'     => '/linkexpired(/(?P<reason>[^/]+)(/(?P<user>[^/]+))?)?',
+			'oauth'           => '/oauth',
 
-			// Only for logged in users, but prior to cookies.
-			'updated-tos'  => '/updated-policies',
-		);
+			// Primarily for logged in users.
+			'updated-tos'     => '/updated-policies',
+			'logout'          => '/logout',
 
-		/**
-		 * List of additional valid paths on login.wordpress.org for logged in requests.
-		 * @var array
-		 */
-		public $valid_sso_paths_logged_in = array(
-			'logout' => '/logout',
-		);
-
-		/**
-		 * List of additional valid paths on login.wordpress.org for logged-out requests.
-		 * @var array
-		 */
-		public $valid_sso_paths_registration = array(
+			// Primarily for logged out users.
 			'pending-profile' => '/register/create-profile(/(?P<profile_user>[^/]+)/(?P<profile_key>[^/]+))?',
 			'pending-create'  => '/register/create(/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+))?',
 			'register'        => '/register(/(?P<user>[^/]+))?',
@@ -221,21 +209,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return;
 			}
 
-			// Extend paths which are only available for logged in users.
-			if ( is_user_logged_in() ) {
-				$this->valid_sso_paths = array_merge(
-					$this->valid_sso_paths,
-					$this->valid_sso_paths_logged_in
-				);
-
-			// Extend registration paths only when registration is open.
-			} elseif ( 'user' === get_site_option( 'registration', 'none' ) ) {
-				$this->valid_sso_paths = array_merge(
-					$this->valid_sso_paths,
-					$this->valid_sso_paths_registration
-				);
-			}
-
 			$redirect_req = $this->_get_safer_redirect_to();
 
 			// Add our host to the list of allowed ones.
@@ -338,14 +311,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 								}
 								return;
 							}
-						} else if ( is_user_logged_in() && 'logout' == self::$matched_route ) {
-							// No redirect, ask the user if they really want to log out.
-							return;
-						} else if ( 'robots' === self::$matched_route ) {
-							// No redirect, just display robots.
-						} else if ( is_user_logged_in() ) {
-							// Otherwise, redirect to the their profile.
-							$this->_redirect_to_source_or_profile();
 						}
 					} elseif (
 						(
@@ -461,7 +426,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * Redirects the user back to where they came from (or w.org profile)
 		 */
 		protected function _redirect_to_source_or_profile() {
-			$redirect = $this->_get_safer_redirect_to();
+			$redirect = $this->_get_safer_redirect_to( false );
 
 			if ( $redirect ) {
 				$this->_safe_redirect( $this->_maybe_add_remote_login_bounce( $redirect ) );

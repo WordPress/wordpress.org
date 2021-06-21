@@ -10,8 +10,8 @@ get_header();
 
 <?php
 wp_login_form( [
-	// pre-fill the last user if their session has simply timed out.
-	'value_username' => wp_parse_auth_cookie()['username'] ?? ''
+	// pre-fill with a given username, or with the last user if their session has simply timed out.
+	'value_username' => $_REQUEST['user'] ?? ( wp_parse_auth_cookie()['username'] ?? '' )
 ] );
 ?>
 

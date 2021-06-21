@@ -25,6 +25,12 @@ if ( ! $pending_user ) {
 	exit;
 }
 
+// Already logged in.. Warn about duplicate accounts, etc.
+if ( is_user_logged_in() && $activation_user != wp_get_current_user()->user_login ) {
+	wp_safe_redirect( home_url( '/linkexpired/register-logged-in' ) );
+	exit;
+}
+
 $can_access = false;
 if ( $pending_user && $pending_user['user_activation_key'] && ! $pending_user['created'] ) {
 	$expiration_duration = 2 * WEEK_IN_SECONDS; // Time that the user has to confirm the account.
@@ -41,12 +47,12 @@ if ( $pending_user && $pending_user['user_activation_key'] && ! $pending_user['c
 		exit;
 	}
 } elseif ( $pending_user && $pending_user['created'] ) {
-	wp_safe_redirect( 'https://wordpress.org/support/' );
+	wp_safe_redirect( home_url( '/linkexpired/account-created/' . urlencode( $pending_user['user_login'] ) ) );
 	die();
 }
 
 if ( ! $can_access ) {
-	wp_safe_redirect( '/' );
+	wp_safe_redirect( '/linkexpired' );
 	die();
 }
 

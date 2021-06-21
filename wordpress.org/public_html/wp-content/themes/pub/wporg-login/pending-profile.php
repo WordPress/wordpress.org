@@ -7,7 +7,7 @@
 
 $sso = WPOrg_SSO::get_instance();
 
- // Migrate to cookies.
+// Migrate to cookies.
 if ( !empty( $sso::$matched_route_params['profile_user'] ) ) {
 	setcookie( 'wporg_profile_user', $sso::$matched_route_params['profile_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 	setcookie( 'wporg_profile_key',  $sso::$matched_route_params['profile_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
@@ -20,6 +20,12 @@ $profile_user = $_COOKIE['wporg_profile_user'] ?? false;
 $profile_key  = $_COOKIE['wporg_profile_key']  ?? false;
 
 $pending_user = wporg_get_pending_user( $profile_user );
+
+// Already logged in.. Warn about duplicate accounts, etc.
+if ( is_user_logged_in() ) {
+	wp_safe_redirect( home_url( '/linkexpired/register-logged-in' ) );
+	exit;
+}
 
 $can_access = false;
 if ( $pending_user && $pending_user['user_profile_key'] ) {
@@ -36,7 +42,7 @@ if ( $pending_user && $pending_user['user_profile_key'] ) {
 }
 
 if ( $can_access && $pending_user['created']  ) {
-	wp_safe_redirect( 'https://wordpress.org/support/' );
+	wp_safe_redirect( home_url( '/linkexpired/account-created/' . urlencode( $pending_user['user_login'] ) ) );
 	die();
 } elseif ( ! $can_access ) {
 	wp_safe_redirect( home_url( '/linkexpired' ) );
