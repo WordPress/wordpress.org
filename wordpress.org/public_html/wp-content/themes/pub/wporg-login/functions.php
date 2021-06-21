@@ -518,3 +518,52 @@ function wporg_login_wordpress_url() {
 
 	return esc_url( $url );
 }
+
+/**
+ * Remember the source of where the user came from,
+ * to allow redirects to be kept even when the redirect is lost.
+ */
+function wporg_remember_where_user_came_from() {
+	if ( ! empty( $_COOKIE['wporg_came_from'] ) ) {
+		return;
+	}
+
+	$came_from = $_REQUEST['redirect_to'] ?? ( $_SERVER['HTTP_REFERER'] ?? '' );
+	if ( ! $came_from ) {
+		return;
+	}
+
+	setcookie( 'wporg_came_from', $came_from, time() + 10*MINUTE_IN_SECONDS, '/', 'login.wordpress.org', true, true );
+}
+add_action( 'init', 'wporg_remember_where_user_came_from' );
+
+/**
+ * Override the ultimate login location with the cookie value, if the redirect
+ * is going to land the user on somewhere that they did not actually come from.
+ */
+function wporg_remember_where_user_came_from_redirect( $redirect, $requested_redirect_to, $user ) {
+	if ( empty( $_COOKIE['wporg_came_from'] ) || is_wp_error( $user ) ) {
+		return $redirect;
+	}
+
+	// If the redirect is to a url that doesn't seem right, override it.
+	$redirect_host = parse_url( $redirect, PHP_URL_HOST );
+	$proper_host   = parse_url( $_COOKIE['wporg_came_from'], PHP_URL_HOST );
+	if (
+		$redirect_host != $proper_host &&
+		in_array(
+			$redirect_host,
+			[
+				'profiles.wordpress.org', // Default redirect for low-priv users.
+				'login.wordpress.org',    // Default redirect for priv'd users.
+			]
+		)
+	) {
+		if ( wp_validate_redirect( $_COOKIE['wporg_came_from'] ) ) {
+			$redirect = $_COOKIE['wporg_came_from'];
+		}
+	}
+
+	return $redirect;
+}
+add_filter( 'login_redirect', 'wporg_remember_where_user_came_from_redirect', 100, 3 );
