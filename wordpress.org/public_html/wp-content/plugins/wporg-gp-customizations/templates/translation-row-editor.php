@@ -99,7 +99,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 					</div>
 
 					<div class="source-details">
-						<?php if ( $translation->context ): ?>
+						<?php if ( wporg_gp_should_display_original_context( $translation ) ): ?>
 							<details open class="source-details__context">
 								<summary>Context</summary>
 								<span class="context bubble"><?php echo esc_translation( $translation->context ); ?></span>
