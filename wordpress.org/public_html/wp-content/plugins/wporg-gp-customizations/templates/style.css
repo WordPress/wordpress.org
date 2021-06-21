@@ -502,8 +502,9 @@ table.translations tr.preview.status-waiting,
 	background-color: #ffe399;
 }
 
-table.translations tr.preview.status-fuzzy, #legend .status-fuzzy {
-	background-color: #fbc5a9;
+table.translations tr.preview.status-fuzzy,
+#legend .status-fuzzy {
+	background-color: #f6a983;
 }
 
 table.translations tr.preview.has-warnings td.original,
@@ -513,7 +514,7 @@ div#legend div.has-warnings {
 
 table.translations tr.preview.status-rejected,
 #legend .status-rejected {
-	background-color: #f1adad;
+	background-color: #eb9090;
 }
 
 table.translations tr.preview.status-old,
@@ -1735,7 +1736,7 @@ ul.language-packs-list {
 }
 
 .ct-chart-contributors .ct-series-c .ct-area { /* rejected */
-	fill: #f1adad;
+	fill: #eb9090;
 	fill-opacity: .5;
 }
 
@@ -1782,8 +1783,8 @@ ul.ct-legend {
 }
 
 .ct-legend .ct-series-2:before { /* rejected */
-	background-color: #f1adad;
-	border-color: #f1adad;
+	background-color: #eb9090;
+	border-color: #eb9090;
 }
 
 @media screen and (min-width: 600px) {
