@@ -32,7 +32,7 @@ if ( 'register' == $reason && $user ) {
 } elseif ( 'account-created' === $reason ) {
 	echo '<p class="center">' . __( "That account has already been created.", 'wporg' ) . '</p>';
 
-	echo '<p class="center"><a href="' . add_query_arg( 'user', $user, home_url() ) . '">' . __( 'Please login to continue.', 'wporg' ) . '</a></p>';
+	echo '<p class="center"><a href="' . add_query_arg( 'user', $user, home_url() ) . '">' . __( 'Please log in to continue.', 'wporg' ) . '</a></p>';
 
 	echo '<p class="center"><a href="' . esc_url( home_url( '/lostpassword/'  . urlencode( $user ) ) ) . '">' .
 		__( 'Reset your password.', 'wporg' ) .
@@ -44,7 +44,7 @@ if ( 'register' == $reason && $user ) {
 		'https://wordpress.org/support/guidelines/#do-not-create-multiple-accounts-sockpuppets'
 	) . '</p>';
 
-	echo '<p class="center">' . __( 'Please logout, and follow the link again to complete the registration.', 'wporg' ) . '</p>';
+	echo '<p class="center">' . __( 'Please log out, and follow the link again to complete the registration.', 'wporg' ) . '</p>';
 
 	echo '<p class="center">' . sprintf(
 		/* translators: %s: logout URL */

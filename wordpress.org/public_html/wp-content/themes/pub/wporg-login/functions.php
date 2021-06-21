@@ -486,7 +486,7 @@ function wporg_login_errors_nicify( $errors, $redirect_to ) {
 	$replace_errors = [
 		'invalid_username' => sprintf(
 			/* translators: %s: <strong>UserLogin</strong> */
-			__( "<strong>Error:</strong> The username %s is not registered on WordPress.org. If you're unsure of your username, you can attempt to login using your email address instead.", 'wporg' ),
+			__( "<strong>Error:</strong> The username %s is not registered on WordPress.org. If you're unsure of your username, you can attempt to log in using your email address instead.", 'wporg' ),
 			'<strong>' . esc_html( wp_unslash( $_POST['log'] ?? '' ) ) . '</strong>'
 		),
 
