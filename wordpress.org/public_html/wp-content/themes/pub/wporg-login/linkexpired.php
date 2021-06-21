@@ -44,7 +44,7 @@ if ( 'register' == $reason && $user ) {
 		'https://wordpress.org/support/guidelines/#do-not-create-multiple-accounts-sockpuppets'
 	) . '</p>';
 
-	echo '<p class="center">' . __( 'Please logout, and folow the link again to complete the registration.', 'wporg' ) . '</p>';
+	echo '<p class="center">' . __( 'Please logout, and follow the link again to complete the registration.', 'wporg' ) . '</p>';
 
 	echo '<p class="center">' . sprintf(
 		/* translators: %s: logout URL */
