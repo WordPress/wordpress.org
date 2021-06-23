@@ -40,6 +40,11 @@ function updatePath(value) {
     value.title ?? 'Openverse',
     url,
   );
+
+  if (value.title) {
+    console.log(`Setting document title: ${value.title}`);
+    document.title = value.title;
+  }
 }
 
 /**
