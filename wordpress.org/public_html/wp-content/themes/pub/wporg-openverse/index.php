@@ -22,5 +22,11 @@ get_header();
 		</iframe>
 	</main><!-- #main -->
 
+    <script>
+        // Transfer constants from PHP-land to JS-land.
+        const openverseUrl = "<?php echo OPENVERSE_URL ?>";
+        const openverseSubpath = "<?php echo OPENVERSE_SUBPATH ?>";
+    </script>
+
 <?php
 get_footer();
