@@ -5,6 +5,8 @@ namespace WordPressdotorg\Openverse\Theme;
 /**
  * This is the URL on which the frontend site of Openverse is hosted. Unless
  * overridden from the Customizer UI, this is the URL for the embedded `iframe`.
+ *
+ * Note: Do not put a trailing slash '/' in this url, as it will cause problems.
  */
 if ( !defined( 'OPENVERSE_URL' ) ) {
 	define( 'OPENVERSE_URL', 'https://search.openverse.engineering' );
