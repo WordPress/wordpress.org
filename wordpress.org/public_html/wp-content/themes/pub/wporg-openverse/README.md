@@ -32,7 +32,7 @@ Follow these steps to set up a local playground for the theme:
 
     1.  Install `@wordpress/env` globally as an `npm` package.
         ```bash
-        $ npm install -g @wordpres/env@latest
+        $ npm install -g @wordpress/env@latest
         ```
     2.  Scaffold a dev environment.
         ```bash
