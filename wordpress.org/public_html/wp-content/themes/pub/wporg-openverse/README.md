@@ -13,8 +13,9 @@ Follow these steps to set up a local playground for the theme:
 
 1.  Build the parent theme WordPress.org theme.
 
-    1.  `cd` into the parent theme directory at `../wporg`.
-    2.  Install all the required `npm` packages.
+    1.  `cd` into the parent theme directory at `../wporg` 
+        (i.e. `wordpress.org/wordpress.org/public_html/wp-content/themes/pub/wporg`).
+    3.  Install all the required `npm` packages.
         ```bash
         $ npm install
         ```
@@ -22,6 +23,8 @@ Follow these steps to set up a local playground for the theme:
         ```bash
         $ npm run build
         ```
+    4.  `cd` back to the Openverse theme directory at `../wporg-openverse`
+        (i.e. `wordpress.org/wordpress.org/public_html/wp-content/themes/pub/wporg-openverse`).
 
 2.  You can choose to set up a new environment automatically or work in an
     existing environment with manual setup.
