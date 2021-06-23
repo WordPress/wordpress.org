@@ -39,9 +39,9 @@ function enqueue_assets() {
 
 	wp_enqueue_style(
 		/* handle    */ 'wporg-ov-style',
-		/* src       */ get_theme_file_uri( '/css/style.css' ),
+		/* src       */ get_theme_file_uri( '/css/openverse.css' ),
 		/* deps      */ array(),
-		/* ver       */ filemtime( __DIR__ . '/css/style.css' )
+		/* ver       */ filemtime( __DIR__ . '/css/openverse.css' )
 	);
 
 	wp_enqueue_script(
