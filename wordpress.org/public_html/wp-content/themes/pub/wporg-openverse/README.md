@@ -63,4 +63,9 @@ Follow these steps to set up a local playground for the theme:
 
 ## Related links
 
-- [Openverse](https://github.com/WordPress/openverse)
+- Source code
+    - [Openverse](https://github.com/WordPress/openverse)
+    - [Openverse catalog](https://github.com/WordPress/openverse-catalog)
+    - [Openverse API](https://github.com/WordPress/openverse-api)
+    - [Openverse frontend](https://github.com/WordPress/openverse-frontend)
+- [Make site](https://make.wordpress.org/openverse/)
