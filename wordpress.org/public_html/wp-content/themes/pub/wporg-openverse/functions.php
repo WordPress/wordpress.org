@@ -2,8 +2,20 @@
 
 namespace WordPressdotorg\Openverse\Theme;
 
-if ( !defined('OPENVERSE_URL') ) {
-	define('OPENVERSE_URL', 'https://search.openverse.engineering');
+/**
+ * This is the URL on which the frontend site of Openverse is hosted. Unless
+ * overridden from the Customizer UI, this is the URL for the embedded `iframe`.
+ */
+if ( !defined( 'OPENVERSE_URL' ) ) {
+	define( 'OPENVERSE_URL', 'https://search.openverse.engineering' );
+}
+
+/**
+ * This is subdirectory on WordPress.org which loads the Openverse site. This is
+ * prefixed in front of all path changes sent by the embedded `iframe`.
+ */
+if ( !defined( 'OPENVERSE_SUBPATH' ) ) {
+    define( 'OPENVERSE_SUBPATH', '/openverse' );
 }
 
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
