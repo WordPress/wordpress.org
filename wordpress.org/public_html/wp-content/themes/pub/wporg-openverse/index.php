@@ -18,7 +18,7 @@ get_header();
 ?>
 
 	<main id="main" class="site-main" role="main">
-		<iframe class="openverse_embed" src="<?php echo get_theme_mod('ov_src_url', OPENVERSE_URL) ?>">
+		<iframe id="openverse_embed" src="<?php echo get_theme_mod('ov_src_url', OPENVERSE_URL) ?>">
 		</iframe>
 	</main><!-- #main -->
 
