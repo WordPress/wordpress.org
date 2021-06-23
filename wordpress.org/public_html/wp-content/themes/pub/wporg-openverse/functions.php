@@ -46,9 +46,9 @@ function enqueue_assets() {
 
 	wp_enqueue_script(
 		/* handle    */ 'wporg-navigation',
-		/* src       */ get_theme_file_uri( '/js/resize.js' ),
+		/* src       */ get_theme_file_uri( '/js/message.js' ),
 		/* deps      */ array(),
-		/* ver       */ filemtime( __DIR__ . '/js/resize.js' ), 
+		/* ver       */ filemtime( __DIR__ . '/js/message.js' ),
 		/* in_footer */ true
 	);
 }
@@ -63,7 +63,7 @@ function use_index_php_as_template() {
 
 /**
  * Enable the option to set the URL for the Openverse embed via a GUI.
- * 
+ *
  * @param \WP_Customize_Manager $wp_customize Theme Customizer object.
  */
 function wporg_ov_customizer( $wp_customize ) {
