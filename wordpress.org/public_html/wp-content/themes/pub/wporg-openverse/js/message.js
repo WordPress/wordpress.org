@@ -33,7 +33,9 @@ function updateHeight(value) {
 function updatePath(value) {
   const path = value.path;
   const url = `${openverseSubpath}${path}`; // openverseSubpath defined in `index.php`
-  history.pushState(
+
+  console.log(`Replacing state URL: ${url}`);
+  history.replaceState(
     value.state,
     value.title ?? 'Openverse',
     url,
