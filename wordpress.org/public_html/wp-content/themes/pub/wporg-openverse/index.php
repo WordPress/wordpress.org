@@ -18,13 +18,14 @@ get_header();
 ?>
 
 	<main id="main" class="site-main" role="main">
-		<iframe id="openverse_embed" src="<?php echo get_theme_mod('ov_src_url', OPENVERSE_URL) ?>">
+		<iframe id="openverse_embed">
+		    😢 Your browser does not support inline frames.
 		</iframe>
 	</main><!-- #main -->
 
     <script>
         // Transfer constants from PHP-land to JS-land.
-        const openverseUrl = "<?php echo OPENVERSE_URL ?>";
+        const openverseUrl = "<?php echo get_theme_mod('ov_src_url', OPENVERSE_URL) ?>";
         const openverseSubpath = "<?php echo OPENVERSE_SUBPATH ?>";
     </script>
 

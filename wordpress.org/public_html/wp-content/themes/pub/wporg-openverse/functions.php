@@ -57,10 +57,18 @@ function enqueue_assets() {
 	);
 
 	wp_enqueue_script(
-		/* handle    */ 'wporg-navigation',
+		/* handle    */ 'wporg-message',
 		/* src       */ get_theme_file_uri( '/js/message.js' ),
 		/* deps      */ array(),
 		/* ver       */ filemtime( __DIR__ . '/js/message.js' ),
+		/* in_footer */ true
+	);
+
+	wp_enqueue_script(
+		/* handle    */ 'wporg-navigation',
+		/* src       */ get_theme_file_uri( '/js/iframe_nav.js' ),
+		/* deps      */ array(),
+		/* ver       */ filemtime( __DIR__ . '/js/iframe_nav.js' ),
 		/* in_footer */ true
 	);
 }
