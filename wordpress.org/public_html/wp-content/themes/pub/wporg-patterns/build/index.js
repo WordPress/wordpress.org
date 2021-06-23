@@ -86,10 +86,141 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "../../../../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":
+/*!*************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/arrayLikeToArray.js ***!
+  \*************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/arrayWithHoles.js":
+/*!***********************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
+  \***********************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+module.exports = _arrayWithHoles;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":
+/*!**************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/arrayWithoutHoles.js ***!
+  \**************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayLikeToArray = __webpack_require__(/*! ./arrayLikeToArray.js */ "../../../../node_modules/@babel/runtime/helpers/arrayLikeToArray.js");
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+
+module.exports = _arrayWithoutHoles;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/asyncToGenerator.js":
+/*!*************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
+  \*************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
+module.exports = _asyncToGenerator;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/defineProperty.js":
+/*!***********************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/defineProperty.js ***!
+  \***********************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+module.exports = _defineProperty;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
 /***/ "../../../../node_modules/@babel/runtime/helpers/extends.js":
-/*!*****************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@babel/runtime/helpers/extends.js ***!
-  \*****************************************************************************************/
+/*!****************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/extends.js ***!
+  \****************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -117,10 +248,231 @@ module.exports["default"] = module.exports, module.exports.__esModule = true;
 
 /***/ }),
 
+/***/ "../../../../node_modules/@babel/runtime/helpers/iterableToArray.js":
+/*!************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/iterableToArray.js ***!
+  \************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+
+module.exports = _iterableToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/iterableToArrayLimit.js ***!
+  \*****************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _iterableToArrayLimit(arr, i) {
+  var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
+
+  if (_i == null) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+
+  var _s, _e;
+
+  try {
+    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+module.exports = _iterableToArrayLimit;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/nonIterableRest.js":
+/*!************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/nonIterableRest.js ***!
+  \************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableRest;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/nonIterableSpread.js":
+/*!**************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/nonIterableSpread.js ***!
+  \**************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableSpread;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/objectWithoutProperties.js":
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/objectWithoutProperties.js ***!
+  \********************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var objectWithoutPropertiesLoose = __webpack_require__(/*! ./objectWithoutPropertiesLoose.js */ "../../../../node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js");
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+  var target = objectWithoutPropertiesLoose(source, excluded);
+  var key, i;
+
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+
+  return target;
+}
+
+module.exports = _objectWithoutProperties;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js":
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js ***!
+  \*************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+
+  return target;
+}
+
+module.exports = _objectWithoutPropertiesLoose;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/slicedToArray.js":
+/*!**********************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/slicedToArray.js ***!
+  \**********************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayWithHoles = __webpack_require__(/*! ./arrayWithHoles.js */ "../../../../node_modules/@babel/runtime/helpers/arrayWithHoles.js");
+
+var iterableToArrayLimit = __webpack_require__(/*! ./iterableToArrayLimit.js */ "../../../../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js");
+
+var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ "../../../../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js");
+
+var nonIterableRest = __webpack_require__(/*! ./nonIterableRest.js */ "../../../../node_modules/@babel/runtime/helpers/nonIterableRest.js");
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/toConsumableArray.js":
+/*!**************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/toConsumableArray.js ***!
+  \**************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayWithoutHoles = __webpack_require__(/*! ./arrayWithoutHoles.js */ "../../../../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js");
+
+var iterableToArray = __webpack_require__(/*! ./iterableToArray.js */ "../../../../node_modules/@babel/runtime/helpers/iterableToArray.js");
+
+var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ "../../../../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js");
+
+var nonIterableSpread = __webpack_require__(/*! ./nonIterableSpread.js */ "../../../../node_modules/@babel/runtime/helpers/nonIterableSpread.js");
+
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+
+module.exports = _toConsumableArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "../../../../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js ***!
+  \***********************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayLikeToArray = __webpack_require__(/*! ./arrayLikeToArray.js */ "../../../../node_modules/@babel/runtime/helpers/arrayLikeToArray.js");
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
 /***/ "../../../../node_modules/@wordpress/icons/build-module/icon/index.js":
-/*!***************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/icon/index.js ***!
-  \***************************************************************************************************/
+/*!**************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/icon/index.js ***!
+  \**************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -162,9 +514,9 @@ function Icon({
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/index.js":
-/*!**********************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/index.js ***!
-  \**********************************************************************************************/
+/*!*********************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/index.js ***!
+  \*********************************************************************************************************/
 /*! exports provided: Icon, addSubmenu, alignCenter, alignJustify, alignLeft, alignRight, archive, archiveTitle, arrowDown, arrowLeft, arrowRight, arrowUp, atSymbol, aspectRatio, audio, backup, blockDefault, blockTable, box, brush, button, buttons, calendar, cancelCircleFilled, capturePhoto, captureVideo, category, chartBar, check, chevronDown, chevronLeft, chevronRight, chevronUp, classic, close, closeSmall, cloudUpload, cloud, code, cog, column, columns, comment, cover, create, crop, currencyDollar, currencyEuro, currencyPound, customPostType, desktop, dragHandle, download, edit, external, file, flipHorizontal, flipVertical, formatBold, formatCapitalize, formatIndent, formatIndentRTL, formatItalic, formatListBullets, formatListBulletsRTL, formatListNumbered, formatListNumberedRTL, formatLtr, formatLowercase, formatOutdent, formatOutdentRTL, formatRtl, formatStrikethrough, formatUnderline, formatUppercase, fullscreen, gallery, globe, grid, group, handle, heading, help, inbox, institution, home, html, image, info, insertAfter, insertBefore, justifyLeft, justifyCenter, justifyRight, justifySpaceBetween, keyboardClose, keyboardReturn, layout, lifesaver, link, linkOff, list, listView, lock, login, loop, mapMarker, media, mediaAndText, megaphone, menu, minus, mobile, more, moreHorizontal, moreHorizontalMobile, moreVertical, moveTo, navigation, overlayText, pageBreak, customLink, page, pages, paragraph, payment, percent, positionCenter, positionLeft, positionRight, pencil, people, pin, plugins, plusCircleFilled, plusCircle, plus, postCategories, postContent, postComments, postCommentsCount, postCommentsForm, postDate, postExcerpt, postFeaturedImage, postList, postTitle, previous, next, preformatted, pullLeft, pullRight, pullquote, queryPagination, queryPaginationNext, queryPaginationNumbers, queryPaginationPrevious, quote, receipt, redo, replace, resizeCornerNE, reusableBlock, rotateLeft, rotateRight, rss, search, separator, settings, share, siteLogo, shortcode, stack, starEmpty, starFilled, starHalf, store, stretchFullWidth, shipping, stretchWide, subscript, superscript, swatch, tableColumnAfter, tableColumnBefore, tableColumnDelete, tableRowAfter, tableRowBefore, tableRowDelete, table, tag, termDescription, footer, header, sidebar, textColor, tablet, title, tool, trash, typography, undo, ungroup, update, upload, verse, video, warning, widget, wordpress */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1015,9 +1367,9 @@ __webpack_require__.r(__webpack_exports__);
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/add-submenu.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/add-submenu.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/add-submenu.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1045,9 +1397,9 @@ const addSubmenu = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/align-center.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/align-center.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/align-center.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1075,9 +1427,9 @@ const alignCenter = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/align-justify.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/align-justify.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/align-justify.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1105,9 +1457,9 @@ const alignJustify = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/align-left.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/align-left.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/align-left.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1135,9 +1487,9 @@ const alignLeft = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/align-right.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/align-right.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/align-right.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1165,9 +1517,9 @@ const alignRight = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/archive-title.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/archive-title.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/archive-title.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1200,9 +1552,9 @@ const archiveTitle = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/archive.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/archive.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/archive.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1230,9 +1582,9 @@ const archive = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/arrow-down.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/arrow-down.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/arrow-down.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1260,9 +1612,9 @@ const arrowDown = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/arrow-left.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/arrow-left.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/arrow-left.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1290,9 +1642,9 @@ const arrowLeft = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/arrow-right.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/arrow-right.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/arrow-right.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1320,9 +1672,9 @@ const arrowRight = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/arrow-up.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/arrow-up.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/arrow-up.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1350,9 +1702,9 @@ const arrowUp = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/aspect-ratio.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/aspect-ratio.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/aspect-ratio.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1380,9 +1732,9 @@ const aspectRatio = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/at-symbol.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/at-symbol.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/at-symbol.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1412,9 +1764,9 @@ const atSymbol = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/audio.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/audio.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/audio.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1442,9 +1794,9 @@ const audio = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/backup.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/backup.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/backup.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1472,9 +1824,9 @@ const backup = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/block-default.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/block-default.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/block-default.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1502,9 +1854,9 @@ const blockDefault = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/block-table.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/block-table.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/block-table.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1532,9 +1884,9 @@ const blockTable = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/box.js":
-/*!****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/box.js ***!
-  \****************************************************************************************************/
+/*!***************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/box.js ***!
+  \***************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1564,9 +1916,9 @@ const box = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElemen
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/brush.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/brush.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/brush.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1594,9 +1946,9 @@ const brush = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/button.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/button.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/button.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1624,9 +1976,9 @@ const button = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/buttons.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/buttons.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/buttons.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1654,9 +2006,9 @@ const buttons = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/calendar.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/calendar.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/calendar.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1684,9 +2036,9 @@ const calendar = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/cancel-circle-filled.js":
-/*!*********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/cancel-circle-filled.js ***!
-  \*********************************************************************************************************************/
+/*!********************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/cancel-circle-filled.js ***!
+  \********************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1714,9 +2066,9 @@ const cancelCircleFilled = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0_
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/capture-photo.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/capture-photo.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/capture-photo.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1744,9 +2096,9 @@ const capturePhoto = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/capture-video.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/capture-video.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/capture-video.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1774,9 +2126,9 @@ const captureVideo = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/category.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/category.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/category.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1806,9 +2158,9 @@ const category = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/chart-bar.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/chart-bar.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/chart-bar.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1838,9 +2190,9 @@ const chartBar = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/check.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/check.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/check.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1868,9 +2220,9 @@ const check = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/chevron-down.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/chevron-down.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/chevron-down.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1898,9 +2250,9 @@ const chevronDown = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/chevron-left.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/chevron-left.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/chevron-left.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1928,9 +2280,9 @@ const chevronLeft = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/chevron-right.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/chevron-right.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/chevron-right.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1958,9 +2310,9 @@ const chevronRight = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/chevron-up.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/chevron-up.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/chevron-up.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1988,9 +2340,9 @@ const chevronUp = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/classic.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/classic.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/classic.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2018,9 +2370,9 @@ const classic = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/close-small.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/close-small.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/close-small.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2048,9 +2400,9 @@ const closeSmall = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/close.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/close.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/close.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2078,9 +2430,9 @@ const close = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/cloud-upload.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/cloud-upload.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/cloud-upload.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2108,9 +2460,9 @@ const cloudUpload = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/cloud.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/cloud.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/cloud.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2138,9 +2490,9 @@ const cloud = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/code.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/code.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/code.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2168,9 +2520,9 @@ const code = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/cog.js":
-/*!****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/cog.js ***!
-  \****************************************************************************************************/
+/*!***************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/cog.js ***!
+  \***************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2200,9 +2552,9 @@ const cog = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElemen
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/column.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/column.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/column.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2230,9 +2582,9 @@ const column = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/columns.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/columns.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/columns.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2260,9 +2612,9 @@ const columns = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/comment.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/comment.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/comment.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2290,9 +2642,9 @@ const comment = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/cover.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/cover.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/cover.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2320,9 +2672,9 @@ const cover = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/create.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/create.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/create.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2350,9 +2702,9 @@ const create = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/crop.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/crop.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/crop.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2380,9 +2732,9 @@ const crop = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/currency-dollar.js":
-/*!****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/currency-dollar.js ***!
-  \****************************************************************************************************************/
+/*!***************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/currency-dollar.js ***!
+  \***************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2410,9 +2762,9 @@ const currencyDollar = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/currency-euro.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/currency-euro.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/currency-euro.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2440,9 +2792,9 @@ const currencyEuro = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/currency-pound.js":
-/*!***************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/currency-pound.js ***!
-  \***************************************************************************************************************/
+/*!**************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/currency-pound.js ***!
+  \**************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2471,9 +2823,9 @@ const currencyPound = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cr
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/custom-link.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/custom-link.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/custom-link.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2501,9 +2853,9 @@ const customLink = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/custom-post-type.js":
-/*!*****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/custom-post-type.js ***!
-  \*****************************************************************************************************************/
+/*!****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/custom-post-type.js ***!
+  \****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2531,9 +2883,9 @@ const customPostType = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/desktop.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/desktop.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/desktop.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2561,9 +2913,9 @@ const desktop = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/download.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/download.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/download.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2591,9 +2943,9 @@ const download = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/drag-handle.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/drag-handle.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/drag-handle.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2623,9 +2975,9 @@ const dragHandle = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/edit.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/edit.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/edit.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2642,9 +2994,9 @@ __webpack_require__.r(__webpack_exports__);
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/external.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/external.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/external.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2672,9 +3024,9 @@ const external = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/file.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/file.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/file.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2702,9 +3054,9 @@ const file = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/flip-horizontal.js":
-/*!****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/flip-horizontal.js ***!
-  \****************************************************************************************************************/
+/*!***************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/flip-horizontal.js ***!
+  \***************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2732,9 +3084,9 @@ const flipHorizontal = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/flip-vertical.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/flip-vertical.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/flip-vertical.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2762,9 +3114,9 @@ const flipVertical = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/footer.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/footer.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/footer.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2793,9 +3145,9 @@ const footer = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-bold.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-bold.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-bold.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2823,9 +3175,9 @@ const formatBold = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-capitalize.js":
-/*!******************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-capitalize.js ***!
-  \******************************************************************************************************************/
+/*!*****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-capitalize.js ***!
+  \*****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2853,9 +3205,9 @@ const formatCapitalize = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__[
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-indent-rtl.js":
-/*!******************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-indent-rtl.js ***!
-  \******************************************************************************************************************/
+/*!*****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-indent-rtl.js ***!
+  \*****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2883,9 +3235,9 @@ const formatIndentRTL = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-indent.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-indent.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-indent.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2913,9 +3265,9 @@ const formatIndent = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-italic.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-italic.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-italic.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2943,9 +3295,9 @@ const formatItalic = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-list-bullets-rtl.js":
-/*!************************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-list-bullets-rtl.js ***!
-  \************************************************************************************************************************/
+/*!***********************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-list-bullets-rtl.js ***!
+  \***********************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2973,9 +3325,9 @@ const formatListBulletsRTL = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-list-bullets.js":
-/*!********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-list-bullets.js ***!
-  \********************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-list-bullets.js ***!
+  \*******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3003,9 +3355,9 @@ const formatListBullets = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-list-numbered-rtl.js":
-/*!*************************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-list-numbered-rtl.js ***!
-  \*************************************************************************************************************************/
+/*!************************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-list-numbered-rtl.js ***!
+  \************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3033,9 +3385,9 @@ const formatListNumberedRTL = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-list-numbered.js":
-/*!*********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-list-numbered.js ***!
-  \*********************************************************************************************************************/
+/*!********************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-list-numbered.js ***!
+  \********************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3063,9 +3415,9 @@ const formatListNumbered = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0_
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-lowercase.js":
-/*!*****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-lowercase.js ***!
-  \*****************************************************************************************************************/
+/*!****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-lowercase.js ***!
+  \****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3093,9 +3445,9 @@ const formatLowercase = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-ltr.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-ltr.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-ltr.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3123,9 +3475,9 @@ const formatLtr = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-outdent-rtl.js":
-/*!*******************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-outdent-rtl.js ***!
-  \*******************************************************************************************************************/
+/*!******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-outdent-rtl.js ***!
+  \******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3153,9 +3505,9 @@ const formatOutdentRTL = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__[
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-outdent.js":
-/*!***************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-outdent.js ***!
-  \***************************************************************************************************************/
+/*!**************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-outdent.js ***!
+  \**************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3183,9 +3535,9 @@ const formatOutdent = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cr
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-rtl.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-rtl.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-rtl.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3213,9 +3565,9 @@ const formatRtl = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-strikethrough.js":
-/*!*********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-strikethrough.js ***!
-  \*********************************************************************************************************************/
+/*!********************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-strikethrough.js ***!
+  \********************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3243,9 +3595,9 @@ const formatStrikethrough = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-underline.js":
-/*!*****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-underline.js ***!
-  \*****************************************************************************************************************/
+/*!****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-underline.js ***!
+  \****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3273,9 +3625,9 @@ const formatUnderline = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/format-uppercase.js":
-/*!*****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-uppercase.js ***!
-  \*****************************************************************************************************************/
+/*!****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/format-uppercase.js ***!
+  \****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3303,9 +3655,9 @@ const formatUppercase = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/fullscreen.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/fullscreen.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/fullscreen.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3333,9 +3685,9 @@ const fullscreen = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/gallery.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/gallery.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/gallery.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: gallery, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3364,9 +3716,9 @@ const gallery = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/globe.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/globe.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/globe.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3394,9 +3746,9 @@ const globe = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/grid.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/grid.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/grid.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3426,9 +3778,9 @@ const grid = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/group.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/group.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/group.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3456,9 +3808,9 @@ const group = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/handle.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/handle.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/handle.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3486,9 +3838,9 @@ const handle = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/header.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/header.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/header.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3516,9 +3868,9 @@ const header = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/heading.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/heading.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/heading.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3546,9 +3898,9 @@ const heading = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/help.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/help.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/help.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3576,9 +3928,9 @@ const help = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/home.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/home.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/home.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3606,9 +3958,9 @@ const home = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/html.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/html.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/html.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3636,9 +3988,9 @@ const html = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/image.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/image.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/image.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3666,9 +4018,9 @@ const image = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/inbox.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/inbox.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/inbox.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3698,9 +4050,9 @@ const inbox = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/info.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/info.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/info.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3728,9 +4080,9 @@ const info = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/insert-after.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/insert-after.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/insert-after.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3758,9 +4110,9 @@ const insertAfter = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/insert-before.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/insert-before.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/insert-before.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3788,9 +4140,9 @@ const insertBefore = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/institution.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/institution.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/institution.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3820,9 +4172,9 @@ const institute = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/justify-center.js":
-/*!***************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/justify-center.js ***!
-  \***************************************************************************************************************/
+/*!**************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/justify-center.js ***!
+  \**************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3850,9 +4202,9 @@ const justifyCenter = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cr
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/justify-left.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/justify-left.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/justify-left.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3880,9 +4232,9 @@ const justifyLeft = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/justify-right.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/justify-right.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/justify-right.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3910,9 +4262,9 @@ const justifyRight = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/justify-space-between.js":
-/*!**********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/justify-space-between.js ***!
-  \**********************************************************************************************************************/
+/*!*********************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/justify-space-between.js ***!
+  \*********************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3940,9 +4292,9 @@ const justifySpaceBetween = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/keyboard-close.js":
-/*!***************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/keyboard-close.js ***!
-  \***************************************************************************************************************/
+/*!**************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/keyboard-close.js ***!
+  \**************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3970,9 +4322,9 @@ const keyboardClose = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cr
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/keyboard-return.js":
-/*!****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/keyboard-return.js ***!
-  \****************************************************************************************************************/
+/*!***************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/keyboard-return.js ***!
+  \***************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4000,9 +4352,9 @@ const keyboardReturn = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/layout.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/layout.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/layout.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4030,9 +4382,9 @@ const layout = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/lifesaver.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/lifesaver.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/lifesaver.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4062,9 +4414,9 @@ const lifesaver = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/link-off.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/link-off.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/link-off.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4092,9 +4444,9 @@ const linkOff = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/link.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/link.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/link.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4122,9 +4474,9 @@ const link = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/list-view.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/list-view.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/list-view.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4152,9 +4504,9 @@ const listView = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/list.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/list.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/list.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4182,9 +4534,9 @@ const list = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/lock.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/lock.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/lock.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4212,9 +4564,9 @@ const lock = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/login.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/login.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/login.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4242,9 +4594,9 @@ const login = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/loop.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/loop.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/loop.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4272,9 +4624,9 @@ const loop = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/map-marker.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/map-marker.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/map-marker.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4302,9 +4654,9 @@ const mapMarker = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/media-and-text.js":
-/*!***************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/media-and-text.js ***!
-  \***************************************************************************************************************/
+/*!**************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/media-and-text.js ***!
+  \**************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4332,9 +4684,9 @@ const mediaAndText = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/media.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/media.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/media.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4362,9 +4714,9 @@ const media = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/megaphone.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/megaphone.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/megaphone.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4394,9 +4746,9 @@ const megaphone = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/menu.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/menu.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/menu.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4424,9 +4776,9 @@ const menu = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/minus.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/minus.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/minus.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4454,9 +4806,9 @@ const minus = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/mobile.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/mobile.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/mobile.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4484,9 +4836,9 @@ const desktop = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/more-horizontal-mobile.js":
-/*!***********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/more-horizontal-mobile.js ***!
-  \***********************************************************************************************************************/
+/*!**********************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/more-horizontal-mobile.js ***!
+  \**********************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4518,9 +4870,9 @@ const moreHorizontalMobile = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/more-horizontal.js":
-/*!****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/more-horizontal.js ***!
-  \****************************************************************************************************************/
+/*!***************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/more-horizontal.js ***!
+  \***************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4548,9 +4900,9 @@ const moreHorizontal = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/more-vertical.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/more-vertical.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/more-vertical.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4578,9 +4930,9 @@ const moreVertical = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/more.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/more.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/more.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4608,9 +4960,9 @@ const more = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/move-to.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/move-to.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/move-to.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4638,9 +4990,9 @@ const moveTo = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/navigation.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/navigation.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/navigation.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4668,9 +5020,9 @@ const navigation = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/next.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/next.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/next.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4698,9 +5050,9 @@ const next = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/overlay-text.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/overlay-text.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/overlay-text.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4728,9 +5080,9 @@ const overlayText = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/page-break.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/page-break.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/page-break.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4758,9 +5110,9 @@ const pageBreak = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/page.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/page.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/page.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4788,9 +5140,9 @@ const page = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/pages.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/pages.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/pages.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4818,9 +5170,9 @@ const pages = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/paragraph.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/paragraph.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/paragraph.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4848,9 +5200,9 @@ const paragraph = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/payment.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/payment.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/payment.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4880,9 +5232,9 @@ const payment = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/pencil.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/pencil.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/pencil.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4910,9 +5262,9 @@ const pencil = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/people.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/people.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/people.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4940,9 +5292,9 @@ const people = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/percent.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/percent.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/percent.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4972,9 +5324,9 @@ const percent = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/pin.js":
-/*!****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/pin.js ***!
-  \****************************************************************************************************/
+/*!***************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/pin.js ***!
+  \***************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5002,9 +5354,9 @@ const pin = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElemen
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/plugins.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/plugins.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/plugins.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5032,9 +5384,9 @@ const plugins = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/plus-circle-filled.js":
-/*!*******************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/plus-circle-filled.js ***!
-  \*******************************************************************************************************************/
+/*!******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/plus-circle-filled.js ***!
+  \******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5062,9 +5414,9 @@ const plusCircleFilled = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__[
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/plus-circle.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/plus-circle.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/plus-circle.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5092,9 +5444,9 @@ const plusCircle = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/plus.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/plus.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/plus.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5122,9 +5474,9 @@ const plus = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/position-center.js":
-/*!****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/position-center.js ***!
-  \****************************************************************************************************************/
+/*!***************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/position-center.js ***!
+  \***************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5152,9 +5504,9 @@ const positionCenter = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/position-left.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/position-left.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/position-left.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5182,9 +5534,9 @@ const positionLeft = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/position-right.js":
-/*!***************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/position-right.js ***!
-  \***************************************************************************************************************/
+/*!**************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/position-right.js ***!
+  \**************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5212,9 +5564,9 @@ const positionRight = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cr
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-categories.js":
-/*!****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-categories.js ***!
-  \****************************************************************************************************************/
+/*!***************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-categories.js ***!
+  \***************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5244,9 +5596,9 @@ const postCategories = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-comments-count.js":
-/*!********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-comments-count.js ***!
-  \********************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-comments-count.js ***!
+  \*******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5274,9 +5626,9 @@ const postCommentsCount = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-comments-form.js":
-/*!*******************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-comments-form.js ***!
-  \*******************************************************************************************************************/
+/*!******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-comments-form.js ***!
+  \******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5304,9 +5656,9 @@ const postCommentsForm = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__[
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-comments.js":
-/*!**************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-comments.js ***!
-  \**************************************************************************************************************/
+/*!*************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-comments.js ***!
+  \*************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5334,9 +5686,9 @@ const postComments = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-content.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-content.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-content.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5364,9 +5716,9 @@ const postContent = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-date.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-date.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-date.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5396,9 +5748,9 @@ const postDate = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-excerpt.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-excerpt.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-excerpt.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5426,9 +5778,9 @@ const postExcerpt = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-featured-image.js":
-/*!********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-featured-image.js ***!
-  \********************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-featured-image.js ***!
+  \*******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5456,9 +5808,9 @@ const postFeaturedImage = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-list.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-list.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-list.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5486,9 +5838,9 @@ const postList = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/post-title.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-title.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/post-title.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5516,9 +5868,9 @@ const postTitle = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/preformatted.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/preformatted.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/preformatted.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5546,9 +5898,9 @@ const preformatted = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cre
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/previous.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/previous.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/previous.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5576,9 +5928,9 @@ const previous = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/pull-left.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/pull-left.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/pull-left.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5606,9 +5958,9 @@ const pullLeft = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/pull-right.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/pull-right.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/pull-right.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5636,9 +5988,9 @@ const pullRight = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/pullquote.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/pullquote.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/pullquote.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5666,9 +6018,9 @@ const pullquote = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/query-pagination-next.js":
-/*!**********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/query-pagination-next.js ***!
-  \**********************************************************************************************************************/
+/*!*********************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/query-pagination-next.js ***!
+  \*********************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5712,9 +6064,9 @@ const queryPaginationNext = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/query-pagination-numbers.js":
-/*!*************************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/query-pagination-numbers.js ***!
-  \*************************************************************************************************************************/
+/*!************************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/query-pagination-numbers.js ***!
+  \************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5753,9 +6105,9 @@ const queryPaginationNumbers = Object(_wordpress_element__WEBPACK_IMPORTED_MODUL
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/query-pagination-previous.js":
-/*!**************************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/query-pagination-previous.js ***!
-  \**************************************************************************************************************************/
+/*!*************************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/query-pagination-previous.js ***!
+  \*************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5801,9 +6153,9 @@ const queryPaginationPrevious = Object(_wordpress_element__WEBPACK_IMPORTED_MODU
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/query-pagination.js":
-/*!*****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/query-pagination.js ***!
-  \*****************************************************************************************************************/
+/*!****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/query-pagination.js ***!
+  \****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5850,9 +6202,9 @@ const queryPagination = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/quote.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/quote.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/quote.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5880,9 +6232,9 @@ const quote = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/receipt.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/receipt.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/receipt.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5912,9 +6264,9 @@ const receipt = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/redo.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/redo.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/redo.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5942,9 +6294,9 @@ const redo = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/replace.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/replace.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/replace.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5972,9 +6324,9 @@ const replace = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/resize-corner-n-e.js":
-/*!******************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/resize-corner-n-e.js ***!
-  \******************************************************************************************************************/
+/*!*****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/resize-corner-n-e.js ***!
+  \*****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6002,9 +6354,9 @@ const resizeCornerNE = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/reusable-block.js":
-/*!***************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/reusable-block.js ***!
-  \***************************************************************************************************************/
+/*!**************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/reusable-block.js ***!
+  \**************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6032,9 +6384,9 @@ const reusableBlock = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cr
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/rotate-left.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/rotate-left.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/rotate-left.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6062,9 +6414,9 @@ const rotateLeft = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/rotate-right.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/rotate-right.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/rotate-right.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6092,9 +6444,9 @@ const rotateRight = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/rss.js":
-/*!****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/rss.js ***!
-  \****************************************************************************************************/
+/*!***************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/rss.js ***!
+  \***************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6122,9 +6474,9 @@ const rss = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElemen
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/search.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/search.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/search.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6152,9 +6504,9 @@ const search = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/separator.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/separator.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/separator.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6182,9 +6534,9 @@ const separator = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/settings.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/settings.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/settings.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6212,9 +6564,9 @@ const settings = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/share.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/share.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/share.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6242,9 +6594,9 @@ const share = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/shipping.js":
-/*!*********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/shipping.js ***!
-  \*********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/shipping.js ***!
+  \********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6272,9 +6624,9 @@ const shipping = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/shortcode.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/shortcode.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/shortcode.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6302,9 +6654,9 @@ const shortcode = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/sidebar.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/sidebar.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/sidebar.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6332,9 +6684,9 @@ const sidebar = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/site-logo.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/site-logo.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/site-logo.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6362,9 +6714,9 @@ const siteLogo = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/stack.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/stack.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/stack.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6392,9 +6744,9 @@ const stack = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/star-empty.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/star-empty.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/star-empty.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6424,9 +6776,9 @@ const starEmpty = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/star-filled.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/star-filled.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/star-filled.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6454,9 +6806,9 @@ const starFilled = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/star-half.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/star-half.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/star-half.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6484,9 +6836,9 @@ const starHalf = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createE
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/store.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/store.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/store.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6516,9 +6868,9 @@ const store = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/stretch-full-width.js":
-/*!*******************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/stretch-full-width.js ***!
-  \*******************************************************************************************************************/
+/*!******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/stretch-full-width.js ***!
+  \******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6546,9 +6898,9 @@ const stretchFullWidth = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__[
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/stretch-wide.js":
-/*!*************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/stretch-wide.js ***!
-  \*************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/stretch-wide.js ***!
+  \************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6576,9 +6928,9 @@ const stretchWide = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/subscript.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/subscript.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/subscript.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6606,9 +6958,9 @@ const subscript = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/superscript.js":
-/*!************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/superscript.js ***!
-  \************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/superscript.js ***!
+  \***********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6636,9 +6988,9 @@ const superscript = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["crea
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/swatch.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/swatch.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/swatch.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6666,9 +7018,9 @@ const swatch = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/table-column-after.js":
-/*!*******************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-column-after.js ***!
-  \*******************************************************************************************************************/
+/*!******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-column-after.js ***!
+  \******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6696,9 +7048,9 @@ const tableColumnAfter = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__[
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/table-column-before.js":
-/*!********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-column-before.js ***!
-  \********************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-column-before.js ***!
+  \*******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6726,9 +7078,9 @@ const tableColumnBefore = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/table-column-delete.js":
-/*!********************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-column-delete.js ***!
-  \********************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-column-delete.js ***!
+  \*******************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6756,9 +7108,9 @@ const tableColumnDelete = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/table-row-after.js":
-/*!****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-row-after.js ***!
-  \****************************************************************************************************************/
+/*!***************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-row-after.js ***!
+  \***************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6786,9 +7138,9 @@ const tableRowAfter = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["cr
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/table-row-before.js":
-/*!*****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-row-before.js ***!
-  \*****************************************************************************************************************/
+/*!****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-row-before.js ***!
+  \****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6816,9 +7168,9 @@ const tableRowBefore = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/table-row-delete.js":
-/*!*****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-row-delete.js ***!
-  \*****************************************************************************************************************/
+/*!****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/table-row-delete.js ***!
+  \****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6846,9 +7198,9 @@ const tableRowDelete = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["c
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/table.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/table.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/table.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6876,9 +7228,9 @@ const table = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/tablet.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/tablet.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/tablet.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6906,9 +7258,9 @@ const tablet = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/tag.js":
-/*!****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/tag.js ***!
-  \****************************************************************************************************/
+/*!***************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/tag.js ***!
+  \***************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6936,9 +7288,9 @@ const tag = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElemen
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/term-description.js":
-/*!*****************************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/term-description.js ***!
-  \*****************************************************************************************************************/
+/*!****************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/term-description.js ***!
+  \****************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6971,9 +7323,9 @@ const tag = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElemen
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/text-color.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/text-color.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/text-color.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7001,9 +7353,9 @@ const textColor = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/title.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/title.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/title.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7031,9 +7383,9 @@ const title = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/tool.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/tool.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/tool.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7061,9 +7413,9 @@ const tool = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/trash.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/trash.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/trash.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7091,9 +7443,9 @@ const trash = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/typography.js":
-/*!***********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/typography.js ***!
-  \***********************************************************************************************************/
+/*!**********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/typography.js ***!
+  \**********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7121,9 +7473,9 @@ const typography = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["creat
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/undo.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/undo.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/undo.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7151,9 +7503,9 @@ const undo = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEleme
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/ungroup.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/ungroup.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/ungroup.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7181,9 +7533,9 @@ const ungroup = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/update.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/update.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/update.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7211,9 +7563,9 @@ const update = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/upload.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/upload.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/upload.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7241,9 +7593,9 @@ const upload = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/verse.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/verse.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/verse.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7271,9 +7623,9 @@ const verse = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/video.js":
-/*!******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/video.js ***!
-  \******************************************************************************************************/
+/*!*****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/video.js ***!
+  \*****************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7301,9 +7653,9 @@ const video = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElem
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/warning.js":
-/*!********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/warning.js ***!
-  \********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/warning.js ***!
+  \*******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7331,9 +7683,9 @@ const warning = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEl
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/widget.js":
-/*!*******************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/widget.js ***!
-  \*******************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/widget.js ***!
+  \******************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7361,9 +7713,9 @@ const widget = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createEle
 /***/ }),
 
 /***/ "../../../../node_modules/@wordpress/icons/build-module/library/wordpress.js":
-/*!**********************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/@wordpress/icons/build-module/library/wordpress.js ***!
-  \**********************************************************************************************************/
+/*!*********************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/@wordpress/icons/build-module/library/wordpress.js ***!
+  \*********************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -7391,9 +7743,9 @@ const wordpress = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 /***/ }),
 
 /***/ "../../../../node_modules/react-use-gesture/dist/reactusegesture.esm.js":
-/*!*****************************************************************************************************!*\
-  !*** /Users/corey/dev/pattern-directory/node_modules/react-use-gesture/dist/reactusegesture.esm.js ***!
-  \*****************************************************************************************************/
+/*!****************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/react-use-gesture/dist/reactusegesture.esm.js ***!
+  \****************************************************************************************************************/
 /*! exports provided: addV, rubberbandIfOutOfBounds, subV, useDrag, useGesture, useHover, useMove, usePinch, useScroll, useWheel */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -10366,18 +10718,21 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../hooks */ "./src/hooks/index.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
-/* harmony import */ var _messaging__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./messaging */ "./src/components/category-context-bar/messaging.js");
-/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../../../../node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../hooks */ "./src/hooks/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
+/* harmony import */ var _messaging__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./messaging */ "./src/components/category-context-bar/messaging.js");
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
+
 
 
 /**
@@ -10397,87 +10752,101 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function CategoryContextBar() {
-  const {
-    path
-  } = Object(_hooks__WEBPACK_IMPORTED_MODULE_4__["useRoute"])();
-  const [height, setHeight] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])(0);
-  const [message, setMessage] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])();
-  const [context] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])({
+  var _useRoute = Object(_hooks__WEBPACK_IMPORTED_MODULE_5__["useRoute"])(),
+      path = _useRoute.path;
+
+  var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(0),
+      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+      height = _useState2[0],
+      setHeight = _useState2[1];
+
+  var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(),
+      _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState3, 2),
+      message = _useState4[0],
+      setMessage = _useState4[1];
+
+  var _useState5 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])({
     title: '',
     links: []
-  });
-  const innerRef = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
-  const {
-    isAllCategory,
-    category,
-    isLoadingPatterns,
-    patterns
-  } = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_2__["useSelect"])(select => {
-    const {
-      getCategoryBySlug,
-      getPatternsByQuery,
-      isLoadingPatternsByQuery,
-      getCurrentQuery
-    } = select(_store__WEBPACK_IMPORTED_MODULE_7__["store"]);
-    const categorySlug = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getCategoryFromPath"])(path);
+  }),
+      _useState6 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState5, 1),
+      context = _useState6[0];
 
-    const _category = getCategoryBySlug(categorySlug);
+  var innerRef = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
 
-    const query = getCurrentQuery();
+  var _useSelect = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_3__["useSelect"])(function (select) {
+    var _select = select(_store__WEBPACK_IMPORTED_MODULE_8__["store"]),
+        getCategoryBySlug = _select.getCategoryBySlug,
+        getPatternsByQuery = _select.getPatternsByQuery,
+        isLoadingPatternsByQuery = _select.isLoadingPatternsByQuery,
+        getCurrentQuery = _select.getCurrentQuery;
+
+    var categorySlug = Object(_utils__WEBPACK_IMPORTED_MODULE_6__["getCategoryFromPath"])(path);
+
+    var _category = getCategoryBySlug(categorySlug);
+
+    var query = getCurrentQuery();
     return {
       isAllCategory: _category && _category.id === -1,
       isLoadingPatterns: isLoadingPatternsByQuery(query),
       patterns: query ? getPatternsByQuery(query) : [],
       category: _category
     };
-  }, [path]);
-  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(() => {
+  }, [path]),
+      isAllCategory = _useSelect.isAllCategory,
+      category = _useSelect.category,
+      isLoadingPatterns = _useSelect.isLoadingPatterns,
+      patterns = _useSelect.patterns;
+
+  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
     if (!category) {
       return;
     }
 
     if (isLoadingPatterns) {
-      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_6__["getLoadingMessage"])(category.name));
+      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_7__["getLoadingMessage"])(category.name));
       return;
     }
 
-    const searchTerm = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__["getQueryArg"])(path, 'search');
+    var searchTerm = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_4__["getQueryArg"])(path, 'search');
 
     if (searchTerm && !isAllCategory) {
-      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_6__["getDefaultSearchMessage"])(patterns.length, category.name, searchTerm));
+      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_7__["getDefaultSearchMessage"])(patterns.length, category.name, searchTerm));
     } else if (searchTerm && isAllCategory) {
-      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_6__["getAllSearchMessage"])(patterns.length, searchTerm));
+      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_7__["getAllSearchMessage"])(patterns.length, searchTerm));
     } else if (!isAllCategory) {
-      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_6__["getDefaultMessage"])(category.count || 0, category.name));
+      setMessage(Object(_messaging__WEBPACK_IMPORTED_MODULE_7__["getDefaultMessage"])(category.count || 0, category.name));
     } else {
       setMessage('');
     }
   }, [category, isLoadingPatterns, patterns]);
-  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(() => {
-    const _height = message ? innerRef.current.offsetHeight : 0;
+  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+    var _height = message ? innerRef.current.offsetHeight : 0;
 
     setHeight(_height);
   }, [message]);
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("header", {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("header", {
     className: "category-context-bar",
     style: {
-      height: `${height}px`
+      height: "".concat(height, "px")
     }
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     ref: innerRef
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h2", {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", {
     className: "category-context-bar__copy"
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("span", {
-    className: `category-context-bar__spinner ${!isLoadingPatterns ? 'category-context-bar__spinner--is-hidden' : ''}`
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["Spinner"], null)), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("span", null, message)), context.links && context.links.length > 0 && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("span", {
+    className: "category-context-bar__spinner ".concat(!isLoadingPatterns ? 'category-context-bar__spinner--is-hidden' : '')
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Spinner"], null)), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("span", null, message)), context.links && context.links.length > 0 && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     className: "category-context-bar__links"
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h3", {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h3", {
     className: "category-context-bar__title"
-  }, context.title), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("ul", null, context.links.map(i => Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", {
-    key: i.href
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("a", {
-    href: i.href
-  }, i.label)))))));
+  }, context.title), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("ul", null, context.links.map(function (i) {
+    return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("li", {
+      key: i.href
+    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+      href: i.href
+    }, i.label));
+  })))));
 }
 
 /* harmony default export */ __webpack_exports__["default"] = (CategoryContextBar);
@@ -10516,7 +10885,7 @@ __webpack_require__.r(__webpack_exports__);
  * @return {Object}
  */
 
-const getDefaultMessage = (count, categoryName) => {
+var getDefaultMessage = function getDefaultMessage(count, categoryName) {
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
   /* translators: %1$d: number of patterns. %2$s category name. */
   Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d <b>%2$s</b> pattern.', '%1$d <b>%2$s</b> patterns.', count, 'wporg-patterns'), count, categoryName, 'wporg-patterns'), {
@@ -10530,7 +10899,7 @@ const getDefaultMessage = (count, categoryName) => {
  * @return {Object}
  */
 
-const getLoadingMessage = categoryName => {
+var getLoadingMessage = function getLoadingMessage(categoryName) {
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
   /* translators: %1$d: number of patterns. %2$s category name. */
   Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Loading <b>%s</b> patterns.', 'wporg-patterns'), categoryName, 'wporg-patterns'), {
@@ -10546,7 +10915,7 @@ const getLoadingMessage = categoryName => {
  * @return {Object}
  */
 
-const getDefaultSearchMessage = (count, categoryName, searchTerm) => {
+var getDefaultSearchMessage = function getDefaultSearchMessage(count, categoryName, searchTerm) {
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
   /* translators: %1$d: number of patterns. %2$s category name. %3$s search term  */
   Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d <b>%2$s</b> pattern matching "<b>%3$s</b>".', '%1$d <b>%2$s</b> patterns matching "<b>%3$s</b>".', count, 'wporg-patterns'), count, categoryName, searchTerm, 'wporg-patterns'), {
@@ -10561,7 +10930,7 @@ const getDefaultSearchMessage = (count, categoryName, searchTerm) => {
  * @return {Object}
  */
 
-const getAllSearchMessage = (count, searchTerm) => {
+var getAllSearchMessage = function getAllSearchMessage(count, searchTerm) {
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(
   /* translators: %1$d: number of patterns. %2$s search term.  */
   Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_n"])('%1$d pattern matching "<b>%2$s</b>".', '%1$d patterns matching "<b>%2$s</b>".', count, 'wporg-patterns'), count, searchTerm, 'wporg-patterns'), {
@@ -11191,6 +11560,155 @@ const MobileMenu = ({
 
 /***/ }),
 
+/***/ "./src/components/my-patterns/index.js":
+/*!*********************************************!*\
+  !*** ./src/components/my-patterns/index.js ***!
+  \*********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_core_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/core-data */ "@wordpress/core-data");
+/* harmony import */ var _wordpress_core_data__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _menu__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./menu */ "./src/components/my-patterns/menu.js");
+/* harmony import */ var _pattern_grid__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../pattern-grid */ "./src/components/pattern-grid/index.js");
+/* harmony import */ var _query_monitor__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../query-monitor */ "./src/components/query-monitor/index.js");
+/* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../hooks */ "./src/hooks/index.js");
+
+
+/**
+ * WordPress dependencies
+ */
+
+
+
+
+
+/**
+ * Internal dependencies
+ */
+
+
+
+
+
+
+const MyPatterns = () => {
+  const query = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_5__["useSelect"])(select => select(_store__WEBPACK_IMPORTED_MODULE_4__["store"]).getCurrentQuery());
+  const author = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_5__["useSelect"])(select => {
+    var _select$getCurrentUse;
+
+    return (_select$getCurrentUse = select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_3__["store"]).getCurrentUser()) === null || _select$getCurrentUse === void 0 ? void 0 : _select$getCurrentUse.id;
+  });
+
+  if (!author) {
+    const loginUrl = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__["addQueryArgs"])(wporgLoginUrl, {
+      redirect_to: window.location
+    });
+    return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+      className: "entry-content"
+    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Please log in to view your patterns.', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("a", {
+      className: "button button-primary",
+      href: loginUrl
+    }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Log in', 'wporg-patterns')));
+  } // Show all patterns regardless of status, but if the current query has a status (the view is draft, for
+  // example), that will override `any`. Lastly, make sure this shows the current user's patterns.
+
+
+  const modifiedQuery = {
+    status: 'any',
+    ...query,
+    author: author
+  };
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_hooks__WEBPACK_IMPORTED_MODULE_9__["RouteProvider"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_query_monitor__WEBPACK_IMPORTED_MODULE_8__["default"], null), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_menu__WEBPACK_IMPORTED_MODULE_6__["default"], null), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_pattern_grid__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    query: modifiedQuery
+  }));
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (MyPatterns);
+
+/***/ }),
+
+/***/ "./src/components/my-patterns/menu.js":
+/*!********************************************!*\
+  !*** ./src/components/my-patterns/menu.js ***!
+  \********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _menu__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../menu */ "./src/components/menu/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
+/* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../hooks */ "./src/hooks/index.js");
+
+
+/**
+ * WordPress dependencies
+ */
+
+/**
+ * Internal dependencies
+ */
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = (function () {
+  const {
+    path,
+    update: updatePath
+  } = Object(_hooks__WEBPACK_IMPORTED_MODULE_4__["useRoute"])();
+  let view = Object(_utils__WEBPACK_IMPORTED_MODULE_3__["getValueFromPath"])(path, 'my-patterns');
+
+  if ('page' === view) {
+    view = 'all';
+  } // @todo Load from an API to get pattern counts.
+
+
+  const options = [{
+    value: `${wporgSiteUrl}/my-patterns/`,
+    slug: 'all',
+    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('All', 'wporg-patterns')
+  }, {
+    value: `${wporgSiteUrl}/my-patterns/draft/`,
+    slug: 'draft',
+    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Drafts', 'wporg-patterns')
+  }, {
+    value: `${wporgSiteUrl}/my-patterns/pending/`,
+    slug: 'pending',
+    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Pending Review', 'wporg-patterns')
+  }];
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("nav", {
+    className: "pattern-grid-menu"
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_menu__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Menu', 'wporg-patterns'),
+    current: view || 'all',
+    options: options,
+    onClick: event => {
+      event.preventDefault();
+      updatePath(event.target.pathname);
+    },
+    isLoading: false
+  }));
+});
+
+/***/ }),
+
 /***/ "./src/components/pattern-grid-menu/index.js":
 /*!***************************************************!*\
   !*** ./src/components/pattern-grid-menu/index.js ***!
@@ -11337,31 +11855,33 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-function PatternGrid({
-  query
-}) {
-  const {
-    isLoading,
-    posts,
-    totalPages
-  } = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_2__["useSelect"])(select => {
-    const {
-      getPatternTotalPagesByQuery,
-      getPatternsByQuery,
-      isLoadingPatternsByQuery
-    } = select(_store__WEBPACK_IMPORTED_MODULE_5__["store"]);
+function PatternGrid(_ref) {
+  var query = _ref.query;
+
+  var _useSelect = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_2__["useSelect"])(function (select) {
+    var _select = select(_store__WEBPACK_IMPORTED_MODULE_5__["store"]),
+        getPatternTotalPagesByQuery = _select.getPatternTotalPagesByQuery,
+        getPatternsByQuery = _select.getPatternsByQuery,
+        isLoadingPatternsByQuery = _select.isLoadingPatternsByQuery;
+
     return {
       isLoading: query && isLoadingPatternsByQuery(query),
       posts: query ? getPatternsByQuery(query) : [],
       totalPages: query ? getPatternTotalPagesByQuery(query) : 0
     };
-  });
+  }),
+      isLoading = _useSelect.isLoading,
+      posts = _useSelect.posts,
+      totalPages = _useSelect.totalPages;
+
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
     className: "pattern-grid"
-  }, isLoading ? Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["Spinner"], null) : posts.map(post => Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_pattern_thumbnail__WEBPACK_IMPORTED_MODULE_4__["default"], {
-    key: post.id,
-    pattern: post
-  }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_pagination__WEBPACK_IMPORTED_MODULE_3__["default"], {
+  }, isLoading ? Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["Spinner"], null) : posts.map(function (post) {
+    return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_pattern_thumbnail__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      key: post.id,
+      pattern: post
+    });
+  })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_pagination__WEBPACK_IMPORTED_MODULE_3__["default"], {
     totalPages: totalPages,
     currentPage: query === null || query === void 0 ? void 0 : query.page
   }));
@@ -11399,32 +11919,32 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-function Pagination({
-  currentPage = 1,
-  totalPages
-}) {
-  const {
-    path,
-    update: updatePath
-  } = Object(_hooks__WEBPACK_IMPORTED_MODULE_3__["useRoute"])();
+function Pagination(_ref) {
+  var _ref$currentPage = _ref.currentPage,
+      currentPage = _ref$currentPage === void 0 ? 1 : _ref$currentPage,
+      totalPages = _ref.totalPages;
+
+  var _useRoute = Object(_hooks__WEBPACK_IMPORTED_MODULE_3__["useRoute"])(),
+      path = _useRoute.path,
+      updatePath = _useRoute.update;
 
   if (!totalPages || totalPages <= 1) {
     return null;
   }
 
-  const hasPrevious = currentPage > 1;
-  const hasNext = currentPage < totalPages;
-  const basePath = path.replace(/page\/\d+\/?$/, '');
-  const pages = Object(_utils_get_pagination_list__WEBPACK_IMPORTED_MODULE_2__["default"])(totalPages, currentPage);
+  var hasPrevious = currentPage > 1;
+  var hasNext = currentPage < totalPages;
+  var basePath = path.replace(/page\/\d+\/?$/, '');
+  var pages = Object(_utils_get_pagination_list__WEBPACK_IMPORTED_MODULE_2__["default"])(totalPages, currentPage);
 
-  const onClick = (event, page) => {
+  var _onClick = function onClick(event, page) {
     event.preventDefault();
 
     if (page === 1) {
-      updatePath(`${basePath}`);
+      updatePath("".concat(basePath));
     }
 
-    updatePath(`${basePath}page/${page}/`);
+    updatePath("".concat(basePath, "page/").concat(page, "/"));
   };
 
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("nav", {
@@ -11436,17 +11956,19 @@ function Pagination({
     className: "pagination__item pagination__item-previous-page"
   }, hasPrevious && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("a", {
     className: "pagination__link",
-    href: `${basePath}page/${currentPage - 1}`,
-    onClick: event => onClick(event, currentPage - 1)
+    href: "".concat(basePath, "page/").concat(currentPage - 1),
+    onClick: function onClick(event) {
+      return _onClick(event, currentPage - 1);
+    }
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("span", {
     className: "screen-reader-text"
   }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Previous page', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("span", {
     "aria-hidden": true
-  }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_x"])('Previous', 'previous page link label', 'wporg-patterns')))), pages.map((page, index) => {
+  }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["_x"])('Previous', 'previous page link label', 'wporg-patterns')))), pages.map(function (page, index) {
     if ('…' === page) {
       return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", {
         className: "pagination__item",
-        key: `${index}-${page}`
+        key: "".concat(index, "-").concat(page)
       }, page);
     }
 
@@ -11455,9 +11977,11 @@ function Pagination({
       key: page
     }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("a", {
       className: "pagination__link",
-      href: `${basePath}page/${page}`,
+      href: "".concat(basePath, "page/").concat(page),
       "aria-current": page === currentPage ? 'page' : undefined,
-      onClick: event => onClick(event, page)
+      onClick: function onClick(event) {
+        return _onClick(event, page);
+      }
     }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("span", {
       className: "screen-reader-text"
     }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])( // translators: %s is the page number.
@@ -11468,8 +11992,10 @@ function Pagination({
     className: "pagination__item pagination__item-next-page"
   }, hasNext && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("a", {
     className: "pagination__link",
-    href: `${basePath}page/${currentPage + 1}`,
-    onClick: event => onClick(event, currentPage + 1)
+    href: "".concat(basePath, "page/").concat(currentPage + 1),
+    onClick: function onClick(event) {
+      return _onClick(event, currentPage + 1);
+    }
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("span", {
     className: "screen-reader-text"
   }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Next page', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("span", {
@@ -11503,43 +12029,46 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const CopyPasteImage = () => // Wrap the image to avoid the UI shift after the GIF loads
-Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-  style: {
-    height: '220px'
-  }
-}, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("img", {
-  src: `${wporgAssetUrl}/images/copy-paste-demo.gif`,
-  alt: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('GIF of copy and pasting.', 'wporg-patterns')
-}));
+var CopyPasteImage = function CopyPasteImage() {
+  return (// Wrap the image to avoid the UI shift after the GIF loads
+    Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+      style: {
+        height: '220px'
+      }
+    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("img", {
+      src: "".concat(wporgAssetUrl, "/images/copy-paste-demo.gif"),
+      alt: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('GIF of copy and pasting.', 'wporg-patterns')
+    }))
+  );
+};
 
-const CopyGuide = ({
-  onFinish
-}) => {
+var CopyGuide = function CopyGuide(_ref) {
+  var onFinish = _ref.onFinish;
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Animate"], {
     type: "appear",
     options: {
       origin: 'bottom'
     }
-  }, ({
-    className
-  }) => Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Guide"], {
-    className: `pattern-actions__guide ${className}`,
-    onFinish: onFinish,
-    finishButtonText: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Close', 'wporg-patterns'),
-    pages: [{
-      image: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(CopyPasteImage, null),
-      content: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        className: "pattern-actions__guide-content"
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h3", {
-        className: "pattern-actions__guide-title"
-      }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('How to use patterns on your WordPress site.', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Patterns are really just text. And, just like you can copy and paste text, you can copy and paste patterns. Its really easy!', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("ol", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Open any post or page in the WordPress block editor.', 'wporg-patterns'))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Place your cursor where you want to add the pattern.', 'wporg-patterns'))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Paste the contents of your clipboard by pressing both the <kbd>⌘</kbd> and <kbd>v</kbd> keys, or right-clicking and choose "Paste" from the menu.', 'wporg-patterns'), {
-        kbd: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("kbd", {
-          className: "pattern-actions__guide-shortcut"
-        })
-      })))))
-    }]
-  }));
+  }, function (_ref2) {
+    var className = _ref2.className;
+    return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Guide"], {
+      className: "pattern-actions__guide ".concat(className),
+      onFinish: onFinish,
+      finishButtonText: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Close', 'wporg-patterns'),
+      pages: [{
+        image: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(CopyPasteImage, null),
+        content: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+          className: "pattern-actions__guide-content"
+        }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h3", {
+          className: "pattern-actions__guide-title"
+        }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('How to use patterns on your WordPress site.', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Patterns are really just text. And, just like you can copy and paste text, you can copy and paste patterns. Its really easy!', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("ol", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Open any post or page in the WordPress block editor.', 'wporg-patterns'))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Place your cursor where you want to add the pattern.', 'wporg-patterns'))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createInterpolateElement"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Paste the contents of your clipboard by pressing both the <kbd>⌘</kbd> and <kbd>v</kbd> keys, or right-clicking and choose "Paste" from the menu.', 'wporg-patterns'), {
+          kbd: Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("kbd", {
+            className: "pattern-actions__guide-shortcut"
+          })
+        })))))
+      }]
+    });
+  });
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (CopyGuide);
@@ -11569,18 +12098,19 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const CopySuccessMessage = ({
-  onClick
-}) => Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Notice"], {
-  className: "pattern-actions__notice",
-  status: "success",
-  isDismissible: false,
-  actions: [{
-    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Learn More', 'wporg-patterns'),
-    onClick: onClick,
-    variant: 'secondary'
-  }]
-}, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("b", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Pattern copied!', 'wporg-patterns')), Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])(' Now you can paste it into any WordPress post or page.', 'wporg-patterns')));
+var CopySuccessMessage = function CopySuccessMessage(_ref) {
+  var onClick = _ref.onClick;
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Notice"], {
+    className: "pattern-actions__notice",
+    status: "success",
+    isDismissible: false,
+    actions: [{
+      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Learn More', 'wporg-patterns'),
+      onClick: onClick,
+      variant: 'secondary'
+    }]
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("b", null, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Pattern copied!', 'wporg-patterns')), Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])(' Now you can paste it into any WordPress post or page.', 'wporg-patterns')));
+};
 
 /* harmony default export */ __webpack_exports__["default"] = (CopySuccessMessage);
 
@@ -11595,12 +12125,15 @@ const CopySuccessMessage = ({
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _copy_pattern_button__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../copy-pattern-button */ "./src/components/copy-pattern-button/index.js");
-/* harmony import */ var _favorite_button__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../favorite-button */ "./src/components/favorite-button/index.js");
-/* harmony import */ var _copy_success_message__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./copy-success-message */ "./src/components/pattern-preview-actions/copy-success-message.js");
-/* harmony import */ var _copy_guide__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./copy-guide */ "./src/components/pattern-preview-actions/copy-guide.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../../../../node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _copy_pattern_button__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../copy-pattern-button */ "./src/components/copy-pattern-button/index.js");
+/* harmony import */ var _favorite_button__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../favorite-button */ "./src/components/favorite-button/index.js");
+/* harmony import */ var _copy_success_message__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./copy-success-message */ "./src/components/pattern-preview-actions/copy-success-message.js");
+/* harmony import */ var _copy_guide__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./copy-guide */ "./src/components/pattern-preview-actions/copy-guide.js");
+
 
 
 /**
@@ -11616,23 +12149,37 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const PatternPreviewActions = ({
-  postId
-}) => {
-  const [showSuccess, setShowSuccess] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])(false);
-  const [showGuide, setShowGuide] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])(false);
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+var PatternPreviewActions = function PatternPreviewActions(_ref) {
+  var postId = _ref.postId;
+
+  var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(false),
+      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+      showSuccess = _useState2[0],
+      setShowSuccess = _useState2[1];
+
+  var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(false),
+      _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState3, 2),
+      showGuide = _useState4[0],
+      setShowGuide = _useState4[1];
+
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     className: "pattern-actions"
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     className: "pattern-actions__container"
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_copy_pattern_button__WEBPACK_IMPORTED_MODULE_1__["default"], {
-    onSuccess: () => setShowSuccess(true)
-  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_favorite_button__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_copy_pattern_button__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    onSuccess: function onSuccess() {
+      return setShowSuccess(true);
+    }
+  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_favorite_button__WEBPACK_IMPORTED_MODULE_3__["default"], {
     patternId: postId
-  }), showSuccess && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_copy_success_message__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    onClick: () => setShowGuide(true)
-  }), showGuide && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_copy_guide__WEBPACK_IMPORTED_MODULE_4__["default"], {
-    onFinish: () => setShowGuide(false)
+  }), showSuccess && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_copy_success_message__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    onClick: function onClick() {
+      return setShowGuide(true);
+    }
+  }), showGuide && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_copy_guide__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    onFinish: function onFinish() {
+      return setShowGuide(false);
+    }
   })));
 };
 
@@ -11659,10 +12206,9 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
-function Canvas({
-  html
-}) {
-  const style = {
+function Canvas(_ref) {
+  var html = _ref.html;
+  var style = {
     width: '100%',
     height: '50vh',
     minHeight: '600px',
@@ -11694,11 +12240,14 @@ function Canvas({
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/extends */ "../../../../node_modules/@babel/runtime/helpers/extends.js");
 /* harmony import */ var _babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var react_use_gesture__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-use-gesture */ "../../../../node_modules/react-use-gesture/dist/reactusegesture.esm.js");
-/* harmony import */ var _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/keycodes */ "@wordpress/keycodes");
-/* harmony import */ var _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_keycodes__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/objectWithoutProperties */ "../../../../node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
+/* harmony import */ var _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var react_use_gesture__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-use-gesture */ "../../../../node_modules/react-use-gesture/dist/reactusegesture.esm.js");
+/* harmony import */ var _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/keycodes */ "@wordpress/keycodes");
+/* harmony import */ var _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_keycodes__WEBPACK_IMPORTED_MODULE_4__);
+
 
 
 
@@ -11712,39 +12261,37 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-function DragHandle({
-  label,
-  className,
-  onDragChange,
-  direction = 'left',
-  ...props
-}) {
-  const dragGestures = Object(react_use_gesture__WEBPACK_IMPORTED_MODULE_2__["useDrag"])(({
-    delta,
-    dragging
-  }) => {
-    const multiplier = direction === 'left' ? -2 : 2;
+function DragHandle(_ref) {
+  var label = _ref.label,
+      className = _ref.className,
+      onDragChange = _ref.onDragChange,
+      _ref$direction = _ref.direction,
+      direction = _ref$direction === void 0 ? 'left' : _ref$direction,
+      props = _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1___default()(_ref, ["label", "className", "onDragChange", "direction"]);
+
+  var dragGestures = Object(react_use_gesture__WEBPACK_IMPORTED_MODULE_3__["useDrag"])(function (_ref2) {
+    var delta = _ref2.delta,
+        dragging = _ref2.dragging;
+    var multiplier = direction === 'left' ? -2 : 2;
 
     if (dragging) {
       onDragChange(delta[0] * multiplier);
     }
   });
 
-  const onKeyDown = event => {
-    const {
-      keyCode
-    } = event;
+  var onKeyDown = function onKeyDown(event) {
+    var keyCode = event.keyCode;
 
-    if (direction === 'left' && keyCode === _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_3__["LEFT"] || direction === 'right' && keyCode === _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_3__["RIGHT"]) {
+    if (direction === 'left' && keyCode === _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_4__["LEFT"] || direction === 'right' && keyCode === _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_4__["RIGHT"]) {
       onDragChange(20);
-    } else if (direction === 'left' && keyCode === _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_3__["RIGHT"] || direction === 'right' && keyCode === _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_3__["LEFT"]) {
+    } else if (direction === 'left' && keyCode === _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_4__["RIGHT"] || direction === 'right' && keyCode === _wordpress_keycodes__WEBPACK_IMPORTED_MODULE_4__["LEFT"]) {
       onDragChange(-20);
     }
   };
 
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
-    className: `pattern-preview__drag-handle ${className}`
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("button", _babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0___default()({
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])("div", {
+    className: "pattern-preview__drag-handle ".concat(className)
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])("button", _babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0___default()({
     className: "pattern-preview__drag-handle-button",
     "aria-label": label
   }, props, {
@@ -11765,16 +12312,22 @@ function DragHandle({
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_compose__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/compose */ "@wordpress/compose");
-/* harmony import */ var _wordpress_compose__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_compose__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _canvas__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./canvas */ "./src/components/pattern-preview/canvas.js");
-/* harmony import */ var _drag_handle__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./drag-handle */ "./src/components/pattern-preview/drag-handle.js");
+/* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "../../../../node_modules/@babel/runtime/helpers/toConsumableArray.js");
+/* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../../../../node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_compose__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/compose */ "@wordpress/compose");
+/* harmony import */ var _wordpress_compose__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_compose__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _canvas__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./canvas */ "./src/components/pattern-preview/canvas.js");
+/* harmony import */ var _drag_handle__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./drag-handle */ "./src/components/pattern-preview/drag-handle.js");
+
+
 
 
 /**
@@ -11792,18 +12345,26 @@ __webpack_require__.r(__webpack_exports__);
 
 /* eslint-disable jsx-a11y/anchor-is-valid -- These are just placeholders. */
 
-const INITIAL_WIDTH = 960;
+var INITIAL_WIDTH = 960;
 
-function PatternPreview({
-  blockContent
-}) {
-  const showViewportControl = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_2__["useViewportMatch"])('mobile', '>=');
-  const showViewportControlDefault = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_2__["useViewportMatch"])('large', '>=');
-  const showViewportControlLarge = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_2__["useViewportMatch"])('wide', '>=');
-  const instanceId = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_2__["useInstanceId"])(PatternPreview);
-  const [width, setWidth] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])(window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH);
-  const onDragChange = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useCallback"])(delta => setWidth(value => value + delta), [setWidth]);
-  const availableWidths = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useMemo"])(() => {
+function PatternPreview(_ref) {
+  var blockContent = _ref.blockContent;
+  var showViewportControl = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_4__["useViewportMatch"])('mobile', '>=');
+  var showViewportControlDefault = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_4__["useViewportMatch"])('large', '>=');
+  var showViewportControlLarge = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_4__["useViewportMatch"])('wide', '>=');
+  var instanceId = Object(_wordpress_compose__WEBPACK_IMPORTED_MODULE_4__["useInstanceId"])(PatternPreview);
+
+  var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["useState"])(window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH),
+      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default()(_useState, 2),
+      width = _useState2[0],
+      setWidth = _useState2[1];
+
+  var onDragChange = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["useCallback"])(function (delta) {
+    return setWidth(function (value) {
+      return value + delta;
+    });
+  }, [setWidth]);
+  var availableWidths = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["useMemo"])(function () {
     // Less than 480 wide.
     if (!showViewportControl) {
       return [];
@@ -11840,54 +12401,58 @@ function PatternPreview({
 
 
     return [{
-      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Medium (480px)', 'wporg-patterns'),
+      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Medium (480px)', 'wporg-patterns'),
       value: 480
     }, {
-      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Narrow (320px)', 'wporg-patterns'),
+      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Narrow (320px)', 'wporg-patterns'),
       value: 320
     }];
   }, [showViewportControl, showViewportControlDefault, showViewportControlLarge]);
-  let currentOpt = false;
+  var currentOpt = false;
 
-  if (!availableWidths.some(opt => opt.value === width)) {
+  if (!availableWidths.some(function (opt) {
+    return opt.value === width;
+  })) {
     currentOpt = {
       /* translators: %s is the width in pixels, ex 600. */
-      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["sprintf"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Current (%spx)', 'wporg-patterns'), width),
+      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["sprintf"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Current (%spx)', 'wporg-patterns'), width),
       value: width
     };
   }
 
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])("div", {
     className: "pattern-preview__size-control"
-  }, showViewportControl && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["SelectControl"], {
+  }, showViewportControl && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__["SelectControl"], {
     hideLabelFromVision: true,
-    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Preview Width', 'wporg-patterns'),
+    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Preview Width', 'wporg-patterns'),
     value: width,
-    options: currentOpt ? [currentOpt, ...availableWidths] : availableWidths,
-    onChange: value => setWidth(Number(value))
-  })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+    options: currentOpt ? [currentOpt].concat(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0___default()(availableWidths)) : availableWidths,
+    onChange: function onChange(value) {
+      return setWidth(Number(value));
+    }
+  })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])("div", {
     className: "pattern-preview__viewport",
     style: {
       width: width + 40
     }
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_drag_handle__WEBPACK_IMPORTED_MODULE_5__["default"], {
-    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Drag to resize', 'wporg-patterns'),
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])(_drag_handle__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Drag to resize', 'wporg-patterns'),
     className: "is-left",
     onDragChange: onDragChange,
     direction: "left",
-    "aria-describedby": `pattern-preview__resize-help-${instanceId}`
-  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_canvas__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    "aria-describedby": "pattern-preview__resize-help-".concat(instanceId)
+  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])(_canvas__WEBPACK_IMPORTED_MODULE_6__["default"], {
     html: blockContent
-  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_drag_handle__WEBPACK_IMPORTED_MODULE_5__["default"], {
-    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Drag to resize', 'wporg-patterns'),
+  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])(_drag_handle__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Drag to resize', 'wporg-patterns'),
     className: "is-right",
     onDragChange: onDragChange,
     direction: "right",
-    "aria-describedby": `pattern-preview__resize-help-${instanceId}`
-  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["VisuallyHidden"], {
-    id: `pattern-preview__resize-help-${instanceId}`,
+    "aria-describedby": "pattern-preview__resize-help-".concat(instanceId)
+  }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__["VisuallyHidden"], {
+    id: "pattern-preview__resize-help-".concat(instanceId),
     className: "pattern-preview__resize-help"
-  }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('Use left and right arrow keys to resize the preview.', 'wporg-patterns'))));
+  }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Use left and right arrow keys to resize the preview.', 'wporg-patterns'))));
 }
 
 /* harmony default export */ __webpack_exports__["default"] = (PatternPreview);
@@ -11903,9 +12468,12 @@ function PatternPreview({
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _iframe__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../iframe */ "./src/components/iframe/index.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../../../../node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _iframe__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../iframe */ "./src/components/iframe/index.js");
+
 
 
 /**
@@ -11917,17 +12485,25 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
-const VIEWPORT_WIDTH = 800;
+var VIEWPORT_WIDTH = 800;
 
-function PatternThumbnail({
-  className,
-  html
-}) {
-  const wrapperRef = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
-  const [frameHeight, setFrameHeight] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])('100%');
-  const [frameScale, setFrameScale] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])(0.3125);
-  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(() => {
-    const handleOnResize = () => {
+function PatternThumbnail(_ref) {
+  var className = _ref.className,
+      html = _ref.html;
+  var wrapperRef = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useRef"])();
+
+  var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])('100%'),
+      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+      frameHeight = _useState2[0],
+      setFrameHeight = _useState2[1];
+
+  var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(0.3125),
+      _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState3, 2),
+      frameScale = _useState4[0],
+      setFrameScale = _useState4[1];
+
+  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+    var handleOnResize = function handleOnResize() {
       try {
         setFrameHeight(wrapperRef.current.clientWidth * 1);
         setFrameScale(wrapperRef.current.clientWidth / VIEWPORT_WIDTH);
@@ -11937,31 +12513,31 @@ function PatternThumbnail({
     handleOnResize(); // eslint-disable-next-line @wordpress/no-global-event-listener -- This is a global event.
 
     window.addEventListener('resize', handleOnResize);
-    return () => {
+    return function () {
       window.addEventListener('resize', handleOnResize); // eslint-disable-line @wordpress/no-global-event-listener -- See above.
     };
   }, []);
-  const style = {
+  var style = {
     border: 'none',
-    width: `${VIEWPORT_WIDTH}px`,
+    width: "".concat(VIEWPORT_WIDTH, "px"),
     maxWidth: 'none',
-    height: `${VIEWPORT_WIDTH}px`,
-    transform: `scale(${frameScale})`,
+    height: "".concat(VIEWPORT_WIDTH, "px"),
+    transform: "scale(".concat(frameScale, ")"),
     transformOrigin: 'top left',
     pointerEvents: 'none'
   };
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     className: className,
     ref: wrapperRef,
     style: {
       height: frameHeight
     },
     tabIndex: "-1"
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_iframe__WEBPACK_IMPORTED_MODULE_1__["default"], {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_iframe__WEBPACK_IMPORTED_MODULE_2__["default"], {
     className: "pattern-grid__preview-iframe",
     style: style,
     headHTML: window.__editorStyles.html
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     dangerouslySetInnerHTML: {
       __html: html
     }
@@ -12002,9 +12578,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-function PatternThumbnail({
-  pattern
-}) {
+function PatternThumbnail(_ref) {
+  var pattern = _ref.pattern;
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
     className: "pattern-grid__pattern"
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("a", {
@@ -12055,12 +12630,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const Pattern = ({
-  content,
-  postId,
-  userHasReported,
-  loggedIn
-}) => {
+var Pattern = function Pattern(_ref) {
+  var content = _ref.content,
+      postId = _ref.postId,
+      userHasReported = _ref.userHasReported,
+      loggedIn = _ref.loggedIn;
   // postId as passed from the HTML dataset is a string.
   postId = Number(postId) || 0;
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_pattern_preview_actions__WEBPACK_IMPORTED_MODULE_2__["default"], {
@@ -12114,8 +12688,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const Patterns = () => {
-  const query = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["useSelect"])(select => select(_store__WEBPACK_IMPORTED_MODULE_6__["store"]).getCurrentQuery());
+var Patterns = function Patterns() {
+  var query = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["useSelect"])(function (select) {
+    return select(_store__WEBPACK_IMPORTED_MODULE_6__["store"]).getCurrentQuery();
+  });
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_hooks__WEBPACK_IMPORTED_MODULE_5__["RouteProvider"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_query_monitor__WEBPACK_IMPORTED_MODULE_4__["default"], null), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_pattern_grid_menu__WEBPACK_IMPORTED_MODULE_3__["default"], null), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_pattern_grid__WEBPACK_IMPORTED_MODULE_2__["default"], {
     query: query
   }));
@@ -12165,31 +12741,39 @@ const QueryMonitor = () => {
     path
   } = Object(_hooks__WEBPACK_IMPORTED_MODULE_4__["useRoute"])();
   const query = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["useSelect"])(select => {
-    const {
-      getCategoryBySlug,
-      hasLoadedCategories
-    } = select(_store__WEBPACK_IMPORTED_MODULE_3__["store"]); // We need categories loaded before building the query
-
-    if (!hasLoadedCategories()) {
-      return;
-    }
+    let _query = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__["getQueryArgs"])(path);
 
     const categorySlug = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getCategoryFromPath"])(path);
-    const category = getCategoryBySlug(categorySlug); // Default to {} if empty
 
-    const queryStrings = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__["getQueryArgs"])(path);
-    let _query = queryStrings; // If we have a category and it's not the default category
+    if (categorySlug) {
+      const {
+        getCategoryBySlug,
+        hasLoadedCategories
+      } = select(_store__WEBPACK_IMPORTED_MODULE_3__["store"]);
 
-    if (category && category.id !== -1) {
-      _query = { ..._query,
-        'pattern-categories': category.id
-      };
+      if (!hasLoadedCategories()) {
+        return;
+      }
+
+      const category = getCategoryBySlug(categorySlug);
+
+      if (category && category.id !== -1) {
+        _query = { ..._query,
+          'pattern-categories': category.id
+        };
+      }
     }
 
     const page = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getPageFromPath"])(path);
 
     if (page > 1) {
       _query.page = page;
+    }
+
+    const myPatternStatus = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getValueFromPath"])(path, 'my-patterns');
+
+    if (myPatternStatus && 'page' !== myPatternStatus) {
+      _query.status = myPatternStatus;
     }
 
     return _query;
@@ -12295,21 +12879,24 @@ const ReportPatternButton = ({
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_a11y__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/a11y */ "@wordpress/a11y");
-/* harmony import */ var _wordpress_a11y__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_a11y__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
-/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../../../../node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_a11y__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/a11y */ "@wordpress/a11y");
+/* harmony import */ var _wordpress_a11y__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_a11y__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
+
 
 
 /**
@@ -12328,7 +12915,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const reducer = (state, action) => {
+var reducer = function reducer(state, action) {
   switch (action.status) {
     case 'submitting':
       return {
@@ -12351,29 +12938,40 @@ const reducer = (state, action) => {
   }
 };
 
-const ReportPatternModal = ({
-  postId,
-  onClose
-}) => {
-  const [state, dispatch] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useReducer"])(reducer, {});
-  const [selectedOption, setOption] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])('');
-  const [details, setDetails] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])('');
-  const container = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+var ReportPatternModal = function ReportPatternModal(_ref) {
+  var postId = _ref.postId,
+      onClose = _ref.onClose;
 
-  const submittedText = Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Your report has been submitted.', 'wporg-patterns');
+  var _useReducer = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useReducer"])(reducer, {}),
+      _useReducer2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useReducer, 2),
+      state = _useReducer2[0],
+      dispatch = _useReducer2[1];
 
-  const {
-    isLoading,
-    mappedReasons
-  } = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_4__["useSelect"])(select => {
-    const {
-      getPatternFlagReasons,
-      isLoadingPatternFlagReasons
-    } = select(_store__WEBPACK_IMPORTED_MODULE_7__["store"]);
-    const reasons = getPatternFlagReasons() || [];
+  var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(''),
+      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+      selectedOption = _useState2[0],
+      setOption = _useState2[1];
+
+  var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(''),
+      _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState3, 2),
+      details = _useState4[0],
+      setDetails = _useState4[1];
+
+  var container = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useRef"])();
+
+  var submittedText = Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Your report has been submitted.', 'wporg-patterns');
+
+  var _useSelect = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_5__["useSelect"])(function (select) {
+    var _select = select(_store__WEBPACK_IMPORTED_MODULE_8__["store"]),
+        getPatternFlagReasons = _select.getPatternFlagReasons,
+        isLoadingPatternFlagReasons = _select.isLoadingPatternFlagReasons;
+
+    var reasons = getPatternFlagReasons() || [];
     return {
       isLoading: isLoadingPatternFlagReasons(),
-      mappedReasons: reasons.sort((a, b) => a.id - b.id).map(i => {
+      mappedReasons: reasons.sort(function (a, b) {
+        return a.id - b.id;
+      }).map(function (i) {
         // We need to convert id to string to make the RadioControl match the selected item.
         return {
           label: i.name,
@@ -12381,9 +12979,11 @@ const ReportPatternModal = ({
         };
       })
     };
-  });
+  }),
+      isLoading = _useSelect.isLoading,
+      mappedReasons = _useSelect.mappedReasons;
 
-  const handleSubmit = event => {
+  var handleSubmit = function handleSubmit(event) {
     event.preventDefault();
 
     if (!selectedOption || !details.length || state.isSubmitted || state.isSubmitting) {
@@ -12393,79 +12993,79 @@ const ReportPatternModal = ({
     dispatch({
       status: 'submitting'
     });
-    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_5___default()({
-      path: Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_6__["addQueryArgs"])('/wp/v2/wporg-pattern-flag'),
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_6___default()({
+      path: Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_7__["addQueryArgs"])('/wp/v2/wporg-pattern-flag'),
       method: 'POST',
       data: {
         parent: postId,
         'wporg-pattern-flag-reason': selectedOption,
         excerpt: details
       }
-    }).then(() => {
+    }).then(function () {
       dispatch({
         status: 'submitted'
       });
-      Object(_wordpress_a11y__WEBPACK_IMPORTED_MODULE_1__["speak"])(submittedText);
+      Object(_wordpress_a11y__WEBPACK_IMPORTED_MODULE_2__["speak"])(submittedText);
       container.current.closest('[role="dialog"]').focus();
-    }).catch(err => {
+    }).catch(function (err) {
       dispatch({
         status: 'error',
         message: err.message
       });
-      Object(_wordpress_a11y__WEBPACK_IMPORTED_MODULE_1__["speak"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["sprintf"])(
+      Object(_wordpress_a11y__WEBPACK_IMPORTED_MODULE_2__["speak"])(Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["sprintf"])(
       /* translators: %s: Error message. */
-      Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Error: %s', 'wporg-patterns'), err.message));
+      Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Error: %s', 'wporg-patterns'), err.message));
     });
   };
 
-  const handleClose = () => {
+  var handleClose = function handleClose() {
     onClose(state.isSubmitted);
   };
 
-  const renderView = () => {
+  var renderView = function renderView() {
     if (isLoading) {
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["Spinner"], null);
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["Spinner"], null);
     }
 
     if (state.isSubmitted) {
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", {
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("p", {
         className: "pattern-report-modal__copy"
       }, submittedText);
     }
 
-    return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("form", {
+    return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("form", {
       onSubmit: handleSubmit
-    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["RadioControl"], {
+    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["RadioControl"], {
       className: "pattern-report-modal__radio",
-      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Please choose a reason:', 'wporg-patterns'),
+      label: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Please choose a reason:', 'wporg-patterns'),
       selected: selectedOption,
       options: mappedReasons,
       onChange: setOption,
       required: true
-    }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["TextareaControl"], {
+    }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["TextareaControl"], {
       label: "Please provide details (required)",
       value: details,
       onChange: setDetails,
       required: true
-    }), state.hasError && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+    }), state.hasError && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
       className: "notice notice-large notice-alt notice-error"
-    }, state.message), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+    }, state.message), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
       className: "pattern-report-modal__actions"
-    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["Button"], {
       isSecondary: true,
       onClick: handleClose
-    }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Cancel', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+    }, Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Cancel', 'wporg-patterns')), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["Button"], {
       type: "submit",
       isBusy: state.isSubmitting,
       isPrimary: true
-    }, state.isSubmitting ? Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Submitting …', 'wporg-patterns') : Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Report', 'wporg-patterns'))));
+    }, state.isSubmitting ? Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Submitting …', 'wporg-patterns') : Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Report', 'wporg-patterns'))));
   };
 
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__["Modal"], {
-    className: `pattern-report-modal ${!state.isSubmitted ? 'pattern-report-modal__has-fixed-height' : ''}`,
-    title: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('Report this pattern', 'wporg-patterns'),
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__["Modal"], {
+    className: "pattern-report-modal ".concat(!state.isSubmitted ? 'pattern-report-modal__has-fixed-height' : ''),
+    title: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__["__"])('Report this pattern', 'wporg-patterns'),
     onRequestClose: handleClose
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("div", {
     ref: container
   }, renderView()));
 };
@@ -12575,12 +13175,22 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RouteProvider", function() { return RouteProvider; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useRoute", function() { return useRoute; });
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/utils/index.js");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "../../../../node_modules/@babel/runtime/helpers/defineProperty.js");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../../../../node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utils */ "./src/utils/index.js");
 
+
+
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 /**
  * WordPress dependencies
@@ -12592,11 +13202,14 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
-const StateContext = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createContext"])();
-function RouteProvider({
-  children
-}) {
-  const [path, setPath] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useState"])(Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_1__["getPathAndQueryString"])(window.location.href));
+var StateContext = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createContext"])();
+function RouteProvider(_ref) {
+  var children = _ref.children;
+
+  var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["useState"])(Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__["getPathAndQueryString"])(window.location.href)),
+      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default()(_useState, 2),
+      path = _useState2[0],
+      setPath = _useState2[1];
   /**
    * Combines query strings from the current path and the new path for arguments with values.
    *
@@ -12604,14 +13217,15 @@ function RouteProvider({
    * @return {Object} Query strings as an object
    */
 
-  const mergeQueryStrings = newPath => {
-    const currentQueryStrings = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_1__["getQueryArgs"])(path);
-    const newQueryStrings = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_1__["getQueryArgs"])(newPath);
-    const combined = { ...currentQueryStrings,
-      ...newQueryStrings
-    }; // remove empty query strings
 
-    return Object(_utils__WEBPACK_IMPORTED_MODULE_2__["removeEmptyArgs"])(combined);
+  var mergeQueryStrings = function mergeQueryStrings(newPath) {
+    var currentQueryStrings = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__["getQueryArgs"])(path);
+    var newQueryStrings = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__["getQueryArgs"])(newPath);
+
+    var combined = _objectSpread(_objectSpread({}, currentQueryStrings), newQueryStrings); // remove empty query strings
+
+
+    return Object(_utils__WEBPACK_IMPORTED_MODULE_4__["removeEmptyArgs"])(combined);
   };
   /**
    * Combines the current and new path's query strings and updates the browser's url.
@@ -12620,13 +13234,13 @@ function RouteProvider({
    */
 
 
-  const _pushState = newPath => {
+  var _pushState = function _pushState(newPath) {
     // Merge the existing and new query strings.
-    const newQueryStrings = mergeQueryStrings(newPath); // Remove the query strings from the path
+    var newQueryStrings = mergeQueryStrings(newPath); // Remove the query strings from the path
 
-    const pathOnly = Object(_utils__WEBPACK_IMPORTED_MODULE_2__["removeQueryString"])(newPath); // Rebuild the full path
+    var pathOnly = Object(_utils__WEBPACK_IMPORTED_MODULE_4__["removeQueryString"])(newPath); // Rebuild the full path
 
-    const rebuiltPath = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_1__["addQueryArgs"])(pathOnly, newQueryStrings);
+    var rebuiltPath = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_3__["addQueryArgs"])(pathOnly, newQueryStrings);
 
     _replaceState(rebuiltPath);
   };
@@ -12637,12 +13251,12 @@ function RouteProvider({
    */
 
 
-  const _replaceState = newPath => {
+  var _replaceState = function _replaceState(newPath) {
     window.history.pushState('', '', newPath);
     setPath(newPath);
   };
 
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(StateContext.Provider, {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["createElement"])(StateContext.Provider, {
     value: {
       path: path,
       update: _pushState,
@@ -12651,7 +13265,7 @@ function RouteProvider({
   }, children);
 }
 function useRoute() {
-  const context = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useContext"])(StateContext);
+  var context = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__["useContext"])(StateContext);
 
   if (context === undefined) {
     throw new Error('useRoute must be used within a Provider');
@@ -12677,6 +13291,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _components_pattern__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/pattern */ "./src/components/pattern/index.js");
 /* harmony import */ var _components_patterns__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/patterns */ "./src/components/patterns/index.js");
+/* harmony import */ var _components_my_patterns__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/my-patterns */ "./src/components/my-patterns/index.js");
 
 
 
@@ -12689,27 +13304,39 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
+
  // Load the grid into the awaiting preview container.
 
-const gridContainer = document.getElementById('patterns__container');
+var gridContainer = document.getElementById('patterns__container');
 
 if (gridContainer) {
   Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["render"])(Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_patterns__WEBPACK_IMPORTED_MODULE_3__["default"], null), gridContainer);
 } // Load the preview into any awaiting preview container.
 
 
-const previewContainers = document.querySelectorAll('.pattern-preview__container');
+var myGridContainer = document.getElementById('my-patterns__container');
 
-for (let i = 0; i < previewContainers.length; i++) {
-  const container = previewContainers[i];
-  const blockContent = JSON.parse(decodeURIComponent(container.innerText));
-  const props = container.dataset;
+if (myGridContainer) {
+  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["render"])(Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_my_patterns__WEBPACK_IMPORTED_MODULE_4__["default"], null), myGridContainer);
+} // Load the preview into any awaiting preview container.
+
+
+var previewContainers = document.querySelectorAll('.pattern-preview__container');
+
+var _loop = function _loop(i) {
+  var container = previewContainers[i];
+  var blockContent = JSON.parse(decodeURIComponent(container.innerText));
+  var props = container.dataset;
   Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["render"])(Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_pattern__WEBPACK_IMPORTED_MODULE_2__["default"], _babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0___default()({}, props, {
     content: blockContent
-  })), container, () => {
+  })), container, function () {
     // This callback is called after the render to unhide the container.
     container.hidden = false;
   });
+};
+
+for (var i = 0; i < previewContainers.length; i++) {
+  _loop(i);
 }
 
 /***/ }),
@@ -12734,8 +13361,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "loadFavorites", function() { return loadFavorites; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addFavorite", function() { return addFavorite; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeFavorite", function() { return removeFavorite; });
-/* harmony import */ var _wordpress_data_controls__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/data-controls */ "@wordpress/data-controls");
-/* harmony import */ var _wordpress_data_controls__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "@babel/runtime/regenerator");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/data-controls */ "@wordpress/data-controls");
+/* harmony import */ var _wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__);
+
+
+var _marked = /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(addFavorite),
+    _marked2 = /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(removeFavorite);
+
 /**
  * WordPress dependencies
  */
@@ -12767,12 +13401,11 @@ function fetchPatterns(query) {
  * @return {Object} Action object.
  */
 
-function loadPatterns(query, {
-  page,
-  patterns,
-  total,
-  totalPages
-}) {
+function loadPatterns(query, _ref) {
+  var page = _ref.page,
+      patterns = _ref.patterns,
+      total = _ref.total,
+      totalPages = _ref.totalPages;
   return {
     type: 'LOAD_BLOCK_PATTERNS',
     query: query,
@@ -12793,10 +13426,9 @@ function loadPatterns(query, {
  * @return {Object} Action object.
  */
 
-function setErrorPatterns(query, {
-  page,
-  error
-}) {
+function setErrorPatterns(query, _ref2) {
+  var page = _ref2.page,
+      error = _ref2.error;
   return {
     type: 'ERROR_BLOCK_PATTERNS',
     query: query,
@@ -12887,21 +13519,40 @@ function loadFavorites(patternIds) {
  * @return {Object} Action object.
  */
 
-function* addFavorite(patternId) {
-  const success = yield Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_0__["apiFetch"])({
-    path: '/wporg/v1/pattern-favorites',
-    method: 'POST',
-    data: {
-      id: patternId
-    }
-  }); // Silently discarding any errors.
+function addFavorite(patternId) {
+  var success;
+  return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function addFavorite$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          _context.next = 2;
+          return Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__["apiFetch"])({
+            path: '/wporg/v1/pattern-favorites',
+            method: 'POST',
+            data: {
+              id: patternId
+            }
+          });
 
-  if (success === true) {
-    return {
-      type: 'ADD_FAVORITE',
-      patternId: patternId
-    };
-  }
+        case 2:
+          success = _context.sent;
+
+          if (!(success === true)) {
+            _context.next = 5;
+            break;
+          }
+
+          return _context.abrupt("return", {
+            type: 'ADD_FAVORITE',
+            patternId: patternId
+          });
+
+        case 5:
+        case "end":
+          return _context.stop();
+      }
+    }
+  }, _marked);
 }
 /**
  * Get the action object to unfavorite a pattern.
@@ -12911,21 +13562,40 @@ function* addFavorite(patternId) {
  * @return {Object} Action object.
  */
 
-function* removeFavorite(patternId) {
-  const success = yield Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_0__["apiFetch"])({
-    path: '/wporg/v1/pattern-favorites',
-    method: 'DELETE',
-    data: {
-      id: patternId
-    }
-  }); // Silently discarding any errors.
+function removeFavorite(patternId) {
+  var success;
+  return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function removeFavorite$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.next = 2;
+          return Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__["apiFetch"])({
+            path: '/wporg/v1/pattern-favorites',
+            method: 'DELETE',
+            data: {
+              id: patternId
+            }
+          });
 
-  if (success === true) {
-    return {
-      type: 'REMOVE_FAVORITE',
-      patternId: patternId
-    };
-  }
+        case 2:
+          success = _context2.sent;
+
+          if (!(success === true)) {
+            _context2.next = 5;
+            break;
+          }
+
+          return _context2.abrupt("return", {
+            type: 'REMOVE_FAVORITE',
+            patternId: patternId
+          });
+
+        case 5:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  }, _marked2);
 }
 
 /***/ }),
@@ -12965,7 +13635,7 @@ __webpack_require__.r(__webpack_exports__);
  * Module Constants
  */
 
-const STORE_NAME = 'wporg/pattern-directory';
+var STORE_NAME = 'wporg/pattern-directory';
 /**
  * Store definition for the block directory namespace.
  *
@@ -12974,7 +13644,7 @@ const STORE_NAME = 'wporg/pattern-directory';
  * @type {Object}
  */
 
-const store = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_0__["createReduxStore"])(STORE_NAME, {
+var store = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_0__["createReduxStore"])(STORE_NAME, {
   reducer: _reducer__WEBPACK_IMPORTED_MODULE_3__["default"],
   selectors: _selectors__WEBPACK_IMPORTED_MODULE_5__,
   actions: _actions__WEBPACK_IMPORTED_MODULE_2__,
@@ -13188,12 +13858,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCategories", function() { return getCategories; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPatternFlagReasons", function() { return getPatternFlagReasons; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getFavorites", function() { return getFavorites; });
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/data-controls */ "@wordpress/data-controls");
-/* harmony import */ var _wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./actions */ "./src/store/actions.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils */ "./src/store/utils.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "@babel/runtime/regenerator");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "../../../../node_modules/@babel/runtime/helpers/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/data-controls */ "@wordpress/data-controls");
+/* harmony import */ var _wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _actions__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./actions */ "./src/store/actions.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils */ "./src/store/utils.js");
+
+
+
+var _marked = /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(getPatternsByQuery),
+    _marked2 = /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(getCategories),
+    _marked3 = /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(getPatternFlagReasons),
+    _marked4 = /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(getFavorites);
+
 /**
  * WordPress dependencies
  */
@@ -13207,82 +13889,244 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-async function parseResponse(response) {
-  try {
+function parseResponse(_x) {
+  return _parseResponse.apply(this, arguments);
+}
+
+function _parseResponse() {
+  _parseResponse = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default()( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(response) {
     var _response$headers, _response$headers2;
 
-    return {
-      total: Number(((_response$headers = response.headers) === null || _response$headers === void 0 ? void 0 : _response$headers.get('X-WP-Total')) || 0),
-      totalPages: Number(((_response$headers2 = response.headers) === null || _response$headers2 === void 0 ? void 0 : _response$headers2.get('X-WP-TotalPages')) || 0),
-      results: await response.json()
-    };
-  } catch (error) {
-    return {};
-  }
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.prev = 0;
+            _context5.t0 = Number(((_response$headers = response.headers) === null || _response$headers === void 0 ? void 0 : _response$headers.get('X-WP-Total')) || 0);
+            _context5.t1 = Number(((_response$headers2 = response.headers) === null || _response$headers2 === void 0 ? void 0 : _response$headers2.get('X-WP-TotalPages')) || 0);
+            _context5.next = 5;
+            return response.json();
+
+          case 5:
+            _context5.t2 = _context5.sent;
+            return _context5.abrupt("return", {
+              total: _context5.t0,
+              totalPages: _context5.t1,
+              results: _context5.t2
+            });
+
+          case 9:
+            _context5.prev = 9;
+            _context5.t3 = _context5["catch"](0);
+            return _context5.abrupt("return", {});
+
+          case 12:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee, null, [[0, 9]]);
+  }));
+  return _parseResponse.apply(this, arguments);
 }
 
-async function parseError(response) {
-  try {
-    return await response.json();
-  } catch (error) {
-    return {};
-  }
+function parseError(_x2) {
+  return _parseError.apply(this, arguments);
 }
 
-function* getPatternsByQuery(query) {
-  const queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_3__["getQueryString"])(query);
+function _parseError() {
+  _parseError = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default()( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(response) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            _context6.prev = 0;
+            _context6.next = 3;
+            return response.json();
 
-  try {
-    yield Object(_actions__WEBPACK_IMPORTED_MODULE_2__["fetchPatterns"])(queryString);
-    const response = yield Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__["apiFetch"])({
-      path: Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_0__["addQueryArgs"])('/wp/v2/wporg-pattern', query),
-      parse: false
-    });
-    const {
-      total,
-      totalPages,
-      results
-    } = yield Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__["__unstableAwaitPromise"])(parseResponse(response));
-    yield Object(_actions__WEBPACK_IMPORTED_MODULE_2__["loadPatterns"])(queryString, {
-      page: query.page || 1,
-      patterns: results,
-      total: total,
-      totalPages: totalPages
-    });
-  } catch (error) {
-    const parsedError = yield Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__["__unstableAwaitPromise"])(parseError(error)); // @todo Do something with this error message.
+          case 3:
+            return _context6.abrupt("return", _context6.sent);
 
-    yield Object(_actions__WEBPACK_IMPORTED_MODULE_2__["setErrorPatterns"])(queryString, {
-      page: query.page || 1,
-      error: parsedError
-    });
-  }
+          case 6:
+            _context6.prev = 6;
+            _context6.t0 = _context6["catch"](0);
+            return _context6.abrupt("return", {});
+
+          case 9:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee2, null, [[0, 6]]);
+  }));
+  return _parseError.apply(this, arguments);
 }
-function* getCategories() {
-  try {
-    yield Object(_actions__WEBPACK_IMPORTED_MODULE_2__["fetchCategories"])();
-    const results = yield Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__["apiFetch"])({
-      path: Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_0__["addQueryArgs"])('/wp/v2/pattern-categories')
-    });
-    yield Object(_actions__WEBPACK_IMPORTED_MODULE_2__["loadCategories"])(results);
-  } catch (error) {}
+
+function getPatternsByQuery(query) {
+  var queryString, response, _yield$__unstableAwai, total, totalPages, results, parsedError;
+
+  return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function getPatternsByQuery$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getQueryString"])(query);
+          _context.prev = 1;
+          _context.next = 4;
+          return Object(_actions__WEBPACK_IMPORTED_MODULE_4__["fetchPatterns"])(queryString);
+
+        case 4:
+          _context.next = 6;
+          return Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3__["apiFetch"])({
+            path: Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__["addQueryArgs"])('/wp/v2/wporg-pattern', query),
+            parse: false
+          });
+
+        case 6:
+          response = _context.sent;
+          _context.next = 9;
+          return Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3__["__unstableAwaitPromise"])(parseResponse(response));
+
+        case 9:
+          _yield$__unstableAwai = _context.sent;
+          total = _yield$__unstableAwai.total;
+          totalPages = _yield$__unstableAwai.totalPages;
+          results = _yield$__unstableAwai.results;
+          _context.next = 15;
+          return Object(_actions__WEBPACK_IMPORTED_MODULE_4__["loadPatterns"])(queryString, {
+            page: query.page || 1,
+            patterns: results,
+            total: total,
+            totalPages: totalPages
+          });
+
+        case 15:
+          _context.next = 24;
+          break;
+
+        case 17:
+          _context.prev = 17;
+          _context.t0 = _context["catch"](1);
+          _context.next = 21;
+          return Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3__["__unstableAwaitPromise"])(parseError(_context.t0));
+
+        case 21:
+          parsedError = _context.sent;
+          _context.next = 24;
+          return Object(_actions__WEBPACK_IMPORTED_MODULE_4__["setErrorPatterns"])(queryString, {
+            page: query.page || 1,
+            error: parsedError
+          });
+
+        case 24:
+        case "end":
+          return _context.stop();
+      }
+    }
+  }, _marked, null, [[1, 17]]);
 }
-function* getPatternFlagReasons() {
-  try {
-    yield Object(_actions__WEBPACK_IMPORTED_MODULE_2__["fetchPatternFlagReasons"])();
-    const results = yield Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__["apiFetch"])({
-      path: Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_0__["addQueryArgs"])('/wp/v2/wporg-pattern-flag-reason')
-    });
-    yield Object(_actions__WEBPACK_IMPORTED_MODULE_2__["loadPatternFlagReasons"])(results);
-  } catch (error) {}
+function getCategories() {
+  var results;
+  return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function getCategories$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.prev = 0;
+          _context2.next = 3;
+          return Object(_actions__WEBPACK_IMPORTED_MODULE_4__["fetchCategories"])();
+
+        case 3:
+          _context2.next = 5;
+          return Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3__["apiFetch"])({
+            path: Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__["addQueryArgs"])('/wp/v2/pattern-categories')
+          });
+
+        case 5:
+          results = _context2.sent;
+          _context2.next = 8;
+          return Object(_actions__WEBPACK_IMPORTED_MODULE_4__["loadCategories"])(results);
+
+        case 8:
+          _context2.next = 12;
+          break;
+
+        case 10:
+          _context2.prev = 10;
+          _context2.t0 = _context2["catch"](0);
+
+        case 12:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  }, _marked2, null, [[0, 10]]);
 }
-function* getFavorites() {
-  try {
-    const results = yield Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_1__["apiFetch"])({
-      path: '/wporg/v1/pattern-favorites'
-    });
-    yield Object(_actions__WEBPACK_IMPORTED_MODULE_2__["loadFavorites"])(results);
-  } catch (error) {}
+function getPatternFlagReasons() {
+  var results;
+  return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function getPatternFlagReasons$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          _context3.next = 3;
+          return Object(_actions__WEBPACK_IMPORTED_MODULE_4__["fetchPatternFlagReasons"])();
+
+        case 3:
+          _context3.next = 5;
+          return Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3__["apiFetch"])({
+            path: Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__["addQueryArgs"])('/wp/v2/wporg-pattern-flag-reason')
+          });
+
+        case 5:
+          results = _context3.sent;
+          _context3.next = 8;
+          return Object(_actions__WEBPACK_IMPORTED_MODULE_4__["loadPatternFlagReasons"])(results);
+
+        case 8:
+          _context3.next = 12;
+          break;
+
+        case 10:
+          _context3.prev = 10;
+          _context3.t0 = _context3["catch"](0);
+
+        case 12:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  }, _marked3, null, [[0, 10]]);
+}
+function getFavorites() {
+  var results;
+  return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function getFavorites$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          _context4.prev = 0;
+          _context4.next = 3;
+          return Object(_wordpress_data_controls__WEBPACK_IMPORTED_MODULE_3__["apiFetch"])({
+            path: '/wporg/v1/pattern-favorites'
+          });
+
+        case 3:
+          results = _context4.sent;
+          _context4.next = 6;
+          return Object(_actions__WEBPACK_IMPORTED_MODULE_4__["loadFavorites"])(results);
+
+        case 6:
+          _context4.next = 10;
+          break;
+
+        case 8:
+          _context4.prev = 8;
+          _context4.t0 = _context4["catch"](0);
+
+        case 10:
+        case "end":
+          return _context4.stop();
+      }
+    }
+  }, _marked4, null, [[0, 8]]);
 }
 
 /***/ }),
@@ -13311,7 +14155,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isLoadingPatternFlagReasons", function() { return isLoadingPatternFlagReasons; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getFavorites", function() { return getFavorites; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFavorite", function() { return isFavorite; });
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./src/store/utils.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../../../../node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils */ "./src/store/utils.js");
+
+
 /**
  * Internal dependencies
  */
@@ -13328,8 +14176,8 @@ __webpack_require__.r(__webpack_exports__);
 function isLoadingPatternsByQuery(state, query) {
   var _state$patterns$queri, _state$patterns$queri2;
 
-  const queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["getQueryString"])(query);
-  const page = (query === null || query === void 0 ? void 0 : query.page) || 1;
+  var queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["getQueryString"])(query);
+  var page = (query === null || query === void 0 ? void 0 : query.page) || 1;
   return !Array.isArray((_state$patterns$queri = state.patterns.queries) === null || _state$patterns$queri === void 0 ? void 0 : (_state$patterns$queri2 = _state$patterns$queri[queryString]) === null || _state$patterns$queri2 === void 0 ? void 0 : _state$patterns$queri2[page]);
 }
 /**
@@ -13355,10 +14203,12 @@ function getPatterns(state) {
 function getPatternsByQuery(state, query) {
   var _state$patterns$queri3, _state$patterns$queri4;
 
-  const queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["getQueryString"])(query);
-  const page = (query === null || query === void 0 ? void 0 : query.page) || 1;
-  const patternIds = (_state$patterns$queri3 = state.patterns.queries) === null || _state$patterns$queri3 === void 0 ? void 0 : (_state$patterns$queri4 = _state$patterns$queri3[queryString]) === null || _state$patterns$queri4 === void 0 ? void 0 : _state$patterns$queri4[page];
-  return (patternIds || []).map(id => state.patterns.byId[id]);
+  var queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["getQueryString"])(query);
+  var page = (query === null || query === void 0 ? void 0 : query.page) || 1;
+  var patternIds = (_state$patterns$queri3 = state.patterns.queries) === null || _state$patterns$queri3 === void 0 ? void 0 : (_state$patterns$queri4 = _state$patterns$queri3[queryString]) === null || _state$patterns$queri4 === void 0 ? void 0 : _state$patterns$queri4[page];
+  return (patternIds || []).map(function (id) {
+    return state.patterns.byId[id];
+  });
 }
 /**
  * Get the count of all patterns for a given query.
@@ -13372,7 +14222,7 @@ function getPatternsByQuery(state, query) {
 function getPatternTotalsByQuery(state, query) {
   var _state$patterns$queri5, _state$patterns$queri6;
 
-  const queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["getQueryString"])(query);
+  var queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["getQueryString"])(query);
   return ((_state$patterns$queri5 = state.patterns.queries) === null || _state$patterns$queri5 === void 0 ? void 0 : (_state$patterns$queri6 = _state$patterns$queri5[queryString]) === null || _state$patterns$queri6 === void 0 ? void 0 : _state$patterns$queri6.total) || 0;
 }
 /**
@@ -13387,7 +14237,7 @@ function getPatternTotalsByQuery(state, query) {
 function getPatternTotalPagesByQuery(state, query) {
   var _state$patterns$queri7, _state$patterns$queri8;
 
-  const queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["getQueryString"])(query);
+  var queryString = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["getQueryString"])(query);
   return ((_state$patterns$queri7 = state.patterns.queries) === null || _state$patterns$queri7 === void 0 ? void 0 : (_state$patterns$queri8 = _state$patterns$queri7[queryString]) === null || _state$patterns$queri8 === void 0 ? void 0 : _state$patterns$queri8.totalPages) || 0;
 }
 /**
@@ -13460,7 +14310,12 @@ function getCategoryBySlug(state, slug) {
     return;
   }
 
-  const [cat] = state.categories.filter(i => i.slug === slug);
+  var _state$categories$fil = state.categories.filter(function (i) {
+    return i.slug === slug;
+  }),
+      _state$categories$fil2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_state$categories$fil, 1),
+      cat = _state$categories$fil2[0];
+
   return cat;
 }
 /**
@@ -13522,10 +14377,14 @@ function isFavorite(state, patternId) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getQueryString", function() { return getQueryString; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAllCategory", function() { return getAllCategory; });
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
-/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "../../../../node_modules/@babel/runtime/helpers/defineProperty.js");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
+/* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_url__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__);
+
+
 /**
  * WordPress dependencies
  */
@@ -13541,14 +14400,15 @@ __webpack_require__.r(__webpack_exports__);
  * @return {string} A string which can be used to key the patterns state.
  */
 
-function getQueryString(query = {}) {
+function getQueryString() {
+  var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   // Ensure stable key by sorting keys. Also more efficient for iterating.
-  const keys = Object.keys(query).sort();
-  let stableKey = '';
+  var keys = Object.keys(query).sort();
+  var stableKey = '';
 
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    let value = query[key];
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    var value = query[key];
 
     if (Array.isArray(value)) {
       value = query[key].join();
@@ -13562,9 +14422,7 @@ function getQueryString(query = {}) {
         break;
 
       default:
-        stableKey += (stableKey ? '&' : '') + Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_0__["addQueryArgs"])('', {
-          [key]: value
-        }).slice(1);
+        stableKey += (stableKey ? '&' : '') + Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_1__["addQueryArgs"])('', _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()({}, key, value)).slice(1);
     }
   }
 
@@ -13584,7 +14442,7 @@ function getAllCategory() {
     id: -1,
     slug: '',
     // Slug matches url
-    name: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["__"])('All', 'wporg-patterns'),
+    name: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__["__"])('All', 'wporg-patterns'),
     link: wporgSiteUrl
   };
 }
@@ -13607,8 +14465,8 @@ __webpack_require__.r(__webpack_exports__);
  * @param {string} stringToCopy A string that will be copied to the clipboard
  * @return {boolean} Whether the copy function succeeded
  */
-const copyToClipboard = stringToCopy => {
-  const element = document.createElement('textarea'); // We don't want the text area to be selected since it's temporary.
+var copyToClipboard = function copyToClipboard(stringToCopy) {
+  var element = document.createElement('textarea'); // We don't want the text area to be selected since it's temporary.
 
   element.setAttribute('readonly', ''); // We don't want screen readers to read the content since it's pattern markup
 
@@ -13619,7 +14477,7 @@ const copyToClipboard = stringToCopy => {
   element.value = stringToCopy;
   document.body.appendChild(element);
   element.select();
-  const success = document.execCommand('copy');
+  var success = document.execCommand('copy');
   document.body.removeChild(element);
   return success;
 };
@@ -13845,6 +14703,17 @@ const getCategoryFromPath = path => {
 const getPageFromPath = path => {
   return Number(getValueFromPath(path, 'page') || 1);
 };
+
+/***/ }),
+
+/***/ "@babel/runtime/regenerator":
+/*!*************************************!*\
+  !*** external "regeneratorRuntime" ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+(function() { module.exports = window["regeneratorRuntime"]; }());
 
 /***/ }),
 

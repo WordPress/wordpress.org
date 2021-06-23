@@ -1,0 +1,14 @@
+body.page.my-patterns {
+	.entry-header {
+		margin: 2rem auto 1rem;
+		max-width: 960px;
+		display: flex;
+		align-items: center;
+
+		.entry-title {
+			display: inline-block;
+			margin: 0 2rem 0 0;
+			line-height: 1.2;
+		}
+	}
+}

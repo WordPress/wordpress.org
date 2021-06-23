@@ -60,6 +60,7 @@
 		"extends": "../../../../.eslintrc.js",
 		"globals": {
 			"wporgAssetUrl": "readonly",
+			"wporgLoginUrl": "readonly",
 			"wporgSiteUrl": "readonly"
 		}
 	},
