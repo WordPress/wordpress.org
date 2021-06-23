@@ -21,17 +21,17 @@
        */
       function sendMessage (type, value) {
         if (window.parent !== window) {
-          const message = { debug: true, type, value }
+          const message = { debug: true, type, value };
 
-          console.log('Sending message to parent window:')
-          console.log(message)
+          console.log('Sending message to parent window:');
+          console.log(message);
 
           window.parent.postMessage(
               message,
               '*', // Bad practice, but we are not sending sensitive info
-          )
+          );
         } else {
-          console.log('No parent window, no message sent!')
+          console.log('No parent window, no message sent!');
         }
       }
 
@@ -39,32 +39,32 @@
         /* Resize events set the height of the `iframe` in which the page is
          rendered. */
         document.forms.resize.addEventListener('submit', (event) => {
-          event.preventDefault()
+          event.preventDefault();
 
-          const input = document.getElementById('height')
-          const height = parseInt(input.value)
+          const input = document.getElementById('height');
+          const height = parseInt(input.value);
 
-          sendMessage('resize', { height })
-        })
+          sendMessage('resize', { height });
+        });
 
         /* URL change events set the address bar URL when a navigation happens
          inside the page */
         document.forms.urlChange.addEventListener('submit', (event) => {
-          event.preventDefault()
+          event.preventDefault();
 
-          const pathInput = document.getElementById('pathInput')
-          const path = pathInput.value
+          const pathInput = document.getElementById('pathInput');
+          const path = pathInput.value;
 
-          const titleInput = document.getElementById('titleInput')
-          const title = titleInput.value
+          const titleInput = document.getElementById('titleInput');
+          const title = titleInput.value;
 
-          const message = { path }
+          const message = { path };
           if (title) {
-            message.title = title
+            message.title = title;
           }
-          sendMessage('urlChange', message)
-        })
-      })
+          sendMessage('urlChange', message);
+        });
+      });
     </script>
   </head>
   <body>
