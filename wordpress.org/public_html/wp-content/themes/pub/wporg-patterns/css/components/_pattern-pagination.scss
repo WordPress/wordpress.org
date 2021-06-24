@@ -1,6 +1,6 @@
 .pagination {
 	max-width: 960px;
-	margin: 1.5rem;
+	margin: 1.5rem 1.5rem 4rem;
 
 	@include breakpoint( $breakpoint-large ) {
 		margin-left: auto;

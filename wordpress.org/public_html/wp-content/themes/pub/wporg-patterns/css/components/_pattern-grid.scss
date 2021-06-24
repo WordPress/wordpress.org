@@ -1,15 +1,12 @@
 .pattern-grid {
+	display: grid;
+	margin: 1.5rem 1.5rem 4rem;
 	max-width: 960px;
-	margin: 1.5rem;
+	grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+	gap: 1.5rem;
 
-	@include breakpoint( $breakpoint-small ) {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-		gap: 1.5rem;
-
-		> * {
-			align-self: baseline;
-		}
+	> * {
+		align-self: baseline;
 	}
 
 	@include breakpoint( $breakpoint-large ) {
@@ -18,10 +15,11 @@
 	}
 }
 
-.pattern-grid__pattern {
+.pattern-grid__pattern-frame {
 	position: relative;
-	margin: 0 0 1.5rem;
-	border: 1px solid $color-gray-light-600;
+	margin: 0;
+	width: 100%;
+	box-shadow: 0 0 0 1px color(gray-2);
 	border-radius: 2px;
 	transition: all 0.075s ease-in-out;
 
@@ -34,6 +32,30 @@
 		overflow: hidden;
 	}
 
+	.pattern-grid__status {
+		position: absolute;
+		top: 0.375rem;
+		left: 0.375rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: 2px;
+		background: color(gray-40);
+		color: $color-white;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		line-height: 1;
+		text-transform: uppercase;
+		pointer-events: none;
+
+		&.is-pending {
+			background: color(yellow-20);
+			color: $color-black;
+		}
+
+		&.is-declined {
+			background: color(red-50);
+		}
+	}
+
 	.pattern-grid__actions {
 		position: absolute;
 		right: 0;
@@ -41,25 +63,11 @@
 		left: 0;
 		display: flex;
 		align-items: center;
+		justify-content: flex-end;
 		padding: 0.375rem;
-		background: rgba($color-white, 0.8);
-		backdrop-filter: blur(3px);
 		opacity: 0;
 		transform: translateY(6px);
-		transition: all 0.075s ease-in-out;
-
-		.pattern-grid__title {
-			flex-grow: 1;
-			margin: 0;
-			padding: 0 0.375rem 0 0.75rem;
-			font-size: 0.75rem;
-			pointer-events: none;
-		}
-
-		.pattern-favorite-button,
-		.pattern-copy-button {
-			flex-shrink: 0;
-		}
+		transition: transform 0.075s ease-in-out, opacity 0.075s ease-in-out;
 
 		.button + .components-button {
 			margin-left: 0.375rem;
@@ -73,4 +81,47 @@
 			transform: translateY(0);
 		}
 	}
+}
+
+.pattern-grid__title {
+	margin: 0.5rem 0;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: color(gray-90);
+
+	a {
+		color: currentColor;
+	}
+}
+
+.pattern-grid__meta {
+	margin: 0.5rem 0;
+	display: flex;
+	gap: 1em;
+	align-items: center;
+}
+
+.pattern-grid__author-avatar,
+.pattern-grid__favorite-count {
+	display: flex;
+	font-size: 0.875rem;
+	line-height: 1;
+	color: color(gray-90);
+	text-decoration: none;
+}
+
+.pattern-grid__author-avatar img {
+	margin-right: 0.5rem;
+	height: 1rem;
+	width: 1rem;
+	border-radius: 6px;
+}
+
+.pattern-grid__favorite-count svg {
+	margin-top: -1px;
+	margin-bottom: 1px;
+	margin-right: 0.25rem;
+	height: 1rem;
+	width: 1rem;
+	fill: color(gray-40);
 }

@@ -6,7 +6,6 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { store as coreStore } from '@wordpress/core-data';
 import { useCallback } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -14,11 +13,10 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import IconHeartOutline from '../icons/heart-outline';
 import IconHeartFilled from '../icons/heart-filled';
 import { store as patternStore } from '../../store';
 
-const FavoriteButton = ( { showLabel = true, patternId } ) => {
+const FavoriteButtonSmall = ( { className, label, patternId } ) => {
 	const { hasPermission, isFavorite } = useSelect( ( select ) => {
 		// Fetch favorites so that the state is synced.
 		select( patternStore ).getFavorites();
@@ -37,29 +35,21 @@ const FavoriteButton = ( { showLabel = true, patternId } ) => {
 		}
 	}, [ isFavorite ] );
 
-	if ( ! hasPermission ) {
-		return null;
-	}
-
-	const buttonClasses = classnames( 'button button-link pattern-favorite-button', {
+	const buttonClasses = classnames( className, 'button button-link pattern-favorite-button-small', {
 		'is-favorited': isFavorite,
-		'has-label': showLabel,
-	} );
-	const labelClasses = classnames( {
-		'screen-reader-text': ! showLabel,
 	} );
 
-	return (
+	return ! hasPermission ? (
+		<span className={ buttonClasses }>
+			<IconHeartFilled className="pattern-favorite-button__filled" />
+			<span>{ label }</span>
+		</span>
+	) : (
 		<button className={ buttonClasses } onClick={ onClick }>
 			<IconHeartFilled className="pattern-favorite-button__filled" />
-			<IconHeartOutline className="pattern-favorite-button__outline" />
-			<span className={ labelClasses }>
-				{ isFavorite
-					? __( 'Remove from favorites', 'wporg-patterns' )
-					: __( 'Add to favorites', 'wporg-patterns' ) }
-			</span>
+			<span>{ label }</span>
 		</button>
 	);
 };
 
-export default FavoriteButton;
+export default FavoriteButtonSmall;

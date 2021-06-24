@@ -4,7 +4,7 @@
 	height: 2.25rem;
 	width: 2.25rem;
 	border-radius: 2px;
-	color: $color__text;
+	color: color(gray-60);
 
 	svg {
 		position: absolute;
@@ -15,21 +15,27 @@
 		transition: all 0.15s ease-out;
 
 		path {
-			fill: $color-gray-300;
+			fill: color(gray-60);
 		}
 	}
 
-	.pattern__favorite-filled {
+	.pattern-favorite-button__filled {
 		opacity: 0;
 	}
 
 	&:hover {
-		color: $color__text;
+		color: color(gray-60);
 		background: transparent;
 
 		svg path {
-			fill: $color__text;
+			fill: color(gray-60);
 		}
+	}
+
+	&:focus {
+		box-shadow:
+			inset 0 0 0 1px #fff,
+			0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
 	}
 
 	&:active {
@@ -53,27 +59,60 @@
 		}
 	}
 
-	&.is-favorited {
-		svg path {
-			fill: $color-alert-red;
+	&:not(.has-label) {
+		background-color: $color-white;
+		box-shadow: 0 1px 2px rgba($color-black, 0.15);
+
+		&:hover {
+			background: color(gray-2);
 		}
 
-		.pattern__favorite-outline {
+		&:focus {
+			box-shadow:
+				inset 0 0 0 1px #fff,
+				0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
+		}
+	}
+
+	&.is-favorited {
+		svg path {
+			fill: color(red-40);
+		}
+
+		.pattern-favorite-button__outline {
 			opacity: 0;
 			transform: scale(2.8);
 		}
 
-		.pattern__favorite-filled {
+		.pattern-favorite-button__filled {
 			opacity: 1;
 		}
 
-		&:hover .pattern__favorite-filled {
+		&:hover .pattern-favorite-button__filled {
 			animation: 0.9s infinite HeartBeat;
 
 			@media (prefers-reduced-motion) {
 				animation: none;
 			}
 		}
+	}
+}
+
+.pattern-favorite-button-small {
+	height: auto;
+
+	&:hover {
+		background: transparent;
+	}
+
+	&:focus {
+		background: transparent;
+		outline: 1px dotted currentColor;
+		box-shadow: none;
+	}
+
+	&.is-favorited svg path {
+		fill: color(red-40);
 	}
 }
 

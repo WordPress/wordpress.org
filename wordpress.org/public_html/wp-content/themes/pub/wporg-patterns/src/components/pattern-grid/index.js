@@ -8,10 +8,9 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import Pagination from './pagination';
-import PatternThumbnail from '../pattern-thumbnail';
 import { store as patternStore } from '../../store';
 
-function PatternGrid( { query } ) {
+function PatternGrid( { query, children } ) {
 	const { isLoading, posts, totalPages } = useSelect( ( select ) => {
 		const { getPatternTotalPagesByQuery, getPatternsByQuery, isLoadingPatternsByQuery } = select(
 			patternStore
@@ -26,13 +25,7 @@ function PatternGrid( { query } ) {
 
 	return (
 		<>
-			<div className="pattern-grid">
-				{ isLoading ? (
-					<Spinner />
-				) : (
-					posts.map( ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> )
-				) }
-			</div>
+			<div className="pattern-grid">{ isLoading ? <Spinner /> : posts.map( children ) }</div>
 			<Pagination totalPages={ totalPages } currentPage={ query?.page } />
 		</>
 	);

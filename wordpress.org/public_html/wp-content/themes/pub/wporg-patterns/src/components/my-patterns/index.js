@@ -12,6 +12,7 @@ import { useSelect } from '@wordpress/data';
  */
 import Menu from './menu';
 import PatternGrid from '../pattern-grid';
+import PatternThumbnail from '../pattern-thumbnail';
 import QueryMonitor from '../query-monitor';
 import { RouteProvider } from '../../hooks';
 
@@ -38,7 +39,9 @@ const MyPatterns = () => {
 		<RouteProvider>
 			<QueryMonitor />
 			<Menu />
-			<PatternGrid query={ modifiedQuery } />
+			<PatternGrid query={ modifiedQuery }>
+				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
+			</PatternGrid>
 		</RouteProvider>
 	);
 };

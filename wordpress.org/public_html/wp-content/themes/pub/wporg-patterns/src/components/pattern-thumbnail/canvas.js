@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import Iframe from '../iframe';
 
 const VIEWPORT_WIDTH = 800;
+const ASPECT_RATIO = 2 / 3;
 
 function PatternThumbnail( { className, html } ) {
 	const wrapperRef = useRef();
@@ -18,7 +19,7 @@ function PatternThumbnail( { className, html } ) {
 	useEffect( () => {
 		const handleOnResize = () => {
 			try {
-				setFrameHeight( wrapperRef.current.clientWidth * 1 );
+				setFrameHeight( wrapperRef.current.clientWidth * ASPECT_RATIO );
 				setFrameScale( wrapperRef.current.clientWidth / VIEWPORT_WIDTH );
 			} catch ( err ) {}
 		};
@@ -37,7 +38,7 @@ function PatternThumbnail( { className, html } ) {
 		border: 'none',
 		width: `${ VIEWPORT_WIDTH }px`,
 		maxWidth: 'none',
-		height: `${ VIEWPORT_WIDTH }px`,
+		height: `${ VIEWPORT_WIDTH * ASPECT_RATIO }px`,
 		transform: `scale(${ frameScale })`,
 		transformOrigin: 'top left',
 		pointerEvents: 'none',
@@ -55,6 +56,7 @@ function PatternThumbnail( { className, html } ) {
 			<Iframe
 				className="pattern-grid__preview-iframe"
 				style={ style }
+				bodyStyle={ 'overflow: hidden;' }
 				headHTML={ window.__editorStyles.html }
 			>
 				<div

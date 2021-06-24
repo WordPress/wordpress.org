@@ -90,7 +90,10 @@ function setHead( doc, head ) {
 		'<style>body{margin:0}</style>' + head;
 }
 
-function Iframe( { contentRef, children, head, headHTML, themeSlug, ...props }, ref ) {
+function Iframe(
+	{ contentRef, children, head, headHTML, bodyStyle = '', themeSlug = 'twentynineteen', ...props },
+	ref
+) {
 	const [ iframeDocument, setIframeDocument ] = useState();
 
 	headHTML += `<style>
@@ -102,6 +105,7 @@ function Iframe( { contentRef, children, head, headHTML, themeSlug, ...props }, 
     }
     .${ BODY_CLASS_NAME } {
         padding: 0;
+        ${ bodyStyle }
     }
     body > div {
         width: 100%;
@@ -110,12 +114,7 @@ function Iframe( { contentRef, children, head, headHTML, themeSlug, ...props }, 
     }
     </style>`;
 
-	if ( themeSlug ) {
-		headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${ themeSlug }/style.css" media="all" />`;
-	} else {
-		headHTML +=
-			'<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css" media="all" />';
-	}
+	headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${ themeSlug }/style.css" media="all" />`;
 
 	const setRef = useCallback( ( node ) => {
 		if ( ! node ) {
