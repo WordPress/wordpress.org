@@ -131,8 +131,10 @@ class Hooks {
 		// Add a no-reply-to-email suggestion to topic subscription emails
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'bbp_subscription_mail_message'), 5, 3 );
 
-		// Break users sessions / passwords when they get blocked.
-		add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
+		if ( 'wordpress.org' === get_blog_details()->domain ) {
+			// Break users sessions / passwords when they get blocked, on the main forums only.
+			add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
+		}
 	}
 
 	/**
