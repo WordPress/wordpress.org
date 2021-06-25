@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>iframe Message exchange test</title>
+    <style>
+      .row:not(:first-of-type) {
+        margin-top: 1em;
+      }
+      label {
+        display: inline-block;
+        width: 5em;
+      }
+    </style>
+    <script>
+      /**
+       * Sends messages to the parent window.
+       *
+       * @param {string} type - the type of the message being sent to the parent
+       * @param {any} value - the data to send along with the message
+       */
+      function sendMessage (type, value) {
+        if (window.parent !== window) {
+          const message = { debug: true, type, value };
+
+          console.log('Sending message to parent window:');
+          console.log(message);
+
+          window.parent.postMessage(
+              message,
+              '*', // Bad practice, but we are not sending sensitive info
+          );
+        } else {
+          console.log('No parent window, no message sent!');
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        /* Resize events set the height of the `iframe` in which the page is
+         rendered. */
+        document.forms.resize.addEventListener('submit', (event) => {
+          event.preventDefault();
+
+          const input = document.getElementById('height');
+          const height = parseInt(input.value);
+
+          sendMessage('resize', { height });
+        });
+
+        /* URL change events set the address bar URL when a navigation happens
+         inside the page */
+        document.forms.urlChange.addEventListener('submit', (event) => {
+          event.preventDefault();
+
+          const pathInput = document.getElementById('pathInput');
+          const path = pathInput.value;
+
+          const titleInput = document.getElementById('titleInput');
+          const title = titleInput.value;
+
+          const message = { path };
+          if (title) {
+            message.title = title;
+          }
+          sendMessage('urlChange', message);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Message exchange</h1>
+
+    <h2>Test resize</h2>
+    <form name="resize">
+      <div class="row">
+        <label for="height">Height*:</label>
+        <input
+            id="height"
+            type="number"
+            placeholder="Height (px)"
+            required/>
+        <code>{number}</code>
+      </div>
+      <div class="row">
+        <button type="submit">
+          Send message
+        </button>
+      </div>
+    </form>
+
+    <h2>Test URL change</h2>
+    <form name="urlChange">
+      <div class="row">
+        <label for="pathInput">Path*:</label>
+        <input
+            id="pathInput"
+            type="text"
+            placeholder="Absolute path"
+            required/>
+        <code>{string}</code>
+      </div>
+      <div class="row">
+        <label for="titleInput">Title:</label>
+        <input
+            id="titleInput"
+            type="text"
+            placeholder="Title"/>
+        <code>{string?}</code>
+      </div>
+      <div class="row">
+        <button type="submit">
+          Send message
+        </button>
+      </div>
+    </form>
+  </body>
+</html>
