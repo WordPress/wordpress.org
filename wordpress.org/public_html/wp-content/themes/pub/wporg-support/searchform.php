@@ -37,7 +37,7 @@ namespace WordPressdotorg\Forums;
 		} elseif ( is_search() || bbp_is_search() ) {
 			if ( !empty( $_GET['tab'] ) ) {
 				$tab     = $_GET['tab'];
-				$project = $_GET[ $_GET['tab'] ];
+				$project = $_GET[ $_GET['tab'] ] ?? '';
 			}
 		}
 	?>
