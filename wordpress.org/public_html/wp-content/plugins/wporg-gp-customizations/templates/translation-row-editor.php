@@ -238,22 +238,22 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 				<div class="panel-content">
 					<div class="meta">
 
-						<?php if ( $translation->translation_status ): ?>
+						<?php if ( $translation->translation_status && ( $can_approve_translation || $can_reject_self ) ): ?>
 							<div class="status-actions">
-							<?php if ( $can_approve_translation ) : ?>
-								<?php if ( 'current' !== $translation->translation_status ) : ?>
-									<button class="approve" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>"><strong>+</strong> <?php _e( 'Approve', 'glotpress' ); ?></button>
-								<?php endif; ?>
-								<?php if ( 'rejected' !== $translation->translation_status ) : ?>
-									<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject', 'glotpress' ); ?></button>
-								<?php endif; ?>
-								<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
+								<?php if ( $can_approve_translation ) : ?>
+									<?php if ( 'current' !== $translation->translation_status ) : ?>
+										<button class="approve" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>"><strong>+</strong> <?php _e( 'Approve', 'glotpress' ); ?></button>
+									<?php endif; ?>
+									<?php if ( 'rejected' !== $translation->translation_status ) : ?>
+										<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject', 'glotpress' ); ?></button>
+									<?php endif; ?>
+									<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
+										<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
+									<?php endif; ?>
+								<?php elseif ( $can_reject_self ): ?>
+									<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject Suggestion', 'glotpress' ); ?></button>
 									<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
 								<?php endif; ?>
-							<?php elseif ( $can_reject_self ): ?>
-								<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject Suggestion', 'glotpress' ); ?></button>
-								<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
-							<?php endif; ?>
 							</div>
 						<?php endif; ?>
 
