@@ -14,10 +14,10 @@ $post_id = get_the_ID();
 if ( comments_open() ) :
 	if ( filter_input( INPUT_GET, 'feedback_submitted' ) ) : ?>
 		<h2 id="reply-title" class="comment-reply-title">
-			<?php esc_html_e( 'Thank you for your feedback', 'wporg-support' ); ?>
+			<?php esc_html_e( 'Thank you for your feedback', 'wporg-forums' ); ?>
 		</h2>
 		<p>
-			<?php esc_html_e( 'We will review it as quickly as possible.', 'wporg-support' ); ?>
+			<?php esc_html_e( 'We will review it as quickly as possible.', 'wporg-forums' ); ?>
 		</p>
 	<?php else :
 	comment_form(
