@@ -264,10 +264,16 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 							</dd>
 						</dl>
 
-						<?php if ( $translation->translation_added && $translation->translation_added != '0000-00-00 00:00:00' ): ?>
+						<?php if ( $translation->translation_added && $translation->translation_added !== '0000-00-00 00:00:00' ): ?>
 							<dl>
-								<dt><?php _e( 'Date added:', 'glotpress' ); ?></dt>
-								<dd><?php echo $translation->translation_added; ?> GMT</dd>
+								<dt><?php _e( 'Added:', 'glotpress' ); ?></dt>
+								<dd><?php echo $translation->translation_added; ?> UTC</dd>
+							</dl>
+						<?php endif; ?>
+						<?php if ( $translation->date_modified && $translation->date_modified !== '0000-00-00 00:00:00' && $translation->date_modified !== $translation->translation_added ): ?>
+							<dl>
+								<dt><?php _e( 'Last modified:', 'glotpress' ); ?></dt>
+								<dd><?php echo $translation->date_modified; ?> UTC</dd>
 							</dl>
 						<?php endif; ?>
 						<?php if ( $translation->user ) : ?>

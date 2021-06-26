@@ -2372,6 +2372,10 @@ table.translations td.translation span.missing {
 	display: none;
 }
 
+.editor-panel .meta dt {
+	margin-right: .25em;
+}
+
 .editor-panel .meta {
 	float: none;
 	width: 100%;
@@ -2440,7 +2444,7 @@ table.translations tr.editor td {
 }
 
 .editor-panel__right {
-	flex: 0 0 20rem;
+	flex: 0 0 21rem;
 	min-width: 1%;
 }
 
