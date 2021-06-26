@@ -243,6 +243,13 @@ class Translation_Sync {
 			}
 
 			if ( $existing_translation === $new_translation ) {
+				// Translations are only synced if they have no warnings.
+				// If the existing translation still has warnings discard them automatically.
+				if ( $_existing_translation->warnings ) {
+					$_existing_translation->warnings = null;
+					$_existing_translation->save();
+				}
+
 				$_existing_translation->set_as_current();
 				gp_clean_translation_set_cache( $new_translation_set->id );
 
@@ -250,6 +257,7 @@ class Translation_Sync {
 			}
 		}
 
+		// Create a new translation.
 		$copy = new GP_Translation( $translation->fields() );
 		$copy->original_id = $new_original->id;
 		$copy->translation_set_id = $new_translation_set->id;
