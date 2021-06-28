@@ -12866,52 +12866,60 @@ __webpack_require__.r(__webpack_exports__);
 
 const QueryMonitor = () => {
   const {
+    setCurrentQuery
+  } = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["useDispatch"])(_store__WEBPACK_IMPORTED_MODULE_3__["store"]);
+  const {
     path
   } = Object(_hooks__WEBPACK_IMPORTED_MODULE_4__["useRoute"])();
-  const query = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["useSelect"])(select => {
-    let _query = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__["getQueryArgs"])(path);
-
-    const categorySlug = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getCategoryFromPath"])(path);
-
+  let queryReady = true;
+  const query = Object(_wordpress_url__WEBPACK_IMPORTED_MODULE_2__["getQueryArgs"])(path);
+  const categorySlug = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getCategoryFromPath"])(path);
+  const categoryId = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["useSelect"])(select => {
     if (categorySlug) {
+      // Don't let the query be set until we have the categories.
+      queryReady = false;
       const {
         getCategoryBySlug,
         hasLoadedCategories
       } = select(_store__WEBPACK_IMPORTED_MODULE_3__["store"]);
 
-      if (!hasLoadedCategories()) {
-        return;
-      }
-
-      const category = getCategoryBySlug(categorySlug);
-
-      if (category && category.id !== -1) {
-        _query = { ..._query,
-          'pattern-categories': category.id
-        };
+      if (hasLoadedCategories()) {
+        queryReady = true;
+        const categoryObj = getCategoryBySlug(categorySlug);
+        return (categoryObj === null || categoryObj === void 0 ? void 0 : categoryObj.id) || false;
       }
     }
 
-    const page = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getPageFromPath"])(path);
+    return false;
+  }, [categorySlug]);
 
-    if (page > 1) {
-      _query.page = page;
-    }
+  if (categoryId) {
+    query['pattern-categories'] = categoryId;
+  }
 
-    const myPatternStatus = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getValueFromPath"])(path, 'my-patterns');
+  const author = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getValueFromPath"])(path, 'author');
 
-    if (myPatternStatus && 'page' !== myPatternStatus) {
-      _query.status = myPatternStatus;
-    }
+  if (author) {
+    query.author_name = author;
+  }
 
-    return _query;
-  }, [path]);
-  const {
-    setCurrentQuery
-  } = Object(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__["useDispatch"])(_store__WEBPACK_IMPORTED_MODULE_3__["store"]);
+  const page = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getPageFromPath"])(path);
+
+  if (page > 1) {
+    query.page = page;
+  }
+
+  const myPatternStatus = Object(_utils__WEBPACK_IMPORTED_MODULE_5__["getValueFromPath"])(path, 'my-patterns');
+
+  if (myPatternStatus && 'page' !== myPatternStatus) {
+    query.status = myPatternStatus;
+  }
+
   Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(() => {
-    setCurrentQuery(query);
-  }, [query]);
+    if (queryReady) {
+      setCurrentQuery(query);
+    }
+  }, [query, queryReady]);
   return null;
 };
 

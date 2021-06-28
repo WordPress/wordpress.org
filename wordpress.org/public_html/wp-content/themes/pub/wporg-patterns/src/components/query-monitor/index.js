@@ -16,48 +16,53 @@ import { getCategoryFromPath, getPageFromPath, getValueFromPath } from '../../ut
  * Listens for changes to the path and reconstructs the query object based on the path
  */
 const QueryMonitor = () => {
+	const { setCurrentQuery } = useDispatch( patternStore );
 	const { path } = useRoute();
 
-	const query = useSelect(
+	let queryReady = true;
+	const query = getQueryArgs( path );
+	const categorySlug = getCategoryFromPath( path );
+
+	const categoryId = useSelect(
 		( select ) => {
-			let _query = getQueryArgs( path );
-
-			const categorySlug = getCategoryFromPath( path );
 			if ( categorySlug ) {
+				// Don't let the query be set until we have the categories.
+				queryReady = false;
 				const { getCategoryBySlug, hasLoadedCategories } = select( patternStore );
-				if ( ! hasLoadedCategories() ) {
-					return;
-				}
-
-				const category = getCategoryBySlug( categorySlug );
-				if ( category && category.id !== -1 ) {
-					_query = {
-						..._query,
-						'pattern-categories': category.id,
-					};
+				if ( hasLoadedCategories() ) {
+					queryReady = true;
+					const categoryObj = getCategoryBySlug( categorySlug );
+					return categoryObj?.id || false;
 				}
 			}
-
-			const page = getPageFromPath( path );
-			if ( page > 1 ) {
-				_query.page = page;
-			}
-
-			const myPatternStatus = getValueFromPath( path, 'my-patterns' );
-			if ( myPatternStatus && 'page' !== myPatternStatus ) {
-				_query.status = myPatternStatus;
-			}
-
-			return _query;
+			return false;
 		},
-		[ path ]
+		[ categorySlug ]
 	);
+	if ( categoryId ) {
+		query[ 'pattern-categories' ] = categoryId;
+	}
 
-	const { setCurrentQuery } = useDispatch( patternStore );
+	const author = getValueFromPath( path, 'author' );
+	if ( author ) {
+		query.author_name = author;
+	}
+
+	const page = getPageFromPath( path );
+	if ( page > 1 ) {
+		query.page = page;
+	}
+
+	const myPatternStatus = getValueFromPath( path, 'my-patterns' );
+	if ( myPatternStatus && 'page' !== myPatternStatus ) {
+		query.status = myPatternStatus;
+	}
 
 	useEffect( () => {
-		setCurrentQuery( query );
-	}, [ query ] );
+		if ( queryReady ) {
+			setCurrentQuery( query );
+		}
+	}, [ query, queryReady ] );
 
 	return null;
 };
