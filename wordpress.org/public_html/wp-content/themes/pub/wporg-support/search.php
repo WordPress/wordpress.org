@@ -13,7 +13,7 @@ get_header(); ?>
 
 	<main id="main" class="site-main" role="main">
 
-		<h1><?php printf( __( 'Search Results for %s' ), esc_html( get_query_var( 's' ) ) ); ?></h1>
+		<h1><?php printf( __( 'Search Results for %s', 'wporg-forums' ), esc_html( get_query_var( 's' ) ) ); ?></h1>
 
 		<div class="search">
 			<?php

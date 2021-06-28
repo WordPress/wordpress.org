@@ -70,3 +70,14 @@ get_template_part( 'header', 'wporg' );
 				<?php endif; ?>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
+
+		<?php if ( ! is_singular() ) : ?>
+		<div class="notice notice-warning notice-alt" style="max-width:960px; margin:1rem auto;">
+			<p style="font-size:0.9375rem; margin:0.75rem 0;">
+			<?php
+				esc_html_e( 'You’re a bit early to the party! This directory hasn’t yet fully launched.', 'wporg-patterns' );
+				echo ' <a href="https://github.com/WordPress/pattern-directory/">' . esc_html__( 'Follow along to see our progress.', 'wporg-patterns' ) . '</a>';
+			?>
+			</p>
+		</div>
+		<?php endif; ?>

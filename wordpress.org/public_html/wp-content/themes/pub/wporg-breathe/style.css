@@ -170,9 +170,8 @@ input[type="submit"] {
 	line-height: 1;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 510px) {
 	.site-header .site-title {
-		max-width: 334px;
 		margin-top: 4px;
 	}
 	.site-header .site-title a {
@@ -1065,6 +1064,8 @@ article.page p.contributor-name {
 
 @media(max-width: 876px) {
 	.handbook-name-container {
+		padding-left: 22px;
+		padding-right: 36px;
 		width: 100%;
 		margin-left: 0;
 	}
@@ -1159,6 +1160,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	top: 4rem;
 	left: 280px;
 	font-size: 1.25rem;
+	padding-right: 34px;
 }
 
 .single-handbook .handbook-breadcrumbs ~ #primary {
@@ -1178,7 +1180,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	margin-top: 0;
 }
 
-@media (max-width: 875px) {
+@media (max-width: 876px) {
 	.handbook-breadcrumbs {
 		top: 3rem;
 		left: 22px;
@@ -1189,11 +1191,11 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	}
 
 	.single-handbook .handbook-name-container ~ .handbook-breadcrumbs {
-		top: 5rem;
+		top: 6rem;
 	}
 
 	.single-handbook .handbook-name-container ~ .handbook-breadcrumbs ~ #primary {
-		padding-top: 10rem;
+		padding-top: 14rem;
 	}
 }
 
