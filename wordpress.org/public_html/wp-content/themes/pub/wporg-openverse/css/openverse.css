@@ -6,3 +6,10 @@
 
     border: none;
 }
+
+.site > .site-content {
+    max-width: none;
+
+    padding: 0;
+    margin: auto;
+}
