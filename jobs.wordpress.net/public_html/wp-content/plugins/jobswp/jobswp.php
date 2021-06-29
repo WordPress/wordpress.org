@@ -131,10 +131,13 @@ class Jobs_Dot_WP {
 
 		add_filter( 'wp_sitemaps_add_provider',       array( $this, 'disable_users_sitemap' ), 10, 2 );
 
-		// Disable canonical redirects for jobs that 404..
+		// Disable canonical redirects for jobs that 404.
 		add_filter( 'template_redirect',              array( $this, 'disable_404_canonical' ), 9 );
 
 		add_action( 'wp_head',                        array( $this, 'rel_canonical_link' ) );
+
+		// Add drafts count indicator.
+		add_filter( 'add_menu_classes',               array( $this, 'add_admin_menu_draft_indicator' ) );
 	}
 
 	/**
@@ -1112,6 +1115,45 @@ EMAIL;
 		if ( $url ) {
 			printf( '<link rel="canonical" href="%s" />' . "\n", esc_url( $url ) );
 		}
+	}
+
+	/**
+	 * Amends job post type admin menu name with indicator count for draft jobs.
+	 *
+	 * @param array $menu Associative array of administration menu items.
+	 * @return array
+	 */
+	public function add_admin_menu_draft_indicator( $menu ) {
+		$post_type = 'job';
+		$menu_path = 'edit.php?post_type=' . $post_type;
+
+		foreach ( $menu as $menu_key => $menu_data ) {
+			if ( $menu_data[2] !== $menu_path ) {
+				continue;
+			}
+
+			$post_counts = wp_count_posts( $post_type, 'readable' );
+			$draft_count = 0;
+			if ( ! empty( $post_counts->draft ) ) {
+				$draft_count = $post_counts->draft;
+			}
+
+			if ( $draft_count ) {
+				$indicator = sprintf(
+					// Use existing styling for plugin-count indicator.
+					'<span class="update-plugins count-%s"><span class="plugin-count">%s</span></span>',
+					$draft_count,
+					number_format_i18n( $draft_count )
+				);
+
+				/* translators: %s: Markup for indicator denoting number of draft jobs. */
+				$menu[ $menu_key ][0] = sprintf( __( 'Jobs %s', 'jobswp' ), $indicator );
+			}
+
+			break;
+		}
+
+		return $menu;
 	}
 
 }
