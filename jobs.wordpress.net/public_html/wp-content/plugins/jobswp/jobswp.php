@@ -376,7 +376,7 @@ class Jobs_Dot_WP {
 
 		if (
 			// Not on post or user listings.
-			! in_array( $pagenow, [ 'edit.php', 'users.php' ] )
+			! in_array( $pagenow, [ 'edit.php', 'plugins.php', 'users.php' ] )
 		||
 			// On post listing but listing another post type.
 			( 'edit.php' === $pagenow && ( ! isset( $_GET['post_type'] ) || 'job' !== $_GET['post_type'] ) )
