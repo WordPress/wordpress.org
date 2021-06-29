@@ -23,12 +23,12 @@ if ( is_user_logged_in() ) {
 $error_user_login = $error_user_email = $error_recapcha_status = $terms_of_service_error = false;
 if ( $_POST ) {
 
-	$error_user_login = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/username-available/' . $user_login ) );
+	$error_user_login = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/username-available/' . urlencode( $user_login ) ) );
 	if ( $error_user_login->get_data()['available'] ) {
 		$error_user_login = false;
 	}
 
-	$error_user_email = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/email-in-use/' . $user_email ) );
+	$error_user_email = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/email-in-use/' . urlencode( $user_email ) ) );
 	if ( $error_user_email->get_data()['available'] ) {
 		$error_user_email = false;
 	}

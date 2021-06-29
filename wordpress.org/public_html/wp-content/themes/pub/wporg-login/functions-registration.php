@@ -366,7 +366,7 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 		$new_email !== $pending_user['user_email']
 	) {
 		// Validate the email
-		$error_user_email = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/email-in-use/' . $new_email ) );
+		$error_user_email = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/email-in-use/' . urlencode( $new_email ) ) );
 		if ( $error_user_email->get_data()['available'] ) {
 			// Change their email, resend confirmation.
 			$pending_user['meta']['changed_email'] = $pending_user['user_email'];
