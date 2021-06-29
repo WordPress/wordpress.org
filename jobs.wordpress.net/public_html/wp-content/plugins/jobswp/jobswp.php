@@ -338,6 +338,36 @@ class Jobs_Dot_WP {
 	}
 
 	/**
+	 * Returns the user assigned as the author of submitted jobs.
+	 *
+	 * @param bool $verify_user Ootional. Only return a non-false value if
+	 *                          job poster user is defined and exists. Otherwise,
+	 *                          returns the default, filtered job poster user_login.
+	 *                          Default true.
+	 * @return WP_User|false If $verify_user is false, then returns the filtered
+	 *                       user_login for the job poster user without any
+	 *                       verification that a user with that login exists. If
+	 *                       $verify_user is true, then returns the job poster
+	 *                       user object if user is defined and exists, else false.
+	 */
+	public function get_jobposter( $verify_user = true ) {
+		/**
+		 * Filters the login of the user assigned as the author of all submitted jobs.
+		 *
+		 * @param string The user login. Default 'jobposter'.
+		 */
+		$jobposter_username = apply_filters( 'jobswp_jobposter_username', 'jobposter' );
+
+		if ( $verify_user && $jobposter_username ) {
+			$user = get_user_by( 'login', $jobposter_username );
+		} else {
+			$user = $jobposter_username;
+		}
+
+		return $user ?: false;
+	}
+
+	/**
 	 * Outputs admin notice on job post type listing admin page if the jobposter
 	 * user account does not exist.
 	 */
@@ -354,12 +384,15 @@ class Jobs_Dot_WP {
 			return;
 		}
 
-		$jobposter_username = apply_filters( 'jobswp_jobposter_username', 'jobposter' );
-		if ( $user = get_user_by( 'login', $jobposter_username ) )
+		$jobposter = $this->get_jobposter();
+
+		// No alert needed if user was found.
+		if ( $jobposter ) {
 			return;
+		}
 
 		echo '<div class="error"><p>';
-		printf( __( 'ERROR: The username configured for posting jobs &mdash; %s &mdash; does not exist.', 'jobswp' ), $jobposter_username );
+		printf( __( 'ERROR: The username configured for posting jobs &mdash; %s &mdash; does not exist.', 'jobswp' ), $this->get_jobposter( false ) );
 		echo '</p></div>';
 	}
 
@@ -791,9 +824,10 @@ EMAIL;
 	 * @return int|WP_Error The new job's ID or a WP_Error
 	 */
 	private function create_job() {
-		$jobposter_username = apply_filters( 'jobswp_jobposter_username', 'jobposter' );
-		if ( ! $user = get_user_by( 'login', $jobposter_username ) )
+		$user = $this->get_jobposter();
+		if ( ! $user ) {
 			return new WP_Error( 'jobswp_missing_user', __( 'The username configured for posting jobs does not exist.', 'jobswp' ) );
+		}
 
 		$args = array(
 			'post_author'  => $user->ID,
