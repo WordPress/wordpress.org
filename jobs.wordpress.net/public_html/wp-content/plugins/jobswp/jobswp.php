@@ -131,7 +131,19 @@ class Jobs_Dot_WP {
 
 		add_filter( 'wp_sitemaps_add_provider',       array( $this, 'disable_users_sitemap' ), 10, 2 );
 
+		// Disable canonical redirects for jobs that 404..
+		add_filter( 'template_redirect',              array( $this, 'disable_404_canonical' ), 9 );
+
 		add_action( 'wp_head',                        array( $this, 'rel_canonical_link' ) );
+	}
+
+	/**
+	 * Disables canonical redirects for requests that 404.
+	 */
+	public function disable_404_canonical() {
+		if ( is_404() && 'job' === get_query_var( 'post_type' ) ) {
+			remove_filter( 'template_redirect', 'redirect_canonical' );
+		}
 	}
 
 	/**
