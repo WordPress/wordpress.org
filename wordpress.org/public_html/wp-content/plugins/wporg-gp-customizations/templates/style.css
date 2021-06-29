@@ -473,12 +473,12 @@ table.locale-sub-projects td {
 	border-right: 1px solid #72777c;
 }
 
-table.locales tr,
-table.glossary tr,
-table.locale-sub-projects tr,
-table.translation-sets tr,
-table.translations tr {
-	box-shadow: -1px 0px 0px #72777c;
+table.locales,
+table.glossary,
+table.locale-sub-projects,
+table.translation-sets,
+table.translations {
+	border-left: 1px solid #72777c;
 }
 
 table.translations tr:nth-child(4n+3),
@@ -501,6 +501,7 @@ table.locale-sub-projects tr:nth-child(even),
 
 #legend .box {
 	border-color: #72777c;
+	box-sizing: border-box;
 }
 
 table.translations tr.preview.status-current,
