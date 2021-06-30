@@ -17,6 +17,7 @@ class Test_Patterns extends TestCase {
 		$patterns = json_decode( $response->body );
 
 		$this->assertSame( 200, $response->status_code );
+		$this->assertGreaterThan( 0, count( $patterns ) );
 		$this->assertIsString( $patterns[0]->title->rendered );
 		$this->assertIsInt( $patterns[0]->meta->wpop_viewport_width );
 		$this->assertIsArray( $patterns[0]->category_slugs );
@@ -70,6 +71,68 @@ class Test_Patterns extends TestCase {
 
 		$this->assertResponseHasPattern( $response );
 		$this->assertSame( array( 'buttons' ), $term_slugs );
+	}
+
+	/**
+	 * @covers ::main()
+	 *
+	 * @dataProvider data_results_limited_to_requested_locale
+	 *
+	 * @group e2e
+	 *
+	 * @param string $locale
+	 */
+	public function test_results_limited_to_requested_locale( $expected_locale ) : void {
+		/*
+		 * Use Core patterns since they should always have translated versions.
+		 *
+		 * Fetch 100 to reduce chances of a false-positive/negative due to way results are paginated.
+		 * e.g., the 'none' case may return a mix of locales, but the first page of results may only
+		 * have `en_US` ones.
+		 */
+		$query_args = '/patterns/1.0/?pattern-keywords=11&per_page=100';
+
+		if ( $expected_locale ) {
+			$query_args .= "&locale=$expected_locale";
+		}
+
+		$response = send_request( $query_args );
+
+		$this->assertResponseHasPattern( $response );
+
+		$patterns      = json_decode( $response->body );
+		$found_locales = array_column( $patterns, 'meta' );
+		$found_locales = array_column( $found_locales, 'wpop_locale' );
+
+		$this->assertSame( 200, $response->status_code );
+
+		if ( $expected_locale ) {
+			$this->assertSame( array( $expected_locale ), array_unique( $found_locales ) );
+		} else {
+			$this->assertGreaterThan( 1, count( array_unique( $found_locales ) ) );
+		}
+	}
+
+	public function data_results_limited_to_requested_locale() {
+		return array(
+			'none' => array(
+				'locale' => '',
+			),
+
+			'american english' => array(
+				'locale' => 'en_US',
+			),
+
+			/*
+			 * This is expected to fail until the translated patterns are added to the database.
+			 *
+			 * @link https://github.com/WordPress/pattern-directory/issues/223
+			 * @link https://github.com/WordPress/pattern-directory/issues/224
+			 */
+			'mexican spanish' => array(
+				'locale' => 'es_MX',
+			),
+		);
 	}
 
 	/**
