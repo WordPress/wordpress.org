@@ -125,6 +125,65 @@ describe( 'state', () => {
 		} );
 	} );
 
+	describe( 'pattern', () => {
+		it( 'should store the pattern in state', () => {
+			const state = patterns(
+				{},
+				{
+					type: 'LOAD_BLOCK_PATTERN',
+					postId: apiPatterns[ 0 ].id,
+					pattern: apiPatterns[ 0 ],
+				}
+			);
+
+			expect( state.byId ).toHaveProperty( '31' );
+		} );
+
+		it( 'should store the next page of patterns in state', () => {
+			const state = patterns(
+				{
+					queries: {},
+					byId: { [ apiPatterns[ 0 ].id ]: apiPatterns[ 0 ] },
+				},
+				{
+					type: 'LOAD_BLOCK_PATTERN',
+					postId: apiPatterns[ 1 ].id,
+					pattern: apiPatterns[ 1 ],
+				}
+			);
+
+			expect( state.byId ).toHaveProperty( '31' );
+			expect( state.byId ).toHaveProperty( '25' );
+		} );
+
+		it( 'should not affect the queries', () => {
+			const state = patterns(
+				{
+					queries: {
+						'': {
+							total: 10,
+							totalPages: 2,
+							1: [ 31, 25, 26, 27, 28 ],
+						},
+					},
+					byId: apiPatterns.reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} ),
+				},
+				{
+					type: 'LOAD_BLOCK_PATTERN',
+					postId: apiPatternsPage2[ 0 ].id,
+					pattern: apiPatternsPage2[ 0 ],
+				}
+			);
+
+			expect( state.queries[ '' ].total ).toBe( 10 );
+			expect( state.queries[ '' ].totalPages ).toBe( 2 );
+			expect( state.queries[ '' ][ '1' ] ).toHaveLength( 5 );
+			expect( state.byId ).toHaveProperty( '31' );
+			expect( state.byId ).toHaveProperty( '25' );
+			expect( state.byId ).toHaveProperty( '29' );
+		} );
+	} );
+
 	describe( 'categories', () => {
 		it( 'should return null when fetching categories', () => {
 			const state = categories(

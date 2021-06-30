@@ -14,6 +14,7 @@ import {
 	fetchPatterns,
 	loadCategories,
 	loadFavorites,
+	loadPattern,
 	loadPatternFlagReasons,
 	loadPatterns,
 	setErrorPatterns,
@@ -63,6 +64,15 @@ export function* getPatternsByQuery( query ) {
 			error: parsedError,
 		} );
 	}
+}
+
+export function* getPattern( postId ) {
+	try {
+		const pattern = yield apiFetch( {
+			path: addQueryArgs( `/wp/v2/wporg-pattern/${ postId }` ),
+		} );
+		yield loadPattern( postId, pattern );
+	} catch ( error ) {}
 }
 
 export function* getCategories() {

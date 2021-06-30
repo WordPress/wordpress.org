@@ -23,10 +23,17 @@ export function patterns( state = {}, action ) {
 }
 
 function byId( state = {}, action ) {
-	const patternsById = ( action.patterns || [] ).reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} );
 	switch ( action.type ) {
-		case 'LOAD_BLOCK_PATTERNS':
+		case 'LOAD_BLOCK_PATTERNS': {
+			const patternsById = ( action.patterns || [] ).reduce(
+				( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ),
+				{}
+			);
 			return { ...state, ...patternsById };
+		}
+		case 'LOAD_BLOCK_PATTERN': {
+			return { ...state, [ action.postId ]: action.pattern };
+		}
 		default:
 			return state;
 	}

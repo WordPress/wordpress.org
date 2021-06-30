@@ -4,7 +4,7 @@
 import apiPatterns from './fixtures/patterns';
 import apiCategories from './fixtures/categories';
 import apiPatternFlagReasons from './fixtures/pattern-flag-reasons';
-import { getCategories, getFavorites, getPatternFlagReasons, getPatternsByQuery } from '../resolvers';
+import { getCategories, getFavorites, getPattern, getPatternFlagReasons, getPatternsByQuery } from '../resolvers';
 
 describe( 'getPatternsByQuery', () => {
 	it( 'yields with the requested patterns & query meta', async () => {
@@ -45,6 +45,28 @@ describe( 'getPatternsByQuery', () => {
 			patterns: apiPatterns,
 			total: 8,
 			totalPages: 2,
+		} );
+	} );
+} );
+
+describe( 'getPattern', () => {
+	const testPattern = apiPatterns[ 0 ];
+
+	it( 'yields with the requested pattern', async () => {
+		const generator = getPattern( testPattern.id );
+
+		// trigger apiFetch
+		const { value: apiFetchAction } = generator.next();
+		expect( apiFetchAction.request ).toEqual( {
+			path: '/wp/v2/wporg-pattern/' + testPattern.id,
+		} );
+
+		// Provide response and trigger action
+		const { value: received } = generator.next( testPattern );
+		expect( received ).toEqual( {
+			type: 'LOAD_BLOCK_PATTERN',
+			postId: testPattern.id,
+			pattern: testPattern,
 		} );
 	} );
 } );

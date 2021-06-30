@@ -15,6 +15,22 @@ export function fetchPatterns( query ) {
 }
 
 /**
+ * Get the action object signalling that a singple pattern has been loaded.
+ *
+ * @param {number} postId The pattern ID.
+ * @param {Object} pattern The pattern as returned from the API.
+ *
+ * @return {Object} Action object.
+ */
+export function loadPattern( postId, pattern ) {
+	return {
+		type: 'LOAD_BLOCK_PATTERN',
+		postId: postId,
+		pattern: pattern,
+	};
+}
+
+/**
  * Get the action object signalling that patterns have been loaded.
  *
  * @param {string} query Search string.
