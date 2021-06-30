@@ -16,7 +16,7 @@
 
 				var rest_url = wporg_registration.rest_url +
 					( this.id == 'user_login' ? '/username-available/' : '/email-in-use/' ) +
-					$this.val();
+					encodeURIComponent( $this.val() );
 
 				$.get( rest_url, function( datas ) {
 					$this.closest( 'p' ).nextUntil( 'p', 'div.message' ).remove();

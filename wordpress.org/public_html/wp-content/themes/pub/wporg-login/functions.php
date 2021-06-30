@@ -97,7 +97,7 @@ function wporg_login_register_scripts() {
 		}'
 	);
 
-	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), '20210517' );
+	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), filemtime( __DIR__ . '/js/registration.js' ) );
 	wp_localize_script( 'wporg-registration', 'wporg_registration', array(
 		'rest_url' => esc_url_raw( rest_url( 'wporg/v1' ) )
 	) );

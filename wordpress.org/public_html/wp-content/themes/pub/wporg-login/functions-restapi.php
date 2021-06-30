@@ -32,7 +32,7 @@ function wporg_login_rest_routes() {
 add_action( 'rest_api_init', 'wporg_login_rest_routes' );
 
 function wporg_login_rest_username_exists( $request ) {
-	$login = trim( $request['login'] );
+	$login = trim( urldecode( $request['login'] ) );
 
 	$validate_signup = wpmu_validate_user_signup( $login, 'placeholder@placeholder.domain' );
 
@@ -72,7 +72,7 @@ function wporg_login_rest_username_exists( $request ) {
 }
 
 function wporg_login_rest_email_in_use( $request ) {
-	$email = trim( $request['email'] );
+	$email = trim( urldecode( $request['email'] ) );
 
 	if ( $user = get_user_by( 'email', $email ) ) {
 		return [
