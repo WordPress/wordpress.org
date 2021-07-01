@@ -54,7 +54,6 @@ body.single-wporg-pattern {
 
 	.pattern-actions {
 		padding: 0 1.5rem 2rem;
-		background: $color-white;
 
 		button {
 			margin: 0;
@@ -144,5 +143,27 @@ body.single-wporg-pattern {
 	.pattern__meta {
 		display: flex;
 		justify-content: flex-end;
+	}
+
+	.pattern__author-avatar {
+		display: inline-flex;
+		align-items: center;
+		font-size: 1rem;
+		line-height: 1;
+		font-weight: 600;
+		color: color(gray-90);
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			text-decoration: underline;
+		}
+	}
+
+	.pattern__author-avatar img {
+		margin-right: 0.75rem;
+		height: 2rem;
+		width: 2rem;
+		border-radius: 4px;
 	}
 }

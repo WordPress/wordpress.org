@@ -38,16 +38,12 @@ $raw_block_content = get_the_content();
 
 				<div
 					hidden
-					class="pattern-preview__container"
+					class="pattern__container"
 					data-post-id="<?php echo intval( get_the_ID() ); ?>"
 					data-logged-in="<?php echo json_encode( is_user_logged_in() ); ?>"
 					data-user-has-reported="<?php echo json_encode( $user_has_reported ); ?>"
-				></div>
+				></div><!-- .pattern__container -->
 
-				<div class="entry-content">
-					<h2><?php esc_html_e( 'More from this designer', 'wporg-patterns' ); ?></h2>
-					<div class="pattern-grid"></div>
-				</div><!-- .entry-content -->
 			</article><!-- #post-## -->
 
 		<?php endwhile; ?>

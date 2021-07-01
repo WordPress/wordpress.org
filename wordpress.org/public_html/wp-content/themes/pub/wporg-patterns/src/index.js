@@ -23,7 +23,7 @@ if ( myGridContainer ) {
 }
 
 // Load the preview into any awaiting preview container.
-const previewContainers = document.querySelectorAll( '.pattern-preview__container' );
+const previewContainers = document.querySelectorAll( '.pattern__container' );
 for ( let i = 0; i < previewContainers.length; i++ ) {
 	const container = previewContainers[ i ];
 	const props = container.dataset;
