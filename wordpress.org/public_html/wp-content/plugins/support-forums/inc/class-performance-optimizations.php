@@ -31,10 +31,7 @@ class Performance_Optimizations {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
 		// Redirect search results.
-		add_action( 'bbp_template_redirect', array( $this, 'redirect_search_results' ) );
-		add_filter( 'pre_get_posts', array( $this, 'search_alterations' ) );
-		add_filter( 'pre_get_posts', array( $this, 'search_forum_alterations' ) );
-		add_filter( 'bbp_after_has_search_results_parse_args', array( $this, 'search_forum_alteration_args' ) );
+		add_action( 'bbp_template_redirect', array( $this, 'redirect_search_results_to_google_search' ) );
 
 		// Redirect (.+)/page/[01]/ and (.+)?paged=[01] to $1
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_page_zero_one' ) );
@@ -79,10 +76,13 @@ class Performance_Optimizations {
 	}
 
 	/**
-	 * Redirects search results to appropriate place.
+	 * Redirects search results to Google Custom Search.
 	 */
-	public function redirect_search_results() {
-		if ( ! is_search() ) {
+	public function redirect_search_results_to_google_search() {
+		$is_wp_search  = is_search();
+		$is_bbp_search = bbp_is_search_results();
+
+		if ( ! $is_wp_search && ! $is_bbp_search ) {
 			return;
 		}
 
@@ -90,84 +90,31 @@ class Performance_Optimizations {
 			return;
 		}
 
-		$search_terms = get_search_query( false );
+		$search_terms = $search_url = '';
 
-		$tab = $_GET['tab'] ?? 'support';
-		if ( ! in_array( $tab, [ 'support', 'docs', 'plugin', 'theme', 'searchforum' ] ) ) {
-			$tab = 'support';
+		if ( $is_bbp_search ) {
+			$search_terms = bbp_get_search_terms();
+		} elseif ( $is_wp_search ) {
+			$search_terms = get_search_query( false );
 		}
 
-		switch ( $tab ) {
-			case 'theme':
-			case 'plugin':
-			case 'searchforum':
-				wp_safe_redirect( add_query_arg( $tab, $_GET[ $tab ], home_url( "/search/{$search_terms}/" ) ) );
-				exit;
-			case 'support':
-				wp_safe_redirect( home_url( "/search/{$search_terms}/" ) );
-				exit;
-			case 'docs':
-				// Do nothing.
-		}
-	}
-
-	/**
-	 * Search alterations for forums.
-	 */
-	public function search_alterations( $query ) {
-		if ( ! is_search() || ! $query->is_search() ) {
-			return;
+		if ( isset( $_GET['intext'] ) ) {
+			$search_terms .= ' intext:"' . esc_attr( $_GET['intext'] ) . '"';
 		}
 
-		$query->set( 'post_type', [ 'page', 'helphub_article' ] );
-
-	}
-
-	public function search_forum_alterations( $query ) {
-		if ( empty( $query->query['_bbp_search_query'] ) ) {
-			return;
+		if ( $search_terms ) {
+			$tab = ! empty( $_GET['tab'] ) && 'docs' === $_GET['tab'] ? 'docs' : 'forums';
+			$search_url = sprintf( "https://wordpress.org/search/%s/?{$tab}=1", urlencode( $search_terms ) );
+			$search_url = esc_url_raw( $search_url );
 		}
 
-		// Limit searches to published topics.
-		$query->set( 'post_type', 'topic' );
-		$query->set( 'post_status', 'publish' );
-
-		// Limit to either the plugin/theme in question, or to general support threads.
-		if ( !empty( $_GET['plugin'] ) ) {
-			$query->set( 'tax_query', [
-				[
-					'taxonomy' => 'topic-plugin',
-					'field' => 'slug',
-					'terms' => [ $_GET['plugin'] ]
-				]
-			] );
-
-			add_filter( 'posts_where', array( $this, 'posts_in_last_year' ) );
-		} elseif ( ! empty( $_GET['theme'] ) ) {
-			$query->set( 'tax_query', [
-				[
-					'taxonomy' => 'topic-theme',
-					'field' => 'slug',
-					'terms' => [ $_GET['theme'] ]
-				]
-			] );
-
-			add_filter( 'posts_where', array( $this, 'posts_in_last_year' ) );
-		} elseif ( ! empty( $_GET['searchforum'] ) ) {
-			$query->set( 'post_parent', (int) $_GET['searchforum'] );
-
-			add_filter( 'posts_where', array( $this, 'posts_in_last_year' ) );
-		} else {
-			$query->set( 'post_parent__not_in', [21261, 21262, 21272] ); // Magic numbers: Plugins, Themes, Reviews
-
-			add_filter( 'posts_where', array( $this, 'posts_in_last_six_months' ) );
+		if ( ! $search_url ) {
+			wp_safe_redirect( home_url( '/' ) );
+			exit;
 		}
-	}
 
-	public function search_forum_alteration_args( $args ) {
-		$args['_bbp_search_query'] = true;
-
-		return $args;
+		wp_safe_redirect( $search_url );
+		exit;
 	}
 
 	/**
