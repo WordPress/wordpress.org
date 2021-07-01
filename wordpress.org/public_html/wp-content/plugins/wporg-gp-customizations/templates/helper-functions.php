@@ -305,6 +305,10 @@ function wporg_references( $project, $entry ) {
 				?>
 				<li><a target="_blank" href="<?php echo $source_url; ?>"><?php echo $file.':'.$line ?></a></li>
 			<?php
+			elseif ( wp_http_validate_url( $reference ) ) :
+				?>
+				<li><a target="_blank" href="<?php echo esc_url( $reference ); ?>"><?php echo esc_html( $reference ); ?></a></li>		
+			<?php
 			else :
 				echo "<li>$file:$line</li>";
 			endif;
