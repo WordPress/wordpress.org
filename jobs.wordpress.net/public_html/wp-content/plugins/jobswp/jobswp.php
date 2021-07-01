@@ -138,6 +138,9 @@ class Jobs_Dot_WP {
 
 		// Add drafts count indicator.
 		add_filter( 'add_menu_classes',               array( $this, 'add_admin_menu_draft_indicator' ) );
+
+		// Prevent logins by jobposter account.
+		add_filter( 'authenticate',                   array( $this, 'prevent_jobposter_login' ), 99, 3 );
 	}
 
 	/**
@@ -1188,6 +1191,29 @@ EMAIL;
 		}
 
 		return $menu;
+	}
+
+	/**
+	 * Prevents the job poster account from being able to log into the site.
+	 *
+	 * @param null|WP_User|WP_Error $user     WP_User if the user is authenticated.
+	 *                                        WP_Error or null otherwise.
+	 * @param string                $username Username or email address.
+	 * @param string                $password User password
+	 * @return null|WP_User|WP_Error
+	 */
+	public function prevent_jobposter_login( $user, $username, $password ) {
+		// If the login attempt hasn't already been rejected.
+		if ( ! is_wp_error( $user ) ) {
+			$jobposter_username = $this->get_jobposter( false );
+
+			if ( $jobposter_username === $username ) {
+				// Use WP's generic authentication failed error message rathen than a customized message.
+				$user = new WP_Error( 'authentication_failed', __( '<strong>Error</strong>: Invalid username, email address or incorrect password.', 'jobswp' ) );
+			}
+		}
+
+		return $user;
 	}
 
 }
