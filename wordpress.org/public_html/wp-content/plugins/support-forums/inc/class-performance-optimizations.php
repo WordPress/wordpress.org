@@ -104,7 +104,7 @@ class Performance_Optimizations {
 
 		if ( $search_terms ) {
 			$tab = ! empty( $_GET['tab'] ) && 'docs' === $_GET['tab'] ? 'docs' : 'forums';
-			$search_url = sprintf( "https://wordpress.org/search/%s/?{$tab}=1", urlencode( $search_terms ) );
+			$search_url = sprintf( "https://wordpress.org/search/%s/?in=support_{$tab}", urlencode( $search_terms ) );
 			$search_url = esc_url_raw( $search_url );
 		}
 
