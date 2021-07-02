@@ -2,7 +2,7 @@
 
 /**
  *
- * @group api
+ * @group plugins-api
  */
 class Tests_API_Locale_Banner extends WP_UnitTestCase {
 

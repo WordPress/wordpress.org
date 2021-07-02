@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group plugins-api
+ */
 class TestUrlSchemes extends WP_UnitTestCase {
 
 	function http_get( $uri ) {

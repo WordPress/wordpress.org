@@ -1,0 +1,9 @@
+{
+	"require-dev": {
+		"wp-phpunit/wp-phpunit": "^5.6"
+	},
+	"scripts": {
+		"test":      "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/plugin-directory/phpunit.xml --verbose --exclude plugins-api'",
+		"test-slow": "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/plugin-directory/phpunit.xml --verbose'"
+	}
+}
