@@ -35,7 +35,7 @@ export const getDefaultMessage = ( count, categoryName ) => {
 export const getLoadingMessage = ( categoryName ) => {
 	return createInterpolateElement(
 		sprintf(
-			/* translators: %1$d: number of patterns. %2$s category name. */
+			/* translators: %s category name. */
 			__( 'Loading <b>%s</b> patterns.', 'wporg-patterns' ),
 			categoryName,
 			'wporg-patterns'

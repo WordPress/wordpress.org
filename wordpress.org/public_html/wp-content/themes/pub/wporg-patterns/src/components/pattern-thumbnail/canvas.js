@@ -7,9 +7,9 @@ import { useEffect, useRef, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import Iframe from '../iframe';
+import getCardFrameHeight from '../../utils/get-card-frame-height';
 
 const VIEWPORT_WIDTH = 800;
-const ASPECT_RATIO = 2 / 3;
 
 function PatternThumbnail( { className, html } ) {
 	const wrapperRef = useRef();
@@ -19,7 +19,7 @@ function PatternThumbnail( { className, html } ) {
 	useEffect( () => {
 		const handleOnResize = () => {
 			try {
-				setFrameHeight( wrapperRef.current.clientWidth * ASPECT_RATIO );
+				setFrameHeight( getCardFrameHeight( wrapperRef.current.clientWidth ) );
 				setFrameScale( wrapperRef.current.clientWidth / VIEWPORT_WIDTH );
 			} catch ( err ) {}
 		};
@@ -38,7 +38,7 @@ function PatternThumbnail( { className, html } ) {
 		border: 'none',
 		width: `${ VIEWPORT_WIDTH }px`,
 		maxWidth: 'none',
-		height: `${ VIEWPORT_WIDTH * ASPECT_RATIO }px`,
+		height: `${ getCardFrameHeight( VIEWPORT_WIDTH ) }px`,
 		transform: `scale(${ frameScale })`,
 		transformOrigin: 'top left',
 		pointerEvents: 'none',

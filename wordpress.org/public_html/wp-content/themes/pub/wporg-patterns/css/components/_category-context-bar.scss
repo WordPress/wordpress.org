@@ -4,11 +4,7 @@
 	border-radius: 2px;
 	font-size: 0.8125rem;
 	overflow: auto;
-	transition: all 300ms ease-out;
-
-	@media (prefers-reduced-motion) {
-		transition: none;
-	}
+	height: 55px; // Prevent layout shifts
 
 	> div {
 		display: flex;

@@ -1,0 +1,9 @@
+.pattern-skeleton__container {
+	display: flex;
+	flex-direction: column;
+}
+
+.pattern-skeleton {
+	background: $color-gray-light-300;
+	border-radius: 2px;
+}

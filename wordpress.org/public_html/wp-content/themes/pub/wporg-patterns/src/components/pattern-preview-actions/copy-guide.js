@@ -33,7 +33,7 @@ const CopyGuide = ( { onFinish } ) => {
 									</h3>
 									<p>
 										{ __(
-											'Patterns are really just text. And, just like you can copy and paste text, you can copy and paste patterns. Its really easy!',
+											'Patterns are really just text. And, just like you can copy and paste text, you can copy and paste patterns. It’s really easy!',
 											'wporg-patterns'
 										) }
 									</p>
@@ -58,7 +58,7 @@ const CopyGuide = ( { onFinish } ) => {
 											<p>
 												{ createInterpolateElement(
 													__(
-														'Paste the contents of your clipboard by pressing both the <kbd>⌘</kbd> and <kbd>v</kbd> keys, or right-clicking and choose "Paste" from the menu.',
+														'Paste the contents of your clipboard by holding down <kbd>ctrl</kbd> control (Windows) or <kbd>⌘</kbd> command (Mac) and pressing the <kbd>v</kbd> key, or right-clicking and choose “Paste” from the menu.',
 														'wporg-patterns'
 													),
 													{

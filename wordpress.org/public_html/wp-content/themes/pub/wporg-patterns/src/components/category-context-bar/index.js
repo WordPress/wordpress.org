@@ -16,8 +16,8 @@ import { store as patternStore } from '../../store';
 
 function CategoryContextBar() {
 	const { path } = useRoute();
-	const [ height, setHeight ] = useState( 0 );
-	const [ message, setMessage ] = useState();
+	const [ height, setHeight ] = useState();
+	const [ message, setMessage ] = useState( getLoadingMessage( 'All' ) );
 	const [ context ] = useState( {
 		title: '',
 		links: [],
