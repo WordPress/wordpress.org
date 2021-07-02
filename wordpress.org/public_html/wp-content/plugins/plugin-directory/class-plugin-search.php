@@ -13,7 +13,7 @@ add_filter( 'option_has_jetpack_search_product', '__return_true' );
 class Plugin_Search {
 
 	// Set this to true to disable the new class and use the old jetpack-search.php code.
-	const USE_OLD_SEARCH = true;
+	const USE_OLD_SEARCH = false;
 
 	// Internal state
 	protected $locale;
