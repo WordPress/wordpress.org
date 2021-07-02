@@ -132,7 +132,7 @@ add_action( 'template_redirect', function() {
 	$new_path = preg_replace( '!^/?(index|contact(-us)?)(\.(html?|php))?!i', '', $new_path );
 
 	// Remove any `<a>` attributes from the URL.
-	$new_path = preg_replace( '!(target|rel|href)=?(.+)$!i', '', $new_path );
+	$new_path = preg_replace( '!(target|rel|href)=.*$!i', '', $new_path );
 
 	// Remove any trailing punctuation.
 	$new_path = preg_replace( '!([ +\'"]|(?:%20))+$!', '', $new_path );
