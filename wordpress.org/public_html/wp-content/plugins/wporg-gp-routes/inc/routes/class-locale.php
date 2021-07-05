@@ -60,7 +60,6 @@ class Locale extends GP_Route {
 
 		// Grab the top level projects to show in the menu first, so as to be able to handle the default Waiting / WP tab selection
 		$top_level_projects = $this->get_active_top_level_projects();
-		usort( $top_level_projects, array( $this, '_sort_reverse_name_callback' ) );
 
 		// Default to the Waiting or WordPress tabs
 		$default_project_tab = 'waiting';
@@ -967,16 +966,8 @@ class Locale extends GP_Route {
 			WHERE
 				parent_project_id IS NULL
 				AND active = 1
-			ORDER BY name ASC
+			ORDER BY FIELD( slug, 'waiting', 'wp', 'wp-themes', 'wp-plugins', 'patterns', 'meta', 'apps' )
 		" );
-	}
-
-	private function _sort_reverse_name_callback( $a, $b ) {
-		// The Waiting project should always be first.
-		if ( $a->slug == 'waiting' ) {
-			return -1;
-		}
-		return - strcasecmp( $a->name, $b->name );
 	}
 
 	private function _encode( $raw ) {
