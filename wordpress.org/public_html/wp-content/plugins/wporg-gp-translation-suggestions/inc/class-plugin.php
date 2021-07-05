@@ -146,10 +146,19 @@ class Plugin {
 			return;
 		}
 
+
+		// Prevent querying the TM for long strings which usually time out
+		// and have no results due to being too unique.
+		$query_tm = mb_strlen( $entry->singular ) <= 420;
+
 		?>
-		<details open class="suggestions__translation-memory" data-nonce="<?php echo esc_attr( wp_create_nonce( 'translation-memory-suggestions-' . $entry->original_id ) ); ?>">
+		<details open class="suggestions__translation-memory<?php echo $query_tm ? '' : ' initialized'; ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'translation-memory-suggestions-' . $entry->original_id ) ); ?>">
 			<summary>Suggestions from Translation Memory</summary>
-			<p class="suggestions__loading-indicator">Loading <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>
+			<?php if ( $query_tm ) : ?>
+				<p class="suggestions__loading-indicator">Loading <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>
+			<?php else : ?>
+				<p class="no-suggestions">No suggestions.</p>
+			<?php endif; ?>
 		</details>
 
 		<details class="suggestions__other-languages" data-nonce="<?php echo esc_attr( wp_create_nonce( 'other-languages-suggestions-' . $entry->original_id ) ); ?>">

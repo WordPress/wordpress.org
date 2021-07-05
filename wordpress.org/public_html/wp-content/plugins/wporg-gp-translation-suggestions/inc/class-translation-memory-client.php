@@ -111,7 +111,7 @@ class Translation_Memory_Client {
 		$request = wp_remote_get(
 			$url,
 			[
-				'timeout'    => 2,
+				'timeout'    => 4,
 				'user-agent' => 'WordPress.org Translate',
 			]
 		);
