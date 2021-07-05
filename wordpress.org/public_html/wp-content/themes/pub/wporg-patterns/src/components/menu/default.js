@@ -8,20 +8,24 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import MenuSkeleton from './menu-skeleton';
+
 const DefaultMenu = ( { current, isLoading, label = __( 'Main Menu', 'wporg-patterns' ), onClick, options } ) => {
-	if ( ! isLoading && ! options.length ) {
+	if ( isLoading ) {
+		return <MenuSkeleton />;
+	}
+
+	if ( ! options.length ) {
 		return null;
 	}
 
 	return (
 		<>
 			<h2 className="screen-reader-text">{ label }</h2>
-			<ul
-				className={ classnames( {
-					'pattern-menu': true,
-					'is-loading': isLoading,
-				} ) }
-			>
+			<ul className="pattern-menu">
 				{ options.map( ( i ) => (
 					<li key={ i.value }>
 						<a

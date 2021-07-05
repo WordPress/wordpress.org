@@ -15,6 +15,17 @@
 		width: calc(100% - #{$gutter-default * 2});
 	}
 
+	.pattern-skeleton__container {
+		flex-wrap: wrap;
+		// match nav item text: line height (1.5) * font size (0.875rem) + 1rem of vertical padding.
+		height: 2.3125rem;
+		align-items: center;
+
+		span {
+			margin-bottom: 0.25rem;
+		}
+	}
+
 	@media only screen and ( min-width: #{$breakpoint-medium + 1} ) {
 		margin: $gutter-default;
 		flex-direction: row;

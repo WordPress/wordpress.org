@@ -69,21 +69,4 @@
 		}
 		// End
 	}
-
-	&.is-loading {
-		height: 24px;
-		position: relative;
-	}
-
-	&.is-loading::after {
-		content: "";
-		position: absolute;
-		background: $color-gray-light-200;
-		border-radius: 4px;
-		width: 80%;
-		height: 24px;
-		left: 0;
-		top: calc(50% - 12px);
-		transition: none;
-	}
 }
