@@ -34,6 +34,15 @@ function wporg_robots_txt( $robots ) {
 
 	}
 
+	// Allow access to the load-scripts.php & load-styles.php admin files.
+	$robots = str_replace(
+		"Allow: /wp-admin/admin-ajax.php\n",
+		"Allow: /wp-admin/admin-ajax.php\n" .
+			"Allow: /wp-admin/load-scripts.php\n" .
+			"Allow: /wp-admin/load-styles.php\n",
+		$robots
+	);
+
 	return $robots;
 }
 add_filter( 'robots_txt', 'wporg_robots_txt', 100 );
