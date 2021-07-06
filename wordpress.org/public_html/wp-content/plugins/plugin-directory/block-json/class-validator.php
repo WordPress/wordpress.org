@@ -234,19 +234,6 @@ class Validator {
 			$this->append_error_data( 'block.json:script', 'error' );
 			$this->append_error_data( 'block.json:editorScript', 'error' );
 		}
-
-		if ( ! isset( $block_json->style ) && ! isset( $block_json->editorStyle ) ) {
-			$this->messages->add(
-				'error',
-				sprintf(
-					__( 'At least one of the following properties must be present: %s', 'wporg-plugins' ),
-					// translators: used between list items, there is a space after the comma.
-					'<code>style</code>' . __( ', ', 'wporg-plugins' ) . '<code>editorStyle</code>'
-				)
-			);
-			$this->append_error_data( 'block.json:style', 'error' );
-			$this->append_error_data( 'block.json:editorStyle', 'error' );
-		}
 	}
 
 	/**
