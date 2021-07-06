@@ -53,3 +53,15 @@ function pre_get_posts( $query ) {
 	] );
 }
 add_filter( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
+
+/**
+ * Prepend feed name in feed's title tag
+ */
+function prepend_rss_title( $title ) {
+	if ( is_feed( FEED ) ) {
+		$title = ucwords( FEED ) . ' &#8211; ' . $title;
+	}
+
+	return $title;
+}
+add_filter( 'wp_title_rss', __NAMESPACE__ . '\\prepend_rss_title' );
