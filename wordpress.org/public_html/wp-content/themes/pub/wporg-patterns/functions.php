@@ -90,11 +90,7 @@ function enqueue_assets() {
  * See https://github.com/WordPress/gutenberg/blob/6ad2a433769a4514fc52083e97aa47a0bc9edf07/lib/client-assets.php#L710
  */
 function generate_block_editor_styles_html() {
-	$handles = array(
-		'wp-block-editor',
-		'wp-block-library',
-		'wp-edit-blocks',
-	);
+	$handles = array( 'wp-block-library' );
 
 	$block_registry = \WP_Block_Type_Registry::get_instance();
 

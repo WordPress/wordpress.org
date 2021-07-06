@@ -11263,7 +11263,7 @@ __webpack_require__.r(__webpack_exports__);
  * The copy was made to remove `tabIndex` and to add the ability to set the iframe's `title`.
  */
 
-const BODY_CLASS_NAME = 'editor-styles-wrapper';
+const BODY_CLASS_NAME = 'pattern-wrapper';
 /**
  * Bubbles some event types (keydown, keypress, and dragover) to parent document
  * document to ensure that the keyboard shortcuts and drag and drop work.
@@ -11354,16 +11354,18 @@ function Iframe({
   head,
   headHTML,
   bodyStyle = '',
-  themeSlug = 'twentynineteen',
+  themeSlug = 'twentytwentyone',
   ...props
 }, ref) {
   const [iframeDocument, setIframeDocument] = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])();
+  headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${themeSlug}/style.css" media="all" />`;
   headHTML += `<style>
     body {
         display: flex;
         min-height: 100vh;
         align-items: center;
         justify-content: center;
+        background-color: white;
     }
     .${BODY_CLASS_NAME} {
         padding: 0;
@@ -11375,7 +11377,6 @@ function Iframe({
         pointer-events: none;
     }
     </style>`;
-  headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${themeSlug}/style.css" media="all" />`;
   const setRef = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useCallback"])(node => {
     if (!node) {
       return;
@@ -12610,13 +12611,16 @@ function PatternPreview(_ref) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _iframe__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../iframe */ "./src/components/iframe/index.js");
-/* harmony import */ var _utils_get_card_frame_height__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/get-card-frame-height */ "./src/utils/get-card-frame-height.js");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _iframe__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../iframe */ "./src/components/iframe/index.js");
+/* harmony import */ var _utils_get_card_frame_height__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/get-card-frame-height */ "./src/utils/get-card-frame-height.js");
 
 
 /**
  * WordPress dependencies
  */
+
 
 /**
  * Internal dependencies
@@ -12636,7 +12640,7 @@ function PatternThumbnail({
   Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(() => {
     const handleOnResize = () => {
       try {
-        setFrameHeight(Object(_utils_get_card_frame_height__WEBPACK_IMPORTED_MODULE_2__["default"])(wrapperRef.current.clientWidth));
+        setFrameHeight(Object(_utils_get_card_frame_height__WEBPACK_IMPORTED_MODULE_3__["default"])(wrapperRef.current.clientWidth));
         setFrameScale(wrapperRef.current.clientWidth / VIEWPORT_WIDTH);
       } catch (err) {}
     };
@@ -12652,9 +12656,9 @@ function PatternThumbnail({
     border: 'none',
     width: `${VIEWPORT_WIDTH}px`,
     maxWidth: 'none',
-    height: `${Object(_utils_get_card_frame_height__WEBPACK_IMPORTED_MODULE_2__["default"])(VIEWPORT_WIDTH)}px`,
+    height: `${Object(_utils_get_card_frame_height__WEBPACK_IMPORTED_MODULE_3__["default"])(VIEWPORT_WIDTH)}px`,
     transform: `scale(${frameScale})`,
-    transformOrigin: 'top left',
+    transformOrigin: Object(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__["isRTL"])() ? 'top right' : 'top left',
     pointerEvents: 'none'
   };
   return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
@@ -12664,7 +12668,7 @@ function PatternThumbnail({
       height: frameHeight
     },
     tabIndex: "-1"
-  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_iframe__WEBPACK_IMPORTED_MODULE_1__["default"], {
+  }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_iframe__WEBPACK_IMPORTED_MODULE_2__["default"], {
     className: "pattern-grid__preview-iframe",
     style: style,
     bodyStyle: 'overflow: hidden;',

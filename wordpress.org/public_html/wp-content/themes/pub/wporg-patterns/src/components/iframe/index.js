@@ -9,7 +9,7 @@ import { useMergeRefs } from '@wordpress/compose';
  * The copy was made to remove `tabIndex` and to add the ability to set the iframe's `title`.
  */
 
-const BODY_CLASS_NAME = 'editor-styles-wrapper';
+const BODY_CLASS_NAME = 'pattern-wrapper';
 
 /**
  * Bubbles some event types (keydown, keypress, and dragover) to parent document
@@ -91,17 +91,19 @@ function setHead( doc, head ) {
 }
 
 function Iframe(
-	{ contentRef, children, head, headHTML, bodyStyle = '', themeSlug = 'twentynineteen', ...props },
+	{ contentRef, children, head, headHTML, bodyStyle = '', themeSlug = 'twentytwentyone', ...props },
 	ref
 ) {
 	const [ iframeDocument, setIframeDocument ] = useState();
 
+	headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${ themeSlug }/style.css" media="all" />`;
 	headHTML += `<style>
     body {
         display: flex;
         min-height: 100vh;
         align-items: center;
         justify-content: center;
+        background-color: white;
     }
     .${ BODY_CLASS_NAME } {
         padding: 0;
@@ -113,8 +115,6 @@ function Iframe(
         pointer-events: none;
     }
     </style>`;
-
-	headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${ themeSlug }/style.css" media="all" />`;
 
 	const setRef = useCallback( ( node ) => {
 		if ( ! node ) {

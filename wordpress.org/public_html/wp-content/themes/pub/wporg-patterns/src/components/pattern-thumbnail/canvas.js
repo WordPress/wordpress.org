@@ -1,6 +1,7 @@
 /**
  * WordPress dependencies
  */
+import { isRTL } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
@@ -40,7 +41,7 @@ function PatternThumbnail( { className, html } ) {
 		maxWidth: 'none',
 		height: `${ getCardFrameHeight( VIEWPORT_WIDTH ) }px`,
 		transform: `scale(${ frameScale })`,
-		transformOrigin: 'top left',
+		transformOrigin: isRTL() ? 'top right' : 'top left',
 		pointerEvents: 'none',
 	};
 

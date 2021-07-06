@@ -53,10 +53,14 @@
 }
 
 .pattern-preview__drag-handle.is-left {
+
+	/*!rtl:ignore*/
 	left: 0;
 }
 
 .pattern-preview__drag-handle.is-right {
+
+	/*!rtl:ignore*/
 	right: 0;
 }
 
