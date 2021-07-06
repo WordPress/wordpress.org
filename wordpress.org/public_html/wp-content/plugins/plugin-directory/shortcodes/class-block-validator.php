@@ -383,7 +383,7 @@ class Block_Validator {
 		foreach ( $error_types as $type => $labels ) {
 			if ( empty( $results_by_type[ $type ] ) ) {
 				// Print out the warning wrapper if we have block.json issues.
-				if ( 'warning' !== $type || empty( $block_json_issues ) ) {
+				if ( 'error' !== $type || empty( $block_json_issues ) ) {
 					continue;
 				}
 			}
@@ -404,7 +404,7 @@ class Block_Validator {
 				}
 			}
 			// Collapse block.json warnings into one details at the end of warnings list.
-			if ( 'warning' === $type && ! empty( $block_json_issues ) ) {
+			if ( 'error' === $type && ! empty( $block_json_issues ) ) {
 				$messages = wp_list_pluck( $block_json_issues, 'message' );
 				$details = '<p>' . implode( '</p><p>', (array) $messages ) . '</p>';
 				$output .= sprintf(
