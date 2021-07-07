@@ -96,7 +96,8 @@ namespace Dotorg\Slack\Trac {
 			continue;
 		}
 
-		$trac_xmlrpc = new \Trac( 'slackbot', SLACKBOT_WPORG_PASSWORD, "$trac.trac.wordpress.org", '/login/xmlrpc', 443, true );
+		$trac_xmlrpc = new \Trac( 'slackbot', SLACKBOT_WPORG_PASSWORD, "https://$trac.trac.wordpress.org/login/xmlrpc" );
+
 		$comment = sprintf( $comment_template, $_POST['channel_name'], $_POST['user_name'], str_replace( '.', '', $_POST['timestamp'] ) );
 		foreach ( $results['ticket'] as $ticket ) {
 			if ( is_array( $ticket ) ) {
