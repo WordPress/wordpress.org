@@ -40,6 +40,13 @@ class Trac {
 		$http_basic_auth .= base64_encode( $username . ':' . $password );
 
 		$this->rpc->headers['Authorization'] = $http_basic_auth;
+
+		// themes.trac requires both the Authorization header and the logged in Cookie.
+		$user = get_user_by( 'login', $username );
+		if ( $user ) {
+			$this->rpc->headers['Cookie'] = LOGGED_IN_COOKIE . '=' . wp_generate_auth_cookie( $user->ID, time() + MINUTE_IN_SECONDS, 'logged_in' );
+		}
+
 	}
 
 	/**
