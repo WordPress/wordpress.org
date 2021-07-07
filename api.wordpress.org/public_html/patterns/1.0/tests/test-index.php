@@ -14,9 +14,9 @@ class Test_Patterns extends TestCase {
 	 * @param Requests_Response $response
 	 */
 	public function assertResponseHasPattern( $response ) {
-		$patterns = json_decode( $response->body );
-
 		$this->assertSame( 200, $response->status_code );
+
+		$patterns = json_decode( $response->body );
 		$this->assertGreaterThan( 0, count( $patterns ) );
 		$this->assertIsString( $patterns[0]->title->rendered );
 		$this->assertIsInt( $patterns[0]->meta->wpop_viewport_width );
@@ -50,11 +50,11 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_all_patterns() : void {
-		$response   = send_request( '/patterns/1.0/' );
+		$response = send_request( '/patterns/1.0/' );
+		$this->assertResponseHasPattern( $response );
+
 		$patterns   = json_decode( $response->body );
 		$term_slugs = $this->get_term_slugs( $patterns );
-
-		$this->assertResponseHasPattern( $response );
 		$this->assertGreaterThan( 1, count( $term_slugs ) );
 	}
 
@@ -66,10 +66,10 @@ class Test_Patterns extends TestCase {
 	public function test_browse_patterns_by_category() : void {
 		$button_term_id = 2;
 		$response       = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id );
-		$patterns       = json_decode( $response->body );
-		$term_slugs     = $this->get_term_slugs( $patterns );
-
 		$this->assertResponseHasPattern( $response );
+
+		$patterns   = json_decode( $response->body );
+		$term_slugs = $this->get_term_slugs( $patterns );
 		$this->assertSame( array( 'buttons' ), $term_slugs );
 	}
 
@@ -97,14 +97,11 @@ class Test_Patterns extends TestCase {
 		}
 
 		$response = send_request( $query_args );
-
 		$this->assertResponseHasPattern( $response );
 
 		$patterns      = json_decode( $response->body );
 		$found_locales = array_column( $patterns, 'meta' );
 		$found_locales = array_column( $found_locales, 'wpop_locale' );
-
-		$this->assertSame( 200, $response->status_code );
 
 		if ( $expected_locale ) {
 			$this->assertSame( array( $expected_locale ), array_unique( $found_locales ) );
@@ -197,12 +194,11 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_all_categories() : void {
-		$response   = send_request( '/patterns/1.0/?categories' );
-		$categories = json_decode( $response->body );
-
+		$response = send_request( '/patterns/1.0/?categories' );
 		$this->assertSame( 200, $response->status_code );
-		$this->assertGreaterThan( 0, count( $categories ) );
 
+		$categories = json_decode( $response->body );
+		$this->assertGreaterThan( 0, count( $categories ) );
 		$this->assertIsInt( $categories[0]->id );
 		$this->assertIsString( $categories[0]->name );
 		$this->assertIsString( $categories[0]->slug );
