@@ -427,6 +427,9 @@ class WPORG_Themes_Upload {
 		$ticket_id = $this->create_or_update_trac_ticket();
 
 		if ( ! $ticket_id  ) {
+			// Since it's been added to SVN at this point, remove it from SVN to prevent future issues.
+			$this->remove_from_svn( 'Trac ticket creation failed.' );
+
 			/* translators: %s: mailto link */
 			return sprintf( __( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ),
 				'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
@@ -1110,6 +1113,25 @@ TICKET;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Remove a theme version commited to SVN.
+	 */
+	function remove_from_svn( $reason ) {
+		$svn_path = "{$this->theme_slug}/{$this->theme->display( 'Version' )}";
+		if ( ! $this->theme_slug || ! $this->theme->display( 'Version' ) || strlen( $svn_path ) < 3 ) {
+			return false;
+		}
+
+		$import_msg = 'Removing theme %1$s - %2$s: %3$s';
+		$import_msg = escapeshellarg( sprintf( $import_msg, $this->theme->display( 'Name' ), $this->theme->display( 'Version' ), $reason ) );
+		$svn_path   = escapeshellarg( "https://themes.svn.wordpress.org/{$svn_path}" );
+		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
+
+		$last_line = $this->exec_with_notify( self::SVN . " --non-interactive --username themedropbox --password {$password} -m {$import_msg} rm {$svn_path}" );
+
+		return (bool) preg_match( '/Committed revision (\d+)\./i', $last_line );
 	}
 
 	/**
