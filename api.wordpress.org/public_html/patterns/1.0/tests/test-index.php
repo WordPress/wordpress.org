@@ -70,7 +70,7 @@ class Test_Patterns extends TestCase {
 
 		$patterns   = json_decode( $response->body );
 		$term_slugs = $this->get_term_slugs( $patterns );
-		$this->assertSame( array( 'buttons' ), $term_slugs );
+		$this->assertContains( 'buttons', $term_slugs );
 	}
 
 	/**
