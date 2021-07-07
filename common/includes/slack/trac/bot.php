@@ -52,7 +52,7 @@ class Bot {
 		$ticket_tracs = '?<trac>' . Trac::get_regex();
 		$tickets      = array();
 
-		// If the channel is not GitHub centric, require the trac to be suffixed like #1234-core
+		// If the channel is GitHub centric, require the trac to be suffixed like #1234-core
 		$require_trac = in_array( $this->get_channel(), self::$github_channels, true );
 		$require_trac = $require_trac ? '' : '?'; // regex optional.
 

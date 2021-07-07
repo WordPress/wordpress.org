@@ -122,7 +122,7 @@ class Trac {
 			'header'        =>
 				[
 					'Content-Type: application/json',
-					'Authorization: Basic ' . base64_encode( $this->credentials[0] . ':' . $this->credentials[1] ),
+					'Cookie: ' . LOGGED_IN_COOKIE . '=' . wp_generate_auth_cookie( get_user_by( 'login', $this->credentials[0] )->ID, time()+60, 'logged_in' ),
 				],
 			'content'       => json_encode( [
 				'method' => $method,

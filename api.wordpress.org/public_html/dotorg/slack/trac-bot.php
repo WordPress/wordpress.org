@@ -1,12 +1,10 @@
 <?php
 
 namespace {
-	require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
-	require dirname( dirname( __DIR__ ) ) . '/includes/object-cache.php';
+	require dirname( dirname( __DIR__ ) ) . '/wp-init.php';
 
 	require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
-	require dirname( dirname( __DIR__ ) ) . '/includes/class-IXR.php';
 	require dirname( dirname( __DIR__ ) ) . '/includes/class-trac.php';
 }
 

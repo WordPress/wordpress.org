@@ -1,12 +1,7 @@
 <?php
 namespace WordPressdotorg\API\Trac\GithubPRs;
 
-require dirname( dirname( dirname( __DIR__ ) ) ) . '/init.php';
-require dirname( dirname( dirname( __DIR__ ) ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
-require dirname( dirname( dirname( __DIR__ ) ) ) . '/includes/wp-json-encode.php';
-require dirname( dirname( dirname( __DIR__ ) ) ) . '/includes/object-cache.php';
-\wp_cache_init();
-
+require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 require __DIR__ . '/functions.php';
 
 $trac          = preg_replace( '![^a-z]!', '', $_GET['trac'] ?? '' );
