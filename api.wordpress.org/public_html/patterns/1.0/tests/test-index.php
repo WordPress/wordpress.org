@@ -152,7 +152,8 @@ class Test_Patterns extends TestCase {
 	 * @param string $search_query
 	 */
 	public function test_search_patterns( $search_term, $match_expected ) : void {
-		$response = send_request( '/patterns/1.0/?&search=' . $search_term . '&pattern-keywords=11&locale=en_US' );
+		// wrap term in double quotes to match exact phrase.
+		$response = send_request( '/patterns/1.0/?&search="' . $search_term . '"&pattern-keywords=11&locale=en_US' );
 
 		if ( $match_expected ) {
 			$this->assertResponseHasPattern( $response );
@@ -162,9 +163,9 @@ class Test_Patterns extends TestCase {
 
 			foreach ( $patterns as $pattern ) {
 				$match_in_title       = stripos( $pattern->title->rendered, $search_term );
-				$match_in_description = stripos( $pattern->meta->wpop_description, $search_term );;
+				$match_in_description = stripos( $pattern->meta->wpop_description, $search_term );
 
-				if ( ! $match_in_title && ! $match_in_description ) {
+				if ( false === $match_in_title && false === $match_in_description ) {
 					$all_patterns_include_query = false;
 					break;
 				}
