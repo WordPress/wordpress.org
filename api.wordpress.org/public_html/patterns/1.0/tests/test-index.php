@@ -50,12 +50,19 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_all_patterns() : void {
-		$response = send_request( '/patterns/1.0/' );
+		$response = send_request( '/patterns/1.0/?per_page=100' );
 		$this->assertResponseHasPattern( $response );
 
-		$patterns   = json_decode( $response->body );
+		// When all locales and keywords are included, there should be at least 100 patterns.
+		$patterns = json_decode( $response->body );
+		$this->assertSame( 100, count( $patterns ) );
+
+		/*
+		 * The exact number of unique categories will vary based on which cohort of pattens happen to be returned,
+		 * but `3` seems like a safe minimum in practice.
+		 */
 		$term_slugs = $this->get_term_slugs( $patterns );
-		$this->assertGreaterThan( 1, count( $term_slugs ) );
+		$this->assertGreaterThan( 3, count( $term_slugs ) );
 	}
 
 	/**
@@ -65,7 +72,12 @@ class Test_Patterns extends TestCase {
 	 */
 	public function test_browse_patterns_by_category() : void {
 		$button_term_id = 2;
-		$response       = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id );
+
+		/*
+		 * This can't include a `pattern-keyword` param because of the workaround in
+		 * `WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_rest_fields()`.
+		 */
+		$response = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id . '&locale=en_US' );
 		$this->assertResponseHasPattern( $response );
 
 		$patterns   = json_decode( $response->body );
@@ -106,6 +118,10 @@ class Test_Patterns extends TestCase {
 		if ( $expected_locale ) {
 			$this->assertSame( array( $expected_locale ), array_unique( $found_locales ) );
 		} else {
+			/*
+			 * This could start failing falsely in the future if new patterns are created in a way that results in
+			 * the first page of patterns all having the same locale.
+			 */
 			$this->assertGreaterThan( 1, count( array_unique( $found_locales ) ) );
 		}
 	}
@@ -120,12 +136,6 @@ class Test_Patterns extends TestCase {
 				'locale' => 'en_US',
 			),
 
-			/*
-			 * This is expected to fail until the translated patterns are added to the database.
-			 *
-			 * @link https://github.com/WordPress/pattern-directory/issues/223
-			 * @link https://github.com/WordPress/pattern-directory/issues/224
-			 */
 			'mexican spanish' => array(
 				'locale' => 'es_MX',
 			),
@@ -142,12 +152,12 @@ class Test_Patterns extends TestCase {
 	 * @param string $search_query
 	 */
 	public function test_search_patterns( $search_term, $match_expected ) : void {
-		$response = send_request( '/patterns/1.0/?search=' . $search_term );
-		$patterns = json_decode( $response->body );
+		$response = send_request( '/patterns/1.0/?&search=' . $search_term . '&pattern-keywords=11&locale=en_US' );
 
 		if ( $match_expected ) {
 			$this->assertResponseHasPattern( $response );
 
+			$patterns = json_decode( $response->body );
 			$all_patterns_include_query = true;
 
 			foreach ( $patterns as $pattern ) {
@@ -194,7 +204,7 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_all_categories() : void {
-		$response = send_request( '/patterns/1.0/?categories' );
+		$response = send_request( '/patterns/1.0/?categories&pattern-keywords=11&locale=en_US' );
 		$this->assertSame( 200, $response->status_code );
 
 		$categories = json_decode( $response->body );
