@@ -27,7 +27,7 @@ body.page-download {
 		}
 	}
 
-	section {
+	section, aside {
 		margin-top: 4em;
 
 		h2:first-of-type {
@@ -86,7 +86,7 @@ body.page-download {
 		}
 	}
 
-	section.hosting {
+	aside.hosting {
 		position: relative;
 		text-align: center;
 		padding: ms( 10 ) 0;
@@ -131,7 +131,7 @@ body.page-download {
 		}
 	}
 
-	section.apps-mobile {
+	aside.apps-mobile {
 		text-align: center;
 		width: 100%;
 		order: 1; /* Assume that mobile users want to install the apps on their phones, and desktop users want to setup WP on a server. */

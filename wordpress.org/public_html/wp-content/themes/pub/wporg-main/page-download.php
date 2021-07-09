@@ -146,7 +146,7 @@ the_post();
 					); ?>
 				</p>
 
-				<section id="mobile" class="apps-mobile">
+				<aside id="mobile" class="apps-mobile">
 					<span class="dashicons dashicons-smartphone"></span>
 					<h2><?php esc_html_e( 'Inspiration strikes anywhere, anytime', 'wporg' ); ?></h2>
 					<p class="subheading"><?php esc_html_e( 'Create or update content on the go with our mobile apps.', 'wporg' ); ?></p>
@@ -160,9 +160,9 @@ the_post();
 						</a>
 					</div>
 					<a href="https://apps.wordpress.com/mobile/" class="call-to-action"><?php esc_html_e( 'Learn more about our mobile apps', 'wporg' ); ?></a>
-				</section>
+				</aside>
 
-				<section id="hosting" class="hosting row gutters between">
+				<aside id="hosting" class="hosting row gutters between">
 					<div class="parallelogram"></div>
 					<span class="dashicons dashicons-cloud"></span>
 					<h2><?php esc_html_e( 'WordPress Hosting', 'wporg' ); ?></h2>
@@ -187,7 +187,7 @@ the_post();
 					<?php endforeach; ?>
 
 					<a href="https://wordpress.org/hosting/" class="call-to-action col-12"><?php esc_html_e( 'See all of our recommended hosts', 'wporg' ); ?></a>
-				</section>
+				</aside>
 
 				<section id="download-install" class="download row gutters between">
 					<h2><?php esc_html_e( 'Priceless, and also free', 'wporg' ); ?></h2>
