@@ -170,7 +170,7 @@ the_post();
 
 					<?php foreach ( array_rand( $hosts, 2 ) as $host ) : ?>
 
-					<div class="host col-6">
+					<div class="host col-6" data-nosnippet>
 						<img src="<?php echo esc_url( get_theme_file_uri( $hosts[ $host ]['logo'] ) ); ?>" class="logo" alt="<?php
 							/* translators: %s: Name of hosting company */
 							printf( esc_attr__( '%s company logo', 'wporg' ), esc_html( $hosts[ $host ]['name'] ) );
