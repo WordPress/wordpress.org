@@ -15,7 +15,7 @@ describe( 'getPageList', () => {
 
 	it( 'should return complex lists', async () => {
 		expect( getPaginationList( 10, 1 ) ).toEqual( [ 1, 2, '…', 9, 10 ] );
-		expect( getPaginationList( 10, 2 ) ).toEqual( [ 1, 2, '…', 9, 10 ] );
+		expect( getPaginationList( 10, 2 ) ).toEqual( [ 1, 2, 3, '…', 9, 10 ] );
 		expect( getPaginationList( 10, 3 ) ).toEqual( [ 1, 2, 3, 4, '…', 9, 10 ] );
 		expect( getPaginationList( 10, 4 ) ).toEqual( [ 1, 2, 3, 4, 5, '…', 9, 10 ] );
 		expect( getPaginationList( 10, 5 ) ).toEqual( [ 1, 2, '…', 4, 5, 6, '…', 9, 10 ] );

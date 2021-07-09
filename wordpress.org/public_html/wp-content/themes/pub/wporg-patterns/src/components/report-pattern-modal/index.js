@@ -42,7 +42,17 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 		return {
 			isLoading: isLoadingPatternFlagReasons(),
 			mappedReasons: reasons
-				.sort( ( a, b ) => a.id - b.id )
+				.sort( ( a, b ) => {
+					// Using the slug allows us to set a custom order for the terms through the admin UI.
+					switch ( true ) {
+						case a.slug < b.slug:
+							return -1;
+						case a.slug > b.slug:
+							return 1;
+						default:
+							return 0;
+					}
+				} )
 				.map( ( i ) => {
 					// We need to convert id to string to make the RadioControl match the selected item.
 					return { label: i.name, value: i.id.toString() };

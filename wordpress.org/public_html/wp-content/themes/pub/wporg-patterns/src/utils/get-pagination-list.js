@@ -18,7 +18,7 @@ export default function getPaginationList( length, current = 1 ) {
 		return range;
 	}
 	list.push( ...range.slice( 0, 2 ) );
-	if ( current > 2 && current <= length - 1 ) {
+	if ( current >= 2 && current <= length - 1 ) {
 		list.push( ...range.slice( current - 2, current + 1 ) );
 	}
 	list.push( ...range.slice( -2 ) );
