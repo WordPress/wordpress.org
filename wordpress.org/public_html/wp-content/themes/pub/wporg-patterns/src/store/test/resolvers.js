@@ -6,6 +6,9 @@ import apiCategories from './fixtures/categories';
 import apiPatternFlagReasons from './fixtures/pattern-flag-reasons';
 import { getCategories, getFavorites, getPattern, getPatternFlagReasons, getPatternsByQuery } from '../resolvers';
 
+// Set up the global.
+global.wporgLocale = '"en_US"';
+
 describe( 'getPatternsByQuery', () => {
 	it( 'yields with the requested patterns & query meta', async () => {
 		const generator = getPatternsByQuery( {} );
@@ -18,7 +21,7 @@ describe( 'getPatternsByQuery', () => {
 		// trigger apiFetch
 		const { value: apiFetchAction } = generator.next();
 		expect( apiFetchAction.request ).toEqual( {
-			path: `/wp/v2/wporg-pattern`,
+			path: `/wp/v2/wporg-pattern?locale=en_US`,
 			parse: false,
 		} );
 

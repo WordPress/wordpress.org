@@ -15,6 +15,7 @@ import DragHandle from './drag-handle';
 /* eslint-disable jsx-a11y/anchor-is-valid -- These are just placeholders. */
 
 const INITIAL_WIDTH = 960;
+const MIN_PREVIEW_WIDTH = 280;
 
 function PatternPreview( { blockContent } ) {
 	const showViewportControl = useViewportMatch( 'mobile', '>=' );
@@ -24,6 +25,12 @@ function PatternPreview( { blockContent } ) {
 	const instanceId = useInstanceId( PatternPreview );
 	const [ width, setWidth ] = useState( window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH );
 	const onDragChange = useCallback( ( delta ) => setWidth( ( value ) => value + delta ), [ setWidth ] );
+
+	const onDragEnd = () => {
+		if ( width < MIN_PREVIEW_WIDTH ) {
+			setWidth( MIN_PREVIEW_WIDTH );
+		}
+	};
 
 	const availableWidths = useMemo( () => {
 		// Less than 480 wide.
@@ -55,10 +62,11 @@ function PatternPreview( { blockContent } ) {
 
 	let currentOpt = false;
 	if ( ! availableWidths.some( ( opt ) => opt.value === width ) ) {
+		const displayWidth = Math.max( Math.floor( width ), MIN_PREVIEW_WIDTH );
 		currentOpt = {
 			/* translators: %s is the width in pixels, ex 600. */
-			label: sprintf( __( 'Current (%spx)', 'wporg-patterns' ), width ),
-			value: width,
+			label: sprintf( __( 'Current (%spx)', 'wporg-patterns' ), displayWidth ),
+			value: displayWidth,
 		};
 	}
 
@@ -80,6 +88,7 @@ function PatternPreview( { blockContent } ) {
 					label={ __( 'Drag to resize', 'wporg-patterns' ) }
 					className="is-left"
 					onDragChange={ onDragChange }
+					onDragEnd={ onDragEnd }
 					direction="left"
 					aria-describedby={ `pattern-preview__resize-help-${ instanceId }` }
 				/>
@@ -88,6 +97,7 @@ function PatternPreview( { blockContent } ) {
 					label={ __( 'Drag to resize', 'wporg-patterns' ) }
 					className="is-right"
 					onDragChange={ onDragChange }
+					onDragEnd={ onDragEnd }
 					direction="right"
 					aria-describedby={ `pattern-preview__resize-help-${ instanceId }` }
 				/>

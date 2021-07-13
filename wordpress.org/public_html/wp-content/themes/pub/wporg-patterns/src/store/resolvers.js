@@ -46,7 +46,7 @@ export function* getPatternsByQuery( query ) {
 	try {
 		yield fetchPatterns( queryString );
 		const response = yield apiFetch( {
-			path: addQueryArgs( '/wp/v2/wporg-pattern', query ),
+			path: addQueryArgs( '/wp/v2/wporg-pattern', { ...query, locale: JSON.parse( wporgLocale ) } ),
 			parse: false,
 		} );
 		const { total, totalPages, results } = yield __unstableAwaitPromise( parseResponse( response ) );

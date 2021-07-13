@@ -8,11 +8,13 @@ import { useDrag } from 'react-use-gesture';
  */
 import { LEFT, RIGHT } from '@wordpress/keycodes';
 
-function DragHandle( { label, className, onDragChange, direction = 'left', ...props } ) {
+function DragHandle( { label, className, onDragChange, onDragEnd, direction = 'left', ...props } ) {
 	const dragGestures = useDrag( ( { delta, dragging } ) => {
 		const multiplier = direction === 'left' ? -2 : 2;
 		if ( dragging ) {
 			onDragChange( delta[ 0 ] * multiplier );
+		} else {
+			onDragEnd();
 		}
 	} );
 
@@ -36,6 +38,7 @@ function DragHandle( { label, className, onDragChange, direction = 'left', ...pr
 				aria-label={ label }
 				{ ...props }
 				onKeyDown={ onKeyDown }
+				onKeyUp={ onDragEnd }
 				{ ...dragGestures() }
 			/>
 		</div>

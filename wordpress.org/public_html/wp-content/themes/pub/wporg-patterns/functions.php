@@ -73,10 +73,11 @@ function enqueue_assets() {
 		wp_add_inline_script(
 			'wporg-pattern-script',
 			sprintf(
-				'var wporgAssetUrl = "%s", wporgSiteUrl = "%s", wporgLoginUrl = "%s";',
+				'var wporgAssetUrl = "%s", wporgSiteUrl = "%s", wporgLoginUrl = "%s", wporgLocale = \'%s\';',
 				esc_url( get_stylesheet_directory_uri() ),
 				esc_url( home_url() ),
-				esc_url( wp_login_url() )
+				esc_url( wp_login_url() ),
+				wp_json_encode( get_locale() )
 			),
 			'before'
 		);
@@ -164,6 +165,9 @@ function pre_get_posts( $query ) {
 	} else if ( ! $query->get( 'pagename' ) && 'post' === $query->get( 'post_type', 'post' ) ) {
 		$query->set( 'post_type', array( POST_TYPE ) );
 		$query->set( 'post_status', array( 'publish' ) );
+
+		$query->set( 'meta_key', 'wpop_locale' );
+		$query->set( 'meta_value', get_locale() );
 	}
 }
 

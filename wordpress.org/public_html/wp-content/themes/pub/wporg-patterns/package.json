@@ -63,7 +63,8 @@
 		"globals": {
 			"wporgAssetUrl": "readonly",
 			"wporgLoginUrl": "readonly",
-			"wporgSiteUrl": "readonly"
+			"wporgSiteUrl": "readonly",
+			"wporgLocale": "readonly"
 		}
 	},
 	"stylelint": {
