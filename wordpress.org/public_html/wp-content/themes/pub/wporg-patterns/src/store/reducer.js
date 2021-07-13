@@ -34,6 +34,11 @@ function byId( state = {}, action ) {
 		case 'LOAD_BLOCK_PATTERN': {
 			return { ...state, [ action.postId ]: action.pattern };
 		}
+		case 'ADD_FAVORITE':
+		case 'REMOVE_FAVORITE': {
+			const updatedPattern = { ...state[ action.patternId ], favorite_count: action.count };
+			return { ...state, [ action.patternId ]: updatedPattern };
+		}
 		default:
 			return state;
 	}

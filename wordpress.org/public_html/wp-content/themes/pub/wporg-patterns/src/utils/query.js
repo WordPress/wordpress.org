@@ -104,3 +104,13 @@ export const getCategoryFromPath = ( path ) => {
 export const getPageFromPath = ( path ) => {
 	return Number( getValueFromPath( path, 'page' ) || 1 );
 };
+
+/**
+ * Retrieve the search term from a url path.
+ *
+ * @param {string} path
+ * @return {string} The search term.
+ */
+export const getSearchTermFromPath = ( path ) => {
+	return getValueFromPath( path, 'search' );
+};

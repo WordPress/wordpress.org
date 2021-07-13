@@ -123,6 +123,56 @@ describe( 'state', () => {
 			expect( state.queries[ '' ][ '3' ] ).toHaveLength( 0 );
 			expect( state.byId ).toHaveProperty( '31' );
 		} );
+
+		it( 'should update when favorites are added', () => {
+			const state = patterns(
+				{
+					queries: {
+						'': {
+							total: 10,
+							totalPages: 2,
+							1: [ 31, 25, 26, 27, 28 ],
+						},
+					},
+					byId: apiPatterns.reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} ),
+				},
+				{
+					type: 'ADD_FAVORITE',
+					patternId: 31,
+					count: 1,
+				}
+			);
+
+			expect( state.byId ).toHaveProperty( '31' );
+			expect( state.byId[ '31' ] ).toHaveProperty( 'title' );
+			expect( state.byId[ '31' ] ).toHaveProperty( 'favorite_count' );
+			expect( state.byId[ '31' ].favorite_count ).toEqual( 1 );
+		} );
+
+		it( 'should update when favorites are removed', () => {
+			const state = patterns(
+				{
+					queries: {
+						'': {
+							total: 10,
+							totalPages: 2,
+							1: [ 31, 25, 26, 27, 28 ],
+						},
+					},
+					byId: apiPatterns.reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} ),
+				},
+				{
+					type: 'REMOVE_FAVORITE',
+					patternId: 31,
+					count: 0,
+				}
+			);
+
+			expect( state.byId ).toHaveProperty( '31' );
+			expect( state.byId[ '31' ] ).toHaveProperty( 'title' );
+			expect( state.byId[ '31' ] ).toHaveProperty( 'favorite_count' );
+			expect( state.byId[ '31' ].favorite_count ).toEqual( 0 );
+		} );
 	} );
 
 	describe( 'pattern', () => {
@@ -238,6 +288,7 @@ describe( 'state', () => {
 			const state = favorites( [ 1, 2, 3 ], {
 				type: 'ADD_FAVORITE',
 				patternId: 5,
+				count: 1,
 			} );
 			expect( state ).toEqual( [ 1, 2, 3, 5 ] );
 		} );
@@ -246,6 +297,7 @@ describe( 'state', () => {
 			const state = favorites( [ 1, 2, 3 ], {
 				type: 'ADD_FAVORITE',
 				patternId: 1,
+				count: 1,
 			} );
 			expect( state ).toEqual( [ 1, 2, 3 ] );
 		} );
@@ -254,6 +306,7 @@ describe( 'state', () => {
 			const state = favorites( [ 1, 2, 3 ], {
 				type: 'REMOVE_FAVORITE',
 				patternId: 3,
+				count: 1,
 			} );
 			expect( state ).toEqual( [ 1, 2 ] );
 		} );
@@ -262,6 +315,7 @@ describe( 'state', () => {
 			const state = favorites( [ 1, 2, 3 ], {
 				type: 'REMOVE_FAVORITE',
 				patternId: 5,
+				count: 1,
 			} );
 			expect( state ).toEqual( [ 1, 2, 3 ] );
 		} );

@@ -2,14 +2,14 @@
 	display: flex;
 	align-items: center;
 	background: $color-white;
-	border: 1px solid $color__text-lighter;
 	border-radius: 2px;
 
 	input[type="search"] {
 		flex-grow: 1;
 		margin: 0;
-		padding: 0.25rem 0.5rem;
+		padding: 0.5rem;
 		border: none;
+		border-radius: 2px;
 		box-shadow: none;
 		font-size: 0.8125rem;
 
@@ -38,6 +38,8 @@
 	background: transparent;
 	border: none;
 	color: $color__text-lighter;
+	height: 35px;
+	align-items: center;
 
 	&:active {
 		background: $color-gray-light-600;

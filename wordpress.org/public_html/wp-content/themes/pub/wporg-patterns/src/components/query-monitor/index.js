@@ -10,7 +10,7 @@ import { getQueryArgs } from '@wordpress/url';
  */
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
-import { getCategoryFromPath, getPageFromPath, getValueFromPath } from '../../utils';
+import { getCategoryFromPath, getPageFromPath, getSearchTermFromPath, getValueFromPath } from '../../utils';
 
 /**
  * Listens for changes to the path and reconstructs the query object based on the path
@@ -51,6 +51,11 @@ const QueryMonitor = () => {
 	const page = getPageFromPath( path );
 	if ( page > 1 ) {
 		query.page = page;
+	}
+
+	const search = getSearchTermFromPath( path );
+	if ( search.length > 0 ) {
+		query.search = search;
 	}
 
 	const myPatternStatus = getValueFromPath( path, 'my-patterns' );

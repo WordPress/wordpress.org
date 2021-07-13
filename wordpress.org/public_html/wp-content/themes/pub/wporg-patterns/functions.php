@@ -12,10 +12,11 @@ add_action( 'body_class', __NAMESPACE__ . '\body_class', 10, 2 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 add_filter( 'init', __NAMESPACE__ . '\add_rewrite' );
 
-add_filter( 'search_template', __NAMESPACE__ . '\use_index_php_as_template' );
 add_filter( 'archive_template', __NAMESPACE__ . '\use_index_php_as_template' );
 
 add_filter( 'pre_handle_404', __NAMESPACE__ . '\bypass_404_page', 10, 2 );
+
+add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_search_url' );
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -238,4 +239,16 @@ function get_all_the_content( $post ) {
 	$content = str_replace( ']]>', ']]&gt;', $content );
 
 	return $content;
+}
+
+/**
+ * Rewrites the search url from s={keyword} to /search/{keyword}.
+ *
+ * @return void
+ */
+function rewrite_search_url() {
+	if ( is_search() && ! empty( $_GET['s'] ) ) {
+		wp_redirect( home_url( '/search/' ) . urlencode( trim( get_query_var( 's' ) ) ) . '/' );
+		exit();
+	}
 }

@@ -27,21 +27,28 @@ get_template_part( 'header', 'wporg' );
 		<header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
 				<?php if ( is_home() ) : ?>
-					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></h1>
+					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Patterns', 'Site title', 'wporg-patterns' ); ?></a></h1>
 
 					<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
+					<?php get_search_form(); ?>
 				<?php else : ?>
 					<div>
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
 							<?php esc_html_e( 'All Patterns', 'wporg-patterns' ); ?>
 						</a>
 						<span class="sep">/</span>
-						<span class="is-current-page">
+						<span id="breadcrumb-part" class="is-current-page">
 							<?php
 							if ( is_singular( POST_TYPE ) ) {
 								esc_html_e( 'Pattern Details', 'wporg-patterns' );
 							} else if ( is_singular() ) {
 								the_title();
+							} else if ( is_search() ) {
+								printf(
+									/* translators: Search query. */
+									esc_html__( 'Search: %s', 'wporg-patterns' ),
+									get_search_query()
+								);
 							} else {
 								the_archive_title();
 							}
@@ -58,15 +65,15 @@ get_template_part( 'header', 'wporg' );
 						>
 						</button>
 
-						<div id="primary-menu" class="menu">
-							<?php
-							wp_nav_menu( array(
-								'theme_location' => 'primary',
-								'menu_id'        => 'primary-menu',
-							) );
-							?>
-						</div>
+						<?php
+						wp_nav_menu( array(
+							'theme_location' => 'primary',
+							'menu_id'        => 'primary-menu',
+						) );
+						?>
+						
 					</nav><!-- #site-navigation -->
+					<?php get_search_form(); ?>
 				<?php endif; ?>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->

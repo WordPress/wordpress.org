@@ -1,6 +1,7 @@
 import {
 	getCategoryFromPath,
 	getPageFromPath,
+	getSearchTermFromPath,
 	getValueFromPath,
 	removeEmptyArgs,
 	removeQueryString,
@@ -67,6 +68,18 @@ describe( 'utils', () => {
 			expect( getPageFromPath( '/pattern-categories/header/page/3/' ) ).toEqual( 3 );
 			expect( getPageFromPath( '/pattern-categories=header?page=2' ) ).toEqual( 2 );
 			expect( getPageFromPath( '/page/4' ) ).toEqual( 4 );
+		} );
+	} );
+
+	describe( 'getSearchTermFromPath', () => {
+		it( 'should return "" if the search term is empty', async () => {
+			expect( getSearchTermFromPath( '' ) ).toEqual( '' );
+		} );
+
+		it( 'should correctly return the search term', async () => {
+			expect( getSearchTermFromPath( '/search/header' ) ).toEqual( 'header' );
+			expect( getSearchTermFromPath( '/search/footer/' ) ).toEqual( 'footer' );
+			expect( getSearchTermFromPath( '/patterns/search/sidebar' ) ).toEqual( 'sidebar' );
 		} );
 	} );
 

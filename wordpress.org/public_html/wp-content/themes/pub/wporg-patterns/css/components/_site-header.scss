@@ -1,20 +1,34 @@
-body.home {
-	.site-header {
-		padding: 3.75rem 1rem;
-		text-align: left;
-	}
+.site-header.home {
+	padding: 0;
+	text-align: left;
 
 	.site-branding {
-		display: grid;
-		grid-template-rows: auto 1fr;
-		grid-template-columns: 1fr 22rem;
+		display: block;
+		padding: 3.75rem 1rem;
 
-		> * {
-			align-self: center;
+
+		@include breakpoint( $breakpoint-medium ) {
+			display: grid;
+			grid-template-rows: auto 1fr;
+			grid-template-columns: 1fr 25rem;
+
+			background-image: url(../images/masthead-bg.png);
+			background-size: contain;
+			background-repeat: no-repeat;
+			background-position-x: 160%;
+
+			> * {
+				align-self: center;
+			}
 		}
 
-		@include breakpoint( 0, $ms-breakpoint - 1 ) {
-			display: block;
+		@include breakpoint( $breakpoint-large - 100 ) {
+			background-position-x: 120%;
+		}
+
+		@include breakpoint( $breakpoint-large ) {
+			grid-template-columns: 1fr 30rem;
+			background-position-x: right;
 		}
 	}
 
@@ -31,21 +45,37 @@ body.home {
 	.site-description {
 		grid-column-start: 1;
 		grid-row-start: 2;
-		margin: 0;
-		font-size: 1.25rem;
+		margin: 0 0 1.5rem;
+		font-size: 1rem;
 		line-height: $type__line-height;
 		text-align: left;
 		color: $color-white;
+	}
+
+	.pattern-search {
+		grid-column-start: 1;
+		grid-row-start: 3;
+
+		@include breakpoint( $breakpoint-large ) {
+			max-width: 60%;
+		}
 	}
 }
 
 body:not(.home) {
 	.site-branding {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
 		font-size: 0.8125rem;
 		color: $color-white;
+
+		@include breakpoint( $breakpoint-medium ) {
+			*:first-child {
+				flex-grow: 1;
+			}
+		}
 
 		a {
 			color: $color-white;
@@ -58,6 +88,17 @@ body:not(.home) {
 
 		.is-current-page {
 			font-weight: 600;
+		}
+
+		.pattern-search {
+			margin-top: 1rem;
+			flex-basis: 100%;
+
+			@include breakpoint( $breakpoint-medium ) {
+				margin-top: 0;
+				margin-left: 1rem;
+				flex-basis: unset;
+			}
 		}
 	}
 }

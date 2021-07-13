@@ -50,45 +50,16 @@ export const getLoadingMessage = ( categoryName ) => {
  * Returns a message regarding current search status.
  *
  * @param {number} count Number of patterns associated to the category.
- * @param {string} categoryName The category name.
  * @param {string|void} searchTerm The search term.
  * @return {Object}
  */
-export const getDefaultSearchMessage = ( count, categoryName, searchTerm ) => {
-	return createInterpolateElement(
-		sprintf(
-			/* translators: %1$d: number of patterns. %2$s category name. %3$s search term  */
-			_n(
-				'%1$d <b>%2$s</b> pattern matching "<b>%3$s</b>".',
-				'%1$d <b>%2$s</b> patterns matching "<b>%3$s</b>".',
-				count,
-				'wporg-patterns'
-			),
-			count,
-			categoryName,
-			searchTerm,
-			'wporg-patterns'
-		),
-		{
-			b: <b />,
-		}
-	);
-};
-
-/**
- * Returns a message regarding current search status for when no category is selected.
- *
- * @param {number} count Number of patterns associated to the category.
- * @param {string|void} searchTerm The search term.
- * @return {Object}
- */
-export const getAllSearchMessage = ( count, searchTerm ) => {
+export const getSearchMessage = ( count, searchTerm ) => {
 	return createInterpolateElement(
 		sprintf(
 			/* translators: %1$d: number of patterns. %2$s search term.  */
 			_n(
-				'%1$d pattern matching "<b>%2$s</b>".',
-				'%1$d patterns matching "<b>%2$s</b>".',
+				'%1$d pattern found for <b>%2$s</b>',
+				'%1$d patterns found for <b>%2$s</b>',
 				count,
 				'wporg-patterns'
 			),

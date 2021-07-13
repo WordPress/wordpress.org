@@ -2,13 +2,20 @@
 	float: none;
 	position: static;
 	width: auto;
+	display: flex;
+	align-items: center;
 
 	a {
 		font-size: 0.8125rem;
 	}
 
+	form[role="search"] {
+		margin-left: 1rem;
+	}
+
 	&.toggled {
-		div.menu {
+		div.menu,
+		ul.menu {
 			position: absolute;
 			top: 57px;
 			right: 0;

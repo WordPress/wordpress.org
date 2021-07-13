@@ -139,14 +139,14 @@ export function loadFavorites( patternIds ) {
  * @return {Object} Action object.
  */
 export function* addFavorite( patternId ) {
-	const success = yield apiFetch( {
+	const result = yield apiFetch( {
 		path: '/wporg/v1/pattern-favorites',
 		method: 'POST',
 		data: { id: patternId },
 	} );
 	// Silently discarding any errors.
-	if ( success === true ) {
-		return { type: 'ADD_FAVORITE', patternId: patternId };
+	if ( 'number' === typeof result ) {
+		return { type: 'ADD_FAVORITE', patternId: patternId, count: result };
 	}
 }
 
@@ -158,13 +158,13 @@ export function* addFavorite( patternId ) {
  * @return {Object} Action object.
  */
 export function* removeFavorite( patternId ) {
-	const success = yield apiFetch( {
+	const result = yield apiFetch( {
 		path: '/wporg/v1/pattern-favorites',
 		method: 'DELETE',
 		data: { id: patternId },
 	} );
 	// Silently discarding any errors.
-	if ( success === true ) {
-		return { type: 'REMOVE_FAVORITE', patternId: patternId };
+	if ( 'number' === typeof result ) {
+		return { type: 'REMOVE_FAVORITE', patternId: patternId, count: result };
 	}
 }
