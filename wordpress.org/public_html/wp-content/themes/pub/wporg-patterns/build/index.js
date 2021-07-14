@@ -7560,6 +7560,104 @@ const wordpress = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["create
 
 /***/ }),
 
+/***/ "../../../../node_modules/dequal/dist/index.mjs":
+/*!****************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/dequal/dist/index.mjs ***!
+  \****************************************************************************************/
+/*! exports provided: dequal */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dequal", function() { return dequal; });
+var has = Object.prototype.hasOwnProperty;
+
+function find(iter, tar, key) {
+	for (key of iter.keys()) {
+		if (dequal(key, tar)) return key;
+	}
+}
+
+function dequal(foo, bar) {
+	var ctor, len, tmp;
+	if (foo === bar) return true;
+
+	if (foo && bar && (ctor=foo.constructor) === bar.constructor) {
+		if (ctor === Date) return foo.getTime() === bar.getTime();
+		if (ctor === RegExp) return foo.toString() === bar.toString();
+
+		if (ctor === Array) {
+			if ((len=foo.length) === bar.length) {
+				while (len-- && dequal(foo[len], bar[len]));
+			}
+			return len === -1;
+		}
+
+		if (ctor === Set) {
+			if (foo.size !== bar.size) {
+				return false;
+			}
+			for (len of foo) {
+				tmp = len;
+				if (tmp && typeof tmp === 'object') {
+					tmp = find(bar, tmp);
+					if (!tmp) return false;
+				}
+				if (!bar.has(tmp)) return false;
+			}
+			return true;
+		}
+
+		if (ctor === Map) {
+			if (foo.size !== bar.size) {
+				return false;
+			}
+			for (len of foo) {
+				tmp = len[0];
+				if (tmp && typeof tmp === 'object') {
+					tmp = find(bar, tmp);
+					if (!tmp) return false;
+				}
+				if (!dequal(len[1], bar.get(tmp))) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		if (ctor === ArrayBuffer) {
+			foo = new Uint8Array(foo);
+			bar = new Uint8Array(bar);
+		} else if (ctor === DataView) {
+			if ((len=foo.byteLength) === bar.byteLength) {
+				while (len-- && foo.getInt8(len) === bar.getInt8(len));
+			}
+			return len === -1;
+		}
+
+		if (ArrayBuffer.isView(foo)) {
+			if ((len=foo.byteLength) === bar.byteLength) {
+				while (len-- && foo[len] === bar[len]);
+			}
+			return len === -1;
+		}
+
+		if (!ctor || typeof foo === 'object') {
+			len = 0;
+			for (ctor in foo) {
+				if (has.call(foo, ctor) && ++len && !has.call(bar, ctor)) return false;
+				if (!(ctor in bar) || !dequal(foo[ctor], bar[ctor])) return false;
+			}
+			return Object.keys(bar).length === len;
+		}
+	}
+
+	return foo !== foo && bar !== bar;
+}
+
+
+/***/ }),
+
 /***/ "../../../../node_modules/react-use-gesture/dist/reactusegesture.esm.js":
 /*!****************************************************************************************************************!*\
   !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/react-use-gesture/dist/reactusegesture.esm.js ***!
@@ -10459,6 +10557,68 @@ function includeStartEndHandlers(handlers, handlerKey) {
 
 /***/ }),
 
+/***/ "../../../../node_modules/use-deep-compare-effect/dist/use-deep-compare-effect.esm.js":
+/*!******************************************************************************************************************************!*\
+  !*** /Users/ryelle/Projects/Work/pattern-directory/node_modules/use-deep-compare-effect/dist/use-deep-compare-effect.esm.js ***!
+  \******************************************************************************************************************************/
+/*! exports provided: default, useDeepCompareEffectNoCheck */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useDeepCompareEffectNoCheck", function() { return useDeepCompareEffectNoCheck; });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var dequal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! dequal */ "../../../../node_modules/dequal/dist/index.mjs");
+
+
+
+function checkDeps(deps) {
+  if (!deps || !deps.length) {
+    throw new Error('useDeepCompareEffect should not be used with no dependencies. Use React.useEffect instead.');
+  }
+
+  if (deps.every(isPrimitive)) {
+    throw new Error('useDeepCompareEffect should not be used with dependencies that are all primitive values. Use React.useEffect instead.');
+  }
+}
+
+function isPrimitive(val) {
+  return val == null || /^[sbn]/.test(typeof val);
+}
+
+function useDeepCompareMemoize(value) {
+  var ref = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+  var signalRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(0);
+
+  if (!Object(dequal__WEBPACK_IMPORTED_MODULE_1__["dequal"])(value, ref.current)) {
+    ref.current = value;
+    signalRef.current += 1;
+  }
+
+  return [signalRef.current];
+}
+
+function useDeepCompareEffect(callback, dependencies) {
+  if (true) {
+    checkDeps(dependencies);
+  } // eslint-disable-next-line react-hooks/exhaustive-deps
+
+
+  return Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(callback, useDeepCompareMemoize(dependencies));
+}
+
+function useDeepCompareEffectNoCheck(callback, dependencies) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(callback, useDeepCompareMemoize(dependencies));
+}
+
+/* harmony default export */ __webpack_exports__["default"] = (useDeepCompareEffect);
+
+
+
+/***/ }),
+
 /***/ "./node_modules/classnames/index.js":
 /*!******************************************!*\
   !*** ./node_modules/classnames/index.js ***!
@@ -12941,8 +13101,7 @@ const Patterns = () => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var use_deep_compare_effect__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! use-deep-compare-effect */ "../../../../node_modules/use-deep-compare-effect/dist/use-deep-compare-effect.esm.js");
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_url__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/url */ "@wordpress/url");
@@ -12950,6 +13109,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
 /* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../hooks */ "./src/hooks/index.js");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
+/**
+ * External dependencies
+ */
+
 /**
  * WordPress dependencies
  */
@@ -13022,9 +13185,10 @@ const QueryMonitor = () => {
 
   if (myPatternStatus && 'page' !== myPatternStatus) {
     query.status = myPatternStatus;
-  }
+  } // Deep compare the object dependency, since `query` is a new object on every render.
 
-  Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(() => {
+
+  Object(use_deep_compare_effect__WEBPACK_IMPORTED_MODULE_0__["default"])(() => {
     if (queryReady) {
       setCurrentQuery(query);
     }

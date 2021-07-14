@@ -56,7 +56,8 @@
 		"postcss": "8.3.0",
 		"react-use-gesture": "9.1.3",
 		"rtlcss": "3.2.1",
-		"sass": "1.34.1"
+		"sass": "1.34.1",
+		"use-deep-compare-effect": "1.6.1"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js",

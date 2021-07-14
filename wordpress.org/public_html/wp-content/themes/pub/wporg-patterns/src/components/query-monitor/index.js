@@ -1,7 +1,11 @@
 /**
+ * External dependencies
+ */
+import useDeepCompareEffect from 'use-deep-compare-effect';
+
+/**
  * WordPress dependencies
  */
-import { useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getQueryArgs } from '@wordpress/url';
 
@@ -39,6 +43,7 @@ const QueryMonitor = () => {
 		},
 		[ categorySlug ]
 	);
+
 	if ( categoryId ) {
 		query[ 'pattern-categories' ] = categoryId;
 	}
@@ -63,7 +68,8 @@ const QueryMonitor = () => {
 		query.status = myPatternStatus;
 	}
 
-	useEffect( () => {
+	// Deep compare the object dependency, since `query` is a new object on every render.
+	useDeepCompareEffect( () => {
 		if ( queryReady ) {
 			setCurrentQuery( query );
 		}
