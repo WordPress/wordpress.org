@@ -678,7 +678,7 @@ class Themes_API {
 		$repo_package  = new WPORG_Themes_Repo_Package( $theme->ID );
 		$phil->version = $repo_package->latest_version();
 
-		$phil->preview_url = "https://wp-themes.com/{$theme->post_name}";
+		$phil->preview_url = "https://wp-themes.com/{$theme->post_name}/";
 
 		$author = get_user_by( 'id', $theme->post_author );
 
