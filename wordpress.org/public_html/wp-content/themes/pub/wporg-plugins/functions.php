@@ -360,10 +360,10 @@ function social_meta_data() {
 		// Set to banner-772x250.
 		$image = $banner['banner'];
 	} elseif ( ! $icon['generated'] && ( $icon['icon_2x'] ) ) {
-		// Set to icon256x256.
+		// Set to icon-256x256.
 		$image = $icon['icon_2x'];
 	} elseif ( ! $icon['generated'] && ( $icon['icon'] ) ) {
-		// Set to icon128x128.
+		// Set to icon-128x128.
 		$image = $icon['icon'];
 	} else {
 		// Fallback to WordPress logo.
