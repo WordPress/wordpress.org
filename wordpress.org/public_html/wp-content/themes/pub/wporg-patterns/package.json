@@ -62,10 +62,9 @@
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js",
 		"globals": {
-			"wporgAssetUrl": "readonly",
-			"wporgLoginUrl": "readonly",
-			"wporgSiteUrl": "readonly",
-			"wporgLocale": "readonly"
+			"wporgLocale": "readonly",
+			"wporgPatternsData": "readonly",
+			"wporgPatternsUrl": "readonly"
 		}
 	},
 	"stylelint": {

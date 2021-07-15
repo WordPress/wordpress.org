@@ -9,35 +9,45 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import Menu from './menu';
 import PatternGrid from '../pattern-grid';
+import PatternGridMenu from '../pattern-grid-menu';
 import PatternThumbnail from '../pattern-thumbnail';
 import QueryMonitor from '../query-monitor';
 import { RouteProvider } from '../../hooks';
 
-const MyPatterns = () => {
-	const query = useSelect( ( select ) => select( patternStore ).getCurrentQuery() );
-	const author = wporgPatternsData.userId;
+const MyFavorites = () => {
+	const { favorites, query } = useSelect( ( select ) => ( {
+		favorites: select( patternStore ).getFavorites(),
+		query: select( patternStore ).getCurrentQuery(),
+	} ) );
+	const isLoggedIn = !! wporgPatternsData.userId;
 
-	if ( ! author ) {
+	if ( ! isLoggedIn ) {
 		const loginUrl = addQueryArgs( wporgPatternsUrl.login, { redirect_to: window.location } );
 		return (
 			<div className="entry-content">
-				<p>{ __( 'Please log in to view your patterns.', 'wporg-patterns' ) }</p>
+				<p>{ __( 'Please log in to view your favorite patterns.', 'wporg-patterns' ) }</p>
 				<a className="button button-primary" href={ loginUrl }>
 					{ __( 'Log in', 'wporg-patterns' ) }
 				</a>
 			</div>
 		);
 	}
-	// Show all patterns regardless of status, but if the current query has a status (the view is draft, for
-	// example), that will override `any`. Lastly, make sure this shows the current user's patterns.
-	const modifiedQuery = { status: 'any', ...query, author: author };
+
+	if ( ! favorites.length ) {
+		return (
+			<div className="entry-content">
+				<p>{ __( 'You haven’t favorited any patterns yet.', 'wporg-patterns' ) }</p>
+			</div>
+		);
+	}
+
+	const modifiedQuery = { ...query, include: favorites };
 
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<Menu />
+			<PatternGridMenu basePath="/my-favorites/" query={ modifiedQuery } />
 			<PatternGrid query={ modifiedQuery }>
 				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
 			</PatternGrid>
@@ -45,4 +55,4 @@ const MyPatterns = () => {
 	);
 };
 
-export default MyPatterns;
+export default MyFavorites;

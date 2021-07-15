@@ -13,13 +13,13 @@ import PatternThumbnail from '../pattern-thumbnail';
 import { RouteProvider } from '../../hooks';
 import { store as patternStore } from '../../store';
 
-const PatternsSearch = ( { resultCount } ) => {
+const PatternsSearch = () => {
 	const query = useSelect( ( select ) => select( patternStore ).getCurrentQuery() );
 
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<CategoryContextBar resultCount={ resultCount } />
+			<CategoryContextBar query={ query } />
 			<PatternGrid query={ query }>
 				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
 			</PatternGrid>

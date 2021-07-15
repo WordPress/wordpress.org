@@ -22,7 +22,7 @@ const Patterns = () => {
 		<RouteProvider>
 			<QueryMonitor />
 			<BreadcrumbMonitor />
-			<PatternGridMenu />
+			<PatternGridMenu query={ query } />
 			<PatternGrid query={ query }>
 				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
 			</PatternGrid>

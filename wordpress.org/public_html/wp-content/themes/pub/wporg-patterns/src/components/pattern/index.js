@@ -15,7 +15,7 @@ import PatternThumbnail from '../pattern-thumbnail';
 import ReportPatternButton from '../report-pattern-button';
 import { store as patternStore } from '../../store';
 
-const Pattern = ( { postId, userHasReported, loggedIn } ) => {
+const Pattern = ( { postId, userHasReported } ) => {
 	// postId as passed from the HTML dataset is a string.
 	postId = Number( postId ) || 0;
 	const pattern = useSelect( ( select ) => select( patternStore ).getPattern( postId ), [ postId ] );
@@ -29,11 +29,7 @@ const Pattern = ( { postId, userHasReported, loggedIn } ) => {
 			<div className="pattern-preview__container">
 				<PatternPreview blockContent={ pattern.content.rendered } />
 				<div className="pattern__meta">
-					<ReportPatternButton
-						userHasReported={ userHasReported === 'true' }
-						loggedIn={ loggedIn === 'true' }
-						postId={ postId }
-					/>
+					<ReportPatternButton userHasReported={ userHasReported === 'true' } postId={ postId } />
 				</div>
 			</div>
 			<div className="entry-content">

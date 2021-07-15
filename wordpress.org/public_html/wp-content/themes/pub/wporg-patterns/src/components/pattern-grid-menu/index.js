@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { getPath } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -13,9 +12,12 @@ import Menu from '../menu';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 
-const PatternGridMenu = () => {
+const PatternGridMenu = ( { basePath = '/', query } ) => {
 	const { path, update: updatePath } = useRoute();
 	const categorySlug = getCategoryFromPath( path );
+
+	// Make sure the path is prefixed with the full site URL.
+	basePath = wporgPatternsUrl.site + basePath;
 
 	const { categories, isLoading } = useSelect( ( select ) => {
 		const { getCategories, isLoadingCategories } = select( patternStore );
@@ -24,6 +26,7 @@ const PatternGridMenu = () => {
 			isLoading: isLoadingCategories(),
 		};
 	} );
+
 	return (
 		<>
 			<nav className="pattern-grid-menu">
@@ -33,7 +36,9 @@ const PatternGridMenu = () => {
 						categories
 							? categories.map( ( record ) => {
 									return {
-										value: `/${ getPath( record.link ) || '' }`,
+										value: record.slug
+											? `${ basePath }pattern-categories/${ record.slug }/`
+											: basePath,
 										slug: record.slug,
 										label: record.name,
 									};
@@ -47,7 +52,7 @@ const PatternGridMenu = () => {
 					isLoading={ isLoading }
 				/>
 			</nav>
-			<CategoryContextBar />
+			<CategoryContextBar query={ query } />
 		</>
 	);
 };

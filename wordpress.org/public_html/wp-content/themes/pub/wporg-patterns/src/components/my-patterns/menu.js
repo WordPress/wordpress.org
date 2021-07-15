@@ -20,17 +20,17 @@ export default function () {
 	// @todo Load from an API to get pattern counts.
 	const options = [
 		{
-			value: `${ wporgSiteUrl }/my-patterns/`,
+			value: `${ wporgPatternsUrl.site }/my-patterns/`,
 			slug: 'all',
 			label: __( 'All', 'wporg-patterns' ),
 		},
 		{
-			value: `${ wporgSiteUrl }/my-patterns/draft/`,
+			value: `${ wporgPatternsUrl.site }/my-patterns/draft/`,
 			slug: 'draft',
 			label: __( 'Drafts', 'wporg-patterns' ),
 		},
 		{
-			value: `${ wporgSiteUrl }/my-patterns/pending/`,
+			value: `${ wporgPatternsUrl.site }/my-patterns/pending/`,
 			slug: 'pending',
 			label: __( 'Pending Review', 'wporg-patterns' ),
 		},

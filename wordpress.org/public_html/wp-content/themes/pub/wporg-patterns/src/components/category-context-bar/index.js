@@ -19,7 +19,7 @@ import { getCategoryFromPath, getSearchTermFromPath } from '../../utils';
 import { getDefaultMessage, getLoadingMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
-function CategoryContextBar() {
+function CategoryContextBar( { query } ) {
 	const { path } = useRoute();
 	const [ height, setHeight ] = useState();
 	const [ message, setMessage ] = useState();
@@ -29,28 +29,22 @@ function CategoryContextBar() {
 	} );
 	const innerRef = useRef( null );
 
-	const { isAllCategory, category, count, isLoadingPatterns, patterns } = useSelect(
+	const { isAllCategory, category, count, isLoadingPatterns } = useSelect(
 		( select ) => {
-			const {
-				getCategoryBySlug,
-				getPatternsByQuery,
-				isLoadingPatternsByQuery,
-				getCurrentQuery,
-				getPatternTotalsByQuery,
-			} = select( patternStore );
+			const { getCategoryBySlug, isLoadingPatternsByQuery, getPatternTotalsByQuery } = select(
+				patternStore
+			);
 			const categorySlug = getCategoryFromPath( path );
 			const _category = getCategoryBySlug( categorySlug );
-			const query = getCurrentQuery();
 
 			return {
 				isAllCategory: _category && _category.id === -1,
 				isLoadingPatterns: isLoadingPatternsByQuery( query ),
-				patterns: query ? getPatternsByQuery( query ) : [],
 				category: _category,
 				count: getPatternTotalsByQuery( query ),
 			};
 		},
-		[ path ]
+		[ path, query ]
 	);
 
 	useEffect( () => {
@@ -79,7 +73,7 @@ function CategoryContextBar() {
 		if ( searchTerm.length > 0 ) {
 			setMessage( getSearchMessage( count, searchTerm ) );
 		}
-	}, [ category, isLoadingPatterns, patterns ] );
+	}, [ category, isLoadingPatterns ] );
 
 	useEffect( () => {
 		const _height = message ? innerRef.current.offsetHeight : 0;

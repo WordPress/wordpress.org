@@ -166,4 +166,12 @@ body.single-wporg-pattern {
 		width: 2rem;
 		border-radius: 4px;
 	}
+
+	.pattern-code {
+		margin-bottom: 5rem;
+		width: 100%;
+		height: 10rem;
+		resize: vertical;
+		font-family: monospace;
+	}
 }

@@ -73,12 +73,30 @@ function enqueue_assets() {
 
 		wp_add_inline_script(
 			'wporg-pattern-script',
+			sprintf( "var wporgLocale = '%s';", wp_json_encode( get_locale() ) ),
+			'before'
+		);
+
+		wp_add_inline_script(
+			'wporg-pattern-script',
 			sprintf(
-				'var wporgAssetUrl = "%s", wporgSiteUrl = "%s", wporgLoginUrl = "%s", wporgLocale = \'%s\';',
-				esc_url( get_stylesheet_directory_uri() ),
-				esc_url( home_url() ),
-				esc_url( wp_login_url() ),
-				wp_json_encode( get_locale() )
+				"var wporgPatternsData = JSON.parse( decodeURIComponent( '%s' ) )",
+				rawurlencode( wp_json_encode( array(
+					'userId' => get_current_user_id(),
+				) ) ),
+			),
+			'before'
+		);
+
+		wp_add_inline_script(
+			'wporg-pattern-script',
+			sprintf(
+				"var wporgPatternsUrl = JSON.parse( decodeURIComponent( '%s' ) )",
+				rawurlencode( wp_json_encode( array(
+					'assets' => esc_url( get_stylesheet_directory_uri() ),
+					'site' => esc_url( home_url() ),
+					'login' => esc_url( wp_login_url() ),
+				) ) ),
 			),
 			'before'
 		);
@@ -141,7 +159,7 @@ function body_class( $classes, $class ) {
 
 /**
  * Handle queries.
- * - My Patterns and Favories have "subpages" which should still show the root page.
+ * - My Patterns and My Favories have "subpages" which should still show the root page.
  * - Default & archive views should show patterns, not posts.
  *
  * @param \WP_Query $query The WordPress Query object.
@@ -157,7 +175,7 @@ function pre_get_posts( $query ) {
 	$pagename = $query->get( 'pagename' );
 	if ( $pagename ) {
 		list( $_pagename ) = explode( '/', $pagename );
-		if ( in_array( $_pagename, array( 'my-patterns', 'favorites' ) ) ) {
+		if ( in_array( $_pagename, array( 'my-patterns', 'my-favorites' ) ) ) {
 			// Need to get the page ID because this is set before `pre_get_posts` fires.
 			$page = get_page_by_path( $_pagename );
 			$query->set( 'pagename', $_pagename );
@@ -178,6 +196,7 @@ function pre_get_posts( $query ) {
  */
 function add_rewrite() {
 	add_rewrite_rule( '^my-patterns/[^/]+/?$', 'index.php?pagename=my-patterns', 'top' );
+	add_rewrite_rule( '^my-favorites/.+/?$', 'index.php?pagename=my-favorites', 'top' );
 }
 
 

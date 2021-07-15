@@ -4,10 +4,7 @@
 	max-width: 960px;
 	grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
 	gap: 1.5rem;
-
-	> * {
-		align-self: baseline;
-	}
+	align-items: start;
 
 	@include breakpoint( $breakpoint-large ) {
 		margin-left: auto;

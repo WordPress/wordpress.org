@@ -20,8 +20,6 @@ get_header();
 	<main id="main" class="site-main" role="main">
 
 		<div id="patterns__container">
-			<!-- Filter placeholder -->
-
 			<div class="pattern-grid">
 				<?php
 				if ( have_posts() ) :

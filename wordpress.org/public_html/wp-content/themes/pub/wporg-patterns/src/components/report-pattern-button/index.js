@@ -12,10 +12,11 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import ReportPatternModal from '../report-pattern-modal';
 
-const ReportPatternButton = ( { postId, loggedIn, userHasReported } ) => {
+const ReportPatternButton = ( { postId, userHasReported } ) => {
 	const [ showModal, setShowModal ] = useState( false );
 	const [ hasSubmitted, setHasSubmitted ] = useState( false );
 	const alreadySubmitted = userHasReported || hasSubmitted;
+	const isLoggedIn = !! wporgPatternsData.userId;
 
 	if ( alreadySubmitted ) {
 		return (
@@ -26,7 +27,7 @@ const ReportPatternButton = ( { postId, loggedIn, userHasReported } ) => {
 		);
 	}
 
-	if ( ! loggedIn ) {
+	if ( ! isLoggedIn ) {
 		return (
 			<p className="pattern-report-button__copy">
 				<a
