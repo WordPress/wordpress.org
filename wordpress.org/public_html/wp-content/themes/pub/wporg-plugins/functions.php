@@ -349,8 +349,26 @@ function social_meta_data() {
 	$icon   = Template::get_plugin_icon();
 	$banner = Template::get_plugin_banner();
 
-	$banner['banner']    = $banner['banner'] ?? false;
-	$banner['banner_2x'] = $banner['banner_2x'] ?? false;
+	/*
+	 * Set social image for both twitter:image and og:image in this priority:
+	 * 2x banner, 1x banner, 2x icon, 1x icon, WordPress logo.
+	 */
+	if ( $banner['banner_2x'] ) {
+		// Set to banner-1544x500.
+		$image = $banner['banner_2x'];
+	} elseif ( $banner['banner'] ) {
+		// Set to banner-772x250.
+		$image = $banner['banner'];
+	} elseif ( ! $icon['generated'] && ( $icon['icon_2x'] ) ) {
+		// Set to icon256x256.
+		$image = $icon['icon_2x'];
+	} elseif ( ! $icon['generated'] && ( $icon['icon'] ) ) {
+		// Set to icon128x128.
+		$image = $icon['icon'];
+	} else {
+		// Fallback to WordPress logo.
+		$image = dirname( __FILE__ ) . '/images/wp-logo-blue.png';
+	}
 
 	printf( '<meta property="og:title" content="%s" />' . "\n", the_title_attribute( array( 'echo' => false ) ) );
 	printf( '<meta property="og:description" content="%s" />' . "\n", esc_attr( strip_tags( get_the_excerpt() ) ) );
@@ -358,15 +376,11 @@ function social_meta_data() {
 	printf( '<meta property="og:site_name" content="%s" />' . "\n", esc_attr( $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org' ) );
 	printf( '<meta property="og:type" content="website" />' . "\n" );
 	printf( '<meta property="og:url" content="%s" />' . "\n", esc_url( get_permalink() ) );
-	printf( '<meta name="twitter:card" content="summary_large_image">' . "\n" );
+	printf( '<meta name="twitter:card" content="%s">' . "\n", esc_attr( $banner['banner_2x'] || $banner['banner'] ? 'summary_large_image' : 'summary' ) );
 	printf( '<meta name="twitter:site" content="@WordPress">' . "\n" );
+	printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $image ) );
+	printf( '<meta property="og:image" content="%s" />' . "\n", esc_url( $image ) );
 
-	if ( $banner['banner_2x'] ) {
-		printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $banner['banner_2x'] ) );
-	}
-	if ( $banner['banner'] ) {
-		printf( '<meta property="og:image" content="%s" />' . "\n", esc_url( $banner['banner'] ) );
-	}
 	if ( ! $icon['generated'] && ( $icon['icon_2x'] || $icon['icon'] ) ) {
 		printf( '<meta name="thumbnail" content="%s" />' . "\n", esc_url( $icon['icon_2x'] ?: $icon['icon'] ) );
 	}
