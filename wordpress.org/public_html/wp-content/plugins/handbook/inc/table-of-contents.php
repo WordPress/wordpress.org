@@ -10,6 +10,13 @@ class WPorg_Handbook_TOC {
 	protected $styles = '<style> .toc-jump { text-align: right; font-size: 12px; } .page .toc-heading { margin-top: -50px; padding-top: 50px !important; }</style>';
 
 	/**
+	 * Array of HTML ids known to exist on the page or that have been auto-generated.
+	 *
+	 * @var array
+	 */
+	private $used_ids = [];
+
+	/**
 	 * Arguments.
 	 *
 	 * @access protected
@@ -103,6 +110,7 @@ class WPorg_Handbook_TOC {
 			return $content;
 		}
 
+		$this->used_ids = $this->get_reserved_ids();
 		for ( $i = 1; $i <= 4; $i++ )
 			$content = $this->add_ids_and_jumpto_links( "h$i", $content );
 
@@ -153,7 +161,6 @@ class WPorg_Handbook_TOC {
 		$first = true;
 		$matches = array();
 		$replacements = array();
-		$used_ids = $this->get_reserved_ids();
 
 		foreach ( $items as $item ) {
 			$replacement = '';
@@ -163,11 +170,11 @@ class WPorg_Handbook_TOC {
 			// Append unique suffix if anchor ID isn't unique.
 			$count = 2;
 			$orig_id = $id;
-			while ( in_array( $id, $used_ids ) && $count < 50 ) {
+			while ( in_array( $id, $this->used_ids ) && $count < 50 ) {
 				$id = $orig_id . '-' . $count;
 				$count++;
 			}
-			$used_ids[] = $id;
+			$this->used_ids[] = $id;
 		
 			if ( ! $first ) {
 				$replacement .= '<p class="toc-jump"><a href="#top">' . __( 'Top &uarr;', 'wporg' ) . '</a></p>';
