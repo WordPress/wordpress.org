@@ -184,5 +184,5 @@ export function getFavorites( state ) {
  * @return {number[]} A list of favorite pattern IDs.
  */
 export function isFavorite( state, patternId ) {
-	return state.favorites.includes( patternId );
+	return state.favorites?.includes( patternId );
 }

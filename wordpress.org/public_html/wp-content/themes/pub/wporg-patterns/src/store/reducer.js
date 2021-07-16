@@ -130,7 +130,7 @@ export function patternFlagReasons( state = undefined, action ) {
  * @param {Object} action Dispatched action.
  * @return {Object} Updated state.
  */
-export function favorites( state = [], action ) {
+export function favorites( state = null, action ) {
 	const { patternId } = action;
 	switch ( action.type ) {
 		case 'LOAD_FAVORITES':

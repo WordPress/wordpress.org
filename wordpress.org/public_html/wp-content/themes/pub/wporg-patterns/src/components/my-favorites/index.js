@@ -9,6 +9,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import EmptyHeader from './empty-header';
 import PatternGrid from '../pattern-grid';
 import PatternGridMenu from '../pattern-grid-menu';
 import PatternThumbnail from '../pattern-thumbnail';
@@ -16,10 +17,31 @@ import QueryMonitor from '../query-monitor';
 import { RouteProvider } from '../../hooks';
 
 const MyFavorites = () => {
-	const { favorites, query } = useSelect( ( select ) => ( {
-		favorites: select( patternStore ).getFavorites(),
-		query: select( patternStore ).getCurrentQuery(),
-	} ) );
+	const { isEmpty, query } = useSelect( ( select ) => {
+		const { getCurrentQuery, getFavorites, getPatternsByQuery, isLoadingPatternsByQuery } = select(
+			patternStore
+		);
+		const _query = getCurrentQuery() || {};
+		const favorites = getFavorites();
+
+		// Favorites haven't loaded yet.
+		if ( favorites === null ) {
+			return {
+				query: false,
+				isEmpty: false,
+			};
+		}
+
+		const modifiedQuery = { ..._query, include: favorites };
+		const isLoading = !! favorites.length && isLoadingPatternsByQuery( modifiedQuery );
+		const posts = favorites.length ? getPatternsByQuery( modifiedQuery ) : [];
+
+		return {
+			query: modifiedQuery,
+			isEmpty: ! isLoading && ! posts.length,
+		};
+	} );
+
 	const isLoggedIn = !! wporgPatternsData.userId;
 
 	if ( ! isLoggedIn ) {
@@ -34,21 +56,15 @@ const MyFavorites = () => {
 		);
 	}
 
-	if ( ! favorites.length ) {
-		return (
-			<div className="entry-content">
-				<p>{ __( 'You haven’t favorited any patterns yet.', 'wporg-patterns' ) }</p>
-			</div>
-		);
+	if ( isEmpty ) {
+		return <EmptyHeader />;
 	}
-
-	const modifiedQuery = { ...query, include: favorites };
 
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<PatternGridMenu basePath="/my-favorites/" query={ modifiedQuery } />
-			<PatternGrid query={ modifiedQuery }>
+			<PatternGridMenu basePath="/my-favorites/" query={ query } />
+			<PatternGrid query={ query }>
 				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
 			</PatternGrid>
 		</RouteProvider>

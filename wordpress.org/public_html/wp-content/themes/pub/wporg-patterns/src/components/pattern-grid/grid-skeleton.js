@@ -42,4 +42,9 @@ const CardSkeleton = () => {
 	);
 };
 
-export default CardSkeleton;
+const GridSkeleton = ( { length = 6 } ) =>
+	Array( length )
+		.fill()
+		.map( ( val, idx ) => <CardSkeleton key={ idx } /> );
+
+export default GridSkeleton;
