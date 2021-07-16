@@ -1,6 +1,7 @@
 module.exports = function ( grunt ) {
 	const isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 	const defaultWebpackConfig = require( '@wordpress/scripts/config/webpack.config' );
+	const isProduction = process.env.NODE_ENV === 'production';
 
 	const getSassFiles = () => {
 		const files = {};
@@ -62,7 +63,7 @@ module.exports = function ( grunt ) {
 	grunt.initConfig( {
 		postcss: {
 			options: {
-				map: 'build' !== process.argv[ 2 ],
+				map: ! isProduction,
 				processors: [
 					require( 'autoprefixer' )( {
 						cascade: false,
@@ -88,9 +89,8 @@ module.exports = function ( grunt ) {
 		sass: {
 			options: {
 				implementation: require( 'sass' ),
-				sourceMap: true,
-				// Don't add source map URL in built version.
-				omitSourceMapUrl: 'build' === process.argv[ 2 ],
+				sourceMap: ! isProduction,
+				omitSourceMapUrl: isProduction,
 				outputStyle: 'expanded',
 			},
 			dist: {
@@ -121,21 +121,27 @@ module.exports = function ( grunt ) {
 				tasks: [ 'webpack' ],
 			},
 		},
+
+		clean: {
+			build: [ 'build/*' ],
+			css: [ 'css/*.css', 'css/*.css.map' ],
+		},
 	} );
 
-	if ( 'build' === process.argv[ 2 ] ) {
+	if ( isProduction ) {
 		grunt.config.merge( { postcss: { options: { processors: [ require( 'cssnano' ) ] } } } );
 	}
 
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( '@lodder/grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-sass-globbing' );
+	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-webpack' );
 
 	grunt.registerTask( 'css', [ 'sass_globbing', 'sass', 'postcss' ] );
 	grunt.registerTask( 'js', [ 'webpack' ] );
 
-	grunt.registerTask( 'default', [ 'css', 'webpack' ] );
-	grunt.registerTask( 'build', [ 'css', 'webpack' ] ); // Automatically runs "production" steps
+	grunt.registerTask( 'default', [ 'clean', 'css', 'js' ] );
+	grunt.registerTask( 'build', [ 'clean', 'css', 'js' ] );
 };

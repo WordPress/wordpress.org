@@ -6,19 +6,14 @@
 		display: block;
 		padding: 3.75rem 1rem;
 
-
 		@include breakpoint( $breakpoint-medium ) {
-			display: grid;
-			grid-template-rows: auto 1fr;
-			grid-template-columns: 1fr 25rem;
-
 			background-image: url(../images/masthead-bg.png);
 			background-size: contain;
 			background-repeat: no-repeat;
 			background-position-x: 160%;
 
-			> * {
-				align-self: center;
+			> div {
+				max-width: 50%;
 			}
 		}
 
@@ -27,15 +22,20 @@
 		}
 
 		@include breakpoint( $breakpoint-large ) {
-			grid-template-columns: 1fr 30rem;
 			background-position-x: right;
+		}
+
+		.site-link {
+			display: inline-block;
+			margin: $gutter-default $gutter-default / 2 0 0;
+			color: $color-white;
+			font-size: 0.8125rem;
+			text-decoration: underline;
 		}
 	}
 
 	// Duplicate class for specifity override.
 	.site-title.site-title {
-		grid-column-start: 1;
-		grid-row-start: 1;
 		margin-top: 0;
 		text-align: left;
 		font-size: 3rem;
@@ -43,8 +43,6 @@
 	}
 
 	.site-description {
-		grid-column-start: 1;
-		grid-row-start: 2;
 		margin: 0 0 1.5rem;
 		font-size: 1rem;
 		line-height: $type__line-height;
@@ -53,8 +51,6 @@
 	}
 
 	.pattern-search {
-		grid-column-start: 1;
-		grid-row-start: 3;
 
 		@include breakpoint( $breakpoint-large ) {
 			max-width: 60%;
