@@ -90,8 +90,8 @@ class Export_JSON extends WP_CLI_Command {
 		}
 
 		// Create JED json files for each JS file.
-		$plugin_json_files = $this->build_json_files( $gp_project, $gp_locale, $set, $plugins, "{$export_dir}/plugins/{$textdomain}-{$gp_locale->wp_locale}" );
-		$theme_json_files  = $this->build_json_files( $gp_project, $gp_locale, $set, $themes, "{$export_dir}/themes/{$textdomain}-{$gp_locale->wp_locale}" );
+		$plugin_json_files = $this->build_json_files( $gp_project, $gp_locale, $translation_set, $plugins, "{$export_dir}/plugins/{$textdomain}-{$gp_locale->wp_locale}" );
+		$theme_json_files  = $this->build_json_files( $gp_project, $gp_locale, $translation_set, $themes, "{$export_dir}/themes/{$textdomain}-{$gp_locale->wp_locale}" );
 
 		WP_CLI::success( "JSON Files for {$project_slug} {$locale} generated." );
 	}
