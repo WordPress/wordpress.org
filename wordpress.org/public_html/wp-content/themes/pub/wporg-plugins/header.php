@@ -36,7 +36,7 @@ require WPORGPATH . 'header.php';
 						$plugin_count = wp_count_posts( 'plugin' )->publish;
 						printf(
 							/* Translators: Total number of plugins. */
-							esc_html( _n( 'Extend your WordPress experience with %s plugin.', 'Extend your WordPress experience with %s plugins.', $plugin_count, 'wporg-plugins' ) ),
+							esc_html( _n( 'Extend your WordPress experience! Browse %s free plugin.', 'Extend your WordPress experience! Browse %s free plugins.', $plugin_count, 'wporg-plugins' ) ),
 							esc_html( number_format_i18n( $plugin_count ) )
 						);
 						?>
