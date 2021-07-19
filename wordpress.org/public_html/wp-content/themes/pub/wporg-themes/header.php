@@ -23,7 +23,7 @@ require WPORGPATH . 'header.php';
 				$theme_count = wp_count_posts( 'repopackage' )->publish;
 				printf(
 					/* Translators: Total number of themes. */
-					esc_html( _n( 'Add style to your WordPress site with %s theme.', 'Add style to your WordPress site with %s themes.', $theme_count, 'wporg-themes' ) ),
+					esc_html( _n( 'Add style to your WordPress site! Browse %s free theme.', 'Add style to your WordPress site! Browse %s free themes.', $theme_count, 'wporg-themes' ) ),
 					esc_html( number_format_i18n( $theme_count ) )
 				);
 				?>
