@@ -79,6 +79,8 @@ describe( 'utils', () => {
 		it( 'should correctly return the search term', async () => {
 			expect( getSearchTermFromPath( '/search/header' ) ).toEqual( 'header' );
 			expect( getSearchTermFromPath( '/search/footer/' ) ).toEqual( 'footer' );
+			expect( getSearchTermFromPath( '/search/조선말/' ) ).toEqual( '조선말' );
+			expect( getSearchTermFromPath( '/search/조선말/' ) ).toHaveLength( 3 );
 			expect( getSearchTermFromPath( '/patterns/search/sidebar' ) ).toEqual( 'sidebar' );
 		} );
 	} );

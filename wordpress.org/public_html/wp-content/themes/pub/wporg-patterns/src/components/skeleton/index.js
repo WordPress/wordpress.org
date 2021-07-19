@@ -1,6 +1,6 @@
-const SkeletonWrapper = ( { style, children } ) => {
+const SkeletonWrapper = ( { className = '', style, children } ) => {
 	return (
-		<span className="pattern-skeleton__container" style={ style }>
+		<span className={ `${ className } pattern-skeleton__container` } style={ style }>
 			{ children }
 		</span>
 	);

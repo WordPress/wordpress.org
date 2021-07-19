@@ -37,17 +37,15 @@ export default function () {
 	];
 
 	return (
-		<nav className="pattern-grid-menu">
-			<Menu
-				label={ __( 'Menu', 'wporg-patterns' ) }
-				current={ view || 'all' }
-				options={ options }
-				onClick={ ( event ) => {
-					event.preventDefault();
-					updatePath( event.target.pathname );
-				} }
-				isLoading={ false }
-			/>
-		</nav>
+		<Menu
+			label={ __( 'Menu', 'wporg-patterns' ) }
+			current={ view || 'all' }
+			options={ options }
+			onClick={ ( event ) => {
+				event.preventDefault();
+				updatePath( event.target.pathname );
+			} }
+			isLoading={ false }
+		/>
 	);
 }

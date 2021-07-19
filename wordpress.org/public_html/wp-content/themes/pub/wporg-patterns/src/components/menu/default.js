@@ -23,7 +23,7 @@ const DefaultMenu = ( { current, isLoading, label = __( 'Main Menu', 'wporg-patt
 	}
 
 	return (
-		<>
+		<nav>
 			<h2 className="screen-reader-text">{ label }</h2>
 			<ul className="pattern-menu">
 				{ options.map( ( i ) => (
@@ -42,7 +42,7 @@ const DefaultMenu = ( { current, isLoading, label = __( 'Main Menu', 'wporg-patt
 					</li>
 				) ) }
 			</ul>
-		</>
+		</nav>
 	);
 };
 

@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __, _x, sprintf } from '@wordpress/i18n';
+import { getQueryString } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -17,15 +18,17 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 
 	const hasPrevious = currentPage > 1;
 	const hasNext = currentPage < totalPages;
-	const basePath = path.replace( /page\/\d+\/?$/, '' );
+	const queryString = getQueryString( path ) ? '?' + getQueryString( path ) : '';
+	const basePath = path.replace( queryString, '' ).replace( /page\/\d+\/?/, '' );
+
 	const pages = getPaginationList( totalPages, currentPage );
+
+	const urlFormat = `${ basePath }page/%s/${ queryString }`;
+	const getPageUrl = ( page ) => ( page === 1 ? `${ basePath }${ queryString }` : sprintf( urlFormat, page ) );
 
 	const onClick = ( event, page ) => {
 		event.preventDefault();
-		if ( page === 1 ) {
-			updatePath( `${ basePath }` );
-		}
-		updatePath( `${ basePath }page/${ page }/` );
+		updatePath( getPageUrl( page ) );
 	};
 
 	return (
@@ -35,7 +38,7 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 					{ hasPrevious && (
 						<a
 							className="pagination__link"
-							href={ `${ basePath }page/${ currentPage - 1 }` }
+							href={ getPageUrl( currentPage - 1 ) }
 							onClick={ ( event ) => onClick( event, currentPage - 1 ) }
 						>
 							<span className="screen-reader-text">{ __( 'Previous page', 'wporg-patterns' ) }</span>
@@ -57,7 +60,7 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 						<li className="pagination__item" key={ page }>
 							<a
 								className="pagination__link"
-								href={ `${ basePath }page/${ page }` }
+								href={ getPageUrl( page ) }
 								aria-current={ page === currentPage ? 'page' : undefined }
 								onClick={ ( event ) => onClick( event, page ) }
 							>
@@ -77,7 +80,7 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 					{ hasNext && (
 						<a
 							className="pagination__link"
-							href={ `${ basePath }page/${ currentPage + 1 }` }
+							href={ getPageUrl( currentPage + 1 ) }
 							onClick={ ( event ) => onClick( event, currentPage + 1 ) }
 						>
 							<span className="screen-reader-text">{ __( 'Next page', 'wporg-patterns' ) }</span>

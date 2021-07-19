@@ -35,7 +35,9 @@ const FavoriteButtonSmall = ( { className, label, patternId } ) => {
 		}
 	}, [ isFavorite ] );
 
-	const buttonClasses = classnames( className, 'button button-link pattern-favorite-button-small', {
+	const buttonClasses = classnames( className, 'pattern-favorite-button-small', {
+		button: hasPermission,
+		'button-link': hasPermission,
 		'is-favorited': isFavorite,
 	} );
 

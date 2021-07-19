@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useContext, useState } from '@wordpress/element';
+import { createContext, useContext, useEffect, useState } from '@wordpress/element';
 import { addQueryArgs, getPathAndQueryString, getQueryArgs } from '@wordpress/url';
 
 /**
@@ -57,6 +57,22 @@ export function RouteProvider( { children } ) {
 		window.history.pushState( '', '', newPath );
 		setPath( newPath );
 	};
+
+	/**
+	 * Updates the path to the current browser path.
+	 */
+	const setPathOnPop = () => {
+		setPath( document.location.href );
+	};
+
+	useEffect( () => {
+		// When the browser modifies the history, update our path.
+		window.addEventListener( 'popstate', setPathOnPop ); // eslint-disable-line @wordpress/no-global-event-listener
+
+		return () => {
+			window.removeEventListener( 'popstate', setPathOnPop ); // eslint-disable-line @wordpress/no-global-event-listener
+		};
+	}, [] );
 
 	return (
 		<StateContext.Provider

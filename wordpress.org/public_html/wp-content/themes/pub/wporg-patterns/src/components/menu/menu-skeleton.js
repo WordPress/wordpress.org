@@ -10,7 +10,7 @@ const PLACEHOLDER_COUNT = 7;
 
 const MenuSkeleton = () => {
 	return (
-		<SkeletonWrapper style={ { flexDirection: 'row' } }>
+		<SkeletonWrapper className="pattern-menu" style={ { flexDirection: 'row' } }>
 			{ Array( PLACEHOLDER_COUNT )
 				.fill()
 				.map( ( val, idx ) => (

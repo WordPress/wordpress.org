@@ -112,5 +112,5 @@ export const getPageFromPath = ( path ) => {
  * @return {string} The search term.
  */
 export const getSearchTermFromPath = ( path ) => {
-	return getValueFromPath( path, 'search' );
+	return decodeURI( getValueFromPath( path, 'search' ) );
 };
