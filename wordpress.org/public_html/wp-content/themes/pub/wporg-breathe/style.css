@@ -348,6 +348,10 @@ body,
 }
 
 @media (max-width: 876px) {
+	#primary {
+		-webkit-backface-visibility: initial;
+	}
+
 	body.responsive-show {
 		overflow-y: visible;
 		position: static;
