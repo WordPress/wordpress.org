@@ -3703,6 +3703,7 @@ section {
 	font-size: 1rem;
 	display: inline-block;
 	margin: 0;
+	word-break: break-word;
 }
 
 .bbpress #bbpress-forums div.bbp-reply-author,
