@@ -15,6 +15,34 @@ namespace WordPressdotorg\API\Patterns;
 
 main( $_SERVER['QUERY_STRING'] );
 
+/**
+ * Last minute rewrite of headers, to correct URLs set by the internal API endpoint.
+ *
+ * @param string $buffer
+ */
+function flush_handler( $buffer ) {
+
+	$old_headers = headers_list();
+
+	// Remove CORS header added by REST API
+	header_remove( 'access-control-allow-headers' );
+
+	$replace = true;
+
+	foreach( headers_list() as $header ) {
+		if ( 'Link: ' === substr( $header, 0, 6) ) {
+			$new_header = str_replace( 'https://wordpress.org/patterns/wp-json/wp/v2/wporg-pattern', 'https://api.wordpress.org/patterns/1.0', $header );
+			$new_header = str_replace( 'https://wordpress.org/patterns/wp-json/', 'https://api.wordpress.org/patterns/1.0/', $new_header );
+			if ( $new_header !== $header ) {
+				header( $new_header, $replace );
+				$replace = false; // Only replace the first time
+			}
+		}
+	}
+
+	return false; // original buffer will be output with no changes
+}
+
 
 /**
  * Proxy w.org/patterns API endpoints for reliability.
@@ -57,6 +85,8 @@ function main( $query_string ) {
 	}
 
 	$wp_init_host = $api_url_base . $endpoint . '?' . urldecode( http_build_query( $query_args ) );
+
+	ob_start( __NAMESPACE__ . '\flush_handler' );
 
 	// Load WordPress to process the request and output the response.
 	require_once dirname( dirname( __DIR__ ) ) . '/wp-init.php';
