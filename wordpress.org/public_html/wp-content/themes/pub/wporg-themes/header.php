@@ -33,8 +33,12 @@ require WPORGPATH . 'header.php';
 		<?php endif; ?>
 	</div>
 </header>
+
+<?php if ( ! is_page( 'upload' ) ) : ?>
 <nav id="site-navigation" class="main-navigation" role="navigation">
 	<ul id="menu-theme-directory" class="menu">
 		<li><a href="<?php echo home_url( '/commercial/' ); ?>"><?php _e( 'Commercial Themes', 'wporg-themes' ); ?></a></li>
 	</ul>
 </nav>
+<?php endif; ?>
+
