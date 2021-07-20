@@ -65,7 +65,7 @@ const MyFavorites = () => {
 			<QueryMonitor />
 			<PatternGridMenu basePath="/my-favorites/" query={ query } />
 			<PatternGrid query={ query }>
-				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
+				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
 			</PatternGrid>
 		</RouteProvider>
 	);

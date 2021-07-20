@@ -219,7 +219,7 @@ export function isFavorite( state, patternId ) {
  * @return {Object} The query to use when requesting content from the API.
  */
 export function getQueryFromUrl( state, url ) {
-	const params = [ 'pattern-categories', 'author', 'page', 'search' ];
+	const params = [ 'categories', 'author', 'page', 'search' ];
 	const query = getQueryArgs( url );
 
 	const categorySlug = getCategoryFromPath( url );
@@ -275,7 +275,7 @@ export function getUrlFromQuery( state, query = {}, baseUrl = wporgPatternsUrl.s
 		const categories = getCategories( state );
 		const term = categories.find( ( { id } ) => termId === id );
 		if ( term?.slug ) {
-			baseUrl += `/pattern-categories/${ term.slug }`;
+			baseUrl += `/categories/${ term.slug }`;
 		}
 		delete query[ 'pattern-categories' ];
 	}

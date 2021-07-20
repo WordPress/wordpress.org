@@ -62,7 +62,7 @@ export const removeQueryString = ( path ) => {
  * as `?category=blog&page=2`, or `/category/blog/?page=2`.
  *
  * @param {string} path A URL path and query string.
- * @param {string} key  The query var to extract, ex: `pattern-categories`, `page`.
+ * @param {string} key  The query var to extract, ex: `categories`, `page`.
  * @return {string} The value of the requested key.
  */
 export const getValueFromPath = ( path, key ) => {
@@ -92,7 +92,7 @@ export const getValueFromPath = ( path, key ) => {
  * @return {string} The category slug.
  */
 export const getCategoryFromPath = ( path ) => {
-	return getValueFromPath( path, 'pattern-categories' );
+	return getValueFromPath( path, 'categories' );
 };
 
 /**

@@ -288,18 +288,15 @@ describe( 'selectors', () => {
 				status: 'draft',
 				page: 2,
 			} );
-			expect( getQueryFromUrl( state, `${ baseUrl }/pattern-categories/header` ) ).toEqual( {
+			expect( getQueryFromUrl( state, `${ baseUrl }/categories/header` ) ).toEqual( {
 				'pattern-categories': 3,
 			} );
-			expect( getQueryFromUrl( state, `${ baseUrl }/pattern-categories/header?page=2` ) ).toEqual( {
+			expect( getQueryFromUrl( state, `${ baseUrl }/categories/header?page=2` ) ).toEqual( {
 				'pattern-categories': 3,
 				page: 2,
 			} );
 			expect(
-				getQueryFromUrl(
-					state,
-					`${ baseUrl }/author/username/pattern-categories/header/?orderby=date&page=3`
-				)
+				getQueryFromUrl( state, `${ baseUrl }/author/username/categories/header/?orderby=date&page=3` )
 			).toEqual( {
 				author_name: 'username',
 				'pattern-categories': 3,
@@ -319,9 +316,9 @@ describe( 'selectors', () => {
 		it( 'should ignore any malformed path segments.', async () => {
 			expect( getQueryFromUrl( state, `${ baseUrl }/page/` ) ).toEqual( {} );
 			expect( getQueryFromUrl( state, `${ baseUrl }/author/page/2` ) ).toEqual( { page: 2 } );
-			expect( getQueryFromUrl( state, `${ baseUrl }/categories/header` ) ).toEqual( {} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/category/header` ) ).toEqual( {} );
 			expect( getQueryFromUrl( state, `${ baseUrl }/foo/bar` ) ).toEqual( {} );
-			expect( getQueryFromUrl( state, `${ baseUrl }/author/pattern-categories/?orderby=date` ) ).toEqual( {
+			expect( getQueryFromUrl( state, `${ baseUrl }/author/categories/?orderby=date` ) ).toEqual( {
 				orderby: 'date',
 			} );
 			expect( getQueryFromUrl( state, `${ baseUrl }/author/page/` ) ).toEqual( {} );
@@ -361,7 +358,7 @@ describe( 'selectors', () => {
 					orderby: 'date',
 					page: 3,
 				} )
-			).toBe( `${ baseUrl }/author/username/pattern-categories/header/page/3/?orderby=date` );
+			).toBe( `${ baseUrl }/author/username/categories/header/page/3/?orderby=date` );
 		} );
 
 		it( 'should add extra object properties as query strings.', async () => {

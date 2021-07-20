@@ -21,7 +21,7 @@ const PatternGridMenu = ( { basePath = '', ...props } ) => {
 			patternStore
 		);
 		const query = getQueryFromUrl( path );
-		// Remove pagination, so we don't go from /page/2/ to /pattern-categories/images/page/2/.
+		// Remove pagination, so we don't go from /page/2/ to /categories/images/page/2/.
 		delete query.page;
 		const _options = ( getCategories() || [] ).map( ( cat ) => {
 			return {

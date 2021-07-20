@@ -50,11 +50,11 @@ describe( 'utils', () => {
 		} );
 
 		it( 'should correctly return the category', async () => {
-			expect( getCategoryFromPath( '/pattern-categories/header' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/pattern-categories/header/page/3/' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/?pattern-categories=header' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/?search=test&pattern-categories=header' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/pattern-categories/abc/?pattern-categories=def' ) ).toEqual( 'def' );
+			expect( getCategoryFromPath( '/categories/header' ) ).toEqual( 'header' );
+			expect( getCategoryFromPath( '/categories/header/page/3/' ) ).toEqual( 'header' );
+			expect( getCategoryFromPath( '/?categories=header' ) ).toEqual( 'header' );
+			expect( getCategoryFromPath( '/?search=test&categories=header' ) ).toEqual( 'header' );
+			expect( getCategoryFromPath( '/categories/abc/?categories=def' ) ).toEqual( 'def' );
 		} );
 	} );
 
@@ -64,9 +64,9 @@ describe( 'utils', () => {
 		} );
 
 		it( 'should correctly return the page number', async () => {
-			expect( getPageFromPath( '/pattern-categories/header' ) ).toEqual( 1 );
-			expect( getPageFromPath( '/pattern-categories/header/page/3/' ) ).toEqual( 3 );
-			expect( getPageFromPath( '/pattern-categories=header?page=2' ) ).toEqual( 2 );
+			expect( getPageFromPath( '/categories/header' ) ).toEqual( 1 );
+			expect( getPageFromPath( '/categories/header/page/3/' ) ).toEqual( 3 );
+			expect( getPageFromPath( '/?categories=header&page=2' ) ).toEqual( 2 );
 			expect( getPageFromPath( '/page/4' ) ).toEqual( 4 );
 		} );
 	} );

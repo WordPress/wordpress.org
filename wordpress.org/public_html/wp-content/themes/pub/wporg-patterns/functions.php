@@ -8,6 +8,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as 
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets', 20 );
 add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
+add_action( 'wp_head', __NAMESPACE__ . '\add_social_meta_tags' );
 add_action( 'body_class', __NAMESPACE__ . '\body_class', 10, 2 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 add_filter( 'init', __NAMESPACE__ . '\add_rewrite' );
@@ -54,6 +55,7 @@ function enqueue_assets() {
 		array( 'dashicons', 'open-sans' ),
 		filemtime( __DIR__ . '/css/style.css' )
 	);
+	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	if ( file_exists( $script_asset_path ) ) {
@@ -253,5 +255,61 @@ function rewrite_search_url() {
 	if ( is_search() && ! empty( $_GET['s'] ) ) {
 		wp_redirect( home_url( '/search/' ) . urlencode( trim( get_query_var( 's' ) ) ) . '/' );
 		exit();
+	}
+}
+
+/**
+ * Add meta tags for richer social media integrations.
+ */
+function add_social_meta_tags() {
+	global $wporg_global_header_options;
+	$default_image = get_stylesheet_directory_uri() . '/images/social-image.png';
+	$og_fields = [];
+
+	if ( is_front_page() || is_home() ) {
+		$og_fields = [
+			'og:title'       => __( 'Block Pattern Directory', 'wporg-patterns' ),
+			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
+			'og:site_name'   => $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org',
+			'og:type'        => 'website',
+			'og:url'         => home_url(),
+			'og:image'       => esc_url( $default_image ),
+		];
+	} else if ( is_tax() ) {
+		$og_fields = [
+			'og:title'       => sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), esc_attr( single_term_title( '', false ) ) ),
+			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
+			'og:site_name'   => esc_attr( $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org' ),
+			'og:type'        => 'website',
+			'og:url'         => esc_url( get_term_link( get_queried_object_id() ) ),
+			'og:image'       => esc_url( $default_image ),
+		];
+	} else if ( is_singular( POST_TYPE ) ) {
+		$og_fields = [
+			'og:title'       => the_title_attribute( array( 'echo' => false ) ),
+			'og:description' => esc_attr( strip_tags( get_post_meta( get_the_ID(), 'wpop_description', true ) ) ),
+			'og:site_name'   => esc_attr( $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org' ),
+			'og:type'        => 'website',
+			'og:url'         => esc_url( get_permalink() ),
+			'og:image'       => esc_url( $default_image ),
+		];
+		printf( '<meta name="twitter:card" content="summary_large_image">' . "\n" );
+		printf( '<meta name="twitter:site" content="@WordPress">' . "\n" );
+		printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $default_image ) );
+	}
+
+	foreach ( $og_fields as $property => $content ) {
+		printf(
+			'<meta property="%1$s" content="%2$s" />' . "\n",
+			esc_attr( $property ),
+			esc_attr( $content )
+		);
+	}
+
+	if ( isset( $og_fields['og:description'] ) ) {
+		printf(
+			'<meta name="description" content="%1$s" />' . "\n",
+			esc_attr( $og_fields['og:description'] )
+		);
 	}
 }
