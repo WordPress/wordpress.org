@@ -339,6 +339,7 @@ class WP_58_Credits extends WP_Credits {
 			'justinahinon',
 			'k3nsai',
 			'kaavyaiyer',
+			'kafleg',
 			'kapilpaul',
 			'karmatosed',
 			'kebbet',
