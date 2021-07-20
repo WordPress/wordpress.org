@@ -25,6 +25,9 @@ class Export extends WP_CLI_Command {
 	 *
 	 * [--locale-slug]
 	 * : Slug of the locale. Default: 'default'.
+	 *
+	 * [--projects]
+	 * : Comma-separated list of projects to export. Default: 'frontend,admin,admin-network,continents-cities'.
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$version = $args[0];
@@ -33,6 +36,7 @@ class Export extends WP_CLI_Command {
 
 		$args = wp_parse_args( $assoc_args, [
 			'locale-slug' => 'default',
+			'projects'    => 'frontend,admin,admin-network,continents-cities',
 		] );
 
 		// Get WP locale.
@@ -47,6 +51,13 @@ class Export extends WP_CLI_Command {
 			$wp_locale = $wp_locale . '_' . $args['locale-slug'];
 		}
 
+		$contexts_to_export = explode( ',', $args['projects'] );
+		$frontend_context   = array_search( 'frontend', $contexts_to_export, true );
+		if ( false !== $frontend_context ) {
+			// Replace 'frontend' with an empty string which is used as project context.
+			$contexts_to_export[ $frontend_context ] = '';
+		}
+
 		$projects = [
 			"wp/$version"               => '',
 			"wp/$version/admin"         => 'admin',
@@ -57,6 +68,10 @@ class Export extends WP_CLI_Command {
 		$files = [];
 
 		foreach ( $projects as $path => $context ) {
+			if ( ! in_array( $context, $contexts_to_export, true ) ) {
+				continue;
+			}
+
 			$gp_project = GP::$project->by_path( $path );
 			if ( ! $gp_project ) {
 				WP_CLI::error( "Invalid project path: $path." );
