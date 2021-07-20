@@ -40,17 +40,17 @@ function PatternPreview( { blockContent } ) {
 		if ( showViewportControlLarge ) {
 			// More than 1280 wide.
 			return [
-				{ label: 'Full (1200px)', value: 1200 },
-				{ label: 'Default (960px)', value: 960 },
-				{ label: 'Medium (480px)', value: 480 },
-				{ label: 'Narrow (320px)', value: 320 },
+				{ label: __( 'Full (1200px)', 'wporg-patterns' ), value: 1200 },
+				{ label: __( 'Default (960px)', 'wporg-patterns' ), value: 960 },
+				{ label: __( 'Medium (480px)', 'wporg-patterns' ), value: 480 },
+				{ label: __( 'Narrow (320px)', 'wporg-patterns' ), value: 320 },
 			];
 		} else if ( showViewportControlDefault ) {
 			// Less than 1280, more than 960.
 			return [
-				{ label: 'Default (960px)', value: 960 },
-				{ label: 'Medium (480px)', value: 480 },
-				{ label: 'Narrow (320px)', value: 320 },
+				{ label: __( 'Default (960px)', 'wporg-patterns' ), value: 960 },
+				{ label: __( 'Medium (480px)', 'wporg-patterns' ), value: 480 },
+				{ label: __( 'Narrow (320px)', 'wporg-patterns' ), value: 320 },
 			];
 		}
 		// Less than 960, but larger than 480.

@@ -123,7 +123,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 					required={ true }
 				/>
 				<TextareaControl
-					label="Please provide details (required)"
+					label={ __( 'Please provide details (required)', 'wporg-patterns' ) }
 					value={ details }
 					onChange={ setDetails }
 					required={ true }
