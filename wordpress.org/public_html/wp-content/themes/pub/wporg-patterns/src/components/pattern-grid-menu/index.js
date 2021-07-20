@@ -2,33 +2,42 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { getQueryString } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import CategoryContextBar from '../category-context-bar';
-import { getCategoryFromPath } from '../../utils';
+import ContextBar from '../context-bar';
 import PatternOrderSelect from '../pattern-order-select';
 import Menu from '../menu';
 import NavigationLayout from '../navigation-layout';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 
-const PatternGridMenu = ( { basePath = '/', query } ) => {
+const PatternGridMenu = ( { basePath = '', ...props } ) => {
 	const { path, update: updatePath } = useRoute();
-	const categorySlug = getCategoryFromPath( path );
-	const queryString = getQueryString( path ) ? '?' + getQueryString( path ) : '';
+	const { categorySlug, isLoading, options } = useSelect( ( select ) => {
+		const { getCategoryById, getCategories, getQueryFromUrl, getUrlFromQuery, isLoadingCategories } = select(
+			patternStore
+		);
+		const query = getQueryFromUrl( path );
+		// Remove pagination, so we don't go from /page/2/ to /pattern-categories/images/page/2/.
+		delete query.page;
+		const _options = ( getCategories() || [] ).map( ( cat ) => {
+			return {
+				value: getUrlFromQuery(
+					{ ...query, 'pattern-categories': cat.id },
+					wporgPatternsUrl.site + basePath
+				),
+				slug: cat.slug,
+				label: cat.name,
+			};
+		} );
 
-	// Make sure the path is prefixed with the full site URL.
-	basePath = wporgPatternsUrl.site + basePath;
-
-	const { categories, isLoading } = useSelect( ( select ) => {
-		const { getCategories, isLoadingCategories } = select( patternStore );
 		return {
-			categories: getCategories(),
+			categorySlug: getCategoryById( query[ 'pattern-categories' ] )?.slug || '',
 			isLoading: isLoadingCategories(),
+			options: _options,
 		};
 	} );
 
@@ -38,19 +47,7 @@ const PatternGridMenu = ( { basePath = '/', query } ) => {
 				primary={
 					<Menu
 						current={ categorySlug }
-						options={
-							categories
-								? categories.map( ( record ) => {
-										return {
-											value: record.slug
-												? `${ basePath }pattern-categories/${ record.slug }/${ queryString }`
-												: `${ basePath }${ queryString }`,
-											slug: record.slug,
-											label: record.name,
-										};
-								  } )
-								: []
-						}
+						options={ options || [] }
 						onClick={ ( event ) => {
 							event.preventDefault();
 							updatePath( event.target.pathname );
@@ -67,7 +64,7 @@ const PatternGridMenu = ( { basePath = '/', query } ) => {
 					/>
 				}
 			/>
-			<CategoryContextBar query={ query } />
+			<ContextBar { ...props } />
 		</>
 	);
 };

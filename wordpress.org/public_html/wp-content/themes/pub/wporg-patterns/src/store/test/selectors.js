@@ -14,12 +14,16 @@ import {
 	getPatternTotalsByQuery,
 	getPatterns,
 	getPatternsByQuery,
+	getQueryFromUrl,
+	getUrlFromQuery,
 	hasLoadedCategories,
 	isFavorite,
 	isLoadingCategories,
 	isLoadingPatternFlagReasons,
 	isLoadingPatternsByQuery,
 } from '../selectors';
+
+global.wporgPatternsUrl = { site: 'http://localhost:8889/' };
 
 describe( 'selectors', () => {
 	const initialState = {
@@ -48,6 +52,7 @@ describe( 'selectors', () => {
 			byId: apiPatterns.reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} ),
 		},
 		favorites: [ 25, 27 ],
+		categories: apiCategories,
 	};
 
 	describe( 'isLoadingPatternsByQuery', () => {
@@ -256,6 +261,127 @@ describe( 'selectors', () => {
 				'id',
 				apiCategories[ 0 ].id
 			);
+		} );
+	} );
+
+	describe( 'getQueryFromUrl', () => {
+		const baseUrl = global.wporgPatternsUrl.site.replace( /\/$/, '' );
+
+		it( 'should return empty object if no URL is passed.', async () => {
+			expect( getQueryFromUrl( state, `${ baseUrl }` ) ).toEqual( {} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/` ) ).toEqual( {} );
+			// This is functionally the same as `/` or `''`.
+			expect( getQueryFromUrl( state, `${ baseUrl }//` ) ).toEqual( {} );
+		} );
+
+		it( 'should return a query object representing this URL.', async () => {
+			expect( getQueryFromUrl( state, `${ baseUrl }/page/3/` ) ).toEqual( {
+				page: 3,
+			} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/search/foo` ) ).toEqual( {
+				search: 'foo',
+			} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/author/username/` ) ).toEqual( {
+				author_name: 'username',
+			} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/my-patterns/draft/page/2/` ) ).toEqual( {
+				status: 'draft',
+				page: 2,
+			} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/pattern-categories/header` ) ).toEqual( {
+				'pattern-categories': 3,
+			} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/pattern-categories/header?page=2` ) ).toEqual( {
+				'pattern-categories': 3,
+				page: 2,
+			} );
+			expect(
+				getQueryFromUrl(
+					state,
+					`${ baseUrl }/author/username/pattern-categories/header/?orderby=date&page=3`
+				)
+			).toEqual( {
+				author_name: 'username',
+				'pattern-categories': 3,
+				orderby: 'date',
+				page: 3,
+			} );
+		} );
+
+		it( 'should ignore any hash values.', async () => {
+			expect( getQueryFromUrl( state, `${ baseUrl }/#content` ) ).toEqual( {} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/page/3/#content` ) ).toEqual( { page: 3 } );
+			expect( getQueryFromUrl( state, `${ baseUrl }/?orderby=date#content` ) ).toEqual( {
+				orderby: 'date',
+			} );
+		} );
+
+		it( 'should ignore any malformed path segments.', async () => {
+			expect( getQueryFromUrl( state, `${ baseUrl }/page/` ) ).toEqual( {} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/author/page/2` ) ).toEqual( { page: 2 } );
+			expect( getQueryFromUrl( state, `${ baseUrl }/categories/header` ) ).toEqual( {} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/foo/bar` ) ).toEqual( {} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/author/pattern-categories/?orderby=date` ) ).toEqual( {
+				orderby: 'date',
+			} );
+			expect( getQueryFromUrl( state, `${ baseUrl }/author/page/` ) ).toEqual( {} );
+		} );
+	} );
+
+	describe( 'getUrlFromQuery', () => {
+		const baseUrl = global.wporgPatternsUrl.site.replace( /\/$/, '' );
+
+		it( 'should return the base URL if no query is passed.', async () => {
+			expect( getUrlFromQuery( state ) ).toBe( `${ baseUrl }/` );
+			expect( getUrlFromQuery( state, {} ) ).toBe( `${ baseUrl }/` );
+		} );
+
+		it( 'should return a URL for the given query.', async () => {
+			expect(
+				getUrlFromQuery( state, {
+					page: 2,
+				} )
+			).toBe( `${ baseUrl }/page/2/` );
+			expect(
+				getUrlFromQuery( state, {
+					author_name: 'username',
+					page: 2,
+				} )
+			).toBe( `${ baseUrl }/author/username/page/2/` );
+			expect(
+				getUrlFromQuery( state, {
+					author_name: 'username',
+					orderby: 'favorite_count',
+				} )
+			).toBe( `${ baseUrl }/author/username/?orderby=favorite_count` );
+			expect(
+				getUrlFromQuery( state, {
+					author_name: 'username',
+					'pattern-categories': 3,
+					orderby: 'date',
+					page: 3,
+				} )
+			).toBe( `${ baseUrl }/author/username/pattern-categories/header/page/3/?orderby=date` );
+		} );
+
+		it( 'should add extra object properties as query strings.', async () => {
+			expect(
+				getUrlFromQuery( state, {
+					foo: 'bar',
+				} )
+			).toBe( `${ baseUrl }/?foo=bar` );
+			expect(
+				getUrlFromQuery( state, {
+					page: 2,
+					foo: 'bar',
+				} )
+			).toBe( `${ baseUrl }/page/2/?foo=bar` );
+			expect(
+				getUrlFromQuery( state, {
+					orderby: 'date',
+					foo: 'bar',
+				} )
+			).toBe( `${ baseUrl }/?orderby=date&foo=bar` );
 		} );
 	} );
 

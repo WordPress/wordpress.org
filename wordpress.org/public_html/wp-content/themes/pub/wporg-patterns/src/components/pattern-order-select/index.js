@@ -28,7 +28,7 @@ const PatternOrderSelect = ( { options } ) => {
 				value={ getQueryArg( window.location.href, 'orderby' ) }
 				options={ options }
 				onChange={ ( value ) => {
-					replace( addQueryArgs( path, { orderby: value } ) );
+					replace( addQueryArgs( path, { orderby: value } ).replace( /\/page\/[\d]+/, '' ) );
 				} }
 			/>
 		</div>

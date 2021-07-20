@@ -33,7 +33,7 @@ const Patterns = () => {
 		<RouteProvider>
 			<QueryMonitor />
 			<BreadcrumbMonitor />
-			<PatternGridMenu query={ query } />
+			<PatternGridMenu />
 			{ isEmpty ? (
 				<>
 					<EmptyHeader />

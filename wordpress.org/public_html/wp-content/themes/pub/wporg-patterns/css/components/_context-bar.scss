@@ -1,4 +1,4 @@
-.category-context-bar {
+.context-bar {
 	margin: 0 $gutter-default;
 	background: $color-gray-light-300;
 	border-radius: 2px;
@@ -44,7 +44,7 @@
 	}
 }
 
-.category-context-bar__copy {
+.context-bar__copy {
 	display: flex;
 	align-items: center;
 
@@ -54,7 +54,7 @@
 	font-weight: 400;
 }
 
-.category-context-bar__title {
+.context-bar__title {
 	margin: 0;
 	padding-right: $gutter-default;
 	color: $color__text;
@@ -63,7 +63,7 @@
 	text-transform: uppercase;
 }
 
-.category-context-bar__links {
+.context-bar__links {
 	display: flex;
 	align-items: center;
 
@@ -72,7 +72,7 @@
 	}
 }
 
-.category-context-bar__spinner {
+.context-bar__spinner {
 	display: flex;
 	width: 28px;
 	margin: 0;
@@ -89,7 +89,7 @@
 	}
 }
 
-.category-context-bar__spinner--is-hidden {
+.context-bar__spinner--is-hidden {
 	overflow: hidden;
 	width: 0;
 	opacity: 0;

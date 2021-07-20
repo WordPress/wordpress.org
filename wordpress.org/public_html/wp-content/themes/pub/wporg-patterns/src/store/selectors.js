@@ -1,7 +1,13 @@
 /**
+ * WordPress dependencies
+ */
+import { buildQueryString, getQueryArgs } from '@wordpress/url';
+
+/**
  * Internal dependencies
  */
 import { getQueryString } from './utils';
+import { getCategoryFromPath, getPageFromPath, getSearchTermFromPath, getValueFromPath } from '../utils';
 
 /**
  * Check if there is a pending request for the given pattern query.
@@ -143,6 +149,23 @@ export function getCategoryBySlug( state, slug ) {
 }
 
 /**
+ * Get category by its term ID.
+ *
+ * @param {Object} state Global application state.
+ * @param {number} termId Term ID.
+ *
+ * @return {Array|undefined} The requested category.
+ */
+export function getCategoryById( state, termId ) {
+	if ( ! hasLoadedCategories( state ) ) {
+		return;
+	}
+
+	const term = state.categories.find( ( { id } ) => termId === id );
+	return term;
+}
+
+/**
  * Get pattern flag reasons.
  *
  * @param {Object} state Global application state.
@@ -185,4 +208,87 @@ export function getFavorites( state ) {
  */
 export function isFavorite( state, patternId ) {
 	return state.favorites?.includes( patternId );
+}
+
+/**
+ * Parse the query from the given URL or path.
+ *
+ * @param {Object} state Global application state.
+ * @param {string} url A URL or path, optionally with query string.
+ *
+ * @return {Object} The query to use when requesting content from the API.
+ */
+export function getQueryFromUrl( state, url ) {
+	const params = [ 'pattern-categories', 'author', 'page', 'search' ];
+	const query = getQueryArgs( url );
+
+	const categorySlug = getCategoryFromPath( url );
+	if ( categorySlug && -1 === params.indexOf( categorySlug ) ) {
+		const term = getCategoryBySlug( state, categorySlug );
+		if ( term?.id ) {
+			query[ 'pattern-categories' ] = term.id;
+		}
+	}
+
+	const author = getValueFromPath( url, 'author' );
+	if ( author && -1 === params.indexOf( author ) ) {
+		query.author_name = author;
+	}
+
+	const page = getPageFromPath( url );
+	if ( 'number' === typeof page && page > 1 ) {
+		query.page = page;
+	}
+
+	const search = getSearchTermFromPath( url );
+	if ( search.length > 0 && -1 === params.indexOf( search ) ) {
+		query.search = search;
+	}
+
+	const myPatternStatus = getValueFromPath( url, 'my-patterns' );
+	if ( myPatternStatus && 'page' !== myPatternStatus ) {
+		query.status = myPatternStatus;
+	}
+
+	return query;
+}
+
+/**
+ * Convert a query object back into the URL for that request.
+ *
+ * @param {Object} state Global application state.
+ * @param {Object} query A query object.
+ * @param {string} baseUrl The URL to build off, defaults to the global site home.
+ *
+ * @return {string} The URL representing that query object.
+ */
+export function getUrlFromQuery( state, query = {}, baseUrl = wporgPatternsUrl.site ) {
+	baseUrl = baseUrl.replace( /\/$/, '' );
+
+	if ( query.author_name ) {
+		baseUrl += `/author/${ query.author_name }`;
+		delete query.author_name;
+	}
+
+	if ( query[ 'pattern-categories' ] ) {
+		const termId = query[ 'pattern-categories' ];
+		const categories = getCategories( state );
+		const term = categories.find( ( { id } ) => termId === id );
+		if ( term?.slug ) {
+			baseUrl += `/pattern-categories/${ term.slug }`;
+		}
+		delete query[ 'pattern-categories' ];
+	}
+
+	if ( query.page ) {
+		baseUrl += `/page/${ query.page }`;
+		delete query.page;
+	}
+
+	if ( Object.keys( query ).length ) {
+		baseUrl += '/?' + buildQueryString( query );
+		return baseUrl;
+	}
+
+	return baseUrl + '/';
 }

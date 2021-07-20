@@ -6,7 +6,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import CategoryContextBar from '../category-context-bar';
+import ContextBar from '../context-bar';
 import EmptyHeader from '../patterns/empty-header';
 import PatternGrid from '../pattern-grid';
 import PatternThumbnail from '../pattern-thumbnail';
@@ -30,7 +30,7 @@ const PatternsSearch = () => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<CategoryContextBar query={ query } />
+			<ContextBar query={ query } />
 			{ isEmpty ? (
 				<>
 					<EmptyHeader />
