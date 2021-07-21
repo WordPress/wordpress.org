@@ -9,6 +9,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets', 20 );
 add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
 add_action( 'wp_head', __NAMESPACE__ . '\add_social_meta_tags' );
+add_filter( 'document_title_parts', __NAMESPACE__ . '\set_document_title' );
 add_action( 'body_class', __NAMESPACE__ . '\body_class', 10, 2 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 add_filter( 'init', __NAMESPACE__ . '\add_rewrite' );
@@ -319,4 +320,50 @@ function add_social_meta_tags() {
 			esc_attr( $og_fields['og:description'] )
 		);
 	}
+}
+
+/**
+ * Append an optimized site name.
+ *
+ * @param array $title {
+ *     The document title parts.
+ *
+ *     @type string $title   Title of the viewed page.
+ *     @type string $page    Optional. Page number if paginated.
+ *     @type string $tagline Optional. Site description when on home page.
+ *     @type string $site    Optional. Site title when not on home page.
+ * }
+ * @return array Filtered title parts.
+ */
+function set_document_title( $title ) {
+	global $wp_query;
+
+	if ( is_front_page() ) {
+		$title['title']   = __( 'Block Pattern Directory', 'wporg-patterns' );
+		$title['tagline'] = __( 'WordPress.org', 'wporg-patterns' );
+	} else {
+		if ( is_singular( POST_TYPE ) ) {
+			$title['title'] .= ' - ' . __( 'Block Pattern', 'wporg-patterns' );
+		} elseif ( is_tax() ) {
+			/* translators: Taxonomy term name */
+			$title['title'] = sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), $title['title'] );
+		} elseif ( is_author() ) {
+			/* translators: Author name */
+			$title['title'] = sprintf( __( 'Block Patterns by %s', 'wporg-patterns' ), $title['title'] );
+		}
+
+		// If results are paged and the max number of pages is known.
+		if ( is_paged() && $wp_query->max_num_pages ) {
+			// translators: 1: current page number, 2: total number of pages
+			$title['page'] = sprintf(
+				__( 'Page %1$s of %2$s', 'wporg-patterns' ),
+				get_query_var( 'paged' ),
+				$wp_query->max_num_pages
+			);
+		}
+
+		$title['site'] = __( 'WordPress.org', 'wporg-patterns' );
+	}
+
+	return $title;
 }
