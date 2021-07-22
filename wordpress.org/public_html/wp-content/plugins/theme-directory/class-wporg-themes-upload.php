@@ -327,7 +327,7 @@ class WPORG_Themes_Upload {
 			);
 
 		// Is there already a theme with the name name by a different author?
-		if ( ! empty( $this->theme_post ) && $this->theme_post->post_author != $this->author->ID  ) {
+		if ( ! empty( $this->theme_post ) && $this->theme_post->post_author != $this->author->ID ) {
 
 			$is_allowed_to_upload_for_theme = false;
 			if (
