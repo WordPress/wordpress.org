@@ -216,11 +216,11 @@ class WPORG_Themes_Upload {
 		if ( ! $this->theme_name || ! $this->theme_slug ) {
 			$error = __( 'The theme has no name.', 'wporg-themes' ) . ' ';
 
-			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
+			/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
 			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
 				'<code>Theme Name:</code>',
 				'<code>style.css</code>',
-				__( 'https://codex.wordpress.org/Theme_Development#Theme_Stylesheet', 'wporg-themes' )
+				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
 			);
 
 			return $error;
@@ -255,11 +255,11 @@ class WPORG_Themes_Upload {
 		if ( empty( $theme_description ) ) {
 			$error = __( 'The theme has no description.', 'wporg-themes' ) . ' ';
 
-			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
+			/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
 			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
 				'<code>Description:</code>',
 				'<code>style.css</code>',
-				__( 'https://codex.wordpress.org/Theme_Development#Theme_Stylesheet', 'wporg-themes' )
+				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
 			);
 
 			return $error;
@@ -268,11 +268,11 @@ class WPORG_Themes_Upload {
 		if ( ! $this->theme->get( 'Tags' ) ) {
 			$error = __( 'The theme has no tags.', 'wporg-themes' ) . ' ';
 
-			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
+			/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
 			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
 				'<code>Tags:</code>',
 				'<code>style.css</code>',
-				__( 'https://codex.wordpress.org/Theme_Development#Theme_Stylesheet', 'wporg-themes' )
+				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
 			);
 
 			return $error;
@@ -281,11 +281,11 @@ class WPORG_Themes_Upload {
 		if ( ! $this->theme->get( 'Version' ) ) {
 			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
 
-			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
+			/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
 			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
 				'<code>Version:</code>',
 				'<code>style.css</code>',
-				__( 'https://codex.wordpress.org/Theme_Development#Theme_Stylesheet', 'wporg-themes' )
+				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
 			);
 
 			return $error;
