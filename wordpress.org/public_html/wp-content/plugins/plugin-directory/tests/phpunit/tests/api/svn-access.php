@@ -2,7 +2,7 @@
 
 /**
  *
- * @group api
+ * @group plugins-api
  */
 class Tests_API_SVN_Access extends WP_UnitTestCase {
 
