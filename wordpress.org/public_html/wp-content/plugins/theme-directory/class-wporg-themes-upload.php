@@ -160,7 +160,7 @@ class WPORG_Themes_Upload {
 	 *
 	 * Runs various tests, creates Trac ticket, repopackage post, and saves the files to the SVN repo.
 	 *
-	 * @return string|array<string> Failure or success message.
+	 * @return mixed Failure or success message.
 	 */
 	public function process_upload( $file_upload ) {
 		$valid_upload = $this->validate_upload( $file_upload );
