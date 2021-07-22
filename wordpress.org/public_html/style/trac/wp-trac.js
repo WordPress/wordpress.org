@@ -54,30 +54,45 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 	// Other Bug Trackers which the WordPress project uses for various things.
 	bugTrackerLocations = {
+		/*
+		 * Fields & options are...
+		 * tracker: The URL to redirect the reporter to
+		 * tracker_text: The Text to display
+		 * Optional:
+		 * prevent_changing_to: Set to true to prevent an existing ticket being changed to it.
+		 * enable_copy: Enable copy-to for the report, GitHub /choose cannot use this.
+		 * allow_bypass: Set to true to allow ignoring the notice.
+		 */
 		'WordPress.org Site': {
 			tracker: 'https://meta.trac.wordpress.org/newticket',
 			tracker_text: 'WordPress.org Meta Trac',
-			prevent_changing_to: true
+			prevent_changing_to: true,
+			enable_copy: true,
+			allow_bypass: true
 		},
 		'Editor': {
 			tracker: 'https://github.com/WordPress/gutenberg/issues/new/choose',
 			tracker_text: 'Gutenberg GitHub Repository',
 			bug_text: "the Gutenberg Editor",
-			disable_copy: true, // Gutenberg has a bug-report flow.
 			allow_bypass: true,
 		},
 		'WordCamp Site & Plugins': {
 			tracker: 'https://github.com/WordPress/wordcamp.org/issues/new/choose',
 			tracker_text: 'WordCamp.org GitHub Repository',
-			disable_copy: true // WordCamp has a bug-report flow.
 		},
 		'Five For The Future': {
 			tracker: 'https://github.com/WordPress/five-for-the-future/issues/new',
-			tracker_text: 'Five for the Future GitHub Repository'
+			tracker_text: 'Five for the Future GitHub Repository',
+			enable_copy: true
 		},
 		'learn.wordpress.org': {
 			tracker: 'https://github.com/WordPress/learn/issues/new',
-			tracker_text: 'WordPress.org Learn GitHub Repository'
+			tracker_text: 'WordPress.org Learn GitHub Repository',
+			enable_copy: true
+		},
+		'Pattern Directory': {
+			tracker: 'https://github.com/WordPress/pattern-directory/issues/new/choose',
+			tracker_text: 'WordPress.org Pattern Directory GitHub Repository',
 		}
 	};
 
@@ -762,8 +777,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 				var tracker = bugTrackerLocations[ selectedComponent ];
 
-				// If the component (ie. Editor) allows bypassing the warning.. or if it's a Bug Gardener, show the create buttons.
-				if ( tracker.allow_bypass || wpTrac.gardener ) {
+				// If the component (ie. Editor) allows bypassing the warning show the create buttons.
+				if ( tracker.allow_bypass ) {
 					toggle.show();
 				}
 
@@ -773,7 +788,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						'<a href="' + tracker.tracker + '">' + ( tracker.tracker_text || tracker.tracker ) + '</a>' +
 					'</p><p>' +
 						'Would you mind opening this ticket over there instead? ' +
-						( tracker.disable_copy ? '' : '<a href="' + tracker.tracker + '" id="new-tracker-ticket">Click here to copy your summary and description over</a>.' ) +
+						( tracker.enable_copy ? '<a href="' + tracker.tracker + '" id="new-tracker-ticket">Click here to copy your summary and description over</a>.' : '' ) +
 					'</p>' +
 						( tracker.allow_bypass ? '<p>If this isn\'t related to ' + ( tracker.bug_text || selectedComponent ) + ', please continue to open this ticket here.</p>' : '' ) +
 					'</div>'
