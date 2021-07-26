@@ -54,7 +54,7 @@ function wporg_themes_render_upload_shortcode() {
 		if ( ! empty( $messages ) ) {
 			$notice_content = "";
 
-			if( is_array( $messages ) ) {
+			if ( is_array( $messages ) ) {
 				foreach( $messages as $message){
 					$notice_content .= "<li>{$message}</li>";
 				}
