@@ -294,9 +294,9 @@ class WPORG_Themes_Upload {
 
 		} else if ( preg_match( '|[^\d\.]|', $this->theme->get( 'Version' ) ) ) {
 			/* translators: %s: style.css */
-			array_push( $style_errors, sprintf( __( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
+			$style_errors[] = sprintf( __( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
 				'<code>style.css</code>'
-			) );
+			);
 		}
 
 		// Version is greater than current version happens after authorship checks.
