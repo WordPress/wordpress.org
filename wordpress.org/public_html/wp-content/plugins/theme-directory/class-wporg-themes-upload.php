@@ -201,7 +201,7 @@ class WPORG_Themes_Upload {
 			array_push( $style_errors, sprintf( __( 'The zip file must include a file named %1$s or %2$s.', 'wporg-themes' ),
 				'<code>screenshot.png</code>',
 				'<code>screenshot.jpg</code>'
-			) );
+			);
 		}
 
 		// reset the theme directory to be where the stylesheet is
