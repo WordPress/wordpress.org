@@ -393,7 +393,7 @@ class WPORG_Themes_Upload {
 		}
 
 		// If we had any issues with information in the style.css, exit early.
-		if( !empty( $style_errors ) ) {
+		if ( ! empty( $style_errors ) ) {
 			return $style_errors;
 		}
 
