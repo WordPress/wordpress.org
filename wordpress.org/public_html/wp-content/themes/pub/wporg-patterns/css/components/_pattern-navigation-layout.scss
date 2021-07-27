@@ -1,5 +1,5 @@
 .pattern-navigation-layout {
-	margin: 0 auto;
+	margin: 0 auto $gutter-default;
 	max-width: $size__site-main;
 	display: flex;
 	flex-direction: column;
@@ -7,12 +7,11 @@
 	align-items: center;
 
 	.pattern-navigation-layout__primary {
-		margin-bottom: $gutter-default;
 		width: 100%;
 	}
 
 	.pattern-navigation-layout__secondary {
-		margin: 0 $gutter-default $gutter-default;
+		margin-top: $gutter-default;
 		width: calc(100% - #{$gutter-default * 2});
 	}
 

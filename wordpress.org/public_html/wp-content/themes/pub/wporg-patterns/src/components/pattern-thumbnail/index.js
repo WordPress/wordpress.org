@@ -41,10 +41,10 @@ function PatternThumbnail( { pattern, showAvatar } ) {
 						<span>{ statusLabel }</span>
 					</div>
 				) : null }
-				<div className="pattern-grid__actions">
+				<span className="pattern-grid__actions">
 					<FavoriteButton showLabel={ false } patternId={ pattern.id } />
 					<CopyPatternButton isSmall={ true } content={ pattern.pattern_content } />
-				</div>
+				</span>
 			</div>
 
 			<h2 className="pattern-grid__title">

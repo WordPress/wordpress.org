@@ -8,7 +8,7 @@ import useDeepCompareEffect from 'use-deep-compare-effect';
  * WordPress dependencies
  */
 import { Spinner } from '@wordpress/components';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -18,15 +18,24 @@ import { useRoute } from '../../hooks';
 import { getLoadingMessage, getMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
+/**
+ * This checks to see if the query is only being sorted.
+ *
+ * @param {Object} query
+ * @param {string} query.orderby Sorting key, used to determine if there is sorting.
+ * @return {boolean} Set to true if the object is empty with a only sorting parameter.
+ */
+const isOnlySorting = ( query ) => {
+	return Object.keys( query ).length === 1 && query.orderby;
+};
+
 function ContextBar( props ) {
 	const { path } = useRoute();
-	const [ height, setHeight ] = useState();
 	const [ message, setMessage ] = useState();
 	const [ context ] = useState( {
 		title: '',
 		links: [],
 	} );
-	const innerRef = useRef( null );
 
 	const { author, category, count, isLoadingPatterns, query } = useSelect(
 		( select ) => {
@@ -54,7 +63,7 @@ function ContextBar( props ) {
 		}
 
 		// We don't show a message when the query is empty.
-		if ( query && ! Object.keys( query ).length ) {
+		if ( ( query && ! Object.keys( query ).length ) || isOnlySorting( query ) ) {
 			setMessage( '' );
 			return;
 		}
@@ -73,39 +82,32 @@ function ContextBar( props ) {
 		}
 	}, [ query, isLoadingPatterns ] );
 
-	useEffect( () => {
-		const _height = message ? innerRef.current.offsetHeight : 0;
-		setHeight( _height );
-	}, [ message ] );
-
 	const classes = classnames( {
 		'context-bar__spinner': true,
 		'context-bar__spinner--is-hidden': ! isLoadingPatterns,
 	} );
 
-	return (
-		<header className="context-bar" style={ { height: `${ height }px` } }>
-			<div ref={ innerRef }>
-				<h2 className="context-bar__copy">
-					<span className={ classes }>
-						<Spinner />
-					</span>
-					<span>{ message }</span>
-				</h2>
-				{ context.links && context.links.length > 0 && (
-					<div className="context-bar__links">
-						<h3 className="context-bar__title">{ context.title }</h3>
+	return ! message ? null : (
+		<header className="context-bar">
+			<h2 className="context-bar__copy">
+				<span className={ classes }>
+					<Spinner />
+				</span>
+				<span>{ message }</span>
+			</h2>
+			{ context.links && context.links.length > 0 && (
+				<div className="context-bar__links">
+					<h3 className="context-bar__title">{ context.title }</h3>
 
-						<ul>
-							{ context.links.map( ( i ) => (
-								<li key={ i.href }>
-									<a href={ i.href }>{ i.label }</a>
-								</li>
-							) ) }
-						</ul>
-					</div>
-				) }
-			</div>
+					<ul>
+						{ context.links.map( ( i ) => (
+							<li key={ i.href }>
+								<a href={ i.href }>{ i.label }</a>
+							</li>
+						) ) }
+					</ul>
+				</div>
+			) }
 		</header>
 	);
 }

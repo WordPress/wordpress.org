@@ -1,23 +1,16 @@
 .context-bar {
-	margin: 0 $gutter-default;
+	margin: $gutter-default $gutter-default 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	background: $color-gray-light-300;
 	border-radius: 2px;
 	font-size: 0.8125rem;
 	overflow: auto;
-	height: 55px; // Prevent layout shifts
-
-	> div {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	@media only screen and ( min-width: $breakpoint-medium ) {
-		margin: 0 $gutter-default;
-	}
 
 	@media only screen and ( min-width: $breakpoint-large ) {
-		margin: 0 auto;
+		margin-left: auto;
+		margin-right: auto;
 		max-width: $size__site-main;
 	}
 
