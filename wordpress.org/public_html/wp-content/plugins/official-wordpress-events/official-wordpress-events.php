@@ -303,7 +303,7 @@ class Official_WordPress_Events {
 
 		$events = $this->parse_wordcamp_events( $response );
 
-		$this->log( sprintf( 'returning %d events', count( $events ) ) );
+		$this->log( sprintf( 'returning %d WordCamp events', count( $events ) ) );
 
 		return $events;
 	}
@@ -567,6 +567,8 @@ class Official_WordPress_Events {
 			return $events;
 		}
 
+		$this->log( sprintf( 'received %d meetup groups', count( $groups ) ) );
+
 		$yesterday    = date( 'c', strtotime( '-1 day' ) );
 		$one_year_out = date( 'c', strtotime( '+1 year' ) );
 		$meetups      = $meetup_client->get_events(
@@ -587,7 +589,7 @@ class Official_WordPress_Events {
 
 		$events = $this->parse_meetup_events( $meetups );
 
-		$this->log( sprintf( 'returning %d events', count( $events ) ) );
+		$this->log( sprintf( 'returning %d meetup events', count( $events ) ) );
 
 		return $events;
 	}

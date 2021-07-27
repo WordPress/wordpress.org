@@ -32,7 +32,7 @@ class Meetup_Client extends API_Client {
 	/**
 	 * @var bool If true, the client will fetch fewer results, for faster debugging.
 	 */
-	protected $debug = false;
+	protected $debug;
 
 	/**
 	 * Meetup_Client constructor.
@@ -164,7 +164,11 @@ class Meetup_Client extends API_Client {
 				break;
 			}
 
-			if ( $this->debug ) {
+			if ( $request_url && $this->debug ) {
+				if ( 'cli' === php_sapi_name() ) {
+					echo "\nDebug mode: Skipping future paginated requests to $request_url";
+				}
+
 				break;
 			}
 		}
