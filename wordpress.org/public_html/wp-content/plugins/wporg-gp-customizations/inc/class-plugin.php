@@ -53,6 +53,8 @@ class Plugin {
 		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 10, 2 );
 		add_action( 'gp_translation_created', array( $this, 'auto_reject_replaced_suggestions' ) );
 
+		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
+
 		// Cron.
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
 		add_action( 'init', [ $this, 'register_cron_events' ] );
@@ -304,6 +306,22 @@ class Plugin {
 			// Previous translation from this translator, reject it.
 			GP::$translation->get( $prev_translation->id )->reject();
 		}
+	}
+
+	/**
+	 * Allow searching for translations by user_id 0, by setting the user_login field to `0` or `anonymous`.
+	 */
+	function allow_searching_for_no_author_translations( $clauses, $set, $filters ) {
+		$user_login = gp_array_get( $filters, 'user_login' );
+	
+		if ( '0' === $user_login ) {
+			$clauses['where'] .= ( $clauses['where'] ? ' AND' : '' ) . ' t.user_id = 0';
+		} elseif ( 'anonymous' === $user_login ) {
+			// 'Anonymous' user exists, but has no translations.
+			$clauses['where'] = preg_replace( '/(user_id\s*=\s*\d+)/', 'user_id = 0', $clauses['where'] );
+		}
+	
+		return $clauses;
 	}
 
 	/**
