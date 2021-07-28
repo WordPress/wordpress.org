@@ -535,6 +535,47 @@ function wpdocs_add_my_custom_menu() {
 &lt;h2&gt;&lt;span class="dashicons dashicons-smiley"&gt;&lt;/span&gt; <?php _e( 'A Cheerful Headline', 'wporg' ); ?>&lt;/h2&gt;
 </pre>
 
+				<h3><?php _e( 'Block Usage', 'wporg' ); ?></h3>
+
+				<p><?php _e( 'The block editor supports use of dashicons as block icons and as its own component.', 'wporg' ); ?></p>
+
+				<h4><?php _e( 'Examples', 'wporg' ); ?></h4>
+
+				<p><?php printf(
+					/* translators: %s: URL to Block Editor Handbook for registering a block. */
+					__( 'Adding an icon to a block. The <code>registerBlockType</code> function accepts a parameter "icon" which accepts the name of a dashicon. The provided example is truncated. See the <a href="%s">full example</a> in the Block Editor Handbook.', 'wporg' ),
+					'https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/writing-your-first-block-type/#registering-the-block'
+				); ?></p>
+
+<pre>
+registerBlockType( 'gutenberg-examples/example-01-basic-esnext', {
+    apiVersion: 2,
+    title: 'Example: Basic (esnext)',
+    icon: 'universal-access-alt',
+    category: 'design',
+    example: {},
+    edit() {},
+    save() {},
+} );
+</pre>
+				<p><?php printf(
+					/* translators: %s: URL to handbook page for Dashicon component. */
+					__( 'Using an icon as a component. A dedicated <code>Dashicon</code> component is available. See the <a href="%s">related documentation</a> in the Block Editor Handbook.', 'wporg' ),
+					'https://developer.wordpress.org/block-editor/reference-guides/components/dashicon/'
+				); ?></p>
+
+<pre>
+import { Dashicon } from '@wordpress/components';
+ 
+const MyDashicon = () =&gt; (
+    &lt;div&gt;
+        &lt;Dashicon icon="admin-home" /&gt;
+        &lt;Dashicon icon="products" /&gt;
+        &lt;Dashicon icon="wordpress" /&gt;
+    &lt;/div&gt;
+);
+</pre>
+
 				<h3><?php _e( 'Photoshop Usage', 'wporg' ); ?></h3>
 
 				<p><?php _e( 'Use the .OTF version of the font for Photoshop mockups, the web-font versions won\'t work. For most accurate results, pick the "Sharp" font smoothing.', 'wporg' ); ?></p>
