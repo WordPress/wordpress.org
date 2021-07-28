@@ -65,12 +65,12 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 		}
 
 		add_filter( 'translation_set_import_over_existing', '__return_false' );
-		//add_filter( 'translation_set_import_status', array( $this, '__string_status_waiting' ) );
+		add_filter( 'translation_set_import_status', array( $this, '__string_status_waiting' ) );
 
 		// Do the import.
 		$imported = $translation_set->import( $translations );
 
-		//remove_filter( 'translation_set_import_status', '__string_status_waiting' );
+		remove_filter( 'translation_set_import_status', '__string_status_waiting' );
 		remove_filter( 'translation_set_import_over_existing', '__return_false' );
 
 		WP_CLI::success( "Imported $imported strings for {$locale->english_name} [$file]" );
