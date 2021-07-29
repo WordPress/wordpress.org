@@ -365,6 +365,7 @@ function wporg_themes_get_feature_list( $include = 'active' ) {
 				'post-formats'          => __( 'Post Formats', 'wporg-themes' ),
 				'rtl-language-support'  => __( 'RTL Language Support', 'wporg-themes' ),
 				'sticky-post'           => __( 'Sticky Post', 'wporg-themes' ),
+				'template-editing'      => __( 'Template Editing', 'wporg-themes' ),
 				'theme-options'         => __( 'Theme Options', 'wporg-themes' ),
 				'threaded-comments'     => __( 'Threaded Comments', 'wporg-themes' ),
 				'translation-ready'     => __( 'Translation Ready', 'wporg-themes' ),
