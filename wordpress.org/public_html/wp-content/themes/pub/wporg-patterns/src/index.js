@@ -25,7 +25,7 @@ if ( myPatternsGridContainer ) {
 }
 
 // Load the preview into any awaiting preview container.
-const myFavsGridContainer = document.getElementById( 'my-favorites__container' );
+const myFavsGridContainer = document.getElementById( 'pattern-favorites__container' );
 if ( myFavsGridContainer ) {
 	render( <MyFavorites />, myFavsGridContainer );
 }

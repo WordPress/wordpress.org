@@ -1,20 +1,28 @@
+@mixin focus_styles {
+	outline: none;
+	border: 1px solid color(blue-70);
+	box-shadow: 0 0 0 3px color(blue-20);
+}
+
 .pattern-search {
 	display: flex;
 	align-items: center;
+	position: relative;
 	background: $color-white;
 	border-radius: 2px;
 
 	input[type="search"] {
 		flex-grow: 1;
 		margin: 0;
-		padding: 0.5rem;
-		border: none;
+		padding: 0.5rem 2rem 0.5rem 0.5rem;
+		border: 1px solid transparent;
 		border-radius: 2px;
 		box-shadow: none;
 		font-size: 0.8125rem;
 
 		&:focus {
-			outline: $color__wp-blue auto 1px;
+
+			@include focus_styles;
 		}
 	}
 
@@ -35,8 +43,11 @@
 
 .pattern-search__button {
 	display: flex;
+	position: absolute;
+	right: 0;
 	background: transparent;
-	border: none;
+	border: 1px solid transparent;
+	border-radius: 2px;
 	color: $color__text-lighter;
 	height: 35px;
 	align-items: center;
@@ -46,6 +57,7 @@
 	}
 
 	&:focus {
-		outline: $color__wp-blue auto 1px;
+
+		@include focus_styles;
 	}
 }

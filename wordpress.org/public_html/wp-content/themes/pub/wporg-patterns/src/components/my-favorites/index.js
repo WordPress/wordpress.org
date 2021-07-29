@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 import { store as patternStore } from '../../store';
 import { useSelect } from '@wordpress/data';
 
@@ -42,31 +41,37 @@ const MyFavorites = () => {
 		};
 	} );
 
+	const mostFavoritedQuery = { orderby: 'favorite_count', per_page: 6 };
+	if ( query[ 'pattern-categories' ] ) {
+		mostFavoritedQuery[ 'pattern-categories' ] = query[ 'pattern-categories' ];
+	}
+
 	const isLoggedIn = !! wporgPatternsData.userId;
-
-	if ( ! isLoggedIn ) {
-		const loginUrl = addQueryArgs( wporgPatternsUrl.login, { redirect_to: window.location } );
-		return (
-			<div className="entry-content">
-				<p>{ __( 'Please log in to view your favorite patterns.', 'wporg-patterns' ) }</p>
-				<a className="button button-primary" href={ loginUrl }>
-					{ __( 'Log in', 'wporg-patterns' ) }
-				</a>
-			</div>
-		);
-	}
-
-	if ( isEmpty ) {
-		return <EmptyHeader />;
-	}
 
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<PatternGridMenu basePath="/my-favorites/" query={ query } />
-			<PatternGrid query={ query }>
-				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
-			</PatternGrid>
+			{ isLoggedIn && <PatternGridMenu basePath="/favorites/" query={ query } /> }
+			{ ! isLoggedIn || isEmpty ? (
+				<>
+					<EmptyHeader isLoggedIn={ isLoggedIn } />
+					<PatternGrid
+						header={
+							<h2 className="pattern-favorites__grid-title">
+								{ __( 'Here’s a few of our favorite patterns', 'wporg-patterns' ) }
+							</h2>
+						}
+						query={ mostFavoritedQuery }
+						showPagination={ false }
+					>
+						{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
+					</PatternGrid>
+				</>
+			) : (
+				<PatternGrid query={ query }>
+					{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
+				</PatternGrid>
+			) }
 		</RouteProvider>
 	);
 };

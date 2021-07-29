@@ -1,0 +1,34 @@
+.pattern-favorites__empty-header {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	margin: 4rem 1rem;
+	padding-top: 4rem;
+	padding-bottom: 4rem;
+	min-height: 20rem;
+	/* stylelint-disable-next-line function-url-quotes */
+	background-image: url("data:image/svg+xml,%3Csvg width='380' height='348' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M190 39.554C210.629 15.33 242.235 0 275.166 0c58.29 0 104.09 45.8 104.09 104.091 0 71.48-64.241 129.734-161.574 217.995l-.24.217L190 347.285l-27.442-24.793-.747-.678C64.763 233.622.744 175.447.744 104.091.744 45.8 46.544 0 104.835 0 137.766 0 169.371 15.33 190 39.554zm0 256.632l1.893-1.893c90.086-81.569 149.512-135.507 149.512-190.202 0-37.851-28.388-66.24-66.239-66.24-29.146 0-57.534 18.736-67.376 44.665H172.4c-10.031-25.929-38.419-44.665-67.565-44.665-37.851 0-66.24 28.389-66.24 66.24 0 54.695 59.427 108.633 149.513 190.202l1.892 1.893z' fill='%23F0F0F0'/%3E%3C/svg%3E%0A");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+
+	@include breakpoint( $breakpoint-large ) {
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.link-create-account {
+		font-size: 0.875rem;
+	}
+
+	p {
+		margin-top: 0.75rem;
+		margin-bottom: 0;
+	}
+}
+
+.pattern-favorites__grid-title {
+	margin-bottom: 3rem;
+	font-size: 1.375rem;
+	text-align: center;
+}

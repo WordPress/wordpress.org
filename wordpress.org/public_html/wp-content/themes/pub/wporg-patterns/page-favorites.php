@@ -16,7 +16,7 @@ get_header();
 		<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 	</header><!-- .entry-header -->
 
-	<div id="my-favorites__container"></div>
+	<div id="pattern-favorites__container"></div>
 
 </main><!-- #main -->
 

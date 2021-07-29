@@ -1,6 +1,6 @@
 .error-404 {
 	display: flex;
-	margin: 0 1rem 4rem;
+	margin: 4rem 1rem;
 	min-height: 28rem;
 	justify-content: center;
 	align-items: center;
@@ -12,6 +12,7 @@
 	background-size: contain;
 
 	.page-title {
+		margin-top: 0;
 		font-weight: 700;
 		font-size: 2.125rem;
 		text-align: center;

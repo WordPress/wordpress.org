@@ -19,14 +19,33 @@ import { getLoadingMessage, getMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
 /**
- * This checks to see if the query is only being sorted.
+ * Check if the query is just the "home" query, and doesn't need a message.
+ *
+ * If the query has no properties, or only "orderby", it is considered a "home" query.
  *
  * @param {Object} query
- * @param {string} query.orderby Sorting key, used to determine if there is sorting.
- * @return {boolean} Set to true if the object is empty with a only sorting parameter.
+ * @return {boolean}
  */
-const isOnlySorting = ( query ) => {
-	return Object.keys( query ).length === 1 && query.orderby;
+const isHomeQuery = ( query ) => {
+	const keys = Object.keys( query || {} );
+	if ( ! keys.length ) {
+		return true;
+	}
+	return keys.length === 1 && keys[ 0 ] === 'orderby';
+};
+
+/**
+ * Check if the query is a valid query.
+ *
+ * @param {Object} query
+ * @return {boolean}
+ */
+const isQueryValid = ( query = {} ) => {
+	// If there is an "include", it should have items.
+	if ( query.hasOwnProperty( 'include' ) ) {
+		return query.include.length > 0;
+	}
+	return true;
 };
 
 function ContextBar( props ) {
@@ -57,13 +76,13 @@ function ContextBar( props ) {
 
 	useDeepCompareEffect( () => {
 		// Show the loading message
-		if ( isLoadingPatterns ) {
+		if ( isQueryValid( query ) && isLoadingPatterns ) {
 			setMessage( getLoadingMessage( { category: category?.name, author: author } ) );
 			return;
 		}
 
 		// We don't show a message when the query is empty.
-		if ( ( query && ! Object.keys( query ).length ) || isOnlySorting( query ) ) {
+		if ( isHomeQuery( query ) ) {
 			setMessage( '' );
 			return;
 		}
