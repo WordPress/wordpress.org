@@ -66,7 +66,7 @@ class Plugin_Search {
 			add_filter( 'option_jetpack_active_modules', array( $this, 'option_jetpack_active_modules' ), 10, 1 );
 			add_filter( 'pre_option_has_jetpack_search_product', array( $this, 'option_has_jetpack_search_product' ), 10, 1 );
 
-			add_filter( 'jetpack_search_abort', array( $this, 'jetpack_search_abort' ) );
+			add_filter( 'jetpack_search_abort', array( $this, 'log_jetpack_search_abort' ) );
 
 			require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search.php' );
 			require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search-helpers.php' );
