@@ -64,7 +64,7 @@ function ContextBar( props ) {
 			const _query = { ...getQueryFromUrl( path ), ...props.query };
 
 			return {
-				author: _query?.author_name,
+				author: wporgPatternsData.currentAuthorName || _query?.author_name,
 				category: getCategoryById( _query[ 'pattern-categories' ] ),
 				count: getPatternTotalsByQuery( _query ),
 				isLoadingPatterns: isLoadingPatternsByQuery( _query ),

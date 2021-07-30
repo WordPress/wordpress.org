@@ -26,13 +26,11 @@ const setBreadcrumbText = ( label ) => {
 const BreadcrumbMonitor = () => {
 	const { path } = useRoute();
 
-	const { authorName, categoryName, query } = useSelect( ( select ) => {
+	const { authorName, categoryName } = useSelect( ( select ) => {
 		const _query = select( patternStore ).getQueryFromUrl( path );
 		const category = select( patternStore ).getCategoryById( _query[ 'pattern-categories' ] );
 		return {
-			query: _query,
-			// @todo Get the author's display name.
-			authorName: _query?.author_name,
+			authorName: wporgPatternsData.currentAuthorName || _query?.author_name,
 			categoryName: category?.name,
 		};
 	}, [] );
@@ -40,7 +38,7 @@ const BreadcrumbMonitor = () => {
 	useEffect( () => {
 		if ( authorName ) {
 			// translators: %s is the author name.
-			setBreadcrumbText( sprintf( __( 'Author: %s', 'wporg-patterns' ), query.author_name ) );
+			setBreadcrumbText( sprintf( __( 'Author: %s', 'wporg-patterns' ), authorName ) );
 		} else if ( categoryName ) {
 			// translators: %s is the category name.
 			setBreadcrumbText( sprintf( __( 'Category: %s', 'wporg-patterns' ), categoryName ) );

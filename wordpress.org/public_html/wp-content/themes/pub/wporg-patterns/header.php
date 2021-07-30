@@ -32,7 +32,12 @@ get_template_part( 'header', 'wporg' );
 
 						<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
 						<?php get_search_form(); ?>
-						<a class="site-link" href="<?php echo esc_url( home_url( '/favorites' ) ); ?>"><?php esc_html_e( 'Favorites', 'wporg-patterns' ); ?></a>
+
+						<?php if ( is_user_logged_in() ) : ?>
+							<a class="site-link" href="<?php echo esc_url( home_url( '/favorites' ) ); ?>"><?php esc_html_e( 'Favorites', 'wporg-patterns' ); ?></a>
+						<?php else : ?>
+							<a class="site-link" href="<?php echo esc_url( wp_login_url() ); ?>"><?php esc_html_e( 'Log in to collect your favorites', 'wporg-patterns' ); ?></a>
+						<?php endif; ?>
 					</div>
 				<?php else : ?>
 					<div>

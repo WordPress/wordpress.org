@@ -85,6 +85,7 @@ function enqueue_assets() {
 				"var wporgPatternsData = JSON.parse( decodeURIComponent( '%s' ) )",
 				rawurlencode( wp_json_encode( array(
 					'userId' => get_current_user_id(),
+					'currentAuthorName' => esc_html( get_the_author_meta( 'display_name' ) ),
 				) ) ),
 			),
 			'before'
@@ -201,12 +202,15 @@ function pre_get_posts( $query ) {
 }
 
 /**
- * Add the "My Patterns" status rewrites.
- * This will redirect `my-patterns/draft`, `my-patterns/pending` etc to use the My Patterns page.
+ * Add rewrites needed for nested page navigation.
+ * - `my-patterns/<status>` will render the My Patterns page.
+ * - `favorites/categories/<cat>` will render the Favorites page.
+ * - `author/<username>/categories/<cat>` will render the author archive.
  */
 function add_rewrite() {
 	add_rewrite_rule( '^my-patterns/[^/]+/?$', 'index.php?pagename=my-patterns', 'top' );
 	add_rewrite_rule( '^favorites/.+/?$', 'index.php?pagename=favorites', 'top' );
+	add_rewrite_endpoint( 'categories', EP_AUTHORS );
 }
 
 
