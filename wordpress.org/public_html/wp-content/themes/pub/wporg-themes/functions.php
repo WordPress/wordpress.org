@@ -62,6 +62,12 @@ function wporg_themes_canonical_redirects() {
 		die();
 	}
 
+	// Searches should be redirected to canonical location.
+	if ( isset( $_GET['s'] ) ) {
+		wp_safe_redirect( home_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ), 301 );
+		die();
+	}
+
 	// Uppercase characters in URLs tend to lead to broken JS pages.
 	// Redirect all paths to the lower-case variant, excluding searches..
 	$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
