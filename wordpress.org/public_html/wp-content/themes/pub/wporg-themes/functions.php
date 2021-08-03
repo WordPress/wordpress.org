@@ -68,6 +68,23 @@ function wporg_themes_canonical_redirects() {
 		die();
 	}
 
+	// Handle 404 pages where it's a singular theme followed by junk, for example, /themes/twentyten/junk/input/
+	if ( is_404() ) {
+		$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		if ( preg_match( '!^/themes/([^/]+)/.+!i', $path, $m ) ) {
+			$posts = get_posts( [
+				'name'        => $m[1],
+				'post_type'   => 'repopackage',
+				'post_status' => 'publish'
+			] );
+
+			if ( $posts ) {
+				wp_safe_redirect( get_permalink( $posts[0] ), 301 );
+				die();
+			}
+		}
+	}
+
 	// Uppercase characters in URLs tend to lead to broken JS pages.
 	// Redirect all paths to the lower-case variant, excluding searches..
 	$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
