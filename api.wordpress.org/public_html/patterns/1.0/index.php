@@ -7,10 +7,6 @@ namespace WordPressdotorg\API\Patterns;
  *
  * This is cached by nginx, so we don't have to worry about the performance costs of loading WP, and don't need to
  * do any any object caching.
- *
- * todo
- * - publish caching sysreq once query args settled for patterns and categories, etc -- https://make.wordpress.org/systems/wp-admin/post.php?post=1788&action=edit
- * - add docs to codex
  */
 
 main( $_SERVER['QUERY_STRING'] );
@@ -21,7 +17,6 @@ main( $_SERVER['QUERY_STRING'] );
  * @param string $buffer
  */
 function flush_handler( $buffer ) {
-
 	$old_headers = headers_list();
 
 	// Remove CORS header added by REST API
@@ -83,6 +78,9 @@ function main( $query_string ) {
 			$query_args['order']   = 'asc';
 		}
 	}
+
+	// Mimic browser request, so that `wp_is_json_request()` is accurate.
+	$_SERVER['HTTP_ACCEPT'] = 'application/json';
 
 	$wp_init_host = $api_url_base . $endpoint . '?' . urldecode( http_build_query( $query_args ) );
 
