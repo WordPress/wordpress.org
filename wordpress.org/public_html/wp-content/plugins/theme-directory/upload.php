@@ -49,10 +49,20 @@ function wporg_themes_render_upload_shortcode() {
 	$notice = '';
 
 	if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-themes-upload' ) && 'upload' === $_POST['action'] ) {
-		$message = wporg_themes_process_upload();
+		$messages = wporg_themes_process_upload();
 
-		if ( ! empty( $message ) ) {
-			$notice = "<div class='notice notice-warning'><p>{$message}</p></div>";
+		if ( ! empty( $messages ) ) {
+			$notice_content = "";
+
+			if ( is_array( $messages ) ) {
+				foreach ( $messages as $message){
+					$notice_content .= "<li>{$message}</li>";
+				}
+			} else {
+				$notice_content = "<li>{$messages}</li>";
+			}
+
+			$notice = "<h2>" . esc_html__( 'Upload Errors', 'wporg-themes' ) . "</h2><div class='notice notice-error notice-large'><ul>{$notice_content}</ul></div>";
 		}
 	}
 
