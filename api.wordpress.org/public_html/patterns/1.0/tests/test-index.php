@@ -24,6 +24,22 @@ class Test_Patterns extends TestCase {
 		$this->assertIsArray( $patterns[0]->keyword_slugs );
 	}
 
+	public function assertAllPatternsMatchSearchTerm( $patterns, $search_term ) {
+		$all_patterns_include_query = true;
+
+		foreach ( $patterns as $pattern ) {
+			$match_in_title       = stripos( $pattern->title->rendered, $search_term );
+			$match_in_description = stripos( $pattern->meta->wpop_description, $search_term );
+
+			if ( false === $match_in_title && false === $match_in_description ) {
+				$all_patterns_include_query = false;
+				break;
+			}
+		}
+
+		$this->assertTrue( $all_patterns_include_query );
+	}
+
 	/**
 	 * Pluck term IDs from a list of patterns.
 	 *
@@ -151,27 +167,24 @@ class Test_Patterns extends TestCase {
 	 *
 	 * @param string $search_query
 	 */
-	public function test_search_patterns( $search_term, $match_expected ) : void {
+	public function test_search_patterns( $search_term, $match_expected, $expected_post_ids ) : void {
 		// wrap term in double quotes to match exact phrase.
 		$response = send_request( '/patterns/1.0/?&search="' . $search_term . '"&pattern-keywords=11&locale=en_US' );
 
 		if ( $match_expected ) {
-			$this->assertResponseHasPattern( $response );
-
-			$patterns = json_decode( $response->body );
-			$all_patterns_include_query = true;
-
-			foreach ( $patterns as $pattern ) {
-				$match_in_title       = stripos( $pattern->title->rendered, $search_term );
-				$match_in_description = stripos( $pattern->meta->wpop_description, $search_term );
-
-				if ( false === $match_in_title && false === $match_in_description ) {
-					$all_patterns_include_query = false;
-					break;
-				}
+			if ( empty( $expected_post_ids ) ) {
+				$this->fail( 'Test case must provide the expected post IDs if a match is expected.' );
 			}
 
-			$this->assertTrue( $all_patterns_include_query );
+			$this->assertResponseHasPattern( $response );
+
+			$patterns    = json_decode( $response->body );
+			$pattern_ids = array_column( $patterns, 'id' );
+			$this->assertAllPatternsMatchSearchTerm( $patterns, $search_term );
+
+			foreach ( $expected_post_ids as $id ) {
+				$this->assertContains( $id, $pattern_ids );
+			}
 
 		} else {
 			$this->assertSame( 200, $response->status_code );
@@ -181,9 +194,11 @@ class Test_Patterns extends TestCase {
 
 	public function data_search_patterns() {
 		return array(
-			'match title' => array(
-				'search_term'    => 'side by side',
-				'match_expected' => true,
+			// Should find posts that have the term in the title, but _not_ in the description.
+			'match title only' => array(
+				'search_term'       => 'side by side',
+				'match_expected'    => true,
+				'expected_post_ids' => array( 19 ),
 			),
 
 			// todo Enable this once https://github.com/WordPress/pattern-directory/issues/28 is done
@@ -193,8 +208,9 @@ class Test_Patterns extends TestCase {
 //			),
 
 			'no matches' => array(
-				'search_term'    => 'Supercalifragilisticexpialidocious',
-				'match_expected' => false,
+				'search_term'       => 'Supercalifragilisticexpialidocious',
+				'match_expected'    => false,
+				'expected_post_ids' => false,
 			),
 		);
 	}
