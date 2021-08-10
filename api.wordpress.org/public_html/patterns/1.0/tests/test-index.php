@@ -129,16 +129,21 @@ class Test_Patterns extends TestCase {
 
 		$patterns      = json_decode( $response->body );
 		$found_locales = array_column( $patterns, 'meta' );
-		$found_locales = array_column( $found_locales, 'wpop_locale' );
+		$found_locales = array_unique( array_column( $found_locales, 'wpop_locale' ) );
 
 		if ( $expected_locale ) {
-			$this->assertSame( array( $expected_locale ), array_unique( $found_locales ) );
+			/*
+			 * Using `assertContains()` instead of `assertSame()` because `en_US` patterns are often included as
+			 * a fallback, if the locale isn't 100% translated.
+			 */
+			$this->assertContains( $expected_locale, $found_locales );
+
 		} else {
 			/*
 			 * This could start failing falsely in the future if new patterns are created in a way that results in
 			 * the first page of patterns all having the same locale.
 			 */
-			$this->assertGreaterThan( 1, count( array_unique( $found_locales ) ) );
+			$this->assertGreaterThan( 1, count( $found_locales ) );
 		}
 	}
 
