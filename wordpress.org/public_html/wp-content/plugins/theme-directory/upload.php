@@ -62,7 +62,7 @@ function wporg_themes_render_upload_shortcode() {
 				$notice_content = "<li>{$messages}</li>";
 			}
 
-			$notice = "<h2>" . esc_html__( 'Upload Errors', 'wporg-themes' ) . "</h2><div class='notice notice-error notice-large'><ul>{$notice_content}</ul></div>";
+			$notice = "<div class='notice notice-warning notice-large'><ul>{$notice_content}</ul></div>";
 		}
 	}
 
