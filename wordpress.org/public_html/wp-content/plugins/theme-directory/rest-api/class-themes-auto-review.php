@@ -123,6 +123,14 @@ class Auto_Review_Controller extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access for the item, WP_Error object otherwise.
 	 */
 	public function update_item( $request ) {
+		if ( ! defined( 'THEME_TRACBOT_PASSWORD' ) || ! THEME_TRACBOT_PASSWORD ) {
+			return new \WP_Error(
+				'rest_error_updating_ticket',
+				__( 'Unable to locate ticket.', 'wporg-themes' ),
+				array( 'status' => \WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+
 		if ( ! class_exists( 'Trac' ) ) {
 			require_once ABSPATH . WPINC . '/class-IXR.php';
 			require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';
@@ -136,7 +144,7 @@ class Auto_Review_Controller extends WP_REST_Controller {
 		// Check for ticket
 		$ticket = $trac_instance->ticket_get( $ticket_id );
 
-		if( ! $ticket ){
+		if ( ! $ticket ) {
 			return new \WP_Error(
 				'rest_invalid_ticket',
 				__( 'Unable to locate ticket.', 'wporg-themes' ),
@@ -146,7 +154,7 @@ class Auto_Review_Controller extends WP_REST_Controller {
 
 		$body = $request->get_body();
 
-		if( empty( $body ) ) {
+		if ( empty( $body ) ) {
 			return new \WP_Error(
 				'rest_error_updating_ticket',
 				__( 'Content was empty.', 'wporg-themes' ),
@@ -158,7 +166,7 @@ class Auto_Review_Controller extends WP_REST_Controller {
 
 		$updated_ticket = $trac_instance->ticket_update( $ticket_id, $content, [], false );
 
-		if( ! $updated_ticket ) {
+		if ( ! $updated_ticket ) {
 			return new \WP_Error(
 				'rest_error_updating_ticket',
 				__( 'We ran into an error updating the ticket.', 'wporg-themes' ),

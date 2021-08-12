@@ -37,6 +37,10 @@ class Trac_Sync {
 	 * The cron trigger for the svn import job.
 	 */
 	public static function cron_trigger() {
+		if ( ! defined( 'THEME_TRACBOT_PASSWORD' ) || ! THEME_TRACBOT_PASSWORD ) {
+			return;
+		}
+
 		if ( ! class_exists( 'Trac' ) ) {
 			require_once ABSPATH . WPINC . '/class-IXR.php';
 			require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';

@@ -42,10 +42,6 @@ function wporg_themes_render_upload_shortcode() {
 		return '<p>' . $log_in_text . '</p>';
 	}
 
-	if ( ! defined( 'THEME_TRACBOT_PASSWORD' ) || ! defined( 'THEME_DROPBOX_PASSWORD' ) ) {
-		return '<div class="notice notice-warning"><p>Error: Please configure the required Trac and SVN details.</p></div>';
-	}
-
 	$notice = '';
 
 	if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-themes-upload' ) && 'upload' === $_POST['action'] ) {
