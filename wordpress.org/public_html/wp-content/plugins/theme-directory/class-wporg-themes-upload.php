@@ -71,6 +71,13 @@ class WPORG_Themes_Upload {
 	protected $theme;
 
 	/**
+	 * The theme slug being uploaded.
+	 *
+	 * @var string
+	 */
+	protected $theme_slug;
+
+	/**
 	 * The theme post if it already exists in the repository.
 	 *
 	 * @var WP_Post
@@ -89,7 +96,7 @@ class WPORG_Themes_Upload {
 	 *
 	 * @var array
 	 */
-	 protected $readme;
+	protected $readme;
 
 	/**
 	 * Trac ticket information.
