@@ -393,7 +393,11 @@ class WPORG_Themes_Upload {
 		// Prevent duplicate URLs.
 		$themeuri = $this->theme->get( 'ThemeURI' );
 		$authoruri = $this->theme->get( 'AuthorURI' );
-		if ( ! empty( $themeuri ) && ! empty( $authoruri ) && $themeuri == $authoruri ) {
+		if (
+			! empty( $themeuri ) &&
+			! empty( $authoruri ) &&
+			$themeuri == $authoruri
+		) {
 			$style_errors->add(
 				'duplicate_uris',
 				__( 'Duplicate theme and author URLs. A theme URL is a page/site that provides details about this specific theme. An author URL is a page/site that provides information about the author of the theme. You aren&rsquo;t required to provide both, so pick the one that best applies to your URL.', 'wporg-themes' )
@@ -401,7 +405,11 @@ class WPORG_Themes_Upload {
 		}
 
 		// Check for child theme's parent in the directory (non-buddypress only)
-		if ( $this->theme->parent() && ! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) && ! $this->is_parent_available() ) {
+		if (
+			$this->theme->parent() &&
+			! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) &&
+			! $this->is_parent_available()
+		) {
 			$style_errors->add(
 				'invalid_parent',
 				sprintf(
@@ -423,7 +431,11 @@ class WPORG_Themes_Upload {
 			);
 
 		// Is there already a theme with the name name by a different author?
-		if ( ! empty( $this->theme_post ) && ! empty( $this->author ) && $this->theme_post->post_author != $this->author->ID ) {
+		if (
+			! empty( $this->theme_post ) &&
+			! empty( $this->author ) &&
+			$this->theme_post->post_author != $this->author->ID
+		) {
 
 			$is_allowed_to_upload_for_theme = false;
 			if (
@@ -450,7 +462,10 @@ class WPORG_Themes_Upload {
 		}
 
 		// Check if the ThemeURI is already in use by another theme by another author.
-		if ( empty( $this->theme_post ) && ! empty( $themeuri ) ) {
+		if (
+			empty( $this->theme_post ) &&
+			! empty( $themeuri )
+		) {
 			$theme_uri_matches = get_posts( [
 				'post_type'        => 'repopackage',
 				'post_status'      => 'publish',
@@ -478,7 +493,10 @@ class WPORG_Themes_Upload {
 		}
 
 		// We know it's the correct author, now we can check if it's suspended.
-		if ( ! empty( $this->theme_post ) && 'suspend' === $this->theme_post->post_status ) {
+		if (
+			! empty( $this->theme_post ) &&
+			'suspend' === $this->theme_post->post_status
+		) {
 			$style_errors->add(
 				'suspended',
 				sprintf(
@@ -490,7 +508,10 @@ class WPORG_Themes_Upload {
 		}
 
 		// Make sure we have version that is higher than any previously uploaded version of this theme. This check happens last to allow the non-author blocks to kick in.
-		if ( ! empty( $this->theme_post ) && ! version_compare( $this->theme->get( 'Version' ), $this->theme_post->max_version, '>' ) ) {
+		if (
+			! empty( $this->theme_post ) &&
+			! version_compare( $this->theme->get( 'Version' ), $this->theme_post->max_version, '>' )
+		) {
 			$style_errors->add(
 				'invalid_version',
 				sprintf(
@@ -1062,7 +1083,10 @@ TICKET;
 		}
 
 		// If there's a previous version and the most current version's status is `new`, we update.
-		if ( ! empty( $this->theme_post->max_version ) && 'new' == $this->theme_post->_status[ $this->theme_post->max_version ] ) {
+		if (
+			! empty( $this->theme_post->max_version ) &&
+			'new' == $this->theme_post->_status[ $this->theme_post->max_version ]
+		) {
 			$ticket_id = (int) $this->theme_post->_ticket_id[ $this->theme_post->max_version ];
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
@@ -1165,7 +1189,10 @@ TICKET;
 
 		// Discard versions that are awaiting review, and maybe set this upload as live.
 		$version_status = 'new';
-		if ( ! empty( $this->trac_ticket->resolution ) && 'live' === $this->trac_ticket->resolution ) {
+		if (
+			! empty( $this->trac_ticket->resolution ) &&
+			'live' === $this->trac_ticket->resolution
+		) {
 			$version_status = 'live';
 		}
 		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), $version_status );
@@ -1374,7 +1401,10 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 
 		// If the uploader and the author are different, email them both.
 		// This only happens under special circumstances.
-		if ( ! empty( $this->theme_post ) && $this->theme_post->post_author != $this->author->ID ) {
+		if (
+			! empty( $this->theme_post ) &&
+			$this->theme_post->post_author != $this->author->ID
+		) {
 			$emails[] = get_user_by( 'id', $this->theme_post->post_author )->user_email;
 		}
 
