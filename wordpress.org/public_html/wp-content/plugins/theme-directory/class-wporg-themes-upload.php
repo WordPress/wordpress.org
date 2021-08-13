@@ -900,6 +900,15 @@ class WPORG_Themes_Upload {
 		// Load the theme checking code.
 		if ( ! function_exists( 'run_themechecks_against_theme' ) ) {
 			include_once WP_PLUGIN_DIR . '/theme-check/checkbase.php';
+
+			// If Theme Check isn't loaded, assume it's fine.
+			if ( ! function_exists( 'run_themechecks_against_theme' ) ) {
+				global $themechecks;
+				// Set the theme checks to an empty list to avoid notices when not available.
+				$themechecks = array();
+
+				return true;
+			}
 		}
 
 		// Run the checks.
