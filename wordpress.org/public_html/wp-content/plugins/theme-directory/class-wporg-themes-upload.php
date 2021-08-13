@@ -47,21 +47,21 @@ class WPORG_Themes_Upload {
 	 *
 	 * @var string
 	 */
-	protected $tmp_dir;
+	protected $tmp_dir = '';
 
 	/**
 	 * Path to a temporary SVN checkout directory.
 	 * 
 	 * @var string
 	 */
-	protected $tmp_svn_dir;
+	protected $tmp_svn_dir = '';
 
 	/**
 	 * Path to temporary theme folder.
 	 *
 	 * @var string
 	 */
-	protected $theme_dir;
+	protected $theme_dir = '';
 
 	/**
 	 * The uploaded theme.
@@ -75,7 +75,7 @@ class WPORG_Themes_Upload {
 	 *
 	 * @var string
 	 */
-	protected $theme_slug;
+	protected $theme_slug = '';
 
 	/**
 	 * The theme post if it already exists in the repository.
@@ -96,7 +96,7 @@ class WPORG_Themes_Upload {
 	 *
 	 * @var array
 	 */
-	protected $readme;
+	protected $readme = array();
 
 	/**
 	 * Trac ticket information.
@@ -110,7 +110,7 @@ class WPORG_Themes_Upload {
 	 * 
 	 * @var int
 	 */
-	protected $trac_changeset;
+	protected $trac_changeset = 0;
 
 	/**
 	 * A Trac instance to communicate with theme.trac.
@@ -118,6 +118,13 @@ class WPORG_Themes_Upload {
 	 * @var Trac
 	 */
 	protected $trac;
+
+	/**
+	 * Theme import status, what the status of this theme version is.
+	 *
+	 * @var string
+	 */
+	protected $version_status = 'new';
 
 	/**
 	 * The list of headers to extract from readme.txt.
@@ -137,17 +144,27 @@ class WPORG_Themes_Upload {
 	 */
 	protected function reset_properties() {
 		$this->author         = false;
-		$this->readme         = false;
+		$this->readme         = array();
 		$this->theme          = false;
 		$this->theme_post     = false;
-		$this->theme_slug     = false;
-		$this->theme_dir      = false;
-		$this->theme_name     = false;
-		$this->tmp_svn_dir    = false;
-		$this->trac_changeset = false;
-		$this->trac_ticket    = false;
+		$this->theme_slug     = '';
+		$this->theme_dir      = '';
+		$this->theme_name     = '';
+		$this->tmp_svn_dir    = '';
+		$this->trac_changeset = 0;
+		$this->trac_ticket    = (object) array(
+			'id'          => 0,
+			'resolution'  => '',
+			'summary'     => '',
+			'keywords'    => [],
+			'parent_link' => '',
+			'priority'    => '',
+			'diff_line'   => '',
+			'description' => '',
+		);
+		$this->version_status = 'new';
 
-		// $this->tmp_dir = false; // Temporary folder per each instance of this class. Doesn't need to be reset each time.
+		// $this->tmp_dir = '';    // Temporary folder per each instance of this class. Doesn't need to be reset each time.
 		// $this->trac    = false; // This can stay active, Trac access won't change between calls.
 	}
 
@@ -954,19 +971,11 @@ class WPORG_Themes_Upload {
 	 * Sets up all Trac ticket information that we need later.
 	 */
 	public function prepare_trac_ticket() {
-		$this->trac_ticket = new StdClass;
-
-		$this->trac_ticket->resolution = '';
-
-		// todo - check trac xml-rpc, maybe data needs to be escaped before sending it there.
 		$this->trac_ticket->summary = sprintf( 'THEME: %1$s – %2$s', $this->theme->display( 'Name' ), $this->theme->display( 'Version' ) );
 
 		// Keywords
-		$this->trac_ticket->keywords = array(
-			'theme-' . $this->theme_slug,
-		);
+		$this->trac_ticket->keywords[] = 'theme-' . $this->theme_slug;
 
-		$this->trac_ticket->parent_link = '';
 		if ( $this->theme->parent() ) {
 			if ( in_array( 'buddypress', $this->theme->get( 'Tags' ) ) ) {
 				$this->trac_ticket->keywords[] = 'buddypress';
@@ -1004,7 +1013,6 @@ class WPORG_Themes_Upload {
 		}
 
 		// Diff line.
-		$this->trac_ticket->diff_line = '';
 		if ( ! empty( $this->theme_post->max_version ) ) {
 			$this->trac_ticket->diff_line = "\nDiff with previous version: [{$this->trac_changeset}] https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}\n";
 		}
@@ -1153,6 +1161,7 @@ TICKET;
 				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically reviewed & approved', array( 'action' => 'new_no_review' ), false );
 
 				$this->trac_ticket->resolution = 'live';
+				$this->version_status          = 'live';
 			}
 
 		}
@@ -1198,7 +1207,7 @@ TICKET;
 			'_requires'     => $this->sanitize_version_like_field( $this->theme->get( 'RequiresWP' ), 'requires' ),
 			'_requires_php' => $this->sanitize_version_like_field( $this->theme->get( 'RequiresPHP' ) ),
 			'_upload_date'  => $upload_date,
-			'_ticket_id'    => $this->trac_ticket->id ?? 0,
+			'_ticket_id'    => $this->trac_ticket->id,
 			'_screenshot'   => $this->theme->screenshot,
 		);
 
@@ -1219,14 +1228,7 @@ TICKET;
 		}
 
 		// Discard versions that are awaiting review, and maybe set this upload as live.
-		$version_status = 'new';
-		if (
-			! empty( $this->trac_ticket->resolution ) &&
-			'live' === $this->trac_ticket->resolution
-		) {
-			$version_status = 'live';
-		}
-		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), $version_status );
+		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), $this->version_status );
 
 		// refresh the post to avoid stale data.
 		if ( $post_id ) {
@@ -1355,10 +1357,7 @@ TICKET;
 	public function send_email_notification() {
 		if ( ! empty( $this->theme_post ) ) {
 
-			if (
-				! empty( $this->trac_ticket->resolution ) &&
-				'live' === $this->trac_ticket->resolution
-			) {
+			if ( 'live' === $this->version_status ) {
 				// Do nothing. The update has been set as live. No need to let them know it's been uploaded.
 				// wporg_themes_approve_version() will send a "Congratulations! It's live!" email momentarily.
 				return;
@@ -1634,7 +1633,7 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 	public function log_to_slack( $status = 'allowed' ) {
 		global $themechecks;
 
-		if ( ! defined( 'THEME_DIRECTORY_SLACK_WEBHOOK' ) || empty( $themechecks ) ) {
+		if ( ! defined( 'THEME_DIRECTORY_SLACK_WEBHOOK' ) ) {
 			return;
 		}
 
@@ -1693,6 +1692,45 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 
 		// Preamble / header
 		if ( $this->theme_post && 'allowed' === $status ) {
+			// Build the fields to include with the post.
+			$fields = [
+				[
+					'type' => 'mrkdwn',
+					'text' => "*Version:*\n{$this->theme->get('Version')}",
+				]
+			];
+
+			if ( $this->trac_ticket->priority ) {
+				$fields[] = [
+					'type' => 'mrkdwn',
+					'text' => "*Priority:*\n{$this->trac_ticket->priority}",
+				];
+			}
+
+			if ( $this->trac_ticket->resolution ) {
+				$fields[] = [
+					'type' => 'mrkdwn',
+					'text' => "*Resolution:*\n{$this->trac_ticket->resolution}",
+				];
+			}
+
+			if ( $this->trac_ticket->id || $this->trac_changeset ) {
+				$fields[] = [
+					'type' => 'mrkdwn',
+					'text' => "*Trac:*\n" .
+						(
+							$this->trac_ticket->id ?
+							"<https://themes.trac.wordpress.org/ticket/{$this->trac_ticket->id}|#{$this->trac_ticket->id}> " :
+							''
+						) .
+						(
+							$this->trac_changeset ?
+							"<https://themes.trac.wordpress.org/changeset/{$this->trac_changeset}|[{$this->trac_changeset}]>" :
+							''
+						),
+				];
+			}
+
 			$blocks[] = [
 				'type' => 'section',
 				'text' => [
@@ -1710,27 +1748,7 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 						$this->theme->display( 'Version' )
 					),
 				],
-				'fields' => array_filter( [
-					[
-						'type' => 'mrkdwn',
-						'text' => "*Version:*\n{$this->theme->get('Version')}",
-					],
-					[
-						'type' => 'mrkdwn',
-						'text' => "*Priority:*\n{$this->trac_ticket->priority}",
-					],
-					$this->trac_ticket->resolution ? [
-						'type' => 'mrkdwn',
-						'text' => "*Resolution:*\n{$this->trac_ticket->resolution}",
-					] : null,
-					[
-						'type' => 'mrkdwn',
-						'text' => "*Trac:*\n" . 
-							"<https://themes.trac.wordpress.org/ticket/{$this->trac_ticket->id}|#{$this->trac_ticket->id}>" .
-							' ' .
-							"<https://themes.trac.wordpress.org/changeset/{$this->trac_changeset}|[{$this->trac_changeset}]>",
-					]
-				] )
+				'fields' => $fields
 			];
 		} elseif ( $this->theme_post ) {
 			$blocks[] = [
