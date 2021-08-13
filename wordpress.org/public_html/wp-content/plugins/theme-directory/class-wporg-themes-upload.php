@@ -1352,25 +1352,34 @@ TICKET;
 	}
 
 	/**
-	 * Sends out an email confirmation to the theme's author.
+	 * Sends out an email confirmation to the theme's author that an upload has taken place.
 	 */
 	public function send_email_notification() {
+		/*
+		 * Skip sending an email when..
+		 *  - The theme is to be made live immediately.
+		 *    `wporg_themes_approve_version()` will send a "Congratulations! It's live!" shortly.
+		 *  - No Trac ticket was created, so there's nothing to reference about where feedback is.
+		 */
+		if (
+			'live' === $this->version_status ||
+			! $this->trac_ticket->id
+		) {
+			return;
+		}
+
 		if ( ! empty( $this->theme_post ) ) {
-
-			if ( 'live' === $this->version_status ) {
-				// Do nothing. The update has been set as live. No need to let them know it's been uploaded.
-				// wporg_themes_approve_version() will send a "Congratulations! It's live!" email momentarily.
-				return;
-			}
-
-			/* translators: 1: theme name, 2: theme version */
-			$email_subject = sprintf( __( '[WordPress Themes] %1$s, new version %2$s', 'wporg-themes' ),
+			$email_subject = sprintf(
+				/* translators: 1: theme name, 2: theme version */
+				__( '[WordPress Themes] %1$s, new version %2$s', 'wporg-themes' ),
 				$this->theme->display( 'Name' ),
 				$this->theme->display( 'Version' )
 			);
 
-			/* translators: 1: theme version, 2: theme name, 3: Trac ticket URL */
-			$email_content = sprintf( __( 'Thank you for uploading version %1$s of %2$s.
+			
+			$email_content = sprintf(
+				/* translators: 1: theme version, 2: theme name, 3: Trac ticket URL */
+				__( 'Thank you for uploading version %1$s of %2$s.
 
 Feedback will be provided at %3$s
 
@@ -1382,13 +1391,15 @@ https://make.wordpress.org/themes', 'wporg-themes' ),
 				'https://themes.trac.wordpress.org/ticket/' . $this->trac_ticket->id
 			);
 		} else {
-			/* translators: %s: theme name */
-			$email_subject = sprintf( __( '[WordPress Themes] New Theme - %s', 'wporg-themes' ),
+			$email_subject = sprintf(
+				/* translators: %s: theme name */
+				__( '[WordPress Themes] New Theme - %s', 'wporg-themes' ),
 				$this->theme->display( 'Name' )
 			);
 
-			/* translators: 1: theme name, 2: Trac ticket URL */
-			$email_content = sprintf( __( 'Thank you for uploading %1$s to the WordPress Theme Directory. A ticket has been created for the review:
+			$email_content = sprintf(
+				/* translators: 1: theme name, 2: Trac ticket URL */
+				__( 'Thank you for uploading %1$s to the WordPress Theme Directory. A ticket has been created for the review:
 <%2$s>
 
 ** Requirements **
