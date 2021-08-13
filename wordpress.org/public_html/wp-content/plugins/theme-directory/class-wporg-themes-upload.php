@@ -108,7 +108,7 @@ class WPORG_Themes_Upload {
 	/**
 	 * Trac changeset.
 	 * 
-	 * @var string
+	 * @var int
 	 */
 	protected $trac_changeset;
 
@@ -130,6 +130,26 @@ class WPORG_Themes_Upload {
 		'license'      => 'license',
 		'license_uri'  => 'license uri',
 	);
+
+	/**
+	 * Reset all class properties before each import, to avoid a situation
+	 * where multiple imports will use one anothers data.
+	 */
+	protected function reset_properties() {
+		$this->author         = false;
+		$this->readme         = false;
+		$this->theme          = false;
+		$this->theme_post     = false;
+		$this->theme_slug     = false;
+		$this->theme_dir      = false;
+		$this->theme_name     = false;
+		$this->tmp_svn_dir    = false;
+		$this->trac_changeset = false;
+		$this->trac_ticket    = false;
+
+		// $this->tmp_dir = false; // Temporary folder per each instance of this class. Doesn't need to be reset each time.
+		// $this->trac    = false; // This can stay active, Trac access won't change between calls.
+	}
 
 	/**
 	 * Validate that a theme upload succeeded and was a valid file.
@@ -170,6 +190,8 @@ class WPORG_Themes_Upload {
 	 * @return WP_Error|string Failure or success message.
 	 */
 	public function process_upload( $file_upload ) {
+		$this->reset_properties();
+
 		$valid_upload = $this->validate_upload( $file_upload );
 		if ( ! $valid_upload ) {
 			return new WP_Error(
