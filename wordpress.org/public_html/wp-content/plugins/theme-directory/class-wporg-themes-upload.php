@@ -163,7 +163,7 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
-	 * Processes the theme upload.
+	 * Processes a theme ZIP upload.
 	 *
 	 * Runs various tests, creates Trac ticket, repopackage post, and saves the files to the SVN repo.
 	 *
@@ -180,6 +180,48 @@ class WPORG_Themes_Upload {
 
 		$this->create_tmp_dirs( $file_upload['name'] );
 		$this->unzip_package( $file_upload );
+
+		$result = $this->import();
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return sprintf(
+			/* translators: 1: theme name, 2: Trac ticket URL */
+			__( 'Thank you for uploading %1$s to the WordPress Theme Directory. We&rsquo;ve sent you an email verifying that we&rsquo;ve received it. Feedback will be provided at <a href="%2$s">%2$s</a>', 'wporg-themes' ),
+			$this->theme->display( 'Name' ),
+			esc_url( 'https://themes.trac.wordpress.org/ticket/' . $this->trac_ticket->id )
+		);
+	}
+
+	/**
+	 * Processes a theme import.
+	 *
+	 * @return WP_Error|true Error object on failure, true on success.
+	 */
+	protected function import( $args = array() ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				// Whether to commit the files to SVN.
+				'commit_to_svn'       => true,
+				// Whether Theme Check should maybe block the import.
+				'run_themecheck'      => true,
+				// Whether a failing Theme Check blocks the import.
+				'block_on_themecheck' => true,
+				// Whether to create a Trac ticket for this import.
+				'create_trac_ticket'  => true,
+			)
+		);
+
+		// When running locally, certain actions cannot be performed.
+		if ( ! defined( 'THEME_TRACBOT_PASSWORD' ) || ! THEME_TRACBOT_PASSWORD ) {
+			$args['create_trac_ticket'] = false;
+		}
+		if ( ! defined( 'THEME_DROPBOX_PASSWORD' ) || ! THEME_DROPBOX_PASSWORD ) {
+			$args['commit_to_svn'] = false;
+		}
 
 		$theme_files = $this->get_all_files( $this->theme_dir );
 
@@ -231,10 +273,12 @@ class WPORG_Themes_Upload {
 		// Let's check some theme headers, shall we?
 		$this->theme_name = $this->theme->get( 'Name' );
 
-		// Determine the theme slug (ascii only for compatibility) based on the name of the theme in the stylesheet
-		$this->theme_slug = remove_accents( $this->theme_name );
-		$this->theme_slug = preg_replace( '/%[a-f0-9]{2}/i', '', $this->theme_slug );
-		$this->theme_slug = sanitize_title_with_dashes( $this->theme_slug );
+		if ( ! $this->theme_slug ) {
+			// Determine the theme slug (ascii only for compatibility) based on the name of the theme in the stylesheet
+			$this->theme_slug = remove_accents( $this->theme_name );
+			$this->theme_slug = preg_replace( '/%[a-f0-9]{2}/i', '', $this->theme_slug );
+			$this->theme_slug = sanitize_title_with_dashes( $this->theme_slug );
+		}
 
 		if ( ! $this->theme_name || ! $this->theme_slug ) {
 			$error = __( 'The theme has no name.', 'wporg-themes' ) . ' ';
@@ -263,8 +307,19 @@ class WPORG_Themes_Upload {
 			);
 		}
 
+		// Populate the theme post.
+		if ( ! $this->theme_post ) {
+			$this->theme_post = $this->get_theme_post();
+		}
+
 		// Populate author.
-		$this->author = wp_get_current_user();
+		if ( ! $this->author ) {
+			if ( is_user_logged_in() ) {
+				$this->author = wp_get_current_user();
+			} elseif ( $this->theme_post ) {
+				$this->author = get_user_by( 'id', $this->theme_post->post_author );
+			}
+		}
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		// This check must be run before `get_theme_post()` to account for "twenty" themes.
@@ -279,9 +334,6 @@ class WPORG_Themes_Upload {
 				)
 			);
 		}
-
-		// Populate the theme post.
-		$this->theme_post = $this->get_theme_post();
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
 		if ( empty( $theme_description ) ) {
@@ -371,7 +423,7 @@ class WPORG_Themes_Upload {
 			);
 
 		// Is there already a theme with the name name by a different author?
-		if ( ! empty( $this->theme_post ) && $this->theme_post->post_author != $this->author->ID ) {
+		if ( ! empty( $this->theme_post ) && ! empty( $this->author ) && $this->theme_post->post_author != $this->author->ID ) {
 
 			$is_allowed_to_upload_for_theme = false;
 			if (
@@ -385,10 +437,10 @@ class WPORG_Themes_Upload {
 			}
 
 			if ( ! $is_allowed_to_upload_for_theme ) {
-				/* translators: 1: theme slug, 2: style.css */
 				$style_errors->add(
 					'cannot_upload_theme',
 					sprintf(
+						/* translators: 1: theme slug, 2: style.css */
 						__( 'There is already a theme called %1$s by a different author. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
 						'<code>' . $this->theme_slug . '</code>',
 						'<code>style.css</code>'
@@ -456,12 +508,16 @@ class WPORG_Themes_Upload {
 			return $style_errors;
 		}
 
-		// Don't send special themes through Theme Check.
-		if ( ! has_category( 'special-case-theme', $this->theme_post ) ) {
-			// Pass it through Theme Check and see how great this theme really is.
+		// Don't block special themes based on Theme Check.
+		if ( has_category( 'special-case-theme', $this->theme_post ) ) {
+			$args['block_on_themecheck'] = false;
+		}
+
+		// Pass it through Theme Check and see how great this theme really is.
+		if ( $args['run_themecheck'] ) {
 			$result = $this->check_theme( $theme_files );
 
-			if ( ! $result ) {
+			if ( ! $result && $args['block_on_themecheck'] ) {
 				// Log it to slack.
 				$this->log_to_slack( 'blocked' );
 
@@ -481,36 +537,43 @@ class WPORG_Themes_Upload {
 		// Let's save everything and get things wrapped up.
 
 		// Create a new version in SVN.
-		$result = $this->add_to_svn();
-		if ( ! $result ) {
-			return new WP_Error(
-				'failed_to_add_to_svn',
-				sprintf(
-					/* translators: %s: mailto link */
-					__( 'There was an error adding your theme to SVN. Please try again, if this error persists report the error to %s.', 'wporg-themes' ),
-					'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
-				)
-			);
+		if ( $args['commit_to_svn'] ) {
+			$result = $this->add_to_svn();
+			if ( ! $result ) {
+				return new WP_Error(
+					'failed_svn_commit',
+					sprintf(
+						/* translators: %s: mailto link */
+						__( 'There was an error adding your theme to SVN. Please try again, if this error persists report the error to %s.', 'wporg-themes' ),
+						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+					)
+				);
+			}
 		}
 
-		// Get all Trac ticket information set up.
-		$this->prepare_trac_ticket();
+		// Create a Trac ticket for this theme version.
+		if ( $args['create_trac_ticket'] ) {
+			// Get all Trac ticket information set up.
+			$this->prepare_trac_ticket();
 
-		// Talk to Trac and let them know about our new version. Or new theme.
-		$ticket_id = $this->create_or_update_trac_ticket();
+			// Talk to Trac and let them know about our new version. Or new theme.
+			$ticket_id = $this->create_or_update_trac_ticket();
 
-		if ( ! $ticket_id  ) {
-			// Since it's been added to SVN at this point, remove it from SVN to prevent future issues.
-			$this->remove_from_svn( 'Trac ticket creation failed.' );
+			if ( ! $ticket_id  ) {
+				if ( $args['commit_to_svn'] ) {
+					// Since it's been added to SVN at this point, remove it from SVN to prevent future issues.
+					$this->remove_from_svn( 'Trac ticket creation failed.' );
+				}
 
-			return new WP_Error(
-				'failed_to_create_trac_ticket',
-				sprintf(
-					/* translators: %s: mailto link */
-					__( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ),
-					'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
-				)
-			);
+				return new WP_Error(
+					'failed_trac_ticket_creation',
+					sprintf(
+						/* translators: %s: mailto link */
+						__( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ),
+						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+					)
+				);
+			}
 		}
 
 		// Add a or update the Theme Directory entry for this theme.
@@ -528,12 +591,7 @@ class WPORG_Themes_Upload {
 		$this->trigger_e2e_run();
 
 		// Success!
-		return sprintf(
-			/* translators: 1: theme name, 2: Trac ticket URL */
-			__( 'Thank you for uploading %1$s to the WordPress Theme Directory. We&rsquo;ve sent you an email verifying that we&rsquo;ve received it. Feedback will be provided at <a href="%2$s">%2$s</a>', 'wporg-themes' ),
-			$this->theme->display( 'Name' ),
-			esc_url( 'https://themes.trac.wordpress.org/ticket/' . $ticket_id )
-		);
+		return true;
 	}
 
 	/**
@@ -1111,6 +1169,11 @@ TICKET;
 			$version_status = 'live';
 		}
 		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), $version_status );
+
+		// refresh the post to avoid stale data.
+		if ( $post_id ) {
+			$this->theme_post = $this->get_theme_post();
+		}
 	}
 
 	/**
