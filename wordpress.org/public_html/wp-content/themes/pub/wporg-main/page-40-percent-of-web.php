@@ -769,7 +769,7 @@ the_post();
 
 					<div class="wp-block-image _40p-timeline-wp-logo-created-img is-style-default">
 						<figure class="aligncenter size-full is-resized">
-							<img loading="lazy" src="https://40percentweb.wpcomstaging.com/wp-content/uploads/2021/03/40p-2005-wp-logo-proposal.gif" alt="2005 WordPress.org Logo Proposal" class="wp-image-637" width="314" height="115">
+							<img loading="lazy" src="<?php echo esc_url( get_stylesheet_directory_uri() . '/images/40p-wp-logo-proposal.png' ); ?>" alt="2005 WordPress.org Logo Proposal" class="wp-image-637" width="314" height="115">
 							<figcaption><?php _e( 'By Jason Santa Maria, 2005', 'wporg' ); ?></figcaption>
 						</figure>
 					</div>
