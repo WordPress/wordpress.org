@@ -172,9 +172,9 @@ class Test_Patterns extends TestCase {
 	 *
 	 * @param string $search_query
 	 */
-	public function test_search_patterns( $search_term, $match_expected, $expected_post_ids ) : void {
+	public function test_search_patterns( $search_term, $locale, $match_expected, $expected_post_ids ) : void {
 		// wrap term in double quotes to match exact phrase.
-		$response = send_request( '/patterns/1.0/?&search="' . $search_term . '"&pattern-keywords=11&locale=en_US' );
+		$response = send_request( '/patterns/1.0/?&search="' . $search_term . '"&pattern-keywords=11&locale=' . $locale );
 
 		if ( $match_expected ) {
 			if ( empty( $expected_post_ids ) ) {
@@ -202,20 +202,77 @@ class Test_Patterns extends TestCase {
 			// Should find posts that have the term in the title, but _not_ in the description.
 			'match title only' => array(
 				'search_term'       => 'side by side',
+				'locale'            => 'en_US',
 				'match_expected'    => true,
 				'expected_post_ids' => array( 19 ),
 			),
 
-			// todo Enable this once https://github.com/WordPress/pattern-directory/issues/28 is done
-//			'match description' => array(
-//				'search_term'    => 'bright gradient background',
-//				'match_expected' => true,
-//			),
+			// Should find posts that have the term in the description, but _not_ in the title.
+			'match description only' => array(
+				'search_term'       => 'quote on top',
+				'locale'            => 'en_US',
+				'match_expected'    => true,
+				'expected_post_ids' => array( 185 ),
+			),
+
+
+			"don't match post_content" => array(
+				'search_term'       => 'The voyage had begun', // Post ID 29.
+				'locale'            => 'en_US',
+				'match_expected'    => false,
+				'expected_post_ids' => false,
+			),
 
 			'no matches' => array(
 				'search_term'       => 'Supercalifragilisticexpialidocious',
+				'locale'            => 'en_US',
 				'match_expected'    => false,
 				'expected_post_ids' => false,
+			),
+
+			"don't match unlisted posts" => array(
+				'search_term'       => 'one filled and one outlined', // Post ID 5.
+				'locale'            => 'en_US',
+				'match_expected'    => false,
+				'expected_post_ids' => false,
+			),
+
+			"don't match trashed posts" => array(
+				'search_term'       => 'i18n test', // Post ID 866.
+				'locale'            => 'es_MX',
+				'match_expected'    => false,
+				'expected_post_ids' => false,
+			),
+
+			// The Core keyword (11) is hardcoded in `test_search_patterns()`, so don't need to specify it here.
+			"only match Core posts" => array(
+				'search_term'       => 'two buttons', // Post ID 727.
+				'locale'            => 'en_US',
+				'match_expected'    => false,
+				'expected_post_ids' => false,
+			),
+
+			"match spanish posts for es_MX request" => array(
+				'search_term'       => 'compensación',
+				'locale'            => 'es_MX',
+				'match_expected'    => true,
+				'expected_post_ids' => array( 2127 ),
+			),
+
+			"don't match nl_NL post for en_US request" => array(
+				'search_term'       => 'verschoven', // Post ID 2226.
+				'locale'            => 'en_US',
+				'match_expected'    => false,
+				'expected_post_ids' => false,
+			),
+
+			// Latin was chosen because it's unlikely to ever be translated
+			// @link https://translate.wordpress.org/projects/patterns/core/
+			"untranslated locales should have en_US posts as a fallback" => array(
+				'search_term'       => 'offset images', // Post ID 2226.
+				'locale'            => 'la',
+				'match_expected'    => true,
+				'expected_post_ids' => array( 201 ),
 			),
 		);
 	}
