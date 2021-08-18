@@ -17,6 +17,7 @@ class Test_Patterns extends TestCase {
 		$this->assertSame( 200, $response->status_code );
 
 		$patterns = json_decode( $response->body );
+		$this->assertIsArray( $patterns );
 		$this->assertGreaterThan( 0, count( $patterns ) );
 		$this->assertIsString( $patterns[0]->title->rendered );
 		$this->assertIsInt( $patterns[0]->meta->wpop_viewport_width );
@@ -31,7 +32,6 @@ class Test_Patterns extends TestCase {
 	 * @param string $search_term
 	 */
 	public function assertAllPatternsMatchSearchTerm( $patterns, $search_term ) {
-		$all_patterns_include_query = true;
 		if ( false !== strpos( $search_term, ' ' ) ) {
 			$this->markTestIncomplete( "This doesn't support phrase-matching quoted terms yet." );
 		}
@@ -41,12 +41,18 @@ class Test_Patterns extends TestCase {
 			$match_in_description = stripos( $pattern->meta->wpop_description, $search_term );
 
 			if ( false === $match_in_title && false === $match_in_description ) {
-				$all_patterns_include_query = false;
-				break;
+				$this->fail( "`$search_term` not found in `{$pattern->title->rendered}` pattern (ID {$pattern->id})" );
 			}
 		}
 
-		$this->assertTrue( $all_patterns_include_query );
+		$this->pass();
+	}
+
+	/**
+	 * PHPUnit provides `fail()`, but no equivalent for success. This makes calling code more obvious and self-documenting.
+	 */
+	public function pass() {
+		$this->assertTrue( true );
 	}
 
 	/**
