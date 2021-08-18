@@ -199,6 +199,7 @@ class Test_Patterns extends TestCase {
 
 			$patterns    = json_decode( $response->body );
 			$pattern_ids = array_column( $patterns, 'id' );
+
 			$this->assertAllPatternsMatchSearchTerm( $patterns, $search_term );
 
 			foreach ( $expected_post_ids as $id ) {
@@ -228,7 +229,6 @@ class Test_Patterns extends TestCase {
 				'match_expected'    => true,
 				'expected_post_ids' => array( 185 ),
 			),
-
 
 			"don't match post_content" => array(
 				'search_term'       => 'The voyage had begun', // Post ID 29.
@@ -289,6 +289,84 @@ class Test_Patterns extends TestCase {
 				'expected_post_ids' => array( 201 ),
 			),
 		);
+	}
+
+	/**
+	 * @covers ::main()
+	 *
+	 * @group e2e
+	 */
+	public function test_search_title_match_boosted_above_description_match() : void {
+		$search_term = 'image';
+		$locale      = 'en_US';
+
+		$response = send_request( "/patterns/1.0/?search=$search_term&pattern-keywords=11&locale=$locale" );
+		$this->assertResponseHasPattern( $response );
+
+		$patterns = json_decode( $response->body );
+
+		$this->assertAllPatternsMatchSearchTerm( $patterns, $search_term );
+
+		$actualOrder = array_column( $patterns, 'id' );
+
+		// Intentionally _not_ using `uasort()`, in order to catch different key orders.
+		$expectedPatterns = json_decode( json_encode( $patterns ) );
+
+		usort( $expectedPatterns, function( $a, $b ) use ( $search_term ) {
+			$adjustment       = 0;
+			$found_in_title_a = false === stripos( $search_term, $a->title->rendered );
+			$found_in_title_b = false === stripos( $search_term, $b->title->rendered );
+
+			if ( $found_in_title_a && ! $found_in_title_b ) {
+				$adjustment = -1;
+			} elseif ( ! $found_in_title_a && $found_in_title_b ) {
+				$adjustment = 1;
+			}
+
+			return $adjustment;
+		} );
+
+		$expectedOrder = array_column( $expectedPatterns, 'id' );
+
+		$this->assertSame( $expectedOrder, $actualOrder );
+	}
+
+	/**
+	 * @covers ::main()
+	 *
+	 * @group e2e
+	 */
+	public function test_search_locale_sort() : void {
+		$search_term = 'offset';
+		$locale      = 'nl_NL';
+
+		$response = send_request( "/patterns/1.0/?search=$search_term&pattern-keywords=11&locale=$locale" );
+		$this->assertResponseHasPattern( $response );
+
+		$patterns = json_decode( $response->body );
+
+		$this->assertAllPatternsMatchSearchTerm( $patterns, $search_term );
+
+		$this->markTestIncomplete(); // todo the following code works, but `WordPressdotorg\Pattern_Directory\Search\modify_es_query_args` isn't boosting the primary locale yet
+
+		$actualOrder = array_column( array_column( $patterns, 'meta' ), 'wpop_locale'  );
+
+		// Intentionally _not_ using `uasort()`, in order to catch different key orders.
+		$expectedOrder = json_decode( json_encode( $actualOrder ) );
+
+		usort( $expectedOrder, function( $a, $b ) {
+			$adjustment = 0;
+
+			if ( $a !== 'en_US' && $b === 'en_US' ) {
+				$adjustment = -1;
+			} elseif ( $a === 'en_US' && $b !== 'en_US' ) {
+				$adjustment = 1;
+			}
+
+			return $adjustment;
+		} );
+
+		$this->assertSame( $expectedOrder, $actualOrder );
 	}
 
 	/**
