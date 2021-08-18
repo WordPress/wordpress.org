@@ -6,6 +6,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import DocumentTitleMonitor from '../document-title-monitor';
 import EmptyHeader from './empty-header';
 import PatternGrid from '../pattern-grid';
 import PatternGridMenu from '../pattern-grid-menu';
@@ -31,6 +32,7 @@ const Patterns = () => {
 
 	return (
 		<RouteProvider>
+			<DocumentTitleMonitor />
 			<QueryMonitor />
 			<BreadcrumbMonitor />
 			<PatternGridMenu />

@@ -7,7 +7,7 @@
 		padding: 3.75rem 1rem;
 
 		@include breakpoint( $breakpoint-medium ) {
-			background-image: url(../images/masthead-bg.png);
+			background-image: url(../images/masthead-bg.png?2);
 			background-size: contain;
 			background-repeat: no-repeat;
 			background-position-x: 160%;
