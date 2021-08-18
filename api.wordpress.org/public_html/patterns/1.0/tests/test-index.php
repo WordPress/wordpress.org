@@ -24,8 +24,17 @@ class Test_Patterns extends TestCase {
 		$this->assertIsArray( $patterns[0]->keyword_slugs );
 	}
 
+	/**
+	 * Asserts that the results contain the search term.
+	 *
+	 * @param array $patterns
+	 * @param string $search_term
+	 */
 	public function assertAllPatternsMatchSearchTerm( $patterns, $search_term ) {
 		$all_patterns_include_query = true;
+		if ( false !== strpos( $search_term, ' ' ) ) {
+			$this->markTestIncomplete( "This doesn't support phrase-matching quoted terms yet." );
+		}
 
 		foreach ( $patterns as $pattern ) {
 			$match_in_title       = stripos( $pattern->title->rendered, $search_term );
@@ -173,8 +182,7 @@ class Test_Patterns extends TestCase {
 	 * @param string $search_query
 	 */
 	public function test_search_patterns( $search_term, $locale, $match_expected, $expected_post_ids ) : void {
-		// wrap term in double quotes to match exact phrase.
-		$response = send_request( '/patterns/1.0/?&search="' . $search_term . '"&pattern-keywords=11&locale=' . $locale );
+		$response = send_request( "/patterns/1.0/?search=$search_term&pattern-keywords=11&locale=$locale" );
 
 		if ( $match_expected ) {
 			if ( empty( $expected_post_ids ) ) {
@@ -201,7 +209,7 @@ class Test_Patterns extends TestCase {
 		return array(
 			// Should find posts that have the term in the title, but _not_ in the description.
 			'match title only' => array(
-				'search_term'       => 'side by side',
+				'search_term'       => 'side',
 				'locale'            => 'en_US',
 				'match_expected'    => true,
 				'expected_post_ids' => array( 19 ),
@@ -209,7 +217,7 @@ class Test_Patterns extends TestCase {
 
 			// Should find posts that have the term in the description, but _not_ in the title.
 			'match description only' => array(
-				'search_term'       => 'quote on top',
+				'search_term'       => 'quote',
 				'locale'            => 'en_US',
 				'match_expected'    => true,
 				'expected_post_ids' => array( 185 ),
@@ -269,7 +277,7 @@ class Test_Patterns extends TestCase {
 			// Latin was chosen because it's unlikely to ever be translated
 			// @link https://translate.wordpress.org/projects/patterns/core/
 			"untranslated locales should have en_US posts as a fallback" => array(
-				'search_term'       => 'offset images', // Post ID 2226.
+				'search_term'       => 'offset',
 				'locale'            => 'la',
 				'match_expected'    => true,
 				'expected_post_ids' => array( 201 ),
