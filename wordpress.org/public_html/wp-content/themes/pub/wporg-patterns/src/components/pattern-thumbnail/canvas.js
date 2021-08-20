@@ -9,13 +9,22 @@ import { useEffect, useRef, useState } from '@wordpress/element';
  */
 import Iframe from '../iframe';
 import getCardFrameHeight from '../../utils/get-card-frame-height';
+import useInView from '../../hooks/in-view';
 
 const VIEWPORT_WIDTH = 800;
 
 function PatternThumbnail( { className, html } ) {
 	const wrapperRef = useRef();
-	const [ frameHeight, setFrameHeight ] = useState( '100%' );
+	const [ frameHeight, setFrameHeight ] = useState( '1px' );
 	const [ frameScale, setFrameScale ] = useState( 0.3125 );
+	const isVisible = useInView( { element: wrapperRef } );
+	const [ shouldLoad, setShouldLoad ] = useState( false );
+
+	useEffect( () => {
+		if ( isVisible ) {
+			setShouldLoad( true );
+		}
+	}, [ isVisible ] );
 
 	useEffect( () => {
 		const handleOnResize = () => {
@@ -62,7 +71,7 @@ function PatternThumbnail( { className, html } ) {
 			>
 				<div
 					dangerouslySetInnerHTML={ {
-						__html: html,
+						__html: shouldLoad ? html : '',
 					} }
 				/>
 			</Iframe>
