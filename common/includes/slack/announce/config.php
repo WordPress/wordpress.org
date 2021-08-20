@@ -408,10 +408,11 @@ function get_whitelist() {
 			'valendesigns',
 		),
 		'training' => array_merge( $wordcamp_central, array(
+			'arasae', // @Sarah (She/Her) on Slack
 			'azhiyadev', // @Hauwa Abashiya on Slack
 			'chanthaboune',
 			'chetan200891',
-			'courane01', // @courtneyengle on Slack
+			'courane01', // @Courtneyon Slack
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
 			'onealtr', // @oneal on Slack
