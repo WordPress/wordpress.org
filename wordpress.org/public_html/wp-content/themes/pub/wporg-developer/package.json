@@ -8,10 +8,10 @@
     "author": "wordpressdotorg",
     "license": "GPL-2.0+",
     "devDependencies": {
-        "grunt": "~1.1.0",
+        "grunt": "~1.4.1",
         "grunt-contrib-watch": "~1.1.0",
         "grunt-sass": "~3.1.0",
         "matchdep": "~2.0.0",
-        "node-sass": "^4.14.1"
+        "node-sass": "^6.0.1"
     }
 }
