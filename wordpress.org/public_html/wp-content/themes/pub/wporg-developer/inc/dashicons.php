@@ -20,111 +20,111 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-menu' => [
 						'code'     => 'f333',
-						'keywords' => 'menu',
+						'keywords' => 'menu admin',
 					],
 					'dashicons-menu-alt' => [
 						'code'     => 'f228',
-						'keywords' => 'menu (alt)',
+						'keywords' => 'menu alt admin',
 					],
 					'dashicons-menu-alt2' => [
 						'code'     => 'f329',
-						'keywords' => 'menu (alt2)',
+						'keywords' => 'menu alt admin',
 					],
 					'dashicons-menu-alt3' => [
 						'code'     => 'f349',
-						'keywords' => 'menu (alt3)',
+						'keywords' => 'menu alt admin',
 					],
 					'dashicons-admin-site' => [
 						'code'     => 'f319',
-						'keywords' => 'site',
+						'keywords' => 'site admin',
 					],
 					'dashicons-admin-site-alt' => [
 						'code'     => 'f11d',
-						'keywords' => 'site (alt)',
+						'keywords' => 'site alt admin',
 					],
 					'dashicons-admin-site-alt2' => [
 						'code'     => 'f11e',
-						'keywords' => 'site (alt2)',
+						'keywords' => 'site alt admin',
 					],
 					'dashicons-admin-site-alt3' => [
 						'code'     => 'f11f',
-						'keywords' => 'site (alt3)',
+						'keywords' => 'site alt admin',
 					],
 					'dashicons-dashboard' => [
 						'code'     => 'f226',
-						'keywords' => 'dashboard',
+						'keywords' => 'dashboard admin',
 					],
 					'dashicons-admin-post' => [
 						'code'     => 'f109',
-						'keywords' => 'post',
+						'keywords' => 'post admin',
 					],
 					'dashicons-admin-media' => [
 						'code'     => 'f104',
-						'keywords' => 'media',
+						'keywords' => 'media admin',
 					],
 					'dashicons-admin-links' => [
 						'code'     => 'f103',
-						'keywords' => 'links',
+						'keywords' => 'links admin',
 					],
 					'dashicons-admin-page' => [
 						'code'     => 'f105',
-						'keywords' => 'page',
+						'keywords' => 'page admin',
 					],
 					'dashicons-admin-comments' => [
 						'code'     => 'f101',
-						'keywords' => 'comments',
+						'keywords' => 'comments admin',
 					],
 					'dashicons-admin-appearance' => [
 						'code'     => 'f100',
-						'keywords' => 'appearance',
+						'keywords' => 'appearance admin',
 					],
 					'dashicons-admin-plugins' => [
 						'code'     => 'f106',
-						'keywords' => 'plugins',
+						'keywords' => 'plugins admin',
 					],
 					'dashicons-plugins-checked' => [
 						'code'     => 'f485',
-						'keywords' => 'plugins checked',
+						'keywords' => 'plugins checked admin',
 					],
 					'dashicons-admin-users' => [
 						'code'     => 'f110',
-						'keywords' => 'users',
+						'keywords' => 'users admin',
 					],
 					'dashicons-admin-tools' => [
 						'code'     => 'f107',
-						'keywords' => 'tools',
+						'keywords' => 'tools admin',
 					],
 					'dashicons-admin-settings' => [
 						'code'     => 'f108',
-						'keywords' => 'settings',
+						'keywords' => 'settings admin',
 					],
 					'dashicons-admin-network' => [
 						'code'     => 'f112',
-						'keywords' => 'network',
+						'keywords' => 'network admin',
 					],
 					'dashicons-admin-home' => [
 						'code'     => 'f102',
-						'keywords' => 'home',
+						'keywords' => 'home admin',
 					],
 					'dashicons-admin-generic' => [
 						'code'     => 'f111',
-						'keywords' => 'generic',
+						'keywords' => 'generic admin',
 					],
 					'dashicons-admin-collapse' => [
 						'code'     => 'f148',
-						'keywords' => 'collapse',
+						'keywords' => 'collapse admin',
 					],
 					'dashicons-filter' => [
 						'code'     => 'f536',
-						'keywords' => 'filter',
+						'keywords' => 'filter admin',
 					],
 					'dashicons-admin-customizer' => [
 						'code'     => 'f540',
-						'keywords' => 'customizer',
+						'keywords' => 'customizer admin',
 					],
 					'dashicons-admin-multisite' => [
 						'code'     => 'f541',
-						'keywords' => 'multisite',
+						'keywords' => 'multisite admin',
 					],
 				],
 			],
@@ -134,33 +134,34 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-welcome-write-blog' => [
 						'code'     => 'f119',
-						'keywords' => 'write blog',
+						'keywords' => 'write blog welcome',
 					],
 					/* Duplicate
 					'dashicons-welcome-edit-page' => [
 						'code'     => 'f119',
+						'lable'    => 'edit page',
 						'keywords' => '',
 					],
 					*/
 					'dashicons-welcome-add-page' => [
 						'code'     => 'f133',
-						'keywords' => 'add page',
+						'keywords' => 'add page welcome',
 					],
 					'dashicons-welcome-view-site' => [
 						'code'     => 'f115',
-						'keywords' => 'view site',
+						'keywords' => 'view site welcome',
 					],
 					'dashicons-welcome-widgets-menus' => [
 						'code'     => 'f116',
-						'keywords' => 'widgets and menus',
+						'keywords' => 'widgets menus welcome',
 					],
 					'dashicons-welcome-comments' => [
 						'code'     => 'f117',
-						'keywords' => 'comments',
+						'keywords' => 'comments welcome',
 					],
 					'dashicons-welcome-learn-more' => [
 						'code'     => 'f118',
-						'keywords' => 'learn more',
+						'keywords' => 'learn more welcome',
 					],
 				],
 			],
@@ -176,27 +177,27 @@ class Devhub_Dashicons {
 					*/
 					'dashicons-format-aside' => [
 						'code'     => 'f123',
-						'keywords' => 'aside',
+						'keywords' => 'aside format',
 					],
 					'dashicons-format-image' => [
 						'code'     => 'f128',
-						'keywords' => 'image',
+						'keywords' => 'image format',
 					],
 					'dashicons-format-gallery' => [
 						'code'     => 'f161',
-						'keywords' => 'gallery',
+						'keywords' => 'gallery format',
 					],
 					'dashicons-format-video' => [
 						'code'     => 'f126',
-						'keywords' => 'video',
+						'keywords' => 'video format',
 					],
 					'dashicons-format-status' => [
 						'code'     => 'f130',
-						'keywords' => 'status',
+						'keywords' => 'status format',
 					],
 					'dashicons-format-quote' => [
 						'code'     => 'f122',
-						'keywords' => 'quote',
+						'keywords' => 'quote format',
 					],
 					/* Duplicate
 					'dashicons-format-links' => [
@@ -206,39 +207,39 @@ class Devhub_Dashicons {
 					*/
 					'dashicons-format-chat' => [
 						'code'     => 'f125',
-						'keywords' => 'chat',
+						'keywords' => 'chat format',
 					],
 					'dashicons-format-audio' => [
 						'code'     => 'f127',
-						'keywords' => 'audio',
+						'keywords' => 'audio format',
 					],
 					'dashicons-camera' => [
 						'code'     => 'f306',
-						'keywords' => 'camera',
+						'keywords' => 'camera format',
 					],
 					'dashicons-camera-alt' => [
 						'code'     => 'f129',
-						'keywords' => 'camera (alt)',
+						'keywords' => 'camera alt format',
 					],
 					'dashicons-images-alt' => [
 						'code'     => 'f232',
-						'keywords' => 'images (alt)',
+						'keywords' => 'images alt format',
 					],
 					'dashicons-images-alt2' => [
 						'code'     => 'f233',
-						'keywords' => 'images (alt 2)',
+						'keywords' => 'images alt format',
 					],
 					'dashicons-video-alt' => [
 						'code'     => 'f234',
-						'keywords' => 'video (alt)',
+						'keywords' => 'video alt format',
 					],
 					'dashicons-video-alt2' => [
 						'code'     => 'f235',
-						'keywords' => 'video (alt 2)',
+						'keywords' => 'video alt format',
 					],
 					'dashicons-video-alt3' => [
 						'code'     => 'f236',
-						'keywords' => 'video (alt 3)',
+						'keywords' => 'video alt format',
 					],
 				],
 			],
@@ -248,83 +249,83 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-media-archive' => [
 						'code'     => 'f501',
-						'keywords' => 'archive',
+						'keywords' => 'archive media',
 					],
 					'dashicons-media-audio' => [
 						'code'     => 'f500',
-						'keywords' => 'audio',
+						'keywords' => 'audio media',
 					],
 					'dashicons-media-code' => [
 						'code'     => 'f499',
-						'keywords' => 'code',
+						'keywords' => 'code media',
 					],
 					'dashicons-media-default' => [
 						'code'     => 'f498',
-						'keywords' => 'default',
+						'keywords' => 'default media',
 					],
 					'dashicons-media-document' => [
 						'code'     => 'f497',
-						'keywords' => 'document',
+						'keywords' => 'document media',
 					],
 					'dashicons-media-interactive' => [
 						'code'     => 'f496',
-						'keywords' => 'interactive',
+						'keywords' => 'interactive media',
 					],
 					'dashicons-media-spreadsheet' => [
 						'code'     => 'f495',
-						'keywords' => 'spreadsheet',
+						'keywords' => 'spreadsheet media',
 					],
 					'dashicons-media-text' => [
 						'code'     => 'f491',
-						'keywords' => 'text',
+						'keywords' => 'text media',
 					],
 					'dashicons-media-video' => [
 						'code'     => 'f490',
-						'keywords' => 'video',
+						'keywords' => 'video media',
 					],
 					'dashicons-playlist-audio' => [
 						'code'     => 'f492',
-						'keywords' => 'audio playlist',
+						'keywords' => 'audio playlist media',
 					],
 					'dashicons-playlist-video' => [
 						'code'     => 'f493',
-						'keywords' => 'video playlist',
+						'keywords' => 'video playlist media',
 					],
 					'dashicons-controls-play' => [
 						'code'     => 'f522',
-						'keywords' => 'play player',
+						'keywords' => 'play player controls media',
 					],
 					'dashicons-controls-pause' => [
 						'code'     => 'f523',
-						'keywords' => 'player pause',
+						'keywords' => 'player pause controls media',
 					],
 					'dashicons-controls-forward' => [
 						'code'     => 'f519',
-						'keywords' => 'player forward',
+						'keywords' => 'player forward controls media',
 					],
 					'dashicons-controls-skipforward' => [
 						'code'     => 'f517',
-						'keywords' => 'player skip forward',
+						'keywords' => 'player skip forward controls media',
 					],
 					'dashicons-controls-back' => [
 						'code'     => 'f518',
-						'keywords' => 'player back',
+						'keywords' => 'player back controls media',
 					],
 					'dashicons-controls-skipback' => [
 						'code'     => 'f516',
-						'keywords' => 'player skip back',
+						'keywords' => 'player skip back controls media',
 					],
 					'dashicons-controls-repeat' => [
 						'code'     => 'f515',
-						'keywords' => 'player repeat',
+						'keywords' => 'player repeat controls media',
 					],
 					'dashicons-controls-volumeon' => [
 						'code'     => 'f521',
-						'keywords' => 'player volume on',
+						'keywords' => 'player volume on controls media',
 					],
 					'dashicons-controls-volumeoff' => [
 						'code'     => 'f520',
-						'keywords' => 'player volume off',
+						'keywords' => 'player volume off controls media',
 					],
 				],
 			],
@@ -334,39 +335,39 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-image-crop' => [
 						'code'     => 'f165',
-						'keywords' => 'crop',
+						'keywords' => 'crop image',
 					],
 					'dashicons-image-rotate' => [
 						'code'     => 'f531',
-						'keywords' => 'rotate',
+						'keywords' => 'rotate image',
 					],
 					'dashicons-image-rotate-left' => [
 						'code'     => 'f166',
-						'keywords' => 'rotate left',
+						'keywords' => 'rotate left image',
 					],
 					'dashicons-image-rotate-right' => [
 						'code'     => 'f167',
-						'keywords' => 'rotate right',
+						'keywords' => 'rotate right image',
 					],
 					'dashicons-image-flip-vertical' => [
 						'code'     => 'f168',
-						'keywords' => 'flip vertical',
+						'keywords' => 'flip vertical image',
 					],
 					'dashicons-image-flip-horizontal' => [
 						'code'     => 'f169',
-						'keywords' => 'flip horizontal',
+						'keywords' => 'flip horizontal image',
 					],
 					'dashicons-image-filter' => [
 						'code'     => 'f533',
-						'keywords' => 'filter',
+						'keywords' => 'filter image',
 					],
 					'dashicons-undo' => [
 						'code'     => 'f171',
-						'keywords' => 'undo',
+						'keywords' => 'undo image',
 					],
 					'dashicons-redo' => [
 						'code'     => 'f172',
-						'keywords' => 'redo',
+						'keywords' => 'redo image',
 					],
 				],
 			],
@@ -406,19 +407,19 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-align-full-width' => [
 						'code'     => 'f134',
-						'keywords' => 'align full width',
+						'keywords' => 'align full width block',
 					],
 					'dashicons-align-pull-left' => [
 						'code'     => 'f10a',
-						'keywords' => 'align pull left',
+						'keywords' => 'align pull left block',
 					],
 					'dashicons-align-pull-right' => [
 						'code'     => 'f10b',
-						'keywords' => 'align pull right',
+						'keywords' => 'align pull right block',
 					],
 					'dashicons-align-wide' => [
 						'code'     => 'f11b',
-						'keywords' => 'align wide',
+						'keywords' => 'align wide block',
 					],
 					'dashicons-block-default' => [
 						'code'     => 'f12b',
@@ -426,111 +427,111 @@ class Devhub_Dashicons {
 					],
 					'dashicons-button' => [
 						'code'     => 'f11a',
-						'keywords' => 'button',
+						'keywords' => 'button block',
 					],
 					'dashicons-cloud-saved' => [
 						'code'     => 'f137',
-						'keywords' => 'cloud saved',
+						'keywords' => 'cloud saved block',
 					],
 					'dashicons-cloud-upload' => [
 						'code'     => 'f13b',
-						'keywords' => 'cloud upload',
+						'keywords' => 'cloud upload block',
 					],
 					'dashicons-columns' => [
 						'code'     => 'f13c',
-						'keywords' => 'columns',
+						'keywords' => 'columns block',
 					],
 					'dashicons-cover-image' => [
 						'code'     => 'f13d',
-						'keywords' => 'cover image',
+						'keywords' => 'cover image block',
 					],
 					'dashicons-ellipsis' => [
 						'code'     => 'f11c',
-						'keywords' => 'ellipsis',
+						'keywords' => 'ellipsis block',
 					],
 					'dashicons-embed-audio' => [
 						'code'     => 'f13e',
-						'keywords' => 'embed audio',
+						'keywords' => 'embed audio block',
 					],
 					'dashicons-embed-generic' => [
 						'code'     => 'f13f',
-						'keywords' => 'embed generic',
+						'keywords' => 'embed generic block',
 					],
 					'dashicons-embed-photo' => [
 						'code'     => 'f144',
-						'keywords' => 'embed photo',
+						'keywords' => 'embed photo block',
 					],
 					'dashicons-embed-post' => [
 						'code'     => 'f146',
-						'keywords' => 'embed post',
+						'keywords' => 'embed post block',
 					],
 					'dashicons-embed-video' => [
 						'code'     => 'f149',
-						'keywords' => 'embed video',
+						'keywords' => 'embed video block',
 					],
 					'dashicons-exit' => [
 						'code'     => 'f14a',
-						'keywords' => 'exit',
+						'keywords' => 'exit block',
 					],
 					'dashicons-heading' => [
 						'code'     => 'f10e',
-						'keywords' => 'heading',
+						'keywords' => 'heading block',
 					],
 					'dashicons-html' => [
 						'code'     => 'f14b',
-						'keywords' => 'html',
+						'keywords' => 'html block',
 					],
 					'dashicons-info-outline' => [
 						'code'     => 'f14c',
-						'keywords' => 'info outline',
+						'keywords' => 'info outline block',
 					],
 					'dashicons-insert' => [
 						'code'     => 'f10f',
-						'keywords' => 'insert',
+						'keywords' => 'insert block',
 					],
 					'dashicons-insert-after' => [
 						'code'     => 'f14d',
-						'keywords' => 'insert after',
+						'keywords' => 'insert after block',
 					],
 					'dashicons-insert-before' => [
 						'code'     => 'f14e',
-						'keywords' => 'insert before',
+						'keywords' => 'insert before block',
 					],
 					'dashicons-remove' => [
 						'code'     => 'f14f',
-						'keywords' => 'remove',
+						'keywords' => 'remove block',
 					],
 					'dashicons-saved' => [
 						'code'     => 'f15e',
-						'keywords' => 'saved',
+						'keywords' => 'saved block',
 					],
 					'dashicons-shortcode' => [
 						'code'     => 'f150',
-						'keywords' => 'shortcode',
+						'keywords' => 'shortcode block',
 					],
 					'dashicons-table-col-after' => [
 						'code'     => 'f151',
-						'keywords' => 'table col after',
+						'keywords' => 'table col after block',
 					],
 					'dashicons-table-col-before' => [
 						'code'     => 'f152',
-						'keywords' => 'table col before',
+						'keywords' => 'table col before block',
 					],
 					'dashicons-table-col-delete' => [
 						'code'     => 'f15a',
-						'keywords' => 'table col delete',
+						'keywords' => 'table col delete block',
 					],
 					'dashicons-table-row-after' => [
 						'code'     => 'f15b',
-						'keywords' => 'table row after',
+						'keywords' => 'table row after block',
 					],
 					'dashicons-table-row-before' => [
 						'code'     => 'f15c',
-						'keywords' => 'table row before',
+						'keywords' => 'table row before block',
 					],
 					'dashicons-table-row-delete' => [
 						'code'     => 'f15d',
-						'keywords' => 'table row delete',
+						'keywords' => 'table row delete block',
 					],
 				],
 			],
@@ -540,147 +541,148 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-editor-bold' => [
 						'code'     => 'f200',
-						'keywords' => 'bold',
+						'keywords' => 'bold editor tinymce',
 					],
 					'dashicons-editor-italic' => [
 						'code'     => 'f201',
-						'keywords' => 'italic',
+						'keywords' => 'italic editor tinymce',
 					],
 					'dashicons-editor-ul' => [
 						'code'     => 'f203',
-						'keywords' => 'ul',
+						'keywords' => 'ul editor tinymce',
 					],
 					'dashicons-editor-ol' => [
 						'code'     => 'f204',
-						'keywords' => 'ol',
+						'keywords' => 'ol editor tinymce',
 					],
 					'dashicons-editor-ol-rtl' => [
 						'code'     => 'f12c',
-						'keywords' => 'ol rtl',
+						'keywords' => 'ol rtl editor tinymce',
 					],
 					'dashicons-editor-quote' => [
 						'code'     => 'f205',
-						'keywords' => 'quote',
+						'keywords' => 'quote editor tinymce',
 					],
 					'dashicons-editor-alignleft' => [
 						'code'     => 'f206',
-						'keywords' => 'alignleft',
+						'keywords' => 'align left editor tinymce',
 					],
 					'dashicons-editor-aligncenter' => [
 						'code'     => 'f207',
-						'keywords' => 'aligncenter',
+						'keywords' => 'aligncenter editor tinymce',
 					],
 					'dashicons-editor-alignright' => [
 						'code'     => 'f208',
-						'keywords' => 'alignright',
+						'keywords' => 'align right editor tinymce',
 					],
 					'dashicons-editor-insertmore' => [
 						'code'     => 'f209',
-						'keywords' => 'insertmore',
+						'keywords' => 'insert more editor tinymce',
 					],
 					'dashicons-editor-spellcheck' => [
 						'code'     => 'f210',
-						'keywords' => 'spellcheck',
+						'keywords' => 'spellcheck editor tinymce',
 					],
 					/* Duplicate
 					'dashicons-editor-distractionfree' => [
 						'code'     => 'f211',
+						'label'    => 'distraction-free",
 						'keywords' => '',
 					],
 					*/
 					'dashicons-editor-expand' => [
 						'code'     => 'f211',
-						'keywords' => 'expand',
+						'keywords' => 'expand editor tinymce',
 					],
 					'dashicons-editor-contract' => [
 						'code'     => 'f506',
-						'keywords' => 'contract',
+						'keywords' => 'contract editor tinymce',
 					],
 					'dashicons-editor-kitchensink' => [
 						'code'     => 'f212',
-						'keywords' => 'kitchen sink',
+						'keywords' => 'kitchen sink editor tinymce',
 					],
 					'dashicons-editor-underline' => [
 						'code'     => 'f213',
-						'keywords' => 'underline',
+						'keywords' => 'underline editor tinymce',
 					],
 					'dashicons-editor-justify' => [
 						'code'     => 'f214',
-						'keywords' => 'justify',
+						'keywords' => 'justify editor tinymce',
 					],
 					'dashicons-editor-textcolor' => [
 						'code'     => 'f215',
-						'keywords' => 'textcolor',
+						'keywords' => 'textcolor editor text color tinymce',
 					],
 					'dashicons-editor-paste-word' => [
 						'code'     => 'f216',
-						'keywords' => 'paste',
+						'keywords' => 'paste editor word tinymce',
 					],
 					'dashicons-editor-paste-text' => [
 						'code'     => 'f217',
-						'keywords' => 'paste',
+						'keywords' => 'paste editor text tinymce',
 					],
 					'dashicons-editor-removeformatting' => [
 						'code'     => 'f218',
-						'keywords' => 'remove formatting',
+						'keywords' => 'remove formatting editor tinymce',
 					],
 					'dashicons-editor-video' => [
 						'code'     => 'f219',
-						'keywords' => 'video',
+						'keywords' => 'video editor tinymce',
 					],
 					'dashicons-editor-customchar' => [
 						'code'     => 'f220',
-						'keywords' => 'custom character',
+						'keywords' => 'custom character editor tinymce',
 					],
 					'dashicons-editor-outdent' => [
 						'code'     => 'f221',
-						'keywords' => 'outdent',
+						'keywords' => 'outdent editor tinymce',
 					],
 					'dashicons-editor-indent' => [
 						'code'     => 'f222',
-						'keywords' => 'indent',
+						'keywords' => 'indent editor tinymce',
 					],
 					'dashicons-editor-help' => [
 						'code'     => 'f223',
-						'keywords' => 'help',
+						'keywords' => 'help editor tinymce',
 					],
 					'dashicons-editor-strikethrough' => [
 						'code'     => 'f224',
-						'keywords' => 'strikethrough',
+						'keywords' => 'strikethrough editor tinymce',
 					],
 					'dashicons-editor-unlink' => [
 						'code'     => 'f225',
-						'keywords' => 'unlink',
+						'keywords' => 'unlink editor tinymce',
 					],
 					'dashicons-editor-rtl' => [
 						'code'     => 'f320',
-						'keywords' => 'rtl',
+						'keywords' => 'rtl editor tinymce',
 					],
 					'dashicons-editor-ltr' => [
 						'code'     => 'f10c',
-						'keywords' => 'ltr',
+						'keywords' => 'ltr editor tinymce',
 					],
 					'dashicons-editor-break' => [
 						'code'     => 'f474',
-						'keywords' => 'break',
+						'keywords' => 'break editor tinymce',
 					],
 					'dashicons-editor-code' => [
 						'code'     => 'f475',
-						'keywords' => 'code',
+						'keywords' => 'code editor tinymce',
 					],
 					/* Duplicate
 					'dashicons-editor-code-duplicate' => [
 						'code'     => 'f494',
-						'keywords' => 'code',
+						'keywords' => '',
 					],
 					*/
 					'dashicons-editor-paragraph' => [
 						'code'     => 'f476',
-						'keywords' => 'paragraph',
+						'keywords' => 'paragraph editor tinymce',
 					],
 					'dashicons-editor-table' => [
 						'code'     => 'f535',
-						'keywords' => 'table',
+						'keywords' => 'table editor tinymce',
 					],
 				],
 			],
@@ -711,7 +713,7 @@ class Devhub_Dashicons {
 					/* Duplicate
 					'dashicons-lock-duplicate' => [
 						'code'     => 'f315',
-						'keywords' => 'lock',
+						'keywords' => '',
 					],
 					*/
 					'dashicons-unlock' => [
@@ -724,7 +726,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-calendar-alt' => [
 						'code'     => 'f508',
-						'keywords' => 'calendar',
+						'keywords' => 'calendar alt',
 					],
 					'dashicons-visibility' => [
 						'code'     => 'f177',
@@ -767,7 +769,7 @@ class Devhub_Dashicons {
 					/* Duplicate
 					'dashicons-arrow-up-duplicate' => [
 						'code'     => 'f143',
-						'keywords' => 'arrow up duplicate',
+						'keywords' => '',
 					],
 					*/
 					'dashicons-arrow-down' => [
@@ -784,35 +786,35 @@ class Devhub_Dashicons {
 					],
 					'dashicons-arrow-up-alt' => [
 						'code'     => 'f342',
-						'keywords' => 'arrow up',
+						'keywords' => 'arrow up alt',
 					],
 					'dashicons-arrow-down-alt' => [
 						'code'     => 'f346',
-						'keywords' => 'arrow down',
+						'keywords' => 'arrow down alt',
 					],
 					'dashicons-arrow-right-alt' => [
 						'code'     => 'f344',
-						'keywords' => 'arrow right',
+						'keywords' => 'arrow right alt',
 					],
 					'dashicons-arrow-left-alt' => [
 						'code'     => 'f340',
-						'keywords' => 'arrow left',
+						'keywords' => 'arrow left alt',
 					],
 					'dashicons-arrow-up-alt2' => [
 						'code'     => 'f343',
-						'keywords' => 'arrow up',
+						'keywords' => 'arrow up alt',
 					],
 					'dashicons-arrow-down-alt2' => [
 						'code'     => 'f347',
-						'keywords' => 'arrow down',
+						'keywords' => 'arrow down alt',
 					],
 					'dashicons-arrow-right-alt2' => [
 						'code'     => 'f345',
-						'keywords' => 'arrow right',
+						'keywords' => 'arrow right alt',
 					],
 					'dashicons-arrow-left-alt2' => [
 						'code'     => 'f341',
-						'keywords' => 'arrow left',
+						'keywords' => 'arrow left alt',
 					],
 					'dashicons-sort' => [
 						'code'     => 'f156',
@@ -850,31 +852,31 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-share' => [
 						'code'     => 'f237',
-						'keywords' => 'share',
+						'keywords' => 'share social',
 					],
 					'dashicons-share-alt' => [
 						'code'     => 'f240',
-						'keywords' => 'share',
+						'keywords' => 'share alt social',
 					],
 					'dashicons-share-alt2' => [
 						'code'     => 'f242',
-						'keywords' => 'share',
+						'keywords' => 'share alt social',
 					],
 					'dashicons-rss' => [
 						'code'     => 'f303',
-						'keywords' => 'rss',
+						'keywords' => 'rss social',
 					],
 					'dashicons-email' => [
 						'code'     => 'f465',
-						'keywords' => 'email',
+						'keywords' => 'email social',
 					],
 					'dashicons-email-alt' => [
 						'code'     => 'f466',
-						'keywords' => 'email (alt)',
+						'keywords' => 'email alt social',
 					],
 					'dashicons-email-alt2' => [
 						'code'     => 'f467',
-						'keywords' => 'email (alt2)',
+						'keywords' => 'email alt social',
 					],
 					'dashicons-networking' => [
 						'code'     => 'f325',
@@ -882,7 +884,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-amazon' => [
 						'code'     => 'f162',
-						'keywords' => 'amazon',
+						'keywords' => 'amazon social',
 					],
 					'dashicons-facebook' => [
 						'code'     => 'f304',
@@ -890,7 +892,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-facebook-alt' => [
 						'code'     => 'f305',
-						'keywords' => 'facebook social',
+						'keywords' => 'facebook social alt',
 					],
 					'dashicons-google' => [
 						'code'     => 'f18b',
@@ -916,7 +918,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-podio' => [
 						'code'     => 'f19c',
-						'keywords' => 'podio',
+						'keywords' => 'podio social',
 					],
 					'dashicons-reddit' => [
 						'code'     => 'f195',
@@ -936,7 +938,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-twitter-alt' => [
 						'code'     => 'f302',
-						'keywords' => 'twitter social',
+						'keywords' => 'twitter social alt',
 					],
 					'dashicons-whatsapp' => [
 						'code'     => 'f19a',
@@ -944,7 +946,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-xing' => [
 						'code'     => 'f19d',
-						'keywords' => 'xing',
+						'keywords' => 'xing social',
 					],
 					'dashicons-youtube' => [
 						'code'     => 'f19b',
@@ -978,7 +980,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-universal-access-alt' => [
 						'code'     => 'f507',
-						'keywords' => 'universal access accessibility',
+						'keywords' => 'universal access accessibility alt',
 					],
 					'dashicons-tickets' => [
 						'code'     => 'f486',
@@ -1024,47 +1026,47 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-buddicons-activity' => [
 						'code'     => 'f452',
-						'keywords' => 'activity',
+						'keywords' => 'activity buddicons',
 					],
 					'dashicons-buddicons-bbpress-logo' => [
 						'code'     => 'f477',
-						'keywords' => 'bbPress logo',
+						'keywords' => 'bbPress logo buddicons',
 					],
 					'dashicons-buddicons-buddypress-logo' => [
 						'code'     => 'f448',
-						'keywords' => 'BuddyPress logo',
+						'keywords' => 'BuddyPress logo buddicons',
 					],
 					'dashicons-buddicons-community' => [
 						'code'     => 'f453',
-						'keywords' => 'community',
+						'keywords' => 'community buddicons',
 					],
 					'dashicons-buddicons-forums' => [
 						'code'     => 'f449',
-						'keywords' => 'forums',
+						'keywords' => 'forums buddicons',
 					],
 					'dashicons-buddicons-friends' => [
 						'code'     => 'f454',
-						'keywords' => 'friends',
+						'keywords' => 'friends buddicons',
 					],
 					'dashicons-buddicons-groups' => [
 						'code'     => 'f456',
-						'keywords' => 'groups',
+						'keywords' => 'groups buddicons',
 					],
 					'dashicons-buddicons-pm' => [
 						'code'     => 'f457',
-						'keywords' => 'private message',
+						'keywords' => 'private message buddicons pm',
 					],
 					'dashicons-buddicons-replies' => [
 						'code'     => 'f451',
-						'keywords' => 'replies',
+						'keywords' => 'replies buddicons',
 					],
 					'dashicons-buddicons-topics' => [
 						'code'     => 'f450',
-						'keywords' => 'topics',
+						'keywords' => 'topics buddicons',
 					],
 					'dashicons-buddicons-tracking' => [
 						'code'     => 'f455',
-						'keywords' => 'tracking',
+						'keywords' => 'tracking buddicons',
 					],
 				],
 			],
@@ -1078,11 +1080,11 @@ class Devhub_Dashicons {
 					],
 					'dashicons-wordpress-alt' => [
 						'code'     => 'f324',
-						'keywords' => 'WordPress',
+						'keywords' => 'WordPress alt',
 					],
 					'dashicons-pressthis' => [
 						'code'     => 'f157',
-						'keywords' => 'press this',
+						'keywords' => 'pressthis',
 					],
 					'dashicons-update' => [
 						'code'     => 'f463',
@@ -1090,7 +1092,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-update-alt' => [
 						'code'     => 'f113',
-						'keywords' => 'update (alt)',
+						'keywords' => 'update alt',
 					],
 					'dashicons-screenoptions' => [
 						'code'     => 'f180',
@@ -1124,11 +1126,11 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-tag' => [
 						'code'     => 'f323',
-						'keywords' => 'tag',
+						'keywords' => 'tag taxonomy',
 					],
 					'dashicons-category' => [
 						'code'     => 'f318',
-						'keywords' => 'category',
+						'keywords' => 'category taxonomy',
 					],
 				],
 			],
@@ -1138,15 +1140,15 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-archive' => [
 						'code'     => 'f480',
-						'keywords' => 'archive',
+						'keywords' => 'archive widget',
 					],
 					'dashicons-tagcloud' => [
 						'code'     => 'f479',
-						'keywords' => 'tagcloud',
+						'keywords' => 'tagcloud widget',
 					],
 					'dashicons-text' => [
 						'code'     => 'f478',
-						'keywords' => 'text',
+						'keywords' => 'text widget',
 					],
 				],
 			],
@@ -1156,67 +1158,67 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-bell' => [
 						'code'     => 'f16d',
-						'keywords' => 'bell',
+						'keywords' => 'bell notifications',
 					],
 					'dashicons-yes' => [
 						'code'     => 'f147',
-						'keywords' => 'yes check checkmark',
+						'keywords' => 'yes check checkmark notifications',
 					],
 					'dashicons-yes-alt' => [
 						'code'     => 'f12a',
-						'keywords' => 'yes check checkmark (alt)',
+						'keywords' => 'yes check checkmark alt notifications',
 					],
 					'dashicons-no' => [
 						'code'     => 'f158',
-						'keywords' => 'no x',
+						'keywords' => 'no x notifications',
 					],
 					'dashicons-no-alt' => [
 						'code'     => 'f335',
-						'keywords' => 'no x',
+						'keywords' => 'no x alt notifications',
 					],
 					'dashicons-plus' => [
 						'code'     => 'f132',
-						'keywords' => 'plus add increase',
+						'keywords' => 'plus add increase notifications',
 					],
 					'dashicons-plus-alt' => [
 						'code'     => 'f502',
-						'keywords' => 'plus add increase',
+						'keywords' => 'plus add increase alt notifications',
 					],
 					'dashicons-plus-alt2' => [
 						'code'     => 'f543',
-						'keywords' => 'plus add increase',
+						'keywords' => 'plus add increase alt notifications',
 					],
 					'dashicons-minus' => [
 						'code'     => 'f460',
-						'keywords' => 'minus decrease',
+						'keywords' => 'minus decrease notifications',
 					],
 					'dashicons-dismiss' => [
 						'code'     => 'f153',
-						'keywords' => 'dismiss',
+						'keywords' => 'dismiss notifications',
 					],
 					'dashicons-marker' => [
 						'code'     => 'f159',
-						'keywords' => 'marker',
+						'keywords' => 'marker notifications',
 					],
 					'dashicons-star-filled' => [
 						'code'     => 'f155',
-						'keywords' => 'filled star',
+						'keywords' => 'filled star notifications',
 					],
 					'dashicons-star-half' => [
 						'code'     => 'f459',
-						'keywords' => 'half star',
+						'keywords' => 'half star notifications',
 					],
 					'dashicons-star-empty' => [
 						'code'     => 'f154',
-						'keywords' => 'empty star',
+						'keywords' => 'empty star notifications',
 					],
 					'dashicons-flag' => [
 						'code'     => 'f227',
-						'keywords' => 'flag',
+						'keywords' => 'flag notifications',
 					],
 					'dashicons-warning' => [
 						'code'     => 'f534',
-						'keywords' => 'warning',
+						'keywords' => 'warning notifications',
 					],
 				],
 			],
@@ -1230,7 +1232,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-location-alt' => [
 						'code'     => 'f231',
-						'keywords' => 'location',
+						'keywords' => 'location alt',
 					],
 					'dashicons-vault' => [
 						'code'     => 'f178',
@@ -1242,7 +1244,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-shield-alt' => [
 						'code'     => 'f334',
-						'keywords' => 'shield',
+						'keywords' => 'shield alt',
 					],
 					'dashicons-sos' => [
 						'code'     => 'f468',
@@ -1302,7 +1304,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-id-alt' => [
 						'code'     => 'f337',
-						'keywords' => 'id',
+						'keywords' => 'id alt',
 					],
 					'dashicons-products' => [
 						'code'     => 'f312',
@@ -1330,7 +1332,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-book-alt' => [
 						'code'     => 'f331',
-						'keywords' => 'book',
+						'keywords' => 'book alt',
 					],
 					'dashicons-download' => [
 						'code'     => 'f316',
@@ -1402,7 +1404,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-tickets-alt' => [
 						'code'     => 'f524',
-						'keywords' => 'tickets (alt)',
+						'keywords' => 'tickets alt',
 					],
 					'dashicons-money' => [
 						'code'     => 'f526',
@@ -1518,7 +1520,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-superhero-alt' => [
 						'code'     => 'f197',
-						'keywords' => 'superhero',
+						'keywords' => 'superhero alt',
 					],
 				],
 			],
