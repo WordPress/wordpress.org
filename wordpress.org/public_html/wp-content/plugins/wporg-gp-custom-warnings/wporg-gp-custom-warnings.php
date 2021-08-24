@@ -311,7 +311,11 @@ class WPorg_GP_Custom_Translation_Warnings {
 
 		// https://github.com/GlotPress/GlotPress-WP/pull/1237
 		add_filter( 'gp_warning_placeholders_re', function( $re ) {
-			return '(?<!%)%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX%l]';
+			// bcdefgosuxEFGX are standard printf placeholders.
+			// % is included to allow/expect %%.
+			// l is included for wp_sprintf_l()'s custom %l format.
+			// @ is included for Swift (as used for iOS mobile app) %@ string format.
+			return '(?<!%)%(\d+\$(?:\d+)?)?[bcdefgosuxEFGX%l@]';
 		} );
 	}
 
