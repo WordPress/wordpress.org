@@ -230,13 +230,13 @@ class WPorg_GP_Custom_Translation_Warnings {
 	/**
 	 * Adds a warning for changing placeholders.
 	 *
-	 * This only supports placeholders in the format of '###[A-Z_]+###'.
+	 * This only supports placeholders in the format of '###[A-Za-z_-]+###'.
 	 *
 	 * @param string $original    The original string.
 	 * @param string $translation The translated string.
 	 */
 	public function warning_mismatching_placeholders( $original, $translation ) {
-		$placeholder_regex = '@(###[A-Z_]+###)@';
+		$placeholder_regex = '@(###[A-Za-z_-]+###)@';
 
 		preg_match_all( $placeholder_regex, $original, $original_placeholders );
 		$original_placeholders = array_unique( $original_placeholders[0] );
