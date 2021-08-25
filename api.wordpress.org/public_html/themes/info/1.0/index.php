@@ -28,8 +28,6 @@ $action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
 // Serve an API request.
 $api = wporg_themes_query_api( $action, $request, 'api_object' );
 
-if ( ! empty( $api->bad_input ) ) {
-	status_header( 400 );
-}
+$api->set_status_header();
 
 echo $api->get_result( $format );
