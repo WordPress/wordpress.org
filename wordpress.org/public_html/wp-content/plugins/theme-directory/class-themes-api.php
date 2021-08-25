@@ -195,6 +195,22 @@ class Themes_API {
 		}
 	}
 
+	/**
+	 * Set the Status header for an API response.
+	 */
+	public function set_status_header() {
+		if ( ! empty( $this->bad_input ) ) {
+			status_header( 400 );
+		} elseif (
+			isset( $this->response->error ) &&
+			'Theme not found' == $this->response->error
+		) {
+			status_header( 404 );
+		} else {
+			status_header( 200 );
+		}
+	}
+
 	/* Action functions */
 
 	/**
