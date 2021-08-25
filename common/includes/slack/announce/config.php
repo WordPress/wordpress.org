@@ -17,6 +17,7 @@ namespace Dotorg\Slack\Announce;
  *  - Use the linked WordPress.org username, which is case-sensitive. Ask the user to type in `/here` in slack to find out the correct account.
  *  - Private groups do NOT need to be listed here. All members of a private group can use announcements.
  *  - Sub-channels inherit access, if a user is granted announce in #foo, they can also announce in #foo-bar.
+ *  - Committers have access to `#core` and all sub-channels. The list comes from the global `$committers` configuration.
  */
 function get_whitelist() {
 	$wordcamp_central = array(
@@ -448,16 +449,18 @@ function get_whitelist() {
 	);
 }
 
+/**
+ * Fetch a list of the WordPress core committers.
+ * 
+ * This is defined on WordPress.org in a global variable called `$committers`.
+ * It's defined as part of the configuration bootstrap.
+ */
 function get_committers() {
-	return array(
-		'aaroncampbell', 'adamsilverstein', 'aduth', 'afercia', 'allancole', 'allendav',
-		'antpb', 'atimmer', 'azaozz', 'bpayton', 'Clorith', 'davidbaumwald', 'dd32', 'desrosj',
-		'DrewAPicture', 'ellatrix', 'flixos90', 'gziolo', 'helen', 'herregroen', 'ianbelanger',
-		'iandunn', 'joedolson', 'joemcgill', 'joen', 'johnbillion', 'johnjamesjacoby', 'jorbin',
-		'jorgefilipecosta', 'jrf', 'karmatosed', 'laurelfulford', 'matt', 'matveb', 'mcsf', 'melchoyce',
-		'michaelarestad', 'mikeschroder', 'nacin', 'noisysocks', 'ocean90', 'omarreiss', 'pento',
-		'peterwilsoncc', 'rachelbaker', 'ryelle', 'SergeyBiryukov', 'swissspidy', 'talldanwp', 'tellyworth',
-		'TimothyBlynJacobs', 'westi', 'westonruter', 'whyisjake', 'williampatton', 'xknown', 'youknowriad',
+	global $committers;
 
-	);
+	if ( empty( $committers ) ) {
+		return array();
+	}
+
+	return array_keys( $committers );
 }
