@@ -1133,7 +1133,6 @@ function get_regional_wordcamp_data() {
 		),
 
 		// WordCamp US.
-		/* WCUS is canceled for 2020. https://us.wordcamp.org/2020/wcus-2020-an-update/
 		'us' => array(
 			'regional_countries' => array_merge(
 				get_iso_3166_2_country_codes( 'south america' ),
@@ -1143,13 +1142,13 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://us.wordcamp.org/2020/',
+				'url'        => 'https://us.wordcamp.org/2021/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2020-10-27 00:00:00',
-				'end_date'   => '2020-10-29 00:00:00',
-				'start_unix_timestamp' => strtotime( '2020-10-27 00:00:00' ) - 5 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2020-10-29 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				'date'       => '2021-10-01 00:00:00',
+				'end_date'   => '2021-10-02 00:00:00',
+				'start_unix_timestamp' => strtotime( '2021-10-01 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2021-10-02 00:00:00' ) - 5 * HOUR_IN_SECONDS,
 
 				'location' => array(
 					'location'  => 'Online',
@@ -1159,7 +1158,6 @@ function get_regional_wordcamp_data() {
 				),
 			),
 		),
-		*/
 	);
 
 	// `promo_start` should be 2 months before the Event's start date. See `maybe_add_regional_wordcamps()`.
