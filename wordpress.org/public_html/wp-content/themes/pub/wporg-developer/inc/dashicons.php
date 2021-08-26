@@ -210,32 +210,32 @@ class Devhub_Dashicons {
 					*/
 					'dashicons-format-aside' => [
 						'code'     => 'f123',
-						'label'    => 'format aside',
+						'label'    => 'aside',
 						'keywords' => 'aside format',
 					],
 					'dashicons-format-image' => [
 						'code'     => 'f128',
-						'label'    => 'format image',
+						'label'    => 'image',
 						'keywords' => 'image format',
 					],
 					'dashicons-format-gallery' => [
 						'code'     => 'f161',
-						'label'    => 'format gallery',
+						'label'    => 'gallery',
 						'keywords' => 'gallery format',
 					],
 					'dashicons-format-video' => [
 						'code'     => 'f126',
-						'label'    => 'format video',
+						'label'    => 'video',
 						'keywords' => 'video format',
 					],
 					'dashicons-format-status' => [
 						'code'     => 'f130',
-						'label'    => 'format status',
+						'label'    => 'status',
 						'keywords' => 'status format',
 					],
 					'dashicons-format-quote' => [
 						'code'     => 'f122',
-						'label'    => 'format quote',
+						'label'    => 'quote',
 						'keywords' => 'quote format',
 					],
 					/* Duplicate
@@ -247,12 +247,12 @@ class Devhub_Dashicons {
 					*/
 					'dashicons-format-chat' => [
 						'code'     => 'f125',
-						'label'    => 'format chat',
+						'label'    => 'chat',
 						'keywords' => 'chat format',
 					],
 					'dashicons-format-audio' => [
 						'code'     => 'f127',
-						'label'    => 'format audio',
+						'label'    => 'audio',
 						'keywords' => 'audio format',
 					],
 					'dashicons-camera' => [
@@ -298,47 +298,47 @@ class Devhub_Dashicons {
 				'icons' => [
 					'dashicons-media-archive' => [
 						'code'     => 'f501',
-						'label'    => 'media archive',
+						'label'    => 'archive',
 						'keywords' => 'archive media',
 					],
 					'dashicons-media-audio' => [
 						'code'     => 'f500',
-						'label'    => 'media audio',
+						'label'    => 'audio',
 						'keywords' => 'audio media',
 					],
 					'dashicons-media-code' => [
 						'code'     => 'f499',
-						'label'    => 'media code',
+						'label'    => 'code',
 						'keywords' => 'code media',
 					],
 					'dashicons-media-default' => [
 						'code'     => 'f498',
-						'label'    => 'media default',
+						'label'    => 'default',
 						'keywords' => 'default media',
 					],
 					'dashicons-media-document' => [
 						'code'     => 'f497',
-						'label'    => 'media document',
+						'label'    => 'document',
 						'keywords' => 'document media',
 					],
 					'dashicons-media-interactive' => [
 						'code'     => 'f496',
-						'label'    => 'media interactive',
+						'label'    => 'interactive',
 						'keywords' => 'interactive media',
 					],
 					'dashicons-media-spreadsheet' => [
 						'code'     => 'f495',
-						'label'    => 'media spreadsheet',
+						'label'    => 'spreadsheet',
 						'keywords' => 'spreadsheet media',
 					],
 					'dashicons-media-text' => [
 						'code'     => 'f491',
-						'label'    => 'media text',
+						'label'    => 'text',
 						'keywords' => 'text media',
 					],
 					'dashicons-media-video' => [
 						'code'     => 'f490',
-						'label'    => 'media video',
+						'label'    => 'video',
 						'keywords' => 'video media',
 					],
 					'dashicons-playlist-audio' => [
@@ -687,17 +687,17 @@ class Devhub_Dashicons {
 					],
 					'dashicons-editor-alignleft' => [
 						'code'     => 'f206',
-						'label'    => 'alignleft',
+						'label'    => 'align left',
 						'keywords' => 'align left editor tinymce',
 					],
 					'dashicons-editor-aligncenter' => [
 						'code'     => 'f207',
-						'label'    => 'aligncenter',
+						'label'    => 'align center',
 						'keywords' => 'aligncenter editor tinymce',
 					],
 					'dashicons-editor-alignright' => [
 						'code'     => 'f208',
-						'label'    => 'alignright',
+						'label'    => 'align right',
 						'keywords' => 'align right editor tinymce',
 					],
 					'dashicons-editor-insertmore' => [
@@ -1257,13 +1257,13 @@ class Devhub_Dashicons {
 					],
 					'dashicons-buddicons-bbpress-logo' => [
 						'code'     => 'f477',
-						'label'    => 'bbPress logo',
-						'keywords' => 'bbPress logo buddicons',
+						'label'    => 'bbPress',
+						'keywords' => 'bbPress buddicons',
 					],
 					'dashicons-buddicons-buddypress-logo' => [
 						'code'     => 'f448',
-						'label'    => 'BuddyPress logo',
-						'keywords' => 'BuddyPress logo buddicons',
+						'label'    => 'BuddyPress',
+						'keywords' => 'BuddyPress buddicons',
 					],
 					'dashicons-buddicons-community' => [
 						'code'     => 'f453',
