@@ -10,7 +10,7 @@
 require_once __DIR__ . '/inc/dashicons.php';
 
 wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20200427' );
-wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20200427' );
+wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20210826' );
 
 get_header(); ?>
 
@@ -39,14 +39,17 @@ get_header(); ?>
 					echo "<h4>{$group_info['label']}</h4>\n\n";
 					echo "<!-- {$group} -->\n";
 
+					echo "<ul>\n";
 					foreach ( $group_info['icons'] as $name => $info ) {
 						printf(
-							'<div alt="%s" class="dashicons %s">%s</div>' . "\n",
-							$info['code'],
-							$name,
-							$info['keywords']
+							'<li data-keywords="%s" data-code="%s" class="dashicons %s"><span>%s</span></li>' . "\n",
+							esc_attr( $info['keywords'] ),
+							esc_attr( $info['code'] ),
+							esc_attr( $name ),
+							$info['label']
 						);
 					}
+					echo "</ul>\n";
 				endforeach;
 				?>
 

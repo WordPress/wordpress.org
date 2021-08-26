@@ -103,6 +103,10 @@ $spacing: 25px;
 			padding-left: $gutter;
 		}
 
+		ul {
+			margin: 0;
+		}
+
 		.dashicons {
 			position: relative;
 			box-sizing: content-box;
@@ -110,29 +114,23 @@ $spacing: 25px;
 			margin-bottom: $gutter * 2;
 			width: $size;
 			height: $size;
-			overflow: hidden;
 			white-space: nowrap;
 			font-size: $iconsize;
 			line-height: 1;
 			cursor: pointer;
 
-			&:before {
-				margin-right: $size;
-				position: relative;
-				left: 20px;
-			}
-
-			&:after {
-				content: attr(alt);
-				display: block;
-				font-size: 14px;
-				color: #999;
-				text-align: center;
-				margin-top: $gutter;
-			}
-
 			&:hover {
 				color: #d54e21;
+			}
+
+			span {
+				display: block;
+				font-size: 14px;
+				color: #888;
+				margin-top: $gutter;
+				text-align: center;
+				word-wrap: break-word;
+				white-space: normal;
 			}
 		}
 	}
