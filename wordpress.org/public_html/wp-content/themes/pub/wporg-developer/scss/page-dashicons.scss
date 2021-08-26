@@ -93,31 +93,42 @@ $spacing: 25px;
 	}
 
 	#iconlist {
-		$size: 40px;
+		$size: 96px;
+		$iconsize: 60px;
+		$gutter: 10px;
+
 		margin-top: 1.5em;
+
+		h4 {
+			padding-left: $gutter;
+		}
 
 		.dashicons {
 			position: relative;
 			box-sizing: content-box;
-			padding: 10px;
+			padding: $gutter;
+			margin-bottom: $gutter * 2;
 			width: $size;
 			height: $size;
 			overflow: hidden;
 			white-space: nowrap;
-			font-size: $size;
+			font-size: $iconsize;
 			line-height: 1;
 			cursor: pointer;
 
 			&:before {
 				margin-right: $size;
+				position: relative;
+				left: 20px;
 			}
 
 			&:after {
 				content: attr(alt);
 				display: block;
-				font-size: 9px;
+				font-size: 14px;
 				color: #999;
 				text-align: center;
+				margin-top: $gutter;
 			}
 
 			&:hover {

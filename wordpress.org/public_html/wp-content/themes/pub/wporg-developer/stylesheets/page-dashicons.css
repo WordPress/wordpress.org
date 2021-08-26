@@ -59,7 +59,7 @@
 
 .dashicons-page #glyph .info {
   float: right;
-  margin-top: 30px;
+  margin-top: 50px;
   width: 35%;
 }
 
@@ -96,29 +96,37 @@
   margin-top: 1.5em;
 }
 
+.dashicons-page #iconlist h4 {
+  padding-left: 10px;
+}
+
 .dashicons-page #iconlist .dashicons {
   position: relative;
   box-sizing: content-box;
   padding: 10px;
-  width: 40px;
-  height: 40px;
+  margin-bottom: 20px;
+  width: 96px;
+  height: 96px;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 40px;
+  font-size: 60px;
   line-height: 1;
   cursor: pointer;
 }
 
 .dashicons-page #iconlist .dashicons:before {
-  margin-right: 40px;
+  margin-right: 96px;
+  position: relative;
+  left: 20px;
 }
 
 .dashicons-page #iconlist .dashicons:after {
   content: attr(alt);
   display: block;
-  font-size: 9px;
+  font-size: 14px;
   color: #999;
   text-align: center;
+  margin-top: 10px;
 }
 
 .dashicons-page #iconlist .dashicons:hover {
