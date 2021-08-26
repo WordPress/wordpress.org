@@ -58,8 +58,12 @@ $spacing: 25px;
 
 		.info {
 			float:right;
-			margin-top: $spacing*2;
+			margin-top: $spacing;
 			width: 35%;
+
+			.charCode code {
+				color: #888;
+			}
 		}
 
 		span {

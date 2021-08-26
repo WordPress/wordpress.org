@@ -59,8 +59,12 @@
 
 .dashicons-page #glyph .info {
   float: right;
-  margin-top: 50px;
+  margin-top: 25px;
   width: 35%;
+}
+
+.dashicons-page #glyph .info .charCode code {
+  color: #888;
 }
 
 .dashicons-page #glyph span {

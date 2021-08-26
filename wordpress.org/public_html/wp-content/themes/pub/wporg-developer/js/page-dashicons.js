@@ -34,11 +34,15 @@
 			jQuery('#temp').html( glyphtemp );
 			glyphtext = jQuery('#temp').text();
 
+			// icon code
+			var charCode = jQuery('#iconlist li.dashicons-' + permalink ).attr('data-code');
+
 			var sectionName = jQuery('#iconlist li.dashicons-' + permalink ).parent().prevAll('h4').first().text();
 
 			var tmpl = wp.template( 'glyphs' );
 
 			jQuery( '#glyph' ).html( tmpl({
+				charCode: charCode,
 				cssClass: 'dashicons-' + permalink,
 				sectionName: sectionName,
 				attr: attr,
