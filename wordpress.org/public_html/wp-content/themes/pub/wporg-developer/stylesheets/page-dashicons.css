@@ -135,6 +135,14 @@
   white-space: normal;
 }
 
+.searching .dashicons-page #iconlist .dashicons {
+  float: left;
+}
+
+.searching .dashicons-page #iconlist {
+  overflow: auto;
+}
+
 .dashicons-page #instructions {
   margin-top: 1.5em;
   border-top: 1px solid lightgrey;

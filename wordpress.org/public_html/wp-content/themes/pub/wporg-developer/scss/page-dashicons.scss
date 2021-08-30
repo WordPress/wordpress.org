@@ -136,6 +136,14 @@ $spacing: 25px;
 				word-wrap: break-word;
 				white-space: normal;
 			}
+
+			.searching & {
+				float: left;
+			}
+		}
+
+		.searching & {
+			overflow: auto;
 		}
 	}
 
