@@ -1167,7 +1167,7 @@ class Devhub_Dashicons {
 			],
 		
 			'WordPress.org' => [
-				'label' => __( 'WordPress.org Specific: Jobs, Profiles, WordCamps', 'wporg' ),
+				'label' => __( 'WordPress.org', 'wporg' ),
 				'icons' => [
 					'dashicons-hammer' => [
 						'code'     => 'f308',
