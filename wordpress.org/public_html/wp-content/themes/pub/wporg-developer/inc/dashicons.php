@@ -581,7 +581,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-html' => [
 						'code'     => 'f14b',
-						'label'    => 'html',
+						'label'    => 'HTML',
 						'keywords' => 'html block',
 					],
 					'dashicons-info-outline' => [
@@ -667,18 +667,18 @@ class Devhub_Dashicons {
 					],
 					'dashicons-editor-ul' => [
 						'code'     => 'f203',
-						'label'    => 'ul',
-						'keywords' => 'ul editor tinymce',
+						'label'    => 'unordered list',
+						'keywords' => 'ul unordered list editor tinymce',
 					],
 					'dashicons-editor-ol' => [
 						'code'     => 'f204',
-						'label'    => 'ol',
-						'keywords' => 'ol editor tinymce',
+						'label'    => 'ordered list',
+						'keywords' => 'ol ordered listeditor tinymce',
 					],
 					'dashicons-editor-ol-rtl' => [
 						'code'     => 'f12c',
-						'label'    => 'ol RTL',
-						'keywords' => 'ol rtl editor tinymce',
+						'label'    => 'ordered list RTL',
+						'keywords' => 'ol ordered list rtl right left editor tinymce',
 					],
 					'dashicons-editor-quote' => [
 						'code'     => 'f205',
@@ -693,7 +693,7 @@ class Devhub_Dashicons {
 					'dashicons-editor-aligncenter' => [
 						'code'     => 'f207',
 						'label'    => 'align center',
-						'keywords' => 'aligncenter editor tinymce',
+						'keywords' => 'align center editor tinymce',
 					],
 					'dashicons-editor-alignright' => [
 						'code'     => 'f208',
@@ -800,12 +800,12 @@ class Devhub_Dashicons {
 					'dashicons-editor-rtl' => [
 						'code'     => 'f320',
 						'label'    => 'RTL',
-						'keywords' => 'rtl editor tinymce',
+						'keywords' => 'rtl right left editor tinymce',
 					],
 					'dashicons-editor-ltr' => [
 						'code'     => 'f10c',
 						'label'    => 'LTR',
-						'keywords' => 'ltr editor tinymce',
+						'keywords' => 'ltr left right editor tinymce',
 					],
 					'dashicons-editor-break' => [
 						'code'     => 'f474',
@@ -1231,7 +1231,7 @@ class Devhub_Dashicons {
 					],
 					'dashicons-tide' => [
 						'code'     => 'f10d',
-						'label'    => 'tide',
+						'label'    => 'Tide',
 						'keywords' => 'Tide',
 					],
 					'dashicons-rest-api' => [
@@ -1323,8 +1323,8 @@ class Devhub_Dashicons {
 					],
 					'dashicons-pressthis' => [
 						'code'     => 'f157',
-						'label'    => 'pressthis',
-						'keywords' => 'pressthis',
+						'label'    => 'Pressthis',
+						'keywords' => 'Pressthis',
 					],
 					'dashicons-update' => [
 						'code'     => 'f463',
