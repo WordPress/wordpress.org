@@ -37,7 +37,7 @@
 			// icon code
 			var charCode = jQuery('#iconlist li.dashicons-' + permalink ).attr('data-code');
 
-			var sectionName = jQuery('#iconlist li.dashicons-' + permalink ).parent().prevAll('h4').first().text();
+			var sectionName = jQuery('#iconlist li.dashicons-' + permalink ).parent().prevAll('h4')[0].childNodes[0].nodeValue;
 
 			var tmpl = wp.template( 'glyphs' );
 

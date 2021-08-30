@@ -105,6 +105,10 @@ $spacing: 25px;
 
 		h4 {
 			padding-left: $gutter;
+
+			a {
+				text-decoration: none;
+			}
 		}
 
 		ul {

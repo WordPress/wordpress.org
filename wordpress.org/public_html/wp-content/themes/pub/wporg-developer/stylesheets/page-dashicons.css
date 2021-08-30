@@ -104,6 +104,10 @@
   padding-left: 10px;
 }
 
+.dashicons-page #iconlist h4 a {
+  text-decoration: none;
+}
+
 .dashicons-page #iconlist ul {
   margin: 0;
 }

@@ -9,8 +9,8 @@
 
 require_once __DIR__ . '/inc/dashicons.php';
 
-wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20210826' );
-wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20210826' );
+wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20210830' );
+wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20210830' );
 
 get_header(); ?>
 
@@ -36,7 +36,14 @@ get_header(); ?>
 
 				<?php
 				foreach ( DevHub_Dashicons::get_dashicons() as $group => $group_info ) :
-					echo "<h4>{$group_info['label']}</h4>\n\n";
+					printf(
+						'<h4 id="%s">%s <a href="#%s" class="anchor"><span aria-hidden="true">#</span><span class="screen-reader-text">%s</span></a></h4>' . "\n\n",
+						esc_attr( 'icons-' . sanitize_title( $group ) ),
+						$group_info['label'],
+						esc_attr( 'icons-' . sanitize_title( $group ) ),
+						$group_info['label']
+					);
+					
 					echo "<!-- {$group} -->\n";
 
 					echo "<ul>\n";
