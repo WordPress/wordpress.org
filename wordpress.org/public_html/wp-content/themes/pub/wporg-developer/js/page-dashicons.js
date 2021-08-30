@@ -93,7 +93,8 @@
 
 			var val = jQuery.trim(jQuery(this).val()).replace(/ +/g, ' ').toLowerCase();
 
-			if ( val == '' ) {
+			if ( val.length < 3 ) {
+				val = '';
 				jQuery('body').removeClass('searching');
 			}
 
