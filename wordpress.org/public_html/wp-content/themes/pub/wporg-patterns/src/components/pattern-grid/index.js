@@ -10,7 +10,7 @@ import GridSkeleton from './grid-skeleton';
 import Pagination from './pagination';
 import { store as patternStore } from '../../store';
 
-function PatternGrid( { header, children, query, showPagination = true } ) {
+function PatternGrid( { header, children, onNavigation, query, showPagination = true } ) {
 	const { isLoading, posts, totalPages } = useSelect( ( select ) => {
 		const { getPatternTotalPagesByQuery, getPatternsByQuery, isLoadingPatternsByQuery } = select(
 			patternStore
@@ -29,7 +29,9 @@ function PatternGrid( { header, children, query, showPagination = true } ) {
 			<div className="pattern-grid">
 				{ isLoading ? <GridSkeleton length={ query?.per_page } /> : posts.map( children ) }
 			</div>
-			{ showPagination && <Pagination totalPages={ totalPages } currentPage={ query?.page } /> }
+			{ showPagination && (
+				<Pagination totalPages={ totalPages } currentPage={ query?.page } onNavigation={ onNavigation } />
+			) }
 		</>
 	);
 }

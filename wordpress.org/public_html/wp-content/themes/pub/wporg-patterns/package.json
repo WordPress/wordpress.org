@@ -35,6 +35,7 @@
 		"@wordpress/core-data": "4.0.1",
 		"@wordpress/data": "6.0.1",
 		"@wordpress/data-controls": "2.2.2",
+		"@wordpress/dom": "3.2.2",
 		"@wordpress/element": "4.0.0",
 		"@wordpress/html-entities": "3.2.1",
 		"@wordpress/i18n": "4.2.1",

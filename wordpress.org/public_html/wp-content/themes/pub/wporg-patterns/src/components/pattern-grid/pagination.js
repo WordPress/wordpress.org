@@ -10,7 +10,7 @@ import { getQueryString } from '@wordpress/url';
 import getPaginationList from '../../utils/get-pagination-list';
 import { useRoute } from '../../hooks';
 
-export default function Pagination( { currentPage = 1, totalPages } ) {
+export default function Pagination( { currentPage = 1, onNavigation, totalPages } ) {
 	const { path, update: updatePath } = useRoute();
 	if ( ! totalPages || totalPages <= 1 ) {
 		return null;
@@ -29,6 +29,9 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 	const onClick = ( event, page ) => {
 		event.preventDefault();
 		updatePath( getPageUrl( page ) );
+		if ( 'function' === typeof onNavigation ) {
+			onNavigation();
+		}
 	};
 
 	return (

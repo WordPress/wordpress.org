@@ -35,6 +35,13 @@
 			}
 		}
 	}
+
+	&:focus {
+		outline: none;
+		box-shadow:
+			inset 0 0 0 1px #fff,
+			0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
+	}
 }
 
 .context-bar__copy {

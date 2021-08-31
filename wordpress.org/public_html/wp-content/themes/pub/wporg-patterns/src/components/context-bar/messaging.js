@@ -136,3 +136,18 @@ export const getSearchMessage = ( count, searchTerm ) => {
 		}
 	);
 };
+
+/**
+ * Returns a message regarding current search status.
+ *
+ * @param {number} page       Current page number.
+ * @param {number} totalPages Total number of pages.
+ * @return {string}
+ */
+export const getPageLabel = ( page = 1, totalPages = 1 ) => {
+	if ( 1 === totalPages ) {
+		return '';
+	}
+	/* translators: %1$d: current page. %2$d: total number of pages.  */
+	return sprintf( __( 'Page %1$d of %2$d.', 'wporg-patterns' ), page, totalPages );
+};

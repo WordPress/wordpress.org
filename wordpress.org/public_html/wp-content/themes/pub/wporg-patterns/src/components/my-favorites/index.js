@@ -14,6 +14,7 @@ import PatternGridMenu from '../pattern-grid-menu';
 import PatternThumbnail from '../pattern-thumbnail';
 import QueryMonitor from '../query-monitor';
 import { RouteProvider } from '../../hooks';
+import useFocusOnNavigation from '../../hooks/use-focus-on-navigation';
 
 const MyFavorites = () => {
 	const { isEmpty, query } = useSelect( ( select ) => {
@@ -40,6 +41,7 @@ const MyFavorites = () => {
 			isEmpty: ! isLoading && ! posts.length,
 		};
 	} );
+	const [ ref, onNavigation ] = useFocusOnNavigation();
 
 	const mostFavoritedQuery = { orderby: 'favorite_count', per_page: 6 };
 	if ( query[ 'pattern-categories' ] ) {
@@ -51,7 +53,11 @@ const MyFavorites = () => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			{ isLoggedIn && <PatternGridMenu basePath="/favorites/" query={ query } /> }
+			<div ref={ ref }>
+				{ isLoggedIn && (
+					<PatternGridMenu basePath="/favorites/" query={ query } onNavigation={ onNavigation } />
+				) }
+			</div>
 			{ ! isLoggedIn || isEmpty ? (
 				<>
 					<EmptyHeader isLoggedIn={ isLoggedIn } />
@@ -68,7 +74,7 @@ const MyFavorites = () => {
 					</PatternGrid>
 				</>
 			) : (
-				<PatternGrid query={ query }>
+				<PatternGrid query={ query } onNavigation={ onNavigation }>
 					{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
 				</PatternGrid>
 			) }

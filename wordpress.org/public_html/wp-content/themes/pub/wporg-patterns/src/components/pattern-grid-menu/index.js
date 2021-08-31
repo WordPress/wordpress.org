@@ -14,7 +14,7 @@ import NavigationLayout from '../navigation-layout';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 
-const PatternGridMenu = ( { basePath = '', ...props } ) => {
+const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 	const { path, update: updatePath } = useRoute();
 	const { categorySlug, isLoading, options } = useSelect( ( select ) => {
 		const { getCategoryById, getCategories, getQueryFromUrl, getUrlFromQuery, isLoadingCategories } = select(
@@ -51,6 +51,9 @@ const PatternGridMenu = ( { basePath = '', ...props } ) => {
 						onClick={ ( event ) => {
 							event.preventDefault();
 							updatePath( event.target.pathname );
+							if ( 'function' === typeof onNavigation ) {
+								onNavigation();
+							}
 						} }
 						isLoading={ isLoading }
 					/>
