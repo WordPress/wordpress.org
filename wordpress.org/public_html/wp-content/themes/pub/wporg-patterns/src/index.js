@@ -10,7 +10,6 @@ import Pattern from './components/pattern';
 import Patterns from './components/patterns';
 import MyFavorites from './components/my-favorites';
 import MyPatterns from './components/my-patterns';
-import PatternsSearch from './components/patterns-search';
 
 // Load the grid into the awaiting preview container.
 const gridContainer = document.getElementById( 'patterns__container' );
@@ -42,10 +41,4 @@ for ( let i = 0; i < previewContainers.length; i++ ) {
 		const contentToHide = document.querySelectorAll( '.hide-if-pattern-loaded' );
 		contentToHide.forEach( ( elem ) => ( elem.hidden = true ) );
 	} );
-}
-
-// Load the patterns search package
-const searchContainer = document.getElementById( 'patterns-search__container' );
-if ( searchContainer ) {
-	render( <PatternsSearch { ...searchContainer.dataset } />, searchContainer );
 }

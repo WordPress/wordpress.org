@@ -79,7 +79,7 @@ export function getPatternTotalPagesByQuery( state, query ) {
  * Get a specific pattern.
  *
  * @param {Object} state Global application state.
- * @param {string} id Pattern ID.
+ * @param {string} id    Pattern ID.
  *
  * @return {Object} The requested pattern, if loaded.
  */
@@ -135,7 +135,7 @@ export function getCategories( state ) {
  * Get category by its slug.
  *
  * @param {Object} state Global application state.
- * @param {string} slug Category slug.
+ * @param {string} slug  Category slug.
  *
  * @return {Array|undefined} The requested category.
  */
@@ -151,7 +151,7 @@ export function getCategoryBySlug( state, slug ) {
 /**
  * Get category by its term ID.
  *
- * @param {Object} state Global application state.
+ * @param {Object} state  Global application state.
  * @param {number} termId Term ID.
  *
  * @return {Array|undefined} The requested category.
@@ -201,7 +201,7 @@ export function getFavorites( state ) {
 /**
  * Check if a pattern ID is in the list of favorites.
  *
- * @param {Object} state Global application state.
+ * @param {Object} state     Global application state.
  * @param {number} patternId The pattern to check.
  *
  * @return {number[]} A list of favorite pattern IDs.
@@ -214,7 +214,7 @@ export function isFavorite( state, patternId ) {
  * Parse the query from the given URL or path.
  *
  * @param {Object} state Global application state.
- * @param {string} url A URL or path, optionally with query string.
+ * @param {string} url   A URL or path, optionally with query string.
  *
  * @return {Object} The query to use when requesting content from the API.
  */
@@ -256,8 +256,8 @@ export function getQueryFromUrl( state, url ) {
 /**
  * Convert a query object back into the URL for that request.
  *
- * @param {Object} state Global application state.
- * @param {Object} query A query object.
+ * @param {Object} state   Global application state.
+ * @param {Object} query   A query object.
  * @param {string} baseUrl The URL to build off, defaults to the global site home.
  *
  * @return {string} The URL representing that query object.

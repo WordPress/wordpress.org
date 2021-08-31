@@ -21,17 +21,16 @@ import { store as patternStore } from '../../store';
 /**
  * Check if the query is just the "home" query, and doesn't need a message.
  *
- * If the query has no properties, or only "orderby", it is considered a "home" query.
+ * Exclude the orderby & page properties; if there are no other query keys, this is a "home" query.
  *
  * @param {Object} query
  * @return {boolean}
  */
 const isHomeQuery = ( query ) => {
-	const keys = Object.keys( query || {} );
-	if ( ! keys.length ) {
-		return true;
-	}
-	return keys.length === 1 && keys[ 0 ] === 'orderby';
+	const allKeys = Object.keys( query || {} );
+	// Filter out "orderby" and "page", which have no affect on what kind of query this is.
+	const keys = allKeys.filter( ( key ) => ! [ 'orderby', 'page' ].includes( key ) );
+	return ! keys.length;
 };
 
 /**

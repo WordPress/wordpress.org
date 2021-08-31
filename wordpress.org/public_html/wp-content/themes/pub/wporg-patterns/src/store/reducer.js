@@ -11,7 +11,7 @@ import { getAllCategory } from './utils';
 /**
  * Reducer to track available patterns.
  *
- * @param {Object} state Current state.
+ * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.
  * @return {Object} Updated state.
  */
@@ -70,7 +70,7 @@ function queries( state = {}, action ) {
 /**
  * Reducer to track categories.
  *
- * @param {Object} state Current state.
+ * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.
  * @return {Object} Updated state.
  */
@@ -92,7 +92,7 @@ export function categories( state = undefined, action ) {
 /**
  * Reducer to track the current query.
  *
- * @param {Object} state Current state.
+ * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.
  * @return {Object} Updated state.
  */
@@ -108,7 +108,7 @@ export function currentQuery( state = undefined, action ) {
 /**
  * Reducer to track pattern flag reasons.
  *
- * @param {Object} state Current state.
+ * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.
  * @return {Object} Updated state.
  */
@@ -126,7 +126,7 @@ export function patternFlagReasons( state = undefined, action ) {
 /**
  * Reducer to track the user's favorites.
  *
- * @param {Object} state Current state.
+ * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.
  * @return {Object} Updated state.
  */

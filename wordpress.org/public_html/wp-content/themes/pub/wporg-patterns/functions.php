@@ -15,6 +15,7 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 add_filter( 'init', __NAMESPACE__ . '\add_rewrite' );
 
 add_filter( 'archive_template', __NAMESPACE__ . '\use_index_php_as_template' );
+add_filter( 'search_template', __NAMESPACE__ . '\use_index_php_as_template' );
 add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_urls' );
 
 /**

@@ -7,9 +7,9 @@ import { createInterpolateElement } from '@wordpress/element';
 /**
  * Returns a message regarding current loading status.
  *
- * @param {Object} data Message properties.
+ * @param {Object} data          Message properties.
  * @param {string} data.category The category name.
- * @param {string} data.author The author's name.
+ * @param {string} data.author   The author's name.
  *
  * @return {Object}
  */
@@ -55,10 +55,10 @@ export const getLoadingMessage = ( { category, author } ) => {
 /**
  * Returns a message regarding the current filter status.
  *
- * @param {Object} data Message properties.
+ * @param {Object} data          Message properties.
  * @param {string} data.category The category name.
- * @param {string} data.author The author's name.
- * @param {number} count Number of patterns associated to the current category.
+ * @param {string} data.author   The author's name.
+ * @param {number} count         Number of patterns associated to the current category.
  *
  * @return {Object}
  */
@@ -113,7 +113,7 @@ export const getMessage = ( { category, author }, count ) => {
 /**
  * Returns a message regarding current search status.
  *
- * @param {number} count Number of patterns associated to the category.
+ * @param {number}      count      Number of patterns associated to the category.
  * @param {string|void} searchTerm The search term.
  * @return {Object}
  */
@@ -128,7 +128,7 @@ export const getSearchMessage = ( count, searchTerm ) => {
 				'wporg-patterns'
 			),
 			count,
-			searchTerm,
+			searchTerm.replace( /\+/g, ' ' ),
 			'wporg-patterns'
 		),
 		{

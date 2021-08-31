@@ -6,6 +6,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import ContextBar from '../context-bar';
 import DocumentTitleMonitor from '../document-title-monitor';
 import EmptyHeader from './empty-header';
 import PatternGrid from '../pattern-grid';
@@ -18,7 +19,7 @@ import { RouteProvider } from '../../hooks';
 import { store as patternStore } from '../../store';
 
 const Patterns = () => {
-	const { isEmpty, query } = useSelect( ( select ) => {
+	const { isEmpty, isSearch, query } = useSelect( ( select ) => {
 		const { getCurrentQuery, getPatternsByQuery, isLoadingPatternsByQuery } = select( patternStore );
 		const _query = getCurrentQuery();
 		const isLoading = _query && isLoadingPatternsByQuery( _query );
@@ -26,6 +27,7 @@ const Patterns = () => {
 
 		return {
 			isEmpty: ! isLoading && ! posts.length,
+			isSearch: _query && !! _query.search,
 			query: _query,
 		};
 	} );
@@ -35,7 +37,7 @@ const Patterns = () => {
 			<DocumentTitleMonitor />
 			<QueryMonitor />
 			<BreadcrumbMonitor />
-			<PatternGridMenu />
+			{ isSearch ? <ContextBar query={ query } /> : <PatternGridMenu /> }
 			{ isEmpty ? (
 				<>
 					<EmptyHeader />

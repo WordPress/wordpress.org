@@ -7,7 +7,7 @@
  *
  * See test/get-pagination-list.js for examples.
  *
- * @param {number} length The total number of pages.
+ * @param {number}  length  The total number of pages.
  * @param {?number} current The current page, used to output extra pages if necessary. Default 1.
  * @return {Array.<number|string>} Array of numbers and … used to display pagination links.
  */

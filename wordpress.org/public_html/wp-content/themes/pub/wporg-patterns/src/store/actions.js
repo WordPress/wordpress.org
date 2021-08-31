@@ -17,7 +17,7 @@ export function fetchPatterns( query ) {
 /**
  * Get the action object signalling that a singple pattern has been loaded.
  *
- * @param {number} postId The pattern ID.
+ * @param {number} postId  The pattern ID.
  * @param {Object} pattern The pattern as returned from the API.
  *
  * @return {Object} Action object.
@@ -33,11 +33,11 @@ export function loadPattern( postId, pattern ) {
 /**
  * Get the action object signalling that patterns have been loaded.
  *
- * @param {string} query Search string.
+ * @param {string} query               Search string.
  * @param {Object} response
- * @param {Array} response.page The current page.
- * @param {Array} response.patterns A list of patterns.
- * @param {number} response.total The total number of patterns.
+ * @param {Array}  response.page       The current page.
+ * @param {Array}  response.patterns   A list of patterns.
+ * @param {number} response.total      The total number of patterns.
  * @param {number} response.totalPages The total number of pages.
  *
  * @return {Object} Action object.
@@ -56,9 +56,9 @@ export function loadPatterns( query, { page, patterns, total, totalPages } ) {
 /**
  * Get the action object signalling that patterns have been loaded.
  *
- * @param {string} query Search string.
+ * @param {string} query          Search string.
  * @param {Object} response
- * @param {Array} response.page The current page.
+ * @param {Array}  response.page  The current page.
  * @param {Object} response.error The error message, as reported from the API.
  *
  * @return {Object} Action object.
