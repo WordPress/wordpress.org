@@ -59,7 +59,7 @@ function emitLocale() {
 	const iframe = document.getElementById('openverse_embed');
 	iframe.contentWindow.postMessage({
 		type: 'localeSet',
-		locale: {
+		value: {
 			dir: currentDir,
 			lang: currentLang,
 			locale: currentLocale, // set in `header.php`
