@@ -22,8 +22,8 @@ get_template_part( 'header', 'wporg' );
 ?>
 
 <script>
-    // used in `message.js`
-    const currentLocale = '<?php echo get_locale() ?>';
+	// used in `message.js`
+	const currentLocale = '<?php echo get_locale() ?>';
 </script>
 
 <div id="page" class="site">

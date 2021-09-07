@@ -19,7 +19,7 @@ get_header();
 
 	<main id="main" class="site-main" role="main">
 		<iframe id="openverse_embed">
-		    😢 Your browser does not support inline frames.
+			😢 Your browser does not support inline frames.
 		</iframe>
 	</main><!-- #main -->
 
