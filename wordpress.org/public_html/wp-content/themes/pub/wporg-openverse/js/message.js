@@ -48,6 +48,28 @@ function updatePath(value) {
 }
 
 /**
+ * Emit a message to the `iframe` containing information about the current
+ * locale. This function combines the locale from WordPress with attributes
+ * from the top-level HTML document.
+ */
+function emitLocale() {
+	const currentLang = document.documentElement.lang
+	const currentDir = document.documentElement.dir
+
+	const iframe = document.getElementById('openverse_embed');
+	iframe.contentWindow.postMessage({
+		type: 'localeSet',
+		locale: {
+			dir: currentDir,
+			lang: currentLang,
+			locale: currentLocale, // set in `header.php`
+		}
+	},
+	'*', // Bad practice, but we are not sending sensitive info
+	);
+}
+
+/**
  * This is the default handler for all messages received in this frame that do
  * not have a handler configured for them.
  */
@@ -77,6 +99,9 @@ function handleIframeMessages ({ origin, data }) {
 			break;
 		case 'urlChange':
 			handler = updatePath;
+			break;
+		case 'localeGet':
+			handler = emitLocale;
 			break;
 		default:
 			handler = logUnhandled;
