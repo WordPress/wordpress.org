@@ -7,6 +7,7 @@
       .row:not(:first-of-type) {
         margin-top: 1em;
       }
+
       label {
         display: inline-block;
         width: 5em;
@@ -19,7 +20,7 @@
        * @param {string} type - the type of the message being sent to the parent
        * @param {any} value - the data to send along with the message
        */
-      function sendMessage (type, value = {}) {
+      function sendMessage(type, value = {}) {
         if (window.parent !== window) {
           const message = { debug: true, type, value };
 
@@ -69,17 +70,19 @@
           event.preventDefault();
 
           const listener = ({ origin, data }) => {
-            if (data.type !== 'localeSet') return;
+            if (data.type !== 'localeSet') {
+              return;
+            }
 
             console.log(`Received message from origin ${origin}:`);
             document.getElementById('gotLocale').innerText = JSON.stringify(data, null, 2);
 
-            console.log('Removing listener')
-            window.removeEventListener('message', listener)
-          }
-          window.addEventListener('message', listener)
-          sendMessage('localeGet')
-        })
+            console.log('Removing listener');
+            window.removeEventListener('message', listener);
+          };
+          window.addEventListener('message', listener);
+          sendMessage('localeGet');
+        });
       });
     </script>
   </head>
