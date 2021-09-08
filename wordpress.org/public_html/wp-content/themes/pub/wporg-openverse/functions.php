@@ -85,8 +85,9 @@ function enqueue_assets() {
 	);
 	wp_add_inline_script(
 		/* handle   */ 'openverse-message',
-		/* JS       */ 'const openverseUrl = ' . json_encode( get_theme_mod( 'ov_src_url', OPENVERSE_URL ) ) . ";\n" .
-		/* JS       */ 'const openverseSubpath = ' . json_encode( OPENVERSE_SUBPATH ) . ";\n",
+		/* JS       */ 'const openverseUrl = ' . wp_json_encode( get_theme_mod( 'ov_src_url', OPENVERSE_URL ) ) . ";\n" .
+		/* JS       */ 'const openverseSubpath = ' . wp_json_encode( OPENVERSE_SUBPATH ) . ";\n" .
+		/* JS       */ 'const currentLocale = ' . wp_json_encode( get_locale() ) . ";\n",
 		/* position */ 'before'
 	);	
 

@@ -6,17 +6,17 @@
  * @param {{ height: number }} value - the new dimensions of the iframe
  */
 function updateHeight(value) {
-	const height = value.height;
-	let heightProp
-	if (height) {
-		heightProp = `${height}px`;
-	} else {
-		heightProp = '100vh';
-	}
-	document
-		.documentElement
-		.style
-		.setProperty('--openverse-embed-height', heightProp);
+  const height = value.height;
+  let heightProp;
+  if (height) {
+    heightProp = `${height}px`;
+  } else {
+    heightProp = '100vh';
+  }
+  document
+    .documentElement
+    .style
+    .setProperty('--openverse-embed-height', heightProp);
 }
 
 /**
@@ -31,20 +31,43 @@ function updateHeight(value) {
  * }} value - the attributes of the new history state
  */
 function updatePath(value) {
-	const path = value.path;
-	const url = `${openverseSubpath}${path}`; // openverseSubpath defined in `index.php`
+  const path = value.path;
+  const url = `${openverseSubpath}${path}`; // openverseSubpath defined in `index.php`
 
-	console.log(`Replacing state URL: ${url}`);
-	history.replaceState(
-		value.state,
-		value.title ?? 'Openverse',
-		url,
-	);
+  console.log(`Replacing state URL: ${url}`);
+  history.replaceState(
+    value.state,
+    value.title ?? 'Openverse',
+    url,
+  );
 
-	if (value.title) {
-		console.log(`Setting document title: ${value.title}`);
-		document.title = value.title;
-	}
+  if (value.title) {
+    console.log(`Setting document title: ${value.title}`);
+    document.title = value.title;
+  }
+}
+
+/**
+ * Emit a message to the `iframe` containing information about the current
+ * locale. This function combines the locale from WordPress with attributes
+ * from the top-level HTML document.
+ */
+function emitLocale() {
+  const currentLang = document.documentElement.lang;
+  const currentDir = document.documentElement.dir;
+
+  const iframe = document.getElementById('openverse_embed');
+  iframe.contentWindow.postMessage(
+    {
+      type: 'localeSet',
+      value: {
+        dir: currentDir,
+        lang: currentLang,
+        locale: currentLocale, // set in `header.php`
+      },
+    },
+    '*', // Bad practice, but we are not sending sensitive info
+  );
 }
 
 /**
@@ -52,7 +75,7 @@ function updatePath(value) {
  * not have a handler configured for them.
  */
 function logUnhandled() {
-	console.error('No handler configured for event received');
+  console.error('No handler configured for event received');
 }
 
 /**
@@ -64,24 +87,27 @@ function logUnhandled() {
  *   value: any,
  * }>} message - the message object sent to this document
  */
-function handleIframeMessages ({ origin, data }) {
-	if (data.debug) {
-		console.log(`Received message from origin ${origin}:`);
-		console.log(data);
-	}
+function handleIframeMessages({ origin, data }) {
+  if (data.debug) {
+    console.log(`Received message from origin ${origin}:`);
+    console.log(data);
+  }
 
-	let handler
-	switch(data.type) {
-		case 'resize':
-			handler = updateHeight;
-			break;
-		case 'urlChange':
-			handler = updatePath;
-			break;
-		default:
-			handler = logUnhandled;
-	}
-	handler(data.value);
+  let handler;
+  switch (data.type) {
+    case 'resize':
+      handler = updateHeight;
+      break;
+    case 'urlChange':
+      handler = updatePath;
+      break;
+    case 'localeGet':
+      handler = emitLocale;
+      break;
+    default:
+      handler = logUnhandled;
+  }
+  handler(data.value);
 }
 
 window.addEventListener('message', handleIframeMessages);
