@@ -76,6 +76,11 @@ class Query_Plugins extends Base {
 			return $response;
 		}
 
+		// Support returning API data in different locales, even on wordpress.org (for api.wordpress.org usage)
+		if ( ! empty( $request['locale'] ) && ! in_array( strtolower( $request['locale'] ), array( 'en_us', 'en' ) ) ) {
+			switch_to_locale( $request['locale'] );
+		}
+
 		/*
 		 * Allow an API search bypass for exact-post matches.
 		 * - `slug:example-plugin` will only return THAT plugin, nothing else.
