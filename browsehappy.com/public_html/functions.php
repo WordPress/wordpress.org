@@ -123,7 +123,7 @@ function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) 
 				wikibase:rank wikibase:{$rank_type}
 			].
 		}
-		{$limit}
+		ORDER BY DESC (?version) {$limit}
 	";
 
 	$request = wp_remote_get( add_query_arg(
