@@ -1,9 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Standalone;
 
-// The API caches here expire every 24~25hours, avoids cache races when multiple change at the same time.
-// define( 'API_CACHE_EXPIRY', 24 * 60 * 60 + rand( 0, 60 * 60 ) );
-define( 'API_CACHE_EXPIRY', rand( 20, 30 ) * 60 ); // Reduce it to every 20-30min temporarily during a system transfer.
+// The API caches here expire every 6-7 hours, avoids cache races when multiple change at the same time.
+define( 'API_CACHE_EXPIRY', 6 * 60 * 60 + rand( 0, 60 * 60 ) );
 class Plugins_Info_API {
 
 	const CACHE_GROUP  = 'plugin_api_info';
