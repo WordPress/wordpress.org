@@ -413,7 +413,7 @@ function get_whitelist() {
 			'azhiyadev', // @Hauwa Abashiya on Slack
 			'chanthaboune',
 			'chetan200891',
-			'courane01', // @Courtneyon Slack
+			'courane01', // @Courtney on Slack
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
 			'onealtr', // @oneal on Slack
