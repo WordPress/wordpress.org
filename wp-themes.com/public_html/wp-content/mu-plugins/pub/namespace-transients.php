@@ -9,6 +9,8 @@ function namespace_transients() {
 	$transients_to_key = array(
 		// Gutenberg uses the global_styles transient, but doesn't vary by theme.
 		'global_styles',
+		// Gutenberg also has it's own global styles transient
+		'gutenberg_global_styles',
 	);
 	foreach ( $transients_to_key as $transient ) {
 		add_filter( "pre_transient_{$transient}",     __NAMESPACE__ . '\get', 10, 2 );
