@@ -35,8 +35,11 @@ function wporg_themes_pre_get_posts( $query ) {
 
 	// eliminate draft posts from showing up in the directory
 	if (
-		! isset( $query->query_vars['post_status'] ) ||
-		'publish' === $query->query_vars['post_status']
+		(
+			! isset( $query->query_vars['post_status'] ) ||
+			'publish' === $query->query_vars['post_status']
+		) &&
+		! $query->is_search()
 	) {
 		$query->query_vars['post_status'] = array(
 			'publish',
