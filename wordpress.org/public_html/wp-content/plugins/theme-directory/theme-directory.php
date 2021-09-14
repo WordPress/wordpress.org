@@ -33,6 +33,7 @@ new WordPressdotorg\Theme_Directory\Jobs\Manager();
 
 // Load the GitHub API client.
 include __DIR__ . '/lib/class-github.php';
+include __DIR__ . '/lib/class-exec-with-logging.php';
 
 // Load the Rest API Endpoints.
 include __DIR__ . '/rest-api.php';
