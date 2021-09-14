@@ -200,6 +200,60 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
+	 * Process a theme update, from files that are already in SVN.
+	 *
+	 * @param string $slug      The theme slug to process. Must exist.
+	 * @param string $version   The theme version to process. Must exist.
+	 * @param int    $changeset The SVN revision if known. Optional.
+	 * @param string $author    The SVN author if known. Optional.
+	 * @return true|WP_Error See ::import() for error conditions.
+	 */
+	public function process_update_from_svn( $slug, $version, $changeset = 0, $author = '' ) {
+		$this->reset_properties();
+
+		$this->theme_slug = $slug;
+
+		// Check out from SVN.
+		$this->create_tmp_dirs( $slug . '.' . $version );
+		$esc_svn = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
+		$this->exec_with_notify(
+			self::SVN . " export {$esc_svn} {$this->theme_dir} --force", // force as we've created the directory already.
+			$output,
+			$return_var
+		);
+		if ( $return_var ) {
+			return new WP_Error(
+				'svn_error',
+				implode( "\n", $output )
+			);
+		}
+
+		// Fetch data from SVN if not known.
+		if ( ! $changeset ) {
+			$changeset = (int) trim( $this->exec_with_notify( self::SVN . " info --show-item=last-changed-revision {$esc_svn}" ) );
+		}
+		if ( ! $author ) {
+			$author = trim( $this->exec_with_notify( self::SVN . " info --show-item=last-changed-author {$esc_svn}" ) );
+		}
+
+		// Get the revision.
+		$this->trac_changeset = $changeset;
+
+		// Get the author.
+		if ( $author && 'themedropbox' !== $author ) {
+			$this->author = get_user_by( 'login', $author );
+		}
+
+		// The version should be set live as it's from SVN.
+		$this->version_status = 'live';
+
+		return $this->import( array( // return true | WP_Error
+			// Since this version is already in SVN, we shouldn't try to import it again.
+			'commit_to_svn' => false,
+		) );
+	}
+
+	/**
 	 * Processes a theme ZIP upload.
 	 *
 	 * Runs various tests, creates Trac ticket, repopackage post, and saves the files to the SVN repo.
@@ -217,7 +271,7 @@ class WPORG_Themes_Upload {
 			);
 		}
 
-		$this->create_tmp_dirs( $file_upload['name'] );
+		$this->create_tmp_dirs( $file_upload['name'], true );
 		$this->unzip_package( $file_upload );
 
 		$result = $this->import();
@@ -657,7 +711,7 @@ class WPORG_Themes_Upload {
 	/**
 	 * Creates a temporary directory, and the theme dir within it.
 	 */
-	public function create_tmp_dirs( $base_name ) {
+	public function create_tmp_dirs( $base_name, $create_svn_tmp = false ) {
 		// Create a temporary directory if it doesn't exist yet.
 		$tmp = self::TMP;
 		if ( ! is_dir( $tmp ) ) {
@@ -678,11 +732,14 @@ class WPORG_Themes_Upload {
 		// Get a sanitized name for that theme and create a directory for it.
 		$base_name         = $this->get_sanitized_zip_name( $base_name );
 		$this->theme_dir   = "{$this->tmp_dir}/{$base_name}";
-		$this->tmp_svn_dir = "{$this->tmp_dir}/svn";
+		$this->tmp_svn_dir = "{$this->tmp_dir}/"; // Set it to something, just in case.
 		mkdir( $this->theme_dir );
-		mkdir( $this->tmp_svn_dir );
 		chmod( $this->theme_dir, 0777 );
-		chmod( $this->tmp_svn_dir, 0777 );
+		if ( $create_svn_tmp ) {
+			$this->tmp_svn_dir = "{$this->tmp_dir}/svn";
+			mkdir( $this->tmp_svn_dir );
+			chmod( $this->tmp_svn_dir, 0777 );
+		}
 
 		// Make sure we clean up after ourselves.
 		add_action( 'shutdown', array( $this, 'remove_files' ) );
@@ -1376,7 +1433,6 @@ TICKET;
 				$this->theme->display( 'Version' )
 			);
 
-			
 			$email_content = sprintf(
 				/* translators: 1: theme version, 2: theme name, 3: Trac ticket URL */
 				__( 'Thank you for uploading version %1$s of %2$s.
