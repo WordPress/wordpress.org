@@ -46,7 +46,7 @@ add_filter( 'rest_pre_echo_response', function( $result ) {
 
 // Include the REST API Endpoints at the appropriate time.
 add_action( 'rest_api_init', function() {
-	include __DIR__ . '/rest-api/class-internal-stats.php';
+	include __DIR__ . '/rest-api/class-internal.php';
 	include __DIR__ . '/rest-api/class-info-endpoint.php';
 	include __DIR__ . '/rest-api/class-query-endpoint.php';
 	include __DIR__ . '/rest-api/class-commercial-shops-endpoint.php';

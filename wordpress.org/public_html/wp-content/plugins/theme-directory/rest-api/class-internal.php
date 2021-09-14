@@ -4,12 +4,18 @@ use WP_REST_Server;
 use WP_Error;
 use WP_Http;
 
-class Internal_Stats {
+class Internal {
 
 	function __construct() {
 		register_rest_route( 'themes/v1', 'update-stats', array(
 			'methods'             => \WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'bulk_update_stats' ),
+			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
+		) );
+
+		register_rest_route( 'themes/v1', 'svn-auth', array(
+			'methods'             => \WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'svn_auth' ),
 			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
 		) );
 	}
@@ -37,6 +43,53 @@ class Internal_Stats {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Generates a SVN auth file.
+	 *
+	 * The SVN auth file is printed directly to the output, designed to be consumed by a cron task.
+	 */
+	function svn_auth() {
+		global $wpdb;
+
+		header( 'Content-Type: text/plain' );
+
+		// Raw SQL to avoid loading every WP_Post / WP_User object causing OOM errors.
+		$themes = $wpdb->get_results(
+			"SELECT p.post_name as slug, u.user_login as user
+			FROM {$wpdb->posts} p
+			JOIN {$wpdb->users} u ON p.post_author = u.ID
+			WHERE p.post_type = 'repopackage' AND p.post_status IN( 'publish', 'delist' )
+			ORDER BY p.post_name ASC"
+		);
+
+		// Some users need write access to all themes, such as the dropbox user.
+		$all_access_users   = get_option( 'svn_all_access', array() );
+		$all_access_users[] = 'themedropbox';
+		echo "[/]\n";
+		echo "* = r\n";
+		foreach ( array_unique( $all_access_users ) as $u ) {
+			echo "{$u} = rw\n";
+		}
+		echo "\n";
+
+		// Theme Authors.
+		foreach ( $themes as $r ) {
+			if ( ! $r->slug ) {
+				// This should never occur, but just to ensure this never produces [/].
+				continue;
+			}
+
+			printf(
+				"[%s]\n%s = rw\n\n",
+				'/' . $r->slug,
+				$r->user
+			);
+
+		}
+
+		exit();		
 	}
 
 	/**
@@ -117,4 +170,4 @@ class Internal_Stats {
 	}
 
 }
-new Internal_Stats();
+new Internal();
