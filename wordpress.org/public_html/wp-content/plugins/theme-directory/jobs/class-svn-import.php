@@ -23,7 +23,7 @@ class SVN_Import {
 	 * Check for new SVN revisions on the target repo, and queue an import job for each matching.
 	 */
 	public static function watcher_trigger() {
-		$last_revision    = (int) get_option( 'svn_import_last_revision', 0 ) - 4;
+		$last_revision    = (int) get_option( 'svn_import_last_revision', 0 );
 		$current_revision = (int) trim( self::exec(
 			'svn info --show-item=revision https://themes.svn.wordpress.org/'
 		) );
