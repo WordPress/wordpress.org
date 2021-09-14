@@ -26,14 +26,15 @@ include __DIR__ . '/admin-edit.php';
 // Load the query modifications needed for the directory.
 include __DIR__ . '/query-modifications.php';
 
-// Load repo jobs.
-include __DIR__ . '/jobs/class-manager.php';
-include __DIR__ . '/jobs/class-trac-sync.php';
-new WordPressdotorg\Theme_Directory\Jobs\Manager();
-
 // Load the GitHub API client.
 include __DIR__ . '/lib/class-github.php';
 include __DIR__ . '/lib/class-exec-with-logging.php';
+
+// Load repo jobs.
+include __DIR__ . '/jobs/class-manager.php';
+include __DIR__ . '/jobs/class-trac-sync.php';
+include __DIR__ . '/jobs/class-svn-import.php';
+new WordPressdotorg\Theme_Directory\Jobs\Manager();
 
 // Load the Rest API Endpoints.
 include __DIR__ . '/rest-api.php';

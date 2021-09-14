@@ -27,6 +27,10 @@ class Manager {
 
 		// A cronjob to check cronjobs.
 		add_action( 'theme_directory_check_cronjobs', [ $this, 'register_cron_tasks' ] );
+
+		// Import from SVN tasks.
+		add_action( 'theme_directory_svn_import_watcher', [ __NAMESPACE__ . '\SVN_Import', 'watcher_trigger' ] );
+		add_action( 'theme_directory_svn_import', [ __NAMESPACE__ . '\SVN_Import', 'import_trigger' ] );
 	}
 
 	/**
@@ -41,6 +45,11 @@ class Manager {
 		$schedules['every_15m']  = [
 			'interval' => 15 * MINUTE_IN_SECONDS,
 			'display'  => 'Every 15 minutes',
+		];
+
+		$schedules['every_5m']  = [
+			'interval' => 5 * MINUTE_IN_SECONDS,
+			'display'  => 'Every 5 minutes',
 		];
 
 		return $schedules;
@@ -58,6 +67,10 @@ class Manager {
 
 		if ( ! wp_next_scheduled( 'theme_directory_check_cronjobs' ) ) {
 			wp_schedule_event( time() + 60, 'every_15m', 'theme_directory_check_cronjobs' );
+		}
+
+		if ( ! wp_next_scheduled( 'theme_directory_svn_import_watcher' ) ) {
+			wp_schedule_event( time() + 60, 'every_5m', 'theme_directory_svn_import_watcher' );
 		}
 	}
 }

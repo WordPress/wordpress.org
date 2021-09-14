@@ -2,9 +2,9 @@
 namespace WordPressdotorg\Theme_Directory\Lib;
 
 /**
- * Simple `exec()` wrapper which adds error reporting to WordPress.org.
+ * Simple `exec()` wrappers which add error reporting to WordPress.org.
  *
- * @package WordPressdotorg\Theme_Directory
+ * @package WordPressdotorg\Theme_Directory\Lib
  */
 trait Exec_With_Logging {
 
@@ -17,7 +17,7 @@ trait Exec_With_Logging {
 	 * 
 	 * @return false|string False on failure, last line of output on success, as per exec().
 	 */
-	public function exec( $command, &$output = null, &$return_var = null ) {
+	public static function exec( $command, &$output = null, &$return_var = null ) {
 		$proc = proc_open(
 			$command,
 			[
@@ -26,6 +26,10 @@ trait Exec_With_Logging {
 			],
 			$pipes
 		);
+
+		if ( ! $proc ) {
+			return false;
+		}
 
 		$stdout = stream_get_contents( $pipes[1] );
 		$stderr = stream_get_contents( $pipes[2] );
@@ -76,4 +80,23 @@ trait Exec_With_Logging {
 		return $stdout ? end( $output ) : '';
 	}
 
+	/**
+	 * Execute a shell process, same behaviour as `shell_exec()` but with PHP Warnings/Notices generated on errors.
+	 * 
+	 * @param string $command Command to execute. Escape it.
+	 * 
+	 * @return false|string False on failure, output on success, mostly per shell_exec().
+	 */
+	public static function shell_exec( $command ) {
+		$output     = [];
+		$return_var = 0;
+		$return = self::exec( $command, $output, $return_var );
+
+		// Diverge from shell_exec(): return false for any error.
+		if ( $return_var > 0 || false === $return || ! $output ) {
+			return false;
+		}
+
+		return implode( "\n", $output );
+	}
 }
