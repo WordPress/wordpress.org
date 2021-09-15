@@ -1219,7 +1219,7 @@ TICKET;
 			// Theme review team auto-approves theme-updates, so mark the theme as live immediately.
 			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets
 			if ( $this->trac_ticket->priority == 'theme update' ) {
-				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically reviewed & approved', array( 'action' => 'new_no_review' ), false );
+				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
 
 				$this->trac_ticket->resolution = 'live';
 				$this->version_status          = 'live';
