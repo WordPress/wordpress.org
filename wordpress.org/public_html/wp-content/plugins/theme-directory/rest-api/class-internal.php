@@ -10,30 +10,33 @@ class Internal {
 		register_rest_route( 'themes/v1', 'update-stats', array(
 			'methods'             => \WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'bulk_update_stats' ),
-			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
+			'permission_callback' => array( $this, 'permission_check_bearer' ),
 		) );
 
 		register_rest_route( 'themes/v1', 'svn-auth', array(
 			'methods'             => \WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'svn_auth' ),
-			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
+			'permission_callback' => function( $request ) {
+				return $this->permission_check_bearer( $request, 'THEME_SVN_AUTH_BEARER_TOKEN' );
+			}
 		) );
 	}
 
 	/**
 	 * A Permission Check callback which validates the request with a Bearer token.
 	 *
-	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @param \WP_REST_Request $request  The Rest API Request.
+	 * @param string           $constant The constant to check.
 	 * @return bool|\WP_Error True if the token exists, WP_Error upon failure.
 	 */
-	function permission_check_internal_api_bearer( $request ) {
+	function permission_check_bearer( $request, $constant = 'THEME_API_INTERNAL_BEARER_TOKEN' ) {
 		$authorization_header = $request->get_header( 'authorization' );
 		$authorization_header = trim( str_ireplace( 'bearer', '', $authorization_header ) );
 
 		if (
 			! $authorization_header ||
-			! defined( 'THEME_API_INTERNAL_BEARER_TOKEN' ) ||
-			! hash_equals( THEME_API_INTERNAL_BEARER_TOKEN, $authorization_header )
+			! defined( $constant ) ||
+			! hash_equals( constant( $constant ), $authorization_header )
 		) {
 			return new WP_Error(
 				'not_authorized',
@@ -73,6 +76,9 @@ class Internal {
 			echo "{$u} = rw\n";
 		}
 		echo "\n";
+
+		// TODO: Temporarily don't output the Theme Authors until we're ready.
+		exit();
 
 		// Theme Authors.
 		foreach ( $themes as $r ) {
