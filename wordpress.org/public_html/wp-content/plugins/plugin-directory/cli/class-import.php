@@ -313,7 +313,7 @@ class Import {
 	 *
 	 * @param string $plugin_slug            The plugin slug.
 	 * @param string $stable_tag             The new stable tag.
-	 * @param string $current_stable_tag     The new stable tag.
+	 * @param string $current_stable_tag     The current stable tag.
 	 * @param array  $svn_changed_tags       The list of SVN tags modified since last import.
 	 * @param string $svn_revision_triggered The SVN revision which triggered the rebuild.
 	 *
@@ -332,6 +332,11 @@ class Import {
 		// Don't rebuild release-confirmation-required tags.
 		if ( $plugin->release_confirmation ) {
 			foreach ( $versions_to_build as $i => $tag ) {
+				// Trunk should always be built, and will never be set as the stable tag when confirmations are enabled.
+				if ( 'trunk' === $tag ) {
+					continue;
+				}
+
 				$release = Plugin_Directory::get_release( $plugin, $tag );
 
 				if ( ! $release || ( $release['zips_built'] && $release['confirmations_required'] ) ) {
