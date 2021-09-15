@@ -634,7 +634,7 @@ class WPORG_Themes_Upload {
 
 		// Pass it through Theme Check and see how great this theme really is.
 		if ( $args['run_themecheck'] ) {
-			$result = $this->check_theme( $theme_files );
+			$result = $this->check_theme();
 
 			if ( ! $result && $args['block_on_themecheck'] ) {
 				// Log it to slack.
@@ -994,10 +994,9 @@ class WPORG_Themes_Upload {
 	/**
 	 * Sends a theme through Theme Check.
 	 *
-	 * @param array $files All theme files to check.
 	 * @return bool Whether the theme passed the checks.
 	 */
-	public function check_theme( $files ) {
+	public function check_theme() {
 		// Load the theme checking code.
 		if ( ! function_exists( 'run_themechecks_against_theme' ) ) {
 			include_once WP_PLUGIN_DIR . '/theme-check/checkbase.php';
