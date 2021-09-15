@@ -12,7 +12,6 @@ function wporg_themes_pre_get_posts( $query ) {
 	if ( !empty( $query->query_vars['post_type'] ) && 'repopackage' != $query->query_vars['post_type'] ) {
 		return;
 	}
-
 	// Themes are never via pagename
 	if ( !empty( $query->query_vars['pagename'] ) ) {
 		return;
@@ -23,11 +22,8 @@ function wporg_themes_pre_get_posts( $query ) {
 		$query->query_vars['browse'] = 'popular';
 	}
 
-	// From now on, always query published themes.
-	$query->query_vars['post_type']   = 'repopackage';
-	if ( ! isset( $query->query_vars['post_status'] ) ) {
-		$query->query_vars['post_status'] = 'publish';
-	}
+	// From now on, always query themes.
+	$query->query_vars['post_type'] = 'repopackage';
 	if ( ! isset( $query->query_vars['browse'] ) ) {
 		$query->query_vars['browse'] = '';
 	}
@@ -37,19 +33,19 @@ function wporg_themes_pre_get_posts( $query ) {
 		$query->query_vars['browse'] = 'favorites';
 	}
 
-	// Delisted items should be available on singular / author archives.
+	// eliminate draft posts from showing up in the directory
 	if (
-		! empty( $query->query_vars['name'] ) ||
-		! empty( $query->query_vars['author_name'] )
+		(
+			! isset( $query->query_vars['post_status'] ) ||
+			'publish' === $query->query_vars['post_status']
+		) &&
+		! $query->is_search()
 	) {
-		if ( ! is_array( $query->query_vars['post_status'] ) ) {
-			$query->query_vars['post_status'] = array(
-				$query->query_vars['post_status']
-			);
-		}
-
-		$query->query_vars['post_status'][] = 'delist';
-	}
+		$query->query_vars['post_status'] = array(
+			'publish',
+			'delist',
+		);
+	} 
 
 	switch ( $query->query_vars['browse'] ) {
 		case 'new':
