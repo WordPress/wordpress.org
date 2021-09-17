@@ -22,9 +22,10 @@ function wporg_comment_max_links_url( $num_links, $url, $comment ) {
 	/******* START CONFIG *******/
 
 	// Get whitelisted URLs.
-	// Note: unnecessary to specify subdomains
+	// Note: unnecessary to specify subdomains, do not include trailing slash.
 	$whitelist_urls = array(
 		'wordpress.org',
+		'github.com/WordPress',
 	);
 
 	// Prevent abuse by enforcing a max link limit regardless of whitelist.
@@ -59,7 +60,7 @@ function wporg_comment_max_links_url( $num_links, $url, $comment ) {
 	foreach ( $whitelist_urls as $url ) {
 
 		// Count the number of occurrences of this particular whitelisted URL.
-		$num_whitelist_links = preg_match_all( '%<a [^>]*href=[\'\"]https?://[^/>]*' . preg_quote( $url, '%' ) . '%i', $comment, $out );
+		$num_whitelist_links = preg_match_all( '%<a [^>]*href=([\'\"])https?://([^/>]+\.)?' . preg_quote( $url, '%' ) . '(/|\\1)%i', $comment, $out );
 
 		// Increase the limit by the number of whitelisted URLs (so that they don't
 		// count against the limit).
