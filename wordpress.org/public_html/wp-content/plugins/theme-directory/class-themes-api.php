@@ -476,9 +476,9 @@ class Themes_API {
 		} else {
 			// get_post_by_slug()
 			$themes = get_posts( array(
-				'name'      => $this->request->slug,
-				'post_type' => 'repopackage',
-				'post_status' => 'publish,delist',
+				'name'        => $this->request->slug,
+				'post_type'   => 'repopackage',
+				'post_status' => 'publish', // delist will be added by query-modifications.
 			) );
 
 			if ( $themes ) {
