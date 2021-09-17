@@ -7,9 +7,8 @@
     border: none;
 }
 
-.site > .site-content {
-    max-width: none;
-
-    padding: 0;
-    margin: auto;
+#main {
+    width: 100% !important;
+    padding: 0 !important;
+    max-width: 100% !important;
 }
