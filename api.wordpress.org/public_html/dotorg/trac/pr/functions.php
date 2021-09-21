@@ -329,16 +329,18 @@ function format_github_content_for_trac_comment( $desc ) {
 
 	// Convert Code blocks.
 	$desc = preg_replace_callback(
-		'#```(?P<format>[a-z]+$)?(?P<code>.+?)```#sm',
+		'#^(?P<indent>[ >]*)```(?P<format>[a-z]+$)(?P<code>.+?)```$#sm',
 		function( $m ) {
 			return
-				"{{{\n" .
-				( $m['format'] ? "#!" . trim( $m['format'] ) . "\n" : '' ) .
+				$m['indent'] . "{{{\n" .
+				$m['indent'] . "#!" . trim( $m['format'] ) . "\n" .
 				trim( $m['code'] ) . "\n" .
-				"}}}\n";
+				$m['indent'] . "}}}\n";
 		},
 		$desc
 	);
+
+	$desc = preg_replace( '#```(.+?)```#s', '{{{$1}}}', $desc );
 
 	// Convert Images (Must happen prior to Links, as the only difference is a preceeding !)
 	$desc = preg_replace( '#!\[(.+?)\]\(https?://(.+?)\)#', '[[Image(https://i0.wp.com/$2)]]', $desc );
