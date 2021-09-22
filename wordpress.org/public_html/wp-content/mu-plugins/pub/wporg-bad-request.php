@@ -44,6 +44,10 @@ add_action( 'send_headers', function( $wp ) {
  * Check a set of internal query variables against the WordPress WP_Query values to detect invalid input.
  */
 function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
+	$query_vars = (new \WP)->public_query_vars;
+	$query_vars[] = 'customize_changeset_uuid';
+	$query_vars[] = 'forum';
+
 	// Assumption: WP::$public_query_vars will only ever contain non-array query vars.
 	// Assumption invalid. Some fields are valid.
 	$array_fields = [ 'post_type' => true, 'cat' => true ];
@@ -66,7 +70,7 @@ function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
 		'second'        => true,
 	];
 
-	foreach ( (new \WP)->public_query_vars as $field ) {
+	foreach ( $query_vars as $field ) {
 		if ( isset( $vars[ $field ] ) ) {
 			if ( ! is_scalar( $vars[ $field ] ) && ! isset( $array_fields[ $field ] ) ) {
 				die_bad_request( "non-scalar $field in $ref" );
@@ -116,11 +120,52 @@ add_action( 'xmlrpc_call', function() {
 /**
  * Detect invalid requests from over hungry vulnerability scanners.
  */
-add_action( 'send_headers', function() {
+add_action( 'setup_theme', function() {
 	if ( isset( $_REQUEST['EGOTEC'] ) ) {
 		die_bad_request( 'EGOTEC request parameter set' );
 	}
-}, 1 );
+
+	// Sorry, this shouldn't be needed.
+	// rate limit bots requesting abnormally-high POST/GET vars
+	// these often include 'pagename' and cause responses to change,
+	// causing the scanner to target even more junk requests to the url.
+	$items = max( count( $_GET ), count( $_POST ) );
+	if (
+		$items >= 8 &&
+		! is_user_logged_in() &&
+		empty( $_SERVER['HTTP_AUTHORIZATION'] ) &&
+		in_array( $items, [ 8, 16, 32, 64, 128, 255, 256, 512, 1024 ], true ) &&
+		wp_using_ext_object_cache()
+	) {
+		$key   = 'scanner:' . $_SERVER['REMOTE_ADDR'];
+		$group = 'ip-ratelimit-bp';
+
+		if ( function_exists( 'wp_cache_add_global_groups' ) ) {
+			wp_cache_add_global_groups( $group );
+		}
+
+		$hits = wp_cache_get( $key, $group );
+		if ( false === $hits ) {
+			wp_cache_add( $key, 1, $group, HOUR_IN_SECONDS );
+			return;
+		}
+
+		// Only increment it for high counts, but block on low counts if exceeded.
+		if ( $items > 16 || $hits > 20 ) {
+			$hits = wp_cache_incr( $key, 1, $group );
+		}
+
+		// Abnormally high numbers to be on the 'safe' side.
+		if ( $hits >= 20 ) {
+			// Since they hit the threshold and still kept going.. longer.
+			if ( $hits == 50 ) {
+				wp_cache_set( $key, $hit, $group, DAY_IN_SECONDS );
+			}
+
+			die_bad_request( "Bulk POST query scanner: $key" );
+		}
+	}
+}, 0 );
 
 /**
  * Detect invalid requests from vulnerability scanners to Jetpack Share by Email forms.
@@ -153,7 +198,7 @@ if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 			die_bad_request( "non-scalar action in admin-ajax." );
 		}
 	} );
-}	
+}
 
 /**
  * Die with a 400 Bad Request.
@@ -174,8 +219,9 @@ function die_bad_request( $reference = '' ) {
 		defined( 'WPORGPATH' ) && file_exists( WPORGPATH . '/403.php' ) &&
 		! defined( 'XMLRPC_REQUEST' ) && ! defined( 'REST_REQUEST' )
 	) {
-		// Bare header, we don't need Block assets.
+		// Bare header & footer, we don't need all the extras.
 		remove_all_actions( 'wp_head' );
+		remove_all_actions( 'wp_footer' );
 
 		status_header( 400 );
 		$header_set_for_403 = true;
