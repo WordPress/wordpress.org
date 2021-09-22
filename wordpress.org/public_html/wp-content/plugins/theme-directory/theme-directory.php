@@ -1407,11 +1407,16 @@ function wporg_themes_get_current_url( $path_only = false ) {
  * Filter the WordPress.org SEO plugin Canonical location to respect Theme Directory differences.
  */
 function wporg_themes_canonical_url( $url ) {
-	if ( get_query_var( 'browse' ) && WPORG_THEMES_DEFAULT_BROWSE === get_query_var( 'browse' ) ) {
+	$browse = get_query_var( 'browse' );
+	if ( ! $browse || ! is_string( $browse ) ) {
+		return $url;
+	}
+
+	// The browse/% urls on the Theme directory are front-page-query alterations.
+	$url = home_url( "browse/{$browse}/" );
+
+	if ( WPORG_THEMES_DEFAULT_BROWSE === $browse ) {
 		$url = home_url( '/' );
-	} elseif ( get_query_var( 'browse' ) ) {
-		// The browse/% urls on the Theme directory are front-page-query alterations.
-		$url = home_url( 'browse/' . get_query_var( 'browse' ) . '/' );
 	}
 
 	return $url;
