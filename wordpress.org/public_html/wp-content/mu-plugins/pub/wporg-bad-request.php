@@ -138,7 +138,7 @@ add_action( 'setup_theme', function() {
 		wp_using_ext_object_cache()
 	) {
 		$key   = 'scanner:' . $_SERVER['REMOTE_ADDR'];
-		$group = 'ip-ratelimit-bp';
+		$group = 'ip-ratelimit-bp2';
 
 		if ( function_exists( 'wp_cache_add_global_groups' ) ) {
 			wp_cache_add_global_groups( $group );
@@ -159,7 +159,7 @@ add_action( 'setup_theme', function() {
 		if ( $hits >= 20 ) {
 			// Since they hit the threshold and still kept going.. longer.
 			if ( $hits == 50 ) {
-				wp_cache_set( $key, $hit, $group, DAY_IN_SECONDS );
+				wp_cache_set( $key, $hits, $group, DAY_IN_SECONDS );
 			}
 
 			die_bad_request( "Bulk POST query scanner: $key" );
