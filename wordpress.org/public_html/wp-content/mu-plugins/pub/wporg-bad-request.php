@@ -206,7 +206,7 @@ if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
  * @param string $reference A unique identifying string to make it easier to read logs.
  */
 function die_bad_request( $reference = '' ) {
-	// Log it if possible, and not on a sandbox
+	// When the user is logged in, log it if possible
 	if ( ! defined( 'WPORG_SANDBOXED' ) || ! WPORG_SANDBOXED ) {
 		if ( function_exists( 'wporg_error_reporter' ) && ! empty( $_COOKIE['wporg_logged_in'] ) ) {
 			wporg_error_reporter( E_USER_NOTICE, "400 Bad Request: $reference", __FILE__, __LINE__ );
@@ -222,6 +222,7 @@ function die_bad_request( $reference = '' ) {
 		// Bare header & footer, we don't need all the extras.
 		remove_all_actions( 'wp_head' );
 		remove_all_actions( 'wp_footer' );
+		remove_all_actions( 'body_class' );
 
 		status_header( 400 );
 		$header_set_for_403 = true;
