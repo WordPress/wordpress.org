@@ -363,6 +363,7 @@ function get_whitelist() {
 			'zackkrida',
 		),
 		'polyglots' => array(
+			'Amieiro',
 			'casiepa', // @Pascal on Slack
 			'CoachBirgit',
 			'deconf',
