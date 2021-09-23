@@ -36,9 +36,9 @@ add_action( 'login_init', function() {
  *
  * @see https://core.trac.wordpress.org/ticket/17737
  */
-add_action( 'send_headers', function( $wp ) {
+add_action( 'parse_request', function( $wp ) {
 	check_for_invalid_query_vars( $wp->query_vars, '$public_query_vars' );
-} );
+}, 0 );
 
 /**
  * Check a set of internal query variables against the WordPress WP_Query values to detect invalid input.
@@ -134,7 +134,6 @@ add_action( 'setup_theme', function() {
 		$items >= 8 &&
 		! is_user_logged_in() &&
 		empty( $_SERVER['HTTP_AUTHORIZATION'] ) &&
-		in_array( $items, [ 8, 16, 32, 64, 128, 255, 256, 512, 1024 ], true ) &&
 		wp_using_ext_object_cache()
 	) {
 		$key   = 'scanner:' . $_SERVER['REMOTE_ADDR'];
@@ -151,7 +150,7 @@ add_action( 'setup_theme', function() {
 		}
 
 		// Only increment it for high counts, but block on low counts if exceeded.
-		if ( $items > 16 || $hits > 20 ) {
+		if ( $items > 32 || $hits > 20 ) {
 			$hits = wp_cache_incr( $key, 1, $group );
 		}
 
@@ -228,7 +227,7 @@ function die_bad_request( $reference = '' ) {
 		$header_set_for_403 = true;
 		include WPORGPATH . '/403.php';
 	} else {
-		\wp_die( 'Bad Request', 'Bad Request', [ 'response' => 400 ] );
+		\wp_die( 'Bad Request: Your request contained query variables that are unexpected. Please contact #meta.', 'Bad Request', [ 'response' => 400 ] );
 	}
 	exit;
 }
