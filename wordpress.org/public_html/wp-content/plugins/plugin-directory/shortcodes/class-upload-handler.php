@@ -417,6 +417,11 @@ class Upload_Handler {
 			'wp-media-folder',
 			'wp-file-download',
 			'wp-table-manager',
+			// reserved plugins that used to exist outside of .org -- reusing would be bad.
+			'acf-repeater',
+			'acf-flexible-content',
+			'acf-options-page',
+			'acf-gallery',
 		);
 
 		return in_array( $this->plugin_slug, $reserved_slugs );
