@@ -514,6 +514,7 @@ class Upload_Handler {
 			'wpress',
 			'wp-',
 			'wp-mail-smtp-',
+			'yandex-',
 			'yahoo-',
 			'yoast',
 			'youtube-',
@@ -527,6 +528,7 @@ class Upload_Handler {
 			'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
 			'trustpilot.com'        => array( 'trustpilot' ),
 			'microsoft.com'         => array( 'bing-', 'microsoft-' ),
+			'yandex-team.ru'        => array( 'yandex' ),
 		);
 
 		// Trademarks that are allowed as 'for-whatever' ONLY.
