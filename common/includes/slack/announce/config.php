@@ -274,6 +274,7 @@ function get_whitelist() {
 			'melchoyce',
 			'paaljoachim',
 			'sarahricker',
+			'shaunandrews',
 		),
 		'design-dashicons' => array(
 			'EmpireOfLight',
