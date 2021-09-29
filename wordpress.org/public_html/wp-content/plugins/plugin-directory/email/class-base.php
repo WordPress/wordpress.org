@@ -47,12 +47,18 @@ abstract class Base {
 
 		foreach ( (array) $users as $user ) {
 			if ( is_string( $user ) && is_email( $user ) ) {
-				$user = get_user_by( 'email', $user );
-			} elseif ( ! ( $user instanceof WP_User ) ) {
+				$email_user = get_user_by( 'email', $user );
+				if ( $email_user ) {
+					$user = $email_user;
+				}
+			}
+
+			if ( ! ( $user instanceof WP_User ) ) {
+				// ID, login (which may be email-like)
 				$user = new WP_User( $user );
 			}
 
-			if ( $user->exists() ) {
+			if ( $user && $user->exists() ) {
 				$this->users[] = $user;
 			}
 
