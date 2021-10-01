@@ -107,7 +107,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		global $wpdb;
 
 		$join  = '';
-		$where = 'WHERE ';
+		$where = ' WHERE ';
 		$where .= $this->get_view_sql_where( $view ?: ( $_REQUEST['view'] ?? 'all' ) );
 
 		if ( isset( $_GET['s'] ) && 'all' != $view ) {
@@ -124,14 +124,14 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		// Join if the view needs the users or description table.
-		if ( strpos( $where, 'description.' ) ) {
-			$join .= "LEFT JOIN {$wpdb->usermeta} description ON users.ID = description.user_id AND description.meta_key = 'description'";
+		if ( strpos( $where . $join, 'users.' ) || strpos( $where, 'description.' ) ) {
+			$join .= " LEFT JOIN {$wpdb->users} users ON registrations.created = 1 AND registrations.user_login = users.user_login";
 		}
-		if ( strpos( $where . $join, 'users.' ) ) {
-			$join .= "LEFT JOIN {$wpdb->users} users ON registrations.created = 1 AND registrations.user_login = users.user_login";
+		if ( strpos( $where, 'description.' ) ) {
+			$join .= " LEFT JOIN {$wpdb->usermeta} description ON users.ID = description.user_id AND description.meta_key = 'description'";
 		}
 
-		return $join . ' ' . $where;
+		return $join . $where;
 	}
 
 	function get_columns() {
