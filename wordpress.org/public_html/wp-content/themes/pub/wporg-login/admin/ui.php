@@ -57,14 +57,20 @@ function wporg_login_admin_page() {
 	} );
 	</script>
 	<style>
-		table.wp-list-table td > a {
+		table.wp-list-table td > a,
+		table.wp-list-table td.column-meta > div > a {
 			color: inherit;
 		}
-		table.wp-list-table td > a:hover {
+		table.wp-list-table td > a:hover,
+		table.wp-list-table td.column-meta > div > a:hover {
 			text-decoration: underline;
 		}
 		table.wp-list-table .delete-red {
 			color: #b32d2e;
+		}
+		td.column-meta > div {
+			max-height: 200px;
+			overflow: scroll;
 		}
 	</style>
 	<?php

@@ -29,6 +29,10 @@ class User_Registrations_List_Table extends WP_List_Table {
 			[
 				'heuristics-block',
 				'Heuristics: Block',
+			],
+			[
+				'banned-users',
+				'Recent Banned Users',
 			]
 		];
 
@@ -91,6 +95,8 @@ class User_Registrations_List_Table extends WP_List_Table {
 				return "meta LIKE '%heuristics\":\"block%'";
 			case 'registered':
 				return 'created = 1';
+			case 'banned-users':
+				return 'created = 1 AND users.user_pass LIKE "BLOCKED%"';
 			default:
 			case 'all':
 				return '1=1';
@@ -115,14 +121,17 @@ class User_Registrations_List_Table extends WP_List_Table {
 				)",
 				 $search_like, $search_like, $search_like, $search_like
 			);
-
-			$join = "
-				LEFT JOIN {$wpdb->users} users ON registrations.created = 1 AND registrations.user_login = users.user_login
-				LEFT JOIN {$wpdb->usermeta} description ON users.ID = description.user_id AND description.meta_key = 'description'
-		   ";
 		}
 
-		return $join . $where;
+		// Join if the view needs the users or description table.
+		if ( strpos( $where, 'description.' ) ) {
+			$join .= "LEFT JOIN {$wpdb->usermeta} description ON users.ID = description.user_id AND description.meta_key = 'description'";
+		}
+		if ( strpos( $where . $join, 'users.' ) ) {
+			$join .= "LEFT JOIN {$wpdb->users} users ON registrations.created = 1 AND registrations.user_login = users.user_login";
+		}
+
+		return $join . ' ' . $where;
 	}
 
 	function get_columns() {
@@ -169,15 +178,21 @@ class User_Registrations_List_Table extends WP_List_Table {
 	   $per_page_offset = ($current_page-1) * $per_page;
 
 		$this->items = $wpdb->get_results(
-			$sql = "SELECT SQL_CALC_FOUND_ROWS registrations.*
+			"SELECT SQL_CALC_FOUND_ROWS registrations.*
 			FROM {$wpdb->base_prefix}user_pending_registrations registrations
 			$join_where
 			ORDER BY {$sort_column} {$sort_order}
 			LIMIT {$per_page_offset}, {$per_page}"
 		);
 
+		$total_items = $wpdb->get_var( 'SELECT FOUND_ROWS()' );
+
+		foreach ( $this->items as $i => $item ) {
+			$this->items[$i]->user = $item->created ? get_user_by( 'slug', $item->user_login ) : false;
+		}
+
 		$this->set_pagination_args([
-			'total_items' => $wpdb->get_var( 'SELECT FOUND_ROWS()' ),
+			'total_items' => $total_items,
 			'per_page'    => $per_page,
 		]);
 
@@ -209,10 +224,10 @@ class User_Registrations_List_Table extends WP_List_Table {
 			echo "<a href='$url'>" . esc_html( $item->user_login ) . '</a>';
 
 			if (
-				( $user = get_user_by( 'login', $item->user_login ) ) &&
-				'BLOCKED' === substr( $user->user_pass, 0, 7 )
+				$item->user &&
+				'BLOCKED' === substr( $item->user->user_pass, 0, 7 )
 			) {
-				echo ' <span class="delete-red">(blocked)</span>';
+				echo ' <span class="delete-red">(banned)</span>';
 			}
 
 		} else {
@@ -257,17 +272,14 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$row_actions['delete'] = '<a href="' . esc_url( $url ) . '">Delete</a>';
 
 		} else {
-			// Account created, find the user.
-			$user = get_user_by( 'login', $item->user_login );
-
 			$url = add_query_arg(
 				'user_id',
-				urlencode( $user->ID ),
+				urlencode( $item->user->ID ),
 				admin_url( 'admin-post.php?action=login_block_account' )
 			);
-			$url = wp_nonce_url( $url, 'block_account_' . $user->ID );
+			$url = wp_nonce_url( $url, 'block_account_' . $item->user->ID );
 
-			if ( $user && 'BLOCKED' !== substr( $user->user_pass, 0, 7 ) ) {
+			if ( $item->user && 'BLOCKED' !== substr( $item->user->user_pass, 0, 7 ) ) {
 				$row_actions['block-account'] = '<a href="' . esc_url( $url ) . '">Block Account</a>';
 			}
 
@@ -282,6 +294,8 @@ class User_Registrations_List_Table extends WP_List_Table {
 	function column_meta( $item ) {
 		$meta = json_decode( $item->meta );
 
+		echo '<div>';
+
 		echo implode( ', ',
 			array_map(
 				[ $this, 'link_to_search' ],
@@ -293,7 +307,6 @@ class User_Registrations_List_Table extends WP_List_Table {
 		);
 		echo '<hr>';
 
-
 		foreach ( [ 'url', 'from', 'occ', 'interests' ] as $field ) {
 			if ( !empty( $meta->$field ) ) {
 				printf( "%s: %s<br>", esc_html( $field ), $this->link_to_search( $meta->$field ) );
@@ -301,13 +314,14 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		// Add other meta after an account is created
-		if ( $user = get_user_by( 'login', $item->user_login ) ) {
+		if ( $item->user ) {
 			// Forum profile description (this is where the spam usually is)
-			if ( $desc = get_user_meta( $user->ID, 'description', true ) ) {
+			if ( $desc = get_user_meta( $item->user->ID, 'description', true ) ) {
 				printf( "forum bio: %s<br>", $this->link_to_search( $desc ) );
 			}
-
 		}
+
+		echo '</div>';
 	}
 
 	function column_scores( $item ) {
