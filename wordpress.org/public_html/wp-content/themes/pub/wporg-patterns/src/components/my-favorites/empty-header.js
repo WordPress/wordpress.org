@@ -13,7 +13,7 @@ function EmptyHeader( { isLoggedIn } ) {
 			<h2>{ __( 'Collect and view your favorite patterns.', 'wporg-patterns' ) }</h2>
 			<p>
 				{ __(
-					'Tap the heart on any pattern to make it as a favorite. All your favorite patterns will appear here.',
+					'Tap the heart on any pattern to mark it as a favorite. All your favorite patterns will appear here.',
 					'wporg-patterns'
 				) }
 			</p>
