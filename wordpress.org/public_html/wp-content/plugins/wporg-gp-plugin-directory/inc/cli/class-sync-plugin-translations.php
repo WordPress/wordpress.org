@@ -83,7 +83,7 @@ class Sync_Plugin_Translations extends WP_CLI_Command {
 		unset( $current_translations_list );
 
 		add_filter( 'gp_translation_prepare_for_save', function( $args, $translation ) use ( $current_translations_map ) {
-			$original = GP::$original->get( $args['original_id'] );
+			$original = GP::$original->get( $args['original_id'] ?? $translation->original_id );
 			if ( ! $original ) {
 				return $args;
 			}
