@@ -152,7 +152,7 @@ the_post();
 					<p class="subheading"><?php esc_html_e( 'Create or update content on the go with our mobile apps.', 'wporg' ); ?></p>
 
 					<div class="web-stores">
-						<a href="http://appstore.com/WordPress" class="button-ios" >
+						<a href="https://itunes.apple.com/app/apple-store/id335703880?pt=299112&ct=wordpress.org&mt=8" class="button-ios" >
 							<img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-apple.png' ) ); ?>" alt="<?php esc_attr_e( 'Available in the Apple App Store', 'wporg' ); ?>" />
 						</a>
 						<a href="http://play.google.com/store/apps/details?id=org.wordpress.android" class="button-android">
