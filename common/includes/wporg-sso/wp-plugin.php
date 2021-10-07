@@ -111,7 +111,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function authenticate_admin_check( $user, $user_login ) {
 
-			if ( 'admin' === $user_login ) {
+			if ( 'admin' === strtolower( $user_login ) ) {
 
 				// Returning a WP_Error from an authenticate filter doesn't block auth, as a later hooked item can return truthful.
 				remove_all_actions( 'authenticate' );
