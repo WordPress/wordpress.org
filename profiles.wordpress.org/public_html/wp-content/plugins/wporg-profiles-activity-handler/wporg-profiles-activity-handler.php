@@ -185,6 +185,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				case 'forum':
 					$activity_id = $this->handle_forum_activity();
 					break;
+				case 'learn':
+					$activity_id = $this->handle_learn_activity();
+					break;
 				case 'plugin':
 					$activity_id = $this->handle_plugin_activity();
 					break;
@@ -331,6 +334,65 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				return true;
 			}
+		}
+
+		/**
+		 * Process activity stream requests from learn.wordpress.org.
+		 *
+		 * @return int|string The activity ID on success; an error message on failure.
+		 */
+		protected function handle_learn_activity() {
+			$user = $this->get_user( $_POST['user'] );
+
+			if ( ! $user ) {
+				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
+			}
+
+			$activity_type = sanitize_text_field( $_POST['activity'] );
+
+			$default_args = array(
+				'user_id'    => $user->ID,
+				'component'  => 'learn',
+				'type'       => "learn_$activity_type",
+				'error_type' => 'wp_error',
+			);
+
+			switch ( $activity_type ) {
+				case 'course_complete':
+					$case_args = array(
+						'item_id'      => absint( $_POST['course_id'] ),
+						'primary_link' => esc_url_raw( $_POST['url'] ),
+
+						'action' => sprintf(
+							'Completed the course <em><a href="%s">%s</a></em> on learn.wordpress.org',
+							esc_url( $_POST['url'] ),
+							esc_html( $_POST['course_title'] )
+						),
+					);
+					break;
+
+				default:
+					$error = "-1 Unrecognized Learn activity.";
+			}
+
+			if ( isset( $error ) ) {
+				$result = $error;
+			} else {
+				$new_activity_args = array_merge( $default_args, $case_args );
+				$activity_id       = bp_activity_add( $new_activity_args );
+
+				if ( is_int( $activity_id ) ) {
+					$result = $activity_id;
+				} else {
+					$result = sprintf(
+						'-1 Unable to save activity: %s. Request was: %s',
+						$activity_id->get_error_message(),
+						wp_json_encode( $new_activity_args )
+					);
+				}
+			}
+
+			return $result;
 		}
 
 		/**
