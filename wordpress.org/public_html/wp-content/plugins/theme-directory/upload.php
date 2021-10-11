@@ -29,20 +29,18 @@ add_filter( 'site_option_upload_filetypes', 'wporg_themes_upload_allow_zip' );
  */
 function wporg_themes_render_upload_shortcode() {
 	if ( ! is_user_logged_in() ) {
-
-		$log_in_text = sprintf(
-			__( 'Before you can upload a new theme, <a href="%s">please log in</a>.', 'wporg-themes' ),
+		return sprintf(
+			'<p>' . __( 'Before you can upload a new theme, <a href="%s">please log in</a>.', 'wporg-themes' ) . '</p>',
 			add_query_arg(
 				'redirect_to',
 				urlencode( 'https://wordpress.org/themes/upload/' ),
 				'https://login.wordpress.org/'
 			)
 		);
-
-		return '<p>' . $log_in_text . '</p>';
 	}
 
-	$notice = '';
+	$notice       = '';
+	$terms_notice = '';
 
 	if (
 		! empty( $_POST['_wpnonce'] ) &&
@@ -52,6 +50,7 @@ function wporg_themes_render_upload_shortcode() {
 		$messages = wporg_themes_process_upload();
 
 		$notice_content = '';
+		$code           = '';
 
 		if ( is_wp_error( $messages ) ) {
 			foreach ( $messages->get_error_codes() as $code ) {
@@ -62,21 +61,32 @@ function wporg_themes_render_upload_shortcode() {
 			$notice_content = "<li>{$messages}</li>";
 		}
 
-		$notice = "<div class='notice notice-warning notice-large'><ul>{$notice_content}</ul></div>";
+		if ( 'pre_upload_terms' === $code ) {
+			$terms_notice = "<div class='notice notice-error notice-large'><ul>{$notice_content}</ul></div>";
+		} else {
+			$notice = "<div class='notice notice-warning notice-large'><ul>{$notice_content}</ul></div>";
+		}
 	}
 
-	$form = '<h2>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h2>
+	return $notice . '<h2>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h2>
 		<form enctype="multipart/form-data" id="upload_form" method="POST" action="" onsubmit="jQuery(\'#upload_button\').attr(\'disabled\',\'disabled\'); return true;">
 			' . wp_nonce_field( 'wporg-themes-upload', '_wpnonce', true, false ) . '
 			<input type="hidden" name="action" value="upload"/>
 			<input type="file" id="zip_file" name="zip_file" size="25"/>
-			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
 			<p>
 				<small>' . sprintf( __( 'Maximum allowed file size: %s', 'wporg-themes' ), esc_html( size_format( wp_max_upload_size() ) ) ) . '</small>
 			</p>
-		</form>';
 
-	return $notice . $form;
+			' . $terms_notice . '
+
+			<p>
+				<label><input type="checkbox" required="required" name="required_terms[permission]"> ' . __( 'I have permission to upload this theme to WordPress.org for others to use and share.', 'wporg-themes' ) . '</label><br>
+				<label><input type="checkbox" required="required" name="required_terms[guidelines]"> ' . sprintf( __( 'The theme complies with all <a href="%s">Theme Guidelines</a>.', 'wporg-themes' ), 'https://make.wordpress.org/themes/handbook/review/required/' ) . '</label><br>
+				<label><input type="checkbox" required="required" name="required_terms[gpl]"> ' . sprintf( __( 'The theme, and all included assets, <a href="%s">are licenced as GPL or are under a GPL compatible license</a>.', 'wporg-themes' ), 'https://make.wordpress.org/themes/handbook/review/required/#1-licensing-copyright' ) . '</label><br>
+			</p>
+
+			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
+		</form>';
 }
 
 /**
@@ -96,6 +106,13 @@ function wporg_themes_process_upload( ) {
 		return new WP_Error(
 			'invalid_upload',
 			__( 'Error in file upload.', 'wporg-themes' )
+		);
+	}
+
+	if ( empty( $_POST['required_terms'] ) || count( $_POST['required_terms'] ) !== 3 ) {
+		return new WP_Error(
+			'pre_upload_terms',
+			__( 'Please agree to terms below.', 'wporg-themes' )
 		);
 	}
 
