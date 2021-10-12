@@ -41,6 +41,15 @@ function wporg_learn_scripts() {
 		array( 'dashicons', 'open-sans' ),
 		filemtime( __DIR__ . '/css/style.css' )
 	);
+	if ( is_post_type_archive( array( 'wporg_workshop', 'lesson-plan' ) ) || is_singular( array( 'wporg_workshop', 'lesson-plan' ) ) ) {
+		wp_enqueue_style(
+			'wporg-print-style',
+			get_theme_file_uri( '/css/print.css' ),
+			array(),
+			filemtime( __DIR__ . '/css/print.css' ),
+			'print'
+		);
+	}
 	wp_enqueue_script(
 		'wporg-navigation',
 		get_theme_file_uri() . '/js/navigation.js',
@@ -616,6 +625,29 @@ function wporg_get_workshop_presenters( $workshop = null ) {
 
 	foreach ( $presenters as $presenter ) {
 		$wp_user = get_user_by( 'login', $presenter );
+
+		if ( $wp_user ) {
+			array_push( $wp_users, $wp_user );
+		}
+	}
+
+	return $wp_users;
+}
+
+/**
+ * Returns the other contributors for the workshop.
+ *
+ * @param WP_Post|int $workshop
+ *
+ * @return WP_User[]|array
+ */
+function wporg_get_workshop_other_contributors( $workshop = null ) {
+	$post               = get_post( $workshop );
+	$other_contributors = get_post_meta( $post->ID, 'other_contributor_wporg_username' );
+	$wp_users           = array();
+
+	foreach ( $other_contributors as $other_contributor ) {
+		$wp_user = get_user_by( 'login', $other_contributor );
 
 		if ( $wp_user ) {
 			array_push( $wp_users, $wp_user );
