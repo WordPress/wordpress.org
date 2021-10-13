@@ -153,8 +153,8 @@ switch ( $event ) {
 				'category'    => 'push',
 				'repo'        => $payload->repository->full_name,
 				'url'         => count( $payload->commits ) > 1 ? $payload->compare : $payload->head_commit->url,
-				'title'       => count( $payload->commits ) . ' commits:' . $payload->head_commit->message,
-				'payoad'      => json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ),
+				'title'       => count( $payload->commits ) . ' commits: ' . $payload->head_commit->message,
+				'payload'     => json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ),
 			]
 		);
 
