@@ -93,9 +93,10 @@ class Auto_Review_Controller extends WP_REST_Controller {
 	 * Returns a cleaned up version of the content.
 	 * 
 	 * @param string $content GitHub specific language to format.
+	 * @param string $slug    The WordPress theme being tested.
 	 * @return string
 	 */
-	public function get_formatted_content( $content ) {
+	public function get_formatted_content( $content, $slug ) {
 		$padding = '<br><br>';
 
 		// Add some space around the titles
@@ -113,6 +114,13 @@ class Auto_Review_Controller extends WP_REST_Controller {
 -----------
 {$content}
 ";
+
+		// Replace any references to "test-theme" with the theme slug.
+		// Maybe temporary. See https://github.com/WordPress/theme-review-action/issues/64
+		if ( $slug ) {
+			$content = str_replace( 'wp-content/themes/test-theme/', "wp-content/themes/{$slug}/", $content );
+		}
+
 		return $content;
 	}
 
@@ -162,7 +170,7 @@ class Auto_Review_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$content = $this->get_formatted_content( urldecode( $body ) );
+		$content = $this->get_formatted_content( urldecode( $body ), $theme_slug );
 
 		$updated_ticket = $trac_instance->ticket_update( $ticket_id, $content, [], false );
 
