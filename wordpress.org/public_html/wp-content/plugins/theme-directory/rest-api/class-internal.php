@@ -59,10 +59,12 @@ class Internal {
 		header( 'Content-Type: text/plain' );
 
 		// Raw SQL to avoid loading every WP_Post / WP_User object causing OOM errors.
+		// postmeta join is temporary to only allow certain themes during testing.
 		$themes = $wpdb->get_results(
 			"SELECT p.post_name as slug, u.user_login as user
 			FROM {$wpdb->posts} p
 			JOIN {$wpdb->users} u ON p.post_author = u.ID
+			JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'svn_access'
 			WHERE p.post_type = 'repopackage' AND p.post_status IN( 'publish', 'delist' )
 			ORDER BY p.post_name ASC"
 		);
@@ -76,9 +78,6 @@ class Internal {
 			echo "{$u} = rw\n";
 		}
 		echo "\n";
-
-		// TODO: Temporarily don't output the Theme Authors until we're ready.
-		exit();
 
 		// Theme Authors.
 		foreach ( $themes as $r ) {
