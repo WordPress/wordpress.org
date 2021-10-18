@@ -1331,7 +1331,7 @@ TICKET;
 		}
 
 		// Remove the files from the old version, so that we can track file removals.
-		$this->exec_with_notify( self::RM . " -rf {$new_version_dir}/*", $output );
+		$this->exec_with_notify( "find {$new_version_dir}/ -mindepth 1 -delete" );
 
 		$theme_dir = escapeshellarg( $this->theme_dir );
 		$this->exec_with_notify( self::CP . " -R {$theme_dir}/* {$new_version_dir}", $output );
