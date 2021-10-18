@@ -318,8 +318,8 @@ function get_whitelist() {
 			'annezazu',
 		),
 		'glotpress' => array(
+			'Amieiro',
 			'ocean90',
-			'GregRoss',
 		),
 		'hosting-community' => array(
 			'andrew.taylor', // @ataylorme on Slack
