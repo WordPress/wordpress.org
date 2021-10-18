@@ -236,6 +236,7 @@ function get_whitelist() {
 			'krogsgard',
 			'rachelbaker',
 			'rmccue',
+			'spacedmonkey', // @Jonny Harris on Slack
 			'TimothyBlynJacobs', // @timothybjacobs on Slack
 		) ),
 		'core-site-health' => array_merge( get_committers(), array(
