@@ -24,18 +24,6 @@ $raw_block_content = get_the_content();
 			?>
 
 			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-				<header class="entry-header">
-					<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
-					<div class="pattern__categories">
-						<?php
-						$categories_list = get_the_term_list( get_the_ID(), 'wporg-pattern-category' );
-						if ( $categories_list ) {
-							echo $categories_list; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						}
-						?>
-					</div>
-				</header><!-- .entry-header -->
-
 				<div
 					hidden
 					class="pattern__container"

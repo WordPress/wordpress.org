@@ -78,34 +78,6 @@ body.single-wporg-pattern {
 		}
 	}
 
-	.pattern-actions__notice {
-		margin: 1.5rem 0 0;
-		height: auto;
-		flex-basis: 100%;
-
-		// @wordpress/components/notice wraps content
-		> * {
-			display: flex;
-			flex-direction: column; // stack on mobile
-			justify-content: space-between;
-			align-items: flex-start;
-			margin: 0;
-
-			button {
-				margin-top: 0.75rem;
-			}
-
-			@media only screen and (min-width: $breakpoint-small) {
-				align-items: center;
-				flex-direction: row;
-
-				button {
-					margin-top: 0;
-				}
-			}
-		}
-	}
-
 	.pattern-actions__guide {
 		max-width: $breakpoint-mobile / 1.25;
 

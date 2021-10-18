@@ -1,0 +1,79 @@
+/* Set up some defaults for all notices. */
+.pattern__container .components-notice {
+	margin-left: 0;
+	margin-right: 0;
+	margin-bottom: $gutter-default;
+	height: auto;
+	flex-basis: 100%;
+
+	&.is-info {
+		background-color: color(gray-5);
+	}
+
+	&.is-warning {
+		background-color: color(yellow-5);
+	}
+
+	&.is-error {
+		background-color: color(red-5);
+	}
+
+	> * {
+		display: flex;
+		flex-direction: column; // stack on mobile
+		justify-content: space-between;
+		align-items: flex-start;
+		margin: 0;
+
+		strong {
+			margin-right: 0.5ch;
+		}
+
+		button {
+			margin-top: 0.75rem;
+			background: color(gray-0);
+			border: 1px solid color(gray-10);
+			box-sizing: border-box;
+			box-shadow: inset 0 -1px 0 color(gray-10);
+			border-radius: 2px;
+			color: color(gray-80);
+
+			&:hover {
+				border-color: color(gray-50) !important;
+				box-shadow: inset 0 -1px 0 color(gray-50) !important;
+				color: color(gray-90) !important;
+			}
+
+			&:focus {
+				border-color: color(gray-0) !important;
+				box-shadow:
+					inset 0 0 0 1px #fff,
+					0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color) !important;
+			}
+		}
+
+		@media only screen and (min-width: $breakpoint-small) {
+			align-items: center;
+			flex-direction: row;
+
+			button {
+				margin-top: 0;
+			}
+		}
+	}
+}
+
+.pattern__status-notice {
+	margin-top: 0;
+	padding-left: $gutter-default;
+	padding-right: $gutter-default;
+	min-height: $gutter-default * 2;
+}
+
+.pattern__status-notice-modal.pattern__status-notice-modal {
+	max-width: $gutter-default * 14;
+
+	p {
+		line-height: 1.6;
+	}
+}

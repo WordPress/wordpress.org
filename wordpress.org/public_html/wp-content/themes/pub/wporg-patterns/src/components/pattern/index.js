@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -13,18 +14,44 @@ import PatternPreview from '../pattern-preview';
 import PatternPreviewActions from '../pattern-preview-actions';
 import PatternThumbnail from '../pattern-thumbnail';
 import ReportPatternButton from '../report-pattern-button';
+import StatusNotice from './status-notice';
 import { store as patternStore } from '../../store';
 
 const Pattern = ( { postId, userHasReported } ) => {
 	// postId as passed from the HTML dataset is a string.
 	postId = Number( postId ) || 0;
-	const pattern = useSelect( ( select ) => select( patternStore ).getPattern( postId ), [ postId ] );
+	const { pattern, categories } = useSelect(
+		( select ) => {
+			const _pattern = select( patternStore ).getPattern( postId );
+			const allCategories = select( patternStore ).getCategories() || [];
+			const _categories = _pattern?.[ 'pattern-categories' ]
+				.map( ( cid ) => allCategories.find( ( { id } ) => id === cid ) )
+				.filter( Boolean );
+
+			return {
+				pattern: _pattern,
+				categories: _categories || [],
+			};
+		},
+		[ postId ]
+	);
 	if ( ! pattern ) {
 		return null;
 	}
 
 	return (
 		<>
+			<header className="entry-header">
+				<StatusNotice pattern={ pattern } />
+				<h1 className="entry-title">{ decodeEntities( pattern.title.rendered ) }</h1>
+				<div className="pattern__categories">
+					{ categories.map( ( { id, name, link } ) => (
+						<a href={ link } key={ id }>
+							{ decodeEntities( name ) }
+						</a>
+					) ) }
+				</div>
+			</header>
 			<PatternPreviewActions postId={ postId } />
 			<div className="pattern-preview__container">
 				<PatternPreview blockContent={ pattern.content.rendered } />

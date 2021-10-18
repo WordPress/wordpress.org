@@ -18,8 +18,8 @@ const CopySuccessMessage = ( { onClick } ) => (
 		] }
 	>
 		<div>
-			<b>{ __( 'Pattern copied!', 'wporg-patterns' ) }</b>
-			{ __( ' Now you can paste it into any WordPress post or page.', 'wporg-patterns' ) }
+			<strong>{ __( 'Pattern copied!', 'wporg-patterns' ) }</strong>
+			{ __( 'Now you can paste it into any WordPress post or page.', 'wporg-patterns' ) }
 		</div>
 	</Notice>
 );
