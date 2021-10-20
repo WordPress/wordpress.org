@@ -496,14 +496,21 @@ function wporg_support_get_compat_object() {
 		$object = $plugin_instance->plugins->plugin;
 
 		/* translators: %s: link to plugin support or review forum */
-		$object->prefixed_title = sprintf( __( 'Plugin: %s', 'wporg-forums' ), $object->post_title );
-		$object->type           = 'plugin';
+		$object->search_prefix = sprintf( __( 'Plugin: %s', 'wporg-forums' ), $object->post_title );
+		$object->type          = 'plugin';
 	} elseif ( ! empty( $plugin_instance->themes->theme ) ) {
 		$object = $plugin_instance->themes->theme;
 
 		/* translators: %s: link to theme support or review forum */
-		$object->prefixed_title = sprintf( __( 'Theme: %s', 'wporg-forums' ), $object->post_title );
-		$object->type           = 'theme';
+		$object->search_prefix = sprintf( __( 'Theme: %s', 'wporg-forums' ), $object->post_title );
+		$object->type          = 'theme';
+	}
+
+	// The search prefix must be sans any special characters.
+	// This may cause some plugins to match other plugins of similar prefixed names.
+	if ( ! empty( $object->search_prefix ) ) {
+		$search_special_chars  = '|';
+		$object->search_prefix = rtrim( strtok( $object->search_prefix, $search_special_chars ) );
 	}
 
 	return $object;
