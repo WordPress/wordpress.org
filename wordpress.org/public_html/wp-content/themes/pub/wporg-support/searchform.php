@@ -31,7 +31,7 @@ namespace WordPressdotorg\Forums;
 	?>
 	<input type="search" id="s" class="search-field" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php the_search_query(); ?>" name="s" />
 	<?php if ( $project ) : ?>
-	<input type="hidden" name="intext" value="<?php echo esc_attr( $project->prefixed_title ); ?>" />
+	<input type="hidden" name="intext" value="<?php echo esc_attr( $project->search_prefix ); ?>" />
 	<?php endif; ?>
 	<?php if ( $tab ) : ?>
 	<input type="hidden" name="tab" value="<?php echo esc_attr( $tab ); ?>" />
