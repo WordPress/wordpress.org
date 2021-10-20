@@ -12,6 +12,7 @@ import Canvas from './canvas';
 import CopyPatternButton from '../copy-pattern-button';
 import FavoriteButton from '../favorite-button';
 import FavoriteButtonSmall from '../favorite-button/small';
+import ManageOptions from '../manage-options';
 
 function getStatusLabel( pattern ) {
 	switch ( pattern.status ) {
@@ -25,7 +26,7 @@ function getStatusLabel( pattern ) {
 	return '';
 }
 
-function PatternThumbnail( { pattern, showAvatar } ) {
+function PatternThumbnail( { pattern, showAvatar, showOptions } ) {
 	const statusLabel = getStatusLabel( pattern );
 	return (
 		<div className="pattern-grid__pattern">
@@ -43,6 +44,7 @@ function PatternThumbnail( { pattern, showAvatar } ) {
 				) : null }
 				<span className="pattern-grid__actions">
 					<FavoriteButton showLabel={ false } patternId={ pattern.id } />
+					{ showOptions && <ManageOptions isSmall patternId={ pattern.id } /> }
 					<CopyPatternButton isSmall={ true } content={ pattern.pattern_content } />
 				</span>
 			</div>

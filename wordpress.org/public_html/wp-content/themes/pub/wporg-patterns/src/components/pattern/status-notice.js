@@ -10,12 +10,6 @@ export default function ( { pattern } ) {
 	const openModal = () => setShowModal( true );
 	const closeModal = () => setShowModal( false );
 
-	const isMyPattern = window.wporgPatternsData.userId === pattern.author;
-
-	if ( ! isMyPattern ) {
-		return null;
-	}
-
 	switch ( pattern.status ) {
 		case 'pending':
 			return (

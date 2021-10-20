@@ -68,7 +68,7 @@ const MyPatterns = () => {
 				</div>
 			) : (
 				<PatternGrid query={ query }>
-					{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
+					{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showOptions /> }
 				</PatternGrid>
 			) }
 		</RouteProvider>

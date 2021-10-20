@@ -39,10 +39,12 @@ const Pattern = ( { postId, userHasReported } ) => {
 		return null;
 	}
 
+	const isMyPattern = window.wporgPatternsData.userId === pattern.author;
+
 	return (
 		<>
 			<header className="entry-header">
-				<StatusNotice pattern={ pattern } />
+				{ isMyPattern && <StatusNotice pattern={ pattern } /> }
 				<h1 className="entry-title">{ decodeEntities( pattern.title.rendered ) }</h1>
 				<div className="pattern__categories">
 					{ categories.map( ( { id, name, link } ) => (
@@ -52,7 +54,7 @@ const Pattern = ( { postId, userHasReported } ) => {
 					) ) }
 				</div>
 			</header>
-			<PatternPreviewActions postId={ postId } />
+			<PatternPreviewActions postId={ postId } showOptions={ isMyPattern } />
 			<div className="pattern-preview__container">
 				<PatternPreview blockContent={ pattern.content.rendered } />
 				<div className="pattern__meta">

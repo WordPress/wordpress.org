@@ -73,6 +73,7 @@
 
 	.pattern-grid__actions {
 		position: absolute;
+		z-index: 10;
 		right: 0;
 		bottom: 0;
 		padding: 0.375rem;
@@ -80,7 +81,7 @@
 		transform: translateY(6px);
 		transition: transform 0.075s ease-in-out, opacity 0.075s ease-in-out;
 
-		.button + .components-button {
+		> *:not(:first-child) {
 			margin-left: 0.375rem;
 		}
 	}
