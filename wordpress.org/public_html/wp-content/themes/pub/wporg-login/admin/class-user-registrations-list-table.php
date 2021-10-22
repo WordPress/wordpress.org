@@ -298,7 +298,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		echo implode( ', ',
 			array_map(
-				[ $this, 'link_to_search' ],
+				function( $ip ) {
+					return $this->link_to_search( $ip ) .
+						( is_callable( 'WordPressdotorg\GeoIP\query' ) ?
+							' ' . \WordPressdotorg\GeoIP\query( $ip, 'country_short' ) : '' );
+				},
 				array_filter( array_unique( [
 					$meta->registration_ip ?? false,
 					$meta->confirmed_ip ?? false
