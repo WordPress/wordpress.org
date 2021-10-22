@@ -51,7 +51,6 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 
 		// Any handbook pages where the slug changes should be listed here.
 		$redirects = [
-			'tutorials/block-tutorial/block-controls-toolbars-and-inspector' => 'tutorials/block-tutorial/block-controls-toolbar-and-sidebar/',
 			'components/server-side-render' => 'packages/packages-server-side-render',
 			'reference-guides/block-api/versions' => 'reference-guides/block-api/block-api-versions',
 			'how-to-guides/block-theme' => 'how-to-guides/themes/create-block-theme',
@@ -64,8 +63,8 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 			'developers/richtext' => 'reference-guides/richtext',
 			'developers/accessibility' => 'how-to-guides/accessibility',
 			'developers/feature-flags' => 'how-to-guides/feature-flags',
-			'tutorials/devenv' => 'handbook/tutorials/devenv',
-			'tutorials/devenv/docker-ubuntu' => 'handbook/tutorials/devenv/docker-ubuntu',
+			'tutorials/devenv' => 'getting-started/devenv',
+			'tutorials/devenv/docker-ubuntu' => 'getting-started/devenv/docker-ubuntu',
 			'tutorials/block-based-theme' => 'how-to-guides/themes/block-theme-overview',
 		];
 
@@ -85,8 +84,9 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 			'developers/platform/' => 'how-to-guides/platform/',
 			'developers/slotfills/' => 'reference-guides/slotfills/',
 			'developers/themes/' => 'how-to-guides/themes/',
+			'handbook/tutorials/' => 'getting-started/',
 			'packages/' => 'reference-guides/packages/',
-			'tutorials/create-block/' => 'handbook/tutorials/create-block/',
+			'tutorials/create-block/' => 'getting-started/create-block/',
 			'tutorials/plugin-sidebar-0/' => 'how-to-guides/sidebar-tutorial/',
 			'tutorials/' => 'how-to-guides/',
 		];
