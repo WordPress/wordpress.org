@@ -51,9 +51,9 @@ function wporg_themes_canonical_redirects() {
 	}
 
 	// We don't support pagination on the directory at present.
-	if ( get_query_var( 'paged' ) ) {
-		$url = remove_query_arg( 'paged' );
-		$url = preg_replace( '!page/\d+!i', '', $url );
+	if ( get_query_var( 'paged' ) || get_query_var( 'page' ) ) {
+		$url = remove_query_arg( [ 'paged', 'page' ] );
+		$url = preg_replace( '!(page/\d+|/\d+/?$)!i', '', $url );
 
 		// Remove any double slashes
 		$url = preg_replace( '!/{2,}!', '/', $url );
