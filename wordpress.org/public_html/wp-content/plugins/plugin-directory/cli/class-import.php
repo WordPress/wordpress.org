@@ -637,6 +637,15 @@ class Import {
 			}
 		}
 
+		// Remove any core blocks from the block list.
+		$blocks = array_filter(
+			$blocks,
+			function( $block_name ) {
+				return 0 !== strpos( $block_name, 'core/' );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
 		// Filter the blocks list so that the parent block is first.
 		if ( count( $blocks ) > 1 ) {
 			$children = array_filter(
