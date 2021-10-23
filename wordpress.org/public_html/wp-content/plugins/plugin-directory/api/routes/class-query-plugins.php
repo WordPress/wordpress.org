@@ -98,9 +98,8 @@ class Query_Plugins extends Base {
 
 			if ( 'slug:' === substr( $query['s'], 0, 5 ) ) {
 				$query['name'] = substr( $query['s'], 5 );
-			}
-
-			if ( 'block:' === substr( $query['s'], 0, 6 ) ) {
+				unset( $query['s'], $query['block_search'] );
+			} elseif ( 'block:' === substr( $query['s'], 0, 6 ) ) {
 				$query['meta_query'][] = [
 					'key' => 'block_name',
 					'value' => substr( $query['s'], 6 )
@@ -114,9 +113,8 @@ class Query_Plugins extends Base {
 
 				// Prioritise block plugins, but try again without the restriction.
 				$try_again_without_tax_query = true;
+				unset( $query['s'], $query['block_search'] );
 			}
-
-			unset( $query['s'], $query['block_search'] );
 		}
 
 		$query['post_type']   = 'plugin';
