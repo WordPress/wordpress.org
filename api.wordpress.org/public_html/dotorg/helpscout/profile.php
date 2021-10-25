@@ -66,12 +66,12 @@ if ( isset ( $request->customer->email ) ) {
 if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', $request->ticket->subject, $m ) ) {
 
 	if ( $user ) {
-		$slack_user = $wpdb->get_row( $sql = $wpdb->prepare(
+		$slack_user = $wpdb->get_row( $wpdb->prepare(
 			'SELECT * FROM slack_users WHERE user_id = %d',
 			$user->ID
 		) );
 	} else {
-		$slack_user = $wpdb->get_row( $sql = $wpdb->prepare(
+		$slack_user = $wpdb->get_row( $wpdb->prepare(
 			'SELECT * FROM slack_users WHERE profiledata LIKE %s',
 			'%' . $wpdb->esc_like( '"email":"' . $m[1] . '"' ) . '%',
 		) );
@@ -89,6 +89,4 @@ if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', $request->ticket->subje
 }
 
 // response to HS is just HTML to display in the sidebar
-$response = array( 'html' => $html );
-
-echo json_encode( $response );
+echo json_encode( array( 'html' => $html ) );
