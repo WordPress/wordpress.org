@@ -68,6 +68,15 @@ function wporg_themes_canonical_redirects() {
 		die();
 	}
 
+	// Redirect direct queries for a theme by ID to it's post.
+	if (
+		isset( $_GET['p'] ) &&
+		( $post = get_post( $_GET['p'] ) )
+	) {
+		wp_safe_redirect( get_permalink( $post ), 301 );
+		die();
+	}
+
 	// Handle 404 pages where it's a singular theme followed by junk, for example, /themes/twentyten/junk/input/
 	if ( is_404() ) {
 		$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
