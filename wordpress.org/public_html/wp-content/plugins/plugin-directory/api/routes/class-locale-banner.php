@@ -13,13 +13,14 @@ class Locale_Banner extends Base {
 
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/locale-banner', array(
-			'methods'  => WP_REST_Server::ALLMETHODS,
-			'callback' => array( $this, 'locale_banner' ),
-			'args'     => array(
+			'methods'             => WP_REST_Server::ALLMETHODS,
+			'callback'            => array( $this, 'locale_banner' ),
+			'args'                => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
 				),
 			),
+			'permission_callback' => '__return_true',
 		) );
 	}
 

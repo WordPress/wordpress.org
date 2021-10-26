@@ -27,8 +27,9 @@ class Query_Plugins extends Base {
 
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/query-plugins/?', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'query' ),
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'query' ),
+			'permission_callback' => '__return_true',
 		) );
 	}
 

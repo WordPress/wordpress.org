@@ -13,8 +13,9 @@ class Popular_Tags extends Base {
 
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/popular-tags/?', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'popular_tags' ),
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'popular_tags' ),
+			'permission_callback' => '__return_true',
 		) );
 	}
 

@@ -60,9 +60,7 @@ class Plugin_Release_Confirmation extends Base {
 			'callback'            => [ $this, 'send_access_email' ],
 			'args'                => [
 			],
-			'permission_callback' => function( $request ) {
-				return is_user_logged_in();
-			},
+			'permission_callback' => 'is_user_logged_in',
 		] );
 
 		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );
