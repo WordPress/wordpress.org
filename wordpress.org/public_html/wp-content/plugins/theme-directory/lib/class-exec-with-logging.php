@@ -11,13 +11,14 @@ trait Exec_With_Logging {
 	/**
 	 * Execute a shell process, same behaviour as `exec()` but with PHP Warnings/Notices generated on errors.
 	 * 
-	 * @param string $command    Command to execute. Escape it.
-	 * @param array  $output     Array to append program output to. Passed by reference.
-	 * @param int    $return_var The commands return value. Passed by reference.
+	 * @param string $command      Command to execute. Escape it.
+	 * @param array  $output       Array to append program output to. Passed by reference.
+	 * @param int    $return_var   The commands return value. Passed by reference.
+	 * @param array  $error_output Array to append program output to. Passed by reference.
 	 * 
 	 * @return false|string False on failure, last line of output on success, as per exec().
 	 */
-	public static function exec( $command, &$output = null, &$return_var = null ) {
+	public static function exec( $command, &$output = null, &$return_var = null, &$error_output = null ) {
 		$proc = proc_open(
 			$command,
 			[
@@ -38,16 +39,24 @@ trait Exec_With_Logging {
 
 		$return_var = proc_close( $proc );
 
+		// Redact any passwords that might be in a command and included in logged errors.
+		foreach ( [ 'command', 'stdout', 'stderr' ] as $field ) {
+			$$field = str_replace( [ THEME_TRACBOT_PASSWORD, THEME_DROPBOX_PASSWORD ], '[redacted]', $$field );
+		}
+
 		// Append to $output, as `exec()` does.
 		if ( ! is_array( $output ) ) {
 			$output = [];
 		}
+		if ( ! is_array( $error_output ) ) {
+			$error_output = [];
+		}
 		if ( $stdout ) {
 			$output = array_merge( $output, explode( "\n", rtrim( $stdout, "\r\n" ) ) );
 		}
-
-		// Redact any passwords that might be in a command and included in logged errors.
-		$command = str_replace( [ THEME_TRACBOT_PASSWORD, THEME_DROPBOX_PASSWORD ], '[redacted]', $command );
+		if ( $stderr ) {
+			$error_output = array_merge( $error_output, explode( "\n", rtrim( $stderr, "\r\n" ) ) );
+		}
 
 		if ( $return_var > 0 ) {
 			trigger_error(

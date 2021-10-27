@@ -658,13 +658,18 @@ class WPORG_Themes_Upload {
 		// Create a new version in SVN.
 		if ( $args['commit_to_svn'] ) {
 			$result = $this->add_to_svn();
-			if ( ! $result ) {
+			if ( ! $result || is_wp_error( $result ) ) {
 				return new WP_Error(
 					'failed_svn_commit',
 					sprintf(
 						/* translators: %s: mailto link */
 						__( 'There was an error adding your theme to SVN. Please try again, if this error persists report the error to %s.', 'wporg-themes' ),
 						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+					) .
+					(
+						is_wp_error( $result ) && $result->get_error_message( 'pre-commit-hook' ) ?
+							'<br><code>' . nl2br( esc_html( $result->get_error_message( 'pre-commit-hook' ) ) ) . '</code>' : 
+							''
 					)
 				);
 			}
@@ -1379,7 +1384,16 @@ TICKET;
 		$theme_path = escapeshellarg( $this->theme_dir );
 		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
 
-		$last_line = $this->exec_with_notify( self::SVN . " --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path}" );
+		$last_line = $this->exec_with_notify( self::SVN . " --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path}", $output, $return_var, $stderr );
+
+		// Pass through any error output from the SVN error handler.
+		if (
+			! empty( $stderr ) &&
+			false !== stripos( $stderr[0], 'Commit blocked by pre-commit hook' ) &&
+			preg_match( '!([*]{12,})(.*?)\\1!s', implode( "\n", $stderr ) . "\n", $m )
+		) {
+			return new WP_Error( 'pre-commit-hook', trim( $m[0] ) );
+		}
 
 		if ( preg_match( '/Committed revision (\d+)\./i', $last_line, $m ) ) {
 			$this->trac_changeset = $m[1];
