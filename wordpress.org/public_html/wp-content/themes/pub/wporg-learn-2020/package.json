@@ -36,6 +36,10 @@
 	},
 	"stylelint": {
 		"extends": "../../../../.stylelintrc",
-		"ignoreFiles": ["*/vendor/*", "**/*.css", "**/*.css.map"]
+		"ignoreFiles": [
+			"*/vendor/*",
+			"**/*.css",
+			"**/*.css.map"
+		]
 	}
 }
