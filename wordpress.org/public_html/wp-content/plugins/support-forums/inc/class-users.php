@@ -30,6 +30,9 @@ class Users {
 		add_filter( 'query_vars',                      array( $this, 'add_query_vars' ) );
 		add_action( 'bbp_add_rewrite_rules',           array( $this, 'add_rewrite_rules' ) );
 
+		// Don't allow attempting to set an email to one that is banned-from-use on WordPress.org.
+		add_action( 'bbp_post_request',                array( $this, 'check_email_safe_for_use' ), 0 ); // bbPress is at 1
+
 		// Parse user's topic and review queries.
 		add_action( 'parse_query',                     array( $this, 'parse_user_topics_query' ) );
 		add_filter( 'posts_groupby',                   array( $this, 'parse_user_topics_posts_groupby' ), 10, 2 );
@@ -293,6 +296,38 @@ class Users {
 		add_rewrite_rule( $user_topics_replied_to_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1',                               $priority );
 		add_rewrite_rule( $user_topics_replied_to_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1&' . $paged_id . '=$matches[2]', $priority );
 		add_rewrite_rule( $user_topics_replied_to_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1&' . $feed_id  . '=$matches[2]', $priority );
+	}
+
+	/**
+	 * Verify that the a new email is valid for use.
+	 * 
+	 * @param string $action The current action.
+	 */
+	function check_email_safe_for_use( $action = '' ) {
+		$user_id    = bbp_get_displayed_user_id();
+		$user_email = bbp_get_displayed_user_field( 'user_email', 'raw' );
+
+		if (
+			// Only on the front-end user edit form, and make sure the request is valid.
+			'bbp-update-user' !== $action ||
+			is_admin() ||
+			empty( $_POST['email'] ) ||
+			! current_user_can( 'edit_user', $user_id ) ||
+			! bbp_verify_nonce_request( 'update-user_' . $user_id )
+		) {
+			return;
+		}
+
+		if (
+			$user_email !== $_POST['email'] &&
+			is_email( $_POST['email'] ) &&
+			is_email_address_unsafe( $_POST['email'] )
+		) {
+			bbp_add_error( 'bbp_user_email_invalid', __( '<strong>Error</strong>: That email address cannot be used.', 'support-forums' ), array( 'form-field' => 'email' ) );
+
+			// Override the post variable to ensure that bbPress & core doesn't use it.
+			$_POST['email'] = $_REQUEST['email'] = $user_email;
+		}
 	}
 
 	/**
