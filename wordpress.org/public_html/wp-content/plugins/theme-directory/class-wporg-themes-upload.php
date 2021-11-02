@@ -1772,13 +1772,6 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 				];
 			}
 
-			if ( $this->commit_msg ) {
-				$fields[] = [
-					'type' => 'mrkdwn',
-					'text' => "*Commit Message:*\n{$this->commit_msg}",
-				];
-			}
-
 			$blocks[] = [
 				'type' => 'section',
 				'text' => [
@@ -1798,6 +1791,17 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 				],
 				'fields' => $fields
 			];
+
+			if ( $this->commit_msg ) {
+				$blocks[] = [
+					'type' => 'section',
+					'text' => [
+						'type' => 'mrkdwn',
+						'text' => "*Commit Message:* {$this->commit_msg}",
+					],
+				];
+			}
+
 		} elseif ( $this->theme_post ) {
 			$blocks[] = [
 				'type' => 'section',
