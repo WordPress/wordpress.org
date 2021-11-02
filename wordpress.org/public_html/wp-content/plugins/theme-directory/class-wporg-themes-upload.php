@@ -132,6 +132,13 @@ class WPORG_Themes_Upload {
 	protected $version_status = 'new';
 
 	/**
+	 * Where the import is triggered from. 'svn' or 'upload'.
+	 * 
+	 * @var string
+	 */
+	protected $importing_from = 'upload';
+
+	/**
 	 * The list of headers to extract from readme.txt.
 	 *
 	 * @var array
@@ -168,6 +175,7 @@ class WPORG_Themes_Upload {
 			'description' => '',
 		);
 		$this->version_status = 'new';
+		$this->importing_from = 'upload';
 
 		// $this->tmp_dir = '';    // Temporary folder per each instance of this class. Doesn't need to be reset each time.
 		// $this->trac    = false; // This can stay active, Trac access won't change between calls.
@@ -216,7 +224,8 @@ class WPORG_Themes_Upload {
 	public function process_update_from_svn( $slug, $version, $changeset = 0, $author = '' ) {
 		$this->reset_properties();
 
-		$this->theme_slug = $slug;
+		$this->importing_from = 'svn';
+		$this->theme_slug     = $slug;
 
 		// Check out from SVN.
 		$this->create_tmp_dirs( $slug . '.' . $version );
@@ -1742,7 +1751,13 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 						) .
 						(
 							$this->trac_changeset ?
-							"<https://themes.trac.wordpress.org/changeset/{$this->trac_changeset}|[{$this->trac_changeset}]>" :
+							"<https://themes.trac.wordpress.org/changeset/{$this->trac_changeset}|[{$this->trac_changeset}]> " :
+							''
+						) . 
+						(
+							// When importing from SVN, include a 'Compare' link as the Changeset likely won't show a Diff unless the author did a `svn cp`.
+							'svn' === $this->importing_from && ! empty( $this->theme_post->max_version ) ?
+							"<https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}|Compare>" :
 							''
 						),
 				];
