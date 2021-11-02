@@ -139,6 +139,13 @@ class WPORG_Themes_Upload {
 	protected $importing_from = 'upload';
 
 	/**
+	 * The SVN commit message, if user defined.
+	 * 
+	 * @var string
+	 */
+	protected $commit_msg = '';
+
+	/**
 	 * The list of headers to extract from readme.txt.
 	 *
 	 * @var array
@@ -176,6 +183,7 @@ class WPORG_Themes_Upload {
 		);
 		$this->version_status = 'new';
 		$this->importing_from = 'upload';
+		$this->commit_msg     = '';
 
 		// $this->tmp_dir = '';    // Temporary folder per each instance of this class. Doesn't need to be reset each time.
 		// $this->trac    = false; // This can stay active, Trac access won't change between calls.
@@ -221,11 +229,12 @@ class WPORG_Themes_Upload {
 	 * @param string $author    The SVN author if known. Optional.
 	 * @return true|WP_Error See ::import() for error conditions.
 	 */
-	public function process_update_from_svn( $slug, $version, $changeset = 0, $author = '' ) {
+	public function process_update_from_svn( $slug, $version, $changeset = 0, $author = '', $commit_message = '' ) {
 		$this->reset_properties();
 
 		$this->importing_from = 'svn';
 		$this->theme_slug     = $slug;
+		$this->commit_msg     = $commit_message;
 
 		// Check out from SVN.
 		$this->create_tmp_dirs( $slug . '.' . $version );
@@ -1760,6 +1769,13 @@ The WordPress Theme Review Team', 'wporg-themes' ),
 							"<https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}|Compare>" :
 							''
 						),
+				];
+			}
+
+			if ( $this->commit_msg ) {
+				$fields[] = [
+					'type' => 'mrkdwn',
+					'text' => "*Commit Message:*\n{$this->commit_msg}",
 				];
 			}
 

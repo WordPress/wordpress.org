@@ -70,8 +70,8 @@ class SVN_Import {
 			}
 
 			$changeset = (int) $element->xpath( '@revision' )[0];
-			$author    = (string) $element->xpath( 'author' )[0];
-			$msg       = (string) $element->xpath( 'msg' )[0];
+			$author    = trim( (string) $element->xpath( 'author' )[0] );
+			$msg       = trim( (string) $element->xpath( 'msg' )[0] );
 
 			$info = compact( 'slug', 'version', 'changeset', 'author', 'msg' );
 
@@ -115,7 +115,8 @@ class SVN_Import {
 			$args['slug'],
 			$args['version'],
 			$args['changeset'] ?? false,
-			$args['author'] ?? false
+			$args['author'] ?? false,
+			$args['msg'] ?? ''
 		);
 
 		// TODO: Look at error result code, maybq re-queue in event of system issue, else email author with concerns (Theme Check, etc)
