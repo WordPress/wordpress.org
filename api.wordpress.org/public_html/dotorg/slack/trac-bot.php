@@ -69,7 +69,7 @@ namespace Dotorg\Slack\Trac {
 				} else {
 					// We don't have an attachment when the Trac is private or if we experienced an error.
 					// Don't set redundancy times on errors.
-					if ( ! $this->trac->is_public() ) {
+					if ( ! $trac_obj->is_public() ) {
 						$parser->set_redundancy( 'slack', $trac, $type, $id );
 					}
 
