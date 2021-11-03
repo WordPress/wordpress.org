@@ -103,6 +103,7 @@ function get_parent_channel( $channel ) {
 		case 'accessibility':
 		case 'design':
 		case 'feature':
+		case 'performance':
 		case 'tide':
 			$parent_channel = 'core';
 			break;

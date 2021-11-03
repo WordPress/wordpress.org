@@ -38,6 +38,7 @@ function get_whitelist() {
 
 	return array(
 		'accessibility' => array(
+			// #core (inc committers) already included via get_parent_channel().
 			'afercia',
 			'alexstine',
 			'arush',
@@ -270,6 +271,7 @@ function get_whitelist() {
 			'poena',
 		) ),
 		'design' => array(
+			// #core (inc committers) already included via get_parent_channel().
 			'chaion07',
 			'estelaris',
 			'hedgefield',
@@ -292,6 +294,7 @@ function get_whitelist() {
 			'lizkaraffa',
 			'milana_cap', // @zzap on Slack
 		),
+		// For all #feature-* channels: #core (inc committers) already included via get_parent_channel().
 		'feature-notifications' => array(
 			'hrmervin',
 			'johnbillion',
@@ -366,6 +369,9 @@ function get_whitelist() {
 		'openverse' => array(
 			'zackkrida',
 		),
+		'performance' => array(
+			// #core (inc committers) already included via get_parent_channel().
+		),
 		'polyglots' => array(
 			'Amieiro',
 			'casiepa', // @Pascal on Slack
@@ -410,6 +416,7 @@ function get_whitelist() {
 			'williampatton',
 		),
 		'tide' => array(
+			// #core (inc committers) already included via get_parent_channel().
 			'JeffPaul',
 			'lukecarbis',
 			'valendesigns',
