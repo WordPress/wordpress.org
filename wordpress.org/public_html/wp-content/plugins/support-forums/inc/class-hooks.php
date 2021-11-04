@@ -345,13 +345,13 @@ class Hooks {
 	}
 
 	/**
-	 * Redirect the defunct plugin 'ask-question' to the how to / troubleshooting forum
+	 * Redirect some problematic defunct plugin support forums to the how to / troubleshooting forum
 	 * as it's a better destination for the users reaching the plugin forum from search engines.
 	 */
 	public function redirect_ask_question_plugin_forum() {
 		if (
 			'plugin' === get_query_var( 'bbp_view' ) &&
-			'ask-question' === get_query_var( 'wporg_plugin' )
+			in_array( get_query_var( 'wporg_plugin' ), array( 'ask-question', 'technical-support' ) )
 		) {
 			wp_safe_redirect( home_url( '/forum/how-to-and-troubleshooting/' ) );
 			exit;
