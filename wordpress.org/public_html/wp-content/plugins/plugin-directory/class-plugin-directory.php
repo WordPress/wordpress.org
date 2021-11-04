@@ -170,7 +170,7 @@ class Plugin_Directory {
 				'not_found_in_trash' => __( 'No plugins found in Trash', 'wporg-plugins' ),
 
 				// Context only available in admin, not in toolbar.
-				'edit_item'          => is_admin() ? __( 'Editing Plugin: %s', 'wporg-plugins' ) : __( 'Edit Plugin', 'wporg-plugins' ),
+				'edit_item'          => is_admin() ? __( 'Editing Plugin:', 'wporg-plugins' ) : __( 'Edit Plugin', 'wporg-plugins' ),
 			),
 			'description'  => __( 'A Repo Plugin', 'wporg-plugins' ),
 			'supports'     => array( 'comments', 'author', 'custom-fields' ),

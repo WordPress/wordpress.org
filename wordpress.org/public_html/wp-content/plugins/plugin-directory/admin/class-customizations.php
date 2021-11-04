@@ -47,7 +47,7 @@ class Customizations {
 
 		// Admin Metaboxes
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
-		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
+		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ), 10, 2 );
 
 		add_filter( 'postmeta_form_keys', array( $this, 'postmeta_form_keys' ) );
 
@@ -69,14 +69,16 @@ class Customizations {
 	 *
 	 * @global string $title The wp-admin title variable.
 	 *
-	 * @param string $post_type The post type of the current page
+	 * @param string $post_type The post type of the current page.
+	 * @param string $context   Meta box context. Possible values include 'normal', 'advanced', 'side'.
 	 * @return void.
 	 */
-	public function replace_title_global( $post_type ) {
+	public function replace_title_global( $post_type, $context ) {
 		global $title;
 
-		if ( 'plugin' === $post_type ) {
-			$title = sprintf( $title, get_the_title() ); // esc_html() on output
+		if ( 'plugin' === $post_type && 'normal' === $context ) {
+			$post_type_object = get_post_type_object( $post_type );
+			$title            = sprintf( '%1$s %2$s', $post_type_object->labels->edit_item, get_the_title() ); // esc_html() on output
 		}
 	}
 
