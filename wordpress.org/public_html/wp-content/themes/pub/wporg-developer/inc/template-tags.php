@@ -1158,11 +1158,9 @@ namespace DevHub {
 	 * Retrieve the URL to the actual source file and line.
 	 *
 	 * @param null $post_id     Post ID.
-	 * @param bool $line_number Whether to append the line number to the URL.
-	 *                          Default true.
 	 * @return string Source file URL with or without line number.
 	 */
-	function get_source_file_link( $post_id = null, $line_number = true ) {
+	function get_source_file_link( $post_id = null ) {
 
 		$post_id = empty( $post_id ) ? get_the_ID() : $post_id;
 		$url     = '';
@@ -1174,6 +1172,33 @@ namespace DevHub {
 			// Line number.
 			if ( $line_number = get_post_meta( get_the_ID(), '_wp-parser_line_num', true ) ) {
 				$url .= "#L{$line_number}";
+			}
+		}
+
+		return esc_url( $url );
+	}
+
+	/**
+	 * Retrieve the URL to the GitHub source file and line.
+	 *
+	 * @param null $post_id     Post ID.
+	 * @return string Source file URL with or without line number.
+	 */
+	function get_github_source_file_link( $post_id = null ) {
+
+		$post_id = empty( $post_id ) ? get_the_ID() : $post_id;
+		$url     = '';
+
+		// Source file.
+		$source_file = get_source_file( $post_id );
+		if ( ! empty( $source_file ) ) {
+			$url = 'https://github.com/WordPress/wordpress-develop/blob/' . get_current_version() . '/src/' . $source_file;
+			// Line number.
+			if ( $line_number = get_post_meta( get_the_ID(), '_wp-parser_line_num', true ) ) {
+				$url .= "#L{$line_number}";
+				if ( $end_line_number = get_post_meta( get_the_ID(), '_wp-parser_end_line_num', true ) ) {
+					$url .= "-L{$end_line_number}";
+				}
 			}
 		}
 

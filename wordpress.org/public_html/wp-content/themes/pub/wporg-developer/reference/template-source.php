@@ -30,6 +30,7 @@ if ( ! empty( $source_file ) ) :
 					<a href="#" class="less-complete-source"><?php _e( 'Collapse full source code', 'wporg' ); ?></a>
 				</span>
 				<span><a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a></span>
+				<span><a href="<?php echo get_github_source_file_link(); ?>"><?php _e( 'View on GitHub', 'wporg' ); ?></a></span>
 			</p>
 		<?php else : ?>
 			<p>
