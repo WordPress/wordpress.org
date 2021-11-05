@@ -8,7 +8,7 @@
 
 <?php if ( bbp_current_user_can_access_create_topic_form() ) : ?>
 
-	<div id="new-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-form">
+	<div id="new-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-form <?php echo esc_attr( bbp_get_view_id() ); ?>">
 
 		<form id="new-post" name="new-post" method="post" action="<?php ( bbp_is_topic_edit() ) ? bbp_topic_permalink() : '#new-post'; ?>">
 

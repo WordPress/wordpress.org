@@ -1,4 +1,5 @@
 .bbpress.modal-open #wp-link-wrap #wp-link #link-selector .howto,
-.bbpress.modal-open #wp-link-wrap #wp-link #search-panel {
+.bbpress.modal-open #wp-link-wrap #wp-link #search-panel,
+.bbp-topic-form.reviews #qt_bbp_topic_content_link {
 	display: none;
 }

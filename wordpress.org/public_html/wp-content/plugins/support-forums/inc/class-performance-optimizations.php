@@ -327,7 +327,7 @@ class Performance_Optimizations {
 
 	public function enqueue_styles() {
 		if ( current_user_can( 'participate' ) ) {
-			wp_enqueue_style( 'support-forums-participants', plugins_url( 'css/styles-participants.css', __DIR__ ) );
+			wp_enqueue_style( 'support-forums-participants', plugins_url( 'css/styles-participants.css', __DIR__ ), array(), '20211105' );
 		}
 	}
 
