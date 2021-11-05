@@ -103,7 +103,7 @@ the_post();
 							);
 							?>
 						</p>
-						<p><?php esc_html_e( 'This will not erase your support forum activity. Any threads or replies created will remain associated with an anonymized account. Please review and edit any personal details out of your support forum activity prior to requesting erasure.', 'wporg' ); ?></p>
+						<p><?php esc_html_e( 'This will not erase your support forum activity. Any topics or replies created will remain associated with an anonymized account. Please review and edit any personal details out of your support forum activity prior to requesting erasure.', 'wporg' ); ?></p>
 					</div>
 
 					<?php if ( $error_message ) : ?>
