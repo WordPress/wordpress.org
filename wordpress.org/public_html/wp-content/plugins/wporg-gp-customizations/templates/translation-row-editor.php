@@ -87,12 +87,12 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						<?php else: ?>
 							<div class="source-string__singular">
 								<small>Singular:</small>
-								<span class="original"><?php echo $singular; ?></span>
+								<span class="original"><?php echo prepare_original( $singular ); ?></span>
 								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); ?></span>
 							</div>
 							<div class="source-string__plural">
 								<small>Plural:</small>
-								<span class="original"><?php echo $plural; ?></span>
+								<span class="original"><?php echo prepare_original( $plural ); ?></span>
 								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->plural ); ?></span>
 							</div>
 						<?php endif; ?>
