@@ -280,15 +280,11 @@ class WPorg_GP_Custom_Translation_Warnings {
 		// Find any percents that are not valid or escaped.
 		if ( $is_sprintf ) {
 			// Negative/Positive lookahead not used to allow the warning to include the context around the % sign.
-			preg_match_all( '/(?P<context>[^\s%]*)%((\d+\$(?:\d+)?)?(\.\d+)?(?P<char>.))/i', $translation, $m );
+			preg_match_all( '/(?P<context>[^\s%]*)%((\d+\$(?:\d+)?)?(?P<char>.))/i', $translation, $m );
 
 			foreach ( $m['char'] as $i => $char ) {
-				if (
-					// % is included for escaped %%.
-					false === strpos( 'bcdefgosux%l', $char ) &&
-					// Check the "placeholder" doesn't exist within the original, as an extra safety mechanism.
-					false === strpos( $original, $m[0][ $i ] )
-				) {
+				// % is included for escaped %%.
+				if ( false === strpos( 'bcdefgosux%l.', $char ) ) {
 					$unexpected_tokens[] = $m[0][ $i ];
 				}
 			}
