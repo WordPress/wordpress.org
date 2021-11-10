@@ -313,15 +313,8 @@ function gutenberg_editor_scripts_and_styles( $hook ) {
 		unset( $editor_settings['enableCustomFields'] );
 	}
 
-	/**
-	 * Filters the settings to pass to the block editor.
-	 *
-	 * @since 3.7.0
-	 *
-	 * @param array   $editor_settings Default editor settings.
-	 * @param WP_Post $post            Post being edited.
-	 */
-	$editor_settings = apply_filters( 'block_editor_settings', $editor_settings, $post );
+	$editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
+	$editor_settings = get_block_editor_settings( $editor_settings, $editor_context );
 
 	$init_script = <<<JS
 ( function() {
