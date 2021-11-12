@@ -97,7 +97,7 @@ export default function ( { pattern } ) {
 				</>
 			);
 
-		case 'declined':
+		case 'unlisted':
 			return (
 				<>
 					<Notice
