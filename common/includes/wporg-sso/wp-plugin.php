@@ -140,6 +140,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		public function authenticate_block_check( $user, $user_login ) {
 
 			$support_user = get_user_by( 'login', $user_login );
+			if ( ! $support_user ) {
+				$support_user = get_user_by( 'email', $user_login );
+			}
+
 			if ( $support_user && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 				$support_user->for_site( WPORG_SUPPORT_FORUMS_BLOGID );
 
