@@ -312,7 +312,7 @@ class Hooks {
 	/**
 	 * Redirect legacy urls to their new permastructure.
 	 *  - /users/$id & /profile/$slug to /users/$slug
-	 *  - /users/my-profile/* => /users/$slug/*
+	 *  - /users/profile/* => /users/$slug/*
 	 * 
 	 * See also: Support_Compat in inc/class-support-compat.php
 	 */
@@ -344,10 +344,10 @@ class Hooks {
 			}
 		}
 
-		if ( 'my-profile' === get_query_var( 'bbp_user' ) ) {
+		if ( 'profile' === get_query_var( 'bbp_user' ) ) {
 			if ( is_user_logged_in() ) {
 				$user = wp_get_current_user();
-				$url  = str_replace( '/my-profile/', "/{$user->user_nicename}/", $_SERVER['REQUEST_URI'] );
+				$url  = str_replace( '/profile/', "/{$user->user_nicename}/", $_SERVER['REQUEST_URI'] );
 			} else {
 				$url  = wp_login_url( home_url( $wp->request ) );
 			}

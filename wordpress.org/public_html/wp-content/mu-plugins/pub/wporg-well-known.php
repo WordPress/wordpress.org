@@ -18,7 +18,7 @@ add_action( 'init', function() {
 	}
 
 	if ( '/.well-known/change-password' === $_SERVER['REQUEST_URI'] ) {
-		wp_safe_redirect( 'https://wordpress.org/support/users/my-profile/edit/' );
+		wp_safe_redirect( 'https://wordpress.org/support/users/profile/edit/' );
 		exit;
 	}
 } );
