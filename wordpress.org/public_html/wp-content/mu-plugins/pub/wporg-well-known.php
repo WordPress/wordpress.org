@@ -8,13 +8,20 @@ if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 	return;
 }
 
-if (
-	'/.well-known/security.txt' === $_SERVER['REQUEST_URI'] ||
-	'/security.txt' === $_SERVER['REQUEST_URI']
-) {
-	security_txt();
-	exit;
-}
+add_action( 'init', function() {
+	if (
+		'/.well-known/security.txt' === $_SERVER['REQUEST_URI'] ||
+		'/security.txt' === $_SERVER['REQUEST_URI']
+	) {
+		security_txt();
+		exit;
+	}
+
+	if ( '/.well-known/change-password' === $_SERVER['REQUEST_URI'] ) {
+		wp_safe_redirect( 'https://wordpress.org/support/users/my-profile/edit/' );
+		exit;
+	}
+} );
 
 function security_txt() {
 	header( 'Content-Type: text/plain')

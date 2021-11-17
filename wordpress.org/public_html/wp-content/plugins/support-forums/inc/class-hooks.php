@@ -312,11 +312,12 @@ class Hooks {
 	/**
 	 * Redirect legacy urls to their new permastructure.
 	 *  - /users/$id & /profile/$slug to /users/$slug
+	 *  - /users/my-profile/* => /users/$slug/*
 	 * 
 	 * See also: Support_Compat in inc/class-support-compat.php
 	 */
 	public function redirect_legacy_urls() {
-		global $wp_query;
+		global $wp_query, $wp;
 
 		if ( ! is_404() ) {
 			return;
@@ -341,6 +342,17 @@ class Hooks {
 				wp_safe_redirect( home_url( '/users/' . $user->user_nicename . '/' ), 301 );
 				exit;
 			}
+		}
+
+		if ( 'my-profile' === get_query_var( 'bbp_user' ) ) {
+			if ( is_user_logged_in() ) {
+				$user = wp_get_current_user();
+				$url  = str_replace( '/my-profile/', "/{$user->user_nicename}/", $_SERVER['REQUEST_URI'] );
+			} else {
+				$url  = wp_login_url( home_url( $wp->request ) );
+			}
+
+			wp_safe_redirect( $url );
 		}
 	}
 
