@@ -74,6 +74,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				add_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
 
+				add_action( 'wp_login', array( $this, 'record_last_logged_in' ), 10, 2 );
+
 				if ( ! $this->is_sso_host() ) {
 					add_filter( 'login_url', [ $this, 'add_locale' ], 21 );
 					add_filter( 'register_url', [ $this, 'add_locale' ], 21 );
@@ -607,6 +609,15 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$tos_agreed_to = get_user_meta( $user_id, self::TOS_USER_META_KEY, true ) ?: 0;
 
 			return $tos_agreed_to >= TOS_REVISION;
+		}
+
+		/**
+		 * Record the last date a user logged in.
+		 * 
+		 * Note: This might be before they agree to the new TOS, which is recorded separately.
+		 */
+		public function record_last_logged_in( $login, $user ) {
+			update_user_meta( $user->ID, 'last_logged_in', gmdate( 'Y-m-d H:i:s' ) );
 		}
 
 	}
