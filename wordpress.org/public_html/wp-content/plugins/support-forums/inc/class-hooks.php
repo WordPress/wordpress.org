@@ -18,7 +18,7 @@ class Hooks {
 		add_filter( 'redirect_canonical',              array( $this, 'handle_bbpress_root_pages' ), 10, 2 );
 		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
-		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ) );
+		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ), 5 );
 		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
@@ -319,6 +319,19 @@ class Hooks {
 	public function redirect_legacy_urls() {
 		global $wp_query, $wp;
 
+		// A user called 'profile' exists, but override it.
+		if ( 'profile' === get_query_var( 'bbp_user' ) ) {
+			if ( is_user_logged_in() ) {
+				$user = wp_get_current_user();
+				$url  = str_replace( '/profile/', "/{$user->user_nicename}/", $_SERVER['REQUEST_URI'] );
+			} else {
+				$url  = wp_login_url( home_url( $wp->request ) );
+			}
+
+			wp_safe_redirect( $url );
+			exit;
+		}
+
 		if ( ! is_404() ) {
 			return;
 		}
@@ -344,17 +357,6 @@ class Hooks {
 			}
 		}
 
-		if ( 'profile' === get_query_var( 'bbp_user' ) ) {
-			if ( is_user_logged_in() ) {
-				$user = wp_get_current_user();
-				$url  = str_replace( '/profile/', "/{$user->user_nicename}/", $_SERVER['REQUEST_URI'] );
-			} else {
-				$url  = wp_login_url( home_url( $wp->request ) );
-			}
-
-			wp_safe_redirect( $url );
-			exit;
-		}
 	}
 
 	/**
