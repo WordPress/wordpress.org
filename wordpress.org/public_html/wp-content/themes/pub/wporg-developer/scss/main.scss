@@ -1921,8 +1921,7 @@ aside[id^="nav_menu"] .widget-title {
 }
 
 .single-handbook {
-	font-size: 13px;
-	font-size: 1.3rem;
+	font-size: 16px;
 
 	p, ol, ul {
 		line-height: 1.6;
@@ -1930,7 +1929,6 @@ aside[id^="nav_menu"] .widget-title {
 
 	.site-main {
 		p, ol, ul {
-			font-size: 1.05em;
 			color: #555;
 		}
 	}
@@ -1946,6 +1944,22 @@ aside[id^="nav_menu"] .widget-title {
 
 	.o2-post {
 		border-top: none;
+	}
+
+	.devhub-wrap {
+		main {
+			h2 {
+				margin-top: 4rem;
+				padding-top: 4rem;
+				border-top: 1px solid #AAA;
+			}
+	
+			h3 {
+				margin-top: 4rem;
+				padding-top: 4rem;
+				border-top: 1px solid #CCC;
+			}
+		}
 	}
 
 	.handbook-name-container + #primary {
