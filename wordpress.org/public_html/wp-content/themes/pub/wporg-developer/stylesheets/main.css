@@ -2314,6 +2314,10 @@ aside[id^="nav_menu"] .widget-title {
   color: #555;
 }
 
+.single-handbook .site-main li {
+  margin-bottom: 2.0rem;
+}
+
 .single-handbook .site-title {
   margin-left: 0;
 }

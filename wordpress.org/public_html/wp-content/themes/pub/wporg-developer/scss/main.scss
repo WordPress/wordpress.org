@@ -1931,6 +1931,10 @@ aside[id^="nav_menu"] .widget-title {
 		p, ol, ul {
 			color: #555;
 		}
+
+		li {
+			margin-bottom: 2.0rem;
+		}
 	}
 
 	.site-title {
@@ -1953,7 +1957,7 @@ aside[id^="nav_menu"] .widget-title {
 				padding-top: 4rem;
 				border-top: 1px solid #AAA;
 			}
-	
+
 			h3 {
 				margin-top: 4rem;
 				padding-top: 4rem;
@@ -2146,7 +2150,7 @@ div[class*="-table-of-contents-container"] {
 				border-right: 1px solid rgba(0,0,0,0.05);
 				border-left: none;
 			}
-	
+
 			&.menu-item-has-children > .expandable > a {
 				padding-right: 30px;
 			}
