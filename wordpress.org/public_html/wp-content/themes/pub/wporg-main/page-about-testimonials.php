@@ -125,16 +125,16 @@ the_post();
 					<p><?php esc_html_e( 'Want to have your story featured on this page?', 'wporg' ); ?></p>
 					<p>
 						<?php
-						/* translators: Link to the twitter #ilovewp feed */
-						printf( wp_kses_post( __( 'Make a blog post with your story and tweet a link to it using the <a href="%s">#ilovewp</a> hashtag. We&#8217;ll select the best ones and feature them here!', 'wporg' ) ), 'https://twitter.com/search?q=%23ilovewp' );
+						/* translators: 1: Link to the twitter #ILoveWP feed 2: The #ILoveWP Hashtag */
+						printf( wp_kses_post( __( 'Make a blog post with your story and tweet a link to it using the <a href="%1$s">%2$s</a> hashtag. We&#8217;ll select the best ones and feature them here!', 'wporg' ) ), 'https://twitter.com/hashtag/ILoveWP', '#ILoveWP' );
 						?>
 					</p>
 
 					<p>
-						<a href="https://twitter.com/intent/tweet?button_hashtag=ilovewp" class="twitter-hashtag-button" data-size="large" data-related="WordPress" data-dnt="true">
+						<a href="https://twitter.com/intent/tweet?button_hashtag=ILoveWP" class="twitter-hashtag-button" data-size="large" data-related="WordPress" data-dnt="true">
 						<?php
-							/* translators: The #ilovewp Hashtag */
-							printf( esc_html__( 'Tweet %s', 'wporg' ), '#ilovewp' );
+							/* translators: The #ILoveWP Hashtag */
+							printf( esc_html__( 'Tweet %s', 'wporg' ), '#ILoveWP' );
 						?>
 						</a>
 					</p>
