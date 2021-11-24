@@ -5,6 +5,26 @@ import { __ } from '@wordpress/i18n';
 import { Modal, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
+function getUnlistedReason( pattern ) {
+	const reasonSlug = pattern.meta.wpop_unlisted_reason || '';
+	switch ( reasonSlug ) {
+		case '1-inappropriate':
+			return __(
+				'This pattern contains content deemed inappropriate for a general audience.',
+				'wporg-patterns'
+			);
+		case '2-copyright':
+			return __(
+				'This pattern contains copyrighted material or uses a trademark without permission.',
+				'wporg-patterns'
+			);
+		case '3-broken':
+			return __( 'This pattern is broken or does not display correctly.', 'wporg-patterns' );
+		default:
+			return __( 'Additional review has been requested for this pattern.', 'wporg-patterns' );
+	}
+}
+
 export default function ( { pattern } ) {
 	const [ showModal, setShowModal ] = useState( false );
 	const openModal = () => setShowModal( true );
@@ -128,9 +148,12 @@ export default function ( { pattern } ) {
 						>
 							<p>
 								{ __(
-									'WordPress.org has chosen to decline listing your pattern for the following reason:',
+									'WordPress.org has removed your pattern from the directory for the following reason:',
 									'wporg-patterns'
 								) }
+							</p>
+							<p>
+								<em>{ getUnlistedReason( pattern ) }</em>
 							</p>
 							<p>
 								{ __(

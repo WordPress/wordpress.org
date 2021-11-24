@@ -67,10 +67,10 @@ export function RouteProvider( { children } ) {
 
 	useEffect( () => {
 		// When the browser modifies the history, update our path.
-		window.addEventListener( 'popstate', setPathOnPop ); // eslint-disable-line @wordpress/no-global-event-listener
+		window.addEventListener( 'popstate', setPathOnPop );
 
 		return () => {
-			window.removeEventListener( 'popstate', setPathOnPop ); // eslint-disable-line @wordpress/no-global-event-listener
+			window.removeEventListener( 'popstate', setPathOnPop );
 		};
 	}, [] );
 
