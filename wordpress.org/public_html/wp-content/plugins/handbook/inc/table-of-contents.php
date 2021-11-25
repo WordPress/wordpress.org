@@ -45,7 +45,7 @@ class WPorg_Handbook_TOC {
 		) );
 	}
 
-	function load_filters() {
+	public function load_filters() {
 		if ( is_singular( $this->post_types ) && ! is_embed() ) {
 			add_filter( 'the_content', array( $this, 'add_toc' ) );
 		}
@@ -102,88 +102,90 @@ class WPorg_Handbook_TOC {
 			return $content;
 		}
 
-		$toc = '';
-
-		$items = $this->get_tags( 'h([1-4])', $content );
+		$toc   = '';
+		$items = $this->get_tags( 'h(?P<level>[1-4])', $content );
 
 		if ( count( $items ) < 2 ) {
 			return $content;
 		}
 
+		// Generate a list of the IDs in the document (generating them as needed).
 		$this->used_ids = $this->get_reserved_ids();
-		for ( $i = 1; $i <= 4; $i++ )
-			$content = $this->add_ids_and_jumpto_links( "h$i", $content );
+		foreach ( $items as $i => $item ) {
+			$items[ $i ]['id'] = $this->get_id_for_item( $item );
+		}
+
+		// Replace each level of the headings.
+		$content = $this->add_ids_and_jumpto_links( $items, $content );
 
 		if ( ! apply_filters( 'handbook_display_toc', true ) ) {
 			return $content;
 		}
 
-		if ( $items ) {
-			$contents_header = 'h' . $items[0][2]; // Duplicate the first <h#> tag in the document.
-			$toc .= $this->styles;
-			$toc .= '<div class="table-of-contents">';
-			$toc .= "<$contents_header>" . esc_html( $this->args->header_text ) . "</$contents_header><ul class=\"items\">";
-			$last_item = false;
-			$used_ids = $this->get_reserved_ids();
+		$contents_header = 'h' . $items[0]['level']; // Duplicate the first <h#> tag in the document for the TOC header
+		$toc            .= $this->styles;
+		$toc            .= '<div class="table-of-contents">';
+		$toc            .= "<$contents_header>" . esc_html( $this->args->header_text ) . "</$contents_header><ul class=\"items\">";
+		$last_item       = false;
 
-			foreach ( $items as $item ) {
-				if ( $last_item ) {
-					if ( $last_item < $item[2] )
-						$toc .= "\n<ul>\n";
-					elseif ( $last_item > $item[2] )
-						$toc .= "\n</ul></li>\n";
-					else
-						$toc .= "</li>\n";
+		foreach ( $items as $item ) {
+			if ( $last_item ) {
+				if ( $last_item < $item['level'] ) {
+					$toc .= "\n<ul>\n";
+				} elseif ( $last_item > $item['level'] ) {
+					$toc .= "\n</ul></li>\n";
+				} else {
+					$toc .= "</li>\n";
 				}
-
-				$last_item = $item[2];
-
-				$id = sanitize_title( $item[3] );
-				// Append unique suffix if anchor ID isn't unique.
-				$count = 2;
-				$orig_id = $id;
-				while ( in_array( $id, $used_ids ) && $count < 50 ) {
-					$id = $orig_id . '-' . $count;
-					$count++;
-				}
-				$used_ids[] = $id;
-
-				$toc .= '<li><a href="#' . esc_attr( $id  ) . '">' . $item[3]  . '</a>';
 			}
-			$toc .= "</ul>\n</div>\n";
+
+			$last_item = $item['level'];
+
+			$toc .= '<li><a href="#' . esc_attr( $item['id']  ) . '">' . $item['title']  . '</a>';
 		}
+
+		$toc .= "</ul>\n</div>\n";
 
 		return $toc . $content;
 	}
 
-	protected function add_ids_and_jumpto_links( $tag, $content ) {
-		$items = $this->get_tags( $tag, $content );
+	/**
+	 * Add the HTML markup for the in-content header elements.
+	 */
+	protected function add_ids_and_jumpto_links( $items, $content ) {
 		$first = true;
 		$matches = array();
 		$replacements = array();
 
 		foreach ( $items as $item ) {
 			$replacement = '';
-			$matches[] = $item[0];
-			$id = sanitize_title( $item[2] );
+			$matches[]   = $item[0];
+			$tag         = 'h' . $item['level']; // 'h2'
+			$id          = $item['id'];
+			$title       = $item['title'];
+			$extra_attrs = $item['attrs']; // 'class="" style=""'
+			$class       = 'toc-heading';
 
-			// Append unique suffix if anchor ID isn't unique.
-			$count = 2;
-			$orig_id = $id;
-			while ( in_array( $id, $this->used_ids ) && $count < 50 ) {
-				$id = $orig_id . '-' . $count;
-				$count++;
+			if ( $extra_attrs ) {
+				// Strip all IDs from the heading attributes (including empty), we'll replace it with one below.
+				$extra_attrs = trim( preg_replace( '/id=(["\'])[^"\']*\\1/i', '', $extra_attrs ) );
+
+				// Extract any classes present, we're adding our own attribute.
+				if ( preg_match( '/class=(["\'])(?P<class>[^"\']+)\\1/i', $extra_attrs, $m ) ) {
+					$extra_attrs = str_replace( $m[0], '', $extra_attrs );
+					$class      .= ' ' . $m['class'];
+				}
 			}
-			$this->used_ids[] = $id;
-		
+
 			if ( ! $first ) {
 				$replacement .= '<p class="toc-jump"><a href="#top">' . __( 'Top &uarr;', 'wporg' ) . '</a></p>';
 			} else {
 				$first = false;
 			}
-			$a11y_text      = sprintf( '<span class="screen-reader-text">%s</span>', $item[2] );
+
+			$a11y_text      = sprintf( '<span class="screen-reader-text">%s</span>', $title );
 			$anchor         = sprintf( '<a href="#%1$s" class="anchor"><span aria-hidden="true">#</span>%2$s</a>', $id, $a11y_text );
-			$replacement   .= sprintf( '<%1$s class="toc-heading" id="%2$s" tabindex="-1">%3$s %4$s</%1$s>', $tag, $id, $item[2], $anchor );
+			$replacement   .= sprintf( '<%1$s id="%2$s" class="%3$s" tabindex="-1" %4$s>%5$s %6$s</%1$s>', $tag, $id, $class, $extra_attrs, $title, $anchor );
 			$replacements[] = $replacement;
 		}
 
@@ -200,10 +202,41 @@ class WPorg_Handbook_TOC {
 		return $content;
 	}
 
-	private function get_tags( $tag, $content = '' ) {
-		if ( empty( $content ) )
+	/**
+	 * Generate an ID for a given HTML element, use the tags `id` attribute if set.
+	 */
+	protected function get_id_for_item( $item ) {
+		if ( ! empty( $item['id'] ) ) {
+			return $item['id'];
+		}
+
+		// Check to see if the item already had a non-empty ID, else generate one from the title.
+		if ( preg_match( '/id=(["\'])(?P<id>[^"\']+)\\1/', $item['attrs'], $m ) ) {
+			$id = $m['id'];
+		} else {
+			$id = sanitize_title( $item['title'] );
+		}
+
+		// Append unique suffix if anchor ID isn't unique in the document.
+		$count   = 2;
+		$orig_id = $id;
+		while ( in_array( $id, $this->used_ids ) && $count < 50 ) {
+			$id = $orig_id . '-' . $count;
+			$count++;
+		}
+
+		$this->used_ids[] = $id;
+
+		return $id;
+	}
+
+	protected function get_tags( $tag, $content = '' ) {
+		if ( empty( $content ) ) {
 			$content = get_the_content();
-		preg_match_all( "/(<{$tag}>)(.*)(<\/{$tag}>)/", $content, $matches, PREG_SET_ORDER );
+		}
+
+		preg_match_all( "/(?P<tag><{$tag}(?P<attrs>[^>]*)>)(?P<title>.*)(<\/{$tag}>)/iJ", $content, $matches, PREG_SET_ORDER );
+
 		return $matches;
 	}
 }
