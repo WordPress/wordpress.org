@@ -34,5 +34,6 @@ function wporg_wordpress_credits_shortcode( $attrs, $content = null ) {
 	foreach ( $props as $username => $name ) {
 		$output[] = '<a href="' . sprintf( $results['data']['profiles'], $username ) . '/">' . $name . '</a>';
 	}
-	return wp_sprintf( '%l.', $output );
+
+	return '<p>' . wp_sprintf( '%l.', $output ) . '</p>';
 }
