@@ -39,7 +39,7 @@ html {
 	padding: 0;
 }
 body {
-	font: 400 13px/24px sans-serif;
+	font: 400 14px/26px sans-serif;
 	text-align: left;
 	background: #fbfbfb;
 	margin: 0;
@@ -156,7 +156,7 @@ body:not(.trac):not(.home-page):not(.home) #main {
 #footer {
 	padding: 24px 0;
 	font-size: 12px;
-	margin: 0 auto 24px auto;
+	margin: 0 auto 0 auto;
 	border-top: #ccc solid 1px;
 	color: inherit;
 }
@@ -711,8 +711,10 @@ img.left {
 
 input {
 	font: 14px/16px sans-serif;
-	padding: 2px;
+	padding: 3px;
 	color: #333;
+	border: 1px solid #ccc;
+	border-radius: 3px;
 }
 input.submit {
 	border: 0;
@@ -1091,6 +1093,7 @@ body.reply-edit #bbpress-forums fieldset legend {
 .sidebar .bbp-forums .bbp-forum-info {
 	width: 80%
 }
+.sidebar .bbp-forums .bbp-forum-reply-count,
 .sidebar .bbp-forums .bbp-forum-topic-count {
 	width: 20%;
 }
@@ -1797,3 +1800,4 @@ body.trac .attachment {
 		left: 0;
 	}
 }
+
