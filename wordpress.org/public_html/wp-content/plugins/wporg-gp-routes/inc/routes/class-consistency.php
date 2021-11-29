@@ -32,7 +32,7 @@ class Consistency extends GP_Route {
 		$search = $set = $project = '';
 		$search_case_sensitive = false;
 
-		if ( ! empty( $_REQUEST['search'] ) ) {
+		if ( isset( $_REQUEST['search'] ) && strlen( $_REQUEST['search'] ) ) {
 			$search = wp_unslash( $_REQUEST['search'] );
 		}
 
@@ -62,7 +62,7 @@ class Consistency extends GP_Route {
 
 		$results = [];
 		$performed_search = false;
-		if ( $search && $locale && $set_slug ) {
+		if ( strlen( $search ) && $locale && $set_slug ) {
 			$performed_search = true;
 			$results = $this->query( [
 				'search'         => $search,
