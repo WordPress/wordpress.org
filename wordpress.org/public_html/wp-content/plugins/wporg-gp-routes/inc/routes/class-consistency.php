@@ -168,13 +168,18 @@ class Consistency extends GP_Route {
 			return [];
 		}
 
-		// Group by translation. Done in PHP because it's faster as in MySQL.
+		// Group by translation and project path. Done in PHP because it's faster as in MySQL.
 		usort( $results, [ $this, '_sort_callback' ] );
 
 		return $results;
 	}
 
 	public function _sort_callback( $a, $b ) {
-		return strnatcmp( $a->translation, $b->translation );
+		$sort = strnatcmp( $a->translation . $a->original_context, $b->translation . $b->original_context );
+		if ( 0 === $sort ) {
+			$sort = strnatcmp( $a->project_path, $b->project_path );
+		}
+
+		return $sort;
 	}
 }
