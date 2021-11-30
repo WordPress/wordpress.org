@@ -115,13 +115,13 @@ class Upload_Handler {
 
 		// Make sure it doesn't use a TRADEMARK protected slug.
 		if ( false !== $this->has_trademarked_slug() ) {
-			$error = __( 'Error: The plugin includes a trademarked name.', 'wporg-plugins' );
+			$error = __( 'Error: The plugin name includes a restricted term.', 'wporg-plugins' );
 
 			if ( $this->has_trademarked_slug() === trim( $this->has_trademarked_slug(), '-' ) ) {
 				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
 				$message = sprintf(
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used at all in your plugin permalink nor the display name. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. Do not attempt to work around this by removing letters (i.e. WordPess) or using numbers (4 instead of A). Those are seen as intentional actions to avoid trademark laws, and are not permitted. If you feel this is in error, such as you legally own the trademarked term, please email us at %4$s and explain why.', 'wporg-plugins' ),
+					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used at all in your plugin permalink nor the display name. To proceed with this submission you must remove "%2$s" from the %3$s line in both your main plugin file and readme entirely. Once you\'ve finished, you may upload the plugin again. Do not attempt to work around this by removing letters (i.e. WordPess) or using numbers (4 instead of A). Those are seen as intentional actions to avoid our restrictions, and are not permitted. If you feel this is in error, such as you legally own the trademark for a term, please email us at %4$s and explain your situation.', 'wporg-plugins' ),
 					'<code>' . $this->plugin_slug . '</code>',
 					trim( $this->has_trademarked_slug(), '-' ),
 					'<code>Plugin Name:</code>',
@@ -131,7 +131,7 @@ class Upload_Handler {
 				// Trademarks ending in "-" indicate slug cannot BEGIN with that term.
 				$message = sprintf(
 					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used to begin your permalink or display name. Per the requirements of trademark owners and law, we disallow the use of certain terms in ways that are infringing and/or misleading. In order to proceed with this submission, you must change the %3$s line in your main plugin file and readme to end with  "-%2$s" instead. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, such as you legally own the trademarked term, please email us at %4$s and explain why.', 'wporg-plugins' ),
+					__( 'Your chosen plugin name - %1$s - contains the restricted term "%2$s" and cannot be used to begin your permalink or display name. We disallow the use of certain terms in ways that are abused, or potentially infringe on and/or are misleading with regards to trademarks. In order to proceed with this submission, you must change the %3$s line in your main plugin file and readme to end with  "-%2$s" instead. Once you\'ve finished, you may upload the plugin again. If you feel this is in error, such as you legally own the trademark for the term, please email us at %4$s and explain your situation.', 'wporg-plugins' ),
 					'<code>' . $this->plugin_slug . '</code>',
 					trim( $this->has_trademarked_slug(), '-' ),
 					'<code>Plugin Name:</code>',
@@ -365,7 +365,7 @@ class Upload_Handler {
 			'plugins@wordpress.org'
 		) . '</p><p>';
 
-		$message .= __( 'If there are any errors in your submission, please email us as soon as possible. We can correct many issues before approval.', 'wporg-plugins' ) . '</p><p>';
+		$message .= __( 'If there are any errors in your submission, such as having submitted via the wrong account, please don\'t resubmit! Instead, email us as soon as possible (you can reply to the automated email we sent you). We can correct most issues before approval.', 'wporg-plugins' ) . '</p><p>';
 
 		$message .= sprintf(
 			/* translators: 1: URL to guidelines; 2: URL to FAQs; */
@@ -375,6 +375,8 @@ class Upload_Handler {
 		) . '</p><p>';
 
 		$message .= __( 'Note: Reviews are currently in English only. We apologize for the inconvenience.', 'wporg-plugins' );
+
+		$message .= '</p>';
 
 		// Success!
 		return $message;
@@ -444,12 +446,16 @@ class Upload_Handler {
 			'android-',
 			'apple-',
 			'applenews-',
+			'applepay-',
 			'aws-',
+			'azon-',
 			'bbpress-',
 			'bing-',
+			'booking-com',
 			'bootstrap-',
 			'buddypress-',
 			'contact-form-7-',
+			'cloudflare-',
 			'cpanel-',
 			'disqus-',
 			'divi-',
@@ -463,6 +469,9 @@ class Upload_Handler {
 			'fb-messenger',
 			'fedex-',
 			'feedburner',
+			'firefox-',
+			'fontawesome-',
+			'font-awesome-',
 			'ganalytics-',
 			'gberg',
 			'github-',
@@ -472,6 +481,8 @@ class Upload_Handler {
 			'googles-',
 			'gravity-form-',
 			'gravity-forms-',
+			'gravityforms-',
+			'gtmetrix-',
 			'gutenberg',
 			'guten-',
 			'hubspot-',
@@ -479,20 +490,27 @@ class Upload_Handler {
 			'insta-',
 			'instagram',
 			'internet-explorer-',
+			'ios-',
 			'jetpack-',
 			'macintosh-',
+			'macos-',
 			'mailchimp-',
 			'microsoft-',
 			'ninja-forms-',
 			'oculus',
 			'onlyfans-',
 			'only-fans-',
+			'opera-',
 			'paddle-',
 			'paypal-',
 			'pinterest-',
+			'plugin',
+			'skype-',
 			'stripe-',
 			'tiktok-',
+			'tik-tok-',
 			'trustpilot',
+			'twitch-',
 			'twitter-',
 			'tweet',
 			'ups-',
@@ -502,6 +520,7 @@ class Upload_Handler {
 			'vva-',
 			'vvoo',
 			'wa-',
+			'webpush-vn',
 			'wh4tsapps',
 			'whatsapp',
 			'whats-app',
@@ -523,6 +542,7 @@ class Upload_Handler {
 			'yahoo-',
 			'yoast',
 			'youtube-',
+			'you-tube-',
 		);
 
 		// Domains from which exceptions would be accepted.
@@ -534,11 +554,17 @@ class Upload_Handler {
 			'trustpilot.com'        => array( 'trustpilot' ),
 			'microsoft.com'         => array( 'bing-', 'microsoft-' ),
 			'yandex-team.ru'        => array( 'yandex' ),
+			'opera.com'             => array( 'opera-' ),
 		);
 
 		// Trademarks that are allowed as 'for-whatever' ONLY.
 		$for_use_exceptions = array(
 			'woocommerce',
+		);
+
+		// Commonly used 'combo' names (to prevent things like 'woopress').
+		$portmanteaus = array(
+			'woo',
 		);
 
 		$has_trademarked_slug = false;
@@ -564,6 +590,14 @@ class Upload_Handler {
 			if ( $for_trademark === substr( $this->plugin_slug, -1 * strlen( $for_trademark ) ) ) {
 				// Yes the slug ENDS with 'for-TRADEMARK'.
 				$has_trademarked_slug = false;
+			}
+		}
+
+		// Check portmanteaus.
+		foreach ( $portmanteaus as $portmanteau ) {
+			if ( 0 === strpos( $this->plugin_slug, $portmanteau ) ) {
+				$has_trademarked_slug = $portmanteau;
+				break;
 			}
 		}
 
