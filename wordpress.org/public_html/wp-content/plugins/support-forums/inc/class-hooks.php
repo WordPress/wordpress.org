@@ -1261,17 +1261,17 @@ class Hooks {
 		// Try to get the most accurate freshness time possible
 		$last_active = get_post_meta( $topic_id, '_bbp_last_active_time', true );
 		if ( empty( $last_active ) ) {
-			if ( ! empty( $reply_id ) ) {
-				$last_active = get_post_field( 'post_date', $reply_id );
-			} else {
-				$last_active = get_post_field( 'post_date', $topic_id );
-			}
+			$last_active = get_post_field( 'post_date', $topic_id );
 		}
 
 		// This is for translating the date components.
 		$datetime = date_create_immutable_from_format( 'Y-m-d H:i:s', $last_active );
-		$date     = wp_date( get_option( 'date_format' ), $datetime->getTimestamp() );
-		$time     = wp_date( get_option( 'time_format' ), $datetime->getTimestamp() );
+		if ( ! $datetime ) {
+			return $anchor;
+		}
+
+		$date = wp_date( get_option( 'date_format' ), $datetime->getTimestamp() );
+		$time = wp_date( get_option( 'time_format' ), $datetime->getTimestamp() );
 
 		return str_replace(
 			'title="' . esc_attr( $title ) . '"',
