@@ -1596,17 +1596,18 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  * Pin one-off events.
  */
 function pin_one_off_events( $events, $current_time ) {
-	if ( $current_time < strtotime( 'December 18, 2020' ) ) {
+
+	if ( $current_time < strtotime( 'December 17, 2021' ) ) {
 		array_unshift( $events, array(
 			'type'                 => 'wordcamp',
 			'title'                => 'State of the Word',
-			'url'                  => 'https://wordpress.org/news/2020/12/state-of-the-word-2020/',
+			'url'                  => 'https://wordpress.org/news/2021/11/state-of-the-word-2021/',
 			'meetup'               => '',
 			'meetup_url'           => '',
-			'date'                 => '2020-12-17 00:00:00',
-			'end_date'             => '2020-12-17 23:00:00',
-			'start_unix_timestamp' => 1608195600,
-			'end_unix_timestamp'   => 1608267600,
+			'date'                 => '2021-12-14 17:00:00',
+			'end_date'             => '2021-12-14 19:00:00',
+			'start_unix_timestamp' => 1639519200,
+			'end_unix_timestamp'   => 1639526400,
 
 			'location' => array(
 				'location'  => 'Online',
