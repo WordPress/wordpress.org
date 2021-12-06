@@ -50,17 +50,35 @@ $allowed_svg = array(
 				// If we still have no name, we don't have a valid block.
 				continue;
 			}
-			$block_icon = isset( $block->icon ) ? $block->icon : '';
+
+			$block_icon = '';
+			$block_styles = [];
+			if ( isset( $block->icon->src ) ) {
+				$block_icon = $block->icon->src;
+
+				if ( isset( $block->icon->foreground ) ) {
+					$block_styles[] = 'color: ' . sanitize_hex_color( $block->icon->foreground );
+				}
+
+				if ( isset( $block->icon->background ) ) {
+					$block_styles[] = 'background-color: ' . sanitize_hex_color( $block->icon->background );
+				}
+
+			} elseif ( isset( $block->icon ) && is_string( $block->icon ) ) {
+				$block_icon = $block->icon;
+			}
+
 			$block_classes = 'plugin-blocks-list-item';
 			$block_classes .= isset( $block->description ) ? ' has-description' : '';
+			$block_style   = $block_styles ? 'style="' . implode('; ', $block_styles ) . '"' : '';
 			?>
 			<li class="<?php echo esc_attr( $block_classes ); ?>">
 				<?php if ( false !== strpos( $block_icon, '<svg' ) ) : ?>
-					<span class="block-icon">
+					<span class="block-icon" <?php echo $block_style; ?>>
 						<?php echo wp_kses( str_replace( '<svg ', '<svg role="img" aria-hidden="true" focusable="false" ', $block_icon ), $allowed_svg ); ?>
 					</span>
 				<?php elseif ( $block_icon ) : ?>
-					<span class="block-icon dashicons dashicons-<?php echo esc_attr( $block->icon ); ?>"></span>
+					<span class="block-icon dashicons dashicons-<?php echo esc_attr( $block_icon ); ?>" <?php echo $block_style; ?>></span>
 				<?php else : ?>
 					<span class="block-icon dashicons dashicons-block-default"></span>
 				<?php endif; ?>
