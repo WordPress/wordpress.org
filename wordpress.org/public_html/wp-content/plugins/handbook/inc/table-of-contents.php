@@ -109,6 +109,14 @@ class WPorg_Handbook_TOC {
 			return $content;
 		}
 
+		// Remove any links we don't need.
+		foreach ( $items as $i => $item ) {
+			// If an element is all HTML, don't link to it.
+			if ( empty( trim( strip_tags( $item['title'] ) ) ) ) {
+				unset( $items[ $i ] );
+			}
+		}
+
 		// Generate a list of the IDs in the document (generating them as needed).
 		$this->used_ids = $this->get_reserved_ids();
 		foreach ( $items as $i => $item ) {
@@ -235,7 +243,7 @@ class WPorg_Handbook_TOC {
 			$content = get_the_content();
 		}
 
-		preg_match_all( "/(?P<tag><{$tag}(?P<attrs>[^>]*)>)(?P<title>.*)(<\/{$tag}>)/iJ", $content, $matches, PREG_SET_ORDER );
+		preg_match_all( "/(?P<tag><{$tag}(?P<attrs>[^>]*)>)(?P<title>.*?)(<\/{$tag}>)/iJ", $content, $matches, PREG_SET_ORDER );
 
 		return $matches;
 	}
