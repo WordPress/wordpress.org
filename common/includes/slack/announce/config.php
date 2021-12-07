@@ -367,6 +367,13 @@ function get_whitelist() {
 		),
 		'meta-wordcamp' => $wordcamp_central,
 		'openverse' => array(
+			'aetherunbound', // @Madison Swain-Bowden on Slack
+			'dhruvkb',
+			'fcoveram', // @Francisco on Slack
+			'krysal',
+			'olgabulat', // @Olga Bulat on Slack
+			'ronnybadilla', // @ronny on Slack
+			'sarayourfriend',
 			'zackkrida',
 		),
 		'performance' => array(
