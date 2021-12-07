@@ -96,6 +96,11 @@ namespace Dotorg\Slack\Trac {
 			continue;
 		}
 
+		// If there's no tickets referenced (ie. just commits) then there's no need to flag tghe reference on Trac.
+		if ( empty( $results['ticket'] ) ) {
+			continue;
+		}
+
 		$trac_xmlrpc = new \Trac( 'slackbot', SLACKBOT_WPORG_PASSWORD, "https://$trac.trac.wordpress.org/login/xmlrpc" );
 
 		$comment = sprintf( $comment_template, $_POST['channel_name'], $_POST['user_name'], str_replace( '.', '', $_POST['timestamp'] ) );
