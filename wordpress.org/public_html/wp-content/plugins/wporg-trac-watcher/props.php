@@ -18,12 +18,13 @@ function from_log( $log ) {
 		'once' => [
 			"^props(?! to ) {$props_greedy}.?$", // Super basic initial primary matcher, trumps even the next one.
 			"{$real_sol}props(?! to ) {$props_greedy}{$real_eol}", // Primary matcher, "Props abc, def". Excludes "props to "
-			"([,.] )props{$props}([,.] )", // Simple inline props matcher, ". props abc." / ", props abc, fixes ..."
+			"([,.] )props {$props_greedy}{$eol}", // Simple inline props matcher, ". props abc." / ", props abc, fixes ..."
 			"{$sol}props([:]| to ) {$props_greedy}{$eol}",
 			"([0-9]|\pP)\s+props([:]|\s+to)? {$props_one}( in .+)?(,|{$eol})",
 			"{$sol}(h/t|hat tip:) {$props_short}{$eol}",
 
 			// These are starting to get real old... like three-digit core commit old..
+			"with help from {$props}{$real_eol}",
 			"\S\sprops([:]|\s+to)? {$props_short}{$eol}", // Inline props
 			"\scredit(?! card)([:]|\sto)? {$props_short}", // Credit: ... or Credit to ...
 			"\s(diff|patch|patches|fix|fixes) from {$props_short}{$eol}", // Fixes from Ryan
@@ -34,7 +35,7 @@ function from_log( $log ) {
 		// These matchers apply no matter which ones above have matched.
 		// They're intended to catch additional inline mentions.
 		'multiple' => [
-			"\sunprops {$props_one}", 
+			"{$sol}unprops:? {$props_greedy}{$eol}", 
 			"{$sol}(dev)?reviewed[- ]by {$props}{$eol}",
 			"\sthanks {$props_one}",
 		]
@@ -145,7 +146,7 @@ function from_log( $log ) {
 			$u = preg_replace( '!((' . implode( '|', $words ) . ')\s+)*!i', '', $u );
 
 			// Trim trailing punctuation (if it starts without punctuation)
-			$u = preg_replace( '!^([a-z0-9].{4,})[\pP\s]+$!iu', '$1', $u );
+			$u = preg_replace( '!^([a-z0-9].{4,}?)[\pP\s]+?$!iu', '$1', $u );
 
 			// Does it start with a expected character, but have space followed by rand punctuation?
 			$u = preg_replace( '!^([a-z0-9]\S+)\s\pP.*$!i', '$1', $u );
@@ -217,12 +218,16 @@ function from_log( $log ) {
 /**
  * Find a user ID for the user being prop'd.
  */
-function find_user_id( $prop, $svn = array() ) {
+function find_user_id( $prop ) {
 	global $wpdb;
+
+	if ( ! $prop ) {
+		return false;
+	}
 
 	// Profile URL - This is primarily used via the Admin UI to assign ownership of a prop.
 	if (
-		preg_match( '!^https?://profiles.wordpress.org/(?P<user>[^/]+)/?$!', $user, $m ) &&
+		preg_match( '!^https?://profiles.wordpress.org/(?P<user>[^/]+)/?$!', $prop, $m ) &&
 		( $user = get_user_by( 'slug', $m['user'] ) )
 	) {
 		return $user->ID;
@@ -257,19 +262,40 @@ function find_user_id( $prop, $svn = array() ) {
 	// previous props?
 	// This works great to catch typo's, correct it manually once and it'll be caught next time.
 	foreach ( get_svns() as $svn ) {
-		$props_table = ['props_table'] ?? false;
+		if ( empty( $svn['props_table'] ) ) {
+			continue;
+		}
+		$props_table = $svn['props_table'];
 		if (
 			$props_table &&
-			( $id = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$props_table} WHERE prop_name = %s LIMIT 1", $prop ) ) )
+			( $id = $wpdb->get_var( $sql = $wpdb->prepare( "SELECT user_id FROM {$props_table} WHERE prop_name = %s AND user_id IS NOT NULL LIMIT 1", $prop ) ) )
 		) {
 			return (int) $id;
 		}
 	}
 
 	// GitHub?
-	$github = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM wporg_github_users WHERE github_user = %s LIMIt 1", $prop ) );
+	$github = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM wporg_github_users WHERE github_user = %s LIMIT 1", $prop ) );
 	if ( $github ) {
 		return (int) $github;
+	}
+
+	// Last resort, full name of someone who has been prop'd before?
+	// Display_Name isn't indexed, so can't be queried without a user list to reference against.
+	foreach ( get_svns() as $svn ) {
+		if ( empty( $svn['props_table'] ) ) {
+			continue;
+		}
+
+		$props_table = $svn['props_table'];
+		$user_id = $wpdb->get_var( $sql = $wpdb->prepare(
+			"SELECT u.ID FROM {$props_table} p JOIN {$wpdb->users} u ON p.user_id = u.ID WHERE u.display_name = %s LIMIT 1",
+			$prop
+		) );
+
+		if ( $user_id ) {
+			return $user_id;
+		}
 	}
 
 	return false;

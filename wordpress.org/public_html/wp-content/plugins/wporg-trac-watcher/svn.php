@@ -115,7 +115,7 @@ function import_revisions( $svn ) {
 					'prop_name' => $prop,
 				];
 
-				$user_id = find_user_id( $prop, $svn );
+				$user_id = find_user_id( $prop );
 				if ( $user_id ) {
 					$data['user_id'] = $user_id;
 				}
