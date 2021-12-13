@@ -1,0 +1,115 @@
+.propstable tr.disabled {
+	opacity: 0.2;
+
+}
+.propstable th.column-message {
+	width: 40%;
+}
+.propstable th.column-props {
+	width: 35%;
+}
+.propstable td.message div.max-height {
+	max-height: 40em;
+	overflow: scroll;
+}
+.propstable td.message ins {
+	color: green;
+	text-decoration: none;
+}
+.propstable td.message del {
+	color: red;
+	text-decoration: none;
+}
+.propstable td.message del.replace {
+	text-decoration: line-through;
+}
+.propstable td.message blockquote {
+	border-left: 0.5em solid #ddd;
+	padding-left: 0.5em;
+	margin-left: 0px;
+}
+.propstable td.props .propslist {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin-bottom: 1.5em;
+}
+
+.propstable td.props {
+	position: relative;
+}
+.propstable td.props p.actions {
+	position: absolute;
+	bottom: 0;
+	margin-top: -1em;
+	visibility: hidden;
+}
+.propstable td.props:hover p.actions {
+	visibility: visible;
+}
+
+.propstable .tablenav .actions {
+	clear: left;
+}
+
+.propstable img.avatar {
+	margin-right: 5px;
+	border-radius: 50%;
+	vertical-align: text-top;
+	float: left;
+}
+.propstable .user {
+	margin: 5px;
+	padding: 3px;
+	width: 45%;
+	min-height: 2.5em;
+	border: 1px solid lightblue;
+	border-radius: 5px;
+	position: relative;
+}
+.propstable .user.add {
+	width: auto;
+}
+.propstable .user .dashicons-editor-help,
+.propstable .user .dashicons-plus {
+	font-size: 3em;
+	line-height: 1.5;
+	color: red;
+	margin-right: 18px;
+	margin-top: -13px;
+}
+.propstable .user .overlay {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 20%;
+	background: rgba(0,0,0,0.1);
+}
+.propstable .user:hover .overlay,
+.propstable .user .overlay:hover {
+	display: block;
+}
+
+.propstable .user .overlay .actions,
+.propstable .user .overlay .actions a {
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	margin: 0;
+}
+.propstable .user .overlay .actions a {
+	margin: auto;
+	width: 100%;
+	color: white;
+}
+.propstable .user .overlay .actions a:before {
+	width: 100%;
+	height: 100%;
+}
+.propstable .user .overlay .actions {
+	background-color: rgba(123,123,123,0.4);
+}
