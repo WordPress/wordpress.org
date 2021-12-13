@@ -181,14 +181,23 @@ function display_reports_page( $details ) {
 				break;
 			case 'versions-contributed':
 					$details = $wpdb->get_results(
-						"SELECT prop_name, user_id, COUNT(*) as count, group_concat( version ORDER BY version ASC  SEPARATOR ', ' ) as versions FROM (
+						"SELECT prop_name, user_id, COUNT( distinct version ) as count,
+							group_concat( distinct version ORDER BY version ASC  SEPARATOR ', ' ) as versions,
+							ifnull(user_id,prop_name) as _groupby
+						FROM (
 							SELECT distinct LEFT(version, 3) as version, prop_name, p.user_id
 							FROM {$details['props_table']} p
 								JOIN {$details['rev_table']} r ON p.revision = r.id
-							group by prop_name, version
+							GROUP BY prop_name, version
+							UNION
+							SELECT distinct LEFT(version, 3) as version, r.author as prop_name, u.ID as user_id
+							FROM {$details['rev_table']} r
+								JOIN {$wpdb->users} u ON r.author = u.user_login
+							GROUP BY r.author, version
 						) a
-						group by prop_name HAVING COUNT(*) > 2
-						ORDER BY COUNT(*) DESC"
+						WHERE version != ''
+						group by _groupby HAVING COUNT(*) > 1
+						ORDER BY `count` DESC"
 					);
 
 					echo '<table class="widefat striped">';
@@ -209,13 +218,16 @@ function display_reports_page( $details ) {
 						}
 
 						printf(
-							'<tr><td>%s</td><td>%s</td><td>%s</td></tr>',
+							'<tr><td>%s</td><td>%s</td><td title="%s">%s</td></tr>',
 							$profile,
 							$p->count,
+							esc_attr( $p->versions ),
 							$p->versions
 						);
 					}
 					echo '</table>';
+
+					break;
 			case 'typos':
 				$details = $wpdb->get_results(
 					"SELECT u.user_login, u.user_nicename,
@@ -257,26 +269,35 @@ function display_reports_page( $details ) {
 				break;
 			case 'raw-contributors-and-committers':
 				$details = $wpdb->get_results(
-					"SELECT p.prop_name, u.user_nicename, u.display_name, u.ID,
-					IFNULL(p.user_id,p.prop_name) as _groupby
+					"SELECT prop_name, ID, user_nicename, display_name, _groupby, SUM(_count) as count FROM (
+						SELECT p.prop_name, u.ID, u.user_nicename, u.display_name,
+							IFNULL(p.user_id,p.prop_name) as _groupby, COUNT(*) as _count
 						FROM {$details['props_table']} p
 							LEFT JOIN {$details['rev_table']} r ON p.revision = r.id
 							LEFT JOIN {$wpdb->users} u ON p.user_id = u.ID
-						WHERE $where
+						WHERE $where AND p.prop_name != r.author
 						GROUP BY _groupby
-					UNION
-						SELECT r.author as prop_name, u.user_nicename, u.display_name, u.ID, u.ID as _groupby
+
+						UNION
+
+						SELECT r.author as prop_name, u.ID, u.user_nicename, u.display_name,
+							u.ID as _groupby, COUNT(*) as _count
 						FROM {$details['rev_table']} r
 							LEFT JOIN {$wpdb->users} u ON r.author = u.user_login
 						WHERE $where
-						ORDER BY prop_name ASC"
+						GROUP BY _groupby
+					) results
+					GROUP BY _groupby
+					ORDER BY count DESC"
 				);
 
 
-				echo "<p>Props (Contributors + Committers bunched together) designed to be copy-pasted elsewhere. Set gravatar size via adding <a href='$url&size=96'>&size=96</a> to this URL.</p>";
+				echo "<p>Props (Contributors + Committers bunched together) designed to be copy-pasted elsewhere.<br>
+				Set gravatar size via adding <a href='$url&size=96'>&size=96</a> to this URL.<br>
+				Note: A committer prop'ing themselves only counts for 1 here.</p>";
 
 				echo '<table class="widefat striped">';
-				echo '<thead><tr><th>ID</th><th>Name</th><th>DisplayName</th><th>Profile URL</th><th>Gravatar</th><th>GravURL</th></tr></thead>';
+				echo '<thead><tr><th>ID</th><th>Name</th><th>DisplayName</th><th>Count</th><th>Profile URL</th><th>Gravatar</th><th>GravURL</th></tr></thead>';
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
@@ -286,10 +307,11 @@ function display_reports_page( $details ) {
 						admin_url( 'admin.php' )
 					);
 					printf(
-						'<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
+						'<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
 						$c->ID,
 						$c->prop_name,
 						$c->display_name,
+						$c->count,
 						make_clickable( $c->user_nicename ? 'https://profile.wordpress.org/' . $c->user_nicename . '/' : '' ),
 						$c->ID ? get_avatar( $c->ID, min( 96, $_GET['size'] ?? 32 ) ) : '',
 						make_clickable( $c->ID ? get_avatar_url( $c->ID, [ 'size' => $_GET['size'] ?? 64 ] ) : '' )
