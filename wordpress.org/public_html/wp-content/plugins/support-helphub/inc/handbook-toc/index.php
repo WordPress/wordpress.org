@@ -9,7 +9,9 @@
 namespace WordPressdotorg\HelpHub;
 
 add_action( 'init', function() {
-	require __DIR__ . '/table-of-contents.php';
+	if ( ! class_exists( 'WPorg_Handbook_TOC' ) ) {
+		require __DIR__ . '/table-of-contents.php';
+	}
 
 	$post_types = array_keys( helphub_post_types()->post_types );
 
