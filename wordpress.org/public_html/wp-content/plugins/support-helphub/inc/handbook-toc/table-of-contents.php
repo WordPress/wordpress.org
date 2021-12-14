@@ -42,6 +42,7 @@ class WPorg_Handbook_TOC {
 
 		$this->args = (object) wp_parse_args( $args, array(
 			'header_text' => __( 'Topics', 'wporg' ),
+			'top_text'    => __( 'Top &uarr;', 'wporg' ),
 		) );
 	}
 
@@ -186,7 +187,7 @@ class WPorg_Handbook_TOC {
 			}
 
 			if ( ! $first ) {
-				$replacement .= '<p class="toc-jump"><a href="#top">' . __( 'Top &uarr;', 'wporg' ) . '</a></p>';
+				$replacement .= '<p class="toc-jump"><a href="#top">' . $this->args->top_text . '</a></p>';
 			} else {
 				$first = false;
 			}
