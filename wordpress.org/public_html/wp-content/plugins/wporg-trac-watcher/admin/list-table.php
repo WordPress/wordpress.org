@@ -56,22 +56,26 @@ class Commits_List_Table extends WP_List_Table {
 		}
 
 		if ( ! empty( $args['version'] ) ) {
-			$where .= $wpdb->prepare( ' AND version LIKE %s', $wpdb->esc_like( $args['version'] ) . '%' );
+			$where .= $wpdb->prepare( ' AND r.version LIKE %s', $wpdb->esc_like( $args['version'] ) . '%' );
 		}
 		if ( ! empty( $args['branch'] ) ) {
-			$where .= $wpdb->prepare( ' AND branch LIKE %s', $wpdb->esc_like( $args['branch'] ) );
+			$where .= $wpdb->prepare( ' AND r.branch LIKE %s', $wpdb->esc_like( $args['branch'] ) );
 		}
 
-		if ( ! empty( $args['revisions'] ) && preg_match( '!(?P<start>\d+):(?P<end>\d+)!', $args['revisions'], $m ) ) {
-			$where .= $wpdb->prepare( ' AND id BETWEEN %d AND %d', $m['start'], $m['end'] );
+		if ( ! empty( $args['revisions'] ) && preg_match( '!(?P<start>\d+)[:-](?P<end>(HEAD|\d+))!', $args['revisions'], $m ) ) {
+			if ( 'HEAD' === $m['end'] ) {
+				$where .= $wpdb->prepare( ' AND r.id > %d', $m['start'] );
+			} else {
+				$where .= $wpdb->prepare( ' AND r.id BETWEEN %d AND %d', $m['start'], $m['end'] );
+			}
 		}
 		if ( ! empty( $args['revisions'] ) && preg_match( '!^[\d,]+$!', $args['revisions'], $m ) ) {
 			$ids = implode(',', array_map( 'intval', explode( ',', $args['revisions'] ) ) );
-			$where .= " AND id IN({$ids})";
+			$where .= " AND r.id IN({$ids})";
 		}
 
 		if ( ! empty( $args['author'] ) ) {
-			$where .= $wpdb->prepare( ' AND author = %s', $args['author'] );
+			$where .= $wpdb->prepare( ' AND r.author = %s', $args['author'] );
 		}
 
 		if ( ! empty( $args['s'] ) ) {
@@ -79,13 +83,11 @@ class Commits_List_Table extends WP_List_Table {
 				$join .= "LEFT JOIN {$props_table} p ON r.id = p.revision";
 			}
 			$where .= $wpdb->prepare(
-				' AND ( message LIKE %s OR p.prop_name LIKE %s )',
+				' AND ( r.message LIKE %s OR p.prop_name LIKE %s )',
 				'%' . $wpdb->esc_like( $args['s'] ) . '%',
 				'%' . $wpdb->esc_like( $args['s'] ) . '%',
 			);
 		}
-
-	//		$where .= ' AND r.id IN( 46290, 51195, 50933, 50810 )';
 
 		$this->items = $wpdb->get_results(
 			"SELECT SQL_CALC_FOUND_ROWS r.* FROM {$rev_table} r
@@ -116,13 +118,12 @@ class Commits_List_Table extends WP_List_Table {
 		$revisions = wp_list_pluck( $this->items, 'id' );
 		$revisions = implode( ',', array_map( 'intval', $revisions ) );
 
-		$props_list = $wpdb->get_results( $wpdb->prepare(
+		$props_list = $wpdb->get_results(
 			"SELECT revision,user_id,prop_name
 			FROM {$props_table}
 			WHERE revision IN({$revisions})
-			ORDER BY LENGTH(prop_name) DESC
-			"
-		) );
+			ORDER BY LENGTH(prop_name) DESC"
+		);
 
 		foreach ( $this->items as $i => $details ) {
 			$this->items[$i]->props = wp_list_pluck(
@@ -214,12 +215,12 @@ class Commits_List_Table extends WP_List_Table {
 
 		$views = [
 			'all' => '<a href="' . esc_url( $url ) . '">All</a>',
-			'unknown-props' => '<a href="' . esc_url( add_query_arg( [ 'unknown-props' => 1 ], $url ) ) . '">Unknown Props</a>',
+			'unknown-props' => '<a href="' . esc_url( add_query_arg( 'unknown-props', 1, $url ) ) . '">Unknown Props</a>',
 		];
 
 		if ( defined( 'WP_CORE_LATEST_RELEASE' ) && 'core' === $this->svn['slug'] ) {
 			$v = sprintf( '%.1f', ((float)WP_CORE_LATEST_RELEASE+0.1) );
-			$views['commits-to-trunk'] = '<a href="' . esc_url( add_query_arg( [ 'version' => $v ], $url ) ) . '">Commits to ' . $v .'</a>';
+			$views['commits-to-trunk'] = '<a href="' . esc_url( add_query_arg( 'version', $v, $url ) ) . '">Commits to ' . $v .'</a>';
 		}
 
 		return $views;
@@ -344,7 +345,7 @@ class Commits_List_Table extends WP_List_Table {
 					$output .= sprintf(
 						'<span class="user" data-prop="%s" data-user="%s">',
 						esc_attr( $prop ),
-						esc_attr( $user->user_login )
+						esc_attr( $user->user_login ?? '' )
 					);
 					if ( $user ) {
 						$output .= '<a href="' . esc_url( $profile ) . '" target="_blank">';

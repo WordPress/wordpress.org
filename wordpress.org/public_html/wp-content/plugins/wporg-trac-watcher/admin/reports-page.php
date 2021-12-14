@@ -5,9 +5,15 @@ function display_reports_page( $details ) {
 	global $wpdb;
 	$url       = add_query_arg( 'page', $_REQUEST['page'], admin_url( 'admin.php' ) );
 	$what      = $_REQUEST['what'] ?? '';
-	$version   = $_REQUEST['version'] ?? (WP_CORE_LATEST_RELEASE+0.1);
+	$version   = $_REQUEST['version'] ?? null;
 	$revisions = $_REQUEST['revisions'] ?? '';
 	$branch    = $_REQUEST['branch'] ?? '';
+	$is_core   = ( 'core' === $details['slug'] );
+
+	// Default to the latest version for core.
+	if ( $is_core && is_null( $version ) ) {
+		$version = sprintf( '%.1f', WP_CORE_LATEST_RELEASE + 0.1 );
+	}
 
 	$url = add_query_arg( 'version', $version, $url );
 	?>
@@ -20,7 +26,9 @@ function display_reports_page( $details ) {
 			<li><a href="<?php echo $url; ?>&what=typos">Props typos matching filter</a></li>
 			<li><a href="<?php echo $url; ?>&what=raw-contributors-and-committers">All Props+Committers matching filter grouped together</a></li>
 			
+			<?php if ( $is_core ) { ?>
 			<li><a href="<?php echo $url; ?>&what=versions-contributed">Versions which users have contributed to. Ignores filter.</a></li>
+			<?php } ?>
 		</ol>
 
 		<form>
@@ -28,7 +36,7 @@ function display_reports_page( $details ) {
 			<input type="hidden" name="what" value="<?php echo esc_attr( $what ); ?>">
 
 		<?php
-		if ( 'core' === $details['slug'] ) {
+		if ( $is_core ) {
 			echo '<select name="version"><option value="">Version</option>';
 			foreach ( get_wordpress_versions() as $v ) {
 				printf(
@@ -56,7 +64,7 @@ function display_reports_page( $details ) {
 		}
 
 		// Revision range.
-		echo '<input type="text" name="revisions" placeholder="Revs: 1:50 or 1,2,4,5" value="' . esc_attr( $revisions ) .'">';
+		echo '<input type="text" name="revisions" placeholder="Revs: 1:HEAD or 1,2,4,5" value="' . esc_attr( $revisions ) .'">';
 
 		echo '<input type="submit" class="button button-primary" value="Filter">';
 
@@ -69,8 +77,12 @@ function display_reports_page( $details ) {
 
 		// Revisions.
 		if ( ! empty( $revisions ) ) {
-			if ( false !== strpos( $revisions, ':' ) || false !== strpos( $revisions, '-' )  ) {
-				$where .= $wpdb->prepare( ' AND r.id BETWEEN %d AND %d', preg_split( '![-:]!', $revisions ) );
+			if (  preg_match( '!(?P<start>\d+)[:-](?P<end>(HEAD|\d+))!', $args['revisions'], $m ) ) {
+				if ( 'HEAD' === $m['end'] ) {
+					$where .= $wpdb->prepare( ' AND r.id > %d', $m['start'] );
+				} else {
+					$where .= $wpdb->prepare( ' AND r.id BETWEEN %d AND %d', $m['start'], $m['end'] );
+				}
 			} elseif ( false !== strpos( $revisions, ',' ) ) {
 				$ids = implode( ',', array_map( 'intval', explode( ',', $revisions ) ) );
 				$where .= " AND r.id IN({$ids})";
@@ -200,6 +212,80 @@ function display_reports_page( $details ) {
 						ORDER BY `count` DESC"
 					);
 
+					// Compress the versions list down to a smaller range.
+					$compress = function( $versions ) {
+						$in = $versions;
+						$out = [];
+						if ( ! is_array( $versions ) ) {
+							$versions = preg_split( '![,\s]+!', $versions );
+						}
+
+						// Don't try to compress only a few versions.
+						if ( count( $versions ) <= 2 ) {
+							return $in;
+						}
+
+						// [ X.Y => 0, X.Y+1 => 1, ... ]
+						$versions = array_flip( $versions );
+
+						$not_a_version = [
+							'0.9', '1.1', '1.2', '1.4', '1.7', '1.8', '1.9',
+						];
+
+						// 2.4 + 2.5 are special. 2.4 was skipped, and many users only have a 2.4 or a 2.5 prop. Give them both versions if they have either.
+						if ( isset( $versions['2.5'] ) || isset( $versions['2.4'] ) ) {
+							$versions['2.5'] = $version['2.4'] = 1;
+						}
+
+						$i = 0; // This counter is just here to protect against infinite loops should something go wrong.
+						while ( $versions && $i++ < 40 ) {
+							$min   = sprintf( '%.1f', min( array_keys( $versions ) ) );
+							$max   = sprintf( '%.1f', max( array_keys( $versions ) ) );
+							if ( $min === $max ) {
+								$out[] = $min;
+								break;
+							} elseif ( $max - $min < 0.2 ) {
+								$out[] = "{$min}-{$max}";
+								break;
+							}
+
+							foreach ( range( $min, $max+0.1, 0.1 ) as $v ) {
+								$v = sprintf( '%.1f', $v );
+
+								if ( in_array( $v, $not_a_version ) ) {
+									unset( $versions[ $v ] );
+									continue;
+								}
+
+								if ( ! isset( $versions[ $v ] ) ) {
+									$last = sprintf( '%.1f', $v - 0.1 );
+
+									if ( $last == $min ) {
+										$out[] = $last;
+										unset( $versions[ $v ] );
+										break;
+									} elseif ( $last - $min < 0.15 ) {
+										// No point doing 1-2, just do 1, 2
+										$out[] = $min;
+										$out[] = $last;
+									} else {
+										$out[] = "{$min}-{$last}";
+									}
+									break;
+								} elseif ( $v == $max ) {
+									$out[] = "{$min}-{$max}"; // (5)";
+									unset( $versions[ $v ] );
+									break;
+								} else {
+									// no break. We're between a start, and end version.
+								}
+								unset( $versions[ $v ] );
+							}
+						}
+
+						return implode( ', ', $out );
+					};
+
 					echo '<table class="widefat striped">';
 					echo '<thead><tr><th>Prop</th><th>Count</th><th>Versions</th></tr></thead>';
 					foreach ( $details as $p ) {
@@ -222,7 +308,7 @@ function display_reports_page( $details ) {
 							$profile,
 							$p->count,
 							esc_attr( $p->versions ),
-							$p->versions
+							$compress( $p->versions )
 						);
 					}
 					echo '</table>';

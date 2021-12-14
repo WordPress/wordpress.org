@@ -77,12 +77,13 @@ function load_page() {
 }
 
 function display_list_table( $details ) {
+	$url   = add_query_arg( 'page', $_REQUEST['page'], admin_url( 'admin.php' ) );
 	$table = new Commits_List_Table( $details );
 	$table->prepare_items( $_REQUEST );
 	?>
 		<div class="wrap propstable">
 			<h2><?php echo esc_html( $details['name'] ); ?> Props</h2>
-			<form method="GET" action="<?php echo esc_url( add_query_arg() ); ?>">
+			<form method="GET" action="<?php echo esc_url( $url ); ?>">
 				<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>" />
 				<?php $table->search_box( 'Search', 's' ); ?>
 				<?php $table->display(); ?>
