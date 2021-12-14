@@ -299,13 +299,6 @@ function display_reports_page( $details ) {
 				echo '<table class="widefat striped">';
 				echo '<thead><tr><th>ID</th><th>Name</th><th>DisplayName</th><th>Count</th><th>Profile URL</th><th>Gravatar</th><th>GravURL</th></tr></thead>';
 				foreach ( $details as $c ) {
-					$link = add_query_arg(
-						[
-							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
-							'revisions' => $c->revisions
-						],
-						admin_url( 'admin.php' )
-					);
 					printf(
 						'<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
 						$c->ID,
