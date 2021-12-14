@@ -122,7 +122,7 @@ class Commits_List_Table extends WP_List_Table {
 			"SELECT revision,user_id,prop_name
 			FROM {$props_table}
 			WHERE revision IN({$revisions})
-			ORDER BY LENGTH(prop_name) DESC"
+			ORDER BY user_id IS NULL DESC, LENGTH(prop_name) DESC"
 		);
 
 		foreach ( $this->items as $i => $details ) {

@@ -37,8 +37,8 @@ add_action( 'admin_post_svn_save', function() {
 		$wpdb->delete(
 			$svn['props_table'],
 			[
-				'id'        => $the_prop->id,
-				'revision'  => $rev,
+				'id'       => $the_prop->id,
+				'revision' => $rev,
 			]
 		);
 	} elseif ( 'edit' === $action && $the_prop ) {
@@ -72,7 +72,7 @@ add_action( 'admin_post_svn_save', function() {
 				],
 				[
 					'prop_name' => $the_prop->prop_name,
-					'user_id' => null
+					'user_id'   => null
 				]
 			);
 		}
@@ -108,6 +108,18 @@ add_action( 'admin_post_svn_save', function() {
 				'user_id'   => $user,
 			]
 		);
+
+		// Update any other occurences of this typo.
+		$wpdb->update(
+			$svn['props_table'],
+			[
+				'user_id'   => $user,
+			],
+			[
+				'prop_name' => $prop_name,
+				'user_id'   => null
+			]
+		);
 	}
 
 	// Output the replacement `<td>`'s
@@ -139,25 +151,28 @@ add_action( 'admin_post_svn_reparse', function() {
 		die( -1 );
 	}
 
-	// Remove the props for the commit first.
+	// Reparse
+	$raw_props = Props\from_log( $details->message );
+
+	// Fetch all the user_id's
+	$props = [];
+	foreach ( $raw_props as $prop ) {
+		$props[ $prop ] = Props\find_user_id( $prop, $svn );
+	}
+
+	// Remove the props for the commit, after reparsing. This is so that any usernames only corrected within that commit get picked up.
 	$wpdb->delete(
 		$svn['props_table'],
-		[
-			'revision' => $rev
-		]
+		[ 'revision' => $rev ]
 	);
 
-	// Reparse
-	$props = Props\from_log( $details->message );
-
 	// Reinsert
-	foreach ( $props as $prop ) {
+	foreach ( $props as $prop => $user_id ) {
 		$data = [
 			'revision'  => $rev,
 			'prop_name' => $prop,
 		];
 
-		$user_id = Props\find_user_id( $prop, $svn );
 		if ( $user_id ) {
 			$data['user_id'] = $user_id;
 		}

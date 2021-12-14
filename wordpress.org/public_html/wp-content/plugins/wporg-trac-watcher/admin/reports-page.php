@@ -24,6 +24,7 @@ function display_reports_page( $details ) {
 			<li><a href="<?php echo $url; ?>&what=committers">All Committers matching filter</a></li>
 			<li><a href="<?php echo $url; ?>&what=cloud">Cloud of Props matching filter</a></li>
 			<li><a href="<?php echo $url; ?>&what=typos">Props typos matching filter</a></li>
+			<li><a href="<?php echo $url; ?>&what=unknown-props">Unknown Props/typos matching filter</a></li>
 			<li><a href="<?php echo $url; ?>&what=raw-contributors-and-committers">All Props+Committers matching filter grouped together</a></li>
 			
 			<?php if ( $is_core ) { ?>
@@ -345,6 +346,39 @@ function display_reports_page( $details ) {
 						'https://profiles.wordpress.org/' . $c->user_nicename . '/',
 						$c->display_name ?: $c->user_nicename,
 						$c->typos,
+						$c->count,
+						$link,
+						'[' . str_replace( ',', '] [', $c->revisions ) . ']'
+					);
+				}
+				echo '</table>';
+
+				break;
+			case 'unknown-props':
+				$details = $wpdb->get_results(
+					"SELECT p.prop_name,
+						COUNT( * ) as count,
+						GROUP_CONCAT( p.revision ORDER BY p.revision ASC ) as revisions
+					FROM {$details['props_table']} p
+						LEFT JOIN {$details['rev_table']} r ON p.revision = r.id
+					WHERE $where AND p.user_id IS NULL
+					GROUP BY p.prop_name
+					ORDER BY r.id DESC"
+				);
+
+				echo '<table class="widefat striped">';
+				echo '<thead><tr><th>Prop</th><th>Count</th><th>Revisions</th></tr></thead>';
+				foreach ( $details as $c ) {
+					$link = add_query_arg(
+						[
+							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
+							'revisions' => $c->revisions
+						],
+						admin_url( 'admin.php' )
+					);
+					printf(
+						'<tr><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',
+						esc_html( $c->prop_name ),
 						$c->count,
 						$link,
 						'[' . str_replace( ',', '] [', $c->revisions ) . ']'
