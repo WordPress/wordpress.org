@@ -9,7 +9,7 @@
 			/* translators: %s: WP.org profile link */
 			__( 'You are currently editing the user %s.', 'rosetta' ),
 			sprintf( '<a href="%1$s">%2$s</a>',
-				'https://profiles.wordpress.org/' . $user->user_nicename,
+				'https://profiles.wordpress.org/' . $user->user_nicename . '/',
 				$user->user_login
 			)
 		);
