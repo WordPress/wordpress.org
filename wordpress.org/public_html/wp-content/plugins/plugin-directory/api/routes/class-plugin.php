@@ -341,7 +341,7 @@ class Plugin extends Base {
 			</div>
 			<p class="reviewer">
 				<?php
-				$review_author_markup_profile = esc_url( 'https://profiles.wordpress.org/' . $reviewer->user_nicename );
+				$review_author_markup_profile = esc_url( 'https://profiles.wordpress.org/' . $reviewer->user_nicename . '/' );
 				$review_author_markup         = '<a href="' . $review_author_markup_profile . '">';
 				$review_author_markup        .= get_avatar( $reviewer->ID, 16, 'monsterid' ) . '</a>';
 				$review_author_markup        .= '<a href="' . $review_author_markup_profile . '" class="reviewer-name">';
