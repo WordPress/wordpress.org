@@ -12,7 +12,7 @@ function display_reports_page( $details ) {
 
 	// Default to the latest version for core.
 	if ( $is_core && is_null( $version ) ) {
-		$version = sprintf( '%.1f', WP_CORE_LATEST_RELEASE + 0.1 );
+		$version = sprintf( '%.1f', floatval( WP_CORE_LATEST_RELEASE ) + 0.1 );
 	}
 
 	$url = add_query_arg( 'version', $version, $url );

@@ -2,6 +2,9 @@
 namespace WordPressdotorg\Trac\Watcher;
 /**
  * Plugin Name: WordPress.org Trac & SVN Watcher.
+ * Description: This plugin imports Trac activity & SVN activity into WordPress.org databases. Trac actions for Profiles, and SVN activity for reporting, profiles, and make.w.org/* reporting.
+ * Version: 1.0
+ * Author: Dion Hulse
  */
 
 define( 'PLUGIN', __FILE__ );
@@ -59,7 +62,7 @@ function create_tables() {
 		UNIQUE KEY `md5_id` (`md5_id`),
 		KEY `category` (`category`),
 		KEY `username` (`username`)
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8;"; // UTF8, but treated as latin1, due to historical profiles reasons.
 
 	$revisions_table = "CREATE TABLE IF NOT EXISTS `%s` (
 		`id` int(11) unsigned NOT NULL,
@@ -85,7 +88,6 @@ function create_tables() {
 		KEY `revision` (`revision`)
 	) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
-	return; // TODO
 	foreach ( SVN\get_svns() as $prefix => $info ) {
 		$wpdb->query( sprintf( $trac_table, 'trac_' . $prefix ) );
 		if ( ! empty( $info['rev_table'] ) ) {

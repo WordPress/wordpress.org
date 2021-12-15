@@ -125,6 +125,12 @@ class Commits_List_Table extends WP_List_Table {
 			ORDER BY user_id IS NULL DESC, LENGTH(prop_name) DESC"
 		);
 
+		// Fill user caches, some commits have a lot of props, yay! :)
+		$unique_user_ids = array_map( 'intval', array_filter( array_unique( wp_list_pluck( $props_list, 'user_id' ) ) ) );
+		if ( $unique_user_ids ) {
+			cache_users( $unique_user_ids );
+		}
+
 		foreach ( $this->items as $i => $details ) {
 			$this->items[$i]->props = wp_list_pluck(
 				wp_list_filter(

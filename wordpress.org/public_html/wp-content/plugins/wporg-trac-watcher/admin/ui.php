@@ -21,6 +21,11 @@ add_action( 'admin_menu', function() {
 	}
 
 	foreach ( $svns as $slug => $details ) {
+		// No point showing this UI if we're not importing Props.
+		if ( empty( $details['props_table'] ) ) {
+			continue;
+		}
+
 		$name = sprintf( "%s Props", $details['name'] );
 		$hook = add_menu_page(
 			$name,
@@ -35,7 +40,8 @@ add_action( 'admin_menu', function() {
 
 		$hook = add_submenu_page(
 			'props-edit-' . $slug,
-			'Reports', 'Reports',
+			'Reports',
+			'Reports',
 			'edit_posts',
 			'props-reports-' . $slug,
 			function() use ( $details ) {
@@ -57,10 +63,8 @@ function load_page() {
 	);
 
 	// Run the import upon loading the page if it hasn't run recently.
-	if ( wp_next_scheduled( 'import_revisions_from_svn' ) < time() + 5*MINUTE_IN_SECONDS ) {
-		ob_start();
+	if ( get_site_transient( 'import_revisions_from_svn' ) < time() - 5*MINUTE_IN_SECONDS ) {
 		do_action( 'import_revisions_from_svn' );
-		ob_end_clean();
 	}
 
 	wp_enqueue_script( 'trac-watch', plugins_url( 'admin/trac-watch.js', PLUGIN ), [ 'jquery', 'thickbox' ], filemtime( __DIR__ . '/trac-watch.js' ) );

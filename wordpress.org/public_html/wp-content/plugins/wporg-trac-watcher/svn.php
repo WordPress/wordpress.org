@@ -6,6 +6,8 @@ use function WordPressdotorg\Trac\Watcher\Props\find_user_id;
 const MAX_REVISIONS = 250;
 
 add_action( 'import_revisions_from_svn', function() {
+	set_site_transient( 'import_revisions_from_svn', time() );
+
 	foreach ( get_svns() as $svn ) {
 		import_revisions( $svn );
 	}
@@ -37,8 +39,13 @@ function import_revisions( $svn ) {
 
 	$svn_url     = $svn['url'];
 	$slug        = $svn['slug'];
-	$db_table    = $svn['rev_table'];
+	$db_table    = $svn['rev_table'] ?? false;
 	$props_table = $svn['props_table'] ?? false;
+
+	// If this SVN doesn't have a rev_table defined, it's not being imported currently.
+	if ( ! $db_table ) {
+		return false;
+	}
 
 	$last_revision = $wpdb->get_var( "SELECT max(id) FROM {$db_table}" );
 	if ( ! is_numeric( $last_revision ) ) {
@@ -73,8 +80,6 @@ function import_revisions( $svn ) {
 		if ( $id <= $last_revision ) {
 			continue;
 		}
-
-		echo "Importing {$id} \n";
 
 		$paths  = (array) $change->paths->path;
 		$paths  = array_filter( $paths, 'is_string' ); // hacky, to remove attributes array, leaving just paths.
