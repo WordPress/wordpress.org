@@ -144,7 +144,7 @@ class Release_Confirmation {
 			foreach ( $data['committer'] as $i => $login ) {
 				$data['committer'][ $i ] = sprintf(
 					'<a href="%s">%s</a>',
-					'https://profiles.wordpress.org/' . get_user_by( 'login', $login )->user_nicename,
+					'https://profiles.wordpress.org/' . get_user_by( 'login', $login )->user_nicename . '/',
 					esc_html( $login )
 				);
 			}

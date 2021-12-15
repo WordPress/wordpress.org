@@ -108,7 +108,7 @@ class Author_Card {
 		<div class="profile-personal">
 			<?php echo get_avatar( $author->ID, 48 ); ?>
 			<div class="profile-details">
-				<strong><a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>"><?php echo $author->user_login; ?></a></strong>
+				<strong><a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>/"><?php echo $author->user_login; ?></a></strong>
 				<?php
 				$author_links = array(
 					sprintf(
@@ -126,8 +126,8 @@ class Author_Card {
 				?>
 
 				<span class="profile-links">
-					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>"><?php _e( 'profile', 'wporg-plugins' ); ?></a> |
-					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>"><?php _e( 'support', 'wporg-plugins' ); ?></a>
+					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>/"><?php _e( 'profile', 'wporg-plugins' ); ?></a> |
+					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>/"><?php _e( 'support', 'wporg-plugins' ); ?></a>
 				</span>
 
 				<div class="profile-email">

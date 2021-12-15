@@ -295,7 +295,7 @@ class Plugin extends Base {
 			return false;
 		}
 
-		return 'https://profiles.wordpress.org/' . $u->user_nicename;
+		return 'https://profiles.wordpress.org/' . $u->user_nicename . '/';
 	}
 
 	/**

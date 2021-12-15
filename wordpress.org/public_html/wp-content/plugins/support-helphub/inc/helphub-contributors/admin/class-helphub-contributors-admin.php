@@ -169,7 +169,7 @@ class Helphub_Contributors_Admin {
 
 		if ( is_array( $contributors ) ) :
 			foreach ( $contributors as $contributor ) {
-				$contributor_link = '<a href="https://profiles.wordpress.org/' . esc_html( $contributor ) . '">@' . esc_html( $contributor ) . '</a>';
+				$contributor_link = '<a href="https://profiles.wordpress.org/' . esc_html( $contributor ) . '/">@' . esc_html( $contributor ) . '</a>';
 
 				if ( end( $contributors ) == $contributor ) {
 					$contributor_link .= esc_html__( '.', 'wporg-forums' );

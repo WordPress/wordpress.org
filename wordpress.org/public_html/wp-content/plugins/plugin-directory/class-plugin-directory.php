@@ -1804,7 +1804,7 @@ class Plugin_Directory {
 
 			Tools::audit_log( sprintf(
 				'Submitted by <a href="%s">%s</a>.',
-				esc_url( '//profiles.wordpress.org/' . $owner->user_nicename ),
+				esc_url( '//profiles.wordpress.org/' . $owner->user_nicename . '/' ),
 				$owner->user_login
 			), $result->ID );
 		}

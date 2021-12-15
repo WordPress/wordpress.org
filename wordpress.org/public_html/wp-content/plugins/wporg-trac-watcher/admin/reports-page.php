@@ -107,7 +107,7 @@ function display_reports_page( $details ) {
 					$counts[] = (object)[
 						'id' => $r->id,
 						'name' => $r->display_name ?: $r->user_nicename,
-						'link' => 'https://profiles.wordpress.org/' . $r->user_nicename,
+						'link' => 'https://profiles.wordpress.org/' . $r->user_nicename . '/',
 						'count' => $r->count
 					];
 				}
