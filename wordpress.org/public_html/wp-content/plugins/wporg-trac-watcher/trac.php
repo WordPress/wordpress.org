@@ -1,9 +1,60 @@
 <?php
 namespace WordPressdotorg\Trac\Watcher\Trac;
+use function WordPressdotorg\Trac\Watcher\SVN\get_svns;
+use SimpleXmlElement;
 
 add_action( 'import_trac_feeds', function() {
-	// Trac RSS feed import from profiles.w.org to be moved here.
+
+	foreach ( get_svns() as $svn ) {
+		if ( empty( $svn['trac'] ) || empty( $svn['trac_table'] ) ) {
+			continue;
+		}
+
+		import_trac_feed( $svn );
+	}
 } );
+
+function import_trac_feed( $svn ) {
+	global $wpdb;
+
+	$feed_url = $svn['trac'] . '/timeline?ticket=on&changeset=on&milestone=on&wiki=on&max=50&daysback=5&format=rss';
+
+	$feed = wp_remote_retrieve_body( wp_remote_get( $feed_url, array( 'timeout' => 60 ) ) );
+	if ( ! $feed ) {
+		return;
+	}
+
+	$xml = new SimpleXmlElement( $feed );
+	if ( ! isset( $xml->channel->item ) ) {
+		return;
+	}
+
+	$trac_table = $svn['trac_table']; // Not user input, safe.
+
+	foreach ( $xml->channel->item as $item ) {
+		$dc     = $item->children( 'http://purl.org/dc/elements/1.1/' );
+		$md5_id = md5( strip_tags( $item->title . $dc->creator . $item->pubDate ) );
+
+		if ( $wpdb->get_var( $wpdb->prepare( "SELECT md5_id FROM {$trac_table} WHERE md5_id = %s LIMIT 1", $md5_id ) ) ) {
+			// if this entry is already in our database, that means all the previous ones should be too
+			break;
+		}
+
+		$wpdb->insert(
+			$trac_table,
+			[
+				'md5_id'      => $md5_id,
+				'description' => trim( strip_tags( (string) $item->description, '<a><strike>' ) ),
+				'summary'     => (string) $item->summary,
+				'category'    => (string) $item->category,
+				'username'    => (string) $dc->creator,
+				'link'        => (string) $item->link,
+				'pubdate'     => gmdate( 'Y-m-d H:i:s', strtotime( (string) $item->pubDate ) ),
+				'title'       => (string) $item->title,
+			]
+		);
+	}
+}
 
 function format_trac_markup( $message ) {
 	$message = esc_html( $message );

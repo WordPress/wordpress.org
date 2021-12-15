@@ -89,7 +89,9 @@ function create_tables() {
 	) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
 	foreach ( SVN\get_svns() as $prefix => $info ) {
-		$wpdb->query( sprintf( $trac_table, 'trac_' . $prefix ) );
+		if ( ! empty( $info['trac_table'] ) ) {
+			$wpdb->query( sprintf( $trac_table, $info['trac_table'] ) );
+		}
 		if ( ! empty( $info['rev_table'] ) ) {
 			$wpdb->query( sprintf( $revisions_table, $info['rev_table'] ) );
 		}
