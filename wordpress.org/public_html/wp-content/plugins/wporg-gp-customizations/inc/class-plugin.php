@@ -496,7 +496,7 @@ class Plugin {
 	 * @return string profile.wordpress.org URL
 	 */
 	public function worg_profile_url( $url, $nicename ) {
-		return 'https://profiles.wordpress.org/' . $nicename;
+		return 'https://profiles.wordpress.org/' . $nicename . '/';
 	}
 
 	/**
