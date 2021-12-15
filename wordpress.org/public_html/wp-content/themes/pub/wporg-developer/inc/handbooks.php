@@ -232,7 +232,7 @@ class Devhub_Handbooks {
 				'/\B@([\w\-]+)/i',
 				function ( $matches ) {
 					return sprintf(
-						'<a href="https://profiles.wordpress.org/%s">@%s</a>',
+						'<a href="https://profiles.wordpress.org/%s/">@%s</a>',
 						esc_attr( $matches[1] ),
 						esc_html( $matches[1] )
 					);
