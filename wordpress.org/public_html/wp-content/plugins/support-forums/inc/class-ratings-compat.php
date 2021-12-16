@@ -73,6 +73,9 @@ class Ratings_Compat {
 		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
 
+		// Checks for review topics.
+		add_action( 'bbp_new_topic_pre_extras', array( $this, 'topic_pre_extras' ) );
+
 		// Add the rating to the Feed body/title
 		if ( did_action( 'bbp_feed' ) ) {
 			add_filter( 'bbp_get_topic_content', array( $this, 'feed_prepend_rating' ), 10, 2 );
@@ -333,6 +336,32 @@ class Ratings_Compat {
 				bbp_get_topic_author_id( $topic_id ),
 				$rating
 			);
+		}
+	}
+
+	/**
+	 * Replace warnings about 'topics' with warnings about 'reviews' when submitting a new review.
+	 */
+	public function topic_pre_extras( $forum_id ) {
+		if ( Plugin::REVIEWS_FORUM_ID != $forum_id ) {
+			return;
+		}
+
+		if ( ! bbp_has_errors() ) {
+			return;
+		}
+
+		// Replace the warnings about topics being too short with reviews.
+
+		// bbPress doesn't have a wrapper to check for specific errors, so we'll reach into bbPress.
+		if ( bbpress()->errors->get_error_message( 'bbp_topic_title' ) && empty( $_POST['bbp_topic_title'] ) ) {
+			bbpress()->errors->remove( 'bbp_topic_title' );
+			bbp_add_error( 'bbp_topic_title', __( '<strong>Error</strong>: Your review needs a title.', 'wporg-forums' ) );
+		}
+
+		if ( bbpress()->errors->get_error_message( 'bbp_topic_content' ) ) {
+			bbpress()->errors->remove( 'bbp_topic_content' );
+			bbp_add_error( 'bbp_topic_content', __( '<strong>Error</strong>: Your review cannot be empty.', 'wporg-forums' ) );
 		}
 	}
 
