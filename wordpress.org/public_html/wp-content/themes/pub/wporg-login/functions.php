@@ -53,6 +53,14 @@ function wporg_login_init() {
 add_action( 'init', 'wporg_login_init' );
 
 /**
+ * Disable the Core Language Selector on wp-login.php.
+ */
+function wporg_login_disable_lang_switcher() {
+	add_filter( 'get_available_languages', '__return_empty_array' );
+}
+add_action( 'login_init', 'wporg_login_disable_lang_switcher' );
+
+/**
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
