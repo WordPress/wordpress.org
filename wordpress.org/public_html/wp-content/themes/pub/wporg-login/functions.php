@@ -463,14 +463,6 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 	return $message;
 }
 
-// This is the action in the top of `wp_login_form()`, which is not used on wp-login.php, see below.
-function wporg_login_form_top( $message ) {
-	$message .= '<p class="intro">' . wporg_login_wporg_is_starpress() . '</p>';
-
-	return $message;
-}
-add_filter( 'login_form_top', 'wporg_login_form_top' );
-
 // This is the login messages, which is displayed on wp-login.php, which does not use wp_login_form() or it's actions.
 function wporg_login_errors_message( $errors, $redirect_to ) {
 	$errors->add(
