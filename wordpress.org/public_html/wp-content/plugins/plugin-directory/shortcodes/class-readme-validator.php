@@ -17,9 +17,14 @@ class Readme_Validator {
 				self::validate_readme();
 			}
 
-			$readme_url      = $_REQUEST['readme'] ?? '';
-			$readme_contents = $_POST['readme_contents'] ?? '';
-			$readme_contents = base64_decode( wp_unslash( $readme_contents ) );
+			$readme_url      = '';
+			$readme_contents = '';
+			if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
+				$readme_url = $_REQUEST['readme'];
+			}
+			if ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
+				$readme_contents = base64_decode( wp_unslash( $_POST['readme_contents'] ) );
+			}
 			?>
 
 			<form method="get" action="">
@@ -58,10 +63,10 @@ class Readme_Validator {
 	 * Validates readme.txt contents and adds feedback.
 	 */
 	protected static function validate_readme() {
-		if ( ! empty( $_REQUEST['readme'] ) ) {
+		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
 			$errors = Validator::instance()->validate_url( wp_unslash( $_REQUEST['readme'] ) );
 
-		} elseif ( ! empty( $_POST['readme_contents'] ) ) {
+		} elseif ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
 			$errors = Validator::instance()->validate_content( base64_decode( wp_unslash( $_REQUEST['readme_contents'] ) ) );
 
 		} else {
