@@ -28,7 +28,12 @@ if ( !empty( $_REQUEST['redirect_to'] ) ) {
 	</p>
 	<p class="login-password">
 		<label for="user_pass"><?php _e( 'Password', 'wporg-login' ); ?></label>
-		<input type="password" name="pwd" id="user_pass" class="input" value="" size="20" />
+		<span class="wp-pwd" style="display:block;">
+			<input type="password" name="pwd" id="user_pass" class="input password-input" value="" size="20" />
+			<button type="button" id="wp-hide-pw" class="button button-secondary wp-hide-pw hide-if-no-js" aria-label="<?php esc_attr_e( 'Show password', 'wporg-login' ); ?>">
+				<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+			</button>
+		</span>
 	</p>
 	<p class="login-remember"><label><input name="rememberme" type="checkbox" id="rememberme" value="forever" /> <?php _e( 'Remember Me', 'wporg-login' ); ?></label></p>
 	<p class="login-submit">
@@ -51,6 +56,20 @@ setTimeout( function() {
 		}
 		d.focus();
 		d.select();
+
+		var h = document.getElementById( 'wp-hide-pw' );
+		h.onclick = function() {
+			var p = document.getElementById( 'user_pass' );
+			if ( p.type === 'password' ) {
+				p.type = 'text';
+				h.ariaLabel = <?php echo json_encode( __( 'Hide password', 'wporg-login' ) ); ?>;
+				h.children[0].className = 'dashicons dashicons-hidden';
+			} else {
+				p.type = 'password';
+				h.ariaLabel = <?php echo json_encode( __( 'Show password', 'wporg-login' ) ); ?>;
+				h.children[0].className = 'dashicons dashicons-visibility';
+			}
+		}
 	} catch( e ){}
 }, 200 );
 </script>

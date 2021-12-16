@@ -64,7 +64,7 @@ add_action( 'login_init', 'wporg_login_disable_lang_switcher' );
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20210517' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20211216' );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
 
@@ -80,7 +80,7 @@ function wporg_login_scripts() {
 	}
 
 	wp_enqueue_style( 'wporg-normalize', get_template_directory_uri() . '/stylesheets/normalize.css', 3 );
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20210517' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20211216' );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
