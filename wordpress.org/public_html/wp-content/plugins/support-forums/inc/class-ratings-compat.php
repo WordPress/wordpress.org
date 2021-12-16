@@ -341,10 +341,43 @@ class Ratings_Compat {
 
 	/**
 	 * Replace warnings about 'topics' with warnings about 'reviews' when submitting a new review.
+	 * Add warnings about reviews containing links.
 	 */
 	public function topic_pre_extras( $forum_id ) {
 		if ( Plugin::REVIEWS_FORUM_ID != $forum_id ) {
 			return;
+		}
+
+		if (
+			! empty( $_POST['bbp_topic_content'] ) &&
+			(
+				false !== stripos( $_POST['bbp_topic_content'], 'https://' ) ||
+				false !== stripos( $_POST['bbp_topic_content'], 'http://' )
+			)
+		) {
+			// Send this review to pending after it gets published. 
+			setcookie( 'wporg_review_to_pending', 'links_blocked', time() + HOUR_IN_SECONDS, '/support/', 'wordpress.org', true, true );
+
+			bbp_add_error(
+				'no_links_please',
+				sprintf(
+					/* translators: %s: Link to forum user guide explaining this. */
+					__( '<strong>Error</strong>: Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
+					'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews'
+				)
+			);
+		} elseif ( ! empty( $_COOKIE['wporg_review_to_pending'] ) ) {
+			add_filter( 'bbp_new_topic_pre_insert', function( $data ) {
+				// If this is still for a review..
+				if ( Plugin::REVIEWS_FORUM_ID == $data['post_parent'] ) {
+					// Clear the cookie.
+					setcookie( 'wporg_review_to_pending', '', time() - HOUR_IN_SECONDS, '/support/', 'wordpress.org', true, true );
+
+					$data['post_status'] = bbp_get_pending_status_id();
+				}
+
+				return $data;
+			} );
 		}
 
 		if ( ! bbp_has_errors() ) {
