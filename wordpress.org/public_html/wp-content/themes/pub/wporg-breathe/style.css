@@ -581,7 +581,8 @@ article.page a.author-avatar img.avatar {
 
 /* Don't show the on-hover gravatar previews */
 body > .author-avatar,
-body > #grav-throbber {
+body > #grav-throbber,
+body > a.grav-tilt-parent {
     display: none;
 }
 
