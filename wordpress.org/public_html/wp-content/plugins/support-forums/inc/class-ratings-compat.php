@@ -374,6 +374,9 @@ class Ratings_Compat {
 					setcookie( 'wporg_review_to_pending', '', time() - HOUR_IN_SECONDS, '/support/', 'wordpress.org', true, true );
 
 					$data['post_status'] = bbp_get_pending_status_id();
+
+					// Add a meta field to find these moderated reviews later.
+					$data['meta_input']['_wporg_moderation_reason'] = $_COOKIE['wporg_review_to_pending'];
 				}
 
 				return $data;
