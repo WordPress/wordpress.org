@@ -14,7 +14,7 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		);
 
 		add_filter( 'template_redirect',               array( $this, 'redirects' ), 1 );
-		add_filter( 'handbook_label', array( $this, 'change_handbook_label' ), 10, 2 );
+		add_filter( 'handbook_label',                  array( $this, 'change_handbook_label' ), 10, 2 );
 		add_filter( 'handbook_display_toc',            array( $this, 'disable_toc' ) );
 		add_filter( 'get_post_metadata',               array( $this, 'fix_markdown_source_meta' ), 10, 4 );
 		add_filter( 'wporg_markdown_before_transform', array( $this, 'wporg_markdown_before_transform' ),  10, 2 );
@@ -288,6 +288,16 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		$markdown = preg_replace(
 			'@(\[.*?\])\(/packages/(.*?)/?(#.*?)?\)@i',
 			'$1(https://developer.wordpress.org/block-editor/designers-developers/developers/packages/packages-$2/$3)',
+			$markdown
+		);
+
+		// Strip the trailing Code is Poetry footer from packages.
+		// See https://github.com/WordPress/gutenberg/blob/trunk/packages/README.md
+		$markdown = preg_replace(
+			// Strip, any number of <br>'s, any number of <p...>'s (with no text content),
+			// an img with 'codeispoetry' in an attribute, followed by any number of </p>'s and <br>'s before EOF
+			'@(<br\s*/?>)*(<p[^>]*>)*<img[^>]*codeispoetry[^>]*/?>(<(/p|br\s*/?)>)*$@i',
+			'',
 			$markdown
 		);
 
