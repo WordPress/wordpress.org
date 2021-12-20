@@ -131,7 +131,7 @@ class WPorg_Handbook_TOC {
 			return $content;
 		}
 
-		$contents_header = 'h' . $items[0]['level']; // Duplicate the first <h#> tag in the document for the TOC header
+		$contents_header = 'h' . reset( $items )['level']; // Duplicate the first <h#> tag in the document for the TOC header
 		$toc            .= $this->styles;
 		$toc            .= '<div class="table-of-contents">';
 		$toc            .= "<$contents_header>" . esc_html( $this->args->header_text ) . "</$contents_header><ul class=\"items\">";
