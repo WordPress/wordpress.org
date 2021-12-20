@@ -378,6 +378,7 @@ function get_whitelist() {
 		),
 		'performance' => array(
 			// #core (inc committers) already included via get_parent_channel().
+			'shetheliving',
 		),
 		'polyglots' => array(
 			'Amieiro',
