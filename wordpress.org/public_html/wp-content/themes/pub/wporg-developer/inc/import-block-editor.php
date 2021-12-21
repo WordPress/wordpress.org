@@ -291,6 +291,14 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 			$markdown
 		);
 
+		// Support strikethrough.
+		// Transform ~~some text~~ to <s>some text</s>
+		$markdown = preg_replace(
+			'@~~(.*?)~~@',
+			'<s>$1</s>',
+			$markdown
+		);
+
 		// Strip the trailing Code is Poetry footer from packages.
 		// See https://github.com/WordPress/gutenberg/blob/trunk/packages/README.md
 		$markdown = preg_replace(
