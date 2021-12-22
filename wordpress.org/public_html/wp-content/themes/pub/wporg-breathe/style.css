@@ -136,6 +136,24 @@ input[type="submit"] {
 	color: #eee;
 }
 
+/*
+ * 2021 global header/footer
+ */
+.wp-block-group.global-header button,
+.wp-block-group.global-header html input[type="button"],
+.wp-block-group.global-header input[type="reset"],
+.wp-block-group.global-header input[type="submit"] {
+	/* Revert styles that should only apply to the content area. */
+	border-radius: initial;
+	box-shadow: initial;
+	font-size: initial;
+	line-height: initial;
+	text-shadow: initial;
+}
+
+
+/* site */
+
 .site,
 .custom-menu .site,
 .site-branding {
