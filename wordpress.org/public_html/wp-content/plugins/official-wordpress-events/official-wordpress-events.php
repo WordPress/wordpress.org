@@ -551,35 +551,20 @@ class Official_WordPress_Events {
 	protected function get_meetup_events() {
 		$events = array();
 
-		// Fetching events for a large number of groups from the Meetup API is currently a very inefficient process.
-		ini_set( 'memory_limit', '900M' );
-		ini_set( 'max_execution_time', 500 );
-
 		$meetup_client = $this->get_meetup_client();
 		if ( ! empty( $meetup_client->error->errors ) ) {
 			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $meetup_client->error ), true );
 			return $events;
 		}
 
-		$groups = $meetup_client->get_groups();
-		if ( ! empty( $meetup_client->error->errors ) ) {
-			$this->log( 'Failed to fetch groups: ' . wp_json_encode( $meetup_client->error ), true );
-			return $events;
-		}
-
-		$this->log( sprintf( 'received %d meetup groups', count( $groups ) ) );
-
-		$yesterday    = date( 'c', strtotime( '-1 day' ) );
-		$one_year_out = date( 'c', strtotime( '+1 year' ) );
-		$meetups      = $meetup_client->get_events(
-			wp_list_pluck( $groups, 'urlname' ),
+		$meetups = $meetup_client->get_network_events(
 			array(
 				// We want cancelled events too so they will be updated in our database table.
-				'status'          => 'upcoming,cancelled',
+				'status'         => false, // We want PAST, UPCOMING, CANCELLED. We'll let the below date cutoff take care of the PAST events.
 				// We don't want cancelled events in the past, but need some leeway here for timezones.
-				'no_earlier_than' => substr( $yesterday, 0, strpos( $yesterday, '+' ) ),
+				'min_event_date' => strtotime( '-1 day' ),
 				// We don't need to cache events happening more than a year from now.
-				'no_later_than'   => substr( $one_year_out, 0, strpos( $one_year_out, '+' ) ),
+				'max_event_date' => strtotime( '+1 year' ),
 			)
 		);
 		if ( ! empty( $meetup_client->error->errors ) ) {
@@ -624,8 +609,8 @@ class Official_WordPress_Events {
 			$latitude        = ! empty( $meetup['venue']['lat'] ) ? $meetup['venue']['lat'] : $meetup['group']['lat'];
 			$longitude       = ! empty( $meetup['venue']['lon'] ) ? $meetup['venue']['lon'] : $meetup['group']['lon'];
 
-			if ( isset( $meetup['venue'] ) ) {
-				$location = $this->format_meetup_venue_location( $meetup['venue'] );
+			if ( ! empty( $meetup['venue']['localized_location'] ) ) {
+				$location = $meetup['venue']['localized_location'];
 			} else {
 				$geocoded_location = $this->reverse_geocode( $latitude, $longitude );
 				$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location );
@@ -751,33 +736,6 @@ class Official_WordPress_Events {
 	}
 
 	/**
-	 * Format a meetup venue's location
-	 *
-	 * @param object $venue
-	 *
-	 * @return string
-	 */
-	protected function format_meetup_venue_location( $venue ) {
-		$location = array();
-
-		if ( isset( $venue['id'] ) && 26906060 === $venue['id'] ) {
-			return 'online';
-		}
-
-		foreach ( array( 'city', 'state', 'localized_country_name' ) as $part ) {
-			if ( ! empty( $venue[ $part ] ) ) {
-				if ( in_array( $part, array( 'state' ) ) ) {
-					$location[] = strtoupper( $venue[ $part ] );
-				} else {
-					$location[] = $venue[ $part ];
-				}
-			}
-		}
-
-		return implode( ', ', $location );
-	}
-
-	/**
 	 * Mark Meetup events as deleted in our database when they're deleted from Meetup.com.
 	 *
 	 * Meetup.com allows organizers to either cancel or delete events. If the event is cancelled, then the status
@@ -791,87 +749,34 @@ class Official_WordPress_Events {
 	public function mark_deleted_meetups() {
 		global $wpdb;
 
-		$chunked_db_events = array();
-
-		// Don't include anything before tomorrow, because time zone differences could result in past events being flagged.
-		$raw_events = $wpdb->get_results( "
-			SELECT id, source_id, meetup_url
-			FROM `". self::EVENTS_TABLE ."`
-			WHERE
-				type      = 'meetup'    AND
-				status    = 'scheduled' AND
-				date_utc >= DATE_ADD( NOW(), INTERVAL 24 HOUR )
-			LIMIT 5000
-		" );
-
-		foreach ( $raw_events as $event ) {
-			$chunked_db_events[ $event->meetup_url ][] = $event;
-		}
-
 		$meetup_client = $this->get_meetup_client();
 		if ( ! empty( $meetup_client->error->errors ) ) {
 			$this->log( 'Failed to instantiate meetup client: ' . wp_json_encode( $meetup_client->error ), true );
 			return;
 		}
 
-		$groups = $meetup_client->get_groups();
-		if ( ! empty( $meetup_client->error->errors ) ) {
-			$this->log( 'Failed to fetch groups: ' . wp_json_encode( $meetup_client->error ), true );
-			return;
-		}
-		$group_urlnames = wp_list_pluck( $groups, 'urlname' );
+		$raw_events = $wpdb->get_results( "
+			SELECT id, source_id
+			FROM `". self::EVENTS_TABLE ."`
+			WHERE
+				type      = 'meetup'    AND
+				status    = 'scheduled' AND
+				date_utc >= NOW()
+			LIMIT 5000
+		", ARRAY_A );
 
-		foreach ( $chunked_db_events as $group_url => $db_events ) {
-			$url_name = trim( wp_parse_url( $group_url, PHP_URL_PATH ), '/' );
+		$events         = array_column( $raw_events, 'source_id', 'id' ); // [ id, source ], [ id, source ] => [ id => source, id => source ]
+		$event_statuses = $meetup_client->get_events_status( $events );
 
-			if ( ! in_array( $url_name, $group_urlnames, true ) ) {
-				// The group doesn't exist anymore, mark its events as deleted.
-				foreach ( $db_events as $db_event ) {
-					$wpdb->update( self::EVENTS_TABLE, array( 'status' => 'deleted' ), array( 'id' => $db_event->id ) );
-
-					$this->log( "Group missing. Marked {$db_event->source_id} as deleted." );
-				}
-
-				continue;
-			}
-
-			$events = $meetup_client->get_group_events(
-				$url_name,
-				array(
-					'status' => 'upcoming,cancelled',
-				)
-			);
-
-			// Make sure we have a valid API response, to avoid marking events as deleted just because the request failed.
-			if ( is_wp_error( $events ) ) {
-				$breaking_error_codes = array( 'invalid_grant', 'auth_fail' );
-				if ( in_array( $events->get_error_code(), $breaking_error_codes, true ) ) {
-					$this->log(
-						sprintf(
-							'Failed to check for deleted meetup events: %s',
-							esc_html( $events->get_error_message() )
-						),
-						true
-					);
-					break;
-				}
-
-				continue;
-			}
-
-			$api_events = wp_list_pluck( $events, 'id' );
-
-			foreach ( $db_events as $db_event ) {
-				// If the event is still appearing in the Meetup.com API results, it hasn't been deleted.
-				if ( in_array( $db_event->source_id, $api_events, true ) ) {
-					continue;
-				}
-
-				// The event is missing from a valid response, so assume that it's been deleted.
-				$wpdb->update( self::EVENTS_TABLE, array( 'status' => 'deleted' ), array( 'id' => $db_event->id ) );
-
-				$this->log( "Event missing. Marked {$db_event->source_id} as deleted." );
-			}
+		foreach ( $event_statuses as $id => $status ) {
+			if ( ! $status ) {
+				$wpdb->update(
+					self::EVENTS_TABLE,
+					array( 'status' => 'deleted' ),
+					array( 'id' => $id )
+				);
+				$this->log( "Event missing. Marked DB ID {$id} as deleted." );
+			}	
 		}
 	}
 
