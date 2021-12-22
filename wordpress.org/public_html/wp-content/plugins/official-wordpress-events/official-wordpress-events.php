@@ -605,7 +605,7 @@ class Official_WordPress_Events {
 			 * Convert to local time, because the `date_utc` column in `wporg_events` is misnomed and actually
 			 * expects the _local_ time.
 			 */
-			$start_timestamp = ( $meetup['time'] / 1000 ) + ( $meetup['utc_offset'] / 1000 ); // convert to seconds
+			$start_timestamp = $meetup['time'] + $meetup['utc_offset'];
 			$latitude        = ! empty( $meetup['venue']['lat'] ) ? $meetup['venue']['lat'] : $meetup['group']['lat'];
 			$longitude       = ! empty( $meetup['venue']['lon'] ) ? $meetup['venue']['lon'] : $meetup['group']['lon'];
 
@@ -646,8 +646,8 @@ class Official_WordPress_Events {
 				'description'     => $meetup['description'] ?? '',
 				'num_attendees'   => $meetup['yes_rsvp_count'],
 				'start_timestamp' => $start_timestamp,
-				'end_timestamp'   => ( empty( $meetup['duration'] ) ? $start_timestamp : $start_timestamp + ( $meetup['duration'] / 1000 ) ), // convert to seconds.
-				'utc_offset'      => $meetup['utc_offset'] / 1000, // convert to seconds.
+				'end_timestamp'   => ( empty( $meetup['duration'] ) ? $start_timestamp : $start_timestamp + ( $meetup['duration'] ) ),
+				'utc_offset'      => $meetup['utc_offset'],
 				'location'        => $location,
 				'country_code'    => $country_code,
 				'latitude'        => $latitude,

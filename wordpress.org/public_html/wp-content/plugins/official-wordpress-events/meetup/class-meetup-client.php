@@ -44,7 +44,7 @@ class Meetup_Client extends API_Client {
 	/**
 	 * @var bool If true, the client will fetch fewer results, for faster debugging.
 	 */
-	protected $debug;
+	protected $debug = false;
 
 	/**
 	 * Meetup_Client constructor.
@@ -423,8 +423,8 @@ class Meetup_Client extends API_Client {
 	/**
 	 * Attempt to extract codes and messages from a suspected error response.
 	 *
-	 * @param array $data          The data in the response body, parsed as an array. May be null for HTTP errors such as 404's.
-	 * @param int   $response_code Optional. The HTTP status code from the response.
+	 * @param null|array $data          The data in the response body, parsed as an array. May be null for HTTP errors such as 404's.
+	 * @param int        $response_code Optional. The HTTP status code from the response.
 	 *
 	 * @return WP_Error
 	 */
@@ -609,7 +609,7 @@ class Meetup_Client extends API_Client {
 
 	/**
 	 * Retrieve the event Status for a range of given IDs.
-	 * 
+	 *
 	 * @param array $event_ids An array of [ id => MeetupID, id2 => MeetupID2 ] to query for.
 	 * @return array Array of Event Statuses if events is found, null values if MeetupID doesn't exist.
 	 */
@@ -1041,7 +1041,7 @@ class Meetup_Client extends API_Client {
 
 	/**
 	 * Get the default fields for each object type.
-	 * 
+	 *
 	 * @param string $type The Object type.
 	 * @return array Fields to query.
 	 */
@@ -1106,9 +1106,9 @@ class Meetup_Client extends API_Client {
 
 	/**
 	 * Apply back-compat fields/filters for previous uses of the client.
-	 * 
+	 *
 	 * Can be removed once all uses of the library have migrated over.
-	 * 
+	 *
 	 * @param string $type   The type of result object.
 	 * @param array  $result The result to back-compat.
 	 * @return The $result with back-compat.
@@ -1120,24 +1120,22 @@ class Meetup_Client extends API_Client {
 
 			if ( ! empty( $result['dateTime'] ) ) {
 				// Required for utc_offset below.
-				$result['time'] = $this->datetime_to_time( $result['dateTime'] ) * 1000;
+				$result['time'] = $this->datetime_to_time( $result['dateTime'] );
 			}
 
 			// Parse an ISO DateInterval into seconds.
 			$now = time();
 			$result['duration'] = ( DateTimeImmutable::createFromFormat( 'U', $now ) )->add( new DateInterval( $result['duration'] ) )->getTimestamp() - $now;
-			$result['duration'] *= 1000;
 
 			$result['utc_offset'] = 0;
 			if ( ! empty( $result['timezone'] ) && isset( $result['time'] ) ) {
 				$result['utc_offset'] = (
 					new DateTimeImmutable(
 						// $result['time'] is back-compat above.
-						gmdate( 'Y-m-d H:i:s', $result['time']/1000 ),
+						gmdate( 'Y-m-d H:i:s', $result['time'] ),
 						new DateTimeZone( $result['timezone'] )
 					)
 				)->getOffset();
-				$result['utc_offset'] *= 1000;
 			}
 
 			if ( ! empty( $result['venue'] ) ) {
@@ -1181,7 +1179,7 @@ class Meetup_Client extends API_Client {
 
 		if ( 'group' === $type ) {
 			// Stub in the fields that are different.
-			$result['founded_date']           = $this->datetime_to_time( $result['foundedDate'] ) * 1000;
+			$result['founded_date']           = $this->datetime_to_time( $result['foundedDate'] );
 			$result['created']                = $result['founded_date'];
 			$result['localized_location']     = $this->localise_location( $result );
 			$result['localized_country_name'] = $this->localised_country_name( $result['country'] );
@@ -1189,16 +1187,19 @@ class Meetup_Client extends API_Client {
 			$result['member_count']           = $result['members'];
 
 			if ( ! empty( $result['proJoinDate'] ) ) {
-				$result['pro_join_date'] = $this->datetime_to_time( $result['proJoinDate'] ) * 1000;
+				$result['pro_join_date'] = $this->datetime_to_time( $result['proJoinDate'] );
 			}
 
 			if ( ! empty( $result['pastEvents']['edges'] ) ) {
-				$result['last_event']         = [
-					'time'           => $this->datetime_to_time( end( $result['pastEvents']['edges'] )['node']['dateTime'] ) * 1000,
+				$result['last_event']       = [
+					'time'           => $this->datetime_to_time( end( $result['pastEvents']['edges'] )['node']['dateTime'] ),
 					'yes_rsvp_count' => end( $result['pastEvents']['edges'] )['node']['going'],
 				];
+				$result['past_event_count'] = count( $result['pastEvents']['edges'] );
 			} elseif ( ! empty( $result['groupAnalytics']['lastEventDate'] ) ) {
-				$result['last_event'] = $this->datetime_to_time( $result['groupAnalytics']['lastEventDate'] ) * 1000;
+				// NOTE: last_event here vs above differs intentionally.
+				$result['last_event']       = $this->datetime_to_time( $result['groupAnalytics']['lastEventDate'] );
+				$result['past_event_count'] = $result['groupAnalytics']['totalPastEvents'];
 			}
 
 			$result['lat'] = $result['latitude'];
@@ -1246,7 +1247,7 @@ class Meetup_Client extends API_Client {
 
 	/**
 	 * Localise a country code to a country name using WP-CLDR if present.
-	 * 
+	 *
 	 * @param string $country Country Code.
 	 * @return Country Name, or country code upon failure.
 	 */
