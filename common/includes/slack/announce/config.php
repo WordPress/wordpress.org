@@ -393,6 +393,7 @@ function get_whitelist() {
 			'SergeyBiryukov', // @sergey on Slack
 			'tobifjellner',
 			'tokyobiyori',
+			'vladytimy', // @vladt on slack
 		),
 		'polyglots-events' => array(
 			'casiepa', // @Pascal on Slack
