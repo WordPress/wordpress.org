@@ -1152,7 +1152,7 @@ class Meetup_Client extends API_Client {
 				// For online events, disregard the Venue lat/lon. It's not correct. In back-compat methods to allow for BC for existing uses of the class.
 				if ( ! empty( $result['venue']['lng'] ) && self::ONLINE_VENUE_ID == $result['venue']['id'] ) {
 					$result['venue']['lat'] = '';
-					$result['venue']['lon'] = '';
+					$result['venue']['lng'] = '';
 				}
 
 				// Seriously.
