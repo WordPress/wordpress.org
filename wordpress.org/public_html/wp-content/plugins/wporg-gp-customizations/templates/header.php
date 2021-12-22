@@ -1,7 +1,13 @@
 <?php
-global $pagetitle;
-$pagetitle = gp_title();
-require WPORGPATH . 'header.php';
+
+if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
+	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+} else {
+	global $pagetitle;
+	$pagetitle = gp_title();
+	require WPORGPATH . 'header.php';
+}
+
 ?>
 <script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
 
@@ -53,4 +59,3 @@ require WPORGPATH . 'header.php';
 	echo gp_breadcrumb();
 
 	do_action( 'gp_after_notices' );
-

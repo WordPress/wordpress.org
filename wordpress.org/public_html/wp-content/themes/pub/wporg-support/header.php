@@ -19,11 +19,16 @@ $menu_items = array(
 	_x( 'https://make.wordpress.org/support/handbook/', 'header menu', 'wporg-forums' ) => _x( 'Get Involved', 'header menu', 'wporg-forums' ),
 );
 
-global $wporg_global_header_options;
-if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
-	$wporg_global_header_options['in_wrapper'] = '';
-$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#content">' . esc_html__( 'Skip to content', 'wporg-forums' ) . '</a>';
-wporg_get_global_header();
+if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
+	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+} else {
+	global $wporg_global_header_options;
+	if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
+		$wporg_global_header_options['in_wrapper'] = '';
+	$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#content">' . esc_html__( 'Skip to content', 'wporg-forums' ) . '</a>';
+	wporg_get_global_header();
+}
+
 ?>
 
 <div id="page" class="site">

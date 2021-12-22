@@ -1,11 +1,17 @@
 <?php
-$GLOBALS['pagetitle'] = wp_get_document_title();
-global $wporg_global_header_options;
-if ( !isset( $wporg_global_header_options['in_wrapper'] ) ) {
-	$wporg_global_header_options['in_wrapper'] = '';
+
+if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
+	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+} else {
+	$GLOBALS['pagetitle'] = wp_get_document_title();
+	global $wporg_global_header_options;
+	if ( !isset( $wporg_global_header_options['in_wrapper'] ) ) {
+		$wporg_global_header_options['in_wrapper'] = '';
+	}
+	$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#headline">' . esc_html( 'Skip to content', 'make-wporg' ) . '</a>';
+	require( WPORGPATH . 'header.php' );
 }
-$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#headline">' . esc_html( 'Skip to content', 'make-wporg' ) . '</a>';
-require( WPORGPATH . 'header.php' );
+
 ?>
 
 <div id="headline">
