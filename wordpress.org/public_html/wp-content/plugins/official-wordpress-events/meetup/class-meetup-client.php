@@ -1,7 +1,7 @@
 <?php
 namespace WordCamp\Utilities;
 
-use DateTime, DateTimeZone;
+use DateTimeInterface, DateTimeImmutable, DateTimeZone, DateInterval;
 use WP_Error;
 
 defined( 'WPINC' ) || die();
@@ -323,17 +323,19 @@ class Meetup_Client extends API_Client {
 	}
 
 	/**
-	 * Convert a ISO8601-ish DateTime returned from the API to a timestamp.
+	 * Convert any timestamp such as a ISO8601-ish DateTime returned from the API to a epoch timestamp.
 	 *
 	 * Handles timestamps in two main formats:
 	 *  - 2021-11-20T17:00+05:30
 	 *  - 2021-11-20T06:30-05:00[US/Eastern]
-	 * Neither contains seconds.
+	 *  - Seconds since epoch
+	 *  - Milliseconds since epoch
+	 *  - DateTime objects
 	 *
 	 * Some extra compat formats are included, just incase Meetup.com decides to return in other similar formats,
 	 * or with different timezone formats, etc.
 	 *
-	 * @param string $datetime A DateTime string returned by the API
+	 * @param mixed $datetime A DateTime string returned by the API, a DateTime instance, or a numeric epoch with or without milliseconds.
 	 * @return int The UTC epoch timestamp.
 	 */
 	public function datetime_to_time( $datetime ) {
@@ -342,6 +344,11 @@ class Meetup_Client extends API_Client {
 			return (int) $datetime;
 		} elseif ( is_numeric( $datetime ) ) {
 			return (int) $datetime;
+		}
+
+		// Handle DateTime objects.
+		if ( $datetime instanceof DateTimeInterface ) {
+			return $datetime->getTimestamp();
 		}
 
 		$datetime_formats = [
@@ -368,7 +375,7 @@ class Meetup_Client extends API_Client {
 
 		// Try each of the timezone formats.
 		foreach ( $datetime_formats as $format ) {
-			$time = DateTime::createFromFormat( $format, $datetime );
+			$time = DateTimeImmutable::createFromFormat( $format, $datetime );
 			if ( $time ) {
 				break;
 			}
@@ -515,14 +522,7 @@ class Meetup_Client extends API_Client {
 			'node'
 		);
 
-		foreach ( $results as &$result ) {
-			$result['member_count']  = $result['groupAnalytics']['totalMembers'];
-			$result['pro_join_date'] = $this->datetime_to_time( $result['proJoinDate'] ) * 1000;
-
-			if ( ! empty( $result['groupAnalytics']['lastEventDate'] ) ) {
-				$result['last_event'] = $this->datetime_to_time( $result['groupAnalytics']['lastEventDate'] ) * 1000;
-			}
-		}
+		$results = $this->apply_backcompat_fields( 'groups', $results );
 
 		return $results;
 	}
@@ -1058,6 +1058,7 @@ class Meetup_Client extends API_Client {
 				'dateTime',
 				'timezone',
 				'endTime',
+				'duration',
 				'createdAt',
 				'isOnline',
 				'going',
@@ -1122,17 +1123,15 @@ class Meetup_Client extends API_Client {
 				$result['time'] = $this->datetime_to_time( $result['dateTime'] ) * 1000;
 			}
 
-			// Easier to parse the difference between start and end, than parse the ISO 'duration' the API provides for now.
-			$result['duration'] = 0;
-			if ( ! empty( $result['endTime'] ) ) {
-				$result['duration'] = ( $this->datetime_to_time( $result['endTime'] ) -  $this->datetime_to_time( $result['dateTime'] ) );
-				$result['duration'] *= 1000;
-			}
+			// Parse an ISO DateInterval into seconds.
+			$now = time();
+			$result['duration'] = ( DateTimeImmutable::createFromFormat( 'U', $now ) )->add( new DateInterval( $result['duration'] ) )->getTimestamp() - $now;
+			$result['duration'] *= 1000;
 
 			$result['utc_offset'] = 0;
 			if ( ! empty( $result['timezone'] ) && isset( $result['time'] ) ) {
 				$result['utc_offset'] = (
-					new DateTime(
+					new DateTimeImmutable(
 						// $result['time'] is back-compat above.
 						gmdate( 'Y-m-d H:i:s', $result['time']/1000 ),
 						new DateTimeZone( $result['timezone'] )
@@ -1182,7 +1181,8 @@ class Meetup_Client extends API_Client {
 
 		if ( 'group' === $type ) {
 			// Stub in the fields that are different.
-			$result['created']                = $this->datetime_to_time( $result['foundedDate'] ) * 1000;
+			$result['founded_date']           = $this->datetime_to_time( $result['foundedDate'] ) * 1000;
+			$result['created']                = $result['founded_date'];
 			$result['localized_location']     = $this->localise_location( $result );
 			$result['localized_country_name'] = $this->localised_country_name( $result['country'] );
 			$result['members']                = $result['groupAnalytics']['totalMembers'] ?? 0;
