@@ -62,12 +62,12 @@
 	}
 }
 
-.helphub-page .table-of-contents > h1,
-.helphub-page .table-of-contents > h2,
-.helphub-page .table-of-contents > h3,
-.helphub-page .table-of-contents > h4,
-.helphub-page .table-of-contents > h5,
-.helphub-page .table-of-contents > h6 {
+.table-of-contents > h1,
+.table-of-contents > h2,
+.table-of-contents > h3,
+.table-of-contents > h4,
+.table-of-contents > h5,
+.table-of-contents > h6 {
 	/**
 	 * originally font-size is 1.3em defined in wporg-breathe theme,
 	 * which is correctly 17px but in HelpHub style this inheritance is wrong
@@ -78,7 +78,8 @@
 	 */
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
 	margin: 0;
-	font-size: 0.94rem;
+	font-size: 0.94rem !important;
+	font-weight: 400 !important;
 	padding: 0.39rem 0.67rem;
 	border-bottom: 1px solid #eee;
 	text-transform: uppercase;

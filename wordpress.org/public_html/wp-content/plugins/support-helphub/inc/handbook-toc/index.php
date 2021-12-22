@@ -15,6 +15,9 @@ add_action( 'init', function() {
 
 	$post_types = array_keys( helphub_post_types()->post_types );
 
+	// And for pages too while we're at it.
+	$post_types[] = 'page';
+
 	new \WPorg_Handbook_TOC( $post_types,  array(
 		'header_text' => __( 'Topics', 'wporg-forums' ),
 		'top_text'    => __( 'Top &uarr;', 'wporg-forums' ),
