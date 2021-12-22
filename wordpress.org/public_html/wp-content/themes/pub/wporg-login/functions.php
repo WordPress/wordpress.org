@@ -56,7 +56,7 @@ add_action( 'init', 'wporg_login_init' );
  * Disable the Core Language Selector on wp-login.php.
  */
 function wporg_login_disable_lang_switcher() {
-	add_filter( 'get_available_languages', '__return_empty_array' );
+	add_filter( 'display_login_language_dropdown', '__return_false' );
 }
 add_action( 'login_init', 'wporg_login_disable_lang_switcher' );
 
