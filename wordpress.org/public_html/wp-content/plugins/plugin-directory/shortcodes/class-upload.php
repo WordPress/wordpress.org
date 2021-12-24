@@ -193,8 +193,6 @@ class Upload {
 					<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
 					<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
 
-					<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
-
 					<p>
 						<small>
 							<?php
@@ -206,6 +204,40 @@ class Upload {
 							?>
 						</small>
 					</p>
+
+					<p>
+						<label>
+							<input type="checkbox" name="requirements[faq]" required="required">
+							<?php
+								printf(
+									__( 'I have read the <a href="%s">Frequently Asked Questions</a>.', 'wporg-plugins' ),
+									'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/'
+								);
+							?>
+						</label>
+						<br>
+						<label>
+							<input type="checkbox" name="requirements[guidelines]" required="required">
+							<?php
+								printf(
+									__( 'This plugin complies with all of the <a href="%s">Plugin Developer Guidelines</a>.', 'wporg-plugins' ),
+									'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/'
+								);
+							?>
+						</label>
+						<br>
+						<label>
+							<input type="checkbox" name="requirements[author]" required="required">
+							<?php _e( 'I have permission to upload this plugin to WordPress.org for others to use and share.', 'wporg-plugins' ); ?>
+						</label>
+						<br>
+						<label>
+							<input type="checkbox" name="requirements[license]" required="required">
+							<?php _e( 'This plugin, all included libraries, and any other included assets are licenced as GPL or are under a GPL compatible license.', 'wporg-plugins' ); ?>
+						</label>
+					</p>
+
+					<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 				</form>
 
 				<?php
