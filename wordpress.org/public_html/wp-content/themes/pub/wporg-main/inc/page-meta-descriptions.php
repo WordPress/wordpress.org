@@ -174,6 +174,11 @@ function custom_open_graph_tags( $tags = [] ) {
 			$title = esc_html_x( 'WordPress and the Journey to 40% of the Web', 'Page title', 'wporg' );
 			$desc  = esc_html__( 'Getting to 40% of the web came with lots of hard work from our amazing WordPress community.', 'wporg' );
 			break;
+
+		case 'page-hosting.php':
+			$title = esc_html_x( 'WordPress Hosting Recommendations', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'Get web hosting for your WordPress website from providers that have modern and approved server configurations.', 'wporg' );
+			break;
 	}
 
 	$tags['og:title']            = $title;
@@ -362,6 +367,10 @@ function custom_page_title( $title, $post = null ) {
 
 		case 'page-download-source.php':
 			$title = esc_html_x( 'Source Code', 'Page title', 'wporg' );
+			break;
+
+		case 'page-hosting.php':
+			$title = esc_html_x( 'WordPress Hosting', 'Page title', 'wporg' );
 			break;
 	}
 

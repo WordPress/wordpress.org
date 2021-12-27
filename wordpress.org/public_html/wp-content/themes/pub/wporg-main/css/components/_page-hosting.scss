@@ -1,0 +1,37 @@
+body.page-hosting {
+	.partner {
+		position: relative;
+
+		&:not(:last-of-type) {
+			margin-bottom: 4em;
+
+			@media (min-width: 450px) {
+				margin-bottom: 2em;
+			}
+		}
+
+		@media (min-width: 450px) {
+			padding-left: 120px; /* Make room for the image. */
+		}
+
+		h2 {
+			padding-left: 110px; /* Make room for the image. */
+			margin-bottom: 1em;
+
+			@media (min-width: 450px) {
+				padding-left: initial;
+				margin-bottom: initial;
+			}
+		}
+
+		img {
+			position: absolute;
+			top: -25px; /* Center it vertically with the h2. */
+			left: -10px;
+
+			@media (min-width: 450px) {
+				top: 0;
+			}
+		}
+	}
+}

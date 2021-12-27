@@ -1792,49 +1792,6 @@ blockquote {
 	/*width: 670px;*/
 }
 
-.wporg-page-hosting #pagebody .partner .forum {
-	margin: 0;
-}
-
-.wporg-page-hosting h2 {
-	font-size: 14px;
-	color: #23282d;
-	font-family: sans-serif;
-    margin: -1px 0 1px 0;
-}
-.wporg-page-hosting h2 a {
-	font-weight: bold;
-}
-
-.wporg-page-hosting .partner {
-	clear: both;
-	min-height: 100px;
-	margin: 40px 10px 40px 0;
-	padding-left: 120px;
-	position: relative;
-}
-
-.wporg-page-hosting #pagebody .partner p {
-	margin-bottom: 10px;
-}
-
-.wporg-page-hosting .partner img {
-	margin-left: 10px;
-	position: absolute;
-	top: 0;
-	left: -10px;
-}
-@media (max-width: 359px) {
-	.wporg-page-hosting .partner {
-		margin-right: 15px;
-		padding-left: 15px;
-	}
-	.wporg-page-hosting .partner img {
-		float: right;
-		position: relative;
-	}
-}
-
 .submit {
 	border-top: 1px solid #ccc;
 	padding: 1.5em 0 0 0;
