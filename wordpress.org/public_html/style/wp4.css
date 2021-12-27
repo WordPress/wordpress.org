@@ -2229,56 +2229,6 @@ img#wpstats {
 	text-align: center;
 }
 
-.wporg-page-mobile .intro-wrapper img.feature {
-	display: block;
-	margin: 0 auto 1em auto;
-}
-
-body.wporg-page-mobile .web-stores {
-	text-align: center;
-}
-
-body.wporg-page-mobile .web-stores img {
-	width: 140px;
-	margin-bottom: 10px;
-}
-
-body.wporg-page-mobile .web-stores a:first-of-type img {
-	margin-right: 10px;
-}
-
-@media screen and (min-width:900px) {
-	.wporg-page-mobile .intro-wrapper {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -moz-box;
-		display: -ms-flexbox;
-		display: flex;
-		margin-bottom: 30px;
-	}
-
-	.wporg-page-mobile .intro {
-		-webkit-box-ordinal-group: 2;
-		-webkit-order: 1;
-		-moz-box-ordinal-group: 2;
-		-ms-flex-order: 1;
-		order: 1;
-		padding-right: 30px;
-	}
-
-	.wporg-page-mobile .intro-wrapper img.feature {
-		-webkit-box-ordinal-group: 4;
-		-webkit-order: 3;
-		-moz-box-ordinal-group: 3;
-		-ms-flex-order: 3;
-		order: 3;
-		max-height: -webkit-max-content;
-		max-height: -moz-max-content;
-		max-height: max-content;
-		height: intrinsic;
-	}
-}
-
 .wporg-responsive .col-7,
 body.wporg-responsive .col-8,
 body.wporg-responsive .col-10 {

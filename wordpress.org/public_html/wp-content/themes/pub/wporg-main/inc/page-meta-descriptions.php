@@ -179,6 +179,11 @@ function custom_open_graph_tags( $tags = [] ) {
 			$title = esc_html_x( 'WordPress Hosting Recommendations', 'Page title', 'wporg' );
 			$desc  = esc_html__( 'Get web hosting for your WordPress website from providers that have modern and approved server configurations.', 'wporg' );
 			break;
+
+		case 'page-mobile.php':
+			$title = esc_html_x( 'WordPress Mobile Apps', 'Page title', 'wporg' );
+			$desc  = esc_html__( 'Manage your site with our Android, iOS, and desktop apps', 'wporg' );
+			break;
 	}
 
 	$tags['og:title']            = $title;
@@ -371,6 +376,10 @@ function custom_page_title( $title, $post = null ) {
 
 		case 'page-hosting.php':
 			$title = esc_html_x( 'WordPress Hosting', 'Page title', 'wporg' );
+			break;
+
+		case 'page-mobile.php':
+			$title = esc_html_x( 'WordPress Mobile Apps', 'Page title', 'wporg' );
 			break;
 	}
 

@@ -1792,49 +1792,6 @@ blockquote {
 	/*width: 670px;*/
 }
 
-.wporg-page-hosting #pagebody .partner .forum {
-	margin: 0;
-}
-
-.wporg-page-hosting h2 {
-	font-size: 14px;
-	color: #23282d;
-	font-family: sans-serif;
-    margin: -1px 0 1px 0;
-}
-.wporg-page-hosting h2 a {
-	font-weight: bold;
-}
-
-.wporg-page-hosting .partner {
-	clear: both;
-	min-height: 100px;
-	margin: 40px 0 40px 10px;
-	padding-right: 120px;
-	position: relative;
-}
-
-.wporg-page-hosting #pagebody .partner p {
-	margin-bottom: 10px;
-}
-
-.wporg-page-hosting .partner img {
-	margin-right: 10px;
-	position: absolute;
-	top: 0;
-	right: -10px;
-}
-@media (max-width: 359px) {
-	.wporg-page-hosting .partner {
-		margin-left: 15px;
-		padding-right: 15px;
-	}
-	.wporg-page-hosting .partner img {
-		float: left;
-		position: relative;
-	}
-}
-
 .submit {
 	border-top: 1px solid #ccc;
 	padding: 1.5em 0 0 0;
@@ -2270,56 +2227,6 @@ img#wpstats {
 }
 .wporg-page-download .download-button-container {
 	text-align: center;
-}
-
-.wporg-page-mobile .intro-wrapper img.feature {
-	display: block;
-	margin: 0 auto 1em auto;
-}
-
-body.wporg-page-mobile .web-stores {
-	text-align: center;
-}
-
-body.wporg-page-mobile .web-stores img {
-	width: 140px;
-	margin-bottom: 10px;
-}
-
-body.wporg-page-mobile .web-stores a:first-of-type img {
-	margin-left: 10px;
-}
-
-@media screen and (min-width:900px) {
-	.wporg-page-mobile .intro-wrapper {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -moz-box;
-		display: -ms-flexbox;
-		display: flex;
-		margin-bottom: 30px;
-	}
-
-	.wporg-page-mobile .intro {
-		-webkit-box-ordinal-group: 2;
-		-webkit-order: 1;
-		-moz-box-ordinal-group: 2;
-		-ms-flex-order: 1;
-		order: 1;
-		padding-left: 30px;
-	}
-
-	.wporg-page-mobile .intro-wrapper img.feature {
-		-webkit-box-ordinal-group: 4;
-		-webkit-order: 3;
-		-moz-box-ordinal-group: 3;
-		-ms-flex-order: 3;
-		order: 3;
-		max-height: -webkit-max-content;
-		max-height: -moz-max-content;
-		max-height: max-content;
-		height: intrinsic;
-	}
 }
 
 .wporg-responsive .col-7,
