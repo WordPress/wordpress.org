@@ -31,8 +31,9 @@ body.page-mobile {
 		display: flex;
 		justify-content: center;
 		align-items: flex-start;
+		flex-wrap: wrap;
 		gap: 15px;
-		margin-top: 30px;
+		margin: 30px 5px;
 
 		@media screen and (min-width:900px) {
 			grid-area: web-stores;
