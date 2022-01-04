@@ -625,7 +625,11 @@ class Import {
 					$relative_filename = str_replace( "$base_dir/", '', $filename );
 					$potential_block_directories[] = dirname( $relative_filename );
 					foreach ( $blocks_in_file as $block ) {
-						$blocks[ $block->name ] = $block;
+						if ( isset( $blocks[ $block->name ] ) ) {
+							$blocks[ $block->name ] = (object) array_merge( (array) $blocks[ $block->name ], array_filter( (array) $block ) );
+						} else {
+							$blocks[ $block->name ] = $block;
+						}
 					}
 				}
 			}
@@ -791,15 +795,21 @@ class Import {
 			if ( ! is_wp_error( $block ) && is_wp_error( $result ) ) {
 				// Only certain properties must be valid for our purposes here.
 				$required_valid_props = array(
-					'block.json',
-					'block.json:editorScript',
-					'block.json:editorStyle',
-					'block.json:name',
-					'block.json:script',
-					'block.json:style',
+					'block.json[editorScript]',
+					'block.json[editorStyle]',
+					'block.json[name]',
+					'block.json[script]',
+					'block.json[style]',
 				);
-				$invalid_props = array_intersect( $required_valid_props, $result->get_error_data( 'error' ) ?: [] );
-				if ( empty( $invalid_props ) ) {
+				$error = $result->get_error_message();
+				$is_json_valid = array_reduce(
+					$required_valid_props,
+					function( $is_valid, $prop ) use ( $error ) {
+						return $is_valid && ( false === strpos( $error, $prop ) );
+					},
+					true
+				);
+				if ( $is_json_valid ) {
 					$blocks[] = $block;
 				}
 			} elseif ( true === $result ) {
