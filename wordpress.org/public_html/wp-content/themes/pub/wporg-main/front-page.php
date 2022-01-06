@@ -34,8 +34,6 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
-$cdn_domain = defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ? 's-origin.wordpress.org' : 's.w.org';
-
 get_header( 'wporg' );
 ?>
 	<header id="masthead" class="site-header" role="banner">
@@ -165,23 +163,47 @@ get_header( 'wporg' );
 
 		<div id="home-below" class="home-below row gutters">
 			<div class="col-4">
-				<h4><a href="<?php echo get_permalink( get_option( 'page_for_posts' ) ); ?>"><?php _e( 'News From Our Blog', 'wporg' ); ?></a></h4>
-
 				<?php
-				$featured = new \WP_Query( [
+				$switched      = false;
+				$news_blog_url = get_permalink( get_option( 'page_for_posts' ) );
+				$featured_args = [
 					'posts_per_page'      => 1,
 					'post_status'         => 'publish',
 					'ignore_sticky_posts' => true,
 					'no_found_rows'       => true,
-				] );
+				];
+				$featured = new \WP_Query( $featured_args );
 
-				while ( $featured->have_posts() ) :
+				// Fetch posts from the English News blog if this site doesn't have any.
+				if ( ! $featured->have_posts() && defined( 'WPORG_NEWS_BLOGID' ) ) {
+					$switched      = switch_to_blog( WPORG_NEWS_BLOGID );
+					$featured      = new \WP_Query( $featured_args );
+					$news_blog_url = home_url( '/' );
+				}
+
+				printf(
+					'<h4><a href="%s">%s</a></h4>',
+					esc_url( $news_blog_url ),
+					__( 'News From Our Blog', 'wporg' )
+				);
+
+				// Forcibly hide all Jetpack sharing buttons.
+				add_filter( 'sharing_show', '__return_false' );
+
+				while ( $featured->have_posts() ) {
 					$featured->the_post();
 
 					the_title( sprintf( '<h5><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h5>' );
 					echo '<div class="entry-summary">' . apply_filters( 'the_excerpt', get_the_excerpt() ) . '</div>';
-				endwhile;
+				}
+
+				remove_filter( 'sharing_show', '__return_false' );
+
 				wp_reset_postdata();
+
+				if ( $switched ) {
+					restore_current_blog();
+				}
 				?>
 			</div>
 
@@ -268,7 +290,7 @@ get_header( 'wporg' );
 
 						foreach ( array_rand( $user_links, 3 ) as $slug ) :
 							printf(
-								'<li><a href="%1$s"><img src="https://'. $cdn_domain .'/images/notableusers/%2$s-2x.png?version=2" alt="%2$s" width="130" height="57" /></a></li>',
+								'<li><a href="%1$s"><img src="https://s.w.org/images/notableusers/%2$s-2x.png?version=2" alt="%2$s" width="130" height="57" /></a></li>',
 								$user_links[ $slug ],
 								$slug
 							);
