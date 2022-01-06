@@ -21,7 +21,7 @@ include dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = $_REQUEST['url'] ?? '';
+$url = wp_unslash( $_REQUEST['url'] ?? '' );
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );
@@ -29,7 +29,7 @@ header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS 
 if (
 	// meta|core are the only tracs embedable.
 	// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
-	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>(milestone|ticketgraph|ticket|changeset))([/?]|$)!i', $url, $m ) ||
+	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone|ticketgraph|ticket|changeset)([/?]|$)!i', $url, $m ) ||
 	'GET' !== $_SERVER['REQUEST_METHOD']
 ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
@@ -45,11 +45,23 @@ if ( ! isset( $_GET['embed'] ) ) {
 	// Unique ID for this instance of the iframe
 	$id = sha1( $url . microtime() );
 
-	$embed_url = 'https://' . ( $_SERVER['HTTP_X_ORIGINAL_HOST'] ?? $_SERVER['HTTP_HOST'] ) . $_SERVER['REQUEST_URI'] . '#el=' . $id;
+	$embed_url = add_query_arg(
+		[
+			'url'   => urlencode( $url ),
+			'embed' => 'true',
+		],
+		'https://api.wordpress.org/dotorg/trac/oembed/'
+	);
+
+	if ( ! empty( $_GET['api_key'] ) ) {
+		$embed_url = add_query_arg( 'api_key', wp_unslash( $_GET['api_key'] ), $embed_url );
+	}
+
+	$embed_url .= '#el=' . $id;
 
 	$html = sprintf(
 		'<iframe sandbox="allow-scripts allow-top-navigation-by-user-activation" security="restricted" src="%s" id="%s" width="600" height="300" title="WordPress.org Trac" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content wporg-trac"></iframe>',
-		esc_url( add_query_arg( 'embed', 'true', $embed_url ) ),
+		esc_url( $embed_url ),
 		esc_attr( 'el-' . $id )
 	);
 
@@ -97,7 +109,7 @@ if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {
 }
 
 $html = wp_remote_retrieve_body(
-	wp_remote_get(
+	wp_safe_remote_get(
 		$url,
 		[
 			'user_agent'          => 'WordPress.org Trac oEmbed; https://api.wordpress.org/dotorg/trac/oembed',
