@@ -211,7 +211,7 @@ add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\child_page_templates' )
 function use_opengraph_data_for_embed_template() {
 	global $post;
 
-	if ( ! $post || 'page' !== $post->post_type || ! $post->page_template || 'default' === $post->page_template ) {
+	if ( ! $post || 'page' !== $post->post_type || ! $post->page_template || ( 'default' === $post->page_template && ! is_front_page() ) ) {
 		return;
 	}
 
