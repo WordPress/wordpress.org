@@ -278,6 +278,30 @@
 	}
 }
 
+#download-mobile {
+	background: #f7f7f7;
+	border-bottom: 1px solid #dddddd;
+	display: none;
+	padding: 20px 0;
+	text-align: center;
+
+	@include breakpoint( 0, $ms-breakpoint ) {
+		display: inherit;
+	}
+
+	span.download-ready {
+		font-size: 1.6em;
+		margin: 0 0.25em;
+	}
+
+	a.download-button {
+		height: inherit;
+		padding: 10px 15px;
+		font-size: 1.6em;
+		margin: 10px 0.25em;
+	}
+}
+
 #home-below {
 	font-size: ms( -2 );
 	margin: 0 auto ms( 0 );

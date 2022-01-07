@@ -36,6 +36,10 @@ $user_class = $showcase ? 'col-12' : 'col-2';
 
 get_header( 'wporg' );
 ?>
+	<aside id="download-mobile">
+		<span class="download-ready"><?php _e( 'Ready to get started?', 'wporg' ); ?></span><a class="button download-button" href="/download/" title="<?php esc_attr_e( 'Get it. Got it? Good.', 'wporg' ); ?>"><?php _e( 'Get WordPress', 'wporg' ); ?></a>
+	</aside>
+
 	<header id="masthead" class="site-header" role="banner">
 		<div class="site-branding">
 			<p class="site-title"><?php _e( 'Meet WordPress', 'wporg' ); ?></p>
