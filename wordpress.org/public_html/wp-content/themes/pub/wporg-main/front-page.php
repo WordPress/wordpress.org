@@ -42,7 +42,7 @@ if ( ! isset( $wporg_global_header_options['in_wrapper'] ) ) {
 get_header( 'wporg' );
 ?>
 	<aside id="download-mobile">
-		<span class="download-ready"><?php _e( 'Ready to get started?', 'wporg' ); ?></span><a class="button download-button" href="/download/" title="<?php esc_attr_e( 'Get it. Got it? Good.', 'wporg' ); ?>"><?php _e( 'Get WordPress', 'wporg' ); ?></a>
+		<span class="download-ready"><?php _e( 'Ready to get started?', 'wporg' ); ?></span><a class="button download-button" href="/download/"><?php _e( 'Get WordPress', 'wporg' ); ?></a>
 	</aside>
 
 	<header id="masthead" class="site-header" role="banner">
