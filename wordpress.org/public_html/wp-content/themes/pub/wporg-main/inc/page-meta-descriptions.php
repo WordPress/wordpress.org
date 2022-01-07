@@ -17,6 +17,7 @@ use WordPressdotorg\API\Serve_Happy\RECOMMENDED_PHP;
  * @return array Filtered Open Graph tags.
  */
 function custom_open_graph_tags( $tags = [] ) {
+	global $wporg_global_header_options;
 
 	// Use `name=""` for description.
 	// See Jetpacks Twitter Card for where it happens for the twitter:* fields.
@@ -24,9 +25,9 @@ function custom_open_graph_tags( $tags = [] ) {
 		return str_replace( '<meta property="description"', '<meta name="description"', $html );
 	} );
 
-	// Override the Front-page tags on Rosetta sites.
-	if ( is_front_page() && isset( $GLOBALS['rosetta'] ) ) {
-		$site_title = isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ? $GLOBALS['wporg_global_header_options']['rosetta_title'] : 'WordPress.org';
+	// Override the Front-page tags.
+	if ( is_front_page() ) {
+		$site_title = ! empty( $wporg_global_header_options['rosetta_title'] ) ? $wporg_global_header_options['rosetta_title'] : 'WordPress';
 		return array(
 			'og:type'         => 'website',
 			'og:title'        => __( 'Blog Tool, Publishing Platform, and CMS', 'wporg' ) . " - {$site_title}",
@@ -197,59 +198,71 @@ function custom_open_graph_tags( $tags = [] ) {
 add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\custom_open_graph_tags' );
 
 /**
- * Renders site's attributes for Rosetta sites.
+ * Renders site's attributes for the WordPress.org frontpages (including Rosetta).
  *
  * @see https://developers.google.com/search/docs/guides/enhance-site
  */
 function sites_attributes_schema() {
-	if ( ! is_front_page() || ! isset( $GLOBALS['rosetta'] ) || empty( $GLOBALS['rosetta']->rosetta->glotpress_locale ) ) {
+	global $rosetta;
+
+	if ( ! is_front_page() ) {
 		return;
 	}
 
-	$og_tags = \WordPressdotorg\MainTheme\custom_open_graph_tags();
-	$locale  = $GLOBALS['rosetta']->rosetta->glotpress_locale;
+	$og_tags         = custom_open_graph_tags();
+	$locale_language = 'en';
+	$name            = 'WordPress.org';
+
+	if ( ! empty( $rosetta->rosetta->glotpress_locale ) ) {
+		$locale_language = $rosetta->rosetta->glotpress_locale->slug;
+		$name            = sprintf(
+			__( 'WordPress - %s', 'wporg' ),
+			$rosetta->rosetta->glotpress_locale->native_name
+		);
+	}
+
 	?>
 <script type="application/ld+json">
 {
-    "@context":"https://schema.org",
-    "@graph":[
-        {
-            "@type":"Organization",
-            "@id":"https://wordpress.org/#organization",
-            "url":"https://wordpress.org/",
-            "name":"WordPress",
-            "logo":{
-                "@type":"ImageObject",
-                "@id":"https://wordpress.org/#logo",
-                "url":"https://s.w.org/style/images/about/WordPress-logotype-wmark.png"
-            },
-            "sameAs":[
-                "https://www.facebook.com/WordPress/",
-                "https://twitter.com/WordPress",
-                "https://en.wikipedia.org/wiki/WordPress"
-            ]
-        },
-        {
-            "@type":"WebSite",
-            "@id":"<?php echo esc_js( home_url( '/#website' ) ); ?>",
-            "url":"<?php echo esc_js( home_url( '/' ) ); ?>",
-            "name":"<?php echo esc_js( sprintf( __( 'WordPress - %s', 'wporg' ), $locale->native_name ) ); ?>",
-            "publisher":{
-                "@id":"https://wordpress.org/#organization"
-            }
-        },
-        {
-            "@type":"WebPage",
-            "@id":"<?php echo esc_js( home_url( '/' ) ); ?>",
-            "url":"<?php echo esc_js( home_url( '/' ) ); ?>",
-            "inLanguage":"<?php echo esc_js( $locale->slug ); ?>",
-            "name":"<?php echo esc_js( $og_tags['og:title'] ); ?>",
-            "description":"<?php echo esc_js( $og_tags['og:description'] ); ?>",
-            "isPartOf":{
-                "@id":"<?php echo esc_js( home_url( '/#website' ) ); ?>"
-            }
-        }
-    ]
+	"@context":"https://schema.org",
+	"@graph":[
+		{
+			"@type":"Organization",
+			"@id":"https://wordpress.org/#organization",
+			"url":"https://wordpress.org/",
+			"name":"WordPress",
+			"logo":{
+				"@type":"ImageObject",
+				"@id":"https://wordpress.org/#logo",
+				"url":"https://s.w.org/style/images/about/WordPress-logotype-wmark.png"
+			},
+			"sameAs":[
+				"https://www.facebook.com/WordPress/",
+				"https://twitter.com/WordPress",
+				"https://en.wikipedia.org/wiki/WordPress"
+			]
+		},
+		{
+			"@type":"WebSite",
+			"@id":"<?php echo esc_js( home_url( '/#website' ) ); ?>",
+			"url":"<?php echo esc_js( home_url( '/' ) ); ?>",
+			"name":"<?php echo esc_js( $name ); ?>",
+			"publisher":{
+				"@id":"https://wordpress.org/#organization"
+			}
+		},
+		{
+			"@type":"WebPage",
+			"@id":"<?php echo esc_js( home_url( '/' ) ); ?>",
+			"url":"<?php echo esc_js( home_url( '/' ) ); ?>",
+			"inLanguage":"<?php echo esc_js( $locale_language ); ?>",
+			"name":"<?php echo esc_js( $og_tags['og:title'] ); ?>",
+			"description":"<?php echo esc_js( $og_tags['og:description'] ); ?>",
+			"isPartOf":{
+				"@id":"<?php echo esc_js( home_url( '/#website' ) ); ?>"
+			}
+		}
+	]
 }
 </script>
 <?php
