@@ -273,21 +273,21 @@ class DevHub_Block_Editor_Importer extends DevHub_Docs_Importer {
 		// Handle /packages/compomnents(/README.md)
 		$markdown = preg_replace(
 			'@(\[.*?\])\(/packages/components/?(#.*?)?\)@i',
-			'$1(https://developer.wordpress.org/block-editor/designers-developers/developers/components/$2)',
+			'$1(https://developer.wordpress.org/block-editor/reference-guide/components/$2)',
 			$markdown
 		);
 
 		// Handle /packages/components/(src/)(.+)(/README.md)
 		$markdown = preg_replace(
 			'@(\[.*?\])\(/packages/components/(src/)?(.*?)/?(#.*?)?\)@i',
-			'$1(https://developer.wordpress.org/block-editor/designers-developers/developers/components/$3/$4)',
+			'$1(https://developer.wordpress.org/block-editor/reference-guide/components/$3/$4)',
 			$markdown
 		);
 
 		// Handle /packages/(.+)(/README.md)
 		$markdown = preg_replace(
 			'@(\[.*?\])\(/packages/(.*?)/?(#.*?)?\)@i',
-			'$1(https://developer.wordpress.org/block-editor/designers-developers/developers/packages/packages-$2/$3)',
+			'$1(https://developer.wordpress.org/block-editor/reference-guide/packages/packages-$2/$3)',
 			$markdown
 		);
 
