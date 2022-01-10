@@ -1,9 +1,13 @@
 <?php
+
+// Don't load the twentyfifteen styles.
+remove_action( 'wp_enqueue_scripts', 'twentyfifteen_scripts' );
+
 wp_register_style(
 	'wporg-translate',
 	plugins_url( 'style.css', __FILE__ ),
 	[ 'gp-base' ],
-	'20210629'
+	filemtime( __DIR__ . '/style.css' )
 );
 gp_enqueue_style( 'wporg-translate' );
 
