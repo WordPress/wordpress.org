@@ -27,7 +27,7 @@ add_action( 'after_setup_theme', 'wporg_support_theme_support' );
  */
 function wporg_support_scripts() {
 
-	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [], '20210719' );
+	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [], '20220110' );
 	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
