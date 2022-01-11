@@ -47,6 +47,9 @@ function custom_open_graph_tags( $tags = [] ) {
 		return $tags;
 	}
 
+	// These values are not correct for our page templates.
+	unset( $tags['article:published_time'], $tags['article:modified_time'] );
+
 	switch ( $post->page_template ) {
 		default:
 			return $tags;
@@ -184,6 +187,12 @@ function custom_open_graph_tags( $tags = [] ) {
 		case 'page-mobile.php':
 			$title = esc_html_x( 'WordPress Mobile Apps', 'Page title', 'wporg' );
 			$desc  = esc_html__( 'Manage your site with our Android, iOS, and desktop apps', 'wporg' );
+			break;
+
+		case 'page-search.php':
+			// Intentionally not internationalised as these are currently english only.
+			$title = 'Search';
+			$desc  = 'Search the WordPress.org website for plugins, themes, and support.';
 			break;
 	}
 
