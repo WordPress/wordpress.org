@@ -304,8 +304,3 @@ require_once __DIR__ . '/inc/recaptcha.php';
  * Include the Privacy request functions.
  */
 require_once __DIR__ . '/inc/privacy-functions.php';
-
-/**
- * Include any global functions needed.
- */
-require_once __DIR__ . '/inc/globals.php';
