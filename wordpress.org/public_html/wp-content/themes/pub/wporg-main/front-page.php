@@ -34,10 +34,7 @@ if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) 
 $swag_class = $showcase ? 'col-4' : 'col-2';
 $user_class = $showcase ? 'col-12' : 'col-2';
 
-// Temporarily add a Skip-to-content selector for front pages.
-if ( ! isset( $wporg_global_header_options['in_wrapper'] ) ) {
-	$wporg_global_header_options['in_wrapper'] = '<a class="skip-link screen-reader-text" href="#masthead">' . __( 'Skip to content', 'wporg' ) . '</a>';
-}
+\WordPressdotorg\skip_to( '#masthead' );
 
 get_header( 'wporg' );
 ?>

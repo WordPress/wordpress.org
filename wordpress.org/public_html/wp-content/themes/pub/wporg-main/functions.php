@@ -37,6 +37,11 @@ function setup() {
 	 * to use them via open graph tags when a page is shared.
 	 */
 	add_theme_support( 'post-thumbnails' );
+
+	/*
+	 * Enable WordPress.org skip-to links.
+	 */
+	add_action( 'wp_head', '\WordPressdotorg\skip_to_main' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 

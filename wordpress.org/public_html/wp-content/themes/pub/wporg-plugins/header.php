@@ -11,6 +11,8 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+\WordPressdotorg\skip_to( '#main' );
+
 $menu_items = array(
 	'/browse/favorites/' => __( 'My Favorites', 'wporg-plugins' ),
 	'/browse/beta/'      => __( 'Beta Testing', 'wporg-plugins' ),
@@ -20,10 +22,6 @@ $menu_items = array(
 if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
 	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 } else {
-	global $wporg_global_header_options;
-	if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
-		$wporg_global_header_options['in_wrapper'] = '';
-	$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#main">' . esc_html__( 'Skip to content', 'wporg-plugins' ) . '</a>';
 	require WPORGPATH . 'header.php';
 }
 
