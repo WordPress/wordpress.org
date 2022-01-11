@@ -1,6 +1,6 @@
 <?php
 
-\WordPressdotorg\skip_link( '#content' );
+\WordPressdotorg\skip_to( '#content' );
 
 if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
 	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
