@@ -42,12 +42,6 @@ html,
 	text-align: center;
 }
 
-.site-header a,
-.site-header a:link,
-.site-header a:visited {
-	text-decoration: none;
-}
-
 .site-title {
 	display: inline-block;
 	font-size: 28px;
@@ -71,12 +65,8 @@ p.site-title a {
 	text-decoration: none;
 }
 
-.site-header .site-title a {
-	color: #fff;
-}
 .site-header .site-title a:hover {
 	color: rgba( 255, 255, 255, 0.8 );
-	border-bottom: none;
 }
 
 .site-header.home .site-title {
@@ -321,20 +311,14 @@ body.wporg-make #headline h2 a:before {
 
 .actionlist a,
 .actionlist a:link,
-.actionlist a:visited {
+.actionlist a:visited,
+.gp-content a {
 	color: #0073aa;
-}
-
-.gp-content a,
-.gp-content a:link,
-.gp-content a:visited,
-.gp-content a:hover {
-	color: #0073aa;
-	text-decoration: none;
 }
 
 .gp-content a:hover {
 	color: #00a0d2;
+	text-decoration: none;
 }
 
 p.description {
@@ -3123,13 +3107,3 @@ table.translations.translation-sets-rtl .textarea-direction-ltr .foreign-text {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 4'%3E%3Cpath fill='%2332373C' fill-rule='evenodd' d='M5.5 4L9 0H2z'/%3E%3C/svg%3E");
 	background-size: 11px 4px;
 }
-
-/* New header support - wp4 not loaded */
-.wporg-make .site-title a:before {
-	-webkit-font-smoothing: antialiased;
-	display: inline-block;
-	font: normal 28px/1 'dashicons';
-	vertical-align: top;
-	width: 36px;
-}
-.make-polyglots .site-title a:before { content: '\f326'; }

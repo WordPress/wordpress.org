@@ -1,8 +1,5 @@
 <?php
 
-// Don't load the twentyfifteen styles.
-remove_action( 'wp_enqueue_scripts', 'twentyfifteen_scripts' );
-
 wp_register_style(
 	'wporg-translate',
 	plugins_url( 'style.css', __FILE__ ),
