@@ -55,10 +55,12 @@ add_action( 'init', 'wporg_login_init' );
 /**
  * Disable the Core Language Selector on wp-login.php.
  */
-function wporg_login_disable_lang_switcher() {
-	add_filter( 'login_display_language_dropdown', '__return_false' );
-}
-add_action( 'login_init', 'wporg_login_disable_lang_switcher' );
+add_filter( 'login_display_language_dropdown', '__return_false' );
+
+/**
+ * Disable XML-RPC endpoints.
+ */
+add_filter( 'xmlrpc_methods', '__return_empty_array' );
 
 /**
  * Replace cores login CSS with our own.
