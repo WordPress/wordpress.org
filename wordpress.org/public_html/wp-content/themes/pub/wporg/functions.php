@@ -51,6 +51,11 @@ function setup() {
 		'caption',
 	) );
 
+	/**
+	 * Enable support for WordPress <title> tags.
+	 */
+	add_theme_support( 'title-tag' );
+
 	// Set up the WordPress core custom background feature.
 	add_theme_support( 'custom-background', apply_filters( 'wporg_custom_background_args', array(
 		'default-color' => 'ffffff',
@@ -60,18 +65,6 @@ function setup() {
 	add_theme_support( 'wp4-styles' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
-
-/**
- * Sets the document title.
- *
- * The global $pagetitle is used by the global w.org header.
- *
- * @global string $pagetitle
- */
-function set_document_title() {
-	$GLOBALS['pagetitle'] = wp_get_document_title();
-}
-add_action( 'get_header', __NAMESPACE__ . '\set_document_title', 10 );
 
 /**
  * Set the separator for the document title.
