@@ -93,7 +93,7 @@ add_filter( 'map_meta_cap', 'wporg_themes_map_meta_cap', 10, 2 );
  */
 function wporg_themes_display_post_states( $states, $post ) {
 	if ( 'repopackage' === $post->post_type ) {
-		switch( $post->post_status ) {
+		switch ( $post->post_status ) {
 			case 'suspend':
 				$states['suspend'] = __( 'Suspended', 'wporg-themes' );
 				break;
@@ -101,7 +101,17 @@ function wporg_themes_display_post_states( $states, $post ) {
 				$states['delist'] = __( 'Delisted', 'wporg-themes' );
 				break;
 		}
+
+		// Append parent status too for child themes.
+		if ( $post->post_parent ) {
+			$parent_states = get_post_states( get_post( $post->post_parent ) );
+			foreach ( $parent_states as $state => $text ) {
+				$states[ "parent-{$state}" ] = 'Parent: ' . $text;
+			}
+		}
+
 	}
+
 	return $states;
 }
 add_filter( 'display_post_states', 'wporg_themes_display_post_states', 10, 2 );
