@@ -24,6 +24,9 @@ function setup() {
 	// Add default posts and comments RSS feed links to head.
 	add_theme_support( 'automatic-feed-links' );
 
+	// Add support for WordPress generated <title> tags.
+	add_theme_support( 'title-tag' );
+
 	// Don't include Adjacent Posts functionality.
 	remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head' );
 

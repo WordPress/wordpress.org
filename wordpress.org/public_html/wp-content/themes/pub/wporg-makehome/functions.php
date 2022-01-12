@@ -10,6 +10,7 @@ add_action( 'after_setup_theme', 'make_setup_theme' );
 function make_setup_theme() {
 	register_nav_menu( 'primary', __( 'Navigation Menu', 'make-wporg' ) );
 	add_theme_support( 'post-thumbnails' );
+	add_theme_support( 'title-tag' );
 }
 
 add_action( 'pre_get_posts', 'make_query_mods' );
@@ -45,17 +46,18 @@ function make_home_site_classes($classes, $class, $id) {
 }
 
 /**
- * Omit page name from front page title.
+ * Set page name for front page title.
  *
  * @param array $parts The document title parts.
  * @return array The document title parts.
  */
-function make_remove_frontpage_name_from_title( $parts ) {
+function make_add_frontpage_name_to_title( $parts ) {
 	if ( is_front_page() ) {
-		$parts['title'] = '';
+		$parts['title'] = 'Get Involved';
+		$parts['site']  = 'WordPress.org';
 	}
 
 	return $parts;	
 }
-add_filter( 'document_title_parts', 'make_remove_frontpage_name_from_title' );
+add_filter( 'document_title_parts', 'make_add_frontpage_name_to_title' );
 

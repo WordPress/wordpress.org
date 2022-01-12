@@ -6,6 +6,7 @@ namespace WordPressdotorg\Make\Breathe;
  */
 function after_setup_theme() {
 	add_theme_support( 'responsive-embeds' );
+	add_theme_support( 'title-tag' );
 
 	remove_theme_support( 'custom-header' );
 	remove_theme_support( 'custom-background' );

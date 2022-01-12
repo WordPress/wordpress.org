@@ -13,7 +13,6 @@ namespace WordPressdotorg\Pattern_Directory\Theme;
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
-$GLOBALS['pagetitle'] = wp_get_document_title();
 global $wporg_global_header_options;
 if ( ! isset( $wporg_global_header_options['in_wrapper'] ) ) {
 	$wporg_global_header_options['in_wrapper'] = '';
