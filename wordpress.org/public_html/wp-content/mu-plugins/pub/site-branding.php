@@ -7,6 +7,8 @@ namespace WordPressdotorg\MU_Plugins\Site_Branding;
 
 add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title_parts', 100 );
 function document_title_parts( $parts ) {
+	global $rosetta;
+
 	// In some places on WordPress.org the document title is used within the theme, don't affect title calls after the </head>.
 	if ( did_action( 'wp_body_open' ) ) {
 		return $parts;
@@ -17,6 +19,15 @@ function document_title_parts( $parts ) {
 	// Ensure that 'WordPress' is present in the title of the URL
 	if ( false === strpos( $combined, 'WordPress' ) ) {
 		$parts['wporg-suffix'] = get_wordpress_brand();
+	}
+
+	// Override anything that set part of the title directly to WordPress.org on rosetta sites.
+	if ( isset( $rosetta ) ) {
+		foreach ( [ 'site', 'tagline' ] as $field ) {
+			if ( ! empty( $parts[ $field ] ) && 'WordPress.org' === $parts[ $field ] ) {
+				$parts[ $field ] = get_wordpress_brand();
+			}
+		}
 	}
 
 	return $parts;
