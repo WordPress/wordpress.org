@@ -10,6 +10,17 @@ add_filter( 'document_title_parts', function() {
 
 if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
 	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+
+	/*
+	 * Intentionally calling this in addition to `wp_head()` from the block. We need to output the global styles
+	 * from Core, scripts for the Navigation and Global Header blocks, etc. Without those, the global header and
+	 * footer won't work properly.
+	 *
+	 * This won't be necessary once GlotPress transitions to use standard WP themes.
+	 * See https://github.com/GlotPress/GlotPress-WP/issues/8
+	 */
+	gp_head();
+
 } else {
 	require WPORGPATH . 'header.php';
 }
