@@ -22,9 +22,11 @@ class Plugin_Rejected extends Base {
 		$email_text = __(
 			'Unfortunately your plugin submission for %1$s (%2$s), submitted on %3$s, has been rejected from the WordPress Plugin Directory.
 
-Plugins are rejected after six months when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours. Please wait for that email before requesting further details.
+Plugins are rejected after three months (90 days) when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours. Please wait for that email before requesting further details.
 
-If you believe this to be in error, please email %4$s with your plugin attached as a zip and explain why you feel your plugin should be accepted.',
+If you believe this to be in error, please email %4$s with your plugin attached as a zip and explain why you feel your plugin should not have been rejected.
+
+If you\'re still working on your code, don\'t panic. You can reply to the original review (or even this email) with your updated code for as long as needed. Even years. All we ask is you do not resubmit your plugin until asked to do so.',
 			'wporg-plugins'
 		);
 
