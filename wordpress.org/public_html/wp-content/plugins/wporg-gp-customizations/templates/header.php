@@ -1,13 +1,5 @@
 <?php
 
-add_theme_support( 'title-tag' );
-add_action( 'gp_head', '_wp_render_title_tag' );
-add_filter( 'document_title_parts', function() {
-	return [
-		'title' => gp_title(),
-	];
-}, 1 );
-
 if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
 	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 

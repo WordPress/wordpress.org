@@ -50,6 +50,16 @@ if ( isset( $template ) && 'translations' === $template ) {
 	gp_enqueue_script( 'wporg-translate-editor' );
 }
 
+add_action( 'after_setup_theme', static function() {
+	add_theme_support( 'title-tag' );
+});
+add_action( 'gp_head', '_wp_render_title_tag' );
+add_filter( 'document_title_parts', static function() {
+	return [
+		'title' => gp_title(),
+	];
+}, 1 );
+
 /**
  * Prints markup for translations help modal in footer.
  */
