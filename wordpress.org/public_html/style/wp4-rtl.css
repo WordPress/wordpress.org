@@ -1560,6 +1560,11 @@ a.rsslink {
 	padding-right: 14px;
 }
 
+.wporg-planet a > .dashicons-rss {
+	color: orange;
+	text-decoration: none;
+}
+
 #pagebody ol {
 	margin-right: 22px;
 }
@@ -2289,7 +2294,7 @@ body.wporg-responsive .col-2 {
 	body.wporg-responsive .col-9,
 	body.wporg-responsive .col-10,
 	body.wporg-responsive .col-12 {
-		width: inherit;
+		width: 95%;
 		float: none;
 		word-wrap: break-word;
 	}
@@ -2418,6 +2423,12 @@ body.wporg-responsive .col-2 {
 	}
 }
 
+/*
+ * New global header/footer needs a clear for .wporg-responsive
+ */
+body.wporg-responsive .wp-block-group.global-footer {
+	clear: both;
+}
 
 /*
  *  Notifications
