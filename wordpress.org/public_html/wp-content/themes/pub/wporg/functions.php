@@ -194,6 +194,11 @@ function hreflang_link_attributes() {
 		return;
 	}
 
+	// Don't add these if within a rest-api request which calls `wp_head`. It's never going to be expected.
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return;
+	}
+
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
 	// Google doesn't have support for a whole lot of languages and throws errors about it,
