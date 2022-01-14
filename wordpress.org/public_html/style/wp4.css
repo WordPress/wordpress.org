@@ -1918,7 +1918,8 @@ form#profile-form table input[type='text'], form#profile-form textarea {
 	color: #c00;
 }
 
-#wordpress-org .widget p.error {
+.widget_blog_subscription p.error,
+.jetpack_subscription_widget p.error {
 	border-left: 4px solid #dc3232;
 	margin-left: 0;
 	margin-right: 0;
