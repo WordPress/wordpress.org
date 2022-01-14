@@ -2425,9 +2425,9 @@ body.wporg-responsive .col-2 {
 }
 
 /*
- * New global header/footer needs a clear for .wporg-responsive
+ * New global header/footer needs a clear for older wp4 themes.
  */
-body.wporg-responsive .wp-block-group.global-footer {
+.wp-block-group.global-footer {
 	clear: both;
 }
 
