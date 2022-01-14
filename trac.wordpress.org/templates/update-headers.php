@@ -3,9 +3,6 @@
 function domdocument_from_url( $url ) {
 	$html = file_get_contents( $url );
 
-	// Fix invalid HTML - https://github.com/WordPress/wporg-mu-plugins/issues/87
-	$html = preg_replace( '!(wp:search.+)(<form.+</form>)!ism', '$1<li>$2</li>', $html );
-
 	$doc = new DOMDocument();
 	$doc->validateOnParse = false;
 
