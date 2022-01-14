@@ -314,7 +314,7 @@
 	<textarea class="${select('@class')} wp-exclude-emoji" id="${select('@id')}" name="${select('@name')}" rows="${select('@rows')}" cols="${select('@cols')}">${select('*|comment()|text()')}</textarea>
 </py:match>
 
-<body py:match="body" id="wordpress-org" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
+<body py:match="body" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
 	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5Z8B3BX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-header.html" />
