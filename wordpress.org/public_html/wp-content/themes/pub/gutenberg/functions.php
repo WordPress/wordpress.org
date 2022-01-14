@@ -139,7 +139,7 @@ function gutenberg_editor_scripts_and_styles( $hook ) {
 		),
 		$meta_box_url
 	);
-	wp_localize_script( 'wp-editor', '_wpMetaBoxUrl', $meta_box_url );
+	wp_add_inline_script( 'wp-editor', sprintf( 'var _wpMetaBoxUrl = %s;', wp_json_encode( $meta_box_url ) ), 'before' );
 
 	// Initialize the editor.
 	$align_wide    = get_theme_support( 'align-wide' );
@@ -865,7 +865,7 @@ function gutenbergtheme_fonts_url() {
  * Enqueue scripts and styles.
  */
 function gutenbergtheme_scripts() {
-	wp_enqueue_style( 'gutenbergtheme-style', get_stylesheet_uri(), [], 13 );
+	wp_enqueue_style( 'gutenbergtheme-style', get_stylesheet_uri(), [], 14 );
 
 	wp_enqueue_style( 'gutenbergthemeblocks-style', get_template_directory_uri() . '/blocks.css');
 
