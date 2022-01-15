@@ -439,6 +439,7 @@ function get_whitelist() {
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
 			'onealtr', // @oneal on Slack
+			'webtechpooja', // @Pooja Derashri on Slack
 		) ),
 		// NOTE: Private Groups need not be listed here. All members of Private Groups have access to /announce & /here
 		'wcasia' => array(
