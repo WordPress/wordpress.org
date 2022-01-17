@@ -17,6 +17,8 @@ use WordPressdotorg\API\Serve_Happy\RECOMMENDED_PHP;
  * @return array Filtered Open Graph tags.
  */
 function custom_open_graph_tags( $tags = [] ) {
+	$site_title = function_exists( '\WordPressdotorg\site_brand' ) ? \WordPressdotorg\site_brand() : 'WordPress.org';
+
 	// Use `name=""` for description.
 	// See Jetpacks Twitter Card for where it happens for the twitter:* fields.
 	add_filter( 'jetpack_open_graph_output', function( $html ) {
@@ -31,7 +33,7 @@ function custom_open_graph_tags( $tags = [] ) {
 			'og:description'  => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
 			'description'     => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
 			'og:url'          => home_url( '/' ),
-			'og:site_name'    => 'WordPress.org', // Rosetta title will automatically be inserted.
+			'og:site_name'    => $site_title,
 			'og:image'        => 'https://s.w.org/images/home/screen-themes.png?3',
 			'og:locale'       => get_locale(),
 			'twitter:card'    => 'summary_large_image',
