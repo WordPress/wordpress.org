@@ -24,7 +24,7 @@
 
 namespace WordPressdotorg\MainTheme;
 
-global $rosetta, $wporg_global_header_options;
+global $rosetta;
 
 $showcase = false;
 if ( is_object( $rosetta ) && $rosetta->showcase instanceof \Rosetta_Showcase ) {
