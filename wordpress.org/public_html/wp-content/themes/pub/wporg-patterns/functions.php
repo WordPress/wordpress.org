@@ -283,15 +283,15 @@ function rewrite_urls() {
  * Add meta tags for richer social media integrations.
  */
 function add_social_meta_tags() {
-	global $wporg_global_header_options;
+	$og_fields     = [];
 	$default_image = get_stylesheet_directory_uri() . '/images/social-image.png';
-	$og_fields = [];
+	$site_title    = function_exists( '\WordPressdotorg\site_brand' ) ? \WordPressdotorg\site_brand() : 'WordPress.org';
 
 	if ( is_front_page() || is_home() ) {
 		$og_fields = [
 			'og:title'       => __( 'Block Pattern Directory', 'wporg-patterns' ),
 			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
-			'og:site_name'   => $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org',
+			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => home_url(),
 			'og:image'       => esc_url( $default_image ),
@@ -300,7 +300,7 @@ function add_social_meta_tags() {
 		$og_fields = [
 			'og:title'       => sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), esc_attr( single_term_title( '', false ) ) ),
 			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
-			'og:site_name'   => esc_attr( $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org' ),
+			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => esc_url( get_term_link( get_queried_object_id() ) ),
 			'og:image'       => esc_url( $default_image ),
@@ -308,8 +308,8 @@ function add_social_meta_tags() {
 	} else if ( is_singular( POST_TYPE ) ) {
 		$og_fields = [
 			'og:title'       => the_title_attribute( array( 'echo' => false ) ),
-			'og:description' => esc_attr( strip_tags( get_post_meta( get_the_ID(), 'wpop_description', true ) ) ),
-			'og:site_name'   => esc_attr( $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org' ),
+			'og:description' => strip_tags( get_post_meta( get_the_ID(), 'wpop_description', true ) ),
+			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => esc_url( get_permalink() ),
 			'og:image'       => esc_url( $default_image ),

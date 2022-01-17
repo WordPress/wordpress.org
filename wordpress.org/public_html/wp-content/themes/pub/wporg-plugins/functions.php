@@ -330,12 +330,13 @@ add_filter( 'get_the_excerpt', __NAMESPACE__ . '\excerpt_length' );
  * Adds meta tags for richer social media integrations.
  */
 function social_meta_data() {
-	global $wporg_global_header_options;
+	$site_title = function_exists( '\WordPressdotorg\site_brand' ) ? \WordPressdotorg\site_brand() : 'WordPress.org';
+
 	if ( is_front_page() ) {
 		$og_fields = [
 			'og:title'       => __( 'WordPress Plugins', 'wporg-plugins' ),
 			'og:description' => __( 'Choose from thousands of free plugins to build, customize, and enhance your WordPress website.', 'wporg-plugins' ),
-			'og:site_name'   => $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org',
+			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => home_url(),
 		];
@@ -366,7 +367,7 @@ function social_meta_data() {
 	printf( '<meta property="og:title" content="%s" />' . "\n", the_title_attribute( array( 'echo' => false ) ) );
 	printf( '<meta property="og:description" content="%s" />' . "\n", esc_attr( strip_tags( get_the_excerpt() ) ) );
 	printf( '<meta name="description" content="%s" />' . "\n", esc_attr( strip_tags( get_the_excerpt() ) ) );
-	printf( '<meta property="og:site_name" content="%s" />' . "\n", esc_attr( $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org' ) );
+	printf( '<meta property="og:site_name" content="%s" />' . "\n", esc_attr( $site_title ) );
 	printf( '<meta property="og:type" content="website" />' . "\n" );
 	printf( '<meta property="og:url" content="%s" />' . "\n", esc_url( get_permalink() ) );
 	printf( '<meta name="twitter:card" content="summary_large_image">' . "\n" );

@@ -17,8 +17,6 @@ use WordPressdotorg\API\Serve_Happy\RECOMMENDED_PHP;
  * @return array Filtered Open Graph tags.
  */
 function custom_open_graph_tags( $tags = [] ) {
-	global $wporg_global_header_options;
-
 	// Use `name=""` for description.
 	// See Jetpacks Twitter Card for where it happens for the twitter:* fields.
 	add_filter( 'jetpack_open_graph_output', function( $html ) {
@@ -27,14 +25,13 @@ function custom_open_graph_tags( $tags = [] ) {
 
 	// Override the Front-page tags.
 	if ( is_front_page() ) {
-		$site_title = ! empty( $wporg_global_header_options['rosetta_title'] ) ? $wporg_global_header_options['rosetta_title'] : 'WordPress';
 		return array(
 			'og:type'         => 'website',
 			'og:title'        => __( 'Blog Tool, Publishing Platform, and CMS', 'wporg' ) . " - {$site_title}",
 			'og:description'  => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
 			'description'     => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
 			'og:url'          => home_url( '/' ),
-			'og:site_name'    => $site_title,
+			'og:site_name'    => 'WordPress.org', // Rosetta title will automatically be inserted.
 			'og:image'        => 'https://s.w.org/images/home/screen-themes.png?3',
 			'og:locale'       => get_locale(),
 			'twitter:card'    => 'summary_large_image',
