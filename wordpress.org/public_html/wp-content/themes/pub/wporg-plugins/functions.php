@@ -236,6 +236,14 @@ function custom_body_class( $classes ) {
 add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
 
 /**
+ * Swaps out the no-js for the js body class if the browser supports Javascript.
+ */
+function nojs_body_tag() {
+        echo "<script>document.body.className = document.body.className.replace('no-js','js');</script>\n";
+}
+add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
+
+/**
  * Append an optimized site name.
  *
  * @param array $title {
