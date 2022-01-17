@@ -20,6 +20,16 @@ function wporg_support_theme_support() {
 }
 add_action( 'after_setup_theme', 'wporg_support_theme_support' );
 
+
+/**
+ * Swaps out the no-js for the js body class if the browser supports Javascript.
+ */
+function nojs_body_tag() {
+	        echo "<script>document.body.className = document.body.className.replace('no-js','js');</script>\n";
+}
+add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
+
+
 /**
  * Enqueue scripts and styles.
  *
