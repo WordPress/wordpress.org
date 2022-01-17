@@ -2,7 +2,7 @@
 namespace WordPressdotorg\MU_Plugins\Site_Branding;
 /**
  * Plugin Name: WordPress.org Site Branding
- * Description: Ensures that <title> tags on WordPress.org always include WordPress.
+ * Description: Ensures that <title> tags on WordPress.org always include WordPress, and WordPress favicons.
  */
 
 add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title_parts', 100 );
@@ -59,3 +59,11 @@ function get_wordpress_brand() {
 
 	return "WordPress.org $name";
 }
+
+/**
+ * Output the WordPress favicon on all WordPress.org themes.
+ */
+function favicon_icon() {
+	echo '<link rel="icon" href="https://s.w.org/favicon.ico?2" type="image/x-icon" />', "\n";
+}
+add_action( 'wp_head', __NAMESPACE__ . '\favicon_icon', 1 );
