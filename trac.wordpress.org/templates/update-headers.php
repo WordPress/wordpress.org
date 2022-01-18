@@ -62,10 +62,19 @@ foreach ( $header->getElementsByTagName( 'body' )[0]->childNodes as $node ) {
 save_domdocument( __DIR__ . '/wporg-header.html', $wporg_header );
 
 // wporg-footer.html
-// Everything within <body>, but not body.
+// Everything within <body>, but not body or jQuery.
 $wporg_footer = domdocument_for_trac();
 $html_node    = $wporg_footer->getElementsByTagName( 'html' )[0];
 foreach ( $footer->getElementsByTagName( 'body' )[0]->childNodes as $node ) {
+	// Exclude jQuery 3.x, Trac has it's own 1.x bundled.
+	if (
+		$node instanceof DomElement &&
+		'script' === $node->tagName &&
+		false !== stripos( $node->getAttribute( 'src' ), 'jquery' )
+	) {
+		continue;
+	}
+
 	$html_node->appendChild( $wporg_footer->importNode( $node, true ) );
 }
 save_domdocument( __DIR__ . '/wporg-footer.html', $wporg_footer );
