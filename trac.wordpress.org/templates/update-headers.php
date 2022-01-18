@@ -48,6 +48,13 @@ if ( ! $header || ! $footer ) {
 $wporg_head = domdocument_for_trac();
 $html_node  = $wporg_head->getElementsByTagName( 'html' )[0];
 foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
+	if (
+		$node instanceOf DomElement &&
+		'title' === $node->tagName
+	) {
+		continue;
+	}
+
 	$html_node->appendChild( $wporg_head->importNode( $node, true ) );
 }
 save_domdocument( __DIR__ . '/wporg-head.html', $wporg_head );
