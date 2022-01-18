@@ -75,6 +75,14 @@ $search_field = $search_form->getElementsByTagName( 'input' )[0];
 $search_field->setAttribute( 'placeholder', 'Search Trac...' );
 $search_field->setAttribute( 'name', 'q' );
 
+// Direct the skip link to the correct element
+$skip_link = $wporg_header->getElementById( 'wporg-skip-link' );
+if ( $skip_link ) {
+	$skip_link->setAttribute( 'href', '#main' );
+	$skip_link->setAttribute( 'data-selector', '#main' );
+	$skip_link->setAttribute( 'tabindex', '' );
+}
+
 save_domdocument( __DIR__ . '/wporg-header.html', $wporg_header );
 
 // wporg-footer.html
