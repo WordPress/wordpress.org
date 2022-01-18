@@ -59,6 +59,15 @@ $html_node    = $wporg_header->getElementsByTagName( 'html' )[0];
 foreach ( $header->getElementsByTagName( 'body' )[0]->childNodes as $node ) {
 	$html_node->appendChild( $wporg_header->importNode( $node, true ) );
 }
+
+// Alter the search form to search Trac
+$search_form = $wporg_header->getElementsByTagName( 'form' )[0];
+$search_form->setAttribute( 'method', 'GET' );
+$search_form->setAttribute( 'action', '/search' );
+$search_field = $search_form->getElementsByTagName( 'input' )[0];
+$search_field->setAttribute( 'placeholder', 'Search Trac...' );
+$search_field->setAttribute( 'name', 'q' );
+
 save_domdocument( __DIR__ . '/wporg-header.html', $wporg_header );
 
 // wporg-footer.html
