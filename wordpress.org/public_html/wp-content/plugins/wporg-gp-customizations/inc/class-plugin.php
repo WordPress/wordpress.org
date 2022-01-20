@@ -584,7 +584,12 @@ class Plugin {
 		}
 
 		if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
-			$stylesheet = 'pub/wporg-main';
+			if ( 'stylesheet' === current_filter() ) {
+				$stylesheet = 'pub/wporg-main';
+			} else {
+				/* template */
+				$stylesheet = 'pub/wporg';
+			}
 		} else {
 			$stylesheet = 'core/twentyfifteen';
 		}

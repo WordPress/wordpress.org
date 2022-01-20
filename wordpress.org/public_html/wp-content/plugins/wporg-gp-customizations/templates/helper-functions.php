@@ -50,10 +50,16 @@ if ( isset( $template ) && 'translations' === $template ) {
 	gp_enqueue_script( 'wporg-translate-editor' );
 }
 
-add_action( 'after_setup_theme', static function() {
-	add_theme_support( 'title-tag' );
-});
-add_action( 'gp_head', '_wp_render_title_tag' );
+// The new header calls wp_head + gp_head, the old header only calls one or the other, so we must manually add this.
+if ( ! FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
+	add_action( 'gp_head', '_wp_render_title_tag' );
+}
+
+/**
+ * Set the document title to that of GlotPress.
+ * 
+ * @see https://github.com/GlotPress/GlotPress-WP/issues/8
+ */
 add_filter( 'document_title_parts', static function() {
 	return [
 		'title' => gp_title(),
