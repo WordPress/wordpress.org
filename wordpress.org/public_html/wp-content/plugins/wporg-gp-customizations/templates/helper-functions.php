@@ -336,6 +336,29 @@ function wporg_references( $project, $entry ) {
 }
 
 /**
+ * Update the URL reference for wordpress-org wporg-mu-plugin file locations.
+ *
+ * @param string $source_url
+ * @param \GP_Project $project
+ * @param string $file
+ * @param string $line
+ *
+ * @return Source URL.
+ */
+function wporg_references_wordpress_org_github( $source_url, $project, $file, $line ) {
+	if (
+		'meta/wordpress-org' === $project->path &&
+		str_starts_with( $file, 'mu-plugins/' ) &&
+		! str_starts_with( $file, 'mu-plugins/pub/' )
+	) {
+		$source_url = "https://github.com/WordPress/wporg-mu-plugins/blob/trunk/{$file}#L{$line}";
+	}
+
+	return $source_url;
+}
+add_filter( 'gp_reference_source_url', 'wporg_references_wordpress_org_github', 10, 4 );
+
+/**
  * Whether to show the context or not.
  *
  * Prevents displaying the context if it doesn't provide any new information
