@@ -17,7 +17,7 @@ module.exports = function( grunt ) {
 				map: 'build' !== process.argv[2],
 				processors: [
 					require( 'autoprefixer' )( {
-						browsers: [
+						overrideBrowserslist: [
 							'Android >= 2.1',
 							'Chrome >= 21',
 							'Edge >= 12',
