@@ -20,7 +20,7 @@ wp_enqueue_script( 'jquery' );
 get_header( 'top-level-page' );
 the_post();
 
-$terms = urldecode( wp_unslash( $_GET['s'] ) );
+$terms = urldecode( wp_unslash( $_GET['s'] ?? '' ) );
 $terms = htmlspecialchars_decode( $terms );
 $terms = explode( '?', $terms )[0];
 $terms = trim( $terms, "/ \r\n\t" );
