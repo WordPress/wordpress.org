@@ -1,0 +1,28 @@
+{
+  "name": "wporg-photos",
+  "version": "1.0.0",
+  "description": "Theme for WordPress Photo Directory",
+  "author": "wordpressdotorg",
+  "license": "GPL-2.0+",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "svn",
+    "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-photos/"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.3.6",
+    "cssnano": "^3.7.4",
+    "es6-promise": "~4.0.5",
+    "grunt": "^1.0.3",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-postcss": "^0.8.0",
+    "grunt-rtlcss": "^2.0.1",
+    "grunt-sass": "~3.0.1",
+    "grunt-sass-globbing": "^1.5.1",
+    "node-sass": "^4.9.3",
+    "pixrem": "^3.0.2"
+  }
+}
