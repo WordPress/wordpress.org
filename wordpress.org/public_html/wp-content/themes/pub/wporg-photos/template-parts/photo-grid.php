@@ -20,7 +20,7 @@ namespace WordPressdotorg\Photo_Directory\Theme;
 	<div class="entry-content">
 		<a href="<?php echo get_post_permalink(); ?>">
 			<?php printf(
-				'<img class="grid-photo" src="%s" srcset="%s" alt="%s" loading="lazy" decoding="async">',
+				'<img class="grid-photo" src="%s" srcset="%s" height="200" width="300" alt="%s" loading="lazy" decoding="async">',
 				esc_url( get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ),
 				esc_attr(
 					get_the_post_thumbnail_url( get_the_ID(), 'medium' )
