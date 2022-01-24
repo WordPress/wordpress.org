@@ -12,6 +12,16 @@
         display: inline-block;
         width: 5em;
       }
+
+      .tip {
+        color: #555;
+        font-size: 0.875em;
+        margin-top: 2px;
+      }
+
+      .tip::before {
+        content: '💡'
+      }
     </style>
     <script>
       /**
@@ -66,6 +76,16 @@
           sendMessage('urlChange', message);
         });
 
+        document.forms.setMeta.addEventListener('submit', (event) => {
+          event.preventDefault();
+
+          const metaInput = document.getElementById('metaInput');
+          const meta = JSON.parse(metaInput.value);
+
+          const message = { meta };
+          sendMessage('setMeta', message);
+        });
+
         document.forms.localeGet.addEventListener('submit', (event) => {
           event.preventDefault();
 
@@ -89,24 +109,6 @@
   <body>
     <h1>Message exchange</h1>
 
-    <h2>Test resize</h2>
-    <form name="resize">
-      <div class="row">
-        <label for="height">Height*:</label>
-        <input
-            id="height"
-            type="number"
-            placeholder="Height (px)"
-            required/>
-        <code>{number}</code>
-      </div>
-      <div class="row">
-        <button type="submit">
-          Send message
-        </button>
-      </div>
-    </form>
-
     <h2>Test URL change</h2>
     <form name="urlChange">
       <div class="row">
@@ -117,6 +119,7 @@
             placeholder="Absolute path"
             required/>
         <code>{string}</code>
+        <p class="tip">Start the path with a '/'.</p>
       </div>
       <div class="row">
         <label for="titleInput">Title:</label>
@@ -125,6 +128,28 @@
             type="text"
             placeholder="Title"/>
         <code>{string?}</code>
+        <p class="tip">Add the '- Openverse' suffix.</p>
+      </div>
+      <div class="row">
+        <button type="submit">
+          Send message
+        </button>
+      </div>
+    </form>
+
+    <h2>Test meta tag passing</h2>
+    <form name="setMeta">
+      <div class="row">
+        <label for="metaInput">Meta*:</label>
+        <textarea
+            id="metaInput"
+            type="text"
+            placeholder="Meta JSON"
+            cols="24"
+            rows="4"
+            required></textarea>
+        <code>JSON ~ [{name: string, content: string}]</code>
+        <p class="tip">Try a 'theme-color' meta tag if your browser supports it.</p>
       </div>
       <div class="row">
         <button type="submit">

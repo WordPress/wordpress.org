@@ -1,25 +1,4 @@
 /**
- * Update the height of the nested `iframe` to match the height of the nested
- * element. This function sets the value of the `--openverse-embed-height` CSS
- * custom property (which is `100vh`, by default).
- *
- * @param {{ height: number }} value - the new dimensions of the iframe
- */
-function updateHeight(value) {
-  const height = value.height;
-  let heightProp;
-  if (height) {
-    heightProp = `${height}px`;
-  } else {
-    heightProp = '100vh';
-  }
-  document
-    .documentElement
-    .style
-    .setProperty('--openverse-embed-height', heightProp);
-}
-
-/**
  * Update the URL in the address bar when a page navigation occurs inside the
  * `iframe` This function uses the History API to change the address without a
  * page reload.
@@ -45,6 +24,33 @@ function updatePath(value) {
     console.log(`Setting document title: ${value.title}`);
     document.title = value.title;
   }
+}
+
+/**
+ * Set the meta attributes on the top-level document based on the meta tags
+ * passed by the `iframe`.
+ *
+ * @param {{
+ *   meta: [{
+ *     name: string,
+ *     content: string,
+ *  }]
+ * }} value - the meta data data supplied by the `iframe`
+ */
+function updateMeta(value) {
+  value.meta.forEach((metaItem) => {
+    let metaTag = document.head.querySelector(`meta[name="${metaItem.name}"]`);
+    if (metaTag) {
+      // Update the tag, if it already exists
+      metaTag.content = metaItem.content;
+    } else {
+      // Create a new tag, otherwise
+      metaTag = document.createElement('meta');
+      metaTag.name = metaItem.name;
+      metaTag.content = metaItem.content;
+      document.head.appendChild(metaTag);
+    }
+  })
 }
 
 /**
@@ -95,11 +101,11 @@ function handleIframeMessages({ origin, data }) {
 
   let handler;
   switch (data.type) {
-    case 'resize':
-      handler = updateHeight;
-      break;
     case 'urlChange':
       handler = updatePath;
+      break;
+    case 'setMeta':
+      handler = updateMeta;
       break;
     case 'localeGet':
       handler = emitLocale;
