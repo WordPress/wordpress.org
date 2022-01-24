@@ -1,8 +1,12 @@
+:root {
+    --header-height: 104.453px; /* redesiged global-header */
+}
+
 #openverse_embed {
     display: block;
 
     width: 100%;
-    height: var(--openverse-embed-height, 100vh); /* This will be updated by JavaScript */
+    height: calc(100vh - var(--header-height));
 
     border: none;
 }
