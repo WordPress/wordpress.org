@@ -21,6 +21,13 @@ function domdocument_for_trac() {
 }
 
 function save_domdocument( $file, $dom ) {
+
+	// Strip all comments out of the template.
+	$xpath = new DOMXPath($dom);
+	foreach ( $xpath->query( '//comment()' ) as $comment ) {
+		$comment->parentNode->removeChild( $comment );
+	}
+
 	$html = $dom->saveXML();
 
 	// Remove the XML header
@@ -31,6 +38,9 @@ function save_domdocument( $file, $dom ) {
 
 	// Escape CDATA tags in <script>
 	$html = preg_replace( '#<script([^>]*)><!\[CDATA\[(.+?)\]\]></script>#ism', "<script$1>//<![CDATA[\n$2\n//]]></script>", $html );
+
+	// Remove trailing whitespace.
+	$html = preg_replace( '#(\S)\s+$#m', '$1', $html );
 
 	return file_put_contents( $file, $html );
 }
@@ -48,14 +58,15 @@ if ( ! $header || ! $footer ) {
 $wporg_head = domdocument_for_trac();
 $html_node  = $wporg_head->getElementsByTagName( 'html' )[0];
 foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
-	// Remove <title>
+	// Skip <title>
 	if (
 		$node instanceOf DomElement &&
 		'title' === $node->tagName
 	) {
 		continue;
 	}
-	// Remove <meta name="generator">
+
+	// Skip <meta name="generator">
 	if (
 		$node instanceOf DomElement &&
 		'meta' === $node->tagName &&
