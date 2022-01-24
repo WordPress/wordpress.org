@@ -13,6 +13,7 @@ function domdocument_from_url( $url ) {
 
 function domdocument_for_trac() {
 	$doc = new DOMDocument();
+	$doc->formatOutput = true;
 
 	$doc->loadHTML( '<!DOCTYPE html>
 	<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" py:strip=""></html>' );
