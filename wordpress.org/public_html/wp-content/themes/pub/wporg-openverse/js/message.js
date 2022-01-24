@@ -1,25 +1,4 @@
 /**
- * Update the height of the nested `iframe` to match the height of the nested
- * element. This function sets the value of the `--openverse-embed-height` CSS
- * custom property (which is `100vh`, by default).
- *
- * @param {{ height: number }} value - the new dimensions of the iframe
- */
-function updateHeight(value) {
-  const height = value.height;
-  let heightProp;
-  if (height) {
-    heightProp = `${height}px`;
-  } else {
-    heightProp = '100vh';
-  }
-  document
-    .documentElement
-    .style
-    .setProperty('--openverse-embed-height', heightProp);
-}
-
-/**
  * Update the URL in the address bar when a page navigation occurs inside the
  * `iframe` This function uses the History API to change the address without a
  * page reload.
@@ -122,9 +101,6 @@ function handleIframeMessages({ origin, data }) {
 
   let handler;
   switch (data.type) {
-    case 'resize':
-      handler = updateHeight;
-      break;
     case 'urlChange':
       handler = updatePath;
       break;
