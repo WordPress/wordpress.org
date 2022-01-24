@@ -16,8 +16,19 @@ add_filter( 'bbp_show_lead_topic', '__return_true' );
  */
 function wporg_support_theme_support() {
 	add_theme_support( 'html5', array( 'comment-form' ) );
+	add_theme_support( 'title-tag' );
 }
 add_action( 'after_setup_theme', 'wporg_support_theme_support' );
+
+
+/**
+ * Swaps out the no-js for the js body class if the browser supports Javascript.
+ */
+function nojs_body_tag() {
+	        echo "<script>document.body.className = document.body.className.replace('no-js','js');</script>\n";
+}
+add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
+
 
 /**
  * Enqueue scripts and styles.
@@ -27,7 +38,7 @@ add_action( 'after_setup_theme', 'wporg_support_theme_support' );
  */
 function wporg_support_scripts() {
 
-	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [], '20210719' );
+	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [], '20220110' );
 	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );
@@ -269,15 +280,6 @@ add_filter( 'excerpt_length', 'wporg_support_excerpt_length' );
  * @package WPBBP
  */
 function wporg_get_global_header() {
-
-	$GLOBALS['pagetitle'] = wp_title( '&#124;', false, 'right' );
-	// Suffix either "WordPress.org $LOCALE" or WordPress.org.
-	if ( isset( $GLOBALS['wporg_global_header_options']['rosetta_title'] ) ) {
-		$GLOBALS['pagetitle'] .= $GLOBALS['wporg_global_header_options']['rosetta_title'];
-	} else {
-		$GLOBALS['pagetitle'] .= __( 'WordPress.org', 'wporg-forums' );
-	}
-
 	require WPORGPATH . 'header.php';
 }
 
@@ -289,6 +291,19 @@ function wporg_support_bbp_raw_title( $title ) {
 	return $title;
 }
 add_filter( 'bbp_raw_title', 'wporg_support_bbp_raw_title' );
+
+/**
+ * Add bbPress titles to the document title.
+ * 
+ * bbPress doesn't support `title-tag` theme support, instead relying upon `wp_title` filters instead.
+ */
+function wporg_support_pre_get_document_title( $title ) {
+	// See wp_get_document_title()
+	$sep = apply_filters( 'document_title_separator', '&#124;' );
+
+	return bbp_title( $title, $sep, 'right' );
+}
+add_filter( 'pre_get_document_title', 'wporg_support_pre_get_document_title' );
 
 /**
  * The Footer for our theme.

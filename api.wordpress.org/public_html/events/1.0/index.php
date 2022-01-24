@@ -8,6 +8,8 @@ use stdClass;
 function main() {
 	global $cache_group, $cache_life;
 
+	validate_request();
+
 	bootstrap();
 
 	/*
@@ -124,7 +126,7 @@ function parse_request() {
 	$location_args = array( 'restrict_by_country' => false );
 
 	// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
-	if ( isset( $_GET['latitude'] ) ) {
+	if ( isset( $_GET['latitude'], $_GET['longitude'] ) ) {
 		$location_args['latitude']  = $_GET['latitude'];
 		$location_args['longitude'] = $_GET['longitude'];
 	}
@@ -168,6 +170,42 @@ function parse_request() {
 	}
 
 	return $location_args;
+}
+
+/**
+ * Validate that the incoming request is in a valid format.
+ */
+function validate_request() {
+	// Not all clients have a user agent.
+	if ( ! isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
+		$_SERVER['HTTP_USER_AGENT'] = '';
+	}
+
+	$must_be_strings = [
+		'latitude',
+		'longitude',
+		'country',
+		'location',
+		'timezone',
+		'locale',
+		'ip',
+	];
+
+	foreach ( $must_be_strings as $field ) {
+		if ( isset( $_GET[ $field ] ) && ! is_scalar( $_GET[ $field ] ) ) {
+			header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400 );
+			die( '{"error":"Bad request.","reason":"' . $field . ' must be of type string."}' );
+		}
+	}
+
+	if ( ! empty( $_POST['location_data'] ) ) {
+		foreach ( $_POST['location_data'] as $field => $value ) {
+			if ( ! is_scalar( $value ) ) {
+				header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400 );
+				die( '{"error":"Bad request.","reason":"' . $field . ' must be of type string."}' );
+			}
+		}
+	}
 }
 
 /**
@@ -1558,17 +1596,18 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  * Pin one-off events.
  */
 function pin_one_off_events( $events, $current_time ) {
-	if ( $current_time < strtotime( 'December 18, 2020' ) ) {
+
+	if ( $current_time < strtotime( 'December 17, 2021' ) ) {
 		array_unshift( $events, array(
 			'type'                 => 'wordcamp',
 			'title'                => 'State of the Word',
-			'url'                  => 'https://wordpress.org/news/2020/12/state-of-the-word-2020/',
+			'url'                  => 'https://wordpress.org/news/2021/11/state-of-the-word-2021/',
 			'meetup'               => '',
 			'meetup_url'           => '',
-			'date'                 => '2020-12-17 00:00:00',
-			'end_date'             => '2020-12-17 23:00:00',
-			'start_unix_timestamp' => 1608195600,
-			'end_unix_timestamp'   => 1608267600,
+			'date'                 => '2021-12-14 17:00:00',
+			'end_date'             => '2021-12-14 19:00:00',
+			'start_unix_timestamp' => 1639519200,
+			'end_unix_timestamp'   => 1639526400,
 
 			'location' => array(
 				'location'  => 'Online',

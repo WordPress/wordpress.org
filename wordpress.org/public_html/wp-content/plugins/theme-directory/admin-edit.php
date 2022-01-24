@@ -89,6 +89,34 @@ function wporg_themes_map_meta_cap( $caps, $cap ) {
 add_filter( 'map_meta_cap', 'wporg_themes_map_meta_cap', 10, 2 );
 
 /**
+ * Mark themes as Delisted / Suspended on the admin post listing.
+ */
+function wporg_themes_display_post_states( $states, $post ) {
+	if ( 'repopackage' === $post->post_type ) {
+		switch ( $post->post_status ) {
+			case 'suspend':
+				$states['suspend'] = __( 'Suspended', 'wporg-themes' );
+				break;
+			case 'delist':
+				$states['delist'] = __( 'Delisted', 'wporg-themes' );
+				break;
+		}
+
+		// Append parent status too for child themes.
+		if ( $post->post_parent ) {
+			$parent_states = get_post_states( get_post( $post->post_parent ) );
+			foreach ( $parent_states as $state => $text ) {
+				$states[ "parent-{$state}" ] = 'Parent: ' . $text;
+			}
+		}
+
+	}
+
+	return $states;
+}
+add_filter( 'display_post_states', 'wporg_themes_display_post_states', 10, 2 );
+
+/**
  * Adds suspend and reinstate actions.
  *
  * @param array   $actions

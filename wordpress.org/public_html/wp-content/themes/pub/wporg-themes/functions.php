@@ -22,6 +22,8 @@ function wporg_themes_setup() {
 		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
 	) );
 
+	add_theme_support( 'title-tag' );
+
 	// No need for canonical lookups
 	remove_action( 'template_redirect', 'redirect_canonical' );
 	remove_action( 'template_redirect', 'wp_old_slug_redirect' );

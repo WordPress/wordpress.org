@@ -20,7 +20,7 @@ function getStatusLabel( pattern ) {
 			return __( 'Pending', 'wporg-patterns' );
 		case 'draft':
 			return __( 'Draft', 'wporg-patterns' );
-		case 'declined':
+		case 'unlisted':
 			return __( 'Declined', 'wporg-patterns' );
 	}
 	return '';

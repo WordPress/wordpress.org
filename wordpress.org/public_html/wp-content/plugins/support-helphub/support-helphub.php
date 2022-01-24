@@ -15,11 +15,13 @@
 
 namespace WordPressdotorg\HelpHub;
 
-require_once( dirname( __FILE__ ) . '/inc/helphub-codex-languages/class-helphub-codex-languages.php' );
-require_once( dirname( __FILE__ ) . '/inc/helphub-contributors/helphub-contributors.php' );
-require_once( dirname( __FILE__ ) . '/inc/helphub-post-types/helphub-post-types.php' );
-require_once( dirname( __FILE__ ) . '/inc/helphub-read-time/helphub-read-time.php' );
-require_once( dirname( __FILE__ ) . '/inc/table-of-contents-lite/table-of-contents-lite.php' );
-require_once( dirname( __FILE__ ) . '/inc/helphub-front-page-blocks/helphub-front-page-blocks.php' );
-require_once( dirname( __FILE__ ) . '/inc/helphub-customroles/class-helphub-custom-roles.php' );
-require_once( dirname( __FILE__ ) . '/inc/helphub-manager/class-helphub-manager.php' );
+define( 'PLUGIN', __FILE__ );
+
+require __DIR__ . '/inc/helphub-codex-languages/class-helphub-codex-languages.php';
+require __DIR__ . '/inc/helphub-contributors/helphub-contributors.php';
+require __DIR__ . '/inc/helphub-post-types/helphub-post-types.php';
+require __DIR__ . '/inc/helphub-read-time/helphub-read-time.php';
+require __DIR__ . '/inc/helphub-front-page-blocks/helphub-front-page-blocks.php';
+require __DIR__ . '/inc/helphub-customroles/class-helphub-custom-roles.php';
+require __DIR__ . '/inc/helphub-manager/class-helphub-manager.php';
+require __DIR__ . '/inc/handbook-toc/index.php';

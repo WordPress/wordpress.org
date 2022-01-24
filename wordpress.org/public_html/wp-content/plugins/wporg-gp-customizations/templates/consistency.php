@@ -150,16 +150,17 @@ if ( $performed_search && ! $results ) {
 					isset( $parent_project->name ) ? sanitize_title( 'project-' . $parent_project->name ) : '',
 					sprintf(
 						'<div class="string">%s%s</div>
-						<div class="meta">Project: <a href="/projects/%s">%s</a></div>',
+						<div class="meta">Project: <a href="/projects/%s/%s/">%s</a></div>',
 						esc_translation( $result->original_singular ),
 						$original_context,
 						$result->project_path,
+						$set,
 						$project_name
 					),
 					sprintf(
 						'<div class="string%s">%s</div>
 						<div class="meta">
-							<a href="/projects/%s/%s?filters[status]=either&filters[original_id]=%d&filters[translation_id]=%d">Source</a> |
+							<a href="/projects/%s/%s/?filters[status]=either&filters[original_id]=%d&filters[translation_id]=%d">Source</a> |
 							Added: %s
 						</div>',
 						$locale_is_rtl ? ' rtl' : '',

@@ -19,6 +19,8 @@ add_filter( 'body_class', function ( $classes ) {
     return array_diff( $classes, array( 'page-child' ) );
 } );
 
+// Noindex until ready.
+add_filter( 'wporg_noindex_request', '__return_true' );
 
 /* See inc/page-meta-descriptions.php for the meta description for this page. */
 

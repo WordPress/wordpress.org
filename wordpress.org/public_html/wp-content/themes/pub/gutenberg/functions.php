@@ -139,7 +139,7 @@ function gutenberg_editor_scripts_and_styles( $hook ) {
 		),
 		$meta_box_url
 	);
-	wp_localize_script( 'wp-editor', '_wpMetaBoxUrl', $meta_box_url );
+	wp_add_inline_script( 'wp-editor', sprintf( 'var _wpMetaBoxUrl = %s;', wp_json_encode( $meta_box_url ) ), 'before' );
 
 	// Initialize the editor.
 	$align_wide    = get_theme_support( 'align-wide' );
@@ -313,15 +313,8 @@ function gutenberg_editor_scripts_and_styles( $hook ) {
 		unset( $editor_settings['enableCustomFields'] );
 	}
 
-	/**
-	 * Filters the settings to pass to the block editor.
-	 *
-	 * @since 3.7.0
-	 *
-	 * @param array   $editor_settings Default editor settings.
-	 * @param WP_Post $post            Post being edited.
-	 */
-	$editor_settings = apply_filters( 'block_editor_settings', $editor_settings, $post );
+	$editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
+	$editor_settings = get_block_editor_settings( $editor_settings, $editor_context );
 
 	$init_script = <<<JS
 ( function() {
@@ -872,7 +865,7 @@ function gutenbergtheme_fonts_url() {
  * Enqueue scripts and styles.
  */
 function gutenbergtheme_scripts() {
-	wp_enqueue_style( 'gutenbergtheme-style', get_stylesheet_uri(), [], 13 );
+	wp_enqueue_style( 'gutenbergtheme-style', get_stylesheet_uri(), [], 14 );
 
 	wp_enqueue_style( 'gutenbergthemeblocks-style', get_template_directory_uri() . '/blocks.css');
 

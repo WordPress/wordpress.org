@@ -394,7 +394,7 @@ jQuery( function( $ ) {
 					continue;
 				}
 
-				printf( '<li><a href="//profiles.wordpress.org/%s">%s %s</a></li>',
+				printf( '<li><a href="//profiles.wordpress.org/%s/">%s %s</a></li>',
 					esc_attr( $maintainer->user_nicename ),
 					get_avatar( $maintainer->user_email, 36 ),
 					$maintainer->display_name ?: $maintainer->user_login
@@ -415,7 +415,7 @@ jQuery( function( $ ) {
 			echo 'Contributors following this component:';
 			echo '<ul class="followers">';
 			foreach ( $followers as $follower ) {
-				echo '<li><a title="' . esc_attr( $follower->user_login ) . '" href="//profiles.wordpress.org/' . esc_attr( $follower->user_nicename ) . '">';
+				echo '<li><a title="' . esc_attr( $follower->user_login ) . '" href="//profiles.wordpress.org/' . esc_attr( $follower->user_nicename ) . '/">';
 				echo get_avatar( $follower->user_email, 36 ) . '</a></li>';
 			}
 			echo '</ul>';
@@ -717,7 +717,7 @@ jQuery( function( $ ) {
 				continue;
 			}
 
-			echo '<a href="//profiles.wordpress.org/' . esc_attr( $maintainer->user_nicename ) . '" title="' . esc_attr( $maintainer->display_name ) . '">' . get_avatar( $maintainer->user_email, 24 ) . "</a>";
+			echo '<a href="//profiles.wordpress.org/' . esc_attr( $maintainer->user_nicename ) . '/" title="' . esc_attr( $maintainer->display_name ) . '">' . get_avatar( $maintainer->user_email, 24 ) . "</a>";
 		}
 		echo '</td>';
 		echo '</tr>';

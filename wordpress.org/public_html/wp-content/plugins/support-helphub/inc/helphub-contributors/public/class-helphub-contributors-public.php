@@ -102,7 +102,7 @@ class HelpHub_Contributors_Public {
 						 */
 						$data = apply_filters( 'helphub_contributors_user_data', $data, $contributor_object );
 
-						$contributor_url      = 'https://profiles.wordpress.org/' . $data['user_nicename'];
+						$contributor_url      = 'https://profiles.wordpress.org/' . $data['user_nicename'] . '/';
 						$contributor_gravatar = '<img src="' . esc_url( get_avatar_url( $data['user_email'], array( 'size' => 40 ) ) ) . '" />';
 						$contributor_name     = '<span class="name">' . esc_html( $data['display_name'] ) . '</span>';
 						$contributor_username = '<span>&#64;' . esc_html( $data['user_nicename'] ) . '</span>';

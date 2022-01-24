@@ -149,6 +149,10 @@ div.sidebar #bbpress-forums {
 	padding: 5px 15px;
 }
 
+#bbp-your-profile fieldset.submit {
+	border: none;
+}
+
 @media screen and ( max-width: 782px ) {
 	#bbpress-forums #bbp-your-profile fieldset {
 		padding: 0px 20px 30px;

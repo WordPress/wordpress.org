@@ -367,10 +367,18 @@ function get_whitelist() {
 		),
 		'meta-wordcamp' => $wordcamp_central,
 		'openverse' => array(
+			'aetherunbound', // @Madison Swain-Bowden on Slack
+			'dhruvkb',
+			'fcoveram', // @Francisco on Slack
+			'krysal',
+			'olgabulat', // @Olga Bulat on Slack
+			'ronnybadilla', // @ronny on Slack
+			'sarayourfriend',
 			'zackkrida',
 		),
 		'performance' => array(
 			// #core (inc committers) already included via get_parent_channel().
+			'shetheliving',
 		),
 		'polyglots' => array(
 			'Amieiro',
@@ -385,6 +393,7 @@ function get_whitelist() {
 			'SergeyBiryukov', // @sergey on Slack
 			'tobifjellner',
 			'tokyobiyori',
+			'vladytimy', // @vladt on slack
 		),
 		'polyglots-events' => array(
 			'casiepa', // @Pascal on Slack
@@ -430,6 +439,7 @@ function get_whitelist() {
 			'jessecowens', // @Jesse Owens on Slack
 			'juliekuehl',
 			'onealtr', // @oneal on Slack
+			'webtechpooja', // @Pooja Derashri on Slack
 		) ),
 		// NOTE: Private Groups need not be listed here. All members of Private Groups have access to /announce & /here
 		'wcasia' => array(

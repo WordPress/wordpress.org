@@ -85,7 +85,7 @@ class Plugin_Self_Transfer extends Base {
 		// Add an audit-log entry as to why this has happened.
 		Tools::audit_log( sprintf(
 			'Ownership self-transferred to <a href="%s">%s</a>.',
-			esc_url( 'https://profiles.wordpress.org/' . $new_owner->user_nicename .'/' ),
+			esc_url( 'https://profiles.wordpress.org/' . $new_owner->user_nicename . '/' ),
 			$new_owner->user_login
 		), $plugin );
 

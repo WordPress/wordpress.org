@@ -76,6 +76,10 @@ class Plugin {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
+
+		// @todo temporary for new header/footer launch.
+		add_filter( 'stylesheet', array( $this, 'switch_theme_for_new_header' ) );
+		add_filter( 'template', array( $this, 'switch_theme_for_new_header' ) );
 	}
 
 	/**
@@ -496,7 +500,7 @@ class Plugin {
 	 * @return string profile.wordpress.org URL
 	 */
 	public function worg_profile_url( $url, $nicename ) {
-		return 'https://profiles.wordpress.org/' . $nicename;
+		return 'https://profiles.wordpress.org/' . $nicename . '/';
 	}
 
 	/**
@@ -555,5 +559,41 @@ class Plugin {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Switch to the `wporg-main` theme once the new header/footer launches.
+	 *
+	 * TwentyFifteen has a bunch of styles that interfere with the design, and we don't want them enqueued. We
+	 * do want to enqueue all the other styles/scripts from Core/plugins, though.
+	 * See `blocks/global-header-footer/classic-header.php`.
+	 *
+	 * @todo This can be removed after launch, but you must permanently switch the theme to `pub/wporg-main`.
+	 *
+	 * @param string $stylesheet
+	 *
+	 * @return string
+	 */
+	function switch_theme_for_new_header( $stylesheet ) {
+		/*
+		 * Otherwise this interferes with `render_global_styles()`, and we don't get all of the CSS variables
+		 * from News.
+		 */
+		if ( ms_is_switched() ) {
+			return $stylesheet;
+		}
+
+		if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
+			if ( 'stylesheet' === current_filter() ) {
+				$stylesheet = 'pub/wporg-main';
+			} else {
+				/* template */
+				$stylesheet = 'pub/wporg';
+			}
+		} else {
+			$stylesheet = 'core/twentyfifteen';
+		}
+
+		return $stylesheet;
 	}
 }

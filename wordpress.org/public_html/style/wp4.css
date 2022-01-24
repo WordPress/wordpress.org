@@ -1560,6 +1560,11 @@ a.rsslink {
 	padding-left: 14px;
 }
 
+.wporg-planet a > .dashicons-rss {
+	color: orange;
+	text-decoration: none;
+}
+
 #pagebody ol {
 	margin-left: 22px;
 }
@@ -1792,49 +1797,6 @@ blockquote {
 	/*width: 670px;*/
 }
 
-.wporg-page-hosting #pagebody .partner .forum {
-	margin: 0;
-}
-
-.wporg-page-hosting h2 {
-	font-size: 14px;
-	color: #23282d;
-	font-family: sans-serif;
-    margin: -1px 0 1px 0;
-}
-.wporg-page-hosting h2 a {
-	font-weight: bold;
-}
-
-.wporg-page-hosting .partner {
-	clear: both;
-	min-height: 100px;
-	margin: 40px 10px 40px 0;
-	padding-left: 120px;
-	position: relative;
-}
-
-.wporg-page-hosting #pagebody .partner p {
-	margin-bottom: 10px;
-}
-
-.wporg-page-hosting .partner img {
-	margin-left: 10px;
-	position: absolute;
-	top: 0;
-	left: -10px;
-}
-@media (max-width: 359px) {
-	.wporg-page-hosting .partner {
-		margin-right: 15px;
-		padding-left: 15px;
-	}
-	.wporg-page-hosting .partner img {
-		float: right;
-		position: relative;
-	}
-}
-
 .submit {
 	border-top: 1px solid #ccc;
 	padding: 1.5em 0 0 0;
@@ -1956,7 +1918,8 @@ form#profile-form table input[type='text'], form#profile-form textarea {
 	color: #c00;
 }
 
-#wordpress-org .widget p.error {
+.widget_blog_subscription p.error,
+.jetpack_subscription_widget p.error {
 	border-left: 4px solid #dc3232;
 	margin-left: 0;
 	margin-right: 0;
@@ -2272,56 +2235,6 @@ img#wpstats {
 	text-align: center;
 }
 
-.wporg-page-mobile .intro-wrapper img.feature {
-	display: block;
-	margin: 0 auto 1em auto;
-}
-
-body.wporg-page-mobile .web-stores {
-	text-align: center;
-}
-
-body.wporg-page-mobile .web-stores img {
-	width: 140px;
-	margin-bottom: 10px;
-}
-
-body.wporg-page-mobile .web-stores a:first-of-type img {
-	margin-right: 10px;
-}
-
-@media screen and (min-width:900px) {
-	.wporg-page-mobile .intro-wrapper {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -moz-box;
-		display: -ms-flexbox;
-		display: flex;
-		margin-bottom: 30px;
-	}
-
-	.wporg-page-mobile .intro {
-		-webkit-box-ordinal-group: 2;
-		-webkit-order: 1;
-		-moz-box-ordinal-group: 2;
-		-ms-flex-order: 1;
-		order: 1;
-		padding-right: 30px;
-	}
-
-	.wporg-page-mobile .intro-wrapper img.feature {
-		-webkit-box-ordinal-group: 4;
-		-webkit-order: 3;
-		-moz-box-ordinal-group: 3;
-		-ms-flex-order: 3;
-		order: 3;
-		max-height: -webkit-max-content;
-		max-height: -moz-max-content;
-		max-height: max-content;
-		height: intrinsic;
-	}
-}
-
 .wporg-responsive .col-7,
 body.wporg-responsive .col-8,
 body.wporg-responsive .col-10 {
@@ -2382,7 +2295,7 @@ body.wporg-responsive .col-2 {
 	body.wporg-responsive .col-9,
 	body.wporg-responsive .col-10,
 	body.wporg-responsive .col-12 {
-		width: inherit;
+		width: 95%;
 		float: none;
 		word-wrap: break-word;
 	}
@@ -2511,6 +2424,12 @@ body.wporg-responsive .col-2 {
 	}
 }
 
+/*
+ * New global header/footer needs a clear for older wp4 themes.
+ */
+.wp-block-group.global-footer {
+	clear: both;
+}
 
 /*
  *  Notifications
@@ -2540,5 +2459,4 @@ body.wporg-responsive .col-2 {
 .notification-danger {
 	background: #f2dede;
 }
-
 /*# sourceMappingURL=wp4.css.map */

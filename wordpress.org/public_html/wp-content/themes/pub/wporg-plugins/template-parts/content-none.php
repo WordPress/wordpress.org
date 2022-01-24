@@ -43,7 +43,7 @@
 			<p>
 				<?php
 				/* translators: Link to user profile. */
-				printf( wp_kses_post( __( 'Your favorite plugins are also shared on <a href="%s">your profile</a>.', 'wporg-plugins' ) ), esc_url( 'https://profiles.wordpress.org/' . $current_user->user_nicename ) );
+				printf( wp_kses_post( __( 'Your favorite plugins are also shared on <a href="%s">your profile</a>.', 'wporg-plugins' ) ), esc_url( 'https://profiles.wordpress.org/' . $current_user->user_nicename . '/#content-favorites' ) );
 				?>
 			</p>
 			<?php endif; ?>

@@ -53,10 +53,20 @@ function wporg_login_init() {
 add_action( 'init', 'wporg_login_init' );
 
 /**
+ * Disable the Core Language Selector on wp-login.php.
+ */
+add_filter( 'login_display_language_dropdown', '__return_false' );
+
+/**
+ * Disable XML-RPC endpoints.
+ */
+add_filter( 'xmlrpc_methods', '__return_empty_array' );
+
+/**
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20210517' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20211216' );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
 
@@ -72,7 +82,7 @@ function wporg_login_scripts() {
 	}
 
 	wp_enqueue_style( 'wporg-normalize', get_template_directory_uri() . '/stylesheets/normalize.css', 3 );
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20210517' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20211216' );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
@@ -454,14 +464,6 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 
 	return $message;
 }
-
-// This is the action in the top of `wp_login_form()`, which is not used on wp-login.php, see below.
-function wporg_login_form_top( $message ) {
-	$message .= '<p class="intro">' . wporg_login_wporg_is_starpress() . '</p>';
-
-	return $message;
-}
-add_filter( 'login_form_top', 'wporg_login_form_top' );
 
 // This is the login messages, which is displayed on wp-login.php, which does not use wp_login_form() or it's actions.
 function wporg_login_errors_message( $errors, $redirect_to ) {

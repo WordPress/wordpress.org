@@ -85,7 +85,6 @@ add_action( 'wp_enqueue_scripts', 'wporg_learn_scripts' );
  * @package WPBBP
  */
 function wporg_get_global_header() {
-	$GLOBALS['pagetitle'] = wp_title( '&#124;', false, 'right' ) . __( 'Learn WordPress', 'wporg-learn' );
 	require WPORGPATH . 'header.php';
 }
 
@@ -165,7 +164,7 @@ function wporg_get_cat_or_default_slug() {
 }
 
 /**
- * Get the values associated to the page/post
+ * Get the values associated to the page/post formatted as a string
  *
  * @param string $post_id Id of the post.
  * @param string $tax_slug The slug for the custom taxonomy.
@@ -179,35 +178,90 @@ function wporg_learn_get_taxonomy_terms_string( $post_id, $tax_slug ) {
 }
 
 /**
+ * Get the values associated to the page/post formatted as an array
+ *
+ * @param string $post_id Id of the post.
+ * @param string $tax_slug The slug for the custom taxonomy.
+ *
+ * @return array
+ */
+function wporg_learn_get_taxonomy_terms_array( $post_id, $tax_slug ) {
+	$term_ids = wp_get_post_terms( $post_id, $tax_slug, array( 'fields' => 'ids' ) );
+
+	$terms = array();
+	foreach ( $term_ids as $id ) {
+		$terms[ $id ] = get_term( $id )->name;
+	}
+
+	return $terms;
+}
+
+/**
+ * Get the values associated to the page/post according to the context
+ *
+ * @param  int    $post_id  ID of the post.
+ * @param  string $tax_slug The slug for the custom taxonomy.
+ * @param  string $context  The context for display.
+ *
+ * @return array|string
+ */
+function wporg_learn_get_taxonomy_terms( $post_id, $tax_slug, $context ) {
+	switch ( $context ) {
+		case 'archive':
+			return wporg_learn_get_taxonomy_terms_string( $post_id, $tax_slug );
+			break;
+		case 'single':
+			return wporg_learn_get_taxonomy_terms_array( $post_id, $tax_slug );
+			break;
+	}
+}
+
+/**
  * Returns the taxonomies associated to a lesson or workshop
  *
  * @param int $post_id Id of the post.
  *
  * @return array
  */
-function wporg_learn_get_lesson_plan_taxonomy_data( $post_id ) {
-	return array(
+function wporg_learn_get_lesson_plan_taxonomy_data( $post_id, $context ) {
+	$data = array(
 		array(
 			'icon'  => 'clock',
+			'slug'  => 'duration',
 			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'duration' ) )->singular_name ),
-			'value' => wporg_learn_get_taxonomy_terms_string( $post_id, 'duration' ),
+			'value' => wporg_learn_get_taxonomy_terms( $post_id, 'duration', $context ),
 		),
 		array(
 			'icon'  => 'admin-users',
+			'slug'  => 'audience',
 			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'audience' ) )->singular_name ),
-			'value' => wporg_learn_get_taxonomy_terms_string( $post_id, 'audience' ),
+			'value' => wporg_learn_get_taxonomy_terms( $post_id, 'audience', $context ),
 		),
 		array(
 			'icon'  => 'dashboard',
+			'slug'  => 'level',
 			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'level' ) )->singular_name ),
-			'value' => wporg_learn_get_taxonomy_terms_string( $post_id, 'level' ),
+			'value' => wporg_learn_get_taxonomy_terms( $post_id, 'level', $context ),
 		),
 		array(
 			'icon'  => 'welcome-learn-more',
+			'slug'  => 'type',
 			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'instruction_type' ) )->singular_name ),
-			'value' => wporg_learn_get_taxonomy_terms_string( $post_id, 'instruction_type' ),
+			'value' => wporg_learn_get_taxonomy_terms( $post_id, 'instruction_type', $context ),
 		),
 	);
+
+	$versions = wporg_learn_get_taxonomy_terms( $post_id, 'wporg_wp_version', $context );
+	if ( $versions ) {
+		$data[] = array(
+			'icon'  => 'wordpress',
+			'slug'  => 'wp_version',
+			'label' => wporg_label_with_colon( get_taxonomy_labels( get_taxonomy( 'wporg_wp_version' ) )->singular_name ),
+			'value' => $versions,
+		);
+	}
+
+	return $data;
 }
 
 /**
@@ -275,7 +329,7 @@ function wporg_archive_modify_query( WP_Query $query ) {
 			'orderby',
 			array(
 				'post_date' => 'DESC',
-				'ID' => 'ASC',
+				'ID'        => 'ASC',
 			)
 		);
 	}
@@ -300,8 +354,24 @@ function wporg_archive_modify_query( WP_Query $query ) {
 	// Omit some post types from search results.
 	if ( $query->is_main_query() && $query->is_search() ) {
 		$public_post_types = array_keys( get_post_types( array( 'public' => true ) ) );
-		$omit_from_search = array( 'attachment', 'lesson', 'quiz', 'sensei_message' );
+		$omit_from_search = array( 'attachment', 'page', 'lesson', 'quiz', 'sensei_message', 'meeting' );
 		$searchable_post_types = array_diff( $public_post_types, $omit_from_search );
+
+		// Only show featured courses, but don't limit other post types
+		$query->set(
+			'meta_query',
+			array(
+				'relation' => 'OR',
+				array(
+					'key'   => '_course_featured',
+					'value' => 'featured',
+				),
+				array(
+					'key'      => '_course_featured',
+					'compare'  => 'NOT EXISTS',
+				),
+			)
+		);
 
 		$query->set( 'post_type', $searchable_post_types );
 	}
@@ -359,13 +429,13 @@ function wporg_archive_query_prioritize_locale( $clauses, $query ) {
 		 * given workshop are consolidated into one with the highest value in the calculated column. Without the
 		 * grouping, there would be a separate row for each postmeta value for each workshop post.
 		 */
-		$clauses['fields']  .= ",
+		$clauses['fields'] .= ",
 			MAX( IF( pmeta.meta_key = 'video_language' AND pmeta.meta_value LIKE '{$locale_root}%', 1, 0 ) ) AS has_language
 		";
-		$clauses['fields']  .= ",
+		$clauses['fields'] .= ",
 			MAX( IF( pmeta.meta_key = 'video_caption_language' AND pmeta.meta_value LIKE '{$locale_root}%', 1, 0 ) ) AS has_caption
 		";
-		$clauses['join']    .= " INNER JOIN {$wpdb->postmeta} pmeta ON ( {$wpdb->posts}.ID = pmeta.post_id )";
+		$clauses['join']   .= " INNER JOIN {$wpdb->postmeta} pmeta ON ( {$wpdb->posts}.ID = pmeta.post_id )";
 		// This orderby clause ensures that the workshops are sorted by the values in the calculated columns first.
 		$clauses['orderby'] = 'has_language DESC, has_caption DESC, ' . $clauses['orderby'];
 
@@ -389,39 +459,44 @@ function wporg_archive_maybe_apply_query_filters( WP_Query &$query ) {
 	$filters = filter_input_array(
 		INPUT_GET,
 		array(
-			'search'   => FILTER_SANITIZE_STRING,
-			'captions' => FILTER_SANITIZE_STRING,
-			'language' => FILTER_SANITIZE_STRING,
-			'audience' => array(
+			'search'     => FILTER_SANITIZE_STRING,
+			'captions'   => FILTER_SANITIZE_STRING,
+			'language'   => FILTER_SANITIZE_STRING,
+			'audience'   => array(
 				'filter' => FILTER_VALIDATE_INT,
 				'flags'  => FILTER_REQUIRE_ARRAY,
 			),
-			'duration' => array(
+			'duration'   => array(
 				'filter' => FILTER_VALIDATE_INT,
 				'flags'  => FILTER_REQUIRE_ARRAY,
 			),
-			'level'    => array(
+			'level'      => array(
 				'filter' => FILTER_VALIDATE_INT,
 				'flags'  => FILTER_REQUIRE_ARRAY,
 			),
-			'series'   => FILTER_VALIDATE_INT,
-			'topic'    => FILTER_VALIDATE_INT,
-			'type'     => array(
+			'series'     => FILTER_VALIDATE_INT,
+			'topic'      => FILTER_VALIDATE_INT,
+			'type'       => array(
 				'filter' => FILTER_VALIDATE_INT,
 				'flags'  => FILTER_REQUIRE_ARRAY,
+			),
+			'wp_version' => array(
+				'filter' => FILTER_VALIDATE_INT,
+				'flags'  => FILTER_FORCE_ARRAY,
 			),
 		),
 		false
 	);
 
 	$entity_map = array(
-		'captions' => 'video_caption_language',
-		'language' => 'video_language',
-		'audience' => 'audience',
-		'duration' => 'duration',
-		'level'    => 'level',
-		'topic'    => 'topic',
-		'type'     => 'instruction_type',
+		'captions'   => 'video_caption_language',
+		'language'   => 'video_language',
+		'audience'   => 'audience',
+		'duration'   => 'duration',
+		'level'      => 'level',
+		'topic'      => 'topic',
+		'type'       => 'instruction_type',
+		'wp_version' => 'wporg_wp_version',
 	);
 
 	$series_slug = wporg_learn_get_series_taxonomy_slug( $query->get( 'post_type' ) );
@@ -431,10 +506,15 @@ function wporg_archive_maybe_apply_query_filters( WP_Query &$query ) {
 
 	$meta_query = array();
 	$tax_query = array();
+
 	$is_filtered = false;
 
 	if ( is_array( $filters ) ) {
 		$filters = array_filter( $filters );
+		// Strip out `wp_version` if it's empty (converted to `array( false )`, due to FILTER_FORCE_ARRAY).
+		if ( isset( $filters['wp_version'] ) && 0 === count( array_filter( $filters['wp_version'] ) ) ) {
+			unset( $filters['wp_version'] );
+		}
 
 		// If both language and captions filters are set, we assume an "OR" relationship.
 		if ( isset( $filters['captions'], $filters['language'] ) ) {
@@ -475,6 +555,7 @@ function wporg_archive_maybe_apply_query_filters( WP_Query &$query ) {
 				case 'series':
 				case 'topic':
 				case 'type':
+				case 'wp_version':
 					if ( ! empty( $tax_query ) ) {
 						$tax_query['relation'] = 'AND';
 					}
@@ -511,10 +592,13 @@ function wporg_archive_maybe_apply_query_filters( WP_Query &$query ) {
  * @return WP_Query
  */
 function wporg_get_archive_query( $post_type, array $args = array() ) {
-	$args = wp_parse_args( $args, array(
-		'post_type'   => $post_type,
-		'post_status' => 'publish',
-	) );
+	$args = wp_parse_args(
+		$args,
+		array(
+			'post_type'   => $post_type,
+			'post_status' => 'publish',
+		)
+	);
 
 	return new WP_Query( $args );
 }
@@ -527,7 +611,7 @@ function wporg_get_archive_query( $post_type, array $args = array() ) {
  * @return array[]
  */
 function wporg_learn_get_card_template_args( $post_id ) {
-	$post = get_post( $post_id );
+	$post      = get_post( $post_id );
 	$post_type = get_post_type( $post );
 
 	$args = array(
@@ -548,7 +632,7 @@ function wporg_learn_get_card_template_args( $post_id ) {
 			);
 
 			if ( is_user_logged_in() ) {
-				$completed    = count( Sensei()->course->get_completed_lesson_ids( $post_id, get_current_user_id() ) );
+				$completed = count( Sensei()->course->get_completed_lesson_ids( $post_id, get_current_user_id() ) );
 
 				$args['meta'][] = array(
 					'icon'  => ( $lesson_count === $completed ) ? 'awards' : 'edit-large',
@@ -559,7 +643,7 @@ function wporg_learn_get_card_template_args( $post_id ) {
 			break;
 
 		case 'lesson-plan':
-			$args['meta'] = wporg_learn_get_lesson_plan_taxonomy_data( $post_id );
+			$args['meta'] = wporg_learn_get_lesson_plan_taxonomy_data( $post_id, 'archive' );
 			break;
 
 		case 'wporg_workshop':
@@ -923,6 +1007,48 @@ function wporg_learn_fix_code_entity_encoding( $content ) {
 add_filter( 'syntaxhighlighter_htmlresult', 'wporg_learn_fix_code_entity_encoding', 20 );
 
 /**
+ * Register theme sidebars.
+ */
+function wporg_learn_register_sidebars() {
+	// Register lesson plans sidebar.
+	register_sidebar(
+		array(
+			'name'          => __( 'Lesson Plans', 'wporg-learn' ),
+			'id'            => 'wporg-learn-lesson-plans',
+			'before_widget' => '<div id="%1$s" class="block-widgets %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h4 class="widget-title">',
+			'after_title'   => '<h4>',
+		)
+	);
+
+	// Register courses sidebar.
+	register_sidebar(
+		array(
+			'name'          => __( 'Courses', 'wporg-learn' ),
+			'id'            => 'wporg-learn-courses',
+			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</aside>',
+			'before_title'  => '<h4 class="widget-title">',
+			'after_title'   => '</h4>',
+		)
+	);
+
+	// Register workshops sidebar.
+	register_sidebar(
+		array(
+			'name'          => __( 'Workshops', 'wporg-learn' ),
+			'id'            => 'wporg-learn-workshops',
+			'before_widget' => '<div id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h4 class="widget-title">',
+			'after_title'   => '</h4>',
+		)
+	);
+}
+add_filter( 'widgets_init', 'wporg_learn_register_sidebars', 10 );
+
+/**
  * Add fallback image to Jetpack when no featured image exists.
  *
  * @param string $default_image The default image URL.
@@ -933,3 +1059,44 @@ function wporg_learn_return_default_image( $default_image ) {
 	return 'https://s.w.org/images/learn-thumbnail-fallback.jpg';
 }
 add_action( 'jetpack_open_graph_image_default', 'wporg_learn_return_default_image', 15, 1 );
+
+/**
+ * Disable the News XML Sitemap generated by Jetpack
+ */
+add_filter( 'jetpack_news_sitemap_generate', '__return_false' );
+
+/**
+ * Redirect meeting posts to associated link
+ *
+ * @return void
+ */
+function wporg_learn_redirect_meetings() {
+	global $post;
+
+	if ( is_singular( array( 'meeting' ) ) ) {
+
+		if ( ! empty( $post->ID ) ) {
+
+			$redirect = wp_http_validate_url( get_post_meta( $post->ID, 'link', true ) );
+
+			if ( $redirect && wp_redirect( $redirect ) ) {
+				exit;
+			}
+		}
+	}
+
+}
+add_action( 'template_redirect', 'wporg_learn_redirect_meetings' );
+
+/**
+ * Add file MIME types for upload.
+ *
+ * @param  array $mime_types Default array of MIME types.
+ *
+ *  @return array Updated MIME type array.
+ */
+function wporg_learn_mime_types( $mime_types ) {
+	$mime_types['vtt'] = 'text/vtt';
+	return $mime_types;
+}
+add_filter( 'mime_types', 'wporg_learn_mime_types' );

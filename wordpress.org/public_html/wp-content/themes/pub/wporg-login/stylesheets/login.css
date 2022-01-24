@@ -345,6 +345,10 @@ body.route-linkexpired p {
 	margin-bottom: 16px;
 }
 
+body.route-root #login form span.wp-pwd {
+	display: block;
+}
+
 body.login form input.input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
 	opacity: 0.5;
 }

@@ -247,9 +247,9 @@ the_post();
 								RECOMMENDED_PHP,
 								'https://www.php.net/',
 								'https://www.mysql.com/',
-								'5.6',
+								'5.7',
 								'https://mariadb.org/',
-								'10.1'
+								'10.2'
 							);
 							?>
 							<br>

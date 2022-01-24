@@ -36,11 +36,10 @@ function PatternThumbnail( { className, html } ) {
 
 		handleOnResize();
 
-		// eslint-disable-next-line @wordpress/no-global-event-listener -- This is a global event.
 		window.addEventListener( 'resize', handleOnResize );
 
 		return () => {
-			window.addEventListener( 'resize', handleOnResize ); // eslint-disable-line @wordpress/no-global-event-listener -- See above.
+			window.addEventListener( 'resize', handleOnResize );
 		};
 	}, [] );
 

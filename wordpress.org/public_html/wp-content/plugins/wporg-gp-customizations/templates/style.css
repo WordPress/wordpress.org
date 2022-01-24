@@ -130,6 +130,7 @@ p.site-title a {
 .navigation-main ul li.current-menu-item:hover a {
 	color: #fff;
 	background: transparent;
+	text-decoration: none;
 }
 
 .navigation-main ul li:hover > a:after,
@@ -316,7 +317,9 @@ body.wporg-make #headline h2 a:before {
 	color: #0073aa;
 }
 
-.gp-content a:hover {
+.gp-content a:hover,
+li>a,
+p a {
 	color: #00a0d2;
 	text-decoration: none;
 }
@@ -725,7 +728,7 @@ span.original-text {
 	color: #006799;
 }
 
-.intro {
+p.intro {
 	width: 75%;
 	margin-bottom: 20px;
 	font-size: 1.1em;
@@ -1453,7 +1456,7 @@ ul.projects-dropdown li > a > span {
 		white-space: nowrap;
 	}
 
-	.intro {
+	p.intro {
 		width: 100%;
 	}
 

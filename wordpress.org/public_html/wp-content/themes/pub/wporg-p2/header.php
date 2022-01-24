@@ -1,6 +1,4 @@
 <?php
-global $pagetitle;
-$pagetitle = wp_get_document_title();
 require WPORGPATH . 'header.php';
 ?>
 <div id="headline">

@@ -32,7 +32,7 @@ class Consistency extends GP_Route {
 		$search = $set = $project = '';
 		$search_case_sensitive = false;
 
-		if ( ! empty( $_REQUEST['search'] ) ) {
+		if ( isset( $_REQUEST['search'] ) && strlen( $_REQUEST['search'] ) ) {
 			$search = wp_unslash( $_REQUEST['search'] );
 		}
 
@@ -62,7 +62,7 @@ class Consistency extends GP_Route {
 
 		$results = [];
 		$performed_search = false;
-		if ( $search && $locale && $set_slug ) {
+		if ( strlen( $search ) && $locale && $set_slug ) {
 			$performed_search = true;
 			$results = $this->query( [
 				'search'         => $search,
@@ -168,13 +168,18 @@ class Consistency extends GP_Route {
 			return [];
 		}
 
-		// Group by translation. Done in PHP because it's faster as in MySQL.
+		// Group by translation and project path. Done in PHP because it's faster as in MySQL.
 		usort( $results, [ $this, '_sort_callback' ] );
 
 		return $results;
 	}
 
 	public function _sort_callback( $a, $b ) {
-		return strnatcmp( $a->translation, $b->translation );
+		$sort = strnatcmp( $a->translation . $a->original_context, $b->translation . $b->original_context );
+		if ( 0 === $sort ) {
+			$sort = strnatcmp( $a->project_path, $b->project_path );
+		}
+
+		return $sort;
 	}
 }

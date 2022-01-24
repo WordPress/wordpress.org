@@ -5,13 +5,14 @@
  * @package wporg-themes
  */
 
-$GLOBALS['pagetitle'] = wp_get_document_title();
-global $wporg_global_header_options;
-if ( !isset( $wporg_global_header_options['in_wrapper'] ) )
-	$wporg_global_header_options['in_wrapper'] = '';
-$wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#themes">' . esc_html__( 'Skip to content', 'wporg-themes' ) . '</a>';
+\WordPressdotorg\skip_to( '#themes' );
 
-require WPORGPATH . 'header.php';
+if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
+	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+} else {
+	require WPORGPATH . 'header.php';
+}
+
 ?>
 <header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 	<div class="site-branding">
@@ -41,4 +42,3 @@ require WPORGPATH . 'header.php';
 	</ul>
 </nav>
 <?php endif; ?>
-

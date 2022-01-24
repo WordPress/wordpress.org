@@ -24,6 +24,9 @@ function setup() {
 	// Add default posts and comments RSS feed links to head.
 	add_theme_support( 'automatic-feed-links' );
 
+	// Add support for WordPress generated <title> tags.
+	add_theme_support( 'title-tag' );
+
 	// Don't include Adjacent Posts functionality.
 	remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head' );
 
@@ -70,7 +73,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20210329' );
+	wp_enqueue_style( 'wporg-style', get_theme_file_uri( '/css/style.css' ), [ 'dashicons', 'open-sans' ], '20220118' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Make jQuery a footer script.
@@ -233,6 +236,14 @@ function custom_body_class( $classes ) {
 add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
 
 /**
+ * Swaps out the no-js for the js body class if the browser supports Javascript.
+ */
+function nojs_body_tag() {
+        echo "<script>document.body.className = document.body.className.replace('no-js','js');</script>\n";
+}
+add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
+
+/**
  * Append an optimized site name.
  *
  * @param array $title {
@@ -319,12 +330,13 @@ add_filter( 'get_the_excerpt', __NAMESPACE__ . '\excerpt_length' );
  * Adds meta tags for richer social media integrations.
  */
 function social_meta_data() {
-	global $wporg_global_header_options;
+	$site_title = function_exists( '\WordPressdotorg\site_brand' ) ? \WordPressdotorg\site_brand() : 'WordPress.org';
+
 	if ( is_front_page() ) {
 		$og_fields = [
 			'og:title'       => __( 'WordPress Plugins', 'wporg-plugins' ),
 			'og:description' => __( 'Choose from thousands of free plugins to build, customize, and enhance your WordPress website.', 'wporg-plugins' ),
-			'og:site_name'   => $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org',
+			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => home_url(),
 		];
@@ -355,7 +367,7 @@ function social_meta_data() {
 	printf( '<meta property="og:title" content="%s" />' . "\n", the_title_attribute( array( 'echo' => false ) ) );
 	printf( '<meta property="og:description" content="%s" />' . "\n", esc_attr( strip_tags( get_the_excerpt() ) ) );
 	printf( '<meta name="description" content="%s" />' . "\n", esc_attr( strip_tags( get_the_excerpt() ) ) );
-	printf( '<meta property="og:site_name" content="%s" />' . "\n", esc_attr( $wporg_global_header_options['rosetta_title'] ?? 'WordPress.org' ) );
+	printf( '<meta property="og:site_name" content="%s" />' . "\n", esc_attr( $site_title ) );
 	printf( '<meta property="og:type" content="website" />' . "\n" );
 	printf( '<meta property="og:url" content="%s" />' . "\n", esc_url( get_permalink() ) );
 	printf( '<meta name="twitter:card" content="summary_large_image">' . "\n" );

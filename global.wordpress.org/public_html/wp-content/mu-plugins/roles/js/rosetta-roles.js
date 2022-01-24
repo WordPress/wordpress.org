@@ -462,31 +462,104 @@
 		return projects._hasStorage;
 	};
 
+	projects.getProjects = function() {
+		return projects.getLocalProjects().then(
+			function( localProjects ) {
+				return localProjects;
+			},
+			function() {
+				return projects.getRemoteProjects().then( function( remoteProjects ) {
+					if ( projects.hasStorage() ) {
+						projects.storeLocalProjects( remoteProjects );
+					}
+
+					return remoteProjects;
+				} );
+			}
+		);
+	};
+
 	projects.getRemoteProjects = function() {
 		return wp.ajax.post( 'rosetta-get-projects' );
 	};
 
 	projects.getLocalProjects = function() {
+		if ( ! projects.hasStorage() ) {
+			return Promise.reject();
+		}
+
 		var lastUpdated = window.localStorage.getItem( 'projectsLastUpdated' );
 		if ( ! lastUpdated || 'undefined' === lastUpdated ) {
-			return false;
+			return Promise.reject();
 		}
 
 		if ( lastUpdated < projects.settings.lastUpdated ) {
-			return false;
+			return Promise.reject();
 		}
 
 		var json = window.localStorage.getItem( 'projects' );
 		if ( ! json ) {
-			return false;
+			return Promise.reject();
 		}
 
-		return JSON.parse( json );
+		if ( '[' === json.substring( 0, 1 ) ) {
+			return Promise.resolve( JSON.parse( json ) );
+		}
+
+		// decompress
+		return projects.decompress( json ).then( function( data ) {
+			return JSON.parse( data );
+		} );
 	};
 
 	projects.storeLocalProjects = function( data ) {
 		window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
-		window.localStorage.setItem( 'projects', JSON.stringify( data ) );
+
+		projects.compress( JSON.stringify( data ) ).then( function( data ) {
+			window.localStorage.setItem( 'projects', data );
+		} ).catch( function() {
+			console.log( "Caching projects locally failed." );
+		} );
+	};
+
+	projects.compress = async function( data ) {
+		if ( 'undefined' === typeof CompressionStream ) {
+			return Promise.reject();
+		}
+
+		var stream = new CompressionStream( 'gzip' ),
+			streamWriter = stream.writable.getWriter();
+
+		streamWriter.write(
+			new TextEncoder().encode( data )
+		);
+		streamWriter.close();
+
+		return new Response( stream.readable ).arrayBuffer().then( function( buffer ) {
+			// Base64 encode it, so it can be stored in localStorage
+			return btoa(
+				new Uint8Array( buffer )
+					.reduce( ( data, byte ) => data + String.fromCharCode( byte ), '' )
+			);
+		} );		
+	};
+
+	projects.decompress = async function( data ) {
+		if ( 'undefined' === typeof DecompressionStream ) {
+			return Promise.reject();
+		}
+
+		// Base64 decode
+		var buffer = Uint8Array.from( atob( data ), c => c.charCodeAt(0) ),
+			stream = new DecompressionStream( 'gzip' ),
+			streamWriter = stream.writable.getWriter();
+
+		streamWriter.write( buffer );
+		streamWriter.close();
+
+		return new Response( stream.readable ).arrayBuffer().then( function( arrayBuffer ) {
+			return new TextDecoder().decode( arrayBuffer );
+		} );
 	};
 
 	projects.initFrame = function( projectData ) {
@@ -502,23 +575,9 @@
 			projects.selection.add( { id: projectID } );
 		});
 
-		var data = null;
-
-		if ( projects.hasStorage() ) {
-			data = projects.getLocalProjects();
-		}
-
-		if ( data && data.length ) {
-			projects.initFrame( data );
-			return;
-		}
-
-		projects.getRemoteProjects().done( function( response ) {
+		projects.getProjects().then( function( response ) {
 			projects.initFrame( response );
-			if ( projects.hasStorage() ) {
-				projects.storeLocalProjects( response );
-			}
-		});
+		} );
 	};
 
 	$( projects.init );

@@ -22,7 +22,7 @@ defined( 'WPINC' ) || die();
 
 		<?php echo wp_kses_data( sprintf(
 			"(<a href='%s'>@%s</a>)",
-			'https://profiles.wordpress.org/' . $contributor['username'],
+			'https://profiles.wordpress.org/' . $contributor['username'] . '/',
 			$contributor['username']
 		) ); ?>
 	</p>

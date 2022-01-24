@@ -72,7 +72,7 @@
 		<?php foreach ( $locale_data['locale_managers'] as $locale_manager ) :
 			?>
 			<li>
-				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $locale_manager['nice_name'] ); ?>"><?php
+				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $locale_manager['nice_name'] ); ?>/"><?php
 					echo get_avatar( $locale_manager['email'], 60 );
 					echo esc_html( $locale_manager['display_name'] );
 					?></a>
@@ -93,7 +93,7 @@
 		<?php foreach ( $locale_data['validators'] as $validator ) :
 			?>
 			<li>
-				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>/"><?php
 					echo get_avatar( $validator['email'], 60 );
 					echo esc_html( $validator['display_name'] );
 				?></a>
@@ -114,7 +114,7 @@
 		<?php foreach ( $locale_data['project_validators'] as $validator ) :
 			?>
 			<li>
-				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>/"><?php
 					echo get_avatar( $validator['email'], 40 );
 					echo esc_html( $validator['display_name'] );
 				?></a>
@@ -136,7 +136,7 @@
 		$translators = array();
 		foreach ( $locale_data['translators'] as $translator ) {
 			$translators[] = sprintf(
-				'<a href="https://profiles.wordpress.org/%s">%s</a>',
+				'<a href="https://profiles.wordpress.org/%s/">%s</a>',
 				esc_attr( $translator['nice_name'] ),
 				esc_html( $translator['display_name'] )
 			);
@@ -154,7 +154,7 @@
 		$translators = array();
 		foreach ( $locale_data['translators_past'] as $translator ) {
 			$translators[] = sprintf(
-				'<a href="https://profiles.wordpress.org/%s">%s</a>',
+				'<a href="https://profiles.wordpress.org/%s/">%s</a>',
 				esc_attr( $translator['nice_name'] ),
 				esc_html( $translator['display_name'] )
 			);

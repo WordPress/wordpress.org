@@ -73,6 +73,9 @@ class Ratings_Compat {
 		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
 
+		// Checks for review topics.
+		add_action( 'bbp_new_topic_pre_extras', array( $this, 'topic_pre_extras' ) );
+
 		// Add the rating to the Feed body/title
 		if ( did_action( 'bbp_feed' ) ) {
 			add_filter( 'bbp_get_topic_content', array( $this, 'feed_prepend_rating' ), 10, 2 );
@@ -333,6 +336,68 @@ class Ratings_Compat {
 				bbp_get_topic_author_id( $topic_id ),
 				$rating
 			);
+		}
+	}
+
+	/**
+	 * Replace warnings about 'topics' with warnings about 'reviews' when submitting a new review.
+	 * Add warnings about reviews containing links.
+	 */
+	public function topic_pre_extras( $forum_id ) {
+		if ( Plugin::REVIEWS_FORUM_ID != $forum_id ) {
+			return;
+		}
+
+		if (
+			! empty( $_POST['bbp_topic_content'] ) &&
+			(
+				false !== stripos( $_POST['bbp_topic_content'], 'https://' ) ||
+				false !== stripos( $_POST['bbp_topic_content'], 'http://' )
+			)
+		) {
+			// Send this review to pending after it gets published. 
+			setcookie( 'wporg_review_to_pending', 'links_blocked', time() + HOUR_IN_SECONDS, '/support/', 'wordpress.org', true, true );
+
+			bbp_add_error(
+				'no_links_please',
+				sprintf(
+					/* translators: %s: Link to forum user guide explaining this. */
+					__( '<strong>Error</strong>: Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
+					'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews'
+				)
+			);
+		} elseif ( ! empty( $_COOKIE['wporg_review_to_pending'] ) ) {
+			add_filter( 'bbp_new_topic_pre_insert', function( $data ) {
+				// If this is still for a review..
+				if ( Plugin::REVIEWS_FORUM_ID == $data['post_parent'] ) {
+					// Clear the cookie.
+					setcookie( 'wporg_review_to_pending', '', time() - HOUR_IN_SECONDS, '/support/', 'wordpress.org', true, true );
+
+					$data['post_status'] = bbp_get_pending_status_id();
+
+					// Add a meta field to find these moderated reviews later.
+					$data['meta_input']['_wporg_moderation_reason'] = $_COOKIE['wporg_review_to_pending'];
+				}
+
+				return $data;
+			} );
+		}
+
+		if ( ! bbp_has_errors() ) {
+			return;
+		}
+
+		// Replace the warnings about topics being too short with reviews.
+
+		// bbPress doesn't have a wrapper to check for specific errors, so we'll reach into bbPress.
+		if ( bbpress()->errors->get_error_message( 'bbp_topic_title' ) && empty( $_POST['bbp_topic_title'] ) ) {
+			bbpress()->errors->remove( 'bbp_topic_title' );
+			bbp_add_error( 'bbp_topic_title', __( '<strong>Error</strong>: Your review needs a title.', 'wporg-forums' ) );
+		}
+
+		if ( bbpress()->errors->get_error_message( 'bbp_topic_content' ) ) {
+			bbpress()->errors->remove( 'bbp_topic_content' );
+			bbp_add_error( 'bbp_topic_content', __( '<strong>Error</strong>: Your review cannot be empty.', 'wporg-forums' ) );
 		}
 	}
 

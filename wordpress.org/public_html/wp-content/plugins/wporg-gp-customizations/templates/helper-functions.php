@@ -1,9 +1,10 @@
 <?php
+
 wp_register_style(
 	'wporg-translate',
 	plugins_url( 'style.css', __FILE__ ),
-	[ 'gp-base' ],
-	'20210629'
+	[ 'gp-base', 'wporg-style' ],
+	filemtime( __DIR__ . '/style.css' )
 );
 gp_enqueue_style( 'wporg-translate' );
 
@@ -48,6 +49,22 @@ wp_register_script(
 if ( isset( $template ) && 'translations' === $template ) {
 	gp_enqueue_script( 'wporg-translate-editor' );
 }
+
+// The new header calls wp_head + gp_head, the old header only calls one or the other, so we must manually add this.
+if ( ! FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
+	add_action( 'gp_head', '_wp_render_title_tag' );
+}
+
+/**
+ * Set the document title to that of GlotPress.
+ * 
+ * @see https://github.com/GlotPress/GlotPress-WP/issues/8
+ */
+add_filter( 'document_title_parts', static function() {
+	return [
+		'title' => gp_title(),
+	];
+}, 1 );
 
 /**
  * Prints markup for translations help modal in footer.
@@ -317,6 +334,29 @@ function wporg_references( $project, $entry ) {
 	</ul>
 	<?php
 }
+
+/**
+ * Update the URL reference for wordpress-org wporg-mu-plugin file locations.
+ *
+ * @param string $source_url
+ * @param \GP_Project $project
+ * @param string $file
+ * @param string $line
+ *
+ * @return Source URL.
+ */
+function wporg_references_wordpress_org_github( $source_url, $project, $file, $line ) {
+	if (
+		'meta/wordpress-org' === $project->path &&
+		str_starts_with( $file, 'mu-plugins/' ) &&
+		! str_starts_with( $file, 'mu-plugins/pub/' )
+	) {
+		$source_url = "https://github.com/WordPress/wporg-mu-plugins/blob/trunk/{$file}#L{$line}";
+	}
+
+	return $source_url;
+}
+add_filter( 'gp_reference_source_url', 'wporg_references_wordpress_org_github', 10, 4 );
 
 /**
  * Whether to show the context or not.

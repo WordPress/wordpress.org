@@ -37,6 +37,11 @@ function setup() {
 	 * to use them via open graph tags when a page is shared.
 	 */
 	add_theme_support( 'post-thumbnails' );
+
+	/*
+	 * Enable WordPress.org skip-to links.
+	 */
+	add_action( 'wp_head', '\WordPressdotorg\skip_to_main' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 
@@ -211,7 +216,7 @@ add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\child_page_templates' )
 function use_opengraph_data_for_embed_template() {
 	global $post;
 
-	if ( ! $post || 'page' !== $post->post_type || ! $post->page_template || 'default' === $post->page_template ) {
+	if ( ! $post || 'page' !== $post->post_type || ! $post->page_template || ( 'default' === $post->page_template && ! is_front_page() ) ) {
 		return;
 	}
 
@@ -304,8 +309,3 @@ require_once __DIR__ . '/inc/recaptcha.php';
  * Include the Privacy request functions.
  */
 require_once __DIR__ . '/inc/privacy-functions.php';
-
-/**
- * Include any global functions needed.
- */
-require_once __DIR__ . '/inc/globals.php';

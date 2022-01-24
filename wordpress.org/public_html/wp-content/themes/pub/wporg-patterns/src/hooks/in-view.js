@@ -21,7 +21,6 @@ const useInView = ( { element } ) => {
 		// Initialize `isVisible`.
 		isVisible();
 
-		/* eslint-disable @wordpress/no-global-event-listener -- These are global events. */
 		window.addEventListener( 'scroll', debouncedIsVisible );
 		window.addEventListener( 'resize', debouncedIsVisible );
 
@@ -29,7 +28,6 @@ const useInView = ( { element } ) => {
 			window.removeEventListener( 'scroll', debouncedIsVisible );
 			window.addEventListener( 'resize', debouncedIsVisible );
 		};
-		/* eslint-enable @wordpress/no-global-event-listener */
 	}, [ element ] );
 
 	const isVisible = () => {

@@ -490,7 +490,7 @@ class Devhub_Dashicons {
 				'label' => __( 'Block Editor', 'wporg' ),
 				'icons' => [
 					'dashicons-align-full-width' => [
-						'code'     => 'f134',
+						'code'     => 'f114',
 						'label'    => 'align full width',
 						'keywords' => 'align full width block',
 					],

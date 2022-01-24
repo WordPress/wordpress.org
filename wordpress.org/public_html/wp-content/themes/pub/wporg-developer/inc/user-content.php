@@ -254,7 +254,7 @@ class DevHub_User_Submitted_Content {
 			. sprintf(
 				/* translators: 1: user profile link, 2: accessibility text, 3: user name, 4: logout URL */
 				__( '<a href="%1$s" aria-label="%2$s">Logged in as %3$s</a>. <a href="%4$s">Log out?</a>' ),
-				'https://profiles.wordpress.org/' . esc_attr( $user_identity->user_nicename ),
+				'https://profiles.wordpress.org/' . esc_attr( $user_identity->user_nicename ) . '/',
 				/* translators: %s: user name */
 				esc_attr( sprintf( __( 'Logged in as %s. Edit your profile.' ), $user_identity->display_name ) ),
 				$user_identity->display_name,

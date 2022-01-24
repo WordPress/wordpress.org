@@ -18,7 +18,7 @@ class Hooks {
 		add_filter( 'redirect_canonical',              array( $this, 'handle_bbpress_root_pages' ), 10, 2 );
 		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
-		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ) );
+		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ), 5 );
 		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
@@ -312,11 +312,25 @@ class Hooks {
 	/**
 	 * Redirect legacy urls to their new permastructure.
 	 *  - /users/$id & /profile/$slug to /users/$slug
+	 *  - /users/profile/* => /users/$slug/*
 	 * 
 	 * See also: Support_Compat in inc/class-support-compat.php
 	 */
 	public function redirect_legacy_urls() {
-		global $wp_query;
+		global $wp_query, $wp;
+
+		// A user called 'profile' exists, but override it.
+		if ( 'profile' === get_query_var( 'bbp_user' ) ) {
+			if ( is_user_logged_in() ) {
+				$user = wp_get_current_user();
+				$url  = str_replace( '/profile/', "/{$user->user_nicename}/", $_SERVER['REQUEST_URI'] );
+			} else {
+				$url  = wp_login_url( home_url( $wp->request ) );
+			}
+
+			wp_safe_redirect( $url );
+			exit;
+		}
 
 		if ( ! is_404() ) {
 			return;
@@ -342,6 +356,7 @@ class Hooks {
 				exit;
 			}
 		}
+
 	}
 
 	/**
@@ -1246,17 +1261,17 @@ class Hooks {
 		// Try to get the most accurate freshness time possible
 		$last_active = get_post_meta( $topic_id, '_bbp_last_active_time', true );
 		if ( empty( $last_active ) ) {
-			if ( ! empty( $reply_id ) ) {
-				$last_active = get_post_field( 'post_date', $reply_id );
-			} else {
-				$last_active = get_post_field( 'post_date', $topic_id );
-			}
+			$last_active = get_post_field( 'post_date', $topic_id );
 		}
 
 		// This is for translating the date components.
 		$datetime = date_create_immutable_from_format( 'Y-m-d H:i:s', $last_active );
-		$date     = wp_date( get_option( 'date_format' ), $datetime->getTimestamp() );
-		$time     = wp_date( get_option( 'time_format' ), $datetime->getTimestamp() );
+		if ( ! $datetime ) {
+			return $anchor;
+		}
+
+		$date = wp_date( get_option( 'date_format' ), $datetime->getTimestamp() );
+		$time = wp_date( get_option( 'time_format' ), $datetime->getTimestamp() );
 
 		return str_replace(
 			'title="' . esc_attr( $title ) . '"',

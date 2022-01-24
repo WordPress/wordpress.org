@@ -1,0 +1,63 @@
+body.page-mobile {
+	.entry-content {
+		@media screen and (min-width: 900px) {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			grid-template-areas:
+				"intro          feature"
+				"web-stores     web-stores"
+				"requirements   requirements"
+			;
+			gap: 0 40px;
+		}
+	}
+
+	img.feature {
+		display: block;
+		margin: 0 auto 1em auto;
+
+		@media screen and (min-width:900px) {
+			grid-area: feature;
+		}
+	}
+
+	.intro {
+		@media screen and (min-width:900px) {
+			grid-area: intro;
+		}
+	}
+
+	.web-stores {
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
+		flex-wrap: wrap;
+		gap: 15px;
+		margin: 30px 5px;
+
+		@media screen and (min-width:900px) {
+			grid-area: web-stores;
+			margin-top: 10px;
+		}
+
+		img,
+		button {
+			height: 42px;
+			width: auto;
+		}
+
+		button {
+			background-color: black;
+			color: white;
+			padding: 5px 10px;
+			border: none;
+			border-radius: 5px;
+		}
+	}
+
+	.requirements {
+		@media screen and (min-width:900px) {
+			grid-area: requirements;
+		}
+	}
+}

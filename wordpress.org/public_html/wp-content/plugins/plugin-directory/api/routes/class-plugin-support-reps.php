@@ -156,7 +156,7 @@ class Plugin_Support_Reps extends Base {
 	function user_support_rep_details( $user ) {
 		$data = array(
 			'nicename' => $user->user_nicename,
-			'profile'  => esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename ),
+			'profile'  => esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
 			'avatar'   => get_avatar_url( $user->ID, 32 ),
 			'name'     => $user->display_name,
 		);

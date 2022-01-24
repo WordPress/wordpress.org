@@ -3,6 +3,9 @@
 // Add support for adding feed links to head.
 add_theme_support( 'automatic-feed-links' );
 
+// Add support for title tags.
+add_theme_support( 'title-tag' );
+
 // Disable comments feed.
 add_filter( 'feed_links_show_comments_feed', '__return_false' );
 
@@ -261,7 +264,7 @@ add_filter( 'excerpt_more', function() {
 function wporg_showcase_document_title( $parts ) {
 	// wp_get_document_title() is used by the theme in breadcrumb(), whereby it
 	// only really needs the title.
-	if ( did_action( 'wp_head' ) ) {
+	if ( did_action( 'wp_body_open' ) ) {
 		return array( 'title' => $parts['title'] );
 	}
 

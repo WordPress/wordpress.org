@@ -168,7 +168,7 @@ class Plugin_Committers extends Base {
 	function user_committer_details( $user ) {
 		$data = array(
 			'nicename' => $user->user_nicename,
-			'profile'  => esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename ),
+			'profile'  => esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
 			'avatar'   => get_avatar_url( $user->ID, 32 ),
 			'name'     => $user->display_name,
 		);

@@ -197,7 +197,7 @@ class Support_Reps extends \WP_List_Table {
 				case 'username':
 					$row .= sprintf(
 						'<strong><a href="%s">%s</a></strong><br />&lt;%s&gt;',
-						esc_url( '//profiles.wordpress.org/' . $user_object->user_nicename ),
+						esc_url( '//profiles.wordpress.org/' . $user_object->user_nicename . '/' ),
 						$user_object->user_login,
 						$user_object->user_email
 					);
