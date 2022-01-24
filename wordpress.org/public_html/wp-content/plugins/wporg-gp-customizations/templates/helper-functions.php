@@ -3,7 +3,7 @@
 wp_register_style(
 	'wporg-translate',
 	plugins_url( 'style.css', __FILE__ ),
-	[ 'gp-base' ],
+	[ 'gp-base', 'wporg-style' ],
 	filemtime( __DIR__ . '/style.css' )
 );
 gp_enqueue_style( 'wporg-translate' );
