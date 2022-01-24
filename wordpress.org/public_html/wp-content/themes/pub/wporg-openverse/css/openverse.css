@@ -1,6 +1,13 @@
 :root {
-    --header-height: 104.453px; /* redesiged global-header */
+    --header-height: 117px;
 }
+
+@media (min-width: 890px) {
+    :root {
+        --header-height: 104.453;
+    }
+}
+
 
 #openverse_embed {
     display: block;
