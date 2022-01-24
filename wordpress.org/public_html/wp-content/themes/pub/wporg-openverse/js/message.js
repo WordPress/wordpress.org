@@ -48,6 +48,33 @@ function updatePath(value) {
 }
 
 /**
+ * Set the meta attributes on the top-level document based on the meta tags
+ * passed by the `iframe`.
+ *
+ * @param {{
+ *   meta: [{
+ *     name: string,
+ *     content: string,
+ *  }]
+ * }} value - the meta data data supplied by the `iframe`
+ */
+function updateMeta(value) {
+  value.meta.forEach((metaItem) => {
+    let metaTag = document.head.querySelector(`meta[name="${metaItem.name}"]`);
+    if (metaTag) {
+      // Update the tag, if it already exists
+      metaTag.content = metaItem.content;
+    } else {
+      // Create a new tag, otherwise
+      metaTag = document.createElement('meta');
+      metaTag.name = metaItem.name;
+      metaTag.content = metaItem.content;
+      document.head.appendChild(metaTag);
+    }
+  })
+}
+
+/**
  * Emit a message to the `iframe` containing information about the current
  * locale. This function combines the locale from WordPress with attributes
  * from the top-level HTML document.
@@ -100,6 +127,9 @@ function handleIframeMessages({ origin, data }) {
       break;
     case 'urlChange':
       handler = updatePath;
+      break;
+    case 'setMeta':
+      handler = updateMeta;
       break;
     case 'localeGet':
       handler = emitLocale;
