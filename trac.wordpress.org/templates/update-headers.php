@@ -48,9 +48,18 @@ if ( ! $header || ! $footer ) {
 $wporg_head = domdocument_for_trac();
 $html_node  = $wporg_head->getElementsByTagName( 'html' )[0];
 foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
+	// Remove <title>
 	if (
 		$node instanceOf DomElement &&
 		'title' === $node->tagName
+	) {
+		continue;
+	}
+	// Remove <meta name="generator">
+	if (
+		$node instanceOf DomElement &&
+		'meta' === $node->tagName &&
+		'generator' === $node->getAttribute( 'name' )
 	) {
 		continue;
 	}
