@@ -93,6 +93,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'Pattern Directory': {
 			tracker: 'https://github.com/WordPress/pattern-directory/issues/new/choose',
 			tracker_text: 'WordPress.org Pattern Directory GitHub Repository',
+		},
+		'Openverse': {
+			tracker: 'https://github.com/WordPress/openverse/issues/new/choose',
+			tracker_text: 'Openverse GitHub Repository',
 		}
 	};
 
