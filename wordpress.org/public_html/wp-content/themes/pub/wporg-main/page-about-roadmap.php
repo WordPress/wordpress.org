@@ -95,10 +95,10 @@ the_post();
 						<tbody>
 						<tr>
 							<th>
-								5.9
+								6.0
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
-							<td><?php echo date_i18n( 'F Y', strtotime( 'Dec 2021' ) ); ?></td>
+							<td>2022</td>
 						</tr>
 						</tbody>
 					</table>
