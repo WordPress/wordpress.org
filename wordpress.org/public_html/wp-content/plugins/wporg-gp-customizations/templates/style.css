@@ -309,6 +309,7 @@ body.wporg-make #headline h2 a:before {
 	margin: 20px auto;
 	max-width: 940px;
 	padding: 0 10px;
+	overflow: auto;
 }
 
 .gp-content h2 {
