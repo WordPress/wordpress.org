@@ -423,11 +423,6 @@ class WPORG_Themes_Upload {
 			);
 		}
 
-		// Populate the theme post.
-		if ( ! $this->theme_post ) {
-			$this->theme_post = $this->get_theme_post();
-		}
-
 		// Populate author.
 		if ( ! $this->author ) {
 			if ( is_user_logged_in() ) {
@@ -449,6 +444,12 @@ class WPORG_Themes_Upload {
 					'<code>style.css</code>'
 				)
 			);
+		}
+
+		// Populate the theme post.
+		// Like it says above, the has_reserved_slug() function *must* run before this.
+		if ( ! $this->theme_post ) {
+			$this->theme_post = $this->get_theme_post();
 		}
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
