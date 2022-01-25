@@ -1,3 +1,14 @@
+:root {
+	/* It doesn't stick on mobile. That may changee soon though, see https://github.com/WordPress/wporg-news-2021/issues/181. */
+	--global-header-height: 0;
+}
+
+@media screen and (min-width: 890px) {
+	:root {
+		--global-header-height: 103px;
+	}
+}
+
 body, html {
 	height: 100%;
 }
@@ -10,8 +21,20 @@ html,
 	color: #1e1e1e;
 }
 
+.gp-content * {
+    box-sizing: content-box;
+}
+
+.gp-content table tbody tr:nth-child(2n) {
+	background-color: unset; /* Override wporg-main. */
+}
+
 .gp-content textarea {
 	max-width: 100%;
+}
+
+.gp-content summary {
+	display: list-item;
 }
 
 .gp-content textarea,
@@ -1509,6 +1532,7 @@ ul.projects-dropdown li > a > span {
 	.stats-table table tbody tr {
 		margin-top: 20px;
 	}
+
 	.stats-table table tbody td {
 		padding: 3px 10px;
 		position: relative;
@@ -1536,6 +1560,9 @@ ul.projects-dropdown li > a > span {
 .stats-table table thead {
 	color: #32373C;
 	background: white;
+}
+.stats-table table td, table th {
+	text-align: unset; /* Override wporg-main. */
 }
 .stats-table table thead th {
 	cursor: pointer;
@@ -2189,23 +2216,11 @@ ul.ct-legend {
 .consistency-table tr.new-translation th {
 	position: -webkit-sticky;
 	position: sticky;
-	top: 0;
+	top: calc( var(--global-header-height) + var(--wp-admin--admin-bar--height) + 100px );
 	padding: 20px 0 10px;
 	background: #fff;
 	text-align: left;
 	box-shadow: 0 -1px 0 #72777c, 0 3px 0 #72777c;
-}
-
-@media screen and (min-width: 600px) {
-	.consistency-table tr.new-translation th {
-		top: 46px;
-	}
-}
-
-@media screen and (min-width: 783px) {
-	.consistency-table tr.new-translation th {
-		top: 32px;
-	}
 }
 
 .anchor-jumper {
@@ -2317,8 +2332,13 @@ table.translations {
 }
 
 table.translations th.checkbox {
-	width: 1em;
+	width: 16px;
 	text-align: center;
+}
+@media screen and (max-width: 782px) {
+	table.translations th.checkbox {
+		width: 24px;
+	}
 }
 
 table.translations th.priority,
@@ -2358,6 +2378,9 @@ table.translations td.translation span.missing {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	font-size: 16px;
 	resize: vertical;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
 }
 
 .editor-panel .textareas p,
