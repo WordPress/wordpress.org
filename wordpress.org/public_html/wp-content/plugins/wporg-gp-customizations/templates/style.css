@@ -1,5 +1,5 @@
 :root {
-	/* It doesn't stick on mobile. That may changee soon though, see https://github.com/WordPress/wporg-news-2021/issues/181. */
+	/* It doesn't stick on mobile. That may change soon though, see https://github.com/WordPress/wporg-news-2021/issues/181. */
 	--global-header-height: 0;
 }
 
@@ -314,8 +314,13 @@ body.wporg-make #headline h2 a:before {
 
 .gp-content h2 {
 	font-family: 'Open Sans', sans-serif !important;
+	font-size: 26px;
 	margin: 2px 0 .6em;
 	overflow: hidden;
+}
+
+.gp-content h2 .action {
+	margin-left: 6px;
 }
 
 .gp-content h3 {
@@ -358,6 +363,10 @@ h2 + .glossary-description,
 h2 + .project-description {
 	margin-top: 1em;
 	margin-bottom: 1em;
+}
+
+.glossary-description {
+	font-size: 16px;
 }
 
 @media screen and (max-width: 960px) {
@@ -438,6 +447,10 @@ table.translations td.original small,
 table.translations td.translation small {
 	color: #293139;
 	font-size: 12px;
+}
+
+table.glossary {
+	font-size: 14px;
 }
 
 table.glossary a.action,
@@ -623,6 +636,10 @@ table.glossary .editor .meta {
 	font-size: 14px;
 }
 
+table.glossary .editor .meta h3 {
+	font-size: 22px;
+}
+
 @media screen and (min-width: 700px) {
 	table.glossary .editor .strings {
 		width: 60%;
@@ -646,6 +663,7 @@ table.glossary .editor .meta dl:first-child {
 
 table.glossary .editor textarea {
 	width: 100%;
+	height: 80px;
 	resize: vertical;
 	box-sizing: border-box;
 }
@@ -1308,6 +1326,7 @@ ul.projects-dropdown {
 
 ul.projects-dropdown,
 ul.projects-dropdown ul {
+	margin-left: 0;
 	padding: 0;
 }
 
@@ -1975,7 +1994,7 @@ ul.ct-legend {
 .locale-project-contributors-table .translation-editor {
 	position: absolute;
 	top: 37px;
-	left: 0;
+	left: 10px;
 	width: 40px;
 	color: #fff;
 	font-weight: 200;
@@ -2054,7 +2073,7 @@ ul.ct-legend {
 }
 
 .locale-project-contributors-table tbody td {
-	padding: 10px 0;
+	padding: 10px;
 	border-bottom: 1px solid #72777c;
 }
 
