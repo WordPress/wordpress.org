@@ -116,6 +116,10 @@ do_action( 'get_header' );
 			font-size: 1.5em;
 		}
 
+		#wporg-skip-link {
+			display: none;
+		}
+
 		#numnumnum, #numnumnum2 {
 			color: #2ea2cc;
 			float: none;
