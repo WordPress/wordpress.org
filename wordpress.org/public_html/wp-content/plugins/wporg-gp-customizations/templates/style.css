@@ -2511,6 +2511,13 @@ table.translations tr.editor td {
 	top: 32px;
 }
 
+@media screen and (min-width: 890px) {
+	.admin-bar .editor-panel__left .panel-header,
+	.admin-bar .editor-panel__right {
+		top: calc( var(--global-header-height) + var(--wp-admin--admin-bar--height) );
+	}
+}
+
 @media screen and (max-width: 782px) {
 	.admin-bar .editor-panel__left .panel-header,
 	.admin-bar .editor-panel__right {
