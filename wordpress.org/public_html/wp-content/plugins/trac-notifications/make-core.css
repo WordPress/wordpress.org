@@ -34,15 +34,16 @@ body.ticket-reports-open #content {
 body.ticket-reports-open #report-popup {
 	display: block;
     position: absolute;
-    top: 140px;
+    top: 179px;
     background: white;
     width: 100%;
 	padding: 0 15px;
 	box-sizing: border-box;
+    z-index: 1;
 }
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 890px) {
 	body.ticket-reports-open #report-popup {
-		top: 184px;
+		top: 166px;
 	}
 }
 #report-popup .ticket-reports {
