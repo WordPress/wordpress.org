@@ -1,13 +1,6 @@
-<?php
-/**
- * The template for displaying the footer.
- *
- * @package wporg-login
- */
-?>
 	</div>
 
-<?php wp_footer(); ?>
+	<?php do_action( 'wporg_login_footer' ); ?>
+</div>
 
-</body>
-</html>
+<?php echo do_blocks( '<!-- wp:wporg/global-footer -->'); ?>

@@ -22,6 +22,8 @@ add_action( 'template_redirect', 'nocache_headers', 10, 0 );
  */
 function wporg_login_setup() {
 	load_theme_textdomain( 'wporg' );
+
+	add_theme_support( 'wp4-styles' );
 }
 add_action( 'after_setup_theme', 'wporg_login_setup' );
 
@@ -63,26 +65,10 @@ add_filter( 'login_display_language_dropdown', '__return_false' );
 add_filter( 'xmlrpc_methods', '__return_empty_array' );
 
 /**
- * Replace cores login CSS with our own.
- */
-function wporg_login_replace_css() {
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20211216' );
-}
-add_action( 'login_init', 'wporg_login_replace_css' );
-
-/**
  * Enqueue scripts and styles.
  */
 function wporg_login_scripts() {
-	$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-
-	// Concatenates core scripts when possible.
-	if ( ! $script_debug ) {
-		$GLOBALS['concatenate_scripts'] = true;
-	}
-
-	wp_enqueue_style( 'wporg-normalize', get_template_directory_uri() . '/stylesheets/normalize.css', 3 );
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons' ), '20211216' );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/build.css', array(), filemtime( __DIR__ . '/build.css' ) );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
@@ -113,7 +99,7 @@ function wporg_login_register_scripts() {
 	) );
 
 	// reCaptcha v3 is loaded on all login pages, not just the registration flow.
-	wp_enqueue_script( 'recaptcha-api-v3', 'https://www.google.com/recaptcha/api.js?onload=reCaptcha_v3_init&render=' . RECAPTCHA_V3_PUBKEY, array(), '3' );
+	wp_enqueue_script( 'recaptcha-api-v3', 'https://www.google.com/recaptcha/api.js?render=explicit&onload=reCaptcha_v3_init', array(), '3' );
 	$login_route = WP_WPOrg_SSO::$matched_route;
 	if ( ! $login_route || 'root' == $login_route ) {
 		$login_route = 'login';
@@ -121,32 +107,45 @@ function wporg_login_register_scripts() {
 	// reCaptcha only supports [a-Z _/] as the action.
 	$login_route = preg_replace( '#[^a-z/_ ]#i', '_', $login_route );
 
+	add_action( 'wp_footer', function() {
+		echo '<div id="recaptcha-container"></div>';
+	});
+
 	wp_add_inline_script(
 		'recaptcha-api-v3',
 		'function reCaptcha_v3_init() {
-			grecaptcha.execute(' .
-				json_encode( RECAPTCHA_V3_PUBKEY ) .
-				', {action: ' . json_encode( $login_route ) . ' }
-			).then( function( token ) {
-				// Add the token to the "primary" form
-				var input = document.createElement( "input" ),
-					form = document.getElementById( "registerform" );
+			var clientId = grecaptcha.render("recaptcha-container", {
+				"sitekey": ' . json_encode( RECAPTCHA_V3_PUBKEY ) . ',
+				"size": "invisible"
+			});
+	
+			grecaptcha.ready(function() {
+				grecaptcha.execute(
+					clientId,
+					{
+						action:' . json_encode( $login_route ) . '
+					}
+				).then( function( token ) {
+					// Add the token to the "primary" form
+					var input = document.createElement( "input" ),
+						form = document.getElementById( "registerform" );
 
-				if ( ! form ) {
-					form = document.querySelectorAll( "form:not(#language-switcher)" );
-				}
+					if ( ! form ) {
+						form = document.querySelectorAll( "form:not(#language-switcher)" );
+					}
 
-				input.setAttribute( "type", "hidden" );
-				input.setAttribute( "name", "_reCaptcha_v3_token" );
-				input.setAttribute( "value", token );
+					input.setAttribute( "type", "hidden" );
+					input.setAttribute( "name", "_reCaptcha_v3_token" );
+					input.setAttribute( "value", token );
 
-				form.appendChild( input );
+					form.appendChild( input );
 
-				if ( form.dataset.submitReady ) {
-					form.submit();
-				} else {
-					form.dataset.submitReady = true;
-				}
+					if ( form.dataset.submitReady ) {
+						form.submit();
+					} else {
+						form.dataset.submitReady = true;
+					}
+				});
 			});
 		}'
 	);
@@ -337,7 +336,7 @@ function wporg_login_language_switcher() {
 	</script>
 	<?php
 }
-add_action( 'wp_footer', 'wporg_login_language_switcher', 1 );
+add_action( 'wporg_login_footer', 'wporg_login_language_switcher', 1 );
 add_action( 'login_footer', 'wporg_login_language_switcher', 1 );
 
 /**
@@ -573,3 +572,8 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 	return $redirect;
 }
 add_filter( 'login_redirect', 'wporg_remember_where_user_came_from_redirect', 100, 3 );
+
+// Include a set of actions that are highly-specific to wp-login.php
+if ( empty( $GLOBALS['interim_login'] ) && ! isset( $_GET['interim-login'] ) ) {
+	include __DIR__ . '/functions-wp-login-overrides.php';
+}
