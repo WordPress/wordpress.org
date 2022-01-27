@@ -64,6 +64,10 @@ class WP_59_Credits extends WP_Credits {
 					'beafialho'           => 'Beatriz Fialho',
 					'pablohoneyhoney'     => 'Pablo Honey',
 					'nalininonstopnewsuk' => 'Nalini Thakor',
+					'kellychoffman'       => 'Kelly Hoffman',
+					'joedolson'           => 'Joe Dolson',
+					'aaronrobertshaw'     => 'Aaron Robertshaw',
+					'dpcalhoun'           => 'David Calhoun',
 				],
 			],
 		];
