@@ -396,6 +396,13 @@ class WPORG_Themes_Upload {
 			$this->theme_slug = sanitize_title_with_dashes( $this->theme_slug );
 		}
 
+		// Account for "twenty" themes, these themes have slugs that do not match the normal conventions.
+		$this->theme_slug = str_replace(
+			array( 'twenty-ten', 'twenty-eleven', 'twenty-twelve', 'twenty-thirteen', 'twenty-fourteen', 'twenty-fifteen', 'twenty-sixteen', 'twenty-seventeen', 'twenty-eighteen', 'twenty-nineteen', 'twenty-twenty-one', 'twenty-twenty-two', 'twenty-twenty-three', 'twenty-twenty-four', 'twenty-twenty-five', 'twenty-twenty-six', 'twenty-twenty-seven', 'twenty-twenty-eight', 'twenty-twenty-nine', 'twenty-thirty', 'twenty-twenty'),
+			array( 'twentyten',  'twentyeleven',  'twentytwelve',  'twentythirteen',  'twentyfourteen',  'twentyfifteen',  'twentysixteen',  'twentyseventeen',  'twentyeighteen',  'twentynineteen', 'twentytwentyone', 'twentytwentytwo', 'twentytwentythree', 'twentytwentyfour',  'twentytwentyfive', 'twentytwentysix', 'twentytwentyseven', 'twentytwentyeight', 'twentytwentynine', 'twentythirty', 'twentytwenty' ),
+			$this->theme_slug
+		);
+
 		if ( ! $this->theme_name || ! $this->theme_slug ) {
 			$error = __( 'The theme has no name.', 'wporg-themes' ) . ' ';
 
@@ -423,6 +430,11 @@ class WPORG_Themes_Upload {
 			);
 		}
 
+		// Populate the theme post.
+		if ( ! $this->theme_post ) {
+			$this->theme_post = $this->get_theme_post();
+		}
+
 		// Populate author.
 		if ( ! $this->author ) {
 			if ( is_user_logged_in() ) {
@@ -433,7 +445,6 @@ class WPORG_Themes_Upload {
 		}
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
-		// This check must be run before `get_theme_post()` to account for "twenty" themes.
 		if ( $this->has_reserved_slug() ) {
 			$style_errors->add(
 				'reserved_slug',
@@ -444,12 +455,6 @@ class WPORG_Themes_Upload {
 					'<code>style.css</code>'
 				)
 			);
-		}
-
-		// Populate the theme post.
-		// Like it says above, the has_reserved_slug() function *must* run before this.
-		if ( ! $this->theme_post ) {
-			$this->theme_post = $this->get_theme_post();
 		}
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
@@ -962,33 +967,22 @@ class WPORG_Themes_Upload {
 	 * @return bool
 	 */
 	public function has_reserved_slug() {
-		$slug = str_replace(
-			array( 'twenty-ten', 'twenty-eleven', 'twenty-twelve', 'twenty-thirteen', 'twenty-fourteen', 'twenty-fifteen', 'twenty-sixteen', 'twenty-seventeen', 'twenty-eighteen', 'twenty-nineteen', 'twenty-twenty-one', 'twenty-twenty-two', 'twenty-twenty-three', 'twenty-twenty-four', 'twenty-twenty-five', 'twenty-twenty-six', 'twenty-twenty-seven', 'twenty-twenty-eight', 'twenty-twenty-nine', 'twenty-thirty', 'twenty-twenty'),
-			array( 'twentyten',  'twentyeleven',  'twentytwelve',  'twentythirteen',  'twentyfourteen',  'twentyfifteen',  'twentysixteen',  'twentyseventeen',  'twentyeighteen',  'twentynineteen', 'twentytwentyone', 'twentytwentytwo', 'twentytwentythree', 'twentytwentyfour',  'twentytwentyfive', 'twentytwentysix', 'twentytwentyseven', 'twentytwentyeight', 'twentytwentynine', 'twentythirty', 'twentytwenty' ),
-			$this->theme_slug
-		);
-
 		$reserved_slugs = array(
 			// Reserve "twenty" names for wordpressdotorg.
 			'twentyten', 'twentyeleven', 'twentytwelve','twentythirteen', 'twentyfourteen', 'twentyfifteen',
 			'twentysixteen', 'twentyseventeen','twentyeighteen', 'twentynineteen', 'twentytwenty',
 			'twentytwentyone', 'twentytwentytwo', 'twentytwentythree', 'twentytwentyfour', 'twentytwentyfive',
 			'twentytwentysix', 'twentytwentyseven', 'twentytwentyeight', 'twentytwentynine', 'twentythirty',
+
 			// Theme Showcase URL parameters.
 			'browse', 'tag', 'search', 'filter', 'upload', 'commercial',
 			'featured', 'popular', 'new', 'updated',
 		);
 
 		// If it's not a reserved slug, they can have it.
-		if (
-			! in_array( $slug, $reserved_slugs, true ) &&
-			! in_array( $this->theme_slug, $reserved_slugs, true )
-		) {
+		if ( ! in_array( $this->theme_slug, $reserved_slugs, true ) ) {
 			return false;
 		}
-
-		// force the slug to be correct for the twenty-x themes.
-		$this->theme_slug = $slug;
 
 		// WordPress.org user is always allowed to upload reserved slugs.
 		if ( 'wordpressdotorg' === $this->author->user_login ) {
@@ -996,16 +990,14 @@ class WPORG_Themes_Upload {
 		}
 
 		// Only committers uploading a default theme *update* are left to be checked for.
-		$theme_post = $this->get_theme_post();
-
 		// New default themes MUST be uploaded by `wordpressdotorg` and will fail this check.
 		if (
 			// Updates only.
-			$theme_post &&
+			$this->theme_post &&
 			// The current user is a Core Committer. [ 'user_login' => 'Trac Title', ... ]
 			! empty( $GLOBALS['committers'][ $this->author->user_login ] ) &&
 			// The theme is owned by WordPress.org.
-			'wordpressdotorg' === get_user_by( 'id', $theme_post->post_author )->user_login
+			'wordpressdotorg' === get_user_by( 'id', $this->theme_post->post_author )->user_login
 		) {
 			// Slug is reserved, but an update is being uploaded by a core committer.
 			return false;
