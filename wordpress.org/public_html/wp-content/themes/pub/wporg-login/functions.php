@@ -130,7 +130,11 @@ function wporg_login_register_scripts() {
 			).then( function( token ) {
 				// Add the token to the "primary" form
 				var input = document.createElement( "input" ),
-					form = document.getElementsByTagName("form")[0];
+					form = document.getElementById( "registerform" );
+
+				if ( ! form ) {
+					form = document.querySelectorAll( "form:not(#language-switcher)" );
+				}
 
 				input.setAttribute( "type", "hidden" );
 				input.setAttribute( "name", "_reCaptcha_v3_token" );
