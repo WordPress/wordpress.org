@@ -11,15 +11,11 @@ function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low
 			$_POST['_reCaptcha_v3_token'],
 			RECAPTCHA_V3_PRIVKEY
 		);
-	
-		// Debugging some Registration issues.
-		if ( $result ) {
-			slack_dm( var_export( compact( 'result', 'check_v3_action' ), true ), '@dd32' );
-		}
 
 		if (
 			! $result ||
 			! $result['success'] ||
+			empty( $result['action'] ) ||
 			$check_v3_action !== $result['action']
 		) {
 			return false;
