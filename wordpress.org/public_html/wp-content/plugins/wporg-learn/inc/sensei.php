@@ -16,6 +16,18 @@ add_action( 'sensei_single_course_content_inside_after', __NAMESPACE__ . '\remov
 add_filter( 'sensei_load_default_supported_theme_wrappers', '__return_false' );
 add_action( 'sensei_before_main_content', __NAMESPACE__ . '\theme_wrapper_start' );
 add_action( 'sensei_after_main_content', __NAMESPACE__ . '\theme_wrapper_end' );
+add_filter( 'sensei_course_slug', __NAMESPACE__ . '\wporg_correct_post_slug' );
+
+/**
+ * Correct the slug in post permalinks to always be "course" regardless of the language chosen for the site.
+ *
+ * @param string $slug //unused
+ *
+ * @return string Correct slug of "course" for the learn.wordpress.org site.
+ */
+function wporg_correct_post_slug( $slug ) {
+	    return 'course';
+}
 
 /**
  * Modify the status message so that logging in takes precedence over enrolling in the course.
