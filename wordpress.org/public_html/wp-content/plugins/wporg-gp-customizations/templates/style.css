@@ -358,6 +358,10 @@ h2 + .project-description {
 	font-size: 16px;
 }
 
+.with-sub-projects #translation-sets {
+	width: auto;
+}
+
 @media screen and (max-width: 960px) {
 	.with-sub-projects {
 		margin-left: 0;
@@ -367,7 +371,6 @@ h2 + .project-description {
 	.with-sub-projects #translation-sets {
 		float: none;
 		margin: 0;
-		width: 100%;
 	}
 
 	#translation-sets {
