@@ -93,11 +93,11 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
 				$login_url = add_query_arg( 'from', $this->host, $login_url );
+			}
 
-				// Not all browsers send referers cross-origin, ensure that a redirect_to is set for this hostname.
-				if ( empty( $redirect_to ) ) {
-					$redirect_to = 'https://' . $this->host . $_SERVER['REQUEST_URI'];
-				}
+			// Always include the redirect_to if not set, to avoid cross-origin redirect issues.
+			if ( empty( $redirect_to ) ) {
+				$redirect_to = 'https://' . $this->host . $_SERVER['REQUEST_URI'];
 			}
 
 			if ( ! empty( $redirect_to ) && $this->_is_valid_targeted_domain( $redirect_to ) ) {
@@ -106,7 +106,6 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			}
 
 			return $login_url;
-
 		}
 
 		/**
