@@ -2225,11 +2225,25 @@ ul.ct-legend {
 .consistency-table tr.new-translation th {
 	position: -webkit-sticky;
 	position: sticky;
-	top: calc( var(--wp-global-header-height) + var(--wp-admin--admin-bar--height) + 100px );
+	top: 0;
 	padding: 20px 0 10px;
 	background: #fff;
 	text-align: left;
 	box-shadow: 0 -1px 0 #72777c, 0 3px 0 #72777c;
+}
+
+/* This is when the admin bar start to stick. */
+@media screen and (min-width: 601px) {
+	.consistency-table tr.new-translation th {
+		top: var(--wp-admin--admin-bar--height);
+	}
+}
+
+/* This is when the global header start to stick. */
+@media screen and (min-width: 890px) {
+	.consistency-table tr.new-translation th {
+		top: calc(var(--wp-global-header-height) + var(--wp-admin--admin-bar--height));
+	}
 }
 
 .anchor-jumper {
