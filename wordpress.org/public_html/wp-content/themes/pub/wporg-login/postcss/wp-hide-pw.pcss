@@ -1,0 +1,47 @@
+.wp-pwd {
+	display: block;
+	position: relative;
+
+	& .button.wp-hide-pw {
+		background: transparent;
+		border: 1px solid transparent;
+		box-shadow: none;
+		font-size: 14px;
+		line-height: 2;
+		width: 2.5rem;
+		height: 2.5rem;
+		min-width: 40px;
+		min-height: 40px;
+		margin: 0;
+		padding: 5px 9px;
+		position: absolute;
+		right: 0;
+		top: 0;
+
+		&:hover {
+			background: transparent;
+			cursor: pointer;
+		}
+
+		&:focus {
+			background: transparent;
+			border-color: #3582c4;
+			box-shadow: 0 0 0 1px #3582c4;
+			/* Only visible in Windows High Contrast mode */
+			outline: 2px solid transparent;
+		}
+
+		&:active {
+			background: transparent;
+			box-shadow: none;
+			transform: none;
+		}
+
+		& .dashicons {
+			width: 1.25rem;
+			height: 1.25rem;
+			top: 0.25rem;
+			background: #fff; /* Hack to hide any browser password manager backgrounds. */
+		}
+	}
+}

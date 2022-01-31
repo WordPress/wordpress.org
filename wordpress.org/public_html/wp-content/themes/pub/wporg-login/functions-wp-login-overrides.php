@@ -8,6 +8,7 @@ add_action( 'login_header', function() {
 } );
 
 add_action( 'login_footer', function() {
+	do_action( 'wporg_login_footer' );
 	echo '</div>';
 	do_action( 'wp_footer' );
 	// OR use the wporg footer: echo do_blocks( '<!-- wp:wporg/global-footer -->'); exit;

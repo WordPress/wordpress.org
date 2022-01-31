@@ -4,12 +4,15 @@ module.exports = {
 		'postcss-import': {},
 
 		// This must go before nesting plugins.
+		'postcss-mixins': {},
+
+		// This must go before nesting plugins.
 		'postcss-nesting': {},
 		'postcss-custom-media': {},
 
 		// This needs to come after any plugins that add "modern" CSS features.
 		'postcss-preset-env': {},
-		'cssnano': {},
+		//'cssnano': {},
 
 		// This has to go after any plugins that output messages.
 		'postcss-reporter': {},

@@ -1,0 +1,27 @@
+.language-switcher {
+	text-align: center;
+	margin: 48px auto 24px;
+
+	& select {
+		display: inline-block;
+		width: 60%;
+		height: 30px;
+	}
+
+	& label {
+		margin-right: .5em;
+	}
+
+	& span.dashicons {
+		line-height: 30px;
+	}
+
+	&.rtl label {
+		margin-right: 0;
+		margin-left: .5em;
+	}
+
+	&@media (max-width: 360px) {
+		width: 100%;
+	}
+}

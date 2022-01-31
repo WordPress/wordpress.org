@@ -124,7 +124,7 @@ get_header();
 		</label>
 	</p>
 	<?php
-		if ( $error_recapcha_status ) {
+		if ( true || $error_recapcha_status ) {
 			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
 		}
 	?>
