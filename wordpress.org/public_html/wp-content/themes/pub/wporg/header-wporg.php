@@ -11,8 +11,4 @@
 
 namespace WordPressdotorg\Theme;
 
-if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
-	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
-} else {
-	require WPORGPATH . 'header.php';
-}
+echo do_blocks( '<!-- wp:wporg/global-header /-->' );

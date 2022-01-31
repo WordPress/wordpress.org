@@ -27,4 +27,3 @@ require WPORGPATH . 'header.php';
 <?php is_home() && ! is_paged() && get_template_part( 'make-intro' ); ?>
 
 <div id="wrapper">
-

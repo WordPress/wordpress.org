@@ -21,11 +21,7 @@ $menu_items = array(
 
 \WordPressdotorg\skip_to( '#content' );
 
-if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
-	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
-} else {
-	wporg_get_global_header();
-}
+echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
 ?>
 

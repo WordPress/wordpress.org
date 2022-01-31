@@ -13,8 +13,8 @@ namespace WordPressdotorg\Openverse\Theme;
 
 \WordPressdotorg\skip_to( '#content' );
 
-get_template_part( 'header', 'wporg' );
-?>
+echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
+?>
 <div id="page" class="site">
 	<div id="content" class="site-content">

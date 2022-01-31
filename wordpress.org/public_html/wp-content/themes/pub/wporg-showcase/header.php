@@ -2,11 +2,7 @@
 
 \WordPressdotorg\skip_to( '#pagebody' );
 
-if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
-	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
-} else {
-	require WPORGPATH . 'header.php';
-}
+echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
 $prefix = is_ssl() ? 'https://' : 'http://s.';
 wp_enqueue_style( 'blog-wp4', $prefix.'wordpress.org/style/blog-wp4.css', array(), 4 );

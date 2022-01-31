@@ -274,15 +274,6 @@ function wporg_support_excerpt_length( $length ) {
 }
 add_filter( 'excerpt_length', 'wporg_support_excerpt_length' );
 
-/**
- * The Header for our theme.
- *
- * @package WPBBP
- */
-function wporg_get_global_header() {
-	require WPORGPATH . 'header.php';
-}
-
 function wporg_support_bbp_raw_title( $title ) {
 	if ( get_query_var( 'paged' ) && ! is_404() ) {
 		$title .= sprintf( ' - page %s', get_query_var( 'paged' ) );
@@ -294,7 +285,7 @@ add_filter( 'bbp_raw_title', 'wporg_support_bbp_raw_title' );
 
 /**
  * Add bbPress titles to the document title.
- * 
+ *
  * bbPress doesn't support `title-tag` theme support, instead relying upon `wp_title` filters instead.
  */
 function wporg_support_pre_get_document_title( $title ) {

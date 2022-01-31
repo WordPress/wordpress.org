@@ -19,11 +19,7 @@ $menu_items = array(
 	'/developers/'       => __( 'Developers', 'wporg-plugins' ),
 );
 
-if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
-	echo do_blocks( '<!-- wp:wporg/global-header /-->' );
-} else {
-	require WPORGPATH . 'header.php';
-}
+echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
 ?>
 <div id="page" class="site">
