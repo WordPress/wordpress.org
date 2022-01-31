@@ -50,11 +50,6 @@ if ( isset( $template ) && 'translations' === $template ) {
 	gp_enqueue_script( 'wporg-translate-editor' );
 }
 
-// The new header calls wp_head + gp_head, the old header only calls one or the other, so we must manually add this.
-if ( ! FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
-	add_action( 'gp_head', '_wp_render_title_tag' );
-}
-
 /**
  * Set the document title to that of GlotPress.
  * 
