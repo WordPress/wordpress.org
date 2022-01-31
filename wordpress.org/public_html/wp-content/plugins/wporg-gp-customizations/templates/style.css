@@ -8,6 +8,7 @@ html,
 .gp-content textarea,
 .gp-content input {
 	color: #1e1e1e;
+	font-size: 14px; /* Overwrite wporg-main. Affects layout rem sizing. */
 }
 
 .gp-content * {
