@@ -34,7 +34,7 @@ if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
 	</div>
 </header>
 
-<div class="gp-content">
+<div class="gp-content clearfix">
 
 	<div id="gp-js-message"></div>
 
