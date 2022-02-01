@@ -1567,6 +1567,7 @@ ul.projects-dropdown li > a > span {
 	text-align: center;
 	border-collapse: collapse;
 	table-layout: fixed;
+	font-size: 15px;
 }
 
 .stats-table table thead {
