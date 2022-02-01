@@ -71,7 +71,12 @@ class Meetup_OAuth2_Client extends API_Client {
 	/**
 	 * @var string
 	 */
-	const SITE_OPTION_KEY_OAUTH = 'meetup_oauth_token';
+	const SITE_OPTION_KEY_OAUTH = 'meetup_access_token';
+
+	/**
+	 * @var string
+	 */
+	const SITE_OPTION_KEY_AUTHORIZATION = 'meetup_oauth_authorization';
 
 	/**
 	 * @var array
@@ -121,65 +126,14 @@ class Meetup_OAuth2_Client extends API_Client {
 	}
 
 	/**
-	 * Step 1 in "Server Flow with User Credentials".
-	 *
-	 * @see https://www.meetup.com/meetup_api/auth/#oauth2servercredentials-auth
-	 *
-	 * @return array
-	 */
-	protected function request_authorization_code() {
-		$authorization_code = array();
-
-		$request = array(
-			'client_id'     => self::CONSUMER_KEY,
-			'redirect_uri'  => self::REDIRECT_URI,
-			'response_type' => 'anonymous_code',
-		);
-
-		$args = array(
-			'headers' => $this->get_headers(),
-			'body'    => $request,
-		);
-
-		$response = $this->tenacious_remote_post( self::URL_AUTHORIZE, $args );
-
-		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
-			$body = json_decode( wp_remote_retrieve_body( $response ), true );
-
-			if ( ! empty( $body['code'] ) ) {
-				$authorization_code = $body;
-			} else {
-				$this->error->add(
-					'unexpected_oauth_authorization_code_response',
-					'The Meetup OAuth API response did not provide the expected data.'
-				);
-			}
-		} else {
-			$this->handle_error_response( $response );
-		}
-
-		return $authorization_code;
-	}
-
-	/**
 	 * Request one of various types of tokens from the Meetup OAuth API.
+	 * 
+	 * Setting $type to 'access_token' is for step 2 of the oAuth flow. This takes a code that has been previously set
+	 * through a user-initiated oAuth authentication.
+	 * 
+	 * Setting $type to 'refresh_token' will request a new access_token generated through the above access_token method.
 	 *
-	 * Setting $type to 'server_token' is for Step 2 in "Server Flow with User Credentials". This gets the "server
-	 * access token" which is then used to request the "oauth access token".
-	 * @see https://www.meetup.com/meetup_api/auth/#oauth2servercredentials-access
-	 *
-	 * Setting $type to 'oauth_token' is for Step 3 in "Server Flow with User Credentials". Technically in the
-	 * documentation, this token is also called an "access token", but here we're calling it the "oauth access token" to
-	 * differentiate it from the "server access token". Also, why are two separate access tokens necessary??
-	 * @see https://www.meetup.com/meetup_api/auth/#oauth2servercredentials-accesspro
-	 *
-	 * Setting $type to 'refresh_token' will request a new server access token for Step 2. This is for when the oauth
-	 * token from Step 3 is expired. The refreshed server token can then be used to obtain a new Step 3
-	 * oauth token. This skips the authorization code request (Step 1), but seems largely superfluous since a second
-	 * oauth token request must still be made with the new server token. Also, the refresh_token string used to refresh
-	 * the server token needs to come from the oauth token array, **not the server token array**. This is not what the
-	 * documentation implies. Why is this so terrible??
-	 * @see https://www.meetup.com/meetup_api/auth/#oauth2server-refresh
+	 * @see https://www.meetup.com/api/authentication/#p02-server-flow-section
 	 *
 	 * Check the `get_oauth_token` method to see how these token request flows work.
 	 *
@@ -196,7 +150,7 @@ class Meetup_OAuth2_Client extends API_Client {
 		$request_body    = array();
 
 		switch( $type ) {
-			case 'server_token': // Request a new server access token.
+			case 'access_token': // Request a new access token.
 				$args = wp_parse_args( $args, array(
 					'code' => '',
 				) );
@@ -205,12 +159,14 @@ class Meetup_OAuth2_Client extends API_Client {
 				$request_body = array(
 					'client_id'     => self::CONSUMER_KEY,
 					'client_secret' => self::CONSUMER_SECRET,
+					'grant_type'    => 'authorization_code',
 					'redirect_uri'  => self::REDIRECT_URI,
 					'code'          => $args['code'],
-					'grant_type'    => 'anonymous_code',
 				);
+				$request_headers['Content-Type'] = 'application/x-www-form-urlencoded';
 				break;
-			case 'refresh_token': // Refresh a server access token.
+
+			case 'refresh_token': // Refresh an access token.
 				$args = wp_parse_args( $args, array(
 					'refresh_token' => '',
 				) );
@@ -221,18 +177,6 @@ class Meetup_OAuth2_Client extends API_Client {
 					'client_secret' => self::CONSUMER_SECRET,
 					'refresh_token' => $args['refresh_token'],
 					'grant_type'    => 'refresh_token',
-				);
-				break;
-			case 'oauth_token': // Request a new oauth token.
-				$args = wp_parse_args( $args, array(
-					'access_token' => '',
-				) );
-
-				$request_url     = self::URL_OAUTH_TOKEN;
-				$request_headers = $this->get_headers( $args['access_token'] );
-				$request_body    = array(
-					'email'    => self::EMAIL,
-					'password' => self::PASSWORD,
 				);
 				break;
 		}
@@ -280,46 +224,60 @@ class Meetup_OAuth2_Client extends API_Client {
 	 */
 	public function get_oauth_token() {
 		if ( $this->oauth_token && ! $this->is_expired_token( $this->oauth_token ) ) {
-			return $this->oauth_token['oauth_token'];
+			return $this->oauth_token['access_token'];
 		}
-
-		$oauth_token   = '';
-		$needs_caching = false;
 
 		$token = get_site_option( self::SITE_OPTION_KEY_OAUTH, array() );
 
-		if ( ! $this->is_valid_token( $token, 'oauth_token' ) ) {
-			$authorization = $this->request_authorization_code(); // Step 1.
-			$server_token  = $this->request_token( 'server_token', $authorization ); // Step 2.
-			$token         = $this->request_token( 'oauth_token', $server_token ); // Step 3.
-			$needs_caching = true;
+		if ( ! $this->is_valid_token( $token, 'access_token' ) ) {
+
+			// At this point, we need to get a new oAuth done.
+			if ( empty( $_GET['code'] ) ) {
+				$_GET['code'] = get_site_option( self::SITE_OPTION_KEY_AUTHORIZATION, false );
+
+				if ( ! $_GET['code'] ) {
+					$message = sprintf(
+						"Meetup.com oAuth expired. Please access the following url while logged into the %s meetup.com account: \n\n%s\n\n" . 
+						"For sites other than WordCamp Central, the ?code=... parameter will need to be stored on this site via wp-cli and this task run again: `wp --url=%s site option update '%s' '...'`",
+						self::EMAIL,
+						sprintf(
+							'https://secure.meetup.com/oauth2/authorize?client_id=%s&response_type=code&redirect_uri=%s&state=meetup-oauth',
+							self::CONSUMER_KEY,
+							self::REDIRECT_URI
+						),
+						network_site_url('/'),
+						self::SITE_OPTION_KEY_AUTHORIZATION
+					);
+
+					if ( admin_url( '/' ) === self::REDIRECT_URI ) {
+						printf( '<div class="notice notice-error"><p>%s</p></div>', nl2br( make_clickable( $message ) ) );
+					}
+
+					trigger_error( $message, E_USER_WARNING );
+
+					return false;
+				}
+			}
+
+			$token = $this->request_token( 'access_token', array( 'code' => $_GET['code'] ) );
+
+			if ( $this->is_valid_token( $token, 'access_token' ) ) {
+				delete_site_option( self::SITE_OPTION_KEY_AUTHORIZATION, false );
+			}
+
 		} elseif ( $this->is_expired_token( $token ) ) {
-			$server_token = $this->request_token( 'refresh_token', $token ); // Alternate for Steps 1 & 2.
-
-			// If the token is no longer valid but "looked valid" fetch a fresh one.
-			if ( ! $server_token && $this->error->get_error_message( 'oauth_error' ) ) {
-				$this->error->remove( 'oauth_error' );
-
-				// The token isn't valid for refreshing, request a new one.
-				$authorization = $this->request_authorization_code(); // Step 1.
-				$server_token  = $this->request_token( 'server_token', $authorization ); // Step 2.
-			}
-
-			$token         = $this->request_token( 'oauth_token', $server_token ); // Step 3.
-			$needs_caching = true;
+			$token = $this->request_token( 'refresh_token', $token );
 		}
 
-		if ( $this->is_valid_token( $token, 'oauth_token' ) ) {
-			$this->oauth_token = $token;
-
-			if ( $needs_caching ) {
-				update_site_option( self::SITE_OPTION_KEY_OAUTH, $token );
-			}
-
-			$oauth_token = $this->oauth_token['oauth_token'];
+		if ( ! $this->is_valid_token( $token, 'access_token' ) ) {
+			return false;
 		}
 
-		return $oauth_token;
+		$this->oauth_token = $token;
+
+		update_site_option( self::SITE_OPTION_KEY_OAUTH, $this->oauth_token );
+
+		return $this->oauth_token['access_token'];
 	}
 
 	/**
@@ -332,7 +290,9 @@ class Meetup_OAuth2_Client extends API_Client {
 	 * @return void
 	 */
 	public function reset_oauth_token() {
-		delete_site_option( self::SITE_OPTION_KEY_OAUTH );
+		// NO. JUST NO. Do not delete the oAuth token.
+		// This is temporarily disabled while Meetup.com server-to-server authentication is unavailable.
+		// delete_site_option( self::SITE_OPTION_KEY_OAUTH );
 
 		$this->oauth_token = array();
 		$this->error       = new WP_Error();
@@ -349,23 +309,22 @@ class Meetup_OAuth2_Client extends API_Client {
 	 * @return bool
 	 */
 	protected function is_valid_token( $token, $type ) {
-		$valid_types = array( 'server_token', 'refresh_token', 'oauth_token' );
+		$valid_types = array( 'refresh_token', 'access_token' );
 
 		if ( ! is_array( $token ) || ! in_array( $type, $valid_types, true ) ) {
 			return false;
 		}
 
 		switch ( $type ) {
-			case 'server_token':
 			case 'refresh_token':
 				$required_properties = array(
 					'access_token' => '',
 				);
 				break;
-			case 'oauth_token':
+			case 'access_token':
 			default:
 				$required_properties = array(
-					'oauth_token'   => '',
+					'access_token'   => '',
 					'refresh_token' => '',
 					'expires_in'    => '',
 				);
