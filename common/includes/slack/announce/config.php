@@ -336,14 +336,8 @@ function get_whitelist() {
 		),
 		'marketing' => array(
 			'eidolonnight',
-			'harryjackson1221',
 			'lmurillom',
-			'maedahbatool',
-			'meher', // @meherbala on Slack
 			'nalininonstopnewsuk', // @Nalini on Slack
-			'oglekler',
-			'webcommsat', // @abhanonstopnewsuk on Slack
-			'yvettesonneveld',
 		),
 		'meta' => array(
 			'coreymckrill',
