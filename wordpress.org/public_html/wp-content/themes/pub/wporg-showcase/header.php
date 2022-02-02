@@ -4,9 +4,8 @@
 
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 
-$prefix = is_ssl() ? 'https://' : 'http://s.';
-wp_enqueue_style( 'blog-wp4', $prefix.'wordpress.org/style/blog-wp4.css', array(), 4 );
-wp_enqueue_style( 'showcase', get_stylesheet_uri(), array(), 20 );
+wp_enqueue_style( 'blog-wp4', 'https://wordpress.org/style/blog-wp4.css', array(), 4 );
+wp_enqueue_style( 'showcase', get_stylesheet_uri(), array( 'dashicons' ), 20 );
 
 ?>
 
