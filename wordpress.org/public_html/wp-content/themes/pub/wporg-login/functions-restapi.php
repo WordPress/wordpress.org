@@ -77,7 +77,8 @@ function wporg_login_rest_email_in_use( $request ) {
 	if ( ! is_email( $email ) ) {
 		return [
 			'available' => false,
-			'error' => __( 'That email address appears to be invalid.', 'wporg' ),
+			'error'     => __( 'That email address appears to be invalid.', 'wporg' ),
+			'avatar'    => false,
 		];
 	}
 
