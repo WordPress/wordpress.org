@@ -335,9 +335,12 @@ function get_whitelist() {
 			'brettface',
 		),
 		'marketing' => array(
+			'eidolonnight',
 			'harryjackson1221',
+			'lmurillom',
 			'maedahbatool',
 			'meher', // @meherbala on Slack
+			'nalininonstopnewsuk', // @Nalini on Slack
 			'oglekler',
 			'webcommsat', // @abhanonstopnewsuk on Slack
 			'yvettesonneveld',
