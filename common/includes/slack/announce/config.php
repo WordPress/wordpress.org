@@ -316,6 +316,7 @@ function get_whitelist() {
 			'jdembowski', // @jan_dembowski on Slack
 			'macmanx',
 			'mariaojob', // @Mary Job on Slack
+			'sterndata',
 		),
 		'fse-outreach-experiment' => array(
 			'annezazu',
