@@ -23,6 +23,12 @@ if ( is_user_logged_in() ) {
 $error_user_login = $error_user_email = $error_recapcha_status = $terms_of_service_error = false;
 if ( $_POST ) {
 
+	/** This filter is documented in wp-includes/user.php */
+	$user_login = apply_filters( 'pre_user_login', $user_login );
+
+	/** This filter is documented in wp-includes/user.php */
+	$user_email = apply_filters( 'pre_user_email', $user_email );
+
 	$error_user_login = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/username-available/' . urlencode( $user_login ) ) );
 	if ( $error_user_login->get_data()['available'] ) {
 		$error_user_login = false;

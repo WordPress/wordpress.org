@@ -336,6 +336,9 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 		if ( isset( $_POST['user_fields'][ $field ] ) ) {
 			$value = trim( sanitize_text_field( wp_unslash( $_POST['user_fields'][ $field ] ) ) );
 			if ( 'url' == $field ) {
+				/** This filter is documented in wp-includes/user.php */
+				$value = apply_filters( 'pre_user_url', $value );
+
 				if ( $pending_user ) {
 					$pending_user['meta'][ $field ] = esc_url_raw( $value );
 				} else {
@@ -366,6 +369,9 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 		$new_email &&
 		$new_email !== $pending_user['user_email']
 	) {
+		/** This filter is documented in wp-includes/user.php */
+		$new_email = apply_filters( 'pre_user_email', $new_email );
+
 		// Validate the email
 		$error_user_email = rest_do_request( new WP_REST_Request( 'GET', '/wporg/v1/email-in-use/' . urlencode( $new_email ) ) );
 		if ( $error_user_email->get_data()['available'] ) {

@@ -74,6 +74,13 @@ function wporg_login_rest_username_exists( $request ) {
 function wporg_login_rest_email_in_use( $request ) {
 	$email = trim( urldecode( $request['email'] ) );
 
+	if ( ! is_email( $email ) ) {
+		return [
+			'available' => false,
+			'error' => __( 'That email address appears to be invalid.', 'wporg' ),
+		];
+	}
+
 	if ( $user = get_user_by( 'email', $email ) ) {
 		return [
 			'available' => false,
@@ -87,7 +94,7 @@ function wporg_login_rest_email_in_use( $request ) {
 	$pending = wporg_get_pending_user( $email );
 
 	// And that there's no pending account signups for other emails for that inbox.
-	if ( ! $pending && false !== strpos( $email, '+' ) ) {
+	if ( ! $pending && str_contains( $email, '+' ) ) {
 		$pending = wporg_get_pending_user_by_email_wildcard( $email );
 	}
 
