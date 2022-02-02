@@ -34,7 +34,7 @@ body.ticket-reports-open #content {
 body.ticket-reports-open #report-popup {
 	display: block;
     position: absolute;
-    top: 179px;
+    top: 122px;
     background: white;
     width: 100%;
 	padding: 0 15px;
@@ -43,7 +43,7 @@ body.ticket-reports-open #report-popup {
 }
 @media screen and (min-width: 890px) {
 	body.ticket-reports-open #report-popup {
-		top: 166px;
+		top: 152px;
 	}
 }
 #report-popup .ticket-reports {
