@@ -46,6 +46,21 @@ function save_domdocument( $file, $dom ) {
 	// Remove trailing whitespace.
 	$html = preg_replace( '#(\S)\s+$#m', '$1', $html );
 
+	// Standardise container IDs, to make diffs simpler.
+	// The hash being replaced here is the result of `uniqid()` to privide unique element classes.
+	$html = preg_replace_callback(
+		'!(?P<class>(?P<prefix>wp-container|modal|wp-elements)-(?P<id>[a-f0-9]{13,14}))(?P<suffix>[^a-f0-9])!',
+		function( $m ) {
+			static $ids = [];
+			static $next_id = 1;
+
+			$prefix_id = $ids[ $m['class'] ] ?? ( $ids[ $m['class'] ] = $m['prefix'] . '-trac-' . ( $next_id++ ) );
+
+			return $prefix_id . $m['suffix'];
+		},
+		$html
+	);
+
 	return file_put_contents( $file, $html );
 }
 
