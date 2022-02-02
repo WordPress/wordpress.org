@@ -1,5 +1,8 @@
 <?php
 
+// Avoid PHP Warnings from 'unexpected' tag attributes.
+libxml_use_internal_errors( true );
+
 function domdocument_from_url( $url ) {
 	$html = file_get_contents( $url );
 
@@ -78,6 +81,14 @@ foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
 
 	$html_node->appendChild( $wporg_head->importNode( $node, true ) );
 }
+
+// Swap out the shortcut icon for a Trac one. #6072
+$icon_url = 'https://s.w.org/style/trac/common/trac.ico';
+foreach ( ( new DOMXPath( $wporg_head ) )->query( '//link[@rel="icon"]' ) as $icon ) {
+	$hash = md5( file_get_contents( $icon_url ) );
+	$icon->setAttribute( 'href', $icon_url . '?v=' . $hash );
+}
+
 save_domdocument( __DIR__ . '/wporg-head.html', $wporg_head );
 
 // wporg-header.html
