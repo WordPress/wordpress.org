@@ -24,7 +24,7 @@
 			<h2 class="widget-title"><?php esc_html_e( 'Stay Up-to-Date', 'wporg-themes' ); ?></h2>
 			<div class="textwidget"><?php
 				printf(
-					__( "Trying to ensure a great experience for the theme authors and users, means that theme requirements change from time to time. Keep up with the latest changes by following the <a href='%s'>Theme Review Team's blog</a>.", 'wporg-themes' ),
+					__( "Trying to ensure a great experience for the theme authors and users, means that theme requirements change from time to time. Keep up with the latest changes by following the <a href='%s'>Themes Team blog</a>.", 'wporg-themes' ),
 					esc_url( 'https://make.wordpress.org/themes/' )
 				);
 			?>
