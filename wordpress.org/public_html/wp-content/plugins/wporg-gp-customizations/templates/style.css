@@ -2223,7 +2223,7 @@ ul.ct-legend {
 }
 
 .consistency-table td {
-	padding: 10px 5px 0 0;
+	padding: 10px 7.5px;
 	vertical-align: top;
 }
 
@@ -2231,7 +2231,7 @@ ul.ct-legend {
 	position: -webkit-sticky;
 	position: sticky;
 	top: 0;
-	padding: 20px 0 10px;
+	padding: 10px 7.5px;
 	background: #fff;
 	text-align: left;
 	box-shadow: 0 -1px 0 #72777c, 0 3px 0 #72777c;
