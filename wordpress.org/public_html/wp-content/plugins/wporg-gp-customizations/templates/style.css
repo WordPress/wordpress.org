@@ -764,6 +764,10 @@ span.original-text {
 	color: #006799;
 }
 
+.notice p {
+	font-size: 14px;
+}
+
 p.intro {
 	width: 75%;
 	margin-bottom: 20px;
