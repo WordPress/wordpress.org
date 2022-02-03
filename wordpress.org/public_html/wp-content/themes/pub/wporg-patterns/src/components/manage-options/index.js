@@ -13,12 +13,13 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { store as patternStore } from '../../store';
 
 const ManageOptions = ( { patternId, isSmall } ) => {
-	const { isDraft } = useSelect(
+	const { isDraft, parent } = useSelect(
 		( select ) => {
 			const _pattern = select( patternStore ).getPattern( patternId );
 
 			return {
 				isDraft: _pattern?.status === 'draft',
+				parent: _pattern?.parent || 0,
 			};
 		},
 		[ patternId ]
@@ -48,7 +49,7 @@ const ManageOptions = ( { patternId, isSmall } ) => {
 		}
 	};
 
-	const editLink = `${ wporgPatternsUrl.site }/pattern/${ patternId }/edit/`;
+	const editLink = `${ wporgPatternsUrl.site }/pattern/${ parent ? parent : patternId }/edit/`;
 
 	const toggleContent = isSmall ? (
 		<Icon icon={ chevronDown } />
@@ -76,7 +77,11 @@ const ManageOptions = ( { patternId, isSmall } ) => {
 		>
 			{ () => (
 				<>
-					<MenuItem href={ editLink }>{ __( 'Open in editor', 'wporg-patterns' ) }</MenuItem>
+					<MenuItem href={ editLink }>
+						{ parent
+							? __( 'Open original in editor', 'wporg-patterns' )
+							: __( 'Open in editor', 'wporg-patterns' ) }
+					</MenuItem>
 					{ ! isDraft && (
 						<MenuItem onClick={ onRevertToDraft }>
 							{ __( 'Revert to draft', 'wporg-patterns' ) }
