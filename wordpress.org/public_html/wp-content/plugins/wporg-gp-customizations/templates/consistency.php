@@ -75,7 +75,7 @@ if ( $performed_search && ! $results ) {
 	$translations_unique_count = count( $translations_unique );
 	$has_different_translations = $translations_unique_count > 1;
 	if ( ! $has_different_translations ) {
-		echo '<p class="notice">All originals have the same translations</p>';
+		echo '<div class="notice"><p>All originals have the same translations.</p></div>';
 	} else {
 		echo '<div id="translations-overview" class="notice wporg-notice-warning"><p>There are ' . $translations_unique_count . ' different translations. <a id="toggle-translations-unique" href="#show">View</a></p>';
 		echo '<ul class="translations-unique hidden">';
