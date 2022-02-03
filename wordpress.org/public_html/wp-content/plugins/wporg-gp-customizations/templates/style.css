@@ -484,7 +484,9 @@ table.locales thead th:not(:last-child) {
 table.translations,
 table.translation-sets,
 table.glossary,
-table.locale-sub-projects {
+table.locale-sub-projects,
+table.consistency-table,
+.stats-table table {
 	font-size: 15px;
 	line-height: 1.6;
 	border-spacing: 0;
