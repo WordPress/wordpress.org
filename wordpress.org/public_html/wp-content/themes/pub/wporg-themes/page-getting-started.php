@@ -41,7 +41,7 @@ if ( have_posts() ) :
 
 				<h2 name="requirements"><?php _e( 'Guidelines &amp; Resources', 'wporg-themes' ); ?></h2>
 				<p>
-					<?php printf( __( 'To ensure that WordPress users are guaranteed a good experience, every theme in the directory is reviewed by the theme review team. Please <a href="%s">review the guidelines before uploading your theme</a>.', 'wporg-themes' ),
+					<?php printf( __( 'To ensure that WordPress users are guaranteed a good experience, every theme in the directory is reviewed by the themes team. Please <a href="%s">review the guidelines before uploading your theme</a>.', 'wporg-themes' ),
 					'https://make.wordpress.org/themes/handbook/review/'
 					); ?>
 				</p>

@@ -1232,8 +1232,8 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			// Theme review team auto-approves theme-updates, so mark the theme as live immediately.
-			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets
+			// Themes team auto-approves theme-updates, so mark the theme as live immediately.
+			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets.
 			if ( $this->trac_ticket->priority == 'theme update' ) {
 				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
 
@@ -1511,11 +1511,11 @@ You can help speed up the process by making sure that your theme follows all of 
 ** Questions? **
 If you have questions you can ask the reviewer in the ticket or chat with us on Slack in the #themereview channel. <https://chat.wordpress.org/>
 
-Subscribe to the Theme Review blog to stay up to date with the latest requirements and the ongoing work to improve the review process:
+Subscribe to the Themes Team blog to stay up to date with the latest requirements and the ongoing work to improve the review process:
 <https://make.wordpress.org/themes/>
 
 Thank you.
-The WordPress Theme Review Team', 'wporg-themes' ),
+The WordPress Themes Team', 'wporg-themes' ),
 				$this->theme->display( 'Name' ),
 				'https://themes.trac.wordpress.org/ticket/' . $this->trac_ticket->id
 			);
