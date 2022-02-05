@@ -2020,7 +2020,16 @@ ul.ct-legend {
 
 .locale-project-contributors-table th {
 	font-weight: bold;
+}
+
+.locale-project-contributors-table th,
+.locale-project-contributors-table td {
+	padding: 10px;
 	border-bottom: 1px solid #72777c;
+}
+
+.locale-project-contributors-table tr:last-child td {
+	border-bottom: 0;
 }
 
 .locale-project-contributors-table th.contributor-stats {
@@ -2069,15 +2078,6 @@ ul.ct-legend {
 	text-align: left;
 	font-size: 10px;
 	padding-top: 5px;
-}
-
-.locale-project-contributors-table tbody td {
-	padding: 10px;
-	border-bottom: 1px solid #72777c;
-}
-
-.locale-project-contributors-table tbody tr:last-child td {
-	border-bottom: 0;
 }
 
 .locale-project-contributors-contributors .stats-hint {
