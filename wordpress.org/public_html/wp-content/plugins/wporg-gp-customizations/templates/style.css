@@ -1464,7 +1464,7 @@ ul.projects-dropdown li > a > span {
 .wporg-notice {
 	background: #fff;
 	border-left: 4px solid #fff;
-	margin: 5px 15px 15px 15px;
+	margin: 5px 0 15px 0;
 	padding: 1px 12px;
 }
 
