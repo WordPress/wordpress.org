@@ -312,6 +312,11 @@ body.wporg-make #headline h2 a:before {
 	margin-left: 6px;
 }
 
+.gp-content h2 a.glossary-link {
+	margin-top: .25em;
+	color: #006799;
+}
+
 .gp-content h3 {
 	background: none;
 	padding: 0;
