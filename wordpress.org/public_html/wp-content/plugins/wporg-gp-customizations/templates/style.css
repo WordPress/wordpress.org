@@ -1224,6 +1224,7 @@ a.contribute-button:hover {
 .project-header .project-box {
 	position: relative;
 	width: 350px;
+	height: 100%;
 	margin-left: 20px;
 	border: 1px solid #72777c;
 	box-shadow: 0 1px 1px -1px rgba(0,0,0,0.1);
