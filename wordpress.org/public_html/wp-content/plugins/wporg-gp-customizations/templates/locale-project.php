@@ -357,7 +357,7 @@ if ( 'wp-plugins' === $project->path ) {
 						<td class="contributor-name">
 							%s
 							<a href="https://profiles.wordpress.org/%s/">%s %s</a>
-							<span>Last translation submitted: %s ago</span>
+							<span>Latest translation: %s ago</span>
 						</td>
 						<td class="contributor-stats">
 							<div class="total">

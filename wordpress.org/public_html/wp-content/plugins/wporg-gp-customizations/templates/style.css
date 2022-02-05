@@ -2004,7 +2004,7 @@ ul.ct-legend {
 
 .locale-project-contributors-table .contributor-name span {
 	float: left;
-	font-size: 11px;
+	font-size: 12px;
 	display: block;
 	margin-top: 13px;
 }
@@ -2025,6 +2025,7 @@ ul.ct-legend {
 .locale-project-contributors-table th,
 .locale-project-contributors-table td {
 	padding: 10px;
+	font-size: 14px;
 	border-bottom: 1px solid #72777c;
 }
 
@@ -2044,7 +2045,7 @@ ul.ct-legend {
 
 .locale-project-contributors-table td.contributor-stats div span {
 	text-transform: uppercase;
-	font-size: 10px;
+	font-size: 12px;
 }
 
 .locale-project-contributors-table td.contributor-stats div.current span {
@@ -2067,7 +2068,7 @@ ul.ct-legend {
 
 .detailed summary {
 	text-align: right;
-	font-size: 10px;
+	font-size: 12px;
 	outline: none;
 	cursor: pointer;
 }
@@ -2076,13 +2077,13 @@ ul.ct-legend {
 	display: block;
 	clear: left;
 	text-align: left;
-	font-size: 10px;
+	font-size: 12px;
 	padding-top: 5px;
 }
 
 .locale-project-contributors-contributors .stats-hint {
 	text-align: right;
-	font-size: 10px;
+	font-size: 12px;
 }
 
 @media screen and (max-width: 500px) {
