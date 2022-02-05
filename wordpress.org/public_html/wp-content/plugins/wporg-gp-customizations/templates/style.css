@@ -1324,7 +1324,7 @@ ul.projects-dropdown {
 
 ul.projects-dropdown,
 ul.projects-dropdown ul {
-	margin-left: 0;
+	margin: 0;
 	padding: 0;
 }
 
