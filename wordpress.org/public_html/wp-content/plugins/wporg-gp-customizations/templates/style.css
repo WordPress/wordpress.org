@@ -2331,8 +2331,19 @@ ul.ct-legend {
 	outline: 0;
 }
 
+.gp-content .bulk-actions {
+	margin-bottom: 1rem;
+}
+
+.gp-content .bulk-actions select,
 .gp-content .bulk-actions input.button {
 	vertical-align: middle;
+}
+
+.gp-content .bulk-actions input.button {
+	height: auto;
+	padding: 10px;
+	font-size: 14px;
 }
 
 #legend {
