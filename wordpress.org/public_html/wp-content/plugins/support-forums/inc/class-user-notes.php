@@ -21,7 +21,7 @@ class User_Notes {
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts',                   array( $this, 'enqueue_scripts' ) );
 
-		add_action( 'bbp_post_request',                     array( $this, 'add_user_note_request' ), 0 ); // Low priority to get below bbp_edit_user_handler()
+		add_action( 'bbp_post_request',                     array( $this, 'add_user_note_request' ), 0 ); // Low priority to get below bbp_edit_user_handler().
 		add_action( 'bbp_get_request',                      array( $this, 'delete_user_note_request' ) );
 
 		add_action( 'bbp_theme_after_topic_author_details', array( $this, 'display_user_notes_toggle_link' ) );
@@ -87,7 +87,7 @@ class User_Notes {
 	/**
 	 * Saves a note to a users meta data.
 	 * 
-	 * @param int    $user_id   The User ID.
+	 * @param int    $user_id   The user ID.
 	 * @param string $note_text The note text to add.
 	 * @param int    $post_id   The support thread this text is related to. Optional.
 	 * @param int    $note_id   The note ID to edit. Optional.
@@ -209,8 +209,8 @@ class User_Notes {
 	/**
 	 * Retrieves all notes for a particular user.
 	 *
-	 * @param int $user_id User ID. Defaults to the current post author.
-	 * @param bool $display_add_note_form Whether to show the Add New Note form.
+	 * @param int  $user_id               User ID. Defaults to the current post author.
+	 * @param bool $display_add_note_form Whether to show the Add New Note form. Default true.
 	 * @return array {
 	 *     Array of user notes.
 	 *
@@ -255,16 +255,16 @@ class User_Notes {
 
 			$note_meta = array(
 				'author' => sprintf(
-					/* translators: 1: user note author's display name, 2: link to post, 3: date, 4: time */
+					/* translators: 1: User note author's display name, 2: Link to post, 3: Date, 4: Time. */
 					__( 'By %1$s on <a href="%2$s">%3$s at %4$s</a>', 'wporg-forums' ),
 					sprintf( '<a href="%s">%s</a>',
 						esc_url( get_home_url( $post_site_id, "/users/{$note->moderator}/" ) ),
 						$note->moderator
 					),
 					esc_url( $post_permalink ),
-					/* translators: localized date format, see https://www.php.net/date */
+					/* translators: Localized date format, see https://www.php.net/date */
 					mysql2date( __( 'F j, Y', 'wporg-forums' ), $note->date ),
-					/* translators: localized time format, see https://www.php.net/date */
+					/* translators: Localized time format, see https://www.php.net/date */
 					mysql2date( __( 'g:i a', 'wporg-forums' ), $note->date )
 				)
 			);
@@ -340,8 +340,8 @@ class User_Notes {
 	 * Replaces '###POST_ID###' and '###POST_PERMALINK###' placeholders
 	 * in the note adding/editing form with the current post ID and permalink.
 	 *
-	 * @param int $user_id User ID. Default 0.
-	 * @param bool $display_add_note_form Whether to show the add new note form. Default true.
+	 * @param int  $user_id               User ID. Default 0.
+	 * @param bool $display_add_note_form Whether to show the Add New Note form. Default true.
 	 * @return string User notes output.
 	 */
 	public function get_user_notes_html( $user_id = 0, $display_add_note_form = true ) {
@@ -478,7 +478,7 @@ class User_Notes {
 		printf( '<div class="wporg-bbp-user-notes-toggle"><a href="#" data-post-id="%d">%s</a></div>',
 			esc_attr( $post_id ),
 			esc_html(
-				/* translators: %d: user notes count */
+				/* translators: %d: User notes count. */
 				sprintf( __( 'User Notes (%d)', 'wporg-forums' ),
 					$this->get_user_notes( $user_id )->count
 				)
