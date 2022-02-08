@@ -1595,7 +1595,7 @@ ul.projects-dropdown li > a > span {
 	font-weight: bold;
 	text-align: center;
 	vertical-align: middle;
-	padding: 10px .5em 10px 10px;
+	padding: 10px 15px 10px 10px;
 	font-size: .8em;
 	line-height: 1.2;
 	border-right: 1px solid #72777C;
@@ -3170,7 +3170,7 @@ table.translations.translation-sets-rtl .textarea-direction-ltr .foreign-text {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 9'%3E%3Cg fill='%2332373C' fill-rule='evenodd'%3E%3Cpath d='M5.5 9L9 5H2zM5.5 0L9 4H2z'/%3E%3C/g%3E%3C/svg%3E");
 	background-position: right center;
 	background-repeat: no-repeat;
-	background-size: 11px 9px;
+	background-size: 15px 9px;
 	cursor: pointer;
 	white-space: normal;
 }
@@ -3180,7 +3180,7 @@ table.translations.translation-sets-rtl .textarea-direction-ltr .foreign-text {
 .tablesorter-wporg-translate thead .tablesorter-headerAsc {
 	background-color: #f9f9f9;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 4'%3E%3Cpath fill='%2332373C' fill-rule='evenodd' d='M5.5 0L9 4H2z'/%3E%3C/svg%3E");
-	background-size: 11px 4px;
+	background-size: 15px 4px;
 }
 
 .tablesorter-wporg-translate thead .headerSortDown,
@@ -3188,5 +3188,5 @@ table.translations.translation-sets-rtl .textarea-direction-ltr .foreign-text {
 .tablesorter-wporg-translate thead .tablesorter-headerDesc {
 	background-color: #f9f9f9;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 4'%3E%3Cpath fill='%2332373C' fill-rule='evenodd' d='M5.5 4L9 0H2z'/%3E%3C/svg%3E");
-	background-size: 11px 4px;
+	background-size: 15px 4px;
 }
