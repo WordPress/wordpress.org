@@ -265,11 +265,12 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		}
 
 		if ( $this->directory && $this->directory->title() ) {
-			$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-			$topic_title = strip_tags( bbp_get_topic_title( $topic_id ) );
-
-			// [WordPress.org] [Plugin Name] This is my threads
-			$title = sprintf( '[%s] [%s] %s', $blog_name, $this->directory->title(), $topic_title );
+			// [Plugin Name] This is my thread title
+			$title = sprintf(
+				'[%s] %s',
+				$this->directory->title(),
+				strip_tags( bbp_get_topic_title( $topic_id ) )
+			);
 		}
 
 		return $title;
@@ -385,11 +386,12 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		}
 
 		if ( $this->directory && $this->directory->title() ) {
-			$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-			$topic_title = strip_tags( bbp_get_topic_title( $topic_id ) );
-
-			// [WordPress.org] [Plugin Name] This is my threads
-			$title = sprintf( '[%s] [%s] %s', $blog_name, $this->directory->title(), $topic_title );
+			// [Plugin Name] This is my thread title
+			$title = sprintf(
+				'[%s] %s',
+				$this->directory->title(),
+				strip_tags( bbp_get_topic_title( $topic_id ) )
+			);
 		}
 
 		return $title;

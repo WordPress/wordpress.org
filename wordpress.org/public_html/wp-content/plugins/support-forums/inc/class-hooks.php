@@ -131,10 +131,44 @@ class Hooks {
 		// Add a no-reply-to-email suggestion to topic subscription emails
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'bbp_subscription_mail_message'), 5, 3 );
 
+		// Strip the Blogname from emails, prefix the forum name instead.
+		add_filter( 'bbp_forum_subscription_mail_title', array( $this, 'replace_subscription_mail_title' ), 9, 2 );
+		add_filter( 'bbp_subscription_mail_title',       array( $this, 'replace_subscription_mail_title' ), 9, 3 );
+
 		if ( 'wordpress.org' === get_blog_details()->domain ) {
 			// Break users sessions / passwords when they get blocked, on the main forums only.
 			add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
 		}
+	}
+
+	/**
+	 * Set forum emails subjects to prefix the forum title.
+	 */
+	function replace_subscription_mail_title( $title, $arg_one, $arg_two = null ) {
+		/*
+		 * Attached to two filters:
+		 * - bbp_forum_subscription_mail_title: Topic ID is $arg_one. $arg_two not present.
+		 * - bbp_subscription_mail_title: Topic ID is $arg_two. Reply ID is $arg_one.
+		 */
+		$topic_id = $arg_one;
+		if ( 'bbp_subscription_mail_title' == current_filter() ) {
+			$topic_id = $arg_two;
+		}
+
+		$blog_name   = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+		$forum_title = bbp_get_topic_forum_title( $topic_id );
+		$topic_title = wp_specialchars_decode( strip_tags( bbp_get_topic_title( $topic_id ) ), ENT_QUOTES );
+
+		// If the email subject is different than we expect, leave it be.
+		if ( ! str_starts_with( $title, "[{$blog_name}] " ) ) {
+			return $title;
+		}
+
+		return sprintf(
+			'[%s] %s',
+			$forum_title,
+			$topic_title
+		);
 	}
 
 	/**
