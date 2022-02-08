@@ -94,7 +94,7 @@ class Plugin {
 
 		if ( $is_subscribed ) {
 			$message = sprintf(
-				__( 'You are subscribed to this forum, and will recieve emails for future topic activity. <a href="%1$s">Unsubscribe from %2$s</a>', 'wporg-forums' ),
+				__( 'You are subscribed to this forum, and will receive emails for future topic activity. <a href="%1$s">Unsubscribe from %2$s</a>', 'wporg-forums' ),
 				self::get_subscription_url( get_current_user_id(), $term->term_id, $this->taxonomy ),
 				esc_html( $term_name )
 			);
