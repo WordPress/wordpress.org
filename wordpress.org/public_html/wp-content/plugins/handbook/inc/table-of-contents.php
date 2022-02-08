@@ -125,6 +125,7 @@ class WPorg_Handbook_TOC {
 		}
 
 		// Replace each level of the headings.
+		$content .= $this->styles . "\n";
 		$content = $this->add_ids_and_jumpto_links( $items, $content );
 
 		if ( ! apply_filters( 'handbook_display_toc', true ) ) {
@@ -132,7 +133,6 @@ class WPorg_Handbook_TOC {
 		}
 
 		$contents_header = 'h' . reset( $items )['level']; // Duplicate the first <h#> tag in the document for the TOC header
-		$toc            .= $this->styles;
 		$toc            .= '<div class="table-of-contents">';
 		$toc            .= "<$contents_header>" . esc_html( $this->args->header_text ) . "</$contents_header><ul class=\"items\">";
 		$last_item       = false;
