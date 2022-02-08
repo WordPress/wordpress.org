@@ -20,15 +20,13 @@ function wporg_support_theme_support() {
 }
 add_action( 'after_setup_theme', 'wporg_support_theme_support' );
 
-
 /**
  * Swaps out the no-js for the js body class if the browser supports Javascript.
  */
 function nojs_body_tag() {
-	        echo "<script>document.body.className = document.body.className.replace('no-js','js');</script>\n";
+	echo "<script>document.body.className = document.body.className.replace('no-js','js');</script>\n";
 }
 add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
-
 
 /**
  * Enqueue scripts and styles.
@@ -38,7 +36,7 @@ add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
  */
 function wporg_support_scripts() {
 
-	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [], '20220110' );
+	wp_enqueue_style( 'forum-wp4-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
 	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20181209', true );

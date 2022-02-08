@@ -63,6 +63,54 @@ class Plugin {
 
 		add_action( 'bbp_template_after_user_subscriptions', array( $this, 'user_subscriptions' ) );
 
+		// Add a banner above the 'forum' about being subscribed to it.
+		add_action( 'bbp_template_before_topics_index', array( $this, 'before_view' ) );
+		add_action( 'wporg_compat_before_single_view',  array( $this, 'before_view' ) );
+	}
+
+	/**
+	 * Add a notice that you're subscribed to the tag/plugin/theme, or have just unsubscribed.
+	 */
+	public function before_view() {
+		$term = false;
+
+		if ( $this->directory && $this->directory->slug && $this->directory->term ) {
+			$term      = $this->directory->term;
+			$term_name = $this->directory->title();
+		} elseif ( bbp_is_topic_tag() ) {
+			$term = get_queried_object();
+			if ( empty( $term->taxonomy ) || $term->taxonomy !== $this->taxonomy ) {
+				return;
+			}
+
+			$term_name = $term->name;
+		}
+
+		if ( empty( $term->term_id ) ) {
+			return;
+		}
+
+		$is_subscribed = self::is_user_subscribed_to_term( get_current_user_id(), $term->term_id );
+
+		if ( $is_subscribed ) {
+			$message = sprintf(
+				__( 'You are subscribed to this forum, and will recieve emails for future topic activity. <a href="%1$s">Unsubscribe from %2$s</a>', 'wporg-forums' ),
+				self::get_subscription_url( get_current_user_id(), $term->term_id, $this->taxonomy ),
+				esc_html( $term_name )
+			);
+		} elseif ( ! empty( $_GET['success'] ) && 'subscription-removed' === $_GET['success'] ) {
+			$message = sprintf(
+				__( 'You have been unsubscribed from future emails for %1$s.', 'wporg-forums' ),
+				esc_html( $term_name )
+			);
+		} else {
+			return;
+		}
+
+		echo '<div class="notice notice-info notice-alt with-dashicon">';
+		echo '<span class="dashicons dashicons-email-alt"></span>';
+		echo "<p>{$message}</p>";
+		echo '</div>';
 	}
 
 	/**
@@ -128,7 +176,7 @@ class Plugin {
 		}
 
 		$is_subscribed = self::is_user_subscribed_to_term( $user_id, $term_id );
-		$success = false;
+		$success       = false;
 
 		if ( true === $is_subscribed && 'wporg_bbp_unsubscribe_term' === $action ) {
 			$success = self::remove_user_subscription( $user_id, $term_id );
@@ -145,6 +193,10 @@ class Plugin {
 
 		// Success!
 		if ( true === $success ) {
+			if ( 'wporg_bbp_unsubscribe_term' === $action ) {
+				$redirect = add_query_arg( 'success', 'subscription-removed', $redirect );
+			}
+
 			bbp_redirect( $redirect );
 		} elseif ( true === $is_subscribed && 'wporg_bbp_subscribe_term' === $action ) {
 			/* translators: Term: topic tag */
@@ -422,7 +474,7 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 					echo '<a href="' . esc_url( get_term_link( $term->term_id ) ) . '">' . esc_html( $term->slug ) . '</a>';
 					if ( get_current_user_id() == $user_id ) {
 						$url = self::get_subscription_url( $user_id, $term->term_id, $this->taxonomy );
-						echo ' (<a href="' . esc_url( self::get_subscription_url( $user_id, $term->term_id, $this->taxonomy ) ) . '">' . esc_html( 'Unsubscribe', 'wporg-forums' ) . '</a>)';
+						echo ' (<a href="' . esc_url( $url ) . '">' . esc_html( 'Unsubscribe', 'wporg-forums' ) . '</a>)';
 					}
 					echo "</br>\n";
 				}

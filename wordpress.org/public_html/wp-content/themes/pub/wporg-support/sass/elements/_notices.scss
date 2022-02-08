@@ -1,8 +1,11 @@
 @import "../variables-site/variables-site";
 
 .notice {
-	background: #fff;
-	border-left: 4px solid #fff;
+	--notice-background-color: #fff;
+	--notice-border-color: #fff;
+
+	background: var(--notice-background-color);
+	border-left: 4px solid var(--notice-border-color);
 	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
 	margin: 1em 0;
 	padding: 1px 12px;
@@ -22,34 +25,52 @@
 	}
 
 	&.notice-success {
-		border-left-color: #46b450;
-	}
+		--notice-border-color: #46b450;
 
-	&.notice-success.notice-alt {
-		background-color: #ecf7ed;
+		&.notice-alt {
+			--notice-background-color: #ecf7ed;
+		}
 	}
 
 	&.notice-warning {
-		border-left-color: #ffb900;
-	}
+		--notice-border-color: #ffb900;
 
-	&.notice-warning.notice-alt {
-		background-color: #fff8e5;
+		&.notice-alt {
+			--notice-background-color: #fff8e5;
+		}
 	}
 
 	&.notice-error {
-		border-left-color: #dc3232;
-	}
+		--notice-border-color: #dc3232;
 
-	&.notice-error.notice-alt {
-		background-color: #fbeaea;
+		&.notice-alt {
+			--notice-background-color: #fbeaea;
+		}
 	}
 
 	&.notice-info {
-		border-left-color: #00a0d2;
+		--notice-border-color: #00a0d2;
+
+		&.notice-alt {
+			--notice-background-color: #e5f5fa;
+		}
 	}
 
-	&.notice-info.notice-alt {
-		background-color: #e5f5fa;
+	&.with-dashicon {
+		padding-left: 80px;
+
+		.dashicons {
+			color: var(--notice-border-color);
+			float: left;
+			font-size: 70px;
+			margin-left: -77px;
+		}
+
+		> p {
+			margin: 0;
+			min-height: 5em;
+			padding-bottom: 1em;
+			padding-top: 1em;
+		}
 	}
 }
