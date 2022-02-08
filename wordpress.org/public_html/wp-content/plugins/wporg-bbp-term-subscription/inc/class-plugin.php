@@ -56,7 +56,13 @@ class Plugin {
 		add_action( 'bbp_new_topic', array( $this, 'notify_term_subscribers_of_new_topic' ), 10, 4 );
 		add_action( 'bbp_new_reply', array( $this, 'notify_term_subscribers_of_new_reply' ), 10, 5 );
 
+		// Replace the title of subscription emails with the term-specific prefix.
+		// This applies to all notification emails sent related to the topic, not just the term-specific emails.
+		add_filter( 'bbp_forum_subscription_mail_title', array( $this, 'replace_forum_subscription_mail_title' ), 10, 2 );
+		add_filter( 'bbp_subscription_mail_title',       array( $this, 'replace_topic_subscription_mail_title' ), 10, 3 );
+
 		add_action( 'bbp_template_after_user_subscriptions', array( $this, 'user_subscriptions' ) );
+
 	}
 
 	/**
@@ -187,7 +193,6 @@ class Plugin {
 
 		// Replace forum-specific messaging with term subscription messaging.
 		add_filter( 'bbp_forum_subscription_mail_message', array( $this, 'replace_forum_subscription_mail_message' ), 10, 4 );
-		add_filter( 'bbp_forum_subscription_mail_title',   array( $this, 'replace_forum_subscription_mail_title' ), 10, 2 );
 
 		// Replace forum subscriber list with term subscribers, avoiding duplicates.
 		add_filter( 'bbp_forum_subscription_user_ids', array( $this, 'add_term_subscribers_to_forum' ) );
@@ -198,7 +203,6 @@ class Plugin {
 		// Remove filters.
 		remove_filter( 'bbp_forum_subscription_user_ids',     array( $this, 'add_term_subscribers_to_forum' ) );
 		remove_filter( 'bbp_forum_subscription_mail_message', array( $this, 'replace_forum_subscription_mail_message' ), 10 );
-		remove_filter( 'bbp_forum_subscription_mail_title',   array( $this, 'replace_forum_subscription_mail_title' ) );
 
 	}
 
@@ -255,6 +259,11 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	 * @param int $topic_id The topic id
 	 */
 	public function replace_forum_subscription_mail_title( $title, $topic_id ) {
+		$terms = get_the_terms( $topic_id, $this->taxonomy );
+		if ( ! $terms ) {
+			return $title;
+		}
+
 		if ( $this->directory && $this->directory->title() ) {
 			$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 			$topic_title = strip_tags( bbp_get_topic_title( $topic_id ) );
@@ -305,7 +314,6 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 
 		// Replace topic-specific messaging with term subscription messaging.
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'replace_topic_subscription_mail_message' ), 10, 3 );
-		add_filter( 'bbp_subscription_mail_title',   array( $this, 'replace_topic_subscription_mail_title' ), 10, 3 );
 
 		// Replace forum subscriber list with term subscribers, avoiding duplicates.
 		add_filter( 'bbp_topic_subscription_user_ids', array( $this, 'add_term_subscribers_to_topic' ) );
@@ -316,7 +324,6 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		// Remove filters.
 		remove_filter( 'bbp_topic_subscription_user_ids', array( $this, 'add_term_subscribers_to_topic' ) );
 		remove_filter( 'bbp_subscription_mail_message',   array( $this, 'replace_topic_subscription_mail_message' ) );
-		remove_filter( 'bbp_subscription_mail_title',     array( $this, 'replace_topic_subscription_mail_title' ) );
 	}
 
 	/**
@@ -372,6 +379,11 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	 * @param int    $topic_id The topic id
 	 */
 	public function replace_topic_subscription_mail_title( $title, $reply_id, $topic_id ) {
+		$terms = get_the_terms( $topic_id, $this->taxonomy );
+		if ( ! $terms ) {
+			return $title;
+		}
+
 		if ( $this->directory && $this->directory->title() ) {
 			$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 			$topic_title = strip_tags( bbp_get_topic_title( $topic_id ) );
