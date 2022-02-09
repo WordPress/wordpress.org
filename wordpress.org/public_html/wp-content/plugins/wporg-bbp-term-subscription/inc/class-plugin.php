@@ -247,13 +247,13 @@ class Plugin {
 		add_filter( 'bbp_forum_subscription_mail_message', array( $this, 'replace_forum_subscription_mail_message' ), 10, 4 );
 
 		// Replace forum subscriber list with term subscribers, avoiding duplicates.
-		add_filter( 'bbp_forum_subscription_user_ids', array( $this, 'add_term_subscribers_to_forum' ) );
+		add_filter( 'bbp_forum_subscription_user_ids', array( $this, 'add_term_subscribers' ) );
 
 		// Actually notify our term subscribers.
 		bbp_notify_forum_subscribers( $topic_id, $forum_id );
 
 		// Remove filters.
-		remove_filter( 'bbp_forum_subscription_user_ids',     array( $this, 'add_term_subscribers_to_forum' ) );
+		remove_filter( 'bbp_forum_subscription_user_ids',     array( $this, 'add_term_subscribers' ) );
 		remove_filter( 'bbp_forum_subscription_mail_message', array( $this, 'replace_forum_subscription_mail_message' ), 10 );
 
 	}
@@ -261,7 +261,7 @@ class Plugin {
 	/**
 	 * Temporarily replace the forum subscriber list with any unincluded term subscribers.
 	 */
-	public function add_term_subscribers_to_forum( $users ) {
+	public function add_term_subscribers( $users ) {
 		return array_diff( $this->subscribers, $users );
 	}
 
@@ -368,21 +368,14 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'replace_topic_subscription_mail_message' ), 10, 3 );
 
 		// Replace forum subscriber list with term subscribers, avoiding duplicates.
-		add_filter( 'bbp_topic_subscription_user_ids', array( $this, 'add_term_subscribers_to_topic' ) );
+		add_filter( 'bbp_topic_subscription_user_ids', array( $this, 'add_term_subscribers' ) );
 
 		// Actually notify our term subscribers.
 		bbp_notify_topic_subscribers( $reply_id, $topic_id, $forum_id );
 
 		// Remove filters.
-		remove_filter( 'bbp_topic_subscription_user_ids', array( $this, 'add_term_subscribers_to_topic' ) );
+		remove_filter( 'bbp_topic_subscription_user_ids', array( $this, 'add_term_subscribers' ) );
 		remove_filter( 'bbp_subscription_mail_message',   array( $this, 'replace_topic_subscription_mail_message' ) );
-	}
-
-	/**
-	 * Temporarily replace the forum subscriber list with any unincluded term subscribers.
-	 */
-	public function add_term_subscribers_to_topic( $users ) {
-		return array_diff( $this->subscribers, $users );
 	}
 
 	/**
@@ -565,7 +558,7 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	 * @param $term_id int The term id
 	 * @return bool False if invalid, otherwise true
 	 */
-	public static function add_user_subscription( $user_id = 0, $term_id = 0 ) {
+	public static function add_user_subscription( $user_id, $term_id ) {
 		if ( empty( $user_id ) || empty( $term_id ) ) {
 			return false;
 		}
@@ -574,6 +567,7 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			add_term_meta( $term_id, self::META_KEY, $user_id );
 			wp_cache_delete( 'wporg_bbp_get_term_subscribers_' . $term_id, 'bbpress_users' );
 		}
+
 		do_action( 'wporg_bbp_add_user_term_subscription', $user_id, $term_id );
 
 		return true;
@@ -586,7 +580,7 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	 * @param $term_id int The term id
 	 * @return bool False if invalid, otherwise true
 	 */
-	public static function remove_user_subscription( $user_id = 0, $term_id = 0 ) {
+	public static function remove_user_subscription( $user_id, $term_id ) {
 		if ( empty( $user_id ) || empty( $term_id ) ) {
 			return false;
 		}
@@ -595,6 +589,7 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			delete_term_meta( $term_id, self::META_KEY, $user_id );
 			wp_cache_delete( 'wporg_bbp_get_term_subscribers_' . $term_id, 'bbpress_users' );
 		}
+
 		do_action( 'wporg_bbp_remove_user_term_subscription', $user_id, $term_id );
 
 		return true;
