@@ -46,7 +46,7 @@ Follow these steps to set up a local playground for the theme:
     5.  `cd` back to the Openverse theme directory at `../..`
         (i.e. `wordpress.org/wordpress.org/public_html/wp-content/themes/pub/wporg-openverse`).
 
-4.  Set up the locale database. The plugin was installed in the previous step, but it pulls from a separate database of locale data.
+3.  Set up the locale database. The plugin was installed in the previous step, but it pulls from a separate database of locale data.
 
     1.  Download the SQL file [wporg_locales.sql](https://raw.githubusercontent.com/WordPress/pattern-directory/trunk/.wp-env/data/wporg_locales.sql) to the theme directory.
     2.  Import the file.
@@ -54,7 +54,7 @@ Follow these steps to set up a local playground for the theme:
         $ wp-env run cli "wp db import wp-content/themes/wporg-openverse/wporg_locales.sql"
         ```
 
-5.  Tell WordPress to load the `mu-plugins`. Since these are in nested folders, they're not loaded automatically. You'll need to create a new file and `require` them.
+4.  Tell WordPress to load the `mu-plugins`. Since these are in nested folders, they're not loaded automatically. You'll need to create a new file and `require` them.
 
     1.  Create a new file `.mu-plugins/loader.php`
     2.  Add the following to this new file:
@@ -65,7 +65,7 @@ Follow these steps to set up a local playground for the theme:
         require_once WPMU_PLUGIN_DIR . '/wporg-mu-plugins/mu-plugins/skip-to/skip-to.php';
         ```
 
-6.  You can choose to set up a new environment automatically or work in an
+5.  You can choose to set up a new environment automatically or work in an
     existing environment with manual setup.
 
     **Automatic:**  
@@ -91,14 +91,14 @@ Follow these steps to set up a local playground for the theme:
     themes into the `wp-content/themes` directory. You must also load the MU
     plugins and activate them using the `mu-plugins.php` file.
 
-7.  Activate and customize the theme.
+6.  Activate and customize the theme.
 
     1.  Log into `/wp-admin`.
     2.  Under Appearance > Themes, activate the theme 'WordPress.org Openverse'.
     3.  To change the embed URL, open the customizer at Appearance > Customize
         and update the value in the 'Openverse embed' panel.
 
-8.  Test message passing.
+7.  Test message passing.
 
     1.  Change the Openverse embed to
         `/wp-content/themes/wporg-openverse/js/message_test.html`.
