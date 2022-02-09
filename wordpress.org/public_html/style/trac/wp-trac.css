@@ -459,6 +459,9 @@ table.progress td.closed {
 	vertical-align: top; /* align everything */
 	padding: .3em; /* breathing room */
 }
+#properties table.trac-properties label > strike {
+	text-decoration: none;
+}
 #properties .col2 #field-cc[type="checkbox"] {
 	width: 2em; /* fix the cc checkbox */
 }

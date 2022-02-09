@@ -411,14 +411,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				});
 			}
 
-			// Add After the Deadline (only add it if it loaded).
-			if ( $.isFunction( $.fn.addProofreader ) ) {
-				$('textarea').addProofreader();
-				$('.AtD_proofread_button').each(function() {
-					$(this).parent().appendTo( $(this).parents('fieldset').find('.wikitoolbar') ).attr( 'title', 'Check spelling and grammar' );
-				});
-			}
-
 			// Add custom buttons to the formatting toolbar.
 			// http://trac.edgewall.org/browser/tags/trac-1.0.9/trac/htdocs/js/wikitoolbar.js
 			(function($) {
@@ -651,7 +643,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				}
 			}
 
-			if ( $body.hasClass( 'core' ) && content.hasClass( 'search' ) ) {
+			if ( content.hasClass( 'search' ) ) {
 				// Remove 'Wiki' and 'Milestone' from search.
 				$( '#fullsearch #milestone' ).next().remove().end().remove();
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
@@ -661,27 +653,14 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		// If we're not dealing with a trusted bug gardener:
 		nonGardeners: function() {
 			var version,
-				elements = {},
-				remove = true;
+				elements = {};
 
-			// If we're on /newticket (based on the field-owner check), declutter.
-			if ( $('#field-owner').length && $body.hasClass( 'core' ) ) {
-				$('#field-priority, #field-severity, #field-milestone, #field-cc, #field-keywords').parents('td').hide().prev().hide();
-				if ( $('#field-focuses').length ) {
-					$('#field-focuses').closest('td').attr( 'colspan', 3 );
-					$('#field-component').parent().add( $('#field-component').parent().prev() ).wrapAll( '<tr />' ).insertBefore( $( '#field-focuses' ).parents( 'tr' ) );
-				}
-				$('label[for="field-focuses"]').html( 'Contributor<br/>Focuses:' );
-				$('#field-version').after( '<br/><em>If you\'re filing a bug against trunk, choose <a href="#" class="set-trunk">\'trunk\'</a>. Otherwise, choose the earliest affected version you tested.</em>' );
-				$('.set-trunk').on( 'click', function() {
-					$('#field-version').val('trunk');
-					return false;
-				});
-			}
+			// Hide disabled fields (new ticket & ticket modify)
+			$('.trac-properties select[disabled]').parents( 'td' ).hide().prev().hide();
 
 			elements.type = $('#field-type');
 			elements.version = $('#field-version');
-			version = elements.version.val();
+			version = parseFloat( elements.version.val() );
 
 			// Remove task (blessed), or make a task ticket read only.
 			if ( 'task (blessed)' === elements.type.val() ) {
@@ -695,11 +674,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			// Once a Version is set, remove newer versions.
 			if ( version ) {
 				elements.version.find('option').each( function() {
-					var value = $(this).val();
+					var value = parseFloat( $(this).val() );
 
-					if ( version === value ) {
-						remove = false;
-					} else if ( remove && value ) {
+					if ( ! value || value > version ) {
 						$(this).remove();
 					}
 				});
@@ -1341,7 +1318,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				});
 				ul.appendTo( container );
 				ul.wrap( '<fieldset id="fieldset-focuses" />' );
-				ul.before( '<legend class="core-focuses-legend">Focuses:</legend>' );
+				ul.before( '<legend class="core-focuses-legend">Contributor Focuses:</legend>' );
 
 				container.on( 'click', '.core-focuses-button', addRemove );
 				container.closest( 'form' ).on( 'submit', submit );
