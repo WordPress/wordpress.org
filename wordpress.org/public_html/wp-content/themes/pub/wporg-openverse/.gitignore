@@ -1,4 +1,5 @@
 # IDE artefacts
 .idea/
 
-wporg-mu-plugins/
+mu-plugins/
+vendor/
