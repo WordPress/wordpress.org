@@ -60,7 +60,7 @@ Follow these steps to set up a local playground for the theme:
     2.  Add the following to this new file:
         ```php
         <?php
-        require_once __DIR__ . '/pub/locales.php';
+        require_once WPMU_PLUGIN_DIR . '/pub/locales.php';
         require_once WPMU_PLUGIN_DIR . '/wporg-mu-plugins/mu-plugins/blocks/global-header-footer/blocks.php';
         require_once WPMU_PLUGIN_DIR . '/wporg-mu-plugins/mu-plugins/skip-to/skip-to.php';
         ```
