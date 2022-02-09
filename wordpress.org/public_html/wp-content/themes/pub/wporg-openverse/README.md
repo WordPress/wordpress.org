@@ -54,7 +54,18 @@ Follow these steps to set up a local playground for the theme:
         $ wp-env run cli "wp db import wp-content/themes/wporg-openverse/wporg_locales.sql"
         ```
 
-3.  You can choose to set up a new environment automatically or work in an
+5.  Tell WordPress to load the `mu-plugins`. Since these are in nested folders, they're not loaded automatically. You'll need to create a new file and `require` them.
+
+    1.  Create a new file `.mu-plugins/loader.php`
+    2.  Add the following to this new file:
+        ```php
+        <?php
+        require_once __DIR__ . '/pub/locales.php';
+        require_once WPMU_PLUGIN_DIR . '/wporg-mu-plugins/mu-plugins/blocks/global-header-footer/blocks.php';
+        require_once WPMU_PLUGIN_DIR . '/wporg-mu-plugins/mu-plugins/skip-to/skip-to.php';
+        ```
+
+6.  You can choose to set up a new environment automatically or work in an
     existing environment with manual setup.
 
     **Automatic:**  
@@ -80,14 +91,14 @@ Follow these steps to set up a local playground for the theme:
     themes into the `wp-content/themes` directory. You must also load the MU
     plugins and activate them using the `mu-plugins.php` file.
 
-4.  Activate and customize the theme.
+7.  Activate and customize the theme.
 
     1.  Log into `/wp-admin`.
     2.  Under Appearance > Themes, activate the theme 'WordPress.org Openverse'.
     3.  To change the embed URL, open the customizer at Appearance > Customize
         and update the value in the 'Openverse embed' panel.
 
-5.  Test message passing.
+8.  Test message passing.
 
     1.  Change the Openverse embed to
         `/wp-content/themes/wporg-openverse/js/message_test.html`.
