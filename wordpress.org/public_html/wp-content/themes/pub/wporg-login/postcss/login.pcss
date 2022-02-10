@@ -1,0 +1,89 @@
+#login h1 {
+	text-align: center;
+	margin-bottom: 24px;
+	position: absolute;
+	top: -50px;
+	width: 100%;
+	left: 0;
+
+	& a {
+		background-image: url(images/wordpress-org.svg);
+		background-size: 256px;
+		background-position: center top;
+		background-repeat: no-repeat;
+		display: block;
+		height: 52px;
+		width: auto;
+
+		@mixin screen-reader-text-indent
+	}
+}
+
+#loginform {
+	& .forgetmenot, & .login-remember {
+		font-weight: normal;
+		margin-bottom: 16px !important;
+
+		& label {
+			font-size: 12px;
+			line-height: 1;
+			cursor: pointer;
+			display: inline-block;
+			margin-bottom: 3px;
+		}
+	}
+
+	& .login-username, & .login-password {
+		& label {
+			@mixin screen-reader-text
+		}
+	}
+}
+
+#login form  input[type="submit"].button-primary {
+	margin: 8px auto;
+	padding: 0;
+
+	background-color: var( --wp--preset--color--blue-1 );
+	border: none;
+	color: #fff;
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+
+.intro {
+	margin-bottom: 24px;
+}
+
+#nav, #language-switcher {
+	text-align: center;
+}
+
+a {
+	text-decoration: none;
+
+	&:hover {
+		text-decoration: underline;
+	}
+
+	&:link,
+	&:visited,
+	&:active,
+	&:hover {
+		color: var( --wp--preset--color--blue-1 );
+	}
+}
+
+
+#login_error {
+	padding: 1em;
+	margin-bottom: 1em;
+	border-left: 5px solid var(--login-error-border);
+	background: var(--login-error-background);
+}
+
+p#backtoblog {
+	display: none;
+}

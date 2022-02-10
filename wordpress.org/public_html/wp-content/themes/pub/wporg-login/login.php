@@ -24,12 +24,12 @@ if ( !empty( $_REQUEST['redirect_to'] ) ) {
 	<p class="intro"><?php echo wporg_login_wporg_is_starpress(); ?></p>
 	<p class="login-username">
 		<label for="user_login"><?php _e( 'Username or Email Address', 'wporg-login' ); ?></label>
-		<input type="text" name="log" id="user_login" class="input" value="<?php echo esc_attr( $username ); ?>" size="20" />
+		<input type="text" name="log" id="user_login" class="input" value="<?php echo esc_attr( $username ); ?>" size="20" autocomplete="username" placeholder="<?php esc_attr_e( 'Username or Email Address', 'wporg-login' ); ?>" />
 	</p>
 	<p class="login-password">
 		<label for="user_pass"><?php _e( 'Password', 'wporg-login' ); ?></label>
-		<span class="wp-pwd" style="display:block;">
-			<input type="password" name="pwd" id="user_pass" class="input password-input" value="" size="20" />
+		<span class="wp-pwd">
+			<input type="password" name="pwd" id="user_pass" class="input password-input" value="" size="20" autocomplete="current-password" placeholder="<?php esc_attr_e( 'Password', 'wporg-login' ); ?>" />
 			<button type="button" id="wp-hide-pw" class="button button-secondary wp-hide-pw hide-if-no-js" aria-label="<?php esc_attr_e( 'Show password', 'wporg-login' ); ?>">
 				<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
 			</button>

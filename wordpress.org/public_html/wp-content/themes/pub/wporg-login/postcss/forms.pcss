@@ -1,0 +1,51 @@
+form {
+	& input:not([type="checkbox"]):not([type="radio"]),
+	& select {
+		display: block;
+		padding: 3px 10px;
+		margin: 2px 6px 16px 0;
+		height: 40px;
+		color: #23282d;
+		font-weight: 400;
+		width: 100%;
+
+		&:placeholder {
+			opacity: 0.5;
+		}
+	}
+
+	& .wp-pwd {
+		margin-top: inherit;
+	}
+
+	& .checkbox label {
+		display: block;
+		line-height: inherit;
+		text-indent: -1.5em;
+		padding-left: 1.5em;
+	}
+
+	& .message {
+		padding: 1em;
+		border-left: 5px solid transparent;
+
+		&.error {
+			border-left-color: var(--login-error-border);
+			background: var(--login-error-background);
+		}
+
+		&.notice {
+			border-left-color: var(--wp--preset--color--vivid-cyan-blue);
+			background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple);
+		}
+	}
+
+	& .input {
+		&.good {
+			border: 1px solid var(--wp--preset--color--vivid-green-cyan);
+		}
+		&.error {
+			border: 1px solid var(--login-error-border);
+		}
+	}
+}

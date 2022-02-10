@@ -1,0 +1,55 @@
+{
+	"name": "wporg-login",
+	"version": "0.0.1",
+	"description": "",
+	"repository": {
+		"type": "svn",
+		"url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-login"
+	},
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"bugs": {
+		"url": "https://meta.trac.wordpress.org/newticket"
+	},
+	"devDependencies": {
+		"@wordpress/browserslist-config": "^4.1.0",
+		"cssnano": "^5.0.8",
+		"postcss": "^8.3.7",
+		"postcss-cli": "^8.3.1",
+		"postcss-custom-media": "^8.0.0",
+		"postcss-import": "^14.0.2",
+		"postcss-nesting": "^8.0.1",
+		"postcss-preset-env": "^6.7.0",
+		"postcss-reporter": "^7.0.2",
+		"rtlcss": "3.5.0"
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	],
+	"scripts": {
+		"start": "npm run build:css -- --watch --poll",
+		"lint:css": "wp-scripts lint-style postcss/**/*.pcss -- TODO wp-scripts not installed",
+		"build": "npm run build:css && npm run build:rtl",
+		"build:css": "postcss postcss/style.pcss --output build.css",
+		"build:rtl": "rtlcss build.css build-rtl.css"
+	},
+	"rtlcssConfig": {},
+	"stylelint": {
+		"extends": "@wordpress/stylelint-config",
+		"rules": {
+			"max-line-length": null,
+			"no-duplicate-selectors": null,
+			"no-descending-specificity": null,
+			"rule-empty-line-before": [
+				"always-multi-line",
+				{
+					"except": [
+						"first-nested",
+						"after-single-line-comment"
+					]
+				}
+			],
+			"selector-class-pattern": null
+		}
+	}
+}

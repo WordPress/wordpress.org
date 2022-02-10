@@ -1,0 +1,82 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+}
+
+.wrapper {
+	flex: 2; /* expand to take up all of the screen */
+	width: 430px;
+	padding: 2em;
+	margin: 120px auto 120px; /* top and bottom values of h1 and #nav */
+	background: #fff;
+	position: relative;
+	border: 1px solid red;
+}
+
+form input:not([type="checkbox"]):not([type="radio"]) {
+		width: 95%;
+		padding: 3px 10px;
+		margin: 2px 6px 16px 0;
+		height: 40px;
+		color: #23282d;
+		font-weight: 400
+	}
+
+form input:not([type="checkbox"]):not([type="radio"]).input:placeholder {
+			opacity: 0.5;
+		}
+
+#login h1 {
+	text-align: center;
+	margin-bottom: 24px;
+	position: absolute;
+	top: -72px;
+	width: 100%;
+	left: 0
+}
+
+#login h1 a {
+		background-image: url(images/wordpress-org.svg);
+		background-size: 256px;
+		background-position: center top;
+		background-repeat: no-repeat;
+		height: 52px;
+		width: auto;
+		text-indent: -9999px;
+		outline: none;
+		overflow: hidden;
+		display: block;
+	}
+
+form {
+	& .forgetmenot, .login-remember {
+		font-weight: normal;
+		margin-bottom: 16px !important
+	}
+
+		& .forgetmenot label, .login-remember label {
+			font-size: 12px;
+			line-height: 1;
+			cursor: pointer;
+			display: inline-block;
+			margin-bottom: 3px;
+		}
+}
+
+form .submit {
+		margin: 8px auto;
+		padding: 0;
+	}
