@@ -150,9 +150,9 @@ class Plugins_Info_API {
 	/**
 	 * Removes any extra fields which the API client doesn't need to be sent.
 	 *
-	 * @param array  $response The plugin_information response to remove fields from
-	 * @param mixed  $request  The request object for the request.
-	 * @param string $method   The requested method, used to determine the default fields to include.
+	 * @param array  $full_response The plugin_information response to remove fields from
+	 * @param mixed  $request       The request object for the request.
+	 * @param string $method        The requested method, used to determine the default fields to include.
 	 *
 	 * @return array The $response with the extra fields removed.
 	 */
@@ -178,7 +178,7 @@ class Plugins_Info_API {
 		// Back-compatible routines.
 		// WordPress 4.9 and older need a "bare" contributor map [ user => profile ]
 		if ( ! empty( $fields['bare_contributors'] ) ) {
-			$contributors             = $response['contributors'] ?? [];
+			$contributors             = $full_response['contributors'] ?? [];
 			$response['contributors'] = array();
 			foreach ( $contributors as $user => $data ) {
 				$response['contributors'][ $user ] = $data['profile'];
