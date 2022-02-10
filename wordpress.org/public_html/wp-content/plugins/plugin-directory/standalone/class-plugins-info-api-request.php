@@ -57,6 +57,7 @@ class Plugins_Info_API_Request {
 		'sections'          => true,
 		'tags'              => true,
 		'tested'            => true,
+		'versions'          => true,
 	);
 
 	// Alterations made to default fields in the info/1.2 API.
@@ -88,6 +89,7 @@ class Plugins_Info_API_Request {
 		'short_description' => true,
 		'tags'              => true,
 		'tested'            => true,
+		'versions'          => true,
 	);
 
 	// Alterations made to the default fields in the info/1.2 API.
@@ -120,7 +122,7 @@ class Plugins_Info_API_Request {
 	// Fields that affect other fields.
 	// If the key is disabled, disable all of the values here unless client turns them on.
 	static $field_interconnected = array(
-		'sections' => [ 'reviews' ], // If sections is disabled, reviews should be disabled unless explicit.
+		'sections' => [ 'reviews' ], // If sections is disabled, reviews should be disabled unless explicitly enabled.
 	);
 
 	public function __construct( $args ) {
