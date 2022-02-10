@@ -59,7 +59,7 @@ Follow these steps to set up a local playground for the theme:
 
 4.  Tell WordPress to load the `mu-plugins`. Since these are in nested folders, they're not loaded automatically. You'll need to create a new file and `require` them.
 
-    1.  Create a new file `.mu-plugins/loader.php`
+    1.  Create a new file `./mu-plugins/loader.php`
     2.  Add the following to this new file:
         ```php
         <?php
