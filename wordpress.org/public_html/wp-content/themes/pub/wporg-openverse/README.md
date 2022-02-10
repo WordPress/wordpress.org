@@ -49,6 +49,9 @@ Follow these steps to set up a local playground for the theme:
 3.  Set up the locale database. The plugin was installed in the previous step, but it pulls from a separate database of locale data.
 
     1.  Download the SQL file [wporg_locales.sql](https://raw.githubusercontent.com/WordPress/pattern-directory/trunk/.wp-env/data/wporg_locales.sql) to the theme directory.
+    ```bash
+    curl -O https://raw.githubusercontent.com/WordPress/pattern-directory/trunk/.wp-env/data/wporg_locales.sql
+    ```
     2.  Import the file.
         ```bash
         $ wp-env run cli "wp db import wp-content/themes/wporg-openverse/wporg_locales.sql"
