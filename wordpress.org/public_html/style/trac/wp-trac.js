@@ -698,7 +698,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		},
 
 		reports: function() {
-			var popup = $( '#report-popup' ), failed = false;
+			var popup = $( '#report-popup' ),
+				$headline = $( '#headline' ),
+				failed = false;
+
 			$( '#report-popup' ).on( 'change', '.tickets-by-topic', function() {
 				var topic = $(this).val();
 				if ( ! topic ) {
@@ -707,12 +710,17 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				window.location.href = $(this).data( 'location' ) + topic;
 				return false;
 			});
+
 			popup.appendTo( '#main' );
+
 			$( '.open-ticket-report' ).click( function( event ) {
 				// Allow opening the report on make.
 				if ( event.metaKey || event.ctrlKey || event.shiftKey ) {
 					return;
 				}
+
+				// Calculate the correct position, even if the header size/etc changes.
+				popup.css( 'top', ( $headline.offset().top + $headline.outerHeight() ) + 'px' );
 
 				if ( popup.children().length === 0 ) {
 					$.ajax({
