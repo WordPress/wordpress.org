@@ -8,7 +8,7 @@ Follow these steps to set up a local playground for the theme:
 
 0.  Install all the prerequisites.
 
-    1.  **Required:** Node.js.
+    1.  **Required:** Node.js 14.
     2.  **Required:** Composer.
     3.  **Recommended:** Docker (to use the automatic setup)
 
