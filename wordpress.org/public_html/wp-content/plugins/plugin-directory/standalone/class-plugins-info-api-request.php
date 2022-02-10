@@ -117,6 +117,12 @@ class Plugins_Info_API_Request {
 		'downloadlink' => 'download_link', // Incorrectly documented in plugins_api().
 	);
 
+	// Fields that affect other fields.
+	// If the key is disabled, disable all of the values here unless client turns them on.
+	static $field_interconnected = array(
+		'sections' => [ 'reviews' ], // If sections is disabled, reviews should be disabled unless explicit.
+	);
+
 	public function __construct( $args ) {
 		$args = (object) $args;
 
@@ -201,6 +207,15 @@ class Plugins_Info_API_Request {
 
 			// If the field is an aliased field, redirect to the proper field.
 			$field = self::$field_aliases[ $field ] ?? $field;
+
+			// Disable linked fields if required.
+			if ( ! $include && isset( self::$field_interconnected[ $field ] ) ) {
+				foreach ( self::$field_interconnected[ $field ] as $linked_field ) {
+					if ( ! isset( $fields[ $linked_field ] ) ) {
+						$requested_fields[ $linked_field ] = false;
+					}
+				}
+			}
 
 			// If it's a valid field, include it.
 			if ( isset( self::$fields[ $field ] ) ) {
