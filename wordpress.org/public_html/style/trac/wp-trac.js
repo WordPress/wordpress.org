@@ -550,20 +550,23 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			$( '#propertyform' ).on( 'submit', function() {
 				var $summary     = $( '#field-summary' ),
 					$description = $( '#field-description' ),
-					$comment     = $( '#comment' );
+					$comment     = $( '#comment' ),
+					isNewTicket  = wpTrac.isNewTicket();
 
 				// Simple replacement for ticket summary.
-				$summary.val( $summary.val().replace( 'Wordpress', 'WordPress' ) );
+				if ( isNewTicket ) {
+					$summary.val( $summary.val().replaceAll( 'Wordpress', 'WordPress' ) );
+				}
 
 				// Use the more judicious replacement for ticket description and comments.
 				$.each( [ ' Wordpress', '&#8216;Wordpress', '&#8220;Wordpress', '>Wordpress', '(Wordpress' ], function( index, value ) {
-					var replacement = value.replace( 'Wordpress', 'WordPress' );
+					var replacement = value.replaceAll( 'Wordpress', 'WordPress' );
 
-					if ( $description.length ) {
-						$description.val( $description.val().replace( value, replacement ) );
+					if ( $description.length && isNewTicket ) {
+						$description.val( $description.val().replaceAll( value, replacement ) );
 					}
 					if ( $comment.length ) {
-						$comment.val( $comment.val().replace( value, replacement ) );
+						$comment.val( $comment.val().replaceAll( value, replacement ) );
 					}
 				} );
 			} );
@@ -2058,3 +2061,26 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 	wpTrac.patchTracFor122Changes();
 
 })(jQuery);
+
+/**
+ * String.prototype.replaceAll() polyfill. For Internet Explorer.
+ * 
+ * https://gomakethings.com/how-to-replace-a-section-of-a-string-with-another-one-with-vanilla-js/
+ * https://vanillajstoolkit.com/polyfills/stringreplaceall/
+ *
+ * @author Chris Ferdinandi
+ * @license MIT
+ */
+if ( ! String.prototype.replaceAll ) {
+	String.prototype.replaceAll = function(str, newStr) {
+
+		// If a regex pattern
+		if ( Object.prototype.toString.call(str).toLowerCase() === '[object regexp]' ) {
+			return this.replace(str, newStr);
+		}
+
+		// If a string
+		return this.replace(new RegExp(str, 'g'), newStr);
+
+	};
+}
