@@ -154,10 +154,11 @@ class Plugins_Info_API {
 	 * @param mixed  $request  The request object for the request.
 	 * @param string $method   The requested method, used to determine the default fields to include.
 	 *
-	 * @return array The $resonse with the extra fields removed.
+	 * @return array The $response with the extra fields removed.
 	 */
-	protected function remove_unexpected_fields( $response, $request, $method = '' ) {
-		$fields = $request->get_expected_fields( $method );
+	protected function remove_unexpected_fields( $full_response, $request, $method = '' ) {
+		$response = $full_response;
+		$fields   = $request->get_expected_fields( $method );
 		foreach ( $fields as $field => $include ) {
 			if ( ! $include ) {
 				unset( $response[ $field ] );
@@ -167,21 +168,26 @@ class Plugins_Info_API {
 			}
 		}
 
+		// Support requesting reviews without sections.
+		if ( ! empty( $fields['reviews'] ) && empty( $fields['sections'] ) ) {
+			$response['sections'] = array(
+				'reviews' => $full_response['sections']['reviews']
+			);
+		}
+
 		// Back-compatible routines.
 		// WordPress 4.9 and older need a "bare" contributor map [ user => profile ]
 		if ( ! empty( $fields['bare_contributors'] ) ) {
-			$contribs                 = $response['contributors'] ?? [];
+			$contributors             = $response['contributors'] ?? [];
 			$response['contributors'] = array();
-			if ( $contribs ) {
-				foreach ( $contribs as $user => $data ) {
-					$response['contributors'][ $user ] = $data['profile'];
-				}
+			foreach ( $contributors as $user => $data ) {
+				$response['contributors'][ $user ] = $data['profile'];
 			}
 		}
 
 		// Only include block translation data for the selected locale.
 		if ( ! empty( $response['block_translations'] ) ) {
-			$response['block_translations'] = !empty( $response['block_translations'][ $request->locale ] ) ? $response['block_translations'][ $request->locale ] : [];
+			$response['block_translations'] = $response['block_translations'][ $request->locale ] ?? [];
 		}
 
 		return $response;

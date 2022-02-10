@@ -18,13 +18,13 @@ class Plugins_Info_API_Request {
 		'description'         => false,
 		'donate_link'         => false,
 		'downloaded'          => false,
-		'downloadlink'        => false,
+		'download_link'       => false,
 		'homepage'            => false,
 		'icons'               => false,
 		'last_updated'        => false,
 		'rating'              => false,
 		'ratings'             => false,
-		'reviews'             => false,
+		'reviews'             => false, // NOTE: sub-key of 'sections'.
 		'requires'            => false,
 		'requires_php'        => false,
 		'sections'            => false,
@@ -37,6 +37,7 @@ class Plugins_Info_API_Request {
 		'author_block_count'  => false,
 		'author_block_rating' => false,
 		'language_packs'      => false,
+		'versions'            => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -45,7 +46,7 @@ class Plugins_Info_API_Request {
 		'contributors'      => false,
 		'bare_contributors' => true,
 		'downloaded'        => true,
-		'downloadlink'      => true,
+		'download_link'     => true,
 		'donate_link'       => true,
 		'homepage'          => true,
 		'last_updated'      => true,
@@ -75,7 +76,7 @@ class Plugins_Info_API_Request {
 		'compatibility'     => true,
 		'downloaded'        => true,
 		'description'       => true,
-		'downloadlink'      => true,
+		'download_link'     => true,
 		'donate_link'       => true,
 		'homepage'          => true,
 		'last_updated'      => true,
@@ -108,6 +109,12 @@ class Plugins_Info_API_Request {
 		'block_translations'   => true,
 		'author_block_count'   => true,
 		'author_block_rating'  => true,
+	);
+
+	// Typo/incorrect field name transforms.
+	static $field_aliases = array(
+		// from => to
+		'downloadlink' => 'download_link', // Incorrectly documented in plugins_api().
 	);
 
 	public function __construct( $args ) {
@@ -159,7 +166,7 @@ class Plugins_Info_API_Request {
 		}
 
 		// In WordPress 4.0+ we request the icons field however we don't use the
-		// description and compatibility fields so we exclue those by default unless requested.
+		// description and compatibility fields so we exclude those by default unless requested.
 		if ( ! empty( $this->requested_fields['icons'] ) ) {
 			$fields['compatibility'] = false;
 			$fields['description']   = false;
@@ -191,6 +198,11 @@ class Plugins_Info_API_Request {
 					$field   = substr( $field, 1 );
 				}
 			}
+
+			// If the field is an aliased field, redirect to the proper field.
+			$field = self::$field_aliases[ $field ] ?? $field;
+
+			// If it's a valid field, include it.
 			if ( isset( self::$fields[ $field ] ) ) {
 				$requested_fields[ $field ] = (bool) $include;
 			}
