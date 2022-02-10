@@ -134,6 +134,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			wpTrac.linkMentions();
 			wpTrac.linkGutenbergIssues();
 			wpTrac.githubPRs.init();
+			wpTrac.suggestNotGeneral.init();
 
 			if ( ! $body.hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
@@ -142,6 +143,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					wpTrac.focuses.init();
 				}
 			}
+		},
+
+		isNewTicket: function() {
+			return (
+				window.location.pathname === '/newticket' ||
+				$( 'form[action*="/newticket"]' ).length > 0
+			);
 		},
 
 		showContributorLabels: function( labels ) {
@@ -396,7 +404,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
 				window.onbeforeunload = function() {
-					if ( window.location.pathname === '/newticket' ) {
+					if ( wpTrac.isNewTicket() ) {
 						if ( ! $( '#field-description' ).val() && ! $( '#field-summary' ).val() ) {
 							return;
 						}
@@ -730,7 +738,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			}
 
 			// Prevent changing to the component if need be.
- 			if ( window.location.pathname !== '/newticket' ) {
+ 			if ( ! wpTrac.isNewTicket() ) {
 				for ( var c in bugTrackerLocations ) {
 					if ( ! bugTrackerLocations[c].prevent_changing_to ) {
 						continue;
@@ -1848,7 +1856,157 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			};
 		}()),
 
+		suggestNotGeneral: ( function() {
+			var enabled = true,
+				skipWords = [ 'and', 'any', 'all', 'the', 'for', 'get', 'plugins', 'general' ],
+				componentWords = {},
+				noticeDiv;
+
+			function init() {
+				// Only on new ticket creations.
+				if ( ! wpTrac.isNewTicket() ) {
+					return;
+				}
+
+				// Only if we have a 'General' option.
+				if ( ! $( '#field-component option[value="General"]' ).length ) {
+					return;
+				}
+
+				// bbPress Trac.. has a set of components that I wish everyone had.
+				if ( $( 'body.bbpress' ).length ) {
+					skipWords.push( 'api' );
+					skipWords.push( 'component' );
+					skipWords.push( 'tools' );
+					skipWords.push( 'appearance' );
+				}
+
+				generateComponentWords();
+
+				$( '#field-description,#field-summary,#field-component' ).on( 'blur', maybeSuggest );
+
+				// Disable once the user hits the component option.
+				$( '#field-component' ).on( 'change', function() {
+					// If they selected 'General', keep nagging.
+					enabled = $(this).find( 'option[value="General"]').prop('selected');
+
+					if ( ! enabled && noticeDiv ) {
+						noticeDiv.remove();
+						noticeDiv = false;
+					}
+				} );
+			}
+
+			function maybeSuggest() {
+				var matchText = $( '#field-summary' ).val().toLowerCase() + ' ' + $( '#field-description' ).val().toLowerCase(),
+					matchingWords = [],
+					matchingComponents = [];
+
+				if ( ! enabled || ! matchText.length ) {
+					return;
+				}
+
+				for ( const [word, components] of Object.entries( componentWords ) ) {
+					if ( matchText.includes( word ) ) {
+						matchingWords.push( word );
+					}
+				}
+
+				// Longest match first.
+				matchingWords.sort( (a,b) => a.length > b.length ? -1 : 1 );
+
+				matchingWords.forEach( (word) => {
+					componentWords[ word ].forEach( (component) => {
+						if ( -1 == matchingComponents.indexOf( component ) ) {
+							matchingComponents.push( component );
+						}
+					});
+				} );
+
+				if ( ! noticeDiv ) {
+					noticeDiv = $( '<div id="componentSuggest"/>' ).insertBefore( $( '.buttons').first() );
+				}
+				noticeDiv.html( getNoticeHTML( matchingComponents ) );
+			}
+
+			function getNoticeHTML( matchingComponents ) {
+				var hasMatches = matchingComponents.length > 0,
+					template = $(
+						'<div class="wp-notice"><p><strong>Have you selected the right component?</strong></p>' +
+						"<p>You've not yet selected a component. " +
+							'Please check the "Component" option above' +
+							( hasMatches ? ' or select from one of the following:' :  '.' ) +
+						'</p>' +
+						'</div>'
+					),
+					ulList;
+
+				if ( hasMatches ) {
+					template.append( $('<ul/>' ) );
+					ulList = template.find('ul');
+
+					ulList.on( 'click', 'a', function(e) {
+						e.preventDefault();
+						const component = $(this).text();
+
+						$( `#field-component option[value="${component}"]` ).prop( 'selected', 'selected' ).change();
+					} );
+
+					matchingComponents.forEach( (component) => {
+						ulList.append( $( `<li><a href="#">${component}</a></li>` ) );
+					} );
+				}
+
+				return template;
+			}
+
+			function generateComponentWords() {
+				$( '#field-component option' ).each( function() {
+					const component = $(this).val(),
+						words = component.split( /[^A-Za-z0-9\.']+/ )
+
+					// Never suggest General..
+					if ( 'General' === component ) {
+						return;
+					}
+
+					if ( words.length > 1 ) {
+						words.push( component );
+					}
+
+					// If it's a plural, add the non-plural form.
+					words.forEach( (word) => {
+						if ( 's' === word.substr( -1 ) ) {
+							words.push( word.substr( 0, word.length - 1 ) );
+						}
+					} );
+
+					words.forEach( (word) => {
+						if ( ! word ) return;
+
+						word = word.toLowerCase();
+
+						if ( component != word && -1 !== skipWords.indexOf( word ) ) return;
+
+						if ( ! ( word in componentWords ) ) {
+							componentWords[ word ] = [];
+						}
+
+						componentWords[ word ].push( component );
+					} );
+				} );
+
+				return componentWords;
+			}
+
+			return {
+				init: init
+			}
+
+		}() ),
+
 		patchTracFor122Changes: function() {
+			// TODO: This needs to be removed, the Trac assets on s.w.org are probably outdated and need updating.
 			console.log( "wp-trac: Applying compat patches for Trac 1.2.2" );
 			// From Trac 1.2.2 threaded_comments.js:
 			window.applyCommentsOrder = window.applyCommentsOrder || function() {}
