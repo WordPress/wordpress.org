@@ -46,18 +46,7 @@ Follow these steps to set up a local playground for the theme:
     5.  `cd` back to the Openverse theme directory at `../..`
         (i.e. `wordpress.org/wordpress.org/public_html/wp-content/themes/pub/wporg-openverse`).
 
-3.  Set up the locale database. The plugin was installed in the previous step, but it pulls from a separate database of locale data.
-
-    1.  Download the SQL file [wporg_locales.sql](https://raw.githubusercontent.com/WordPress/pattern-directory/trunk/.wp-env/data/wporg_locales.sql) to the theme directory.
-    ```bash
-    curl -O https://raw.githubusercontent.com/WordPress/pattern-directory/trunk/.wp-env/data/wporg_locales.sql
-    ```
-    2.  Import the file.
-        ```bash
-        $ wp-env run cli "wp db import wp-content/themes/wporg-openverse/wporg_locales.sql"
-        ```
-
-4.  Tell WordPress to load the `mu-plugins`. Since these are in nested folders, they're not loaded automatically. You'll need to create a new file and `require` them.
+3.  Tell WordPress to load the `mu-plugins`. Since these are in nested folders, they're not loaded automatically. You'll need to create a new file and `require` them.
 
     1.  Create a new file `./mu-plugins/loader.php`
     2.  Add the following to this new file:
@@ -68,7 +57,7 @@ Follow these steps to set up a local playground for the theme:
         require_once WPMU_PLUGIN_DIR . '/wporg-mu-plugins/mu-plugins/skip-to/skip-to.php';
         ```
 
-5.  You can choose to set up a new environment automatically or work in an
+4.  You can choose to set up a new environment automatically or work in an
     existing environment with manual setup.
 
     **Automatic:**  
@@ -93,6 +82,17 @@ Follow these steps to set up a local playground for the theme:
     instance and load both the `wporg` (parent) and `wporg-openverse` (child)
     themes into the `wp-content/themes` directory. You must also load the MU
     plugins and activate them using the `mu-plugins.php` file.
+
+5.  Set up the locale database. The plugin was installed in step 2, but it pulls from a separate database of locale data.
+
+    1.  Download the SQL file [wporg_locales.sql](https://raw.githubusercontent.com/WordPress/pattern-directory/trunk/.wp-env/data/wporg_locales.sql) to the theme directory.
+        ```bash
+        curl -O https://raw.githubusercontent.com/WordPress/pattern-directory/trunk/.wp-env/data/wporg_locales.sql
+        ```
+    2.  Import the file.
+        ```bash
+        $ wp-env run cli "wp db import wp-content/themes/wporg-openverse/wporg_locales.sql"
+        ```
 
 6.  Activate and customize the theme.
 
