@@ -38,6 +38,7 @@ class Plugins_Info_API_Request {
 		'author_block_rating' => false,
 		'language_packs'      => false,
 		'versions'            => false,
+		'screenshots'         => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -58,6 +59,7 @@ class Plugins_Info_API_Request {
 		'tags'              => true,
 		'tested'            => true,
 		'versions'          => true,
+		'screenshots'       => true,
 	);
 
 	// Alterations made to default fields in the info/1.2 API.
@@ -90,6 +92,7 @@ class Plugins_Info_API_Request {
 		'tags'              => true,
 		'tested'            => true,
 		'versions'          => true,
+		'screenshots'       => true,
 	);
 
 	// Alterations made to the default fields in the info/1.2 API.
