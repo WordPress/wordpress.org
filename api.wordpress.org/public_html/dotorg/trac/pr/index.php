@@ -6,17 +6,39 @@ require __DIR__ . '/functions.php';
 
 $trac          = preg_replace( '![^a-z]!', '', $_GET['trac'] ?? '' );
 $ticket        = intval( $_GET['ticket'] ?? 0 );
+$author        = wp_unslash( $_GET['author'] ?? '' );
 $authenticated = ! empty( $_GET['authenticated'] ); // Longer caches for logged out requests.
 
-if ( empty( $trac ) || empty( $ticket ) ) {
+header( 'Content-Type: application/json' );
+header( 'Access-Control-Allow-Origin: *' );
+
+if ( empty( $trac ) || ( empty( $ticket ) && empty( $author ) ) ) {
 	header( 'HTTP/1.0 400 Bad Request' );
-	header( 'Content-Type: application/json' );
-	die( '{"error":"Ticket number is invalid."}' );
+	die( '{"error":"Trac, Ticket number, or Author is invalid."}' );
+}
+
+// Type one: Return PRs by Author.
+if ( $author ) {
+	header( 'Cache-Control: max-age=' . HOUR_IN_SECONDS );
+	header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ) );
+
+	$user_id = get_user_by( 'slug', $author )->ID ?? 0;
+
+	$tickets = $wpdb->get_col( $wpdb->prepare(
+		"SELECT `ticket`
+		FROM `trac_github_prs`
+		WHERE trac = %s AND author = %d",
+		$trac,
+		$user_id
+	) );
+
+	echo wp_json_encode( $tickets );
+	die();
 }
 
 // Fetch any linked PRs
 $prs = $wpdb->get_results( $wpdb->prepare(
-	"SELECT `repo`, `pr`, `data`, `last_checked`
+	"SELECT `repo`, `pr`, `data`, `last_checked`, `author`
 	FROM `trac_github_prs`
 	WHERE trac = %s AND ticket = %s",
 	$trac,
@@ -64,11 +86,17 @@ array_walk( $prs, function( $data ) use ( $authenticated ) {
 			// TODO: catch the trac ticket changing and update the database.
 			unset( $data->data->trac_ticket );
 
+			// Check if we now have an author for this PR, the author may link their account after creating the PR.
+			if ( ! $data->author ) {
+				$data->author = (int) find_wporg_user_by_github( $pr_data->user->name, 'ID' );
+			}
+
 			$wpdb->update(
 				'trac_github_prs',
 				[
 					'data'         => json_encode( $pr_data ),
 					'last_checked' => gmdate( 'Y-m-d H:i:s' ),
+					'author'       => $data->author,
 				],
 				[
 					'repo' => $data->repo,
@@ -97,8 +125,6 @@ if ( $authenticated ) {
 
 header( 'Cache-Control: max-age=' . $expiry );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + $expiry ) );
-header( 'Content-Type: application/json' );
-header( 'Access-Control-Allow-Origin: *' );
 
 // Only return the actual PR data needed
 $prs = array_column( $prs, 'data' );

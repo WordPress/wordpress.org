@@ -1665,13 +1665,24 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					primaryGitRepoDesc = 'WordPress.org Meta GitHub mirror';
 				}
 
+				if ( ! trac ) {
+					return;
+				}
+
+				// Add ability to include GitHub tickets into a 'my-patches' report.
+				// "Just" include a variable called '$GITHUBTICKETS' in the Query.
+				var $warning = $("#warning.system-message:contains('GITHUBTICKETS')");
+				if ( $warning.length ) {
+					renderReportLoadGitHubTickets( $warning );
+				}
+
 				// This seems to be the easiest place to find the current Ticket ID..
 				var canonical = $( 'link[rel="canonical"]' ).prop( 'href' );
 				if ( canonical ) {
 					ticket = canonical.match( /\/ticket\/(\d+)$/ )[1];
 				}
 
-				if ( ! trac || ! ticket ) {
+				if ( ! ticket ) {
 					return;
 				}
 
@@ -1732,6 +1743,40 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					var $div = $( this.parentNode.parentNode ).toggleClass( 'collapsed' );
 					return ! $div.hasClass( 'collapsed' );
 				} );
+			}
+
+			function renderReportLoadGitHubTickets( $warning ) {
+				var user = wpTracCurrentUser,
+					match = document.location.search.match( /USER=([^&]+)/ );
+				if ( match ) {
+					user = match[1];
+				}
+
+				// Logged out requests without a user context.
+				if ( 'anonymous' === user ) {
+					$warning.remove();
+					return;
+				}
+
+				$warning.html(
+					'<strong>Warning:</strong> Tickets with an attached GitHub PRs not included <button>Load PRs</button>'	
+				);
+
+				$warning.on( 'click', function() {
+					$(this).find('button').prop( 'disabled', 'disabled' ).text( 'Please wait..' );
+
+					$.ajax(
+						apiEndpoint
+							+ '?trac=' + trac
+							+ '&author=' + user
+							+ ( authenticated ? '&authenticated=1' : '' )
+					).success( function( ticketList ) {
+						document.location = document.location.toString() +
+							( document.location.search ? '&' : '?' ) +
+							'GITHUBTICKETS=' + ticketList.join(',');
+					} );
+				} )
+
 			}
 
 			// Logic to determine what the PRs status is
