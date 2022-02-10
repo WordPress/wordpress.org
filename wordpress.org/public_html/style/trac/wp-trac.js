@@ -706,6 +706,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			});
 			popup.appendTo( '#main' );
 			$( '.open-ticket-report' ).click( function( event ) {
+				// Allow opening the report on make.
+				if ( event.metaKey || event.ctrlKey || event.shiftKey ) {
+					return;
+				}
+
 				if ( popup.children().length === 0 ) {
 					$.ajax({
 						url: 'https://make.wordpress.org/core/reports/?from-trac',
