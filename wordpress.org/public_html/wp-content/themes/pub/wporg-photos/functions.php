@@ -86,7 +86,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() .  '/css/style.css', [ 'dashicons', 'open-sans' ], '20211214' );
+	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() .  '/css/style.css', [ 'dashicons', 'open-sans' ], '20220214' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Make jQuery a footer script.
