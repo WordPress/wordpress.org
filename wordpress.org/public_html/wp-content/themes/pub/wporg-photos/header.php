@@ -26,12 +26,14 @@ if ( FEATURE_2021_GLOBAL_HEADER_FOOTER ) {
 	require WPORGPATH . 'header.php';
 }
 
+$show_full_header = is_home() && ! is_paged();
 ?>
+
 <div id="page" class="site">
 	<div id="content" class="site-content">
-		<header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
+		<header id="masthead" class="site-header <?php echo $show_full_header ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
-				<?php if ( is_home() ) : ?>
+				<?php if ( $show_full_header ) : ?>
 					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Photos', 'Site title', 'wporg-photos' ); ?></a></h1>
 
 					<p class="site-description">
