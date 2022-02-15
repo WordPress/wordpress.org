@@ -314,6 +314,13 @@ body,
 	color: inherit;
 }
 
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+	text-shadow: inherit;
+}
+
 button:hover,
 html input[type="button"]:hover,
 input[type="reset"]:hover,
