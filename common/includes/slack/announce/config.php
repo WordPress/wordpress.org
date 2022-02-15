@@ -373,6 +373,7 @@ function get_whitelist() {
 			'olgabulat', // @Olga Bulat on Slack
 			'ronnybadilla', // @ronny on Slack
 			'sarayourfriend',
+			'stacimc',
 			'zackkrida',
 		),
 		'performance' => array(
