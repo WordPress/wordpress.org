@@ -320,7 +320,7 @@ function pre_get_posts( $query ) {
 	}
 
 	// Set the number of photos to appear per page in the photos archive.
-	if ( is_post_type_archive( $post_type ) ) {
+	if ( is_post_type_archive( $post_type ) || ( is_home() && is_paged() ) ) {
 		$query->set( 'posts_per_page', 30 );
 	}
 }

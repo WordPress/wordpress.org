@@ -46,10 +46,14 @@ get_header();
 	endif;
 	?>
 
-	<?php if ( $query_total === $GLOBALS['wp_query']->query_vars['posts_per_page'] ) : ?>
-	<div class="photos-all-links navigation"><a href="<?php echo esc_url( get_post_type_archive_link( get_photo_post_type() ) ); ?>"><?php _e( 'See more photos&rarr;', 'wporg-photos' ); ?></a></div>
-	<?php endif; ?>
-
+	<?php if ( ! is_paged() && $GLOBALS['wp_query']->max_num_pages > 1 ) : ?>
+		<?php
+		$link = '<div class="nav-next">' . get_next_posts_link( __( 'See more photos&rarr;', 'wporg-photos' ) ) . '</div>';
+		echo _navigation_markup( $link, 'posts-navigation', __( 'Photos navigation', 'wporg-photos' ) ); ?>
+	<?php else :
+		the_posts_pagination();
+	endif;
+	?>
 	</main><!-- #main -->
 
 	<aside id="secondary" class="widget-area wrap" role="complementary">
