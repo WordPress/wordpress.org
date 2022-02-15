@@ -5,8 +5,7 @@
     "../wporg"
   ],
   "mappings": {
-    "wp-content/mu-plugins": "./wporg-mu-plugins/mu-plugins",
-    "wp-content/mu-plugins/mu-plugins.php": "./mu-plugins.php"
+    "wp-content/mu-plugins": "./mu-plugins"
   },
   "config": {
     "FEATURE_2021_GLOBAL_HEADER_FOOTER": true
