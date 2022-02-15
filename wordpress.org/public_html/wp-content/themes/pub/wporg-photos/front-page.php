@@ -22,11 +22,13 @@ get_header();
 
 	<?php
 	$placeholder_count = 0;
-	$query_total = $GLOBALS['wp_query']->post_count;
-	$min_grid_items = 12;
-	// Show placeholders to ensure front page has a minimum number of grid items.
-	if ( $query_total < $min_grid_items ) {
-		$placeholder_count = $min_grid_items - $query_total;
+	if ( ! is_paged() ) {
+		$query_total = $GLOBALS['wp_query']->post_count;
+		$min_grid_items = 12;
+		// Show placeholders to ensure front page has a minimum number of grid items.
+		if ( $query_total < $min_grid_items ) {
+			$placeholder_count = $min_grid_items - $query_total;
+		}
 	}
 
 	while ( have_posts() ) :
