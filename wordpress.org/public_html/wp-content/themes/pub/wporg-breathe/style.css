@@ -84,58 +84,6 @@ input[type="submit"] {
 	height: auto;
 }
 
-/* wporg-header overrides */
-#wporg-header input.text {
-	font-size: 12px !important;
-	padding: 3px;
-	box-sizing: content-box;
-}
-
-#wporg-header input[type="submit"] {
-	box-shadow: none;
-}
-
-#wporg-header ul li.download {
-	float: right;
-	height: 34px;
-	margin-right: 14px;
-	overflow: hidden;
-	padding: 0 0 34px;
-}
-
-@media screen and (max-width: 820px) {
-	#wporg-header ul li.download {
-		display: none;
-	}
-}
-
-@media screen and (max-width: 768px) {
-	#wporg-header ul li.download {
-		display: block;
-		float: none;
-		margin: 10px 20px 20px;
-		padding-bottom: 0;
-		height: auto;
-	}
-	#wporg-header ul li.download a {
-		padding: 4px 10px;
-	}
-}
-
-#wporg-header ul li.download a {
-	margin: 0;
-	padding: 0 16px;
-}
-
-#wporg-header ul li.download a:hover {
-	color: #eee;
-}
-
-#wporg-header ul li.download.current a,
-#wporg-header ul li.download.current-menu-item a {
-	color: #eee;
-}
-
 /*
  * 2021 global header/footer
  */
@@ -151,6 +99,13 @@ input[type="submit"] {
 	text-shadow: initial;
 }
 
+.wp-block-group.global-header p,
+.wp-block-group.global-header ul,
+.wp-block-group.global-header ol {
+	/* Revert styles that should only apply to the content area. */
+	font-size: inherit;
+	line-height: inherit;
+}
 
 /* site */
 
@@ -808,14 +763,6 @@ nav.o2-post-footer-actions ul li > span > a {
 	}
 	.o2-editor-content-wrapper {
 		margin-top: auto;
-	}
-}
-
-@media screen and (min-width: 769px) {
-	#wporg-header ul li.current-menu-item:after,
-	#wporg-header ul li.current_page_parent:after,
-	#wporg-header ul li a.current ~ .uparrow {
-		border-bottom-color: #0073aa;
 	}
 }
 
