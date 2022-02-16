@@ -25,6 +25,33 @@ a[href*=".slack.com"]::before {
 body, button, input, select, textarea,
 .site-header .site-title {
 	font-family: 'Open Sans', sans-serif;
+	font-size: var(--wp--preset--font-size--normal);
+}
+
+p, ul, ol,
+#primary,
+#secondary aside {
+	font-size: inherit;
+}
+
+h1 {
+	font-size: 1.8em;
+}
+
+h2 {
+	font-size: 1.6em;
+}
+
+h3 {
+	font-size: 1.4em;
+}
+
+h4 {
+	font-size: 1.2em;
+}
+
+.entry-content .reports.ticket-reports {
+	font-size: var(--wp--preset--font-size--small);
 }
 
 table {
@@ -114,7 +141,7 @@ input[type="submit"] {
 .site-branding {
 	box-sizing: border-box;
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: 1024px;
 	padding: 0 10px;
 }
 
@@ -138,7 +165,7 @@ input[type="submit"] {
 
 .site-header .site-title a {
 	color: #fff;
-	font-size: 28px;
+	font-size: 26px;
 	font-weight: 300;
 	line-height: 1;
 }
@@ -233,7 +260,7 @@ input[type="submit"] {
 .navigation-main a,
 .navigation-main a:visited {
 	color: rgba(255, 255, 255, 0.8);
-	font-size: 14px;
+	font-size: var(--wp--preset--font-size--small);
 }
 
 .wporg-make .site-title a:before,
@@ -419,7 +446,7 @@ input[type="submit"]:hover {
   margin: 0 0 1.5em 0 !important;
   padding: 0;
   font-weight: 400;
-  font-size: 2.2em;
+  font-size: 1.5em;
   line-height: 1.1;
   text-transform: none;
 }
@@ -791,7 +818,6 @@ nav.o2-post-footer-actions ul li > span > a {
 }
 
 .make-welcome .entry-content {
-	font-size: 14px;
 	color: #333;
 	line-height: 1.45;
 	width: 100%;
@@ -815,7 +841,7 @@ nav.o2-post-footer-actions ul li > span > a {
 .make-welcome .entry-content h2,
 .make-welcome .entry-content .welcome p:first-child {
 	font-weight: normal;
-	font-size: 18px;
+	font-size: 1.125em;
 	font-family: "Open Sans", serif;
 }
 
@@ -843,7 +869,6 @@ nav.o2-post-footer-actions ul li > span > a {
 
 .make-welcome .entry-meta .post-edit-link {
 	margin-right: 10px;
-	font-size: 1.2em;
 	font-weight: normal;
 	padding-right: 15px;
 	border-right: 1px solid #ccc;
@@ -866,7 +891,7 @@ nav.o2-post-footer-actions ul li > span > a {
 	display: none;
 }
 
-@media screen and (min-width: 960px) {
+@media screen and (min-width: 1024px) {
 	.make-welcome .entry-content p {
 		display: block;
 	}
@@ -990,7 +1015,7 @@ nav.o2-post-footer-actions ul li > span > a {
 
 .contributor-name {
 	padding-top: 14px;
-	font-size: 1.8rem;
+	font-size: 1.2rem;
 }
 
 article.page p.contributor-name {
@@ -1422,7 +1447,7 @@ h2.toc-heading + h3.toc-heading:target {
 
 .post-type-archive-handbook #main,
 .single-handbook #main {
-	max-width: 960px;
+	max-width: 1024px;
 	margin: 0 auto;
 	display: flex;
 }
