@@ -27,6 +27,7 @@ include( dirname( __FILE__ ) . '/inc/class-hooks.php' );
 include( dirname( __FILE__ ) . '/inc/class-report-topic.php' );
 include( dirname( __FILE__ ) . '/inc/class-nsfw-handler.php' );
 include( dirname( __FILE__ ) . '/inc/class-stats.php' );
+include( dirname( __FILE__ ) . '/inc/class-emails.php' );
 
 // Compat-only includes.
 include( dirname( __FILE__ ) . '/inc/class-dropin.php' );

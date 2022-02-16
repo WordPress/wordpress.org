@@ -4,6 +4,8 @@ namespace WordPressdotorg\Forums;
  * Some basic Statistics for forum actions.
  * 
  * These are very ad-hoc and added on an as-needed basis.
+ * 
+ * No user-specific detail is stored, only that a `key: value` action occurred `x` times.
  */
 class Stats {
 
