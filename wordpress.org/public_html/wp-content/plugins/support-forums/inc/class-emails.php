@@ -57,6 +57,9 @@ class Emails {
 			$attrs['headers'] = explode( "\n", str_replace( "\r\n", "\n", $attrs['headers'] ) );
 		}
 
+		$no_reply    = apply_filters( 'bbp_subscription_to_email', bbp_get_do_not_reply_address() );
+		$dest_emails = is_array( $attrs['to'] ) ? $attrs['to'] : explode( ',', $attrs['to'] );
+
 		// Pull out CC's and BCC's to a separate array.
 		foreach ( $attrs['headers'] as $i => $header ) {
 			if ( ! str_contains( $header, ':' ) ) {
@@ -72,11 +75,9 @@ class Emails {
 			}
 		}
 
-		$no_reply    = apply_filters( 'bbp_subscription_to_email', bbp_get_do_not_reply_address() );
-		$dest_emails = is_array( $attrs['to'] ) ? $attrs['to'] : explode( ',', $attrs['to'] );
 		// Remove the noreply email, it was probably set as the $to address.
 		$dest_emails = array_diff( $dest_emails, [ $no_reply ] );
-	
+
 		// This shouldn't happen, but if it does, let wp_mail() do it's thing instead.
 		// NOTE: We still process if there was only one to/cc/bcc address, to ensure the below custom filter gets run.
 		if ( empty( $dest_emails ) ) {
