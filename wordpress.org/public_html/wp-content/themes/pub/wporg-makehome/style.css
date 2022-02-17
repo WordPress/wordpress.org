@@ -233,6 +233,7 @@ section.get-involved article.make-cli           h2 a:before { content: '\f345'; 
 section.get-involved article.make-hosting       h2 a:before { content: '\f176'; }
 section.get-involved article.make-tide          h2 a:before { content: '\f10d'; }
 section.get-involved article.make-openverse     h2 a:before { content: '\f179'; }
+section.get-involved article.make-photos        h2 a:before { content: '\f306'; }
 
 section.get-involved article.featured-group h2:after {
 	display: block;
