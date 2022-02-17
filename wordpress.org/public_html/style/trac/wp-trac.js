@@ -1986,6 +1986,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 				if ( ! noticeDiv ) {
 					noticeDiv = $( '<div id="componentSuggest"/>' ).insertBefore( $( '.buttons').first() );
+
+					noticeDiv.on( 'click', 'a.component', function(e) {
+						e.preventDefault();
+						const component = $(this).text();
+
+						$( `#field-component option[value="${component}"]` ).prop( 'selected', 'selected' ).change();
+					} );
 				}
 				noticeDiv.html( getNoticeHTML( matchingComponents ) );
 			}
@@ -2003,19 +2010,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					ulList;
 
 				if ( hasMatches ) {
-					template.append( $('<ul/>' ) );
-					ulList = template.find('ul');
-
-					ulList.on( 'click', 'a', function(e) {
-						e.preventDefault();
-						const component = $(this).text();
-
-						$( `#field-component option[value="${component}"]` ).prop( 'selected', 'selected' ).change();
-					} );
+					ulList = $('<ul/>' );
 
 					matchingComponents.forEach( (component) => {
-						ulList.append( $( `<li><a href="#">${component}</a></li>` ) );
+						ulList.append( $( `<li><a href="#" class="component">${component}</a></li>` ) );
 					} );
+					template.append( ulList );
 				}
 
 				return template;
