@@ -9,6 +9,8 @@
 		currentlyViewing = options.currentlyViewing || [],
 		page = options.currentPage || '',
 		banner = false,
+		$adminbar = false,
+		$header = false,
 		bannerOffset = 200,
 		isTyping = false,
 		_n = wp.i18n._n,
@@ -20,6 +22,9 @@
 	}
 
 	jQuery( document ).ready( function() {
+		$adminbar = jQuery('#wpadminbar');
+		$header = jQuery('header.global-header');
+
 		maybeDisplay();
 
 		if ( options.heartbeatTime ) {
@@ -68,7 +73,10 @@
 				.replace( '%s', userlistPretty )
 			);
 			banner.show();
-			bannerOffset = banner.offset().top - jQuery('#wpadminbar').height();
+
+			// If we scroll past this number, we need to stick it to the viewport.
+			// NOTE: There's a bug here - in short screen & mobile viewports it'll switch to fixed too early. meh.
+			bannerOffset = $header.height() - $adminbar.height();
 		}
 	}
 
@@ -78,13 +86,17 @@
 			return;
 		}
 
-		var $main = jQuery('#main');
+		var offset = 'var(--wp-admin--admin-bar--height, 0px)';
+		if ( 'fixed' === $header.css('position') ) {
+			offset = 'var(--wp-global-header-offset, 0px)';
+		}
+
 		if ( jQuery(window).scrollTop() > bannerOffset ) {
 			banner.css( 'position', 'fixed' );
-			$main.css( 'padding-top', banner.height() );
+			banner.css( 'top', offset );
 		} else {
 			banner.css( 'position', 'initial' );
-			$main.css( 'padding-top', 0 );
+			banner.css( 'top', '' );
 		}
 	} );
 
