@@ -314,20 +314,6 @@
 	<textarea class="${select('@class')} wp-exclude-emoji" id="${select('@id')}" name="${select('@name')}" rows="${select('@rows')}" cols="${select('@cols')}">${select('*|comment()|text()')}</textarea>
 </py:match>
 
-<!--! Mark description/comment links as nofollow user-generated-content. -->
-<div py:match="div[contains(@class,'searchable')]" py:attrs="select('@*')">
-	<?python
-	from genshi.core import TEXT, Markup
-	def nofollow_ugc(stream):
-		for kind, data, pos in stream:
-			if kind is TEXT:
-				data = data.replace( 'class="ext-link"', 'class="ext-link" rel="ugc nofollow"' )
-				data = Markup( data )
-			yield kind, data, pos
-	?>
-	${nofollow_ugc(select('*|comment()|text()'))}
-</div>
-
 <body py:match="body" id="wordpress-org" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
 	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5Z8B3BX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<!--! WP.org Global Header -->
