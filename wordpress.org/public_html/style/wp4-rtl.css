@@ -47,8 +47,7 @@ pre {
 
 pre a { font-weight: normal; }
 
-a,
-#wporg-footer ul li a {
+a {
 	color: #21759b;
 	text-decoration: none;
 	font-weight: normal;
@@ -58,8 +57,7 @@ strong a {
 	font-weight: bold;
 }
 
-a:visited,
-#wporg-footer ul li a:visited {
+a:visited {
 	color: #4ca6cf;
 }
 
@@ -1591,116 +1589,6 @@ a.rsslink {
 	padding-right: 19px;
 }
 
-#wporg-footer {
-	clear: both;
-	overflow: auto;
-	margin: 0 auto;
-	padding: 22px 14px 65px 14px;
-	border-top: 1px solid #dfdfdf;
-	background-color: #f7f7f7;
-}
-
-#wporg-footer .wrapper {
-	overflow: auto;
-	max-width: 932px;
-}
-
-#wporg-footer ul {
-	float: right;
-	overflow: auto;
-	width: 135px;
-	margin-right: 24px;
-	margin-bottom: 20px; /* for narrow screens */
-	padding-right: 0; /* override other generic styles */
-}
-
-@media screen and (min-width:960px) {
-	#wporg-footer ul:first-child {
-		margin-right: 0;
-	}
-}
-
-@media screen and (min-width:561px) and (max-width:974px) {
-	#wporg-footer .wrapper {
-		max-width: 600px;
-	}
-
-	#wporg-footer ul:nth-child(3n+1) {
-		margin-right: 0;
-	}
-
-	#wporg-footer ul:nth-child(4n) {
-		clear: both;
-	}
-
-	#wporg-footer ul {
-		margin-right: 2%;
-		width: 32%;
-	}
-}
-
-@media screen and (max-width:560px) {
-	#wporg-footer .wrapper {
-		max-width: 360px;
-	}
-
-	#wporg-footer ul:nth-child(2n+1) {
-		margin-right: 0;
-	}
-
-	#wporg-footer ul:nth-child(odd) {
-		clear: both;
-	}
-
-	#wporg-footer ul {
-		margin-right: 4%;
-		width: 48%;
-	}
-}
-
-#wporg-footer ul li {
-	font-size: 14px;
-	margin-bottom: 1px;
-	color: #bbb;
-	list-style-type: none;
-}
-
-#wporg-footer ul li a {
-	border: none;
-}
-
-#wporg-footer .social-media-links .dashicons {
-	margin-left: 4px;
-}
-
-#wporg-footer .cip {
-	clear: both;
-	float: none;
-	text-align: center;
-	margin: 35px auto 0 auto;
-	font-size: 16px;
-	letter-spacing: 0.3em;
-	text-transform: uppercase;
-	color: #cccccc;
-}
-
-#wporg-footer .cip-image {
-	background: url(//s.w.org/style/images/codeispoetry.png?1) center center no-repeat;
-	-webkit-background-size: 190px 15px;
-	background-size: 190px 15px;
-	width: 190px;
-	height: 15px;
-	text-indent: -9999px;
-}
-
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
-       only screen and (min-resolution: 1.5dppx),
-       only screen and (min-resolution: 144dpi) {
-	#wporg-footer .cip-image {
-		background-image: url(//s.w.org/style/images/codeispoetry-2x.png?1);
-	}
-}
-
 blockquote {
 	background: #f5f5f5;
 	border: 1px solid #dadada;
@@ -1918,7 +1806,8 @@ form#profile-form table input[type='text'], form#profile-form textarea {
 	color: #c00;
 }
 
-#wordpress-org .widget p.error {
+.widget_blog_subscription p.error,
+.jetpack_subscription_widget p.error {
 	border-right: 4px solid #dc3232;
 	margin-right: 0;
 	margin-left: 0;
@@ -2424,9 +2313,9 @@ body.wporg-responsive .col-2 {
 }
 
 /*
- * New global header/footer needs a clear for .wporg-responsive
+ * New global header/footer needs a clear for older wp4 themes.
  */
-body.wporg-responsive .wp-block-group.global-footer {
+.wp-block-group.global-footer {
 	clear: both;
 }
 
