@@ -1443,6 +1443,7 @@ body.make-security #headline h2 a:before { content: '\f160'; }
 body.make-tide #headline h2 a:before { content: '\f10d'; }
 body.make-openverse #headline h2 a:before { content: '\f179'; }
 body.make-test #headline h2 a:before { content: '\f115'; }
+body.make-photos #headline h2 a:before { content: '\f306'; }
 
 .make-core .site-title a:before { content: '\f475'; }
 .make-design .site-title a:before { content: '\f309'; }
@@ -1466,6 +1467,7 @@ body.make-test #headline h2 a:before { content: '\f115'; }
 .make-tide .site-title a:before { content: '\f10d'; }
 .make-openverse .site-title a:before { content: '\f179'; }
 .make-test .site-title a:before { content: '\f115'; }
+.make-photos .site-title a:before { content: '\f306'; }
 
 #headline .login {
 	font-size: 12px;
