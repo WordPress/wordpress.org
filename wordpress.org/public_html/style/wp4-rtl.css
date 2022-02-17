@@ -1439,7 +1439,10 @@ body.make-tv #headline h2 a:before { content: '\f235'; }
 body.make-marketing #headline h2 a:before { content: '\f130'; }
 body.make-cli #headline h2 a:before { content: '\f345'; }
 body.make-hosting #headline h2 a:before { content: '\f176'; }
+body.make-security #headline h2 a:before { content: '\f160'; }
 body.make-tide #headline h2 a:before { content: '\f10d'; }
+body.make-openverse #headline h2 a:before { content: '\f179'; }
+body.make-test #headline h2 a:before { content: '\f115'; }
 
 .make-core .site-title a:before { content: '\f475'; }
 .make-design .site-title a:before { content: '\f309'; }
@@ -1459,7 +1462,10 @@ body.make-tide #headline h2 a:before { content: '\f10d'; }
 .make-marketing .site-title a:before { content: '\f130'; }
 .make-cli .site-title a:before { content: '\f345'; }
 .make-hosting .site-title a:before { content: '\f176'; }
+.make-security .site-title a:before { content: '\f160'; }
 .make-tide .site-title a:before { content: '\f10d'; }
+.make-openverse .site-title a:before { content: '\f179'; }
+.make-test .site-title a:before { content: '\f115'; }
 
 #headline .login {
 	font-size: 12px;
