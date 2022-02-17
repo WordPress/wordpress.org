@@ -165,7 +165,7 @@ input[type="submit"] {
 
 .site-header .site-title a {
 	color: #fff;
-	font-size: 26px;
+	font-size: 28px;
 	font-weight: 300;
 	line-height: 1;
 }
@@ -260,7 +260,7 @@ input[type="submit"] {
 .navigation-main a,
 .navigation-main a:visited {
 	color: rgba(255, 255, 255, 0.8);
-	font-size: var(--wp--preset--font-size--small);
+	font-size: 0.75em;
 }
 
 .wporg-make .site-title a:before,
