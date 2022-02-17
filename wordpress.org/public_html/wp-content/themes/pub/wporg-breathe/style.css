@@ -412,6 +412,7 @@ input[type="submit"]:hover {
 
 .widget-title {
 	line-height: 1.2;
+	font-size: 1.4em;
 }
 
 .post-type-archive-handbook aside[id^="handbook"] .widget-title,
