@@ -381,6 +381,11 @@ input[type="submit"]:hover {
 		overflow-x: visible;
 	}
 
+	#secondary {
+		top: var(--wp-admin--admin-bar--height, 0px);
+		z-index: 500;
+	}
+
 	#secondary-toggle {
 		margin-left: 22px;
 		margin-right: 0px;
