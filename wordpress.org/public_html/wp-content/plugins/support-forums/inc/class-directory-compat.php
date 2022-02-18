@@ -248,10 +248,11 @@ abstract class Directory_Compat {
 
 	public function always_load() {
 		// Add filters necessary for determining which compat file to use.
-		add_action( 'bbp_init',              array( $this, 'register_taxonomy' ) );
-		add_filter( 'query_vars',            array( $this, 'add_query_var' ) );
-		add_action( 'bbp_add_rewrite_rules', array( $this, 'add_rewrite_rules' ) );
-		add_filter( 'term_link',             array( $this, 'get_term_link' ), 10, 3 );
+		add_action( 'bbp_init',                 array( $this, 'register_taxonomy' ) );
+		add_filter( 'query_vars',               array( $this, 'add_query_var' ) );
+		add_action( 'bbp_add_rewrite_rules',    array( $this, 'add_rewrite_rules' ) );
+		add_filter( 'term_link',                array( $this, 'get_term_link' ), 10, 3 );
+		add_filter( 'get_' . $this->taxonomy(), array( $this, 'get_term' ) );
 	}
 
 	/**
@@ -742,8 +743,6 @@ abstract class Directory_Compat {
 			return;
 		}
 
-		do_action( 'bbp_template_notices' );
-
 		$term_subscription = '';
 		if ( $this->term ) {
 			$subscribe = $unsubscribe = '';
@@ -771,40 +770,44 @@ abstract class Directory_Compat {
 	}
 
 	/**
-	 * Term subscriptions use `get_term_link` for the redirect. This needs to be
-	 * filtered to redirect to the appropriate theme/plugin support view.
+	 * Correct the link to the compat terms.
 	 *
-	 * @param string $termlink The term link
-	 * @param object $term The term object
-	 * @param string $taxonomy The taxonomy object
+	 * @param string $term_link The term link
+	 * @param object $term      The term object
+	 * @param string $taxonomy  The taxonomy object
 	 * @return string The term link, or the support view link
 	 */
-	public function get_term_link( $termlink, $term, $taxonomy ) {
-		if ( ! class_exists( 'WordPressdotorg\Forums\Term_Subscription\Plugin' ) ) {
-			return $termlink;
-		}
-
+	public function get_term_link( $term_link, $term, $taxonomy ) {
 		// Only do this for the non-public compat taxonomies.
 		if ( $this->taxonomy() != $taxonomy ) {
-			return $termlink;
+			return $term_link;
 		}
 
-		// Are we on a view where this needs filtering?
-		if (
-			( bbp_is_single_view() && $this->compat() == bbp_get_view_id() )
-		||
-			bbp_is_subscriptions()
-		||
-			( isset( $_GET['term_id'] ) && isset( $_GET['taxonomy'] ) )
-		) {
-			// Check that the subscription is to this compat.
-			if ( $this->taxonomy() == $taxonomy ) {
-				$paged = get_query_var( 'paged' ) > 1 ? 'page/' . absint( get_query_var( 'paged' ) ) . '/' : '';
-				$termlink = sprintf( home_url( '/%s/%s/%s' ), $this->compat(), $term->slug, $paged );
-			}
+		$paged = '';
+		if ( get_query_var( 'paged' ) > 1 ) {
+			$paged = 'page/' . absint( get_query_var( 'paged' ) ) . '/';
 		}
 
-		return $termlink;
+		return sprintf(
+			home_url( '/%s/%s/%s' ),
+			$this->compat(),
+			$term->slug,
+			$paged
+		);
+	}
+
+	/**
+	 * Set the term name for the compat terms to that of the directory.
+	 * 
+	 * @param \WP_Term $term 
+	 * @return \WP_Term
+	 */
+	public function get_term( $term ) {
+		// Note: Not using $this->title() here so as to filter other terms of this taxonomy correctly.
+
+		$term->name = $this->get_object( $term->slug )->post_title ?? $term->name;
+
+		return $term;
 	}
 
 	/**
@@ -838,14 +841,19 @@ abstract class Directory_Compat {
 	public function get_object( $slug ) {
 		global $wpdb;
 
-		if ( 'theme' == $this->compat() ) {
-			if ( ! is_null( $this->theme ) ) {
-				return $this->theme;
-			}
-		} else {
-			if ( ! is_null( $this->plugin ) ) {
-				return $this->plugin;
-			}
+		if (
+			'theme' == $this->compat() &&
+			! is_null( $this->theme ) &&
+			( ! $slug || $slug === $this->theme->post_name )
+		) {
+			return $this->theme;
+
+		} elseif (
+			'plugin' == $this->compat() &&
+			! is_null( $this->plugin ) &&
+			( ! $slug || $slug === $this->plugin->post_name )
+		) {
+			return $this->plugin;
 		}
 
 		return self::get_object_by_slug_and_type( $slug, $this->compat() );

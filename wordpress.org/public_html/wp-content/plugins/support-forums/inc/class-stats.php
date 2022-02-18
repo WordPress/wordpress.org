@@ -32,6 +32,17 @@ class Stats {
 		$type   = str_replace( 'topic-', '', get_term( $term_id )->taxonomy );
 
 		bump_stats_extra( 'wporg-support', $action . '-' . $type );
+
+		// Tokenised links are from email unsubscribe links, record these in duplicate.
+		if ( isset( $_GET['token'] ) ) {
+			$type .= '_email';
+			if ( isset( $_POST['List-Unsubscribe'] ) && 'One-Click' === $_POST['List-Unsubscribe'] ) {
+				$type .= '_oneclick';
+			}
+
+			bump_stats_extra( 'wporg-support', $action . '-' . $type );
+		}
+		
 	}
 
 	/**
