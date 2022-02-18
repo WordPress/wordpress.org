@@ -63,7 +63,7 @@ class Ticket extends Resource {
 		}
 
 		$url = sprintf(
-			'%s/query?id=%s&col=id&col=summary&col=owner&col=type&col=cc&col=status&col=priority&col=milestone&col=component&col=version&col=severity&col=resolution&col=time&col=focuses&col=reporter&col=keywords&col=description&format=csv',
+			'%s/query?id=%s&col=id&col=summary&col=owner&col=type&col=cc&col=status&col=priority&col=milestone&col=component&col=version&col=severity&col=resolution&col=time&col=changetime&col=focuses&col=reporter&col=keywords&col=description&format=csv',
 			$this->trac->get_url(),
 			$this->id
 		);

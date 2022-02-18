@@ -37,6 +37,11 @@ namespace Dotorg\Slack\Trac {
 		$slack = new \Dotorg\Slack\Send( \Dotorg\Slack\Send\WEBHOOK );
 		$slack->set_user( $trac_obj );
 
+		$parsed_objects = array(
+			'ticket' => array(),
+			'commit' => array(),
+		);
+
 		foreach ( $results as $type => $values ) {
 			// Loop through all tickets and commits for this Trac.
 			foreach ( $values as $value ) {
@@ -45,6 +50,9 @@ namespace Dotorg\Slack\Trac {
 				$class = 'commit' === $type ? $commit_class : $ticket_class;
 				// Get the Ticket or Commit object for this Trac + ID.
 				$obj = call_user_func( array( $class, 'get' ), $trac_obj, $id );
+
+				// Keep a reference to this object for later.
+				$parsed_objects[ $type ][ $id ] = $obj;
 
 				// Check if we should be posting this to Slack so quickly.
 				if ( $since = $parser->is_redundant( 'slack', $trac, $type, $id ) ) {
@@ -96,7 +104,7 @@ namespace Dotorg\Slack\Trac {
 			continue;
 		}
 
-		// If there's no tickets referenced (ie. just commits) then there's no need to flag tghe reference on Trac.
+		// If there's no tickets referenced (ie. just commits) then there's no need to flag the reference on Trac.
 		if ( empty( $results['ticket'] ) ) {
 			continue;
 		}
@@ -105,16 +113,29 @@ namespace Dotorg\Slack\Trac {
 
 		$comment = sprintf( $comment_template, $_POST['channel_name'], $_POST['user_name'], str_replace( '.', '', $_POST['timestamp'] ) );
 		foreach ( $results['ticket'] as $ticket ) {
-			if ( is_array( $ticket ) ) {
-				$ticket = $ticket['id'];
+			$ticket_id = is_array( $ticket ) ? $ticket['id'] : $ticket;
+
+			// If the ticket is closed and hasn't been modified in over 2 years, don't post a reference to it.
+			if ( ! empty( $parsed_objects[ 'ticket' ][ $ticket_id ] ) ) {
+				$ticket_object = $parsed_objects[ 'ticket' ][ $ticket_id ];
+				$ticket_object->fetch();
+
+				$is_closed         = ( 'closed' === $ticket_object->status );
+				$last_modified     = strtotime( $ticket_object->modified );
+				$has_recent_change = ( ! $last_modified || $last_modified > ( time() - 2 * YEAR_IN_SECONDS ) );
+
+				if ( $is_closed && ! $has_recent_change ) {
+					continue;
+				}
 			}
 
-			if ( $parser->is_redundant( 'trac', $trac, 'ticket', $ticket ) ) {	
+			if ( $parser->is_redundant( 'trac', $trac, 'ticket', $ticket_id ) ) {
 				continue;
 			}
-			$parser->set_redundancy( 'trac', $trac, 'ticket', $ticket );
 
-			$trac_xmlrpc->ticket_update( $ticket, $comment );
+			$parser->set_redundancy( 'trac', $trac, 'ticket', $ticket_id );
+
+			$trac_xmlrpc->ticket_update( $ticket_id, $comment );
 		}
 	}
 }
