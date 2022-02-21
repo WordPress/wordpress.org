@@ -41,6 +41,10 @@ class Plugin {
 
 		// List all sites in the auto-complete.
 		add_action( 'init', [ $this, 'override_o2_xposts_get_data' ], 9 ); // before o2_Xposts::get_data();
+
+		// Filter new posts & comments to fix/expand short xposts.
+		add_filter( 'preprocess_comment', [ $this, 'preprocess_comment' ] );
+		add_filter( 'o2_create_post', [ $this, 'o2_create_post' ] );
 	}
 
 	/**
@@ -139,6 +143,62 @@ class Plugin {
 
 		return $allcaps;
 	}
+
+
+	/**
+	 * Filter newly created comments to correct any mis-typed crossposts.
+	 */
+	public function preprocess_comment( $comment_data ) {
+		$comment_data['comment_content'] = $this->correct_xposts( $comment_data['comment_content'] );
+
+		return $comment_data;
+	}
+
+	/**
+	 * Filter newly created posts to correct any mis-typed crossposts.
+	 */
+	public function o2_create_post( $post ) {
+		$post->post_content = addslashes( $this->correct_xposts( stripslashes( $post->post_content ) ) );
+
+		return $post;
+	}
+
+	/**
+	 * Corrects xposts from either +site or +domain/site to +domain/site/ as required on make.wordpress.org.
+	 */
+	protected function correct_xposts( $string ) {
+		$current_site = get_blog_details();
+
+		return preg_replace_callback(
+			o2_Xposts::XPOSTS_REGEX,
+			function( $m ) use( $current_site ) {
+				$site = $m[1];
+				$site = str_replace( $current_site->domain, '', $site );
+				$site = trim( $site, '/' );
+
+				$sites = get_sites( [
+					'fields'     => 'ids',
+					'network_id' => $current_site->site_id,
+					'domain'     => $current_site->domain,
+					'path'       => "/{$site}/",
+				] );
+
+				// If site could not be found, or there's multiple, let o2 deal with it.
+				if ( count( $sites ) !== 1 ) {
+					return $m[0];
+				}
+
+				$correct = "make.wordpress.org/{$site}/";
+				if ( $m[1] !== $correct ) {
+					return str_replace( $m[1], $correct, $m[0] );
+				}
+
+				return $m[0];
+			},
+			$string
+		);
+	}
+
 }
 
 add_action( 'init', [ new Plugin(), 'init' ], 5 );
