@@ -105,7 +105,7 @@ class SVN_Import {
 		include_once dirname( __DIR__ ) . '/class-wporg-themes-upload.php';
 
 		if ( empty( $args['slug'] ) || empty( $args['version'] ) ) {
-			trigger_error( 'Theme Import aborted, invalid input provided: ' . json_Encode( $args ), E_USER_WARNING );
+			trigger_error( 'Theme Import aborted, invalid input provided: ' . json_encode( $args ), E_USER_WARNING );
 			return;
 		}
 
@@ -114,16 +114,46 @@ class SVN_Import {
 		$return = $uploader->process_update_from_svn(
 			$args['slug'],
 			$args['version'],
-			$args['changeset'] ?? false,
-			$args['author'] ?? false,
-			$args['msg'] ?? ''
+			$args['changeset'],
+			$args['author'],
+			$args['msg']
 		);
 
-		// TODO: Look at error result code, maybq re-queue in event of system issue, else email author with concerns (Theme Check, etc)
-		//       CC emails to themes team in event of having to contact the author?
-
 		if ( is_wp_error( $return ) ) {
-			throw new Exception( "Theme Import Failure: " . $return->get_error_code . ' ' . $return->get_error_message() );
+
+			// Retry once in the event of a WordPress.org issue exporting from themes.svn.wordpress.org.
+			if ( 'svn_error' === $return->get_error_code() ) {
+				if ( empty( $args['retry'] ) ) {
+					$args['retry'] = $return;
+					wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'theme_directory_svn_import', $args );
+					return;
+				} else {
+					throw new Exception( 'Theme Import Failure: ' . $return->get_error_code() . ' ' . $return->get_error_message() );
+				}
+			}
+
+			// Otherwise email the author about this problem.
+			wp_mail(
+				// $uploader->author->user_email,
+				get_user_by( 'login', 'dd32' )->user_email, // TODO, DEBUG for now.
+				sprintf(
+					'Theme Import Failure: %s [%d] %s',
+					$uploader->theme_post->post_title,
+					$args['changeset'],
+					$args['msg']
+				),
+				sprintf(
+					"Hi %s,\n\nYour theme update for %s %s has failed some checks. Please see the below errors.\n\n%s\n\n----\nWordPress Theme Directory",
+					$uploader->author->user_email . ' ' .
+					( $uploader->author->display_name ?: $uploader->author->user_login ),
+					$uploader->theme->display('Title'),
+					$uploader->theme->display('Version'),
+					$return->get_error_message(),
+				),
+				[
+					'From: "WordPress Theme Directory" <themes@wordpress.org>'
+				]
+			);
 		}
 	}
 }

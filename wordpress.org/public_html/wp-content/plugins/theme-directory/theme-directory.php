@@ -532,6 +532,9 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		$post = get_post( $post_id );
 	}
 
+	// Keep track of the last live version.
+	update_post_meta( $post_id, '_last_live_version', get_post_meta( $post_id, '_live_version', true ) );
+
 	// Update current version. Used to prioritize localized themes.
 	update_post_meta( $post_id, '_live_version', $version );
 
