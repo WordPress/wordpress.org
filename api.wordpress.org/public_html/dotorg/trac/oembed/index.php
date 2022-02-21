@@ -45,6 +45,22 @@ if ( ! isset( $_GET['embed'] ) ) {
 	// Unique ID for this instance of the iframe
 	$id = sha1( $url . microtime() );
 
+	$embed = [
+		'version'       => '1.0',
+		'provider_name' => 'WordPress.org Trac',
+		'provider_url'  => $m['baseurl'],
+		'title'         => 'WordPress.org Trac',
+		'type'          => 'rich',
+		'width'         => 600,
+		'height'        => 300,
+		'html'          => '',
+	];
+
+	// Default milestone embeds to 120px height.
+	if ( 'milestone' === $type ) {
+		$embed['height'] = 120;
+	}
+
 	$embed_url = add_query_arg(
 		[
 			'url'   => urlencode( $url ),
@@ -60,9 +76,11 @@ if ( ! isset( $_GET['embed'] ) ) {
 	$embed_url .= '#el=' . $id;
 
 	$html = sprintf(
-		'<iframe sandbox="allow-scripts allow-top-navigation-by-user-activation" security="restricted" src="%s" id="%s" width="600" height="300" title="WordPress.org Trac" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content wporg-trac"></iframe>',
+		'<iframe sandbox="allow-scripts allow-top-navigation-by-user-activation" security="restricted" src="%s" id="%s" width="%d" height="%d" title="WordPress.org Trac" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content wporg-trac"></iframe>',
 		esc_url( $embed_url ),
-		esc_attr( 'el-' . $id )
+		esc_attr( 'el-' . $id ),
+		esc_attr( $embed['width'] ),
+		esc_attr( $embed['height'] )
 	);
 
 	$html .= sprintf(
@@ -83,21 +101,7 @@ if ( ! isset( $_GET['embed'] ) ) {
 		esc_attr( $id ),
 	);
 
-	$embed = [
-		'version'       => '1.0',
-		'provider_name' => 'WordPress.org Trac',
-		'provider_url'  => $m['baseurl'],
-		'title'         => 'WordPress.org Trac',
-		'type'          => 'rich',
-		'width'         => 600,
-		'height'        => 300,
-		'html'          => $html,
-	];
-
-	// Default milestone embeds to 120px.
-	if ( 'milestone' === $type ) {
-		$embed['height'] = 120;
-	}
+	$embed['html'] = $html;
 
 	echo wp_json_encode( $embed );
 	die();
@@ -130,15 +134,19 @@ $doc->loadHTML( $html );
 
 // IDs of elements to remove
 $remove_elements = [
-	'wporg-header', 'wporg-footer',
 	'headline', 'banner', 'mainnav',
 	'ctxtnav', 'help', 'altlinks',
 	'prefs',
+	'wporg-global-header-script-js',
+	'wporg-global-header-script-js-extra',
+	'wporg-global-header-footer-css',
 ];
 
-// Tags to just strip out.
+// Tags, with optional class specification to just strip out.
 $remove_tags = [
-	'form'
+	'form',
+	'header.global-header',
+	'footer.global-footer',
 ];
 
 // Additional elements per type of page.
@@ -170,7 +178,12 @@ foreach ( $remove_elements as $id ) {
 
 // Remove any tags
 foreach ( $remove_tags as $tag ) {
+	list( $tag, $class ) = explode( '.', $tag, 2 );
 	foreach ( $doc->getElementsByTagName( $tag ) as $el ) {
+		if ( $class && ! str_contains( $el->getAttribute( 'class' ), $class ) ) {
+			continue;
+		}
+
 		$el->parentNode->removeChild( $el );
 	}
 }
@@ -241,6 +254,14 @@ $js = <<<JS
 })();
 JS;
 $doc->getElementsByTagName( 'head' )[0]->appendChild( $doc->createElement( 'script', $js ) );
+
+$css = <<<CSS
+html {
+	--wp-global-header-height: 0;
+	--wp-admin--admin-bar--height: 0;
+}
+CSS;
+$doc->getElementsByTagName( 'head' )[0]->appendChild( $doc->createElement( 'style', $css ) );
 
 $data = $doc->saveHTML();
 
