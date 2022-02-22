@@ -2,6 +2,8 @@
 
 namespace WordPressdotorg\Openverse\Theme;
 
+use function WordPressdotorg\Locales\get_locales;
+
 /**
  * This is the URL on which the frontend site of Openverse is hosted. Unless
  * overridden from the Customizer UI, this is the URL for the embedded `iframe`.
@@ -83,13 +85,20 @@ function enqueue_assets() {
 		/* ver       */ filemtime( __DIR__ . '/js/message.js' ),
 		/* in_footer */ true
 	);
+
+	$use_path_based_locale_forwarding = get_theme_mod( 'ov_path_based_i18n', false );
+	$wp_locale = get_locale();
+	$locale = get_locales()[ $wp_locale ];
+	$locale_slug = $use_path_based_locale_forwarding && $wp_locale !== 'en_US' ? $locale->slug : '';
+
 	wp_add_inline_script(
 		/* handle   */ 'openverse-message',
 		/* JS       */ 'const openverseUrl = ' . wp_json_encode( get_theme_mod( 'ov_src_url', OPENVERSE_URL ) ) . ";\n" .
 		/* JS       */ 'const openverseSubpath = ' . wp_json_encode( OPENVERSE_SUBPATH ) . ";\n" .
-		/* JS       */ 'const currentLocale = ' . wp_json_encode( get_locale() ) . ";\n",
+		/* JS       */ 'const currentLocale = ' . wp_json_encode( $wp_locale ) . ";\n" . /* Used for legacy cookie based locale forwarding */
+		/* JS       */ 'const localeSlug = ' . wp_json_encode( $locale_slug ) . ";\n",
 		/* position */ 'before'
-	);	
+	);
 
 	wp_enqueue_script(
 		/* handle    */ 'openverse-navigation',
@@ -159,6 +168,20 @@ function wporg_ov_customizer( $wp_customize ) {
 		'input_attrs' => array(
 			'placeholder' => 'URL'
 		)
+	) );
+
+	$wp_customize->add_setting( 'ov_path_based_i18n', array(
+		'type' => 'theme_mod',
+		'capability' => 'edit_theme_options',
+		'default' => false
+	) );
+
+	$wp_customize->add_control( 'ov_path_based_i18n', array(
+		'section' => 'ov_embed',
+		'type' => 'checkbox',
+		'id' => 'ov_path_based_i18n',
+		'label' => 'Use path based locale forwarding',
+		'priority' => 10
 	) );
 }
 add_action( 'customize_register', __NAMESPACE__ . '\wporg_ov_customizer' );
