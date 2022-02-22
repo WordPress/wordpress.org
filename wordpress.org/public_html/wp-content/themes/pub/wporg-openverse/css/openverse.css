@@ -7,6 +7,13 @@
     border: none;
 }
 
+/*
+Remove the scrollbar for the footer which is re-implemented in Openverse itself.
+*/
+body {
+    overflow:hidden;
+}
+
 #main,
 .site,
 .site-content {
