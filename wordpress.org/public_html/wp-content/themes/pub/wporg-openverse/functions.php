@@ -73,7 +73,13 @@ add_filter( 'posts_request', __NAMESPACE__ . '\disable_default_query', 10, 2 );
  * As all URIs will be passed through to the iframe, there's no point in parsing
  * this or querying for posts that definitely do not exist within the WordPress site.
  */
-add_filter( 'do_parse_request', '__return_false' );
+function disable_parse_request( $return, $wp ) {
+	// Avoid E_WARNING: array_keys() expects parameter 1 to be array, null given in wp-includes/class-wp.php:548
+	$wp->query_vars = array();
+
+	return false;
+}
+add_filter( 'do_parse_request', __NAMESPACE__ . '\disable_parse_request', 10, 2 );
 
 /**
  * Enqueue styles & scripts.
