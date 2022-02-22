@@ -53,15 +53,27 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
  * but since this theme is nothing more than an iframe
  * disable those queries by returning an empty SQL
  * query for the main WP_Query instance.
+ * 
+ * Set no_found_rows to avoid querying for FOUND_ROWS().
  */
 function disable_default_query( $sql, $query ) {
 	if ( $query->is_main_query() ) {
 		$sql = '';
+		$query->set( 'no_found_rows', true );
 	}
 
 	return $sql;
 }
 add_filter( 'posts_request', __NAMESPACE__ . '\disable_default_query', 10, 2 );
+
+/**
+ * Disable request parsing.
+ * 
+ * This avoids `WP` parsing the requested URI to generate the WP_Query parameters.
+ * As all URIs will be passed through to the iframe, there's no point in parsing
+ * this or querying for posts that definitely do not exist within the WordPress site.
+ */
+add_filter( 'do_parse_request', '__return_false' );
 
 /**
  * Enqueue styles & scripts.
