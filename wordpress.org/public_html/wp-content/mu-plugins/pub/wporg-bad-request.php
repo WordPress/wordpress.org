@@ -50,6 +50,7 @@ function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
 	$query_vars[] = 'action';
 	$query_vars[] = 'bbp_search';
 	$query_vars[] = 'url';
+	$query_vars[] = 'replytocom';
 
 	// Assumption: WP::$public_query_vars will only ever contain non-array query vars.
 	// Assumption invalid. Some fields are valid.
@@ -71,6 +72,7 @@ function check_for_invalid_query_vars( $vars, $ref = '$public_query_vars' ) {
 		'hour'          => true,
 		'minute'        => true,
 		'second'        => true,
+		'replytocom'    => true,
 	];
 
 	foreach ( $query_vars as $field ) {
@@ -207,14 +209,8 @@ function die_bad_request( $reference = '' ) {
 		! defined( 'XMLRPC_REQUEST' ) && ! defined( 'REST_REQUEST' )
 	) {
 		status_header( 400 );
-		get_header();
-
-		echo '<div>
-			<h1>Bad Request</h1>
-			<p>Your request contained query variables that are unexpected. Please contact #meta.</p>
-		</div>';
-
-		get_footer();
+		$header_set_for_403 = true;
+		include WPORGPATH . '/403.php';
 	} else {
 		\wp_die( 'Bad Request: Your request contained query variables that are unexpected. Please contact #meta.', 'Bad Request', [ 'response' => 400 ] );
 	}
