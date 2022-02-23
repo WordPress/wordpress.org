@@ -206,7 +206,8 @@ function die_bad_request( $reference = '' ) {
 	// Use a prettier error page on WordPress.org
 	if (
 		str_contains( $_SERVER['HTTP_HOST'], 'wordpress.org' ) &&
-		! defined( 'XMLRPC_REQUEST' ) && ! defined( 'REST_REQUEST' )
+		! defined( 'XMLRPC_REQUEST' ) && ! defined( 'REST_REQUEST' ) &&
+		! is_admin() /* admin-ajax, admin-post */
 	) {
 		status_header( 400 );
 		$header_set_for_403 = true;
