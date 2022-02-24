@@ -257,7 +257,7 @@ $js = <<<JS
 
 	function send() {
 		window.parent.postMessage( {
-			height: document.getElementById('main').offsetHeight || 0,
+			height: Math.max( document.getElementsByTagName('html')[0].offsetHeight, document.documentElement.clientHeight ),
 			el: id
 		}, '*' );
 	}
