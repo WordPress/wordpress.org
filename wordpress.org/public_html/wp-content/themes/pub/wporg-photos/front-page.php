@@ -79,7 +79,7 @@ get_header();
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
-			'title' => __( 'FAQ', 'wporg-plugins' ),
+			'title' => __( 'FAQ', 'wporg-photos' ),
 			'text'  => sprintf(
 				/* translators: URL to make/plugins site. */
 				__( 'Learn more about licensing, usage, and adding your photos to the WordPress Photo Directory via <a href="%s">Frequently Asked Questions</a>.', 'wporg-photos' ),

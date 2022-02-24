@@ -92,7 +92,7 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 		edit_post_link(
 			sprintf(
 				/* translators: %s: Name of current post */
-				esc_html__( 'Edit %s', 'wporg-plugins' ),
+				esc_html__( 'Edit %s', 'wporg-photos' ),
 				the_title( '<span class="screen-reader-text">"', '"</span>', false )
 			),
 			'<span class="edit-link">',
