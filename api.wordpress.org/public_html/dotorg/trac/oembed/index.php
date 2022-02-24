@@ -32,7 +32,7 @@ header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS 
 if (
 	// meta|core are the only tracs embedable.
 	// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
-	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone|ticketgraph|ticket|changeset)([/?]|$)!i', $url, $m ) ||
+	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone|ticketgraph|ticket|changeset|query)([/?]|$)!i', $url, $m ) ||
 	'GET' !== $_SERVER['REQUEST_METHOD']
 ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
@@ -169,6 +169,10 @@ switch ( $type ) {
 			}
 		}
 		break;
+	case 'query':
+		$remove_tags[] = 'h1';
+		$remove_tags[] = 'h2';
+		break;
 }
 
 // Remove any elements that are not needed.
@@ -186,11 +190,16 @@ foreach ( $remove_tags as $tag ) {
 		list( $tag, $class ) = explode( '.', $tag );
 	}
 
+	$elements_to_remove = [];
 	foreach ( $doc->getElementsByTagName( $tag ) as $el ) {
 		if ( $class && ! str_contains( $el->getAttribute( 'class' ), $class ) ) {
 			continue;
 		}
 
+		$elements_to_remove[] = $el;
+	}
+
+	foreach ( $elements_to_remove as $el ) {
 		$el->parentNode->removeChild( $el );
 	}
 }
@@ -226,21 +235,20 @@ foreach ( $doc->getElementsByTagName( 'a' ) as $el ) {
 }
 
 // Remove wp-trac.js, we don't need it here - It alters the page too much and adds elements on load.
-// Recursive as it can't iterate over the document while altering it properly.
-do {
-	$removed = 0;
-	foreach ( $doc->getElementsByTagName( 'script' ) as $script ) {
-		$src = (string) $script->getAttribute( 'src' );
+$elements_to_remove = [];
+foreach ( $doc->getElementsByTagName( 'script' ) as $script ) {
+	$src = (string) $script->getAttribute( 'src' );
 
-		if (
-			false !== stripos( $src, 'wp-trac.js' ) ||
-			false !== stripos( $script->textContent, 'wpTrac' )
-		) {
-			$script->parentNode->removeChild( $script );
-			$removed++;
-		}
+	if (
+		false !== stripos( $src, 'wp-trac.js' ) ||
+		false !== stripos( $script->textContent, 'wpTrac' )
+	) {
+		$elements_to_remove[] = $script;
 	}
-} while ( $removed );
+}
+foreach ( $elements_to_remove as $el ) {
+	$el->parentNode->removeChild( $el );
+}
 
 // Add a script to the header.
 $js = <<<JS
