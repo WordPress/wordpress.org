@@ -18,6 +18,9 @@
  */
 include dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
+// Avoid warnings from DomDocument.
+libxml_use_internal_errors( true );
+
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
@@ -142,7 +145,7 @@ $remove_elements = [
 	'wporg-global-header-footer-css',
 ];
 
-// Tags, with optional class specification to just strip out.
+// Tags, with optional SINGLE class specification to just strip out.
 $remove_tags = [
 	'form',
 	'header.global-header',
@@ -178,7 +181,11 @@ foreach ( $remove_elements as $id ) {
 
 // Remove any tags
 foreach ( $remove_tags as $tag ) {
-	list( $tag, $class ) = explode( '.', $tag, 2 );
+	$class = false;
+	if ( str_contains( $tag, '.' ) ) {
+		list( $tag, $class ) = explode( '.', $tag );
+	}
+
 	foreach ( $doc->getElementsByTagName( $tag ) as $el ) {
 		if ( $class && ! str_contains( $el->getAttribute( 'class' ), $class ) ) {
 			continue;
