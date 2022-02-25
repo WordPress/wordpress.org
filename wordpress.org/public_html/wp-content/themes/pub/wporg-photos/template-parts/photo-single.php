@@ -56,8 +56,8 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 
 	<div class="entry-content">
 		<figure>
-			<a href="<?php echo wp_get_attachment_url( get_post_thumbnail_id() ); ?>">
-				<img class="single-photo" src="<?php echo get_the_post_thumbnail_url( get_the_ID(), 'medium'); ?>" srcset="<?php echo esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ); ?>">
+			<a href="<?php echo wp_get_attachment_url( get_post_thumbnail_id() ); ?>" aria-label="<?php esc_attr_e( 'View larger photo', 'wporg-photos' ); ?>">
+				<img class="single-photo" src="<?php echo get_the_post_thumbnail_url( get_the_ID(), 'medium'); ?>" srcset="<?php echo esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ); ?>" alt="">
 			</a>
 
 			<?php
