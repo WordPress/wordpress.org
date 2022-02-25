@@ -132,10 +132,13 @@ class SVN_Import {
 				}
 			}
 
-			// Otherwise email the author about this problem.
+			/*
+			 * Otherwise email the author about this problem.
+			 * NOTE: This email has a HTML content type, as Theme Check output is HTML.
+			 * TRANSLATION: These strings are not marked for translated, as they will always be English at present.
+			 */
 			wp_mail(
-				// $uploader->author->user_email,
-				get_user_by( 'login', 'dd32' )->user_email, // TODO, DEBUG for now.
+				$uploader->author->user_email,
 				sprintf(
 					'Theme Import Failure: %s [%d] %s',
 					$uploader->theme_post->post_title,
@@ -143,15 +146,22 @@ class SVN_Import {
 					$args['msg']
 				),
 				sprintf(
-					"Hi %s,\n\nYour theme update for %s %s has failed some checks. Please see the below errors.\n\n%s\n\n----\nWordPress Theme Directory",
-					$uploader->author->user_email . ' ' .
-					( $uploader->author->display_name ?: $uploader->author->user_login ),
-					$uploader->theme->display('Title'),
-					$uploader->theme->display('Version'),
-					$return->get_error_message(),
+					nl2br(
+						// Intentionally not translated. See above.
+						"Hi %s,\n\n" .
+						"Your theme update for %s has failed requirements.\n" .
+						"Please see the below error and commit an updated version, this may not be the only error present.\n\n%s\n\n" .
+						"Please review the latest <a href='%s'>Theme Guidelines</a>.\n" .
+						"----\nWordPress Theme Directory",
+					),
+					esc_html( $uploader->author->display_name ?: $uploader->author->user_login ),
+					$uploader->theme->display('Name') . ' ' . $uploader->theme->display('Version'),
+					'<div style="margin-left: 30px">' . $return->get_error_message() . '</div>',
+					'https://make.wordpress.org/themes/handbook/review/required/'
 				),
 				[
-					'From: "WordPress Theme Directory" <themes@wordpress.org>'
+					'From: "WordPress Theme Directory" <themes@wordpress.org>',
+					'Content-Type: text/html; charset=UTF-8'
 				]
 			);
 		}
