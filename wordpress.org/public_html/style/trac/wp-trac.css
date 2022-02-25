@@ -2362,3 +2362,10 @@ a.mention.me {
 		display: block;
 	}
 }
+
+@media (max-width:1200px) {
+	table.listing {
+		display: block;
+		overflow-x: auto;
+	}
+}
