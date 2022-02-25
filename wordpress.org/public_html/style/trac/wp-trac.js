@@ -1919,18 +1919,14 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 		suggestNotGeneral: ( function() {
 			var enabled = true,
-				skipWords = [ 'and', 'any', 'all', 'the', 'for', 'get', 'plugins', 'general' ],
+				skipWords = [ 'and', 'any', 'all', 'the', 'for', 'get', 'plugins', 'general', 'wordpress' ],
+				generalCategories = [ 'General' ],
 				componentWords = {},
 				noticeDiv;
 
 			function init() {
 				// Only on new ticket creations.
 				if ( ! wpTrac.isNewTicket() ) {
-					return;
-				}
-
-				// Only if we have a 'General' option.
-				if ( ! $( '#field-component option[value="General"]' ).length ) {
 					return;
 				}
 
@@ -1942,14 +1938,28 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					skipWords.push( 'appearance' );
 				}
 
+				// On Meta, WordPress.org site is a "generic" category that shouldn't be used if possible.
+				if ( $( 'body.meta' ).length ) {
+					generalCategories.push( 'WordPress.org Site' );
+					skipWords.push( 'wordpress.org' );
+				}
+
+				// Only if we have a 'General' option.
+				const components = jQuery( '#field-component option' ).get().map( opt => opt.value ),
+					hasDefaultCat = generalCategories.filter( value => components.includes( value ) );
+
+				if ( ! hasDefaultCat ) {
+					return;
+				}
+
 				generateComponentWords();
 
 				$( '#field-description,#field-summary,#field-component' ).on( 'blur', maybeSuggest );
 
 				// Disable once the user hits the component option.
 				$( '#field-component' ).on( 'change', function() {
-					// If they selected 'General', keep nagging.
-					enabled = $(this).find( 'option[value="General"]').prop('selected');
+					// If they selected a general category keep nagging.
+					enabled = ( -1 !== generalCategories.indexOf( $(this).val() ) );
 
 					if ( ! enabled && noticeDiv ) {
 						noticeDiv.remove();
