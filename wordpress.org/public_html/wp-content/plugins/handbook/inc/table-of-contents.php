@@ -9,7 +9,7 @@ class WPorg_Handbook_TOC {
 
 	protected $styles = '<style>
 		.toc-jump { text-align: right; font-size: 12px; }
-		.toc-heading .anchor { color: inherit; font-weight: inherit; margin-left: -25px; }
+		.toc-heading .anchor { color: inherit; font-weight: inherit; text-decoration: none !important; margin-left: -25px; }
 		.toc-heading .anchor:before { visibility: hidden; vertical-align: initial; padding: 0.5em 0; margin-right: 5px; }
 		.toc-heading:target .anchor:before { margin-left: -8px; margin-right: 13px; }
 		.toc-heading .anchor:hover:before, .toc-heading .anchor:focus:before { visibility: visible; }
