@@ -29,7 +29,6 @@ class WordPressTV_Theme {
 		add_action( 'widgets_init', array( $this, 'widgets_init' ) );
 		add_action( 'init', array( $this, 'register_taxonomies' ), 0 );
 		add_action( 'pre_get_posts', array( $this, 'posts_per_page' ) );
-		add_action( 'init', array( $this, 'improve_search' ) );
 		add_action( 'publish_post', array( $this, 'publish_post' ), 10, 1 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_meta_box_fields' ), 10, 2);
@@ -222,7 +221,7 @@ class WordPressTV_Theme {
 			}
 			*/
 
-			$data[] = array_filter( $video_data, function( $item ) { 
+			$data[] = array_filter( $video_data, function( $item ) {
 				return '' !== $item && [] !== $item;
 			} );
 		}
@@ -413,178 +412,6 @@ class WordPressTV_Theme {
 		}
 	}
 
-	/**
-	 * Activates the improved search, but not in admin.
-	 */
-	function improve_search() {
-		if ( is_admin() ) {
-			return;
-		}
-
-		add_filter( 'posts_search', array( $this, 'search_posts_search' ), 10, 2 );
-		add_action( 'pre_get_posts', array( $this, 'search_pre_get_posts' ) );
-	}
-
-	/**
-	 * Sort the search results by the number of views each post has
-	 *
-	 * @param WP_Query $query
-	 */
-	function search_pre_get_posts( $query ) {
-		/*
-		 * @todo Optimize this before re-enabling
-		 *
-		 * This method was disabled because it caused 504 errors on large result sets
-		 * (e.g., https://wordpress.tv/?s=keynote). Sorting by a meta value is not performant.
-		 *
-		 * Maybe look at ways to do the sorting in PHP, or just use Elasticsearch instead.
-		 */
-		return;
-
-		if ( ! $query->is_main_query() || ! $query->is_search ) {
-			return;
-		}
-
-		// Set custom sorting
-		$query->set( 'meta_key', 'wptv_post_views' );
-		$query->set( 'orderby', 'meta_value_num' );
-		$query->set( 'order', 'DESC' );
-	}
-
-	/**
-	 * Improved Search: posts_search filter
-	 *
-	 * Recreates the search SQL by including a taxonomy search.
-	 * Relies on various other filters used once.
-	 * @todo optimize the get_tax_query part.
-	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
-	 *
-	 * @param string   $search
-	 * @param WP_Query $query
-	 * @return string
-	 */
-	function search_posts_search( $search, $query ) {
-		global $wpdb;
-		if ( ! $query->is_main_query() || ! $query->is_search || is_admin() ) {
-			return $search;
-		}
-
-		// Get the tax query and replace the leading AND with an OR
-		$tax_query = get_tax_sql( $this->get_tax_query( get_query_var( 's' ) ), $wpdb->posts, 'ID' );
-		if ( 'and' == substr( trim( strtolower( $tax_query['where'] ) ), 0, 3 ) ) {
-			$tax_query['where'] = ' OR ' . substr( trim( $tax_query['where'] ), 3 );
-		}
-
-		// Mostly taken from query.php
-		if ( isset( $query->query_vars['search_terms'] ) ) {
-			$search = $searchand = '';
-			$n      = empty( $query->query_vars['exact'] ) ? '%' : '';
-
-			foreach ( (array) $query->query_vars['search_terms'] as $term ) {
-				$term = esc_sql( $wpdb->esc_like( $term ) );
-				$search .= "{$searchand}(($wpdb->posts.post_title LIKE '{$n}{$term}{$n}') OR ($wpdb->posts.post_content LIKE '{$n}{$term}{$n}'))";
-				$searchand = ' AND ';
-			}
-
-			// Combine the search and tax queries.
-			if ( ! empty( $search ) ) {
-				// Add the tax search to the query
-				if ( ! empty( $tax_query['where'] ) ) {
-					$search .= $tax_query['where'];
-				}
-
-				$search = " AND ({$search}) ";
-				if ( ! is_user_logged_in() ) {
-					$search .= " AND ($wpdb->posts.post_password = '') ";
-				}
-			}
-		}
-
-		// These are single-use filters, they delete themselves right after they're used.
-		add_filter( 'posts_join', array( $this, 'search_posts_join' ), 10, 2 );
-		add_filter( 'posts_groupby', array( $this, 'search_posts_groupby' ), 10, 2 );
-
-		return $search;
-	}
-
-	/**
-	 * Improved Search: posts_join filter
-	 *
-	 * This adds the JOIN clause resulting from the taxonomy
-	 * search. Make sure this filter runs only once per WP_Query request.
-	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
-	 *
-	 * @param string   $join
-	 * @param WP_Query $query
-	 * @return string
-	 */
-	function search_posts_join( $join, &$query ) {
-		// Make sure this filter doesn't run again.
-		remove_filter( 'posts_join', array( $this, 'search_posts_join' ), 10, 2 );
-
-		if ( $query->is_main_query() ) {
-			global $wpdb;
-			$tax_query = get_tax_sql( $this->get_tax_query( get_query_var( 's' ) ), $wpdb->posts, 'ID' );
-			$join .= $tax_query['join'];
-		}
-
-		return $join;
-	}
-
-	/**
-	 * Improved Search: posts_groupby filter
-	 *
-	 * Searching with taxonomies may include duplicates when
-	 * search query matches content and one or more taxonomies.
-	 * This filter glues all duplicates. Use only once per WP_Query.
-	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
-	 *
-	 * @param string   $group_by
-	 * @param WP_Query $query
-	 * @return string
-	 */
-	function search_posts_groupby( $group_by, &$query ) {
-		// Never run this again
-		remove_filter( 'posts_groupby', array( $this, 'search_posts_groupby' ), 10, 2 );
-
-		global $wpdb;
-		$group_by = "$wpdb->posts.ID";
-
-		return $group_by;
-	}
-
-	/**
-	 * Returns a $tax_query array for an improved search.
-	 *
-	 * @param string $search
-	 * @return array
-	 */
-	function get_tax_query( $search ) {
-		$taxonomies = array(
-			'producer',
-			'speakers', /*'flavor', 'language',*/
-			'event'
-		);
-
-		$terms    = get_terms( $taxonomies, array(
-			'search' => $search,
-		) );
-		$term_ids = wp_list_pluck( $terms, 'term_id' );
-
-		$tax_query = array();
-		foreach ( $taxonomies as $taxonomy ) {
-			$tax_query[] = array(
-				'taxonomy' => $taxonomy,
-				'terms'    => $term_ids,
-			);
-		}
-		$tax_query['relation'] = 'OR';
-
-		return $tax_query;
-	}
 
 	/**
 	 * Change VideoPress Params, runs during wp_footer
@@ -874,9 +701,9 @@ class WordPressTV_Theme {
 
 	/**
 	 * Convert a WPTV Locale to a WP Locale code.
-	 * 
+	 *
 	 * This isn't all correct, and many of these need to be combined.
-	 * 
+	 *
 	 * See https://meta.trac.wordpress.org/ticket/1156
 	 */
 	function locale_to_wp_locale( $locale ) {
