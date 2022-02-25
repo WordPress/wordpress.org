@@ -40,7 +40,8 @@ if ( comments_open() ) :
 				),
 				'<textarea id="comment" name="comment" rows="6" maxlength="65525" required></textarea>'
 			),
-			'comment_notes_after' => esc_html__( 'Feedback you send to us will go only to the folks who maintain documentation. They may reach out in case there are questions or would like to followup feedback. But that too will stay behind the scenes.', 'wporg-forums' ),
+			'comment_notes_after' => esc_html__( 'Feedback you send to us will go only to the folks who maintain documentation. They may reach out in case there are questions or would like to followup feedback. But that too will stay behind the scenes.', 'wporg-forums' ) .
+			                         '<br>' . sprintf( __( '<strong>This is not for personalized support.</strong> Please create a <a href="%s">forum thread</a> instead to receive help from the community.', 'wporg-forums'), home_url( '/forums/#bbpress-forums' ) ),
 			'label_submit'        => __( 'Submit Feedback', 'wporg-forums' ),
 		)
 	);
