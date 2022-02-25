@@ -390,6 +390,9 @@ class WPTV_Anon_Upload {
 			}
 		}
 
+		// Should be enqueued, but do it anyway.
+		wp_enqueue_script( 'jquery' );
+
 		?>
 		<div class="stuffbox" id="review-video">
 			<style type="text/css" scoped="scoped">

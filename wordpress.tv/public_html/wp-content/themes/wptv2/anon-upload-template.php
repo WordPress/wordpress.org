@@ -177,6 +177,8 @@ function anon_upload_css() {
 }
 add_action( 'wp_head', 'anon_upload_css' );
 
+wp_enqueue_script( 'jquery' );
+
 get_header();
 
 $message = '';
