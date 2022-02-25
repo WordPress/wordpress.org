@@ -172,6 +172,7 @@ switch ( $type ) {
 	case 'query':
 		$remove_tags[] = 'h1';
 		$remove_tags[] = 'h2';
+		$remove_tags[] = 'div.paging';
 		break;
 }
 
@@ -257,7 +258,7 @@ $js = <<<JS
 
 	function send() {
 		window.parent.postMessage( {
-			height: Math.max( document.getElementsByTagName('html')[0].offsetHeight, document.documentElement.clientHeight ),
+			height: Math.max( document.getElementsByTagName('html')[0].offsetHeight, document.documentElement.offsetHeight ),
 			el: id
 		}, '*' );
 	}
@@ -277,6 +278,10 @@ html {
 }
 CSS;
 $doc->getElementsByTagName( 'head' )[0]->appendChild( $doc->createElement( 'style', $css ) );
+
+// Finally add a CSS class to target.
+$body = $doc->getElementsByTagName( 'body' )[0];
+$body->setAttribute( 'class', $body->getAttribute( 'class' ) . ' is-oembed' );
 
 $data = $doc->saveHTML();
 

@@ -2093,83 +2093,83 @@ a.mention.me {
 	#properties table.trac-properties > tbody > tr > td#focuses {
 		padding-left: 22px;
 	}
-	.listing.tickets th,
-	.listing.tickets td {
+	body:not(.is-oembed) .listing.tickets th,
+	body:not(.is-oembed) .listing.tickets td {
 		display: block;
 	}
-	.listing.tickets thead th,
-	.listing.tickets tbody .trac-columns th {
+	body:not(.is-oembed) .listing.tickets thead th,
+	body:not(.is-oembed) .listing.tickets tbody .trac-columns th {
 		display: inline-block;
 	}
-	.listing.tickets tbody tr td.id::before,
-	.listing.tickets tbody tr td.ticket::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.id::before,
+	body:not(.is-oembed) .listing.tickets tbody tr td.ticket::before {
 		content: "Ticket: ";
 	}
-	.listing.tickets tbody tr td.summary::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.summary::before {
 		content: "Summary: ";
 	}
-	.listing.tickets tbody tr td.status::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.status::before {
 		content: "Status: ";
 	}
-	.listing.tickets tbody tr td.resolution::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.resolution::before {
 		content: "Resolution: ";
 	}
-	.listing.tickets tbody tr td.owner::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.owner::before {
 		content: "Owner: ";
 	}
-	.listing.tickets tbody tr td.type::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.type::before {
 		content: "Type: ";
 	}
-	.listing.tickets tbody tr td.priority::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.priority::before {
 		content: "Priority: ";
 	}
-	.listing.tickets tbody tr td.milestone::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.milestone::before {
 		content: "Milestone: ";
 	}
-	.listing.tickets tbody tr td.component::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.component::before {
 		content: "Component: ";
 	}
-	.listing.tickets tbody tr td.severity::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.severity::before {
 		content: "Severity: ";
 	}
-	.listing.tickets tbody tr td.workflow::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.workflow::before {
 		content: "Workflow: ";
 	}
-	.listing.tickets tbody tr td.date::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.date::before {
 		content: "Date: ";
 	}
-	.listing.tickets tbody tr td.time::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.time::before {
 		content: "Created: ";
 	}
-	.listing.tickets tbody tr td.changetime::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.changetime::before {
 		content: "Modified: ";
 	}
-	.listing.tickets tbody tr td.version::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.version::before {
 		content: "Version: ";
 	}
-	.listing.tickets tbody tr td.reporter::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.reporter::before {
 		content: "Reporter: ";
 	}
-	.listing.tickets tbody tr td.Comments::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.Comments::before {
 		content: "Comments: ";
 	}
-	.listing.tickets tbody tr td.Stars::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.Stars::before {
 		content: "Stars: ";
 	}
-	.listing.tickets tbody tr td.keywords::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.keywords::before {
 		content: "Keywords: ";
 	}
-	.listing.tickets tbody tr td.focuses::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.focuses::before {
 		content: "Focuses: ";
 	}
-	.listing.tickets tbody tr td.cc::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td.cc::before {
 		content: "CC: ";
 	}
-	.listing.tickets tbody tr td:not(.Comments, .Stars)::before {
+	body:not(.is-oembed) .listing.tickets tbody tr td:not(.Comments, .Stars)::before {
 		font-weight: 600;
 	}
-	.listing.tickets tbody tr td.Stars,
-	.listing.tickets tbody tr td.Comments {
+	body:not(.is-oembed) .listing.tickets tbody tr td.Stars,
+	body:not(.is-oembed) .listing.tickets tbody tr td.Comments {
 		display: inline-block;
 		float: right;
 	}
@@ -2478,4 +2478,13 @@ a.mention.me {
 	#github-prs li {
 		display: block;
 	}
+}
+
+/* Trac oEmbed rules */
+body.is-oembed table.listing {
+	display: block;
+	overflow-x: auto;
+}
+body.is-oembed table.listing .summary {
+	min-width: 40vw;
 }
