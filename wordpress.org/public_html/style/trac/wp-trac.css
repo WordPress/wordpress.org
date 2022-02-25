@@ -33,19 +33,18 @@ fieldset {
 	border: 1px solid #d7d7d7;
 }
 
+/* Add extra whitespace betweeen trac footer and global footer. */
+footer.wp-block-group.global-footer {
+	margin-top: 2em;
+}
+
 /* Fixing display of the header */
 #headline {
 	background: #0073aa;
 	border-bottom: 0;
 	height: 62px;
 }
-@media screen and (min-width: 769px) {
-	#wporg-header ul li a.current ~ .uparrow {
-		border-bottom-color: #0073aa;
-	}
-}
-#wporg-header :link, #wporg-header :visited,
-#wporg-header :link:hover, #wporg-header :visited:hover,
+
 header :link, header :visited, header :link:hover, header :visited:hover,
 footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 #headline :link, #headline :visited,
@@ -67,8 +66,6 @@ footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 .security #headline a {
 	color: #555;
 }
-#wporg-header ul :link, #wporg-header ul :visited,
-#wporg-header ul :link:hover, #wporg-header ul :visited:hover,
 header :link, header :visited, header :link:hover, header :visited:hover,
 footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 #headline :link:hover, #headline :visited:hover,
@@ -623,12 +620,7 @@ blockquote.citation {
 #mainnav .active :link:hover, #mainnav .active :visited:hover {
 	border-right: none;
 }
-#altlinks {
-	padding-bottom: 10px;
-}
-#footer {
-	padding: .5em 0; /* more breathing room */
-}
+
 #prefs {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
@@ -691,6 +683,14 @@ table.listing tbody tr:hover td,
 table.code tbody tr:hover td {
 	background: #eee;
 }
+
+@media (max-width:1200px) {
+	table.listing {
+		display: block;
+		overflow-x: auto;
+	}
+}
+
 .suggestions {
 	border: 1px solid #888;
 }
@@ -2360,12 +2360,5 @@ a.mention.me {
 	}
 	#github-prs li {
 		display: block;
-	}
-}
-
-@media (max-width:1200px) {
-	table.listing {
-		display: block;
-		overflow-x: auto;
 	}
 }
