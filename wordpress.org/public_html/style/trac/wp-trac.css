@@ -116,7 +116,7 @@ h3.change a {
 
 /* We like the WP button styles, but they need to be a bit smaller sometimes */
 .inlinebuttons input {
-	margin:  0 0 .2em .4em; /* Trac is 0 .1em .1em  */
+	margin: 0 0 .2em .4em; /* Trac is 0 .1em .1em */
 }
 #prefs .buttons input[type=button],
 #prefs .buttons input[type=submit],
@@ -125,6 +125,9 @@ h3.change a {
 	font-size: 10px;
 	line-height: 20px;
 	height: 21px;
+}
+#prefs {
+	padding-top: 25px;
 }
 #prefs input {
 	margin: .1em;
@@ -684,13 +687,6 @@ table.code tbody tr:hover td {
 	background: #eee;
 }
 
-@media (max-width:1200px) {
-	table.listing {
-		display: block;
-		overflow-x: auto;
-	}
-}
-
 .suggestions {
 	border: 1px solid #888;
 }
@@ -728,7 +724,7 @@ input[type=text], input.textwidget, textarea {
 	font-size: 13px;
 }
 input[name="description"] {
-    width: 100%;
+	width: 100%;
 }
 fieldset {
 	-webkit-border-radius: 3px;
@@ -1883,7 +1879,7 @@ table.dirlist td.name a.dir:before {
 	margin-right: 2px;
 }
 table.dirlist td.name a.file:before {
-	content: "\f105"; /*  dashicons-admin-page */
+	content: "\f105"; /* dashicons-admin-page */
 	color: #999;
 }
 table.dirlist td.rev a.chgset {
@@ -2097,6 +2093,111 @@ a.mention.me {
 	#properties table.trac-properties > tbody > tr > td#focuses {
 		padding-left: 22px;
 	}
+	.listing.tickets th,
+	.listing.tickets td {
+		display: block;
+	}
+	.listing.tickets thead th,
+	.listing.tickets tbody .trac-columns th {
+		display: inline-block;
+	}
+	.listing.tickets tbody tr td.id::before,
+	.listing.tickets tbody tr td.ticket::before {
+		content: "Ticket: ";
+	}
+	.listing.tickets tbody tr td.summary::before {
+		content: "Summary: ";
+	}
+	.listing.tickets tbody tr td.status::before {
+		content: "Status: ";
+	}
+	.listing.tickets tbody tr td.resolution::before {
+		content: "Resolution: ";
+	}
+	.listing.tickets tbody tr td.owner::before {
+		content: "Owner: ";
+	}
+	.listing.tickets tbody tr td.type::before {
+		content: "Type: ";
+	}
+	.listing.tickets tbody tr td.priority::before {
+		content: "Priority: ";
+	}
+	.listing.tickets tbody tr td.milestone::before {
+		content: "Milestone: ";
+	}
+	.listing.tickets tbody tr td.component::before {
+		content: "Component: ";
+	}
+	.listing.tickets tbody tr td.severity::before {
+		content: "Severity: ";
+	}
+	.listing.tickets tbody tr td.workflow::before {
+		content: "Workflow: ";
+	}
+	.listing.tickets tbody tr td.date::before {
+		content: "Date: ";
+	}
+	.listing.tickets tbody tr td.time::before {
+		content: "Created: ";
+	}
+	.listing.tickets tbody tr td.changetime::before {
+		content: "Modified: ";
+	}
+	.listing.tickets tbody tr td.version::before {
+		content: "Version: ";
+	}
+	.listing.tickets tbody tr td.reporter::before {
+		content: "Reporter: ";
+	}
+	.listing.tickets tbody tr td.Comments::before {
+		content: "Comments: ";
+	}
+	.listing.tickets tbody tr td.Stars::before {
+		content: "Stars: ";
+	}
+	.listing.tickets tbody tr td.keywords::before {
+		content: "Keywords: ";
+	}
+	.listing.tickets tbody tr td.focuses::before {
+		content: "Focuses: ";
+	}
+	.listing.tickets tbody tr td.cc::before {
+		content: "CC: ";
+	}
+	.listing.tickets tbody tr td:not(.Comments, .Stars)::before {
+		font-weight: 600;
+	}
+	.listing.tickets tbody tr td.Stars,
+	.listing.tickets tbody tr td.Comments {
+		display: inline-block;
+		float: right;
+	}
+	.tickets tr.color3-odd,
+	.tickets tr.color3-even,
+	table.tickets tbody tr.even.prio3,
+	table.tickets tbody tr.odd.prio3 {
+		border-color: #ccc;
+	}
+	.tickets tr.color4-odd,
+	.tickets tr.color4-even,
+	table.tickets tbody tr.even.prio4,
+	table.tickets tbody tr.odd.prio4 {
+		border-color: #099;
+	}
+	.tickets tr.color5-odd,
+	.tickets tr.color5-even,
+	table.tickets tbody tr.prio5 {
+		border-color: #469;
+	}
+	.tickets tr.color6-odd,
+	.tickets tr.color6-even {
+		border-color: #888;
+	}
+	.listing.tickets thead tr th a,
+	.listing.tickets tbody .trac-columns th a {
+		font-size: 1.2em;
+	}
 }
 
 @media (max-width: 640px) {
@@ -2145,6 +2246,22 @@ a.mention.me {
 	#header img {
 		max-width: 50%; /* prevent the logo and search from colliding (to a point) */
 		height: auto;
+	}
+	#filters th,
+	#filters td {
+		display: block;
+	}
+	#filters .trac-clause td:not(.actions td), 
+	#filters .trac-clause th {
+		text-align:left;
+	}
+	#filters .trac-clause tbody {
+		display:table;
+		padding:7px 0 7px 0;
+	}
+	#filters th,
+	#filters td label {
+		font-size:13px;
 	}
 	#content.ticket, .milestone .info .progress, .milestone .info dl, #content.timeline dl, #stats {
 		margin-left: 0; /* use all the available space */
