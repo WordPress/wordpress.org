@@ -81,7 +81,7 @@ get_header();
 		the_widget( 'WP_Widget_Text', array(
 			'title' => __( 'FAQ', 'wporg-photos' ),
 			'text'  => sprintf(
-				/* translators: URL to make/plugins site. */
+				/* translators: URL to FAQ page. */
 				__( 'Learn more about licensing, usage, and adding your photos to the WordPress Photo Directory via <a href="%s">Frequently Asked Questions</a>.', 'wporg-photos' ),
 				esc_url( home_url( 'faq' ) )
 			),
