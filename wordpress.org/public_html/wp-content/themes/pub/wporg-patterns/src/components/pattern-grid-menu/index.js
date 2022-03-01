@@ -62,7 +62,7 @@ const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 					<PatternOrderSelect
 						options={ [
 							{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
-							{ label: __( 'Favorites', 'wporg-patterns' ), value: 'favorite_count' },
+							{ label: __( 'Popular', 'wporg-patterns' ), value: 'favorite_count' },
 						] }
 					/>
 				}
