@@ -139,7 +139,7 @@ function wporg_login_admin_settings_page() {
 		$block_words = wp_unslash( $_POST['registration_block_words'] ?? '' );
 		if ( $block_words ) {
 			$block_words = explode( "\n", $block_words );
-			$block_words = array_values( array_unique( array_filter( array_map( 'trim', $block_words ) ) ) );
+			$block_words = array_values( array_unique( array_filter( $block_words ) ) );
 
 			// Sanity; Don't let it change more than 20%.
 			if ( count( $block_words ) < count( get_option( 'registration_block_words' ) ) * 0.8 ) {
@@ -189,7 +189,10 @@ function wporg_login_admin_settings_page() {
 	printf(
 		'<tr>
 			<th>reCaptcha v3 low-score threshold for Registration</th>
-			<td><input name="recaptcha_v3_threshold" type="number" min="0.0" max="1.0" step="0.1" name="" value="%s"></td>
+			<td>
+				<input name="recaptcha_v3_threshold" type="number" min="0.0" max="1.0" step="0.1" name="" value="%s">
+				<p><em>Any reCaptcha v3 score lower than this threshold is considered to have failed the reCaptcha and will be put into manual review.</em></p>
+			</td>
 		</tr>',
 		esc_attr( get_option( 'recaptcha_v3_threshold', 0.2 ) )
 	);
@@ -199,7 +202,10 @@ function wporg_login_admin_settings_page() {
 			<th>Block words for registration</th>
 			<td>
 				<textarea name="registration_block_words" rows="10" cols="80">%s</textarea>
-				<p><em>Any registrations with any of these phrases within their username, email address, or profile fields will be put into manual review. One phrase per line.</em></p>
+				<p>
+					<em>Any registrations with any of these phrases within their username, email address, or profile fields will be put into manual review.</em><br>
+					<em>Multiple words allowed to form a phrase. Leading/trailing whitespace is not removed. One phrase per line.</em>
+				</p>
 			</td>
 		</tr>',
 		esc_textarea( implode( "\n", get_option( 'registration_block_words', [] ) ) )
@@ -355,15 +361,36 @@ add_action( 'admin_post_login_block_account', function() {
 		wp_die();
 	}
 
-	if ( empty( $_REQUEST['user_id'] ) ) {
+	if ( empty( $_REQUEST['user'] ) ) {
 		die();
 	}
 
-	$user_id = (int) $_REQUEST['user_id'];
+	$pending_user = wporg_get_pending_user( $_REQUEST['user'] );
+	if ( ! $pending_user || ! $pending_user['created'] ) {
+		die();
+	}
 
-	check_admin_referer( 'block_account_' . $user_id );
+	$user = get_user_by( 'slug', $pending_user['user_login'] );
+	if ( ! $user ) {
+		die();
+	}
 
-	if ( $user_id && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+	$table = new User_Registrations_List_Table();
+
+	ob_start();
+	$pending_as_object       = (object) $pending_user;
+	$pending_as_object->meta = (object) $pending_as_object->meta;
+	$pending_as_object->user = $user;
+
+	unset( $pending_as_object->meta->registration_ip, $pending_as_object->meta->confirmed_ip );
+
+	$table->column_meta( $pending_as_object );
+	$meta_column = ob_get_clean();
+	$meta_column = wp_strip_all_tags( str_replace( '<br>', "\n", $meta_column ), false );
+
+	check_admin_referer( 'block_account_' . $user->ID );
+
+	if ( $user && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 
 		// Switch first so that bbPress loads with the correct context.
 		// This also ensures that the bbp_participant code doesn't kick in.
@@ -378,8 +405,12 @@ add_action( 'admin_post_login_block_account', function() {
 		restore_current_blog();
 		switch_to_blog( WPORG_SUPPORT_FORUMS_BLOGID );
 
+		add_filter( 'wporg_bbp_forum_role_changed_note_text', function( $text ) use ( $meta_column ) {
+			return trim( "{$meta_column}\n\n{$text}" );
+		} );
+
 		// Set the user to blocked. Support forum hooks will take care of the rest.
-		bbp_set_user_role( $user_id, bbp_get_blocked_role() );
+		bbp_set_user_role( $user->ID, bbp_get_blocked_role() );
 
 		restore_current_blog();
 	}

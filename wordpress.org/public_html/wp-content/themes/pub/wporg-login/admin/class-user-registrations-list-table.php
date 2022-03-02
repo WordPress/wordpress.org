@@ -311,8 +311,8 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		} else {
 			$url = add_query_arg(
-				'user_id',
-				urlencode( $item->user->ID ),
+				'user',
+				urlencode( $item->user->user_login ),
 				admin_url( 'admin-post.php?action=login_block_account' )
 			);
 			$url = wp_nonce_url( $url, 'block_account_' . $item->user->ID );
