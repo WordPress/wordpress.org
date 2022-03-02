@@ -8,7 +8,7 @@
 $sso = WPOrg_SSO::get_instance();
 
 // Migrate to cookies.
-if ( !empty( $sso::$matched_route_params['confirm_user'] ) ) {
+if ( ! empty( $sso::$matched_route_params['confirm_user'] ) ) {
 	setcookie( 'wporg_confirm_user', $sso::$matched_route_params['confirm_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 	setcookie( 'wporg_confirm_key',  $sso::$matched_route_params['confirm_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 
@@ -157,7 +157,7 @@ get_header();
 		<input type="text" disabled="disabled" class="disabled" value="<?php echo esc_attr( $activation_user ); ?>" size="20" />
 	</p>
 
-	<div class="user-pass1-wrap">
+	<div class="user-pass1-wrap" <?php echo ( $pending_user['cleared'] ? '' : "style='display:none;'" ); ?>>
 		<p>
 			<label for="pass1"><?php _e( 'Password', 'wporg' ); ?></label>
 		</p>
@@ -186,7 +186,7 @@ get_header();
 	?>
 
 	<p class="login-submit">
-		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary button-large" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
+		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary button-large" value="<?php ( $pending_user['cleared'] ? esc_attr_e( 'Create Account', 'wporg' ) : esc_attr_e( 'Save Profile Information', 'wporg' ) ); ?>" />
 	</p>
 
 </form>

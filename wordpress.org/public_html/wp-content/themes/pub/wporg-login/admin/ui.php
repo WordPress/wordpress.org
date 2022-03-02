@@ -12,6 +12,17 @@ add_action( 'admin_menu', function() {
 		'dashicons-admin-users',
 		1
 	);
+
+	add_submenu_page(
+		'user-registrations',
+		'Settings',
+		'Settings',
+		'promote_users',
+		'user-registration-settings',
+		'wporg_login_admin_settings_page',
+		'dashicons-admin-settings'
+	);
+
 });
 
 function wporg_login_admin_action_text( $action ) {
@@ -92,6 +103,118 @@ function wporg_login_admin_page() {
 	$wp_list_table->search_box( 'Search', 's' );
 	$wp_list_table->display();
 
+	echo '</form>';
+	echo '</div>';
+}
+
+function wporg_login_admin_settings_page() {
+	if ( $_POST && check_admin_referer( 'update_login_settings' ) ) {
+		$recaptcha_v3_threshold = wp_unslash( $_POST['recaptcha_v3_threshold'] ?? '' );
+		if ( $recaptcha_v3_threshold ) {
+			$recaptcha_v3_threshold = sprintf( "%.1f", $recaptcha_v3_threshold );
+			update_option( 'recaptcha_v3_threshold', $recaptcha_v3_threshold );
+		}
+
+		$block_words = wp_unslash( $_POST['registration_block_words'] ?? '' );
+		if ( $block_words ) {
+			$block_words = explode( "\n", $block_words );
+			$block_words = array_values( array_unique( array_filter( array_map( 'trim', $block_words ) ) ) );
+
+			// Sanity; Don't let it change more than 20%.
+			if ( count( $block_words ) < count( get_option( 'registration_block_words' ) ) * 0.8 ) {
+				wp_die( "Are you sure you wanted to do that? You attempted to change registration_block_words to less than 80% of the previous value." );
+			}
+
+			update_option( 'registration_block_words', $block_words );
+		}
+
+		$banned_email_domains = wp_unslash( $_POST['banned_email_domains'] ?? '' );
+		if ( $banned_email_domains ) {
+			$banned_email_domains = explode( "\n", $banned_email_domains );
+			$banned_email_domains = array_values( array_unique( array_filter( array_map( 'trim', $banned_email_domains ) ) ) );
+
+			// Sanity; Don't let it change more than 20%.
+			if ( count( $banned_email_domains ) < count( get_site_option( 'banned_email_domains' ) ) * 0.8 ) {
+				wp_die( "Are you sure you wanted to do that? You attempted to change banned_email_domains to less than 80% of the previous value." );
+			}
+
+			// Network-wide option.
+			update_site_option( 'banned_email_domains', $banned_email_domains );
+		}
+
+		$ip_block = wp_unslash( $_POST['ip_block'] ?? '' );
+		$ip_allow = wp_unslash( $_POST['ip_allow'] ?? '' );
+		if ( $ip_block || $ip_allow ) {
+			wp_cache_add_global_groups( array( 'registration-limit' ) );
+
+			if ( $ip_allow ) {
+				wp_cache_set( $ip_allow, 'whitelist', 'registration-limit', DAY_IN_SECONDS );
+			}
+			if ( $ip_block ) {
+				wp_cache_set( $ip_block, 999, 'registration-limit', DAY_IN_SECONDS );
+			}
+		}
+
+		echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
+	}
+
+	echo '<div class="wrap">';
+	echo '<h1 class="wp-heading-inline">Registration &amp; Login Settings</h1>';
+	echo '<hr class="wp-header-end">';
+	echo '<form method="POST">';
+	wp_nonce_field( 'update_login_settings' );
+	echo '<table class="form-table">';
+
+	printf(
+		'<tr>
+			<th>reCaptcha v3 low-score threshold for Registration</th>
+			<td><input name="recaptcha_v3_threshold" type="number" min="0.0" max="1.0" step="0.1" name="" value="%s"></td>
+		</tr>',
+		esc_attr( get_option( 'recaptcha_v3_threshold', 0.2 ) )
+	);
+
+	printf(
+		'<tr>
+			<th>Block words for registration</th>
+			<td>
+				<textarea name="registration_block_words" rows="10" cols="80">%s</textarea>
+				<p><em>Any registrations with any of these phrases within their username, email address, or profile fields will be put into manual review. One phrase per line.</em></p>
+			</td>
+		</tr>',
+		esc_textarea( implode( "\n", get_option( 'registration_block_words', [] ) ) )
+	);
+
+	printf(
+		'<tr>
+			<th>Banned Email Domains</th>
+			<td>
+				<textarea name="banned_email_domains" rows="10" cols="80">%s</textarea>
+				<p id="banned-email-domains-desc"><em>These email domains are WordPress.org-wide. No emails will be sent to them. No users can set their email address to it.<br>One email domain per line. This is the same list as <a href="https://wordpress.org/wp-admin/network/settings.php#banned_email_domains">https://wordpress.org/wp-admin/network/settings.php#banned_email_domains</a>.</em></p>
+			</td>
+		</tr>',
+		esc_textarea( implode( "\n", get_site_option( 'banned_email_domains', [] ) ) ),
+	);
+
+	echo '<tr>
+		<th>IP Block for 24hrs</th>
+		<td>
+			<input class="regular-text" type="text" name="ip_block" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" placeholder="xxx.xxx.xxx.xxx">
+			<p><em>One IP only. IP will be blocked from registrations for 24hrs. </em></p>
+		</td>
+	</tr>';
+
+	echo '<tr>
+		<th>IP Allow for 24hrs</th>
+		<td>
+			<input class="regular-text" type="text" name="ip_allow" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" placeholder="xxx.xxx.xxx.xxx">
+			<p><em>One IP only. IP will bypass per-IP limits on registrations for 24hrs. Will also bypass Jetpack Protect login limiter.</em></p>
+		</td>
+	</tr>';
+
+	echo '</table>';
+	echo '<p class="submit">
+		<input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+	</p>';
 	echo '</form>';
 	echo '</div>';
 }
@@ -230,7 +353,7 @@ add_action( 'admin_post_login_block_account', function() {
 		include_once WP_PLUGIN_DIR . '/support-forums/support-forums.php';
 
 		// bbPress roles still aren't quite right, need to switch away and back..
-		// This is hacky, but otherwise the bbp_set_user_role() call below will appear to succeed, but no role aleration will actually happen.
+		// This is hacky, but otherwise the bbp_set_user_role() call below will appear to succeed, but no role alteration will actually happen.
 		restore_current_blog();
 		switch_to_blog( WPORG_SUPPORT_FORUMS_BLOGID );
 

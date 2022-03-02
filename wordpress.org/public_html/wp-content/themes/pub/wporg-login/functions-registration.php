@@ -45,7 +45,7 @@ function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low
 }
 
 /**
- * Handles creating a "Pending" registration that will later be converted to an actual user  account.
+ * Handles creating a "Pending" registration that will later be converted to an actual user account.
  */
 function wporg_login_create_pending_user( $user_login, $user_email, $meta = array() ) {
 	global $wpdb, $wp_hasher;
@@ -95,9 +95,12 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		$pending_user['meta']['heuristics'] = wporg_registration_check_private_heuristics( compact( 'user_login', 'user_email' ) );
 	}
 
+	$passes_block_words = wporg_login_check_against_block_words( $pending_user );
+
 	$pending_user['cleared'] = (
 		'allow' === $pending_user['meta']['heuristics'] &&
-		(float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 ) 
+		(float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 ) &&
+		$passes_block_words
 	);
 
 	$inserted = wporg_update_pending_user( $pending_user );
@@ -397,10 +400,42 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 		}
 	}
 
+	// If not manually approved, check against block_words.
+	if ( $pending_user['cleared'] < 2 ) {
+		$passes_block_words = wporg_login_check_against_block_words( $pending_user );
+		if ( ! $passes_block_words ) {
+			$pending_user['cleared'] = 0;
+		}
+	}
+
 	if ( $pending_user ) {
 		wporg_update_pending_user( $pending_user );
 		if ( $updated_email ) {
 			wporg_login_send_confirmation_email( $pending_user );
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Check a pending user object against the 'block words' setting.
+ * 
+ * @return bool
+ */
+function wporg_login_check_against_block_words( $user ) {
+	$block_words = get_option( 'registration_block_words', [] );
+
+	foreach ( $block_words as $word ) {
+		if (
+			false !== stripos( $user['user_login'], $word ) ||
+			false !== stripos( $user['user_email'], $word ) ||
+			false !== stripos( $user['meta']['url'], $word ) ||
+			false !== stripos( $user['meta']['from'], $word ) ||
+			false !== stripos( $user['meta']['occ'], $word ) ||
+			false !== stripos( $user['meta']['interests'], $word )
+		) {
+			return false;
 		}
 	}
 
