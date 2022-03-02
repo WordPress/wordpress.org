@@ -188,7 +188,12 @@ class User_Registrations_List_Table extends WP_List_Table {
 		$total_items = $wpdb->get_var( 'SELECT FOUND_ROWS()' );
 
 		foreach ( $this->items as $i => $item ) {
-			$this->items[$i]->user = $item->created ? get_user_by( 'slug', $item->user_login ) : false;
+			$this->items[$i]->user       = $item->created ? get_user_by( 'slug', $item->user_login ) : false;
+			$this->items[$i]->pending_id = (int) $this->items[$i]->pending_id;
+			$this->items[$i]->cleared    = (int) $this->items[$i]->cleared;
+			$this->items[$i]->created    = (int) $this->items[$i]->created;
+			$this->items[$i]->meta       = json_decode( $this->items[$i]->meta );
+			$this->items[$i]->scores     = json_decode( $this->items[$i]->scores );
 		}
 
 		$this->set_pagination_args([
@@ -196,6 +201,38 @@ class User_Registrations_List_Table extends WP_List_Table {
 			'per_page'    => $per_page,
 		]);
 
+	}
+
+	function single_row( $item ) {
+		$classes = $this->get_row_class( $item );
+		printf( '<tr class="%s">', esc_attr( implode( ' ', $classes ) ) );
+		$this->single_row_columns( $item );
+		echo '</tr>';
+	}
+
+	function get_row_class( $item ) {
+		$classes = [];
+
+		if ( ! empty( $_GET['view'] ) && 'all' !== $_GET['view'] ) {
+			return $classes;
+		}
+
+		if (
+			$item->user &&
+			'BLOCKED' === substr( $item->user->user_pass, 0, 7 )
+		) {
+			$classes[] = 'blocked';
+		} elseif ( $item->created ) {
+			$classes[] = 'created';
+		} elseif ( $item->cleared > 1 ) {
+			$classes[] = 'manually-approved';
+		} elseif ( $item->cleared ) {
+			$classes[] = 'cleared';
+		} else {
+			$classes[] = 'failed';
+		}
+
+		return $classes;
 	}
 
 	function column_default( $item, $column_name ) {
@@ -235,6 +272,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		echo '<hr>';
+
 		echo $this->link_to_search( $item->user_email );
 
 		$row_actions = [];
@@ -292,7 +330,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 	}
 
 	function column_meta( $item ) {
-		$meta = json_decode( $item->meta );
+		$meta = $item->meta;
 
 		echo '<div>';
 
@@ -309,6 +347,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 				] ) )
 			)
 		);
+
 		echo '<hr>';
 
 		foreach ( [ 'url', 'from', 'occ', 'interests' ] as $field ) {
@@ -332,7 +371,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		echo ( $item->cleared ? 'Passed' : 'Failed' ) . '<br>';
 
-		foreach ( json_decode( $item->scores ) as $type => $val ) {
+		foreach ( $item->scores as $type => $val ) {
 			printf(
 				'<abbr title="%s">%s</abbr> ',
 				esc_attr( $type ),
@@ -340,8 +379,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			);
 		}
 
-		$meta    = json_decode( $item->meta );
-		$akismet = $meta->akismet_result ?? '';
+		$akismet = $item->meta->akismet_result ?? '';
 		if ( $akismet ) {
 			printf(
 				'<abbr title="%s">%s</abbr> ',
@@ -350,7 +388,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			);
 		}
 
-		$heuristics = $meta->heuristics ?? '';
+		$heuristics = $item->meta->heuristics ?? '';
 		if ( $heuristics ) {
 			printf(
 				'<abbr title="%s">%s</abbr> ',

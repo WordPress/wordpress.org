@@ -83,6 +83,27 @@ function wporg_login_admin_page() {
 			max-height: 200px;
 			overflow: scroll;
 		}
+		.wp-list-table.toplevel_page_user-registrations > tbody > tr.created {
+			background-color: rgba(74, 202, 12, 0.06);
+		}
+		.wp-list-table.toplevel_page_user-registrations > tbody > tr.manually-approved {
+			background-color: rgba(74, 202, 12, 0.12);
+		}
+		.wp-list-table.toplevel_page_user-registrations > tbody > tr.cleared {
+			background-color: rgba(202, 181, 12, 0.06)
+		}
+		.wp-list-table.toplevel_page_user-registrations > tbody > tr.failed {
+			background-color: rgba(202, 12, 12, 0.06)
+		}
+		.wp-list-table.toplevel_page_user-registrations > tbody > tr.blocked {
+			background-color: rgba(202, 12, 12, 0.12)
+		}
+		.wp-list-table.toplevel_page_user-registrations > tbody td {
+			border-bottom: 1px solid #cecece;
+		}
+		.wp-list-table.toplevel_page_user-registrations > tbody hr {
+			opacity: 0.5;
+		}
 	</style>
 	<?php
 
