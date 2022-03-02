@@ -429,13 +429,18 @@ function wporg_login_check_against_block_words( $user ) {
 	foreach ( $block_words as $word ) {
 		if (
 			false !== stripos( $user['user_login'], $word ) ||
-			false !== stripos( $user['user_email'], $word ) ||
-			false !== stripos( $user['meta']['url'], $word ) ||
-			false !== stripos( $user['meta']['from'], $word ) ||
-			false !== stripos( $user['meta']['occ'], $word ) ||
-			false !== stripos( $user['meta']['interests'], $word )
+			false !== stripos( $user['user_email'], $word )
 		) {
 			return false;
+		}
+
+		foreach ( [ 'url', 'from', 'occ', 'interests' ] as $field ) {
+			if (
+				! empty( $user['meta'][ $field ] ) &&
+				false !== stripos( $user['meta'][ $field ], $word )
+			) {
+				return false;
+			}
 		}
 	}
 
