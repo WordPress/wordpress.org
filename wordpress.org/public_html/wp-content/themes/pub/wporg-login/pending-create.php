@@ -68,25 +68,26 @@ if ( isset( $_POST['user_pass'] ) && 2 !== $pending_user['cleared'] ) {
 	if ( ! wporg_login_check_recapcha_status( 'pending_create', false ) ) {
 		unset( $_POST['user_pass'] );
 		$error_recapcha_status = true;
+	}
 
-		// Store for reference.
-		if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
-			$recaptcha_api = wporg_login_recaptcha_api(
-				$_POST['_reCaptcha_v3_token'],
-				RECAPTCHA_V3_PRIVKEY
-			);
-			if ( $recaptcha_api && $recaptcha_api['success'] && 'pending_create' == $recaptcha_api['action'] ) {
-				$pending_user['scores']['create_attempt'] = $recaptcha_api['score'];
-			} // else: probably `timeout-or-duplicate` or w.org network error.
-		}
+	// Store for reference.
+	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
+		$recaptcha_api = wporg_login_recaptcha_api(
+			$_POST['_reCaptcha_v3_token'],
+			RECAPTCHA_V3_PRIVKEY
+		);
+		if ( $recaptcha_api && $recaptcha_api['success'] && 'pending_create' == $recaptcha_api['action'] ) {
+			$pending_user['scores']['create_attempt'] = $recaptcha_api['score'];
+		} // else: probably `timeout-or-duplicate` or w.org network error.
+	}
 
-		// Allow a recaptcha fail to try again, but if they're blocked due to low score, mark them as needing approval.
-		if (
-			! empty( $pending_user['scores']['create_attempt'] ) &&
-			(float) $pending_user['scores']['create_attempt'] < (float) get_option( 'recaptcha_v3_threshold', 0.2 )
-		) {
-			$pending_user['cleared'] = 0;
-		}
+	// Allow a recaptcha fail to try again, but if they're blocked due to low score, mark them as needing approval.
+	if (
+		$error_recapcha_status &&
+		! empty( $pending_user['scores']['create_attempt'] ) &&
+		(float) $pending_user['scores']['create_attempt'] < (float) get_option( 'recaptcha_v3_threshold', 0.2 )
+	) {
+		$pending_user['cleared'] = 0;
 	}
 
 	wporg_update_pending_user( $pending_user );
