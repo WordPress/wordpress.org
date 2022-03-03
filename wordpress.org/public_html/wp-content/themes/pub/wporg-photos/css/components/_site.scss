@@ -87,6 +87,7 @@ body.search  {
 			height: 200px;
 			width: 300px;
 			object-fit: cover;
+			transition: all 250ms;
 
 			&:active,
 			&:hover {
