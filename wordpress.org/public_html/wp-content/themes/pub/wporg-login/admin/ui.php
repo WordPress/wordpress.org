@@ -19,8 +19,7 @@ add_action( 'admin_menu', function() {
 		'Settings',
 		'promote_users',
 		'user-registration-settings',
-		'wporg_login_admin_settings_page',
-		'dashicons-admin-settings'
+		'wporg_login_admin_settings_page'
 	);
 
 });
