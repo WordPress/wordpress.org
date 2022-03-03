@@ -517,6 +517,25 @@ div.upload-checkbox-wrapper {
 	input[type="checkbox"] {
 		margin-top: 0;
 	}
+
+	div {
+		padding-left: 25px;
+	}
+
+	input {
+		margin-left: -25px;
+	}
+
+	@include breakpoint( 0, 782px ) {
+		div {
+			margin: 0.5rem 0;
+			padding-left: 35px;
+		}
+
+		input {
+			margin-left: -35px;
+		}
+	}
 }
 
 #wporg-photo-upload label.error {
