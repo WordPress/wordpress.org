@@ -138,6 +138,7 @@ function wporg_login_admin_settings_page() {
 
 		$block_words = wp_unslash( $_POST['registration_block_words'] ?? '' );
 		if ( $block_words ) {
+			$block_words = str_replace( "\r", '', $block_words ); // We're not trimming the lines (So spaces before/after can be included to match full words only), but need to remove the 'arrrs.
 			$block_words = explode( "\n", $block_words );
 			$block_words = array_values( array_unique( array_filter( $block_words ) ) );
 
