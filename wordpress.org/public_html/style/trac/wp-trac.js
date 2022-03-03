@@ -97,6 +97,16 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'Openverse': {
 			tracker: 'https://github.com/WordPress/openverse/issues/new/choose',
 			tracker_text: 'Openverse GitHub Repository',
+		},
+		'Global Header/Footer': {
+			tracker: 'https://github.com/WordPress/wporg-mu-plugins/issues/new?labels=Header+%26+Footer',
+			tracker_text: 'WordPress.org mu-plugins GitHub Repository',
+			enable_copy: true
+		},
+		'News (wordpress.org/news)': {
+			tracker: 'https://github.com/WordPress/wporg-news-2021/issues/new',
+			tracker_text: 'WordPress.org News GitHub Repository',
+			enable_copy: true
 		}
 	};
 
@@ -813,7 +823,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				url_params[summary_field]     = $('#field-summary').val();
 				url_params[description_field] = $('#field-description').val()
 
-				url = href + '?' + $.param( url_params );
+				url = href + ( href.indexOf( '?' ) ? '&' : '?' ) + $.param( url_params );
 				if ( url.length > 1500 ) {
 					url_params[description_field] = '(Couldn\'t copy over your description as it was too long. Please paste it here. Your old window was not closed.)';
 					url = href + '?' + $.param( url_params );
