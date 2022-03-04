@@ -762,6 +762,9 @@ div.trac-content {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
+.foldable a:hover {
+	text-decoration: none; /* for bb's */
+}
 #prefs {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
@@ -2448,6 +2451,7 @@ a.mention.me {
 #github-prs ul.pull-requests {
 	border: 1px solid #ccc;
 	padding: 0 1em;
+	margin: 0;
 	position: relative;
 }
 #github-prs ul.pull-requests li {
@@ -2461,6 +2465,10 @@ a.mention.me {
 }
 #github-prs .button {
 	color: black;
+	white-space: nowrap;
+}
+#github-prs .button:hover {
+	text-decoration: none;
 }
 #github-prs ins {
 	color: green;
