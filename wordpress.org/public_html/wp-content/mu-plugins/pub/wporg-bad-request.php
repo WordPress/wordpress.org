@@ -178,17 +178,6 @@ add_action( 'send_headers', function() {
 } );
 
 /**
- * Detect invalid admin ajax requests.
- */
-if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-	add_action( 'admin_init', function() {
-		if ( ! empty( $_REQUEST['action'] ) && ! is_scalar( $_REQUEST['action'] ) ) {
-			die_bad_request( "non-scalar action in admin-ajax." );
-		}
-	} );
-}
-
-/**
  * Die with a 400 Bad Request.
  *
  * @param string $reference A unique identifying string to make it easier to read logs.
