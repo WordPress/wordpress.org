@@ -6,7 +6,12 @@ require( $base_dir . '/wp-init.php' );
 
 // function to verify signature from HelpScout
 function isFromHelpScout($data, $signature) {
+	if ( ! defined( 'HELPSCOUT_SECRET_KEY' ) ) {
+		return false;
+	}
+
 	$calculated = base64_encode( hash_hmac( 'sha1', $data, HELPSCOUT_SECRET_KEY, true ) );
+
 	return hash_equals( $signature, $calculated );
 }
 
