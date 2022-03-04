@@ -818,7 +818,7 @@ nav.o2-post-footer-actions ul li > span > a {
 	background: #eee;
 	/* jQuery slideUp overrides the margin, causing the animation to be a bit funky. !important stops that. */
 	margin: -4em 0 4em 0 !important;
-	padding: 2em 0;
+	padding: 2em 1em;
 	position: relative;
 	width: 100%;
 }
