@@ -1261,6 +1261,17 @@ TICKET;
 
 		// Otherwise create it for this new theme.
 		} else {
+
+			// Filter the tags to those that exist on the site already.
+			$tags = array_intersect(
+				$this->theme->get( 'Tags' ),
+				get_terms( array(
+					'hide_empty' => false,
+					'taxonomy' => 'post_tag',
+					'fields' => 'slugs'
+				) )
+			);
+
 			$post_id = wp_insert_post( array(
 				'post_author'    => $this->author->ID,
 				'post_title'     => $this->theme->get( 'Name' ),
@@ -1272,7 +1283,7 @@ TICKET;
 				'comment_status' => 'closed',
 				'ping_status'    => 'closed',
 				'post_type'      => 'repopackage',
-				'tags_input'     => $this->theme->get( 'Tags' ),
+				'tags_input'     => $tags,
 			) );
 		}
 
