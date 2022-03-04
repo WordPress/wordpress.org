@@ -1664,7 +1664,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				primaryGitRepo, primaryGitRepoDesc, container;
 
 			function init() {
-				// TODO: If this is added to other Trac's, expand this..
 				if ( $body.hasClass( 'core' ) ) {
 					trac = 'core';
 					primaryGitRepo = 'WordPress/wordpress-develop';
@@ -1673,6 +1672,14 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					trac = 'meta';
 					primaryGitRepo = 'WordPress/wordpress.org';
 					primaryGitRepoDesc = 'WordPress.org Meta GitHub mirror';
+				} else if ( $body.hasClass( 'bbpress' ) ) {
+					trac = 'bbpress';
+					primaryGitRepo = 'bbpress/bbPress';
+					primaryGitRepoDesc = 'bbPress GitHub mirror';
+				} else if ( $body.hasClass( 'buddypress' ) ) {
+					trac = 'buddypress';
+					primaryGitRepo = 'buddypress/buddypress';
+					primaryGitRepoDesc = 'BuddyPress GitHub mirror';
 				}
 
 				if ( ! trac ) {
