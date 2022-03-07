@@ -33,9 +33,8 @@ $show_full_header = is_home() && ! is_paged();
 	<div id="content" class="site-content">
 		<header id="masthead" class="site-header <?php echo $show_full_header ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
+				<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Photos', 'Site title', 'wporg-photos' ); ?></a></h1>
 				<?php if ( $show_full_header ) : ?>
-					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Photos', 'Site title', 'wporg-photos' ); ?></a></h1>
-
 					<p class="site-description">
 						<?php
 						$photo_count = get_photos_count();
@@ -48,8 +47,6 @@ $show_full_header = is_home() && ! is_paged();
 					</p>
 					<?php get_search_form(); ?>
 				<?php else : ?>
-					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Photos', 'Site title', 'wporg-photos' ); ?></a></p>
-
 					<nav id="site-navigation" class="main-navigation" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-photos' ); ?>"></button>
 						<div id="primary-menu" class="menu">

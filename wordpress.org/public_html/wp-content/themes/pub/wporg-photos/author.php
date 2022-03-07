@@ -17,7 +17,7 @@ get_header();
 	 	<?php if ( have_posts() ) : ?>
 
 			<header class="page-header">
-				<h1 class="page-title">
+				<h2 class="page-title">
 					<?php
 					printf(
 						/* translators: Search query. */
@@ -29,7 +29,7 @@ get_header();
 										)
 					);
 					?>
-				</h1>
+				</h2>
 			</header><!-- .page-header -->
 
 		<?php

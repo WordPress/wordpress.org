@@ -14,9 +14,9 @@ $terms = get_terms( [ 'taxonomy' => $tax_name, 'hide_empty' => false ] );
 ?>
 
 <header class="page-header">
-	<h1 class="page-title">
+	<h2 class="page-title">
 		<?php _e( 'Orientations', 'wporg-photo' ); ?>
-	</h1>
+	</h2>
 
 	<p><?php _e( 'Browse photos by orientation&hellip;', 'wporg-photos' ); ?></p>
 </header><!-- .page-header -->
