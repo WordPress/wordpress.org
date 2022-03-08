@@ -4,24 +4,23 @@ namespace WordPressdotorg\Plugin_Directory;
 // Hmm
 add_filter( 'option_has_jetpack_search_product', '__return_true' );
 
-
 /**
- ** Override Jetpack Search class with special features for the Plugin Directory
- **
- ** @package WordPressdotorg\Plugin_Directory
- **/
+ * Override Jetpack Search class with special features for the Plugin Directory
+ *
+ * @package WordPressdotorg\Plugin_Directory
+ */
 class Plugin_Search {
 
 	// Set this to true to disable the new class and use the old jetpack-search.php code.
 	const USE_OLD_SEARCH = false;
 
-	// Internal state
-	protected $locale;
-	protected $is_block_search;
-	protected $is_english;
-	protected $en_boost;
-	protected $desc_boost;
-	protected $desc_en_boost;
+	// Internal state - These are all overridden below, but here for reference purposes for a non-block english search.
+	protected $locale          = 'en_US';
+	protected $is_block_search = false;
+	protected $is_english      = true;
+	protected $en_boost        = 0.00001;
+	protected $desc_boost      = 1;
+	protected $desc_en_boost   = 0.00001;
 
 	/**
 	 * Fetch the instance of the Plugin_Search class.
@@ -66,7 +65,7 @@ class Plugin_Search {
 			add_filter( 'option_jetpack_active_modules', array( $this, 'option_jetpack_active_modules' ), 10, 1 );
 			add_filter( 'pre_option_has_jetpack_search_product', array( $this, 'option_has_jetpack_search_product' ), 10, 1 );
 
-			add_filter( 'jetpack_search_abort', array( $this, 'log_jetpack_search_abort' ) );
+			// add_filter( 'jetpack_search_abort', array( $this, 'log_jetpack_search_abort' ) );
 
 			require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search.php' );
 			require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search-helpers.php' );
@@ -151,20 +150,17 @@ class Plugin_Search {
 		$this->is_english = ( !$this->locale || 'en' === $this->locale );
 
 		if ( $this->is_english ) {
-			$matching_fields      = array(
+			$matching_fields = array(
 				'all_content_en',
 			);
 		} else {
-			$matching_fields      = array(
+			$matching_fields = array(
 				'all_content_' . $this->locale,
 				'all_content_en^' . $this->en_boost,
 			);
 		}
 
 		$args['query_fields'] = $matching_fields;
-
-
-
 
 		return $args;
 	}
