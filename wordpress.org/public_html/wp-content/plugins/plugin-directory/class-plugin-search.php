@@ -146,8 +146,8 @@ class Plugin_Search {
 		$this->desc_en_boost        = $this->desc_boost * $this->en_boost;
 
 		// We need to be locale aware for this
-		$this->locale = strtolower( substr( get_locale(), 0, 2 ) );
-		$this->is_english = ( !$this->locale || 'en' === $this->locale );
+		$this->locale     = get_locale();
+		$this->is_english = ( ! $this->locale || str_starts_with( $this->locale, 'en_' ) );
 
 		if ( $this->is_english ) {
 			$matching_fields = array(
