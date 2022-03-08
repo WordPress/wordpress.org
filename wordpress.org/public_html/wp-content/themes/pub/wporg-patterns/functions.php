@@ -5,6 +5,8 @@ namespace WordPressdotorg\Pattern_Directory\Theme;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
 
+require_once __DIR__ . '/includes/inline-styles.php';
+
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets', 20 );
 add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
@@ -26,13 +28,8 @@ add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_urls' );
  * as indicating support for post thumbnails.
  */
 function setup() {
-	add_theme_support( 'post-thumbnails' );
-
 	// Add gutenberg styling supports.
 	add_theme_support( 'align-wide' );
-	add_theme_support( 'custom-spacing' );
-	add_theme_support( 'custom-line-height' );
-	add_theme_support( 'experimental-link-color' );
 
 	// The parent wporg theme is designed for use on wordpress.org/* and assumes locale-domains are available.
 	// Remove hreflang support.
@@ -115,7 +112,8 @@ function enqueue_assets() {
  * See https://github.com/WordPress/gutenberg/blob/6ad2a433769a4514fc52083e97aa47a0bc9edf07/lib/client-assets.php#L710
  */
 function generate_block_editor_styles_html() {
-	$handles = array( 'wp-block-library' );
+	wp_enqueue_global_styles();
+	$handles = array( 'wp-block-library', 'global-styles' );
 
 	$block_registry = \WP_Block_Type_Registry::get_instance();
 
@@ -146,6 +144,9 @@ function generate_block_editor_styles_html() {
 		),
 		'before'
 	);
+
+	wp_dequeue_style( 'global-styles' );
+	wp_deregister_style( 'global-styles' );
 }
 
 /**
