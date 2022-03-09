@@ -7,7 +7,13 @@
 class WPorg_Handbook_TOC {
 	protected $post_types = array();
 
-	protected $styles = '<style> .toc-jump { text-align: right; font-size: 12px; } .page .toc-heading { margin-top: -50px; padding-top: 50px !important; }</style>';
+	protected $styles = '<style>
+		.toc-jump { text-align: right; font-size: 12px; }
+		.toc-heading a { color: inherit; font-weight: inherit; margin-left: -25px; text-decoration: none !important; }
+		.toc-heading a:before { visibility: hidden; vertical-align: middle; margin-top: -5px; margin-right: 5px; }
+		.toc-heading:target a:before { margin-left: -8px; margin-right: 13px; }
+		.toc-heading a:hover:before, .toc-heading a:focus:before { visibility: visible; }
+	</style>';
 
 	/**
 	 * Array of HTML ids known to exist on the page or that have been auto-generated.
@@ -192,9 +198,14 @@ class WPorg_Handbook_TOC {
 				$first = false;
 			}
 
-			$a11y_text      = sprintf( '<span class="screen-reader-text">%s</span>', $title );
-			$anchor         = sprintf( '<a href="#%1$s" class="anchor"><span aria-hidden="true">#</span>%2$s</a>', $id, $a11y_text );
-			$replacement   .= sprintf( '<%1$s id="%2$s" class="%3$s" tabindex="-1" %4$s>%5$s %6$s</%1$s>', $tag, $id, $class, $extra_attrs, $title, $anchor );
+			$replacement   .= sprintf(
+				'<%1$s id="%2$s" class="%3$s" tabindex="-1" %4$s><a href="#%2$s" class="dashicons-before dashicons-admin-links">%5$s</a></%1$s>',
+				$tag,
+				$id,
+				$class,
+				$extra_attrs,
+				$title
+			);
 			$replacements[] = $replacement;
 		}
 
