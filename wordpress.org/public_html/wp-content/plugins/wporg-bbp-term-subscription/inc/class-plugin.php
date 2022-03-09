@@ -377,6 +377,9 @@ To unsubscribe from future emails click here:
 	/**
 	 * Replace the forum subscription subject/title with term-specific messaging.
 	 *
+	 * Eg, before it would be similar to `[Plugins] This is my thread title`.
+	 * This changes it to `[Plugin Name] Thread title`.
+	 *
 	 * @param string $title The current title
 	 * @param int $topic_id The topic id
 	 */
@@ -387,11 +390,12 @@ To unsubscribe from future emails click here:
 		}
 
 		if ( $this->directory && $this->directory->title() ) {
-			$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-			$topic_title = strip_tags( bbp_get_topic_title( $topic_id ) );
-
-			// [WordPress.org] [Plugin Name] This is my threads
-			$title = sprintf( '[%s] [%s] %s', $blog_name, $this->directory->title(), $topic_title );
+			// [Plugin Name] This is my thread title
+			$title = sprintf(
+				'[%s] %s',
+				$this->directory->title(),
+				strip_tags( bbp_get_topic_title( $topic_id ) )
+			);
 		}
 
 		return $title;
@@ -515,6 +519,9 @@ To unsubscribe from future emails click here:
 	/**
 	 * Replace the topic subscription subject/title with term-specific messaging.
 	 *
+	 * Eg, before it would be similar to `[Plugins] This is my thread title`.
+	 * This changes it to `[Plugin Name] Thread title`.
+	 *
 	 * @param string $title    The current title
 	 * @param int    $reply_id The reply id
 	 * @param int    $topic_id The topic id
@@ -526,11 +533,12 @@ To unsubscribe from future emails click here:
 		}
 
 		if ( $this->directory && $this->directory->title() ) {
-			$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-			$topic_title = strip_tags( bbp_get_topic_title( $topic_id ) );
-
-			// [WordPress.org] [Plugin Name] This is my threads
-			$title = sprintf( '[%s] [%s] %s', $blog_name, $this->directory->title(), $topic_title );
+			// [Plugin Name] This is my thread title
+			$title = sprintf(
+				'[%s] %s',
+				$this->directory->title(),
+				strip_tags( bbp_get_topic_title( $topic_id ) )
+			);
 		}
 
 		return $title;
