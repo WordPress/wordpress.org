@@ -1,21 +1,17 @@
-:root {
-    --header-height: 117px;
-}
-
-@media (min-width: 890px) {
-    :root {
-        --header-height: 104.453px;
-    }
-}
-
-
 #openverse_embed {
     display: block;
 
     width: 100%;
-    height: calc(100vh - var(--header-height));
+    height: calc(100vh - var(--wp-global-header-height));
 
     border: none;
+}
+
+/*
+Remove the scrollbar for the footer which is re-implemented in Openverse itself.
+*/
+body {
+    overflow:hidden;
 }
 
 #main,
