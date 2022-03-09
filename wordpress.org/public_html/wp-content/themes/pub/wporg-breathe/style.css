@@ -25,6 +25,33 @@ a[href*=".slack.com"]::before {
 body, button, input, select, textarea,
 .site-header .site-title {
 	font-family: 'Open Sans', sans-serif;
+	font-size: var(--wp--preset--font-size--normal);
+}
+
+p, ul, ol,
+#primary,
+#secondary aside {
+	font-size: inherit;
+}
+
+h1 {
+	font-size: 1.8em;
+}
+
+h2 {
+	font-size: 1.6em;
+}
+
+h3 {
+	font-size: 1.4em;
+}
+
+h4 {
+	font-size: 1.2em;
+}
+
+.entry-content .reports.ticket-reports {
+	font-size: var(--wp--preset--font-size--small);
 }
 
 table {
@@ -84,58 +111,6 @@ input[type="submit"] {
 	height: auto;
 }
 
-/* wporg-header overrides */
-#wporg-header input.text {
-	font-size: 12px !important;
-	padding: 3px;
-	box-sizing: content-box;
-}
-
-#wporg-header input[type="submit"] {
-	box-shadow: none;
-}
-
-#wporg-header ul li.download {
-	float: right;
-	height: 34px;
-	margin-right: 14px;
-	overflow: hidden;
-	padding: 0 0 34px;
-}
-
-@media screen and (max-width: 820px) {
-	#wporg-header ul li.download {
-		display: none;
-	}
-}
-
-@media screen and (max-width: 768px) {
-	#wporg-header ul li.download {
-		display: block;
-		float: none;
-		margin: 10px 20px 20px;
-		padding-bottom: 0;
-		height: auto;
-	}
-	#wporg-header ul li.download a {
-		padding: 4px 10px;
-	}
-}
-
-#wporg-header ul li.download a {
-	margin: 0;
-	padding: 0 16px;
-}
-
-#wporg-header ul li.download a:hover {
-	color: #eee;
-}
-
-#wporg-header ul li.download.current a,
-#wporg-header ul li.download.current-menu-item a {
-	color: #eee;
-}
-
 /*
  * 2021 global header/footer
  */
@@ -151,6 +126,13 @@ input[type="submit"] {
 	text-shadow: initial;
 }
 
+.wp-block-group.global-header p,
+.wp-block-group.global-header ul,
+.wp-block-group.global-header ol {
+	/* Revert styles that should only apply to the content area. */
+	font-size: inherit;
+	line-height: inherit;
+}
 
 /* site */
 
@@ -159,7 +141,7 @@ input[type="submit"] {
 .site-branding {
 	box-sizing: border-box;
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: 1024px;
 	padding: 0 10px;
 }
 
@@ -278,7 +260,7 @@ input[type="submit"] {
 .navigation-main a,
 .navigation-main a:visited {
 	color: rgba(255, 255, 255, 0.8);
-	font-size: 14px;
+	font-size: 0.75em;
 }
 
 .wporg-make .site-title a:before,
@@ -359,6 +341,21 @@ body,
 	color: inherit;
 }
 
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+	text-shadow: inherit;
+}
+
+button:hover,
+html input[type="button"]:hover,
+input[type="reset"]:hover,
+input[type="submit"]:hover {
+	/* remove box-shaddows from buttons that likely won't look good with it */
+	box-shadow: inherit;
+}
+
 @media only screen and (max-width: 480px) {
 	body.responsive-show #wpadminbar {
 		top: 0;
@@ -382,6 +379,11 @@ body,
 	#page.hfeed, /* The feed may have a table and we don't want to stop x-direction scrolling */
 	body.responsive-show #page {
 		overflow-x: visible;
+	}
+
+	#secondary {
+		top: var(--wp-admin--admin-bar--height, 0px);
+		z-index: 500;
 	}
 
 	#secondary-toggle {
@@ -415,6 +417,7 @@ body,
 
 .widget-title {
 	line-height: 1.2;
+	font-size: 1.4em;
 }
 
 .post-type-archive-handbook aside[id^="handbook"] .widget-title,
@@ -449,7 +452,7 @@ body,
   margin: 0 0 1.5em 0 !important;
   padding: 0;
   font-weight: 400;
-  font-size: 2.2em;
+  font-size: 1.5em;
   line-height: 1.1;
   text-transform: none;
 }
@@ -811,25 +814,16 @@ nav.o2-post-footer-actions ul li > span > a {
 	}
 }
 
-@media screen and (min-width: 769px) {
-	#wporg-header ul li.current-menu-item:after,
-	#wporg-header ul li.current_page_parent:after,
-	#wporg-header ul li a.current ~ .uparrow {
-		border-bottom-color: #0073aa;
-	}
-}
-
 .make-welcome {
 	background: #eee;
 	/* jQuery slideUp overrides the margin, causing the animation to be a bit funky. !important stops that. */
 	margin: -4em 0 4em 0 !important;
-	padding: 2em 0;
+	padding: 2em 1em;
 	position: relative;
 	width: 100%;
 }
 
 .make-welcome .entry-content {
-	font-size: 14px;
 	color: #333;
 	line-height: 1.45;
 	width: 100%;
@@ -853,7 +847,7 @@ nav.o2-post-footer-actions ul li > span > a {
 .make-welcome .entry-content h2,
 .make-welcome .entry-content .welcome p:first-child {
 	font-weight: normal;
-	font-size: 18px;
+	font-size: 1.125em;
 	font-family: "Open Sans", serif;
 }
 
@@ -881,7 +875,6 @@ nav.o2-post-footer-actions ul li > span > a {
 
 .make-welcome .entry-meta .post-edit-link {
 	margin-right: 10px;
-	font-size: 1.2em;
 	font-weight: normal;
 	padding-right: 15px;
 	border-right: 1px solid #ccc;
@@ -904,7 +897,7 @@ nav.o2-post-footer-actions ul li > span > a {
 	display: none;
 }
 
-@media screen and (min-width: 960px) {
+@media screen and (min-width: 1024px) {
 	.make-welcome .entry-content p {
 		display: block;
 	}
@@ -1028,7 +1021,7 @@ nav.o2-post-footer-actions ul li > span > a {
 
 .contributor-name {
 	padding-top: 14px;
-	font-size: 1.8rem;
+	font-size: 1.2rem;
 }
 
 article.page p.contributor-name {
@@ -1460,7 +1453,7 @@ h2.toc-heading + h3.toc-heading:target {
 
 .post-type-archive-handbook #main,
 .single-handbook #main {
-	max-width: 960px;
+	max-width: 1024px;
 	margin: 0 auto;
 	display: flex;
 }

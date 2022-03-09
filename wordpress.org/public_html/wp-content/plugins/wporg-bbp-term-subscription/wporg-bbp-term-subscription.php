@@ -19,7 +19,7 @@ define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
 include( dirname( __FILE__ ) . '/inc/class-plugin.php' );
 
 // Instantiate the Plugin
-new Plugin();
+$GLOBALS['wporg_bbp_topic_term_subscriptions'] = new Plugin();
 
 // Easy access for templates
 function get_subscription_link( $term_id ) {

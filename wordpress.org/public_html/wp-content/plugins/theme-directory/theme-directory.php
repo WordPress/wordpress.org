@@ -520,17 +520,30 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 			}
 		}
 
+		// Filter the tags to those that exist on the site already.
+		$tags = array_intersect(
+			$theme_data['Tags'],
+			get_terms( array(
+				'hide_empty' => false,
+				'taxonomy' => 'post_tag',
+				'fields' => 'slugs'
+			) )
+		);
+
 		wp_update_post( array(
 			'ID'           => $post_id,
 			'post_title'   => $theme_post_name,
 			'post_content' => $theme_data['Description'],
 			'post_parent'  => $theme_parent_post_id,
-			'tags_input'   => $theme_data['Tags'],
+			'tags_input'   => $tags,
 		) );
 
 		// Refresh the $post object for notifications.
 		$post = get_post( $post_id );
 	}
+
+	// Keep track of the last live version.
+	update_post_meta( $post_id, '_last_live_version', get_post_meta( $post_id, '_live_version', true ) );
 
 	// Update current version. Used to prioritize localized themes.
 	update_post_meta( $post_id, '_live_version', $version );

@@ -274,8 +274,10 @@ function get_whitelist() {
 		'design' => array(
 			// #core (inc committers) already included via get_parent_channel().
 			'chaion07',
+			'critterverse',
 			'estelaris',
 			'hedgefield',
+			'Joen',
 			'karmatosed',
 			'melchoyce',
 			'paaljoachim',
@@ -373,6 +375,7 @@ function get_whitelist() {
 			'olgabulat', // @Olga Bulat on Slack
 			'ronnybadilla', // @ronny on Slack
 			'sarayourfriend',
+			'stacimc',
 			'zackkrida',
 		),
 		'performance' => array(

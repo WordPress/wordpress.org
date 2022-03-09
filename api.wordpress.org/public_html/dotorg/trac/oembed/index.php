@@ -18,6 +18,9 @@
  */
 include dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
+// Avoid warnings from DomDocument.
+libxml_use_internal_errors( true );
+
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
@@ -29,7 +32,7 @@ header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS 
 if (
 	// meta|core are the only tracs embedable.
 	// milestone|ticketgraph|ticket|changeset are the only endpoints allowable.
-	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone|ticketgraph|ticket|changeset)([/?]|$)!i', $url, $m ) ||
+	! preg_match( '!^(?P<baseurl>https://(?P<trac>meta|core).trac.wordpress.org/)(?P<type>milestone|ticketgraph|ticket|changeset|query)([/?]|$)!i', $url, $m ) ||
 	'GET' !== $_SERVER['REQUEST_METHOD']
 ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
@@ -44,6 +47,22 @@ if ( ! isset( $_GET['embed'] ) ) {
 
 	// Unique ID for this instance of the iframe
 	$id = sha1( $url . microtime() );
+
+	$embed = [
+		'version'       => '1.0',
+		'provider_name' => 'WordPress.org Trac',
+		'provider_url'  => $m['baseurl'],
+		'title'         => 'WordPress.org Trac',
+		'type'          => 'rich',
+		'width'         => 600,
+		'height'        => 300,
+		'html'          => '',
+	];
+
+	// Default milestone embeds to 120px height.
+	if ( 'milestone' === $type ) {
+		$embed['height'] = 120;
+	}
 
 	$embed_url = add_query_arg(
 		[
@@ -60,9 +79,11 @@ if ( ! isset( $_GET['embed'] ) ) {
 	$embed_url .= '#el=' . $id;
 
 	$html = sprintf(
-		'<iframe sandbox="allow-scripts allow-top-navigation-by-user-activation" security="restricted" src="%s" id="%s" width="600" height="300" title="WordPress.org Trac" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content wporg-trac"></iframe>',
+		'<iframe sandbox="allow-scripts allow-top-navigation-by-user-activation" security="restricted" src="%s" id="%s" width="%d" height="%d" title="WordPress.org Trac" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" class="wp-embedded-content wporg-trac"></iframe>',
 		esc_url( $embed_url ),
-		esc_attr( 'el-' . $id )
+		esc_attr( 'el-' . $id ),
+		esc_attr( $embed['width'] ),
+		esc_attr( $embed['height'] )
 	);
 
 	$html .= sprintf(
@@ -83,21 +104,7 @@ if ( ! isset( $_GET['embed'] ) ) {
 		esc_attr( $id ),
 	);
 
-	$embed = [
-		'version'       => '1.0',
-		'provider_name' => 'WordPress.org Trac',
-		'provider_url'  => $m['baseurl'],
-		'title'         => 'WordPress.org Trac',
-		'type'          => 'rich',
-		'width'         => 600,
-		'height'        => 300,
-		'html'          => $html,
-	];
-
-	// Default milestone embeds to 120px.
-	if ( 'milestone' === $type ) {
-		$embed['height'] = 120;
-	}
+	$embed['html'] = $html;
 
 	echo wp_json_encode( $embed );
 	die();
@@ -130,15 +137,19 @@ $doc->loadHTML( $html );
 
 // IDs of elements to remove
 $remove_elements = [
-	'wporg-header', 'wporg-footer',
 	'headline', 'banner', 'mainnav',
 	'ctxtnav', 'help', 'altlinks',
 	'prefs',
+	'wporg-global-header-script-js',
+	'wporg-global-header-script-js-extra',
+	'wporg-global-header-footer-css',
 ];
 
-// Tags to just strip out.
+// Tags, with optional SINGLE class specification to just strip out.
 $remove_tags = [
-	'form'
+	'form',
+	'header.global-header',
+	'footer.global-footer',
 ];
 
 // Additional elements per type of page.
@@ -158,6 +169,11 @@ switch ( $type ) {
 			}
 		}
 		break;
+	case 'query':
+		$remove_tags[] = 'h1';
+		$remove_tags[] = 'h2';
+		$remove_tags[] = 'div.paging';
+		break;
 }
 
 // Remove any elements that are not needed.
@@ -170,7 +186,21 @@ foreach ( $remove_elements as $id ) {
 
 // Remove any tags
 foreach ( $remove_tags as $tag ) {
+	$class = false;
+	if ( str_contains( $tag, '.' ) ) {
+		list( $tag, $class ) = explode( '.', $tag );
+	}
+
+	$elements_to_remove = [];
 	foreach ( $doc->getElementsByTagName( $tag ) as $el ) {
+		if ( $class && ! str_contains( $el->getAttribute( 'class' ), $class ) ) {
+			continue;
+		}
+
+		$elements_to_remove[] = $el;
+	}
+
+	foreach ( $elements_to_remove as $el ) {
 		$el->parentNode->removeChild( $el );
 	}
 }
@@ -206,21 +236,20 @@ foreach ( $doc->getElementsByTagName( 'a' ) as $el ) {
 }
 
 // Remove wp-trac.js, we don't need it here - It alters the page too much and adds elements on load.
-// Recursive as it can't iterate over the document while altering it properly.
-do {
-	$removed = 0;
-	foreach ( $doc->getElementsByTagName( 'script' ) as $script ) {
-		$src = (string) $script->getAttribute( 'src' );
+$elements_to_remove = [];
+foreach ( $doc->getElementsByTagName( 'script' ) as $script ) {
+	$src = (string) $script->getAttribute( 'src' );
 
-		if (
-			false !== stripos( $src, 'wp-trac.js' ) ||
-			false !== stripos( $script->textContent, 'wpTrac' )
-		) {
-			$script->parentNode->removeChild( $script );
-			$removed++;
-		}
+	if (
+		false !== stripos( $src, 'wp-trac.js' ) ||
+		false !== stripos( $script->textContent, 'wpTrac' )
+	) {
+		$elements_to_remove[] = $script;
 	}
-} while ( $removed );
+}
+foreach ( $elements_to_remove as $el ) {
+	$el->parentNode->removeChild( $el );
+}
 
 // Add a script to the header.
 $js = <<<JS
@@ -229,7 +258,7 @@ $js = <<<JS
 
 	function send() {
 		window.parent.postMessage( {
-			height: document.getElementById('main').offsetHeight || 0,
+			height: Math.max( document.getElementsByTagName('html')[0].offsetHeight, document.documentElement.offsetHeight ),
 			el: id
 		}, '*' );
 	}
@@ -241,6 +270,18 @@ $js = <<<JS
 })();
 JS;
 $doc->getElementsByTagName( 'head' )[0]->appendChild( $doc->createElement( 'script', $js ) );
+
+$css = <<<CSS
+html {
+	--wp-global-header-height: 0;
+	--wp-admin--admin-bar--height: 0;
+}
+CSS;
+$doc->getElementsByTagName( 'head' )[0]->appendChild( $doc->createElement( 'style', $css ) );
+
+// Finally add a CSS class to target.
+$body = $doc->getElementsByTagName( 'body' )[0];
+$body->setAttribute( 'class', $body->getAttribute( 'class' ) . ' is-oembed' );
 
 $data = $doc->saveHTML();
 

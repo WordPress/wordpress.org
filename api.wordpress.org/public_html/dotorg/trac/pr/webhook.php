@@ -80,6 +80,9 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 
 		// Step 3. If not in DB, or $pr_data->trac_ticket isn't yet in the DB, add a new row of it.
 		if ( $pr_data->trac_ticket && ( ! $existing_refs || ! $matched_existing_ref ) ) {
+
+			$user_id = (int) find_wporg_user_by_github( $pr_data->user->name, 'ID' );
+
 			$wpdb->insert(
 				'trac_github_prs',
 				[
@@ -90,6 +93,7 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 					'repo'         => $pr_repo,
 					'pr'           => $pr_number,
 					'data'         => json_encode( $_pr_data_no_ticket ),
+					'author'       => $user_id,
 				]
 			);
 

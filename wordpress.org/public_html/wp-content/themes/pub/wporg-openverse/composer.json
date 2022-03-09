@@ -1,0 +1,55 @@
+{
+  "name": "wporg/wporg-openverse",
+  "description": "",
+  "homepage": "https://wordpress.org",
+  "license": "GPL-2.0-or-later",
+  "support": {
+    "issues": "https://github.com/WordPress/wordpress.org/issues"
+  },
+  "config": {
+    "platform": {
+      "php": "7.4"
+    },
+    "allow-plugins": {
+      "composer/installers": true
+    }
+  },
+  "extra": {
+    "installer-paths": {
+      "mu-plugins/{$name}/": [
+        "type:wordpress-muplugin"
+      ]
+    }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org/"
+    },
+    {
+      "type": "package",
+      "package": [
+        {
+          "name": "wordpress-meta/pub",
+          "type": "wordpress-muplugin",
+          "version": "1",
+          "source": {
+            "type": "svn",
+            "url": "https://meta.svn.wordpress.org/sites/",
+            "reference": "trunk/wordpress.org/public_html/wp-content/mu-plugins/pub/"
+          }
+        }
+      ]
+    },
+    {
+      "type": "vcs",
+      "url": "git@github.com:WordPress/wporg-mu-plugins.git"
+    }
+  ],
+  "require": {},
+  "require-dev": {
+    "composer/installers": "~1.0",
+    "wordpress-meta/pub": "1",
+    "wporg/wporg-mu-plugins": "dev-trunk"
+  }
+}

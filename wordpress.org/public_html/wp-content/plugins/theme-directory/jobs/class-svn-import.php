@@ -105,7 +105,7 @@ class SVN_Import {
 		include_once dirname( __DIR__ ) . '/class-wporg-themes-upload.php';
 
 		if ( empty( $args['slug'] ) || empty( $args['version'] ) ) {
-			trigger_error( 'Theme Import aborted, invalid input provided: ' . json_Encode( $args ), E_USER_WARNING );
+			trigger_error( 'Theme Import aborted, invalid input provided: ' . json_encode( $args ), E_USER_WARNING );
 			return;
 		}
 
@@ -114,16 +114,56 @@ class SVN_Import {
 		$return = $uploader->process_update_from_svn(
 			$args['slug'],
 			$args['version'],
-			$args['changeset'] ?? false,
-			$args['author'] ?? false,
-			$args['msg'] ?? ''
+			$args['changeset'],
+			$args['author'],
+			$args['msg']
 		);
 
-		// TODO: Look at error result code, maybq re-queue in event of system issue, else email author with concerns (Theme Check, etc)
-		//       CC emails to themes team in event of having to contact the author?
-
 		if ( is_wp_error( $return ) ) {
-			throw new Exception( "Theme Import Failure: " . $return->get_error_code . ' ' . $return->get_error_message() );
+
+			// Retry once in the event of a WordPress.org issue exporting from themes.svn.wordpress.org.
+			if ( 'svn_error' === $return->get_error_code() ) {
+				if ( empty( $args['retry'] ) ) {
+					$args['retry'] = $return;
+					wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'theme_directory_svn_import', $args );
+					return;
+				} else {
+					throw new Exception( 'Theme Import Failure: ' . $return->get_error_code() . ' ' . $return->get_error_message() );
+				}
+			}
+
+			/*
+			 * Otherwise email the author about this problem.
+			 * NOTE: This email has a HTML content type, as Theme Check output is HTML.
+			 * TRANSLATION: These strings are not marked for translated, as they will always be English at present.
+			 */
+			wp_mail(
+				$uploader->author->user_email,
+				sprintf(
+					'Theme Import Failure: %s [%d] %s',
+					$uploader->theme_post->post_title,
+					$args['changeset'],
+					$args['msg']
+				),
+				sprintf(
+					nl2br(
+						// Intentionally not translated. See above.
+						"Hi %s,\n\n" .
+						"Your theme update for %s has failed requirements.\n" .
+						"Please see the below error and commit an updated version, this may not be the only error present.\n\n%s\n\n" .
+						"Please review the latest <a href='%s'>Theme Guidelines</a>.\n" .
+						"----\nWordPress Theme Directory",
+					),
+					esc_html( $uploader->author->display_name ?: $uploader->author->user_login ),
+					$uploader->theme->display('Name') . ' ' . $uploader->theme->display('Version'),
+					'<div style="margin-left: 30px">' . $return->get_error_message() . '</div>',
+					'https://make.wordpress.org/themes/handbook/review/required/'
+				),
+				[
+					'From: "WordPress Theme Directory" <themes@wordpress.org>',
+					'Content-Type: text/html; charset=UTF-8'
+				]
+			);
 		}
 	}
 }

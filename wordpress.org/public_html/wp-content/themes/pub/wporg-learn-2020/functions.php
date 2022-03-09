@@ -341,11 +341,30 @@ function wporg_archive_modify_query( WP_Query $query ) {
 	// Possibly temporary until more of the courses are filled out.
 	if ( $query->is_main_query() && $query->is_post_type_archive( 'course' ) ) {
 		$query->set(
+			'orderby',
+			array(
+				'post_date' => 'ASC',
+				'ID'        => 'DESC',
+			)
+		);
+
+		$query->set(
 			'meta_query',
 			array(
 				array(
 					'key'   => '_course_featured',
 					'value' => 'featured',
+				),
+			)
+		);
+
+		$query->set(
+			'tax_query',
+			array(
+				array(
+					'taxonomy'  => 'course-category',
+					'field'     => 'id',
+					'terms'     => get_terms( 'course-category', array( 'fields' => 'ids' ) ),
 				),
 			)
 		);
@@ -377,6 +396,30 @@ function wporg_archive_modify_query( WP_Query $query ) {
 	}
 }
 add_action( 'pre_get_posts', 'wporg_archive_modify_query' );
+
+/**
+ * Add ordering to query for advanced filtering
+ *
+ * @param  string $orderby
+ * @param  object $query
+ *
+ * @return string
+ */
+function wporg_archive_orderby( $orderby, $query ) {
+	global $wpdb;
+
+	if ( is_admin() ) {
+		return $orderby;
+	}
+
+	// Group courses by their category
+	if ( $query->is_main_query() && $query->is_post_type_archive( 'course' ) ) {
+		$orderby = $wpdb->term_relationships . '.term_taxonomy_id DESC, ' . $orderby;
+	}
+
+	return $orderby;
+}
+add_filter( 'posts_orderby', 'wporg_archive_orderby', 10, 2 );
 
 /**
  * Modify the workshop post type archive query to prioritize workshops in the user's locale.

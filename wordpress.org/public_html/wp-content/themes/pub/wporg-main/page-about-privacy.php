@@ -56,7 +56,7 @@ the_post();
 					<p><?php esc_html_e( 'If you send us a request (for example via a support email or via one of our feedback mechanisms), we reserve the right to publish it in order to help us clarify or respond to your request or to help us support other users. WordPress.org takes all measures reasonably necessary to protect against the unauthorized access, use, alteration, or destruction of potentially personally-identifying and personally-identifying information.', 'wporg' ); ?></p>
 
 					<h2><?php esc_html_e( 'Use of personal information', 'wporg' ); ?></h2>
-					<p><?php esc_html_e( 'We use the information you provide to register for an account, attend our events, receive newsletters, use certain other services, or participate in the WordPress open source project in any other way.', 'wporg' ); ?></p>
+					<p><?php esc_html_e( 'We will not use the information you provide when you register for an account, attend our events, receive newsletters, use certain other services, or participate in the WordPress open source project in any other way.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'We will not sell or lease your personal information to third parties unless we have your permission or are required by law to do so.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'We would like to send you email marketing communication which may be of interest to you from time to time. If you have consented to marketing, you may opt out later.', 'wporg' ); ?></p>
 					<p><?php esc_html_e( 'You have a right at any time to stop us from contacting you for marketing purposes.  If you no longer wish to be contacted for marketing purposes, please click on the unsubscribe link at the bottom of the email.', 'wporg' ); ?></p>

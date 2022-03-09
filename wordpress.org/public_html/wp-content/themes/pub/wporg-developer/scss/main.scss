@@ -2183,7 +2183,7 @@ div[class*="-table-of-contents-container"] {
 	}
 	.current-menu-ancestor .expandable .dashicons:hover,
 	.current-menu-item .expandable .dashicons:hover {
-		background-color:: #0073aa !important;
+		background-color: #0073aa !important;
 		color: #fff !important;
 	}
 	.children,
@@ -2295,11 +2295,12 @@ div[class*="-table-of-contents-container"] {
 }
 body.responsive-show {
 	position: fixed;
-	top: 32px;
 
 	#secondary {
+		top: var(--wp-admin--admin-bar--height, 0);
 		left: 0;
 		overflow-y: scroll;
+		z-index: 500;
 
 		.search-section {
 			margin-top: 32px;
@@ -2319,13 +2320,8 @@ body.responsive-show {
 	}
 }
 @media only screen and (max-width: 782px) {
-	#secondary {
-		top: 46px;
-	}
-
 	body.responsive-show {
 		position: fixed;
-		top: 46px;
 		left: 0;
 		right: 0;
 		bottom: 0;
@@ -2335,15 +2331,6 @@ body.responsive-show {
 		}
 	}
 }
-@media only screen and (max-width: 480px) {
-	body.responsive-show #secondary {
-		top: 46px;
-	}
-	body.responsive-show #wpadminbar {
-		top: -46px;
-	}
-}
-
 @media (max-width: 876px) {
 	#secondary {
 		position: fixed;

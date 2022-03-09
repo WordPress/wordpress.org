@@ -1,4 +1,6 @@
 # IDE artefacts
 .idea/
 
-wporg-mu-plugins/
+mu-plugins/
+vendor/
+wporg_locales.sql

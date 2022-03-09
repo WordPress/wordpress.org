@@ -97,6 +97,16 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'Openverse': {
 			tracker: 'https://github.com/WordPress/openverse/issues/new/choose',
 			tracker_text: 'Openverse GitHub Repository',
+		},
+		'Global Header/Footer': {
+			tracker: 'https://github.com/WordPress/wporg-mu-plugins/issues/new?labels=Header+%26+Footer',
+			tracker_text: 'WordPress.org mu-plugins GitHub Repository',
+			enable_copy: true
+		},
+		'News (wordpress.org/news)': {
+			tracker: 'https://github.com/WordPress/wporg-news-2021/issues/new',
+			tracker_text: 'WordPress.org News GitHub Repository',
+			enable_copy: true
 		}
 	};
 
@@ -134,6 +144,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			wpTrac.linkMentions();
 			wpTrac.linkGutenbergIssues();
 			wpTrac.githubPRs.init();
+			wpTrac.suggestNotGeneral.init();
 
 			if ( ! $body.hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
@@ -142,6 +153,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					wpTrac.focuses.init();
 				}
 			}
+		},
+
+		isNewTicket: function() {
+			return (
+				window.location.pathname === '/newticket' ||
+				$( 'form[action*="/newticket"]' ).length > 0
+			);
 		},
 
 		showContributorLabels: function( labels ) {
@@ -396,7 +414,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
 				window.onbeforeunload = function() {
-					if ( window.location.pathname === '/newticket' ) {
+					if ( wpTrac.isNewTicket() ) {
 						if ( ! $( '#field-description' ).val() && ! $( '#field-summary' ).val() ) {
 							return;
 						}
@@ -408,14 +426,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				};
 				$( '.buttons' ).on( 'click', 'input', function() {
 					window.onbeforeunload = null;
-				});
-			}
-
-			// Add After the Deadline (only add it if it loaded).
-			if ( $.isFunction( $.fn.addProofreader ) ) {
-				$('textarea').addProofreader();
-				$('.AtD_proofread_button').each(function() {
-					$(this).parent().appendTo( $(this).parents('fieldset').find('.wikitoolbar') ).attr( 'title', 'Check spelling and grammar' );
 				});
 			}
 
@@ -550,20 +560,23 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			$( '#propertyform' ).on( 'submit', function() {
 				var $summary     = $( '#field-summary' ),
 					$description = $( '#field-description' ),
-					$comment     = $( '#comment' );
+					$comment     = $( '#comment' ),
+					isNewTicket  = wpTrac.isNewTicket();
 
 				// Simple replacement for ticket summary.
-				$summary.val( $summary.val().replace( 'Wordpress', 'WordPress' ) );
+				if ( isNewTicket ) {
+					$summary.val( $summary.val().replaceAll( 'Wordpress', 'WordPress' ) );
+				}
 
 				// Use the more judicious replacement for ticket description and comments.
 				$.each( [ ' Wordpress', '&#8216;Wordpress', '&#8220;Wordpress', '>Wordpress', '(Wordpress' ], function( index, value ) {
-					var replacement = value.replace( 'Wordpress', 'WordPress' );
+					var replacement = value.replaceAll( 'Wordpress', 'WordPress' );
 
-					if ( $description.length ) {
-						$description.val( $description.val().replace( value, replacement ) );
+					if ( $description.length && isNewTicket ) {
+						$description.val( $description.val().replaceAll( value, replacement ) );
 					}
 					if ( $comment.length ) {
-						$comment.val( $comment.val().replace( value, replacement ) );
+						$comment.val( $comment.val().replaceAll( value, replacement ) );
 					}
 				} );
 			} );
@@ -651,7 +664,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				}
 			}
 
-			if ( $body.hasClass( 'core' ) && content.hasClass( 'search' ) ) {
+			if ( content.hasClass( 'search' ) ) {
 				// Remove 'Wiki' and 'Milestone' from search.
 				$( '#fullsearch #milestone' ).next().remove().end().remove();
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
@@ -661,27 +674,14 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		// If we're not dealing with a trusted bug gardener:
 		nonGardeners: function() {
 			var version,
-				elements = {},
-				remove = true;
+				elements = {};
 
-			// If we're on /newticket (based on the field-owner check), declutter.
-			if ( $('#field-owner').length && $body.hasClass( 'core' ) ) {
-				$('#field-priority, #field-severity, #field-milestone, #field-cc, #field-keywords').parents('td').hide().prev().hide();
-				if ( $('#field-focuses').length ) {
-					$('#field-focuses').closest('td').attr( 'colspan', 3 );
-					$('#field-component').parent().add( $('#field-component').parent().prev() ).wrapAll( '<tr />' ).insertBefore( $( '#field-focuses' ).parents( 'tr' ) );
-				}
-				$('label[for="field-focuses"]').html( 'Contributor<br/>Focuses:' );
-				$('#field-version').after( '<br/><em>If you\'re filing a bug against trunk, choose <a href="#" class="set-trunk">\'trunk\'</a>. Otherwise, choose the earliest affected version you tested.</em>' );
-				$('.set-trunk').on( 'click', function() {
-					$('#field-version').val('trunk');
-					return false;
-				});
-			}
+			// Hide disabled fields (new ticket & ticket modify)
+			$('.trac-properties select[disabled]').parents( 'td' ).hide().prev().hide();
 
 			elements.type = $('#field-type');
 			elements.version = $('#field-version');
-			version = elements.version.val();
+			version = parseFloat( elements.version.val() );
 
 			// Remove task (blessed), or make a task ticket read only.
 			if ( 'task (blessed)' === elements.type.val() ) {
@@ -695,11 +695,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			// Once a Version is set, remove newer versions.
 			if ( version ) {
 				elements.version.find('option').each( function() {
-					var value = $(this).val();
+					var value = parseFloat( $(this).val() );
 
-					if ( version === value ) {
-						remove = false;
-					} else if ( remove && value ) {
+					if ( ! value || value > version ) {
 						$(this).remove();
 					}
 				});
@@ -710,7 +708,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		},
 
 		reports: function() {
-			var popup = $( '#report-popup' ), failed = false;
+			var popup = $( '#report-popup' ),
+				$headline = $( '#headline' ),
+				failed = false;
+
 			$( '#report-popup' ).on( 'change', '.tickets-by-topic', function() {
 				var topic = $(this).val();
 				if ( ! topic ) {
@@ -719,8 +720,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				window.location.href = $(this).data( 'location' ) + topic;
 				return false;
 			});
+
 			popup.appendTo( '#main' );
+
 			$( '.open-ticket-report' ).click( function( event ) {
+				// Allow opening the report on make.
+				if ( event.metaKey || event.ctrlKey || event.shiftKey ) {
+					return;
+				}
+
+				// Calculate the correct position, even if the header size/etc changes.
+				popup.css( 'top', ( $headline.offset().top + $headline.outerHeight() ) + 'px' );
+
 				if ( popup.children().length === 0 ) {
 					$.ajax({
 						url: 'https://make.wordpress.org/core/reports/?from-trac',
@@ -753,7 +764,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			}
 
 			// Prevent changing to the component if need be.
- 			if ( window.location.pathname !== '/newticket' ) {
+ 			if ( ! wpTrac.isNewTicket() ) {
 				for ( var c in bugTrackerLocations ) {
 					if ( ! bugTrackerLocations[c].prevent_changing_to ) {
 						continue;
@@ -812,7 +823,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				url_params[summary_field]     = $('#field-summary').val();
 				url_params[description_field] = $('#field-description').val()
 
-				url = href + '?' + $.param( url_params );
+				url = href + ( href.indexOf( '?' ) ? '&' : '?' ) + $.param( url_params );
 				if ( url.length > 1500 ) {
 					url_params[description_field] = '(Couldn\'t copy over your description as it was too long. Please paste it here. Your old window was not closed.)';
 					url = href + '?' + $.param( url_params );
@@ -1341,7 +1352,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				});
 				ul.appendTo( container );
 				ul.wrap( '<fieldset id="fieldset-focuses" />' );
-				ul.before( '<legend class="core-focuses-legend">Focuses:</legend>' );
+				ul.before( '<legend class="core-focuses-legend">Contributor Focuses:</legend>' );
 
 				container.on( 'click', '.core-focuses-button', addRemove );
 				container.closest( 'form' ).on( 'submit', submit );
@@ -1653,7 +1664,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				primaryGitRepo, primaryGitRepoDesc, container;
 
 			function init() {
-				// TODO: If this is added to other Trac's, expand this..
 				if ( $body.hasClass( 'core' ) ) {
 					trac = 'core';
 					primaryGitRepo = 'WordPress/wordpress-develop';
@@ -1662,6 +1672,25 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					trac = 'meta';
 					primaryGitRepo = 'WordPress/wordpress.org';
 					primaryGitRepoDesc = 'WordPress.org Meta GitHub mirror';
+				} else if ( $body.hasClass( 'bbpress' ) ) {
+					trac = 'bbpress';
+					primaryGitRepo = 'bbpress/bbPress';
+					primaryGitRepoDesc = 'bbPress GitHub mirror';
+				} else if ( $body.hasClass( 'buddypress' ) ) {
+					trac = 'buddypress';
+					primaryGitRepo = 'buddypress/buddypress';
+					primaryGitRepoDesc = 'BuddyPress GitHub mirror';
+				}
+
+				if ( ! trac ) {
+					return;
+				}
+
+				// Add ability to include GitHub tickets into a 'my-patches' report.
+				// "Just" include a variable called '$GITHUBTICKETS' in the Query.
+				var $warning = $("#warning.system-message:contains('GITHUBTICKETS')");
+				if ( $warning.length ) {
+					renderReportLoadGitHubTickets( $warning );
 				}
 
 				// This seems to be the easiest place to find the current Ticket ID..
@@ -1670,7 +1699,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					ticket = canonical.match( /\/ticket\/(\d+)$/ )[1];
 				}
 
-				if ( ! trac || ! ticket ) {
+				if ( ! ticket ) {
 					return;
 				}
 
@@ -1731,6 +1760,40 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 					var $div = $( this.parentNode.parentNode ).toggleClass( 'collapsed' );
 					return ! $div.hasClass( 'collapsed' );
 				} );
+			}
+
+			function renderReportLoadGitHubTickets( $warning ) {
+				var user = wpTracCurrentUser,
+					match = document.location.search.match( /USER=([^&]+)/ );
+				if ( match ) {
+					user = match[1];
+				}
+
+				// Logged out requests without a user context.
+				if ( 'anonymous' === user ) {
+					$warning.remove();
+					return;
+				}
+
+				$warning.html(
+					'<strong>Warning:</strong> Tickets with an attached GitHub PRs not included <button>Load PRs</button>'	
+				);
+
+				$warning.on( 'click', function() {
+					$(this).find('button').prop( 'disabled', 'disabled' ).text( 'Please wait..' );
+
+					$.ajax(
+						apiEndpoint
+							+ '?trac=' + trac
+							+ '&author=' + user
+							+ ( authenticated ? '&authenticated=1' : '' )
+					).success( function( ticketList ) {
+						document.location = document.location.toString() +
+							( document.location.search ? '&' : '?' ) +
+							'GITHUBTICKETS=' + ticketList.join(',');
+					} );
+				} )
+
 			}
 
 			// Logic to determine what the PRs status is
@@ -1871,7 +1934,167 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			};
 		}()),
 
+		suggestNotGeneral: ( function() {
+			var enabled = true,
+				skipWords = [ 'and', 'any', 'all', 'the', 'for', 'get', 'plugins', 'general', 'wordpress' ],
+				generalCategories = [ 'General' ],
+				componentWords = {},
+				noticeDiv;
+
+			function init() {
+				// Only on new ticket creations.
+				if ( ! wpTrac.isNewTicket() ) {
+					return;
+				}
+
+				// bbPress Trac.. has a set of components that I wish everyone had.
+				if ( $( 'body.bbpress' ).length ) {
+					skipWords.push( 'api' );
+					skipWords.push( 'component' );
+					skipWords.push( 'tools' );
+					skipWords.push( 'appearance' );
+				}
+
+				// On Meta, WordPress.org site is a "generic" category that shouldn't be used if possible.
+				if ( $( 'body.meta' ).length ) {
+					generalCategories.push( 'WordPress.org Site' );
+					skipWords.push( 'wordpress.org' );
+				}
+
+				// Only if we have a 'General' option.
+				const components = jQuery( '#field-component option' ).get().map( opt => opt.value ),
+					hasDefaultCat = generalCategories.filter( value => components.includes( value ) );
+
+				if ( ! hasDefaultCat ) {
+					return;
+				}
+
+				generateComponentWords();
+
+				$( '#field-description,#field-summary,#field-component' ).on( 'blur', maybeSuggest );
+
+				// Disable once the user hits the component option.
+				$( '#field-component' ).on( 'change', function() {
+					// If they selected a general category keep nagging.
+					enabled = ( -1 !== generalCategories.indexOf( $(this).val() ) );
+
+					if ( ! enabled && noticeDiv ) {
+						noticeDiv.remove();
+						noticeDiv = false;
+					}
+				} );
+			}
+
+			function maybeSuggest() {
+				var matchText = $( '#field-summary' ).val().toLowerCase() + ' ' + $( '#field-description' ).val().toLowerCase(),
+					matchingWords = [],
+					matchingComponents = [];
+
+				if ( ! enabled || ! matchText.length ) {
+					return;
+				}
+
+				for ( const [word, components] of Object.entries( componentWords ) ) {
+					if ( matchText.includes( word ) ) {
+						matchingWords.push( word );
+					}
+				}
+
+				// Longest match first.
+				matchingWords.sort( (a,b) => a.length > b.length ? -1 : 1 );
+
+				matchingWords.forEach( (word) => {
+					componentWords[ word ].forEach( (component) => {
+						if ( -1 == matchingComponents.indexOf( component ) ) {
+							matchingComponents.push( component );
+						}
+					});
+				} );
+
+				if ( ! noticeDiv ) {
+					noticeDiv = $( '<div id="componentSuggest"/>' ).insertBefore( $( '.buttons').first() );
+
+					noticeDiv.on( 'click', 'a.component', function(e) {
+						e.preventDefault();
+						const component = $(this).text();
+
+						$( `#field-component option[value="${component}"]` ).prop( 'selected', 'selected' ).change();
+					} );
+				}
+				noticeDiv.html( getNoticeHTML( matchingComponents ) );
+			}
+
+			function getNoticeHTML( matchingComponents ) {
+				var hasMatches = matchingComponents.length > 0,
+					template = $(
+						'<div class="wp-notice"><p><strong>Have you selected the right component?</strong></p>' +
+						"<p>You've not yet selected a component. " +
+							'Please check the "Component" option above' +
+							( hasMatches ? ' or select from one of the following:' :  '.' ) +
+						'</p>' +
+						'</div>'
+					),
+					ulList;
+
+				if ( hasMatches ) {
+					ulList = $('<ul/>' );
+
+					matchingComponents.forEach( (component) => {
+						ulList.append( $( `<li><a href="#" class="component">${component}</a></li>` ) );
+					} );
+					template.append( ulList );
+				}
+
+				return template;
+			}
+
+			function generateComponentWords() {
+				$( '#field-component option' ).each( function() {
+					const component = $(this).val(),
+						words = component.split( /[^A-Za-z0-9\.']+/ )
+
+					// Never suggest General..
+					if ( 'General' === component ) {
+						return;
+					}
+
+					if ( words.length > 1 ) {
+						words.push( component );
+					}
+
+					// If it's a plural, add the non-plural form.
+					words.forEach( (word) => {
+						if ( 's' === word.substr( -1 ) ) {
+							words.push( word.substr( 0, word.length - 1 ) );
+						}
+					} );
+
+					words.forEach( (word) => {
+						if ( ! word ) return;
+
+						word = word.toLowerCase();
+
+						if ( component != word && -1 !== skipWords.indexOf( word ) ) return;
+
+						if ( ! ( word in componentWords ) ) {
+							componentWords[ word ] = [];
+						}
+
+						componentWords[ word ].push( component );
+					} );
+				} );
+
+				return componentWords;
+			}
+
+			return {
+				init: init
+			}
+
+		}() ),
+
 		patchTracFor122Changes: function() {
+			// TODO: This needs to be removed, the Trac assets on s.w.org are probably outdated and need updating.
 			console.log( "wp-trac: Applying compat patches for Trac 1.2.2" );
 			// From Trac 1.2.2 threaded_comments.js:
 			window.applyCommentsOrder = window.applyCommentsOrder || function() {}
@@ -1918,3 +2141,26 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 	wpTrac.patchTracFor122Changes();
 
 })(jQuery);
+
+/**
+ * String.prototype.replaceAll() polyfill. For Internet Explorer.
+ * 
+ * https://gomakethings.com/how-to-replace-a-section-of-a-string-with-another-one-with-vanilla-js/
+ * https://vanillajstoolkit.com/polyfills/stringreplaceall/
+ *
+ * @author Chris Ferdinandi
+ * @license MIT
+ */
+if ( ! String.prototype.replaceAll ) {
+	String.prototype.replaceAll = function(str, newStr) {
+
+		// If a regex pattern
+		if ( Object.prototype.toString.call(str).toLowerCase() === '[object regexp]' ) {
+			return this.replace(str, newStr);
+		}
+
+		// If a string
+		return this.replace(new RegExp(str, 'g'), newStr);
+
+	};
+}

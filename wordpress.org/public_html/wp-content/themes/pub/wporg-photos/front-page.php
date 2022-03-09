@@ -22,11 +22,13 @@ get_header();
 
 	<?php
 	$placeholder_count = 0;
-	$query_total = $GLOBALS['wp_query']->post_count;
-	$min_grid_items = 12;
-	// Show placeholders to ensure front page has a minimum number of grid items.
-	if ( $query_total < $min_grid_items ) {
-		$placeholder_count = $min_grid_items - $query_total;
+	if ( ! is_paged() ) {
+		$query_total = $GLOBALS['wp_query']->post_count;
+		$min_grid_items = 12;
+		// Show placeholders to ensure front page has a minimum number of grid items.
+		if ( $query_total < $min_grid_items ) {
+			$placeholder_count = $min_grid_items - $query_total;
+		}
 	}
 
 	while ( have_posts() ) :
@@ -46,10 +48,14 @@ get_header();
 	endif;
 	?>
 
-	<?php if ( $query_total === $GLOBALS['wp_query']->query_vars['posts_per_page'] ) : ?>
-	<div class="photos-all-links navigation"><a href="<?php echo esc_url( get_post_type_archive_link( get_photo_post_type() ) ); ?>"><?php _e( 'See more photos&rarr;', 'wporg-photos' ); ?></a></div>
-	<?php endif; ?>
-
+	<?php if ( ! is_paged() && $GLOBALS['wp_query']->max_num_pages > 1 ) : ?>
+		<?php
+		$link = '<div class="nav-next">' . get_next_posts_link( __( 'See more photos&rarr;', 'wporg-photos' ) ) . '</div>';
+		echo _navigation_markup( $link, 'posts-navigation', __( 'Photos navigation', 'wporg-photos' ) ); ?>
+	<?php else :
+		the_posts_pagination();
+	endif;
+	?>
 	</main><!-- #main -->
 
 	<aside id="secondary" class="widget-area wrap" role="complementary">
@@ -73,9 +79,9 @@ get_header();
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
-			'title' => __( 'FAQ', 'wporg-plugins' ),
+			'title' => __( 'FAQ', 'wporg-photos' ),
 			'text'  => sprintf(
-				/* translators: URL to make/plugins site. */
+				/* translators: URL to FAQ page. */
 				__( 'Learn more about licensing, usage, and adding your photos to the WordPress Photo Directory via <a href="%s">Frequently Asked Questions</a>.', 'wporg-photos' ),
 				esc_url( home_url( 'faq' ) )
 			),

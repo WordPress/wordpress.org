@@ -33,19 +33,18 @@ fieldset {
 	border: 1px solid #d7d7d7;
 }
 
+/* Add extra whitespace betweeen trac footer and global footer. */
+footer.wp-block-group.global-footer {
+	margin-top: 2em;
+}
+
 /* Fixing display of the header */
 #headline {
 	background: #0073aa;
 	border-bottom: 0;
 	height: 62px;
 }
-@media screen and (min-width: 769px) {
-	#wporg-header ul li a.current ~ .uparrow {
-		border-bottom-color: #0073aa;
-	}
-}
-#wporg-header :link, #wporg-header :visited,
-#wporg-header :link:hover, #wporg-header :visited:hover,
+
 header :link, header :visited, header :link:hover, header :visited:hover,
 footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 #headline :link, #headline :visited,
@@ -67,8 +66,6 @@ footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 .security #headline a {
 	color: #555;
 }
-#wporg-header ul :link, #wporg-header ul :visited,
-#wporg-header ul :link:hover, #wporg-header ul :visited:hover,
 header :link, header :visited, header :link:hover, header :visited:hover,
 footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 #headline :link:hover, #headline :visited:hover,
@@ -119,7 +116,7 @@ h3.change a {
 
 /* We like the WP button styles, but they need to be a bit smaller sometimes */
 .inlinebuttons input {
-	margin:  0 0 .2em .4em; /* Trac is 0 .1em .1em  */
+	margin: 0 0 .2em .4em; /* Trac is 0 .1em .1em */
 }
 #prefs .buttons input[type=button],
 #prefs .buttons input[type=submit],
@@ -128,6 +125,9 @@ h3.change a {
 	font-size: 10px;
 	line-height: 20px;
 	height: 21px;
+}
+#prefs {
+	padding-top: 25px;
 }
 #prefs input {
 	margin: .1em;
@@ -459,6 +459,9 @@ table.progress td.closed {
 	vertical-align: top; /* align everything */
 	padding: .3em; /* breathing room */
 }
+#properties table.trac-properties label > strike {
+	text-decoration: none;
+}
 #properties .col2 #field-cc[type="checkbox"] {
 	width: 2em; /* fix the cc checkbox */
 }
@@ -620,12 +623,7 @@ blockquote.citation {
 #mainnav .active :link:hover, #mainnav .active :visited:hover {
 	border-right: none;
 }
-#altlinks {
-	padding-bottom: 10px;
-}
-#footer {
-	padding: .5em 0; /* more breathing room */
-}
+
 #prefs {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
@@ -688,6 +686,7 @@ table.listing tbody tr:hover td,
 table.code tbody tr:hover td {
 	background: #eee;
 }
+
 .suggestions {
 	border: 1px solid #888;
 }
@@ -725,7 +724,7 @@ input[type=text], input.textwidget, textarea {
 	font-size: 13px;
 }
 input[name="description"] {
-    width: 100%;
+	width: 100%;
 }
 fieldset {
 	-webkit-border-radius: 3px;
@@ -762,6 +761,9 @@ div.trac-content {
 .foldable :link, .foldable :visited {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
+}
+.foldable a:hover {
+	text-decoration: none; /* for bb's */
 }
 #prefs {
 	-webkit-border-radius: 3px;
@@ -1880,7 +1882,7 @@ table.dirlist td.name a.dir:before {
 	margin-right: 2px;
 }
 table.dirlist td.name a.file:before {
-	content: "\f105"; /*  dashicons-admin-page */
+	content: "\f105"; /* dashicons-admin-page */
 	color: #999;
 }
 table.dirlist td.rev a.chgset {
@@ -2094,6 +2096,111 @@ a.mention.me {
 	#properties table.trac-properties > tbody > tr > td#focuses {
 		padding-left: 22px;
 	}
+	body:not(.is-oembed) .listing.tickets th,
+	body:not(.is-oembed) .listing.tickets td {
+		display: block;
+	}
+	body:not(.is-oembed) .listing.tickets thead th,
+	body:not(.is-oembed) .listing.tickets tbody .trac-columns th {
+		display: inline-block;
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.id::before,
+	body:not(.is-oembed) .listing.tickets tbody tr td.ticket::before {
+		content: "Ticket: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.summary::before {
+		content: "Summary: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.status::before {
+		content: "Status: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.resolution::before {
+		content: "Resolution: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.owner::before {
+		content: "Owner: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.type::before {
+		content: "Type: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.priority::before {
+		content: "Priority: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.milestone::before {
+		content: "Milestone: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.component::before {
+		content: "Component: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.severity::before {
+		content: "Severity: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.workflow::before {
+		content: "Workflow: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.date::before {
+		content: "Date: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.time::before {
+		content: "Created: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.changetime::before {
+		content: "Modified: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.version::before {
+		content: "Version: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.reporter::before {
+		content: "Reporter: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.Comments::before {
+		content: "Comments: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.Stars::before {
+		content: "Stars: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.keywords::before {
+		content: "Keywords: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.focuses::before {
+		content: "Focuses: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.cc::before {
+		content: "CC: ";
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td:not(.Comments, .Stars)::before {
+		font-weight: 600;
+	}
+	body:not(.is-oembed) .listing.tickets tbody tr td.Stars,
+	body:not(.is-oembed) .listing.tickets tbody tr td.Comments {
+		display: inline-block;
+		float: right;
+	}
+	.tickets tr.color3-odd,
+	.tickets tr.color3-even,
+	table.tickets tbody tr.even.prio3,
+	table.tickets tbody tr.odd.prio3 {
+		border-color: #ccc;
+	}
+	.tickets tr.color4-odd,
+	.tickets tr.color4-even,
+	table.tickets tbody tr.even.prio4,
+	table.tickets tbody tr.odd.prio4 {
+		border-color: #099;
+	}
+	.tickets tr.color5-odd,
+	.tickets tr.color5-even,
+	table.tickets tbody tr.prio5 {
+		border-color: #469;
+	}
+	.tickets tr.color6-odd,
+	.tickets tr.color6-even {
+		border-color: #888;
+	}
+	.listing.tickets thead tr th a,
+	.listing.tickets tbody .trac-columns th a {
+		font-size: 1.2em;
+	}
 }
 
 @media (max-width: 640px) {
@@ -2142,6 +2249,22 @@ a.mention.me {
 	#header img {
 		max-width: 50%; /* prevent the logo and search from colliding (to a point) */
 		height: auto;
+	}
+	#filters th,
+	#filters td {
+		display: block;
+	}
+	#filters .trac-clause td:not(.actions td), 
+	#filters .trac-clause th {
+		text-align:left;
+	}
+	#filters .trac-clause tbody {
+		display:table;
+		padding:7px 0 7px 0;
+	}
+	#filters th,
+	#filters td label {
+		font-size:13px;
 	}
 	#content.ticket, .milestone .info .progress, .milestone .info dl, #content.timeline dl, #stats {
 		margin-left: 0; /* use all the available space */
@@ -2328,6 +2451,7 @@ a.mention.me {
 #github-prs ul.pull-requests {
 	border: 1px solid #ccc;
 	padding: 0 1em;
+	margin: 0;
 	position: relative;
 }
 #github-prs ul.pull-requests li {
@@ -2341,6 +2465,10 @@ a.mention.me {
 }
 #github-prs .button {
 	color: black;
+	white-space: nowrap;
+}
+#github-prs .button:hover {
+	text-decoration: none;
 }
 #github-prs ins {
 	color: green;
@@ -2358,4 +2486,13 @@ a.mention.me {
 	#github-prs li {
 		display: block;
 	}
+}
+
+/* Trac oEmbed rules */
+body.is-oembed table.listing {
+	display: block;
+	overflow-x: auto;
+}
+body.is-oembed table.listing .summary {
+	min-width: 40vw;
 }

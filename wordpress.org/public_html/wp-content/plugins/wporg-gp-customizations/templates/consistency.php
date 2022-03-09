@@ -69,7 +69,7 @@ gp_tmpl_header();
 
 <?php
 if ( $performed_search && ! $results ) {
-	echo '<p class="notice">No results were found.</p>';
+	echo '<div class="notice"><p>No results were found.</p></div>';
 
 } elseif ( $performed_search && $results ) {
 	$translations_unique_count = count( $translations_unique );

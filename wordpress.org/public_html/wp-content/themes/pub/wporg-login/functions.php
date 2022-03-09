@@ -95,8 +95,13 @@ function wporg_login_register_scripts() {
 	wp_add_inline_script(
 		'recaptcha-api',
 		'function onSubmit(token) {
-			var form = document.getElementById("registerform");
+			var form = document.querySelector( "#registerform, form:not(#language-switcher)" );
 
+			if ( ! form ) {
+				return;
+			}
+
+			// This is used for the interaction with the invisible v3 recaptcha. 
 			if ( form.dataset.submitReady ) {
 				form.submit();
 			} else {
@@ -130,10 +135,10 @@ function wporg_login_register_scripts() {
 			).then( function( token ) {
 				// Add the token to the "primary" form
 				var input = document.createElement( "input" ),
-					form = document.getElementById( "registerform" );
+					form = document.querySelector( "#registerform, form:not(#language-switcher)" );
 
 				if ( ! form ) {
-					form = document.querySelectorAll( "form:not(#language-switcher)" );
+					return;
 				}
 
 				input.setAttribute( "type", "hidden" );
@@ -142,6 +147,7 @@ function wporg_login_register_scripts() {
 
 				form.appendChild( input );
 
+				// If the visual reCaptcha v2 is not loaded, this data point will never be used.
 				if ( form.dataset.submitReady ) {
 					form.submit();
 				} else {

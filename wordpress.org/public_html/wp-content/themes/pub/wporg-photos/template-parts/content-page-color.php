@@ -14,9 +14,9 @@ $terms = get_terms( [ 'taxonomy' => $tax_name, 'hide_empty' => false ] );
 ?>
 
 <header class="page-header">
-	<h1 class="page-title">
+	<h2 class="page-title">
 		<?php _e( 'Colors', 'wporg-photo' ); ?>
-	</h1>
+	</h2>
 
 	<p><?php _e( 'Browse photos predominantly featuring one of these colors&hellip;', 'wporg-photos' ); ?></p>
 </header><!-- .page-header -->
@@ -32,7 +32,7 @@ $terms = get_terms( [ 'taxonomy' => $tax_name, 'hide_empty' => false ] );
 
 		<div class="entry-content">
 			<span></span>
-			<a href="<?php echo esc_url( get_term_link( $term->term_id ) ); ?>"><?php echo $term->name; ?></a>
+			<a href="<?php echo esc_url( get_term_link( $term->term_id ) ); ?>"><?php echo $term->name; ?> (<?php echo $term->count; ?>)</a>
 		</div><!-- .entry-content -->
 
 		<footer class="entry-footer">

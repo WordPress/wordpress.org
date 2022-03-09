@@ -42,11 +42,11 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	}
 
 	function title() {
-		return $this->plugin->post_title;
+		return $this->plugin->post_title ?? '';
 	}
 
 	function status() {
-		return $this->plugin->post_status;
+		return $this->plugin->post_status ?? '';
 	}
 
 	function forum_id() {

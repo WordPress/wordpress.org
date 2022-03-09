@@ -86,7 +86,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  * Enqueue scripts and styles.
  */
 function scripts() {
-	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() .  '/css/style.css', [ 'dashicons', 'open-sans' ], '20211214' );
+	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() .  '/css/style.css', [ 'dashicons', 'open-sans' ], '20220303' );
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	// Make jQuery a footer script.
@@ -320,7 +320,7 @@ function pre_get_posts( $query ) {
 	}
 
 	// Set the number of photos to appear per page in the photos archive.
-	if ( is_post_type_archive( $post_type ) ) {
+	if ( is_post_type_archive( $post_type ) || ( is_home() && is_paged() ) ) {
 		$query->set( 'posts_per_page', 30 );
 	}
 }

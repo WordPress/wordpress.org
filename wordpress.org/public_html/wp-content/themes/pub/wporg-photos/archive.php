@@ -17,7 +17,7 @@ get_header();
 
 		<?php if ( ! is_post_type_archive( Registrations::get_post_type() ) ) : ?>
 			<header class="page-header">
-				<h1 class="page-title"><?php the_archive_title(); ?></h1>
+				<h2 class="page-title"><?php the_archive_title(); ?></h2>
 			</header><!-- .page-header -->
 		<?php endif; ?>
 

@@ -23,6 +23,9 @@ function init() {
 
 	$detector = new Detector();
 
-	add_action( 'locale', [ $detector, 'get_locale' ] );
+	add_filter( 'locale', [ $detector, 'get_locale' ] );
+	add_filter( 'pre_determine_locale', [ $detector, 'get_locale' ] );
 }
-add_action( 'plugins_loaded', __NAMESPACE__ . '\init', 1 );
+
+// Override the locale ASAP.
+init();

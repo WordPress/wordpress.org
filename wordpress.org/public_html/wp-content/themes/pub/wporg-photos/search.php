@@ -17,7 +17,7 @@ get_header();
 	 	<?php if ( have_posts() ) : ?>
 
 			<header class="page-header">
-				<h1 class="page-title">
+				<h2 class="page-title">
 					<?php
 					printf(
 						/* translators: Search query. */
@@ -25,7 +25,7 @@ get_header();
 						'<strong>' . sanitize_text_field( get_search_query( false ) ) . '</strong>'
 					);
 					?>
-				</h1>
+				</h2>
 			</header><!-- .page-header -->
 
 		<?php
@@ -42,9 +42,9 @@ get_header();
 			<section class="no-results not-found">
 
 			<header class="page-header">
-				<h1 class="page-title">
+				<h2 class="page-title">
 					<?php _e( 'Nothing Found', 'wporg-photos' ); ?>
-				</h1>
+				</h2>
 			</header>
 
 			<p><?php _e( 'Sorry, but nothing matched your search terms.', 'wporg-photos' ); ?></p>

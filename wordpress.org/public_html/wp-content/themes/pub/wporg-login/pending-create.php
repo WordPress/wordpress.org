@@ -8,7 +8,7 @@
 $sso = WPOrg_SSO::get_instance();
 
 // Migrate to cookies.
-if ( !empty( $sso::$matched_route_params['confirm_user'] ) ) {
+if ( ! empty( $sso::$matched_route_params['confirm_user'] ) ) {
 	setcookie( 'wporg_confirm_user', $sso::$matched_route_params['confirm_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 	setcookie( 'wporg_confirm_key',  $sso::$matched_route_params['confirm_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
 
@@ -68,25 +68,26 @@ if ( isset( $_POST['user_pass'] ) && 2 !== $pending_user['cleared'] ) {
 	if ( ! wporg_login_check_recapcha_status( 'pending_create', false ) ) {
 		unset( $_POST['user_pass'] );
 		$error_recapcha_status = true;
+	}
 
-		// Store for reference.
-		if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
-			$recaptcha_api = wporg_login_recaptcha_api(
-				$_POST['_reCaptcha_v3_token'],
-				RECAPTCHA_V3_PRIVKEY
-			);
-			if ( $recaptcha_api && $recaptcha_api['success'] && 'pending_create' == $recaptcha_api['action'] ) {
-				$pending_user['scores']['create_attempt'] = $recaptcha_api['score'];
-			} // else: probably `timeout-or-duplicate` or w.org network error.
-		}
+	// Store for reference.
+	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
+		$recaptcha_api = wporg_login_recaptcha_api(
+			$_POST['_reCaptcha_v3_token'],
+			RECAPTCHA_V3_PRIVKEY
+		);
+		if ( $recaptcha_api && $recaptcha_api['success'] && 'pending_create' == $recaptcha_api['action'] ) {
+			$pending_user['scores']['create_attempt'] = $recaptcha_api['score'];
+		} // else: probably `timeout-or-duplicate` or w.org network error.
+	}
 
-		// Allow a recaptcha fail to try again, but if they're blocked due to low score, mark them as needing approval.
-		if (
-			! empty( $pending_user['scores']['create_attempt'] ) &&
-			(float) $pending_user['scores']['create_attempt'] < (float) get_option( 'recaptcha_v3_threshold', 0.2 )
-		) {
-			$pending_user['cleared'] = 0;
-		}
+	// Allow a recaptcha fail to try again, but if they're blocked due to low score, mark them as needing approval.
+	if (
+		$error_recapcha_status &&
+		! empty( $pending_user['scores']['create_attempt'] ) &&
+		(float) $pending_user['scores']['create_attempt'] < (float) get_option( 'recaptcha_v3_threshold', 0.2 )
+	) {
+		$pending_user['cleared'] = 0;
 	}
 
 	wporg_update_pending_user( $pending_user );
@@ -157,7 +158,7 @@ get_header();
 		<input type="text" disabled="disabled" class="disabled" value="<?php echo esc_attr( $activation_user ); ?>" size="20" />
 	</p>
 
-	<div class="user-pass1-wrap">
+	<div class="user-pass1-wrap" <?php echo ( $pending_user['cleared'] ? '' : "style='display:none;'" ); ?>>
 		<p>
 			<label for="pass1"><?php _e( 'Password', 'wporg' ); ?></label>
 		</p>
@@ -186,7 +187,7 @@ get_header();
 	?>
 
 	<p class="login-submit">
-		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary button-large" value="<?php esc_attr_e( 'Create Account', 'wporg' ); ?>" />
+		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary button-large" value="<?php ( $pending_user['cleared'] ? esc_attr_e( 'Create Account', 'wporg' ) : esc_attr_e( 'Save Profile Information', 'wporg' ) ); ?>" />
 	</p>
 
 </form>

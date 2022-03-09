@@ -52,77 +52,77 @@ class WPORG_Themes_Upload {
 	 *
 	 * @var string
 	 */
-	protected $tmp_dir = '';
+	public $tmp_dir = '';
 
 	/**
 	 * Path to a temporary SVN checkout directory.
 	 * 
 	 * @var string
 	 */
-	protected $tmp_svn_dir = '';
+	public $tmp_svn_dir = '';
 
 	/**
 	 * Path to temporary theme folder.
 	 *
 	 * @var string
 	 */
-	protected $theme_dir = '';
+	public $theme_dir = '';
 
 	/**
 	 * The uploaded theme.
 	 *
 	 * @var WP_Theme
 	 */
-	protected $theme;
+	public $theme;
 
 	/**
 	 * The theme slug being uploaded.
 	 *
 	 * @var string
 	 */
-	protected $theme_slug = '';
+	public $theme_slug = '';
 
 	/**
 	 * The theme post if it already exists in the repository.
 	 *
 	 * @var WP_Post
 	 */
-	protected $theme_post;
+	public $theme_post;
 
 	/**
 	 * The theme author (current user).
 	 *
 	 * @var WP_User
 	 */
-	protected $author;
+	public $author;
 
 	/**
 	 * The theme readme.txt data.
 	 *
 	 * @var array
 	 */
-	protected $readme = array();
+	public $readme = array();
 
 	/**
 	 * Trac ticket information.
 	 *
 	 * @var object
 	 */
-	protected $trac_ticket;
+	public $trac_ticket;
 
 	/**
 	 * Trac changeset.
 	 * 
 	 * @var int
 	 */
-	protected $trac_changeset = 0;
+	public $trac_changeset = 0;
 
 	/**
 	 * A Trac instance to communicate with theme.trac.
 	 *
 	 * @var Trac
 	 */
-	protected $trac;
+	public $trac;
 
 	/**
 	 * Theme import status, what the status of this theme version is.
@@ -143,7 +143,7 @@ class WPORG_Themes_Upload {
 	 * 
 	 * @var string
 	 */
-	protected $commit_msg = '';
+	public $commit_msg = '';
 
 	/**
 	 * The list of headers to extract from readme.txt.
@@ -1261,6 +1261,17 @@ TICKET;
 
 		// Otherwise create it for this new theme.
 		} else {
+
+			// Filter the tags to those that exist on the site already.
+			$tags = array_intersect(
+				$this->theme->get( 'Tags' ),
+				get_terms( array(
+					'hide_empty' => false,
+					'taxonomy' => 'post_tag',
+					'fields' => 'slugs'
+				) )
+			);
+
 			$post_id = wp_insert_post( array(
 				'post_author'    => $this->author->ID,
 				'post_title'     => $this->theme->get( 'Name' ),
@@ -1272,7 +1283,7 @@ TICKET;
 				'comment_status' => 'closed',
 				'ping_status'    => 'closed',
 				'post_type'      => 'repopackage',
-				'tags_input'     => $this->theme->get( 'Tags' ),
+				'tags_input'     => $tags,
 			) );
 		}
 
@@ -1760,7 +1771,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 						(
 							// When importing from SVN, include a 'Compare' link as the Changeset likely won't show a Diff unless the author did a `svn cp`.
 							'svn' === $this->importing_from && ! empty( $this->theme_post->max_version ) ?
-							"<https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}|Compare>" :
+							"<https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->_last_live_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}|Compare>" :
 							''
 						),
 				];

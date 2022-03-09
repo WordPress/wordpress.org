@@ -1335,6 +1335,19 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		// WP_User::has_role() does not exist, and WP_User::has_cap( 'bbp_blocked' ) will be truthful for super admins.
 		$user_has_blocked_role = ! empty( $user->roles ) && in_array( $blocked_role, $user->roles, true );
 
+		// Define what has blocked the user.
+		if ( ! ms_is_switched() ) {
+			$where_from = preg_replace( '!^https?://!i', '', home_url( is_admin() ? '/wp-admin' : '' ) );
+		} else {
+			// When we're switched, we can't determine the source of the switch, so we use a bit of URL parsing magic.
+			$where_from = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			if ( str_contains( $where_from, '?' ) ) {
+				list( $where_from, ) = explode( '?', $where_from );
+			}
+			// Trim actual filename off, just the major path component.
+			$where_from = preg_replace( '!/[^/?]+\.[a-z]{3}$!i', '', $where_from  );
+		}
+
 		if (
 			( $blocked_role === $new_role || $user_has_blocked_role ) &&
 			! $password_broken
@@ -1359,9 +1372,13 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 
 			// Add a user note about this action.
 			$note_text = sprintf(
-				'Forum role changed to %s.',
-				get_role( $new_role )->name
+				$where_from ? 'Forum role changed to %s via %s.' : 'Forum role changed to %s.',
+				get_role( $new_role )->name,
+				$where_from
 			);
+
+			// Used in wporg-login to add context.
+			$note_text = apply_filters( 'wporg_bbp_forum_role_changed_note_text', $note_text, $user );
 		} else if (
 			$password_broken &&
 			! $user_has_blocked_role
@@ -1382,9 +1399,13 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 
 			// Add a user note about this action.
 			$note_text = sprintf(
-				'Forum role changed to %s.',
-				get_role( $new_role )->name
+				$where_from ? 'Forum role changed to %s via %s.' : 'Forum role changed to %s.',
+				get_role( $new_role )->name,
+				$where_from
 			);
+
+			// Unused, here for consistency with above.
+			$note_text = apply_filters( 'wporg_bbp_forum_role_changed_note_text', $note_text, $user );
 		}
 
 		if ( $note_text ) {

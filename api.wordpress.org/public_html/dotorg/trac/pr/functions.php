@@ -102,11 +102,15 @@ function fetch_pr_data( $repo, $pr ) {
 /**
  * Find a WordPress.org user by a Github login.
  */
-function find_wporg_user_by_github( $github_user ) {
+function find_wporg_user_by_github( $github_user, $what = 'user_login' ) {
 	global $wpdb;
 
+	if ( ! in_array( $what, [ 'ID', 'user_login' ], true ) ) {
+		return false;
+	}
+
 	return $wpdb->get_var( $wpdb->prepare(
-		"SELECT u.user_login
+		"SELECT u.{$what}
 			FROM wporg_github_users g
 				JOIN {$wpdb->users} u ON g.user_id = u.ID
 			WHERE g.github_user = %s",

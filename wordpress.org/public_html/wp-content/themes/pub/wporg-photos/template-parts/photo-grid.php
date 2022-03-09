@@ -1,6 +1,6 @@
 <?php
 /**
- * Template part for displaying plugins.
+ * Template part for displaying grid of photos.
  *
  * @link https://codex.wordpress.org/Template_Hierarchy
  *

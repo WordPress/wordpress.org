@@ -22,14 +22,6 @@ class WPorg_Handbook_Callout_Boxes {
 	 * @access public
 	 */
 	public function __construct() {
-		$this->shortcodes = array(
-			'info'    => __( 'Note:',    'wporg' ),
-			'tip'     => __( 'Tip:',     'wporg' ),
-			'alert'   => __( 'Alert:',   'wporg' ),
-			'tutorial' => __( 'Tutorial:', 'wporg' ),
-			'warning' => __( 'Warning:', 'wporg' )
-		);
-
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
 	}
 
@@ -39,6 +31,14 @@ class WPorg_Handbook_Callout_Boxes {
 	 * @access public
 	 */
 	public function register_shortcodes() {
+		$this->shortcodes = array(
+			'info'     => __( 'Note:',     'wporg' ),
+			'tip'      => __( 'Tip:',      'wporg' ),
+			'alert'    => __( 'Alert:',    'wporg' ),
+			'tutorial' => __( 'Tutorial:', 'wporg' ),
+			'warning'  => __( 'Warning:',  'wporg' )
+		);
+
 		foreach ( array_keys( $this->shortcodes ) as $name) {
 			add_shortcode( $name, array( $this, "{$name}_shortcode" ) );
 		}

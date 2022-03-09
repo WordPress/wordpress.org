@@ -54,7 +54,7 @@
 		}
 	
 		$this.val(
-			val.substr( 0, $this.prop('selectionStart') ) +      // Text before cusor/selection
+			val.substr( 0, $this.prop('selectionStart') ) +      // Text before cursor/selection
 			"`" + paste + "`" +                                  // The pasted text, wrapping with `
 			val.substr( $this.prop('selectionEnd'), val.length ) // Text after cursor position/selection
 		);
@@ -63,14 +63,13 @@
 	} );
 
 	if ( $( 'body' ).is( '.bbp-view' ) ) {
-		$( '.bbp-body .bbp-admin-links a' ).click( function( e ) {
+		$( '.bbp-admin-links a' ).click( function( e ) {
 			var $this = $( this ),
-				$element = $this.closest( '.bbp-body' ),
-				$content = $element.find( '.bbp-topic-content' ),
+				$element = $this.parents('.reply,.topic'),
 				type;
 
 			// Don't affect open-in-new-tab.
-			if ( e.metaKey || e.ctrlKey || e.which === 2 ) {
+			if ( e.metaKey || e.ctrlKey || e.shiftKey ) {
 				return;
 			}
 
@@ -89,16 +88,13 @@
 			$element.fadeTo( 500, .5 );
 
 			$.get( $this.prop( 'href' ) ).done( function() {
-				$content.append(
+				$this.parent().before(
 					'<div class="bbp-template-notice">' + wporgSupport.strings[ type ] + '</div>'
 				);
 
-				// Remove actions.
-				$this.parent().find('a:not(.bbp-topic-edit-link)').remove();
-
 				$element.fadeTo( 250, 1 );
-			} ).error( function() {
-				$content.append(
+			} ).fail( function() {
+				$this.parent().before(
 					'<div class="bbp-template-notice">' + wporgSupport.strings.action_failed + '</div>'
 				);
 

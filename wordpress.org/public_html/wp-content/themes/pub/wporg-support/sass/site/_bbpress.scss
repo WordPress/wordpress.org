@@ -27,7 +27,7 @@ $paginationBreakPoint: "600px";
 			display: inline-block;
 			vertical-align: top;
 			width: 30%;
-			margin-right: 4.5%;
+			margin-right: 4%;
 			font-size: ms( -2 );
 
 			&:nth-child(3n) {
@@ -74,7 +74,7 @@ $paginationBreakPoint: "600px";
 			@media (min-width: $ms-breakpoint) {
 				height: 200px;
 				border-bottom: none;
-				margin: 2rem 4.5% 0 0;
+				margin: 2rem 4% 0 0;
 
 				&:nth-child(3n) {
 					margin-right: 0;

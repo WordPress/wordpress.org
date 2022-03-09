@@ -265,8 +265,6 @@ class Release_Confirmation {
 			return true;
 		}
 
-		setcookie( self::COOKIE, false, time() - DAY_IN_SECONDS );
-
 		return false;
 	}
 
@@ -301,6 +299,12 @@ class Release_Confirmation {
 		// Migrate URL param to cookie.
 		if ( isset( $_REQUEST[ self::URL_PARAM ] ) ) {
 			setcookie( self::COOKIE, $_REQUEST[ self::URL_PARAM ], time() + DAY_IN_SECONDS, '/plugins/', 'wordpress.org', true, true );
+		}
+
+		// Expire the cookie when needed. This is not for security, only performance / cleanliness.
+		if ( isset( $_COOKIE[ self::COOKIE ] ) && ! self::can_access() ) {
+			unset( $_COOKIE[ self::COOKIE ] );
+			setcookie( self::COOKIE, false, time() - DAY_IN_SECONDS );
 		}
 
 		// This page requires login.

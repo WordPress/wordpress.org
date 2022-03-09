@@ -87,6 +87,7 @@ body.search  {
 			height: 200px;
 			width: 300px;
 			object-fit: cover;
+			transition: all 250ms;
 
 			&:active,
 			&:hover {
@@ -191,7 +192,6 @@ body.page {
 		background-color: #fff;
 		margin: 0 auto;
 		padding: ms( 10 ) ms( 4 ) 0;
-		width: $size__site-main;
 
 		.entry-title {
 			color: $color__text-main;
@@ -498,7 +498,7 @@ body.page .taxonomy-photo_color {
 			background-color: #fff;
 			display: block;
 			min-height: 3.8rem;
-			opacity: 0.6;
+			opacity: 0.9;
 		}
 
 		a {
@@ -517,6 +517,25 @@ div.upload-checkbox-wrapper {
 
 	input[type="checkbox"] {
 		margin-top: 0;
+	}
+
+	div {
+		padding-left: 25px;
+	}
+
+	input {
+		margin-left: -25px;
+	}
+
+	@include breakpoint( 0, 782px ) {
+		div {
+			margin: 0.5rem 0;
+			padding-left: 35px;
+		}
+
+		input {
+			margin-left: -35px;
+		}
 	}
 }
 

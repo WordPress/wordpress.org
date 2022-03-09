@@ -61,6 +61,8 @@ class Performance_Optimizations {
 
 		// Add some caching on count_users().
 		add_filter( 'pre_count_users', array( $this, 'cache_count_users' ), 10, 3 );
+		// ..and don't do expensive orderbys & counting for user queries that don't need it.
+		add_action( 'pre_get_users', array( $this, 'pre_get_users' ) );
 	}
 
 	/**
@@ -561,9 +563,10 @@ class Performance_Optimizations {
 	 * Cache the result of `count_users()` as the Support Forums site has a lot of users.
 	 * 
 	 * This slows wp-admin/users.php down so much that it's hard to use when required.
-	 * As these numbers don't change often, it's cached for 6 hours, which avoids a 20-60s query on each users.php pageload.
+	 * As these numbers don't change often, it's cached for 24hrs hours, which avoids a 20-60s query on each users.php pageload.
 	 */
 	public function cache_count_users( $result, $strategy, $site_id ) {
+		global $wpdb;
 		static $running = false;
 
 		if ( $result || ! is_multisite() || $running ) {
@@ -572,17 +575,63 @@ class Performance_Optimizations {
 
 		switch_to_blog( $site_id );
 
-		$result = get_site_transient( 'count_users' );
+		$result = get_transient( 'count_users' );
 		if ( ! $result ) {
+			if ( is_callable( [ $wpdb, 'send_reads_to_masters' ] ) ) {
+				$wpdb->send_reads_to_masters(); // unfortunate.
+			}
+
+			// always time strategy, memory loads every single meta_value, that ain't gonna work.
+			$strategy = 'time';
+
 			$running = true;
 			$result  = count_users( $strategy, $site_id );
 			$running = false;
 
-			set_site_transient( 'count_users', $result, 6 * HOUR_IN_SECONDS );
+			set_transient( 'count_users', $result, DAY_IN_SECONDS );
 		}
 
 		restore_current_blog();
 
 		return $result;
+	}
+
+	/**
+	 * Filter use queries to be more performant, as the default WordPress user queries
+	 * just don't scale to several million users here.
+	 * 
+	 * @param \WP_User_Query $query
+	 */
+	public function pre_get_users( $query ) {
+		$is_role_related = false;
+		foreach ( [ 'role', 'role__in', 'role__not_in', 'capability', 'capability__in', 'capability__not_in' ] as $var ) {
+			if ( ! empty( $query->query_vars[ $var ] ) ) {
+				$is_role_related = true;
+				break;
+			}
+		}
+
+		// Don't count users unless searching.
+		if ( empty( $query->query_vars['search'] ) && ! $is_role_related ) {
+			$query->query_vars['count_total'] = false;
+		}
+
+		// Sort by ID instead of login by default, speeds up initial load.
+		if ( 'login' === $query->query_vars['orderby'] && empty( $_GET['orderby'] ) ) {
+			$query->query_vars['orderby'] = 'ID';
+			$query->query_vars['order'] = 'DESC';
+		}
+
+		// Searches for email domains should be wildcard before only.
+		if ( str_starts_with( $query->query_vars['search'], '*@' ) && str_ends_with( $query->query_vars['search'], '*' ) ) {
+			$is_role_related = false;
+
+			$query->query_vars['search'] = '*' . trim( $query->query_vars['search'], '*' );
+		}
+
+		// If a search is being performed, and it's not capability/role dependant, ignore the blog_id.
+		if ( $query->query_vars['blog_id'] && ! $is_role_related ) {
+			$query->query_vars['blog_id'] = false;
+		}
 	}
 }

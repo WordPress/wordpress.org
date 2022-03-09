@@ -507,7 +507,6 @@ class Test_Events extends TestCase {
 				),
 			),
 
-
 			/*
 			 * The country name, locale, and timezone are given
 			 */
@@ -1218,9 +1217,9 @@ class Test_Events extends TestCase {
 			'ip-asia' => array(
 				'input' => array( 'ip' => '86.108.55.28' ),
 				'expected' => array(
-					'description' => 'aqaba',
-					'latitude'    => '29.527',
-					'longitude'   => '35.008',
+					'description' => 'zarqa',
+					'latitude'    => '32.073',
+					'longitude'   => '36.088',
 					'country'     => 'JO',
 					'internal'    => true,
 				),
@@ -1316,9 +1315,9 @@ class Test_Events extends TestCase {
 			'ipv6-europe-anonymized' => array(
 				'input'    => array( 'ip' => '2a02:578:1000::' ),
 				'expected' => array(
-					'description' => 'sint-niklaas',
-					'latitude'    => '51.165',
-					'longitude'   => '4.144',
+					'description' => 'brussels',
+					'latitude'    => '50.850',
+					'longitude'   => '4.349',
 					'country'     => 'BE',
 					'internal'    => true,
 				),
@@ -1338,9 +1337,9 @@ class Test_Events extends TestCase {
 			'ipv6-oceania-collapsed-prefix' => array(
 				'input'    => array( 'ip' => '::ffff:0190:c500' ),
 				'expected' => array(
-					'description' => 'perth',
-					'latitude'    => '-31.952',
-					'longitude'   => '115.861',
+					'description' => 'sydney',
+					'latitude'    => '-33.868',
+					'longitude'   => '151.207',
 					'country'     => 'AU',
 					'internal'    => true,
 				),
@@ -1457,8 +1456,8 @@ class Test_Events extends TestCase {
 		$seed_events = array();
 
 		// Don't forget to update the values here when they're updated in the FUT.
-		$actual_events_before_expiration = pin_one_off_events( $seed_events, strtotime( 'December 17, 2020' ) );
-		$actual_events_after_expiration  = pin_one_off_events( $seed_events, strtotime( 'December 18, 2020' ) );
+		$actual_events_before_expiration = pin_one_off_events( $seed_events, strtotime( 'December 16, 2021' ) );
+		$actual_events_after_expiration  = pin_one_off_events( $seed_events, strtotime( 'December 17, 2021' ) );
 
 		$this->assertIsArray( $actual_events_after_expiration );
 		$this->assertEmpty( $actual_events_after_expiration );
