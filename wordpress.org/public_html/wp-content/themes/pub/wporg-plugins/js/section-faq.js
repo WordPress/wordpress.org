@@ -37,7 +37,9 @@
 			} ).next( 'dd' ).slideToggle( 200 );
 
 			if ( window.location.hash ) {
-				window.scrollTo( 0, $question.offset().top );
+				var scrollPaddingTop = parseInt( $('html').css('scroll-padding-top') || 0 );
+
+				window.scrollTo( 0, $question.offset().top - scrollPaddingTop );
 			}
 		} );
 
