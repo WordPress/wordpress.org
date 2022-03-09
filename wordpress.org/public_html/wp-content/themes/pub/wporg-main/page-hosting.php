@@ -55,7 +55,7 @@ $hosting_cache_buster = '3';
 						<p>Powering over 2 million websites, Bluehost offers the ultimate WordPress platform. Tuned for WordPress, we offer WordPress-centric dashboards and tools along with 1-click installation, a FREE domain name, email, FTP, and more. Easily scalable and backed by legendary 24/7 support by in-house WordPress experts.</p>
 
 						<div class="forum">
-							<a href="https://wordpress.org/support/topic-tag/bluehost/">Forum threads about Bluehost &raquo;</a>
+							<a href="https://wordpress.org/search/Bluehost/?in=support_forums">Forum threads about Bluehost &raquo;</a>
 						</div>
 					</div>
 
@@ -75,7 +75,7 @@ $hosting_cache_buster = '3';
 						<p>DreamHost has been committed to WordPress and its community for over 10 years. Our hosting platforms are optimized for WordPress and our team actively contributes to the WordPress community. At DreamHost, you take total control of your server or let our team of experts handle everything for you. DreamHost offers choice, performance and value for new users and experts alike.</p>
 
 						<div class="forum">
-							<a href="https://wordpress.org/support/topic-tag/dreamhost/">Forum threads about DreamHost &raquo;</a>
+							<a href="https://wordpress.org/search/DreamHost/?in=support_forums">Forum threads about DreamHost &raquo;</a>
 						</div>
 					</div>
 
@@ -95,7 +95,7 @@ $hosting_cache_buster = '3';
 						<p>SiteGround has tools that make managing WordPress sites easy: one-click install, managed updates, WP-Cli, WordPress staging and git integration. We have a very fast support team with advanced WordPress expertise available 24/7. We provide latest speed technologies that make WordPress load faster: NGINX-based caching, SSD-drives, PHP 7, CDN, HTTP/2. We proactively protect the WordPress sites from hacks.</p>
 
 						<div class="forum">
-							<a href="https://wordpress.org/support/topic-tag/siteground/">Forum threads about SiteGround &raquo;</a>
+							<a href="https://wordpress.org/search/SiteGround/?in=support_forums">Forum threads about SiteGround &raquo;</a>
 						</div>
 					</div>
 
