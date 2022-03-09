@@ -255,6 +255,9 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	/**
 	 * Replace the forum subscription subject/title with term-specific messaging.
 	 *
+	 * Eg, before it would be similar to `[Plugins] This is my thread title`.
+	 * This changes it to `[Plugin Name] Thread title`.
+	 *
 	 * @param string $title The current title
 	 * @param int $topic_id The topic id
 	 */
@@ -374,6 +377,9 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 
 	/**
 	 * Replace the topic subscription subject/title with term-specific messaging.
+	 *
+	 * Eg, before it would be similar to `[Plugins] This is my thread title`.
+	 * This changes it to `[Plugin Name] Thread title`.
 	 *
 	 * @param string $title    The current title
 	 * @param int    $reply_id The reply id
