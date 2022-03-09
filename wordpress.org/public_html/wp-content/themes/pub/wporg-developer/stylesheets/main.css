@@ -2649,7 +2649,7 @@ div[class*="-table-of-contents-container"] .sub-menu {
   margin: 0 !important;
 }
 
-/** /Handbook **/
+/** Handbook **/
 .rest-api-handbook-reference .table-of-contents {
   float: none;
   overflow: hidden;
@@ -2866,7 +2866,7 @@ body.responsive-show #o2-expand-editor {
     padding: 0 4rem;
   }
   .devhub-wrap .reference-landing .searchform {
-    text-alignment: center;
+    text-align: center;
   }
   .devhub-wrap .reference-landing .searchform input[type="text"],
   .devhub-wrap .reference-landing .searchform input[type="submit"] {

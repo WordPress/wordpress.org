@@ -314,9 +314,6 @@
 
 	/* =Content
 	----------------------------------------------- */
-
-	.sticky {
-	}
 	.hentry {
 		margin: 0;
 	}
@@ -409,8 +406,6 @@
 	.site-main .gallery {
 		margin-bottom: 1.5em;
 	}
-	.gallery-caption {
-	}
 	.site-main .gallery a img {
 		border: none;
 		height: auto;
@@ -418,10 +413,6 @@
 	}
 	.site-main .gallery dd {
 		margin: 0;
-	}
-	.site-main .gallery-columns-4 .gallery-item {
-	}
-	.site-main .gallery-columns-4 .gallery-item img {
 	}
 
 	/* Make sure embeds and iframes fit their containers */
@@ -1396,24 +1387,10 @@
 			padding: 0.125em;
 			border: 1px solid #eee;
 		}
-
-		.comment-author-attribution {
-		}
-
 		.comment-meta {
 			padding: .5em 1em;
 			background-color: #f7f7f7;
 			overflow: auto;
-		}
-
-		.comment-meta .comment-author cite,
-		.comment-meta .comment-author cite a {
-		}
-
-		.comment-meta a {
-		}
-
-		.comment-meta a:hover {
 		}
 
 		.comment-content {
@@ -1445,15 +1422,8 @@
 			padding: 0;
 		}
 
-		.comment-text {
-		}
-
 		#respond {
 			overflow: hidden;
-		}
-
-		#respond .log-in-out {
-
 		}
 
 		#respond .log-in-out a {
@@ -1462,15 +1432,6 @@
 
 		#reply-title small a {
 			font-style: italic;
-		}
-
-		#respond label {
-		}
-
-		#respond p.req label {
-		}
-
-		#respond span.required {
 		}
 
 		#respond #submit {
@@ -1535,9 +1496,6 @@
 			color: #888;
 			float: right;
 			margin-top: -15px;
-
-			a {
-			}
 		}
 
 		.comment-author {
@@ -2262,7 +2220,7 @@ div[class*="-table-of-contents-container"] {
 		margin: 0 !important;
 	}
 }
-/** /Handbook **/
+/** Handbook **/
 
 .rest-api-handbook-reference {
 
@@ -2509,7 +2467,7 @@ body.responsive-show {
 		}
 
 		.reference-landing .searchform {
-			text-alignment: center;
+			text-align: center;
 		}
 
 		.reference-landing .searchform input[type="text"],
