@@ -1063,12 +1063,8 @@
 			.arg-default {
 				color: #000000;
 			}
-			a {
-				text-decoration: none;
-
-				&:hover {
-					border-bottom: 1px dotted #21759b;
-				}
+			a:hover {
+				border-bottom: 1px dotted #21759b;
 			}
 		}
 		h2 {
