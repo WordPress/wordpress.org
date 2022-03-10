@@ -160,7 +160,7 @@ class Plugin {
 
 		$term_id = $term->term_id;
 		$auth    = 'nonce';
-		$user_id = get_current_user_id();
+		$user_id = isset( $_REQUEST['user_id'] ) ? $_REQUEST['user_id'] : get_current_user_id(); // Must pass nonce check below.
 
 		// If a user_id + token is provided, verify the request and maybe use the provided user_id.
 		if ( isset( $_GET['token'] ) ) {
@@ -190,12 +190,12 @@ class Plugin {
 						),
 						esc_attr( $_SERVER['REQUEST_URI'] ),
 						esc_attr__( 'Yes, unsubscribe me', 'wporg-forums' ),
-						get_term_link( $term ),
-						sprintf(
+						esc_url( get_term_link( $term ) ),
+						esc_attr( sprintf(
 							/* translators: 1: Plugin, Theme, or Tag name. */
-							esc_attr__( 'No, take me to the %s forum.', 'wporg-forums' ),
+							__( 'No, take me to the %s forum.', 'wporg-forums' ),
 							$term->name
-						)
+						) )
 					)
 				);
 				exit;
@@ -208,11 +208,11 @@ class Plugin {
 			bbp_add_error( 'wporg_bbp_subscribe_logged_id', __( '<strong>ERROR</strong>: You must be logged in to do this!', 'wporg-forums' ) );
 
 		// Check nonce.
-		} elseif ( 'nonce' === $auth && ! bbp_verify_nonce_request( 'toggle-term-subscription_' . $user_id . '_' . $term_id . '_' . $this->taxonomy ) ) {
+		} elseif ( 'token' !== $auth && ! bbp_verify_nonce_request( 'toggle-term-subscription_' . $user_id . '_' . $term_id . '_' . $this->taxonomy ) ) {
 			bbp_add_error( 'wporg_bbp_subscribe_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
 
-		// Check user's ability to spectate.
-		} elseif ( ! user_can( $user_id, 'spectate' ) ) {
+		// Check user's ability to spectate if attempting to subscribe to a term.
+		} elseif ( ! user_can( $user_id, 'spectate' ) && 'wporg_bbp_subscribe_term' === $action ) {
 			bbp_add_error( 'wporg_bbp_subscribe_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to do this!', 'wporg-forums' ) );
 		}
 
@@ -624,11 +624,9 @@ To unsubscribe from future emails click here:
 			if ( $terms ) {
 				echo '<p id="bbp-term-' . esc_attr( $this->taxonomy ) . '">' . "\n";
 				foreach ( $terms as $term ) {
+					$unsub_url = self::get_subscription_url( $user_id, $term->term_id, $this->taxonomy );
 					echo '<a href="' . esc_url( get_term_link( $term->term_id ) ) . '">' . esc_html( $term->name ) . '</a>';
-					if ( get_current_user_id() == $user_id ) {
-						$url = self::get_subscription_url( $user_id, $term->term_id, $this->taxonomy );
-						echo ' (<a href="' . esc_url( $url ) . '">' . esc_html( 'Unsubscribe', 'wporg-forums' ) . '</a>)';
-					}
+					echo ' (<a href="' . esc_url( $unsub_url ) . '">' . esc_html( 'Unsubscribe', 'wporg-forums' ) . '</a>)';
 					echo "</br>\n";
 				}
 				echo "</p>\n";
@@ -792,6 +790,10 @@ To unsubscribe from future emails click here:
 			add_query_arg( compact( 'action', 'term_id' ), $permalink ),
 			'toggle-term-subscription_' . $user_id . '_' . $term_id . '_' . $taxonomy
 		);
+
+		if ( $user_id != get_current_user_id() ) {
+			$url = add_query_arg( 'user_id', $user_id, $url );
+		}
 
 		return esc_url( $url );
 	}
