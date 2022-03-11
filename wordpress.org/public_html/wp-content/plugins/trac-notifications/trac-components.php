@@ -5,8 +5,20 @@ class Make_Core_Trac_Components {
 
 	const POST_TYPE_NAME = 'component';
 
+	protected $trac;
+
+	protected $tracs_supported = array( 'core', 'meta' );
+
 	function __construct( $api ) {
-		$this->api = $api;
+		$make_site = explode( '/', home_url( '' ) );
+		$trac = $make_site[3];
+		if ( $make_site[2] !== 'make.wordpress.org' || ! in_array( $trac, $this->tracs_supported ) ) {
+			return;
+		}
+
+		$this->trac = $trac;
+		$this->api  = $api;
+
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -19,6 +31,14 @@ class Make_Core_Trac_Components {
 		add_action( 'manage_component_posts_custom_column', array( $this, 'manage_posts_custom_column' ), 10, 2 );
 		add_filter( 'wp_nav_menu_objects', array( $this, 'highlight_menu_component_link' ) );
 		add_filter( 'map_meta_cap', [ $this, 'map_meta_cap' ], 10, 4 );
+	}
+
+	function trac_url() {
+		return 'https://' . $this->trac . '.trac.wordpress.org';
+	}
+
+	function trac_name() {
+		return ucfirst( $this->trac );
 	}
 
 	function init() {
@@ -341,7 +361,7 @@ jQuery( function( $ ) {
 			'tag_slug__in' => $post->post_name
 		) );
 		if ( $recent_posts->have_posts() ) {
-			echo "<h3>Recent posts on the make/core blog</h3>\n<ul>";
+			echo "<h3>Recent posts on the make/{$this->trac} blog</h3>\n<ul>";
 			while ( $recent_posts->have_posts() ) {
 				$recent_posts->the_post();
 				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
@@ -403,8 +423,8 @@ jQuery( function( $ ) {
 			echo "</ul>\n\n";
 		}
 
-		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of core are always seeking to mentor others to impart their knowledge.\n\n";
-		echo "<strong>Want to help? Start following this component!</strong> <a href='/core/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
+		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of {$this->trac_name()} are always seeking to mentor others to impart their knowledge.\n\n";
+		echo "<strong>Want to help? Start following this component!</strong> <a href='/{$this->trac}/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
 
 		$followers = $this->api->get_component_followers( $post->post_title );
 		if ( $followers ) {
@@ -478,7 +498,7 @@ jQuery( function( $ ) {
 		$component_count = isset( $component_type[ $component ] ) ? array_sum( $component_type[ $component ] ) : 0;
 
 		if ( is_singular() ) {
-			echo '<div><a class="create-new-ticket button button-large button-primary" href="https://login.wordpress.org/?redirect_to=' . urlencode( 'https://core.trac.wordpress.org/newticket?component=' . urlencode( $component ) ) . '" rel="nofollow">Create a new ticket</a></div>';
+			echo '<div><a class="create-new-ticket button button-large button-primary" href="https://login.wordpress.org/?redirect_to=' . urlencode( $this->trac_url() . '/newticket?component=' . urlencode( $component ) ) . '" rel="nofollow">Create a new ticket</a></div>';
 		}
 
 		if ( ! $component_count ) {
@@ -595,14 +615,14 @@ jQuery( function( $ ) {
 		if ( ! isset( $args['status'] ) ) {
 			$args['status'] = '!closed';
 		}
-		return add_query_arg( $args, 'https://core.trac.wordpress.org/query' );
+		return add_query_arg( $args, $this->trac_url() . '/query' );
 	}
 
 	function render_tickets( $tickets ) {
 		echo '<ul class="ticket-list">';
 		foreach ( $tickets as $ticket ) {
 			$ticket = (object) $ticket;
-			echo '<li><a href="https://core.trac.wordpress.org/ticket/' . $ticket->id . '">#' . $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
+			echo '<li><a href="' . $this->trac_url() . '/ticket/' . $ticket->id . '">#' . $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
 			if ( ! empty( $ticket->focuses ) ) {
 				echo ' <span class="focus">' . implode( '</span> <span class="focus">', explode( ', ', esc_html( $ticket->focuses ) ) ) . '</span>';
 			}
@@ -624,7 +644,7 @@ jQuery( function( $ ) {
 		$topics = explode( ' ', $attr[0] );
 		$both = in_array( 'focus', $topics ) && in_array( 'component', $topics );
 
-		echo '<select class="tickets-by-topic" data-location="https://core.trac.wordpress.org/">';
+		echo '<select class="tickets-by-topic" data-location="' . $this->trac_url() . '/">';
 		if ( $both ) {
 			$default = 'Select a focus or component';
 		} elseif ( in_array( 'focus', $topics ) ) {
@@ -690,7 +710,7 @@ jQuery( function( $ ) {
 		if ( ! empty( $this->breakdown_component_type[ $component ] ) ) {
 			$open_tickets = array_sum( $this->breakdown_component_type[ $component ] );
 		}
-		echo '<td class="right"><a href="https://core.trac.wordpress.org/component/' . esc_attr( rawurlencode( $component ) ) . '">' . $open_tickets . '</a></td>';
+		echo '<td class="right"><a href="' . $this->trac_url() . '/component/' . esc_attr( rawurlencode( $component ) ) . '">' . $open_tickets . '</a></td>';
 		if ( $history['change'] ) {
 			$count = sprintf( "%+d", $history['change'] );
 			if ( $history['change'] > 0 ) {

@@ -29,7 +29,7 @@ class wporg_trac_notifications {
 		$this->trac = $trac;
 		$this->api  = new Trac_Notifications_HTTP_Client( $this->trac_url() . '/wpapi', TRAC_NOTIFICATIONS_API_KEY );
 
-		if ( 'core' === $trac ) {
+		if ( 'core' === $trac || 'meta' === $trac ) {
 			require __DIR__ . '/trac-components.php';
 			$this->components = new Make_Core_Trac_Components( $this->api );
 		}

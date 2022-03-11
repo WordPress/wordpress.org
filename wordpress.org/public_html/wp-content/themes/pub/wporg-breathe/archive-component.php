@@ -3,12 +3,16 @@
  * Template for component pages, for make/core.
  */
 
+$trac_name = 'Core';
+if ( isset( $wporg_trac_notifications ) ) {
+	$trac_name = $wporg_trac_notifications->trac_name();
+}
 ?>
 <?php get_header(); ?>
 
 	<div id="primary" class="content-area">
 		<div role="main">
-		<h1>WordPress Core Components</h1>
+		<h1><?php printf( 'WordPress %s Components', $trac_name ); ?></h1>
 
 <?php
 	if ( $cached = get_transient( 'trac_components_page' ) ) {
