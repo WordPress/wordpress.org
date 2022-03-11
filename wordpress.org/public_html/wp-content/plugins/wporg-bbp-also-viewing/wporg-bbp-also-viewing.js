@@ -48,7 +48,7 @@
 			}
 
 			jQuery('#main').before(
-				'<div id="also-viewing-banner" style="display: none; font-size: 0.8rem; color: #fff; line-height: 2rem; background: #d54e21; width:100%; text-align: center; position: initial; top: 32px; left: 0; z-index: 9999;"></div>'
+				'<div id="also-viewing-banner" style="display: none; font-size: 0.8rem; color: #fff; line-height: 2rem; background: #d54e21; width:100%; text-align: center; position: initial; top: 32px; left: 0; z-index: 150;"></div>'
 			);
 			banner = jQuery( '#also-viewing-banner' );
 		}
