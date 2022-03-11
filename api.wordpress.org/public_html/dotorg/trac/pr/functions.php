@@ -20,7 +20,7 @@ function fetch_pr_data( $repo, $pr ) {
 		null,
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
-	if ( !empty( $raw_check_runs->check_runs ) ) {
+	if ( ! empty( $raw_check_runs->check_runs ) ) {
 		foreach ( $raw_check_runs->check_runs as $check ) {
 			switch ( $check->status ) {
 				case 'queued':
@@ -49,12 +49,14 @@ function fetch_pr_data( $repo, $pr ) {
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
 	$reviews = [];
-	foreach ( $_reviews as $r ) {
-		if (
-			in_array( $r->state, [ 'CHANGES_REQUESTED', 'APPROVED' ] ) &&
-			! in_array( $r->user->login, $reviews[ $r->state ] ?? [], true )
-		) {
-			$reviews[ $r->state ][] = $r->user->login;
+	if ( $_reviews ) {
+		foreach ( $_reviews as $r ) {
+			if (
+				in_array( $r->state, [ 'CHANGES_REQUESTED', 'APPROVED' ] ) &&
+				! in_array( $r->user->login, $reviews[ $r->state ] ?? [], true )
+			) {
+				$reviews[ $r->state ][] = $r->user->login;
+			}
 		}
 	}
 
@@ -64,10 +66,12 @@ function fetch_pr_data( $repo, $pr ) {
 		null,
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
-	foreach ( $_files as $f ) {
-		if ( preg_match( '!(^tests/|/tests/)!', $f->filename ) ) {
-			$touches_tests = true;
-			break;
+	if ( $_files ) {
+		foreach ( $_files as $f ) {
+			if ( preg_match( '!(^tests/|/tests/)!', $f->filename ) ) {
+				$touches_tests = true;
+				break;
+			}
 		}
 	}
 
