@@ -11,7 +11,7 @@ import Iframe from '../iframe';
 import getCardFrameHeight from '../../utils/get-card-frame-height';
 import useInView from '../../hooks/in-view';
 
-const VIEWPORT_WIDTH = 800;
+const VIEWPORT_WIDTH = 1200;
 
 function PatternThumbnail( { className, html } ) {
 	const wrapperRef = useRef();

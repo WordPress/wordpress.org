@@ -56,6 +56,13 @@ function enqueue_assets() {
 	);
 	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
+	// Build up the alignment styles to match the layout set in theme.json.
+	// See https://github.com/WordPress/gutenberg/blob/9d4b83cbbafcd6c6cbd20c86b572f458fc65ff16/lib/block-supports/layout.php#L38
+	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
+	$layout = wp_get_global_settings( array( 'layout' ) );
+	$style = gutenberg_get_layout_style( '.entry-content', $layout, true, $block_gap );
+	wp_add_inline_style( 'wporg-style', $style );
+
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	if ( file_exists( $script_asset_path ) ) {
 		$script_asset = require( $script_asset_path );
@@ -135,6 +142,13 @@ function generate_block_editor_styles_html() {
 	wp_styles()->done = array();
 	wp_styles()->do_items( $handles );
 	wp_styles()->done = $done;
+
+	// Build up the alignment styles to match the layout set in theme.json.
+	// See https://github.com/WordPress/gutenberg/blob/9d4b83cbbafcd6c6cbd20c86b572f458fc65ff16/lib/block-supports/layout.php#L38
+	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
+	$layout = wp_get_global_settings( array( 'layout' ) );
+	$style = gutenberg_get_layout_style( 'body > div', $layout, true, $block_gap );
+	echo '<style>' . $style . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 	wp_add_inline_script(
 		'wporg-pattern-script',
