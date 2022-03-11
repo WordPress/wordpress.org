@@ -9,7 +9,7 @@ function fetch_pr_data( $repo, $pr ) {
 	$data = api_request( $url );
 
 	// Error time..
-	if ( ! $data || ! $data->number ) {
+	if ( ! $data || empty( $data->number ) ) {
 		return false;
 	}
 
