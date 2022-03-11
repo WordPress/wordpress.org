@@ -607,15 +607,6 @@ body > a.grav-tilt-parent {
     display: none;
 }
 
-
-/* See .entry-meta .entry-date */
-.page .o2-post .entry-meta {
-	float: right;
-	width: 0;
-	top: -30px;
-	right: 10px;
-}
-
 .entry-author-meta {
 	font-size: 0.8em;
 	font-weight: 300;
