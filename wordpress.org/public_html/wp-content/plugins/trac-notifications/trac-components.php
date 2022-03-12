@@ -324,10 +324,12 @@ jQuery( function( $ ) {
 			return $content;
 		}
 
+		$component = str_replace( '&amp;', '&', $post->post_title );
+
 		ob_start();
 
 		if ( ! is_singular() ) {
-			$this->ticket_table( $post->post_title );
+			$this->ticket_table( $component );
 			return ob_get_clean();
 		}
 
@@ -397,9 +399,9 @@ jQuery( function( $ ) {
 			echo "\n\n";
 		}
 
-		$this->ticket_table( $post->post_title );
+		$this->ticket_table( $component );
 
-		$this->trac_content( $post->post_title );
+		$this->trac_content( $component );
 
 		echo '<h3>Help maintain this component</h3>';
 
@@ -426,7 +428,7 @@ jQuery( function( $ ) {
 		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of {$this->trac_name()} are always seeking to mentor others to impart their knowledge.\n\n";
 		echo "<strong>Want to help? Start following this component!</strong> <a href='/{$this->trac}/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
 
-		$followers = $this->api->get_component_followers( $post->post_title );
+		$followers = $this->api->get_component_followers( $component );
 		if ( $followers ) {
 			$followers = "'" . implode( "', '", esc_sql( $followers ) ) . "'";
 			$followers = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($followers)" );
@@ -680,7 +682,8 @@ jQuery( function( $ ) {
 			return;
 		}
 
-		$component = $post->post_title;
+		$component = str_replace( '&amp;', '&', $post->post_title );
+
 		$history = $this->api->get_component_history( $component );
 
 		if ( ! $history ) {
