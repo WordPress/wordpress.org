@@ -61,7 +61,7 @@ const Pattern = ( { postId, userHasReported } ) => {
 					<ReportPatternButton userHasReported={ userHasReported === 'true' } postId={ postId } />
 				</div>
 			</div>
-			<div className="entry-content">
+			<div className="pattern__related-patterns">
 				<PatternGrid
 					query={ { author: pattern.author, per_page: 3, exclude: postId } }
 					showPagination={ false }
