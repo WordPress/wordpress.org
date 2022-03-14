@@ -18,3 +18,23 @@ body.page {
 		max-width: none;
 	}
 }
+
+body.page-about {
+	.entry-header {
+		display: none; // The top-level heading `h1` is set in the cover block.
+	}
+
+	.entry-content {
+		padding-top: ms(4);
+
+		@media ( max-width: $breakpoint-small ) {
+			h1 {
+				font-size: 36px !important; // override the size from the editor.
+			}
+
+			.wp-block-cover {
+				padding: 48px !important; // override the padding from the editor.
+			}
+		}
+	}
+}

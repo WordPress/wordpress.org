@@ -174,6 +174,9 @@ function body_class( $classes, $class ) {
 	if ( 'my-patterns' === $wp_query->get( 'pagename' ) ) {
 		$classes[] = 'my-patterns';
 	}
+	if ( $wp_query->is_page() ) {
+		$classes[] = 'page-' . $wp_query->get( 'pagename' );
+	}
 	return $classes;
 }
 
