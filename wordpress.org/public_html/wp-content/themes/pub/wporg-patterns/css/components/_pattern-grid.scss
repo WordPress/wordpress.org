@@ -61,7 +61,8 @@
 		text-transform: uppercase;
 		pointer-events: none;
 
-		&.is-pending {
+		&.is-pending,
+		&.is-pending-review {
 			background: color(yellow-20);
 			color: $color-black;
 		}

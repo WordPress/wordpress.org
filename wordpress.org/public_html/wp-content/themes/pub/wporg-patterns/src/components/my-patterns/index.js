@@ -26,6 +26,10 @@ const MyPatterns = () => {
 		// Show all patterns regardless of status, but if the current query has a status (the view is draft, for
 		// example), that will override `any`. Lastly, make sure this shows the current user's patterns.
 		const modifiedQuery = { status: 'any', ..._query, author: author };
+		// If the status is "pending", we actually want to show pending and pending-review (possibly spam).
+		if ( 'pending' === modifiedQuery.status ) {
+			modifiedQuery.status = 'pending,pending-review';
+		}
 		const isLoading = author && isLoadingPatternsByQuery( modifiedQuery );
 		const posts = author ? getPatternsByQuery( modifiedQuery ) : [];
 

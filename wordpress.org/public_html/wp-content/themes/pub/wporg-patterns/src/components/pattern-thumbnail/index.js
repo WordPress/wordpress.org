@@ -16,6 +16,7 @@ import ManageOptions from '../manage-options';
 
 function getStatusLabel( pattern ) {
 	switch ( pattern.status ) {
+		case 'pending-review': // Potential spam.
 		case 'pending':
 			return __( 'Pending', 'wporg-patterns' );
 		case 'draft':
