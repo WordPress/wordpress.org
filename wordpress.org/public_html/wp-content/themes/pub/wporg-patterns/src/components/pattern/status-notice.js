@@ -31,6 +31,7 @@ export default function ( { pattern } ) {
 	const closeModal = () => setShowModal( false );
 
 	switch ( pattern.status ) {
+		case 'pending-review': // Potential spam.
 		case 'pending':
 			return (
 				<>
