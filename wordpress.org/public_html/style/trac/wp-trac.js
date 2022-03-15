@@ -85,7 +85,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			tracker_text: 'Five for the Future GitHub Repository',
 			enable_copy: true
 		},
-		'learn.wordpress.org': {
+		'Learn (learn.wordpress.org)': {
 			tracker: 'https://github.com/WordPress/learn/issues/new',
 			tracker_text: 'WordPress.org Learn GitHub Repository',
 			enable_copy: true
@@ -773,7 +773,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						component.children('option[value="' + c + '"]').remove();
 					}
 				}
-				return;
 			}
 
 			// Show a notice when the component is selected.
@@ -793,7 +792,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				var tracker = bugTrackerLocations[ selectedComponent ];
 
 				// If the component (ie. Editor) allows bypassing the warning show the create buttons.
-				if ( tracker.allow_bypass ) {
+				if ( ! wpTrac.isNewTicket() || tracker.allow_bypass ) {
 					toggle.show();
 				}
 
@@ -802,13 +801,17 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						'<strong>Tickets related to ' + ( tracker.bug_text || selectedComponent ) + '</strong> should be filed on the ' +
 						'<a href="' + tracker.tracker + '">' + ( tracker.tracker_text || tracker.tracker ) + '</a>' +
 					'</p><p>' +
-						'Would you mind opening this ticket over there instead? ' +
+						'Would you mind creating this ticket over there instead if appropriate? ' +
 						( tracker.enable_copy ? '<a href="' + tracker.tracker + '" id="new-tracker-ticket">Click here to copy your summary and description over</a>.' : '' ) +
 					'</p>' +
-						( tracker.allow_bypass ? '<p>If this isn\'t related to ' + ( tracker.bug_text || selectedComponent ) + ', please continue to open this ticket here.</p>' : '' ) +
+						( wpTrac.isNewTicket() && tracker.allow_bypass ? "<p>If this isn't related to " + ( tracker.bug_text || selectedComponent ) + ', please continue to open this ticket here.</p>' : '' ) +
 					'</div>'
 				);
 			});
+
+			if ( ! wpTrac.isNewTicket() && ! $('#action_reopen').length ) {
+				component.trigger('change');
+			}
 
 			$('#propertyform').on( 'click', '#new-tracker-ticket', function() {
 				var url, url_params = {}, href = $(this).attr( 'href' ),
@@ -823,10 +826,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 				url_params[summary_field]     = $('#field-summary').val();
 				url_params[description_field] = $('#field-description').val()
 
-				url = href + ( href.indexOf( '?' ) ? '&' : '?' ) + $.param( url_params );
+				url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( url_params );
 				if ( url.length > 1500 ) {
 					url_params[description_field] = '(Couldn\'t copy over your description as it was too long. Please paste it here. Your old window was not closed.)';
-					url = href + '?' + $.param( url_params );
+					url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( url_params );
 					window.open( url );
 				} else {
 					window.location.href = url;
