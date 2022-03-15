@@ -597,7 +597,7 @@ class Block_Plugin_Checker {
 					sprintf( __( 'Block name %s is invalid. Please use lowercase alphanumeric characters.', 'wporg-plugins' ), '<code>' . $block->name . '</code>' )
 				);
 			} else {
-				$disallowed_ns = array( 'cgb/', 'create-block/', 'example/', 'block/', 'core/' );
+				$disallowed_ns = array( 'cgb/', 'create-block/', 'example/', 'block/', 'core/', 'gutenberg-examples/' );
 				foreach ( $disallowed_ns as $ns ) {
 					if ( 0 === strpos( $block->name, $ns ) ) {
 						$this->record_result(
