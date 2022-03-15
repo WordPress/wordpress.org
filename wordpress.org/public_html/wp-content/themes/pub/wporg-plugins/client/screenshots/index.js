@@ -1,8 +1,13 @@
-/* global localeData */
+/* global localeData, wp */
+/**
+ * WordPress dependencies.
+ */
+import { isRTL } from '@wordpress/i18n';
+
 /**
  * Internal dependencies.
  */
-import ImageGallery from './image-gallery';
+import ImageGallery from 'react-image-gallery';
 
 export const Screenshots = ( { screenshots = [] } ) => {
 	if ( ! screenshots ) {
@@ -20,7 +25,15 @@ export const Screenshots = ( { screenshots = [] } ) => {
 	return (
 		<div id="screenshots" className="plugin-screenshots">
 			<h2>{ localeData.screenshots }</h2>
-			<ImageGallery items={ items } />
+			<ImageGallery
+				items={ items }
+				lazyLoad={ true }
+				disableSwipe={ true }
+				useBrowserFullscreen={ false }
+				showPlayButton={ false }
+				showFullscreenButton={ true }
+				isRTL={ isRTL() }
+			/>
 		</div>
 	);
 };
