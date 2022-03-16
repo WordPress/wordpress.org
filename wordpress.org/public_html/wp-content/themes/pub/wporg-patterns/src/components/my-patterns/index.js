@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
+import { Button } from '@wordpress/components';
 import { store as patternStore } from '../../store';
 import { useSelect } from '@wordpress/data';
 
@@ -43,10 +44,15 @@ const MyPatterns = () => {
 		const loginUrl = addQueryArgs( wporgPatternsUrl.login, { redirect_to: window.location } );
 		return (
 			<div className="entry-content">
-				<p>{ __( 'Please log in to view your patterns.', 'wporg-patterns' ) }</p>
-				<a className="button button-primary" href={ loginUrl }>
-					{ __( 'Log in', 'wporg-patterns' ) }
-				</a>
+				<div className="alignwide" style={ { maxWidth: 960 } }>
+					<p>{ __( 'Please log in to view your patterns.', 'wporg-patterns' ) }</p>
+					<p>
+						<a className="button button-primary button-large" href={ loginUrl }>
+							{ __( 'Log in', 'wporg-patterns' ) }
+						</a>
+					</p>
+					<div style={ { height: 100 } } aria-hidden="true" className="wp-block-spacer" />
+				</div>
 			</div>
 		);
 	}
@@ -67,8 +73,16 @@ const MyPatterns = () => {
 			/>
 			{ isEmpty ? (
 				<div className="pattern-grid__empty-header">
-					<h2>{ __( 'Nothing found', 'wporg-patterns' ) }</h2>
-					<p>{ __( 'You haven’t created any patterns yet.', 'wporg-patterns' ) }</p>
+					<h2>{ __( 'Create and share patterns for every WordPress site.', 'wporg-patterns' ) }</h2>
+					<p>
+						{ __(
+							'Anyone can create and share patterns using the familiar block editor. Design helpful starting points for yourself and any WordPress site.',
+							'wporg-patterns'
+						) }
+					</p>
+					<Button variant="primary" href={ `${ wporgPatternsUrl.site }/new-pattern/` }>
+						{ __( 'Create your first pattern', 'wporg-patterns' ) }
+					</Button>
 				</div>
 			) : (
 				<PatternGrid query={ query }>
