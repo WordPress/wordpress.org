@@ -843,7 +843,9 @@ JS;
 		// Markup for optional note to send to user in rejection email.
 		echo '<label for="moderator_note_to_user">' . __( '(Optional) Note to user:', 'wporg-photos' );
 		echo '<p class="description"><em>' . __( 'Included in approval/rejection email.', 'wporg-photos' ) . '</em></p>';
-		echo '<textarea id="moderator_note_to_user" name="moderator_note_to_user" rows="4"' . disabled( true, $is_disabled, false ) . '>';
+		// Currently no email is sent if photo changes state from being published, so don't allow the field to be set.
+		$is_note_to_user_disabled = $is_disabled || ( 'publish' === get_post_status( $post ) );
+		echo '<textarea id="moderator_note_to_user" name="moderator_note_to_user" rows="4"' . disabled( true, $is_note_to_user_disabled, false ) . '>';
 		echo esc_textarea( self::get_moderator_note_to_user( $post ) );
 		echo '</textarea>';
 		echo '</label>';
