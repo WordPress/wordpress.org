@@ -134,3 +134,69 @@ function render_elements_support_styles( $block_content, $block ) {
 remove_filter( 'render_block', 'wp_render_elements_support', 10, 2 );
 remove_filter( 'render_block', 'gutenberg_render_elements_support', 10, 2 );
 add_filter( 'render_block', __NAMESPACE__ . '\render_elements_support_styles', 10, 2 );
+
+/**
+ * Render out the duotone stylesheet and SVG.
+ *
+ * See `wp_render_duotone_support`, `gutenberg_render_duotone_support`.
+ * Copied from https://github.com/WordPress/gutenberg/blob/a9b29acd0a058644ef28523c00fbe633272d6c0c/lib/block-supports/duotone.php#L419.
+ *
+ * @param  string $block_content Rendered block content.
+ * @param  array  $block         Block object.
+ * @return string                Filtered block content.
+ */
+function render_duotone_support_styles( $block_content, $block ) {
+	$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] );
+
+	$duotone_support = false;
+	if ( $block_type && property_exists( $block_type, 'supports' ) ) {
+		$duotone_support = _wp_array_get( $block_type->supports, array( 'color', '__experimentalDuotone' ), false );
+	}
+
+	$has_duotone_attribute = isset( $block['attrs']['style']['color']['duotone'] );
+
+	if (
+		! $duotone_support ||
+		! $has_duotone_attribute
+	) {
+		return $block_content;
+	}
+
+	$filter_preset   = array(
+		'slug'   => wp_unique_id( sanitize_key( implode( '-', $block['attrs']['style']['color']['duotone'] ) . '-' ) ),
+		'colors' => $block['attrs']['style']['color']['duotone'],
+	);
+	$filter_property = gutenberg_get_duotone_filter_property( $filter_preset );
+	$filter_id       = gutenberg_get_duotone_filter_id( $filter_preset );
+	$filter_svg      = gutenberg_get_duotone_filter_svg( $filter_preset );
+
+	$scope     = '.' . $filter_id;
+	$selectors = explode( ',', $duotone_support );
+	$scoped    = array();
+	foreach ( $selectors as $sel ) {
+		$scoped[] = $scope . ' ' . trim( $sel );
+	}
+	$selector = implode( ', ', $scoped );
+
+	// !important is needed because these styles render before global styles,
+	// and they should be overriding the duotone filters set by global styles.
+	$filter_style = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG
+		? $selector . " {\n\tfilter: " . $filter_property . " !important;\n}\n"
+		: $selector . '{filter:' . $filter_property . ' !important;}';
+
+	// Like the layout hook, this assumes the hook only applies to blocks with a single wrapper.
+	$content = preg_replace(
+		'/' . preg_quote( 'class="', '/' ) . '/',
+		'class="' . $filter_id . ' ',
+		$block_content,
+		1
+	);
+
+	// Output the style first, to fix the Safari bug.
+	// See https://github.com/WordPress/gutenberg/blob/a9b29acd0a058644ef28523c00fbe633272d6c0c/lib/block-supports/duotone.php#L467.
+	return '<style>' . $filter_style . '</style>' . $filter_svg . $content;
+}
+// Remove WordPress core filter to avoid rendering duplicate support elements.
+remove_filter( 'render_block', 'wp_render_duotone_support', 10, 2 );
+remove_filter( 'render_block', 'gutenberg_render_duotone_support', 10, 2 );
+add_filter( 'render_block', __NAMESPACE__ . '\render_duotone_support_styles', 10, 2 );
