@@ -273,13 +273,11 @@ class GoogleCloudStorage {
 
 		$basedir = sprintf( 'gs://%s', $bucket );
 
-		$use_https = true;
-
-		$baseurl = sprintf(
-			'%s://storage.googleapis.com/%s',
-			$use_https ? 'https' : 'http',
-			$bucket
-		);
+		$baseurl = 'https://' . self::get_cloud_domain();
+		// If using default cloud domain, then need to include bucket name in path.
+		if ( self::is_default_cloud_domain() ) {
+			$baseurl .= '/' . $bucket;
+		}
 
 		$values = [
 			'path'   => $basedir . $values['subdir'],
