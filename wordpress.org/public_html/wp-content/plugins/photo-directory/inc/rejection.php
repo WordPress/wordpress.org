@@ -921,6 +921,8 @@ JS;
 
 			if ( $value ) {
 				update_post_meta( $post_id, $meta_key, $value );
+			} else {
+				delete_post_meta( $post_id, $meta_key );
 			}
 		}
 	}
