@@ -1,0 +1,10 @@
+{
+    "name": "wordpress/wporg-photo-directory",
+    "description": "Functionality for WordPress Photo Directory.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "google/cloud-vision": "^1.5",
+        "google/cloud-storage": "^1.26"
+    }
+}

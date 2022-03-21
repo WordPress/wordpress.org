@@ -1,0 +1,36 @@
+.fixed .column-wporg-photo { font-weight: bold; width: 180px; }
+.photos-flagged {
+	list-style: none;
+}
+.photos-flagged li {
+	display: inline-block;
+	border-radius: 6px;
+	color: #fff;
+	margin: 2px;
+	padding: 2px 4px;
+}
+.photos-flagged li::before {
+	margin-right: 4px;
+}
+.photos-flagged li.very_likely,
+.photos-flagged li.likely {
+	background-color: #AA0000;
+}
+.photos-flagged li.possible {
+	background-color: darkorange;
+}
+
+dl.photos-flagged {
+	display: grid;
+	grid-template-columns: 40px 1fr;
+}
+dl.photos-flagged dt {
+	font-weight: bold;
+}
+
+.pending-rejection {
+	background-color: #ffae42;
+	color: #000;
+	display: block;
+	padding-left: 10px;
+}
