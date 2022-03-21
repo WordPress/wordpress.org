@@ -723,15 +723,15 @@ class Uploads {
 			} else {
 				$content .= '[input type="hidden" name="post_title" value=""]' . "\n";
 				$content .= sprintf(
+					'[input type="file" name="ug_photo" id="ug_photo" description="%s" required="true" aria-required="true"]' . "\n",
+					esc_attr( __( 'Photo', 'wporg-photos' ) )
+				)
+				. sprintf(
 					'[%s name="post_content" class="textarea" id="ug_content" description="%s" maxlength="%d" help="%s"]' . "\n",
 					$description_shortcode,
 					esc_attr( __( 'Description (optional)', 'wporg-photos' ) ),
 					self::MAX_LENGTH_DESCRIPTION,
 					esc_attr( sprintf( __( 'Maximum of %d characters.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
-				)
-				. sprintf(
-					'[input type="file" name="ug_photo" id="ug_photo" description="%s" required="true" aria-required="true"]' . "\n",
-					esc_attr( __( 'Photo', 'wporg-photos' ) )
 				)
 				. '<div class="upload-checkbox-wrapper">' . "\n";
 
