@@ -155,6 +155,17 @@ class GoogleCloudStorage {
 	}
 
 	/**
+	 * Determines if the configured cloud domain is the default Google Storage
+	 * domain or not.
+	 *
+	 * @return bool True if the cloud domain is the default Google Storage
+	 *              domain, else false.
+	 */
+	public static function is_default_cloud_domain() {
+		return self::get_cloud_domain() === 'storage.googleapis.com';
+	}
+
+	/**
 	 * Determines if Google Cloud Storage has been enabled.
 	 *
 	 * Must be enabled via 'wporg_photos_google_cloud_bucket' filter.
