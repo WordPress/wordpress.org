@@ -92,7 +92,8 @@ class Photo {
 	public static function init() {
 		add_action( 'wporg_photos_photo_upload_complete',   [ __CLASS__, 'get_analysis' ] );
 		add_action( 'wporg_photos_photo_analysis_complete', [ __CLASS__, 'assign_categories' ], 11 );
-		add_action( 'wporg_photos_photo_analysis_complete', [ __CLASS__, 'assign_colors' ], 11 );
+		// Disabled until such time as it can be improved, assuming that's worthwhile.
+		//add_action( 'wporg_photos_photo_analysis_complete', [ __CLASS__, 'assign_colors' ], 11 );
 		add_action( 'wporg_photos_photo_analysis_complete', [ __CLASS__, 'assign_tags' ] );
 		add_action( 'wporg_photos_photo_upload_complete',   [ __CLASS__, 'set_orientation' ] );
 
