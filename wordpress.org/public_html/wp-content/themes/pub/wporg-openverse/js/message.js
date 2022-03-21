@@ -16,7 +16,6 @@ function updatePath(value) {
     url = url.replace(`openverse/${localeSlug}`, 'openverse');
   }
 
-  console.log(`Replacing state URL: ${url}`);
   history.replaceState(
     value.state,
     value.title ?? 'Openverse',
@@ -24,7 +23,6 @@ function updatePath(value) {
   );
 
   if (value.title) {
-    console.log(`Setting document title: ${value.title}`);
     document.title = value.title;
   }
 }
