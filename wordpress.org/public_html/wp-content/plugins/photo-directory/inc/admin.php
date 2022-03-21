@@ -197,7 +197,7 @@ class Admin {
 			printf(
 				$prefixed_format,
 				sprintf(
-					'<a class="row-title" href="%s" aria-label="%s">%s</a>',
+					'<div><a class=row-title" href="%s" aria-label="%s">%s</a></div>',
 					get_edit_post_link( $post_id ),
 					/* translators: %s: Post title. */
 					esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
@@ -206,7 +206,7 @@ class Admin {
 			);
 		} else {
 			printf(
-					'<span>%s</span>',
+					'<div>%s</div>',
 					sprintf( $prefixed_format, $image )
 			);
 		}
