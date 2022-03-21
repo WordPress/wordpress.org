@@ -81,8 +81,8 @@ class Rejection {
 				'email' => __( 'The photo contained potentially privacy-violating material such as a home address, license plate, or other form of personal identification.', 'wporg-photos' ),
 			],
 			'variation'     => [
-				'label' => __( 'Minor variation of already published photo', 'wporg-photos' ),
-				'email' => __( 'The photo is a minor variation of something you have already had published to the site. This can be the same subject matter taken from a different angle, from slightly before or after in time, with a different composition or cropping, or staged or edited differently.', 'wporg-photos' ),
+				'label' => __( 'Duplicate or minor variation of submitted photo', 'wporg-photos' ),
+				'email' => __( 'The photo is a duplicate or minor variation of something you have already had published to the site or recently submitted. This can be the same subject matter taken from a different angle, from slightly before or after in time, with a different composition or cropping or dimensions, or staged or edited differently.', 'wporg-photos' ),
 			],
 			'submission-error' => [ // This specific key is referenced in code, so make related updates if renaming.
 				'label' => __( 'Submission error', 'wporg-photos' ),
