@@ -36,6 +36,10 @@ class Rejection {
 				'label' => __( 'General/nonspecific', 'wporg-photos' ),
 				'email' => '', // No specific reason will be conveyed to contributor.
 			],
+			'copyright'     => [
+				'label' => __( 'Potential copyright/ownership infringement', 'wporg-photos' ),
+				'email' => __( 'The photo has been posted elsewhere but does not appear to be your original work. We require that you "have the copyright or other legal ownership for any photo you submit". This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.', 'wporg-photos' ),
+			],
 			'image_quality' => [
 				'label' => __( 'Insufficient image quality (e.g. blurriness, composition, lighting, lens issues)', 'wporg-photos' ),
 				'email' => __( 'The photo had an issue regarding image quality. Submissions should be of high quality composition, lighting, focus, and color. The image should be free of blur (for the primary subject), noise, lens flare, glare, and spots due to water or dirt on the lens.', 'wporg-photos' ),
