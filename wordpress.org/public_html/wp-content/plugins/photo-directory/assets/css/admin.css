@@ -34,3 +34,8 @@ dl.photos-flagged dt {
 	display: block;
 	padding-left: 10px;
 }
+
+#photo_categorydiv div.tabs-panel,
+#photo_colordiv div.tabs-panel {
+	max-height: initial;
+}
