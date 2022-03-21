@@ -803,6 +803,21 @@ class Admin {
 						);
 					?></li>
 					<li><?php
+						$pending_count = Photo::count_user_pending_photos( $author->ID );
+						$link_args = [
+							'post_type'   => Registrations::get_post_type(),
+							'post_status' => 'pending',
+							'author'      => $author->ID,
+						];
+						/* translators: %s: Linked number of photos submitted by user that have been rejected. */
+						printf(
+							__( 'Pending photos: <strong>%s</strong>', 'wporg-photos' ),
+							( 0 === $pending_count )
+								? $pending_count
+								: sprintf( '<a href="%s">%d</a>', add_query_arg( $link_args, 'edit.php' ), $pending_count )
+						);
+					?></li>
+					<li><?php
 						/* translators: %s: Date user account was created. */
 						printf( __( 'Created: <strong>%s</strong>', 'wporg-photos' ), $account_created ); ?></li>
 				</ul>
