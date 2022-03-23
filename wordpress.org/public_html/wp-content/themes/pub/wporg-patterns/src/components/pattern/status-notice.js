@@ -5,26 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { Modal, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
-function getUnlistedReason( pattern ) {
-	const reasonSlug = pattern.meta.wpop_unlisted_reason || '';
-	switch ( reasonSlug ) {
-		case '1-inappropriate':
-			return __(
-				'This pattern contains content deemed inappropriate for a general audience.',
-				'wporg-patterns'
-			);
-		case '2-copyright':
-			return __(
-				'This pattern contains copyrighted material or uses a trademark without permission.',
-				'wporg-patterns'
-			);
-		case '3-broken':
-			return __( 'This pattern is broken or does not display correctly.', 'wporg-patterns' );
-		default:
-			return __( 'Additional review has been requested for this pattern.', 'wporg-patterns' );
-	}
-}
-
 export default function ( { pattern } ) {
 	const [ showModal, setShowModal ] = useState( false );
 	const openModal = () => setShowModal( true );
@@ -154,11 +134,20 @@ export default function ( { pattern } ) {
 								) }
 							</p>
 							<p>
-								<em>{ getUnlistedReason( pattern ) }</em>
+								<em
+									dangerouslySetInnerHTML={ {
+										__html:
+											pattern.unlisted_reason?.description ||
+											__(
+												"This pattern doesn't meet the guidelines for the pattern directory.",
+												'wporg-patterns'
+											),
+									} }
+								/>
 							</p>
 							<p>
 								{ __(
-									'You can update your pattern to resubmitt it for approval at any time.',
+									'You can update your pattern to resubmit it for approval at any time.',
 									'wporg-patterns'
 								) }
 							</p>

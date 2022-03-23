@@ -112,7 +112,7 @@ function ContextBar( props ) {
 
 	const spinnerClassName = classnames( {
 		'context-bar__spinner': true,
-		'context-bar__spinner--is-hidden': ! isLoadingPatterns,
+		'context-bar__spinner--is-hidden': ! isLoadingPatterns || props.isEmpty,
 	} );
 
 	return (

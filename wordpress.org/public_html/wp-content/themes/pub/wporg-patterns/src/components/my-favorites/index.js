@@ -55,7 +55,12 @@ const MyFavorites = () => {
 			<QueryMonitor />
 			<div ref={ ref }>
 				{ isLoggedIn && (
-					<PatternGridMenu basePath="/favorites/" query={ query } onNavigation={ onNavigation } />
+					<PatternGridMenu
+						basePath="/favorites/"
+						query={ query }
+						onNavigation={ onNavigation }
+						isEmpty={ isEmpty }
+					/>
 				) }
 			</div>
 			{ ! isLoggedIn || isEmpty ? (
