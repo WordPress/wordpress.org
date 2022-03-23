@@ -67,7 +67,7 @@
 .pattern-preview__drag-handle-button {
 	$height: 100px;
 	position: absolute;
-	top: calc(50% - #{$height/2});
+	top: calc(50% - #{$height / 2});
 	left: 6px;
 	padding: 0;
 	width: 8px;
