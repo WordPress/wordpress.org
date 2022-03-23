@@ -1567,3 +1567,16 @@ h2.toc-heading + h3.toc-heading:target {
 .notice.notice-info.notice-alt {
 	background-color: #e5f5fa;
 }
+
+@media (max-width: 600px) {
+	.navigation .previous,
+	.navigation .nav-older,
+	.navigation p.nav-newer {
+		float: none;
+		width: 100%;
+	}
+	.navigation .nav-older a {
+		border-right: 0;
+	}
+}
+
