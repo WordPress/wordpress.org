@@ -107,6 +107,16 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			tracker: 'https://github.com/WordPress/wporg-news-2021/issues/new',
 			tracker_text: 'WordPress.org News GitHub Repository',
 			enable_copy: true
+		},
+		'bbpress.org' : {
+			tracker: 'https://bbpress.trac.wordpress.org/newticket?component=Site+-+bbPress.org',
+			tracker_text: 'bbPress Trac instance',
+			enable_copy: true
+		},
+		'buddypress.org': {
+			tracker: 'https://buddypress.trac.wordpress.org/newticket?component=BuddyPress.org+Sites',
+			tracker_text: 'BuddyPress Trac instance',
+			enable_copy: true
 		}
 	};
 
