@@ -491,7 +491,7 @@ a {outline: none}
 
 .wpsc-slide-nav .wpsc-slide-pager span {
 	display: inline-block;
-	text-indent: -1000%;
+	text-indent: -9999px;
 
 	background: #dcdcdc;
 	border: 1px #bcbcbc solid;
