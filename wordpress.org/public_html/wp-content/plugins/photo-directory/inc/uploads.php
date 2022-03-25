@@ -237,7 +237,7 @@ class Uploads {
 				$output = '<p>'
 					. sprintf(
 						__( 'Please <a href="%s">log in or create an account</a> so you can upload a photo.', 'wporg-photos' ),
-						esc_url( wp_login_url( '/' . self::SUBMIT_PAGE_SLUG ) ) )
+						esc_url( wp_login_url( get_permalink() ) ) )
 					. '</p>';
 			}
 		}
