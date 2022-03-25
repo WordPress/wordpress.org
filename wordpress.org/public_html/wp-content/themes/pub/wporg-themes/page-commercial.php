@@ -81,3 +81,13 @@ if ( have_posts() ) :
 endif;
 
 get_footer();
+
+?>
+<script>
+	var themes = document.querySelectorAll( '#themes .theme' );
+	for (var i = 0; i < themes.length; i++) {
+		themes[i].addEventListener( 'click', function () {
+			this.querySelector( 'a' ).click();
+		} );
+	}
+</script>
