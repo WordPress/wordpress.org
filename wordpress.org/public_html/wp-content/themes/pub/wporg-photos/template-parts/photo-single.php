@@ -88,6 +88,15 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 			</div>
 		</div>
 
+		<div class="entry-license">
+			<h3><?php _e( 'License / Usage', 'wporg-photos' ); ?></h3>
+			<p><?php printf(
+				/* translators: %s: URL to CCO license. */
+				__( 'Photo contributors are asked to submit their original content under the <a href="%s">CC0 license</a>. This license allows everyone to use the photos anywhere, for any purpose, without the need for permission, attribution, or payment. However, you cannot claim ownership or authorship of any photos in the WordPress Photo Directory, as the copyrights remain with the original photographers or rights holders. Submissions are moderated by a team of volunteers who recommend prior to use that you verify that the work is actually under the CC0 license and abides by any applicable local laws.', 'wporg-photos' ),
+				'https://creativecommons.org/share-your-work/public-domain/cc0/'
+			); ?></p>
+		</div>
+
 		<?php
 		edit_post_link(
 			sprintf(
