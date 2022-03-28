@@ -15,6 +15,8 @@
  *    `stream_metadata()` will result in PHP warnings.
  * 2. Modified `register()` to pass this new class as the second arg to
  *    `stream_wrapper_register()`.
+ *
+ * @link https://github.com/googleapis/google-cloud-php/issues/5118
  */
 
 /**
