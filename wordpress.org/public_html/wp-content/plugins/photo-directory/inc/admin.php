@@ -124,7 +124,7 @@ class Admin {
 
 	public static function admin_enqueue_scripts_and_styles() {
 		wp_enqueue_script( 'wporg-photos', plugins_url( 'assets/js/admin.js', dirname( __FILE__ ) ), [], filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/js/admin.js' ), true );
-		wp_enqueue_style( 'wporg_photos_admin', plugins_url( 'assets/css/admin.css', WPORG_PHOTO_DIRECTORY_MAIN_FILE ), [], '20220126' );
+		wp_enqueue_style( 'wporg_photos_admin', plugins_url( 'assets/css/admin.css', WPORG_PHOTO_DIRECTORY_MAIN_FILE ), [], filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/css/admin.css' ) );
 	}
 
 	protected static function should_include_photo_column() {
