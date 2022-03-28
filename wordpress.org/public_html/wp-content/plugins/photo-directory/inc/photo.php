@@ -1025,6 +1025,38 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		return ! empty( $faces['count'] );
 	}
 
+	/**
+	 * Determines if a photo is controversial.
+	 *
+	 * This only applies for unpublished photos that also meet one of these
+	 * criteria:
+	 * - Flagged by Vision as being "possible" or more likely in any criteria category
+	 *
+	 * @param int|WP_Post|null Optional. The post or attachment. Default null,
+	 *                         indicating the current post.
+	 * @return bool True if photo is controversial, else false.
+	 */
+	public static function is_controversial( $post = null ) {
+		$post = get_post( $post );
+
+		// If post is an attachment, get its parent.
+		if ( 'attachment' === get_post_type( $post ) ) {
+			$post = get_post( wp_get_post_parent_id( $post->ID ) );
+		}
+
+		if ( ! $post ) {
+			return false;
+		}
+
+		// Controversial if photo got flagged as 'possible' or more likely by Vision.
+		$flags = Photo::get_filtered_moderation_assessment( $post->ID );
+		if ( ! empty( $flags ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Photo', 'init' ] );
