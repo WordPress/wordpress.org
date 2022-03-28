@@ -190,7 +190,11 @@ class Admin {
 		}
 
 		$image_id = get_post_thumbnail_id( $post );
-		$image = wp_get_attachment_image( $image_id );
+		$classes = '';
+		if ( Photo::is_controversial( $post ) ) {
+			$classes .= ' blurred';
+		}
+		$image = wp_get_attachment_image( $image_id, 'thumbnail', false, [ 'class' => trim( $classes ) ] );
 
 		$can_edit_post = current_user_can( 'edit_post', $post->ID );
 
@@ -198,7 +202,7 @@ class Admin {
 			printf(
 				$prefixed_format,
 				sprintf(
-					'<div><a class="row-title" href="%s" aria-label="%s">%s</a></div>',
+					'<div><a class="photos-photo-link row-title" href="%s" aria-label="%s">%s</a></div>',
 					get_edit_post_link( $post_id ),
 					/* translators: %s: Post title. */
 					esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
@@ -486,11 +490,18 @@ class Admin {
 
 		$thumb_url = wp_get_attachment_image_src( $image_id, [ 900, 450 ], true );
 
+		$classes = 'photo-thumbnail';
+
+		if ( Photo::is_controversial( $image_id ) ) {
+			$classes .= ' blurred';
+		}
+
 		printf(
-			'<a class="row-title" href="%s" target="_blank" aria-label="%s"><img class="photo-thumbnail" src="%s" style="max-width:100%%" alt="" /></a>',
+			'<a class="photos-photo-link row-title" href="%s" target="_blank" aria-label="%s"><img class="%s" src="%s" style="max-width:100%%" alt="" /></a>',
 			wp_get_attachment_url( $image_id ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
+			esc_attr( $classes ),
 			set_url_scheme( $thumb_url[0] )
 		);
 	}

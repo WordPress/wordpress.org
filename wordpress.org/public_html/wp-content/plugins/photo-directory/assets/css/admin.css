@@ -39,3 +39,14 @@ dl.photos-flagged dt {
 #photo_colordiv div.tabs-panel {
 	max-height: initial;
 }
+
+.photos-photo-link {
+	display: inline-block;
+	overflow: hidden;
+}
+.photos-photo-link img.blurred {
+	filter: blur(4rem);
+}
+.column-wporg-photo .photos-photo-link img.blurred {
+	filter: blur( 0.7rem );
+}
