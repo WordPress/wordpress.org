@@ -750,7 +750,7 @@ class Admin {
 		}
 
 		$author = get_user_by( 'id', $post->post_author );
-		$photos_count = count_user_posts( $author->ID, Registrations::get_post_type(), true );
+		$photos_count = Photo::count_user_published_photos( $author->ID );
 		$account_created = explode( ' ', $author->user_registered )[0];
 		?>
 		<style>
