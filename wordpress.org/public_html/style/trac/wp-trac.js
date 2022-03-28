@@ -353,7 +353,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 			// Ticket-only tweaks.
 			if ( content.hasClass( 'ticket' ) ) {
-				wpTrac.redirectTicketsToProperTracker();
+				wpTrac.redirectTicketsToProperTracker.init();
 
 				// A collection of ticket hacks that must be run again after previews.
 				wpTrac.postPreviewHacks();
@@ -766,87 +766,95 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			});
 		},
 
-		redirectTicketsToProperTracker: function() {
+		redirectTicketsToProperTracker: ( function() {
 			var component = $('#field-component');
-			// Special hack to not show the warning on Meta Trac for the WordPress.org site.
-			if ( window.location.host === 'meta.trac.wordpress.org' ) {
-				delete bugTrackerLocations['WordPress.org Site'];
-			}
 
-			// Prevent changing to the component if need be.
- 			if ( ! wpTrac.isNewTicket() ) {
-				for ( var c in bugTrackerLocations ) {
-					if ( ! bugTrackerLocations[c].prevent_changing_to ) {
-						continue;
+			return {
+				init: function() {
+					// Special hack to not show the warning on Meta Trac for the WordPress.org site.
+					if ( window.location.host === 'meta.trac.wordpress.org' ) {
+						delete bugTrackerLocations['WordPress.org Site'];
 					}
-					if ( component.val() != c ) {
-						component.children('option[value="' + c + '"]').remove();
+
+					// Prevent changing to the component if need be.
+					if ( ! wpTrac.isNewTicket() ) {
+						for ( var c in bugTrackerLocations ) {
+							if ( ! bugTrackerLocations[c].prevent_changing_to ) {
+								continue;
+							}
+							if ( component.val() != c ) {
+								component.children('option[value="' + c + '"]').remove();
+							}
+						}
 					}
+
+					// Show a notice when the component is selected.
+					component.change( wpTrac.redirectTicketsToProperTracker.maybeShowNotice );
+
+					// Trigger a warning on load, when the ticket is not closed.
+					if ( ! wpTrac.isNewTicket() && ! $('#action_reopen').length ) {
+						wpTrac.redirectTicketsToProperTracker.maybeShowNotice();
+					}
+
+					$('#propertyform').on( 'click', '#new-tracker-ticket', function() {
+						var url, url_params = {}, href = $(this).attr( 'href' ),
+							summary_field = 'summary', description_field = 'description';
+
+						// Trac (default) and GitHub are supported.
+						if ( href.match( /github.com/ ) ) {
+							summary_field = 'title';
+							description_field = 'body';
+						}
+
+						url_params[summary_field]     = $('#field-summary').val();
+						url_params[description_field] = $('#field-description').val()
+
+						url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( url_params );
+						if ( url.length > 1500 ) {
+							url_params[description_field] = '(Couldn\'t copy over your description as it was too long. Please paste it here. Your old window was not closed.)';
+							url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( url_params );
+							window.open( url );
+						} else {
+							window.location.href = url;
+						}
+						return false;
+					});
+				},
+
+				maybeShowNotice: function() {
+					var toggle = $('input[name="attachment"]').parent().add('.ticketdraft').add('.wp-notice').add('div.buttons');
+
+					// Reset.
+					$('.wp-notice.component').remove();
+					toggle.hide();
+
+					var selectedComponent = component.val();
+					if ( !( selectedComponent in bugTrackerLocations ) ) {
+						toggle.show();
+						return;
+					}
+
+					var tracker = bugTrackerLocations[ selectedComponent ];
+
+					// If the component (ie. Editor) allows bypassing the warning show the create buttons.
+					if ( ! wpTrac.isNewTicket() || tracker.allow_bypass ) {
+						toggle.show();
+					}
+
+					$('div.buttons').before(
+						'<div class="wp-notice component"><p>' +
+							'<strong>Tickets related to ' + ( tracker.bug_text || selectedComponent ) + '</strong> should be filed on the ' +
+							'<a href="' + tracker.tracker + '">' + ( tracker.tracker_text || tracker.tracker ) + '</a>' +
+						'</p><p>' +
+							'Would you mind creating this ticket over there instead if appropriate? ' +
+							( tracker.enable_copy ? '<a href="' + tracker.tracker + '" id="new-tracker-ticket">Click here to copy your summary and description over</a>.' : '' ) +
+						'</p>' +
+							( wpTrac.isNewTicket() && tracker.allow_bypass ? "<p>If this isn't related to " + ( tracker.bug_text || selectedComponent ) + ', please continue to open this ticket here.</p>' : '' ) +
+						'</div>'
+					);
 				}
-			}
-
-			// Show a notice when the component is selected.
-			component.change( function() {
-				var toggle = $('input[name="attachment"]').parent().add('.ticketdraft').add('.wp-notice').add('div.buttons');
-
-				// Reset.
-				$('.wp-notice.component').remove();
-				toggle.hide();
-
-				var selectedComponent = $(this).val();
-				if ( !( selectedComponent in bugTrackerLocations ) ) {
-					toggle.show();
-					return;
-				}
-
-				var tracker = bugTrackerLocations[ selectedComponent ];
-
-				// If the component (ie. Editor) allows bypassing the warning show the create buttons.
-				if ( ! wpTrac.isNewTicket() || tracker.allow_bypass ) {
-					toggle.show();
-				}
-
-				$('div.buttons').before(
-					'<div class="wp-notice component"><p>' +
-						'<strong>Tickets related to ' + ( tracker.bug_text || selectedComponent ) + '</strong> should be filed on the ' +
-						'<a href="' + tracker.tracker + '">' + ( tracker.tracker_text || tracker.tracker ) + '</a>' +
-					'</p><p>' +
-						'Would you mind creating this ticket over there instead if appropriate? ' +
-						( tracker.enable_copy ? '<a href="' + tracker.tracker + '" id="new-tracker-ticket">Click here to copy your summary and description over</a>.' : '' ) +
-					'</p>' +
-						( wpTrac.isNewTicket() && tracker.allow_bypass ? "<p>If this isn't related to " + ( tracker.bug_text || selectedComponent ) + ', please continue to open this ticket here.</p>' : '' ) +
-					'</div>'
-				);
-			});
-
-			if ( ! wpTrac.isNewTicket() && ! $('#action_reopen').length ) {
-				component.trigger('change');
-			}
-
-			$('#propertyform').on( 'click', '#new-tracker-ticket', function() {
-				var url, url_params = {}, href = $(this).attr( 'href' ),
-					summary_field = 'summary', description_field = 'description';
-
-				// Trac (default) and GitHub are supported.
-				if ( href.match( /github.com/ ) ) {
-					summary_field = 'title';
-					description_field = 'body';
-				}
-
-				url_params[summary_field]     = $('#field-summary').val();
-				url_params[description_field] = $('#field-description').val()
-
-				url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( url_params );
-				if ( url.length > 1500 ) {
-					url_params[description_field] = '(Couldn\'t copy over your description as it was too long. Please paste it here. Your old window was not closed.)';
-					url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( url_params );
-					window.open( url );
-				} else {
-					window.location.href = url;
-				}
-				return false;
-			});
-		},
+			};
+		}() ),
 
 		autocomplete: (function() {
 			var ticketParticipants = [],
