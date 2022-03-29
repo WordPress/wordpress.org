@@ -91,6 +91,7 @@ get_template_part( 'template-parts/component', 'breadcrumbs' );
 							'orderby'        => 'modified title',
 							'order'          => 'DESC',
 							'posts_per_page' => -1,
+							'post__not_in'   => array( 377, 378 ),
 						);
 
 						$drafted_content = get_posts( $args );
@@ -110,7 +111,7 @@ get_template_part( 'template-parts/component', 'breadcrumbs' );
 											<span aria-hidden="true"><?php esc_html_e( 'Status', 'wporg-learn' ); ?></span>
 										</th>
 										<th scope="col">
-											<span aria-hidden="true"><?php esc_html_e( 'Last Modified', 'wporg-learn' ); ?></span>
+											<span aria-hidden="true"><?php esc_html_e( 'Last Updated', 'wporg-learn' ); ?></span>
 										</th>
 									</tr>
 								</thead>
@@ -136,6 +137,8 @@ get_template_part( 'template-parts/component', 'breadcrumbs' );
 				</div>
 
 				<?php
+
+				get_template_part( 'template-parts/content', 'page' );
 			endwhile; // End of the loop.
 			?>
 		</div>
