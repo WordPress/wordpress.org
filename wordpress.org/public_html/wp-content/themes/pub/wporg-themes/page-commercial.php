@@ -40,11 +40,10 @@ if ( have_posts() ) :
 				</p>
 
 				<p>
-					<?php _e( 'Want to see your company on this list?', 'wporg-themes' ); ?>
 					<?php
 					printf(
 						/* translators: Element on page. */
-						__( '<a href="%s">View the requirements</a>.', 'wporg-themes' ),
+						__( 'Want to see your company on this list? <a href="%s">View the requirements</a>.', 'wporg-themes' ),
 						'#themeRequirements'
 					)
 					?>
