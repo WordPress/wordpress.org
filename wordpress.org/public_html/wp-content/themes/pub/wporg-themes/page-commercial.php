@@ -39,6 +39,17 @@ if ( have_posts() ) :
 					<?php _e( 'What they all have in common is people behind them who support open source, WordPress, and its GPL license.', 'wporg-themes' ); ?>
 				</p>
 
+				<p>
+					<?php _e( 'Want to see your company on this list?', 'wporg-themes' ); ?>
+					<?php
+					printf(
+						/* translators: Element on page. */
+						__( '<a href="%s">View the requirements</a>.', 'wporg-themes' ),
+						'#themeRequirements'
+					)
+					?>
+				</p>
+
 				<h2 class="screen-reader-text"><?php _e( 'Themes List', 'wporg-themes' ); ?></h2>
 
 				<div id="themes">
@@ -61,7 +72,7 @@ if ( have_posts() ) :
 					</div>
 				</div>
 
-				<p><?php _e( 'If you would like to be included in this list please send your info to themes at wordpress dot org. To be included, you should:', 'wporg-themes' ); ?></p>
+				<p id="themeRequirements"><?php _e( 'If you would like to be included in this list please send your info to themes at wordpress dot org. To be included, you should:', 'wporg-themes' ); ?></p>
 
 				<ul>
 					<li><?php _e( 'Distribute 100% GPL themes, including artwork and CSS.', 'wporg-themes' ); ?></li>
