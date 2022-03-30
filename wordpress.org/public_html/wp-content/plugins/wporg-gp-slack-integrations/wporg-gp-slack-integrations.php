@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/integrations/log-warnings.php';
+require_once __DIR__ . '/integrations/log-imported-originals.php';
 
 class WPorg_GP_Slack_Integrations {
 
@@ -19,6 +20,13 @@ class WPorg_GP_Slack_Integrations {
 	 */
 	public $log_warnings;
 
+	/**
+	 * Holds the logger for imported originals instance.
+	 *
+	 * @var WPorg_GP_Slack_Log_Imported_Originals
+	 */
+	public $log_imported_originals;
+
 	public function __construct() {
 		add_action( 'gp_init', array( $this, 'init_integrations' ) );
 	}
@@ -27,7 +35,8 @@ class WPorg_GP_Slack_Integrations {
 	 * Initializes custom Slack integrations.
 	 */
 	public function init_integrations() {
-		$this->log_warnings = new WPorg_GP_Slack_Log_Warnings();
+		$this->log_warnings           = new WPorg_GP_Slack_Log_Warnings();
+		$this->log_imported_originals = new WPorg_GP_Slack_Log_Imported_Originals();
 	}
 }
 
