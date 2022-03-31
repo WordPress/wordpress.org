@@ -7,7 +7,7 @@ class WPorg_GP_Slack_Log_Imported_Originals {
 	/**
 	 * Holds the channels name to send notifcations too.
 	 */
-	private const SLACK_CHANNEL = '@ocean90';
+	private const SLACK_CHANNEL = '#polyglots';
 
 	/**
 	 * Holds the list of allowed project IDs
