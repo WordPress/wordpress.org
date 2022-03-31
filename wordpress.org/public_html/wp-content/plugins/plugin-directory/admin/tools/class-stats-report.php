@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Tools;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
 
 /**
  * All functionality related to Stats_Report Tool.
@@ -52,26 +53,29 @@ class Stats_Report {
 	 * @return array {
 	 *     Array of stats.
 	 *
-	 *     @type int $plugin_approve                     The number of plugins approved within the defined time interval.
-	 *     @type int $plugin_delist                      The number of plugins delisted within the defined time interval.
-	 *     @type int $plugin_new                         The number of plugins submitted within the defined time interval.
-	 *     @type int $plugin_reject                      The number of plugins rejected within the defined time interval.
-	 *     @type int $in_queue                           The number of plugins currently in the queue (new or pending).
-	 *     @type int $in_queue_new                       The number of new plugins currently in the queue.
-	 *     @type int $in_queue_pending                   The number of pending plugins currently in the queue.
-	 *     @type int $in_queue_from_time_window          The number of plugins currently in the queue submitted during the specified time window.
-	 *     @type int $in_queue_old                       The number of plugins currently in the queue that are older than "recently".
-	 *     @type int $supportpress_queue_total_open      The number of currently open support threads.
-	 *     @type int $supportpress_queue_total_open_old  The number of currently open support threads with no activity "recently".
-	 *     @type int $supportpress_queue_interval_all    The number of threads (from just within the specified time window).
-	 *     @type int $supportpress_queue_interval_closed The number of closed threads (from just withing the specified time window).
-	 *     @type int $supportpress_queue_interval_open   The number of open threads (from just withing the specified time window).
+	 *     @type int $plugin_approve                        The number of plugins approved within the defined time interval.
+	 *     @type int $plugin_delist                         The number of plugins delisted within the defined time interval.
+	 *     @type int $plugin_new                            The number of plugins submitted within the defined time interval.
+	 *     @type int $plugin_reject                         The number of plugins rejected within the defined time interval.
+	 *     @type int $in_queue                              The number of plugins currently in the queue (new or pending).
+	 *     @type int $in_queue_new                          The number of new plugins currently in the queue.
+	 *     @type int $in_queue_pending                      The number of pending plugins currently in the queue.
+	 *     @type int $in_queue_from_time_window             The number of plugins currently in the queue submitted during the specified time window.
+	 *     @type int $in_queue_old                          The number of plugins currently in the queue that are older than "recently".
+	 *     @type int $helpscout_queue_total_conversations   The number of ongoing Help Scout conversations.
+	 *     @type int $helpscout_queue_new_conversations     The number of new Help Scout conversations.
+	 *     @type int $helpscout_queue_customers             The number of unique Plugin authors contacted.
+	 *     @type int $helpscout_queue_conversations_per_day The number of Help Scout conversations per day.
+	 *     @type int $helpscout_queue_busiest_day           The busiest day in the Help Scout queue.
+	 *     @type int $helpscout_queue_messages_received     The number of emails received in HelpScout.
+	 *     @type int $helpscout_queue_replies_sent          The number of replies sent to emails.
+	 *     @type int $helpscout_queue_emails_created        The number of new outgoing conversations created.
 	 * }
 	 */
 	public function get_stats( $args = array() ) {
 		global $wpdb;
 
-		$stats['as_of_date'] = strftime( '%Y-%m-%d', time() );
+		$stats['as_of_date'] = gmdate( 'Y-m-d' );
 
 		$defaults = array(
 			'date'       => $stats['as_of_date'],
@@ -150,38 +154,30 @@ class Stats_Report {
 		) );
 
 		// --------------
-		// SupportPress Queue
+		// Help Scout Queue
 		// --------------
-		// # of currently open threads
-		$stats['supportpress_queue_total_open'] = $wpdb->get_var(
-			"SELECT COUNT(*) FROM plugins_support_threads WHERE state = 'open'"
-		);
 
-		// # of currently open threads with no activity in last 7 days
-		$stats['supportpress_queue_total_open_old'] = $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM plugins_support_threads WHERE state = 'open' AND dt < DATE_SUB( NOW(), INTERVAL %d DAY )",
-			$args['recentdays']
-		) );
+		$start_datetime = gmdate( 'Y-m-d\T00:00:00\Z', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) );
+		$end_datetime   = gmdate( 'Y-m-d\T23:59:59\Z', strtotime( $args['date'] ) );
 
-		// # of total threads (from just those received during the time window)
-		$stats['supportpress_queue_interval_all'] = $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM plugins_support_threads WHERE state IN ( 'closed', 'open' ) AND dt < %s AND dt > DATE_SUB( %s, INTERVAL %d DAY )",
-			$args['date'],
-			$args['date'],
-			absint( $args['num_days'] ) + 1
-		) );
+		$api_payload = [
+			'start'     => $start_datetime,
+			'end'       => $end_datetime,
+			'mailboxes' => HELPSCOUT_PLUGINS_MAILBOXID,
+		];
+		
+		$company_report  = HelpScout::api( '/v2/reports/company', $api_payload );
+		$mailbox_overall = HelpScout::api( '/v2/reports/conversations', $api_payload );
+		$email_report    = HelpScout::api( '/v2/reports/email', $api_payload );
 
-		// # of open and closed threads (from just those received during the time window)
-		$sp_states = array( 'closed', 'open' );
-		foreach ( $sp_states as $sp_state ) {
-			$stats[ 'supportpress_queue_interval_' . $sp_state ] = $wpdb->get_var( $wpdb->prepare(
-				'SELECT COUNT(*) FROM plugins_support_threads WHERE state = %s AND dt < %s AND dt > DATE_SUB( %s, INTERVAL %d DAY )',
-				$sp_state,
-				$args['date'],
-				$args['date'],
-				absint( $args['num_days'] ) + 1
-			) );
-		}
+		$stats['helpscout_queue_total_conversations']     = $mailbox_overall->current->totalConversations ?? 0;
+		$stats['helpscout_queue_new_conversations']       = $mailbox_overall->current->newConversations ?? 0;
+		$stats['helpscout_queue_customers']               = $mailbox_overall->current->customers ?? 0;
+		$stats['helpscout_queue_conversations_per_day']   = $mailbox_overall->current->conversationsPerDay ?? 0;
+		$stats['helpscout_queue_busiest_day']             = gmdate( 'l', strtotime( 'Sunday +' . $mailbox_overall->busiestDay->day . ' days' ) ); // Hacky? but works
+		$stats['helpscout_queue_messages_received']       = $mailbox_overall->current->messagesReceived ?? 0;
+		$stats['helpscout_queue_replies_sent']            = $company_report->current->totalReplies;
+		$stats['helpscout_queue_emails_created']          = $email_report->current->volume->emailsCreated ?? 0;
 
 		return $stats;
 	}
@@ -197,27 +193,28 @@ class Stats_Report {
 
 		$args = array();
 
-		if ( isset( $_POST['date'] ) && preg_match( '/[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/', $_POST['date'] ) ) {
-			$args['date'] = $_POST['date'];
+		if ( isset( $_REQUEST['date'] ) && preg_match( '/[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/', $_REQUEST['date'] ) ) {
+			$args['date'] = $_REQUEST['date'];
 		} else {
-			$args['date'] = '';
+			$args['date'] = gmdate( 'Y-m-d' );
 		}
 
-		$args['num_days']   = empty( $_POST['days'] ) ? '' : absint( $_POST['days'] );
-		$args['recentdays'] = empty( $_POST['recentdays'] ) ? '' : absint( $_POST['recentdays'] );
+		$args['num_days']   = empty( $_REQUEST['days'] ) ? 7 : absint( $_REQUEST['days'] );
+		$args['recentdays'] = empty( $_REQUEST['recentdays'] ) ? 7 : absint( $_REQUEST['recentdays'] );
 
 		$stats = $this->get_stats( $args );
 
-		$date = strftime( '%Y-%m-%d', time() );
+		$date = gmdate( 'Y-m-d' );
 
-		$start_date = date( 'Y-m-d', strtotime( "-{$stats['num_days']} days", strtotime( $stats['date'] ) ) );
+		$start_date = gmdate( 'Y-m-d', strtotime( "-{$stats['num_days']} days", strtotime( $stats['date'] ) ) );
 		?>
 
 		<div class="wrap stats-report">
 
-		<h1><?php _e( 'Plugin Repository and SupportPress Stats Report', 'wporg-plugins' ); ?></h1>
+		<h1><?php _e( 'Plugin Repository and email Stats Report', 'wporg-plugins' ); ?></h1>
 
-		<form method="post">
+		<form method="get">
+		<input type="hidden" name="action" value="<?php echo esc_attr( $_REQUEST['action'] ); ?>"/>
 		<table class="form-table"><tbody>
 		<tr><th scope="row"><label for="date"><?php _e( 'Date', 'wporg-plugins' ); ?></label></th><td>
 		<input name="date" type="text" id="date" value="<?php echo esc_attr( $args['date'] ); ?>" class="text">
@@ -379,65 +376,72 @@ class Stats_Report {
 			</li>
 		</ul>
 
-		<h3><?php _e( 'SupportPress Queue Stats', 'wporg-plugins' ); ?></h3>
+		<h3><?php _e( 'Help Scout Queue Stats', 'wporg-plugins' ); ?></h3>
 
 		<ul style="font-family:Courier New;">
 			<li>
 			<?php
-				/* translators: %d: number of open tickets */
 				printf(
-					__( 'Total open tickets* : %d', 'wporg-plugins' ),
-					esc_html( $stats['supportpress_queue_total_open'] )
+					'Total Conversations: %d',
+					esc_html( $stats['helpscout_queue_total_conversations'] )
 				);
 			?>
 			</li>
 			<li>
 			<?php
-				/* translators: 1: number of most recent days, 2: number of plugins with no activity */
 				printf(
-					__( ' &rarr; (with no activity in last %1$d days)** : %2$d', 'wporg-plugins' ),
-					esc_html( $stats['recentdays'] ),
-					esc_html( $stats['supportpress_queue_total_open_old'] )
+					'New Conversations: %d',
+					esc_html( $stats['helpscout_queue_new_conversations'] )
 				);
 			?>
 			</li>
 			<li>
 			<?php
-				/* translators: %d: number of most recent days */
 				printf(
-					__( 'Within defined %d day time window:', 'wporg-plugins' ),
-					esc_html( $stats['num_days'] )
+					'Customers: %d',
+					esc_html( $stats['helpscout_queue_customers'] )
 				);
-				?>
-				<ul style="margin-left:20px;margin-top:0.5em;">
-					<li>
-					<?php
-						/* translators: %d: total number of plugins within defined time window */
-						printf(
-							__( 'Total : %d', 'wporg-plugins' ),
-							esc_html( $stats['supportpress_queue_interval_all'] )
-						);
-					?>
-					</li>
-					<li>
-					<?php
-						/* translators: %d: number of closed plugins within defined time window */
-						printf(
-							__( 'Closed : %d', 'wporg-plugins' ),
-							esc_html( $stats['supportpress_queue_interval_closed'] )
-						);
-					?>
-					</li>
-					<li>
-					<?php
-						/* translators: %d: number of open plugins within defined time window */
-						printf(
-							__( 'Open : %d', 'wporg-plugins' ),
-							esc_html( $stats['supportpress_queue_interval_open'] )
-						);
-					?>
-					</li>
-				</ul>
+			?>
+			</li>
+			<li>
+			<?php
+				printf(
+					'Conversations per Day: %d',
+					esc_html( $stats['helpscout_queue_conversations_per_day'] )
+				);
+			?>
+			</li>
+			<li>
+			<?php
+				printf(
+					'Busiest Day: %s',
+					esc_html( $stats['helpscout_queue_busiest_day'] )
+				);
+			?>
+			</li>
+			<li>
+			<?php
+				printf(
+					'Messages Received: %d',
+					esc_html( $stats['helpscout_queue_messages_received'] )
+				);
+			?>
+			</li>
+			<li>
+			<?php
+				printf(
+					'Replies Sent: %d',
+					esc_html( $stats['helpscout_queue_replies_sent'] )
+				);
+			?>
+			</li>
+			<li>
+			<?php
+				printf(
+					'Emails Created: %d',
+					esc_html( $stats['helpscout_queue_emails_created'] )
+				);
+			?>
 			</li>
 		</ul>
 
