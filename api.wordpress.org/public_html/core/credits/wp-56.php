@@ -557,7 +557,7 @@ class WP_56_Credits extends WP_Credits {
 			'noahshrader',
 			'noahtallen',
 			'noisysocks',
-			'oandregal',
+			'nosolosw',
 			'nourma',
 			'nrqsnchz',
 			'ntsekouras',
