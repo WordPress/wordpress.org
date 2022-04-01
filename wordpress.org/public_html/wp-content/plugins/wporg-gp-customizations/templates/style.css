@@ -82,6 +82,8 @@ body {
 
 .gp-content label {
 	vertical-align: unset;
+	display: inline-block;
+	font-size: 1rem;
 }
 
 .gp-content input[type=checkbox]:checked:before {
@@ -2448,8 +2450,8 @@ table.translations tr.editor td {
 }
 
 .panel-header__bubble--warning {
-	color: #e44b3e;
-	border-color: #e44b3e;
+	color: var(--gp-color-danger-fg);
+	border-color: var(--gp-color-danger-fg);
 }
 
 .panel-header__bubble--waiting {
