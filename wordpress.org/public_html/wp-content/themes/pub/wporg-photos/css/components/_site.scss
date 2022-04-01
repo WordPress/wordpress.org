@@ -176,6 +176,11 @@ body.single-photo {
 
 	.entry-header {
 		margin-bottom: 1rem;
+
+		@include breakpoint( 0, 960px ) {
+			margin-left: 20px;
+			margin-right: 20px;
+		}
 	}
 
 	.entry-footer {
