@@ -42,7 +42,7 @@ class Plugin {
 		add_action( 'gp_project_created', array( $this, 'update_projects_last_updated' ) );
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
-		add_action( 'wp_default_scripts', array( $this, 'bump_script_versions' ) );
+		add_action( 'init', array( $this, 'bump_assets_versions' ), 20 );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
@@ -451,16 +451,20 @@ class Plugin {
 	}
 
 	/**
-	 * Changes the versions of some default scripts for cache bust.
-	 *
-	 * @see https://wordpress.slack.com/archives/meta-i18n/p1460626195000251
-	 *
-	 * @param WP_Scripts &$scripts WP_Scripts instance, passed by reference.
+	 * Changes the versions of GlotPress default assets for extra cache busting.
 	 */
-	public function bump_script_versions( &$scripts ) {
-		foreach ( [ 'gp-editor', 'gp-glossary' ] as $handle ) {
-			if ( isset( $scripts->registered[ $handle ] ) && '20160329' === $scripts->registered[ $handle ]->ver ) {
-				$scripts->registered[ $handle ]->ver = '20160329a';
+	public function bump_assets_versions() {
+		$scripts = wp_scripts();
+		foreach ( [ 'gp-common', 'gp-editor', 'gp-glossary', 'gp-translations-page', 'gp-mass-create-sets-page' ] as $handle ) {
+			if ( isset( $scripts->registered[ $handle ] ) ) {
+				$scripts->registered[ $handle ]->ver = $scripts->registered[ $handle ]->ver . '-1';
+			}
+		}
+
+		$styles = wp_styles();
+		foreach ( [ 'gp-base' ] as $handle ) {
+			if ( isset( $styles->registered[ $handle ] ) ) {
+				$styles->registered[ $handle ]->ver = $styles->registered[ $handle ]->ver . '-1';
 			}
 		}
 	}

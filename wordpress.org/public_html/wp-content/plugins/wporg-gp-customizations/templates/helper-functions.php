@@ -30,7 +30,7 @@ wp_register_script(
 	'wporg-translate-editor',
 	plugins_url( 'js/editor.js', __FILE__ ),
 	[ 'gp-editor', 'autosize' ],
-	'20190510'
+	filemtime( __DIR__ . '/js/editor.js' )
 );
 
 wp_register_style(
