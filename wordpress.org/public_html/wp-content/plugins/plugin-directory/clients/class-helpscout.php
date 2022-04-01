@@ -9,6 +9,11 @@ namespace WordPressdotorg\Plugin_Directory\Clients;
 class HelpScout {
 	const API_BASE = 'https://api.helpscout.net';
 
+	/**
+	 * The HTTP timeout for the HelpScout API.
+	 */
+	const TIMEOUT = 15;
+
 	public static function api( $url, $args = null, $method = 'GET' ) {
 		// Verify the configuration variables are available.
 		if ( ! defined( 'HELPSCOUT_APP_ID' ) || ! defined( 'HELPSCOUT_APP_SECRET' ) ) {
@@ -32,6 +37,7 @@ class HelpScout {
 					'Accept'        => 'application/json',
 					'Authorization' => self::get_auth_string(),
 				],
+				'timeout' => self::TIMEOUT,
 				'body'    => ( 'POST' === $method && $args ) ? $args : null,
 			)
 		);
@@ -51,7 +57,8 @@ class HelpScout {
 		$request = wp_remote_post(
 			self::API_BASE . '/v2/oauth2/token',
 			array(
-				'body' => array(
+				'timeout' => self::TIMEOUT,
+				'body'    => array(
 					'grant_type'    => 'client_credentials',
 					'client_id'     => HELPSCOUT_APP_ID,
 					'client_secret' => HELPSCOUT_APP_SECRET
@@ -71,7 +78,7 @@ class HelpScout {
 
 		set_site_transient( __CLASS__ . 'get_auth_token', [ 'exp' => time() + $expiry, 'token' => $token ], $expiry );
 
-		return $token;
+		return 'BEARER ' . $token;
 	}
 
 }
