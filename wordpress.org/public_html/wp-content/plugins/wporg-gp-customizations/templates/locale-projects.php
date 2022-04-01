@@ -93,7 +93,7 @@ gp_tmpl_header();
 </div>
 <div class="sort-bar">
 	<form id="sort-filter" action="" method="GET">
-		<input type="hidden" name="s" value="<?php echo esc_attr( $search ?? '' ); ?>"
+		<input type="hidden" name="s" value="<?php echo esc_attr( $search ?? '' ); ?>">
 		<input type="hidden" name="page" value="1">
 
 		<?php
@@ -113,7 +113,7 @@ gp_tmpl_header();
 		$filter_count++;
 		?>
 		<label for="filter">Filter:</label>
-		<select id="filter" name="filter">
+		<select id="filter" class="is-small" name="filter">
 			<?php
 				$sorts = array();
 				if ( is_user_logged_in() && in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
@@ -140,7 +140,7 @@ gp_tmpl_header();
 			?>
 		</select>
 
-		<button type="submit"><?php echo ( 1 === $filter_count ? 'Apply Filter' : 'Apply Filters' ); ?></button>
+		<button type="submit" class="button is-small"><?php echo ( 1 === $filter_count ? 'Apply Filter' : 'Apply Filters' ); ?></button>
 	</form>
 </div>
 <div id="projects" class="projects">

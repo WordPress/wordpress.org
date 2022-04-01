@@ -183,7 +183,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						<div class="translation-actions">
 							<?php if ( $can_edit ) : ?>
 								<div class="translation-actions__primary">
-									<button class="translation-actions__save with-tooltip"
+									<button class="button is-primary translation-actions__save with-tooltip"
 											type="button"
 											aria-label="<?php echo $can_approve_translation ? 'Save and approve translation' : 'Suggest new translation'; ?>"
 											data-nonce="<?php echo esc_attr( wp_create_nonce( 'add-translation_' . $translation->original_id ) ); ?>">
@@ -191,16 +191,22 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 									</button>
 								</div>
 								<div class="translation-actions__secondary">
-									<button type="button" class="translation-actions__copy with-tooltip" aria-label="Copy original">
+									<button type="button" class="button is-small translation-actions__copy with-tooltip" aria-label="Copy original">
 										<span class="screen-reader-text">Copy</span><span aria-hidden="true" class="dashicons dashicons-admin-page"></span>
 									</button>
-									<button type="button" class="translation-actions__ltr with-tooltip" aria-label="Switch to LTR">
+									<button type="button" class="button is-small translation-actions__insert-tab with-tooltip" aria-label="Insert tab">
+										<span class="screen-reader-text">Insert tab</span><span aria-hidden="true" class="dashicons dashicons-editor-indent"></span>
+									</button>
+									<button type="button" class="button is-small translation-actions__insert-newline with-tooltip" aria-label="Insert newline">
+										<span class="screen-reader-text">Insert newline</span><span aria-hidden="true" class="dashicons dashicons-editor-break"></span>
+									</button>
+									<button type="button" class="button is-small translation-actions__ltr with-tooltip" aria-label="Switch to LTR">
 										<span class="screen-reader-text">LTR</span><span aria-hidden="true" class="dashicons dashicons-editor-ltr"></span>
 									</button>
-									<button type="button" class="translation-actions__rtl with-tooltip" aria-label="Switch to RTL">
+									<button type="button" class="button is-small translation-actions__rtl with-tooltip" aria-label="Switch to RTL">
 										<span class="screen-reader-text">RTL</span><span aria-hidden="true" class="dashicons dashicons-editor-rtl"></span>
 									</button>
-									<button type="button" class="translation-actions__help with-tooltip" aria-label="Show help">
+									<button type="button" class="button is-small translation-actions__help with-tooltip" aria-label="Show help">
 										<span class="screen-reader-text">Help</span><span aria-hidden="true" class="dashicons dashicons-editor-help"></span>
 									</button>
 								</div>
@@ -242,17 +248,17 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 							<div class="status-actions">
 								<?php if ( $can_approve_translation ) : ?>
 									<?php if ( 'current' !== $translation->translation_status ) : ?>
-										<button class="approve" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>"><strong>+</strong> <?php _e( 'Approve', 'glotpress' ); ?></button>
+										<button class="button  is-primary approve" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>"><strong>+</strong> <?php _e( 'Approve', 'glotpress' ); ?></button>
 									<?php endif; ?>
 									<?php if ( 'rejected' !== $translation->translation_status ) : ?>
-										<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject', 'glotpress' ); ?></button>
+										<button class="button reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject', 'glotpress' ); ?></button>
 									<?php endif; ?>
 									<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
-										<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
+										<button class="button fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
 									<?php endif; ?>
 								<?php elseif ( $can_reject_self ): ?>
-									<button class="reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject Suggestion', 'glotpress' ); ?></button>
-									<button class="fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
+									<button class="button reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject Suggestion', 'glotpress' ); ?></button>
+									<button class="button fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
 								<?php endif; ?>
 							</div>
 						<?php endif; ?>

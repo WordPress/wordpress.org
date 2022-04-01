@@ -42,21 +42,30 @@ $priority_char = array(
 		endif;
 		?>
 
-		<div class="original-tags">
-			<?php
-			if ( wporg_gp_should_display_original_context( $translation ) ) :
-				?>
-				<span class="context bubble"><?php echo esc_html( $translation->context ); ?></span>
-				<?php
-			endif;
 
-			if ( '1' === $translation->priority || '-1' === $translation->priority ) :
-				?>
-				<span class="priority bubble"><?php echo esc_html( sprintf( 'Priority: %s', gp_array_get( GP::$original->get_static( 'priorities' ), $translation->priority ) ) ); ?></span>
-				<?php
-			endif;
+		<?php
+		$show_context  = wporg_gp_should_display_original_context( $translation );
+		$show_priority = '1' === $translation->priority || '-1' === $translation->priority;
+		if ( $show_context || $show_priority ) :
 			?>
-		</div>
+			<div class="original-tags">
+				<?php
+				if ( $show_context ) :
+					?>
+					<span class="context bubble"><?php echo esc_html( $translation->context ); ?></span>
+					<?php
+				endif;
+
+				if ( $show_priority ) :
+					?>
+					<span class="priority bubble"><?php echo esc_html( sprintf( 'Priority: %s', gp_array_get( GP::$original->get_static( 'priorities' ), $translation->priority ) ) ); ?></span>
+					<?php
+				endif;
+				?>
+			</div>
+			<?php
+		endif;
+		?>
 	</td>
 	<td class="translation foreign-text">
 		<?php

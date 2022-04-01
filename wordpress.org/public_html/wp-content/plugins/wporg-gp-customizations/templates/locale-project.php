@@ -144,7 +144,7 @@ if ( 'wp-plugins' === $project->path ) {
 ?>
 
 <div class="locale-project">
-	<table class="locale-sub-projects">
+	<table class="gp-table locale-sub-projects">
 		<thead>
 			<tr>
 				<th class="header"><?php _e( 'Set / Sub Project' ); ?></th>
@@ -240,10 +240,10 @@ if ( 'wp-plugins' === $project->path ) {
 	<div class="locale-project-contributors-group locale-project-contributors-contributors">
 		<h3>Translation Contributors</h3>
 		<?php if ( $locale_contributors['contributors'] ) : ?>
-		<table class="locale-project-contributors-table">
+		<table class="gp-table locale-project-contributors-table">
 			<thead>
 				<tr>
-					<th class="contributor-name">Contributor</th>
+					<th class="contributor-details">Contributor</th>
 					<th class="contributor-stats">Translations</th>
 				</tr>
 			</thead>
@@ -354,10 +354,15 @@ if ( 'wp-plugins' === $project->path ) {
 
 				printf(
 					'<tr id="contributor-%s">
-						<td class="contributor-name">
-							%s
-							<a href="https://profiles.wordpress.org/%s/">%s %s</a>
-							<span>Latest translation: %s ago</span>
+						<td class="contributor-details">
+							<div class="contributor-avatar">
+								%s
+								%s
+							</div>
+							<div class="contributor-name">
+								<a href="https://profiles.wordpress.org/%s/">%s</a>
+								<span>Latest translation: %s ago</span>
+							</div>
 						</td>
 						<td class="contributor-stats">
 							<div class="total">
@@ -385,9 +390,9 @@ if ( 'wp-plugins' === $project->path ) {
 						</td>
 					</tr>',
 					$contributor->nicename,
+					get_avatar( $contributor->email, 40 ),
 					$contributor->is_editor ? '<span class="translation-editor">Editor</span>' : '',
 					$contributor->nicename,
-					get_avatar( $contributor->email, 40 ),
 					$contributor->display_name ?: $contributor->nicename,
 					human_time_diff( strtotime( $contributor->last_update ) ),
 					number_format_i18n( $contributor->total_count ),

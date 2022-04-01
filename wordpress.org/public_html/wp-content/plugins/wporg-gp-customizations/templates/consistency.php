@@ -63,7 +63,7 @@ gp_tmpl_header();
 	</p>
 
 	<p>
-		<button type="submit" class="consistency-form-submit">Analyze</button>
+		<button type="submit" class="button is-primary consistency-form-submit">Analyze</button>
 	</p>
 </form>
 
@@ -92,7 +92,7 @@ if ( $performed_search && ! $results ) {
 	}
 
 	?>
-	<table class="consistency-table">
+	<table class="gp-table consistency-table">
 		<thead>
 			<th>Original</th>
 			<th>Translation</th>

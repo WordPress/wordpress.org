@@ -112,7 +112,7 @@ class Plugin {
 			'gp-translation-suggestions',
 			plugins_url( 'css/translation-suggestions.css', PLUGIN_FILE ),
 			[],
-			'20200301'
+			'20220401'
 		);
 		gp_enqueue_style( 'gp-translation-suggestions' );
 

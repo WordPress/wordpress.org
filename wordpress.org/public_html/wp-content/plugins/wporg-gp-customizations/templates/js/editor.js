@@ -69,7 +69,7 @@
 		autosize( $textarea );
 	}
 
-	// Override copy function to adopt custom markup.
+	// Override functions to adopt custom markup.
 	$gp.editor.copy = function() {
 		var $activeTextarea = $gp.editor.current.find( '.textareas.active textarea' );
 		if ( ! $activeTextarea.length ) {
@@ -100,6 +100,38 @@
 		// Trigger input event for autosize().
 		var event = new Event( 'input' );
 		$activeTextarea[0].dispatchEvent( event );
+	};
+	$gp.editor.tab = function() {
+		var text_area = $gp.editor.current.find( '.textareas.active textarea' );
+		if ( ! text_area.length ) {
+			return;
+		}
+
+		var cursorPos = text_area.prop( 'selectionStart' );
+		var v = text_area.val();
+		var textBefore = v.substring( 0,  cursorPos );
+		var textAfter  = v.substring( cursorPos, v.length );
+
+		text_area.val( textBefore + '\t' + textAfter );
+
+		text_area.focus();
+		text_area[0].selectionEnd = cursorPos + 1;
+	},
+	$gp.editor.newline = function() {
+		var text_area = $gp.editor.current.find( '.textareas.active textarea' );
+		if ( ! text_area.length ) {
+			return;
+		}
+
+		var cursorPos = text_area.prop( 'selectionStart' );
+		var v = text_area.val();
+		var textBefore = v.substring( 0,  cursorPos );
+		var textAfter  = v.substring( cursorPos, v.length );
+
+		text_area.val( textBefore + '\n' + textAfter );
+
+		text_area.focus();
+		text_area[0].selectionEnd = cursorPos + 1;
 	};
 
 	function switchTextDirection() {
@@ -243,6 +275,7 @@
 				.on( 'click', 'button.panel-header-actions__next', $gp.editor.next )
 				.on( 'click', 'button.panel-header-actions__cancel', $gp.editor.hooks.cancel )
 				.on( 'click', 'button.translation-actions__copy', $gp.editor.hooks.copy )
+				.on( 'click', 'button.translation-actions__insert-tab', $gp.editor.hooks.tab )
 				.on( 'click', 'button.translation-actions__save', $gp.editor.hooks.ok )
 				.on( 'click', 'button.translation-actions__help', openHelpModal )
 				.on( 'click', 'button.translation-actions__ltr', switchTextDirection )
