@@ -83,7 +83,7 @@ body {
 .gp-content label {
 	vertical-align: unset;
 	display: inline-block;
-	font-size: 1rem;
+	font-size: inherit;
 }
 
 .gp-content input[type=checkbox]:checked:before {
