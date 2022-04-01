@@ -383,6 +383,11 @@ function get_whitelist() {
 			// #core (inc committers) already included via get_parent_channel().
 			'shetheliving',
 		),
+		'photos' => array(
+			'topher1kenobe',
+			'katiejrichards',
+			'marcusskyverge',
+		),
 		'polyglots' => array(
 			'Amieiro',
 			'casiepa', // @Pascal on Slack
