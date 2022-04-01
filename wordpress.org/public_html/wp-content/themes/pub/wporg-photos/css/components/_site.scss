@@ -176,15 +176,18 @@ body.single-photo {
 
 	.entry-header {
 		margin-bottom: 1rem;
-
-		@include breakpoint( 0, 960px ) {
-			margin-left: 20px;
-			margin-right: 20px;
-		}
 	}
 
 	.entry-footer {
 		margin-top: 2rem;
+	}
+
+	.entry-header,
+	.entry-footer {
+		@include breakpoint( 0, 960px ) {
+			margin-left: 20px;
+			margin-right: 20px;
+		}
 	}
 }
 
@@ -307,11 +310,6 @@ body.page {
 			display: inline-block;
 			min-width: 80px;
 		}
-	}
-
-	@include breakpoint( 0, 960px ) {
-		margin-left: 20px;
-		margin-right: 20px;
 	}
 
 	.photo-meta-label {

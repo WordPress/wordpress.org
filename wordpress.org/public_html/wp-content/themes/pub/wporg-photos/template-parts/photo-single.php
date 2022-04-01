@@ -88,7 +88,7 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 			</div>
 		</div>
 
-		<div class="entry-license">
+		<div class="photo-license">
 			<h3><?php _e( 'License / Usage', 'wporg-photos' ); ?></h3>
 			<p><?php printf(
 				/* translators: %s: URL to CCO license. */
