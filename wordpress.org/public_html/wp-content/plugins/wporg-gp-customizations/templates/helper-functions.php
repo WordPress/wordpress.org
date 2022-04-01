@@ -54,6 +54,11 @@ if ( isset( $template ) && 'translations' === $template ) {
 remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 remove_action( 'wp_head', 'wp_print_styles', 8 );
 
+// Remove output of hreflang tags.
+add_action( 'wp_head', function () {
+	remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
+}, 1 );
+
 /**
  * Set the document title to that of GlotPress.
  * 
