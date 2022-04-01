@@ -2244,6 +2244,10 @@ table.translations tr.preview:not(.has-warnings) > td.priority + td.original {
 	border-left: none;
 }
 
+table.translations {
+	table-layout: fixed;
+}
+
 table.translations th.gp-column-original,
 table.translations th.gp-column-translation {
 	width: 50%;
