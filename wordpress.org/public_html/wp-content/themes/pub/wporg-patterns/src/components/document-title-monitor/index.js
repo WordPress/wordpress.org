@@ -48,7 +48,7 @@ const DocumentTitleMonitor = () => {
 			);
 		}
 
-		parts.push( __( 'WordPress.org', 'wporg-patterns' ) );
+		parts.push( __( 'WordPress.org', 'wporg-patterns' ) + ` ${ wporgLocale.displayName }` );
 		return parts.join( ' | ' );
 	} );
 

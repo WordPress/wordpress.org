@@ -4,6 +4,7 @@ namespace WordPressdotorg\Pattern_Directory\Theme;
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
+use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
 
 require_once __DIR__ . '/includes/inline-styles.php';
 
@@ -80,7 +81,13 @@ function enqueue_assets() {
 
 		wp_add_inline_script(
 			'wporg-pattern-script',
-			sprintf( "var wporgLocale = '%s';", wp_json_encode( get_locale() ) ),
+			sprintf(
+				"var wporgLocale = JSON.parse( decodeURIComponent( '%s' ) )",
+				rawurlencode( wp_json_encode( array(
+					'id' => get_locale(),
+					'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
+				) ) ),
+			),
 			'before'
 		);
 

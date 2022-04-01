@@ -7,7 +7,7 @@ import apiPatternFlagReasons from './fixtures/pattern-flag-reasons';
 import { getCategories, getFavorites, getPattern, getPatternFlagReasons, getPatternsByQuery } from '../resolvers';
 
 // Set up the global.
-global.wporgLocale = '"en_US"';
+global.wporgLocale = { id: 'en_US' };
 
 describe( 'getPatternsByQuery', () => {
 	it( 'yields with the requested patterns & query meta', async () => {
