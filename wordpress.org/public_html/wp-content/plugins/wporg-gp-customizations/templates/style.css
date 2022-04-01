@@ -33,6 +33,35 @@ body {
 	background-color: unset;
 }
 
+.gp-content .form-table {
+	width: auto;
+	border: 0;
+}
+
+.gp-content .form-table * {
+	border: inherit;
+}
+
+.gp-content .form-table tr {
+	background: none !important;
+}
+
+.gp-content .form-table th {
+	padding-right: 1rem;
+}
+
+.gp-content dt {
+	margin-bottom: 2px;
+}
+
+.gp-content dd {
+	margin: 0;
+}
+
+.gp-content dd + dt {
+	margin-top: 10px;
+}
+
 .gp-content input,
 .gp-content select {
 	margin: 0;
@@ -450,13 +479,8 @@ table.translations tr.editor:hover {
 	font-size: 1.5rem;
 }
 
-.gp-content h2 a.glossary-link {
-	margin-top: .25em;
-	color: #006799;
-}
-
 .gp-content h3 {
-	padding: 0;
+	font-size: 1.25rem;
 	margin: 2px 0 .6em;
 }
 
@@ -469,6 +493,24 @@ table.translations tr.editor:hover {
 
 p.description {
 	margin: 1em;
+}
+
+a.project-actions {
+	display: inline-block;
+	margin-bottom: 1rem;
+}
+
+a.project-actions:not(:hover):not(:focus) {
+	text-decoration: none;
+}
+
+a.project-actions.open {
+	display: inline-block;
+	margin-bottom: .5rem;
+}
+
+small code {
+	font-size: 1em;
 }
 
 p.actionlist,
@@ -579,14 +621,6 @@ dt a.edit {
 table.glossary .editor .strings {
 	width: 100%;
 	float: none;
-}
-
-table.glossary .editor .strings dt {
-	margin-bottom: 2px;
-}
-
-table.glossary .editor .strings dd {
-	margin: 0 0 10px;
 }
 
 table.glossary .editor .strings input[type="text"] {
@@ -2204,7 +2238,7 @@ table.translations td.priority {
 	display: none;
 }
 
-table.translations tr.preview > td.priority + td.original {
+table.translations tr.preview:not(.has-warnings) > td.priority + td.original {
 	border-left: none;
 }
 
