@@ -43,7 +43,7 @@ class Locale extends GP_Route {
 	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = false ) {
 		global $wpdb;
 
-		$per_page = 20;
+		$per_page = 21;
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
 		$filter = gp_get( 'filter', false );
@@ -266,6 +266,8 @@ class Locale extends GP_Route {
 						return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
 					case 'wordcamp':
 						return '<div class="default-icon"><span class="dashicons dashicons-tickets"></span></div>';
+					case 'pattern-directory':
+						return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
 					case 'browsehappy':
 						return '<div class="icon"><img src="' . plugins_url( 'templates/images/browsehappy.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
 					default:
@@ -297,6 +299,8 @@ class Locale extends GP_Route {
 				return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 			case 'apps':
 				return '<div class="default-icon"><span class="dashicons dashicons-smartphone"></span></div>';
+			case 'patterns':
+				return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
 			default:
 				return '<div class="default-icon"><span class="dashicons dashicons-translation"></span></div>';
 		}

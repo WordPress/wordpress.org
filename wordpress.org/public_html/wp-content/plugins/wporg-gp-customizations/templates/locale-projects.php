@@ -85,8 +85,10 @@ gp_tmpl_header();
 	</ul>
 	<div class="search-form">
 		<form>
+			<input type="hidden" name="filter" value="<?php echo esc_attr( $filter ?? '' ); ?>">
+			<input type="hidden" name="without-editors" value="<?php echo esc_attr( $without_editors ? '1' : '' ); ?>">
 			<label class="screen-reader-text" for="projects-filter"><?php esc_attr_e( 'Search projects...' ); ?></label>
-			<input placeholder="<?php esc_attr_e( 'Search projects...' ); ?>" type="search" id="projects-filter" name="s" value="<?php if ( !empty( $search ) ) { echo esc_attr( $search ); } ?>" class="filter-search">
+			<input placeholder="<?php esc_attr_e( 'Search projects...' ); ?>" type="search" id="projects-filter" name="s" value="<?php echo esc_attr( $search ?? '' ); ?>" class="filter-search">
 			<input type="submit" value="<?php esc_attr_e( 'Search' ); ?>" class="screen-reader-text" />
 		</form>
 	</div>
@@ -102,7 +104,7 @@ gp_tmpl_header();
 		if ( 'waiting' === $project->slug && is_user_logged_in() ) {
 			$filter_count++;
 			?>
-			<input id="filter-without-editors" type="checkbox" name="without-editors" value="1"<?php checked( isset( $_GET['without-editors'] ) ); ?>>
+			<input id="filter-without-editors" type="checkbox" name="without-editors" value="1"<?php checked( $without_editors ); ?>>
 			<label for="filter-without-editors">Limit to projects without editors</label>
 			<span class="filter-sep" aria-hidden="true">|</span>
 			<?php
@@ -143,6 +145,15 @@ gp_tmpl_header();
 		<button type="submit" class="button is-small"><?php echo ( 1 === $filter_count ? 'Apply Filter' : 'Apply Filters' ); ?></button>
 	</form>
 </div>
+
+<?php
+if ( isset( $pages ) && $pages['pages'] > 1 ) {
+	echo '<div class="projects-paging">';
+	echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
+	echo '</div>';
+}
+?>
+
 <div id="projects" class="projects">
 	<?php
 	foreach ( $sub_projects as $sub_project ) {
@@ -192,14 +203,14 @@ gp_tmpl_header();
 
 				<div class="project-name">
 					<h4>
-						<?php echo gp_link_get( $project_url, $project_name ) ?>
+						<?php echo gp_link_get( $project_url, wp_trim_words( $project_name, 10 ) ); ?>
 					</h4>
 				</div>
 				<div class="project-description">
 					<p><?php
 						$description = wp_strip_all_tags( $sub_project->description );
 						$description = str_replace( array( 'WordPress.org Plugin Page', 'WordPress.org Theme Page' ), '', $description );
-						echo wp_trim_words( $description, 30 );
+						echo wp_trim_words( $description, 15 );
 					?></p>
 				</div>
 			</div>
@@ -242,10 +253,13 @@ gp_tmpl_header();
 	}
 	?>
 </div>
+
 <?php
-	if ( isset( $pages ) && $pages['pages'] > 1 ) {
-		echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
-	}
+if ( isset( $pages ) && $pages['pages'] > 1 ) {
+	echo '<div class="projects-paging">';
+	echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
+	echo '</div>';
+}
 ?>
 
 <script>
