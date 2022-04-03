@@ -52,7 +52,7 @@ if ( isset( $template ) && 'translations' === $template ) {
 
 // Remove Emoji fallback support
 remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-remove_action( 'wp_head', 'wp_print_styles', 8 );
+remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 // Remove output of hreflang tags.
 add_action( 'wp_head', function () {
