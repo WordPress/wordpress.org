@@ -110,12 +110,17 @@ body {
 	transform: none;
 }
 
+.gp-content .button:focus,
+.gp-content .button:hover {
+	text-decoration: none;
+}
+
 .gp-content a,
+.gp-content .button.is-link,
 li>a,
 p a {
 	text-decoration: underline;
 	text-decoration-thickness: max(1px,0.063rem);
-	text-underline-offset: 0.1em;
 }
 
 li>a:hover,
@@ -125,16 +130,13 @@ p a:hover {
 
 .gp-content a:active,
 .gp-content a:focus,
-.gp-content a:hover {
+.gp-content a:hover,
+.gp-content .button.is-link:focus,
+.gp-content .button.is-link:hover {
 	text-decoration: underline;
-	text-decoration-thickness: max(3px,0.188rem);
-	text-decoration-skip-ink: none;
+	text-decoration-thickness: max(2px,0.125rem);
 }
 
-.gp-content .button:focus,
-.gp-content .button:hover {
-	text-decoration: none;
-}
 
 .gp-content .button-group > .button {
 	border-radius: 2px !important;
@@ -613,6 +615,10 @@ table.translations td.translation small {
 	margin-top: .2em;
 }
 
+.original-tags > * {
+	max-width: 100%;
+}
+
 ul a.edit,
 dt a.edit {
 	background: none;
@@ -681,15 +687,6 @@ span.translation-text,
 span.original-text {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	white-space: pre-wrap;
-}
-
-.glossary-word {
-	border: 0;
-	text-decoration: underline;
-	text-decoration-style: dashed;
-	text-underline-offset: 2px;
-	text-decoration-skip-ink: none;
-	text-decoration-thickness: 1px;
 }
 
 .ui-tooltip {
@@ -1112,7 +1109,6 @@ ul.filter-header-links {
 	margin: 0 0 8px;
 	font-size: 18px;
 	font-weight: 600;
-	line-height: 1.3;
 }
 
 .projects .project-description {
