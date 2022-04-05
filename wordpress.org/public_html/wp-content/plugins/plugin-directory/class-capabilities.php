@@ -44,6 +44,9 @@ class Capabilities {
 			return array( 'do_not_allow' );
 		}
 
+		// The current user instance.
+		$user = new \WP_User( $user_id );
+
 		// Start over, we'll specify all caps below.
 		$required_caps = array();
 
@@ -105,8 +108,7 @@ class Capabilities {
 			}
 		}
 
-		// Allow users with review caps to access.
-		$user = new \WP_User( $user_id );
+		// Allow users with review caps to access, unless they've been explicitly denied above.
 		if ( $user->has_cap( 'plugin_review' ) ) {
 			$required_caps[] = 'plugin_review';
 		}
