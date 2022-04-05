@@ -91,6 +91,7 @@ function get_whitelist() {
 		'core' => array_merge( get_committers(), array(
 			'amykamala', // @amy kamala on Slack
 			'angelasjin',
+			'annezazu',
 			'antpb',
 			'audrasjb',
 			'Boniu91', // @Piotrek Boniu on Slack
@@ -115,6 +116,7 @@ function get_whitelist() {
 			'metalandcoffee',
 			'monikarao',
 			'pbiron',
+			'priethor',
 			'psykro', // @jon_bossenger on Slack
 			'sabernhardt',
 			'sncoker', // @shawntellecoker on Slack
