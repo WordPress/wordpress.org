@@ -21,6 +21,7 @@ class Custom_Fields {
 			'header_author_uri'  => 'Plugin Author URI',
 			'header_textdomain'  => 'Plugin TextDomain',
 			'header_description' => 'Plugin Description',
+			'header_name'        => 'Plugin Name',
 		);
 
 		echo '<dl>';
