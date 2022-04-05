@@ -16,6 +16,7 @@ global $post;
 
 <div id="admin" class="section">
 	<?php the_closed_plugin_notice(); ?>
+	<?php the_no_self_management_notice(); ?>
 
 	<h2><?php esc_html_e( 'Statistics', 'wporg-plugins' ); ?></h2>
 
