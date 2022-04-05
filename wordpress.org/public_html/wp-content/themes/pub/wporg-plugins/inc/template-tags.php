@@ -407,7 +407,7 @@ function the_plugin_self_close_button() {
 	$active_installs = (int) get_post_meta( $post->ID, 'active_installs', true );
 	$close_link      = false;
 
-	if ( ! current_user_can( 'plugin_admin_edit', $post ) || 'publish' != $post->post_status ) {
+	if ( ! current_user_can( 'plugin_self_close', $post ) ) {
 		return;
 	}
 
@@ -439,16 +439,13 @@ function the_plugin_self_close_button() {
 function the_plugin_self_transfer_form() {
 	$post = get_post();
 
-	if (
-		! current_user_can( 'plugin_admin_edit', $post ) ||
-		'publish' != $post->post_status
-	) {
+	if ( ! current_user_can( 'plugin_admin_edit', $post ) ) {
 		return;
 	}
 
 	echo '<h4>' . esc_html__( 'Transfer This Plugin', 'wporg-plugins' ) . '</h4>';
 
-	if ( get_current_user_id() != $post->post_author ) {
+	if ( ! current_user_can( 'plugin_self_transfer', $post ) ) {
 		$owner = get_user_by( 'id', $post->post_author );
 		/* translators: %s: Name of plugin owner */
 		echo '<p>' . esc_html( sprintf(
@@ -495,10 +492,7 @@ function the_plugin_self_transfer_form() {
 function the_plugin_release_confirmation_form() {
 	$post = get_post();
 
-	if (
-		! current_user_can( 'plugin_admin_edit', $post ) ||
-		'publish' != $post->post_status
-	) {
+	if ( ! current_user_can( 'plugin_manage_releases', $post ) ) {
 		return;
 	}
 
