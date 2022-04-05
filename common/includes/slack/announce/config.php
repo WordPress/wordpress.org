@@ -170,9 +170,11 @@ function get_whitelist() {
 			'ellatrix', // @ella on Slack
 			'JeffPaul',
 			'karmatosed',
+			'Mamaduka',
 			'mapk',
 			'matveb', // @matias on Slack
 			'mcsf',
+			'ndiego', //@Nick Diego on Slack
 			'paaljoachim',
 			'talldanwp', // @danr on Slack
 			'youknowriad',
