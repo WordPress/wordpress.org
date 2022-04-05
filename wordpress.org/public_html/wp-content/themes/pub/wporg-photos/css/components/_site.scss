@@ -206,6 +206,12 @@ body.page {
 			font-weight: 400;
 		}
 	}
+
+	&:not(.logged-in).page {
+		.entry-footer {
+			display: none;
+		}
+	}
 }
 
 .site-content .no-results {
