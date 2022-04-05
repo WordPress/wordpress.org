@@ -47,6 +47,11 @@ class Capabilities {
 		// The current user instance.
 		$user = new \WP_User( $user_id );
 
+		// Shortcut, if no user specified, we can't help.
+		if ( ! $user_id || ! $user->exists() ) {
+			return array( 'do_not_allow' );
+		}
+
 		// Start over, we'll specify all caps below.
 		$required_caps = array();
 
