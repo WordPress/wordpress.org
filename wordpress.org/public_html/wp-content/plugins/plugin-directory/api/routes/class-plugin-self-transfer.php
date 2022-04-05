@@ -30,10 +30,7 @@ class Plugin_Self_Transfer extends Base {
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-				return
-					current_user_can( 'plugin_admin_edit', $plugin ) &&
-					get_current_user_id() == $plugin->post_author &&
-					'publish' === $plugin->post_status;
+				return current_user_can( 'plugin_self_transfer', $plugin );
 			},
 		] );
 

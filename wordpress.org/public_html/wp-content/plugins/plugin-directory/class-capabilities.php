@@ -22,74 +22,101 @@ class Capabilities {
 	 * @return array Primitive caps.
 	 */
 	public static function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
-		$plugin_edit_cap = false;
-		switch ( $cap ) {
-			case 'plugin_admin_edit':
-			case 'plugin_add_committer':
-			case 'plugin_remove_committer':
-			case 'plugin_add_support_rep':
-			case 'plugin_remove_support_rep':
-				$plugin_edit_cap = true;
-
-				// Fall through
-				// Although we no longer have a admin view, this capability is still used to determine if the current user is a committer/contributor.
-			case 'plugin_admin_view':
-				// Committers + Contributors.
-				// If no committers, post_author.
-				$required_caps = array();
-				$post          = get_post( $context[0] );
-
-				if ( ! $post ) {
-					$required_caps[] = 'do_not_allow';
-					break;
-				}
-
-				$user = new \WP_User( $user_id );
-				if ( $user->has_cap( 'plugin_review' ) ) {
-					$required_caps[] = 'plugin_review';
-					break;
-				}
-
-				// Committers
-				$committers = Tools::get_plugin_committers( $post->post_name );
-				if ( ! $committers && 'publish' === $post->post_status ) {
-					// post_author in the event no committers exist (yet?)
-					$committers = array( get_user_by( 'ID', $post->post_author )->user_login );
-				}
-
-				if ( in_array( $user->user_login, $committers ) ) {
-					$required_caps[] = 'exist'; // All users are allowed to exist, even when they have no role.
-					break;
-				}
-
-				if ( ! $plugin_edit_cap ) {
-					// Contributors can view, but not edit.
-					$terms = get_the_terms( $post, 'plugin_contributors' );
-					if ( is_array( $terms ) ) {
-						$contributors = (array) wp_list_pluck( $terms, 'name' );
-						if ( in_array( $user->user_nicename, $contributors, true ) ) {
-							$required_caps[] = 'exist'; // All users are allowed to exist, even when they have no role.
-							break;
-						}
-					}
-				}
-
-				// Else;
-				$required_caps[] = 'do_not_allow';
-				break;
-
-			case 'plugin_transition':
-				/*
-				 Handle the transition between
-				 pending -> publish
-				 publish -> rejected
-				 publish -> closed
-				 etc
-				*/
-				break;
+		$handled_caps = array(
+			// All these caps must pass a WP_Post context.
+			'plugin_admin_view',
+			'plugin_admin_edit',
+			'plugin_add_committer',
+			'plugin_remove_committer',
+			'plugin_add_support_rep',
+			'plugin_remove_support_rep',
+			'plugin_self_transfer',
+			'plugin_self_close',
+			'plugin_manage_releases',
+		);
+		if ( ! in_array( $cap, $handled_caps ) ) {
+			return $required_caps;
 		}
 
-		return $required_caps;
+		// Protect against a cap call without a plugin context.
+		$post = $context ? get_post( $context[0] ) : false;
+		if ( ! $post ) {
+			return array( 'do_not_allow' );
+		}
+
+		// Start over, we'll specify all caps below.
+		$required_caps = array();
+
+		// Certain actions require the plugin to be published.
+		if (
+			'publish' !== $post->post_status &&
+			in_array(
+				$cap,
+				array(
+					'plugin_self_transfer',
+					'plugin_self_close',
+					'plugin_manage_releases',
+				)
+			)
+		) {
+			$required_caps[] = 'do_not_allow';
+		}
+
+		// If a plugin is in the Beta or Featured views, they're not able to self-manage certain things. Require reviewer.
+		if (
+			in_array(
+				$cap,
+				array(
+					'plugin_self_close',
+					'plugin_self_transfer',
+					'plugin_add_committer',
+					'plugin_remove_committer',
+				)
+			) &&
+			is_object_in_term( $post->ID, 'plugin_section', array( 'beta', 'featured' ) )
+		) {
+			$required_caps[] = 'plugin_review';
+		}
+
+		// Only the Owner of a plugin is able to transfer plugins.
+		if ( 'plugin_self_transfer' === $cap && $user_id != $post->post_author ) {
+			$required_caps[] = 'do_not_allow';
+		}
+
+		// Committers
+		$committers = Tools::get_plugin_committers( $post->post_name );
+		// If there are no committers, use the plugin author if the plugin is published.
+		if ( ! $committers && 'publish' === $post->post_status ) {
+			$committers = array( get_user_by( 'ID', $post->post_author )->user_login );
+		}
+
+		if ( in_array( $user->user_login, $committers ) ) {
+			$required_caps[] = 'exist';
+		}
+
+		// Contributors can view, but not edit.
+		if ( 'plugin_admin_view' === $cap ) {
+			$terms = get_the_terms( $post, 'plugin_contributors' );
+			if ( is_array( $terms ) ) {
+				$contributors = (array) wp_list_pluck( $terms, 'name' );
+				if ( in_array( $user->user_nicename, $contributors, true ) ) {
+					$required_caps[] = 'exist';
+				}
+			}
+		}
+
+		// Allow users with review caps to access.
+		$user = new \WP_User( $user_id );
+		if ( $user->has_cap( 'plugin_review' ) ) {
+			$required_caps[] = 'plugin_review';
+		}
+
+		// If we've not found a matching user/cap, deny.
+		if ( ! $required_caps ) {
+			$required_caps[] = 'do_not_allow';
+		}
+
+		return array_unique( $required_caps );
 	}
 
 	/**

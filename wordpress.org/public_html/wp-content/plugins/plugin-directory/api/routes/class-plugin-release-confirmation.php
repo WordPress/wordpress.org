@@ -29,7 +29,7 @@ class Plugin_Release_Confirmation extends Base {
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-				return current_user_can( 'plugin_admin_edit', $plugin ) && 'publish' === $plugin->post_status;
+				return current_user_can( 'plugin_manage_releases', $plugin );
 			},
 		] );
 
@@ -49,8 +49,7 @@ class Plugin_Release_Confirmation extends Base {
 
 				return (
 					Release_Confirmation_Shortcode::can_access() &&
-					current_user_can( 'plugin_admin_edit', $plugin ) &&
-					'publish' === $plugin->post_status
+					current_user_can( 'plugin_manage_releases', $plugin )
 				);
 			},
 		] );
