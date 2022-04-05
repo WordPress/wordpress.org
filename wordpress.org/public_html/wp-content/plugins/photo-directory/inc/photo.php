@@ -1048,6 +1048,11 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			return false;
 		}
 
+		// Not controversial if it has been published.
+		if ( 'publish' === get_post_status( $post ) ) {
+			return false;
+		}
+
 		// Controversial if photo got flagged as 'possible' or more likely by Vision.
 		$flags = Photo::get_filtered_moderation_assessment( $post->ID );
 		if ( ! empty( $flags ) ) {
