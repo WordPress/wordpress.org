@@ -219,7 +219,7 @@ class Stats_Report {
 		<h1><?php _e( 'Plugin Repository and email Stats Report', 'wporg-plugins' ); ?></h1>
 
 		<form method="get">
-		<input type="hidden" name="action" value="<?php echo esc_attr( $_REQUEST['action'] ); ?>"/>
+		<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>"/>
 		<table class="form-table"><tbody>
 		<tr><th scope="row"><label for="date"><?php _e( 'Date', 'wporg-plugins' ); ?></label></th><td>
 		<input name="date" type="text" id="date" value="<?php echo esc_attr( $args['date'] ); ?>" class="text">
