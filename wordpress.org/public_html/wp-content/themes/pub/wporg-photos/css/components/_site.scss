@@ -248,6 +248,12 @@ body.page {
 		margin-left: 0;
 		padding-left: 0;
 	}
+
+	input[type="text"] {
+		@include breakpoint( 0, 600px ) {
+			width: calc( 100% - 10px );
+		}
+	}
 }
 
 .photo-upload-disabled {
