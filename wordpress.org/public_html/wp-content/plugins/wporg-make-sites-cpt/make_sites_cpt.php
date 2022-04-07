@@ -116,9 +116,15 @@ function make_site_properties_cb( $post ) {
 					<th><label for="make_site_id"><?php esc_html_e( 'Site', 'make_site_cpt' ); ?></label></th>
 					<td><select name="make_site_id" id="make_site_id">
 						<option value=""></option>
-						<?php foreach ( make_site_get_network_sites() as $value => $label ) : ?>
+<?php 
+	foreach ( make_site_get_network_sites() as $value => $label ) {
+		
+		// skip all the non make blogs, so it's a lot easier to find the right one in the list
+		if ( strpos( $label, "https://make.wordpress.org" ) === false ) {
+			continue;
+		} ?>
 							<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $make_site_id, $value ) ?>><?php echo esc_html( $label ); ?></option>
-						<?php endforeach; ?>
+						<?php } // endforeach; ?>
 					</select></td>
 				</tr>
 			<?php endif; ?>
