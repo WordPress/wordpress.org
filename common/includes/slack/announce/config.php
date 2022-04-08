@@ -459,11 +459,7 @@ function get_whitelist() {
 			'SamSuresh',
 		),
 		'wceu' => array(
-			'casiepa', // @Pascal on Slack
-		),
-		'wceu-volunteers' => array(
-			'Kau-Boy',
-			'sippis',
+			'vertizio', // @Pascal on Slack
 		),
 		'wcus' => array(
 			'cronkled', // @alx on Slack
