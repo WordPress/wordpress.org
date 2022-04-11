@@ -108,7 +108,7 @@ class Send {
 	function send( $channel, $thread = false ) {
 		if ( $this->testing() ) {
 			$this->set_text( "[$channel] " . $this->get_text() );
-			$channel = '#test';
+			$channel = '#testing-slack';
 		}
 
 		$payload = $this->get_payload();
@@ -137,4 +137,3 @@ class Send {
 		return file_get_contents( $this->webhook, false, $context );
 	}
 }
-
