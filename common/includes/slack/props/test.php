@@ -22,4 +22,4 @@ $data = array(
 	'team_id' => '1',
 );
 
-run( $data, true );
+echo run( $data, true );

@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * This endpoint receives payloads from the `/props` slash command in `#props`.
+ *
+ * To manage, browse to https://wordpress.slack.com/apps/manage/custom-integrations > Slash Commands > `/props`.
+ */
+
 namespace {
 	require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
 	require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
@@ -27,7 +33,6 @@ function get_avatar( $username, $slack_id, $team_id ) {
 }
 
 if ( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN' ) === $_POST['token'] ) {
-	run( $_POST );
+	echo run( $_POST );
 }
-
 }
