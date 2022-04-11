@@ -26,7 +26,7 @@ use WP_Block_Type_Registry;
  */
 function render_layout_support_styles( $block_content, $block ) {
 	$block_type     = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] );
-	$support_layout = gutenberg_block_has_support( $block_type, array( '__experimentalLayout' ), false );
+	$support_layout = block_has_support( $block_type, array( '__experimentalLayout' ), false );
 
 	if ( ! $support_layout ) {
 		return $block_content;
@@ -44,18 +44,28 @@ function render_layout_support_styles( $block_content, $block ) {
 		$used_layout = $default_layout;
 	}
 
-	$id        = uniqid();
-	$gap_value = _wp_array_get( $block, array( 'attrs', 'style', 'spacing', 'blockGap' ) );
+	$class_name = wp_unique_id( 'wp-container-' );
+	$gap_value  = _wp_array_get( $block, array( 'attrs', 'style', 'spacing', 'blockGap' ) );
 	// Skip if gap value contains unsupported characters.
 	// Regex for CSS value borrowed from `safecss_filter_attr`, and used here
 	// because we only want to match against the value, not the CSS attribute.
-	$gap_value = preg_match( '%[\\\(&=}]|/\*%', $gap_value ) ? null : $gap_value;
-	$style     = gutenberg_get_layout_style( ".wp-container-$id", $used_layout, $has_block_gap_support, $gap_value );
+	if ( is_array( $gap_value ) ) {
+		foreach ( $gap_value as $key => $value ) {
+			$gap_value[ $key ] = $value && preg_match( '%[\\\(&=}]|/\*%', $value ) ? null : $value;
+		}
+	} else {
+		$gap_value = $gap_value && preg_match( '%[\\\(&=}]|/\*%', $gap_value ) ? null : $gap_value;
+	}
+
+	// If a block's block.json skips serialization for spacing or spacing.blockGap,
+	// don't apply the user-defined value to the styles.
+	$should_skip_gap_serialization = wp_should_skip_block_supports_serialization( $block_type, 'spacing', 'blockGap' );
+	$style                         = wp_get_layout_style( ".$class_name", $used_layout, $has_block_gap_support, $gap_value, $should_skip_gap_serialization );
 	// This assumes the hook only applies to blocks with a single wrapper.
 	// I think this is a reasonable limitation for that particular hook.
 	$content = preg_replace(
 		'/' . preg_quote( 'class="', '/' ) . '/',
-		'class="wp-container-' . $id . ' ',
+		'class="' . esc_attr( $class_name ) . ' ',
 		$block_content,
 		1
 	);
@@ -77,8 +87,14 @@ add_filter( 'render_block', __NAMESPACE__ . '\render_layout_support_styles', 10,
  * @return string                Filtered block content.
  */
 function render_elements_support_styles( $block_content, $block ) {
-
 	if ( ! $block_content ) {
+		return $block_content;
+	}
+
+	$block_type                    = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] );
+	$skip_link_color_serialization = wp_should_skip_block_supports_serialization( $block_type, 'color', 'link' );
+
+	if ( $skip_link_color_serialization ) {
 		return $block_content;
 	}
 
@@ -88,16 +104,16 @@ function render_elements_support_styles( $block_content, $block ) {
 	}
 
 	/*
-	* For now we only care about link color.
-	* This code in the future when we have a public API
-	* should take advantage of WP_Theme_JSON_Gutenberg::compute_style_properties
-	* and work for any element and style.
-	*/
+	 * For now we only care about link color.
+	 * This code in the future when we have a public API
+	 * should take advantage of WP_Theme_JSON::compute_style_properties
+	 * and work for any element and style.
+	 */
 	if ( null === $link_color ) {
 		return $block_content;
 	}
 
-	$class_name = 'wp-elements-' . uniqid();
+	$class_name = wp_unique_id( 'wp-elements-' );
 
 	if ( strpos( $link_color, 'var:preset|color|' ) !== false ) {
 		// Get the name from the string and add proper styles.
@@ -107,7 +123,7 @@ function render_elements_support_styles( $block_content, $block ) {
 	}
 	$link_color_declaration = esc_html( safecss_filter_attr( "color: $link_color" ) );
 
-	$style = "<style>.$class_name a{" . $link_color_declaration . ";}</style>\n";
+	$style = ".$class_name a{" . $link_color_declaration . ';}';
 
 	// Like the layout hook this assumes the hook only applies to blocks with a single wrapper.
 	// Retrieve the opening tag of the first HTML element.
@@ -166,9 +182,9 @@ function render_duotone_support_styles( $block_content, $block ) {
 		'slug'   => wp_unique_id( sanitize_key( implode( '-', $block['attrs']['style']['color']['duotone'] ) . '-' ) ),
 		'colors' => $block['attrs']['style']['color']['duotone'],
 	);
-	$filter_property = gutenberg_get_duotone_filter_property( $filter_preset );
-	$filter_id       = gutenberg_get_duotone_filter_id( $filter_preset );
-	$filter_svg      = gutenberg_get_duotone_filter_svg( $filter_preset );
+	$filter_property = wp_get_duotone_filter_property( $filter_preset );
+	$filter_id       = wp_get_duotone_filter_id( $filter_preset );
+	$filter_svg      = wp_get_duotone_filter_svg( $filter_preset );
 
 	$scope     = '.' . $filter_id;
 	$selectors = explode( ',', $duotone_support );
