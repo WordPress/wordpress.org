@@ -100,7 +100,7 @@ class Translation_Sync {
 			$output = array_filter( $output, fn( $line ) => ! str_starts_with( $line, '0 translations' ) );
 			if ( $return_var ) {
 				$message .= 'Failure: ' . implode( "\n", $output ) . "\n";
-			} else {
+			} elseif ( $output ) {
 				$message .= implode( "\n", $output ) . "\n";
 			}
 		}
