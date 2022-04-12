@@ -145,7 +145,7 @@ function render_elements_support_styles( $block_content, $block ) {
 		$content              = substr_replace( $block_content, ' class="' . $class_name . '"', $first_element_offset + strlen( $first_element ) - 1, 0 );
 	}
 
-	return $content . $style;
+	return $content . '<style>' . $style . '</style>';
 }
 remove_filter( 'render_block', 'wp_render_elements_support', 10, 2 );
 remove_filter( 'render_block', 'gutenberg_render_elements_support', 10, 2 );
