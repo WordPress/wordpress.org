@@ -21,8 +21,9 @@ class WPorg_GP_Project_Stats {
 	function __construct() {
 		global $wpdb, $gp_table_prefix;
 
-		add_action( 'gp_translation_created', array( $this, 'translation_created' ) );
-		add_action( 'gp_translation_saved', array( $this, 'translation_saved' ) );
+		add_action( 'gp_translation_created', array( $this, 'translation_edited' ) );
+		add_action( 'gp_translation_saved', array( $this, 'translation_edited' ) );
+		add_action( 'gp_translation_deleted', array( $this, 'translation_edited' ) );
 		add_action( 'gp_originals_imported', array( $this, 'originals_imported' ), 10, 5 );
 
 		// DB Writes are delayed until shutdown to bulk-update the stats during imports
@@ -37,12 +38,7 @@ class WPorg_GP_Project_Stats {
 		$wpdb->project_translation_status = $gp_table_prefix . 'project_translation_status';
 	}
 
-	function translation_created( $translation ) {
-		$set = GP::$translation_set->get( $translation->translation_set_id );
-		$this->projects_to_update[ $set->project_id ][ $set->locale . '/' . $set->slug ] = true;
-	}
-
-	function translation_saved( $translation ) {
+	function translation_edited( $translation ) {
 		$set = GP::$translation_set->get( $translation->translation_set_id );
 		$this->projects_to_update[ $set->project_id ][ $set->locale . '/' . $set->slug ] = true;
 	}
