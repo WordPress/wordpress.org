@@ -46,15 +46,21 @@ class Build_Listener {
 		$message   = '';
 
 		// Build in a separate process.
-		$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate language-pack generate plugin ' . escapeshellarg( $args['plugin'] ) . ' 2>&1';
+		$cmd        = WPORGTRANSLATE_WPCLI . ' wporg-translate language-pack generate plugin ' . escapeshellarg( $args['plugin'] ) . ' 2>&1';
+		$output     = [];
+		$return_var = 0;
 		exec( $cmd, $output, $return_var );
+		$output = array_filter( $output, fn( $line ) => ! str_ends_with( $line, ', no translations.' ) );
 		if ( $return_var ) {
-			$message .= "\tFailure: " . implode( "\n\t", $output ) . "\n";
+			$message .= 'Failure: ' . implode( "\n", $output ) . "\n";
 		} else {
-			$message .= "\t" . implode( "\n\t", $output ) . "\n";
+			$message .= implode( "\n", $output ) . "\n";
 		}
 
-		$message .= "Language packs for {$args['plugin']} processed.\n";
+		$message = trim( $message );
+		if ( ! $message ) {
+			$message = "No language packs for {$args['plugin']} generated.";
+		}
 
 		$attachment = [
 			'title'      => "Language packs for {$args['plugin']}",

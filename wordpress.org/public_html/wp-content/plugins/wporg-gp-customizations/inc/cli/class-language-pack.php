@@ -618,8 +618,6 @@ class Language_Pack extends WP_CLI_Command {
 					WP_CLI::log( "Skip {$wp_locale}, translations below threshold ({$percent_translated}%)." );
 					continue;
 				}
-			} else {
-				WP_CLI::log( "Skipping threshold check for {$wp_locale}, has existing language pack." );
 			}
 
 			// Check if new translations are available since last build.

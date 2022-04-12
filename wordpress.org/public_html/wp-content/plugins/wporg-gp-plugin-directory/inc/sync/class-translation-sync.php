@@ -48,7 +48,7 @@ class Translation_Sync {
 		}
 
 		// Sync translations only if the stable project was updated.
-		if ( false === strpos( $project->path, '/stable' ) ) {
+		if ( str_ends_with( $project->path, '/dev' ) || str_ends_with( $project->path, '/dev-readme' ) ) {
 			return;
 		}
 
@@ -84,12 +84,8 @@ class Translation_Sync {
 			return false;
 		}
 
-		$sub_project = basename( $args['gp_project'] );
-		$sub_project_counterpart = $this->project_mapping[ $sub_project ];
-
 		$timestamp = time();
 		$message   = '';
-		$updates   = 0;
 
 		foreach ( $translation_sets as $translation_set ) {
 			if ( 0 == $translation_set->current_count() ) {
@@ -97,29 +93,29 @@ class Translation_Sync {
 			}
 
 			// Sync translations in a separate process.
-			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate sync-plugin-translations ' . escapeshellarg( $args['gp_project'] ) . ' ' . escapeshellarg( $translation_set->locale ) . ' --set=' . escapeshellarg( $translation_set->slug ) . ' 2>&1';
-			$output = '';
+			$cmd        = WPORGTRANSLATE_WPCLI . ' wporg-translate sync-plugin-translations ' . escapeshellarg( $args['gp_project'] ) . ' ' . escapeshellarg( $translation_set->locale ) . ' --set=' . escapeshellarg( $translation_set->slug ) . ' 2>&1';
+			$output     = [];
 			$return_var = 0;
 			exec( $cmd, $output, $return_var );
 			if ( $return_var ) {
-				$message .= "\tFailure: " . implode( "\n\t", $output ) . "\n";
+				$message .= 'Failure: ' . implode( "\n", $output ) . "\n";
 			} else {
-				$message .= "\t" . implode( "\n\t", $output ) . "\n";
+				$message .= implode( "\n", $output ) . "\n";
 			}
-			$updates += 1;
 		}
 
-		if ( ! $updates ) {
-			$message .= "\tNo translations are available to sync.\n";
+		$message = trim( $message );
+		if ( ! $message ) {
+			$message = 'No translations are available to sync.';
 		}
 
-		$message .= 'Translation sync was successfully processed.';
+		$type = str_ends_with( $project->path, '/dev-readme' ) ? 'readme' : 'code';
 
 		$attachment = [
-			'title'      => "Translation Sync for {$args['plugin']}",
+			'title'      => "Translation sync for {$type} of {$args['plugin']}",
 			'title_link' => "https://translate.wordpress.org/projects/wp-plugins/{$args['plugin']}",
 			'text'       => $message,
-			'fallback'   => "Translations for {$args['plugin']} were synced.",
+			'fallback'   => "Translations for {$type} of {$args['plugin']} were synced.",
 			'color'      => '#00a0d2',
 			'mrkdwn_in'  => [ 'text' ],
 			'ts'         => $timestamp,
