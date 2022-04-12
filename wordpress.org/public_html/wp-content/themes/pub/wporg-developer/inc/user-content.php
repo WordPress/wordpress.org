@@ -491,7 +491,7 @@ class DevHub_User_Submitted_Content {
 	public static function get_editor_style() {
 		$style = '<style type="text/css">';
 		ob_start();
-		include get_stylesheet_directory() . '/stylesheets/editor-style.css';
+		include get_template_directory() . '/stylesheets/editor-style.css';
 		$style .= ob_get_clean();
 		$style .= ' </style>';
 		return $style;

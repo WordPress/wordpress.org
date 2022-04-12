@@ -123,7 +123,7 @@ class DevHub_Redirects {
 	public static function paginated_home_page_404() {
 		// Paginated front page.
 		if ( is_front_page() && is_paged() ) {
-			include( get_stylesheet_directory() . '/404.php' );
+			include( get_template_directory() . '/404.php' );
 			exit;
 		}
 	}
