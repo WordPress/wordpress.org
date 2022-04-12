@@ -97,6 +97,7 @@ class Translation_Sync {
 			$output     = [];
 			$return_var = 0;
 			exec( $cmd, $output, $return_var );
+			$output = array_filter( $output, fn( $line ) => ! str_starts_with( $line, '0 translations' ) );
 			if ( $return_var ) {
 				$message .= 'Failure: ' . implode( "\n", $output ) . "\n";
 			} else {
