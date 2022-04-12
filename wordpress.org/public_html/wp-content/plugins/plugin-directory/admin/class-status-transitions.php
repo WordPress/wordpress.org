@@ -167,7 +167,7 @@ class Status_Transitions {
 	 * @param \WP_Post $post Post object.
 	 * @param string   $status Project status. Accepts 'active' or 'inactive'.
 	 */
-	public function set_translation_status( $post, $status ) {
+	public static function set_translation_status( $post, $status ) {
 		if ( ! defined( 'TRANSLATE_API_INTERNAL_BEARER_TOKEN' ) ) {
 			return;
 		}

@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
 
@@ -75,6 +76,9 @@ class Plugin_Self_Close extends Base {
 			sprintf( 'Plugin closed. Reason: Author Self-close Request from %s', $_SERVER['REMOTE_ADDR'] ),
 			$plugin
 		);
+
+		// Archive translation project.
+		Status_Transitions::set_translation_status( $plugin, 'inactive' );
 
 		// Email all Plugin Committers.
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been closed', 'wporg-plugins' ), $plugin->post_title );
