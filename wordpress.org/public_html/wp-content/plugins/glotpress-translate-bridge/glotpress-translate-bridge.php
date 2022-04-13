@@ -39,10 +39,12 @@ class GlotPress_Translate_Bridge {
 	 *
 	 * @return string The translated string if it exists, else, the existing string.
 	 */
-	static function translate( $singular, $project_path, $context = null ) {
+	static function translate( $singular, $project_path, $context = null, & $found = null ) {
 		$t = self::instance();
 
 		$translation = $t->find_translation( compact( 'singular', 'context' ), $project_path );
+
+		$found = (bool) $translation;
 
 		return $translation ? $translation[0] : $singular;
 	}
