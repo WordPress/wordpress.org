@@ -249,7 +249,7 @@ class Template {
 
 		if ( 'closed' === $post->post_status ) {
 			$text = __( 'N/A', 'wporg-plugins' );
-		} elseif ( $count <= 10 ) {
+		} elseif ( $count < 10 ) {
 			$text = __( 'Fewer than 10', 'wporg-plugins' );
 		} elseif ( $count >= 1000000 ) {
 			$million_count = intdiv( $count, 1000000 );
