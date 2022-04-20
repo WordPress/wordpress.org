@@ -19,6 +19,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'needs-unit-tests' : 'Ticket has a particular need for unit tests.',
 		'has-dev-note' : 'Ticket with a published post on the development blog.',
 		'needs-dev-note' : 'Ticket needs a post on the development blog.',
+		'add-to-field-guide': 'Ticket dev-note should be included in the releasese field guide.',
 		'has-privacy-review' : 'Input has been given from the core privacy team reviewing the privacy implications of the suggested changes.',
 		'needs-privacy-review' : 'Input is needed from the core privacy team with regards to the privacy implications of the suggested changes.',
 		'has-copy-review' : 'Input has been given from a copywriter reviewing the suggested verbiage changes.',
