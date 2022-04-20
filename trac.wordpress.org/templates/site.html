@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '174'
+	scripts_version = '155'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = 'https://make.wordpress.org/' + project_slug + '/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
@@ -313,19 +313,6 @@
 <py:match path="textarea[@id='field-description' or @id='comment' or @name='edited_comment']">
 	<textarea class="${select('@class')} wp-exclude-emoji" id="${select('@id')}" name="${select('@name')}" rows="${select('@rows')}" cols="${select('@cols')}">${select('*|comment()|text()')}</textarea>
 </py:match>
-
-<!--! Mark description/comment links as nofollow user-generated-content. -->
-<div py:match="div[contains(@class,'description') or contains(@class,'comment')]" py:attrs="select('@*')">
-	<?python
-	from genshi.core import TEXT, Markup
-	def nofollow_ugc(stream):
-		for kind, data, pos in stream:
-			if kind is TEXT and isinstance( data, Markup ) and ( 'ext-link' in data ):
-				data = Markup( data.replace( '<' + 'a class="ext-link"', '<' + 'a class="ext-link" rel="ugc nofollow"' ) )
-			yield kind, data, pos
-	?>
-	${nofollow_ugc(select('*|comment()|text()'))}
-</div>
 
 <body py:match="body" id="wordpress-org" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
 	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5Z8B3BX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>

@@ -24,7 +24,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'has-copy-review' : 'Input has been given from a copywriter reviewing the suggested verbiage changes.',
 		'needs-copy-review' : 'Input is needed from a copywriter with regards to the suggested verbiage changes.',
 		'needs-docs' : 'Inline documentation is needed.',
-		'needs-codex' : 'The Codex needs to be updated or expanded.',
+		'needs-user-docs' : 'The User Documentation needs to be updated or expanded.',
 		'has-screenshots' : 'Visual changes are documented with screenshots.',
 		'needs-screenshots' : 'Screenshots are needed as a visual change log.',
 		'commit' : 'Patch is a suggested commit candidate.',
