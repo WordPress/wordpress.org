@@ -168,10 +168,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				die( '-1 No user specified.' );
 			}
 
-			if ( empty( $_POST['source'] ) ) {
-				die( '-1 No source specified.' );
-			}
-
 			$source = $_POST['source'];
 
 			// Disable default BP moderation
