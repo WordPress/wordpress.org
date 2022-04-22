@@ -170,6 +170,18 @@ input[type="submit"] {
 	line-height: 1;
 }
 
+.no-sidebar .site-header {
+	background: #0073aa;
+}
+
+.no-sidebar .site-header .hgroup {
+	text-align: unset;
+}
+
+.no-sidebar .site-header .site-title {
+	font-size: unset;
+}
+
 @media (max-width: 510px) {
 	.site-header .site-title {
 		margin-top: 4px;
