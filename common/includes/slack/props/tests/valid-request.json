@@ -1,0 +1,123 @@
+{
+	"token": "mock token value",
+	"team_id": "mock team ID",
+	"api_app_id": "mock app ID",
+	"event": {
+		"client_msg_id": "mock client message ID",
+		"type": "message",
+		"text": "props to <@U02RR6SGY> for co-leading 5.9.3 RC 1, to <@U02RQHNND> for running mission control and to <@U3KJ0TK4L> <@U4L99HZB6> <@U024MFP4L> <@U6R2E3Y9Y> <@U023GFZJ07L> <@U1E5RLU1L> for their help testing the release package :community: :wordpress:",
+		"user": "mock user ID",
+		"ts": "1649883341.182409",
+		"team": "mock team ID",
+		"blocks": [
+			{
+				"type": "rich_text",
+				"block_id": "9i6W",
+				"elements": [
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "text",
+								"text": "props to "
+							},
+							{
+								"type": "user",
+								"user_id": "U02RR6SGY"
+							},
+							{
+								"type": "text",
+								"text": " for co-leading 5.9.3 RC 1, to "
+							},
+							{
+								"type": "user",
+								"user_id": "U02RQHNND"
+							},
+							{
+								"type": "text",
+								"text": " for running mission control and to "
+							},
+							{
+								"type": "user",
+								"user_id": "U3KJ0TK4L"
+							},
+							{
+								"type": "text",
+								"text": " "
+							},
+							{
+								"type": "user",
+								"user_id": "U4L99HZB6"
+							},
+							{
+								"type": "text",
+								"text": " "
+							},
+							{
+								"type": "user",
+								"user_id": "U024MFP4L"
+							},
+							{
+								"type": "text",
+								"text": " "
+							},
+							{
+								"type": "user",
+								"user_id": "U6R2E3Y9Y"
+							},
+							{
+								"type": "text",
+								"text": " "
+							},
+							{
+								"type": "user",
+								"user_id": "U023GFZJ07L"
+							},
+							{
+								"type": "text",
+								"text": " "
+							},
+							{
+								"type": "user",
+								"user_id": "U1E5RLU1L"
+							},
+							{
+								"type": "text",
+								"text": " for their help testing the release package "
+							},
+							{
+								"type": "emoji",
+								"name": "community"
+							},
+							{
+								"type": "text",
+								"text": " "
+							},
+							{
+								"type": "emoji",
+								"name": "wordpress"
+							}
+						]
+					}
+				]
+			}
+		],
+		"channel": "C0FRG66LR",
+		"event_ts": "1649883341.182409",
+		"channel_type": "group"
+	},
+	"type": "event_callback",
+	"event_id": "mock event ID",
+	"event_time": 1649883341,
+	"authorizations": [
+		{
+			"enterprise_id": null,
+			"team_id": "mock team ID",
+			"user_id": "mock user ID",
+			"is_bot": true,
+			"is_enterprise_install": false
+		}
+	],
+	"is_ext_shared_channel": false,
+	"event_context": "mock event context"
+}
