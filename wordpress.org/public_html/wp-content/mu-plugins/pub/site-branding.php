@@ -48,14 +48,71 @@ namespace WordPressdotorg\MU_Plugins\Site_Branding {
 	/**
 	 * Filter Jetpack opengraph tags to reference the localised WordPress.org site.
 	 */
-	function jetpack_opengraph( $fields ) {
+	function jetpack_open_graph_tags( $fields ) {
 		if ( isset( $fields['og:site_name'] ) && 'WordPress.org' === $fields['og:site_name'] ) {
 			$fields['og:site_name'] = get_wordpress_brand();
 		}
 
+		// Don't use our default Site Logo for default Jetpack Opengraph fields.
+		$default_site_logo = get_site_icon_url(); // Namespaced filter, not the WordPress function.
+		if ( $default_site_logo ) {
+			if ( ! empty( $fields['og:image'] ) && $fields['og:image'] === $default_site_logo ) {
+				$fields['og:image'] = jetpack_open_graph_image_default();
+				unset( $fields['og:image:width'], $fields['og:image:height'], $fields['og:image:secure_url'] );
+			}
+
+			if ( ! empty( $fields['twitter:image'] ) && $fields['twitter:image'] === $default_site_logo ) {
+				$fields['twitter:image'] = jetpack_twitter_cards_image_default();
+			}
+		}
+
+		/*
+		* Jetpack extracts image URLs like they are used in the content which leads
+		* to blurry previews if they are too small.
+		* This removes the size part of the image URL so the full URL is used.
+		*/
+		$strip_size = function( $url ) {
+			return preg_replace( '/-\d+x\d+(\..+$)/', '$1', $url, 1 );
+		};
+		foreach ( [ 'og:image', 'og:image:secure_url', 'twitter:image' ] as $field ) {
+			if ( isset( $fields[ $field ] ) ) {
+				$fields[ $field ] = is_string( $fields[ $field ] ) ?
+					$strip_size( $fields[ $field ] ) :
+					array_map( $strip_size, $fields[ $field ] );
+			}
+		}
+
 		return $fields;
 	}
-	add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\jetpack_opengraph', 100 );
+	add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\jetpack_open_graph_tags', 100 );
+
+	/**
+	 * Set a default og:image image.
+	 */
+	function jetpack_open_graph_image_default() {
+		return 'https://s.w.org/images/backgrounds/wordpress-bg-medblue.png';
+	}
+	add_filter( 'jetpack_open_graph_image_default', __NAMESPACE__ . '\jetpack_open_graph_image_default' );
+	
+	/**
+	 * To prevent a cropped version of the og:image on Twitter, provide a square version.
+	 */
+	function jetpack_twitter_cards_image_default() {
+		return 'https://s.w.org/images/backgrounds/wordpress-bg-medblue-square.png';
+	}
+	add_filter( 'jetpack_twitter_cards_image_default', __NAMESPACE__ . '\jetpack_twitter_cards_image_default' );
+
+	/**
+	 * Customize the Twitter username used as "twitter:site" Twitter Card Meta Tag.
+	 *
+	 * This username will also be appended to tweets launched by the tweet button.
+	 *
+	 * @param string $handle Twitter Username.
+	 */
+	function jetpack_twitter_cards_site_tag( $handle ) {
+		return $handle ?: 'WordPress';
+	}
+	add_filter( 'jetpack_twitter_cards_site_tag', __NAMESPACE__ . '\jetpack_twitter_cards_site_tag' );
 
 	/**
 	 * Return the 'Brand' of the WordPress.org site.
@@ -80,13 +137,21 @@ namespace WordPressdotorg\MU_Plugins\Site_Branding {
 	}
 
 	/**
-	 * Output the WordPress favicon on all WordPress.org themes.
+	 * Set a default Site Icon if one is not set.
+	 * 
+	 * Causes the icon to be set for all WordPress.org themes.
+	 * 
+	 * NOTE: See the above `jetpack_open_graph_tags()` function for where this is overridden for OpenGraph.
 	 */
-	function favicon_icon() {
-		echo '<link rel="icon" href="https://s.w.org/favicon.ico?2" type="image/x-icon" />', "\n";
-	}
-	add_action( 'wp_head', __NAMESPACE__ . '\favicon_icon', 1 );
+	function get_site_icon_url( $url = '', $size = 0 ) {
+		// Return the favicon for the 32px variety if needed, the wmark image is just a higher resolution variant.
+		if ( 32 === $size ) {
+			return $url ?: 'https://s.w.org/favicon.ico?2';
+		}
 
+		return $url ?: 'https://s.w.org/images/wmark.png';
+	}
+	add_filter( 'get_site_icon_url', __NAMESPACE__ . '\get_site_icon_url', 10, 2 );
 }
 
 namespace WordPressdotorg {
