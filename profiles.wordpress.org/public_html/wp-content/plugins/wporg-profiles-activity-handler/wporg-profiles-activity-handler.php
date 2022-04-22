@@ -154,6 +154,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * register themselves.
 		 */
 		public function handle_activity() {
+			/*
+			 * This is useful for testing on your sandbox.
+			 *
+			 * e.g., Edit `$_POST['user_id']` so that activity goes to a test account rather than a real one.
+			 */
+			do_action( 'wporg_profiles_before_handle_activity' );
+
 			// Return error if not a valid activity request.
 			if ( true !== apply_filters( 'wporg_is_valid_activity_request', false ) ) {
 				die( '-1 Not a valid activity request' );
@@ -164,11 +171,12 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				die( '-1 Activity component not activated' );
 			}
 
-			if ( empty( $_POST['user'] ) ) {
+			$source = sanitize_text_field( $_POST['source'] );
+
+			// The `slack` source requires multiples users, so the parameters are named differently.
+			if ( empty( $_POST['user'] ) && 'slack' !== $source ) {
 				die( '-1 No user specified.' );
 			}
-
-			$source = $_POST['source'];
 
 			// Disable default BP moderation
 			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2, 1 );
@@ -198,6 +206,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					break;
 				case 'wordpress':
 					$activity_id = $this->handle_wordpress_activity();
+					break;
+				case 'slack':
+					$activity_id = $this->handle_slack_activity();
 					break;
 				default:
 					$activity_id = '-1 Unrecognized activity source';
@@ -712,6 +723,92 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			);
 
 			return bp_activity_add( $args );
+		}
+
+		/**
+		 * Process activity stream requests from wordpress.slack.com (via api.wordpress.org).
+		 *
+		 * The giver/recipient IDs have already been validated by `api.w.org/.../props`, so we can assume they're
+		 * valid.
+		 *
+		 * @return bool|string `true` if all activities are added, string error message if any of them fail.
+		 */
+		protected function handle_slack_activity() {
+			$activity_type  = sanitize_text_field( $_POST['activity'] );
+			$user_case_args = array();
+			$errors         = '';
+
+			$default_args = array(
+				'component'  => 'slack',
+				'type'       => "slack_$activity_type",
+				'error_type' => 'wp_error',
+			);
+
+			switch ( $activity_type ) {
+				case 'props_given':
+					$user_case_args = $this->handle_props_given( $_POST );
+					break;
+
+				default:
+					$errors .= "-1 Unrecognized Slack activity. ";
+			}
+
+			if ( ! $errors ) {
+				foreach ( $user_case_args as $case_args ) {
+					$new_activity_args = array_merge( $default_args, $case_args );
+					$activity_id       = bp_activity_add( $new_activity_args );
+
+					if ( ! is_int( $activity_id ) ) {
+						$errors .= sprintf(
+							'-1 Unable to save activity for %d: %s. ',
+							$case_args['user_id'],
+							$activity_id->get_error_message()
+						);
+					}
+				}
+			}
+
+			return $errors ?: true;
+		}
+
+		protected function handle_props_given( $post_unsafe ) {
+			$giver_id       = (int) $post_unsafe['giver_user']['id'];
+			$giver_username = sanitize_text_field( $post_unsafe['giver_user']['user_login'] );
+			$recipient_ids  = array_map( 'intval', $post_unsafe['recipient_ids'] );
+			$url            = wp_http_validate_url( $post_unsafe['url'] );
+			$message        = sanitize_text_field( $post_unsafe['message'] );
+			$message_id     = sanitize_text_field( $post_unsafe['message_id'] ); // {channel}-{timestamp}
+
+			$action_given = sprintf(
+				'<a href="%s">Gave props</a> in <a href="https://make.wordpress.org/chat/">Slack</a>',
+				esc_url_raw( $url ),
+			);
+
+			$action_received = sprintf(
+				'<a href="%1$s">Received props</a> from <a href="https://profiles.wordpress.org/%2$s/">@%2$s</a> in <a href="https://make.wordpress.org/chat/">Slack</a>',
+				esc_url_raw( $url ),
+				$giver_username,
+			);
+
+			$user_case_args[] = array(
+				'user_id'      => $giver_id,
+				'item_id'      => $message_id,
+				'primary_link' => $url,
+				'action'       => $action_given,
+				'content'      => wp_kses_data( $message ),
+			);
+
+			foreach ( $recipient_ids as $recipient_id ) {
+				$user_case_args[] = array(
+					'user_id'      => $recipient_id,
+					'item_id'      => $message_id,
+					'primary_link' => $url,
+					'action'       => $action_received,
+					'content'      => wp_kses_data( $message ),
+				);
+			}
+
+			return $user_case_args;
 		}
 
 	} /* /class WPOrg_Profiles_Activity_Handler */
