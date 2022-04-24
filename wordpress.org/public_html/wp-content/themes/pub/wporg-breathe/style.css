@@ -1187,11 +1187,11 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 
 .single-handbook .handbook-name-container ~ .handbook-breadcrumbs {
-	top: 5rem;
+	top: 7rem;
 }
 
 .single-handbook .handbook-name-container ~ .handbook-breadcrumbs ~ #primary {
-	padding-top: 10rem;
+	padding-top: 12rem;
 }
 
 .single-handbook .entry-content .table-of-contents + p,
