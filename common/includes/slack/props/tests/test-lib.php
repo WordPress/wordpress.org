@@ -103,15 +103,7 @@ class Test_Props_Lib extends TestCase {
 	public function data_get_recipient_slack_ids() : array {
 		$valid_request = self::get_valid_request();
 
-		$cases = array(
-			'empty' => array(
-				'blocks'   => array(),
-				'expected' => array(),
-			),
-
-			'valid' => array(
-				'blocks'   => $valid_request->event->blocks,
-				'expected' => array(
+		$valid_users = array(
 					'U02RR6SGY',
 					'U02RQHNND',
 					'U3KJ0TK4L',
@@ -120,7 +112,32 @@ class Test_Props_Lib extends TestCase {
 					'U6R2E3Y9Y',
 					'U023GFZJ07L',
 					'U1E5RLU1L',
-				),
+				);
+
+		$mentioned_twice = json_decode( json_encode( $valid_request->event->blocks ) );
+		$mentioned_twice[0]->elements[0]->elements[] = (object) array(
+			'type' => 'text',
+			'text' => ' one more time ',
+		);
+		$mentioned_twice[0]->elements[0]->elements[] = (object) array(
+			'type'    => 'user',
+			'user_id' => 'U1E5RLU1L',
+		);
+
+		$cases = array(
+			'empty' => array(
+				'blocks'   => array(),
+				'expected' => array(),
+			),
+
+			'user mentioned twice' => array(
+				'blocks'   => $mentioned_twice,
+				'expected' => $valid_users,
+			),
+
+			'valid' => array(
+				'blocks'   => $valid_request->event->blocks,
+				'expected' => $valid_users,
 			),
 		);
 

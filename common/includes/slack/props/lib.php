@@ -103,7 +103,7 @@ function get_recipient_slack_ids( array $blocks ) : array {
 		}
 	}
 
-	return $ids;
+	return array_unique( $ids );
 }
 
 /**
