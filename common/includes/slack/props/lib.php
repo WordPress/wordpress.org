@@ -70,8 +70,16 @@ function handle_props_message( object $request ) : string {
 		return 'Invalid props';
 	}
 
-	$giver_user          = map_slack_users_to_wporg( array( $request->event->user ) )[0];
+	$giver_user          = map_slack_users_to_wporg( array( $request->event->user ) );
+	$giver_user          = array_pop( $giver_user );
 	$recipient_slack_ids = get_recipient_slack_ids( $request->event->blocks );
+
+	// You have to have a w.org account to have a Slack account, so this should always be populated.
+	// The 'Received props from @...' would be broken if the giver can't be found.
+	// Don't throw if a recipient lookup fails, since we still want other recipients to get props.
+	if ( empty( $giver_user ) ) {
+		throw new Exception( 'w.org user lookup for slack ID '. $request->event->user .' failed' );
+	}
 
 	if ( empty( $recipient_slack_ids ) ) {
 		return 'Nobody was mentioned';
