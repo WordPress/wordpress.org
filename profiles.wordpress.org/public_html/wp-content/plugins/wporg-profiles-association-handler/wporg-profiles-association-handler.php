@@ -161,6 +161,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				case 'polyglots':
 					$association_id = $this->handle_polyglots_association();
 					break;
+				case 'generic-badge':
+					$association_id = $this->handle_badge_association();
+					break;
 				default:
 					$association_id = '-1 Unrecognized association source.';
 					break;
@@ -290,6 +293,54 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				return '-1 Unknown association command';
 			}
 
+			return 1;
+		}
+
+		/**
+		 * Handles incoming associations for the generic '{assign|remove}_badge()' functions. See pub/profile-helpers.php.
+		 *
+		 * Payload:  (beyond 'action' and 'source')
+		 *  user:    User ID/email/login
+		 *  badge:   Slug for group/association
+		 *  command: Either 'add' or 'remove'
+		 */
+		private function handle_badge_association() {
+			$user = wp_unslash( $_POST['user'] ?? '' );
+
+			// Handle login/email as input..
+			if ( ! is_numeric( $user ) ) {
+				$_user = get_user_by( 'login', $user );
+				if ( ! $_user && is_email( $user ) ) {
+					$_user = get_user_by( 'email', $user );
+				}
+
+				$user = $_user->ID ?? $user;
+			}
+
+			$user = get_user_by( 'id', $user );
+			if ( ! $user ) {
+				status_header( 400 );
+				return '-1 Association requested for unrecognized user: ' . sanitize_text_field( $_POST['user'] );
+			}
+
+			$badge    = sanitize_key( $_POST['badge'] ?? '' );
+			$group_id = BP_Groups_Group::group_exists( $badge );
+			if ( ! $badge || ! $group_id ) {
+				status_header( 400 );
+				return '-1 Association does not exist: ' . $badge;
+			}
+
+			if ( 'add' == $_POST['command'] ) {
+				groups_join_group( $group_id, $user->ID );
+				groups_accept_invite( $user->ID, $group_id );
+			} elseif ( 'remove' == $_POST['command'] ) {
+				groups_leave_group( $group_id, $user->ID );
+			} else {
+				status_header( 400 );
+				return '-1 Unknown association command';
+			}
+
+			// NOTE: Actual response from `groups_join_group()` & `groups_leave_group()` set in cookies.
 			return 1;
 		}
 
