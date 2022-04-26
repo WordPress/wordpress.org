@@ -9,7 +9,7 @@ function from_log( $log ) {
 	$props_one    = '\s*(?P<props>\S{4,})'; // Single prop, 4char+
 	$sol          = '(^|[.]|\pP)\s*';       // Start of line, actual start of line or sentence start.
 	$real_sol     = '(^|[.])\s*';
-	$eol          = '([.]([^.]|$)|\pP|$)';          // EOL that's a full stop, new line, or randon punctuation.
+	$eol          = '([.]([^.]|$)|\pP|$)';          // EOL that's a full stop, new line, or random punctuation.
 	$real_eol     = '([.][^.]|[.]?$)';              // EOL that's actually full stop or new line.
 
 	// These matchers are regular expressions, put inside `#..#im`
@@ -19,7 +19,7 @@ function from_log( $log ) {
 			"^props(?! to ) {$props_greedy}.?$", // Super basic initial primary matcher, trumps even the next one.
 			"{$real_sol}props(?! to ) {$props_greedy}{$real_eol}", // Primary matcher, "Props abc, def". Excludes "props to "
 			"([,.] )props {$props_greedy}{$eol}", // Simple inline props matcher, ". props abc." / ", props abc, fixes ..."
-			"{$sol}props([:]| to ) {$props_greedy}{$eol}",
+			".{$sol}props([:]| to ) {$props_greedy}{$eol}", // `.` prefix is to ensure that the SOL is not the start of the message, to avoid triggering for https://meta.trac.wordpress.org/changeset/11790
 			"([0-9]|\pP)\s+props([:]|\s+to)? {$props_one}( in .+)?(,|{$eol})",
 			"{$sol}(h/t|hat tip:) {$props_short}{$eol}",
 
