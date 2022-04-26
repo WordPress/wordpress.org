@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Trac\Watcher\SVN;
 use function WordPressdotorg\Trac\Watcher\Props\from_log as props_from_log;
+use function WordPressdotorg\Profiles\assign_badge;
 use function WordPressdotorg\Trac\Watcher\Props\find_user_id;
 
 const MAX_REVISIONS = 250;
@@ -164,6 +165,11 @@ function import_revisions( $svn ) {
 				}
 
 				$wpdb->insert( $props_table, $data );
+
+				// Auto-assign Meta Contributor badge for matched meta contributions.
+				if ( $user_id && 'meta' === $slug && function_exists( 'WordPressdotorg\Profiles\assign_badge' ) ) {
+					assign_badge( 'meta-contributor', $user_id );
+				}
 			}
 		}
 
