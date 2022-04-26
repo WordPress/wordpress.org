@@ -166,6 +166,7 @@ function get_whitelist() {
 		'core-editor' => array_merge( get_committers(), array(
 			'annezazu',
 			'azaozz',
+			'fabiankaegy',
 			'gziolo',
 			'ellatrix', // @ella on Slack
 			'JeffPaul',
