@@ -1929,8 +1929,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						htmlElement(
 							'a',
 							{ href: data.changes.html_url, title: data.title },
-							'#' + data.number + ' ' +
-								( data.title.length > 23 ? data.title.substr( 0, 20 ) + '...' : data.title )
+							'#' + data.number + ' ' + data.title
 						) +
 						' by ' +
 						htmlElement( 'a', { href: data.user.url }, '@' + data.user.name ) +
