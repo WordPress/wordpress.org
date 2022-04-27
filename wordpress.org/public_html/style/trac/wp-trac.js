@@ -7,6 +7,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'has-patch' : 'Proposed solution attached and ready for review.',
 		'needs-patch' : 'Ticket needs a new patch.',
 		'needs-refresh' : 'Patch no longer applies cleanly and needs to be updated.',
+		'changes-requested': 'Feedback has been provided and the patch needs to be updated.',
 		'reporter-feedback' : 'Feedback is needed from the reporter.',
 		'dev-feedback' : 'Feedback is needed from a core developer.',
 		'dev-reviewed' : 'Indicates that a ticket has been reviewed by two committers and can be backported when used in combination with the commit keyword.',
