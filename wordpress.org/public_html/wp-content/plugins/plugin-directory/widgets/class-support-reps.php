@@ -59,7 +59,7 @@ class Support_Reps extends \WP_Widget {
 				<li data-user="<?php echo esc_attr( $support_rep->user_nicename ); ?>">
 					<?php echo get_avatar( $support_rep->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$support_rep->user_nicename}/" ); ?>">
-						<?php echo Template::encode( $support_rep->display_name ); ?>
+						<?php echo Template::encode( $support_rep->display_name ?: $support_rep->user_nicename ); ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_support_rep', $post ) ) : ?>

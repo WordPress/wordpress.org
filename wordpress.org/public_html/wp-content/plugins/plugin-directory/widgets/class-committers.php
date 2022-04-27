@@ -56,7 +56,7 @@ class Committers extends \WP_Widget {
 				<li data-user="<?php echo esc_attr( $committer->user_nicename ); ?>">
 					<?php echo get_avatar( $committer->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$committer->user_nicename}/" ); ?>">
-						<?php echo Template::encode( $committer->display_name ); ?>
+						<?php echo Template::encode( $committer->display_name ?: $committer->user_nicename ); ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_committer', $post ) ) : ?>
