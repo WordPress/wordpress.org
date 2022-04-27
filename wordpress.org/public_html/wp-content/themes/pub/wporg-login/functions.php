@@ -503,7 +503,7 @@ function wporg_login_errors_nicify( $errors, $redirect_to ) {
 
 		'must_change_password' => sprintf(
 			/* translators: %s: <code>password reset help queue.</code> */
-			__( '<strong>Error:</strong> Your password needs to be changed. Please check your email for a link to set a new password. Please contact %s if you are unable to access your accounts registered email.', 'wporg' ),
+			__( "<strong>Error:</strong> Your password needs to be changed. Please check your email for a link to set a new password. Please contact %s if you are unable to access your account's registered email.", 'wporg' ),
 			'<code>' . $sso::SUPPORT_EMAIL . '</code>'
 		)
 	];
