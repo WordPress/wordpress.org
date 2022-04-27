@@ -490,10 +490,9 @@ add_filter( 'wp_login_errors', 'wporg_login_errors_message', 10, 2 );
 
 /**
  * Replace some login related error messages with nicer forms.
- * 
- * See https://core.trac.wordpress.org/ticket/52915
  */
 function wporg_login_errors_nicify( $errors, $redirect_to ) {
+	$sso = WPOrg_SSO::get_instance();
 
 	$replace_errors = [
 		'invalid_username' => sprintf(
@@ -502,6 +501,11 @@ function wporg_login_errors_nicify( $errors, $redirect_to ) {
 			'<strong>' . esc_html( wp_unslash( $_POST['log'] ?? '' ) ) . '</strong>'
 		),
 
+		'must_change_password' => sprintf(
+			/* translators: %s: <code>password reset help queue.</code> */
+			__( '<strong>Error:</strong> Your password needs to be changed. Please check your email for a link to set a new password. Please contact %s if you are unable to access your accounts registered email.', 'wporg' ),
+			'<code>' . $sso::SUPPORT_EMAIL . '</code>'
+		)
 	];
 
 	foreach ( $replace_errors as $error_code => $error_message ) {
