@@ -167,6 +167,7 @@ function get_whitelist() {
 			'annezazu',
 			'azaozz',
 			'fabiankaegy',
+			'get_dave', // @getdave on Slack
 			'gziolo',
 			'ellatrix', // @ella on Slack
 			'JeffPaul',
