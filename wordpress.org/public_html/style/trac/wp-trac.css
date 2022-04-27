@@ -376,6 +376,8 @@ table.progress td.closed {
 .milestone .info h2 {
 	-webkit-box-shadow: none;
 	box-shadow: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .trac-groupprogress table.progress {
 	-webkit-box-shadow: none;
@@ -490,9 +492,7 @@ ul.children > li.child {
 	font-size: 13px;
 }
 /* =timeline.css */
-#content.timeline {
-	width: 100%;
-}
+
 #content.timeline dl {
 	margin-left: 1em;
 }
@@ -2054,6 +2054,9 @@ a.mention.me {
 /* =Responsive / Mobile
 ----------------------------------------------- */
 @media (max-width: 770px) {
+	#main {
+		overflow-x: auto;
+	}
 	#headline {
 		height: auto;
 		min-height: 62px;
@@ -2081,6 +2084,9 @@ a.mention.me {
 		position: static;
 		top: 0;
 		right: 0;
+	}
+	.core.trac #mainnav {
+		display: none;
 	}
 	.newticket-instructions {
 		margin-left: 1em;
@@ -2278,12 +2284,18 @@ a.mention.me {
 	#ticket table.properties > tbody > tr > th {
 		width: 30%; /* More room so columns don't overlap */
 	}
+	#properties table.trac-properties > colgroup > col.th,
+	#properties table.trac-properties > colgroup > col.td {
+		width: 100%;
+	}
 	#field-description-help, #content.ticket label[for="comment"] {
 		float: none; /* don't let it collide with the editor buttons */
 	}
 	#keyword-label {
 		min-width: 115px !important;
 		text-align: left;
+		float: none;
+		display: block;
 	}
 	#properties table.trac-properties {
 		display: block !important;
