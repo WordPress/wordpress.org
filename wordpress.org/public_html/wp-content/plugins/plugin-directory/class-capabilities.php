@@ -63,11 +63,21 @@ class Capabilities {
 				array(
 					'plugin_self_transfer',
 					'plugin_self_close',
-					'plugin_manage_releases',
 				)
 			)
 		) {
 			$required_caps[] = 'do_not_allow';
+		}
+
+		// Disable (or restrict to reviewers) release management.
+		if ( 'plugin_manage_releases' === $cap ) {
+			if ( 'disabled' === $post->post_status ) {
+				// Plugin reviewers can approve for disabled plugins.
+				$required_caps[] = 'plugin_review';
+			} elseif ( 'publish' !== $post->post_status ) {
+				// A non-published plugin cannot have it's releases approved.
+				$required_caps[] = 'do_not_allow';
+			}
 		}
 
 		// If a plugin is in the Beta or Featured views, they're not able to self-manage certain things. Require reviewer.

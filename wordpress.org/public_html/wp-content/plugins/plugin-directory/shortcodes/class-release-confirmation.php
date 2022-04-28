@@ -36,7 +36,7 @@ class Release_Confirmation {
 
 		// Remove closed plugins.
 		$plugins = array_filter( $plugins, function( $plugin ) {
-			return $plugin && 'publish' === $plugin->post_status;
+			return ( $plugin && in_array( $plugin->post_status, array( 'publish', 'disabled' ) ) );
 		} );
 
 		uasort( $plugins, function( $a, $b ) {
@@ -231,7 +231,10 @@ class Release_Confirmation {
 			$current_user_confirmed = isset( $data['confirmations'][ wp_get_current_user()->user_login ] );
 
 			if ( ! $current_user_confirmed && ! $data['confirmed'] ) {
-				if ( self::can_access() ) {
+				if (
+					self::can_access() &&
+					current_user_can( 'plugin_manage_releases', $plugin  )
+				) {
 					$buttons[] = sprintf(
 						'<a href="%s" class="button approve-release button-primary">%s</a>',
 						Template::get_release_confirmation_link( $data['tag'], $plugin ),
@@ -256,6 +259,11 @@ class Release_Confirmation {
 	}
 
 	static function can_access() {
+		// Plugin reviewers can always access the release management functionality.
+		if ( current_user_can( 'plugin_review' ) ) {
+			return true;
+		}
+
 		// Must have an access token..
 		if ( ! is_user_logged_in() || empty( $_COOKIE[ self::COOKIE ] ) ) {
 			return false;
