@@ -181,6 +181,10 @@ function wporg_redirect_site_not_found() {
 		case '2019.wordpress.org':
 		case '2020.wordpress.org':
 		case '2021.wordpress.org':
+		case '2022.wordpress.org':
+		case '2023.wordpress.org':
+		case '2024.wordpress.org':
+		case '2025.wordpress.org':
 			$location = 'https://' . explode( '.', $host )[0] . '.wordpress.net/';
 			break;
 
@@ -204,3 +208,40 @@ function wporg_redirect_site_not_found() {
 	}
 	exit;
 }
+
+/**
+ * Redirect w.org/contributor-training/ to it's new home on Learn.
+ */
+add_action( 'template_redirect', function() {
+	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
+	if ( 'wordpress.org' !== $_SERVER['HTTP_HOST'] || ! str_starts_with( $path, '/contributor-training' ) ) {
+		return;
+	}
+
+	$redirects = [
+		'/contributor-training/course/how-decisions-are-made-in-the-wordpress-project' => 'https://learn.wordpress.org/course/how-decisions-are-made-in-the-wordpress-project/',
+		'/contributor-training/course/writing-in-the-wordpress-voice'                  => 'https://learn.wordpress.org/course/writing-in-the-wordpress-voice/',
+		'/contributor-training/course/basic-principles-of-conflict-resolution'         => 'https://learn.wordpress.org/course/basic-principles-of-conflict-resolution/',
+		'/contributor-training/course/meeting-etiquette'                               => 'https://learn.wordpress.org/course/community-meeting-etiquette/',
+		'/contributor-training/course/wordpress-meetup-organizer-training'             => 'https://learn.wordpress.org/course/wordpress-meetup-organizer-training/',
+
+		/*
+		// Awaiting migration confirmation.
+		'/contributor-training/course/open-source-basics-and-wordpress/'               => 'https://learn.wordpress.org/course/open-source-basics-and-wordpress/',
+		'/contributor-training/course/wordpress-community-deputy-training/'            => 'https://learn.wordpress.org/course/wordpress-community-deputy-training/',
+		'/contributor-training/course/wordcamp-organizer-training/'                    => 'https://learn.wordpress.org/course/wordcamp-organizer-training/',
+		'/contributor-training/course/wordcamp-mentor-training/'                       => 'https://learn.wordpress.org/course/wordcamp-mentor-training/',
+		*/
+	];
+
+	foreach ( $redirects as $match => $redirect ) {
+		if ( str_starts_with( $path, $match ) ) {
+			wp_safe_redirect( $redirect, 301, 'Contributor Training to Learn' );
+			exit;
+		}
+	}
+
+	// If no specific course match, search for make-specific courses.
+	//wp_safe_redirect( 'https://learn.wordpress.org/courses/?search=make.wordpress.org', 301, 'Contributor Training to Learn' );
+	//exit;
+} );
