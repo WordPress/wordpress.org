@@ -215,14 +215,16 @@ class Make_Core_Pot extends WP_CLI_Command {
 		];
 
 		$command_assoc_args = [
-			'exclude'       => implode( ',', $admin_exclude ),
-			'include'       => 'wp-admin/*',
-			'merge'         => $hello_dolly_pot,
-			'package-name'  => self::PACKAGE_NAME,
-			'headers'       => $headers,
-			'file-comment'  => '',
-			'skip-audit'    => true,
-			'ignore-domain' => true,
+			'exclude'            => implode( ',', $admin_exclude ),
+			'include'            => 'wp-admin/*',
+			'merge'              => $hello_dolly_pot,
+			'subtract'           => $this->destination . '/wordpress.pot',
+			'subtract-and-merge' => true,
+			'package-name'       => self::PACKAGE_NAME,
+			'headers'            => $headers,
+			'file-comment'       => '',
+			'skip-audit'         => true,
+			'ignore-domain'      => true,
 		];
 
 		if ( version_compare( $wp_version, '5.2-beta', '<' ) ) {
@@ -233,8 +235,6 @@ class Make_Core_Pot extends WP_CLI_Command {
 
 		unlink( $hello_dolly_pot );
 
-		$this->merge_pot( $this->destination . '/wordpress.pot', $this->destination . '/wordpress-admin.pot' );
-
 		// Admin Network.
 		$command_args = [
 			'i18n',
@@ -244,19 +244,18 @@ class Make_Core_Pot extends WP_CLI_Command {
 		];
 
 		$command_assoc_args = [
-			'include'       => implode( ',', $admin_network_files ),
-			'package-name'  => self::PACKAGE_NAME,
-			'headers'       => $headers,
-			'file-comment'  => '',
-			'skip-js'       => true, // TODO: No use of wp.i18n, yet.
-			'skip-audit'    => true,
-			'ignore-domain' => true,
+			'include'            => implode( ',', $admin_network_files ),
+			'subtract'           => sprintf( '%1$s/wordpress.pot,%1$s/wordpress-admin.pot', $this->destination ),
+			'subtract-and-merge' => true,
+			'package-name'       => self::PACKAGE_NAME,
+			'headers'            => $headers,
+			'file-comment'       => '',
+			'skip-js'            => true, // TODO: No use of wp.i18n, yet.
+			'skip-audit'         => true,
+			'ignore-domain'      => true,
 		];
 
 		WP_CLI::run_command( $command_args, $command_assoc_args );
-
-		$this->merge_pot( $this->destination . '/wordpress.pot', $this->destination . '/wordpress-admin-network.pot' );
-		$this->merge_pot( $this->destination . '/wordpress-admin.pot', $this->destination . '/wordpress-admin-network.pot' );
 	}
 
 	/**
@@ -271,39 +270,5 @@ class Make_Core_Pot extends WP_CLI_Command {
 		}
 
 		return preg_match( '/\$wp_version\s*=\s*\'(.*?)\';/', file_get_contents( $version_php ), $matches ) ? $matches[1] : false;
-	}
-
-	/**
-	 * Merges duplicate originals of two POT files.
-	 *
-	 * Preserves the references and comments of each original.
-	 *
-	 * @param string $to_file   Path to the POT file where duplicates should be merged into.
-	 * @param string $from_file Path to the POT file where duplicates should be extracted from.
-	 */
-	private function merge_pot( $to_file, $from_file ) {
-		$to = new Translations();
-		Po::fromFile( $to_file, $to );
-		$from = new Translations();
-		Po::fromFile( $from_file, $from );
-
-		foreach ( $to as $original ) {
-			// Check for duplicate.
-			$existing = $from->find( $original );
-			if ( ! $existing ) {
-				continue;
-			}
-
-			// Merge.
-			$original->mergeWith( $existing );
-
-			// Remove original from source
-			unset( $from[ $existing->getId() ] );
-		}
-
-		$to->deleteHeader( Translations::HEADER_LANGUAGE );
-		$from->deleteHeader( Translations::HEADER_LANGUAGE );
-		PotGenerator::toFile( $to, $to_file );
-		PotGenerator::toFile( $from, $from_file );
 	}
 }
