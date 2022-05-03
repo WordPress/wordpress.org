@@ -72,7 +72,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		];
 
 		$command_assoc_args = [
-			'exclude'       => 'patterns,wp-content',
+			'exclude'       => 'patterns,styles', // Workaround for https://github.com/wp-cli/i18n-command/pull/320.
 			'include'       => 'wp-admin/includes/continents-cities.php',
 			'package-name'  => self::PACKAGE_NAME,
 			'headers'       => $headers,
@@ -195,7 +195,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		}
 
 		$admin_exclude = [
-			'patterns', 'wp-content',
+			'patterns', 'styles', // Workaround for https://github.com/wp-cli/i18n-command/pull/320.
 			'wp-admin/includes/continents-cities.php',
 			// External libraries.
 			'wp-admin/includes/class-ftp*',
@@ -246,7 +246,7 @@ class Make_Core_Pot extends WP_CLI_Command {
 		];
 
 		$command_assoc_args = [
-			'exclude'            => 'patterns,wp-content',
+			'exclude'            => 'patterns,styles', // Workaround for https://github.com/wp-cli/i18n-command/pull/320.
 			'include'            => implode( ',', $admin_network_files ),
 			'subtract'           => sprintf( '%1$s/wordpress.pot,%1$s/wordpress-admin.pot', $this->destination ),
 			'subtract-and-merge' => true,
