@@ -24,8 +24,11 @@ class Release_Confirmation {
 		$plugins = Tools::get_users_write_access_plugins( wp_get_current_user() );
 
 		if ( ! $plugins ) {
-			wp_safe_redirect( home_url( '/developers/' ) );
-			// Redirect via JS too, as technically the page output should've already started (but probably hasn't on WordPress.org)
+			if ( ! headers_sent() ) {
+				wp_safe_redirect( home_url( '/developers/' ) );
+			}
+
+			// Redirect via JS too, as technically the page output should've already started.
 			echo '<script>document.location=' . json_encode( home_url( '/developers/' ) ) . '</script>';
 			exit;
 		}
