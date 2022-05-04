@@ -224,6 +224,47 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
+		 * Add an activity payload to a profile
+		 *
+		 * @param string $component
+		 * @param string $type
+		 * @param mixed  $user
+		 * @param array  $activity_args The arguments that should be passed to `bp_activity_add()`, minus the other params passed in to this function
+		 *
+		 * @return int|string
+		 */
+		protected function add_activity( string $component, string $type, $user, array $activity_args ) {
+			$user = $this->get_user( $user );
+
+			if ( ! $user ) {
+				return '-1 Activity reported for unrecognized user : ' . $user;
+			}
+
+			$required_args = array(
+				'user_id'    => $user->ID,
+				'component'  => $component,
+				'type'       => "{$component}_$type",
+				'error_type' => 'wp_error',
+			);
+
+			$new_activity_args = array_merge( $activity_args, $required_args );
+			$activity_id       = bp_activity_add( $new_activity_args );
+
+			if ( is_int( $activity_id ) ) {
+				$result = $activity_id;
+
+			} else {
+				$result = sprintf(
+					'-1 Unable to save activity: %s. Request was: %s',
+					$activity_id->get_error_message(),
+					wp_json_encode( $new_activity_args )
+				);
+			}
+
+			return $result;
+		}
+
+		/**
 		 * Handles incoming activities for a forum.
 		 *
 		 * Recognized activities:
@@ -349,24 +390,14 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * @return int|string The activity ID on success; an error message on failure.
 		 */
 		protected function handle_learn_activity() {
-			$user = $this->get_user( $_POST['user'] );
-
-			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
-			}
-
+			$error         = '';
+			$activity_args = array();
 			$activity_type = sanitize_text_field( $_POST['activity'] );
-
-			$default_args = array(
-				'user_id'    => $user->ID,
-				'component'  => 'learn',
-				'type'       => "learn_$activity_type",
-				'error_type' => 'wp_error',
-			);
+			$user          = sanitize_text_field( $_POST['user'] );
 
 			switch ( $activity_type ) {
 				case 'course_complete':
-					$case_args = array(
+					$activity_args = array(
 						'item_id'      => absint( $_POST['course_id'] ),
 						'primary_link' => esc_url_raw( $_POST['url'] ),
 
@@ -379,25 +410,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					break;
 
 				default:
-					$error = "-1 Unrecognized Learn activity.";
+					$error = '-1 Unrecognized Learn activity.';
 			}
 
-			if ( isset( $error ) ) {
-				$result = $error;
-			} else {
-				$new_activity_args = array_merge( $default_args, $case_args );
-				$activity_id       = bp_activity_add( $new_activity_args );
-
-				if ( is_int( $activity_id ) ) {
-					$result = $activity_id;
-				} else {
-					$result = sprintf(
-						'-1 Unable to save activity: %s. Request was: %s',
-						$activity_id->get_error_message(),
-						wp_json_encode( $new_activity_args )
-					);
-				}
-			}
+			$result = $error || $this->add_activity( 'learn', $activity_type, $user, $activity_args );
 
 			return $result;
 		}
