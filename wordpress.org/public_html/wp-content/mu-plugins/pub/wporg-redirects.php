@@ -224,14 +224,10 @@ add_action( 'template_redirect', function() {
 		'/contributor-training/course/basic-principles-of-conflict-resolution'         => 'https://learn.wordpress.org/course/basic-principles-of-conflict-resolution/',
 		'/contributor-training/course/meeting-etiquette'                               => 'https://learn.wordpress.org/course/community-meeting-etiquette/',
 		'/contributor-training/course/wordpress-meetup-organizer-training'             => 'https://learn.wordpress.org/course/wordpress-meetup-organizer-training/',
-
-		/*
-		// Awaiting migration confirmation.
 		'/contributor-training/course/open-source-basics-and-wordpress/'               => 'https://learn.wordpress.org/course/open-source-basics-and-wordpress/',
 		'/contributor-training/course/wordpress-community-deputy-training/'            => 'https://learn.wordpress.org/course/wordpress-community-deputy-training/',
 		'/contributor-training/course/wordcamp-organizer-training/'                    => 'https://learn.wordpress.org/course/wordcamp-organizer-training/',
 		'/contributor-training/course/wordcamp-mentor-training/'                       => 'https://learn.wordpress.org/course/wordcamp-mentor-training/',
-		*/
 	];
 
 	foreach ( $redirects as $match => $redirect ) {
@@ -242,6 +238,6 @@ add_action( 'template_redirect', function() {
 	}
 
 	// If no specific course match, search for make-specific courses.
-	//wp_safe_redirect( 'https://learn.wordpress.org/courses/?search=make.wordpress.org', 301, 'Contributor Training to Learn' );
-	//exit;
+	wp_safe_redirect( 'https://learn.wordpress.org/course-category/contributing-to-wordpress/', 301, 'Contributor Training to Learn' );
+	exit;
 } );
