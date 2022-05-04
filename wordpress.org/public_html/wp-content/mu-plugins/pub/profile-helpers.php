@@ -1,5 +1,7 @@
 <?php
+
 namespace WordPressdotorg\Profiles;
+use WP_Error;
 
 /**
  * Assign a badge to a given user.
@@ -56,28 +58,48 @@ function badge_api( string $action, string $badge, $user ) : bool {
  * Send requests to Profiles and handle errors.
  *
  * `$request_args` should match what the handler expects for a particular request.
- * See `wporg-profiles-activity-handler.php` and `wporg-profiles-association-handler.php`.
+ * See `wporg-profiles-activity-handler.php` and `wporg-profiles-association-handler.php`
+ *
+ * @return array|WP_Error
  */
 function api( array $args ) {
 	$url       = 'https://profiles.wordpress.org/wp-admin/admin-ajax.php';
 	$headers   = [];
 	$sslverify = true;
+	$error     = '';
 
 	// Requests to w.org sandbox should also use profiles.w.org sandbox, for testing end to end.
 	if ( 'staging' === wp_get_environment_type() ) {
-		$url       = str_replace( 'profiles.wordpress.org', '127.0.0.1', $url );
-		$sslverify = false; // wp_remote_get() cannot verify SSL if the hostname is 127.0.0.1.
+		$url             = str_replace( 'profiles.wordpress.org', '127.0.0.1', $url );
+		$sslverify       = false; // wp_remote_get() cannot verify SSL if the hostname is 127.0.0.1.
+		$headers['host'] = 'profiles.wordpress.org';
 	}
 
-	// Note: Authentication is handled elsewhere transparently.
-	return wp_remote_post(
+	// Note: Authentication is handled transparently by `enable_wporg_profiles_ajax_handler()` on Profiles.
+	$response = wp_remote_post(
 		$url,
 		[
 			'body'      => $args,
-			'headers'   => [
-				'host' => 'profiles.wordpress.org',
-			],
+			'timeout'   => 10,
+			'headers'   => $headers,
 			'sslverify' => $sslverify,
 		]
 	);
+
+	if ( is_wp_error( $response ) ) {
+		$error = $response->get_error_message();
+
+	} elseif ( 200 != wp_remote_retrieve_response_code( $response ) || 1 !== (int) wp_remote_retrieve_body( $response ) ) {
+		$error = sprintf(
+			'Error %s %s',
+			$response['response']['code'],
+			$response['body']
+		);
+	}
+
+	if ( $error ) {
+		trigger_error( wp_kses_post( $error ), E_USER_WARNING );
+	}
+
+	return $response;
 }
