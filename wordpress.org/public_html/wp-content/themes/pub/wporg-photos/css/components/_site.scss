@@ -288,6 +288,15 @@ body.page {
 	.nav-links {
 		text-align: inherit;
 	}
+
+	@include breakpoint( 0, 737px ) {
+		padding-right: 0;
+
+		.nav-links {
+			display: flex;
+			justify-content: center;
+		}
+	}
 }
 
 .photo-author {
