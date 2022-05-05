@@ -204,6 +204,9 @@ body.page {
 		.entry-title {
 			color: $color__text-main;
 			font-weight: 400;
+			@include breakpoint( 0, 960px ) {
+				padding: 0;
+			}
 		}
 	}
 
