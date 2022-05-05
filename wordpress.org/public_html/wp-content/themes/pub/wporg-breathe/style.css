@@ -425,6 +425,12 @@ input[type="submit"]:hover {
 	.content-area {
 		width: 100%;
 	}
+
+	.content-area table {
+		display: block;
+		max-width: fit-content;
+		overflow-x: auto;
+	}
 }
 
 .widget-title {
