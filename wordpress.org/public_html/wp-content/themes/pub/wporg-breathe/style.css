@@ -1189,7 +1189,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 
 .single-handbook .handbook-breadcrumbs ~ #primary {
-	padding-top: 8rem;
+	padding-top: 9rem;
 }
 
 .single-handbook .handbook-name-container ~ .handbook-breadcrumbs {
@@ -1516,6 +1516,10 @@ h2.toc-heading + h3.toc-heading:target {
 	.rtl nav.o2-post-actions ul {
 		left: 0;
 		right: initial;
+	}
+
+	.single-handbook .handbook-breadcrumbs ~ #primary {
+		padding-top: 10rem;
 	}
 }
 
