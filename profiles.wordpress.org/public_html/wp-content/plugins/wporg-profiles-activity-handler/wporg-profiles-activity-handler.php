@@ -158,80 +158,88 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * register themselves.
 		 */
 		public function handle_activity() {
-			/*
-			 * This is useful for testing on your sandbox.
-			 *
-			 * e.g., Edit `$_POST['user_id']` so that activity goes to a test account rather than a real one.
-			 */
-			do_action( 'wporg_profiles_before_handle_activity' );
-
-			// Return error if not a valid activity request.
-			if ( true !== apply_filters( 'wporg_is_valid_activity_request', false ) ) {
-				die( '-1 Not a valid activity request' );
-			}
-
-			// Return error if activities are not enabled.
-			if ( ! bp_is_active( 'activity' ) ) {
-				die( '-1 Activity component not activated' );
-			}
-
 			try {
-				$activity = $this->sanitize_activity( $_POST );
+				/*
+				 * This is useful for testing on your sandbox.
+				 *
+				 * e.g., Edit `$_POST['user_id']` so that activity goes to a test account rather than a real one.
+				 */
+				do_action( 'wporg_profiles_before_handle_activity' );
+
+				// Return error if not a valid activity request.
+				if ( true !== apply_filters( 'wporg_is_valid_activity_request', false ) ) {
+					throw new Exception( '-1 Not a valid activity request' );
+				}
+
+				// Return error if activities are not enabled.
+				if ( ! bp_is_active( 'activity' ) ) {
+					throw new Exception( '-1 Activity component not activated' );
+				}
+
+				$source = sanitize_text_field( $_POST['source'] ?? $_POST['component'] );
+
+
+				// The `slack` source requires multiples users, so the parameters are named differently.
+				if ( empty( $_POST['user'] ) && empty( $_POST['user_id'] ) && 'slack' !== $source ) {
+					throw new Exception( '-1 No user specified.' );
+				}
+
+				// Disable default BP moderation
+				remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2 );
+				remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2 );
+
+				// Disable requirement that user have a display_name set
+				remove_filter( 'bp_activity_before_save', 'bporg_activity_requires_display_name' );
+
+				// If an activity doesn't require special logic, then `add_activity()` can be called directly. Compare
+				// Learn and Slack to see the difference.
+				switch ( $source ) {
+					case 'forum':
+						$activity_id = $this->handle_forum_activity();
+						break;
+					case 'learn':
+						$activity_id = $this->add_activity( $activity );
+						break;
+					case 'plugin':
+						$activity_id = $this->handle_plugin_activity();
+						break;
+					case 'theme':
+						$activity_id = $this->handle_theme_activity();
+						break;
+					case 'trac':
+						$activity_id = $this->handle_trac_activity();
+						break;
+					case 'wordcamp':
+						$activity_id = $this->handle_wordcamp_activity();
+						break;
+					case 'wordpress':
+						$activity_id = $this->handle_wordpress_activity();
+						break;
+					case 'slack':
+						$activity_id = $this->handle_slack_activity();
+						break;
+					default:
+						throw new Exception( '-1 Unrecognized activity source' );
+						break;
+				}
+
+				if ( is_wp_error( $activity_id ) ) {
+					throw new Exception( '-1 Unable to save activity: ' . $activity_id->get_error_message() );
+				} elseif ( str_starts_with( $activity_id, '-1' ) ) {
+					throw new Exception( $activity_id );
+				} elseif ( false === $activity_id || intval( $activity_id ) <= 0 ) {
+					throw new Exception( '-1 Unable to save activity' );
+				}
+
+				$response = '1';
+
 			} catch ( Exception $exception ) {
-				die( wp_kses_post( $exception->getMessage() ) );
+				trigger_error( $exception->getMessage(), E_USER_WARNING );
+
+				$response = $exception->getMessage();
 			}
 
-			$source = sanitize_text_field( $_POST['source'] );
-			// The `slack` source requires multiples users, so the parameters are named differently.
-			if ( empty( $_POST['user'] ) && empty( $_POST['user_id'] ) && 'slack' !== $source ) {
-				die( '-1 No user specified.' );
-			}
-
-			// Disable default BP moderation
-			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2 );
-			remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2 );
-
-			// Disable requirement that user have a display_name set
-			remove_filter( 'bp_activity_before_save', 'bporg_activity_requires_display_name' );
-
-			// If an activity doesn't require special logic, then `add_activity()` can be called directly. Compare
-			// Learn and Slack to see the difference.
-			switch ( $source ) {
-				case 'forum':
-					$activity_id = $this->handle_forum_activity();
-					break;
-				case 'learn':
-					$activity_id = $this->add_activity( $activity );
-					break;
-				case 'plugin':
-					$activity_id = $this->handle_plugin_activity();
-					break;
-				case 'theme':
-					$activity_id = $this->handle_theme_activity();
-					break;
-				case 'trac':
-					$activity_id = $this->handle_trac_activity();
-					break;
-				case 'wordcamp':
-					$activity_id = $this->handle_wordcamp_activity();
-					break;
-				case 'wordpress':
-					$activity_id = $this->handle_wordpress_activity();
-					break;
-				case 'slack':
-					$activity_id = $this->handle_slack_activity();
-					break;
-				default:
-					$activity_id = '-1 Unrecognized activity source';
-					break;
-			}
-
-			if ( false === $activity_id ) {
-				$activity_id = '-1 Unable to save activity';
-			}
-
-			$success = intval( $activity_id ) > 0 ? '1' : $activity_id;
-			die( $success );
+			die( $response );
 		}
 
 		/**
