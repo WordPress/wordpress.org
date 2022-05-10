@@ -71,11 +71,11 @@ class Capabilities {
 
 		// Disable (or restrict to reviewers) release management.
 		if ( 'plugin_manage_releases' === $cap ) {
-			if ( 'disabled' === $post->post_status ) {
-				// Plugin reviewers can approve for disabled plugins.
+			if ( 'disabled' === $post->post_status || 'closed' === $post->post_status ) {
+				// Plugin reviewers can approve for disabled/closed plugins.
 				$required_caps[] = 'plugin_review';
 			} elseif ( 'publish' !== $post->post_status ) {
-				// A non-published plugin cannot have it's releases approved.
+				// A non-published plugin cannot have it's releases approved otherwise.
 				$required_caps[] = 'do_not_allow';
 			}
 		}
