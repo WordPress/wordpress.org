@@ -65,7 +65,10 @@ function get_user_email_for_email( $request ) {
 					// Extract `To:`, `X-Orig-To:`, and fallback to all emails.
 					$emails = [];
 					if ( preg_match( '!^(x-orig-to:|to:)\s*(.+@.+)$!im', $email_body, $m ) ) {
-						$emails = [ trim( $m[2], '<> ' ) ];
+						$m[2] = str_replace( [ '&lt;', '&gt;' ], '', $m[2] );
+						$m[2] = trim( $m[2], '<> ' );
+
+						$emails = [ $m[2] ];
 					} else {
 						// Ugly regex for emails, but it's good for mailer-daemon emails.
 						if ( preg_match_all( '![^\s;"]+@[^\s;&"]+\.[^\s;&"]+!', $email_body, $m ) ) {
