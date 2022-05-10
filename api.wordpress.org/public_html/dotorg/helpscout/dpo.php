@@ -13,7 +13,7 @@ wp_set_current_user( get_user_by( 'login', 'wordpressdotorg' )->ID );
 
 // default empty output
 $html  = '';
-$email = $request->customer->email;
+$email = get_user_email_for_email( $request );
 
 $html .= sprintf(
 	"<p>Search <a href='%s'>Erasures</a> | <a href='%s'>Exports</a></p>",

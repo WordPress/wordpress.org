@@ -7,12 +7,14 @@ $request = include __DIR__ . '/common.php';
 // default empty output
 $html = '';
 $user = false;
+$email = get_user_email_for_email( $request );
 
 // Look up a user based on email address
-if ( isset ( $request->customer->email ) ) {
+if ( $email ) {
 
 	// look up profile url by email
-	$user = get_user_by( 'email', $request->customer->email );
+	$user = get_user_by( 'email', $email );
+
 	if ( isset( $user->user_nicename ) ) {
 		$html .= '<p>Profile: <a href="https://profiles.wordpress.org/' . $user->user_nicename . '/">'. $user->user_nicename .'</a></p>';
 		$html .= '<p>Forums: <a href="https://wordpress.org/support/users/'. $user->user_nicename . '/">'. $user->user_nicename .'</a></p>';

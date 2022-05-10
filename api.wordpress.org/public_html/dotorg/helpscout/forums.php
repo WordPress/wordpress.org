@@ -5,9 +5,10 @@
 $request = include __DIR__ . '/common.php';
 
 // default empty output
-$html = '';
+$html  = '';
 // look up profile url by email
-$user = get_user_by( 'email', $request->customer->email );
+$email = get_user_email_for_email( $request );
+$user  = get_user_by( 'email', $email );
 
 // Include Notes
 if ( $user && $user->_wporg_bbp_user_notes ) {
