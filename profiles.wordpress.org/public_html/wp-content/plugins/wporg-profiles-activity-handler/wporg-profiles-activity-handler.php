@@ -6,7 +6,7 @@ Author: Mert Yazicioglu, Scott Reilly
 Author URI: http://www.mertyazicioglu.com
 License: GPL2
 Version: 1.1
-Description: Handles the activites sent from other services in the .org ecosystem (bbPress, WP, Trac).
+Description: Handles the activities sent from other services in the .org ecosystem (bbPress, WP, Trac).
 */
 
 /*  Copyright 2013  Mert Yazicioglu  (email : mert@mertyazicioglu.com)
@@ -175,26 +175,33 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				die( '-1 Activity component not activated' );
 			}
 
-			$source = sanitize_text_field( $_POST['source'] );
+			try {
+				$activity = $this->sanitize_activity( $_POST );
+			} catch ( Exception $exception ) {
+				die( wp_kses_post( $exception->getMessage() ) );
+			}
 
+			$source = sanitize_text_field( $_POST['source'] );
 			// The `slack` source requires multiples users, so the parameters are named differently.
-			if ( empty( $_POST['user'] ) && 'slack' !== $source ) {
+			if ( empty( $_POST['user'] ) && empty( $_POST['user_id'] ) && 'slack' !== $source ) {
 				die( '-1 No user specified.' );
 			}
 
 			// Disable default BP moderation
-			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2, 1 );
-			remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2, 1 );
+			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2 );
+			remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2 );
 
 			// Disable requirement that user have a display_name set
 			remove_filter( 'bp_activity_before_save', 'bporg_activity_requires_display_name' );
 
+			// If an activity doesn't require special logic, then `add_activity()` can be called directly. Compare
+			// Learn and Slack to see the difference.
 			switch ( $source ) {
 				case 'forum':
 					$activity_id = $this->handle_forum_activity();
 					break;
 				case 'learn':
-					$activity_id = $this->handle_learn_activity();
+					$activity_id = $this->add_activity( $activity );
 					break;
 				case 'plugin':
 					$activity_id = $this->handle_plugin_activity();
@@ -228,31 +235,69 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
-		 * Add an activity payload to a profile
+		 * Sanitize a `$_POST` request to add activity.
 		 *
-		 * @param string $component
-		 * @param string $type
-		 * @param mixed  $user
-		 * @param array  $activity_args The arguments that should be passed to `bp_activity_add()`, minus the other params passed in to this function
-		 *
-		 * @return int|string
+		 * @throws Exception
 		 */
-		protected function add_activity( string $component, string $type, $user, array $activity_args ) {
-			$user = $this->get_user( $user );
+		public static function sanitize_activity( array $activity ) : array {
+			$defaults = array(
+				// These items are intentionally left out as a precaution.
+				// `id`, `recorded_time`, `is_spam`, `hide_sitewide`.
 
-			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . $user;
-			}
-
-			$required_args = array(
-				'user_id'    => $user->ID,
-				'component'  => $component,
-				'type'       => "{$component}_$type",
-				'error_type' => 'wp_error',
+				// These are safe for clients to override.
+				'action'            => '',
+				'content'           => '',
+				'component'         => false,
+				'type'              => false,
+				'primary_link'      => '',
+				'user_id'           => false,
+				'item_id'           => false,
+				'secondary_item_id' => false,
+				'error_type'        => 'wp_error',
 			);
 
-			$new_activity_args = array_merge( $activity_args, $required_args );
-			$activity_id       = bp_activity_add( $new_activity_args );
+			// Map a few differences between what the client sends and what `bp_activity_add()` expects.
+			$activity['component'] = $activity['source'];
+			$activity['action']    = $activity['message']; // The original `action` is the `admin-ajax.php` action.
+			$activity['type']      = $activity['component'] . '_' . $activity['type'];
+
+			$activity = array_intersect_key( $activity, $defaults );
+			$activity = array_merge( $defaults, $activity );
+
+			$filters = array(
+				'wp_kses_data'        => array( 'action', 'content' ),
+				'sanitize_text_field' => array( 'component', 'type', 'error_type' ),
+				'intval'              => array( 'user_id', 'item_id', 'secondary_item_id' ),
+				'sanitize_url'        => array( 'primary_link' ),
+			);
+
+			foreach ( $filters as $filter => $keys ) {
+				foreach ( $keys as $key ) {
+					$activity[ $key ] = call_user_func( $filter, $activity[ $key ] );
+				}
+			}
+
+			$user = get_user_by( 'id', $activity['user_id'] );
+
+			if ( ! $user ) {
+				throw new Exception( '-1 Activity reported for unrecognized user ID: ' . $activity['user_id'] );
+			}
+
+			$activity['user_id'] = $user->ID;
+
+			return $activity;
+		}
+
+		/**
+		 * Add an activity payload to a profile
+		 *
+		 * @param array $activity The arguments that should be passed to `bp_activity_add()`
+		 *
+		 * @return int|string Activity ID on success; error on failure.
+		 */
+		protected function add_activity( array $activity ) {
+			$activity_id = bp_activity_add( $activity );
+
 
 			if ( is_int( $activity_id ) ) {
 				$result = $activity_id;
@@ -261,7 +306,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$result = sprintf(
 					'-1 Unable to save activity: %s. Request was: %s',
 					$activity_id->get_error_message(),
-					wp_json_encode( $new_activity_args )
+					wp_json_encode( $activity )
 				);
 			}
 
@@ -386,40 +431,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				return true;
 			}
-		}
-
-		/**
-		 * Process activity stream requests from learn.wordpress.org.
-		 *
-		 * @return int|string The activity ID on success; an error message on failure.
-		 */
-		protected function handle_learn_activity() {
-			$error         = '';
-			$activity_args = array();
-			$activity_type = sanitize_text_field( $_POST['activity'] );
-			$user          = sanitize_text_field( $_POST['user'] );
-
-			switch ( $activity_type ) {
-				case 'course_complete':
-					$activity_args = array(
-						'item_id'      => absint( $_POST['course_id'] ),
-						'primary_link' => esc_url_raw( $_POST['url'] ),
-
-						'action' => sprintf(
-							'Completed the course <em><a href="%s">%s</a></em> on learn.wordpress.org',
-							esc_url( $_POST['url'] ),
-							esc_html( $_POST['course_title'] )
-						),
-					);
-					break;
-
-				default:
-					$error = '-1 Unrecognized Learn activity.';
-			}
-
-			$result = $error || $this->add_activity( 'learn', $activity_type, $user, $activity_args );
-
-			return $result;
 		}
 
 		/**
