@@ -41,15 +41,16 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			add_action( 'plugins_loaded',            array( $this, 'plugins_loaded' ) );
 
 			// Disable default BP activity features
-			add_filter( 'bp_activity_can_comment',    '__return_false' );
-			add_filter( 'bp_activity_do_mentions',    '__return_false' );
-			add_filter( 'bp_activity_use_akismet',    '__return_false' );
+			add_filter( 'bp_activity_can_comment', '__return_false' );
+			add_filter( 'bp_activity_do_mentions', '__return_false' );
+			add_filter( 'bp_activity_use_akismet', '__return_false' );
 		}
 
 		/**
 		 * Gets a user by either login, slug, or id.
 		 *
-		 * @param string|int     $username The user's login, slug, or id.
+		 * @param string|int $username The user's login, slug, or id.
+		 *
 		 * @return WP_User|false WP_User object on success, false on failure.
 		 */
 		protected function get_user( $username ) {
@@ -77,7 +78,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Changes the table names to use custom wporg activity tables rather
 		 * than the ones for BuddyPress.org.
 		 *
-		 * @param  array $tables The default tables.
+		 * @param array $tables The default tables.
+		 *
 		 * @return array
 		 */
 		public function change_global_table_names( $tables ) {
@@ -93,7 +95,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Changes the meta table name to use custom wporg activity meta tables rather
 		 * than the ones for BuddyPress.org.
 		 *
-		 * @param  array $tables The default meta table.
+		 * @param array $tables The default meta table.
+		 *
 		 * @return array
 		 */
 		public function change_meta_table_names( $tables ) {
@@ -107,7 +110,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		/**
 		 * Ensures that the activity component is activated.
 		 *
-		 * @param  array $activated Array of activated components.
+		 * @param array $activated Array of activated components.
+		 *
 		 * @return array
 		 */
 		public function activate_activity_component( $activated ) {
@@ -300,7 +304,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
 				$required_args[] = 'message';
 				$required_args[] = 'url';
-				$required_args = array_merge( $required_args, array( 'title', 'site', 'message', 'url' ) );
+				$required_args   = array_merge( $required_args, array( 'title', 'site', 'message', 'url' ) );
 			}
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ) {
 				$required_args[] = 'topic_id';
@@ -326,7 +330,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'item_id'           => $item_id,
 				'secondary_item_id' => intval( $_POST['forum_id'] ),
 			);
-			$activity_id = bp_activity_get_activity_id( $args );
+			$activity_id  = bp_activity_get_activity_id( $args );
 			$activity_obj = $activity_id ? new BP_Activity_Activity( $activity_id ) : false;
 
 			// Record the creation of a topic or reply.
@@ -346,9 +350,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						esc_html( $_POST['title'] ),
 						esc_html( $_POST['site'] )
 					);
-				}
-				// Action message for reply creation.
-				else {
+
+				} else {
+					 // Action message for reply creation.
 					$action = sprintf(
 						'Posted a <a href="%s">reply</a> to <i>%s</i>, on the site %s',
 						esc_url( $_POST['url'] ),
@@ -370,9 +374,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				);
 
 				return bp_activity_add( $args );
-			}
-			// Remove activity related to a topic or reply.
-			elseif ( in_array( $type, array( 'forum_topic_remove', 'forum_reply_remove' ) ) ) {
+
+			} elseif ( in_array( $type, array( 'forum_topic_remove', 'forum_reply_remove' ) ) ) {
+				// Remove activity related to a topic or reply.
 				if ( ! $activity_obj ) {
 					return '-1 Activity not previously reported.';
 				}
@@ -492,8 +496,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 *  - Receiving props on a commit
 		 */
 		private function handle_trac_activity() {
-			$args = array();
-
 			$user = $this->get_user( $_POST['user'] );
 
 			if ( ! $user ) {
@@ -554,7 +556,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$usernames = array_filter( $usernames );
 				foreach ( $usernames as $username ) {
 					$user = $this->get_user( $username );
-					if ( empty( $user ) ) continue;
+					if ( empty( $user ) ) {
+						continue;
+					}
 					$args = array(
 						'user_id'           => $user->ID,
 						'action'            => sprintf( 'Received props in %s', $_POST['trac'] ),
@@ -637,7 +641,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						);
 					}
 				} elseif ( 'attendee_checked_in' == $_POST['activity_type'] ) {
-					$type = 'wordcamp_attendee_checked_in';
+					$type  = 'wordcamp_attendee_checked_in';
 					$order = absint( $_POST['checked_in_count'] );
 
 					$action = sprintf(
@@ -662,7 +666,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
 				'secondary_item_id' => intval( $_POST['wordcamp_id'] ),
-				'hide_sitewide'     => false
+				'hide_sitewide'     => false,
 			);
 
 			$ret = bp_activity_add( $args );
@@ -735,7 +739,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
 				'secondary_item_id' => false,
-				'hide_sitewide'     => false
+				'hide_sitewide'     => false,
 			);
 
 			return bp_activity_add( $args );
