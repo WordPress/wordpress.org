@@ -178,6 +178,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				$source = sanitize_text_field( $_POST['source'] ?? $_POST['component'] );
 
+				// The original `action` was the `admin-ajax.php` action, which is no longer needed.
+				// Renaming this allows simple handlers to pass the sanitized $_POST directly to `bp_activity_add()`.
+				$_POST['action'] = $_POST['message'];
 
 				// The `slack` source requires multiples users, so the parameters are named differently.
 				if ( empty( $_POST['user'] ) && empty( $_POST['user_id'] ) && 'slack' !== $source ) {
@@ -198,7 +201,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						$activity_id = $this->handle_forum_activity();
 						break;
 					case 'learn':
-						$activity_id = $this->add_activity( $activity );
+						$activity_id = bp_activity_add( $this->sanitize_activity( $_POST ) );
 						break;
 					case 'plugin':
 						$activity_id = $this->handle_plugin_activity();
@@ -243,7 +246,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
-		 * Sanitize a `$_POST` request to add activity.
+		 * Sanitize `$_POST` args intended for `bp_activity_add()`.
 		 *
 		 * @throws Exception
 		 */
@@ -261,13 +264,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'user_id'           => false,
 				'item_id'           => false,
 				'secondary_item_id' => false,
-				'error_type'        => 'wp_error',
 			);
-
-			// Map a few differences between what the client sends and what `bp_activity_add()` expects.
-			$activity['component'] = $activity['source'];
-			$activity['action']    = $activity['message']; // The original `action` is the `admin-ajax.php` action.
-			$activity['type']      = $activity['component'] . '_' . $activity['type'];
 
 			$activity = array_intersect_key( $activity, $defaults );
 			$activity = array_merge( $defaults, $activity );
@@ -291,34 +288,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				throw new Exception( '-1 Activity reported for unrecognized user ID: ' . $activity['user_id'] );
 			}
 
-			$activity['user_id'] = $user->ID;
+			// Standardize on a WP_Error so that the rest of the file can assume it, rather than handling both.
+			$activity['error_type'] = 'wp_error';
 
 			return $activity;
-		}
-
-		/**
-		 * Add an activity payload to a profile
-		 *
-		 * @param array $activity The arguments that should be passed to `bp_activity_add()`
-		 *
-		 * @return int|string Activity ID on success; error on failure.
-		 */
-		protected function add_activity( array $activity ) {
-			$activity_id = bp_activity_add( $activity );
-
-
-			if ( is_int( $activity_id ) ) {
-				$result = $activity_id;
-
-			} else {
-				$result = sprintf(
-					'-1 Unable to save activity: %s. Request was: %s',
-					$activity_id->get_error_message(),
-					wp_json_encode( $activity )
-				);
-			}
-
-			return $result;
 		}
 
 		/**
@@ -695,6 +668,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$ret .= "\t$k => $v\n";
 				}
 			}
+
 			return $ret;
 		}
 
