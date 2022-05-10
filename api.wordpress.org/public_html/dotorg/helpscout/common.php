@@ -38,12 +38,18 @@ function get_user_email_for_email( $request ) {
 
 	// Determine if this is a bounce, and if so, find out who for.
 	if ( ! $user && $email && isset( $request->ticket->id ) ) {
-		$from = strtolower( $email . ' ' . ( $request->customer->fname ?? '' ) . ' ' . $request->customers->lname );
+		$from          = strtolower( $email . ' ' . ( $request->customer->fname ?? '' ) . ' ' . $request->customers->lname );
+		$subject_lower = strtolower( $subject );
 		if (
 			str_contains( $from, 'mail delivery' ) ||
 			str_contains( $from, 'postmaster' ) ||
-			str_contains( strtolower( $subject ), 'undelivered mail' ) ||
-			str_contains( strtolower( $subject ), 'returned to sender')
+			str_contains( $from, 'mailer-daemon' ) ||
+			str_contains( $subject_lower, 'undelivered mail' ) ||
+			str_contains( $subject_lower, 'returned mail' ) ||
+			str_contains( $subject_lower, 'returned to sender' ) ||
+			str_contains( $subject_lower, 'delivery status' ) ||
+			str_contains( $subject_lower, 'delivery report' ) ||
+			str_contains( $subject_lower, 'mail delivery failed' )
 		) {
 			// Fetch the email.
 			$email_obj = Helpscout_API::api( '/v2/conversations/' . $request->ticket->id . '?embed=threads' );
