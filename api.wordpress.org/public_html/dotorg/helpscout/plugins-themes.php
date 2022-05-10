@@ -24,11 +24,30 @@ foreach ( [
 	list( $type, $post_type ) = $details;
 
 	switch_to_blog( $site_id );
+
+	$slugs = [];
+	if ( 'plugin' === $type ) {
+		// Committer to a plugin.
+		$slugs = $wpdb->get_col( $wpdb->prepare( 'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s', $user->user_login ) );
+		$slugs = array_filter( array_map( function( $slug ) {
+			return ltrim( $slug, '/' ) ?: false;
+		}, $slugs ) );
+
+		// TODO: Would be nice to pull for support reps too, but that's less common.
+	}
+
+	$slugs    = $slugs ? '"' . implode( '", "', array_map( 'esc_sql', $slugs ) ) . '"' : '';
+	$or_slugs = $slugs ? "OR post_name IN( {$slugs} )" : '';
+
 	$counts = $wpdb->get_results( $wpdb->prepare(
-		"SELECT post_status, COUNT(*) as count, group_concat( ID ) as ids, group_concat( post_title SEPARATOR ', ' ) as titles FROM $wpdb->posts WHERE post_type = %s AND post_author = %s GROUP BY post_status",
+		"SELECT post_status, COUNT(*) as count, group_concat( ID ) as ids, group_concat( post_title SEPARATOR ', ' ) as titles
+		FROM $wpdb->posts
+		WHERE post_type = %s AND ( post_author = %s {$or_slugs} )
+		GROUP BY post_status",
 		$post_type,
 		$user->ID
 	) );
+
 	if ( $counts ) {
 		$total       = array_sum( wp_list_pluck( $counts, 'count' ) );
 		$ids         = wp_parse_id_list( implode( ',', wp_list_pluck( $counts, 'ids' ) ) );
@@ -46,7 +65,7 @@ foreach ( [
 			'<p><a href="%s" title="%s">%s</a></p>',
 			add_query_arg( [ 'post_type' => $post_type, 'author' => $user->ID ], admin_url( 'edit.php' ) ),
 			esc_attr( $post_statii ),
-			ucwords( _n( "$total $type", "{$total} {$type}s", $total ) ) // Real bad internationalisation where internationalisation will bever be used.
+			ucwords( _n( "$total $type", "{$total} {$type}s", $total ) ) // Real bad internationalisation where internationalisation will never be used.
 		);
 
 		// plugins@ and themes@ - expand and provide direct links.
