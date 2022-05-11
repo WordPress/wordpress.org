@@ -180,7 +180,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				// The original `action` was the `admin-ajax.php` action, which is no longer needed.
 				// Renaming this allows simple handlers to pass the sanitized $_POST directly to `bp_activity_add()`.
-				$_POST['action'] = $_POST['message'];
+				$_POST['action'] = $_POST['message'] ?? '';
 
 				// The `slack` source requires multiples users, so the parameters are named differently.
 				if ( empty( $_POST['user'] ) && empty( $_POST['user_id'] ) && 'slack' !== $source ) {
