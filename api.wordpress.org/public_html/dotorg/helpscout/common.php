@@ -40,7 +40,7 @@ function get_user_email_for_email( $request ) {
 
 	// Determine if this is a bounce, and if so, find out who for.
 	if ( ! $user && $email && isset( $request->ticket->id ) ) {
-		$from          = strtolower( $email . ' ' . ( $request->customer->fname ?? '' ) . ' ' . $request->customers->lname );
+		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $request->customer->fname ?? false ), ( $request->customer->lname ?? false ) ] ) ) );
 		$subject_lower = strtolower( $subject );
 		if (
 			str_contains( $from, 'mail delivery' ) ||
