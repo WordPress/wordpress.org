@@ -1,7 +1,9 @@
 <?php
 use WordPressdotorg\API\HelpScout\API as Helpscout_API;
 
-$wp_init_host = 'https://api.wordpress.org/';
+if ( ! isset( $wp_init_host ) ) {
+	$wp_init_host = 'https://api.wordpress.org/';
+}
 $base_dir = dirname( dirname( __DIR__ ) );
 require( $base_dir . '/wp-init.php' );
 
