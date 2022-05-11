@@ -1,0 +1,202 @@
+#original {
+	border: 1px solid black;
+}
+
+#original h1 {
+	margin: .5em 14px;
+	line-height: 34px;
+}
+
+#original p {
+	margin: 14px 26px 14px 14px;
+}
+
+#original ul#translation-list {
+	margin-left: 1rem;
+}
+
+.helper-translation-discussion {
+	position:relative;
+	min-height: 600px;
+}
+.discussion-list {
+	list-style:none;
+	max-width: 560px;
+}
+.comments-wrapper {
+	max-width: 600px;
+}
+article.comment {
+	margin: 15px 30px 15px 30px;
+	position: relative;
+	font-size: 0.9rem;
+}
+article.comment p {
+	margin-bottom: 0.5em;
+}
+article.comment footer {
+	overflow: hidden;
+	font-size: 0.8rem;
+	font-style: italic;
+}
+article.comment time {
+	font-style: italic;
+	opacity: 0.8;
+	display: inline-block;
+	padding-left: 4px;
+}
+.comment-locale {
+	opacity: 0.8;
+	float: right;
+}
+.comment-avatar {
+	margin-left: -45px;
+	margin-bottom: -25px;
+	width: 50px;
+	height: 26px;
+}
+.comment-avatar img {
+	display: block;
+	border-radius: 13px;
+}
+.comments-selector {
+	display: inline-block;
+	padding-left: 10px;
+	font-size: 0.9em;
+}
+.comment-content {
+	text-align: start;
+}
+.comment-form-comment label{
+	display: block;
+}
+h6 {
+	font-size: 1em;
+}
+.discussion-heading{
+	line-height: 1.2em;
+}
+.discussion-locales ul li{
+	display: inline;
+}
+.active-link{
+	font-weight: bold;
+}
+.discussion-wrapper textarea#comment {
+	width: 100%;
+	margin-top: 15px;
+}
+.discussion-wrapper .submit {
+	margin: 0 5px 0 0;
+	background: #2271b1;
+	border-color: #2271b1;
+	color: #fff;
+	text-decoration: none;
+	text-shadow: none;
+	font-size: 13px;
+	line-height: 2.15384615;
+	min-height: 30px;
+	padding: 0 10px;
+	cursor: pointer;
+	border-width: 1px;
+	border-style: solid;
+	-webkit-appearance: none;
+	border-radius: 3px;
+	white-space: nowrap;
+	box-sizing: border-box;
+}
+.discussion-wrapper .submit:hover {
+	background: #135e96;
+	border-color: #135e96;
+	color: #fff;
+}
+.modal-item {
+	display: inline-block;
+	width: 30%;
+	margin-top: 7px;
+}
+.modal-item label {
+	display: inherit;
+	margin-left: 8px;
+	cursor: pointer;
+}
+.modal-item input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 5px;
+}
+.modal-comment {
+	margin-top: 27px;
+}
+.modal-comment textarea {
+	width: 97%;
+	height: 170px;
+}
+.modal-btn {
+	float: right;
+	font-size: 15px;
+	height: 35px;
+	line-height: 1;
+	background: #0085ba;
+	border-color: #0073aa #006799 #006799;
+	box-shadow: 0 1px 0 #006799;
+	color: #fff;
+	text-decoration: none;
+	text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
+	margin-top: 10px;
+	padding: 0 13px;
+	border-radius: 3px;
+}
+.modal-reason-title{
+	margin-top: 12px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#TB_title {
+	background: #fcfcfc;
+	border-bottom: 1px solid #ddd;
+	height: 29px;
+	padding: 13px 0;
+}
+div#TB_ajaxWindowTitle {
+	font-size: 1.3em;
+}
+.meta summary.feedback-summary{
+	font-size: 1.2em;
+	font-weight: bold;
+	padding: 7px 0;
+}
+.gp-content ul.feedback-reason-list {
+	list-style-type: none;
+	display: inline-block;
+	padding-left: .5em;
+}
+.feedback-reason-list li {
+	width: 50%;
+	float: left;
+	padding-top: 4px;
+}
+.feedback-reason-list li label {
+	font-size: 1.1em;
+	cursor: pointer;
+}
+.feedback-reason-list li input[type="checkbox"] {
+	margin-right: 5px;
+}
+.feedback-comment label, .gp-content h3.feedback-reason-title {
+	font-size: 1.1em;
+	font-weight: bold;
+	margin: 0;
+}
+.feedback-comment textarea {
+	height: 110px;
+	font-size: 1.1em;
+}
+.status-actions details {
+	margin-bottom: 5px;
+}
+
+.async-content #legend {
+	margin-top: 2em;
+	float: none;
+}
