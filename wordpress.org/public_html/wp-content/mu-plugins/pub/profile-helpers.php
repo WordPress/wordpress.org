@@ -1,5 +1,12 @@
 <?php
 
+/*
+ * These functions provide a simple interface for other plugins to add/remove badges and activity entries from
+ * profiles.w.org.
+ *
+ * See `api.w.org/includes/profiles/profiles.php` for a similar function that is tailored to the API.
+ */
+
 namespace WordPressdotorg\Profiles;
 use WP_Error;
 
