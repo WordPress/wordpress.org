@@ -271,7 +271,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			$filters = array(
 				'wp_kses_data'        => array( 'action', 'content' ),
-				'sanitize_text_field' => array( 'component', 'type', 'error_type' ),
+				'sanitize_text_field' => array( 'component', 'type' ),
 				'intval'              => array( 'user_id', 'item_id', 'secondary_item_id' ),
 				'sanitize_url'        => array( 'primary_link' ),
 			);
