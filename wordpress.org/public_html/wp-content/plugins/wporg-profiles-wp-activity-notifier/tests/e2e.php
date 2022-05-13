@@ -22,7 +22,12 @@ const TEST_USERNAME = 'iandunn-test';
 main( $args[0] );
 
 function main( string $case ) : void {
-	switch_to_blog( 11 ); // make.w.org/test-site
+	if ( defined( 'IS_WORDCAMP_NETWORK' ) && IS_WORDCAMP_NETWORK ) {
+		switch_to_blog( 1056 ); // testing.wordcamp.org/2019
+	} else {
+		switch_to_blog( 11 ); // make.w.org/test-site
+	}
+
 	require_once dirname( __DIR__ ) . '/wporg-profiles-wp-activity-notifier.php';
 
 	// Disable the subscribers plugin in order to pass `is_post_notifiable()`.
@@ -47,13 +52,24 @@ function disable_subscribers_plugin( array $plugins ) : array {
 }
 
 function test_post( WPOrg_WP_Activity_Notifier $notifier ) : void {
-	$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1802 ) ); // post
-	sleep( 1 ); // buddypress don't show activity that happens at the exact same time
-	$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1826 ) ); // handbook
-	sleep( 1 );
-	$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1832 ) ); // course
+	if ( defined( 'IS_WORDCAMP_NETWORK' ) && IS_WORDCAMP_NETWORK ) {
+		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1 ) ); // post
+
+	} else {
+		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1802 ) ); // post
+		sleep( 1 ); // buddypress doesn't show activity that happens at the exact same time
+		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1826 ) ); // handbook
+		sleep( 1 );
+		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1832 ) ); // course
+	}
 }
 
 function test_comment( WPOrg_WP_Activity_Notifier $notifier ) : void {
-	$notifier->insert_comment( 224, get_comment( 224 ) );
+	if ( defined( 'IS_WORDCAMP_NETWORK' ) && IS_WORDCAMP_NETWORK ) {
+		$comment_id = 1;
+	} else {
+		$comment_id = 224;
+	}
+
+	$notifier->insert_comment( $comment_id, get_comment( $comment_id ) );
 }

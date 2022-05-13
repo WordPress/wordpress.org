@@ -28,7 +28,23 @@ class WPOrg_WP_Activity_Notifier {
 	}
 
 	private function __construct() {
-		require_once WPMU_PLUGIN_DIR . '/pub/profile-helpers.php';
+		$is_wordcamp = defined( 'IS_WORDCAMP_NETWORK' ) && IS_WORDCAMP_NETWORK;
+		$environment = $is_wordcamp ? get_wordcamp_environment() : wp_get_environment_type();
+
+		/*
+		 * Requests will always fail when in local environments, unless the dev is proxied. Proxied devs could test
+		 * locally if they're careful (especially with user IDs), but it's better to test on w.org sandboxes with
+		 * test accounts. That prevents real profiles from having test data accidentally added to them.
+		 */
+		if ( 'local' === $environment ) {
+			return;
+		}
+
+		if ( $is_wordcamp ) {
+			require_once WP_CONTENT_DIR . '/mu-plugins-private/wporg-mu-plugins/pub/profile-helpers.php';
+		} else {
+			require_once WPMU_PLUGIN_DIR . '/pub/profile-helpers.php';
+		}
 
 		add_action( 'init', array( $this, 'init' ) );
 	}
