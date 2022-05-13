@@ -65,37 +65,30 @@ class WPOrg_WP_Activity_Notifier {
 	 * @return boolean True == the post can be notified about.
 	 */
 	public function is_post_notifiable( $post ) {
-		// Sanity check the argument is a post
 		if ( ! $post || ! is_a( $post, 'WP_Post' ) ) {
 			return false;
 		}
 
-		// Don't notify if the site is for subscribers only
 		if ( class_exists( 'Subscribers_Only' ) ) {
 			$notifiable = false;
 		}
 
-		// Don't notify if not of 'post' post_type
 		elseif ( 'post' != $post->post_type ) {
 			$notifiable = false;
 		}
 
-		// Don't notify if not publicly published
 		elseif ( 'publish' != $post->post_status ) {
 			$notifiable = false;
 		}
 
-		// Don't notify if password is required
 		elseif ( ! empty( $post->post_password ) ) {
 			$notifiable = false;
 		}
 
-		// At this point it is permitted to notify about the post
 		else {
 			$notifiable = true;
 		}
 
-		// Return filtered value to allow overriding or extending checks
 		return apply_filters( 'wporg_profiles_wp_activity-is_post_notifiable', $notifiable, $post );
 	}
 
@@ -107,22 +100,18 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Post $post The post
 	 */
 	public function maybe_notify_new_published_post( $new_status, $old_status, $post ) {
-		// Only proceed if the post is transitioning to the publish status
 		if ( 'publish' != $new_status ) {
 			return;
 		}
 
-		// Only proceed if the post is actually changing status
 		if ( $old_status == $new_status ) {
 			return;
 		}
 
-		// Only proceed if permitted to notify about the post
 		if ( ! $this->is_post_notifiable( $post ) ) {
 			return;
 		}
 
-		// Send notification for the post
 		$this->notify_new_blog_post( $post );
 	}
 
@@ -132,7 +121,6 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Post $post The published post
 	 */
 	public function notify_new_blog_post( $post ) {
-		// Don't notify if importing.
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
@@ -181,19 +169,16 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Comment $comment    The comment
 	 */
 	public function maybe_notify_new_approved_comment( $new_status, $old_status, $comment ) {
-		// Only proceed if the comment is transitioning to the approved status
 		if ( 'approved' != $new_status ) {
 			return;
 		}
 
 		$post = get_post( $comment->comment_post_ID );
 
-		// Only proceed if permitted to notify about the post
 		if ( ! $this->is_post_notifiable( $post ) ) {
 			return;
 		}
 
-		// Only proceed if there are no objections to the comment notification
 		if ( apply_filters( 'wporg_profiles_wp_activity-is_comment_notifiable', true, $comment, $post ) ) {
 			$this->notify_new_approved_comment( $comment, $post );
 		}
@@ -206,7 +191,6 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Post    $post The comment's post
 	 */
 	private function notify_new_approved_comment( $comment, $post ) {
-		// Don't notify if importing.
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
@@ -245,22 +229,18 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param int    $topic_id  Topic ID.
 	 */
 	private function _notify_forum_topic_payload( $activity, $topic_id ) {
-		// Don't notify if importing.
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
 
-		// Bail if site is private.
 		if ( ! bbp_is_site_public() ) {
 			return;
 		}
 
-		// Only handle recognized activities.
 		if ( ! in_array( $activity, array( 'create-topic', 'remove-topic' ) ) ) {
 			return;
 		}
 
-		// Bail on create-topic if topic is not published.
 		if ( 'create-topic' === $activity && ! bbp_is_topic_published( $topic_id ) ) {
 			return;
 		}
@@ -316,22 +296,18 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param int    $reply_id  Reply ID.
 	 */
 	private function _notify_forum_reply_payload( $activity, $reply_id ) {
-		// Don't notify if importing.
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
 
-		// Bail if site is private.
 		if ( ! bbp_is_site_public() ) {
 			return;
 		}
 
-		// Only handle recognized activities.
 		if ( ! in_array( $activity, array( 'create-reply', 'remove-reply' ) ) ) {
 			return;
 		}
 
-		// Bail on create-reply if not published.
 		if ( 'create-reply' === $activity && ! bbp_is_reply_published( $reply_id ) ) {
 			return;
 		}
@@ -419,10 +395,8 @@ class WPOrg_WP_Activity_Notifier {
 		// Remove blockquoted text since the text isn't original.
 		$text = preg_replace( '/<blockquote>.+?<\/blockquote>/s', '', $text );
 
-		// Strip tags and surrounding whitespace.
 		$text = trim( strip_tags( $text ) );
 
-		// Strip shortcodes.
 		if ( function_exists( 'strip_shortcodes' ) ) {
 			$text = strip_shortcodes( $text );
 		}
@@ -430,7 +404,6 @@ class WPOrg_WP_Activity_Notifier {
 		// If trimming by chars, behave like a more multibyte-aware
 		// /* bbp_get_reply_excerpt */().
 		if ( 'chars' === $trim_style ) {
-			// Multibyte support
 			if ( function_exists( 'mb_strlen' ) ) {
 				$text_length = mb_strlen( $text );
 			} else {
