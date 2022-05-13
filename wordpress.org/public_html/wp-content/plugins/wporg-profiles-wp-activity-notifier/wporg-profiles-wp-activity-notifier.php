@@ -6,9 +6,9 @@ Author: Mert Yazicioglu, Scott Reilly
 Version: 1.1
 */
 
-class WPOrg_WP_Activity_Notifier {
-	private $activity_handler_url = 'https://profiles.wordpress.org/wp-admin/admin-ajax.php';
+use WordPressdotorg\Profiles;
 
+class WPOrg_WP_Activity_Notifier {
 	/**
 	 * @var WPOrg_WP_Activity_Notifier The singleton instance.
 	 */
@@ -28,6 +28,8 @@ class WPOrg_WP_Activity_Notifier {
 	}
 
 	private function __construct() {
+		require_once WPMU_PLUGIN_DIR . '/pub/profile-helpers.php';
+
 		add_action( 'init', array( $this, 'init' ) );
 	}
 
@@ -133,20 +135,18 @@ class WPOrg_WP_Activity_Notifier {
 		);
 
 		$args = array(
-			'body' => array(
-				'action'   => 'wporg_handle_activity',
-				'source'   => 'wordpress',
-				'user'     => $author->user_login,
-				'post_id'  => $post->ID,
-				'blog'     => get_bloginfo( 'name' ),
-				'blog_url' => site_url(),
-				'title'    => get_the_title( $post ),
-				'content'  => $content,
-				'url'      => get_permalink( $post->ID ),
-			),
+			'action'   => 'wporg_handle_activity',
+			'source'   => 'wordpress',
+			'user'     => $author->user_login,
+			'post_id'  => $post->ID,
+			'blog'     => get_bloginfo( 'name' ),
+			'blog_url' => site_url(),
+			'title'    => get_the_title( $post ),
+			'content'  => $content,
+			'url'      => get_permalink( $post->ID ),
 		);
 
-		wp_remote_post( $this->activity_handler_url, $args );
+		Profiles\api( $args );
 	}
 
 	/**
@@ -204,20 +204,18 @@ class WPOrg_WP_Activity_Notifier {
 		}
 
 		$args = array(
-			'body' => array(
-				'action'     => 'wporg_handle_activity',
-				'source'     => 'wordpress',
-				'user'       => $user->user_login,
-				'comment_id' => $comment->comment_ID,
-				'content'    => get_comment_excerpt( $comment ),
-				'title'      => get_the_title( $post ),
-				'blog'       => get_bloginfo( 'name' ),
-				'blog_url'   => site_url(),
-				'url'        => get_comment_link( $comment ),
-			),
+			'action'     => 'wporg_handle_activity',
+			'source'     => 'wordpress',
+			'user'       => $user->user_login,
+			'comment_id' => $comment->comment_ID,
+			'content'    => get_comment_excerpt( $comment ),
+			'title'      => get_the_title( $post ),
+			'blog'       => get_bloginfo( 'name' ),
+			'blog_url'   => site_url(),
+			'url'        => get_comment_link( $comment ),
 		);
 
-		wp_remote_post( $this->activity_handler_url, $args );
+		Profiles\api( $args );
 	}
 
 	/**
@@ -250,23 +248,21 @@ class WPOrg_WP_Activity_Notifier {
 		$url = remove_query_arg( array( 'view' ), $url );
 
 		$args = array(
-			'body' => array(
-				'action'    => 'wporg_handle_activity',
-				'activity'  => $activity,
-				'source'    => 'forum',
-				'user'      => get_user_by( 'id', bbp_get_topic_author_id( $topic_id ) )->user_login,
-				'post_id'   => '',
-				'topic_id'  => $topic_id,
-				'forum_id'  => bbp_get_topic_forum_id( $topic_id ),
-				'title'     => strip_tags( bbp_get_topic_title( $topic_id ) ),
-				'url'       => $url,
-				'message'   => bbp_get_topic_excerpt( $topic_id, 55 ),
-				'site'      => get_bloginfo( 'name' ),
-				'site_url'  => site_url(),
-			),
+			'action'    => 'wporg_handle_activity',
+			'activity'  => $activity,
+			'source'    => 'forum',
+			'user'      => get_user_by( 'id', bbp_get_topic_author_id( $topic_id ) )->user_login,
+			'post_id'   => '',
+			'topic_id'  => $topic_id,
+			'forum_id'  => bbp_get_topic_forum_id( $topic_id ),
+			'title'     => strip_tags( bbp_get_topic_title( $topic_id ) ),
+			'url'       => $url,
+			'message'   => bbp_get_topic_excerpt( $topic_id, 55 ),
+			'site'      => get_bloginfo( 'name' ),
+			'site_url'  => site_url(),
 		);
 
-		wp_remote_post( $this->activity_handler_url, $args );
+		Profiles\api( $args );
 	}
 
 	/**
@@ -317,23 +313,21 @@ class WPOrg_WP_Activity_Notifier {
 		$url = remove_query_arg( array( 'view' ), $url );
 
 		$args = array(
-			'body' => array(
-				'action'    => 'wporg_handle_activity',
-				'activity'  => $activity,
-				'source'    => 'forum',
-				'user'      => get_user_by( 'id', bbp_get_reply_author_id( $reply_id ) )->user_login,
-				'post_id'   => $reply_id,
-				'topic_id'  => bbp_get_reply_topic_id( $reply_id ),
-				'forum_id'  => bbp_get_reply_forum_id( $reply_id ),
-				'title'     => strip_tags( bbp_get_reply_topic_title( $reply_id ) ),
-				'url'       => $url,
-				'message'   => $this->get_reply_excerpt( $reply_id, 15 ),
-				'site'      => get_bloginfo( 'name' ),
-				'site_url'  => site_url(),
-			),
+			'action'    => 'wporg_handle_activity',
+			'activity'  => $activity,
+			'source'    => 'forum',
+			'user'      => get_user_by( 'id', bbp_get_reply_author_id( $reply_id ) )->user_login,
+			'post_id'   => $reply_id,
+			'topic_id'  => bbp_get_reply_topic_id( $reply_id ),
+			'forum_id'  => bbp_get_reply_forum_id( $reply_id ),
+			'title'     => strip_tags( bbp_get_reply_topic_title( $reply_id ) ),
+			'url'       => $url,
+			'message'   => $this->get_reply_excerpt( $reply_id, 15 ),
+			'site'      => get_bloginfo( 'name' ),
+			'site_url'  => site_url(),
 		);
 
-		wp_remote_post( $this->activity_handler_url, $args );
+		Profiles\api( $args );
 	}
 
 	/**
