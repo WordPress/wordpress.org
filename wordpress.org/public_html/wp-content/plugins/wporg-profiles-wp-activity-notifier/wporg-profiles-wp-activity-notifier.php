@@ -71,11 +71,18 @@ class WPOrg_WP_Activity_Notifier {
 			return false;
 		}
 
-		if ( class_exists( 'Subscribers_Only' ) ) {
+		$notifiable_post_types = array( 'post', 'handbook', 'wporg_workshop', 'lesson-plan', 'course' );
+
+		// There's a large number of custom handbooks, and more will be created in the future.
+		if ( str_contains( $post->post_type, '-handbook' ) ) {
+			$notifiable_post_types[] = $post->post_type;
+		}
+
+		if ( is_plugin_active( 'subscribers-only.php' ) ) {
 			$notifiable = false;
 		}
 
-		elseif ( 'post' != $post->post_type ) {
+		elseif ( ! in_array( $post->post_type, $notifiable_post_types, true ) ) {
 			$notifiable = false;
 		}
 
@@ -84,6 +91,11 @@ class WPOrg_WP_Activity_Notifier {
 		}
 
 		elseif ( ! empty( $post->post_password ) ) {
+			$notifiable = false;
+		}
+
+		// Some Handbook posts are automatically created and don't have an author.
+		elseif ( $post->wporg_markdown_source || 0 === $post->post_author ) {
 			$notifiable = false;
 		}
 
@@ -135,15 +147,16 @@ class WPOrg_WP_Activity_Notifier {
 		);
 
 		$args = array(
-			'action'   => 'wporg_handle_activity',
-			'source'   => 'wordpress',
-			'user'     => $author->user_login,
-			'post_id'  => $post->ID,
-			'blog'     => get_bloginfo( 'name' ),
-			'blog_url' => site_url(),
-			'title'    => get_the_title( $post ),
-			'content'  => $content,
-			'url'      => get_permalink( $post->ID ),
+			'action'    => 'wporg_handle_activity',
+			'source'    => 'wordpress',
+			'user'      => $author->user_login,
+			'post_id'   => $post->ID,
+			'blog'      => get_bloginfo( 'name' ),
+			'blog_url'  => site_url(),
+			'post_type' => $post->post_type,
+			'title'     => get_the_title( $post ),
+			'content'   => $content,
+			'url'       => get_permalink( $post->ID ),
 		);
 
 		Profiles\api( $args );
