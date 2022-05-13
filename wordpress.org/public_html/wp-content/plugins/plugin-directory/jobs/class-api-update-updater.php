@@ -24,6 +24,7 @@ class API_Update_Updater {
 			FROM {$wpdb->posts} p
 				LEFT JOIN {$wpdb->prefix}update_source u ON p.ID = u.plugin_id
 				LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'version'
+				LEFT JOIN {$wpdb->postmeta} pm_stable ON p.ID = pm_stable.post_id AND pm_stable.meta_key = 'stable_tag'
 			WHERE
 				p.post_type = 'plugin'
 				AND (
@@ -34,6 +35,7 @@ class API_Update_Updater {
 					u.plugin_id IS NULL OR
 					u.last_updated != p.post_modified OR
 					( u.version != pm.meta_value AND u.version != left( pm.meta_value, 128 ) ) OR
+					( u.stable_tag != pm_stable.meta_value AND u.stable_tag != left( pm_stable.meta_value, 128 ) ) OR
 					( u.available = 1 AND (p.post_status != 'publish' AND p.post_status != 'disabled' ) ) OR
 					( u.available = 0 AND (p.post_status = 'publish' OR p.post_status = 'disabled' ) )
 				)"
