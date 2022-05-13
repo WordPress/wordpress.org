@@ -715,8 +715,32 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			} else {
 				$type    = 'blog_post_create';
 				$item_id = $_POST['post_id'];
-				$action  = sprintf(
-					'Wrote a new post, <i><a href="%s">%s</a></i>, on the site %s',
+
+				switch ( $_POST['post_type'] ) {
+					case 'wporg_workshop':
+						$post_type = 'workshop';
+						break;
+
+					case 'lesson-plan':
+						$post_type = 'lesson plan';
+						break;
+
+					case 'course':
+						$post_type = 'course';
+						break;
+
+					case 'handbook':
+					case str_contains( $_POST['post_type'], '-handbook' ):
+						$post_type = 'handbook page';
+						break;
+
+					default:
+						$post_type = 'post';
+				}
+
+				$action = sprintf(
+					'Wrote a new %s, <i><a href="%s">%s</a></i>, on the site %s',
+					$post_type,
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
 					$_POST['blog']
