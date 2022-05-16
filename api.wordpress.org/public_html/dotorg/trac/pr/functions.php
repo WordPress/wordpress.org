@@ -315,7 +315,7 @@ function determine_trac_ticket( $pr ) {
 
 				$trac = $trac_redirects[ $trac ] ?? $trac;
 
-				return [ $trac, $m[1] ];
+				return [ $trac, $id ];
 			}
 		}
 	}
