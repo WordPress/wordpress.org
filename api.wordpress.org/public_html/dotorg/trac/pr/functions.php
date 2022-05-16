@@ -243,6 +243,12 @@ function get_app_install_token() {
 function determine_trac_ticket( $pr ) {
 	$ticket = false;
 
+	// If the trac found is the key, return the value.
+	$trac_redirects = [
+		// Themes trac mentions are likely Meta tickets.
+		'themes' => 'meta',
+	];
+
 	// For now, we assume everything is destined for the Core Trac.
 	$trac = 'core';
 	switch ( $pr->base->repo->full_name ) {
@@ -252,22 +258,39 @@ function determine_trac_ticket( $pr ) {
 		case 'WordPress/wordpress-develop':
 			$trac = 'core';
 			break;
+		case 'buddypress/buddypress':
+			$trac = 'buddypress';
+			break;
+		case 'bbpress/bbPress':
+			$trac = 'bbpress';
+			break;
 		default:
+			// If `?trac=....` is passed to the webhook endpoint:
 			if ( defined( 'WEBHOOK_TRAC_HINT' ) && WEBHOOK_TRAC_HINT ) {
 				$trac = WEBHOOK_TRAC_HINT;
+			}
+
+			// If a specific trac is mentioned within the PR body:
+			elseif ( preg_match( '!/(?P<trac>[a-z]+).trac.wordpress.org/!i', $pr->body, $m ) ) {
+				$trac = $m['trac'];
+			}
+
+			// If the repo starts with 'wporg-' assume Meta.
+			elseif ( str_starts_with( $pr->base->repo->full_name, 'WordPress/wporg-' ) ) {
+				$trac = 'meta';
 			}
 			break;
 	}
 
 	$regexes = [
-		'!' . $trac . '.trac.wordpress.org/ticket/(\d+)!i',
+		'!(?P<trac>[a-z]+).trac.wordpress.org/ticket/(?P<id>\d+)!i',
 		'!(?:^|\s)#WP(\d+)!', // #WP1234
 		'!(?:^|\s)#(\d{4,5})!', // #1234
 		'!Ticket[ /-](\d+)!i',
 		// diff filenames.
 		'!\b(\d+)(\.\d)?\.(?:diff|patch)!i',
 		// Formats of common branches
-		'!(?:' . $trac . '|WordPress|fix|trac)[-/](\d+)!i',
+		'!((?P<trac>core|meta|bbpress|buddypress|themes)|WordPress|fix|trac)[-/](?P<id>\d+)!i',
 		// Starts or ends with a ticketish number
 		// These match things it really shouldn't, and are a last-ditch effort.
 		'!\s(\d{4,5})$!i',
@@ -283,6 +306,15 @@ function determine_trac_ticket( $pr ) {
 			$pr->head->ref
 		] as $field ) {
 			if ( preg_match( $regex, $field, $m ) ) {
+				$id = $m['id'] ?? $m[1];
+
+				// If a Trac-specific link is detected, use that trac.
+				if ( ! empty( $m['trac'] ) ) {
+					$trac = $m['trac'];
+				}
+
+				$trac = $trac_redirects[ $trac ] ?? $trac;
+
 				return [ $trac, $m[1] ];
 			}
 		}
