@@ -73,7 +73,7 @@ function get_user_email_for_email( $request ) {
 						$emails = [ $m[2] ];
 					} else {
 						// Ugly regex for emails, but it's good for mailer-daemon emails.
-						if ( preg_match_all( '![^\s;"]+@[^\s;&"]+\.[^\s;&"]+!', $email_body, $m ) ) {
+						if ( preg_match_all( '![^\s;"]+@[^\s;&"]+\.[^\s;&"]+[a-z]!', $email_body, $m ) ) {
 							$emails = array_unique( array_diff( $m[0], [ $request->mailbox->email ] ) );
 						}
 					}
