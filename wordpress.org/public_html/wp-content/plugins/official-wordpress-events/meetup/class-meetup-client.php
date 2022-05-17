@@ -34,7 +34,7 @@ class Meetup_Client extends API_Client {
 	/**
 	 * @var string The GraphQL field that must be present for pagination to work.
 	 */
-	public $pageInfo = 'pageInfo { hasNextPage endCursor }';
+	public $pagination = 'pageInfo { hasNextPage endCursor }';
 
 	/**
 	 * @var Meetup_OAuth2_Client|null
@@ -55,7 +55,7 @@ class Meetup_Client extends API_Client {
 	 *     @type bool $debug If true, the client will fetch fewer results, for faster debugging.
 	 * }
 	 */
-	public function __construct( array $settings = [] ) {
+	public function __construct( array $settings = array() ) {
 		parent::__construct( array(
 			/*
 			 * Response codes that should break the request loop.
@@ -73,8 +73,7 @@ class Meetup_Client extends API_Client {
 				// TODO: NOTE: These headers are not returned from the GraphQL API, every request is 200 even if throttled.
 				401, // Unauthorized (invalid key).
 				429, // Too many requests (rate-limited).
-				404, // Unable to find group
-
+				404, // Unable to find group.
 				503, // Timeout between API cache & GraphQL Server.
 			),
 			// NOTE: GraphQL does not expose the Quota Headers.
@@ -91,10 +90,10 @@ class Meetup_Client extends API_Client {
 		$this->debug = $settings['debug'];
 
 		if ( $this->debug ) {
-			self::cli_message( "Meetup Client debug is on. Results will be truncated." );
+			self::cli_message( 'Meetup Client debug is on. Results will be truncated.' );
 		}
 
-		$this->oauth_client = new Meetup_OAuth2_Client;
+		$this->oauth_client = new Meetup_OAuth2_Client();
 
 		if ( ! empty( $this->oauth_client->error->get_error_messages() ) ) {
 			$this->error = $this->merge_errors( $this->error, $this->oauth_client->error );
@@ -138,10 +137,10 @@ class Meetup_Client extends API_Client {
 	 * Send a paginated request to the Meetup API and return the aggregated response.
 	 *
 	 * This automatically paginates requests and will repeat requests to ensure all results are retrieved.
-	 * For pagination to work, $this->pageInfo must be present within the string, and a 'cursor' variable defined.
+	 * For pagination to work, $this->pagination must be present within the string, and a 'cursor' variable defined.
 	 *
-	 * @param string $request_url The API endpoint URL to send the request to.
-	 * @param array  $variables   The Query variables used in the query.
+	 * @param string $query     The API endpoint URL to send the request to.
+	 * @param array  $variables The Query variables used in the query.
 	 *
 	 * @return array|WP_Error The results of the request.
 	 */
@@ -151,7 +150,7 @@ class Meetup_Client extends API_Client {
 		$has_next_page        = false;
 		$is_paginated_request = ! empty( $variables ) &&
 			array_key_exists( 'cursor', $variables ) &&
-			false !== stripos( $query, $this->pageInfo );
+			false !== stripos( $query, $this->pagination );
 
 		do {
 			$request_args = $this->get_request_args( $query, $variables );
@@ -194,10 +193,10 @@ class Meetup_Client extends API_Client {
 				// the targetted values are living.
 				array_walk_recursive(
 					$new_data,
-					function( $value, $key ) use( &$has_next_page, &$end_cursor ) {
+					function ( $value, $key ) use ( &$has_next_page, &$end_cursor ) {
 						// NOTE: This will be truthful and present on the final page causing paged
 						// requests to always make an additional request to a final empty page.
-						if ( $key === 'hasNextPage' ) {
+						if ( 'hasNextPage' === $key ) {
 							$has_next_page = $value;
 						} elseif ( 'endCursor' === $key ) {
 							$end_cursor = $value;
@@ -224,7 +223,10 @@ class Meetup_Client extends API_Client {
 			}
 		} while ( $has_next_page );
 
-		if ( ! empty( $this->error->get_error_messages() ) ) {
+		$errors = implode( '. ', $this->error->get_error_messages() );
+		if ( ! empty( $errors ) ) {
+			trigger_error( "Request error(s): $errors", E_USER_WARNING );
+
 			return $this->error;
 		}
 
@@ -240,7 +242,7 @@ class Meetup_Client extends API_Client {
 		$merged = $array1;
 
 		foreach ( $array2 as $key => &$value ) {
-			// Merge numeric arrays
+			// Merge numeric arrays.
 			if ( is_array( $value ) && wp_is_numeric_array( $value ) && isset( $merged[ $key ] ) ) {
 				$merged[ $key ] = array_merge( $merged[ $key ], $value );
 			} elseif ( is_array( $value ) && isset( $merged[ $key ] ) && is_array( $merged[ $key ] ) ) {
@@ -276,14 +278,14 @@ class Meetup_Client extends API_Client {
 				'Content-Type'  => 'application/json',
 				'Authorization' => "Bearer $oauth_token",
 			),
-			'body' => wp_json_encode( compact( 'query', 'variables' ) )
+			'body' => wp_json_encode( compact( 'query', 'variables' ) ),
 		);
 	}
 
 	/**
 	 * Check the rate limit status in an API response and delay further execution if necessary.
 	 *
-	 * @param array $headers
+	 * @param array $response
 	 *
 	 * @return void
 	 */
@@ -351,15 +353,15 @@ class Meetup_Client extends API_Client {
 			return $datetime->getTimestamp();
 		}
 
-		$datetime_formats = [
-			'Y-m-d\TH:iP',   // 2021-11-20T17:00+05:30
-			'Y-m-d\TH:i:sP', // 2021-11-20T17:00:00+05:30
+		$datetime_formats = array(
+			'Y-m-d\TH:iP',   // '2021-11-20T17:00+05:30'.
+			'Y-m-d\TH:i:sP', // '2021-11-20T17:00:00+05:30'.
 			// DateTime::createFromFormat() doesn't handle the final `]` character in the following timezone format.
-			'Y-m-d\TH:i\[e', // 2021-11-20T06:30[US/Eastern]
+			'Y-m-d\TH:i\[e', // '2021-11-20T06:30[US/Eastern]'.
 			'c',             // ISO8601, just incase the above don't cover it.
-			'Y-m-d\TH:i:s',  // timezoneless 2021-11-20T17:00:00
-			'Y-m-d\TH:i',    // timezoneless 2021-11-20T17:00
-		];
+			'Y-m-d\TH:i:s',  // timezoneless '2021-11-20T17:00:00'.
+			'Y-m-d\TH:i',    // timezoneless '2021-11-20T17:00'.
+		);
 
 		// See above, just keep one timezone if the timezone format is `P\[e\]`. Simpler matching, assume the timezones are the same.
 		$datetime = preg_replace( '/([-+][0-9:]+)[[].+[]]$/', '$1', $datetime );
@@ -467,13 +469,13 @@ class Meetup_Client extends API_Client {
 	 * @return array|WP_Error
 	 */
 	public function get_groups( array $args = array() ) {
-		$fields = $this->get_default_fields( 'group' );
+		$filters = array();
+		$fields  = $this->get_default_fields( 'group' );
 
-		if ( !empty( $args['fields'] ) && is_array( $args['fields'] ) ) {
+		if ( ! empty( $args['fields'] ) && is_array( $args['fields'] ) ) {
 			$fields = array_merge( $fields, $args['fields'] );
 		}
 
-		$filters = [];
 		/*
 		 *  See https://www.meetup.com/api/schema/#GroupAnalyticsFilter for valid filters.
 		 */
@@ -490,18 +492,18 @@ class Meetup_Client extends API_Client {
 			}
 		}
 
-		$variables = [
+		$variables = array(
 			'urlname' => 'wordpress',
 			'perPage' => 200,
 			'cursor'  => null,
-		];
+		);
 
 		$query = '
 		query ($urlname: String!, $perPage: Int!, $cursor: String ) {
 			proNetworkByUrlname( urlname: $urlname ) {
 				groupsSearch( input: { first: $perPage, after: $cursor }, filter: { ' . implode( ', ', $filters ) . '} ) {
 					count
-					'  . $this->pageInfo . '
+					'  . $this->pagination . '
 					edges {
 						node {
 							' . implode( ' ', $fields ) . '
@@ -517,14 +519,14 @@ class Meetup_Client extends API_Client {
 			return $result;
 		}
 
-		$results = array_column(
+		$groups = array_column(
 			$result['proNetworkByUrlname']['groupsSearch']['edges'],
 			'node'
 		);
 
-		$results = $this->apply_backcompat_fields( 'groups', $results );
+		$groups = $this->apply_backcompat_fields( 'groups', $groups );
 
-		return $results;
+		return $groups;
 	}
 
 	/**
@@ -577,20 +579,19 @@ class Meetup_Client extends API_Client {
 	 * @param string $event_id The Event ID.
 	 * @return array
 	 */
-	function get_event_details( $event_id ) {
-
+	public function get_event_details( $event_id ) {
 		$fields = $this->get_default_fields( 'event' );
 
 		// Accepts, slug / id / slugId as the query-by fields.
-		$query = '
+		$query     = '
 		query ( $eventId: ID ) {
 			event( id: $eventId ) {
 				' . implode( ' ', $fields ) . '
 			}
 		}';
-		$variables = [
+		$variables = array(
 			'eventId' => $event_id,
-		];
+		);
 
 		$result = $this->send_paginated_request( $query, $variables );
 
@@ -616,15 +617,15 @@ class Meetup_Client extends API_Client {
 	public function get_events_status( $event_ids ) {
 		/* $events = [ id => $meetupID, id2 => $meetupID2 ] */
 
-		$return = [];
+		$return = array();
 		$chunks = array_chunk( $event_ids, 250, true );
 
 		foreach ( $chunks as $chunked_events ) {
-			$keys      = [];
-			$query     = '';
+			$keys  = array();
+			$query = '';
 
 			foreach ( $chunked_events as $id => $event_id ) {
-				$key = 'e' . md5( $id );
+				$key          = 'e' . md5( $id );
 				$keys[ $key ] = $id;
 
 				$query .= sprintf(
@@ -658,31 +659,31 @@ class Meetup_Client extends API_Client {
 	 * @return array|WP_Error
 	 */
 	public function get_group_details( $group_slug, $args = array() ) {
-		$fields = $this->get_default_fields( 'group' );;
+		$fields = $this->get_default_fields( 'group' );
 
-		$events_fields = [
+		$events_fields = array(
 			'dateTime',
 			'going',
-		];
+		);
 
-		if ( !empty( $args['fields'] ) && is_array( $args['fields'] ) ) {
+		if ( ! empty( $args['fields'] ) && is_array( $args['fields'] ) ) {
 			$fields = array_merge( $fields, $args['fields'] );
 		}
-		if ( !empty( $args['events_fields'] ) && is_array( $args['events_fields'] ) ) {
+		if ( ! empty( $args['events_fields'] ) && is_array( $args['events_fields'] ) ) {
 			$events_fields = array_merge( $events_fields, $args['events_fields'] );
-		} elseif ( !empty( $args['events_fields'] ) && true === $args['events_fields'] ) {
+		} elseif ( ! empty( $args['events_fields'] ) && true === $args['events_fields'] ) {
 			$events_fields = array_merge( $events_fields, $this->get_default_fields( 'events' ) );
 		}
 
 		// pastEvents cannot filter to the most recent past event, `last: 1`, `reverse:true, first: 1`, etc doesn't work.
 		// Instead, we fetch the details for every past event instead.
 
-		$query = '
+		$query     = '
 		query ( $urlname: String!, $perPage: Int!, $cursor: String ) {
 			groupByUrlname( urlname: $urlname ) {
 				' . implode( ' ', $fields ) . '
 				pastEvents ( input: { first: $perPage, after: $cursor } ) {
-					' . $this->pageInfo . '
+					' . $this->pagination . '
 					edges {
 						node {
 							' . implode( ' ', $events_fields ) . '
@@ -691,11 +692,11 @@ class Meetup_Client extends API_Client {
 				}
 			}
 		}';
-		$variables = [
+		$variables = array(
 			'urlname' => $group_slug,
 			'perPage' => 200,
 			'cursor'  => null,
-		];
+		);
 
 		$result = $this->send_paginated_request( $query, $variables );
 
@@ -703,12 +704,10 @@ class Meetup_Client extends API_Client {
 			return $result;
 		}
 
-		// Format it similar to previous response payload??
-		$result = $result['groupByUrlname'];
+		// Format it similar to previous response payload.
+		$group = $this->apply_backcompat_fields( 'group', $result['groupByUrlname'] );
 
-		$result = $this->apply_backcompat_fields( 'group', $result );
-
-		return $result;
+		return $group;
 	}
 
 	/**
@@ -729,8 +728,8 @@ class Meetup_Client extends API_Client {
 			);
 		}
 
-		// Filters
-		$filters = [];
+		// Filters.
+		$filters = array();
 		if ( isset( $args['role'] ) && 'leads' === $args['role'] ) {
 			// See https://www.meetup.com/api/schema/#MembershipStatus for valid statuses.
 			$filters[] = 'status: LEADER';
@@ -743,11 +742,11 @@ class Meetup_Client extends API_Client {
 		}
 
 		// 'memberships' => 'GroupUserConnection' not documented.
-		$query = '
+		$query     = '
 		query ( $urlname: String!, $perPage: Int!, $cursor: String ) {
 			groupByUrlname( urlname: $urlname ) {
 				memberships ( input: { first: $perPage, after: $cursor }, filter: { ' . implode( ', ', $filters ) . ' } ) {
-					' . $this->pageInfo . '
+					' . $this->pagination . '
 					edges {
 						node {
 							' . implode( ' ', $fields ) . '
@@ -756,18 +755,18 @@ class Meetup_Client extends API_Client {
 				}
 			}
 		}';
-		$variables = [
+		$variables = array(
 			'urlname' => $group_slug,
 			'perPage' => 200,
 			'cursor'  => null,
-		];
+		);
 
 		$results = $this->send_paginated_request( $query, $variables );
 		if ( is_wp_error( $results ) || ! isset( $results['groupByUrlname'] ) ) {
 			return $results;
 		}
 
-		// Select memberships.edges[*].node
+		// Select memberships.edges[*].node.
 		$results = array_column(
 			$results['groupByUrlname']['memberships']['edges'],
 			'node'
@@ -780,20 +779,20 @@ class Meetup_Client extends API_Client {
 	 * Query all events from the Network.
 	 */
 	public function get_network_events( array $args = array() ) {
-		$defaults = [
-			'filters'        => [],
+		$defaults = array(
+			'filters'        => array(),
 			'max_event_date' => time() + YEAR_IN_SECONDS,
 			'min_event_date' => false,
-			'online_events'  => null, // true: only online events, false: only IRL events
-			'status'         => 'upcoming', //  UPCOMING, PAST, CANCELLED
+			'online_events'  => null, // true: only online events, false: only IRL events.
+			'status'         => 'upcoming', // UPCOMING, PAST, CANCELLED.
 			'sort'           => '',
-		];
-		$args = wp_parse_args( $args, $defaults );
+		);
+		$args     = wp_parse_args( $args, $defaults );
 
 		$fields = $this->get_default_fields( 'event' );
 
-		// See https://www.meetup.com/api/schema/#ProNetworkEventsFilter
-		$filters = [];
+		// See https://www.meetup.com/api/schema/#ProNetworkEventsFilter.
+		$filters = array();
 
 		if ( $args['min_event_date'] ) {
 			$filters['eventDateMin'] = 'eventDateMin: ' . $this->datetime_to_time( $args['min_event_date'] ) * 1000;
@@ -806,22 +805,22 @@ class Meetup_Client extends API_Client {
 			$filters['isOnlineEvent'] = 'isOnlineEvent: ' . ( $args['online_events'] ? 'true' : 'false' );
 		}
 
-		// See https://www.meetup.com/api/schema/#ProNetworkEventStatus
-		if ( $args['status'] && in_array( $args['status'], [ 'cancelled', 'upcoming', 'past' ] ) ) {
+		// See https://www.meetup.com/api/schema/#ProNetworkEventStatus.
+		if ( $args['status'] && in_array( $args['status'], array( 'cancelled', 'upcoming', 'past' ) ) ) {
 			$filters['status'] = 'status: ' . strtoupper( $args['status'] );
 		}
 
 		if ( $args['filters'] ) {
-			foreach( $args['filters'] as $key => $filter ) {
+			foreach ( $args['filters'] as $key => $filter ) {
 				$filters[ $key ] = "{$key}: {$filter}";
 			}
 		}
 
-		$query = '
+		$query     = '
 		query ( $urlname: String!, $perPage: Int!, $cursor: String ) {
 			proNetworkByUrlname( urlname: $urlname ) {
 				eventsSearch ( input: { first: $perPage, after: $cursor }, filter: { ' . implode( ', ', $filters )  . ' } ) {
-					' . $this->pageInfo . '
+					' . $this->pagination . '
 					edges {
 						node {
 							' . implode( ' ', $fields ) . '
@@ -830,12 +829,11 @@ class Meetup_Client extends API_Client {
 				}
 			}
 		}';
-		$variables = [
+		$variables = array(
 			'urlname' => 'wordpress',
-			'perPage' => 1000, // More per-page to avoid hitting request limits
+			'perPage' => 1000, // More per-page to avoid hitting request limits.
 			'cursor'  => null,
-		];
-
+		);
 
 		$results = $this->send_paginated_request( $query, $variables );
 
@@ -844,18 +842,18 @@ class Meetup_Client extends API_Client {
 		}
 
 		if ( empty( $results['proNetworkByUrlname']['eventsSearch'] ) ) {
-			return [];
+			return array();
 		}
 
-		// Select edges[*].node
-		$results = array_column(
+		// Select edges[*].node.
+		$events = array_column(
 			$results['proNetworkByUrlname']['eventsSearch']['edges'],
 			'node'
 		);
 
-		$results = $this->apply_backcompat_fields( 'events', $results );
+		$events = $this->apply_backcompat_fields( 'events', $events );
 
-		return $results;
+		return $events;
 
 	}
 
@@ -868,13 +866,13 @@ class Meetup_Client extends API_Client {
 	 * @return array|WP_Error
 	 */
 	public function get_group_events( $group_slug, array $args = array() ) {
-		$defaults = [
+		$defaults = array(
 			'status'          => 'upcoming',
 			'no_earlier_than' => '',
 			'no_later_than'   => '',
-			'fields'          => [],
-		];
-		$args = wp_parse_args( $args, $defaults );
+			'fields'          => array(),
+		);
+		$args     = wp_parse_args( $args, $defaults );
 
 		/*
 		 * The GraphQL API has 4 events fields, here's some comments:
@@ -891,7 +889,7 @@ class Meetup_Client extends API_Client {
 		 * we can query using the individual fields to get the statii we want, and apply the other filters directly.
 		 */
 		if ( false !== strpos( $args['status'], ',' ) ) {
-			$events = [];
+			$events = array();
 			foreach ( explode( ',', $args['status'] ) as $status ) {
 				$args['status'] = $status;
 				$status_events  = $this->get_group_events( $group_slug, $args );
@@ -905,20 +903,21 @@ class Meetup_Client extends API_Client {
 			}
 
 			// Resort all items.
-			usort( $events, function( $a, $b ) {
-				if ( $a['time'] == $b['time'] ) {
-					return 0;
-				}
+			usort(
+				$events,
+				function( $a, $b ) {
+					if ( $a['time'] == $b['time'] ) {
+						return 0;
+					}
 
-				return ( $a['time'] < $b['time'] ) ? -1 : 1;
-			} );
+					return ( $a['time'] < $b['time'] ) ? -1 : 1;
+				}
+			);
 
 			return $events;
 		}
 
 		$fields = $this->get_default_fields( 'event' );
-
-		// TODO: Check the above list against Official_WordPress_Events::parse_meetup_events()
 
 		if ( ! empty( $args['fields'] ) && is_array( $args['fields'] ) ) {
 			$fields = array_merge(
@@ -936,16 +935,16 @@ class Meetup_Client extends API_Client {
 				break;
 			default:
 				// We got nothing.
-				return [];
+				return array();
 		}
 
 		// No filters defined, as we have to do it ourselves. See above.
 
-		$query = '
+		$query     = '
 		query ( $urlname: String!, $perPage: Int!, $cursor: String ) {
 			groupByUrlname( urlname: $urlname ) {
 				' . $event_field . ' ( input: { first: $perPage, after: $cursor } ) {
-					' . $this->pageInfo . '
+					' . $this->pagination . '
 					edges {
 						node {
 							' . implode( ' ', $fields ) . '
@@ -954,41 +953,42 @@ class Meetup_Client extends API_Client {
 				}
 			}
 		}';
-		$variables = [
+		$variables = array(
 			'urlname' => $group_slug,
 			'perPage' => 200,
 			'cursor'  => null,
-		];
+		);
 
 		$results = $this->send_paginated_request( $query, $variables );
 		if ( is_wp_error( $results ) || ! isset( $results['groupByUrlname'] ) ) {
 			return $results;
 		}
 
-		// Select {$event_field}.edges[*].node
-		$results = array_column(
+		// Select {$event_field}.edges[*].node.
+		$events = array_column(
 			$results['groupByUrlname'][ $event_field ]['edges'],
 			'node'
 		);
 
-		$results = $this->apply_backcompat_fields( 'events', $results );
+		$events = $this->apply_backcompat_fields( 'events', $events );
 
 		// Apply filters.
 		if ( $args['no_earlier_than'] || $args['no_later_than'] ) {
 			$args['no_earlier_than'] = $this->datetime_to_time( $args['no_earlier_than'] ) ?: 0;
 			$args['no_later_than']   = $this->datetime_to_time( $args['no_later_than'] ) ?: PHP_INT_MAX;
 
-			$results = array_filter(
-				$results,
-				function( $event ) use( $args ) {
-					return
+			$events = array_filter(
+				$events,
+				function ( $event ) use ( $args ) {
+					return (
 						$event['time'] >= $args['no_earlier_than'] &&
-						$event['time'] < $args['no_later_than'];
+						$event['time'] < $args['no_later_than']
+					);
 				}
 			);
 		}
 
-		return $results;
+		return $events;
 	}
 
 	/**
@@ -1001,14 +1001,14 @@ class Meetup_Client extends API_Client {
 	 */
 	public function get_result_count( $route, array $args = array() ) {
 		$result  = false;
-		$filters = [];
+		$filters = array();
 
 		// Number of groups in the Pro Network.
 		if ( 'pro/wordpress/groups' !== $route ) {
 			return false;
 		}
 
-		// https://www.meetup.com/api/schema/#GroupAnalyticsFilter
+		// https://www.meetup.com/api/schema/#GroupAnalyticsFilter.
 		if ( ! empty( $args['pro_join_date_max'] ) ) {
 			$filters['proJoinDateMax'] = 'proJoinDateMax: ' . $this->datetime_to_time( $args['pro_join_date_max'] ) * 1000;
 		}
@@ -1024,7 +1024,7 @@ class Meetup_Client extends API_Client {
 
 		$query = '
 		query {
-			proNetworkByUrlname( urlname: "wordpress" ) {
+			proNetworkByUrlname( urlname: "WordPress" ) {
 				groupsSearch( filter: { ' .  implode( ', ', $filters ) . ' } ) {
 					count
 				}
@@ -1048,7 +1048,7 @@ class Meetup_Client extends API_Client {
 	protected function get_default_fields( $type ) {
 		if ( 'event' === $type ) {
 			// See https://www.meetup.com/api/schema/#Event for valid fields.
-			return [
+			return array(
 				'id',
 				'title',
 				'description',
@@ -1066,24 +1066,18 @@ class Meetup_Client extends API_Client {
 					' . implode( ' ', $this->get_default_fields( 'group' ) ) . '
 				}',
 				'venue {
-					id
-					lat
-					lng
-					name
-					city
-					state
-					country
-				}'
-			];
+					' . implode( ' ', $this->get_default_fields( 'venue' ) ) . '
+				}',
+			);
 		} elseif ( 'memberships' === $type ) {
 			// See https://www.meetup.com/api/schema/#User for valid fields.
-			return [
+			return array(
 				'id',
 				'name',
 				'email',
-			];
+			);
 		} elseif ( 'group' === $type ) {
-			return [
+			return array(
 				'id',
 				'name',
 				'urlname',
@@ -1100,7 +1094,17 @@ class Meetup_Client extends API_Client {
 				'proJoinDate',
 				'latitude',
 				'longitude',
-			];
+			);
+		} elseif ( 'venue' === $type ) {
+			return array(
+				'id',
+				'lat',
+				'lng',
+				'name',
+				'city',
+				'state',
+				'country',
+			);
 		}
 	}
 
@@ -1111,6 +1115,7 @@ class Meetup_Client extends API_Client {
 	 *
 	 * @param string $type   The type of result object.
 	 * @param array  $result The result to back-compat.
+	 *
 	 * @return The $result with back-compat.
 	 */
 	protected function apply_backcompat_fields( $type, $result ) {
@@ -1124,7 +1129,7 @@ class Meetup_Client extends API_Client {
 			}
 
 			// Parse an ISO DateInterval into seconds.
-			$now = time();
+			$now                = time();
 			$result['duration'] = ( DateTimeImmutable::createFromFormat( 'U', $now ) )->add( new DateInterval( $result['duration'] ) )->getTimestamp() - $now;
 
 			$result['utc_offset'] = 0;
@@ -1163,8 +1168,8 @@ class Meetup_Client extends API_Client {
 			}
 
 			$result['status'] = strtolower( $result['status'] );
-			if ( in_array( $result['status'], [ 'published', 'past', 'active', 'autosched' ] ) ) {
-				$result['status'] = 'upcoming'; // Right, past is upcoming in this context
+			if ( in_array( $result['status'], array( 'published', 'past', 'active', 'autosched' ) ) ) {
+				$result['status'] = 'upcoming'; // Right, past is upcoming in this context.
 			}
 
 			$result['yes_rsvp_count'] = $result['going'];
@@ -1191,10 +1196,10 @@ class Meetup_Client extends API_Client {
 			}
 
 			if ( ! empty( $result['pastEvents']['edges'] ) ) {
-				$result['last_event']       = [
+				$result['last_event']       = array(
 					'time'           => $this->datetime_to_time( end( $result['pastEvents']['edges'] )['node']['dateTime'] ),
 					'yes_rsvp_count' => end( $result['pastEvents']['edges'] )['node']['going'],
-				];
+				);
 				$result['past_event_count'] = count( $result['pastEvents']['edges'] );
 			} elseif ( ! empty( $result['groupAnalytics']['lastEventDate'] ) ) {
 				// NOTE: last_event here vs above differs intentionally.
@@ -1217,12 +1222,12 @@ class Meetup_Client extends API_Client {
 	/**
 	 * Generate a localised location name.
 	 *
-	 * For the US this is 'City, ST, USA'
-	 * For Canada this is 'City, ST, Canada'
-	 * For the rest of world, this is 'City, CountryName'
+	 * For the US this is 'City, ST, USA'.
+	 * For Canada this is 'City, ST, Canada'.
+	 * For the rest of world, this is 'City, CountryName'.
 	 */
 	protected function localise_location( $args = array() ) {
-		// Hard-code the Online event location
+		// Hard-code the Online event location.
 		if ( ! empty( $args['id'] ) && self::ONLINE_VENUE_ID == $args['id'] ) {
 			return 'online';
 		}
@@ -1242,7 +1247,7 @@ class Meetup_Client extends API_Client {
 		// Set countries to USA, AU, or Australia in that order.
 		$country = $this->localised_country_name( $country );
 
-		return implode( ', ',  array_filter( [ $city, $state, $country ] ) ) ?: false;
+		return implode( ', ',  array_filter( array( $city, $state, $country ) ) ) ?: false;
 	}
 
 	/**
@@ -1256,11 +1261,11 @@ class Meetup_Client extends API_Client {
 		$country           = strtoupper( $country );
 
 		// Shortcut, CLDR isn't always what we expect here.
-		$shortcut = [
+		$shortcut = array(
 			'US' => 'USA',
 			'HK' => 'Hong Kong',
 			'SG' => 'Singapore',
-		];
+		);
 		if ( ! empty( $shortcut[ $country ] ) ) {
 			return $shortcut[ $country ];
 		}

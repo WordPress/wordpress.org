@@ -127,10 +127,10 @@ class Meetup_OAuth2_Client extends API_Client {
 
 	/**
 	 * Request one of various types of tokens from the Meetup OAuth API.
-	 * 
+	 *
 	 * Setting $type to 'access_token' is for step 2 of the oAuth flow. This takes a code that has been previously set
 	 * through a user-initiated oAuth authentication.
-	 * 
+	 *
 	 * Setting $type to 'refresh_token' will request a new access_token generated through the above access_token method.
 	 *
 	 * @see https://www.meetup.com/api/authentication/#p02-server-flow-section
@@ -149,14 +149,14 @@ class Meetup_OAuth2_Client extends API_Client {
 		$request_headers = $this->get_headers();
 		$request_body    = array();
 
-		switch( $type ) {
+		switch ( $type ) {
 			case 'access_token': // Request a new access token.
 				$args = wp_parse_args( $args, array(
 					'code' => '',
 				) );
 
-				$request_url  = self::URL_ACCESS_TOKEN;
-				$request_body = array(
+				$request_url                     = self::URL_ACCESS_TOKEN;
+				$request_body                    = array(
 					'client_id'     => self::CONSUMER_KEY,
 					'client_secret' => self::CONSUMER_SECRET,
 					'grant_type'    => 'authorization_code',
@@ -237,7 +237,7 @@ class Meetup_OAuth2_Client extends API_Client {
 
 				if ( ! $_GET['code'] ) {
 					$message = sprintf(
-						"Meetup.com oAuth expired. Please access the following url while logged into the %s meetup.com account: \n\n%s\n\n" . 
+						"Meetup.com oAuth expired. Please access the following url while logged into the %s meetup.com account: \n\n%s\n\n" .
 						"For sites other than WordCamp Central, the ?code=... parameter will need to be stored on this site via wp-cli and this task run again: `wp --url=%s site option update '%s' '...'`",
 						self::EMAIL,
 						sprintf(
@@ -264,7 +264,6 @@ class Meetup_OAuth2_Client extends API_Client {
 			if ( $this->is_valid_token( $token, 'access_token' ) ) {
 				delete_site_option( self::SITE_OPTION_KEY_AUTHORIZATION, false );
 			}
-
 		} elseif ( $this->is_expired_token( $token ) ) {
 			$token = $this->request_token( 'refresh_token', $token );
 		}

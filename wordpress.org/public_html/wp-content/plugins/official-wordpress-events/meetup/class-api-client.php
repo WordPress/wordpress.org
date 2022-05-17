@@ -35,7 +35,7 @@ class API_Client {
 	/*
 	 * @var array A list of integer response codes that should break the "tenacious" remote request loop.
 	 */
-	protected $breaking_response_codes = [];
+	protected $breaking_response_codes = array();
 
 	/**
 	 * @var string|null The URL for the current request being attempted.
@@ -59,13 +59,13 @@ class API_Client {
 	 *                                             remote request loop.
 	 * }
 	 */
-	public function __construct( array $settings = [] ) {
+	public function __construct( array $settings = array() ) {
 		$this->error = new WP_Error();
 
-		$defaults = [
+		$defaults = array(
 			'throttle_callback'       => '',
-			'breaking_response_codes' => [ 400, 401, 404, 429 ],
-		];
+			'breaking_response_codes' => array( 400, 401, 404, 429 ),
+		);
 
 		$settings = wp_parse_args( $settings, $defaults );
 
@@ -85,7 +85,7 @@ class API_Client {
 	 *
 	 * @return array|WP_Error
 	 */
-	protected function tenacious_remote_request( $url, array $args = [] ) {
+	protected function tenacious_remote_request( $url, array $args = array() ) {
 		$attempt_count  = 0;
 		$max_attempts   = 3;
 		$breaking_codes = $this->breaking_response_codes;
@@ -171,7 +171,7 @@ class API_Client {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function tenacious_remote_get( $url, array $args = [] ) {
+	public function tenacious_remote_get( $url, array $args = array() ) {
 		$args['method'] = 'GET';
 
 		return $this->tenacious_remote_request( $url, $args );
@@ -185,7 +185,7 @@ class API_Client {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function tenacious_remote_post( $url, array $args = [] ) {
+	public function tenacious_remote_post( $url, array $args = array() ) {
 		$args['method'] = 'POST';
 
 		return $this->tenacious_remote_request( $url, $args );
