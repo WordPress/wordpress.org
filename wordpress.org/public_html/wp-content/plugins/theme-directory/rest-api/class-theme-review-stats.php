@@ -166,11 +166,11 @@ class Theme_Review_Stats extends WP_REST_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		return $wpdb->get_results(
 			"	
-			SELECT p.post_name as postName,
-				p.post_author as post_author,
+			SELECT p.post_name AS postName,
+				p.post_author AS post_author,
 				substring_index( substring_index( pm.meta_value, '\"', 4 ), '\"', -1 ) AS author,
-				LEFT(p.post_date, 7) as published_on,
-				group_concat( t.slug SEPARATOR ', ' ) as tags
+				LEFT(p.post_date, 7) AS published_on,
+				group_concat( t.slug SEPARATOR ', ' ) AS tags
 
 			FROM {$wpdb->posts} p
 			JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_author'
