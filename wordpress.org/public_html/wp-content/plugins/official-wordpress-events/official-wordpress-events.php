@@ -7,8 +7,7 @@ Version:     0.1
 Author:      WordPress.org Meta Team
 */
 
-use WordCamp\Utilities\API_Client;
-use WordCamp\Utilities\Meetup_Client;
+use WordPressdotOrg\MU_Plugins\Utilities\{ API_Client, Meetup_Client };
 
 class Official_WordPress_Events {
 	const EVENTS_TABLE          = 'wporg_events';
@@ -77,15 +76,7 @@ class Official_WordPress_Events {
 	 * @return API_Client
 	 */
 	protected function get_api_client() {
-		if ( ! class_exists( '\WordCamp\Utilities\API_Client' ) ) {
-			$files = array(
-				'class-api-client.php',
-			);
-
-			foreach ( $files as $file ) {
-				require_once trailingslashit( __DIR__ ) . "meetup/$file";
-			}
-		}
+		require_once WPMU_PLUGIN_DIR . '/pub-sync/utilities/class-api-client.php';
 
 		return new API_Client();
 	}
@@ -96,17 +87,9 @@ class Official_WordPress_Events {
 	 * @return Meetup_Client
 	 */
 	protected function get_meetup_client() {
-		if ( ! class_exists( '\WordCamp\Utilities\Meetup_Client' ) ) {
-			$files = array(
-				'class-api-client.php',
-				'class-meetup-oauth2-client.php',
-				'class-meetup-client.php',
-			);
-
-			foreach ( $files as $file ) {
-				require_once trailingslashit( __DIR__ ) . "meetup/$file";
-			}
-		}
+		require_once WPMU_PLUGIN_DIR . '/pub-sync/utilities/class-meetup-client.php';
+		require_once WPMU_PLUGIN_DIR . '/pub-sync/utilities/class-api-client.php';
+		require_once WPMU_PLUGIN_DIR . '/pub-sync/utilities/class-meetup-oauth2-client.php';
 
 		return new Meetup_Client();
 	}
