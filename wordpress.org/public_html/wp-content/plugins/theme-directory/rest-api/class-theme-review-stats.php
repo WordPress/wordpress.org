@@ -187,7 +187,6 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	}
 
 	/**
-	 * Returns a list of
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
@@ -224,7 +223,6 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	}
 
 	/**
-	 * Returns a list of grouped author upload counts, grouped by month.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
