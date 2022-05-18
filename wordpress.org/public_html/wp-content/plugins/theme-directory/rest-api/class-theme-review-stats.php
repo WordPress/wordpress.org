@@ -137,8 +137,8 @@ class Theme_Review_Stats extends WP_REST_Controller {
 					p.post_date_gmt AS published_date,
 					DATEDIFF( p.post_date_gmt, substring_index( substring_index( pm.meta_value, '\"', 4 ), '\"', -1 ) ) as days_to_review
 			
-                    FROM {$wpdb->posts} p
-                    JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_upload_date'
+					FROM {$wpdb->posts} p
+					JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_upload_date'
 			
 					WHERE p.post_type = 'repopackage' and p.post_status = 'publish'
 			
