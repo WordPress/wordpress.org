@@ -313,7 +313,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$start_date = $this->get_start_date( $request );
-		$rows       = $this->get_uploaded_themes( $start_date );
+		$rows       = $this->get_uploaded_themes();
 
 		return new WP_REST_Response( $rows, \WP_Http::OK );
 	}
