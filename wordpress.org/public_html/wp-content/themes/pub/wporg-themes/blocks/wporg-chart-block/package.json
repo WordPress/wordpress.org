@@ -1,0 +1,38 @@
+{
+  "name": "chart-block",
+  "version": "1.0.0",
+  "description": " Hook an endpoint to display data using a chart library.",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build index=./src/index.js frontend=./src/frontend/index.js",
+    "check-engines": "wp-scripts check-engines",
+    "check-licenses": "wp-scripts check-licenses",
+    "format:js": "wp-scripts format-js",
+    "lint:css": "wp-scripts lint-style",
+    "lint:js": "wp-scripts lint-js",
+    "lint:md:docs": "wp-scripts lint-md-docs",
+    "lint:md:js": "wp-scripts lint-md-js",
+    "lint:pkg-json": "wp-scripts lint-pkg-json",
+    "packages-update": "wp-scripts packages-update",
+    "start": "wp-scripts start index=./src/index.js frontend=./src/frontend/index.js",
+    "test:e2e": "wp-scripts test-e2e",
+    "test:unit": "wp-scripts test-unit-js",
+    "test:unit-php": "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/theme-review-stats-block/phpunit.xml.dist --verbose'",
+    "wp-env": "wp-env"
+  },
+  "author": "",
+  "license": "GPL-2.0-or-later",
+  "devDependencies": {
+    "@wordpress/api-fetch": "^6.5.0",
+    "@wordpress/blocks": "^11.7.0",
+    "@wordpress/components": "^19.10.0",
+    "@wordpress/element": "^4.6.0",
+    "@wordpress/env": "4.0.3",
+    "@wordpress/i18n": "^4.8.0",
+    "@wordpress/scripts": "15.0.1"
+  },
+  "dependencies": {
+    "@wordpress/icons": "^8.4.0",
+    "react-google-charts": "^4.0.0"
+  }
+}
