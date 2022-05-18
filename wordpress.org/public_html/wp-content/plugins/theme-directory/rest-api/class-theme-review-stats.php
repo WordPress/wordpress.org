@@ -122,10 +122,15 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	 * @return void
 	 */
 	public function get_average_review_days( $start_date ) {
+		$cached = wp_cache_get( __METHOD__, 'API:Theme-Stats' );
+		if ( $cached ) {
+			return $cached;
+		}
+
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		return $wpdb->get_results(
+		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"	
 				SELECT LEFT( upload_date, 7 ) AS ym, AVG(days_to_review) AS average_days_to_review
@@ -153,6 +158,11 @@ class Theme_Review_Stats extends WP_REST_Controller {
 				$start_date
 			)
 		);
+
+		// Expire the cache in 1 hour
+		wp_cache_set( __METHOD__, $results, 'API:Theme-Stats', 3600 );
+
+		return $results;
 	}
 
 	/**
