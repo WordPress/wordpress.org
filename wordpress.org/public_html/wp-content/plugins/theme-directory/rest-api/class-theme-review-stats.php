@@ -178,10 +178,10 @@ class Theme_Review_Stats extends WP_REST_Controller {
 			LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'post_tag'
 			LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
 
-			WHERE p.post_type = 'repopackage' and p.post_status = 'publish'
+			WHERE p.post_type = 'repopackage' AND p.post_status = 'publish'
 
-			Group by p.ID
-			Order By published_on asc
+			GROUP BY p.ID
+			ORDER BY published_on ASC
 			"
 		);
 	}
