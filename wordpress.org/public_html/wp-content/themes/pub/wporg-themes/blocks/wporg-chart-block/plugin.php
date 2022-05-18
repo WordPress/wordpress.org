@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Chart Block 
+ * Plugin Name: Chart Block
  * Description: Hook an endpoint to display data using a chart library.
  * Plugin URI: https://github.com/WordPress/wporg-chart-block
  * Author: WordPress.org
@@ -11,14 +11,6 @@
  */
 
 namespace WordPressdotorg\Chart_Block;
-
-/**
- * Turn on the REST endpoint.
- */
-add_action( 'rest_api_init', function() {
-	require_once  __DIR__ . '/src/inc/class-theme-review-stats.php';
-} );
-
 
 /**
  * Render the block content (html) on the frontend of the site.
@@ -111,7 +103,7 @@ add_action( 'init', __NAMESPACE__ . '\register_assets' );
  * Conditionally remove the Script/Style assets added through `register_block_type()`.
  */
 function conditionally_load_assets() {
-	if ( ! is_singular() || ! has_block('wporg-chart-block/main' ) ) {
+	if ( ! is_singular() || ! has_block( 'wporg-chart-block/main' ) ) {
 		wp_dequeue_script( 'wporg-chart-block-script' );
 		wp_dequeue_style( 'wporg-chart-block-style' );
 	}
