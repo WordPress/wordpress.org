@@ -274,7 +274,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	 */
 	public function get_by_author_type( $request ) {
 		$start_date = $this->get_start_date( $request );
-		$rows       = $this->get_uploaded_themes( $start_date );
+		$rows       = $this->get_uploaded_themes();
 		$authorMap  = array(); // Temporarily store themes per author
 		$map        = array();
 
