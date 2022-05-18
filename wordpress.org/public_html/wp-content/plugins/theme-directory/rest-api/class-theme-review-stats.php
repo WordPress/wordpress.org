@@ -137,8 +137,8 @@ class Theme_Review_Stats extends WP_REST_Controller {
 					p.post_date_gmt AS published_date,
 					DATEDIFF( p.post_date_gmt, substring_index( substring_index( pm.meta_value, '\"', 4 ), '\"', -1 ) ) as days_to_review
 			
-                    FROM wporg_35_posts p
-                    JOIN wporg_35_postmeta pm ON p.ID = pm.post_id AND pm.meta_key = '_upload_date'
+                    FROM {$wpdb->posts} p
+                    JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_upload_date'
 			
 					WHERE p.post_type = 'repopackage' and p.post_status = 'publish'
 			
@@ -172,8 +172,8 @@ class Theme_Review_Stats extends WP_REST_Controller {
 				LEFT(p.post_date, 7) as published_on,
 				group_concat( t.slug SEPARATOR ', ' ) as tags
 
-			FROM  {$wpdb->posts} p
-			JOIN  {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_author'
+			FROM {$wpdb->posts} p
+			JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_author'
 			LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
 			LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'post_tag'
 			LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
