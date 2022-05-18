@@ -161,10 +161,15 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	 * @return void
 	 */
 	public function get_uploaded_themes() {
+		$cached = wp_cache_get( __METHOD__, 'API:Theme-Stats' );
+		if ( $cached ) {
+			return $cached;
+		}
+
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		return $wpdb->get_results(
+		$results = $wpdb->get_results(
 			"	
 			SELECT p.post_name AS postName,
 				p.post_author AS post_author,
@@ -184,6 +189,11 @@ class Theme_Review_Stats extends WP_REST_Controller {
 			ORDER BY published_on ASC
 			"
 		);
+
+		// Expire the cache in 1 hour
+		wp_cache_set( __METHOD__, $results, 'API:Theme-Stats', 3600 );
+
+		return $results;
 	}
 
 	/**
@@ -231,7 +241,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	public function get_by_segment( $request ) {
 		$start_date = $this->get_start_date( $request );
 		$rows       = $this->get_uploaded_themes();
-		$author_map  = array(); // Temporarily store themes per author
+		$author_map = array(); // Temporarily store themes per author
 		$map        = array();
 
 		foreach ( $rows as $value ) {
@@ -275,7 +285,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	public function get_by_author_type( $request ) {
 		$start_date = $this->get_start_date( $request );
 		$rows       = $this->get_uploaded_themes();
-		$author_map  = array(); // Temporarily store themes per author
+		$author_map = array(); // Temporarily store themes per author
 		$map        = array();
 
 		foreach ( $rows as $value ) {
