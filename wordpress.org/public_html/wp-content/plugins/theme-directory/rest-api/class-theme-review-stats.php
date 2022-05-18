@@ -18,7 +18,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	 */
 	public function __construct() {
 		$this->namespace = 'themes/v1';
-		$this->rest_base = 'review-stats';
+		$this->rest_base = 'stats';
 
 		$this->register_routes();
 	}
@@ -96,7 +96,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	}
 
 	/**
-	 * Return whether the user can retrieve the data
+	 * Return whether the user can retrieve the data.
 	 *
 	 * @return bool
 	 */
@@ -137,16 +137,16 @@ class Theme_Review_Stats extends WP_REST_Controller {
 					p.post_date_gmt AS published_date,
 					DATEDIFF( p.post_date_gmt, substring_index( substring_index( pm.meta_value, '\"', 4 ), '\"', -1 ) ) as days_to_review
 			
-                    FROM {$wpdb->posts} p
-                    JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_upload_date'
+                    FROM wporg_35_posts p
+                    JOIN wporg_35_postmeta pm ON p.ID = pm.post_id AND pm.meta_key = '_upload_date'
 			
 					WHERE p.post_type = 'repopackage' and p.post_status = 'publish'
 			
 					ORDER BY p.ID desc
 				)a
 				
-				where published_date > upload_date AND days_to_review IS NOT NULL AND upload_date >= %s
-			P∏
+				WHERE published_date > upload_date AND days_to_review IS NOT NULL AND upload_date >= %s
+
 				GROUP BY ym
 				ORDER BY upload_date ASC
 					",
