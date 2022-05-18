@@ -219,7 +219,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 
 		$out = $this->filter_items_before( $out, $start_date );
 
-		return new WP_REST_Response( array_values( $out ), \WP_Http::OK );
+		return rest_ensure_response( array_values( $out ) );
 	}
 
 	/**
