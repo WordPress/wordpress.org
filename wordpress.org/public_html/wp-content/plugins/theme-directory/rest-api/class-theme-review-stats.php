@@ -128,7 +128,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"	
-				SELECT LEFT( upload_date, 7 ) as ym, AVG(days_to_review) as average_days_to_review
+				SELECT LEFT( upload_date, 7 ) AS ym, AVG(days_to_review) AS average_days_to_review
 
 				FROM (
 					SELECT p.post_name,
