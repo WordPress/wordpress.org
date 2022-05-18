@@ -194,7 +194,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	 */
 	public function get_by_theme_type( $request ) {
 		$start_date = $this->get_start_date( $request );
-		$rows       = $this->get_uploaded_themes( $start_date );
+		$rows       = $this->get_uploaded_themes();
 		$map        = array();
 
 		foreach ( $rows as $value ) {
@@ -231,7 +231,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	public function get_by_segment( $request ) {
 		$start_date = $this->get_start_date( $request );
 		$rows       = $this->get_uploaded_themes();
-		$authorMap  = array(); // Temporarily store themes per author
+		$author_map  = array(); // Temporarily store themes per author
 		$map        = array();
 
 		foreach ( $rows as $value ) {
@@ -243,15 +243,15 @@ class Theme_Review_Stats extends WP_REST_Controller {
 				$map[ $ym ]['segment3'] = 0; // Counter for authors with 5+ themes
 			}
 
-			if ( isset( $authorMap[ $value->post_author ] ) ) {
-				if ( $authorMap[ $value->post_author ] >= 5 ) {
+			if ( isset( $author_map[ $value->post_author ] ) ) {
+				if ( $author_map[ $value->post_author ] >= 5 ) {
 					$map[ $ym ]['segment3']++;
 				} else {
 					$map[ $ym ]['segment2']++;
 				}
-				$authorMap[ $value->post_author ]++;
+				$author_map[ $value->post_author ]++;
 			} else {
-				$authorMap[ $value->post_author ] = 1;
+				$author_map[ $value->post_author ] = 1;
 				$map[ $ym ]['segment1']++;
 			}
 		}
@@ -275,7 +275,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	public function get_by_author_type( $request ) {
 		$start_date = $this->get_start_date( $request );
 		$rows       = $this->get_uploaded_themes();
-		$authorMap  = array(); // Temporarily store themes per author
+		$author_map  = array(); // Temporarily store themes per author
 		$map        = array();
 
 		foreach ( $rows as $value ) {
@@ -286,10 +286,10 @@ class Theme_Review_Stats extends WP_REST_Controller {
 				$map[ $ym ]['many-themes'] = 0; // Counter to represent whether author has already uploaded a different theme
 			}
 
-			if ( isset( $authorMap[ $value->post_author ] ) ) {
+			if ( isset( $author_map[ $value->post_author ] ) ) {
 				$map[ $ym ]['many-themes']++;
 			} else {
-				$authorMap[ $value->post_author ] = 1;
+				$author_map[ $value->post_author ] = 1;
 				$map[ $ym ]['first-theme']++;
 			}
 		}
