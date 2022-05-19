@@ -58,9 +58,7 @@ export default ( {
 					data={ chartData }
 					options={ chartOptions }
 				/>
-				<div className="wporg-chart-block__notes">
-					{ chartNotes.length > 0 && <Notes notes={ chartNotes } /> }
-				</div>
+				<Notes notes={ chartNotes } />
 			</CardBody>
 		</Card>
 	);
