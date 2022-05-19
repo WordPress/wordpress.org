@@ -57,6 +57,8 @@ class Official_WordPress_Events {
 	 * @see https://dotorg.trac.wordpress.org/changeset/15351/
 	 */
 	public function schedule_cron_jobs() {
+		//return; // todo revert after fatals fixed
+
 		if ( ! wp_next_scheduled( 'owpe_prime_events_cache' ) ) {
 			wp_schedule_event( time(), 'hourly', 'owpe_prime_events_cache' );
 		}
