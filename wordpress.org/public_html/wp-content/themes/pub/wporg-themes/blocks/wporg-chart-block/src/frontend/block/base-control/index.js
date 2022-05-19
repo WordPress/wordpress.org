@@ -73,7 +73,7 @@ export default ( {
 	};
 
 	return (
-		<Card>
+		<Card className="wporg-chart-block__card">
 			<CardHeader>{ cardTitle }</CardHeader>
 			<CardBody>{ getContent() }</CardBody>
 		</Card>

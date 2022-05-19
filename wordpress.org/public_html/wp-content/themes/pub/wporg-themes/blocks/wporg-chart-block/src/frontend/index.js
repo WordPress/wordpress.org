@@ -16,10 +16,13 @@ const init = () => {
 		return;
 	}
 
-    // We may have multiple charts on the same page
-    containers.forEach( container => {
-        render( createElement( Block, { data: container.dataset }  ), container );
-    })	
+	// We may have multiple charts on the same page
+	containers.forEach( ( container ) => {
+		render(
+			createElement( Block, { data: container.dataset } ),
+			container
+		);
+	} );
 };
 
 document.addEventListener( 'DOMContentLoaded', init ); // eslint-disable-line

@@ -2,6 +2,10 @@
 	width: 100%;
 }
 
+.wporg-chart-block__card {
+	min-height: 400px;
+}
+
 .wporg-chart-block__actions label {
 	margin-right: 0.5rem;
 	font-size: 14px;

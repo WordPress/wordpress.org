@@ -26,12 +26,12 @@ const Block = ( { data } ) => {
 					<Actions />
 				</Fragment>
 			}
-            chartType={type}
+			chartType={ type }
 			chartData={ chartData }
-			chartHeadings={ headings.split(',') }
-			chartOptions={options.trim().length ? JSON.parse(options) : {} }
-			chartNotes={ notes.trim().length ? notes.split(',') : []  }
-			url={ `${url}?startDate=${startDate}` }
+			chartHeadings={ headings.split( ',' ) }
+			chartOptions={ options.trim().length ? JSON.parse( options ) : {} }
+			chartNotes={ notes.trim().length ? notes.split( ',' ) : [] }
+			url={ `${ url }?startDate=${ startDate }` }
 			mapFunction={ setChartData }
 		/>
 	);
@@ -39,6 +39,6 @@ const Block = ( { data } ) => {
 
 export default ( props ) => (
 	<AppContext>
-		<Block {...props} />
+		<Block { ...props } />
 	</AppContext>
 );
