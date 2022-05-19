@@ -28,7 +28,7 @@ function render_callback( $attributes, $content ) {
 			data-notes="%s" 
 			data-type="%s" 
 			data-options="%s"
-		>Loading Stats ...</div>',
+		></div>',
 		esc_attr( $attributes['dataURL'] ?? '' ),
 		esc_attr( $attributes['title'] ?? '' ),
 		esc_attr( $attributes['headings'] ?? '' ),
@@ -54,16 +54,16 @@ function register_assets() {
 	// Register our block script with WordPress.
 	wp_register_script(
 		'wporg-chart-block-block-script',
-		plugins_url( 'build/index.js', __FILE__ ),
+		get_template_directory_uri() . '/blocks/wporg-chart-block/build/index.js',
 		$block_info['dependencies'],
 		$block_info['version'],
 		false
 	);
 
-	// Register our block's base CSS.
+	// Register our block's base CSS .
 	wp_register_style(
 		'wporg-chart-block-block-style',
-		plugins_url( 'style.css', __FILE__ ),
+		get_template_directory_uri() . '/blocks/wporg-chart-block/build/style.css',
 		array(),
 		$block_info['version']
 	);
@@ -72,14 +72,14 @@ function register_assets() {
 	if ( ! is_admin() ) {
 		wp_register_script(
 			'wporg-chart-block-script',
-			plugin_dir_url( __FILE__ ) . 'build/frontend.js',
+			get_stylesheet_directory_uri() . '/blocks/wporg-chart-block/build/frontend.js',
 			$frontend_info['dependencies'],
 			$frontend_info['version'],
 			false
 		);
 		wp_register_style(
 			'wporg-chart-block-style',
-			plugin_dir_url( __FILE__ ) . 'build/frontend.css',
+			get_stylesheet_directory_uri() . '/blocks/wporg-chart-block/build/frontend.css',
 			array( 'wp-components' ),
 			$frontend_info['version']
 		);

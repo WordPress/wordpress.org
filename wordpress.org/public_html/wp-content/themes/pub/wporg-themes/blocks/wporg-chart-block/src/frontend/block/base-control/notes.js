@@ -9,9 +9,9 @@ export default ( { notes } ) => {
 	const [ showNotes, setShowNotes ] = useState( false );
 
 	return (
-		<div className="wporg-theme-review-stats__notes">
+		<div className="wporg-chart-block__notes">
 			<Button
-				className="wporg-theme-review-stats__notes__toggle"
+				className="wporg-chart-block__notes__toggle"
 				onClick={ () => setShowNotes( ! showNotes ) }
 			>
 				{ __( 'See notes', 'wporg' ) } ({ notes.length })
