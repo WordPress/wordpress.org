@@ -2,8 +2,14 @@
  * WordPress dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { Card, CardBody, CardHeader } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import {
+	Card,
+	CardBody,
+	CardHeader,
+	Flex,
+	Spinner,
+} from '@wordpress/components';
+import { Fragment, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import Chart from '../../chart';
 import Notes from './notes';
@@ -28,7 +34,7 @@ export default ( {
 		} )
 			.then( ( data ) => {
 				setFetchingData( false );
-				mapFunction(data);
+				mapFunction( data );
 			} )
 			.catch( () => {
 				setFetchingData( false );
@@ -36,22 +42,25 @@ export default ( {
 			} );
 	}, [ url ] );
 
-	if ( error ) {
-		return <p>{ error.message }</p>;
-	}
+	const getContent = () => {
+		if ( error ) {
+			return <p>{ error.message }</p>;
+		}
 
-	if ( fetchingData ) {
-		return <p>{ __( 'Loading stats ...', 'wporg' ) }</p>;
-	}
+		if ( fetchingData ) {
+			return (
+				<Flex align="center" justify="center">
+					<Spinner />
+				</Flex>
+			);
+		}
 
-	if ( ! chartData.length ) {
-		return <p>{ __( 'No Data', 'wporg' ) }</p>;
-	}
+		if ( ! chartData.length ) {
+			return <p>{ __( 'No Data', 'wporg' ) }</p>;
+		}
 
-	return (
-		<Card>
-			<CardHeader>{ cardTitle }</CardHeader>
-			<CardBody>
+		return (
+			<Fragment>
 				<Chart
 					type={ chartType }
 					headings={ chartHeadings }
@@ -59,7 +68,14 @@ export default ( {
 					options={ chartOptions }
 				/>
 				<Notes notes={ chartNotes } />
-			</CardBody>
+			</Fragment>
+		);
+	};
+
+	return (
+		<Card>
+			<CardHeader>{ cardTitle }</CardHeader>
+			<CardBody>{ getContent() }</CardBody>
 		</Card>
 	);
 };
