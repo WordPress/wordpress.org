@@ -74,7 +74,8 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		'meta' => $meta + array(
 			'registration_ip'  => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
 		),
-		'scores' => array()
+		'scores' => array(),
+		'cleared' => 0,
 	);
 
 	// reCaptcha v3 logging.
@@ -102,6 +103,11 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		(float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 ) &&
 		$passes_block_words
 	);
+
+	// Run a filter on the cleared status..
+	if ( ! apply_filters( 'wporg_login_registration_check_user', true, $pending_user ) ) {
+		$pending_user['cleared'] = false;
+	}
 
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
@@ -400,10 +406,15 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 		}
 	}
 
-	// If not manually approved, check against block_words.
+	// If not manually approved, check against block_words, and any other registration checks that are hooked in.
 	if ( $pending_user['cleared'] < 2 ) {
 		$passes_block_words = wporg_login_check_against_block_words( $pending_user );
 		if ( ! $passes_block_words ) {
+			$pending_user['cleared'] = 0;
+		}
+
+		// Check the filter.
+		if ( ! apply_filters( 'wporg_login_registration_check_user', true, $pending_user ) ) {
 			$pending_user['cleared'] = 0;
 		}
 	}
