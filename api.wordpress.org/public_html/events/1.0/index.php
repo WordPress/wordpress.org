@@ -1288,24 +1288,24 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			continue;
 		}
 
-		$start = $data['promo_start'];
+		$promo_start = $data['promo_start'];
 
 		/**
 		 * The targeted area of the regional camp promotion "zooms in" over the course of 6 weeks.
 		 */
-		if ( is_within_date_range( $current_time, $start, strtotime( '+ 2 weeks', $start ) ) ) {
-			// Phase 1: Show worldwide for first two weeks.
+		if ( is_within_date_range( $current_time, $promo_start, strtotime( '+ 2 weeks', $promo_start ) ) ) {
+			// Phase 1: Show worldwide for the first two weeks of the promo (8-6 weeks before the event).
 			$regional_wordcamps[] = $data['event'];
 
-		} elseif ( is_within_date_range( $current_time, strtotime( '+ 2 weeks', $start ), strtotime( '+ 4 weeks', $start ) ) ) {
-			// Phase 2: Show within regional countries for next two weeks.
+		} elseif ( is_within_date_range( $current_time, strtotime( '+ 2 weeks', $promo_start ), strtotime( '+ 4 weeks', $promo_start ) ) ) {
+			// Phase 2: Show within regional countries for the next two weeks (6-4 weeks before the event).
 			if ( ! empty( $location['country'] ) && in_array( strtoupper( $location['country'] ), $data['regional_countries'], true ) ) {
 				$regional_wordcamps[] = $data['event'];
 			}
 
-		} elseif ( is_within_date_range( $current_time, strtotime( '+ 4 weeks', $start ), strtotime( '+ 6 weeks', $start ) ) ) {
+		} elseif ( is_within_date_range( $current_time, strtotime( '+ 4 weeks', $promo_start ), strtotime( '+ 6 weeks', $promo_start ) ) ) {
 			/*
-			 * Phase 3: Show within the event country for the last two weeks of the promo.
+			 * Phase 3: Show within the event country for the last two weeks of the promo (4-2 weeks before the event).
 			 *
 			 * Note: This is _in addition to_ any countries that are within the normal search radius. It mostly
 			 * only has an effect in large countries like the US, where not all locations are covered by the
@@ -1316,7 +1316,8 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			}
 		}
 
-		// After the promo ends, the event will just be displayed to everyone in the normal search radius.
+		// After the promo ends, the event will just be displayed to everyone in the normal search radius (2 weeks
+		// before the event until it's over).
 	}
 
 	return array_merge( $regional_wordcamps, $local_events );
