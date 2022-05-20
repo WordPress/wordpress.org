@@ -10,7 +10,8 @@ add_filter(
 	'single_post_title',
 	function( $title ) {
 		if ( 'Review Stats' === $title ) {
-			$title = __( 'Review Stats', 'wporg-themes' );
+			/* translators: Stats about theme reviews.  */
+			$title = __( 'Theme Review Stats', 'wporg-themes' );
 		}
 
 		return $title;
