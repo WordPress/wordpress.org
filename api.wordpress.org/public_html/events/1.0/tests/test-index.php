@@ -175,8 +175,6 @@ class Test_Events extends TestCase {
 
 		$region_data = array(
 			'us' => array(
-				'promo_start' => strtotime( '2019-08-16 00:00:00' ),
-
 				'regional_countries' => array_merge(
 					get_iso_3166_2_country_codes( 'south america' ),
 					get_iso_3166_2_country_codes( 'north america' )

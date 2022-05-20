@@ -1198,11 +1198,6 @@ function get_regional_wordcamp_data() {
 		),
 	);
 
-	// `promo_start` should be 2 months before the Event's start date. See `maybe_add_regional_wordcamps()`.
-	foreach ( $events as & $event ) {
-		$event['promo_start'] = strtotime( $event['event']['date'] . ' - 2 months' );
-	}
-
 	return $events;
 }
 
@@ -1284,15 +1279,9 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 	$regional_wordcamps = array();
 
 	foreach ( $region_data as $region => $data ) {
-		if ( empty( $data['promo_start'] ) ) {
-			continue;
-		}
+		$promo_start = strtotime( $data['event']['date'] . ' - 2 months' );
 
-		$promo_start = $data['promo_start'];
-
-		/**
-		 * The targeted area of the regional camp promotion "zooms in" over the course of 6 weeks.
-		 */
+		// The targeted area of the regional camp promotion "zooms in" over the course of 6 weeks.
 		if ( is_within_date_range( $current_time, $promo_start, strtotime( '+ 2 weeks', $promo_start ) ) ) {
 			// Phase 1: Show worldwide for the first two weeks of the promo (8-6 weeks before the event).
 			$regional_wordcamps[] = $data['event'];
