@@ -118,7 +118,7 @@ class Test_Events extends TestCase {
 
 		sort( $actual_countries );
 
-		$this->assertSame( $actual_countries, $expected_countries );
+		$this->assertSame( $expected_countries, $actual_countries );
 	}
 
 	function data_get_events_country_restriction() : array {
@@ -133,13 +133,9 @@ class Test_Events extends TestCase {
 			),
 
 			/*
-			 * This assumes there will always be at least an upcoming event on both sides of the border, so the
+			 * This assumes there will always be at least 1 upcoming event on both sides of the border, so the
 			 * coordinates need to be half-way between two very active groups in different countries, where the
 			 * mid-point is less than `$event_distances['meetup']`.
-			 *
-			 * If Toronto, CA and Buffalo, US no longer work in the future, then another possible location would be
-			 * `53.997654, -6.403377` -- between Belfast, GB and Dublin, IE -- or `47.986952, -122.961350` --
-			 * between Seattle, US and Victoria, CA.
 			 *
 			 * See https://wordpress.slack.com/archives/C08M59V3P/p1524168308000202.
 			 */
@@ -148,12 +144,25 @@ class Test_Events extends TestCase {
 					'number'              => '500',
 					'restrict_by_country' => false,
 
+					// If one of these stops working, comment it out and try another.
 					'nearby' => array(
+						// Toronto CA and Buffalo US
 						'latitude'  => '43.254372',
 						'longitude' => '-79.063746',
+
+						// Belfast GB and Dublin IE
+						//'latitude'  => '53.997654',
+						//'longitude' => '-6.403377',
+
+						// Seattle US and Victoria CA
+						//'latitude'  => '47.986952',
+						//'longitude' => '-122.961350',
 					),
 				),
-				'expected_countries' => array( 'CA', 'US' ),
+				'expected_countries' => array(
+					'CA', 'US'
+					//'GB', 'IE'
+				),
 			),
 		);
 	}
@@ -971,7 +980,7 @@ class Test_Events extends TestCase {
 			),
 
 			// https://meta.trac.wordpress.org/ticket/3367
-			// The following tests ensure that West/East portlands return correctly with inversed timezones.
+			// The following tests ensure that the West/East Portlands return correctly with inversed timezones.
 			'usa-city-disambiguation' => array(
 				'input' => array(
 					'location_name' => 'Portland',
