@@ -1215,9 +1215,9 @@ class Test_Events extends TestCase {
 			'ip-asia' => array(
 				'input' => array( 'ip' => '86.108.55.28' ),
 				'expected' => array(
-					'description' => 'zarqa',
-					'latitude'    => '32.073',
-					'longitude'   => '36.088',
+					'description' => 'karak city',
+					'latitude'    => '31.164',
+					'longitude'   => '35.762',
 					'country'     => 'JO',
 					'internal'    => true,
 				),
