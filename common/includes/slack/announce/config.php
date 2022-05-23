@@ -388,7 +388,8 @@ function get_whitelist() {
 		),
 		'performance' => array(
 			// #core (inc committers) already included via get_parent_channel().
-			'shetheliving',
+			'clarkeemily', // @Emily Clarke on Slack
+			'shetheliving', // @Bethany Chobanian Lang (they/them) on Slack
 		),
 		'photos' => array(
 			'topher1kenobe',
