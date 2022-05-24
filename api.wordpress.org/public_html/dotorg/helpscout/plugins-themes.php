@@ -40,10 +40,11 @@ foreach ( [
 	$or_slugs = $slugs ? "OR post_name IN( {$slugs} )" : '';
 
 	$counts = $wpdb->get_results( $wpdb->prepare(
-		"SELECT post_status, COUNT(*) as count, group_concat( ID ) as ids, group_concat( post_title SEPARATOR ', ' ) as titles
+		"SELECT post_status, COUNT(*) as count, group_concat( ID ORDER BY post_title ) as ids, group_concat( post_title ORDER BY post_title SEPARATOR ', ' ) as titles
 		FROM $wpdb->posts
 		WHERE post_type = %s AND ( post_author = %s {$or_slugs} )
-		GROUP BY post_status",
+		GROUP BY post_status
+		ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'closed', 'approved', 'suspended', 'rejected', 'draft' )",
 		$post_type,
 		$user->ID
 	) );
@@ -72,13 +73,45 @@ foreach ( [
 		if ( "{$type}s@wordpress.org" === $request->mailbox->email ) {
 			$html .= '<ul>';
 			foreach ( $ids as $post_id ) {
-				$post = get_post( $post_id );
+				$post        = get_post( $post_id );
+				$post_status = '';
+
+				switch ( $post->post_status ) {
+					// Plugins
+					case 'rejected':
+						$post_status = '(Rejected)';
+						break;
+					case 'closed':
+					case 'disabled':
+						$post_status = '(Closed)';
+						break;
+					case 'pending':
+					case 'new':
+						$post_status = '(In Review)';
+						break;
+					case 'approved':
+						$post_status = '(Approved)';
+						break;
+
+					// Themes
+					case 'draft':
+						$post_status = '(In Review or Rejected)';
+						break;
+					case 'suspended':
+						$post_status = '(Suspended)';
+						break;
+					case 'delisted':
+						$post_status = '(Delisted)';
+						break;
+				}
+
 				$html .= sprintf(
-					'<li><a href="%s">%s</a> <a href="%s">#</a></li>',
+					'<li><a href="%s">%s</a> <a href="%s">#</a> %s</li>',
 					/* get_edit_post_link( $post ), // Won't work as post type not registered */
 					esc_url( add_query_arg( [ 'action' => 'edit', 'post' => $post_id ], admin_url( 'post.php' ) ) ),
 					esc_html( $post->post_title ),
-					get_permalink( $post )
+					get_permalink( $post ),
+					esc_html( $post_status )
 				);
 			}
 			$html .= '</ul>';
