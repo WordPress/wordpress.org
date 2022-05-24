@@ -36,6 +36,14 @@ foreach ( [
 		// TODO: Would be nice to pull for support reps too, but that's less common.
 	}
 
+	// Reported themes, shortcut, assume the slug is the title.. since it is..
+	if (
+		'theme' === $type &&
+		str_starts_with( $request->ticket->subject, 'Reported Theme:' )
+	) {
+		$slugs[] = sanitize_title_with_dashes( trim( explode( ':', $request->ticket->subject )[1] ) );
+	}
+
 	$slugs    = $slugs ? '"' . implode( '", "', array_map( 'esc_sql', $slugs ) ) . '"' : '';
 	$or_slugs = $slugs ? "OR post_name IN( {$slugs} )" : '';
 
