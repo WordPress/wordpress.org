@@ -95,7 +95,7 @@ the_post();
 						<tbody>
 						<tr>
 							<th>
-								6.0
+								6.1
 								<a href="https://core.trac.wordpress.org/tickets/major">(Trac)</a>
 							</th>
 							<td>2022</td>
