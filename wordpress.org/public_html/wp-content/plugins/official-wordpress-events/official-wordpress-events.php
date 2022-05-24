@@ -57,8 +57,6 @@ class Official_WordPress_Events {
 	 * @see https://dotorg.trac.wordpress.org/changeset/15351/
 	 */
 	public function schedule_cron_jobs() {
-		return; // todo revert after fatals fixed
-
 		if ( ! wp_next_scheduled( 'owpe_prime_events_cache' ) ) {
 			wp_schedule_event( time(), 'hourly', 'owpe_prime_events_cache' );
 		}
@@ -89,8 +87,8 @@ class Official_WordPress_Events {
 	 * @return Meetup_Client
 	 */
 	protected function get_meetup_client() {
-		require_once WPMU_PLUGIN_DIR . '/pub-sync/utilities/class-meetup-client.php';
 		require_once WPMU_PLUGIN_DIR . '/pub-sync/utilities/class-api-client.php';
+		require_once WPMU_PLUGIN_DIR . '/pub-sync/utilities/class-meetup-client.php';
 		require_once WPMU_PLUGIN_DIR . '/pub-sync/utilities/class-meetup-oauth2-client.php';
 
 		return new Meetup_Client();
@@ -761,7 +759,7 @@ class Official_WordPress_Events {
 					array( 'id' => $id )
 				);
 				$this->log( "Event missing. Marked DB ID {$id} as deleted." );
-			}	
+			}
 		}
 	}
 
