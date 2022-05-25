@@ -79,8 +79,12 @@ if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', $request->ticket->subje
 		) );
 	}
 
-	if ( $slack_user ) {
-		$slack_data = json_decode( $slack_user->profiledata );
+	$slack_data = $slack_user ? json_decode( $slack_user->profiledata ) : false;
+	if ( $slack_user && ! $slack_data ) {
+		$html .= '<hr/>';
+		$html .= '<ul><li>Slack: Has clicked signup link, but likely not finalised Slack signup flow.</li></ul>';
+	}
+	if ( $slack_data ) {
 		$html .= '<hr/>';
 		$html .= '<ul>';
 		$html .= '<li>Slack: <a href="https://wordpress.slack.com/archives/' . $slack_user->dm_id .  '">' . esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ) . '</a></li>';
