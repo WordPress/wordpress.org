@@ -204,6 +204,11 @@ function run( $data ) {
 	// By sending the channel ID, we can post to private groups.
 	$send->send( $data['channel_id'] );
 
+	// If it was broadcast in a private channel, don't try to broadcast to the public parent channel.
+	if ( 'privategroup' === $channel ) {
+		return;
+	}
+
 	// Broadcast this message as a non-@here to the "parent" channel too.
 	$parent_channel = get_parent_channel( $channel );
 
