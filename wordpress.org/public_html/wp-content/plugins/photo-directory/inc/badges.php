@@ -21,7 +21,7 @@ class Badges {
 	}
 
 	/**
-	 * Watch for pattern status changes, and assign (or remove) the Pattern Author badge as appropriate.
+	 * Watch for post status changes, and assign (or remove) the Photo Contributor badge as appropriate.
 	 */
 	public static function status_transitions( $new_status, $old_status, $post ) {
 		$post = get_post( $post );
