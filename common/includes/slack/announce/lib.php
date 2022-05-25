@@ -174,7 +174,7 @@ function run( $data ) {
 
 		if (
 			$channel_info &&
-			( channel_info['is_private'] || $channel_info['is_group'] || $channel_info['is_mpim'] )
+			( $channel_info['is_private'] || $channel_info['is_group'] || $channel_info['is_mpim'] )
 		) {
 			$channel = 'privategroup';
 		}
