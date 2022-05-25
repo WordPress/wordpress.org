@@ -10,8 +10,8 @@ require( $base_dir . '/wp-init.php' );
 include_once __DIR__ . '/class-helpscout.php';
 
 // function to verify signature from HelpScout
-function isFromHelpScout($data, $signature) {
-	if ( ! defined( 'HELPSCOUT_SECRET_KEY' ) ) {
+function is_from_helpscout( $data, $signature ) {
+	if ( ! defined( 'HELPSCOUT_SECRET_KEY' ) || ! $signature ) {
 		return false;
 	}
 
@@ -92,19 +92,13 @@ function get_user_email_for_email( $request ) {
 	return $user->user_email ?? $email;
 }
 
-//  HelpScout sends json data in the POST, so grab it from the input directly
-$data = file_get_contents( 'php://input' );
+// HelpScout sends json data in the POST, so grab it from the input directly.
+$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
 
-// check the signature header
-if ( ! isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+// Check the signature matches.
+if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ) ) {
 	exit;
 }
 
-$signature = $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'];
-if ( ! isFromHelpScout( $data, $signature ) ) {
-	// failure = no response
-	exit;
-}
-
-// get the info from HS
-return json_decode( $data );
+// get the info from HS.
+return json_decode( $HTTP_RAW_POST_DATA );
