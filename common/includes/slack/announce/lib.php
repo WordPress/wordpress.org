@@ -5,6 +5,32 @@ use Dotorg\Slack\Send;
 
 require_once __DIR__ . '/config.php';
 
+function api_call( $method, $content = array() ) {
+	$content['token'] = SLACK_TOKEN;
+	$content = http_build_query( $content );
+	$context = stream_context_create( array(
+	    'http' => array(
+		'method'  => 'POST',
+		'header'  => 'Content-Type: application/x-www-form-urlencoded' . PHP_EOL,
+		'content' => $content,
+	    ),
+	) );
+
+	$response = file_get_contents( 'https://slack.com/api/' . $method, false, $context );
+	return json_decode( $response, true );
+}
+
+function get_channel_info( $channel_id ) {
+	$channel_info = api_call(
+		'conversations.info',
+		array(
+			'channel' => $channel_id,
+		)
+	);
+
+	return $channel_info['channel'] ?? false;
+}
+
 function get_whitelist_for_channel( $channel ) {
 	$whitelist = get_whitelist();
 
@@ -128,9 +154,31 @@ function get_parent_channel( $channel ) {
 function run( $data ) {
 	global $wpdb;
 
-	$channel = $data['channel_name'];
-	$user = false;
+	/* Respond with a 200 ASAP.
+	 * The inline API calls might delay this more than 3s, which will cause Slack to error (or retry).
+	 * We don't need to respond with the body until later, but the 200 header must make it back within 3s.
+	 */
+	http_response_code( 200 );
+	ignore_user_abort( true );
+	flush();
+
+	$channel           = $data['channel_name'];
+	$channel_id        = $data['channel_id'];
+	$user              = false;
 	$slack_profiledata = false;
+	$channel_info      = false;
+
+	// Slack sends the channel_name as 'privategroup' for old private channels, but the actual private channel name for newer private channels.
+	if ( 'privategroup' !== $channel ) {
+		$channel_info = get_channel_info( $channel_id );
+
+		if (
+			$channel_info &&
+			( channel_info['is_private'] || $channel_info['is_group'] || $channel_info['is_mpim'] )
+		) {
+			$channel = 'privategroup';
+		}
+	}
 
 	// Find the user_login for the Slack user_id
 	if ( isset( $data['user_id'] ) ) {
@@ -202,12 +250,7 @@ function run( $data ) {
 	}
 
 	// By sending the channel ID, we can post to private groups.
-	$send->send( $data['channel_id'] );
-
-	// If it was broadcast in a private channel, don't try to broadcast to the public parent channel.
-	if ( 'privategroup' === $channel ) {
-		return;
-	}
+	$send->send( $channel_id );
 
 	// Broadcast this message as a non-@here to the "parent" channel too.
 	$parent_channel = get_parent_channel( $channel );
@@ -226,6 +269,5 @@ function run( $data ) {
 
 	$send->set_text( 'In #' . $channel . ': ' . $text );
 	$send->send( '#' . $parent_channel );
-
 }
 
