@@ -227,14 +227,26 @@ ul, ol {
 	background: #fff;
 }
 
-.theme-browser .theme .theme-screenshot img {
+.theme-browser .theme .theme-screenshot::before {
+	float: left;
+	padding-top: 75%;
+	content: '';
+}
+
+.theme-browser .theme .theme-screenshot::after {
 	display: block;
-	margin: 0 auto;
-	height: auto;
-	max-height: 300px;
-	left: 0;
-	position: inherit;
+	content: '';
+	clear: both;
+}
+
+.theme-browser .theme .theme-screenshot > img {
+	position: absolute;
 	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	object-fit: cover;
 	-webkit-transform: translateZ( 0 );
 	transition: opacity 0.2s ease-in-out;
 }
