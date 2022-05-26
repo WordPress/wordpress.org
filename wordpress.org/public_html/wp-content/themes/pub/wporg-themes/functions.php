@@ -7,11 +7,6 @@
  */
 
 /**
- * Require block files.
- */
-require_once __DIR__ . '/blocks/wporg-chart-block/plugin.php';
-
-/**
  * Sets up theme defaults and registers support for various WordPress features.
  *
  * Note that this function is hooked into the after_setup_theme hook, which
