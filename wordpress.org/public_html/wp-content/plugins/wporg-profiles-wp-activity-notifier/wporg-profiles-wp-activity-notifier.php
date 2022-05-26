@@ -111,7 +111,7 @@ class WPOrg_WP_Activity_Notifier {
 		}
 
 		// Some Handbook posts are automatically created and don't have an author.
-		elseif ( $post->wporg_markdown_source || 0 === $post->post_author ) {
+		elseif ( $post->wporg_markdown_source || ! $post->post_author ) {
 			$notifiable = false;
 		}
 
