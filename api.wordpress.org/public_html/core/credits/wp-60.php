@@ -434,6 +434,7 @@ class WP_60_Credits extends WP_Credits {
 			'otshelnik-fm',
 			'overclokk',
 			'ovidiul',
+			'paaljoachim',
 			'paapst',
 			'pablohoneyhoney',
 			'paragoninitiativeenterprises',
