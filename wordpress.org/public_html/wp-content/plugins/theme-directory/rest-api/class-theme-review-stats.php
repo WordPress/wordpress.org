@@ -35,7 +35,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_uploaded_themes' ),
-				'permission_callback' => array( $this, 'get_items_permissions' ),
+				'permission_callback' => '__return_true',
 			)
 		);
 
@@ -45,7 +45,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_by_theme_type' ),
-				'permission_callback' => array( $this, 'get_items_permissions' ),
+				'permission_callback' => '__return_true',
 			)
 		);
 
@@ -55,7 +55,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_by_segment' ),
-				'permission_callback' => array( $this, 'get_items_permissions' ),
+				'permission_callback' => '__return_true',
 			)
 		);
 
@@ -65,7 +65,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_by_author_type' ),
-				'permission_callback' => array( $this, 'get_items_permissions' ),
+				'permission_callback' => '__return_true',
 			)
 		);
 
