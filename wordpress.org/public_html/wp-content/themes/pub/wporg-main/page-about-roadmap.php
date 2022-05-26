@@ -41,7 +41,7 @@ the_post();
 						<?php
 						printf(
 							/* translators: 1: Link to Gutenberg demo page, 2: Link to Feature Projects Overview page */
-							wp_kses_post( __( 'WordPress is continually under development. Currently, work is underway on Phase 2 of the Gutenberg project. The Gutenberg project is a reimagination of the way we manage content on the web. Its goal is to broaden access to web presence, which is a foundation of successful modern businesses. Phase 1 was the new block editor, which was released in WordPress 5.0, you can <a href="%1$s">see that in action here</a>. In 2021 we’re focusing on merging full site editing (Phase 2) into WordPress which brings block editing to the entire site, not just posts and pages. For more information on full site editing, its components, and other active feature work, check out the <a href="%2$s">Feature Projects Overview</a> page.', 'wporg' ) ),
+							wp_kses_post( __( 'WordPress is continually under development. Currently, work is underway on Phase 2 of the Gutenberg project. The Gutenberg project is a reimagination of the way we manage content on the web. Its goal is to broaden access to web presence, which is a foundation of successful modern businesses. Phase 1 was the new block editor, which was released in WordPress 5.0, you can <a href="%1$s">see that in action here</a>. In 2021 we were focusing on merging full site editing (Phase 2) into WordPress which brings block editing to the entire site, not just posts and pages. For more information on full site editing, its components, and other active feature work, check out the <a href="%2$s">Feature Projects Overview</a> page.', 'wporg' ) ),
 							esc_url( home_url( '/gutenberg/' ) ),
 							'https://make.wordpress.org/core/features/'
 						);
@@ -52,17 +52,81 @@ the_post();
 						<?php
 						printf(
 							/* translators: %s: Link to make/core blog post */
-							wp_kses_post( __( 'For 2021 the project has some big picture goals, as outlined in <a href="%s">this post</a>:', 'wporg' ) ),
-							'https://make.wordpress.org/updates/2021/01/21/big-picture-goals-2021/'
+							wp_kses_post( __( 'For 2022 the project has some big picture goals, as outlined in <a href="%s">this post</a>:', 'wporg' ) ),
+							'https://make.wordpress.org/project/2022/01/21/big-picture-goals-2022/'
 						);
 						?>
 					</p>
 
-					<ul>
-						<li><?php echo wp_kses_post( __( '<strong>Full site editing</strong>: Bring into the Gutenberg plugin, and subsequently WordPress Core, the ability to edit all elements of a site using Gutenberg blocks. This will include all in-progress features designed to help existing users transition to Gutenberg as well. Scope/Timeline: MVP in the plugin by April 2021, v1 in Core by WordPress 5.8.', 'wporg' ) ); ?></li>
-						<li><?php echo wp_kses_post( __( '<strong>LearnWP</strong>: Enable WordPress skills-leveling by providing workshops, pre-recorded trainings, and self-serve learning opportunities on learn.wordpress.org. Scope/Timeline: regularly publish new workshops and lesson plans, maintain a high pass rate on workshop quizzes to establish learner success and comprehension.', 'wporg' ) ); ?></li>
-						<li><?php echo wp_kses_post( __( '<strong>Contributor tools</strong>: Decrease the manual overhead of maintenance work for teams through better tooling. Scope/Timeline: Varied, and pending additional testing.', 'wporg' ) ); ?></li>
-					</ul>
+					<ol>
+						<li><?php echo wp_kses_post( __( '<strong>Drive adoption of the new WordPress editor</strong> – Following WordPress 5.9, our focus will be driving user adoption by making full site editing (and its tools) easy to find and use.', 'wporg' ) ); ?>
+							<ol>
+								<li><?php echo wp_kses_post( __( '<strong>For the CMS</strong> – Get high quality feedback, ensure actionable tickets come from the feedback with collaboration from design as needed, and ship code that solves our users’ most pressing needs.', 'wporg' ) ); ?>
+									<ol>
+										<li><?php echo wp_kses_post( __( 'Invite more users and extenders to participate in the FSE Outreach program (10–12 calls for testing).', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Host regular design-driven user testing (one test a week).', 'wporg' ) ); ?></li>
+									</ol>
+								</li>
+								<li><?php echo wp_kses_post( __( '<strong>For the Community</strong> – Share our knowledge and resources in a way that inspires and motivates our users to action. ', 'wporg' ) ); ?>
+									<ol>
+										<li><?php echo wp_kses_post( __( 'Invite more users and extenders to augment their skills through LearnWP.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Turn routine support issues into new evergreen content (10–15 pieces of canonical content using Learn, Docs, WordPress.org, etc).', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Translate high impact user-facing content across Rosetta sites (15–20 locales).', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Host audience-specific WordPress events (10–12 by common language, interest, or profession).', 'wporg' ) ); ?></li>
+									</ol>
+								</li>
+								<li><?php echo wp_kses_post( __( '<strong>For the Ecosystem</strong> – Prioritize full site editing tools and content across the ecosystem for all users.', 'wporg' ) ); ?>
+									<ol>
+										<li><?php echo wp_kses_post( __( 'Highlight block themes and plugins in the directories.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Provide tools/training to learn how to build block themes.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Improve the block developer experience.', 'wporg' ) ); ?></li>
+									</ol>
+								</li>
+							</ol>
+						</li>
+						<li><?php echo wp_kses_post( __( '<strong>Support open source alternatives for all site-building necessities</strong> – Provide access to open source elements needed to get a site up and running.', 'wporg' ) ); ?>
+							<ol>
+								<li><?php echo wp_kses_post( __( '<strong>For the CMS</strong>', 'wporg' ) ); ?>
+									<ol>
+										<li><?php echo wp_kses_post( __( 'Update new user onboarding flow to match modern standards.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Integrate Openverse into wp-admin.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Integrate Photo Directory submissions into wp-admin.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Pattern creator', 'wporg' ) ); ?></li>
+									</ol>
+								</li>
+								<li><?php echo wp_kses_post( __( '<strong>For the Community</strong>', 'wporg' ) ); ?>
+									<ol>
+										<li><?php echo wp_kses_post( __( 'Ship LearnWP learning opportunities (1 workshop/week, 6 courses/year)', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Increase the number of social learning spaces (4 SLSs/week)', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Block theme contribution drive (500 block themes in the repo).', 'wporg' ) ); ?></li>
+									</ol>
+								</li>
+								<li><?php echo wp_kses_post( __( '<strong>For the Ecosystem</strong>', 'wporg' ) ); ?>
+									<ol>
+										<li><?php echo wp_kses_post( __( 'Update the theme previewer to support block themes.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Update the content &amp; design across WP.org.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Update Polyglots tools to Improve the translation experience.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Create a developer-focused communications site.', 'wporg' ) ); ?></li>
+									</ol>
+								</li>
+							</ol>
+						</li>
+						<li><?php echo wp_kses_post( __( '<strong>Open Source stewards</strong>: Iterate on WordPress’ open source methodologies to guide and sustain long term success for WordPress as well as the overall open source community that we are part of.', 'wporg' ) ); ?>
+							<ol>
+								<li><?php echo wp_kses_post( __( 'For All', 'wporg' ) ); ?>
+									<ol>
+										<li><?php echo wp_kses_post( __( '5ftF program expansion', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Recruitment of future leaders in the community', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Onboarding of current leaders in the community', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Upstream contributions to other OS projects (PHP, JS, Matrix, or the like)', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'WordPress Project maintenance', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Ancillary programs', 'wporg' ) ); ?></li>
+									</ol>
+								</li>
+							</ol>
+						</li>
+						<li><?php echo wp_kses_post( __( '<strong>Bonus</strong>: Preparations for WordPress’ 20th birthday', 'wporg' ) ); ?></li>
+					</ol>
 
 					<p>
 						<?php
@@ -106,8 +170,8 @@ the_post();
 					<p><?php
 						printf(
 							/* translators: %s: Link to Make WordPress Core blog post */
-							wp_kses_post( __( 'For more information on the planned release schedule, please read the Make WordPress Core post about the <a href="%s">tentative release calendar for 2020-2021</a>.', 'wporg' ) ),
-							'https://make.wordpress.org/core/2019/11/21/tentative-release-calendar-2020-2021/'
+							wp_kses_post( __( 'For more information on the planned release schedule, please read the Make WordPress Core post about the <a href="%s">proposed major release timing for 2022</a>.', 'wporg' ) ),
+							'https://make.wordpress.org/core/2022/01/27/proposal-2022-major-release-timing/'
 						);
 						?>
 					</p>
