@@ -115,6 +115,10 @@ class WPOrg_WP_Activity_Notifier {
 			$notifiable = false;
 		}
 
+		elseif ( $post->_xpost_original_permalink || str_starts_with( $post->post_name, 'xpost-' ) ) {
+			$notifiable = false;
+		}
+
 		else {
 			$notifiable = true;
 		}

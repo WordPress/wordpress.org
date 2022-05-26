@@ -56,11 +56,15 @@ function test_post( WPOrg_WP_Activity_Notifier $notifier ) : void {
 		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1 ) ); // post
 
 	} else {
+		// These should notify
 		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1802 ) ); // post
 		sleep( 1 ); // buddypress doesn't show activity that happens at the exact same time
 		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1826 ) ); // handbook
 		sleep( 1 );
 		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1832 ) ); // course
+
+		// These should not notify
+		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 722 ) ); // x-post (should not notify, check https://profiles.wordpress.org/jmdodd/)
 	}
 }
 
