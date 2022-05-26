@@ -327,6 +327,7 @@ class WP_60_Credits extends WP_Credits {
 			'kapacity',
 			'kapilpaul',
 			'karmatosed',
+			'karolinakulinska',
 			'karpstrucking',
 			'kasparsd',
 			'kbat82',
