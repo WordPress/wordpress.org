@@ -35,7 +35,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_uploaded_themes' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'get_items_permissions' ),
 			)
 		);
 
