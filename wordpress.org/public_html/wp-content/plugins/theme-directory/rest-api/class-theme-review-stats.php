@@ -156,7 +156,7 @@ class Theme_Review_Stats extends WP_REST_Controller {
 	}
 
 	/**
-	 * Returns a list of published themes.
+	 * Returns a list of published themes. The current month is removed since data is currently incomplete.
 	 *
 	 * @return void
 	 */
@@ -166,11 +166,12 @@ class Theme_Review_Stats extends WP_REST_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		return $wpdb->get_results(
 			"	
-			SELECT p.post_name as postName,
-				p.post_author as post_author,
+			SELECT 
+				p.post_name AS postName,
+				p.post_author AS post_author,
 				substring_index( substring_index( pm.meta_value, '\"', 4 ), '\"', -1 ) AS author,
-				LEFT(p.post_date, 7) as published_on,
-				group_concat( t.slug SEPARATOR ', ' ) as tags
+				LEFT(p.post_date, 7) AS published_on,
+				group_concat( t.slug SEPARATOR ', ' ) AS tags
 
 			FROM  {$wpdb->posts} p
 			JOIN  {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_author'
@@ -178,10 +179,10 @@ class Theme_Review_Stats extends WP_REST_Controller {
 			LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'post_tag'
 			LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
 
-			WHERE p.post_type = 'repopackage' and p.post_status = 'publish'
+			WHERE p.post_type = 'repopackage' AND p.post_status = 'publish' AND p.post_date < DATE_FORMAT(NOW() ,'%Y-%m-01')
 
-			Group by p.ID
-			Order By published_on asc
+			GROUP by p.ID
+			ORDER By published_on ASC
 			"
 		);
 	}
