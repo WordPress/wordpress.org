@@ -1,3 +1,6 @@
+// Set the source directory, prevents an undefined warning in the webpack config.
+process.env.WP_SRC_DIRECTORY = 'src';
+
 module.exports = function ( grunt ) {
 	const isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 	const defaultWebpackConfig = require( '@wordpress/scripts/config/webpack.config' );
