@@ -67,7 +67,7 @@ the_post();
 										<li><?php echo wp_kses_post( __( 'Host regular design-driven user testing (one test a week).', 'wporg' ) ); ?></li>
 									</ol>
 								</li>
-								<li><?php echo wp_kses_post( __( '<strong>For the Community</strong> – Share our knowledge and resources in a way that inspires and motivates our users to action. ', 'wporg' ) ); ?>
+								<li><?php echo wp_kses_post( __( '<strong>For the Community</strong> – Share our knowledge and resources in a way that inspires and motivates our users to action.', 'wporg' ) ); ?>
 									<ol>
 										<li><?php echo wp_kses_post( __( 'Invite more users and extenders to augment their skills through LearnWP.', 'wporg' ) ); ?></li>
 										<li><?php echo wp_kses_post( __( 'Turn routine support issues into new evergreen content (10–15 pieces of canonical content using Learn, Docs, WordPress.org, etc).', 'wporg' ) ); ?></li>
