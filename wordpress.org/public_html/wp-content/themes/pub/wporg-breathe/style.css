@@ -513,6 +513,10 @@ input[type="submit"]:hover {
 .o2-post #searchform:last-child {
 	margin-bottom: 5em;
 }
+.o2-post #searchform #searchsubmit {
+	height: 33.5px;
+	padding-bottom: .6em;
+}
 
 pre, code {
 	font-size: 0.9em;
