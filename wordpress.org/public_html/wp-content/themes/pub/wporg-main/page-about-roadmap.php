@@ -105,7 +105,7 @@ the_post();
 									<ol>
 										<li><?php echo wp_kses_post( __( 'Update the theme previewer to support block themes.', 'wporg' ) ); ?></li>
 										<li><?php echo wp_kses_post( __( 'Update the content &amp; design across WP.org.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Update Polyglots tools to Improve the translation experience.', 'wporg' ) ); ?></li>
+										<li><?php echo wp_kses_post( __( 'Update Polyglots tools to improve the translation experience.', 'wporg' ) ); ?></li>
 										<li><?php echo wp_kses_post( __( 'Create a developer-focused communications site.', 'wporg' ) ); ?></li>
 									</ol>
 								</li>
