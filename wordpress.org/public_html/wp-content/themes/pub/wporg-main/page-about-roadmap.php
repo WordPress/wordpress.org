@@ -63,23 +63,23 @@ the_post();
 							<ol>
 								<li><?php echo wp_kses_post( __( '<strong>For the CMS</strong> – Get high quality feedback, ensure actionable tickets come from the feedback with collaboration from design as needed, and ship code that solves our users’ most pressing needs.', 'wporg' ) ); ?>
 									<ol>
-										<li><?php echo wp_kses_post( __( 'Invite more users and extenders to participate in the FSE Outreach program (10–12 calls for testing).', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Host regular design-driven user testing (one test a week).', 'wporg' ) ); ?></li>
+										<li><?php esc_html_e( 'Invite more users and extenders to participate in the FSE Outreach program (10–12 calls for testing).', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Host regular design-driven user testing (one test a week).', 'wporg' ); ?></li>
 									</ol>
 								</li>
 								<li><?php echo wp_kses_post( __( '<strong>For the Community</strong> – Share our knowledge and resources in a way that inspires and motivates our users to action.', 'wporg' ) ); ?>
 									<ol>
-										<li><?php echo wp_kses_post( __( 'Invite more users and extenders to augment their skills through LearnWP.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Turn routine support issues into new evergreen content (10–15 pieces of canonical content using Learn, Docs, WordPress.org, etc).', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Translate high impact user-facing content across Rosetta sites (15–20 locales).', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Host audience-specific WordPress events (10–12 by common language, interest, or profession).', 'wporg' ) ); ?></li>
+										<li><?php esc_html_e( 'Invite more users and extenders to augment their skills through LearnWP.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Turn routine support issues into new evergreen content (10–15 pieces of canonical content using Learn, Docs, WordPress.org, etc).', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Translate high impact user-facing content across Rosetta sites (15–20 locales).', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Host audience-specific WordPress events (10–12 by common language, interest, or profession).', 'wporg' ); ?></li>
 									</ol>
 								</li>
 								<li><?php echo wp_kses_post( __( '<strong>For the Ecosystem</strong> – Prioritize full site editing tools and content across the ecosystem for all users.', 'wporg' ) ); ?>
 									<ol>
-										<li><?php echo wp_kses_post( __( 'Highlight block themes and plugins in the directories.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Provide tools/training to learn how to build block themes.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Improve the block developer experience.', 'wporg' ) ); ?></li>
+										<li><?php esc_html_e( 'Highlight block themes and plugins in the directories.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Provide tools/training to learn how to build block themes.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Improve the block developer experience.', 'wporg' ); ?></li>
 									</ol>
 								</li>
 							</ol>
@@ -88,39 +88,39 @@ the_post();
 							<ol>
 								<li><?php echo wp_kses_post( __( '<strong>For the CMS</strong>', 'wporg' ) ); ?>
 									<ol>
-										<li><?php echo wp_kses_post( __( 'Update new user onboarding flow to match modern standards.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Integrate Openverse into wp-admin.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Integrate Photo Directory submissions into wp-admin.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Pattern creator', 'wporg' ) ); ?></li>
+										<li><?php esc_html_e( 'Update new user onboarding flow to match modern standards.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Integrate Openverse into wp-admin.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Integrate Photo Directory submissions into wp-admin.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Pattern creator', 'wporg' ); ?></li>
 									</ol>
 								</li>
 								<li><?php echo wp_kses_post( __( '<strong>For the Community</strong>', 'wporg' ) ); ?>
 									<ol>
-										<li><?php echo wp_kses_post( __( 'Ship LearnWP learning opportunities (1 workshop/week, 6 courses/year)', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Increase the number of social learning spaces (4 SLSs/week)', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Block theme contribution drive (500 block themes in the repo).', 'wporg' ) ); ?></li>
+										<li><?php esc_html_e( 'Ship LearnWP learning opportunities (1 workshop/week, 6 courses/year)', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Increase the number of social learning spaces (4 SLSs/week)', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Block theme contribution drive (500 block themes in the repo).', 'wporg' ); ?></li>
 									</ol>
 								</li>
 								<li><?php echo wp_kses_post( __( '<strong>For the Ecosystem</strong>', 'wporg' ) ); ?>
 									<ol>
-										<li><?php echo wp_kses_post( __( 'Update the theme previewer to support block themes.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Update the content &amp; design across WP.org.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Update Polyglots tools to improve the translation experience.', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Create a developer-focused communications site.', 'wporg' ) ); ?></li>
+										<li><?php esc_html_e( 'Update the theme previewer to support block themes.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Update the content &amp; design across WP.org.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Update Polyglots tools to improve the translation experience.', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Create a developer-focused communications site.', 'wporg' ); ?></li>
 									</ol>
 								</li>
 							</ol>
 						</li>
 						<li><?php echo wp_kses_post( __( '<strong>Open Source stewards</strong>: Iterate on WordPress’ open source methodologies to guide and sustain long term success for WordPress as well as the overall open source community that we are part of.', 'wporg' ) ); ?>
 							<ol>
-								<li><?php echo wp_kses_post( __( 'For All', 'wporg' ) ); ?>
+								<li><?php esc_html_e( 'For All', 'wporg' ); ?>
 									<ol>
-										<li><?php echo wp_kses_post( __( '5ftF program expansion', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Recruitment of future leaders in the community', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Onboarding of current leaders in the community', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Upstream contributions to other OS projects (PHP, JS, Matrix, or the like)', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'WordPress Project maintenance', 'wporg' ) ); ?></li>
-										<li><?php echo wp_kses_post( __( 'Ancillary programs', 'wporg' ) ); ?></li>
+										<li><?php esc_html_e( '5ftF program expansion', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Recruitment of future leaders in the community', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Onboarding of current leaders in the community', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Upstream contributions to other OS projects (PHP, JS, Matrix, or the like)', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'WordPress Project maintenance', 'wporg' ); ?></li>
+										<li><?php esc_html_e( 'Ancillary programs', 'wporg' ); ?></li>
 									</ol>
 								</li>
 							</ol>
