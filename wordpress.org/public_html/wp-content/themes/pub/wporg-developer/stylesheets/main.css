@@ -329,7 +329,7 @@ input {
 }
 
 .devhub-wrap #content, .devhub-wrap #content-area {
-  padding: 0 10px;
+  padding: 0 max( 20px, 2% );
 }
 
 .devhub-wrap #content .toc-heading, .devhub-wrap #content-area .toc-heading {
@@ -659,7 +659,8 @@ input {
 .devhub-wrap .site-content:before,
 .devhub-wrap .site-content:after,
 .devhub-wrap .site-footer:before,
-.devhub-wrap .site-footer:after {
+.devhub-wrap .site-footer:after,
+.devhub-wrap section:after {
   content: '';
   display: table;
 }
@@ -668,7 +669,8 @@ input {
 .devhub-wrap .entry-content:after,
 .devhub-wrap .comment-content:after,
 .devhub-wrap .site-content:after,
-.devhub-wrap .site-footer:after {
+.devhub-wrap .site-footer:after,
+.devhub-wrap section:after {
   clear: both;
 }
 
@@ -857,14 +859,6 @@ input {
 .devhub-wrap h2.entry-title a {
   text-decoration: none;
   color: #606060;
-}
-
-.devhub-wrap section {
-  overflow: auto;
-}
-
-.devhub-wrap section.error-404 {
-  overflow: visible;
 }
 
 .devhub-wrap .home-landing .section {
@@ -2779,8 +2773,6 @@ body.responsive-show #o2-expand-editor {
     max-width: 100%;
     width: 100%;
   }
-  .devhub-wrap #content,
-  .devhub-wrap #content-area,
   .devhub-wrap .inner-wrap {
     max-width: 100%;
     padding: 0 13px;
@@ -2788,9 +2780,6 @@ body.responsive-show #o2-expand-editor {
   .devhub-wrap #content-area .has-sidebar,
   .devhub-wrap .inner-wrap .has-sidebar {
     width: 100%;
-  }
-  .devhub-wrap #content-area {
-    padding-left: 2%;
   }
   .devhub-wrap.archive .meta, .devhub-wrap.search .meta {
     font-size: 100%;
@@ -2807,12 +2796,6 @@ body.responsive-show #o2-expand-editor {
   }
   .devhub-wrap.archive .sourcefile, .devhub-wrap.search .sourcefile {
     float: left;
-  }
-}
-
-@media (min-width: 43em) and (max-width: 43em) {
-  .devhub-wrap #content-area {
-    padding-left: 2%;
   }
 }
 

@@ -27,7 +27,7 @@
 	}
 
 	#content, #content-area {
-		padding: 0 10px;
+		padding: 0 #{"max( 20px, 2% )"};
 
 		.toc-heading {
 			clear: left;
@@ -299,7 +299,8 @@
 	.site-content:before,
 	.site-content:after,
 	.site-footer:before,
-	.site-footer:after {
+	.site-footer:after,
+	section:after {
 		content: '';
 		display: table;
 	}
@@ -308,7 +309,8 @@
 	.entry-content:after,
 	.comment-content:after,
 	.site-content:after,
-	.site-footer:after {
+	.site-footer:after,
+	section:after {
 		clear: both;
 	}
 
@@ -505,13 +507,6 @@
 	 * section styles
 	 */
 
-	section {
-		overflow: auto;
-	}
-
-	section.error-404 {
-		overflow: visible;
-	}
 	.home-landing .section {
 		padding: 50px 0 10px;
 		padding: 5rem 0 1rem;
@@ -2090,7 +2085,7 @@ div[class*="-table-of-contents-container"] {
 				border-right: 1px solid rgba(0,0,0,0.05);
 				border-left: none;
 			}
-	
+
 			&.menu-item-has-children > .expandable > a {
 				padding-right: 30px;
 			}
@@ -2357,8 +2352,6 @@ body.responsive-show {
 		max-width: 100%;
 		width: 100%;
 
-		#content,
-		#content-area,
 		.inner-wrap {
 			max-width: 100%;
 			padding: 0 13px;
@@ -2368,9 +2361,6 @@ body.responsive-show {
 			.has-sidebar {
 				width: 100%;
 			}
-		}
-		#content-area {
-			padding-left: 2%;
 		}
 
 		&.archive, &.search {
@@ -2396,11 +2386,6 @@ body.responsive-show {
 
 			.sourcefile {
 				float: left;
-			}
-		}
-		#content-area {
-			@media (max-width: 43em) {
-				padding-left: 2%;
 			}
 		}
 	}
