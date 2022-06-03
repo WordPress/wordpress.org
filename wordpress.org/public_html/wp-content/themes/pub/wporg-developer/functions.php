@@ -259,6 +259,16 @@ function widgets_init() {
 		'before_title'  => '<h4 class="widget-title">',
 		'after_title'   => '</h4>',
 	) );
+
+	register_sidebar( array(
+		'name'          => __( 'Landing Page Footer - Right', 'wporg' ),
+		'id'            => 'landing-footer-3',
+		'description'   => __( 'Appears in footer of the primary landing page', 'wporg' ),
+		'before_widget' => '<div id="%1$s" class="widget box %2$s">',
+		'after_widget'  => '</div>',
+		'before_title'  => '<h4 class="widget-title">',
+		'after_title'   => '</h4>',
+	) );
 }
 
 /**

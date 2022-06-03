@@ -70,20 +70,19 @@ get_header(); ?>
 				<?php if ( is_active_sidebar( 'landing-footer-1') ) { ?>
 					<?php dynamic_sidebar( 'landing-footer-1' ); ?>
 				<?php } else { ?>
-					<div class=" box"></div>
+					<div class="box"></div>
 				<?php } ?>
-
-				<div class="box">
-					<h3 class="widget-title"><?php _e( 'Contribute', 'wporg' ); ?></h3>
-					<ul class="unordered-list no-bullets">
-						<li><a href="https://make.wordpress.org/" class="make-wp-link"><?php _e( 'Help Make WordPress', 'wporg' ); ?></a></li>
-					</ul>
-				</div>
 
 				<?php if ( is_active_sidebar( 'landing-footer-2') ) { ?>
 					<?php dynamic_sidebar( 'landing-footer-2' ); ?>
 				<?php } else { ?>
-					<div class=" box"></div>
+					<div class="box"></div>
+				<?php } ?>
+
+				<?php if ( is_active_sidebar( 'landing-footer-3') ) { ?>
+					<?php dynamic_sidebar( 'landing-footer-3' ); ?>
+				<?php } else { ?>
+					<div class="box"></div>
 				<?php } ?>
 
 			</div>
