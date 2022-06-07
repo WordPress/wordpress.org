@@ -2053,10 +2053,12 @@ a.mention.me {
 
 /* =Responsive / Mobile
 ----------------------------------------------- */
-@media (max-width: 770px) {
+@media (max-width: 960px) {
 	#main {
 		overflow-x: auto;
 	}
+}
+@media (max-width: 770px) {
 	#headline {
 		height: auto;
 		min-height: 62px;
