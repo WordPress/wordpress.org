@@ -23,6 +23,10 @@ class WPorg_Handbook_Callout_Boxes {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
+
+		if ( did_action( 'init' ) ) {
+			$this->register_shortcodes();
+		}
 	}
 
 	/**
