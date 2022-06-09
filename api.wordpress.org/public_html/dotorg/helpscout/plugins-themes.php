@@ -39,7 +39,7 @@ foreach ( [
 	// Reported themes, shortcut, assume the slug is the title.. since it is..
 	if (
 		'theme' === $type &&
-		str_starts_with( $request->ticket->subject, 'Reported Theme:' )
+		str_starts_with( $request->ticket->subject ?? '', 'Reported Theme:' )
 	) {
 		$slugs[] = sanitize_title_with_dashes( trim( explode( ':', $request->ticket->subject )[1] ) );
 	}
