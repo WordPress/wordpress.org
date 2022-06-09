@@ -112,7 +112,7 @@ h6 {
 }
 .modal-item {
 	display: inline-block;
-	width: 30%;
+	width: 33%;
 	margin-top: 7px;
 }
 .modal-item label {
@@ -128,7 +128,7 @@ h6 {
 	margin-top: 27px;
 }
 .modal-comment textarea {
-	width: 97%;
+	width: 100%;
 	height: 170px;
 }
 .modal-btn {
@@ -148,18 +148,22 @@ h6 {
 }
 .modal-reason-title{
 	margin-top: 12px;
-    margin-bottom: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+	margin-bottom: 10px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 #TB_title {
-	background: #fcfcfc;
+	background: #f1f1f1;
 	border-bottom: 1px solid #ddd;
-	height: 29px;
-	padding: 13px 0;
+	height: 45px !important;
+}
+div#TB_ajaxContent {
+	margin:0 auto;
+	height: auto !important;
 }
 div#TB_ajaxWindowTitle {
-	font-size: 1.3em;
+	font-size: 1.2em;
+	padding: 8px;
 }
 .meta summary.feedback-summary{
 	font-size: 1.2em;
@@ -199,4 +203,9 @@ div#TB_ajaxWindowTitle {
 .async-content #legend {
 	margin-top: 2em;
 	float: none;
+}
+
+#TB_closeWindowButton:focus .tb-close-icon {
+	-webkit-box-shadow: none;
+	box-shadow: none;
 }

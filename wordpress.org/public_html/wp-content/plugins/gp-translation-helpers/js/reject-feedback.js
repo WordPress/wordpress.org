@@ -43,7 +43,7 @@
 			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
 					var selectedRow = $( this ).parents( 'tr.preview' );
-					if ( selectedRow.hasClass( 'status-current' ) ) {
+					if ( ! selectedRow.hasClass( 'untranslated' ) ) {
 						return selectedRow.attr( 'row' );
 					}
 					$( this ).prop( 'checked', false );

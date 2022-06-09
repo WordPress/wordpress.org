@@ -192,7 +192,7 @@ class WPorg_GlotPress_Notifications {
 		}
 
 		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
-			return $array();
+			return array();
 		}
 
 		$project = self::get_project_to_translate( $comment );
