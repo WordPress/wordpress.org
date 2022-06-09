@@ -9,7 +9,7 @@ class WPorg_Handbook_TOC {
 
 	protected $styles = '<style>
 		.toc-jump { text-align: right; font-size: 12px; }
-		.toc-heading a { color: inherit; font-weight: inherit; margin-left: -25px; text-decoration: none !important; }
+		.toc-heading a:first-of-type { color: inherit; font-weight: inherit; margin-left: -25px; text-decoration: none !important; }
 		.toc-heading a:before { visibility: hidden; vertical-align: middle; margin-top: -5px; margin-right: 5px; }
 		.toc-heading:target a:before { margin-left: -8px; margin-right: 13px; }
 		.toc-heading a:hover:before, .toc-heading a:focus:before { visibility: visible; }
@@ -260,4 +260,3 @@ class WPorg_Handbook_TOC {
 		return $matches;
 	}
 }
-
