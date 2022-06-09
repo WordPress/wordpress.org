@@ -299,8 +299,7 @@
 	.site-content:before,
 	.site-content:after,
 	.site-footer:before,
-	.site-footer:after,
-	section:after {
+	.site-footer:after {
 		content: '';
 		display: table;
 	}
@@ -309,8 +308,7 @@
 	.entry-content:after,
 	.comment-content:after,
 	.site-content:after,
-	.site-footer:after,
-	section:after {
+	.site-footer:after {
 		clear: both;
 	}
 

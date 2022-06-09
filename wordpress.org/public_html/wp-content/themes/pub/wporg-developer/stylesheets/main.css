@@ -659,8 +659,7 @@ input {
 .devhub-wrap .site-content:before,
 .devhub-wrap .site-content:after,
 .devhub-wrap .site-footer:before,
-.devhub-wrap .site-footer:after,
-.devhub-wrap section:after {
+.devhub-wrap .site-footer:after {
   content: '';
   display: table;
 }
@@ -669,8 +668,7 @@ input {
 .devhub-wrap .entry-content:after,
 .devhub-wrap .comment-content:after,
 .devhub-wrap .site-content:after,
-.devhub-wrap .site-footer:after,
-.devhub-wrap section:after {
+.devhub-wrap .site-footer:after {
   clear: both;
 }
 
