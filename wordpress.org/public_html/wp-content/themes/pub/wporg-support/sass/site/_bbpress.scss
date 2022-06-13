@@ -565,6 +565,11 @@ $paginationBreakPoint: "600px";
 				opacity: 1;
 				flex: 1;
 
+				// See: https://meta.trac.wordpress.org/ticket/6321
+				@media (max-width: 375px) {
+					padding: 2px 6px;
+				}
+
 				@media (min-width: $paginationBreakPoint) {
 					flex: inherit;
 				}

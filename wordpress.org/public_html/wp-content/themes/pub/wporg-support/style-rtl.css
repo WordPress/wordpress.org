@@ -4033,6 +4033,12 @@ section {
 	flex: 1;
 }
 
+@media (max-width: 375px) {
+	.bbpress #bbpress-forums .bbp-pagination .page-numbers {
+		padding: 2px 6px;
+	}
+}
+
 @media (min-width: 600px) {
 	.bbpress #bbpress-forums .bbp-pagination .page-numbers {
 		flex: inherit;
