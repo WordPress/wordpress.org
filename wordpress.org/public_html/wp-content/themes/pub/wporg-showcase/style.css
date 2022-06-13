@@ -871,7 +871,7 @@ a.wpsc-hero-learnmore {
 	.leftsidebar {
 		background: #fff;
 		border: 1px #DFDFDF solid;
-		height: 100%;
+		height: auto;
 		margin-left: -210px;
 		margin-top: -1px;
 		min-height: 100vh;
