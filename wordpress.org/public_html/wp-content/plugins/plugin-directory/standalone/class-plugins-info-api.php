@@ -248,6 +248,9 @@ class Plugins_Info_API {
 			$response['plugins'][ $i ] = (object) $this->remove_unexpected_fields( $plugin_data, $request, 'query_plugins' );
 		}
 
+		// Reset array values so this is JSON-encoded as an array, not object.
+		$response['plugins'] = array_values( $response['plugins'] );
+
 		$this->output( $response );
 	}
 
