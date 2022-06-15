@@ -184,7 +184,6 @@ function find_latest_translations( $args ) {
 				continue;
 		}
 
-		usort( $results, 'version_compare_version_key_desc' );
 		if ( $version ) {
 			$found = false;
 			foreach ( $results as $result ) {
