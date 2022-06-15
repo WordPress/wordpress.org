@@ -66,6 +66,15 @@
 				$loginForm.find( '.login-email' ).removeClass( 'hidden' ).find( 'input' ).addClass( 'error' );
 			});
 
+			// Apply the input validation after initial blur, to avoid showing as invalid during initial edits.
+			$loginForm.on( 'blur', 'input[data-pattern-after-blur]', function() {
+				var $this = $( this );
+				if ( $this.val() ) {
+					$this.prop( 'pattern', $this.data( 'pattern-after-blur' ) );
+					$this.data( 'pattern-after-blur', false );
+				}
+			} );
+
 			// If the form has data in it upon load, immediately trigger the validation.
 			if ( $loginForm.find('#user_login').val() ) {
 				$loginForm.find('#user_login').blur();

@@ -365,7 +365,15 @@ body.login form input.input:-moz-placeholder { /* Firefox 18- */
 	opacity: 0.5;
 }
 
-body.login form input.error {
+body.login form span.invalid-message {
+	display: none;
+}
+body.login form input.input:invalid + span.invalid-message {
+	display: block;
+}
+
+body.login form input.error,
+body.login form input:invalid {
 	background-color: #fbeaea;
 	border: 2px solid #dc3232;
 }
