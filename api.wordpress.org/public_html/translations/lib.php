@@ -163,9 +163,20 @@ function find_latest_translations( $args ) {
 
 		if ( ! $results ) {
 			$query = $wpdb->prepare(
-				"SELECT `version`, `updated` FROM `language_packs` WHERE `type` = %s AND `domain` = %s AND `language` = %s AND `active` = 1",
-				$type, $domain, $language );
+				"SELECT `version`, `updated`
+				FROM `language_packs`
+				WHERE `type` = %s AND `domain` = %s AND `language` = %s AND `active` = 1
+				ORDER BY `version` DESC",
+				$type,
+				$domain,
+				$language
+			);
+
 			$results = $wpdb->get_results( $query, ARRAY_A );
+
+			if ( $results ) {
+				usort( $results, 'version_compare_version_key_desc' );
+			}
 
 			wp_cache_set( $cache_key, ( $results ? $results : '_empty_' ), $translations_cache_group, $translations_cache_time );
 
