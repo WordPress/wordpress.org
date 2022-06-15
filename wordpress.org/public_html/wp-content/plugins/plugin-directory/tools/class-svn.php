@@ -444,7 +444,7 @@ class SVN {
 			}
 
 			// Prefix options with `-` or `--` if they're longer than 2 characters.
-			if ( '-' != substr( $key, 0, 1 ) ) {
+			if ( ! str_starts_with( $key, '-' ) ) {
 				$key = '-' . ( strlen( $key ) > 2 ? '-' : '' ) . $key;
 			}
 
