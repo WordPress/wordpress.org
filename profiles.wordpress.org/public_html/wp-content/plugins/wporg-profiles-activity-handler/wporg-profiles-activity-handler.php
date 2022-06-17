@@ -29,7 +29,26 @@ defined( 'ABSPATH' ) or die();
 
 if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
+	class SavedActivity {
+		public $id;
+		public $type;
+		public $is_contribution;
+
+		function __construct( $id, $type, $is_contribution ) {
+			$this->id = $id;
+			$this->type = $type;
+			$this->is_contribution = $is_contribution;
+		}
+	}
+
 	class WPOrg_Profiles_Activity_Handler {
+
+		/**
+		 *  Name of meta key that tracks last contribution as a unix timestamp.
+		 *
+		 * @var string
+		 */
+		const last_contribution_meta_key = 'wporg_5ftf_last_contribution';
 
 		/**
 		 * Constructor.
@@ -204,7 +223,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						$activity_id = bp_activity_add( $this->sanitize_activity( $_POST ) );
 						break;
 					case 'plugin':
-						$activity_id = $this->handle_plugin_activity();
+						$activity = $this->handle_plugin_activity();
 						break;
 					case 'theme':
 						$activity_id = $this->handle_theme_activity();
@@ -232,6 +251,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					throw new Exception( $activity_id );
 				} elseif ( false === $activity_id || intval( $activity_id ) <= 0 ) {
 					throw new Exception( '-1 Unable to save activity' );
+				}
+
+				if( $activity instanceof SavedActivity && $activity->is_contribution ) {
+					self::update_last_contribution_meta( $_POST['user_id'] );
 				}
 
 				$response = '1';
@@ -399,7 +422,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					'hide_sitewide'     => false,
 				);
 
-				return bp_activity_add( $args );
+				return new SavedActivity( bp_activity_add( $args ), 'forum_activity', true );
 
 			} elseif ( in_array( $type, array( 'forum_topic_remove', 'forum_reply_remove' ) ) ) {
 				// Remove activity related to a topic or reply.
@@ -443,7 +466,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'hide_sitewide'     => false,
 			);
 
-			return bp_activity_add( $args );
+			return new SavedActivity( bp_activity_add( $args ), 'plugin_activity', true );
 		}
 
 		/**
@@ -846,6 +869,16 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			return $user_case_args;
+		}
+
+		/**
+		 * Updates meta value to current timestamp indicating the user's last contribution.
+		 * 
+		 * @return int|bool result of update_user_meta();
+		 */
+		protected function update_last_contribution_meta() {
+			$user = self::get_user( $_POST['user'] );
+			return update_user_meta( $user->ID, self::last_contribution_meta_key, time() );
 		}
 
 	} /* /class WPOrg_Profiles_Activity_Handler */
