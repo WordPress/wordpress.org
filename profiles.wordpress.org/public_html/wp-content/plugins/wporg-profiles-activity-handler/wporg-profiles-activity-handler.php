@@ -422,7 +422,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					'hide_sitewide'     => false,
 				);
 
-				return new SavedActivity( bp_activity_add( $args ), 'forum_activity', true );
+				return bp_activity_add( $args );
 
 			} elseif ( in_array( $type, array( 'forum_topic_remove', 'forum_reply_remove' ) ) ) {
 				// Remove activity related to a topic or reply.
