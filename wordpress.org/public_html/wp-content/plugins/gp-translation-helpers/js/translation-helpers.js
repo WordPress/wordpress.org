@@ -1,4 +1,4 @@
-/* global $gp, window */
+/* global $gp, window, $gp_translation_helpers_settings */
 $gp.translation_helpers = (
 	function( $ ) {
 		return {
@@ -13,7 +13,8 @@ $gp.translation_helpers = (
 				$( $gp.translation_helpers.table )
 					.on( 'beforeShow', '.editor', $gp.translation_helpers.hooks.initial_fetch )
 					.on( 'click', '.helpers-tabs li', $gp.translation_helpers.hooks.tab_select )
-					.on( 'click', 'a.comment-reply-link', $gp.translation_helpers.hooks.reply_comment_form );
+					.on( 'click', 'a.comment-reply-link', $gp.translation_helpers.hooks.reply_comment_form )
+					.on( 'click', 'a.opt-out-discussion,a.opt-in-discussion', $gp.translation_helpers.hooks.optin_optout_discussion );
 			},
 			initial_fetch: function( $element ) {
 				var $helpers = $element.find( '.translation-helpers' );
@@ -80,6 +81,27 @@ $gp.translation_helpers = (
 					$comment.text( 'Reply' );
 				}
 			},
+			optin_optout_discussion: function( $link ) {
+				var data = {
+					action: 'optout_discussion_notifications',
+					data: {
+						nonce: $gp_translation_helpers_settings.nonce,
+						originalId: $link.attr( 'data-original-id' ),
+						optType: $link.attr( 'data-opt-type' ),
+					},
+				};
+				$.ajax(
+					{
+						type: 'POST',
+						url: $gp_translation_helpers_settings.ajax_url,
+						data: data,
+					}
+				).done(
+					function() {
+						$gp.translation_helpers.fetch( 'discussion' );
+					}
+				);
+			},
 			hooks: {
 				initial_fetch: function() {
 					$gp.translation_helpers.initial_fetch( $( this ) );
@@ -92,6 +114,11 @@ $gp.translation_helpers = (
 				reply_comment_form: function( event ) {
 					event.preventDefault();
 					$gp.translation_helpers.reply_comment_form( $( this ) );
+					return false;
+				},
+				optin_optout_discussion: function( event ) {
+					event.preventDefault();
+					$gp.translation_helpers.optin_optout_discussion( $( this ) );
 					return false;
 				},
 			},

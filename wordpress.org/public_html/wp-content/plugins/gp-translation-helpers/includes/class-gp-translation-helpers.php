@@ -62,6 +62,7 @@ class GP_Translation_Helpers {
 		add_action( 'transition_comment_status', array( 'GP_Notifications', 'on_comment_status_change' ), 10, 3 );
 		add_action( 'gp_pre_tmpl_load', array( $this, 'register_reject_feedback_js' ), 10, 2 );
 		add_action( 'wp_ajax_reject_with_feedback', array( $this, 'reject_with_feedback' ) );
+		add_action( 'wp_ajax_optout_discussion_notifications', array( $this, 'optout_discussion_notifications' ) );
 
 		add_thickbox();
 		gp_enqueue_style( 'thickbox' );
@@ -159,7 +160,9 @@ class GP_Translation_Helpers {
 		}
 
 		$translation_helpers_settings = array(
-			'th_url' => gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-translation-helpers' ) ),
+			'th_url'   => gp_url_project( $args['project'], gp_url_join( $args['locale_slug'], $args['translation_set_slug'], '-get-translation-helpers' ) ),
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'gp_optin_optout' ),
 		);
 
 		add_action( 'gp_head', array( $this, 'css_and_js' ), 10 );
@@ -394,17 +397,55 @@ class GP_Translation_Helpers {
 		$first_translation_id = array_shift( $translation_id_array );
 
 		// Post comment on discussion page for the first string
-		$save_feedback = $this->insert_reject_comment( $reject_comment, $first_original_id, $reject_reason, $first_translation_id, $locale_slug, $_SERVER );
+		$first_comment_id = $this->insert_reject_comment( $reject_comment, $first_original_id, $reject_reason, $first_translation_id, $locale_slug, $_SERVER );
 
 		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
-			$reject_comment = get_comment_link( $save_feedback );
+			$reject_comment = get_comment_link( $first_comment_id );
 			foreach ( $original_id_array as $index => $single_original_id ) {
-				$this->insert_reject_comment( $reject_comment, $single_original_id, $reject_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
+				$comment_id = $this->insert_reject_comment( $reject_comment, $single_original_id, $reject_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
+				$comment    = get_comment( $comment_id );
+				GP_Notifications::add_related_comment( $comment );
 			}
 		}
 
+		if ( $first_comment_id ) {
+			$comment = get_comment( $first_comment_id );
+			GP_Notifications::init( $comment, null, null );
+		}
+
 		wp_send_json_success();
+	}
+
+	/**
+	 * Adds or removes metadata to a user, related with the opt-in/opt-out status in a discussion
+	 *
+	 * It receives thought Ajax this data:
+	 * - nonce.
+	 * - originalId. The id of the original string related with the discussion.
+	 * - optType:
+	 *   - optout. Add the metadata, to opt-out from the notifications.
+	 *   - optin. Removes the metadata, to opt-in from the notifications. Default status.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @return void
+	 */
+	public function optout_discussion_notifications() {
+		$nonce = sanitize_text_field( $_POST['data']['nonce'] );
+		if ( ! wp_verify_nonce( $nonce, 'gp_optin_optout' ) ) {
+			wp_send_json_error( esc_html__( 'Invalid nonce.' ), 403 );
+		} else {
+			$user_id     = get_current_user_id();
+			$original_id = sanitize_text_field( $_POST['data']['originalId'] );
+			$opt_type    = sanitize_text_field( $_POST['data']['optType'] );
+			if ( 'optout' === $opt_type ) {
+				add_user_meta( $user_id, 'gp_opt_out', $original_id );
+			} elseif ( 'optin' === $opt_type ) {
+				delete_user_meta( $user_id, 'gp_opt_out', $original_id );
+			}
+			 wp_send_json_success();
+		}
 	}
 
 	/**
