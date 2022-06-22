@@ -11,6 +11,8 @@
 	// Over qualified to override other styles
 	select.components-select-control__input.components-select-control__input {
 		width: auto;
+		// Set a line-height so that it's consistent across screen sizes.
+		line-height: 1;
 	}
 
 	body.rtl & {

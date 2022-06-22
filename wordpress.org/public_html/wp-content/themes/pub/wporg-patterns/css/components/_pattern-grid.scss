@@ -19,10 +19,10 @@
 
 .pattern-grid {
 	display: grid;
-	margin: 1.5rem 1.5rem 4rem;
+	margin: $gutter-default $gutter-default 4rem;
 	max-width: 960px;
 	grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
-	gap: 1.5rem;
+	gap: $gutter-default;
 	align-items: start;
 
 	@include breakpoint( $breakpoint-large ) {

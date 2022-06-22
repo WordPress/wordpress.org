@@ -110,6 +110,16 @@ body.single-wporg-pattern {
 		max-width: $size__site-main;
 		margin-left: auto;
 		margin-right: auto;
+
+		> * {
+			margin-left: $gutter-default;
+			margin-right: $gutter-default;
+
+			@include breakpoint( $breakpoint-large ) {
+				margin-left: auto;
+				margin-right: auto;
+			}
+		}
 	}
 
 	.pattern__meta {
