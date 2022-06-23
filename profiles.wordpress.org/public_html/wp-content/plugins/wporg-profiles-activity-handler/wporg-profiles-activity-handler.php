@@ -596,6 +596,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						$_POST['wordcamp_name']
 					);
 				}
+
 			} elseif ( isset( $_POST['organizer_id'] ) && ! empty( $_POST['organizer_id'] ) ) {
 				$type    = 'wordcamp_organizer_add';
 				$item_id = $_POST['organizer_id'];
@@ -613,6 +614,22 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						$_POST['wordcamp_name']
 					);
 				}
+
+			} elseif ( isset( $_POST['type'] ) && 'mentor_assign' === $_POST['type'] ) {
+				$type          = 'wordcamp_mentor_assign';
+				$item_id       = absint( $_POST['wordcamp_id'] );
+				$wordcamp_name = sanitize_text_field( $_POST['wordcamp_name'] );
+
+				if ( empty( $_POST['url'] ) ) {
+					$action = 'Started mentoring ' . $wordcamp_name;
+				} else {
+					$action = sprintf(
+						'Started mentoring <a href="%s">%s</a>',
+						sanitize_url( $_POST['url'] ),
+						$wordcamp_name
+					);
+				}
+
 			} elseif ( isset( $_POST['attendee_id'] ) && ! empty( $_POST['attendee_id'] ) ) {
 				$item_id = $_POST['attendee_id'];
 
@@ -632,6 +649,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 							$_POST['wordcamp_name']
 						);
 					}
+
 				} elseif ( 'attendee_checked_in' == $_POST['activity_type'] ) {
 					$type  = 'wordcamp_attendee_checked_in';
 					$order = absint( $_POST['checked_in_count'] );
@@ -653,7 +671,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'user_id'           => $user->ID,
 				'action'            => $action,
 				'content'           => '',
-				'primary_link'      => $_POST['url'],
+				'primary_link'      => $_POST['url'] ?? '',
 				'component'         => 'wordcamp',
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
