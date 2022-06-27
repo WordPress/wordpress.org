@@ -4,23 +4,7 @@ Plugin Name: WordPress.org 5ftf Activity Handler
 Plugin URI: http://wordpress.org
 License: GPL2
 Version: 1.1
-Description: Handles saving of last 5ftf 
-*/
-
-/*  Copyright 2013
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, version 2, as
-    published by the Free Software Foundation.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+Description: Handles saving of last 5ftf contribution.
 */
 
 defined( 'ABSPATH' ) or die();
@@ -45,7 +29,6 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 
 		/**
 		 * Saves contribution if it qualifies as a contribution.
-		 * 
 		 */
 		public function handle_contribution( $args ) {
 			if( self::is_5ftf_contribution( $args['type'] ) ) {
