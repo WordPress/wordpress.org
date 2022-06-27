@@ -31,7 +31,7 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 		 * Saves contribution if it qualifies as a contribution.
 		 */
 		public function handle_contribution( $args ) {
-			if( self::is_5ftf_contribution( $args['type'] ) ) {
+			if ( self::is_5ftf_contribution( $args['type'] ) ) {
 				self::update_last_contribution_meta( $args['user_id'] );
 			}
 		}
@@ -40,14 +40,17 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 		 * Returns whether action is considered a contribution.
 		 */
 		public function is_5ftf_contribution( $action ) {
-			$valid_actions = array( 'forum_topic_create' );
+			$wordpress_actions = array( 'blog_post_create' );
+			$wordcamp_actions  = array( 'wordcamp_speaker_add', 'wordcamp_organizer_add' );
+
+			$valid_actions = array_merge( $wordpress_actions, $wordcamp_actions );
 
 			return in_array( $action, $valid_actions, true );
 		}
 
 		/**
 		 * Updates meta value to current timestamp indicating the user's last contribution.
-		 * 
+		 *
 		 * @return int|bool result of update_user_meta();
 		 */
 		protected function update_last_contribution_meta( $user_id ) {
