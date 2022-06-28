@@ -28,7 +28,7 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 		}
 
 		/**
-		 * Saves contribution if it qualifies as a contribution.
+		 * Saves meta value if it qualifies as a contribution.
 		 */
 		public function handle_contribution( $args ) {
 			if ( self::is_5ftf_contribution( $args['type'] ) ) {
