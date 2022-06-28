@@ -24,15 +24,36 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 		 * Constructor.
 		 */
 		public function __construct() {
-			add_filter( 'bp_activity_add', array( $this, 'handle_contribution' ) );
+			add_filter( 'bp_activity_add', array( $this, 'handle_activity' ) );
+			add_filter( 'wporg_github_added_activity', array( $this, 'handle_github_activity' ) );
 		}
 
 		/**
 		 * Saves meta value if it qualifies as a contribution.
 		 */
-		public function handle_contribution( $args ) {
+		public function handle_activity( $args ) {
 			if ( self::is_5ftf_contribution( $args['type'] ) ) {
 				self::update_last_contribution_meta( $args['user_id'] );
+			}
+		}
+
+		/**
+		 * Saves meta value if it qualifies as a github contribution.
+		 */
+		public function handle_github_activity( $args ) {
+			/**
+			* $args.category string Type of github event
+			* $args.repo string Name of the public repository
+			* $args.user_id string|null Name of the public repository
+			*/
+
+			$valid_actions = array( 'pr_opened', 'pr_merged', 'issue_opened' );
+
+			if ( in_array( $args['category'], $valid_actions, true ) ) {
+				// user_id may be null
+				if ( $args['user_id'] ) {
+					update_last_contribution_meta( $args['user_id'] );
+				}
 			}
 		}
 
