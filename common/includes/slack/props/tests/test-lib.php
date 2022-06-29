@@ -3,7 +3,7 @@
 namespace Dotorg\Slack\Props\Tests;
 use wpdbStub;
 use PHPUnit\Framework\TestCase;
-use function Dotorg\Slack\Props\{ is_valid_props, get_recipient_slack_ids, map_slack_users_to_wporg, prepare_message };
+use function Dotorg\Slack\Props\{ is_valid_props, get_recipient_slack_ids, map_slack_users_to_wporg, map_slack_channel_ids_to_names, prepare_message };
 
 /**
  * @group slack
@@ -104,15 +104,15 @@ class Test_Props_Lib extends TestCase {
 		$valid_request = self::get_valid_request();
 
 		$valid_users = array(
-					'U02RR6SGY',
-					'U02RQHNND',
-					'U3KJ0TK4L',
-					'U4L99HZB6',
-					'U024MFP4L',
-					'U6R2E3Y9Y',
-					'U023GFZJ07L',
-					'U1E5RLU1L',
-				);
+			'U02RR6SGY',
+			'U02RQHNND',
+			'U3KJ0TK4L',
+			'U4L99HZB6',
+			'U024MFP4L',
+			'U6R2E3Y9Y',
+			'U023GFZJ07L',
+			'U1E5RLU1L',
+		);
 
 		$mentioned_twice = json_decode( json_encode( $valid_request->event->blocks ) );
 		$mentioned_twice[0]->elements[0]->elements[] = (object) array(
@@ -243,12 +243,49 @@ class Test_Props_Lib extends TestCase {
 	}
 
 	/**
+	 * @covers ::map_slack_channel_ids_to_names
+	 * @dataProvider data_map_slack_channel_ids_to_names
+	 * @group unit
+	 */
+	public function test_map_slack_channel_ids_to_names( string $message, array $expected ) : void {
+		$actual = map_slack_channel_ids_to_names( $message );
+
+		$this->assertSame( $expected, $actual );
+	}
+
+	public function data_map_slack_channel_ids_to_names() : array {
+		$cases = array(
+			'none' => array(
+				'message'  => 'thanks to <@U039G75HC> for great work on',
+				'expected' => array(),
+			),
+
+			'single team' => array(
+				'message'  => 'thanks to <@U02RR7CQY> for great work on the <#C037W5S7X|community-team>',
+				'expected' => array(
+					'C037W5S7X' => 'community-team',
+				),
+			),
+
+			'multiple teams' => array(
+				'message'  => 'thanks to <@U039G75HC> for great work in <#C037W5S7X|community-team> and <#C08M59V3P|meta-wordcamp>',
+				'expected' => array(
+					'C037W5S7X' => 'community-team',
+					'C08M59V3P' => 'meta-wordcamp',
+				),
+			),
+		);
+
+		return $cases;
+	}
+
+	/**
 	 * @covers ::prepare_message
 	 * @dataProvider data_prepare_message
 	 * @group unit
 	 */
-	public function test_prepare_message( string $text, array $user_map, string $expected ) : void {
-		$actual = prepare_message( $text, $user_map );
+	public function test_prepare_message( array $elements, array $user_map, array $channel_map, string $expected ) : void {
+		$actual = prepare_message( $elements, $user_map, $channel_map );
 
 		$this->assertSame( $expected, $actual );
 	}
@@ -258,13 +295,15 @@ class Test_Props_Lib extends TestCase {
 
 		$cases = array(
 			'empty' => array(
-				'text'     => '',
-				'user_map' => array(),
-				'expected' => '',
+				'elements'    => array(),
+				'user_map'    => array(),
+				'channel_map' => array(),
+				'expected'    => '',
 			),
 
 			'valid' => array(
-				'text' => $valid_request->event->text,
+				'elements' => $valid_request->event->blocks[0]->elements[0]->elements,
+
 				'user_map' => array(
 					'U023GFZJ07L' => array(
 						'id' => 18752239,
@@ -305,7 +344,74 @@ class Test_Props_Lib extends TestCase {
 						'user_login' => 'webcommsat',
 					),
 				),
+
+				'channel_map' => array(),
 				'expected' => 'props to @Mamaduka for co-leading 5.9.3 RC 1, to @SergeyBiryukov for running mission control and to @davidbaumwald @pbiron @markjaquith @webcommsat @costdev @jeroenrotty for their help testing the release package :community: :wordpress:',
+			),
+
+			'escaped elements' => array(
+				'elements' => array(
+					(object) array(
+						'type' => 'text',
+						'text' => 'Props to ',
+					),
+					(object) array(
+						'type'    => 'user',
+						'user_id' => 'U04F2C6V5',
+					),
+					(object) array(
+						'type' => 'text',
+						'text' => ' for title fix in ',
+					),
+					(object) array(
+						'type' => 'link',
+						'url'  => 'https://github.com/WordPress/wordpress.org/pull/73',
+					),
+					(object) array(
+						'type' => 'text',
+						'text' => ', and to ',
+					),
+					(object) array(
+						'type'    => 'user',
+						'user_id' => 'U84ST75AL',
+					),
+					(object) array(
+						'type' => 'text',
+						'text' => ' for facilitating the ',
+					),
+					(object) array(
+						'type'       => 'channel',
+						'channel_id' => 'C037W5S7X',
+					),
+					(object) array(
+						'type' => 'text',
+						'text' => ' triage ',
+					),
+					(object) array(
+						'type'    => 'emoji',
+						'name'    => 'thank-you',
+					),
+					(object) array(
+						'type'    => 'emoji',
+						'name'    => 'pizza',
+						'unicode' => '1f355',
+					),
+				),
+
+				'user_map' => array(
+					'U04F2C6V5' => array(
+						'user_login' => 'aurooba',
+					),
+					'U84ST75AL' => array(
+						'user_login' => 'estelaris',
+					),
+				),
+
+				'channel_map' => array(
+					'C037W5S7X' => 'docs',
+				),
+
+				'expected' => 'Props to @aurooba for title fix in https://github.com/WordPress/wordpress.org/pull/73, and to @estelaris for facilitating the #docs triage :thank-you::pizza:',
 			),
 		);
 

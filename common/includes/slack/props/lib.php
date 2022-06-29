@@ -45,8 +45,9 @@ function handle_props_message( object $request ) : string {
 
 	// This is Slack's unintuitive way of giving messages a unique ID :|
 	// https://api.slack.com/messaging/retrieving#individual_messages
-	$message_id = sprintf( '%s-%s', $request->event->channel, $request->event->ts );
-	$message    = prepare_message( $request->event->text, $recipient_users );
+	$message_id    = sprintf( '%s-%s', $request->event->channel, $request->event->ts );
+	$channel_names = map_slack_channel_ids_to_names( $request->event->text );
+	$message       = prepare_message( $request->event->blocks[0]->elements[0]->elements, $recipient_users, $channel_names );
 
 	add_activity_to_profile( compact( 'giver_user', 'recipient_ids', 'url', 'message_id', 'message' ) );
 
@@ -142,18 +143,61 @@ function map_slack_users_to_wporg( array $slack_ids ) : array {
 }
 
 /**
- * Replace Slack IDs with w.org usernames, to better fit w.org profiles.
+ * Parse Slack channel names and IDs out of message.
+ *
+ * This avoids having to make an API call to Slack to fetch the channels, like their docs recommend.
  */
-function prepare_message( string $original, array $user_map ) : string {
-	$search  = array();
-	$replace = array();
+function map_slack_channel_ids_to_names( string $message ) : array {
+	$map = array();
 
-	foreach ( $user_map as $slack_id => $wporg_user ) {
-		$search[]  = sprintf( '<@%s>', $slack_id );
-		$replace[] = '@' . $wporg_user['user_login'];
+	preg_match_all( '/<#(\w*\d*)\|([\w-]*)>/m', $message, $matches, PREG_SET_ORDER );
+
+	foreach ( $matches as $match ) {
+		$map[ $match[1] ] = $match[2];
 	}
 
-	return str_replace( $search, $replace, $original );
+	return $map;
+}
+
+
+/**
+ * Prepare message to be sent to the Profiles API.
+ *
+ * Replace Slack IDs with w.org usernames, to better fit w.org profiles.
+ * Un-escape URLs and other things Slack has escaped.
+ */
+function prepare_message( array $elements, array $user_map, array $channel_map ) : string {
+	$prepared = '';
+
+	foreach ( $elements as $element ) {
+		switch ( $element->type ) {
+			case 'text':
+				$prepared .= $element->text;
+			break;
+
+			case 'link':
+				$prepared .= $element->url;
+			break;
+
+			case 'emoji':
+				$prepared .= ":{$element->name}:";
+			break;
+
+			case 'user':
+				$prepared .= '@' . $user_map[ $element->user_id ]['user_login'];
+			break;
+
+			case 'channel':
+				$prepared .= '#' . $channel_map[ $element->channel_id ];
+			break;
+
+			default:
+				// Ignore
+			break;
+		}
+	}
+
+	return $prepared;
 }
 
 /**
