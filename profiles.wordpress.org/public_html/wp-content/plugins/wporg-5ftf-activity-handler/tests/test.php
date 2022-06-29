@@ -18,7 +18,6 @@ if ( 'staging' !== wp_get_environment_type() || 'cli' !== php_sapi_name() ) {
 }
 
 const TEST_USERNAME = 'dufresnesteven';
-const TEST_USERID   = '17657928';
 
 /** @var array $args */
 main( $args[0] );
@@ -27,9 +26,9 @@ function main( string $case ) : void {
 
 	require_once dirname( __DIR__ ) . '/wporg-5ftf-activity-handler.php';
 
-	call_user_func( __NAMESPACE__ . "\\test_$case", WPOrg_5ftf_Activity_Handler::get_instance() );
+	$user = get_user_by( 'slug', TEST_USERNAME );
 
-	// echo "\nThere should be new activity on https://profiles.wordpress.org/$user->user_nicename/ \n";
+	call_user_func( __NAMESPACE__ . "\\test_$case", WPOrg_5ftf_Activity_Handler::get_instance(), $user );
 }
 
 function expect( $fail, $result ) {
@@ -50,19 +49,19 @@ function expectFalse( $result ) {
  * Tests the handling of GitHub activities
  */
 
-function test_github_filter( WPOrg_5ftf_Activity_Handler $handler ) : void {
-	test_github_filter_success( $handler );
+function test_github_filter( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
+	test_github_filter_success( $handler, $user );
 	test_github_filter_no_user_id( $handler );
-	test_github_filter_unsupported_category( $handler );
+	test_github_filter_unsupported_category( $handler, $user );
 }
 
-function test_github_filter_success( WPOrg_5ftf_Activity_Handler $handler ) : void {
+function test_github_filter_success( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
 	expectTrue(
 		$handler->handle_github_activity(
 			array(
 				'category' => 'pr_merged',
 				'repo'     => 'wordpress.org',
-				'user_id'  => TEST_USERID,
+				'user_id'  => $user->ID,
 			)
 		)
 	);
@@ -79,13 +78,13 @@ function test_github_filter_no_user_id( WPOrg_5ftf_Activity_Handler $handler ) :
 	);
 }
 
-function test_github_filter_unsupported_category( WPOrg_5ftf_Activity_Handler $handler ) : void {
+function test_github_filter_unsupported_category( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
 	expectFalse(
 		$handler->handle_github_activity(
 			array(
 				'category' => 'not_supported',
 				'repo'     => 'wordpress.org',
-				'user_id'  => TEST_USERID,
+				'user_id'  => $user->ID,
 			)
 		)
 	);
