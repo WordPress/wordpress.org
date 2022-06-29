@@ -60,36 +60,36 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 
 		/**
 		 * Saves meta value if it qualifies as a github contribution.
-		 * 
+		 *
 		 * $args.category string Type of github event
 		 * $args.repo string Name of the public repository
 		 * $args.user_id string|null Name of the public repository
-		 * 
+		 *
 		 * @return int|bool
 		 */
 		public function handle_github_activity( $args ) {
 			$valid_actions = array( 'pr_opened', 'pr_closed', 'pr_merged', 'issue_opened', 'pr_reopened' );
 
-			if( empty( $args['user_id'] ) ) {	
+			if ( empty( $args['user_id'] ) ) {
 				// user_id may be null if the user didn't connect their github account to their wordpress.org account
-				return  '-1 WordPress.org user id is missing';
+				return '-1 WordPress.org user id is missing';
 			}
 
-			if( ! in_array( $args['category'], $valid_actions, true ) ) {
-				return  '-1 Category: ' . sanitize_text_field( $args['category'] ) . ' is not a contribution.';
+			if ( ! in_array( $args['category'], $valid_actions, true ) ) {
+				return '-1 Category: ' . sanitize_text_field( $args['category'] ) . ' is not a contribution.';
 			}
 
-			return self::update_last_contribution_meta( $args['user_id'] );	
+			return self::update_last_contribution_meta( $args['user_id'] );
 		}
 
 		/**
 		 * Returns whether action is considered a contribution.
-		 * 
+		 *
 		 * @return boolean True if action == contribution
 		 */
 		public function is_5ftf_contribution( $action ) {
 			$wordpress_actions = array( 'blog_post_create' );
-			$wordcamp_actions = array( 'wordcamp_speaker_add', 'wordcamp_organizer_add' );
+			$wordcamp_actions  = array( 'wordcamp_speaker_add', 'wordcamp_organizer_add' );
 
 			$valid_actions = array_merge( $wordpress_actions, $wordcamp_actions );
 
@@ -98,7 +98,7 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 
 		/**
 		 * Updates meta value to current timestamp indicating the user's last contribution.
-		 * 
+		 *
 		 * @return int|bool result of update_user_meta();
 		 */
 		protected function update_last_contribution_meta( $user_id ) {

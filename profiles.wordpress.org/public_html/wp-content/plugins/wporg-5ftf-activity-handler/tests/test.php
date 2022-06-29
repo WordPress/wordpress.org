@@ -8,6 +8,7 @@
  */
 
 namespace WordPressdotorg\WPORG_5ftf_Activity_Notifier\Tests;
+
 use WPOrg_5ftf_Activity_Handler;
 
 ini_set( 'display_errors', 'On' ); // won't do anything if fatal errors
@@ -17,7 +18,7 @@ if ( 'staging' !== wp_get_environment_type() || 'cli' !== php_sapi_name() ) {
 }
 
 const TEST_USERNAME = 'dufresnesteven';
-const TEST_USERID = '17657928';
+const TEST_USERID   = '17657928';
 
 /** @var array $args */
 main( $args[0] );
@@ -28,22 +29,21 @@ function main( string $case ) : void {
 
 	call_user_func( __NAMESPACE__ . "\\test_$case", WPOrg_5ftf_Activity_Handler::get_instance() );
 
-
-	//echo "\nThere should be new activity on https://profiles.wordpress.org/$user->user_nicename/ \n";
+	// echo "\nThere should be new activity on https://profiles.wordpress.org/$user->user_nicename/ \n";
 }
 
 function expect( $fail, $result ) {
-	if( $fail) {
-		echo 'Test Error: ' . PHP_EOL . ' Received:' . PHP_EOL . $result  . PHP_EOL;
+	if ( $fail ) {
+		echo 'Test Error: ' . PHP_EOL . ' Received:' . PHP_EOL . $result . PHP_EOL;
 	}
 }
 
 function expectTrue( $result ) {
-	expect( ( $result !== true || substr($result, 0, 1) !== '1' ), $result);
+	expect( ( $result !== true || substr( $result, 0, 1 ) !== '1' ), $result );
 }
 
 function expectFalse( $result ) {
-	expect(substr($result, 0, 2) !== '-1', $result);
+	expect( substr( $result, 0, 2 ) !== '-1', $result );
 }
 
 /**
@@ -57,24 +57,36 @@ function test_github_filter( WPOrg_5ftf_Activity_Handler $handler ) : void {
 }
 
 function test_github_filter_success( WPOrg_5ftf_Activity_Handler $handler ) : void {
-	expectTrue( $handler->handle_github_activity( [
-		"category" => "pr_merged",
-		"repo" => "wordpress.org",
-		"user_id" => TEST_USERID
-	] ) );
+	expectTrue(
+		$handler->handle_github_activity(
+			array(
+				'category' => 'pr_merged',
+				'repo'     => 'wordpress.org',
+				'user_id'  => TEST_USERID,
+			)
+		)
+	);
 }
 
 function test_github_filter_no_user_id( WPOrg_5ftf_Activity_Handler $handler ) : void {
-	expectFalse( $handler->handle_github_activity( [
-		"category" => "pr_merged",
-		"repo" => "wordpress.org",
-	] ) );
+	expectFalse(
+		$handler->handle_github_activity(
+			array(
+				'category' => 'pr_merged',
+				'repo'     => 'wordpress.org',
+			)
+		)
+	);
 }
 
 function test_github_filter_unsupported_category( WPOrg_5ftf_Activity_Handler $handler ) : void {
-	expectFalse( $handler->handle_github_activity( [
-		"category" => "not_supported",
-		"repo" => "wordpress.org",
-		"user_id" => TEST_USERID
-	] ) );
+	expectFalse(
+		$handler->handle_github_activity(
+			array(
+				'category' => 'not_supported',
+				'repo'     => 'wordpress.org',
+				'user_id'  => TEST_USERID,
+			)
+		)
+	);
 }
