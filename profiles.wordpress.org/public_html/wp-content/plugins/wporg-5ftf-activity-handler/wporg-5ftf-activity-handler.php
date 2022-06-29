@@ -24,14 +24,17 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 		 * Constructor.
 		 */
 		public function __construct() {
-			add_filter( 'bp_activity_add', array( $this, 'handle_activity' ) );
-			add_filter( 'wporg_github_added_activity', array( $this, 'handle_github_activity' ) );
+			if ( 'profiles.wordpress.org' === site_url() ) {
+				add_filter( 'bp_activity_add', array( $this, 'handle_wordpress_activity' ) );
+			} elseif ( str_ends_with( 'wordpress.org', site_url() ) ) {
+				add_filter( 'wporg_github_added_activity', array( $this, 'handle_github_activity' ) );
+			}
 		}
 
 		/**
 		 * Saves meta value if it qualifies as a contribution.
 		 */
-		public function handle_activity( $args ) {
+		public function handle_wordpress_activity( $args ) {
 			if ( self::is_5ftf_contribution( $args['type'] ) ) {
 				self::update_last_contribution_meta( $args['user_id'] );
 			}
@@ -50,7 +53,7 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 			$valid_actions = array( 'pr_opened', 'pr_merged', 'issue_opened' );
 
 			if ( in_array( $args['category'], $valid_actions, true ) ) {
-				// user_id may be null
+				// user_id may be null if the user didn't connect their github account to their wordpress.org account
 				if ( $args['user_id'] ) {
 					update_last_contribution_meta( $args['user_id'] );
 				}
