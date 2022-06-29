@@ -14,11 +14,29 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 	class WPOrg_5ftf_Activity_Handler {
 
 		/**
+		 * @var WPOrg_5ftf_Activity_Handler The singleton instance.
+		 */
+		private static $instance;
+
+		/**
 		 *  Name of meta key that tracks last contribution as a unix timestamp.
 		 *
 		 * @var string
 		 */
 		const last_contribution_meta_key = 'wporg_5ftf_last_contribution';
+
+		/**
+		 * Returns always the same instance of this plugin.
+		 *
+		 * @return WPOrg_5ftf_Activity_Handler
+		 */
+		public static function get_instance() {
+			if ( ! self::$instance ) {
+				self::$instance = new self();
+			}
+
+			return self::$instance;
+		}
 
 		/**
 		 * Constructor.
@@ -42,30 +60,36 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 
 		/**
 		 * Saves meta value if it qualifies as a github contribution.
+		 * 
+		 * $args.category string Type of github event
+		 * $args.repo string Name of the public repository
+		 * $args.user_id string|null Name of the public repository
+		 * 
+		 * @return int|bool
 		 */
 		public function handle_github_activity( $args ) {
-			/**
-			* $args.category string Type of github event
-			* $args.repo string Name of the public repository
-			* $args.user_id string|null Name of the public repository
-			*/
+			$valid_actions = array( 'pr_opened', 'pr_closed', 'pr_merged', 'issue_opened', 'pr_reopened' );
 
-			$valid_actions = array( 'pr_opened', 'pr_merged', 'issue_opened' );
-
-			if ( in_array( $args['category'], $valid_actions, true ) ) {
+			if( empty( $args['user_id'] ) ) {	
 				// user_id may be null if the user didn't connect their github account to their wordpress.org account
-				if ( $args['user_id'] ) {
-					update_last_contribution_meta( $args['user_id'] );
-				}
+				return  '-1 WordPress.org user id is missing';
 			}
+
+			if( ! in_array( $args['category'], $valid_actions, true ) ) {
+				return  '-1 Category: ' . sanitize_text_field( $args['category'] ) . ' is not a contribution.';
+			}
+
+			return self::update_last_contribution_meta( $args['user_id'] );	
 		}
 
 		/**
 		 * Returns whether action is considered a contribution.
+		 * 
+		 * @return boolean True if action == contribution
 		 */
 		public function is_5ftf_contribution( $action ) {
 			$wordpress_actions = array( 'blog_post_create' );
-			$wordcamp_actions  = array( 'wordcamp_speaker_add', 'wordcamp_organizer_add' );
+			$wordcamp_actions = array( 'wordcamp_speaker_add', 'wordcamp_organizer_add' );
 
 			$valid_actions = array_merge( $wordpress_actions, $wordcamp_actions );
 
@@ -74,7 +98,7 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 
 		/**
 		 * Updates meta value to current timestamp indicating the user's last contribution.
-		 *
+		 * 
 		 * @return int|bool result of update_user_meta();
 		 */
 		protected function update_last_contribution_meta( $user_id ) {
@@ -85,5 +109,5 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 } /* if class_exists */
 
 if ( class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
-	new WPOrg_5ftf_Activity_Handler();
+	WPOrg_5ftf_Activity_Handler::get_instance();
 }
