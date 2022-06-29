@@ -115,23 +115,29 @@ input[type="submit"] {
  * 2021 global header/footer
  */
 .wp-block-group.global-header button,
-.wp-block-group.global-header html input[type="button"],
+.wp-block-group.global-header input[type="button"],
 .wp-block-group.global-header input[type="reset"],
 .wp-block-group.global-header input[type="submit"] {
 	/* Revert styles that should only apply to the content area. */
-	border-radius: initial;
-	box-shadow: initial;
-	font-size: initial;
-	line-height: initial;
-	text-shadow: initial;
+	border-radius: revert;
+	box-shadow: revert;
+	text-shadow: revert;
+}
+
+.wp-block-group.global-header button:focus,
+.wp-block-group.global-header input[type="button"]:focus,
+.wp-block-group.global-header input[type="reset"]:focus,
+.wp-block-group.global-header input[type="submit"]:focus {
+	/* Bring back the browser focus style */
+	outline: revert;
 }
 
 .wp-block-group.global-header p,
 .wp-block-group.global-header ul,
 .wp-block-group.global-header ol {
 	/* Revert styles that should only apply to the content area. */
-	font-size: inherit;
-	line-height: inherit;
+	font-size: revert;
+	line-height: revert;
 }
 
 /* site */
