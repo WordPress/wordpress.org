@@ -53,9 +53,20 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 		 * Saves meta value if it qualifies as a contribution.
 		 */
 		public function handle_activity( $args ) {
-			if ( self::is_5ftf_contribution( $args['type'] ) ) {
-				self::update_last_contribution_meta( $args['user_id'] );
+
+			if ( empty( $args['user_id'] ) ) {
+				return '-1 WordPress.org user id is missing';
 			}
+
+			if ( ! isset( $args['type'] ) ) {
+				return '-1 Activity type is missing';
+			}
+
+			if ( ! self::is_5ftf_contribution( $args['type'] ) ) {
+				return '-1 Activity is not considered a contribution';
+			}
+
+			return self::update_last_contribution_meta( $args['user_id'] );
 		}
 
 		/**

@@ -22,6 +22,8 @@ const TEST_USERNAME = 'dufresnesteven';
 /** @var array $args */
 main( $args[0] );
 
+
+// Test Helper functions
 function main( string $case ) : void {
 
 	require_once dirname( __DIR__ ) . '/wporg-5ftf-activity-handler.php';
@@ -45,16 +47,87 @@ function expectFalse( $result ) {
 	expect( substr( $result, 0, 2 ) !== '-1', $result );
 }
 
+
+/**
+ * Tests the handling of `bp_activity_add` activities
+ *
+ * Source: https://github.com/WordPress/wordpress.org/blob/trunk/profiles.wordpress.org/public_html/wp-content/plugins/wporg-profiles-activity-handler/wporg-profiles-activity-handler.php
+ */
+function test_bp_filter( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
+	test_bp_filter_success( $handler, $user );
+	test_bp_filter_missing_user_id( $handler, $user );
+	test_bp_filter_missing_type( $handler, $user );
+	test_bp_filter_not_supported_type( $handler, $user );
+}
+
+/**
+ * Should update database.
+ */
+function test_bp_filter_success( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
+	expectTrue(
+		$handler->handle_activity(
+			array(
+				'type'    => 'blog_post_create',
+				'user_id' => $user->ID,
+			)
+		)
+	);
+}
+
+/**
+ * Should return error message due to missing user id.
+ */
+function test_bp_filter_missing_user_id( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
+	expectFalse(
+		$handler->handle_activity(
+			array(
+				'type' => 'blog_post_create',
+			)
+		)
+	);
+}
+
+/**
+ * Should return error message due to missing type.
+ */
+function test_bp_filter_missing_type( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
+	expectFalse(
+		$handler->handle_activity(
+			array(
+				'user_id' => $user->ID,
+			)
+		)
+	);
+}
+
+/**
+ * Should return error message due to type not being a contribution.
+ */
+function test_bp_filter_not_supported_type( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
+	expectFalse(
+		$handler->handle_activity(
+			array(
+				'type'    => 'not_supported',
+				'user_id' => $user->ID,
+			)
+		)
+	);
+}
+
 /**
  * Tests the handling of GitHub activities
+ *
+ * Source: https://github.com/WordPress/wordpress.org/blob/trunk/api.wordpress.org/public_html/dotorg/github/activity.php
  */
-
 function test_github_filter( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
 	test_github_filter_success( $handler, $user );
 	test_github_filter_no_user_id( $handler );
 	test_github_filter_unsupported_category( $handler, $user );
 }
 
+/**
+ * Should update database.
+ */
 function test_github_filter_success( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
 	expectTrue(
 		$handler->handle_github_activity(
@@ -67,6 +140,9 @@ function test_github_filter_success( WPOrg_5ftf_Activity_Handler $handler, $user
 	);
 }
 
+/**
+ * Should return error message due to missing user id.
+ */
 function test_github_filter_no_user_id( WPOrg_5ftf_Activity_Handler $handler ) : void {
 	expectFalse(
 		$handler->handle_github_activity(
@@ -78,6 +154,9 @@ function test_github_filter_no_user_id( WPOrg_5ftf_Activity_Handler $handler ) :
 	);
 }
 
+/**
+ * Should return error message due to unsupported category.
+ */
 function test_github_filter_unsupported_category( WPOrg_5ftf_Activity_Handler $handler, $user ) : void {
 	expectFalse(
 		$handler->handle_github_activity(
