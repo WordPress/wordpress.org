@@ -43,7 +43,7 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 		 */
 		public function __construct() {
 			if ( 'profiles.wordpress.org' === site_url() ) {
-				add_filter( 'bp_activity_add', array( $this, 'handle_wordpress_activity' ) );
+				add_filter( 'bp_activity_add', array( $this, 'handle_activity' ) );
 			} elseif ( str_ends_with( 'wordpress.org', site_url() ) ) {
 				add_filter( 'wporg_github_added_activity', array( $this, 'handle_github_activity' ) );
 			}
@@ -52,7 +52,7 @@ if ( ! class_exists( 'WPOrg_5ftf_Activity_Handler' ) ) {
 		/**
 		 * Saves meta value if it qualifies as a contribution.
 		 */
-		public function handle_wordpress_activity( $args ) {
+		public function handle_activity( $args ) {
 			if ( self::is_5ftf_contribution( $args['type'] ) ) {
 				self::update_last_contribution_meta( $args['user_id'] );
 			}
