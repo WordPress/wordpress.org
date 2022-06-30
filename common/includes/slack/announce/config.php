@@ -314,6 +314,8 @@ function get_whitelist() {
 			'psykro', // @jon_bossenger on Slack
 			'raaaahman', // @Sylvain Schellenberger on slack
 			'schlessera',
+			'sephsekla', // @Joe Bailey-Roberts on Slack
+			'bacoords',
 		),
 		'feature-shinyupdates' => array(
 			'obenland',
