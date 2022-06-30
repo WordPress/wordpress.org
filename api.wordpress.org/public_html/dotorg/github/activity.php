@@ -84,7 +84,7 @@ function save_github_activity( $data ) {
 		$data
 	);
 
-	apply_filters( 'wporg_github_added_activity', $data );
+	do_action( 'wporg_github_added_activity', $data );
 }
 
 $event   = $_SERVER['HTTP_X_GITHUB_EVENT'];
