@@ -168,6 +168,7 @@ function init() {
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items_for_handbook_root', 10, 2 );
 
 	add_filter( 'syntaxhighlighter_htmlresult', __NAMESPACE__ . '\\syntaxhighlighter_htmlresult' );
+	add_filter( 'wporg_profiles_wp_activity-is_post_notifiable','__return_true' );
 }
 
 /**
