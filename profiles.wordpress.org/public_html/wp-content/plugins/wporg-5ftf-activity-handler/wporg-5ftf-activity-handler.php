@@ -27,6 +27,14 @@ class WPOrg_5ftf_Activity_Handler {
 	 */
 	const last_contribution_meta_key = 'wporg_5ftf_last_contribution';
 
+
+	/**
+	 *  Name of meta key that stores information about the last_contribution_meta_key.
+	 *
+	 * @var string
+	 */
+	const last_contribution_info_meta_key = 'last_contribution_info_meta_key';
+
 	/**
 	 * Returns always the same instance of this plugin.
 	 *
@@ -68,7 +76,7 @@ class WPOrg_5ftf_Activity_Handler {
 			return '-1 Activity is not considered a contribution';
 		}
 
-		return self::update_last_contribution_meta( $args['user_id'] );
+		return self::update_last_contribution_meta( $args['user_id'], $args );
 	}
 
 	/**
@@ -92,7 +100,7 @@ class WPOrg_5ftf_Activity_Handler {
 			return '-1 Category: ' . sanitize_text_field( $args['category'] ) . ' is not a contribution.';
 		}
 
-		return self::update_last_contribution_meta( $args['user_id'] );
+		return self::update_last_contribution_meta( $args['user_id'], $args );
 	}
 
 	/**
@@ -114,7 +122,11 @@ class WPOrg_5ftf_Activity_Handler {
 	 *
 	 * @return int|bool result of update_user_meta();
 	 */
-	protected function update_last_contribution_meta( $user_id ) {
+	protected function update_last_contribution_meta( $user_id, $args ) {
+
+		// Save information about what updates the value
+		update_user_meta( $user_id, self::last_contribution_info_meta_key, json_encode( $args ) );
+
 		return update_user_meta( $user_id, self::last_contribution_meta_key, time() );
 	}
 
