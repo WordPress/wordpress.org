@@ -203,6 +203,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					case 'learn':
 						$activity_id = bp_activity_add( $this->sanitize_activity( $_POST ) );
 						break;
+					case 'glotpress':
+						$activity_id = $this->digest_bump( $this->sanitize_activity( $_POST ) );
+						break;
 					case 'plugin':
 						$activity_id = $this->handle_plugin_activity();
 						break;
@@ -937,6 +940,15 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 */
 		protected function get_digest_actions( string $component, string $type, int $count ) : string {
 			switch ( $component . ':' . $type ) {
+				case 'glotpress:glotpress_translation_suggested':
+					$singular = 'Suggested %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+					$plural   = 'Suggested %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+					break;
+
+				case 'glotpress:glotpress_translation_approved':
+					$singular = 'Translated %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+					$plural   = 'Translated %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+					break;
 
 				default:
 					$action = '';
