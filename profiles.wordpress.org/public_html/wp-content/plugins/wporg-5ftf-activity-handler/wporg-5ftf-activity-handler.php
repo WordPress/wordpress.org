@@ -27,7 +27,6 @@ class WPOrg_5ftf_Activity_Handler {
 	 */
 	const last_contribution_meta_key = 'wporg_5ftf_last_contribution';
 
-
 	/**
 	 *  Name of meta key that stores information about the last_contribution_meta_key.
 	 *
