@@ -866,6 +866,91 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			return $user_case_args;
 		}
 
+		/**
+		 * Bump the count for an activity digest by 1.
+		 *
+		 * Many contributions happen too frequently to show each one on a profile, because they would quickly fill
+		 * it, and crowd out all of the person's other activities. This creates a rolling digest, so that only 1
+		 * entry per day is created. That single entry gets updated each time a new action occurs, so the latest
+		 * count is always displayed.
+		 *
+		 * @param array $new_activity
+		 *
+		 * @return WP_Error|bool|int
+		 */
+		protected function digest_bump( array $new_activity ) {
+			$args = array(
+				'fields'   => 'ids',
+				'per_page' => 1,
+
+				'date_query' => array(
+					array(
+						'after' => date( 'Y-m-d H:i:s', strtotime( 'today midnight' ) ),
+					),
+				),
+
+				'filter_query' => array(
+					array(
+						'column'   => 'component',
+						'value'    => $new_activity['component'],
+						'relation' => 'AND',
+					),
+					array(
+						'column'   => 'type',
+						'value'    => $new_activity['type'],
+						'relation' => 'AND',
+					),
+					array(
+						'column'   => 'user_id',
+						'value'    => $new_activity['user_id'],
+						'relation' => 'AND',
+					),
+				),
+			);
+
+			$stored_activity_id = bp_activity_get( $args )['activities'][0] ?? false;
+			$current_count      = (int) bp_activity_get_meta( $stored_activity_id, 'digest_count', true );
+			$new_action         = $this->get_digest_actions( $new_activity['component'], $new_activity['type'], $current_count + 1 );
+
+			if ( $stored_activity_id ) {
+				$activity_id             = $stored_activity_id;
+				$activity_object         = new BP_Activity_Activity( $activity_id );
+				$activity_object->action = $new_action;
+
+				$activity_object->save();
+				bp_activity_update_meta( $activity_id, 'digest_count', $current_count + 1 );
+
+			} else {
+				$new_activity['action'] = $new_action;
+				$activity_id            = bp_activity_add( $new_activity );
+
+				bp_activity_update_meta( $activity_id, 'digest_count', 1 );
+			}
+
+			return $activity_id;
+		}
+
+		/**
+		 * Get the action string for a digest activity.
+		 *
+		 * This doesn't use BuddyPress' `format_callback` because we don't register the `type`s.
+		 */
+		protected function get_digest_actions( string $component, string $type, int $count ) : string {
+			switch ( $component . ':' . $type ) {
+
+				default:
+					$action = '';
+			}
+
+			if ( $singular && $plural ) {
+				$action = sprintf(
+					_n( $singular, $plural, $count ),
+					$count
+				);
+			}
+
+			return $action;
+		}
 	} /* /class WPOrg_Profiles_Activity_Handler */
 } /* if class_exists */
 
