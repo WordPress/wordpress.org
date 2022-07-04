@@ -53,7 +53,7 @@ class WPOrg_5ftf_Activity_Handler {
 	public function __construct() {
 		if ( 'profiles.wordpress.org' === site_url() ) {
 			add_filter( 'bp_activity_add', array( $this, 'handle_activity' ) );
-		} elseif ( str_ends_with( 'wordpress.org', site_url() ) ) {
+		} elseif ( str_ends_with( 'wordpress.org', site_url() ) && constant( 'IS_WPORG_MULTINETWORK' ) ) {
 			add_filter( 'wporg_github_added_activity', array( $this, 'handle_github_activity' ) );
 		}
 	}
