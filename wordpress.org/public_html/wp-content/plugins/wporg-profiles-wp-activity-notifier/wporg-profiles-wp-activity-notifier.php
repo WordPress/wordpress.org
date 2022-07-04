@@ -87,7 +87,8 @@ class WPOrg_WP_Activity_Notifier {
 			return false;
 		}
 
-		$notifiable_post_types = array( 'post', 'handbook', 'wporg_workshop', 'lesson-plan', 'course' );
+		// wp-parser-* post types belong to developer.wordpress.org
+		$notifiable_post_types = array( 'post', 'handbook', 'wporg_workshop', 'lesson-plan', 'course', 'wp-parser-hook', 'wp-parser-function', 'wp-parser-method', 'wp-parser-class' );
 
 		// There's a large number of custom handbooks, and more will be created in the future.
 		if ( str_contains( $post->post_type, '-handbook' ) ) {
