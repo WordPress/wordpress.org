@@ -17,7 +17,7 @@ if ( 'staging' !== wp_get_environment_type() || 'cli' !== php_sapi_name() ) {
 	die( 'Error: Wrong environment.' );
 }
 
-const TEST_USERNAME = 'dufresnesteven';
+const TEST_USERNAME = 'metatestaccount';
 
 /** @var array $args */
 main( $args[0] );
@@ -46,7 +46,6 @@ function expectTrue( $result ) {
 function expectFalse( $result ) {
 	expect( substr( $result, 0, 2 ) !== '-1', $result );
 }
-
 
 /**
  * Tests the handling of `bp_activity_add` activities
