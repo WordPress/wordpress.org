@@ -182,9 +182,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				// Renaming this allows simple handlers to pass the sanitized $_POST directly to `bp_activity_add()`.
 				$_POST['action'] = $_POST['message'] ?? '';
 
-				// The `slack` source requires multiples users, so the parameters are named differently.
-				if ( empty( $_POST['user'] ) && empty( $_POST['user_id'] ) && 'slack' !== $source ) {
-					throw new Exception( '-1 No user specified.' );
+				// Slack and GlotPress sometimes include user IDs in a different location, and they always use
+				// `sanitize_activity()`, which checks for a valid user ID. Checking here too adds complexity and
+				// is unnecessary.
+				if ( ! in_array( $source, array( 'slack', 'glotpress' ), true ) ) {
+					if ( empty( $_POST['user'] ) && empty( $_POST['user_id'] ) ) {
+						throw new Exception( '-1 No user specified.' );
+					}
 				}
 
 				// Disable default BP moderation
@@ -204,7 +208,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						$activity_id = bp_activity_add( $this->sanitize_activity( $_POST ) );
 						break;
 					case 'glotpress':
-						$activity_id = $this->digest_bump( $this->sanitize_activity( $_POST ) );
+						$activity_id = $this->handle_glotpress_activity( $_POST );
 						break;
 					case 'plugin':
 						$activity_id = $this->handle_plugin_activity();
@@ -870,18 +874,53 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
-		 * Bump the count for an activity digest by 1.
+		 * Process activity from translate.w.org (via api.wordpress.org).
+		 *
+		 * @return bool|string `true` if all activities are added, string error message if any of them fail.
+		 * @throws Exception
+		 */
+		protected function handle_glotpress_activity( $post_unsafe ) {
+			$activities = array();
+			$errors     = '';
+
+			// The client may send multiple activities in a single request.
+			if ( isset( $post_unsafe['activities'] ) ) {
+				$activities = $post_unsafe['activities'];
+			} else {
+				$activities[] = $post_unsafe;
+			}
+
+			foreach ( $activities as $activity ) {
+				$bump        = intval( $activity['bump'] ?? 1 );
+				$activity_id = $this->digest_bump( $this->sanitize_activity( $activity ), $bump );
+
+				if ( is_wp_error( $activity_id ) ) {
+					$errors .= sprintf(
+						'-1 Unable to save activity for %d: %s. ',
+						$activity['user_id'],
+						$activity_id->get_error_message()
+					);
+				}
+			}
+
+			return $errors ?: true;
+		}
+
+		/**
+		 * Bump the count for an activity digest.
 		 *
 		 * Many contributions happen too frequently to show each one on a profile, because they would quickly fill
 		 * it, and crowd out all of the person's other activities. This creates a rolling digest, so that only 1
 		 * entry per day is created. That single entry gets updated each time a new action occurs, so the latest
 		 * count is always displayed.
 		 *
-		 * @param array $new_activity
-		 *
-		 * @return WP_Error|bool|int
+		 * @return WP_Error|int
 		 */
-		protected function digest_bump( array $new_activity ) {
+		protected function digest_bump( array $new_activity, int $bump = 1 ) {
+			// Standardize on this to reduce the number of paths in error handling code.
+			// Also done in `sanitize_activity()`, but callers aren't guaranteed to use that.
+			$new_activity['error_type'] = 'wp_error';
+
 			$args = array(
 				'fields'   => 'ids',
 				'per_page' => 1,
@@ -913,15 +952,16 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			$stored_activity_id = bp_activity_get( $args )['activities'][0] ?? false;
 			$current_count      = (int) bp_activity_get_meta( $stored_activity_id, 'digest_count', true );
-			$new_action         = $this->get_digest_actions( $new_activity['component'], $new_activity['type'], $current_count + 1 );
+			$new_action         = $this->get_digest_actions( $new_activity['component'], $new_activity['type'], $current_count + $bump );
 
 			if ( $stored_activity_id ) {
-				$activity_id             = $stored_activity_id;
-				$activity_object         = new BP_Activity_Activity( $activity_id );
+				$activity_object         = new BP_Activity_Activity( $stored_activity_id );
 				$activity_object->action = $new_action;
+				$saved                   = $activity_object->save();
+				$activity_id             = is_wp_error( $saved ) ? $saved : $stored_activity_id;
 
-				$activity_object->save();
-				bp_activity_update_meta( $activity_id, 'digest_count', $current_count + 1 );
+				// Increase this even if couldn't update action, to preserve accurate count.
+				bp_activity_update_meta( $activity_id, 'digest_count', $current_count + $bump );
 
 			} else {
 				$new_activity['action'] = $new_action;
