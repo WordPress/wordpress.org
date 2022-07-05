@@ -9,7 +9,7 @@
 namespace WordPressdotorg\GlotPress\Profiles;
 
 use WordPressdotorg\Profiles as Profiles_API;
-use GP, GP_Translation;
+use GP, GP_Translation, GP_Project, GP_Locale, GP_Translation_Set;
 
 defined( 'WPINC' ) || die();
 
@@ -22,13 +22,21 @@ if ( 'local' === wp_get_environment_type() ) {
 	return;
 }
 
-add_action( 'gp_translation_created', __NAMESPACE__ . '\add_translation_activity' );
-add_action( 'gp_translation_saved', __NAMESPACE__ . '\add_translation_activity', 10, 2 );
+add_action( 'gp_translation_created', __NAMESPACE__ . '\add_single_translation_activity' );
+add_action( 'gp_translation_saved', __NAMESPACE__ . '\add_single_translation_activity', 10, 2 );
+add_action( 'gp_translation_set_bulk_action_post', __NAMESPACE__ . '\add_bulk_translation_activity', 10, 4 );
 
 /**
  * Add a activity when strings are suggested and approved.
  */
-function add_translation_activity( GP_Translation $new_translation, GP_Translation $previous_translation = null ) : void {
+function add_single_translation_activity( GP_Translation $new_translation, GP_Translation $previous_translation = null ) : void {
+	$bulk_request = gp_post( 'bulk', null );
+
+	// Bulk actions are handled by `add_bulk_translation_activity()`.
+	if ( $bulk_request ) {
+		return;
+	}
+
 	$current_user_is_editor = GP::$permission->current_user_can(
 		'approve',
 		'translation-set',
@@ -53,6 +61,67 @@ function add_translation_activity( GP_Translation $new_translation, GP_Translati
 		'component' => 'glotpress',
 		'type'      => $type,
 		'user_id'   => $new_translation->user_id,
+	);
+
+	Profiles_API\api( $request_body );
+}
+
+/**
+ * Add activity when bulk actions are performed.
+ */
+function add_bulk_translation_activity( GP_Project $project, GP_Locale $locale, GP_Translation_Set $translation_set, array $bulk ) : void {
+	switch ( $bulk['action'] ) {
+		case 'approve':
+			$type = 'glotpress_translation_approved';
+			break;
+
+		default:
+			return;
+	}
+
+	$translation_ids = array();
+	foreach ( $bulk['row-ids'] as $row_id ) {
+		$parts             = explode( '-', $row_id );
+		$translation_ids[] = intval( $parts[1] ?? 0 );
+	}
+
+	$translations = GP::$translation->find_many(
+		sprintf( 'id IN ( %s )', implode( ',', $translation_ids ) )
+	);
+
+	$user_type_counts = array();
+	foreach ( $translations as $translation ) {
+		// `GP_Route_Translation::_bulk_approve()` tracks which `set_status()` calls succeed, but that information
+		// isn't passed to this callback. Check this just in case any of them failed.
+		if ( 'current' !== $translation->status ) {
+			continue;
+		}
+
+		$user_id = $translation->user_id;
+
+		if ( isset( $user_type_counts[ $user_id ][ $type ] ) ) {
+			$user_type_counts[ $user_id ][ $type ]++;
+		} else {
+			$user_type_counts[ $user_id ][ $type ] = 1;
+		}
+	}
+
+	$activities = array();
+	foreach ( $user_type_counts as $user_id => $types ) {
+		foreach ( $types as $type => $count ) {
+			$activities[] = array(
+				'component' => 'glotpress',
+				'type'      => $type,
+				'user_id'   => $user_id,
+				'bump'      => $count,
+			);
+		}
+	}
+
+	$request_body = array(
+		'action'     => 'wporg_handle_activity',
+		'component'  => 'glotpress',
+		'activities' => $activities,
 	);
 
 	Profiles_API\api( $request_body );
