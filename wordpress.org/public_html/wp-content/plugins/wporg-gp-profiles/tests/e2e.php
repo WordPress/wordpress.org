@@ -10,7 +10,7 @@
 namespace WordPressdotorg\GlotPress\Profiles\Tests;
 
 use WordPressdotorg\GlotPress\Profiles as GlotPress_Profiles;
-use Exception, WP_User, GP_Translation;
+use Exception, WP_User, GP_Translation, GP_Translation_Set, GP_Project, GP_Locale;
 
 ini_set( 'display_errors', 'On' ); // won't do anything if fatal errors
 
@@ -51,6 +51,16 @@ function test_add( WP_User $user ) {
 		'status'  => 'current',
 	) );
 	GlotPress_Profiles\add_single_translation_activity( $translation );
+
+	echo "\nThe daily digest count should have been bumped on https://profiles.wordpress.org/$user->user_nicename/ \n";
+}
+
+function test_bulk_approve( WP_User $user ) {
+	$bulk = array(
+		'action'  => 'approve',
+		'row-ids' => array( '541-33', '542-34' ),
+	);
+	GlotPress_Profiles\add_bulk_translation_activity( new GP_Project(), new GP_Locale(), new GP_Translation_Set(), $bulk );
 
 	echo "\nThe daily digest count should have been bumped on https://profiles.wordpress.org/$user->user_nicename/ \n";
 }
