@@ -30,10 +30,12 @@ add_action( 'gp_translation_set_bulk_action_post', __NAMESPACE__ . '\add_bulk_tr
  * Add a activity when strings are suggested and approved.
  */
 function add_single_translation_activity( GP_Translation $new_translation, GP_Translation $previous_translation = null ) : void {
-	$bulk_request = gp_post( 'bulk', null );
+	$bulk_request   = gp_post( 'bulk', null );
+	$import_request = isset( $_FILES['import-file'] );
 
-	// Bulk actions are handled by `add_bulk_translation_activity()`.
-	if ( $bulk_request ) {
+	// Bulk actions are handled by `add_bulk_translation_activity()`. Importing is blocked by
+	// https://github.com/GlotPress/GlotPress/issues/1467.
+	if ( $bulk_request || $import_request ) {
 		return;
 	}
 
