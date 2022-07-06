@@ -22,9 +22,18 @@ if ( 'local' === wp_get_environment_type() ) {
 	return;
 }
 
-add_action( 'gp_translation_created', __NAMESPACE__ . '\add_single_translation_activity' );
-add_action( 'gp_translation_saved', __NAMESPACE__ . '\add_single_translation_activity', 10, 2 );
-add_action( 'gp_translation_set_bulk_action_post', __NAMESPACE__ . '\add_bulk_translation_activity', 10, 4 );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\register_callbacks' );
+
+function register_callbacks() : void {
+	// Ignore programmatic actions, only notify for user-initiated actions.
+	if ( empty( $_POST ) || ! is_user_logged_in() ) {
+		return;
+	}
+
+	add_action( 'gp_translation_created', __NAMESPACE__ . '\add_single_translation_activity' );
+	add_action( 'gp_translation_saved', __NAMESPACE__ . '\add_single_translation_activity', 10, 2 );
+	add_action( 'gp_translation_set_bulk_action_post', __NAMESPACE__ . '\add_bulk_translation_activity', 10, 4 );
+}
 
 /**
  * Add a activity when strings are suggested and approved.
@@ -50,14 +59,20 @@ function add_single_translation_activity( GP_Translation $new_translation, GP_Tr
 	);
 
 	/*
+	 * Regular user is suggesting a string.
+	 *
 	 * `GP_Route_Translation::translations_post` saves the translation as `waiting` for all users. Then, if the
-	 * user is an editor, it saves it second time to update the status to `current`. We can ignore the first save
-	 * since two avoid two bumps for a single action.
+	 * user is an editor, it saves it a second time to update the status to `current`. We can ignore the first save,
+	 * to avoid two notifications for a single action.
 	 */
 	if ( 'waiting' === $new_translation->status && ! $current_user_is_editor ) {
 		$type = 'glotpress_translation_suggested';
-	} elseif ( 'current' === $new_translation->status && 'current' !== $previous_translation->status ) {
+
+	// Editor is approving a suggested string.
+	// Avoid sending a notification when a `current` post is re-saved, like when dismissing warnings.
+	} elseif ( 'current' === $new_translation->status && isset( $previous_translation->status ) && 'current' !== $previous_translation->status ) {
 		$type = 'glotpress_translation_approved';
+
 	} else {
 		return;
 	}

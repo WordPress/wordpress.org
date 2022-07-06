@@ -46,11 +46,15 @@ function test_add( WP_User $user ) {
 	) );
 	GlotPress_Profiles\add_single_translation_activity( $translation );
 
+	$previous_translation = new GP_Translation( array(
+		'user_id' => $user->ID,
+		'status'  => 'waiting',
+	) );
 	$translation = new GP_Translation( array(
 		'user_id' => $user->ID,
 		'status'  => 'current',
 	) );
-	GlotPress_Profiles\add_single_translation_activity( $translation );
+	GlotPress_Profiles\add_single_translation_activity( $translation, $previous_translation );
 
 	echo "\nThe daily digest count should have been bumped on https://profiles.wordpress.org/$user->user_nicename/ \n";
 }
