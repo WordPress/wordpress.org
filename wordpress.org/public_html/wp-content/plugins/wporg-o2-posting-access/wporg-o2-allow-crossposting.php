@@ -26,11 +26,6 @@ class Plugin {
 			return;
 		}
 
-		// If the current user can't edit posts, they're not going to need this.
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			return;
-		}
-
 		$this->_current_blog_id = get_current_blog_id();
 
 		// Dynamically allow edit_posts when needed.
@@ -94,7 +89,7 @@ class Plugin {
 
 		$data = [
 			'data'  => array_values( $xposts->site_suggestions() ),
-			'limit' => 30, // Show all sites
+			'limit' => 50, // Show all sites
 		];
 
 		wp_send_json_success( json_encode( $data ) );
@@ -111,6 +106,10 @@ class Plugin {
 	 * @return array Array of all the user's capabilities.
 	 */
 	public function user_has_cap( $allcaps, $caps, $args, $user ) {
+		if ( ! is_user_logged_in() ) {
+			return $allcaps;
+		}
+
 		if ( $user->ID !== get_current_user_id() ) {
 			return $allcaps;
 		}
@@ -188,7 +187,7 @@ class Plugin {
 					return $m[0];
 				}
 
-				$correct = "make.wordpress.org/{$site}/";
+				$correct = "{$current_site->domain}/{$site}/";
 				if ( $m[1] !== $correct ) {
 					return str_replace( $m[1], $correct, $m[0] );
 				}
