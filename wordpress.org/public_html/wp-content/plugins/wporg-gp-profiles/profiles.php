@@ -39,6 +39,10 @@ function add_single_translation_activity( GP_Translation $new_translation, GP_Tr
 		return;
 	}
 
+	if ( ! get_userdata( $new_translation->user_id ) ) {
+		return;
+	}
+
 	$current_user_is_editor = GP::$permission->current_user_can(
 		'approve',
 		'translation-set',
