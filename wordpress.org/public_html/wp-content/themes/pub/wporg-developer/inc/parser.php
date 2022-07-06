@@ -18,7 +18,6 @@ class DevHub_Parser {
 		'wp-admin/js/',
 		'wp-content/',
 		'wp-includes/ID3/',
-		'wp-includes/IXR/',
 		'wp-includes/PHPMailer/',
 		'wp-includes/SimplePie/',
 		'wp-includes/Text/',
