@@ -64,6 +64,7 @@ class Themes_API {
 		'requires'           => false,
 		'requires_php'       => false,
 		'trac_tickets'       => false,
+		'patterns'           => false,
 	);
 
 	/**
@@ -892,6 +893,33 @@ class Themes_API {
 				$phil->sections['description'] = GlotPress_Translate_Bridge::translate( $phil->sections['description'], $glotpress_project );
 			}
 
+		}
+
+		if ( $this->fields['patterns'] ) {
+			$pattern_meta = get_post_meta( $theme->ID, '_patterns', true );
+			$patterns_data = array();
+
+			if ( ! empty( $pattern_meta ) ) {
+				switch_to_blog( 699 ); // Pattern Directory
+
+				$args = array(
+					'post_name__in' => $pattern_meta,
+					'post_type'     => 'wporg-pattern',
+					'post_status'   => 'publish',
+				);
+
+				foreach ( get_posts( $args ) as $pattern_post ) {
+					$p = array();
+					$p['name'] = $pattern_post->post_title;
+					$p['link'] = get_permalink( $pattern_post );
+
+					$patterns_data[] = $p;
+				}
+
+				restore_current_blog();
+			}
+
+			$phil->patterns = $patterns_data;
 		}
 
 		wp_cache_set( $cache_key, $phil, $this->cache_group, $this->cache_life );

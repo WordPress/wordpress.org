@@ -76,6 +76,13 @@ class WPORG_Themes_Upload {
 	public $theme;
 
 	/**
+	 * The uploaded theme.json.
+	 *
+	 * @var WP_Theme_JSON
+	 */
+	public $theme_json = null;
+
+	/**
 	 * The theme slug being uploaded.
 	 *
 	 * @var string
@@ -369,6 +376,9 @@ class WPORG_Themes_Upload {
 
 		// We have a stylesheet, let's set up the theme, theme post, and author.
 		$this->theme = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
+
+		// Get Theme.json data if it exists
+		$this->theme_json = $this->get_theme_json( $theme_files );
 
 		// We need a screen shot. People love screen shots.
 		if ( ! $this->has_screenshot( $theme_files ) ) {
@@ -1299,6 +1309,10 @@ TICKET;
 			'_screenshot'   => $this->theme->screenshot,
 		);
 
+		if ( ! empty( $this->theme_json ) && $this->theme_json->get_patterns() ) {
+			$post_meta[ '_patterns' ] = $this->theme_json->get_patterns();
+		}
+
 		// Store readme.txt data if present.
 		foreach ( $this->readme as $field => $data ) {
 			$post_meta[ "_{$field}" ] = $data;
@@ -1864,5 +1878,28 @@ The WordPress Themes Team', 'wporg-themes' ),
 		}
 
 		$send->send( '#themereview-firehose' );
+	}
+
+	/**
+	 * Returns WP_THEME_JSON information if it exists.
+	 * 
+	 * @return WP_Theme_JSON|null
+	 */
+	public function get_theme_json( $theme_files ) {
+		$theme_json = preg_grep( '/theme.json/i', $theme_files );
+
+		if ( ! $theme_json ) {
+			return null;
+		}
+
+		$file_path = (string) array_pop( $theme_json );
+
+		$decoded_file = wp_json_file_decode( $file_path, array( 'associative' => true ) );
+
+		if ( ! is_array( $decoded_file ) ) {
+			return null;
+		}
+
+		return new WP_Theme_JSON( $decoded_file, 'default' );
 	}
 }

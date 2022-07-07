@@ -79,6 +79,13 @@
 				</div><!-- .theme-tags -->
 				<# } #>
 
+				<# if ( data.patterns ) { #>
+				<div class="theme-patterns">
+					<h3><?php _e( 'Patterns:', 'wporg-themes' ); ?></h3>
+					<div>{{{ data.patterns }}}</div>
+				</div><!-- .theme-patterns -->
+				<# } #>
+
 				<div class="theme-downloads">
 					<h3><?php _e( 'Downloads Per Day', 'wporg-themes' ); ?></h3>
 					<div id="theme-download-stats-{{data.id}}" class="chart"></div>

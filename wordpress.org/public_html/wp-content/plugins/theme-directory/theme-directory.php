@@ -889,6 +889,7 @@ function wporg_themes_get_themes_for_query() {
 		'active_installs' => true,
 		'requires' => true,
 		'requires_php' => true,
+		'patterns' => true,
 	);
 
 	$api_result = wporg_themes_query_api( 'query_themes', $request );
@@ -930,6 +931,7 @@ function wporg_themes_theme_information( $slug ) {
 			'active_installs' => true,
 			'requires' => true,
 			'requires_php' => true,
+			'patterns' => true
 		)
 	) );
 }

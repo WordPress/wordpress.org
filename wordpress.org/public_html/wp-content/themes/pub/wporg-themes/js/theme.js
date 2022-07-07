@@ -355,6 +355,7 @@ window.wp = window.wp || {};
 					photon_screenshots: true,
 					active_installs: true,
 					requires_php: true,
+ 					patterns: true,
 				}
 			}, request);
 
@@ -522,6 +523,11 @@ window.wp = window.wp || {};
 			data.tags = _.map( data.tags, function( tag, slug ) {
 				var translated_tag = l10n.tags[ slug ] || tag;
 				return '<a href="' + themes.data.settings.path + themes.router.baseUrl( 'tags/' + slug ) + '">' + translated_tag + '</a>';
+			}).join( ', ' );
+
+			// Make patterns click-able and separated by a comma.
+			data.patterns = _.map( data.patterns, function( pattern ) {
+				return '<a href="'+ pattern.link + '">' + pattern.name + '</a>';
 			}).join( ', ' );
 
 			data.path = themes.data.settings.path;

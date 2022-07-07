@@ -111,6 +111,25 @@
 				</div><!-- .theme-tags -->
 				<?php } ?>
 
+				<?php if ( $theme->patterns ) { ?>
+				<div class="theme-patterns">
+					<h2><?php _e( 'Patterns:', 'wporg-themes' ); ?></h2>
+					<div><?php
+					$pattern_links = array();
+
+					foreach ( $theme->patterns as $pattern ) {
+						$pattern_links[] = sprintf(
+							"<a href='%s'>%s</a>",
+							esc_url( $pattern['link'] ),
+							esc_html( $pattern['name'] )
+						);
+					}
+					echo implode( ', ', $pattern_links );
+					?>
+					</div>
+				</div><!-- .theme-patterns -->
+				<?php } ?>
+
 				<div class="theme-downloads">
 				</div><!-- .theme-downloads -->
 			</div>
