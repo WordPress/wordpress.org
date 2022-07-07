@@ -65,7 +65,7 @@ if ( $email ) {
 }
 
 // If this is related to a slack user, include the details of the slack account.
-if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', $request->ticket->subject, $m ) ) {
+if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', $request->ticket->subject ?? '', $m ) ) {
 
 	if ( $user ) {
 		$slack_user = $wpdb->get_row( $wpdb->prepare(
