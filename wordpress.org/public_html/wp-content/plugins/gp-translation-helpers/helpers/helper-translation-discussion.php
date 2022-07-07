@@ -199,7 +199,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			return $allcaps;
 		}
 
-		if ( in_array( 'read', $caps, true ) && is_user_logged_in() && ! is_admin() ) {
+		if ( in_array( 'read', $caps, true ) && is_user_logged_in() && ( ! is_admin() || wp_doing_ajax() ) ) {
 			$allcaps['read'] = true;
 		}
 
