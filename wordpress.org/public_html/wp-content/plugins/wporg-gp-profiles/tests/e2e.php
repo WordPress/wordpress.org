@@ -62,7 +62,7 @@ function test_add( WP_User $user ) {
 function test_bulk_approve( WP_User $user ) {
 	$bulk = array(
 		'action'  => 'approve',
-		'row-ids' => array( '541-33', '542-34' ),
+		'row-ids' => array( '512-43', '514-44' ),
 	);
 	GlotPress_Profiles\add_bulk_translation_activity( new GP_Project(), new GP_Locale(), new GP_Translation_Set(), $bulk );
 

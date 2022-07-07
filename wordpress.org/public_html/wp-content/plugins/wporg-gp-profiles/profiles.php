@@ -26,7 +26,7 @@ add_action( 'plugins_loaded', __NAMESPACE__ . '\register_callbacks' );
 
 function register_callbacks() : void {
 	// Ignore programmatic actions, only notify for user-initiated actions.
-	if ( empty( $_POST ) || ! is_user_logged_in() ) {
+	if ( empty( $_POST ) || ! is_user_logged_in() || ! wp_using_themes() ) {
 		return;
 	}
 
@@ -39,16 +39,7 @@ function register_callbacks() : void {
  * Add a activity when strings are suggested and approved.
  */
 function add_single_translation_activity( GP_Translation $new_translation, GP_Translation $previous_translation = null ) : void {
-	$bulk_request   = gp_post( 'bulk', null );
-	$import_request = isset( $_FILES['import-file'] );
-
-	// Bulk actions are handled by `add_bulk_translation_activity()`. Importing is blocked by
-	// https://github.com/GlotPress/GlotPress/issues/1467.
-	if ( $bulk_request || $import_request ) {
-		return;
-	}
-
-	if ( ! get_userdata( $new_translation->user_id ) ) {
+	if ( ! should_notify( $new_translation->user_id ) ) {
 		return;
 	}
 
@@ -85,6 +76,41 @@ function add_single_translation_activity( GP_Translation $new_translation, GP_Tr
 	);
 
 	Profiles_API\api( $request_body );
+}
+
+/**
+ * Determine if a notification should be sent for the current `gp_translation_{created|saved}` action.
+ *
+ * This isn't needed for `gp_translation_set_bulk_action_post` callbacks, since that only gets triggered by the
+ * normal UI flow.
+ */
+function should_notify( int $user_id ) : bool {
+	$notify = true;
+
+	/*
+	 * `GP_Route_Translation::translations_post()` runs at `template_redirect:10`, and processes user-initiated
+	 * actions. After that point, other code -- like
+	 * `WordPressdotorg\GlotPress\Plugin_Directory\Sync\Translation_Sync\sync_translations` -- may create
+	 * translations programmatically.
+	 */
+	if ( did_action( 'get_header' ) || did_action( 'shutdown' ) ) {
+		$notify = false;
+	}
+
+	$bulk_request   = gp_post( 'bulk', null );
+	$import_request = isset( $_FILES['import-file'] );
+
+	// Bulk actions are handled by `add_bulk_translation_activity()`. Importing is blocked by
+	// https://github.com/GlotPress/GlotPress/issues/1467.
+	if ( $bulk_request || $import_request ) {
+		$notify = false;
+	}
+
+	if ( ! get_userdata( $user_id ) ) {
+		$notify = false;
+	}
+
+	return $notify;
 }
 
 /**
