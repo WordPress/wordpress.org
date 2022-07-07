@@ -9,7 +9,9 @@ namespace WordPressdotorg\Theme_Directory\Lib;
 trait Exec_With_Logging {
 
 	/**
-	 * Execute a shell process, same behaviour as `exec()` but with PHP Warnings/Notices generated on errors.
+	 * Execute a shell process, same behavior as `exec()` but with PHP Warnings/Notices generated on errors.
+	 * 
+	 * The en_US.UTF-8 locale is forced to allow for commit messages to contain UTF8 characters.
 	 * 
 	 * @param string $command      Command to execute. Escape it.
 	 * @param array  $output       Array to append program output to. Passed by reference.
@@ -25,7 +27,12 @@ trait Exec_With_Logging {
 				1 => [ 'pipe', 'w' ], // STDOUT
 				2 => [ 'pipe', 'w' ], // STDERR
 			],
-			$pipes
+			$pipes,
+			null,
+			[
+				'LANG'     => 'en_US.UTF-8',
+				'LC_CTYPE' => 'en_US.UTF-8',
+			]
 		);
 
 		if ( ! $proc ) {
