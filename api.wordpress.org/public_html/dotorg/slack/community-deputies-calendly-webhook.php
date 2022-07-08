@@ -101,7 +101,7 @@ foreach ( $questions_and_answers as $question => $answer ) {
 }
 
 // If the location isn't specified, use their Name instead, as it's likely an individual-specific meeting.
-$location       = $location ?: ( $questions_and_answers['Name'] ?? '' );
+$location       = $location ?: ( $request_body_parsed->payload->name ?: '' );
 $event_with_loc = $location ? "{$location} {$event_name}" : $event_name;
 
 $send = new Send( SLACK_MESSAGE_WEBHOOK_URL );
