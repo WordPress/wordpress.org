@@ -58,6 +58,7 @@ class WPOrg_WP_Activity_Notifier {
 	public function init() {
 		add_action( 'transition_post_status',    array( $this, 'maybe_notify_new_published_post'   ), 10, 3 );
 		add_action( 'post_updated',              array( $this, 'maybe_notify_updated_post'         ), 10, 3 );
+		add_action( 'wp_insert_post',         	 array( $this, 'insert_post' ),                       10, 2 );
 		add_action( 'transition_comment_status', array( $this, 'maybe_notify_new_approved_comment' ), 10, 3 );
 		add_action( 'wp_insert_comment',         array( $this, 'insert_comment' ),                    10, 2 );
 
@@ -164,6 +165,67 @@ class WPOrg_WP_Activity_Notifier {
 		$this->notify_blog_post( $post, 'new' );
 	}
 
+	public function insert_post ($postId, $post) {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return;
+		}
+		
+		if ( ! $this->is_post_notifiable( $post ) ) {
+			return;
+		}
+
+		if ( $post->post_type === 'wporg_workshop' ) {
+			$this->notify_workshop_presenter( $post );
+		}
+	}
+
+	/**
+	 * Sends activity notification for workshop presenter.
+	 *
+	 * @param WP_Post $post The published post
+	 */
+	public function notify_workshop_presenter( $post ) {
+		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
+			return;
+		}
+
+		$presenter_wporg_username = get_post_meta( $post->ID, 'presenter_wporg_username');
+
+		if ( empty( $presenter_wporg_username ) ) {
+			return;
+		}
+		
+		$permalink = get_permalink( $post );
+
+		$title = wp_kses_data( $post->post_title );
+		
+		$content = wp_trim_words(
+			strip_shortcodes( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content ),
+			55
+		);
+
+		foreach ($presenter_wporg_username as $username) {
+			$userId = get_user_by( 'slug', strtolower( $username ) )->ID;
+
+			$args = array(
+				'action'       => 'wporg_handle_activity',
+				'component'    => 'learn',
+				'type'         => 'workshop_presenter_assign',
+				'user_id'      => $userId,
+				'primary_link' => $permalink,
+				'item_id'      => $post->ID,
+				'content'      => $content,
+				'message' => sprintf(
+					'Assigned presenter to the workshop, <i><a href="%s">%s</a></i>, on the site %s',
+					$permalink,
+					$title,
+					get_bloginfo( 'name' )
+				),
+			);
+	
+			Profiles\api( $args );
+		}
+	}
 
 	/**
 	 * Sends activity notification for new blog post.
