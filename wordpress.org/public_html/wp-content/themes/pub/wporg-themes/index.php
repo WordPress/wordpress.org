@@ -28,7 +28,9 @@ get_header();
 				<?php } ?>
 			</ul>
 
-			<a class="drawer-toggle" href="#"><?php _e( 'Feature Filter', 'wporg-themes' ); ?></a>
+			<a class="drawer-toggle" href="#">
+				<span class="drawer-text"><?php _e( 'Feature Filter', 'wporg-themes' ); ?></span>
+			</a>
 
 			<div class="search-form"></div>
 

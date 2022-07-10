@@ -1303,6 +1303,10 @@ body.full-overlay-active {
 	color: #fff;
 }
 
+.wp-filter .drawer-toggle .drawer-text {
+	display: inline-block;
+}
+
 .filter-drawer {
 	display: none;
 	margin: 0 -20px;
@@ -1710,11 +1714,6 @@ span.favorite.favorited {
 		padding: 0;
 	}
 
-	/* Hide Feature Filter on mobile. */
-	.wp-filter .drawer-toggle {
-		display: none;
-	}
-
 	/* Full width search form. */
 	.wp-filter .search-form,
 	.wp-filter .wp-filter-search {
@@ -1762,5 +1761,23 @@ span.favorite.favorited {
 
 	.posts-navigation {
 		margin-top: 40px;
+	}
+}
+
+@media only screen and (max-width: 375px) {
+	.wp-filter .drawer-toggle {
+		float: right;
+		margin-top: 12px;
+		margin-right: 0;
+	}
+
+	.wp-filter .drawer-toggle:before {
+		margin-right: 0;
+	}
+}
+
+@media only screen and (max-width: 350px) {
+	.wp-filter .drawer-toggle .drawer-text {
+		display: none;
 	}
 }
