@@ -34,6 +34,7 @@ class DevHub_Parser {
 		'wp-includes/class-smtp.php',
 		'wp-includes/class-snoopy.php',
 		'wp-includes/class-wp-block-parser.php',
+		'wp-includes/compat.php',
 		'wp-includes/js/',
 		'wp-includes/random_compat/',
 		'wp-includes/sodium_compat/',
