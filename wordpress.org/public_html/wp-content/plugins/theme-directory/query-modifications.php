@@ -121,6 +121,15 @@ function wporg_themes_pre_get_posts( $query ) {
 			$query->query_vars['orderby'] = 'meta_value DESC';
 			break;
 
+		// List themes tagged as 'full-site-editing' under 'Block'
+		// Ordered by date added
+		case 'block':
+			$query->query_vars['browse'] = 'block';
+			$query->query_vars['tag'] = 'full-site-editing';
+			$query->query_vars['orderby'] = 'post_date';
+			$query->query_vars['order'] = 'DESC';
+			break;
+
 		default:
 			// Force a 404 for anything else.
 			if ( $query->query_vars['browse'] ) {
@@ -136,7 +145,7 @@ function wporg_themes_pre_get_posts( $query ) {
 	if (
 		empty( $query->query_vars['name'] ) &&
 		empty( $query->query_vars['author_name'] ) &&
-		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) ) &&
+		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated', 'block' ) ) &&
 		empty( $query->query_vars['meta_query']['trac_sync_ticket_id'] ) && // jobs/class-trac-sync.php - Always needs to find the post, and looks up via a meta search.
 		empty( $query->query_vars['meta_query']['theme_uri_search'] ) // class-wporg-themes-upload.php - Searching all known themes by meta value.
 	) {
@@ -149,7 +158,7 @@ function wporg_themes_pre_get_posts( $query ) {
 	// Prioritize translated themes for localized requests, except when viewing a specific ordered themes.
 	if (
 		'en_US' !== get_locale() &&
-		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) )
+		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated', 'block' ) )
 	) {
 		add_filter( 'posts_clauses', 'wporg_themes_prioritize_translated_posts_clauses', 11 );
 	}
@@ -214,7 +223,7 @@ function wporg_themes_prioritize_exact_matches_clauses( $clauses, $query ) {
  */
 function wporg_themes_parse_request( $wp ) {
 	$sections = array(
-		'new', 'updated', /*'featured',*/ 'favorites', 'popular'
+		'new', 'updated', /*'featured',*/ 'favorites', 'popular', 'block'
 	);
 
 	if ( !empty( $wp->query_vars['browse'] ) && ! in_array( $wp->query_vars['browse'], $sections ) ) {
