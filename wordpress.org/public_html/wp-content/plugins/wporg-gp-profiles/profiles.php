@@ -83,8 +83,10 @@ function add_single_translation_activity( GP_Translation $new_translation, GP_Tr
  *
  * This isn't needed for `gp_translation_set_bulk_action_post` callbacks, since that only gets triggered by the
  * normal UI flow.
+ *
+ * @param mixed $user_id Accept mixed so that callers don't have to check the type. `get_userdata()` will do that.
  */
-function should_notify( int $user_id ) : bool {
+function should_notify( $user_id ) : bool {
 	$notify = true;
 
 	/*
