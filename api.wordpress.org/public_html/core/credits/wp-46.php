@@ -68,7 +68,7 @@ class WP_46_Credits extends WP_Credits {
 					'afragen'      => array( 'Andy Fragen', '0355aa5eef5115d6e6befa7fbe16dc4c' ),
 					'ramiy'        => 'Rami Yushuvaev',
 					'spacedmonkey' => 'Jonny Harris',
-					'rianrietveld' => 'Rian Rietveld ',
+					'rianrietveld' => 'Rian Rietveld',
 					'mapk'         => 'Mark Uraine',
 					'mattmiklic'   => 'Matt Miklic',
 				),

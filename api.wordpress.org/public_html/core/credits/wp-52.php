@@ -442,7 +442,7 @@ class WP_52_Credits extends WP_Credits {
 			'toro_unit',
 			'torres126',
 			'travel_girl',
-			'tsewlliw ',
+			'tsewlliw',
 			'tz-media',
 			'umang7',
 			'vaishalipanchal',

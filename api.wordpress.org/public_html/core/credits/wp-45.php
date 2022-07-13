@@ -24,7 +24,7 @@ class WP_45_Credits extends WP_Credits {
 				'data'    => array(
 					'mikeschroder'    => array( 'Mike Schroder',     'Release Lead' ),
 					'adamsilverstein' => array( 'Adam Silverstein',  'Release Deputy' ),
-					'melchoyce'       => array( 'Mel Choyce ',       'Release Design Lead' ),
+					'melchoyce'       => array( 'Mel Choyce',        'Release Design Lead' ),
 					'jorbin'          => array( 'Aaron Jorbin',      'Core Developer' ),
 					'boonebgorges'    => array( 'Boone B. Gorges',   'Core Developer' ),
 					'ocean90'         => array( 'Dominik Schilling', 'Core Developer' ),
@@ -62,7 +62,7 @@ class WP_45_Credits extends WP_Credits {
 				'data'    => array(
 					'chriscct7'        => array( 'Chris Christoff', 'd0931e57862048dabb0bea3a71ce6229' ),
 					'danielbachhuber'  => 'Daniel Bachhuber',
-					'celloexpressions' => 'Nick Halsey ',
+					'celloexpressions' => 'Nick Halsey',
 					'dnewton'          => array( 'David Newton', '2b5c483d8d2a5fb69cb5b27c784edea3' ),
 					'ebinnion'         => 'Eric Binnion',
 					'grantpalin'       => 'Grant Palin',

@@ -69,8 +69,8 @@ class WP_47_Credits extends WP_Credits {
 				'type'    => 'titles',
 				'shuffle' => true,
 				'data'    => array(
-					'danielbachhuber'  => 'Daniel Bachhuber ',
-					'celloexpressions' => 'Nick Halsey ',
+					'danielbachhuber'  => 'Daniel Bachhuber',
+					'celloexpressions' => 'Nick Halsey',
 					'ramiy'            => 'Rami Yushuvaev',
 					'johnregan3'       => 'John Regan',
 					'sirbrillig'       => 'Payton Swick',
