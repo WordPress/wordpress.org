@@ -23,6 +23,7 @@ get_header();
 			<ul class="filter-links">
 				<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>" data-sort="popular" <?php if ( (is_front_page() && !get_query_var('browse') ) || 'popular' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Popular', 'themes', 'wporg-themes' ); ?></a></li>
 				<li><a href="<?php echo esc_url( home_url( 'browse/new/' ) ); ?>" data-sort="new" <?php if ( 'new' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Latest', 'themes', 'wporg-themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'tags/full-site-editing/' ) ); ?>" data-tag="full-site-editing" <?php if ( 'full-site-editing' == get_query_var('tag') ) { echo 'class="current"'; } ?>><?php _e( 'Full Site Editing', 'wporg-themes' ); ?></a></li>
 				<?php if ( is_user_logged_in() ) { ?>
 					<li><a href="<?php echo esc_url( home_url( 'browse/favorites/' ) ); ?>" data-sort="favorites" <?php if ( 'favorites' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Favorites', 'themes', 'wporg-themes' ); ?></a></li>
 				<?php } ?>

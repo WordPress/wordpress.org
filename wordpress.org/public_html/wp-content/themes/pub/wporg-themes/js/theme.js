@@ -1455,6 +1455,12 @@ window.wp = window.wp || {};
 
 			event.preventDefault();
 
+			// Special handling for any tags present within the menu, such as full-site-editing.
+			if ( ! sort && $el.data( 'tag' ) ) {
+				themes.router.trigger( 'route:tag', $el.data( 'tag' ) );
+				return;
+			}
+
 			$( 'body' ).removeClass( 'filters-applied show-filters' );
 
 			// Bail if this is already active
@@ -1561,6 +1567,8 @@ window.wp = window.wp || {};
 				name = $( 'label[for="filter-id-' + tag + '"]' ).text();
 				names.push( name );
 				filteringBy.append( '<span class="tag">' + name + '</span>' );
+
+				$( '.filter-links li > a[data-tag="' + tag + '"]' ).addClass( 'current' );
 			});
 
 			themes.router.navigate( themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
