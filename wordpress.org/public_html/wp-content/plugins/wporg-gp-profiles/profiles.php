@@ -139,21 +139,12 @@ function add_bulk_translation_activity( GP_Project $project, GP_Locale $locale, 
 		$activities = get_bulk_approve_activities( $translations );
 	}
 
-	$reviewer_id            = get_current_user_id();
-	$current_user_is_editor = GP::$permission->current_user_can(
-		$bulk['action'],
-		'translation-set',
-		$translations[0]->translation_set_id
+	$activities[] = array(
+		'component' => 'glotpress',
+		'type'      => 'glotpress_translation_reviewed',
+		'user_id'   => get_current_user_id(),
+		'bump'      => count( $translations ),
 	);
-
-	if ( $reviewer_id && $current_user_is_editor ) {
-		$activities[] = array(
-			'component' => 'glotpress',
-			'type'      => 'glotpress_translation_reviewed',
-			'user_id'   => $reviewer_id,
-			'bump'      => count( $translations ),
-		);
-	}
 
 	$request_body = array(
 		'action'     => 'wporg_handle_activity',
