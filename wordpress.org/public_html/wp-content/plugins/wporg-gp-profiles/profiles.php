@@ -119,16 +119,13 @@ function should_notify( $user_id ) : bool {
  * Add activity when bulk actions are performed.
  */
 function add_bulk_translation_activity( GP_Project $project, GP_Locale $locale, GP_Translation_Set $translation_set, array $bulk ) : void {
-	switch ( $bulk['action'] ) {
-		case 'approve':
-			$type = 'glotpress_translation_approved';
-			break;
-
-		default:
-			return;
+	if ( ! in_array( $bulk['action'], array( 'approve', 'reject', 'fuzzy' ) ) ) {
+		return;
 	}
 
+	$activities      = array();
 	$translation_ids = array();
+
 	foreach ( $bulk['row-ids'] as $row_id ) {
 		$parts             = explode( '-', $row_id );
 		$translation_ids[] = intval( $parts[1] ?? 0 );
@@ -138,7 +135,43 @@ function add_bulk_translation_activity( GP_Project $project, GP_Locale $locale, 
 		sprintf( 'id IN ( %s )', implode( ',', $translation_ids ) )
 	);
 
+	if ( 'approve' === $bulk['action'] ) {
+		$activities = get_bulk_approve_activities( $translations );
+	}
+
+	$reviewer_id            = get_current_user_id();
+	$current_user_is_editor = GP::$permission->current_user_can(
+		$bulk['action'],
+		'translation-set',
+		$translations[0]->translation_set_id
+	);
+
+	if ( $reviewer_id && $current_user_is_editor ) {
+		$activities[] = array(
+			'component' => 'glotpress',
+			'type'      => 'glotpress_translation_reviewed',
+			'user_id'   => $reviewer_id,
+			'bump'      => count( $translations ),
+		);
+	}
+
+	$request_body = array(
+		'action'     => 'wporg_handle_activity',
+		'component'  => 'glotpress',
+		'activities' => $activities,
+	);
+
+	Profiles_API\api( $request_body );
+}
+
+/**
+ * Generate the activities payload for bulk approval actions.
+ */
+function get_bulk_approve_activities( array $translations ) : array {
+	$type             = 'glotpress_translation_approved';
 	$user_type_counts = array();
+	$activities       = array();
+
 	foreach ( $translations as $translation ) {
 		// `GP_Route_Translation::_bulk_approve()` tracks which `set_status()` calls succeed, but that information
 		// isn't passed to this callback. Check this just in case any of them failed.
@@ -155,7 +188,6 @@ function add_bulk_translation_activity( GP_Project $project, GP_Locale $locale, 
 		}
 	}
 
-	$activities = array();
 	foreach ( $user_type_counts as $user_id => $types ) {
 		foreach ( $types as $type => $count ) {
 			$activities[] = array(
@@ -167,11 +199,5 @@ function add_bulk_translation_activity( GP_Project $project, GP_Locale $locale, 
 		}
 	}
 
-	$request_body = array(
-		'action'     => 'wporg_handle_activity',
-		'component'  => 'glotpress',
-		'activities' => $activities,
-	);
-
-	Profiles_API\api( $request_body );
+	return $activities;
 }
