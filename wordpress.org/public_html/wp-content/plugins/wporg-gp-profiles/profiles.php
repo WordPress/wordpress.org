@@ -172,6 +172,10 @@ function get_bulk_approve_activities( array $translations ) : array {
 
 		$user_id = $translation->user_id;
 
+		if ( ! get_userdata( $user_id ) ) {
+			continue;
+		}
+
 		if ( isset( $user_type_counts[ $user_id ][ $type ] ) ) {
 			$user_type_counts[ $user_id ][ $type ]++;
 		} else {
