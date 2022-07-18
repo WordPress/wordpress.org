@@ -22,49 +22,78 @@ if ( 700 !== get_current_blog_id() ) {
 	die( 'Must be run on translate-test.wordpress.org.' );
 }
 
-const TEST_USERNAME = 'iandunn-test';
+const TRANSLATOR_ID      = 12824495; // iandunn-test
+const REVIEWER_ID        = 20508422; // metatestaccount
+const TRANSLATION_SET_ID = 3;
 
 /** @var array $args */
 main( $args[0] );
 
 function main( $case ) {
-	$user = get_user_by( 'slug', TEST_USERNAME );
+	$translator = get_user_by( 'id', TRANSLATOR_ID );
 
 	try {
-		call_user_func( __NAMESPACE__ . "\\test_$case", $user );
+		add_action( 'gp_pre_can_user', __NAMESPACE__ . '\grant_editor_capabilities', 10, 2 );
+		call_user_func( __NAMESPACE__ . "\\test_$case", $translator );
+		echo "\nThe daily digest count should have been bumped on https://profiles.wordpress.org/$translator->user_nicename/, and/or the reviewer. \n";
 
 	} catch ( Exception $exception ) {
 		echo $exception->getMessage();
-
 	}
 }
 
-function test_add( WP_User $user ) {
+function grant_editor_capabilities( $preliminary, $filter_args ) {
+	if ( REVIEWER_ID === $filter_args['user_id'] ) {
+		return true;
+	} else {
+		return $preliminary;
+	}
+}
+
+function test_suggest( WP_User $user ) {
+	wp_set_current_user( TRANSLATOR_ID );
+
 	$translation = new GP_Translation( array(
-		'user_id' => $user->ID,
-		'status'  => 'waiting',
+		'user_id'            => $user->ID,
+		'status'             => 'waiting',
+		'translation_set_id' => TRANSLATION_SET_ID,
 	) );
 	GlotPress_Profiles\add_single_translation_activity( $translation );
+}
+
+function test_approve( WP_User $translator ) {
+	wp_set_current_user( REVIEWER_ID );
+
+	$_POST['status'] = 'current';
 
 	$previous_translation = new GP_Translation( array(
-		'user_id' => $user->ID,
-		'status'  => 'waiting',
+		'user_id'            => $translator->ID,
+		'status'             => 'waiting',
+		'translation_set_id' => TRANSLATION_SET_ID,
 	) );
 	$translation = new GP_Translation( array(
-		'user_id' => $user->ID,
+		'user_id' => $translator->ID,
 		'status'  => 'current',
 	) );
 	GlotPress_Profiles\add_single_translation_activity( $translation, $previous_translation );
-
-	echo "\nThe daily digest count should have been bumped on https://profiles.wordpress.org/$user->user_nicename/ \n";
 }
 
-function test_bulk_approve( WP_User $user ) {
+function test_bulk_approve( WP_User $translator ) {
+	wp_set_current_user( REVIEWER_ID );
+
 	$bulk = array(
 		'action'  => 'approve',
 		'row-ids' => array( '512-43', '514-44' ),
 	);
 	GlotPress_Profiles\add_bulk_translation_activity( new GP_Project(), new GP_Locale(), new GP_Translation_Set(), $bulk );
+}
 
-	echo "\nThe daily digest count should have been bumped on https://profiles.wordpress.org/$user->user_nicename/ \n";
+function test_bulk_reject( WP_User $translator ) {
+	wp_set_current_user( REVIEWER_ID );
+
+	$bulk = array(
+		'action'  => 'reject',
+		'row-ids' => array( '512-43', '514-44' ),
+	);
+	GlotPress_Profiles\add_bulk_translation_activity( new GP_Project(), new GP_Locale(), new GP_Translation_Set(), $bulk );
 }
