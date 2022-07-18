@@ -39,6 +39,8 @@ class WordPressTV_Theme {
 
 		add_filter( 'document_title_parts', array( $this, 'document_title_parts' ) );
 
+		add_filter( 'template_redirect', array( $this, 'redirects' ) );
+
 		register_nav_menus( array(
 			'primary'            => __( 'Primary Menu', 'wptv' ),
 			'footer'             => __( 'Footer Menu', 'wptv' ),
@@ -128,6 +130,22 @@ class WordPressTV_Theme {
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Various static redirects as required.
+	 */
+	function redirects() {
+		if ( ! is_404() ) {
+			return;
+		}
+
+		// Learn.WordPress.org category changed from social-learning to online workshops.
+		if ( str_starts_with( $_SERVER['REQUEST_URI'], '/category/social-learning' ) ) {
+			$url = str_replace( '/social-learning', '/learn-wordpress-online-workshops', $_SERVER['REQUEST_URI'] );
+			wp_safe_redirect( $url );
+			die();
+		}
 	}
 
 	/**
