@@ -150,79 +150,72 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Post $post The post.
 	 */
 	public function maybe_notify_new_published_post( $new_status, $old_status, $post ) {
-		if ( 'publish' != $new_status ) {
+		if ( ! $this->is_post_notifiable( $post ) ) {
 			return;
 		}
 
-		if ( $old_status == $new_status ) {
-			return;
+		if ( 'wporg_workshop' === $post->post_type ) {
+			$this->notify_workshop_presenter( $post );
 		}
 
 		if ( ! $this->is_post_notifiable( $post, 'publish' ) ) {
+		if ( $old_status === $new_status ) {
 			return;
 		}
 
 		$this->notify_blog_post( $post, 'new' );
 	}
 
-	public function insert_post ($postId, $post) {
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			return;
-		}
-		
-		if ( ! $this->is_post_notifiable( $post ) ) {
-			return;
-		}
-
-		if ( $post->post_type === 'wporg_workshop' ) {
-			$this->notify_workshop_presenter( $post );
-		}
-	}
-
 	/**
 	 * Sends activity notification for workshop presenter.
 	 *
-	 * @param WP_Post $post The published post
+	 * @param WP_Post $post Post object.
 	 */
 	public function notify_workshop_presenter( $post ) {
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
 
-		$presenter_wporg_username = get_post_meta( $post->ID, 'presenter_wporg_username');
+		$presenter_wporg_username = filter_input( INPUT_POST, 'presenter-wporg-username' );
 
 		if ( empty( $presenter_wporg_username ) ) {
 			return;
 		}
-		
+
+		$unique_presenter_wporg_username = array_unique( array_map( 'trim', explode( ',', $presenter_wporg_username ) ) );
+
 		$permalink = get_permalink( $post );
 
 		$title = wp_kses_data( $post->post_title );
-		
+
 		$content = wp_trim_words(
 			strip_shortcodes( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content ),
 			55
 		);
 
-		foreach ($presenter_wporg_username as $username) {
-			$userId = get_user_by( 'slug', strtolower( $username ) )->ID;
+		foreach ( $unique_presenter_wporg_username as $username ) {
+			$user_id = get_user_by( 'slug', strtolower( $username ) )->ID;
+
+			if ( ! $user_id ) {
+				continue;
+			}
 
 			$args = array(
 				'action'       => 'wporg_handle_activity',
 				'component'    => 'learn',
 				'type'         => 'workshop_presenter_assign',
-				'user_id'      => $userId,
+				'user_id'      => $user_id,
 				'primary_link' => $permalink,
 				'item_id'      => $post->ID,
 				'content'      => $content,
-				'message' => sprintf(
+				'message'      => sprintf(
 					'Assigned presenter to the workshop, <i><a href="%s">%s</a></i>, on the site %s',
 					$permalink,
 					$title,
 					get_bloginfo( 'name' )
 				),
 			);
-	
+
 			Profiles\api( $args );
 		}
 	}
