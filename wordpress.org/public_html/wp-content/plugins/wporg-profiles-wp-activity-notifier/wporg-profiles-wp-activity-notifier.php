@@ -223,7 +223,7 @@ class WPOrg_WP_Activity_Notifier {
 				'item_id'      => $post->ID,
 				'content'      => $content,
 				'message'      => sprintf(
-					'Assigned presenter to the workshop, <i><a href="%s">%s</a></i>, on the site %s',
+					'Assigned presenter to the tutorial, <i><a href="%s">%s</a></i>, on the site %s',
 					$permalink,
 					$title,
 					get_bloginfo( 'name' )
