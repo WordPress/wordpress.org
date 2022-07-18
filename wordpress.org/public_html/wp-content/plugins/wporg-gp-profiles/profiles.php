@@ -49,6 +49,12 @@ function add_single_translation_activity( GP_Translation $new_translation, GP_Tr
 		$new_translation->translation_set_id
 	);
 
+	$activities            = array();
+	$review_status         = gp_post( 'status' );
+	$valid_review_statuses = array( 'current', 'rejected', 'fuzzy' );
+	$is_reviewing          = $current_user_is_editor && get_current_user_id() !== $new_translation->user_id &&
+	                         $review_status && in_array( $review_status, $valid_review_statuses, true );
+
 	/*
 	 * Regular user is suggesting a string.
 	 *
@@ -57,22 +63,38 @@ function add_single_translation_activity( GP_Translation $new_translation, GP_Tr
 	 * to avoid two notifications for a single action.
 	 */
 	if ( 'waiting' === $new_translation->status && ! $current_user_is_editor ) {
-		$type = 'glotpress_translation_suggested';
+		$activities[] = array(
+			'component' => 'glotpress',
+			'type'      => 'glotpress_translation_suggested',
+			'user_id'   => $new_translation->user_id,
+		);
 
 	// Editor is approving a suggested string.
 	// Avoid sending a notification when a `current` post is re-saved, like when dismissing warnings.
 	} elseif ( 'current' === $new_translation->status && isset( $previous_translation->status ) && 'current' !== $previous_translation->status ) {
-		$type = 'glotpress_translation_approved';
+		$activities[] = array(
+			'component' => 'glotpress',
+			'type'      => 'glotpress_translation_approved',
+			'user_id'   => $new_translation->user_id,
+		);
+	}
 
-	} else {
+	if ( $is_reviewing ) {
+		$activities[] = array(
+			'component' => 'glotpress',
+			'type'      => 'glotpress_translation_reviewed',
+			'user_id'   => get_current_user_id(),
+		);
+	}
+
+	if ( empty( $activities ) ) {
 		return;
 	}
 
 	$request_body = array(
 		'action'    => 'wporg_handle_activity',
 		'component' => 'glotpress',
-		'type'      => $type,
-		'user_id'   => $new_translation->user_id,
+		'activities' => $activities,
 	);
 
 	Profiles_API\api( $request_body );
