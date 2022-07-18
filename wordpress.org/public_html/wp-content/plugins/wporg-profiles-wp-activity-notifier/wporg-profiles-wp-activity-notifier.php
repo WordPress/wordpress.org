@@ -10,7 +10,9 @@ use WordPressdotorg\Profiles;
 
 class WPOrg_WP_Activity_Notifier {
 	/**
-	 * @var WPOrg_WP_Activity_Notifier The singleton instance.
+	 * The singleton instance.
+	 *
+	 * @var WPOrg_WP_Activity_Notifier
 	 */
 	private static $instance;
 
@@ -98,6 +100,8 @@ class WPOrg_WP_Activity_Notifier {
 
 		// All actions can notify about handbooks.
 		$notifiable_post_types = array( 'handbook' );
+		// wp-parser-* post types belong to developer.wordpress.org.
+		$notifiable_post_types = array( 'post', 'handbook', 'wporg_workshop', 'lesson-plan', 'course', 'wp-parser-hook', 'wp-parser-function', 'wp-parser-method', 'wp-parser-class' );
 
 		// There's a large number of custom handbooks, and more will be created in the future.
 		if ( str_contains( $post->post_type, '-handbook' ) ) {
@@ -131,6 +135,19 @@ class WPOrg_WP_Activity_Notifier {
 		} elseif ( ! empty( $post->post_password ) ) {
 			$notifiable = false;
 		} elseif ( $is_markdown_post || ! $post->post_author ) {
+			// Some Handbook posts are automatically created and don't have an author.
+			$notifiable = false;
+		} elseif ( $post->_xpost_original_permalink || str_starts_with( $post->post_name, 'xpost-' ) ) {
+			$notifiable = false;
+		if ( is_plugin_active( 'subscribers-only.php' ) ) {
+			$notifiable = false;
+		} elseif ( ! in_array( $post->post_type, $notifiable_post_types, true ) ) {
+			$notifiable = false;
+		} elseif ( 'publish' !== $post->post_status ) {
+			$notifiable = false;
+		} elseif ( ! empty( $post->post_password ) ) {
+			$notifiable = false;
+		} elseif ( $post->wporg_markdown_source || ! $post->post_author ) {
 			// Some Handbook posts are automatically created and don't have an author.
 			$notifiable = false;
 		} elseif ( $post->_xpost_original_permalink || str_starts_with( $post->post_name, 'xpost-' ) ) {
@@ -171,7 +188,7 @@ class WPOrg_WP_Activity_Notifier {
 	 *
 	 * @param WP_Post $post Post object.
 	 */
-	public function notify_workshop_presenter( $post ) {
+	private function notify_workshop_presenter( $post ) {
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
@@ -183,12 +200,9 @@ class WPOrg_WP_Activity_Notifier {
 		}
 
 		$unique_presenter_wporg_username = array_unique( array_map( 'trim', explode( ',', $presenter_wporg_username ) ) );
-
-		$permalink = get_permalink( $post );
-
-		$title = wp_kses_data( $post->post_title );
-
-		$content = wp_trim_words(
+		$permalink                       = get_permalink( $post );
+		$title                           = wp_kses_data( $post->post_title );
+		$content                         = wp_trim_words(
 			strip_shortcodes( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content ),
 			55
 		);
@@ -279,6 +293,7 @@ class WPOrg_WP_Activity_Notifier {
 	 */
 	public function insert_comment( $id, $comment ) {
 		if ( 1 == $comment->comment_approved ) {
+		if ( 1 === $comment->comment_approved ) {
 			$this->maybe_notify_new_approved_comment( 'approved', '', $comment );
 		}
 	}
@@ -291,7 +306,7 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Comment $comment    The comment.
 	 */
 	public function maybe_notify_new_approved_comment( $new_status, $old_status, $comment ) {
-		if ( 'approved' != $new_status ) {
+		if ( 'approved' !== $new_status ) {
 			return;
 		}
 
@@ -347,8 +362,10 @@ class WPOrg_WP_Activity_Notifier {
 	 *
 	 * @param string $activity The activity type. One of: create-topic, remove-topic.
 	 * @param int    $topic_id Topic ID.
+	 * @param string $activity  The activity type. One of: create-topic, remove-topic.
+	 * @param int    $topic_id  Topic ID.
 	 */
-	private function _notify_forum_topic_payload( $activity, $topic_id ) {
+	private function notify_forum_topic_payload( $activity, $topic_id ) {
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
@@ -357,7 +374,7 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
-		if ( ! in_array( $activity, array( 'create-topic', 'remove-topic' ) ) ) {
+		if ( ! in_array( $activity, array( 'create-topic', 'remove-topic' ), true ) ) {
 			return;
 		}
 
@@ -370,18 +387,18 @@ class WPOrg_WP_Activity_Notifier {
 		$url = remove_query_arg( array( 'view' ), $url );
 
 		$args = array(
-			'action'    => 'wporg_handle_activity',
-			'activity'  => $activity,
-			'source'    => 'forum',
-			'user'      => get_user_by( 'id', bbp_get_topic_author_id( $topic_id ) )->user_login,
-			'post_id'   => '',
-			'topic_id'  => $topic_id,
-			'forum_id'  => bbp_get_topic_forum_id( $topic_id ),
-			'title'     => strip_tags( bbp_get_topic_title( $topic_id ) ),
-			'url'       => $url,
-			'message'   => bbp_get_topic_excerpt( $topic_id, 55 ),
-			'site'      => get_bloginfo( 'name' ),
-			'site_url'  => site_url(),
+			'action'   => 'wporg_handle_activity',
+			'activity' => $activity,
+			'source'   => 'forum',
+			'user'     => get_user_by( 'id', bbp_get_topic_author_id( $topic_id ) )->user_login,
+			'post_id'  => '',
+			'topic_id' => $topic_id,
+			'forum_id' => bbp_get_topic_forum_id( $topic_id ),
+			'title'    => strip_tags( bbp_get_topic_title( $topic_id ) ),
+			'url'      => $url,
+			'message'  => bbp_get_topic_excerpt( $topic_id, 55 ),
+			'site'     => get_bloginfo( 'name' ),
+			'site_url' => site_url(),
 		);
 
 		Profiles\api( $args );
@@ -393,7 +410,7 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param int $topic_id Topic ID.
 	 */
 	public function notify_forum_new_topic( $topic_id ) {
-		$this->_notify_forum_topic_payload( 'create-topic', $topic_id );
+		$this->notify_forum_topic_payload( 'create-topic', $topic_id );
 	}
 
 	/**
@@ -402,7 +419,7 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param int $topic_id Topic ID.
 	 */
 	public function notify_forum_remove_topic( $topic_id ) {
-		$this->_notify_forum_topic_payload( 'remove-topic', $topic_id );
+		$this->notify_forum_topic_payload( 'remove-topic', $topic_id );
 	}
 
 	/**
@@ -412,8 +429,10 @@ class WPOrg_WP_Activity_Notifier {
 	 *
 	 * @param string $activity The activity type. One of: create-reply, remove-reply.
 	 * @param int    $reply_id Reply ID.
+	 * @param string $activity  The activity type. One of: create-reply, remove-reply.
+	 * @param int    $reply_id  Reply ID.
 	 */
-	private function _notify_forum_reply_payload( $activity, $reply_id ) {
+	private function notify_forum_reply_payload( $activity, $reply_id ) {
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
@@ -422,7 +441,7 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
-		if ( ! in_array( $activity, array( 'create-reply', 'remove-reply' ) ) ) {
+		if ( ! in_array( $activity, array( 'create-reply', 'remove-reply' ), true ) ) {
 			return;
 		}
 
@@ -435,18 +454,18 @@ class WPOrg_WP_Activity_Notifier {
 		$url = remove_query_arg( array( 'view' ), $url );
 
 		$args = array(
-			'action'    => 'wporg_handle_activity',
-			'activity'  => $activity,
-			'source'    => 'forum',
-			'user'      => get_user_by( 'id', bbp_get_reply_author_id( $reply_id ) )->user_login,
-			'post_id'   => $reply_id,
-			'topic_id'  => bbp_get_reply_topic_id( $reply_id ),
-			'forum_id'  => bbp_get_reply_forum_id( $reply_id ),
-			'title'     => strip_tags( bbp_get_reply_topic_title( $reply_id ) ),
-			'url'       => $url,
-			'message'   => $this->get_reply_excerpt( $reply_id, 15 ),
-			'site'      => get_bloginfo( 'name' ),
-			'site_url'  => site_url(),
+			'action'   => 'wporg_handle_activity',
+			'activity' => $activity,
+			'source'   => 'forum',
+			'user'     => get_user_by( 'id', bbp_get_reply_author_id( $reply_id ) )->user_login,
+			'post_id'  => $reply_id,
+			'topic_id' => bbp_get_reply_topic_id( $reply_id ),
+			'forum_id' => bbp_get_reply_forum_id( $reply_id ),
+			'title'    => strip_tags( bbp_get_reply_topic_title( $reply_id ) ),
+			'url'      => $url,
+			'message'  => $this->get_reply_excerpt( $reply_id, 15 ),
+			'site'     => get_bloginfo( 'name' ),
+			'site_url' => site_url(),
 		);
 
 		Profiles\api( $args );
@@ -458,7 +477,7 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param int $reply_id Reply ID.
 	 */
 	public function notify_forum_new_reply( $reply_id ) {
-		$this->_notify_forum_reply_payload( 'create-reply', $reply_id );
+		$this->notify_forum_reply_payload( 'create-reply', $reply_id );
 	}
 
 	/**
@@ -467,7 +486,7 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param int $reply_id Reply ID.
 	 */
 	public function notify_forum_remove_reply( $reply_id ) {
-		$this->_notify_forum_reply_payload( 'remove-reply', $reply_id );
+		$this->notify_forum_reply_payload( 'remove-reply', $reply_id );
 	}
 
 	/**
@@ -506,7 +525,7 @@ class WPOrg_WP_Activity_Notifier {
 	 */
 	public function trim_text( $text, $length = 15, $trim_style = 'words' ) {
 		$length     = (int) $length;
-		$trim_style = in_array( $trim_style, array( 'chars', 'words' ) ) ? $trim_style : 'words';
+		$trim_style = in_array( $trim_style, array( 'chars', 'words' ), true ) ? $trim_style : 'words';
 
 		// Remove blockquoted text since the text isn't original.
 		$text = preg_replace( '/<blockquote>.+?<\/blockquote>/s', '', $text );
@@ -533,11 +552,7 @@ class WPOrg_WP_Activity_Notifier {
 				}
 				$text .= '&hellip;';
 			}
-		} else {
-			// Else trim by words.
-			$text = wp_trim_words( $text, $length );
 		}
-
 		return $text;
 	}
 }
