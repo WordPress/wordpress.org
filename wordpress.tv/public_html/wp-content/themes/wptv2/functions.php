@@ -143,7 +143,7 @@ class WordPressTV_Theme {
 		// Learn.WordPress.org category changed from social-learning to online workshops.
 		if ( str_starts_with( $_SERVER['REQUEST_URI'], '/category/social-learning' ) ) {
 			$url = str_replace( '/social-learning', '/learn-wordpress-online-workshops', $_SERVER['REQUEST_URI'] );
-			wp_safe_redirect( $url );
+			wp_safe_redirect( $url, 301 );
 			die();
 		}
 	}
