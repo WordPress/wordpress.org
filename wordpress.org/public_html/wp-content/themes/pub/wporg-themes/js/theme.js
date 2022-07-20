@@ -896,7 +896,7 @@ window.wp = window.wp || {};
 			function bindPatterns( $container, patterns ) {
 				$.each( patterns, function ( key, value ) {
 					/**
-					 * This is a duplicate of wporg-pattern-preview `render_block` function.
+					 * This is a duplicate of wporg-screenshot-preview `render_block` function.
 					 * We have to do this because of how backbone controls state on the theme view page.
 					 */
 					 var newEl = $( '<div class="wporg-screenshot-preview-js"></div>' )
