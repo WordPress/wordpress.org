@@ -164,13 +164,20 @@ class Emails {
 		$forum_id     = bbp_get_topic_forum_id( $topic_id );
 		$topic_author = bbp_get_reply_author_id( $reply_id );
 
+		// For performance reasons, we've removed the bbPress bbp_update_topic() method, and replaced it with our slightly altered variant.
+		$bbp_update_topic = [ Plugin::get_instance()->dropin, 'bbp_update_topic' ];
+		if ( ! has_filter( 'bbp_new_topic', $bbp_update_topic ) ) {
+			// Fallback to the default bbPress function if ours isn't present (ie. Rosetta, or when we've successfully removed our performance customizations).
+			$bbp_update_topic = 'bbp_update_topic';
+		}
+
 		// Remove the bbPress topic update handler
-		remove_action( 'bbp_new_topic', 'bbp_update_topic' );
+		remove_action( 'bbp_new_topic', $bbp_update_topic );
 
 		// Call the bbp_new_topic action..
 		do_action( 'bbp_new_topic', $topic_id, $forum_id, array(), $topic_author );
 
-		add_action( 'bbp_new_topic', 'bbp_update_topic', 10, 5 ); // bbPress requests 5, but calls it with 4..
+		add_action( 'bbp_new_topic', $bbp_update_topic, 10, 5 ); // bbPress requests 5, but calls it with 4..
 
 		delete_post_meta( $topic_id, self::SUBSCRIPTIONS_TRIGGER_KEY );
 	}
@@ -191,11 +198,19 @@ class Emails {
 			return;
 		}
 
-		remove_action( 'bbp_new_reply', 'bbp_update_reply' );
+		// For performance reasons, we've removed the bbPress bbp_update_reply() method, and replaced it with our slightly altered variant.
+		$bbp_update_reply = [ Plugin::get_instance()->dropin, 'bbp_update_reply' ];
+		if ( ! has_filter( 'bbp_new_reply', $bbp_update_reply ) ) {
+			// Fallback to the default bbPress function if ours isn't present (ie. Rosetta, or when we've successfully removed our performance customizations).
+			$bbp_update_reply = 'bbp_update_reply';
+		}
+
+		// Remove the bbPress topic update handler
+		remove_action( 'bbp_new_reply', $bbp_update_reply );
 
 		do_action( 'bbp_new_reply', $reply_id, $topic_id, $forum_id, array(), $reply_author, false, false );
 
-		add_action( 'bbp_new_reply',  'bbp_update_reply', 10, 7 );
+		add_action( 'bbp_new_reply',  $bbp_update_reply, 10, 7 );
 
 		delete_post_meta( $reply_id, self::SUBSCRIPTIONS_TRIGGER_KEY );
 	}
