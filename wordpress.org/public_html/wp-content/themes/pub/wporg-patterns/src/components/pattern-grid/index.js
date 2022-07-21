@@ -12,9 +12,8 @@ import { store as patternStore } from '../../store';
 
 function PatternGrid( { header, children, onNavigation, query, showPagination = true } ) {
 	const { isLoading, posts, totalPages } = useSelect( ( select ) => {
-		const { getPatternTotalPagesByQuery, getPatternsByQuery, isLoadingPatternsByQuery } = select(
-			patternStore
-		);
+		const { getPatternTotalPagesByQuery, getPatternsByQuery, isLoadingPatternsByQuery } =
+			select( patternStore );
 
 		return {
 			isLoading: query && isLoadingPatternsByQuery( query ),
