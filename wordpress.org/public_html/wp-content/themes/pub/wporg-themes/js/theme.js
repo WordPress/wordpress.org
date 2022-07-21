@@ -491,7 +491,9 @@ window.wp = window.wp || {};
 			'click .theme-actions .button-secondary': 'preview',
 			'keydown .theme-actions .button-secondary': 'preview',
 			'touchend .theme-actions .button-secondary': 'preview',
-			'click .favorite': 'favourite_toggle'
+			'click .favorite': 'favourite_toggle',
+			// This is provided by a Third Party
+			'click .wporg-screenshot-card': 'preview', 
 		},
 
 		// The HTML template for the theme overlay
@@ -547,6 +549,7 @@ window.wp = window.wp || {};
 			// Contain "tabbing" inside the overlay
 			this.containFocus( this.$el );
 			this.renderDownloadsGraph();
+			this.renderPatterns();
 		},
 
 		favourite_toggle: function() {
@@ -593,6 +596,9 @@ window.wp = window.wp || {};
 			var self = this,
 				current, preview;
 
+			// We will replace this if we have a pattern click
+			var cache_preview_url = this.model.attributes.preview_url;
+
 			// Bail if the user scrolled on a touch device
 			if ( this.touchDrag === true ) {
 				return this.touchDrag = false;
@@ -618,6 +624,12 @@ window.wp = window.wp || {};
 
 			// Set focus to current theme.
 			themes.focusedTheme = this.$el;
+
+			// Show the pattern
+			var $target = $(event.target).closest('a')[0];
+			if( $target && $target.classList.contains( 'wporg-screenshot-card' ) ) {
+				this.model.attributes.preview_url = $target.href.replace('&preview', '');
+			} 
 
 			// Construct a new Preview view.
 			preview = new themes.view.Preview({
@@ -699,6 +711,7 @@ window.wp = window.wp || {};
 			});
 
 			this.listenTo( preview, 'preview:close', function() {
+				self.model.attributes.preview_url = cache_preview_url;
 				self.current = self.model;
 			});
 		},
@@ -873,6 +886,60 @@ window.wp = window.wp || {};
 			});
 		},
 
+		renderPatterns: function() {
+			var options = {
+				type: 'GET',
+				url: 'https://wp-themes.com/' + this.model.get( 'slug' ) + '/?rest_route=/wporg-patterns/v1/patterns',
+			};
+			var self = this.model;
+
+			function bindPatterns( $container, patterns ) {
+				$.each( patterns, function ( key, value ) {
+					/**
+					 * This is a duplicate of wporg-screenshot-preview `render_block` function.
+					 * We have to do this because of how backbone controls state on the theme view page.
+					 */
+					 var newEl = $( '<div class="wporg-screenshot-preview-js"></div>' )
+					 .attr( 'data-link', value.link )
+					 .attr( 'data-preview-link', value.preview_link )
+					 .attr( 'data-version', self.get( 'version' ) );
+
+					$container.append( newEl );
+				});
+
+				if ( window.__wporg_screenshot_preview_render ) {
+					window.__wporg_screenshot_preview_render();
+				}
+			}
+
+			$.ajax( options ).done( function( data ){
+				var $container = $( '#theme-patterns-grid-js' );
+				var $showAllBtn = $( '#theme-patterns-button-js' );
+				var patterns = JSON.parse( data );
+				var previewSize = 9;
+
+				if( patterns.length ) {
+					// Show the pattern section
+					$( '#theme-patterns-js' ).show();
+
+					var firstSet = patterns.slice( 0, previewSize );
+					bindPatterns( $container, firstSet );
+
+					if( patterns.length > previewSize ) {
+						$showAllBtn.show();
+
+						$showAllBtn.on( 'click', function ( event ) {
+							event.preventDefault();
+							
+							var remainingSet = patterns.slice( previewSize );
+							bindPatterns( $container, remainingSet );
+
+							$showAllBtn.hide();
+						} );
+					}
+				}
+			} );
+		},
 		// Handles .disabled classes for next/previous buttons
 		navigation: function() {
 
