@@ -8,7 +8,7 @@
 		<nav class="wp-container-18 global-footer__navigation-external wp-block-navigation" aria-label=""><ul class="wp-block-navigation__container"><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://wordpress.com/?ref=wporg-footer"><span class="wp-block-navigation-item__label">WordPress.com</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://ma.tt/"><span class="wp-block-navigation-item__label">Matt</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://wordpress.org/about/privacy/"><span class="wp-block-navigation-item__label">Privacy</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://publiccode.eu/"><span class="wp-block-navigation-item__label">Public Code</span></a></li></ul></nav>
 	</div>
 	<div class="wp-container-22 wp-block-group global-footer__logos-container">
-		<div class="is-content-justification-left wp-container-20 wp-block-group">
+		<div class="wp-container-20 is-content-justification-left wp-block-group">
 				<figure class="wp-block-image global-footer__wporg-logo-mark">
 					<a href="https://wordpress.org/">
 						<svg xmlns="http://www.w3.org/2000/svg" role="img" width="28" height="28" viewbox="0 0 28 28">
@@ -71,12 +71,53 @@
 <style>.wp-container-21 {display: flex;gap: 0.5em;flex-wrap: wrap;align-items: center;}.wp-container-21 > * { margin: 0; }</style>
 <style>.wp-container-22 > .alignleft { float: left; margin-inline-start: 0; margin-inline-end: 2em; }.wp-container-22 > .alignright { float: right; margin-inline-start: 2em; margin-inline-end: 0; }.wp-container-22 > .aligncenter { margin-left: auto !important; margin-right: auto !important; }</style>
 <style>.wp-container-23 > .alignleft { float: left; margin-inline-start: 0; margin-inline-end: 2em; }.wp-container-23 > .alignright { float: right; margin-inline-start: 2em; margin-inline-end: 0; }.wp-container-23 > .aligncenter { margin-left: auto !important; margin-right: auto !important; }</style>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/jetpack/_inc/build/photon/photon.min.js?ver=20191001" id="jetpack-photon-js"/>
+<script type="text/javascript" src="https://s.w.org/wp-content/themes/pub/wporg/js/skip-link-focus-fix.min.js?ver=20151215" id="wporg-plugins-skip-link-focus-fix-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-includes/js/dist/vendor/lodash.min.js?ver=4.17.19" id="lodash-js"/>
+<script type="text/javascript" id="lodash-js-after">//<![CDATA[
+window.lodash = _.noConflict();
+//]]></script>
+<script type="text/javascript" src="https://wordpress.org/wp-includes/js/dist/vendor/moment.min.js?ver=2.29.4" id="moment-js"/>
+<script type="text/javascript" id="moment-js-after">//<![CDATA[
+moment.updateLocale( 'en_US', {"months":["January","February","March","April","May","June","July","August","September","October","November","December"],"monthsShort":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"weekdays":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"weekdaysShort":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"week":{"dow":0},"longDateFormat":{"LT":"g:i a","LTS":null,"L":null,"LL":"F j, Y","LLL":"F j, Y g:i a","LLLL":null}} );
+//]]></script>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/dom-ready/index.min.js?ver=222ad38e3e5e302c8bbf" id="wp-dom-ready-js"/>
+<script type="text/javascript" id="wp-dom-ready-js-after">//<![CDATA[
+wp.galleryBlockV2Enabled = true;
+//]]></script>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/a11y/index.min.js?ver=aefdd2523cc4b947d519" id="wp-a11y-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/deprecated/index.min.js?ver=a6c6d4c69fd417744058" id="wp-deprecated-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/dom/index.min.js?ver=e261d9dd4c18babfe851" id="wp-dom-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/escape-html/index.min.js?ver=fbad781820bda8333f76" id="wp-escape-html-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/element/index.min.js?ver=4c2f42c463d52ea8f151" id="wp-element-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/is-shallow-equal/index.min.js?ver=5299ef30233b42ce5199" id="wp-is-shallow-equal-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/keycodes/index.min.js?ver=a3a8e2ae16444745f04c" id="wp-keycodes-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/priority-queue/index.min.js?ver=6c6ae9ab4bf3e96ca1ac" id="wp-priority-queue-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/compose/index.min.js?ver=8668e47c2d239c83beb8" id="wp-compose-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/date/index.min.js?ver=aa0eba8ad4ea84cc6a81" id="wp-date-js"/>
+<script type="text/javascript" id="wp-date-js-after">//<![CDATA[
+wp.date.setSettings( {"l10n":{"locale":"en_US","months":["January","February","March","April","May","June","July","August","September","October","November","December"],"monthsShort":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"weekdays":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"weekdaysShort":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"meridiem":{"am":"am","pm":"pm","AM":"AM","PM":"PM"},"relative":{"future":"%s from now","past":"%s ago"},"startOfWeek":0},"formats":{"time":"g:i a","date":"F j, Y","datetime":"F j, Y g:i a","datetimeAbbreviated":"M j, Y g:i a"},"timezone":{"offset":0,"string":"UTC","abbr":"UTC"}} );
+//]]></script>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/primitives/index.min.js?ver=9bab352d0620a6132df8" id="wp-primitives-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/redux-routine/index.min.js?ver=77304ecb13ce81b5a0cc" id="wp-redux-routine-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/data/index.min.js?ver=d9984093176a80497056" id="wp-data-js"/>
+<script type="text/javascript" id="wp-data-js-after">//<![CDATA[
+( function() {
+	var userId = 0;
+	var storageKey = "WP_DATA_USER_" + userId;
+	wp.data
+		.use( wp.data.plugins.persistence, { storageKey: storageKey } );
+	wp.data.plugins.persistence.__unstableMigrate( { storageKey: storageKey } );
+} )();
+//]]></script>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/rich-text/index.min.js?ver=317d90de6b73122c9158" id="wp-rich-text-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/warning/index.min.js?ver=24c7e8a7f6d5d3062b74" id="wp-warning-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/gutenberg/build/components/index.min.js?ver=6d9e757f767f6320a686" id="wp-components-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/mu-plugins/pub-sync/blocks/screenshot-preview/build/index.js?ver=17df7fb7fd4b5537389a" id="wporg-screenshot-preview-js"/>
 <script type="text/javascript" id="wporg-global-header-script-js-extra">//<![CDATA[
 /* <![CDATA[ */
 var wporgGlobalHeaderI18n = {"openSearchLabel":"Open Search","closeSearchLabel":"Close Search","overflowMenuLabel":"More menu"};
 /* ]]]]><![CDATA[> */
 //]]></script>
-<script type="text/javascript" src="https://wordpress.org/wp-content/plugins/jetpack/_inc/build/photon/photon.min.js?ver=20191001" id="jetpack-photon-js"/>
-<script type="text/javascript" src="https://s.w.org/wp-content/themes/pub/wporg/js/skip-link-focus-fix.min.js?ver=20151215" id="wporg-plugins-skip-link-focus-fix-js"/>
-<script type="text/javascript" src="https://wordpress.org/wp-content/mu-plugins/pub-sync/blocks/global-header-footer/js/wporg-global-header-script.js?ver=1656434980" id="wporg-global-header-script-js"/>
+<script type="text/javascript" src="https://wordpress.org/wp-content/mu-plugins/pub-sync/blocks/global-header-footer/js/wporg-global-header-script.js?ver=1656434742" id="wporg-global-header-script-js"/>
 	</html>
