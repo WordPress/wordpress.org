@@ -145,4 +145,8 @@ jQuery( function( $ ) {
 			} );
 		};
 	}
+
+	$( '.tooltip' ).tooltip( {
+		tooltipClass: 'hoverTooltip',
+	} );
 } );

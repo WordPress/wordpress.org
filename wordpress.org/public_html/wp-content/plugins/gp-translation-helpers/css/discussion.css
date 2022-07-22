@@ -4,7 +4,7 @@
 
 #original h1 {
 	margin: .5em 14px;
-	line-height: 34px;
+	line-height: 45px;
 }
 
 #original p {
@@ -66,6 +66,19 @@ article.comment time {
 }
 .comment-content {
 	text-align: start;
+}
+.comment-content span.dashicons.dashicons-info,
+.feedback-reason-list span.dashicons.dashicons-info,
+#TB_window span.dashicons.dashicons-info {
+	color: #D3D3D3;
+	font-size:16px;
+}
+.feedback-reason-list li {
+	white-space:nowrap;
+	padding-right: 2px;
+}
+.ui-tooltip {
+	z-index: 100051 !important;
 }
 .comment-form-comment label{
 	display: block;
@@ -208,4 +221,11 @@ div#TB_ajaxWindowTitle {
 #TB_closeWindowButton:focus .tb-close-icon {
 	-webkit-box-shadow: none;
 	box-shadow: none;
+}
+.hoverTooltip {
+	position: fixed !important;
+}
+
+a.comment-reply-link {
+	margin: 2px !important;
 }

@@ -28,5 +28,5 @@
 		<?php endif; ?>
 		</h4>
 	<?php endif; ?>
-	<?php gp_tmpl_load( 'comment-section', get_defined_vars(), dirname( __FILE__ ) ); ?>
+	<?php gp_tmpl_load( 'comment-section', get_defined_vars() ); ?>
 </div>

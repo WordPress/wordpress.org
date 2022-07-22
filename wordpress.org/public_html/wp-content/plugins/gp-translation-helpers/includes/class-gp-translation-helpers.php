@@ -72,6 +72,20 @@ class GP_Translation_Helpers {
 
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
+		add_filter(
+			'gp_tmpl_load_locations',
+			function( $locations, $template, $args, $template_path ) {
+				if ( 'translation-row-editor-meta-status' === $template ) {
+					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/gp-templates-overrides/' );
+				} else {
+					$locations[] = dirname( dirname( __FILE__ ) ) . '/templates/';
+				}
+
+				return $locations;
+			},
+			60,
+			4
+		);
 
 		$this->helpers = self::load_helpers();
 	}
@@ -275,7 +289,7 @@ class GP_Translation_Helpers {
 			}
 		);
 
-		gp_tmpl_load( 'translation-helpers', array( 'sections' => $sections ), dirname( __FILE__ ) . '/templates/' );
+		gp_tmpl_load( 'translation-helpers', array( 'sections' => $sections ) );
 	}
 
 	/**

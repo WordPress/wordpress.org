@@ -325,10 +325,13 @@ class GP_Notifications {
 		 * @param array $email_addresses The email addresses to be notified.
 		 */
 		$email_addresses = apply_filters( 'gp_notification_before_send_emails', $email_addresses );
-		if ( ( null === $comment ) || ( null === $comment_meta ) || ( empty( $email_addresses ) ) ) {
+		if ( null === $comment || null === $comment_meta || empty( $email_addresses ) ) {
 			return false;
 		}
-		$original        = self::get_original( $comment );
+		$original = self::get_original( $comment );
+		if ( ! $original ) {
+			return false;
+		}
 		$email_addresses = self::remove_commenter_email_address( $comment, $email_addresses );
 		$email_addresses = self::remove_optout_discussion_email_addresses( $original->id, $email_addresses );
 

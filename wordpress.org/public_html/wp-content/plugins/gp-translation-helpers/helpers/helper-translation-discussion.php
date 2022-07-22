@@ -510,7 +510,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter(
 			'comment_form_fields',
 			function( $comment_fields ) {
-				$comment_fields['comment'] = str_replace( '>Comment<', '>Please leave your comment about this string here:<', $comment_fields['comment'] );
+				$comment_fields['comment'] = str_replace( '</label>', ' (required)</label>', $comment_fields['comment'] );
 				return $comment_fields;
 			}
 		);
@@ -663,7 +663,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$data_attribute_string = trim( $data_attribute_string );
 
 		$link = sprintf(
-			"<a rel='nofollow' class='comment-reply-link' href='%s' %s aria-label='%s'>%s</a>",
+			"<a rel='nofollow' class='comment-reply-link button is-primary' href='%s' %s aria-label='%s'>%s</a>",
 			esc_url(
 				add_query_arg(
 					array(
@@ -718,23 +718,41 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
-	 * Return an array of allowed rejection reasons
+	 * Return an array of allowed rejection reasons and explanation of each reason.
 	 *
 	 * @since 0.0.2
 	 *
 	 * @return array
 	 */
-	public static function get_reject_reasons() {
+	public static function get_reject_reasons(): array {
 		return array(
-			'style'       => __( 'Style Guide' ),
-			'grammar'     => __( 'Grammar' ),
-			'branding'    => __( 'Branding' ),
-			'glossary'    => __( 'Glossary' ),
-			'punctuation' => __( 'Punctuation' ),
-			'typo'        => __( 'Typo' ),
+			'style'       => array(
+				'name'        => __( 'Style Guide' ),
+				'explanation' => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
+			),
+			'grammar'     => array(
+				'name'        => __( 'Grammar' ),
+				'explanation' => __( 'The translation has some grammar problems. It will be interesting to provide a link explaining the grammar issue for your locale in the comment.' ),
+			),
+			'branding'    => array(
+				'name'        => __( 'Branding' ),
+				'explanation' => __( 'The translation is using incorrectly some brand. E.g. WordPress without the capital P.' ),
+			),
+			'glossary'    => array(
+				'name'        => __( 'Glossary' ),
+				'explanation' => __( 'The translation is not using the glossary correctly. It will be interesting to provide some link to the glossary for your locale in the comment.' ),
+			),
+			'punctuation' => array(
+				'name'        => __( 'Punctuation' ),
+				'explanation' =>
+					__( 'The translation is not using the punctuation marks correctly.' ),
+			),
+			'typo'        => array(
+				'name'        => __( 'Typo' ),
+				'explanation' => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
+			),
 		);
 	}
-
 }
 
 /**
@@ -868,7 +886,31 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 			<?php if ( $reject_reason ) : ?>
 			<p>
 				<?php echo esc_html( _n( 'Rejection Reason: ', 'Rejection Reasons: ', count( $reject_reason ) ) ); ?>
-				<span><?php echo wp_kses( implode( '</span> | <span>', $reject_reason ), array( 'span' => array() ) ); ?></span>
+				<?php
+				$number_of_items = count( $reject_reason );
+				$counter         = 0;
+				$reject_reasons  = Helper_Translation_Discussion::get_reject_reasons();
+				foreach ( $reject_reason as $reason ) {
+					echo wp_kses(
+						sprintf(
+						/* translators: 1: Title with the explanation of the reject reason , 2: The reject reason */
+							__( '<span title="%1$s" class="tooltip">%2$s</span> <span class="tooltip dashicons dashicons-info" title="%1$s"></span>', 'glotpress' ),
+							$reject_reasons[ $reason ]['explanation'],
+							$reject_reasons[ $reason ]['name'],
+						),
+						array(
+							'span' => array(
+								'class' => array(),
+								'title' => array(),
+							),
+						)
+					);
+
+					if ( ++$counter < $number_of_items ) {
+						echo ', ';
+					}
+				}
+				?>
 			</p>
 			<?php endif; ?>
 		<?php endif; ?>
@@ -928,6 +970,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 							'title_reply_to'      => esc_html__( 'Reply to %s' ),
 							'title_reply_before'  => '<h5 id="reply-title" class="discuss-title">',
 							'title_reply_after'   => '</h5>',
+							'comment_field'       => '<p class="">',
 							'id_form'             => 'commentform-' . $comment->comment_post_ID,
 							'cancel_reply_link'   => '<span></span>',
 							'comment_notes_after' => implode(
