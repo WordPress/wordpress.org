@@ -902,7 +902,7 @@ window.wp = window.wp || {};
 					 var newEl = $( '<div class="wporg-screenshot-preview-js"></div>' )
 					 .attr( 'data-link', value.link )
 					 .attr( 'data-preview-link', value.preview_link )
-					 .attr( 'data-version', self.get( 'version' ) );
+					 .attr( 'data-version', self.get( 'version' ) + '-betaV1' );
 
 					$container.append( newEl );
 				});
