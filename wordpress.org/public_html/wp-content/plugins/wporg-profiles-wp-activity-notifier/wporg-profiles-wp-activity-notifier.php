@@ -292,7 +292,6 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Comment $comment Comment.
 	 */
 	public function insert_comment( $id, $comment ) {
-		if ( 1 == $comment->comment_approved ) {
 		if ( 1 === $comment->comment_approved ) {
 			$this->maybe_notify_new_approved_comment( 'approved', '', $comment );
 		}
