@@ -597,7 +597,7 @@ window.wp = window.wp || {};
 				current, preview;
 
 			// We will replace this if we have a pattern click
-			var cache_preview_url = this.model.attributes.preview_url;
+			var cachePreviewUrl = this.model.attributes.preview_url;
 			var lastFocusedElement = document.activeElement;
 
 			// Bail if the user scrolled on a touch device
@@ -712,7 +712,7 @@ window.wp = window.wp || {};
 			});
 
 			this.listenTo( preview, 'preview:close', function() {
-				self.model.attributes.preview_url = cache_preview_url;
+				self.model.attributes.preview_url = cachePreviewUrl;
 				self.current = self.model;
 
 				// Restore to the element that was focused last before opening
