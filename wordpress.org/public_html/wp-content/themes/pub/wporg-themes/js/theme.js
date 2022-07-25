@@ -905,7 +905,8 @@ window.wp = window.wp || {};
 					 var newEl = $( '<div class="wporg-screenshot-preview-js"></div>' )
 					 .attr( 'data-link', value.link )
 					 .attr( 'data-preview-link', value.preview_link )
-					 .attr( 'data-version', self.get( 'version' ) + '-betaV1' );
+					 .attr( 'data-version', self.get( 'version' ) + '-betaV1' )
+					 .attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', value.title ) );
 
 					$container.append( newEl );
 				});
