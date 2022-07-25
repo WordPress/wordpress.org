@@ -598,6 +598,7 @@ window.wp = window.wp || {};
 
 			// We will replace this if we have a pattern click
 			var cache_preview_url = this.model.attributes.preview_url;
+			var lastFocusedElement = document.activeElement;
 
 			// Bail if the user scrolled on a touch device
 			if ( this.touchDrag === true ) {
@@ -713,6 +714,11 @@ window.wp = window.wp || {};
 			this.listenTo( preview, 'preview:close', function() {
 				self.model.attributes.preview_url = cache_preview_url;
 				self.current = self.model;
+
+				// Restore to the element that was focused last before opening
+				if ( lastFocusedElement ) {
+					lastFocusedElement.focus();
+				}
 			});
 		},
 
@@ -754,9 +760,6 @@ window.wp = window.wp || {};
 					// switch focus to button.left on tabbing and vice versa
 					if ( $target.is( 'button.close' ) && event.shiftKey ) {
 						$el.find( '.theme-tags a:last-child' ).focus();
-						event.preventDefault();
-					} else if ( $target.is( '.theme-tags a:last-child' ) ) {
-						$el.find( 'button.close' ).focus();
 						event.preventDefault();
 					}
 				}
@@ -933,6 +936,9 @@ window.wp = window.wp || {};
 							
 							var remainingSet = patterns.slice( previewSize );
 							bindPatterns( $container, remainingSet );
+
+							// Find the next card that was just added
+							$container.find( '.wporg-screenshot-card' )[previewSize].focus();
 
 							$showAllBtn.hide();
 						} );
