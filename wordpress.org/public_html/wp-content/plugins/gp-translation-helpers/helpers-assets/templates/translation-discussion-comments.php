@@ -103,6 +103,7 @@
 				'id_form'             => 'commentform-' . $_post_id,
 				'cancel_reply_link'   => '<span></span>',
 				'format'              => 'html5',
+				'class_submit' => 'button is-primary',
 				'comment_notes_after' => implode(
 					"\n",
 					array(

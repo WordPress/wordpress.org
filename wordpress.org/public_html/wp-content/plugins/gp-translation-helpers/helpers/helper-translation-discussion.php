@@ -970,7 +970,6 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 							'title_reply_to'      => esc_html__( 'Reply to %s' ),
 							'title_reply_before'  => '<h5 id="reply-title" class="discuss-title">',
 							'title_reply_after'   => '</h5>',
-							'comment_field'       => '<p class="">',
 							'id_form'             => 'commentform-' . $comment->comment_post_ID,
 							'cancel_reply_link'   => '<span></span>',
 							'comment_notes_after' => implode(

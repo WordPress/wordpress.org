@@ -14,7 +14,7 @@
 					'<label>Comment </label>' +
 					'<textarea name="modal_feedback_comment"></textarea>' +
 			'</div>' +
-			'<button id="modal-reject-btn" class="modal-btn">Reject</button>' +
+			'<button id="modal-reject-btn" class="modal-btn gp-btn-style">Reject</button>' +
 			'</form>' +
 			'</div>';
 
@@ -149,6 +149,15 @@
 					div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
 					div.find( 'textarea[name="feedback_comment"]' ).val( '' );
 				}
+			}
+		).fail(
+			function( xhr, msg ) {
+				msg = 'An error has occurred';
+				if ( xhr.responseText ) {
+					msg += ': ' + xhr.responseText;
+				}
+				msg += '. Please, take a screenshot, send it to the developers, and reload the page to see if it still worked.';
+				$gp.notices.error( msg );
 			}
 		);
 	}

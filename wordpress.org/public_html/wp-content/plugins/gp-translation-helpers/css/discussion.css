@@ -146,25 +146,44 @@ h6 {
 }
 .modal-btn {
 	float: right;
-	font-size: 15px;
-	height: 35px;
-	line-height: 1;
-	background: #0085ba;
-	border-color: #0073aa #006799 #006799;
-	box-shadow: 0 1px 0 #006799;
-	color: #fff;
-	text-decoration: none;
-	text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
-	margin-top: 10px;
-	padding: 0 13px;
-	border-radius: 3px;
 }
+.gp-btn-style:hover, #respond form .form-submit .submit:hover {
+	background-color: var(--gp-color-btn-primary-hover-bg);
+	border-color: var(--gp-color-btn-primary-hover-border);
+	color: var(--gp-color-btn-primary-hover-text);
+	box-shadow: 0 0 0 1px var(--gp-color-canvas-default),0 0 0 2px var(--gp-color-btn-primary-hover-border);
+}
+.gp-btn-style, #respond form .form-submit .submit{
+	background-color: var(--gp-color-btn-primary-bg);
+	border-color: var(--gp-color-btn-primary-border);
+	color: var(--gp-color-btn-primary-text);
+	-webkit-appearance: none;
+	appearance: none;
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+	padding: 5px 16px;
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 500;
+	border: 1px solid var(--gp-color-btn-border);
+	border-radius: 2px;
+	box-shadow: none;
+	min-height: 32px;
+	margin: 0;
+	cursor: pointer;
+	outline: 0;
+	white-space: nowrap;
+	vertical-align: middle;
+}
+
 .modal-reason-title{
 	margin-top: 12px;
 	margin-bottom: 10px;
 	padding-top: 10px;
 	padding-bottom: 10px;
 }
+
 #TB_title {
 	background: #f1f1f1;
 	border-bottom: 1px solid #ddd;
