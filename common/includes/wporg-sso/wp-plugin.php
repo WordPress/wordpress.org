@@ -68,6 +68,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				add_filter( 'allow_password_reset', array( $this, 'disable_password_reset_for_blocked_users' ), 10, 2 );
 				add_filter( 'authenticate', array( $this, 'authenticate_block_check' ), 5, 2 );
+				add_filter( 'authenticate', array( $this, 'authenticate_block_nologin_accounts' ), 5, 2 );
 
 				add_filter( 'password_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
 				add_filter( 'email_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
@@ -166,6 +167,27 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						)
 					);
 				}
+			}
+
+			return $user;
+		}
+
+		/**
+		 * Checks if the authenticated user cannot login via the web.
+		 *
+		 * @param WP_User|WP_Error|null $user WP_User or WP_Error object if a previous
+		 *                                    callback failed authentication.
+		 * @param string $user_login The user login attmpting to login.
+		 * @return WP_User|WP_Error WP_User on success, WP_Error on failure.
+		 */
+		public function authenticate_block_nologin_accounts( $user, $user_login ) {
+			global $nologin_accounts; // [ 'user1', 'user2' ]
+
+			if ( in_array( $user_login, $nologin_accounts, true ) ) {
+				// Returning a WP_Error from an authenticate filter doesn't block auth, as a later hooked item can return truthful.
+				remove_all_actions( 'authenticate' );
+
+				return new WP_Error( 'blocked_account', __( '<strong>ERROR</strong>: Your account has been disabled.', 'wporg' ) );
 			}
 
 			return $user;
