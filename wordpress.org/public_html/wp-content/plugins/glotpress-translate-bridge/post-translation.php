@@ -19,7 +19,10 @@ use GlotPress_Translate_Bridge;
  *    probably be defined per-site rather than per-post or be 100% automatically
  *    selected.
  *  - Some Block Templates are known to not be caught by the `the_content` filters.
- *  - Test
+ *  - Some strings from post content include `&nbsp;` and `<br>` tags, it might be
+ *    better to standardise some of these prior to inserting into GlotPress,
+ *    for example, replacing `<br>` with a literal `\n`, although that will make
+ *    retrieving them harder.
  *  - Test
  * 
  * Notes:
