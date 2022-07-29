@@ -45,6 +45,7 @@ class Plugin {
 		$this->nsfw_handler = new NSFW_Handler;
 		$this->stats        = new Stats;
 		$this->emails       = new Emails;
+		$this->audit_log    = new Audit_Log;
 
 		// These modifications are specific to https://wordpress.org/support/
 		$blog_id = get_current_blog_id();
