@@ -18,13 +18,13 @@ class Audit_Log {
 		$type   = str_replace( 'topic-', '', get_term( $term_id )->taxonomy );
 
 		$this->log(
-			// plugin: Plugin Name (one-click)
-			// theme: Theme Name
+			// plugin: plugin-slug (one-click)
+			// theme: theme-slug
 			// tag: tag-name
 			"%s: %s%s",
 			[
 				$type,
-				get_term( $term_id )->name,
+				get_term( $term_id )->slug,
 				// Tokenised links are from email unsubscribe links
 				( isset( $_POST['List-Unsubscribe'] ) && 'One-Click' === $_POST['List-Unsubscribe'] ) ? ' (one-click)' : ''
 			],
