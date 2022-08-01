@@ -7,10 +7,10 @@
 		<form>
 			<h3 class="feedback-reason-title"><?php esc_html_e( 'Type (Optional)', 'glotpress' ); ?></h3>
 			<ul class="feedback-reason-list">
-				<?php
-				$reject_reasons = Helper_Translation_Discussion::get_reject_reasons();
-				foreach ( $reject_reasons as $key => $reason ) :
-					?>
+			<?php
+				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+			foreach ( $comment_reasons as $key => $reason ) :
+				?>
 					<li>
 						<label class="tooltip" title="<?php echo esc_attr( $reason['explanation'] ); ?>"><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key ); ?>" /><?php echo esc_html( $reason['name'] ); ?></label><span class="tooltip dashicons dashicons-info" title="<?php echo esc_attr( $reason['explanation'] ); ?>"></span>
 					</li>

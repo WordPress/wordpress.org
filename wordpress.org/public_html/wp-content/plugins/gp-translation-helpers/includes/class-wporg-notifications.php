@@ -297,16 +297,22 @@ class WPorg_GlotPress_Notifications {
 	 * @return string|null The email body message.
 	 */
 	public static function get_email_body( WP_Comment $comment, ?array $comment_meta ): ?string {
-		$project  = self::get_project_from_post_id( $comment->comment_post_ID );
-		$original = self::get_original( $comment->comment_post_ID );
-		$output   = esc_html__( 'Hi:' );
-		$output  .= '<br><br>';
-		$output  .= esc_html__( 'There is a new comment in a discussion of the WordPress translation system that may be of interest to you.' );
-		$output  .= '<br>';
-		$output  .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
-		$output  .= '<br><br>';
-		$url      = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
-		$output  .= '- <strong>' . esc_html__( 'Discussion URL: ' ) . '</strong><a href="' . $url . '">' . $url . '</a><br>';
+		$project         = self::get_project_from_post_id( $comment->comment_post_ID );
+		$original        = self::get_original( $comment->comment_post_ID );
+		$url             = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
+		$link_to_comment = $url . '#comment-' . $comment->comment_ID;
+		$output          = esc_html__( 'Hi:' );
+		$output         .= '<br><br>';
+		$output         .= wp_kses(
+			/* translators: The comment URL where the user can find the comment. */
+			sprintf( __( 'There is a <a href="%1$s">new comment in a discussion</a> of the WordPress translation system that may be of interest to you.', 'glotpress' ), $link_to_comment ),
+			array(
+				'a' => array( 'href' => array() ),
+			)
+		) . '<br>';
+		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
+		$output .= '<br><br>';
+		$output .= '- <strong>' . esc_html__( 'Discussion URL: ' ) . '</strong><a href="' . $url . '">' . $url . '</a><br>';
 		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
 			$output .= '- <strong>' . esc_html__( 'Locale: ' ) . '</strong>' . esc_html( $comment_meta['locale'][0] ) . '<br>';
 		}

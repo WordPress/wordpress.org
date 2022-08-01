@@ -59,27 +59,62 @@
 		?>
 	</ul><!-- .discussion-list -->
 	<?php
+	// $option_typo     = '<option value="typo">Typo in the English text (admins will be notified)</option>';
+	// $option_context  = '<option value="context">Where does this string appear? (more context) (admins will be notified)</option>';
+	$optgroup_question = '';
+	if ( $locale_slug ) {
+		$gp_locale = GP_Locales::by_slug( $locale_slug );
+		if ( $gp_locale ) {
+			$optgroup_question = '
+					<optgroup label="Notify validators">
+					    <option value="question">Question about translating to ' . esc_html( $gp_locale->english_name ) . '</option>
+					</optgroup>';
+		}
+	}
+	$options = '<select required="" name="comment_topic" id="comment_topic">
+					<option value="">Select a topic</option>
+					<optgroup label="Notify admins">
+						<option value="typo">Typo in the English text</option>
+						<option value="context">Where does this string appear? (more context)</option>
+					</optgroup>' .
+			   $optgroup_question .
+			   '</select>';
+
 	add_action(
 		'comment_form_logged_in_after',
-		function () use ( $locale_slug ) {
-			$language_question = '';
-
-			if ( $locale_slug ) {
-				$gp_locale = GP_Locales::by_slug( $locale_slug );
-				if ( $gp_locale ) {
-					$language_question = '<option value="question">Question about translating to ' . esc_html( $gp_locale->english_name ) . '</option>';
-				}
-			}
+		function () use ( $locale_slug, $options ) {
+			/**
+			 * Filters the options.
+			 *
+			 * @param string $options     The options for the select element.
+			 * @param string $locale_slug The slug of the current locale.
+			 *
+			 *@since 0.0.2
+			 */
+			$options = apply_filters( 'gp_discussion_new_comment_options', $options, $locale_slug );
 
 			echo '<p class="comment-form-topic">
-					<label for="comment_topic">Topic <span class="required" aria-hidden="true">*</span> (required)</label>
-					<select required name="comment_topic" id="comment_topic">
-						<option value="">Select topic</option>
-						<option value="typo">Typo in the English text</option>
-    					<option value="context">Where does this string appear? (more context)</option>' .
-						wp_kses( $language_question, array( 'option' => array( 'value' => true ) ) ) .
-					'</select>
-    			</p>';
+					<label for="comment_topic">Topic <span class="required" aria-hidden="true">*</span> (required)</label> ' .
+						wp_kses(
+							$options,
+							array(
+								'select'   =>
+										   array(
+											   'required' => true,
+											   'name'     => true,
+											   'id'       => true,
+										   ),
+								'optgroup' =>
+										array(
+											'label' => true,
+										),
+								'option'   =>
+										array(
+											'value' => true,
+										),
+							)
+						) .
+				'</p>';
 		},
 		10,
 		2
@@ -103,7 +138,7 @@
 				'id_form'             => 'commentform-' . $_post_id,
 				'cancel_reply_link'   => '<span></span>',
 				'format'              => 'html5',
-				'class_submit' => 'button is-primary',
+				'class_submit'        => 'button is-primary',
 				'comment_notes_after' => implode(
 					"\n",
 					array(
