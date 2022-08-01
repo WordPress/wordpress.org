@@ -388,7 +388,7 @@ function get_whitelist() {
 			'stacimc',
 			'zackkrida',
 		),
-		'performance' => array(
+		'core-performance' => array(
 			// #core (inc committers) already included via get_parent_channel().
 			'clarkeemily', // @Emily Clarke on Slack
 			'shetheliving', // @Bethany Chobanian Lang (they/them) on Slack
@@ -488,7 +488,7 @@ function get_whitelist() {
 
 /**
  * Fetch a list of the WordPress core committers.
- * 
+ *
  * This is defined on WordPress.org in a global variable called `$committers`.
  * It's defined as part of the configuration bootstrap.
  */

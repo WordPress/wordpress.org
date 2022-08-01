@@ -37,7 +37,7 @@ function wporg_robots_txt( $robots ) {
 	// WordPress.org/plugins/search/* should not be indexed for now. See https://meta.trac.wordpress.org/ticket/5323
 	if ( 'wordpress.org' === $blog_details->domain || defined( 'IS_ROSETTA_NETWORK' ) ) {
 		$robots .= "\nUser-agent: *\n" .
-		           "Disallow: /plugins/search\n";
+		           "Disallow: /plugins/search/\n";
 	}
 
 	// Allow access to the load-scripts.php & load-styles.php admin files.

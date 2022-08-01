@@ -126,11 +126,11 @@ class WP_36_Credits extends WP_Credits {
 			'ericmann',
 			'ethitter',
 			'evansolomon',
-			'f-j-kaiser ', #  F J Kaiser
+			'f-j-kaiser', #  F J Kaiser
 			'faishal',
 			'fanquake',
 			'feedmeastraycat',
-			'frank-klein ', #  Frank Klein
+			'frank-klein', #  Frank Klein
 			'FStop',
 			'garyc40',
 			'GaryJ',

@@ -116,10 +116,10 @@ class Handbook {
 			return '';
 		}
 		if ( 'github.com' !== parse_url( $markdown_source, PHP_URL_HOST )
-			|| false !== stripos( $markdown_source, '/edit/master/' ) ) {
+			|| false !== stripos( $markdown_source, '/edit/main/' ) ) {
 			return $markdown_source;
 		}
-		$markdown_source = str_replace( '/blob/master/', '/edit/master/', $markdown_source );
+		$markdown_source = str_replace( '/blob/main/', '/edit/main/', $markdown_source );
 		return $markdown_source;
 	}
 }

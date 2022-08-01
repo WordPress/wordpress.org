@@ -60,18 +60,32 @@ class GP_Translation_Helpers {
 		add_action( 'gp_before_request', array( $this, 'before_request' ), 10, 2 );
 		add_action( 'rest_after_insert_comment', array( 'GP_Notifications', 'init' ), 10, 3 );
 		add_action( 'transition_comment_status', array( 'GP_Notifications', 'on_comment_status_change' ), 10, 3 );
-		add_action( 'gp_pre_tmpl_load', array( $this, 'register_reject_feedback_js' ), 10, 2 );
-		add_action( 'wp_ajax_reject_with_feedback', array( $this, 'reject_with_feedback' ) );
+		add_action( 'gp_pre_tmpl_load', array( $this, 'register_comment_feedback_js' ), 10, 2 );
+		add_action( 'wp_ajax_comment_with_feedback', array( $this, 'comment_with_feedback' ) );
 		add_action( 'wp_ajax_optout_discussion_notifications', array( $this, 'optout_discussion_notifications' ) );
 
 		add_thickbox();
 		gp_enqueue_style( 'thickbox' );
 
-		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ), array(), '0.0.1' );
+		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ), array(), '20220722' );
 		gp_enqueue_style( 'gp-discussion-css' );
 
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
+		add_filter(
+			'gp_tmpl_load_locations',
+			function( $locations, $template, $args, $template_path ) {
+				if ( 'translation-row-editor-meta-status' === $template ) {
+					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/gp-templates-overrides/' );
+				} else {
+					$locations[] = dirname( dirname( __FILE__ ) ) . '/templates/';
+				}
+
+				return $locations;
+			},
+			60,
+			4
+		);
 
 		$this->helpers = self::load_helpers();
 	}
@@ -175,10 +189,10 @@ class GP_Translation_Helpers {
 			}
 		);
 
-		wp_register_style( 'gp-translation-helpers-css', plugins_url( 'css/translation-helpers.css', __DIR__ ), '', '0.0.1' ); // todo: add the version as global element.
+		wp_register_style( 'gp-translation-helpers-css', plugins_url( 'css/translation-helpers.css', __DIR__ ), '', '20220722' ); // todo: add the version as global element.
 		gp_enqueue_style( 'gp-translation-helpers-css' );
 
-		wp_register_script( 'gp-translation-helpers', plugins_url( '/js/translation-helpers.js', __DIR__ ), array( 'gp-editor' ), '2017-02-09', true );
+		wp_register_script( 'gp-translation-helpers', plugins_url( '/js/translation-helpers.js', __DIR__ ), array( 'gp-editor' ), '20220722', true );
 		gp_enqueue_scripts( array( 'gp-translation-helpers' ) );
 
 		wp_localize_script( 'gp-translation-helpers', '$gp_translation_helpers_settings', $translation_helpers_settings );
@@ -275,7 +289,7 @@ class GP_Translation_Helpers {
 			}
 		);
 
-		gp_tmpl_load( 'translation-helpers', array( 'sections' => $sections ), dirname( __FILE__ ) . '/templates/' );
+		gp_tmpl_load( 'translation-helpers', array( 'sections' => $sections ) );
 	}
 
 	/**
@@ -343,52 +357,52 @@ class GP_Translation_Helpers {
 	 *
 	 * @return void
 	 */
-	public function register_reject_feedback_js( $template, $translation_set ) {
+	public function register_comment_feedback_js( $template, $translation_set ) {
 
 		if ( 'translations' !== $template ) {
 			return;
 		}
 
-		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery', 'gp-common', 'gp-editor', 'thickbox' ), '0.0.1' );
-		gp_enqueue_script( 'gp-reject-feedback-js' );
+		wp_register_script( 'gp-comment-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery', 'gp-common', 'gp-editor', 'thickbox' ), '20220726' );
+		gp_enqueue_script( 'gp-comment-feedback-js' );
 
 		wp_localize_script(
-			'gp-reject-feedback-js',
-			'$gp_reject_feedback_settings',
+			'gp-comment-feedback-js',
+			'$gp_comment_feedback_settings',
 			array(
-				'url'            => admin_url( 'admin-ajax.php' ),
-				'nonce'          => wp_create_nonce( 'gp_reject_feedback' ),
-				'locale_slug'    => $translation_set['locale_slug'],
-				'reject_reasons' => Helper_Translation_Discussion::get_reject_reasons(),
+				'url'             => admin_url( 'admin-ajax.php' ),
+				'nonce'           => wp_create_nonce( 'gp_comment_feedback' ),
+				'locale_slug'     => $translation_set['locale_slug'],
+				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons(),
 			)
 		);
 	}
 
 	/**
-	 * Is called from the AJAX request in reject-feedback.js to submit a rejection feedback.
+	 * Is called from the AJAX request in reject-feedback.js to submit an comment feedback.
 	 *
 	 * @since 0.0.2
 	 *
 	 * @return void
 	 */
-	public function reject_with_feedback() {
-		check_ajax_referer( 'gp_reject_feedback', 'nonce' );
+	public function comment_with_feedback() {
+		check_ajax_referer( 'gp_comment_feedback', 'nonce' );
 
 		$helper_discussion    = new Helper_Translation_Discussion();
 		$locale_slug          = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
 		$translation_id_array = ! empty( $_POST['data']['translation_id'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] ) : null;
 		$original_id_array    = ! empty( $_POST['data']['original_id'] ) ? array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] ) : null;
-		$reject_reason        = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
-		$all_reject_reasons   = array_keys( Helper_Translation_Discussion::get_reject_reasons() );
-		$reject_reason        = array_filter(
-			$reject_reason,
-			function( $reason ) use ( $all_reject_reasons ) {
-				return in_array( $reason, $all_reject_reasons );
+		$comment_reason       = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
+		$all_comment_reasons  = array_keys( Helper_Translation_Discussion::get_comment_reasons() );
+		$comment_reason       = array_filter(
+			$comment_reason,
+			function( $reason ) use ( $all_comment_reasons ) {
+				return in_array( $reason, $all_comment_reasons );
 			}
 		);
-		$reject_comment       = sanitize_text_field( $_POST['data']['comment'] );
+		$comment              = sanitize_text_field( $_POST['data']['comment'] );
 
-		if ( ! $locale_slug || ! $translation_id_array || ! $original_id_array || ( ! $reject_reason && ! $reject_comment ) ) {
+		if ( ! $locale_slug || ! $translation_id_array || ! $original_id_array || ( ! $comment_reason && ! $comment ) ) {
 			wp_send_json_error();
 		}
 
@@ -397,13 +411,13 @@ class GP_Translation_Helpers {
 		$first_translation_id = array_shift( $translation_id_array );
 
 		// Post comment on discussion page for the first string
-		$first_comment_id = $this->insert_reject_comment( $reject_comment, $first_original_id, $reject_reason, $first_translation_id, $locale_slug, $_SERVER );
+		$first_comment_id = $this->insert_comment( $comment, $first_original_id, $comment_reason, $first_translation_id, $locale_slug, $_SERVER );
 
 		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
-			$reject_comment = get_comment_link( $first_comment_id );
+			$comment = get_comment_link( $first_comment_id );
 			foreach ( $original_id_array as $index => $single_original_id ) {
-				$comment_id = $this->insert_reject_comment( $reject_comment, $single_original_id, $reject_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
+				$comment_id = $this->insert_comment( $comment, $single_original_id, $comment_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
 				$comment    = get_comment( $comment_id );
 				GP_Notifications::add_related_comment( $comment );
 			}
@@ -449,20 +463,19 @@ class GP_Translation_Helpers {
 	}
 
 	/**
-	 * Inserts rejection feedback as WordPress comment
+	 * Inserts feedback as WordPress comment.
 	 *
-	 * @since 0.0.2
-	 *
-	 *  @param string $reject_comment Feedback entered by reviewer.
-	 *  @param int    $original_id ID of the original where the comment will be added.
-	 *  @param array  $reject_reason Reason(s) for rejection.
-	 *  @param string $translation_id ID of the rejected translation.
-	 *  @param string $locale_slug    Locale of the rejected translation.
+	 *  @param string $comment        Feedback entered by reviewer.
+	 *  @param int    $original_id    ID of the original where the comment will be added.
+	 *  @param array  $reason         Reason(s) for comment.
+	 *  @param string $translation_id ID of the commented translation.
+	 *  @param string $locale_slug    Locale of the commented translation.
 	 *  @param array  $server         The $_SERVER array
 	 *
 	 * @return false|int
+	 * @since 0.0.2
 	 */
-	private function insert_reject_comment( $reject_comment, $original_id, $reject_reason, $translation_id, $locale_slug, $server ) {
+	private function insert_comment( $comment, $original_id, $reason, $translation_id, $locale_slug, $server ) {
 		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original_id );
 		$user    = wp_get_current_user();
 		return wp_insert_comment(
@@ -472,11 +485,11 @@ class GP_Translation_Helpers {
 				'comment_author_email' => $user->user_email,
 				'comment_author_url'   => $user->user_url,
 				'comment_author_IP'    => sanitize_text_field( $server['REMOTE_ADDR'] ),
-				'comment_content'      => $reject_comment,
+				'comment_content'      => $comment,
 				'comment_agent'        => sanitize_text_field( $server['HTTP_USER_AGENT'] ),
 				'user_id'              => $user->ID,
 				'comment_meta'         => array(
-					'reject_reason'  => $reject_reason,
+					'reject_reason'  => $reason,
 					'translation_id' => $translation_id,
 					'locale'         => $locale_slug,
 				),

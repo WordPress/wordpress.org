@@ -591,7 +591,7 @@ class WP_58_Credits extends WP_Credits {
 			'tjnowell',
 			'tkama',
 			'tmatsuur',
-			'tmdk ',
+			'tmdk',
 			'tobiasbg',
 			'tobifjellner',
 			'toro_unit',

@@ -18,9 +18,8 @@ import useFocusOnNavigation from '../../hooks/use-focus-on-navigation';
 
 const MyFavorites = () => {
 	const { isEmpty, query } = useSelect( ( select ) => {
-		const { getCurrentQuery, getFavorites, getPatternsByQuery, isLoadingPatternsByQuery } = select(
-			patternStore
-		);
+		const { getCurrentQuery, getFavorites, getPatternsByQuery, isLoadingPatternsByQuery } =
+			select( patternStore );
 		const _query = getCurrentQuery() || {};
 		const favorites = getFavorites();
 

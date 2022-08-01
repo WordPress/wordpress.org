@@ -8,7 +8,7 @@ class DevHub_Command extends WP_CLI_Command {
 	 * Parses WP code.
 	 *
 	 * The source code for the version of WordPress to be parsed needs to be
-	 * obtained and unpackaged locally. You should not be code used in an
+	 * obtained and unpackaged locally. It should not be code used in an
 	 * active install.
 	 *
 	 * ## OPTIONS
@@ -79,18 +79,6 @@ class DevHub_Command extends WP_CLI_Command {
 			WP_CLI::error( 'Unable to create temporary directory for downloading WordPress. If retrying fails, consider obtaining the files manually and supplying that path via --src_path argument.' );
 		}
 
-		// Determine importing user's ID. 
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user ) {
-			WP_CLI::error( 'Invalid user_id provided.' );
-		}
-		WP_CLI::log( "Importing as user ID $user_id ({$user->user_nicename})." );
-
-		$plugins = [
-			'phpdoc-parser'  => 'phpdoc-parser/plugin.php',
-			'posts-to-posts' => 'posts-to-posts/posts-to-posts.php',
-		];
-
 		// Verify path is not a file.
 		if ( is_file( $path ) ) {
 			WP_CLI::error( 'Path provided for WordPress source to parse does not appear to be a directory.' );
@@ -112,6 +100,18 @@ class DevHub_Command extends WP_CLI_Command {
 			$last_parsed_date = get_option( 'wp_parser_last_import' );
 			WP_CLI::confirm( "Looks like WP $version was already parsed on " . date_i18n( 'Y-m-d H:i', $last_parsed_date ) . ". Proceed anyway?" );
 		}
+
+		// Determine importing user's ID. 
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			WP_CLI::error( 'Invalid user_id provided.' );
+		}
+		WP_CLI::log( "Importing as user ID $user_id ({$user->user_nicename})." );
+
+		$plugins = [
+			'phpdoc-parser'  => 'phpdoc-parser/plugin.php',
+			'posts-to-posts' => 'posts-to-posts/posts-to-posts.php',
+		];
 
 		// Get the phpdoc-parser plugin if not installed.
 		$all_plugins = get_plugins();

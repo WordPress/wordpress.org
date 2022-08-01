@@ -1,0 +1,32 @@
+<?php
+/**
+ * Template for the meta section of the editor row in a translation set display
+ *
+ * @package    GlotPress
+ * @subpackage Templates
+ */
+
+?>
+<dl>
+	<?php gp_tmpl_load( 'translation-row-editor-meta-feedback', get_defined_vars() ); ?>
+	<dt><?php _e( 'Status:', 'glotpress' ); ?></dt>
+	<dd>
+		<?php echo display_status( $translation->translation_status ); ?>
+		<?php if ( $translation->translation_status ) : ?>
+			<?php if ( $can_approve_translation ) : ?>
+				<?php if ( 'current' !== $translation->translation_status ) : ?>
+					<button class="approve" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Approve this translation. Any existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"><strong>+</strong> <?php _ex( 'Approve', 'Action', 'glotpress' ); ?></button>
+				<?php endif; ?>
+				<?php if ( 'rejected' !== $translation->translation_status ) : ?>
+					<button class="reject" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Reject this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"><strong>&minus;</strong> <?php _ex( 'Reject', 'Action', 'glotpress' ); ?></button>
+				<?php endif; ?>
+				<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
+					<button class="fuzzy" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Mark this translation as fuzzy for further review.', 'glotpress' ); ?>"><strong>~</strong> <?php _ex( 'Fuzzy', 'Action', 'glotpress' ); ?></button>
+				<?php endif; ?>
+			<?php elseif ( $can_reject_self ) : ?>
+				<button class="reject" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Reject this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"><strong>&minus;</strong> <?php _ex( 'Reject', 'Action', 'glotpress' ); ?></button>
+				<button class="fuzzy" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Mark this translation as fuzzy for further review.', 'glotpress' ); ?>"><strong>~</strong> <?php _ex( 'Fuzzy', 'Action', 'glotpress' ); ?></button>
+			<?php endif; ?>
+		<?php endif; ?>
+	</dd>
+</dl>

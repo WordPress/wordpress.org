@@ -79,6 +79,12 @@
 				</div><!-- .theme-tags -->
 				<# } #>
 
+				<div id="theme-patterns-js" class="theme-patterns" style="display: none;">
+					<h3><?php _e( 'Patterns:', 'wporg-themes' ); ?></h3>	
+					<div id="theme-patterns-grid-js" class="theme-patterns-grid"></div>
+					<a id="theme-patterns-button-js" class="theme-patterns-button" href="#" style="display:none"><?php _e( 'Show all patterns', 'wporg-themes' ); ?></a>
+				</div>
+
 				<div class="theme-downloads">
 					<h3><?php _e( 'Downloads Per Day', 'wporg-themes' ); ?></h3>
 					<div id="theme-download-stats-{{data.id}}" class="chart"></div>

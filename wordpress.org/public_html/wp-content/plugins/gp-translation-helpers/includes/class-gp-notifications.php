@@ -325,10 +325,13 @@ class GP_Notifications {
 		 * @param array $email_addresses The email addresses to be notified.
 		 */
 		$email_addresses = apply_filters( 'gp_notification_before_send_emails', $email_addresses );
-		if ( ( null === $comment ) || ( null === $comment_meta ) || ( empty( $email_addresses ) ) ) {
+		if ( null === $comment || null === $comment_meta || empty( $email_addresses ) ) {
 			return false;
 		}
-		$original        = self::get_original( $comment );
+		$original = self::get_original( $comment );
+		if ( ! $original ) {
+			return false;
+		}
 		$email_addresses = self::remove_commenter_email_address( $comment, $email_addresses );
 		$email_addresses = self::remove_optout_discussion_email_addresses( $original->id, $email_addresses );
 
@@ -363,10 +366,12 @@ class GP_Notifications {
 	 * @return string|null
 	 */
 	public static function get_email_body( WP_Comment $comment, array $comment_meta ): string {
-		$post     = get_post( $comment->comment_post_ID );
-		$project  = self::get_project_from_post( $post );
-		$original = self::get_original( $comment );
-		$output   = '';
+		$post            = get_post( $comment->comment_post_ID );
+		$project         = self::get_project_from_post( $post );
+		$original        = self::get_original( $comment );
+		$url             = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
+		$link_to_comment = $url . '#comment-' . $comment->comment_ID;
+		$output          = '';
 		/**
 		 * Filters the content of the email at the beginning of the function that gets its content.
 		 *
@@ -379,10 +384,9 @@ class GP_Notifications {
 		$output  = apply_filters( 'gp_notification_pre_email_body', $output, $comment, $comment_meta );
 		$output .= esc_html__( 'Hi there,', 'glotpress' );
 		$output .= '<br><br>';
-		$url     = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
 		$output .= wp_kses(
 			/* translators: The discussion URL where the user can find the comment. */
-			sprintf( __( 'There is a new comment in a <a href="%1$s">GlotPress discussion</a> that may be of interest to you.', 'glotpress' ), $url ),
+			sprintf( __( 'There is a <a href="%1$s">new comment in a GlotPress discussion</a> that may be of interest to you.', 'glotpress' ), $link_to_comment ),
 			array(
 				'a' => array( 'href' => array() ),
 			)

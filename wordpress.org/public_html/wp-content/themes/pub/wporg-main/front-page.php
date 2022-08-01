@@ -1,12 +1,5 @@
 <?php
 
-/*
- * NOTE: This isn't actually used, instead the site loads `public_html/index-wporg.php`.
- *
- * Please sync any changes in both places.
- */
-
-
 /**
  * The main template file.
  *

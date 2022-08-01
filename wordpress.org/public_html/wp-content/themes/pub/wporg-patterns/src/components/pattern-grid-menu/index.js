@@ -17,9 +17,8 @@ import { useRoute } from '../../hooks';
 const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 	const { path, update: updatePath } = useRoute();
 	const { categorySlug, isLoading, options } = useSelect( ( select ) => {
-		const { getCategoryById, getCategories, getQueryFromUrl, getUrlFromQuery, isLoadingCategories } = select(
-			patternStore
-		);
+		const { getCategoryById, getCategories, getQueryFromUrl, getUrlFromQuery, isLoadingCategories } =
+			select( patternStore );
 		const query = getQueryFromUrl( path );
 		// Remove pagination, so we don't go from /page/2/ to /categories/images/page/2/.
 		delete query.page;

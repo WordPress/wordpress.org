@@ -1,0 +1,15 @@
+
+.theme-patterns-grid {
+	align-items: start;
+	display: grid;
+	gap: 1.5rem;
+	grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+}
+
+.theme-patterns-button,
+.theme-patterns-button:hover {
+	display: block;
+	font-size: 14px;
+	margin-top: 16px;
+	text-decoration: underline;
+}

@@ -354,16 +354,32 @@ function wporg_support_get_slack_username( $user_id = 0 ) {
 	global $wpdb;
 
 	$user_id = bbp_get_user_id( $user_id );
-	$slack_username = '';
 
-	$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
+	$data = wp_cache_get( "user_id:$user_id", 'slack_data' );
+	if ( false === $data ) {
+		$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
+
+		// Cache nonexistence as an empty string.
+		wp_cache_add( "user_id:$user_id", (string) $data, 'slack_data', 1800 );
+	}
+
 	if ( $data && ( $data = json_decode( $data, true ) ) ) {
-		if ( isset( $data['profile']['display_name'] ) ) {
-			$slack_username = $data['profile']['display_name'];
+		if ( ! empty( $data['deleted'] ) ) {
+			return false;
+		}
+
+		// Optional Display Name field
+		if ( ! empty( $data['profile']['display_name'] ) ) {
+			return $data['profile']['display_name'];
+		}
+
+		// Fall back to "Full Name" field.
+		if ( ! empty( $data['profile']['real_name'] ) ) {
+			return $data['profile']['real_name'];
 		}
 	}
 
-	return $slack_username;
+	return false;
 }
 
 /**

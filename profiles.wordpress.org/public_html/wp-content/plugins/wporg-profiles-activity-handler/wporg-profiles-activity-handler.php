@@ -961,13 +961,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$activity_id             = is_wp_error( $saved ) ? $saved : $stored_activity_id;
 
 				// Increase this even if couldn't update action, to preserve accurate count.
-				bp_activity_update_meta( $activity_id, 'digest_count', $current_count + $bump );
+				bp_activity_update_meta( $stored_activity_id, 'digest_count', $current_count + $bump );
 
 			} else {
 				$new_activity['action'] = $new_action;
 				$activity_id            = bp_activity_add( $new_activity );
 
-				bp_activity_update_meta( $activity_id, 'digest_count', 1 );
+				bp_activity_update_meta( $activity_id, 'digest_count', $bump );
 			}
 
 			return $activity_id;
@@ -979,6 +979,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * This doesn't use BuddyPress' `format_callback` because we don't register the `type`s.
 		 */
 		protected function get_digest_actions( string $component, string $type, int $count ) : string {
+			$action   = '';
+			$singular = false;
+			$plural   = false;
+
 			switch ( $component . ':' . $type ) {
 				case 'glotpress:glotpress_translation_suggested':
 					$singular = 'Suggested %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
@@ -990,8 +994,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$plural   = 'Translated %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
 					break;
 
-				default:
-					$action = '';
+				case 'glotpress:glotpress_translation_reviewed':
+					$singular = 'Reviewed %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+					$plural   = 'Reviewed %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+					break;
 			}
 
 			if ( $singular && $plural ) {

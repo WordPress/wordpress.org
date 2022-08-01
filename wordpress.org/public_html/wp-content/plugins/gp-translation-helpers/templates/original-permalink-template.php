@@ -29,7 +29,7 @@
 										<?php endforeach; ?>
 										</summary>
 
-										<?php gp_tmpl_load( 'comment-section', get_defined_vars(), dirname( __FILE__ ) ); ?>
+										<?php gp_tmpl_load( 'comment-section', get_defined_vars() ); ?>
 
 									</details>
 								</div>

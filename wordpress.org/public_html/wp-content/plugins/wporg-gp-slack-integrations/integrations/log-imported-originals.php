@@ -54,6 +54,11 @@ class WPorg_GP_Slack_Log_Imported_Originals {
 			return;
 		}
 
+		// Ignore import if no new strings have been added/fuzzied.
+		if ( ! $originals_added && ! $originals_fuzzied ) {
+			return;
+		}
+
 		$project = GP::$project->get( $project_id );
 		if ( ! $project ) {
 			return;

@@ -243,7 +243,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 				</div>
 				<div class="panel-content">
 					<div class="meta">
-
+						<?php gp_tmpl_load( 'translation-row-editor-meta-feedback', get_defined_vars() ); ?>
 						<?php if ( $translation->translation_status && ( $can_approve_translation || $can_reject_self ) ): ?>
 							<div class="status-actions">
 								<?php if ( $can_approve_translation ) : ?>
