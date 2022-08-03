@@ -39,6 +39,9 @@ class Post_Parser {
 			'core/group'       => new Parsers\BasicText(),
 			'core/media-text'  => new Parsers\BasicText(),
 			'core/social-link' => new Parsers\BasicText(),
+
+			// Generic shortcode handler..
+			'core/shortcode'   => new Parsers\ShortcodeBlock(),
 		];
 	}
 

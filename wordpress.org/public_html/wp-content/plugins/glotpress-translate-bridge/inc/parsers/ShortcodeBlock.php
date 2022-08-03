@@ -5,18 +5,28 @@ namespace WordPressdotorg\Post_Translation\Parsers;
  * Handle blocks with attributes present in the attributes that are also used
  * in a shortcode within the block content.
  *
+ * Example: new Parsers\ShortcodeBlock();
  * Example: new Parsers\ShortcodeBlock( [ 'subscribePlaceholder', 'submitButtonText' ] );
+ *
+ * TODO: Figure out how to make the second case selectable per-shortcode, if it's even needed..
  */
 class ShortcodeBlock implements BlockParser {
 	use GetSetAttribute;
 
 	public $attribute_names = [];
 
-	public function __construct( array $attribute_names ) {
+	public function __construct( array $attribute_names = [] ) {
 		$this->attribute_names = $attribute_names;
 	}
 
 	public function to_strings( array $block ) : array {
+		// The entire shortcode is a string.
+		if ( ! $this->attribute_names ) {
+			return [
+				trim( $block['innerHTML'] )
+			];
+		}
+
 		$strings = [];
 		foreach ( $this->attribute_names as $attribute_name ) {
 			$strings = array_merge( $strings, $this->get_attribute( $attribute_name, $block ) );
@@ -26,6 +36,12 @@ class ShortcodeBlock implements BlockParser {
 	}
 
 	public function replace_strings( array $block, array $replacements ) : array {
+		if ( ! $this->attribute_names ) {
+			$block['innerHTML'] = $replacements[ trim( $block['innerHTML'] ) ];
+
+			return $block;
+		}
+
 		foreach ( $this->attribute_names as $attribute_name ) {
 			$this->set_attribute( $attribute_name, $block, $replacements );
 
