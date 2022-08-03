@@ -35,7 +35,7 @@ function get_frontend_translation_project( $id ) {
  * Translate the Post title.
  */
 function the_title( $title, $id = 0 ) {
-	return translate_string_for_post( $title, $post );
+	return translate_string_for_post( $title, $id );
 }
 
 /**
