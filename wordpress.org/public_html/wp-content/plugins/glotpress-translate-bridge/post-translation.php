@@ -26,11 +26,11 @@ use GlotPress_Translate_Bridge;
  *  - Test
  * 
  * Notes:
- *  - Enable the 'test' functions at the bottom of this file, but changing `/*` to `//*`.
+ *  - Enable the 'test' functions at the bottom of this file, by changing `/*` to `//*`.
  */
 
 const TEXTDOMAIN_PREFIX     = 'dynamic-glotpress/';
-const DEFAULT_PROJECT       = 'disabled/posttranslation';
+const PROJECT_BASE          = 'disabled/posttranslation';
 const META_KEY_PROJECT      = 'glotpress_translation_project';
 const META_KEY_TRANSLATABLE = 'glotpress_translated';
 
@@ -50,7 +50,9 @@ function init() {
 add_action( 'init', __NAMESPACE__ . '\init', 9 );
 
 /**
- * Get the project for a posts translation project.
+ * Get the translation project for a given post.
+ *
+ * Translation is enabled per-post, with a per-site project and optional project defined per post.
  */
 function get_post_translation_project( $post ) {
 	$post = get_post( $post );
@@ -61,9 +63,35 @@ function get_post_translation_project( $post ) {
 	}
 
 	// Filter: project, post as context
-	return apply_filters( 'post_translation_project', ( $post->{ META_KEY_PROJECT } ?: DEFAULT_PROJECT ), $post );
+	return apply_filters( 'post_translation_project', ( $post->{ META_KEY_PROJECT } ?: get_site_translation_project() ), $post );
 }
 
+/**
+ * Get the translation project for a given site.
+ *
+ * This is used as the default fallback for if a post-specific project is not specified.
+ */
+function get_site_translation_project() {
+	$slug = sanitize_title_with_dashes(
+		str_replace(
+			[
+				'http://',
+				'https://',
+				'/'
+			],
+			[
+				'',
+				'',
+				'-'
+			],
+			home_url()
+		)
+	);
+
+	$project = PROJECT_BASE . '/' . $slug;
+
+	return apply_filters( 'site_translation_project', $project, PROJECT_BASE, $slug );
+}
 
 // Temp hackery - this is for debugging and enabling this.
 add_filter( 'post_translation_enabled', '__return_true' );
@@ -75,16 +103,17 @@ add_filter( 'post_translation_project', function( $project, $post ) {
 		$project = 'meta/wordpress-org';
 	}
 
-	if (
-		'https://wordpress.org/main-test/' === home_url( '/' )
-	) {
-		$project = DEFAULT_PROJECT . '/wordpress-org-main-test';
-	}
-
-	// TODO: This filter might deserve to be set to select the appropriate GlotPress project automatically.
-
 	return $project;
 }, 10, 2 );
+
+// Make WordPress.org sites presented as Rosetta sites pull from the correct project.
+add_filter( 'site_translation_project', function( $project, $base, $slug ) {
+	if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK && 'https://test.wordpress.org/' != home_url('/') ) {
+		$project = preg_replace( '/^[a-z]{2,6}-wordpress-org/', 'wordpress-org', $project );
+	}
+
+	return $project;
+}, 10, 3 );
 
 /* Reverse all strings that should be translated, for visibility during test & review
 add_filter( 'gettext', function( $translated, $original, $domain ) {
