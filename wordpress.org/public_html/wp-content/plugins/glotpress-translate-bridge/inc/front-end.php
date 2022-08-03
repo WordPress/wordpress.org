@@ -81,6 +81,36 @@ function the_content( $content, $post = null ) {
 }
 
 /**
+ * Translate any postmeta fields specified.
+ */
+add_filter( 'get_post_metadata', __NAMESPACE__ . '\post_meta_filter', 100, 4 );
+function post_meta_filter( $value, $post_id, $meta_key, $single ) {
+	$translatable_post_meta = apply_filters( 'translatable_post_meta', [] );
+
+	if ( ! in_array( $meta_key, $translatable_post_meta, true ) ) {
+		return $value;
+	}
+
+	$project = get_frontend_translation_project( $post );
+
+	remove_filter( 'get_post_metadata', __NAMESPACE__ . '\\' . __FUNCTION__ );
+
+	$value = get_post_meta( $post_id, $meta_key, $single );
+
+	if ( $single ) {
+		$value = translate_string( $value, $project );
+	} else {
+		foreach ( $value as $i => $vv ) {
+			$value[ $i ] = translate_string( $vv, $project );
+		}
+	}
+
+	add_filter( 'get_post_metadata', __NAMESPACE__ . '\\' . __FUNCTION__, 100, 4 );
+
+	return $value;
+}
+
+/**
  * Translate a given string in the context of a post.
  */
 function translate_string_for_post( $string, $post ) {

@@ -56,6 +56,11 @@ class Post_Parser {
 			$strings[] = $post->post_excerpt;
 		}
 
+		$post_meta_to_include = apply_filters( 'translatable_post_meta', [] );
+		foreach ( $post_meta_to_include as $meta_key ) {
+			$strings[] = get_post_meta( $post->ID, $meta_key, true );
+		}
+
 		return $strings;
 	}
 
