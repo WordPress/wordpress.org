@@ -28,20 +28,22 @@ class Post_Parser {
 			'core/quote'       => new Parsers\HTMLParser( [ 'p', 'cite' ] ),
 			'core/heading'     => new Parsers\HTMLRegexParser( '/h[1-6]/' ),
 
-			'core/button'      => new Parsers\Button(),
+			//'core/button'      => new Parsers\Button(),
+			//'core/buttons'     => new Parsers\BasicText(),
+			'core/button'      => new Parsers\HTMLParser( 'a', [ 'href', 'title' ] ),
+
+			// Generic shortcode handler..
+			'core/shortcode'   => new Parsers\ShortcodeBlock(),
+
 			'core/spacer'      => new Parsers\Noop(),
 
 			// Common core blocks that use the default parser.
-			'core/buttons'     => new Parsers\BasicText(),
 			'core/column'      => new Parsers\BasicText(),
 			'core/columns'     => new Parsers\BasicText(),
 			'core/cover'       => new Parsers\BasicText(),
 			'core/group'       => new Parsers\BasicText(),
 			'core/media-text'  => new Parsers\BasicText(),
 			'core/social-link' => new Parsers\BasicText(),
-
-			// Generic shortcode handler..
-			'core/shortcode'   => new Parsers\ShortcodeBlock(),
 		];
 	}
 
