@@ -13,11 +13,9 @@ use GlotPress_Translate_Bridge;
 
 /*
  * TODO:
- *  - Create GlotPress projects within a parent-project scope for translations
- *  - Re-evaluate how it selects projects for where to pull a string from,
- *    currently this is done through post_meta and filtered, but this should
- *    probably be defined per-site rather than per-post or be 100% automatically
- *    selected.
+ *  - Re-evaluate how the GlotPress interaction in MakePot happens. Other projects
+ *    on WordPress.org install that as a helper-plugin to translate.w.org and call
+ *    a WP-CLI method instead.
  *  - Some Block Templates are known to not be caught by the `the_content` filters.
  *  - Some strings from post content include `&nbsp;` and `<br>` tags, it might be
  *    better to standardise some of these prior to inserting into GlotPress,
@@ -33,6 +31,7 @@ const TEXTDOMAIN_PREFIX     = 'dynamic-glotpress/';
 const PROJECT_BASE          = 'disabled/posttranslation';
 const META_KEY_PROJECT      = 'glotpress_translation_project';
 const META_KEY_TRANSLATABLE = 'glotpress_translated';
+const PROJECT_INHERIT_SETS  = PROJECT_BASE; // 'wp/dev'; // The project to inherit (copy) translation sets from.
 
 function init() {
 	if ( ! class_exists( 'GlotPress_Translate_Bridge' ) ) {

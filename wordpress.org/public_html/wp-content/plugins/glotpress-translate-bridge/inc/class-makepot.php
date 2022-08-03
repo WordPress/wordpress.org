@@ -13,6 +13,52 @@ class MakePot {
 		$this->posts   = $posts;
 	}
 
+	/**
+	 * Create a translation project for a site..
+	 */
+	public function create_translation_project_for_current_site() {
+		$project_args = array(
+			'name'              => get_blog_details()->blogname,
+			'slug'              => trim( str_replace( PROJECT_BASE, '', $this->project ), '/' ),
+			'parent_project_id' => 0,
+			'description'       => 'Strings for ' . home_url('/'),
+			'active'            => 1,
+		);
+
+		// Load GlotPress for the API.
+		switch_to_blog( WPORG_TRANSLATE_BLOGID );
+		$this->load_glotpress();
+
+		$parent = GP::$project->by_path( PROJECT_BASE );
+
+		$project_args['parent_project_id'] = $parent->id;
+
+		$project = GP::$project->create_and_select( $project_args );
+
+		// Import translation sets.
+		if ( $project ) {
+			$translation_sets = (array) GP::$translation_set->by_project_id(
+				GP::$project->by_path( PROJECT_INHERIT_SETS )->id
+			);
+
+			foreach ( $translation_sets as $set ) {
+				echo sprintf( 'Creating translation set %s (%s)', $set->name, $set->locale . ( $set->slug != 'default' ? '/' . $set->slug : '' ) );
+
+				GP::$translation_set->create( array(
+					'project_id' => $project->id,
+					'name'       => $set->name,
+					'locale'     => $set->locale,
+					'slug'       => $set->slug,
+				) );
+			}
+		}
+
+		// Switch back
+		restore_current_blog();
+
+		return (bool) $project;
+	}
+
 	public function import( $save = false ) {
 		// Avoid attempting to import strings when no patterns are found.
 		// This is a precautionary check to ensure we don't accidentally remove all translations.
@@ -28,6 +74,13 @@ class MakePot {
 
 		// Switch back, so we can create proper referenced originals.
 		restore_current_blog();
+
+		// Create the project on-the-fly for the current site.
+		if ( ! $this->project_obj ) {
+			$this->create_translation_project_for_current_site();
+
+			$this->project_obj = GP::$project->by_path( $this->project );
+		}
 
 		if ( ! $this->project_obj ) {
 			return 'Project not found!';
@@ -150,6 +203,10 @@ class MakePot {
 	 * Load GlotPress so that we can interact with the GlotPress APIs.
 	 */
 	public function load_glotpress() {
+		if ( did_action( 'gp_init' ) ) {
+			return;
+		}
+
 		// TODO: Figure out how to properly do the following stuff.
 		// This might be better be done as a two-part process;
 		// 1. Generate the partial .po here on the individual sites
