@@ -14,7 +14,9 @@ add_action( 'save_post', function( $post_id, $post ) {
 
 	// Import any changes into GlotPress.
 	if ( ! wp_next_scheduled( 'post_translation_import_to_glotpress', array( $post_id ) ) ) {
-		wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'post_translation_import_to_glotpress', array( $post_id ) );
+	//	wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'post_translation_import_to_glotpress', array( $post_id ) );
+	// TEMP HACKERY: Run the import now, rather than queueing a cron task that won't actually do anything in production.
+		do_action( 'post_translation_import_to_glotpress', $post_id );
 	}
 }, 10, 2 );
 
