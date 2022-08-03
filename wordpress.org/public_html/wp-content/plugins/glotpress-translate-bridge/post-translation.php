@@ -41,7 +41,7 @@ function init() {
 	include_once __DIR__ . '/inc/post-parser.php';
 	include_once __DIR__ . '/inc/front-end.php';
 
-	if ( is_admin() || wp_doing_cron() ) {
+	if ( is_admin() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 		include_once __DIR__ . '/inc/admin.php';
 	}
 
