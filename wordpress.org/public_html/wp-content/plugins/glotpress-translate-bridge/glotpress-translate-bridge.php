@@ -135,9 +135,6 @@ class GlotPress_Translate_Bridge {
 		$sql_plural   = isset( $strings['plural'] )   ? $wpdb->prepare( "o.plural = %s",   $strings['plural']   ) : 'o.plural IS NULL';
 		$sql_context  = !empty( $strings['context'] ) ? $wpdb->prepare( "o.context = %s",  $strings['context']  ) : 'o.context IS NULL';
 
-		// TODO: HackyHackhack. This is temporary, this class matches on the context field matching OR being null, when testing some existing strings have a context set that we're unaware of
-		$sql_context = '1=1';
-
 		$sql_locale = $wpdb->prepare( "s.locale = %s AND s.slug = %s", $locale['locale'], $locale['slug'] );
 
 		$translation = $wpdb->get_row(
@@ -189,6 +186,10 @@ class GlotPress_Translate_Bridge {
 
 		if ( 'en_US' === $wp_locale ) {
 			return false;
+		}
+
+		if ( 'pirate' === $wp_locale ) {
+			return [ 'locale' => 'pirate', 'slug' => 'default' ];
 		}
 
 		preg_match( '!^([a-z]{2,3})(_([A-Z]{2}))?(_([a-z0-9]+))?$!', $wp_locale, $matches );
