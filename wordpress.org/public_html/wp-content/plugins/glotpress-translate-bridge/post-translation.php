@@ -2,7 +2,7 @@
 /*
  * Plugin Name: GlotPress Post Translation
  * Description: This plugin allows for a post to be translated into another locale, through GlotPress.
- * Version: 0.1
+ * Version: 0.2
  * Plugin URI: https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/glotpress-translate-bridge/
  * Author: WordPress.org Contributors
  * License: GPLv2
