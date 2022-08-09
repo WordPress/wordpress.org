@@ -129,6 +129,7 @@ function get_whitelist() {
 		'core-auto-updates' => array_merge( get_committers(), array(
 			'afragen',
 			'audrasjb',
+			'costdev',
 			'pbiron',
 		) ),
 		'core-bootstrap' => array_merge( get_committers(), array(
