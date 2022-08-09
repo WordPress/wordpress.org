@@ -1555,6 +1555,7 @@ h2.toc-heading + h3.toc-heading:target {
 	height: auto !important;
 	background-color: white !important;
 	font-family: 'Open Sans' !important;
+	font-size: inherit;
 }
 
 .notice {
