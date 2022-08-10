@@ -286,19 +286,19 @@ class Plugin {
 
 		// Check for empty topic id.
 		if ( empty( $topic_id ) || ! $topic ) {
-			bbp_add_error( 'wporg_bbp_topic_resolution_topic_id', __( '<strong>ERROR</strong>: No topic was found!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_topic_resolution_topic_id', __( '<strong>Error:</strong> No topic was found!', 'wporg-forums' ) );
 
 		// Check valid resolution.
 		} elseif ( ! $this->is_valid_topic_resolution( $resolution ) ) {
-			bbp_add_error( 'wporg_bbp_topic_resolution_invalid', __( '<strong>ERROR</strong>: That is not a valid topic resolution!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_topic_resolution_invalid', __( '<strong>Error:</strong> That is not a valid topic resolution!', 'wporg-forums' ) );
 
 		// Check user permissions.
 		} elseif ( ! $this->user_can_resolve( $user_id, $topic->ID ) ) {
-			bbp_add_error( 'wporg_bbp_topic_resolution_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to do this!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_topic_resolution_permissions', __( '<strong>Error:</strong> You don\'t have permission to do this!', 'wporg-forums' ) );
 
 		// Check nonce.
 		} elseif ( ! bbp_verify_nonce_request( 'toggle-topic-resolution_' . $topic->ID ) ) {
-			bbp_add_error( 'wporg_bbp_topic_resolution_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_topic_resolution_nonce', __( '<strong>Error:</strong> Are you sure you wanted to do that?', 'wporg-forums' ) );
 		}
 
 		if ( bbp_has_errors() ) {

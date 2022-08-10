@@ -315,15 +315,15 @@ class Moderators {
 
 		// Check for empty post id.
 		if ( ! $post ) {
-			bbp_add_error( 'wporg_bbp_archive_post_id', __( '<strong>ERROR</strong>: No post was found! Which post are you archiving?', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_archive_post_id', __( '<strong>Error:</strong> No post was found! Which post are you archiving?', 'wporg-forums' ) );
 
 		// Check for current user.
 		} elseif ( empty( $user_id ) ) {
-			bbp_add_error( 'wporg_bbp_archive_logged_in', __( '<strong>ERROR</strong>: You must be logged in to do this!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_archive_logged_in', __( '<strong>Error:</strong> You must be logged in to do this!', 'wporg-forums' ) );
 
 		// Check nonce.
 		} elseif ( ! bbp_verify_nonce_request( 'toggle-post-archive_' . $user_id . '_' . $post->ID ) ) {
-			bbp_add_error( 'wporg_bbp_archive_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_archive_nonce', __( '<strong>Error:</strong> Are you sure you wanted to do that?', 'wporg-forums' ) );
 
 		}
 
@@ -350,9 +350,9 @@ class Moderators {
 		if ( true === $success ) {
 			bbp_redirect( $permalink );
 		} elseif ( true === $is_archived && 'wporg_bbp_archive_post' === $action ) {
-			bbp_add_error( 'wporg_bbp_archive_post', __( '<strong>ERROR</strong>: There was a problem archiving that post!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_archive_post', __( '<strong>Error:</strong> There was a problem archiving that post!', 'wporg-forums' ) );
 		} elseif ( false === $is_archived && 'wporg_bbp_unarchive_post' === $action ) {
-			bbp_add_error( 'wporg_bbp_unarchive_post', __( '<strong>ERROR</strong>: There was a problem unarchiving that post!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_unarchive_post', __( '<strong>Error:</strong> There was a problem unarchiving that post!', 'wporg-forums' ) );
 		}
 	}
 
@@ -711,13 +711,13 @@ class Moderators {
 		// Make sure topic exists
 		$topic = bbp_get_topic( $topic_id );
 		if ( empty( $topic ) ) {
-			bbp_add_error( 'bbp_toggle_topic_missing', __( '<strong>ERROR:</strong> This topic could not be found or no longer exists.', 'wporg-forums' ) );
+			bbp_add_error( 'bbp_toggle_topic_missing', __( '<strong>Error:</strong> This topic could not be found or no longer exists.', 'wporg-forums' ) );
 			return;
 		}
 
 		// What is the user doing here?
 		if ( ! current_user_can( 'edit_topic', $topic_id ) ) {
-			bbp_add_error( 'bbp_toggle_topic_permission', __( '<strong>ERROR:</strong> You do not have permission to do that.', 'wporg-forums' ) );
+			bbp_add_error( 'bbp_toggle_topic_permission', __( '<strong>Error:</strong> You do not have permission to do that.', 'wporg-forums' ) );
 			return;
 		}
 
@@ -775,13 +775,13 @@ class Moderators {
 		// Make sure reply exists
 		$reply = bbp_get_reply( $reply_id );
 		if ( empty( $reply ) ) {
-			bbp_add_error( 'bbp_toggle_reply_missing', __( '<strong>ERROR:</strong> This reply could not be found or no longer exists.', 'wporg-forums' ) );
+			bbp_add_error( 'bbp_toggle_reply_missing', __( '<strong>Error:</strong> This reply could not be found or no longer exists.', 'wporg-forums' ) );
 			return;
 		}
 
 		// What is the user doing here?
 		if ( ! current_user_can( 'edit_reply', $reply_id ) ) {
-			bbp_add_error( 'bbp_toggle_reply_permission', __( '<strong>ERROR:</strong> You do not have permission to do that.', 'wporg-forums' ) );
+			bbp_add_error( 'bbp_toggle_reply_permission', __( '<strong>Error:</strong> You do not have permission to do that.', 'wporg-forums' ) );
 			return;
 		}
 
@@ -839,7 +839,7 @@ class Moderators {
 
 				if ( bbp_is_topic_open( $r['id'] ) ) {
 					$retval['status']  = bbp_close_topic( $r['id'] );
-					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem closing the topic.', 'wporg-forums' );
+					$retval['message'] = __( '<strong>Error:</strong> There was a problem closing the topic.', 'wporg-forums' );
 				}
 
 				break;
@@ -849,7 +849,7 @@ class Moderators {
 
 				if ( ! bbp_is_topic_open( $r['id'] ) ) {
 					$retval['status']  = bbp_open_topic( $r['id'] );
-					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem opening the topic.', 'wporg-forums' );
+					$retval['message'] = __( '<strong>Error:</strong> There was a problem opening the topic.', 'wporg-forums' );
 				}
 
 				break;
@@ -859,7 +859,7 @@ class Moderators {
 
 				if ( ! bbp_is_topic_sticky( $r['id'] ) ) {
 					$retval['status']  = bbp_stick_topic( $r['id'], ! empty( $_GET['super'] ) );
-					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem sticking the topic.', 'wporg-forums' );
+					$retval['message'] = __( '<strong>Error:</strong> There was a problem sticking the topic.', 'wporg-forums' );
 				}
 
 				break;
@@ -869,7 +869,7 @@ class Moderators {
 
 				if ( bbp_is_topic_sticky( $r['id'] ) ) {
 					$retval['status']  = bbp_unstick_topic( $r['id'] );
-					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem unsticking the topic.', 'wporg-forums' );
+					$retval['message'] = __( '<strong>Error:</strong> There was a problem unsticking the topic.', 'wporg-forums' );
 				}
 
 				break;
@@ -879,7 +879,7 @@ class Moderators {
 
 				if ( ! bbp_is_topic_spam( $r['id'] ) ) {
 					$retval['status']  = bbp_spam_topic( $r['id'] );
-					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem marking the topic as spam.', 'wporg-forums' );
+					$retval['message'] = __( '<strong>Error:</strong> There was a problem marking the topic as spam.', 'wporg-forums' );
 				}
 				$retval['view_all'] = true;
 
@@ -890,7 +890,7 @@ class Moderators {
 
 				if ( bbp_is_topic_spam( $r['id'] ) ) {
 					$retval['status']  = bbp_unspam_topic( $r['id'] );
-					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem unmarking the topic as spam.', 'wporg-forums' );
+					$retval['message'] = __( '<strong>Error:</strong> There was a problem unmarking the topic as spam.', 'wporg-forums' );
 				}
 				$retval['view_all'] = false;
 
@@ -901,7 +901,7 @@ class Moderators {
 
 				if ( ! bbp_is_topic_pending( $r['id'] ) ) {
 					$retval['status']  = bbp_unapprove_topic( $r['id'] );
-					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem unapproving the topic.', 'wporg-forums' );
+					$retval['message'] = __( '<strong>Error:</strong> There was a problem unapproving the topic.', 'wporg-forums' );
 				}
 				$retval['view_all'] = true;
 
@@ -912,7 +912,7 @@ class Moderators {
 
 				if ( bbp_is_topic_pending( $r['id'] ) ) {
 					$retval['status']  = bbp_approve_topic( $r['id'] );
-					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem approving the topic.', 'wporg-forums' );
+					$retval['message'] = __( '<strong>Error:</strong> There was a problem approving the topic.', 'wporg-forums' );
 				}
 				$retval['view_all'] = false;
 
@@ -952,7 +952,7 @@ class Moderators {
 
 				if ( ! bbp_is_reply_spam( $r['id'] ) ) {
 					$retval['status']   = bbp_spam_reply( $r['id'] );
-					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem marking the reply as spam.', 'wporg-forums' );
+					$retval['message']  = __( '<strong>Error:</strong> There was a problem marking the reply as spam.', 'wporg-forums' );
 				}
 				$retval['view_all'] = true;
 
@@ -963,7 +963,7 @@ class Moderators {
 
 				if ( bbp_is_reply_spam( $r['id'] ) ) {
 					$retval['status']   = bbp_unspam_reply( $r['id'] );
-					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem unmarking the reply as spam.', 'wporg-forums' );
+					$retval['message']  = __( '<strong>Error:</strong> There was a problem unmarking the reply as spam.', 'wporg-forums' );
 				}
 				$retval['view_all'] = false;
 
@@ -974,7 +974,7 @@ class Moderators {
 
 				if ( ! bbp_is_reply_pending( $r['id'] ) ) {
 					$retval['status']   = bbp_unapprove_reply( $r['id'] );
-					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem unapproving the reply.', 'wporg-forums' );
+					$retval['message']  = __( '<strong>Error:</strong> There was a problem unapproving the reply.', 'wporg-forums' );
 				}
 				$retval['view_all'] = true;
 
@@ -985,7 +985,7 @@ class Moderators {
 
 				if ( bbp_is_reply_pending( $r['id'] ) ) {
 					$retval['status']   = bbp_approve_reply( $r['id'] );
-					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem approving the reply.', 'wporg-forums' );
+					$retval['message']  = __( '<strong>Error:</strong> There was a problem approving the reply.', 'wporg-forums' );
 				}
 				$retval['view_all'] = false;
 

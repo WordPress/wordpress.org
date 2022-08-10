@@ -362,7 +362,7 @@ class Ratings_Compat {
 				'no_links_please',
 				sprintf(
 					/* translators: %s: Link to forum user guide explaining this. */
-					__( '<strong>Error</strong>: Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
+					__( '<strong>Error:</strong> Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
 					'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews'
 				)
 			);
@@ -392,12 +392,12 @@ class Ratings_Compat {
 		// bbPress doesn't have a wrapper to check for specific errors, so we'll reach into bbPress.
 		if ( bbpress()->errors->get_error_message( 'bbp_topic_title' ) && empty( $_POST['bbp_topic_title'] ) ) {
 			bbpress()->errors->remove( 'bbp_topic_title' );
-			bbp_add_error( 'bbp_topic_title', __( '<strong>Error</strong>: Your review needs a title.', 'wporg-forums' ) );
+			bbp_add_error( 'bbp_topic_title', __( '<strong>Error:</strong> Your review needs a title.', 'wporg-forums' ) );
 		}
 
 		if ( bbpress()->errors->get_error_message( 'bbp_topic_content' ) ) {
 			bbpress()->errors->remove( 'bbp_topic_content' );
-			bbp_add_error( 'bbp_topic_content', __( '<strong>Error</strong>: Your review cannot be empty.', 'wporg-forums' ) );
+			bbp_add_error( 'bbp_topic_content', __( '<strong>Error:</strong> Your review cannot be empty.', 'wporg-forums' ) );
 		}
 	}
 

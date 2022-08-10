@@ -114,7 +114,7 @@ class Plugin {
 
 		if ( $is_subscribed ) {
 			$message = sprintf(
-				__( 'You are subscribed to this forum, and will receive emails for future topic activity. <a href="%1$s">Unsubscribe from %2$s.</a>', 'wporg-forums' ),
+				__( 'You are subscribed to this forum, and will receive emails for future topic activity. <a href="%1$s">Unsubscribe from %2$s</a>.', 'wporg-forums' ),
 				self::get_subscription_url( get_current_user_id(), $term->term_id, $this->taxonomy ),
 				esc_html( $term->name )
 			);
@@ -168,7 +168,7 @@ class Plugin {
 			$user_id = $this->has_valid_unsubscription_token();
 
 			if ( ! $user_id ) {
-				bbp_add_error( 'wporg_bbp_subscribe_invalid_token', __( '<strong>ERROR</strong>: Link expired!', 'wporg-forums' ) );
+				bbp_add_error( 'wporg_bbp_subscribe_invalid_token', __( '<strong>Error:</strong> Link expired!', 'wporg-forums' ) );
 				return false;
 			}
 
@@ -205,15 +205,15 @@ class Plugin {
 
 		// Check for empty term id.
 		if ( empty( $user_id ) ) {
-			bbp_add_error( 'wporg_bbp_subscribe_logged_id', __( '<strong>ERROR</strong>: You must be logged in to do this!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_logged_id', __( '<strong>Error:</strong> You must be logged in to do this!', 'wporg-forums' ) );
 
 		// Check nonce.
 		} elseif ( 'token' !== $auth && ! bbp_verify_nonce_request( 'toggle-term-subscription_' . $user_id . '_' . $term_id . '_' . $this->taxonomy ) ) {
-			bbp_add_error( 'wporg_bbp_subscribe_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_nonce', __( '<strong>Error:</strong> Are you sure you wanted to do that?', 'wporg-forums' ) );
 
 		// Check user's ability to spectate if attempting to subscribe to a term.
 		} elseif ( ! user_can( $user_id, 'spectate' ) && 'wporg_bbp_subscribe_term' === $action ) {
-			bbp_add_error( 'wporg_bbp_subscribe_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to do this!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_permissions', __( '<strong>Error:</strong> You don\'t have permission to do this!', 'wporg-forums' ) );
 		}
 
 		if ( bbp_has_errors() ) {
@@ -245,10 +245,10 @@ class Plugin {
 			bbp_redirect( $redirect );
 		} elseif ( true === $is_subscribed && 'wporg_bbp_subscribe_term' === $action ) {
 			/* translators: Term: topic tag */
-			bbp_add_error( 'wporg_bbp_subscribe_user', __( '<strong>ERROR</strong>: There was a problem subscribing to that term!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_user', __( '<strong>Error:</strong> There was a problem subscribing to that term!', 'wporg-forums' ) );
 		} elseif ( false === $is_subscribed && 'wporg_bbp_unsubscribe_term' === $action ) {
 			/* translators: Term: topic tag */
-			bbp_add_error( 'wporg_bbp_unsubscribe_user', __( '<strong>ERROR</strong>: There was a problem unsubscribing from that term!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_unsubscribe_user', __( '<strong>Error:</strong> There was a problem unsubscribing from that term!', 'wporg-forums' ) );
 		}
 	}
 
@@ -360,7 +360,7 @@ Note that replying to this email has no effect.
 
 %4$s
 
-To unsubscribe from future emails click here:
+To unsubscribe from future emails, click here:
 ####UNSUB_LINK####', 'wporg-forums' ),
 			$topic_author_name,
 			$topic_content,
@@ -502,7 +502,7 @@ Note that replying to this email has no effect.
 
 %4$s
 
-To unsubscribe from future emails click here:
+To unsubscribe from future emails, click here:
 ####UNSUB_LINK####', 'wporg-forums' ),
 			$reply_author_name,
 			$reply_content,

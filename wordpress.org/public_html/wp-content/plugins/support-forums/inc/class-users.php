@@ -323,7 +323,7 @@ class Users {
 			is_email( $_POST['email'] ) &&
 			is_email_address_unsafe( $_POST['email'] )
 		) {
-			bbp_add_error( 'bbp_user_email_invalid', __( '<strong>Error</strong>: That email address cannot be used.', 'wporg-forums' ), array( 'form-field' => 'email' ) );
+			bbp_add_error( 'bbp_user_email_invalid', __( '<strong>Error:</strong> That email address cannot be used.', 'wporg-forums' ), array( 'form-field' => 'email' ) );
 
 			// Override the post variable to ensure that bbPress & core doesn't use it.
 			$_POST['email'] = $_REQUEST['email'] = $user_email;
