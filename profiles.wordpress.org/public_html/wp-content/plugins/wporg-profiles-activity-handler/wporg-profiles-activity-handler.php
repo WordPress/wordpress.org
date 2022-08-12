@@ -723,6 +723,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 */
 		private function handle_wordpress_activity() {
 			$user = self::get_user( $_POST['user'] );
+			$content      = $_POST['content'];
+			$primary_link = sanitize_url( $_POST['url'] );
 
 			if ( ! $user ) {
 				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
@@ -737,7 +739,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$_POST['title'],
 					$_POST['blog']
 				);
-			} else {
+			} elseif ( isset( $_POST['type'] ) && 'new' === $_POST['type'] ) {
 				$type    = 'blog_post_create';
 				$item_id = $_POST['post_id'];
 
@@ -770,13 +772,33 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$_POST['title'],
 					$_POST['blog']
 				);
+			} elseif ( isset( $_POST['type'] ) && 'update' === $_POST['type'] ) {
+				// Handbooks are currently the only post type that send notifications of updates.
+				$type    = 'blog_handbook_update';
+				$item_id = $_POST['post_id'];
+				$action  = ''; // Will be set by `digest_bump()`
+				$content = false;
+				$primary_link = sanitize_url( $_POST['blog_url'] ); // To group digest entries by site.
+
+				$singular = sprintf(
+					'Updated a handbook page on <a href="%s">%s</a>.',
+					sanitize_url( $_POST['blog_url'] ),
+					sanitize_text_field( $_POST['blog'] )
+				);
+
+				$plural = sprintf(
+					'Made %s updates to handbook pages on <a href="%s">%s</a>.',
+					'%d',
+					sanitize_url( $_POST['blog_url'] ),
+					sanitize_text_field( $_POST['blog'] )
+				);
 			}
 
 			$args = array(
 				'user_id'           => $user->ID,
 				'action'            => $action,
-				'content'           => $_POST['content'],
-				'primary_link'      => $_POST['url'],
+				'content'           => $content,
+				'primary_link'      => $primary_link,
 				'component'         => 'blogs',
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
@@ -784,7 +806,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'hide_sitewide'     => false,
 			);
 
-			return bp_activity_add( $args );
+			if ( 'blog_handbook_update' === $type ) {
+				$activity_id = $this->digest_bump( $args, 1, $singular, $plural, true );
+			} else {
+				$activity_id = bp_activity_add( $args );
+			}
+
+			return $activity_id;
 		}
 
 		/**
@@ -932,9 +960,17 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * entry per day is created. That single entry gets updated each time a new action occurs, so the latest
 		 * count is always displayed.
 		 *
+		 * @param bool $group_by_site If `true`, a separate digest entry is created for each site; otherwise a
+		 *                            single entry is shared across all sites. If `true`,
+		 *                            `$new_activity['primary_link']` must be the _site_ URL, rather than the
+		 *                            _post_ URL.
+		 *
 		 * @return WP_Error|int
 		 */
-		protected function digest_bump( array $new_activity, int $bump, string $singular, string $plural ) {
+		protected function digest_bump(
+			array $new_activity, int $bump, string $action_singular, string $action_plural,
+			bool $group_by_site = false
+		) {
 			// Standardize on this to reduce the number of paths in error handling code.
 			// Also done in `sanitize_activity()`, but callers aren't guaranteed to use that.
 			$new_activity['error_type'] = 'wp_error';
@@ -967,6 +1003,16 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					),
 				),
 			);
+
+			if ( $group_by_site ) {
+				$args['filter_query'][] = array(
+					array(
+						'column'   => 'primary_link',
+						'value'    => $new_activity['primary_link'],
+						'relation' => 'AND',
+					),
+				);
+			}
 
 			$stored_activity_id = bp_activity_get( $args )['activities'][0] ?? false;
 			$current_count      = (int) bp_activity_get_meta( $stored_activity_id, 'digest_count', true );
