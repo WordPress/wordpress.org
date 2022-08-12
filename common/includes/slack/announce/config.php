@@ -156,6 +156,9 @@ function get_whitelist() {
 			'voldemortensen',
 			'westonruter',
 		) ),
+		'core-dev-blog' => array(
+			'bph',
+		),
 		'core-docs' => array_merge( get_committers(), array(
 			'DrewAPicture', // @drew on Slack
 			'Kenshino',
