@@ -892,7 +892,25 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			foreach ( $activities as $activity ) {
 				$bump        = intval( $activity['bump'] ?? 1 );
-				$activity_id = $this->digest_bump( $this->sanitize_activity( $activity ), $bump );
+				$activity = $this->sanitize_activity( $activity );
+
+				switch ( $activity['type'] ) {
+					case 'glotpress_translation_suggested':
+						$action = 'Suggested';
+						break;
+
+					case 'glotpress_translation_approved':
+						$action = 'Translated';
+						break;
+
+					case 'glotpress_translation_reviewed':
+						$action = 'Reviewed';
+						break;
+				}
+
+				$singular    = $action . ' %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+				$plural      = $action . ' %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+				$activity_id = $this->digest_bump( $activity, $bump, $singular, $plural );
 
 				if ( is_wp_error( $activity_id ) ) {
 					$errors .= sprintf(
@@ -916,7 +934,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 *
 		 * @return WP_Error|int
 		 */
-		protected function digest_bump( array $new_activity, int $bump = 1 ) {
+		protected function digest_bump( array $new_activity, int $bump, string $singular, string $plural ) {
 			// Standardize on this to reduce the number of paths in error handling code.
 			// Also done in `sanitize_activity()`, but callers aren't guaranteed to use that.
 			$new_activity['error_type'] = 'wp_error';
@@ -952,7 +970,12 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			$stored_activity_id = bp_activity_get( $args )['activities'][0] ?? false;
 			$current_count      = (int) bp_activity_get_meta( $stored_activity_id, 'digest_count', true );
-			$new_action         = $this->get_digest_actions( $new_activity['component'], $new_activity['type'], $current_count + $bump );
+			$new_total          = $current_count + $bump;
+
+			$new_action = sprintf(
+				_n( $action_singular, $action_plural, $new_total ),
+				$new_total
+			);
 
 			if ( $stored_activity_id ) {
 				$activity_object         = new BP_Activity_Activity( $stored_activity_id );
@@ -961,7 +984,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$activity_id             = is_wp_error( $saved ) ? $saved : $stored_activity_id;
 
 				// Increase this even if couldn't update action, to preserve accurate count.
-				bp_activity_update_meta( $stored_activity_id, 'digest_count', $current_count + $bump );
+				bp_activity_update_meta( $stored_activity_id, 'digest_count', $new_total );
 
 			} else {
 				$new_activity['action'] = $new_action;
@@ -971,43 +994,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			return $activity_id;
-		}
-
-		/**
-		 * Get the action string for a digest activity.
-		 *
-		 * This doesn't use BuddyPress' `format_callback` because we don't register the `type`s.
-		 */
-		protected function get_digest_actions( string $component, string $type, int $count ) : string {
-			$action   = '';
-			$singular = false;
-			$plural   = false;
-
-			switch ( $component . ':' . $type ) {
-				case 'glotpress:glotpress_translation_suggested':
-					$singular = 'Suggested %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					$plural   = 'Suggested %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					break;
-
-				case 'glotpress:glotpress_translation_approved':
-					$singular = 'Translated %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					$plural   = 'Translated %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					break;
-
-				case 'glotpress:glotpress_translation_reviewed':
-					$singular = 'Reviewed %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					$plural   = 'Reviewed %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-					break;
-			}
-
-			if ( $singular && $plural ) {
-				$action = sprintf(
-					_n( $singular, $plural, $count ),
-					$count
-				);
-			}
-
-			return $action;
 		}
 	} /* /class WPOrg_Profiles_Activity_Handler */
 } /* if class_exists */
