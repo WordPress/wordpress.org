@@ -76,10 +76,13 @@ function test_update_handbook( WPOrg_WP_Activity_Notifier $notifier, WP_User $us
 
 	wp_set_current_user( $user->ID );
 
-	// This should notify.
-	$handbook = get_post( 1849 );
-	$notifier->maybe_notify_updated_post( $handbook->ID, $handbook, $handbook );
+	// Use a different post each time to ensure all posts grouped into the same activity entry.
+	$handbook_ids = array( 1849, 1611, 1486, 1128, 1734, 1077 );
+	$handbook_id  = $handbook_ids[ array_rand( $handbook_ids, 1 ) ];
 
+	// This should notify.
+	$handbook = get_post( $handbook_id );
+	$notifier->maybe_notify_updated_post( $handbook_id, $handbook, $handbook );
 	sleep( 1 ); // buddypress doesn't show activity that happens at the exact same time.
 
 	// This should not notify.
