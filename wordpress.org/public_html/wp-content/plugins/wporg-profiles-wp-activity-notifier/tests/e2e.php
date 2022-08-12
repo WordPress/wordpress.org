@@ -8,7 +8,7 @@
  */
 
 namespace WordPressdotorg\Activity_Notifier\Tests;
-use WPOrg_WP_Activity_Notifier;
+use WPOrg_WP_Activity_Notifier, WP_User;
 
 ini_set( 'display_errors', 'On' ); // won't do anything if fatal errors
 
@@ -51,7 +51,7 @@ function disable_subscribers_plugin( array $plugins ) : array {
 	return $plugins;
 }
 
-function test_post( WPOrg_WP_Activity_Notifier $notifier ) : void {
+function test_new_post( WPOrg_WP_Activity_Notifier $notifier ) : void {
 	if ( defined( 'IS_WORDCAMP_NETWORK' ) && IS_WORDCAMP_NETWORK ) {
 		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 1 ) ); // post
 
@@ -66,6 +66,25 @@ function test_post( WPOrg_WP_Activity_Notifier $notifier ) : void {
 		// These should not notify
 		$notifier->maybe_notify_new_published_post( 'publish', 'draft', get_post( 722 ) ); // x-post (should not notify, check https://profiles.wordpress.org/jmdodd/)
 	}
+}
+
+function test_update_handbook( WPOrg_WP_Activity_Notifier $notifier, WP_User $user ) : void {
+	// WordCamp.org doesn't use the Handbook plugin.
+	if ( defined( 'IS_WORDCAMP_NETWORK' ) && IS_WORDCAMP_NETWORK ) {
+		return;
+	}
+
+	wp_set_current_user( $user->ID );
+
+	// This should notify
+	$handbook = get_post( 1849 );
+	$notifier->maybe_notify_updated_post( $handbook->ID, $handbook, $handbook );
+
+	sleep( 1 ); // buddypress doesn't show activity that happens at the exact same time
+
+	// This should not notify
+	$regular_post = get_post( 1879 ); // `post` post type.
+	$notifier->maybe_notify_updated_post( $regular_post->ID, $regular_post, $regular_post );
 }
 
 function test_comment( WPOrg_WP_Activity_Notifier $notifier ) : void {

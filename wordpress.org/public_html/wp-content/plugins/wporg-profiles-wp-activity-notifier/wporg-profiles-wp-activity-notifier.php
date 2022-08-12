@@ -51,6 +51,7 @@ class WPOrg_WP_Activity_Notifier {
 
 	public function init() {
 		add_action( 'transition_post_status',    array( $this, 'maybe_notify_new_published_post'   ), 10, 3 );
+		add_action( 'post_updated',              array( $this, 'maybe_notify_updated_post'         ), 10, 3 );
 		add_action( 'transition_comment_status', array( $this, 'maybe_notify_new_approved_comment' ), 10, 3 );
 		add_action( 'wp_insert_comment',         array( $this, 'insert_comment' ),                    10, 2 );
 
@@ -79,20 +80,28 @@ class WPOrg_WP_Activity_Notifier {
 	 * Indicates whether it is permitted to notify about a post or not.
 	 *
 	 * @param WP_Post $post The post
+	 * @param string  $action 'publish' for new posts, 'update' for existing posts, 'comment' for new comments.
 	 *
 	 * @return boolean True == the post can be notified about.
 	 */
-	public function is_post_notifiable( $post ) {
+	public function is_post_notifiable( $post, $action ) {
 		if ( ! $post || ! is_a( $post, 'WP_Post' ) ) {
 			return false;
 		}
 
-		// wp-parser-* post types belong to developer.wordpress.org
-		$notifiable_post_types = array( 'post', 'handbook', 'wporg_workshop', 'lesson-plan', 'course', 'wp-parser-hook', 'wp-parser-function', 'wp-parser-method', 'wp-parser-class' );
+		// All actions can notify about handbooks.
+		$notifiable_post_types = array( 'handbook' );
 
 		// There's a large number of custom handbooks, and more will be created in the future.
 		if ( str_contains( $post->post_type, '-handbook' ) ) {
 			$notifiable_post_types[] = $post->post_type;
+		}
+
+		if ( 'publish' === $action || 'comment' === $action ) {
+			$notifiable_post_types = array_merge(
+				$notifiable_post_types,
+				array( 'post', 'handbook', 'wporg_workshop', 'lesson-plan', 'course' )
+			);
 		}
 
 		if ( is_plugin_active( 'subscribers-only.php' ) ) {
@@ -143,24 +152,27 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
-		if ( ! $this->is_post_notifiable( $post ) ) {
+		if ( ! $this->is_post_notifiable( $post, 'publish' ) ) {
 			return;
 		}
 
-		$this->notify_new_blog_post( $post );
+		$this->notify_blog_post( $post, 'new' );
 	}
+
 
 	/**
 	 * Sends activity notification for new blog post.
 	 *
 	 * @param WP_Post $post The published post
+	 * @param string  $type 'new' for new posts, 'update' for existing ones.
 	 */
-	public function notify_new_blog_post( $post ) {
+	public function notify_blog_post( $post, $type ) {
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
 
-		$author = get_user_by( 'id', $post->post_author );
+		$user_id = 'new' === $type ? $post->post_author : get_current_user_id();
+		$user    = get_user_by( 'id', $user_id );
 
 		$content = wp_trim_words(
 			strip_shortcodes( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content ),
@@ -169,8 +181,9 @@ class WPOrg_WP_Activity_Notifier {
 
 		$args = array(
 			'action'    => 'wporg_handle_activity',
+			'type'      => $type,
 			'source'    => 'wordpress',
-			'user'      => $author->user_login,
+			'user'      => $user->user_login,
 			'post_id'   => $post->ID,
 			'blog'      => get_bloginfo( 'name' ),
 			'blog_url'  => site_url(),
@@ -181,6 +194,21 @@ class WPOrg_WP_Activity_Notifier {
 		);
 
 		Profiles\api( $args );
+	}
+
+	/**
+	 * Send an activity notification if the post being updated matches certain criteria.
+	 */
+	public function maybe_notify_updated_post( int $post_id, WP_Post $before, WP_Post $after ) : void {
+		if ( 'publish' !== $before->post_status || 'publish' !== $after->post_status ) {
+			return;
+		}
+
+		if ( ! $this->is_post_notifiable( $after, 'update' ) ) {
+			return;
+		}
+
+		$this->notify_blog_post( $after, 'update' );
 	}
 
 	/**
@@ -209,7 +237,7 @@ class WPOrg_WP_Activity_Notifier {
 
 		$post = get_post( $comment->comment_post_ID );
 
-		if ( ! $this->is_post_notifiable( $post ) ) {
+		if ( ! $this->is_post_notifiable( $post, 'comment' ) ) {
 			return;
 		}
 
