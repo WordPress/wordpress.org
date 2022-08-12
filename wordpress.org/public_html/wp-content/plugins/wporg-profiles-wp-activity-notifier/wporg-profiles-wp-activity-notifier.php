@@ -110,6 +110,17 @@ class WPOrg_WP_Activity_Notifier {
 			);
 		}
 
+		// Some post types are imported programmatically and aren't directly attributable to a wordpress.org
+		// account.
+		$is_markdown_post = false;
+		$post_meta        = get_post_custom( $post->ID );
+
+		foreach ( $post_meta as $key => $value ) {
+			if ( str_contains( $key, '_markdown_source' ) ) {
+				$is_markdown_post = true;
+			}
+		}
+
 		if ( is_plugin_active( 'subscribers-only.php' ) ) {
 			$notifiable = false;
 		} elseif ( ! in_array( $post->post_type, $notifiable_post_types, true ) ) {
@@ -118,7 +129,7 @@ class WPOrg_WP_Activity_Notifier {
 			$notifiable = false;
 		} elseif ( ! empty( $post->post_password ) ) {
 			$notifiable = false;
-		} elseif ( $post->wporg_markdown_source || ! $post->post_author ) {
+		} elseif ( $is_markdown_post || ! $post->post_author ) {
 			// Some Handbook posts are automatically created and don't have an author.
 			$notifiable = false;
 		} elseif ( $post->_xpost_original_permalink || str_starts_with( $post->post_name, 'xpost-' ) ) {
