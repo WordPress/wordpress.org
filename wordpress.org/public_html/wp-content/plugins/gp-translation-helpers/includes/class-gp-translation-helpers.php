@@ -363,7 +363,7 @@ class GP_Translation_Helpers {
 			return;
 		}
 
-		wp_register_script( 'gp-comment-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery', 'gp-common', 'gp-editor', 'thickbox' ), '20220801' );
+		wp_register_script( 'gp-comment-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery', 'gp-common', 'gp-editor', 'thickbox' ), '20220812' );
 		gp_enqueue_script( 'gp-comment-feedback-js' );
 
 		wp_localize_script(

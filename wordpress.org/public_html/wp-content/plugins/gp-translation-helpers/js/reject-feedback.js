@@ -117,7 +117,7 @@
 
 		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
 
-		if ( ! comment.trim().length && ! commentReason.length ) {
+		if ( ( comment === undefined && ! commentReason.length ) || ( ! comment.trim().length && ! commentReason.length ) ) {
 			$gp.editor.set_status( button, status );
 			return;
 		}
