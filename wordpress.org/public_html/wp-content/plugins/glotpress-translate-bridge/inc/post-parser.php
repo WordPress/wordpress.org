@@ -36,12 +36,12 @@ class Post_Parser {
 			'core/shortcode'   => new Parsers\ShortcodeBlock(),
 
 			'core/spacer'      => new Parsers\Noop(),
+			// These contain other blocks to be parsed.
+			'core/column'      => new Parsers\Noop(),
+			'core/columns'     => new Parsers\Noop(),
+			'core/group'       => new Parsers\Noop(),
 
 			// Common core blocks that use the default parser.
-			'core/column'      => new Parsers\BasicText(),
-			'core/columns'     => new Parsers\BasicText(),
-			'core/cover'       => new Parsers\BasicText(),
-			'core/group'       => new Parsers\BasicText(),
 			'core/media-text'  => new Parsers\BasicText(),
 			'core/social-link' => new Parsers\BasicText(),
 		];
