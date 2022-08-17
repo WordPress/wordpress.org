@@ -2,8 +2,8 @@
 namespace WordPressdotorg\Post_Translation;
 
 add_action( 'save_post', function( $post_id, $post ) {
-	// Only need to process published posts.
-	if ( 'publish' != $post->post_status ) {
+	// Only need to process published pages.
+	if ( 'publish' != $post->post_status || 'page' !== $post->post_type ) {
 		return;
 	}
 
@@ -25,7 +25,7 @@ add_action( 'post_translation_import_to_glotpress', function( $post_id ) {
 	include_once __DIR__ . '/class-makepot.php';
 
 	$post = get_post( $post_id );
-	if ( ! $post || 'publish' != $post->post_status ) {
+	if ( ! $post || 'publish' != $post->post_status || 'page' != $post->post_type ) {
 		return;
 	}
 
