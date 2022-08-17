@@ -11,8 +11,11 @@ add_filter( 'the_title', __NAMESPACE__ . '\the_title', 2, 2 );
 add_filter( 'get_the_excerpt', __NAMESPACE__ . '\get_the_excerpt', 2, 2 );
 
 // Filter `the_content()` output, not `$post->post_content` or `get_the_content()`, as neither have filters.
-// Before Block parsing at priority 9
+// Before Block parsing at priority 9 (Ugh, doesn't catch Patterns inserted from within blocks! See render_block)
 add_filter( 'the_content', __NAMESPACE__ . '\the_content', 2, 2 );
+
+// Filter `render_block()` data to catch individual blocks in Block Templates
+add_filter( 'render_block', __NAMESPACE__ . '\render_block', 10, 3 );
 
 /**
  * Get the translation post for use on the front-end, returns false for English(US) and admin contexts.
@@ -76,6 +79,36 @@ function the_content( $content, $post = null ) {
 	);
 
 	wp_cache_set( $cache_key, $translated_content, CACHE_GROUP, 6 * HOUR_IN_SECONDS );
+
+	return $translated_content ?: $content;
+}
+
+function render_block( $content, $block, $instance ) {
+	/*
+	 * Don't translate individual blocks when rendering a block within the content loop.
+	 * This avoids double-processing blocks that are present within the content, while also
+	 * processing blocks that are used elsewhere (Such as block templates).
+	 */
+	if ( doing_filter( 'the_content' ) ) {
+		return $content;
+	}
+
+	$post    = get_post( $post );
+	$locale  = get_locale();
+	$project = get_frontend_translation_project( $post );
+
+	if ( ! $project || ! $post || ! $locale ) {
+		return $content;
+	}
+
+	$translated_content = Post_Parser::translate_block(
+		$content,
+		$block,
+		function( $string ) use( $project ) {
+			//var_dump( $string );
+			return translate_string( $string, $project );
+		}
+	);
 
 	return $translated_content ?: $content;
 }

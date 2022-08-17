@@ -17,7 +17,7 @@ class Post_Parser {
 	public $parsers = [];
 	public $fallback;
 
-	public function __construct( string $content ) {
+	public function __construct( string $content = '' ) {
 		$this->content  = $content;
 		$this->fallback = new Parsers\BasicText();
 		$this->parsers  = [
@@ -48,6 +48,7 @@ class Post_Parser {
 	}
 
 	public static function post_to_strings( $post ) {
+		// TODO: Detect post using a block template, pull strings from there.
 		$self    = new self( $post->post_content );
 		$strings = $self->to_strings();
 
@@ -96,17 +97,35 @@ class Post_Parser {
 		return $self->replace_strings_with_kses( $translations );
 	}
 
+	public static function translate_block( string $content, $block, callable $callback_translate ) /* :bool|string */ {
+		$self    = new self();
+		$parser  = $self->parsers[ $block['blockName'] ] ?? $self->fallback;
+		$strings = $parser->to_strings( $block ); // does not do innerBlocks, intentionally.
+
+		if ( ! $strings ) {
+			return $content;
+		}
+
+		$replacements = [];
+		foreach ( $strings as $string ) {
+			$replacements[ $string ] = $callback_translate( $string ) ?: $string;
+		}
+
+		$block = $parser->replace_strings( $block, $replacements );
+
+		return $block['innerContent'][0] ?: $content;
+	}
+
 	public function block_parser_to_strings( array $block ) : array {
 		$parser = $this->parsers[ $block['blockName'] ] ?? $this->fallback;
 
 		$strings = $parser->to_strings( $block );
-//var_dump( [ $block['blockName'], $parser, $strings ] );
 
 		foreach ( $block['innerBlocks'] as $inner_block ) {
 			$strings = array_merge( $strings, $this->block_parser_to_strings( $inner_block ) );
 		}
 
-		return $strings;
+		return array_unique( $strings );
 	}
 
 	public function block_parser_replace_strings( array &$block, array $replacements ) : array {
