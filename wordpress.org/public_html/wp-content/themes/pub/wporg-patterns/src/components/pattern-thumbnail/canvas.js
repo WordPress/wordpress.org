@@ -69,6 +69,7 @@ function PatternThumbnail( { className, html } ) {
 				headHTML={ window.__editorStyles.html }
 			>
 				<div
+					className="entry-content"
 					dangerouslySetInnerHTML={ {
 						__html: shouldLoad ? html : '',
 					} }

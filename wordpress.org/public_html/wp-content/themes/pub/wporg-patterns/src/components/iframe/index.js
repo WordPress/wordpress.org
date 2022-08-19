@@ -104,6 +104,9 @@ function Iframe(
         align-items: center;
         justify-content: center;
         background-color: white;
+        /* Override the Twenty Twenty-One sizes with our custom sizes. */
+        --responsive--aligndefault-width: 800px;
+        --responsive--alignwide-width: 1000px;
     }
     .${ BODY_CLASS_NAME } {
         padding: 0;
@@ -136,7 +139,6 @@ function Iframe(
 			}
 
 			setHead( contentDocument, headHTML );
-			setBodyClassName( contentDocument );
 			bubbleEvents( contentDocument );
 			setBodyClassName( contentDocument );
 			setIframeDocument( contentDocument );

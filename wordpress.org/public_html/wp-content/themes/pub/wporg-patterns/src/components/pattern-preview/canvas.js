@@ -19,6 +19,7 @@ function Canvas( { html } ) {
 				headHTML={ window.__editorStyles.html }
 			>
 				<div
+					className="entry-content"
 					dangerouslySetInnerHTML={ {
 						__html: html,
 					} }
