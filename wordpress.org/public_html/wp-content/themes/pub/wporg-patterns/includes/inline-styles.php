@@ -178,13 +178,14 @@ function render_duotone_support_styles( $block_content, $block ) {
 		return $block_content;
 	}
 
+	$colors          = $block['attrs']['style']['color']['duotone'];
+	$filter_key      = is_array( $colors ) ? implode( '-', $colors ) : $colors;
 	$filter_preset   = array(
-		'slug'   => wp_unique_id( sanitize_key( implode( '-', $block['attrs']['style']['color']['duotone'] ) . '-' ) ),
-		'colors' => $block['attrs']['style']['color']['duotone'],
+		'slug'   => wp_unique_id( sanitize_key( $filter_key . '-' ) ),
+		'colors' => $colors,
 	);
 	$filter_property = wp_get_duotone_filter_property( $filter_preset );
 	$filter_id       = wp_get_duotone_filter_id( $filter_preset );
-	$filter_svg      = wp_get_duotone_filter_svg( $filter_preset );
 
 	$scope     = '.' . $filter_id;
 	$selectors = explode( ',', $duotone_support );
@@ -200,7 +201,10 @@ function render_duotone_support_styles( $block_content, $block ) {
 		? $selector . " {\n\tfilter: " . $filter_property . " !important;\n}\n"
 		: $selector . '{filter:' . $filter_property . ' !important;}';
 
-	// Like the layout hook, this assumes the hook only applies to blocks with a single wrapper.
+	wp_register_style( $filter_id, false, array(), true, true );
+	wp_add_inline_style( $filter_id, $filter_style );
+	wp_enqueue_style( $filter_id );
+
 	$content = preg_replace(
 		'/' . preg_quote( 'class="', '/' ) . '/',
 		'class="' . $filter_id . ' ',
@@ -208,8 +212,13 @@ function render_duotone_support_styles( $block_content, $block ) {
 		1
 	);
 
+	$filter_svg = '';
+	if ( 'unset' !== $colors ) {
+		$filter_svg = wp_get_duotone_filter_svg( $filter_preset );
+	}
+
 	// Output the style first, to fix the Safari bug.
-	// See https://github.com/WordPress/gutenberg/blob/a9b29acd0a058644ef28523c00fbe633272d6c0c/lib/block-supports/duotone.php#L467.
+	// See https://github.com/WordPress/gutenberg/blob/330f1f4a19603529130dbd831be824c07d50d8e8/lib/block-supports/duotone.php#L431.
 	return '<style>' . $filter_style . '</style>' . $filter_svg . $content;
 }
 // Remove WordPress core filter to avoid rendering duplicate support elements.
