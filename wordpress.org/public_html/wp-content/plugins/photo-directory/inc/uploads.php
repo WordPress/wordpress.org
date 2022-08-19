@@ -102,6 +102,9 @@ class Uploads {
 
 		/* After upload, after photo validates. */
 
+		// Disable jpeg to webp converstion.
+		add_filter( 'wp_upload_image_mime_transforms',  [ __CLASS__, 'disable_jpeg_to_wepb' ] );
+
 		// Set post fields for photo.
 		add_action( 'wporg_photos_upload_success',      [ __CLASS__, 'set_post_fields' ], 100, 3 );
 		// Store original file info.
@@ -789,6 +792,27 @@ class Uploads {
 		) {
 			do_action( 'wporg_photos_photo_upload_complete', $result['media_ids'][0], $result['post_id'] );
 		}
+	}
+
+	/**
+	 * Disable conversion of uploaded jpegs to webp.
+	 *
+	 * This is required as webp appears to use a lot of memory for conversion, often running out
+	 * of memory during upload on WordPress.org. Additionally, we don't use/expose webp at present.
+	 * This may be only required temporarily, see the below Core Trac ticket for confirmation.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/6142
+	 * @see https://core.trac.wordpress.org/ticket/55443
+	 *
+	 * @param array $transforms The mime type transforms for uploads.
+	 * @return array The modified $transforms.
+	 */
+	public static function disable_jpeg_to_wepb( $transforms ) {
+		if ( isset( $transforms['image/jpeg'] ) ) {
+			$transforms['image/jpeg'] = [ 'image/jpeg' ];
+		}
+
+		return $transforms;
 	}
 }
 
