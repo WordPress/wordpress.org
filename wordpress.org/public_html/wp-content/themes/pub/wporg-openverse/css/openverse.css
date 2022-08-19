@@ -18,6 +18,7 @@ body {
 .site,
 .site-content {
     width: 100% !important;
+    height: calc(100vh - var(--wp-global-header-height)) !important;
     padding: 0 !important;
     max-width: 100% !important;
 }
