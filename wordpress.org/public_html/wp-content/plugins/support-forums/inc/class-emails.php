@@ -162,7 +162,7 @@ class Emails {
 		}
 
 		$forum_id     = bbp_get_topic_forum_id( $topic_id );
-		$topic_author = bbp_get_reply_author_id( $reply_id );
+		$topic_author = bbp_get_topic_author_id( $topic_id );
 
 		// For performance reasons, we've removed the bbPress bbp_update_topic() method, and replaced it with our slightly altered variant.
 		$bbp_update_topic = [ Plugin::get_instance()->dropin, 'bbp_update_topic' ];
