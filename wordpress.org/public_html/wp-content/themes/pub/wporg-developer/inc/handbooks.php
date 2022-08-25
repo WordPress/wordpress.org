@@ -170,7 +170,7 @@ class Devhub_Handbooks {
 		}
 
 		// Get current user's role.
-		$role = wp_get_current_user()->roles[0];
+		$role = current( wp_get_current_user()->roles );
 
 		// Unset caps set by handbook plugin.
 		// Only administrators, editors, and handbook_editors can manipulate handbooks.

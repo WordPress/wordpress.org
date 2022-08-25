@@ -351,7 +351,7 @@ class WPORG_Explanations {
 			return $caps;
 		}
 
-		$role = wp_get_current_user()->roles[0];
+		$role = current( wp_get_current_user()->roles );
 
 		// Only grant explanation post type caps for admins, editors, and explanation editors.
 		if ( in_array( $role, array( 'administrator', 'editor', 'expl_editor' ) ) ) {
