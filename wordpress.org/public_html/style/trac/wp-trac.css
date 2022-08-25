@@ -2387,6 +2387,7 @@ a.mention.me {
 	}
 	#attachments > div.attachments > p {
 		float: none;
+		position: unset;
 	}
 	#prefs {
 		position: static !important;
