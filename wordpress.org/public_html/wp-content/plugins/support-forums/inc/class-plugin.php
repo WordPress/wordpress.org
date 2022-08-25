@@ -21,6 +21,24 @@ class Plugin {
 	 */
 	private static $db_version = 5636;
 
+	// Define the properties for all the Support Forum components.
+	public $users                = false;
+	public $user_notes           = false;
+	public $moderators           = false;
+	public $hooks                = false;
+	public $report_topic         = false;
+	public $nsfw_handler         = false;
+	public $stats                = false;
+	public $emails               = false;
+	public $audit_log            = false;
+	public $dropin               = false;
+	public $support_compat       = false;
+	public $performance          = false;
+	public $themes               = false;
+	public $plugins              = false;
+	public $plugin_subscriptions = false; // Defined via Support_Compat
+	public $theme_subscriptions  = false; // Defined via Support_Compat
+
 	/**
 	 * Always return the same instance of this plugin.
 	 *
