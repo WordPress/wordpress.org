@@ -294,7 +294,8 @@ class Performance_Optimizations {
 			}
 		}
 
-		if ( bbp_is_single_view() && 'all-replies' === bbp_get_view_id() ) {
+		// Limit all-replies & all-topics views to posts in the last month.
+		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'all-replies', 'all-topics' ) ) ) {
 			add_filter( 'posts_where', array( $this, 'posts_in_last_month' ) );
 		}
 
