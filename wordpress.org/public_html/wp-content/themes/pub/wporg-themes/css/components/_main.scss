@@ -1241,7 +1241,7 @@ body.full-overlay-active {
 	width: 20px;
 	height: 20px;
 	border-radius: 50%;
-	position: relative;
+	position: absolute;
 	background: #1d2327;
 	box-shadow: inset 4px 4px 0 7px #fff;
 	animation: rotation 800ms linear infinite;
