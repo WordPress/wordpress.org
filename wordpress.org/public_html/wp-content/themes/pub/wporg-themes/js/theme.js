@@ -998,6 +998,7 @@ window.wp = window.wp || {};
 			'click .collapse-sidebar': 'collapse',
 			'click .previous-theme': 'previousTheme',
 			'click .next-theme': 'nextTheme',
+			'click .wp-full-overlay-footer .devices button': 'devicePreview',
 			'keyup': 'keyEvent'
 		},
 
@@ -1016,6 +1017,10 @@ window.wp = window.wp || {};
 				$( 'body' ).addClass( 'theme-installer-active full-overlay-active' );
 				$( '.close-full-overlay' ).focus();
 			});
+
+			if ( themes.activeDevicePreview ) {
+				this.setDevicePreview( themes.activeDevicePreview );
+			}
 		},
 
 		close: function() {
@@ -1043,6 +1048,27 @@ window.wp = window.wp || {};
 			} else {
 				this.$el.toggleClass( 'expanded' );
 			}
+
+			return false;
+		},
+
+		devicePreview: function( event ) {
+			return this.setDevicePreview( event.target.dataset.device );
+		},
+
+		setDevicePreview: function ( device ) {
+			// Make the correct button appear active
+			var $footer = this.$el.find( '.wp-full-overlay-footer' );
+			$footer.find( '.active' ).removeClass( 'active' );
+			$footer.find( '.' + device ).addClass( 'active' );
+
+			// Update the iframe with the device class to change the iframe width
+			this.$el.find( '.wp-full-overlay-main iframe' )
+			.removeClass( themes.activeDevicePreview ) // Remove the previous device class
+			.addClass( device );
+
+			// Store our active viewport to reuse if theme changes
+			themes.activeDevicePreview = device;
 
 			return false;
 		},

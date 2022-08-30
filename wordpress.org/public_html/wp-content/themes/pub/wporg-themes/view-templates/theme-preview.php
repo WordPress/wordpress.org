@@ -39,6 +39,11 @@
 				<span class="collapse-sidebar-label"><?php _e( 'Collapse', 'wporg-themes' ); ?></span>
 				<span class="collapse-sidebar-arrow"></span>
 			</a>
+			<div class="devices">
+				<button data-device="preview-desktop" class="preview-desktop active"><span class="screen-reader-text"><?php echo _e( 'Enter desktop preview mode', 'wporg-themes' ); ?></span></button>
+				<button data-device="preview-tablet" class="preview-tablet"><span class="screen-reader-text"><?php _e( 'Enter tablet preview mode', 'wporg-themes' ); ?></span></button>
+				<button data-device="preview-mobile" class="preview-mobile"><span class="screen-reader-text"><?php _e( 'Enter mobile preview mode', 'wporg-themes' ); ?></span></button>
+			</div>
 		</div>
 	</div>
 	<div class="wp-full-overlay-main">

@@ -586,15 +586,6 @@ body.author .theme-browser .theme .theme-author  {
 	line-height: 1.5;
 }
 
-.theme-install-overlay iframe {
-	border: 0;
-	height: 100%;
-	width: 100%;
-	z-index: 20;
-	transition: opacity 0.3s;
-}
-
-
 /*------------------------------------------------------------------------------
   16.2 - Install Themes
 ------------------------------------------------------------------------------*/
@@ -1013,13 +1004,95 @@ body.full-overlay-active {
 	display: none;
 }
 
-/* Animations */
-.wp-full-overlay,
-.wp-full-overlay-sidebar,
-.wp-full-overlay .collapse-sidebar,
-.wp-full-overlay-main {
-	transition-property: left, right, top, bottom, width, margin;
-	transition-duration: 0.2s;
+.wp-full-overlay .devices {
+	position: absolute;
+	bottom: 20px;
+	right: 0;
+	z-index: 50;
+	display: block;
+	height: 25px;
+	padding: 0;
+	color: #777;
+	text-decoration: none;
+}
+
+.wp-full-overlay-footer .devices button {
+	display: inline-block;
+	cursor: pointer;
+	background: transparent;
+	border: none;
+	height: 46px;
+	padding: 0 3px;
+	margin: 0 0 0 -4px;
+	box-shadow: none;
+	border-top: 1px solid transparent;
+	border-bottom: 4px solid transparent;
+	transition:
+		.15s color ease-in-out,
+		.15s background-color ease-in-out,
+		.15s border-color ease-in-out;
+}
+
+.wp-full-overlay-footer .devices button:focus {
+	box-shadow: none;
+	outline: none;
+}
+
+.wp-full-overlay-footer .devices button:before {
+	display: inline-block;
+	-webkit-font-smoothing: antialiased;
+	font: normal 20px/30px "dashicons";
+	vertical-align: top;
+	margin: 3px 0;
+	padding: 4px 8px;
+	color: #646970;
+}
+
+.wp-full-overlay-footer .devices button.active {
+	border-bottom-color: #1d2327;
+}
+
+.wp-full-overlay-footer .devices button:hover,
+.wp-full-overlay-footer .devices button:focus {
+	background-color: #fff;
+}
+
+.wp-full-overlay-footer .devices button:focus,
+.wp-full-overlay-footer .devices button.active:hover {
+	border-bottom-color: #2271b1;
+}
+
+.wp-full-overlay-footer .devices button.active:before {
+	color: #1d2327;
+}
+
+.wp-full-overlay-footer .devices button:hover:before,
+.wp-full-overlay-footer .devices button:focus:before {
+	color: #2271b1;
+}
+
+.wp-full-overlay-footer .devices .preview-desktop:before {
+	content: "\f472";
+}
+
+.wp-full-overlay-footer .devices .preview-tablet:before {
+	content: "\f471";
+}
+
+.wp-full-overlay-footer .devices .preview-mobile:before {
+	content: "\f470";
+}
+
+.wp-full-overlay-main .preview-mobile {
+	margin: 20vh auto auto;
+	width: 320px;
+	height: 480px;
+}
+
+.wp-full-overlay-main .preview-tablet {
+	margin: 0 auto;
+	width: 720px; /* Size is loosely based on a typical "tablet" device size. Intentionally ambiguous - this does not represent any particular device precisely. */
+	height: 1080px;
 }
 
 /*------------------------------------------------------------------------------
@@ -1063,10 +1136,17 @@ body.full-overlay-active {
 
 #customize-container iframe,
 .theme-install-overlay iframe {
+	display: block;
+	margin: 0 auto;
 	height: calc( 100% - 32px );
 	width: 100%;
 	z-index: 20;
-	transition: opacity 0.3s;
+	transition: opacity 0.3s, width 0.3s, height .3s, margin .3s;
+}
+
+.theme-install-overlay iframe {
+	position: relative;
+	border: none;
 }
 
 #customize-container .collapse-sidebar {
@@ -1148,9 +1228,34 @@ body.full-overlay-active {
 }
 
 .theme-install-overlay .wp-full-overlay-main {
-	background: #fff url(/wp-admin/images/spinner.gif) no-repeat center center;
-	background-size: 20px 20px;
+	background: #1d2327;
 }
+
+.theme-install-overlay .wp-full-overlay-main::before {
+	content: '';
+	display: inline-block;
+	margin-left: -10px;
+	margin-top: -10px;
+	left: 50%;
+	top: 50%;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	position: relative;
+	background: #1d2327;
+	box-shadow: inset 4px 4px 0 7px #fff;
+	animation: rotation 800ms linear infinite;
+	z-index: 1;
+}
+
+@keyframes rotation {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+} 
 
 /* Spinner */
 .spinner {
@@ -1568,8 +1673,7 @@ span.favorite.favorited {
 	}
 
 	.spinner,
-	.customize-loading #customize-container,
-	.theme-install-overlay .wp-full-overlay-main {
+	.customize-loading #customize-container {
 		background-image: url(/wp-admin/images/spinner-2x.gif);
 	}
 }
