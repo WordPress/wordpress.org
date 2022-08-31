@@ -47,10 +47,7 @@ add_filter( 'body_class', 'wporg_login_body_class' );
 /**
  * Remove the toolbar.
  */
-function wporg_login_init() {
-	show_admin_bar( false );
-}
-add_action( 'init', 'wporg_login_init' );
+add_filter( 'show_admin_bar', '__return_false', 101 );
 
 /**
  * Disable the Core Language Selector on wp-login.php.
