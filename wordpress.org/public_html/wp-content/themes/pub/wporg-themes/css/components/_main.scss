@@ -780,7 +780,7 @@ body.full-overlay-active {
 	left: 0;
 	padding: 0;
 	margin: 0;
-	z-index: 10;
+	z-index: 1000;
 	background: #eee;
 }
 
@@ -1004,95 +1004,97 @@ body.full-overlay-active {
 	display: none;
 }
 
-.wp-full-overlay .devices {
-	position: absolute;
-	bottom: 20px;
-	right: 0;
-	z-index: 50;
-	display: block;
-	height: 25px;
-	padding: 0;
-	color: #777;
-	text-decoration: none;
-}
+@include breakpoint( 722px ) { // Slighly larger than the table viewport
+	.wp-full-overlay .devices {
+		position: absolute;
+		bottom: 20px;
+		right: 0;
+		z-index: 50;
+		display: block;
+		height: 25px;
+		padding: 0;
+		color: #777;
+		text-decoration: none;
+	}
 
-.wp-full-overlay-footer .devices button {
-	display: inline-block;
-	cursor: pointer;
-	background: transparent;
-	border: none;
-	height: 46px;
-	padding: 0 3px;
-	margin: 0 0 0 -4px;
-	box-shadow: none;
-	border-top: 1px solid transparent;
-	border-bottom: 4px solid transparent;
-	transition:
-		.15s color ease-in-out,
-		.15s background-color ease-in-out,
-		.15s border-color ease-in-out;
-}
+	.wp-full-overlay-footer .devices button {
+		display: inline-block;
+		cursor: pointer;
+		background: transparent;
+		border: none;
+		height: 46px;
+		padding: 0 3px;
+		margin: 0 0 0 -4px;
+		box-shadow: none;
+		border-top: 1px solid transparent;
+		border-bottom: 4px solid transparent;
+		transition:
+			.15s color ease-in-out,
+			.15s background-color ease-in-out,
+			.15s border-color ease-in-out;
+	}
 
-.wp-full-overlay-footer .devices button:focus {
-	box-shadow: none;
-	outline: none;
-}
+	.wp-full-overlay-footer .devices button:focus {
+		box-shadow: none;
+		outline: none;
+	}
 
-.wp-full-overlay-footer .devices button:before {
-	display: inline-block;
-	-webkit-font-smoothing: antialiased;
-	font: normal 20px/30px "dashicons";
-	vertical-align: top;
-	margin: 3px 0;
-	padding: 4px 8px;
-	color: #646970;
-}
+	.wp-full-overlay-footer .devices button:before {
+		display: inline-block;
+		-webkit-font-smoothing: antialiased;
+		font: normal 20px/30px "dashicons";
+		vertical-align: top;
+		margin: 3px 0;
+		padding: 4px 8px;
+		color: #646970;
+	}
 
-.wp-full-overlay-footer .devices button.active {
-	border-bottom-color: #1d2327;
-}
+	.wp-full-overlay-footer .devices button.active {
+		border-bottom-color: #1d2327;
+	}
 
-.wp-full-overlay-footer .devices button:hover,
-.wp-full-overlay-footer .devices button:focus {
-	background-color: #fff;
-}
+	.wp-full-overlay-footer .devices button:hover,
+	.wp-full-overlay-footer .devices button:focus {
+		background-color: #fff;
+	}
 
-.wp-full-overlay-footer .devices button:focus,
-.wp-full-overlay-footer .devices button.active:hover {
-	border-bottom-color: #2271b1;
-}
+	.wp-full-overlay-footer .devices button:focus,
+	.wp-full-overlay-footer .devices button.active:hover {
+		border-bottom-color: #2271b1;
+	}
 
-.wp-full-overlay-footer .devices button.active:before {
-	color: #1d2327;
-}
+	.wp-full-overlay-footer .devices button.active:before {
+		color: #1d2327;
+	}
 
-.wp-full-overlay-footer .devices button:hover:before,
-.wp-full-overlay-footer .devices button:focus:before {
-	color: #2271b1;
-}
+	.wp-full-overlay-footer .devices button:hover:before,
+	.wp-full-overlay-footer .devices button:focus:before {
+		color: #2271b1;
+	}
 
-.wp-full-overlay-footer .devices .preview-desktop:before {
-	content: "\f472";
-}
+	.wp-full-overlay-footer .devices .preview-desktop:before {
+		content: "\f472";
+	}
 
-.wp-full-overlay-footer .devices .preview-tablet:before {
-	content: "\f471";
-}
+	.wp-full-overlay-footer .devices .preview-tablet:before {
+		content: "\f471";
+	}
 
-.wp-full-overlay-footer .devices .preview-mobile:before {
-	content: "\f470";
-}
+	.wp-full-overlay-footer .devices .preview-mobile:before {
+		content: "\f470";
+	}
 
-.wp-full-overlay-main .preview-mobile {
-	margin: 20vh auto auto;
-	width: 320px;
-	height: 480px;
-}
+	.wp-full-overlay-main .preview-mobile {
+		margin: 20vh auto auto;
+		width: 320px;
+		height: 480px;
+	}
 
-.wp-full-overlay-main .preview-tablet {
-	margin: 0 auto;
-	width: 720px; /* Size is loosely based on a typical "tablet" device size. Intentionally ambiguous - this does not represent any particular device precisely. */
-	height: 1080px;
+	.wp-full-overlay-main .preview-tablet {
+		margin: 0 auto;
+		width: 720px; /* Size is loosely based on a typical "tablet" device size. Intentionally ambiguous - this does not represent any particular device precisely. */
+		height: 1080px;
+	}
 }
 
 /*------------------------------------------------------------------------------
