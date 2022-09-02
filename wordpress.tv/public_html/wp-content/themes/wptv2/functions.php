@@ -46,6 +46,12 @@ class WordPressTV_Theme {
 			'footer'             => __( 'Footer Menu', 'wptv' ),
 			'featured_wordcamps' => __( 'Featured WordCamps', 'wptv' ),
 		) );
+
+		// MediaRSS
+		// All videos are uploaded by anonvideoupload, we don't need that in the RSS feed.
+		add_filter( 'mrss_avatar_user', '__return_false' );
+		// Add the original uploaded file to the mediaRss output.
+		add_filter( 'mrss_media', array( $this, 'mrss_media_add_original' ) );
 	}
 
 	/**
@@ -786,6 +792,39 @@ class WordPressTV_Theme {
 		];
 
 		return $locales[ $locale ] ?? false;
+	}
+
+	/**
+	 * Add the Original uploaded file to the mediaRss output.
+	 */
+	public function mrss_media_add_original( $meds ) {
+		global $post;
+
+		if ( ! function_exists( 'find_all_videopress_shortcodes' ) ) {
+			return $meds;
+		}
+	
+		$videos = array_keys( find_all_videopress_shortcodes( $post->post_content ) );
+		if ( ! $videos ) {
+			return $meds;
+		}
+
+		$video        = video_get_info_by_guid( $videos[0] );
+		$original_url = video_attachment_url( $video );
+
+		if ( $original_url ) {
+			$meds[] = array(
+				'content' => array(
+					'attr' => array(
+						'medium'    => 'video',
+						'isDefault' => 'false',
+						'url'       => $original_url,
+					)
+				)
+			);
+		}
+
+		return $meds;
 	}
 }
 
