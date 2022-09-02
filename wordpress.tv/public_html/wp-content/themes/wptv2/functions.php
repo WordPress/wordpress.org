@@ -39,7 +39,7 @@ class WordPressTV_Theme {
 
 		add_filter( 'document_title_parts', array( $this, 'document_title_parts' ) );
 
-		add_filter( 'template_redirect', array( $this, 'redirects' ) );
+		add_filter( 'template_redirect', array( $this, 'redirects' ), 1 );
 
 		register_nav_menus( array(
 			'primary'            => __( 'Primary Menu', 'wptv' ),
@@ -144,6 +144,12 @@ class WordPressTV_Theme {
 		if ( str_starts_with( $_SERVER['REQUEST_URI'], '/category/social-learning' ) ) {
 			$url = str_replace( '/social-learning', '/learn-wordpress-online-workshops', $_SERVER['REQUEST_URI'] );
 			wp_safe_redirect( $url, 301 );
+			die();
+		}
+
+		// Redirect /upload to submit-video
+		if ( 'upload' === trim( $_SERVER['REQUEST_URI'], '/' ) ) {
+			wp_safe_redirect( '/submit-video/', 301 );
 			die();
 		}
 	}
