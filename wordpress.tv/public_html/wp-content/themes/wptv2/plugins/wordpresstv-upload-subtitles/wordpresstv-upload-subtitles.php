@@ -150,11 +150,6 @@ class WordPressTV_Subtitles_Upload {
 			wp_die( 'You can not subtitle this video.' );
 		}
 
-		$tracks = class_exists( 'VideoPress_Subtitles' ) ? VideoPress_Subtitles::get_tracks( $video_data->guid ) : array();
-		if ( ! empty( $tracks[ $language['key'] ] ) ) {
-			$this->error( 8 );
-		}
-
 		if ( empty( $_FILES['wptv_subtitles_file']['name'] ) ) {
 			$this->error( 1 );
 		}
