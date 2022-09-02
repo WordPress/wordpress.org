@@ -25,14 +25,22 @@ global $wptv, $originalcontent;
 				if ( function_exists( 'find_all_videopress_shortcodes' ) ) {
 					$videos = array_keys( find_all_videopress_shortcodes( $originalcontent ) );
 					if ( ! empty( $videos ) ) {
-						$video = video_get_info_by_guid( $videos[0] );
-						$formats = array( 'fmt_std' => 'Low', 'fmt_dvd' => 'Med', 'fmt_hd' => 'High', 'fmt1_ogg' => 'Low' );
+						$video     = video_get_info_by_guid( $videos[0] );
+						$api_data  = video_get_single_response( $video );
+						$formats   = array( 'fmt_std' => 'Low', 'fmt_dvd' => 'Med', 'fmt_hd' => 'High', 'fmt1_ogg' => 'Low' );
 						$mp4_links = array();
-						$ogg_link = NULL;
+						$ogg_link  = false;
+
 						foreach ( $formats as $format => $name ) {
 							if ( 'fmt1_ogg' == $format ) {
 								$link = video_highest_resolution_ogg( $video );
 							} else {
+
+								// Check if HLS transcoded, no audio, no need to link to it.
+								if ( ! empty( $api_data['files'][ str_replace( 'fmt_', '', $format ) ]['hls'] ) ) {
+									continue;
+								}
+
 								$link = video_url_by_format( $video, $format );
 							}
 
@@ -45,6 +53,10 @@ global $wptv, $originalcontent;
 							} else {
 								$mp4_links[] = "<a href='$link'>$name</a>";
 							}
+						}
+
+						if ( ! empty( $api_data['original'] ) ) {
+							$mp4_links[] = "<a href='{$api_data['original']}'>Original</a>";
 						}
 
 						if ( ! empty( $mp4_links ) || ! empty( $ogg_link ) ) {

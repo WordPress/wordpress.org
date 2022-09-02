@@ -96,9 +96,11 @@ class WordPressTV_REST_API {
 						'location'    => array(),
 						'producer'    => array(),
 						'video'       => array(
-							'mp4' => array(),
-							'ogg' => array(),
-						)
+							'mp4'      => array(),
+							'ogg'      => array(),
+							'original' => false,
+						),
+						'subtitles'   => array(),
 					);
 
 					foreach ( [ 'speakers', 'event', 'language', 'tags', 'category' ] as $tax ) {
@@ -144,20 +146,30 @@ class WordPressTV_REST_API {
 						$post_videos = array_keys( find_all_videopress_shortcodes( $post->post_content ) );
 						if ( $post_videos ) {
 							$post_video = video_get_info_by_guid( $post_videos[0] );
+							$api_data   = video_get_single_response( $post_video );
 
-							// Ogg
+							// Original uploaded file, may vary in format.
+							$video['video']['original'] = $api_data['original'];
+
+							// Ogg - No longer generated as of May 2021
 							if ( $link = video_highest_resolution_ogg( $post_video ) ) {
 								$video['video']['ogg']['low'] = $link;
 							}
 
-							// MP4
+							// MP4 - Audio no longer available in all formats
 							$mp4_formats = array( 'low' => 'fmt_std', 'med' => 'fmt_dvd', 'high' => 'fmt_hd' );
 							foreach ( $mp4_formats as $mp4_field => $mp4_format ) {
-								if ( $link = video_url_by_format( $post_video, $mp4_format ) ) {
-									$video['video']['mp4'][ $mp4_field ] = $link;
+								// Check if HLS transcoded, no audio, no need to link to it.
+								if ( ! empty( $api_data['files'][ str_replace( 'fmt_', '', $mp4_format ) ]['hls'] ) ) {
+									continue;
 								}
+
+								$video['video']['mp4'][ $mp4_field ] = video_url_by_format( $post_video, $mp4_format );
 							}
 						}
+
+						// Expose the subtitles
+						$video['subtitles'] = (array) $api_data['subtitles'];
 					}
 
 					$response['videos'][] = $video;
