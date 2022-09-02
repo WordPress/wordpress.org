@@ -142,6 +142,11 @@ class WordPressTV_REST_API {
 						$video['producer']['link'] = 'https://profiles.wordpress.org/' . urlencode( $producer_username[0]->name ) . '/';
 					}
 
+					$attachment_url = $wptv->get_video_attachment_url( $post );
+					if ( $attachment_url ) {
+						$video['video']['original'] = $attachment_url;
+					}
+
 					if ( function_exists( 'find_all_videopress_shortcodes' ) ) {
 						$post_videos = array_keys( find_all_videopress_shortcodes( $post->post_content ) );
 						if ( $post_videos ) {
@@ -149,7 +154,9 @@ class WordPressTV_REST_API {
 							$api_data   = video_get_single_response( $post_video );
 
 							// Original uploaded file, may vary in format.
-							$video['video']['original'] = $api_data['original'];
+							if ( empty( $video['video']['original'] ) ) {
+								$video['video']['original'] = $api_data['original'];
+							}
 
 							// Ogg - No longer generated as of May 2021
 							if ( $link = video_highest_resolution_ogg( $post_video ) ) {

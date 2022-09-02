@@ -55,7 +55,10 @@ global $wptv, $originalcontent;
 							}
 						}
 
-						if ( ! empty( $api_data['original'] ) ) {
+						$attachment_url = $wptv->get_video_attachment_url();
+						if ( $attachment_url ) {
+							$mp4_links[] = "<a href='{$attachment_url}'>Original</a>";
+						} elseif ( ! empty( $api_data['original'] ) ) {
 							$mp4_links[] = "<a href='{$api_data['original']}'>Original</a>";
 						}
 

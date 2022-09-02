@@ -609,6 +609,35 @@ class WordPressTV_Theme {
 	}
 
 	/**
+	 * Retrieve the original uploaded file details.
+	 */
+	function get_video_attachment( $post = null ) {
+		$post   = get_post( $post );
+		$videos = get_children(
+			array(
+				'post_parent' => $post->ID,
+				'post_mime_type' => 'video/%'
+			)
+		);
+
+		if ( ! $videos ) {
+			return false;
+		}
+
+		$videos = array_values( $videos );
+		return $videos[0];
+	}
+
+	/**
+	 * Return the URL to the attached video.
+	 */
+	function get_video_attachment_url( $post = null ) {
+		$attachment = $this->get_video_attachment( $post );
+
+		return $attachment ? wp_get_attachment_url( $attachment->ID ) : false;
+	}
+
+	/**
 	 * Retrieves the guid for the wpvideo video for a given post.
 	 */
 	function get_the_video_guid( $post = null ) {
@@ -798,19 +827,7 @@ class WordPressTV_Theme {
 	 * Add the Original uploaded file to the mediaRss output.
 	 */
 	public function mrss_media_add_original( $meds ) {
-		global $post;
-
-		if ( ! function_exists( 'find_all_videopress_shortcodes' ) ) {
-			return $meds;
-		}
-	
-		$videos = array_keys( find_all_videopress_shortcodes( $post->post_content ) );
-		if ( ! $videos ) {
-			return $meds;
-		}
-
-		$video        = video_get_info_by_guid( $videos[0] );
-		$original_url = video_attachment_url( $video );
+		$original_url = $this->get_video_attachment_url();
 
 		if ( $original_url ) {
 			$meds[] = array(
