@@ -238,6 +238,7 @@ function get_whitelist() {
 			'garrett-eclipse',
 			'idea15', // @Heather Burns on Slack
 			'lakenh',
+			'paaljoachim',
 			'xkon',
 		) ),
 		'core-restapi' => array_merge( get_committers(), array(
