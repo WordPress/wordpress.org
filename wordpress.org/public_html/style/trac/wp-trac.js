@@ -126,9 +126,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 
 	// phpDocumentor tags, but also a few common @-terms.
 	reservedTerms = [
-		'access', 'author', 'category', 'copyright', 'covers', 'deprecated', 'example', 'expectedDeprecated',
-		'final', 'filesource', 'global', 'group', 'home', 'ignore', 'import', 'inheritdoc',
-		'internal', 'license', 'link', 'media', 'mention', 'mentions', 'method', 'name',
+		'access', 'author', 'category', 'copyright', 'covers', 'coversNothing', 'deprecated', 'example',
+		'expectedDeprecated', 'final', 'filesource', 'global', 'group', 'home', 'ignore', 'import',
+		'inheritdoc', 'internal', 'license', 'link', 'media', 'mention', 'mentions', 'method', 'name',
 		'notification', 'notifications', 'package', 'param', 'private', 'property', 'property-read',
 		'requires', 'return', 'returns', 'see', 'since', 'static', 'staticvar', 'subpackage',
 		'term', 'terms', 'throws', 'ticket', 'toc', 'todo', 'tutorial', 'type',
