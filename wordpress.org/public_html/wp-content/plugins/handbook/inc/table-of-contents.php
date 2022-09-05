@@ -8,11 +8,39 @@ class WPorg_Handbook_TOC {
 	protected $post_types = array();
 
 	protected $styles = '<style>
-		.toc-jump { text-align: right; font-size: 12px; }
-		.toc-heading a:first-of-type { color: inherit; font-weight: inherit; margin-left: -25px; text-decoration: none !important; }
-		.toc-heading a:before { visibility: hidden; vertical-align: middle; margin-top: -5px; margin-right: 5px; }
-		.toc-heading:target a:before { margin-left: -8px; margin-right: 13px; }
-		.toc-heading a:hover:before, .toc-heading a:focus:before { visibility: visible; }
+		.toc-header {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 48px !important;
+		}
+		.toc-jump {
+			text-align: right;
+			font-size: 0.75em;
+			order: 2;
+		}
+		.toc-heading a {
+			color: inherit;
+			font-weight: inherit;
+			margin-left: -32px;
+			text-decoration: none !important;
+		}
+		.toc-heading a:before {
+			vertical-align: middle;
+			/* icon is 20px wide in a 32px space, so add 12px horizontal margin. */
+			margin: -4px 8px 0 4px;
+		}
+		@media (max-width: 876px) {
+			.toc-heading a {
+				margin-left: -20px;
+			}
+			.toc-heading a:before {
+				/* icon is 14px wide in a 20px space, so add 6px horizontal margin. */
+				margin: -2px 4px 0 2px;
+				width: 14px;
+				height: 14px;
+				font-size: 14px;
+			}
+		}
 	</style>';
 
 	/**
@@ -132,6 +160,10 @@ class WPorg_Handbook_TOC {
 
 		// Replace each level of the headings.
 		$content .= $this->styles . "\n";
+		//var_dump( $this->styles ); // they look fine on sandbox, not missing like they are on local
+		// so why don't they work?
+		//wp_die();
+		//die( 'main handbook .org' );
 		$content = $this->add_ids_and_jumpto_links( $items, $content );
 
 		if ( ! apply_filters( 'handbook_display_toc', true ) ) {
@@ -206,7 +238,7 @@ class WPorg_Handbook_TOC {
 				$extra_attrs,
 				$title
 			);
-			$replacements[] = $replacement;
+			$replacements[] = '<header class="toc-header">' . $replacement . '</header>';
 		}
 
 		if ( $replacements ) {
