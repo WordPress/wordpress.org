@@ -36,10 +36,10 @@ class DevHub_Search_Form_Autocomplete {
 	 */
 	public function scripts_and_styles() {
 
-		wp_enqueue_style( 'awesomplete-css', get_template_directory_uri() . '/stylesheets/awesomplete.css', array(), '20160114' );
-		wp_enqueue_style( 'autocomplete-css', get_template_directory_uri() . '/stylesheets/autocomplete.css', array(), '20171220' );
+		wp_enqueue_style( 'awesomplete-css', get_template_directory_uri() . '/stylesheets/awesomplete.css', array(), '20220905' );
+		wp_enqueue_style( 'autocomplete-css', get_template_directory_uri() . '/stylesheets/autocomplete.css', array(), '20220905' );
 
-		wp_register_script( 'awesomplete', get_template_directory_uri() . '/js/awesomplete.min.js', array(), '20160322', true );
+		wp_register_script( 'awesomplete', get_template_directory_uri() . '/js/awesomplete.min.js', array(), '20220905', true );
 		wp_enqueue_script( 'awesomplete' );
 
 		wp_register_script( 'autocomplete', get_stylesheet_directory_uri() . '/js/autocomplete.js', array( 'awesomplete' ), filemtime( dirname( __DIR__ ) . '/js/autocomplete.js' ), true );
