@@ -9,13 +9,24 @@
 
 require_once __DIR__ . '/inc/dashicons.php';
 
-wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20210830' );
-wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20210830' );
+wp_enqueue_style(
+	'dashicons-page',
+	get_template_directory_uri() . '/stylesheets/page-dashicons.css',
+	array(),
+	filemtime( __DIR__ . '/stylesheets/page-dashicons.css' )
+);
+wp_enqueue_script(
+	'dashicons-page',
+	get_template_directory_uri() . '/js/page-dashicons.js',
+	array( 'jquery', 'wp-util' ),
+	filemtime( __DIR__ . '/js/page-dashicons.js' )
+);
 
 get_header(); ?>
 
 	<div id="content-area" <?php body_class( 'dashicons-page' ); ?>>
-		<?php while ( have_posts() ) : the_post(); ?>
+		<?php while ( have_posts() ) :
+			the_post(); ?>
 		<main id="main" <?php post_class( 'site-main' ); ?> role="main">
 
 			<div class="details clear">
@@ -43,7 +54,7 @@ get_header(); ?>
 						esc_attr( 'icons-' . sanitize_title( $group ) ),
 						$group_info['label']
 					);
-					
+
 					echo "<!-- {$group} -->\n";
 
 					echo "<ul>\n";
@@ -67,8 +78,9 @@ get_header(); ?>
 
 				<h3><?php _e( 'WordPress Usage', 'wporg' ); ?></h3>
 
-				<p><?php  printf(
-					__( 'Admin menu items can be added with <code><a href="%s">register_post_type()</a></code> and <code><a href="%s">add_menu_page()</a></code>, which both have an option to set an icon. To show the current icon, you should pass in %s.', 'wporg' ),
+				<p>
+				<?php  printf(
+					__( 'Admin menu items can be added with <code><a href="%1$s">register_post_type()</a></code> and <code><a href="%2$s">add_menu_page()</a></code>, which both have an option to set an icon. To show the current icon, you should pass in %3$s.', 'wporg' ),
 					'https://developer.wordpress.org/reference/functions/register_post_type/',
 					'https://developer.wordpress.org/reference/functions/add_menu_page/',
 					'<code>\'dashicons-<span id="wp-class-example">{icon}</span>\'</code>'
@@ -76,7 +88,8 @@ get_header(); ?>
 
 				<h4><?php _e( 'Examples', 'wporg' ); ?></h4>
 
-				<p><?php printf(
+				<p>
+				<?php printf(
 					__( 'In <code><a href="%s">register_post_type()</a></code>, set <code>menu_icon</code> in the arguments array.', 'wporg' ),
 					'https://developer.wordpress.org/reference/functions/register_post_type/'
 				); ?></p>
@@ -88,22 +101,23 @@ get_header(); ?>
  * @see register_post_type()
  */
 function wpdocs_create_post_type() {
-    register_post_type( 'acme_product',
-        array(
-            'labels' => array(
-                'name'          => __( 'Products', 'textdomain' ),
-                'singular_name' => __( 'Product', 'textdomain' )
-            ),
-            'public'      => true,
-            'has_archive' => true,
-            'menu_icon'   => 'dashicons-products',
-        )
-    );
+	register_post_type( 'acme_product',
+		array(
+			'labels' => array(
+				'name'          => __( 'Products', 'textdomain' ),
+				'singular_name' => __( 'Product', 'textdomain' )
+			),
+			'public'      => true,
+			'has_archive' => true,
+			'menu_icon'   => 'dashicons-products',
+		)
+	);
 }
 add_action( 'init', 'wpdocs_create_post_type', 0 );
 </pre>
 
-				<p><?php printf(
+				<p>
+				<?php printf(
 					__( 'The function <code><a href="%s">add_menu_page()</a></code> accepts a parameter after the callback function for an icon URL, which can also accept a dashicons class.', 'wporg' ),
 					'https://developer.wordpress.org/reference/functions/add_menu_page/'
 				); ?></p>
@@ -115,15 +129,15 @@ add_action( 'init', 'wpdocs_create_post_type', 0 );
  * @see add_menu_page()
  */
 function wpdocs_add_my_custom_menu() {
-    // Add an item to the menu.
-    add_menu_page(
-        __( 'My Page', 'textdomain' ),
-        __( 'My Title', 'textdomain' ),
-        'manage_options',
-        'my-page',
-        'my_admin_page_function',
-        'dashicons-admin-media'
-    );
+	// Add an item to the menu.
+	add_menu_page(
+		__( 'My Page', 'textdomain' ),
+		__( 'My Title', 'textdomain' ),
+		'manage_options',
+		'my-page',
+		'my_admin_page_function',
+		'dashicons-admin-media'
+	);
 }</pre>
 
 				<h3><?php _e( 'CSS/HTML Usage', 'wporg' ); ?></h3>
@@ -150,7 +164,8 @@ function wpdocs_add_my_custom_menu() {
 
 				<h4><?php _e( 'Examples', 'wporg' ); ?></h4>
 
-				<p><?php printf(
+				<p>
+				<?php printf(
 					/* translators: %s: URL to Block Editor Handbook for registering a block. */
 					__( 'Adding an icon to a block. The <code>registerBlockType</code> function accepts a parameter "icon" which accepts the name of a dashicon. The provided example is truncated. See the <a href="%s">full example</a> in the Block Editor Handbook.', 'wporg' ),
 					'https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/writing-your-first-block-type/#registering-the-block'
@@ -167,7 +182,8 @@ registerBlockType( 'gutenberg-examples/example-01-basic-esnext', {
     save() {},
 } );
 </pre>
-				<p><?php printf(
+				<p>
+				<?php printf(
 					/* translators: %s: URL to handbook page for Dashicon component. */
 					__( 'Using an icon as a component. A dedicated <code>Dashicon</code> component is available. See the <a href="%s">related documentation</a> in the Block Editor Handbook.', 'wporg' ),
 					'https://developer.wordpress.org/block-editor/reference-guides/components/dashicon/'
@@ -175,7 +191,7 @@ registerBlockType( 'gutenberg-examples/example-01-basic-esnext', {
 
 <pre>
 import { Dashicon } from '@wordpress/components';
- 
+
 const MyDashicon = () =&gt; (
     &lt;div&gt;
         &lt;Dashicon icon="admin-home" /&gt;

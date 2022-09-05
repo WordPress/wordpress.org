@@ -98,13 +98,17 @@ class WPORG_Edit_Parsed_Content {
 				<td>
 					<div class="wporg_parsed_readonly <?php echo $ticket ? 'hidden' : ''; ?>"><?php echo apply_filters( 'the_content', $content ); ?></div>
 					<div class="wporg_parsed_content <?php echo $ticket ? '' : 'hidden'; ?>">
-						<?php wp_editor( $content, 'content', array(
-							'media_buttons' => false,
-							'tinymce'       => false,
-							'quicktags'     => true,
-							'textarea_rows' => 10,
-							'textarea_name' => 'content',
-						) ); ?>
+						<?php wp_editor(
+							$content,
+							'content',
+							array(
+								'media_buttons' => false,
+								'tinymce'       => false,
+								'quicktags'     => true,
+								'textarea_rows' => 10,
+								'textarea_name' => 'content',
+							)
+						); ?>
 					</div>
 				</td>
 			</tr><!-- .wporg_parsed_content -->
@@ -163,13 +167,23 @@ class WPORG_Edit_Parsed_Content {
 	public function admin_enqueue_scripts() {
 		// Only enqueue 'wporg-parsed-content' script and styles on Code Reference post type screens.
 		if ( in_array( get_current_screen()->id, $this->post_types ) ) {
-			wp_enqueue_script( 'wporg-parsed-content', get_template_directory_uri() . '/js/parsed-content.js', array( 'jquery', 'utils' ), '20150824', true );
+			wp_enqueue_script(
+				'wporg-parsed-content',
+				get_template_directory_uri() . '/js/parsed-content.js',
+				array( 'jquery', 'utils' ),
+				filemtime( dirname( __DIR__ ) . '/js/parsed-content.js' ),
+				true
+			);
 
-			wp_localize_script( 'wporg-parsed-content', 'wporgParsedContent', array(
-				'ajaxURL'    => admin_url( 'admin-ajax.php' ),
-				'searchText' => __( 'Searching ...', 'wporg' ),
-				'retryText'  => __( 'Invalid ticket number, please try again.', 'wporg' )
-			) );
+			wp_localize_script(
+				'wporg-parsed-content',
+				'wporgParsedContent',
+				array(
+					'ajaxURL'    => admin_url( 'admin-ajax.php' ),
+					'searchText' => __( 'Searching ...', 'wporg' ),
+					'retryText'  => __( 'Invalid ticket number, please try again.', 'wporg' ),
+				)
+			);
 		}
 	}
 
@@ -199,7 +213,7 @@ class WPORG_Edit_Parsed_Content {
 				@$doc->loadHTML( $body );
 
 				$nodes = $doc->getElementsByTagName( 'title' );
-				$title = $nodes->item(0)->nodeValue;
+				$title = $nodes->item( 0 )->nodeValue;
 
 				// Strip off the site name.
 				$title = str_ireplace( ' – WordPress Trac', '', $title );
@@ -212,7 +226,7 @@ class WPORG_Edit_Parsed_Content {
 			update_post_meta( $post_id, 'wporg_ticket_number', $ticket_no );
 			update_post_meta( $post_id, 'wporg_ticket_title', $title );
 
-			$link = sprintf( '<a href="%1$s">%2$s</a>', esc_url( $ticket_url ),  apply_filters( 'the_title', $title ) );
+			$link = sprintf( '<a href="%1$s">%2$s</a>', esc_url( $ticket_url ), apply_filters( 'the_title', $title ) );
 
 			// Can haz success.
 			wp_send_json_success( array(

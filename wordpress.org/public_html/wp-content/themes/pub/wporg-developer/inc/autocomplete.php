@@ -21,8 +21,8 @@ class DevHub_Search_Form_Autocomplete {
 	 */
 	public function init() {
 
-		add_action( 'wp_ajax_autocomplete',  array( $this, 'autocomplete_data_update' ) );
-		add_action( "wp_ajax_nopriv_autocomplete",  array( $this, 'autocomplete_data_update' ) );
+		add_action( 'wp_ajax_autocomplete', array( $this, 'autocomplete_data_update' ) );
+		add_action( 'wp_ajax_nopriv_autocomplete', array( $this, 'autocomplete_data_update' ) );
 
 		// Enqueue scripts and styles.
 		add_action( 'wp_enqueue_scripts', array( $this, 'scripts_and_styles' ), 11 );
@@ -36,14 +36,33 @@ class DevHub_Search_Form_Autocomplete {
 	 */
 	public function scripts_and_styles() {
 
-		wp_enqueue_style( 'awesomplete-css', get_template_directory_uri() . '/stylesheets/awesomplete.css', array(), '20220905' );
-		wp_enqueue_style( 'autocomplete-css', get_template_directory_uri() . '/stylesheets/autocomplete.css', array(), '20220905' );
+		wp_enqueue_style(
+			'awesomplete-css',
+			get_template_directory_uri() . '/stylesheets/awesomplete.css',
+			array(),
+			filemtime( dirname( __DIR__ ) . '/stylesheets/awesomplete.css' )
+		);
+		wp_enqueue_style(
+			'autocomplete-css',
+			get_template_directory_uri() . '/stylesheets/autocomplete.css',
+			array(),
+			filemtime( dirname( __DIR__ ) . '/stylesheets/autocomplete.css' )
+		);
 
-		wp_register_script( 'awesomplete', get_template_directory_uri() . '/js/awesomplete.min.js', array(), '20220905', true );
+		wp_register_script(
+			'awesomplete',
+			get_template_directory_uri() . '/js/awesomplete.min.js',
+			array(),
+			filemtime( dirname( __DIR__ ) . '/js/awesomplete.min.js' ),
+			true
+		);
 		wp_enqueue_script( 'awesomplete' );
 
 		wp_register_script( 'autocomplete', get_stylesheet_directory_uri() . '/js/autocomplete.js', array( 'awesomplete' ), filemtime( dirname( __DIR__ ) . '/js/autocomplete.js' ), true );
-		wp_localize_script( 'autocomplete', 'autocomplete', array(
+		wp_localize_script(
+			'autocomplete',
+			'autocomplete',
+			array(
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'autocomplete_nonce' ),
 			)
@@ -71,7 +90,7 @@ class DevHub_Search_Form_Autocomplete {
 			'posts'     => array(),
 		);
 
-		if ( !( isset( $_POST['data'] ) && $_POST['data'] ) ) {
+		if ( ! ( isset( $_POST['data'] ) && $_POST['data'] ) ) {
 			wp_send_json_error( $defaults );
 		}
 
@@ -85,12 +104,12 @@ class DevHub_Search_Form_Autocomplete {
 		}
 
 		foreach ( $form_data['post_type'] as $key => $post_type ) {
-			if ( !in_array( $post_type , $parser_post_types ) ) {
+			if ( ! in_array( $post_type, $parser_post_types ) ) {
 				unset( $form_data['post_type'][ $key ] );
 			}
 		}
 
-		$post_types = !empty( $form_data['post_type'] ) ? $form_data['post_type'] : $parser_post_types;
+		$post_types = ! empty( $form_data['post_type'] ) ? $form_data['post_type'] : $parser_post_types;
 
 		$args = array(
 			'posts_per_page'       => -1,
@@ -116,14 +135,14 @@ class DevHub_Search_Form_Autocomplete {
 				}
 
 				if ( $post->post_type == 'wp-parser-class' ) {
-					$title =  'class ' . $title . ' {}';
+					$title = 'class ' . $title . ' {}';
 				}
 
 				$form_data['posts'][ $title ] = $permalink;
 			}
 		}
 
-		wp_send_json_success ( $form_data );
+		wp_send_json_success( $form_data );
 	}
 
 }

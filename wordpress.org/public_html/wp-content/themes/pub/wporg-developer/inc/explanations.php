@@ -143,7 +143,7 @@ class WPORG_Explanations {
 		if ( false !== strpos( $preview_link, 'preview_nonce=' ) ) {
 			$url = parse_url( $preview_link );
 			$url_query = array();
-			parse_str ( $url['query'], $url_query );
+			parse_str( $url['query'], $url_query );
 
 			$preview_link = get_preview_post_link(
 				$post->post_parent,
@@ -183,7 +183,7 @@ class WPORG_Explanations {
 					// Modify it to include the pending count.
 					$menu[ $i ][0] = sprintf(
 						__( 'Explanations %s', 'wporg' ),
-						"<span class='update-plugins count-{$count}'><span class='plugin-count'>" . number_format_i18n( $count ) . "</span></span>"
+						"<span class='update-plugins count-{$count}'><span class='plugin-count'>" . number_format_i18n( $count ) . '</span></span>'
 					);
 					break;
 				}
@@ -273,7 +273,8 @@ class WPORG_Explanations {
 				<div class="inside" style="padding-bottom:0;">
 					<strong><?php _e( 'Associated with: ', 'wporg' ); ?></strong>
 					<?php
-					printf( '<a href="%1$s">%2$s</a>',
+					printf(
+						'<a href="%1$s">%2$s</a>',
 						esc_url( get_permalink( $post->post_parent ) ),
 						str_replace( 'Explanation: ', '', get_the_title( $post->post_parent ) )
 					);
@@ -356,8 +357,10 @@ class WPORG_Explanations {
 		// Only grant explanation post type caps for admins, editors, and explanation editors.
 		if ( in_array( $role, array( 'administrator', 'editor', 'expl_editor' ) ) ) {
 			$base_caps = array(
-				'edit_explanations', 'edit_others_explanations',
-				'edit_published_explanations', 'edit_posts'
+				'edit_explanations',
+				'edit_others_explanations',
+				'edit_published_explanations',
+				'edit_posts',
 			);
 
 			foreach ( $base_caps as $cap ) {
@@ -366,9 +369,12 @@ class WPORG_Explanations {
 
 			$editor_caps = array(
 				'publish_explanations',
-				'delete_explanations', 'delete_others_explanations',
-				'delete_published_explanations', 'delete_private_explanations',
-				'edit_private_explanations', 'read_private_explanations'
+				'delete_explanations',
+				'delete_others_explanations',
+				'delete_published_explanations',
+				'delete_private_explanations',
+				'edit_private_explanations',
+				'read_private_explanations',
 			);
 
 			if ( ! empty( $caps['edit_pages'] ) ) {
@@ -404,13 +410,15 @@ class WPORG_Explanations {
 				return $actions;
 			}
 
-			$expl_action['edit-expl'] = sprintf( '<a href="%1$s" alt="%2$s">%3$s</a>',
+			$expl_action['edit-expl'] = sprintf(
+				'<a href="%1$s" alt="%2$s">%3$s</a>',
 				esc_url( get_edit_post_link( $expl->ID ) ),
 				esc_attr__( 'Edit Explanation', 'wporg' ),
 				__( 'Edit Explanation', 'wporg' )
 			);
 		} else {
-			$expl_action['add-expl'] = sprintf( '<a href="" class="create-expl" data-nonce="%1$s" data-id="%2$s">%3$s</a>',
+			$expl_action['add-expl'] = sprintf(
+				'<a href="" class="create-expl" data-nonce="%1$s" data-id="%2$s">%3$s</a>',
 				esc_attr( wp_create_nonce( 'create-expl' ) ),
 				esc_attr( $post->ID ),
 				__( 'Add Explanation', 'wporg' )
@@ -450,7 +458,7 @@ class WPORG_Explanations {
 					<?php _e( 'Add Explanation', 'wporg' ); ?>
 				</a><!-- #create-explanation -->
 			</span><!-- expl-row-actions -->
-		<?php
+			<?php
 		endif;
 	}
 
@@ -467,17 +475,17 @@ class WPORG_Explanations {
 			return '';
 		}
 
-		switch( $status = $post->post_status ) {
-			case 'draft' :
+		switch ( $status = $post->post_status ) {
+			case 'draft':
 				$label = __( 'Draft', 'wporg' );
 				break;
-			case 'pending' :
+			case 'pending':
 				$label = __( 'Pending Review', 'wporg' );
 				break;
-			case 'publish' :
+			case 'publish':
 				$label = __( 'Published', 'wporg' );
 				break;
-			default :
+			default:
 				$status = '';
 				$label = __( 'None', 'wporg' );
 				break;
@@ -495,7 +503,7 @@ class WPORG_Explanations {
 	 * @return bool True if admin.css should be enqueued, false otherwise.
 	 */
 	public function admin_enqueue_base_scripts( $do_enqueue ) {
-		return $do_enqueue || in_array( get_current_screen()->id, $this->screen_ids  );
+		return $do_enqueue || in_array( get_current_screen()->id, $this->screen_ids );
 	}
 
 	/**
@@ -507,20 +515,33 @@ class WPORG_Explanations {
 
 		$parsed_post_types_screen_ids = DevHub_Admin::get_parsed_post_types_screen_ids();
 
-		if ( in_array( get_current_screen()->id, array_merge(
+		if ( in_array(
+			get_current_screen()->id,
+			array_merge(
 				$parsed_post_types_screen_ids,
 				$this->screen_ids
-		) ) ) {
-			wp_enqueue_script( 'wporg-explanations', get_template_directory_uri() . '/js/explanations.js', array( 'jquery', 'wp-util' ), '20160630', true );
+			)
+		) ) {
+			wp_enqueue_script(
+				'wporg-explanations',
+				get_template_directory_uri() . '/js/explanations.js',
+				array( 'jquery', 'wp-util' ),
+				filemtime( dirname( __DIR__ ) . '/js/explanations.js' ),
+				true
+			);
 
-			wp_localize_script( 'wporg-explanations', 'wporg', array(
-				'editContentLabel' => __( 'Edit Explanation', 'wporg' ),
-				'statusLabel'      => array(
-					'draft'        => __( 'Draft', 'wporg' ),
-					'pending'      => __( 'Pending Review', 'wporg' ),
-					'publish'      => __( 'Published', 'wporg' ),
-				),
-			) );
+			wp_localize_script(
+				'wporg-explanations',
+				'wporg',
+				array(
+					'editContentLabel' => __( 'Edit Explanation', 'wporg' ),
+					'statusLabel'      => array(
+						'draft'        => __( 'Draft', 'wporg' ),
+						'pending'      => __( 'Pending Review', 'wporg' ),
+						'publish'      => __( 'Published', 'wporg' ),
+					),
+				)
+			);
 		}
 	}
 
@@ -558,7 +579,6 @@ class WPORG_Explanations {
 					new WP_Error( 'post_error', __( 'Explanation could not be created.', 'wporg' ) )
 				);
 			}
-
 		}
 	}
 
@@ -604,11 +624,13 @@ class WPORG_Explanations {
 			$index = array_search( 'title', array_keys( $columns ) );
 			$pos   = false === $index ? count( $columns ) : $index + 1;
 
-			$col_data = [ 'has_explanation' => sprintf(
-				'<span class="dashicons dashicons-info" title="%s"></span><span class="screen-reader-text">%s</span>',
-				esc_attr__( 'Has explanation?', 'wporg' ),
-				esc_html__( 'Explanation?', 'wporg' )
-			) ];
+			$col_data = [
+				'has_explanation' => sprintf(
+					'<span class="dashicons dashicons-info" title="%s"></span><span class="screen-reader-text">%s</span>',
+					esc_attr__( 'Has explanation?', 'wporg' ),
+					esc_html__( 'Explanation?', 'wporg' )
+				),
+			];
 			$columns  = array_merge( array_slice( $columns, 0, $pos ), $col_data, array_slice( $columns, $pos ) );
 		}
 

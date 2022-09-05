@@ -22,7 +22,7 @@ class DevHub_Admin {
 	 */
 	public static function do_init() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_scripts' ] );
-	
+
 		add_action( 'comment_author', [ __CLASS__, 'append_user_nicename' ], 10, 2 );
 
 		if ( class_exists( 'DevHub_User_Contributed_Notes_Voting' ) ) {
@@ -30,7 +30,7 @@ class DevHub_Admin {
 			add_filter( 'edit_comment_misc_actions', [ __CLASS__, 'add_reset_votes_form_field' ], 10, 2 );
 
 			// Reset votes after editing a comment in the wp-admin.
-			add_filter( 'comment_edit_redirect',  [ __CLASS__, 'comment_edit_redirect'], 10, 2 );
+			add_filter( 'comment_edit_redirect', [ __CLASS__, 'comment_edit_redirect' ], 10, 2 );
 		}
 	}
 
@@ -66,7 +66,12 @@ class DevHub_Admin {
 		 * @param bool True if admin.css should be enqueued, false otherwise.
 		 */
 		if ( (bool) apply_filters( 'devhub-admin_enqueue_scripts', in_array( get_current_screen()->id, $screen_ids ) ) ) {
-			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', [], '20181101' );
+			wp_enqueue_style(
+				'wporg-admin',
+				get_template_directory_uri() . '/stylesheets/admin.css',
+				[],
+				filemtime( dirname( __DIR__ ) . '/stylesheets/admin.css' ),
+			);
 		}
 	}
 
@@ -84,7 +89,7 @@ class DevHub_Admin {
 
 		if ( $comment->user_id ) {
 			$username = get_user_by( 'id', $comment->user_id )->user_nicename;
-	
+
 			$author_name .= '</strong><div class="comment-author-nicename">@' . $username . '</div><strong>';
 		}
 
