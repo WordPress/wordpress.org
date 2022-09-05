@@ -782,7 +782,7 @@ class DevHub_Formatting {
 		// Use an allowedlist of languages, falling back to PHP.
 		// This should account for all languages used in the handbooks.
 		$lang_list = [ 'js', 'json', 'sh', 'bash', 'html', 'css', 'scss', 'php', 'markdown', 'yaml' ];
-		$lang = in_array( $attr['lang'], $lang_list ) ? $attr['lang'] : 'php';
+		$lang = in_array( $attr['lang'] ?? '', $lang_list ) ? $attr['lang'] ?? '': 'php';
 
 		$content = self::_trim_code( $content );
 		// Hides numbers if <= 4 lines of code (last line has no linebreak).
