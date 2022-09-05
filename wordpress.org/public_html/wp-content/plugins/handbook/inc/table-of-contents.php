@@ -160,10 +160,6 @@ class WPorg_Handbook_TOC {
 
 		// Replace each level of the headings.
 		$content .= $this->styles . "\n";
-		//var_dump( $this->styles ); // they look fine on sandbox, not missing like they are on local
-		// so why don't they work?
-		//wp_die();
-		//die( 'main handbook .org' );
 		$content = $this->add_ids_and_jumpto_links( $items, $content );
 
 		if ( ! apply_filters( 'handbook_display_toc', true ) ) {
