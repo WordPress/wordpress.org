@@ -1,107 +1,114 @@
+/* global jQuery, Prism, wporgFunctionReferenceI18n */
 /**
  * function-reference.js
  *
  * Handles all interactivity on the single function page
  */
-var wporg_developer = ( function( $ ) {
-	'use strict';
 
-	var $sourceCollapsedHeight;
+// eslint-disable-next-line id-length -- $ OK.
+jQuery( function ( $ ) {
+	// 22.5px (line height) * 15 for 15 lines + 15px top padding + 10px extra.
+	// The extra 10px added to partially show next line so it's clear there is more.
+	const MIN_HEIGHT = 22.5 * 15 + 15 + 10;
 
-	var $usesList, $usedByList, $showMoreUses, $hideMoreUses, $showMoreUsedBy, $hideMoreUsedBy;
-
-	function onLoad() {
-		sourceCodeHighlightInit();
-
-		toggleUsageListInit();
+	function collapseCodeBlock( $element, $button ) {
+		$button.text( wporgFunctionReferenceI18n.expand );
+		$button.attr( 'aria-expanded', 'false' );
+		// This uses `css()` instead of `height()` to prevent jQuery from adding
+		// in the padding. We want to add in just the top padding, since the
+		// bottom is intentionally cut off.
+		$element.css( { height: MIN_HEIGHT + 'px' } );
 	}
 
-	function sourceCodeHighlightInit() {
-
-		// We require the SyntaxHighlighter javascript library
-		if ( undefined === window.SyntaxHighlighter ) {
-			return;
-		}
-
-		SyntaxHighlighter.highlight();
-
-		// 1em (margin) + 10 * 17px + 10. Lines are 1.1em which rounds to 17px: calc( 1em + 17px * 10 + 10 ).
-		// Extra 10px added to partially show next line so it's clear there is more.
-		$sourceCollapsedHeight = 196;
-		sourceCodeDisplay();
+	function expandCodeBlock( $element, $button ) {
+		$button.text( wporgFunctionReferenceI18n.collapse );
+		$button.attr( 'aria-expanded', 'true' );
+		// { height: auto; } can't be used here or the transition effect won't work.
+		$element.height( $element.data( 'height' ) );
 	}
 
-	function sourceCodeDisplay( element ) {
+	// For each code block, add the copy button & expanding functionality.
+	$( '.wp-block-code' ).each( function ( i, element ) {
+		const $element = $( element );
+		let timeoutId;
 
-		if ( element !== undefined ) {
-			// Find table inside a specific source code element if passed.
-			var sourceCode = $( '.source-content', element ).find( 'table' );
-		} else {
-			// Find table inside all source code elements.
-			var sourceCode = $( '.source-content' ).find( 'table' );
-		}
-
-		if ( !sourceCode.length ) {
-			return;
-		}
-
-		sourceCode.each( function( t ) {
-			if ( ( $sourceCollapsedHeight - 12 ) < $( this ).height() ) {
-
-				var sourceContent = $( this ).closest( '.source-content' );
-
-				// Do this with javascript so javascript-less can enjoy the total sourcecode
-				sourceContent.find( '.source-code-container' ).css( {
-					height: $sourceCollapsedHeight + 'px'
-				} );
-
-				sourceContent.find( '.source-code-links' ).find( 'span:first' ).show();
-				sourceContent.find( '.show-complete-source' ).show();
-				sourceContent.find( '.show-complete-source' ).off( 'click.togglesource' ).on( 'click.togglesource', toggleCompleteSource );
-				sourceContent.find( '.less-complete-source' ).off( 'click.togglesource' ).on( 'click.togglesource', toggleCompleteSource );
+		const $copyButton = $( document.createElement( 'button' ) );
+		$copyButton.text( wporgFunctionReferenceI18n.copy );
+		$copyButton.on( 'click', function () {
+			clearTimeout( timeoutId );
+			const code = $element.find( 'code' ).text();
+			if ( ! code ) {
+				return;
 			}
+
+			// This returns a promise which will resolve if the copy suceeded,
+			// and we can set the button text to tell the user it worked.
+			// We don't do anything if it fails.
+			window.navigator.clipboard.writeText( code ).then( function () {
+				$copyButton.text( wporgFunctionReferenceI18n.copied );
+				wp.a11y.speak( wporgFunctionReferenceI18n.copied );
+
+				// After 5 seconds, reset the button text.
+				timeoutId = setTimeout( function () {
+					$copyButton.text( wporgFunctionReferenceI18n.copy );
+				}, 5000 );
+			} );
 		} );
-	}
 
-	function toggleCompleteSource( e ) {
-		e.preventDefault();
+		const $container = $( document.createElement( 'div' ) );
+		$container.addClass( 'wp-code-block-button-container' );
 
-		var sourceContent = $( this ).closest( '.source-content' );
+		$container.append( $copyButton );
 
-		if ( $( this ).parent().find( '.show-complete-source' ).is( ':visible' ) ) {
-			var heightGoal = sourceContent.find( 'table' ).height() + 45; // takes into consideration potential x-scrollbar
-		} else {
-			var heightGoal = $sourceCollapsedHeight;
+		// Check code block height, and if it's larger, add in the collapse
+		// button, and set it to be collapsed differently.
+		const originalHeight = $element.height();
+		if ( originalHeight > MIN_HEIGHT ) {
+			$element.data( 'height', originalHeight );
+
+			const $expandButton = $( document.createElement( 'button' ) );
+			$expandButton.on( 'click', function () {
+				if ( 'true' === $expandButton.attr( 'aria-expanded' ) ) {
+					collapseCodeBlock( $element, $expandButton );
+				} else {
+					expandCodeBlock( $element, $expandButton );
+				}
+			} );
+
+			collapseCodeBlock( $element, $expandButton );
+			$container.append( $expandButton );
 		}
 
-		sourceContent.find( '.source-code-container:first' ).animate( { height: heightGoal + 'px' } );
+		$element.before( $container );
+	} );
 
-		$( this ).parent().find( 'a' ).toggle();
-	}
+	let $usesList, $usedByList, $showMoreUses, $hideMoreUses, $showMoreUsedBy, $hideMoreUsedBy;
 
 	function toggleUsageListInit() {
+		var usesToShow = $( '#uses-table' ).data( 'show' ),
+			usedByToShow = $( '#used-by-table' ).data( 'show' );
 
 		// We only expect one used_by and uses per document
 		$usedByList = $( 'tbody tr', '#used-by-table' );
-		$usesList   = $( 'tbody tr', '#uses-table' );
+		$usesList = $( 'tbody tr', '#uses-table' );
 
-		if ( $usedByList.length > 5 ) {
-			$usedByList = $usedByList.slice( 5 ).hide();
+		if ( $usedByList.length > usedByToShow ) {
+			$usedByList = $usedByList.slice( usedByToShow ).hide();
 
 			$showMoreUsedBy = $( '.used-by .show-more' ).show().on( 'click', toggleMoreUsedBy );
 			$hideMoreUsedBy = $( '.used-by .hide-more' ).on( 'click', toggleMoreUsedBy );
 		}
 
-		if ( $usesList.length > 5 ) {
-			$usesList = $usesList.slice( 5 ).hide();
+		if ( $usesList.length > usesToShow ) {
+			$usesList = $usesList.slice( usesToShow ).hide();
 
 			$showMoreUses = $( '.uses .show-more' ).show().on( 'click', toggleMoreUses );
 			$hideMoreUses = $( '.uses .hide-more' ).on( 'click', toggleMoreUses );
 		}
 	}
 
-	function toggleMoreUses( e ) {
-		e.preventDefault();
+	function toggleMoreUses( event ) {
+		event.preventDefault();
 
 		$usesList.toggle();
 
@@ -109,8 +116,8 @@ var wporg_developer = ( function( $ ) {
 		$hideMoreUses.toggle();
 	}
 
-	function toggleMoreUsedBy( e ) {
-		e.preventDefault();
+	function toggleMoreUsedBy( event ) {
+		event.preventDefault();
 
 		$usedByList.toggle();
 
@@ -118,11 +125,26 @@ var wporg_developer = ( function( $ ) {
 		$hideMoreUsedBy.toggle();
 	}
 
-	$( onLoad );
+	toggleUsageListInit();
 
-	// Expose the sourceCodeDisplay() function for usage outside of this function.
-	return {
-		sourceCodeDisplay: sourceCodeDisplay
-	};
+	// Runs before the highlight parsing is run.
+	// `env` is defined here: https://github.com/PrismJS/prism/blob/2815f699970eb8387d741e3ac886845ce5439afb/prism.js#L583-L588
+	Prism.hooks.add( 'before-highlight', function ( env ) {
+		// If the code starts with `<`, it's either already got an opening tag,
+		// or it starts with HTML. Either way, we don't want to inject here.
+		if ( 'php' === env.language && ! env.code.startsWith( '<' ) ) {
+			env.code = '<? ' + env.code;
+			env.hasAddedTag = true;
+		}
+	} );
 
-} )( jQuery );
+	// Runs before `highlightedCode` is set to the `innerHTML` of the container.
+	Prism.hooks.add( 'before-insert', function ( env ) {
+		if ( env.hasAddedTag ) {
+			env.highlightedCode = env.highlightedCode.replace(
+				'<span class="token delimiter important">&lt;?</span> ',
+				''
+			);
+		}
+	} );
+} );

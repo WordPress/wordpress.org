@@ -1,0 +1,19 @@
+
+// stylelint-disable
+
+$header-font: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+$body-font: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+$serif-font: Georgia, Times, serif;
+
+$code-font:
+	Hack, "Fira Code", Consolas, Menlo, Monaco, "Andale Mono",
+	"Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono",
+	"Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L",
+	"Courier New", Courier, monospace;
+
+// stylelint-enable
+
+@import "colors";
+@import "dimensions";

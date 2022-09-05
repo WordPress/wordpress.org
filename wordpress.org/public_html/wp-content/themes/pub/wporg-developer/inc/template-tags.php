@@ -113,7 +113,7 @@ namespace {
 
 			// Check if the current page is a reply to a note.
 			$reply_id = 0;
-			if ( isset( $_GET['replytocom'] ) && $_GET['replytocom'] ) {		
+			if ( isset( $_GET['replytocom'] ) && $_GET['replytocom'] ) {
 				/* Javascript uses preventDefault() when clicking links with '?replytocom={comment_ID}'
 				 * We assume Javascript is disabled when visiting a page with this query var.
 				 * There are no consequences if Javascript is enabled.
@@ -175,7 +175,7 @@ namespace {
 			$is_user_logged_in  = is_user_logged_in();
 			$can_user_post_note = DevHub\can_user_post_note( true, get_the_ID() );
 			$is_user_verified   = $is_user_logged_in && $can_user_post_note;
-		
+
 			$args['updated_note'] = 0;
 			if ( isset( $_GET['updated-note'] ) && $_GET['updated-note'] ) {
 				$args['updated_note'] = absint( $_GET['updated-note'] );
@@ -620,17 +620,7 @@ namespace DevHub {
 	 * @return string
 	 */
 	function get_site_section_url() {
-		$parts = explode( '/', $GLOBALS['wp']->request );
-		switch ( $parts[0] ) {
-			case 'reference':
-			case 'plugins':
-			case 'themes':
-				return home_url( '/' . $parts[0] . '/' );
-			case 'cli':
-				return home_url( '/cli/commands/' );
-			default:
-				return home_url( '/' );
-		}
+		return home_url( '/' );
 	}
 
 	/**
@@ -644,23 +634,11 @@ namespace DevHub {
 			case 'resources':
 			case 'resource':
 				return sprintf( __( 'Developer Resources: %s', 'wporg' ), get_the_title() );
-			case 'reference':
-				return __( 'Code Reference', 'wporg' );
-			case 'plugins':
-				return __( 'Plugin Handbook', 'wporg' );
-			case 'themes':
-				return __( 'Theme Handbook', 'wporg' );
-			case 'apis':
-				return __( 'Common APIs Handbook', 'wporg' );
-			case 'block-editor':
-				return __( 'Block Editor Handbook', 'wporg' );
-			case 'cli':
-				return __( 'WP-CLI Commands', 'wporg' );
-			case 'coding-standards':
-				return __( 'Coding Standards Handbook', 'wporg' );
-			case 'rest-api':
-				return __( 'REST API Handbook', 'wporg' );
 			default:
+				if( is_page( 'reference' ) ) {
+					return __( 'Code Reference', 'wporg' );
+				}
+
 				return __( 'Developer Resources', 'wporg' );
 		}
 	}
@@ -687,6 +665,36 @@ namespace DevHub {
 	}
 
 	/**
+	 * Returns the hook string.
+	 *
+	 * @param int $post_id
+	 *
+	 * @return string
+	 */
+	function get_hook_type_name( $post_id ) {
+		$hook_type = get_post_meta( $post_id, '_wp-parser_hook_type', true );
+		if ( false !== strpos( $hook_type, 'action' ) ) {
+			if ( 'action_reference' === $hook_type ) {
+				$hook_type = 'do_action_ref_array';
+			} elseif ( 'action_deprecated' === $hook_type ) {
+				$hook_type = 'do_action_deprecated';
+			} else {
+				$hook_type = 'do_action';
+			}
+		} else {
+			if ( 'filter_reference' === $hook_type ) {
+				$hook_type = 'apply_filters_ref_array';
+			} elseif ( 'filter_deprecated' === $hook_type ) {
+				$hook_type = 'apply_filters_deprecated';
+			} else {
+				$hook_type = 'apply_filters';
+			}
+		}
+
+		return $hook_type;
+	}
+
+	/**
 	 * Retrieve function name and arguments as signature string
 	 *
 	 * @param int $post_id
@@ -707,7 +715,7 @@ namespace DevHub {
 		$types        = array();
 
 		if ( 'wp-parser-class' === get_post_type( $post_id ) ) {
-			return $signature;
+			return '<span class="keyword">class</span> ' . $signature . ' {}';
 		}
 
 		if ( $tags ) {
@@ -725,24 +733,7 @@ namespace DevHub {
 				$hook_args[] = ' <nobr><span class="arg-type">' . esc_html( $type ) . '</span> <span class="arg-name">' . esc_html( $arg ) . '</span></nobr>';
 			}
 
-			$hook_type = get_post_meta( $post_id, '_wp-parser_hook_type', true );
-			if ( false !== strpos( $hook_type, 'action' ) ) {
-				if ( 'action_reference' === $hook_type ) {
-					$hook_type = 'do_action_ref_array';
-				} elseif ( 'action_deprecated' === $hook_type ) {
-					$hook_type = 'do_action_deprecated';
-				} else {
-					$hook_type = 'do_action';
-				}
-			} else {
-				if ( 'filter_reference' === $hook_type ) {
-					$hook_type = 'apply_filters_ref_array';
-				} elseif ( 'filter_deprecated' === $hook_type ) {
-					$hook_type = 'apply_filters_deprecated';
-				} else {
-					$hook_type = 'apply_filters';
-				}
-			}
+			$hook_type = get_hook_type_name( $post_id );
 
 			$delimiter = false !== strpos( $signature, '$' ) ? '"' : "'";
 			$signature = $delimiter . $signature . $delimiter;
@@ -782,6 +773,11 @@ namespace DevHub {
 		}
 		$signature .= ')';
 
+		$return = get_return( $post_id, false );
+		if ( $return ) {
+			$signature .= ': ' . $return;
+		}
+
 		return wp_kses_post( $signature );
 	}
 
@@ -804,9 +800,6 @@ namespace DevHub {
 		if ( $tags ) {
 			$encountered_optional = false;
 			foreach ( $tags as $tag ) {
-				// Fix unintended markup introduced by parser.
-				$tag = str_replace( array( '<strong>', '</strong>' ), '__', $tag );
-
 				if ( ! empty( $tag['name'] ) && 'param' == $tag['name'] ) {
 					$params[ $tag['variable'] ] = $tag;
 					$types = array();
@@ -871,12 +864,59 @@ namespace DevHub {
 						}
 					}
 				}
-
 			}
 		}
 
 		return $params;
 	}
+
+	/**
+	 * Recurse through parameters that referer to arguments in other functions or methods, and find the innermost parameter description.
+	 * For example the description for the wp_count_terms( $args ) parameter refers to get_terms( $args ) which in turn refers to WP_Term_Query::__construct( $query ).
+	 * Given the wp_count_terms( $args ) parameter, this will find and return the one for WP_Term_Query::__construct( $query ).
+	 *
+	 * @param array $param A single parameter array as found in `_wp-parser_args` postmeta.
+	 * @param int   $recursion_limit Maximum number of levels to recurse through.
+	 *
+	 * @return array|null
+	 */
+
+	function get_param_reference( $param, $recursion_limit = 3 ) {
+		if ( $recursion_limit > 0 && preg_match_all( '#rel="(function|method)">([^<>()]+)[(][)]</a>#', $param[ 'content' ], $matches, PREG_SET_ORDER ) ) {
+			foreach ( $matches as $match ) {
+				if ( $_post = get_page_by_title( $match[2], OBJECT, 'wp-parser-' . $match[1] ) ) {
+					if ( $_params = get_params( $_post->ID ) ) {
+
+						$arg_names_to_try = array_unique([
+							$param['variable'], // An exact match for the name eg $args
+							'$args',
+							'$query', // For example get_terms( $args ) -> WP_Term_Query::__construct( $query )
+						]);
+
+						foreach ( $arg_names_to_try as $variable_name ) {
+							if ( isset( $_params[ $variable_name ] ) ) {
+								// Sometimes the referenced doc page has another level of indirection!
+								$recurse = get_param_reference( $_params[ $variable_name ], $recursion_limit - 1 );
+								if ( $recurse ) {
+									$recurse[ 'parent' ] = $_post->post_title;
+									$recurse[ 'parent_var' ] = $variable_name;
+									return $recurse;
+								} else {
+									$result = $_params[ $variable_name ];
+									$result[ 'parent' ] = $_post->post_title;
+									$result[ 'parent_var' ] = $variable_name;
+									return $result;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
 
 	/**
 	 * Retrieve arguments as an array
@@ -915,7 +955,7 @@ namespace DevHub {
 	 *
 	 * @return string
 	 */
-	function get_return( $post_id = null ) {
+	function get_return( $post_id = null, $include_description = true ) {
 
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
@@ -934,7 +974,11 @@ namespace DevHub {
 		$type        = empty( $return['types'] ) ? '' : esc_html( implode( '|', $return['types'] ) );
 		$type        = apply_filters( 'devhub-function-return-type', $type, $post_id );
 
-		return "<span class='return-type'>({$type})</span> $description";
+		if ( $include_description ) {
+			return "<span class='return-type'>{$type}</span> $description";
+		} else {
+			return "<span class='return-type'>{$type}</span>";
+		}
 	}
 
 	/**
@@ -1245,10 +1289,24 @@ namespace DevHub {
 	 * @return boolean
 	 */
 	function post_type_has_uses_info( $post_type = null ) {
-		$post_type             = $post_type ? $post_type : get_post_type();
-		$post_types_with_uses  = array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-class' );
+		$post_type            = $post_type ? $post_type : get_post_type();
+		$post_types_with_uses = array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-class' );
 
 		return in_array( $post_type, $post_types_with_uses );
+	}
+
+	/**
+	 * Does the post type support hooks information?
+	 *
+	 * @param string $post_type Optional. The post type name. If blank, assumes current post type.
+	 *
+	 * @return boolean
+	 */
+	function post_type_has_hooks_info( $post_type = null ) {
+		$post_type             = $post_type ? $post_type : get_post_type();
+		$post_types_with_hooks = array( 'wp-parser-function', 'wp-parser-method' );
+
+		return in_array( $post_type, $post_types_with_hooks );
 	}
 
 	/**
@@ -1272,15 +1330,42 @@ namespace DevHub {
 			) );
 			return $connected;
 		} elseif ( 'wp-parser-function' === $post_type ) {
-			$connection_types = array( 'functions_to_functions', 'functions_to_methods', 'functions_to_hooks' );
+			$connection_types = array( 'functions_to_functions', 'functions_to_methods' );
 		} else {
-			$connection_types = array( 'methods_to_functions', 'methods_to_methods', 'methods_to_hooks' );
+			$connection_types = array( 'methods_to_functions', 'methods_to_methods' );
 		}
 
 		$connected = new \WP_Query( array(
-			'post_type'           => array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-hook' ),
+			'post_type'           => array( 'wp-parser-function', 'wp-parser-method' ),
 			'connected_type'      => $connection_types,
-			'connected_direction' => array( 'from', 'from', 'from' ),
+			'connected_direction' => array( 'from', 'from' ),
+			'connected_items'     => $post_id,
+			'nopaging'            => true,
+		) );
+
+		return $connected;
+	}
+
+	/**
+	 * Retrieves a WP_Query object for the hook posts that the current post is linked to.
+	 *
+	 * @param int|WP_Post|null $post Optional. Post ID or post object. Default is global $post.
+	 * @return WP_Query|null   The WP_Query if the post's post type supports 'uses', null otherwise.
+	 */
+	function get_hooks( $post = null ) {
+		$post_id   = get_post_field( 'ID', $post );
+		$post_type = get_post_type( $post );
+
+		if ( 'wp-parser-function' === $post_type ) {
+			$connection_types = array( 'functions_to_hooks' );
+		} else {
+			$connection_types = array( 'methods_to_hooks' );
+		}
+
+		$connected = new \WP_Query( array(
+			'post_type'           => 'wp-parser-hook',
+			'connected_type'      => $connection_types,
+			'connected_direction' => array( 'from' ),
 			'connected_items'     => $post_id,
 			'nopaging'            => true,
 		) );
@@ -1336,12 +1421,62 @@ namespace DevHub {
 	}
 
 	/**
+	 * Find functions & methods that are often used by other functions and methods.
+	 */
+	function _get_functions_to_exclude_from_uses() {
+		global $wpdb;
+
+		$ids = get_transient( __METHOD__ );
+		if ( $ids ) {
+			return $ids;
+		}
+
+		$ids = $wpdb->get_col(
+			"SELECT p2p_to
+			FROM {$wpdb->p2p} p2p
+			WHERE p2p_type IN ( 'methods_to_functions', 'functions_to_functions', 'methods_to_methods', 'functions_to_methods' )
+			GROUP BY p2p_to
+			HAVING COUNT(*) > 50"
+		);
+
+		set_transient( __METHOD__, $ids, DAY_IN_SECONDS );
+
+		return $ids;
+	}
+
+	/**
+	 * Rearrange the results of get_uses() so that frequent functions are pushed to the bottom.
+	 * Sorts the array in-place.
+	 *
+	 * @return int The number of infrequent items in the list (ie the cutoff point for show/hide).
+	 */
+	function split_uses_by_frequent_funcs( &$posts ) {
+
+		$frequent_funcs = _get_functions_to_exclude_from_uses();
+
+		// Sort the posts array so frequently used functions are at the end
+		usort( $posts, function( $a, $b ) use ( $frequent_funcs ) {
+			return (int) in_array( $a->ID, $frequent_funcs ) - (int) in_array( $b->ID, $frequent_funcs );
+		} );
+
+		$infrequent_count = 0;
+		foreach ( $posts as $i => $post ) {
+			if ( in_array( $post->ID, $frequent_funcs ) ) {
+				break;
+			}
+			$infrequent_count = $i + 1;
+		}
+
+		return $infrequent_count;
+	}
+
+	/**
 	 * Returns the array of post types that have source code.
 	 *
 	 * @return array
 	 */
 	function get_post_types_with_source_code() {
-		return array( 'wp-parser-class', 'wp-parser-method', 'wp-parser-function' );
+		return array( 'wp-parser-class', 'wp-parser-method', 'wp-parser-function', 'wp-parser-hook' );
 	}
 
 	/**
@@ -1427,6 +1562,14 @@ namespace DevHub {
 				$source_code .= $source_line;
 			}
 			fclose( $handle );
+		}
+
+		// Trim leading whitespace.
+		if ( preg_match_all( "!^([\t ]*).+$!m", $source_code, $m ) ) {
+			$strip_prefix = min( array_map( 'strlen', $m[1] ) );
+			if ( $strip_prefix ) {
+				$source_code = preg_replace( "!^[\t ]{" . $strip_prefix . "}!m", '$1', $source_code );
+			}
 		}
 
 		update_post_meta( $post_id, $meta_key, addslashes( $source_code ) );
@@ -1593,6 +1736,10 @@ namespace DevHub {
 
 		$description = $post->post_content;
 
+		// Replace code blocks generated by Markdown with wp:code blocks.
+		$description = str_replace( '<pre><code>', '[code lang="php"]', $description );
+		$description = str_replace( '</code></pre>', '[/code]', $description );
+
 		if ( $description ) {
 			$description = apply_filters( 'the_content', apply_filters( 'get_the_content' , $description ) );
 		}
@@ -1623,7 +1770,17 @@ namespace DevHub {
 		$post_types = get_parsed_post_types();
 		$taxonomies = array( 'wp-parser-since', 'wp-parser-package', 'wp-parser-source-file' );
 
-		return ! ( is_search() || is_404() ) && ( is_singular( $post_types ) || is_post_type_archive( $post_types ) || is_tax( $taxonomies ) );
+		return ! ( is_search() || is_404() ) && ( is_singular( $post_types ) || is_post_type_archive( $post_types ) || is_tax( $taxonomies ) || is_page( 'reference' ) );
+	}
+
+	/**
+	 * Should the search bar filters be shown?
+	 *
+	 * @return bool True if search bar filters should be shown.
+	 */
+	function should_show_search_filters() {
+		$is_handbook = $GLOBALS['wp_query']->is_handbook;
+		return ( is_page( 'reference' ) || is_search() ) && ! $is_handbook;
 	}
 
 	/**
@@ -1858,9 +2015,10 @@ namespace DevHub {
 			'params',
 			'return',
 			'explanation',
-			'source',
-			'related',
 			'methods',
+			'source',
+			'hooks',
+			'related',
 			'changelog',
 			'notes'
 		);

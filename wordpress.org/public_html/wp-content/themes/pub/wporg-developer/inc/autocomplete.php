@@ -42,7 +42,7 @@ class DevHub_Search_Form_Autocomplete {
 		wp_register_script( 'awesomplete', get_template_directory_uri() . '/js/awesomplete.min.js', array(), '20160322', true );
 		wp_enqueue_script( 'awesomplete' );
 
-		wp_register_script( 'autocomplete', get_template_directory_uri() . '/js/autocomplete.js', array( 'awesomplete' ), '20160524', true );
+		wp_register_script( 'autocomplete', get_stylesheet_directory_uri() . '/js/autocomplete.js', array( 'awesomplete' ), filemtime( dirname( __DIR__ ) . '/js/autocomplete.js' ), true );
 		wp_localize_script( 'autocomplete', 'autocomplete', array(
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'autocomplete_nonce' ),
@@ -99,13 +99,28 @@ class DevHub_Search_Form_Autocomplete {
 			'orderby'              => '',
 			'search_orderby_title' => 1,
 			'order'                => 'ASC',
+			'_autocomplete_search' => true,
 		);
 
 		$search = get_posts( $args );
 
-		if ( !empty( $search ) ) {
-			$titles = wp_list_pluck( $search, 'post_title' );
-			$form_data['posts'] = array_values( array_unique( $titles ) );
+		if ( ! empty( $search ) ) {
+			$post_types_function_like = array( 'wp-parser-function', 'wp-parser-method' );
+
+			foreach ( $search as $post ) {
+				$permalink = get_permalink( $post->ID );
+				$title     = $post->post_title;
+
+				if ( in_array( $post->post_type, $post_types_function_like ) ) {
+					$title .= '()';
+				}
+
+				if ( $post->post_type == 'wp-parser-class' ) {
+					$title =  'class ' . $title . ' {}';
+				}
+
+				$form_data['posts'][ $title ] = $permalink;
+			}
 		}
 
 		wp_send_json_success ( $form_data );

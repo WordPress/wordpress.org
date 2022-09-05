@@ -29,7 +29,8 @@ $spacing: 25px;
 			border-radius: 2px;
 			font: 11pt sans-serif;
 			padding: 10px;
-			background: rgba(255,255,255,.8);
+			background: rgba(255, 255, 255, 0.8);
+
 			&:focus {
 				background: #fff;
 				outline: none;
@@ -38,14 +39,14 @@ $spacing: 25px;
 	}
 
 	.entry-content {
-		float:left;
+		float: left;
 		margin-top: 0 !important;
 		padding: 1.5em $spacing;
 		width: 50%;
 	}
 
 	#glyph {
-		float:left;
+		float: left;
 		padding: 1.5em $spacing;
 		width: 50%;
 
@@ -57,7 +58,7 @@ $spacing: 25px;
 		}
 
 		.info {
-			float:right;
+			float: right;
 			margin-top: $spacing;
 			width: 35%;
 
@@ -76,14 +77,14 @@ $spacing: 25px;
 		}
 
 		.name {
-			font-size: .9em;
+			font-size: 0.9em;
 		}
 	}
 
 	h4 {
 		margin: 1.5em 0;
 		padding-top: $spacing;
-		border-top: 1px solid lightgrey;
+		border-top: 1px solid #d3d3d3;
 
 		&:first-of-type {
 			margin-top: 0;
@@ -153,7 +154,7 @@ $spacing: 25px;
 
 	#instructions {
 		margin-top: 1.5em;
-		border-top: 1px solid lightgrey;
+		border-top: 1px solid #d3d3d3;
 
 		h3 {
 			margin: 1.5em 0 0.75em;
@@ -221,6 +222,7 @@ $spacing: 25px;
 				&:nth-of-type(2) {
 					margin-left: 0;
 				}
+
 				&:last-of-type {
 					margin-right: 0;
 				}

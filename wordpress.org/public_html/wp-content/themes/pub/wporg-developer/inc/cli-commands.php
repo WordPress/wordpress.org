@@ -101,7 +101,7 @@ class DevHub_Command extends WP_CLI_Command {
 			WP_CLI::confirm( "Looks like WP $version was already parsed on " . date_i18n( 'Y-m-d H:i', $last_parsed_date ) . ". Proceed anyway?" );
 		}
 
-		// Determine importing user's ID. 
+		// Determine importing user's ID.
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
 			WP_CLI::error( 'Invalid user_id provided.' );
@@ -112,21 +112,6 @@ class DevHub_Command extends WP_CLI_Command {
 			'phpdoc-parser'  => 'phpdoc-parser/plugin.php',
 			'posts-to-posts' => 'posts-to-posts/posts-to-posts.php',
 		];
-
-		// Get the phpdoc-parser plugin if not installed.
-		$all_plugins = get_plugins();
-		if ( ! in_array( $plugins['phpdoc-parser'], array_keys( $all_plugins ) ) ) {
-			WP_CLI::log( "Installing phpdoc-parser plugin..." );
-			WP_CLI::runcommand( 'plugin install https://github.com/WordPress/phpdoc-parser/archive/master.zip' );
-			touch( WP_PLUGIN_DIR . '/phpdoc-parser/.devhub-parser-installed' );
-		}
-
-		// Verify the phpdoc-parser plugin is available locally.
-		wp_cache_set( 'plugins', [], 'plugins' ); // Reset cache of plugins.
-		$all_plugins = get_plugins();
-		if ( ! in_array( $plugins['phpdoc-parser'], array_keys( $all_plugins ) ) ) {
-			WP_CLI::error( 'The PHPDoc-Parser plugin (from https://github.com/WordPress/phpdoc-parser) could not be automatically installed locally in ' . WP_PLUGIN_DIR . '/. Please do so manually.' );
-		}
 
 		// Install phpdoc-parser plugin dependencies if not installed.
 		$plugin_dir = WP_PLUGIN_DIR . '/phpdoc-parser/';
@@ -188,8 +173,10 @@ class DevHub_Command extends WP_CLI_Command {
 		}
 
 		// 3. Run the parser.
+		// If running locally, run a quick parse which skips DB replication-lag sleep()'s
+		$quick = in_array( wp_get_environment_type(), array( 'local', 'development' ) ) ? '--quick' : '';
 		WP_CLI::log( 'Running the parser (this will take awhile)...' );
-		WP_CLI::runcommand( "parser create {$path} --user={$user_id}" );
+		WP_CLI::runcommand( "parser create {$path} --user={$user_id} {$quick}" );
 
 		// 4. Deactivate phpdoc-parser plugin.
 		WP_CLI::log( 'Deactivating phpdoc-parser plugin...' );
@@ -276,22 +263,6 @@ class DevHub_Command extends WP_CLI_Command {
 			$cmd = "rm -rf {$tmp_dir}";
 			WP_CLI::confirm( "About to delete temporary directory. Does this look proper? `$cmd`" );
 			WP_CLI::launch( $cmd, false, true );
-		}
-
-		// Remove the phpdoc-parser plugin.
-		// @todo Add argument to facilitate disabling this step, or do a git checkout and only delete if no local changes.
-		$plugin = 'phpdoc-parser';
-		$all_plugins = get_plugins();
-		if ( in_array( $plugin . '/plugin.php', array_keys( $all_plugins ) ) ) {
-			// Only delete the plugin if it was automatically installed via parse command.
-			if ( file_exists( WP_PLUGIN_DIR . '/phpdoc-parser/.devhub-parser-installed' ) ) {
-				WP_CLI::log( "Deleting plugin {$plugin}..." );
-				WP_CLI::runcommand( "plugin delete {$plugin}" );
-			} else {
-				WP_CLI::log( "Plugin {$plugin} present but was manually installed or looks to have customizations so it must be deleted manually, if so desired." );
-			}
-		} else {
-			WP_CLI::log( "Plugin {$plugin} not present so it can't be deleted." );
 		}
 
 		WP_CLI::success( 'Clean-up is complete.' );

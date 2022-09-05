@@ -74,8 +74,10 @@ class DevHub_Registrations {
 			'show_in_rest' => true,
 		) );
 
-		// Methods
+		// Rewrite rules. The more specific rules like `/embed` must be first, to override the more generic rules.
 		add_rewrite_rule( 'reference/classes/page/([0-9]{1,})/?$', 'index.php?post_type=wp-parser-class&paged=$matches[1]', 'top' );
+		add_rewrite_rule( 'reference/classes/([^/]+)/embed/?$', 'index.php?post_type=wp-parser-class&name=$matches[1]&embed=true', 'top' );
+		add_rewrite_rule( 'reference/classes/([^/]+)/([^/]+)/embed/?$', 'index.php?post_type=wp-parser-method&name=$matches[1]-$matches[2]&embed=true', 'top' );
 		add_rewrite_rule( 'reference/classes/([^/]+)/([^/]+)/?$', 'index.php?post_type=wp-parser-method&name=$matches[1]-$matches[2]', 'top' );
 
 		// Classes

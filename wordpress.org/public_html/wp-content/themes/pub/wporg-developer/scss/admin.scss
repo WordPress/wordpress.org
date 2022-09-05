@@ -1,3 +1,5 @@
+// stylelint-disable selector-id-pattern -- These are generated names.
+
 /* =Admin CSS
 ----------------------------------------------- */
 
@@ -24,7 +26,6 @@
 
 
 /* Explanations */
-
 .fixed {
 	.column-has_explanation {
 		width: 2em;
@@ -39,7 +40,8 @@
 		display: inline-block;
 		margin-top: 4px;
 
-		&:focus, &:hover {
+		&:focus,
+		&:hover {
 			color: #0073aa;
 		}
 
@@ -48,6 +50,7 @@
 		}
 
 		.screen-reader-text {
+
 			@media screen and (max-width: 782px) {
 				position: static;
 				-webkit-clip-path: none;
@@ -58,7 +61,8 @@
 			}
 		}
 
-		& [aria-hidden="true"] {
+		[aria-hidden="true"] {
+
 			@media screen and (max-width: 782px) {
 				display: none;
 			}
@@ -80,6 +84,7 @@
 			padding-right: 6px;
 			padding-left: 0;
 		}
+
 		&:nth-child(n+2) {
 			padding-left: 8px;
 			border-left: 1px solid #ccc;
@@ -88,16 +93,17 @@
 }
 
 .status {
-	font-weight: bold;
+	font-weight: 700;
 
 	&.pending {
-		color: red;
+		color: #f00;
 	}
 
 	&.publish {
-		color: green;
+		color: #008000;
 	}
 }
+
 .post-type-wp-parser-function,
 .post-type-wp-parser-class,
 .post-type-wp-parser-method,
@@ -107,6 +113,7 @@
 			padding-top: 10px;
 			padding-bottom: 10px;
 		}
+
 		td {
 			padding: 10px;
 

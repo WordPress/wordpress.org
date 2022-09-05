@@ -115,23 +115,10 @@
 		} );
 	}
 
-	// Add toggle links to source code in preview if needed.
-	function updateSourceCode() {
-		if ( undefined !== wporg_developer ) {
-			wporg_developer.sourceCodeDisplay( preview );
-		}
-	}
-
 	function updatePreview_HTML( content ) {
 		// Update preview content
 		previewContent.html( content );
 
-		if ( undefined !== window.SyntaxHighlighter ) {
-			SyntaxHighlighter.highlight();
-		}
-
-		// Add toggle link to source code in preview if needed.
-		updateSourceCode();
 		spinner.hide();
 	}
 

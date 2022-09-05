@@ -77,13 +77,13 @@
 }
 
 .dashicons-page #glyph .name {
-  font-size: .9em;
+  font-size: 0.9em;
 }
 
 .dashicons-page h4 {
   margin: 1.5em 0;
   padding-top: 25px;
-  border-top: 1px solid lightgrey;
+  border-top: 1px solid #d3d3d3;
 }
 
 .dashicons-page h4:first-of-type {
@@ -149,7 +149,7 @@
 
 .dashicons-page #instructions {
   margin-top: 1.5em;
-  border-top: 1px solid lightgrey;
+  border-top: 1px solid #d3d3d3;
 }
 
 .dashicons-page #instructions h3 {

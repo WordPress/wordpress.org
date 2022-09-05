@@ -23,7 +23,7 @@
 			'header_text' => __( 'Contents', 'wporg' )
 		) );
 
-		$content = '<div class="content-toc">' . $TOC->add_toc( $content ) . '</div>';
+		$content = $TOC->add_toc( $content );
 
 	endif;
 	?>

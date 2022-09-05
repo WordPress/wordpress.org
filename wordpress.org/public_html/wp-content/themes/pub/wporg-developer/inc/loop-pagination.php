@@ -54,10 +54,10 @@ function loop_pagination( $args = array() ) {
 		'total'        => $max_num_pages,
 		'current'      => $current,
 		'prev_next'    => true,
-		//'prev_text'  => __( '&laquo; Previous' ), // This is the WordPress default.
-		//'next_text'  => __( 'Next &raquo;' ), // This is the WordPress default.
+		'prev_text'    => __( 'Previous', 'wporg' ),
+		'next_text'    => __( 'Next', 'wporg' ),
 		'show_all'     => false,
-		'end_size'     => 1,
+		'end_size'     => 2,
 		'mid_size'     => 1,
 		'add_fragment' => '',
 		'type'         => 'plain',
@@ -110,4 +110,4 @@ function loop_pagination( $args = array() ) {
 		return $page_links;
 }
 
-?>
+

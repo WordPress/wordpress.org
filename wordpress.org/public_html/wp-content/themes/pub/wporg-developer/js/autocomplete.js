@@ -18,7 +18,8 @@
 
 	var	searchfield = $( '#search-field', form ),
 		processing = false,
-		search = '';
+		search = '',
+		autocompleteResults = {};
 
 	var awesome = new Awesomplete( searchfield.get( 0 ), {
 		maxItems: 9999,
@@ -62,6 +63,13 @@
 
 			return false;
 		},
+		replace: function( text ) {
+			searchfield.val( text );
+
+			if ( text in autocompleteResults ) {
+				window.location = autocompleteResults[ text ];
+			}
+		}
 	} );
 
 	// On input event for the search field.
@@ -101,9 +109,11 @@
 					return false;
 				}
 
-				if ( ( response.success === true ) && response.data.posts.length ) {
+				if ( response.success === true && Object.values( response.data.posts ).length ) {
+					autocompleteResults = response.data.posts;
+
 					// Update the autocomplete list
-					awesome.list = response.data.posts;
+					awesome.list = Object.keys( response.data.posts );
 				}
 			} )
 			.always( function() {

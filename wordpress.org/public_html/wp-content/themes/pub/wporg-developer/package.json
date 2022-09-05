@@ -1,5 +1,6 @@
 {
     "name": "wporg-developer",
+    "version": "1.0.0",
     "description": "Theme for WordPress Developer Resources",
     "repository": {
         "type": "svn",
@@ -13,5 +14,9 @@
         "grunt-sass": "~3.1.0",
         "matchdep": "~2.0.0",
         "node-sass": "^6.0.1"
+    },
+    "scripts": {
+        "start": "grunt watch",
+        "build": "grunt"
     }
 }

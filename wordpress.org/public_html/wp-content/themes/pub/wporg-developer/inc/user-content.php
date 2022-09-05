@@ -55,12 +55,6 @@ class DevHub_User_Submitted_Content {
 		// Customize allowed tags
 		add_filter( 'wp_kses_allowed_html',            array( __CLASS__, 'wp_kses_allowed_html' ), 10, 2 );
 
-		// Make 'php' the default language
-		add_filter( 'syntaxhighlighter_shortcodeatts', array( __CLASS__, 'syntaxhighlighter_shortcodeatts' ) );
-
-		// Tweak code contained in shortcode
-		add_filter( 'syntaxhighlighter_precode',       array( __CLASS__, 'syntaxhighlighter_precode' ) );
-
 		// Allowed HTML for a new child comment
 		add_filter( 'preprocess_comment',              array( __CLASS__, 'comment_new_allowed_html' ) );
 
@@ -169,38 +163,48 @@ class DevHub_User_Submitted_Content {
 	 */
 	public static function scripts_and_styles() {
 		if ( is_singular() ) {
-			wp_enqueue_script( 'wporg-developer-function-reference', get_template_directory_uri() . '/js/function-reference.js', array( 'jquery', 'syntaxhighlighter-core', 'syntaxhighlighter-brush-php' ), '20180724', true );
-			wp_enqueue_style( 'syntaxhighlighter-core' );
-			wp_enqueue_style( 'syntaxhighlighter-theme-default' );
+			wp_enqueue_script(
+				'wporg-developer-function-reference',
+				get_template_directory_uri() . '/js/function-reference.js',
+				array( 'jquery', 'wp-a11y' ),
+				filemtime( dirname( __DIR__ ) . '/js/function-reference.js' ),
+				true
+			);
+			wp_localize_script(
+				'wporg-developer-function-reference',
+				'wporgFunctionReferenceI18n',
+				array(
+					'copy'   => __( 'Copy', 'wporg' ),
+					'copied' => __( 'Code copied', 'wporg' ),
+					'expand'   => __( 'Expand code', 'wporg' ),
+					'collapse' => __( 'Collapse code', 'wporg' ),
+				)
+			);
 
-			wp_enqueue_script( 'wporg-developer-user-notes', get_template_directory_uri() . '/js/user-notes.js', array( 'jquery', 'quicktags' ), '20200110', true );
-			wp_enqueue_script( 'wporg-developer-user-notes-feedback', get_template_directory_uri() . '/js/user-notes-feedback.js', array( 'jquery', 'quicktags' ), '20181023', true );
-			wp_localize_script( 'wporg-developer-user-notes-feedback', 'wporg_note_feedback', array(
-				'show'             => __( 'Show Feedback', 'wporg' ),
-				'hide'             => __( 'Hide Feedback', 'wporg' ),
-			) );
+			wp_enqueue_script(
+				'wporg-developer-user-notes',
+				get_template_directory_uri() . '/js/user-notes.js',
+				array( 'jquery', 'quicktags' ),
+				filemtime( dirname( __DIR__ ) . '/js/user-notes.js' ),
+				true
+			);
+
+			wp_enqueue_script(
+				'wporg-developer-user-notes-feedback',
+				get_template_directory_uri() . '/js/user-notes-feedback.js',
+				array( 'jquery', 'quicktags' ),
+				filemtime( dirname( __DIR__ ) . '/js/user-notes-feedback.js' ),
+				true
+			);
+			wp_localize_script(
+				'wporg-developer-user-notes-feedback',
+				'wporg_note_feedback',
+				array(
+					'show' => __( 'Show Feedback', 'wporg' ),
+					'hide' => __( 'Hide Feedback', 'wporg' ),
+				)
+			);
 		}
-	}
-
-	/**
-	 * Sets the default language for SyntaxHighlighter shortcode.
-	 *
-	 * @param array $atts Shortcode attributes.
-	 * @return array
-	 */
-	public static function syntaxhighlighter_shortcodeatts( $atts ) {
-		$atts['language'] = 'php';
-		return $atts;
-	}
-
-	/**
-	 * Subverts capital_P_dangit for SyntaxHighlighter shortcode.
-	 *
-	 * @param string $code
-	 * @return string
-	 */
-	public static function syntaxhighlighter_precode( $code ) {
-		return str_replace( 'Wordpress', 'Word&#112;ress', $code );
 	}
 
 	/**

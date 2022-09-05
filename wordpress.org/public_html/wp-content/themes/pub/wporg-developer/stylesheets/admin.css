@@ -84,15 +84,15 @@
 }
 
 .status {
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .status.pending {
-  color: red;
+  color: #f00;
 }
 
 .status.publish {
-  color: green;
+  color: #008000;
 }
 
 .post-type-wp-parser-function .form-table th,

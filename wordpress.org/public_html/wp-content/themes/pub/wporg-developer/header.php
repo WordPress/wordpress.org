@@ -7,15 +7,23 @@
  * @package wporg-developer
  */
 
+\WordPressdotorg\skip_to( '#content' );
+
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+
+$show_search = DevHub\should_show_search_bar();
+
+// When to show the masthead
+$show_masthead = is_front_page() || is_page( 'reference' );
 
 ?>
 
-<header id="masthead" class="site-header<?php if ( is_front_page() ) { echo ' home'; } ?>" role="banner">
+<header id="masthead" class="site-header<?php if ( $show_masthead ) { echo ' home'; } ?>" role="banner">
 	<?php if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() && ! is_search() ) : ?>
 		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu', 'wporg' ); ?></strong></a>
 	<?php endif; ?>
-	<div class="site-branding">
+	<div class="site-branding<?php echo ! $show_masthead && $show_search ? ' has-actions': '' ?>">
+
 		<h1 class="site-title">
 			<a href="<?php echo esc_url( DevHub\get_site_section_url() ); ?>" rel="home"><?php echo DevHub\get_site_section_title(); ?></a>
 		</h1>
@@ -24,33 +32,27 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 		<p class="site-description"><?php _e( 'The freedom to build.', 'wporg' ); ?></p>
 		<?php endif; ?>
 
-		<nav id="site-navigation" class="main-navigation" role="navigation">
-			<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg' ); ?>"></button>
-			<?php
-			$active_menu = is_post_type_archive( 'command' ) || is_singular( 'command' ) ? 'devhub-cli-menu' : 'devhub-menu';
-			wp_nav_menu( array(
-				'theme_location'  => $active_menu,
-				'container_class' => 'menu-container',
-				'container_id'    => 'primary-menu',
-			) ); ?>
-		</nav>
+		<div>
+			<?php if ( $show_search ) : ?>
+				<?php get_search_form(); ?>
+			<?php endif; ?>
+
+			<?php if ( ! $show_masthead ) : ?>
+			<nav id="site-navigation" class="main-navigation" role="navigation">
+				<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg' ); ?>"></button>
+				<?php
+				$active_menu = is_post_type_archive( 'command' ) || is_singular( 'command' ) ? 'devhub-cli-menu' : 'devhub-menu';
+				wp_nav_menu( array(
+					'theme_location'  => $active_menu,
+					'container_class' => 'menu-container',
+					'container_id'    => 'primary-menu',
+				) ); ?>
+			</nav>
+			<?php endif; ?>
+		</div>
 	</div>
 </header><!-- #masthead -->
 
 <div id="page" class="hfeed site devhub-wrap">
-	<a href="#main" class="screen-reader-text"><?php _e( 'Skip to content', 'wporg' ); ?></a>
-
 	<?php do_action( 'before' ); ?>
-	<?php
-	if ( DevHub\should_show_search_bar() ) : ?>
-		<div id="inner-search">
-			<?php get_search_form(); ?>
-			<div id="inner-search-icon-container">
-				<div id="inner-search-icon">
-					<div class="dashicons dashicons-search"><span class="screen-reader-text"><?php _e( 'Search', 'wporg' ); ?></span></div>
-				</div>
-			</div>
-		</div>
-
-	<?php endif; ?>
 	<div id="content" class="site-content">

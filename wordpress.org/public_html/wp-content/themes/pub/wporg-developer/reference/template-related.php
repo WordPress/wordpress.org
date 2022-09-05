@@ -16,6 +16,10 @@ if ( show_usage_info() ) :
 	$uses_to_show    = 5;
 	$used_by_to_show = 5;
 
+	if ( $has_uses ) {
+		$uses_to_show = min( $uses_to_show, split_uses_by_frequent_funcs( $uses->posts ) );
+	}
+
 	if ( $has_uses || $has_used_by ) :
 	?>
 	<hr />
@@ -25,7 +29,7 @@ if ( show_usage_info() ) :
 		<?php if ( $has_uses ) : ?>
 			<article class="uses">
 				<h3><?php _e( 'Uses', 'wporg' ); ?></h3>
-				<table id="uses-table">
+				<table id="uses-table" data-show="<?php echo esc_attr( $uses_to_show ) ?>">
 					<caption class="screen-reader-text"><?php esc_html_e( 'Uses', 'wporg' ); ?></caption>
 					<thead>
 						<tr>
@@ -36,9 +40,9 @@ if ( show_usage_info() ) :
 					<tbody>
 						<?php while ( $uses->have_posts() ) : $uses->the_post(); ?>
 						<tr>
-							<td>
-								<span><?php echo esc_attr( get_source_file() ); ?>:</span>
+							<td class="related-title">
 								<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( ! in_array( get_post_type(), array( 'wp-parser-class', 'wp-parser-hook' ), true ) ) : ?>()<?php endif; ?></a>
+								<span><?php echo esc_attr( get_source_file() ); ?></span>
 							</td>
 							<td class="related-desc">
 								<?php echo get_summary(); ?>
@@ -51,7 +55,7 @@ if ( show_usage_info() ) :
 				<?php if ( $uses->post_count > $uses_to_show ) : ?>
 				<a href="#" class="show-more"><?php
 					/* translators: %d: remaining 'uses' count */
-					printf( _n( 'Show %d more use', 'Show %d more uses', $uses->post_count - $uses_to_show, 'wporg' ),
+					printf( _n( 'Show %s more use', 'Show %s more uses', $uses->post_count - $uses_to_show, 'wporg' ),
 						number_format_i18n( $uses->post_count - $uses_to_show )
 					);
 					?></a>
@@ -65,7 +69,7 @@ if ( show_usage_info() ) :
 
 			<article class="used-by">
 				<h3><?php esc_html_e( 'Used By', 'wporg' ); ?></h3>
-				<table id="used-by-table">
+				<table id="used-by-table" data-show="<?php echo esc_attr( $used_by_to_show ) ?>">
 					<caption class="screen-reader-text"><?php esc_html_e( 'Used By', 'wporg' ); ?></caption>
 					<thead>
 						<tr>
@@ -76,9 +80,9 @@ if ( show_usage_info() ) :
 					<tbody>
 						<?php while ( $used_by->have_posts() ) : $used_by->the_post(); ?>
 						<tr>
-							<td>
-								<span><?php echo esc_attr( get_source_file() ); ?>:</span>
+							<td class="related-title">
 								<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( ! in_array( get_post_type(), array( 'wp-parser-class', 'wp-parser-hook' ), true ) ) : ?>()<?php endif; ?></a>
+									<span><?php echo esc_attr( get_source_file() ); ?></span>
 							</td>
 							<td class="related-desc">
 								<?php echo get_summary(); ?>
@@ -91,7 +95,7 @@ if ( show_usage_info() ) :
 				<?php if ( $used_by->post_count > $used_by_to_show ) : ?>
 				<a href="#" class="show-more"><?php
 					/* translators: %d: remaining 'used by' count */
-					printf( _n( 'Show %d more used by', 'Show %d more used by', $used_by->post_count - $used_by_to_show, 'wporg' ),
+					printf( _n( 'Show %s more used by', 'Show %s more used by', $used_by->post_count - $used_by_to_show, 'wporg' ),
 						number_format_i18n( $used_by->post_count - $used_by_to_show )
 					);
 					?></a>

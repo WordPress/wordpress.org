@@ -39,25 +39,31 @@ class DevHub_Formatting {
 		add_filter( 'devhub-format-description', array( __CLASS__, 'autolink_references' ) );
 		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_hash_formatting' ), 9 );
 		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_description_html_as_code' ) );
+		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_description_quotes_to_code' ) );
 		add_filter( 'devhub-format-description', array( __CLASS__, 'convert_lists_to_markup' ) );
 
 		add_filter( 'devhub-format-hash-param-description', array( __CLASS__, 'autolink_references' ) );
 		add_filter( 'devhub-format-hash-param-description', array( __CLASS__, 'fix_param_description_parsedown_bug' ) );
+		add_filter( 'devhub-format-hash-param-description', array( __CLASS__, 'fix_param_description_quotes_to_code' ) );
+		add_filter( 'devhub-format-hash-param-description', array( __CLASS__, 'convert_lists_to_markup' ) );
 
 		add_filter( 'devhub-function-return-type', array( __CLASS__, 'autolink_references' ) );
 
-		add_filter( 'syntaxhighlighter_htmlresult', array( __CLASS__, 'fix_code_entity_encoding' ), 20 );
-	}
+		add_shortcode( 'php', array( __CLASS__, 'do_shortcode_php' ) );
+		add_shortcode( 'js', array( __CLASS__, 'do_shortcode_js' ) );
+		add_shortcode( 'css', array( __CLASS__, 'do_shortcode_css' ) );
+		add_shortcode( 'code', array( __CLASS__, 'do_shortcode_code' ) );
 
-	/**
-	 * Fixes bug in (or at least in using) SyntaxHighlighter code shortcodes that
-	 * causes double-encoding of `>` character.
-	 *
-	 * @param string $content The text being handled as code.
-	 * @return string
-	 */
-	public static function fix_code_entity_encoding( $content ) {
-		return str_replace( '&amp;gt;', '&gt;', $content );
+		add_filter(
+			'no_texturize_shortcodes',
+			function ( $shortcodes ) {
+				$shortcodes[] = 'php';
+				$shortcodes[] = 'js';
+				$shortcodes[] = 'css';
+				$shortcodes[] = 'code';
+				return $shortcodes;
+			}
+		);
 	}
 
 	/**
@@ -313,7 +319,7 @@ class DevHub_Formatting {
 		// Simple allowable tags that should get unencoded.
 		// Note: This precludes them from being able to be used in an encoded fashion
 		// within a parameter description.
-		$allowable_tags = array( 'code' );
+		$allowable_tags = array( 'code', 'br' );
 		foreach ( $allowable_tags as $tag ) {
 			$text = str_replace( array( "&lt;{$tag}&gt;", "&lt;/{$tag}&gt;" ), array( "<{$tag}>", "</{$tag}>" ), $text );
 		}
@@ -378,40 +384,50 @@ class DevHub_Formatting {
 				$content = " $piece "; // Pad with whitespace to simplify the regexes
 
 				// Only if the text contains something that might be a function.
-				if ( false !== strpos( $content, '()' ) ) {
+				if ( str_contains( $content, '()' ) || str_contains( $content, '::' ) || str_contains( $content, '->' ) ) {
 
 					// Detect references to class methods, e.g. WP_Query::query()
 					// or functions, e.g. register_post_type().
 					$content = preg_replace_callback(
 						'~
-							(?!<.*?)       # Non-capturing check to ensure not matching what looks like the inside of an HTML tag.
-							(              # 1: The full method or function name.
-								((\w+)::)? # 2: The class prefix, if a method reference.
-								(\w+)      # 3: The method or function name.
+							(?!<.*?)                  # Non-capturing check to ensure not matching what looks like the inside of an HTML tag.
+							(?P<name>
+								(?P<class>
+									(\w+)             # Class Name
+									(::|->|-&gt;)     # Object reference
+									(\w+)             # Method
+									(?P<after>\(\)| ) # () or whitespace to terminate.
+								)
+								|
+								(?P<function>\w+\(\)) # Functions must always end in ().
 							)
-							\(\)           # The () that signifies either a method or function.
-							(?![^<>]*?>)   # Non-capturing check to ensure not matching what looks like the inside of an HTML tag.
+							(?![^<>]*?>)              # Non-capturing check to ensure not matching what looks like the inside of an HTML tag.
 						~x',
-						function ( $matches ) {
+						function( $matches ) {
+							$name  = rtrim( $matches['name'], '() ' );
+							$after = ( '()' === $matches['after'] ? '' : ' ' );
+
 							// Reference to a class method.
-							if ( $matches[2] ) {
+							if ( $matches['class'] ) {
+								$name = str_replace( array( '->', '-&gt;' ), '::', $name );
+
 								// Only link actually parsed methods.
-								if ( $post = get_page_by_title( $matches[1], OBJECT, 'wp-parser-method' ) ) {
+								if ( $post = get_page_by_title( $name, OBJECT, 'wp-parser-method' ) ) {
 									return sprintf(
-										'<a href="%s">%s</a>',
+										'<a href="%s" rel="method">%s</a>' . $after,
 										get_permalink( $post->ID ),
-										$matches[0]
+										$name . '()'
 									);
 								}
 
 							// Reference to a function.
 							} else {
 								// Only link actually parsed functions.
-								if ( $post = get_page_by_title( $matches[1], OBJECT, 'wp-parser-function' ) ) {
+								if ( $post = get_page_by_title( $name, OBJECT, 'wp-parser-function' ) ) {
 									return sprintf(
-										'<a href="%s">%s</a>',
+										'<a href="%s" rel="function">%s</a>' . $after,
 										get_permalink( $post->ID ),
-										$matches[0]
+										$name . '()'
 									);
 								}
 							}
@@ -451,7 +467,7 @@ class DevHub_Formatting {
 						// Only link actually parsed classes.
 						if ( $post = get_page_by_title( $matches[0], OBJECT, 'wp-parser-class' ) ) {
 							return sprintf(
-								'<a href="%s">%s</a>',
+								'<a href="%s" rel="class">%s</a>',
 								get_permalink( $post->ID ),
 								$matches[0]
 							);
@@ -483,6 +499,11 @@ class DevHub_Formatting {
 	 * list processing during parsing.
 	 *
 	 * Recognizes lists where list items are denoted with an asterisk or dash.
+	 * Examples:
+	 * - https://developer.wordpress.org/reference/functions/add_menu_page/
+	 * - https://developer.wordpress.org/reference/classes/wp_term_query/__construct/
+	 * - https://developer.wordpress.org/reference/hooks/password_change_email/
+	 * - https://developer.wordpress.org/reference/classes/WP_Query/parse_query/
 	 *
 	 * Does not handle nesting of lists.
 	 *
@@ -490,43 +511,22 @@ class DevHub_Formatting {
 	 * @return string
 	 */
 	public static function convert_lists_to_markup( $text ) {
-		$inline_list = false;
-		$li = '<br /> * ';
+		// Expand new lines for ease of matching.
+		$text = preg_replace( '!<br>\s*!', "<br>\n", $text );
 
-		// Convert asterisks to a list.
-		// Example: https://developer.wordpress.org/reference/functions/add_menu_page/
-		if ( false !== strpos( $text, ' * ' ) )  {
-			// Display as simple plaintext list.
-			$text = str_replace( ' * ', "\n" . $li, $text );
-			$inline_list = true;
+		// Trim any trailing <br>s on strings.
+		$text = preg_replace( '/<br>\s*$/s', '', $text );
+
+		// Add line items
+		$text = preg_replace( '!^\s*[*-] (.+?)(<br>)*$!m', '<li>$1</li>', $text, -1, $replacements_made );
+
+		if ( ! $replacements_made ) {
+			return $text;
 		}
 
-		// Convert dashes to a list.
-		// Example: https://developer.wordpress.org/reference/classes/wp_term_query/__construct/
-		// Example: https://developer.wordpress.org/reference/hooks/password_change_email/
-		if ( false !== strpos( $text, ' - ' ) )  {
-			// Display as simple plaintext list.
-			$text = str_replace( ' - ', "\n" . $li, $text );
-			$inline_list = true;
-		}
-
-		// If list detected.
-		if ( $inline_list ) {
-			// Replace first item, ensuring the opening 'ul' tag is prepended.
-			$text = preg_replace( '~^' . preg_quote( $li ) . '(.+)$~mU', "<ul><li>\$1</li>\n", $text, 1 );
-			// Wrap subsequent list items in 'li' tags.
-			$text = preg_replace( '~^' . preg_quote( $li ) . '(.+)$~mU', "<li>\$1</li>\n", $text ); 
-			$text = trim( $text );
-
-			// Close the list if it hasn't been closed before start of next hash parameter.
-			//$text = preg_replace( '~(</li>)(\s+</li>)~smU', '$1</ul>$2', $text );
-			$text = preg_replace( '~(</li>)(\s*</li>)~smU', '$1</ul>$2', $text );
-
-			// Closethe list if it hasn't been closed and it's the end of the description.
-			if ( '</li>' === substr( trim( $text ), -5 ) ) {
-				$text .= '</ul>';
-			}
-		}
+		// Wrap in a `ul`.
+		$text = substr_replace( $text, '<ul><li>', strpos( $text, '<li>' ), 4 ); // First instance
+		$text = substr_replace( $text, '</li></ul>', strrpos( $text, '</li>' ), 5 ); // Last instance.
 
 		return $text;
 	}
@@ -597,9 +597,9 @@ class DevHub_Formatting {
 					$name = ltrim( $name, '$' );
 				}
 				if ( $name ) {
-					$new_text .= "<b>'{$name}'</b><br />";
+					$new_text .= "<code>{$name}</code>";
 				}
-				$new_text .= "<i><span class='type'>({$type})</span></i> {$description}";
+				$new_text .= "<span class='type'>{$type}</span><div class='desc'>{$description}</div>";
 				if ( ! $skip_closing_li ) {
 					$new_text .= '</li>';
 				}
@@ -670,6 +670,154 @@ class DevHub_Formatting {
 		return $text;
 	}
 
+	/**
+	 * Wraps code-like references within 'code' tags.
+	 *
+	 * Example: https://developer.wordpress.org/reference/classes/wp_term_query/__construct/
+	 *
+	 * @param string $text Text.
+	 * @return string
+	 */
+	public static function fix_param_description_quotes_to_code( $text ) {
+		// Don't do anything if this is a hash notation string.
+		if ( ! $text || str_starts_with( $text, '{' ) || str_contains( $text, '<ul class="param-hash">' ) ) {
+			return $text;
+		}
+
+		$textarr     = preg_split( '/(<[^<>]+>)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE ); // split out HTML tags
+		$text        = '';
+		$within_code = false;
+		foreach ( $textarr as $piece ) {
+			// HTML tags are untouched.
+			if ( str_starts_with( $piece, '<' ) || $within_code ) {
+				$text .= $piece;
+
+				if ( str_starts_with( $piece, '</code' ) ) {
+					$within_code = false;
+				} elseif ( ! $within_code ) {
+					$within_code = str_starts_with( $piece, '<code' );
+				}
+
+				continue;
+			}
+
+			// Pipe delimited types inline.
+			$piece = preg_replace( "/(([\w'\[\]]+\|)+[\w'\[\]]+)/", '<code>$1</code>', $piece, -1 );
+
+			// Quoted strings.
+			$piece = preg_replace( "/('[^' ]*')/", '<code>$1</code>', $piece, -1 );
+
+			// Replace ###PARAM### too.
+			// Example: http://localhost:8888/reference/hooks/password_change_email/
+			$piece = preg_replace( "/((#{2,})\w+\\2)/", '<code>$1</code>', $piece );
+
+			$text .= $piece;
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Render the php shortcode using the Code Syntax Block syntax.
+	 *
+	 * This is a workaround for user-submitted code, which used the php shortcode from Syntax Highlighter Evolved.
+	 *
+	 * @param array|string $attr    Shortcode attributes array or empty string.
+	 * @param string       $content Shortcode content.
+	 * @param string       $tag     Shortcode name.
+	 * @return string
+	 */
+	public static function do_shortcode_php( $attr, $content, $tag ) {
+		$attr = is_array( $attr ) ? $attr : array();
+		$attr['lang'] = 'php';
+
+		return self::do_shortcode_code( $attr, $content, $tag );
+	}
+
+	/**
+	 * Render the js shortcode using the Code Syntax Block syntax.
+	 *
+	 * This is a workaround for user-submitted code, which used the js shortcode from Syntax Highlighter Evolved.
+	 *
+	 * @param array|string $attr    Shortcode attributes array or empty string.
+	 * @param string       $content Shortcode content.
+	 * @param string       $tag     Shortcode name.
+	 * @return string
+	 */
+	public static function do_shortcode_js( $attr, $content, $tag ) {
+		$attr = is_array( $attr ) ? $attr : array();
+		$attr['lang'] = 'js';
+
+		return self::do_shortcode_code( $attr, $content, $tag );
+	}
+
+	/**
+	 * Render the css shortcode using the Code Syntax Block syntax.
+	 *
+	 * This is a new shortcode, but built to mirror the above two, `js` & `php`.
+	 *
+	 * @param array|string $attr    Shortcode attributes array or empty string.
+	 * @param string       $content Shortcode content.
+	 * @param string       $tag     Shortcode name.
+	 * @return string
+	 */
+	public static function do_shortcode_css( $attr, $content, $tag ) {
+		$attr = is_array( $attr ) ? $attr : array();
+		$attr['lang'] = 'css';
+
+		return self::do_shortcode_code( $attr, $content, $tag );
+	}
+
+	/**
+	 * Render the code shortcode using the Code Syntax Block syntax.
+	 *
+	 * This is used in the handbooks content.
+	 *
+	 * @param array|string $attr    Shortcode attributes array or empty string.
+	 * @param string       $content Shortcode content.
+	 * @param string       $tag     Shortcode name.
+	 * @return string
+	 */
+	public static function do_shortcode_code( $attr, $content, $tag ) {
+		// Use an allowedlist of languages, falling back to PHP.
+		// This should account for all languages used in the handbooks.
+		$lang_list = [ 'js', 'json', 'sh', 'bash', 'html', 'css', 'scss', 'php', 'markdown', 'yaml' ];
+		$lang = in_array( $attr['lang'], $lang_list ) ? $attr['lang'] : 'php';
+
+		$content = self::_trim_code( $content );
+		// Hides numbers if <= 4 lines of code (last line has no linebreak).
+		$show_line_numbers = substr_count( $content, "\n" ) > 3;
+
+		// Shell is flagged with `sh` or `bash` in the handbooks, but Prism uses `shell`.
+		if ( 'sh' === $lang || 'bash' === $lang ) {
+			$lang = 'shell';
+		}
+
+		return do_blocks(
+			sprintf(
+				'<!-- wp:code {"lineNumbers":$3$s} --><pre class="wp-block-code"><code lang="%1$s" class="language-%1$s %4$s">%2$s</code></pre><!-- /wp:code -->',
+				$lang,
+				$content,
+				$show_line_numbers ? 'true' : 'false',
+				$show_line_numbers ? 'line-numbers' : ''
+			)
+		);
+	}
+
+	/**
+	 * Trim off any extra space, including initial new lines.
+	 * Strip out <br /> and <p> added by WordPress.
+	 *
+	 * @param string $content Shortcode content.
+	 * @return string
+	 */
+	public static function _trim_code( $content ) {
+		$content = preg_replace( '/<br \/>/', '', $content );
+		$content = preg_replace( '/<\/p>\s*<p>/', "\n\n", $content );
+		// Trim everything except leading spaces.
+		$content = trim( $content, "\n\r\t\v\x00" );
+		return $content;
+	}
 } // DevHub_Formatting
 
 DevHub_Formatting::init();
