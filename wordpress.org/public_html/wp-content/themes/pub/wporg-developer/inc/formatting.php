@@ -599,9 +599,9 @@ class DevHub_Formatting {
 				if ( $name ) {
 					$new_text .= "<code>{$name}</code>";
 				}
-				$new_text .= "<span class='type'>{$type}</span><div class='desc'>{$description}</div>";
+				$new_text .= "<span class='type'>{$type}</span><div class='desc'>{$description}";
 				if ( ! $skip_closing_li ) {
-					$new_text .= '</li>';
+					$new_text .= '</div></li>';
 				}
 				$new_text .= "\n";
 			}
