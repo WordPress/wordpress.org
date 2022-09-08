@@ -103,7 +103,7 @@ class Uploads {
 		/* After upload, after photo validates. */
 
 		// Disable jpeg to webp converstion.
-		add_filter( 'wp_upload_image_mime_transforms',  [ __CLASS__, 'disable_jpeg_to_wepb' ] );
+		add_filter( 'wp_upload_image_mime_transforms',  [ __CLASS__, 'disable_jpeg_to_webp' ] );
 
 		// Set post fields for photo.
 		add_action( 'wporg_photos_upload_success',      [ __CLASS__, 'set_post_fields' ], 100, 3 );
@@ -454,12 +454,12 @@ class Uploads {
 	}
 
 	/**
-	 * Validates a photo after being uploading.
+	 * Validates a photo after being uploaded.
 	 *
 	 * If valid, then triggers a success action.
 	 *
-	 * Note: Validations at this point should likely involve needing the actual
-	 * photo file. If possible, perform upload permission checks in
+	 * Note: Validations at this point probably involves needing the actual
+	 * photo file. If possible, perform upload permission checks earlier in
 	 * `can_proceed_with_upload()`.
 	 *
 	 * @param int[] $media_ids Media IDs for uploaded files.
@@ -795,7 +795,7 @@ class Uploads {
 	}
 
 	/**
-	 * Disable conversion of uploaded jpegs to webp.
+	 * Disables conversion of uploaded jpegs to webp.
 	 *
 	 * This is required as webp appears to use a lot of memory for conversion, often running out
 	 * of memory during upload on WordPress.org. Additionally, we don't use/expose webp at present.
@@ -807,7 +807,7 @@ class Uploads {
 	 * @param array $transforms The mime type transforms for uploads.
 	 * @return array The modified $transforms.
 	 */
-	public static function disable_jpeg_to_wepb( $transforms ) {
+	public static function disable_jpeg_to_webp( $transforms ) {
 		if ( isset( $transforms['image/jpeg'] ) ) {
 			$transforms['image/jpeg'] = [ 'image/jpeg' ];
 		}
