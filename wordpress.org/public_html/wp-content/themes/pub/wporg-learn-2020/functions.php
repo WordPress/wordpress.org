@@ -25,6 +25,9 @@ function setup() {
 	// The parent wporg theme is designed for use on wordpress.org/* and assumes locale-domains are available.
 	// Remove hreflang support.
 	remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
+
+	add_filter( 'mkaz_code_syntax_force_loading', '__return_true' );
+	add_filter( 'mkaz_prism_css_path', '__return_empty_string' ); // Disable default styles to avoid conflicts.
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 
@@ -58,6 +61,24 @@ function wporg_learn_scripts() {
 		true
 	);
 
+	wp_enqueue_script(
+		'wporg-developer-function-reference',
+		get_stylesheet_directory_uri() . '/js/function-reference.js',
+		array( 'jquery', 'wp-a11y' ),
+		filemtime( __DIR__ . '/js/function-reference.js' ),
+		true
+	);
+	wp_localize_script(
+		'wporg-developer-function-reference',
+		'wporgFunctionReferenceI18n',
+		array(
+			'copy'   => __( 'Copy', 'wporg' ),
+			'copied' => __( 'Code copied', 'wporg' ),
+			'expand'   => __( 'Expand code', 'wporg' ),
+			'collapse' => __( 'Collapse code', 'wporg' ),
+		)
+	);
+
 	// Temporarily disabling the enhanced dropdowns for workshop filtering, see https://github.com/WordPress/Learn/issues/810
 
 	// phpcs:ignore
@@ -82,15 +103,6 @@ function wporg_learn_scripts() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'wporg_learn_scripts' );
-
-/**
- * The Header for our theme.
- *
- * @package WPBBP
- */
-function wporg_get_global_header() {
-	require WPORGPATH . 'header.php';
-}
 
 /**
  * Get the taxonomies associated to workshop
