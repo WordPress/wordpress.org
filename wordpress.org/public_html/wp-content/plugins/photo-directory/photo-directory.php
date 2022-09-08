@@ -27,6 +27,7 @@ require_once __DIR__ . '/inc/search.php';
 require_once __DIR__ . '/inc/settings.php';
 require_once __DIR__ . '/inc/template-tags.php';
 require_once __DIR__ . '/inc/uploads.php';
+require_once __DIR__ . '/inc/user.php';
 require_once __DIR__ . '/inc/google-cloud-storage-stream-metadata.php';
 require_once __DIR__ . '/inc/google-cloud-storage.php';
 require_once __DIR__ . '/inc/google-vision-api.php';

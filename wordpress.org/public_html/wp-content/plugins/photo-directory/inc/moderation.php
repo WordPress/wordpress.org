@@ -462,7 +462,7 @@ https://wordpress.org/photos/
 		$flags = [];
 
 		// Flag if this is user's first submission.
-		$published_photos_count = Photo::count_user_published_photos( $post->post_author );
+		$published_photos_count = User::count_published_photos( $post->post_author );
 		if ( ! $published_photos_count ) {
 			$flags[ 'no published photo' ] = 'possible';
 		}

@@ -423,48 +423,6 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	}
 
 	/**
-	 * Returns a count of published photos for a user.
-	 *
-	 * @param int $user_id Optional. The user ID. If not defined, assumes global
-	 *                     author. Default false.
-	 * @return int
-	 */
-	public static function count_user_published_photos( $user_id = false ) {
-		if (  ! $user_id ) {
-			global $authordata;
-
-			$user_id = $authordata->ID;
-		}
-
-		return count_user_posts( $user_id, Registrations::get_post_type(), true );
-	}
-
-	/**
-	 * Returns a count of pending photos for a user.
-	 *
-	 * @param int $user_id Optional. The user ID. If not defined, assumes global
-	 *                     author. Default false.
-	 * @return int
-	 */
-	public static function count_user_pending_photos( $user_id = false ) {
-		if (  ! $user_id ) {
-			global $authordata;
-
-			$user_id = $authordata->ID;
-		}
-
-		$pending = get_posts( [
-			'fields'         => 'ids',
-			'posts_per_page' => -1,
-			'author'         => $user_id,
-			'post_status'    => 'pending',
-			'post_type'      => Registrations::get_post_type(),
-		] );
-
-		return count( $pending );
-	}
-
-	/**
 	 * Returns the full photo analysis data from cache or via API call.
 	 *
 	 * @param int  $image_id The ID of the attachment that is the photo.

@@ -56,23 +56,6 @@ class Admin {
 	}
 
 	/**
-	 * Returns the count of the number of photo submissions from a user that were rejected.
-	 *
-	 * @param int $user_id The user ID.
-	 * @return int
-	 */
-	public static function count_user_rejections( $user_id ) {
-		global $wpdb;
-
-		return (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s AND post_author = %d",
-			Registrations::get_post_type(),
-			Rejection::get_post_status(),
-			$user_id
-		) );
-	}
-
-	/**
 	 * Outputs admin notices.
 	 */
 	public static function add_notice_if_killswitch_enabled() {
@@ -532,12 +515,12 @@ class Admin {
 		$display_name .= '<div class="user-approved-count">'
 		. sprintf(
 			__( 'Approved: <strong>%s</strong>', 'wporg-photos' ),
-			sprintf( '<a href="%s">%d</a>', $approved_link, Photo::count_user_published_photos() )
+			sprintf( '<a href="%s">%d</a>', $approved_link, User::count_published_photos() )
 		)
 		. "</div>\n";
 
 		// Show number of pending photos if there are any.
-		$pending_count = Photo::count_user_pending_photos();
+		$pending_count = User::count_pending_photos();
 		if ( $pending_count ) {
 			$pending_link = add_query_arg( [
 				'post_type'   => Registrations::get_post_type(),
@@ -762,7 +745,7 @@ class Admin {
 		}
 
 		$author = get_user_by( 'id', $post->post_author );
-		$photos_count = Photo::count_user_published_photos( $author->ID );
+		$photos_count = User::count_published_photos( $author->ID );
 		$account_created = explode( ' ', $author->user_registered )[0];
 		?>
 		<style>
@@ -800,7 +783,7 @@ class Admin {
 						);
 					?></li>
 					<li><?php
-						$rejected_count = self::count_user_rejections( $author->ID );
+						$rejected_count = User::count_rejected_photos( $author->ID );
 						$link_args = [
 							'post_type'   => Registrations::get_post_type(),
 							'post_status' => Rejection::get_post_status(),
@@ -815,7 +798,7 @@ class Admin {
 						);
 					?></li>
 					<li><?php
-						$pending_count = Photo::count_user_pending_photos( $author->ID );
+						$pending_count = User::count_pending_photos( $author->ID );
 						$link_args = [
 							'post_type'   => Registrations::get_post_type(),
 							'post_status' => 'pending',
