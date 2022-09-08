@@ -41,7 +41,7 @@ class Settings {
 			__( 'Prevent all photo uploads?', 'wporg-photos' ),
 			[ __CLASS__, 'display_option' ],
 			'media',
-			'uploads'
+			is_multisite() ? 'default' : 'uploads'
 		);
 	}
 
