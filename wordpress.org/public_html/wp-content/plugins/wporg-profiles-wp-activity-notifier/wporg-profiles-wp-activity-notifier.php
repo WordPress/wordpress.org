@@ -60,7 +60,6 @@ class WPOrg_WP_Activity_Notifier {
 	public function init() {
 		add_action( 'transition_post_status',    array( $this, 'maybe_notify_new_published_post'   ), 10, 3 );
 		add_action( 'post_updated',              array( $this, 'maybe_notify_updated_post'         ), 10, 3 );
-		add_action( 'wp_insert_post',         	 array( $this, 'insert_post' ),                       10, 2 );
 		add_action( 'transition_comment_status', array( $this, 'maybe_notify_new_approved_comment' ), 10, 3 );
 		add_action( 'wp_insert_comment',         array( $this, 'insert_comment' ),                    10, 2 );
 
@@ -100,8 +99,6 @@ class WPOrg_WP_Activity_Notifier {
 
 		// All actions can notify about handbooks.
 		$notifiable_post_types = array( 'handbook' );
-		// wp-parser-* post types belong to developer.wordpress.org.
-		$notifiable_post_types = array( 'post', 'handbook', 'wporg_workshop', 'lesson-plan', 'course', 'wp-parser-hook', 'wp-parser-function', 'wp-parser-method', 'wp-parser-class' );
 
 		// There's a large number of custom handbooks, and more will be created in the future.
 		if ( str_contains( $post->post_type, '-handbook' ) ) {
@@ -139,19 +136,6 @@ class WPOrg_WP_Activity_Notifier {
 			$notifiable = false;
 		} elseif ( $post->_xpost_original_permalink || str_starts_with( $post->post_name, 'xpost-' ) ) {
 			$notifiable = false;
-		if ( is_plugin_active( 'subscribers-only.php' ) ) {
-			$notifiable = false;
-		} elseif ( ! in_array( $post->post_type, $notifiable_post_types, true ) ) {
-			$notifiable = false;
-		} elseif ( 'publish' !== $post->post_status ) {
-			$notifiable = false;
-		} elseif ( ! empty( $post->post_password ) ) {
-			$notifiable = false;
-		} elseif ( $post->wporg_markdown_source || ! $post->post_author ) {
-			// Some Handbook posts are automatically created and don't have an author.
-			$notifiable = false;
-		} elseif ( $post->_xpost_original_permalink || str_starts_with( $post->post_name, 'xpost-' ) ) {
-			$notifiable = false;
 		} else {
 			$notifiable = true;
 		}
@@ -167,16 +151,36 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Post $post The post.
 	 */
 	public function maybe_notify_new_published_post( $new_status, $old_status, $post ) {
-		if ( ! $this->is_post_notifiable( $post ) ) {
+		if ( 'publish' != $new_status ) {
 			return;
 		}
 
+		/**
+		 * Gutenberg sends two requests when we hit the Publish/Update button.
+		 * https://github.com/WordPress/wordpress.org/pull/84#discussion_r919290748
+		 *
+		 * For the first request, $old_status would be different from $new_status,
+		 * if the post, for example, is changed from draft to published.
+		 * For the second request (from the same Publish/Update button hit),
+		 * $old_status would be the same as $new_status in the same example,
+		 * both their values would be 'publish'.
+		 *
+		 * This brings the result that only the first request from Gutenberg could
+		 * pass the condition if ($old_status == $new_status) { return; }.
+		 *
+		 * However, only the second request would carry the data from meta boxes,
+		 * which is what we need here, so we need to put this logic above that
+		 * condition.
+		 */
 		if ( 'wporg_workshop' === $post->post_type ) {
 			$this->notify_workshop_presenter( $post );
 		}
 
+		if ( $old_status == $new_status ) {
+			return;
+		}
+
 		if ( ! $this->is_post_notifiable( $post, 'publish' ) ) {
-		if ( $old_status === $new_status ) {
 			return;
 		}
 
@@ -291,7 +295,7 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Comment $comment Comment.
 	 */
 	public function insert_comment( $id, $comment ) {
-		if ( 1 === $comment->comment_approved ) {
+		if ( 1 == $comment->comment_approved ) {
 			$this->maybe_notify_new_approved_comment( 'approved', '', $comment );
 		}
 	}
@@ -304,7 +308,7 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Comment $comment    The comment.
 	 */
 	public function maybe_notify_new_approved_comment( $new_status, $old_status, $comment ) {
-		if ( 'approved' !== $new_status ) {
+		if ( 'approved' != $new_status ) {
 			return;
 		}
 
@@ -360,8 +364,6 @@ class WPOrg_WP_Activity_Notifier {
 	 *
 	 * @param string $activity The activity type. One of: create-topic, remove-topic.
 	 * @param int    $topic_id Topic ID.
-	 * @param string $activity  The activity type. One of: create-topic, remove-topic.
-	 * @param int    $topic_id  Topic ID.
 	 */
 	private function notify_forum_topic_payload( $activity, $topic_id ) {
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
@@ -427,8 +429,6 @@ class WPOrg_WP_Activity_Notifier {
 	 *
 	 * @param string $activity The activity type. One of: create-reply, remove-reply.
 	 * @param int    $reply_id Reply ID.
-	 * @param string $activity  The activity type. One of: create-reply, remove-reply.
-	 * @param int    $reply_id  Reply ID.
 	 */
 	private function notify_forum_reply_payload( $activity, $reply_id ) {
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
@@ -550,7 +550,10 @@ class WPOrg_WP_Activity_Notifier {
 				}
 				$text .= '&hellip;';
 			}
+		} else { // Else trim by words.
+			$text = wp_trim_words( $text, $length );
 		}
+
 		return $text;
 	}
 }
