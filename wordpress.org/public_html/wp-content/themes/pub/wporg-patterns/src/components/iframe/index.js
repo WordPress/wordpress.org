@@ -107,6 +107,11 @@ function Iframe(
         /* Override the Twenty Twenty-One sizes with our custom sizes. */
         --responsive--aligndefault-width: 800px;
         --responsive--alignwide-width: 1000px;
+        --global--color-background: #ffffff;
+        --global--color-primary: #000;
+        --global--color-secondary: #000;
+        --button--color-background: #000;
+        --button--color-text-hover: #000; 
     }
     .${ BODY_CLASS_NAME } {
         padding: 0;
