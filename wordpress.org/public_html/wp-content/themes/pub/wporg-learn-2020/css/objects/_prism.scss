@@ -1,19 +1,22 @@
 /**
  * Custom theme for learn.wordpress.org
  *
- * Forked from developer.wordpress.org
+ * ⚠️  Forked from developer.wordpress.org. Please make changes in the "Learn Customizations" section at the
+ * bottom, to make syncing upstream easier.
+ *
  * Forked from a11y-dark theme by ericwbailey, which was based on the okaidia theme.
  *
  * https://github.com/PrismJS/prism-themes/blob/master/themes/prism-a11y-dark.css
  * https://github.com/PrismJS/prism/blob/gh-pages/themes/prism-okaidia.css
  */
 
+/* stylelint-disable value-keyword-case */
 $code-font:
 	Hack, "Fira Code", Consolas, Menlo, Monaco, "Andale Mono",
 	"Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono",
 	"Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L",
 	"Courier New", Courier, monospace;
-
+/* stylelint-enable value-keyword-case */
 code[class*="language-"],
 pre[class*="language-"] {
 	color: get-color(gray-100);
@@ -246,6 +249,20 @@ pre.line-numbers > code {
 /*
  * Learn customizations
  */
+
+/* stylelint-disable no-duplicate-selectors -- These are intentionally kept separate, see start of file. */
 .github-markdown pre.wp-block-code {
 	margin-top: 0;
+}
+
+.wp-code-block-button-container {
+	padding: 0.5rem;
+
+	button {
+		font-size: 0.8rem !important;
+	}
+
+	+ pre {
+		padding: 1em;
+	}
 }
