@@ -106,6 +106,9 @@ body {
 	text-indent: unset;
 }
 
+.gp-content .button {
+	margin: 0;
+}
 .gp-content .button:active {
 	transform: none;
 }
