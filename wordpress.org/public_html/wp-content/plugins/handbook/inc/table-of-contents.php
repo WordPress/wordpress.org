@@ -18,7 +18,7 @@ class WPorg_Handbook_TOC {
 			font-size: 0.75em;
 			order: 2;
 		}
-		.toc-heading a {
+		.toc-heading a:first-of-type {
 			color: inherit;
 			font-weight: inherit;
 			margin-left: -32px;
