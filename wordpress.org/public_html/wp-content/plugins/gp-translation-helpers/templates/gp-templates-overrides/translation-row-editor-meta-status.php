@@ -19,6 +19,7 @@
 				<?php endif; ?>
 				<?php if ( 'rejected' !== $translation->translation_status ) : ?>
 					<button class="reject" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Reject this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"><strong>&minus;</strong> <?php _ex( 'Reject', 'Action', 'glotpress' ); ?></button>
+					<button class="changesrequested" style="display: none;" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-changesrequested_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Request changes for this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"><strong>&minus;</strong> <?php _ex( 'Request changes', 'Action', 'glotpress' ); ?></button>
 				<?php endif; ?>
 				<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
 					<button class="fuzzy" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Mark this translation as fuzzy for further review.', 'glotpress' ); ?>"><strong>~</strong> <?php _ex( 'Fuzzy', 'Action', 'glotpress' ); ?></button>

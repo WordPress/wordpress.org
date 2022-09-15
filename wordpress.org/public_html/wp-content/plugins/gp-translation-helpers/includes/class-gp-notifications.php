@@ -34,9 +34,6 @@ class GP_Notifications {
 				if ( ( '0' !== $comment->comment_parent ) ) { // Notify to the thread only if the comment is in a thread.
 					self::send_emails_to_thread_commenters( $comment, $comment_meta );
 				}
-				if ( ( '0' === $comment->comment_parent ) && array_key_exists( 'reject_reason', $comment_meta ) && ( ! empty( $comment_meta['reject_reason'] ) ) ) {  // Notify a rejection without parent comments.
-					self::send_rejection_email_to_translator( $comment, $comment_meta );
-				}
 				$root_comment      = self::get_root_comment_in_a_thread( $comment );
 				$root_comment_meta = get_comment_meta( $root_comment->comment_ID );
 				if ( array_key_exists( 'comment_topic', $root_comment_meta ) ) {
@@ -49,6 +46,8 @@ class GP_Notifications {
 							self::send_emails_to_validators( $comment, $comment_meta );
 							break;
 					}
+				} elseif ( ( '0' === $comment->comment_parent ) ) {  // Notify an approval, rejection or fuzzy without parent comments.
+					self::send_action_email_to_translator( $comment, $comment_meta );
 				}
 			}
 		}
@@ -103,7 +102,7 @@ class GP_Notifications {
 	}
 
 	/**
-	 * Sends the reject notification to the translator.
+	 * Sends the action notification (approval, rejection, fuzzy) to the translator.
 	 *
 	 * @since 0.0.2
 	 *
@@ -112,14 +111,16 @@ class GP_Notifications {
 	 *
 	 * @return void
 	 */
-	public static function send_rejection_email_to_translator( WP_Comment $comment, array $comment_meta ) {
+	public static function send_action_email_to_translator( WP_Comment $comment, array $comment_meta ) {
 		$translation_id = $comment_meta['translation_id'];
 		$translation    = GP::$translation->get( $translation_id );
-		$translator     = get_user_by( 'id', $translation->user_id_last_modified );
+		$translator     = get_user_by( 'id', $translation->user_id );
 		if ( false === $translator ) {
-			$translator = get_user_by( 'id', $translation->user_id );
+			$translator = get_user_by( 'id', $translation->user_id_last_modified );
 		}
-		self::send_emails( $comment, $comment_meta, array( $translator->user_email ) );
+		if ( false === $translator ) {
+			self::send_emails( $comment, $comment_meta, array( $translator->user_email ) );
+		}
 	}
 
 	/**
@@ -420,6 +421,20 @@ class GP_Notifications {
 					$output .= '- ' . wp_kses( sprintf( __( '<strong>Translation string:</strong> %s', 'glotpress' ), $translation->translation_0 ), array( 'strong' => array() ) ) . '<br/>';
 				}
 			}
+		}
+		if ( isset( $comment_meta['reject_reason'][0] ) && ! empty( maybe_unserialize( $comment_meta['reject_reason'][0] ) ) ) {
+			$reasons         = array();
+			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+			$reasons         = array_map(
+				function( $reason ) use ( $comment_reasons ) {
+					if ( array_key_exists( $reason, $comment_reasons ) ) {
+						return $comment_reasons[ $reason ]['name'];
+					}
+				},
+				maybe_unserialize( $comment_meta['reject_reason'][0] )
+			);
+			/* translators: The reason(s) for rejection. */
+			$output .= '- ' . wp_kses( sprintf( __( '<strong>Reason(s):</strong> %s', 'glotpress' ), implode( ', ', $reasons ) ), array( 'strong' => array() ) ) . '<br/>';
 		}
 		/* translators: The comment made. */
 		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) ) . '<br/>';

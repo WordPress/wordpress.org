@@ -147,7 +147,7 @@ h6 {
 .modal-btn {
 	float: right;
 }
-.gp-btn-style:hover, #respond form .form-submit .submit:hover {
+.gp-btn-style:hover, #respond form .form-submit .submit:hover, .other-comments:hover{
 	background-color: var(--gp-color-btn-primary-hover-bg);
 	border-color: var(--gp-color-btn-primary-hover-border);
 	color: var(--gp-color-btn-primary-hover-text);
@@ -247,4 +247,20 @@ div#TB_ajaxWindowTitle {
 
 a.comment-reply-link {
 	margin: 2px !important;
+}
+.other-comments{
+	font-size: .7em;
+	background: #0285ba;
+	color: #fff !important;
+	padding: 3px;
+	text-decoration: none;
+	display: inline-block;
+	text-decoration: none !important;
+	margin-top: 8px;
+}
+.discussions-table-head{
+	background-color: var(--gp-color-canvas-subtle) !important;
+}
+.bulk-comment-item{
+	font-size: .8em;
 }

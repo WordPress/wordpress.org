@@ -26,6 +26,45 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
+	 * Loads the 'discussions-dashboard' template.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string|null $locale_slug          Optional. The locale slug. E.g. "es".
+	 *
+	 * @return void
+	 */
+	public function discussions_dashboard( $locale_slug ) {
+		if ( ! is_user_logged_in() ) {
+			$this->die_with_404();
+		}
+		$all_comments_count  = count(
+			get_comments(
+				array(
+					'meta_key'   => 'locale',
+					'meta_value' => $locale_slug,
+				)
+			)
+		);
+		$comments_per_page   = 12;
+		$total_pages         = (int) ceil( $all_comments_count / $comments_per_page );
+		$page_num_from_query = get_query_var( 'page' );
+		$page_number         = ( ! empty( $page_num_from_query ) && is_int( $page_num_from_query ) ) ? $page_num_from_query : 1;
+		$gp_locale           = GP_Locales::by_slug( $locale_slug );
+		$args                = array(
+			'number'     => $comments_per_page,
+			'meta_key'   => 'locale',
+			'meta_value' => $locale_slug,
+			'paged'      => $page_number,
+		);
+
+		$comments_query = new WP_Comment_Query( $args );
+		$comments       = $comments_query->comments;
+
+		$this->tmpl( 'discussions-dashboard', get_defined_vars() );
+	}
+
+	/**
 	 * Loads the 'original-permalink' template.
 	 *
 	 * @since 0.0.2

@@ -40,6 +40,14 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public $load_inline = true;
 
 	/**
+	 * Indicates whether we're currently using a temporary post.
+	 *
+	 * @since 0.0.2
+	 * @var object|null
+	 */
+	public static $temporary_post = null;
+
+	/**
 	 * The post type used to store the comments.
 	 *
 	 * @since 0.0.1
@@ -89,6 +97,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function after_constructor() {
 		$this->register_post_type_and_taxonomy();
 		add_filter( 'pre_comment_approved', array( $this, 'comment_moderation' ), 10, 2 );
+		add_filter( 'comments_open', array( $this, 'comments_open_override' ), 10, 2 );
 		add_filter( 'map_meta_cap', array( $this, 'map_comment_meta_caps' ), 10, 4 );
 		add_filter( 'user_has_cap', array( $this, 'give_user_read_cap' ), 10, 3 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
@@ -252,6 +261,28 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
+	 * Enable showing the comment form on non-existing posts.
+	 *
+	 * @param      boolean $open     Whether the comments are open or not.
+	 * @param      int     $post_id  The post id.
+	 *
+	 * @return     bool    Whether the comments are open or not.
+	 */
+	public function comments_open_override( $open, $post_id ) {
+		if ( self::is_temporary_post_id( $post_id ) ) {
+			return true;
+		}
+
+		// If we just had to define a temporary post, the post id can also be 0.
+		// This is due to a code change in core in this commit:
+		// https://github.com/WordPress/WordPress/commit/1069ac4afda821742cf7f600412aacc139013a55
+		if ( self::$temporary_post && 0 === $post_id ) {
+			return true;
+		}
+		return $open;
+	}
+
+	/**
 	 * Updates the comment's approval status before it is set.
 	 *
 	 * It only updates the approved status if the user has previous translations.
@@ -365,7 +396,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 */
 	public static function maybe_get_temporary_post( $post_id ) {
 		if ( self::is_temporary_post_id( $post_id ) ) {
-			return new Gth_Temporary_Post( $post_id );
+			self::$temporary_post = new Gth_Temporary_Post( $post_id );
+			return self::$temporary_post;
 		}
 
 		return get_post( $post_id );
@@ -526,7 +558,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'post'                 => $post,
 				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
 				'locale_slug'          => $this->data['locale_slug'],
-				'original_permalink'   => $this->data['original_permalink'],
 				'original_id'          => $this->data['original_id'],
 				'project'              => $this->data['project'],
 				'translation_set_slug' => $this->data['translation_set_slug'],
@@ -654,6 +685,12 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			'replyto'        => sprintf( $args['reply_to_text'], $comment->comment_author ),
 		);
 
+		if ( get_option( 'page_comments' ) ) {
+			$permalink = str_replace( '#comment-' . $comment->comment_ID, '', get_comment_link( $comment ) );
+		} else {
+			$permalink = get_permalink( $post->ID );
+		}
+
 		$data_attribute_string = '';
 
 		foreach ( $data_attributes as $name => $value ) {
@@ -671,7 +708,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 						'unapproved'      => false,
 						'moderation-hash' => false,
 					),
-					$args['original_permalink']
+					$permalink
 				)
 			) . '#' . $args['respond_id'],
 			$data_attribute_string,
