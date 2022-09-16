@@ -2339,6 +2339,14 @@ table.translations td.translation span.missing {
 	color: #46b450;
 }*/
 
+button.button.is-primary.approve,
+button.button.reject,
+button.button.changesrequested,
+button.button.fuzzy
+{
+	margin-bottom: 0.5rem;
+}
+
 button.reject strong {
 	color: #dc3232;
 }
