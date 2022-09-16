@@ -117,6 +117,7 @@
 			 * @param {document#event} event   The event.
 			 */
 			function toggleButtons( thisObj, event ) {
+				return;
 				var form = thisObj.closest( 'form' );
 				var commentText = form.find( 'textarea[name="feedback_comment"]' ).val();
 				var div = thisObj.closest( '.meta' );
@@ -152,6 +153,7 @@
 			 * @param {document#event} event   The event.
 			 */
 			function toggleModalButtons( thisObj, event ) {
+				return;
 				var form = thisObj.closest( 'form' );
 				var commentText = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 				var div = thisObj.closest( '#TB_ajaxContent' );
