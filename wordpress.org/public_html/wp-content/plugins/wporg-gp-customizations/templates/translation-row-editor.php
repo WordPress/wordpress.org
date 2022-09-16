@@ -252,6 +252,9 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 									<?php endif; ?>
 									<?php if ( 'rejected' !== $translation->translation_status ) : ?>
 										<button class="button reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject', 'glotpress' ); ?></button>
+										<?php if ( apply_filters( 'gp_enable_changesrequested_status', false ) ) : // todo: delete when we merge the gp-translation-helpers in GlotPress ?>
+											<button class="button changesrequested" style="display: none;" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-changes_requested_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Request changes for this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"><strong>&minus;</strong> <?php _ex( 'Request changes', 'Action', 'glotpress' ); ?></button>
+										<?php endif; ?>
 									<?php endif; ?>
 									<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
 										<button class="button fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
