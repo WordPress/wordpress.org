@@ -48,7 +48,6 @@ foreach ( $comments as $_comment ) {
 		$comments_by_post_id[ $_comment->comment_post_ID ] = array();
 	}
 
-
 	$comments_by_post_id[ $_comment->comment_post_ID ][] = $_comment;
 
 	if ( ! isset( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] ) ) {
@@ -59,21 +58,26 @@ foreach ( $comments as $_comment ) {
 }
 
 // If the referenced comment is not in the current batch of comments we need to re-add it.
-foreach ( $bulk_comments as $original_id => $_post_id ) {
-	if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
-		$linked_comment = $_comment->comment_content;
-		$parts          = wp_parse_url( $linked_comment );
-		$comment_id     = intval( str_replace( 'comment-', '', $parts['fragment'] ) );
-		if ( $comment_id ) {
-			$comments_by_post_id[ $_comment->comment_post_ID ][] = get_comment( $comment_id );
+foreach ( $bulk_comments as $original_id => $_comments ) {
+	foreach ( $_comments as $_comment ) {
+		if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
+			$linked_comment = $_comment->comment_content;
+			$parts          = wp_parse_url( $linked_comment );
+			$comment_id     = intval( str_replace( 'comment-', '', $parts['fragment'] ) );
+			if ( $comment_id ) {
+				$comments_by_post_id[ $_comment->comment_post_ID ][] = get_comment( $comment_id );
+				if ( ! isset( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] ) ) {
+					$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
+				}
+			}
 		}
 	}
 }
 
-uasort(
+uksort(
 	$comments_by_post_id,
 	function( $a, $b ) use ( $latest_comment_date_by_post_id ) {
-		return $latest_comment_date_by_post_id[ $b->comment_post_ID ] <=> $latest_comment_date_by_post_id[ $a->comment_post_ID ];
+		return $latest_comment_date_by_post_id[ $b ] <=> $latest_comment_date_by_post_id[ $a ];
 	}
 );
 
