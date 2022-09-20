@@ -847,6 +847,12 @@ div.trac-content {
 	box-shadow: none;
 }
 
+/* There's already a border on the title, no need for a border on links in titles */
+.wikipage h2 :link, .wikipage h2 :visited,
+.wikipage h3 :link, .wikipage h3 :visited {
+	border-bottom: none;
+}
+
 /* Gravatars and Comments */
 span.avatar img,
 table.properties img.avatar {
