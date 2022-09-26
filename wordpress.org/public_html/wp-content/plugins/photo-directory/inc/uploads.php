@@ -891,7 +891,7 @@ class Uploads {
 					$description_shortcode,
 					esc_attr( __( 'Description (optional)', 'wporg-photos' ) ),
 					self::MAX_LENGTH_DESCRIPTION,
-					esc_attr( sprintf( __( 'Maximum of %d characters.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
+					esc_attr( sprintf( __( 'Maximum of %d characters. No HTML.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
 				)
 				. '<div class="upload-checkbox-wrapper">' . "\n";
 
