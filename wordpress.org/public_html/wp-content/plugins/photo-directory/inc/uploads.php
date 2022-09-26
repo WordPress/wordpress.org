@@ -394,6 +394,15 @@ class Uploads {
 				case 'too-many-files':
 					$rejection = __( 'You can only upload one photo at a time.', 'wporg-photos' );
 					break;
+				case 'upload-error':
+					$rejection = __( 'There has been an error handling this submission. Feel free to try again, but if it persists try back again later.', 'wporg-photos' );
+					break;
+				case 'upload-error-partial':
+					$rejection = __( 'There has been an error with this submission and it has only partially uploaded. Feel free to try again, but if it persists try back again later.', 'wporg-photos' );
+					break;
+				case 'upload-error-unknown':
+					$rejection = __( 'There has been an unknown error handling this submission. Feel free to try again, but if it persists try back again later.', 'wporg-photos' );
+					break;
 			}
 			unset( $_COOKIE['wporg_photos_reject_reason'] );
 		}
@@ -522,6 +531,16 @@ class Uploads {
 				case UPLOAD_ERR_INI_SIZE:
 				case UPLOAD_ERR_FORM_SIZE:
 					return 'file-too-large';
+				case UPLOAD_ERR_NO_FILE:
+					return 'no-file-uploaded';
+				case UPLOAD_ERR_PARTIAL:
+					return 'upload-error-partial';
+				case UPLOAD_ERR_NO_TMP_DIR:
+				case UPLOAD_ERR_CANT_WRITE:
+				case UPLOAD_ERR_EXTENSION:
+					return 'upload-error';
+				default:
+					return 'upload-error-unknown';
 			}
 		}
 
