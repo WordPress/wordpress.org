@@ -241,7 +241,6 @@ function hreflang_link_attributes() {
 		'pcd',
 		'pcm',
 		'rhg',
-		'roa',
 		'rup',
 		'sah',
 		'sc-it',
@@ -254,6 +253,7 @@ function hreflang_link_attributes() {
 		'twd',
 		'ty-tj',
 		'tzm',
+		'vec',
 		'zgh',
 	);
 

@@ -1311,7 +1311,6 @@ function wporg_themes_add_hreflang_link_attributes() {
 		'pcd',
 		'pcm',
 		'rhg',
-		'roa',
 		'rup',
 		'sah',
 		'sc-it',
@@ -1324,6 +1323,7 @@ function wporg_themes_add_hreflang_link_attributes() {
 		'twd',
 		'ty-tj',
 		'tzm',
+		'vec',
 		'zgh',
 	);
 

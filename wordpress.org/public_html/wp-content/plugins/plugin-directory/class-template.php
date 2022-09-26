@@ -941,7 +941,6 @@ class Template {
 			'pcd',
 			'pcm',
 			'rhg',
-			'roa',
 			'rup',
 			'sah',
 			'sc-it',
@@ -954,6 +953,7 @@ class Template {
 			'twd',
 			'ty-tj',
 			'tzm',
+			'vec',
 			'zgh',
 		);
 
