@@ -269,6 +269,21 @@ class Uploads {
 					),
 					'max_file_size' => self::get_maximum_photo_file_size(),
 					'min_file_size' => self::get_minimum_photo_file_size(),
+
+					// File dimensions.
+					'err_file_too_long'     => sprintf(
+						/** translators: %d: The maximum number of pixels. */
+						__( 'The selected file cannot be longer in either length or width than %dpx.', 'wporg-photos' ),
+						self::big_image_size_threshold( 0 )
+					),
+					'err_file_too_short'    => sprintf(
+						/** translators: %d: The minimum number of pixels. */
+						__( 'The selected file must be longer in both length and width than %dpx.', 'wporg-photos' ),
+						self::get_minimum_photo_dimension()
+					),
+					'max_file_dimension' => self::big_image_size_threshold( 0 ),
+					'min_file_dimension' => self::get_minimum_photo_dimension(),
+					'msg_validating_dimensions' => __( 'Validating photo dimensions&hellip;', 'wporg-photos' ),
 				]
 			);
 		}
@@ -382,6 +397,18 @@ class Uploads {
 					$rejection = sprintf(
 						__( 'The file size for your submission is too large. Please submit a photo smaller than %d MB in size.', 'wporg-photos' ),
 						self::get_maximum_photo_file_size( false )
+					);
+					break;
+				case 'file-too-long':
+					$rejection = sprintf(
+						__( 'Your submission is too large. Please submit a photo with length and width each smaller than %dpx.', 'wporg-photos' ),
+						self::big_image_size_threshold( 0 )
+					);
+					break;
+				case 'file-too-short':
+					$rejection = sprintf(
+						__( 'Your submission is too small. Please submit a photo with length and width each larger than %dpx.', 'wporg-photos' ),
+						self::get_minimum_photo_dimension()
 					);
 					break;
 				case 'file-too-small':
@@ -578,6 +605,16 @@ class Uploads {
 		// Check image type.
 		if ( ! in_array( $image_type, [ IMG_JPG, IMG_JPEG ] ) ) {
 			return 'file-not-jpg';
+		}
+
+		// Check image dimensions.
+		$max_dimension = self::big_image_size_threshold( 0 );
+		$min_dimension = self::get_minimum_photo_dimension();
+		if ( $width > $max_dimension || $length > $max_dimension ) {
+			return 'file-too-long';
+		}
+		if ( $width < $min_dimension || $length < $min_dimension ) {
+			return 'file-too-short';
 		}
 
 		if ( ! isset( $_POST['photo_copyright'] ) || ! $_POST['photo_copyright'] ) {
