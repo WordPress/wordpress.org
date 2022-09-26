@@ -1,4 +1,7 @@
-function photoSubmitLoaded() {
+/**
+ * Initializes things related to the photo upload form.
+ */
+function photoSubmitInit() {
 
 	// Remove query parameters added by Frontend Uploader.
 	const photo_upload_url = new URL(document.location);
@@ -28,24 +31,154 @@ function photoSubmitLoaded() {
 	if ( photo_upload_field ) {
 		// Add custom validation for upload file size.
 		photo_upload_field.addEventListener( 'change', e => {
-			photoShowFileSizeError( photo_upload_field );
+			photoShowFileErrors( photo_upload_field );
 		} );
 	}
 
-	// Customize jQuery Validator, if still in use.
+	// Disable jQuery Validation, if still in use.
 	if ( window.jQuery && window.jQuery.validator ) {
-		// Customize error message for invalid file mimetype.
-		jQuery.validator.messages.accept = PhotoDir.err_invalid_mimetype;
+		jQuery( photo_upload_form ).validate().settings.ignore = "*";
 	}
+
+	// Show/remove error when any form field value is changed.
+	photoGetInputFields( photo_upload_form ).forEach( (input, i) => {
+		input.addEventListener( 'change', e => {
+			photoRemoveFieldError( e.target );
+		} );
+	} );
 
 	// Check validity of form fields on submission.
 	photo_upload_form.addEventListener( 'submit', e => {
-		photoShowFileSizeError( photo_upload_field );
+		e.preventDefault();
+
+		const photo_upload_form = e.target;
+		const photo_upload_input = document.getElementById( 'ug_photo' );
+
+		// Clear any server notices from a previous submit.
+		document.querySelector( '.ugc-notice' )?.remove();
+
+		// Disable submit button.
+		photoSetSubmitButtonDisabled( photo_upload_form, true );
+
+		// Show errors for fields that aren't the file input.
+		photoShowFieldErrors( photo_upload_form );
+
+		// Show errors for file input field.
+		photoShowFileErrors( photo_upload_input );
+
+		// Scroll top of form into view.
+		document.getElementById( 'wporg-photo-upload' ).scrollIntoView( true );
+
 		if ( photo_upload_form.checkValidity() ) {
-			photo_upload_submit.disabled = true;
+			photo_upload_form.submit();
 		}
+
+		return false;
 	} );
 
+}
+
+/**
+ * Returns the input fields of interest for generic validation.
+ *
+ * Fields that have custom validation should be listed here as exclusions.
+ *
+ * @param {HTMLElement} form - The form.
+ * @returns {HTMLElement[]} Array of input fields.
+ */
+function photoGetInputFields( form ) {
+	return form.querySelectorAll( 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"])');
+}
+
+/**
+ * Sets the 'disabled' attribute for the submit button of a form.
+ *
+ * @param {HTMLElement} form - The form element.
+ * @param {Boolean} state - True if the button should be disabled, else false.
+ */
+function photoSetSubmitButtonDisabled( form, state ) {
+	const submitButton = form.querySelector('input[type="submit"]');
+
+	submitButton.disabled = !!state;
+}
+
+/**
+ * Shows errors for invalid input fields and remove previously reported errors
+ * for valid input fields.
+ *
+ * Does not handle input that are:
+ * - hidden
+ * - buttons
+ * - file
+ *
+ * @param {HTMLElement} form - A form.
+ */
+function photoShowFieldErrors( form ) {
+	photoGetInputFields( form ).forEach( (input, i) => {
+		photoShowFieldError( input );
+	} );
+}
+
+/**
+ * Removes an error message for the given input.
+ *
+ * @param {HTMLElement} field - An input field.
+ */
+function photoRemoveFieldError( field ) {
+	field.parentNode.querySelectorAll( '.' + PhotoDir.error_class ).forEach( errorEl => errorEl.remove() );
+	field.parentNode.querySelectorAll( '.processing' ).forEach( errorEl => errorEl.remove() );
+}
+
+/**
+ * Shows the error if the input field is invalid, or removes a previously
+ * reported error if the input field is valid.
+ *
+ * @param {HTMLElement} field - An input field.
+ * @returns {String} Error message, if any.
+ */
+function photoShowFieldError( field ) {
+	photoRemoveFieldError( field );
+
+	let errorMessage = field.validationMessage;
+	const cssClass = PhotoDir.error_class;
+
+	if ( ! errorMessage ) {
+		return '';
+	}
+
+	// Set custom error messages.
+	if ( field.validity.valueMissing ) {
+		errorMessage = PhotoDir.err_field_required;
+	}
+
+	errorEl = document.createElement( 'span' );
+	errorEl.setAttribute( 'class', cssClass );
+	errorEl.innerHTML = errorMessage;
+	field.insertAdjacentElement( 'afterend', errorEl );
+
+	return '';
+}
+
+/**
+ * Validates a file upload against multiple criteria.
+ *
+ * @param {HTMLElement} field - The HTML file input field element.
+ * @return {Boolean} True if an error was encountered, else false.
+ */
+async function photoCheckFileValidations( field ) {
+	let error = false;
+
+	// Check if no file chosen.
+	if ( ! error ) {
+		error = field.validity.valueMissing;
+	}
+
+	// Check for file size error.
+	if ( ! error ) {
+		error = photoCheckFileSize( field );
+	}
+
+	return error;
 }
 
 /**
@@ -56,7 +189,8 @@ function photoSubmitLoaded() {
  * If there is no file selected, or the file is of sufficient size, then any
  * existing custom validity message is cleared.
  *
- * @param {Object} field - The HTML file input field object.
+ * @param {HTMLElement} field - The HTML file input field element.
+ * @return {Boolean} True if file size is invalid, else false.
  */
 function photoCheckFileSize( field ) {
 	const MAX_SIZE = PhotoDir.max_file_size; // In bytes.
@@ -67,60 +201,52 @@ function photoCheckFileSize( field ) {
 	if ( files.length > 0 ) {
 		const file_size = files[0].size;
 
-		// Note: If changing the error message for either case, ensure the "// Don't show error message..."
-		// regex in `photoShowFileSizeError()` still matches them both.
 		if ( file_size >= MAX_SIZE ) {
 			field.setCustomValidity( PhotoDir.err_file_too_large );
-			return;
+			return true;
 		} else if ( file_size <= MIN_SIZE ) {
 			field.setCustomValidity( PhotoDir.err_file_too_small );
-			return;
+			return true;
 		}
 	}
 
 	// No custom constraint violation.
 	field.setCustomValidity('');
+	return false;
+}
+
+/**
+ * Shows error messages for the file upload input.
+ *
+ * @param {HTMLElement} field - The HTML file input field element.
+ */
+function photoShowFileErrors( field ) {
+	// Checks custom file input validation. A custom validity error message gets
+	// set on the field if a validation fails.
+	photoCheckFileValidations( field );
+	photoShowFileError( field );
 }
 
 /**
  * Handles the display of the error message for the file upload input.
  *
- * If the file input field has a file selected, it is checked to see if it is
- * too large or too small. An appropriate error message is shown in either case.
- * If no file is selected, or the file is of sufficient size, then no error is
- * shown and any existing error for the field is cleared.
- *
- * This pseudo-mimics and also works around the jQuery Validation handling that
- * doesn't play well with custom error reporting like this.
- *
- * @param {Object} field - The HTML file input field object.
+ * @param {HTMLElement} field - The HTML file input field element.
+ * @return {boolean} True if no error was shown, false if error was shown.
  */
-function photoShowFileSizeError( field ) {
-	// Check field for file size validation errors.
-	photoCheckFileSize( field );
-
+function photoShowFileError( field ) {
 	const errorMessage = field.validationMessage;
-	const errorId = `${field.id}-error`;
-	let errorEl = document.getElementById( errorId );
 
-	// Don't show error message for any other error.
-	if ( ! errorMessage || ! field.validity.customError || ! / MB\.$/.test( errorMessage ) ) {
-		errorEl?.remove();
+	// Remove any existing error message.
+	photoRemoveFieldError( field );
+
+	// Return if no legitimate custom error to report.
+	if ( ! errorMessage ) {
 		return;
 	}
 
-	if ( ! errorEl ) {
-		errorEl = document.createElement( 'label' );
-		field.after( errorEl );
-	}
-
-	errorEl.setAttribute( 'id', errorId );
-	errorEl.setAttribute( 'class', 'custom-error' );
-	errorEl.setAttribute( 'for', field.id );
-	errorEl.removeAttribute( 'style' );
-	errorEl.innerHTML = errorMessage;
+	photoShowFieldError( field );
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-	photoSubmitLoaded();
+	photoSubmitInit();
 } );

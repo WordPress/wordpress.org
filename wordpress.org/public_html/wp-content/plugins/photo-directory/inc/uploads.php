@@ -250,6 +250,11 @@ class Uploads {
 				'wporg-photos-submit',
 				'PhotoDir',
 				[
+					'error_class'           => 'error',
+
+					// Field required.
+					'err_field_required'    => __( 'This field is required.', 'wporg-photos' ),
+
 					// File extension.
 					'err_invalid_mimetype' => __( 'Please select a JPEG image.', 'wporg-photos' ),
 
