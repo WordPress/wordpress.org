@@ -1,19 +1,18 @@
 /**
  * WordPress dependencies
  */
-import { isRTL } from '@wordpress/i18n';
+import { __, isRTL } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Iframe from '../iframe';
 import getCardFrameHeight from '../../utils/get-card-frame-height';
 import useInView from '../../hooks/in-view';
 
 const VIEWPORT_WIDTH = 1200;
 
-function PatternThumbnail( { className, html } ) {
+export default function ( { url } ) {
 	const wrapperRef = useRef();
 	const [ frameHeight, setFrameHeight ] = useState( '1px' );
 	const [ frameScale, setFrameScale ] = useState( 0.3125 );
@@ -39,7 +38,7 @@ function PatternThumbnail( { className, html } ) {
 		window.addEventListener( 'resize', handleOnResize );
 
 		return () => {
-			window.addEventListener( 'resize', handleOnResize );
+			window.removeEventListener( 'resize', handleOnResize );
 		};
 	}, [] );
 
@@ -55,28 +54,19 @@ function PatternThumbnail( { className, html } ) {
 
 	return (
 		<div
-			className={ className }
 			ref={ wrapperRef }
 			style={ {
 				height: frameHeight,
+				overflow: 'hidden',
 			} }
-			tabIndex="-1"
 		>
-			<Iframe
-				className="pattern-grid__preview-iframe"
+			<iframe
+				className="pattern-grid__preview"
+				title={ __( 'Pattern Preview', 'wporg-patterns' ) }
+				tabIndex="-1"
 				style={ style }
-				bodyStyle={ 'overflow: hidden;' }
-				headHTML={ window.__editorStyles.html }
-			>
-				<div
-					className="entry-content"
-					dangerouslySetInnerHTML={ {
-						__html: shouldLoad ? html : '',
-					} }
-				/>
-			</Iframe>
+				src={ shouldLoad ? url : '' }
+			/>
 		</div>
 	);
 }
-
-export default PatternThumbnail;

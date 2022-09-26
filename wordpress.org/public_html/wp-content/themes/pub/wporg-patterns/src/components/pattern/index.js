@@ -56,7 +56,7 @@ const Pattern = ( { postId, userHasReported } ) => {
 			</header>
 			<PatternPreviewActions postId={ postId } showOptions={ isMyPattern } />
 			<div className="pattern-preview__container">
-				<PatternPreview blockContent={ pattern.content.rendered } />
+				<PatternPreview pattern={ pattern } />
 				<div className="pattern__meta">
 					<ReportPatternButton userHasReported={ userHasReported === 'true' } postId={ postId } />
 				</div>

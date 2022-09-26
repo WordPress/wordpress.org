@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import { Disabled } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -35,7 +36,7 @@ function PatternThumbnail( { pattern, showAvatar, showOptions } ) {
 				<a href={ pattern.link } rel="bookmark">
 					<span className="screen-reader-text">{ decodeEntities( pattern.title.rendered ) }</span>
 					<Disabled>
-						<Canvas className="pattern-grid__preview" html={ pattern.content.rendered } />
+						<Canvas url={ addQueryArgs( pattern.link, { view: true } ) } />
 					</Disabled>
 				</a>
 				{ statusLabel ? (

@@ -6,11 +6,8 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
 use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
 
-require_once __DIR__ . '/includes/inline-styles.php';
-
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets', 20 );
-add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
 add_action( 'wp_head', __NAMESPACE__ . '\add_social_meta_tags' );
 add_filter( 'document_title_parts', __NAMESPACE__ . '\set_document_title' );
 add_action( 'body_class', __NAMESPACE__ . '\body_class', 10, 2 );
@@ -119,48 +116,6 @@ function enqueue_assets() {
 	}
 
 	wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . "/js/navigation$suffix.js", array(), '20210331', true );
-}
-
-/**
- * Generate styles used in the block pattern preview iframe.
- * See https://github.com/WordPress/gutenberg/blob/6ad2a433769a4514fc52083e97aa47a0bc9edf07/lib/client-assets.php#L710
- */
-function generate_block_editor_styles_html() {
-	wp_enqueue_global_styles();
-	$handles = array( 'wp-block-library', 'global-styles' );
-
-	$block_registry = \WP_Block_Type_Registry::get_instance();
-
-	foreach ( $block_registry->get_all_registered() as $block_type ) {
-		if ( ! empty( $block_type->style ) ) {
-			$handles[] = $block_type->style;
-		}
-
-		if ( ! empty( $block_type->editor_style ) ) {
-			$handles[] = $block_type->editor_style;
-		}
-	}
-
-	$handles = array_unique( $handles );
-	$done    = wp_styles()->done;
-
-	ob_start();
-
-	wp_styles()->done = array();
-	wp_styles()->do_items( $handles );
-	wp_styles()->done = $done;
-
-	wp_add_inline_script(
-		'wporg-pattern-script',
-		sprintf(
-			'window.__editorStyles = JSON.parse( decodeURIComponent( \'%s\' ) );',
-			rawurlencode( wp_json_encode( array( 'html' => ob_get_clean() ) ) )
-		),
-		'before'
-	);
-
-	wp_dequeue_style( 'global-styles' );
-	wp_deregister_style( 'global-styles' );
 }
 
 /**

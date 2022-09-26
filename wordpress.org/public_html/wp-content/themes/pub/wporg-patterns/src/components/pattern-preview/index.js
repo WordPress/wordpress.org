@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import { useInstanceId, useViewportMatch } from '@wordpress/compose';
 import { SelectControl, VisuallyHidden } from '@wordpress/components';
@@ -17,7 +18,7 @@ import DragHandle from './drag-handle';
 const INITIAL_WIDTH = 960;
 const MIN_PREVIEW_WIDTH = 280;
 
-function PatternPreview( { blockContent } ) {
+function PatternPreview( { pattern } ) {
 	const showViewportControl = useViewportMatch( 'mobile', '>=' );
 	const showViewportControlDefault = useViewportMatch( 'large', '>=' );
 	const showViewportControlLarge = useViewportMatch( 'wide', '>=' );
@@ -92,7 +93,7 @@ function PatternPreview( { blockContent } ) {
 					direction="left"
 					aria-describedby={ `pattern-preview__resize-help-${ instanceId }` }
 				/>
-				<Canvas html={ blockContent } />
+				<Canvas url={ addQueryArgs( pattern.link, { view: true } ) } />
 				<DragHandle
 					label={ __( 'Drag to resize', 'wporg-patterns' ) }
 					className="is-right"

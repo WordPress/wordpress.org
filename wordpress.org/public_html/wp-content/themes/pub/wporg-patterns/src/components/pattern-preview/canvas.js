@@ -1,9 +1,9 @@
 /**
- * Internal dependencies
+ * WordPress dependencies
  */
-import Iframe from '../iframe';
+import { __ } from '@wordpress/i18n';
 
-function Canvas( { html } ) {
+function Canvas( { url } ) {
 	const style = {
 		width: '100%',
 		height: '50vh',
@@ -13,18 +13,13 @@ function Canvas( { html } ) {
 
 	return (
 		<div>
-			<Iframe
+			<iframe
 				className="pattern-preview__viewport-iframe"
+				title={ __( 'Pattern Preview', 'wporg-patterns' ) }
+				tabIndex="-1"
 				style={ style }
-				headHTML={ window.__editorStyles.html }
-			>
-				<div
-					className="entry-content"
-					dangerouslySetInnerHTML={ {
-						__html: html,
-					} }
-				/>
-			</Iframe>
+				src={ url }
+			/>
 		</div>
 	);
 }

@@ -26,7 +26,7 @@ const useInView = ( { element } ) => {
 
 		return () => {
 			window.removeEventListener( 'scroll', debouncedIsVisible );
-			window.addEventListener( 'resize', debouncedIsVisible );
+			window.removeEventListener( 'resize', debouncedIsVisible );
 		};
 	}, [ element ] );
 
