@@ -938,6 +938,8 @@ class Template {
 			'me-me',
 			'mfe',
 			'nqo',
+			'pap-aw',
+			'pap-cw',
 			'pcd',
 			'pcm',
 			'rhg',

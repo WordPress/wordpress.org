@@ -238,6 +238,8 @@ function hreflang_link_attributes() {
 		'me-me',
 		'mfe',
 		'nqo',
+		'pap-aw',
+		'pap-cw',
 		'pcd',
 		'pcm',
 		'rhg',
