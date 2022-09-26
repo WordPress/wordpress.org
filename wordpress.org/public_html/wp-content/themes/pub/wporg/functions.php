@@ -231,7 +231,7 @@ function hreflang_link_attributes() {
 		'kab',
 		'li',
 		'li-nl',
-		'lig',
+		'lij',
 		'lmo',
 		'mai',
 		'me',

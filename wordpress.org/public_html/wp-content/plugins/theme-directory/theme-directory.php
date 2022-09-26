@@ -1301,7 +1301,7 @@ function wporg_themes_add_hreflang_link_attributes() {
 		'kab',
 		'li',
 		'li-nl',
-		'lig',
+		'lij',
 		'lmo',
 		'mai',
 		'me',

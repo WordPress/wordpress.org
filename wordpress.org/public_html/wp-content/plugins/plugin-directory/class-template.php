@@ -931,7 +931,7 @@ class Template {
 			'kab',
 			'li',
 			'li-nl',
-			'lig',
+			'lij',
 			'lmo',
 			'mai',
 			'me',
