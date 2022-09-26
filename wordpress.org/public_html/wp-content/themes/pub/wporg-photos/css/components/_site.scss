@@ -566,10 +566,22 @@ div.upload-checkbox-wrapper {
 	}
 }
 
-#wporg-photo-upload label.error {
-	background-color: #fbeaea;
-	border-left: 5px solid red;
+#wporg-photo-upload span {
 	padding: 0.1rem 0.3rem;
+	font-weight: normal;
+	border-left-width: 5px;
+	border-left-style: solid;
+
+	&.error {
+		background-color: #fbeaea;
+		border-left-color: red;
+	}
+
+	&.processing {
+		background-color: #e5f5fa;
+		border-left-color: #00a0d2;
+		font-style: italic;
+	}
 }
 
 .taxonomy-photo_orientation {
