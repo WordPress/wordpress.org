@@ -913,9 +913,9 @@ class Uploads {
 				$content .= '<p>' . __( 'Thanks for your submissions! Please wait until a photo is approved by moderators before submitting again.', 'wporg-photos' ) . '</p>';
 			} else {
 				$valid_upload_mimetypes = implode( ',', array_values( self::restrict_upload_mimes() ) );
-				$content .= '[input type="hidden" name="post_title" value=""]' . "\n";
+				$content .= '<input type="hidden" name="post_title" value="" id="ugc-input-post_title" />' . "\n";
 				$content .= sprintf(
-					'[input type="hidden" name="MAX_FILE_SIZE" value="%s"]' . "\n",
+					'<input type="hidden" name="MAX_FILE_SIZE" value="%s" id="ugc-input-max_file_size" />' . "\n",
 					self::get_maximum_photo_file_size()
 				);
 				$content .= '<div class="ugc-input-wrapper">' . "\n"
