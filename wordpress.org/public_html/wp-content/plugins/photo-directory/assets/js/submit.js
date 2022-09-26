@@ -32,6 +32,12 @@ function photoSubmitLoaded() {
 		} );
 	}
 
+	// Customize jQuery Validator, if still in use.
+	if ( window.jQuery && window.jQuery.validator ) {
+		// Customize error message for invalid file mimetype.
+		jQuery.validator.messages.accept = PhotoDir.err_invalid_mimetype;
+	}
+
 	// Check validity of form fields on submission.
 	photo_upload_form.addEventListener( 'submit', e => {
 		photoShowFileSizeError( photo_upload_field );

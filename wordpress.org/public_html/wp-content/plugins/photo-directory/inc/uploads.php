@@ -250,6 +250,10 @@ class Uploads {
 				'wporg-photos-submit',
 				'PhotoDir',
 				[
+					// File extension.
+					'err_invalid_mimetype' => __( 'Please select a JPEG image.', 'wporg-photos' ),
+
+					// File size.
 					'err_file_too_large'    => sprintf(
 						__( 'The selected file cannot be larger than %s MB.', 'wporg-photos' ),
 						self::get_maximum_photo_file_size( false )
@@ -330,15 +334,13 @@ class Uploads {
 	/**
 	 * Restricts upload mimetypes to only allow image mimetypes.
 	 *
-	 * @param array $mimes Array of mimetypes.
+	 * @param array $mimes Array of mimetypes. Ignored.
 	 * @return array
 	 */
-	public static function restrict_upload_mimes( $mimes ) {
-		$acceptable_mimes = [
-			'jpg|jpeg|jpe' => true,
+	public static function restrict_upload_mimes( $mimes = [] ) {
+		return [
+			'jpg|jpeg|jpe' => 'image/jpeg',
 		];
-
-		return array_intersect_key( $mimes, $acceptable_mimes );
 	}
 
 	/**
@@ -367,6 +369,9 @@ class Uploads {
 					break;
 				case 'duplicate-file':
 					$rejection = __( 'Your submission appears to be a duplicate of something uploaded before.', 'wporg-photos' );
+					break;
+				case 'file-not-jpg':
+					$rejection = __( 'Your submission must be an image in the JPEG format.', 'wporg-photos' );
 					break;
 				case 'file-too-large':
 					$rejection = sprintf(
@@ -542,6 +547,13 @@ class Uploads {
 			if ( $file_size <= self::get_minimum_photo_file_size() ) {
 				return 'file-too-small';
 			}
+		}
+
+		list( $width, $length, $image_type ) = getimagesize( $_FILES['files']['tmp_name'][0] );
+
+		// Check image type.
+		if ( ! in_array( $image_type, [ IMG_JPG, IMG_JPEG ] ) ) {
+			return 'file-not-jpg';
 		}
 
 		if ( ! isset( $_POST['photo_copyright'] ) || ! $_POST['photo_copyright'] ) {
@@ -839,15 +851,22 @@ class Uploads {
 			if ( self::user_reached_concurrent_submission_limit() ) {
 				$content .= '<p>' . __( 'Thanks for your submissions! Please wait until a photo is approved by moderators before submitting again.', 'wporg-photos' ) . '</p>';
 			} else {
+				$valid_upload_mimetypes = implode( ',', array_values( self::restrict_upload_mimes() ) );
 				$content .= '[input type="hidden" name="post_title" value=""]' . "\n";
 				$content .= sprintf(
 					'[input type="hidden" name="MAX_FILE_SIZE" value="%s"]' . "\n",
 					self::get_maximum_photo_file_size()
 				);
-				$content .= sprintf(
-					'[input type="file" name="ug_photo" id="ug_photo" description="%s" required="true" aria-required="true"]' . "\n",
+				$content .= '<div class="ugc-input-wrapper">' . "\n"
+				. sprintf(
+					'<label for="ug_photo">%s</label>' . "\n",
 					esc_attr( __( 'Photo', 'wporg-photos' ) )
 				)
+				. sprintf(
+					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" accept="%s">' . "\n",
+					esc_attr( $valid_upload_mimetypes )
+				)
+				. "</div>\n"
 				. sprintf(
 					'[%s name="post_content" class="textarea" id="ug_content" description="%s" maxlength="%d" help="%s"]' . "\n",
 					$description_shortcode,
