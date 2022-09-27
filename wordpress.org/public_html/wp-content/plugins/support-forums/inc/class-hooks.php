@@ -131,8 +131,11 @@ class Hooks {
 		// Add a no-reply-to-email suggestion to topic subscription emails
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'bbp_subscription_mail_message'), 5, 3 );
 
+		// Don't embed WordPress.org links with anchors included.
+		add_filter( 'pre_oembed_result', array( $this, 'pre_oembed_result_dont_embed_wordpress_org_anchors' ), 20, 2 );
+
+		// Break users sessions / passwords when they get blocked, on the main forums only.
 		if ( 'wordpress.org' === get_blog_details()->domain ) {
-			// Break users sessions / passwords when they get blocked, on the main forums only.
 			add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
 		}
 	}
@@ -1310,6 +1313,26 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
         );
 
 		return $message;
+	}
+
+	/**
+	 * Don't embed WordPress.org links when anchors are included.
+	 *
+	 * NOTE: `$return` will have HTML when the link points to the current site, as WordPress uses
+	 *       the same filter to preempt HTTP requests, ignoring any earlier filtered results.
+	 *
+	 * TODO: It may be better wanted to inject the actual hash into the oEmbed iframe instead of
+	 *       disabling this rich embed entirely.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/4346
+	 */
+	public function pre_oembed_result_dont_embed_wordpress_org_anchors( $return, $url ) {
+		// Match WordPress.org + Subdomains which includes a Hash character in the URL.
+		if ( preg_match( '!^https?://([^/]+[.])?wordpress[.]org/.*#!i', $url ) ) {
+			$return = false;
+		}
+
+		return $return;
 	}
 
 	/**
