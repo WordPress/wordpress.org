@@ -99,14 +99,13 @@ function scripts() {
 
 	if ( get_query_var( 'plugin_advanced' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), false, true );
-		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20210329b', true );
+		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20220929', true );
 
 		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
 			'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
 			'l10n' => array(
 				'date'      => __( 'Date', 'wporg-plugins' ),
 				'downloads' => __( 'Downloads', 'wporg-plugins' ),
-				'growth'    => __( 'Growth', 'wporg-plugins' ),
 				'noData'    => __( 'No data yet', 'wporg-plugins' ),
 				'today'     => __( 'Today', 'wporg-plugins' ),
 				'yesterday' => __( 'Yesterday', 'wporg-plugins' ),
