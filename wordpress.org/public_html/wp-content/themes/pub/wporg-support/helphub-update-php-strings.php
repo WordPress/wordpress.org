@@ -24,7 +24,7 @@ function wporg_support_filter_update_php_title( $title, $id ) {
 		return $title;
 	}
 
-	return __( 'Get a faster, more secure website: update your PHP today', 'wporg-forums' );
+	return __( 'Get a faster, more secure website: update PHP today', 'wporg-forums' );
 }
 add_filter( 'the_title', 'wporg_support_filter_update_php_title', 5, 2 );
 
