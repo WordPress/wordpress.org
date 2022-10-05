@@ -70,7 +70,13 @@ function wporg_support_filter_update_php_content( $content ) {
 		RECOMMENDED_PHP
 	);
 	$content .= '</li>';
-	$content .= '<li>' . __( '<strong>Your website will be more secure.</strong> PHP, like WordPress, is maintained by its community. Because PHP is so popular, it is a target for hackers – but the latest version will have the latest security features. Older versions of PHP <em>do not have this</em>, so updating is essential to keep your WordPress site secure.', 'wporg-forums' ) . '</li>';
+	$content .= '<li>';
+	$content .= sprintf(
+		/* translators: %s: recommended PHP version */
+		__( '<strong>Your website will be more secure.</strong> PHP, like WordPress, is maintained by its community. Because PHP is so popular, it is a target for hackers – but the latest version will have the latest security features. Older versions of PHP (lower than %s) <em>do not have this</em>, so updating is essential to keep your WordPress site secure.', 'wporg-forums' ),
+		RECOMMENDED_PHP
+	);
+	$content .= '</li>';
 	$content .= '</ul>';
 	$content .= '<p>' . __( 'And then there are a number of secondary benefits:', 'wporg-forums' ) . '</p>';
 	$content .= '<ul>';
