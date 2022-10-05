@@ -149,7 +149,7 @@ function wporg_support_filter_update_php_content( $content ) {
 	);
 	$content .= '</p>';
 	$content .= '<p>' . __( 'If you can&#8217;t find your host on this list, then email your hosting company and ask them to help! Here&#8217;s some template text you can use:', 'wporg-forums' ) . '</p>';
-	$content .= '<pre>' . __( 'Dear Hosting Provider,<br><br>I want my website to be as performant and secure as<br>possible with the latest version of PHP. For the server<br>my WordPress site is hosted on, I want to ensure that<br>is the case. If I am not already on the latest version<br>of PHP, please let me know what steps I need to take<br>to update.<br><br>Thanks!', 'wporg-forums' ) . '</pre>';
+	$content .= '<pre>' . __( 'Dear Hosting Provider,<br><br>I want my WordPress website to be as performant and<br>secure as possible with the latest version of PHP.<br>If the server my site is hosted on is not already on<br>the latest version of PHP, please let me know what<br>steps I need to take to update it.<br><br>Thanks!', 'wporg-forums' ) . '</pre>';
 	$content .= '<p>' . __( 'If you run into any issues at this stage, either change the PHP version back yourself, contact your hosting company or a professional web developer. In the unlikely event something goes wrong and you need to restore your backup, contact your host and ask them to restore the previous version of PHP you had running. You can then restore your backup.', 'wporg-forums' ) . '</p>';
 	$content .= '<p>' . __( 'You should now have all the information you need to update! Nice work! With an up-to-date version of PHP you&#8217;ll enjoy a faster, more secure website and happier visitors.', 'wporg-forums' ) . '</p>';
 
