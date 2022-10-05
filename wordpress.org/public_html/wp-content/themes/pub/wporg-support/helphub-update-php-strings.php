@@ -144,7 +144,7 @@ function wporg_support_filter_update_php_content( $content ) {
 	$content .= '<p>';
 	$content .= sprintf(
 		/* translators: %s: link URL to hosting-specific update resources */
-		__( 'Thus, exactly <em>how</em> to do the update depends on your hosting company. We&#8217;ve asked hosting companies to submit instructions on how to update your PHP version on their hosting, and <a href="%s">you&#8217;ll find a list of hosts who have instructions available here</a>.', 'wporg-forums' ),
+		__( 'Exactly <em>how</em> to do the update depends on your hosting company. We&#8217;ve asked hosting companies to submit instructions on how to update your PHP version on their hosting, and <a href="%s">you&#8217;ll find a list of hosts who have instructions available here</a>.', 'wporg-forums' ),
 		esc_url( _x( 'https://github.com/WordPress/servehappy-resources/blob/master/tutorials/hosting-specific/tutorials-en.md', 'link URL to hosting-specific update resources', 'wporg-forums' ) )
 	);
 	$content .= '</p>';
