@@ -117,7 +117,7 @@ function wporg_support_filter_update_php_content( $content ) {
 		esc_url( _x( 'https://wordpress.org/plugins/search/backup/', 'link URL for free backup plugins', 'wporg-forums' ) )
 	);
 	$content .= '</li>';
-	$content .= '<li>' . __( '<strong>Update WordPress, themes, and plugins:</strong> from your WordPress Dashboard, head to the Updates page under the <em>Dashboard &gt; Updates</em> menu, and then update everything. You should do this regularly anyway :). When done, check your site is working as expected.', 'wporg-forums' ) . '</li>';
+	$content .= '<li>' . __( '<strong>Update WordPress, themes, and plugins:</strong> from your WordPress Dashboard, head to the Updates page under the <em>Dashboard &gt; Updates</em> menu, and then update everything. You should do this regularly anyway :). When done, check that your site is working as expected.', 'wporg-forums' ) . '</li>';
 	$content .= '<li>';
 	$content .= sprintf(
 		/* translators: %s: link URL to the PHP Compatibility Checker plugin */
