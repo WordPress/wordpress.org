@@ -103,10 +103,9 @@ function wporg_support_filter_update_php_content( $content ) {
 	$content .= '<p>' . __( 'This section starts off with some warnings, but don&#8217;t be afraid! As with most things technical, we just need to cover some background before we can get to the part where you update your PHP version.', 'wporg-forums' ) . '</p>';
 	$content .= '<p>';
 	$content .= sprintf(
-		/* translators: 1: minimum required PHP version, 2: recommended PHP version */
-		__( 'Updating your PHP version should not be a problem, but we can&#8217;t <em>guarantee</em> that it&#8217;s not. WordPress itself works with PHP as far back as version %1$s (we&#8217;re currently recommending version %2$s, so this is <em>great</em> backward compatibility!), but we don&#8217;t know if your themes or plugins will work. They should, and popular or reputable ones almost certainly will be, but we can&#8217;t guarantee it.', 'wporg-forums' ),
-		MINIMUM_PHP,
-		RECOMMENDED_PHP
+		/* translators: %s: minimum required PHP version */
+		__( 'Updating your PHP version should not be a problem, but we can&#8217;t <em>guarantee</em> that it&#8217;s not. WordPress itself works with PHP as far back as version %s, but we don&#8217;t know if your themes or plugins will work. They should, and popular or reputable ones almost certainly will be, but we can&#8217;t guarantee it.', 'wporg-forums' ),
+		MINIMUM_PHP
 	);
 	$content .= '</p>';
 	$content .= '<p>' . __( 'There are a couple of steps you should take to mitigate any risk before proceeding:', 'wporg-forums' ) . '</p>';
