@@ -86,6 +86,18 @@ function wporg_support_filter_update_php_content( $content ) {
 	$content .= '</ul>';
 	$content .= '<p>' . __( 'These benefits are good for you, and good for your website&#8217;s visitors. These are the reasons you should update PHP today. The next section will show you how to do this.', 'wporg-forums' ) . '</p>';
 
+	// Section "How to check your PHP version".
+	$content .= '<h3>' . __( 'How to check your PHP version', 'wporg-forums' ) . '</h3>';
+	$content .= '<p>' . __( 'To check what version of PHP your WordPress site is using, from the WordPress Dashboard, select <em>Tools &gt; Site Health</em> from the sidebar menu, and then select the Info tab. Expand the Server section and scroll down until you see <strong>PHP version</strong>.', 'wporg-forums' ) . '</p>';
+	$content .= '<p>';
+	$content .= sprintf(
+		/* translators: %s: recommended PHP version */
+		__( 'If this number is at or higher than PHP %s, then you don&#8217;t need to update PHP at this time!' ),
+		RECOMMENDED_PHP
+	);
+	$content .= '</p>';
+	$content .= '<p>' . __( 'However, if your site is lower than the recommended version, running on an outdated and insecure version of PHP, then it&#8217;s time to update. You also may have noticed a warning such as "PHP Update Required" or "PHP Update Recommended" on the Dashboard or in Site Health – these serve as important reminders to update PHP and make your site more secure.', 'wporg-forums' ) . '</p>';
+
 	// Section "Before you update your PHP version".
 	$content .= '<h3>' . __( 'Before you update your PHP version', 'wporg-forums' ) . '</h3>';
 	$content .= '<p>' . __( 'This section starts off with some warnings, but don&#8217;t be afraid! As with most things technical, we just need to cover some background before we can get to the part where you update your PHP version.', 'wporg-forums' ) . '</p>';
