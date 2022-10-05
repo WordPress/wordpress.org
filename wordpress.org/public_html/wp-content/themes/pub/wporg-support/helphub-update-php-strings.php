@@ -108,7 +108,7 @@ function wporg_support_filter_update_php_content( $content ) {
 		MINIMUM_PHP
 	);
 	$content .= '</p>';
-	$content .= '<p>' . __( 'There are a couple of steps you should take to mitigate any risk before proceeding:', 'wporg-forums' ) . '</p>';
+	$content .= '<p>' . __( 'There are a couple of steps you should take to avoid problems before proceeding:', 'wporg-forums' ) . '</p>';
 	$content .= '<ul>';
 	$content .= '<li>';
 	$content .= sprintf(
