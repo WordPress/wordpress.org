@@ -64,8 +64,9 @@ function wporg_support_filter_update_php_content( $content ) {
 	$content .= '<ul>';
 	$content .= '<li>';
 	$content .= sprintf(
-		/* translators: %s: recommended PHP version */
-		__( '<strong>Your website will be faster</strong> as the latest version of PHP is more efficient. Updating to the latest supported version (currently %s) can deliver a huge performance increase; up to 3 or 4x faster for older versions.', 'wporg-forums' ),
+		/* translators: 1: link URL to WordPress requirements page, 2: recommended PHP version */
+		__( '<strong>Your website will be faster</strong> because the latest version of PHP is more efficient. Updating to <a href="%1$s">WordPress&#8217;s recommended PHP version</a> (currently %2$s or higher) can deliver a huge performance increase; up to 3 or 4x faster than older versions.', 'wporg-forums' ),
+		esc_url( _x( 'https://wordpress.org/about/requirements/', 'link URL to WordPress requirements page', 'wporg-forums' ) ),
 		RECOMMENDED_PHP
 	);
 	$content .= '</li>';
