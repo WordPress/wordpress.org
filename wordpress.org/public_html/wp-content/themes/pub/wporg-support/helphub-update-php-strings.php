@@ -104,7 +104,7 @@ function wporg_support_filter_update_php_content( $content ) {
 	$content .= '<p>';
 	$content .= sprintf(
 		/* translators: %s: minimum required PHP version */
-		__( 'Updating your PHP version should not be a problem, but we can&#8217;t <em>guarantee</em> that it&#8217;s not. WordPress itself works with PHP as far back as version %s, but we don&#8217;t know if your themes or plugins will work. They should, and popular or reputable ones almost certainly will be, but we can&#8217;t guarantee it.', 'wporg-forums' ),
+		__( 'Updating your PHP version should not be a problem, but we can&#8217;t <em>guarantee</em> that it&#8217;s not. WordPress itself works with PHP as far back as version %s, but we don&#8217;t know if your themes or plugins will work on newer versions. They should, and popular or reputable ones almost certainly will be, but we can&#8217;t guarantee it.', 'wporg-forums' ),
 		MINIMUM_PHP
 	);
 	$content .= '</p>';
