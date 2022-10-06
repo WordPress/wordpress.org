@@ -22,6 +22,17 @@ add_filter( 'user_display_name', function( $name, $user_id, $context ) {
 	return $name;
 }, 1, 3 );
 
+// Filter `get_the_author_meta()`.
+add_filter( 'get_the_author_display_name', function( $name, $user_id ) {
+	if ( '' === $name ) {
+		$name = get_user_by( 'id', $user_id )->user_nicename;
+	}
+
+	$name = maybe_replace_blocked_user_name( $name, $user_id );
+
+	return $name;
+}, 1, 2 );
+
 // bbPress skips user filtering and does it's own
 add_filter( 'bbp_get_displayed_user_field', function( $value, $field, $filter ) {
 	if ( 'edit' === $filter ) {
