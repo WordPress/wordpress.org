@@ -155,27 +155,6 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
-		/**
-		 * Gutenberg sends two requests when we hit the Publish/Update button.
-		 * https://github.com/WordPress/wordpress.org/pull/84#discussion_r919290748
-		 *
-		 * For the first request, $old_status would be different from $new_status,
-		 * if the post, for example, is changed from draft to published.
-		 * For the second request (from the same Publish/Update button hit),
-		 * $old_status would be the same as $new_status in the same example,
-		 * both their values would be 'publish'.
-		 *
-		 * This brings the result that only the first request from Gutenberg could
-		 * pass the condition if ($old_status == $new_status) { return; }.
-		 *
-		 * However, only the second request would carry the data from meta boxes,
-		 * which is what we need here, so we need to put this logic above that
-		 * condition.
-		 */
-		if ( 'wporg_workshop' === $post->post_type ) {
-			$this->notify_workshop_presenter( $post );
-		}
-
 		if ( $old_status == $new_status ) {
 			return;
 		}
@@ -185,56 +164,6 @@ class WPOrg_WP_Activity_Notifier {
 		}
 
 		$this->notify_blog_post( $post, 'new' );
-	}
-
-	/**
-	 * Sends activity notification for workshop presenter.
-	 *
-	 * @param WP_Post $post Post object.
-	 */
-	private function notify_workshop_presenter( $post ) {
-		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
-			return;
-		}
-
-		$presenter_wporg_username = filter_input( INPUT_POST, 'presenter-wporg-username' );
-
-		if ( empty( $presenter_wporg_username ) ) {
-			return;
-		}
-
-		$unique_presenter_wporg_username = array_unique( array_map( 'trim', explode( ',', $presenter_wporg_username ) ) );
-		$permalink                       = get_permalink( $post );
-		$title                           = wp_kses_data( $post->post_title );
-		$content                         = wp_trim_words(
-			strip_shortcodes( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content ),
-			55
-		);
-
-		foreach ( $unique_presenter_wporg_username as $username ) {
-			$user_id = get_user_by( 'slug', strtolower( $username ) )->ID;
-
-			if ( ! $user_id ) {
-				continue;
-			}
-
-			$args = array(
-				'action'       => 'wporg_handle_activity',
-				'component'    => 'learn',
-				'type'         => 'workshop_presenter_assign',
-				'user_id'      => $user_id,
-				'primary_link' => $permalink,
-				'item_id'      => $post->ID,
-				'content'      => $content,
-				'message'      => sprintf(
-					'Assigned as a presenter on the Learn WordPress tutorial, <i><a href="%s">%s</a></i>',
-					$permalink,
-					$title,
-				),
-			);
-
-			Profiles\api( $args );
-		}
 	}
 
 	/**
