@@ -14,7 +14,7 @@ add_filter( 'user_display_name', function( $name, $user_id, $context ) {
 	}
 
 	if ( '' === $name && $user_id ) {
-		$name = get_user_by( 'id', $user_id )->user_nicename ?? $user_id;
+		$name = get_user_by( 'id', $user_id )->user_nicename ?? (string) $user_id;
 	}
 
 	$name = maybe_replace_blocked_user_name( $name, $user_id );
@@ -26,7 +26,7 @@ add_filter( 'user_display_name', function( $name, $user_id, $context ) {
 add_filter( 'get_the_author_display_name', function( $name, $user_id ) {
 
 	if ( '' === $name && $user_id ) {
-		$name = get_user_by( 'id', $user_id )->user_nicename ?? $user_id;
+		$name = get_user_by( 'id', $user_id )->user_nicename ?? (string) $user_id;
 	}
 
 	$name = maybe_replace_blocked_user_name( $name, $user_id );
