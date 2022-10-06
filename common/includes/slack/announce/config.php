@@ -126,7 +126,7 @@ function get_whitelist() {
 			'welcher',
 			'whitneyyadrich', // @Whitney on Slack
 		) ),
-		'core-auto-updates' => array_merge( get_committers(), array(
+		'core-upgrade-install' => array_merge( get_committers(), array(
 			'afragen',
 			'audrasjb',
 			'costdev',
