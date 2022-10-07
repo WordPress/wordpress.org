@@ -284,6 +284,10 @@ class Uploads {
 					'max_file_dimension' => self::big_image_size_threshold( 0 ),
 					'min_file_dimension' => self::get_minimum_photo_dimension(),
 					'msg_validating_dimensions' => __( 'Validating photo dimensions&hellip;', 'wporg-photos' ),
+
+					// Toggle all confirmation checkboxes for upload.
+					'user_can_toggle_all_checkboxes' => User::can_toggle_confirmation_checkboxes(),
+					'toggle_all_checkboxes' => __( 'As a contributor of many photos, I am well aware of the requirements listed below and agree to them all.', 'wporg-photos' ),
 				]
 			);
 		}

@@ -10,7 +10,30 @@ function photoSubmitInit() {
 		history.replaceState( null, null, photo_upload_url) ;
 	}
 
-	// Prevent double-submission of upload form.
+	// Add checkbox to set/unset all other confirmation checkboxes.
+	if ( PhotoDir.user_can_toggle_all_checkboxes ) {
+		const checkboxDiv = document.createElement( 'div' );
+		checkboxDiv.setAttribute('class', 'confirmation-checkbox-toggle-container');
+		const checkboxLabel = document.createElement( 'label' );
+		const checkboxToggle = document.createElement( 'input' );
+		checkboxDiv.insertAdjacentElement( 'afterbegin', checkboxLabel );
+		checkboxLabel.insertAdjacentElement( 'afterbegin', checkboxToggle );
+		checkboxToggle.setAttribute('class', 'confirmation-checkbox-toggle');
+		checkboxToggle.setAttribute('name', 'confirmation-checkbox-toggle');
+		checkboxToggle.setAttribute('type', 'checkbox');
+		checkboxLabel.insertAdjacentText( 'beforeend', ' ' + PhotoDir.toggle_all_checkboxes );
+		checkboxToggle.addEventListener( 'change', e => {
+			const newState = e.target.checked;
+			// For checkboxes not matching the current toggle state, click them so that they do.
+			document.querySelectorAll('.upload-checkbox-wrapper input[type="checkbox"]:not(.confirmation-checkbox-toggle)').forEach( v => {
+				if ( v.checked !== newState ) {
+					v.click();
+				}
+			} );
+		} );
+		document.querySelector('.upload-checkbox-wrapper p').insertAdjacentElement( 'afterend', checkboxDiv );
+	}
+
 	const photo_fieldset = document.getElementById('wporg-photo-upload');
 	if ( null === photo_fieldset ) {
 		return;

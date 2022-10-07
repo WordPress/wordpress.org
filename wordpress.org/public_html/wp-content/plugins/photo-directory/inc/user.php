@@ -19,6 +19,14 @@ class User {
 	 */
 	const MAX_PENDING_SUBMISSIONS = 5;
 
+	/**
+	 * The number of published posts before a given user is permitted to toggle
+	 * all of the confirmation checkboxes when submitting a photo.
+	 *
+	 * @var int
+	 */
+	const TOGGLE_ALL_THRESHOLD = 30;
+
 	public static function init() {
 	}
 
@@ -86,6 +94,38 @@ class User {
 			Rejection::get_post_status(),
 			$user_id
 		) );
+	}
+
+	/**
+	 * Determines if a user is eligible to toggle all confirmation checkboxes on
+	 * the photo upload form.
+	 *
+	 * The intent is that users who have submitted a decent number of published
+	 * photos are as aware of the listed criteria as they're going to be and have
+	 * demonstrated that they are able to abide by them.
+	 *
+	 * @todo Handle eventual case when a new checkbox is added or one is changed
+	 *       enough to warrant making the user manually re-check the checkboxes.
+	 *       The latest checkbox update date can be stored as a constant and, if
+	 *       set, the contributor must also have a post (or N posts) published
+	 *       after that date to requalify for the bulk toggle.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes current
+	 *                     user. Default false.
+	 * @return bool True if user can toggle confirmation checkboxes, else false.
+	 */
+	public static function can_toggle_confirmation_checkboxes( $user_id = false ) {
+		$can = false;
+
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( $user_id && self::count_published_photos( $user_id ) >= self::TOGGLE_ALL_THRESHOLD ) {
+			$can = true;
+		}
+
+		return $can;
 	}
 
 }
