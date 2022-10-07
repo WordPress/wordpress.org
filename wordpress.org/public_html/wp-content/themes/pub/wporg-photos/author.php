@@ -24,7 +24,7 @@ get_header();
 						esc_html__( 'Photos contributed by: %s', 'wporg-photos' ),
 						sprintf(
 							'<a href="%s" class="photo-author">%s</a>',
-							esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
+							esc_url( 'https://profiles.wordpress.org/' . get_the_author_meta( 'nicename' ) . '/' ),
 							get_avatar( get_the_author_meta( 'ID' ), 32 ) . get_the_author_meta( 'display_name' )
 										)
 					);
