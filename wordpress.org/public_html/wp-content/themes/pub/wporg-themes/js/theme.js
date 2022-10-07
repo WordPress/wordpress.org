@@ -488,12 +488,15 @@ window.wp = window.wp || {};
 			'click': 'collapse',
 			'click .left': 'previousTheme',
 			'click .right': 'nextTheme',
+			'click .screenshot': 'preview',
 			'click .theme-actions .button-secondary': 'preview',
 			'keydown .theme-actions .button-secondary': 'preview',
 			'touchend .theme-actions .button-secondary': 'preview',
 			'click .favorite': 'favourite_toggle',
 			// This is provided by a Third Party
-			'click .wporg-screenshot-card': 'preview', 
+			'click #theme-patterns-grid-js .wporg-screenshot-card': 'preview', 
+			'click .wporg-horizontal-slider-js .wporg-screenshot-card': 'thumbnailPreview', 
+			'keydown .wporg-horizontal-slider-js .wporg-screenshot-card': 'thumbnailPreview', 
 		},
 
 		// The HTML template for the theme overlay
@@ -550,6 +553,11 @@ window.wp = window.wp || {};
 			this.containFocus( this.$el );
 			this.renderDownloadsGraph();
 			this.renderPatterns();
+
+			// Currently this feature is in beta
+			if ( window.location.href.includes( 'beta=style_variations' ) ) {
+				this.renderStyleVariations();
+			}
 		},
 
 		favourite_toggle: function() {
@@ -722,6 +730,52 @@ window.wp = window.wp || {};
 			});
 		},
 
+		thumbnailPreview: function ( event ) {
+			// 'enter' and 'space' keys expand the details view when a theme is :focused
+			if ( event.type === 'keydown' && ( event.which !== 13 && event.which !== 32 ) ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			var anchorLink = event.target;
+
+			if ( anchorLink.tagName.toLowerCase() !== 'a' ) {
+				anchorLink = $( anchorLink ).parent( 'a' )[0];
+			}
+
+			// Get the theme's main thumbnail
+			var $thumbnailContainer = $('.screenshot');
+
+			// Create element
+			 var newEl = $( '<div class="wporg-thumbnail-screenshot-preview-js"></div>' )
+			 .attr( 'data-link', anchorLink.href )
+			 .attr( 'data-preview-link', anchorLink.href + '&v=' + this.model.attributes.version + '-betaV2' )
+			 .attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', anchorLink.innerText ) )
+			 .attr( 'data-height', $thumbnailContainer.height() + 'px' )
+			 .attr( 'data-aspect-ratio', 3 / 4 )
+			 .attr( 'data-query-string', '?vpw=1200&vph=900' );
+
+			 $thumbnailContainer.find('picture').hide();
+
+			 /**
+			  * The screenshot container uses a padding system to prevent image size change.
+			  * We don't want the padding when we preview our image.
+			  */
+			 $thumbnailContainer.addClass( 'style-variation' );
+
+			// Remove if one exists, we can't just replace the source.
+			$( '.wporg-thumbnail-screenshot-preview-js' ).remove();
+			$thumbnailContainer.append( newEl );
+
+			if ( window.__wporg_screenshot_preview_render ) {
+				window.__wporg_screenshot_preview_render( 'wporg-thumbnail-screenshot-preview-js' );
+			}
+
+			// Update the preview url so uses get style variation when the previewer is opened
+			this.model.attributes.preview_url = anchorLink.href;
+		},
+
 		// Handles .disabled classes for previous/next buttons in theme installer preview
 		setNavButtonsState: function() {
 			var $themeInstaller = $( '.theme-install-overlay' ),
@@ -787,6 +841,8 @@ window.wp = window.wp || {};
 
 				// Add a temporary closing class while overlay fades out
 				$( 'body' ).addClass( 'closing-overlay' );
+
+				self.unmountReactAssets();
 
 				// With a quick fade out animation
 				this.$el.fadeOut( 1, function() {
@@ -904,8 +960,7 @@ window.wp = window.wp || {};
 					 */
 					 var newEl = $( '<div class="wporg-screenshot-preview-js"></div>' )
 					 .attr( 'data-link', value.link )
-					 .attr( 'data-preview-link', value.preview_link )
-					 .attr( 'data-version', self.get( 'version' ) + '-betaV1' )
+					 .attr( 'data-preview-link', value.preview_link + '&v=' + self.get( 'version' ) + '-betaV1'  )
 					 .attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', value.title ) );
 
 					$container.append( newEl );
@@ -947,6 +1002,71 @@ window.wp = window.wp || {};
 				}
 			} );
 		},
+
+		renderStyleVariations: function() {
+			var options = {
+				type: 'GET',    
+				url: 'https://wp-themes.com/' + this.model.get( 'slug' ) + '/?rest_route=/wporg-styles/v1/variations',
+			};
+			var self = this.model;
+
+			/**
+			 * Map it to be compatible with the wporg/screenshot-preview block
+			 * 
+			 * See: https://github.com/WordPress/wporg-mu-plugins/tree/trunk/mu-plugins/blocks/screenshot-preview
+			 */
+			function mapVariations( variations ) {
+				var out = [];
+
+				$.each( variations, function ( key, value ) {
+					 out.push( {
+						title: value.title,
+						link: value.link,
+						previewLink: value.preview_link + '&v=' + self.get( 'version' ) + '-betaV1.1.0',
+						caption:  _wpThemeSettings.l10n.style_variation_caption_template.replace( '%s', value.title ),
+					 } );
+				} );
+
+				return out;
+			}
+
+			$.ajax( options ).done( function( data ) {
+				var $container = $( '.wporg-horizontal-slider-js' );
+				var variations = JSON.parse( data );
+
+				if ( variations.length ) {
+					var mapped = mapVariations( variations );
+
+					$container.attr( 'data-items', JSON.stringify( mapped ) );
+					$container.attr( 'data-title', _wpThemeSettings.l10n.style_variations_title );
+					
+					if ( window.__wporg_horizontal_slider_render ) {
+						window.__wporg_horizontal_slider_render();
+					}        
+				}
+			} );
+		},
+		/* jshint ignore:start */
+		/* Turns off ReactDOM undefined */
+		unmountReactAssets: function () {
+			if( ! ReactDOM || ! ReactDOM.unmountComponentAtNode ) {
+				return;
+			}
+
+			$( '.wporg-horizontal-slider-js' ).each( function () {
+				ReactDOM.unmountComponentAtNode( this );
+			} );
+
+			$( '.wporg-screenshot-preview-js' ).each( function () {
+				ReactDOM.unmountComponentAtNode( this );
+			} );
+
+			$( '.wporg-thumbnail-screenshot-preview-js' ).each( function () {
+				ReactDOM.unmountComponentAtNode( this );
+			} )  ;
+		},
+		/* jshint ignore:end */
+
 		// Handles .disabled classes for next/previous buttons
 		navigation: function() {
 

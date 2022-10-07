@@ -206,6 +206,11 @@ function wporg_themes_scripts() {
 				/* translators: %s: Name of the pattern */
 				'pattern_caption_template' => __( '%s pattern', 'wporg-themes' ),
 
+				'style_variations_title' => __( 'Style variations', 'wporg-themes' ),
+
+				/* translators: %s: Title of the style variation */
+				'style_variation_caption_template' => __( '%s style variation', 'wporg-themes' ),
+
 				// Active Installs
 				'active_installs_less_than_10' => __( 'Less than 10', 'wporg-themes' ),
 				'active_installs_1_million' => __( '1+ million', 'wporg-themes' ),

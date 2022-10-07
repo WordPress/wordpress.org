@@ -70,6 +70,8 @@
 				<div class="screenshot blank"></div>
 				<# } #>
 
+				<div class="wporg-style-variations wporg-horizontal-slider-js"></div>
+
 				<div class="theme-description entry-summary"><p>{{{ data.description }}}</p></div>
 
 				<# if ( data.tags ) { #>

@@ -485,10 +485,10 @@ body.author .theme-browser .theme .theme-author  {
 
 /* First screenshot, shown big */
 .theme-wrap .screenshot {
+	margin-bottom: 0 !important;
 	border: 1px solid #fff;
 	box-shadow: 0 0 0 1px rgba( 0, 0, 0, 0.2 );
 	box-sizing: border-box;
-	overflow: hidden;
 	position: relative;
 }
 
@@ -498,13 +498,17 @@ body.author .theme-browser .theme .theme-author  {
 	padding-top: 75%; /* using a 4/3 aspect ratio */
 }
 
+.theme-wrap .screenshot.style-variation:after {
+	display: none;
+}
+
 .theme-wrap .screenshot img {
 	height: auto;
+	vertical-align: middle;
+	width: 100%;
 	position: absolute;
 	left: 0;
 	top: 0;
-	vertical-align: middle;
-	width: 100%;
 }
 
 .theme-wrap .screenshot.selected {
@@ -520,6 +524,10 @@ body.author .theme-browser .theme .theme-author  {
 .theme-browser .theme .theme-screenshot.blank,
 .theme-wrap .screenshot.blank {
 	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAALElEQVQYGWO8d+/efwYkoKioiMRjYGBC4WHhUK6A8T8QIJt8//59ZC493AAAQssKpBK4F5AAAAAASUVORK5CYII=);
+}
+
+.theme-wrap .wporg-style-variations {
+	margin: 8px 0 0 !important;
 }
 
 /**
