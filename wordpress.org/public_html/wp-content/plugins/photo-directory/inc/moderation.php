@@ -308,14 +308,17 @@ https://wordpress.org/photos/
 			return;
 		}
 
-		// Bail if user has already been emailed.
-		if  ( self::has_user_been_emailed( $post ) ) {
-			return;
-		}
-
 		$user = get_user_by( 'id', $post->post_author );
 
 		$rejection_message = '';
+
+		// Add verbiage to acknowledge if photo was previously published prior
+		// to its rejection.
+		if ( self::has_user_been_emailed( $post ) ) {
+			$rejection_message .= __( 'Though this photo had already been approved, we have since decided to decline it and have unpublished it from the site.', 'wporg-photos' ) . "\n";
+		} else {
+			$rejection_message .= __( 'The photo has been declined and will not be published to the site.', 'wporg-photos' ) . "\n";
+		}
 
 		// Check for specifics provided by the moderator regarding the rejection.
 		$rejection_reason = Rejection::get_rejection_reason( $post );
@@ -351,7 +354,6 @@ https://wordpress.org/photos/
 
 Thank you for submitting a photo to the WordPress Photo Directory.
 
-The photo has been declined and will not be published to the site.
 %2$s
 Submission date: %3$s
 Original filename: %4$s
