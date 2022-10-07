@@ -13,7 +13,9 @@ class Posts {
 	 * Initializer.
 	 */
 	public static function init() {
-		add_action( 'publish_' . Registrations::get_post_type(), [ __CLASS__, 'make_photo_attachment_available' ] );
+		$post_type = Registrations::get_post_type();
+
+		add_action( "publish_{$post_type}", [ __CLASS__, 'make_photo_attachment_available' ] );
 		add_action( 'before_delete_post', [ __CLASS__, 'delete_attachments' ], 10, 2 );
 		add_action( 'delete_attachment',  [ __CLASS__, 'delete_photo_post' ], 10, 2 );
 		add_action( 'template_redirect',  [ __CLASS__, 'redirect_attachment_page_to_photo' ] );
@@ -26,6 +28,25 @@ class Posts {
 		add_action( 'pre_get_posts',      [ __CLASS__, 'offset_front_page_paginations' ], 11 );
 		// Fix pages count for front page paginations.
 		add_filter( 'the_posts',          [ __CLASS__, 'fix_front_page_pagination_count' ], 10, 2 );
+
+		// Modify REST response to include URL to small photo (used by Profiles).
+		add_filter( "rest_prepare_{$post_type}", [ __CLASS__, 'rest_prepare_add_photo_url' ] );
+	}
+
+	/**
+	 * Amends REST response for photos to include URL to small version of photo.
+	 *
+	 * @param WP_REST_Response $response
+	 * @return WP_REST_Response
+	 */
+	public static function rest_prepare_add_photo_url( $response ) {
+		$data = $response->get_data();
+
+		$data['photo-thumbnail-url'] = wp_get_attachment_image_src( get_post_thumbnail_id( $data['id'] ), 'medium' )[0];
+
+		$response->set_data( $data );
+
+		return $response;
 	}
 
 	/**
