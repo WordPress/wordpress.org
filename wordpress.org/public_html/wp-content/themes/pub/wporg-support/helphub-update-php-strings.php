@@ -56,7 +56,7 @@ function wporg_support_filter_update_php_content( $content ) {
 	$content .= '<p>';
 	$content .= sprintf(
 		/* translators: %s: link URL about keeping WordPress up to date */
-		__( 'PHP is one of the programming languages that WordPress is built on. The PHP version used on your website is usually set by your hosting company, but may be an option you can adjust yourself. Whilst you may be familiar with the importance of <a href="%s">keeping WordPress, and your themes and plugins up-to-date</a>, keeping PHP up-to-date is just as important.', 'wporg-forums' ),
+		__( 'PHP is one of the programming languages that WordPress is built on. The PHP version used on your website is usually set by your hosting company, but may be an option you can adjust yourself. And while you may be familiar with the importance of <a href="%s">keeping WordPress, and your themes and plugins up-to-date</a>, keeping PHP up-to-date is just as important.', 'wporg-forums' ),
 		esc_url( _x( 'https://wordpress.org/support/article/administration-screens/#updates', 'link URL about keeping WordPress up to date', 'wporg-forums' ) )
 	);
 	$content .= '</p>';
