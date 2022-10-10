@@ -5,6 +5,7 @@ namespace WordPressdotorg\GlotPress\Customizations;
 use GP;
 use GP_Locales;
 use GP_Translation;
+use WordPressdotorg\GlotPress\Customizations\CLI\Show_Stats;
 use WP_CLI;
 
 class Plugin {
@@ -447,6 +448,7 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate make-core-pot', __NAMESPACE__ . '\CLI\Make_Core_Pot' );
 		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
+		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Show_Stats' );
 
 	}
 
