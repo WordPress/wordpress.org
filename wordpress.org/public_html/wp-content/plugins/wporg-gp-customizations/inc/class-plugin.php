@@ -5,7 +5,7 @@ namespace WordPressdotorg\GlotPress\Customizations;
 use GP;
 use GP_Locales;
 use GP_Translation;
-use WordPressdotorg\GlotPress\Customizations\CLI\Show_Stats;
+use WordPressdotorg\GlotPress\Customizations\CLI\Stats;
 use WP_CLI;
 
 class Plugin {
@@ -60,6 +60,7 @@ class Plugin {
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
 		add_action( 'init', [ $this, 'register_cron_events' ] );
 		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
+		add_action( 'wporg_translate_update_polyglots_stats', [ $this, 'update_polyglots_stats' ] );
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
@@ -130,6 +131,9 @@ class Plugin {
 		if ( ! wp_next_scheduled( 'wporg_translate_update_contributor_profile_badges' ) ) {
 			wp_schedule_event( time(), '15_minutes', 'wporg_translate_update_contributor_profile_badges' );
 		}
+		if ( ! wp_next_scheduled( 'wporg_translate_update_polyglots_stats' ) ) {
+			wp_schedule_event( time(), 'daily', 'wporg_translate_update_polyglots_stats' );
+		}
 	}
 
 	/**
@@ -178,6 +182,16 @@ class Plugin {
 		}
 
 		update_option( 'wporg_translate_last_badges_sync', $now );
+	}
+
+	/**
+	 * Updates the Polyglots stats at https://make.wordpress.org/polyglots/stats/
+	 *
+	 * @return void
+	 */
+	public function update_polyglots_stats() {
+		$stats = new Stats();
+		$stats();
 	}
 
 	/**
@@ -448,7 +462,7 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate make-core-pot', __NAMESPACE__ . '\CLI\Make_Core_Pot' );
 		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
-		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Show_Stats' );
+		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Stats_Print' );
 
 	}
 

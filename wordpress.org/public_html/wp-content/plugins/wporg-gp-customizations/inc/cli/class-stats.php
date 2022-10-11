@@ -20,7 +20,7 @@ use WP_CLI_Command;
 use WP_Query;
 use function WordPressdotorg\Locales\get_locales;
 
-class Show_Stats extends WP_CLI_Command {
+class Stats {
 
 	/**
 	 * Number of years backward from which you want to obtain statistics.
@@ -127,9 +127,21 @@ class Show_Stats extends WP_CLI_Command {
 	private const FEEDBACK_POST_TYPE = 'gth_original';
 
 	/**
-	 * Shows Polyglots stats.
+	 * Whether the class should print the info in the CLI or not.
+	 *
+	 * @var bool
 	 */
-	public function __invoke( $args, $assoc_args ) {
+	private bool $echo_the_values = false;
+
+	/**
+	 * Prints the Polyglots stats or stores them on a page.
+	 *
+	 * @param bool $echo_the_values Whether it should print the info in the CLI or stores it on a page.
+	 *
+	 * @return void
+	 */
+	public function __invoke( bool $echo_the_values = false ) {
+		$this->echo_the_values = $echo_the_values;
 		$this->set_number_of_years_with_data();
 		$this->print_header();
 		$this->print_wordpress_translation_percentage();
@@ -160,9 +172,12 @@ class Show_Stats extends WP_CLI_Command {
 	 * @return void
 	 */
 	private function print_header(): void {
-		$this->header  = $this->create_gutenberg_paragraph( 'Polyglots stats. Created at ' . gmdate( 'Y-m-d H:i:s' ) . ' ' . date_default_timezone_get() );
-		$this->header .= $this->create_gutenberg_paragraph( 'Created using the <b>wp wporg-translate show-stats --url=translate.wordpress.org</b> command.' );
-		$this->print_wpcli_heading( 'Polyglots stats. Created at ' . gmdate( 'Y-m-d H:i:s' ) . ' ' . date_default_timezone_get() );
+		if ( ! $this->echo_the_values ) {
+			$this->header = $this->create_gutenberg_paragraph( 'Polyglots stats. Created at ' . gmdate( 'Y-m-d H:i:s' ) . ' ' . date_default_timezone_get() );
+			$this->header .= $this->create_gutenberg_paragraph( 'Created using the <b>wp wporg-translate show-stats --url=translate.wordpress.org</b> command.' );
+		} else {
+			$this->print_wpcli_heading( 'Polyglots stats. Created at ' . gmdate( 'Y-m-d H:i:s' ) . ' ' . date_default_timezone_get() );
+		}
 	}
 
 	/**
@@ -181,9 +196,11 @@ class Show_Stats extends WP_CLI_Command {
 				ORDER BY YEAR( date_added ) DESC"
 		);
 
-		$this->originals_by_year = $this->create_gutenberg_heading( 'Number of originals in the last ' . $this->number_of_years . ' years.' );
-		$this->print_wpcli_heading( 'Number of originals in the last ' . $this->number_of_years . ' years.' );
-
+		if ( ! $this->echo_the_values ) {
+			$this->originals_by_year = $this->create_gutenberg_heading( 'Number of originals in the last ' . $this->number_of_years . ' years.' );
+		} else {
+			$this->print_wpcli_heading( 'Number of originals in the last ' . $this->number_of_years . ' years.' );
+		}
 		$code  = "Year \t\t Number of strings" . PHP_EOL;
 		$code .= '................................................................' . PHP_EOL;
 
@@ -198,8 +215,11 @@ class Show_Stats extends WP_CLI_Command {
 		$code .= '(*) Estimated for the current year.' . PHP_EOL;
 		$code .= PHP_EOL;
 
-		$this->originals_by_year .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->originals_by_year .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -216,9 +236,11 @@ class Show_Stats extends WP_CLI_Command {
 		$core_50_90  = $this->get_core_interval( 90, 50 );
 		$core_50     = $this->get_core_interval( 50, 0, '<', '>' );
 		$core_0      = $this->get_core_empty_translated();
-
-		$this->wordpress_translation_percentage = $this->create_gutenberg_heading( 'WordPress core: Translated percentage by the locale.' );
-		$this->print_wpcli_heading( 'WordPress core: Translated percentage by the locale.' );
+		if ( ! $this->echo_the_values ) {
+			$this->wordpress_translation_percentage = $this->create_gutenberg_heading( 'WordPress core: Translated percentage by the locale.' );
+		} else {
+			$this->print_wpcli_heading( 'WordPress core: Translated percentage by the locale.' );
+		}
 		$code  = '................................................................' . PHP_EOL;
 		$code .= "Number of locales:                         \t" . number_format_i18n( count( $this->get_existing_locales() ) ) . PHP_EOL;
 		$code .= "Number of locales with variants:           \t" . number_format_i18n( count( $this->get_existing_locales( 'with_variants' ) ) ) . PHP_EOL;
@@ -234,9 +256,11 @@ class Show_Stats extends WP_CLI_Command {
 		$code .= '................................................................' . PHP_EOL;
 		$code .= 'The difference between the number of locales and the number of ' . PHP_EOL;
 		$code .= "WordPress (wp/dev) is due to some duplicated variants. \n" . PHP_EOL;
-
-		$this->wordpress_translation_percentage .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->wordpress_translation_percentage .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -261,8 +285,11 @@ class Show_Stats extends WP_CLI_Command {
 			ARRAY_A );
 
 		$header = 'Language Packs generated per year.';
-		$this->packages_generated_by_year = $this->create_gutenberg_heading( $header );
-		$this->print_wpcli_heading( $header );
+		if ( ! $this->echo_the_values ) {
+			$this->packages_generated_by_year = $this->create_gutenberg_heading( $header );
+		} else {
+			$this->print_wpcli_heading( $header );
+		}
 		$code       = "Year \t Core Packs \t Plugin Packs \t Theme Packs \t Total Packs " . PHP_EOL;
 		$code      .= '.......................................................................' . PHP_EOL;
 
@@ -285,8 +312,11 @@ class Show_Stats extends WP_CLI_Command {
 		$code .= '.......................................................................' . PHP_EOL;
 		$code .= '(*) Estimated for the current year.' . PHP_EOL;
 
-		$this->packages_generated_by_year .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->packages_generated_by_year .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -318,8 +348,11 @@ class Show_Stats extends WP_CLI_Command {
 			ARRAY_A );
 
 		$header = 'Unique Plugins / Themes language packs per year.';
-		$this->themes_plugins_by_year = $this->create_gutenberg_heading( $header );
-		$this->print_wpcli_heading( $header );
+		if ( ! $this->echo_the_values ) {
+			$this->themes_plugins_by_year = $this->create_gutenberg_heading( $header );
+		} else {
+			$this->print_wpcli_heading( $header );
+		}
 		$code       = "Year \t Plugins \t Themes \t Total" . PHP_EOL;
 		$code      .= '................................................................' . PHP_EOL;
 
@@ -340,8 +373,11 @@ class Show_Stats extends WP_CLI_Command {
 		$code .= '................................................................' . PHP_EOL;
 		$code .= '(*) Estimated for the current year.' . PHP_EOL;
 
-		$this->themes_plugins_by_year .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->themes_plugins_by_year .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -364,8 +400,11 @@ class Show_Stats extends WP_CLI_Command {
 	 */
 	private function print_total_translations_translators_by_year() {
 		global $wpdb;
-		$this->translations_translators_by_year = $this->create_gutenberg_heading( 'Number of translations and translators in the last ' . $this->number_of_years . ' years.' );
-		$this->print_wpcli_heading( 'Number of translations and translators in the last ' . $this->number_of_years . ' years.' );
+		if ( ! $this->echo_the_values ) {
+			$this->translations_translators_by_year = $this->create_gutenberg_heading( 'Number of translations and translators in the last ' . $this->number_of_years . ' years.' );
+		} else {
+			$this->print_wpcli_heading( 'Number of translations and translators in the last ' . $this->number_of_years . ' years.' );
+		}
 		$code       = "Year \t\t Number of translations \t Translators \t Translators with > 1 translation" . PHP_EOL;
 		$code      .= '................................................................' . PHP_EOL;
 		$last_year  = gmdate( 'Y' );
@@ -423,8 +462,11 @@ class Show_Stats extends WP_CLI_Command {
 		$code .= '(*) Estimated for the current year.' . PHP_EOL;
 		$code .= PHP_EOL;
 
-		$this->translations_translators_by_year .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->translations_translators_by_year .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	private function print_forum_by_locale_and_year() {
@@ -439,8 +481,11 @@ class Show_Stats extends WP_CLI_Command {
 		}
 		ksort($this->forum_ids);
 		$header = 'Forums. Topics by year and locale.';
-		$this->forum_post_and_replies_by_year = $this->create_gutenberg_heading( $header );
-		$this->print_wpcli_heading( $header );
+		if ( ! $this->echo_the_values ) {
+			$this->forum_post_and_replies_by_year = $this->create_gutenberg_heading( $header );
+		} else {
+			$this->print_wpcli_heading( $header );
+		}
 
 		$code .= str_pad('Locale', 12 );
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
@@ -454,12 +499,18 @@ class Show_Stats extends WP_CLI_Command {
 			}
 			$code .= PHP_EOL;
 		}
-		$this->forum_post_and_replies_by_year .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->forum_post_and_replies_by_year .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 
 		$header = 'Forums. Replies by year and locale.';
-		$this->forum_post_and_replies_by_year .= $this->create_gutenberg_heading( $header );
-		$this->print_wpcli_heading( $header );
+		if ( ! $this->echo_the_values ) {
+			$this->forum_post_and_replies_by_year .= $this->create_gutenberg_heading( $header );
+		} else {
+			$this->print_wpcli_heading( $header );
+		}
 
 		$code = str_pad('Locale', 12 );
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
@@ -473,8 +524,11 @@ class Show_Stats extends WP_CLI_Command {
 			}
 			$code .= PHP_EOL;
 		}
-		$this->forum_post_and_replies_by_year .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->forum_post_and_replies_by_year .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -488,8 +542,11 @@ class Show_Stats extends WP_CLI_Command {
 		$last_year                     = gmdate( 'Y' );
 		$first_year                    = $last_year - $this->number_of_years;
 		$first_id                      = 0;
-		$this->most_active_translators = $this->create_gutenberg_heading( 'Most active translators in the last ' . $this->number_of_years . ' years.' );
-		$this->print_wpcli_heading( 'Most active translators in the last ' . $this->number_of_years . ' years.' );
+		if ( ! $this->echo_the_values ) {
+			$this->most_active_translators = $this->create_gutenberg_heading( 'Most active translators in the last ' . $this->number_of_years . ' years.' );
+		} else {
+			$this->print_wpcli_heading( 'Most active translators in the last ' . $this->number_of_years . ' years.' );
+		}
 		$code = "Year \t Translations \t Translator" . PHP_EOL;
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
 			if ( gmdate( 'Y' ) == $year ) {
@@ -526,8 +583,12 @@ class Show_Stats extends WP_CLI_Command {
 				$code         .= "{$year} \t  {$strings_added}  \t {$contributor->user_login}" . PHP_EOL;
 			}
 		}
-		$this->most_active_translators .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+
+		if ( ! $this->echo_the_values ) {
+			$this->most_active_translators .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -677,8 +738,11 @@ class Show_Stats extends WP_CLI_Command {
 		$current_number                     = number_format_i18n( $status_counter['current'] );
 		$fuzzy_number                       = number_format_i18n( $status_counter['fuzzy'] );
 		$old_number                         = number_format_i18n( $status_counter['old'] );
-		$this->feedback_received            = $this->create_gutenberg_heading( 'Feedback in the last ' . $this->number_of_years . ' years (starting on 2022-07-28).' );
-		$this->print_wpcli_heading( 'Feedback in the last ' . $this->number_of_years . ' years (starting on 2022-07-28).' );
+		if ( ! $this->echo_the_values ) {
+			$this->feedback_received = $this->create_gutenberg_heading( 'Feedback in the last ' . $this->number_of_years . ' years (starting on 2022-07-28).' );
+		} else {
+			$this->print_wpcli_heading( 'Feedback in the last ' . $this->number_of_years . ' years (starting on 2022-07-28).' );
+		}
 		$code  = "Opt-in users: \t\t\t\t\t {$optin_users}" . PHP_EOL;
 		$code .= "Original strings with comments: \t\t {$original_strings_with_comments}" . PHP_EOL;
 		$code .= "Comments: \t\t\t\t\t {$total_comments}" . PHP_EOL;
@@ -700,8 +764,11 @@ class Show_Stats extends WP_CLI_Command {
 			$code           .= " - {$commenter->user_login}: {$tabs} {$comments_number} comments. Profile: {$url}" . PHP_EOL;
 		}
 		$code                    .= PHP_EOL;
-		$this->feedback_received .= $this->create_gutenberg_code( $code );
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->feedback_received .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -725,8 +792,11 @@ class Show_Stats extends WP_CLI_Command {
 		$registered_this_year_new_project_translation_editors = $this->count_managers( 'translation_editor', 'registered_this_year' );
 		$started_this_year_new_translation_editor             = $this->count_managers( 'translation_editor', 'started_this_year' );
 
-		$this->managers_stats = $this->create_gutenberg_heading( 'Managers stats.' );
-		$this->print_wpcli_heading( 'Managers stats.' );
+		if ( ! $this->echo_the_values ) {
+			$this->managers_stats = $this->create_gutenberg_heading( 'Managers stats.' );
+		} else {
+			$this->print_wpcli_heading( 'Managers stats.' );
+		}
 		$code  = 'Local managers (LM):' . PHP_EOL;
 		$code .= " - Total:\t\t\t\t\t\t\t\t" . number_format_i18n( array_sum( $locale_managers ) ) . PHP_EOL;
 		$code .= " - Total users that have been registered this year and get the role:\t" . number_format_i18n( array_sum( $registered_this_year_new_locale_managers ) ) . PHP_EOL;
@@ -754,9 +824,12 @@ class Show_Stats extends WP_CLI_Command {
 				$code .= "\t - " . $locale->english_name . ': ' . number_format_i18n( $project_translation_editors[ $locale->english_name ] ) . ', ' . number_format_i18n( $registered_this_year_new_project_translation_editors[ $locale->english_name ] ) . ', ' . number_format_i18n( $started_this_year_new_translation_editor[ $locale->english_name ] ) . PHP_EOL;
 			}
 		}
-		$this->managers_stats .= $this->create_gutenberg_code( $code );
 
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->managers_stats .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -767,8 +840,11 @@ class Show_Stats extends WP_CLI_Command {
 	private function print_contributors_per_locale():void {
 		$locales                       = get_locales();
 		$header                        = 'Contributors per locale';
-		$this->contributors_per_locale = $this->create_gutenberg_heading( $header );
-		$this->print_wpcli_heading( $header );
+		if ( ! $this->echo_the_values ) {
+			$this->contributors_per_locale = $this->create_gutenberg_heading( $header );
+		} else {
+			$this->print_wpcli_heading( $header );
+		}
 		$code  = '.........................................................................................' . PHP_EOL;
 		$code .= 'Active contributor: 1 translation in the last 365 days.' . PHP_EOL;
 		$code .= '.........................................................................................' . PHP_EOL;
@@ -782,9 +858,12 @@ class Show_Stats extends WP_CLI_Command {
 									str_pad(number_format_i18n( count($all_contributors) - count( $current_contributors ) ), 20) .
 									str_pad(number_format_i18n( count( $all_contributors ) ), 20) . PHP_EOL;
 		}
-		$this->contributors_per_locale .= $this->create_gutenberg_code( $code );
 
-		WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->contributors_per_locale .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
@@ -1121,6 +1200,9 @@ class Show_Stats extends WP_CLI_Command {
 	 * @return void
 	 */
 	private function update_page() {
+		if ( $this->echo_the_values ) {
+			return;
+		}
 		define( 'MAKE_POLYGLOTS_BLOG_ID', 19 );
 		define( 'POLYGLOTS_PAGE_ID', 42132 );
 		add_filter( 'wp_revisions_to_keep',
@@ -1142,11 +1224,6 @@ class Show_Stats extends WP_CLI_Command {
 			'post_content' => $this->get_polyglots_stats_page_content(),
 		), true ); // phpcs:ignore PEAR.Functions.FunctionCallSignature.MultipleArguments
 		restore_current_blog();
-		if ( $ret ) {
-			print_wpcli_heading( 'Page updated! https://make.wordpress.org/polyglots/stats/');
-		} else {
-			$this->print_wpcli_heading('We had a problem updating the page https://make.wordpress.org/polyglots/stats/');
-		}
 	}
 
 	/**
