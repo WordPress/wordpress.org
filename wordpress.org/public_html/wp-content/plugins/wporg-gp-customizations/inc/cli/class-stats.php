@@ -900,9 +900,9 @@ class Stats {
 	/**
 	 * Returns the number of locales with WordPress core translation project generated.
 	 *
-	 * @return int
+	 * @return mixed
 	 */
-	private function get_core_total(): int {
+	private function get_core_total() {
 		global $wpdb;
 
 		return $wpdb->get_results(
@@ -923,9 +923,9 @@ class Stats {
 	/**
 	 * Returns the number of locales with WordPress full translated
 	 *
-	 * @return int
+	 * @return mixed
 	 */
-	private function get_core_full_translated(): int {
+	private function get_core_full_translated() {
 		global $wpdb;
 
 		return $wpdb->get_results(
@@ -952,9 +952,9 @@ class Stats {
 	 * @param string $minor_symbol
 	 * @param string $greater_symbol
 	 *
-	 * @return int
+	 * @return mixed
 	 */
-	private function get_core_interval( int $upper_value, int $lower_value, string $minor_symbol = '<', string $greater_symbol = '>=' ): int {
+	private function get_core_interval( int $upper_value, int $lower_value, string $minor_symbol = '<', string $greater_symbol = '>=' ) {
 		global $wpdb;
 
 		return $wpdb->get_results(
@@ -981,9 +981,9 @@ class Stats {
 	/**
 	 * Returns the number of locales with WordPress empty translated.
 	 *
-	 * @return int
+	 * @return mixed
 	 */
-	private function get_core_empty_translated(): int {
+	private function get_core_empty_translated() {
 		global $wpdb;
 
 		return $wpdb->get_results(
