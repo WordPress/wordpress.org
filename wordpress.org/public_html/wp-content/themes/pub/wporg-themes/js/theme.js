@@ -746,31 +746,51 @@ window.wp = window.wp || {};
 
 			// Get the theme's main thumbnail
 			var $thumbnailContainer = $('.screenshot');
+			var CARD_ACTIVE_CLASS = 'wporg-screenshot-card__active';
+			var SCREENSHOT_PREVIEW_CLASS = 'wporg-thumbnail-screenshot-preview-js';
+			var STYLE_VARIATION_CLASS = 'style-variation';
 
-			// Create element
-			 var newEl = $( '<div class="wporg-thumbnail-screenshot-preview-js"></div>' )
-			 .attr( 'data-link', anchorLink.href )
-			 .attr( 'data-preview-link', anchorLink.href + '&v=' + this.model.attributes.version + '-betaV2' )
-			 .attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', anchorLink.innerText ) )
-			 .attr( 'data-height', $thumbnailContainer.height() + 'px' )
-			 .attr( 'data-aspect-ratio', 3 / 4 )
-			 .attr( 'data-query-string', '?vpw=1200&vph=900' );
+			/**
+			 * Determine the index, we need to restore the original thumbnail if it's the first item.
+			 */
+			var itemIndex = $( '.wporg-horizontal-slider-js .wporg-screenshot-card').index( anchorLink );
 
-			 $thumbnailContainer.find('picture').hide();
+			if( itemIndex === 0 ) {
+				$thumbnailContainer.find('picture').show();
+				$thumbnailContainer.removeClass( STYLE_VARIATION_CLASS );
+				$( '.' + SCREENSHOT_PREVIEW_CLASS ).remove();
+			} else {
+				// Create element
+				var newEl = $( '<div class="'+ SCREENSHOT_PREVIEW_CLASS +'"></div>' )
+				.attr( 'data-link', anchorLink.href )
+				.attr( 'data-preview-link', anchorLink.href + '&v=' + this.model.attributes.version + '-betaV2' )
+				.attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', anchorLink.innerText ) )
+				.attr( 'data-height', $thumbnailContainer.height() + 'px' )
+				.attr( 'data-aspect-ratio', 3 / 4 )
+				.attr( 'data-query-string', '?vpw=1200&vph=900' );
 
-			 /**
-			  * The screenshot container uses a padding system to prevent image size change.
-			  * We don't want the padding when we preview our image.
-			  */
-			 $thumbnailContainer.addClass( 'style-variation' );
+			   $thumbnailContainer.find('picture').hide();
 
-			// Remove if one exists, we can't just replace the source.
-			$( '.wporg-thumbnail-screenshot-preview-js' ).remove();
-			$thumbnailContainer.append( newEl );
+			   /**
+				* The screenshot container uses a padding system to prevent image size change.
+				* We don't want the padding when we preview our image.
+			   */
+			   $thumbnailContainer.addClass( STYLE_VARIATION_CLASS );
 
-			if ( window.__wporg_screenshot_preview_render ) {
-				window.__wporg_screenshot_preview_render( 'wporg-thumbnail-screenshot-preview-js' );
+				// Remove if one exists, we can't just replace the source.
+				$( '.' + SCREENSHOT_PREVIEW_CLASS ).remove();
+				$thumbnailContainer.append( newEl );
+
+				if ( window.__wporg_screenshot_preview_render ) {
+					window.__wporg_screenshot_preview_render( SCREENSHOT_PREVIEW_CLASS );
+				}
 			}
+
+			/**
+			 * Add an active class on the current style variation.
+			 */
+			$( '.' + CARD_ACTIVE_CLASS ).removeClass( CARD_ACTIVE_CLASS );
+			anchorLink.classList.add( CARD_ACTIVE_CLASS );
 
 			// Update the preview url so uses get style variation when the previewer is opened
 			this.model.attributes.preview_url = anchorLink.href;
@@ -1022,7 +1042,7 @@ window.wp = window.wp || {};
 					 out.push( {
 						title: value.title,
 						link: value.link,
-						previewLink: value.preview_link + '&v=' + self.get( 'version' ) + '-betaV1.1.0',
+						previewLink: value.preview_link + '&v=' + self.get( 'version' ) + '-betaV1.1.1',
 						caption:  _wpThemeSettings.l10n.style_variation_caption_template.replace( '%s', value.title ),
 					 } );
 				} );
