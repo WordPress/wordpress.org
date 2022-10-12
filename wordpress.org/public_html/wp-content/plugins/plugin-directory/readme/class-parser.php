@@ -578,6 +578,9 @@ class Parser {
 	 */
 	protected function sanitize_contributors( $users ) {
 		foreach ( $users as $i => $name ) {
+			// Trim any leading `@` off the name, in the event that someone uses `@joe-bloggs`.
+			$name = ltrim( $name, '@' );
+
 			// Contributors should be listed by their WordPress.org Login name (Example: 'Joe Bloggs')
 			$user = get_user_by( 'login', $name );
 
