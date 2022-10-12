@@ -133,11 +133,17 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 				$attributes['keywords'] = implode( ' ', $keywords );
 			}
 
+			$authorship = "[{$pr_data->user->url} {$pr_data->user->name}]";
+			if ( $user_id ) {
+				$user       = get_user_by( 'id', $user_id );
+				$authorship = "[https://profiles.wordpress.org/{$user->user_nicename}/ @{$user->user_login}]";
+			}
+
 			$trac->update(
 				$pr_data->trac_ticket[1],
 				"''This ticket was mentioned in [{$pr_data->html_url} PR #{$pr_number}] " .
 					"on [https://github.com/{$pr_repo}/ {$pr_repo}] " .
-					"by [{$pr_data->user->url} {$pr_data->user->name}].''" .
+					"by {$authorship}.''" .
 					( $pr_description ? "\n{$pr_description}" : '' ),
 				$attributes,  // Attributes changed
 				true // Notify
@@ -200,15 +206,22 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			die( 'PR Not linked to any tickets' );
 		}
 
-		$comment_template = "{{{#!comment\n%s\n}}}\n[%s %s] commented on [%s %s]:\n\n%s";
-		$comment_author   = find_wporg_user_by_github( $payload->comment->user->login );
+		$comment_template = "{{{#!comment\n%s\n}}}\n%s commented on [%s %s]:\n\n%s";
+		$user_id          = find_wporg_user_by_github( $payload->comment->user->login, 'ID' );
+		$authorship       = "[{$payload->comment->user->html_url} {$payload->comment->user->login}]";
+		$comment_author   = '';
 		$comment_time     = new \DateTime( $payload->comment->created_at );
+
+		if ( $user_id ) {
+			$user           = get_user_by( 'id', $user_id );
+			$authorship     = "[https://profiles.wordpress.org/{$user->user_nicename}/ @{$user->user_login}]";
+			$comment_author = $user->user_login;
+		}
 
 		$comment_body = sprintf(
 			$comment_template,
 			$payload->comment->id,
-			$payload->comment->user->html_url,
-			$payload->comment->user->login,
+			$authorship,
 			$payload->comment->html_url,
 			'PR #' . $payload->issue->number,
 			format_github_content_for_trac_comment( $payload->comment->body )
