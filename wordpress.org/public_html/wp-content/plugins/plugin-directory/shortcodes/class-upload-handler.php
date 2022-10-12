@@ -361,7 +361,7 @@ class Upload_Handler {
 
 		$message .= sprintf(
 			/* translators: 1: plugins@wordpress.org */
-			__( 'We&rsquo;ve sent you an email verifying this submission. Please make sure to whitelist our email address - <a href="mailto:%1$s">%1$s</a> - to ensure you receive all our communications.' ),
+			__( 'We&rsquo;ve sent you an email verifying this submission. Please make sure to allowlist our email address - <a href="mailto:%1$s">%1$s</a> - to ensure you receive all our communications.' ),
 			'plugins@wordpress.org'
 		) . '</p><p>';
 
