@@ -5,7 +5,7 @@ Plugin URI: http://wordpress.org
 Author: Scott Reilly
 License: GPL2
 Version: 1.0
-Description: Handles the associations sent from other services in the .org ecosystem (WP, WordCamp, WP, etc).
+Description: Handles the associations sent from other services in the .org ecosystem (WP, WordCamp, etc).
 */
 
 defined( 'ABSPATH' ) or die();
@@ -29,9 +29,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		 */
 		public function plugins_loaded() {
 			add_action( 'wp_ajax_nopriv_wporg_handle_association', array( $this, 'handle_association' ) );
-
-			// Approve users added to groups
-//			add_action( 'groups_join_group', array( $this, 'auto_accept_group_invite_for_user' ), 10, 2 );
 
 			// Disable activity reporting related to groups
 			add_filter( 'bp_activity_component_before_save',       array( $this, 'disable_group_activity_reporting' ) );
@@ -101,16 +98,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		}
 
 		/**
-		 * Accept all invitations to a group on behalf of the user.
-		 *
-		 * @param int $group_id Group ID
-		 * @param int $user_id  User ID
-		 */
-		public function auto_accept_group_invite_for_user( $group_id, $user_id ) {
-			//TODO
-		}
-
-		/**
 		 * BP thinks wp-admin is the slug for a user being displayed (which happens
 		 * to actually exist on .org), so clear that until a proper fix is pursued.
 		 *
@@ -153,14 +140,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 
 			switch ( $source ) {
 				case 'wordcamp':
-					$association_id = $this->handle_wordcamp_association();
-					break;
-				case 'meetups' :
-					$association_id = $this->handle_meetup_association();
-					break;
+				case 'meetups':
 				case 'polyglots':
-					$association_id = $this->handle_polyglots_association();
-					break;
+					// These sources may send the field as `user_id`/`association`, so handle that format if not specified otherwise.
+					$_POST['users'] ??= (array) $_POST['user_id'];
+					$_POST['badge'] ??= $_POST['association'];
+
+					// Fall through, the generic-badge uses `users`/`badge` for the fields, as set above.
 				case 'generic-badge':
 					$association_id = $this->handle_badge_association();
 					break;
@@ -178,169 +164,75 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		}
 
 		/**
-		 * Handles incoming associations for WordCamp.
-		 *
-		 * Payload: (beyond 'action' and 'source')
-		 *  user_id:     User ID
-		 *  association: Slug for group/association
-		 *  command:     Either 'add' or 'remove'
-		 */
-		private function handle_wordcamp_association() {
-			$user = get_user_by( 'id', $_POST['user_id'] );
-
-			if ( ! $user ) {
-				return '-1 Association reported for unrecognized user: ' . sanitize_text_field( $_POST['user_id'] );
-			}
-
-			$association = sanitize_key( $_POST['association'] );
-
-			$associated_associations = array( 'wordcamp-organizer', 'wordcamp-speaker' );
-
-			if ( ! in_array( $association, $associated_associations ) ) {
-				return '-1 Unrecognized association type';
-			}
-
-			if ( ! $group_id = BP_Groups_Group::group_exists( $association ) ) {
-				return '-1 Association does not exist: ' . $association;
-			}
-
-			if ( 'add' == $_POST['command'] ) {
-				groups_join_group( $group_id, $user->ID );
-				groups_accept_invite( $user->ID, $group_id );
-			} elseif ( 'remove' == $_POST['command'] ) {
-				groups_leave_group( $group_id, $user->ID );
-			} else {
-				return '-1 Unknown association command';
-			}
-
-			return 1;
-		}
-
-		/**
-		 * Handles incoming associations for Meetup.
-		 *
-		 * Payload: (beyond 'action' and 'source')
-		 *  users:       List of users login
-		 *  association: Group slug
-		 * @return int|string
-		 */
-		private function handle_meetup_association() {
-
-			if ( ( ! isset( $_POST['users'] ) || ( ! is_array( $_POST['users'] ) ) ) ) {
-				return '-1 Users does not exist: ';
-			}
-
-			$association = sanitize_key( $_POST['association'] );
-			$associated_associations = array( 'meetup-organizer' );
-
-			if ( ! in_array( $association, $associated_associations ) ) {
-				return '-1 Unrecognized association type';
-			}
-
-			if ( ! $group_id = BP_Groups_Group::group_exists( $association ) ) {
-				return '-1 Association does not exist: ' . $association;
-			}
-
-			foreach ( $_POST['users'] as $user ) {
-				$user = get_user_by( 'login', $user );
-				if ( 'add' == $_POST['command'] ) {
-					groups_join_group( $group_id, $user->ID );
-					groups_accept_invite( $user->ID, $group_id );
-				} elseif ( 'remove' == $_POST['command'] ) {
-					groups_leave_group( $group_id, $user->ID );
-				} else {
-					return '-1 Unknown association command';
-				}
-			}
-
-			return 1;
-
-		}
-
-		/**
-		 * Handles incoming associations for Polyglots/translate.wordpress.org.
-		 *
-		 * Payload: (beyond 'action' and 'source')
-		 *  user_id:     User ID
-		 *  association: Slug for group/association
-		 *  command:     Either 'add' or 'remove'
-		 */
-		private function handle_polyglots_association() {
-			$user = get_user_by( 'id', $_POST['user_id'] );
-
-			if ( ! $user ) {
-				return '-1 Association reported for unrecognized user: ' . sanitize_text_field( $_POST['user_id'] );
-			}
-
-			$association = sanitize_key( $_POST['association'] );
-
-			$associated_associations = array( 'translation-editor', 'translation-contributor' );
-
-			if ( ! in_array( $association, $associated_associations ) ) {
-				return '-1 Unrecognized association type';
-			}
-
-			if ( ! $group_id = BP_Groups_Group::group_exists( $association ) ) {
-				return '-1 Association does not exist: ' . $association;
-			}
-
-			if ( 'add' == $_POST['command'] ) {
-				groups_join_group( $group_id, $user->ID );
-				groups_accept_invite( $user->ID, $group_id );
-			} elseif ( 'remove' == $_POST['command'] ) {
-				groups_leave_group( $group_id, $user->ID );
-			} else {
-				return '-1 Unknown association command';
-			}
-
-			return 1;
-		}
-
-		/**
 		 * Handles incoming associations for the generic '{assign|remove}_badge()' functions. See pub/profile-helpers.php.
 		 *
 		 * Payload:  (beyond 'action' and 'source')
-		 *  user:    User ID/email/login
-		 *  badge:   Slug for group/association
+		 *  users:   User ID(s)/login(s)/nicename(s).
+		 *  badge:   Slug for group/association.
 		 *  command: Either 'add' or 'remove'
 		 */
 		private function handle_badge_association() {
-			$user = wp_unslash( $_POST['user'] ?? '' );
-
-			// Handle login/email as input..
-			if ( ! is_numeric( $user ) ) {
-				$_user = get_user_by( 'login', $user );
-				if ( ! $_user && is_email( $user ) ) {
-					$_user = get_user_by( 'email', $user );
-				}
-
-				$user = $_user->ID ?? $user;
-			}
-
-			$user = get_user_by( 'id', $user );
-			if ( ! $user ) {
-				status_header( 400 );
-				return '-1 Association requested for unrecognized user: ' . sanitize_text_field( $_POST['user'] );
-			}
-
+			$users    = wp_unslash( $_POST['users'] ?? [] );
+			$command  = $_POST['command'] ?? '';
 			$badge    = sanitize_key( $_POST['badge'] ?? '' );
 			$group_id = BP_Groups_Group::group_exists( $badge );
+
 			if ( ! $badge || ! $group_id ) {
 				status_header( 400 );
 				return '-1 Association does not exist: ' . $badge;
 			}
 
-			if ( 'add' == $_POST['command'] ) {
-				groups_join_group( $group_id, $user->ID );
-				groups_accept_invite( $user->ID, $group_id );
-			} elseif ( 'remove' == $_POST['command'] ) {
-				groups_leave_group( $group_id, $user->ID );
-			} else {
+			if ( 'add' !== $command && 'remove' !== $command ) {
 				status_header( 400 );
 				return '-1 Unknown association command';
 			}
 
-			// NOTE: Actual response from `groups_join_group()` & `groups_leave_group()` set in cookies.
+			if ( empty( $users ) ) {
+				status_header( 400 );
+				return '-1 User(s) not specified';
+			}
+
+			// Validate all users.
+			foreach ( $users as $i => $user ) {
+				if ( is_numeric( $user ) && ( absint( $user ) == $user ) ) {
+					$_user = get_user_by( 'id', $user );
+				} else {
+					$_user = get_user_by( 'login', $user );
+					if ( ! $_user ) {
+						$_user = get_user_by( 'slug', $user );
+					}
+				}
+
+				if ( ! $_user ) {
+					status_header( 400 );
+					return '-1 Association requested for unrecognized user: ' . sanitize_text_field( $user );
+				}
+
+				$users[ $i ] = $_user->ID;
+			}
+
+			// Defer group re-counts.
+			if ( function_exists( 'bp_groups_defer_group_members_count' ) ) {
+				bp_groups_defer_group_members_count( true );
+			}
+
+			foreach ( $users as $user_id ) {
+				if ( 'add' == $command ) {
+					if ( ! groups_is_user_member( $user_id, $group_id ) ) {
+						groups_join_group( $group_id, $user_id );
+					}
+				} elseif ( 'remove' == $command ) {
+					if ( groups_is_user_member( $group_id, $user_id ) ) {
+						groups_leave_group( $group_id, $user_id );
+					}
+				}
+			}
+
+			// Perform the group recounts.
+			if ( function_exists( 'bp_groups_defer_group_members_count' ) ) {
+				bp_groups_defer_group_members_count( false, $group_id );
+			}
+
 			return 1;
 		}
 
