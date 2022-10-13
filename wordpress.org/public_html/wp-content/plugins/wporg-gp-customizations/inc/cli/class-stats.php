@@ -191,9 +191,9 @@ class Stats {
 			"SELECT
 				YEAR( date_added ) as year,
 				count(*) as strings
-				FROM {$wpdb->gp_originals} 
-				GROUP BY YEAR( date_added )
-				ORDER BY YEAR( date_added ) DESC"
+			FROM {$wpdb->gp_originals} 
+			GROUP BY YEAR( date_added )
+			ORDER BY YEAR( date_added ) DESC"
 		);
 
 		if ( ! $this->echo_the_values ) {
@@ -236,11 +236,13 @@ class Stats {
 		$core_50_90  = $this->get_core_interval( 90, 50 );
 		$core_50     = $this->get_core_interval( 50, 0, '<', '>' );
 		$core_0      = $this->get_core_empty_translated();
+
 		if ( ! $this->echo_the_values ) {
 			$this->wordpress_translation_percentage = $this->create_gutenberg_heading( 'WordPress core: Translated percentage by the locale.' );
 		} else {
 			$this->print_wpcli_heading( 'WordPress core: Translated percentage by the locale.' );
 		}
+
 		$code  = '................................................................' . PHP_EOL;
 		$code .= "Number of locales:                         \t" . number_format_i18n( count( $this->get_existing_locales() ) ) . PHP_EOL;
 		$code .= "Number of locales with variants:           \t" . number_format_i18n( count( $this->get_existing_locales( 'with_variants' ) ) ) . PHP_EOL;
@@ -256,6 +258,7 @@ class Stats {
 		$code .= '................................................................' . PHP_EOL;
 		$code .= 'The difference between the number of locales and the number of ' . PHP_EOL;
 		$code .= "WordPress (wp/dev) is due to some duplicated variants. \n" . PHP_EOL;
+
 		if ( ! $this->echo_the_values ) {
 			$this->wordpress_translation_percentage .= $this->create_gutenberg_code( $code );
 		} else {
@@ -282,7 +285,8 @@ class Stats {
 			WHERE updated >= '2010-01-01'
 			GROUP BY LEFT( updated, 4 )
 			ORDER BY LEFT( updated, 4 ) DESC",
-			ARRAY_A );
+			ARRAY_A
+		);
 
 		$header = 'Language Packs generated per year.';
 		if ( ! $this->echo_the_values ) {
@@ -307,7 +311,7 @@ class Stats {
 			         str_pad( number_format_i18n( $package['plugin_packs'] ), 16 ) .
 			         str_pad( number_format_i18n( $package['theme_packs'] ), 16 ) .
 			         str_pad( number_format_i18n( $package['total_packs'] ), 16 ) .
-					 PHP_EOL;
+			         PHP_EOL;
 		}
 		$code .= '.......................................................................' . PHP_EOL;
 		$code .= '(*) Estimated for the current year.' . PHP_EOL;
@@ -345,7 +349,8 @@ class Stats {
 			)a
 			GROUP BY year
 			ORDER BY year DESC",
-			ARRAY_A );
+			ARRAY_A
+		);
 
 		$header = 'Unique Plugins / Themes language packs per year.';
 		if ( ! $this->echo_the_values ) {
@@ -387,7 +392,7 @@ class Stats {
 	 *      $translators =  $wpdb->get_var(
 	 *      $wpdb->prepare(
 	 *      "SELECT COUNT( DISTINCT user_id) as translators
-	 *      FROM translate_translations
+	 *      FROM gp_translations
 	 *      WHERE date_modified >= '%s' and date_modified <= '%s'",
 	 *      '2022-01-01 00:00:00',
 	 *      '2022-12-31 23:59:59'
@@ -405,59 +410,67 @@ class Stats {
 		} else {
 			$this->print_wpcli_heading( 'Number of translations and translators in the last ' . $this->number_of_years . ' years.' );
 		}
+
 		$code       = "Year \t\t Number of translations \t Translators \t Translators with > 1 translation" . PHP_EOL;
 		$code      .= '................................................................' . PHP_EOL;
 		$last_year  = gmdate( 'Y' );
 		$first_year = $last_year - $this->number_of_years;
 		$first_id   = 0;
+
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
 			if ( gmdate( 'Y' ) == $year ) {
 				$last_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->gp_translations}" );
 			} else {
 				$last_id = $first_id - 1;
 			}
-			$starting_date = $year . '-01-01 00:00:00';
-			$first_id      = $wpdb->get_var( $wpdb->prepare(
+
+			$first_id = $wpdb->get_var( $wpdb->prepare(
 				"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added >= %s",
-				$starting_date
+				$year . '-01-01'
 			) );
 
-			$row = $wpdb->get_row( $wpdb->prepare(
-				"SELECT
-					COUNT(*) as strings_added,
-					COUNT( DISTINCT user_id ) as contributors
-				FROM {$wpdb->gp_translations}
-				WHERE id BETWEEN %d AND %d",
-				$first_id,
-				$last_id,
-			), ARRAY_A ); // phpcs:ignore PEAR.Functions.FunctionCallSignature.MultipleArguments
+			$row = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT
+						COUNT(*) as strings_added,
+						COUNT( DISTINCT user_id ) as contributors
+					FROM {$wpdb->gp_translations}
+					WHERE id BETWEEN %d AND %d",
+					$first_id,
+					$last_id,
+				),
+				ARRAY_A
+			);
 
 			$strings_added = number_format_i18n( $row['strings_added'] );
 			$contributors  = number_format_i18n( $row['contributors'] );
 
-			$wpdb->get_results( $wpdb->prepare(
-				"SELECT 
-    				DISTINCT user_id, count(id) as translation_number 
-				FROM {$wpdb->gp_translations} 
-				WHERE id BETWEEN %d AND %d 
-				GROUP BY user_id 
-				HAVING( COUNT(id) > 1 )",
-				$first_id,
-				$last_id,
-			), ARRAY_A ); // phpcs:ignore PEAR.Functions.FunctionCallSignature.MultipleArguments
-			$repeat_contributors_rows = $wpdb->num_rows;
+			$repeat_contributors_val = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(user_id) FROM (
+						SELECT DISTINCT user_id, count(id) as translations_number
+						FROM {$wpdb->gp_translations} 
+						WHERE id BETWEEN %d AND %d 
+						GROUP BY user_id 
+						HAVING translations_number > 1
+					) a",
+					$first_id,
+					$last_id,
+				)
+			);
 
 			if ( gmdate( 'Y' ) == $year ) {
 				$strings_added       = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $row['strings_added'] ) ), 10, ' ', STR_PAD_LEFT );
 				$contributors        = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $row['contributors'] ) ), 6, ' ', STR_PAD_LEFT );
-				$repeat_contributors = str_pad( number_format_i18n( $this->estimate_value_for_full_year(  $repeat_contributors_rows ) ), 8, ' ', STR_PAD_LEFT );
+				$repeat_contributors = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $repeat_contributors_val ) ), 8, ' ', STR_PAD_LEFT );
 				$code               .= "{$year} (*) \t {$strings_added} \t\t\t {$contributors} \t {$repeat_contributors}" . PHP_EOL;
 			}
-			$strings_added       = str_pad( number_format_i18n( $row['strings_added'] ), 10, ' ', STR_PAD_LEFT );
-			$contributors        = str_pad( number_format_i18n( $row['contributors'] ), 6, ' ', STR_PAD_LEFT );
-			$repeat_contributors = str_pad( number_format_i18n( $repeat_contributors_rows ), 8, ' ', STR_PAD_LEFT );
+			$strings_added       = str_pad( $strings_added, 10, ' ', STR_PAD_LEFT );
+			$contributors        = str_pad( $contributors, 6, ' ', STR_PAD_LEFT );
+			$repeat_contributors = str_pad( number_format_i18n( $repeat_contributors_val ), 8, ' ', STR_PAD_LEFT );
 			$code               .= "{$year} \t\t {$strings_added} \t\t\t {$contributors} \t {$repeat_contributors}" . PHP_EOL;
 		}
+
 		$code .= '................................................................' . PHP_EOL;
 		$code .= '(*) Estimated for the current year.' . PHP_EOL;
 		$code .= PHP_EOL;
@@ -475,11 +488,14 @@ class Stats {
 		$forum_posts   = array();
 		$forum_replies = array();
 		$code          = '';
+
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
 			$forum_posts[ $year ]   = $this->get_forums_stats( 'topic', $year );
 			$forum_replies[ $year ] = $this->get_forums_stats( 'reply', $year );
 		}
+
 		ksort($this->forum_ids);
+
 		$header = 'Forums. Topics by year and locale.';
 		if ( ! $this->echo_the_values ) {
 			$this->forum_post_and_replies_by_year = $this->create_gutenberg_heading( $header );
@@ -492,13 +508,15 @@ class Stats {
 			$code .= str_pad( $year, 8,' ', STR_PAD_LEFT  );
 		}
 		$code .= PHP_EOL;
+
 		foreach ( $this->forum_ids as $key => $value ) {
 			$code .= str_pad($key, 12 );
 			for ( $year = $last_year; $year > $first_year; $year -- ) {
-				 $code .= str_pad( number_format_i18n( $forum_posts[$year][$key] ), 8,' ', STR_PAD_LEFT  );
+				$code .= str_pad( number_format_i18n( $forum_posts[$year][$key] ), 8,' ', STR_PAD_LEFT  );
 			}
 			$code .= PHP_EOL;
 		}
+
 		if ( ! $this->echo_the_values ) {
 			$this->forum_post_and_replies_by_year .= $this->create_gutenberg_code( $code );
 		} else {
@@ -517,10 +535,11 @@ class Stats {
 			$code .= str_pad( $year, 8,' ', STR_PAD_LEFT  );
 		}
 		$code .= PHP_EOL;
+
 		foreach ( $this->forum_ids as $key => $value ) {
 			$code .= str_pad($key, 12 );
 			for ( $year = $last_year; $year > $first_year; $year -- ) {
-				 $code .= str_pad( number_format_i18n( $forum_replies[$year][$key] ), 8,' ', STR_PAD_LEFT  );
+				$code .= str_pad( number_format_i18n( $forum_replies[$year][$key] ), 8,' ', STR_PAD_LEFT  );
 			}
 			$code .= PHP_EOL;
 		}
@@ -539,14 +558,16 @@ class Stats {
 	private function print_most_active_translators(): void {
 		global $wpdb;
 
-		$last_year                     = gmdate( 'Y' );
-		$first_year                    = $last_year - $this->number_of_years;
-		$first_id                      = 0;
+		$last_year  = gmdate( 'Y' );
+		$first_year = $last_year - $this->number_of_years;
+		$first_id   = 0;
+
 		if ( ! $this->echo_the_values ) {
 			$this->most_active_translators = $this->create_gutenberg_heading( 'Most active translators in the last ' . $this->number_of_years . ' years.' );
 		} else {
 			$this->print_wpcli_heading( 'Most active translators in the last ' . $this->number_of_years . ' years.' );
 		}
+
 		$code = "Year \t Translations \t Translator" . PHP_EOL;
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
 			if ( gmdate( 'Y' ) == $year ) {
@@ -554,25 +575,29 @@ class Stats {
 			} else {
 				$last_id = $first_id - 1;
 			}
-			$starting_date = $year . '-01-01 00:00:00';
-			$first_id      = $wpdb->get_var( $wpdb->prepare(
+
+			$first_id = $wpdb->get_var( $wpdb->prepare(
 				"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added >= %s",
-				$starting_date
+				$year . '-01-01'
 			) );
 
-			$rows  = $wpdb->get_results( $wpdb->prepare(
-				"SELECT  
-    				user_id, 
-    				COUNT(*) as strings_added 
-				FROM {$wpdb->gp_translations} 
-				WHERE id BETWEEN %d AND %d
-				GROUP BY user_id 
-				ORDER BY `strings_added` DESC 
-				LIMIT %d",
-				$first_id,
-				$last_id,
-				$this->number_of_translators
-			), ARRAY_A ); // phpcs:ignore PEAR.Functions.FunctionCallSignature.MultipleArguments
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT  
+						user_id, 
+						COUNT(*) as strings_added 
+					FROM {$wpdb->gp_translations} 
+					WHERE id BETWEEN %d AND %d
+					GROUP BY user_id 
+					ORDER BY `strings_added` DESC 
+					LIMIT %d",
+					$first_id,
+					$last_id,
+					$this->number_of_translators
+				),
+				ARRAY_A
+			);
+
 			$code .= '................................................................' . PHP_EOL;
 			foreach ( $rows as $row ) {
 				if ( 0 == $row['user_id'] ) {
@@ -625,14 +650,20 @@ class Stats {
 		$commenters                     = array();
 
 		// Get the number of opt-in users.
-		$optin_users = number_format_i18n( $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(user_id) as optin_users FROM {$wpdb->usermeta}
-                      WHERE meta_key = %s AND meta_value LIKE %s",
-			'wporg_351_gp_default_sort',
-		'%s:19:\"notifications_optin\";s:2:\"on\";%' ) ) );
+		$optin_users = number_format_i18n(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(user_id) as optin_users
+						FROM {$wpdb->usermeta}
+						WHERE meta_key = %s AND meta_value LIKE %s",
+					$wpdb->base_prefix . WPORG_TRANSLATE_BLOGID . '_gp_default_sort',
+					'%s:19:\"notifications_optin\";s:2:\"on\";%'
+				)
+			)
+		);
 
 		// Get the number of original strings with comments: one CPT for each original.
-		$feedback_posts_args            = array(
+		$feedback_posts_args = array(
 			'posts_per_page' => - 1,
 			'post_status'    => 'publish',
 			'post_type'      => $this::FEEDBACK_POST_TYPE,
@@ -640,32 +671,37 @@ class Stats {
 				array( 'after' => '2022-07-28' ),
 			),
 		);
+
 		$feedback_posts                 = new WP_Query( $feedback_posts_args );
 		$original_strings_with_comments = number_format_i18n( $feedback_posts->post_count );
 
 		// Get the total number of comments.
-		$feedback_comments_args = array(
-			'number'     => - 1,
-			'post_type'  => $this::FEEDBACK_POST_TYPE,
-			'count'      => true,
-			'date_query' => array(
-				array( 'after' => '2022-07-28' ),
-			),
+		$total_comments = number_format_i18n(
+			get_comments(
+				array(
+					'number'     => - 1,
+					'post_type'  => $this::FEEDBACK_POST_TYPE,
+					'count'      => true,
+					'date_query' => array(
+						array( 'after' => '2022-07-28' ),
+					),
+				)
+			)
 		);
-		$total_comments         = number_format_i18n( get_comments( $feedback_comments_args ) );
 
 		// Get some info related with the status of the translations who get feedback.
 		// First, get the comments related with a translation, because we can get comments related
 		// only with the original.
-		$feedback_comments_args = array(
-			'post_type'  => $this::FEEDBACK_POST_TYPE,
-			'count'      => false,
-			'meta_key'   => 'translation_id',
-			'date_query' => array(
-				array( 'after' => '2022-07-28' ),
-			),
+		$comments = get_comments(
+			array(
+				'post_type'  => $this::FEEDBACK_POST_TYPE,
+				'count'      => false,
+				'meta_key'   => 'translation_id',
+				'date_query' => array(
+					array( 'after' => '2022-07-28' ),
+				),
+			)
 		);
-		$comments               = get_comments( $feedback_comments_args );
 
 		// Get the translation ids with a feedback comment.
 		foreach ( $comments as $comment ) {
@@ -677,11 +713,10 @@ class Stats {
 		foreach ( $comment_meta_translation_ids as $comment_meta_translation_id ) {
 			$translation = $wpdb->get_row(
 				$wpdb->prepare(
-					'SELECT translate_translation_sets.locale, translate_translations.id, translate_translations.original_id, 
-       						translate_translations.user_id, translate_translations.status 
-						FROM translate_translations 
-       					INNER JOIN translate_translation_sets on translate_translations.translation_set_id=translate_translation_sets.id 
-		            	WHERE translate_translations.id= %s',
+					"SELECT s.locale, t.id, t.original_id, t.user_id, t.status 
+					FROM {$wpdb->gp_translations} t
+					INNER JOIN {$wpdb->gp_translation_sets} s ON t.translation_set_id = s.id 
+					WHERE t.id = %s",
 					$comment_meta_translation_id
 				)
 			);
@@ -691,14 +726,14 @@ class Stats {
 			if ( 'rejected' == $translation->status ) {
 				$is_current_from_rejection = $wpdb->get_row(
 					$wpdb->prepare(
-						"SELECT translate_translations.id, translate_translation_sets.locale
-						FROM translate_translations 
-       					INNER JOIN translate_translation_sets on translate_translations.translation_set_id=translate_translation_sets.id 
-		            	WHERE
-		            	    	 translate_translations.status='current' 
-		            	     AND translate_translations.original_id=%d  
-							 AND translate_translations.user_id=%d 
-							AND translate_translation_sets.locale=%s",
+						"SELECT t.id, s.locale
+						FROM {$wpdb->gp_translations} t
+						INNER JOIN {$wpdb->gp_translation_sets} s ON t.translation_set_id = s.id 
+						WHERE
+							t.status='current' 
+							AND t.original_id = %d  
+							AND t.user_id = %d 
+							AND s.locale = %s",
 						$translation->original_id,
 						$translation->user_id,
 						$translation->locale
@@ -712,25 +747,29 @@ class Stats {
 		}
 
 		// Get most active commenter's.
-		$most_active_commenters_args = array(
-			'post_type'  => $this::FEEDBACK_POST_TYPE,
-			'count'      => false,
-			'date_query' => array(
-				array( 'after' => '2022-07-28' ),
-			),
+		$comments = get_comments(
+			array(
+				'post_type'  => $this::FEEDBACK_POST_TYPE,
+				'count'      => false,
+				'date_query' => array(
+					array( 'after' => '2022-07-28' ),
+				),
+			)
 		);
-		$comments                    = get_comments( $most_active_commenters_args );
 		foreach ( $comments as $comment ) {
 			$comment_user_ids[] = $comment->user_id;
 		}
+
 		$commenters_with_comment_count = array_count_values( $comment_user_ids );
 		arsort( $commenters_with_comment_count );
+
 		$commenters_number = number_format_i18n( count( $commenters_with_comment_count ) );
 		foreach ( $commenters_with_comment_count as $user_id => $comment_number ) {
 			$user                  = get_user_by( 'id', $user_id );
 			$user->comments_number = $comment_number;
 			$commenters[]          = $user;
 		}
+
 		// Format and print the info.
 		$comment_meta_translation_id_number = number_format_i18n( count( $comment_meta_translation_ids ) );
 		$rejected_number                    = number_format_i18n( $status_counter['rejected'] );
@@ -738,6 +777,7 @@ class Stats {
 		$current_number                     = number_format_i18n( $status_counter['current'] );
 		$fuzzy_number                       = number_format_i18n( $status_counter['fuzzy'] );
 		$old_number                         = number_format_i18n( $status_counter['old'] );
+
 		if ( ! $this->echo_the_values ) {
 			$this->feedback_received = $this->create_gutenberg_heading( 'Feedback in the last ' . $this->number_of_years . ' years (starting on 2022-07-28).' );
 		} else {
@@ -797,6 +837,7 @@ class Stats {
 		} else {
 			$this->print_wpcli_heading( 'Managers stats.' );
 		}
+
 		$code  = 'Local managers (LM):' . PHP_EOL;
 		$code .= " - Total:\t\t\t\t\t\t\t\t" . number_format_i18n( array_sum( $locale_managers ) ) . PHP_EOL;
 		$code .= " - Total users that have been registered this year and get the role:\t" . number_format_i18n( array_sum( $registered_this_year_new_locale_managers ) ) . PHP_EOL;
@@ -806,6 +847,7 @@ class Stats {
 				$code .= "\t - " . $locale->english_name . ': ' . number_format_i18n( $locale_managers[ $locale->english_name ] ) . ', ' . number_format_i18n( $registered_this_year_new_locale_managers[ $locale->english_name ] ) . ', ' . number_format_i18n( $started_this_year_new_locale_managers[ $locale->english_name ] ) . PHP_EOL;
 			}
 		}
+
 		$code .= 'General Translator Editors (GTE):' . PHP_EOL;
 		$code .= " - Total:\t\t\t\t\t\t\t\t" . number_format_i18n( array_sum( $general_translation_editors ) ). PHP_EOL;
 		$code .= " - Total users that have been registered this year and get the role:\t" . number_format_i18n( array_sum( $registered_this_year_new_general_translation_editors ) ) . PHP_EOL;
@@ -815,6 +857,7 @@ class Stats {
 				$code .= "\t - " . $locale->english_name . ': ' . number_format_i18n( $general_translation_editors[ $locale->english_name ] ) . ', ' . number_format_i18n( $registered_this_year_new_general_translation_editors[ $locale->english_name ] ) . ', ' . number_format_i18n( $started_this_year_new_general_translation_editors[ $locale->english_name ] ) . PHP_EOL;
 			}
 		}
+
 		$code .= 'Project Translation Editors (PTE):' . PHP_EOL;
 		$code .= " - Total:\t\t\t\t\t\t\t\t" . number_format_i18n( array_sum( $project_translation_editors ) ) . PHP_EOL;
 		$code .= " - Total users that have been registered this year and get the role:\t" . number_format_i18n( array_sum( $registered_this_year_new_project_translation_editors ) ) . PHP_EOL;
@@ -840,11 +883,13 @@ class Stats {
 	private function print_contributors_per_locale():void {
 		$locales                       = get_locales();
 		$header                        = 'Contributors per locale';
+
 		if ( ! $this->echo_the_values ) {
 			$this->contributors_per_locale = $this->create_gutenberg_heading( $header );
 		} else {
 			$this->print_wpcli_heading( $header );
 		}
+
 		$code  = '.........................................................................................' . PHP_EOL;
 		$code .= 'Active contributor: 1 translation in the last 365 days.' . PHP_EOL;
 		$code .= '.........................................................................................' . PHP_EOL;
@@ -854,9 +899,9 @@ class Stats {
 			$current_contributors = $this->get_translation_contributors( $locale, 365 );
 			$all_contributors     = $this->get_translation_contributors( $locale );
 			$code                .= str_pad( $locale->english_name, 40) .
-									str_pad(number_format_i18n( count( $current_contributors ) ), 20) .
-									str_pad(number_format_i18n( count($all_contributors) - count( $current_contributors ) ), 20) .
-									str_pad(number_format_i18n( count( $all_contributors ) ), 20) . PHP_EOL;
+			                        str_pad( number_format_i18n( count( $current_contributors ) ), 20) .
+			                        str_pad( number_format_i18n( count($all_contributors) - count( $current_contributors ) ), 20) .
+			                        str_pad( number_format_i18n( count( $all_contributors ) ), 20) . PHP_EOL;
 		}
 
 		if ( ! $this->echo_the_values ) {
@@ -889,8 +934,7 @@ class Stats {
 				2, // 2 = wp/dev
 				'default'
 			);
-		}
-		if ( '' == $query ) {
+		} else {
 			return array();
 		}
 
@@ -905,19 +949,17 @@ class Stats {
 	private function get_core_total() {
 		global $wpdb;
 
-		return $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT count(*) as counter from 
-                     (SELECT
-				        (100 * stats.current/stats.all) as percent_complete
-			            FROM {$wpdb->project_translation_status} stats
-				            LEFT JOIN {$wpdb->gp_projects} projects ON stats.project_id = projects.id
-			            WHERE
-				            projects.path = 'wp/dev'
-				            AND projects.active = 1
-                    ) n"
-			)
-		)[0]->counter;
+		return $wpdb->get_var(
+			"SELECT count(*) as counter FROM (
+				SELECT
+					(100 * stats.current/stats.all) as percent_complete
+					FROM {$wpdb->project_translation_status} stats
+						LEFT JOIN {$wpdb->gp_projects} projects ON stats.project_id = projects.id
+					WHERE
+						projects.path = 'wp/dev'
+						AND projects.active = 1
+			) n"
+		);
 	}
 
 	/**
@@ -928,20 +970,19 @@ class Stats {
 	private function get_core_full_translated() {
 		global $wpdb;
 
-		return $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT count(*) as counter from 
-                     (SELECT
-				        (100 * stats.current/stats.all) as percent_complete
-			            FROM {$wpdb->project_translation_status} stats
-				            LEFT JOIN {$wpdb->gp_projects} projects ON stats.project_id = projects.id
-			            WHERE
-				            projects.path = 'wp/dev'
-				            AND projects.active = 1
-                        HAVING 
- 			                percent_complete >= 100.00) n"
-			)
-		)[0]->counter;
+		return $wpdb->get_var(
+			"SELECT count(*) as counter FROM (
+				SELECT
+					(100 * stats.current/stats.all) as percent_complete
+				FROM {$wpdb->project_translation_status} stats
+					LEFT JOIN {$wpdb->gp_projects} projects ON stats.project_id = projects.id
+				WHERE
+					projects.path = 'wp/dev'
+					AND projects.active = 1
+				HAVING 
+					percent_complete >= 100.00
+			) n"
+		);
 	}
 
 	/**
@@ -957,25 +998,26 @@ class Stats {
 	private function get_core_interval( int $upper_value, int $lower_value, string $minor_symbol = '<', string $greater_symbol = '>=' ) {
 		global $wpdb;
 
-		return $wpdb->get_results(
+		return $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT count(*) as counter from 
-                     (SELECT
-				        (100 * stats.current/stats.all) as percent_complete
-			            FROM {$wpdb->project_translation_status} stats
-				            LEFT JOIN {$wpdb->gp_projects} projects ON stats.project_id = projects.id
-			            WHERE
-				            projects.path = 'wp/dev'
-				            AND projects.active = 1
-                        HAVING 
- 			                percent_complete %1s %2d
-                            AND percent_complete %3s %4d) n",
+				"SELECT count(*) as counter FROM (
+					SELECT
+						(100 * stats.current/stats.all) as percent_complete
+					FROM {$wpdb->project_translation_status} stats
+						LEFT JOIN {$wpdb->gp_projects} projects ON stats.project_id = projects.id
+					WHERE
+						projects.path = 'wp/dev'
+						AND projects.active = 1
+					HAVING
+						percent_complete %1\$s %2\$d
+						AND percent_complete %3\$s %4\$d
+				) n",
 				$greater_symbol,
 				$lower_value,
 				$minor_symbol,
 				$upper_value
 			)
-		)[0]->counter;
+		);
 	}
 
 	/**
@@ -986,20 +1028,19 @@ class Stats {
 	private function get_core_empty_translated() {
 		global $wpdb;
 
-		return $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT count(*) as counter from 
-                     (SELECT
-				        (100 * stats.current/stats.all) as percent_complete
-			            FROM {$wpdb->project_translation_status} stats
-				            LEFT JOIN {$wpdb->gp_projects} projects ON stats.project_id = projects.id
-			            WHERE
-				            projects.path = 'wp/dev'
-				            AND projects.active = 1
-                        HAVING 
-                            percent_complete <= 0.00) n"
-			)
-		)[0]->counter;
+		return $wpdb->get_var(
+			"SELECT count(*) as counter FROM (
+				SELECT
+					(100 * stats.current/stats.all) as percent_complete
+				FROM {$wpdb->project_translation_status} stats
+					LEFT JOIN {$wpdb->gp_projects} projects ON stats.project_id = projects.id
+				WHERE
+					projects.path = 'wp/dev'
+					AND projects.active = 1
+				HAVING 
+					percent_complete <= 0.00
+			) n"
+		);
 	}
 
 	/**
@@ -1009,39 +1050,13 @@ class Stats {
 	 */
 	private function get_id_first_user_of_this_year(): int {
 		global $wpdb;
-		$user = $wpdb->get_row(
+
+		return $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->users} where user_registered >= %s limit 1",
+				"SELECT * FROM {$wpdb->users} WHERE user_registered >= %s LIMIT 1",
 				gmdate( 'Y-m-d H:i:s', strtotime( 'first day of january this year' ) )
 			)
 		);
-
-		return $user->ID;
-	}
-
-	/**
-	 * Converts a property of an array of objects into a string with the properties of the
-	 * different objects separated by a parameter
-	 *
-	 * @param array  $objects Array of objects to convert.
-	 * @param string $field Property of the object to convert.
-	 * @param string $glue Text used to put between the fields.
-	 *
-	 * @return string
-	 */
-	private function object_to_string( array $objects, string $field = 'user_id', string $glue = ', ' ): string {
-		$output = array();
-		if ( ! empty( $objects ) && count( $objects ) > 0 ) {
-			foreach ( $objects as $object ) {
-				if ( is_array( $object ) && isset( $object[ $field ] ) ) {
-					$output[] = $object[ $field ];
-				} elseif ( is_object( $object ) && isset( $object->$field ) ) {
-					$output[] = $object->$field;
-				}
-			}
-		}
-
-		return join( $glue, $output );
 	}
 
 	/**
@@ -1094,14 +1109,24 @@ class Stats {
 				// Get the users that have registered this year.
 				$query->query_where .= ' AND user_id >= ' . $this->id_first_user_of_this_year;
 			}
+
 			if ( 'started_this_year' === $type ) {
 				// Get the users that have start translating this year.
-				$sql                 = "SELECT `user_id` FROM `translate_user_translations_count` WHERE `locale`='" .
-									  $locale->slug . "' AND `accepted` > 0 AND `date_added` > '" . gmdate( 'Y' ) . "-01-01 00:00:00'";
-				$user_ids            = $wpdb->get_results( $wpdb->prepare( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				$user_ids            = $this->object_to_string( $user_ids );
-				$query->query_where .= ' AND user_id IN (' . $user_ids . ')';
+				$user_ids = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT `user_id`
+						FROM `{$wpdb->user_translations_count}`
+						WHERE `locale` = %s AND
+							`accepted` > 0 AND
+							`date_added` > %s",
+						$locale->slug,
+						gmdate( 'Y-01-01' )
+					)
+				);
+
+				$query->query_where .= ' AND user_id IN (' . implode( ', ', array_map( 'intval', $user_ids ) ) . ')';
 			}
+
 			$query->query();
 			$users = $query->get_results();
 
@@ -1130,7 +1155,11 @@ class Stats {
 
 		$users = $wpdb->get_col(
 			$wpdb->prepare(
-				'SELECT DISTINCT user_id FROM translate_user_translations_count WHERE accepted > 0 AND locale = %s AND locale_slug = %s',
+				"SELECT DISTINCT user_id
+				FROM {$wpdb->user_translations_count}
+				WHERE accepted > 0 AND
+					locale = %s AND
+					locale_slug = %s",
 				$locale,
 				$locale_slug
 			) . $date_constraint
@@ -1173,19 +1202,19 @@ class Stats {
 		global $wpdb;
 
 		$date_constraint = '';
-		if ( null !== $year ) {
-			$date_constraint = $wpdb->prepare( ' AND YEAR(post_date_gmt) = ' . $year );     // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( $year ) {
+			$date_constraint = $wpdb->prepare( ' AND YEAR(post_date) = %d', $year );
 		}
+
 		foreach ( $this->forum_ids as $key => $value ) {
 			global $wpdb;
-			$sql        = "SELECT COUNT(id) as posts FROM wporg_{$value}_posts WHERE post_status='publish' AND post_type='{$type}'";
-			$site_posts = $wpdb->get_row(
+
+			$posts[ $key ] = $wpdb->get_var(
 				$wpdb->prepare(
-					$sql,               // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+					"SELECT COUNT(id) as posts FROM {$wpdb->base_prefix}{$value}_posts WHERE post_status = 'publish' AND post_type = %s",
+					$type
 				) . $date_constraint
 			);
-
-			$posts[ $key ] = $site_posts->posts;
 		}
 
 		return $posts;
@@ -1217,12 +1246,15 @@ class Stats {
 		2 );
 		switch_to_blog( MAKE_POLYGLOTS_BLOG_ID );
 
-		$ret = wp_update_post( array(
-			'ID'           => POLYGLOTS_PAGE_ID,
-			'post_type'    => 'page',
-			'post_author'  => 'Amieiro',
-			'post_content' => $this->get_polyglots_stats_page_content(),
-		), true ); // phpcs:ignore PEAR.Functions.FunctionCallSignature.MultipleArguments
+		wp_update_post(
+			array(
+				'ID'           => POLYGLOTS_PAGE_ID,
+				'post_type'    => 'page',
+				'post_author'  => 'Amieiro',
+				'post_content' => $this->get_polyglots_stats_page_content(),
+			),
+			true
+		);
 		restore_current_blog();
 	}
 
@@ -1233,16 +1265,16 @@ class Stats {
 	 */
 	private function get_polyglots_stats_page_content(): string {
 		return $this->header .
-			   $this->wordpress_translation_percentage .
-			   $this->originals_by_year .
-		       $this->packages_generated_by_year .
-		       $this->themes_plugins_by_year .
-			   $this->translations_translators_by_year .
-		       $this->forum_post_and_replies_by_year .
-			   $this->feedback_received .
-			   $this->contributors_per_locale .
-			   $this->managers_stats .
-			   $this->most_active_translators;
+			$this->wordpress_translation_percentage .
+			$this->originals_by_year .
+			$this->packages_generated_by_year .
+			$this->themes_plugins_by_year .
+			$this->translations_translators_by_year .
+			$this->forum_post_and_replies_by_year .
+			$this->feedback_received .
+			$this->contributors_per_locale .
+			$this->managers_stats .
+			$this->most_active_translators;
 	}
 
 	/**
