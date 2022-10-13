@@ -212,25 +212,33 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 			}
 
 			// Defer group re-counts.
-			if ( function_exists( 'bp_groups_defer_group_members_count' ) ) {
-				bp_groups_defer_group_members_count( true );
-			}
+			bp_groups_defer_group_members_count( true );
+
+			$users_altered = 0;
 
 			foreach ( $users as $user_id ) {
 				if ( 'add' == $command ) {
 					if ( ! groups_is_user_member( $user_id, $group_id ) ) {
 						groups_join_group( $group_id, $user_id );
+						$users_altered++;
 					}
 				} elseif ( 'remove' == $command ) {
 					if ( groups_is_user_member( $group_id, $user_id ) ) {
 						groups_leave_group( $group_id, $user_id );
+						$users_altered++;
 					}
 				}
 			}
 
-			// Perform the group recounts.
-			if ( function_exists( 'bp_groups_defer_group_members_count' ) ) {
-				bp_groups_defer_group_members_count( false, $group_id );
+			// If we altered any group memberships, perform the group recounts during shutdown, so as not to delay the request returning.
+			if ( $users_altered ) {
+				add_action( 'shutdown', function() use( $group_id ) {
+					if ( function_exists( 'fastcgi_finish_request' ) ) {
+						fastcgi_finish_request();
+					}
+
+					bp_groups_defer_group_members_count( false, $group_id );
+				} );
 			}
 
 			return 1;
