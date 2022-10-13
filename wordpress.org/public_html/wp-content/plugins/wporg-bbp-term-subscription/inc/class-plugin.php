@@ -66,8 +66,8 @@ class Plugin {
 		add_action( 'bbp_template_redirect', array( $this, 'fix_bbpress_post_actions' ), 9 ); // before bbp_get_request/bbp_post_request
 
 		// Notify subscribers when a topic or reply with a given term is added.
-		add_action( 'bbp_new_topic', array( $this, 'notify_term_subscribers_of_new_topic' ), 10, 4 );
-		add_action( 'bbp_new_reply', array( $this, 'notify_term_subscribers_of_new_reply' ), 10, 5 );
+		add_action( 'bbp_new_topic', array( $this, 'notify_term_subscribers_of_new_topic' ), 10, 2 );
+		add_action( 'bbp_new_reply', array( $this, 'notify_term_subscribers_of_new_reply' ), 10, 3 );
 
 		// Replace the title of subscription emails with the term-specific prefix.
 		// This applies to all notification emails sent related to the topic, not just the term-specific emails.
@@ -259,10 +259,8 @@ class Plugin {
 	 *
 	 * @param int $topic_id The topic id
 	 * @param int $forum_id The forum id
-	 * @param mixed $anonymous_data Array of anonymous user data
-	 * @param int $topic_author The topic author id
 	 */
-	public function notify_term_subscribers_of_new_topic( $topic_id, $forum_id, $anonymous_data = false, $topic_author = 0 ) {
+	public function notify_term_subscribers_of_new_topic( $topic_id, $forum_id ) {
 		$terms = get_the_terms( $topic_id, $this->taxonomy );
 		if ( ! $terms ) {
 			return;
@@ -409,10 +407,8 @@ To unsubscribe from future emails, click here:
 	 * @param int $reply_id The reply id
 	 * @param int $topic_id The topic id
 	 * @param int $forum_id The forum id
-	 * @param mixed $anonymous_data
-	 * @param int $reply_author
 	 */
-	public function notify_term_subscribers_of_new_reply( $reply_id, $topic_id, $forum_id, $anonymous_data, $reply_author ) {
+	public function notify_term_subscribers_of_new_reply( $reply_id, $topic_id, $forum_id ) {
 		$terms = get_the_terms( $topic_id, $this->taxonomy );
 		if ( ! $terms ) {
 			return;
