@@ -190,6 +190,9 @@ class Plugin {
 	 * @return void
 	 */
 	public function update_polyglots_stats() {
+		// Increase the memory limit during the cron request to support the memory-heavy stats cron.
+		ini_set( 'memory_limit', '1G' );
+
 		$stats = new Stats();
 		$stats();
 	}
