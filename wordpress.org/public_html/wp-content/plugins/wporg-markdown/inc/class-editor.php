@@ -180,11 +180,18 @@ class Editor {
 		if ( is_wp_error( $markdown_source ) ) {
 			return '';
 		}
-		if ( 'github.com' !== parse_url( $markdown_source, PHP_URL_HOST )
-			|| false !== stripos( $markdown_source, '/edit/master/' ) ) {
+
+		if ( 'github.com' !== parse_url( $markdown_source, PHP_URL_HOST ) ) {
 			return $markdown_source;
 		}
-		$markdown_source = str_replace( '/blob/master/', '/edit/master/', $markdown_source );
+
+		if ( preg_match( '!^https?://github.com/(?P<repo>[^/]+/[^/]+)/(?P<editblob>blob|edit)/(?P<branchfile>.*)$!i', $markdown_source, $m ) ) {
+			if ( 'edit' === $m['editblob'] ) {
+				return $markdown_source;
+			}
+
+			$markdown_source = "https://github.com/{$m['repo']}/edit/{$m['branchfile']}";
+		}
 
 		return apply_filters( 'wporg_markdown_edit_link', $markdown_source, $post_id );
 	}
