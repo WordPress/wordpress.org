@@ -7,6 +7,7 @@ use GP_Locales;
 use GP_Translation;
 use WordPressdotorg\GlotPress\Customizations\CLI\Stats;
 use WP_CLI;
+use function WordPressdotorg\Profiles\assign_badge;
 
 class Plugin {
 
@@ -143,6 +144,10 @@ class Plugin {
 	public function update_contributor_profile_badges() {
 		global $wpdb;
 
+		if ( ! function_exists( 'WordPressdotorg\Profiles\assign_badge' ) ) {
+			return;
+		}
+
 		if ( ! isset( $wpdb->user_translations_count ) ) {
 			return;
 		}
@@ -165,21 +170,7 @@ class Plugin {
 			return;
 		}
 
-		$request_body = [
-			'action'      => 'wporg_handle_association',
-			'source'      => 'polyglots',
-			'command'     => 'add',
-			'association' => 'translation-contributor',
-		];
-
-		foreach( $user_ids as $user_id ) {
-			$request_body['user_id'] = $user_id;
-
-			wp_remote_post( 'https://profiles.wordpress.org/wp-admin/admin-ajax.php', [
-				'body'       => $request_body,
-				'user-agent' => 'WordPress.org Translate',
-			] );
-		}
+		assign_badge( 'translation-contributor', $user_ids );
 
 		update_option( 'wporg_translate_last_badges_sync', $now );
 	}
