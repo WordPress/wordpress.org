@@ -643,11 +643,18 @@ class Stats {
 		$original_strings_with_comments = 0;
 		$total_comments                 = 0;
 		$optin_users                    = 0;
-		$status_counter                 = array();
 		$comment_meta_translation_ids   = array();
 		$comment_user_ids               = array();
 		$commenters_number              = 0;
 		$commenters                     = array();
+		$status_counter                 = array(
+			'current'                => 0,
+			'current_from_rejection' => 0,
+			'fuzzy'                  => 0,
+			'rejected'               => 0,
+			'old'                    => 0,
+			'waiting'                => 0,
+		);
 
 		// Get the number of opt-in users.
 		$optin_users = number_format_i18n(
@@ -720,6 +727,9 @@ class Stats {
 					$comment_meta_translation_id
 				)
 			);
+			if ( ! $translation ) { 
+				continue;
+			}
 
 			// If this translation was rejected, I look for a current translation for the same original (original_id),
 			// translator (user_id) and language (locale).
