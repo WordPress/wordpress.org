@@ -14,38 +14,79 @@ use WP_Error;
  * Assign a badge to a given user.
  * 
  * @param $badge string The badge group to assign.
- * @param $user  mixed  The user to assign.
+ * @param $users mixed  The user(s) to assign. A WP_User/ID/Login/Email (or array of) of the user(s) to assign.
  * @return bool
  */
-function assign_badge( string $badge, $user ) : bool {
-	return badge_api( 'add', $badge, $user );
+function assign_badge( string $badge, $users ) : bool {
+	return badge_api( 'add', $badge, $users );
 }
 
 /**
  * Remove a badge from a given user.
  * 
  * @param $badge string The badge group to assign.
- * @param $user  mixed  The user to assign.
+ * @param $users mixed  The user(s) to assign. A WP_User/ID/Login/Email (or array of) of the user(s) to assign.
  * @return bool
  */
-function remove_badge( string $badge, $user ) : bool {
-	return badge_api( 'remove', $badge, $user );
+function remove_badge( string $badge, $users ) : bool {
+	return badge_api( 'remove', $badge, $users );
+}
+
+/**
+ * Record an activity item for a user.
+ * 
+ * @param $component string     The component to be used for the acitivity.
+ * @param $type      string     The type of the activity in that component.
+ * @param $user      int|string ID, Login, or Slug of user.
+ * @param $args      array      The args for the activity item. See `bp_activity_add()`.
+ */
+function add_activity( string $component, string $type, $user, array $args ) {
+	$request = api( [
+		'action'    => 'wporg_handle_activity',
+		'source'    => 'generic',
+		'component' => $component,
+		'type'      => $type,
+		'user'      => $user,
+		'args'      => $args,
+	] );
+
+	return ( 200 === wp_remote_retrieve_response_code( $request ) );
 }
 
 /**
  * Assign a badge to a given user.
  * 
- * @param $action string 'Add' or 'Remove'.
+ * @param $action string The action to perform; 'add' or 'remove'.
  * @param $badge  string The badge group to assign.
- * @param $user   mixed  The user to assign to.
+ * @param $users  mixed  The user(s) to assign to. A WP_User/ID/Login/Email/Slug (or array of) of the user(s) to assign.
  * @return bool
  */
-function badge_api( string $action, string $badge, $user ) : bool {
-	if ( is_object( $user ) && isset( $user->ID ) ) {
-		$user = $user->ID;
-	}
+function badge_api( string $action, string $badge, $users ) : bool {
+	$users = (array) $users;
+	$users = array_filter( array_map( function( $user ) {
+		// WP_User-like object.
+		if ( is_object( $user ) ) {
+			return $user->ID ?? false;
+		}
 
-	if ( ! $action || ! $badge || ! is_scalar( $user ) ) {
+		// User ID.
+		if ( is_numeric( $user ) && absint( $user ) == $user ) {
+			return (int) $user;
+		}
+
+		// Support user login / email / slug.
+		$_user = get_user_by( 'login', $user );
+		if ( ! $_user && is_email( $user ) ) {
+			$_user = get_user_by( 'email', $user );
+		}
+		if ( ! $_user ) {
+			$_user = get_user_by( 'slug', $user );
+		}
+
+		return $_user->ID ?? false;
+	}, $users ) );
+
+	if ( ! $action || ! $badge || ! $users ) {
 		return false;
 	}
 
@@ -53,7 +94,7 @@ function badge_api( string $action, string $badge, $user ) : bool {
 		'action'  => 'wporg_handle_association',
 		'source'  => 'generic-badge',
 		'command' => $action,
-		'user'    => $user,
+		'users'   => $users,
 		'badge'   => $badge,
 	] );
 
