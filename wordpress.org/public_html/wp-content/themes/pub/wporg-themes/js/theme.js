@@ -1042,7 +1042,7 @@ window.wp = window.wp || {};
 					 out.push( {
 						title: value.title,
 						link: value.link,
-						previewLink: value.preview_link + '&v=' + self.get( 'version' ) + '-betaV1.1.1',
+						previewLink: value.preview_link + '&v=' + self.get( 'version' ) + '-betaV1.1.2',
 						caption:  _wpThemeSettings.l10n.style_variation_caption_template.replace( '%s', value.title ),
 					 } );
 				} );
