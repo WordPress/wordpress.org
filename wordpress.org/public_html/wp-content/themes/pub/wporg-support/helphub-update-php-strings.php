@@ -140,7 +140,7 @@ function wporg_support_filter_update_php_content( $content ) {
 	// Section "How to update your website's PHP version for a faster, more secure website".
 	$content .= '<h3>' . __( 'How to update your website&#8217;s PHP version for a faster, more secure website', 'wporg-forums' ) . '</h3>';
 	$content .= '<p>' . __( 'You&#8217;re now ready to update your website&#8217;s PHP version! You&#8217;ve done due diligence, got backups, and are in the best possible shape to do the update.', 'wporg-forums' ) . '</p>';
-	$content .= '<p>' . __( 'As the PHP version is set at the server level by your hosting company, updating involves either interacting with your host&#8217;s settings or asking them to do it.', 'wporg-forums' ) . '</p>';
+	$content .= '<p>' . __( 'PHP is installed on your website&#8217;s server, so updating it involves either interacting with your host&#8217;s settings or asking your provider to do it for you.', 'wporg-forums' ) . '</p>';
 	$content .= '<p>';
 	$content .= sprintf(
 		/* translators: %s: link URL to hosting-specific update resources */
