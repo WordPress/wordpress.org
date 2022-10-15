@@ -230,3 +230,104 @@ function wporg_ov_customizer( $wp_customize ) {
 	) );
 }
 add_action( 'customize_register', __NAMESPACE__ . '\wporg_ov_customizer' );
+
+/*
+	=====================================
+	Openverse standalone site redirection
+	=====================================
+ */
+
+/**
+ * This is the URL at which the standalone Openverse site is hosted. When
+ * redirect is enabled (see setting `ov_is_redirect_enabled`), the theme
+ * redirects all incoming requests to the right URL on this domain.
+ *
+ * Note: Do not put a trailing slash '/' in this URL, as it will cause problems.
+ */
+if ( !defined( 'OPENVERSE_STANDALONE_URL' ) ) {
+	define( 'OPENVERSE_STANDALONE_URL', 'https://openverse.wordpress.net' );
+}
+
+/**
+ * Determine the target URL of the redirect based on the Openverse standalone
+ * URL, the requested path and the current locale.
+ *
+ * Examples:
+ * - https://ru.wordpress.org/openverse → {OPENVERSE_STANDALONE_URL}/ru/
+ * - https://wordpress.org/openverse/search/?q=dog → {OPENVERSE_STANDALONE_URL}/search/?q=dog
+ */
+function get_target_url() {
+	$target_url = OPENVERSE_STANDALONE_URL;
+
+	$curr_locale = get_locale();
+	$locale = get_locale_slug( $curr_locale );
+	if ( $locale !== '' ) {
+		$target_url .= '/' . $locale;
+	}
+
+	$path = $_SERVER['REQUEST_URI'];
+	if ( $path ) {
+		$count = 1; // Only replace the leading Openverse subpath.
+		$target_url .= str_replace( OPENVERSE_SUBPATH, '', $path, $count );
+	}
+
+	return $target_url;
+}
+
+/**
+* Provide configuration for the theme to redirect to the given standalone
+* Openverse site. The destination URL can be configured and the behaviour can
+* be dormant unless enabled.
+*
+* @param \WP_Customize_Manager $wp_customize Theme Customizer object.
+*/
+function wporg_ov_redir_customizer( $wp_customize ) {
+	$wp_customize->add_section( 'ov_redir', array(
+		'priority' => 10,
+		'capability' => 'edit_theme_options',
+		'title' => 'Openverse Redirect',
+		'description' => 'Configure the redirection to the standalone Openverse site.'
+	) );
+
+	$wp_customize->add_setting( 'ov_redirect_url', array(
+		'type' => 'theme_mod',
+		'capability' => 'edit_theme_options',
+		'default' => OPENVERSE_STANDALONE_URL,
+		'sanitize_callback' => function( $val, $setting ) {
+			if ( empty( $val ) ) {
+				return $setting->default;
+			}
+			return $val;
+		}
+	) );
+
+	$wp_customize->add_control( 'ov_redirect_url', array(
+		'section' => 'ov_redir',
+		'type' => 'url',
+		'id' => 'ov_redirect_url',
+		'label' => 'Redirect URL',
+		'description' => '<b>Note</b>: '
+									. 'Do not put a trailing slash \'/\' in this URL.<br/>'
+									. '<b>Default</b>: '
+									. esc_html( OPENVERSE_STANDALONE_URL ),
+		'priority' => 10,
+		'input_attrs' => array(
+			'placeholder' => 'URL'
+		)
+	) );
+
+	$wp_customize->add_setting( 'ov_is_redirect_enabled', array(
+		'type' => 'theme_mod',
+		'capability' => 'edit_theme_options',
+		'default' => false
+	) );
+
+	$wp_customize->add_control( 'ov_is_redirect_enabled', array(
+		'section' => 'ov_redir',
+		'type' => 'checkbox',
+		'id' => 'ov_is_redirect_enabled',
+		'label' => 'Redirect to the standalone Openverse site.',
+		'priority' => 10
+	) );
+}
+add_action( 'customize_register', __NAMESPACE__ . '\wporg_ov_redir_customizer' );
