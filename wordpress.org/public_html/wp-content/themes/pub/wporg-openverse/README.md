@@ -11,7 +11,7 @@ Follow these steps to set up a local playground for the theme:
     1.  **Required:** Node.js 14
     2.  **Required:** Composer
     3.  **Required:** Subversion
-    3.  **Recommended:** Docker (to use the automatic setup)
+    4.  **Recommended:** Docker (to use the automatic setup)
 
 1.  Build the parent theme WordPress.org theme.
 
