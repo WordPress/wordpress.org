@@ -85,6 +85,21 @@ function disable_parse_request( $return, $wp ) {
 add_filter( 'do_parse_request', __NAMESPACE__ . '\disable_parse_request', 10, 2 );
 
 /**
+ * Get the slug of the given WP locale. This function returns a blank string if
+ * the locale is `en_US` because that is considered the default and is not
+ * prefixed in the URL paths. It also returns a blank string if `$wp_locale` is
+ * not found in the locales list.
+ */
+function get_locale_slug ( $curr_locale ) {
+	if ( $curr_locale === 'en_US' ) {
+		return '';
+	}
+
+	$locale = get_locales()[$curr_locale];
+	return isset( $locale ) ? $locale->slug : '';
+}
+
+/**
  * Enqueue styles & scripts.
  *
  * The wporg theme registers these with static versions, so we need to override
@@ -108,15 +123,17 @@ function enqueue_assets() {
 	);
 
 	$use_path_based_locale_forwarding = get_theme_mod( 'ov_path_based_i18n', false );
-	$wp_locale = get_locale();
-	$locale = get_locales()[ $wp_locale ];
-	$locale_slug = $use_path_based_locale_forwarding && $wp_locale !== 'en_US' ? $locale->slug : '';
+	$curr_locale = get_locale();
+	$locale_slug = '';
+	if ( $use_path_based_locale_forwarding ) {
+		$locale_slug = get_locale_slug( $curr_locale );
+	}
 
 	wp_add_inline_script(
 		/* handle   */ 'openverse-message',
 		/* JS       */ 'const openverseUrl = ' . wp_json_encode( get_theme_mod( 'ov_src_url', OPENVERSE_URL ) ) . ";\n" .
 		/* JS       */ 'const openverseSubpath = ' . wp_json_encode( OPENVERSE_SUBPATH ) . ";\n" .
-		/* JS       */ 'const currentLocale = ' . wp_json_encode( $wp_locale ) . ";\n" . /* Used for legacy cookie based locale forwarding */
+		/* JS       */ 'const currentLocale = ' . wp_json_encode( $curr_locale ) . ";\n" . /* Used for legacy cookie based locale forwarding */
 		/* JS       */ 'const localeSlug = ' . wp_json_encode( $locale_slug ) . ";\n",
 		/* position */ 'before'
 	);
