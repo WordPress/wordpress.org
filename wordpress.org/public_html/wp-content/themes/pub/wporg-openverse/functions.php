@@ -17,6 +17,9 @@ if ( !defined( 'OPENVERSE_URL' ) ) {
 /**
  * This is subdirectory on WordPress.org which loads the Openverse site. This is
  * prefixed in front of all path changes sent by the embedded `iframe`.
+ *
+ * When used with the standalone redirect, it is removed from the path forwarded
+ * to the standalone site.
  */
 if ( !defined( 'OPENVERSE_SUBPATH' ) ) {
     define( 'OPENVERSE_SUBPATH', '/openverse' );
@@ -150,6 +153,13 @@ function title_no_title( $title ) {
 	return $title;
 }
 add_filter( 'document_title_parts', __NAMESPACE__ . '\title_no_title' );
+
+/*
+	TODO: Delete this and everything related to it
+	======================
+	Openverse iframe embed
+	======================
+ */
 
 /**
  * Enable the option to set the URL for the Openverse embed via a GUI.
