@@ -805,7 +805,13 @@ class Import {
 				$is_json_valid = array_reduce(
 					$required_valid_props,
 					function( $is_valid, $prop ) use ( $error ) {
-						return $is_valid && ( false === strpos( $error, $prop ) );
+						$prop_field = substr( $prop, 11, -1 ); // 'name' in 'block.json[name]'
+						return (
+							$is_valid &&
+							( false === strpos( $error, $prop ) ) &&
+							// String in rest_validate_object_value_from_schema()
+							( false === strpos( $error, "{$prop_field} is a required property of block.json." ) )
+						);
 					},
 					true
 				);
