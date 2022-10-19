@@ -738,10 +738,10 @@ window.wp = window.wp || {};
 
 			event.preventDefault();
 
-			var anchorLink = event.target;
+			var $anchorLink = $( event.target );
 
-			if ( anchorLink.tagName.toLowerCase() !== 'a' ) {
-				anchorLink = $( anchorLink ).parent( 'a' )[0];
+			if ( $anchorLink.prop( 'tagName' ).toLowerCase() !== 'a' ) {
+				$anchorLink = $( $anchorLink.parent( 'a' )[0] );
 			}
 
 			// Get the theme's main thumbnail
@@ -753,23 +753,26 @@ window.wp = window.wp || {};
 			/**
 			 * Determine the index, we need to restore the original thumbnail if it's the first item.
 			 */
-			var itemIndex = $( '.wporg-horizontal-slider-js .wporg-screenshot-card').index( anchorLink );
+			var cards = $( '.wporg-horizontal-slider-js .wporg-screenshot-card' );
+			cards.attr( 'aria-selected', false );
+			$anchorLink.attr( 'aria-selected', true );
 
-			if( itemIndex === 0 ) {
-				$thumbnailContainer.find('picture').show();
+			if( cards.index( $anchorLink ) === 0 ) {
+				$thumbnailContainer.find( 'picture' ).show();
 				$thumbnailContainer.removeClass( STYLE_VARIATION_CLASS );
 				$( '.' + SCREENSHOT_PREVIEW_CLASS ).remove();
 			} else {
 				// Create element
-				var newEl = $( '<div class="'+ SCREENSHOT_PREVIEW_CLASS +'"></div>' )
-				.attr( 'data-link', anchorLink.href )
-				.attr( 'data-preview-link', anchorLink.href + '&v=' + this.model.attributes.version + '-betaV2' )
-				.attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', anchorLink.innerText ) )
+				var newEl = $( '<div class="'+ SCREENSHOT_PREVIEW_CLASS +'" role="tabpanel"></div>' )
+				.attr( 'data-link', $anchorLink.attr( 'href' ) )
+				.attr( 'data-preview-link', $anchorLink.attr( 'href' ) + '&v=' + this.model.attributes.version + '-betaV2' )
+				.attr( 'data-caption', _wpThemeSettings.l10n.pattern_caption_template.replace( '%s', $anchorLink.find( 'img' ).attr( 'alt' ) ) )
 				.attr( 'data-height', $thumbnailContainer.height() + 'px' )
 				.attr( 'data-aspect-ratio', 3 / 4 )
-				.attr( 'data-query-string', '?vpw=1200&vph=900' );
+				.attr( 'data-query-string', '?vpw=1200&vph=900' )
+				.attr( 'id', $anchorLink.attr( 'aria-controls' ) );
 
-			   $thumbnailContainer.find('picture').hide();
+			   $thumbnailContainer.find( 'picture' ).hide();
 
 			   /**
 				* The screenshot container uses a padding system to prevent image size change.
@@ -790,10 +793,10 @@ window.wp = window.wp || {};
 			 * Add an active class on the current style variation.
 			 */
 			$( '.' + CARD_ACTIVE_CLASS ).removeClass( CARD_ACTIVE_CLASS );
-			anchorLink.classList.add( CARD_ACTIVE_CLASS );
+			$anchorLink.addClass( CARD_ACTIVE_CLASS );
 
 			// Update the preview url so uses get style variation when the previewer is opened
-			this.model.attributes.preview_url = anchorLink.href;
+			this.model.attributes.preview_url = $anchorLink.attr( 'href' );
 		},
 
 		// Handles .disabled classes for previous/next buttons in theme installer preview
