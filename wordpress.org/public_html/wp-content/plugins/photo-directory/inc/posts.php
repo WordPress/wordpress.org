@@ -42,7 +42,7 @@ class Posts {
 	public static function rest_prepare_add_photo_url( $response ) {
 		$data = $response->get_data();
 
-		$data['photo-thumbnail-url'] = wp_get_attachment_image_src( get_post_thumbnail_id( $data['id'] ), 'medium' )[0];
+		$data['photo-thumbnail-url'] = wp_get_attachment_image_src( get_post_thumbnail_id( $data['id'] ), 'medium' )[0] ?? '';
 
 		$response->set_data( $data );
 
