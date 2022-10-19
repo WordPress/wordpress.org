@@ -295,6 +295,7 @@ class Themes_API {
 				'post-formats'          => __( 'Post Formats' ),
 				'rtl-language-support'  => __( 'RTL Language Support' ),
 				'sticky-post'           => __( 'Sticky Post' ),
+				'style-variations'      => __( 'Style Variations', 'wporg-themes' ),
 				'theme-options'         => __( 'Theme Options' ),
 				'threaded-comments'     => __( 'Threaded Comments' ),
 				'translation-ready'     => __( 'Translation Ready' ),
