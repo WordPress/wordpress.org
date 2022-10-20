@@ -17,16 +17,6 @@ class Uploads {
 	const MAX_LENGTH_DESCRIPTION = 250;
 
 	/**
-	 * Maximum number of pending/concurrent submissions.
-	 *
-	 * Once this threshold is met, a user will be unable to make another
-	 * submission until the current submission is approved or rejected.
-	 *
-	 * @var int
-	 */
-	const MAX_PENDING_SUBMISSIONS = 5;
-
-	/**
 	 * The default maximum allowed file size in megabytes.
 	 *
 	 * @see `get_maximum_photo_file_size()` for actually retrieving the maximum
@@ -524,7 +514,7 @@ class Uploads {
 
 		// Check if user has reached submission limit.
 		if ( $can ) {
-			$can = ! self::user_reached_concurrent_submission_limit();
+			$can = ! User::has_reached_concurrent_submission_limit();
 			$reason = 'concurrent-submission-limit';
 		}
 
@@ -848,33 +838,6 @@ class Uploads {
 	}
 
 	/**
-	 * Determines if user has reached concurrent submission limit for pending
-	 * uploads (e.g. max number of photos awaiting moderation).
-	 *
-	 * @return bool True if use has exceeded pending sumission limit, else false.
-	 */
-	public static function user_reached_concurrent_submission_limit() {
-		$limit_reached = true;
-
-		if ( is_user_logged_in() ) {
-			$posts = get_posts( [
-				'fields'         => 'ids',
-				'posts_per_page' => self::MAX_PENDING_SUBMISSIONS,
-				'author'         => get_current_user_id(),
-				'post_status'    => 'pending',
-				'post_type'      => Registrations::get_post_type(),
-			] );
-
-			if ( count( $posts ) < self::MAX_PENDING_SUBMISSIONS ) {
-				$limit_reached = false;
-			}
-		}
-
-		return $limit_reached;
-	}
-
-
-	/**
 	 * Outputs a notice for users who are prevented from uploading and prevents
 	 * the upload form from being output.
 	 *
@@ -913,7 +876,7 @@ class Uploads {
 				esc_attr( __( 'Upload your photo', 'wporg-photos' ) )
 			);
 
-			if ( self::user_reached_concurrent_submission_limit() ) {
+			if ( User::has_reached_concurrent_submission_limit() ) {
 				$content .= '<p>' . __( 'Thanks for your submissions! Please wait until a photo is approved by moderators before submitting again.', 'wporg-photos' ) . '</p>';
 			} else {
 				$valid_upload_mimetypes = implode( ',', array_values( self::restrict_upload_mimes() ) );

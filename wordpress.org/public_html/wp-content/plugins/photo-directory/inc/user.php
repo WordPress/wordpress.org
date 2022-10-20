@@ -128,6 +128,38 @@ class User {
 		return $can;
 	}
 
+	/**
+	 * Determines if user has reached concurrent submission limit for pending
+	 * uploads (e.g. max number of photos awaiting moderation).
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes current
+	 *                     user. Default false.
+	 * @return bool True if user has exceeded pending sumission limit, else false.
+	 */
+	public static function has_reached_concurrent_submission_limit( $user_id = false ) {
+		$limit_reached = true;
+
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( $user_id ) {
+			$posts = get_posts( [
+				'fields'         => 'ids',
+				'posts_per_page' => self::MAX_PENDING_SUBMISSIONS,
+				'author'         => $user_id,
+				'post_status'    => 'pending',
+				'post_type'      => Registrations::get_post_type(),
+			] );
+
+			if ( count( $posts ) < self::MAX_PENDING_SUBMISSIONS ) {
+				$limit_reached = false;
+			}
+		}
+
+		return $limit_reached;
+	}
+
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\User', 'init' ] );
