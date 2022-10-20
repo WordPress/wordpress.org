@@ -1319,11 +1319,17 @@ h2.toc-heading + h3.toc-heading:target {
 .toc-heading:target:before {
 	content: '';
 	position: absolute;
-	left: -10px;
+	left: -40px;
 	top: 50px;
 	border-left: 5px solid #0073aa;
 	height: 50%;
 	height: calc(100% - 50px);
+}
+
+@media(max-width: 876px) {
+	.toc-heading:target:before {
+		left: -10px;
+	}
 }
 
 .toc-jump {
