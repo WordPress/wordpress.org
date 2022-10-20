@@ -555,9 +555,7 @@ window.wp = window.wp || {};
 			this.renderPatterns();
 
 			// Currently this feature is in beta
-			if ( window.location.href.includes( 'beta=style_variations' ) ) {
-				this.renderStyleVariations();
-			}
+			this.renderStyleVariations();
 		},
 
 		favourite_toggle: function() {
