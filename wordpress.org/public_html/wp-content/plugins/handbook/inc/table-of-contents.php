@@ -40,6 +40,9 @@ class WPorg_Handbook_TOC {
 				height: 14px;
 				font-size: 14px;
 			}
+			.toc-heading a:first-of-type {
+				margin-left: 0;
+			}
 		}
 	</style>';
 
