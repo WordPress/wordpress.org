@@ -344,8 +344,11 @@ function photoShowFileError( field ) {
 			upload_form.submit();
 			return;
 		} else {
-			document.getElementById( 'wporg-photo-upload' ).scrollIntoView( true );
-			photoSetSubmitButtonDisabled( field.closest( 'form' ), false );
+			const stillProcessing = errorMessage === PhotoDir.msg_validating_dimensions;
+			if ( ! stillProcessing ) {
+				document.getElementById( 'wporg-photo-upload' ).scrollIntoView( true );
+				photoSetSubmitButtonDisabled( field.closest( 'form' ), false );
+			}
 		}
 	}
 
