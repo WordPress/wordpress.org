@@ -15,6 +15,9 @@ class User {
 	 * Once this threshold is met, a user will be unable to make another
 	 * submission until a current submission is approved or rejected.
 	 *
+	 * @see `get_concurrent_submission_limit()` for actually retrieving the maximum
+	 * pending submissions for a user, since it can vary based on the user and may
+	 * be filtered.
 	 * @var int
 	 */
 	const MAX_PENDING_SUBMISSIONS = 5;
@@ -129,6 +132,25 @@ class User {
 	}
 
 	/**
+	 * Returns the number of concurrent submissions allowed for a user.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes current
+	 *                     user. Default false.
+	 * @return int The number of concurrent submissions for a user.
+	 */
+	public static function get_concurrent_submission_limit( $user_id = false ) {
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		return apply_filters( 'wporg_photos_max_concurrent_submissions', self::MAX_PENDING_SUBMISSIONS, $user_id );
+	}
+
+	/**
 	 * Determines if user has reached concurrent submission limit for pending
 	 * uploads (e.g. max number of photos awaiting moderation).
 	 *
@@ -144,15 +166,16 @@ class User {
 		}
 
 		if ( $user_id ) {
+			$max_pending_submissions = self::get_concurrent_submission_limit( $user_id );
 			$posts = get_posts( [
 				'fields'         => 'ids',
-				'posts_per_page' => self::MAX_PENDING_SUBMISSIONS,
+				'posts_per_page' => $max_pending_submissions,
 				'author'         => $user_id,
 				'post_status'    => 'pending',
 				'post_type'      => Registrations::get_post_type(),
 			] );
 
-			if ( count( $posts ) < self::MAX_PENDING_SUBMISSIONS ) {
+			if ( count( $posts ) < $max_pending_submissions ) {
 				$limit_reached = false;
 			}
 		}

@@ -558,9 +558,10 @@ https://wordpress.org/photos/
 
 		$content .= '<h2>' . __( 'Submissions awaiting moderation', 'wporg-photos' ) . "</h2>\n";
 		$content .= '<p>';
+		$max_pending_submissions = User::get_concurrent_submission_limit( $user_id );
 		$content .= sprintf(
-			_n( 'You can have up to <strong>%d</strong> photo in the moderation queue at a time. You currently have <strong>%d</strong>.', 'You can have up to <strong>%d</strong> photos in the moderation queue at a time. You currently have <strong>%d</strong>.', User::MAX_PENDING_SUBMISSIONS,'wporg-photos' ),
-			User::MAX_PENDING_SUBMISSIONS,
+			_n( 'You can have up to <strong>%d</strong> photo in the moderation queue at a time. You currently have <strong>%d</strong>.', 'You can have up to <strong>%d</strong> photos in the moderation queue at a time. You currently have <strong>%d</strong>.', $max_pending_submissions,'wporg-photos' ),
+			$max_pending_submissions,
 			count( $pending )
 		);
 		$content .= "</p>\n";
