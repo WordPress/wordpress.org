@@ -44,10 +44,6 @@ $paginationBreakPoint: "600px";
 			border-bottom: 1px solid #eee;
 			margin: 1rem 0;
 
-			a.bbp-forum-title:active, a.bbp-forum-title:focus {
-				text-decoration: none;
-			}
-
 			h3 {
 				font-size: 1.4rem;
 				margin-bottom: 0;
@@ -59,14 +55,27 @@ $paginationBreakPoint: "600px";
 			}
 
 			a {
+				&.bbp-forum-title {
+					color: inherit;
+					font-weight: normal;
+				}
 
-				&:hover {
-
-					color: $color__link;
+				&:active, &:focus, &:hover {
 					text-decoration: none;
+				}
+	
+				&:hover {
+					color: $color__link;
+				}
 
-					h3 {
-						color: $color__link;
+				&.dashicons-before {
+    				-webkit-box-decoration-break: clone;
+    				box-decoration-break: clone;
+					padding-left: 1em;
+
+					&:before {
+						margin-left: -1em;
+						vertical-align: baseline;
 					}
 				}
 			}
@@ -271,12 +280,8 @@ $paginationBreakPoint: "600px";
 			}
 		}
 
-		/* bbPress 2.5 */
-		div.bbp-reply-author a.bbp-author-name,
-		div.bbp-topic-author a.bbp-author-name,
-		/* bbPress 2.6 */
-		div.bbp-reply-author a.bbp-author-link span.bbp-author-name,
-		div.bbp-topic-author a.bbp-author-link span.bbp-author-name {
+		div.bbp-reply-author .bbp-author-name,
+		div.bbp-topic-author .bbp-author-name {
 			clear: none;
 			font-size: ms(0);
 			display: inline-block;
