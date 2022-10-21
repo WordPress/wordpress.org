@@ -253,11 +253,11 @@ if ( !defined( 'OPENVERSE_STANDALONE_URL' ) ) {
  * URL, the requested path and the current locale.
  *
  * Examples:
- * - https://ru.wordpress.org/openverse → {OPENVERSE_STANDALONE_URL}/ru/
- * - https://wordpress.org/openverse/search/?q=dog → {OPENVERSE_STANDALONE_URL}/search/?q=dog
+ * - https://ru.wordpress.org/openverse → {ov_redirect_url}/ru/
+ * - https://wordpress.org/openverse/search/?q=dog → {ov_redirect_url}/search/?q=dog
  */
 function get_target_url() {
-	$target_url = OPENVERSE_STANDALONE_URL;
+	$target_url = get_theme_mod( 'ov_redirect_url', OPENVERSE_STANDALONE_URL );
 
 	$curr_locale = get_locale();
 	$locale = get_locale_slug( $curr_locale );
