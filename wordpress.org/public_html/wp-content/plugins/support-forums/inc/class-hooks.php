@@ -22,6 +22,7 @@ class Hooks {
 		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
+		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
 
 		// Add bbPress support to the WordPress.org SEO plugin.
 		add_filter( 'wporg_canonical_base_url', array( $this, 'wporg_canonical_base_url' ) );
@@ -230,6 +231,21 @@ class Hooks {
 		}
 
 		return $caps;
+	}
+
+	/**
+	 * Allow moderators to view anonymized user account details.
+	 */
+	function allow_mods_to_view_inactive_users( $filter_value, $user_id ) {
+		if (
+			! $filter_value &&
+			bbp_is_user_inactive( $user_id ) &&
+			current_user_can( 'moderate' )
+		) {
+			$filter_value = true;
+		}
+
+		return $filter_value;
 	}
 
 	/**
