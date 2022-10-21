@@ -242,7 +242,8 @@ add_action( 'customize_register', __NAMESPACE__ . '\wporg_ov_customizer' );
  * redirect is enabled (see setting `ov_is_redirect_enabled`), the theme
  * redirects all incoming requests to the right URL on this domain.
  *
- * Note: Do not put a trailing slash '/' in this URL, as it will cause problems.
+ * Note: Do not put a trailing slash '/' in this URL. Paths start with a leading
+ * slash so a trailing slash here will lead to two slashes in the final URL.
  */
 if ( !defined( 'OPENVERSE_STANDALONE_URL' ) ) {
 	define( 'OPENVERSE_STANDALONE_URL', 'https://openverse.wordpress.net' );
@@ -294,6 +295,9 @@ function wporg_ov_redir_customizer( $wp_customize ) {
 		'capability' => 'edit_theme_options',
 		'default' => OPENVERSE_STANDALONE_URL,
 		'sanitize_callback' => function( $val, $setting ) {
+			if ( substr( $val, -1 ) == '/' ) { // If the last character is a slash '/',...
+				$val = substr( $val, 0, -1 );    // ...remove it.
+			}
 			if ( empty( $val ) ) {
 				return $setting->default;
 			}
