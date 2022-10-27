@@ -66,15 +66,26 @@ class Plugin_Search {
 			add_filter( 'pre_option_has_jetpack_search_product', array( $this, 'option_has_jetpack_search_product' ), 10, 1 );
 
 			// add_filter( 'jetpack_search_abort', array( $this, 'log_jetpack_search_abort' ) );
-
-			require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search.php' );
-			require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search-helpers.php' );
+			
 			// $es_query_args = apply_filters( 'jetpack_search_es_query_args', $es_query_args, $query );
-			//
-			add_filter( 'jetpack_search_es_wp_query_args', array( $this, 'jetpack_search_es_wp_query_args' ), 10, 2 );
-			add_filter( 'jetpack_search_es_query_args', array( $this, 'jetpack_search_es_query_args' ), 10, 2 );
 
-			\Jetpack_Search::instance()->setup();
+			add_filter( 'jetpack_search_es_wp_query_args', array( $this, 'jetpack_search_es_wp_query_args' ), 10, 2 );
+			add_filter( 'jetpack_search_es_query_args', array( $this, 'jetpack_search_es_query_args' ), 10, 2 );			
+
+			// Temporary. This loads the old legacy location of Jetpack.
+			if ( include_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search.php' ) ) {
+				require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search-helpers.php' );
+
+				\Jetpack_Search::instance()->setup();
+			// Temporary. This loads the new version. To ensure the Search code is available, include the Jetpack autoloader. This should already be loaded though.
+			} else if ( include_once( ABSPATH . 'wp-content/plugins/jetpack/vendor/autoload_packages.php' ) ) { // Let the Autoloader do what it does.
+
+				\Automattic\Jetpack\Search\Classic_Search::instance()->setup();
+			// This shouldn't happen, but better safe than sorry.
+			} else {
+				wp_die( 'Plugin search is undergoing maintenance.' );
+			}
+		}
 		}
 
 	}
