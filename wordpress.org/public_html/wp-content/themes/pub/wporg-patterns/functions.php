@@ -214,26 +214,6 @@ function user_has_flagged_pattern() {
 }
 
 /**
- * Get the full, filtered content of a post, ignoring more and noteaser tags and pagination.
- *
- * See https://github.com/WordPress/wordcamp.org/blob/442ea26d8e6a1b39f97114e933842b1ec4f8eef9/public_html/wp-content/mu-plugins/blocks/includes/content.php#L21
- *
- * @param int|WP_Post $post Post ID or post object.
- * @return string The full, filtered post content.
- */
-function get_all_the_content( $post ) {
-	$post = get_post( $post );
-
-	$content = wp_kses_post( $post->post_content );
-
-	/** This filter is documented in wp-includes/post-template.php */
-	$content = apply_filters( 'the_content', $content );
-	$content = str_replace( ']]>', ']]&gt;', $content );
-
-	return $content;
-}
-
-/**
  * Set up redirects for the site.
  *
  * @return void
