@@ -80,7 +80,7 @@ class Plugin_Search {
 			// Temporary. This loads the new version. To ensure the Search code is available, include the Jetpack autoloader. This should already be loaded though.
 			} else if ( include_once( ABSPATH . 'wp-content/plugins/jetpack/vendor/autoload_packages.php' ) ) { // Let the Autoloader do what it does.
 
-				\Automattic\Jetpack\Search\Classic_Search::instance()->setup();
+				\Automattic\Jetpack\Search\Classic_Search::instance();
 			// This shouldn't happen, but better safe than sorry.
 			} else {
 				wp_die( 'Plugin search is undergoing maintenance.' );
