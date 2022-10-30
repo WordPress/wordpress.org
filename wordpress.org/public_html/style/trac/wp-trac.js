@@ -14,6 +14,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'2nd-opinion' : 'A second opinion is desired for the problem or solution.',
 		'close' : 'The ticket is a candidate for closure.',
 		'needs-testing' : 'Patch has a particular need for testing.',
+		'has-testing-info' : 'Steps have been provided to reproduce the issue or test a patch.'
+		'needs-testing-info' : 'A more detailed testing procedure is needed to reproduce the issue, or to validate a patch works as expected.',
 		'needs-design' : 'A designer should create a prototype of how the suggested changes should look/behave before writing code.',
 		'needs-design-feedback' : 'A designer should review and give feedback on the proposed changes.',
 		'has-unit-tests' : 'Proposed solution has unit test coverage.',
@@ -1236,6 +1238,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 						wpTrac.workflow.removeKeyword( 'needs-patch' );
 					} else if ( 'needs-patch' === keyword ) {
 						wpTrac.workflow.removeKeyword( 'has-patch' );
+					}
+
+					if ( 'has-testing-info' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'needs-testing-info' );
+					} else if ( 'needs-testing-info' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'has-testing-info' );
 					}
 
 					if ( 'has-unit-tests' === keyword ) {
