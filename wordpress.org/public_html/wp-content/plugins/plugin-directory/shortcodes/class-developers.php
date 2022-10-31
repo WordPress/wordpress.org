@@ -88,6 +88,32 @@ class Developers {
 
 		$output .= '<h3>' . __( 'Interested in development?', 'wporg-plugins' ) . '</h3>';
 
+		if ( $post->development_link ) {
+			$host = wp_parse_url( $post->development_link, PHP_URL_HOST );
+
+			if ( 'github.com' === $host ) {
+				$output .= '<p>' . sprintf(
+					/* translators: %s: Link to development location. */
+					__( 'Plugin development occurs on GitHub in %s.', 'wporg-plugins' ),
+					sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( $post->development_link ),
+						esc_html( trim( wp_parse_url( $post->development_link, PHP_URL_PATH ), '/' ) )
+					)
+				) . '</p>';
+			} else {
+				$output .= '<p>' . sprintf(
+					/* translators: %s: Link to development location. */
+					__( 'Plugin development occurs on %s.', 'wporg-plugins' ),
+					sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( $post->development_link ),
+						esc_html( $host )
+					)
+				) . '</p>';
+			}
+		}
+
 		if ( is_user_logged_in() ) {
 			$subscribed = Tools::subscribed_to_plugin_commits( $post, get_current_user_id() );
 			$email_url  = esc_url( add_query_arg( array(
