@@ -135,6 +135,10 @@ class Hooks {
 		// Don't embed WordPress.org links with anchors included.
 		add_filter( 'pre_oembed_result', array( $this, 'pre_oembed_result_dont_embed_wordpress_org_anchors' ), 20, 2 );
 
+		// Add a user note when flagging/unflagging a user.
+		add_filter( 'wporg_bbp_flag_user', array( $this, 'log_user_flag_changes' ) );
+		add_filter( 'wporg_bbp_unflag_user', array( $this, 'log_user_flag_changes' ) );
+
 		// Break users sessions / passwords when they get blocked, on the main forums only.
 		if ( 'wordpress.org' === get_blog_details()->domain ) {
 			add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
@@ -1449,34 +1453,25 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 
 		if ( $note_text ) {
 			// Add a user note about this action.
-			$notes   = Plugin::get_instance()->user_notes->get_user_notes( $user->ID );
-			$note_id = 0;
-
-			// Check to see if the last note added was from the current user in the last few minutes, and if so, append to it.
-			if ( $notes->count ) {
-				$last_note_id = array_key_last( $notes->raw );
-				$last_note    = $notes->raw[ $last_note_id ];
-				if (
-					// Note from the current user
-					$last_note->moderator === wp_get_current_user()->user_nicename &&
-					// ..and created within 5 minutes.
-					absint( time() - strtotime( $last_note->date ) ) <= 5 * MINUTE_IN_SECONDS
-				) {
-					$note_id = $last_note_id;
-
-					// Prefix the existing message.
-					$note_text = trim( $last_note->text . "\n\n" . $note_text );
-				}
-			}
-
-			// Add a user note about this action.
-			Plugin::get_instance()->user_notes->add_user_note(
+			Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
 				$user->ID,
-				$note_text,
-				null,
-				$note_id
+				$note_text
 			);
 		}
 
+	}
+
+	/**
+	 * Add a user note when a user is flagged / unflagged.
+	 */
+	function log_user_flag_changes( $user_id ) {
+		$flag_action = ( 'wporg_bbp_flag_user' === current_filter () ) ? 'flaged' : 'unflagged';
+
+		$note_text = "User {$flag_action}.";
+
+		Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
+			$user_id,
+			$note_text
+		);
 	}
 }
