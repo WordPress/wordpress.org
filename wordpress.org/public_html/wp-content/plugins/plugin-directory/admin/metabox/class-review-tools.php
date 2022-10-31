@@ -9,6 +9,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
 
 /**
  * The Plugin Review metabox.
@@ -281,6 +282,38 @@ class Review_Tools {
 					<li><a href='https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=<?php echo esc_attr( $post->post_name ); ?>'>Block Plugin Checker</a></li>
 				<?php endif; ?>
 			</ul>
+			<p>
+				<?php
+				$svn_sync_url = add_query_arg(
+					array(
+						'action'      => 'plugin-svn-sync',
+						'slug'        => $post->post_name,
+						'_ajax_nonce' => wp_create_nonce( 'wporg_plugins_svn_sync-' . $post->post_name ),
+					),
+					admin_url( 'admin-ajax.php' )
+				);
+				?>
+				<a id="svn-sync" class="button button-secondary" href="<?php echo esc_url( $svn_sync_url ); ?>">Trigger svn sync</a>
+				<script>
+				jQuery( function( $ ) {
+					$( '#svn-sync' ).click( function( e ) {
+						e.preventDefault();
+
+						var $this = $(this),
+						    url = $this.attr('href');
+
+						$this.addClass( 'disabled' );
+						$this.prop( 'href', '' );
+
+						if ( url ) {
+							$.get( url ).then( function( response ) {
+								alert( response );
+							} );
+						}
+					} );
+				});
+				</script>
+			</p>
 			<?php
 		}
 
@@ -327,5 +360,26 @@ class Review_Tools {
 
 			return $string;
 		} );
+	}
+
+	/**
+	 * admin-ajax.php handler for queueing a plugin import.
+	 */
+	static function svn_sync() {
+		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) );
+
+		check_ajax_referer( 'wporg_plugins_svn_sync-' . $plugin_slug );
+
+		Plugin_Import::queue(
+			$plugin_slug,
+			array(
+				'tags_touched' => [
+					'trunk'
+				],
+				'source' => 'wp-admin svn-sync button'
+			)
+		);
+
+		die( "Queued SVN import for {$plugin_slug}." );
 	}
 }
