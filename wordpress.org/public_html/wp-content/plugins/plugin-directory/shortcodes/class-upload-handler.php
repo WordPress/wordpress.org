@@ -144,6 +144,19 @@ class Upload_Handler {
 
 		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
 
+		// If no matching plugin by that slug, check to see if a plugin exists with that Title in the database.
+		if ( ! $plugin_post ) {
+			$plugin_posts = get_posts( array(
+				'post_type'   => 'plugin',
+				'title'       => $this->plugin['Name'],
+				'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
+			) );
+
+			if ( $plugin_posts ) {
+				$plugin_post = array_shift( $plugin_posts );
+			}
+		}
+
 		// Is there already a plugin with the same slug by a different author?
 		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
 			$error = __( 'Error: The plugin already exists.', 'wporg-plugins' );
@@ -151,7 +164,7 @@ class Upload_Handler {
 			return new \WP_Error( 'already_exists', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 				__( 'There is already a plugin with the name %1$s in the directory. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>',
+				'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
 				'<code>Plugin Name:</code>'
 			) );
 		}
@@ -163,7 +176,7 @@ class Upload_Handler {
 			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
 				/* translators: 1: plugin slug, 2: Documentation URL, 3: plugins@wordpress.org */
 				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Instead, please update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>',
+				'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
 				__( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 'wporg-plugins' ),
 				'plugins@wordpress.org'
 			) );
@@ -237,7 +250,7 @@ class Upload_Handler {
 				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 					__( 'There is already a plugin with the name %1$s known to exist, though it is not hosted on WordPress.org. This means the permalink %2$s is already in use, and has a significant user base. Were we to accept it as-is, our system would overwrite those other installs and potentially damage any existing users. This is especially true since WordPress 5.5 and up will automatically update plugins and themes. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is an incorrect assessment of the situation, please email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
-					'<code>' . $this->plugin['Name'] . '</code>',
+					'<code>' . esc_html( $this->plugin['Name'] ) . '</code>',
 					'<code>' . $this->plugin_slug . '</code>',
 					'<code>Plugin Name:</code>',
 					'plugins@wordpress.org'
@@ -258,6 +271,41 @@ class Upload_Handler {
 			) );
 		}
 		$readme = new Parser( $readme );
+
+		// Double check no existing plugins clash with the readme title.
+		$readme_plugin_post = get_posts( array(
+			'post_type'   => 'plugin',
+			'title'       => $readme->name,
+			'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
+		) );
+		if ( $readme_plugin_post ) {
+			$error = __( 'README Error: The plugin has already been submitted.', 'wporg-plugins' );
+
+			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
+				/* translators: 1: plugin slug, 2: Documentation URL, 3: plugins@wordpress.org */
+				__( 'You have already submitted a plugin named %1$s. There is no need to resubmit existing plugins, even for new versions. Instead, please update your plugin within the directory via <a href="%2$s">SVN</a>. If you need assistance, email <a href="mailto:%3$s">%3$s</a> and let us know.', 'wporg-plugins' ),
+				'<code>' . esc_html( $readme->name ) . '</code>',
+				__( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 'wporg-plugins' ),
+				'plugins@wordpress.org'
+			) );
+		}
+
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) ) {
+			$installs = wporg_stats_get_plugin_name_install_count( $readme->name );
+
+			if ( $installs && $installs->count >= 100 ) {
+				$error = __( 'Error: That plugin name is already in use.', 'wporg-plugins' );
+
+				return new \WP_Error( 'already_exists_in_the_wild', $error . ' ' . sprintf(
+					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+					__( 'There is already a plugin with the name %1$s known to exist, though it is not hosted on WordPress.org. This means the permalink %2$s is already in use, and has a significant user base. Were we to accept it as-is, our system would overwrite those other installs and potentially damage any existing users. This is especially true since WordPress 5.5 and up will automatically update plugins and themes. You must rename your plugin by changing the %3$s line in your main plugin file and in your readme. Once you have done so, you may upload it again. If you feel this is an incorrect assessment of the situation, please email <a href="mailto:%4$s">%4$s</a> and explain why so that we may help you.', 'wporg-plugins' ),
+					'<code>' . esc_html( $readme->name ) . '</code>',
+					'<code>' . $this->plugin_slug . '</code>',
+					'<code>Plugin Name:</code>',
+					'plugins@wordpress.org'
+				) );
+			}
+		}
 
 		// Check for a readme license.
 		if ( empty( $readme->license ) ) {
