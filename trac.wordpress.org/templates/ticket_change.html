@@ -68,6 +68,9 @@ Arguments:
       </span>
       <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
     </span>
+    <span class="threading">
+      <span py:if="'cnum' in change" id="comment:$cnum" class="cnum">${commentref('#', cnum)}</span>
+    </span>
     <div py:if="show_buttons" class="trac-ticket-buttons">
       <form py:if="'cnum' in change and can_edit_comment" method="get" action="#comment:${cnum}">
         <div class="inlinebuttons">
