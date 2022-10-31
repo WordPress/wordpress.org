@@ -53,13 +53,14 @@ Arguments:
     </div>
   </h3>
 </py:when>
-<py:when test="'author' in change and 'prbot' == change.author and change.comment.startswith('\'\'')"
-         py:with="
-           wporg_user  = wporg_sanitize_user_nicename(change.author);
-           pr_byline   = change.comment.partition('\n')[0];
-           pr_comment  = ''.join(change.comment.partition('\n')[1:]) or False;
-           prbot_class = 'prbot with-context' if pr_comment or change.fields else 'prbot without-context';
-         ">
+<py:when test="'author' in change and 'prbot' == change.author"
+        py:with="
+          wporg_user   = wporg_sanitize_user_nicename(change.author);
+          display_text = re.sub( '[{]+#!comment[^}]+[}]+', '', change.comment ).lstrip();
+          pr_byline    = display_text.partition('\n')[0];
+          pr_comment   = ''.join(display_text.partition('\n')[1:]) or False;
+          prbot_class  = 'prbot with-context' if pr_comment or change.fields else 'prbot without-context';
+        ">
   <h3 class="change chat-bot ${prbot_class}">
     <span class="avatar">
       <span class="username-line">
