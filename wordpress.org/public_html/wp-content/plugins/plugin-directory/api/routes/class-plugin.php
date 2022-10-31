@@ -20,9 +20,10 @@ class Plugin extends Base {
 	 */
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/?', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'plugin_info' ),
-			'args'     => array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'plugin_info' ),
+			'permission_callback' => '__return_true',
+			'args'                => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
 				),
