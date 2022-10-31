@@ -648,11 +648,13 @@ class Stats {
 		$commenters_number              = 0;
 		$commenters                     = array();
 		$status_counter                 = array(
+			'changesrequested'       => 0,
 			'current'                => 0,
 			'current_from_rejection' => 0,
 			'fuzzy'                  => 0,
 			'rejected'               => 0,
 			'old'                    => 0,
+			'unknown'                => 0,
 			'waiting'                => 0,
 		);
 
@@ -753,7 +755,8 @@ class Stats {
 					$status_counter['current_from_rejection'] ++;
 				}
 			}
-			$status_counter[ $translation->status ] ++;
+
+			$status_counter[ $translation->status ?: 'unknown' ] ++;
 		}
 
 		// Get most active commenter's.
