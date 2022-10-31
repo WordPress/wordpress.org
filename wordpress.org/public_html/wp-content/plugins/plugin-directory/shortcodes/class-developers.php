@@ -98,7 +98,7 @@ class Developers {
 
 			if ( isset( $named_locations[ $host ] ) ) {
 				$output .= '<p>' . sprintf(
-					/* translators: 1: Platform the plugin is hosted on. 2: Link to development location. */
+					/* translators: 1: Platform the plugin is hosted on, eg. GitHub. 2: Link to development location. */
 					__( 'Plugin development occurs on %1$s in %2$s.', 'wporg-plugins' ),
 					esc_html( $named_locations[ $host ] ),
 					sprintf(
