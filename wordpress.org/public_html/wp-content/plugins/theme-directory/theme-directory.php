@@ -1458,3 +1458,9 @@ add_filter( 'wporg_canonical_url', 'wporg_themes_canonical_url' );
 
 // Theme Directory doesn't support pagination.
 add_filter( 'wporg_rel_next_pages', '__return_zero' );
+
+// Force-enable Jetpack SEO
+function wporg_themes_jetpack_seo_enable( $modules ) {
+	return array_values( array_merge( $modules, array( 'seo-tools' ) ) );
+}
+add_filter( 'jetpack_active_modules', 'wporg_themes_jetpack_seo_enable' );

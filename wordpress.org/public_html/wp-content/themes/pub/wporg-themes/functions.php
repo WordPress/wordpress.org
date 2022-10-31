@@ -484,17 +484,6 @@ function wporg_themes_get_tag_translations() {
 	return $translations;
 }
 
-if ( class_exists( 'Jetpack' ) ) {
-//	include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo.php';
-//	include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-posts.php';
-//	include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-titles.php';
-//	include_once WP_CONTENT_DIR . '/plugins/jetpack/modules/seo-tools/jetpack-seo-utils.php';
-
-	if ( class_exists( 'Jetpack_SEO' ) ) {
-		new Jetpack_SEO;
-	}
-}
-
 /**
  * Prints markup information in the head of a page.
  *
