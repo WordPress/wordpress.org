@@ -1465,7 +1465,7 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	 * Add a user note when a user is flagged / unflagged.
 	 */
 	function log_user_flag_changes( $user_id ) {
-		$flag_action = ( 'wporg_bbp_flag_user' === current_filter () ) ? 'flaged' : 'unflagged';
+		$flag_action = ( 'wporg_bbp_flag_user' === current_filter () ) ? 'flagged' : 'unflagged';
 
 		$note_text = "User {$flag_action}.";
 
