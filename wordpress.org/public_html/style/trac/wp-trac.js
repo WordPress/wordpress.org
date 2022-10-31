@@ -14,7 +14,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 		'2nd-opinion' : 'A second opinion is desired for the problem or solution.',
 		'close' : 'The ticket is a candidate for closure.',
 		'needs-testing' : 'Patch has a particular need for testing.',
-		'has-testing-info' : 'Steps have been provided to reproduce the issue or test a patch.'
+		'has-testing-info' : 'Steps have been provided to reproduce the issue or test a patch.',
 		'needs-testing-info' : 'A more detailed testing procedure is needed to reproduce the issue, or to validate a patch works as expected.',
 		'needs-design' : 'A designer should create a prototype of how the suggested changes should look/behave before writing code.',
 		'needs-design-feedback' : 'A designer should review and give feedback on the proposed changes.',
