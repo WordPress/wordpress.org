@@ -935,10 +935,10 @@ span.contributor-label[title]:hover {
 #changelog h3.chat-bot .trac-ticket-buttons {
 	display: none;
 }
-#changelog h3.chat-bot.pr-bot:hover .trac-ticket-buttons {
+#changelog h3.chat-bot.prbot:hover .trac-ticket-buttons {
 	display: inherit;
 }
-#changelog h3.chat-bot.pr-bot .trac-ticket-buttons .trac-delete {
+#changelog h3.chat-bot.prbot .trac-ticket-buttons .trac-delete {
 	display: none;
 }
 span.time-ago {
