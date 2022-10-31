@@ -66,15 +66,28 @@ class Plugin_Search {
 			add_filter( 'pre_option_has_jetpack_search_product', array( $this, 'option_has_jetpack_search_product' ), 10, 1 );
 
 			// add_filter( 'jetpack_search_abort', array( $this, 'log_jetpack_search_abort' ) );
-
-			require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search.php' );
-			require_once( ABSPATH . 'wp-content/plugins/jetpack/modules/search/class.jetpack-search-helpers.php' );
+			
 			// $es_query_args = apply_filters( 'jetpack_search_es_query_args', $es_query_args, $query );
-			//
-			add_filter( 'jetpack_search_es_wp_query_args', array( $this, 'jetpack_search_es_wp_query_args' ), 10, 2 );
-			add_filter( 'jetpack_search_es_query_args', array( $this, 'jetpack_search_es_query_args' ), 10, 2 );
 
-			\Jetpack_Search::instance()->setup();
+			add_filter( 'jetpack_search_es_wp_query_args', array( $this, 'jetpack_search_es_wp_query_args' ), 10, 2 );
+			add_filter( 'jetpack_search_es_query_args', array( $this, 'jetpack_search_es_query_args' ), 10, 2 );			
+
+			// Load Jetpack Search.
+			include_once WP_PLUGIN_DIR . '/jetpack/vendor/autoload_packages.php';
+
+			if ( class_exists( '\Automattic\Jetpack\Search\Classic_Search' ) ) {
+				// New Jetpack
+				\Automattic\Jetpack\Search\Classic_Search::instance();
+
+			} else {
+				// Old(er) Jetpack, load the classic search module, Temporarily.
+				
+				include_once WP_PLUGIN_DIR . '/jetpack/modules/search/class.jetpack-search.php';
+				include_once WP_PLUGIN_DIR . '/jetpack/modules/search/class.jetpack-search-helpers.php';
+
+				\Jetpack_Search::instance()->setup();
+			}
+
 		}
 
 	}
