@@ -91,11 +91,18 @@ class Developers {
 		if ( $post->development_link ) {
 			$host = wp_parse_url( $post->development_link, PHP_URL_HOST );
 
-			if ( 'github.com' === $host ) {
+			$named_locations = [
+				'github.com' => __( 'GitHub', 'wporg-plugins' ),
+				'gitlab.com' => __( 'GitLab', 'wporg-plugins' ),
+			];
+
+			if ( isset( $named_locations[ $host ] ) ) {
 				$output .= '<p>' . sprintf(
-					/* translators: %s: Link to development location. */
-					__( 'Plugin development occurs on GitHub in %s.', 'wporg-plugins' ),
+					/* translators: 1: Platform the plugin is hosted on. 2: Link to development location. */
+					__( 'Plugin development occurs on %1$s in %2$s.', 'wporg-plugins' ),
+					esc_html( $named_locations[ $host ] ),
 					sprintf(
+						// <a href="https://github.com/user/repo">user/repo</a>
 						'<a href="%s">%s</a>',
 						esc_url( $post->development_link ),
 						esc_html( trim( wp_parse_url( $post->development_link, PHP_URL_PATH ), '/' ) )
@@ -106,6 +113,7 @@ class Developers {
 					/* translators: %s: Link to development location. */
 					__( 'Plugin development occurs on %s.', 'wporg-plugins' ),
 					sprintf(
+						// <a href="https://example.org/path/here">example.org</a>.
 						'<a href="%s">%s</a>',
 						esc_url( $post->development_link ),
 						esc_html( $host )
