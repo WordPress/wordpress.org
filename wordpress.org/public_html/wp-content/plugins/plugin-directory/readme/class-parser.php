@@ -55,6 +55,11 @@ class Parser {
 	/**
 	 * @var string
 	 */
+	public $development_link = '';
+
+	/**
+	 * @var string
+	 */
 	public $short_description = '';
 
 	/**
@@ -137,6 +142,10 @@ class Parser {
 		'stable tag'        => 'stable_tag',
 		'license'           => 'license',
 		'license uri'       => 'license_uri',
+		// These few are aliased
+		'development link'  => 'development_link',
+		'development'       => 'development_link',
+		'github'            => 'development_link',
 	);
 
 	/**
@@ -306,6 +315,15 @@ class Parser {
 		}
 		if ( ! empty( $headers['license_uri'] ) ) {
 			$this->license_uri = $headers['license_uri'];
+		}
+		if ( ! empty( $headers['development_link'] ) ) {
+			$this->development_link = $headers['development_link'];
+		} else {
+			// Extract from the readme if possible.
+			// First GitHub/Gitlab mention
+			if ( preg_match( '!https://(gitlab.com|github.com)/[^/]+/[a-z0-9.-]+!i', implode( ' ', $contents ), $m ) ) {
+				$this->development_link = $m[0];
+			}
 		}
 
 		// Parse the short description.
