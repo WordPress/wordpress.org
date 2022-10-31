@@ -359,11 +359,7 @@ class Upload_Handler {
 			'<code>' . $this->plugin_slug . '</code>'
 		) . '</p><p>';
 
-		$message .= sprintf(
-			/* translators: 1: plugins@wordpress.org */
-			__( 'We&rsquo;ve sent you an email verifying this submission. Please make sure to whitelist our email address - <a href="mailto:%1$s">%1$s</a> - to ensure you receive all our communications.' ),
-			'plugins@wordpress.org'
-		) . '</p><p>';
+		$message .= __( 'We&rsquo;ve sent you an email verifying this submission. Make sure you set all emails from wordpress.org to never go to spam (i.e. via email filters or approval lists). That will ensure you won&rsquo;t miss any of our messages.', 'wporg-plugins' ) . '</p><p>';
 
 		$message .= __( 'If there are any errors in your submission, such as having submitted via the wrong account, please don\'t resubmit! Instead, email us as soon as possible (you can reply to the automated email we sent you). We can correct most issues before approval.', 'wporg-plugins' ) . '</p><p>';
 
