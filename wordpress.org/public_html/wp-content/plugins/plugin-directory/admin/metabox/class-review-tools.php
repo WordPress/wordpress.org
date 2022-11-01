@@ -116,11 +116,12 @@ class Review_Tools {
 		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
 			$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
 		}
-		uksort( $zip_files, function ( $a, $b ) {
-			return strtotime( $a ) < strtotime( $b );
-		} );
 
-		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) || $zip_files ) {
+		if ( $zip_files ) {
+			uksort( $zip_files, function ( $a, $b ) {
+				return strtotime( $a ) < strtotime( $b );
+			} );
+
 			echo '<p><strong>Zip files:</strong></p>';
 			echo '<ul class="plugin-zip-files">';
 			foreach ( $zip_files as $zip_date => $zip ) {
