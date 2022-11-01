@@ -375,7 +375,6 @@ class Upload_Handler {
 					'support_threads_resolved' => 0,
 					'downloads'                => 0,
 					'last_updated'             => gmdate( 'Y-m-d H:i:s' ),
-					'plugin_status'            => 'new',
 					'rating'                   => 0,
 					'ratings'                  => array(),
 					'active_installs'          => 0,
