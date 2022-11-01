@@ -120,12 +120,6 @@ class Review_Tools {
 			return strtotime( $a ) < strtotime( $b );
 		} );
 
-		$zip_url = get_post_meta( $post->ID, '_submitted_zip', true );
-		if ( $zip_url ) {
-			// Back-compat only.
-			$zip_files['User provided URL'] = array( $zip_url, null );
-		}
-
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) || $zip_files ) {
 			echo '<p><strong>Zip files:</strong></p>';
 			echo '<ul class="plugin-zip-files">';
