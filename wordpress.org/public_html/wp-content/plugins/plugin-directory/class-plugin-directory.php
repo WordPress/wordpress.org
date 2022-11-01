@@ -95,21 +95,6 @@ class Plugin_Directory {
 			return array_unique( $modules );
 		} );
 
-/*
-		// Temporarily disabled to see if this is still needed / causing issues.
-		// Work around caching issues
-		add_filter( 'pre_option_jetpack_sync_full__started', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__started', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__params', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__params', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__queue_finished', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__queue_finished', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__send_started', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__send_started', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__finished', array( $this, 'bypass_options_cache' ), 10, 2 );
-		add_filter( 'default_option_jetpack_sync_full__finished', '__return_null' );
-*/
-
 		// Fix login URLs in admin bar
 		add_filter( 'login_url', array( $this, 'fix_login_url' ), 10, 3 );
 
@@ -552,7 +537,7 @@ class Plugin_Directory {
 		// Remove the /admin$ redirect to wp-admin
 		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
 
-		// disable feeds
+		// Disable feeds
 		remove_action( 'wp_head', 'feed_links', 2 );
 		remove_action( 'wp_head', 'feed_links_extra', 3 );
 
@@ -955,21 +940,6 @@ class Plugin_Directory {
 		}
 
 		return $found_posts;
-	}
-
-	/**
-	 * Filter to bypass caching for options critical to Jetpack sync to work around race conditions and other unidentified bugs.
-	 * If this works and becomes a permanent solution, it probably belongs elsewhere.
-	 */
-	public function bypass_options_cache( $value, $option ) {
-		global $wpdb;
-		$value = $wpdb->get_var( $wpdb->prepare(
-			"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
-			$option
-		) );
-		$value = maybe_unserialize( $value );
-
-		return $value;
 	}
 
 	/**
