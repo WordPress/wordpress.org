@@ -112,32 +112,34 @@ class Review_Tools {
 			'suppress_filters' => false,
 		] );
 
-		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
+		$zip_files = array();
+		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
+			$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
+		}
 
-			$zip_files = array();
-			foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
-				$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
-			}
+		if ( $zip_files ) {
 			uksort( $zip_files, function ( $a, $b ) {
 				return strtotime( $a ) < strtotime( $b );
 			} );
-
-			$zip_url = get_post_meta( $post->ID, '_submitted_zip', true );
-			if ( $zip_url ) {
-				// Back-compat only.
-				$zip_files['User provided URL'] = array( $zip_url, null );
-			}
 
 			echo '<p><strong>Zip files:</strong></p>';
 			echo '<ul class="plugin-zip-files">';
 			foreach ( $zip_files as $zip_date => $zip ) {
 				list( $zip_url, $zip_file ) = $zip;
-				$zip_size                   = is_object( $zip_file ) ? size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 ) : 'unknown size';
+				$zip_size                   = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
 
-				printf( '<li>%s <a href="%s">%s</a> (%s)</li>', esc_html( $zip_date ), esc_url( $zip_url ), esc_html( $zip_url ), esc_html( $zip_size ) );
+				printf(
+					'<li>%1$s <a href="%2$s">%3$s</a> (%4$s)</li>',
+					esc_html( $zip_date ),
+					esc_url( $zip_url ),
+					esc_html( basename( $zip_url ) ),
+					esc_html( $zip_size )
+				);
 			}
 			echo '</ul>';
+		}
 
+		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 			$slug_restricted = [];
 			$slug_reserved   = [];
 

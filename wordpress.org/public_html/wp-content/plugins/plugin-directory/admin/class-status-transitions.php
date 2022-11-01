@@ -202,7 +202,6 @@ class Status_Transitions {
 	 * @param \WP_Post $post    Post object.
 	 */
 	public function approved( $post_id, $post ) {
-		$attachments   = get_attached_media( 'application/zip', $post_id );
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
@@ -213,6 +212,7 @@ class Status_Transitions {
 
 		/*
 		 Temporarily disable SVN prefill from ZIP files
+		$attachments = get_attached_media( 'application/zip', $post_id );
 		if ( $attachments ) {
 			$attachment = end( $attachments );
 
@@ -227,11 +227,6 @@ class Status_Transitions {
 		*/
 
 		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
-
-		// Delete zips.
-		foreach ( $attachments as $attachment ) {
-			wp_delete_attachment( $attachment->ID, true );
-		}
 
 		// Grant commit access.
 		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
@@ -254,11 +249,6 @@ class Status_Transitions {
 		// Default data for review.
 		$original_permalink = $post->post_name;
 		$submission_date    = get_the_modified_date( 'F j, Y', $post_id );
-
-		// Delete zips.
-		foreach ( get_attached_media( 'application/zip', $post_id ) as $attachment ) {
-			wp_delete_attachment( $attachment->ID, true );
-		}
 
 		// Change slug to 'rejected-plugin-name-rejected' to free up 'plugin-name'.
 		wp_update_post( array(
