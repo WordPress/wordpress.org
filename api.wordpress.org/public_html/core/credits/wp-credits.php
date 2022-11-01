@@ -55,6 +55,7 @@ abstract class WP_Credits {
 		'5.8' => '2020-02-24 00:00:00',
 		'5.9' => '2021-06-30 00:00:00',
 		'6.0' => '2022-01-04 00:00:00',
+		'6.1' => '2022-05-03 00:00:00',
 	);
 
 	final public static function factory( $version, $gp_locale ) {
