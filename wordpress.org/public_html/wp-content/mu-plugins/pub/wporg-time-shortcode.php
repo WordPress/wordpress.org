@@ -85,8 +85,8 @@ function time_converter_script() {
 						d = new Date();
 
 					d.setUTCFullYear( + m[1] );
-					d.setUTCDate( + m[3] );
 					d.setUTCMonth( + m[2] - 1 );
+					d.setUTCDate( + m[3] );
 					d.setUTCHours( + m[4] );
 					d.setUTCMinutes( + m[5] );
 					d.setUTCSeconds( + m[6] );
