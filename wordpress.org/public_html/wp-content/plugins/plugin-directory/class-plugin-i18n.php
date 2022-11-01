@@ -460,7 +460,7 @@ class Plugin_I18n {
 
 		$translation_sets = $this->cache_get( $post->post_name, $branch, $cache_suffix );
 		if ( false === $translation_sets ) {
-			$api_url  = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch, [ 'https' ] );
+			$api_url  = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch . '/', [ 'https' ] );
 			$response = wp_remote_get( $api_url );
 
 			if ( is_wp_error( $response ) || WP_Http::OK !== wp_remote_retrieve_response_code( $response ) ) {

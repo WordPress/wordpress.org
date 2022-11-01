@@ -76,6 +76,9 @@ class Plugin {
 
 		//Locales\Serbian_Latin::init();
 
+		// Correct `WP_Locale` for variant locales in project lists.
+		add_filter( 'gp_translation_sets_sort', [ $this, 'filter_gp_translation_sets_sort' ] );
+
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
@@ -569,5 +572,25 @@ class Plugin {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Filter the project translation set list to have correct WP_Locale fields for variants.
+	 *
+	 * This also affects the API output, so as not to have duplicate `wp_locale` fields with variants.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/4367
+	 *
+	 * @param array $translation_sets The translation sets.
+	 * @return array Filtered translation sets.
+	 */
+	function filter_gp_translation_sets_sort( $translation_sets ) {
+		foreach ( $translation_sets as $set ) {
+			if ( 'default' !== $set->slug && ! str_contains( $set->wp_locale, $set->slug ) ) {
+				$set->wp_locale .= '_' . $set->slug;
+			}
+		}
+
+		return $translation_sets;
 	}
 }
