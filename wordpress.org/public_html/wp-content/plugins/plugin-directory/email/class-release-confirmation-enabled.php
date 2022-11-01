@@ -15,19 +15,26 @@ class Release_Confirmation_Enabled extends Base {
 	}
 
 	function body() {
-		/* translators: 1: Plugin Author, 2: Plugin Name, 3: URL to the handbook */
+		/* translators: 1: Plugin Author, 2: User Name, 5: Plugin Name, 4: Plugin URL, 5: Plugin slug, 6: URL to the handbook */
 		return sprintf(
 			__( 'Howdy %1$s,
 
-Release confirmations are now enabled for %2$s.
+%2$s has enabled release confirmations for the following plugin:
+%3$s
+%4$s
 
-This means that each time you release a new version of %2$s you\'ll be required to confirm the release by following a link in an automated email.
+A new email will be sent to all committers when a new pending release exists for %5$s with a link to the Release Management dashboard.
+
+You, or another committer to the plugin, will be required to confirm the release on that dashboard before WordPress.org processes the newly committed plugin update.
 
 For more information, please read the following handbook article:
-%3$s', 'wporg-plugins' ),
+%6$s', 'wporg-plugins' ),
 			$this->user_text( $this->user ),
+			$this->user_text( $this->who ),
 			$this->plugin->post_title,
-			'https://developer.wordpress.org/plugins/wordpress-org/' // TODO: Handbook page.
+			get_permalink( $this->plugin ),
+			$this->plugin->post_name,
+			'https://developer.wordpress.org/plugins/wordpress-org/release-confirmation-emails/'
 		);
 	}
 }

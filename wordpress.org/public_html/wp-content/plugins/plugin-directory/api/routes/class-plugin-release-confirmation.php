@@ -130,7 +130,10 @@ class Plugin_Release_Confirmation extends Base {
 		$email = new Release_Confirmation_Enabled_Email(
 			$plugin,
 			Tools::get_plugin_committers( $plugin->post_name ),
-			[]
+			[
+				// Don't include the plugin reviewer who triggered this.
+				'who' => is_admin() ? 'WordPress.org' : null,
+			]
 		);
 		$email->send();
 
