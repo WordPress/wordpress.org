@@ -68,6 +68,7 @@ class Plugin_Self_Close extends Base {
 		wp_update_post( $plugin );
 
 		// Update the Metadata
+		update_post_meta( $plugin->ID, '_closed', time() );
 		update_post_meta( $plugin->ID, '_close_reason', 'author-request' );
 		update_post_meta( $plugin->ID, 'plugin_closed_date', current_time( 'mysql' ) );
 
