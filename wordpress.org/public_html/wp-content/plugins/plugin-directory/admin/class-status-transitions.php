@@ -137,6 +137,7 @@ class Status_Transitions {
 				break;
 
 			case 'rejected':
+				$this->save_rejected_reason( $post->ID );
 				$this->rejected( $post->ID, $post );
 				break;
 
@@ -266,8 +267,10 @@ class Status_Transitions {
 			[
 				'slug'            => $original_permalink,
 				'submission_date' => $submission_date,
+				'reason'          => sanitize_key( $_POST['rejection_reason'] ?? '' )
 			]
 		);
+
 		// ..and log rejection.
 		if ( $email->send() ) {
 			Tools::audit_log( 'Plugin rejected.', $post_id ); 
@@ -334,6 +337,29 @@ class Status_Transitions {
 
 		update_post_meta( $post_id, '_close_reason', $close_reason );
 		update_post_meta( $post_id, 'plugin_closed_date', current_time( 'mysql' ) );
+
+		Tools::audit_log( sprintf( 'Plugin closed. Reason: %s', $close_reason ), $post_id );
+	}
+
+	/**
+	 * Save the reason for rejecting a plugin.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function save_rejected_reason( $post_id ) {
+		// TODO: Bulk rejection?
+		if ( ! isset( $_POST['rejection_reason'] ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'plugin_approve', $post_id ) ) {
+			return;
+		}
+
+		$rejection_reason = sanitize_key( $_POST['rejection_reason'] );
+
+		update_post_meta( $post_id, '_rejection_reason', $rejection_reason );
+		update_post_meta( $post_id, 'plugin_rejected_date', current_time( 'mysql' ) );
 
 		Tools::audit_log( sprintf( 'Plugin closed. Reason: %s', $close_reason ), $post_id );
 	}

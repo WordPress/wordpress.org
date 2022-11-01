@@ -90,9 +90,11 @@ class Controls {
 			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status );
 		}
 
-		$close_reasons   = Template::get_close_reasons();
-		$close_reason    = (string) get_post_meta( $post->ID, '_close_reason', true );
-		$active_installs = (int) get_post_meta( $post->ID, 'active_installs', true );
+		$close_reasons     = Template::get_close_reasons();
+		$close_reason      = (string) get_post_meta( $post->ID, '_close_reason', true );
+		$rejection_reasons = Template::get_rejection_reasons();
+		$rejection_reason  = (string) get_post_meta( $post->ID, '_rejection_reason', true );
+		$active_installs   = (int) get_post_meta( $post->ID, 'active_installs', true );
 
 		$reason_label   = Template::get_close_reason();
 		$reason_unknown = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $reason_label );
@@ -134,6 +136,17 @@ class Controls {
 					</select>
 				</p>
 
+			<?php endif; ?>
+
+			<?php if ( in_array( 'rejected', $statuses, true ) && 'rejected' != $post->post_status ) : ?>
+				<p>
+					<label for="rejection_reason"><?php _e( 'Rejection Reason:', 'wporg-plugins' ); ?></label>
+					<select name="rejection_reason" id="rejection_reason">
+						<?php foreach ( $rejection_reasons as $key => $label ) : ?>
+							<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $rejection_reason ); ?>><?php echo esc_html( $label ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</p>
 			<?php endif; ?>
 
 			<?php foreach ( $statuses as $status ) : ?>
