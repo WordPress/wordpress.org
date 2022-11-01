@@ -1,8 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
-use WordPressdotorg\Plugin_Directory\CLI;
-
 /**
  * Remove no-longer-needed ZIP files.
  *
