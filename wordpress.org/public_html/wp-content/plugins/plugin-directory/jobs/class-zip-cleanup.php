@@ -49,7 +49,7 @@ class ZIP_Cleanup {
 			}
 
 			// If the plugin is still pending review, skip.
-			if ( 'pending' === $plugin->post_status || 'draft' === $plugin->post_status ) {
+			if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 				continue;
 			}
 
