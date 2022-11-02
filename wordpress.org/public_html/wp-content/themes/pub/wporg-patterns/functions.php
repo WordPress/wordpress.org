@@ -79,7 +79,7 @@ function enqueue_assets() {
 		wp_add_inline_script(
 			'wporg-pattern-script',
 			sprintf(
-				"var wporgLocale = JSON.parse( decodeURIComponent( '%s' ) )",
+				"var wporgLocale = JSON.parse( decodeURIComponent( '%s' ) );",
 				rawurlencode( wp_json_encode( array(
 					'id' => get_locale(),
 					'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
@@ -91,10 +91,12 @@ function enqueue_assets() {
 		wp_add_inline_script(
 			'wporg-pattern-script',
 			sprintf(
-				"var wporgPatternsData = JSON.parse( decodeURIComponent( '%s' ) )",
+				"var wporgPatternsData = JSON.parse( decodeURIComponent( '%s' ) );",
 				rawurlencode( wp_json_encode( array(
-					'userId' => get_current_user_id(),
 					'currentAuthorName' => esc_html( get_the_author_meta( 'display_name' ) ),
+					'env' => esc_js( wp_get_environment_type() ),
+					'thumbnailVersion' => 1, // cachebuster for the generated thumbnail image.
+					'userId' => get_current_user_id(),
 				) ) ),
 			),
 			'before'
@@ -103,7 +105,7 @@ function enqueue_assets() {
 		wp_add_inline_script(
 			'wporg-pattern-script',
 			sprintf(
-				"var wporgPatternsUrl = JSON.parse( decodeURIComponent( '%s' ) )",
+				"var wporgPatternsUrl = JSON.parse( decodeURIComponent( '%s' ) );",
 				rawurlencode( wp_json_encode( array(
 					'assets' => esc_url( get_stylesheet_directory_uri() ),
 					'site' => esc_url( home_url() ),

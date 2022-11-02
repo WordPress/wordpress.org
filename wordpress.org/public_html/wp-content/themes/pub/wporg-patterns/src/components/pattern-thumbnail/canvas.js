@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __, isRTL } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
@@ -9,14 +9,12 @@ import { useEffect, useRef, useState } from '@wordpress/element';
  */
 import getCardFrameHeight from '../../utils/get-card-frame-height';
 import useInView from '../../hooks/in-view';
+import Screenshot from './screenshot';
 
-const VIEWPORT_WIDTH = 1200;
-
-export default function ( { url } ) {
+export default function ( { alt, url } ) {
 	const wrapperRef = useRef();
-	const [ frameHeight, setFrameHeight ] = useState( '1px' );
-	const [ frameScale, setFrameScale ] = useState( 0.3125 );
 	const isVisible = useInView( { element: wrapperRef } );
+	const [ frameHeight, setFrameHeight ] = useState( '1px' );
 	const [ shouldLoad, setShouldLoad ] = useState( false );
 
 	useEffect( () => {
@@ -29,7 +27,6 @@ export default function ( { url } ) {
 		const handleOnResize = () => {
 			try {
 				setFrameHeight( getCardFrameHeight( wrapperRef.current.clientWidth ) );
-				setFrameScale( wrapperRef.current.clientWidth / VIEWPORT_WIDTH );
 			} catch ( err ) {}
 		};
 
@@ -40,32 +37,30 @@ export default function ( { url } ) {
 		return () => {
 			window.removeEventListener( 'resize', handleOnResize );
 		};
-	}, [] );
+	}, [ isVisible ] );
 
 	const style = {
 		border: 'none',
-		width: `${ VIEWPORT_WIDTH }px`,
+		width: '100%',
 		maxWidth: 'none',
-		height: `${ getCardFrameHeight( VIEWPORT_WIDTH ) }px`,
-		transform: `scale(${ frameScale })`,
-		transformOrigin: isRTL() ? 'top right' : 'top left',
-		pointerEvents: 'none',
+		height: `${ frameHeight }px`,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
 	};
 
 	return (
-		<div
-			ref={ wrapperRef }
-			style={ {
-				height: frameHeight,
-				overflow: 'hidden',
-			} }
-		>
-			<iframe
+		<div ref={ wrapperRef }>
+			<Screenshot
 				className="pattern-grid__preview"
-				title={ __( 'Pattern Preview', 'wporg-patterns' ) }
-				tabIndex="-1"
+				alt={ alt || __( 'Pattern Preview', 'wporg-patterns' ) }
 				style={ style }
-				src={ shouldLoad ? url : '' }
+				isReady={ shouldLoad }
+				src={
+					wporgPatternsData.env === 'local'
+						? url.replace( wporgPatternsUrl.site, 'https://wordpress.org/patterns' )
+						: url
+				}
 			/>
 		</div>
 	);

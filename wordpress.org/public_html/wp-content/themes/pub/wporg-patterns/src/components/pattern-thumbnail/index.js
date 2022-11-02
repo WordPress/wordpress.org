@@ -3,7 +3,6 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
-import { Disabled } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -35,9 +34,13 @@ function PatternThumbnail( { pattern, showAvatar, showOptions } ) {
 			<div className="pattern-grid__pattern-frame">
 				<a href={ pattern.link } rel="bookmark">
 					<span className="screen-reader-text">{ decodeEntities( pattern.title.rendered ) }</span>
-					<Disabled>
-						<Canvas url={ addQueryArgs( pattern.link, { view: true } ) } />
-					</Disabled>
+					<Canvas
+						url={ addQueryArgs( pattern.link, {
+							view: true,
+							modified: pattern.modified_gmt,
+							version: wporgPatternsData.thumbnailVersion,
+						} ) }
+					/>
 				</a>
 				{ statusLabel ? (
 					<div className={ `pattern-grid__status is-${ pattern.status }` }>

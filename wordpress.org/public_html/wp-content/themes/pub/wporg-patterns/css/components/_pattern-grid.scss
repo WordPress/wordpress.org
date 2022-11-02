@@ -46,6 +46,10 @@
 
 	.pattern-grid__preview {
 		overflow: hidden;
+
+		&.has-error {
+			color: color(red-60);
+		}
 	}
 
 	.pattern-grid__status {
