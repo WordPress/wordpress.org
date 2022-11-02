@@ -142,10 +142,7 @@ class Parser {
 		'stable tag'        => 'stable_tag',
 		'license'           => 'license',
 		'license uri'       => 'license_uri',
-		// These few are aliased
 		'development link'  => 'development_link',
-		'development'       => 'development_link',
-		'github'            => 'development_link',
 	);
 
 	/**
