@@ -444,6 +444,28 @@ class WPORG_Themes_Upload {
 			}
 		}
 
+		// Default Theme handling.
+		if (
+			// Reserved slugs include twenty* and other terms
+			$this->has_reserved_slug() &&
+			// ...so limit to twenty* only
+			str_starts_with( $this->theme_slug, 'twenty' ) &&
+			// The current user is a Core Committer. [ 'user_login' => 'Trac Title', ... ]
+			! empty( $GLOBALS['committers'][ $this->author->user_login ] ) &&
+			(
+				// New theme submission
+				! $this->theme_post
+				||
+				// OR an Update and the theme is owned by WordPress.org.
+				'wordpressdotorg' === get_user_by( 'id', $this->theme_post->post_author )->user_login
+			)
+		) {
+			// Set the author to WordPress.org
+			$this->author = get_user_by( 'login', 'wordpressdotorg' );
+
+			// WordPress.org is allowed to bypass Theme Check, see further down.
+		}
+
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
 			$style_errors->add(
@@ -558,29 +580,15 @@ class WPORG_Themes_Upload {
 			! empty( $this->author ) &&
 			$this->theme_post->post_author != $this->author->ID
 		) {
-
-			$is_allowed_to_upload_for_theme = false;
-			if (
-				// The theme is owned by WordPress.org.
-				'wordpressdotorg' === get_user_by( 'id', $this->theme_post->post_author )->user_nicename &&
-				// The current user is a Core Committer. [ 'user_login' => 'Trac Title', ... ]
-				! empty( $GLOBALS['committers'][ $this->author->user_login ] )
-			) {
-				// Allow core committers to update default themes (as authored by @wordpressdotorg)
-				$is_allowed_to_upload_for_theme = true;
-			}
-
-			if ( ! $is_allowed_to_upload_for_theme ) {
-				$style_errors->add(
-					'cannot_upload_theme',
-					sprintf(
-						/* translators: 1: theme slug, 2: style.css */
-						__( 'There is already a theme called %1$s by a different author. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
-						'<code>' . $this->theme_slug . '</code>',
-						'<code>style.css</code>'
-					) . $are_you_in_the_right_place
-				);
-			}
+			$style_errors->add(
+				'cannot_upload_theme',
+				sprintf(
+					/* translators: 1: theme slug, 2: style.css */
+					__( 'There is already a theme called %1$s by a different author. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
+					'<code>' . $this->theme_slug . '</code>',
+					'<code>style.css</code>'
+				) . $are_you_in_the_right_place
+			);
 		}
 
 		// Check if the ThemeURI is already in use by another theme by another author.
@@ -651,8 +659,10 @@ class WPORG_Themes_Upload {
 			return $style_errors;
 		}
 
-		// Don't block special themes based on Theme Check.
+		// Don't block special themes or default themes based on Theme Check.
 		if ( has_category( 'special-case-theme', $this->theme_post ) ) {
+			$args['block_on_themecheck'] = false;
+		} elseif ( 'wordpressdotorg' === get_user_by( 'id', $this->theme_post->post_author )->user_login ) {
 			$args['block_on_themecheck'] = false;
 		}
 
@@ -989,20 +999,6 @@ class WPORG_Themes_Upload {
 			return false;
 		}
 
-		// Only committers uploading a default theme *update* are left to be checked for.
-		// New default themes MUST be uploaded by `wordpressdotorg` and will fail this check.
-		if (
-			// Updates only.
-			$this->theme_post &&
-			// The current user is a Core Committer. [ 'user_login' => 'Trac Title', ... ]
-			! empty( $GLOBALS['committers'][ $this->author->user_login ] ) &&
-			// The theme is owned by WordPress.org.
-			'wordpressdotorg' === get_user_by( 'id', $this->theme_post->post_author )->user_login
-		) {
-			// Slug is reserved, but an update is being uploaded by a core committer.
-			return false;
-		}
-
 		// Slug is reserved, user is not authorized.
 		return true;
 	}
@@ -1198,6 +1194,14 @@ TICKET;
 			$this->trac = new Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
 		}
 
+		/*
+		 * Trac reporter is always the authenticated user, unless it's not-auth'd in which case it's the Theme Author.
+		 *
+		 * This allows for Committers to upload Default themes under 'WordPress.org' but it still be to noted on Trac who uploaded it.
+		 * This also allows for SVN imports where the current user is not set.
+		 */
+		$trac_ticket_reporter = wp_get_current_user()->user_login ?? $this->author->user_login;
+
 		// If there's a previous version and the most current version's status is `new`, we update.
 		if (
 			! empty( $this->theme_post->max_version ) &&
@@ -1214,7 +1218,7 @@ TICKET;
 				$ticket_id = $this->trac->ticket_create( $this->trac_ticket->summary, $this->trac_ticket->description, array(
 					'type'      => 'theme',
 					'keywords'  => implode( ' ', $this->trac_ticket->keywords ),
-					'reporter'  => $this->author->user_login,
+					'reporter'  => $trac_ticket_reporter,
 					'cc'        => $this->author->user_email,
 					'priority'  => $this->trac_ticket->priority,
 					'owner'     => '',
@@ -1226,7 +1230,7 @@ TICKET;
 			$ticket_id = $this->trac->ticket_create( $this->trac_ticket->summary, $this->trac_ticket->description, array(
 				'type'      => 'theme',
 				'keywords'  => implode( ' ', $this->trac_ticket->keywords ),
-				'reporter'  => $this->author->user_login,
+				'reporter'  => $trac_ticket_reporter,
 				'cc'        => $this->author->user_email,
 				'priority'  => $this->trac_ticket->priority,
 				'owner'     => '',
@@ -1533,18 +1537,15 @@ The WordPress Themes Team', 'wporg-themes' ),
 			);
 		}
 
-		$emails = [
+		// Email the Theme Author(s). The uploader & theme author may differ in special cases (default themes).
+		$emails = array_filter( array_unique( [
+			// The theme author
 			$this->author->user_email,
-		];
-
-		// If the uploader and the author are different, email them both.
-		// This only happens under special circumstances.
-		if (
-			! empty( $this->theme_post ) &&
-			$this->theme_post->post_author != $this->author->ID
-		) {
-			$emails[] = get_user_by( 'id', $this->theme_post->post_author )->user_email;
-		}
+			// The theme Author (usually the same)
+			get_user_by( 'id', $this->theme_post->post_author )->user_email ?? false,
+			// The current user (also, usually the same)
+			wp_get_current_user()->user_email
+		] ) );
 
 		wp_mail( $emails, $email_subject, $email_content, 'From: "WordPress Theme Directory" <themes@wordpress.org>' );
 	}
