@@ -662,7 +662,7 @@ class WPORG_Themes_Upload {
 		// Don't block special themes or default themes based on Theme Check.
 		if ( has_category( 'special-case-theme', $this->theme_post ) ) {
 			$args['block_on_themecheck'] = false;
-		} elseif ( 'wordpressdotorg' === get_user_by( 'id', $this->theme_post->post_author )->user_login ) {
+		} elseif ( 'wordpressdotorg' === $this->author->user_login ) {
 			$args['block_on_themecheck'] = false;
 		}
 
