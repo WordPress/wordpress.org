@@ -80,7 +80,7 @@ class GP_Translation_Helpers {
 		add_filter(
 			'gp_tmpl_load_locations',
 			function( $locations, $template, $args, $template_path ) {
-				if ( 'translation-row-editor-meta-status' === $template || 'locale-projects' === $template ) {
+				if ( 'translation-row-editor-meta-status' === $template ) {
 					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/gp-templates-overrides/' );
 				} else {
 					$locations[] = dirname( dirname( __FILE__ ) ) . '/templates/';
@@ -412,6 +412,7 @@ class GP_Translation_Helpers {
 
 		$helper_discussion    = new Helper_Translation_Discussion();
 		$locale_slug          = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
+		$translation_status   = $helper_discussion->sanitize_translation_status( sanitize_text_field( $_POST['data']['translation_status'] ) );
 		$translation_id_array = ! empty( $_POST['data']['translation_id'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] ) : null;
 		$original_id_array    = ! empty( $_POST['data']['original_id'] ) ? array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] ) : null;
 		$comment_reason       = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
@@ -442,13 +443,13 @@ class GP_Translation_Helpers {
 		$first_translation_id = array_shift( $translation_id_array );
 
 		// Post comment on discussion page for the first string
-		$first_comment_id = $this->insert_comment( $comment, $first_original_id, $comment_reason, $first_translation_id, $locale_slug, $_SERVER );
+		$first_comment_id = $this->insert_comment( $comment, $first_original_id, $comment_reason, $first_translation_id, $locale_slug, $_SERVER, $translation_status );
 
 		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
 			$comment = get_comment_link( $first_comment_id );
 			foreach ( $original_id_array as $index => $single_original_id ) {
-				$comment_id = $this->insert_comment( $comment, $single_original_id, $comment_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
+				$comment_id = $this->insert_comment( $comment, $single_original_id, $comment_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER, $translation_status );
 				$comment    = get_comment( $comment_id );
 				GP_Notifications::add_related_comment( $comment );
 			}
@@ -506,7 +507,7 @@ class GP_Translation_Helpers {
 	 * @return false|int
 	 * @since 0.0.2
 	 */
-	private function insert_comment( $comment, $original_id, $reason, $translation_id, $locale_slug, $server ) {
+	private function insert_comment( $comment, $original_id, $reason, $translation_id, $locale_slug, $server, $translation_status ) {
 		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original_id );
 		$user    = wp_get_current_user();
 		return wp_insert_comment(
@@ -520,9 +521,10 @@ class GP_Translation_Helpers {
 				'comment_agent'        => sanitize_text_field( $server['HTTP_USER_AGENT'] ),
 				'user_id'              => $user->ID,
 				'comment_meta'         => array(
-					'reject_reason'  => $reason,
-					'translation_id' => $translation_id,
-					'locale'         => $locale_slug,
+					'reject_reason'      => $reason,
+					'translation_id'     => $translation_id,
+					'locale'             => $locale_slug,
+					'translation_status' => $translation_status,
 				),
 			)
 		);

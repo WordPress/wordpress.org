@@ -118,7 +118,7 @@ class GP_Notifications {
 		if ( false === $translator ) {
 			$translator = get_user_by( 'id', $translation->user_id_last_modified );
 		}
-		if ( false === $translator ) {
+		if ( $translator ) {
 			self::send_emails( $comment, $comment_meta, array( $translator->user_email ) );
 		}
 	}

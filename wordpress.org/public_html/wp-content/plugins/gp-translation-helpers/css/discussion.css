@@ -228,6 +228,12 @@ div#TB_ajaxWindowTitle {
 	height: 110px;
 	font-size: 1.1em;
 }
+.feedback-comment .note {
+	font-size: 0.8rem;
+	font-weight: normal;
+	display: inline-block;
+	margin-bottom: 1rem;
+}
 .status-actions details {
 	margin-bottom: 5px;
 }
@@ -263,4 +269,47 @@ a.comment-reply-link {
 }
 .bulk-comment-item{
 	font-size: .8em;
+}
+.hide-textarea {
+	border: #dfe3e3 thin solid;
+	border-radius: 5px;
+	width: fit-content;
+}
+.hide-textarea summary {
+	padding: 5px 10px;
+	background-color: var(--gp-color-btn-primary-bg);
+	border-color: var(--gp-color-btn-primary-border);
+	color: var(--gp-color-btn-primary-text);
+	border-radius: 2px;
+	width: max-content;
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 500;
+	cursor: pointer;
+}
+.hide-textarea summary:hover {
+	background-color: var(--gp-color-btn-primary-hover-bg);
+	border-color: var(--gp-color-btn-primary-hover-border);
+	color: var(--gp-color-btn-primary-hover-text);
+	box-shadow: 0 0 0 1px var(--gp-color-canvas-default),0 0 0 2px var(--gp-color-btn-primary-hover-border);
+}
+h5#reply-title {
+	padding-left: 13px;
+}
+ul#glossary-item-list {
+    list-style-type: none;
+	border: #bcc3c3 thin solid;
+    padding: 10px;
+    border-radius: 3px;
+    background: #f2f2f2;
+}
+ul#glossary-item-list h6 {
+	margin-top: 3px;
+    margin-bottom: 8px
+}
+ul#glossary-item-list li label {
+    margin-left: 5px;
+}
+#glossary-item-list li label input[type="checkbox"].glossary-word-item {
+    margin-right: 5px;
 }

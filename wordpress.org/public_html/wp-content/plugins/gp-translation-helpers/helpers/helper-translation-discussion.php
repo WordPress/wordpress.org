@@ -166,6 +166,18 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		register_meta(
 			'comment',
+			'translation_status',
+			array(
+				'description'       => 'Translation status as at when the comment was made',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => array( $this, 'sanitize_comment_translation_status' ),
+				'rewrite'           => false,
+			)
+		);
+
+		register_meta(
+			'comment',
 			'comment_topic',
 			array(
 				'description'       => 'Reason for the comment',
@@ -549,8 +561,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
-		$post = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
-
+		$post   = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
 			array(
@@ -562,7 +573,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'original_id'          => $this->data['original_id'],
 				'project'              => $this->data['project'],
 				'translation_set_slug' => $this->data['translation_set_slug'],
-
 			),
 			$this->assets_dir . 'templates'
 		);
@@ -665,6 +675,26 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			throw new Exception( 'Invalid translation ID' );
 		}
 		return $translation_id;
+	}
+
+	/**
+	 * Sets the translation_status meta_key as "unknown" if is not in the accepted values.
+	 *
+	 * Used as sanitize callback in the register_meta for the "comment" object type,
+	 * 'translation_status' meta_key
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string $translation_status The meta_value for the meta_key "translation_status".
+	 *
+	 * @return string
+	 */
+	public function sanitize_translation_status( string $translation_status ): string {
+		if ( ! in_array( $translation_status, array( 'approved', 'rejected', 'waiting', 'current', 'fuzzy', 'changesrequested' ), true ) ) {
+			$translation_status = 'unknown';
+		}
+		return $translation_status;
+
 	}
 
 	/**
@@ -863,6 +893,8 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 	$comment_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
 
+	$_translation_status = get_comment_meta( $comment->comment_ID, 'translation_status', true );
+
 	$classes = array( 'comment-locale-' . $comment_locale );
 	if ( ! empty( $comment_reason ) ) {
 		$classes[] = 'rejection-feedback';
@@ -994,7 +1026,11 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 			if ( ! $is_linking_comment ) :
 				if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
-					gth_print_translation( $comment_translation_id, $args, 'Translation: ' );
+					$translation_status = '';
+					if ( $_translation_status ) {
+						$translation_status = ' (' . $_translation_status . ')';
+					}
+					gth_print_translation( $comment_translation_id, $args, 'Translation' . $translation_status . ': ' );
 				}
 
 				?>
