@@ -225,6 +225,17 @@ body.page {
 	width: 100%;
 }
 
+.site-content .search-username {
+	grid-column: 1 / -1;
+	margin-bottom: 1rem;
+	width: 100%;
+	font-style: italic;
+
+	p {
+		margin-top: 0;
+	}
+}
+
 #wporg-photo-upload {
 	border: none;
 	margin: 0;

@@ -29,6 +29,8 @@ get_header();
 			</header><!-- .page-header -->
 
 		<?php
+			get_template_part( 'template-parts/content-partial-search', 'user' );
+
 			while ( have_posts() ) :
 				the_post();
 
@@ -48,6 +50,8 @@ get_header();
 			</header>
 
 			<p><?php _e( 'Sorry, but nothing matched your search terms.', 'wporg-photos' ); ?></p>
+
+			<?php get_template_part( 'template-parts/content-partial-search', 'user' ); ?>
 
 			<p><?php _e( 'Please try again with some different keywords.', 'wporg-photos' ); ?></p>
 
