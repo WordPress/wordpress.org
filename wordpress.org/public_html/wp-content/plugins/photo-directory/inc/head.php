@@ -15,6 +15,7 @@ class Head {
 	public static function init() {
 		add_filter( 'document_title_separator', [ __CLASS__, 'document_title_separator' ] );
 		add_filter( 'wp_resource_hints',        [ __CLASS__, 'wp_resource_hints' ], 10, 2 );
+		add_action( 'wp_head',                  [ __CLASS__, 'json_ld_schema' ], 1 );
 	}
 
 	/**
@@ -66,6 +67,39 @@ class Head {
 		}
 
 		return $uris;
+	}
+
+	/**
+	 * Outputs structured data.
+	 */
+	public static function json_ld_schema() {
+		$schema = false;
+
+		// Schema for individual photo pages.
+		if ( is_singular( Registrations::get_post_type() ) && 'publish' === get_post_status( get_queried_object_id() ) ) {
+			$contributor_name = get_the_author_meta( 'display_name', get_queried_object()->post_author );
+			$schema = [
+				"@context"           => 'https://schema.org',
+				"@type"              => 'ImageObject',
+				'contentUrl'         => wp_get_attachment_image_src( get_post_thumbnail_id(), 'full' )[0] ?? '',
+				'license'            => 'https://creativecommons.org/share-your-work/public-domain/cc0/',
+				'acquireLicensePage' => "https://wordpress.org/photos/license/",
+				'creditText'         => $contributor_name,
+				'creator' => [
+					'@type'          => 'Person',
+					'name'           => $contributor_name,
+				],
+				'copyrightNotice'    => $contributor_name,
+			];
+		}
+
+		// Print the schema.
+		if ( $schema ) {
+			echo PHP_EOL, '<script type="application/ld+json">', PHP_EOL;
+			// Output URLs without escaping the slashes, and print it human readable.
+			echo wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+			echo PHP_EOL, '</script>', PHP_EOL;
+		}
 	}
 
 }
