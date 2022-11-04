@@ -579,6 +579,11 @@ class Language_Pack extends WP_CLI_Command {
 			$wpdb->insert_id
 		) );
 
+		// Clear the API update-check translation caches. See api.wordpress.org/translations/lib.php
+		wp_cache_add_global_groups( [ 'update-check-translations', 'translations-query' ] );
+		wp_cache_delete( "{$type}:{$language}:{$domain}", 'update-check-translations' );
+		wp_cache_delete( "{$type}:{$domain}:{$version}", 'translations-query' );
+
 		return true;
 	}
 

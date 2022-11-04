@@ -21,9 +21,12 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		return array();
 	}
 
+	// See wporg-gp-customizations/inc/cli/class-language-pack.php for where this is flushed from.
 	$cache_group = 'translations-query';
-	$cache_time  = 900; // 15 minutes
+	$cache_time  = 10800; // 3 hours, 6 hours if no results found.
 	$cache_key   = "$type:$domain:$version";
+
+	wp_cache_add_global_groups( $cache_group );
 
 	$translations = wp_cache_get( $cache_key, $cache_group );
 	if ( '_empty_' === $translations ) {
@@ -136,8 +139,11 @@ function find_latest_translations( $args ) {
 	global $wpdb;
 	extract( $args, EXTR_SKIP );
 
+	// See wporg-gp-customizations/inc/cli/class-language-pack.php for where this is flushed from.
 	$translations_cache_group = 'update-check-translations';
-	$translations_cache_time  = 900; // 15 minutes
+	$translations_cache_time  = 10800; // 3 hours, 6 hours if no results found.
+
+	wp_cache_add_global_groups( $translations_cache_group );
 
 	$return = array();
 	foreach ( $languages as $language ) {
