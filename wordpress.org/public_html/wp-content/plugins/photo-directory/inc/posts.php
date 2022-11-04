@@ -279,16 +279,30 @@ class Posts {
 	/**
 	 * Returns the next post in the queue that the current user can moderate.
 	 *
+	 * By default it chooses a random photo in the queue that wasn't submitted
+	 * by the current user.
+	 *
+	 * @param string $orderby The field to order posts by when determining the
+	 *                        next post in queue. Default 'rand'.
+	 * @param string $order   The sort order used when determining the next post
+	 *                        in queue. Either 'ASC' or 'DESC'. Default 'ASC'.
 	 * @return WP_Post|false The next post, or false if there are no other posts
 	 *                       available for the user to moderate.
 	 */
-	public static function get_next_post_in_queue() {
+	public static function get_next_post_in_queue( $orderby = 'rand', $order = 'ASC' ) {
 		$next = false;
+
+		if ( 'rand' === $orderby ) {
+			$order = '';
+		}
+		elseif ( ! in_array( $order, [ 'ASC', 'DESC' ] ) ) {
+			$order = 'ASC';
+		}
 
 		$posts = get_posts( [
 			'author__not_in' => [ get_current_user_id() ],
-			'order'          => 'ASC',
-			'orderby'        => 'date',
+			'order'          => $order,
+			'orderby'        => $orderby,
 			'posts_per_page' => 1,
 			'post_status'    => 'pending',
 			'post_type'      => Registrations::get_post_type(),
