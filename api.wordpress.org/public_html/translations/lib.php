@@ -1,17 +1,11 @@
 <?php
 
-function version_compare_version_key_desc( $a, $b ) {
-    return version_compare( $b['version'], $a['version'] );
-}
-
-function version_compare_version_prop_desc( $a, $b ) {
-	return version_compare( $b->version, $a->version );
-}
-
+// Used by api.wordpress.org/translations/core/1.0/
 function find_all_translations_for_core( $version = null ) {
 	return find_all_translations_for_type_and_domain( 'core', 'default', $version );
 }
 
+// Used by api.wordpress.org/translations/plugins/1.0/, api.wordpress.org/translations/themes/1.0/, and wordpress.org/plugins/wp-json/plugins/v1/plugin/$slug
 function find_all_translations_for_type_and_domain( $type, $domain = 'default', $version = null ) {
 	global $wpdb;
 
@@ -28,8 +22,8 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	}
 
 	$cache_group = 'translations-query';
-	$cache_time = 900; // 15 min
-	$cache_key = "$type:$domain:$version";
+	$cache_time  = 900; // 15 minutes
+	$cache_key   = "$type:$domain:$version";
 
 	$translations = wp_cache_get( $cache_key, $cache_group );
 	if ( '_empty_' === $translations ) {
@@ -40,11 +34,13 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 			$type, $domain ) );
 
 		if ( ! $translations ) {
-			wp_cache_add( $cache_key, '_empty_', $cache_group, $cache_time );
+			wp_cache_add( $cache_key, '_empty_', $cache_group, $cache_time * 2 );
 			return array();
 		}
 
-		usort( $translations, 'version_compare_version_prop_desc' );
+		usort( $translations, function( $a, $b ) {
+			return version_compare( $b->version, $a->version );
+		} );
 
 		$_translations = array();
 		foreach ( $translations as $translation ) {
@@ -134,12 +130,14 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	return $translations;
 }
 
+// Used by check_for_translations_paired_with_update(), and check_for_translations_of_installed_items()
+// Used by api.wordpress.org/plugins/update-check/, api.wordpress.org/themes/update-check, and api.wordpress.org/core/version-check/.
 function find_latest_translations( $args ) {
 	global $wpdb;
 	extract( $args, EXTR_SKIP );
 
 	$translations_cache_group = 'update-check-translations';
-	$translations_cache_time = 900; // 15 minutes
+	$translations_cache_time  = 900; // 15 minutes
 
 	$return = array();
 	foreach ( $languages as $language ) {
@@ -156,11 +154,6 @@ function find_latest_translations( $args ) {
 		$cache_key = "{$type}:{$language}:{$domain}";
 
 		$results = wp_cache_get( $cache_key, $translations_cache_group );
-
-		// No language packs were found
-		if ( '_empty_' == $results )
-			continue;
-
 		if ( ! $results ) {
 			$query = $wpdb->prepare(
 				"SELECT `version`, `updated`
@@ -175,13 +168,22 @@ function find_latest_translations( $args ) {
 			$results = $wpdb->get_results( $query, ARRAY_A );
 
 			if ( $results ) {
-				usort( $results, 'version_compare_version_key_desc' );
+				usort( $results, function( $a, $b ) {
+					return version_compare( $b['version'], $a['version'] );
+				} );
 			}
 
-			wp_cache_set( $cache_key, ( $results ? $results : '_empty_' ), $translations_cache_group, $translations_cache_time );
+			if ( $results ) {
+				wp_cache_set( $cache_key, $results, $translations_cache_group, $translations_cache_time );
+			} else {
+				$results = '_empty_';
+				wp_cache_set( $cache_key, $results, $translations_cache_group, $translations_cache_time * 2 );
+			}
+		}
 
-			if ( ! $results )
-				continue;
+		// No language packs were found
+		if ( '_empty_' == $results ) {
+			continue;
 		}
 
 		if ( $version ) {
@@ -221,9 +223,10 @@ function find_latest_translations( $args ) {
 	return $return;
 }
 
+// Used by api.wordpress.org/plugins/update-check/ (disabled)
 function check_for_translations_paired_with_update( $args ) {
 	extract( $args );
-	$translations_for_update = array();
+	$translations_for_update       = array();
 	$translations_found_for_update = find_latest_translations( array( 'type' => $type, 'domain' => $domain, 'version' => $version, 'languages' => $languages ) );
 
 	foreach ( $translations_found_for_update as $language_pack ) {
@@ -237,17 +240,21 @@ function check_for_translations_paired_with_update( $args ) {
 			// Example: version 3.7 is ready to go, but someone releases an update for 3.6.1.
 			// The 3.6.1 strings are "newer" than the 3.7 strings, but the 3.7 language pack is
 			// the new minimum, so it needs to be served.
-			if ( $wporg_updated <= $site_updated && version_compare( $current_version, $language_pack['version'], '>=' ) )
+			if ( $wporg_updated <= $site_updated && version_compare( $current_version, $language_pack['version'], '>=' ) ) {
 				$update = false;
+			}
 		}
-		if ( ! $update )
+
+		if ( ! $update ) {
 			continue;
+		}
 
 		$translations_for_update[] = $language_pack;
 	}
 	return $translations_for_update;
 }
 
+// Used by api.wordpress.org/plugins/update-check/, api.wordpress.org/themes/update-check, and api.wordpress.org/core/version-check/.
 function check_for_translations_of_installed_items( $args ) {
 	extract( $args );
 	$translations_for_current = find_latest_translations( array( 'type' => $type, 'domain' => $domain, 'version' => $version, 'languages' => $languages ) );
@@ -259,11 +266,14 @@ function check_for_translations_of_installed_items( $args ) {
 			$wporg_updated = strtotime( $language_pack['updated'] );
 			$site_updated  = strtotime( $language_data[ $language_pack['language'] ]['PO-Revision-Date'] );
 
-			if ( $wporg_updated <= $site_updated )
+			if ( $wporg_updated <= $site_updated ) {
 				$update = false;
+			}
 		}
-		if ( ! $update )
+
+		if ( ! $update ) {
 			continue;
+		}
 
 		$translations[] = $language_pack;
 	}
