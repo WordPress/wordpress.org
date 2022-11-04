@@ -276,6 +276,31 @@ class Posts {
 		return $posts;
 	}
 
+	/**
+	 * Returns the next post in the queue that the current user can moderate.
+	 *
+	 * @return WP_Post|false The next post, or false if there are no other posts
+	 *                       available for the user to moderate.
+	 */
+	public static function get_next_post_in_queue() {
+		$next = false;
+
+		$posts = get_posts( [
+			'author__not_in' => [ get_current_user_id() ],
+			'order'          => 'ASC',
+			'orderby'        => 'date',
+			'posts_per_page' => 1,
+			'post_status'    => 'pending',
+			'post_type'      => Registrations::get_post_type(),
+		] );
+
+		if ( $posts ) {
+			$next = $posts[0];
+		}
+
+		return $next;
+	}
+
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Posts', 'init' ] );
