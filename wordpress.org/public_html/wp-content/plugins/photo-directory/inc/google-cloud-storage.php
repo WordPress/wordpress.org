@@ -180,7 +180,7 @@ class GoogleCloudStorage {
 		 * usage to actually function, but this determines if it should be
 		 * enabled in the first place.
 		 *
-		 * @param $enable_google_cloud_storage Enable Google Cloud Storage? Default false.
+		 * @param bool $enable_google_cloud_storage Enable Google Cloud Storage? Default false.
 		 */
 		return (bool) apply_filters( 'wporg_photos_enable_google_cloud_storage', false );
 	}
@@ -227,7 +227,7 @@ class GoogleCloudStorage {
 	protected static function init_gs_client( $http_handler = null ) {
 		if ( ! self::is_google_cloud_configured() ) {
 			$required_filters = [
-				'wporg_photos_google_credentials_json_path',
+				'wporg_photos_google_storage_credentials_json_path',
 				'wporg_photos_google_cloud_project_id',
 				'wporg_photos_google_cloud_bucket',
 			];
