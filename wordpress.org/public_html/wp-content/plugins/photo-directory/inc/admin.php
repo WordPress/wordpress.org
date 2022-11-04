@@ -53,6 +53,10 @@ class Admin {
 
 		// Modify admin menu links for photo posts.
 		add_action( 'admin_menu',                              [ __CLASS__, 'modify_admin_menu_links' ] );
+
+		// Navigate to next post after moderation.
+		add_action( 'edit_form_top',                           [ __CLASS__, 'show_moderation_message' ] );
+		add_filter( 'redirect_post_location',                  [ __CLASS__, 'redirect_to_next_post_after_moderation' ], 5, 2 );
 	}
 
 	/**
@@ -951,6 +955,101 @@ class Admin {
 			'',
 			1
 		);
+	}
+
+	/**
+	 * Outputs an admin notice when a photo post has been moderated and the
+	 * moderator has been redirected to the next photo in the queue.
+	 *
+	 * @param WP_Post $post Post object.
+	 */
+	public static function show_moderation_message( $post ) {
+		if (
+			empty( $_GET['photomoderated'] )
+		||
+			empty( $_GET['photoaction'] )
+		||
+			Registrations::get_post_type() !== get_post_type( $post )
+		) {
+			return;
+		}
+
+		$moderated_post = get_post( (int) $_GET['photomoderated'] );
+
+		if ( ! $moderated_post ) {
+			return;
+		}
+
+		$message = '';
+		$edit_link = get_edit_post_link( $moderated_post );
+
+		switch ( $_GET['photoaction'] ) {
+			case 'approval':
+				$message = sprintf(
+					/* translators: 1: Link markup to view photo post, 2: Link markup to edit photo post. */
+					__( 'Photo post approved. %1$s &mdash; %2$s', 'wporg-photos' ),
+					sprintf(
+						' <a href="%s">%s</a>',
+						esc_url( get_post_permalink( $moderated_post ) ),
+						__( 'View photo post', 'wporg-photos' )
+					),
+					sprintf(
+						' <a href="%s">%s</a>',
+						esc_url( $edit_link ),
+						__( 'Edit photo post', 'wporg-photos' )
+					)
+				);
+				break;
+			case 'rejection':
+				$message = sprintf(
+					/* translators: %s: Link markup to view photo post. */
+					__( 'Photo post rejected. %s', 'wporg-photos' ),
+					sprintf(
+						' <a href="%s">%s</a>',
+						esc_url( $edit_link ),
+						__( 'Edit photo post', 'wporg-photos' )
+					)
+				);
+				break;
+			default:
+				$message = '';
+		}
+
+		if ( $message ) {
+			printf(
+				'<div id="message" class="updated notice notice-success is-dismissible"><p>%s</p></div>',
+				$message
+			);
+		}
+	}
+
+	/**
+	 * Overrides the redirect after moderating a post to load the next post in
+	 * the queue.
+	 *
+	 * Only redirects if a photo post is initially published or rejected.
+	 *
+	 * @param string $location The destination URL.
+	 * @param int    $post_id  The post ID.
+	 * @return string
+	 */
+	public static function redirect_to_next_post_after_moderation( $location, $post_id ) {
+		$is_rejection = isset( $_POST[ Rejection::$action ] );
+
+		if (
+			( isset( $_POST['publish'] ) || $is_rejection )
+		&&
+			Registrations::get_post_type() === get_post_type( $post_id )
+		) {
+			$action = $is_rejection ? 'rejection' : 'approval';
+			$next_post = Posts::get_next_post_in_queue();
+			if ( $next_post ) {
+				$location = add_query_arg( 'photomoderated', $post_id, get_edit_post_link( $next_post, 'url' ) );
+				$location = add_query_arg( 'photoaction', $action, $location );
+			}
+		}
+
+		return $location;
 	}
 
 }
