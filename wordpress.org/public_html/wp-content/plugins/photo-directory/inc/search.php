@@ -31,6 +31,28 @@ class Search {
 	}
 
 	/**
+	 * Determines if the search query matches the username of a contributor.
+	 *
+	 * The search must be solely for the user's nicename and a found user must
+	 * also have a published photo.
+	 *
+	 * @param string $search The search string.
+	 * @return WP_User|false The user if the search matches a contributor, else false.
+	 */
+	public static function query_matches_username( $search ) {
+		$matches = false;
+
+		if ( preg_match( '/^[a-zA-Z0-9_]{3,}$/', $search ) ) {
+			$user = get_user_by( 'slug', $search );
+			if ( $user && User::count_published_photos( $user->ID ) ) {
+				$matches = $user;
+			}
+		}
+
+		return $matches;
+	}
+
+	/**
 	 * Changes default search to search only photos.
 	 *
 	 * @param WP_Query $query The WP_Query object.
