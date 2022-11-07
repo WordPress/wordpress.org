@@ -303,6 +303,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			} else if ( $this->is_sso_host() ) {
 				// If on the SSO host
 				if ( ! preg_match( '!/wp-login\.php$!', $this->script ) ) {
+
 					// ... but not on its login screen.
 					self::$matched_route        = false;
 					self::$matched_route_regex  = false;

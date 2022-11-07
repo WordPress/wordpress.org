@@ -47,6 +47,11 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
 				$this->host   = $_SERVER['HTTP_HOST'];
 				$this->script = $_SERVER['SCRIPT_NAME'];
+
+				// Remove port numbers from the hostname
+				if ( strstr( $this->host, ':' ) ) {
+					$this->host = substr( $this->host, 0, strpos( $this->host, ':' ) );
+				}
 			}
 		}
 
@@ -173,12 +178,16 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * @return boolean True is ok, false if not
 		 */
 		protected function _is_valid_targeted_domain( $host ) {
-			if ( empty( $host ) || ! is_string( $host ) || ! strstr( $host, '.' ) ) {
+			if ( empty( $host ) || ! is_string( $host ) ) {
 				return false;
 			}
 
-			if ( strstr( $host, '/' ) ) {
+			if ( strstr( $host, '/' ) || strstr( $host, ':' ) ) {
 				$host = parse_url( $host, PHP_URL_HOST );
+			}
+
+			if ( $host === $this->sso_host ) {
+				return true;
 			}
 
 			if ( in_array( $host, self::VALID_HOSTS, true ) ) {
