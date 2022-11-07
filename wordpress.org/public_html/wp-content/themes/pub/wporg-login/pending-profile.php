@@ -85,6 +85,13 @@ get_header();
 				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
 			);
 		}
+
+		if ( 'local' === wp_get_environment_type() && ! empty( $_COOKIE['emailed_url'] ) ) {
+			printf(
+				'<br><br><strong>Local Development</strong>: The URL emailed to you is: <a href="%1$s">%1$s</a>.',
+				wp_unslash( $_COOKIE['emailed_url'] )
+			);
+		}
 		?></p>
 	</div>
 

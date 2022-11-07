@@ -160,22 +160,31 @@ function wporg_login_send_confirmation_email( $user ) {
 		return false;
 	}
 
+	$password_set_url = home_url( '/register/create/' . urlencode( $user_login ) . '/' . urlencode( $activation_key ) . '/' );
+
 	$body  = sprintf( __( 'Hi %s,', 'wporg' ), $user_login ) . "\n\n";
 	$body .= __( 'Welcome to WordPress.org! Your new account has been setup.', 'wporg' ) . "\n";
 	$body .= "\n";
 	$body .= sprintf( __( 'Your username is: %s', 'wporg' ), $user_login ) . "\n";
 	$body .= __( 'You can create a password at the following URL:', 'wporg' ) . "\n";
-	$body .= home_url( '/register/create/' . urlencode( $user_login ) . '/' . urlencode( $activation_key ) . '/' );
+	$body .= $password_set_url;
 	$body .= "\n\n";
 	$body .= __( '-- The WordPress.org Team', 'wporg' );
+
+	$headers = array(
+		'From: "WordPress.org" <noreply@wordpress.org>'
+	);
+
+	if ( 'local' === wp_get_environment_type() ) {
+		$headers = array();
+		setcookie( 'emailed_url', $password_set_url );
+	}
 
 	return wp_mail(
 		$user_email,
 		__( '[WordPress.org] Your new account', 'wporg' ),
 		$body,
-		array(
-			'From: "WordPress.org" <noreply@wordpress.org>'
-		)
+		$headers
 	);
 }
 

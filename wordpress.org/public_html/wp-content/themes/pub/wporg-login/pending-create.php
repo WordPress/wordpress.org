@@ -125,7 +125,12 @@ if ( isset( $_POST['user_pass'] ) ) {
 		}
 	}
 
-	wp_safe_redirect( 'https://wordpress.org/support/' );
+	if ( 'local' === wp_get_environment_type() ) {
+		wp_safe_redirect( home_url() );
+	} else {
+		wp_safe_redirect( 'https://wordpress.org/support/' );
+	}
+
 	die();
 }
 
