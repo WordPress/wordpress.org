@@ -302,6 +302,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			} else if ( $this->is_sso_host() ) {
 				// If on the SSO host
+
 				if ( ! preg_match( '!/wp-login\.php$!', $this->script ) ) {
 
 					// ... but not on its login screen.
@@ -325,6 +326,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						add_filter( 'is_valid_wporg_sso_path' , '__return_true' );
 
 						if ( preg_match( '!^/(\?.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
+
 							// If at host root (/)
 							if ( ! empty( $_GET['action'] ) ) {
 								// If there's an action, it's really meant for wp-login.php, redirect
@@ -460,7 +462,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		/**
 		 * Redirects the user back to where they came from (or w.org profile)
 		 */
-		protected function _redirect_to_source_or_profile() {
+		public function redirect_to_source_or_profile() {
 			$redirect = $this->_get_safer_redirect_to( false );
 
 			// On local environments, just throw a logged in message instead.
@@ -482,6 +484,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			} else {
 				$this->_safe_redirect( 'https://wordpress.org/' );
 			}
+		}
+
+		protected function _redirect_to_source_or_profile() {
+			return $this->redirect_to_source_or_profile();
 		}
 
 		/**
@@ -613,8 +619,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$token_cookie = wp_generate_auth_cookie( $user_id, time() + HOUR_IN_SECONDS, 'tos_token' );
 				$remember_me  = (int) $this->maybe_block_auth_cookies_context_provider()['remember_me'];
 
-				setcookie( self::LOGIN_TOS_COOKIE, $token_cookie, time() + HOUR_IN_SECONDS, '/', $this->sso_host, true, true );
-				setcookie( self::LOGIN_TOS_COOKIE . '_remember', $remember_me, time() + HOUR_IN_SECONDS, '/', $this->sso_host, true, true );
+				setcookie( self::LOGIN_TOS_COOKIE, $token_cookie, time() + HOUR_IN_SECONDS, '/', $this->get_cookie_host(), true, true );
+				setcookie( self::LOGIN_TOS_COOKIE . '_remember', $remember_me, time() + HOUR_IN_SECONDS, '/', $this->get_cookie_host(), true, true );
 
 				// Redirect them to the interstitial.
 				add_filter( 'login_redirect', [ $this, 'redirect_to_policy_update' ], 1000 );

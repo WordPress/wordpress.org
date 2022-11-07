@@ -20,7 +20,7 @@ if (
 }
 
 // Set user context for this request only, since the cookies aren't yet set.
-wp_set_current_user( $user );
+wp_set_current_user( $user->ID );
 
 // Record the TOS agreement.
 if (
@@ -32,7 +32,7 @@ if (
 	update_user_meta( $user->ID, $sso::TOS_USER_META_KEY, TOS_REVISION );
 	wp_set_auth_cookie( $user->ID, $login_remember_me );
 
-	$sso->redirect_all_login_or_signup_to_sso();
+	$sso->redirect_to_source_or_profile();
 	exit;
 }
 
