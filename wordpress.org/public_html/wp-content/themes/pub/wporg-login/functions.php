@@ -88,6 +88,18 @@ function wporg_login_register_scripts() {
 		return;
 	}
 
+	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), filemtime( __DIR__ . '/js/registration.js' ) );
+	wp_localize_script( 'wporg-registration', 'wporg_registration', array(
+		'rest_url' => esc_url_raw( rest_url( 'wporg/v1' ) )
+	) );
+
+	// Local environments do not need reCaptcha.
+	if ( 'local' === wp_get_environment_type() && ! defined( 'RECAPTCHA_V3_PUBKEY' ) ) {
+		wp_register_script( 'recaptcha-api', false ); // Empty script to satisfy wporg-registration requirements.
+		return;
+	}
+
+
 	wp_register_script( 'recaptcha-api', 'https://www.google.com/recaptcha/api.js', array(), '2' );
 	wp_add_inline_script(
 		'recaptcha-api',
@@ -108,11 +120,6 @@ function wporg_login_register_scripts() {
 			}
 		}'
 	);
-
-	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), filemtime( __DIR__ . '/js/registration.js' ) );
-	wp_localize_script( 'wporg-registration', 'wporg_registration', array(
-		'rest_url' => esc_url_raw( rest_url( 'wporg/v1' ) )
-	) );
 
 	// reCaptcha v3 is loaded on all login pages, not just the registration flow.
 	wp_enqueue_script( 'recaptcha-api-v3', 'https://www.google.com/recaptcha/api.js?onload=reCaptcha_v3_init&render=' . RECAPTCHA_V3_PUBKEY, array(), '3' );

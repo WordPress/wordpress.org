@@ -2,6 +2,15 @@
 
 function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low_scores = true ) {
 
+	// Allow local installs to bypass
+	if (
+		'local' === wp_get_environment_type() &&
+		! defined( 'RECAPTCHA_V3_PRIVKEY' ) &&
+		! defined( 'RECAPTCHA_INVIS_PRIVKEY' )
+	) {
+		return true;
+	}
+
 	// reCaptcha V3 Checks
 	if ( $check_v3_action ) {
 		if ( empty( $_POST['_reCaptcha_v3_token'] ) ) {
@@ -74,7 +83,9 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		'meta' => $meta + array(
 			'registration_ip'  => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
 		),
-		'scores' => array(),
+		'scores' => array(
+			'pending' => 1,
+		),
 		'cleared' => 0,
 	);
 
