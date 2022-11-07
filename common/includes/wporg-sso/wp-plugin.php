@@ -77,6 +77,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				add_action( 'wp_login', array( $this, 'record_last_logged_in' ), 10, 2 );
 
+				add_filter( 'salt', array( $this, 'salt' ), 10, 2 );
+
 				if ( ! $this->is_sso_host() ) {
 					add_filter( 'login_url', [ $this, 'add_locale' ], 21 );
 					add_filter( 'register_url', [ $this, 'add_locale' ], 21 );
@@ -578,10 +580,21 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		protected function _generate_remote_login_hash( $user, $valid_until, $remember_me = false ) {
 			// re-use the same frag that Auth cookies use to invalidate sessions.
 			$pass_frag = substr( $user->user_pass, 8, 4 );
-			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until );
+			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until, 'wporg_sso' );
 			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me, $key );
 
 			return $hash;
+		}
+
+		/**
+		 * Add a custom salt, defined in the config.
+		 */
+		public function salt( $salt, $scheme ) {
+			if ( 'wporg_sso' === $scheme && defined( 'WPORG_SSO_SALT' ) ) {
+				$salt = WPORG_SSO_SALT;
+			}
+
+			return $salt;
 		}
 
 		/**
