@@ -34,7 +34,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 */
 		public function __construct() {
 			// On local installations, the SSO host is always the current sites domain and scheme.
-			if ( 'local' === wp_get_environment_type() ) {
+			if ( function_exists( 'wp_get_environment_type' ) && 'local' === wp_get_environment_type() ) {
 				$this->sso_host     = parse_url( home_url(), PHP_URL_HOST );
 				$this->sso_host_url = untrailingslashit( home_url() ); // Respect scheme, domain, and port.
 
