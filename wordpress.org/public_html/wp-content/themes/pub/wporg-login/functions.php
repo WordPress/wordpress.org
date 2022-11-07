@@ -238,12 +238,17 @@ remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 remove_action( 'rest_api_init', 'wp_oembed_register_route' );
 
 // Don't perform any WP_Query queries on this site..
-add_filter( 'posts_request', '__return_empty_string' );
+if ( ! is_admin() ) {
+	add_filter( 'posts_pre_query', '__return_empty_array' );
+}
+
 // Don't attempt to do canonical lookups..
 remove_filter( 'template_redirect', 'redirect_canonical' );
+
 // There's no need to edit the site..
 remove_action( 'wp_head', 'wlwmanifest_link' );
 remove_action( 'wp_head', 'rsd_link' );
+
 // We don't need all the rest routes either..
 remove_action( 'rest_api_init', 'create_initial_rest_routes', 99 );
 
