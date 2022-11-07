@@ -34,8 +34,6 @@ add_action( 'rest_api_init', 'wporg_login_rest_routes' );
 function wporg_login_rest_username_exists( $request ) {
 	$login = trim( urldecode( $request['login'] ) );
 
-	$validate_signup = wpmu_validate_user_signup( $login, 'placeholder@placeholder.domain' );
-
 	// We're going to enforce that you can't have a user_login which matches another users user_nicename.. just because sanity.
 	if ( ($user = get_user_by( 'login', $login )) || ($user = get_user_by( 'slug', $login )) ) {
 		return [
@@ -57,14 +55,18 @@ function wporg_login_rest_username_exists( $request ) {
 		];
 	}
 
-	// Perform general validations.
-	$validate_signup_error = $validate_signup['errors']->get_error_message( 'user_name' );
+	// Perform general Multisite validations.
+	$validate_signup_error = false;
+	if ( function_exists( 'wpmu_validate_user_signup' ) ) {
+		$validate_signup = wpmu_validate_user_signup( $login, 'placeholder@placeholder.domain' );
+		$validate_signup_error = $validate_signup['errors']->get_error_message( 'user_name' );
+	}
 
 	if ( $validate_signup_error ) {
 		return [
 			'available' => false,
-			'error' => $validate_signup_error,
-			'avatar' => false,
+			'error'     => $validate_signup_error,
+			'avatar'    => false,
 		];
 	}
 
@@ -109,8 +111,13 @@ function wporg_login_rest_email_in_use( $request ) {
 		];
 	}
 
-	$validate_signup = wpmu_validate_user_signup( '', $email );
-	$validate_signup_error = $validate_signup['errors']->get_error_message( 'user_email' );
+	// Perform general Multisite validations.
+	$validate_signup_error = false;
+	if ( function_exists( 'wpmu_validate_user_signup' ) ) {
+		$validate_signup = wpmu_validate_user_signup( '', $email );
+		$validate_signup_error = $validate_signup['errors']->get_error_message( 'user_email' );
+	}
+
 	if ( $validate_signup_error ) {
 		return [
 			'available' => false,

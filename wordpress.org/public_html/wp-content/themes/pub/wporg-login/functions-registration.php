@@ -285,7 +285,10 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 		$password = wp_generate_password();
 	}
 
-	$user_id = wpmu_create_user(
+	// Use wpmu_create_user() on multisite, and wp_create_user() on single-sites (local testing).
+	$wp_create_user = function_exists( 'wpmu_create_user' ) ? 'wpmu_create_user' : 'wp_create_user';
+
+	$user_id = $wp_create_user(
 		wp_slash( $user_login ),
 		$password,
 		wp_slash( $user_email )
