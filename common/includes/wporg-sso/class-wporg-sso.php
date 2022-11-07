@@ -35,8 +35,13 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		public function __construct() {
 			// On local installations, the SSO host is always the current sites domain and scheme.
 			if ( 'local' === wp_get_environment_type() ) {
-				$this->sso_host     = wp_parse_url( home_url(), PHP_URL_HOST );
+				$this->sso_host     = parse_url( home_url(), PHP_URL_HOST );
 				$this->sso_host_url = untrailingslashit( home_url() ); // Respect scheme, domain, and port.
+
+				// If a port is specified, include that in the hostname.
+				if ( parse_url( home_url(), PHP_URL_PORT ) ) {
+					$this->sso_host .= ':' . parse_url( home_url(), PHP_URL_PORT );
+				}
 			} else {
 				$this->sso_host_url = 'https://' . $this->sso_host;
 			}
@@ -47,11 +52,6 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
 				$this->host   = $_SERVER['HTTP_HOST'];
 				$this->script = $_SERVER['SCRIPT_NAME'];
-
-				// Remove port numbers from the hostname
-				if ( strstr( $this->host, ':' ) ) {
-					$this->host = substr( $this->host, 0, strpos( $this->host, ':' ) );
-				}
 			}
 		}
 
@@ -62,6 +62,17 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			}
 
 			return self::$instance;
+		}
+
+		/**
+		 * Return the hostname to use in cookie headers.
+		 *
+		 * Cookies do not respect the port in the hostname, and are hostname-specific unless the `Port` parameter is set.
+		 */
+		public function get_cookie_host() {
+			list( $cookie_host ) = explode( ':', $this->sso_host );
+
+			return $cookie_host;
 		}
 
 		/**
@@ -182,7 +193,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				return false;
 			}
 
-			if ( strstr( $host, '/' ) || strstr( $host, ':' ) ) {
+			if ( strstr( $host, '/' ) ) {
 				$host = parse_url( $host, PHP_URL_HOST );
 			}
 
