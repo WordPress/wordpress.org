@@ -69,7 +69,7 @@
 			// Apply the input validation after initial blur, to avoid showing as invalid during initial edits.
 			$loginForm.on( 'blur', 'input[data-pattern-after-blur]', function() {
 				var $this = $( this );
-				if ( $this.val() ) {
+				if ( $this.val() && $this.data( 'pattern-after-blur' ) ) {
 					$this.prop( 'pattern', $this.data( 'pattern-after-blur' ) );
 					$this.data( 'pattern-after-blur', false );
 				}
