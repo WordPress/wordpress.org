@@ -6,7 +6,6 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 	 * @author stephdau
 	 */
 	class WPOrg_SSO {
-		const SSO_HOST = 'login.wordpress.org';
 
 		const SUPPORT_EMAIL = 'forum-password-resets@wordpress.org';
 
@@ -20,12 +19,13 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			'wordcamp.org'
 		];
 
-		public $sso_host_url;
-		public $sso_login_url;
-		public $sso_signup_url;
+		public $sso_host       = 'login.wordpress.org';
+		public $sso_host_url   = '';
+		public $sso_login_url  = '';
+		public $sso_signup_url = '';
 
-		public $host;
-		public $script;
+		public $host   = '';
+		public $script = '';
 
 		private static $instance = null;
 
@@ -33,7 +33,14 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * Constructor, instantiate common properties
 		 */
 		public function __construct() {
-			$this->sso_host_url   = 'https://' . self::SSO_HOST;
+			// On local installations, the SSO host is always the current sites domain and scheme.
+			if ( 'local' === wp_get_environment_type() ) {
+				$this->sso_host     = wp_parse_url( home_url(), PHP_URL_HOST );
+				$this->sso_host_url = untrailingslashit( home_url() ); // Respect scheme, domain, and port.
+			} else {
+				$this->sso_host_url = 'https://' . $this->sso_host;
+			}
+
 			$this->sso_login_url  = $this->sso_host_url . '/';
 			$this->sso_signup_url = $this->sso_host_url . '/register';
 
@@ -67,7 +74,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$host = ( ! $url || ! isset( $url['host'] ) ) ? null : $url['host'];
 			} else {
 				// If not on the SSO host, add login.wordpress.org, to be safe
-				$host = self::SSO_HOST;
+				$host = $this->sso_host;
 			}
 
 			// If we got a host by now, it's a safe wordpress.org-based one, add it to the list of allowed redirects
@@ -123,7 +130,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * @return bool True if current host is the SSO host, false if not.
 		 */
 		public function is_sso_host() {
-			return self::SSO_HOST === $this->host;
+			return $this->sso_host === $this->host;
 		}
 
 		/**
@@ -145,10 +152,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			} else if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
 				// We didn't get a redirect_to, but we got a referrer, use that if a valid target.
 				$redirect_to_referrer = $_SERVER['HTTP_REFERER'];
-				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) && self::SSO_HOST != parse_url( $redirect_to_referrer, PHP_URL_HOST ) ) {
+				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) && $this->sso_host != parse_url( $redirect_to_referrer, PHP_URL_HOST ) ) {
 					$redirect_to = $redirect_to_referrer;
 				}
-			} elseif ( self::SSO_HOST !== $this->host ) {
+			} elseif ( ! $this->is_sso_host() ) {
 				// Otherwise, attempt to guess the parent dir of where they came from and validate that.
 				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$_SERVER['REQUEST_URI']}" );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_source_parent ) ) {

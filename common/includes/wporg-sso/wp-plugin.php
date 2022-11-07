@@ -294,7 +294,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					add_filter( 'login_url', array( $this, 'login_url' ), 20, 2 );
 				}
 
-			} else if ( self::SSO_HOST === $this->host ) {
+			} else if ( $this->is_sso_host() ) {
 				// If on the SSO host
 				if ( ! preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// ... but not on its login screen.
@@ -375,8 +375,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @example add_action( 'network_site_url', array( $this, 'login_network_site_url' ), 10, 3 );
 		 */
 		public function login_network_site_url( $url, $path, $scheme ) {
-			if ( self::SSO_HOST === $this->host && preg_match( '!/wp-login\.php$!', $this->script ) ) {
-				$url = preg_replace( '!^(https?://)[^/]+(/.+)$!' , '\1'.self::SSO_HOST.'\2', $url );
+			if ( $this->is_sso_host() && preg_match( '!/wp-login\.php$!', $this->script ) ) {
+				$url = preg_replace( '!^(https?://)[^/]+(/.+)$!' , '\1' . $this->sso_host . '\2', $url );
 			}
 
 			return $url;
@@ -594,8 +594,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$token_cookie = wp_generate_auth_cookie( $user_id, time() + HOUR_IN_SECONDS, 'tos_token' );
 				$remember_me  = (int) $this->maybe_block_auth_cookies_context_provider()['remember_me'];
 
-				setcookie( self::LOGIN_TOS_COOKIE, $token_cookie, time() + HOUR_IN_SECONDS, '/', self::SSO_HOST, true, true );
-				setcookie( self::LOGIN_TOS_COOKIE . '_remember', $remember_me, time() + HOUR_IN_SECONDS, '/', self::SSO_HOST, true, true );
+				setcookie( self::LOGIN_TOS_COOKIE, $token_cookie, time() + HOUR_IN_SECONDS, '/', $this->sso_host, true, true );
+				setcookie( self::LOGIN_TOS_COOKIE . '_remember', $remember_me, time() + HOUR_IN_SECONDS, '/', $this->sso_host, true, true );
 
 				// Redirect them to the interstitial.
 				add_filter( 'login_redirect', [ $this, 'redirect_to_policy_update' ], 1000 );
