@@ -83,6 +83,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					add_filter( 'login_url', [ $this, 'add_locale' ], 21 );
 					add_filter( 'register_url', [ $this, 'add_locale' ], 21 );
 					add_filter( 'lostpassword_url', [ $this, 'add_locale' ], 21 );
+
+					add_filter( 'logout_redirect', [ $this, 'logout_redirect' ], 100 );
 				} else {
 					add_filter( 'login_redirect', [ $this, 'maybe_add_remote_login_bounce_to_post_login_url' ], 10, 3 );
 
@@ -459,6 +461,31 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function add_locale( $url ) {
 			return add_query_arg( 'locale', get_locale(), $url );
+		}
+
+		/**
+		 * Change the logout destination to not land on wp-login on hosts other
+		 * than login.wordpress.org.
+		 *
+		 * @param string $redirect The redirection location post-logout.
+		 * @return string
+		 */
+		public function logout_redirect( $redirect ) {
+			if (
+				str_starts_with( $redirect, wp_login_url() ) &&
+				! str_starts_with( $redirect, $this->sso_host_url )
+			) {
+				// Prefer the source page, as long as it wasn't a login/admin page.
+				$redirect = wp_get_referer();
+				if (
+					str_starts_with( $redirect, wp_login_url() ) &&
+					! str_contains( $redirect, '/wp-admin/' )
+				) {
+					$redirect = home_url('/');
+				}
+			}
+
+			return $redirect;
 		}
 
 		/**
