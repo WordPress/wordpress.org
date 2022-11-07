@@ -9,8 +9,10 @@ $sso = WPOrg_SSO::get_instance();
 
 // Migrate to cookies.
 if ( ! empty( $sso::$matched_route_params['confirm_user'] ) ) {
-	setcookie( 'wporg_confirm_user', $sso::$matched_route_params['confirm_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-	setcookie( 'wporg_confirm_key',  $sso::$matched_route_params['confirm_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+	$cookie_host = $sso->get_cookie_host();
+
+	setcookie( 'wporg_confirm_user', $sso::$matched_route_params['confirm_user'], time()+DAY_IN_SECONDS, '/register/', $cookie_host, true, true );
+	setcookie( 'wporg_confirm_key',  $sso::$matched_route_params['confirm_key'],  time()+DAY_IN_SECONDS, '/register/', $cookie_host, true, true );
 
 	wp_safe_redirect( '/register/create' );
 	die();
@@ -109,12 +111,13 @@ if ( isset( $_POST['user_pass'] ) ) {
 	if ( $pending_user && ! $pending_user['created'] ) {
 		$user = wporg_login_create_user_from_pending( $pending_user, $user_pass );
 		if ( $user ) {
+			$cookie_host = $sso->get_cookie_host();
 
 			// Clear the cookies, they're no longer needed.
-			setcookie( 'wporg_profile_user', false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-			setcookie( 'wporg_profile_key',  false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-			setcookie( 'wporg_confirm_user', false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-			setcookie( 'wporg_confirm_key',  false, time()-DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+			setcookie( 'wporg_profile_user', false, time()-DAY_IN_SECONDS, '/register/', $cookie_host, true, true );
+			setcookie( 'wporg_profile_key',  false, time()-DAY_IN_SECONDS, '/register/', $cookie_host, true, true );
+			setcookie( 'wporg_confirm_user', false, time()-DAY_IN_SECONDS, '/register/', $cookie_host, true, true );
+			setcookie( 'wporg_confirm_key',  false, time()-DAY_IN_SECONDS, '/register/', $cookie_host, true, true );
 
 			// Log the user in
 			wp_set_current_user( $user->ID );

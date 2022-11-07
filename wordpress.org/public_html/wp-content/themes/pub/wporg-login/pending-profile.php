@@ -8,9 +8,11 @@
 $sso = WPOrg_SSO::get_instance();
 
 // Migrate to cookies.
-if ( !empty( $sso::$matched_route_params['profile_user'] ) ) {
-	setcookie( 'wporg_profile_user', $sso::$matched_route_params['profile_user'], time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
-	setcookie( 'wporg_profile_key',  $sso::$matched_route_params['profile_key'],  time()+DAY_IN_SECONDS, '/register/', 'login.wordpress.org', true, true );
+if ( ! empty( $sso::$matched_route_params['profile_user'] ) ) {
+	$cookie_host = $sso->get_cookie_host();
+
+	setcookie( 'wporg_profile_user', $sso::$matched_route_params['profile_user'], time()+DAY_IN_SECONDS, '/register/', $cookie_host, true, true );
+	setcookie( 'wporg_profile_key',  $sso::$matched_route_params['profile_key'],  time()+DAY_IN_SECONDS, '/register/', $cookie_host, true, true );
 
 	wp_safe_redirect( '/register/create-profile' );
 	die();
