@@ -113,23 +113,29 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @return WP_User|WP_Error WP_User on success, WP_Error on failure.
 		 */
 		public function authenticate_admin_check( $user, $user_login ) {
-
-			if ( 'admin' === strtolower( $user_login ) ) {
-
-				// Returning a WP_Error from an authenticate filter doesn't block auth, as a later hooked item can return truthful.
-				remove_all_actions( 'authenticate' );
-
-				return new WP_Error(
-					'admin_wrong_place',
-					sprintf(
-						'<strong>%s</strong><br><br>%s',
-						__( 'Are you in the right place?', 'wporg' ),
-						__( 'This login form is for the WordPress.org website, rather than your personal WordPress site.', 'wporg' )
-					)
-				);
+			// Allow 'admin' to login in local environments.
+			if ( 'local' === wp_get_environment_type() ) {
+				return $user;
 			}
 
-			return $user;
+			// If this isn't the admin user logging in, allow it.
+			if ( 'admin' !== strtolower( $user_login ) ) {
+				return $user;
+			}
+
+			// Someone is attempting to login as 'admin', throw an error.
+
+			// Returning a WP_Error from an authenticate filter doesn't block auth, as a later hooked item can return truthful.
+			remove_all_actions( 'authenticate' );
+
+			return new WP_Error(
+				'admin_wrong_place',
+				sprintf(
+					'<strong>%s</strong><br><br>%s',
+					__( 'Are you in the right place?', 'wporg' ),
+					__( 'This login form is for the WordPress.org website, rather than your personal WordPress site.', 'wporg' )
+				)
+			);
 		}
 
 		/**
@@ -183,7 +189,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		public function authenticate_block_nologin_accounts( $user, $user_login ) {
 			global $nologin_accounts; // [ 'user1', 'user2' ]
 
-			if ( in_array( $user_login, $nologin_accounts, true ) ) {
+			if ( ! empty( $nologin_accounts ) && in_array( $user_login, $nologin_accounts, true ) ) {
 				// Returning a WP_Error from an authenticate filter doesn't block auth, as a later hooked item can return truthful.
 				remove_all_actions( 'authenticate' );
 
