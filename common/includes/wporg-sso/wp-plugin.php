@@ -463,6 +463,18 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		protected function _redirect_to_source_or_profile() {
 			$redirect = $this->_get_safer_redirect_to( false );
 
+			// On local environments, just throw a logged in message instead.
+			if ( 'local' === wp_get_environment_type() ) {
+				wp_die(
+					sprintf(
+						"<h1>Logged in!</h1><p>You are currently logged in as <code>%s</code>.</p><p><a href='%s'>Would you like to logout?</a>",
+						wp_get_current_user()->user_login,
+						wp_logout_url()
+					)
+				);
+				exit;
+			}
+
 			if ( $redirect ) {
 				$this->_safe_redirect( $this->_maybe_add_remote_login_bounce( $redirect ) );
 			} elseif ( is_user_logged_in() ) {
