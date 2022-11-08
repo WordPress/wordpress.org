@@ -1403,6 +1403,11 @@ body.bbpress .atwho-view strong {
 	color: #080;
 }
 
+body.bbpress .wiki-toc ul li,
+body.bbpress #content.prefs #tabs li {
+	list-style: none;
+}
+
 /* BuddyPress colors */
 body.buddypress .wp-notice {
 	background: #fff3ec;
