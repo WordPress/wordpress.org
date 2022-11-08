@@ -1599,7 +1599,7 @@ div.plugin-meta img {
 /* =Trac
 -------------------------------------------------------------- */
 
-body.trac .attachment {
+body.trac a.attachment {
 	display: inline;
 }
 
