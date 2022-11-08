@@ -230,7 +230,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$to = wp_sanitize_redirect( $to );
 			}
 
-			if ( ! $this->_is_valid_targeted_domain( $to ) ) {
+			// If it's a full URI, validate the host.
+			if ( ! str_starts_with( $to, '/' ) && ! $this->_is_valid_targeted_domain( $to ) ) {
 				$to = $this->_get_safer_redirect_to();
 			}
 

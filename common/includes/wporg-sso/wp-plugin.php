@@ -257,6 +257,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			add_filter( 'site_url', array( $this, 'login_post_url' ), 20, 3 );
 			add_filter( 'register_url', array( $this, 'register_url' ), 20 );
 
+			// Maybe do a Remote SSO login
+			$this->_maybe_perform_remote_login();
+
 			if ( preg_match( '!/wp-signup\.php$!', $_SERVER['REQUEST_URI'] ) ) {
 				// Note: wp-signup.php is not a physical file, and so it's matched on it's request uri.
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
@@ -272,14 +275,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 					// Allow logout on non-dotorg hosts.
 					if ( isset( $_GET['action'] ) && empty( $_POST ) && 'logout' == $_GET['action'] ) {
-						if ( ! preg_match( '!wordpress\.org$!', $_SERVER['HTTP_HOST'] ) ) {
+						if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
 							return;
 						}
-					}
-
-					// Remote SSO login?
-					if ( isset( $_GET['action'] ) && 'remote-login' === $_GET['action'] && ! empty( $_GET['sso_token'] ) ) {
-						$this->_maybe_perform_remote_login();
 					}
 
 					// If on a WP login screen...
@@ -478,8 +476,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// Prefer the source page, as long as it wasn't a login/admin page.
 				$redirect = wp_get_referer();
 				if (
-					str_starts_with( $redirect, wp_login_url() ) &&
-					! str_contains( $redirect, '/wp-admin/' )
+					str_starts_with( $redirect, wp_login_url() ) ||
+					str_contains( $redirect, '/wp-admin/' )
 				) {
 					$redirect = home_url('/');
 				}
@@ -523,6 +521,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * Logs in a user on the current domain on a remote-login action.
 		 */
 		protected function _maybe_perform_remote_login() {
+			if ( empty( $_GET['sso_token'] ) ) {
+				return;
+			}
+
 			$remote_token = wp_unslash( $_GET['sso_token'] );
 			if ( ! is_string( $remote_token ) || 3 !== substr_count( $remote_token, '|' ) ) {
 				wp_die( 'Invalid token.' );
@@ -551,9 +553,19 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				if ( isset( $_GET['redirect_to'] ) ) {
 					$this->_safe_redirect( wp_unslash( $_GET['redirect_to'] ) );
+
+				} elseif ( ! str_contains( $this->script, '/wp-login.php' ) ) {
+					// SSO login, no redirect_url, and on a not-a-login page. Remove sso arg and redirect to self.
+					$this->_safe_redirect( remove_query_arg( 'sso_token' ) );
+
 				} else {
 					$this->_safe_redirect( home_url( '/' ) );
+
 				}
+				exit;
+			} else {
+				// Invalid auth, remove the query var.
+				$this->_safe_redirect( remove_query_arg( 'sso_token' ) );
 				exit;
 			}
 
@@ -588,14 +600,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$hash        = $this->_generate_remote_login_hash( $user, $valid_until, $remember_me );
 				$sso_token   = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me;
 
-				$redirect = add_query_arg(
-					array(
-						'action'      => 'remote-login',
-						'sso_token'   => urlencode( $sso_token ),
-						'redirect_to' => urlencode( $redirect ),
-					),
-					'https://' . $redirect_host . '/wp-login.php' // Assume that wp-login exists and is accessible
-				);
+				$redirect = add_query_arg( 'sso_token', urlencode( $sso_token ), $redirect );
 			}
 
 			return $redirect;
