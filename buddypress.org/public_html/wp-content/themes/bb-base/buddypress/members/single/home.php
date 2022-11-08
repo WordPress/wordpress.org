@@ -30,8 +30,8 @@
 		elseif ( bp_is_user_profile() ) :
 			bp_get_template_part( 'members/single/profile'  );
 
-		elseif ( bp_is_user_forums() ) :
-			bp_get_template_part( 'members/single/forums'   );
+//		elseif ( bp_is_user_forums() ) :
+//			bp_get_template_part( 'members/single/forums'   );
 
                 elseif ( bp_is_user_notifications() ) :
                         bp_get_template_part( 'members/single/notifications'   );
