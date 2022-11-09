@@ -868,6 +868,14 @@ class Uploads {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) ) {
 			$content .= apply_filters( 'wporg_photos_pre_upload_form', $content );
 
+			if ( User::count_published_photos( get_current_user_id() ) ) {
+				$content .= sprintf(
+					/* translators: %s: URL to current user's photo archive. */
+					'<p>' . __( 'View <a href="%s">your archive of photos</a> to see what you&#8217;ve already had published.', 'wporg-photos' ) . '</p>',
+					get_author_posts_url( get_current_user_id() )
+				);
+			}
+
 			$content .= '<fieldset id="wporg-photo-upload">';
 
 			$content .= sprintf(
