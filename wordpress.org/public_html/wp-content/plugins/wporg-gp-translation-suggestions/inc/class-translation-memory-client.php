@@ -156,7 +156,7 @@ class Translation_Memory_Client {
 	 * @return string HTML markup for the differences between the two texts.
 	 */
 	protected static function diff( $previous_text, $text ) {
-		$diff     = new  Text_Diff( 'auto', [ [ $previous_text ], [ $text ] ] );
+		$diff     = new  Text_Diff( 'auto', [ [ $text ], [ $previous_text ] ] );
 		$renderer = new WP_Text_Diff_Renderer_inline();
 
 		return $renderer->render( $diff );
