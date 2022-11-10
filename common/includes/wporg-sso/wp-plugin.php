@@ -550,26 +550,25 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			if ( $remote_expiration_valid && $valid_remote_hash ) {
 				wp_set_current_user( (int) $user_id );
 				wp_set_auth_cookie( (int) $user_id, (bool) $remember_me );
-
-				if ( isset( $_GET['redirect_to'] ) ) {
-					$this->_safe_redirect( wp_unslash( $_GET['redirect_to'] ) );
-
-				} elseif ( ! str_contains( $this->script, '/wp-login.php' ) ) {
-					// SSO login, no redirect_url, and on a not-a-login page. Remove sso arg and redirect to self.
-					$this->_safe_redirect( remove_query_arg( 'sso_token' ) );
-
-				} else {
-					$this->_safe_redirect( home_url( '/' ) );
-
-				}
-				exit;
-			} else {
-				// Invalid auth, remove the query var.
-				$this->_safe_redirect( remove_query_arg( 'sso_token' ) );
-				exit;
 			}
 
-			return false;
+			if ( isset( $_GET['redirect_to'] ) ) {
+				$redirect_to = wp_unslash( $_GET['redirect_to'] );
+			} else {
+				// Generate the current url based on the current hostname and request uri.
+				$redirect_to = set_url_scheme( 'http://' . $this->host . ( $_SERVER['REQUEST_URI'] ?? '/' ) );
+
+				// Remove the sso_token parameter, as we've now used it.
+				$redirect_to = remove_query_arg( 'sso_token', $redirect_to );
+			}
+
+			// If we're going to land on a login page, go back home to avoid a potential endless loop.
+			if ( str_contains( $redirect_to, '/wp-login.php' ) ) {
+				$redirect_to = home_url( '/' );
+			}
+
+			$this->_safe_redirect( $redirect_to );
+			exit;
 		}
 
 		public function maybe_add_remote_login_bounce_to_post_login_url( $redirect, $requested, $user ) {
