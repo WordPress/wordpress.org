@@ -58,21 +58,32 @@ class User {
 	 * @return int
 	 */
 	public static function count_pending_photos( $user_id = false ) {
+		return count( self::get_pending_photos( $user_id ) );
+	}
+
+	/**
+	 * Returns the pending photos for a user.
+	 *
+	 * @param int    $user_id Optional. The user ID. If not defined, assumes global
+	 *                        author. Default false.
+	 * @param string $fields  Optional. The fields to return from the pending photos.
+	 *                        Default 'ids'.
+	 * @return array
+	 */
+	public static function get_pending_photos( $user_id = false, $fields = 'ids' ) {
 		if (  ! $user_id ) {
 			global $authordata;
 
 			$user_id = $authordata->ID;
 		}
 
-		$pending = get_posts( [
-			'fields'         => 'ids',
+		return get_posts( [
+			'fields'         => $fields,
 			'posts_per_page' => -1,
 			'author'         => $user_id,
 			'post_status'    => 'pending',
 			'post_type'      => Registrations::get_post_type(),
 		] );
-
-		return count( $pending );
 	}
 
 	/**
@@ -148,6 +159,32 @@ class User {
 		}
 
 		return apply_filters( 'wporg_photos_max_concurrent_submissions', self::MAX_PENDING_SUBMISSIONS, $user_id );
+	}
+
+	/**
+	 * Returns the file names for all of a user's pending submissions.
+	 *
+	 * @param int $user_id The user ID. If false, then assumes current user. Default false.
+	 * @return array
+	 */
+	public static function get_pending_file_names( $user_id = false ) {
+		global $wpdb;
+
+		$names = [];
+
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( $user_id && $post_ids = self::get_pending_photos( $user_id ) ) {
+			$post_ids = implode( ',', array_map( 'intval', array_values( $post_ids ) ) );
+			$names = $wpdb->get_col( $wpdb->prepare(
+				"SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN ($post_ids)",
+				Registrations::get_meta_key( 'original_filename' )
+			) );
+		}
+
+		return $names;
 	}
 
 	/**
