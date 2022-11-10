@@ -206,6 +206,14 @@ async function photoCheckFileValidations( field ) {
 		error = field.validity.valueMissing;
 	}
 
+	// Check for duplicate file name.
+	if ( ! error && PhotoDir.pending_file_names ) {
+		if ( PhotoDir.pending_file_names.includes( field.files[0]?.name ) ) {
+			field.setCustomValidity( PhotoDir.err_duplicate_pending_file_name );
+			error = true;
+		}
+	}
+
 	// Check for file size error.
 	if ( ! error ) {
 		error = photoCheckFileSize( field );

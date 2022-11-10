@@ -278,6 +278,10 @@ class Uploads {
 					// Toggle all confirmation checkboxes for upload.
 					'user_can_toggle_all_checkboxes' => User::can_toggle_confirmation_checkboxes(),
 					'toggle_all_checkboxes' => __( 'As a contributor of many photos, I am well aware of the requirements listed below and agree to them all.', 'wporg-photos' ),
+
+					// File names of user's pending submissions.
+					'err_duplicate_pending_file_name' => __( 'You already have a pending submission with this file name.', 'wporg-photos' ),
+					'pending_file_names' => User::get_pending_file_names(),
 				]
 			);
 		}
