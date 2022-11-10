@@ -44,7 +44,11 @@ class User {
 		if (  ! $user_id ) {
 			global $authordata;
 
-			$user_id = $authordata->ID;
+			$user_id = $authordata->ID ?? 0;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
 		}
 
 		return count_user_posts( $user_id, Registrations::get_post_type(), true );
@@ -74,7 +78,11 @@ class User {
 		if (  ! $user_id ) {
 			global $authordata;
 
-			$user_id = $authordata->ID;
+			$user_id = $authordata->ID ?? 0;
+		}
+
+		if ( ! $user_id ) {
+			return [];
 		}
 
 		return get_posts( [
