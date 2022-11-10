@@ -15,6 +15,7 @@ class Search {
 	public static function init() {
 		add_action( 'pre_get_posts',        [ __CLASS__, 'default_search_to_only_photos' ] );
 		add_filter( 'posts_join',           [ __CLASS__, 'tag_join_for_search' ], 10, 2 );
+		add_filter( 'posts_search',         [ __CLASS__, 'limit_partial_matching' ], 9, 2 );
 		add_filter( 'posts_search',         [ __CLASS__, 'tag_where_for_search' ], 10, 2 );
 		add_filter( 'posts_groupby',        [ __CLASS__, 'tag_groupby_for_search' ], 10, 2 );
 		add_filter( 'posts_search_orderby', [ __CLASS__, 'tag_orderby_for_search' ], 10, 2 );
@@ -89,6 +90,28 @@ class Search {
 		}
 
 		return $join;
+	}
+
+	/**
+	 * Limits partial matching of search terms to at least being at the start of
+	 * a matching term.
+	 *
+	 * @param string   $where Search SQL for WHERE clause.
+	 * @param WP_Query $query The current WP_Query object.
+	 * @return string
+	 */
+	public static function limit_partial_matching( $where, $query ) {
+		global $wpdb;
+
+		if ( ! is_admin() && $query->is_search() && $query->is_main_query() ) {
+			$where = preg_replace(
+				"/LIKE '(\{\w+\})([^\{]+)(\{\w+\})'/",
+				"LIKE '$2$1'",
+				$where
+			);
+		}
+
+		return $where;
 	}
 
 	/**
