@@ -22,6 +22,9 @@ add_action( 'template_redirect', 'nocache_headers', 10, 0 );
  */
 function wporg_login_setup() {
 	load_theme_textdomain( 'wporg' );
+
+	// We don't need wp4.css to load here.
+	add_theme_support( 'wp4-styles' );
 }
 add_action( 'after_setup_theme', 'wporg_login_setup' );
 
