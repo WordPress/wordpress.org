@@ -220,9 +220,6 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * @param int    $status HTTP redirect status, defaults to 302
 		 */
 		protected function _safe_redirect( $to, $status = 302 ) {
-			if ( headers_sent() ) {
-				return;
-			}
 
 			// When available, sanitize the redirect prior to redirecting.
 			// This isn't strictly needed, but prevents harmless invalid inputs being passed through to the Location header.
@@ -239,13 +236,29 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$to = apply_filters( 'wp_redirect', $to, $status );
 			}
 
+			// In the event headers have been sent already, output a HTML redirect.
+			if ( headers_sent() ) {
+				if ( function_exists( 'esc_url' ) ) {
+					$to = esc_url( $to );
+				} else {
+					// This is not a replacement for esc_url().
+					$to = htmlspecialchars( $to, ENT_QUOTES | ENT_SUBSTITUTE );
+				}
+
+				printf(
+					'<meta http-equiv="refresh" content="1;url=%1$s" />' . 
+					'<a href="%1$s">%1$s</a>',
+					$to
+				);
+				exit;
+			}
+
 			header(
 				'Location: ' . $to,
 				true,
 				preg_match( '/^30(1|2)$/', $status ) ? $status : 302
 			);
-
-			die();
+			exit;
 		}
 	}
 }
