@@ -77,6 +77,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				add_action( 'wp_login', array( $this, 'record_last_logged_in' ), 10, 2 );
 
+				add_action( 'login_form_logout', array( $this, 'login_form_logout' ) );
+
 				add_filter( 'salt', array( $this, 'salt' ), 10, 2 );
 
 				if ( ! $this->is_sso_host() ) {
@@ -257,8 +259,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			add_filter( 'site_url', array( $this, 'login_post_url' ), 20, 3 );
 			add_filter( 'register_url', array( $this, 'register_url' ), 20 );
 
-			// Maybe do a Remote SSO login
+			// Maybe do a Remote SSO login/logout
 			$this->_maybe_perform_remote_login();
+			$this->_maybe_perform_remote_logout();
 
 			if ( preg_match( '!/wp-signup\.php$!', $_SERVER['REQUEST_URI'] ) ) {
 				// Note: wp-signup.php is not a physical file, and so it's matched on it's request uri.
@@ -273,11 +276,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						return;
 					}
 
-					// Allow logout on non-dotorg hosts.
+					// Allow logout to process. See self::login_form_logout()
 					if ( isset( $_GET['action'] ) && empty( $_POST ) && 'logout' == $_GET['action'] ) {
-						if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
-							return;
-						}
+						return;
 					}
 
 					// If on a WP login screen...
@@ -487,6 +488,44 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
+		 * Override the logout process.
+		 */
+		public function login_form_logout() {
+			check_admin_referer( 'log-out' );
+
+			// The entire remote-logout process isn't needed on local environments.
+			if ( 'local' === wp_get_environment_type() ) {
+				$sso = $this;
+				add_filter( 'logout_redirect', function() use( $sso ) {
+					return $sso->sso_host_url . '/loggedout';
+				} );
+				return;
+			}
+
+			$user = wp_get_current_user();
+
+			// Perform the logout on this network first.
+			wp_logout();
+
+			// Redirect back to the requested location.. the referer.. or failing that, the current sites front page after it's all done.
+			$logout_redirect = ( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ?: wp_get_referer() ) ?: home_url( '/' );
+			$logout_redirect = apply_filters( 'logout_redirect', $logout_redirect, $logout_redirect, $user );
+
+			$remote_logout_url = add_query_arg(
+				array(
+					'action'         => 'remote-logout',
+					'redirect_to'    => urlencode( $logout_redirect ),
+					'loggedout_on[]' => urlencode( $this->_get_targetted_host( $this->host ) ),
+					'sso_logout'     => urlencode( $this->_generate_remote_token( $user ) )
+				),
+				$this->sso_host_url . '/wp-login.php'
+			);
+
+			$this->_safe_redirect( $remote_logout_url );
+			exit;
+		}
+
+		/**
 		 * Redirects the user back to where they came from (or w.org profile)
 		 */
 		public function redirect_to_source_or_profile() {
@@ -511,6 +550,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			} else {
 				$this->_safe_redirect( 'https://wordpress.org/' );
 			}
+			exit;
 		}
 
 		protected function _redirect_to_source_or_profile() {
@@ -526,30 +566,12 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 
 			$remote_token = wp_unslash( $_GET['sso_token'] );
-			if ( ! is_string( $remote_token ) || 3 !== substr_count( $remote_token, '|' ) ) {
-				wp_die( 'Invalid token.' );
-			}
+			$remote_token = $this->_validate_remote_token( $remote_token );
 
-			list( $user_id, $sso_hash, $valid_until, $remember_me ) = explode( '|', $remote_token, 4 );
-
-			$remote_expiration_valid = (
-				// +/- 5s on a 5s timeout.
-				$valid_until >= ( time() - 5 ) &&
-				$valid_until <= ( time() + 10 )
-			);
-
-			$valid_remote_hash = false;
-			$user = get_user_by( 'id', $user_id );
-			if ( $user ) {
-				$valid_remote_hash = hash_equals(
-					$this->_generate_remote_login_hash( $user, $valid_until, $remember_me ),
-					$sso_hash
-				);
-			}
-
-			if ( $remote_expiration_valid && $valid_remote_hash ) {
-				wp_set_current_user( (int) $user_id );
-				wp_set_auth_cookie( (int) $user_id, (bool) $remember_me );
+			// Log the user in if successful.
+			if ( $remote_token && $remote_token['valid'] && $remote_token['user'] ) {
+				wp_set_current_user( $remote_token['user']->ID );
+				wp_set_auth_cookie( $remote_token['user']->ID, (bool) $remote_token['remember_me'] );
 			}
 
 			if ( isset( $_GET['redirect_to'] ) ) {
@@ -589,32 +611,141 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$redirect_host = parse_url( $redirect, PHP_URL_HOST );
 
 			if ( $user && $this->_is_valid_targeted_domain( $redirect_host ) && ! preg_match( '!wordpress.org$!i', $redirect_host ) ) {
-
-				// Fetch auth cookie parts to find out if the user has selected 'remember me'.
-				$auth_cookie_parts = wp_parse_auth_cookie( '', 'secure_auth' );
-
-				$valid_until = time() + 5; // Super short timeout.
-				$remember_me = ! empty( $_POST['rememberme'] ) || ( $auth_cookie_parts && $auth_cookie_parts['expiration'] >= ( time() + ( 2 * DAY_IN_SECONDS ) ) );
-
-				$hash        = $this->_generate_remote_login_hash( $user, $valid_until, $remember_me );
-				$sso_token   = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me;
-
-				$redirect = add_query_arg( 'sso_token', urlencode( $sso_token ), $redirect );
+				$sso_token = $this->_generate_remote_token( $user );
+				$redirect  = add_query_arg( 'sso_token', urlencode( $sso_token ), $redirect );
 			}
 
 			return $redirect;
 		}
 
 		/**
+		 * Log out a user from all sites and networks.
+		 *
+		 * This works by keeping track of the domains logged out on, and redirecting the user to the next
+		 * site in self::VALID_HOSTS. Each is only requested once, so the user should experience minimal
+		 * redirects.
+		 */
+		protected function _maybe_perform_remote_logout() {
+			if ( empty( $_GET['sso_logout'] ) ) {
+				return;
+			}
+
+			$remote_token = wp_unslash( $_GET['sso_logout'] );
+			$remote_token = $this->_validate_remote_token( $remote_token );
+
+			if ( ! $remote_token || ! $remote_token['valid'] ) {
+				return;
+			}
+			$user = $remote_token['user'];
+
+			// If the matching user is logged in, log them out.
+			// If they're logged in as someone else, that's problematic, but we ignore that intentionally.
+			if ( is_user_logged_in() && get_current_user_id() == $user->ID ) {
+				wp_logout();
+			}
+
+			// Hosts logged out on..
+			$logged_out_on     = (array) $_REQUEST['loggedout_on'] ?? [];
+			$logged_out_on[]   = $this->_get_targetted_host( $this->host );
+			$need_to_logout_on = array_diff( self::VALID_HOSTS, $logged_out_on );
+
+			// Logged out everywhere, send them over to the logout confirmation screen.
+			if ( ! $need_to_logout_on ) {
+				$final_url = $this->sso_host_url . '/loggedout';
+
+				if ( ! empty( $_REQUEST['redirect_to'] ) ) {
+					$final_url = add_query_arg( 'redirect_to', $_REQUEST['redirect_to'], $final_url );
+				}
+
+				$this->_safe_redirect( $final_url );
+				exit;
+			}
+
+			// Redirect on to the next host in self::VALID_HOSTS to logout from.
+			$logout_redirect = add_query_arg(
+				array(
+					'action'       => 'remote-logout',
+					'sso_logout'   => urlencode( $this->_generate_remote_token( $user ) ),
+					'redirect_to'  => urlencode( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ),
+					'loggedout_on' => array_values( $logged_out_on )
+				),
+				'https://' . reset( $need_to_logout_on ) . '/wp-login.php'
+			);
+
+			$this->_safe_redirect( $logout_redirect );
+			exit;
+		}
+
+		/**
+		 * Generates a remote token for login/logout.
+		 *
+		 * @param WP_User $user The User for the token.
+		 * @return string The SSO token.
+		 */
+		protected function _generate_remote_token( $user ) {
+			// Use a super-short timeout for the token. It's only going to be used once.
+			$valid_until = time() + self::REMOTE_TOKEN_TIMEOUT;
+
+			/*
+			 * Fetch auth cookie parts to find out if the user has selected 'remember me'.
+			 * This is only useful for login tokens, but causes no harm for loggout tokens.
+			 */
+			$auth_cookie_parts = wp_parse_auth_cookie( '', 'secure_auth' );
+			$remember_me       = ! empty( $_POST['rememberme'] ) || ( $auth_cookie_parts && $auth_cookie_parts['expiration'] >= ( time() + ( 2 * DAY_IN_SECONDS ) ) );
+
+			$hash        = $this->_generate_remote_token_hash( $user, $valid_until, $remember_me );
+			$sso_token   = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me;
+
+			return $sso_token;
+		}
+
+		/**
 		 * Generate a hash for remote-login for non-wordpress.org domains
 		 */
-		protected function _generate_remote_login_hash( $user, $valid_until, $remember_me = false ) {
+		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false ) {
 			// re-use the same frag that Auth cookies use to invalidate sessions.
 			$pass_frag = substr( $user->user_pass, 8, 4 );
 			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until, 'wporg_sso' );
 			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me, $key );
 
 			return $hash;
+		}
+
+		/**
+		 * Validates a SSO token is valid.
+		 *
+		 * @param string $token The raw token from the URL, wp_unslash() it please.
+		 * @return array If the token was valid.
+		 */
+		protected function _validate_remote_token( $token ) {
+			if ( ! is_string( $token ) || 3 !== substr_count( $token, '|' ) ) {
+				wp_die( 'Invalid token.' );
+			}
+
+			list( $user_id, $sso_hash, $valid_until, $remember_me ) = explode( '|', $token, 4 );
+
+			$expiration_valid = (
+				// +/- 5s on a 5s timeout.
+				$valid_until >= ( time() - self::REMOTE_TOKEN_TIMEOUT ) &&
+				$valid_until <= ( time() + ( self::REMOTE_TOKEN_TIMEOUT * 2 ) )
+			);
+
+			$valid_hash = false;
+			$user       = get_user_by( 'id', $user_id );
+			if ( $user ) {
+				$valid_hash = hash_equals(
+					$this->_generate_remote_token_hash( $user, $valid_until, $remember_me ),
+					$sso_hash
+				);
+			}
+
+			$valid = ( $expiration_valid && $valid_hash );
+
+			return compact(
+				'valid',
+				'user',
+				'remember_me'
+			);
 		}
 
 		/**
@@ -631,6 +762,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		/**
 		 * Hooked to 'set_auth_cookie' to provide action to the below function, as the
 		 * `send_auth_cookies` filter used for the below function has no user context.
+		 *
+		 * @see https://core.trac.wordpress.org/ticket/56971
 		 */
 		public function maybe_block_auth_cookies_context_provider( $auth_cookie = null, $expire = null, $expiration = null, $user_id = null ) {
 			static $_user_id_remember_me = false;
@@ -649,6 +782,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 *
 		 * Note: This action provides no context about the request, which is why the context is being
 		 * provided via the 'set_auth_cookie' filter hook above.
+		 * @see https://core.trac.wordpress.org/ticket/56971
 		 */
 		public function maybe_block_auth_cookies( $send_cookies ) {
 			$user_id = $this->maybe_block_auth_cookies_context_provider()['user_id'] ?? false;

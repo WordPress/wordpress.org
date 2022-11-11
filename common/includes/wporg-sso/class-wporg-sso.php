@@ -12,6 +12,14 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		const LOGIN_TOS_COOKIE  = 'wporg_tos_login';
 		const TOS_USER_META_KEY = 'tos_revision';
 
+		/**
+		 * The time SSO tokens are valid. These are used for remote login/logout on
+		 * non-wordpress.org domains.
+		 *
+		 * @var int
+		 */
+		const REMOTE_TOKEN_TIMEOUT = 5;
+
 		const VALID_HOSTS = [
 			'wordpress.org',
 			'bbpress.org',
@@ -185,7 +193,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		/**
 		 * Tests if the passed host/domain, or URL, is part of the WordPress.org network.
 		 *
-		 * @param unknown $host A domain, hostname, or URL
+		 * @param string $host A domain, hostname, or URL
 		 * @return boolean True is ok, false if not
 		 */
 		protected function _is_valid_targeted_domain( $host ) {
@@ -201,14 +209,32 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				return true;
 			}
 
+			$host = $this->_get_targetted_host( $host );
+
+			return in_array( $host, self::VALID_HOSTS, true );
+		}
+
+		/**
+		 * Determine the targetted hostname for a given hostname.
+		 *
+		 * This returns 'wordpress.org' in the case of 'login.wordpress.org'.
+		 * This does NOT validate the hostname is valid for a redirect.
+		 *
+		 * @param string $host The hostname to process.
+		 * @return string The hostname, maybe top-level, maybe not.
+		 */
+		protected function _get_targetted_host( $host ) {
 			if ( in_array( $host, self::VALID_HOSTS, true ) ) {
-				return true;
+				return $host;
 			}
 
 			// If not a top-level domain, shrink it down and try again.
 			$top_level_host = implode( '.', array_slice( explode( '.', $host ), -2 ) );
+			if ( in_array( $top_level_host, self::VALID_HOSTS, true ) ) {
+				$host = $top_level_host;
+			}
 
-			return in_array( $top_level_host, self::VALID_HOSTS, true );
+			return $host;
 		}
 
 		/**
