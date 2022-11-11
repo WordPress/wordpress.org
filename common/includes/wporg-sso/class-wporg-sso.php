@@ -236,6 +236,13 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$to = apply_filters( 'wp_redirect', $to, $status );
 			}
 
+			/*
+			 * Collapse leading multiple slashes at the start of the path in the URL.
+			 * This can cause problems with setting cookies when the redirect is to
+			 * a SSO login destination such as `http://example.org//////wp-admin`.
+			 */
+			$to = preg_replace( '!^(https?://[^/]+)/{2,}!', '$1/', $to );
+
 			// In the event headers have been sent already, output a HTML redirect.
 			if ( headers_sent() ) {
 				if ( function_exists( 'esc_url' ) ) {
