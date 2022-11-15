@@ -148,6 +148,7 @@ class Stats {
 		$wpdb->gp_projects                = 'translate_projects';
 		$wpdb->gp_originals               = 'translate_originals';
 		$wpdb->gp_translations            = 'translate_translations';
+		$wpdb->user_translations_count    = 'translate_user_translations_count';
 
 		$this->echo_the_values = $echo_the_values;
 		$this->set_number_of_years_with_data();
@@ -613,7 +614,9 @@ class Stats {
 				}
 				$strings_added = number_format_i18n( $row['strings_added'] );
 				$contributor   = get_user_by( 'id', $row['user_id'] );
-				$code         .= "{$year} \t  {$strings_added}  \t {$contributor->user_login}" . PHP_EOL;
+				if ($contributor) {
+					$code .= "{$year} \t  {$strings_added}  \t {$contributor->user_login}" . PHP_EOL;
+				}
 			}
 		}
 
