@@ -276,6 +276,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						return;
 					}
 
+					// Don't redirect the 'postpass' wp-login handlers to login.wordpress.org.
+					if ( isset( $_GET['action'] ) && 'postpass' == $_GET['action'] ) {
+						return;
+					}
+
 					// Allow logout to process. See self::login_form_logout()
 					if ( isset( $_GET['action'] ) && empty( $_POST ) && 'logout' == $_GET['action'] ) {
 						return;
@@ -397,17 +402,26 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		/**
 		 * Filters the default login lost URL and returns our custom one instead.
 		 *
+		 * Does not alter the URL if `wp-login.php?action=postpass` is present.
+		 * Attached to `site_url`.
+		 *
 		 * @param string      $url     The complete site URL including scheme and path.
 		 * @param string      $path    Path relative to the site URL. Blank string if no path is specified.
 		 * @param string|null $scheme  Site URL context.
 		 * @return string
 		 */
 		public function login_post_url( $url, $path, $scheme ) {
-			if ( 'login_post' === $scheme ) {
-				return $this->sso_host_url . '/wp-login.php';
+			// Only affect links that are relative to the login form.
+			if ( 'login_post' != $scheme ) {
+				return $url;
 			}
 
-			return $url;
+			// Don't alter the post-password form.
+			if ( str_contains( $url, 'wp-login.php?action=postpass' ) ) {
+				return $url;
+			}
+
+			return $this->sso_host_url . '/wp-login.php';
 		}
 
 		/**
