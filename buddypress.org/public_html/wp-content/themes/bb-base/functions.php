@@ -285,6 +285,17 @@ function bb_base_get_plugins( $page = 1, $search = false, $tag = 'bbpress' ) {
 	$args    = array( 'tag' => $tag, 'page' => (int) $page, 'per_page' => 10, 'search' => $search );
 	$plugins = bb_base_plugins_api('query_plugins', $args);
 
+	// Handle errors, in the least-graceful way possible.
+	if ( is_wp_error( $plugins ) ) {
+		return (object) array(
+			'plugins' => array(),
+			'info'    => array(
+				'page'    => (int) $page,
+				'results' => 0,
+			)
+		);
+	}
+
 	foreach( $plugins->plugins as $plugin_key => $plugin_value ) {
 		if ( $plugins->plugins[$plugin_key]->slug == 'mingle' ) {
 			unset( $plugins->plugins[$plugin_key] );
