@@ -143,12 +143,11 @@ class Stats {
 	public function __invoke( bool $echo_the_values = false ) {
 		global $wpdb;
 
-		$wpdb->gp_translation_sets        = 'translate_translation_sets';
-		$wpdb->project_translation_status = 'translate_project_translation_status';
-		$wpdb->gp_projects                = 'translate_projects';
-		$wpdb->gp_originals               = 'translate_originals';
-		$wpdb->gp_translations            = 'translate_translations';
-		$wpdb->user_translations_count    = 'translate_user_translations_count';
+		// This value is only set in the production site (translate.wordpress.org).
+		// This check avoids to fire the cron job from another sites.
+		if ( ! isset( $wpdb->project_translation_status ) ) {
+			return;
+		}
 
 		$this->echo_the_values = $echo_the_values;
 		$this->set_number_of_years_with_data();
