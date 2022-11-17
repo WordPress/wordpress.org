@@ -39,6 +39,7 @@ class Reviews {
 			foreach ( $reviews as $review ) {
 				$GLOBALS['post'] = $review; // Override the_post();
 				setup_postdata( $review );
+				$reply_count = (int) get_post_meta( $review->ID, '_bbp_reply_count', true );
 				?>
 				<article class="plugin-review">
 					<div class="review-avatar">
@@ -52,6 +53,9 @@ class Reviews {
 							<div class="header-bottom">
 								<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
 								<span class="review-date"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ); ?></span>
+								<?php if ( $reply_count ) : ?>
+								<span class="review-replies"><?php printf( _n( '%s reply', '%s replies', $reply_count, 'wporg-plugins' ), number_format_i18n( $reply_count ) ); ?></span>
+								<?php endif; ?>
 							</div>
 						</header>
 						<div class="review-content"><?php echo wp_strip_all_tags( get_the_content() ); ?></div>
