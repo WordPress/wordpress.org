@@ -1,5 +1,4 @@
 {
-  "core": "WordPress/WordPress#master",
   "themes": [
     ".",
     "../wporg"

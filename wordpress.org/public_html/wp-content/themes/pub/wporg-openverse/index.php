@@ -14,6 +14,22 @@
 
 namespace WordPressdotorg\Openverse\Theme;
 
+/*
+	If the theme mod `ov_is_redirect_enabled` is set to `true`, redirect to the
+	standalone site and exit immediately. If not, print what would have been the
+	redirect URL to the HTML as a comment.
+ */
+
+$is_redirect_enabled = get_theme_mod( 'ov_is_redirect_enabled' );
+$target_url = get_target_url();
+
+if ( $is_redirect_enabled ) {
+	wp_redirect( $target_url );
+	exit;
+} else {
+	echo "<!-- " . $target_url . " -->";
+}
+
 get_header();
 ?>
 
