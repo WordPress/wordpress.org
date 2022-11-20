@@ -338,6 +338,9 @@ function get_whitelist() {
 		),
 		'fse-outreach-experiment' => array(
 			'annezazu',
+			'colorful tones', // @colorful-tones on Slack
+			'daisyo', // @DaisyO on Slack
+			'greenshady',
 		),
 		'glotpress' => array(
 			'Amieiro',
