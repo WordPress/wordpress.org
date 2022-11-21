@@ -1,5 +1,13 @@
 <?php
 
+/*
+ * This provide an interface to add/remove badges and activity entries from profiles.w.org.
+ * It uses Requests directly because WP often isn't loaded in endpoints.
+ *
+ * See `w.org/public_html/wp-content/mu-plugins/pub/profile-helpers.php` for a similar interface that is tailored
+ * to WP environments.
+ */
+
 namespace Dotorg\Profiles;
 use Requests, Requests_Exception;
 
