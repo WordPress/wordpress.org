@@ -342,6 +342,11 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 			$value = $pending_user['meta'][ $field ];
 			if ( 'url' == $field ) {
 				wp_update_user( array( 'ID' => $user_id, 'user_url' => $value ) );
+
+				// Update BuddyPress xProfile data.
+				if ( function_exists( 'WordPressdotorg\Profiles\update_profile' ) ) {
+					WordPressdotorg\Profiles\update_profile( 'Website URL', $value, $user_id );
+				}
 			} else {
 				if ( $value ) {
 					update_user_meta( $user_id, $field, $value );

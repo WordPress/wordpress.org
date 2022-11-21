@@ -1,14 +1,13 @@
 <?php
 
 /*
- * These functions provide a simple interface for other plugins to add/remove badges and activity entries from
- * profiles.w.org.
+ * These functions provide a simple interface for other plugins to modify WordPress.org Profile data, such as badges, activity entries, and xProfile fields.
  *
- * See `api.w.org/includes/profiles/profiles.php` for a similar function that is tailored to the API.
+ * See `api.w.org/includes/profiles/profiles.php` for a similar badge function that is tailored to the API.
  */
 
 namespace WordPressdotorg\Profiles;
-use WP_Error;
+use WP_Error, WP_User;
 
 /**
  * Assign a badge to a given user.
@@ -48,6 +47,26 @@ function add_activity( string $component, string $type, $user, array $args ) {
 		'type'      => $type,
 		'user'      => $user,
 		'args'      => $args,
+	] );
+
+	return ( 200 === wp_remote_retrieve_response_code( $request ) );
+}
+
+/**
+ * Update a BuddyPress profile field with a value.
+ *
+ * @param $field string      The profile field name to update.
+ * @param $value mixed       The value to update it to.
+ * @param $user  int|WP_User The user object or user ID to update.
+ * @return bool
+ */
+function update_profile( $field, $value, $user ) {
+	$request = api( [
+		'action' => 'wporg_update_profile',
+		'user'   => $user instanceOf WP_User ? $user->ID : $user,
+		'fields' => [
+			$field => $value
+		],
 	] );
 
 	return ( 200 === wp_remote_retrieve_response_code( $request ) );
