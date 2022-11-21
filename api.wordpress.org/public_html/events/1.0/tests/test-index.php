@@ -1224,9 +1224,9 @@ class Test_Events extends TestCase {
 			'ip-asia' => array(
 				'input' => array( 'ip' => '86.108.55.28' ),
 				'expected' => array(
-					'description' => 'karak city',
-					'latitude'    => '31.164',
-					'longitude'   => '35.762',
+					'description' => 'amman',
+					'latitude'    => '31.955',
+					'longitude'   => '35.945',
 					'country'     => 'JO',
 					'internal'    => true,
 				),
@@ -1312,8 +1312,8 @@ class Test_Events extends TestCase {
 				'input'    => array( 'ip' => '2405:200:1000::' ),
 				'expected' => array(
 					'description' => 'mumbai',
-					'latitude'    => '19.014',
-					'longitude'   => '72.848',
+					'latitude'    => '19.076',
+					'longitude'   => '72.877',
 					'country'     => 'IN',
 					'internal'    => true,
 				),
