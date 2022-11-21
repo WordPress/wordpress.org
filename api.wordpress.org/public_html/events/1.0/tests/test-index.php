@@ -1463,9 +1463,11 @@ class Test_Events extends TestCase {
 		$seed_events = array();
 
 		// Don't forget to update the values here when they're updated in the FUT.
+		$actual_events_before_start      = pin_one_off_events( $seed_events, strtotime( 'December 12, 2022' ) );
 		$actual_events_before_expiration = pin_one_off_events( $seed_events, strtotime( 'December 17, 2022' ) );
 		$actual_events_after_expiration  = pin_one_off_events( $seed_events, strtotime( 'December 19, 2022' ) );
 
+		$this->assertEmpty( $actual_events_before_start );
 		$this->assertIsArray( $actual_events_after_expiration );
 		$this->assertEmpty( $actual_events_after_expiration );
 

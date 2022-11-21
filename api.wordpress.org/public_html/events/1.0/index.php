@@ -1587,7 +1587,7 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  */
 function pin_one_off_events( $events, $current_time ) {
 
-	if ( $current_time < strtotime( 'December 18, 2022' ) ) {
+	if ( $current_time > strtotime( 'December 13, 2022' ) && $current_time < strtotime( 'December 18, 2022' ) ) {
 		$utc_offset = -5 * HOUR_IN_SECONDS;
 
 		$sotw = array(
