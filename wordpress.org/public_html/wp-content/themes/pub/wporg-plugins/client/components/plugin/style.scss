@@ -179,11 +179,11 @@
 		position:fixed;
 	}
 
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#advanced:not(.displayed) ~ .tabs li#tablink-description,
-	span#reviews:target ~ .tabs li#tablink-reviews,
-	span#installation:target ~ .tabs li#tablink-installation,
-	span#developers:target ~ .tabs li#tablink-developers,
-	span#advanced.displayed ~ .tabs li#tablink-advanced  {
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#advanced:not(.displayed) ~ #section-links .tabs li#tablink-description,
+	span#reviews:target ~ #section-links .tabs li#tablink-reviews,
+	span#installation:target ~ #section-links .tabs li#tablink-installation,
+	span#developers:target ~ #section-links .tabs li#tablink-developers,
+	span#advanced.displayed ~ #section-links .tabs li#tablink-advanced  {
 		border-top: 2px solid #eee;
 		border-left: 2px solid #eee;
 		border-right: 2px solid #eee;
@@ -195,6 +195,50 @@
 			&.active, &:hover {
 				padding-bottom: 2px !important;
 			}
+		}
+	}
+
+
+	span#section-links {
+		display: flex;
+		flex-flow: row wrap;
+
+		.tabs {
+			flex: 1 1 auto;
+		}
+
+		@media screen and (max-width:34em) {
+			display: block;
+		}
+	}
+
+	#link-support {
+		border-bottom: 2px solid #eee;
+		flex: 0 0 auto;
+		font-size: 0.9rem;
+		align-self: flex-end;
+		height: 2rem;
+
+		a::before {
+			content: '\f125';
+			display: inline-block;
+			font-family: dashicons;
+			margin-right: 0.4em;
+			vertical-align: top;
+			font-size: 1.2em;
+			max-height: 1em;
+		}
+
+		@media screen and (max-width: 737px) {
+			padding-right: 20px;
+		}
+
+		@media screen and (max-width:34em) {
+			border-bottom: 0;
+			display: block;
+			margin-left: 20px;
+			margin-top: 1.5rem;
+			width: 100%;
 		}
 	}
 
