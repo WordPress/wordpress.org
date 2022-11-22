@@ -124,6 +124,7 @@ class Starter_Content {
 		$this->filter_posts();
 		$this->filter_nav_menus();
 		$this->filter_post_thumbnails();
+		$this->filter_page_template();
 		$this->filter_sidebars();
 		$this->filter_theme_mods();
 	}
@@ -173,6 +174,24 @@ class Starter_Content {
 
 	public function filter_posts() {
 		add_filter( 'posts_pre_query', array( $this, 'filter_page_query' ), 10, 2 );
+	}
+
+	public function filter_page_template() {
+
+		add_filter(
+			'get_post_metadata',
+			function( $value, $post_id, $meta_key ) {
+				if ( '_wp_page_template' !== $meta_key ) {
+					return $value;
+				}
+
+				$post_data = $this->find_data_by_id( $post_id );
+
+				return $post_data['template'] ?? $value;
+			},
+			10,
+			3
+		);
 	}
 
 	public function filter_post_thumbnails() {
