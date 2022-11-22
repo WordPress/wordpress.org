@@ -30,7 +30,8 @@ class Audit_Log {
 				'one-click'   => ( isset( $_POST['List-Unsubscribe'] ) && 'One-Click' === $_POST['List-Unsubscribe'] ) ? ' (one-click)' : '',
 
 				// Not used in the printf, but included in meta
-				'request-uri' => $_SERVER['REQUEST_URI']
+				'request-uri' => $_SERVER['REQUEST_URI'],
+				'referer'     => wp_get_raw_referer(),
 			],
 			$user_id,
 			'subscriptions',
