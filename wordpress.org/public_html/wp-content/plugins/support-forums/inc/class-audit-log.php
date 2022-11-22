@@ -23,10 +23,14 @@ class Audit_Log {
 			// tag: tag-name
 			"%s: %s%s",
 			[
-				$type,
-				get_term( $term_id )->slug,
+				// Args for the above sprintf.
+				'type'        => $type,
+				'slug'        => get_term( $term_id )->slug,
 				// Tokenised links are from email unsubscribe links
-				( isset( $_POST['List-Unsubscribe'] ) && 'One-Click' === $_POST['List-Unsubscribe'] ) ? ' (one-click)' : ''
+				'one-click'   => ( isset( $_POST['List-Unsubscribe'] ) && 'One-Click' === $_POST['List-Unsubscribe'] ) ? ' (one-click)' : '',
+
+				// Not used in the printf, but included in meta
+				'request-uri' => $_SERVER['REQUEST_URI']
 			],
 			$user_id,
 			'subscriptions',
