@@ -450,9 +450,6 @@ class Stats {
 				ARRAY_A
 			);
 
-			$strings_added = number_format_i18n( $row['strings_added'] );
-			$contributors  = number_format_i18n( $row['contributors'] );
-
 			$repeat_contributors_val = $wpdb->get_var(
 				$wpdb->prepare(
 					"SELECT COUNT(user_id) FROM (
@@ -473,6 +470,8 @@ class Stats {
 				$repeat_contributors = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $repeat_contributors_val ) ), 8, ' ', STR_PAD_LEFT );
 				$code               .= "{$year} (*) \t {$strings_added} \t\t\t {$contributors} \t {$repeat_contributors}" . PHP_EOL;
 			}
+			$strings_added       = number_format_i18n( $row['strings_added'] );
+			$contributors        = number_format_i18n( $row['contributors'] );
 			$strings_added       = str_pad( $strings_added, 10, ' ', STR_PAD_LEFT );
 			$contributors        = str_pad( $contributors, 6, ' ', STR_PAD_LEFT );
 			$repeat_contributors = str_pad( number_format_i18n( $repeat_contributors_val ), 8, ' ', STR_PAD_LEFT );
