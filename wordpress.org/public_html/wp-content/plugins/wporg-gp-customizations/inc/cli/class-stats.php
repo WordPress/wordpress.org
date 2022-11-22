@@ -433,8 +433,9 @@ class Stats {
 			}
 
 			$first_id = $wpdb->get_var( $wpdb->prepare(
-				"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added >= %s",
-				$year . '-01-01'
+				"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added BETWEEN %s AND %s",
+				$year . '-01-01 00:00:00',
+				$year . '-01-02 00:00:00',
 			) );
 
 			$row = $wpdb->get_row(
