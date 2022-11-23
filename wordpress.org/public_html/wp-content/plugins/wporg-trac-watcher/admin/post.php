@@ -159,7 +159,8 @@ add_action( 'admin_post_svn_reparse', function() {
 	}
 
 	// Reparse
-	$raw_props = Props\from_log( $details->message );
+	$include_old = strtotime( $details->date ) < strtotime( '2020-01-01' );
+	$raw_props   = Props\from_log( $details->message, $include_old );
 
 	// Fetch all the user_id's
 	$props = [];

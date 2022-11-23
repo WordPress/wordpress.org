@@ -149,8 +149,12 @@ function import_revisions( $svn ) {
 		$wpdb->insert( $db_table, $data );
 
 		if ( $props_table ) {
+
+			// Only run the more lenient props matchers on 'older' commits. 2020 holds no significance.
+			$include_old = strtotime( $date ) < strtotime( '2020-01-01' );
+
 			// Look for the props in the commit.
-			$props = props_from_log( $msg );
+			$props = props_from_log( $msg, $include_old );
 
 			foreach ( $props as $prop ) {
 

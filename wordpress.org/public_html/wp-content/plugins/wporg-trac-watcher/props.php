@@ -2,7 +2,18 @@
 namespace WordPressdotorg\Trac\Watcher\Props;
 use function WordPressdotorg\Trac\Watcher\SVN\get_svns;
 
-function from_log( $log ) {
+/**
+ * Parse a log message and extract the props.
+ *
+ * The $include_old parameter can be used to run much more lenient matchers against the log, if the primary prop regexes
+ * do not match. These are mostly from the early days of commits when they were less structured, but can have a higher
+ * false-positive match. Such as "updates from github".
+ *
+ * @param string $log         The log message
+ * @param bool   $include_old Whether to include the "really old matchers". See Note above.
+ * @return array
+ */
+function from_log( $log, $include_old = false ) {
 	$props        = '\s*(?P<props>.+?)';
 	$props_greedy = '\s*(?P<props>.+)';
 	$props_short  = '\s*(?P<props>\S{4,}((\s*and)?\s+\S{4,})?)'; // One or two words 4char+
@@ -22,8 +33,10 @@ function from_log( $log ) {
 			".{$sol}props([:]| to ) {$props_greedy}{$eol}", // `.` prefix is to ensure that the SOL is not the start of the message, to avoid triggering for https://meta.trac.wordpress.org/changeset/11790
 			"([0-9]|\pP)\s+props([:]|\s+to)? {$props_one}( in .+)?(,|{$eol})",
 			"{$sol}(h/t|hat tip:) {$props_short}{$eol}",
+		],
 
-			// These are starting to get real old... like three-digit core commit old..
+		// These are starting to get real old... like three-digit core commit old.. only run when needed (See the $include_old parameter)
+		'old' => [
 			"with help from {$props}{$real_eol}",
 			"\S\sprops([:]|\s+to)? {$props_short}{$eol}", // Inline props
 			"\scredit(?! card)([:]|\sto)? {$props_short}", // Credit: ... or Credit to ...
@@ -67,6 +80,16 @@ function from_log( $log ) {
 			break;
 		}
 	}
+
+	if ( ! $data && $include_old ) {
+		foreach ( $matchers['old'] as $regex ) {
+			if ( preg_match_all( '#' . $regex . '#im', $log, $m ) ) {
+				$data = array_merge( $data, $m['props'] );
+				break;
+			}
+		}
+	}
+
 	foreach ( $matchers['multiple'] as $regex ) {
 		if ( preg_match_all( '#' . $regex . '#im', $log, $m ) ) {
 			$data = array_merge( $data, $m['props'] );
