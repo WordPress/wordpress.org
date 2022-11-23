@@ -104,18 +104,22 @@ class Emails {
 		// Prevent recursive calls.
 		$recursive = true;
 		foreach ( $dest_emails as $to ) {
-			// The to is always the current recipient.
-			$attrs['to'] = $to;
+			// Use a fresh copy of the attrs.
+			$email_attrs = $attrs;
+
+			// The to is always going to be the current recipient.
+			$email_attrs['to'] = $to;
 
 			// Filter for w.org plugins to personalize emails.
-			$attrs = apply_filters( 'wporg_bbp_subscription_email', $attrs );
-	
+			$email_attrs = apply_filters( 'wporg_bbp_subscription_email', $email_attrs );
+
+			// Send the filtered email.
 			$filter_return = wp_mail(
-				$attrs['to'],
-				$attrs['subject'],
-				$attrs['message'],
-				$attrs['headers'],
-				$attrs['attachments']
+				$email_attrs['to'],
+				$email_attrs['subject'],
+				$email_attrs['message'],
+				$email_attrs['headers'],
+				$email_attrs['attachments']
 			);
 		}
 

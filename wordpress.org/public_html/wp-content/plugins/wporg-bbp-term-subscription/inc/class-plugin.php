@@ -80,6 +80,9 @@ class Plugin {
 		// Add a banner above the 'forum' about being subscribed to it.
 		add_action( 'bbp_template_before_topics_index', array( $this, 'before_view' ) );
 		add_action( 'wporg_compat_before_single_view',  array( $this, 'before_view' ) );
+
+		// Use a custom salt
+		add_filter( 'salt', array( $this, 'forum_subscriptions_salt' ), 10, 2 );
 	}
 
 	/**
@@ -797,6 +800,17 @@ To unsubscribe from future emails, click here:
 	}
 
 	/**
+	 * Define a custom salt for wp_hash( ..., 'forum_subcriptions' ).
+	 */
+	public function forum_subscriptions_salt( $salt, $scheme ) {
+		if ( 'forum_subscriptions' === $scheme && defined( 'FORUM_SUBSCRIPTIONS_SALT' ) ) {
+			$salt = FORUM_SUBSCRIPTIONS_SALT;
+		}
+
+		return $salt;
+	}
+
+	/**
 	 * Generates a unsubscription token for a user.
 	 *
 	 * The token form is 'user_id|expiry|hash', and dependant upon the user email, password, and term.
@@ -816,7 +830,7 @@ To unsubscribe from future emails, click here:
 
 		$expiry    = intval( $expiry );
 		$pass_frag = substr( $user->user_pass, 8, 4 ); // Password fragment used by cookie auth.
-		$key       = wp_hash( $term->term_id . '|' . $term->taxonomy . '|' . $user->user_email . '|' . $pass_frag . '|' . $expiry, 'forum_subcriptions' );
+		$key       = wp_hash( $term->term_id . '|' . $term->taxonomy . '|' . $user->user_email . '|' . $pass_frag . '|' . $expiry, 'forum_subscriptions' );
 		$hash      = hash_hmac( 'sha256',  $term->term_id . '|' . $term->taxonomy . '|' . $user->user_email . '|' . $expiry, $key );
 
 		return $user->ID . '|' . $expiry . '|' . $hash;
