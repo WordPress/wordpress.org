@@ -184,3 +184,12 @@
 	}
 	?>
 </div><!-- .discussion-wrapper -->
+<script>	
+	jQuery(function( e, mentions ) {
+		var mentionsList = '<?php echo wp_json_encode( $mentions_list ); ?>';
+		var jetpackMentionsData = JSON.parse( mentionsList );
+		if( jetpackMentionsData.length > 0 ) {
+			jQuery( 'textarea#comment' ).mentions( jetpackMentionsData );
+		}
+	});
+</script>

@@ -43,6 +43,16 @@ class WPorg_GlotPress_Customizations {
 				10,
 				2
 			);
+
+			add_filter( 'jetpack_mentions_should_load_ui', '__return_true' );
+			add_filter(
+				'jetpack_mentions_allowed_post_types',
+				function( $post_types ) {
+					$post_types[] = Helper_Translation_Discussion::POST_TYPE;
+					return $post_types;
+				}
+			);
+
 		}
 	}
 }

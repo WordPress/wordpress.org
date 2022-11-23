@@ -266,8 +266,16 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			return $cache[ $post->ID ];
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$locale_exists = isset( $_POST['meta']['locale'] ) && ! empty( $this->sanitize_comment_locale( $_POST['meta']['locale'] ) );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$locale_slug = $locale_exists ? $_POST['meta']['locale'] : null;
+
+		$set_slug = $locale_exists ? 'default' : null;
+
 		// We were able to gather all information, let's put it in the cache.
-		$cache[ $post->ID ] = GP_Route_Translation_Helpers::get_permalink( $project->path, $original_id );
+		$cache[ $post->ID ] = GP_Route_Translation_Helpers::get_permalink( $project->path, $original_id, $set_slug, $locale_slug );
 
 		return $cache[ $post->ID ];
 	}
@@ -561,7 +569,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
-		$post   = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+		$post          = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+		$mentions_list = apply_filters( 'gp_mentions_list', array(), $comments, $this->data['locale_slug'], $this->data['original_id'] );
+
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
 			array(
@@ -573,6 +583,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'original_id'          => $this->data['original_id'],
 				'project'              => $this->data['project'],
 				'translation_set_slug' => $this->data['translation_set_slug'],
+				'mentions_list'        => $mentions_list,
+
 			),
 			$this->assets_dir . 'templates'
 		);

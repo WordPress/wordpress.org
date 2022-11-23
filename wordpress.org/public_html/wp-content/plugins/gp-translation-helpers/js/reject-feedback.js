@@ -22,7 +22,7 @@
 			$( 'body' ).append( modalFeedbackForm );
 
 			// Remove click event added to <summary> by wporg-gp-customizations plugin
-			$( $gp.editor.table ).off( 'click', 'summary' );
+			$( $gp.editor.table ).off( 'click', 'summary.feedback-summary' );
 
 			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar-bottom .button' ).click(
 				function( e ) {
