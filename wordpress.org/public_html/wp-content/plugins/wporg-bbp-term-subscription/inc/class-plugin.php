@@ -179,8 +179,9 @@ class Plugin {
 						'<h1>%1$s</h1>' .
 						'<p>%2$s</p>' .
 						'<form method="POST" action="%3$s">' .
-							'<input type="submit" name="confirm" value="%4$s">' .
-							'&nbsp<a href="%5$s">%6$s</a>' .
+							'<input type="hidden" name="_wp_http_referer" value="%4$s" />' .
+							'<input type="submit" name="confirm" value="%5$s">' .
+							'&nbsp<a href="%6$s">%7$s</a>' .
 						'</form>',
 						get_bloginfo('name'),
 						sprintf(
@@ -189,6 +190,7 @@ class Plugin {
 							$term->name
 						),
 						esc_attr( $_SERVER['REQUEST_URI'] ),
+						esc_attr( wp_get_raw_referer() ),
 						esc_attr__( 'Yes, unsubscribe me', 'wporg-forums' ),
 						esc_url( get_term_link( $term ) ),
 						esc_attr( sprintf(
