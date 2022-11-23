@@ -88,10 +88,13 @@ $args = array(
 	'reverse_children' => false,
 );
 
-
-
 ?>
 
+<div class="filter-toolbar">
+	<a class="<?php echo ( ! $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( remove_query_arg( array( 'filter', 'page' ) ) ); ?>">All&nbsp;(<?php echo esc_html( count( $all_comments_post_ids ) ); ?>)</a> <span class="separator">•</span>
+	<a class="<?php echo ( 'participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'participating', $_SERVER['REQUEST_URI'] ) ); ?>">Participating&nbsp;(<?php echo esc_html( count( $participating_post_ids ) ); ?>)</a> <span class="separator">•</span>
+	<a class="<?php echo ( 'not_participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'not_participating', $_SERVER['REQUEST_URI'] ) ); ?>">Not participating&nbsp;(<?php echo esc_html( count( $not_participating_post_ids ) ); ?>)</a>
+</div>
 <table id="translations" class="translations clear">
 	<thead class="discussions-table-head">
 	<tr>
