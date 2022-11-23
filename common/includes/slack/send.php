@@ -122,6 +122,11 @@ class Send {
 			// $payload['reply_broadcast'] = true;
 		}
 
+		// Filter to allow short-circuit by Matrix
+		if ( apply_filters( 'skip_slack_posting', false, $channel, $payload[ 'text' ] ) ) {
+			return;
+		}
+
 		# error_log( print_r( $payload, true ) );
 		$payload = json_encode( $payload );
 		$content = http_build_query( compact( 'payload' ) );
