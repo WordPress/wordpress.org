@@ -341,7 +341,8 @@ class Commits_List_Table extends WP_List_Table {
 				return "<div>{$message}</div>";
 
 			case 'props':
-				$output = '<div class="propslist">';
+				$can_edit = current_user_can( 'publish_posts' );
+				$output   = '<div class="propslist">';
 
 				foreach ( $item->props as $prop => $user_id ) {
 					$user    = $user_id ? get_user_by( 'ID', $user_id ) : false;
@@ -372,7 +373,9 @@ class Commits_List_Table extends WP_List_Table {
 					if ( $user ) {
 						$output .= '</a>';
 					}
-					$output .= '<div class="overlay"><div class="actions"><a href="#" class="edit dashicons dashicons-edit"></a></div></div>';
+					if ( $can_edit ) {
+						$output .= '<div class="overlay"><div class="actions"><a href="#" class="edit dashicons dashicons-edit"></a></div></div>';
+					}
 
 					if ( $prop_is_different_from_user || $prop_display_name_different ) {
 						$output .= sprintf(
@@ -384,10 +387,16 @@ class Commits_List_Table extends WP_List_Table {
 
 					$output .= '</span>';
 				}
-				$output .= '<span class="user add"><a href="#" class="add dashicons dashicons-plus"></a>&nbsp;<a href="#" class="add">Add new</a></span>';
+
+				if ( $can_edit ) {
+					$output .= '<span class="user add"><a href="#" class="add dashicons dashicons-plus"></a>&nbsp;<a href="#" class="add">Add new</a></span>';
+				}
+
 				$output .= '</div>';
 
-				$output .= '<p class="actions"><a href="#" class="reparse">Reparse</a></p>';
+				if ( $can_edit ) {
+					$output .= '<p class="actions"><a href="#" class="reparse">Reparse</a></p>';
+				}
 
 				return $output;
 
