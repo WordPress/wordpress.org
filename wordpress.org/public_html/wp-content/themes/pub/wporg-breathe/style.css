@@ -533,6 +533,7 @@ pre code {
 }
 
 .wp-block-code {
+	color: #000000;
 	background-color: #f1f1f1;
 	display: block;
 	font-size: 13px;
