@@ -17,6 +17,19 @@ global $section, $section_slug, $section_content, $post;
 $content   = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
 
+$demo_configs = [
+	'classic-editor' => http_build_query( array( 'url' => '/wp-admin/post-new.php' ) ),
+	'coblocks' => http_build_query( array( 'url' => '/wp-admin/post-new.php' ) ),
+	'create-block-theme' => http_build_query( array( 'url' => '/wp-admin/admin.php?page=create-block-theme' ) ),
+	'gutenberg' => http_build_query( array( 'url' => '/wp-admin/admin.php?page=gutenberg' ) ),
+	'contact-form-7' => http_build_query( array( 'url' => '/wp-admin/post-new.php' ) ),
+	'bbpress' => http_build_query( array( 'url' => '/wp-admin/index.php?page=bbp-about' ) ),
+	'buddypress' => http_build_query( array( 'url' => '/wp-admin/' ) ),
+	'copy-delete-posts' => http_build_query( array( 'url' => '/wp-admin/edit.php' ) )
+];
+$has_demo = array_key_exists($post->post_name, $demo_configs);
+$demo_querystring = $has_demo ? $demo_configs[$post->post_name] : false;
+
 $plugin_title = $is_closed ? $post->post_name : get_the_title();
 ?>
 
@@ -55,6 +68,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 	<span id="reviews"></span>
 	<span id="installation"></span>
 	<span id="developers"></span>
+	<span id="demo"></span>
 	<span id="advanced" class="<?php if ( get_query_var( 'plugin_advanced' ) ) { echo 'displayed'; } ?>"></span>
 	<span id="section-links">
 		<ul class="tabs clear">
@@ -66,6 +80,9 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			</li>
 		<?php endif; ?>
 		<li id="tablink-developers"><a href="<?php the_permalink(); ?>#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
+		<?php if ( $has_demo ) : ?>
+			<li id="tablink-demo"><a href="<?php the_permalink(); ?>#demo"><?php esc_html_e( 'Demo', 'wporg-plugins' ); ?></a></li>
+		<?php endif; ?>
 		<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
 			<li id="tablink-advanced"><a href="<?php the_permalink(); ?>advanced/"><?php esc_html_e( 'Advanced View', 'wporg-plugins' ); ?></a></li>
 		<?php endif; ?>
@@ -83,7 +100,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 		else :
 			$plugin_sections = Template::get_plugin_sections();
 
-			foreach ( array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog' ) as $section_slug ) :
+			foreach ( array( 'description', 'screenshots', 'blocks', 'installation', 'faq', 'reviews', 'developers', 'changelog', 'demo' ) as $section_slug ) :
 				$section_content = '';
 
 				if ( 'description' === $section_slug && $is_closed ) {
@@ -92,6 +109,14 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 
 				} elseif ( 'blocks' === $section_slug ) {
 					$section_content = get_post_meta( get_the_ID(), 'all_blocks', true );
+				}  elseif ( 'demo' === $section_slug && $has_demo ) {
+					$zip_file = urlencode($post->post_name) . '.latest-stable.zip';
+					$section_content = <<<CONTENT
+						<iframe
+							class="plugin-demo-preview"
+							src="https://wasm.wordpress.net/wordpress.html?plugin=$zip_file&$demo_querystring"
+						></iframe>
+CONTENT;
 				} elseif ( ! in_array( $section_slug, [ 'screenshots', 'installation', 'faq', 'changelog' ], true ) || ! $is_closed ) {
 					if ( isset( $content[ $section_slug ] ) ) {
 						$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );

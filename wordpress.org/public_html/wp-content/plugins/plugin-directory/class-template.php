@@ -349,6 +349,7 @@ class Template {
 			'support',
 			'reviews',
 			'developers',
+			'demo',
 		);
 		if ( ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
 			unset( $default_sections[ array_search( 'screenshots', $default_sections ) ] );
@@ -409,6 +410,11 @@ class Template {
 
 				case 'developers':
 					$title = _x( 'Contributors &amp; Developers', 'plugin tab title', 'wporg-plugins' );
+					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
+					break;
+
+				case 'demo':
+					$title = _x( 'Demo', 'plugin tab title', 'wporg-plugins' );
 					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
 					break;
 
