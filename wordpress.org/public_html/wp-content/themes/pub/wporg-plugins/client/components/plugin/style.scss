@@ -178,11 +178,13 @@
 	span#installation {
 		position:fixed;
 	}
-
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#advanced:not(.displayed) ~ #section-links .tabs li#tablink-description,
+ 
+	
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#advanced:not(.displayed) ~ span#demo:not(:target) ~ #section-links .tabs li#tablink-description,
 	span#reviews:target ~ #section-links .tabs li#tablink-reviews,
 	span#installation:target ~ #section-links .tabs li#tablink-installation,
 	span#developers:target ~ #section-links .tabs li#tablink-developers,
+	span#demo:target ~ #section-links .tabs li#tablink-demo,
 	span#advanced.displayed ~ #section-links .tabs li#tablink-advanced  {
 		border-top: 2px solid #eee;
 		border-left: 2px solid #eee;
@@ -242,14 +244,15 @@
 		}
 	}
 
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-description,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #screenshots,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #faq,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #blocks,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers,
-	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers ~ button,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#demo:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-description,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#demo:not(:target) ~ span#developers:not(:target) ~ .entry-content #screenshots,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#demo:not(:target) ~ span#developers:not(:target) ~ .entry-content #faq,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#demo:not(:target) ~ span#developers:not(:target) ~ .entry-content #blocks,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#demo:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#demo:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers ~ button,
 	span#reviews:target ~ .entry-content #tab-reviews,
 	span#installation:target ~ .entry-content #tab-installation,
+	span#demo:target ~ .entry-content #tab-demo,
 	span#developers:target ~ .entry-content #tab-changelog,
 	span#developers:target ~ .entry-content #tab-developers,
 	span#developers:target ~ .entry-content #tab-developers ~ button,
@@ -263,12 +266,18 @@
 	}
 
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-meta .plugin-contributors,
+	span#demo:target ~ .entry-meta,
 	span#reviews:target ~ .entry-meta .plugin-meta,
 	span#reviews:target ~ .entry-meta .plugin-support,
 	span#reviews:target ~ .entry-meta .plugin-donate,
 	span#reviews:target ~ .entry-meta .plugin-contributors,
 	span#installation:target ~ .entry-meta .plugin-contributors {
 		display:none;
+	}
+
+	span#demo:target ~ .entry-content {
+		width: 100%;
+		max-width: none;
 	}
 
 	@media screen and ( min-width: $ms-breakpoint ) {
