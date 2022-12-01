@@ -10,11 +10,15 @@ gp_tmpl_header();
 
 ?>
 <div class="stats-table">
+
+<?php /* todo: remove this code and the style-full-width.css file after the tests */
+if ( ! ( ( isset( $_GET['full-width'] ) && 'true' == $_GET['full-width'] ) ) ): ?>
 	<style>
 	.gp-content {
 		max-width: 95%;
 	}
 	</style>
+<?php endif; ?>
 	<table id="stats-table" class="table">
 		<thead>
 			<tr>

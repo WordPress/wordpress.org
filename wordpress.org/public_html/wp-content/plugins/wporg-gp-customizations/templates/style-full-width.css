@@ -1,0 +1,87 @@
+/* todo: remove this file and its invocation after the tests */
+.site-header .site-branding {
+	max-width: 100%;
+	padding: 0 20px;
+}
+
+.navigation-main {
+	max-width: 100%;
+}
+
+.gp-content {
+	max-width: 100%;
+	padding: 0 20px;
+}
+
+@media screen and (min-width: 900px) {
+	.locales {
+		-ms-grid-columns: 1fr 30px 1fr 30px 1fr;
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+@media screen and (min-width: 1100px) {
+	.locales {
+		-ms-grid-columns: 1fr 30px 1fr 30px 1fr;
+		grid-template-columns: repeat(5, 1fr);
+	}
+}
+
+@media screen and (min-width: 1300px) {
+	.locales {
+		-ms-grid-columns: 1fr 30px 1fr 30px 1fr;
+		grid-template-columns: repeat(6, 1fr);
+	}
+}
+
+@media screen and (min-width: 1419px) {
+	.projects {
+		grid-template-columns: repeat( 4, minmax( 0, 1fr ) );
+	}
+}
+
+@media screen and (min-width: 1619px) {
+	.projects {
+		grid-template-columns: repeat( 5, minmax( 0, 1fr ) );
+	}
+}
+
+@media screen and (min-width: 2019px) {
+	.projects {
+		grid-template-columns: repeat( 6, minmax( 0, 1fr ) );
+	}
+}
+
+/* Sub Projects table */
+table.gp-table.locale-sub-projects {
+	max-width: 1000px;
+}
+
+table.locale-sub-projects thead th:nth-child( 1 ) {
+	width: 35%;
+}
+
+table.locale-sub-projects thead th:nth-child( n+2 ) {
+	width: 16.25%;
+}
+
+.locale-sub-projects .sub-project-status {
+	font-size: 90%;
+	color: #a0a5aa;
+}
+
+.gp-table.locale-project-contributors-table {
+	max-width: 1000px;
+}
+
+.locale-project-contributors-table .contributor-details {
+	width: 35%;
+}
+
+@media screen and (min-width: 700px) {
+	.editor-panel__right {
+		min-width: 40%;
+	}
+}
+
+ 
