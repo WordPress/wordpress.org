@@ -53,7 +53,7 @@ class WPorg_Handbook_TOC {
 	}
 
 	public function load_filters() {
-		if ( is_singular( $this->post_types ) && ! is_embed() ) {
+		if ( is_singular( $this->post_types ) && ! is_embed() && ! is_front_page() ) {
 			add_filter( 'the_content', array( $this, 'add_toc' ) );
 		}
 	}
