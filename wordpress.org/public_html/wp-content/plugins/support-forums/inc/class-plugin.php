@@ -38,6 +38,7 @@ class Plugin {
 	public $plugins              = false;
 	public $plugin_subscriptions = false; // Defined via Support_Compat
 	public $theme_subscriptions  = false; // Defined via Support_Compat
+	public $blocks               = false;
 
 	/**
 	 * Always return the same instance of this plugin.
@@ -78,6 +79,10 @@ class Plugin {
 			// Plugin_Directory_Compat depending on the request.
 			$this->themes          = new Theme_Directory_Compat;
 			$this->plugins         = new Plugin_Directory_Compat;
+		}
+
+		if ( class_exists( 'Automattic\Blocks_Everywhere\Blocks_Everywhere' ) ) {
+			$this->blocks = new Blocks;
 		}
 
 		add_action( 'bbp_add_rewrite_rules', array( $this, 'maybe_flush_rewrite_rules' ) );
