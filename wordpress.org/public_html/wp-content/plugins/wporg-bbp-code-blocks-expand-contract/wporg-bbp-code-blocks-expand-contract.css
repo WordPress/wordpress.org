@@ -24,3 +24,21 @@
 .wporg-bbp-code-expand.wporg-bbp-code-expanded:before {
 	content: "\f343";
 }
+
+/* force-disable overflow on the <code> elements. */
+#bbpress-forums div.bbp-topic-content pre code,
+#bbpress-forums div.bbp-reply-content pre code {
+	overflow: unset !important;
+	overflow-x: inherit;
+}
+
+#bbpress-forums div.bbp-topic-content pre.wporg-bbp-code-expander-code-wrapper,
+#bbpress-forums div.bbp-reply-content pre.wporg-bbp-code-expander-code-wrapper {
+	white-space: pre-wrap;
+}
+
+#bbpress-forums div.bbp-topic-content pre.wporg-bbp-code-expander-code-wrapper code,
+#bbpress-forums div.bbp-reply-content pre.wporg-bbp-code-expander-code-wrapper code {
+	display: unset;
+//	max-height: unset;
+}
