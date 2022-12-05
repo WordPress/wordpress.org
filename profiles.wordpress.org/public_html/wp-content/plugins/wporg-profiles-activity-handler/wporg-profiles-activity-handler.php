@@ -38,12 +38,14 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			add_filter( 'bp_activity_global_tables', array( $this, 'change_global_table_names' ) );
 			add_filter( 'bp_activity_meta_tables',   array( $this, 'change_meta_table_names' ) );
 			add_filter( 'bp_active_components',      array( $this, 'activate_activity_component' ) );
+			add_action( 'bp_setup_cache_groups',     array( $this, 'bp_setup_cache_groups' ), 11 );
 			add_action( 'plugins_loaded',            array( $this, 'plugins_loaded' ) );
 
 			// Disable default BP activity features
 			add_filter( 'bp_activity_can_comment', '__return_false' );
 			add_filter( 'bp_activity_do_mentions', '__return_false' );
 			add_filter( 'bp_activity_use_akismet', '__return_false' );
+
 		}
 
 		/**
@@ -105,6 +107,28 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$tables['activity'] = $bp->table_prefix . 'wporg_activity_meta';
 
 			return $tables;
+		}
+
+		/**
+		 * Make the cache-group localised to the profile site.
+		 *
+		 * See https://core.trac.wordpress.org/ticket/54303 for remove_global_group.
+		 */
+		public function bp_setup_cache_groups() {
+			global $wp_object_cache;
+
+			if ( ! is_object( $wp_object_cache ) || 'WPORG_Object_Cache' !== get_class( $wp_object_cache ) ) {
+				return;
+			}
+
+			$wp_object_cache->global_groups = array_diff(
+				$wp_object_cache->global_groups,
+				[
+					'bp_activity',
+					'bp_activity_comments',
+					'activity_meta'
+				]
+			);
 		}
 
 		/**

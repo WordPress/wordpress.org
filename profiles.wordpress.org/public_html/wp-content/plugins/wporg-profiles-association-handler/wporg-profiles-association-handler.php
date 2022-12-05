@@ -21,6 +21,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 			add_filter( 'bp_groups_global_tables', array( $this, 'change_global_table_names' ) );
 			add_filter( 'bp_groups_meta_tables',   array( $this, 'change_meta_table_names' ) );
 			add_filter( 'bp_active_components',    array( $this, 'activate_groups_component' ) );
+			add_action( 'bp_setup_cache_groups',   array( $this, 'bp_setup_cache_groups' ), 11 );
+
 			add_action( 'plugins_loaded',          array( $this, 'plugins_loaded' ) );
 		}
 
@@ -69,6 +71,35 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 
 			return $tables;
 		}
+
+		/**
+		 * Make the cache-group localised to the profile site.
+		 *
+		 * See https://core.trac.wordpress.org/ticket/54303 for remove_global_group.
+		 */
+		public function bp_setup_cache_groups() {
+			global $wp_object_cache;
+
+			if ( ! is_object( $wp_object_cache ) || 'WPORG_Object_Cache' !== get_class( $wp_object_cache ) ) {
+				return;
+			}
+
+			$wp_object_cache->global_groups = array_diff(
+				$wp_object_cache->global_groups,
+				[
+					'bp_groups',
+					'bp_group_admins',
+					'bp_group_invite_count',
+					'group_meta',
+					'bp_groups_memberships',
+					'bp_groups_memberships_for_user',
+					'bp_group_mods',
+					'bp_groups_invitations_as_memberships',
+					'bp_groups_group_type'
+				]
+			);
+		}
+
 
 		/**
 		 * Ensures that the groups component is activated.
