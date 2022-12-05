@@ -61,9 +61,9 @@ class Blocks {
 		$settings['iso']['linkMenu'] = [
 			[
 				/* translators: Link title to the WordPress Editor support article. */
-				'title' => __( 'Help & Support', 'wporg' ),
+				'title' => __( 'Help & Support', 'wporg-forums' ),
 				/* translators: Link to the WordPress Editor article, used as the forum 'Help & Support' destination. */
-				'link' => __( 'https://wordpress.org/support/article/wordpress-editor/', 'wporg' ),
+				'url'   => __( 'https://wordpress.org/support/article/wordpress-editor/', 'wporg-forums' ),
 			]
 		];
 
