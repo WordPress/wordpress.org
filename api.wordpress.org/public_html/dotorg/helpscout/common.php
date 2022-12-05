@@ -42,17 +42,22 @@ function get_user_email_for_email( $request ) {
 	if ( ! $user && $email && isset( $request->ticket->id ) ) {
 		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $request->customer->fname ?? false ), ( $request->customer->lname ?? false ) ] ) ) );
 		$subject_lower = strtolower( $subject );
+
 		if (
 			str_contains( $from, 'mail delivery' ) ||
 			str_contains( $from, 'postmaster' ) ||
 			str_contains( $from, 'mailer-daemon' ) ||
+			str_contains( $from, 'noreply' ) ||
 			str_contains( $subject_lower, 'undelivered mail' ) ||
 			str_contains( $subject_lower, 'returned mail' ) ||
 			str_contains( $subject_lower, 'returned to sender' ) ||
 			str_contains( $subject_lower, 'delivery status' ) ||
 			str_contains( $subject_lower, 'delivery report' ) ||
-			str_contains( $subject_lower, 'mail delivery failed' )
+			str_contains( $subject_lower, 'mail delivery failed' ) ||
+			str_contains( $subject_lower, 'mail delivery failure' )
 		) {
+
+
 			// Fetch the email.
 			$email_obj = Helpscout_API::api( '/v2/conversations/' . $request->ticket->id . '?embed=threads' );
 			if ( ! empty( $email_obj->_embedded->threads ) ) {
@@ -66,11 +71,11 @@ function get_user_email_for_email( $request ) {
 
 					// Extract `To:`, `X-Orig-To:`, and fallback to all emails.
 					$emails = [];
-					if ( preg_match( '!^(x-orig-to:|to:)\s*(.+@.+)$!im', $email_body, $m ) ) {
-						$m[2] = str_replace( [ '&lt;', '&gt;' ], '', $m[2] );
-						$m[2] = trim( $m[2], '<> ' );
+					if ( preg_match( '!^(x-orig-to:|to:|Final-Recipient:(\s*rfc\d+;)?)\s*(?P<email>.+@.+)$!im', $email_body, $m ) ) {
+						$m['email'] = str_replace( [ '&lt;', '&gt;' ], '', $m['email'] );
+						$m['email'] = trim( $m['email'], '<> ' );
 
-						$emails = [ $m[2] ];
+						$emails = [ $m['email'] ];
 					} else {
 						// Ugly regex for emails, but it's good for mailer-daemon emails.
 						if ( preg_match_all( '![^\s;"]+@[^\s;&"]+\.[^\s;&"]+[a-z]!', $email_body, $m ) ) {
