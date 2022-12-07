@@ -32,6 +32,9 @@ class Blocks {
 
 		// Allow the oEmbed proxy endpoint for any user who can publish a thread/reply..
 		add_filter( 'rest_api_init', [ $this, 'overwrite_oembed_10_proxy_permission' ], 20 );
+
+		// Hack to make Imgur embeds work. This should be fixed by Imgur.
+		add_filter( 'oembed_remote_get_args', [ $this, 'oembed_remote_get_args' ], 10, 2 );
 	}
 
 	public function enqueue_scripts() {
@@ -81,7 +84,13 @@ class Blocks {
 			]
 		];
 
-		// TODO: To modify the available embeds modify $settings['iso']['allowEmbeds']
+		$settings['iso']['allowEmbeds'] = array_diff(
+			$settings['iso']['allowEmbeds'],
+			[
+				// Disable screencast, it seems not to work.
+				'screencast',
+			]
+		);
 
 		return $settings;
 	}
@@ -107,5 +116,21 @@ class Blocks {
 			$oembed_proxy_route_args,
 			true
 		);
+	}
+
+	/**
+	 * Imgur oEmbed API appears to block any request with a lowercase 'wordpress' in the user-agent.
+	 *
+	 * @param array  $http_args    The args to pass to wp_safe_remote_get().
+	 * @param string $provider_url The URL of the oEmbed provider to be requested.
+	 * @return array The modified $http_args.
+	 */
+	public function oembed_remote_get_args( $http_args, $provider_url ) {
+		if ( str_contains( $provider_url, 'imgur.com' ) ) {
+			$http_args['user-agent'] = apply_filters( 'http_headers_useragent', 'WordPress/' . get_bloginfo( 'version' ) . '; ' . get_bloginfo( 'url' ), $provider_url );
+			$http_args['user-agent'] = str_replace( 'wordpress', 'WordPress', $http_args['user-agent'] );
+		}
+
+		return $http_args;
 	}
 }
