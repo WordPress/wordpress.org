@@ -27,6 +27,9 @@ class Blocks {
 		// Customize blocks for the Support Forums.
 		add_filter( 'blocks_everywhere_editor_settings', [ $this, 'editor_settings' ] );
 
+		// Enable the blocks on the server-side.
+		add_filter( 'blocks_everywhere_allowed_blocks', [ $this, 'allowed_blocks' ] );
+
 		// Allow the oEmbed proxy endpoint for any user who can publish a thread/reply..
 		add_filter( 'rest_api_init', [ $this, 'overwrite_oembed_10_proxy_permission' ], 20 );
 	}
@@ -44,6 +47,14 @@ class Blocks {
 	public function after_setup_theme() {
 		// This will make embeds resize properly.
 		add_theme_support( 'responsive-embeds' );
+	}
+
+	public function allowed_blocks( $blocks ) {
+		// See ::editor_settings();
+		$blocks[] = 'core/image';
+		$blocks[] = 'core/embed';
+
+		return array_unique( $blocks );
 	}
 
 	public function editor_settings( $settings ) {
