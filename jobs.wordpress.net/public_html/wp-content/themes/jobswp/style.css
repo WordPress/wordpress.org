@@ -465,6 +465,10 @@ a:active {
 		display: block;
 	}
 
+	.container .main-navigation {
+		width: 100%;
+	}
+
 	.main-navigation ul {
 		display: none;
 	}
@@ -1409,6 +1413,9 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	}
 	#content {
 		padding-top: 20px;
+	}
+	.container .site-branding {
+		width: 100%;
 	}
 	#logo {
 		text-align: center;
