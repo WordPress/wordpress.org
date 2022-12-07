@@ -80,7 +80,7 @@ add_action( 'template_redirect', __NAMESPACE__ . '\enforce_trailing_slash' );
 function content_width() {
 	$GLOBALS['content_width'] = apply_filters( 'wporg_photos_content_width', 960 );
 }
-add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
+add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 100 );
 
 /**
  * Enqueue scripts and styles.
