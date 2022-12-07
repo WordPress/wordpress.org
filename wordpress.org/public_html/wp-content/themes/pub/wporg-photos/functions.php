@@ -195,7 +195,7 @@ function document_title( $title ) {
 	global $wp_query;
 
 	if ( is_front_page() ) {
-		$title['title']   = __( 'WordPress Photos', 'wporg-photos' );
+		$title['title']   = __( 'WordPress Photo Directory', 'wporg-photos' );
 		$title['tagline'] = __( 'WordPress.org', 'wporg-photos' );
 	} else {
 		if ( is_singular( get_photo_post_type() ) ) {
@@ -214,7 +214,7 @@ function document_title( $title ) {
 			);
 		}
 
-		$title['site'] = __( 'WordPress.org', 'wporg-photos' );
+		$title['site'] = __( 'WordPress.org Photo Directory', 'wporg-photos' );
 	}
 
 	return $title;
