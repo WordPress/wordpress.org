@@ -26,6 +26,9 @@ class Blocks {
 
 		// Customize blocks for the Support Forums.
 		add_filter( 'blocks_everywhere_editor_settings', [ $this, 'editor_settings' ] );
+
+		// Allow the oEmbed proxy endpoint for any user who can publish a thread/reply..
+		add_filter( 'rest_api_init', [ $this, 'overwrite_oembed_10_proxy_permission' ], 20 );
 	}
 
 	public function enqueue_scripts() {
@@ -70,5 +73,28 @@ class Blocks {
 		// TODO: To modify the available embeds modify $settings['iso']['allowEmbeds']
 
 		return $settings;
+	}
+
+	public function overwrite_oembed_10_proxy_permission() {
+		// A register_route_args filter would be handy here... See https://core.trac.wordpress.org/ticket/54087
+		$oembed_proxy_route_args = rest_get_server()->get_routes( 'oembed/1.0' )['/oembed/1.0/proxy'] ?? false;
+		if ( ! $oembed_proxy_route_args ) {
+			return;
+		}
+
+		// Flip it from [ GET => true ] to [ GET ]
+		$oembed_proxy_route_args[0]['methods'] = array_keys( $oembed_proxy_route_args[0]['methods'] );
+
+		// Overwrite the permission_callback, allow any user who can create replies to use embeds.
+		$oembed_proxy_route_args[0]['permission_callback'] = function() {
+			return bbp_current_user_can_publish_topics() || bbp_current_user_can_publish_replies();
+		};
+
+		register_rest_route(
+			'oembed/1.0',
+			'/proxy',
+			$oembed_proxy_route_args,
+			true
+		);
 	}
 }
