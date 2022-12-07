@@ -84,13 +84,13 @@ class Blocks {
 			]
 		];
 
-		$settings['iso']['allowEmbeds'] = array_diff(
+		$settings['iso']['allowEmbeds'] = array_values( array_diff(
 			$settings['iso']['allowEmbeds'],
 			[
 				// Disable screencast, it seems not to work.
 				'screencast',
 			]
-		);
+		) );
 
 		return $settings;
 	}
