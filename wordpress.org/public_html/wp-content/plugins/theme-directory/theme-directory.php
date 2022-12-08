@@ -164,6 +164,21 @@ function wporg_themes_init() {
 		) );
 	}
 
+    register_taxonomy( 'theme_business_model', 'repopackage', array(
+        'hierarchical'      => true, /* for tax_input[] handling on post saves. */
+        'query_var'         => 'theme_business_model',
+        'rewrite'           => false,
+        'labels'            => array(
+            'name' => __( 'Business Model', 'wporg-plugins' ),
+        ),
+        'public'            => true,
+        'show_ui'           => true,
+        'show_admin_column' => false,
+        'capabilities'      => array(
+            'assign_terms' => 'theme_set_category',
+        ),
+    ) );
+
 	// Add the browse/* views
 	add_rewrite_tag( '%browse%', '([^/]+)' );
 	add_permastruct( 'browse', 'browse/%browse%' );

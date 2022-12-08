@@ -242,9 +242,8 @@ class Plugin_Directory {
 				'name' => __( 'Business Model', 'wporg-plugins' ),
 			),
 			'public'            => true,
-			'show_ui'           => false,
+			'show_ui'           => true,
 			'show_admin_column' => false,
-			'meta_box_cb'       => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
 			),
