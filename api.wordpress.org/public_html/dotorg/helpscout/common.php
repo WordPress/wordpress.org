@@ -38,6 +38,16 @@ function get_user_email_for_email( $request ) {
 		$user = get_user_by( 'slug', $m[1] );
 	}
 
+	// If the customer object has alternative emails listed, check to see if they have a profile.
+	if ( ! $user && ! empty( $request->customer->emails ) ) {
+		foreach ( $request->customer->emails as $alt_email ) {
+			$user = get_user_by( 'email', $alt_email );
+			if ( $user ) {
+				break;
+			}
+		}
+	}
+
 	// Determine if this is a bounce, and if so, find out who for.
 	if ( ! $user && $email && isset( $request->ticket->id ) ) {
 		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $request->customer->fname ?? false ), ( $request->customer->lname ?? false ) ] ) ) );

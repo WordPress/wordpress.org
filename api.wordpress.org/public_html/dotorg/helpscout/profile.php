@@ -18,6 +18,11 @@ if ( $email ) {
 	if ( isset( $user->user_nicename ) ) {
 		$html .= '<p>Profile: <a href="https://profiles.wordpress.org/' . $user->user_nicename . '/">'. $user->user_nicename .'</a></p>';
 		$html .= '<p>Forums: <a href="https://wordpress.org/support/users/'. $user->user_nicename . '/">'. $user->user_nicename .'</a></p>';
+
+		// When the Displayed account email doesn't match the email being displayed, output the user email address too.
+		if ( ! empty( $request->customer->email ) && $request->customer->email !== $user->email ) {
+			$html .= '<p>Account Email: ' . esc_html( $user->user_email ) . '</p>';
+		}
 	} else {
 		$html .= '<p>No profile found</p>';
 	}
