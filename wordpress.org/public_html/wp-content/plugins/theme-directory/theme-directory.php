@@ -169,7 +169,7 @@ function wporg_themes_init() {
         'query_var'         => 'theme_business_model',
         'rewrite'           => false,
         'labels'            => array(
-            'name' => __( 'Business Model', 'wporg-plugins' ),
+            'name' => __( 'Business Model', 'wporg-themes' ),
         ),
         'public'            => true,
         'show_ui'           => true,
