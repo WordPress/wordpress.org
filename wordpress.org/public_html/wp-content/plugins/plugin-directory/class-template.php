@@ -587,7 +587,7 @@ class Template {
 				$html  = "<style type='text/css'>";
 				$html .= "#{$id} { background-image: url('{$banner}'); }";
 				if ( ! empty( $banner_2x ) ) {
-					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
+					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 120dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
 				}
 				$html .= '</style>';
 				$html .= "<div class='plugin-banner' id='{$id}'></div>";
