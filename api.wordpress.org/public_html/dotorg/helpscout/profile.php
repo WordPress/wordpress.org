@@ -20,7 +20,7 @@ if ( $email ) {
 		$html .= '<p>Forums: <a href="https://wordpress.org/support/users/'. $user->user_nicename . '/">'. $user->user_nicename .'</a></p>';
 
 		// When the Displayed account email doesn't match the email being displayed, output the user email address too.
-		if ( ! empty( $request->customer->email ) && $request->customer->email !== $user->email ) {
+		if ( ! empty( $request->customer->email ) && $request->customer->email !== $user->user_email ) {
 			$html .= '<p>Account Email: ' . esc_html( $user->user_email ) . '</p>';
 		}
 	} else {
