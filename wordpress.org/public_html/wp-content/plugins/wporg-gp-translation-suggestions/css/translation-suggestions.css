@@ -68,11 +68,12 @@
 }
 
 .translation-suggestion__original-diff del {
-	color: #9A2323;
+	color: #000;
 	background: #F1ADAD;
+	text-decoration: line-through;
 }
 
 .translation-suggestion__original-diff ins {
-	color: #31843F;
+	color: #000;
 	background: #B5E1B9;
 }
