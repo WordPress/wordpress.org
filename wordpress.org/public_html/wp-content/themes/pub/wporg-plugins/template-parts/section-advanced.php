@@ -32,8 +32,12 @@ global $post;
 	</table>
 
 	<?php
+		do_action( 'before_plugin_advanced_zone' );
+
 		// Display the advanced controls (only seen if the plugin is open).
 		the_plugin_advanced_zone();
+
+		do_action( 'after_plugin_advanced_zone' );
 
 		// Display the danger zone (only shown to committers of the plugin).
 		the_plugin_danger_zone();
