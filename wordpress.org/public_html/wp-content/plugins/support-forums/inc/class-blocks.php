@@ -18,9 +18,6 @@ class Blocks {
 		// Enable theme compatibility CSS.
 		add_filter( 'blocks_everywhere_theme_compat', '__return_true' );
 
-		// Any Javascript / CSS tweaks needed.
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
-
 		// Theme Tweaks, these should be moved to the theme.
 		add_filter( 'after_setup_theme', [ $this, 'after_setup_theme' ] );
 
@@ -35,16 +32,6 @@ class Blocks {
 
 		// Hack to make Imgur embeds work. This should be fixed by Imgur.
 		add_filter( 'oembed_remote_get_args', [ $this, 'oembed_remote_get_args' ], 10, 2 );
-	}
-
-	public function enqueue_scripts() {
-		wp_enqueue_script(
-			'wporg-bbp-blocks',
-			plugins_url( '/js/blocks.js', __DIR__ ),
-			[ 'wp-block-editor', 'jquery' ],
-			filemtime( dirname( __DIR__ ) . '/js/blocks.js' ),
-			true
-		);
 	}
 
 	public function after_setup_theme() {
