@@ -1,6 +1,6 @@
 <?php
-
 namespace WordPressdotorg\Forums;
+use WP_Block_Patterns_Registry, WP_Block_Pattern_Categories_Registry;
 
 /**
  * Customizations for the Support Forum and the Blocks Everywhere plugin.
@@ -32,6 +32,9 @@ class Blocks {
 
 		// Hack to make Imgur embeds work. This should be fixed by Imgur.
 		add_filter( 'oembed_remote_get_args', [ $this, 'oembed_remote_get_args' ], 10, 2 );
+
+		// Add block patterns.
+		add_filter( 'init', [ $this, 'register_predefs' ] );
 	}
 
 	public function after_setup_theme() {
@@ -79,6 +82,10 @@ class Blocks {
 			]
 		) );
 
+		// Add patterns
+		$settings['editor']['__experimentalBlockPatterns'] = WP_Block_Patterns_Registry::get_instance()->get_all_registered();
+		$settings['editor']['__experimentalBlockPatternCategories'] = WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
+
 		return $settings;
 	}
 
@@ -119,5 +126,124 @@ class Blocks {
 		}
 
 		return $http_args;
+	}
+
+	/**
+	 * Register pre-defs for the forums.
+	 */
+	public function register_predefs() {
+		$registered = WP_Block_Patterns_Registry::get_instance()->get_all_registered();
+		foreach ( $registered as $pattern ) {
+			unregister_block_pattern( $pattern['name'] );
+		}
+	
+		$registered = WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
+		foreach ( $registered as $pattern ) {
+			unregister_block_pattern_category( $pattern['name'] );
+		}
+	
+		register_block_pattern_category( 'predef', [ 'label' => 'Pre-defined Replies' ] );
+	
+		register_block_pattern( 'wordpress-org/no-dashboard', [
+			'title'      => 'Cannot Access Dashboard',
+			'categories' => [ 'predef' ],
+			'content'    => '
+				<!-- wp:paragraph -->
+				<p>Try <a href="https://wordpress.org/support/article/faq-troubleshooting/#how-to-deactivate-all-plugins-when-not-able-to-access-the-administrative-menus">manually resetting your plugins</a> (no Dashboard access required). If that resolves the issue, reactivate each one individually until you find the cause.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>If that does not resolve the issue, access your server via <a href="https://wordpress.org/support/article/ftp-clients/">SFTP or FTP</a>, or a file manager in your hosting account\'s control panel, navigate to <code>/wp-content/themes/</code> and rename the directory of your currently active theme. This will force the default theme to activate and hopefully rule-out a theme-specific issue (theme functions can interfere like plugins).</p>
+				<!-- /wp:paragraph -->',
+		] );
+	
+		register_block_pattern( 'wordpress-org/theme-conflict', [
+			'title'      => 'Error Related to Plugin or Theme Conflict',
+			'categories' => [ 'predef' ],
+			'content'    => '
+				<!-- wp:paragraph -->
+				<p>This may be a plugin or theme conflict. Please attempt to disable all plugins, and use one of the default (Twenty*) themes. If the problem goes away, enable them one by one to identify the source of your troubles.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>If you can install plugins, install and activate "Health Check": <a href="https://wordpress.org/plugins/health-check/">https://wordpress.org/plugins/health-check/</a></p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>It will add some additional features under the menu item under Tools &gt; Site Health.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>On its troubleshooting tab, you can Enable Troubleshooting Mode. This will disable all plugins, switch to a standard WordPress theme (if available), allow you to turn your plugins on and off and switch between themes, <strong>without affecting normal visitors to your site</strong>. This allows you to test for various compatibility issues.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>There’s a more detailed description about how to use the Health Check plugin and its Troubleshooting Mode at <a href="https://make.wordpress.org/support/handbook/appendix/troubleshooting-using-the-health-check/">https://make.wordpress.org/support/handbook/appendix/troubleshooting-using-the-health-check/</a></p>
+				<!-- /wp:paragraph -->',
+		] );
+	
+		register_block_pattern( 'wordpress-org/missing-files', [
+			'title'      => 'Error Related to Missing or Damaged Core Files',
+			'categories' => [ 'predef' ],
+			'content'    => '
+				<!-- wp:paragraph -->
+				<p>Try <a href="https://wordpress.org/download/">downloading WordPress</a> again, access your server via <a href="https://wordpress.org/support/article/ftp-clients/">SFTP or FTP</a>, or a file manager in your hosting account\'s control panel, and delete then replace your copies of everything <strong>except</strong> the `wp-config.php` file and the <code>/wp-content/</code> directory with fresh copies from the download. This will effectively replace all of your core files without damaging your content and settings.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>Some uploaders tend to be unreliable when overwriting files, so don\'t forget to delete the original files before replacing them.</p>
+				<!-- /wp:paragraph -->',
+		] );
+	
+		register_block_pattern( 'wordpress-org/oom', [
+			'title'      => 'Out of Memory Errors',
+			'categories' => [ 'predef' ],
+			'content'    => '
+				<!-- wp:paragraph -->
+				<p>If you\'re seeing this error either suddenly (no specific task was done to cause the error) or frequently, try deactivating all plugins to rule-out a plugin-specific issue and try switching themes to rule-out a theme-specific issue.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>Otherwise, here are three ways to increase PHP\'s memory allocation:</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:list {"ordered":true} -->
+				<ol><!-- wp:list-item -->
+				<li>If you can edit or override the system <code>php.ini</code> file, increase the memory limit. For example, <code>memory_limit = 128M</code></li>
+				<!-- /wp:list-item -->
+	
+				<!-- wp:list-item -->
+				<li>If you cannot edit or override the system <code>php.ini</code> file, add <code>php_value memory_limit 128M</code> to your <code>.htaccess</code> file.</li>
+				<!-- /wp:list-item -->
+	
+				<!-- wp:list-item -->
+				<li>If neither of these work, it\'s time to ask your hosting provider to temporarily increase PHP\'s memory allocation on your account.</li>
+				<!-- /wp:list-item --></ol>
+				<!-- /wp:list -->
+	
+				<!-- wp:paragraph -->
+				<p>(in the above examples, the limit is set to 128MB)</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p><a href="https://make.wordpress.org/support/handbook/giving-good-support/pre-defined-replies/#error-500-internal-server-error"><strong>Error 500: Internal Server Error</strong></a></p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>Internal server errors (error 500) are often caused by plugin or theme function conflicts, so if you have access to your admin panel, try deactivating all plugins. If you don\'t have access to your admin panel, try <a href="https://wordpress.org/support/article/faq-troubleshooting/#how-to-deactivate-all-plugins-when-not-able-to-access-the-administrative-menus">manually resetting your plugins</a> (no Dashboard access required). If that resolves the issue, reactivate each one individually until you find the cause.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>If that does not resolve the issue, try switching to the default theme for your version of WordPress to rule-out a theme-specific issue. If you don\'t have access to your admin panel, access your server via <a href="https://wordpress.org/support/article/ftp-clients/">SFTP or FTP</a>, or a file manager in your hosting account\'s control panel, navigate to <code>/wp-content/themes/</code> and rename the directory of your currently active theme. This will force the default theme to activate and hopefully rule-out a theme-specific issue.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>If that does not resolve the issue, it\'s possible that a <code>.htaccess</code> rule could be the source of the problem. To check for this, access your server via SFTP or FTP, or a file manager in your hosting account\'s control panel, and rename the <code>.htaccess</code> file. If you can\'t find a <code>.htaccess</code> file, make sure that you have set your SFTP or FTP client to view invisible files.</p>
+				<!-- /wp:paragraph -->
+	
+				<!-- wp:paragraph -->
+				<p>If you weren’t able to resolve the issue by either resetting your plugins and theme or renaming your <code>.htaccess</code> file, we may be able to help, but we\'ll need a more detailed error message. Internal server errors are usually described in more detail in the server error log. If you have access to your server error log, generate the error again, note the date and time, then immediately check your server error log for any errors that occurred during that time period. If you don’t have access to your server error log, ask your hosting provider to look for you.</p>
+				<!-- /wp:paragraph -->',
+		] );
 	}
 }
