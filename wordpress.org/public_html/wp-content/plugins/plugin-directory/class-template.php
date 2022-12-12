@@ -344,6 +344,7 @@ class Template {
 		$default_sections = array(
 			'description',
 			'screenshots',
+			'faq',
 			'blocks',
 			'stats',
 			'support',
