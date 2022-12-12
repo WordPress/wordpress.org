@@ -7,7 +7,7 @@
  * @package WordPressdotorg\Plugin_Directory\Theme
  */
 
-global $section, $section_slug, $section_content;
+global $section_slug, $section_title, $section_content;
 
 $prefix = in_array( $section_slug, array( 'screenshots', 'faq', 'blocks' ), true ) ? '' : 'tab-';
 
@@ -36,7 +36,7 @@ $allowed_svg = array(
 ?>
 
 <div id="<?php echo esc_attr( $prefix . $section_slug ); ?>" class="<?php echo esc_attr( $classes ); ?>">
-	<h2 id="<?php echo esc_attr( $section_slug . '-header' ); ?>"><?php echo esc_html( $section['title'] ); ?></h2>
+	<h2 id="<?php echo esc_attr( $section_slug . '-header' ); ?>"><?php echo esc_html( $section_title ); ?></h2>
 
 	<p><?php printf( esc_html( _n( 'This plugin provides %d block.', 'This plugin provides %d blocks.', count( $section_content ), 'wporg-plugins'  ) ), count( $section_content ) ); ?></p>
 	<ul class="plugin-blocks-list">

@@ -331,101 +331,25 @@ class Template {
 	}
 
 	/**
-	 * Returns the available sections for a plugin.
+	 * Returns the section names for plugins.
 	 *
 	 * @static
-	 *
-	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
 	 * @return array
 	 */
-	public static function get_plugin_sections( $post = null ) {
-		$plugin = get_post( $post );
-
-		$default_sections = array(
-			'description',
-			'screenshots',
-			'faq',
-			'blocks',
-			'stats',
-			'support',
-			'reviews',
-			'installation',
-			'developers',
-			'changelog',
-		);
-		if ( ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
-			unset( $default_sections[ array_search( 'screenshots', $default_sections ) ] );
-		}
-		if ( ! get_post_meta( $plugin->ID, 'all_blocks' ) ) {
-			unset( $default_sections[ array_search( 'blocks', $default_sections ) ] );
-		}
-
-		$raw_sections = get_post_meta( $plugin->ID, 'sections', true ) ?: array();
-		$raw_sections = array_unique( array_merge( $raw_sections, $default_sections ) );
-
-		$sections  = array();
-		$title     = '';
-		$permalink = get_permalink();
-
-		foreach ( $raw_sections as $section_slug ) {
-			switch ( $section_slug ) {
-
-				case 'description':
-					$title = _x( 'Description', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'installation':
-					$title = _x( 'Installation', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'faq':
-					$title = _x( 'FAQ', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'screenshots':
-					$title = _x( 'Screenshots', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'changelog':
-					$title = _x( 'Changelog', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'stats':
-					$title = _x( 'Stats', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'support':
-					$title = _x( 'Support', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'reviews':
-					$title = _x( 'Reviews', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'developers':
-					$title = _x( 'Contributors &amp; Developers', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'other_notes':
-					$title = _x( 'Other Notes', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				case 'blocks':
-					$title = _x( 'Blocks', 'plugin tab title', 'wporg-plugins' );
-					break;
-
-				default:
-					// Skip ahead to the next section
-					continue 2;
-			}
-
-			$sections[] = array(
-				'slug'  => $section_slug,
-				'title' => $title,
-			);
-		}
-
-		return $sections;
+	public static function get_plugin_section_titles() {
+		return [
+			'description'  => _x( 'Description', 'plugin tab title', 'wporg-plugins' ),
+			'installation' => _x( 'Installation', 'plugin tab title', 'wporg-plugins' ),
+			'faq'          => _x( 'FAQ', 'plugin tab title', 'wporg-plugins' ),
+			'screenshots'  => _x( 'Screenshots', 'plugin tab title', 'wporg-plugins' ),
+			'changelog'    => _x( 'Changelog', 'plugin tab title', 'wporg-plugins' ),
+			'stats'        => _x( 'Stats', 'plugin tab title', 'wporg-plugins' ),
+			'support'      => _x( 'Support', 'plugin tab title', 'wporg-plugins' ),
+			'reviews'      => _x( 'Reviews', 'plugin tab title', 'wporg-plugins' ),
+			'developers'   => _x( 'Contributors &amp; Developers', 'plugin tab title', 'wporg-plugins' ),
+			'other_notes'  => _x( 'Other Notes', 'plugin tab title', 'wporg-plugins' ),
+			'blocks'       => _x( 'Blocks', 'plugin tab title', 'wporg-plugins' ),
+		];
 	}
 
 	/**
