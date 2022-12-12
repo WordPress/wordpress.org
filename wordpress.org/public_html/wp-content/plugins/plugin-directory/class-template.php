@@ -350,6 +350,7 @@ class Template {
 			'reviews',
 			'installation',
 			'developers',
+			'changelog',
 		);
 		if ( ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
 			unset( $default_sections[ array_search( 'screenshots', $default_sections ) ] );
