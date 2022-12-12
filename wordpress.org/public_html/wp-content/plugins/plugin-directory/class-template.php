@@ -348,6 +348,7 @@ class Template {
 			'stats',
 			'support',
 			'reviews',
+			'installation',
 			'developers',
 		);
 		if ( ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
@@ -361,7 +362,7 @@ class Template {
 		$raw_sections = array_unique( array_merge( $raw_sections, $default_sections ) );
 
 		$sections  = array();
-		$title     = $url = '';
+		$title     = '';
 		$permalink = get_permalink();
 
 		foreach ( $raw_sections as $section_slug ) {
@@ -369,57 +370,46 @@ class Template {
 
 				case 'description':
 					$title = _x( 'Description', 'plugin tab title', 'wporg-plugins' );
-					$url   = $permalink;
 					break;
 
 				case 'installation':
 					$title = _x( 'Installation', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'faq':
 					$title = _x( 'FAQ', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'screenshots':
 					$title = _x( 'Screenshots', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'changelog':
 					$title = _x( 'Changelog', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'stats':
 					$title = _x( 'Stats', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'support':
 					$title = _x( 'Support', 'plugin tab title', 'wporg-plugins' );
-					$url   = 'https://wordpress.org/support/plugin/' . $plugin->post_name . '/';
 					break;
 
 				case 'reviews':
 					$title = _x( 'Reviews', 'plugin tab title', 'wporg-plugins' );
-					$url   = 'https://wordpress.org/support/plugin/' . $plugin->post_name . '/reviews/';
 					break;
 
 				case 'developers':
 					$title = _x( 'Contributors &amp; Developers', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
 					break;
 
 				case 'other_notes':
 					$title = _x( 'Other Notes', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
 					break;
 
 				case 'blocks':
 					$title = _x( 'Blocks', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
 					break;
 
 				default:
@@ -429,7 +419,6 @@ class Template {
 
 			$sections[] = array(
 				'slug'  => $section_slug,
-				'url'   => $url,
 				'title' => $title,
 			);
 		}
