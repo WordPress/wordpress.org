@@ -410,14 +410,17 @@ function get_whitelist() {
 		'polyglots' => array(
 			'Amieiro',
 			'casiepa', // @Pascal on Slack
+			'chaion07',
 			'CoachBirgit',
 			'deconf',
 			'evarlese',
 			'felipeelia',
+			'kharisblank', // @kharisulistiyo on Slack
 			'Nao',
 			'ocean90',
 			'petya',
 			'SergeyBiryukov', // @sergey on Slack
+			'spiraltee', // @Tosin on Slack
 			'tobifjellner',
 			'tokyobiyori',
 			'vladytimy', // @vladt on slack
