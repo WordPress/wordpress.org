@@ -86,6 +86,9 @@ class Blocks {
 		$settings['editor']['__experimentalBlockPatterns'] = WP_Block_Patterns_Registry::get_instance()->get_all_registered();
 		$settings['editor']['__experimentalBlockPatternCategories'] = WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
 
+		// Enable the custom paragraph that converts HTML and PHP code into a code block.
+		$settings['replaceParagraphCode'] = true;
+
 		return $settings;
 	}
 
