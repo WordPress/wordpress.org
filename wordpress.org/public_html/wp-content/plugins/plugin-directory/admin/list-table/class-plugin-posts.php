@@ -333,6 +333,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 *
 	 * @global array $locked_post_status This seems to be deprecated.
 	 * @global array $avail_post_stati
+	 * @global \wpdb $wpdb
 	 * @return array
 	 */
 	protected function get_views() {

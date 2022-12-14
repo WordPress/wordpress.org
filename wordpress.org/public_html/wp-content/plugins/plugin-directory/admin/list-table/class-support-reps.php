@@ -41,8 +41,6 @@ class Support_Reps extends \WP_List_Table {
 	 *
 	 * @access public
 	 *
-	 * @global string $role
-	 * @global string $usersearch
 	 */
 	public function prepare_items() {
 		$plugin_slug = get_post()->post_name;
