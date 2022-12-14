@@ -53,7 +53,16 @@ class WPorg_Handbook_TOC {
 	}
 
 	public function load_filters() {
-		if ( is_singular( $this->post_types ) && ! is_embed() && ! is_front_page() ) {
+		$page_supports_toc = is_singular( $this->post_types ) && ! is_embed() && ! is_front_page();
+
+		/**
+		 * Filter whether the table of contents should be injected into the page.
+		 *
+		 * @param bool $page_supports_toc True if the current page supports a table of contents.
+		 */
+		$should_add_toc = apply_filters( 'wporg_handbook_toc_should_add_toc', $page_supports_toc );
+
+		if ( $should_add_toc ) {
 			add_filter( 'the_content', array( $this, 'add_toc' ) );
 		}
 	}
