@@ -238,6 +238,7 @@ class Blocks {
 	 * Conditionally disable the Block Editor under certain circumstances.
 	 *
 	 * Those circumstances are:
+	 *  - The page is an article.
 	 *  - The user has disabled the editor.
 	 *  - The default is forum opt-in, and the forum has the block_editor not enabled.
 	 *  - The topic/reply being edited was not created in the Block Editor.
@@ -245,6 +246,10 @@ class Blocks {
 	public function blocks_everywhere_bbpress_editor( $use_it ) {
 		if ( ! $use_it ) {
 			return $use_it;
+		}
+
+		if ( is_singular( 'helphub_article' ) ) {
+			return false;
 		}
 
 		$user_id = get_current_user_id();
