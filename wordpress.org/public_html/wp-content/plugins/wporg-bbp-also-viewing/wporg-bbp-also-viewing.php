@@ -380,7 +380,9 @@ function rest_api_init() {
 			'callback' => function( $request ) {
 				return get_others_currently_viewing( (string) $request['page'] );
 			},
-			'permission_callback' => 'is_user_logged_in',
+			'permission_callback' => function() {
+				return is_user_logged_in() && enabled();
+			},
 		],
 		[
 			'methods'  => 'POST',
@@ -390,14 +392,18 @@ function rest_api_init() {
 					! empty( $request['isTyping'] ) && 'false' !== $request['isTyping']
 				);
 			},
-			'permission_callback' => 'is_user_logged_in',
+			'permission_callback' => function() {
+				return is_user_logged_in() && enabled();
+			},
 		],
 		[
 			'methods'  => 'DELETE',
 			'callback' => function( $request ) {
 				return clear_viewing( (string) $request['page'] );
 			},
-			'permission_callback' => 'is_user_logged_in',
+			'permission_callback' => function() {
+				return is_user_logged_in() && enabled();
+			},
 		],
 	] );
 }
