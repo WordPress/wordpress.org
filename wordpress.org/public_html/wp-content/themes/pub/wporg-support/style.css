@@ -4695,6 +4695,14 @@ div.bbp-breadcrumb p {
 }
 
 /*--------------------------------------------------------------
+# Block Editor Specific
+--------------------------------------------------------------*/
+/* Move the Block Editor toolbar below the Header z-index bar */
+.iso-editor.has-fixed-toolbar .interface-interface-skeleton__header {
+	z-index: 200;
+}
+
+/*--------------------------------------------------------------
 # HelpHub Specific
 --------------------------------------------------------------*/
 .three-up.helphub-front-page p,
