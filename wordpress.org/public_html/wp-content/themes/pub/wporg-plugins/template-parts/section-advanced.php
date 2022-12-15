@@ -33,6 +33,11 @@ global $post;
 
 	<?php
 		do_action( 'before_plugin_advanced_zone' );
+		// Display the community categorization options.
+		the_plugin_community_zone();
+
+		// Display the commercial categorization options.
+		the_plugin_commercial_zone();
 
 		// Display the advanced controls (only seen if the plugin is open).
 		the_plugin_advanced_zone();

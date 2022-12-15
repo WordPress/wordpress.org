@@ -87,6 +87,16 @@ function scripts() {
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
 		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-faq.js' ), true );
+
+		$post = get_post();
+		if ( $post && current_user_can( 'plugin_admin_edit', $post ) ) {
+			wp_enqueue_script( 'wporg-plugins-categorization', get_stylesheet_directory_uri() . '/js/section-categorization.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-categorization.js' ), true );
+			wp_localize_script( 'wporg-plugins-categorization', 'categorizationOptions', [
+				'restUrl'    => get_rest_url(),
+				'restNonce'  => wp_create_nonce( 'wp_rest' ),
+				'pluginSlug' => $post->post_name,
+			] );
+		}
 	}
 
 	if ( ! is_404() ) {
@@ -229,7 +239,20 @@ add_action( 'customize_preview_init', __NAMESPACE__ . '\customize_preview_js' );
  * @return array
  */
 function custom_body_class( $classes ) {
+	$post = get_post();	
+
 	$classes[] = 'no-js';
+
+	if ( $post && is_singular( 'plugin' ) ) {
+		if ( has_term( 'commercial', 'plugin_business_model', $post ) ) {
+			$classes[] = 'is-commercial-plugin';
+		}
+
+		if ( has_term( 'community', 'plugin_business_model', $post ) ) {
+			$classes[] = 'is-community-plugin';
+		}
+	}
+
 	return $classes;
 }
 add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
