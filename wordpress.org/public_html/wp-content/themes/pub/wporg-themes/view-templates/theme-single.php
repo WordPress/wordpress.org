@@ -7,7 +7,7 @@
 		</div>
 	</div>
 	<div class="theme-wrap">
-		<div class="theme-about hentry">
+		<div class="theme-about hentry" data-slug="{{{ data.slug }}}">
 			<# if ( data.is_outdated ) { #>
 			<div class="theme-notice notice notice-warning notice-alt">
 				<p><?php _e( 'This theme <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-themes' ); ?></p>
@@ -28,6 +28,26 @@
 			</div>
 
 			<div class="theme-head">
+				<# if ( data.is_community ) { #>
+				<div class="widget categorization-widget categorization-widget-community">
+					<div class="widget-head">
+						<h3><?php esc_html_e( 'Community Theme', 'wporg-themes' ); ?></h3>
+						<a href="{{{ data.external_repository_url }}}" rel="nofollow"><?php _e( 'Contribute', 'wporg-themes' ); ?></a>
+					</div>
+					<p><?php esc_html_e( 'This theme is developed and supported by a community.', 'wporg-themes' ); ?></p>
+				</div>
+				<# } #>
+
+				<# if ( data.is_commercial ) { #>
+				<div class="widget categorization-widget categorization-widget-commercial">
+					<div class="widget-head">
+						<h3><?php esc_html_e( 'Commercial Theme', 'wporg-themes' ); ?></h3>
+						<a href="{{{ data.external_support_url }}}" rel="nofollow"><?php _e( 'Support', 'wporg-themes' ); ?></a>
+					</div>
+					<p><?php esc_html_e( 'This theme is free but offers additional paid commercial upgrades or support.', 'wporg-themes' ); ?></p>
+				</div>
+				<# } #>
+
 				<div class="theme-actions clear">
 					<a href="{{{ data.preview_url }}}" class="button button-secondary alignleft"><?php _e( 'Preview', 'wporg-themes' ); ?></a>
 					<a href="{{ data.download_link }}" class="button button-primary alignright"><?php _e( 'Download', 'wporg-themes' ); ?></a>
@@ -91,6 +111,42 @@
 					<h3><?php _e( 'Downloads Per Day', 'wporg-themes' ); ?></h3>
 					<div id="theme-download-stats-{{data.id}}" class="chart"></div>
 				</div><!-- .theme-downloads -->
+
+				<# if ( data.can_configure_categorization_options && data.is_community ) { #>
+				<div class="theme-categorization-options">
+					<h3><?php _e( 'Community Options', 'wporg-themes' ); ?></h3>
+					<p><?php esc_html_e( 'This theme is developed and supported by a community.', 'wporg-themes' ); ?></p>
+					<form id="community" class="categorization" method="POST">
+					<p>
+						<label for="external_repository_url"><?php esc_html_e( 'Development repository URL', 'wporg-themes' ); ?></label>
+						<input id="external_repository_url" type="text" name="external_repository_url" value="{{{ data.external_repository_url }}}" data-original-value="{{{ data.external_repository_url}}}">
+						<span class="help"><?php esc_html_e( 'Optional. The URL where development happens, such as at github.com.', 'wporg-themes' ); ?></span>
+					</p>
+					<p>
+						<button class="button button-secondary" type="submit"><?php esc_html_e( 'Save', 'wporg-themes' ); ?></button>
+						<span class="success-msg"><?php esc_html_e( 'Saved!', 'wporg-themes' ) ?></span>
+					</p>
+					</form>
+				</div><!-- .theme-categorization-options -->
+				<# } #>
+
+				<# if ( data.can_configure_categorization_options && data.is_commercial ) { #>
+				<div class="theme-categorization-options">
+					<h3><?php _e( 'Commercial Options', 'wporg-themes' ); ?></h3>
+					<p><?php esc_html_e( 'This theme is free but offers paid upgrades, support, and/or add-ons.', 'wporg-themes' ); ?></p>
+					<form id="commercial" class="categorization" method="POST">
+					<p>
+						<label for="external_support_url"><?php esc_html_e( 'Commercial support URL', 'wporg-themes' ); ?></label>
+						<input id="external_support_url" type="text" name="external_support_url" value="{{{ data.external_support_url }}}" data-original-value="{{{ data.external_support_url }}}">
+						<span class="help"><?php esc_html_e( 'Optional. The URL for theme support, other than its support forum on wordpress.org.', 'wporg-themes' ); ?></span>
+					</p>
+					<p>
+						<button class="button button-secondary" type="submit"><?php esc_html_e( 'Save', 'wporg-themes' ); ?></button>
+						<span class="success-msg"><?php esc_html_e( 'Saved!', 'wporg-themes' ) ?></span>
+					</p>
+					</form>
+				</div><!-- .theme-categorization-options -->
+				<# } #>
 			</div>
 
 			<div class="theme-meta">

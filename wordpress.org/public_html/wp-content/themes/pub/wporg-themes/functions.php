@@ -215,6 +215,11 @@ function wporg_themes_scripts() {
 				'active_installs_less_than_10' => __( 'Less than 10', 'wporg-themes' ),
 				'active_installs_1_million' => __( '1+ million', 'wporg-themes' ),
 			),
+			'rest' => array(
+				'restUrl'   => get_rest_url(),
+				'restNonce' => wp_create_nonce( 'wp_rest' ),
+				'themeSlug' => get_post()->post_name ?? '',
+			),
 		) );
 	}
 

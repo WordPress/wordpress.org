@@ -472,6 +472,106 @@ body.author .theme-browser .theme .theme-author  {
 	}
 }
 
+@keyframes hideAnimation {
+	to {
+		visibility: hidden;
+	}
+}
+
+.theme-wrap {
+	.categorization-container {
+		h2 {
+			margin-top: 0;
+		}
+		p {
+			font-size: 15px;
+		}
+	}
+
+	.categorization {
+		.help {
+			color: #999;
+			margin-top: 0;
+			display: inline-block;
+			font-size: 0.8rem;
+		}
+		label {
+			font-weight: bold;
+			display: block;
+		}
+		input {
+			width: 100%;
+		}
+		.success-msg {
+			background: #eff7ed;
+			border-color: #64b450;
+			padding: 0.1rem 0.6rem 0.2rem;
+			overflow: auto;
+			position: relative;
+			border-width: 0 0 0 5px;
+			border-style: solid;
+			margin-left: 1rem;
+			font-size: 0.8rem;
+			user-select: none;
+			transition: visibility 0s, opacity 0.5s linear;
+			visibility: hidden;
+			opacity: 0;
+		}
+		.success-msg.saved {
+			visibility: visible;
+			opacity: 1;
+			animation: hideAnimation 0s ease-in 5s;
+			animation-fill-mode: forwards;
+		}
+	}
+
+	.categorization-widget {
+		font-size: 15px;
+		margin-bottom: 2rem;
+
+		.widget-head {
+			display: flex;
+			flex-flow: row wrap;
+			column-gap: 12px;
+			justify-content: space-between;
+
+			h3 {
+				flex: 1 1 auto;
+				font-size: 0.9rem;
+				font-weight: bold;
+				margin-top: 0;
+				margin-bottom: 0.2rem;
+			}
+			a {
+				font-size: 13px;
+				line-height: 2;
+				flex: 0 0 auto;
+				text-align: right;
+
+				&[href=""] {
+					display: none;
+				}
+
+				&:after {
+					content: '\f504';
+					font-family: dashicons;
+					margin-left: 2px;
+				}
+			}
+		}
+
+		p {
+			font-size: 0.7rem;
+			margin-top: 0.5rem;
+		}
+	}
+
+	.theme-categorization-options {
+		border-top: 4px solid #ddd;
+		font-size: 15px;
+	}
+}
+
 /**
  * Theme Screenshots gallery
  */
