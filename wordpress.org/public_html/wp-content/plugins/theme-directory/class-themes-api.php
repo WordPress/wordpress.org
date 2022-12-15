@@ -76,16 +76,14 @@ class Themes_API {
 	 *
 	 * @var string
 	 */
-//	private $cache_group = 'theme-info';
-private $cache_group = 'test-theme-info'; // Don't pollute production cache.
+	private $cache_group = 'theme-info';
 
 	/**
 	 * The amount of time to keep information cached.
 	 *
 	 * @var int
 	 */
-//	private $cache_life = 600; // 10 minutes.
-private $cache_life = 1; // Disable caching.
+	private $cache_life = 600; // 10 minutes.
 
 	/**
 	 * Flag the input as having been malformed.
