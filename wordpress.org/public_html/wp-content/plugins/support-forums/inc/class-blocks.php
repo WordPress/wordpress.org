@@ -8,7 +8,18 @@ use WP_Block_Patterns_Registry, WP_Block_Pattern_Categories_Registry;
  * To enable this file to be loaded on a bbPress install, activate the Blocks Everywhere plugin.
  */
 class Blocks {
+
+	public $forum_enabled_by_default = false;
+	public $user_enabled_by_default  = true;
+
 	public function __construct() {
+		if ( null !== get_option( 'forum_block_editor_enabled', null ) ) {
+			$this->forum_enabled_by_default = get_option( 'forum_block_editor_enabled' );
+		}
+		if ( null !== get_option( 'user_block_editor_enabled', null ) ) {
+			$this->user_enabled_by_default = get_option( 'user_block_editor_enabled' );
+		}
+
 		// Enable bbPress support.
 		add_filter( 'blocks_everywhere_bbpress', '__return_true' );
 
@@ -35,6 +46,15 @@ class Blocks {
 
 		// Add block patterns.
 		add_filter( 'init', [ $this, 'register_predefs' ] );
+
+		// Add user opt-in/out
+		add_action( 'bbp_user_edit_after', [ $this, 'bbp_user_edit_after' ], 11 );
+		add_action( 'bbp_profile_update', [ $this, 'bbp_profile_update' ], 10, 1 );
+		add_filter( 'blocks_everywhere_bbpress_editor', [ $this, 'blocks_everywhere_bbpress_editor' ] );
+
+		// Add forum opt-in/out.
+		add_action( 'admin_init', [ $this, 'admin_init' ] );
+		add_action( 'save_post', [ $this, 'metabox_forum_optin_save_handler' ] );
 	}
 
 	public function after_setup_theme() {
@@ -82,7 +102,7 @@ class Blocks {
 			]
 		) );
 
-		// Add patterns
+		// Add patterns.
 		$settings['editor']['__experimentalBlockPatterns'] = WP_Block_Patterns_Registry::get_instance()->get_all_registered();
 		$settings['editor']['__experimentalBlockPatternCategories'] = WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
 
@@ -129,6 +149,151 @@ class Blocks {
 		}
 
 		return $http_args;
+	}
+
+	/**
+	 * Add an option to the user profile to enable/disable it.
+	 */
+	public function bbp_user_edit_after() {
+		$user_id     = bbp_get_displayed_user_id();
+		$user_status = get_user_option( 'block_editor', $user_id ) ?: 'default';
+		$default     = $this->user_enabled_by_default ? 'enabled' : 'disabled';
+
+		// TODO: Enable for all users
+		if ( ! current_user_can( 'moderate' ) && 'default' === $user_status ) {
+			return;
+		}
+
+		// TODO: Checkbox at public launch. A checkbox doesn't make sense until it's enabled-by-default.
+		printf(
+			'<p>
+				<select name="block_editor" id="block_editor">
+					<option value="default" %s>Default (%s)</option>
+					<option value="enabled" %s>Enabled (yes)</option>
+					<option value="disabled" %s>Disabled (no)</option>
+				</select>
+				<label for="disable_block_editor">%s</label>
+			</p>',
+			selected( $user_status, 'default', false ),
+			esc_html( $default ),
+			selected( $user_status, 'enabled', false ),
+			selected( $user_status, 'disabled', false ),
+			'Use the Block Editor for new topics and replies.',
+		);
+	}
+
+	/**
+	 * Save the user option to enable/disable.
+	 */
+	public function bbp_profile_update( $user_id ) {
+		if ( empty( $_REQUEST['block_editor'] ) ) {
+			return;
+		}
+
+		$value = sanitize_key( wp_unslash( $_REQUEST['block_editor'] ) );
+		if ( 'default' === $value ) {
+			delete_user_option( $user_id, 'block_editor' );
+		} else {
+			update_user_option( $user_id, 'block_editor', $value, false );
+		}
+
+	}
+
+	/**
+	 * Add an admin interface to enable/disable the Block Editor for a forum.
+	 */
+	public function admin_init() {
+		add_meta_box( 'block_editor', 'Block Editor for Topics/Replies', [ $this, 'metabox_forum_optin' ], 'forum', 'side' );
+	}
+
+	/**
+	 * Display the forum opt-in for the Block Editor.
+	 */
+	function metabox_forum_optin() {
+		global $post;
+
+		$forum_status = $post->block_editor ?: 'default';
+		$default      = $this->forum_enabled_by_default ? 'enabled' : 'disabled';
+
+		printf(
+			'<p>
+				<select name="block_editor" id="block_editor">
+					<option value="default" %s>Default (%s)</option>
+					<option value="enabled" %s>Enabled</option>
+					<option value="disabled" %s>Disabled</option>
+				</select>
+			</p>',
+			selected( $forum_status, 'default', false ),
+			esc_html( $default ),
+			selected( $forum_status, 'enabled', false ),
+			selected( $forum_status, 'disabled', false ),
+		);
+	}
+	/**
+	 * Save the values for ::metabox_forum_optin().
+	 *
+	 * @param WP_Post $post The post being edited.
+	 */
+	function metabox_forum_optin_save_handler( $post_id ) {
+		$post = get_post( $post_id );
+		if (
+			! $post ||
+			'forum' !== $post->post_type ||
+			! current_user_can( 'edit_post', $post->ID ) ||
+			! isset( $_REQUEST['block_editor'] )
+		) {
+			return;
+		}
+
+		$value = sanitize_key( wp_unslash( $_REQUEST['block_editor'] ) );
+		if ( 'default' === $value ) {
+			delete_post_meta( $post->ID, 'block_editor' );
+		} else {
+			update_post_meta( $post->ID, 'block_editor', $value );
+		}
+	}
+
+	/**
+	 * Conditionally disable the Block Editor under certain circumstances.
+	 *
+	 * Those circumstances are:
+	 *  - The user has disabled the editor.
+	 *  - The default is forum opt-in, and the forum has the block_editor not enabled.
+	 *  - The topic/reply being edited was not created in the Block Editor.
+	 */
+	public function blocks_everywhere_bbpress_editor( $use_it ) {
+		if ( ! $use_it ) {
+			return $use_it;
+		}
+
+		$user_id = get_current_user_id();
+
+		// Respect the user option.
+		$user_option = get_user_option( 'block_editor', $user_id );
+		if ( ! $user_option ) {
+			$user_option = $this->user_enabled_by_default ? 'enabled' : 'disabled';
+		}
+
+		// Determine if the forum has the editor enabled.
+		$forum             = bbp_get_forum( bbp_get_forum_id() );
+		$enabled_for_forum = ( 'enabled' === $forum->block_editor || ( ! $forum->block_editor && $this->forum_enabled_by_default ) );
+		$enabled_for_user  = ( 'disabled' !== $user_option );
+		$use_it            = ( $enabled_for_user && $enabled_for_forum );
+
+		// If we're editing a post made without the editor, let's respect that.
+		if ( $use_it && bbp_is_reply_edit() ) {
+			$reply = bbp_get_reply( bbp_get_reply_id() );
+
+			if ( $reply && ! has_blocks( $reply->post_content ) ) {
+				$use_it = false;
+			}
+		} elseif ( $use_it && bbp_is_topic_edit() ) {
+			if ( ! has_blocks( get_post_field( 'post_content', bbp_get_topic_id() ) ) ) {
+				$use_it = false;
+			}
+		}
+
+		return $use_it;
 	}
 
 	/**
