@@ -60,9 +60,11 @@ add_action( 'init', 'wporg_themes_post_status' );
  *
  * @param array  $caps Returns the user's actual capabilities.
  * @param string $cap  Capability name.
+ * @param int    $user_id The user ID.
+ * @param mixed  $context Adds the context to the cap. Typically the object ID.
  * @return array
  */
-function wporg_themes_map_meta_cap( $caps, $cap ) {
+function wporg_themes_map_meta_cap( $caps, $cap, $user_id, $context ) {
 	switch ( $cap ) {
 		case 'delete_categories':
 		case 'edit_categories':
@@ -82,11 +84,43 @@ function wporg_themes_map_meta_cap( $caps, $cap ) {
 			$caps[] = 'reinstate_themes';
 			unset( $caps[ array_search( $cap, $caps ) ] );
 			break;
+
+		case 'theme_configure_categorization_options':
+			// Protect against a cap call without a theme context.
+			$post = $context ? get_post( $context[0] ) : false;
+			if ( ! $post ) {
+				return [ 'do_not_allow' ];
+			}
+
+			// The current user instance.
+			$user = new \WP_User( $user_id );
+
+			// Shortcut, if no user specified, we can't help.
+			if ( ! $user_id || ! $user->exists() ) {
+				return [ 'do_not_allow' ];
+			}
+
+			// Post must be a published theme.
+			if ( 'publish' !== $post->post_status || 'repopackage' !== $post->post_type ) {
+				return [ 'do_not_allow' ];
+			}
+
+			// User must be able to edit theme or be the theme owner.
+			if ( ! ( user_can( $user->ID, 'edit_post', $post ) || $user->ID === $post->post_author ) ) {
+				return [ 'do_not_allow' ];
+			}
+
+			// Start over, we'll specify all caps below.
+			$caps = [];
+
+			// At this point, user is allowed.
+			$caps[] = 'exist';
+			break;
 	}
 
 	return $caps;
 }
-add_filter( 'map_meta_cap', 'wporg_themes_map_meta_cap', 10, 2 );
+add_filter( 'map_meta_cap', 'wporg_themes_map_meta_cap', 10, 4 );
 
 /**
  * Mark themes as Delisted / Suspended on the admin post listing.

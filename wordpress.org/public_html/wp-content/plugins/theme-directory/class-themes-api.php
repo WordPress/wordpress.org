@@ -64,6 +64,11 @@ class Themes_API {
 		'requires'           => false,
 		'requires_php'       => false,
 		'trac_tickets'       => false,
+		'is_commercial'      => false,
+		'is_community'       => false,
+		'external_repository_url' => false,
+		'external_support_url' => false,
+		'can_configure_categorization_options' => false,
 	);
 
 	/**
@@ -71,14 +76,16 @@ class Themes_API {
 	 *
 	 * @var string
 	 */
-	private $cache_group = 'theme-info';
+//	private $cache_group = 'theme-info';
+private $cache_group = 'test-theme-info'; // Don't pollute production cache.
 
 	/**
 	 * The amount of time to keep information cached.
 	 *
 	 * @var int
 	 */
-	private $cache_life = 600; // 10 minutes.
+//	private $cache_life = 600; // 10 minutes.
+private $cache_life = 1; // Disable caching.
 
 	/**
 	 * Flag the input as having been malformed.
@@ -459,6 +466,11 @@ class Themes_API {
 			$defaults['requires'] = true;
 			$defaults['requires_php'] = true;
 			$defaults['creation_time'] = true;
+			$defaults['is_commercial'] = true;
+			$defaults['is_community'] = true;
+			$defaults['external_repository_url'] = true;
+			$defaults['external_support_url'] = true;
+			$defaults['can_configure_categorization_options'] = true;
 		}
 
 		$this->request->fields = (array) ( $this->request->fields ?? [] );
@@ -525,6 +537,11 @@ class Themes_API {
 			$defaults['parent'] = true;
 			$defaults['requires'] = true;
 			$defaults['requires_php'] = true;
+			$defaults['is_commercial'] = true;
+			$defaults['is_community'] = true;
+			$defaults['external_repository_url'] = true;
+			$defaults['external_support_url'] = true;
+			$defaults['can_configure_categorization_options'] = true;
 		}
 
 		$this->request->fields = (array) ( $this->request->fields ?? [] );
@@ -877,6 +894,36 @@ class Themes_API {
 
 		if ( $this->fields['trac_tickets'] ) {
 			$phil->trac_tickets = get_post_meta( $theme->ID, '_ticket_id', true );
+		}
+
+		if ( $this->fields['is_commercial'] ) {
+			$phil->is_commercial = has_term( 'commercial', 'theme_business_model', $theme );
+		}
+
+		if ( $this->fields['external_support_url'] ) {
+			// Only return external_support_url value if theme is commercial.
+			if ( ! empty( $phil->is_commercial ) ) {
+				$phil->external_support_url = get_post_meta( $theme->ID, 'external_support_url', true );
+			} else {
+				$phil->external_support_url = false;
+			}
+		}
+
+		if ( $this->fields['is_community'] ) {
+			$phil->is_community = has_term( 'community', 'theme_business_model', $theme );
+		}
+
+		if ( $this->fields['external_repository_url'] ) {
+			// Only return external_repository_url value if theme is community.
+			if ( ! empty( $phil->is_community ) ) {
+				$phil->external_repository_url = get_post_meta( $theme->ID, 'external_repository_url', true );
+			} else {
+				$phil->external_repository_url = '';
+			}
+		}
+
+		if ( $this->fields['can_configure_categorization_options'] ) {
+			$phil->can_configure_categorization_options = current_user_can( 'theme_configure_categorization_options', $theme );
 		}
 
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {
