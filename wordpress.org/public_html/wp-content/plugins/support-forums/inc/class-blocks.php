@@ -51,6 +51,9 @@ class Blocks {
 		// Add forum opt-in/out.
 		add_action( 'admin_init', [ $this, 'admin_init' ] );
 		add_action( 'save_post', [ $this, 'metabox_forum_optin_save_handler' ] );
+
+		// Implement Blocks-no-empty-replies.
+		add_filter( 'bbp_new_reply_pre_content', [ $this, 'bbp_new_reply_pre_content' ] );
 	}
 
 	public function after_setup_theme() {
@@ -277,6 +280,25 @@ class Blocks {
 		}
 
 		return $use_it;
+	}
+
+	/**
+	 * Don't allow empty block replies.
+	 */
+	public function bbp_new_reply_pre_content( $content ) {
+		// Remove HTML tags.
+		$no_html_content = wp_strip_all_tags( $content, true );
+		// Remove HTML comments (including encoded).
+		$no_html_content = preg_replace( '@(<|&lt;)!--.*?--(>|&gt;)@i', '', $no_html_content );
+		// Remove whitespace.
+		$no_html_content = trim( $no_html_content );
+
+		if ( empty( $no_html_content ) ) {
+			// Trigger bbPress's internal "This looks empty!" checks. See bbp_new_reply_handler().
+			$content = '';
+		}
+
+		return $content;
 	}
 
 	/**
