@@ -1,0 +1,15 @@
+
+// See: https://github.com/Automattic/blocks-everywhere/issues/110
+.wp-block-navigation__responsive-close, 
+.wp-block-navigation__responsive-container  { 
+	pointer-events: unset !important;
+}
+
+.wp-block-navigation:not(.is-selected):not(.has-child-selected) .has-child:hover>.wp-block-navigation__submenu-container {
+	opacity: 1;
+	visibility: unset;
+}
+
+.wp-block-navigation-item .wp-block-navigation-item__content {
+	cursor: pointer;
+}
