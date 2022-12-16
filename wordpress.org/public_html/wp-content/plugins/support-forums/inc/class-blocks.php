@@ -53,7 +53,12 @@ class Blocks {
 		add_action( 'save_post', [ $this, 'metabox_forum_optin_save_handler' ] );
 
 		// Implement Blocks-no-empty-replies.
-		add_filter( 'bbp_new_reply_pre_content', [ $this, 'bbp_new_reply_pre_content' ] );
+		add_filter( 'bbp_new_reply_pre_content', [ $this, 'no_empty_block_replies' ] );
+		add_filter( 'bbp_new_topic_pre_content', [ $this, 'no_empty_block_replies' ] );
+
+		// Reverse twemoji replacements. Before bbPress sanitization gets to it.
+		add_filter( 'bbp_new_reply_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
+		add_filter( 'bbp_new_topic_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
 	}
 
 	public function after_setup_theme() {
@@ -285,7 +290,7 @@ class Blocks {
 	/**
 	 * Don't allow empty block replies.
 	 */
-	public function bbp_new_reply_pre_content( $content ) {
+	public function no_empty_block_replies( $content ) {
 		// Remove HTML tags.
 		$no_html_content = wp_strip_all_tags( $content, true );
 		// Remove HTML comments (including encoded).
@@ -299,6 +304,29 @@ class Blocks {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Reverse twemoji upon save.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/52219
+	 */
+	public function reverse_twemoji_upon_save( $content ) {
+		// <img ... class="emoji" alt="emojihere" ... />
+		if ( false === str_contains( $content, 'emoji' ) ) {
+			return $content;
+		}
+
+		$content = wp_unslash( $content );
+
+		// Replace all img.emoji with the alt text.
+		$content = preg_replace(
+			'~<img[^>]+class="emoji"[^>]+alt="(.*?)"+[^>]+>~i',
+			'$1',
+			$content
+		);
+
+		return wp_slash( $content ); // Expect slashed.
 	}
 
 	/**
