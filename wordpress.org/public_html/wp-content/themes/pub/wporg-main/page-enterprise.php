@@ -43,9 +43,6 @@ the_post();
 				</section>
 			<div class="entry-content row enterprise-logos">
 				<section class="col-2">
-					<img src="<?php echo get_theme_file_uri('images/enterprise/newyorkpostlogo.png'); ?>">
-				</section>
-				<section class="col-2">
 					<img src="<?php echo get_theme_file_uri('images/enterprise/thesunlogo.png'); ?>">
 				</section>
 				<section class="col-2">
