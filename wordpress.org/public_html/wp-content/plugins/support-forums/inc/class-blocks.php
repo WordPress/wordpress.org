@@ -52,10 +52,6 @@ class Blocks {
 		add_action( 'admin_init', [ $this, 'admin_init' ] );
 		add_action( 'save_post', [ $this, 'metabox_forum_optin_save_handler' ] );
 
-		// Implement Blocks-no-empty-replies.
-		add_filter( 'bbp_new_reply_pre_content', [ $this, 'no_empty_block_replies' ] );
-		add_filter( 'bbp_new_topic_pre_content', [ $this, 'no_empty_block_replies' ] );
-
 		// Reverse twemoji replacements. Before bbPress sanitization gets to it.
 		add_filter( 'bbp_new_reply_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
 		add_filter( 'bbp_new_topic_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
@@ -288,32 +284,13 @@ class Blocks {
 	}
 
 	/**
-	 * Don't allow empty block replies.
-	 */
-	public function no_empty_block_replies( $content ) {
-		// Remove HTML tags.
-		$no_html_content = wp_strip_all_tags( $content, true );
-		// Remove HTML comments (including encoded).
-		$no_html_content = preg_replace( '@(<|&lt;)!--.*?--(>|&gt;)@i', '', $no_html_content );
-		// Remove whitespace.
-		$no_html_content = trim( $no_html_content );
-
-		if ( empty( $no_html_content ) ) {
-			// Trigger bbPress's internal "This looks empty!" checks. See bbp_new_reply_handler().
-			$content = '';
-		}
-
-		return $content;
-	}
-
-	/**
 	 * Reverse twemoji upon save.
 	 *
 	 * @see https://core.trac.wordpress.org/ticket/52219
 	 */
 	public function reverse_twemoji_upon_save( $content ) {
 		// <img ... class="emoji" alt="emojihere" ... />
-		if ( false === str_contains( $content, 'emoji' ) ) {
+		if ( ! str_contains( $content, 'emoji' ) ) {
 			return $content;
 		}
 
