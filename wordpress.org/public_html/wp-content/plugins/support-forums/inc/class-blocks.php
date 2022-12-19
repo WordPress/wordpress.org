@@ -267,16 +267,21 @@ class Blocks {
 		$enabled_for_user  = ( 'enabled' === $user_option );
 		$use_it            = ( $enabled_for_user && $enabled_for_forum );
 
-		// If we're editing a post made without the editor, let's respect that.
-		if ( $use_it && bbp_is_reply_edit() ) {
-			$reply = bbp_get_reply( bbp_get_reply_id() );
+		if ( $use_it ) {
+			$reply_id = bbp_is_reply_edit() ? bbp_get_reply_id() : ( ( bbp_is_post_request() && ! empty( $_POST['action'] ) && 'bbp-edit-reply' === $_POST['action'] ) ? $_POST['bbp_reply_id'] : 0 );
+			$topic_id = bbp_is_topic_edit() ? bbp_get_topic_id() : ( ( bbp_is_post_request() && ! empty( $_POST['action'] ) && 'bbp-edit-topic' === $_POST['action'] ) ? $_POST['bbp_topic_id'] : 0 );
 
-			if ( $reply && ! has_blocks( $reply->post_content ) ) {
-				$use_it = false;
-			}
-		} elseif ( $use_it && bbp_is_topic_edit() ) {
-			if ( ! has_blocks( get_post_field( 'post_content', bbp_get_topic_id() ) ) ) {
-				$use_it = false;
+			// If we're editing a post made without the editor, let's respect that.
+			if ( $reply_id ) {
+				$reply = bbp_get_reply( $reply_id );
+
+				if ( $reply && ! has_blocks( $reply->post_content ) ) {
+					$use_it = false;
+				}
+			} elseif ( $topic_id ) {
+				if ( ! has_blocks( get_post_field( 'post_content', $topic_id ) ) ) {
+					$use_it = false;
+				}
 			}
 		}
 
