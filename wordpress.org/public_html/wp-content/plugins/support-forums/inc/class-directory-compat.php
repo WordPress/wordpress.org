@@ -62,6 +62,10 @@ abstract class Directory_Compat {
 
 			// Tell WordPress not to 404 (before bbPress overrides it) so that Canonical can do it's job.
 			add_filter( 'pre_handle_404', array( $this, 'abort_wp_handle_404' ) );
+
+			// Let plugins know which forum we're in.
+			add_filter( 'bbp_get_forum_id', array( $this, 'bbp_get_forum_id' ) );
+
 		}
 	}
 
@@ -726,6 +730,24 @@ abstract class Directory_Compat {
 		return $handled;
 	}
 
+	/**
+	 * These compat routes are views, but showing a singular forum.
+	 * This makes other plugins understand that the compat view is a forum.
+	 *
+	 * @param int $forum_id The detected forum id.
+	 * @return int The actual forum id.
+	 */
+	public function bbp_get_forum_id( $forum_id ) {
+		if ( ! $forum_id && bbp_is_single_view() ) {
+			if ( $this->compat() === bbp_get_view_id() ) {
+				$forum_id = $this->forum_id();
+			} elseif ( 'reviews' == bbp_get_view_id() ) {
+				$forum_id = Plugin::REVIEWS_FORUM_ID;
+			}
+		}
+
+		return $forum_id;
+	}
 
 	/**
 	 * Add a subscribe/unsubscribe link to the compat views.
