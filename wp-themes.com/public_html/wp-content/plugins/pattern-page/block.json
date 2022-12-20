@@ -1,0 +1,10 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "wporg/patterns-preview",
+	"title": "WordPress.org Pattern Preview",
+	"category": "widgets",
+	"icon": "plugin",
+	"description": "Show pattern preview.",
+	"textdomain": "wporg"
+}
