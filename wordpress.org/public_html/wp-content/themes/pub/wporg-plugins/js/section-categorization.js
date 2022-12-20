@@ -9,8 +9,6 @@
 	};
 
 	document.addEventListener( 'submit', event => {
-		event.preventDefault();
-
 		const form = event.target.closest('form');
 		const submitButton = form.querySelector('button[type="submit"]');
 		const successMsg = form.querySelector('.success-msg');
@@ -18,6 +16,8 @@
 		if ( ! form || ! ['commercial', 'community'].includes(form.id) ) {
 			return;
 		}
+
+		event.preventDefault();
 
 		successMsg?.classList.remove( 'saved' );
 
