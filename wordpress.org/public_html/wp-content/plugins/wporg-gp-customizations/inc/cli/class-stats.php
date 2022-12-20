@@ -50,63 +50,63 @@ class Stats {
 	 * @var int[]
 	 */
 	private array $forum_ids = array(
-		'pt'    => 383,
-		'make'  => 384,
-//		''      => 385,
-		'emoji' => 386,
-		'hau'   => 387,
-		'fao'   => 388,
-		'af'    => 389,
-		'am'    => 390,
-		'id'    => 391,
-		'mya'   => 392,
-		'ja'    => 393,
-		'ru'    => 394,
-		'de'    => 395,
-		'bs'    => 396,
-		'th'    => 397,
-		'cn'    => 398,
-		'ak'    => 399,
-		'an'    => 400,
-		'ar'    => 401,
-		'arq'   => 402,
-		'ug'    => 403,
-		'tw'    => 404,
-		'bg'    => 405,
-		'sr'    => 406,
-		'hr'    => 407,
-		'nl'    => 408,
-		'he'    => 409,
-		'ka'    => 410,
-		'fi'    => 411,
-		'mk'    => 412,
-		'ca'    => 413,
-		'sk'    => 414,
-		'pl'    => 415,
-		'ro'    => 416,
-		'es'    => 417,
-		'br'    => 418,
-		'en'    => 419,
-		'sq'    => 420,
-		'hy'    => 421,
-		'rup'   => 422,
-		'frp'   => 423,
-		'as'    => 424,
-		'ast'   => 425,
-		'az'    => 426,
-		'az-tr' => 427,
-		'bcc'   => 428,
-		'eu'    => 429,
-		'bel'   => 430,
-		'bn'    => 431,
-		'bre'   => 432,
-		'ceb'   => 433,
-		'zh-hk' => 434,
-		'co'    => 435,
-		'cs'    => 436,
-		'et'    => 437,
-		'eo'    => 438,
-		'uz'    => 439,
+		'pt'                => 383,
+		'make'              => 384,
+		// ''      => 385,
+					'emoji' => 386,
+		'hau'               => 387,
+		'fao'               => 388,
+		'af'                => 389,
+		'am'                => 390,
+		'id'                => 391,
+		'mya'               => 392,
+		'ja'                => 393,
+		'ru'                => 394,
+		'de'                => 395,
+		'bs'                => 396,
+		'th'                => 397,
+		'cn'                => 398,
+		'ak'                => 399,
+		'an'                => 400,
+		'ar'                => 401,
+		'arq'               => 402,
+		'ug'                => 403,
+		'tw'                => 404,
+		'bg'                => 405,
+		'sr'                => 406,
+		'hr'                => 407,
+		'nl'                => 408,
+		'he'                => 409,
+		'ka'                => 410,
+		'fi'                => 411,
+		'mk'                => 412,
+		'ca'                => 413,
+		'sk'                => 414,
+		'pl'                => 415,
+		'ro'                => 416,
+		'es'                => 417,
+		'br'                => 418,
+		'en'                => 419,
+		'sq'                => 420,
+		'hy'                => 421,
+		'rup'               => 422,
+		'frp'               => 423,
+		'as'                => 424,
+		'ast'               => 425,
+		'az'                => 426,
+		'az-tr'             => 427,
+		'bcc'               => 428,
+		'eu'                => 429,
+		'bel'               => 430,
+		'bn'                => 431,
+		'bre'               => 432,
+		'ceb'               => 433,
+		'zh-hk'             => 434,
+		'co'                => 435,
+		'cs'                => 436,
+		'et'                => 437,
+		'eo'                => 438,
+		'uz'                => 439,
 	);
 
 	private string $header                           = '';
@@ -162,6 +162,17 @@ class Stats {
 		$this->print_contributors_per_locale();
 		$this->print_managers_stats();
 		$this->print_most_active_translators();
+		$result = $wpdb->insert(
+			'polyglot_stats',
+			array(
+				'locales_100'      => $this->get_core_full_translated(),
+				'locales_95_plus'  => $this->get_core_interval( 100, 95 ),
+				'locales_90_plus'  => $this->get_core_interval( 95, 90 ),
+				'locales_50_plus'  => $this->get_core_interval( 90, 50 ),
+				'locales_below_50' => $this->get_core_interval( 50, 0, '<', '>' ),
+				'date'             => gmdate( 'Y-m-d' ),
+			)
+		);
 		$this->update_page();
 	}
 
@@ -181,7 +192,7 @@ class Stats {
 	 */
 	private function print_header(): void {
 		if ( ! $this->echo_the_values ) {
-			$this->header = $this->create_gutenberg_paragraph( 'Polyglots stats. Created at ' . gmdate( 'Y-m-d H:i:s' ) . ' ' . date_default_timezone_get() );
+			$this->header  = $this->create_gutenberg_paragraph( 'Polyglots stats. Created at ' . gmdate( 'Y-m-d H:i:s' ) . ' ' . date_default_timezone_get() );
 			$this->header .= $this->create_gutenberg_paragraph( 'Created using the <b>wp wporg-translate show-stats --url=translate.wordpress.org</b> command.' );
 		} else {
 			$this->print_wpcli_heading( 'Polyglots stats. Created at ' . gmdate( 'Y-m-d H:i:s' ) . ' ' . date_default_timezone_get() );
@@ -302,24 +313,24 @@ class Stats {
 		} else {
 			$this->print_wpcli_heading( $header );
 		}
-		$code       = "Year \t Core Packs \t Plugin Packs \t Theme Packs \t Total Packs " . PHP_EOL;
-		$code      .= '.......................................................................' . PHP_EOL;
+		$code  = "Year \t Core Packs \t Plugin Packs \t Theme Packs \t Total Packs " . PHP_EOL;
+		$code .= '.......................................................................' . PHP_EOL;
 
 		foreach ( $packages as $package ) {
 			if ( gmdate( 'Y' ) == $package['year'] ) {
 				$code .= str_pad( $package['year'] . ' (*) ', 10 ) .
-				         str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['core_packs']) ), 16 ) .
-				         str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['plugin_packs'] ) ), 16 ) .
-				         str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['theme_packs'] ) ), 16 ) .
-				         str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['total_packs'] ) ), 16 ) .
-				         PHP_EOL;
+						 str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['core_packs'] ) ), 16 ) .
+						 str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['plugin_packs'] ) ), 16 ) .
+						 str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['theme_packs'] ) ), 16 ) .
+						 str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['total_packs'] ) ), 16 ) .
+						 PHP_EOL;
 			}
 			$code .= str_pad( $package['year'], 10 ) .
-			         str_pad( number_format_i18n( $package['core_packs'] ), 16 ) .
-			         str_pad( number_format_i18n( $package['plugin_packs'] ), 16 ) .
-			         str_pad( number_format_i18n( $package['theme_packs'] ), 16 ) .
-			         str_pad( number_format_i18n( $package['total_packs'] ), 16 ) .
-			         PHP_EOL;
+					 str_pad( number_format_i18n( $package['core_packs'] ), 16 ) .
+					 str_pad( number_format_i18n( $package['plugin_packs'] ), 16 ) .
+					 str_pad( number_format_i18n( $package['theme_packs'] ), 16 ) .
+					 str_pad( number_format_i18n( $package['total_packs'] ), 16 ) .
+					 PHP_EOL;
 		}
 		$code .= '.......................................................................' . PHP_EOL;
 		$code .= '(*) Estimated for the current year.' . PHP_EOL;
@@ -366,22 +377,22 @@ class Stats {
 		} else {
 			$this->print_wpcli_heading( $header );
 		}
-		$code       = "Year \t Plugins \t Themes \t Total" . PHP_EOL;
-		$code      .= '................................................................' . PHP_EOL;
+		$code  = "Year \t Plugins \t Themes \t Total" . PHP_EOL;
+		$code .= '................................................................' . PHP_EOL;
 
 		foreach ( $packages as $package ) {
 			if ( gmdate( 'Y' ) == $package['year'] ) {
 				$code .= str_pad( $package['year'] . ' (*) ', 10 ) .
-				         str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['plugins']) ), 16 ) .
-				         str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['themes'] ) ), 16 ) .
-				         str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['total'] ) ), 16 ) .
-				         PHP_EOL;
+						 str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['plugins'] ) ), 16 ) .
+						 str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['themes'] ) ), 16 ) .
+						 str_pad( number_format_i18n( $this->estimate_value_for_full_year( $package['total'] ) ), 16 ) .
+						 PHP_EOL;
 			}
 			$code .= str_pad( $package['year'], 10 ) .
-			         str_pad( number_format_i18n( $package['plugins'] ), 16 ) .
-			         str_pad( number_format_i18n( $package['themes'] ), 16 ) .
-			         str_pad( number_format_i18n( $package['total'] ), 16 ) .
-			         PHP_EOL;
+					 str_pad( number_format_i18n( $package['plugins'] ), 16 ) .
+					 str_pad( number_format_i18n( $package['themes'] ), 16 ) .
+					 str_pad( number_format_i18n( $package['total'] ), 16 ) .
+					 PHP_EOL;
 		}
 		$code .= '................................................................' . PHP_EOL;
 		$code .= '(*) Estimated for the current year.' . PHP_EOL;
@@ -432,11 +443,13 @@ class Stats {
 				$last_id = $first_id - 1;
 			}
 
-			$first_id = $wpdb->get_var( $wpdb->prepare(
-				"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added BETWEEN %s AND %s",
-				$year . '-01-01 00:00:00',
-				$year . '-01-02 00:00:00',
-			) );
+			$first_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added BETWEEN %s AND %s",
+					$year . '-01-01 00:00:00',
+					$year . '-01-02 00:00:00',
+				)
+			);
 
 			$row = $wpdb->get_row(
 				$wpdb->prepare(
@@ -502,7 +515,7 @@ class Stats {
 			$forum_replies[ $year ] = $this->get_forums_stats( 'reply', $year );
 		}
 
-		ksort($this->forum_ids);
+		ksort( $this->forum_ids );
 
 		$header = 'Forums. Topics by year and locale.';
 		if ( ! $this->echo_the_values ) {
@@ -511,16 +524,16 @@ class Stats {
 			$this->print_wpcli_heading( $header );
 		}
 
-		$code .= str_pad('Locale', 12 );
+		$code .= str_pad( 'Locale', 12 );
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
-			$code .= str_pad( $year, 8,' ', STR_PAD_LEFT  );
+			$code .= str_pad( $year, 8, ' ', STR_PAD_LEFT );
 		}
 		$code .= PHP_EOL;
 
 		foreach ( $this->forum_ids as $key => $value ) {
-			$code .= str_pad($key, 12 );
+			$code .= str_pad( $key, 12 );
 			for ( $year = $last_year; $year > $first_year; $year -- ) {
-				$code .= str_pad( number_format_i18n( $forum_posts[$year][$key] ), 8,' ', STR_PAD_LEFT  );
+				$code .= str_pad( number_format_i18n( $forum_posts[ $year ][ $key ] ), 8, ' ', STR_PAD_LEFT );
 			}
 			$code .= PHP_EOL;
 		}
@@ -538,16 +551,16 @@ class Stats {
 			$this->print_wpcli_heading( $header );
 		}
 
-		$code = str_pad('Locale', 12 );
+		$code = str_pad( 'Locale', 12 );
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
-			$code .= str_pad( $year, 8,' ', STR_PAD_LEFT  );
+			$code .= str_pad( $year, 8, ' ', STR_PAD_LEFT );
 		}
 		$code .= PHP_EOL;
 
 		foreach ( $this->forum_ids as $key => $value ) {
-			$code .= str_pad($key, 12 );
+			$code .= str_pad( $key, 12 );
 			for ( $year = $last_year; $year > $first_year; $year -- ) {
-				$code .= str_pad( number_format_i18n( $forum_replies[$year][$key] ), 8,' ', STR_PAD_LEFT  );
+				$code .= str_pad( number_format_i18n( $forum_replies[ $year ][ $key ] ), 8, ' ', STR_PAD_LEFT );
 			}
 			$code .= PHP_EOL;
 		}
@@ -584,10 +597,12 @@ class Stats {
 				$last_id = $first_id - 1;
 			}
 
-			$first_id = $wpdb->get_var( $wpdb->prepare(
-				"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added >= %s",
-				$year . '-01-01'
-			) );
+			$first_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added >= %s",
+					$year . '-01-01'
+				)
+			);
 
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
@@ -613,7 +628,7 @@ class Stats {
 				}
 				$strings_added = number_format_i18n( $row['strings_added'] );
 				$contributor   = get_user_by( 'id', $row['user_id'] );
-				if ($contributor) {
+				if ( $contributor ) {
 					$code .= "{$year} \t  {$strings_added}  \t {$contributor->user_login}" . PHP_EOL;
 				}
 			}
@@ -739,7 +754,7 @@ class Stats {
 					$comment_meta_translation_id
 				)
 			);
-			if ( ! $translation ) { 
+			if ( ! $translation ) {
 				continue;
 			}
 
@@ -826,7 +841,7 @@ class Stats {
 			$comments_number = number_format_i18n( $commenter->comments_number );
 			$code           .= " - {$commenter->user_login}: {$tabs} {$comments_number} comments. Profile: {$url}" . PHP_EOL;
 		}
-		$code                    .= PHP_EOL;
+		$code .= PHP_EOL;
 		if ( ! $this->echo_the_values ) {
 			$this->feedback_received .= $this->create_gutenberg_code( $code );
 		} else {
@@ -872,7 +887,7 @@ class Stats {
 		}
 
 		$code .= 'General Translator Editors (GTE):' . PHP_EOL;
-		$code .= " - Total:\t\t\t\t\t\t\t\t" . number_format_i18n( array_sum( $general_translation_editors ) ). PHP_EOL;
+		$code .= " - Total:\t\t\t\t\t\t\t\t" . number_format_i18n( array_sum( $general_translation_editors ) ) . PHP_EOL;
 		$code .= " - Total users that have been registered this year and get the role:\t" . number_format_i18n( array_sum( $registered_this_year_new_general_translation_editors ) ) . PHP_EOL;
 		$code .= " - Total users that have start translating this year and get the role:\t" . number_format_i18n( array_sum( $started_this_year_new_general_translation_editors ) ) . PHP_EOL;
 		foreach ( $locales as $locale ) {
@@ -904,8 +919,8 @@ class Stats {
 	 * @return void
 	 */
 	private function print_contributors_per_locale():void {
-		$locales                       = get_locales();
-		$header                        = 'Contributors per locale';
+		$locales = get_locales();
+		$header  = 'Contributors per locale';
 
 		if ( ! $this->echo_the_values ) {
 			$this->contributors_per_locale = $this->create_gutenberg_heading( $header );
@@ -921,10 +936,10 @@ class Stats {
 		foreach ( $locales as $locale ) {
 			$current_contributors = $this->get_translation_contributors( $locale, 365 );
 			$all_contributors     = $this->get_translation_contributors( $locale );
-			$code                .= str_pad( $locale->english_name, 40) .
-			                        str_pad( number_format_i18n( count( $current_contributors ) ), 20) .
-			                        str_pad( number_format_i18n( count($all_contributors) - count( $current_contributors ) ), 20) .
-			                        str_pad( number_format_i18n( count( $all_contributors ) ), 20) . PHP_EOL;
+			$code                .= str_pad( $locale->english_name, 40 ) .
+									str_pad( number_format_i18n( count( $current_contributors ) ), 20 ) .
+									str_pad( number_format_i18n( count( $all_contributors ) - count( $current_contributors ) ), 20 ) .
+									str_pad( number_format_i18n( count( $all_contributors ) ), 20 ) . PHP_EOL;
 		}
 
 		if ( ! $this->echo_the_values ) {
@@ -1174,7 +1189,7 @@ class Stats {
 			$date_constraint = $wpdb->prepare( ' AND date_modified >= CURRENT_DATE - INTERVAL %d DAY', $max_age_days );
 		}
 
-		[ $locale, $locale_slug ] = array_merge( explode( '/', $locale->slug ), array( 'default' ) );
+		array( $locale, $locale_slug ) = array_merge( explode( '/', $locale->slug ), array( 'default' ) );
 
 		$users = $wpdb->get_col(
 			$wpdb->prepare(
@@ -1257,7 +1272,8 @@ class Stats {
 		}
 		define( 'MAKE_POLYGLOTS_BLOG_ID', 19 );
 		define( 'POLYGLOTS_PAGE_ID', 42132 );
-		add_filter( 'wp_revisions_to_keep',
+		add_filter(
+			'wp_revisions_to_keep',
 			function ( $num, $post ) {
 				if ( POLYGLOTS_PAGE_ID === $post->ID ) {
 					$num = 0; // pretend we don't want to keep revisions so that it will not lookup all old revisions.
@@ -1266,7 +1282,8 @@ class Stats {
 				return $num;
 			},
 			10,
-		2 );
+			2
+		);
 		switch_to_blog( MAKE_POLYGLOTS_BLOG_ID );
 
 		wp_update_post(
