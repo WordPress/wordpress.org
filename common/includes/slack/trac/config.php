@@ -98,6 +98,7 @@ class Meta extends Trac {
 		'photo-directory/'                      => [ '#meta' => true, '#photos' => true ],
 		'wporg-themes/'                         => [ '#meta' => true, '#themereview' => true ],
 		'theme-directory/'                      => [ '#meta' => true, '#themereview' => true ],
+		'wp-themes.com/'                        => [ '#meta' => true, '#themereview' => true ],
 		'wporg-plugins/'                        => [ '#meta' => true, '#pluginreview' => true ],
 		'plugin-directory/'                     => [ '#meta' => true, '#pluginreview' => true ],
 		'plugins/support-forums/'               => [ '#meta' => true, '#forums' => true ],
