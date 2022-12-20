@@ -263,7 +263,7 @@ class Blocks {
 
 		// Determine if the forum has the editor enabled.
 		$forum             = bbp_get_forum( bbp_get_forum_id() );
-		$enabled_for_forum = $forum ? ( 'enabled' === $forum->block_editor || ( ! $forum->block_editor && $this->forum_enabled_by_default ) ) : true;
+		$enabled_for_forum = $forum ? ( 'enabled' === $forum->block_editor || ( ! $forum->block_editor && $this->forum_enabled_by_default ) ) : $this->forum_enabled_by_default;
 		$enabled_for_user  = ( 'enabled' === $user_option );
 		$use_it            = ( $enabled_for_user && $enabled_for_forum );
 
