@@ -1586,14 +1586,15 @@ function pin_next_workshop_discussion_group( $events, $user_agent ) {
  * Pin one-off events.
  */
 function pin_one_off_events( $events, $current_time ) {
-
 	if ( $current_time > strtotime( 'December 13, 2022' ) && $current_time < strtotime( 'December 18, 2022' ) ) {
 		$utc_offset = -5 * HOUR_IN_SECONDS;
 
 		$sotw = array(
 			'type'                 => 'wordcamp',
 			'title'                => 'State of the Word',
-			'url'                  => 'https://wordpress.org/news/2022/11/state-of-the-word-2022/',
+			// `utm_source` is `private` because it would have to be set by the WP install, we don't need it, and tracking it could be a privacy concern.
+			// This may need to be updated for GA4 - https://support.google.com/analytics/answer/10089681.
+			'url'                  => 'https://wordpress.org/news/2022/11/state-of-the-word-2022/?utm_source=private&utm_medium=events_widget&utm_campaign=sotw2022',
 			'meetup'               => '',
 			'meetup_url'           => '',
 			'date'                 => '2022-12-15 13:00:00',
