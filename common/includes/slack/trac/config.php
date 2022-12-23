@@ -61,6 +61,7 @@ class Core extends Trac {
 		'css'                    => '#core-css',
 		'javascript'             => '#core-js',
 		'coding-standards'       => '#core-coding-standards',
+		'performance'            => [ '#core' => true, '#core-performance' => true ],
 		'Privacy'                => '#core-privacy',
 		'privacy'                => '#core-privacy',
 		'Site Health'            => '#core-site-health',
