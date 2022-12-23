@@ -18,7 +18,7 @@ use GP_Locales;
 use WP_CLI;
 use WP_CLI_Command;
 use WP_Query;
-use function WordPressdotorg\Locales\get_locales;
+use function WordPressdotorg\I18nTeams\Locales\get_locales_data;
 
 class Stats {
 
@@ -162,15 +162,22 @@ class Stats {
 		$this->print_contributors_per_locale();
 		$this->print_managers_stats();
 		$this->print_most_active_translators();
-		$result = $wpdb->insert(
+		$all_locales_data = get_locales_data();
+		$stats_data       = $all_locales_data['status_counts'];
+		$result           = $wpdb->insert(
 			'polyglot_stats',
 			array(
-				'locales_100'      => $this->get_core_full_translated(),
-				'locales_95_plus'  => $this->get_core_interval( 100, 95 ),
-				'locales_90_plus'  => $this->get_core_interval( 95, 90 ),
-				'locales_50_plus'  => $this->get_core_interval( 90, 50 ),
-				'locales_below_50' => $this->get_core_interval( 50, 0, '<', '>' ),
-				'date'             => gmdate( 'Y-m-d' ),
+				'releases_by_locale'                    => $stats_data['all'],
+				'releases_by_locale_uptodate'           => $stats_data['latest'],
+				'releases_by_locale_minor_behind'       => $stats_data['minor-behind'],
+				'releases_by_locale_one_major_behind'   => $stats_data['major-behind-one'],
+				'releases_by_locale_multi_major_behind' => $stats_data['major-behind-many'],
+				'locales_100'                           => $this->get_core_full_translated(),
+				'locales_95_plus'                       => $this->get_core_interval( 100, 95 ),
+				'locales_90_plus'                       => $this->get_core_interval( 95, 90 ),
+				'locales_50_plus'                       => $this->get_core_interval( 90, 50 ),
+				'locales_below_50'                      => $this->get_core_interval( 50, 0, '<', '>' ),
+				'date'                                  => gmdate( 'Y-m-d' ),
 			)
 		);
 		$this->update_page();
