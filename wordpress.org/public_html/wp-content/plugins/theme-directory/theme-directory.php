@@ -175,7 +175,7 @@ function wporg_themes_init() {
         'show_ui'           => true,
         'show_admin_column' => false,
         'capabilities'      => array(
-            'assign_terms' => 'theme_set_category',
+            'assign_terms' => 'assign_categories',
         ),
     ) );
 
