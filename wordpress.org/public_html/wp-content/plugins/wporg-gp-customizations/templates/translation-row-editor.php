@@ -238,95 +238,111 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 			</div>
 
 			<div class="editor-panel__right">
-				<div class="panel-header">
-					<h3><?php _e( 'Meta', 'glotpress' ); ?></h3>
-				</div>
 				<div class="panel-content">
-					<div class="meta">
-						<?php gp_tmpl_load( 'translation-row-editor-meta-feedback', get_defined_vars() ); ?>
-						<?php if ( $translation->translation_status && ( $can_approve_translation || $can_reject_self ) ): ?>
-							<div class="status-actions">
-								<?php if ( $can_approve_translation ) : ?>
-									<?php if ( 'current' !== $translation->translation_status ) : ?>
-										<button class="button  is-primary approve" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>"><strong>+</strong> <?php _e( 'Approve', 'glotpress' ); ?></button>
-									<?php endif; ?>
-									<?php if ( 'rejected' !== $translation->translation_status ) : ?>
-										<button class="button reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject', 'glotpress' ); ?></button>
-										<?php if ( apply_filters( 'gp_enable_changesrequested_status', false ) ) : // todo: delete when we merge the gp-translation-helpers in GlotPress ?>
-											<button class="button changesrequested" style="display: none;" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-changesrequested_' . $translation->id ) ); ?>" title="<?php esc_attr_e( 'Request changes for this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"><strong>&minus;</strong> <?php _ex( 'Request changes', 'Action', 'glotpress' ); ?></button>
-										<?php endif; ?>
-									<?php endif; ?>
-									<?php if ( 'fuzzy' !== $translation->translation_status ) : ?>
-										<button class="button fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
-									<?php endif; ?>
-								<?php elseif ( $can_reject_self ): ?>
-									<button class="button reject" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"><strong>&minus;</strong> <?php _e( 'Reject Suggestion', 'glotpress' ); ?></button>
-									<button class="button fuzzy" tabindex="-1" data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"><strong>~</strong> <?php _e( 'Fuzzy', 'glotpress' ); ?></button>
-								<?php endif; ?>
-							</div>
-						<?php endif; ?>
+					<?php
+					$meta_sidebar = '<div class="meta" id="sidebar-div-meta-' . $translation->row_id . '">';
+					$meta_sidebar .= gp_tmpl_get_output( 'translation-row-editor-meta-feedback', get_defined_vars() );
+					if ( $translation->translation_status && ( $can_approve_translation || $can_reject_self ) ) {
+						$meta_sidebar .= '<div class="status-actions">';
+						if ( $can_approve_translation ) {
+							if ( 'current' !== $translation->translation_status ) {
+								$meta_sidebar .= '<button class="button is-primary approve" tabindex="-1" data-nonce="' . esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ) . '"><strong>+</strong> ' . __( 'Approve', 'glotpress' ) . '</button> ';
+							}
+							if ( 'rejected' !== $translation->translation_status ) {
+								$meta_sidebar .= '<button class="button reject" tabindex="-1" data-nonce="' . esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ) . '"><strong>&minus;</strong> ' . __( 'Reject', 'glotpress' ) . '</button> ';
+								if ( apply_filters( 'gp_enable_changesrequested_status', false ) ) { // todo: delete when we merge the gp-translation-helpers in GlotPress.
+									$meta_sidebar .= '<button class="button changesrequested" style="display: none;" data-nonce="' . esc_attr( wp_create_nonce( 'update-translation-status-changesrequested_' . $translation->id ) ) . '" title="' . esc_attr__( 'Request changes for this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ) . '"><strong>&minus;</strong> ' . _x( 'Request changes', 'Action', 'glotpress' ) . '</button>';
+								}
+							}
+							if ( 'fuzzy' !== $translation->translation_status ) {
+								$meta_sidebar .= '<button class="button fuzzy" tabindex="-1" data-nonce="' . esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ) . '"><strong>~</strong> ' . __( 'Fuzzy', 'glotpress' ) . '</button> ';
+							}
+						} elseif ( $can_reject_self ) {
+							$meta_sidebar .= '<button class="button reject" tabindex="-1" data-nonce="' . esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ) . '"><strong>&minus;</strong> ' . __( 'Reject Suggestion', 'glotpress' ) . '</button> ';
+							$meta_sidebar .= '<button class="button fuzzy" tabindex="-1" data-nonce="' . esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ) . '"><strong>~</strong> ' . __( 'Fuzzy', 'glotpress' ) . '</button> ';
+						}
+						$meta_sidebar .= '</div>';
+					}
+					$meta_sidebar .= '<dl>';
+					$meta_sidebar .= '    <dt>' . __( 'Status:', 'glotpress' ) . '</dt>';
+					$meta_sidebar .= '    <dd>';
+					$meta_sidebar .= display_status( $translation->translation_status );
+					$meta_sidebar .= '    </dd>';
+					$meta_sidebar .= '</dl>';
+					if ( $translation->translation_added && '0000-00-00 00:00:00' !== $translation->translation_added ) {
+						$meta_sidebar .= '<dl>';
+						$meta_sidebar .= '    <dt>' . __( 'Added:', 'glotpress' ) . '</dt>';
+						$meta_sidebar .= '    <dd>' . $translation->translation_added . ' UTC</dd>';
+						$meta_sidebar .= '</dl>';
+					}
+					if ( $translation->date_modified && '0000-00-00 00:00:00' !== $translation->date_modified && $translation->date_modified !== $translation->translation_added ) {
+						$meta_sidebar .= '<dl>';
+						$meta_sidebar .= '    <dt>' . __( 'Last modified:', 'glotpress' ) . '</dt>';
+						$meta_sidebar .= '    <dd>' . $translation->date_modified . ' UTC</dd>';
+						$meta_sidebar .= '</dl>';
+					}
+					if ( $translation->user ) {
+						$meta_sidebar .= '<dl>';
+						$meta_sidebar .= '    <dt>' . __( 'Translated by:', 'glotpress' ) . '</dt>';
+						ob_start();
+						gp_link_user( $translation->user );
+						$meta_sidebar .= '    <dd>' . ob_get_contents() . '</dd>';
+						ob_end_clean();
+						$meta_sidebar .= '</dl>';
+					}
+					if ( $translation->user_last_modified && ( ! $translation->user || $translation->user->ID !== $translation->user_last_modified->ID ) ) {
+						$meta_sidebar .= '<dl>';
+						$meta_sidebar .= '<dt>';
+						if ( 'current' === $translation->translation_status ) {
+							$meta_sidebar .= __( 'Approved by:', 'glotpress' );
+						} elseif ( 'rejected' === $translation->translation_status ) {
+							$meta_sidebar .= __( 'Rejected by:', 'glotpress' );
+						} else {
+							$meta_sidebar .= __( 'Last updated by:', 'glotpress' );
+						}
+						$meta_sidebar .= '</dt>';
+						ob_start();
+						gp_link_user( $translation->user );
+						$meta_sidebar .= '    <dd>' . ob_get_contents() . '</dd>';
+						ob_end_clean();
+						$meta_sidebar .= '</dl>';
+					}
+					$meta_sidebar .= '<dl>';
+					$meta_sidebar .= '<dt>' . __( 'Priority of the original:', 'glotpress' ) . '</dt>';
+					if ( $can_write ) {
+						$meta_sidebar .= '<dd>';
+						$meta_sidebar .= gp_select(
+							'priority-' . $translation->original_id,
+							GP::$original->get_static( 'priorities' ),
+							$translation->priority,
+							array(
+								'class'      => 'priority',
+								'tabindex'   => '-1',
+								'data-nonce' => wp_create_nonce( 'set-priority_' . $translation->original_id ),
+							)
+						);
+						$meta_sidebar .= '</dd>';
+					} else {
+						$meta_sidebar .= '<dd>' . gp_array_get( GP::$original->get_static( 'priorities' ), $translation->priority, 'unknown' ) . '</dd>';
+					}
+					$meta_sidebar .= '</dl>';
+					$meta_sidebar .= '</div>';
 
-						<dl>
-							<dt><?php _e( 'Status:', 'glotpress' ); ?></dt>
-							<dd>
-								<?php echo display_status( $translation->translation_status ); ?>
-							</dd>
-						</dl>
+					$defined_vars = get_defined_vars();
 
-						<?php if ( $translation->translation_added && $translation->translation_added !== '0000-00-00 00:00:00' ): ?>
-							<dl>
-								<dt><?php _e( 'Added:', 'glotpress' ); ?></dt>
-								<dd><?php echo $translation->translation_added; ?> UTC</dd>
-							</dl>
-						<?php endif; ?>
-						<?php if ( $translation->date_modified && $translation->date_modified !== '0000-00-00 00:00:00' && $translation->date_modified !== $translation->translation_added ): ?>
-							<dl>
-								<dt><?php _e( 'Last modified:', 'glotpress' ); ?></dt>
-								<dd><?php echo $translation->date_modified; ?> UTC</dd>
-							</dl>
-						<?php endif; ?>
-						<?php if ( $translation->user ) : ?>
-							<dl>
-								<dt><?php _e( 'Translated by:', 'glotpress' ); ?></dt>
-								<dd><?php gp_link_user( $translation->user ); ?></dd>
-							</dl>
-						<?php endif; ?>
-						<?php if ( $translation->user_last_modified && ( ! $translation->user || $translation->user->ID !== $translation->user_last_modified->ID ) ) : ?>
-							<dl>
-								<dt><?php
-									if ( 'current' === $translation->translation_status ) {
-										_e( 'Approved by:', 'glotpress' );
-									} elseif ( 'rejected' === $translation->translation_status ) {
-										_e( 'Rejected by:', 'glotpress' );
-									} else {
-										_e( 'Last updated by:', 'glotpress' );
-									}
-									?>
-								</dt>
-								<dd><?php gp_link_user( $translation->user_last_modified ); ?></dd>
-							</dl>
-						<?php endif; ?>
+					/**
+					 * Filter the content in the sidebar.
+					 *
+					 * @since 4.0.0
+					 *
+					 * @param string $meta_sidebar Default content for the sidebar.
+					 * @param array  $defined_vars The defined vars.
+					 */
+					$meta_sidebar = apply_filters( 'gp_right_sidebar', $meta_sidebar, $defined_vars );
 
-						<dl>
-							<dt><?php _e( 'Priority of the original:', 'glotpress' ); ?></dt>
-							<?php if ( $can_write ): ?>
-								<dd><?php
-									echo gp_select(
-										'priority-' . $translation->original_id,
-										GP::$original->get_static( 'priorities' ),
-										$translation->priority,
-										array(
-											'class'      => 'priority',
-											'tabindex'   => '-1',
-											'data-nonce' => wp_create_nonce( 'set-priority_' . $translation->original_id ),
-										)
-									);
-									?></dd>
-							<?php else : ?>
-								<dd><?php echo gp_array_get( GP::$original->get_static( 'priorities' ), $translation->priority, 'unknown' ); ?></dd>
-							<?php endif; ?>
-						</dl>
-					</div>
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo $meta_sidebar;
+					?>
 
 					<?php do_action( 'wporg_translate_meta', $translation ); ?>
 				</div>

@@ -29,7 +29,7 @@ body {
 	background-color: inherit;
 }
 
-.gp-content table tbody tr:nth-child(2n):not(:hover) {
+.gp-content table tbody tr:nth-child(2n):not(:hover, .preview) {
 	background-color: unset;
 }
 
@@ -176,7 +176,7 @@ select.is-small {
 
 .site-header .site-branding {
 	margin: 0 auto;
-	max-width: 1200px;
+	max-width: 1600px;
 	padding: 0 10px;
 }
 
@@ -238,7 +238,7 @@ p.site-title a {
 
 .navigation-main {
 	background: transparent;
-	max-width: 1200px;
+	max-width: 1600px;
 	height: 32px;
 	margin: -32px auto 0 auto;
 	text-align: right;
@@ -478,7 +478,7 @@ table.translations tr.editor:hover {
 
 .gp-content {
 	margin: 20px auto;
-	max-width: 1200px;
+	max-width: 1600px;
 	padding: 0 10px;
 }
 
@@ -649,7 +649,7 @@ table.glossary .editor .meta h3 {
 	font-size: 22px;
 }
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 1024px) {
 	table.glossary .editor .strings {
 		width: 60%;
 		float: left;
@@ -899,10 +899,17 @@ ul.filter-header-links {
 		}
 	}
 
-	@media screen and (min-width: 700px) {
+	@media screen and (min-width: 1024px) {
 		.locales {
 			-ms-grid-columns: 1fr 30px 1fr 30px 1fr;
 			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+
+	@media screen and (min-width: 1300px) {
+		.locales {
+			-ms-grid-columns: 1fr 30px 1fr 30px 1fr;
+			grid-template-columns: repeat(4, 1fr);
 		}
 	}
 }
@@ -1078,6 +1085,12 @@ ul.filter-header-links {
 @media screen and (min-width: 1219px) {
 	.projects {
 		grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
+	}
+}
+
+@media screen and (min-width: 1500px) {
+	.projects {
+		grid-template-columns: repeat( 4, minmax( 0, 1fr ) );
 	}
 }
 
@@ -1506,7 +1519,7 @@ ul.projects-dropdown li > a > span {
 }
 
 /* Responsive styles */
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1024px) {
 	#hello {
 		margin: 25px 10px 15px;
 	}
@@ -2370,7 +2383,7 @@ table.translations tr.editor td {
 	border-top: 1px solid #72777c;
 }
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 1024px) {
 	.editor-panel {
 		display: flex;
 		align-items: flex-start;
@@ -2383,7 +2396,7 @@ table.translations tr.editor td {
 	min-width: 1%;
 }
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 1024px) {
 	.editor-panel__left {
 		border-bottom: 0;
 		border-right: 1px solid #72777c;
@@ -2395,8 +2408,9 @@ table.translations tr.editor td {
 	min-width: 1%;
 }
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 1024px) {
 	.editor-panel__right {
+		min-width: 40%;
 		position: -webkit-sticky;
 		position: sticky;
 		top: 0;
@@ -2413,7 +2427,16 @@ table.translations tr.editor td {
 	min-height: 40px;
 }
 
-@media screen and (min-width: 700px) {
+@media screen and (max-width: 1023px) {
+	.editor-panel__left {
+		width: 100%;
+	}
+	.editor-panel__right {
+		width: 100%;
+	}
+}
+
+@media screen and (min-width: 1024px) {
 	.panel-header {
 		height: 40px;
 	}
