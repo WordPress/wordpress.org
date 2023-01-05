@@ -352,6 +352,7 @@ function get_whitelist() {
 			'mikeschroder', // @mike on Slack
 			'jadonn',
 			'JavierCasares',
+			'jessibelle',
 			'amykamala', // @amy kamala on Slack
 			'brechtryckaert',
 			'brettface',
