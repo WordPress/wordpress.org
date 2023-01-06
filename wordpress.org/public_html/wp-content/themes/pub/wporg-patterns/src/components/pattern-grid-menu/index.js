@@ -14,6 +14,19 @@ import NavigationLayout from '../navigation-layout';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 
+const ALLOWED_CATS = [
+	'', // All
+	'buttons',
+	'columns',
+	'gallery',
+	'featured',
+	'header',
+	'footer',
+	'images',
+	'text',
+	'wireframe',
+];
+
 const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 	const { path, update: updatePath } = useRoute();
 	const { categorySlug, isLoading, options } = useSelect( ( select ) => {
@@ -22,16 +35,21 @@ const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 		const query = getQueryFromUrl( path );
 		// Remove pagination, so we don't go from /page/2/ to /categories/images/page/2/.
 		delete query.page;
-		const _options = ( getCategories() || [] ).map( ( cat ) => {
-			return {
-				value: getUrlFromQuery(
-					{ ...query, 'pattern-categories': cat.id },
-					wporgPatternsUrl.site + basePath
-				),
-				slug: cat.slug,
-				label: cat.name,
-			};
-		} );
+		const _options = ( getCategories() || [] )
+			.map( ( cat ) => {
+				if ( ! ALLOWED_CATS.includes( cat.slug ) ) {
+					return false;
+				}
+				return {
+					value: getUrlFromQuery(
+						{ ...query, 'pattern-categories': cat.id },
+						wporgPatternsUrl.site + basePath
+					),
+					slug: cat.slug,
+					label: cat.name,
+				};
+			} )
+			.filter( Boolean );
 
 		return {
 			categorySlug: getCategoryById( query[ 'pattern-categories' ] )?.slug || '',

@@ -79,7 +79,7 @@ export function* getCategories() {
 	try {
 		yield fetchCategories();
 		const results = yield apiFetch( {
-			path: addQueryArgs( '/wp/v2/pattern-categories' ),
+			path: addQueryArgs( '/wp/v2/pattern-categories', { per_page: 50 } ),
 		} );
 		yield loadCategories( results );
 	} catch ( error ) {}
