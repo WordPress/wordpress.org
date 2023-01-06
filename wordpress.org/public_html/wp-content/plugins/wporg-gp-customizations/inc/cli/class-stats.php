@@ -18,6 +18,7 @@ use GP_Locales;
 use WP_CLI;
 use WP_CLI_Command;
 use WP_Query;
+use function WordPressdotorg\Locales\get_locales;
 use function WordPressdotorg\I18nTeams\Locales\get_locales_data;
 
 class Stats {
