@@ -10,6 +10,8 @@
 
 namespace WordPressdotorg\GlotPress\Customizations\CLI;
 
+require WP_PLUGIN_DIR . '/wp-i18n-teams/wp-i18n-teams.php';
+
 use DateTime;
 use Exception;
 use GP;
@@ -165,6 +167,8 @@ class Stats {
 		$this->print_most_active_translators();
 		$all_locales_data = get_locales_data();
 		$stats_data       = $all_locales_data['status_counts'];
+		$total_gtes       = array_sum( $this->count_managers( 'general_translation_editor' ) );
+		$total_ptes       = array_sum( $this->count_managers( 'translation_editor' ) );
 		$result           = $wpdb->insert(
 			'polyglot_stats',
 			array(
@@ -178,6 +182,10 @@ class Stats {
 				'locales_90_plus'                       => $this->get_core_interval( 95, 90 ),
 				'locales_50_plus'                       => $this->get_core_interval( 90, 50 ),
 				'locales_below_50'                      => $this->get_core_interval( 50, 0, '<', '>' ),
+				'locales_with_language_packs'           => $stats_data['has-language-pack'],
+				'locales_without_project'               => $stats_data['no-wp-project'],
+				'translators_gtes'                      => $total_gtes,
+				'translators_ptes'                      => $total_ptes,
 				'date'                                  => gmdate( 'Y-m-d' ),
 			)
 		);
