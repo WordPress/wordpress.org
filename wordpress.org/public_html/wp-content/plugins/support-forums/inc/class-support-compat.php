@@ -22,7 +22,7 @@ class Support_Compat {
 		21267, // Your WordPress
 		21271, // Meetups
 		21272, // Reviews
-		15837052, // Test Forum - For testing purposes only.
+		16352837, // Mobile - Future use
 	);
 
 	public function __construct() {
