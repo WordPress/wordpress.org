@@ -361,6 +361,9 @@ function get_whitelist() {
 			'eidolonnight',
 			'lmurillom',
 			'nalininonstopnewsuk', // @Nalini on Slack
+			'robinwpdeveloper',
+			'santanainniss',
+			'SeReedMedia',
 		),
 		'meta' => array(
 			'coreymckrill',
