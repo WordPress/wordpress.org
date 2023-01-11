@@ -48,6 +48,13 @@ class Stats {
 	private int $id_first_user_of_this_year = 0;
 
 	/**
+	 * Total number or contributors across all locales.
+	 *
+	 * @var int
+	 */
+	private int $all_translators_contributors = 0;
+
+	/**
 	 * Id of each forum database, for each country
 	 *
 	 * @var int[]
@@ -186,6 +193,7 @@ class Stats {
 				'locales_without_project'               => $stats_data['no-wp-project'],
 				'translators_gtes'                      => $total_gtes,
 				'translators_ptes'                      => $total_ptes,
+				'translators_contributors'              => $this->all_translators_contributors,
 				'date'                                  => gmdate( 'Y-m-d' ),
 			)
 		);
@@ -950,9 +958,10 @@ class Stats {
 		$code .= "Locale \t\t\t\t Active contributors Past contributors All contributors" . PHP_EOL;
 		$code .= '.........................................................................................' . PHP_EOL;
 		foreach ( $locales as $locale ) {
-			$current_contributors = $this->get_translation_contributors( $locale, 365 );
-			$all_contributors     = $this->get_translation_contributors( $locale );
-			$code                .= str_pad( $locale->english_name, 40 ) .
+			$current_contributors                = $this->get_translation_contributors( $locale, 365 );
+			$all_contributors                    = $this->get_translation_contributors( $locale );
+			$this->all_translators_contributors += count( $all_contributors );
+			$code                               .= str_pad( $locale->english_name, 40 ) .
 									str_pad( number_format_i18n( count( $current_contributors ) ), 20 ) .
 									str_pad( number_format_i18n( count( $all_contributors ) - count( $current_contributors ) ), 20 ) .
 									str_pad( number_format_i18n( count( $all_contributors ) ), 20 ) . PHP_EOL;
