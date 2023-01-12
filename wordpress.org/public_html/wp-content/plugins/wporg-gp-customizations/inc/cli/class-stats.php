@@ -172,6 +172,11 @@ class Stats {
 		$this->print_contributors_per_locale();
 		$this->print_managers_stats();
 		$this->print_most_active_translators();
+
+		$translation_stats_json  = file_get_contents( 'https://api.wordpress.org/stats/locale/1.0/' );
+		$ranslation_stats_array  = $translation_stats_json && '{' == $translation_stats_json[0] ? json_decode( $translation_stats_json, true ) : null;
+		$wp_translated_sites_pct = 100 - $ranslation_stats_array['English (US)'];
+
 		$all_locales_data = get_locales_data();
 		$stats_data       = $all_locales_data['status_counts'];
 		$total_gtes       = array_sum( $this->count_managers( 'general_translation_editor' ) );
@@ -194,6 +199,7 @@ class Stats {
 				'translators_gtes'                      => $total_gtes,
 				'translators_ptes'                      => $total_ptes,
 				'translators_contributors'              => $this->all_translators_contributors,
+				'wp_translated_sites_pct'               => $wp_translated_sites_pct,
 				'date'                                  => gmdate( 'Y-m-d' ),
 			)
 		);
