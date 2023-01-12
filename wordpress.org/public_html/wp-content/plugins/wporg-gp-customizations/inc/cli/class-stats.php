@@ -20,6 +20,7 @@ use GP_Locales;
 use WP_CLI;
 use WP_CLI_Command;
 use WP_Query;
+use WordPressdotorg\GlotPress\Routes\Plugin;
 use function WordPressdotorg\Locales\get_locales;
 use function WordPressdotorg\I18nTeams\Locales\get_locales_data;
 
@@ -46,13 +47,6 @@ class Stats {
 	 * @var int
 	 */
 	private int $id_first_user_of_this_year = 0;
-
-	/**
-	 * Total number or contributors across all locales.
-	 *
-	 * @var int
-	 */
-	private int $all_translators_contributors = 0;
 
 	/**
 	 * Id of each forum database, for each country
@@ -177,6 +171,9 @@ class Stats {
 		$ranslation_stats_array  = $translation_stats_json && '{' == $translation_stats_json[0] ? json_decode( $translation_stats_json, true ) : null;
 		$wp_translated_sites_pct = 100 - $ranslation_stats_array['English (US)'];
 
+		$contributors_per_locale  = Plugin::get_contributors_count();
+		$total_contributors_count = array_sum( $contributors_per_locale );
+
 		$all_locales_data = get_locales_data();
 		$stats_data       = $all_locales_data['status_counts'];
 		$total_gtes       = array_sum( $this->count_managers( 'general_translation_editor' ) );
@@ -198,7 +195,7 @@ class Stats {
 				'locales_without_project'               => $stats_data['no-wp-project'],
 				'translators_gtes'                      => $total_gtes,
 				'translators_ptes'                      => $total_ptes,
-				'translators_contributors'              => $this->all_translators_contributors,
+				'translators_contributors'              => $total_contributors_count,
 				'wp_translated_sites_pct'               => $wp_translated_sites_pct,
 				'date'                                  => gmdate( 'Y-m-d' ),
 			)
@@ -964,10 +961,9 @@ class Stats {
 		$code .= "Locale \t\t\t\t Active contributors Past contributors All contributors" . PHP_EOL;
 		$code .= '.........................................................................................' . PHP_EOL;
 		foreach ( $locales as $locale ) {
-			$current_contributors                = $this->get_translation_contributors( $locale, 365 );
-			$all_contributors                    = $this->get_translation_contributors( $locale );
-			$this->all_translators_contributors += count( $all_contributors );
-			$code                               .= str_pad( $locale->english_name, 40 ) .
+			$current_contributors = $this->get_translation_contributors( $locale, 365 );
+			$all_contributors     = $this->get_translation_contributors( $locale );
+			$code                .= str_pad( $locale->english_name, 40 ) .
 									str_pad( number_format_i18n( count( $current_contributors ) ), 20 ) .
 									str_pad( number_format_i18n( count( $all_contributors ) - count( $current_contributors ) ), 20 ) .
 									str_pad( number_format_i18n( count( $all_contributors ) ), 20 ) . PHP_EOL;
