@@ -607,6 +607,7 @@ class Upload_Handler {
 			'microsoft.com'         => array( 'bing-', 'microsoft-' ),
 			'yandex-team.ru'        => array( 'yandex' ),
 			'opera.com'             => array( 'opera-' ),
+			'adobe.com'				=> array( 'adobe-' ),
 		);
 
 		// Trademarks that are allowed as 'for-whatever' ONLY.
