@@ -255,7 +255,7 @@ class Plugin_Search {
 					'title_en.ngram^' . $this->en_boost,
 				] ),
 				'type' => 'phrase',
-				'boost' => 0.2,
+				'boost' => 2,
 				],
 			];
 
@@ -270,8 +270,8 @@ class Plugin_Search {
 					'title_en^' . $this->en_boost,
 					'slug_text',
 				  ] ),
-				  'type' => 'best_fields',
-				  'boost' => 2,
+				  'type' => 'most_fields',
+				  'boost' => 5,
 				],
 			];
 
