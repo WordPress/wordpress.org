@@ -30,6 +30,7 @@
 #bbpress-forums div.bbp-reply-content pre code {
 	overflow: unset !important;
 	overflow-x: inherit;
+	white-space: pre;
 }
 
 #bbpress-forums div.bbp-topic-content pre.wporg-bbp-code-expander-code-wrapper,
