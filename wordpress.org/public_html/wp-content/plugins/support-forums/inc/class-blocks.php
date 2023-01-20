@@ -9,7 +9,7 @@ use WP_Block_Patterns_Registry, WP_Block_Pattern_Categories_Registry;
  */
 class Blocks {
 
-	public $forum_enabled_by_default = false;
+	public $forum_enabled_by_default = true;
 
 	public function __construct() {
 		if ( null !== get_option( 'forum_block_editor_enabled', null ) ) {
