@@ -190,6 +190,7 @@ class Stats {
 				'releases_by_locale_minor_behind'       => $stats_data['minor-behind'],
 				'releases_by_locale_one_major_behind'   => $stats_data['major-behind-one'],
 				'releases_by_locale_multi_major_behind' => $stats_data['major-behind-many'],
+				'locales_total'                         => $this->get_core_total(),
 				'locales_100'                           => $this->get_core_full_translated(),
 				'locales_95_plus'                       => $this->get_core_interval( 100, 95 ),
 				'locales_90_plus'                       => $this->get_core_interval( 95, 90 ),
