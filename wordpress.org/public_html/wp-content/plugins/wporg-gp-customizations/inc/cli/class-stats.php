@@ -178,7 +178,11 @@ class Stats {
 		$stats_data       = $all_locales_data['status_counts'];
 		$total_gtes       = array_sum( $this->count_managers( 'general_translation_editor' ) );
 		$total_ptes       = array_sum( $this->count_managers( 'translation_editor' ) );
-		$result           = $wpdb->insert(
+
+		$locale_requests = $this->get_locale_requests();
+		$editor_requests = $this->get_editor_requests();
+
+		$result = $wpdb->insert(
 			'polyglot_stats',
 			array(
 				'releases_by_locale'                    => $stats_data['all'],
@@ -193,6 +197,10 @@ class Stats {
 				'locales_below_50'                      => $this->get_core_interval( 50, 0, '<', '>' ),
 				'locales_with_language_packs'           => $stats_data['has-language-pack'],
 				'locales_without_project'               => $stats_data['no-wp-project'],
+				'requests_total'                        => $editor_requests['total'],
+				'requests_unresolved'                   => $editor_requests['unresolved_editor_requests'],
+				'locale_requests_total'                 => $locale_requests['total'],
+				'locale_requests_unresolved'            => $locale_requests['unresolved_locale_requests'],
 				'translators_gtes'                      => $total_gtes,
 				'translators_ptes'                      => $total_ptes,
 				'translators_contributors'              => $total_contributors_count,
@@ -201,6 +209,89 @@ class Stats {
 			)
 		);
 		$this->update_page();
+	}
+
+	/**
+	 * Fetch total number of locale requests and number of unresolved locale requests.
+	 *
+	 * @return array $locale_requests Array of the count of each of resolved and unresolved locale requests.
+	 */
+	private function get_locale_requests() {
+		$locale_requests = array();
+		switch_to_blog( 19 );
+		$args                     = array(
+			'post_type'   => 'post',
+			'tag'         => 'locale-requests',
+			'post_status' => 'publish',
+		);
+		$locale_requests['total'] = ( new WP_query( $args ) )->found_posts;
+		register_taxonomy(
+			'p2_resolved',
+			'post',
+			array(
+				'public'    => true,
+				'query_var' => 'resolved',
+				'rewrite'   => false,
+				'show_ui'   => false,
+			)
+		);
+
+		$args = array(
+			'tag'       => 'locale-requests',
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'p2_resolved',
+					'field'    => 'slug',
+					'terms'    => 'unresolved',
+				),
+			),
+		);
+		$locale_requests['unresolved_locale_requests'] = ( new WP_query( $args ) )->found_posts;
+
+		restore_current_blog();
+
+		return $locale_requests;
+	}
+
+	/**
+	 * Fetch total number of editor requests and number of unresolved editor requests.
+	 *
+	 * @return array $editor_requests Array of the count of each of resolved and unresolved editor requests.
+	 */
+	private function get_editor_requests() {
+		$editor_requests = array();
+		switch_to_blog( 19 );
+		register_taxonomy(
+			'p2_resolved',
+			'post',
+			array(
+				'public'    => true,
+				'query_var' => 'resolved',
+				'rewrite'   => false,
+				'show_ui'   => false,
+			)
+		);
+		$args                     = array(
+			'post_type'   => 'post',
+			'tag'         => 'editor-requests',
+			'post_status' => 'publish',
+		);
+		$editor_requests['total'] = ( new WP_query( $args ) )->found_posts;
+		$args                     = array(
+			'post_type' => 'post',
+			'tag'       => 'editor-requests',
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'p2_resolved',
+					'field'    => 'slug',
+					'terms'    => 'unresolved',
+				),
+			),
+		);
+		$editor_requests['unresolved_editor_requests'] = ( new WP_query( $args ) )->found_posts;
+		restore_current_blog();
+
+		return $editor_requests;
 	}
 
 	/**
