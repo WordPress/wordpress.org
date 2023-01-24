@@ -166,6 +166,18 @@ class Stats {
 		$this->print_contributors_per_locale();
 		$this->print_managers_stats();
 		$this->print_most_active_translators();
+		$this->store_stats();
+
+		$this->update_page();
+	}
+
+	/**
+	 * Store the generated stats in the database
+	 *
+	 * @return void
+	 */
+	private function store_stats() {
+		global $wpdb;
 
 		$translation_stats_json  = file_get_contents( 'https://api.wordpress.org/stats/locale/1.0/' );
 		$ranslation_stats_array  = $translation_stats_json && '{' == $translation_stats_json[0] ? json_decode( $translation_stats_json, true ) : null;
@@ -209,7 +221,6 @@ class Stats {
 				'date'                                  => gmdate( 'Y-m-d' ),
 			)
 		);
-		$this->update_page();
 	}
 
 	/**
