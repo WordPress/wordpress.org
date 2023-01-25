@@ -165,8 +165,6 @@ final class HelpHub_Post_Types {
 
 		// Register an example taxonomy. To register more taxonomies, duplicate this line.
 		$this->taxonomies['helphub_category']      = new HelpHub_Post_Types_Taxonomy( array( 'post', 'helphub_article' ), 'category', __( 'Category', 'wporg-forums' ), __( 'Categories', 'wporg-forums' ) );
-		$this->taxonomies['helphub_persona']       = new HelpHub_Post_Types_Taxonomy( array( 'post', 'helphub_article' ), 'helphub_persona', __( 'Persona', 'wporg-forums' ), __( 'Personas', 'wporg-forums' ) );
-		$this->taxonomies['helphub_experience']    = new HelpHub_Post_Types_Taxonomy( array( 'post', 'helphub_article' ), 'helphub_experience', __( 'Experience', 'wporg-forums' ), __( 'Experiences', 'wporg-forums' ) );
 		$this->taxonomies['helphub_major_release'] = new HelpHub_Post_Types_Taxonomy( 'helphub_version', 'helphub_major_release', __( 'Major Release', 'wporg-forums' ), __( 'Major Releases', 'wporg-forums' ) );
 
 		register_activation_hook( __FILE__, array( $this, 'install' ) );
