@@ -175,6 +175,23 @@ function wporg_support_breadcrumb() {
 }
 add_filter( 'bbp_before_get_breadcrumb_parse_args', 'wporg_support_breadcrumb' );
 
+add_filter(
+	'bbp_breadcrumbs',
+	/**
+	 * Filters the breadcrumbs to replace the home URL with the forums page.
+	 */
+	function( $crumbs ) {
+		foreach ( $crumbs as $i => $link ) {
+			if ( str_contains( $link, 'bbp-breadcrumb-home' ) ) {
+				$crumbs[ $i ] = str_replace( home_url(), home_url( '/forums/' ), $link );
+			}
+		}
+		return $crumbs;
+	},
+	10,
+	2
+);
+
 /**
  * Customize arguments for Subscribe/Unsubscribe link.
  *
