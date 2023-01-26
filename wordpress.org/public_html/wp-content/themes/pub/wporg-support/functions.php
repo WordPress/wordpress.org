@@ -187,9 +187,7 @@ add_filter(
 			}
 		}
 		return $crumbs;
-	},
-	10,
-	2
+	}
 );
 
 /**
