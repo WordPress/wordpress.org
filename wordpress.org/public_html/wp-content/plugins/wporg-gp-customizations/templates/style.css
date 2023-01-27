@@ -3093,3 +3093,96 @@ table.translations.translation-sets-rtl .textarea-direction-ltr .foreign-text {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 4'%3E%3Cpath fill='%2332373C' fill-rule='evenodd' d='M5.5 4L9 0H2z'/%3E%3C/svg%3E");
 	background-size: 15px 4px;
 }
+
+ul.sidebar-tabs {
+	display: inherit;
+}
+
+.editor .nav-sidebar {
+	width: 100%;
+	overflow: auto;
+}
+
+.sidebar-tabs > li {
+	padding: 8px 15px 7px 15px;
+}
+
+.editor .nav-sidebar .meta {
+	border: 0;
+	border-top: 1px solid #72777C;
+}
+
+.sidebar-tabs li.current {
+	border: 1px solid #72777C;
+	border-bottom: 1px solid #fff;
+	margin-top: -1px;
+}
+
+.meta,
+.meta.discussion,
+.meta.history,
+.meta.other-locales {
+	padding: 12px;
+}
+
+.meta.discussion .comment-respond:not(.hide-textarea) {
+	padding: 0;
+}
+
+.meta.discussion .optin-message-for-each-discussion :not(.hide-textarea) {
+	padding: 1rem 0;
+}
+
+.meta.history td:nth-child(1),
+.meta.history td:nth-child(3),
+.meta.history td:nth-child(4) {
+	text-align: center;
+	vertical-align: middle;
+	overflow: hidden;
+}
+
+.meta.history th,
+.meta.history td {
+	padding: 4px !important;
+	border: 1px solid #72777C !important;
+}
+
+.meta.history th:nth-child(1) {
+	width: 20%;
+	vertical-align: middle;
+}
+
+.meta.history  th:nth-child(2) {
+	width: 50%;
+	vertical-align: middle;
+}
+
+.meta.history th:nth-child(3),
+.meta.history th:nth-child(4) {
+	width: 15%;
+	vertical-align: middle;
+}
+
+.meta.other-locales ul {
+	margin: 0;
+	padding: 0;
+}
+
+.meta.other-locales .locale.unique {
+	width: 6rem;
+	background: #0073aa;
+	margin-right: 10px !important;
+}
+
+@media screen and (max-width: 530px), (min-width: 1024px) and (max-width: 1280px) {
+	.editor-panel__right .tab-meta,
+	.editor-panel__right .tab-discussion,
+	.editor-panel__right .tab-history,
+	.editor-panel__right .tab-other-locales {
+		white-space: nowrap;
+		width: 90px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		vertical-align: top;
+	}
+}
