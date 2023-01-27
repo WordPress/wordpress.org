@@ -49,6 +49,11 @@ class Stats {
 	private int $id_first_user_of_this_year = 0;
 
 	/**
+	 * Percentage of non-EN_US sites.
+	 */
+	private string $translated_sites_pct = '';
+
+	/**
 	 * Id of each forum database, for each country
 	 *
 	 * @var int[]
@@ -180,9 +185,7 @@ class Stats {
 	private function store_stats() {
 		global $wpdb;
 
-		$translation_stats_json  = file_get_contents( 'https://api.wordpress.org/stats/locale/1.0/' );
-		$ranslation_stats_array  = $translation_stats_json && '{' == $translation_stats_json[0] ? json_decode( $translation_stats_json, true ) : null;
-		$wp_translated_sites_pct = 100 - $ranslation_stats_array['English (US)'];
+		$this->translated_sites_pct = $this->get_translated_sites_pct();
 
 		$contributors_per_locale  = Plugin::get_contributors_count();
 		$total_contributors_count = array_sum( $contributors_per_locale );
@@ -218,7 +221,7 @@ class Stats {
 				'translators_gtes'                      => $total_gtes,
 				'translators_ptes'                      => $total_ptes,
 				'translators_contributors'              => $total_contributors_count,
-				'wp_translated_sites_pct'               => $wp_translated_sites_pct,
+				'wp_translated_sites_pct'               => $$this->translated_sites_pct,
 				'date'                                  => gmdate( 'Y-m-d' ),
 			)
 		);
@@ -339,9 +342,8 @@ class Stats {
 	 * @return void
 	 */
 	private function print_weekly_stats() {
-		$last_week_date          = date( 'Y-m-d', strtotime( '-1 week' ) );
-		$last_week               = $this->get_last_week_data();
-		$wp_translated_sites_pct = $this->get_translated_sites_pct();
+		$last_week_date = date( 'Y-m-d', strtotime( '-1 week' ) );
+		$last_week      = $this->get_last_week_data();
 
 		$contributors_per_locale  = Plugin::get_contributors_count();
 		$total_contributors_count = array_sum( $contributors_per_locale );
@@ -373,7 +375,7 @@ class Stats {
 		$translators_gtes_diff            = $total_gtes - $last_week->translators_gtes;
 		$translators_ptes_diff            = $total_ptes - $last_week->translators_ptes;
 		$translators_contributors_diff    = $total_contributors_count - $last_week->translators_contributors;
-		$wp_translated_sites_pct_diff     = $wp_translated_sites_pct - $last_week->wp_translated_sites_pct;
+		$wp_translated_sites_pct_diff     = $this->translated_sites_pct - $last_week->wp_translated_sites_pct;
 
 		$code  = 'Summary for weekly stats' . PHP_EOL;
 		$code .= 'Below stats are dated ' . gmdate( 'Y-m-d' ) . ' compared to ' . $last_week_date . ' (differences between brackets)' . PHP_EOL;
@@ -382,7 +384,7 @@ class Stats {
 
 		$code .= 'Translations: ' . $this->get_core_total() . ' (' . $total_releases_diff . ') total, ' . $this->get_core_full_translated() . ' (' . $locales_100_diff . ') at 100%, ' . $this->get_core_interval( 100, 95 ) . ' (' . $locales_95_plus_diff . ') over 95%, ' . $this->get_core_interval( 95, 90 ) . ' (' . $locales_90_plus_diff . ') over 90%, ' . $this->get_core_interval( 90, 50 ) . ' (' . $locales_50_plus_diff . ') over 50%, ' . $this->get_core_interval( 90, 50 ) . ' (' . $locales_below_50_diff . ') below 50%, ' . $stats_data['has-language-pack'] . ' (' . $locales_with_language_packs_diff . ') have a language pack generated, ' . $stats_data['no-wp-project'] . ' (' . $locales_without_project_diff . ') have no project.' . PHP_EOL;
 
-		$code .= '		Requests: There are ' . $editor_requests['unresolved_editor_requests'] . ' unresolved editor requests out of ' . $editor_requests['total'] . ' (' . $editor_requests_unresolved_diff . ') total and ' . $locale_requests['unresolved_locale_requests'] . ' unresolved locale requests out of ' . $locale_requests['total'] . ' (' . $locale_requests_unresolved_diff . ') total.' . PHP_EOL;
+		$code .= 'Requests: There are ' . $editor_requests['unresolved_editor_requests'] . ' unresolved editor requests out of ' . $editor_requests['total'] . ' (' . $editor_requests_unresolved_diff . ') total and ' . $locale_requests['unresolved_locale_requests'] . ' unresolved locale requests out of ' . $locale_requests['total'] . ' (' . $locale_requests_unresolved_diff . ') total.' . PHP_EOL;
 
 		$code .= 'Translators: There are ' . $total_gtes . ' (' . $translators_gtes_diff . ') GTE, ' . $total_ptes . ' (' . $translators_gtes_diff . ')  and ' . $total_contributors_count . ' (' . $translators_contributors_diff . ') translation contributors.' . PHP_EOL;
 		$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL;
