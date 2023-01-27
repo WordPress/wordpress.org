@@ -390,6 +390,12 @@ class Themes_API {
 			asort( $tags[ __( 'Features' ) ] );
 		}
 
+		// See https://core.trac.wordpress.org/ticket/56869.
+		if ( ! isset( $wp_version ) || version_compare( $wp_version, '6.0-alpha', '>=' ) ) {
+			$tags[ __( 'Features' ) ]['style-variations'] = __( 'Style Variations' );
+			asort( $tags[ __( 'Features' ) ] );
+		}
+
 		// Only return tag slugs, to stay compatible with bbpress-version of Themes API.
 		foreach ( $tags as $title => $group ) {
 			$tags[ $title ] = array_keys( $group );
