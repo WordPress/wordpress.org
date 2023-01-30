@@ -115,6 +115,7 @@ function get_whitelist() {
 			'meaganhanes',
 			'metalandcoffee',
 			'monikarao',
+			'mukesh27',
 			'pbiron',
 			'priethor',
 			'psykro', // @jon_bossenger on Slack
