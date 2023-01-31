@@ -385,7 +385,7 @@ class Stats {
 		$code .= 'Translators: There are ' . $current_date_data->translators_gtes . ' (' . $this->prefix_num( $stats_diff->translators_gtes ) . ') GTE, ' . $current_date_data->translators_ptes . ' (' . $this->prefix_num( $stats_diff->translators_ptes ) . ')  and ' . $current_date_data->translators_contributors . ' (' . $this->prefix_num( $stats_diff->translators_contributors ) . ') translation contributors.' . PHP_EOL;
 		$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL . PHP_EOL;
 
-		$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $this->prefix_num( $stats_diff->wp_translated_sites_pct ) . ') of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
+		$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $this->prefix_num( round( $stats_diff->wp_translated_sites_pct, 3 ) ) . '%) of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
 		if ( ! $this->echo_the_values ) {
 			$this->stats_comparison .= $this->create_gutenberg_code( $code );
 		} else {
