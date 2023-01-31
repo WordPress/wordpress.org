@@ -401,8 +401,8 @@ class Stats {
 	 * @return boolean True if date is valid and False if invalid
 	 */
 	private function is_date_valid( $date, $format = 'Y-m-d' ) {
-		$d = DateTime::createFromFormat( $format, $date );
-		return $d && $d->format( $format ) == $date;
+		$_date = DateTime::createFromFormat( $format, $date );
+		return $_date && $_date->format( $format ) === $date;
 	}
 
 	/**
