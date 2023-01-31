@@ -354,13 +354,17 @@ class Stats {
 		if ( ! $this->is_date_valid( $current_date ) || ( $old_date && ! $this->is_date_valid( $old_date ) ) ) {
 			return;
 		}
-		$old_date = is_null( $old_date ) ? gmdate( 'Y-m-d', strtotime( '-1 week' ) ) : $old_date;
-
+		$old_date          = is_null( $old_date ) ? date( 'Y-m-d', strtotime( '-1 week' ) ) : $old_date;
 		$current_date_data = $this->get_data_for_date( $current_date );
 		$old_date_data     = $this->get_data_for_date( $old_date );
 
 		if ( ! $current_date_data || ! $old_date_data ) {
 			return;
+		}
+		if ( ! $this->echo_the_values ) {
+			$this->stats_comparison = $this->create_gutenberg_heading( 'Summary for weekly stats' );
+		} else {
+			$this->print_wpcli_heading( 'Summary for weekly stats' );
 		}
 		$stats_diff = array();
 		foreach ( $current_date_data as $key => $value ) {
@@ -368,19 +372,20 @@ class Stats {
 		}
 		$all_locales_data = get_locales_data();
 		$stats_data       = $all_locales_data['status_counts'];
-		$code             = 'Summary for weekly stats' . PHP_EOL;
-				$code    .= 'Below stats are dated ' . $current_date . ' compared to ' . $old_date . ' (differences between brackets)' . PHP_EOL;
 
-				$code .= 'Releases: ' . $current_date_data->releases_by_locale . ' (' . $stats_diff['releases_by_locale'] . ') locale, ' . $current_date_data->releases_by_locale_uptodate . ' (' . $stats_diff['releases_by_locale_uptodate'] . ') up to date, ' . $current_date_data->releases_by_locale_minor_behind . ' (' . $stats_diff['releases_by_locale_minor_behind'] . ') behind by minor versions, ' . $current_date_data->releases_by_locale_one_major_behind . ' (' . $stats_diff['releases_by_locale_one_major_behind'] . ') behind by one major version, ' . $current_date_data->releases_by_locale_multi_major_behind . ' (' . $stats_diff['releases_by_locale_multi_major_behind'] . ') behind more than one major version, ' . $stats_data['no-site'] . ' (N/A) have site but never released, ' . $stats_data['no-releases'] . ' (N/A) have no site.' . PHP_EOL;
+		$code  = 'Summary for weekly stats' . PHP_EOL;
+		$code .= 'Below stats are dated ' . $current_date . ' compared to ' . $old_date . ' (differences between brackets)' . PHP_EOL . PHP_EOL;
 
-				$code .= 'Translations: ' . $current_date_data->locales_total . ' (' . $stats_diff['locales_total'] . ') total, ' . $current_date_data->locales_100 . ' (' . $stats_diff['locales_100'] . ') at 100%, ' . $current_date_data->locales_95_plus . ' (' . $stats_diff['locales_95_plus'] . ') over 95%, ' . $current_date_data->locales_90_plus . ' (' . $stats_diff['locales_90_plus'] . ') over 90%, ' . $current_date_data->locales_50_plus . ' (' . $stats_diff['locales_50_plus'] . ') over 50%, ' . $current_date_data->locales_below_50 . ' (' . $stats_diff['locales_below_50'] . ') below 50%, ' . $current_date_data->locales_with_language_packs . ' (' . $stats_diff['locales_with_language_packs'] . ') have a language pack generated, ' . $current_date_data->locales_without_project . ' (' . $stats_diff['locales_without_project'] . ') have no project.' . PHP_EOL;
+		$code .= 'Releases: ' . $current_date_data->releases_by_locale . ' (' . $stats_diff['releases_by_locale'] . ') locale, ' . $current_date_data->releases_by_locale_uptodate . ' (' . $stats_diff['releases_by_locale_uptodate'] . ') up to date, ' . $current_date_data->releases_by_locale_minor_behind . ' (' . $stats_diff['releases_by_locale_minor_behind'] . ') behind by minor versions, ' . $current_date_data->releases_by_locale_one_major_behind . ' (' . $stats_diff['releases_by_locale_one_major_behind'] . ') behind by one major version, ' . $current_date_data->releases_by_locale_multi_major_behind . ' (' . $stats_diff['releases_by_locale_multi_major_behind'] . ') behind more than one major version, ' . $stats_data['no-site'] . ' (N/A) have site but never released, ' . $stats_data['no-releases'] . ' (N/A) have no site.' . PHP_EOL . PHP_EOL;
 
-				$code .= '		Requests: There are ' . $current_date_data->requests_unresolved . ' unresolved editor requests out of ' . $current_date_data->requests_total . ' (' . $stats_diff['requests_unresolved'] . ') total and ' . $current_date_data->locale_requests_unresolved . ' unresolved locale requests out of ' . $current_date_data->locale_requests_total . ' (' . $stats_diff['locale_requests_unresolved'] . ') total.' . PHP_EOL;
+		$code .= 'Translations: ' . $current_date_data->locales_total . ' (' . $stats_diff['locales_total'] . ') total, ' . $current_date_data->locales_100 . ' (' . $stats_diff['locales_100'] . ') at 100%, ' . $current_date_data->locales_95_plus . ' (' . $stats_diff['locales_95_plus'] . ') over 95%, ' . $current_date_data->locales_90_plus . ' (' . $stats_diff['locales_90_plus'] . ') over 90%, ' . $current_date_data->locales_50_plus . ' (' . $stats_diff['locales_50_plus'] . ') over 50%, ' . $current_date_data->locales_below_50 . ' (' . $stats_diff['locales_below_50'] . ') below 50%, ' . $current_date_data->locales_with_language_packs . ' (' . $stats_diff['locales_with_language_packs'] . ') have a language pack generated, ' . $current_date_data->locales_without_project . ' (' . $stats_diff['locales_without_project'] . ') have no project.' . PHP_EOL . PHP_EOL;
 
-				$code .= 'Translators: There are ' . $current_date_data->translators_gtes . ' (' . $stats_diff['translators_gtes'] . ') GTE, ' . $current_date_data->translators_ptes . ' (' . $stats_diff['translators_ptes'] . ')  and ' . $current_date_data->translators_contributors . ' (' . $stats_diff['translators_contributors'] . ') translation contributors.' . PHP_EOL;
-				$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL;
+		$code .= 'Requests: There are ' . $current_date_data->requests_unresolved . ' unresolved editor requests out of ' . $current_date_data->requests_total . ' (' . $stats_diff['requests_unresolved'] . ') total and ' . $current_date_data->locale_requests_unresolved . ' unresolved locale requests out of ' . $current_date_data->locale_requests_total . ' (' . $stats_diff['locale_requests_unresolved'] . ') total.' . PHP_EOL . PHP_EOL;
 
-				$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $stats_diff['wp_translated_sites_pct'] . ') of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
+		$code .= 'Translators: There are ' . $current_date_data->translators_gtes . ' (' . $stats_diff['translators_gtes'] . ') GTE, ' . $current_date_data->translators_ptes . ' (' . $stats_diff['translators_ptes'] . ')  and ' . $current_date_data->translators_contributors . ' (' . $stats_diff['translators_contributors'] . ') translation contributors.' . PHP_EOL;
+		$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL . PHP_EOL;
+
+		$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $stats_diff['wp_translated_sites_pct'] . ') of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
 		if ( ! $this->echo_the_values ) {
 			$this->stats_comparison .= $this->create_gutenberg_code( $code );
 		} else {
@@ -1537,7 +1542,8 @@ class Stats {
 			$this->feedback_received .
 			$this->contributors_per_locale .
 			$this->managers_stats .
-			$this->most_active_translators;
+			$this->most_active_translators .
+			$this->stats_comparison;
 	}
 
 	/**
