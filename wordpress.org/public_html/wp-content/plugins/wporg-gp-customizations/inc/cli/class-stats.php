@@ -129,6 +129,8 @@ class Stats {
 	private string $contributors_per_locale          = '';
 	private string $managers_stats                   = '';
 	private string $most_active_translators          = '';
+	private string $stats_comparison                 = '';
+
 
 	/**
 	 * The name of the custom post type used to the translation feedback.
@@ -379,7 +381,11 @@ class Stats {
 				$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL;
 
 				$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $stats_diff['wp_translated_sites_pct'] . ') of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
-				WP_CLI::log( $code );
+		if ( ! $this->echo_the_values ) {
+			$this->stats_comparison .= $this->create_gutenberg_code( $code );
+		} else {
+			WP_CLI::log( $code );
+		}
 	}
 
 	/**
