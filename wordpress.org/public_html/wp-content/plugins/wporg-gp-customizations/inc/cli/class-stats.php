@@ -311,7 +311,7 @@ class Stats {
 	}
 
 	/**
-	 * Fetch stats data stored a week ago.
+	 * Fetch stats data for a specific date.
 	 *
 	 * @param string $date The date for the record to be retrieved.
 	 *
