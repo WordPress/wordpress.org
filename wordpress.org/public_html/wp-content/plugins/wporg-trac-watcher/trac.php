@@ -40,18 +40,30 @@ function import_trac_feed( $svn ) {
 			break;
 		}
 
+		$description = (string) $item->description;
+		// Trac RSS feeds include a `…` in the changes list..
+		$description = str_replace( '<li>…</li>', '', $description );
+		$description = trim( strip_tags( $description, '<a><strike>' ) );
+
+		$fields = [
+			'md5_id'      => $md5_id,
+			'description' => $description,
+			'summary'     => (string) $item->summary,
+			'category'    => (string) $item->category,
+			'username'    => (string) $dc->creator,
+			'link'        => (string) $item->link,
+			'pubdate'     => gmdate( 'Y-m-d H:i:s', strtotime( (string) $item->pubDate ) ),
+			'title'       => (string) $item->title,
+		];
+
+		if ( 'plugins' === $svn['slug'] && 'changeset' === (string) $item->category ) {
+			// The slug is the first line before the first '/'.
+			$fields['slug'] = explode( '/', explode( "\n", $description )[0] )[0];
+		}
+
 		$wpdb->insert(
 			$trac_table,
-			[
-				'md5_id'      => $md5_id,
-				'description' => trim( strip_tags( (string) $item->description, '<a><strike>' ) ),
-				'summary'     => (string) $item->summary,
-				'category'    => (string) $item->category,
-				'username'    => (string) $dc->creator,
-				'link'        => (string) $item->link,
-				'pubdate'     => gmdate( 'Y-m-d H:i:s', strtotime( (string) $item->pubDate ) ),
-				'title'       => (string) $item->title,
-			]
+			$fields
 		);
 	}
 }
