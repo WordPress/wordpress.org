@@ -172,7 +172,7 @@ class Stats {
 		$this->print_managers_stats();
 		$this->print_most_active_translators();
 		$this->store_stats();
-		$this->print_weekly_stats();
+		$this->print_stats_comparison( gmdate( 'Y-m-d' ) );
 
 		$this->update_page();
 	}
@@ -313,13 +313,14 @@ class Stats {
 	/**
 	 * Fetch stats data stored a week ago.
 	 *
+	 * @param string $date The date for the record to be retrieved.
+	 *
 	 * @return mixed
 	 */
-	private function get_last_week_data() {
+	private function get_data_for_date( $date ) {
 		global $wpdb;
-		$last_week = date( 'Y-m-d', strtotime( '-1 week' ) );
-		$sql       = "SELECT * FROM polyglot_stats WHERE date = '" . $last_week . "'";
-		$results   = $wpdb->get_results( $sql );
+		$sql     = "SELECT * FROM polyglot_stats WHERE date = '" . $date . "'";
+		$results = $wpdb->get_results( $sql );
 		return $results[0];
 	}
 
@@ -339,58 +340,55 @@ class Stats {
 	/**
 	 * Print stats compared week on week.
 	 *
+	 * @param string $current_date The date for which we display the stats.
+	 * @param string $old_date The date to compare the stats with.
+	 *
 	 * @return void
 	 */
-	private function print_weekly_stats() {
-		$last_week_date = date( 'Y-m-d', strtotime( '-1 week' ) );
-		$last_week      = $this->get_last_week_data();
+	private function print_stats_comparison( $current_date, $old_date = null ) {
+		if ( ! $this->is_date_valid( $current_date ) || ( $old_date && ! $this->is_date_valid( $old_date ) ) ) {
+			return;
+		}
+		$old_date = is_null( $old_date ) ? gmdate( 'Y-m-d', strtotime( '-1 week' ) ) : $old_date;
 
-		$contributors_per_locale  = Plugin::get_contributors_count();
-		$total_contributors_count = array_sum( $contributors_per_locale );
+		$current_date_data = $this->get_data_for_date( $current_date );
+		$old_date_data     = $this->get_data_for_date( $old_date );
 
+		if ( ! $current_date_data || ! $old_date_data ) {
+			return;
+		}
+		$stats_diff = array();
+		foreach ( $current_date_data as $key => $value ) {
+			$stats_diff[ $key ] = $value - $old_date_data->$key;
+		}
 		$all_locales_data = get_locales_data();
 		$stats_data       = $all_locales_data['status_counts'];
-		$total_gtes       = array_sum( $this->count_managers( 'general_translation_editor' ) );
-		$total_ptes       = array_sum( $this->count_managers( 'translation_editor' ) );
+		$code             = 'Summary for weekly stats' . PHP_EOL;
+				$code    .= 'Below stats are dated ' . $current_date . ' compared to ' . $old_date . ' (differences between brackets)' . PHP_EOL;
 
-		$locale_requests = $this->get_locale_requests();
-		$editor_requests = $this->get_editor_requests();
+				$code .= 'Releases: ' . $current_date_data->releases_by_locale . ' (' . $stats_diff['releases_by_locale'] . ') locale, ' . $current_date_data->releases_by_locale_uptodate . ' (' . $stats_diff['releases_by_locale_uptodate'] . ') up to date, ' . $current_date_data->releases_by_locale_minor_behind . ' (' . $stats_diff['releases_by_locale_minor_behind'] . ') behind by minor versions, ' . $current_date_data->releases_by_locale_one_major_behind . ' (' . $stats_diff['releases_by_locale_one_major_behind'] . ') behind by one major version, ' . $current_date_data->releases_by_locale_multi_major_behind . ' (' . $stats_diff['releases_by_locale_multi_major_behind'] . ') behind more than one major version, ' . $stats_data['no-site'] . ' (N/A) have site but never released, ' . $stats_data['no-releases'] . ' (N/A) have no site.' . PHP_EOL;
 
-		$total_releases_diff              = $this->get_core_total() - $last_week->locales_total;
-		$uptodate_diff                    = $stats_data['latest'] - $last_week->releases_by_locale_uptodate;
-		$minor_behind_diff                = $stats_data['minor-behind'] - $last_week->releases_by_locale_minor_behind;
-		$major_behind_one_diff            = $stats_data['major-behind-one'] - $last_week->releases_by_locale_one_major_behind;
-		$major_behind_many_diff           = $stats_data['major-behind-many'] - $last_week->releases_by_locale_multi_major_behind;
-		$locales_100_diff                 = $this->get_core_full_translated() - $last_week->locales_below_50;
-		$locales_95_plus_diff             = $this->get_core_interval( 100, 95 ) - $last_week->locales_95_plus;
-		$locales_90_plus_diff             = $this->get_core_interval( 95, 90 ) - $last_week->locales_95_plus;
-		$locales_50_plus_diff             = $this->get_core_interval( 90, 50 ) - $last_week->locales_50_plus;
-		$locales_below_50_diff            = $this->get_core_interval( 50, 0, '<', '>' ) - $last_week->locales_below_50;
-		$locales_with_language_packs_diff = $stats_data['has-language-pack'] - $last_week->locales_with_language_packs;
-		$locales_without_project_diff     = $stats_data['no-wp-project'] - $last_week->locales_without_project;
-		$editor_requests_total_diff       = $editor_requests['total'] - $last_week->requests_total;
-		$editor_requests_unresolved_diff  = $editor_requests['unresolved_editor_requests'] - $last_week->requests_unresolved;
-		$locale_requests_total_diff       = $locale_requests['total'] - $last_week->locale_requests_total;
-		$locale_requests_unresolved_diff  = $locale_requests['unresolved_locale_requests'] - $last_week->locale_requests_unresolved;
-		$translators_gtes_diff            = $total_gtes - $last_week->translators_gtes;
-		$translators_ptes_diff            = $total_ptes - $last_week->translators_ptes;
-		$translators_contributors_diff    = $total_contributors_count - $last_week->translators_contributors;
-		$wp_translated_sites_pct_diff     = $this->translated_sites_pct - $last_week->wp_translated_sites_pct;
+				$code .= 'Translations: ' . $current_date_data->locales_total . ' (' . $stats_diff['locales_total'] . ') total, ' . $current_date_data->locales_100 . ' (' . $stats_diff['locales_100'] . ') at 100%, ' . $current_date_data->locales_95_plus . ' (' . $stats_diff['locales_95_plus'] . ') over 95%, ' . $current_date_data->locales_90_plus . ' (' . $stats_diff['locales_90_plus'] . ') over 90%, ' . $current_date_data->locales_50_plus . ' (' . $stats_diff['locales_50_plus'] . ') over 50%, ' . $current_date_data->locales_below_50 . ' (' . $stats_diff['locales_below_50'] . ') below 50%, ' . $current_date_data->locales_with_language_packs . ' (' . $stats_diff['locales_with_language_packs'] . ') have a language pack generated, ' . $current_date_data->locales_without_project . ' (' . $stats_diff['locales_without_project'] . ') have no project.' . PHP_EOL;
 
-		$code  = 'Summary for weekly stats' . PHP_EOL;
-		$code .= 'Below stats are dated ' . gmdate( 'Y-m-d' ) . ' compared to ' . $last_week_date . ' (differences between brackets)' . PHP_EOL;
+				$code .= '		Requests: There are ' . $current_date_data->requests_unresolved . ' unresolved editor requests out of ' . $current_date_data->requests_total . ' (' . $stats_diff['requests_unresolved'] . ') total and ' . $current_date_data->locale_requests_unresolved . ' unresolved locale requests out of ' . $current_date_data->locale_requests_total . ' (' . $stats_diff['locale_requests_unresolved'] . ') total.' . PHP_EOL;
 
-		$code .= 'Releases: ' . $this->get_core_total() . ' (' . $total_releases_diff . ') locale, ' . $stats_data['latest'] . ' (' . $uptodate_diff . ') up to date, ' . $stats_data['minor-behind'] . ' (±' . $minor_behind_diff . ') behind by minor versions, ' . $stats_data['major-behind-one'] . ' (±' . $major_behind_one_diff . ') behind by one major version, ' . $stats_data['major-behind-many'] . ' (' . $major_behind_many_diff . ') behind more than one major version, ' . $stats_data['no-site'] . ' (N/A) have site but never released, ' . $stats_data['no-releases'] . ' (N/A) have no site.' . PHP_EOL;
+				$code .= 'Translators: There are ' . $current_date_data->translators_gtes . ' (' . $stats_diff['translators_gtes'] . ') GTE, ' . $current_date_data->translators_ptes . ' (' . $stats_diff['translators_ptes'] . ')  and ' . $current_date_data->translators_contributors . ' (' . $stats_diff['translators_contributors'] . ') translation contributors.' . PHP_EOL;
+				$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL;
 
-		$code .= 'Translations: ' . $this->get_core_total() . ' (' . $total_releases_diff . ') total, ' . $this->get_core_full_translated() . ' (' . $locales_100_diff . ') at 100%, ' . $this->get_core_interval( 100, 95 ) . ' (' . $locales_95_plus_diff . ') over 95%, ' . $this->get_core_interval( 95, 90 ) . ' (' . $locales_90_plus_diff . ') over 90%, ' . $this->get_core_interval( 90, 50 ) . ' (' . $locales_50_plus_diff . ') over 50%, ' . $this->get_core_interval( 90, 50 ) . ' (' . $locales_below_50_diff . ') below 50%, ' . $stats_data['has-language-pack'] . ' (' . $locales_with_language_packs_diff . ') have a language pack generated, ' . $stats_data['no-wp-project'] . ' (' . $locales_without_project_diff . ') have no project.' . PHP_EOL;
+				$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $stats_diff['wp_translated_sites_pct'] . ') of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
+				WP_CLI::log( $code );
+	}
 
-		$code .= 'Requests: There are ' . $editor_requests['unresolved_editor_requests'] . ' unresolved editor requests out of ' . $editor_requests['total'] . ' (' . $editor_requests_unresolved_diff . ') total and ' . $locale_requests['unresolved_locale_requests'] . ' unresolved locale requests out of ' . $locale_requests['total'] . ' (' . $locale_requests_unresolved_diff . ') total.' . PHP_EOL;
-
-		$code .= 'Translators: There are ' . $total_gtes . ' (' . $translators_gtes_diff . ') GTE, ' . $total_ptes . ' (' . $translators_gtes_diff . ')  and ' . $total_contributors_count . ' (' . $translators_contributors_diff . ') translation contributors.' . PHP_EOL;
-		$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL;
-
-		$code .= 'Site language: ' . $wp_translated_sites_pct . '% (' . $wp_translated_sites_pct_diff . ') of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
-		WP_CLI::log( $code );
+	/**
+	 * Checks if date is valid
+	 *
+	 * @param string $date The date that needs to be validated.
+	 *
+	 * @return boolean True if date is valid and False if invalid
+	 */
+	private function is_date_valid( $date, $format = 'Y-m-d' ) {
+		$d = DateTime::createFromFormat( $format, $date );
+		return $d && $d->format( $format ) == $date;
 	}
 
 	/**
