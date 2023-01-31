@@ -104,6 +104,17 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					</li>
 				<?php endif; ?>
 
+				<?php // todo remove the condition when launch for all users ?>
+				<?php if ( \WordPressdotorg\Two_Factor\is_2fa_beta_tester() ) : ?>
+				<li class="<?php if ( wporg_bbp_is_single_user_edit_account() ) : ?>current<?php endif; ?>">
+					<span class="bbp-user-edit-account-link">
+						<a href="<?php bbp_user_profile_edit_url(); ?>account/">
+							<?php esc_html_e( 'Edit Account', 'wporg-forums' ); ?>
+						</a>
+					</span>
+				</li>
+				<?php endif; ?>
+
 				<li class="<?php if ( bbp_is_single_user_edit() ) :?>current<?php endif; ?>">
 					<span class="bbp-user-edit-link">
 						<a href="<?php bbp_user_profile_edit_url(); ?>" title="<?php
