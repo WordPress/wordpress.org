@@ -158,6 +158,9 @@ class Stats {
 			return;
 		}
 
+		define( 'MAKE_POLYGLOTS_BLOG_ID', MAKE_POLYGLOTS_BLOG_ID );
+		define( 'POLYGLOTS_PAGE_ID', 42132 );
+
 		$this->echo_the_values = $echo_the_values;
 		$this->set_number_of_years_with_data();
 		$this->print_header();
@@ -234,7 +237,7 @@ class Stats {
 	 */
 	private function get_locale_requests() {
 		$locale_requests = array();
-		switch_to_blog( 19 );
+		switch_to_blog( MAKE_POLYGLOTS_BLOG_ID );
 		$args                     = array(
 			'post_type'   => 'post',
 			'tag'         => 'locale-requests',
@@ -276,7 +279,7 @@ class Stats {
 	 */
 	private function get_editor_requests() {
 		$editor_requests = array();
-		switch_to_blog( 19 );
+		switch_to_blog( MAKE_POLYGLOTS_BLOG_ID );
 		register_taxonomy(
 			'p2_resolved',
 			'post',
@@ -1485,8 +1488,7 @@ class Stats {
 		if ( $this->echo_the_values ) {
 			return;
 		}
-		define( 'MAKE_POLYGLOTS_BLOG_ID', 19 );
-		define( 'POLYGLOTS_PAGE_ID', 42132 );
+
 		add_filter(
 			'wp_revisions_to_keep',
 			function ( $num, $post ) {
