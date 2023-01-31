@@ -160,7 +160,7 @@ class Stats {
 			return;
 		}
 
-		define( 'MAKE_POLYGLOTS_BLOG_ID', MAKE_POLYGLOTS_BLOG_ID );
+		define( 'MAKE_POLYGLOTS_BLOG_ID', 19 );
 		define( 'POLYGLOTS_PAGE_ID', 42132 );
 
 		$this->echo_the_values = $echo_the_values;
@@ -226,7 +226,7 @@ class Stats {
 				'translators_gtes'                      => $total_gtes,
 				'translators_ptes'                      => $total_ptes,
 				'translators_contributors'              => $total_contributors_count,
-				'wp_translated_sites_pct'               => $$this->translated_sites_pct,
+				'wp_translated_sites_pct'               => $this->translated_sites_pct,
 				'date'                                  => gmdate( 'Y-m-d' ),
 			)
 		);
@@ -368,7 +368,7 @@ class Stats {
 		}
 		$stats_diff = new \stdClass();
 		foreach ( $current_date_data as $key => $value ) {
-			$stats_diff[ $key ] = $value - $old_date_data->$key;
+			$stats_diff->$key = $value - $old_date_data->$key;
 		}
 		$all_locales_data = get_locales_data();
 		$stats_data       = $all_locales_data['status_counts'];
