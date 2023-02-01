@@ -118,7 +118,7 @@ function get_whitelist() {
 			'mukesh27',
 			'pbiron',
 			'priethor',
-			'psykro', // @jon_bossenger on Slack
+			'psykro', // @Jonathan on Slack
 			'sabernhardt',
 			'sncoker', // @shawntellecoker on Slack
 			'thelmachido', // @thelmachido-zw on Slack
@@ -202,7 +202,7 @@ function get_whitelist() {
 			'adamsilverstein',
 			'aduth',
 			'nerrad',
-			'psykro', // @jon_bossenger on Slack
+			'psykro', // @Jonathan on Slack
 			'rmccue',
 		) ),
 		'core-media' => array_merge( get_committers(), array(
@@ -317,7 +317,7 @@ function get_whitelist() {
 			'johnbillion',
 			'justinahinon',
 			'loganfive', // @Garrett Hunter on Slack
-			'psykro', // @jon_bossenger on Slack
+			'psykro', // @Jonathan on Slack
 			'raaaahman', // @Sylvain Schellenberger on slack
 			'schlessera',
 			'sephsekla', // @Joe Bailey-Roberts on Slack
@@ -387,6 +387,8 @@ function get_whitelist() {
 		),
 		'meta-learn' => array(
 			'coreymckrill',
+			'courane01', // @Courtney on Slack
+			'psykro', // @Jonathan on Slack
 			'tellyworth',
 		),
 		'meta-wordcamp' => $wordcamp_central,
@@ -492,7 +494,7 @@ function get_whitelist() {
 			'onealtr', // @oneal on Slack
 			'pbrocks',
 			'piyopiyofox',
-			'psykro',
+			'psykro', // @Jonathan on Slack
 			'richtabor',
 			'trynet',
 			'webtechpooja', // @Pooja Derashri on Slack
