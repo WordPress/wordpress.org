@@ -177,7 +177,7 @@ select.is-small {
 .site-header .site-branding {
 	margin: 0 auto;
 	max-width: 1600px;
-	padding: 0 10px;
+	padding: 0 20px;
 }
 
 .site-header.home {
@@ -479,7 +479,7 @@ table.translations tr.editor:hover {
 .gp-content {
 	margin: 20px auto;
 	max-width: 1600px;
-	padding: 0 10px;
+	padding: 0 20px;
 }
 
 .gp-content h2 {
@@ -2337,7 +2337,7 @@ table.translations td.translation span.missing {
 	float: none;
 	width: 100%;
 	margin: 0;
-	padding: 20px 10px;
+	padding: 0 10px 20px 10px;
 }
 
 .editor-panel .meta .status-actions {
@@ -3094,6 +3094,7 @@ table.translations.translation-sets-rtl .textarea-direction-ltr .foreign-text {
 	background-size: 15px 4px;
 }
 
+/* translate.w.org CSS. Class: .wporg-make */
 ul.sidebar-tabs {
 	display: inherit;
 }
@@ -3168,7 +3169,7 @@ ul.sidebar-tabs {
 	padding: 0;
 }
 
-.meta.other-locales .locale.unique {
+.meta.other-locales .locale.unique, .meta.other-locales .other-locales .locale {
 	width: 6rem;
 	background: #0073aa;
 	margin-right: 10px !important;
