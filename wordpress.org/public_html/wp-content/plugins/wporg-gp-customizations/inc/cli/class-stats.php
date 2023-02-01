@@ -373,8 +373,7 @@ class Stats {
 		$all_locales_data = get_locales_data();
 		$stats_data       = $all_locales_data['status_counts'];
 
-		$code  = 'Summary for weekly stats' . PHP_EOL;
-		$code .= 'Below stats are dated ' . $current_date . ' compared to ' . $old_date . ' (differences between brackets)' . PHP_EOL . PHP_EOL;
+		$code = 'Below stats are dated ' . $current_date . ' compared to ' . $old_date . ' (differences between brackets)' . PHP_EOL . PHP_EOL;
 
 		$code .= 'Releases: ' . $current_date_data->releases_by_locale . ' (' . $this->prefix_num( $stats_diff->releases_by_locale ) . ') locale, ' . $current_date_data->releases_by_locale_uptodate . ' (' . $this->prefix_num( $stats_diff->releases_by_locale_uptodate ) . ') up to date, ' . $current_date_data->releases_by_locale_minor_behind . ' (' . $this->prefix_num( $stats_diff->releases_by_locale_minor_behind ) . ') behind by minor versions, ' . $current_date_data->releases_by_locale_one_major_behind . ' (' . $this->prefix_num( $stats_diff->releases_by_locale_one_major_behind ) . ') behind by one major version, ' . $current_date_data->releases_by_locale_multi_major_behind . ' (' . $this->prefix_num( $stats_diff->releases_by_locale_multi_major_behind ) . ') behind more than one major version, ' . $stats_data['no-site'] . ' (N/A) have site but never released, ' . $stats_data['no-releases'] . ' (N/A) have no site.' . PHP_EOL . PHP_EOL;
 
