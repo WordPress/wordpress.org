@@ -166,7 +166,6 @@ class Stats {
 		$this->echo_the_values = $echo_the_values;
 		$this->set_number_of_years_with_data();
 		$this->print_header();
-		$this->print_stats_comparison( gmdate( 'Y-m-d' ) );
 		$this->print_wordpress_translation_percentage();
 		$this->print_packages_generated();
 		$this->print_unique_themes_plugins_by_year();
@@ -178,6 +177,7 @@ class Stats {
 		$this->print_managers_stats();
 		$this->print_most_active_translators();
 		$this->store_stats();
+		$this->print_stats_comparison( gmdate( 'Y-m-d' ) );
 
 		$this->update_page();
 	}
