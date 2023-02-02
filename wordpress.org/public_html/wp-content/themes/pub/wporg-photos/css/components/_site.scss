@@ -320,12 +320,23 @@ body.page {
 
 .photo-meta {
 	display: flex;
-	flex-flow: row wrap;
+	flex-flow: row nowrap;
 	justify-content: space-around;
+
+	@include breakpoint( 0, 600px ) {
+		flex-wrap: wrap;
+	}
 
 	.column {
 		flex: 2 1 auto;
 		margin-bottom: 2rem;
+		min-width: 250px;
+
+		&:first-child {
+			@include breakpoint( 0, 600px ) {
+				margin-bottom: 1rem;
+			}
+		}
 
 		&:last-child {
 			flex: 1 1 auto;
