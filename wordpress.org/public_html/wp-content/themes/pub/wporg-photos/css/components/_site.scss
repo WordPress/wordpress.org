@@ -66,6 +66,10 @@ body.search  {
 			padding: 0 10px;
 		}
 
+		@include breakpoint( 0, 650px ) {
+			padding: initial;
+		}
+
 		article {
 			max-height: 200px;
 			height: 200px;
