@@ -50,6 +50,21 @@ summary {
 	}
 }
 
+.site-contribute {
+	color: rgba( 255, 255, 255, 0.8);
+	font-weight: 300;
+	margin-top: 0;
+
+	a {
+		color: rgba( 255, 255, 255, 0.8);
+		font-weight: 500;
+
+		&:hover {
+			color: rgba(0, 0, 0, 0.8);
+		}
+	}
+}
+
 body.author,
 body.archive,
 body.post-type-archive-photo,

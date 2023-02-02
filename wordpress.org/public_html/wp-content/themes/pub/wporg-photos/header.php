@@ -46,6 +46,15 @@ $show_full_header = is_home() && ! is_paged();
 						?>
 					</p>
 					<?php get_search_form(); ?>
+
+					<p class="site-contribute">
+						<?php
+							printf(
+								__( 'Or <a href="%s">contribute</a> your own photos!', 'wporg-photos' ),
+								esc_url( get_permalink( get_page_by_path( 'submit' ) ) )
+							);
+						?>
+					</p>
 				<?php else : ?>
 					<nav id="site-navigation" class="main-navigation" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-photos' ); ?>"></button>
@@ -64,4 +73,3 @@ $show_full_header = is_home() && ! is_paged();
 				<?php endif; ?>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
-
