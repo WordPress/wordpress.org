@@ -5,21 +5,30 @@ function decodeHtml(html) {
 }
 
 function copyAttribution(event){
+	document.addEventListener('copy', copyAttributionListener);
+	document.execCommand('copy');
+	document.removeEventListener('copy', copyAttributionListener);
+}
+
+function copyAttributionListener(event) {
 	event.preventDefault();
 	const attribution = document.querySelector('.attribution-text .tab.active');
 	const copyButton  = document.querySelector('.attribution-copy');
 
-	let txt = attribution.innerHTML;
+	let txt = attribution.innerHTML.trim();
 
 	if ( attribution.classList.contains('tab-html') ) {
 		txt = decodeHtml(txt);
 	}
 	
-	navigator.clipboard.writeText(txt.trim()).then(res=>{
-		copyButton.textContent = PhotoDir.copied_text;
-		setTimeout(function() { restoreCopyButtonText(); }, 4000);
-		  function restoreCopyButtonText(){ copyButton.textContent = PhotoDir.copy_to_clipboard_text; }
-	})
+	let html = attribution.classList.contains('tab-rich-text') ? txt : '';
+
+	event.clipboardData.setData('text/html', html);
+	event.clipboardData.setData('text/plain', txt);
+
+	copyButton.textContent = PhotoDir.copied_text;
+	setTimeout(function() { restoreCopyButtonText(); }, 4000);
+	function restoreCopyButtonText(){ copyButton.textContent = PhotoDir.copy_to_clipboard_text; }
 }
 
 function initCopyToCliboard(){
