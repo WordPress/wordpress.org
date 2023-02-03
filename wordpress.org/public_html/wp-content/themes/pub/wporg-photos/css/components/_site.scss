@@ -522,6 +522,50 @@ body.page {
 	}
 }
 
+div.attribution {
+	margin: 1rem 0 3rem;
+	font-size: 0.9rem;
+
+	.attribution-copy {
+		background-color: #30272E;
+		border-color: transparent;
+		color: #fff;
+		font-size: small;
+		padding: 0.25rem 0.5rem;
+		margin-top: 1rem;
+	}
+
+	.attribution-label {
+		margin-bottom: 1rem;
+	}
+
+	.attribution-text {
+		.tabs {
+			button {
+				background-color: white;
+				border: 0;
+				border-bottom: 1px solid #aaa;
+				padding: 0.5rem 1rem;
+
+				&.active {
+					border: 1px solid #aaa;
+					border-bottom-color: #fff;
+					display: inline-block;
+				}
+			}
+		}
+		.tab {
+			display: none;
+			border: 1px solid #aaa;
+			padding: 1rem;
+			margin-top: -1px;
+		}
+		.active {
+			display: block;
+		}
+	}
+}
+
 .taxonomy-photo_color-black,
 .color-black::before  { background-color: black }
 .taxonomy-photo_color-blue,

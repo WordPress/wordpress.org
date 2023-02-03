@@ -102,6 +102,18 @@ function scripts() {
 	wp_dequeue_script( 'devicepx' );
 	wp_register_script( 'grofiles-cards', false );
 	wp_enqueue_script( 'grofiles-cards' );
+
+	if ( is_singular( get_photo_post_type() ) ) {
+		wp_enqueue_script( 'wporg-photos-attribution', get_stylesheet_directory_uri() . '/js/attribution.js', [], filemtime( __DIR__ . '/js/attribution.js' ), true );
+		wp_localize_script(
+			'wporg-photos-attribution',
+			'PhotoDir',
+			[
+				'copied_text'            => __( 'Copied!', 'wporg-photos' ),
+				'copy_to_clipboard_text' => __( 'Copy to clipboard', 'wporg-photos' ),
+			]
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
