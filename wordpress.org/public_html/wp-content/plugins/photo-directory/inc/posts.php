@@ -31,6 +31,11 @@ class Posts {
 
 		// Modify REST response to include URL to small photo (used by Profiles).
 		add_filter( "rest_prepare_{$post_type}", [ __CLASS__, 'rest_prepare_add_photo_url' ] );
+
+		// Dedicate primary feed to photos.
+		add_action( 'request',            [ __CLASS__, 'make_primary_feed_all_photos' ] );
+		add_filter( 'the_content_feed',   [ __CLASS__, 'add_photo_to_rss_feed' ] );
+		add_filter( 'wp_get_attachment_image_attributes', [ __CLASS__, 'feed_attachment_image_attributes' ], 10, 3 );
 	}
 
 	/**
@@ -313,6 +318,58 @@ class Posts {
 		}
 
 		return $next;
+	}
+
+	/**
+	 * Changes feeds to only serve photos by default.
+	 *
+	 * @param array $query_vars The array of requested query variables.
+	 * @return array
+	 */
+	public static function make_primary_feed_all_photos( $query_vars ) {
+		if ( isset( $query_vars['feed'] ) && ! isset( $query_vars['post_type'] ) ) {
+			$query_vars['post_type'] = Registrations::get_post_type();
+		}
+
+		return $query_vars;
+	}
+
+	/**
+	 * Outputs markup to include the photo in RSS feeds of photos.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public static function add_photo_to_rss_feed( $content ) {
+		global $post;
+
+		if ( $post && Registrations::get_post_type() === get_post_type( $post ) && has_post_thumbnail( $post->ID ) ) {
+			$content = '<figure>'
+				. get_the_post_thumbnail( $post->ID, 'medium_large', [ 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
+				. ( $content ? "<figcaption>{$content}</figcaption>\n" : '' )
+				. "</figure>\n";
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Overrides the image attributes for images shown in feed.
+	 *
+	 * @param string[]     $attr       Array of attribute values for the image markup, keyed by attribute name.
+	 *                                 See `wp_get_attachment_image()`.
+	 * @param WP_Post      $attachment Image attachment post.
+	 * @param string|int[] $size       Requested image size. Can be any registered image size name, or
+	 *                                 an array of width and height values in pixels (in that order).
+	 * @return string[]
+	 */
+	public static function feed_attachment_image_attributes( $attr, $attachment, $size ) {
+		if ( is_feed() ) {
+			$attr['class'] = '';
+			unset( $attr['srcset'] );
+		}
+
+		return $attr;
 	}
 
 }
