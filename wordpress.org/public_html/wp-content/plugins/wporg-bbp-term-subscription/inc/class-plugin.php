@@ -761,7 +761,7 @@ To unsubscribe from future emails, click here:
 	 * @param int $taxonomy The taxonomy
 	 * @return string
 	 */
-	public static function get_subscription_url( $user_id = 0, $term_id, $taxonomy ) {
+	public static function get_subscription_url( $user_id, $term_id, $taxonomy ) {
 		if ( empty( $user_id ) ) {
 			$user_id = bbp_get_user_id();
 		}
