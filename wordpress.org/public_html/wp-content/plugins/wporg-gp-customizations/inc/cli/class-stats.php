@@ -381,7 +381,7 @@ class Stats {
 
 		$code .= 'Requests: There are ' . $current_date_data->requests_unresolved . ' unresolved editor requests out of ' . $current_date_data->requests_total . ' (' . $this->prefix_num( $stats_diff->requests_unresolved ) . ') total and ' . $current_date_data->locale_requests_unresolved . ' unresolved locale requests out of ' . $current_date_data->locale_requests_total . ' (' . $this->prefix_num( $stats_diff->locale_requests_unresolved ) . ') total.' . PHP_EOL . PHP_EOL;
 
-		$code .= 'Translators: There are ' . $current_date_data->translators_gtes . ' (' . $this->prefix_num( $stats_diff->translators_gtes ) . ') GTE, ' . $current_date_data->translators_ptes . ' (' . $this->prefix_num( $stats_diff->translators_ptes ) . ')  and ' . $current_date_data->translators_contributors . ' (' . $this->prefix_num( $stats_diff->translators_contributors ) . ') translation contributors.' . PHP_EOL;
+		$code .= 'Translators: There are ' . $current_date_data->translators_gtes . ' (' . $this->prefix_num( $stats_diff->translators_gtes ) . ') GTEs, ' . $current_date_data->translators_ptes . ' (' . $this->prefix_num( $stats_diff->translators_ptes ) . ') PTEs and ' . $current_date_data->translators_contributors . ' (' . $this->prefix_num( $stats_diff->translators_contributors ) . ') translation contributors.' . PHP_EOL;
 		$code .= '(A wordpress.org account could have multiple roles over different locale)' . PHP_EOL . PHP_EOL;
 
 		$code .= 'Site language: ' . $current_date_data->wp_translated_sites_pct . '% (' . $this->prefix_num( round( $stats_diff->wp_translated_sites_pct, 3 ) ) . '%) of WordPress sites are running a translated WordPress site. ' . PHP_EOL;
