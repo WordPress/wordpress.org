@@ -24,7 +24,7 @@ $is_redirect_enabled = get_theme_mod( 'ov_is_redirect_enabled' );
 $target_url = get_target_url();
 
 if ( $is_redirect_enabled ) {
-	wp_redirect( $target_url );
+	wp_redirect( $target_url, 301 );
 	exit;
 } else {
 	echo "<!-- " . $target_url . " -->";
