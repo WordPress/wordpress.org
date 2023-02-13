@@ -506,8 +506,10 @@ class Upload_Handler {
 			'booking-com',
 			'bootstrap-',
 			'buddypress-',
-			'contact-form-7-',
+			'chatgpt-',
+			'chat-gpt-',
 			'cloudflare-',
+			'contact-form-7-',
 			'cpanel-',
 			'disqus-',
 			'divi-',
@@ -599,13 +601,14 @@ class Upload_Handler {
 
 		// Domains from which exceptions would be accepted.
 		$trademark_exceptions = array(
-			'yoast.com'             => array( 'yoast' ),
+			'adobe.com'             => array( 'adobe' ),
 			'automattic.com'        => array( 'akismet', 'akismet-', 'jetpack', 'jetpack-', 'wordpress', 'wp-', 'woo', 'woo-', 'woocommerce', 'woocommerce-' ),
 			'facebook.com'          => array( 'facebook', 'instagram', 'oculus', 'whatsapp' ),
 			'support.microsoft.com' => array( 'bing-', 'microsoft-' ),
 			'trustpilot.com'        => array( 'trustpilot' ),
 			'microsoft.com'         => array( 'bing-', 'microsoft-' ),
 			'yandex-team.ru'        => array( 'yandex' ),
+			'yoast.com'             => array( 'yoast' ),
 			'opera.com'             => array( 'opera-' ),
 			'adobe.com'				=> array( 'adobe-' ),
 		);
