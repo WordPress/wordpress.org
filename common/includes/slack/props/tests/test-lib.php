@@ -124,6 +124,8 @@ class Test_Props_Lib extends TestCase {
 			'user_id' => 'U1E5RLU1L',
 		);
 
+		$mentions_in_list = json_decode( file_get_contents( __DIR__ . '/mentions-in-list.json' ) );
+
 		$cases = array(
 			'empty' => array(
 				'blocks'   => array(),
@@ -132,6 +134,11 @@ class Test_Props_Lib extends TestCase {
 
 			'user mentioned twice' => array(
 				'blocks'   => $mentioned_twice,
+				'expected' => $valid_users,
+			),
+
+			'mentions in a list' => array(
+				'blocks'   => $mentions_in_list,
 				'expected' => $valid_users,
 			),
 

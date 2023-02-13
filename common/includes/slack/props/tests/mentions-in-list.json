@@ -1,0 +1,106 @@
+[
+	{
+		"type": "rich_text",
+		"block_id": "D8i",
+		"elements": [
+			{
+				"type": "rich_text_section",
+				"elements": [
+					{
+						"type": "text",
+						"text": "Props to:\n"
+					}
+				]
+			},
+			{
+				"type": "rich_text_list",
+				"elements": [
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "user",
+								"user_id": "U02RR6SGY"
+							}
+						]
+					},
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "user",
+								"user_id": "U02RQHNND"
+							}
+						]
+					},
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "user",
+								"user_id": "U3KJ0TK4L"
+							}
+						]
+					},
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "user",
+								"user_id": "U4L99HZB6"
+							}
+						]
+					},
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "user",
+								"user_id": "U024MFP4L"
+							}
+						]
+					},
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "user",
+								"user_id": "U6R2E3Y9Y"
+							}
+						]
+					},
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "user",
+								"user_id": "U023GFZJ07L"
+							}
+						]
+					},
+					{
+						"type": "rich_text_section",
+						"elements": [
+							{
+								"type": "user",
+								"user_id": "U1E5RLU1L"
+							}
+						]
+					}
+				],
+				"style": "bullet",
+				"indent": 0,
+				"border": 0
+			},
+			{
+				"type": "rich_text_section",
+				"elements": [
+					{
+						"type": "text",
+						"text": "For testing WordPress 6.2 Beta 1 release!"
+					}
+				]
+			}
+		]
+	}
+]
