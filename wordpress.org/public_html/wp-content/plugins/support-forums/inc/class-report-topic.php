@@ -105,11 +105,11 @@ class Report_Topic {
 			remove_action( 'set_object_terms', array( $this, 'detect_manual_modlook' ), 10 );
 			wp_add_object_terms( $_POST['wporg-support-report-topic'], 'modlook', 'topic-tag' );
 
-			$reason = $_POST['topic-report-reason'];
-
-			if ( 'other-input' === $reason ) {
-				$reason = $_POST['topic-report-reason-other'];
-			}
+            $reason = sprintf(
+                '%s: %s',
+                $_POST['topic-report-reason'],
+                $_POST['topic-report-reason-details']
+            );
 
 			$this->add_modlook_history( $_POST['wporg-support-report-topic'], $reason );
 
@@ -172,7 +172,7 @@ class Report_Topic {
 				<input type="hidden" name="wporg-support-report-topic" value="<?php echo esc_attr( bbp_get_topic_id() ); ?>">
 
 				<label for="topic-report-reason"><?php _e( 'Report this topic for:', 'wporg-forums' ); ?></label>
-				<select name="topic-report-reason" id="topic-report-reason" required="required" onchange="wporg_report_topic_change()">
+				<select name="topic-report-reason" id="topic-report-reason" required="required">
 					<option value=""><?php _ex( '&mdash; Choose one &mdash;', 'Report a topic reason', 'wporg-forums' ); ?></option>
 					<option><?php _ex( 'Guideline violation', 'Report a topic reason', 'wporg-forums' ); ?></option>
 					<option><?php _ex( 'Security related', 'Report a topic reason', 'wporg-forums' ); ?></option>
@@ -180,22 +180,12 @@ class Report_Topic {
 					<option><?php _ex( 'NSFW (Not Safe For Work) link', 'Report a topic reason', 'wporg-forums' ); ?></option>
 					<option value="other-input"><?php _ex( 'Other', 'Report a topic reason', 'wporg-forums' ); ?></option>
 				</select>
-				<aside id="report-topic-other" style="display: none;">
-					<label for="topic-report-reason-other"><?php _e( 'Your own reason:', 'wporg-forums' ); ?></label>
-					<input type="text" name="topic-report-reason-other" id="topic-report-reason-other">
+				<aside id="report-topic-other">
+					<label for="topic-report-reason-details"><?php _e( 'Why are you reporting this topic:', 'wporg-forums' ); ?></label>
+					<input type="text" name="topic-report-reason-details" id="topic-report-reason-details" required="required">
 				</aside>
 				<input type="submit" name="submit" value="<?php esc_attr_e( 'Report', 'wporg-forums' ); ?>">
 			</form>
-
-            <script type="text/javascript">
-                function wporg_report_topic_change() {
-                	if ( 'other-input' === document.getElementById('topic-report-reason').value ) {
-                		document.getElementById( 'report-topic-other' ).style.display = 'block';
-                    } else {
-						document.getElementById( 'report-topic-other' ).style.display = 'none';
-                    }
-                }
-            </script>
 <?php
 			$report_text = ob_get_clean();
 		}
