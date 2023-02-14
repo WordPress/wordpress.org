@@ -36,6 +36,9 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 				'/5-for-the-future' => '/five-for-the-future/',
 				'/5forthefuture'    => '/five-for-the-future/',
 				'/fiveforthefuture' => '/five-for-the-future/',
+
+				// Deprecated About / Testimonials page https://github.com/WordPress/wporg-main-2022/issues/196
+				'/about/testimonials' => '/news/category/community/',
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
