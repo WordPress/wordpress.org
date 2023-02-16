@@ -150,13 +150,14 @@ gp_tmpl_header();
 </div>
 
 <?php
+
 if ( isset( $pages ) && $pages['pages'] > 1 ) {
 	echo '<div class="projects-paging">';
 	echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
 	echo '</div>';
 }
-?>
 
+?>
 <div id="projects" class="projects">
 	<?php
 	foreach ( $sub_projects as $sub_project ) {
@@ -183,7 +184,11 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 				$parent_project_id = $parent_project->parent_project_id;
 				$project_name = "{$parent_project->name} - {$project_name}";
 			}
-
+		} elseif ( 'Patterns' == $project->name ) {
+			$prefix = 'https://translate.wordpress.org/projects/patterns/core';
+			$suffix = '?filters%5Bterm%5D=https%3A%2F%2Fwordpress.org%2Fpatterns%2Fpattern%2F' . $sub_project->slug . '%2F&filters%5Bterm_scope%5D=scope_any&filters%5Bstatus%5D=current_or_waiting_or_fuzzy_or_untranslated_or_rejected_or_changesrequested_or_old&filters%5Buser_login%5D=&filter=Apply+Filters&sort%5Bby%5D=priority&sort%5Bhow%5D=desc';
+			$project_url = $prefix . '/' . $locale_slug . '/' . $set_slug . '/' . $suffix;
+			$project_name = $sub_project->name;
 		} else {
 			$project_url = gp_url_join( '/locale', $locale_slug, $set_slug, $sub_project->path );
 			$project_name = $sub_project->name;

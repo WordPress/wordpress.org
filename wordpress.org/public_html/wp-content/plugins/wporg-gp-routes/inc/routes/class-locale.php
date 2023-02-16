@@ -72,7 +72,7 @@ class Locale extends GP_Route {
 				$this->roles_adapter->is_approver_for_locale( $user_id, $locale_slug ) // Doesn't have project-level access either
 			)
 			// Add check to see if there are any waiting translations for this locale?
-			) {
+		) {
 			$default_project_tab = 'wp';
 		}
 
@@ -105,6 +105,13 @@ class Locale extends GP_Route {
 				'locale' => $locale_slug,
 			)
 		);
+
+		$data['project']                = $project;
+		$data['sub_projects']           = $paged_sub_projects['projects'];
+		$data['pages']                  = $paged_sub_projects['pages'];
+		$data                           = apply_filters( 'gp_subprojects', $data );
+		$paged_sub_projects['projects'] = $data['sub_projects'];
+		$paged_sub_projects['pages']    = $data['pages'];
 
 		if ( ! $paged_sub_projects ) {
 			return $this->die_with_404();
@@ -588,6 +595,11 @@ class Locale extends GP_Route {
 			$status->untranslated_count = 0;
 			$status->all_count          = 0;
 			$status->percent_complete   = 0;
+		}
+
+		$status = apply_filters( 'gp_get_project_status', $status, $project, $locale, $set_slug );
+		if ( 0 != $status->sub_projects_count ) {
+			return $status;
 		}
 
 		$set = GP::$translation_set->by_project_id_slug_and_locale(
