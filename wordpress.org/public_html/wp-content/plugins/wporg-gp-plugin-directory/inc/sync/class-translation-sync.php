@@ -135,10 +135,13 @@ class Translation_Sync {
 	public function queue_translation_for_sync( $translation ) {
 		global $wpdb;
 
-		// Only propagate current translations without warnings.
-		if ( 'current' !== $translation->status || ! empty( $translation->warnings ) ) {
+		$allowed_statuses = array( 'current', 'rejected', 'changesrequested', 'fuzzy' );
+		// Do not propagate waiting translations and other translations with warnings.
+		if ( ! in_array( $translation->status, $allowed_statuses ) || ! empty( $translation->warnings ) ) {
 			return;
 		}
+
+		do_action( 'wporg_translate_translation_synced', $translation );
 
 		$project = GP::$project->one(
 			"SELECT p.* FROM {$wpdb->gp_projects} AS p JOIN {$wpdb->gp_originals} AS o ON o.project_id = p.id WHERE o.id = %d",
@@ -258,14 +261,14 @@ class Translation_Sync {
 		$copy = new GP_Translation( $translation->fields() );
 		$copy->original_id = $new_original->id;
 		$copy->translation_set_id = $new_translation_set->id;
-		$copy->status = 'current';
+		$copy->status = $translation->status;
 
 		$translation = GP::$translation->create( $copy );
 		if ( ! $translation ) {
 			return false;
 		}
 
-		$translation->set_as_current();
+		$translation->set_status( $copy->status );
 		gp_clean_translation_set_cache( $new_translation_set->id );
 
 		return true;
