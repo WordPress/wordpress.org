@@ -329,6 +329,14 @@ add_filter( 'document_title_separator', __NAMESPACE__ . '\document_title_separat
  * @return string
  */
 function excerpt_length( $excerpt ) {
+	/*
+	 * Don't run this filter during rest-api requests.
+	 * This shouldn't normally be needed, but this avoids accidental shortening of the API fields.
+	 */
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return $excerpt;
+	}
+
 	if ( is_home() || is_archive() ) {
 		/*
 		 * translators: If your word count is based on single characters (e.g. East Asian characters),
