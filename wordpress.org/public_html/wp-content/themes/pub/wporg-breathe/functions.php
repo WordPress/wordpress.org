@@ -44,10 +44,16 @@ function customize_register( $wp_customize ) {
 }
 
 /**
- * noindex the Mentions archives.
+ * noindex some specific pages.
  */
 function no_robots( $noindex ) {
+	global $wp_query;
+
 	if ( is_tax( 'mentions' ) ) {
+		$noindex = true;
+	}
+
+	if ( is_object( $wp_query ) && !empty( $wp_query->query_vars['o2_recent_comments'] ) ) {
 		$noindex = true;
 	}
 
