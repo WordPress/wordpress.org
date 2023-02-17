@@ -63,7 +63,7 @@ $paginationBreakPoint: "600px";
 				&:active, &:focus, &:hover {
 					text-decoration: none;
 				}
-	
+
 				&:hover {
 					color: $color__link;
 				}
@@ -301,7 +301,7 @@ $paginationBreakPoint: "600px";
 				margin-left: 1rem;
 				padding-left: 0;
 			}
-	
+
 			@media screen and ( max-width: 480px ) {
 				min-height: auto;
 				border-bottom: 0;
@@ -1175,7 +1175,7 @@ div.bbp-breadcrumb {
 		input[type="text"] {
 			width: 100%;
 			padding: 0.2rem 0.5rem 0.1rem;
-			margin: 0;
+			margin: 5px 0;
 		}
 	}
 

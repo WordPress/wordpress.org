@@ -4618,7 +4618,7 @@ div.bbp-breadcrumb p {
 .sidebar .topic-info li.topic-report input[type="text"] {
 	width: 100%;
 	padding: 0.2rem 0.5rem 0.1rem;
-	margin: 0;
+	margin: 5px 0;
 }
 
 .sidebar .topic-info li.topic-previous-reports .previous-reports {
