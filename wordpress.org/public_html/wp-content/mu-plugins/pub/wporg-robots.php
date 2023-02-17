@@ -20,9 +20,12 @@ function wporg_robots_txt( $robots ) {
 		           "Allow: /locale/*/stats/plugins/$\n" .
 		           "Allow: /locale/*/stats/themes/$\n";
 
-	} elseif ( 'wordpress.org' === $blog_details->domain ) {
+	} elseif ( 'wordpress.org' === $blog_details->domain || 'developer.wordpress.org' === $blog_details->domain ) {
 		// WordPress.org/search/ should not be indexed.
 		$robots .= "\nUser-agent: *\n" .
+				   "Disallow: /wp-admin/\n" .
+				   "Disallow: /?rest_route=\n" .
+				   "Disallow: /xmlrpc.php\n" .
 		           "Disallow: /search\n" .
 		           "Disallow: /?s=\n";
 
