@@ -141,8 +141,6 @@ class Translation_Sync {
 			return;
 		}
 
-		do_action( 'wporg_translate_translation_synced', $translation );
-
 		$project = GP::$project->one(
 			"SELECT p.* FROM {$wpdb->gp_projects} AS p JOIN {$wpdb->gp_originals} AS o ON o.project_id = p.id WHERE o.id = %d",
 			$translation->original_id
@@ -267,6 +265,8 @@ class Translation_Sync {
 		if ( ! $translation ) {
 			return false;
 		}
+
+		do_action( 'wporg_translate_translation_synced', $copy, $translation );
 
 		$translation->set_status( $copy->status );
 		gp_clean_translation_set_cache( $new_translation_set->id );
