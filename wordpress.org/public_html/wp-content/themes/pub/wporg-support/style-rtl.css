@@ -3861,7 +3861,7 @@ section {
 
 .bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links,
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links {
-	display: none;
+	display: block;
 	position: absolute;
 	bottom: 0;
 	left: 0;
@@ -3893,18 +3893,6 @@ section {
 .bbpress #bbpress-forums li.bbp-body div.type-topic span.bbp-admin-links a:hover,
 .bbpress #bbpress-forums li.bbp-body div.type-reply span.bbp-admin-links a:hover {
 	text-decoration: underline;
-}
-
-.bbpress #bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links,
-.bbpress #bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links {
-	display: block;
-}
-
-.bbpress #bbpress-forums li.bbp-body div.type-topic:focus-within span.bbp-admin-links,
-.bbpress #bbpress-forums li.bbp-body div.type-reply:focus-within span.bbp-admin-links {
-	/* Separated from the block above due to browsers that
-			 * don't support :focus-within */
-	display: block;
 }
 
 .bbpress #bbpress-forums ul.status-closed,

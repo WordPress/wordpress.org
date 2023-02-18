@@ -383,7 +383,7 @@ $paginationBreakPoint: "600px";
 
 		li.bbp-body div.type-topic span.bbp-admin-links,
 		li.bbp-body div.type-reply span.bbp-admin-links {
-			display: none;
+			display: block;
 			position: absolute;
 			bottom: 0;
 			right: 0;
@@ -407,19 +407,6 @@ $paginationBreakPoint: "600px";
 					text-decoration: underline;
 				}
 			}
-		}
-
-		li.bbp-body div.type-topic:hover span.bbp-admin-links,
-		li.bbp-body div.type-reply:hover span.bbp-admin-links {
-			display: block;
-		}
-
-		li.bbp-body div.type-topic:focus-within span.bbp-admin-links,
-		li.bbp-body div.type-reply:focus-within span.bbp-admin-links {
-
-			/* Separated from the block above due to browsers that
-			 * don't support :focus-within */
-			display: block;
 		}
 
 		ul.status-closed,
