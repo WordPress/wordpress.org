@@ -103,6 +103,7 @@ $args = array(
 		<th>Project</th>
 		<th>Author</th>
 		<th>Submitted on</th>
+		<th><?php echo esc_html( apply_filters( 'gp_involved_table_heading', __( 'Validators Involved' ) ) ); ?></th>
 	</tr>
 	</thead>
 	<tbody>
@@ -118,6 +119,20 @@ $args = array(
 			$parent_project = GP::$project->get( $project->parent_project_id );
 			$project_name   = ( $parent_project ) ? $parent_project->name : $project->name;
 			$project_link   = gp_link_project_get( $project, esc_html( $project_name ) );
+
+			$comment_authors            = array_unique( array_column( $post_comments, 'comment_author_email' ) );
+			$validator_emails           = GP_Notifications::get_validators_email_addresses( $project->path );
+			$validators_involved_emails = array_intersect( $validator_emails, $comment_authors );
+
+			$validators_involved_emails = apply_filters( 'gp_validators_involved', $validators_involved_emails, $locale_slug, $original_id, $comment_authors );
+
+			$validator_involved_names = array_map(
+				function( $validator ) {
+					$validator_user = get_user_by( 'email', $validator );
+					return '<a href="' . esc_url( gp_url_profile( $validator_user->user_nicename ) ) . '">' . esc_html( $validator_user->display_name ) . '</a>';
+				},
+				$validators_involved_emails
+			);
 
 			$first_comment        = reset( $post_comments );
 			$no_of_other_comments = count( $post_comments ) - 1;
@@ -200,6 +215,19 @@ $args = array(
 				<td><?php echo wp_kses( $project_link, array( 'a' => array( 'href' => true ) ) ); ?></td>
 				<td><?php echo get_comment_author_link( $first_comment ); ?></td>
 				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
+				<td class="gtes-involved">
+					<?php
+						echo wp_kses(
+							implode( ', ', $validator_involved_names ),
+							array(
+								'a' => array(
+									'href'  => array(),
+									'class' => array(),
+								),
+							)
+						);
+					?>
+			</td>
 			</tr>
 			<?php
 		}

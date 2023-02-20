@@ -804,8 +804,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return array
 	 */
-	public static function get_comment_reasons(): array {
-		return array(
+	public static function get_comment_reasons( $locale = null ): array {
+		$default_reasons = array(
 			'style'       => array(
 				'name'        => __( 'Style Guide' ),
 				'explanation' => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
@@ -824,14 +824,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			),
 			'punctuation' => array(
 				'name'        => __( 'Punctuation' ),
-				'explanation' =>
-					__( 'The translation is not using the punctuation marks correctly.' ),
+				'explanation' => __( 'The translation is not using the punctuation marks correctly.' ),
 			),
 			'typo'        => array(
 				'name'        => __( 'Typo' ),
 				'explanation' => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
 			),
 		);
+		$reasons         = apply_filters( 'gp_custom_reasons', $default_reasons, $locale );
+		return $reasons;
 	}
 }
 
@@ -897,9 +898,8 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 	$is_linking_comment = preg_match( '!^' . home_url( gp_url() ) . '[a-z0-9_/#-]+$!i', $comment->comment_content );
 
-	$comment_locale = get_comment_meta( $comment->comment_ID, 'locale', true );
-	$current_locale = $args['locale_slug'];
-
+	$comment_locale         = get_comment_meta( $comment->comment_ID, 'locale', true );
+	$current_locale         = $args['locale_slug'];
 	$current_translation_id = $args['translation_id'];
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
 
@@ -959,7 +959,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 			if ( $comment_reason ) :
 				?>
-				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'is being discussed here' ); ?></a>.
+				<p>The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'is being discussed here' ); ?></a>.</p>
 			<?php else : ?>
 				<a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'Please continue the discussion here' ); ?></a>
 			<?php endif; ?>
@@ -1036,14 +1036,15 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				<?php
 			}
 
-			if ( ! $is_linking_comment ) :
-				if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
-					$translation_status = '';
-					if ( $_translation_status ) {
-						$translation_status = ' (' . $_translation_status . ')';
-					}
-					gth_print_translation( $comment_translation_id, $args, 'Translation' . $translation_status . ': ' );
+			if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
+				$translation_status = '';
+				if ( $_translation_status ) {
+
+					$translation_status = ( is_array( $_translation_status ) && array_key_exists( $comment_translation_id, $_translation_status ) ) ? '(' . $_translation_status[ $comment_translation_id ] . ')' : ' (' . $_translation_status[0] . ')';
 				}
+				gth_print_translation( $comment_translation_id, $args, 'Translation' . $translation_status . ': ' );
+			}
+			if ( ! $is_linking_comment ) :
 
 				?>
 				<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">

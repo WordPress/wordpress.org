@@ -30,13 +30,16 @@
  */
 
 require_once __DIR__ . '/includes/class-gp-route-translation-helpers.php';
+require_once __DIR__ . '/includes/class-gp-sidebar.php';
 require_once __DIR__ . '/includes/class-gp-translation-helpers.php';
 require_once __DIR__ . '/includes/class-gth-temporary-post.php';
 require_once __DIR__ . '/includes/class-gp-notifications.php';
 require_once __DIR__ . '/includes/class-wporg-notifications.php';
 require_once __DIR__ . '/includes/class-wporg-customizations.php';
+require_once __DIR__ . '/includes/class-gp-custom-locale-reasons.php';
 
-add_action( 'gp_init', array( 'GP_Translation_Helpers', 'init' ) );
+add_action( 'gp_init', array( 'GP_Translation_Helpers', 'init' ) ); // todo: remove this when this plugin will be merged in the GlotPress core.
+add_action( 'gp_init', array( 'GP_Sidebar', 'init' ) );    // todo: remove this when this plugin will be merged in the GlotPress core.
 add_action( 'gp_init', array( 'WPorg_GlotPress_Notifications', 'init' ) );    // todo: include this class in a different plugin.
 add_action( 'gp_init', array( 'WPorg_GlotPress_Customizations', 'init' ) );    // todo: include this class in a different plugin.
 add_filter( 'gp_enable_changesrequested_status', '__return_true' ); // todo: remove this filter when this plugin will be merged in the GlotPress core.

@@ -5,6 +5,9 @@
 			var rowIds = [];
 			var translationIds = [];
 			var originalIds = [];
+			var bulkTranslationStatus = [];
+			var translationStatuses = {};
+			var statusIndex = 0;
 			var modalFeedbackForm =
 			'<div id="reject-feedback-form" style="display:none;">' +
 			'<form>' +
@@ -29,7 +32,11 @@
 					rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map(
 						function() {
 							var selectedRow = $( this ).parents( 'tr.preview' );
+							var translationStatus = '';
+
 							if ( ! selectedRow.hasClass( 'untranslated' ) ) {
+								translationStatus = selectedRow.attr( 'class' ).split( ' ' )[ 1 ].substring( 7 );
+								bulkTranslationStatus.push( translationStatus );
 								return selectedRow.attr( 'row' );
 							}
 							$( this ).prop( 'checked', false );
@@ -45,7 +52,9 @@
 							if ( originalId && translationId ) {
 								originalIds.push( originalId );
 								translationIds.push( translationId );
+								translationStatuses[ translationId ] = bulkTranslationStatus[ statusIndex ];
 							}
+							statusIndex++;
 						}
 					);
 
@@ -104,6 +113,8 @@
 					commentData.original_id = originalIds;
 					commentData.translation_id = translationIds;
 					commentData.is_bulk_reject = true;
+					commentData.translation_status = translationStatuses;
+
 					commentWithFeedback( commentData, false, 'rejected' );
 					e.preventDefault();
 				}
@@ -282,7 +293,7 @@
 		feedbackData.comment = comment;
 		feedbackData.original_id = [ $gp.editor.current.original_id ];
 		feedbackData.translation_id = [ $gp.editor.current.translation_id ];
-		feedbackData.translation_status = status;
+		feedbackData.translation_status = [ status ];
 
 		commentWithFeedback( feedbackData, button, status );
 	}

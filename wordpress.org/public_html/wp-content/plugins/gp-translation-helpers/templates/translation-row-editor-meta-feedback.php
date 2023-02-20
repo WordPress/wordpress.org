@@ -8,7 +8,7 @@
 			<h3 class="feedback-reason-title"><?php esc_html_e( 'Type (Optional)', 'glotpress' ); ?></h3>
 			<ul class="feedback-reason-list">
 			<?php
-				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons( $locale_slug );
 			foreach ( $comment_reasons as $key => $reason ) :
 				?>
 					<li>
@@ -17,9 +17,10 @@
 				<?php endforeach; ?>
 			</ul>
 			<div class="feedback-comment">
-				<label><?php esc_html_e( 'Comment (Optional)', 'glotpress' ); ?>
-					<textarea name="feedback_comment"></textarea>
+				<label for="feedback_comment"><?php esc_html_e( 'Comment (Optional)', 'glotpress' ); ?>
 				</label>
+				<textarea name="feedback_comment"></textarea>
+
 				<label class="note">Please note that all feedback is visible to the public.</label>
 			</div>
 		</form>

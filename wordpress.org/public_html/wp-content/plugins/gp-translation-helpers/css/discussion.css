@@ -297,19 +297,22 @@ h5#reply-title {
 	padding-left: 13px;
 }
 ul#glossary-item-list {
-    list-style-type: none;
+	list-style-type: none;
 	border: #bcc3c3 thin solid;
-    padding: 10px;
-    border-radius: 3px;
-    background: #f2f2f2;
+	padding: 10px;
+	border-radius: 3px;
+	background: #f2f2f2;
 }
 ul#glossary-item-list h6 {
 	margin-top: 3px;
-    margin-bottom: 8px
+	margin-bottom: 8px
 }
 ul#glossary-item-list li label {
-    margin-left: 5px;
+	margin-left: 5px;
 }
 #glossary-item-list li label input[type="checkbox"].glossary-word-item {
-    margin-right: 5px;
+	margin-right: 5px;
+}
+td.gtes-involved a{
+	text-decoration: none;
 }
