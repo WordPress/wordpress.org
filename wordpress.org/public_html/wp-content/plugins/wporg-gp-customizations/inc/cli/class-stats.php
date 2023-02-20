@@ -32,7 +32,7 @@ class Stats {
 	 *
 	 * @var int
 	 */
-	private int $number_of_years = 15;
+	private int $number_of_years = 3;
 
 	/**
 	 * Number of translators with more translations each year to get feedback from.
