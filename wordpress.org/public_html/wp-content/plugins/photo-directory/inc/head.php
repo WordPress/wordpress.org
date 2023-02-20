@@ -16,6 +16,14 @@ class Head {
 		add_filter( 'document_title_separator', [ __CLASS__, 'document_title_separator' ] );
 		add_filter( 'wp_resource_hints',        [ __CLASS__, 'wp_resource_hints' ], 10, 2 );
 		add_action( 'wp_head',                  [ __CLASS__, 'json_ld_schema' ], 1 );
+		add_action( 'wp_head',                  [ __CLASS__, 'disable_hreflang' ], 1 );
+	}
+
+	/**
+	 * Disable the hreflang tags from the parent theme.
+	 */
+	public static function disable_hreflang() {
+		remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
 	}
 
 	/**

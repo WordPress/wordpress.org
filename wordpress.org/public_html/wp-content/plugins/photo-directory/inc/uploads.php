@@ -110,7 +110,7 @@ class Uploads {
 
 		/* After upload, after photo validates. */
 
-		// Disable jpeg to webp converstion.
+		// Disable jpeg to webp conversion.
 		add_filter( 'wp_upload_image_mime_transforms',  [ __CLASS__, 'disable_jpeg_to_webp' ] );
 
 		// Set post fields for photo.
