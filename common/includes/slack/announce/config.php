@@ -406,6 +406,7 @@ function get_whitelist() {
 		'core-performance' => array(
 			// #core (inc committers) already included via get_parent_channel().
 			'clarkeemily', // @Emily Clarke on Slack
+			'joegrainger', // @Joe Grainger on Slack
 			'mukesh27',
 			'mxbclang', // @Bethany Chobanian Lang (they/them) on Slack
 		),
