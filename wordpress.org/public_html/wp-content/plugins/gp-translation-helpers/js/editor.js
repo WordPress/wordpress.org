@@ -11,16 +11,12 @@ jQuery( function( $ ) {
 		change_visible_div( divId, originalId );
 	} );
 
-	// When a new translation row is opened (with double click), the tabs
-	// (header tab and content) for this row are updated with the Ajax query.
-	$gp.editor.table.on( 'dblclick', 'tr.preview td', function() {
-		loadTabsAndDivs( $( this ) );
-	} );
-
-	// When a new translation row is opened (clicking in the "Details" button), the
-	// tabs (header tab and content) for this row are updated with the Ajax query.
-	$gp.editor.table.on( 'click', '.action.edit', function( ) {
-		loadTabsAndDivs( $( this ) );
+	// When a new translation row is opened (with double click, clicking in the "Details" button,
+	// or with the hotkeys), the translation textarea is focused, so the tabs (header tabs and
+	// divs with the content) for the right sidebar are updated.
+	$gp.editor.table.on( 'focus input', 'tr.editor textarea.foreign-text', function() {
+		var tr = $( this ).closest( 'tr.editor' );
+		loadTabsAndDivs( tr );
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -202,7 +198,7 @@ jQuery( function( $ ) {
 	 * @param {Object} element The element that triggers the action.
 	 */
 	function loadTabsAndDivs( element ) {
-		var originalId = element.closest( 'tr' ).attr( 'id' ).substring( 8 );
+		var originalId = element.closest( 'tr' ).attr( 'id' ).substring( 7 );
 		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
 		$.getJSON( requestUrl, function( data ) {
 			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion&nbsp;(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
