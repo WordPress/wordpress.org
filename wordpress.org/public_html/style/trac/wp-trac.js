@@ -90,9 +90,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			enable_copy: true
 		},
 		'Learn (learn.wordpress.org)': {
-			tracker: 'https://github.com/WordPress/learn/issues/new',
+			tracker: 'https://github.com/WordPress/Learn/issues/new/choose',
 			tracker_text: 'WordPress.org Learn GitHub Repository',
-			enable_copy: true
 		},
 		'Pattern Directory': {
 			tracker: 'https://github.com/WordPress/pattern-directory/issues/new/choose',
