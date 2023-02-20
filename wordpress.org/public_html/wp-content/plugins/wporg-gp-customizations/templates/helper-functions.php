@@ -8,17 +8,6 @@ wp_register_style(
 );
 gp_enqueue_style( 'wporg-translate' );
 
-/* todo: remove this code and the style-full-width.css file after the tests */
-if ( isset( $_GET['full-width'] ) && 'true' == $_GET['full-width'] ) {
-	wp_register_style(
-		'wporg-translate-full-width',
-		plugins_url( 'style-full-width.css', __FILE__ ),
-		[ 'gp-base', 'wporg-style', 'wporg-translate' ],
-		filemtime( __DIR__ . '/style-full-width.css' )
-	);
-	gp_enqueue_style( 'wporg-translate-full-width' );
-}
-
 gp_enqueue_script( 'jquery' );
 
 wp_register_script(

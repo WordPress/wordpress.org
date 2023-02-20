@@ -238,11 +238,12 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 			</div>
 
 			<div class="editor-panel__right">
-				<div class="panel-header">
-					<h3><?php _e( 'Meta', 'glotpress' ); ?></h3>
-				</div>
+<!--				<div class="panel-header">
+					<h3><?php /*_e( 'Meta', 'glotpress' ); */?></h3>
+				</div>-->
 				<div class="panel-content">
-					<div class="meta">
+					<?php ob_start(); ?>
+                    <div class="meta" id="sidebar-div-meta-<?php echo $translation->row_id ?>">
 						<?php gp_tmpl_load( 'translation-row-editor-meta-feedback', get_defined_vars() ); ?>
 						<?php if ( $translation->translation_status && ( $can_approve_translation || $can_reject_self ) ): ?>
 							<div class="status-actions">
@@ -327,6 +328,25 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 							<?php endif; ?>
 						</dl>
 					</div>
+					<?php
+					$meta_sidebar = ob_get_clean();
+
+					$sidebar_tabs  = '<nav class="nav-sidebar">';
+					$sidebar_tabs .= '<ul class="sidebar-tabs">';
+					$sidebar_tabs .= '	<li class="current tab-meta" data-tab="sidebar-tab-meta-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Meta</li>';
+					$sidebar_tabs .= '	<li class="tab-discussion" data-tab="sidebar-tab-discussion-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Discussion&nbsp;<span class="count"></span></li>';
+					$sidebar_tabs .= '	<li class="tab-history" data-tab="sidebar-tab-history-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">History&nbsp;<span class="count"></span></li>';
+					$sidebar_tabs .= '	<li class="tab-other-locales" data-tab="sidebar-tab-other-locales-' . $translation->row_id . '" data-row-id="' . $translation->row_id . '">Other&nbsp;locales&nbsp;<span class="count"></span></li>';
+					$sidebar_tabs .= '</ul>';
+					$sidebar_tabs .= $meta_sidebar;
+					$sidebar_tabs .= '<div class="meta discussion" id="sidebar-div-discussion-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
+					$sidebar_tabs .= '<div class="meta history" id="sidebar-div-history-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
+					$sidebar_tabs .= '<div class="meta other-locales" id="sidebar-div-other-locales-' . $translation->row_id . '"  data-row-id="' . $translation->row_id . '" style="display: none;"></div>';
+					$sidebar_tabs .= '</nav>';
+
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo $sidebar_tabs;
+					?>
 
 					<?php do_action( 'wporg_translate_meta', $translation ); ?>
 				</div>
