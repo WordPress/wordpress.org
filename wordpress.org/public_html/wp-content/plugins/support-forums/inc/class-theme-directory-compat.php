@@ -90,10 +90,20 @@ class Theme_Directory_Compat extends Directory_Compat {
 			exit;
 		}
 
+		if ( ! $this->for_slug( $slug ) ) {
+			status_header( 404 );
+		}
+	}
+
+	/**
+	 * Set the directory instance to the slugs data.
+	 *
+	 * @param string $slug The theme slug.
+	 */
+	public function for_slug( $slug ) {
 		$theme = $this->get_object( $slug );
 		if ( ! $theme ) {
-			status_header( 404 );
-			return;
+			return false;
 		}
 
 		$this->slug         = $theme->post_name;

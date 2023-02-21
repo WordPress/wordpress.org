@@ -168,6 +168,13 @@ class Emails {
 		$forum_id     = bbp_get_topic_forum_id( $topic_id );
 		$topic_author = bbp_get_topic_author_id( $topic_id );
 
+		// Setup the forum compat classes, as used by email filters for subject changes.
+		$forums = Plugin::get_instance();
+		if ( $forums->plugins ) {
+			$forums->plugins->init_for_topic( $topic_id );
+			$forums->themes->init_for_topic( $topic_id );
+		}
+
 		// For performance reasons, we've removed the bbPress bbp_update_topic() method, and replaced it with our slightly altered variant.
 		$bbp_update_topic = [ Plugin::get_instance()->dropin, 'bbp_update_topic' ];
 		if ( ! has_filter( 'bbp_new_topic', $bbp_update_topic ) ) {
@@ -200,6 +207,13 @@ class Emails {
 
 		if ( ! bbp_is_reply_published( $reply_id ) || ! bbp_is_topic_public( $topic_id ) ) {
 			return;
+		}
+
+		// Setup the forum compat classes, as used by email filters for subject changes.
+		$forums = Plugin::get_instance();
+		if ( $forums->plugins ) {
+			$forums->plugins->init_for_topic( $topic_id );
+			$forums->themes->init_for_topic( $topic_id );
 		}
 
 		// For performance reasons, we've removed the bbPress bbp_update_reply() method, and replaced it with our slightly altered variant.

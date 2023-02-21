@@ -18,6 +18,7 @@ abstract class Directory_Compat {
 	abstract protected function taxonomy();
 	abstract protected function name();
 	abstract protected function parse_query();
+	abstract protected function for_slug( $slug );
 	abstract protected function do_view_sidebar();
 	abstract protected function do_topic_sidebar();
 	abstract protected function do_view_header();
@@ -67,6 +68,25 @@ abstract class Directory_Compat {
 			add_filter( 'bbp_get_forum_id', array( $this, 'bbp_get_forum_id' ) );
 
 		}
+	}
+
+	/**
+	 * Maybe load the data for this compat directory class.
+	 *
+	 * @param int $topic_id The topic ID that we should initialize in the context of.
+	 */
+	public function init_for_topic( $topic_id ) {
+		$forum_id = bbp_get_topic_forum_id( $topic_id );
+		if ( $forum_id != $this->forum_id() ) {
+			return;
+		}
+
+		$terms = get_the_terms( $topic_id, $this->taxonomy() );
+		if ( ! $terms ) {
+			return;
+		}
+
+		$this->for_slug( $terms[0]->slug );
 	}
 
 	/**
@@ -827,7 +847,9 @@ abstract class Directory_Compat {
 	public function get_term( $term ) {
 		// Note: Not using $this->title() here so as to filter other terms of this taxonomy correctly.
 
-		$term->name = $this->get_object( $term->slug )->post_title ?? $term->name;
+		if ( ! is_admin() ) {
+			$term->name = $this->get_object( $term->slug )->post_title ?? $term->name;
+		}
 
 		return $term;
 	}
