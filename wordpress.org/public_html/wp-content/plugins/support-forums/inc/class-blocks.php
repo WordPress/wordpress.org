@@ -159,6 +159,7 @@ class Blocks {
 
 		printf(
 			'<p>
+				<input type="hidden" name="can_update_block_editor_preference" value="true">
 				<input name="block_editor" id="block_editor" type="checkbox" value="disabled" %s />
 				<label for="block_editor">%s</label>
 			</p>',
@@ -174,6 +175,11 @@ class Blocks {
 	 * Save the user option to enable/disable.
 	 */
 	public function bbp_profile_update( $user_id ) {
+		// Catch profile updates that should not be able to include the "Disable Block Editor" preference, and return early.
+		if ( ! isset( $_REQUEST['can_update_block_editor_preference'] ) ) {
+			return;
+		}
+
 		$disabled = ! empty( $_REQUEST['block_editor'] ) && 'disabled' === $_REQUEST['block_editor'];
 
 		if ( $disabled ) {

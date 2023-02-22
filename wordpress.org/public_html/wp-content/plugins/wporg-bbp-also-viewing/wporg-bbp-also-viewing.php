@@ -72,9 +72,9 @@ add_action( 'init', __NAMESPACE__ . '\init' );
 
 /**
  * Whether Also Viewing is enabled for the current user.
- * 
+ *
  * @param int $user_id The user ID to check for.
- * 
+ *
  * @return bool
  */
 function enabled( $user_id = 0 ) {
@@ -87,9 +87,9 @@ function enabled( $user_id = 0 ) {
 
 /**
  * Whether Also Viewing is able to be activated for the current user.
- * 
+ *
  * @param int $user_id The user ID to check for.
- * 
+ *
  * @return bool
  */
 function allowed_for_user( $user_id = 0 ) {
@@ -109,9 +109,9 @@ function allowed_for_user( $user_id = 0 ) {
 
 /**
  * The current page "slug"/"path" for refering to the current request.
- * 
+ *
  * This uses the WordPress.org SEO plugin for the canonical url, or falls back to REQUEST_URI.
- * 
+ *
  * @return string The path for the current page, eg. 'view/no-replies'
  */
 function current_page() {
@@ -130,9 +130,9 @@ function current_page() {
 
 /**
  * Sanitizes a given string/url/path to the format used for uniquely identifying pages.
- * 
+ *
  * @param string $page The strng/url/path
- * 
+ *
  * @return string The sanitized $page.
  */
 function sanitize_page_url_for_db( $page ) {
@@ -193,6 +193,7 @@ function bbp_user_edit_after() {
 
 	printf(
 		'<p>
+		<input type="hidden" name="can_update_also_viewing_preference" value="true">
 		<input name="also_viewing" id="also_viewing_toggle" type="checkbox" value="yes" %s>
 		<label for="also_viewing_toggle">%s</label>
 		</p>',
@@ -208,6 +209,11 @@ function bbp_user_edit_after() {
  * Save the user option to enable/disable.
  */
 function bbp_profile_update( $user_id ) {
+	// Catch profile updates that should not be able to include the Also Viewing preference, and return early.
+	if ( ! isset( $_REQUEST['can_update_also_viewing_preference'] ) ) {
+		return;
+	}
+
 	$enabled = ! empty( $_REQUEST['also_viewing'] ) && 'yes' === $_REQUEST['also_viewing'];
 
 	update_user_meta( $user_id, USER_OPTION, (int) $enabled );
@@ -221,9 +227,9 @@ function bbp_profile_update( $user_id ) {
 
 /**
  * Get the list of users who are currently viewing a page.
- * 
+ *
  * @param string $page The page to get the userse for.
- * 
+ *
  * @return array Array of user names + if they're typing.
  */
 function get_currently_viewing( $page ) {
@@ -267,9 +273,9 @@ function get_currently_viewing( $page ) {
 
 /**
  * Get the list of OTHER users who are currently viewing a page.
- * 
+ *
  * @param string $page The page to get the userse for.
- * 
+ *
  * @return array Array of user names + if they're typing.
  */
 function get_others_currently_viewing( $page ) {
@@ -285,11 +291,11 @@ function get_others_currently_viewing( $page ) {
 
 /**
  * Mark a user as currently viewing/typing on the current page.
- * 
+ *
  * @param string $page    The page being viewed. Default current page.
  * @param bool   $typing  If the current user is typing. Default false.
  * @param int    $user_id The user ID who is viewing/typing.
- * 
+ *
  * @return bool
  */
 function user_viewing( $page = false, $typing = false, $user_id = false ) {
@@ -332,7 +338,7 @@ function user_viewing( $page = false, $typing = false, $user_id = false ) {
 
 /**
  * Mark a user as no longer viewing a page.
- * 
+ *
  * @param string $page    The page to no longer view. Defaults to clearing all pages.
  * @param int    $user_id The user ID no longer viewing the page. Default current user.
  */
@@ -429,7 +435,7 @@ function cron_cleanup() {
 
 /**
  * The table name used for storing the state of users.
- * 
+ *
  * @return string
  */
 function get_table() {
@@ -440,7 +446,7 @@ function get_table() {
 
 /**
  * Maybe create the database table used for this plugin.
- * 
+ *
  * This only runs once per site, ever.
  */
 function maybe_create_table() {
