@@ -17,6 +17,7 @@ const makeVisible = ( children ) => {
  */
 const adjustOffset = ( element ) => {
     const { top, height } = element.getBoundingClientRect();
+    console.log(element.getBoundingClientRect());
     element.style.transform = `translate(0, -${ top }px)`;
 
     // If the element is smaller than the window width, we'll center it
@@ -53,8 +54,8 @@ const init = () => {
     }
 
     makeVisible( container.children );
-    adjustOffset( container );
     setParentDisplay( container );
+    adjustOffset( container );
 }   
 
 window.addEventListener( 'load', init );
