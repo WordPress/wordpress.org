@@ -133,3 +133,23 @@ function modify_pattern_page_query( $query ) {
 	}
 }
 add_action( 'pre_get_posts', __NAMESPACE__ . '\modify_pattern_page_query', 5 );
+
+/**
+ * Updates query block 'inherit' parameter to false to fix post loading.
+ * See: https://meta.trac.wordpress.org/ticket/6676
+ *
+ * @param array         $context
+ * @param array         $parsed_block
+ * @param WP_Block|null $parent_block
+ * @return array
+ */
+function modify_query_block_context( $context, $parsed_block, $parent_block ) {
+
+	if ( 'core/query' === $parent_block->parsed_block['blockName'] ) {
+		$context['query']['inherit'] = false;
+	}
+
+	return $context;
+}
+
+add_filter( 'render_block_context', __NAMESPACE__ . '\modify_query_block_context', 10, 3 );
