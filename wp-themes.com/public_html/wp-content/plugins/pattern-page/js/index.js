@@ -53,8 +53,8 @@ const init = () => {
     }
 
     makeVisible( container.children );
-    adjustOffset( container );
     setParentDisplay( container );
+    adjustOffset( container );
 }   
 
 window.addEventListener( 'load', init );
