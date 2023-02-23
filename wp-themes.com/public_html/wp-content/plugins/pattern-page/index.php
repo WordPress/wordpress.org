@@ -53,7 +53,7 @@ function register_assets() {
 			'wporg-pattern-preview',
 			plugin_dir_url( __FILE__ ) . 'build/index.js',
 			array(),
-			null,
+			filemtime( __DIR__ . '/build/index.js' ),
 			true
 		);
 
