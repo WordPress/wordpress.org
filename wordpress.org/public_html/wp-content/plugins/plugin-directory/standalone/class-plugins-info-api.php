@@ -310,8 +310,8 @@ class Plugins_Info_API {
 			default:
 			case 'json':
 			case 'jsonp':
-				if ( ! function_exists( 'wp_json_encode' ) && defined( 'WPORGAPIPATH' ) ) {
-					require WPORGAPIPATH . '/includes/wp-json-encode.php';
+				if ( ! function_exists( 'wp_json_encode' ) && defined( 'API_WPORGPATH' ) ) {
+					require API_WPORGPATH . '/includes/wp-json-encode.php';
 				}
 				$json = function_exists( 'wp_json_encode' ) ? wp_json_encode( $response ) : json_encode( $response );
 				if ( 'jsonp' == $this->format ) {
