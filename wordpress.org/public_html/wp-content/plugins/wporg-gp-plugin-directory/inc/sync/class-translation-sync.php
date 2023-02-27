@@ -135,7 +135,7 @@ class Translation_Sync {
 	public function queue_translation_for_sync( $translation ) {
 		global $wpdb;
 
-		$allowed_statuses = array( "current", "rejected", "changesrequested", "fuzzy" );
+		$allowed_statuses = array( 'current', 'rejected', 'changesrequested', 'fuzzy' );
 		
 		// Do not propagate waiting translations and other translations with warnings.
 		if ( ! in_array( $translation->status, $allowed_statuses ) || ! empty( $translation->warnings ) ) {
@@ -249,7 +249,7 @@ class Translation_Sync {
 					$_existing_translation->save();
 				}
 
-				$_existing_translation->set_as_current();
+				$_existing_translation->set_status( $translation->status );
 				gp_clean_translation_set_cache( $new_translation_set->id );
 
 				return true;
