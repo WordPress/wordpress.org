@@ -91,8 +91,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					add_filter( 'login_redirect', [ $this, 'maybe_add_remote_login_bounce_to_post_login_url' ], 10, 3 );
 
 					// Updated TOS interceptor.
-					add_action( 'set_auth_cookie',   [ $this, 'maybe_block_auth_cookies_context_provider' ], 10, 4 );
-					add_filter( 'send_auth_cookies', [ $this, 'maybe_block_auth_cookies' ], 100 );
+					add_filter( 'send_auth_cookies', [ $this, 'maybe_block_auth_cookies' ], 100, 4 );
 				}
 			}
 		}
@@ -774,33 +773,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
-		 * Hooked to 'set_auth_cookie' to provide action to the below function, as the
-		 * `send_auth_cookies` filter used for the below function has no user context.
-		 *
-		 * @see https://core.trac.wordpress.org/ticket/56971
-		 */
-		public function maybe_block_auth_cookies_context_provider( $auth_cookie = null, $expire = null, $expiration = null, $user_id = null ) {
-			static $_user_id_remember_me = false;
-			if ( ! is_null( $auth_cookie ) ) {
-				$remember_me = ( 0 !== $expire );
-				$_user_id_remember_me = compact( 'user_id', 'remember_me' );
-			} else {
-				// Fetching the data.
-				return $_user_id_remember_me;
-			}
-		}
-
-		/**
 		 * Hooked to 'send_auth_cookies' to prevent sending of the Authentication cookies and redirect
 		 * to the updated policy interstitial if required.
-		 *
-		 * Note: This action provides no context about the request, which is why the context is being
-		 * provided via the 'set_auth_cookie' filter hook above.
-		 * @see https://core.trac.wordpress.org/ticket/56971
 		 */
-		public function maybe_block_auth_cookies( $send_cookies ) {
-			$user_id = $this->maybe_block_auth_cookies_context_provider()['user_id'] ?? false;
-
+		public function maybe_block_auth_cookies( $send_cookies, $expire, $expiration, $user_id ) {
 			if (
 				$user_id &&
 				! $this->has_agreed_to_tos( $user_id )
@@ -809,7 +785,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				// Set a cookie so that we can keep the user in a auth'd (but not) state.
 				$token_cookie = wp_generate_auth_cookie( $user_id, time() + HOUR_IN_SECONDS, 'tos_token' );
-				$remember_me  = (int) $this->maybe_block_auth_cookies_context_provider()['remember_me'];
+				$remember_me  = ( 0 !== $expire );
 
 				setcookie( self::LOGIN_TOS_COOKIE, $token_cookie, time() + HOUR_IN_SECONDS, '/', $this->get_cookie_host(), true, true );
 				setcookie( self::LOGIN_TOS_COOKIE . '_remember', $remember_me, time() + HOUR_IN_SECONDS, '/', $this->get_cookie_host(), true, true );
