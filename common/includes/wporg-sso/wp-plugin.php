@@ -736,7 +736,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				wp_die( 'Invalid token.' );
 			}
 
-			list( $user_id, $sso_hash, $valid_until, $remember_me, $session_token ) = explode( '|', $sso_token, 4 );
+			list( $user_id, $sso_hash, $valid_until, $remember_me, $session_token ) = explode( '|', $sso_token, 5 );
 
 			$expiration_valid = (
 				// +/- 5s on a 5s timeout.
