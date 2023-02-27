@@ -29,8 +29,10 @@ if (
 ) {
 	// Agreement has been reached.
 
+	$token = wp_parse_auth_cookie( $token_cookie, 'tos_token' )['token'] ?? '';
+
 	update_user_meta( $user->ID, $sso::TOS_USER_META_KEY, TOS_REVISION );
-	wp_set_auth_cookie( $user->ID, $login_remember_me );
+	wp_set_auth_cookie( $user->ID, $login_remember_me, true, $token );
 
 	$sso->redirect_to_source_or_profile();
 	exit;
