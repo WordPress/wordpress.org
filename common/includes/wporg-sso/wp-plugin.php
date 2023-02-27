@@ -91,7 +91,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					add_filter( 'login_redirect', [ $this, 'maybe_add_remote_login_bounce_to_post_login_url' ], 10, 3 );
 
 					// Updated TOS interceptor.
-					add_filter( 'send_auth_cookies', [ $this, 'maybe_block_auth_cookies' ], 100, 4 );
+					add_filter( 'send_auth_cookies', [ $this, 'maybe_block_auth_cookies' ], 100, 5 );
 				}
 			}
 		}
@@ -584,7 +584,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Log the user in if successful.
 			if ( $remote_token && $remote_token['valid'] && $remote_token['user'] ) {
 				wp_set_current_user( $remote_token['user']->ID );
-				wp_set_auth_cookie( $remote_token['user']->ID, (bool) $remote_token['remember_me'] );
+				wp_set_auth_cookie( $remote_token['user']->ID, (bool) $remote_token['remember_me'], true, $remote_token['session_token'] );
 			}
 
 			if ( isset( $_GET['redirect_to'] ) ) {
@@ -703,11 +703,12 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			 * Fetch auth cookie parts to find out if the user has selected 'remember me'.
 			 * This is only useful for login tokens, but causes no harm for loggout tokens.
 			 */
-			$auth_cookie_parts = wp_parse_auth_cookie( '', 'secure_auth' );
+			$auth_cookie_parts = wp_parse_auth_cookie( '', 'logged_in' );
 			$remember_me       = ! empty( $_POST['rememberme'] ) || ( $auth_cookie_parts && $auth_cookie_parts['expiration'] >= ( time() + ( 2 * DAY_IN_SECONDS ) ) );
+			$session_token     = wp_get_session_token();
 
-			$hash        = $this->_generate_remote_token_hash( $user, $valid_until, $remember_me );
-			$sso_token   = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me;
+			$hash        = $this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token );
+			$sso_token   = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me . '|' . $session_token;
 
 			return $sso_token;
 		}
@@ -715,11 +716,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		/**
 		 * Generate a hash for remote-login for non-wordpress.org domains
 		 */
-		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false ) {
+		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false, $session_token = '' ) {
 			// re-use the same frag that Auth cookies use to invalidate sessions.
 			$pass_frag = substr( $user->user_pass, 8, 4 );
-			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until, 'wporg_sso' );
-			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me, $key );
+			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until . '|' . $session_token, 'wporg_sso' );
+			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me . '|' . $session_token, $key );
 
 			return $hash;
 		}
@@ -730,12 +731,12 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @param string $token The raw token from the URL, wp_unslash() it please.
 		 * @return array If the token was valid.
 		 */
-		protected function _validate_remote_token( $token ) {
-			if ( ! is_string( $token ) || 3 !== substr_count( $token, '|' ) ) {
+		protected function _validate_remote_token( $sso_token ) {
+			if ( ! is_string( $sso_token ) || 4 !== substr_count( $sso_token, '|' ) ) {
 				wp_die( 'Invalid token.' );
 			}
 
-			list( $user_id, $sso_hash, $valid_until, $remember_me ) = explode( '|', $token, 4 );
+			list( $user_id, $sso_hash, $valid_until, $remember_me, $session_token ) = explode( '|', $sso_token, 4 );
 
 			$expiration_valid = (
 				// +/- 5s on a 5s timeout.
@@ -752,12 +753,14 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				);
 			}
 
+			// Validate that the remote login token is valid.
 			$valid = ( $expiration_valid && $valid_hash );
 
 			return compact(
 				'valid',
 				'user',
-				'remember_me'
+				'remember_me',
+				'session_token'
 			);
 		}
 
@@ -776,7 +779,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * Hooked to 'send_auth_cookies' to prevent sending of the Authentication cookies and redirect
 		 * to the updated policy interstitial if required.
 		 */
-		public function maybe_block_auth_cookies( $send_cookies, $expire, $expiration, $user_id ) {
+		public function maybe_block_auth_cookies( $send_cookies, $expire, $expiration, $user_id, $token = '' ) {
 			if (
 				$user_id &&
 				! $this->has_agreed_to_tos( $user_id )
@@ -784,7 +787,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$send_cookies = false;
 
 				// Set a cookie so that we can keep the user in a auth'd (but not) state.
-				$token_cookie = wp_generate_auth_cookie( $user_id, time() + HOUR_IN_SECONDS, 'tos_token' );
+				$token_cookie = wp_generate_auth_cookie( $user_id, time() + HOUR_IN_SECONDS, 'tos_token', $token );
 				$remember_me  = ( 0 !== $expire );
 
 				setcookie( self::LOGIN_TOS_COOKIE, $token_cookie, time() + HOUR_IN_SECONDS, '/', $this->get_cookie_host(), true, true );
