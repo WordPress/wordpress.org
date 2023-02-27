@@ -840,7 +840,13 @@ class Import {
 
 		foreach ( $props as $prop ) {
 			if ( isset( $parsed_json->$prop ) ) {
-				$files[] = trailingslashit( $block_json_path ) . $parsed_json->$prop;
+				foreach ( (array) $parsed_json->$prop as $file ) {
+					if ( str_starts_with( $file, 'file:' ) || str_contains( $file, '.' ) ) {
+						$files[] = trailingslashit( $block_json_path ) . remove_block_asset_path_prefix( $file );
+					} else {
+						// script handle.. not handled.
+					}
+				}
 			}
 		}
 
