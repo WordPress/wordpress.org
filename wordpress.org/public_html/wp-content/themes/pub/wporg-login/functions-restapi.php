@@ -101,7 +101,7 @@ function wporg_login_rest_email_in_use( $request ) {
 		$pending = wporg_get_pending_user_by_email_wildcard( $email );
 	}
 
-	if ( $pending ) {
+	if ( $pending && ! $pending['created'] ) {
 		return [
 			'available' => false,
 			'error' => __( 'That email address already has an account.', 'wporg' ) . '<br>' .
