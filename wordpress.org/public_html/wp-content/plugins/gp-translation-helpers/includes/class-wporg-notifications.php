@@ -147,7 +147,8 @@ class WPorg_GlotPress_Notifications {
 								$role  = ! ( 'commenter' === $mentionable_user['role'] ) ? ' - ' . $mentionable_user['role'] : '';
 							}
 
-								$user = get_user_by( 'email', $email );
+							$user = get_user_by( 'email', $email );
+							if ( $user ) {
 								return array(
 									'ID'            => $user->ID,
 									'user_login'    => $user->user_login,
@@ -156,10 +157,16 @@ class WPorg_GlotPress_Notifications {
 									'source'        => array( 'translators' ),
 									'image_URL'     => get_avatar_url( $user->ID ),
 								);
+							}
+
+							return false;
 						},
 						$all_email_addresses
 					);
-							return $users;
+
+					$users = array_filter( $users );
+
+					return $users;
 				},
 				10,
 				4

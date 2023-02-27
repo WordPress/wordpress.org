@@ -579,7 +579,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'post'                 => $post,
 				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
 				'locale_slug'          => $this->data['locale_slug'],
-				'original_permalink'   => $this->data['original_permalink'],
+				'original_permalink'   => $this->data['original_permalink'] ?? false,
 				'original_id'          => $this->data['original_id'],
 				'project'              => $this->data['project'],
 				'translation_set_slug' => $this->data['translation_set_slug'],
