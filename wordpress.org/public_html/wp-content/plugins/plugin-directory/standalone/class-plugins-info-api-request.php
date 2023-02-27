@@ -311,6 +311,10 @@ class Plugins_Info_API_Request {
 				return false;
 			}
 
+			if ( ! empty( $this->args->slug ) && ! is_string( $this->args->slug ) ) {
+				return false;
+			}
+
 			if ( ! is_string( $this->locale ) ) {
 				return false;
 			}
