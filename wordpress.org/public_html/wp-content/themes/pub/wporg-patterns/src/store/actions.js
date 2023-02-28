@@ -136,7 +136,7 @@ export function loadFavorites( patternIds ) {
  *
  * @param {number} patternId The pattern to favorite.
  *
- * @return {Object} Action object.
+ * @return {Object|void} Action object.
  */
 export function* addFavorite( patternId ) {
 	const result = yield apiFetch( {
@@ -155,7 +155,7 @@ export function* addFavorite( patternId ) {
  *
  * @param {number} patternId The pattern to unfavorite.
  *
- * @return {Object} Action object.
+ * @return {Object|void} Action object.
  */
 export function* removeFavorite( patternId ) {
 	const result = yield apiFetch( {
