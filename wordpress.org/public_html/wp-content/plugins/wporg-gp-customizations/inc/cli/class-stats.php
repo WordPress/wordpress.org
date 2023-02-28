@@ -947,9 +947,10 @@ class Stats {
 				array( 'after' => '2022-07-28' ),
 			),
 		);
-
-		$feedback_posts                 = new WP_Query( $feedback_posts_args );
-		$original_strings_with_comments = number_format_i18n( $feedback_posts->post_count );
+		$feedback_posts_count = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_status='publish' AND post_type=%s AND post_date > %s", $this::FEEDBACK_POST_TYPE, '2022-07-28'
+		));
+		$original_strings_with_comments = number_format_i18n( $feedback_posts_count );
 
 		// Get the total number of comments.
 		$total_comments = number_format_i18n(
@@ -968,22 +969,9 @@ class Stats {
 		// Get some info related with the status of the translations who get feedback.
 		// First, get the comments related with a translation, because we can get comments related
 		// only with the original.
-		$comments = get_comments(
-			array(
-				'post_type'  => $this::FEEDBACK_POST_TYPE,
-				'count'      => false,
-				'meta_key'   => 'translation_id',
-				'date_query' => array(
-					array( 'after' => '2022-07-28' ),
-				),
-			)
-		);
-
-		// Get the translation ids with a feedback comment.
-		foreach ( $comments as $comment ) {
-			$comment_meta_translation_ids[] = get_comment_meta( $comment->comment_post_ID, 'translation_id', true );
-		}
-		$comment_meta_translation_ids = array_unique( $comment_meta_translation_ids );
+		$comment_meta_translation_ids = $wpdb->get_col( $wpdb->prepare(
+			"SELECT cm.meta_value FROM $wpdb->commentmeta cm, $wpdb->comments c, $wpdb->posts p WHERE p.post_status='publish' AND p.post_type=%s AND p.post_date > %s AND cm.meta_key = 'translation_id' AND c.comment_post_id = p.id AND cm.comment_id = c.comment_id", $this::FEEDBACK_POST_TYPE, '2022-07-28'
+		));
 
 		// Check all comments with a related translation.
 		foreach ( $comment_meta_translation_ids as $comment_meta_translation_id ) {
@@ -1027,18 +1015,9 @@ class Stats {
 		}
 
 		// Get most active commenter's.
-		$comments = get_comments(
-			array(
-				'post_type'  => $this::FEEDBACK_POST_TYPE,
-				'count'      => false,
-				'date_query' => array(
-					array( 'after' => '2022-07-28' ),
-				),
-			)
-		);
-		foreach ( $comments as $comment ) {
-			$comment_user_ids[] = $comment->user_id;
-		}
+		$comment_user_ids = $wpdb->get_col( $wpdb->prepare(
+			"SELECT c.user_id FROM $wpdb->comments c, $wpdb->posts p WHERE p.post_status='publish' AND p.post_type=%s AND p.post_date > %s AND c.comment_post_id = p.id", $this::FEEDBACK_POST_TYPE, '2022-07-28'
+		));
 
 		$commenters_with_comment_count = array_count_values( $comment_user_ids );
 		arsort( $commenters_with_comment_count );
