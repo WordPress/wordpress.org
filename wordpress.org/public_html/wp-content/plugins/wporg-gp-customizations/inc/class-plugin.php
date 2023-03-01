@@ -57,6 +57,8 @@ class Plugin {
 
 		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
 
+		add_filter( 'gp_custom_reasons', array( $this, 'get_custom_reasons' ), 10, 2 );
+
 		// Cron.
 		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
 		add_action( 'init', [ $this, 'register_cron_events' ] );
@@ -592,5 +594,39 @@ class Plugin {
 		}
 
 		return $translation_sets;
+	}
+
+	public function get_custom_reasons( $default_reasons, $locale ) {
+		$locale_reasons = array(
+			'it' => array(
+				'consistency'          => array(
+					'name'        => 'Consistenza',
+					'explanation' => 'Utilizzare una traduzione consistente',
+				),
+				'second_person'        => array(
+					'name'        => '2a persona',
+					'explanation' => 'Per i verbi utilizziamo la seconda persona singolare rivolgendoci direttamente all’utente',
+				),
+				'capitalize_titlecase' => array(
+					'name'        => 'No maiuscole TitleCase',
+					'explanation' => 'Verificare il corretto uso delle maiuscole in italiano, sono presenti maiuscole non necessarie/errate',
+				),
+				'double_space'         => array(
+					'name'        => 'Spazio doppio',
+					'explanation' => 'Sono presenti uno o più uno spazi doppi',
+				),
+				'beginning_space'      => array(
+					'name'        => 'Spazio all’inizio o alla fine',
+					'explanation' => 'Sono presenti/assenti spazi all’inizio o alla fine della traduzione diversamente dalla stringa originale',
+				),
+				'no_s_plural'          => array(
+					'name'        => 'Niente s al plurale',
+					'explanation' => 'In italiano non si riportano le s del plurale dei termini che rimangono invariati',
+				),
+			),
+		);
+
+		$reasons = isset( $locale_reasons[ $locale ] ) ? $locale_reasons[ $locale ] : array();
+		return array_merge( $default_reasons, $reasons );
 	}
 }
