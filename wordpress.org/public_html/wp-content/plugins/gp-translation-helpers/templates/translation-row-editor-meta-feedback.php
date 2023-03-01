@@ -12,7 +12,7 @@
 			foreach ( $comment_reasons as $key => $reason ) :
 				?>
 					<li>
-						<label class="tooltip" title="<?php echo esc_attr( $reason['explanation'] ); ?>"><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key ); ?>" /><?php echo esc_html( $reason['name'] ); ?></label><span class="tooltip dashicons dashicons-info" title="<?php echo esc_attr( $reason['explanation'] ); ?>"></span>
+						<label><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key ); ?>" /><span class="gp-reason-text"><?php echo esc_html( $reason['name'] ); ?></span><span class="tooltip dashicons dashicons-info" title="<?php echo esc_attr( $reason['explanation'] ); ?>"></span></label>
 					</li>
 				<?php endforeach; ?>
 			</ul>

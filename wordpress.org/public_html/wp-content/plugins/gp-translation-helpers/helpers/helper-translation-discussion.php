@@ -971,7 +971,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				<?php
 				$number_of_items = count( $comment_reason );
 				$counter         = 0;
-				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons( $comment_locale );
 				foreach ( $comment_reason as $reason ) {
 					echo wp_kses(
 						sprintf(

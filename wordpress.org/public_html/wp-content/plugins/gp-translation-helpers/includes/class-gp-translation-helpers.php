@@ -452,7 +452,7 @@ class GP_Translation_Helpers {
 		$translation_id_array = ! empty( $_POST['data']['translation_id'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] ) : null;
 		$original_id_array    = ! empty( $_POST['data']['original_id'] ) ? array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] ) : null;
 		$comment_reason       = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
-		$all_comment_reasons  = array_keys( Helper_Translation_Discussion::get_comment_reasons() );
+		$all_comment_reasons  = array_keys( Helper_Translation_Discussion::get_comment_reasons( $locale_slug ) );
 		$comment_reason       = array_filter(
 			$comment_reason,
 			function( $reason ) use ( $all_comment_reasons ) {
