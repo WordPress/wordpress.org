@@ -525,7 +525,7 @@ class Plugin_Directory {
 		add_rewrite_rule( '^([^/]+)/advanced/?$', 'index.php?name=$matches[1]&plugin_advanced=1', 'top' );
 
 		// Handle the old plugin tabs URLs.
-		add_rewrite_rule( '^extend/plugins/([^/]+)/(?!tags)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
+		add_rewrite_rule( '^extend/plugins/([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
 
 		// Handle content for broken clients that send #'s to the server
 		add_rewrite_rule( '^([^/]+)/\#(.*)/?$', 'index.php?name=$matches[1]', 'top' );
