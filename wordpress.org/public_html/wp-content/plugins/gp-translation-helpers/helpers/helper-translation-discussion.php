@@ -440,7 +440,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		if ( false !== $post_id ) {
 			// Something was found in the cache.
 
-			if ( self::is_temporary_post_id( $post_id ) && $create ) {
+			if ( self::is_temporary_post_id( $post_id ) ) {
 				// a fake post_id was stored in the cache but we need to create an entry.
 				// Let's pretend a cache fail, so that we get a chance to create an entry unless one already exists.
 				$post_id = false;
@@ -484,7 +484,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			}
 		}
 
-		wp_cache_add( $cache_key, $post_id );
+		wp_cache_set( $cache_key, $post_id );
 		return $post_id;
 	}
 
