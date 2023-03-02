@@ -235,7 +235,6 @@ class Import {
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
 		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
-		update_post_meta( $plugin->ID, 'tags',               wp_slash( $tagged_versions ) );
 		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
 		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
@@ -280,7 +279,9 @@ class Import {
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', wp_slash( $stable_tag ) );
-		update_post_meta( $plugin->ID, 'version', wp_slash( $headers->Version ) );
+		update_post_meta( $plugin->ID, 'version',    wp_slash( $headers->Version ) );
+		// Update the list of tags last, as it controls which ZIPs are present in the 'Previous versions' section and info API.
+		update_post_meta( $plugin->ID, 'tags',       wp_slash( $tagged_versions ) );
 
 		// Ensure that the API gets the updated data
 		API_Update_Updater::update_single_plugin( $plugin->post_name );
