@@ -1437,7 +1437,7 @@ ul.projects-dropdown li > a > span {
 	color: #509040;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 675px) {
 	.locale-sub-projects th,
 	.locale-sub-projects td {
 		display: block;
@@ -1478,6 +1478,10 @@ ul.projects-dropdown li > a > span {
 
 	.locale-sub-projects td.stats.waiting:before {
 		content: "Waiting:";
+	}
+
+	.locale-sub-projects td.stats.changesrequested:before {
+		content: "Changes requested:";
 	}
 }
 
