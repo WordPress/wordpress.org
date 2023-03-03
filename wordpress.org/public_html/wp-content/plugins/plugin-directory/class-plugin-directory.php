@@ -517,6 +517,9 @@ class Plugin_Directory {
 
 		// Add duplicate search rule which will be hit before the following old-plugin tab rules
 		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
+		
+		// Add additional tags endpoint, to avoid being caught in old-plugins tab rules. See: https://meta.trac.wordpress.org/ticket/6819.
+		add_rewrite_rule( '^tags/([^/]+)/?$', 'index.php?plugin_tags=$matches[1]', 'top' );
 
 		// Add a rule for generated plugin icons. geopattern-icon/demo.svg | geopattern-icon/demo_abc123.svg
 		add_rewrite_rule( '^geopattern-icon/([^/_]+)(_([a-f0-9]{6}))?\.svg$', 'index.php?name=$matches[1]&geopattern_icon=$matches[3]', 'top' );
