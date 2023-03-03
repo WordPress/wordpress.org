@@ -134,7 +134,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 
 		$icon       = '';
 		$plugin     = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url ), esc_html( $this->plugin->post_title ) );
-		$faq        = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url . 'faq/' ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
+		$faq        = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url . '#faq' ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
 		$support    = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
 		$active     = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
 		$unresolved = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/unresolved/' ), __( 'Unresolved Topics', 'wporg-forums' ) );
