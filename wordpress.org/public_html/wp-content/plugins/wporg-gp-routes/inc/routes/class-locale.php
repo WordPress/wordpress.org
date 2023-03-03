@@ -588,13 +588,14 @@ class Locale extends GP_Route {
 	private function get_project_status( $project, $locale, $set_slug, $status = null, $calc_sub_projects = true ) {
 		if ( null === $status ) {
 			$status = new stdClass;
-			$status->sub_projects_count = 0;
-			$status->waiting_count      = 0;
-			$status->current_count      = 0;
-			$status->fuzzy_count        = 0;
-			$status->untranslated_count = 0;
-			$status->all_count          = 0;
-			$status->percent_complete   = 0;
+			$status->sub_projects_count     = 0;
+			$status->waiting_count          = 0;
+			$status->current_count          = 0;
+			$status->fuzzy_count            = 0;
+			$status->untranslated_count     = 0;
+			$status->changesrequested_count = 0;
+			$status->all_count              = 0;
+			$status->percent_complete       = 0;
 		}
 
 		$status = apply_filters( 'gp_get_project_status', $status, $project, $locale, $set_slug );
@@ -610,11 +611,12 @@ class Locale extends GP_Route {
 
 		if ( $set ) {
 			$status->sub_projects_count += 1;
-			$status->waiting_count      += (int) $set->waiting_count();
-			$status->current_count      += (int) $set->current_count();
-			$status->fuzzy_count        += (int) $set->fuzzy_count();
-			$status->untranslated_count += (int) $set->untranslated_count();
-			$status->all_count          += (int) $set->all_count();
+			$status->waiting_count          += (int) $set->waiting_count();
+			$status->current_count          += (int) $set->current_count();
+			$status->fuzzy_count            += (int) $set->fuzzy_count();
+			$status->untranslated_count     += (int) $set->untranslated_count();
+			$status->changesrequested_count += (int) $set->changesrequested_count();
+			$status->all_count              += (int) $set->all_count();
 
 			if ( $status->all_count ) {
 				/*
