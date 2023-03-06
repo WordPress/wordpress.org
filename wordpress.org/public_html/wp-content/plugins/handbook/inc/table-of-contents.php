@@ -18,20 +18,35 @@ class WPorg_Handbook_TOC {
 			font-size: 0.75em;
 			order: 2;
 		}
+		.rtl .toc-jump {
+			text-align: left;
+		}
 		.toc-heading a:first-of-type {
 			color: inherit;
 			font-weight: inherit;
 			margin-left: -32px;
 			text-decoration: none !important;
 		}
+		.rtl .toc-heading a:first-of-type {
+			margin-left: inherit;
+			margin-right: -32px;
+		}
 		.toc-heading a:before {
 			vertical-align: middle;
 			/* icon is 20px wide in a 32px space, so add 12px horizontal margin. */
 			margin: -4px 8px 0 4px;
 		}
+		.rtl .toc-heading a:before {
+			margin-left: 8px;
+			margin-right: 4px;
+		}
 		@media (max-width: 876px) {
 			.toc-heading a {
 				margin-left: -20px;
+			}
+			.rtl .toc-heading a {
+				margin-left: inherit;
+				margin-right: -20px;
 			}
 			.toc-heading a:before {
 				/* icon is 14px wide in a 20px space, so add 6px horizontal margin. */
@@ -40,8 +55,16 @@ class WPorg_Handbook_TOC {
 				height: 14px;
 				font-size: 14px;
 			}
+			.rtl .toc-heading a:before {
+				margin-left: 4px;
+				margin-right: 2px;
+			}
 			.toc-heading a:first-of-type {
 				margin-left: 0;
+			}
+			.rtl .toc-heading a:first-of-type {
+				margin-left: inherit;
+				margin-right: 0;
 			}
 		}
 	</style>';
