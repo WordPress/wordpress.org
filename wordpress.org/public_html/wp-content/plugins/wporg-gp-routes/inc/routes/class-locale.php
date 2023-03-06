@@ -599,7 +599,7 @@ class Locale extends GP_Route {
 		}
 
 		$status = apply_filters( 'gp_get_project_status', $status, $project, $locale, $set_slug );
-		if ( $status->is_pattern ) {
+		if ( isset( $status->is_pattern ) && $status->is_pattern ) {
 			return $status;
 		}
 
