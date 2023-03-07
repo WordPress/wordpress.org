@@ -59,10 +59,11 @@ add_filter( 'robots_txt', 'wporg_robots_txt', 100 );
 function wporg_robots_prefix_sitemaps( $robots ) {
 	$blog_details = get_blog_details();
 
-	// Prefix the News and Showcase sitemaps
+	// Prefix the News, Showcase, and Documenation sitemaps
 	if ( 'wordpress.org' === $blog_details->domain ) {
 		$robots = "Sitemap: https://wordpress.org/news/sitemap.xml\n" .
 		          "Sitemap: https://wordpress.org/showcase/sitemap.xml\n" .
+		          "Sitemap: https://wordpress.org/documentation/sitemap.xml\n" .
 		          $robots;
 	}
 
