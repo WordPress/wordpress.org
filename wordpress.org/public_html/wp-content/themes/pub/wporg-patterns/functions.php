@@ -16,7 +16,7 @@ add_filter( 'init', __NAMESPACE__ . '\add_rewrite' );
 
 add_filter( 'archive_template', __NAMESPACE__ . '\use_index_php_as_template' );
 add_filter( 'search_template', __NAMESPACE__ . '\use_index_php_as_template' );
-add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_urls' );
+add_action( 'parse_request', __NAMESPACE__ . '\rewrite_urls' );
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -220,10 +220,10 @@ function user_has_flagged_pattern() {
  *
  * @return void
  */
-function rewrite_urls() {
+function rewrite_urls( $wp ) {
 	// Redirect searches to `/search/term`.
-	if ( is_search() && ! empty( $_GET['s'] ) ) {
-		wp_redirect( home_url( '/search/' ) . urlencode( trim( get_query_var( 's' ) ) ) . '/' );
+	if ( isset( $_GET['s'] ) && ! empty( $_GET['s'] ) ) {
+		wp_redirect( home_url( '/search/' ) . urlencode( trim( sanitize_text_field( $_GET['s']) ) ) . '/' );
 		exit();
 	}
 	// Redirect old slug `my-favorites` to `favorites`, see WordPress/pattern-directory#332.
