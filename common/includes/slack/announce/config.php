@@ -368,8 +368,10 @@ function get_whitelist() {
 		),
 		'meta' => array(
 			'coreymckrill',
+			'courane01', // @Courtney on Slack
 			'dd32',
 			'obenland',
+			'SeReedMedia',
 			'SergeyBiryukov', // @sergey on Slack
 			'tellyworth',
 		),
