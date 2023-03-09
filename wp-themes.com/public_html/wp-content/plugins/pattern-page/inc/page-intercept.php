@@ -145,7 +145,7 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\modify_pattern_page_query', 5 );
  */
 function modify_query_block_context( $context, $parsed_block, $parent_block ) {
 
-	if ( 'core/query' === $parent_block->parsed_block['blockName'] ) {
+	if ( $parent_block && 'core/query' === $parent_block->parsed_block['blockName'] ) {
 		$context['query']['inherit'] = false;
 	}
 
