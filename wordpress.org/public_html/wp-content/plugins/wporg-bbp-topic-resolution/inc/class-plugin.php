@@ -509,6 +509,7 @@ class Plugin {
 	 * @return bool True if allowed, false if not
 	 */
 	public function user_can_resolve( $user_id, $topic_id ) {
+		$post     = false;
 		$topic_id = bbp_get_topic_id();
 		if ( $topic_id ) {
 			$post = get_post( $topic_id );
