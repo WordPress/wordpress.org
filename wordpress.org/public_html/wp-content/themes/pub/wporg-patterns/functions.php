@@ -221,7 +221,7 @@ function user_has_flagged_pattern() {
  * @return void
  */
 function rewrite_urls() {
-	// Redirect searches to `/search/term`
+	// Redirect searches to `/search/term`.
 	if ( is_search() && ! empty( $_GET['s'] ) ) {
 		wp_redirect( home_url( '/search/' ) . urlencode( trim( get_query_var( 's' ) ) ) . '/' );
 		exit();
