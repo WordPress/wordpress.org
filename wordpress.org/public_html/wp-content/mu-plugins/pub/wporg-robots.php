@@ -20,11 +20,20 @@ function wporg_robots_txt( $robots ) {
 		           "Allow: /locale/*/stats/plugins/$\n" .
 		           "Allow: /locale/*/stats/themes/$\n";
 
-	} elseif ( 'wordpress.org' === $blog_details->domain ) {
-		// WordPress.org/search/ should not be indexed.
-		$robots .= "\nUser-agent: *\n" .
-		           "Disallow: /search\n" .
-		           "Disallow: /?s=\n";
+	} elseif ( 'wordpress.org' === $blog_details->domain || defined( 'IS_ROSETTA_NETWORK' ) ) {
+		// WordPress.org/plugins/search/* should not be indexed for now. See https://meta.trac.wordpress.org/ticket/5323
+		$robots .= "Disallow: /?rest_route=\n" .
+				   "Disallow: /xmlrpc.php\n" .
+				   "Disallow: /plugins/search/\n" .
+				   "\n# Prevent crawling of search URLs\n" .
+				   "# --------------------------------\n" .
+				   "Disallow: /search/\n" .
+				   "Disallow: /*/search/\n" .
+				   "Disallow: /?s=\n" .
+				   "Disallow: /*/?s=\n" .
+				   "\n# Prevent crawling of leaky theme endpoints\n" .
+				   "# --------------------------------\n" .
+				   "Disallow: /plugins/wp-json/plugins/v1/locale-banner\n";
 
 	} elseif ( 's-origin.wordpress.org' === $blog_details->domain ) {
 		// Placeholder for the s.w.org domain. See https://meta.trac.wordpress.org/ticket/5668
@@ -34,18 +43,13 @@ function wporg_robots_txt( $robots ) {
 
 	}
 
-	// WordPress.org/plugins/search/* should not be indexed for now. See https://meta.trac.wordpress.org/ticket/5323
-	if ( 'wordpress.org' === $blog_details->domain || defined( 'IS_ROSETTA_NETWORK' ) ) {
-		$robots .= "\nUser-agent: *\n" .
-		           "Disallow: /plugins/search/\n";
-	}
-
 	// Allow access to the load-scripts.php & load-styles.php admin files.
 	$robots = str_replace(
 		"Allow: /wp-admin/admin-ajax.php\n",
+		"Disallow: /*/wp-admin/\n" .
 		"Allow: /wp-admin/admin-ajax.php\n" .
-			"Allow: /wp-admin/load-scripts.php\n" .
-			"Allow: /wp-admin/load-styles.php\n",
+		"Allow: /wp-admin/load-scripts.php\n" .
+		"Allow: /wp-admin/load-styles.php\n",
 		$robots
 	);
 
