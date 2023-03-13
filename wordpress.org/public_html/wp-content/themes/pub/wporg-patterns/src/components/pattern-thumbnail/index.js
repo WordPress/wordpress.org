@@ -35,6 +35,7 @@ function PatternThumbnail( { pattern, showAvatar, showOptions } ) {
 				<a href={ pattern.link } rel="bookmark">
 					<span className="screen-reader-text">{ decodeEntities( pattern.title.rendered ) }</span>
 					<Canvas
+						useMShot={ 'publish' === pattern.status }
 						url={ addQueryArgs( pattern.link, {
 							view: true,
 							modified: pattern.modified_gmt,
