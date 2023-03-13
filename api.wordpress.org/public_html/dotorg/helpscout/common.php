@@ -107,6 +107,42 @@ function get_user_email_for_email( $request ) {
 	return $user->user_email ?? $email;
 }
 
+function get_plugin_or_theme_from_email( $request ) {
+	$subject = $request->ticket->subject ?? '';
+
+	$possible = [
+		'themes' => [],
+		'plugins' => []
+	];
+
+	// Fetch the email.
+	$email_obj = Helpscout_API::api( '/v2/conversations/' . $request->ticket->id . '?embed=threads' );
+	if ( ! empty( $email_obj->_embedded->threads ) ) {
+		foreach ( $email_obj->_embedded->threads as $thread ) {
+			if ( 'customer' !== $thread->type ) {
+				continue;
+			}
+
+			// Extract matches from the email.
+			$email_body = strip_tags( str_replace( '<br>', "\n", $thread->body ) );
+
+			if ( ! preg_match_all( '!/(?<type>plugins|themes)/(?P<slug>[a-z0-9-]+)/?!im', $email_body, $m ) ) {
+				preg_match_all( '!(?P<type>Plugin|Theme):\s*(?P<slug>[a-z0-9-]+)$!im', $email_body, $m );
+			}
+
+			if ( $m ) {
+				foreach ( $m[0] as $i => $match ) {
+					$type = strtolower( $m['type'][ $i ] );
+					$slug = strtolower( $m['slug'][ $i ] );
+					$possible[ $type ][] = $slug;
+				}
+			}
+		}
+	}
+
+	return $possible;
+}
+
 // HelpScout sends json data in the POST, so grab it from the input directly.
 $HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
 
