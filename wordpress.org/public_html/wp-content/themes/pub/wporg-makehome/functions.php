@@ -60,3 +60,15 @@ function make_add_frontpage_name_to_title( $parts ) {
 }
 add_filter( 'document_title_parts', 'make_add_frontpage_name_to_title' );
 
+/**
+ * Noindex the post_type behind the site listing.
+ */
+function make_noindex( $noindex ) {
+	if ( is_singular( 'make_site' ) ) {
+		$noindex = true;
+	}
+
+	return $noindex;
+}
+add_filter( 'wporg_noindex_request', 'make_noindex' );
+
