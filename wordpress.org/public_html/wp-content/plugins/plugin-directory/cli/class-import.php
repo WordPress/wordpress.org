@@ -232,6 +232,14 @@ class Import {
 			$requires_php = $headers->RequiresPHP;
 		}
 
+		// Keep a log of all plugin names used by the plugin over time.
+		$plugin_names = get_post_meta( $plugin->ID, 'plugin_name_history', true ) ?: [];
+		if ( ! isset( $plugin_names[ $headers->Name ] ) ) {
+			// [ 'Plugin Name' => '1.2.3', 'Plugin New Name' => '4.5.6' ]
+			$plugin_names[ $headers->Name ] = $headers->Version;
+			update_post_meta( $plugin->ID, 'plugin_name_history', wp_slash( $plugin_names ) );
+		}
+
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
 		update_post_meta( $plugin->ID, 'requires_php',       wp_slash( $requires_php ) );
 		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( array_keys( $tagged_versions ) ) );
