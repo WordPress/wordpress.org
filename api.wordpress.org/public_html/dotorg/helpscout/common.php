@@ -147,9 +147,9 @@ function get_plugin_or_theme_from_email( $request ) {
 	}
 
 	$regexes = [
-		'!/([^/]+\.)?wordpress.org/(?<type>plugins|themes)/(?P<slug>[^/]+)/?!im',
+		'!/([^/]+\.)?wordpress.org/(?<type>plugins|themes)/(?P<slug>[a-z0-9-]+)/?!im',
 		'!(?P<type>Plugin|Theme):\s*(?P<slug>[a-z0-9-]+)$!im',
-		'!(?P<type>plugins|themes)\.(trac|svn)\.wordpress\.org/(browser/)?(?P<slug>[^/]+)!im',
+		'!(?P<type>plugins|themes)\.(trac|svn)\.wordpress\.org/(browser/)?(?P<slug>[a-z0-9-]+)!im',
 	];
 
 	// Fetch the email.

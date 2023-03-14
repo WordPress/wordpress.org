@@ -58,6 +58,8 @@ foreach ( $mentioned as $type => $slugs ) {
 		echo '<p><strong>' . ucwords( $type ) . ' mentioned in this email:</strong></p>';
 
 		display_items( $post_ids );
+
+		echo '<br/>';
 	}
 
 	restore_current_blog();
@@ -73,6 +75,8 @@ if ( $user ) {
 			echo '<p><strong>' . ucwords( $type ) . ' owned by this user:</strong></p>';
 
 			display_items( $items );
+
+			echo '<br/>';
 		}
 
 		restore_current_blog();
@@ -115,7 +119,7 @@ function get_user_items( $user ) {
 		$ids = $wpdb->get_col(
 			"SELECT ID
 			FROM $wpdb->posts
-			WHERE post_type IN( 'plugin', 'repopackage' ) AND {$where}
+			WHERE post_type IN( 'plugin', 'repopackage' ) AND ( {$where} )
 			ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'closed', 'approved', 'suspended', 'rejected', 'draft' ), post_title",
 		);
 	}
