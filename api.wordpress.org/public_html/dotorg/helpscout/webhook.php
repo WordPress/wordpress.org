@@ -22,3 +22,6 @@ if (
 		]
 	);
 }
+
+// Warm the caches.
+get_email_thread( $request->id, true );

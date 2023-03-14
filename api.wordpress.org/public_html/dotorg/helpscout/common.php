@@ -1,13 +1,11 @@
 <?php
-use WordPressdotorg\API\HelpScout\API as Helpscout_API;
+use WordPressdotorg\MU_Plugins\Utilities\HelpScout;
 
 if ( ! isset( $wp_init_host ) ) {
 	$wp_init_host = 'https://api.wordpress.org/';
 }
 $base_dir = dirname( dirname( __DIR__ ) );
 require( $base_dir . '/wp-init.php' );
-
-include_once __DIR__ . '/class-helpscout.php';
 
 // function to verify signature from HelpScout
 function is_from_helpscout( $data, $signature ) {
@@ -20,6 +18,28 @@ function is_from_helpscout( $data, $signature ) {
 	return hash_equals( $signature, $calculated );
 }
 
+/**
+ * Caching wrapper around the HelpScout conversation API.
+ */
+function get_email_thread( $thread_id, $force = false ) {
+	wp_cache_add_global_groups( 'helpscout-thread' );
+
+	if ( $thread = wp_cache_get( $thread_id, 'helpscout-thread' ) ) {
+		if ( ! $force ) {
+			return $thread;
+		}
+	}
+
+	$email_obj = Helpscout::instance()->get( '/v2/conversations/' . $thread_id . '?embed=threads' );
+
+	wp_cache_set( $thread_id, $email_obj, 'helpscout-thread', 6 * HOUR_IN_SECONDS );
+
+	return $email_obj;
+}
+
+/**
+ * Get the user associated with a HelpScout email.
+ */
 function get_user_email_for_email( $request ) {
 	$email   = $request->customer->email ?? false;
 	$subject = $request->ticket->subject ?? '';
@@ -69,7 +89,7 @@ function get_user_email_for_email( $request ) {
 
 
 			// Fetch the email.
-			$email_obj = Helpscout_API::api( '/v2/conversations/' . $request->ticket->id . '?embed=threads' );
+			$email_obj = get_email_thread( $request->ticket->id );
 			if ( ! empty( $email_obj->_embedded->threads ) ) {
 				foreach ( $email_obj->_embedded->threads as $thread ) {
 					if ( 'customer' !== $thread->type ) {
@@ -111,36 +131,58 @@ function get_plugin_or_theme_from_email( $request ) {
 	$subject = $request->ticket->subject ?? '';
 
 	$possible = [
-		'themes' => [],
-		'plugins' => []
+		'themes'  => [],
+		'plugins' => [],
+	];
+
+	// Reported themes, shortcut, assume the slug is the title.. since it is..
+	if ( str_starts_with( $subject, 'Reported Theme:' ) ) {
+		$possible['themes'][] = sanitize_title_with_dashes( trim( explode( ':', $request->ticket->subject )[1] ) );
+	}
+
+	$regexes = [
+		'!/([^/]+\.)?wordpress.org/(?<type>plugins|themes)/(?P<slug>[^/]+)/?!im',
+		'!(?P<type>Plugin|Theme):\s*(?P<slug>[a-z0-9-]+)$!im',
+		'!(?P<type>plugins|themes)\.(trac|svn)\.wordpress\.org/(browser/)?(?P<slug>[^/]+)!im',
 	];
 
 	// Fetch the email.
-	$email_obj = Helpscout_API::api( '/v2/conversations/' . $request->ticket->id . '?embed=threads' );
+	$email_obj = get_email_thread( $request->ticket->id );
 	if ( ! empty( $email_obj->_embedded->threads ) ) {
 		foreach ( $email_obj->_embedded->threads as $thread ) {
-			if ( 'customer' !== $thread->type ) {
+			if ( empty( $thread->body ) ) {
 				continue;
 			}
 
 			// Extract matches from the email.
 			$email_body = strip_tags( str_replace( '<br>', "\n", $thread->body ) );
 
-			if ( ! preg_match_all( '!/(?<type>plugins|themes)/(?P<slug>[a-z0-9-]+)/?!im', $email_body, $m ) ) {
-				preg_match_all( '!(?P<type>Plugin|Theme):\s*(?P<slug>[a-z0-9-]+)$!im', $email_body, $m );
-			}
+			foreach ( $regexes as $regex ) {
+				if ( ! preg_match_all( $regex, $email_body, $m ) ) {
+					continue;
+				}
 
-			if ( $m ) {
 				foreach ( $m[0] as $i => $match ) {
+					if ( str_contains( $match, 'developer.wordpress.org' ) || str_contains( $match, 'make.wordpress.org' ) ) {
+						continue; // Sometimes it picks up the references to devhub or make in threads we don't want.
+					}
+
 					$type = strtolower( $m['type'][ $i ] );
+					if ( ! str_ends_with( $type, 's' ) ) {
+						$type .= 's';
+					}
 					$slug = strtolower( $m['slug'][ $i ] );
+
 					$possible[ $type ][] = $slug;
 				}
 			}
 		}
 	}
 
-	return $possible;
+	$possible['themes']  = array_unique( $possible['themes'] );
+	$possible['plugins'] = array_unique( $possible['plugins'] );
+
+	return array_filter( $possible );
 }
 
 // HelpScout sends json data in the POST, so grab it from the input directly.
