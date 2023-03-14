@@ -135,9 +135,25 @@ function get_plugin_or_theme_from_email( $request ) {
 		'plugins' => [],
 	];
 
-	// Reported themes, shortcut, assume the slug is the title.. since it is..
+	// Reported themes, shortcut, assume the slug is the title.. since it always is..
 	if ( str_starts_with( $subject, 'Reported Theme:' ) ) {
 		$possible['themes'][] = sanitize_title_with_dashes( trim( explode( ':', $request->ticket->subject )[1] ) );
+	}
+
+	// Plugin reviews, match the format of "[WordPress Plugin Directory] {Type Of Email}: {Plugin Title}"
+	if ( preg_match( '!^(Re: )?\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ) {
+		switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+		$plugins = get_posts( [
+			'title'       => trim( $m['title'] ),
+			'post_type'   => 'plugin',
+			'post_status' => 'any',
+		] );
+		restore_current_blog();
+
+		// As we're searching by title, multiple plugins may come up.
+		foreach ( $plugins as $plugin ) {
+			$possible['plugins'][] = $plugin->post_name;
+		}
 	}
 
 	// Often a slug is mentioned in the title, so let's try to extract that.
