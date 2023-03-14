@@ -63,7 +63,11 @@ if ( ! is_array( $gp_default_sort ) ) {
 		<th><label for="default_sort[notifications_optin]"><?php _e( 'I want to receive notifications of discussions:', 'glotpress' ); ?></label></th>
 		<td><input type="checkbox" id="default_sort[notifications_optin]" name="default_sort[notifications_optin]" <?php gp_checked( 'on' == gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ); ?> /></td>
 	</tr>
-	<tr><th><h4>ChatGPT Translation settings</h4></th></tr>
+	<tr>
+		<th>
+			<h4>ChatGPT Translation settings</h4>
+		</th>
+	</tr>
 	<tr>
 		<th><label><?php _e( 'OpenAI(ChatGPT) API Key', 'glotpress' ); ?></label></th>
 		<td><input type="text" class="openai_api_key" id="default_sort[openai_api_key]" name="default_sort[openai_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_api_key', '' ) ); ?>" /></td>
