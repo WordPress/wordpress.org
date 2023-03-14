@@ -140,6 +140,12 @@ function get_plugin_or_theme_from_email( $request ) {
 		$possible['themes'][] = sanitize_title_with_dashes( trim( explode( ':', $request->ticket->subject )[1] ) );
 	}
 
+	// Often a slug is mentioned in the title, so let's try to extract that.
+	if ( preg_match_all( '!(?P<slug>[a-z0-9\-]{10,})!', $subject, $m ) ) {
+		$possible['plugins'] = array_merge( $possible['plugins'], $m['slug'] );
+		$possible['themes']  = array_merge( $possible['themes'],  $m['slug'] );
+	}
+
 	$regexes = [
 		'!/([^/]+\.)?wordpress.org/(?<type>plugins|themes)/(?P<slug>[^/]+)/?!im',
 		'!(?P<type>Plugin|Theme):\s*(?P<slug>[a-z0-9-]+)$!im',
