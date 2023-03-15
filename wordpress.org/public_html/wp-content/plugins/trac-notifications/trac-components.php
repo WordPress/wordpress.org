@@ -41,6 +41,10 @@ class Make_Core_Trac_Components {
 		return ucfirst( $this->trac );
 	}
 
+	function slack_channel_url( $channel_id ) {
+		return 'https://wordpress.slack.com/archives/' . sanitize_text_field( $channel_id );
+	}
+
 	function init() {
 		add_shortcode( 'trac-select', array( $this, 'shortcode_select' ) );
 		add_shortcode( 'logged-in', array( $this, 'shortcode_logged_in' ) );
@@ -151,8 +155,11 @@ class Make_Core_Trac_Components {
 		if ( ! $this->page_is_component( $post ) ) {
 			return;
 		}
-		$value = get_post_meta( $post->ID, '_active_maintainers', true );
-		echo '<p><label for="active-maintainers">Active maintainers (WP.org usernames, comma-separated)</label> <input type="text" class="large-text" id="active-maintainers" name="active-maintainers" value="' . esc_attr( $value ) . '" />';
+		$active_maintainers = get_post_meta( $post->ID, '_active_maintainers', true );
+		echo '<p><label for="active-maintainers">Active maintainers (WP.org usernames, comma-separated)</label> <input type="text" class="large-text" id="active-maintainers" name="active-maintainers" value="' . esc_attr( $active_maintainers ) . '" />';
+
+		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
+		echo '<p><label for="slack-channel">Slack channel ID</label> <input type="text" class="large-text" id="slack-channel" name="slack-channel" value="' . esc_attr( $slack_channel ) . '" />';
 	}
 
 	function save_post( $post_id, $post ) {
@@ -170,6 +177,10 @@ class Make_Core_Trac_Components {
 
 		if ( isset( $_POST['active-maintainers'] ) ) {
 			update_post_meta( $post->ID, '_active_maintainers', sanitize_text_field( wp_unslash( $_POST['active-maintainers'] ) ) );
+		}
+
+		if ( isset( $_POST['slack-channel'] ) ) {
+			update_post_meta( $post->ID, '_slack_channel', sanitize_text_field( wp_unslash( $_POST['slack-channel'] ) ) );
 		}
 	}
 
@@ -403,7 +414,7 @@ jQuery( function( $ ) {
 
 		$this->trac_content( $component );
 
-		echo '<h3>Help maintain this component</h3>';
+		echo '<h3>Component Maintainers</h3>';
 
 		$maintainers = get_post_meta( $post->ID, '_active_maintainers', true );
 		if ( $maintainers ) {
@@ -423,10 +434,28 @@ jQuery( function( $ ) {
 				);
 			}
 			echo "</ul>\n\n";
+		} else {
+			echo "\n" . "<strong>There are currently no maintainers of this component.</strong>\n\n";
 		}
 
-		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of {$this->trac_name()} are always seeking to mentor others to impart their knowledge.\n\n";
-		echo "<strong>Want to help? Start following this component!</strong> <a href='/{$this->trac}/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
+		echo "\n" . "Component maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of {$this->trac_name()} are always seeking to mentor others to impart their knowledge. Many contributors help maintain one or more components.\n\n";
+
+		echo '<h3>Help maintain this component</h3>';
+
+		echo "Want to help maintain this component? There's several ways to get involved." . "\n\n";
+
+		echo '<ul>';
+
+		echo '<li><a href="' . $this->trac_url() . '/component/' . esc_attr( rawurlencode( $component ) ) . '">Find some open tickets to work on in Trac.</a>';
+
+		$slack_channel = get_post_meta( $post->ID, '_aslack_channel', true );
+		if ( ! empty( $slack_channel ) ) {
+			echo '<li><a href="' . $this->slack_channel_url( $slack_channel ) . '">' . "Join the discussion in the component's Slack channel.</a></li>";
+		}
+
+		echo "<li>Start following this component by <a href='/{$this->trac}/notifications/'>adjusting your notifications</a>." . "</li>";
+
+		echo "</ul>\n\n";
 
 		$followers = $this->api->get_component_followers( $component );
 		if ( $followers ) {
@@ -693,7 +722,7 @@ jQuery( function( $ ) {
 		static $once = true;
 		if ( $once ) {
 			$once = false;
-			echo '<thead><tr><td>Component</td><td>Tickets</td><td>7 Days</td><td>0&nbsp;Replies</td><td>Maintainers</td></tr></thead>';
+			echo '<thead><tr><td>Component</td><td>Tickets</td><td>7 Days</td><td>0&nbsp;Replies</td><td>Slack</td><td>Maintainers</td></tr></thead>';
 		}
 
 		$arrow = '';
@@ -730,6 +759,15 @@ jQuery( function( $ ) {
 			echo ' <span style="color: red; font-weight: bold">!!</span></td>';
 		} else {
 			echo '<td></td>';
+		}
+
+		$slack_channel = get_post_meta( $post->id, '_slack_channel', true );
+		if ( empty( $slack_channel ) ) {
+			echo '<td></td>';
+		} else {
+			echo '<td>';
+			echo '<a href="' . $this->slack_channel_url( $slack_channel ) . '">Join the ' . $component . 'Slack channel</a>';
+			echo '</td>';
 		}
 
 		$maintainers = $this->get_component_maintainers_by_post( $post->ID );
