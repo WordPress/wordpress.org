@@ -448,7 +448,7 @@ jQuery( function( $ ) {
 
 		echo '<li><a href="' . $this->trac_url() . '/component/' . esc_attr( rawurlencode( $component ) ) . '">Find some open tickets to work on in Trac.</a>';
 
-		$slack_channel = get_post_meta( $post->ID, '_aslack_channel', true );
+		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
 		if ( ! empty( $slack_channel ) ) {
 			echo '<li><a href="' . $this->slack_channel_url( $slack_channel ) . '">' . "Join the discussion in the component's Slack channel.</a></li>";
 		}
