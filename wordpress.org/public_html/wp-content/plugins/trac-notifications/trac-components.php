@@ -761,7 +761,7 @@ jQuery( function( $ ) {
 			echo '<td></td>';
 		}
 
-		$slack_channel = get_post_meta( $post->id, '_slack_channel', true );
+		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
 		if ( empty( $slack_channel ) ) {
 			echo '<td></td>';
 		} else {
