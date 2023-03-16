@@ -383,6 +383,7 @@ class Template {
 		}
 
 		// Resolve to URLs
+		$svg     = $svg     ? self::get_asset_url( $plugin, $svg )     : false;
 		$icon    = $icon    ? self::get_asset_url( $plugin, $icon )    : false;
 		$icon_2x = $icon_2x ? self::get_asset_url( $plugin, $icon_2x ) : false;
 
