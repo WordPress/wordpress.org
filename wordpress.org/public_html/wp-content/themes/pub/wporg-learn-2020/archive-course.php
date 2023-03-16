@@ -20,8 +20,11 @@ get_template_part( 'template-parts/component', 'breadcrumbs' );
 
 <main id="main" class="site-main">
 	<section>
-		<div class="section-heading section-heading--with-space">
+		<div class="section-heading section-heading--with-space row align-middle between">
 			<?php the_archive_title( '<h1 class="section-heading_title h2">', '</h1>' ); ?>
+			<?php if ( is_user_logged_in() ) : ?>
+				<a class="section-heading_link" href="/my-courses/"><?php esc_html_e( 'My Courses', 'wporg-learn' ); ?></a>
+			<?php endif; ?>
 		</div>
 
 		<hr>
