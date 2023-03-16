@@ -316,6 +316,7 @@ body.post-type-archive-component table td { vertical-align: middle; }
 td.maintainers { padding-top: 4px; padding-bottom: 4px; height: 26px; }
 td.maintainers img.avatar { margin-right: 5px; }
 .component-info .create-new-ticket { float: right; margin-top: 25px; }
+.component-slack-link { float: right; }
 </style>
 <script>
 jQuery( function( $ ) {
@@ -722,7 +723,7 @@ jQuery( function( $ ) {
 		static $once = true;
 		if ( $once ) {
 			$once = false;
-			echo '<thead><tr><td>Component</td><td>Tickets</td><td>7 Days</td><td>0&nbsp;Replies</td><td>Slack</td><td>Maintainers</td></tr></thead>';
+			echo '<thead><tr><td>Component</td><td>Tickets</td><td>7 Days</td><td>0&nbsp;Replies</td><td>Maintainers</td></tr></thead>';
 		}
 
 		$arrow = '';
@@ -732,11 +733,19 @@ jQuery( function( $ ) {
 		}
 
 		echo '<tr>';
+		echo '<td>';
 		if ( $post->post_parent ) {
-			echo '<td>&mdash; <a href="' . get_permalink() . '">' . $post->post_title . '</a></td>';
+			echo '&mdash; <a href="' . get_permalink() . '">' . $post->post_title . '</a>';
 		} else {
-			echo '<td><a href="' . get_permalink() . '"><strong>' . $post->post_title . '</strong></a></td>';
+			echo '<a href="' . get_permalink() . '"><strong>' . $post->post_title . '</strong></a>';
 		}
+
+		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
+		if ( ! empty( $slack_channel ) ) {
+				echo '<span class="component-slack-link"><a href="' . $this->slack_channel_url( $slack_channel ) . '"><span class="screen-reader-text">Join the ' . $component . ' Slack channel</span></a></span>';
+		}
+
+		echo '</td>';
 
 		$open_tickets = 0;
 		if ( ! empty( $this->breakdown_component_type[ $component ] ) ) {
@@ -759,15 +768,6 @@ jQuery( function( $ ) {
 			echo ' <span style="color: red; font-weight: bold">!!</span></td>';
 		} else {
 			echo '<td></td>';
-		}
-
-		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
-		if ( empty( $slack_channel ) ) {
-			echo '<td></td>';
-		} else {
-			echo '<td>';
-			echo '<a href="' . $this->slack_channel_url( $slack_channel ) . '">Join the ' . $component . 'Slack channel</a>';
-			echo '</td>';
 		}
 
 		$maintainers = $this->get_component_maintainers_by_post( $post->ID );
