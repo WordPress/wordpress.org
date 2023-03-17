@@ -1,4 +1,4 @@
-/* global FileReader, fetch */
+/* global FileReader */
 /**
  * WordPress dependencies
  */
