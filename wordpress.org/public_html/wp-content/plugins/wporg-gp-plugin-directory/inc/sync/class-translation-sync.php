@@ -249,7 +249,18 @@ class Translation_Sync {
 					$_existing_translation->save();
 				}
 
-				$_existing_translation->set_status( $translation->status );
+				if ( 'current' !== $translation->status && 'changesrequested' != $translation->status ) {
+					$_existing_translation->set_status( $translation->status );
+				}
+
+				if ( 'current' == $translation->status ) {
+					$_existing_translation->set_as_current();
+				}
+
+				if ( 'changesrequested' == $translation->set_as_changesrequested() ) {
+					$_existing_translation->set_as_current();
+				}
+
 				gp_clean_translation_set_cache( $new_translation_set->id );
 
 				return true;
