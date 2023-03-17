@@ -233,6 +233,60 @@ function get_plugin_or_theme_from_email( $request ) {
 	return array_filter( $possible );
 }
 
+/**
+ * Determine the WordPress.org username for a Helpscout user ID.
+ *
+ * @param int $user_id Helpscout user ID.
+ * @return \WP_User WordPress.org user object.
+ */
+function get_wporg_user_for_helpscout_user( $hs_id, $instance = false ) {
+	wp_cache_add_global_groups( 'helpscout-users' );
+
+	if ( ! $hs_id ) {
+		return false;
+	}
+
+	$client    = get_client( $instance );
+	$cache_key = "{$client->name}:{$hs_id}";
+
+	$user_id = wp_cache_get( $cache_key, 'helpscout-users', false, $found );
+	if ( $found ) {
+		return $user_id ? get_user_by( 'id', $user_id ) : false;
+	}
+
+	$hs_user = $client->get( "/users/{$hs_id}" );
+	if ( empty( $hs_user->email ) ) {
+		return false;
+	}
+
+	$emails = array_unique( array_merge( $hs_user->alternateEmails, [ $hs_user->email ] ) );
+
+	// Sort emails by string length
+	usort( $emails, function( $a, $b ) {
+		return strlen( $b ) <=> strlen( $a );
+	} );
+
+	foreach ( $emails as $email ) {
+		if ( preg_match( '!^(?P<user>.+)@(chat|git).wordpress.org$!i', $email, $m ) ) {
+			$user = get_user_by( 'login', $m['user'] );
+			if ( $user ) {
+				break;
+			}
+		}
+
+		$user = get_user_by( 'email', $email );
+		if ( $user ) {
+			break;
+		}
+	}
+
+	if ( $user ) {
+		wp_cache_set( $cache_key, $user->ID, 'helpscout-users', MONTH_IN_SECONDS );
+	}
+
+	return $user;
+}
+
 // HelpScout sends json data in the POST, so grab it from the input directly.
 $HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
 
