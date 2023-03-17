@@ -15,7 +15,7 @@ function is_from_helpscout( $data, $signature ) {
 		$client = get_client( $instance );
 
 		if ( $client && $client->validate_webhook_signature( $data, $signature ) ) {
-			define( 'HELPSCOUT_WEBHOOK_INSTANCE', $instance->name );
+			define( 'HELPSCOUT_WEBHOOK_INSTANCE', $client->name );
 
 			return true;
 		}
