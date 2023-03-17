@@ -9,13 +9,33 @@ require( $base_dir . '/wp-init.php' );
 
 // function to verify signature from HelpScout
 function is_from_helpscout( $data, $signature ) {
-	if ( ! defined( 'HELPSCOUT_SECRET_KEY' ) || ! $signature ) {
-		return false;
+	$instances = [ 'wordpress', 'foundation' ];
+
+	foreach ( $instances as $instance ) {
+		$client = get_client( $instance );
+
+		if ( $client && $client->validate_webhook_signature( $data, $signature ) ) {
+			define( 'HELPSCOUT_WEBHOOK_INSTANCE', $instance->name );
+
+			return true;
+		}
 	}
 
-	$calculated = base64_encode( hash_hmac( 'sha1', $data, HELPSCOUT_SECRET_KEY, true ) );
+	return false;
+}
 
-	return hash_equals( $signature, $calculated );
+/**
+ * Fetch the appropriate HelpScout API client.
+ *
+ * @param string $instance The instance to fetch. Accepts 'wordpress', 'foundation', from ?instance=..., or if a webhook based on the calling webhook secret.
+ * @return HelpScout
+ */
+function get_client( $instance = false ) {
+	if ( ! $instance && defined( 'HELPSCOUT_WEBHOOK_INSTANCE' ) ) {
+		$instance = HELPSCOUT_WEBHOOK_INSTANCE;
+	}
+
+	return Helpscout::instance( $instance );
 }
 
 /**
@@ -24,15 +44,22 @@ function is_from_helpscout( $data, $signature ) {
 function get_email_thread( $thread_id, $force = false ) {
 	wp_cache_add_global_groups( 'helpscout-thread' );
 
-	if ( $thread = wp_cache_get( $thread_id, 'helpscout-thread' ) ) {
+	if ( ! $thread_id ) {
+		return false;
+	}
+
+	$client    = get_client();
+	$cache_key = "{$client->name}:{$thread_id}";
+
+	if ( $thread = wp_cache_get( $cache_key, 'helpscout-thread' ) ) {
 		if ( ! $force ) {
 			return $thread;
 		}
 	}
 
-	$email_obj = Helpscout::instance()->get( '/v2/conversations/' . $thread_id . '?embed=threads' );
+	$email_obj = $client->get( '/v2/conversations/' . $thread_id . '?embed=threads' );
 
-	wp_cache_set( $thread_id, $email_obj, 'helpscout-thread', 6 * HOUR_IN_SECONDS );
+	wp_cache_set( $cache_key, $email_obj, 'helpscout-thread', 6 * HOUR_IN_SECONDS );
 
 	return $email_obj;
 }
@@ -87,9 +114,8 @@ function get_user_email_for_email( $request ) {
 			str_contains( $subject_lower, 'mail delivery failure' )
 		) {
 
-
 			// Fetch the email.
-			$email_obj = get_email_thread( $request->ticket->id );
+			$email_obj = get_email_thread( $request->ticket->id ?? 0 );
 			if ( ! empty( $email_obj->_embedded->threads ) ) {
 				foreach ( $email_obj->_embedded->threads as $thread ) {
 					if ( 'customer' !== $thread->type ) {
@@ -169,7 +195,7 @@ function get_plugin_or_theme_from_email( $request ) {
 	];
 
 	// Fetch the email.
-	$email_obj = get_email_thread( $request->ticket->id );
+	$email_obj = get_email_thread( $request->ticket->id ?? 0 );
 	if ( ! empty( $email_obj->_embedded->threads ) ) {
 		foreach ( $email_obj->_embedded->threads as $thread ) {
 			if ( empty( $thread->body ) ) {
