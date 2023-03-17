@@ -569,6 +569,17 @@ class Template {
 			return false;
 		}
 
+		// Sort them if needed, svg > png > jpg
+		if ( count( $assets ) > 1 ) {
+			uasort( $assets, function( $a, $b ) {
+				// Thankfully the extensions are alphabetical, so let's just sort by that.
+				$a_ext = strtolower( pathinfo( $a['filename'], PATHINFO_EXTENSION ) );
+				$b_ext = strtolower( pathinfo( $b['filename'], PATHINFO_EXTENSION ) );
+
+				return $b_ext <=> $a_ext;
+			} );
+		}
+
 		return array_shift( $assets );
 	}
 
