@@ -42,26 +42,34 @@ function get_client( $instance = false ) {
  * Caching wrapper around the HelpScout conversation API.
  */
 function get_email_thread( $thread_id, $force = false ) {
-	wp_cache_add_global_groups( 'helpscout-thread' );
-
 	if ( ! $thread_id ) {
 		return false;
 	}
 
-	$client    = get_client();
-	$cache_key = "{$client->name}:{$thread_id}";
+	return cached_helpscout_get( '/v2/conversations/' . $thread_id . '?embed=threads', $force );
+}
 
-	if ( $thread = wp_cache_get( $cache_key, 'helpscout-thread' ) ) {
-		if ( ! $force ) {
+/**
+ * Caching wrapper around the HelpScout GET API.
+ *
+ * TODO: This should probably be moved to the MU plugin.
+ */
+function cached_helpscout_get( $url, $force = false, $instance = false ) {
+	wp_cache_add_global_groups( 'helpscout-cache' );
+	$client    = get_client( $instance );
+	$cache_key = "{$client->name}:" . sha1( $url );
+
+	if ( $data = wp_cache_get( $cache_key, 'helpscout-cache' ) ) {
+		if ( ! $data ) {
 			return $thread;
 		}
 	}
 
-	$email_obj = $client->get( '/v2/conversations/' . $thread_id . '?embed=threads' );
+	$data = $client->get( $url );
 
-	wp_cache_set( $cache_key, $email_obj, 'helpscout-thread', 6 * HOUR_IN_SECONDS );
+	wp_cache_set( $cache_key, $data, 'helpscout-cache', 6 * HOUR_IN_SECONDS );
 
-	return $email_obj;
+	return $data;
 }
 
 /**
@@ -117,6 +125,8 @@ function get_user_email_for_email( $request ) {
 			// Fetch the email.
 			$email_obj = get_email_thread( $request->ticket->id ?? 0 );
 			if ( ! empty( $email_obj->_embedded->threads ) ) {
+				$attachment_api_urls = [];
+
 				foreach ( $email_obj->_embedded->threads as $thread ) {
 					if ( 'customer' !== $thread->type ) {
 						continue;
@@ -124,25 +134,37 @@ function get_user_email_for_email( $request ) {
 
 					// Extract emails from the mailer-daemon.
 					$email_body = strip_tags( str_replace( '<br>', "\n", $thread->body ) );
-
-					// Extract `To:`, `X-Orig-To:`, and fallback to all emails.
-					$emails = [];
-					if ( preg_match( '!^(x-orig-to:|to:|Final-Recipient:(\s*rfc\d+;)?)\s*(?P<email>.+@.+)$!im', $email_body, $m ) ) {
-						$m['email'] = str_replace( [ '&lt;', '&gt;' ], '', $m['email'] );
-						$m['email'] = trim( $m['email'], '<> ' );
-
-						$emails = [ $m['email'] ];
-					} else {
-						// Ugly regex for emails, but it's good for mailer-daemon emails.
-						if ( preg_match_all( '![^\s;"]+@[^\s;&"]+\.[^\s;&"]+[a-z]!', $email_body, $m ) ) {
-							$emails = array_unique( array_diff( $m[0], [ $request->mailbox->email ] ) );
-						}
+					$user       = get_user_from_emails( extract_emails_from_text( $email_body ) );
+					if ( $user ) {
+						break;
 					}
 
-					foreach ( $emails as $maybe_email ) {
-						$user = get_user_by( 'email', $maybe_email );
-						if ( $user ) {
-							break;
+					// Track the attachments too, sometimes the email included in the body of the email is a final forwarded destination, but the attachment contains the real email.
+					foreach ( $thread->_embedded->attachments ?? [] as $attachment ) {
+						if (
+							! $attachment->width && // Exclude imagey attachments.
+							$attachment->size < 100 * KB_IN_BYTES &&
+							(
+								str_contains( $attachment->mimeType, 'message' ) ||
+								str_contains( $attachment->mimeType, 'text' ) ||
+								str_contains( $attachment->mimeType, 'rfc' )
+							)
+						) {
+							$attachment_api_urls[] = $attachment->_links->data->href;
+						}
+					}
+				}
+
+				// If we didn't find a user, try to extract the email from the attachments (Which is likely the original email)
+				if ( ! $user && $attachment_api_urls ) {
+					foreach ( $attachment_api_urls as $attachment_api_url ) {
+						$data = cached_helpscout_get( $attachment_api_url )->data ?? '';
+						if ( $data ) {
+							$data = base64_decode( $data ) ?: $data;
+							$user = get_user_from_emails( extract_emails_from_text( $data ) );
+							if ( $user ) {
+								break;
+							}
 						}
 					}
 				}
@@ -153,6 +175,50 @@ function get_user_email_for_email( $request ) {
 	return $user->user_email ?? $email;
 }
 
+/**
+ * Extract email-like strings from a string.
+ *
+ * @param string $text The text to look in.
+ * @return array
+ */
+function extract_emails_from_text( $text ) {
+	// Extract `To:`, `X-Orig-To:`, and fallback to all emails.
+	$emails = [];
+	if ( preg_match( '!^(x-orig-to:|to:|Final-Recipient:(\s*rfc\d+;)?)\s*(?P<email>.+@.+)$!im', $text, $m ) ) {
+		$m['email'] = str_replace( [ '&lt;', '&gt;' ], '', $m['email'] );
+		$m['email'] = trim( $m['email'], '<> ' );
+
+		$emails = [ $m['email'] ];
+	} else {
+		// Ugly regex for emails, but it's good for mailer-daemon emails.
+		if ( preg_match_all( '![^\s;"]+@[^\s;&"]+\.[^\s;&"]+[a-z]!', $text, $m ) ) {
+			$emails = array_unique( array_diff( $m[0], [ $request->mailbox->email ] ) );
+		}
+	}
+
+	return $emails;
+}
+
+/**
+ * Given a list of emails, find the first user that matches.
+ *
+ * @param array $emails The list of emails to check.
+ * @return WP_User|false
+ */
+function get_user_from_emails( $emails ) {
+	foreach ( $emails as $maybe_email ) {
+		$user = get_user_by( 'email', $maybe_email );
+		if ( $user ) {
+			return $user;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Get the possible plugins or themes from the email.
+ */
 function get_plugin_or_theme_from_email( $request ) {
 	$subject = $request->ticket->subject ?? '';
 
