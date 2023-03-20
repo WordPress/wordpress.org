@@ -327,6 +327,14 @@ function get_wporg_user_for_helpscout_user( $hs_id, $instance = false ) {
 
 	$emails = array_unique( array_merge( $hs_user->alternateEmails, [ $hs_user->email ] ) );
 
+	// Allow add plus-addresses without the sub-routing to the list of emails to check.
+	foreach ( $emails as $email ) {
+		$e = preg_replace( '!^([^+]+)[+][^+]+@(.+)$!', '$1@$2', $email );
+		if ( $e != $email ) {
+			$emails[] = $e;
+		}
+	}
+
 	// Sort emails by string length
 	usort( $emails, function( $a, $b ) {
 		return strlen( $b ) <=> strlen( $a );
