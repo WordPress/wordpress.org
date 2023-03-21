@@ -128,10 +128,10 @@ class Translation_Memory extends GP_Route {
 		if ( 200 !== $response_status ) {
 			return array();
 		}
-		$output  = json_decode( wp_remote_retrieve_body( $openai_response ), true );
-		$message = $output['choices'][0]['message'];
+		$output                            = json_decode( wp_remote_retrieve_body( $openai_response ), true );
+		$message                           = $output['choices'][0]['message'];
 		$response['openai']['translation'] = trim( trim( $message['content'] ), '"' );
-		$response['openai']['diff'] = '';
+		$response['openai']['diff']        = '';
 
 		return $response;
 	}
@@ -151,8 +151,9 @@ class Translation_Memory extends GP_Route {
 		if ( empty( trim( $deepl_api_key ) ) ) {
 			return array();
 		}
-		$source_lang = 'EN';
-		$target_lang = $this->get_deepl_locale( $locale );
+		$deepl_formality = gp_array_get( $gp_default_sort, 'deepl_formality', 'default' );
+		$source_lang     = 'EN';
+		$target_lang     = $this->get_deepl_locale( $locale );
 		if ( empty( $target_lang ) ) {
 			return array();
 		}
@@ -165,6 +166,7 @@ class Translation_Memory extends GP_Route {
 					'text'        => $original_singular,
 					'source_lang' => $source_lang,
 					'target_lang' => $target_lang,
+					'formality'   => $deepl_formality,
 				),
 			),
 		);

@@ -95,4 +95,18 @@ if ( ! is_array( $gp_default_sort ) ) {
 			</label></th>
 		<td><input type="text" class="deepl_api_key" id="default_sort[deepl_api_key]" name="default_sort[deepl_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ); ?>" placeholder="Enter your Deepl API key" /></td>
 	</tr>
+
+	<tr>
+		<th><label for="default_sort[deepl_formality]">
+				<?php esc_html_e( 'Formality', 'glotpress' ); ?></label>
+				<a href="https://www.deepl.com/docs-api/translate-text/translate-text/" target="_blank"><small><?php esc_html_e( '(Formality info)', 'glotpress' ); ?></small></a>
+		</th>
+		<td>
+			<select name="default_sort[deepl_formality]" id="default_sort[deepl_formality]">
+				<option value="default" <?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_formality' ) ) == 'default' ? ' selected="selected"' : ''; ?> ><?php esc_html_e( 'Default', 'glotpress' ); ?></option>
+				<option value="prefer_more" <?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_formality' ) ) == 'prefer_more' ? ' selected="selected"' : ''; ?> ><?php esc_html_e( 'Formal', 'glotpress' ); ?></option>
+				<option value="prefer_less" <?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_formality' ) ) == 'prefer_less' ? ' selected="selected"' : ''; ?> ><?php esc_html_e( 'Informal', 'glotpress' ); ?></option>
+			</select>
+		</td>
+	</tr>
 </table>
