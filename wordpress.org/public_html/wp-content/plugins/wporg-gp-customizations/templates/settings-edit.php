@@ -26,11 +26,11 @@ if ( ! is_array( $gp_default_sort ) ) {
 
 <table class="form-table">
 	<tr>
-		<th><label for="per_page"><?php _e( 'Number of items per page:', 'glotpress' ); ?></label></th>
+		<th><label for="per_page"><?php esc_html_e( 'Number of items per page:', 'glotpress' ); ?></label></th>
 		<td><input type="number" id="per_page" name="per_page" value="<?php echo esc_attr( $gp_per_page ); ?>"/></td>
 	</tr>
 	<tr>
-		<th><label for="default_sort[by]"><?php _e( 'Default Sort By:', 'glotpress' ); ?></label></th>
+		<th><label for="default_sort[by]"><?php esc_html_e( 'Default Sort By:', 'glotpress' ); ?></label></th>
 		<td>
 			<?php
 			$sort_bys = wp_list_pluck( gp_get_sort_by_fields(), 'title' );
@@ -40,7 +40,7 @@ if ( ! is_array( $gp_default_sort ) ) {
 		</td>
 	</tr>
 	<tr>
-		<th><label for="default_sort[how]"><?php _e( 'Default Sort Order:', 'glotpress' ); ?></label></th>
+		<th><label for="default_sort[how]"><?php esc_html_e( 'Default Sort Order:', 'glotpress' ); ?></label></th>
 		<td>
 			<?php
 			echo gp_radio_buttons(
@@ -60,7 +60,39 @@ if ( ! is_array( $gp_default_sort ) ) {
 		 I do this because the post values are processed in the GP_Route_Settings->settings_post,
 		 and I have to modify the GlotPress core to add a new configuration item. -->
 	<tr>
-		<th><label for="default_sort[notifications_optin]"><?php _e( 'I want to receive notifications of discussions:', 'glotpress' ); ?></label></th>
+		<th><label for="default_sort[notifications_optin]"><?php esc_html_e( 'I want to receive notifications of discussions:', 'glotpress' ); ?></label></th>
 		<td><input type="checkbox" id="default_sort[notifications_optin]" name="default_sort[notifications_optin]" <?php gp_checked( 'on' == gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ); ?> /></td>
+	</tr>
+	<tr>
+		<th>
+			<h4><?php esc_html_e( 'OpenAI (ChatGPT) settings', 'glotpress' ); ?></h4>
+		</th>
+	</tr>
+	<tr>
+		<th><label for="default_sort[openai_api_key]">
+				<?php esc_html_e( 'OpenAI API Key', 'glotpress' ); ?>
+				<a href="https://platform.openai.com/account/usage" target="_blank"><small><?php esc_html_e( '(Current usage)', 'glotpress' ); ?></small></a>
+			</label></th>
+		<td><input type="text" class="openai_api_key" id="default_sort[openai_api_key]" name="default_sort[openai_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_api_key', '' ) ); ?>" placeholder="Enter your OpenAI API key" /></td>
+	</tr>
+	<tr>
+		<th><label for="default_sort[openai_custom_prompt]"><?php esc_html_e( 'Custom Prompt', 'glotpress' ); ?></label></th>
+		<td><textarea class="openai_custom_prompt" id="default_sort[openai_custom_prompt]" name="default_sort[openai_custom_prompt]" placeholder="Enter your custom prompt for ChatGPT translation suggestions"><?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_custom_prompt', '' ) ); ?></textarea></td>
+	</tr>
+	<tr>
+		<th><label for="default_sort[openai_temperature]"><?php esc_html_e( 'Temperature', 'glotpress' ); ?></label></th>
+		<td><input type="number" min="0" max="2" step=".1" class="openai_temperature" id="default_sort[openai_temperature]" name="default_sort[openai_temperature]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_temperature', 0 ) ); ?>" placeholder="Enter your OpenAI key" /></td>
+	</tr>
+	<tr>
+		<th>
+			<h4><?php esc_html_e( 'Deepl settings', 'glotpress' ); ?></h4>
+		</th>
+	</tr>
+	<tr>
+		<th><label for="default_sort[deepl_api_key]">
+				<?php esc_html_e( 'Deepl API Key', 'glotpress' ); ?>
+				<a href="https://support.deepl.com/hc/en-us/articles/360021200939-DeepL-API-Free" target="_blank"><small><?php esc_html_e( '(DeepL API Free)', 'glotpress' ); ?></small></a>
+			</label></th>
+		<td><input type="text" class="deepl_api_key" id="default_sort[deepl_api_key]" name="default_sort[deepl_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ); ?>" placeholder="Enter your Deepl API key" /></td>
 	</tr>
 </table>

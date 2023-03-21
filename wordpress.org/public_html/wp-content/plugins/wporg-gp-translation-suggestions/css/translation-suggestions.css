@@ -42,6 +42,32 @@
 	width: 3em;
 }
 
+.openai-suggestion__score {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 10px;
+	border-radius: 100%;
+	background: #F2F0F7;
+	color: #4E426C;
+	font-size: 12px;
+	height: 3em;
+	width: 5em;
+}
+
+.deepl-suggestion__score {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 10px;
+	border-radius: 100%;
+	background: #F2F0F7;
+	color: #4E426C;
+	font-size: 12px;
+	height: 3em;
+	width: 4em;
+}
+
 .translation-suggestion__translation {
 	flex: 1;
 	min-width: 1%;
