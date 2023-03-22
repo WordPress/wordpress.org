@@ -78,6 +78,16 @@ function browsehappy_get_browser_data( $browser = false ) {
 				: __( '&#8220;Microsoft Edge ranks first when put to real world page load tests. Whether you use the web to search, watch or play, this browser won&#8217;t slow you down.&#8221;', 'browsehappy' )
 			),
 		),
+		'brave' => (object) array(
+			'name' => 'Brave',
+			'long_name' => 'Brave',
+			'wikipedia' => 'Brave_(web_browser)',
+			'wikidata' => 'Q22906900',
+			'normalized' => 1.5, // include second number if non-zero
+			'facebook' => 'bravetheinternet',
+			'url' => 'https://brave.com/',
+			'info' => __( '&#8220;The Brave browser is a fast, private and secure web browser for PC, Mac and mobile.&#8221;', 'browsehappy' ),
+		),
 	);
 	if ( false === $browser )
 		return $data;

@@ -96,7 +96,7 @@ header, #main, footer {
 
 .wrap {
 	zoom: 1;
-	max-width: 1150px;
+	max-width: 1380px;
 	margin: 0 auto;
 }
 
@@ -325,6 +325,10 @@ html[dir="rtl"] #browserlist li {
 
 #browserlist li#edge .icon {
 	background-position: -625px 0;
+}
+
+#browserlist li#brave .icon {
+	background-position: -750px 0;
 }
 
 #browserlist h2 {
@@ -601,7 +605,7 @@ html[dir="rtl"] #share nav li {
 	font-variant: initial;
 }
 
-@media (max-width: 1168px) {
+@media (max-width: 1379px) {
 	#main .wrap {
 		max-width: 728px;
 	}
@@ -609,12 +613,12 @@ html[dir="rtl"] #share nav li {
 		width: 242px;
 	}
 }
-@media (max-width: 976px)  {
+@media (max-width: 976px) {
 	#main .wrap {
 		max-width: 768px;
 	}
 }
-@media (max-width: 784px)  {
+@media (max-width: 784px) {
 	#main .wrap {
 		max-width: 690px;
 	}
@@ -622,7 +626,7 @@ html[dir="rtl"] #share nav li {
 		width: 230px;
 	}
 }
-@media (max-width: 705px)  {
+@media (max-width: 705px) {
 	#main .wrap {
 		max-width: 460px;
 	}
@@ -686,6 +690,6 @@ html[dir="rtl"] #share nav li {
 	#browserlist li .icon, #share nav li a {
 		background-image: url(imgs/browsehappy-sprite-2x.png);
 		background-repeat: no-repeat;
-		background-size: 750px 170px;
+		background-size: 875px 170px;
 	}
 }
