@@ -283,7 +283,7 @@ class Translation_Memory extends GP_Route {
 			'HU'    => 'prefer_less',
 			'ID'    => 'prefer_more',
 			'IT'    => 'prefer_less',
-			'JA'    => 'prefer_less',
+			'JA'    => 'prefer_more',
 			'KO'    => 'prefer_less',
 			'LT'    => 'prefer_less',
 			'LV'    => 'prefer_less',
@@ -302,10 +302,7 @@ class Translation_Memory extends GP_Route {
 			'ZH'    => 'prefer_less',
 		);
 
-		if ( 'DE' == $locale && 'formal' == $set_slug ) {
-			return 'prefer_more';
-		}
-		if ( 'NL' == $locale && 'formal' == $set_slug ) {
+		if ( ( 'DE' == $locale || 'NL' == $locale ) && 'formal' == $set_slug ) {
 			return 'prefer_more';
 		}
 		if ( array_key_exists( $locale, $lang_informality ) ) {
