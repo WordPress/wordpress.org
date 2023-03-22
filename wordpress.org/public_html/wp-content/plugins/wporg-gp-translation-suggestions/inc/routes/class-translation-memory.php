@@ -168,7 +168,6 @@ class Translation_Memory extends GP_Route {
 				),
 			),
 		);
-		error_log( print_r($deepl_response, true) );
 		if ( is_wp_error( $deepl_response ) ) {
 			return array();
 		} else {
