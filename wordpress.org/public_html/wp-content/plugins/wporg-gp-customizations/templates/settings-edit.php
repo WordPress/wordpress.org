@@ -71,7 +71,12 @@ if ( ! is_array( $gp_default_sort ) ) {
 	<tr>
 		<th><label for="default_sort[openai_api_key]">
 				<?php esc_html_e( 'OpenAI API Key', 'glotpress' ); ?>
-				<a href="https://platform.openai.com/account/usage" target="_blank"><small><?php esc_html_e( '(Current usage)', 'glotpress' ); ?></small></a>
+				<a href="https://platform.openai.com/account/usage" target="_blank"><small>
+					<?php
+					/* translators: %d: number of OpenAI tokens used. */
+					echo esc_html( sprintf( __( '(OpenAI tokens used: %d)', 'glotpress' ), gp_array_get( $gp_default_sort, 'openai_tokens_used', 0 ) ) );
+					?>
+				</small></a>
 			</label></th>
 		<td><input type="text" class="openai_api_key" id="default_sort[openai_api_key]" name="default_sort[openai_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_api_key', '' ) ); ?>" placeholder="Enter your OpenAI API key" /></td>
 	</tr>
@@ -90,8 +95,13 @@ if ( ! is_array( $gp_default_sort ) ) {
 	</tr>
 	<tr>
 		<th><label for="default_sort[deepl_api_key]">
-				<?php esc_html_e( 'Deepl API Key', 'glotpress' ); ?>
-				<a href="https://support.deepl.com/hc/en-us/articles/360021200939-DeepL-API-Free" target="_blank"><small><?php esc_html_e( '(DeepL API Free)', 'glotpress' ); ?></small></a>
+				<?php esc_html_e( 'Deepl Free API Key', 'glotpress' ); ?>
+				<a href="https://www.deepl.com/es/account/usage" target="_blank"><small>
+						<?php
+						/* translators: %d: number of chars translated with Deepl. */
+						echo esc_html( sprintf( __( '(Chars translated with Deepl: %d)', 'glotpress' ), gp_array_get( $gp_default_sort, 'deepl_chars_used', 0 ) ) );
+						?>
+					</small></a>
 			</label></th>
 		<td><input type="text" class="deepl_api_key" id="default_sort[deepl_api_key]" name="default_sort[deepl_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ); ?>" placeholder="Enter your Deepl API key" /></td>
 	</tr>

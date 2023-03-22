@@ -128,12 +128,30 @@ class Translation_Memory extends GP_Route {
 		if ( 200 !== $response_status ) {
 			return array();
 		}
-		$output                            = json_decode( wp_remote_retrieve_body( $openai_response ), true );
+		$output = json_decode( wp_remote_retrieve_body( $openai_response ), true );
+		$this->update_openai_tokens_used( $output['usage']['total_tokens'] );
+
 		$message                           = $output['choices'][0]['message'];
 		$response['openai']['translation'] = trim( trim( $message['content'] ), '"' );
 		$response['openai']['diff']        = '';
 
 		return $response;
+	}
+
+	/**
+	 * Updates the number of tokens used by OpenAI.
+	 *
+	 * @param int $tokens_used The number of tokens used.
+	 */
+	private function update_openai_tokens_used( int $tokens_used ) {
+		$gp_default_sort    = get_user_option( 'gp_default_sort' );
+		$openai_tokens_used = gp_array_get( $gp_default_sort, 'openai_tokens_used' );
+		if ( ! is_int( $openai_tokens_used ) || $openai_tokens_used < 0 ) {
+			$openai_tokens_used = 0;
+		}
+		$openai_tokens_used                   += $tokens_used;
+		$gp_default_sort['openai_tokens_used'] = $openai_tokens_used;
+		update_user_option( get_current_user_id(), 'gp_default_sort', $gp_default_sort );
 	}
 
 	/**
@@ -152,7 +170,7 @@ class Translation_Memory extends GP_Route {
 		if ( empty( trim( $deepl_api_key ) ) ) {
 			return array();
 		}
-		$target_lang     = $this->get_deepl_locale( $locale );
+		$target_lang = $this->get_deepl_locale( $locale );
 		if ( empty( $target_lang ) ) {
 			return array();
 		}
@@ -175,8 +193,25 @@ class Translation_Memory extends GP_Route {
 			$body                             = wp_remote_retrieve_body( $deepl_response );
 			$response['deepl']['translation'] = json_decode( $body )->translations[0]->text;
 			$response['deepl']['diff']        = '';
+			$this->update_deepl_chars_used( $original_singular );
 			return $response;
 		}
+	}
+
+	/**
+	 * Updates the number of characters used by DeepL.
+	 *
+	 * @param string $original_singular The singular from the original string.
+	 */
+	private function update_deepl_chars_used( string $original_singular ) {
+		$gp_default_sort  = get_user_option( 'gp_default_sort' );
+		$deepl_chars_used = gp_array_get( $gp_default_sort, 'deepl_chars_used', 0 );
+		if ( ! is_int( $deepl_chars_used ) || $deepl_chars_used < 0 ) {
+			$deepl_chars_used = 0;
+		}
+		$deepl_chars_used                   += mb_strlen( $original_singular );
+		$gp_default_sort['deepl_chars_used'] = $deepl_chars_used;
+		update_user_option( get_current_user_id(), 'gp_default_sort', $gp_default_sort );
 	}
 
 	/**
