@@ -232,7 +232,7 @@ class Translation_Sync {
 		$existing_translations = GP::$translation->find( [
 			'translation_set_id' => $new_translation_set->id,
 			'original_id'        => $new_original->id,
-			'status'             => [ 'current', 'waiting', 'fuzzy' ],
+			'status'             => [ 'current', 'waiting', 'fuzzy', 'changesrequested' ],
 		] );
 
 		foreach ( $existing_translations as $_existing_translation ) {
@@ -252,7 +252,7 @@ class Translation_Sync {
 				if ( 'current' == $translation->status ) {
 					$_existing_translation->set_as_current();
 
-				} elseif ( 'changesrequested' == $translation->status() ) {
+				} elseif ( 'changesrequested' == $translation->status ) {
 					$_existing_translation->set_as_changesrequested();
 
 				} else {
