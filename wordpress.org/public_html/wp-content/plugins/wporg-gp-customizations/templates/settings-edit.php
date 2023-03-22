@@ -96,7 +96,7 @@ if ( ! is_array( $gp_default_sort ) ) {
 	<tr>
 		<th><label for="default_sort[deepl_api_key]">
 				<?php esc_html_e( 'Deepl Free API Key', 'glotpress' ); ?>
-				<a href="https://www.deepl.com/es/account/usage" target="_blank"><small>
+				<a href="https://www.deepl.com/account/usage" target="_blank"><small>
 						<?php
 						/* translators: %d: number of chars translated with Deepl. */
 						echo esc_html( sprintf( __( '(Chars translated with Deepl: %d)', 'glotpress' ), gp_array_get( $gp_default_sort, 'deepl_chars_used', 0 ) ) );
