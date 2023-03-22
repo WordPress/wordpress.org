@@ -37,8 +37,8 @@ class Translation_Memory extends GP_Route {
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $current_set_slug, $locale_slug );
 		$locale_glossary                 = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
 
-		$openai_suggestions = $this->get_openai_suggestion( $original->singular, $locale, $locale_glossary );
-		$deepl_suggestions  = $this->get_deepl_suggestion( $original->singular, $locale );
+		$openai_suggestions = $this->get_openai_suggestion( $original->singular, $locale_slug, $locale_glossary );
+		$deepl_suggestions  = $this->get_deepl_suggestion( $original->singular, $locale_slug, $set_slug );
 		if ( is_wp_error( $suggestions ) ) {
 			wp_send_json_error( $suggestions->get_error_code() );
 		}
@@ -141,10 +141,11 @@ class Translation_Memory extends GP_Route {
 	 *
 	 * @param string $original_singular The singular from the original string.
 	 * @param string $locale            The locale.
+	 * @param string $set_slug          The set slug.
 	 *
 	 * @return array
 	 */
-	private function get_deepl_suggestion( string $original_singular, string $locale ): array {
+	private function get_deepl_suggestion( string $original_singular, string $locale, string $set_slug ): array {
 		$free_url        = 'https://api-free.deepl.com/v2/translate';
 		$gp_default_sort = get_user_option( 'gp_default_sort' );
 		$deepl_api_key   = gp_array_get( $gp_default_sort, 'deepl_api_key' );
@@ -164,7 +165,7 @@ class Translation_Memory extends GP_Route {
 					'text'        => $original_singular,
 					'source_lang' => 'EN',
 					'target_lang' => $target_lang,
-					'formality'   => $this->get_language_formality( $target_lang ),
+					'formality'   => $this->get_language_formality( $target_lang, $set_slug ),
 				),
 			),
 		);
@@ -227,11 +228,12 @@ class Translation_Memory extends GP_Route {
 	/**
 	 * Gets the formality of the language.
 	 *
-	 * @param string $locale The locale.
+	 * @param string $locale   The locale.
+	 * @param string $set_slug The set slug.
 	 *
 	 * @return string
 	 */
-	private function get_language_formality( string $locale ): string {
+	private function get_language_formality( string $locale, string $set_slug ): string {
 		$lang_informality = array(
 			'BG'    => 'prefer_more',
 			'CS'    => 'prefer_less',
@@ -265,6 +267,12 @@ class Translation_Memory extends GP_Route {
 			'ZH'    => 'prefer_less',
 		);
 
+		if ( 'DE' == $locale && 'formal' == $set_slug ) {
+			return 'prefer_more';
+		}
+		if ( 'NL' == $locale && 'formal' == $set_slug ) {
+			return 'prefer_more';
+		}
 		if ( array_key_exists( $locale, $lang_informality ) ) {
 			return $lang_informality[ $locale ];
 		}
