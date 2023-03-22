@@ -151,8 +151,6 @@ class Translation_Memory extends GP_Route {
 		if ( empty( trim( $deepl_api_key ) ) ) {
 			return array();
 		}
-		$deepl_formality = gp_array_get( $gp_default_sort, 'deepl_formality', 'default' );
-		$source_lang     = 'EN';
 		$target_lang     = $this->get_deepl_locale( $locale );
 		if ( empty( $target_lang ) ) {
 			return array();
@@ -164,12 +162,13 @@ class Translation_Memory extends GP_Route {
 				'body'    => array(
 					'auth_key'    => $deepl_api_key,
 					'text'        => $original_singular,
-					'source_lang' => $source_lang,
+					'source_lang' => 'EN',
 					'target_lang' => $target_lang,
-					'formality'   => $deepl_formality,
+					'formality'   => $this->get_language_formality( $target_lang ),
 				),
 			),
 		);
+		error_log( print_r($deepl_response, true) );
 		if ( is_wp_error( $deepl_response ) ) {
 			return array();
 		} else {
@@ -224,6 +223,54 @@ class Translation_Memory extends GP_Route {
 			return $available_locales[ $locale ];
 		}
 		return '';
+	}
+
+	/**
+	 * Gets the formality of the language.
+	 *
+	 * @param string $locale The locale.
+	 *
+	 * @return string
+	 */
+	private function get_language_formality( string $locale ): string {
+		$lang_informality = array(
+			'BG'    => 'prefer_more',
+			'CS'    => 'prefer_less',
+			'DA'    => 'prefer_less',
+			'DE'    => 'prefer_less',
+			'EL'    => 'prefer_less',
+			'EN-GB' => 'prefer_less',
+			'ES'    => 'prefer_less',
+			'ET'    => 'prefer_less',
+			'FI'    => 'prefer_less',
+			'FR'    => 'prefer_more',
+			'HU'    => 'prefer_less',
+			'ID'    => 'prefer_more',
+			'IT'    => 'prefer_less',
+			'JA'    => 'prefer_less',
+			'KO'    => 'prefer_less',
+			'LT'    => 'prefer_less',
+			'LV'    => 'prefer_less',
+			'NB'    => 'prefer_less',
+			'NL'    => 'prefer_less',
+			'PL'    => 'prefer_less',
+			'PT-BR' => 'prefer_less',
+			'PT-PT' => 'prefer_more',
+			'RO'    => 'prefer_less',
+			'RU'    => 'prefer_more',
+			'SK'    => 'prefer_less',
+			'SL'    => 'prefer_less',
+			'SV'    => 'prefer_less',
+			'TR'    => 'prefer_less',
+			'UK'    => 'prefer_less',
+			'ZH'    => 'prefer_less',
+		);
+
+		if ( array_key_exists( $locale, $lang_informality ) ) {
+			return $lang_informality[ $locale ];
+		}
+
+		return 'default';
 	}
 }
 
