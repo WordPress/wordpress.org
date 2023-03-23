@@ -465,6 +465,13 @@ class Customizations {
 				array( __NAMESPACE__ . '\Metabox\Support_Reps', 'display' ),
 				'plugin', 'side'
 			);
+
+			add_meta_box(
+				'plugin-commits',
+				__( 'Plugin Commits', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Commits', 'display' ),
+				'plugin', 'normal', 'low'
+			);
 		}
 
 		// Remove unnecessary metaboxes.
