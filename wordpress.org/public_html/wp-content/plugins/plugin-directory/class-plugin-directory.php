@@ -1251,7 +1251,7 @@ class Plugin_Directory {
 		if ( is_404() ) {
 
 			// [1] => plugins [2] => example-plugin-name [3..] => random().
-			$path = explode( '/', $_SERVER['REQUEST_URI'] );
+			$path = explode( '/', trailingslashit( explode( '?', $_SERVER['REQUEST_URI'] )[0] ) );
 
 			if ( 'tags' === $path[2] ) {
 				if ( isset( $path[3] ) && ! empty( $path[3] ) ) {
