@@ -1161,16 +1161,20 @@ class Plugin_Directory {
 		$vars[] = 'geopattern_icon';
 		$vars[] = 'block_search';
 
-		// Remove support for any query vars the Plugin Directory doesn't support/need.
-		$not_needed = [
-			'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
-			'posts', 'withcomments', 'withoutcomments', 'favicon', 'cpage',
-			'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
-			'attachment_id', 'subpost', 'subpost_id', 'preview',
-			'post_format', 'cat', 'category_name', 'tag', // We use custom cats/tags.
-		];
+		// Remove support for any query vars the Plugin Directory doesn't support/need on the front-end.
+		if ( ! is_admin() ) {
+			$not_needed = [
+				'm', 'w', 'year', 'monthnum', 'day', 'hour', 'minute', 'second',
+				'posts', 'withcomments', 'withoutcomments', 'favicon', 'cpage',
+				'search', 'exact', 'sentence', 'calendar', 'more', 'tb', 'pb',
+				'attachment_id', 'subpost', 'subpost_id', 'preview',
+				'post_format', 'cat', 'category_name', 'tag', // We use custom cats/tags.
+			];
 
-		return array_diff( $vars, $not_needed );
+			$vars = array_diff( $vars, $not_needed );
+		}
+
+		return $vars;
 	}
 
 	/**
