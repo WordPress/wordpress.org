@@ -166,11 +166,11 @@ function display_items( $post_ids ) {
 				$post_status = '(In Review or Rejected)';
 				$style       = '';
 				break;
-			case 'suspended':
+			case 'suspend':
 				$post_status = '(Suspended)';
 				$style       = 'color: red;';
 				break;
-			case 'delisted':
+			case 'delist':
 				$post_status = '(Delisted)';
 				$style       = 'color: red;';
 				break;
