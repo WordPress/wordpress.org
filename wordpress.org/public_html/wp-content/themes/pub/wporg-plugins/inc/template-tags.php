@@ -128,7 +128,7 @@ function the_author_byline( $post = null ) {
 function the_active_plugin_notice( $post = null ) {
 	if ( ! in_array( get_post_status( $post ), [ 'rejected', 'closed' ], true ) ) {
 		echo wp_kses_post( get_plugin_status_notice( $post ) );
-	};
+	}
 }
 
 /**
@@ -633,5 +633,27 @@ function the_plugin_release_confirmation_form() {
 	} else {
 		/* translators: 1: plugins@wordpress.org */
 		echo '<p>' . sprintf( __( 'To disable release confirmations, please contact the plugins team by emailing %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
+	}
+}
+
+/**
+ * Displays a persistent notice to the plugin author.
+ */
+function the_author_notice( $post = null ) {
+	$post = get_post( $post );
+
+	if ( ! current_user_can( 'plugin_admin_edit', $post->ID ) ) {
+		return;
+	}
+
+	$notice = get_post_meta( $post->ID, '_author_notice', true );
+
+	if ( $notice && $notice['type'] && $notice['html'] ) {
+		printf(
+			'<div class="notice notice-alt notice-%s">%s</div>',
+			esc_attr( $notice['type'] ),
+			'<p><strong>' . __( 'A note from the Plugin Review team, visible only to the plugin author &amp; committers.', 'wporg-plugins' ) . '</strong></p>' .
+			wp_kses_post( $notice['html'] ) // Should have wrapping <p> tags.
+		);
 	}
 }

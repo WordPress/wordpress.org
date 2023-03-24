@@ -63,6 +63,7 @@ class Customizations {
 		add_action( 'wp_ajax_plugin-svn-sync', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'svn_sync' ) );
 
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
 	}
 
 	/**
@@ -471,6 +472,13 @@ class Customizations {
 				__( 'Plugin Commits', 'wporg-plugins' ),
 				array( __NAMESPACE__ . '\Metabox\Commits', 'display' ),
 				'plugin', 'normal', 'low'
+			);
+
+			add_meta_box(
+				'plugin-author-notice',
+				__( 'Author Notice (Displayed on the plugins page to Plugin Authors)', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Author_Notice', 'display' ),
+				'plugin', 'normal', 'high'
 			);
 		}
 
