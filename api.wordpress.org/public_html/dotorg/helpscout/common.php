@@ -80,11 +80,6 @@ function get_user_email_for_email( $request ) {
 	$subject = $request->ticket->subject ?? '';
 	$user    = get_user_by( 'email', $email );
 
-	// Ignore @wordpress.org "users", unless it's literally the only match (The ?? $email fallback at the end).
-	if ( $user && str_ends_with( $user->user_email, '@wordpress.org' ) ) {
-		$user = false;
-	}
-
 	// If this is related to a slack user, fetch their details instead.
 	if (
 		false !== stripos( $email, 'slack' ) &&
@@ -95,12 +90,12 @@ function get_user_email_for_email( $request ) {
 
 	// If the customer object has alternative emails listed, check to see if they have a profile.
 	if ( ! $user && ! empty( $request->customer->emails ) ) {
-		foreach ( $request->customer->emails as $alt_email ) {
-			$user = get_user_by( 'email', $alt_email );
-			if ( $user ) {
-				break;
-			}
-		}
+		$user = get_user_from_emails( $request->customer->emails );
+	}
+
+	// Ignore @wordpress.org "users", unless it's literally the only match (The ?? $email fallback at the end).
+	if ( $user && str_ends_with( $user->user_email, '@wordpress.org' ) ) {
+		$user = false;
 	}
 
 	// Determine if this is a bounce, and if so, find out who for.
@@ -184,17 +179,27 @@ function get_user_email_for_email( $request ) {
 function extract_emails_from_text( $text ) {
 	// Extract `To:`, `X-Orig-To:`, and fallback to all emails.
 	$emails = [];
-	if ( preg_match( '!^(x-orig-to:|to:|Final-Recipient:(\s*rfc\d+;)?)\s*(?P<email>.+@.+)$!im', $text, $m ) ) {
-		$m['email'] = str_replace( [ '&lt;', '&gt;' ], '', $m['email'] );
-		$m['email'] = trim( $m['email'], '<> ' );
-
-		$emails = [ $m['email'] ];
-	} else {
+	if ( preg_match_all( '!^(x-orig-to:|to:|(Final|Original)-Recipient:(\s*rfc\d+;)?)\s*(?P<email>.+@.+)$!im', $text, $m ) ) {
+		$emails = $m['email'];
+	} elseif (
 		// Ugly regex for emails, but it's good for mailer-daemon emails.
-		if ( preg_match_all( '![^\s;"]+@[^\s;&"]+\.[^\s;&"]+[a-z]!', $text, $m ) ) {
-			$emails = array_unique( array_diff( $m[0], [ $request->mailbox->email ] ) );
-		}
+		preg_match_all( '![^\s;"]+@[^\s;&"]+\.[^\s;&"]+[a-z]!', $text, $m )
+	) {
+		$emails = $m[0];
 	}
+
+	// Clean them up.
+	foreach ( $emails as &$email ) {
+		$email = str_replace( [ '&lt;', '&gt;' ], '', $email );
+		$email = trim( $email, '<> ' );
+	}
+	$emails = array_unique( $emails );
+
+	// Remove any internal emails.
+	$emails = array_filter( $emails, function( $email ) use( $request ) {
+		return ! str_ends_with( $email, '@wordpress.org' ) &&
+			$email != $request->mailbox->email;
+	} );
 
 	return $emails;
 }
