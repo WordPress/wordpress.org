@@ -40,6 +40,12 @@ $repo_post_types = [
 	'plugins' => 'plugin',
 ];
 
+// Display plugins first in the plugins inbox.
+if ( str_starts_with( $request->mailbox->email ?? '' , 'plugins' ) ) {
+	$sites           = array_reverse( $sites );
+	$repo_post_types = array_reverse( $repo_post_types );
+}
+
 // Mentioned in email
 $mentioned = get_plugin_or_theme_from_email( $request );
 foreach ( $mentioned as $type => $slugs ) {
