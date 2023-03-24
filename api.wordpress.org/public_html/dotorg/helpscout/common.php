@@ -196,9 +196,8 @@ function extract_emails_from_text( $text ) {
 	$emails = array_unique( $emails );
 
 	// Remove any internal emails.
-	$emails = array_filter( $emails, function( $email ) use( $request ) {
-		return ! str_ends_with( $email, '@wordpress.org' ) &&
-			$email != $request->mailbox->email;
+	$emails = array_filter( $emails, function( $email ) {
+		return ! str_ends_with( $email, '@wordpress.org' );
 	} );
 
 	return $emails;
