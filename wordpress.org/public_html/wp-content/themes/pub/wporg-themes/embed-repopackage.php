@@ -32,14 +32,11 @@ the_post();
 $theme = wporg_themes_theme_information( $post->post_name );
 ?>
 <div <?php post_class( 'wp-embed' ); ?>>
-	<div class="wp-embed-featured-image rectangular">
-		<a href="<?php the_permalink(); ?>" target="_top">
-			<img src='<?php echo $theme->screenshot_url; ?>'>
-		</a>
-	</div>
-
 	<p class="wp-embed-heading">
 		<a href="<?php the_permalink(); ?>" target="_top">
+			<div class="wp-embed-featured-image rectangular">
+				<img src='<?php echo $theme->screenshot_url; ?>' alt=''>
+			</div>
 			<?php echo esc_html( $theme->name ); ?>
 		</a>
 	</p>
