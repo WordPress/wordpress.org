@@ -43,10 +43,12 @@ if ( ! headers_sent() ) {
 			margin-left: 20px;
 			margin-right: auto;
 		}
+		.wp-embed-featured-image.plugin-icon,
 		.wp-embed-featured-image .plugin-icon {
 			background-size: 100%;
 			height: 60px;
 			width: 60px;
+			border: 0;
 		}
 		p.wp-embed-heading {
 			margin: 0;
@@ -129,14 +131,13 @@ if ( ! headers_sent() ) {
 </head>
 <body <?php body_class(); ?>>
 	<div <?php post_class( 'wp-embed' ); ?>>
-		<div class="wp-embed-featured-image rectangular">
-			<a href="<?php the_permalink(); ?>" target="_top">
-				<?php echo Template::get_plugin_icon( $post, 'html' ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?>
-			</a>
-		</div>
-
 		<p class="wp-embed-heading">
 			<a href="<?php the_permalink(); ?>" target="_top">
+				<?php
+					$plugin_icon = Template::get_plugin_icon( $post, 'html' );
+					$plugin_icon = str_replace( $plugin_icon, "class='plugin-icon'", "class='wp-embed-featured-image rectangular plugin-icon'" );
+					echo $plugin_icon;
+				?>
 				<?php the_title(); ?>
 			</a>
 			<span class="byline"><?php the_author_byline(); ?></span>
@@ -170,7 +171,7 @@ if ( ! headers_sent() ) {
 			if ( $tested_up_to ) :
 				?>
 				<span class="tested-with">
-					<i class="dashicons dashicons-wordpress-alt"></i>
+					<i class="dashicons dashicons-wordpress-alt" aria-hidden="true"></i>
 					<?php
 					/* translators: WordPress version. */
 					printf( esc_html__( 'Tested with %s', 'wporg-plugins' ), esc_html( $tested_up_to ) );
