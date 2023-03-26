@@ -17,8 +17,9 @@ $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
 	<div class="entry-thumbnail">
 		<a href="<?php the_permalink(); ?>" rel="bookmark">
 			<?php
-			// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-			echo Template::get_plugin_icon( get_post(), 'html' );
+			$plugin_icon = Template::get_plugin_icon( get_post(), 'html' );
+			$plugin_icon = str_replace( $plugin_icon, "alt=''", "alt='" . get_the_title() . "'" );
+			echo $plugin_icon;
 			?>
 		</a>
 	</div><div class="entry">
@@ -35,15 +36,15 @@ $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
 	<hr>
 	<footer>
 		<span class="plugin-author">
-			<i class="dashicons dashicons-admin-users"></i> <?php echo esc_html( strip_tags( get_post_meta( get_the_ID(), 'header_author', true ) ) ?: get_the_author() ); ?>
+			<i class="dashicons dashicons-admin-users" aria-hidden="true"></i> <?php echo esc_html( strip_tags( get_post_meta( get_the_ID(), 'header_author', true ) ) ?: get_the_author() ); ?>
 		</span>
 		<span class="active-installs">
-			<i class="dashicons dashicons-chart-area"></i>
+			<i class="dashicons dashicons-chart-area" aria-hidden="true"></i>
 			<?php echo esc_html( Template::active_installs() ); ?>
 		</span>
 		<?php if ( $tested_up_to ) : ?>
 			<span class="tested-with">
-				<i class="dashicons dashicons-wordpress-alt"></i>
+				<i class="dashicons dashicons-wordpress-alt" aria-hidden="true"></i>
 				<?php
 				/* translators: WordPress version. */
 				printf( esc_html__( 'Tested with %s', 'wporg-plugins' ), esc_html( $tested_up_to ) );
@@ -51,7 +52,7 @@ $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
 			</span>
 		<?php endif; ?>
 		<span class="last-updated">
-			<i class="dashicons dashicons-calendar"></i>
+			<i class="dashicons dashicons-calendar" aria-hidden="true"></i>
 			<?php
 			/* Translators: Plugin modified time. */
 			printf( esc_html__( 'Updated %s ago', 'wporg-plugins' ), esc_html( human_time_diff( get_post_modified_time() ) ) );
