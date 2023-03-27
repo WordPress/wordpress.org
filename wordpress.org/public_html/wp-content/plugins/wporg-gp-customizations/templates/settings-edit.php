@@ -68,6 +68,15 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 	</tr>
 	<tr>
 		<th>
+			<h4><?php esc_html_e( 'External translating services', 'glotpress' ); ?></h4>
+		</th>
+	</tr>
+	<tr>
+		<th><label for="default_sort[external_services_exclude_some_status]"><?php esc_html_e( 'Don\'t use OpenAI and Deepl with translations in current, rejected or old status.', 'glotpress' ); ?></label></th>
+		<td><input type="checkbox" id="default_sort[external_services_exclude_some_status]" name="default_sort[external_services_exclude_some_status]" <?php gp_checked( 'on' == gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 'off' ) ); ?> /></td>
+	</tr>
+	<tr>
+		<th>
 			<h4><?php esc_html_e( 'OpenAI (ChatGPT) settings', 'glotpress' ); ?></h4>
 		</th>
 	</tr>

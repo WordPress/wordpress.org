@@ -11,8 +11,14 @@ use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 class Translation_Memory extends GP_Route {
 
 	public function get_suggestions( $project_path, $locale_slug, $set_slug ) {
-		$original_id = gp_get( 'original' );
-		$nonce       = gp_get( 'nonce' );
+		$original_id                           = gp_get( 'original' );
+		$translation_id                        = gp_get( 'translation', 0 );
+		$nonce                                 = gp_get( 'nonce' );
+		$gp_default_sort                       = get_user_option( 'gp_default_sort' );
+		$external_services_exclude_some_status = gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 0 );
+		$translation                           = null;
+		$openai_suggestions                    = array();
+		$deepl_suggestions                     = array();
 
 		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
 			wp_send_json_error( 'invalid_nonce' );
@@ -37,8 +43,19 @@ class Translation_Memory extends GP_Route {
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $current_set_slug, $locale_slug );
 		$locale_glossary                 = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
 
-		$openai_suggestions = $this->get_openai_suggestion( $original->singular, $locale_slug, $locale_glossary );
-		$deepl_suggestions  = $this->get_deepl_suggestion( $original->singular, $locale_slug, $set_slug );
+		if ( $external_services_exclude_some_status ) {
+			if ( $translation_id > 0 ) {
+				$translation = GP::$translation->get( $translation_id );
+			}
+			if ( ! $translation || ( 'current' != $translation->status && 'rejected' != $translation->status && 'old' != $translation->status ) ) {
+				$openai_suggestions = $this->get_openai_suggestion( $original->singular, $locale_slug, $locale_glossary );
+				$deepl_suggestions  = $this->get_deepl_suggestion( $original->singular, $locale_slug, $set_slug );
+			}
+		} else {
+			$openai_suggestions = $this->get_openai_suggestion( $original->singular, $locale_slug, $locale_glossary );
+			$deepl_suggestions  = $this->get_deepl_suggestion( $original->singular, $locale_slug, $set_slug );
+		}
+
 		if ( is_wp_error( $suggestions ) ) {
 			wp_send_json_error( $suggestions->get_error_code() );
 		}
@@ -151,7 +168,6 @@ class Translation_Memory extends GP_Route {
 		}
 		$openai_tokens_used                            += $tokens_used;
 		$gp_external_translations['openai_tokens_used'] = $openai_tokens_used;
-		error_log( print_r( $gp_external_translations, true ) );
 		update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
 	}
 
