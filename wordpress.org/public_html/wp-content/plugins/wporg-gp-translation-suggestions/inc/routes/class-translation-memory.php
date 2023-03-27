@@ -144,14 +144,15 @@ class Translation_Memory extends GP_Route {
 	 * @param int $tokens_used The number of tokens used.
 	 */
 	private function update_openai_tokens_used( int $tokens_used ) {
-		$gp_default_sort    = get_user_option( 'gp_default_sort' );
-		$openai_tokens_used = gp_array_get( $gp_default_sort, 'openai_tokens_used' );
+		$gp_external_translations = get_user_option( 'gp_external_translations' );
+		$openai_tokens_used       = gp_array_get( $gp_external_translations, 'openai_tokens_used' );
 		if ( ! is_int( $openai_tokens_used ) || $openai_tokens_used < 0 ) {
 			$openai_tokens_used = 0;
 		}
-		$openai_tokens_used                   += $tokens_used;
-		$gp_default_sort['openai_tokens_used'] = $openai_tokens_used;
-		update_user_option( get_current_user_id(), 'gp_default_sort', $gp_default_sort );
+		$openai_tokens_used                            += $tokens_used;
+		$gp_external_translations['openai_tokens_used'] = $openai_tokens_used;
+		error_log( print_r( $gp_external_translations, true ) );
+		update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
 	}
 
 	/**
@@ -204,14 +205,14 @@ class Translation_Memory extends GP_Route {
 	 * @param string $original_singular The singular from the original string.
 	 */
 	private function update_deepl_chars_used( string $original_singular ) {
-		$gp_default_sort  = get_user_option( 'gp_default_sort' );
-		$deepl_chars_used = gp_array_get( $gp_default_sort, 'deepl_chars_used', 0 );
+		$gp_external_translations = get_user_option( 'gp_external_translations' );
+		$deepl_chars_used         = gp_array_get( $gp_external_translations, 'deepl_chars_used', 0 );
 		if ( ! is_int( $deepl_chars_used ) || $deepl_chars_used < 0 ) {
 			$deepl_chars_used = 0;
 		}
-		$deepl_chars_used                   += mb_strlen( $original_singular );
-		$gp_default_sort['deepl_chars_used'] = $deepl_chars_used;
-		update_user_option( get_current_user_id(), 'gp_default_sort', $gp_default_sort );
+		$deepl_chars_used                            += mb_strlen( $original_singular );
+		$gp_external_translations['deepl_chars_used'] = $deepl_chars_used;
+		update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
 	}
 
 	/**
@@ -321,7 +322,7 @@ class Translation_Memory extends GP_Route {
 		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'wporg-editor-settings' ) ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'Invalid nonce.', 'glotpress' ) ), 403 );
 		}
-		if ( ! isset( $_POST['translation']) ) {
+		if ( ! isset( $_POST['translation'] ) ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'Translation parameter is not present.', 'glotpress' ) ), 400 );
 		}
 		if ( ! isset( $_POST['openAITranslationsUsed'] ) && ! isset( $_POST['deeplTranslationsUsed'] ) ) {
@@ -357,21 +358,21 @@ class Translation_Memory extends GP_Route {
 	 * @return void
 	 */
 	private function update_one_external_translation( string $translation, string $suggestion, string $external_translations_used, string $external_same_translations_used ) {
-		$sameTranslationUsed = $translation == $suggestion;
+		$sameTranslationUsed      = $translation == $suggestion;
 		$gp_external_translations = get_user_option( 'gp_external_translations' );
-		$translations_used = gp_array_get( $gp_external_translations, $external_translations_used, 0 );
-		$same_translations_used = gp_array_get( $gp_external_translations, $external_same_translations_used, 0 );
+		$translations_used        = gp_array_get( $gp_external_translations, $external_translations_used, 0 );
+		$same_translations_used   = gp_array_get( $gp_external_translations, $external_same_translations_used, 0 );
 		if ( ! is_int( $translations_used ) || $translations_used < 0 ) {
 			$translations_used = 0;
 		}
 		$translations_used++;
-		$gp_external_translations[$external_translations_used] = $translations_used;
+		$gp_external_translations[ $external_translations_used ] = $translations_used;
 		if ( $sameTranslationUsed ) {
 			if ( ! is_int( $same_translations_used ) || $same_translations_used < 0 ) {
 				$same_translations_used = 0;
 			}
 			$same_translations_used++;
-			$gp_external_translations[$external_same_translations_used] = $same_translations_used;
+			$gp_external_translations[ $external_same_translations_used ] = $same_translations_used;
 		}
 		update_user_option( get_current_user_id(), 'gp_external_translations', $gp_external_translations );
 	}
