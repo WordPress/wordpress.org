@@ -20,7 +20,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikidata' => 'Q777',
 			'normalized' => 1, // just first number
 			'facebook' => 'googlechrome',
-			'url' => 'https://www.google.com/chrome',
+			'url' => class_exists( 'Browse_Happy_Locale' ) && 'zh_CN' === Browse_Happy_Locale::locale() ? 'https://www.google.cn/chrome' : 'https://www.google.com/chrome',
 			'info' => ( $latest_strings ?
 				__( '&#8220;Get more done with the new Google Chrome. A more simple, secure, and faster web browser than ever, with Google’s smarts built-in.&#8221;', 'browsehappy' )
 				: __( '&#8220;A fast new browser from Google. Try&nbsp;it&nbsp;now!&#8221;', 'browsehappy' )
