@@ -1,6 +1,8 @@
 ( function( $ ){
 	var $html = $( 'html' );
 	var $document = $( document );
+	var $openAITranslationsUsed = [];
+	var $deeplTranslationsUsed = [];
 
 	function checkStorage() {
 		var test = 'test',
@@ -67,6 +69,48 @@
 		$textarea.addClass( 'autosize' );
 
 		autosize( $textarea );
+	}
+
+	/**
+	 * Adds the suggestion to the translation in an array, and removes the previous suggestions, so
+	 * we only store the last one in the database, using the saveExternalSuggestions() function.
+	 *
+	 * @return {void}
+	 */
+	function addSuggestion() {
+		var $row = $(this);
+		var $originalId = $row.closest('tr').attr('id').substring(7);
+		var $CSSclass = $row.attr('class');
+		if ( $CSSclass.indexOf('openai') > -1 ) {
+			$openAITranslationsUsed[$originalId] = $row.find('.translation-suggestion__translation').text();
+			$deeplTranslationsUsed.splice($originalId, 1);
+		} else if ( $CSSclass.indexOf('deepl') > -1 ) {
+			$deeplTranslationsUsed[$originalId] = $row.find('.translation-suggestion__translation').text();
+			$openAITranslationsUsed.splice($originalId, 1);
+		}
+	}
+
+	/**
+	 * Saves the number of external suggestions used and used without modification.
+	 *
+	 * @return {void}
+	 **/
+	function saveExternalSuggestions() {
+		var $button = $(this);
+		var $row = $button.closest('tr.editor');
+		var $originalId = $row.attr('id').substring(7);
+		var $translation = $row.find('.lt-mirror__canvas').text().trim();
+		var $data = {
+			nonce: wporgEditorSettings.nonce,
+			translation: $translation,
+			openAITranslationsUsed: $openAITranslationsUsed[$originalId],
+			deeplTranslationsUsed: $deeplTranslationsUsed[$originalId]
+		};
+		$.ajax({
+			url: '/-save-external-suggestions',
+			type: 'POST',
+			data: $data,
+		});
 	}
 
 	// Override functions to adopt custom markup.
@@ -270,12 +314,15 @@
 			original.apply( $gp.editor, arguments );
 
 			$( $gp.editor.table )
+				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
+				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion )
 				.on( 'click', 'button.translation-form-list__tab', switchPluralTabs )
 				.on( 'click', 'button.panel-header-actions__previous', $gp.editor.prev )
 				.on( 'click', 'button.panel-header-actions__next', $gp.editor.next )
 				.on( 'click', 'button.panel-header-actions__cancel', $gp.editor.hooks.cancel )
 				.on( 'click', 'button.translation-actions__copy', $gp.editor.hooks.copy )
 				.on( 'click', 'button.translation-actions__insert-tab', $gp.editor.hooks.tab )
+				.on( 'click', 'button.translation-actions__save', saveExternalSuggestions )
 				.on( 'click', 'button.translation-actions__save', $gp.editor.hooks.ok )
 				.on( 'click', 'button.translation-actions__help', openHelpModal )
 				.on( 'click', 'button.translation-actions__ltr', switchTextDirection )

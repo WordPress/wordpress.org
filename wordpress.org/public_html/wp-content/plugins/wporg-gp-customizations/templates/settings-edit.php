@@ -22,6 +22,9 @@ if ( ! is_array( $gp_default_sort ) ) {
 		'how' => 'desc',
 	);
 }
+
+$gp_external_translations = get_user_option( 'gp_external_translations' );
+
 ?>
 
 <table class="form-table">
@@ -71,13 +74,30 @@ if ( ! is_array( $gp_default_sort ) ) {
 	<tr>
 		<th><label for="default_sort[openai_api_key]">
 				<?php esc_html_e( 'OpenAI API Key', 'glotpress' ); ?>
+			</label>
+					<?php
+					if ( gp_array_get( $gp_external_translations, 'openai_translations_used', 0 ) > 0 ) {
+						echo '<br>';
+						echo '<small>';
+						/* translators: %d: number of OpenAI translations used. */
+						echo esc_html( sprintf( _n( '%d OpenAI translation used', '%d OpenAI translations used', 'glotpress' ), gp_array_get( $gp_external_translations, 'openai_translations_used', 0 ) ) );
+						if ( gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) > 0 ) {
+							/* translators: %d: number of OpenAI translations used. */
+							echo ' ' . esc_html( sprintf( _n( '(%d used without modifications)', '(%d used without modifications)', 'glotpress' ), gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) ) );
+						}
+						echo '</small>';
+					}
+					?>
+				<br>
 				<a href="https://platform.openai.com/account/usage" target="_blank"><small>
 					<?php
 					/* translators: %d: number of OpenAI tokens used. */
-					echo esc_html( sprintf( __( '(OpenAI tokens used: %d)', 'glotpress' ), gp_array_get( $gp_default_sort, 'openai_tokens_used', 0 ) ) );
+					echo esc_html( sprintf( __( 'OpenAI tokens used: %d', 'glotpress' ), gp_array_get( $gp_default_sort, 'openai_tokens_used', 0 ) ) );
 					?>
 				</small></a>
-			</label></th>
+				<br>
+				<br>
+			</th>
 		<td><input type="text" class="openai_api_key" id="default_sort[openai_api_key]" name="default_sort[openai_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_api_key', '' ) ); ?>" placeholder="Enter your OpenAI API key" /></td>
 	</tr>
 	<tr>
@@ -96,13 +116,28 @@ if ( ! is_array( $gp_default_sort ) ) {
 	<tr>
 		<th><label for="default_sort[deepl_api_key]">
 				<?php esc_html_e( 'Deepl Free API Key', 'glotpress' ); ?>
+			</label>
+					<?php
+					if ( gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) > 0 ) {
+						echo '<br>';
+						echo '<small>';
+						/* translators: %d: number of OpenAI translations used. */
+						echo esc_html( sprintf( _n( '%d Deepl translation used', '%d Deepl translations used', 'glotpress' ), gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) ) );
+						if ( gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) > 0 ) {
+							/* translators: %d: number of OpenAI translations used. */
+							echo ' ' . esc_html( sprintf( _n( '(%d used without modifications)', '(%d used without modifications)', 'glotpress' ), gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) ) );
+						}
+						echo '</small>';
+					}
+					?>
+				<br>
 				<a href="https://www.deepl.com/account/usage" target="_blank"><small>
 						<?php
 						/* translators: %d: number of chars translated with Deepl. */
 						echo esc_html( sprintf( __( '(Chars translated with Deepl: %d)', 'glotpress' ), gp_array_get( $gp_default_sort, 'deepl_chars_used', 0 ) ) );
 						?>
 					</small></a>
-			</label></th>
+			</th>
 		<td><input type="text" class="deepl_api_key" id="default_sort[deepl_api_key]" name="default_sort[deepl_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ); ?>" placeholder="Enter your Deepl API key" /></td>
 	</tr>
 </table>

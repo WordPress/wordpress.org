@@ -98,6 +98,7 @@ class Plugin {
 
 		GP::$router->prepend( "/$set/-get-tm-suggestions", [ __NAMESPACE__ . '\Routes\Translation_Memory', 'get_suggestions' ] );
 		GP::$router->prepend( "/$set/-get-other-language-suggestions", [ __NAMESPACE__ . '\Routes\Other_Languages', 'get_suggestions' ] );
+		GP::$router->prepend( "/-save-external-suggestions", [ __NAMESPACE__ . '\Routes\Translation_Memory', 'update_external_translations' ], 'post' );
 	}
 
 	/**
