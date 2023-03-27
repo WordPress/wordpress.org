@@ -78,15 +78,15 @@
 	 * @return {void}
 	 */
 	function addSuggestion() {
-		var $row = $(this);
-		var $originalId = $row.closest('tr').attr('id').substring(7);
-		var $CSSclass = $row.attr('class');
-		if ( $CSSclass.indexOf('openai') > -1 ) {
-			$openAITranslationsUsed[$originalId] = $row.find('.translation-suggestion__translation').text();
-			$deeplTranslationsUsed.splice($originalId, 1);
-		} else if ( $CSSclass.indexOf('deepl') > -1 ) {
-			$deeplTranslationsUsed[$originalId] = $row.find('.translation-suggestion__translation').text();
-			$openAITranslationsUsed.splice($originalId, 1);
+		var $row = $( this );
+		var $originalId = $row.closest( 'tr' ).attr( 'id' ).substring( 7 );
+		var $CSSclass = $row.attr( 'class' );
+		if ( $CSSclass.indexOf( 'openai' ) > -1 ) {
+			$openAITranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
+			$deeplTranslationsUsed.splice( $originalId, 1 );
+		} else if ( $CSSclass.indexOf( 'deepl' ) > -1 ) {
+			$deeplTranslationsUsed[ $originalId ] = $row.find( '.translation-suggestion__translation' ).text();
+			$openAITranslationsUsed.splice( $originalId, 1 );
 		}
 	}
 
@@ -96,10 +96,10 @@
 	 * @return {void}
 	 **/
 	function saveExternalSuggestions() {
-		var $button = $(this);
-		var $row = $button.closest('tr.editor');
-		var $originalId = $row.attr('id').substring(7);
-		var $translation = $row.find('.lt-mirror__canvas').text().trim();
+		var $button = $( this );
+		var $row = $button.closest( 'tr.editor' );
+		var $originalId = $row.attr( 'id' ).substring( 7 );
+		var $translation = $row.find( 'textarea' ).val();
 		var $data = {
 			nonce: wporgEditorSettings.nonce,
 			translation: $translation,
@@ -314,8 +314,6 @@
 			original.apply( $gp.editor, arguments );
 
 			$( $gp.editor.table )
-				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
-				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion )
 				.on( 'click', 'button.translation-form-list__tab', switchPluralTabs )
 				.on( 'click', 'button.panel-header-actions__previous', $gp.editor.prev )
 				.on( 'click', 'button.panel-header-actions__next', $gp.editor.next )
@@ -329,7 +327,9 @@
 				.on( 'click', 'button.translation-actions__rtl', switchTextDirection )
 				.on( 'focus', 'textarea', textareaAutosize )
 				.on( 'click', 'summary', toggleDetails )
-				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu );
+				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu )
+				.on( 'click', '.translation-suggestion.with-tooltip.openai', addSuggestion )
+				.on( 'click', '.translation-suggestion.with-tooltip.deepl', addSuggestion );
 		}
 	})( $gp.editor.install_hooks );
 
