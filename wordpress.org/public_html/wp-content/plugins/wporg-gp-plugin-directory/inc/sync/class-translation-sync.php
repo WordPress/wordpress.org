@@ -265,6 +265,11 @@ class Translation_Sync {
 			}
 		}
 
+		// Do not create a new translation if it is not current
+		if ( 'current' !== $translation->status ) {
+			return true;
+		}
+
 		// Create a new translation.
 		$copy = new GP_Translation( $translation->fields() );
 		$copy->original_id = $new_original->id;
