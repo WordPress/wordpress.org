@@ -589,7 +589,7 @@ html[dir="rtl"] #share nav li {
 #byline {
 	clear: both;
 	margin: 0 auto;
-	padding-top: 10px;
+	padding-top: 60px;
 }
 
 #byline a {
@@ -658,6 +658,23 @@ html[dir="rtl"] #share nav li {
 	#browserlist li {
 		width: 242px;
 	}
+	#about,
+	#share {
+		float: none;
+		margin-left: 15px;
+		margin-right: 15px;
+		width: inherit;
+	}
+	#about {
+		margin-bottom: 15px;
+
+	}
+	#byline {
+		padding-top: 20px;
+	}
+	footer {
+		padding: 40px 0;
+	}
 }
 @media (max-width: 430px) {
 	header {
@@ -668,6 +685,9 @@ html[dir="rtl"] #share nav li {
 	}
 	.wf-leaguegothic1leaguegothic2-n4-active header h1 {
 		font-size: 1000%;
+	}
+	footer {
+		padding: 25px 0;
 	}
 }
 @media (max-width: 383px) {
