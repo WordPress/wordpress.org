@@ -60,8 +60,9 @@ class Author_Notice {
 
 				$( '#author-notice-texteditable' ).on( 'input change', function() {
 					// Don't allow deleting the <p> tag.
-					if ( ! $( this ).text() ) {
-						$( this ).html('<p></p>')
+					if ( ! $( this ).children( 'p,div,ul,ol,pre,code' ).length ) {
+						var text = $(this).html();
+						$( this ).html('<p/>').find('p').html(text);
 					}
 
 					// Update the hidden input value with the HTML.
