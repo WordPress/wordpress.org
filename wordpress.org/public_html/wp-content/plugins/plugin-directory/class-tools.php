@@ -24,8 +24,8 @@ class Tools {
 	 * @return string|bool Average color as a hex value, False on failure.
 	 */
 	public static function get_image_average_color( $file_location ) {
-		if ( ! class_exists( 'Tonesque' ) && function_exists( 'jetpack_require_lib' ) ) {
-			jetpack_require_lib( 'tonesque' );
+		if ( ! class_exists( 'Tonesque' ) && defined( 'JETPACK__PLUGIN_DIR' ) ) {
+			include JETPACK__PLUGIN_DIR . '/_inc/lib/tonesque.php';
 		}
 
 		if ( ! class_exists( 'Tonesque' ) ) {
