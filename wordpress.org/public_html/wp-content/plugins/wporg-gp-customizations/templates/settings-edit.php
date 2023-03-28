@@ -87,11 +87,17 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 					if ( gp_array_get( $gp_external_translations, 'openai_translations_used', 0 ) > 0 ) {
 						echo '<br>';
 						echo '<small>';
-						/* translators: %d: number of OpenAI translations used. */
-						echo esc_html( sprintf( _n( '%s OpenAI translation used.', '%s OpenAI translations used.', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'openai_translations_used', 0 ) ) ) );
+						/* translators: Number of OpenAI translations used. */
+						echo esc_html( sprintf( _n( '%s OpenAI translation used:', '%s OpenAI translations used:', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'openai_translations_used', 0 ) ) ) );
 						if ( gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) > 0 ) {
-							/* translators: %d: number of OpenAI translations used. */
-							echo ' ' . esc_html( sprintf( _n( '%s used without modifications.', '%s used without modifications.', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) ) ) );
+							echo ' ' . esc_html(
+								sprintf(
+								/* translators: 1: Number of OpenAI translations used with modifications. 2: Number of OpenAI translations used without modifications. */
+									__( '%1$s with modifications and %2$s without modifications.', 'glotpress' ),
+									number_format_i18n( gp_array_get( $gp_external_translations, 'openai_translations_used', 0 ) - gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) ),
+									number_format_i18n( gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) ),
+								)
+							);
 						}
 						echo '</small>';
 					}
@@ -101,7 +107,7 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 					<?php
 					$openai_tokens_used = gp_array_get( $gp_external_translations, 'openai_tokens_used', 0 );
 					if ( $openai_tokens_used > 0 ) {
-						/* translators: %d: number of OpenAI tokens used. */
+						/* translators: Number of OpenAI tokens used. */
 						echo esc_html( sprintf( __( 'OpenAI tokens used: %s', 'glotpress' ), number_format_i18n( $openai_tokens_used ) ) );
 					}
 					?>
@@ -132,11 +138,17 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 					if ( gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) > 0 ) {
 						echo '<br>';
 						echo '<small>';
-						/* translators: %d: number of DeepL translations used. */
-						echo esc_html( sprintf( _n( '%s DeepL translation used.', '%s DeepL translations used.', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) ) ) );
+						/* translators: Number of DeepL translations used. */
+						echo esc_html( sprintf( _n( '%s DeepL translation used:', '%s DeepL translations used:', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) ) ) );
 						if ( gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) > 0 ) {
-							/* translators: %d: number of DeepL translations used. */
-							echo ' ' . esc_html( sprintf( _n( '%s used without modifications.', '%s used without modifications.', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) ) ) );
+							echo ' ' . esc_html(
+								sprintf(
+								/* translators: 1: Number of DeepL translations used with modifications. 2: Number of DeepL translations used without modifications. */
+									__( '%1$s with modifications and %2$s without modifications.', 'glotpress' ),
+									number_format_i18n( gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) - gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) ),
+									number_format_i18n( gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) ),
+								)
+							);
 						}
 						echo '</small>';
 					}
@@ -146,7 +158,7 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 						<?php
 						$deepl_chars_used = gp_array_get( $gp_external_translations, 'deepl_chars_used', 0 );
 						if ( $deepl_chars_used > 0 ) {
-							/* translators: %d: number of chars translated with DeepL. */
+							/* translators: Number of chars translated with DeepL. */
 							echo esc_html( sprintf( __( 'Chars translated with DeepL: %s', 'glotpress' ), number_format_i18n( $deepl_chars_used ) ) );
 						}
 						?>
