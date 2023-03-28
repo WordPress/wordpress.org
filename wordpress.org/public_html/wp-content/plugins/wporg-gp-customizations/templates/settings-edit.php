@@ -24,6 +24,7 @@ if ( ! is_array( $gp_default_sort ) ) {
 }
 
 $gp_external_translations = get_user_option( 'gp_external_translations' );
+error_log( 'Frontend $gp_external_translations: ' . print_r( $gp_external_translations, true ) );
 
 ?>
 
@@ -103,7 +104,7 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 					$openai_tokens_used = gp_array_get( $gp_external_translations, 'openai_tokens_used', 0 );
 					if ( $openai_tokens_used > 0 ) {
 						/* translators: %d: number of OpenAI tokens used. */
-						echo esc_html( sprintf( __( 'OpenAI tokens used: %d', 'glotpress' ), number_format( $openai_tokens_used ) ) );
+						echo esc_html( sprintf( __( 'OpenAI tokens used: %s', 'glotpress' ), number_format_i18n( $openai_tokens_used ) ) );
 					}
 					?>
 				</small></a>
@@ -148,7 +149,7 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 						$deepl_chars_used = gp_array_get( $gp_external_translations, 'deepl_chars_used', 0 );
 						if ( $deepl_chars_used > 0 ) {
 							/* translators: %d: number of chars translated with Deepl. */
-							echo esc_html( sprintf( __( '(Chars translated with Deepl: %d)', 'glotpress' ), number_format( $deepl_chars_used ) ) );
+							echo esc_html( sprintf( __( 'Chars translated with Deepl: %s', 'glotpress' ), number_format_i18n( $deepl_chars_used ) ) );
 						}
 						?>
 					</small></a>
