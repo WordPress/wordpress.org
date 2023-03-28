@@ -13,6 +13,26 @@ class Author_Notice {
 	const POST_META_KEY = '_author_notice';
 
 	/**
+	 * The HTML allowed in the author notice.
+	 */
+	const ALLOWED_TAGS = [
+		'p'      => true,
+		'strong' => true,
+		'em'     => true,
+		'a'      => [
+			'href' => true,
+		],
+		'i'      => true,
+		'b'	     => true,
+		'br'     => true,
+		'code'   => true,
+		'pre'    => true,
+		'ul'     => true,
+		'ol'     => true,
+		'li'     => true,
+	];
+
+	/**
 	 * Displays the author notice controls.
 	 */
 	public static function display() {
@@ -45,7 +65,7 @@ class Author_Notice {
 		?>
 
 		<div id="author-notice-texteditable" class="inline notice notice-alt notice-<?php echo esc_attr( $notice['type'] ); ?>" contentEditable="true">
-			<?php echo wp_kses_post( $notice['html'] ); ?>
+			<?php echo wp_kses( $notice['html'], self::ALLOWED_TAGS ); ?>
 		</div>
 
 		<input type="hidden" name="author_notice[html]" id="author-notice" value="<?php echo esc_attr( $notice['html'] ); ?>" />
@@ -96,7 +116,7 @@ class Author_Notice {
 		) {
 			$new_author_notice         = wp_unslash( $_REQUEST['author_notice'] );
 			$new_author_notice['type'] = sanitize_key( $new_author_notice['type'] );
-			$new_author_notice['html'] = wp_kses_post( trim( $new_author_notice['html'] ) );
+			$new_author_notice['html'] = wp_kses( trim( $new_author_notice['html'] ), self::ALLOWED_TAGS );
 
 			// Check it's not empty with tags removed.
 			if (
