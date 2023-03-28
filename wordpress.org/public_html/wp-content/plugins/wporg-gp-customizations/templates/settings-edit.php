@@ -24,8 +24,6 @@ if ( ! is_array( $gp_default_sort ) ) {
 }
 
 $gp_external_translations = get_user_option( 'gp_external_translations' );
-error_log( 'Frontend $gp_external_translations: ' . print_r( $gp_external_translations, true ) );
-
 ?>
 
 <table class="form-table">
@@ -73,7 +71,7 @@ error_log( 'Frontend $gp_external_translations: ' . print_r( $gp_external_transl
 		</th>
 	</tr>
 	<tr>
-		<th><label for="default_sort[external_services_exclude_some_status]"><?php esc_html_e( 'Don\'t use OpenAI and Deepl with translations in current, rejected or old status.', 'glotpress' ); ?></label></th>
+		<th><label for="default_sort[external_services_exclude_some_status]"><?php esc_html_e( 'Don\'t use OpenAI and DeepL with translations in current, rejected or old status.', 'glotpress' ); ?></label></th>
 		<td><input type="checkbox" id="default_sort[external_services_exclude_some_status]" name="default_sort[external_services_exclude_some_status]" <?php gp_checked( 'on' == gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 'off' ) ); ?> /></td>
 	</tr>
 	<tr>
@@ -90,10 +88,10 @@ error_log( 'Frontend $gp_external_translations: ' . print_r( $gp_external_transl
 						echo '<br>';
 						echo '<small>';
 						/* translators: %d: number of OpenAI translations used. */
-						echo esc_html( sprintf( _n( '%d OpenAI translation used', '%d OpenAI translations used', 'glotpress' ), gp_array_get( $gp_external_translations, 'openai_translations_used', 0 ) ) );
+						echo esc_html( sprintf( _n( '%s OpenAI translation used.', '%s OpenAI translations used.', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'openai_translations_used', 0 ) ) ) );
 						if ( gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) > 0 ) {
 							/* translators: %d: number of OpenAI translations used. */
-							echo ' ' . esc_html( sprintf( _n( '(%d used without modifications)', '(%d used without modifications)', 'glotpress' ), gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) ) );
+							echo ' ' . esc_html( sprintf( _n( '%s used without modifications.', '%s used without modifications.', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'openai_same_translations_used', 0 ) ) ) );
 						}
 						echo '</small>';
 					}
@@ -123,22 +121,22 @@ error_log( 'Frontend $gp_external_translations: ' . print_r( $gp_external_transl
 	</tr>
 	<tr>
 		<th>
-			<h4><?php esc_html_e( 'Deepl settings', 'glotpress' ); ?></h4>
+			<h4><?php esc_html_e( 'DeepL settings', 'glotpress' ); ?></h4>
 		</th>
 	</tr>
 	<tr>
 		<th><label for="default_sort[deepl_api_key]">
-				<?php esc_html_e( 'Deepl Free API Key', 'glotpress' ); ?>
+				<?php esc_html_e( 'DeepL Free API Key', 'glotpress' ); ?>
 			</label>
 					<?php
 					if ( gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) > 0 ) {
 						echo '<br>';
 						echo '<small>';
-						/* translators: %d: number of Deepl translations used. */
-						echo esc_html( sprintf( _n( '%d Deepl translation used', '%d Deepl translations used', 'glotpress' ), gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) ) );
+						/* translators: %d: number of DeepL translations used. */
+						echo esc_html( sprintf( _n( '%s DeepL translation used.', '%s DeepL translations used.', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'deepl_translations_used', 0 ) ) ) );
 						if ( gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) > 0 ) {
-							/* translators: %d: number of Deepl translations used. */
-							echo ' ' . esc_html( sprintf( _n( '(%d used without modifications)', '(%d used without modifications)', 'glotpress' ), gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) ) );
+							/* translators: %d: number of DeepL translations used. */
+							echo ' ' . esc_html( sprintf( _n( '%s used without modifications.', '%s used without modifications.', 'glotpress' ), number_format_i18n( gp_array_get( $gp_external_translations, 'deepl_same_translations_used', 0 ) ) ) );
 						}
 						echo '</small>';
 					}
@@ -148,12 +146,12 @@ error_log( 'Frontend $gp_external_translations: ' . print_r( $gp_external_transl
 						<?php
 						$deepl_chars_used = gp_array_get( $gp_external_translations, 'deepl_chars_used', 0 );
 						if ( $deepl_chars_used > 0 ) {
-							/* translators: %d: number of chars translated with Deepl. */
-							echo esc_html( sprintf( __( 'Chars translated with Deepl: %s', 'glotpress' ), number_format_i18n( $deepl_chars_used ) ) );
+							/* translators: %d: number of chars translated with DeepL. */
+							echo esc_html( sprintf( __( 'Chars translated with DeepL: %s', 'glotpress' ), number_format_i18n( $deepl_chars_used ) ) );
 						}
 						?>
 					</small></a>
 			</th>
-		<td><input type="text" class="deepl_api_key" id="default_sort[deepl_api_key]" name="default_sort[deepl_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ); ?>" placeholder="Enter your Deepl API key" /></td>
+		<td><input type="text" class="deepl_api_key" id="default_sort[deepl_api_key]" name="default_sort[deepl_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ); ?>" placeholder="Enter your DeepL API key" /></td>
 	</tr>
 </table>
