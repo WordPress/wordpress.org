@@ -1,9 +1,10 @@
 ( function( $ ){
-	function fetchSuggestions( $container, apiUrl, originalId, nonce ) {
+	function fetchSuggestions( $container, apiUrl, originalId, translationId, nonce ) {
 		var xhr = $.ajax( {
 			url: apiUrl,
 			data: {
 				'original': originalId,
+				'translation': translationId,
 				'nonce': nonce
 			},
 			dataType: 'json',
@@ -44,9 +45,10 @@
 		$container.addClass( 'fetching' );
 
 		var originalId = $gp.editor.current.original_id;
+		var translationId = $gp.editor.current.translation_id;
 		var nonce = $container.data( 'nonce' );
 
-		fetchSuggestions( $container, window.WPORG_TRANSLATION_MEMORY_API_URL, originalId, nonce );
+		fetchSuggestions( $container, window.WPORG_TRANSLATION_MEMORY_API_URL, originalId, translationId, nonce );
 	}
 
 	function maybeFetchOtherLanguageSuggestions() {
@@ -62,9 +64,10 @@
 		$container.addClass( 'fetching' );
 
 		var originalId = $gp.editor.current.original_id;
+		var translationId = $gp.editor.current.translation_id;
 		var nonce = $container.data( 'nonce' );
 
-		fetchSuggestions( $container, window.WPORG_OTHER_LANGUAGES_API_URL, originalId , nonce );
+		fetchSuggestions( $container, window.WPORG_OTHER_LANGUAGES_API_URL, originalId , translationId,  nonce );
 	}
 
 	function copySuggestion( event ) {
