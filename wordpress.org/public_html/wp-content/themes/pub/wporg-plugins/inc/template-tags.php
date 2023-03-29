@@ -495,13 +495,13 @@ function the_plugin_danger_zone() {
 	// Output the Release Confirmation form.
 	the_plugin_release_confirmation_form();
 
-	// Output the transfer form.
-	the_plugin_self_transfer_form();
-
 	if ( 'publish' != $post->post_status ) {
 		// A reminder of the closed status.
 		the_active_plugin_notice();
 	} else {
+		// Output the transfer form.
+		the_plugin_self_transfer_form();
+
 		// Output the self close button.
 		the_plugin_self_close_button();
 	}
