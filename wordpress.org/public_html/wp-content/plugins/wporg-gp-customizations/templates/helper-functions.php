@@ -33,6 +33,14 @@ wp_register_script(
 	filemtime( __DIR__ . '/js/editor.js' )
 );
 
+wp_localize_script(
+	'wporg-translate-editor',
+	'wporgEditorSettings',
+	array(
+		'nonce' => wp_create_nonce( 'wporg-editor-settings' ),
+	)
+);
+
 wp_register_style(
 	'chartist',
 	plugins_url( 'css/chartist.min.css', __FILE__ ),
