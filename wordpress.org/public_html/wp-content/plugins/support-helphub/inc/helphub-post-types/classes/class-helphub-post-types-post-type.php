@@ -139,7 +139,6 @@ class HelpHub_Post_Types_Post_Type {
 		}
 		add_action( 'admin_init', array( $this, 'add_menu_order' ) );
 		add_action( 'after_setup_theme', array( $this, 'ensure_post_thumbnails_support' ) );
-		add_filter( 'jetpack_sitemap_post_types', array( $this, 'add_to_sitemaps' ) );
 	} // End __construct()
 
 	/**
@@ -794,17 +793,6 @@ class HelpHub_Post_Types_Post_Type {
 	 */
 	public function add_menu_order() {
 		add_post_type_support( 'post', 'page-attributes' );
-	} // End add_menu_order()
-
-	/**
-	 * Add the post_type to Jetpack Sitemaps.
-	 *
-	 * @access public
-	 * @since  1.0.0
-	 */
-	public function add_to_sitemaps( $post_types ) {
-		$post_types[] = $this->post_type;
-		return $post_types;
-	} // End add_to_sitemaps()
+	} // End ens
 
 } // End Class
