@@ -206,13 +206,16 @@ class Translation_Memory extends GP_Route {
 		);
 		if ( is_wp_error( $deepl_response ) ) {
 			return array();
-		} else {
-			$body                             = wp_remote_retrieve_body( $deepl_response );
-			$response['deepl']['translation'] = json_decode( $body )->translations[0]->text;
-			$response['deepl']['diff']        = '';
-			$this->update_deepl_chars_used( $original_singular );
-			return $response;
 		}
+		$response_status = wp_remote_retrieve_response_code( $deepl_response );
+		if ( 200 !== $response_status ) {
+			return array();
+		}
+		$body                             = wp_remote_retrieve_body( $deepl_response );
+		$response['deepl']['translation'] = json_decode( $body )->translations[0]->text;
+		$response['deepl']['diff']        = '';
+		$this->update_deepl_chars_used( $original_singular );
+		return $response;
 	}
 
 	/**
