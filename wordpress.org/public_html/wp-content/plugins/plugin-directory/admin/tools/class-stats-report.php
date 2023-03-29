@@ -31,7 +31,7 @@ class Stats_Report {
 	 */
 	public function add_to_menu() {
 		add_submenu_page(
-			'tools.php',
+			'plugin-tools',
 			__( 'Stats Report', 'wporg-plugins' ),
 			__( 'Stats Report', 'wporg-plugins' ),
 			'plugin_review',

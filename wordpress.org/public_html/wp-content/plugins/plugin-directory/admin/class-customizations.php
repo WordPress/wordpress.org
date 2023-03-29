@@ -37,6 +37,7 @@ class Customizations {
 		add_action( 'admin_notices', array( $this, 'add_post_status_notice' ) );
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 
 		add_filter( 'wp_insert_post_data', array( $this, 'check_existing_plugin_slug_on_post_update' ), 10, 2 );
 		add_filter( 'wp_unique_post_slug', array( $this, 'check_existing_plugin_slug_on_inline_save' ), 10, 6 );
@@ -140,6 +141,48 @@ class Customizations {
 					break;
 			}
 		}
+	}
+
+	/**
+	 * Add the Repo Tools menu item to the admin menu.
+	 */
+	public function admin_menu() {
+		add_menu_page( 
+			__( 'Plugin Tools', 'wporg-plugins' ),
+			__( 'Plugin Tools', 'wporg-plugins' ),
+			'plugin_review',
+			'plugin-tools',
+			array( $this, 'plugin_tools_page' ),
+			'dashicons-admin-tools',
+			30
+		);
+	}
+
+	/**
+	 * Render the Repo Tools dashboard page, just a basic list of the menu items.
+	 */
+	public function plugin_tools_page() {
+		global $submenu;
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Plugin Tools', 'wporg-plugins' ); ?></h1>
+			<ul>
+				<?php
+				foreach ( $submenu['plugin-tools'] ?? [] as $page ) {
+					if ( 'plugin-tools' === $page[2] ) {
+						continue;
+					}
+
+					printf(
+						'<li><a href="%s">%s</a></li>',
+						esc_url( admin_url( 'admin.php?page=' . $page[2] ) ),
+						esc_html( $page[0] )
+					);
+				}
+				?>
+			</ul>
+		</div>
+		<?php
 	}
 
 	/**

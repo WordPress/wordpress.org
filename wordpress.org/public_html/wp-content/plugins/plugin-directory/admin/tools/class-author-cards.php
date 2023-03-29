@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Tools;
 
 use WordPressdotorg\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Author_Card;
+use const WordPressdotorg\Plugin_Directory\PLUGIN_FILE;
 
 /**
  * All functionality related to Author_Cards Tool.
@@ -25,33 +26,34 @@ class Author_Cards {
 	 */
 	private function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_to_menu' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
 	/**
-	 * Enqueue JS and CSS assets needed for any wp-admin screens.
-	 *
-	 * @param string $hook_suffix The hook suffix of the current screen.
+	 * Add the Author Cards tool to the Tools menu.
 	 */
-	public function enqueue_assets( $hook_suffix ) {
-		switch ( $hook_suffix ) {
-			case 'tools_page_authorcards':
-				wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 5 );
-				break;
-		}
-	}
-
 	public function add_to_menu() {
-		add_submenu_page(
-			'tools.php',
+		$hook = add_submenu_page(
+			'plugin-tools',
 			__( 'Author Cards', 'wporg-plugins' ),
 			__( 'Author Cards', 'wporg-plugins' ),
 			'plugin_review',
 			'authorcards',
 			array( $this, 'show_form' )
 		);
+
+		add_action( "admin_print_styles-{$hook}", array( $this, 'enqueue_assets' ) );
 	}
 
+	/**
+	 * Enqueue JS and CSS assets needed for any wp-admin screens.
+	 */
+	public function enqueue_assets() {
+		wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', PLUGIN_FILE ), array( 'edit' ), 5 );
+	}
+
+	/**
+	 * Display the Author Cards tool.
+	 */
 	public function show_form() {
 		if ( ! current_user_can( 'plugin_review' ) ) {
 			return;
