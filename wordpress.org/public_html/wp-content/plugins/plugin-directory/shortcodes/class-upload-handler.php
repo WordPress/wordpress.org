@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 
 /**
  * The [wporg-plugin-upload] shortcode handler to display a plugin uploader.
@@ -58,6 +59,7 @@ class Upload_Handler {
 	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
 	public function process_upload() {
+		$has_upload_token = $this->has_valid_upload_token();
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
@@ -114,7 +116,7 @@ class Upload_Handler {
 		}
 
 		// Make sure it doesn't use a TRADEMARK protected slug.
-		if ( false !== $this->has_trademarked_slug() ) {
+		if ( false !== $this->has_trademarked_slug() && ! $has_upload_token ) {
 			$error = __( 'Error: The plugin name includes a restricted term.', 'wporg-plugins' );
 
 			if ( $this->has_trademarked_slug() === trim( $this->has_trademarked_slug(), '-' ) ) {
@@ -241,7 +243,7 @@ class Upload_Handler {
 		}
 
 		// Prevent uploads using popular Plugin names in the wild.
-		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) ) {
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) && ! $has_upload_token ) {
 			$installs = wporg_stats_get_plugin_name_install_count( $this->plugin['Name'] );
 
 			if ( $installs && $installs->count >= 100 ) {
@@ -299,7 +301,7 @@ class Upload_Handler {
 			) );
 		}
 
-		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) ) {
+		if ( function_exists( 'wporg_stats_get_plugin_name_install_count' ) && ! $has_upload_token ) {
 			$installs = wporg_stats_get_plugin_name_install_count( $readme->name );
 
 			if ( $installs && $installs->count >= 100 ) {
@@ -331,7 +333,7 @@ class Upload_Handler {
 		// We're not actually using this right now.
 		$result = $this->check_plugin();
 
-		if ( ! $result ) {
+		if ( ! $result && ! $has_upload_token ) {
 			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
 
 			return new \WP_Error( 'failed_checks', $error . ' ' . sprintf(
@@ -796,6 +798,17 @@ https://make.wordpress.org/plugins', 'wporg-plugins'
 	 */
 	public function whitelist_zip_files() {
 		return 'zip';
+	}
+
+	/**
+	 * Determine if the current user has a valid upload token.
+	 *
+	 * An upload token can be used to bypass various plugin checks.
+	 */
+	public function has_valid_upload_token() {
+		$token = wp_unslash( $_REQUEST['upload_token'] ?? '' );
+
+		return $token && Upload_Token::instance()->is_valid_for_user( get_current_user_id(), $token );
 	}
 
 }

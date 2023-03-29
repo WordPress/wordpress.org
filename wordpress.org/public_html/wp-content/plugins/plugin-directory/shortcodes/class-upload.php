@@ -27,6 +27,8 @@ class Upload {
 	public static function display() {
 		ob_start();
 
+		$uploader = new Upload_Handler();
+
 		if ( is_user_logged_in() ) :
 			include_once ABSPATH . 'wp-admin/includes/template.php';
 
@@ -57,7 +59,6 @@ class Upload {
 				&& ! $submitted_counts->total
 			) :
 				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) :
-					$uploader      = new Upload_Handler();
 					$upload_result = $uploader->process_upload();
 
 					if ( is_wp_error( $upload_result ) ) {
@@ -180,6 +181,21 @@ class Upload {
 				<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 					<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 					<input type="hidden" name="action" value="upload"/>
+					<?php
+					if ( ! empty( $_REQUEST['upload_token'] ) ) {
+						printf(
+							'<input type="hidden" name="upload_token" value="%s"/>',
+							esc_attr( $_REQUEST['upload_token'] )
+						);
+
+						if ( ! $uploader->has_valid_upload_token() ) {
+							printf(
+								'<div class="notice notice-error notice-alt"><p>%s</p></div>',
+								esc_html__( 'The token provided is invalid for this user.', 'wporg-plugins')
+							);
+						}
+					}
+					?>
 					<?php
 					/*
 					<fieldset>
