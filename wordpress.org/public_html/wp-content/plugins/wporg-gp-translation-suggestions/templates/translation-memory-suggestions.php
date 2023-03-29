@@ -44,7 +44,7 @@ if ( empty( $suggestions ) && empty( $openai_suggestions ) && empty( $deepl_sugg
 	foreach ( $deepl_suggestions as $suggestion ) {
 		echo '<li>';
 		echo '<div class="translation-suggestion with-tooltip deepl" tabindex="0" role="button" aria-pressed="false" aria-label="Copy translation">';
-			echo '<span class="deepl-suggestion__score">Deepl</span>';
+			echo '<span class="deepl-suggestion__score">DeepL</span>';
 
 			echo '<span class="translation-suggestion__translation">';
 				echo esc_translation( $suggestion['translation'] );
