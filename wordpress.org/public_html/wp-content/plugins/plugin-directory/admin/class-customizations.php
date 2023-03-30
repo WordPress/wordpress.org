@@ -405,7 +405,7 @@ class Customizations {
 			$post_states['disabled'] = _x( 'Disabled', 'plugin status', 'wporg-plugins' );
 			// Affix the reason it's disabled.
 			$reason = Template::get_close_reason( $post );
-			if ( $reason ) {
+			if ( $reason != _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) ) {
 				$post_states['reason'] = $reason;
 			}
 		}
@@ -413,7 +413,7 @@ class Customizations {
 			$post_states['closed'] = _x( 'Closed', 'plugin status', 'wporg-plugins' );
 			// Affix the reason it's closed.
 			$reason = Template::get_close_reason( $post );
-			if ( $reason ) {
+			if ( $reason != _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) ) {
 				$post_states['reason'] = $reason;
 			}
 		}
