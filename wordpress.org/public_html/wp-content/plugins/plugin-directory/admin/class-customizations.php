@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin;
 
 use \WordPressdotorg\Plugin_Directory;
 use \WordPressdotorg\Plugin_Directory\Tools;
+use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
 
@@ -402,9 +403,19 @@ class Customizations {
 
 		if ( 'disabled' == $post->post_status && 'disabled' != $post_status ) {
 			$post_states['disabled'] = _x( 'Disabled', 'plugin status', 'wporg-plugins' );
+			// Affix the reason it's disabled.
+			$reason = Template::get_close_reason( $post );
+			if ( $reason ) {
+				$post_states['reason'] = $reason;
+			}
 		}
 		if ( 'closed' == $post->post_status && 'closed' != $post_status ) {
 			$post_states['closed'] = _x( 'Closed', 'plugin status', 'wporg-plugins' );
+			// Affix the reason it's closed.
+			$reason = Template::get_close_reason( $post );
+			if ( $reason ) {
+				$post_states['reason'] = $reason;
+			}
 		}
 		if ( 'rejected' == $post->post_status && 'rejected' != $post_status ) {
 			$post_states['rejected'] = _x( 'Rejected', 'plugin status', 'wporg-plugins' );
