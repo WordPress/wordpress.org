@@ -82,6 +82,18 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$actions['plugin_reject'] = __( 'Reject', 'wporg-plugins' );
 		}
 
+		if ( current_user_can( 'plugin_approve' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'closed', 'disabled' ) ) ) ) {
+			$actions['plugin_open'] = __( 'Open', 'wporg-plugins' );
+		}
+
+		if ( current_user_can( 'plugin_close' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'publish', 'approved', 'disabled' ) ) ) ) {
+			$actions['plugin_close'] = __( 'Close', 'wporg-plugins' );
+		}
+
+		if ( current_user_can( 'plugin_close' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'publish', 'approved', 'closed' ) ) ) ) {
+			$actions['plugin_disable'] = __( 'Disable', 'wporg-plugins' );
+		}
+
 		return $actions;
 	}
 
@@ -498,5 +510,44 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		return $status_links;
+	}
+
+	/**
+	 * Display the "actions" fields below the filters.
+	 */
+	public function extra_tablenav( $which ) {
+		parent::extra_tablenav( $which );
+
+		// TODO: This shouldn't have inline CSS/JS.
+
+		if ( 'top' === $which ) {
+			?>
+			<fieldset class="alignleft actions hide-if-js bulk-plugin_close bulk-plugin_disable" disabled="disabled">
+				<select name="close_reason" id="close_reason">
+					<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></option>
+					<?php foreach ( Template::get_close_reasons() as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</fieldset>
+			<style>
+				#posts-filter fieldset.bulk-plugin_close {
+					margin: 0;
+				}
+			</style>
+			<script>
+			jQuery( function( $ ) {
+				$( '.bulkactions' ).on( 'change', function() {
+					var $this = $( this ),
+						val = $this.find(':selected').val(),
+						$tablenav = $this.parents('form').find( '.tablenav.top' );
+
+					$tablenav.find( '.actions.bulk-plugin_close, .actions.bulk-plugin_disable' ).prop( 'disabled', true ).hide();
+					$tablenav.find( '.actions.bulk-' + val ).prop( 'disabled', false ).show();
+				} );
+			} );
+			</script>
+			<?php
+		}
 	}
 }

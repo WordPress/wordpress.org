@@ -322,7 +322,7 @@ class Status_Transitions {
 	 * @param int $post_id Post ID.
 	 */
 	public function save_close_reason( $post_id ) {
-		if ( ! isset( $_POST['close_reason'] ) ) {
+		if ( ! isset( $_REQUEST['close_reason'] ) ) {
 			return;
 		}
 
@@ -330,7 +330,7 @@ class Status_Transitions {
 			return;
 		}
 
-		$close_reason = sanitize_key( $_POST['close_reason'] );
+		$close_reason = sanitize_key( $_REQUEST['close_reason'] );
 
 		update_post_meta( $post_id, '_close_reason', $close_reason );
 		update_post_meta( $post_id, 'plugin_closed_date', current_time( 'mysql' ) );

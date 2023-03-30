@@ -30,7 +30,7 @@ class Customizations {
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 
-		add_action( 'load-edit.php', array( $this, 'bulk_reject_plugins' ) );
+		add_action( 'load-edit.php', array( $this, 'bulk_action_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
 		add_action( 'edit_form_top', array( $this, 'show_permalink' ) );
@@ -228,51 +228,92 @@ class Customizations {
 	}
 
 	/**
-	 * Rejects plugins in bulk.
+	 * Performs plugin status changes in bulk.
 	 */
-	public function bulk_reject_plugins() {
-		if ( empty( $_REQUEST['action'] ) || empty( $_REQUEST['action2'] ) || ! in_array( 'plugin_reject', array( $_REQUEST['action'], $_REQUEST['action2'] ) ) || 'plugin' !== $_REQUEST['post_type'] ) {
+	public function bulk_action_plugins() {
+		if (
+			empty( $_REQUEST['action'] ) ||
+			empty( $_REQUEST['action2'] ) ||
+			'plugin' !== $_REQUEST['post_type']
+		) {
 			return;
 		}
 
 		check_admin_referer( 'bulk-posts' );
 
-		$rejected = 0;
+		$action = array_intersect(
+			[ 'plugin_open', 'plugin_close', 'plugin_disable', 'plugin_reject' ],
+			[ $_REQUEST['action'], $_REQUEST['action2'] ]
+		);
+		$action = array_shift( $action );
+		if ( ! $action ) {
+			return;
+		}
+
+		switch( $action ) {
+			case 'plugin_open':
+				$capability = 'plugin_approve';
+				$new_status = 'publish';
+				$message    = _n_noop( '%s plugin opened.', '%s plugins opened.', 'wporg-plugins' );
+				$from_state = [ 'closed', 'disabled' ];
+				break;
+			case 'plugin_close':
+				$capability = 'plugin_close';
+				$new_status = 'closed';
+				$message    = _n_noop( '%s plugin closed.', '%s plugins closed.', 'wporg-plugins' );
+				$from_state = [ 'closed', 'disabled', 'publish', 'approved' ];
+				break;
+			case 'plugin_disable':
+				$capability = 'plugin_close';
+				$new_status = 'disabled';
+				$message    = _n_noop( '%s plugin disabled.', '%s plugins disabled.', 'wporg-plugins' );
+				$from_state = [ 'closed', 'disabled', 'publish', 'approved' ];
+				break;
+			case 'plugin_reject':
+				$capability = 'plugin_reject';
+				$new_status = 'rejected';
+				$message    = _n_noop( '%s plugin rejected.', '%s plugins rejected.', 'wporg-plugins' );
+				$from_state = [ 'new', 'pending' ];
+				break;
+			default:
+				return;
+		}
+
+		$closed = 0;
 		$plugins  = get_posts( array(
 			'post_type'      => 'plugin',
 			'post__in'       => array_map( 'absint', $_REQUEST['post'] ),
-			'post_status'    => array( 'new', 'pending' ),
+			'post_status'    => $from_state,
 			'posts_per_page' => count( $_REQUEST['post'] ),
 		) );
 
 		foreach ( $plugins as $plugin ) {
-			if ( ! current_user_can( 'plugin_reject', $plugin ) ) {
-				wp_die( __( 'You are not allowed to reject this plugin.', 'wporg-plugins' ), '', array( 'back_link' => true ) );
+			if ( ! current_user_can( $capability, $plugin ) ) {
+				continue;
 			}
 
 			$updated = wp_update_post( array(
 				'ID'          => $plugin->ID,
-				'post_status' => 'rejected',
+				'post_status' => $new_status,
 			) );
 
 			if ( $updated && ! is_wp_error( $updated ) ) {
-				$rejected++;
+				$closed++;
 			}
+
 		}
 
-		if ( $rejected ) {
-			set_transient( 'settings_errors', array(
-				array(
-					'setting' => 'wporg-plugins',
-					'code'    => 'plugins-bulk-rejected',
-					'message' => sprintf( _n( '%d plugin rejected.', '%d plugins rejected.', $rejected, 'wporg-plugins' ), $rejected ),
-					'type'    => 'updated',
-				),
-			) );
-		}
+		set_transient( 'settings_errors', array(
+			array(
+				'setting' => 'wporg-plugins',
+				'code'    => 'plugins-bulk-actioned',
+				'message' => sprintf( translate_nooped_plural( $message, $closed, 'wporg-plugins' ), number_format_i18n( $closed ) ),
+				'type'    => 'updated',
+			),
+		) );
 
 		$send_back = remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'locked', 'ids', 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), wp_get_referer() );
-		wp_redirect( add_query_arg( array( 'settings-updated' => true ), $send_back ) );
+		wp_safe_redirect( add_query_arg( array( 'settings-updated' => true ), $send_back ) );
 		exit;
 	}
 
