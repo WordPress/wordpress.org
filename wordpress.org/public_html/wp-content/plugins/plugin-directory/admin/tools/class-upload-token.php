@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Tools;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
  * All functionality related to the Upload Token Tool.
@@ -28,10 +29,14 @@ class Upload_Token {
 	}
 
 	/**
-	 * Plugin Submission handler, delete any upload token for that user if used.
+	 * Plugin Submission handler, delete the upload token for that user.
+	 *
+	 * Note: This is only hooked in the event that an upload token was validated as being available.
 	 */
 	public function plugin_upload( $plugin, $plugin_post ) {
 		$this->delete_token( $plugin_post->post_author );
+
+		Tools::audit_log( 'Plugin submitted using an Upload Token - Bypassed Trademark and Active Install checks.', $plugin_post->ID );
 	}
 
 	/**
