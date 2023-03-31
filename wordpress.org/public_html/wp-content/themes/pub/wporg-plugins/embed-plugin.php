@@ -136,7 +136,7 @@ if ( ! headers_sent() ) {
 				<?php
 					$plugin_icon = Template::get_plugin_icon( $post, 'html' );
 					$plugin_icon = str_replace( $plugin_icon, "class='plugin-icon'", "class='wp-embed-featured-image rectangular plugin-icon'" );
-					echo $plugin_icon;
+					echo $plugin_icon; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 				?>
 				<?php the_title(); ?>
 			</a>

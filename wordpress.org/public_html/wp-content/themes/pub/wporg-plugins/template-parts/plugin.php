@@ -19,7 +19,7 @@ $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
 			<?php
 			$plugin_icon = Template::get_plugin_icon( get_post(), 'html' );
 			$plugin_icon = str_replace( $plugin_icon, "alt=''", "alt='" . get_the_title() . "'" );
-			echo $plugin_icon;
+			echo $plugin_icon; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 			?>
 		</a>
 	</div><div class="entry">
