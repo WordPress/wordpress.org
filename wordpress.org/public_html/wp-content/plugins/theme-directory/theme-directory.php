@@ -741,12 +741,35 @@ function wporg_themes_remove_wpthemescom( $theme_slug ) {
 }
 
 /**
- * Custom version of core's deprecated `get_theme_data()` function.
+ * Custom version of core's deprecated `get_theme_data()` function merged with some WP_Theme changes.
  *
- * @param string $theme_file Path to the file.
+ * This function exists purely because we can't create a `WP_Theme` instance
+ * from a style.css as a string. We need a very small selection of the data,
+ * so this is better than complex workarounds.
+ *
+ * @param string $theme_file URL or Path to the file.
  * @return array|false File headers, or false on failure.
  */
 function wporg_themes_get_header_data( $theme_file ) {
+
+	// WP_Theme::$file_headers, which is private.
+	$file_headers = array(
+		'Name'        => 'Theme Name',
+		'ThemeURI'    => 'Theme URI',
+		'Description' => 'Description',
+		'Author'      => 'Author',
+		'AuthorURI'   => 'Author URI',
+		'Version'     => 'Version',
+		'Template'    => 'Template',
+		'Status'      => 'Status',
+		'Tags'        => 'Tags',
+		'TextDomain'  => 'Text Domain',
+		'DomainPath'  => 'Domain Path',
+		'RequiresWP'  => 'Requires at least',
+		'RequiresPHP' => 'Requires PHP',
+		'UpdateURI'   => 'Update URI',
+	);
+
 	$themes_allowed_tags = array(
 		'a'       => array(
 			'href'  => array(),
@@ -763,66 +786,38 @@ function wporg_themes_get_header_data( $theme_file ) {
 		'strong'  => array(),
 	);
 
-	$context = stream_context_create( array(
-		'http' => array(
-			'user_agent' => 'WordPress.org Theme Directory'
-		)
-	) );
+	/*
+	 * If it's a remote file, download it first.
+	 *
+	 * While get_file_data() can operate on a http:// url, we can't
+	 * guarantee that the server will be happy with the User Agent.
+	 */
+	if ( str_contains( $theme_file, '://' ) ) {
+		$request = wp_remote_get( 
+			$theme_file,
+			[
+				'user-agent' => 'WordPress.org Theme Directory',
+				'stream'     => true,
+			]
+		);
+		$theme_file = $request['filename'] ?? false;
+	}
 
-	$theme_data = file_get_contents( $theme_file, false, $context );
-	if ( ! $theme_data ) {
-		// Failure reading, or empty style.css file.
+	if ( ! $theme_file || ! file_exists( $theme_file ) ) {
 		return false;
 	}
 
-	$theme_data = str_replace( '\r', '\n', $theme_data );
+	$theme_data = get_file_data( $theme_file, $file_headers, 'theme' );
 
-	// Set defaults.
-	$author_uri  = '';
-	$template    = '';
-	$version     = '';
-	$status      = 'publish';
-	$tags        = array();
-	$author      = 'Anonymous';
-	$name        = '';
-	$theme_uri   = '';
-	$description = '';
-
-	if ( preg_match( '|^[ \t\/*#@]*Theme Name:(.*)$|mi', $theme_data, $m ) ) {
-		$name = wp_strip_all_tags( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Theme URI:(.*)$|mi', $theme_data, $m ) ) {
-		$theme_uri = esc_url( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Description:(.*)$|mi', $theme_data, $m ) ) {
-		$description = wp_kses( trim( $m[1] ), $themes_allowed_tags );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Author:(.*)$|mi', $theme_data, $m ) ) {
-		$author = wp_kses( trim( $m[1] ), $themes_allowed_tags );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Author URI:(.*)$|mi', $theme_data, $m ) ) {
-		$author_uri = esc_url( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Version:(.*)$|mi', $theme_data, $m ) ) {
-		$version = wp_strip_all_tags( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Template:(.*)$|mi', $theme_data, $m ) ) {
-		$template = wp_strip_all_tags( trim( $m[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Status:(.*)$|mi', $theme_data, $m ) ) {
-		$status = wp_strip_all_tags( trim( $meta_key[1] ) );
-	}
-
-	if ( preg_match( '|^[ \t\/*#@]*Tags:(.*)$|mi', $theme_data, $m ) ) {
-		$tags = array_map( 'trim', explode( ',', wp_strip_all_tags( trim( $m[1] ) ) ) );
-	}
+	$name        = wp_strip_all_tags( trim( $theme_data['Name'] ) );
+	$theme_uri   = esc_url( trim( $theme_data['ThemeURI'] ) );
+	$description = wp_kses( trim( $theme_data['Description'] ), $themes_allowed_tags );
+	$author      = wp_kses( trim( $theme_data['Author'] ), $themes_allowed_tags ) ?: 'Anonymous';
+	$author_uri  = esc_url( trim( $theme_data['AuthorURI'] ) );
+	$version     = wp_strip_all_tags( trim( $theme_data['Version'] ) );
+	$template    = wp_strip_all_tags( trim( $theme_data['Template'] ) );
+	$status      = wp_strip_all_tags( trim( $theme_data['Status'] ) ) ?: 'publish';
+	$tags        = array_map( 'trim', explode( ',', wp_strip_all_tags( trim( $theme_data['Tags'] ) ) ) ) ?: [];
 
 	return array(
 		'Name'        => $name,
