@@ -240,8 +240,6 @@ class Customizations {
 			return;
 		}
 
-		check_admin_referer( 'bulk-posts' );
-
 		$action = array_intersect(
 			[ 'plugin_open', 'plugin_close', 'plugin_disable', 'plugin_reject' ],
 			[ $_REQUEST['action'], $_REQUEST['action2'] ]
@@ -250,6 +248,8 @@ class Customizations {
 		if ( ! $action ) {
 			return;
 		}
+
+		check_admin_referer( 'bulk-posts' );
 
 		switch( $action ) {
 			case 'plugin_open':
