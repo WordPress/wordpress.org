@@ -24,6 +24,7 @@ class Stats_Report {
 	 */
 	private function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_to_menu' ) );
+		add_action( 'admin_page_access_denied', array( $this, 'admin_page_access_denied' ) );
 	}
 
 	/**
@@ -38,6 +39,21 @@ class Stats_Report {
 			'statsreport',
 			array( $this, 'show_stats' )
 		);
+	}
+
+	/**
+	 * Redirect the old location.
+	 */
+	public function admin_page_access_denied() {
+		global $pagenow, $plugin_page;
+		if (
+			isset( $pagenow, $plugin_page ) &&
+			'tools.php' === $pagenow &&
+			'statsreport' === $plugin_page
+		) {
+			wp_safe_redirect( admin_url( "admin.php?page={$plugin_page}" ) );
+			exit;
+		}
 	}
 
 	/**
