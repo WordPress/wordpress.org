@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import { Spinner } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ import useInterval from '../../hooks/use-interval';
  * Module constants
  */
 const MAX_ATTEMPTS = 10;
-const RETRY_DELAY = 1000;
+const RETRY_DELAY = 2000;
 const VIEWPORT_WIDTH = 1200;
 const IMAGE_WIDTH = 600;
 
@@ -46,6 +46,7 @@ export default function ( { alt, className, isReady = false, src, style } ) {
 	const [ hasLoaded, setHasLoaded ] = useState( false );
 	const [ hasError, setHasError ] = useState( false );
 	const [ base64Img, setBase64Img ] = useState( '' );
+	const [ shouldRetry, setShouldRetry ] = useState( false );
 
 	// We don't want to keep trying infinitely.
 	const hasAborted = attempts > MAX_ATTEMPTS;
@@ -68,27 +69,39 @@ export default function ( { alt, className, isReady = false, src, style } ) {
 		reader.readAsDataURL( blob );
 	};
 
+	const fetchImage = async () => {
+		try {
+			const res = await fetch( fullUrl );
+
+			if ( res.redirected ) {
+				setShouldRetry( true );
+			} else if ( res.status === 200 && ! res.redirected ) {
+				await convertResponseToBase64( res );
+
+				setHasLoaded( true );
+				setShouldRetry( false );
+			} else {
+				setAttempts( attempts + 1 );
+			}
+		} catch ( error ) {
+			setHasError( true );
+			setShouldRetry( false );
+		}
+	};
+
+	useEffect( () => {
+		( async () => await fetchImage() )();
+	}, [] );
+
 	/**
 	 * The Snapshot service will redirect when its generating an image.
 	 * We want to continue requesting the image until it doesn't redirect.
 	 */
 	useInterval(
 		async () => {
-			try {
-				const res = await fetch( fullUrl );
-
-				if ( res.status === 200 && ! res.redirected ) {
-					await convertResponseToBase64( res );
-
-					setHasLoaded( true );
-				} else {
-					setAttempts( attempts + 1 );
-				}
-			} catch ( error ) {
-				setHasError( true );
-			}
+			await fetchImage();
 		},
-		isLoading ? RETRY_DELAY : null
+		shouldRetry ? RETRY_DELAY : null
 	);
 
 	if ( ! isReady ) {
