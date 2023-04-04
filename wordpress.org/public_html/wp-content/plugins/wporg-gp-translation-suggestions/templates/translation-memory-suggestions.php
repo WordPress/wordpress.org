@@ -5,7 +5,7 @@ if ( empty( $suggestions ) ) {
 	echo '<ul class="suggestions-list">';
 	foreach ( $suggestions as $suggestion ) {
 		echo '<li>';
-		echo '<div class="translation-suggestion with-tooltip" tabindex="0" role="button" aria-pressed="false" aria-label="Copy translation">';
+		echo '<div class="translation-suggestion with-tooltip ' . esc_html( strtolower( $type ) ) . '" tabindex="0" role="button" aria-pressed="false" aria-label="Copy translation">';
 			echo '<span class="' . esc_html( strtolower( $type ) ) . '-suggestion__score">';
 		if ( 'Translation' == $type ) {
 			echo number_format( 100 * $suggestion['similarity_score'] ) . '%';
