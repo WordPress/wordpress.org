@@ -11,6 +11,7 @@ use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 class Translation_Memory extends GP_Route {
 
 	public function get_suggestions( $project_path, $locale_slug, $set_slug ) {
+		$type                                  = 'Translation';
 		$original_id                           = gp_get( 'original' );
 		$translation_id                        = gp_get( 'translation', 0 );
 		$nonce                                 = gp_get( 'nonce' );
@@ -38,7 +39,44 @@ class Translation_Memory extends GP_Route {
 			$locale .= '_' . $set_slug;
 		}
 
-		$suggestions                     = Translation_Memory_Client::query( $original->singular, $locale );
+		$suggestions = Translation_Memory_Client::query( $original->singular, $locale );
+
+		if ( is_wp_error( $suggestions ) ) {
+			wp_send_json_error( $suggestions->get_error_code() );
+		}
+
+		wp_send_json_success(
+			gp_tmpl_get_output(
+				'translation-memory-suggestions',
+				compact( 'suggestions', 'type' ),
+				PLUGIN_DIR . '/templates/'
+			)
+		);
+	}
+
+	public function get_openai_suggestions( $project_path, $locale_slug, $set_slug ) {
+		$type                                  = 'OpenAI';
+		$original_id                           = gp_get( 'original' );
+		$translation_id                        = gp_get( 'translation', 0 );
+		$nonce                                 = gp_get( 'nonce' );
+		$gp_default_sort                       = get_user_option( 'gp_default_sort' );
+		$external_services_exclude_some_status = gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 0 );
+		$translation                           = null;
+		$suggestions                           = array();
+
+		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
+			wp_send_json_error( 'invalid_nonce' );
+		}
+
+		if ( empty( $original_id ) ) {
+			wp_send_json_error( 'no_original' );
+		}
+
+		$original = GP::$original->get( $original_id );
+		if ( ! $original ) {
+			wp_send_json_error( 'invalid_original' );
+		}
+
 		$current_set_slug                = 'default';
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $current_set_slug, $locale_slug );
 		$locale_glossary                 = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
@@ -48,19 +86,67 @@ class Translation_Memory extends GP_Route {
 				$translation = GP::$translation->get( $translation_id );
 			}
 			if ( ! $translation || ( 'current' != $translation->status && 'rejected' != $translation->status && 'old' != $translation->status ) ) {
-				$openai_suggestions = $this->get_openai_suggestion( $original->singular, $locale_slug, $locale_glossary );
-				$deepl_suggestions  = $this->get_deepl_suggestion( $original->singular, $locale_slug, $set_slug );
+				$suggestions = $this->get_openai_suggestion( $original->singular, $locale_slug, $locale_glossary );
 			}
 		} else {
-			$openai_suggestions = $this->get_openai_suggestion( $original->singular, $locale_slug, $locale_glossary );
-			$deepl_suggestions  = $this->get_deepl_suggestion( $original->singular, $locale_slug, $set_slug );
+			$suggestions = $this->get_openai_suggestion( $original->singular, $locale_slug, $locale_glossary );
 		}
 
-		if ( is_wp_error( $suggestions ) ) {
-			wp_send_json_error( $suggestions->get_error_code() );
+		wp_send_json_success(
+			gp_tmpl_get_output(
+				'translation-memory-suggestions',
+				compact( 'suggestions', 'type' ),
+				PLUGIN_DIR . '/templates/'
+			)
+		);
+	}
+
+	public function get_deepl_suggestions( $project_path, $locale_slug, $set_slug ) {
+		$type                                  = 'DeepL';
+		$original_id                           = gp_get( 'original' );
+		$translation_id                        = gp_get( 'translation', 0 );
+		$nonce                                 = gp_get( 'nonce' );
+		$gp_default_sort                       = get_user_option( 'gp_default_sort' );
+		$external_services_exclude_some_status = gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 0 );
+		$translation                           = null;
+		$suggestions                           = array();
+
+		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
+			wp_send_json_error( 'invalid_nonce' );
 		}
 
-		wp_send_json_success( gp_tmpl_get_output( 'translation-memory-suggestions', compact( 'suggestions', 'openai_suggestions', 'deepl_suggestions' ), PLUGIN_DIR . '/templates/' ) );
+		if ( empty( $original_id ) ) {
+			wp_send_json_error( 'no_original' );
+		}
+
+		$original = GP::$original->get( $original_id );
+		if ( ! $original ) {
+			wp_send_json_error( 'invalid_original' );
+		}
+
+		$locale = $locale_slug;
+		if ( 'default' !== $set_slug ) {
+			$locale .= '_' . $set_slug;
+		}
+
+		if ( $external_services_exclude_some_status ) {
+			if ( $translation_id > 0 ) {
+				$translation = GP::$translation->get( $translation_id );
+			}
+			if ( ! $translation || ( 'current' != $translation->status && 'rejected' != $translation->status && 'old' != $translation->status ) ) {
+				$suggestions = $this->get_deepl_suggestion( $original->singular, $locale_slug, $set_slug );
+			}
+		} else {
+			$suggestions = $this->get_deepl_suggestion( $original->singular, $locale_slug, $set_slug );
+		}
+
+		wp_send_json_success(
+			gp_tmpl_get_output(
+				'translation-memory-suggestions',
+				compact( 'suggestions', 'type' ),
+				PLUGIN_DIR . '/templates/'
+			)
+		);
 	}
 
 	/**
@@ -377,7 +463,7 @@ class Translation_Memory extends GP_Route {
 	 * @return void
 	 */
 	private function update_one_external_translation( string $translation, string $suggestion, string $external_translations_used, string $external_same_translations_used ) {
-		$sameTranslationUsed      = $translation == $suggestion;
+		$is_the_same_translation  = $translation == $suggestion;
 		$gp_external_translations = get_user_option( 'gp_external_translations' );
 		$translations_used        = gp_array_get( $gp_external_translations, $external_translations_used, 0 );
 		$same_translations_used   = gp_array_get( $gp_external_translations, $external_same_translations_used, 0 );
@@ -386,7 +472,7 @@ class Translation_Memory extends GP_Route {
 		}
 		$translations_used++;
 		$gp_external_translations[ $external_translations_used ] = $translations_used;
-		if ( $sameTranslationUsed ) {
+		if ( $is_the_same_translation ) {
 			if ( ! is_int( $same_translations_used ) || $same_translations_used < 0 ) {
 				$same_translations_used = 0;
 			}
