@@ -29,6 +29,7 @@
 
 		xhr.always( function() {
 			$container.removeClass( 'fetching' );
+			removeNoSuggestionsMessage( $container );
 		} );
 	}
 
@@ -51,6 +52,46 @@
 		fetchSuggestions( $container, window.WPORG_TRANSLATION_MEMORY_API_URL, originalId, translationId, nonce );
 	}
 
+	/**
+	 * Gets the suggestions from the OpenAI API.
+	 *
+	 * @return {void}
+	 **/
+	function maybeFetchOpenAISuggestions() {
+		maybeFetchExternalSuggestions( gpTranslationSuggestions.get_external_translations.get_openai_translations, window.WPORG_TRANSLATION_MEMORY_OPENAI_API_URL );
+	}
+
+	/**
+	 * Gets the suggestions from the DeepL API.
+	 *
+	 * @return {void}
+	 **/
+	function maybeFetchDeeplSuggestions() {
+		maybeFetchExternalSuggestions( gpTranslationSuggestions.get_external_translations.get_deepl_translations, window.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL );
+	}
+
+	/**
+	 * Gets the suggestions from an external service.
+	 *
+	 * @param getExternalSuggestions
+	 * @param apiUrl
+	 */
+	function maybeFetchExternalSuggestions( getExternalSuggestions, apiUrl ) {
+		var $container = $gp.editor.current.find( '.suggestions__translation-memory' );
+		if ( !$container.length ) {
+			return;
+		}
+		if ( true !== getExternalSuggestions ) {
+			return;
+		}
+
+		var originalId = $gp.editor.current.original_id;
+		var translationId = $gp.editor.current.translation_id;
+		var nonce = $container.data( 'nonce' );
+
+		fetchSuggestions( $container, apiUrl, originalId, translationId, nonce );
+	}
+
 	function maybeFetchOtherLanguageSuggestions() {
 		var $container = $gp.editor.current.find( '.suggestions__other-languages' );
 		if ( ! $container.length ) {
@@ -70,6 +111,45 @@
 		fetchSuggestions( $container, window.WPORG_OTHER_LANGUAGES_API_URL, originalId , translationId,  nonce );
 	}
 
+	/**
+	 * Removes the "No suggestions" message if there are suggestions.
+	 *
+	 * This is needed because the suggestions are loaded asynchronously.
+	 *
+	 * @param $container
+	 */
+	function removeNoSuggestionsMessage( $container ) {
+		var hasSuggestions = $container.find( '.translation-suggestion' ).length > 0;
+		if ( hasSuggestions ) {
+			$container.find( '.no-suggestions' ).hide();
+		} else {
+			$container = removeNoSuggestionsDuplicateMessage( $container );
+		}
+	}
+
+	/**
+	 * Removes duplicate "No suggestions" messages.
+	 *
+	 * @param $container
+	 * @returns {*|jQuery}
+	 */
+	function removeNoSuggestionsDuplicateMessage( $container ) {
+		var $html = $($container);
+		var $paragraphs = $html.find('p');
+		var uniqueParagraphs = [];
+
+		$paragraphs.each(function() {
+			var paragraphText = $(this).text().trim();
+
+			if (uniqueParagraphs.indexOf(paragraphText) === -1) {
+				uniqueParagraphs.push(paragraphText);
+			} else {
+				$(this).remove();
+			}
+		});
+
+		return $html.prop('outerHTML');
+	}
 	function copySuggestion( event ) {
 		if ( 'A' === event.target.tagName ) {
 			return;
@@ -96,8 +176,9 @@
 	$gp.editor.show = ( function( original ) {
 		return function() {
 			original.apply( $gp.editor, arguments );
-
 			maybeFetchTranslationMemorySuggestions();
+			maybeFetchOpenAISuggestions();
+			maybeFetchDeeplSuggestions();
 			maybeFetchOtherLanguageSuggestions();
 		}
 	})( $gp.editor.show );
