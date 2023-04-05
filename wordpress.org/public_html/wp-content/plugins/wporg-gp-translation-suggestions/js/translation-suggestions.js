@@ -58,7 +58,7 @@
 	 * @return {void}
 	 **/
 	function maybeFetchOpenAISuggestions() {
-		maybeFetchExternalSuggestions( gpTranslationSuggestions.get_openai_translations, window.WPORG_TRANSLATION_MEMORY_OPENAI_API_URL );
+		maybeFetchExternalSuggestions( gpTranslationSuggestions.get_external_translations.get_openai_translations, window.WPORG_TRANSLATION_MEMORY_OPENAI_API_URL );
 	}
 
 	/**
@@ -67,7 +67,7 @@
 	 * @return {void}
 	 **/
 	function maybeFetchDeeplSuggestions() {
-		maybeFetchExternalSuggestions( gpTranslationSuggestions.get_deepl_translations, window.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL );
+		maybeFetchExternalSuggestions( gpTranslationSuggestions.get_external_translations.get_deepl_translations, window.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL );
 	}
 
 	/**
@@ -81,7 +81,7 @@
 		if ( !$container.length ) {
 			return;
 		}
-		if ( 'true' !== getExternalSuggestions ) {
+		if ( true !== getExternalSuggestions ) {
 			return;
 		}
 

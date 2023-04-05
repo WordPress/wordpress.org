@@ -127,16 +127,18 @@ class Plugin {
 		);
 
 		$gp_default_sort         = get_user_option( 'gp_default_sort' );
-		$get_openai_translations = empty( trim( gp_array_get( $gp_default_sort, 'openai_api_key' ) ) ) ? 'false' : 'true';
-		$get_deepl_translations  = empty( trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ) ) ? 'false' : 'true';
+		$get_openai_translations = ! empty( trim( gp_array_get( $gp_default_sort, 'openai_api_key' ) ) );
+		$get_deepl_translations  = ! empty( trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ) );
 
 		wp_localize_script(
 			'gp-translation-suggestions',
 			'gpTranslationSuggestions',
 			array(
-				'nonce'                   => wp_create_nonce( 'gp-translation-suggestions' ),
-				'get_openai_translations' => $get_openai_translations,
-				'get_deepl_translations'  => $get_deepl_translations,
+				'nonce'                     => wp_create_nonce( 'gp-translation-suggestions' ),
+				'get_external_translations' => array(
+					'get_openai_translations' => $get_openai_translations,
+					'get_deepl_translations'  => $get_deepl_translations,
+				),
 			)
 		);
 
