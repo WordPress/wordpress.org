@@ -370,6 +370,8 @@ class Upload_Handler {
 					'contributors'             => $readme->contributors,
 					'screenshots'              => $readme->screenshots,
 					'donate_link'              => $readme->donate_link,
+					'license'                  => $readme->license,
+					'license_uri'              => $readme->license_uri,
 					'sections'                 => array_keys( $readme->sections ),
 					'version'                  => $this->plugin['Version'],
 					'header_name'              => $this->plugin['Name'],
