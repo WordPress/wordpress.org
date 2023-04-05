@@ -123,7 +123,7 @@ class Plugin {
 			'gp-translation-suggestions',
 			plugins_url( './js/translation-suggestions.js', PLUGIN_FILE ),
 			array( 'gp-editor' ),
-			'20190510'
+			filemtime( plugin_dir_path( __FILE__ ) . '/../js/translation-suggestions.js' )
 		);
 
 		$gp_default_sort         = get_user_option( 'gp_default_sort' );
