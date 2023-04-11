@@ -63,6 +63,9 @@ class Performance_Optimizations {
 		add_filter( 'pre_count_users', array( $this, 'cache_count_users' ), 10, 3 );
 		// ..and don't do expensive orderbys & counting for user queries that don't need it.
 		add_action( 'pre_get_users', array( $this, 'pre_get_users' ) );
+
+		// Disable feeds for non-existent views. See https://bbpress.trac.wordpress.org/ticket/3544
+		add_action( 'bbp_request', array( $this, 'bbp_request_disable_missing_view_feeds' ), 9 ); // Before bbp_request_feed_trap().
 	}
 
 	/**
@@ -634,5 +637,30 @@ class Performance_Optimizations {
 		if ( $query->query_vars['blog_id'] && ! $is_role_related ) {
 			$query->query_vars['blog_id'] = false;
 		}
+	}
+
+	/**
+	 * Disable feeds for missing bbPress views.
+	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3544
+	 *
+	 * @param array $query_vars
+	 * @return array
+	 */
+	public function bbp_request_disable_missing_view_feeds( $query_vars ) {
+		$view_id = bbp_get_view_rewrite_id();
+
+		if (
+			isset( $query_vars['feed'] ) &&
+			isset( $query_vars[ $view_id ] ) &&
+			! bbp_get_view_query_args( $query_vars[ $view_id ] )
+		) {
+			unset( $query_vars[ $view_id ] );
+
+			// Set a 404 status, without this bbPress is unsure of what to do.
+			$query_vars['error'] = 404;
+		}
+
+		return $query_vars;
 	}
 }
