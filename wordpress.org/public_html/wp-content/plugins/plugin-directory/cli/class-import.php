@@ -242,7 +242,7 @@ class Import {
 		}
 
 		// Validate whether the dependencies are met by WordPress.org-hosted plugins.
-		$requires_plugins       = array_map( 'trim', explode( ',', $headers->RequiresPlugins ) );
+		$requires_plugins       = array_filter( array_map( 'trim', explode( ',', $headers->RequiresPlugins ) ) );
 		$requires_plugins_unmet = false;
 		foreach ( $requires_plugins as $requires_plugin_slug ) {
 			// TODO: Add support for premium plugins.

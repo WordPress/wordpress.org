@@ -377,7 +377,7 @@ class Upload_Handler {
 					'header_author_uri'        => $this->plugin['AuthorURI'],
 					'header_textdomain'        => $this->plugin['TextDomain'],
 					'header_description'       => $this->plugin['Description'],
-					'requires_plugins'         => array_map( 'trim', explode( ',', $this->plugin['RequiresPlugins'] ) ),
+					'requires_plugins'         => array_filter( array_map( 'trim', explode( ',', $this->plugin['RequiresPlugins'] ) ) ),
 					'assets_screenshots'       => array(),
 					'assets_icons'             => array(),
 					'assets_banners'           => array(),
