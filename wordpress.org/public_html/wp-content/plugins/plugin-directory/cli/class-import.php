@@ -41,18 +41,18 @@ class Import {
 
 	// Plugin headers that are stored in plugin meta
 	public $plugin_headers = array(
-		// Header         => meta_key
-		'Name'            => 'header_name',
-		'PluginURI'       => 'header_plugin_uri',
-		'Author'          => 'header_author',
-		'AuthorURI'       => 'header_author_uri',
-		'TextDomain'      => 'header_textdomain',
-		'RequiresPlugins' => 'requires_plugins'
+		// Header    => meta_key
+		'Name'       => 'header_name',
+		'PluginURI'  => 'header_plugin_uri',
+		'Author'     => 'header_author',
+		'AuthorURI'  => 'header_author_uri',
+		'TextDomain' => 'header_textdomain',
 
 		// These headers are stored in these fields, but are handled separately.
-		// 'Version'     => 'version',
-		// 'RequiresWP'  => 'requires',
-		// 'RequiresPHP' => 'requires_php',
+		// 'Version'         => 'version',
+		// 'RequiresWP'      => 'requires',
+		// 'RequiresPHP'     => 'requires_php',
+		// 'RequiresPlugins' => 'requires_plugins'
 	);
 
 	/**
@@ -239,6 +239,28 @@ class Import {
 			// [ 'Plugin Name' => '1.2.3', 'Plugin New Name' => '4.5.6' ]
 			$plugin_names[ $headers->Name ] = $headers->Version;
 			update_post_meta( $plugin->ID, 'plugin_name_history', wp_slash( $plugin_names ) );
+		}
+
+		// Validate whether the dependencies are met by WordPress.org-hosted plugins.
+		$requires_plugins       = array_map( 'trim', explode( ',', $headers->RequiresPlugins ) );
+		$requires_plugins_unmet = false;
+		foreach ( $requires_plugins as $requires_plugin_slug ) {
+			// TODO: Add support for premium plugins.
+			$requires_plugin_post = Plugin_Directory::get_plugin_post( $requires_plugin_slug );
+			if (
+				! $requires_plugin_post ||
+				'publish' !== $requires_plugin_post->post_status
+			) {
+				$requires_plugins_unmet = true;
+				break;
+			}
+		}
+
+		update_post_meta( $plugin->ID, 'requires_plugins', wp_slash( $requires_plugins ) );
+		if ( $requires_plugins_unmet ) {
+			update_post_meta( $plugin->ID, '_requires_plugins_unmet', true );
+		} else {
+			delete_post_meta( $plugin->ID, '_requires_plugins_unmet' );
 		}
 
 		update_post_meta( $plugin->ID, 'requires',           wp_slash( $requires ) );
