@@ -103,6 +103,7 @@ function get_whitelist() {
 			'desrosj',
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
+			'ironprogrammer',
 			'JeffPaul',
 			'JoshuaWold',
 			'justinahinon',
