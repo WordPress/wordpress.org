@@ -532,7 +532,7 @@ div.attribution {
 		color: #fff;
 		font-size: small;
 		padding: 0.25rem 0.5rem;
-		margin-top: 1rem;
+		margin-top: 1.5rem;
 	}
 
 	.attribution-label {
@@ -554,14 +554,18 @@ div.attribution {
 				}
 			}
 		}
-		.tab {
-			display: none;
+		.tab-content {
 			border: 1px solid #aaa;
 			padding: 1rem;
 			margin-top: -1px;
-		}
-		.active {
-			display: block;
+
+			.tab {
+				display: none;
+
+				&.active {
+					display: block;
+				}
+			}
 		}
 	}
 }

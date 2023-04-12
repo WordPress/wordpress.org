@@ -99,6 +99,7 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 					<button><?php _e( 'HTML', 'wporg-photos' ); ?></button>
 					<button><?php _e( 'Plain text', 'wporg-photos' ); ?></button>
 				</div>
+				<div class="tab-content">
 				<div class="tab tab-rich-text active">
 				<?php printf(
 					/* translators: 1: URL to CCO license, 2: URL to photo's page, 3: URL to contributor's profile, 4: Contributor's display name, 5: URL to Photo Directory. */
@@ -130,6 +131,7 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 				); ?>
 				</div>
 				<button class="attribution-copy"><?php _e( 'Copy to clipboard', 'wporg-photos' ); ?></button>
+				</div>
 			</div>
 		</div>
 
