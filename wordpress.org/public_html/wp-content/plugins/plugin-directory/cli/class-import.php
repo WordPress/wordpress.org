@@ -41,12 +41,13 @@ class Import {
 
 	// Plugin headers that are stored in plugin meta
 	public $plugin_headers = array(
-		// Header    => meta_key
-		'Name'       => 'header_name',
-		'PluginURI'  => 'header_plugin_uri',
-		'Author'     => 'header_author',
-		'AuthorURI'  => 'header_author_uri',
-		'TextDomain' => 'header_textdomain',
+		// Header         => meta_key
+		'Name'            => 'header_name',
+		'PluginURI'       => 'header_plugin_uri',
+		'Author'          => 'header_author',
+		'AuthorURI'       => 'header_author_uri',
+		'TextDomain'      => 'header_textdomain',
+		'RequiresPlugins' => 'requires_plugins'
 
 		// These headers are stored in these fields, but are handled separately.
 		// 'Version'     => 'version',
@@ -722,38 +723,72 @@ class Import {
 	 * Find the plugin headers for the given directory.
 	 *
 	 * @param string $directory The directory of the plugin.
+	 * @param int    $max_depth The maximum depth to search for files. Default: current directory only.
 	 *
 	 * @return object The plugin headers.
 	 */
-	public static function find_plugin_headers( $directory ) {
-		$files = Filesystem::list_files( $directory, false, '!\.php$!i' );
+	public static function find_plugin_headers( $directory, $max_depth = -1 ) {
+		$files = Filesystem::list_files( $directory, ( $max_depth > 0 ), '!\.php$!i', $max_depth );
 
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			require ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		// Add any additional headers required.
+		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_extra_plugin_headers' ) );
+
 		/*
 		 * Sometimes plugins have multiple files which we detect as a plugin based on the headers.
-		 * We'll return immediately if the file has a `Plugin Name:` header, otherwise
+		 * We'll break immediately if the file has a `Plugin Name:` header, otherwise
 		 * simply return the last set of headers we come across.
 		 */
-		$possible_headers = false;
+		$headers = false;
 		foreach ( $files as $file ) {
 			$data = get_plugin_data( $file, false, false );
 			if ( array_filter( $data ) ) {
-				if ( $data['Name'] ) {
-					return (object) $data;
-				} else {
-					$possible_headers = (object) $data;
+				$data['PluginFile'] = $file;
+				$headers            = $data;
+
+				if ( $headers['Name'] ) {
+					break;
 				}
 			}
 		}
 
-		if ( $possible_headers ) {
-			return $possible_headers;
+		remove_filter( 'extra_plugin_headers', array( __CLASS__, 'add_extra_plugin_headers' ) );
+
+		if ( ! $headers ) {
+			return false;
 		}
 
-		return false;
+		// The extra_plugin_headers filter doesn't let you set the key.
+		foreach ( self::add_extra_plugin_headers( [] ) as $key => $header ) {
+			if (
+				$key != $header &&
+				! isset( $headers[ $key ] ) &&
+				isset( $headers[ $header ] )
+			) {
+				$headers[ $key ] = $headers[ $header ];
+				unset( $headers[ $header ] );
+			}
+		}
+
+		return (object) $headers;
+	}
+
+	/**
+	 * Add support for additional plugin headers prior to WordPress supporting it.
+	 *
+	 * @param array $headers The headers to look for in plugins.
+	 * @return array
+	 */
+	public static function add_extra_plugin_headers( $headers ) {
+		// WordPress Plugin Dependencies - See https://meta.trac.wordpress.org/ticket/6921
+		if ( ! isset( $headers['RequiresPlugins'] ) ) {
+			$headers['RequiresPlugins'] = 'Requires Plugins';
+		}
+
+		return $headers;
 	}
 
 	/**

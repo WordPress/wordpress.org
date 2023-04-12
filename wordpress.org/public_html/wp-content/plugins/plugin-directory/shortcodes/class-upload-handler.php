@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
@@ -63,14 +64,10 @@ class Upload_Handler {
 		$zip_file         = $_FILES['zip_file']['tmp_name'];
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
-		$plugin_files = Filesystem::list_files( $this->plugin_dir, true /* Recursive */, '!\.php$!i', 1 /* Depth */ );
-		foreach ( $plugin_files as $plugin_file ) {
-			$plugin_data = get_plugin_data( $plugin_file, false, false ); // No markup/translation needed.
-			if ( ! empty( $plugin_data['Name'] ) ) {
-				$this->plugin      = $plugin_data;
-				$this->plugin_root = dirname( $plugin_file );
-				break;
-			}
+		$plugin_data = (array) Import::find_plugin_headers( $this->plugin_dir, 1 /* Max Depth to search */ );
+		if ( ! empty( $plugin_data['Name'] ) ) {
+			$this->plugin      = $plugin_data;
+			$this->plugin_root = dirname( $plugin_data['PluginFile'] );
 		}
 
 		// Let's check some plugin headers, shall we?
@@ -261,7 +258,7 @@ class Upload_Handler {
 		}
 
 		// Check for a valid readme.
-		$readme = $this->find_readme_file();
+		$readme = Import::find_readme_file( $this->plugin_root );
 		if ( empty( $readme ) ) {
 			$error = __( 'Error: The plugin has no readme.', 'wporg-plugins' );
 
@@ -380,6 +377,7 @@ class Upload_Handler {
 					'header_author_uri'        => $this->plugin['AuthorURI'],
 					'header_textdomain'        => $this->plugin['TextDomain'],
 					'header_description'       => $this->plugin['Description'],
+					'requires_plugins'         => $this->plugin['RequiresPlugins'],
 					'assets_screenshots'       => array(),
 					'assets_icons'             => array(),
 					'assets_banners'           => array(),
@@ -673,26 +671,6 @@ class Upload_Handler {
 		}
 
 		return $has_trademarked_slug;
-	}
-
-	/**
-	 * Find the plugin readme file.
-	 *
-	 * Looks for either a readme.txt or readme.md file, prioritizing readme.txt.
-	 *
-	 * @return string The plugin readme.txt or readme.md filename.
-	 */
-	protected function find_readme_file() {
-		$files = Filesystem::list_files( $this->plugin_root, false /* non-recursive */, '!^readme\.(txt|md)$!i' );
-
-		// Prioritize readme.txt file.
-		foreach ( $files as $file ) {
-			if ( '.txt' === strtolower( substr( $file, -4 ) ) ) {
-				return $file;
-			}
-		}
-
-		return reset( $files );
 	}
 
 	/**
