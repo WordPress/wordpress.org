@@ -32,8 +32,8 @@ abstract class Directory_Compat {
 
 	public function init() {
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
-			// Intercept feed requests prior to bbp_request_feed_trap.
-			add_filter( 'bbp_request', array( $this, 'request' ), 9 );
+			// Intercept feed requests prior to bbp_request_feed_trap at 10, before Performance::bbp_request_disable_missing_view_feeds at 9
+			add_filter( 'bbp_request', array( $this, 'request' ), 5 );
 
 			// Add plugin or theme name to view feed titles.
 			add_filter( 'wp_title_rss', array( $this, 'title_correction_for_feed' ) );
