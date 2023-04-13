@@ -249,6 +249,8 @@ class Import {
 			$requires_plugin_post = Plugin_Directory::get_plugin_post( $requires_plugin_slug );
 			if (
 				! $requires_plugin_post ||
+				// get_plugin_post() will resolve some edge-cases, but we only want exact slug-matches.
+				$requires_plugin_slug !== $requires_plugin_post->post_name ||
 				'publish' !== $requires_plugin_post->post_status
 			) {
 				$requires_plugins_unmet = true;
