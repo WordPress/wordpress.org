@@ -43,6 +43,13 @@ summary {
 		color: #666;
 		font-style: italic;
 
+		span {
+			font-style: normal;
+			font-weight: bold;
+			margin-right: 0.2rem;
+			user-select: none;
+		}
+
 		@include breakpoint( 0, 960px ) {
 			margin-left: 20px;
 			margin-right: 20px;

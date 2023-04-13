@@ -56,18 +56,26 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 
 	<div class="entry-content">
 		<figure>
+			<?php $alt_text = get_the_content(); ?>
+
 			<a href="<?php echo wp_get_attachment_url( get_post_thumbnail_id() ); ?>" aria-label="<?php esc_attr_e( 'View larger photo', 'wporg-photos' ); ?>">
-				<img class="single-photo" src="<?php echo get_the_post_thumbnail_url( get_the_ID(), 'medium'); ?>" srcset="<?php echo esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ); ?>" alt="">
+				<?php
+				printf(
+					'<img class="single-photo" src="%s" srcset="%s" alt="%s">',
+					esc_url( get_the_post_thumbnail_url( get_the_ID(), 'medium') ),
+					esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ),
+					esc_attr( $alt_text )
+				);
+				?>
 			</a>
 
-			<?php
-			$caption = get_the_content();
-			if ( $caption ) {
-			?>
+			<?php if ( $alt_text ) : ?>
 
-			<figcaption class="wp-caption-text"><?php echo wp_kses_post( $caption ); ?></figcaption>
+			<figcaption class="wp-caption-text" aria-hidden="true">
+				<span><?php _e( 'Alternative Text:', 'wporg-photos' ); ?></span><?php echo wp_kses_post( $alt_text ); ?>
+			</figcaption>
 
-			<?php } ?>
+			<?php endif; ?>
 		</figure>
 	</div><!-- .entry-content -->
 
