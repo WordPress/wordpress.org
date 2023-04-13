@@ -111,7 +111,7 @@ function photoSubmitInit() {
  * @returns {HTMLElement[]} Array of input fields.
  */
 function photoGetInputFields( form ) {
-	return form.querySelectorAll( 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"])');
+	return form.querySelectorAll('textarea, input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"])');
 }
 
 /**

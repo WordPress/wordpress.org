@@ -14,7 +14,7 @@ class Uploads {
 	 *
 	 * @var int
 	 */
-	const MAX_LENGTH_DESCRIPTION = 250;
+	const MAX_LENGTH_DESCRIPTION = 350;
 
 	/**
 	 * The default maximum allowed file size in megabytes.
@@ -908,11 +908,11 @@ class Uploads {
 				)
 				. "</div>\n"
 				. sprintf(
-					'[%s name="post_content" class="textarea" id="ug_content" description="%s" maxlength="%d" help="%s"]' . "\n",
+					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d" help="%s"]' . "\n",
 					$description_shortcode,
-					esc_attr( __( 'Description (optional)', 'wporg-photos' ) ),
+					esc_attr( __( 'Alternative Text (required)', 'wporg-photos' ) ),
 					self::MAX_LENGTH_DESCRIPTION,
-					esc_attr( sprintf( __( 'Maximum of %d characters. No HTML.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
+					esc_attr( sprintf( __( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Maximum of %d characters. No HTML.', 'wporg-photos' ), self::MAX_LENGTH_DESCRIPTION ) )
 				)
 				. '<div class="upload-checkbox-wrapper">' . "\n";
 
