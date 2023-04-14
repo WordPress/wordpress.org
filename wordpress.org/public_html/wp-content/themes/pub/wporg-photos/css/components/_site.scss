@@ -39,14 +39,14 @@ summary {
 }
 
 .site-main {
-	figcaption {
+	.photo-alt-text {
 		color: #666;
 		font-style: italic;
+		margin: 0;
 
 		span {
 			font-style: normal;
 			font-weight: bold;
-			margin-right: 0.2rem;
 			user-select: none;
 		}
 

@@ -55,28 +55,33 @@ use WordPressdotorg\Photo_Directory\Template_Tags;
 	</header><!-- .entry-header -->
 
 	<div class="entry-content">
-		<figure>
-			<?php $alt_text = get_the_content(); ?>
+		<?php $alt_text = get_the_content(); ?>
 
-			<a href="<?php echo wp_get_attachment_url( get_post_thumbnail_id() ); ?>" aria-label="<?php esc_attr_e( 'View larger photo', 'wporg-photos' ); ?>">
-				<?php
-				printf(
-					'<img class="single-photo" src="%s" srcset="%s" alt="%s">',
-					esc_url( get_the_post_thumbnail_url( get_the_ID(), 'medium') ),
-					esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ),
+		<a href="<?php echo wp_get_attachment_url( get_post_thumbnail_id() ); ?>">
+			<?php
+			printf(
+				'<img class="single-photo" src="%s" srcset="%s" alt="%s">',
+				esc_url( get_the_post_thumbnail_url( get_the_ID(), 'medium') ),
+				esc_attr( wp_get_attachment_image_srcset( get_post_thumbnail_id() ) ),
+				sprintf(
+					/* translators: %s: The alternative text for the photo. */
+					'View larger photo: %s',
 					esc_attr( $alt_text )
-				);
-				?>
-			</a>
+				)
+			);
+			?>
 
-			<?php if ( $alt_text ) : ?>
+		</a>
 
-			<figcaption class="wp-caption-text" aria-hidden="true">
-				<span><?php _e( 'Alternative Text:', 'wporg-photos' ); ?></span><?php echo wp_kses_post( $alt_text ); ?>
-			</figcaption>
+		<?php if ( $alt_text ) : ?>
 
-			<?php endif; ?>
-		</figure>
+		<p class="photo-alt-text">
+			<span><?php _e( 'Alternative Text: ', 'wporg-photos' ); ?></span><?php echo wp_kses_post( $alt_text ); ?>
+
+		</p>
+
+		<?php endif; ?>
+
 	</div><!-- .entry-content -->
 
 	<footer class="entry-footer">
