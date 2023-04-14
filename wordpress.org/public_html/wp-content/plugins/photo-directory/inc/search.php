@@ -106,7 +106,7 @@ class Search {
 		if ( ! is_admin() && $query->is_search() && $query->is_main_query() ) {
 			$where = preg_replace(
 				"/LIKE '(\{\w+\})([^\{]+)(\{\w+\})'/",
-				"LIKE '$2$1'",
+				"REGEXP '\\\\\\\\b$2.*'",
 				$where
 			);
 		}
