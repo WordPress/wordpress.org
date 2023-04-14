@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable
 
 // Avoid PHP Warnings from 'unexpected' tag attributes.
 libxml_use_internal_errors( true );
@@ -118,8 +119,11 @@ foreach ( $header->getElementsByTagName( 'body' )[0]->childNodes as $node ) {
 $search_form = $wporg_header->getElementsByTagName( 'form' )[0];
 $search_form->setAttribute( 'method', 'GET' );
 $search_form->setAttribute( 'action', '/search' );
+$search_label = $search_form->getElementsByTagName( 'label' )[0];
+$search_label->nodeValue = "";
+$search_label->appendChild($wporg_header->createTextNode('Search Trac'));
+
 $search_field = $search_form->getElementsByTagName( 'input' )[0];
-$search_field->setAttribute( 'placeholder', 'Search Trac...' );
 $search_field->setAttribute( 'name', 'q' );
 
 // Direct the skip link to the correct element
