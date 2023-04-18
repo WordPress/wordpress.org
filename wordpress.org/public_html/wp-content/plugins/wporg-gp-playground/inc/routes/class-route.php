@@ -110,7 +110,7 @@ class Route extends GP_Route {
 			}
 		</script>
 		<script type="module">
-			import { connectPlayground, login, installPluginsFromDirectory } from '@wp-playground/client';
+			import { connectPlayground, login, installPluginsFromDirectory, installThemeFromDirectory } from '@wp-playground/client';
 			let response;
 			let totalPercentage = 0;
 
@@ -141,7 +141,7 @@ class Route extends GP_Route {
 				'wp/dev': '',
 				'wp/dev/admin': 'admin-',
 				'wp-plugins/glotpress/dev': 'plugins/glotpress-',
-				'wp-<?php echo esc_attr( $type ); ?>s/<?php echo esc_attr( $plugin ); ?>/dev': '<?php echo esc_attr( $type ); ?>s/<?php echo esc_attr( $plugin ); ?>-',
+				'wp-<?php echo esc_attr( $type ); ?>s/<?php echo esc_attr( $plugin ), 'plugin' === $type ? '/dev' : '/' ?>': '<?php echo esc_attr( $type ); ?>s/<?php echo esc_attr( $plugin ); ?>-',
 			};
 			const filters = {
 				'wp': '&filters[term]=wp-admin',
