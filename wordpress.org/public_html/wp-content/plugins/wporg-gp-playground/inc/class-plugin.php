@@ -13,11 +13,6 @@ class Plugin {
 	private static $instance;
 
 	/**
-	 * @var array
-	 */
-	private $queue = array();
-
-	/**
 	 * Returns always the same instance of this plugin.
 	 *
 	 * @return Plugin

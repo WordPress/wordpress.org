@@ -18,11 +18,12 @@ class Route extends GP_Route {
 			wp_send_json_error( 'translation_set_found' );
 		}
 
-		if ( ! preg_match( '#^wp-plugins/([^/]+)/#', $project_path, $m ) ) {
+		if ( ! preg_match( '#^wp-(plugin|theme)s/([^/]+)#', $project_path, $m ) ) {
 			die( 'Unknown path' );
 		}
-		$plugin = $m[1];
-		$plugin_project = GP::$project->by_path( 'wp-plugins/' . $plugin );
+		$type = $m[1];
+		$plugin = $m[2];
+		$plugin_project = GP::$project->by_path( $m[0] );
 		if ( ! $project ) {
 			die( 'Project not found' );
 		}
@@ -99,7 +100,7 @@ class Route extends GP_Route {
 		</div>
 		<iframe id="wp"></iframe>
 		<div id="info">
-			This is WordPress running just in your browser, with the plugin <strong><?php echo esc_html( $plugin_project->name ); ?></strong> in <strong><?php echo esc_html( $gp_locale->english_name ); ?></strong> for translation. Logged in as <em><?php echo wp_get_current_user()->display_name; ?> (<?php echo wp_get_current_user()->user_login; ?>)</em> on <a href="<?php echo esc_url( home_url() ); ?>" target="_blank"><?php echo get_bloginfo( 'name' ); ?></a>.
+			This is WordPress running just in your browser, with the <?php echo esc_html( $type ); ?> <strong><?php echo esc_html( $plugin_project->name ); ?></strong> in <strong><?php echo esc_html( $gp_locale->english_name ); ?></strong> for translation. Logged in as <em><?php echo wp_get_current_user()->display_name; ?> (<?php echo wp_get_current_user()->user_login; ?>)</em> on <a href="<?php echo esc_url( home_url() ); ?>" target="_blank"><?php echo get_bloginfo( 'name' ); ?></a>.
 		</div>
 		<script type="importmap">
 			{
@@ -135,11 +136,12 @@ class Route extends GP_Route {
 
 			await login(client, 'admin', 'password');
 			await client.mkdirTree('/wordpress/wp-content/languages/plugins');
+			await client.mkdirTree('/wordpress/wp-content/languages/themes');
 			const languages = {
 				'wp/dev': '',
 				'wp/dev/admin': 'admin-',
 				'wp-plugins/glotpress/dev': 'plugins/glotpress-',
-				'wp-plugins/<?php echo esc_attr( $plugin ); ?>/dev': 'plugins/<?php echo esc_attr( $plugin ); ?>-',
+				'wp-<?php echo esc_attr( $type ); ?>s/<?php echo esc_attr( $plugin ); ?>/dev': '<?php echo esc_attr( $type ); ?>s/<?php echo esc_attr( $plugin ); ?>-',
 			};
 			const filters = {
 				'wp': '&filters[term]=wp-admin',
@@ -178,17 +180,22 @@ ENDP
 );
 			`});
 			console.log(response.text);
-			progress( 20, 'Installing plugins...' );
+			progress( 20, 'Installing plugins and themes...' );
+			<?php if ( 'plugin' === $type ) : ?>
 			await installPluginsFromDirectory( client, ['glotpress-local', '<?php echo esc_attr( $plugin ); ?>'] );
-			progress( 15, 'Making plugins translatable...' );
+			<?php elseif ( 'theme' === $type ) : ?>
+			await installPluginsFromDirectory( client, ['glotpress-local'] );
+			await installThemeFromDirectory( client, '<?php echo esc_attr( $plugin ); ?>' );
+			<?php endif; ?>
+			progress( 15, 'Making <?php echo esc_attr( $type ); ?> translatable...' );
 			response = await client.run({
 				code: '<' + '?' + 'php ' + `
 include 'wordpress/wp-load.php';
 $request = new WP_REST_Request();
-$request->set_param( 'name', '<?php echo esc_html( $plugin ); ?>');
-$request->set_param( 'path', 'wp-plugins/<?php echo esc_html( $plugin ); ?>');
-$request->set_param( 'locale', '<?php echo esc_html( $gp_locale->wp_locale ); ?>');
-$request->set_param( 'locale_slug', '<?php echo esc_html( $translation_set_slug ); ?>');
+$request->set_param( 'name', '<?php echo esc_attr( $plugin ); ?>');
+$request->set_param( 'path', 'wp-<?php echo esc_attr( $type ); ?>s/<?php echo esc_attr( $plugin ); ?>');
+$request->set_param( 'locale', '<?php echo esc_attr( $gp_locale->wp_locale ); ?>');
+$request->set_param( 'locale_slug', '<?php echo esc_attr( $translation_set_slug ); ?>');
 GP::$rest->create_local_project( $request );
 			`});
 			await client.goTo( '/wp-admin/' );
