@@ -24,8 +24,9 @@
 		support_link = 'https://wordpress.org/support/'
 
 	# <link rel="canonical">
-	if req.environ['PATH_INFO'].startswith('/ticket/') :
-		canonical = 'https://' + req.environ['HTTP_HOST'] + '/ticket/' + req.environ['PATH_INFO'].split('/')[2]
+	if req.environ['PATH_INFO'].startswith( ( '/ticket/', '/changeset/' ) ) :
+		url_path_parts = req.environ['PATH_INFO'].split('/')
+		canonical  = 'https://' + req.environ['HTTP_HOST'] + '/' + url_path_parts[1] + '/' + url_path_parts[2]
 	else :
 		canonical = false;
 
