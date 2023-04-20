@@ -34,6 +34,7 @@ class Admin {
 		add_filter( 'use_block_editor_for_post_type',          [ __CLASS__, 'disable_block_editor' ], 10, 2 );
 		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_to_photo_media_if_pending' ] );
 		add_filter( 'add_menu_classes',                        [ __CLASS__, 'add_admin_menu_pending_indicator' ] );
+		add_filter( "manage_taxonomies_for_{$post_type}_columns", [ __CLASS__, 'remove_orientations_column' ], 10, 2 );
 
 		// Record and display photo contributor IP address.
 		add_action( 'transition_post_status',                  [ __CLASS__, 'record_contributor_ip' ], 10, 3 );
@@ -1050,6 +1051,24 @@ class Admin {
 		}
 
 		return $location;
+	}
+
+	/**
+	 * Removes the 'Orientations' column from post listings.
+	 *
+	 * The column doesn't represent information that needs to be gleaned from a
+	 * post listing overview.
+	 *
+	 * @param string[] $taxonomies Array of taxonomy names to show columns for.
+	 * @param string   $post_type  The post type.
+	 * @return string[]
+	 */
+	public static function remove_orientations_column( $taxonomies, $post_type ) {
+		if ( Registrations::get_post_type() === $post_type ) {
+			unset( $taxonomies[ Registrations::get_taxonomy( 'orientations' ) ] );
+		}
+
+		return $taxonomies;
 	}
 
 }
