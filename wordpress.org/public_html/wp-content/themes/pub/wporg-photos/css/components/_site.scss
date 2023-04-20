@@ -389,6 +389,36 @@ body.page {
 		min-width: 100px;
 	}
 
+	.photo-tags {
+		display: flex;
+		flex-flow: row nowrap;
+
+		ul {
+			display: flex;
+			flex-flow: row wrap;
+			gap: 0.5rem;
+			list-style: none;
+			margin: 0.3rem 0 1rem;
+		}
+
+		.photo-tag {
+			background-color: #ddd;
+			color: #333;
+			padding: 4px 14px;
+			border-radius: 16px;
+			font-size: 14px;
+
+			a {
+				text-decoration: none;
+
+				&:hover {
+					color: #0073aa;
+					text-decoration: underline;
+				}
+			}
+		}
+	}
+
 	.photo-dimensions {
 		margin-top: 1rem;
 	}
