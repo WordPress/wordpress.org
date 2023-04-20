@@ -288,13 +288,13 @@ class Posts {
 	 * by the current user.
 	 *
 	 * @param string $orderby The field to order posts by when determining the
-	 *                        next post in queue. Default 'rand'.
+	 *                        next post in queue. Default 'date'.
 	 * @param string $order   The sort order used when determining the next post
 	 *                        in queue. Either 'ASC' or 'DESC'. Default 'ASC'.
 	 * @return WP_Post|false The next post, or false if there are no other posts
 	 *                       available for the user to moderate.
 	 */
-	public static function get_next_post_in_queue( $orderby = 'rand', $order = 'ASC' ) {
+	public static function get_next_post_in_queue( $orderby = 'date', $order = 'ASC' ) {
 		$next = false;
 
 		if ( 'rand' === $orderby ) {
@@ -311,6 +311,18 @@ class Posts {
 			'posts_per_page' => 1,
 			'post_status'    => 'pending',
 			'post_type'      => Registrations::get_post_type(),
+			'meta_query'     => [
+				'relation'   => 'OR',
+				[
+					'key'     => '_edit_lock',
+					'compare' => 'NOT EXISTS',
+				],
+				[
+					'key'     => '_edit_lock',
+					'value'   => '',
+					'compare' => '='
+				],
+			],
 		] );
 
 		if ( $posts ) {
