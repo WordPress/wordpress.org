@@ -43,6 +43,8 @@ class Moderation {
 	 * Initializes component.
 	 */
 	public static function init() {
+		$post_type = Registrations::get_post_type();
+
 		add_filter( 'the_title',                     [ __CLASS__, 'change_prefix_from_private_to_awaiting_moderation' ], 10, 2 );
 		add_filter( 'photo_column_data_end',         [ __CLASS__, 'output_moderation_flags' ] );
 		add_action( 'wporg_photos_approve_post',     [ __CLASS__, 'send_approval_email' ] );
@@ -55,6 +57,9 @@ class Moderation {
 		// Add column to users table with count of photos moderated.
 		add_filter( 'manage_users_columns',               [ __CLASS__, 'add_moderated_count_column' ] );
 		add_filter( 'manage_users_custom_column',         [ __CLASS__, 'handle_moderated_count_column_data' ], 10, 3 );
+
+		// Modify Date column for photo posts table with name of moderator.
+		add_action( 'post_date_column_time',              [ __CLASS__, 'add_moderator_to_date_column' ], 10, 3 );
 	}
 
 	/**
@@ -626,6 +631,30 @@ https://wordpress.org/photos/
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Amends the Date column for photo posts to include the moderator.
+	 *
+	 * @param string  $t_time      The published time.
+	 * @param WP_Post $post        Post object.
+	 * @param string  $column_name The column name.
+	 * @return string
+	 */
+	public static function add_moderator_to_date_column( $t_time, $post, $column_name ) {
+		if ( 'date' !== $column_name || Registrations::get_post_type() !== get_post_type( $post ) ) {
+			return $t_time;
+		}
+
+		$moderator = Photo::get_moderator_link( $post );
+
+		if ( $moderator ) {
+			$t_time .= '<div class="photo-moderator">'
+				. sprintf( __( 'Moderated by: %s', 'wporg-photos' ), $moderator )
+				. '</div>';
+		}
+
+		return $t_time;
 	}
 
 }
