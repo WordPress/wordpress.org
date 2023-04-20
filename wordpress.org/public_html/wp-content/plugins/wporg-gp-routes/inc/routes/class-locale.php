@@ -277,6 +277,8 @@ class Locale extends GP_Route {
 						return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
 					case 'browsehappy':
 						return '<div class="icon"><img src="' . plugins_url( 'templates/images/browsehappy.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
+					case 'openverse':
+						return '<div class="icon"><img src="' . plugins_url( 'templates/images/openverse.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
 					default:
 						return '<div class="default-icon"><span class="dashicons dashicons-networking"></span></div>';
 				}
