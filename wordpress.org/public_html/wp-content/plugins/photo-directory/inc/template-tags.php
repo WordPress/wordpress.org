@@ -119,19 +119,19 @@ function show_tags( $post = 0, $echo = true ) {
 	}
 
 	$output = '<div class="photo-tags">';
-	$output .= '<span class="photo-meta-label photo-tags-label">' . __( 'Tags: ', 'wporg-photos' ) . '</span>';
+	$output .= '<span class="photo-meta-label photo-tags-label">' . __( 'Tags: ', 'wporg-photos' ) . '</span>' . "\n";
+	$output .= "<ul>\n";
 
-	$tags_output = [];
 	foreach ( $tags as $tag ) {
-		$tags_output[] = sprintf(
-			'<a class="photo-tag photo-tag-%s" href="%s">%s</a>',
+		$output .= sprintf(
+			'<li class="photo-tag photo-tag-%s"><a href="%s">%s</a></li>',
 			esc_attr( $tag->slug ),
 			esc_url( get_term_link( $tag->slug, Registrations::get_taxonomy( 'tags' ) ) ),
 			$tag->name
 		);
 	}
-	$output .= implode( ', ', $tags_output );
 
+	$output .= "</ul>\n";
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
