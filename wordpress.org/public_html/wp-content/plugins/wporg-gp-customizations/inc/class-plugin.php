@@ -45,6 +45,7 @@ class Plugin {
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
 		add_action( 'init', array( $this, 'bump_assets_versions' ), 20 );
+		add_action( 'init', array( $this, 'add_cors_header' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'add_consistency_tool_link' ), 10, 5 );
@@ -463,6 +464,22 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
 		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Stats_Print' );
 
+	}
+
+	/**
+	 * Allow the Playground to access translate.wordpress.org.
+	 */
+	public static function add_cors_header() {
+		if ( headers_sent() ) {
+			return;
+		}
+		if ( isset( $_SERVER['HTTP_ORIGIN'] ) ) {
+			switch ( $_SERVER['HTTP_ORIGIN'] ) {
+				case 'https://playground.wordpress.net':
+					header( 'Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] );
+			}
+		}
+		header( 'Vary: origin' );
 	}
 
 	/**
