@@ -748,7 +748,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$user       = get_user_by( 'id', $user_id );
 			if ( $user ) {
 				$valid_hash = hash_equals(
-					$this->_generate_remote_token_hash( $user, $valid_until, $remember_me ),
+					$this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token ),
 					$sso_hash
 				);
 			}
