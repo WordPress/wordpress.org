@@ -697,12 +697,14 @@ var wpTrac, coreKeywordList, gardenerKeywordList, reservedTerms, coreFocusesList
 			version = parseFloat( elements.version.val() );
 
 			// Remove task, or make a task ticket read only. This supports the ticket type being 'task' or 'task (blessed)'
-			if ( -1 !== elements.type.val().indexOf( 'task' ) ) {
-				elements.type.after('<input type="hidden" name="field_type" value="' + elements.type.val() + '" /> ' + elements.type.val() )
-					.parent().css('vertical-align', 'middle').end()
-					.remove();
-			} else {
-				elements.type.find('option[value*="task"]').remove();
+			if ( elements.type.length ) {
+				if ( -1 !== elements.type.val().indexOf( 'task' ) ) {
+					elements.type.after('<input type="hidden" name="field_type" value="' + elements.type.val() + '" /> ' + elements.type.val() )
+						.parent().css('vertical-align', 'middle').end()
+						.remove();
+				} else {
+					elements.type.find('option[value*="task"]').remove();
+				}
 			}
 
 			// Once a Version is set, remove newer versions.
