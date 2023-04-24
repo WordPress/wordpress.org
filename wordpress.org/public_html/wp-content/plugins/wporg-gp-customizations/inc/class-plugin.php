@@ -372,7 +372,7 @@ class Plugin {
 
 		add_action( 'gp_head', 'stats_hide_smile_css' );
 		add_action( 'gp_head', 'stats_admin_bar_head', 100 );
-		add_action( 'gp_footer', 'stats_footer', 101 );
+		add_action( 'gp_footer', array( 'Automattic\Jetpack\Stats\Tracking_Pixel', 'add_to_footer' ), 101 );
 	}
 
 	/**
