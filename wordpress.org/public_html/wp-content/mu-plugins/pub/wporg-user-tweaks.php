@@ -37,6 +37,12 @@ add_filter( 'get_the_author_display_name', function( $name, $user_id ) {
 // bbPress skips user filtering and does it's own
 add_filter( 'bbp_get_displayed_user_field', function( $value, $field, $filter ) {
 	if ( 'edit' === $filter ) {
+
+		// When editing a user, if the nickname is blank, fill it in with the nice name. 
+		if ( 'nickname' === $field && empty( $value ) ) {
+			$value = bbp_get_displayed_user_field( 'user_nicename', 'edit' );
+		}
+
 		return $value;
 	}
 
