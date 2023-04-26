@@ -50,3 +50,6 @@ dl.photos-flagged dt {
 .column-wporg-photo .photos-photo-link img.blurred {
 	filter: blur( 0.7rem );
 }
+.photo-moderator {
+	margin-top: 1rem;
+}
