@@ -69,6 +69,7 @@ class Themes_API {
 		'external_repository_url' => false,
 		'external_support_url' => false,
 		'can_configure_categorization_options' => false,
+		'upload_date'        => false,
 	);
 
 	/**
@@ -822,6 +823,10 @@ class Themes_API {
 
 		if ( $this->fields['creation_time'] ) {
 			$phil->creation_time = get_post_time( 'Y-m-d H:i:s', true, $theme->ID, true );
+		}
+
+		if ( $this->fields['upload_date'] ) {
+			$phil->upload_dates = get_post_meta( $theme->ID, '_upload_date', true );
 		}
 
 		if ( $this->fields['homepage'] ) {
