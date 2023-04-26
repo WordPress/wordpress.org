@@ -826,7 +826,7 @@ class Themes_API {
 		}
 
 		if ( $this->fields['upload_date'] ) {
-			$phil->upload_dates = get_post_meta( $theme->ID, '_upload_date', true );
+			$phil->upload_date = get_post_meta( $theme->ID, '_upload_date', true );
 		}
 
 		if ( $this->fields['homepage'] ) {
