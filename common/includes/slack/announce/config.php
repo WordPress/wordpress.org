@@ -117,6 +117,7 @@ function get_whitelist() {
 			'metalandcoffee',
 			'monikarao',
 			'mukesh27',
+			'oglekler',
 			'pbiron',
 			'priethor',
 			'psykro', // @Jonathan on Slack
