@@ -75,7 +75,9 @@ class Upload {
 				endif;
 
 			else :
-				$plugins = wp_count_posts( 'plugin', 'readable' );
+				$plugins       = wp_count_posts( 'plugin', 'readable' );
+				$oldest_plugin = get_posts( [ 'post_type' => 'plugin', 'post_status' => 'new', 'order' => 'ASC', 'orderby' => 'post_date_gmt', 'numberposts' => 1 ] );
+				$queue_length  = floor( ( time() - strtotime( $oldest_plugin[0]->post_date_gmt ?? 'now' ) ) / DAY_IN_SECONDS );
 				?>
 
 				<div class="plugin-queue-message notice notice-info notice-alt">
@@ -92,7 +94,25 @@ class Upload {
 								$plugins->new,
 								'wporg-plugins'
 							) ),
-							'<strong>' . $plugins->new . '</strong>'
+							'<strong>' . number_format_i18n( $plugins->new ) . '</strong>'
+						);
+					}
+
+					// If the queue is currently beyond 10 days, display a warning to that effect.
+					if ( $queue_length > 10 ) {
+						echo '</p><p>';
+						esc_html_e( 'The review queue is currently longer than normal, we apologize for the delays and ask for patience.', 'wporg-plugins' );
+
+						echo '</p><p>';
+						printf(
+							/* translators: %s: Number of days. Only displayed if > 10 */
+							esc_html( _n(
+								'The current wait for an initial review is at least %s day.',
+								'The current wait for an initial review is at least %s days.',
+								$queue_length,
+								'wporg-plugins'
+							) ),
+							'<strong>' . number_format_i18n( $queue_length ) . '</strong>'
 						);
 					}
 					?>
