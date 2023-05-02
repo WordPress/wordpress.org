@@ -348,11 +348,17 @@ class Ratings_Compat {
 			return;
 		}
 
+		$topic_content = false;
+		if ( ! empty( $_POST['bbp_topic_content'] ) ) {
+			// Apply the new-topic pre-content filters. This allows for various forum hooks to remove links.
+			$topic_content = apply_filters( 'bbp_new_topic_pre_content', $_POST['bbp_topic_content'] );
+		}
+
 		if (
-			! empty( $_POST['bbp_topic_content'] ) &&
+			$topic_content &&
 			(
-				false !== stripos( $_POST['bbp_topic_content'], 'https://' ) ||
-				false !== stripos( $_POST['bbp_topic_content'], 'http://' )
+				false !== stripos( $topic_content, 'https://' ) ||
+				false !== stripos( $topic_content, 'http://' )
 			)
 		) {
 			// Send this review to pending after it gets published. 
