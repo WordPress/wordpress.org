@@ -53,8 +53,10 @@ class Blocks {
 		add_action( 'save_post', [ $this, 'metabox_forum_optin_save_handler' ] );
 
 		// Reverse twemoji replacements. Before bbPress sanitization gets to it.
-		add_filter( 'bbp_new_reply_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
-		add_filter( 'bbp_new_topic_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
+		add_filter( 'bbp_new_reply_pre_content',  [ $this, 'reverse_twemoji_upon_save' ], 5 );
+		add_filter( 'bbp_edit_reply_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
+		add_filter( 'bbp_new_topic_pre_content',  [ $this, 'reverse_twemoji_upon_save' ], 5 );
+		add_filter( 'bbp_edit_topic_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
 	}
 
 	public function after_setup_theme() {
