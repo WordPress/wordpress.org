@@ -309,7 +309,14 @@ class Blocks {
 
 		// Replace all img.emoji with the alt text.
 		$content = preg_replace(
-			'~<img[^>]+class="emoji"[^>]+alt="(.*?)"+[^>]+>(</img>)?~iu',
+			'~<img[^>]+class="emoji"[^>]+alt="(.*?)"+[^>]+>(\s*</img>)?~iu',
+			'$1',
+			$content
+		);
+
+		// Replace all emoji svgs with the alt text, for when the emoji class has been stripped.
+		$content = preg_replace(
+			'~<img[^>]+alt="(.*?)"+[^>]+s\.w\.org/images/core/emoji[^>]+>(\s*</img>)?~iu',
 			'$1',
 			$content
 		);
