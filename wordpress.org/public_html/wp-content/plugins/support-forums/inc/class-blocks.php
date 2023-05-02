@@ -309,7 +309,7 @@ class Blocks {
 
 		// Replace all img.emoji with the alt text.
 		$content = preg_replace(
-			'~<img[^>]+class="emoji"[^>]+alt="(.*?)"+[^>]+>~i',
+			'~<img[^>]+class="emoji"[^>]+alt="(.*?)"+[^>]+>(</img>)?~iu',
 			'$1',
 			$content
 		);
