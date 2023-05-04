@@ -53,11 +53,6 @@ add_filter( 'body_class', 'wporg_login_body_class' );
 add_filter( 'show_admin_bar', '__return_false', 101 );
 
 /**
- * Disable the Core Language Selector on wp-login.php.
- */
-add_filter( 'login_display_language_dropdown', '__return_false' );
-
-/**
  * Disable XML-RPC endpoints.
  */
 add_filter( 'xmlrpc_methods', '__return_empty_array' );
@@ -319,8 +314,16 @@ function wporg_login_get_locales() {
  * 
  * Note: See the 'Locale Detection' plugin for the switching of the locale.
  */
-function wporg_login_language_switcher() {
+function wporg_login_language_switcher( $display = true ) {
 	$current_locale = get_locale();
+
+	/*
+	 * If something has explicitely disabled the switcher, don't show our version either.
+	 * This is used for when we're called from the 'login_display_language_dropdown' filter.
+	 */
+	if ( ! $display ) {
+		return $display;
+	}
 
 	?>
 	<div class="language-switcher">
@@ -354,9 +357,11 @@ function wporg_login_language_switcher() {
 		} );
 	</script>
 	<?php
+
+	return false; // For the login_display_language_dropdown filter.
 }
-add_action( 'wp_footer', 'wporg_login_language_switcher', 1 );
-add_action( 'login_footer', 'wporg_login_language_switcher', 1 );
+add_action( 'wp_footer', 'wporg_login_language_switcher', 1, 0 );
+add_action( 'login_display_language_dropdown', 'wporg_login_language_switcher', 20 );
 
 /**
  * Simple API for accessing the reCaptcha verify api.
