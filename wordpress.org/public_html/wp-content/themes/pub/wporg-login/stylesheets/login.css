@@ -638,3 +638,13 @@ form {
 		padding-bottom: 20px;
 	}
 }
+
+/* Two Factor customizations required. */
+#loginform {
+	position: relative;
+}
+#login .backup-methods-wrap {
+	padding: 0;
+	position: absolute;
+	top: 100%;
+}
