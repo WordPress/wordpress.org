@@ -24,6 +24,38 @@ if ( ! is_array( $gp_default_sort ) ) {
 }
 
 $gp_external_translations = get_user_option( 'gp_external_translations' );
+
+$openai_key      = trim( gp_array_get( $gp_default_sort, 'openai_api_key' ) );
+$openai_response = null;
+if ( $openai_key ) {
+	$openai_response = wp_remote_get(
+		'https://api.openai.com/v1/usage?date=' . gmdate( 'Y-m-d' ),
+		array(
+			'timeout' => 4,
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'Bearer ' . $openai_key,
+			),
+		)
+	);
+}
+$openai_response_code = wp_remote_retrieve_response_code( $openai_response );
+
+$deepl_key      = trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) );
+$deepl_response = null;
+if ( $deepl_key ) {
+	$deepl_response = wp_remote_get(
+		'https://api-free.deepl.com/v2/usage',
+		array(
+			'timeout' => 4,
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'DeepL-Auth-Key ' . $deepl_key,
+			),
+		)
+	);
+}
+$deepl_response_code = wp_remote_retrieve_response_code( $deepl_response );
 ?>
 
 <table class="form-table">
@@ -115,7 +147,22 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 				<br>
 				<br>
 			</th>
-		<td><input type="text" class="openai_api_key" id="default_sort[openai_api_key]" name="default_sort[openai_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_api_key', '' ) ); ?>" placeholder="Enter your OpenAI API key" /></td>
+		<td>
+			<input type="text" class="openai_api_key" id="default_sort[openai_api_key]" name="default_sort[openai_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'openai_api_key', '' ) ); ?>" placeholder="Enter your OpenAI API key" />
+			<?php
+			if ( trim( $openai_key ) ) {
+				echo '<br>';
+				if ( 200 != $openai_response_code ) {
+					echo '<small style="color:red;">';
+					esc_html_e( 'Your OpenAI API Key is not correct.', 'glotpress' );
+				} else {
+					echo '<small style="color:green;">';
+					esc_html_e( 'Your OpenAI API Key is correct.', 'glotpress' );
+				}
+				echo '</small>';
+			}
+			?>
+		</td>
 	</tr>
 	<tr>
 		<th><label for="default_sort[openai_custom_prompt]"><?php esc_html_e( 'Custom Prompt', 'glotpress' ); ?></label></th>
@@ -164,6 +211,21 @@ $gp_external_translations = get_user_option( 'gp_external_translations' );
 						?>
 					</small></a>
 			</th>
-		<td><input type="text" class="deepl_api_key" id="default_sort[deepl_api_key]" name="default_sort[deepl_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ); ?>" placeholder="Enter your DeepL API key" /></td>
+		<td>
+			<input type="text" class="deepl_api_key" id="default_sort[deepl_api_key]" name="default_sort[deepl_api_key]" value="<?php echo esc_html( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ); ?>" placeholder="Enter your DeepL API key" />
+			<?php
+			if ( trim( $deepl_key ) ) {
+				echo '<br>';
+				if ( 200 != $deepl_response_code ) {
+					echo '<small style="color:red;">';
+					esc_html_e( 'Your DeepL Free API Key is not correct.', 'glotpress' );
+				} else {
+					echo '<small style="color:green;">';
+					esc_html_e( 'Your DeepL Free API Key is correct.', 'glotpress' );
+				}
+				echo '</small>';
+			}
+			?>
+		</td>
 	</tr>
 </table>
