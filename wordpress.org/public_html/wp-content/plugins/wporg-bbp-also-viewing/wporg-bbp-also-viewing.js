@@ -68,10 +68,10 @@
 
 			// Add the anonymous users to the list.
 			if ( anonymousUserCount ) {
-				var anonymousText = _n( '%s other person', '%s other people', anonymousUserCount, 'wporg-forums' ).replace( '%s', anonymousUserCount )
+				var anonymousText = _n( '%s other person', '%s other people', anonymousUserCount, 'wporg-forums' ).replace( '%s', anonymousUserCount );
 
 				if ( anonymousUserTyping ) {
-					anonymousText += ' ' + _n( '(%s is typing)', '(%s are typing)', anonymousUserTyping, 'wporg-forums' ).replace( '%s', anonymousUserTyping )
+					anonymousText += ' ' + _n( '(%s is typing)', '(%s are typing)', anonymousUserTyping, 'wporg-forums' ).replace( '%s', anonymousUserTyping );
 				}
 
 				userList.push( anonymousText );
