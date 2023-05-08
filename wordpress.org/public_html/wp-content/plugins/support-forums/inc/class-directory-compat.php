@@ -1055,4 +1055,55 @@ abstract class Directory_Compat {
 
 		return $support_reps;
 	}
+
+	/**
+	 * Get the plugin or theme object slugs for a given user.
+	 *
+	 * @param int $user_id The user id.
+	 * @return array
+	 */
+	public function get_user_object_slugs( $user_id ) {
+		global $wpdb;
+
+		// Check the cache.
+		$cache_key   = $user_id;
+		$cache_group = $this->compat() . '-user-object-slugs';
+		$slugs       = wp_cache_get( $cache_key, $cache_group );
+		if ( $slugs !== false ) {
+			return $slugs;
+		}
+		$slugs = [];
+
+		// Themes.
+		if ( 'theme' == $this->compat() ) {
+			$slugs = $wpdb->get_col( $wpdb->prepare(
+				"SELECT post_name
+					FROM %i
+					WHERE post_type = 'repopackage' AND post_author = %d",
+				$wpdb->base_prefix . WPORG_THEME_DIRECTORY_BLOGID . '_posts',
+				$user_id
+			) );
+		}
+
+		// Plugins
+		if ( 'plugin' == $this->compat() ) {
+			$slugs = $wpdb->get_col( $wpdb->prepare(
+				"SELECT DISTINCT p.post_name
+					FROM %i AS t
+						LEFT JOIN %i AS tt ON tt.term_id = t.term_id
+						LEFT JOIN %i AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						LEFT JOIN %i AS p ON tr.object_id = p.ID
+					WHERE tt.taxonomy IN( 'plugin_contributors', 'plugin_support_reps', 'plugin_committers' ) AND t.name = %s",
+					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_terms',
+					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_taxonomy',
+					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_relationships',
+					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_posts',
+					get_user_by( 'id', $user_id )->user_nicename
+			) );
+		}
+
+		wp_cache_set( $cache_key, $slugs, $cache_group, HOUR_IN_SECONDS );
+
+		return $slugs;
+	}
 }

@@ -56,14 +56,34 @@
 		if ( ! userCount ) {
 			banner.hide();
 		} else {
-			userList = currentlyViewing.map( function( item ) {
+			anonymousUsers      = currentlyViewing.filter( function( item ) { return ! item.user_id; } );
+			anonymousUserCount  = anonymousUsers.length;
+			anonymousUserTyping = anonymousUsers.filter( function( item ) { return !! item.isTyping; } ).length;
+			userList            = currentlyViewing.filter( function( item ) { return !! item.user_id; } );
+
+			// Markup those who are typing, and flatten it to just the name.
+			userList = userList.map( function( item ) {
 				return item.who + ( item.isTyping ? ' ' + __( '(is typing)', 'wporg-forums' ) : '' );
 			} );
 
-			if ( userCount > 1 ) {
+			// Add the anonymous users to the list.
+			if ( anonymousUserCount ) {
+				var anonymousText = _n( '%s other person', '%s other people', anonymousUserCount, 'wporg-forums' );
+
+				anonymousText = anonymousText.replace( '%s', anonymousUserCount );
+				if ( anonymousUserTyping ) {
+					anonymousText += ' ' + _n( '(%s is typing)', '(%s are typing)', anonymousUserTyping, 'wporg-forums' );
+				}
+
+				userList.push( anonymousText );
+			}
+
+			displayCount = userList.length;
+
+			if ( displayCount > 1 ) {
 				userlistPretty = __( '%1$s and %2$s', 'wporg-forums' )
-				.replace( '%1$s', userList.slice( 0, -1 ).join( ', ' ) + ( userCount > 2 ? ',' : '' ) )
-				.replace( '%2$s', userList.slice( -1 ) );
+					.replace( '%1$s', userList.slice( 0, -1 ).join( ', ' ) + ( displayCount > 2 ? ',' : '' ) )
+					.replace( '%2$s', userList.slice( -1 ) );
 			} else {
 				userlistPretty = userList.join( ', ' ); // only one element.
 			}
