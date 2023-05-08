@@ -285,6 +285,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						return;
 					}
 
+					// Don't redirect the 2fa 'revalidate_2fa' handler to login.wordpress.org when presented on WordPress.org
+					if ( isset( $_REQUEST['action'] ) && 'revalidate_2fa' == $_REQUEST['action'] ) {
+						return;
+					}
+
 					// If on a WP login screen...
 					$redirect_to_sso_login = $this->sso_login_url;
 
@@ -417,6 +422,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			// Don't alter the post-password form.
 			if ( str_contains( $url, 'wp-login.php?action=postpass' ) ) {
+				return $url;
+			}
+
+			// Don't alter the revalidate 2fa form.
+			if ( str_contains( $url, 'wp-login.php?action=revalidate_2fa' ) ) {
 				return $url;
 			}
 
