@@ -308,7 +308,7 @@ function get_others_currently_viewing( $page ) {
 	$current_user_objects = get_user_object_slugs( get_current_user_id() );
 	foreach ( $users as &$u ) {
 		$user_objects = get_user_object_slugs( $u['user_id'] );
-		if ( ! array_intersect( $user_objects, $current_user_objects ) ) {
+		if ( ! array_intersect( $current_user_objects, $user_objects ) ) {
 			$u['who']     = '';
 			$u['user_id'] = 0;
 		}
@@ -328,8 +328,13 @@ function get_user_object_slugs( $user_id ) {
 		return [];
 	}
 
-	$plugin_slugs = \WordPressdotorg\Forums\Plugin::get_instance()->plugins->get_user_object_slugs( $user_id );
-	$theme_slugs  = \WordPressdotorg\Forums\Plugin::get_instance()->themes->get_user_object_slugs( $user_id );
+	$forums = \WordPressdotorg\Forums\Plugin::get_instance();
+	if ( ! $forums->plugins || ! $forums->themes ) {
+		return [];
+	}
+
+	$plugin_slugs = $forums->plugins->get_user_object_slugs( $user_id );
+	$theme_slugs  = $forums->themes->get_user_object_slugs( $user_id );
 
 	$matrix = [];
 	foreach ( $plugin_slugs as $slug ) {
