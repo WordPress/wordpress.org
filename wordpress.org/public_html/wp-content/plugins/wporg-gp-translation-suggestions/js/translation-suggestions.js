@@ -15,7 +15,6 @@
 			$container.find( '.suggestions__loading-indicator' ).remove();
 			if ( response.success ) {
 				$container.append( response.data );
-				addSuggestionToTranslation( response.data );
 			} else {
 				$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
 			}
