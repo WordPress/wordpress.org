@@ -15,6 +15,7 @@
 			$container.find( '.suggestions__loading-indicator' ).remove();
 			if ( response.success ) {
 				$container.append( response.data );
+				addSuggestionToTranslation( response.data );
 			} else {
 				$container.append( $( '<span/>', { 'text': 'Error while loading suggestions.' } ) );
 			}
@@ -31,6 +32,33 @@
 			$container.removeClass( 'fetching' );
 			removeNoSuggestionsMessage( $container );
 		} );
+	}
+
+	/**
+	 * Add the suggestion from the translation memory to the translation textarea if
+	 * the suggestion has 100% of accuracy.
+	 *
+	 * @return {void}
+	 **/
+	function addSuggestionToTranslation( data ) {
+		var suggestions = $( data ).find( '.translation-suggestion.with-tooltip.translation' );
+		if ( ! suggestions.length ) {
+			return;
+		}
+		for ( var i = 0; i < suggestions.length; i++ ) {
+			var score = $( suggestions[i] ).find( '.translation-suggestion__score' );
+			if ( score.length > 0 && score.text() === '100%' ) {
+				var translation = $( suggestions[i] ).find( '.translation-suggestion__translation' );
+				if ( translation.length > 0 ) {
+					var activeTextarea = $gp.editor.current.find( '.textareas.active textarea' );
+					if ( ! activeTextarea.length ) {
+						return;
+					}
+					activeTextarea.val( translation.text() ).focus();
+					break;
+				}
+			}
+		}
 	}
 
 	function maybeFetchTranslationMemorySuggestions() {
